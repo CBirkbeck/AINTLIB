@@ -276,6 +276,7 @@ private theorem eq_of_restrictionMap_eq_of_isOXAcyclic [HasLocLiftPowerBounded A
   rw [map_sub, sub_eq_zero]
   exact h W hW hWI
 
+omit [DecidableEq (RationalLocData A)] in
 /-- **Agreement propagates off a canonical intersection.** Sections of `X₁` and `X₂` that
 agree on a rational datum `I` cutting out `X₁ ∩ X₂` agree on *every* common rational
 subset `Y`.
@@ -10447,6 +10448,279 @@ private theorem wca_restrictionMap_bijective_of_rationalOpen_eq
     ⟨restrictionMap D' D h_eq.le, congrFun hcomp1, congrFun hcomp2⟩
 
 set_option linter.unusedSectionVars false in
+/-- Every piece of the image cover is the image piece of some generator in `T`. -/
+private theorem imageGenCover_exists_generator
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) (T : Finset A) (hspan : Ideal.span (T : Set A) = ⊤) :
+    ∀ E : ↥(imageGenCover D₀ T hspan).covers,
+      ∃ t, t ∈ T ∧ E.1 = imagePieceDatum D₀ T t hspan := by
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+  letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
+  rintro ⟨E, hE⟩
+  have hE' : E ∈ (T.image D₀.canonicalMap).image (fun u =>
+      genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap) u
+        (imageGenCover_span D₀ T hspan)) := hE
+  rw [Finset.mem_image] at hE'
+  obtain ⟨u, hu, rfl⟩ := hE'
+  rw [Finset.mem_image] at hu
+  obtain ⟨t, ht, rfl⟩ := hu
+  exact ⟨t, ht, rfl⟩
+
+set_option linter.unusedSectionVars false in
+/-- When two generators have the same canonical image, the first image piece already equals
+its self-intersection with the second — as rational opens.
+
+Threaded through `imagePieceDatum_P` rather than a bare `rfl`: the `rfl` is well-typed but
+not at reducible transparency, and every subsequent `rw` over the goal then chokes. -/
+private theorem imagePieceDatum_rationalOpen_interSamePair_self
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) (T : Finset A) (hspan : Ideal.span (T : Set A) = ⊤)
+    (t t' : A) (hTT : D₀.canonicalMap t' = D₀.canonicalMap t)
+    (hPPim : (imagePieceDatum D₀ T t' hspan).P = (imagePieceDatum D₀ T t hspan).P) :
+    rationalOpen (imagePieceDatum D₀ T t hspan).T
+        (imagePieceDatum D₀ T t hspan).s =
+      rationalOpen ((imagePieceDatum D₀ T t hspan).interSamePair
+        (imagePieceDatum D₀ T t' hspan) hPPim).T
+        ((imagePieceDatum D₀ T t hspan).interSamePair
+          (imagePieceDatum D₀ T t' hspan) hPPim).s := by
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+  letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
+  have h := RationalLocData.interSamePair_rationalOpen
+    (imagePieceDatum D₀ T t hspan) (imagePieceDatum D₀ T t' hspan) hPPim
+  rw [show rationalOpen (imagePieceDatum D₀ T t' hspan).T
+      (imagePieceDatum D₀ T t' hspan).s =
+    rationalOpen (imagePieceDatum D₀ T t hspan).T
+      (imagePieceDatum D₀ T t hspan).s by
+    show rationalOpen (T.image D₀.canonicalMap) (D₀.canonicalMap t') =
+      rationalOpen (T.image D₀.canonicalMap) (D₀.canonicalMap t)
+    rw [hTT], Set.inter_self] at h
+  exact h.symm
+
+
+set_option linter.unusedSectionVars false in
+/-- The canonical map of an image piece, applied to a section pulled back from global
+sections, is that section restricted to the piece.
+
+The subset proof is existentially quantified rather than made a binder: stating how it is
+built would drag `globalLocData`'s membership unfolding into the signature, and every
+consumer has proof irrelevance available anyway. -/
+private theorem imagePieceDatum_canonicalMap_globalSections_backward
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) (T : Finset A) (hspan : Ideal.span (T : Set A) = ⊤) (t : A)
+    [DecidableEq (RationalLocData (presheafValue D₀))]
+    (y : presheafValue (globalLocData (presheafValue_concretePair D₀))) :
+    ∃ hglobal_sub : rationalOpen (imagePieceDatum D₀ T t hspan).T
+        (imagePieceDatum D₀ T t hspan).s ⊆
+      rationalOpen (globalLocData (presheafValue_concretePair D₀)).T
+        (globalLocData (presheafValue_concretePair D₀)).s,
+      (imagePieceDatum D₀ T t hspan).canonicalMap
+          (globalSections_backward (presheafValue_concretePair D₀) y) =
+        restrictionMap (globalLocData (presheafValue_concretePair D₀))
+          (imagePieceDatum D₀ T t hspan) hglobal_sub y := by
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+
+  have hglobal_sub : rationalOpen (imagePieceDatum D₀ T t hspan).T
+      (imagePieceDatum D₀ T t hspan).s ⊆
+      rationalOpen (globalLocData (presheafValue_concretePair D₀)).T
+        (globalLocData (presheafValue_concretePair D₀)).s := by
+    intro v hv
+    exact ⟨hv.1, fun w hw => by
+      rw [Finset.mem_singleton.mp hw]
+      exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
+  -- v4.33: forward proof (no `rw` on a goal carrying `y` at its defeq-only
+  -- `globalLocData`-typed occurrences, which chokes `kabstract`): the roundtrip
+  -- `canonicalMap (backward y) = y` is pushed through the restriction by `congrArg`.
+  have hchain : (imagePieceDatum D₀ T t hspan).canonicalMap
+      (globalSections_backward (presheafValue_concretePair D₀) y) =
+      restrictionMap (globalLocData (presheafValue_concretePair D₀))
+        (imagePieceDatum D₀ T t hspan) hglobal_sub y :=
+    (restrictionMapHom_canonicalMap _ _ hglobal_sub _).symm.trans
+      (congrArg (restrictionMap (globalLocData (presheafValue_concretePair D₀))
+          (imagePieceDatum D₀ T t hspan) hglobal_sub)
+        (globalSections_canonicalMap_backward (presheafValue_concretePair D₀) y))
+  exact ⟨hglobal_sub, hchain⟩
+
+set_option linter.unusedSectionVars false in
+/-- **Per-piece verification**: the section pulled back from the B-side glue restricts to
+`f t` on the `t`-piece, for every generator `t ∈ T`.
+
+`y` enters only through `hy` and `g` only through `hg_restr`, so the construction of the
+transported family stays in the caller. -/
+private theorem genRestrictedCover_piece_eq
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) (T : Finset A) (hspan : Ideal.span (T : Set A) = ⊤)
+    [DecidableEq (RationalLocData (presheafValue D₀))]
+    (f : ∀ t ∈ T, presheafValue (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl))
+    (hcompat : ∀ (t₁ : A) (ht₁ : t₁ ∈ T) (t₂ : A) (ht₂ : t₂ ∈ T)
+      (D₃ : RationalLocData A)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆
+        rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).T
+          (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆
+        rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).T
+          (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s),
+      restrictionMap _ D₃ h₃₁ (f t₁ ht₁) = restrictionMap _ D₃ h₃₂ (f t₂ ht₂))
+    (tof : ↥(imageGenCover D₀ T hspan).covers → A)
+    (htof_mem : ∀ E, tof E ∈ T)
+    (htof_eq : ∀ E : ↥(imageGenCover D₀ T hspan).covers,
+      E.1 = imagePieceDatum D₀ T (tof E) hspan)
+    (g : ∀ (E : ↥(imageGenCover D₀ T hspan).covers), presheafValue E.1)
+    (hg_restr : ∀ (E : ↥(imageGenCover D₀ T hspan).covers)
+      (E₃ : RationalLocData (presheafValue D₀))
+      (h₃ : rationalOpen E₃.T E₃.s ⊆ rationalOpen E.1.T E.1.s),
+      restrictionMap E.1 E₃ h₃ (g E) =
+      restrictionMap (imagePieceDatum D₀ T (tof E) hspan) E₃
+        (by rw [← htof_eq E]; exact h₃)
+        (genPiece_relative_equiv D₀ T (tof E) hspan (f (tof E) (htof_mem E))))
+    (y : presheafValue (imageGenCover D₀ T hspan).base)
+    (hy : ∀ (E : ↥(imageGenCover D₀ T hspan).covers),
+      restrictionMap (imageGenCover D₀ T hspan).base E.1
+        ((imageGenCover D₀ T hspan).hsubset E.1 E.2) y = g E)
+    (hEt_mem : ∀ t' ∈ T, imagePieceDatum D₀ T t' hspan ∈ (imageGenCover D₀ T hspan).covers)
+    (t : A) (ht : t ∈ T) :
+    restrictionMap D₀ (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl)
+      (RationalLocData.interSamePair_subset_left _ _ _)
+      (globalSections_backward (presheafValue_concretePair D₀) y) = f t ht := by
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+  refine (genPiece_relative_equiv D₀ T t hspan).injective ?_
+  rw [genPiece_relative_equiv_restrictionMap]
+  -- the canonical chain: `canMap_Bt (backward y) = restriction_{global→Bt} y`
+  obtain ⟨hglobal_sub, hchain⟩ :=
+    imagePieceDatum_canonicalMap_globalSections_backward D₀ T hspan t y
+  rw [hchain]
+  -- identify with the glued value at the `t`-piece of the B-cover
+  set Et : ↥(imageGenCover D₀ T hspan).covers := ⟨_, hEt_mem t ht⟩ with hEt
+  have hy_t := hy Et
+  rw [show restrictionMap (globalLocData (presheafValue_concretePair D₀))
+      (imagePieceDatum D₀ T t hspan) hglobal_sub y =
+    restrictionMap (imageGenCover D₀ T hspan).base Et.1
+      ((imageGenCover D₀ T hspan).hsubset Et.1 Et.2) y from rfl]
+  rw [hy_t]
+  -- compare the glued value with the target via the bijective self-intersection
+  -- `Et.1` is `imagePieceDatum … t …` by construction, and `htof_eq` names it at `tof Et`.
+  have hTT : D₀.canonicalMap (tof Et) = D₀.canonicalMap t :=
+    congrArg RationalLocData.s
+      ((htof_eq Et).symm.trans (rfl : Et.1 = imagePieceDatum D₀ T t hspan))
+  -- v4.33: pair-equality proof between the two image pieces, built from
+  -- `imagePieceDatum_P` so it is well-typed at reducible transparency (a bare `rfl`
+  -- makes every subsequent `rw` over the goal choke); threaded uniformly below.
+  have hPPim : (imagePieceDatum D₀ T (tof Et) hspan).P =
+      (imagePieceDatum D₀ T t hspan).P :=
+    (imagePieceDatum_P D₀ T (tof Et) hspan).trans
+      (imagePieceDatum_P D₀ T t hspan).symm
+  have hro_eq := imagePieceDatum_rationalOpen_interSamePair_self D₀ T hspan t
+    (tof Et) hTT hPPim
+  refine (wca_restrictionMap_bijective_of_rationalOpen_eq
+    (imagePieceDatum D₀ T t hspan)
+    ((imagePieceDatum D₀ T t hspan).interSamePair
+      (imagePieceDatum D₀ T (tof Et) hspan) hPPim) hro_eq).injective ?_
+  -- LHS: the W′-square at `(t, tof Et)`
+  rw [show restrictionMap (imagePieceDatum D₀ T t hspan)
+      ((imagePieceDatum D₀ T t hspan).interSamePair
+        (imagePieceDatum D₀ T (tof Et) hspan) hPPim) hro_eq.symm.le
+      (genPiece_relative_equiv D₀ T t hspan (f t ht)) =
+    restrictionMap (imagePieceDatum D₀ T (tof Et) hspan)
+      ((imagePieceDatum D₀ T t hspan).interSamePair
+        (imagePieceDatum D₀ T (tof Et) hspan) hPPim)
+      (RationalLocData.interSamePair_subset_right _ _ _)
+      (genPiece_relative_equiv D₀ T (tof Et) hspan (f (tof Et) (htof_mem Et))) from
+    genPiece_family_pair_compat D₀ T hspan t (tof Et)
+      (f t ht) (f (tof Et) (htof_mem Et))
+      (fun D₃ h₃₁ h₃₂ => hcompat t ht (tof Et) (htof_mem Et) D₃ h₃₁ h₃₂)]
+  -- RHS: the cast vanishes (`hg_restr` at the same target; recast the source-spelling)
+  exact (show restrictionMap (imagePieceDatum D₀ T t hspan)
+      ((imagePieceDatum D₀ T t hspan).interSamePair
+        (imagePieceDatum D₀ T (tof Et) hspan) hPPim) hro_eq.symm.le (g Et) =
+    restrictionMap (imagePieceDatum D₀ T (tof Et) hspan)
+      ((imagePieceDatum D₀ T t hspan).interSamePair
+        (imagePieceDatum D₀ T (tof Et) hspan) hPPim)
+      (RationalLocData.interSamePair_subset_right _ _ _)
+      (genPiece_relative_equiv D₀ T (tof Et) hspan
+        (f (tof Et) (htof_mem Et))) from
+    hg_restr Et _ hro_eq.symm.le)
+
+
+set_option linter.unusedSectionVars false in
+/-- The family transported through the G1-equivs is compatible on the image cover.
+
+Both sides factor through the pairwise intersection of the two image pieces, where
+`genPiece_family_pair_compat` supplies the agreement; `restrictionMap_eq_of_eq_on_inter`
+carries it down to the arbitrary common subset `E₃`.
+
+`g` enters only through `hg_restr` — what its restrictions ARE — never through its
+definition, which is what lets the choice function `tof` stay in the caller. -/
+private theorem genRestrictedCover_transported_compat
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) (T : Finset A) (hspan : Ideal.span (T : Set A) = ⊤)
+    (f : ∀ t ∈ T, presheafValue (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl))
+    (hcompat : ∀ (t₁ : A) (ht₁ : t₁ ∈ T) (t₂ : A) (ht₂ : t₂ ∈ T)
+      (D₃ : RationalLocData A)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆
+        rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).T
+          (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆
+        rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).T
+          (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s),
+      restrictionMap _ D₃ h₃₁ (f t₁ ht₁) = restrictionMap _ D₃ h₃₂ (f t₂ ht₂))
+    (tof : ↥(imageGenCover D₀ T hspan).covers → A)
+    (htof_mem : ∀ E, tof E ∈ T)
+    (htof_eq : ∀ E : ↥(imageGenCover D₀ T hspan).covers,
+      E.1 = imagePieceDatum D₀ T (tof E) hspan)
+    (g : ∀ (E : ↥(imageGenCover D₀ T hspan).covers), presheafValue E.1)
+    (hg_restr : ∀ (E : ↥(imageGenCover D₀ T hspan).covers)
+      (E₃ : RationalLocData (presheafValue D₀))
+      (h₃ : rationalOpen E₃.T E₃.s ⊆ rationalOpen E.1.T E.1.s),
+      restrictionMap E.1 E₃ h₃ (g E) =
+      restrictionMap (imagePieceDatum D₀ T (tof E) hspan) E₃
+        (by rw [← htof_eq E]; exact h₃)
+        (genPiece_relative_equiv D₀ T (tof E) hspan (f (tof E) (htof_mem E)))) :
+    ∀ (E₁ E₂ : ↥(imageGenCover D₀ T hspan).covers)
+      (E₃ : RationalLocData (presheafValue D₀))
+      (h₃₁ : rationalOpen E₃.T E₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
+      (h₃₂ : rationalOpen E₃.T E₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
+      restrictionMap E₁.1 E₃ h₃₁ (g E₁) = restrictionMap E₂.1 E₃ h₃₂ (g E₂) := by
+  intro E₁ E₂ E₃ h₃₁ h₃₂
+  rw [hg_restr E₁ E₃ h₃₁, hg_restr E₂ E₃ h₃₂]
+  have h₃₁' : rationalOpen E₃.T E₃.s ⊆
+      rationalOpen (imagePieceDatum D₀ T (tof E₁) hspan).T
+        (imagePieceDatum D₀ T (tof E₁) hspan).s := by
+    rw [← htof_eq E₁]; exact h₃₁
+  have h₃₂' : rationalOpen E₃.T E₃.s ⊆
+      rationalOpen (imagePieceDatum D₀ T (tof E₂) hspan).T
+        (imagePieceDatum D₀ T (tof E₂) hspan).s := by
+    rw [← htof_eq E₂]; exact h₃₂
+  exact restrictionMap_eq_of_eq_on_inter
+    (imagePieceDatum D₀ T (tof E₁) hspan) (imagePieceDatum D₀ T (tof E₂) hspan)
+    ((imagePieceDatum D₀ T (tof E₁) hspan).interSamePair
+      (imagePieceDatum D₀ T (tof E₂) hspan) rfl) E₃
+    (RationalLocData.interSamePair_rationalOpen (imagePieceDatum D₀ T (tof E₁) hspan)
+      (imagePieceDatum D₀ T (tof E₂) hspan) rfl)
+    (genPiece_relative_equiv D₀ T (tof E₁) hspan (f (tof E₁) (htof_mem E₁)))
+    (genPiece_relative_equiv D₀ T (tof E₂) hspan (f (tof E₂) (htof_mem E₂)))
+    (RationalLocData.interSamePair_subset_left _ _ _)
+    (RationalLocData.interSamePair_subset_right _ _ _) h₃₁' h₃₂'
+    (genPiece_family_pair_compat D₀ T hspan (tof E₁) (tof E₂)
+      (f (tof E₁) (htof_mem E₁)) (f (tof E₂) (htof_mem E₂))
+      (fun D₃ hh₃₁ hh₃₂ => hcompat (tof E₁) (htof_mem E₁) (tof E₂) (htof_mem E₂)
+        D₃ hh₃₁ hh₃₂))
+
+
+set_option linter.unusedSectionVars false in
 /-- **G3c-gluing (assembly)**: given the B-side gluing of the image cover, every
 A-compatible family on the restricted gen-cover glues — per the cast-free chase:
 transport the family through the G1-equivs (B-compat via W′ + `E₁₂`-factoring),
@@ -10491,19 +10765,7 @@ theorem genRestrictedCover_gluing
   intro hBglue f hcompat
   classical
   -- choose a generator for each B-cover piece
-  have hchoose : ∀ E : ↥(imageGenCover D₀ T hspan).covers,
-      ∃ t, t ∈ T ∧ E.1 = genPieceDatum (presheafValue_concretePair D₀)
-        (T.image D₀.canonicalMap) (D₀.canonicalMap t)
-        (imageGenCover_span D₀ T hspan) := by
-    rintro ⟨E, hE⟩
-    have hE' : E ∈ (T.image D₀.canonicalMap).image (fun u =>
-        genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap) u
-          (imageGenCover_span D₀ T hspan)) := hE
-    rw [Finset.mem_image] at hE'
-    obtain ⟨u, hu, rfl⟩ := hE'
-    rw [Finset.mem_image] at hu
-    obtain ⟨t, ht, rfl⟩ := hu
-    exact ⟨t, ht, rfl⟩
+  have hchoose := imageGenCover_exists_generator D₀ T hspan
   set tof : ↥(imageGenCover D₀ T hspan).covers → A := fun E => (hchoose E).choose
     with htof
   have htof_mem : ∀ E, tof E ∈ T := fun E => (hchoose E).choose_spec.1
@@ -10533,167 +10795,15 @@ theorem genRestrictedCover_gluing
     rw [hg]
     exact RationalCoveringData.eqRec_restrictionMap_direct _ _ (htof_eq E).symm E₃ _ h₃ _
   -- B-side compatibility for `g` (factor through the pairwise intersection + W′)
-  have hgcompat : ∀ (E₁ E₂ : ↥(imageGenCover D₀ T hspan).covers)
-      (E₃ : RationalLocData (presheafValue D₀))
-      (h₃₁ : rationalOpen E₃.T E₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
-      (h₃₂ : rationalOpen E₃.T E₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
-      restrictionMap E₁.1 E₃ h₃₁ (g E₁) = restrictionMap E₂.1 E₃ h₃₂ (g E₂) := by
-    intro E₁ E₂ E₃ h₃₁ h₃₂
-    rw [hg_restr E₁ E₃ h₃₁, hg_restr E₂ E₃ h₃₂]
-    -- factor through `E₁₂ := imagePiece-(tof E₁) ∩ imagePiece-(tof E₂)`
-    have h₃₁' : rationalOpen E₃.T E₃.s ⊆
-        rationalOpen (imagePieceDatum D₀ T (tof E₁) hspan).T
-          (imagePieceDatum D₀ T (tof E₁) hspan).s := by
-      rw [show imagePieceDatum D₀ T (tof E₁) hspan = genPieceDatum
-        (presheafValue_concretePair D₀) (T.image D₀.canonicalMap)
-        (D₀.canonicalMap (tof E₁)) (imageGenCover_span D₀ T hspan) from rfl,
-        ← htof_eq E₁]
-      exact h₃₁
-    have h₃₂' : rationalOpen E₃.T E₃.s ⊆
-        rationalOpen (imagePieceDatum D₀ T (tof E₂) hspan).T
-          (imagePieceDatum D₀ T (tof E₂) hspan).s := by
-      rw [show imagePieceDatum D₀ T (tof E₂) hspan = genPieceDatum
-        (presheafValue_concretePair D₀) (T.image D₀.canonicalMap)
-        (D₀.canonicalMap (tof E₂)) (imageGenCover_span D₀ T hspan) from rfl,
-        ← htof_eq E₂]
-      exact h₃₂
-    have hE₁₂ : rationalOpen E₃.T E₃.s ⊆
-        rationalOpen ((imagePieceDatum D₀ T (tof E₁) hspan).interSamePair
-          (imagePieceDatum D₀ T (tof E₂) hspan) rfl).T
-          ((imagePieceDatum D₀ T (tof E₁) hspan).interSamePair
-            (imagePieceDatum D₀ T (tof E₂) hspan) rfl).s := by
-      rw [RationalLocData.interSamePair_rationalOpen _ _ (by rfl)]
-      exact fun v hv => ⟨h₃₁' hv, h₃₂' hv⟩
-    -- rewrite both sides through the E₁₂-factoring
-    rw [show restrictionMap (genPieceDatum (presheafValue_concretePair D₀)
-        (T.image D₀.canonicalMap) (D₀.canonicalMap (tof E₁))
-        (imageGenCover_span D₀ T hspan)) E₃ (by rw [← htof_eq E₁]; exact h₃₁)
-        (genPiece_relative_equiv D₀ T (tof E₁) hspan (f (tof E₁) (htof_mem E₁))) =
-      restrictionMap _ E₃ hE₁₂
-        (restrictionMap (imagePieceDatum D₀ T (tof E₁) hspan)
-          ((imagePieceDatum D₀ T (tof E₁) hspan).interSamePair
-            (imagePieceDatum D₀ T (tof E₂) hspan) rfl)
-          (RationalLocData.interSamePair_subset_left _ _ _)
-          (genPiece_relative_equiv D₀ T (tof E₁) hspan (f (tof E₁) (htof_mem E₁)))) from
-      (restrictionMap_restrictionMap (imagePieceDatum D₀ T (tof E₁) hspan) _ E₃
-        (RationalLocData.interSamePair_subset_left _ _ _) hE₁₂ _).symm]
-    rw [show restrictionMap (genPieceDatum (presheafValue_concretePair D₀)
-        (T.image D₀.canonicalMap) (D₀.canonicalMap (tof E₂))
-        (imageGenCover_span D₀ T hspan)) E₃ (by rw [← htof_eq E₂]; exact h₃₂)
-        (genPiece_relative_equiv D₀ T (tof E₂) hspan (f (tof E₂) (htof_mem E₂))) =
-      restrictionMap _ E₃ hE₁₂
-        (restrictionMap (imagePieceDatum D₀ T (tof E₂) hspan)
-          ((imagePieceDatum D₀ T (tof E₁) hspan).interSamePair
-            (imagePieceDatum D₀ T (tof E₂) hspan) rfl)
-          (RationalLocData.interSamePair_subset_right _ _ _)
-          (genPiece_relative_equiv D₀ T (tof E₂) hspan (f (tof E₂) (htof_mem E₂)))) from
-      (restrictionMap_restrictionMap (imagePieceDatum D₀ T (tof E₂) hspan) _ E₃
-        (RationalLocData.interSamePair_subset_right _ _ _) hE₁₂ _).symm]
-    congr 1
-    exact genPiece_family_pair_compat D₀ T hspan (tof E₁) (tof E₂)
-      (f (tof E₁) (htof_mem E₁)) (f (tof E₂) (htof_mem E₂))
-      (fun D₃ h₃₁ h₃₂ => hcompat (tof E₁) (htof_mem E₁) (tof E₂) (htof_mem E₂)
-        D₃ h₃₁ h₃₂)
+  have hgcompat := genRestrictedCover_transported_compat D₀ T hspan f hcompat
+    tof htof_mem htof_eq g hg_restr
   -- glue at B
   obtain ⟨y, hy⟩ := hBglue g hgcompat
   -- pull back through the global-sections identification and verify per piece
-  refine ⟨globalSections_backward (presheafValue_concretePair D₀) y, ?_⟩
-  intro t ht
-  refine (genPiece_relative_equiv D₀ T t hspan).injective ?_
-  rw [genPiece_relative_equiv_restrictionMap]
-  -- the canonical chain: `canMap_Bt (backward y) = restriction_{global→Bt} y`
-  have hglobal_sub : rationalOpen (imagePieceDatum D₀ T t hspan).T
-      (imagePieceDatum D₀ T t hspan).s ⊆
-      rationalOpen (globalLocData (presheafValue_concretePair D₀)).T
-        (globalLocData (presheafValue_concretePair D₀)).s := by
-    intro v hv
-    exact ⟨hv.1, fun w hw => by
-      rw [Finset.mem_singleton.mp hw]
-      exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
-  -- v4.33: forward proof (no `rw` on a goal carrying `y` at its defeq-only
-  -- `globalLocData`-typed occurrences, which chokes `kabstract`): the roundtrip
-  -- `canonicalMap (backward y) = y` is pushed through the restriction by `congrArg`.
-  have hchain : (imagePieceDatum D₀ T t hspan).canonicalMap
-      (globalSections_backward (presheafValue_concretePair D₀) y) =
-      restrictionMap (globalLocData (presheafValue_concretePair D₀))
-        (imagePieceDatum D₀ T t hspan) hglobal_sub y :=
-    (restrictionMapHom_canonicalMap _ _ hglobal_sub _).symm.trans
-      (congrArg (restrictionMap (globalLocData (presheafValue_concretePair D₀))
-          (imagePieceDatum D₀ T t hspan) hglobal_sub)
-        (globalSections_canonicalMap_backward (presheafValue_concretePair D₀) y))
-  rw [hchain]
-  -- identify with the glued value at the `t`-piece of the B-cover
-  have hEt_mem : genPieceDatum (presheafValue_concretePair D₀)
-      (T.image D₀.canonicalMap) (D₀.canonicalMap t)
-      (imageGenCover_span D₀ T hspan) ∈ (imageGenCover D₀ T hspan).covers :=
-    Finset.mem_image_of_mem _ (Finset.mem_image_of_mem _ ht)
-  set Et : ↥(imageGenCover D₀ T hspan).covers := ⟨_, hEt_mem⟩ with hEt
-  have hy_t := hy Et
-  rw [show restrictionMap (globalLocData (presheafValue_concretePair D₀))
-      (imagePieceDatum D₀ T t hspan) hglobal_sub y =
-    restrictionMap (imageGenCover D₀ T hspan).base Et.1
-      ((imageGenCover D₀ T hspan).hsubset Et.1 Et.2) y from rfl]
-  rw [hy_t]
-  -- compare the glued value with the target via the bijective self-intersection
-  have hTT : D₀.canonicalMap (tof Et) = D₀.canonicalMap t := by
-    have h1 := htof_eq Et
-    have h2 : Et.1 = genPieceDatum (presheafValue_concretePair D₀)
-        (T.image D₀.canonicalMap) (D₀.canonicalMap t)
-        (imageGenCover_span D₀ T hspan) := rfl
-    have := h1.symm.trans h2
-    exact congrArg RationalLocData.s this
-  -- v4.33: pair-equality proof between the two image pieces, built from
-  -- `imagePieceDatum_P` so it is well-typed at reducible transparency (a bare `rfl`
-  -- makes every subsequent `rw` over the goal choke); threaded uniformly below.
-  have hPPim : (imagePieceDatum D₀ T (tof Et) hspan).P =
-      (imagePieceDatum D₀ T t hspan).P :=
-    (imagePieceDatum_P D₀ T (tof Et) hspan).trans
-      (imagePieceDatum_P D₀ T t hspan).symm
-  have hro_eq : rationalOpen (imagePieceDatum D₀ T t hspan).T
-      (imagePieceDatum D₀ T t hspan).s =
-      rationalOpen ((imagePieceDatum D₀ T t hspan).interSamePair
-        (imagePieceDatum D₀ T (tof Et) hspan) hPPim).T
-        ((imagePieceDatum D₀ T t hspan).interSamePair
-          (imagePieceDatum D₀ T (tof Et) hspan) hPPim).s := by
-    have h := RationalLocData.interSamePair_rationalOpen
-      (imagePieceDatum D₀ T t hspan) (imagePieceDatum D₀ T (tof Et) hspan) hPPim
-    rw [show rationalOpen (imagePieceDatum D₀ T (tof Et) hspan).T
-        (imagePieceDatum D₀ T (tof Et) hspan).s =
-      rationalOpen (imagePieceDatum D₀ T t hspan).T
-        (imagePieceDatum D₀ T t hspan).s by
-      show rationalOpen (T.image D₀.canonicalMap) (D₀.canonicalMap (tof Et)) =
-        rationalOpen (T.image D₀.canonicalMap) (D₀.canonicalMap t)
-      rw [hTT], Set.inter_self] at h
-    exact h.symm
-  refine (wca_restrictionMap_bijective_of_rationalOpen_eq
-    (imagePieceDatum D₀ T t hspan)
-    ((imagePieceDatum D₀ T t hspan).interSamePair
-      (imagePieceDatum D₀ T (tof Et) hspan) hPPim) hro_eq).injective ?_
-  -- LHS: the W′-square at `(t, tof Et)`
-  rw [show restrictionMap (imagePieceDatum D₀ T t hspan)
-      ((imagePieceDatum D₀ T t hspan).interSamePair
-        (imagePieceDatum D₀ T (tof Et) hspan) hPPim) hro_eq.symm.le
-      (genPiece_relative_equiv D₀ T t hspan (f t ht)) =
-    restrictionMap (imagePieceDatum D₀ T (tof Et) hspan)
-      ((imagePieceDatum D₀ T t hspan).interSamePair
-        (imagePieceDatum D₀ T (tof Et) hspan) hPPim)
-      (RationalLocData.interSamePair_subset_right _ _ _)
-      (genPiece_relative_equiv D₀ T (tof Et) hspan (f (tof Et) (htof_mem Et))) from
-    genPiece_family_pair_compat D₀ T hspan t (tof Et)
-      (f t ht) (f (tof Et) (htof_mem Et))
-      (fun D₃ h₃₁ h₃₂ => hcompat t ht (tof Et) (htof_mem Et) D₃ h₃₁ h₃₂)]
-  -- RHS: the cast vanishes (`hg_restr` at the same target; recast the source-spelling)
-  exact (show restrictionMap (imagePieceDatum D₀ T t hspan)
-      ((imagePieceDatum D₀ T t hspan).interSamePair
-        (imagePieceDatum D₀ T (tof Et) hspan) hPPim) hro_eq.symm.le (g Et) =
-    restrictionMap (imagePieceDatum D₀ T (tof Et) hspan)
-      ((imagePieceDatum D₀ T t hspan).interSamePair
-        (imagePieceDatum D₀ T (tof Et) hspan) hPPim)
-      (RationalLocData.interSamePair_subset_right _ _ _)
-      (genPiece_relative_equiv D₀ T (tof Et) hspan
-        (f (tof Et) (htof_mem Et))) from
-    hg_restr Et _ hro_eq.symm.le)
-
+  exact ⟨globalSections_backward (presheafValue_concretePair D₀) y,
+    fun t ht => genRestrictedCover_piece_eq D₀ T hspan f hcompat tof htof_mem
+      htof_eq g hg_restr y hy
+      (fun t' ht' => Finset.mem_image_of_mem _ (Finset.mem_image_of_mem _ ht')) t ht⟩
 set_option linter.unusedSectionVars false in
 /-- **G4: the bundled acyclicity transport (T-R2-ACYCLIC-TRANSPORT)**: if the B-level
 image cover of `Spa 𝒪_X(D₀)` is `O_X`-acyclic, so is the A-level restricted cover

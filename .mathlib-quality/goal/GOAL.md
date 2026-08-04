@@ -15011,3 +15011,132 @@ Two sites the analysis refused, and both refusals were right:
 > **Rule: a repair pass must distinguish "I broke this" from "this was already like that."**
 > The git diff is the only reliable oracle. A textual scan for the idiom finds pre-existing uses
 > that already compile, and "fixing" them is how a mechanical batch turns into a regression.
+
+### `genRestrictedCover_gluing`, phase 1: `hgcompat` 61 → 2, and an instance-binder gotcha
+
+The helper `restrictionMap_eq_of_eq_on_inter` from the propA3 work paid off immediately in a
+second consumer. `hgcompat`'s 61 lines were 45 lines of two `rw [show … from …]` blocks
+factoring each side through `interSamePair` before `genPiece_family_pair_compat` — which is
+*exactly* what that helper says. The whole block became one `exact`.
+
+Extracted as `genRestrictedCover_transported_compat`, over an abstract `g` carrying only its
+restriction spec `hg_restr`, never its definition — so `tof` (the choice of generator per
+B-cover piece) stays in the caller.
+
+**Two instance failures, one after the other, same root.**
+
+`imageGenCover` supplies its own `letI : DecidableEq (presheafValue D₀) := Classical.decEq _`
+*inside* its definition, so consumers do not normally need it. But `T.image D₀.canonicalMap`
+appears in my lemma's **signature** (in `htof_eq` and `hg_restr`), and `Finset.image` needs
+`DecidableEq` on the *target*. In the caller that is fine — its `classical` runs before the
+`have`s. In a lemma it is needed before any tactic can run.
+
+The fix is to *receive* the caller's instance as a binder, not re-derive one: `open Classical in`
+supplies a **different** instance and the two `Finset`s stop being interchangeable at the call
+site. That is the `hT` lesson from `unitCover`, reached from the statement side rather than the
+proof side.
+
+Then the binder itself failed — because I put `[DecidableEq (presheafValue D₀)]` in the instance
+block at the top, *above* `(D₀ : RationalLocData A)`:
+
+> **An instance binder mentioning a variable bound later in the same signature silently
+> auto-binds a FRESH copy of that variable.** The error is identical to having no binder at
+> all — `failed to synthesize DecidableEq (presheafValue D₀)` — with nothing pointing at the
+> ordering. It must go *after* the binder it mentions.
+
+This is the same family as "section variables lead the argument list", which has now cost a
+build in five files; the common shape is that Lean silently produces a *well-formed but wrong*
+signature and the error surfaces somewhere else.
+
+### `genRestrictedCover_gluing` 191 → 40, and a stale-index bug my own assert let through
+
+Five declarations: `imageGenCover_exists_generator` (10),
+`imagePieceDatum_rationalOpen_interSamePair_self` (15),
+`genRestrictedCover_transported_compat` (24), `genRestrictedCover_piece_eq` (69, still to
+split), **`genRestrictedCover_gluing` (40)**.
+
+The helper `restrictionMap_eq_of_eq_on_inter` from the propA3 work paid for itself in a second
+consumer on first contact: `hgcompat`'s 61 lines were 45 lines of two `rw [show … from …]`
+blocks factoring through `interSamePair` before `genPiece_family_pair_compat`, which is exactly
+what that helper states. One `exact`.
+
+**Four failures getting there, in order, each teaching something different.**
+
+1. `failed to synthesize DecidableEq (presheafValue D₀)`. `imageGenCover` supplies its own
+   `letI := Classical.decEq _` *inside* the definition, so consumers never need it — but
+   `T.image D₀.canonicalMap` appeared in my lemma's **signature**, and `Finset.image` needs
+   `DecidableEq` on the target. In the caller that is fine (its `classical` runs before the
+   `have`s); in a lemma it is needed before any tactic can run.
+2. Adding `[DecidableEq (presheafValue D₀)]` to the instance block **did nothing** — I put it
+   above `(D₀ : RationalLocData A)`. **An instance binder mentioning a variable bound later in
+   the same signature silently auto-binds a FRESH copy**, and the error is identical to having
+   no binder at all. Same family as "section variables lead the argument list", which has now
+   cost a build in five files: Lean produces a well-formed but *wrong* signature and the error
+   surfaces elsewhere.
+3. With the binder in the right place, `Application type mismatch` between
+   `imagePieceDatum D₀ T t hspan` and its `genPieceDatum … (T.image …) …` spelling — because a
+   *variable* `DecidableEq` builds a different `Finset.image` than the one baked into
+   `imagePieceDatum`. **The fix was to delete the binder**: state the lemma purely in
+   `imagePieceDatum` terms, which carries its own instance. Restating in the API that owns the
+   instance beats threading the instance.
+4. Then a `whnf` timeout at `<decl>:0` — cumulative, so per the recorded rule: decompose or make
+   it cheaper, never raise. Cheaper won: replacing two `_ _` placeholders with the explicit
+   `genPiece_relative_equiv …` terms removed two higher-order unification problems and the
+   timeout with them.
+
+Finally `DecidableEq (RationalLocData (presheafValue D₀))`: `restrictionMap_eq_of_eq_on_inter`
+auto-includes this file's section variable (L136) and never uses it, so at ring
+`presheafValue D₀` it demanded an instance that does not exist. `omit … in` above the docstring.
+
+**And a bug in my own extraction script, which an assert reported but did not stop.** `hro_eq`
+sits *inside* the verification region, so replacing the verification first invalidated
+`hro_eq`'s indices; the second edit then spliced into the following declarations. My guard
+`assert a_hc < a_ro < a_ver or a_hc < a_ver <= a_ro` *passed* — on the second disjunct, which
+says precisely "hro_eq is inside the region I am about to replace".
+
+> **An assert that admits the failure case is not a guard.** Written as a disjunction it read
+> like "either order is fine"; what the second disjunct actually described was the bug. The fix
+> is to assert the *one* arrangement the code handles (`a_hc < a_ver < a_ro`) and to splice the
+> inner edit into the extracted text rather than into the original list.
+
+**Final: `genRestrictedCover_gluing` 191 → six declarations, all under 50** — 11 / 12 / 18 / 24 /
+48 / **41**, total 154 (was 191 in one body).
+
+The last stretch was six more builds, all on **one root cause worth naming**: this file's late
+declarations live at ring `presheafValue D₀`, but three of the constructions they use —
+`imageGenCover`, `imagePieceDatum`, and (being `private` in this file) `globalSections_backward` —
+each relate to `DecidableEq` differently:
+
+| construction | how it gets `DecidableEq` | consequence for a lemma over it |
+|---|---|---|
+| `imagePieceDatum` | own `letI := Classical.decEq _` | needs nothing; **state lemmas in its terms** |
+| `imageGenCover` | own `letI`, but `.covers` is a `Finset` built with it | a *variable* instance is not defeq to it |
+| `globalSections_backward` | auto-included section variable, unused | `omit`, or thread a binder |
+
+The failures, in order, and what each actually meant:
+
+1. `failed to synthesize DecidableEq (presheafValue D₀)` — `T.image` in the *signature*.
+2. Adding the binder did nothing: **placed above `(D₀ : …)`, so it auto-bound a fresh `D₀`.**
+3. With it placed correctly, `Application type mismatch` between `imagePieceDatum …` and its
+   `genPieceDatum … (T.image …) …` spelling. **The fix was to delete the binder** and state
+   everything in `imagePieceDatum` terms — restating in the API that owns the instance beats
+   threading the instance.
+4. `whnf` timeout at `<decl>:0` (cumulative → decompose or cheapen, never raise). Cheapening won:
+   two `_ _` placeholders replaced by explicit terms removed two higher-order unifications.
+5. `DecidableEq (RationalLocData (presheafValue D₀))` from `restrictionMap_eq_of_eq_on_inter`'s
+   auto-included, unused section variable → `omit … in`.
+6. `synthesized type class instance is not definitionally equal … synthesized inst✝, inferred
+   Classical.decEq` — one term, `Finset.mem_image_of_mem`, *re-deriving* a membership whose
+   `Finset` was built with `Classical.decEq`. **Passed the membership as a hypothesis** and let
+   the caller, where the instances agree, discharge it. Third outing for the `hT` rule.
+
+> **When a declaration must mention a construction whose instances are baked in, do not
+> reproduce those instances — either restate in an API that owns them, or pass the fact you
+> need as a hypothesis.** A binder gives you a *different* instance, and the resulting error
+> ("not definitionally equal") names the class, never the provenance.
+
+Two script slips also recurred and are now closed at the source: a body sliced from `head+1`
+rather than after `:= by` (fourth occurrence — both slices now route through one `body_of`
+helper), and a lifted block dedented when its source indent already matched the destination.
+
+`#print axioms`: `[propext, Classical.choice, Quot.sound]` for both this and the propA3 headline.
