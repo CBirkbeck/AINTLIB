@@ -38305,3 +38305,39 @@ Its proof: `pairing_galois` to move `σ` across, then `fieldWeilPairing_gl2_zmod
 once inside the `letI`.
 
 Root green at **9733 jobs**.
+
+### [WP-D3d step 4, move 2] the proof, derived from `pairing_galois`'s own proof (2026-08-04)
+
+Having read `pairing_galois`'s proof (`FibreGalois.lean:130–143`), move 2 transcribes as:
+
+```
+theorem GaloisFibreChart.pairing_det (C : GaloisFibreChart k E L) (σ : L ≃ₐ[k] L)
+    (N : ℕ) [NeZero N] (hN : (N : L) ≠ 0) (P Q P' Q' : E.Point (geomFieldPt k L))
+    (hP hQ hP' hQ' : …)                       -- the four torsion hypotheses, as in pairing_galois
+    (hPP' hQQ' : …)                           -- the scheme-theoretic σ-action, as in pairing_galois
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (hgP : P' = (g 0 0).val • P + (g 0 1).val • Q)
+    (hgQ : Q' = (g 1 0).val • P + (g 1 1).val • Q) :
+    σ (C.pairing N hN P Q hP hQ : L)
+      = (C.pairing N hN P Q hP hQ : L) ^ (g 0 0 * g 1 1 - g 0 1 * g 1 0).val := by
+  letI := C.elliptic
+  refine (C.pairing_galois σ N hN P Q P' Q' hP hQ hP' hQ' hPP' hQQ').symm.trans ?_
+  -- now: (C.pairing N hN P' Q' hP' hQ') = (C.pairing N hN P Q hP hQ) ^ det g
+  have hdP : C.dict P' = (g 0 0).val • C.dict P + (g 0 1).val • C.dict Q := by
+    rw [hgP, map_add, map_nsmul, map_nsmul]     -- `.val : ℕ`, so `map_nsmul`, not `map_zsmul`
+  have hdQ : C.dict Q' = (g 1 0).val • C.dict P + (g 1 1).val • C.dict Q := by
+    rw [hgQ, map_add, map_nsmul, map_nsmul]
+  -- `C.pairing` is by definition `fieldWeilPairing (C.W.baseChange L) N hN (C.dict ·) (C.dict ·)`
+  refine (fieldWeilPairing_congr (C.W.baseChange L) N hN _ _ _ _ hdP hdQ).trans ?_
+  exact fieldWeilPairing_gl2_zmod (C.W.baseChange L) N hN (C.dict P) (C.dict Q) _ _ g _ _
+```
+
+Two things to watch: the coefficients are `ZMod.val`s, i.e. **`ℕ`**, so the transport of `hgP`/`hgQ`
+through `C.dict` is `map_nsmul` (`pairing_galois` uses `map_zsmul` because its scalars are the `(N : ℤ)`
+of the torsion hypotheses); and `fieldWeilPairing_congr`'s four torsion arguments can all be `_` since
+they are propositional.
+
+Move 3 then closes step 4: injectivity of `algebraMap K (AlgebraicClosure K)` on the identity produced by
+`algebraMap_fieldPairingValue_eq_pairing` + this, followed by `algebraMap_factorRootOfUnityDescend`.
+
+Root green at **9733 jobs**.
