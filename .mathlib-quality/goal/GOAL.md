@@ -14617,3 +14617,64 @@ Left, both poor value for the ~3 lines each needs:
 Neither is blocked; both are simply a poor trade at this size. Recorded rather than forced, because
 manufacturing a helper whose only purpose is to move a number is the failure mode this measure
 invites — the same reason `wedhorn_lemma_834` (~11 tiny lemmas to clear 131) is left alone.
+
+### `unitCover_relOverlap_forward_witness` Phase 1 — attempted twice, reverted twice
+
+The plan (hoist `hA₀` ×4 and `hsplit`, lift the two `hclass` existentials; 217 → 158) is sound and
+the bodies transfer, but three separate obstacles killed it. Two are now fixed knowledge; the third
+is the real blocker.
+
+1. **Placement.** A shared lemma must go above the *earliest* consumer. `hA₀`'s four call sites span
+   L3039–L9055, so inserting above the target at L4370 left the first two with
+   `Unknown identifier`. Fixed by inserting above `unitCover_relPlus_forward_witness` (L3003).
+2. **Slicing.** These `have`s have multi-line *statements*, so the body starts after the `:= by`
+   line, not after the head line. Slicing from `head+1` swept statement fragments into the lemma
+   body and produced `unknown tactic`. Third occurrence of this class in the session — the fix is
+   to locate `:= by` explicitly and slice from there, never `a+1`.
+3. **`DecidableEq` provenance — the actual blocker.** The parent's body opens with `classical`, so
+   its `insert` / `.product` / `.image` are built with `Classical.decEq`, while
+   `(D₀.interSamePair (unitDatum D₀.P f) rfl).T` was built with the *section's* `[DecidableEq A]`.
+   In the parent both are in scope and the step `have hp'' : … := hp'` typechecks by defeq. In an
+   extracted lemma with its own `[DecidableEq A]` binder the two `Finset`s are no longer
+   interchangeable:
+
+   ```
+   hp' : p ∈ (D₀.interSamePair (unitDatum D₀.P f) ⋯).T
+   expected  p ∈ Finset.image (fun r ↦ r.1 * r.2) ((insert D₀.s D₀.T).product {1, f})
+   ```
+
+   Neither `[DecidableEq A]` nor `open Classical in` resolves this — they supply *different*
+   instances, and the mismatch is exactly between two instances. The extraction needs the
+   `interSamePair … .T = image …` identity passed as an explicit hypothesis (the "pass the
+   definitional identity the proof's `rfl`s were silently using" manoeuvre), or the parent's
+   `classical` removed so that one instance is used throughout.
+
+Reverted; the file is back to `6cbbb7b61` and builds clean. Recorded rather than forced: this is a
+real technique gap, not a size problem, and the fix wants deciding rather than guessing.
+
+### Phase 1 landed: 217 → 170, and the `DecidableEq`-provenance fix
+
+Third attempt, green first build. `hclass₁`/`hclass₂` are now `unitCover_class_left` /
+`unitCover_class_right`, each taking `hA₀` and `hsplit` as hypotheses plus **`hT`**, the identity
+
+```lean
+(D₀.interSamePair (unitDatum D₀.P f) rfl).T
+  = ((insert D₀.s D₀.T).product (insert 1 {f})).image (fun r => r.1 * r.2)
+```
+
+discharged at the call site by `rfl`. That is the fix for the blocker recorded above: `.T` is built
+with the *section's* `DecidableEq` and the image with the caller's `classical` one, so the coercion
+`have hp'' : … := hp'` is defeq in the caller and not under a fresh instance binder. Passing the
+identity moves exactly that one fact across, and the caller — where the two really are defeq —
+proves it by `rfl`. Fourth appearance of the manoeuvre, and the first where the identity is about
+*instance provenance* rather than a `set`-local's definition.
+
+**A substring trap, worth stating.** Rewiring the coercion by `line.replace(":= hp'", ":= hT ▸ hp'")`
+also corrupted the *next* line, because `:= hp'` is a prefix of `:= hp''`. The symptom was an
+`invalid ▸ notation` pointing at a goal that had already been rewritten by `Finset.mem_image`.
+Match line-**final** occurrences (`line.rstrip().endswith(":= hp'")`) and assert the hit count — it
+was exactly 1 per lemma, which is what confirmed the fix.
+
+Remaining phases for this target (measured, not started): the four `rcases` bullets plus the
+`hLHS`/`hRHS` they depend on (~110 lines → ~61), then `haMbb`/`hsplit`/`hinvO`, then
+`hF_alg`/`heq_s` → ~46.

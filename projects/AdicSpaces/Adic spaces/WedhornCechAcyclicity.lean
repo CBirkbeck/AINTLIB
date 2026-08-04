@@ -4364,6 +4364,77 @@ private theorem unitCover_relOverlap_forwardLocHom_algebraMap
   rw [unitCover_relOverlap_forwardLocHom, IsLocalization.Away.lift_eq]
   rfl
 
+/-- Classification of the first factor: each `p` contributes `c` or `c · f`.
+
+`hT` carries across a definitional identity available only in the caller: `.T` is built with the
+section's `DecidableEq` and the image with the caller's `classical` one, so the two are
+interchangeable there but not under a fresh instance binder. -/
+private theorem unitCover_class_left [DecidableEq A] (D₀ : RationalLocData A) (f : A)
+    (hT : (D₀.interSamePair (unitDatum D₀.P f) rfl).T =
+      ((insert D₀.s D₀.T).product (insert (1 : A) ({f} : Finset A))).image
+        (fun r : A × A => r.1 * r.2))
+    (hA₀ : ∀ p ∈ insert D₀.s D₀.T,
+      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀)
+    (hsplit : ∀ p' q' : A, divByS (p' * q') D₀.s =
+      divByS p' D₀.s * algebraMap A (Localization.Away D₀.s) q') :
+    ∀ p ∈ insert ((D₀.s * 1 : A)) (D₀.interSamePair (unitDatum D₀.P f) rfl).T,
+      ∃ c, c ∈ (presheafValue_concretePair D₀).A₀ ∧
+        (D₀.coeRingHom (divByS p D₀.s) = c ∨
+         D₀.coeRingHom (divByS p D₀.s) = c * D₀.canonicalMap f) := by
+  intro p hp
+  rcases Finset.mem_insert.mp hp with rfl | hp'
+  · refine ⟨D₀.coeRingHom (divByS (D₀.s * 1) D₀.s), ?_, Or.inl rfl⟩
+    rw [show divByS (D₀.s * 1) D₀.s = divByS D₀.s D₀.s by rw [mul_one]]
+    exact hA₀ D₀.s (Finset.mem_insert_self _ _)
+  · have hp'' : p ∈ ((insert D₀.s D₀.T).product
+        (insert (1 : A) ({f} : Finset A))).image (fun r : A × A => r.1 * r.2) := hT ▸ hp'
+    rw [Finset.mem_image] at hp''
+    obtain ⟨⟨p', q'⟩, hpq', rfl⟩ := hp''
+    have hp1 : p' ∈ insert D₀.s D₀.T := (Finset.mem_product.mp hpq').1
+    have hq1 : q' ∈ insert (1 : A) ({f} : Finset A) := (Finset.mem_product.mp hpq').2
+    rw [show (((p', q').1 : A) * (p', q').2 : A) = p' * q' from rfl]
+    refine ⟨D₀.coeRingHom (divByS p' D₀.s), hA₀ p' hp1, ?_⟩
+    rcases Finset.mem_insert.mp hq1 with h1 | hf
+    · refine Or.inl ?_
+      rw [h1, hsplit p' 1, map_mul, map_one, map_one, mul_one]
+    · refine Or.inr ?_
+      rw [Finset.mem_singleton.mp hf, hsplit p' f, map_mul]
+      rfl
+
+/-- Classification of the second factor. -/
+private theorem unitCover_class_right [DecidableEq A] (D₀ : RationalLocData A) (f : A)
+    (hT : (D₀.interSamePair (coUnitDatum D₀.P f) rfl).T =
+      ((insert D₀.s D₀.T).product (insert f ({1} : Finset A))).image
+        (fun r : A × A => r.1 * r.2))
+    (hA₀ : ∀ p ∈ insert D₀.s D₀.T,
+      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀)
+    (hsplit : ∀ p' q' : A, divByS (p' * q') D₀.s =
+      divByS p' D₀.s * algebraMap A (Localization.Away D₀.s) q') :
+    ∀ q ∈ insert ((D₀.s * f : A)) (D₀.interSamePair (coUnitDatum D₀.P f) rfl).T,
+      ∃ c, c ∈ (presheafValue_concretePair D₀).A₀ ∧
+        (D₀.coeRingHom (divByS q D₀.s) = c ∨
+         D₀.coeRingHom (divByS q D₀.s) = c * D₀.canonicalMap f) := by
+  intro q hq
+  rcases Finset.mem_insert.mp hq with rfl | hq'
+  · refine ⟨D₀.coeRingHom (divByS D₀.s D₀.s), hA₀ D₀.s (Finset.mem_insert_self _ _),
+      Or.inr ?_⟩
+    rw [hsplit D₀.s f, map_mul]
+    rfl
+  · have hq'' : q ∈ ((insert D₀.s D₀.T).product
+        (insert f ({1} : Finset A))).image (fun r : A × A => r.1 * r.2) := hT ▸ hq'
+    rw [Finset.mem_image] at hq''
+    obtain ⟨⟨p', q'⟩, hpq', rfl⟩ := hq''
+    have hp1 : p' ∈ insert D₀.s D₀.T := (Finset.mem_product.mp hpq').1
+    have hq1 : q' ∈ insert f ({1} : Finset A) := (Finset.mem_product.mp hpq').2
+    rw [show (((p', q').1 : A) * (p', q').2 : A) = p' * q' from rfl]
+    refine ⟨D₀.coeRingHom (divByS p' D₀.s), hA₀ p' hp1, ?_⟩
+    rcases Finset.mem_insert.mp hq1 with hf | h1
+    · refine Or.inr ?_
+      rw [hf, hsplit p' f, map_mul]
+      rfl
+    · refine Or.inl ?_
+      rw [Finset.mem_singleton.mp h1, hsplit p' 1, map_mul, map_one, map_one, mul_one]
+
 set_option linter.unusedSectionVars false in
 /-- **Relative-overlap per-generator witnesses (O4)**: every `t ∈ T_inter` (a product
 `p·q` over the two factor-data) has a `locSubring`-witness over the B-side annulus datum.
@@ -4449,56 +4520,9 @@ private theorem unitCover_relOverlap_forward_witness
     rw [h9, map_mul, map_mul]
     rfl
   -- classification of the first factor
-  have hclass₁ : ∀ p ∈ insert ((D₀.s * 1 : A))
-      (D₀.interSamePair (unitDatum D₀.P f) rfl).T,
-      ∃ c, c ∈ (presheafValue_concretePair D₀).A₀ ∧
-        (D₀.coeRingHom (divByS p D₀.s) = c ∨
-         D₀.coeRingHom (divByS p D₀.s) = c * D₀.canonicalMap f) := by
-    intro p hp
-    rcases Finset.mem_insert.mp hp with rfl | hp'
-    · refine ⟨D₀.coeRingHom (divByS (D₀.s * 1) D₀.s), ?_, Or.inl rfl⟩
-      rw [show divByS (D₀.s * 1) D₀.s = divByS D₀.s D₀.s by rw [mul_one]]
-      exact hA₀ D₀.s (Finset.mem_insert_self _ _)
-    · have hp'' : p ∈ ((insert D₀.s D₀.T).product
-          (insert (1 : A) ({f} : Finset A))).image (fun r : A × A => r.1 * r.2) := hp'
-      rw [Finset.mem_image] at hp''
-      obtain ⟨⟨p', q'⟩, hpq', rfl⟩ := hp''
-      have hp1 : p' ∈ insert D₀.s D₀.T := (Finset.mem_product.mp hpq').1
-      have hq1 : q' ∈ insert (1 : A) ({f} : Finset A) := (Finset.mem_product.mp hpq').2
-      rw [show (((p', q').1 : A) * (p', q').2 : A) = p' * q' from rfl]
-      refine ⟨D₀.coeRingHom (divByS p' D₀.s), hA₀ p' hp1, ?_⟩
-      rcases Finset.mem_insert.mp hq1 with h1 | hf
-      · refine Or.inl ?_
-        rw [h1, hsplit p' 1, map_mul, map_one, map_one, mul_one]
-      · refine Or.inr ?_
-        rw [Finset.mem_singleton.mp hf, hsplit p' f, map_mul]
-        rfl
+  have hclass₁ := unitCover_class_left D₀ f rfl hA₀ hsplit
   -- classification of the second factor
-  have hclass₂ : ∀ q ∈ insert ((D₀.s * f : A))
-      (D₀.interSamePair (coUnitDatum D₀.P f) rfl).T,
-      ∃ c, c ∈ (presheafValue_concretePair D₀).A₀ ∧
-        (D₀.coeRingHom (divByS q D₀.s) = c ∨
-         D₀.coeRingHom (divByS q D₀.s) = c * D₀.canonicalMap f) := by
-    intro q hq
-    rcases Finset.mem_insert.mp hq with rfl | hq'
-    · refine ⟨D₀.coeRingHom (divByS D₀.s D₀.s), hA₀ D₀.s (Finset.mem_insert_self _ _),
-        Or.inr ?_⟩
-      rw [hsplit D₀.s f, map_mul]
-      rfl
-    · have hq'' : q ∈ ((insert D₀.s D₀.T).product
-          (insert f ({1} : Finset A))).image (fun r : A × A => r.1 * r.2) := hq'
-      rw [Finset.mem_image] at hq''
-      obtain ⟨⟨p', q'⟩, hpq', rfl⟩ := hq''
-      have hp1 : p' ∈ insert D₀.s D₀.T := (Finset.mem_product.mp hpq').1
-      have hq1 : q' ∈ insert f ({1} : Finset A) := (Finset.mem_product.mp hpq').2
-      rw [show (((p', q').1 : A) * (p', q').2 : A) = p' * q' from rfl]
-      refine ⟨D₀.coeRingHom (divByS p' D₀.s), hA₀ p' hp1, ?_⟩
-      rcases Finset.mem_insert.mp hq1 with hf | h1
-      · refine Or.inr ?_
-        rw [hf, hsplit p' f, map_mul]
-        rfl
-      · refine Or.inl ?_
-        rw [Finset.mem_singleton.mp h1, hsplit p' 1, map_mul, map_one, map_one, mul_one]
+  have hclass₂ := unitCover_class_right D₀ f rfl hA₀ hsplit
   -- decompose `t = p · q`
   have ht' : t ∈ ((insert (D₀.s * 1) (D₀.interSamePair (unitDatum D₀.P f) rfl).T).product
       (insert (D₀.s * f) (D₀.interSamePair (coUnitDatum D₀.P f) rfl).T)).image
