@@ -1,1 +1,1 @@
-FOCUS: route beta transition — levelCoord DONE. NEXT: levelTransition (the locally constant GL2 matrix between two level bases) and the piecewise glSmul identification.
+FOCUS: route beta transition — forward direction DONE (levelBasisPt_glSmul, levelCoord_levelBasisPt_glSmul). NEXT: the CONVERSE (columns => L = glSmul g L) needing the ZMod.val arithmetic mirroring constGL_hom_fullLevelHom, then invertibility of the transition matrix.

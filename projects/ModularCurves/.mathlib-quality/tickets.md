@@ -37323,3 +37323,18 @@ input left is the root `ζ` with `g^*ζ = ζ^{det g}` (WP-D3d).
    `Matrix.GeneralLinearGroup`;
 4. `fullLevelPairing_glSmul` on each clopen piece of `levelTransitionCols`;
 5. the arithmetic input: `ζ` with `g^*ζ = ζ^{det g}` (WP-D3d).
+
+* `levelCoord_congr` — `levelCoord` depends on the point only through the morphism (the
+  section-condition proof is a `Prop`).
+* **`levelBasisPt_glSmul`** — the `j`-th basis point of `g • L` is the `L`-basis combination labelled
+  by the `j`-th **column** of `g`. *No `ZMod.val` arithmetic here*: `constGL_hom_fullLevelHom`
+  already contains it, and `Matrix.mulVec_single_one` reads `g · e_j` as `g.col j`.
+* **`levelCoord_levelBasisPt_glSmul`** — hence the transition columns of `g • L` against `L` are
+  exactly the columns of `g`. **This is the forward half of the transition statement.**
+
+The **converse** (transition columns `⟹ L' = glSmul g L`) is the one place the `ZMod.val`
+bookkeeping cannot be borrowed: it needs `pointToTorsion` injectivity plus
+`(1 : ZMod N).val • P' = P'` and `(0 : ZMod N).val • Q' = 0`, i.e. `zsmul_eq_of_intCast_eq` — the
+same computation as `constGL_hom_fullLevelHom`'s `harith`, run in reverse. After that, invertibility
+of the transition matrix (pointwise, from `fullLevelFibreMap_bijective`) puts it in
+`Matrix.GeneralLinearGroup`, and `fullLevelPairing_glSmul` closes `hdet` piecewise.

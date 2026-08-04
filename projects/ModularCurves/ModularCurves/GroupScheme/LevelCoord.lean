@@ -130,6 +130,46 @@ theorem levelBasisPt_eq_sigmaι (hinv : NIsInvertible S N) (L L' : E.FullLevelPt
     (by rw [Category.assoc, E.fullLevelHom_torsionπ L]; simp [constSchemeπ]) ?_
   rw [hc, E.levelCoord_sigmaι hinv L c]
 
+/-- **(the forward direction)** The `j`-th basis point of `g • L` is the `L`-basis combination
+labelled by the `j`-th **column** of `g`.
+
+No `ZMod.val` arithmetic is needed here: `constGL_hom_fullLevelHom` already contains it, and
+`Matrix.mulVec_single` reads `g · e_j` as the `j`-th column. -/
+theorem levelBasisPt_glSmul (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (L : E.FullLevelPt N) (j : Fin 2) :
+    E.levelBasisPt (E.glSmul g L) j =
+      Sigma.ι (fun _ : Fin 2 → ZMod N => S)
+        (fun i => (g : Matrix (Fin 2) (Fin 2) (ZMod N)) i j) ≫ E.fullLevelHom L := by
+  rw [levelBasisPt, ← E.constGL_hom_fullLevelHom g L, ← Category.assoc]
+  congr 1
+  show Sigma.ι (fun _ : Fin 2 → ZMod N => S) (Pi.single j 1) ≫
+      Sigma.desc (fun a => Sigma.ι (fun _ : Fin 2 → ZMod N => S) (glEquiv g a)) = _
+  rw [Sigma.ι_desc]
+  congr 1
+  show (g : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec (Pi.single j 1) = _
+  rw [Matrix.mulVec_single_one]
+  rfl
+
+/-- `levelCoord` depends on the point only through the morphism — the section-condition proof is a
+`Prop`, so it may be replaced freely. -/
+theorem levelCoord_congr (hinv : NIsInvertible S N) (L : E.FullLevelPt N)
+    {T : Scheme.{u}} {g : T ⟶ S} {t t' : T ⟶ E.torsion N}
+    (ht : t ≫ E.torsionπ N = g) (ht' : t' ≫ E.torsionπ N = g) (h : t = t') :
+    E.levelCoord hinv L t ht = E.levelCoord hinv L t' ht' := by
+  subst h; rfl
+
+/-- …hence the transition columns of `g • L` against `L` are exactly the columns of `g`. This is the
+forward half of "the transition matrix expresses `L'` in terms of `L`". -/
+theorem levelCoord_levelBasisPt_glSmul (hinv : NIsInvertible S N)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (L : E.FullLevelPt N) (j : Fin 2) :
+    E.levelCoord hinv L (E.levelBasisPt (E.glSmul g L) j)
+        (E.levelBasisPt_torsionπ (E.glSmul g L) j) =
+      LocallyConstant.const S (fun i => (g : Matrix (Fin 2) (Fin 2) (ZMod N)) i j) := by
+  rw [E.levelCoord_congr hinv L (E.levelBasisPt_torsionπ (E.glSmul g L) j)
+    (by rw [Category.assoc, E.fullLevelHom_torsionπ L]; simp [constSchemeπ])
+    (E.levelBasisPt_glSmul g L j)]
+  exact E.levelCoord_sigmaι hinv L _
+
 end EllipticCurve
 
 end ModularCurves
