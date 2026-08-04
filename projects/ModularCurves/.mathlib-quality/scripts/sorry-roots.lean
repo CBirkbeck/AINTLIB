@@ -20,6 +20,8 @@ import ModularCurves.ModularCurve.RhoPoints
 import ModularCurves.ModularCurve.YFullFromYOne
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.Moduli.GammaHClosure
+import ModularCurves.ModularCurve.YFullSmoothAffine
+import ModularCurves.WeilPairing.DetCocycle
 
 open Lean
 

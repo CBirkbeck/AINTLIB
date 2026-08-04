@@ -36200,3 +36200,37 @@ What was built for `N = 3` is not wasted: `e3GlIso` / `e3GlIso_hom_homEquiv` /
 `e3GlRingEquiv` are the general shape of "a `GL₂`-automorphism of the moduli problem induces
 one of the representing ring", which the general route needs too — with `universalE3Obj`
 replaced by the `Y(N)`-level object.
+
+# ══════════════════════════════════════════════════════════════════════════
+# END-OF-SESSION SNAPSHOT — 2026-08-04. Root green at 9720 jobs, 847/847 modules.
+# ══════════════════════════════════════════════════════════════════════════
+
+Authoritative, from `scripts/sorry-roots.lean` (re-run after every change this session):
+
+| target | sorry-roots |
+|---|---|
+| `YFull.exists_representing_smooth_affine` | **0** ✅ (was 1 — itself) |
+| `YFull.gammaFullNaive_representable_assembly` | **0** ✅ (was 3) |
+| `yFullCandidate_representableBy` | **0** ✅ (was 1) |
+| `gammaOneNaive_representable` | 0 ✅ |
+| `gammaFullNaive_rigid_and_representable` | 0 ✅ |
+| `gammaFullDrinfeld_rigid_and_representable` | 0 ✅ |
+| `yRho_representable` | 7 — the Weil register, unchanged |
+| `yRho_geometricallyIrreducible` | 4 — 3 Weil + itself (Leg 2, out of scope) |
+
+**T-E9 went from three sorry-roots to zero this session.** `yRho_representable`'s seven are
+untouched and are exactly the Weil-pairing register — nothing else in its cone carries a
+`sorry`.
+
+## Next session starts here
+
+`FOCUS` (also in `beastmode_active`): **WP-D3c step 2** — transport `fieldWeilPairingHom`
+along a field *isomorphism*. Begin with `muNAlgebra` (`WeilPairing/EtaleDescent.lean:235`),
+which is `finiteEtaleOfπ (muNπ (Spec k) N)`, so the transport is `muNMapAlong` plus the
+`Spec k ≅ Spec k'` iso; then `torsionPairAlgebra`; then the uniqueness argument via
+`fieldWeilPairingHom_unique`. After that, **WP-D3d** (assemble `ζ` componentwise — the whole
+base side is already in place) and then `nonempty_weilPairing_of_root_of_det` closes DS4's
+first two register entries.
+
+Do **not** restart on the `N = 3` shortcut: see the REDIRECT entry above — it needs finite-group
+generation facts that mathlib lacks over `ZMod 3` and that the general route does not need.

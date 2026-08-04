@@ -1,1 +1,1 @@
-FOCUS: WP-D3c-N3 step 2 — prove e3GlRingEquiv g (e3Zeta R) = e3Zeta R ^ (det g).val; first read how glSmul acts and whether e3ClassifyingRingHom gives a computation rule
+FOCUS: WP-D3c step 2 — transport muNAlgebra/torsionPairAlgebra along a field isomorphism; start from muNAlgebra (EtaleDescent.lean:235)
