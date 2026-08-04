@@ -14793,3 +14793,123 @@ and immune: an abstract `OD` cannot desynchronise anything.
 Left at 62: `hF_alg` (5) is the only remaining real unit, and it needs `F`'s `set`-local definition
 passed — the same shape, so tractable. The rest is eight 3-4 line `have`s whose statements are
 longer than their proofs; compressing those is metric-work, not decomposition.
+
+### A name collision caught an un-consumed dedup — 62 sites across 18 files
+
+Phase A of the `propA3_part1_gluing` decomposition added a pointwise `restrictionMap_comp`
+(the `congrFun (restrictionMap_comp …) y` idiom, written by hand at 38 sites in
+WedhornCechAcyclicity alone). The build answered:
+
+```
+error: a non-private declaration `ValuationSpectrum.restrictionMap_restrictionMap`
+       has already been declared
+```
+
+It exists in `Presheaf.lean:1863` — added by **my own commit `44105bbd3`** earlier in this
+run, whose docstring even says "consumers otherwise write `congrFun (restrictionMap_comp …)
+y` by hand, which they do at more than a dozen sites across the project". The lemma landed;
+the sites were never rewired. Current count of hand-written sites:
+
+```
+62 across 18 files — WedhornCechAcyclicity 14, GeometricReduction 7, StandardDescent 6,
+SheafyPair 5, RestrictedLimitSheaf 5, RelativeDescentHuber 4, EmbeddingTopo 4, … 
+```
+
+(Down from 38 in this file because the decomposition itself consumed 24 of them.)
+
+**The transferable bit is the diagnostic, not the lemma.** A name collision on a lemma you
+are about to add is never just a naming problem — it is the build telling you the fact
+already exists, and it is the *only* signal that catches a duplicate whose statement you
+would otherwise have re-derived from scratch. This is the third distinct dedup mechanism
+recorded here, after the exact-body hash and the repeated-block scan, and the only one that
+fires *before* the duplicate is written.
+
+It also names a specific failure mode to avoid: **landing a helper without rewiring its
+consumers leaves the duplication in place and hides it**, because a name-based scan now
+finds one declaration and calls it clean. Queued as a Task-3 batch (62 mechanical sites).
+
+### `wedhorn_lemma_834_propA3_part1_gluing` 349 → 16 — the biggest single target on the board
+
+Nine declarations, none over 40. Sizes: 11 / 9 / 1 / 4 / 33 / 40 / 14 / 21 / **16**.
+
+**What blocked it.** Steps 1–4 are a `let`-chain — `chooseC` (a choice of containing
+`C`-piece), `gVj` (`f` restricted from it), `yVj` (glued on `C|Vⱼ`), `yV` (transported to
+`Vⱼ`) — each defined from the previous. Every later step mentions the whole chain, so no
+step lifts out on its own.
+
+**What unblocked it** is the `unitCover` move again, and this is now the third target it has
+carried: ask what the later steps *consume* about `yV`, not what it *is*. The answer is one
+existential —
+
+```lean
+∀ Vj D' (mem : D' ∈ (C_restr_at Vj).covers) (hsub),
+  ∃ Dc hc, restrictionMap Vj.1 D' hsub (y Vj) = restrictionMap Dc.1 D' hc (f Dc)
+```
+
+"on each piece of `C|Vⱼ`, `y` agrees with *some* `f`-value". That is exactly the content of
+the step-3 gluing with `chooseC` existentially quantified away, and steps 5, 8-mixed and
+8-outer need nothing else — so all three become lemmas over an abstract `y`, and the
+`let`-chain stays local to the one lemma that builds it.
+
+Worth stating as a rule, since it has now generalised twice past its origin:
+
+> **Existentially quantify the construction, not just the output.** When a proof's later
+> steps all mention a chain of `let`s, the chain is usually witnessing one existential. Find
+> the statement whose *witness* is the chain, and the chain stops being shared state.
+
+**Three helpers came out of it**, each packaging a chase the Prop A.3 proofs run at every
+overlap: `eq_of_restrictionMap_eq_of_isOXAcyclic` (the 20-line `sub_eq_zero` →
+`Eq.rec`-transport → `separation` → `map_sub` idiom, 4 uses here),
+`restrictionMap_eq_of_eq_on_inter` (reduce a common refinement to the canonical
+intersection, 2 uses), `restrictionMap_presheafValueCast` (the `show … from rfl` that folds
+a raw `Eq.rec` back into the `presheafValueCast` the section was built with).
+
+**Two mechanical notes.**
+
+- Generating a signature by string-composition, three of the six lemmas sharing a `SPEC`
+  block: `SPEC` carried its own outer parens, so `(hy :\n{SPEC})` left one paren open and
+  the *next binder's* `:` reported `unexpected token ':'; expected ')'` — an error pointing
+  20 lines past the cause. A **paren-balance check per generated signature** catches it with
+  no build: all six read `+0` after the fix. That check is now worth running on every
+  generated signature, since it costs nothing and the error message never points at the bug.
+- `#print axioms` on the public theorem is enough to certify all eight private helpers —
+  they are its transitive dependencies. `[propext, Classical.choice, Quot.sound]`, no
+  `sorryAx`.
+
+### The same pathology, a second time — and it is now a named pattern
+
+Searching for prior art before writing the `tateAlgebra_flat` helpers (cardinal rule: reuse,
+don't duplicate) turned up `mem_span_range_iff_exists_fin` at `TateAlgebra.lean:1390` —
+
+```lean
+private lemma mem_span_range_iff_exists_fin :
+    x ∈ Submodule.span R (Set.range s) ↔ ∃ c : Fin k → R, x = ∑ j, c j • s j
+```
+
+— and **four sites in the same file** (L2166, L2301, L2662, L2727) still hand-rolling exactly
+its forward direction:
+
+```lean
+obtain ⟨cf, hcf⟩ := Finsupp.mem_span_range_iff_exists_finsupp.mp hv_span
+have hcf_sum : … = ∑ j, cf j • s₀ j := by
+  rw [← hcf, Finsupp.sum, Finset.sum_subset (Finset.subset_univ _)]
+  intro j _ hj; rw [Finsupp.notMem_support_iff.mp hj, zero_smul]
+```
+
+Four lines each, byte-identical modulo names, one `.mp` away from the helper sitting 700 lines
+above them. A fifth site is in `ArtinReesConvergence.lean:65`, which would need the helper
+un-`private`d.
+
+**So: `landed helper, un-rewired consumers` is a pattern, not an accident** — twice in one
+session, in unrelated files, both times with the helper's own docstring describing the duplication
+it was meant to remove. It is invisible to every dedup scan recorded here: the name-based scan sees
+one declaration, the exact-body hash sees anonymous `have`s not declarations, and the
+repeated-block scan only fires if you run it on a corpus that *includes* the helper's body, which
+it does not, because the helper is a one-liner and the copies are four lines of tactic.
+
+**The scan that does find it**: grep the *helper's own statement shape* — here
+`mem_span_range_iff_exists_finsupp`, there `restrictionMap_comp` — and count. If the raw mathlib
+lemma a helper wraps still has consumers, the helper did not land; it was only written. Worth
+running once per newly-added helper, as the last step of adding it.
+
+Queued for the `tateAlgebra_flat` batch (4 sites, same file, free with that decomposition).
