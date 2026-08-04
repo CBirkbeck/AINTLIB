@@ -44,11 +44,12 @@ Not a blocker (no `sorry`), so **not** fleet-eligible as WIP — it is dedup/dea
 `isIntegrallyClosed_quotient_minimalPrime` — all general-purpose. Also widened this window and
 independently useful: `ΓSpecIso_hom_appTop_specMap_comp` (now `φ : R ⟶ R'`, was `R ⟶ R`).
 
-## KM-SEESAW-DEDUP (2026-08-05): a private affine-scheme helper duplicated
+## KM-SEESAW-DEDUP (2026-08-05): RESOLVED same-day — relocated, not duplicated
 `ForMathlib/Seesaw.lean` needs the scalar tower `Γ(S,⊤) → κ(s) → K` for a field-valued point of an
 affine `S`. It is **already proved** in the tree as the `private` pair `affineFieldFactor_isScalarTower`
 / `affineFieldFactor_residue_isScalarTower` (`EllipticCurve/PoleSheafBaseCechHigher.lean:55,84`) — pure
 affine-scheme infrastructure, zero elliptic-curve content, made unreachable only by `private`.
-`Seesaw.lean:118` therefore carries a `sorry`-stubbed local restatement rather than a copied 60-line
-body. **Resolution: one public home in `ForMathlib/`** (e.g. `ForMathlib/AffineFieldPointTower.lean`),
-cited by both files. Do not resolve by copying.
+**RESOLUTION (done):** both lemmas moved verbatim to the new public
+`ForMathlib/AffineFieldPointTower.lean` (134 lines, no elliptic-curve content), `private` dropped;
+`PoleSheafBaseCechHigher.lean` now imports it and still builds; `Seesaw.lean` cites it directly and its
+stub leaf is gone. No proof body was copied.

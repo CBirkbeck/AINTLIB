@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import ModularCurves.ForMathlib.AffineFieldPointTower
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
 import ModularCurves.Picard.RigidDescent
@@ -105,30 +106,6 @@ that shape: `FibrewiseElliptic.sectionPoleSheafPower_field_orderedBaseCech_kerne
 (`…:360`) computes `finrank K (ker (d⁰ ⊗ K)) = n`, Riemann–Roch for `𝒪(n[0])`.
 Logged in `.mathlib-quality/b2_log.jsonl` under `KM-SEESAW-1`.
 -/
-
-/-- The scalar tower `Γ(S,⊤) → κ(s) → K` attached to a field-valued point of an affine `S`, where `s`
-is the point `K` lies over.
-
-**Duplication, deliberately recorded.** This fact is already proved in the tree, as the `private` pair
-`affineFieldFactor_isScalarTower` / `affineFieldFactor_residue_isScalarTower`
-(`EllipticCurve/PoleSheafBaseCechHigher.lean:55,84`). Both are pure affine-scheme infrastructure with no
-elliptic-curve content, so the right end state is one public home in `ForMathlib/` that this file and
-`PoleSheafBaseCechHigher` share; being `private` there is why it cannot simply be cited here. Logged in
-`.mathlib-quality/DEBT.md` as a dedup item — do **not** resolve it by copying the 60-line proof body. -/
-private theorem affineFieldFactor_residue_isScalarTower
-    {S : Scheme.{u}} [IsAffine S]
-    (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K] :
-    let t : Spec (.of K) ⟶ S :=
-      Spec.map (CommRingCat.ofHom (algebraMap Γ(S, (⊤ : S.Opens)) K)) ≫ S.isoSpec.inv
-    let x := Scheme.SpecToEquivOfField K S t
-    let s := x.1
-    let ψ := x.2
-    letI : Algebra Γ(S, (⊤ : S.Opens)) ↥(S.residueField s) :=
-      ((S.fromSpecResidueField s).appTop ≫
-        (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
-    letI : Algebra (↥(S.residueField s)) K := ψ.hom.toAlgebra
-    IsScalarTower Γ(S, (⊤ : S.Opens)) (↥(S.residueField s)) K := by
-  sorry
 
 /-- **(KM-SEESAW-1′-res)** The residue-field form: at a point `s` of the base, fibrewise triviality of
 `M` makes `ker (d⁰ ⊗ κ(s))` one-dimensional.
