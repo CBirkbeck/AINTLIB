@@ -36348,3 +36348,43 @@ is the three-step chain itself (`polyEquivTensor` → `cancelBaseChange` →
 `quotIdealMapEquivTensorQuot`), then the `muNAlgebra` transport through `muNSpecFieldIso`.
 
 Root green at **9721 jobs**.
+
+### [WP-D3c-2a] the correct `cancelBaseChange` instantiation (worked out; the naive one does **not** typecheck)
+
+`Algebra.TensorProduct.cancelBaseChange R S T A B : A ⊗[S] (S ⊗[R] B) ≃ₐ[T] A ⊗[R] B`.
+
+The naive reading — `A := S[X]`, `S := R[X]`, `B := AdjoinRoot f` — gives
+`S[X] ⊗[R[X]] (R[X] ⊗[R] AdjoinRoot f)`, whose inner factor is **not** `AdjoinRoot f`. It does
+not apply.
+
+The instantiation that works puts the *quotient* in the `A` slot:
+
+```
+Algebra.TensorProduct.cancelBaseChange R R[X] S (AdjoinRoot f) S
+  : AdjoinRoot f ⊗[R[X]] (R[X] ⊗[R] S) ≃ₐ[S] AdjoinRoot f ⊗[R] S
+```
+
+using `[Algebra R[X] (AdjoinRoot f)]` and `[IsScalarTower R R[X] (AdjoinRoot f)]` (both
+present). Then `R[X] ⊗[R] S ≅ S[X]` (`Polynomial.polyEquivTensor` composed with
+`Algebra.TensorProduct.comm`), so
+
+```
+AdjoinRoot f ⊗[R[X]] S[X] ≅ AdjoinRoot f ⊗[R] S
+```
+
+and `Algebra.TensorProduct.comm` on both sides turns that into the
+`S[X] ⊗[R[X]] AdjoinRoot f ≅ S ⊗[R] AdjoinRoot f` that
+`quotIdealMapEquivTensorQuot` produces. Full chain:
+
+```
+S ⊗[R] AdjoinRoot f
+  ≅ AdjoinRoot f ⊗[R] S                      -- Algebra.TensorProduct.comm
+  ≅ AdjoinRoot f ⊗[R[X]] (R[X] ⊗[R] S)       -- cancelBaseChange, symm, as instantiated above
+  ≅ AdjoinRoot f ⊗[R[X]] S[X]                -- polyEquivTensor + comm on the inner factor
+  ≅ S[X] ⊗[R[X]] AdjoinRoot f                -- Algebra.TensorProduct.comm
+  ≅ S[X] ⧸ Ideal.map (algebraMap R[X] S[X]) (span {f})   -- quotIdealMapEquivTensorQuot, symm
+  = AdjoinRoot (f.map (algebraMap R S))      -- Ideal.map_span + AdjoinRoot defn
+```
+
+The scaffolding (`polyAlgebra`, `isScalarTower_poly`, `map_X_pow_sub_one`) is already in
+`ForMathlib/AdjoinRootBaseChange.lean`; what remains is this six-step chain.
