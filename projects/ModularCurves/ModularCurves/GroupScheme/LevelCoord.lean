@@ -115,6 +115,21 @@ theorem levelTransitionCols_self (hinv : NIsInvertible S N) (L : E.FullLevelPt N
     exact congrArg (fun f => LocallyConstant.toFun f t) this
   exact Prod.ext (h 0) (h 1)
 
+/-- **(the bridge to the trivialisation level)** Where a column of the transition is the *constant*
+vector `c`, the corresponding basis point of `L'` **is** the `L`-basis combination labelled `c` —
+i.e. the transition's columns really do express `L'` in terms of `L`.
+
+`levelCoord_injective` plus `levelCoord_sigmaι`: both points have the same coordinate vector. -/
+theorem levelBasisPt_eq_sigmaι (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N) (j : Fin 2)
+    (c : Fin 2 → ZMod N)
+    (hc : E.levelCoord hinv L (E.levelBasisPt L' j) (E.levelBasisPt_torsionπ L' j) =
+      LocallyConstant.const S c) :
+    E.levelBasisPt L' j =
+      Sigma.ι (fun _ : Fin 2 → ZMod N => S) c ≫ E.fullLevelHom L := by
+  refine E.levelCoord_injective hinv L _ _ (E.levelBasisPt_torsionπ L' j)
+    (by rw [Category.assoc, E.fullLevelHom_torsionπ L]; simp [constSchemeπ]) ?_
+  rw [hc, E.levelCoord_sigmaι hinv L c]
+
 end EllipticCurve
 
 end ModularCurves

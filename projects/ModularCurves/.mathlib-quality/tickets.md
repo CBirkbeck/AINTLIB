@@ -37308,3 +37308,18 @@ point of `L'`. Then, on each clopen piece where that matrix is a constant `g`, i
 (pointwise, from `fullLevelFibreMap_bijective`); (b) on each clopen piece where it is a constant
 `g`, identify `L' = glSmul g L`; (c) apply `fullLevelPairing_glSmul`. Then the only arithmetic
 input left is the root `ζ` with `g^*ζ = ζ^{det g}` (WP-D3d).
+
+* **`levelBasisPt_eq_sigmaι`** — the bridge to the trivialisation level: where a column of the
+  transition is the *constant* vector `c`, the corresponding basis point of `L'` **is** the
+  `L`-basis combination labelled `c`. (`levelCoord_injective` + `levelCoord_sigmaι`: both points have
+  the same coordinate vector.) This is what converts the locally constant transition into the
+  section identities `P' = c₀(0)·P + c₀(1)·Q`, `Q' = c₁(0)·P + c₁(1)·Q` that `glSmul` is defined by.
+
+**Precise remaining chain for `hdet`** (all tools now named):
+1. from `levelBasisPt_eq_sigmaι` + `pointToTorsion` injectivity, get the two section identities;
+2. hence `L' = glSmul g L` for the matrix `g` with columns `c₀, c₁` (needs the `ZMod.val`
+   bookkeeping of `zsmul_eq_of_intCast_eq` / `val_smul_mul`, exactly as in `constGL_hom_fullLevelHom`);
+3. invertibility of `g` pointwise from `fullLevelFibreMap_bijective`, to land in
+   `Matrix.GeneralLinearGroup`;
+4. `fullLevelPairing_glSmul` on each clopen piece of `levelTransitionCols`;
+5. the arithmetic input: `ζ` with `g^*ζ = ζ^{det g}` (WP-D3d).
