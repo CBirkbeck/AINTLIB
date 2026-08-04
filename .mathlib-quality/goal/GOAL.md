@@ -15140,3 +15140,51 @@ rather than after `:= by` (fourth occurrence — both slices now route through o
 helper), and a lifted block dedented when its source indent already matched the destination.
 
 `#print axioms`: `[propext, Classical.choice, Quot.sound]` for both this and the propA3 headline.
+
+### `mem_span_range_iff_exists_fin`: the four un-rewired consumers, cleared
+
+The second instance of "landed helper, un-rewired consumers" (the pattern named above) is now
+closed. `TateAlgebra.lean:1390` states exactly the forward direction that four proofs in the
+same file were hand-rolling 700–1300 lines below it:
+
+```lean
+obtain ⟨cf, hcf⟩ := Finsupp.mem_span_range_iff_exists_finsupp.mp hv_span
+have hcf_sum : … = ∑ j : Fin k, cf j • s₀ j := by
+  rw [← hcf, Finsupp.sum, Finset.sum_subset (Finset.subset_univ _)]
+  intro j _ hj; rw [Finsupp.notMem_support_iff.mp hj, zero_smul]
+```
+
+Each collapses to `obtain ⟨cf, hcf_sum⟩ := mem_span_range_iff_exists_fin.mp hv_span`.
+22 lines gone, `tateAlgebra_flat` 253 → 244, module green first try.
+
+**These were hand edits, not a script, and deliberately so.** The dry run of a scripted version
+matched only 1 of 4: two sites wrap the `rw` across two lines, and one states the equation as
+`show … by` inside a `congr_arg` rather than as `have … := by`. A regex tight enough to be safe
+matched almost nothing, and one loose enough to match would have had to guess at three different
+shapes. **Four hand edits cost less than the third iteration of the script would have.**
+
+The script's assertions did their job — it failed loudly on the shapes it did not understand
+rather than corrupting them — which is the property that makes a scripted attempt cheap to
+abandon.
+
+### Next unit, designed and measured: `tateAlgebra_flat` (244)
+
+Two blocks dominate: `hAR_ctrl` (88) and `hdecomp_or_ctrl` (118). Lifting both leaves the main
+body at ~40, but each is itself over the bar, so the cascade is four lemmas, not two:
+
+| # | lemma | content | est. |
+|---|---|---|---|
+| G1 | `exists_ideal_pow_coeffs_of_mem_smul` | an element of `I^m • K` is an `I^m`-combination of any finite generating family — generic in `R`, `M`; **two call sites** (the `smul_induction_on` at the end of `hAR_ctrl`, and the one at ~L2700) | 15 |
+| G2 | `exists_ideal_pow_coeffs_of_mem_ker` | Artin–Rees: `lift₀ ∈ I^(m+k₀)` componentwise and `∈ K` ⟹ `I^m` coefficients. No `g`, no `relMap₀`, no `x` | 22 |
+| G3 | `hAR_ctrl` | the lift + kernel-membership, then G2 | 30 |
+| G4 | `hdecomp_or_ctrl` | the `Nat.find` minimal-failing-level chase; its `q = 0` branch (~50) likely splits again | ~60 |
+
+**The abstraction that unblocks G3** is the same one used three times already: `relMap₀` enters
+only through `hrel : ∀ r, relMap₀ r = ∑ i, g i * r i` — what it *computes* — never through its
+construction, so the `w^N`-scaling that built `g` stays in the caller. And the six lines that
+currently unfold `g` inside `h_ker` collapse to a single hypothesis
+`hy : ∑ i, P.A₀.subtype (g i) * y i = 0`, with the vector `y := fun i => (x i).val n` abstracted.
+
+Note the metric subtlety this design is shaped around: **splitting a 244-line proof into
+40 + 88 + 118 makes the over-50 count worse, not better** (one item becomes two). Only the full
+cascade reduces it, so the intermediate state is not a valid stopping point.

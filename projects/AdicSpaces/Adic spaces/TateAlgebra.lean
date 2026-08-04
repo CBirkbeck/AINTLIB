@@ -2163,12 +2163,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
       -- Decompose v ∈ K₀ over s₀ using the spanning hypothesis.
       have hv_span : (⟨v, hv⟩ : K₀) ∈ Submodule.span P.A₀ (Set.range s₀) :=
         hs₀ ▸ Submodule.mem_top
-      obtain ⟨cf, hcf⟩ := Finsupp.mem_span_range_iff_exists_finsupp.mp hv_span
-      -- Convert Finsupp.sum to Finset.sum over univ
-      have hcf_sum : (⟨v, hv⟩ : K₀) = ∑ j : Fin k, cf j • s₀ j := by
-        rw [← hcf, Finsupp.sum,
-          Finset.sum_subset (Finset.subset_univ _)]
-        intro j _ hj; rw [Finsupp.notMem_support_iff.mp hj, zero_smul]
+      obtain ⟨cf, hcf_sum⟩ := mem_span_range_iff_exists_fin.mp hv_span
       -- Extract component-wise equality
       have hv_eq : ∀ i, v i = ∑ j, (cf j : P.A₀) * (s₀ j : Fin l → P.A₀) i := by
         intro i
@@ -2298,12 +2293,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
         have h_in_span : (⟨fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀),
             h_scaled_ker⟩ : K₀) ∈ Submodule.span P.A₀ (Set.range s₀) :=
           hs₀ ▸ Submodule.mem_top
-        obtain ⟨cf, hcf⟩ := Finsupp.mem_span_range_iff_exists_finsupp.mp h_in_span
-        have hcf_sum : (⟨fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀),
-            h_scaled_ker⟩ : K₀) = ∑ j : Fin k, cf j • s₀ j := by
-          rw [← hcf, Finsupp.sum,
-            Finset.sum_subset (Finset.subset_univ _)]
-          intro j _ hj; rw [Finsupp.notMem_support_iff.mp hj, zero_smul]
+        obtain ⟨cf, hcf_sum⟩ := mem_span_range_iff_exists_fin.mp h_in_span
         -- Extract component-wise equality (in A₀).
         have hcf_eq : ∀ i, (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀) =
             ∑ j, cf j * (s₀ j : Fin l → P.A₀) i := by
@@ -2659,11 +2649,7 @@ private theorem exists_controlled_decomposition_of_forall_fail (I : Ideal A) (P 
     (hI₀mem _).mpr (by simp [I.mul_mem_left _ (hval_mem_I n)])
   have h_in_sp : (⟨⟨_, hM⟩, hM_I₀⟩ : I₀) ∈
       Submodule.span P.A₀ (Set.range g₀) := hg₀ ▸ Submodule.mem_top
-  obtain ⟨cf, hcf⟩ := Finsupp.mem_span_range_iff_exists_finsupp.mp h_in_sp
-  have hcf_sum : (⟨⟨(w : A) ^ M * h.val n, hM⟩, hM_I₀⟩ : I₀) =
-      ∑ q : Fin numG, cf q • g₀ q := by
-    rw [← hcf, Finsupp.sum, Finset.sum_subset (Finset.subset_univ _)]
-    intro q _ hq; rw [Finsupp.notMem_support_iff.mp hq, zero_smul]
+  obtain ⟨cf, hcf_sum⟩ := mem_span_range_iff_exists_fin.mp h_in_sp
   have hcf_A : (w : A) ^ M * h.val n =
       ∑ q, P.A₀.subtype ((g₀ q : I₀).val) * P.A₀.subtype (cf q) := by
     have h' := congr_arg (fun (x : I₀) ↦ P.A₀.subtype x.val) hcf_sum
@@ -2724,12 +2710,9 @@ private theorem exists_controlled_decomposition_of_first_failure (I : Ideal A) (
     · -- Base: a ∈ P.I^m, v ∈ I₀.
       have hv_sp : (⟨v, hv⟩ : I₀) ∈ Submodule.span P.A₀ (Set.range g₀) :=
         hg₀ ▸ Submodule.mem_top
-      obtain ⟨cf, hcf⟩ := Finsupp.mem_span_range_iff_exists_finsupp.mp hv_sp
+      obtain ⟨cf, hcf_sum⟩ := mem_span_range_iff_exists_fin.mp hv_sp
       have hv_eq : v = ∑ j : Fin numG, (cf j : P.A₀) * (g₀ j : I₀).val := by
-        have h' := congr_arg (fun (x : I₀) ↦ x.val) (show (⟨v, hv⟩ : I₀) =
-          ∑ j, cf j • g₀ j by
-            rw [← hcf, Finsupp.sum, Finset.sum_subset (Finset.subset_univ _)]
-            intro j _ hj; rw [Finsupp.notMem_support_iff.mp hj, zero_smul])
+        have h' := congr_arg (fun (x : I₀) ↦ x.val) hcf_sum
         simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower, smul_eq_mul] at h'
         exact h'
       refine ⟨fun j ↦ a * cf j, fun j ↦ Ideal.mul_mem_right _ _ ha, ?_⟩
