@@ -499,6 +499,71 @@ private theorem valuation_package_of_extension
     rw [this, h_ext_A₀ ⟨f, hf_A₀⟩]
     exact Valuation.restrictToConvex_le_one v₀_A₀ H hle_A₀ ⟨f, hf_A₀⟩
 
+/-- The generator attaining the maximum of `V₀.valuation ∘ φ` over a generating set `S` of the
+ideal of definition lies in that ideal and misses `𝔭`, provided the maximum is nonzero. -/
+private theorem exists_generator_attaining_sup (P : PairOfDefinition A)
+    {𝔭 : Ideal A} [𝔭.IsPrime] (V₀ : ValuationSubring (FractionRing (A ⧸ 𝔭)))
+    {S : Finset P.A₀} (hS : Ideal.span (S : Set P.A₀) = P.I) (hSne : S.Nonempty)
+    (hg_ne0 : S.sup' hSne (fun t ↦ V₀.valuation (P.toFractionQuotient 𝔭 t)) ≠ 0) :
+    ∃ t₀ : P.A₀, t₀ ∈ P.I ∧ (P.A₀.subtype t₀ : A) ∉ 𝔭 ∧
+      V₀.valuation (P.toFractionQuotient 𝔭 t₀) =
+        S.sup' hSne (fun t ↦ V₀.valuation (P.toFractionQuotient 𝔭 t)) := by
+  set φ := P.toFractionQuotient 𝔭
+  obtain ⟨t₀, ht₀_S, ht₀_val⟩ :=
+    Finset.exists_mem_eq_sup' hSne (fun t ↦ V₀.valuation (φ t))
+  have ht₀_I : t₀ ∈ P.I := hS ▸ Ideal.subset_span (Finset.mem_coe.mpr ht₀_S)
+  have ht₀_notp : (P.A₀.subtype t₀ : A) ∉ 𝔭 := by
+    intro h_in_p
+    have : V₀.valuation (φ t₀) = 0 := by
+      have hφ_zero : φ t₀ = 0 := by
+        simp only [φ, toFractionQuotient, RingHom.comp_apply, Subring.coe_subtype]
+        exact (map_eq_zero_iff _
+          (IsFractionRing.injective (A ⧸ 𝔭) (FractionRing (A ⧸ 𝔭)))).mpr
+            (Ideal.Quotient.eq_zero_iff_mem.mpr h_in_p)
+      rw [hφ_zero, map_zero]
+    exact hg_ne0 (by convert this using 1)
+  exact ⟨t₀, ht₀_I, ht₀_notp, ht₀_val.symm⟩
+
+/-- The maximum of `V₀.valuation ∘ φ` over a generating set of the ideal of definition lies
+strictly between `0` and `1` — below `1` because the generators land in `V₀.nonunits`, nonzero
+because `a₀ ∈ P.I` misses `𝔭` — and dominates the pulled-back valuation on all of `P.I`. -/
+private theorem sup_valuation_generators_lt_one_and_ne_zero (P : PairOfDefinition A)
+    {𝔭 : Ideal A} [𝔭.IsPrime] (V₀ : ValuationSubring (FractionRing (A ⧸ 𝔭)))
+    (hrange₀ : (P.toFractionQuotient 𝔭).range ≤ V₀.toSubring)
+    (hnonunits₀ : (P.toFractionQuotient 𝔭).range.subtype ''
+      (Ideal.map (P.toFractionQuotient 𝔭).rangeRestrict P.I : Set _) ⊆ V₀.nonunits)
+    {S : Finset P.A₀} (hS : Ideal.span (S : Set P.A₀) = P.I) (hSne : S.Nonempty)
+    {a₀ : P.A₀} (ha₀_I : a₀ ∈ P.I) (ha₀_notp : (P.A₀.subtype a₀ : A) ∉ 𝔭) :
+    (∀ a : P.A₀, a ∈ P.I →
+        P.pulledBackValuation V₀ (P.A₀.subtype a) ≤ S.sup' hSne (fun t ↦ V₀.valuation (P.toFractionQuotient 𝔭 t))) ∧
+      S.sup' hSne (fun t ↦ V₀.valuation (P.toFractionQuotient 𝔭 t)) < 1 ∧ S.sup' hSne (fun t ↦ V₀.valuation (P.toFractionQuotient 𝔭 t)) ≠ 0 := by
+  set φ := P.toFractionQuotient 𝔭
+  set g_max := S.sup' hSne (fun t ↦ V₀.valuation (φ t)) with g_max_def
+  have hg_lt1 : g_max < 1 := by
+    rw [Finset.sup'_lt_iff]
+    intro t ht
+    exact P.pulledBackValuation_lt_one hnonunits₀
+      (hS ▸ Ideal.subset_span (Finset.mem_coe.mpr ht))
+  have ha₀_val_ne : V₀.valuation (φ a₀) ≠ 0 := by
+    rw [ne_eq, Valuation.zero_iff]; intro h
+    exact ha₀_notp (by
+      simp only [φ, toFractionQuotient, RingHom.comp_apply, Subring.coe_subtype] at h
+      exact Ideal.Quotient.eq_zero_iff_mem.mp
+        ((IsFractionRing.injective (A ⧸ 𝔭) (FractionRing (A ⧸ 𝔭))).eq_iff.mp
+          (h.trans (map_zero _).symm)))
+  have hpb_eq : ∀ b : P.A₀, P.pulledBackValuation V₀ (P.A₀.subtype b) =
+      V₀.valuation (φ b) := P.pulledBackValuation_eq_valuation_toFractionQuotient V₀
+  have hpb_le_gmax : ∀ a : P.A₀, a ∈ P.I →
+      P.pulledBackValuation V₀ (P.A₀.subtype a) ≤ g_max :=
+    fun a ha ↦ valuation_le_on_ideal_of_le_on_generators (P.pulledBackValuation V₀)
+      (P.pulledBackValuation_le_one hrange₀)
+      hS (fun t ht ↦ hpb_eq t ▸ Finset.le_sup' (f := fun t ↦ V₀.valuation (φ t)) ht) ha
+  have ha₀_val_le_gmax : V₀.valuation (φ a₀) ≤ g_max := by
+    rw [← hpb_eq]; exact hpb_le_gmax a₀ ha₀_I
+  have hg_ne0 : g_max ≠ 0 := ne_of_gt <|
+    lt_of_lt_of_le (zero_lt_iff.mpr ha₀_val_ne) ha₀_val_le_gmax
+  exact ⟨hpb_le_gmax, hg_lt1, hg_ne0⟩
+
 /-- **Rank-1 extension (Wedhorn Lemma 7.45, Steps 3-7).**
 
 Constructs a valuation `v_ext : Valuation A (WithZero H_gen.toSubgroup)` that is
@@ -531,43 +596,12 @@ theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
     exact ha₀_notp (by rw [show s = P.A₀.subtype a₀ from rfl, ha₀_zero, map_zero]
                        exact 𝔭.zero_mem)
   set g_max := S.sup' hSne (fun t ↦ V₀.valuation (φ t)) with g_max_def
-  have hg_lt1 : g_max < 1 := by
-    rw [Finset.sup'_lt_iff]
-    intro t ht
-    exact P.pulledBackValuation_lt_one hnonunits₀
-      (hS ▸ Ideal.subset_span (Finset.mem_coe.mpr ht))
-  have ha₀_val_ne : V₀.valuation (φ a₀) ≠ 0 := by
-    rw [ne_eq, Valuation.zero_iff]; intro h
-    exact ha₀_notp (by
-      simp only [φ, toFractionQuotient, RingHom.comp_apply, Subring.coe_subtype] at h
-      exact Ideal.Quotient.eq_zero_iff_mem.mp
-        ((IsFractionRing.injective (A ⧸ 𝔭) (FractionRing (A ⧸ 𝔭))).eq_iff.mp
-          (h.trans (map_zero _).symm)))
-  have hpb_eq : ∀ b : P.A₀, P.pulledBackValuation V₀ (P.A₀.subtype b) =
-      V₀.valuation (φ b) := P.pulledBackValuation_eq_valuation_toFractionQuotient V₀
-  have hpb_le_gmax : ∀ a : P.A₀, a ∈ P.I →
-      P.pulledBackValuation V₀ (P.A₀.subtype a) ≤ g_max :=
-    fun a ha ↦ valuation_le_on_ideal_of_le_on_generators (P.pulledBackValuation V₀)
-      (P.pulledBackValuation_le_one hrange₀)
-      hS (fun t ht ↦ hpb_eq t ▸ Finset.le_sup' (f := fun t ↦ V₀.valuation (φ t)) ht) ha
-  have ha₀_val_le_gmax : V₀.valuation (φ a₀) ≤ g_max := by
-    rw [← hpb_eq]; exact hpb_le_gmax a₀ ha₀_I
-  have hg_ne0 : g_max ≠ 0 := ne_of_gt <|
-    lt_of_lt_of_le (zero_lt_iff.mpr ha₀_val_ne) ha₀_val_le_gmax
-  obtain ⟨t₀, ht₀_S, ht₀_val⟩ :=
-    Finset.exists_mem_eq_sup' hSne (fun t ↦ V₀.valuation (φ t))
-  have ht₀_I : t₀ ∈ P.I := hS ▸ Ideal.subset_span (Finset.mem_coe.mpr ht₀_S)
-  have ht₀_notp : (P.A₀.subtype t₀ : A) ∉ 𝔭 := by
-    intro h_in_p
-    have : V₀.valuation (φ t₀) = 0 := by
-      have hφ_zero : φ t₀ = 0 := by
-        simp only [φ, toFractionQuotient, RingHom.comp_apply, Subring.coe_subtype]
-        exact (map_eq_zero_iff _
-          (IsFractionRing.injective (A ⧸ 𝔭) (FractionRing (A ⧸ 𝔭)))).mpr
-            (Ideal.Quotient.eq_zero_iff_mem.mpr h_in_p)
-      rw [hφ_zero, map_zero]
-    exact hg_ne0 (by convert this using 1)
-  clear a₀ ha₀_I ha₀_notp s hs_nil _h_pow_mul ha₀_val_ne ha₀_val_le_gmax
+  obtain ⟨hpb_le_gmax, hg_lt1, hg_ne0⟩ :=
+    sup_valuation_generators_lt_one_and_ne_zero P V₀ hrange₀ hnonunits₀ hS hSne ha₀_I ha₀_notp
+  obtain ⟨t₀, ht₀_I, ht₀_notp, ht₀_val'⟩ :=
+    exists_generator_attaining_sup P V₀ hS hSne hg_ne0
+  have ht₀_val : g_max = V₀.valuation (φ t₀) := ht₀_val'.symm
+  clear a₀ ha₀_I ha₀_notp s hs_nil _h_pow_mul
   set a₀ := t₀
   set s := (P.A₀.subtype a₀ : A)
   have ha₀_I : a₀ ∈ P.I := ht₀_I

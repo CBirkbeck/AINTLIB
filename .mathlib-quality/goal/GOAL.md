@@ -16231,3 +16231,24 @@ extra hypotheses through the new signature.
 
 Block 3 (`exists_generator_attaining_sup`) lifts exactly that boundary, needing only `hS`,
 `hSne` and `hg_ne0`.
+
+**A lift can invalidate a later `clear`.** The `g_max ∈ (0,1)` block exports three facts
+(`hpb_le_gmax`, `hg_lt1`, `hg_ne0`) and keeps three internal (`hpb_eq`, `ha₀_val_ne`,
+`ha₀_val_le_gmax`). Two of the internal ones are named in the caller's `clear`:
+
+```lean
+clear a₀ ha₀_I ha₀_notp s hs_nil _h_pow_mul ha₀_val_ne ha₀_val_le_gmax
+```
+
+After the lift those hypotheses no longer exist, so the `clear` fails on an unknown name. The
+list had to shrink by exactly the two that moved.
+
+This is the flip side of the previous entry. A `clear` is an excellent seam *signal* — but it
+is also a **consumer of every name it mentions**, so lifting anything it names is an edit to
+the `clear` too.
+
+> Before lifting a block, grep for its hypotheses in `clear`/`omit`/`rename` lines further
+> down. Those tactics reference names without using them, so a use-site scan that looks for
+> real uses will miss them entirely.
+
+Caught by reading the block's exports before writing, not by the compiler.
