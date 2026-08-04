@@ -15992,3 +15992,87 @@ differs and `restrictScalars` is needed there and not here.
 > declaration that consumes it; that one cannot be wrong.
 
 Caught before building, at the cost of one `grep`.
+
+**Binding a `∀` as parameters leaves an orphaned `intro`.** Stage 3 lifted `hAR_ctrl`, whose
+statement was `∀ n m, hyp → …` and whose body opened `intro n m hn`. I turned the three into
+lemma *parameters* and kept the body verbatim, so the `intro` had nothing left to introduce:
+
+```
+Tactic `introN` failed: There are no additional binders or `let` bindings in the goal
+```
+
+Obvious in hindsight and cheap to fix, but it is a distinct member of the same family as the
+binder-rename bug: **the lift boundary is where the body's assumptions about its own goal stop
+holding.** A verbatim body assumes the goal it had; changing the statement from `∀`-form to
+parameter-form changes that goal.
+
+> When lifting a `have : ∀ …` whose body starts by `intro`-ing those binders, either keep the
+> `∀` in the lemma's conclusion, or drop the leading `intro`. Decide which before writing —
+> the two must agree, and only the body shows you which was assumed.
+
+### A GREEN BUILD DOES NOT CERTIFY THAT YOUR CODE STILL EXISTS
+
+Stage 4's first attempt **deleted 612 lines** — every declaration after `tateAlgebra_flat`,
+including `Module.Flat.quotient_of_flat_of_saturated` and the whole
+`exists_controlled_decomposition` family. The cause was one character of slice:
+
+```python
+out[i_suff:] = CALL.split("\n") + ["", "end TateAlgebraFlat"]   # to END OF FILE
+```
+
+`tateAlgebra_flat` is not the last declaration in `TateAlgebra.lean`. Everything below the
+`suffices` block was replaced by the call and a section terminator.
+
+**`lake build` returned EXIT=0.** Of course it did: a file with 612 fewer theorems is still a
+valid Lean file. Every check I habitually run — build green, no new `sorry`, error count zero —
+passes on a truncated file. The *only* signal was the line count I happened to print:
+`file 3081 -> 2469`.
+
+This is the second instance of this class (the earlier one deleted 758 lines when a search
+matched text the script had just inserted). Both times: green build, silent loss.
+
+> **Deletion is invisible to every downstream check.** Build status, error counts and sorry
+> counts are all monotone in the wrong direction — removing code can only make them look
+> better. Detecting loss requires comparing *against the previous state*, which no compiler
+> will do for you.
+
+The standing guard, now in the script and to be carried into every future one:
+
+```python
+DECL = re.compile(r'^(?:private |protected |noncomputable )*'
+                  r'(?:theorem|lemma|def|abbrev|instance)\s+([A-Za-z_][\w.\'₀-₉]*)', re.M)
+before, after = set(DECL.findall(original)), set(DECL.findall(result))
+if before - after:
+    sys.exit(f"ABORT: declarations would be LOST: {sorted(before - after)}")
+```
+
+Two supporting habits that made recovery instant: a `.pre-<stage>` backup taken before every
+edit, and printing the line-count delta on every run. The backup made the revert exact —
+`git diff` against HEAD afterwards showed only stage 3, with `lost: none`.
+
+And the deeper rule about slices:
+
+> Never bound an edit range by "the rest of the file". Bound it by the *last line you
+> identified*, and assert that line exists exactly once. `out[i:]` is almost always a bug in a
+> file that has more than one declaration.
+
+### `tateAlgebra_flat` stages 3–4: 150 → 127 → 100
+
+* `exists_ideal_pow_decomp_of_forall_mem` (24c) — `hAR_ctrl`, the Artin–Rees control step.
+* `isTrivialRelation_of_coeff_decomp` — the `suffices` block, **generalised**: it touches `s₀`
+  only through `P.A₀.subtype ((s₀ j) i)`, so replacing that with an arbitrary
+  `a : Fin l → Fin k → A` drops `relMap₀`, `K₀` and `P` from it entirely. What remains is the
+  general fact — coefficientwise decomposition plus restricted columns gives a trivial
+  relation — with the conclusion written as the explicit `∃` rather than the
+  `IsTrivialRelation` abbrev, so it cannot depend on which namespace that abbrev lives in.
+
+Stage 3 cost one build to a new member of a familiar family: the lifted body opened with
+`intro n m hn` while I had bound those three as *parameters*, so the `intro` had nothing to
+introduce. Same root as the binder-rename bug — the lift boundary is where a verbatim body's
+assumptions about its own goal stop holding, and turning `have : ∀ …` into parameter form is
+exactly such a change.
+
+Stage 5 is written and queued: `hsyz` → `syzygy_relation_of_ker`, and `hdecomp_or_ctrl` →
+`exists_syzygy_decomp_or_ctrl`, the latter absorbing the `hAR_ctrl` restatement by calling
+`exists_ideal_pow_decomp_of_forall_mem` directly. Projected: 100 − 40 − 11 ≈ **49**, clearing
+the bar.

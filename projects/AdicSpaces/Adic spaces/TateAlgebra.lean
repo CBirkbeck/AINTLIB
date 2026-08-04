@@ -2193,6 +2193,98 @@ private theorem exists_syzygy_decomp_of_clear_denominators
     exact Finset.sum_congr rfl (fun j _ ↦ by
       simp only [c₀, Subring.coe_subtype]; ring)
 
+/-- Artin–Rees filtration control for the syzygy decomposition: if every component of the
+coefficient vector at multi-index `n` lies `k₀` levels deep in the `P.I`-adic filtration, the
+vector decomposes over the generating family `s₀` with coefficients that are themselves at
+level `m`.
+
+The `k₀` shift is the Artin–Rees constant supplied by `hAR`. -/
+private theorem exists_ideal_pow_decomp_of_forall_mem
+    (P : PairOfDefinition A) [IsNoetherianRing P.A₀] {l k : ℕ} (w : Aˣ)
+    (f : Fin l → A) (x : Fin l → ↥(TateAlgebra A))
+    (hcoord : ∀ s : Fin 1 →₀ ℕ, ∑ i, f i * (x i).val s = 0)
+    (N : ℕ) (g : Fin l → P.A₀)
+    (hg : ∀ i, P.A₀.subtype (g i) = (w : A) ^ N * f i)
+    (relMap₀ : (Fin l → P.A₀) →ₗ[P.A₀] P.A₀)
+    (hrel : ∀ r, relMap₀ r = ∑ i, g i * r i)
+    (s₀ : Fin k → ↥(LinearMap.ker relMap₀))
+    (hs₀ : Submodule.span P.A₀ (Set.range s₀) = ⊤) (k₀ : ℕ)
+    (hAR : ∀ nn ≥ k₀, (P.I ^ nn • ⊤ ⊓ LinearMap.ker relMap₀ :
+        Submodule P.A₀ (Fin l → P.A₀)) =
+      P.I ^ (nn - k₀) • (P.I ^ k₀ • ⊤ ⊓ LinearMap.ker relMap₀))
+    (n : Fin 1 →₀ ℕ) (m : ℕ)
+    (hn : ∀ i, (x i).val n ∈ Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀)) :
+    ∃ c₀ : Fin k → A, (∀ j, c₀ j ∈
+        Subtype.val '' ((P.I ^ m : Ideal P.A₀) : Set P.A₀)) ∧
+      ∀ i, (x i).val n = ∑ j, c₀ j * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) := by
+  have hcomp : ∀ i, ∃ a : P.A₀, a ∈ P.I ^ (m + k₀) ∧ P.A₀.subtype a = (x i).val n := by
+    intro i; obtain ⟨a, ha, heq⟩ := hn i; exact ⟨a, ha, heq⟩
+  choose lift₀ hlift₀_mem hlift₀_eq using hcomp
+  have h_ker : (fun i ↦ lift₀ i) ∈ LinearMap.ker relMap₀ := by
+    -- need relMap₀ (fun i => lift₀ i) = 0
+    -- i.e., ∑ g(i) * lift₀(i) = 0 in A₀
+    -- Proof by injectivity of A₀ → A.
+    have h_sum_zero : P.A₀.subtype (∑ i : Fin l, g i * lift₀ i) = 0 := by
+      simp only [map_sum, map_mul, Subring.coe_subtype, hg]
+      -- ↑(g i) = ↑w ^ N * f i (hg), ↑(lift₀ i) = (x i).val n
+      trans (↑w : A) ^ N * ∑ i, f i * (x i).val n
+      · rw [Finset.mul_sum]
+        exact Finset.sum_congr rfl (fun i _ ↦ by
+          rw [show (↑(lift₀ i) : A) = (x i).val n from hlift₀_eq i]; ring)
+      · rw [hcoord, mul_zero]
+    have h_eq_zero : ∑ i : Fin l, g i * lift₀ i = 0 := by
+      ext; simpa [Subring.coe_subtype] using h_sum_zero
+    change (fun i ↦ lift₀ i) ∈ LinearMap.ker relMap₀
+    rw [LinearMap.mem_ker, hrel]
+    exact h_eq_zero
+  suffices ∃ c₀ : Fin k → P.A₀, (∀ j, c₀ j ∈ P.I ^ m) ∧
+      ∀ i, lift₀ i = ∑ j, c₀ j * (s₀ j : Fin l → P.A₀) i by
+    obtain ⟨c₀, hc₀_mem, hc₀_eq⟩ := this
+    refine ⟨fun j ↦ P.A₀.subtype (c₀ j), fun j ↦ ⟨c₀ j, hc₀_mem j, rfl⟩, fun i ↦ ?_⟩
+    have h := congr_arg P.A₀.subtype (hc₀_eq i)
+    simp only [map_sum, map_mul] at h
+    rw [← hlift₀_eq i]; exact h
+  exact exists_ideal_pow_coeffs_of_forall_mem P.I m hAR s₀ hs₀ _ hlift₀_mem h_ker
+
+/-- Assembling a coefficientwise decomposition into a trivial relation in `TateAlgebra A`:
+if every coefficient of every `x i` decomposes over a fixed family `a` with coefficients
+`c'' n j`, and each column `n ↦ c'' n j` is itself restricted, then the relation `f` on `x` is
+trivial in the sense of the equational criterion for flatness.
+
+Stated for an arbitrary `a`; the caller instantiates it at the images of a generating family
+of syzygies. -/
+private theorem isTrivialRelation_of_coeff_decomp
+    {l k : ℕ} (f : Fin l → A) (x : Fin l → ↥(TateAlgebra A))
+    (a : Fin l → Fin k → A) (hsyz : ∀ j, ∑ i, f i * a i j = 0)
+    (c'' : (Fin 1 →₀ ℕ) → Fin k → A)
+    (hc'' : ∀ n i, (x i).val n = ∑ j, c'' n j * a i j)
+    (hrestr'' : ∀ j, (fun n ↦ c'' n j) ∈ TateAlgebra A) :
+    ∃ (k' : ℕ) (a' : Fin l → Fin k' → A) (y : Fin k' → ↥(TateAlgebra A)),
+      (∀ i, x i = ∑ j, a' i j • y j) ∧ ∀ j, ∑ i, f i * a' i j = 0 := by
+  refine ⟨k, a,
+    fun j ↦ ⟨fun n ↦ c'' n j, hrestr'' j⟩, ?_, ?_⟩
+  · intro i; apply Subtype.ext; funext n
+    have hrhs : (∑ j, a i j •
+        (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A)) :
+        ↥(TateAlgebra A)).val n =
+      ∑ j, a i j * c'' n j := by
+      rw [show (∑ j, a i j •
+          (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val =
+        (TateAlgebra A).subtype (∑ j, a i j •
+          (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))) from rfl,
+        map_sum]
+      simp only [Subring.coe_subtype]
+      trans ∑ j, (a i j •
+          (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val n
+      · exact Fintype.sum_apply n
+          (fun j ↦ (a i j •
+            (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val)
+      · exact Finset.sum_congr rfl (fun j _ ↦
+          TateAlgebra.smul_val_eq _ _ n)
+    rw [hrhs, hc'' n i]
+    exact Finset.sum_congr rfl (fun j _ ↦ by ring)
+  · exact fun j ↦ hsyz j
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **Flatness of the Tate algebra** (`A⟨X⟩` is flat over noetherian `A`).
 
@@ -2264,37 +2356,9 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
       (∀ i, (x i).val n ∈ Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀)) →
       ∃ c₀ : Fin k → A, (∀ j, c₀ j ∈
           Subtype.val '' ((P.I ^ m : Ideal P.A₀) : Set P.A₀)) ∧
-        ∀ i, (x i).val n = ∑ j, c₀ j * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) := by
-    intro n m hn
-    have hcomp : ∀ i, ∃ a : P.A₀, a ∈ P.I ^ (m + k₀) ∧ P.A₀.subtype a = (x i).val n := by
-      intro i; obtain ⟨a, ha, heq⟩ := hn i; exact ⟨a, ha, heq⟩
-    choose lift₀ hlift₀_mem hlift₀_eq using hcomp
-    have h_ker : (fun i ↦ lift₀ i) ∈ K₀ := by
-      -- K₀ = ker relMap₀, so need relMap₀ (fun i => lift₀ i) = 0
-      -- i.e., ∑ g(i) * lift₀(i) = 0 in A₀
-      -- Proof by injectivity of A₀ → A.
-      have h_sum_zero : P.A₀.subtype (∑ i : Fin l, g i * lift₀ i) = 0 := by
-        simp only [map_sum, map_mul, Subring.coe_subtype]
-        -- Goal: ∑ i, ↑(g i) * ↑(lift₀ i) = 0
-        -- ↑(g i) = ↑w ^ N * f i, ↑(lift₀ i) = (x i).val n
-        trans (↑w : A) ^ N * ∑ i, f i * (x i).val n
-        · rw [Finset.mul_sum]
-          exact Finset.sum_congr rfl (fun i _ ↦ by
-            rw [show (↑(lift₀ i) : A) = (x i).val n from hlift₀_eq i]; ring)
-        · rw [hcoord, mul_zero]
-      have h_eq_zero : ∑ i : Fin l, g i * lift₀ i = 0 := by
-        ext; simpa [Subring.coe_subtype] using h_sum_zero
-      change (fun i ↦ lift₀ i) ∈ LinearMap.ker relMap₀
-      rw [LinearMap.mem_ker]
-      exact h_eq_zero
-    suffices ∃ c₀ : Fin k → P.A₀, (∀ j, c₀ j ∈ P.I ^ m) ∧
-        ∀ i, lift₀ i = ∑ j, c₀ j * (s₀ j : Fin l → P.A₀) i by
-      obtain ⟨c₀, hc₀_mem, hc₀_eq⟩ := this
-      refine ⟨fun j ↦ P.A₀.subtype (c₀ j), fun j ↦ ⟨c₀ j, hc₀_mem j, rfl⟩, fun i ↦ ?_⟩
-      have h := congr_arg P.A₀.subtype (hc₀_eq i)
-      simp only [map_sum, map_mul] at h
-      rw [← hlift₀_eq i]; exact h
-    exact exists_ideal_pow_coeffs_of_forall_mem P.I m hAR s₀ hs₀ _ hlift₀_mem h_ker
+        ∀ i, (x i).val n = ∑ j, c₀ j * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) :=
+    fun n m hn ↦ exists_ideal_pow_decomp_of_forall_mem P w f x hcoord N g (fun _ ↦ rfl)
+      relMap₀ (fun _ ↦ rfl) s₀ hs₀ k₀ hAR n m hn
   -- Step 7: Assemble the IsTrivialRelation witness.
   -- For each n, hdecomp_A gives a decomposition over the A₀-generators.
   -- For convergence, hAR_ctrl gives controlled coefficients.
@@ -2398,37 +2462,9 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
         · -- m ≥ q: hypothesis fails, contradiction
           exact absurd hm (hq_fail_above m (by omega))
   choose c' hc'_decomp hc'_filt using hdecomp_or_ctrl
-  suffices ∃ c' : (Fin 1 →₀ ℕ) → Fin k → A,
-      (∀ n i, (x i).val n =
-        ∑ j, c' n j * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i)) ∧
-      (∀ j, (fun n ↦ c' n j) ∈ TateAlgebra A) by
-    obtain ⟨c'', hc'', hrestr''⟩ := this
-    refine ⟨k, fun i j ↦ P.A₀.subtype ((s₀ j : Fin l → P.A₀) i),
-      fun j ↦ ⟨fun n ↦ c'' n j, hrestr'' j⟩, ?_, ?_⟩
-    · intro i; apply Subtype.ext; funext n
-      have hrhs : (∑ j, P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) •
-          (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A)) :
-          ↥(TateAlgebra A)).val n =
-        ∑ j, P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) * c'' n j := by
-        rw [show (∑ j, P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) •
-            (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val =
-          (TateAlgebra A).subtype (∑ j, P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) •
-            (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))) from rfl,
-          map_sum]
-        simp only [Subring.coe_subtype]
-        trans ∑ j, (P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) •
-            (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val n
-        · exact Fintype.sum_apply n
-            (fun j ↦ (P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) •
-              (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val)
-        · exact Finset.sum_congr rfl (fun j _ ↦
-            TateAlgebra.smul_val_eq _ _ n)
-      rw [hrhs, hc'' n i]
-      exact Finset.sum_congr rfl (fun j _ ↦ by ring)
-    · exact fun j ↦ hsyz j
-  -- Prove the suffices using c' from the diagonal construction.
-  refine ⟨c', hc'_decomp, fun j ↦ ?_⟩
-  exact mem_tateAlgebra_of_filtration_control P x c' hc'_filt j
+  exact isTrivialRelation_of_coeff_decomp f x
+    (fun i j ↦ P.A₀.subtype ((s₀ j : Fin l → P.A₀) i)) hsyz c' hc'_decomp
+    (fun j ↦ mem_tateAlgebra_of_filtration_control P x c' hc'_filt j)
 
 end TateAlgebraFlat
 
