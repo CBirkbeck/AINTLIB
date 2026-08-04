@@ -16190,3 +16190,44 @@ caught by the uniqueness assertion at zero build cost.
 > Tactic lines are never anchors. `classical`, `intro n`, `simp`, `constructor` — these are
 > vocabulary, not identifiers. Anchor on a *declaration name*, then locate everything else
 > relative to it, and assert uniqueness **within that scope** rather than file-wide.
+
+### `exists_spa_point_via_restrictToConvex` 133 → 108: `valuation_package_of_extension`
+
+The inner `suffices` (22c) lifted, and generalised on the way out. Only one step needed `H` to
+literally be a `convexGenerated` — the cofinality of `u_max`'s powers — so taking *that* as the
+hypothesis `h_cofinal` leaves `H` an arbitrary `ConvexSubgroup`. The lemma then says what it
+actually does: an extension of `v₀_A₀.restrictToConvex H hle` vanishing on `𝔭` upgrades to the
+four-part package (vanishing / restriction / continuity / bounded on `A⁺`).
+
+That is the third time in this session that **abstracting the ambient object beat splitting the
+syntax** — after `V` in the first target and `g`/`relMap₀` in `tateAlgebra_flat`. It is now the
+first thing to try, not the fallback.
+
+**A fifth indentation-class catch, and the guard shape that keeps catching them.** The
+cofinality block had to be *deleted* from the lifted body, and my deletion string carried the
+**pre-dedent** columns while the body had already been dedented by 2. The `count == 1`
+assertion on the deletion fired and printed the actual lines, which showed the indent
+immediately.
+
+> Any literal you match against a lifted body must be written in **post-transformation**
+> columns. Dedent first, then quote what you see — never what the source file shows.
+
+**An explicit `clear` marks a lift boundary.** `exists_spa_point_via_restrictToConvex` chooses
+an initial `a₀`, uses it *only* to establish `S.Nonempty` and `g_max ≠ 0`, then says
+
+```lean
+clear a₀ ha₀_I ha₀_notp s hs_nil _h_pow_mul ha₀_val_ne ha₀_val_le_gmax
+set a₀ := t₀
+```
+
+and continues with the sup-attaining generator. The author has written down, precisely, where a
+block of context stops being live — which is exactly where a lift can go without threading
+extra hypotheses through the new signature.
+
+> A `clear` is the author telling you which hypotheses die at that point. Everything before it
+> is a self-contained phase whose only exports are the facts *not* cleared. That is a better
+> seam signal than indentation or comment structure, and unlike those it cannot be stale — the
+> compiler enforces it.
+
+Block 3 (`exists_generator_attaining_sup`) lifts exactly that boundary, needing only `hS`,
+`hSne` and `hg_ne0`.
