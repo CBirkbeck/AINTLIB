@@ -37808,3 +37808,44 @@ identity `coverTriv_b.hom = coverTriv_a.hom ≫ constSchemeMap (gl2Both N g)` (v
 and `constSchemePointsEquiv_comp_constSchemeMap` converts that into the reading identity.
 
 Root green at **9731 jobs**.
+
+# ══════════════════════════════════════════════════════════════════════════
+# START HERE (revised) — route β: ONE plumbing lemma left before `hdet`
+# ══════════════════════════════════════════════════════════════════════════
+
+Root green at **9731 jobs**; census unchanged (7, all the Weil register).
+
+With `constSchemePointsEquiv_comp_constSchemeMap` landed, the toolchain is closed and the remaining
+work is a single **plumbing** step, then the composition.
+
+**THE ONE REMAINING LEMMA — lift `fullLevelHom_pullAlong` to the square.**
+
+`fullLevelHom_pullAlong` (proved) says the *one-leg* trivialisation commutes with base change. What
+`hdet` needs is the *square* version, i.e. how `coverTriv.hom` behaves under precomposition with a map
+`k : W ⟶ pullback (E.torsionSqπ N) p`:
+
+  `k ≫ (coverTriv p hinv L).hom = (coverTriv over W, for the level structure L.pullAlong (k ≫ snd))`,
+
+so that the two kernel-pair projections `a`, `b` present the *same* torsion pair in the two
+pulled-back level bases `α^*L`, `β^*L` (`α = a ≫ pullback.snd`, `β = b ≫ pullback.snd`). Route:
+transport `fullLevelHom_pullAlong` through `fullLevelSqIso` exactly as
+`fullLevelSqIso_glSmul_inv` transports `fullLevelIso_glSmul` — check on the coproduct inclusions with
+`fullLevelSqIso_inv_ι` (proved), which is the pattern that has worked three times now.
+
+**Then the composition, every link proved:**
+
+1. `fullLevelHom_eq_of_levelCoord` — the two pulled-back level structures differ by
+   `constSchemeMap (mulVec g)`, `g` the transition (`levelTransitionCols`);
+2. the square version of that (same `fullLevelSqIso_inv_ι` argument) gives
+   `b ≫ coverTriv.hom = (a ≫ coverTriv.hom) ≫ constSchemeMap (gl2Both N g)`;
+3. `constSchemePointsEquiv_comp_constSchemeMap` turns 2 into `c ∘ b = gl2Both N g ∘ (c ∘ a)`, i.e.
+   `jointReading`'s two components (they are `c.comap a`, `c.comap b` by
+   `constSchemePointsEquiv_natural`);
+4. `detFun_gl2Both` — `det (gl2Both g v) = det g · det v`;
+5. `comp_localDetPairing_restrict` — on each piece the pairing is `ζ ^ det (reading)`;
+6. `comp_rootPower_muNMapAlong_eq` — two such agree iff their **values** agree, an equation in
+   `Γ(W, ⊤)`;
+7. `fieldWeilPairing_det_of_galois` + WP-D3d — the value equation, i.e. `g^*ζ = ζ ^ det g`.
+
+Steps 1 and 3–6 are proved; step 2 is the lemma above; step 7 is WP-D3d, the only item left with
+mathematical content.
