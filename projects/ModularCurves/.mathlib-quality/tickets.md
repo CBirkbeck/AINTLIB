@@ -38280,3 +38280,28 @@ made it four lines.
    `nonempty_weilPairing_of_cover_of_values` are discharged.
 
 Root green at **9733 jobs**; census unchanged (7, all the Weil register).
+
+### [WP-D3d step 4, move 2] how it must be stated — the `C.elliptic` instance dodge (2026-08-04)
+
+`GaloisFibreChart.pairing` is `fieldWeilPairing (C.W.baseChange L) N hN (C.dict P) (C.dict Q) _ _` under a
+`letI := C.elliptic`. That `letI` is **inside** the definition, so `(C.W.baseChange L).toAffine.IsElliptic`
+is *not* in scope for anything stated about the chart from outside — the same instance-invisibility trap
+as `finiteEtaleOfπ`.
+
+Consequence: move 2 must **not** mention `galoisPointEquiv C.W σ` in its hypotheses, because that needs
+the invisible instance to elaborate. `GaloisFibreChart.pairing_galois` (`FibreGalois.lean:122`) already
+solves this and is the template to copy: it states the `σ`-action **scheme-theoretically**,
+
+  `(P'.1 : Spec (of L) ⟶ E.E) = Spec.map (CommRingCat.ofHom (σ : L →+* L)) ≫ (P.1 : _ ⟶ E.E)`,
+
+and only inside the proof does `letI := C.elliptic` and appeal to `C.equivariant` to convert to
+`galoisPointEquiv`. So move 2 should read: given `P' Q'` presenting the `σ`-images scheme-theoretically
+**and** a matrix `g` with `P' = g₀₀·P + g₀₁·Q`, `Q' = g₁₀·P + g₁₁·Q` in `E.Point (geomFieldPt k L)`,
+conclude `σ (C.pairing N hN P Q _ _) = (C.pairing N hN P Q _ _) ^ det g`.
+
+Its proof: `pairing_galois` to move `σ` across, then `fieldWeilPairing_gl2_zmod` on the `C.dict`-images
+(`C.dict` is additive and `ℤ`-linear, so the matrix relation transports), which is exactly what
+`fieldWeilPairing_det_of_galois` (`WeilPairing/PairingTransport.lean`) does — it can be used directly
+once inside the `letI`.
+
+Root green at **9733 jobs**.
