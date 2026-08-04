@@ -1,1 +1,1 @@
-FOCUS: WP-D3a-FACTOR is now genuinely PROVED (isIntegrallyClosed_quotient_minimalPrime). WP-D3d step 1 done. NEXT: step 2-4 — field pairing value at each factor generic point, descend with rootOfUnityDescend, verify the value equations via fieldWeilPairing_det_of_galois.
+FOCUS: WP-D3d step 3 DONE (factorRootOfUnityDescend + algebraMap_ companion). NEXT: step 2 — the field pairing value at each factor generic point as an element of {u : FractionRing (A/p) // u^N = 1}, from fieldWeilPairingHom; then step 4, the value equations via fieldWeilPairing_det_of_galois.

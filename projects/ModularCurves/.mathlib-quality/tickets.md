@@ -38070,3 +38070,25 @@ hypothesis is exactly what this supplies), and the value equations via
 `fieldWeilPairing_det_of_galois`.
 
 Root green at **9732 jobs**; census unchanged (7, all the Weil register).
+
+### [WP-D3d step 3] the factor-level root descent (2026-08-04) — axiom-verified
+
+`WeilPairing/FactorRoot.lean` (new leaf, importing `ForMathlib/FactorIntegrallyClosed` and
+`WeilPairing/UniversalRootBase`):
+
+* **`factorRootOfUnityDescend`** — a root of unity in `FractionRing (A ⧸ p)` descends to `A ⧸ p`. The two
+  hypotheses `rootOfUnityDescend` needs are supplied automatically: `IsDomain (A ⧸ p)` from `p` being a
+  minimal prime, `IsIntegrallyClosed (A ⧸ p)` from `isIntegrallyClosed_quotient_minimalPrime`;
+* **`algebraMap_factorRootOfUnityDescend`** — it maps to the given root of unity, so **any identity
+  proved at the generic point transports down**. This is what makes the value equations of
+  `nonempty_weilPairing_of_cover_of_values` checkable on the generic fibre.
+
+**WP-D3d's remaining steps are 2 and 4:**
+2. produce the field pairing value at each factor's generic point as an element of
+   `{ u : FractionRing (A ⧸ p) // u ^ N = 1 }` — from `fieldWeilPairingHom` /
+   `EllipticCurve.torsionPairAlgebraPointsEquiv` (`WeilPairing/FieldPairingUnique.lean`);
+4. verify the value equations, i.e. `Γ(α)(ζ) = Γ(β)(ζ) ^ det g`, from
+   `fieldWeilPairing_det_of_galois` at the generic fibre plus
+   `algebraMap_factorRootOfUnityDescend` to bring it down.
+
+Root green at **9732 jobs**; census unchanged (7, all the Weil register).
