@@ -54,4 +54,38 @@ theorem muNCarrierRingEquiv_symm_apply
           (CommRingCat.of (AdjoinRoot ((X : Polynomial k) ^ N - 1)))).inv.hom x) :=
   rfl
 
+/-- **(WP-D3c-2b-ALG)** The carrier identification intertwines the `k`-algebra structure that
+`finiteEtaleOfπ` installs on `Γ(μ_N, ⊤)` with `AdjoinRoot.of` on the model.
+
+Read in the `symm` direction — the one that unfolds — this is exactly
+`muNSpecFieldIso_struct` after applying `Scheme.Hom.appTop` and `Scheme.ΓSpecIso`'s
+naturality. -/
+theorem muNCarrierRingEquiv_symm_algebraMap (a : k) :
+    (muNCarrierRingEquiv k N).symm
+        (AdjoinRoot.of ((X : Polynomial k) ^ N - 1) a) =
+      ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫
+        (muNπ (Spec (CommRingCat.of k)) N).appTop).hom a := by
+  rw [muNCarrierRingEquiv_symm_apply]
+  have happ := congrArg (fun f : muN (Spec (CommRingCat.of k)) N ⟶
+      Spec (CommRingCat.of k) => f.appTop) (muNSpecFieldIso_struct k N)
+  simp only [Scheme.Hom.comp_appTop] at happ
+  have hnat : (Spec.map (CommRingCat.ofHom
+        (AdjoinRoot.of ((X : Polynomial k) ^ N - 1)))).appTop =
+      (Scheme.ΓSpecIso (CommRingCat.of k)).hom ≫
+        CommRingCat.ofHom (AdjoinRoot.of ((X : Polynomial k) ^ N - 1)) ≫
+          (Scheme.ΓSpecIso
+            (CommRingCat.of (AdjoinRoot ((X : Polynomial k) ^ N - 1)))).inv := by
+    rw [← Category.assoc, ← Scheme.ΓSpecIso_naturality, Category.assoc, Iso.hom_inv_id,
+      Category.comp_id]
+  rw [hnat] at happ
+  have hfinal : (Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫
+        (muNπ (Spec (CommRingCat.of k)) N).appTop =
+      CommRingCat.ofHom (AdjoinRoot.of ((X : Polynomial k) ^ N - 1)) ≫
+        (Scheme.ΓSpecIso
+            (CommRingCat.of (AdjoinRoot ((X : Polynomial k) ^ N - 1)))).inv ≫
+          (muNSpecFieldIso k N).hom.appTop := by
+    rw [← happ, Category.assoc, Category.assoc, Iso.inv_hom_id_assoc]
+  rw [hfinal]
+  rfl
+
 end ModularCurves

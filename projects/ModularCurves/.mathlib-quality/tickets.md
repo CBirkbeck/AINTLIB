@@ -36630,3 +36630,38 @@ direction trap flagged in the WP-D3c-2b-ALG ticket is therefore avoided by worki
 
 `WeilPairing/MuNBaseChange.lean`: two declarations, sorry-free, axiom-verified, in the root
 import. Root green at **9722 jobs**.
+
+## [WP-D3c-2b-ALG] DONE (2026-08-04) — the algebra compatibility, axiom-verified
+
+`muNCarrierRingEquiv_symm_algebraMap` (`WeilPairing/MuNBaseChange.lean`):
+
+```
+(muNCarrierRingEquiv k N).symm (AdjoinRoot.of ((X : k[X])^N − 1) a) =
+  ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (muNπ (Spec k) N).appTop).hom a
+```
+
+The right-hand side is *literally* the map `finiteEtaleOfπ` uses for its `letI : Algebra k
+Γ(X, ⊤)` (`WeilPairing/EtaleDescent.lean:104`), so this says the carrier identification
+intertwines the two `k`-algebra structures — the missing half of WP-D3c-2b.
+
+Proof shape that worked (three earlier shapes did not):
+
+1. `congrArg (·.appTop)` on `muNSpecFieldIso_struct`, then `Scheme.Hom.comp_appTop`;
+2. `hnat`: `(Spec.map (ofHom (AdjoinRoot.of _))).appTop = ΓSpecIso.hom ≫ ofHom _ ≫ ΓSpecIso.inv`
+   — `Scheme.ΓSpecIso_naturality` plus `Iso.hom_inv_id`, the same move as
+   `isStandardSmoothOfRelativeDimension_specMap_appTop`;
+3. **cancel at the morphism level, not after applying to `a`** — the key step. Derive
+   `hfinal : ΓSpecIso.inv ≫ (muNπ).appTop = ofHom (AdjoinRoot.of _) ≫ ΓSpecIso.inv ≫
+   (muNSpecFieldIso).hom.appTop` by `rw [← happ, Category.assoc, Category.assoc,
+   Iso.inv_hom_id_assoc]`; then `rw [hfinal]` and `rfl`.
+
+   Applying `happ` *after* `a` leaves a residual `ΓSpecIso.hom (ΓSpecIso.inv a)` that neither
+   `simp`, `simp only [CommRingCat.comp_apply]`, nor `congr 1` discharges (`congr 1` produces
+   six goals including two type equalities), and `simp [← CommRingCat.comp_apply]` loops.
+
+`WeilPairing/MuNBaseChange.lean`: three declarations, sorry-free, axiom-verified, in the root
+import. Root green at **9722 jobs**.
+
+**WP-D3c-2b now reduces to bookkeeping**: `quotSpanBaseChange` transports the model,
+`map_X_pow_sub_one` matches the polynomial, `muNCarrierRingEquiv` + this compatibility move it
+to the carrier, and `CommAlgCat.FiniteEtale.isoMk` packages the result.
