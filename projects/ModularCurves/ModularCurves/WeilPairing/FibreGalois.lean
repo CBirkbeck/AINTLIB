@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.FibrePointDict
+import ModularCurves.WeilPairing.FieldPairingDet
 import ModularCurves.WeilPairing.GaloisFieldPairing
 import ModularCurves.Moduli.ChartPointsGalois
 import ModularCurves.WeilPairing.GaloisFibre
@@ -142,35 +143,41 @@ theorem GaloisFibreChart.pairing_galois (C : GaloisFibreChart k E L) (σ : L ≃
   refine Eq.trans (fieldWeilPairing_congr (C.W.baseChange L) N hN hsP' hsQ' hgP hgQ hdP hdQ) ?_
   exact fieldWeilPairing_galois C.W σ N hN (C.dict P) (C.dict Q) hsP hsQ hgP hgQ
 
-/- **(WP-D3d step 4, move 2) — IN PROGRESS, two gaps localised.** The chart-level determinant law,
-stated with the `σ`-action scheme-theoretically (as `pairing_galois` is, because `C.pairing` hides
-`IsElliptic` in a `letI`):
+/-- **(WP-D3d step 4, move 2)** The chart-level **determinant law**: if `σ` carries `(P, Q)` to
+`(P', Q')` and the matrix `g` expresses `(P', Q')` in terms of `(P, Q)`, then `σ` raises the pairing to
+`det g`.
 
-  `σ (C.pairing N hN P Q hP hQ) = (C.pairing N hN P Q hP hQ) ^ (g 0 0 * g 1 1 - g 0 1 * g 1 0).val`
-
-given `hPP'`/`hQQ'` as in `pairing_galois` plus `hgP : P' = (g 0 0).val • P + (g 0 1).val • Q` and
-`hgQ` likewise. Skeleton: `letI := C.elliptic`; `pairing_galois … |>.symm.trans`; transport `hgP`/`hgQ`
-through `C.dict`; `fieldWeilPairing_congr`; `fieldWeilPairing_gl2_zmod`.
-
-Two gaps found on the first attempt, both concrete:
-
-* `fieldWeilPairing_congr`'s **torsion arguments cannot be `_`** — the two *primed* ones are the torsion
-  proofs of the `g`-combination, which nothing determines. Supply all four explicitly:
-  `hsP : (N : ℤ) • C.dict P = 0` (from `hP` by `← map_zsmul`), similarly `hsQ`, and
-  `hsP' : (N : ℤ) • ((g 0 0).val • C.dict P + (g 0 1).val • C.dict Q) = 0`
-  (by `rw [← hdP, ← map_zsmul, hP', map_zero]`), similarly `hsQ'`. Mind the direction: `hdP` reads
-  `C.dict P' = comb`, so in `congr`'s vocabulary the *source* is `C.dict P'` and the *target* is `comb`.
-* `hdP : C.dict P' = (g 0 0).val • C.dict P + (g 0 1).val • C.dict Q` is **not** closed by
-  `rw [hgP, map_add, map_nsmul, map_nsmul]` — that leaves goals. The coefficients are `ZMod.val`s
-  (`ℕ`), while `C.dict` is an **`AddEquiv`** (field type confirmed: `E.Point (geomFieldPt k L) ≃+
-  (W.baseChange L).toAffine.Point`). `map_add` does fire; the `nsmul` steps are what remain, so try
-  `AddEquiv.map_nsmul`, or `map_nsmul (C.dict : _ →+ _)` with the hom coercion made explicit, or
-  `simp only [map_add, map_nsmul]` instead of a `rw` chain — a `rw` cannot fire the same `map_nsmul`
-  pattern at two different coefficient positions in one list, which is the likely cause of the leftover
-  goals (the same trap as `pullback.lift_fst_assoc` in `fullLevelSqIso_inv_baseChange`).
-
-Everything else in step 4 is proved: `algebraMap_fieldPairingValue_eq_pairing` (move 1) and
-`algebraMap_factorRootOfUnityDescend` (move 3's descent). -/
+The `σ`-action is stated **scheme-theoretically**, as in `pairing_galois`, because `C.pairing` hides
+`(C.W.baseChange L).toAffine.IsElliptic` in a `letI`, so `galoisPointEquiv C.W σ` cannot appear here. -/
+theorem GaloisFibreChart.pairing_det (C : GaloisFibreChart k E L) (σ : L ≃ₐ[k] L)
+    (N : ℕ) [NeZero N] (hN : (N : L) ≠ 0) (P Q P' Q' : E.Point (geomFieldPt k L))
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    (hP' : (N : ℤ) • P' = 0) (hQ' : (N : ℤ) • Q' = 0)
+    (hPP' : (P'.1 : Spec (CommRingCat.of L) ⟶ E.E) =
+      Spec.map (CommRingCat.ofHom (σ : L →+* L)) ≫ (P.1 : _ ⟶ E.E))
+    (hQQ' : (Q'.1 : Spec (CommRingCat.of L) ⟶ E.E) =
+      Spec.map (CommRingCat.ofHom (σ : L →+* L)) ≫ (Q.1 : _ ⟶ E.E))
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (hgP : P' = (g 0 0).val • P + (g 0 1).val • Q)
+    (hgQ : Q' = (g 1 0).val • P + (g 1 1).val • Q) :
+    σ (C.pairing N hN P Q hP hQ : L) =
+      (C.pairing N hN P Q hP hQ : L) ^ (g 0 0 * g 1 1 - g 0 1 * g 1 0).val := by
+  letI := C.elliptic
+  refine (C.pairing_galois σ N hN P Q P' Q' hP hQ hP' hQ' hPP' hQQ').symm.trans ?_
+  have hdP : C.dict P' = (g 0 0).val • C.dict P + (g 0 1).val • C.dict Q := by
+    rw [hgP]; simp only [map_add, map_nsmul]
+  have hdQ : C.dict Q' = (g 1 0).val • C.dict P + (g 1 1).val • C.dict Q := by
+    rw [hgQ]; simp only [map_add, map_nsmul]
+  have hsP : (N : ℤ) • C.dict P = 0 := by rw [← map_zsmul, hP, map_zero]
+  have hsQ : (N : ℤ) • C.dict Q = 0 := by rw [← map_zsmul, hQ, map_zero]
+  have hsP' : (N : ℤ) • C.dict P' = 0 := by rw [← map_zsmul, hP', map_zero]
+  have hsQ' : (N : ℤ) • C.dict Q' = 0 := by rw [← map_zsmul, hQ', map_zero]
+  have hcP : (N : ℤ) • ((g 0 0).val • C.dict P + (g 0 1).val • C.dict Q) = 0 := by
+    rw [← hdP]; exact hsP'
+  have hcQ : (N : ℤ) • ((g 1 0).val • C.dict P + (g 1 1).val • C.dict Q) = 0 := by
+    rw [← hdQ]; exact hsQ'
+  refine (fieldWeilPairing_congr (C.W.baseChange L) N hN hsP' hsQ' hcP hcQ hdP hdQ).trans ?_
+  exact fieldWeilPairing_gl2_zmod (C.W.baseChange L) N hN (C.dict P) (C.dict Q) hsP hsQ g hcP hcQ
 
 end FibrePairing
 

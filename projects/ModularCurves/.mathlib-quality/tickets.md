@@ -38341,3 +38341,26 @@ Move 3 then closes step 4: injectivity of `algebraMap K (AlgebraicClosure K)` on
 `algebraMap_fieldPairingValue_eq_pairing` + this, followed by `algebraMap_factorRootOfUnityDescend`.
 
 Root green at **9733 jobs**.
+
+### [WP-D3d step 4, move 2] LANDED (2026-08-04) — axiom-verified
+
+**`GaloisFibreChart.pairing_det`** (`WeilPairing/FibreGalois.lean`): if `σ` carries `(P, Q)` to
+`(P', Q')` and the matrix `g` expresses `(P', Q')` in terms of `(P, Q)`, then
+`σ (C.pairing … P Q …) = (C.pairing … P Q …) ^ det g`.
+
+Both localised gaps resolved exactly as diagnosed:
+* the `nsmul` transport through `C.dict` (an `AddEquiv`) needs **`simp only [map_add, map_nsmul]`**, not a
+  `rw` chain — a `rw` list cannot fire `map_nsmul` at two coefficient positions;
+* `fieldWeilPairing_congr` needs **all four** torsion arguments explicitly, the primed pair being the
+  `g`-combination's, obtained by `rw [← hdP]; exact hsP'`.
+
+One import was added: `WeilPairing/FieldPairingDet` into `WeilPairing/FibreGalois` (for
+`fieldWeilPairing_gl2_zmod`); no cycle, `FieldPairingDet` depends only on `FieldPairing`.
+
+**Step 4 has one move left.** Move 3: combine `algebraMap_fieldPairingValue_eq_pairing` (move 1) with
+`pairing_det` (move 2) to get the determinant law for `fieldPairingValue` *in the closure*, descend to `K`
+by injectivity of `algebraMap K (AlgebraicClosure K)`, and then to the component by
+`algebraMap_factorRootOfUnityDescend`. That closes WP-D3d and, via
+`nonempty_weilPairing_of_cover_of_values`, DS4's `weilPairing` and `weilPairing_over` for invertible `N`.
+
+Root green at **9733 jobs**; census unchanged (7, all the Weil register).
