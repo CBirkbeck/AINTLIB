@@ -1,1 +1,1 @@
-FOCUS: WP-D3c-2c step 2 — transport torsion_baseChange_isPullback along isoSpec via IsPullback.of_iso; four commutations = isoSpec_hom_naturality
+FOCUS: WP-D3c-2c step 3 — match isPullback_specMap_torsion_baseChange against pullbackSpecIso via IsPullback.isoIsPullback; need Algebra k Gamma(E[N]) and the legs as algebraMap Spec.maps

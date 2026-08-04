@@ -36878,3 +36878,32 @@ root import. Root green at **9723 jobs**.
 `Spec k` with the same two legs, so `IsPullback.uniqueUpToIso` (or
 `IsPullback.isoIsPullback`) gives `Spec Γ(E_{k'}[N],⊤) ≅ Spec (Γ(E[N],⊤) ⊗[k] k')`, and
 `Scheme.ΓSpecIso` reads it back as a ring isomorphism, exactly as `muNCarrierRingEquiv` does.
+
+## [WP-D3c-2c] step 3a landed (2026-08-04) — the torsion carrier's algebra map, axiom-verified
+
+`WeilPairing/TorsionBaseChange.lean` gains three declarations (five in total, sorry-free,
+axiom-verified, in the root import):
+
+* `torsionCarrierAlgebra` — `finiteEtaleOfπ`'s `Algebra k Γ(E[N], ⊤)`, reconstructed by the
+  same expression (`@[reducible]`, local instance) — the exact analogue of
+  `muNCarrierAlgebra`;
+* `ofHom_algebraMap_torsionCarrier` — `ofHom (algebraMap k Γ(E[N],⊤)) = ΓSpecIso.inv ≫
+  (torsionπ).appTop`, by `rfl`;
+* `specMap_ofHom_algebraMap_torsionCarrier` — its `Spec` form.
+
+**Orientation gotcha (cost one build).** The first attempt stated the `Spec` identity as
+`Spec.map ((torsionπ).appTop) = Spec.map ΓSpecIso.hom ≫ Spec.map (ofHom (algebraMap …))`.
+That does not typecheck: `Spec.map` is contravariant, so `Spec.map ΓSpecIso.hom` starts at
+`Spec k`, not at `Spec Γ(E[N],⊤)`. The correct direction is the other one —
+`Spec.map (ofHom (algebraMap …)) = Spec.map ((torsionπ).appTop) ≫ Spec.map ΓSpecIso.inv` —
+which is just `Spec.map_comp` on the `rfl` ring identity. Always state the ring identity first
+and let `Spec.map_comp` produce the geometric one.
+
+Root green at **9723 jobs**.
+
+### Environment note (2026-08-04)
+The session was interrupted by a filesystem stall on the volume holding the repo — data reads
+returned `Interrupted system call` while `stat` still worked, so `lake`, `git` and all file
+reads failed for a stretch. It cleared on its own. **The in-flight edit did not survive** the
+stall (`git status` showed only the sentinels modified), so nothing unverified entered the
+tree; the declarations above are the re-done, compiled version.

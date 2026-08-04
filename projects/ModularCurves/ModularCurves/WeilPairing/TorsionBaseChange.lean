@@ -60,4 +60,37 @@ theorem isPullback_specMap_torsion_baseChange [IsAffine S] {T : Scheme.{u}} [IsA
 
 end EllipticCurve
 
+section Carrier
+
+variable (k : Type u) [Field k] (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ)
+  [NeZero N]
+
+/-- The `k`-algebra structure that `finiteEtaleOfπ` installs on `Γ(E[N], ⊤)`, reconstructed by
+the same expression so that it is usable outside that definition's scope — the exact analogue
+of `muNCarrierAlgebra`. -/
+@[reducible] noncomputable def torsionCarrierAlgebra :
+    Algebra k Γ(E.torsion N, ⊤) :=
+  (((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop).hom).toAlgebra
+
+attribute [local instance] torsionCarrierAlgebra
+
+/-- **(WP-D3c-2c)** With that instance the algebra map *is* `ΓSpecIso.inv` followed by the
+torsion's structure map — true by definition of `torsionCarrierAlgebra`, recorded so that
+consumers need not unfold it. -/
+theorem ofHom_algebraMap_torsionCarrier :
+    CommRingCat.ofHom (algebraMap k Γ(E.torsion N, ⊤)) =
+      (Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop :=
+  rfl
+
+/-- **(WP-D3c-2c)** …hence, after `Spec`, the leg that
+`AlgebraicGeometry.pullbackSpecIso` expects at the `X`-corner factors through the
+structure map of the torsion. -/
+theorem specMap_ofHom_algebraMap_torsionCarrier :
+    Spec.map (CommRingCat.ofHom (algebraMap k Γ(E.torsion N, ⊤))) =
+      Spec.map ((E.torsionπ N).appTop) ≫
+        Spec.map (Scheme.ΓSpecIso (CommRingCat.of k)).inv := by
+  rw [ofHom_algebraMap_torsionCarrier, Spec.map_comp]
+
+end Carrier
+
 end ModularCurves
