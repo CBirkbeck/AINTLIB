@@ -37736,3 +37736,48 @@ The `comap` identification is recorded as a comment in the file: it is literally
 `constSchemePointsEquiv_natural`, but stating it standalone times out at `isDefEq` at this
 instantiation. Apply it at the use site, where `k` is a concrete kernel-pair projection, or name the
 point `⟨coverTriv.hom, coverTriv_htriv⟩` first so the `Subtype.mk` is not re-elaborated.
+
+# ══════════════════════════════════════════════════════════════════════════
+# START HERE — route β, state of play (2026-08-04). Root green at 9730 jobs.
+# ══════════════════════════════════════════════════════════════════════════
+
+DS4's first two register entries (`weilPairing`, `weilPairing_over`) for **invertible `N`** are one
+statement away. Everything below is proved and axiom-verified.
+
+**The chain, all links proved except the last:**
+
+| # | statement | where |
+|---|---|---|
+| 1 | full level structure + root ⟹ pairing (`hdet` vacuous at `p = 𝟙`) | `nonempty_weilPairing_of_fullLevel` |
+| 2 | the pairing, **named**, + over-`S` | `fullLevelPairing`, `_over` |
+| 3 | determinant law, **bare matrix** | `fullLevelPairing_eq_of_fullLevelHom` |
+| 4 | the descent skeleton (all `WeilPairingLocalData` fields but `cocycle`) | `nonempty_weilPairing_of_cover_of_cocycle` |
+| 5 | `coverPairing` **is** `localDetPairing` | `coverPairing_eq_localDetPairing` |
+| 6 | on a piece the pairing is `ζ ^ det(reading)` | `comp_localDetPairing_restrict` |
+| 7 | two such agree iff their **values** agree | `comp_rootPower_muNMapAlong_eq` |
+| 8 | `det (gl2Both g v) = det g · det v` | `detFun_gl2Both` |
+| 9 | the transition of two level bases, locally constant | `levelTransitionCols`, `eq_glSmul_of_levelCoord`, `fullLevelHom_eq_of_levelCoord` |
+| 10 | the level trivialisation commutes with base change | `fullLevelHom_pullAlong` |
+| 11 | the tautological reading of the cover trivialisation | `coverTrivReading` |
+| 12 | arithmetic det law of the field pairing | `fieldWeilPairing_det_of_galois` |
+| — | **the one gap** | below |
+
+**THE ONE GAP.** With `c := coverTrivReading p hinv L` and `a, b` the two kernel-pair projections
+(so `a ≫ pullback.fst = b ≫ pullback.fst`): at each point `t`,
+
+  `c (b t) = gl2Both N g (c (a t))`,
+
+`g` being the transition between the level bases at the two `S'`-points. This is the *pointwise*
+shadow of `fullLevelHom_eq_of_levelCoord`, which is already proved at the scheme level. Feed it
+through 6→7→8 and `hdet` closes, hence 4, hence the register entries.
+
+Then **WP-D3d** (the root `ζ` with `g^*ζ = ζ^{det g}`) is the only remaining item with mathematical
+content; its arithmetic core is 12 and its descent from the generic fibre is
+`WeilPairing/UniversalRootBase.lean`.
+
+**Two things NOT to redo**: the transition's invertibility (unnecessary — see the "does not exist"
+entry) and the semilinear two-field transport of `weilPairing` (route α, ~1150 lines — de-risked and
+available, but route β does not need it).
+
+**Out of scope / user decision**: the register's arbitrary-`N` generality needs Cartier duality
+(AG-CD), while every consumer lives over ℚ-algebras. See the "two structural findings" entry.
