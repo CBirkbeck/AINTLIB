@@ -15437,3 +15437,20 @@ is **2, not 4**. Dedenting by 4 put `have` in column 0 and the measure reported 
 
 `hginv` itself (now 19c) stays inline permanently: it *calls* `injective`, so it is the one piece
 the universe constraint genuinely blocks.
+
+**Corrected arithmetic for the rest of `xPresheaf_isSheafOfTopologicalRings` (65).** The two lifts
+I listed above are *not* enough — I did the sums:
+
+| block | c | note |
+|---|---|---|
+| `hVS2` + `hle2` + `hcov2` | 5 + 2 + 5 = **12** | inside `hginv`; derive the saturated-cover data from `stabV`. **No `injective` call** — extractable as one lemma returning the triple |
+| `hres` | **9** | inside the uniqueness leg; ∀-over-`ι` but only *receives* `hg''`, never calls `homGlue` |
+| existence leg `refine RingHom.ext …` | **4** | per-`i`, no `ι` |
+
+Three lemmas, saving ≈ 12 − 1 + 9 − 1 + 4 − 1 = **22**, i.e. 65 → **≈ 43**. Two lifts would reach
+only ~55, which is why the previous entry's plan was wrong.
+
+Note `hginv` (19c) still cannot move as a unit — it calls `injective` — but **its interior can**:
+the `hVS2`/`hle2`/`hcov2` triple is pure `stabV`-transport and never touches the sheaf structure.
+That is the refinement worth keeping: *a proof blocked by a universe constraint may still have
+extractable interior*, because the constraint attaches to the call, not to the surrounding block.
