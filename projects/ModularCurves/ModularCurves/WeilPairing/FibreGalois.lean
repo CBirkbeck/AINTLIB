@@ -75,8 +75,13 @@ section FibrePairing
 variable (k : Type u) [Field k] (E : EllipticCurve (Spec (CommRingCat.of k)))
   (L : Type u) [Field L] [DecidableEq L] [IsAlgClosed L] [Algebra k L]
 
-/-- The geometric point of `E` at the algebraically closed extension `L`. -/
-noncomputable abbrev geomPt : Spec (CommRingCat.of L) ⟶ Spec (CommRingCat.of k) :=
+/-- The geometric point of `E` at the algebraically closed extension `L`.
+
+Named `geomFieldPt`, not `geomPt`: `ModularCurve/RhoSections.lean` already has a
+`ModularCurves.geomPt`, the geometric point of a *scheme* at a point of its space (215 uses
+against this one's six), and the two collided when the orphan modules were wired into the
+root import. -/
+noncomputable abbrev geomFieldPt : Spec (CommRingCat.of L) ⟶ Spec (CommRingCat.of k) :=
   Spec.map (CommRingCat.ofHom (algebraMap k L))
 
 /-- **(DS4 M1c, labelled data)** A `k`-rational Weierstrass chart for `E` at the geometric
@@ -91,10 +96,10 @@ structure GaloisFibreChart where
   /-- Its base change to `L` is elliptic. -/
   elliptic : (W.baseChange L).toAffine.IsElliptic
   /-- The point dictionary at the geometric point. -/
-  dict : E.Point (geomPt k L) ≃+ (W.baseChange L).toAffine.Point
+  dict : E.Point (geomFieldPt k L) ≃+ (W.baseChange L).toAffine.Point
   /-- The dictionary carries the scheme-level Galois action `P ↦ Spec σ ≫ P` to mathlib's
   coordinatewise action. -/
-  equivariant : ∀ (σ : L ≃ₐ[k] L) (P Q : E.Point (geomPt k L)),
+  equivariant : ∀ (σ : L ≃ₐ[k] L) (P Q : E.Point (geomFieldPt k L)),
     (Q.1 : Spec (CommRingCat.of L) ⟶ E.E) =
         Spec.map (CommRingCat.ofHom (σ : L →+* L)) ≫
           (P.1 : Spec (CommRingCat.of L) ⟶ E.E) →
@@ -106,7 +111,7 @@ variable {k E L}
 /-- The Weil pairing on the scheme points of `E` at the geometric point, computed through
 a `GaloisFibreChart`. -/
 noncomputable def GaloisFibreChart.pairing (C : GaloisFibreChart k E L) (N : ℕ)
-    (hN : (N : L) ≠ 0) (P Q : E.Point (geomPt k L))
+    (hN : (N : L) ≠ 0) (P Q : E.Point (geomFieldPt k L))
     (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) : { u : L // u ^ N = 1 } :=
   letI := C.elliptic
   fieldWeilPairing (C.W.baseChange L) N hN (C.dict P) (C.dict Q)
@@ -115,7 +120,7 @@ noncomputable def GaloisFibreChart.pairing (C : GaloisFibreChart k E L) (N : ℕ
 /-- **(E′ ★)** The pairing on scheme points is `Gal(L/k)`-equivariant: the transport of
 `fieldWeilPairing_galois` along the chart. -/
 theorem GaloisFibreChart.pairing_galois (C : GaloisFibreChart k E L) (σ : L ≃ₐ[k] L)
-    (N : ℕ) (hN : (N : L) ≠ 0) (P Q P' Q' : E.Point (geomPt k L))
+    (N : ℕ) (hN : (N : L) ≠ 0) (P Q P' Q' : E.Point (geomFieldPt k L))
     (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
     (hP' : (N : ℤ) • P' = 0) (hQ' : (N : ℤ) • Q' = 0)
     (hPP' : (P'.1 : Spec (CommRingCat.of L) ⟶ E.E) =
@@ -169,7 +174,7 @@ variable (E : EllipticCurve (Spec (CommRingCat.of k)))
 `E` at the geometric point. -/
 noncomputable abbrev torsionFibrePoint
     (f : (EllipticCurve.torsionAlgebra k E N hk).obj →ₐ[k] AlgebraicClosure k) :
-    E.Point (geomPt k (AlgebraicClosure k)) :=
+    E.Point (geomFieldPt k (AlgebraicClosure k)) :=
   (EllipticCurve.torsionAlgebraFibreEquiv k E N hk (AlgebraicClosure k) f : _)
 
 include hk in

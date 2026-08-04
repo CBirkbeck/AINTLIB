@@ -35872,3 +35872,38 @@ available), decomposes into finitely many factors (D3a-DOM), each factor is a lo
 hence standard smooth (D3a-FACTOR), hence a normal domain (D3b), and a root of unity in its
 fraction field descends to it (`exists_algebraMap_eq_of_pow_eq_one`, pre-existing). The only
 remaining input to `WeilPairingLocalData` is the root's `det`-transformation law.
+
+# ══════════════════════════════════════════════════════════════════════════
+# COVERAGE BLOCKER CLOSED (2026-08-04) — all 74 orphan modules are now in the
+# root import. Root green at **9719 jobs** (was 9645 / 756-of-833 reachable).
+# ══════════════════════════════════════════════════════════════════════════
+
+The board recorded that the orphan modules "cannot simply be wired in" because a scan found
+43 candidate duplicate fully-qualified names. **Measured: exactly one of them actually
+blocks.**
+
+* `lake build <all 74 orphans>` — green at 9394 jobs, so they all compile.
+* Appending all 74 to `ModularCurves.lean` fails with **one** error:
+  `import ModularCurves.ModularCurve.RhoSections failed, environment already contains
+  'ModularCurves.geomPt' from ModularCurves.WeilPairing.FibreGalois`.
+* The two are genuinely different notions, both legitimate:
+  - `WeilPairing/FibreGalois.geomPt k L : Spec L ⟶ Spec k` — the geometric point of a field
+    extension (**6** uses);
+  - `ModularCurve/RhoSections.geomPt T x : Spec (geomResidue T x) ⟶ T` — the geometric point
+    of a *scheme* at a point of its space (**215** uses).
+  (A third, `YOneAtlasClassify.geomPt`, is a structure field `D.geomPt` and never clashed.)
+* **Fix**: renamed the six-use one to **`geomFieldPt`**, with the reason in its docstring, and
+  `geomPt_eq_chart` → `geomFieldPt_eq_chart` for consistency. Surgical: the `\bgeomPt\b`
+  boundary correctly left `geomPt_eq_chart` alone on the first pass.
+
+Coverage went from **773/847** modules to **847/847**. Nothing else in the 43-name scan was
+real — they were regex false positives or already fixed.
+
+**Axiom profiles re-checked after the wiring and unchanged**:
+`YFull.gammaFullNaive_representable_assembly`, `exists_weilPairingHom_of_field` and
+`gammaOneNaive_representable` are `propext / Classical.choice / Quot.sound`;
+`yRho_representable` still carries exactly its seven Weil-pairing roots.
+
+Consequence: `lake build ModularCurves` is now a **complete** check of the project. The
+recorded recipe for building the orphan list explicitly is obsolete, and any `sorry`, error or
+duplicate anywhere in the tree is visible to the routine build.
