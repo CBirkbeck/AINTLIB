@@ -110,10 +110,35 @@ Logged in `.mathlib-quality/b2_log.jsonl` under `KM-SEESAW-1`.
 /-- **(KM-SEESAW-1′-res)** The residue-field form: at a point `s` of the base, fibrewise triviality of
 `M` makes `ker (d⁰ ⊗ κ(s))` one-dimensional.
 
-This is the whole geometric content of `KM-SEESAW-1′`. `H⁰` of the base-Čech complex is `Γ` of the
-module (`baseSectionsIsoKernelOrderedBaseCechDifferential`), base change along
-`Spec κ(s) ⟶ S` turns it into `Γ(X_s, M_s)` (`orderedBaseCechComplexBaseChangeIso`), fibrewise
-triviality replaces `M_s` by `𝒪_{X_s}`, and `UniversallyOConnected π` evaluates that to `κ(s)`. -/
+This is the whole geometric content of `KM-SEESAW-1′`.
+
+**The route, with every input located (do not re-derive; and note which tools are NOT usable).**
+
+1. `ker ((C.d 0 1).hom.baseChange κ(s))` ≃ the degree-`0` kernel of the `extendScalars κ(s)` image of
+   `C`, by `ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv`
+   (`ForMathlib/LowDegreeFiniteProjectiveReplacement.lean:164`). This is pure bookkeeping between
+   `LinearMap.baseChange` and `ModuleCat.extendScalars`; `baseCechKernelOrderedBaseChangeLinearEquiv`
+   (`ForMathlib/SchemeModuleOrderedBaseCechZero.lean:161`) uses it the same way and is the model.
+2. That complex is the fibre's own ordered base-Čech complex, by
+   `orderedBaseCechComplexBaseChangeIso` (`ForMathlib/AffineModuleCechBaseChange.lean:1037`), for
+   `t : Spec κ(s) ⟶ S`. Needs `[IsAffine S]`, `[IsAffine (Spec κ(s))]`, `[M.IsQuasicoherent]` — the last
+   from `hM.isQuasicoherent`. **No flatness or exactness is needed for this step**, which is the point.
+3. Transport the kernel along that iso of complexes (`HomologicalComplex.kernelZeroLinearEquivOfHom`,
+   used in the same way at `SchemeModuleOrderedBaseCechZero.lean:161`).
+4. `baseSectionsIsoKernelOrderedBaseCechDifferential`
+   (`ForMathlib/SchemeModuleOrderedBaseCechZero.lean:256`) applied **on the fibre** identifies that
+   kernel with `baseSections π_s M_s`.
+5. `hfib` replaces `M_s` by `unitObj`, and `hπ` — `UniversallyOConnected π`, i.e. Stacks 0EX7's
+   "`f_*𝒪_X = 𝒪_S` after arbitrary base change" — evaluates `baseSections π_s 𝒪` to `κ(s)`. Close with
+   `Module.finrank_self`.
+
+**Not usable here, and why** — `baseSectionsBaseChangeEquiv_of_orderedBaseCech_package`
+(`EllipticCurve/PoleSheafNeighborhoodHOne.lean:377`) looks like exactly this statement, but its `hexact`
+hypothesis is positive-tail exactness of the complex, which is false for a fibrewise-*trivial* sheaf on a
+genus-1 fibre (`H¹(E_s, 𝒪) = κ(s)`; see the rejected split above). Its inner tool
+`baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison` takes kernel-comparison bijectivity
+instead of exactness and *is* usable, but steps 1–4 above already give the identification directly, so it
+is not needed. -/
 theorem orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial
     {X S : Scheme.{u}} [IsAffine S] [IsNoetherian X] [X.IsSeparated]
     {π : X ⟶ S}
