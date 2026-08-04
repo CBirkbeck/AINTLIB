@@ -1,0 +1,56 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import ModularCurves.WeilPairing.FieldPairingUnique
+
+/-!
+# The field pairing as a root of unity in the base field (WP-D3d step 2)
+
+`fieldWeilPairingHom` (`WeilPairing/FieldPairingUnique.lean`) is a morphism of finite étale
+`K`-algebras `μ_N-algebra ⟶ torsionPair-algebra`. Composing it with a **`K`-rational** point of the
+torsion-pair algebra and reading the result through `muNAlgebraFibreEquiv`
+(`WeilPairing/GaloisFibre.lean`) turns it into an honest element of `{ a : K // a ^ N = 1 }`.
+
+That is the shape the componentwise construction of `ζ` needs (`factorRootOfUnityDescend`,
+`WeilPairing/FactorRoot.lean`, then `nonempty_weilPairing_of_cover_of_values`): at the generic point of
+each component of the cover, the pairing of the tautological basis is a root of unity in that
+component's function field.
+-/
+
+open AlgebraicGeometry CategoryTheory
+
+universe u
+
+namespace ModularCurves
+
+variable (K : Type u) [Field K] [PerfectField K] [DecidableEq (AlgebraicClosure K)]
+  (E : EllipticCurve (Spec (CommRingCat.of K))) (N : ℕ) [NeZero N] (hK : (N : K) ≠ 0)
+
+/-- **(WP-D3d step 2)** The value of the field-level Weil pairing at a `K`-rational point of the
+torsion-pair algebra, as a root of unity in `K` itself.
+
+`fieldWeilPairingHom` composed with the point is a `K`-point of the `μ_N`-algebra, and
+`muNAlgebraFibreEquiv` reads such points as `N`-th roots of unity. -/
+noncomputable def fieldPairingValue
+    (f : (EllipticCurve.torsionPairAlgebra K E N hK).obj →ₐ[K] K) : { a : K // a ^ N = 1 } :=
+  muNAlgebraFibreEquiv K N hK K (f.comp (fieldWeilPairingHom K E N hK).hom.hom)
+
+/-- The defining property, transported: the pairing value is the reading of
+`fieldWeilPairingHom` at the point — by construction, so that consumers can rewrite through it
+without unfolding `muNAlgebraFibreEquiv`. -/
+theorem fieldPairingValue_eq
+    (f : (EllipticCurve.torsionPairAlgebra K E N hK).obj →ₐ[K] K) :
+    fieldPairingValue K E N hK f =
+      muNAlgebraFibreEquiv K N hK K (f.comp (fieldWeilPairingHom K E N hK).hom.hom) :=
+  rfl
+
+/-- …and it really is an `N`-th root of unity in `K` (the subtype's own property, named for use at
+`rootOfUnityDescend`'s interface). -/
+theorem fieldPairingValue_pow
+    (f : (EllipticCurve.torsionPairAlgebra K E N hK).obj →ₐ[K] K) :
+    (fieldPairingValue K E N hK f : K) ^ N = 1 :=
+  (fieldPairingValue K E N hK f).2
+
+end ModularCurves

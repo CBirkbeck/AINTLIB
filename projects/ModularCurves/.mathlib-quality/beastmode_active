@@ -1,1 +1,1 @@
-FOCUS: WP-D3d step 3 DONE (factorRootOfUnityDescend + algebraMap_ companion). NEXT: step 2 — the field pairing value at each factor generic point as an element of {u : FractionRing (A/p) // u^N = 1}, from fieldWeilPairingHom; then step 4, the value equations via fieldWeilPairing_det_of_galois.
+FOCUS: WP-D3d step 2 DONE (fieldPairingValue: the field pairing at a K-rational point as an element of {a : K // a^N = 1}). NEXT: step 4 — the value equations, i.e. transport fieldWeilPairing_det_of_galois through fieldPairingValue and algebraMap_factorRootOfUnityDescend.

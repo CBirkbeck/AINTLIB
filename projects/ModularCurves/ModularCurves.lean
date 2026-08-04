@@ -226,6 +226,7 @@ import ModularCurves.WeilPairing.PairingTransport
 import ModularCurves.WeilPairing.TorsionBaseChange
 import ModularCurves.WeilPairing.TorsionSqBaseChange
 import ModularCurves.WeilPairing.FieldPairingUnique
+import ModularCurves.WeilPairing.FieldPairingValue
 import ModularCurves.WeilPairing.FullLevelBaseChange
 import ModularCurves.WeilPairing.FullLevelPairing
 import ModularCurves.WeilPairing.FieldPairingDet

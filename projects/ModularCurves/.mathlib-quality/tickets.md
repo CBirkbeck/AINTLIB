@@ -38092,3 +38092,31 @@ Root green at **9732 jobs**; census unchanged (7, all the Weil register).
    `algebraMap_factorRootOfUnityDescend` to bring it down.
 
 Root green at **9732 jobs**; census unchanged (7, all the Weil register).
+
+### [WP-D3d step 2] the field pairing as a root of unity in the base field (2026-08-04) — axiom-verified
+
+`WeilPairing/FieldPairingValue.lean` (new leaf):
+
+* **`fieldPairingValue`** — the value of `fieldWeilPairingHom` at a **`K`-rational** point of the
+  torsion-pair algebra, read through `muNAlgebraFibreEquiv` (`WeilPairing/GaloisFibre.lean`, which
+  identifies `R`-points of `μ_{N,Spec k}` with `{ a : R // a ^ N = 1 }`), as an element of
+  `{ a : K // a ^ N = 1 }`;
+* `fieldPairingValue_eq` / `fieldPairingValue_pow` — the definitional reading and the root-of-unity
+  property, named so consumers need not unfold `muNAlgebraFibreEquiv`.
+
+This is exactly what `factorRootOfUnityDescend` takes as input at a component's function field, so
+**WP-D3d steps 1–3 are now all done**:
+
+| step | statement |
+|---|---|
+| 1 | `isIntegrallyClosed_quotient_minimalPrime` — each component is an integrally closed domain |
+| 2 | `fieldPairingValue` — the pairing at the generic point is a root of unity in the function field |
+| 3 | `factorRootOfUnityDescend` (+ `algebraMap_` companion) — it descends to the component |
+| 4 | **remaining** — the value equations |
+
+Step 4 is: transport `fieldWeilPairing_det_of_galois` (`WeilPairing/PairingTransport.lean`) through
+`fieldPairingValue` to get `σ(ζ_K) = ζ_K ^ det g` at the generic fibre, then bring it down with
+`algebraMap_factorRootOfUnityDescend` and feed it to
+`nonempty_weilPairing_of_cover_of_values`.
+
+Root green at **9733 jobs**; census unchanged (7, all the Weil register).
