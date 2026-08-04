@@ -38152,3 +38152,27 @@ Silverman pairing by `fieldWeilPairingHom_spec`, apply `fieldWeilPairing_det_of_
 by injectivity of `algebraMap K (AlgebraicClosure K)`, and finally descend to the component with
 `algebraMap_factorRootOfUnityDescend`. That completes WP-D3d and therefore DS4's first two register
 entries for invertible `N`.
+
+### [WP-D3d step 4] …and it is a WIDENING, not a new proof (2026-08-04)
+
+Reading the two `_comp_algEquiv` lemmas shows neither proof uses that `σ` is an *equivalence* of a
+*single* ring — both only use `Spec.map` of the underlying ring hom:
+
+* `algHomEquivSpecOver_comp_algEquiv` (`WeilPairing/GaloisFibre.lean:37`) opens with
+  `show Spec.map (CommRingCat.ofHom ((σ.toAlgHom.comp f).toRingHom)) ≫ X.isoSpec.inv = …`;
+* `muNAlgebraFibreEquiv_comp_algEquiv` (`:187`) is that plus `muNAlgebraFibreEquiv_val`,
+  `muNPointsEquiv_coe` and `ΓSpecIso_hom_appTop_specMap_comp`, again only through
+  `CommRingCat.ofHom (σ : R →+* R)`.
+
+So step 4's bridge is obtained by **widening both statements in place** from `σ : R ≃ₐ[k] R` to
+`φ : R →ₐ[k] R'`:
+
+  `algHomEquivSpecOver R' π halg (φ.comp f) = Spec.map (CommRingCat.ofHom φ) ≫ algHomEquivSpecOver R π halg f`
+  `(muNAlgebraFibreEquiv k N hk R' (φ.comp f) : R') = φ ((muNAlgebraFibreEquiv k N hk R f) : R)`
+
+with the existing `AlgEquiv` versions recovered by instantiation — the same manoeuvre that worked for
+`coordRingMap_surjective_of_ringEquiv` earlier this session. That is materially cheaper than a fresh
+proof, and it is the *whole* of what step 4 lacks.
+
+**Grep the conclusion first** (twice bitten today): before widening, check that no
+`_comp_algHom` variant already exists.
