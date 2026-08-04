@@ -15668,3 +15668,171 @@ Universe note: `Γ₀` must be in `R`'s universe, since the conclusion existenti
 `Γ : Type u`. Auto-bound `u` handles this as long as both binders name it — which is why the
 abstract lemma sits in `Presheaf.lean` (where `{R : Type u}` is the idiom) rather than in
 `Lemma745.lean`, whose `variable` block is `Type*`.
+
+### The docstring walk-back, generalised — and the anchor that was not an anchor
+
+Starting `genRestrictedCover_isOXAcyclic_of_units_or_empty` (214c) I anchored the insertion on
+the line `set_option linter.unusedSectionVars false in`, which sits immediately above the
+target. It occurs **170 times** in `WedhornCechAcyclicity.lean`. The count assertion caught it
+before any write, so the cost was one aborted run rather than a corrupted file.
+
+This is last round's docstring bug wearing different clothes. Both times I picked a *nearby*
+line as the anchor instead of deriving the insertion point from the declaration itself. The fix
+is the same rule, now written as a reusable helper rather than re-derived per target:
+
+```python
+def decl_top(i_decl):
+    j = i_decl - 1
+    if L[j].rstrip().endswith("-/"):          # walk back to the /-- opener,
+        while not L[j].lstrip().startswith("/--"):   # NOT to the first blank line
+            j -= 1
+    while re.match(r'^(set_option .* in|@\[.*\]|open .* in)\s*$', L[j-1]):
+        j -= 1                                 # then over the modifiers that bind to it
+    return j
+```
+
+> **Anchor on the declaration, then walk back.** A neighbouring line is not an identifier.
+> `set_option … in` and `@[simp]` are idioms, so they repeat; a declaration name does not.
+
+The two guards compose: `only()` asserts the *declaration* line is unique (it is — it is a
+name), and `decl_top` derives everything else structurally, so there is nothing left to
+mis-anchor on.
+
+Both lift bodies were taken as **verbatim line ranges from the original file**, never retyped —
+21 and 28 raw lines — with a `dedent` that aborts if the columns it removes contain code. That
+closes the transcription-error class that cost five builds on the previous target.
+
+**Verbatim extraction has one seam: the binder names.** Lemma B's body came across as an
+untouched line range, but I renamed the hypothesis `_h_empty` → `h_empty` in the new signature
+(the underscore means "unused", and in the lemma it *is* used). The body still said
+`rw [_h_empty t ht htn]`, so the `rw` failed and the lemma reported `unsolved goals` on top of
+`Unknown identifier` — two errors, one cause.
+
+> Copying a body verbatim protects every name that comes from *outside* the lift. It does not
+> protect the ones you renamed *at* the lift boundary. After extracting, grep the moved body
+> for each binder you renamed — that set is small and known, unlike the set of names you might
+> have mistyped.
+
+### Lifting a `let`-bound structure out of a proof costs two things a `have` does not
+
+`C_gen` and `C_sub` (23-line `RationalCoveringData` literals) unified into one `imageSubCover`
+parameterised by `Sfin ⊆ T`. The dedup claim was **proved, not assumed**: the script asserted the
+two literals have equal length and differ in exactly three lines, and printed them —
+
+```
+gen: (Tpos.image D₀.canonicalMap) u hspanB)     sub: (T.image …) u hspanBT)
+gen: (Tpos.image …) (D₀.canonicalMap t) hspanB, sub: (T.image …) hspanBT,
+gen: exact hcond i (_hsub hi)                   sub: exact hcond i hi
+```
+
+all three the same variation. Had they differed anywhere else the run would have aborted and
+said where. **Assert the shape you are claiming; a dedup you did not verify is a rewrite.**
+
+Then two failures the `have`-lifts never hit:
+
+**1. Local instances do not travel with the lifted text.** The caller sets up
+
+```lean
+letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
+```
+
+immediately above the block. Six errors, every one naming `DecidableEq (presheafValue D₀)`, and
+none naming the `letI` that used to supply it — the *provenance* is exactly what the message
+omits. Fixed by adding both as instance binders, **placed after `D₀` is bound**: an instance
+binder mentioning `D₀` above its binder silently auto-binds a fresh `D₀` and fails identically.
+
+**2. `let` is transparent; `def` is not.** Five downstream sites do `Finset.mem_image.mp hD`
+with `hD : D ∈ C_gen.covers`. Under `let C_gen := …` that unfolds to a literal `Finset.image`
+and unifies; against an opaque `def` it does not:
+
+```
+  hD has type            D ∈ C_gen.covers
+  but is expected to be  ?a ∈ Finset.image ?f ?s
+```
+
+> Replacing an in-proof `let` by a top-level `def` changes the *reduction behaviour* of every
+> downstream step, not just where the code lives. Either mark it `@[reducible]` or supply a
+> projection lemma and rewrite each consumer.
+
+Took `@[reducible]` here: the def is 23 lines and used twice, nothing like the large hot-path
+reducible that caused the isDefEq wall on another project. `noncomputable` was also required —
+it depends on `instCommRingPresheafValue`.
+
+**Name the lifted lemma's binders exactly as the caller named them.** Lift B failed because I
+"improved" `_h_empty` to `h_empty` in the new signature while the body — copied verbatim —
+still called the old name. For stage 3 the new binders are `_hsub`, `_h_units`, `hspanB`,
+`hspanBT`, `hkey`, `hTne`, underscores and all, so the moved bodies need *zero* edits.
+
+The leading underscore looks wrong on a hypothesis that is used (it means "unused"), and that
+is exactly the impulse to resist: renaming at the lift boundary buys nothing and reintroduces
+the one error class verbatim extraction exists to eliminate. Rename later, in a separate pass,
+where the compiler checks every site at once.
+
+### The instance a definition bakes in is part of its interface
+
+Stage 3 failed on four errors that all said the same thing:
+
+```
+synthesized  inst✝
+inferred     Classical.decEq (RationalLocData (presheafValue D₀))
+```
+
+`imageGenCover` takes **no** `DecidableEq` binders — it installs its own:
+
+```lean
+noncomputable def imageGenCover … : RationalCoveringData (presheafValue D₀) :=
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+```
+
+so `(imageGenCover …).covers` is a `Finset.image` built with *that* instance. In the original
+proof the ambient instance was also `Classical.decEq` (the caller's `letI`), so
+`Finset.mem_image.mp` unified. Give the lifted lemma an instance *binder* instead and the two
+are no longer the same term — the goal is unchanged, the proof is unchanged, and it stops
+type-checking.
+
+Note which lemma broke: `imageSubCover_isOXAcyclic_of_units` was fine with binders, because its
+statement mentions `imageSubCover`, **my** def, whose instances *are* those binders. Only the
+lemma facing `imageGenCover` broke.
+
+> **Match the instance discipline of whatever your statement mentions.** A def that installs
+> `Classical.decEq` internally requires its consumers to have the same instance ambient;
+> a def with instance binders requires them to be passed. Lifting a proof moves it between
+> those two worlds, and the error names the class, never the provenance.
+
+Restructured into three lemmas: `E`/`F` face `imageSubCover` and keep binders; `G` faces
+`imageGenCover`, takes no `DecidableEq` binders, installs the same two `letI`s, and derives
+`hspanB`/`hspanBT` under them — which also removed them from the caller entirely.
+
+### `genRestrictedCover_isOXAcyclic_of_units_or_empty` CLEARED: 214 → 26
+
+Seven declarations, largest 33:
+
+| decl | c |
+|---|---|
+| `genRestrictedCover_isOXAcyclic_of_all_empty` | 21 |
+| `spa_presheafValue_empty_of_notMem` | 29 |
+| `imageSubCover` (def) | 23 |
+| `rationalOpen_image_eq_of_dominant_mem` | 12 |
+| `imageSubCover_isOXAcyclic_of_units` | 32 |
+| `imageSubCover_isOXAcyclic_of_subset` | 21 |
+| `imageGenCover_isOXAcyclic_of_units_or_empty` | 33 |
+| **target** | **26** |
+
+Three stages, four build failures, and every failure was about *context that does not travel
+with copied text* rather than about the mathematics:
+
+1. an anchor that occurred 170 times (caught by assertion, no write);
+2. a binder renamed at the lift boundary while the body kept the old name;
+3. local `letI` instances left behind at the call site;
+4. `let` → `def` changing reduction behaviour for five downstream `Finset.mem_image` steps;
+5. an instance *binder* where the surrounding code needs the `Classical.decEq` that
+   `imageGenCover` bakes in.
+
+The mathematics never broke. Every single failure was an artefact of moving a proof across a
+declaration boundary, and each has a mechanical guard, now all in the lift script: assert the
+anchor is unique and derive position via `decl_top`; keep the caller's binder names verbatim;
+carry the caller's `letI`s; and check what the *statement's* head symbol does about instances
+before choosing binders.
+
+Over-50 count 74 → 73; no new declaration is over the bar.
