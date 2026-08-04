@@ -36078,3 +36078,39 @@ With `glSmul`'s coordinate formula
 (`Moduli/GammaH.lean:123` — `g • (P,Q) = (g₀₀·P + g₁₀·Q, g₀₁·P + g₁₁·Q)`) and the classifying
 rules `e3ClassifyingRingHom_gamma` / `_beta`, the determinant law is now a statement purely
 about the ℰ₃ normal form: **step 2(b)**, the three explicit substitutions.
+
+## [WP-D3c-N3 step 2] SHARPENED to a single computation (2026-08-04)
+
+Two structural observations collapse step 2(b) from "three explicit substitutions in the ℰ₃
+normal form" to **one**.
+
+**(i) `e3Zeta` is algebraic over `R`, not a varying function.** `e3Zeta_cyclotomic` (proved)
+says `e3Zeta R ^ 2 + e3Zeta R + 1 = 0`, so `e3Zeta` is a primitive cube root of unity *in the
+ring*: `E3ModuliRing ℚ ≅ ℚ(ζ₃)[γ, γ⁻¹]` and `e3Zeta` is the constant `ζ₃`. (This is the
+classical fact that `Y(3)` has constant field `ℚ(ζ₃)`.) Since `e3GlRingEquiv g` is an
+**`R`-algebra** automorphism — `e3GlIso` is a morphism in `EllObj R`, so its base map lies
+over `Spec R` — it permutes the roots of `x² + x + 1`, hence
+
+`e3GlRingEquiv g (e3Zeta R) ∈ {e3Zeta R, e3Zeta R ^ 2}` = `{e3Zeta R, e3Zeta R ⁻¹}`.
+
+So the law is a **binary** determination for each `g`, not an open-ended computation.
+
+**(ii) The resulting map is forced.** `g ↦ (e3GlRingEquiv g fixes e3Zeta ? 1 : −1)` is a group
+homomorphism `GL₂(𝔽₃) → {±1}` (because `e3GlRingEquiv` is one and the two roots are swapped by
+an involution). Now `SL₂(𝔽₃)` is perfect-mod-3: its abelianisation is `ℤ/3`, which has **no**
+`ℤ/2` quotient, so any homomorphism `GL₂(𝔽₃) → ℤ/2` kills `SL₂(𝔽₃)` and therefore factors
+through `det`. Hence there are exactly two candidates — the trivial one and `det` — and the
+law follows from **a single non-triviality check**:
+
+> one matrix of determinant `−1` inverts `e3Zeta`.
+
+### The remaining ticket, in final form
+- **[WP-D3c-N3-c]** exhibit one `g ∈ GL₂(ℤ/3)` with `det g = −1` and
+  `e3GlRingEquiv R hR hL hArb g (e3Zeta R) ≠ e3Zeta R`.
+  The natural candidate is the swap `(P, Q) ↦ (Q, P)`, whose `glSmul` is immediate from the
+  coordinate formula (`Moduli/GammaH.lean:123`) and whose effect on `(β, γ)` is read off from
+  `e3ClassifyingRingHom_gamma` / `_beta` at the swapped datum.
+- Plus the formal parts: (α) `e3GlRingEquiv` is a monoid hom in `g` — from
+  `gammaFullNaiveGlAction`'s `map_mul'` (proved) transported through
+  `e3GlIso_hom_homEquiv`; (β) an `R`-algebra automorphism permutes the roots of `x²+x+1`;
+  (γ) `Hom(GL₂(𝔽₃), ℤ/2)` factors through `det`.
