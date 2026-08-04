@@ -37575,3 +37575,29 @@ Two elaboration facts worth keeping (both cost iterations):
 3. decompose by `levelTransitionCols` and apply `fullLevelPairing_eq_of_fullLevelHom` piecewise;
    glue by `locConst_hom_ext`.
 4. **WP-D3d** — the root `ζ` with `g^*ζ = ζ^{det g}`.
+
+### [route β] step (1) `fullLevelHom_pullAlong` — recipe with every name confirmed (2026-08-04)
+
+Statement:
+`constSchemeMapAlong σ (Fin 2 → ZMod N) ≫ E.fullLevelHom L =
+   (E.baseChange σ).fullLevelHom (L.pullAlong σ) ≫ E.torsionBaseChangeHom N σ`.
+
+**Do not** route through `comp_pointToTorsion` (`EllipticCurve/Torsion.lean:93`): its conclusion is
+indexed by the base map `w ≫ g`, so at `g = 𝟙 S` one gets `σ ≫ 𝟙 S` and hits the index problem of
+pattern (6) in the elaboration notes. Instead, after `Sigma.hom_ext`, split each `v`-component with
+**`pullback.hom_ext`** on `E.torsion N = pullback (E.mulByHom N) E.zero` and compute the two legs:
+
+* `torsionι` leg — LHS is `σ ≫ (v₀·P + v₁·Q).1` by `ι_constSchemeMapAlong` (`GroupScheme/MuN.lean:546`)
+  and `pointToTorsion_torsionι`; RHS is
+  `(v₀·(L.pullAlong σ).1.1 + v₁·(L.pullAlong σ).1.2).1 ≫ pullback.fst E.π σ`, and
+  `(L.pullAlong σ).1.i = Point.asSection E σ (Point.pull E σ L.1.i)` **by definition**
+  (`Point.pull E t P = ⟨t ≫ P.1, _⟩`, `Moduli/GammaH.lean:377`). Normalise the combination with
+  **`Point.asSection_add`** (`Moduli/GammaHRepresentability.lean:3839`) and **`Point.asSection_zsmul`**
+  (`EllipticCurve/GroupLaw.lean:275`), then **`Point.pull_add`** / **`Point.pull_zsmul`**
+  (`LevelStructure/ExactOrder.lean:72`, `:61`), reaching
+  `Point.asSection E σ (Point.pull E σ (v₀·P + v₁·Q))`; finish with **`Point.asSection_val_fst`**.
+* `torsionπ` leg — `σ` on both sides (`pointToTorsion_torsionπ`, `torsionBaseChangeHom_torsionπ`,
+  `Category.id_comp`).
+
+Every lemma named here has been verified to exist. Re-associate with
+`(Category.assoc _ _ _).symm.trans`, never `← Category.assoc`.
