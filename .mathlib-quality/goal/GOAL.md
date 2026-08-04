@@ -15352,3 +15352,31 @@ count), which I had not counted at all.
 
 The macro itself remains an owner call — it changes how every proof in the project opens, which is
 a style commitment, not a cleanup.
+
+### `xPresheaf_isSheafOfTopologicalRings` (90) — scoped, decomposable, one lift
+
+Unlike the previous two, this one has **zero `letI`/`haveI` in its body** — it is not
+instance-blocked. Structure:
+
+```
+  L1720   4c  hcov          L1731   3c  obtain ⟨g, hg, huniq⟩ := …homGlue
+  L1735  44c  hginv   <-- the whole gap
+  L1784   3c  hgXc          L1788   4c  RingHom.ext          L1792  15c  rintro ⟨g'', hg''c⟩
+```
+
+**One lift clears it**: `hginv` at 44c gives 90 → 47.
+
+`hginv` proves `∀ t, g.1 t ∈ frobFixed p F ϖ (iSup U)` by separating over the saturated pieces
+(`hVS2`/`hle2`/`hcov2` from `stabV`), then a six-step `hLa…hLf` chain against `hRa`. It consumes
+`V'`, `U'`, `hle`, `hVS`, `hcov`, `stabV`, `stabU` (both in-proof `have`s), `g`, `hg`, `f`, `U`.
+
+**The one design decision, and the reason this is recorded rather than half-done**: the conclusion
+mentions `iSup U`, but the body works entirely in `V'` — and `V'` is *defined* as
+`(yFunctor …).obj (curvePreimage … (iSup U))`, so `rw [mem_frobFixed]` is what bridges them.
+Stating the lemma in the **post-`rw` form** (about `V'`, `limitFrobHom`, `limitRestrict`) and
+leaving the `rw` at the call site keeps `iSup U` out of the signature entirely — the
+"restate in use-shape" move that unblocked `isOXAcyclic_interProd`. Stating it in the pre-`rw` form
+instead would drag the `yFunctor`/`curvePreimage` definitional chain into the signature.
+
+Everything needed is above; the remaining work is transcribing `mem_frobFixed`'s unfolded form
+into the statement.
