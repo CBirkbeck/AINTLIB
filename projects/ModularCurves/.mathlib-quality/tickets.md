@@ -36931,3 +36931,35 @@ Root green at **9723 jobs**.
 `(AlgebraicGeometry.pullbackSpecIso k Γ(E[N],⊤) k').isPullback`-style square, and finally
 `ΓSpecIso` to read the apex comparison as the ring isomorphism
 `Γ(E_{k'}[N],⊤) ≃+* Γ(E[N],⊤) ⊗[k] k'`.
+
+## [WP-D3c-2c] step 3c landed (2026-08-04) — the square is in `pullbackSpecIso` shape, axiom-verified
+
+`isPullback_torsion_baseChange_specAlgebraMap`:
+
+```
+IsPullback (Spec.map ((torsionBaseChangeHom N _).appTop))
+           (Spec.map (((E.baseChange _).torsionπ N).appTop) ≫ Spec.map (ΓSpecIso (of k')).inv)
+           (Spec.map (ofHom (algebraMap k Γ(E.torsion N, ⊤))))      -- the X-leg
+           (Spec.map (ofHom (algebraMap k k')))                      -- the Y-leg
+```
+
+Both legs are now `Spec` of `algebraMap`s and the base corners are `Spec k`, `Spec k'` — exactly
+the shape `AlgebraicGeometry.pullbackSpecIso k Γ(E.torsion N, ⊤) k'` is stated in.
+
+A third `IsPullback.of_iso`, apex and `X`-corner unchanged (`Iso.refl`), with
+`asIso (Spec.map (ΓSpecIso _).inv)` at the two base corners. The two nontrivial commutations
+are `specMap_ofHom_algebraMap_torsionCarrier` (`X`-leg) and `Spec.map` of
+`Scheme.ΓSpecIso_inv_naturality` (`Y`-leg); the other two are `simp`.
+
+**Gotcha**: the bullets must be `simp only [asIso_hom, Iso.refl_hom, Category.id_comp]` before
+`exact` — a bare `simp` closes the two trivial goals but rewrites the other two into shapes the
+named lemmas no longer match, and collapsing bullets to guess the goal count produces
+`No goals to be solved`.
+
+Seven declarations in `WeilPairing/TorsionBaseChange.lean`, sorry-free, axiom-verified, in the
+root import. Root green at **9723 jobs**.
+
+**Remaining for WP-D3c-2c**: `IsPullback.isoIsPullback` against `pullbackSpecIso`'s own square
+(which is `IsPullback.of_hasPullback` transported along that iso), giving
+`Spec Γ(E_{k'}[N],⊤) ≅ Spec (Γ(E[N],⊤) ⊗[k] k')`; then `ΓSpecIso` reads it as the ring
+isomorphism `Γ(E_{k'}[N],⊤) ≃+* Γ(E[N],⊤) ⊗[k] k'`, exactly as `muNCarrierRingEquiv` does.

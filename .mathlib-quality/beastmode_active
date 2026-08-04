@@ -1,1 +1,1 @@
-FOCUS: WP-D3c-2c step 3b — second IsPullback.of_iso to insert GammaSpecIso at the Y and Z corners, then isoIsPullback against pullbackSpecIso k Gamma(E[N]) k2
+FOCUS: WP-D3c-2c step 3c — rewrite both legs into algebraMap form (GammaSpecIso naturality), then isoIsPullback against pullbackSpecIso

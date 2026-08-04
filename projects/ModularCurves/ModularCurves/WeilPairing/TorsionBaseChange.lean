@@ -111,6 +111,36 @@ theorem isPullback_specMap_torsion_baseChange_algebraMap :
       (Spec.map ((Spec.map (CommRingCat.ofHom (algebraMap k k'))).appTop)) :=
   E.isPullback_specMap_torsion_baseChange N (Spec.map (CommRingCat.ofHom (algebraMap k k')))
 
+/-- **(WP-D3c-2c step 3c)** The torsion base-change square in exactly the shape
+`AlgebraicGeometry.pullbackSpecIso k Γ(E[N],⊤) k'` is stated in: both legs are `Spec` of
+`algebraMap`s, and the base corners are `Spec k` and `Spec k'`.
+
+A third `IsPullback.of_iso`, with the apex and the `X`-corner unchanged and
+`Spec.map (ΓSpecIso _).inv` at the two base corners. Its two nontrivial commutations are
+`specMap_ofHom_algebraMap_torsionCarrier` (the `X`-leg) and `Spec.map` of
+`Scheme.ΓSpecIso_inv_naturality` (the `Y`-leg). -/
+theorem isPullback_torsion_baseChange_specAlgebraMap :
+    IsPullback
+      (Spec.map ((E.torsionBaseChangeHom N
+        (Spec.map (CommRingCat.ofHom (algebraMap k k')))).appTop))
+      (Spec.map (((E.baseChange
+          (Spec.map (CommRingCat.ofHom (algebraMap k k')))).torsionπ N).appTop) ≫
+        Spec.map (Scheme.ΓSpecIso (CommRingCat.of k')).inv)
+      (Spec.map (CommRingCat.ofHom (algebraMap k Γ(E.torsion N, ⊤))))
+      (Spec.map (CommRingCat.ofHom (algebraMap k k'))) := by
+  refine (isPullback_specMap_torsion_baseChange_algebraMap k E N k').of_iso
+    (Iso.refl _) (Iso.refl _)
+    (asIso (Spec.map (Scheme.ΓSpecIso (CommRingCat.of k')).inv))
+    (asIso (Spec.map (Scheme.ΓSpecIso (CommRingCat.of k)).inv)) ?_ ?_ ?_ ?_
+  · simp
+  · simp
+  · simp only [asIso_hom, Iso.refl_hom, Category.id_comp]
+    exact (specMap_ofHom_algebraMap_torsionCarrier k E N).symm
+  · simp only [asIso_hom]
+    rw [← Spec.map_comp, ← Spec.map_comp]
+    congr 1
+    exact (Scheme.ΓSpecIso_inv_naturality (CommRingCat.ofHom (algebraMap k k'))).symm
+
 end Carrier
 
 end ModularCurves
