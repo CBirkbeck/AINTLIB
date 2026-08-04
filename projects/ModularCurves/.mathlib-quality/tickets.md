@@ -37387,3 +37387,36 @@ is **invertible**. Three routes, all measured against what exists:
 already needed, keeps everything on the scheme side (no geometric points), and delivers the
 *linearity* of the coordinate map as a reusable by-product — which is also what any future
 `E[N] ≅ (ℤ/N)²_S` group-scheme statement will want.
+
+## [route β] THE INVERTIBILITY OBSTACLE DOES NOT EXIST (2026-08-04) — axiom-verified
+
+The three routes above were all answers to the wrong question. `constGL g` and `glSmul g L` need
+`g ∈ GL₂(ℤ/N)`, but **nothing in the determinant law does**:
+
+* WP-A4 (`constSchemeMap_gl2Both_comp_detConstMor_rootSplitting`) is stated for a **bare matrix**;
+* the two `fullLevelSqIso`s that get inverted in the `hom`-direction argument are isomorphisms
+  whatever `g` is;
+* the only thing needed of `g` is the factorisation `fullLevelHom L' = constSchemeMap (mulVec g) ≫
+  fullLevelHom L`, which is `constGL_hom_fullLevelHom`'s section computation with invertibility
+  dropped.
+
+Landed (`GroupScheme/LevelCoord.lean` + `WeilPairing/FullLevelPairing.lean`):
+
+* `basis_eq_of_levelBasisPt_eq_sigmaι`, `basis_fst_…`, `basis_snd_…` — the section identities
+  `P' = c₀(0)·P + c₀(1)·Q`, `Q' = c₁(0)·P + c₁(1)·Q` from the transition columns;
+* **`fullLevelHom_eq_constSchemeMap_comp`** — the linearity for a bare matrix (`val_smul_add`,
+  `val_smul_mul`, `module`);
+* **`fullLevelHom_eq_of_levelCoord`** — the same conclusion straight from the transition columns;
+* `fullLevelSqIso_inv_eq_of_fullLevelHom` / `_hom_eq_of_…` — the square versions;
+* **`fullLevelPairing_eq_of_fullLevelHom`** — ***the determinant law with no `GL₂` anywhere***:
+  `e_{L', ζ^det g} = e_{L, ζ}`.
+
+**So the invertibility ticket is closed as unnecessary**, and route β's remaining work is exactly two
+items: (i) assemble `hdet` piecewise from `levelTransitionCols` + the above (bookkeeping with
+`locConstPiece`/`mem_locConstPiece`, no new mathematics), and (ii) **WP-D3d**: the root `ζ` with
+`g^*ζ = ζ^{det g}`, whose arithmetic core is `fieldWeilPairing_det_of_galois` and whose descent from
+the generic fibre is `WeilPairing/UniversalRootBase.lean`.
+
+*Note on elaboration*: `fullLevelHom_eq_of_levelCoord` first hit a `whnf` timeout; the cause was the
+`_` placeholders for the column vectors, and writing `(fun i => g i 0)` / `(fun i => g i 1)`
+explicitly fixed it — **no heartbeat option was added**.

@@ -1,1 +1,1 @@
-FOCUS: route beta transition COMPLETE (eq_glSmul_of_levelCoord: constant transition columns => L = g dot L). NEXT: invertibility of the transition matrix (pointwise from fullLevelFibreMap_bijective), then hdet piecewise via fullLevelPairing_glSmul; then WP-D3d (zeta with the det law).
+FOCUS: route beta — INVERTIBILITY OBSTACLE REMOVED. fullLevelPairing_eq_of_fullLevelHom gives the det law for a BARE matrix. Remaining: assemble hdet piecewise from levelTransitionCols + this, then WP-D3d (zeta with g^*zeta = zeta^{det g}).

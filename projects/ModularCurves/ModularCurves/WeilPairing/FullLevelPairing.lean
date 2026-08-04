@@ -7,6 +7,7 @@ import ModularCurves.WeilPairing.DetCocycle
 import ModularCurves.WeilPairing.TorsionSqBaseChange
 import ModularCurves.GroupScheme.ConstSchemeSquare
 import ModularCurves.GroupScheme.GLSchemeAction
+import ModularCurves.GroupScheme.LevelCoord
 
 /-!
 # The Weil pairing over a base with a full level structure (route β, step 1)
@@ -196,6 +197,109 @@ theorem nonempty_weilPairing_of_fullLevel (hinv : NIsInvertible S N) (L : E.Full
       e ≫ muNπ S N = E.torsionSqπ N :=
   nonempty_weilPairing_of_root_of_trivialised E N ζ (E.fullLevelSqIso hinv L)
     (E.fullLevelSqIso_hom_π hinv L)
+
+/-! ### Linearity of the trivialisation, for a **bare** matrix — invertibility is not needed
+
+`constGL g` and `glSmul g L` require `g ∈ GL₂(ℤ/N)`, which made the transition look as though it had
+to be proved invertible before the determinant law could be applied. It does not: the only thing the
+law needs is `fullLevelHom L' = constSchemeMap (mulVec g) ≫ fullLevelHom L`, which holds for an
+arbitrary matrix; WP-A4 (`constSchemeMap_gl2Both_comp_detConstMor_rootSplitting`) is likewise stated
+for a bare matrix; and the two `fullLevelSqIso`s that get inverted are isomorphisms regardless. -/
+
+/-- **(the linearity)** If the two basis points of `L'` are the `L`-basis combinations given by the
+columns of an **arbitrary** matrix `g`, the whole trivialisation factors: `fullLevelHom L'` is
+`mulVec g` followed by `fullLevelHom L`.
+
+This is `constGL_hom_fullLevelHom`'s section computation (`val_smul_add`, `val_smul_mul`, `module`)
+with the invertibility of `g` dropped. -/
+theorem fullLevelHom_eq_constSchemeMap_comp (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (h0 : L'.1.1 = ((g 0 0).val : ℤ) • L.1.1 + ((g 1 0).val : ℤ) • L.1.2)
+    (h1 : L'.1.2 = ((g 0 1).val : ℤ) • L.1.1 + ((g 1 1).val : ℤ) • L.1.2) :
+    E.fullLevelHom L' = constSchemeMap (S := S) (fun v => g.mulVec v) ≫ E.fullLevelHom L := by
+  refine Sigma.hom_ext _ _ fun v => ?_
+  rw [← Category.assoc, constSchemeMap_ι, fullLevelHom, fullLevelHom, Sigma.ι_desc, Sigma.ι_desc]
+  have hP : (N : ℤ) • L.1.1 = 0 := L.2.1.1
+  have hQ : (N : ℤ) • L.1.2 = 0 := L.2.1.2
+  have harith : ((v 0).val : ℤ) • L'.1.1 + ((v 1).val : ℤ) • L'.1.2 =
+      (((g.mulVec v) 0).val : ℤ) • L.1.1 + (((g.mulVec v) 1).val : ℤ) • L.1.2 := by
+    rw [h0, h1]
+    simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_two]
+    rw [val_smul_add E L.1.1 hP, val_smul_add E L.1.2 hQ,
+      val_smul_mul E L.1.1 hP, val_smul_mul E L.1.1 hP,
+      val_smul_mul E L.1.2 hQ, val_smul_mul E L.1.2 hQ]
+    module
+  simp only [harith]
+
+/-- **(route β, THE TRANSITION, invertibility-free form)** If the transition columns of `L'` against
+`L` are the constant columns of an arbitrary matrix `g`, the trivialisations factor through
+`mulVec g`. This is the form the pairing's determinant law consumes — no `GL₂` needed. -/
+theorem fullLevelHom_eq_of_levelCoord (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (hc : ∀ j : Fin 2,
+      E.levelCoord hinv L (E.levelBasisPt L' j) (E.levelBasisPt_torsionπ L' j) =
+        LocallyConstant.const S (fun i => g i j)) :
+    E.fullLevelHom L' = constSchemeMap (S := S) (fun v => g.mulVec v) ≫ E.fullLevelHom L := by
+  refine E.fullLevelHom_eq_constSchemeMap_comp L L' g ?_ ?_
+  · exact E.basis_fst_eq_of_levelBasisPt_eq_sigmaι L L' (fun i => g i 0)
+      (E.levelBasisPt_eq_sigmaι hinv L L' 0 (fun i => g i 0) (hc 0))
+  · exact E.basis_snd_eq_of_levelBasisPt_eq_sigmaι L L' (fun i => g i 1)
+      (E.levelBasisPt_eq_sigmaι hinv L L' 1 (fun i => g i 1) (hc 1))
+
+/-- **(the square version, bare matrix)** The factorisation of the trivialisation carries over to the
+square: `fullLevelSqIso L'` factors through the diagonal action `gl2Both N g`. -/
+theorem fullLevelSqIso_inv_eq_of_fullLevelHom (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (h : E.fullLevelHom L' = constSchemeMap (S := S) (fun v => g.mulVec v) ≫ E.fullLevelHom L) :
+    (E.fullLevelSqIso hinv L').inv =
+      constSchemeMap (S := S) (gl2Both N g) ≫ (E.fullLevelSqIso hinv L).inv := by
+  refine Sigma.hom_ext _ _ fun vw => ?_
+  obtain ⟨v, w⟩ := vw
+  rw [← Category.assoc, constSchemeMap_ι]
+  have hgl : gl2Both N g (v, w) = (g.mulVec v, g.mulVec w) := rfl
+  rw [hgl, E.fullLevelSqIso_inv_ι hinv L' v w,
+    E.fullLevelSqIso_inv_ι hinv L (g.mulVec v) (g.mulVec w)]
+  have key : ∀ u : Fin 2 → ZMod N,
+      Sigma.ι (fun _ : Fin 2 → ZMod N => S) u ≫ (E.fullLevelIso hinv L').hom =
+        Sigma.ι (fun _ : Fin 2 → ZMod N => S) (g.mulVec u) ≫ (E.fullLevelIso hinv L).hom := by
+    intro u
+    show Sigma.ι (fun _ : Fin 2 → ZMod N => S) u ≫ E.fullLevelHom L' =
+      Sigma.ι (fun _ : Fin 2 → ZMod N => S) (g.mulVec u) ≫ E.fullLevelHom L
+    rw [h, ← Category.assoc, constSchemeMap_ι]
+  refine pullback.hom_ext ?_ ?_ <;>
+    simp only [pullback.lift_fst, pullback.lift_snd, key]
+
+/-- …hence, at the level of the `hom`s, the direction the pairing consumes. -/
+theorem fullLevelSqIso_hom_eq_of_fullLevelHom (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (h : E.fullLevelHom L' = constSchemeMap (S := S) (fun v => g.mulVec v) ≫ E.fullLevelHom L) :
+    (E.fullLevelSqIso hinv L).hom =
+      (E.fullLevelSqIso hinv L').hom ≫ constSchemeMap (S := S) (gl2Both N g) := by
+  have hinvEq := E.fullLevelSqIso_inv_eq_of_fullLevelHom hinv L L' g h
+  calc (E.fullLevelSqIso hinv L).hom
+      = (E.fullLevelSqIso hinv L').hom ≫
+          (E.fullLevelSqIso hinv L').inv ≫ (E.fullLevelSqIso hinv L).hom := by
+        rw [← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+    _ = _ := by simp [hinvEq]
+
+/-- **(route β, THE DETERMINANT LAW, invertibility-free)** Two level structures whose transition is
+the *arbitrary* matrix `g` give the same pairing once the root is twisted by `det g`:
+
+`e_{L', ζ ^ det g} = e_{L, ζ}`.
+
+No `GL₂`, no `glSmul`: `fullLevelSqIso_hom_eq_of_fullLevelHom` moves the transition onto the constant
+scheme and WP-A4 converts it into the `det g`-th power of the root. -/
+theorem fullLevelPairing_eq_of_fullLevelHom (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (h : E.fullLevelHom L' = constSchemeMap (S := S) (fun v => g.mulVec v) ≫ E.fullLevelHom L)
+    (ζ : { a : Γ(S, (⊤ : S.Opens)) // a ^ N = 1 }) :
+    E.fullLevelPairing hinv L'
+        ⟨(ζ : Γ(S, (⊤ : S.Opens))) ^ g.det.val, by
+          rw [← pow_mul, mul_comm, pow_mul, ζ.2, one_pow]⟩ =
+      E.fullLevelPairing hinv L ζ := by
+  rw [fullLevelPairing, fullLevelPairing,
+    E.fullLevelSqIso_hom_eq_of_fullLevelHom hinv L L' g h, Category.assoc,
+    constSchemeMap_gl2Both_comp_detConstMor_rootSplitting]
 
 /-! ### The pairing on a trivialising cover, and the descent
 

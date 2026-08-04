@@ -232,6 +232,48 @@ theorem eq_glSmul_of_levelCoord (hinv : NIsInvertible S N) (L L' : E.FullLevelPt
   FullLevelPt.ext_of_levelBasisPt E L' (E.glSmul g L) fun j => by
     rw [E.levelBasisPt_eq_sigmaι hinv L L' j _ (hc j), E.levelBasisPt_glSmul g L j]
 
+/-! ### The section identities behind the transition
+
+`constSchemeMap` lives in `WeilPairing/CharZeroDescent.lean`, so the *trivialisation-level* linearity
+(`fullLevelHom_eq_constSchemeMap_comp`) is proved in `WeilPairing/FullLevelPairing.lean`; what belongs
+here are the **section identities** it consumes. -/
+
+/-- The section identity behind `fullLevelHom_eq_constSchemeMap_comp`'s hypotheses: if the `j`-th
+basis point of `L'` is the `L`-combination labelled `c`, then the corresponding basis *section* of
+`L'` is that combination. -/
+theorem basis_eq_of_levelBasisPt_eq_sigmaι (L L' : E.FullLevelPt N) (j : Fin 2)
+    (c : Fin 2 → ZMod N)
+    (h : E.levelBasisPt L' j =
+      Sigma.ι (fun _ : Fin 2 → ZMod N => S) c ≫ E.fullLevelHom L) :
+    (((Pi.single j 1 : Fin 2 → ZMod N) 0).val : ℤ) • L'.1.1 +
+        (((Pi.single j 1 : Fin 2 → ZMod N) 1).val : ℤ) • L'.1.2 =
+      (((c 0).val : ℤ) • L.1.1 + ((c 1).val : ℤ) • L.1.2) := by
+  have h' := congrArg (fun m => m ≫ E.torsionι N) h
+  simp only [levelBasisPt, fullLevelHom, Category.assoc, Sigma.ι_desc,
+    E.pointToTorsion_torsionι] at h'
+  exact Subtype.ext h'
+
+/-- …read at `j = 0`: the first basis section of `L'` is the combination labelled by the first
+column. -/
+theorem basis_fst_eq_of_levelBasisPt_eq_sigmaι (L L' : E.FullLevelPt N) (c : Fin 2 → ZMod N)
+    (h : E.levelBasisPt L' 0 =
+      Sigma.ι (fun _ : Fin 2 → ZMod N => S) c ≫ E.fullLevelHom L) :
+    L'.1.1 = ((c 0).val : ℤ) • L.1.1 + ((c 1).val : ℤ) • L.1.2 := by
+  have e00 : (Pi.single (0 : Fin 2) (1 : ZMod N) : Fin 2 → ZMod N) 0 = 1 := by simp
+  have e01 : (Pi.single (0 : Fin 2) (1 : ZMod N) : Fin 2 → ZMod N) 1 = 0 := by simp
+  have h0 := E.basis_eq_of_levelBasisPt_eq_sigmaι L L' 0 c h
+  rwa [e00, e01, E.one_val_zsmul L'.2.1.1, E.zero_val_zsmul, add_zero] at h0
+
+/-- …and at `j = 1`. -/
+theorem basis_snd_eq_of_levelBasisPt_eq_sigmaι (L L' : E.FullLevelPt N) (c : Fin 2 → ZMod N)
+    (h : E.levelBasisPt L' 1 =
+      Sigma.ι (fun _ : Fin 2 → ZMod N => S) c ≫ E.fullLevelHom L) :
+    L'.1.2 = ((c 0).val : ℤ) • L.1.1 + ((c 1).val : ℤ) • L.1.2 := by
+  have e10 : (Pi.single (1 : Fin 2) (1 : ZMod N) : Fin 2 → ZMod N) 0 = 0 := by simp
+  have e11 : (Pi.single (1 : Fin 2) (1 : ZMod N) : Fin 2 → ZMod N) 1 = 1 := by simp
+  have h1 := E.basis_eq_of_levelBasisPt_eq_sigmaι L L' 1 c h
+  rwa [e10, e11, E.one_val_zsmul L'.2.1.2, E.zero_val_zsmul, zero_add] at h1
+
 end EllipticCurve
 
 end ModularCurves
