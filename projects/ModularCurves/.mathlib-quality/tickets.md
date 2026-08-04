@@ -37870,3 +37870,24 @@ For (i) the remaining lemma is the square base-change of `coverTriv`, whose targ
 written into `WeilPairing/FullLevelPairing.lean` immediately above the `coverTrivReading` section.
 
 Root green at **9731 jobs**.
+
+**Correction to the entry immediately above.** `coverPairing_glSmul` compares the pairing for *two
+level structures on the same cover*; the descent's cocycle compares *one* pairing precomposed with the
+two kernel-pair projections. Those connect only after base change to the kernel pair, so
+`coverPairing_glSmul` is the **cover-level** form of the determinant law, not literally the cocycle's
+consumer — calling it "(ii)'s consumer" overstated it.
+
+The accurate statement of what remains, via the *proved* reduction
+`comp_localDetPairing_eq_of_pieces` + `comp_rootPower_muNMapAlong_eq`: `hdet` is exactly the value
+equation in `Γ(piece, ⊤)`
+
+  `Γ(α)(ζ) ^ (det v).val = Γ(β)(ζ) ^ (det w).val`,   `α = a ≫ pullback.snd`, `β = b ≫ pullback.snd`,
+
+and it splits into
+
+  **(a)** `det w = det g · det v` — the reading relation, needing the square base-change of
+  `coverTriv` (target shape in `WeilPairing/FullLevelPairing.lean`) to identify the transition `g`;
+  **(b)** `Γ(α)(ζ) = Γ(β)(ζ) ^ (det g).val` — WP-D3d, the root's determinant law in pulled-back form.
+
+`coverTriv_glSmul_hom` and `coverPairing_glSmul` are what (a) will be *proved against* once the
+transition is identified, and `fieldWeilPairing_det_of_galois` is (b)'s arithmetic core.
