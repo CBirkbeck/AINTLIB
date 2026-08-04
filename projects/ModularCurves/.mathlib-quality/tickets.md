@@ -38434,3 +38434,32 @@ discharged immediately.
 *step's own name-shape* in `ForMathlib/`.
 
 Root green at **9733 jobs**; census unchanged (7, all the Weil register).
+
+### [WP-D3d] the redirect, with its two residuals named (2026-08-04)
+
+Reading `exists_descended_model_of_curveActionFamily`'s actual signature sharpens the redirect. Its
+hypotheses are `[Fintype G] [DecidableEq G] [Nontrivial R]`, `[IsLocalRing (FixedPoints.subalgebra ℤ R G)]`,
+`hfree : IsFreeAlgebraAction G ℤ R`, and the geometric action data `act` with multiplicativity,
+cartesian-ness and zero-compatibility. Its conclusion is
+
+  `∃ (E : VariableChange R) (W₁ : WeierstrassCurve (FixedPoints.subring R G)),
+     W₁.map (algebraMap _ R) = E⁻¹ • W₀`.
+
+Two residuals, both real and both small-to-medium:
+
+1. **the `VariableChange` twist.** The descended model base-changes to `E⁻¹ • W₀`, *not* to `W₀`.
+   `fieldWeilPairing_det_of_galois` wants `W.baseChange K = E_K` on the nose. A `VariableChange` is an
+   isomorphism of Weierstrass curves, so what is needed is **invariance of `fieldWeilPairing` under a
+   `VariableChange`** — grep for it before assuming it is missing; if absent it is a genuine (if routine)
+   lemma, since the pairing is defined from divisors of the coordinate ring and a variable change is a
+   ring isomorphism over the base.
+2. **`IsFreeAlgebraAction G ℤ K` for `G = ⟨τ⟩`.** For a field `K` with a finite automorphism group this
+   is the standard freeness behind Artin's theorem; check whether
+   `ForMathlib/WeierstrassInvariant.lean` already derives it from a Galois hypothesis, and if not what its
+   definition unfolds to. The `[IsLocalRing (FixedPoints.subalgebra ℤ K G)]` hypothesis, by contrast, is
+   immediate — the fixed points of a field form a field.
+
+So the redirect stands — the descent itself is **not** to be rebuilt — but it is not free either. Recording
+the residuals so the next session neither re-derives the descent nor assumes the twist away.
+
+Root green at **9733 jobs**; census unchanged (7, all the Weil register).
