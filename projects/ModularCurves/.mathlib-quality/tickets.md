@@ -37547,3 +37547,31 @@ about a *named* pairing rather than pointwise range-chasing. `comp_localDetPairi
 Estimate for step 1: **80–120 lines**, of the same flavour as `TorsionSqBaseChange.lean`
 (`fullLevelHom` and `fullLevelIso` base-change along `σ : T' ⟶ T` via `FullLevelPt.pullAlong`, which
 already exists at `Moduli/GammaH.lean:374`).
+
+### [route β] item (A) step 1's core is DONE (2026-08-04) — axiom-verified
+
+**`pointToTorsion_asSection_torsionBaseChangeHom`** (`WeilPairing/TorsionSqBaseChange.lean`):
+`torsionBaseChangeHom` carries the torsion point of the base-changed curve cut out by
+`Point.asSection σ x` to the torsion point of `E` cut out by `x`. `pullback.hom_ext` on the two legs
+of `E.torsion N = pullback (E.mulByHom N) E.zero`.
+
+Two elaboration facts worth keeping (both cost iterations):
+
+* `pullback.lift_fst` does **not** close the `torsionι` leg — `Point.asSection`'s lift and
+  `torsionBaseChangeHom_torsionι`'s `pullback.fst E.π σ` arrive by different instance paths. The
+  tree's own **`Point.asSection_val_fst`** / `_val_snd` (`EllipticCurve/GroupLaw.lean:255`) are the
+  right tools; always look for a project-level computation rule before reaching for the mathlib one.
+* `← Category.assoc` fails on these goals with a *"target expression is not type-correct under
+  `implicit` transparency"* note. **`(Category.assoc _ _ _).symm.trans`** is the working substitute
+  (and `reassoc_of%` did not help).
+
+**Next on the critical path** (in order):
+1. `fullLevelHom_pullAlong` — `constSchemeMapAlong σ V ≫ E.fullLevelHom L =
+   (E.baseChange σ).fullLevelHom (L.pullAlong σ) ≫ E.torsionBaseChangeHom N σ`, by `Sigma.hom_ext`
+   plus `comp_pointToTorsion` and the lemma just landed. `Point.asSection_zsmul`
+   (`GroupLaw.lean:275`) is the additivity input.
+2. the base-change compatibility of `fullLevelPairing` (its square/`detConstMor`/`rootSplitting`
+   halves are formal once (1) is in).
+3. decompose by `levelTransitionCols` and apply `fullLevelPairing_eq_of_fullLevelHom` piecewise;
+   glue by `locConst_hom_ext`.
+4. **WP-D3d** — the root `ζ` with `g^*ζ = ζ^{det g}`.

@@ -1,1 +1,1 @@
-FOCUS: route beta item (B) COMPLETE (comp_rootPower_muNMapAlong_eq). REMAINING: item (A) the reading comparison (vw.2 = gl2Both g vw.1 on each piece), then WP-D3d (zeta with g^*zeta = zeta^{det g}).
+FOCUS: route beta item (A) step 1 — pointToTorsion_asSection_torsionBaseChangeHom DONE. NEXT: fullLevelHom_pullAlong (constSchemeMapAlong sigma V then fullLevelHom L = fullLevelHom (L.pullAlong sigma) then torsionBaseChangeHom), then the base-change compatibility of fullLevelPairing, then decompose by levelTransitionCols.

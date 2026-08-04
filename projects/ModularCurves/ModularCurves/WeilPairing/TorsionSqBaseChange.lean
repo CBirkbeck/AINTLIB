@@ -105,6 +105,44 @@ noncomputable def torsionSqBaseChangeIso :
       pullback ((E.baseChange p).torsionπ N) ((E.baseChange p).torsionπ N) :=
   (E.isPullback_torsionSq_baseChange N p).isoPullback.symm
 
+/-! ### Torsion points and base change (route β, item (A) step 1)
+
+The revised item (A) needs the base-change compatibility of `fullLevelPairing`, whose heart is this:
+the torsion point of the base-changed curve determined by a *pulled-back* section maps, under
+`torsionBaseChangeHom`, to the torsion point of the original curve determined by that section. -/
+
+/-- **(route β, item (A) step 1, the core)** `torsionBaseChangeHom` carries the torsion point of the
+base-changed curve cut out by `Point.asSection σ x` to the torsion point of `E` cut out by `x`.
+
+`pullback.hom_ext` splits this into the two legs of `E.torsion N = pullback (E.mulByHom N) E.zero`:
+the `torsionι` leg is `torsionBaseChangeHom_torsionι` then `pointToTorsion_torsionι` then
+**`Point.asSection_val_fst`** (the tree's own computation rule — `pullback.lift_fst` does *not* match
+here, because `Point.asSection`'s lift and `torsionBaseChangeHom_torsionι`'s `pullback.fst E.π σ`
+arrive by different instance paths), and the `torsionπ` leg is the same with `_torsionπ`.
+
+Note also that `← Category.assoc` fails on these goals with a *type-correctness under implicit
+transparency* note; `(Category.assoc _ _ _).symm.trans` is the working substitute. -/
+theorem pointToTorsion_asSection_torsionBaseChangeHom {T' : Scheme.{u}} (σ : T' ⟶ S)
+    (x : E.Point σ) (hx : (x : T' ⟶ E.E) ≫ E.mulByHom N = σ ≫ E.zero)
+    (hy : ((EllipticCurve.Point.asSection E σ x : (E.baseChange σ).Point (𝟙 T')) :
+        T' ⟶ (E.baseChange σ).E) ≫ (E.baseChange σ).mulByHom N =
+      (𝟙 T') ≫ (E.baseChange σ).zero) :
+    (E.baseChange σ).pointToTorsion (EllipticCurve.Point.asSection E σ x) hy ≫
+        E.torsionBaseChangeHom N σ =
+      E.pointToTorsion x hx := by
+  refine pullback.hom_ext ?_ ?_
+  · show _ ≫ E.torsionι N = _ ≫ E.torsionι N
+    simp only [Category.assoc, E.torsionBaseChangeHom_torsionι N σ]
+    refine (Category.assoc _ _ _).symm.trans ?_
+    rw [(E.baseChange σ).pointToTorsion_torsionι (EllipticCurve.Point.asSection E σ x) hy,
+      EllipticCurve.Point.asSection_val_fst, E.pointToTorsion_torsionι x hx]
+  · show _ ≫ E.torsionπ N = _ ≫ E.torsionπ N
+    simp only [Category.assoc, E.torsionBaseChangeHom_torsionπ N σ]
+    refine (Category.assoc _ _ _).symm.trans ?_
+    rw [(E.baseChange σ).pointToTorsion_torsionπ (EllipticCurve.Point.asSection E σ x) hy,
+      Category.id_comp]
+    exact (E.pointToTorsion_torsionπ x hx).symm
+
 end EllipticCurve
 
 end ModularCurves
