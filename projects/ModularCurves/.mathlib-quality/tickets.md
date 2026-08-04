@@ -37469,3 +37469,25 @@ points, i.e. `muNPointsEquiv S N (g ≫ p) ⟨h ≫ muNMapAlong p N, _⟩ = muNP
 `constSchemePointsEquiv_mapAlong` (`GroupScheme/MuN.lean:580`) is the constant-scheme analogue and the
 model; `muNMapAlong_π` gives the compatibility the statement needs. Estimate **30–50 lines**, and it
 is the same lemma item (A) will want.
+
+### [route β] (B) — correction and partial landing (2026-08-04)
+
+**Correction to the previous entry**: the bridging lemma is *not* missing.
+**`muNPointsEquiv_mapAlong`** already exists at `GroupScheme/MuN.lean:735` ("the points dictionary is
+natural in the base: reading a point after the base-change comparison gives the same `Γ`-value"). So
+item (B) needs no new mathematics at all.
+
+Landed: `WeilPairing/RootPowerPoints.lean` (new) with **`muNPointsEquiv_rootPower`** — the value of
+`rootPower N ζ k` is `ζ ^ k.val`. Proved by exhibiting `⟨rootPower N ζ k, rootPower_π …⟩` as
+`(muNPointsEquiv …).symm ⟨ζ ^ k.val, _⟩` via `Subtype.ext rfl`, then `Equiv.apply_symm_apply`; the two
+**transparency** options (`backward.defeqAttrib.useBackward`, `backward.isDefEq.respectTransparency
+false`) are needed, as they already are on `rootPower` itself. *No heartbeat option.*
+
+Not landed: `comp_rootPower_muNMapAlong_eq` (statement and full route recorded in the file). The
+obstruction is elaborative only: `muNPointsEquiv_mapAlong` bakes a *specific* section-condition proof
+term into its statement, so the value computation must be threaded with `Eq.trans`/`exact` — proof
+terms are defeq but not syntactically equal, and the `rw`-based script hits `isDefEq` timeouts on
+`muNPointsEquiv`. Next attempt: state the value lemma in exactly the shape
+`muNPointsEquiv_mapAlong` produces, so that no reassociation rewrite is needed.
+
+Root green at **9729 jobs**; sorry-census unchanged (`yRho_representable`: 7, all the Weil register).

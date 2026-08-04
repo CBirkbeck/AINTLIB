@@ -1,1 +1,1 @@
-FOCUS: route beta — INVERTIBILITY OBSTACLE REMOVED. fullLevelPairing_eq_of_fullLevelHom gives the det law for a BARE matrix. Remaining: assemble hdet piecewise from levelTransitionCols + this, then WP-D3d (zeta with g^*zeta = zeta^{det g}).
+FOCUS: route beta item (B) — muNPointsEquiv_rootPower landed; comp_rootPower_muNMapAlong_eq NOT landed (isDefEq timeouts from rw on muNPointsEquiv; next attempt must state the value lemma in muNPointsEquiv_mapAlong shape and thread by Eq.trans, not rw). Then item (A) the reading comparison, then WP-D3d.

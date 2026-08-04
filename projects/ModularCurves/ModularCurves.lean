@@ -227,6 +227,7 @@ import ModularCurves.WeilPairing.FieldPairingUnique
 import ModularCurves.WeilPairing.FullLevelPairing
 import ModularCurves.WeilPairing.FieldPairingDet
 import ModularCurves.WeilPairing.FullLevelCover
+import ModularCurves.WeilPairing.RootPowerPoints
 import ModularCurves.WeilPairing.RootSplitting
 import ModularCurves.WeilPairing.UniversalRootBase
 import ModularCurves.WeilPairing.UniversalRootThree
