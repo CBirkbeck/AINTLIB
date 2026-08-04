@@ -36306,3 +36306,28 @@ torsion scheme, for which `torsion_baseChange_isPullback` is the input.
 
 Every piece is mathlib API; nothing here is a gap. Sizing: comparable to the two-step
 localisation identification in `Moduli/LevelThreeSmooth.lean` (~60 lines).
+
+### [WP-D3c-2a] the exact assembly, verified to exist
+
+```
+k' ⊗[k] AdjoinRoot f
+  ≅ k'[X] ⊗[k[X]] AdjoinRoot f          -- Algebra.TensorProduct.cancelBaseChange
+                                        --   (R := k, S := k[X], A := k'[X], B := AdjoinRoot f)
+                                        --   using k'[X] ≅ k' ⊗[k] k[X] (Polynomial.polyEquivTensor)
+  ≅ k'[X] ⧸ Ideal.map _ (span {f})      -- Algebra.TensorProduct.quotIdealMapEquivTensorQuot, symm
+  = AdjoinRoot (f.map (algebraMap k k')) -- Ideal.map_span + AdjoinRoot defn
+```
+and `((X : k[X])^N − 1).map (algebraMap k k') = (X : k'[X])^N − 1` by
+`Polynomial.map_sub / map_pow / map_X / map_one`.
+
+`Algebra.TensorProduct.cancelBaseChange` is confirmed present
+(`RingTheory/TensorProduct/Maps.lean`) with the shape above and its `_tmul` computation
+lemmas. The one instance to supply is `Algebra k[X] k'[X]`, from
+`(Polynomial.mapRingHom (algebraMap k k')).toAlgebra`, together with the
+`IsScalarTower` instances the cancellation needs.
+
+**This is the point to start the next session.** Nothing above it is open: the reduction of
+DS4's first two register entries to the root's determinant law is proved
+(`nonempty_weilPairing_of_root_of_det`), the base side of the root is complete, the field
+pairing is canonical (`fieldWeilPairingHom_unique`), and the transport is reduced to this one
+piece of mathlib-standard algebra plus the same treatment for `torsionPairAlgebra`.
