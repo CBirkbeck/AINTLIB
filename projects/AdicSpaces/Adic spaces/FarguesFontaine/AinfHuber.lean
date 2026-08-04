@@ -200,7 +200,7 @@ Source: standard for adic rings; matches the pair `Spa(A_inf, A_inf)` in
 theorem isAffinoidRing_Ainf : IsAffinoidRing (Ainf p F) := by
   refine ⟨?_, fun a _ => trivial, fun x _ => isPowerBounded_Ainf p F x⟩
   show IsOpen ((⊤ : Subring (Ainf p F)) : Set (Ainf p F))
-  simpa using isOpen_univ
+  simp
 
 /-- Elementary comparison: `(p,[ϖ])^(2n) ⊆ (p)^n ⊔ ([ϖ])^n`. Each monomial `p^a [ϖ]^b`
 with `a + b = 2n` has `a ≥ n` or `b ≥ n`. Together with the reverse inclusion

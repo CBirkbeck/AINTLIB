@@ -251,7 +251,8 @@ variable {A : Type v} [CommRing A] [TopologicalSpace A]
 completion model): let `A` be a Tate ring all of whose completion models are
 strongly noetherian — Definition 6.36(i) is a condition on `Â`
 ("`Â⟨X₁, …, Xₙ⟩` is noetherian for all `n`"); the formalization quantifies over
-the models (see `IsStronglyNoetherianTateRing` for the one-model form). Then `A` is sheafy in the ring-level sense
+the models (see `IsStronglyNoetherianTateRing` for the one-model
+  form). Then `A` is sheafy in the ring-level sense
 (`IsSheafyTateRing`): for every pair of definition and every ring of integral
 elements of the completion, the completed pair's genuine all-open structure
 presheaf is a sheaf of topological rings.

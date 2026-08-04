@@ -55,7 +55,8 @@ containment — a strictly provisional stand-in until the genuine `𝒱`-layer
 (canonical `Spa` objects of `𝒱`, restriction, Prop 8.6) exists. The public name
 `IsAdicMorphism` is reserved for the eventual predicate on morphisms of actual
 adic spaces and is deliberately **not** defined here. -/
-def PresentationIsAdicMorphism (X Y : AdicSpacePresentation.{u}) (f : C(X.carrier, Y.carrier)) : Prop :=
+def PresentationIsAdicMorphism (X Y : AdicSpacePresentation.{u}) (f : C(X.carrier,
+  Y.carrier)) : Prop :=
   ∀ (x : X.carrier),
     ∃ (NX : PresentationAffinoidNeighborhood X x)
       (NY : PresentationAffinoidNeighborhood Y (f x))

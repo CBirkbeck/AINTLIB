@@ -222,7 +222,7 @@ theorem coe_p_ne_zero : (p : Ainf p F) ≠ 0 := by
   intro h
   have h1 : ((p : Ainf p F)).coeff 1 = 1 := by
     have h2 := WittVector.teichmuller_mul_pow_coeff (p := p) (R := OF F) 1 1
-    simpa using h2
+    simp
   rw [h] at h1
   simp at h1
 

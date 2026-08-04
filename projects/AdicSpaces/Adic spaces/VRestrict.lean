@@ -229,8 +229,8 @@ noncomputable def VPreObj.ofIso {X : TopRingPresheafedSpace.{u}} {Y : VPreObj.{u
   val_supp := fun x => by
     have hY : IsLocalRing (ToType (Y.toPresheafedSpace.ringStalk
         (ConcreteCategory.hom e.hom.base x))) := Y.isLocalRing_stalk _
-    have hX : IsLocalRing (ToType (X.ringStalk x)) := by
-      exact (isoStalkRingEquiv e x).isLocalRing
+    have hX : IsLocalRing (ToType (X.ringStalk x)) :=
+      (isoStalkRingEquiv e x).isLocalRing
     rw [supp_comap]
     rw [show (Y.val (ConcreteCategory.hom e.hom.base x)).supp
         = @IsLocalRing.maximalIdeal _ _ hY from Y.val_supp _]

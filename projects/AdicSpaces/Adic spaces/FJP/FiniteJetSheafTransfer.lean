@@ -239,34 +239,44 @@ theorem pushedCompatB (d₁ d₂ : ↥C.covers) (D₃ : RationalLocData (JetB F)
       (presheafValueMapB d₂.1 (hC.piece d₂.2) (f d₂)) := by
   haveI : IsSheafy (JetB F) := isSheafy_JetB F
   set hIrat := interDatum_isRational (hC.piece d₁.2) (hC.piece d₂.2) with hIratdef
-  have hsub₁ : rationalOpen (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).T (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).s ⊆ rationalOpen d₁.1.T d₁.1.s := by
+  have hsub₁ : rationalOpen (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).T (interDatum
+    d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).s ⊆ rationalOpen d₁.1.T d₁.1.s := by
     rw [rationalOpen_interDatum]
     exact Set.inter_subset_left
-  have hsub₂ : rationalOpen (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).T (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).s ⊆ rationalOpen d₂.1.T d₂.1.s := by
+  have hsub₂ : rationalOpen (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).T (interDatum
+    d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).s ⊆ rationalOpen d₂.1.T d₂.1.s := by
     rw [rationalOpen_interDatum]
     exact Set.inter_subset_right
-  have hpush₁ : rationalOpen (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).T (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s ⊆
+  have hpush₁ : rationalOpen (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+    hIrat).T (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s ⊆
       rationalOpen (pushDatumB d₁.1 (hC.piece d₁.2)).T
         (pushDatumB d₁.1 (hC.piece d₁.2)).s := by
     rw [pushDatumB_interOpen]
     exact Set.inter_subset_left
-  have hpush₂ : rationalOpen (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).T (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s ⊆
+  have hpush₂ : rationalOpen (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+    hIrat).T (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s ⊆
       rationalOpen (pushDatumB d₂.1 (hC.piece d₂.2)).T
         (pushDatumB d₂.1 (hC.piece d₂.2)).s := by
     rw [pushDatumB_interOpen]
     exact Set.inter_subset_right
   have h₃I : rationalOpen D₃.T D₃.s ⊆
-      rationalOpen (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).T (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s := by
+      rationalOpen (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+        hIrat).T (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s := by
     rw [pushDatumB_interOpen]
     exact Set.subset_inter h₃₁ h₃₂
-  have hpushed := congrArg (presheafValueMapB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat) (hcompat d₁ d₂ (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hsub₁ hsub₂)
-  rw [presheafValueMapB_restriction d₁.1 (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) (hC.piece d₁.2) hIrat hsub₁ hpush₁ (f d₁),
-    presheafValueMapB_restriction d₂.1 (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) (hC.piece d₂.2) hIrat hsub₂ hpush₂ (f d₂)]
+  have hpushed := congrArg (presheafValueMapB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+    hIrat) (hcompat d₁ d₂ (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hsub₁ hsub₂)
+  rw [presheafValueMapB_restriction d₁.1 (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+    (hC.piece d₁.2) hIrat hsub₁ hpush₁ (f d₁),
+    presheafValueMapB_restriction d₂.1 (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece
+      d₂.2)) (hC.piece d₂.2) hIrat hsub₂ hpush₂ (f d₂)]
     at hpushed
   have hfac₁ := congrFun (restrictionMap_comp (pushDatumB d₁.1 (hC.piece d₁.2))
-    (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat) D₃ hpush₁ h₃I) (presheafValueMapB d₁.1 (hC.piece d₁.2) (f d₁))
+    (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+      hIrat) D₃ hpush₁ h₃I) (presheafValueMapB d₁.1 (hC.piece d₁.2) (f d₁))
   have hfac₂ := congrFun (restrictionMap_comp (pushDatumB d₂.1 (hC.piece d₂.2))
-    (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat) D₃ hpush₂ h₃I) (presheafValueMapB d₂.1 (hC.piece d₂.2) (f d₂))
+    (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+      hIrat) D₃ hpush₂ h₃I) (presheafValueMapB d₂.1 (hC.piece d₂.2) (f d₂))
   simp only [Function.comp_apply] at hfac₁ hfac₂
   rw [← hfac₁, ← hfac₂, hpushed]
 
@@ -285,34 +295,44 @@ theorem pushedCompatC (d₁ d₂ : ↥C.covers) (D₃ : RationalLocData (JetC F)
       (presheafValueMapC d₂.1 (hC.piece d₂.2) (f d₂)) := by
   haveI : IsSheafy (JetC F) := isSheafy_JetC F
   set hIrat := interDatum_isRational (hC.piece d₁.2) (hC.piece d₂.2) with hIratdef
-  have hsub₁ : rationalOpen (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).T (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).s ⊆ rationalOpen d₁.1.T d₁.1.s := by
+  have hsub₁ : rationalOpen (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).T (interDatum
+    d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).s ⊆ rationalOpen d₁.1.T d₁.1.s := by
     rw [rationalOpen_interDatum]
     exact Set.inter_subset_left
-  have hsub₂ : rationalOpen (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).T (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).s ⊆ rationalOpen d₂.1.T d₂.1.s := by
+  have hsub₂ : rationalOpen (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).T (interDatum
+    d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).s ⊆ rationalOpen d₂.1.T d₂.1.s := by
     rw [rationalOpen_interDatum]
     exact Set.inter_subset_right
-  have hpush₁ : rationalOpen (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).T (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s ⊆
+  have hpush₁ : rationalOpen (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+    hIrat).T (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s ⊆
       rationalOpen (pushDatumC d₁.1 (hC.piece d₁.2)).T
         (pushDatumC d₁.1 (hC.piece d₁.2)).s := by
     rw [pushDatumC_interOpen]
     exact Set.inter_subset_left
-  have hpush₂ : rationalOpen (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).T (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s ⊆
+  have hpush₂ : rationalOpen (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+    hIrat).T (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s ⊆
       rationalOpen (pushDatumC d₂.1 (hC.piece d₂.2)).T
         (pushDatumC d₂.1 (hC.piece d₂.2)).s := by
     rw [pushDatumC_interOpen]
     exact Set.inter_subset_right
   have h₃I : rationalOpen D₃.T D₃.s ⊆
-      rationalOpen (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).T (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s := by
+      rationalOpen (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+        hIrat).T (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat).s := by
     rw [pushDatumC_interOpen]
     exact Set.subset_inter h₃₁ h₃₂
-  have hpushed := congrArg (presheafValueMapC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat) (hcompat d₁ d₂ (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hsub₁ hsub₂)
-  rw [presheafValueMapC_restriction d₁.1 (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) (hC.piece d₁.2) hIrat hsub₁ hpush₁ (f d₁),
-    presheafValueMapC_restriction d₂.1 (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) (hC.piece d₂.2) hIrat hsub₂ hpush₂ (f d₂)]
+  have hpushed := congrArg (presheafValueMapC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+    hIrat) (hcompat d₁ d₂ (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hsub₁ hsub₂)
+  rw [presheafValueMapC_restriction d₁.1 (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+    (hC.piece d₁.2) hIrat hsub₁ hpush₁ (f d₁),
+    presheafValueMapC_restriction d₂.1 (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece
+      d₂.2)) (hC.piece d₂.2) hIrat hsub₂ hpush₂ (f d₂)]
     at hpushed
   have hfac₁ := congrFun (restrictionMap_comp (pushDatumC d₁.1 (hC.piece d₁.2))
-    (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat) D₃ hpush₁ h₃I) (presheafValueMapC d₁.1 (hC.piece d₁.2) (f d₁))
+    (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+      hIrat) D₃ hpush₁ h₃I) (presheafValueMapC d₁.1 (hC.piece d₁.2) (f d₁))
   have hfac₂ := congrFun (restrictionMap_comp (pushDatumC d₂.1 (hC.piece d₂.2))
-    (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)) hIrat) D₃ hpush₂ h₃I) (presheafValueMapC d₂.1 (hC.piece d₂.2) (f d₂))
+    (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
+      hIrat) D₃ hpush₂ h₃I) (presheafValueMapC d₂.1 (hC.piece d₂.2) (f d₂))
   simp only [Function.comp_apply] at hfac₁ hfac₂
   rw [← hfac₁, ← hfac₂, hpushed]
 

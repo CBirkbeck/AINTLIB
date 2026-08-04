@@ -2691,7 +2691,8 @@ theorem RationalCoveringData.noCommonZero_plusHalf_of_refines_span_top
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (_hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
-    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCoveringData A) (f₀ : A) (S : Finset A)
+    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCoveringData A) (f₀ :
+      A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤) :
     ∀ v ∈ rationalOpen (insert f₀ C.base.T) C.base.s,
       ∃ f ∈ S, ¬ v.vle f 0 := by
@@ -2709,7 +2710,8 @@ theorem RationalCoveringData.noCommonZero_minusHalf_of_refines_span_top
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (_hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
-    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCoveringData A) (f₀ : A) (S : Finset A)
+    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCoveringData A) (f₀ :
+      A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤) :
     ∀ v ∈ rationalOpen (laurentMinusDatum C.base f₀).T
                        (laurentMinusDatum C.base f₀).s,

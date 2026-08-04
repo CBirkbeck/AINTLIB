@@ -1653,7 +1653,8 @@ to `r`).
 
 Source: Stacks 0316 proof, "(details omitted)". -/
 theorem mvPowerSeriesEval_surjective [IsNoetherianRing R] (I : Ideal R)
-    {n : ℕ} (hn : 0 < n) (f : Fin n → R) (hf : ∀ i, f i ∈ I) (hspan : Ideal.span (Set.range f) = I) :
+    {n : ℕ} (hn : 0 < n) (f : Fin n → R) (hf : ∀ i, f i ∈ I) (hspan : Ideal.span (Set.range f) =
+      I) :
     Function.Surjective (mvPowerSeriesEval I hn f hf) := by
   intro r
   exact ⟨_mvPowerSeriesEval_surjective_limit I hn f hf hspan r,

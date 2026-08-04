@@ -70,14 +70,16 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A]
   [PlusSubring A] [IsRingOfIntegralElements (A⁺ : Subring A)]
 
 omit [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
-  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace
+    A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
 /-- `rationalOpen` is antitone in its numerator family. -/
 theorem rationalOpen_subset_of_numerator_subset {S₀ S : Finset A} (hSS : S₀ ⊆ S)
     (f : A) : rationalOpen S f ⊆ rationalOpen S₀ f :=
   fun _ ⟨hspa, hT, h0⟩ => ⟨hspa, fun t ht => hT t (hSS ht), h0⟩
 
 omit [T2Space A] [NonarchimedeanRing A]
-  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace
+    A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
 /-- The rational open of the generated standard piece is the base rational open
 intersected with the form-(a) piece `R(S/f)`. -/
 theorem rationalOpen_stdPiece_eq [DecidableEq A] (C : RationalCoveringData A)

@@ -1090,6 +1090,85 @@ theorem restrictionMap_eq_of_restrictionMap_eq [HasLocLiftPowerBounded A]
   rw [c1, ← c2, hz]
 
 
+omit [IsHuberRing A] in
+/-- Intersecting with a fixed `Q` preserves inclusion of rational opens. -/
+private theorem rationalOpen_interSamePair_subset (M P Q : RationalLocData A)
+    (hMP : rationalOpen M.T M.s ⊆ rationalOpen P.T P.s) (hQP : Q.P = P.P) (hQM : Q.P = M.P) :
+    rationalOpen (M.interSamePair Q hQM).T (M.interSamePair Q hQM).s
+      ⊆ rationalOpen (P.interSamePair Q hQP).T (P.interSamePair Q hQP).s := by
+  rw [RationalLocData.interSamePair_rationalOpen, RationalLocData.interSamePair_rationalOpen]
+  exact Set.inter_subset_inter_left _ hMP
+
+/-- The Čech cocycle condition for the per-piece glued sections `g` produced from `hV0`.
+
+Two pieces `P₁, P₂` of `Uf` agree on any common refinement `D₃`: they already agree on the
+canonical intersection `M = P₁ ∩ P₂` — checked there by `hV1`-separation, one `V`-piece `Q` at
+a time, where both sides restrict to `f` on `Pᵢ ∩ Q` by `hg'` and those agree by `hf` — and
+`D₃ ⊆ M`, so restricting further preserves the agreement. -/
+private theorem interProd_gluing_cocycle [HasLocLiftPowerBounded A]
+    (Uf V : RationalCoveringData A) (hbase : V.base = Uf.base)
+    (hUfP : ∀ P ∈ Uf.covers, P.P = Uf.base.P)
+    (hVP : ∀ Q ∈ V.covers, Q.P = Uf.base.P)
+    (hV1 : ∀ (P P' : RationalLocData A) (hP : P ∈ Uf.covers) (hP' : P' ∈ Uf.covers),
+      (V.restrictTo (P.interSamePair P' (by rw [hUfP P' hP', hUfP P hP]))
+        (by rw [hbase]
+            exact (RationalLocData.interSamePair_subset_left P P' _).trans
+              (Uf.hsubset P hP))
+        (by rw [hbase]; exact hUfP P hP)
+        (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).IsOXAcyclic)
+    (f : ∀ D : ↥(Uf.interProd V hbase hUfP hVP).covers, presheafValue D.1)
+    (hf : ∀ (D₁ D₂ : ↥(Uf.interProd V hbase hUfP hVP).covers) (D₃ : RationalLocData A)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+      restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂))
+    (g : ∀ P : ↥Uf.covers, presheafValue P.1)
+    (hg' : ∀ (P : ↥Uf.covers) (Q : ↥V.covers),
+      restrictionMap P.1 (P.1.interSamePair Q.1 ((hVP Q.1 Q.2).trans (hUfP P.1 P.2).symm))
+          (RationalLocData.interSamePair_subset_left _ _ _) (g P)
+        = f ⟨_, mem_covers_interProd Uf V hbase hUfP hVP P.2 Q.2⟩)
+    (P₁ P₂ : ↥Uf.covers) (D₃ : RationalLocData A)
+    (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen P₁.1.T P₁.1.s)
+    (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen P₂.1.T P₂.1.s) :
+    restrictionMap P₁.1 D₃ h₃₁ (g P₁) = restrictionMap P₂.1 D₃ h₃₂ (g P₂) := by
+  -- Agree on the canonical intersection `M = P₁ ∩ P₂` (via `hV1`), then restrict.
+  set M := P₁.1.interSamePair P₂.1
+    ((hUfP P₂.1 P₂.2).trans (hUfP P₁.1 P₁.2).symm) with hM
+  have hMP₁ : rationalOpen M.T M.s ⊆ rationalOpen P₁.1.T P₁.1.s :=
+    RationalLocData.interSamePair_subset_left _ _ _
+  have hMP₂ : rationalOpen M.T M.s ⊆ rationalOpen P₂.1.T P₂.1.s :=
+    RationalLocData.interSamePair_subset_right _ _ _
+  have hcanon : restrictionMap P₁.1 M hMP₁ (g P₁) =
+      restrictionMap P₂.1 M hMP₂ (g P₂) := by
+    rw [← sub_eq_zero]
+    refine (hV1 P₁.1 P₂.1 P₁.2 P₂.2).separation _ (fun E hE => ?_)
+    rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hE
+    obtain ⟨Q, -, hQeq⟩ := hE
+    have hQP₁ : Q.1.P = P₁.1.P := (hVP Q.1 Q.2).trans (hUfP P₁.1 P₁.2).symm
+    have hQP₂ : Q.1.P = P₂.1.P := (hVP Q.1 Q.2).trans (hUfP P₂.1 P₂.2).symm
+    have hEM : rationalOpen E.T E.s ⊆ rationalOpen M.T M.s := by
+      rw [← hQeq]; exact RationalLocData.interSamePair_subset_left _ _ _
+    have hEP₁Q : rationalOpen E.T E.s ⊆ rationalOpen (P₁.1.interSamePair Q.1 hQP₁).T
+        (P₁.1.interSamePair Q.1 hQP₁).s :=
+      hQeq ▸ rationalOpen_interSamePair_subset M P₁.1 Q.1 hMP₁ hQP₁ _
+    have hEP₂Q : rationalOpen E.T E.s ⊆ rationalOpen (P₂.1.interSamePair Q.1 hQP₂).T
+        (P₂.1.interSamePair Q.1 hQP₂).s :=
+      hQeq ▸ rationalOpen_interSamePair_subset M P₂.1 Q.1 hMP₂ hQP₂ _
+    have eL := restrictionMap_eq_of_restrictionMap_eq P₁.1 M E _ hMP₁ hEM
+      (RationalLocData.interSamePair_subset_left _ _ _) hEP₁Q _ _ (hg' P₁ Q)
+    have eR := restrictionMap_eq_of_restrictionMap_eq P₂.1 M E _ hMP₂ hEM
+      (RationalLocData.interSamePair_subset_left _ _ _) hEP₂Q _ _ (hg' P₂ Q)
+    change restrictionMap M E hEM
+      (restrictionMap P₁.1 M hMP₁ (g P₁) - restrictionMap P₂.1 M hMP₂ (g P₂)) = 0
+    rw [restrictionMap_sub, eL, eR]
+    exact sub_eq_zero_of_eq (hf ⟨_, mem_covers_interProd Uf V hbase hUfP hVP P₁.2 Q.2⟩
+      ⟨_, mem_covers_interProd Uf V hbase hUfP hVP P₂.2 Q.2⟩ E hEP₁Q hEP₂Q)
+  have hD₃M : rationalOpen D₃.T D₃.s ⊆ rationalOpen M.T M.s := by
+    rw [hM, RationalLocData.interSamePair_rationalOpen]
+    exact Set.subset_inter h₃₁ h₃₂
+  have c1 := restrictionMap_restrictionMap P₁.1 M D₃ hMP₁ hD₃M (g P₁)
+  have c2 := restrictionMap_restrictionMap P₂.1 M D₃ hMP₂ hD₃M (g P₂)
+  rw [← c1, hcanon, c2]
+
 /-- **Explicit Wedhorn A.3(3) in degree 0** for `RationalCoveringData`/`IsOXAcyclic`:
 the product cover `Uf × V` is `O_X`-acyclic given `Uf` is and `V` restricted to
 the `Uf`-pieces (`hV0`) and `Uf`-pairwise-intersections (`hV1`) is acyclic. This
@@ -1139,78 +1218,12 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
               P.1 P.2 _ _ _ E₁.1 E₁.2⟩
             ⟨E₂.1, RationalCoveringData.restrictTo_mem_interProd Uf V hbase hUfP hVP
               P.1 P.2 _ _ _ E₂.1 E₂.2⟩ D₃ h₃₁ h₃₂)
-    have hgcoc : ∀ (P₁ P₂ : ↥Uf.covers) (D₃ : RationalLocData A)
-        (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen P₁.1.T P₁.1.s)
-        (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen P₂.1.T P₂.1.s),
-        restrictionMap P₁.1 D₃ h₃₁ (g P₁) = restrictionMap P₂.1 D₃ h₃₂ (g P₂) := by
-      intro P₁ P₂ D₃ h₃₁ h₃₂
-      -- Agree on the canonical intersection `M = P₁ ∩ P₂` (via `hV1`), then restrict.
-      set M := P₁.1.interSamePair P₂.1
-        ((hUfP P₂.1 P₂.2).trans (hUfP P₁.1 P₁.2).symm) with hM
-      have hMP₁ : rationalOpen M.T M.s ⊆ rationalOpen P₁.1.T P₁.1.s :=
-        RationalLocData.interSamePair_subset_left _ _ _
-      have hMP₂ : rationalOpen M.T M.s ⊆ rationalOpen P₂.1.T P₂.1.s :=
-        RationalLocData.interSamePair_subset_right _ _ _
-      have hcanon : restrictionMap P₁.1 M hMP₁ (g P₁) =
-          restrictionMap P₂.1 M hMP₂ (g P₂) := by
-        rw [← sub_eq_zero]
-        refine (hV1 P₁.1 P₂.1 P₁.2 P₂.2).separation _ (fun E hE => ?_)
-        rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hE
-        obtain ⟨Q, -, hQeq⟩ := hE
-        have hQP₁ : Q.1.P = P₁.1.P := (hVP Q.1 Q.2).trans (hUfP P₁.1 P₁.2).symm
-        have hQP₂ : Q.1.P = P₂.1.P := (hVP Q.1 Q.2).trans (hUfP P₂.1 P₂.2).symm
-        have hEP₁Q : rationalOpen E.T E.s ⊆
-            rationalOpen (P₁.1.interSamePair Q.1 hQP₁).T
-              (P₁.1.interSamePair Q.1 hQP₁).s := by
-          rw [← hQeq, RationalLocData.interSamePair_rationalOpen,
-            RationalLocData.interSamePair_rationalOpen,
-            RationalLocData.interSamePair_rationalOpen]
-          intro v hv; exact ⟨hv.1.1, hv.2⟩
-        have hEP₂Q : rationalOpen E.T E.s ⊆
-            rationalOpen (P₂.1.interSamePair Q.1 hQP₂).T
-              (P₂.1.interSamePair Q.1 hQP₂).s := by
-          rw [← hQeq, RationalLocData.interSamePair_rationalOpen,
-            RationalLocData.interSamePair_rationalOpen,
-            RationalLocData.interSamePair_rationalOpen]
-          intro v hv; exact ⟨hv.1.2, hv.2⟩
-        have hmem₁ := mem_covers_interProd Uf V hbase hUfP hVP P₁.2 Q.2
-        have hmem₂ := mem_covers_interProd Uf V hbase hUfP hVP P₂.2 Q.2
-        have hDmem₁ := mem_covers_restrictTo V P₁.1
-          (by rw [hbase]; exact Uf.hsubset P₁.1 P₁.2)
-          (by rw [hbase]; exact hUfP P₁.1 P₁.2)
-          (fun Q hQ => by rw [hbase]; exact hVP Q hQ) Q.2
-        have hDmem₂ := mem_covers_restrictTo V P₂.1
-          (by rw [hbase]; exact Uf.hsubset P₂.1 P₂.2)
-          (by rw [hbase]; exact hUfP P₂.1 P₂.2)
-          (fun Q hQ => by rw [hbase]; exact hVP Q hQ) Q.2
-        have hg₁ := hg P₁ ⟨_, hDmem₁⟩
-        have hg₂ := hg P₂ ⟨_, hDmem₂⟩
-        simp only [RationalCoveringData.restrictTo_base] at hg₁ hg₂
-        have hP₁Q : rationalOpen (P₁.1.interSamePair Q.1 hQP₁).T
-            (P₁.1.interSamePair Q.1 hQP₁).s ⊆ rationalOpen P₁.1.T P₁.1.s :=
-          RationalLocData.interSamePair_subset_left _ _ _
-        have hP₂Q : rationalOpen (P₂.1.interSamePair Q.1 hQP₂).T
-            (P₂.1.interSamePair Q.1 hQP₂).s ⊆ rationalOpen P₂.1.T P₂.1.s :=
-          RationalLocData.interSamePair_subset_left _ _ _
-        have hEM : rationalOpen E.T E.s ⊆ rationalOpen M.T M.s := by
-          rw [← hQeq]; exact RationalLocData.interSamePair_subset_left _ _ _
-        -- LHS = resMap (P₁∩Q) E (f ⟨P₁∩Q⟩); RHS = resMap (P₂∩Q) E (f ⟨P₂∩Q⟩); equal by `hf`.
-        have eL : restrictionMap M E hEM (restrictionMap P₁.1 M hMP₁ (g P₁)) =
-            restrictionMap (P₁.1.interSamePair Q.1 hQP₁) E hEP₁Q (f ⟨_, hmem₁⟩) :=
-          restrictionMap_eq_of_restrictionMap_eq P₁.1 M E _ hMP₁ hEM hP₁Q hEP₁Q _ _ hg₁
-        have eR : restrictionMap M E hEM (restrictionMap P₂.1 M hMP₂ (g P₂)) =
-            restrictionMap (P₂.1.interSamePair Q.1 hQP₂) E hEP₂Q (f ⟨_, hmem₂⟩) :=
-          restrictionMap_eq_of_restrictionMap_eq P₂.1 M E _ hMP₂ hEM hP₂Q hEP₂Q _ _ hg₂
-        change restrictionMap M E hEM
-          (restrictionMap P₁.1 M hMP₁ (g P₁) - restrictionMap P₂.1 M hMP₂ (g P₂)) = 0
-        rw [restrictionMap_sub, eL, eR]
-        exact sub_eq_zero_of_eq (hf ⟨_, hmem₁⟩ ⟨_, hmem₂⟩ E hEP₁Q hEP₂Q)
-      have hD₃M : rationalOpen D₃.T D₃.s ⊆ rationalOpen M.T M.s := by
-        rw [hM, RationalLocData.interSamePair_rationalOpen]
-        exact Set.subset_inter h₃₁ h₃₂
-      have c1 := restrictionMap_restrictionMap P₁.1 M D₃ hMP₁ hD₃M (g P₁)
-      have c2 := restrictionMap_restrictionMap P₂.1 M D₃ hMP₂ hD₃M (g P₂)
-      rw [← c1, hcanon, c2]
+    have hg' : ∀ (P : ↥Uf.covers) (Q : ↥V.covers),
+        restrictionMap P.1 (P.1.interSamePair Q.1 ((hVP Q.1 Q.2).trans (hUfP P.1 P.2).symm))
+            (RationalLocData.interSamePair_subset_left _ _ _) (g P)
+          = f ⟨_, mem_covers_interProd Uf V hbase hUfP hVP P.2 Q.2⟩ :=
+      fun P Q => hg P ⟨_, mem_covers_restrictTo V P.1 _ _ _ Q.2⟩
+    have hgcoc := interProd_gluing_cocycle Uf V hbase hUfP hVP hV1 f hf g hg'
     obtain ⟨x, hx⟩ := hU.gluing g hgcoc
     refine ⟨x, fun D => ?_⟩
     obtain ⟨D₀, hD₀⟩ := D
@@ -4647,14 +4660,18 @@ private noncomputable def unitCover_relOverlap_forward
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s) :=
     (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).uniformSpace
-  letI : IsTopologicalRing (Localization.Away (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+  letI : IsTopologicalRing (Localization.Away (((D₀.interSamePair (unitDatum D₀.P f)
+    rfl).interSamePair
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s) :=
     (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+        f))).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away (((D₀.interSamePair (unitDatum D₀.P f)
+    rfl).interSamePair
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s) :=
     (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).isUniformAddGroup
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+        f))).isUniformAddGroup
   exact UniformSpace.Completion.extensionHom
     (((unitCover_overlapDatum_B D₀ f).coeRingHom).comp
       (unitCover_relOverlap_forwardLocHom D₀ f))
@@ -4671,21 +4688,26 @@ private theorem unitCover_relOverlap_forward_coe
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s) :
     unitCover_relOverlap_forward D₀ f
         ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-          (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).coeRingHom y) =
+          (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+            f))).coeRingHom y) =
       (unitCover_overlapDatum_B D₀ f).coeRingHom
         (unitCover_relOverlap_forwardLocHom D₀ f y) := by
   letI : UniformSpace (Localization.Away (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s) :=
     (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).uniformSpace
-  letI : IsTopologicalRing (Localization.Away (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+  letI : IsTopologicalRing (Localization.Away (((D₀.interSamePair (unitDatum D₀.P f)
+    rfl).interSamePair
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s) :=
     (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+        f))).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away (((D₀.interSamePair (unitDatum D₀.P f)
+    rfl).interSamePair
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s) :=
     (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).isUniformAddGroup
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+        f))).isUniformAddGroup
   exact UniformSpace.Completion.extensionHom_coe
     (((unitCover_overlapDatum_B D₀ f).coeRingHom).comp
       (unitCover_relOverlap_forwardLocHom D₀ f))
@@ -4789,19 +4811,22 @@ private theorem unitCover_relOverlap_gen_identities
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A) :
     ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f *
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f))).canonicalMap f *
       (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).coeRingHom
         (divByS ((D₀.s * 1) * (D₀.s * 1))
           ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s)) = 1) ∧
+            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+              f))).s)) = 1) ∧
     ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).coeRingHom
         (divByS ((D₀.s * f) * (D₀.s * f))
           ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
             (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s)) =
       (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f) := by
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f))).canonicalMap f) := by
   set DII := (D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
     (D₀.interSamePair (coUnitDatum D₀.P f) rfl) rfl with hDII
   have hu_DII : IsUnit (DII.canonicalMap DII.s) := isUnit_s_in_presheafValue DII
@@ -5080,13 +5105,16 @@ private theorem unitCover_relOverlap_locRestriction_baseUnit
     (D₀ : RationalLocData A) (f : A) :
     IsUnit (algebraMap A (Localization.Away
       (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s) D₀.s) := by
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f))).s) D₀.s) := by
   have h2 : IsUnit (algebraMap A (Localization.Away
       (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s) (D₀.s * 1) *
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f))).s) (D₀.s * 1) *
     algebraMap A (Localization.Away
       (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s) (D₀.s * f)) := by
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f))).s) (D₀.s * f)) := by
     rw [← map_mul]
     rw [show ((D₀.s * 1) * (D₀.s * f) : A) =
       (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
@@ -5136,7 +5164,8 @@ private theorem unitCover_relOverlap_restriction_factor
         ((RationalLocData.interSamePair_subset_left _ _ _).trans
           (RationalLocData.interSamePair_subset_left _ _ _))).comp D₀.coeRingHom =
       ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).coeRingHom).comp
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f))).coeRingHom).comp
         (unitCover_relOverlap_locRestriction D₀ f) := by
   refine IsLocalization.ringHom_ext (Submonoid.powers D₀.s) ?_
   ext a
@@ -5157,7 +5186,8 @@ private theorem unitCover_relOverlap_locRoundtrip1
     (unitCover_relOverlap_backwardLocHom D₀ f).comp
         (unitCover_relOverlap_forwardLocHom D₀ f) =
       (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).coeRingHom := by
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f))).coeRingHom := by
   refine IsLocalization.ringHom_ext
     (Submonoid.powers (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s) ?_
@@ -5198,16 +5228,21 @@ private theorem unitCover_relOverlap_backward_forward
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)))) :
     unitCover_relOverlap_backward D₀ f (unitCover_relOverlap_forward D₀ f x) = x := by
   letI : UniformSpace (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).s) := ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f)).s) := ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).uniformSpace
-  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f)
+    rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).s) :=
     ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f)).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f)
+    rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).s) :=
     ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).isUniformAddGroup
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f)).isUniformAddGroup
   letI : UniformSpace (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
     (unitCover_overlapDatum_B D₀ f).uniformSpace
   letI : IsTopologicalRing (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
@@ -5227,7 +5262,8 @@ private theorem unitCover_relOverlap_backward_forward
   intro a
   show unitCover_relOverlap_backward D₀ f (unitCover_relOverlap_forward D₀ f
     (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).coeRingHom a)) =
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f)).coeRingHom a)) =
     ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).coeRingHom a
   rw [unitCover_relOverlap_forward_coe, unitCover_relOverlap_backward_coe]
@@ -5251,16 +5287,21 @@ private theorem unitCover_relOverlap_forward_restriction
   letI : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
   letI : UniformSpace (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).s) := ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f)).s) := ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).uniformSpace
-  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f)
+    rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).s) :=
     ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f)).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f)
+    rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).s) :=
     ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).isUniformAddGroup
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f)).isUniformAddGroup
   letI : UniformSpace (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
     (unitCover_overlapDatum_B D₀ f).uniformSpace
   letI : IsTopologicalRing (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
@@ -5311,16 +5352,21 @@ private theorem unitCover_relOverlap_forward_backward
       unitCover_relOverlap_forward_restriction]
     rfl
   letI : UniformSpace (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).s) := ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f)).s) := ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).uniformSpace
-  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f)
+    rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).s) :=
     ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f)).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (unitDatum D₀.P f)
+    rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).s) :=
     ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).isUniformAddGroup
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+          f)).isUniformAddGroup
   letI : UniformSpace (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
     (unitCover_overlapDatum_B D₀ f).uniformSpace
   letI : IsTopologicalRing (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
@@ -6142,7 +6188,8 @@ private theorem unitCover_annulus_canonicalMap_isUnit
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A) :
     IsUnit ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f) := by
+            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+              f))).canonicalMap f) := by
   have hu : IsUnit ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap
       ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
@@ -6164,7 +6211,8 @@ private theorem unitCover_minus_restriction_backward_invS_one
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A) :
     (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f *
+            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+              f))).canonicalMap f *
             restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
               ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
                 (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
@@ -6173,7 +6221,8 @@ private theorem unitCover_minus_restriction_backward_invS_one
               (invS (coUnitDatum (presheafValue_concretePair D₀)
                 (D₀.canonicalMap f)))) = 1 := by
   have hf_res : (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f =
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+        f))).canonicalMap f =
     restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
       ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
         (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
@@ -6211,7 +6260,8 @@ private theorem unitCover_annulus_canonicalMap_eq_backward
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A) :
     (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f =
+            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀
+              f))).canonicalMap f =
           unitCover_relOverlap_backward D₀ f
             ((unitCover_overlapDatum_B D₀ f).canonicalMap (D₀.canonicalMap f)) := by
   rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap (D₀.canonicalMap f) =
@@ -6350,7 +6400,8 @@ private theorem unitCover_sq_minus_comp_C
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A)
-    (hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f))) (c : presheafValue D₀) :
+    (hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f))) (c : presheafValue
+      D₀) :
     (((restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
         ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
           (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
@@ -8807,7 +8858,8 @@ private theorem genPiece_relOverlap_forwardLocHom_algebraMap
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) (a : A) :
     genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂
-        (algebraMap A (Localization.Away (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+        (algebraMap A (Localization.Away (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+          rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s)) a) =
       algebraMap (presheafValue D₀)
         (Localization.Away (((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -9075,20 +9127,28 @@ private noncomputable def genPiece_relOverlap_forward
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
     presheafValue ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl) →+* presheafValue ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl) →+* presheafValue ((imagePieceDatum D₀ T t₁
+        hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl) := by
-  letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).isUniformAddGroup
   exact UniformSpace.Completion.extensionHom
     ((((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom).comp (genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂))
+      (imagePieceDatum D₀ T t₂
+        hspan) rfl).coeRingHom).comp (genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂))
     (genPiece_relOverlap_forwardCompletion_continuous D₀ T hspan t₁ t₂)
 
 /-- G3b-6′ coe-tracking. -/
@@ -9101,22 +9161,31 @@ private theorem genPiece_relOverlap_forward_coe
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A)
     (y : Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s) :
-    genPiece_relOverlap_forward D₀ T hspan t₁ t₂ (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+    genPiece_relOverlap_forward D₀ T hspan t₁ t₂ (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+      rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom y) =
       ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom (genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂ y) := by
-  letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (imagePieceDatum D₀ T t₂
+        hspan) rfl).coeRingHom (genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂ y) := by
+  letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).isUniformAddGroup
   exact UniformSpace.Completion.extensionHom_coe
     ((((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom).comp (genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂))
+      (imagePieceDatum D₀ T t₂
+        hspan) rfl).coeRingHom).comp (genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂))
     (genPiece_relOverlap_forwardCompletion_continuous D₀ T hspan t₁ t₂) y
 
 set_option linter.unusedSectionVars false in
@@ -9128,7 +9197,8 @@ private theorem genPiece_relOverlap_backward_baseHom_isUnit
       CompleteSpace A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
-    IsUnit ((restrictionMapHom D₀ ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+    IsUnit ((restrictionMapHom D₀ ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+      rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl)
         ((RationalLocData.interSamePair_subset_left _ _ _).trans
           (RationalLocData.interSamePair_subset_left _ _ _)))
@@ -9139,7 +9209,8 @@ private theorem genPiece_relOverlap_backward_baseHom_isUnit
           (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s)) := isUnit_s_in_presheafValue _
   rw [show ((((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s : A)) = (D₀.s * t₁) * t₂ from rfl, map_mul, map_mul] at hu
+      (genPieceDatum D₀.P T t₂
+        hspan) rfl).s : A)) = (D₀.s * t₁) * t₂ from rfl, map_mul, map_mul] at hu
   have hu₁ : IsUnit (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap t₁) :=
     isUnit_of_mul_isUnit_right (isUnit_of_mul_isUnit_left hu)
@@ -9160,7 +9231,8 @@ private noncomputable def genPiece_relOverlap_backwardLocHom
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
     Localization.Away (((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).s) →+* presheafValue ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (imagePieceDatum D₀ T t₂ hspan) rfl).s) →+* presheafValue ((D₀.interSamePair (genPieceDatum
+        D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl) :=
   IsLocalization.Away.lift
     (x := ((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -9420,7 +9492,8 @@ private noncomputable def genPiece_relOverlap_backward
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
     presheafValue ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl) →+* presheafValue ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (imagePieceDatum D₀ T t₂ hspan) rfl) →+* presheafValue ((D₀.interSamePair (genPieceDatum D₀.P
+        T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl) := by
   letI : UniformSpace (Localization.Away ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s) := ((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -9474,7 +9547,8 @@ private theorem genPiece_relOverlap_locRoundtrip1
         (genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂) =
       ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom := by
-  refine IsLocalization.ringHom_ext (Submonoid.powers (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  refine IsLocalization.ringHom_ext (Submonoid.powers (((D₀.interSamePair (genPieceDatum D₀.P T t₁
+    hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s)) ?_
   ext a
   simp only [RingHom.comp_apply]
@@ -9495,14 +9569,20 @@ private theorem genPiece_relOverlap_backward_forward
       (genPieceDatum D₀.P T t₂ hspan) rfl)) :
     genPiece_relOverlap_backward D₀ T hspan t₁ t₂
       (genPiece_relOverlap_forward D₀ T hspan t₁ t₂ x) = x := by
-  letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).isUniformAddGroup
   letI : UniformSpace (Localization.Away ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s) := ((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -9515,7 +9595,8 @@ private theorem genPiece_relOverlap_backward_forward
       (imagePieceDatum D₀ T t₂ hspan) rfl).isUniformAddGroup
   refine @UniformSpace.Completion.ext'
     (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
     (presheafValue ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl)) _ _ _ _
@@ -9652,21 +9733,28 @@ private theorem genPiece_relOverlap_forward_backward
       (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂) =
       ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom := by
-    refine IsLocalization.ringHom_ext (Submonoid.powers (((imagePieceDatum D₀ T t₁ hspan).interSamePair
+    refine IsLocalization.ringHom_ext (Submonoid.powers (((imagePieceDatum D₀ T t₁
+      hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s)) ?_
     ext x
     simp only [RingHom.comp_apply]
     rw [genPiece_relOverlap_backwardLocHom_algebraMap,
       genPiece_relOverlap_forward_restriction]
     rfl
-  letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  letI : IsTopologicalRing (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+  letI : IsUniformAddGroup (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
+    rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
+        hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).isUniformAddGroup
   letI : UniformSpace (Localization.Away ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s) := ((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -9690,7 +9778,8 @@ private theorem genPiece_relOverlap_forward_backward
   show genPiece_relOverlap_forward D₀ T hspan t₁ t₂
     (genPiece_relOverlap_backward D₀ T hspan t₁ t₂
       (((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom w)) = ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+      (imagePieceDatum D₀ T t₂
+        hspan) rfl).coeRingHom w)) = ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom w
   rw [genPiece_relOverlap_backward_coe]
   exact RingHom.congr_fun hloc w
@@ -12157,8 +12246,8 @@ def RationalCoveringData.toFiniteCover [IsHuberRing A] (C : RationalCoveringData
       Set ↥(Spa A A⁺)) ↥C.covers where
   sets D := Subtype.val ⁻¹'
     (Subtype.val ⁻¹' rationalOpen D.1.T D.1.s : Set ↥(Spa A A⁺))
-  isOpen D := by
-    exact (rationalOpen_isOpen D.1.T D.1.s).preimage continuous_subtype_val
+  isOpen D :=
+    (rationalOpen_isOpen D.1.T D.1.s).preimage continuous_subtype_val
   isCover := by
     ext ⟨⟨v, hv⟩, hv_base⟩
     simp only [Set.mem_iUnion, Set.mem_preimage, Set.mem_univ, iff_true]

@@ -1082,6 +1082,22 @@ theorem wAloc_p_pow_mul {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (n : ℕ)
     gaussValueF_p_pow_mul p F (bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 u) n,
     gaussValueF_alocToWittF p F ϖ hρ0 hρ1]
 
+/-- A nonzero value-group element embeds to a strictly positive real: the embedding is
+strictly monotone, hence injective, and sends `0` to `0`. -/
+theorem valueGroup_embedding_pos {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (γ : (MonoidWithZeroHom.ValueGroup₀
+      (MonoidWithZeroHom.ofClass (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)))ˣ) :
+    (0 : NNReal) < MonoidWithZeroHom.ValueGroup₀.embedding γ.1 := by
+  refine pos_iff_ne_zero.mpr fun h0 => ?_
+  have hinj := (MonoidWithZeroHom.ValueGroup₀.embedding_strictMono
+    (f := MonoidWithZeroHom.ofClass (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal))).injective
+  have h00 : MonoidWithZeroHom.ValueGroup₀.embedding (0 :
+      MonoidWithZeroHom.ValueGroup₀ (MonoidWithZeroHom.ofClass (Valued.v :
+        Valuation (hatK p F hρ0 hρ1) NNReal))) = 0 := map_zero _
+  exact γ.ne_zero (hinj (h0.trans h00.symm))
+
+
 /-- Cauchy criterion for sequences in the completed field, in plain `NNReal` terms
 (the value-group γ-balls are reached through the strict-mono embedding). -/
 theorem cauchySeq_of_valued_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
@@ -1091,16 +1107,8 @@ theorem cauchySeq_of_valued_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     CauchySeq s := by
   rw [(Valued.hasBasis_uniformity (hatK p F hρ0 hρ1) NNReal).cauchySeq_iff]
   rintro γ -
-  have hγpos : (0 : NNReal) < MonoidWithZeroHom.ValueGroup₀.embedding γ.1 := by
-    refine pos_iff_ne_zero.mpr fun h0 => ?_
-    have hinj := (MonoidWithZeroHom.ValueGroup₀.embedding_strictMono
-      (f := MonoidWithZeroHom.ofClass (Valued.v :
-        Valuation (hatK p F hρ0 hρ1) NNReal))).injective
-    have h00 : MonoidWithZeroHom.ValueGroup₀.embedding (0 :
-        MonoidWithZeroHom.ValueGroup₀ (MonoidWithZeroHom.ofClass (Valued.v :
-          Valuation (hatK p F hρ0 hρ1) NNReal))) = 0 := map_zero _
-    have := hinj (h0.trans h00.symm)
-    exact γ.ne_zero this
+  have hγpos : (0 : NNReal) < MonoidWithZeroHom.ValueGroup₀.embedding γ.1 :=
+    valueGroup_embedding_pos p F γ
   obtain ⟨K, hK⟩ := exists_pow_lt_of_lt_one hγpos hρ1
   obtain ⟨N₀, hN₀⟩ := h (ρ ^ K) (pow_pos hρ0 K)
   refine ⟨N₀, fun m hm n hn => ?_⟩

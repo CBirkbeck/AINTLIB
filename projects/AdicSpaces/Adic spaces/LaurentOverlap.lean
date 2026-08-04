@@ -276,6 +276,15 @@ noncomputable def overlap_minus_evalHom
     (invS (overlapDatum B P b))
     (invS_isPowerBounded_in_overlap B P b)
 
+/-- A constant restricted power series has no coefficient in positive degree. -/
+private theorem coeff_single_algebraMap_eq_zero {n : ℕ} (hn : n ≠ 0) (a : B) :
+    (MvPowerSeries.coeff (R := B) (Finsupp.single 0 n))
+      (↑(algebraMap B ↥(TateAlgebra B) a) : MvPowerSeries (Fin 1) B) = 0 := by
+  change (MvPowerSeries.coeff (Finsupp.single 0 n)) (MvPowerSeries.C (σ := Fin 1) a) = 0
+  classical
+  rw [MvPowerSeries.coeff_C, if_neg (Finsupp.single_ne_zero.mpr hn)]
+
+
 /-- `overlap_plus_evalHom` sends `algebraMap a` to `canonicalMap a`. -/
 theorem overlap_plus_evalHom_algebraMap
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b a : B) :
@@ -290,12 +299,7 @@ theorem overlap_plus_evalHom_algebraMap
     congr 1
   · intro n hn
     unfold TateAlgebraWedhorn.evalTerm TateAlgebra.coeff TateAlgebra.toIndex
-    have : (MvPowerSeries.coeff (R := B) (Finsupp.single 0 n))
-        (↑(algebraMap B ↥(TateAlgebra B) a) : MvPowerSeries (Fin 1) B) = 0 := by
-      change (MvPowerSeries.coeff (Finsupp.single 0 n))
-        (MvPowerSeries.C (σ := Fin 1) a) = 0
-      classical
-      rw [MvPowerSeries.coeff_C, if_neg (Finsupp.single_ne_zero.mpr hn)]
+    have := coeff_single_algebraMap_eq_zero B hn a
     simp [this]
 
 /-- `overlap_plus_evalHom` sends `X` to `canonicalMap b`. -/
@@ -349,12 +353,7 @@ theorem overlap_minus_evalHom_algebraMap
     congr 1
   · intro n hn
     unfold TateAlgebraWedhorn.evalTerm TateAlgebra.coeff TateAlgebra.toIndex
-    have : (MvPowerSeries.coeff (R := B) (Finsupp.single 0 n))
-        (↑(algebraMap B ↥(TateAlgebra B) a) : MvPowerSeries (Fin 1) B) = 0 := by
-      change (MvPowerSeries.coeff (Finsupp.single 0 n))
-        (MvPowerSeries.C (σ := Fin 1) a) = 0
-      classical
-      rw [MvPowerSeries.coeff_C, if_neg (Finsupp.single_ne_zero.mpr hn)]
+    have := coeff_single_algebraMap_eq_zero B hn a
     simp [this]
 
 /-- `overlap_minus_evalHom` sends `X` to `invS`. -/
@@ -2409,12 +2408,7 @@ theorem TA_B_to_bivariateOverlap_evalHom_algebraMap
     rfl
   · intro n hn
     unfold TateAlgebraWedhorn.evalTerm TateAlgebra.coeff TateAlgebra.toIndex
-    have h0 : (MvPowerSeries.coeff (R := B) (Finsupp.single 0 n))
-        (↑(algebraMap B ↥(TateAlgebra B) a) : MvPowerSeries (Fin 1) B) = 0 := by
-      change (MvPowerSeries.coeff (Finsupp.single 0 n))
-        (MvPowerSeries.C (σ := Fin 1) a) = 0
-      classical
-      rw [MvPowerSeries.coeff_C, if_neg (Finsupp.single_ne_zero.mpr hn)]
+    have h0 := coeff_single_algebraMap_eq_zero B hn a
     rw [h0, RingHom.map_zero, zero_mul]
 
 /-- The first-stage evalHom sends `TateAlgebra.X` to `mk TateAlgebra₂.X`.

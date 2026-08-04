@@ -158,8 +158,8 @@ theorem isContinuous_of_restriction_isContinuous (P : PairOfDefinition A) {Γ₀
       rintro _ ⟨a, ha, rfl⟩
       simp only [Valuation.ltAddSubgroup, Units.val_mk0]
       exact ha
-    have h_zero : (0 : A) ∈ P.A₀.subtype '' {a : P.A₀ | v (P.A₀.subtype a) < γ} := by
-      exact ⟨0, by simp only [Subring.subtype_apply, Set.mem_setOf_eq, ZeroMemClass.coe_zero,
+    have h_zero : (0 : A) ∈ P.A₀.subtype '' {a : P.A₀ | v (P.A₀.subtype a) < γ} :=
+      ⟨0, by simp only [Subring.subtype_apply, Set.mem_setOf_eq, ZeroMemClass.coe_zero,
         map_zero, zero_lt_iff.mpr hγ], rfl⟩
     exact Filter.mem_of_superset ((h_res γ).mem_nhds h_zero) h_sub
 

@@ -134,8 +134,10 @@ theorem vle_one_iff_canonicalValuation_le {R : Type*} [CommRing R] [TopologicalS
   exact Valuation.vle_iff_le (ValuativeRel.valuation R) (x := d) (y := 1)
 
 /-- **`hw_loc` threading (Wedhorn 8.2, wedhorn.txt:3739-3740).** If `v ∈ rationalOpen D.T D.s`
-(`v(t) ≤ v(s)`, `v(s) ≠ 0`) and `w` extends `v` to `Localization.Away D.s` (`comap algebraMap w = v`),
-then `w ≤ 1` on `locSubring = A₀[t/s]`: on the generators `algebraMap '' A₀` (via `v ≤ 1` on `A⁺ ⊇ A₀`)
+(`v(t) ≤ v(s)`, `v(s) ≠ 0`) and `w` extends `v` to `Localization.Away D.s` (`comap algebraMap w =
+  v`),
+then `w ≤ 1` on `locSubring = A₀[t/s]`: on the generators `algebraMap '' A₀` (via `v ≤ 1` on `A⁺ ⊇
+  A₀`)
 and `divByS t s` (via `v(t) ≤ v(s)` and `divByS t s · s = t`), then on the generated subring
 (the valuation integers form a subring). -/
 theorem extension_vle_one_on_locPlusSubring (D : RationalLocData A)
@@ -180,7 +182,8 @@ completion extension (algebraic; the heavy proofs about it are extracted into ow
 noncomputable def scResHom (D : RationalLocData A) (w : Spv (Localization.Away D.s)) :
     Localization.Away D.s →+*
       WithVal (ValuationSpectrum.residueFieldValuation (Localization.Away D.s) w) :=
-  ((WithVal.equiv (ValuationSpectrum.residueFieldValuation (Localization.Away D.s) w)).symm.toRingHom).comp
+  ((WithVal.equiv (ValuationSpectrum.residueFieldValuation (Localization.Away D.s)
+    w)).symm.toRingHom).comp
     ((algebraMap ((Localization.Away D.s) ⧸ w.supp)
         (FractionRing ((Localization.Away D.s) ⧸ w.supp))).comp
       (Ideal.Quotient.mk w.supp))
@@ -200,7 +203,8 @@ theorem scResHom_val (D : RationalLocData A) (w : Spv (Localization.Away D.s))
   rfl
 
 /-- `scResHom D w` is continuous (w.r.t. `D.topology`): preimages of valuation-nbhds are the
-`w`-continuity nbhds, via the value-group embedding bridge and `scResHom_val`. (Own-budget extraction
+`w`-continuity nbhds, via the value-group embedding bridge and `scResHom_val`. (Own-budget
+  extraction
 of the `hφ` core.) -/
 theorem scResHom_continuous (D : RationalLocData A) (w : Spv (Localization.Away D.s))
     (hw_cont : @ValuationSpectrum.IsContinuous _ _ D.topology w) :
@@ -212,7 +216,8 @@ theorem scResHom_continuous (D : RationalLocData A) (w : Spv (Localization.Away 
   apply continuous_of_continuousAt_zero (scResHom D w).toAddMonoidHom
   rw [ContinuousAt, map_zero]
   rw [(Valued.hasBasis_nhds_zero
-    (WithVal (ValuationSpectrum.residueFieldValuation (Localization.Away D.s) w)) _).tendsto_right_iff]
+    (WithVal (ValuationSpectrum.residueFieldValuation (Localization.Away D.s)
+      w)) _).tendsto_right_iff]
   rintro γ -
   have hδ_ne : MonoidWithZeroHom.ValueGroup₀.embedding γ.1 ≠
       (0 : ValuationSpectrum.valueGroup (Localization.Away D.s) w) := fun h =>
@@ -240,7 +245,8 @@ theorem scResHom_continuous (D : RationalLocData A) (w : Spv (Localization.Away 
 own heartbeat budget). `L` is valued in `w`'s value group. -/
 theorem comap_coeRingHom_extensionHom_ofValuation_eq {R : Type*} [CommRing R] [UniformSpace R]
     [IsUniformAddGroup R] [IsTopologicalRing R] (w : Spv R)
-    {L : Type*} [Field L] [Valued L (ValuationSpectrum.valueGroup R w)] [CompleteSpace L] [T0Space L]
+    {L : Type*} [Field L] [Valued L (ValuationSpectrum.valueGroup R w)] [CompleteSpace L] [T0Space
+      L]
     (φ : R →+* L) (hφ : Continuous φ)
     (hval : ∀ a, Valued.v (φ a) = ValuationSpectrum.canonicalValuation R w a) :
     comap (UniformSpace.Completion.coeRingHom)

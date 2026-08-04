@@ -1341,20 +1341,23 @@ section HeightOneGenerization
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 
 /-- The class of `g₀` in `Γ ⧸ maxAvoid` is non-trivial. -/
-private theorem maxAvoid_quotientMk_ne_one {Γ : Type*} [CommGroup Γ] [LinearOrder Γ] [IsOrderedMonoid Γ]
+private theorem maxAvoid_quotientMk_ne_one {Γ : Type*} [CommGroup Γ] [LinearOrder
+  Γ] [IsOrderedMonoid Γ]
     {g₀ : Γ} (hg₀_lt : g₀ < 1) :
     QuotientGroup.mk' (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup g₀ ≠ 1 := fun h1 ↦
   ConvexSubgroup.not_mem_maxAvoid hg₀_lt.ne ((QuotientGroup.eq_one_iff g₀).mp h1)
 
 /-- The class of `g₀` in `Γ ⧸ maxAvoid` is `< 1`. -/
-private theorem maxAvoid_quotientMk_lt_one {Γ : Type*} [CommGroup Γ] [LinearOrder Γ] [IsOrderedMonoid Γ]
+private theorem maxAvoid_quotientMk_lt_one {Γ : Type*} [CommGroup Γ] [LinearOrder
+  Γ] [IsOrderedMonoid Γ]
     {g₀ : Γ} (hg₀_lt : g₀ < 1) :
     QuotientGroup.mk' (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup g₀ < 1 :=
   lt_of_le_of_ne ((ConvexSubgroup.maxAvoid hg₀_lt.ne).quotientMk_le_one hg₀_lt.le)
     (maxAvoid_quotientMk_ne_one hg₀_lt)
 
 /-- Cofinality of the powers of `g₀` descends to `Γ ⧸ maxAvoid`. -/
-private theorem maxAvoid_quotient_cofinal {Γ : Type*} [CommGroup Γ] [LinearOrder Γ] [IsOrderedMonoid Γ]
+private theorem maxAvoid_quotient_cofinal {Γ : Type*} [CommGroup Γ] [LinearOrder Γ] [IsOrderedMonoid
+  Γ]
     {g₀ : Γ} (hg₀_lt : g₀ < 1)
     (hcof : ∀ γ : Γ, ∃ n : ℕ, g₀ ^ n ≤ γ) :
     ∀ d : Γ ⧸ (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup,
@@ -1368,7 +1371,8 @@ private theorem maxAvoid_quotient_cofinal {Γ : Type*} [CommGroup Γ] [LinearOrd
   exact ⟨n, by rw [← map_pow]; exact H.quotientMk_monotone hn⟩
 
 /-- `Γ ⧸ maxAvoid` is `MulArchimedean`: every convex subgroup of it is trivial. -/
-private theorem maxAvoid_quotient_mulArchimedean {Γ : Type*} [CommGroup Γ] [LinearOrder Γ] [IsOrderedMonoid Γ]
+private theorem maxAvoid_quotient_mulArchimedean {Γ : Type*} [CommGroup Γ] [LinearOrder
+  Γ] [IsOrderedMonoid Γ]
     {g₀ : Γ} (hg₀_lt : g₀ < 1)
     (hcof : ∀ γ : Γ, ∃ n : ℕ, g₀ ^ n ≤ γ) :
     MulArchimedean (Γ ⧸ (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup) := by
@@ -1462,7 +1466,7 @@ theorem Valuation.coarsen_maxAvoid_isContinuous_mulArchimedean
   have hmem : a₀ + 0 ∈ (a₀ + ·) '' {b : A | v b < ↑(g₀ ^ (n + 1))} :=
     Set.mem_image_of_mem _ (by simp)
   refine Filter.mem_of_superset
-    (((Homeomorph.addLeft a₀).isOpenMap _ hopen).mem_nhds (by simpa using hmem)) ?_
+    (((Homeomorph.addLeft a₀).isOpenMap _ hopen).mem_nhds (by simp)) ?_
   rintro _ ⟨b, hb, rfl⟩
   calc v.coarsen H (a₀ + b) ≤ max (v.coarsen H a₀) (v.coarsen H b) :=
         Valuation.map_add _ _ _

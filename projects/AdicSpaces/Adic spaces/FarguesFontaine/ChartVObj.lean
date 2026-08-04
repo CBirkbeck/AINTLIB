@@ -211,10 +211,12 @@ theorem exists_ball_approx (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
   have hdiff : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
       (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
         - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hh) ≤ min ((2 : NNReal)⁻¹ ^ n) 1 := by
-    rw [show ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    rw [show ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+      hρ₂1))
         - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hh
       = -(BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hh
-        - ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) by ring,
+        - ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+          hρ₂1))) by ring,
       wI_neg]
     exact hwb
   have hh1 : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
@@ -276,17 +278,21 @@ theorem chartPlus_le_completedPlusSubring_of_dense (a b : ℕ) (ha : 0 < a)
       ?_ ?_ glueSeq_eps_tendsto
     · intro n
       have h1 := le_trans (le_max_left _ _) (hball n)
-      rw [show ((((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      rw [show ((((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+        hρ₂1))
           - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n)).1)
-        = (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).1
+        = (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+          hρ₂1))).1
           - (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n)).1 from rfl,
         Valuation.map_sub_swap, BIProd_fst] at h1
       exact h1
     · intro n
       have h2 := le_trans (le_max_right _ _) (hball n)
-      rw [show ((((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      rw [show ((((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+        hρ₂1))
           - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n)).2)
-        = (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).2
+        = (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+          hρ₂1))).2
           - (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n)).2 from rfl,
         Valuation.map_sub_swap, BIProd_snd] at h2
       exact h2

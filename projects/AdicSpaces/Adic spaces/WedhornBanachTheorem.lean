@@ -537,7 +537,8 @@ theorem isInducing_of_closedRange_of_topNilpUnit
     wedhorn_6_16_of_topNilpUnit hϖ hϖu f.rangeRestrict hcont (LinearMap.surjective_rangeRestrict f)
   have hinjRR : Function.Injective f.rangeRestrict := fun x y h => hinj (Subtype.ext_iff.mp h)
   have hindRR : Topology.IsInducing f.rangeRestrict :=
-    ((Equiv.ofBijective _ ⟨hinjRR, LinearMap.surjective_rangeRestrict f⟩).toHomeomorphOfContinuousOpen
+    ((Equiv.ofBijective _ ⟨hinjRR, LinearMap.surjective_rangeRestrict
+      f⟩).toHomeomorphOfContinuousOpen
       hcont hopen).isInducing
   -- `⇑f = Subtype.val ∘ f̃`; compose inducings.
   exact Topology.IsInducing.subtypeVal.comp hindRR

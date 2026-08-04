@@ -82,7 +82,8 @@ since `V` dominates the valuation ring `ι(O)` of the subfield `ι(F)`, `ι⁻¹
 `comap ι V.valuation` has integer ring `O = v.valuationSubring`, hence is equivalent to `v`.
 
 **Status: `sorry`** (T-L4-EXT-FIELD, parent T-L4-EXT). The classical place-extension theorem;
-mathlib has the ingredients (`LocalSubring.exists_le_valuationSubring`, `ValuationSubring.valuation`)
+mathlib has the ingredients (`LocalSubring.exists_le_valuationSubring`,
+  `ValuationSubring.valuation`)
 but not the assembled existence. -/
 theorem exists_comap_isEquiv_of_field_hom
     {F : Type*} {L : Type uL} [Field F] [Field L] (ι : F →+* L)
@@ -105,7 +106,8 @@ theorem exists_comap_isEquiv_of_field_hom
   -- Contraction `v.valuationSubring = V.comap ι`: `O := v.valuationSubring` maps into `V` (`hV`),
   -- and `O.toLocalSubring` is a maximal local subring (`isMax_toLocalSubring`); `V.comap ι` dominates
   -- `O`, so by maximality they are equal.
-  have hsubF : v.valuationSubring.toLocalSubring.toSubring ≤ (V.comap ι).toLocalSubring.toSubring := by
+  have hsubF : v.valuationSubring.toLocalSubring.toSubring ≤ (V.comap
+    ι).toLocalSubring.toSubring := by
     intro x hx
     have hιx : ι x ∈ V := by
       obtain ⟨hsub, -⟩ := LocalSubring.le_def.mp hV
@@ -127,7 +129,8 @@ theorem exists_comap_isEquiv_of_field_hom
       simpa using this
     have hιab : ι (a : F) * ι (b : F) = 1 := by rw [← map_mul, hab, map_one]
     have hιbV : ι (b : F) ∈ V := ValuationSubring.mem_comap.mp b.2
-    have hmem_map : ι (a : F) ∈ (LocalSubring.map ι v.valuationSubring.toLocalSubring).toSubring := by
+    have hmem_map : ι (a : F) ∈ (LocalSubring.map ι
+      v.valuationSubring.toLocalSubring).toSubring := by
       rw [LocalSubring.map_toSubring]; exact Subring.mem_map.mpr ⟨a, a.2, rfl⟩
     -- `⟨ι ↑a, _⟩ : ι(O)` maps to a unit of `V`; `hlocal_L` ⟹ it is a unit of `ι(O)`.
     have haunit_L : IsUnit (Subring.inclusion hsub_L ⟨ι (a : F), hmem_map⟩) :=
@@ -213,7 +216,8 @@ theorem exists_valuation_extension_of_prime_over
       _ = (ι.comp (algebraMap (R ⧸ s.supp) F)).comp (Ideal.Quotient.mk s.supp) := by rw [← h2]
   have hcomm : (Valuation.comap ((algebraMap (S ⧸ q') L).comp (Ideal.Quotient.mk q')) w).comap
         (algebraMap R S)
-      = ((Valuation.comap ι w).comap (algebraMap (R ⧸ s.supp) F)).comap (Ideal.Quotient.mk s.supp) := by
+      = ((Valuation.comap ι w).comap (algebraMap (R ⧸ s.supp) F)).comap (Ideal.Quotient.mk
+        s.supp) := by
     rw [← Valuation.comap_comp, ← Valuation.comap_comp, ← Valuation.comap_comp, hsq,
       RingHom.comp_assoc]
   have he2 : sF.comap (algebraMap (R ⧸ s.supp) F) = sQuot :=
@@ -254,7 +258,8 @@ theorem exists_dominating_valuation_of_minimalPrime_le {R : Type uR} [CommRing R
     ext r
     rw [Valuation.comap_supp, Ideal.mem_comap, Valuation.mem_supp_iff, V.valuation.zero_iff, hf_R]
     have hinj1 : Function.Injective (algebraMap (R ⧸ q) Dp) :=
-      IsLocalization.injective Dp (Ideal.primeCompl_le_nonZeroDivisors (Ideal.map (Ideal.Quotient.mk q) p))
+      IsLocalization.injective Dp (Ideal.primeCompl_le_nonZeroDivisors (Ideal.map (Ideal.Quotient.mk
+        q) p))
     have hinj2 : Function.Injective (algebraMap Dp (FractionRing Dp)) :=
       IsFractionRing.injective Dp (FractionRing Dp)
     simp only [RingHom.comp_apply, map_eq_zero_iff _ hinj2, map_eq_zero_iff _ hinj1,
@@ -266,7 +271,8 @@ theorem exists_dominating_valuation_of_minimalPrime_le {R : Type uR} [CommRing R
     intro y hy
     rw [Valuation.comap_apply, hf_R]
     simp only [RingHom.comp_apply]
-    have hd_max : (algebraMap (R ⧸ q) Dp) (Ideal.Quotient.mk q y) ∈ IsLocalRing.maximalIdeal Dp := by
+    have hd_max : (algebraMap (R ⧸ q) Dp) (Ideal.Quotient.mk q
+      y) ∈ IsLocalRing.maximalIdeal Dp := by
       rw [IsLocalization.AtPrime.to_map_mem_maximal_iff Dp (Ideal.map (Ideal.Quotient.mk q) p)]
       exact Ideal.mem_map_of_mem _ hy
     have hc_nu : ¬ IsUnit (((algebraMap Dp (FractionRing Dp)).codRestrict V.toSubring hVle)
@@ -531,7 +537,8 @@ theorem exists_spa_point_not_vle_one_huber
   have hx_not_integral : ¬ IsIntegral ((presheafValue D')⁺) x := fun hint =>
     hxnot (IsRingOfIntegralElements.isIntegrallyClosed (B := (presheafValue D')⁺) x hint)
   -- HU-b: `x⁻¹` is a non-unit of `B⁺[x⁻¹] := adjoin B⁺ {x⁻¹} ⊆ B_x := Localization.Away x`.
-  have hnonunit := not_isUnit_invSelf_of_not_isIntegral (Bx := Localization.Away x) x hx_not_integral
+  have hnonunit := not_isUnit_invSelf_of_not_isIntegral (Bx := Localization.Away
+    x) x hx_not_integral
   -- HU-b': a maximal ideal `𝔪` of `B⁺[x⁻¹]` containing `x⁻¹` (proper since `x⁻¹` is a non-unit).
   obtain ⟨𝔪, h𝔪max, h𝔪ge⟩ := Ideal.exists_le_maximal _ (Ideal.span_singleton_ne_top hnonunit)
   have hxinv𝔪 : (⟨IsLocalization.Away.invSelf x, Algebra.subset_adjoin (Set.mem_singleton _)⟩ :
@@ -547,7 +554,8 @@ theorem exists_spa_point_not_vle_one_huber
   -- HU-d (huber2.txt:646-648): a prime `q'` of `B_x` lying over `q = supp s` (Stacks 00FK, minimal
   -- prime under the injective inclusion `R := B⁺[x⁻¹] ↪ B_x`); extend `s` to a valuation `t` of
   -- `B_x` (`exists_valuation_extension_of_prime_over`); set `v := comap (B → B_x) (ofValuation t)`.
-  set Radj := Algebra.adjoin ↑(presheafValue D')⁺ {(IsLocalization.Away.invSelf x : Localization.Away x)}
+  set Radj := Algebra.adjoin ↑(presheafValue D')⁺ {(IsLocalization.Away.invSelf x :
+    Localization.Away x)}
     with hRadj
   letI : Algebra ↑Radj (Localization.Away x) := Radj.val.toRingHom.toAlgebra
   have hinj : Function.Injective (algebraMap ↑Radj (Localization.Away x)) := Subtype.val_injective
@@ -555,7 +563,8 @@ theorem exists_spa_point_not_vle_one_huber
     Ideal.exists_comap_eq_of_mem_minimalPrimes_of_injective hinj q hq_min
   haveI := hq'prime
   obtain ⟨Γt, _, t, ht_equiv⟩ := exists_valuation_extension_of_prime_over s q'
-    (hq'eq.trans hs_supp.symm) (FractionRing (↑Radj ⧸ s.supp)) (FractionRing (Localization.Away x ⧸ q'))
+    (hq'eq.trans hs_supp.symm) (FractionRing (↑Radj ⧸ s.supp)) (FractionRing (Localization.Away x ⧸
+      q'))
   -- ▸ Pre-extracted facts about the comap valuation `W a := t(algebraMap a)` (Huber's properties
   --   (b)(c)(d)), for the restricted-witness continuity wiring (T-SPVAI-4).
   have hW_le : ∀ f : presheafValue D', f ∈ (presheafValue D')⁺ →
@@ -575,7 +584,8 @@ theorem exists_spa_point_not_vle_one_huber
     exact one_ne_zero
   set rs := (t.comap algB).restrictIdealSingle 1 hW1 with hrs_def
   -- Bridge: `(ofValuation rs).vle a b ↔ rs a ≤ rs b`.
-  have hbr : ∀ a b : presheafValue D', (ValuationSpectrum.ofValuation rs).vle a b ↔ rs a ≤ rs b := by
+  have hbr : ∀ a b : presheafValue D', (ValuationSpectrum.ofValuation
+    rs).vle a b ↔ rs a ≤ rs b := by
     intro a b
     letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
     haveI : rs.Compatible := Valuation.Compatible.ofValuation rs

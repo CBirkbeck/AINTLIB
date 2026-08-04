@@ -1070,8 +1070,8 @@ theorem exists_twist_deep (zb c : OF F) (m : ℕ) (hm : 0 < m)
     calc perfectoidValuation p F (zb : F) ^ (m * (j + 1))
         = (perfectoidValuation p F (zb : F) ^ (j + 1)) ^ m := by
           rw [← pow_mul, mul_comm]
-      _ < perfectoidValuation p F (c : F) ^ m := by
-          exact pow_lt_pow_left₀ hmax zero_le (Nat.pos_iff_ne_zero.mp hm)
+      _ < perfectoidValuation p F (c : F) ^ m :=
+          pow_lt_pow_left₀ hmax zero_le (Nat.pos_iff_ne_zero.mp hm)
       _ ≤ perfectoidValuation p F (zb : F) ^ (k - i) := hcm
   -- exponent reversal for a base < 1
   have hexp : k - i < m * (j + 1) := by

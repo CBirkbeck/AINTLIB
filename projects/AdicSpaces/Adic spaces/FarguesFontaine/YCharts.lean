@@ -167,8 +167,8 @@ theorem t2Space_Ainf : T2Space (Ainf p F) := by
   refine ⟨(x + ·) '' (Iinf p F ϖ ^ n : Ideal (Ainf p F)),
     (y + ·) '' (Iinf p F ϖ ^ n : Ideal (Ainf p F)),
     (isOpenMap_add_left x) _ hopen, (isOpenMap_add_left y) _ hopen,
-    ⟨0, by simpa using (Ideal.zero_mem _)⟩,
-    ⟨0, by simpa using (Ideal.zero_mem _)⟩, ?_⟩
+    ⟨0, by simp⟩,
+    ⟨0, by simp⟩, ?_⟩
   rw [Set.disjoint_left]
   rintro z ⟨a, ha, rfl⟩ ⟨b, hb, hz⟩
   refine hn ?_

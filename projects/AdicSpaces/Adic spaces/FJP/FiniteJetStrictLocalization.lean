@@ -421,6 +421,177 @@ private theorem norm_sum_mul_le {S : Type*} [NormedCommRing S] [IsUltrametricDis
     (mul_nonneg hK (zero_le_one.trans hCr1)) fun b _ => hterm b
 
 
+/-- The 𝓓-vertex difference of the two lifts is a `d₁`-cycle. -/
+private theorem d1_rD_extRho_sub_eq_zero (u : Fin m → PB F m) (v : Fin m → PC F m)
+    (xb : PB F m) (xc : PC F m) (hu : d1 (rB F m g f) u = xb) (hv : d1 (rC F m g f) v = xc)
+    (hcompat : extRhoB F m xb = extRhoC F m xc) :
+    d1 (rD F m g f) (fun i => extRhoB F m (u i) - extRhoC F m (v i)) = 0 := by
+  have h1 : d1 (rD F m g f) (fun i => extRhoB F m (u i)) = extRhoB F m xb := by
+    rw [← hu, d1_map (extRhoB F m)]
+    congr 1
+    exact (funext fun i => (extRhoB_rB F m g f i)).symm
+  have h2 : d1 (rD F m g f) (fun i => extRhoC F m (v i)) = extRhoC F m xc := by
+    rw [← hv, d1_map (extRhoC F m)]
+    rfl
+  rw [d1_sub, h1, h2, hcompat, sub_self]
+
+/-- Ultrametric bound on that difference. -/
+private theorem norm_extRho_sub_le (hB hC M : ℝ) (hB0 : 0 ≤ hB) (hC0 : 0 ≤ hC) (hM0 : 0 ≤ M)
+    (u : Fin m → PB F m) (v : Fin m → PC F m)
+    (hun' : ‖u‖ ≤ hB * M) (hvn' : ‖v‖ ≤ hC * M) :
+    ‖(fun i => extRhoB F m (u i) - extRhoC F m (v i) : Fin m → PD F m)‖ ≤ (hB + hC) * M := by
+  refine pi_norm_le_iff_of_nonneg (mul_nonneg (add_nonneg hB0 hC0) hM0) |>.mpr fun i => ?_
+  show ‖extRhoB F m (u i) - extRhoC F m (v i)‖ ≤ _
+  refine (norm_sub_le_max _ _).trans (max_le ?_ ?_)
+  · calc ‖extRhoB F m (u i)‖ ≤ ‖u i‖ := norm_mapRestricted_le _ _ _ _
+      _ ≤ ‖u‖ := norm_le_pi_norm u i
+      _ ≤ hB * M := hun'
+      _ ≤ (hB + hC) * M := mul_le_mul_of_nonneg_right (by linarith) hM0
+  · calc ‖extRhoC F m (v i)‖ ≤ ‖v i‖ := norm_mapRestricted_le _ _ _ _
+      _ ≤ ‖v‖ := norm_le_pi_norm v i
+      _ ≤ hC * M := hvn'
+      _ ≤ (hB + hC) * M := mul_le_mul_of_nonneg_right (by linarith) hM0
+
+/-- The corrected 𝓒-lift is compatible with `u`: the `d₂`-correction is exactly the difference. -/
+private theorem extRho_comp_eq (u : Fin m → PB F m) (v : Fin m → PC F m)
+    (sC : Pairs m → PC F m) (sD : Pairs m → PD F m)
+    (hsC : ∀ p, extRhoC F m (sC p) = sD p)
+    (hsD : d2 (rD F m g f) sD = (fun i => extRhoB F m (u i) - extRhoC F m (v i))) :
+    ∀ i, extRhoB F m (u i) = extRhoC F m ((fun i => v i + d2 (rC F m g f) sC i) i) := by
+  set w : Fin m → PD F m := fun i => extRhoB F m (u i) - extRhoC F m (v i) with hw
+  set v' : Fin m → PC F m := (fun i => v i + d2 (rC F m g f) sC i) with hv'def
+  intro i
+  rw [hv'def]
+  show _ = extRhoC F m (v i + d2 (rC F m g f) sC i)
+  rw [map_add, d2_map (extRhoC F m)]
+  have heq : d2 (fun j => extRhoC F m (rC F m g f j)) (fun p => extRhoC F m (sC p)) i =
+      d2 (rD F m g f) sD i := by
+    congr 1
+    exact funext hsC
+  rw [heq, congrFun hsD i, hw]
+  show extRhoB F m (u i) =
+    extRhoC F m (v i) + (extRhoB F m (u i) - extRhoC F m (v i))
+  ring
+
+/-- The norm bound closing the witness construction. -/
+private theorem norm_d1_rA_le (hB hC z CrC CrA Bs M : ℝ)
+    (hM0 : 0 ≤ M) (hBs0 : 0 ≤ Bs) (hCrA1 : 1 ≤ CrA)
+    (hCrC : CrC = 1 + ∑ i, ‖rC F m g f i‖) (hCrA : CrA = 1 + ∑ i, ‖rA F m g f i‖)
+    (hBsB : hB ≤ Bs) (hBsC : hC ≤ Bs) (hBszC : z * (hB + hC) * CrC ≤ Bs)
+    (hzM0 : 0 ≤ z * (hB + hC) * M)
+    (u : Fin m → PB F m) (v : Fin m → PC F m) (sC : Pairs m → PC F m) (a : Fin m → PA F m)
+    (hun' : ‖u‖ ≤ hB * M) (hvn' : ‖v‖ ≤ hC * M)
+    (hsCn' : ∀ p, ‖sC p‖ ≤ z * (hB + hC) * M)
+    (ha : ∀ i, extJB F m (a i) = u i ∧ extIotaC F m (a i) = (fun i => v i + d2 (rC F m g f) sC i)
+      i) :
+    ‖d1 (rA F m g f) a‖ ≤ (1 + Bs * CrA) * M := by
+  set v' : Fin m → PC F m := (fun i => v i + d2 (rC F m g f) sC i) with hv'def
+  have hd2bound : ∀ i, ‖d2 (rC F m g f) sC i‖ ≤ z * (hB + hC) * M * CrC :=
+    fun i => norm_d2_le _ _ _ _ hzM0 hCrC hsCn' i
+  have hv'n : ‖v'‖ ≤ Bs * M := by
+    refine pi_norm_le_iff_of_nonneg (mul_nonneg hBs0 hM0) |>.mpr fun i => ?_
+    show ‖v i + d2 (rC F m g f) sC i‖ ≤ _
+    refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
+    · calc ‖v i‖ ≤ ‖v‖ := norm_le_pi_norm v i
+        _ ≤ hC * M := hvn'
+        _ ≤ Bs * M := mul_le_mul_of_nonneg_right hBsC hM0
+    · refine (hd2bound i).trans ?_
+      calc z * (hB + hC) * M * CrC = (z * (hB + hC) * CrC) * M := by ring
+        _ ≤ Bs * M := mul_le_mul_of_nonneg_right hBszC hM0
+  have han : ‖a‖ ≤ Bs * M := by
+    refine pi_norm_le_iff_of_nonneg (mul_nonneg hBs0 hM0) |>.mpr fun i => ?_
+    have hmax := ext_max_norm_eq F m (a i)
+    rw [(ha i).1, (ha i).2] at hmax
+    rw [← hmax]
+    refine max_le ?_ ?_
+    · exact (norm_le_pi_norm u i).trans (hun'.trans
+        (mul_le_mul_of_nonneg_right hBsB hM0))
+    · exact (norm_le_pi_norm v' i).trans hv'n
+  have hfinal : ∀ (T : Finset (Fin m)), ‖∑ j ∈ T, a j * rA F m g f j‖ ≤ Bs * M * CrA :=
+    norm_sum_mul_le a (rA F m g f) (Bs * M) CrA (mul_nonneg hBs0 hM0) hCrA
+      (fun j => (norm_le_pi_norm a j).trans han)
+  show ‖d1 (rA F m g f) a‖ ≤ (1 + Bs * CrA) * M
+  unfold d1
+  refine (hfinal Finset.univ).trans ?_
+  calc Bs * M * CrA = Bs * CrA * M := by ring
+    _ ≤ (1 + Bs * CrA) * M := by
+        refine mul_le_mul_of_nonneg_right ?_ hM0
+        linarith [mul_nonneg hBs0 (zero_le_one.trans hCrA1)]
+
+/-- The per-pair core of `ideal_pullback_controlled`: given the three Koszul lifting constants
+(`hB`, `hC`, `z`) and the combined bound `Bs`, a compatible pair `(xb, xc)` pulls back to a single
+`xa` with the stated norm control.
+
+Split from the constant-building preamble so that each half reads on its own: everything here is
+the construction of `xa` from lifts of `xb` and `xc` plus the `d₂`-correction, and the constants
+enter only through the inequalities `hBsB` / `hBsC` / `hBszC`. -/
+private theorem ideal_pullback_controlled_witness
+    (hB hC z CrC CrA Bs : ℝ)
+    (hB0 : 0 ≤ hB) (hC0 : 0 ≤ hC) (hz0 : 0 ≤ z) (hBs0 : 0 ≤ Bs) (hCrA1 : 1 ≤ CrA)
+    (hCrC : CrC = 1 + ∑ i, ‖rC F m g f i‖)
+    (hCrA : CrA = 1 + ∑ i, ‖rA F m g f i‖)
+    (hBsB : hB ≤ Bs) (hBsC : hC ≤ Bs) (hBszC : z * (hB + hC) * CrC ≤ Bs)
+    (hliftB : ∀ x ∈ Ideal.span (Set.range (rB F m g f)),
+      ∃ u : Fin m → PB F m, d1 (rB F m g f) u = x ∧ ‖u‖ ≤ hB * ‖x‖)
+    (hliftC : ∀ x ∈ Ideal.span (Set.range (rC F m g f)),
+      ∃ u : Fin m → PC F m, d1 (rC F m g f) u = x ∧ ‖u‖ ≤ hC * ‖x‖)
+    (hliftD : ∀ u : Fin m → PD F m, d1 (rD F m g f) u = 0 →
+      ∃ v : Pairs m → PD F m, d2 (rD F m g f) v = u ∧ ‖v‖ ≤ z * ‖u‖)
+    (xb : PB F m) (hxb : xb ∈ IB F m g f) (xc : PC F m) (hxc : xc ∈ IC F m g f)
+    (hcompat : extRhoB F m xb = extRhoC F m xc) :
+    ∃ xa ∈ IA F m g f, extJB F m xa = xb ∧ extIotaC F m xa = xc ∧
+      ‖xa‖ ≤ (1 + Bs * CrA) * max ‖xb‖ ‖xc‖ := by
+  classical
+  haveI hPB := isNoetherianRing_PB F m
+  haveI hPC := isNoetherianRing_PC F m
+  haveI hPD := isNoetherianRing_PD F m
+  set M : ℝ := max ‖xb‖ ‖xc‖ with hM
+  have hM0 : (0 : ℝ) ≤ M := le_max_of_le_left (norm_nonneg xb)
+  obtain ⟨u, hu, hun⟩ := hliftB xb hxb
+  obtain ⟨v, hv, hvn⟩ := hliftC xc hxc
+  have hun' : ‖u‖ ≤ hB * M :=
+    hun.trans (mul_le_mul_of_nonneg_left (le_max_left _ _) hB0)
+  have hvn' : ‖v‖ ≤ hC * M :=
+    hvn.trans (mul_le_mul_of_nonneg_left (le_max_right _ _) hC0)
+  set w : Fin m → PD F m := fun i => extRhoB F m (u i) - extRhoC F m (v i) with hw
+  have hwd1 : d1 (rD F m g f) w = 0 :=
+    d1_rD_extRho_sub_eq_zero F m g f u v xb xc hu hv hcompat
+  obtain ⟨sD, hsD, hsDn⟩ := hliftD w hwd1
+  have hwn : ‖w‖ ≤ (hB + hC) * M :=
+    norm_extRho_sub_le F m hB hC M hB0 hC0 hM0 u v hun' hvn'
+  have hzM0 : 0 ≤ z * (hB + hC) * M :=
+    mul_nonneg (mul_nonneg hz0 (add_nonneg hB0 hC0)) hM0
+  have hsDn' : ‖sD‖ ≤ z * (hB + hC) * M :=
+    hsDn.trans (by nlinarith [mul_le_mul_of_nonneg_left hwn hz0])
+  choose sC hsC hsCn using fun p : Pairs m => extRhoC_strict_surjective F m (sD p)
+  have hsCn' : ∀ p, ‖sC p‖ ≤ z * (hB + hC) * M := fun p =>
+    (hsCn p).le.trans ((norm_le_pi_norm sD p).trans hsDn')
+  set v' : Fin m → PC F m := fun i => v i + d2 (rC F m g f) sC i with hv'def
+  have hv'd1 : d1 (rC F m g f) v' = xc := by
+    rw [hv'def, d1_add, hv,
+      show d1 (rC F m g f) (fun i => d2 (rC F m g f) sC i) = 0 from d1_d2 _ sC, add_zero]
+  have hv'compat : ∀ i, extRhoB F m (u i) = extRhoC F m (v' i) :=
+    extRho_comp_eq F m g f u v sC sD hsC hsD
+  choose a ha using fun i => (ext_milnorRow_exact F m (u i) (v' i) (hv'compat i)).exists
+  refine ⟨d1 (rA F m g f) a, ?_, ?_, ?_, ?_⟩
+  · show d1 (rA F m g f) a ∈ Ideal.span (Set.range (rA F m g f))
+    unfold d1
+    exact Ideal.sum_mem _ fun i _ => Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨i, rfl⟩)
+  · rw [show extJB F m (d1 (rA F m g f) a) =
+      d1 (fun i => extJB F m (rA F m g f i)) (fun i => extJB F m (a i)) from
+        d1_map (extJB F m) _ a,
+      show (fun i => extJB F m (rA F m g f i)) = rB F m g f from rfl,
+      show (fun i => extJB F m (a i)) = u from funext fun i => (ha i).1]
+    exact hu
+  · rw [show extIotaC F m (d1 (rA F m g f) a) =
+      d1 (fun i => extIotaC F m (rA F m g f i)) (fun i => extIotaC F m (a i)) from
+        d1_map (extIotaC F m) _ a,
+      show (fun i => extIotaC F m (rA F m g f i)) = rC F m g f from rfl,
+      show (fun i => extIotaC F m (a i)) = v' from funext fun i => (ha i).2]
+    exact hv'd1
+  · exact norm_d1_rA_le F m g f hB hC z CrC CrA Bs M hM0 hBs0 hCrA1 hCrC hCrA hBsB hBsC
+      hBszC hzM0 u v sC a hun' hvn' hsCn' ha
+
 /-- The controlled pullback ([FJP] (4.12)–(4.16)): a matching pair of graph-ideal elements
 comes from an element of `I_𝓐` with a uniformly bounded representative. This is where the
 `d₂`-syzygy correction (`exists_d2_lift` at the 𝓓-vertex) enters. -/
@@ -468,114 +639,8 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
     linarith
   refine ⟨1 + Bs * CrA, le_add_of_nonneg_right (mul_nonneg hBs0
     (zero_le_one.trans hCrA1)), fun xb hxb xc hxc hcompat => ?_⟩
-  set M : ℝ := max ‖xb‖ ‖xc‖ with hM
-  have hM0 : (0 : ℝ) ≤ M := le_max_of_le_left (norm_nonneg xb)
-  obtain ⟨u, hu, hun⟩ := hliftB xb hxb
-  obtain ⟨v, hv, hvn⟩ := hliftC xc hxc
-  have hun' : ‖u‖ ≤ hB * M :=
-    hun.trans (mul_le_mul_of_nonneg_left (le_max_left _ _) hB0)
-  have hvn' : ‖v‖ ≤ hC * M :=
-    hvn.trans (mul_le_mul_of_nonneg_left (le_max_right _ _) hC0)
-  set w : Fin m → PD F m := fun i => extRhoB F m (u i) - extRhoC F m (v i) with hw
-  have hwd1 : d1 (rD F m g f) w = 0 := by
-    have h1 : d1 (rD F m g f) (fun i => extRhoB F m (u i)) = extRhoB F m xb := by
-      rw [← hu, d1_map (extRhoB F m)]
-      congr 1
-      exact (funext fun i => (extRhoB_rB F m g f i)).symm
-    have h2 : d1 (rD F m g f) (fun i => extRhoC F m (v i)) = extRhoC F m xc := by
-      rw [← hv, d1_map (extRhoC F m)]
-      rfl
-    rw [hw, d1_sub, h1, h2, hcompat, sub_self]
-  obtain ⟨sD, hsD, hsDn⟩ := hliftD w hwd1
-  have hwn : ‖w‖ ≤ (hB + hC) * M := by
-    refine pi_norm_le_iff_of_nonneg (mul_nonneg (add_nonneg hB0 hC0) hM0) |>.mpr fun i => ?_
-    show ‖extRhoB F m (u i) - extRhoC F m (v i)‖ ≤ _
-    refine (norm_sub_le_max _ _).trans (max_le ?_ ?_)
-    · calc ‖extRhoB F m (u i)‖ ≤ ‖u i‖ := norm_mapRestricted_le _ _ _ _
-        _ ≤ ‖u‖ := norm_le_pi_norm u i
-        _ ≤ hB * M := hun'
-        _ ≤ (hB + hC) * M := mul_le_mul_of_nonneg_right (by linarith) hM0
-    · calc ‖extRhoC F m (v i)‖ ≤ ‖v i‖ := norm_mapRestricted_le _ _ _ _
-        _ ≤ ‖v‖ := norm_le_pi_norm v i
-        _ ≤ hC * M := hvn'
-        _ ≤ (hB + hC) * M := mul_le_mul_of_nonneg_right (by linarith) hM0
-  have hzM0 : 0 ≤ z * (hB + hC) * M :=
-    mul_nonneg (mul_nonneg hz0 (add_nonneg hB0 hC0)) hM0
-  have hsDn' : ‖sD‖ ≤ z * (hB + hC) * M := by
-    refine hsDn.trans ?_
-    calc z * ‖w‖ ≤ z * ((hB + hC) * M) := mul_le_mul_of_nonneg_left hwn hz0
-      _ = z * (hB + hC) * M := by ring
-  have hsec : ∀ p : Pairs m, ∃ c : PC F m, extRhoC F m c = sD p ∧ ‖c‖ = ‖sD p‖ := fun p =>
-    extRhoC_strict_surjective F m (sD p)
-  choose sC hsC hsCn using hsec
-  have hsCn' : ∀ p, ‖sC p‖ ≤ z * (hB + hC) * M := fun p => by
-    rw [hsCn p]
-    exact (norm_le_pi_norm sD p).trans hsDn'
-  set v' : Fin m → PC F m := fun i => v i + d2 (rC F m g f) sC i with hv'def
-  have hv'd1 : d1 (rC F m g f) v' = xc := by
-    rw [hv'def, d1_add, hv,
-      show d1 (rC F m g f) (fun i => d2 (rC F m g f) sC i) = 0 from d1_d2 _ sC, add_zero]
-  have hv'compat : ∀ i, extRhoB F m (u i) = extRhoC F m (v' i) := fun i => by
-    rw [hv'def]
-    show _ = extRhoC F m (v i + d2 (rC F m g f) sC i)
-    rw [map_add, d2_map (extRhoC F m)]
-    have heq : d2 (fun j => extRhoC F m (rC F m g f j)) (fun p => extRhoC F m (sC p)) i =
-        d2 (rD F m g f) sD i := by
-      congr 1
-      exact funext hsC
-    rw [heq, congrFun hsD i, hw]
-    show extRhoB F m (u i) =
-      extRhoC F m (v i) + (extRhoB F m (u i) - extRhoC F m (v i))
-    ring
-  have hpull := fun i => (ext_milnorRow_exact F m (u i) (v' i) (hv'compat i)).exists
-  choose a ha using hpull
-  refine ⟨d1 (rA F m g f) a, ?_, ?_, ?_, ?_⟩
-  · show d1 (rA F m g f) a ∈ Ideal.span (Set.range (rA F m g f))
-    unfold d1
-    exact Ideal.sum_mem _ fun i _ => Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨i, rfl⟩)
-  · rw [show extJB F m (d1 (rA F m g f) a) =
-      d1 (fun i => extJB F m (rA F m g f i)) (fun i => extJB F m (a i)) from
-        d1_map (extJB F m) _ a,
-      show (fun i => extJB F m (rA F m g f i)) = rB F m g f from rfl,
-      show (fun i => extJB F m (a i)) = u from funext fun i => (ha i).1]
-    exact hu
-  · rw [show extIotaC F m (d1 (rA F m g f) a) =
-      d1 (fun i => extIotaC F m (rA F m g f i)) (fun i => extIotaC F m (a i)) from
-        d1_map (extIotaC F m) _ a,
-      show (fun i => extIotaC F m (rA F m g f i)) = rC F m g f from rfl,
-      show (fun i => extIotaC F m (a i)) = v' from funext fun i => (ha i).2]
-    exact hv'd1
-  · have hd2bound : ∀ i, ‖d2 (rC F m g f) sC i‖ ≤ z * (hB + hC) * M * CrC :=
-      fun i => norm_d2_le _ _ _ _ hzM0 hCrC hsCn' i
-    have hv'n : ‖v'‖ ≤ Bs * M := by
-      refine pi_norm_le_iff_of_nonneg (mul_nonneg hBs0 hM0) |>.mpr fun i => ?_
-      show ‖v i + d2 (rC F m g f) sC i‖ ≤ _
-      refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
-      · calc ‖v i‖ ≤ ‖v‖ := norm_le_pi_norm v i
-          _ ≤ hC * M := hvn'
-          _ ≤ Bs * M := mul_le_mul_of_nonneg_right hBsC hM0
-      · refine (hd2bound i).trans ?_
-        calc z * (hB + hC) * M * CrC = (z * (hB + hC) * CrC) * M := by ring
-          _ ≤ Bs * M := mul_le_mul_of_nonneg_right hBszC hM0
-    have han : ‖a‖ ≤ Bs * M := by
-      refine pi_norm_le_iff_of_nonneg (mul_nonneg hBs0 hM0) |>.mpr fun i => ?_
-      have hmax := ext_max_norm_eq F m (a i)
-      rw [(ha i).1, (ha i).2] at hmax
-      rw [← hmax]
-      refine max_le ?_ ?_
-      · exact (norm_le_pi_norm u i).trans (hun'.trans
-          (mul_le_mul_of_nonneg_right hBsB hM0))
-      · exact (norm_le_pi_norm v' i).trans hv'n
-    have hfinal : ∀ (T : Finset (Fin m)), ‖∑ j ∈ T, a j * rA F m g f j‖ ≤ Bs * M * CrA :=
-      norm_sum_mul_le a (rA F m g f) (Bs * M) CrA (mul_nonneg hBs0 hM0) hCrA
-        (fun j => (norm_le_pi_norm a j).trans han)
-    show ‖d1 (rA F m g f) a‖ ≤ (1 + Bs * CrA) * M
-    unfold d1
-    refine (hfinal Finset.univ).trans ?_
-    calc Bs * M * CrA = Bs * CrA * M := by ring
-      _ ≤ (1 + Bs * CrA) * M := by
-          refine mul_le_mul_of_nonneg_right ?_ hM0
-          linarith [mul_nonneg hBs0 (zero_le_one.trans hCrA1)]
+  exact ideal_pullback_controlled_witness F m g f hB hC z CrC CrA Bs hB0 hC0 hz0 hBs0
+    hCrA1 hCrC hCrA hBsB hBsC hBszC hliftB hliftC hliftD xb hxb xc hxc hcompat
 
 /-- `I_𝓐` is closed in `P_𝓐` ([FJP] Lemma 4.3: "Consequently `I_R` is closed in `P_R`"). -/
 theorem isClosed_IA (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :

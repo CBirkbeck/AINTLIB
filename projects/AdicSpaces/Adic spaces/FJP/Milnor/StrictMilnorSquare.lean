@@ -116,9 +116,12 @@ structure StrictMilnorSquare (k : Type u) [NontriviallyNormedField k]
   pods_noetherian_D : ∀ m : ℕ, IsNoetherianRing (FiniteJet.GraphKoszul.P D m)
   /-- Noetherian unit-ball pods (the Wedhorn-closedness input of the §4 chase;
   d = 2 supplier: T303's `isNoetherianRing_unitBall_of_section`). -/
-  unitBall_pods_noetherian_B : ∀ m : ℕ, IsNoetherianRing (FiniteJet.unitBall (FiniteJet.GraphKoszul.P B m))
-  unitBall_pods_noetherian_C : ∀ m : ℕ, IsNoetherianRing (FiniteJet.unitBall (FiniteJet.GraphKoszul.P C m))
-  unitBall_pods_noetherian_D : ∀ m : ℕ, IsNoetherianRing (FiniteJet.unitBall (FiniteJet.GraphKoszul.P D m))
+  unitBall_pods_noetherian_B : ∀ m : ℕ, IsNoetherianRing (FiniteJet.unitBall
+    (FiniteJet.GraphKoszul.P B m))
+  unitBall_pods_noetherian_C : ∀ m : ℕ, IsNoetherianRing (FiniteJet.unitBall
+    (FiniteJet.GraphKoszul.P C m))
+  unitBall_pods_noetherian_D : ∀ m : ℕ, IsNoetherianRing (FiniteJet.unitBall
+    (FiniteJet.GraphKoszul.P D m))
 
 namespace StrictMilnorSquare
 

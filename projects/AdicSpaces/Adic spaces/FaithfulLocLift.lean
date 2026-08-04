@@ -54,7 +54,8 @@ of `𝒪(D')` pulls back into `rationalOpen(D') ⊆ rationalOpen(D)`, where `D.s
 `w(D'.canonicalMap D.s) ≠ 0`. The reduction is complete; it bottoms at the single source-justified
 leaf Prop 7.51(2)/7.49 (`exists_spa_point_supp_eq_maxIdeal_of_complete`) carried by the unit
 criterion. NO `IsDomain`, NO noeth-`A₀`, NO T001 algebraic route — this is the reviewer-recommended
-faithful replacement for `isUnit_canonicalMap_s_of_huber` (whose `spa_point_nonOpen` sorry is opaque). -/
+faithful replacement for `isUnit_canonicalMap_s_of_huber` (whose `spa_point_nonOpen` sorry is
+  opaque). -/
 theorem isUnit_canonicalMap_s_faithful
     [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
@@ -104,7 +105,8 @@ This is a genuine **cited external leaf** ([Hu2] 3.3(i) — not reproved in Wedh
 `isIntegral_of_forall_continuous_valuation_le_one` (Presheaf.lean) is `[IsDomain]`-gated (an
 artifact of its FractionRing route, false for case-(b) non-domain `presheafValue D'`) + carries a
 7.22 continuity sorry, so it does NOT discharge this. Should a faithful in-repo discharge be wanted
-later, formalise Huber's hypothesis-free 3.3(i) proof directly (≈25 lines + his (3.1) continuity). -/
+later, formalise Huber's hypothesis-free 3.3(i) proof directly (≈25 lines + his (3.1)
+  continuity). -/
 theorem mem_plus_of_forall_spa_vle_one
     [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
@@ -121,7 +123,8 @@ theorem mem_plus_of_forall_spa_vle_one
 
 set_option linter.unusedSectionVars false in
 /-- **Power-bounded from Spa-boundedness (Wedhorn 7.18(1) + Def 7.14(1)).** If every continuous
-valuation `w ∈ Spa(B, B⁺)` of `B = presheafValue D'` satisfies `w(x) ≤ 1`, then `x` is power-bounded.
+valuation `w ∈ Spa(B,
+  B⁺)` of `B = presheafValue D'` satisfies `w(x) ≤ 1`, then `x` is power-bounded.
 *Proof.* By `mem_plus_of_forall_spa_vle_one` (the substantive direction of Huber [Hu2] 3.3(i) =
 Wedhorn 7.18(1)), `x ∈ B⁺`; and `B⁺ ⊆ B°` (`IsRingOfIntegralElements.subset_powerBounded`,
 Def 7.14(1)), so `x ∈ B° = {power-bounded}`. -/

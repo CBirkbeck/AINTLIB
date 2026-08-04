@@ -120,7 +120,7 @@ private theorem vlt_one_of_not_vle_pow {v : Spv (Ainf p F)} {a : Ainf p F} {n : 
     have hchain : ∀ k : ℕ, v.vle a (a ^ (k + 1)) := by
       intro k
       induction k with
-      | zero => simpa using (v.vle_total a a).elim id id
+      | zero => simp
       | succ m ih =>
           refine v.vle_trans ih ?_
           have hmul := v.mul_vle_mul_left h1a (a ^ (m + 1))

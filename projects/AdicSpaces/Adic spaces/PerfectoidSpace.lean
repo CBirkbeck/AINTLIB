@@ -77,15 +77,15 @@ def toTopCat : TopCat.{u} := SpaTop X.Ring
 This requires that perfectoid rings are sheafy (Scholze, Theorem 6.3), which
 follows from the deep result that perfectoid rings are stably uniform. The
 proof goes through almost mathematics and tilting. -/
-noncomputable def toAffinoidAdicPresentation : AffinoidAdicPresentation.{u} := by
-  exact sorry
+noncomputable def toAffinoidAdicPresentation : AffinoidAdicPresentation.{u} :=
+  sorry
 
 /-- Every affinoid perfectoid space gives rise to an adic space *presentation*.
 
 This combines `toAffinoidAdicPresentation` with the fact that every affinoid adic
 presentation is trivially an adic space presentation (covered by itself). -/
-noncomputable def toAdicSpacePresentation : AdicSpacePresentation.{u} := by
-  exact sorry
+noncomputable def toAdicSpacePresentation : AdicSpacePresentation.{u} :=
+  sorry
 
 end AffinoidPerfectoidSpace
 

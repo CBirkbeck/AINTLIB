@@ -118,7 +118,8 @@ variable [DecidableEq A]
 theorem imgSpan (D₀ : RationalLocData A) {E : RationalLocData A}
     [DecidableEq (presheafValue D₀)]
     (hspanE : Ideal.span (E.T : Set A) = ⊤) :
-    Ideal.span ((E.T.image D₀.canonicalMap : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤ := by
+    Ideal.span ((E.T.image D₀.canonicalMap : Finset (presheafValue D₀)) : Set (presheafValue
+      D₀)) = ⊤ := by
   rw [Finset.coe_image, ← Ideal.map_span, hspanE]
   exact Ideal.map_top _
 

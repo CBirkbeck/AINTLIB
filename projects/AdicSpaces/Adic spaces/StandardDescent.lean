@@ -209,7 +209,8 @@ variable [PlusSubring A] [IsRingOfIntegralElements (A⁺ : Subring A)]
   [DecidableEq A] [DecidableEq (RationalLocData A)]
 
 omit [T2Space A] [NonarchimedeanRing A]
-  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [PlusSubring A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [PlusSubring
+    A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
 /-- The generated standard cover of a base, as `StandardCoverData` (from
 `StandardRefinement.lean`), with pieces `stdPiece`. -/
 theorem stdPiece_mem_ofSpanTop (D₀ : RationalLocData A) (hD₀ : D₀.IsRational)
@@ -218,7 +219,8 @@ theorem stdPiece_mem_ofSpanTop (D₀ : RationalLocData A) (hD₀ : D₀.IsRation
   (mem_genCoverPieces D₀ hD₀ S hS).mpr ⟨⟨f, hf⟩, rfl⟩
 
 omit [T2Space A] [NonarchimedeanRing A]
-  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [PlusSubring A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [PlusSubring
+    A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
 theorem mem_ofSpanTop_covers {D₀ : RationalLocData A} {hD₀ : D₀.IsRational}
     {S : Finset A} {hS : Ideal.span (S : Set A) = ⊤} {P : RationalLocData A}
     (hP : P ∈ (StandardCoverData.ofSpanTop D₀ hD₀ S hS).covers) :

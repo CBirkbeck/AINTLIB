@@ -283,7 +283,8 @@ theorem mem_BIPlusIn_iff_isIntegral
   · intro hz
     have hKinv1 : ρ₁ ^ m * ((σ₁ ^ m)⁻¹) ≤ 1 :=
       mul_inv_le_one_of_le₀ (pow_le_pow_left₀ zero_le hρσ m) zero_le
-    obtain ⟨x, hx⟩ := exists_BIProd_wI_le p F ϖ z.2 (mul_pos (pow_pos hρ₁0 m) (inv_pos.mpr (pow_pos hσ₁0 m)))
+    obtain ⟨x, hx⟩ := exists_BIProd_wI_le p F ϖ z.2 (mul_pos (pow_pos hρ₁0 m) (inv_pos.mpr (pow_pos
+      hσ₁0 m)))
     obtain ⟨⟨a, k⟩, hak⟩ := exists_mk'_sPow p F ϖ x; subst hak
     have hxw : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
         (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1

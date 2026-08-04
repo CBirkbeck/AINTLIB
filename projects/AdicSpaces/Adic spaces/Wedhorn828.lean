@@ -2058,9 +2058,7 @@ private lemma algebraMap_mem_closure_range_iU (D : RationalLocData A) (m : ℕ)
   have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) := by
     letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
     letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-    change DenseRange (UniformSpace.Completion.coeRingHom :
-      Localization.Away D.s → presheafValue D)
-    exact UniformSpace.Completion.denseRange_coe
+    exact denseRange_coeRingHom D
   intro x
   have hx_cl : x ∈ closure (Set.range (D.coeRingHom)) := hdense x
   have hsub : Set.range (D.coeRingHom) ⊆
@@ -2174,15 +2172,49 @@ local instance : T2Space (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
   MvTateAlgebra.mvTate_t2Space m
 
 omit [CompatiblePlusSubring A] in
-/-- **`mk(s)` is a unit in the quotient `γ = source ⧸ ker Ψ`** (helper for
-`presheafValue_mvRestricted_surjection`). Mirrors `example638_isUnit_mk_s`: the relation
-`algebraMap _ B⟨Y⟩ ∘ example638_evalHom D = Ψ ∘ ι` (pushed termwise through the evaluation tsum,
-using
-the three characterizing facts `hΨ_cont`/`hΨ_alg`/`hΨ_genX` of the bounded evaluation hom `Ψ`) plus
-`invS D ∈ range (example638_evalHom D)` exhibit `mk(ι c)` as the inverse of `mk(algebraMap s)`.
-`Ψ` is opaque; its evaluation behaviour enters only through the three facts, so the conclusion is
-topology-free and matches the caller's `RingHom.ker Ψ`. -/
-private lemma presheafValue_mvRestricted_isUnit_mk_s
+/-- Termwise comparison of the two evaluation series: applying `algebraMap` to the `𝒪(U)`-side
+term equals applying `Ψ` to the `A⟨X₁..Xₙ₊ₘ⟩`-side term.
+
+Purely algebraic — the coefficient goes across by `hΨ_alg` and each generator power by
+`hΨ_genX`, so none of the topology needed to *sum* the series is needed here. -/
+private lemma mvEvalTerm_algebraMap_eq
+    (Ψ : restrictedMvPowerSeriesSubring (D.T.card + m) A →+*
+      restrictedMvPowerSeriesSubring m (presheafValue D))
+    (hΨ_alg : ∀ x, Ψ (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A) x) =
+      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (D.canonicalMap x))
+    (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
+        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (example638_genTuple D i))
+    (h : restrictedMvPowerSeriesSubring D.T.card A) (v : Fin D.T.card →₀ ℕ) :
+    algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (mvEvalTerm D.canonicalMap (example638_genTuple D) h v) =
+      Ψ (mvEvalTerm (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
+        (fun i ↦ (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+          restrictedMvPowerSeriesSubring (D.T.card + m) A)) h v) := by
+  -- LHS term: `algebraMap _ T (canonicalMap(coeffᵥ) · ∏ (tᵢ/s)^vᵢ)`.
+  rw [mvEvalTerm, mvEvalTerm, map_mul, map_prod]
+  rw [map_mul]
+  -- generators on `Ψ`: `Ψ(algebraMap a) = algebraMap _ T (canonicalMap a)` (`hΨ_alg`).
+  rw [hΨ_alg (MvPowerSeries.coeff v h.val)]
+  congr 1
+  rw [map_prod]
+  refine Finset.prod_congr rfl (fun i _ ↦ ?_)
+  rw [map_pow, map_pow]
+  congr 1
+  -- `Ψ(bι i) = algebraMap _ T (example638_genTuple D i)` (`hΨ_genX`).
+  exact (hΨ_genX i).symm
+
+omit [CompatiblePlusSubring A] in
+/-- The variable-inclusion `ι : A⟨X₁..Xₙ⟩ → A⟨X₁..Xₙ₊ₘ⟩` (`Xᵢ ↦ X (castAdd m i)`) together with
+the pointwise identity `algebraMap ∘ example638_evalHom = Ψ ∘ ι`.
+
+Packaged as an existential so that the whole topology/uniformity/completeness preamble that
+`mvEvalHomBounded` needs in order to *build* `ι` stays inside this proof: the caller only ever
+uses `ι` as a ring map and `hkey` as an equation. The identity is proved by pushing both
+continuous additive maps through the single evaluation `tsum` termwise — no Fubini. -/
+private lemma exists_mvRestricted_inclusion
     (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A))
     (Ψ : restrictedMvPowerSeriesSubring (D.T.card + m) A →+*
       restrictedMvPowerSeriesSubring m (presheafValue D))
@@ -2195,8 +2227,11 @@ private lemma presheafValue_mvRestricted_isUnit_mk_s
         MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
       algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
         (example638_genTuple D i)) :
-    IsUnit ((Ideal.Quotient.mk (RingHom.ker Ψ)).comp
-      (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) D.s) := by
+    ∃ ι : restrictedMvPowerSeriesSubring D.T.card A →+*
+        restrictedMvPowerSeriesSubring (D.T.card + m) A,
+      ∀ h : restrictedMvPowerSeriesSubring D.T.card A,
+        algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+          (example638_evalHom D h) = Ψ (ι h) := by
   -- Install the source-ring (`A⟨X₁..Xₙ₊ₘ⟩`) topology/uniform/complete/nonarch/T0 instances so that
   -- `mvEvalHomBounded` can build the variable-inclusion `ι`.
   letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
@@ -2226,48 +2261,60 @@ private lemma presheafValue_mvRestricted_isUnit_mk_s
       (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (D.T.card + m)) bι hbι
   -- `algebraMap _ T ∘ example638_evalHom D = Ψ ∘ ι` POINTWISE (push the continuous additive maps
   -- through the single evaluation `tsum`, termwise — NO Fubini).
-  have hkey : ∀ h : restrictedMvPowerSeriesSubring D.T.card A,
-      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-          (example638_evalHom D h) = Ψ (ι h) := by
-    intro h
-    -- LHS: push `algebraMap _ T` through the `example638_evalHom` tsum.
-    have hL : algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-          (example638_evalHom D h) =
-        ∑' v, algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-          (mvEvalTerm D.canonicalMap (example638_genTuple D) h v) := by
-      change algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-        (∑' v, mvEvalTerm D.canonicalMap (example638_genTuple D) h v) = _
-      exact (mvEvalTerm_summable D.canonicalMap (canonicalMap_continuous D)
-        (example638_genTuple D) (example638_genTuple_isBounded D) h).map_tsum
-        (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)))
-        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := presheafValue D) m)
-    -- RHS: push `Ψ` through the `ι` tsum.
-    have hR : Ψ (ι h) =
-        ∑' v, Ψ (mvEvalTerm (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
-          bι h v) := by
-      change Ψ (∑' v, mvEvalTerm
-        (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) bι h v) = _
-      exact (mvEvalTerm_summable
-        (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
-        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (D.T.card + m)) bι hbι h).map_tsum
-        Ψ hΨ_cont
-    rw [hL, hR]
-    -- termwise equality of the two evaluation series.
-    refine tsum_congr (fun v ↦ ?_)
-    -- LHS term: `algebraMap _ T (canonicalMap(coeffᵥ) · ∏ (tᵢ/s)^vᵢ)`.
-    rw [mvEvalTerm, mvEvalTerm, map_mul, map_prod]
-    rw [map_mul]
-    -- generators on `Ψ`: `Ψ(algebraMap a) = algebraMap _ T (canonicalMap a)` (`hΨ_alg`).
-    rw [hΨ_alg (MvPowerSeries.coeff v h.val)]
-    congr 1
-    rw [map_prod]
-    refine Finset.prod_congr rfl (fun i _ ↦ ?_)
-    rw [map_pow, map_pow]
-    congr 1
-    -- `Ψ(bι i) = algebraMap _ T (example638_genTuple D i)` (`hΨ_genX`).
-    exact (hΨ_genX i).symm
+  refine ⟨ι, fun h => ?_⟩
+  -- LHS: push `algebraMap _ T` through the `example638_evalHom` tsum.
+  have hL : algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (example638_evalHom D h) =
+      ∑' v, algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (mvEvalTerm D.canonicalMap (example638_genTuple D) h v) := by
+    change algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+      (∑' v, mvEvalTerm D.canonicalMap (example638_genTuple D) h v) = _
+    exact (mvEvalTerm_summable D.canonicalMap (canonicalMap_continuous D)
+      (example638_genTuple D) (example638_genTuple_isBounded D) h).map_tsum
+      (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)))
+      (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := presheafValue D) m)
+  -- RHS: push `Ψ` through the `ι` tsum.
+  have hR : Ψ (ι h) =
+      ∑' v, Ψ (mvEvalTerm (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
+        bι h v) := by
+    change Ψ (∑' v, mvEvalTerm
+      (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) bι h v) = _
+    exact (mvEvalTerm_summable
+      (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
+      (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (D.T.card + m)) bι hbι h).map_tsum
+      Ψ hΨ_cont
+  rw [hL, hR]
+  -- termwise equality of the two evaluation series.
+  refine tsum_congr (fun v ↦ ?_)
+  exact mvEvalTerm_algebraMap_eq D m Ψ hΨ_alg hΨ_genX h v
   -- Finish like `example638_isUnit_mk_s`: `invS D = example638_evalHom D c`, so
   -- `algebraMap _ T (invS D) = Ψ (ι c) ∈ range Ψ`; the inverse of `mk(alg s)` is `mk(ι c)`.
+
+omit [CompatiblePlusSubring A] in
+/-- **`mk(s)` is a unit in the quotient `γ = source ⧸ ker Ψ`** (helper for
+`presheafValue_mvRestricted_surjection`). Mirrors `example638_isUnit_mk_s`: the relation
+`algebraMap _ B⟨Y⟩ ∘ example638_evalHom D = Ψ ∘ ι` (pushed termwise through the evaluation tsum,
+using
+the three characterizing facts `hΨ_cont`/`hΨ_alg`/`hΨ_genX` of the bounded evaluation hom `Ψ`) plus
+`invS D ∈ range (example638_evalHom D)` exhibit `mk(ι c)` as the inverse of `mk(algebraMap s)`.
+`Ψ` is opaque; its evaluation behaviour enters only through the three facts, so the conclusion is
+topology-free and matches the caller's `RingHom.ker Ψ`. -/
+private lemma presheafValue_mvRestricted_isUnit_mk_s
+    (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A))
+    (Ψ : restrictedMvPowerSeriesSubring (D.T.card + m) A →+*
+      restrictedMvPowerSeriesSubring m (presheafValue D))
+    (hΨ_cont : @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m))
+      (MvTateAlgebra.mvTateAlgebraTopology' m) Ψ)
+    (hΨ_alg : ∀ x, Ψ (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A) x) =
+      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (D.canonicalMap x))
+    (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
+        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (example638_genTuple D i)) :
+    IsUnit ((Ideal.Quotient.mk (RingHom.ker Ψ)).comp
+      (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) D.s) := by
+  obtain ⟨ι, hkey⟩ := exists_mvRestricted_inclusion D m hA_complete Ψ hΨ_cont hΨ_alg hΨ_genX
   obtain ⟨c, hc⟩ := invS_mem_range D
   rw [isUnit_iff_exists_inv]
   refine ⟨Ideal.Quotient.mk (RingHom.ker Ψ) (ι c), ?_⟩
@@ -2472,19 +2519,6 @@ private lemma presheafValue_mvRestricted_fU_X_isPowerBounded
     (Ideal.Quotient.mk (RingHom.ker Ψ)) continuous_quotient_mk'
     (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hZ_pb
 
-
-omit [CompatiblePlusSubring A] in
-/-- In the localization topology, the `0`-neighbourhood filter is the comap along
-`D.coeRingHom` of the `0`-neighbourhood filter of the completion. -/
-private lemma nhds_zero_eq_comap_coeRingHom (D : RationalLocData A) :
-    @nhds _ D.topology (0 : Localization.Away D.s) =
-      Filter.comap D.coeRingHom (@nhds _ _ (0 : presheafValue D)) := by
-  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  have hcoe_ind : @Topology.IsInducing _ _ D.topology _ (D.coeRingHom) :=
-    (UniformSpace.Completion.isUniformInducing_coe (Localization.Away D.s)).isInducing
-  have h := hcoe_ind.nhds_eq_comap (0 : Localization.Away D.s)
-  rw [h, map_zero]
 
 omit [CompatiblePlusSubring A] in
 /-- `fU` expands over the support of its argument: it is `eval₂ ψγ (fU ∘ X)`. -/

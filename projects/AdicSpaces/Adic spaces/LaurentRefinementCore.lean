@@ -494,7 +494,8 @@ Base-INDEPENDENT (condition is `v(1) ≤ v(f)`).
 
 `@[reducible]` (v4.33): see `unitDatum` — the same `kabstract`-at-reducible choke on
 `interSamePair D₀ (coUnitDatum D₀.P f) rfl` subterms in downstream goals. -/
-@[reducible] noncomputable def coUnitDatum (P : PairOfDefinition A) (f : A) : RationalLocData A where
+@[reducible] noncomputable def coUnitDatum (P : PairOfDefinition A) (f :
+  A) : RationalLocData A where
   P := P
   T := {1}
   s := f

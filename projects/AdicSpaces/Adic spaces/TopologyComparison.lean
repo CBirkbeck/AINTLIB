@@ -1060,8 +1060,8 @@ theorem tateAlgebra_polynomials_dense (s : A) :
     -- idx ∈ I, so idx 0 < N
     have hlt : idx 0 < N := by
       change idx 0 < (I.image (· 0)).sup id + 1
-      have h_le : idx 0 ≤ (I.image (· 0)).sup id := by
-        exact Finset.le_sup (f := id)
+      have h_le : idx 0 ≤ (I.image (· 0)).sup id :=
+        Finset.le_sup (f := id)
           (Finset.mem_image_of_mem (· 0) hidx)
       linarith
     rw [scaleIncl_truncTate_eq g N s idx hlt]

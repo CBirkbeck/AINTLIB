@@ -341,8 +341,8 @@ theorem isPowerBounded_of_norm_le_one {R : Type*} [SeminormedCommRing R] {x : R}
   refine hball ?_
   rw [Metric.mem_ball, dist_zero_right]
   calc ‖x ^ n * y‖ ≤ ‖x ^ n‖ * ‖y‖ := norm_mul_le _ _
-    _ ≤ max ‖(1 : R)‖ 1 * ‖y‖ := by
-        exact mul_le_mul_of_nonneg_right (hM n) (norm_nonneg y)
+    _ ≤ max ‖(1 : R)‖ 1 * ‖y‖ :=
+        mul_le_mul_of_nonneg_right (hM n) (norm_nonneg y)
     _ < max ‖(1 : R)‖ 1 * (ε / max ‖(1 : R)‖ 1) :=
         mul_lt_mul_of_pos_left hy hMpos
     _ = ε := mul_div_cancel₀ _ (ne_of_gt hMpos)
@@ -1113,7 +1113,8 @@ theorem isUnit_bridgeBaseD_s (hD : D.IsRational) :
       bridgeBaseD D e (d i) * (bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeXD D e i) :=
     fun i => by rw [RingHom.map_mul (bridgeBaseD D e), bridgeBaseD_s_mul_X]
   have happ : bridgeBaseD D e c * bridgeBaseD D e (rhoC F (iotaC F D.s)) +
-      ∑ i, bridgeBaseD D e (d i) * (bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeXD D e i) = 1 := by
+      ∑ i, bridgeBaseD D e (d i) * (bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeXD D e
+        i) = 1 := by
     have h0 := congrArg (bridgeBaseD D e) hxy
     rw [RingHom.map_one (bridgeBaseD D e), RingHom.map_add (bridgeBaseD D e),
       RingHom.map_mul (bridgeBaseD D e),
@@ -1127,7 +1128,8 @@ theorem isUnit_bridgeBaseD_s (hD : D.IsRational) :
     calc bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeBaseD D e c +
         ∑ i, bridgeBaseD D e (rhoC F (iotaC F D.s)) * (bridgeBaseD D e (d i) * bridgeXD D e i)
         = bridgeBaseD D e c * bridgeBaseD D e (rhoC F (iotaC F D.s)) +
-          ∑ i, bridgeBaseD D e (d i) * (bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeXD D e i) := by
+          ∑ i, bridgeBaseD D e (d i) * (bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeXD D e
+            i) := by
           rw [mul_comm (bridgeBaseD D e (rhoC F (iotaC F D.s))) (bridgeBaseD D e c)]
           congr 1
           exact Finset.sum_congr rfl fun i _ => by ring

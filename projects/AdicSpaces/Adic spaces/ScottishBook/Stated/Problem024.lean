@@ -87,7 +87,8 @@ The counterexample is the [FJP] finite-jet algebra at its chart datum `(W; ϖ)`,
 **any** complete ultrametric nonarchimedean field `K` carrying a pseudouniformizer
 (`FiniteJet.IsFJPBase`) — no discreteness needed, so `ℚ_p`, `ℂ_p` and `F((t))` all qualify.
 See `finiteJet_not_flat_canonicalMap` and the discussion in `Problem028.lean`. -/
-theorem problem24_completed_false (K : Type u) [NormedField K] [IsUltrametricDist K] [CompleteSpace K]
+theorem problem24_completed_false (K : Type u) [NormedField K] [IsUltrametricDist K] [CompleteSpace
+  K]
       [FiniteJet.IsFJPBase K] :
     ¬ ∀ (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A)
         (_ : PlusSubring A) (_ : IsHuberRing A) (_ : IsTateRing A)
@@ -100,7 +101,8 @@ theorem problem24_completed_false (K : Type u) [NormedField K] [IsUltrametricDis
 
 /-- The same statement in existential form: there is a Tate pair and a rational datum
 whose completed rational localization is not flat. -/
-theorem exists_rationalLoc_not_flat (K : Type u) [NormedField K] [IsUltrametricDist K] [CompleteSpace K]
+theorem exists_rationalLoc_not_flat (K : Type u) [NormedField K] [IsUltrametricDist
+  K] [CompleteSpace K]
       [FiniteJet.IsFJPBase K] :
     ∃ (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A)
       (_ : PlusSubring A) (_ : IsHuberRing A) (_ : IsTateRing A)

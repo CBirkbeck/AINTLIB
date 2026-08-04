@@ -86,7 +86,8 @@ def IsProblem28Witness {A : Type u} [CommRing A] [TopologicalSpace A]
 
 /-- **The finite-jet algebra is a Problem-28 witness** (with `f = Q²` and the chart datum
 `(W; ϖ)`) — the concrete form of `problem28` below. -/
-theorem finiteJet_isProblem28Witness (K : Type u) [NormedField K] [IsUltrametricDist K] [CompleteSpace K]
+theorem finiteJet_isProblem28Witness (K : Type u) [NormedField K] [IsUltrametricDist
+  K] [CompleteSpace K]
     [FiniteJet.IsFJPBase K] :
     IsProblem28Witness (FiniteJet.scottishWitness K) (FiniteJet.chartDatum K) :=
   FiniteJet.finiteJet_problem28 K

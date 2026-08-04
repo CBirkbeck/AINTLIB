@@ -723,8 +723,8 @@ theorem eventually_pair_wI_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ�
     have hb1 : Valued.v (w.1 - z.1) ≤ ε / 2 := hw1
     have hb2 : Valued.v (w.2 - z.2) ≤ ε / 2 := hw2
     exact max_le hb1 hb2
-  have hhalfle : (ε : NNReal) / 2 ≤ ε := by
-    exact div_le_self zero_le (by norm_num)
+  have hhalfle : (ε : NNReal) / 2 ≤ ε :=
+    div_le_self zero_le (by norm_num)
   have hcomap : ∀ᶠ x in Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z),
       wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
         (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x - z) ≤ ε / 2 := by
@@ -755,15 +755,8 @@ theorem exists_nnreal_lt_gamma {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       Valuation (hatK p F hρ0 hρ1) NNReal)))ˣ) :
     ∃ ε : NNReal, 0 < ε ∧ ∀ w : hatK p F hρ0 hρ1,
       Valued.v w ≤ ε → (Valued.v).restrict w < γ.1 := by
-  have hγpos : (0 : NNReal) < MonoidWithZeroHom.ValueGroup₀.embedding γ.1 := by
-    refine pos_iff_ne_zero.mpr fun h0 => ?_
-    have hinj := (MonoidWithZeroHom.ValueGroup₀.embedding_strictMono
-      (f := MonoidWithZeroHom.ofClass (Valued.v :
-        Valuation (hatK p F hρ0 hρ1) NNReal))).injective
-    have h00 : MonoidWithZeroHom.ValueGroup₀.embedding (0 :
-        MonoidWithZeroHom.ValueGroup₀ (MonoidWithZeroHom.ofClass (Valued.v :
-          Valuation (hatK p F hρ0 hρ1) NNReal))) = 0 := map_zero _
-    exact γ.ne_zero (hinj (h0.trans h00.symm))
+  have hγpos : (0 : NNReal) < MonoidWithZeroHom.ValueGroup₀.embedding γ.1 :=
+    valueGroup_embedding_pos p F γ
   obtain ⟨N, hN⟩ := _root_.exists_pow_lt_of_lt_one hγpos hρ1
   refine ⟨ρ ^ (N + 1), pow_pos hρ0 (N + 1), fun w hw => ?_⟩
   have hlt : Valued.v w < MonoidWithZeroHom.ValueGroup₀.embedding γ.1 := by
@@ -1023,45 +1016,55 @@ def resIHom {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
       resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₂0 hσ₂1 (z : _)),
     resI_pair_mem p F ϖ hθ0 hθ1 hη0 hη1 hσ₁0 hσ₁1 hσ₂0 hσ₂1 z.2⟩
   map_one' := by
-    have hone : ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    have hone : ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+      hρ₂1))
         = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 1 := by
       rw [map_one]
       rfl
     have e1 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1
-        ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 1 := by
+        ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+          hρ₂1)) = 1 := by
       rw [hone, resI_BIProd p F ϖ hθ0 hθ1 hσ₁0 hσ₁1, map_one]
     have e2 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₂0 hσ₂1
-        ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 1 := by
+        ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+          hρ₂1)) = 1 := by
       rw [hone, resI_BIProd p F ϖ hη0 hη1 hσ₂0 hσ₂1, map_one]
     refine Subtype.ext ?_
     rw [show ((1 : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
       : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) = (1, 1) from rfl]
     exact Prod.ext e1 e2
   map_mul' := fun z z' => by
-    have hcoe : ((z * z' : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-        = (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * (z' : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := rfl
+    have hcoe : ((z * z' : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F
+      hρ₂0 hρ₂1))
+        = (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * (z' : (hatK p F hρ₁0 hρ₁1) × (hatK p F
+          hρ₂0 hρ₂1)) := rfl
     have e1 := resI_mul p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z.2 z'.2
     have e2 := resI_mul p F ϖ hη0 hη1 hσ₂0 hσ₂1 z.2 z'.2
     refine Subtype.ext ?_
     exact Prod.ext e1 e2
   map_zero' := by
-    have hzero : ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    have hzero : ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+      hρ₂1))
         = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 0 := by
       rw [map_zero]
       rfl
     have e1 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1
-        ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 0 := by
+        ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+          hρ₂1)) = 0 := by
       rw [hzero, resI_BIProd p F ϖ hθ0 hθ1 hσ₁0 hσ₁1, map_zero]
     have e2 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₂0 hσ₂1
-        ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 0 := by
+        ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+          hρ₂1)) = 0 := by
       rw [hzero, resI_BIProd p F ϖ hη0 hη1 hσ₂0 hσ₂1, map_zero]
     refine Subtype.ext ?_
     rw [show ((0 : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
       : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) = (0, 0) from rfl]
     exact Prod.ext e1 e2
   map_add' := fun z z' => by
-    have hcoe : ((z + z' : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-        = (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) + (z' : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := rfl
+    have hcoe : ((z + z' : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F
+      hρ₂0 hρ₂1))
+        = (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) + (z' : (hatK p F hρ₁0 hρ₁1) × (hatK p F
+          hρ₂0 hρ₂1)) := rfl
     have e1 := resI_add p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z.2 z'.2
     have e2 := resI_add p F ϖ hη0 hη1 hσ₂0 hσ₂1 z.2 z'.2
     refine Subtype.ext ?_
@@ -1323,8 +1326,10 @@ theorem exists_eq_p_pow_mul {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁
     rw [pImage, ← hu]
     exact (u.isUnit).pow n
   obtain ⟨v, hv⟩ := hupow
-  set V : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) := (v : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) with hVdef
-  set W : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) := ((v⁻¹ : ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))ˣ) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) with hWdef
+  set V : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) := (v : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0
+    hρ₂1)) with hVdef
+  set W : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) := ((v⁻¹ : ((hatK p F hρ₁0 hρ₁1) × (hatK p F
+    hρ₂0 hρ₂1))ˣ) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) with hWdef
   have hVW : V * W = 1 := v.mul_inv
   have hc1 : V.1 * W.1 = 1 := congrArg Prod.fst hVW
   have hc2 : V.2 * W.2 = 1 := congrArg Prod.snd hVW

@@ -2368,8 +2368,8 @@ theorem exists_continuous_valuation_of_valuationSubring_of_span_eq
           (not_le.mp (by rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV))
       have hsnx_ne : v₀_A₀ ⟨s ^ n * x, hn⟩ ≠ 0 :=
         ne_of_gt (lt_of_le_of_lt zero_le hv₀_lt)
-      have hv₀_sn_eq : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ = (v₀_A₀ t₀) ^ n := by
-        exact hsn_eq ▸ map_pow v₀_A₀ t₀ n
+      have hv₀_sn_eq : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ = (v₀_A₀ t₀) ^ n :=
+        hsn_eq ▸ map_pow v₀_A₀ t₀ n
       have hsn_ne : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ ≠ 0 := by
         rw [hv₀_sn_eq]; exact pow_ne_zero n hv₀_ne
       have hsn_mem : Units.mk0 (v₀_A₀ ⟨s ^ n, hsn_A₀⟩) hsn_ne ∈ H_gen := by

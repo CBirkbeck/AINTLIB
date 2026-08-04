@@ -294,7 +294,8 @@ noncomputable instance restrictedMvPowerSeriesSubring.instAlgebra (k : ℕ) (A :
 /-! ### Strongly noetherian rings -/
 
 /-- A topological ring `A` is **strongly noetherian** if the ring of restricted power series
-`A⟨T₁, …, Tₖ⟩` is noetherian for all `k ≥ 0` (Proposition & Definition 6.36 of Wedhorn, stated here with `A`-level restricted
+`A⟨T₁, …, Tₖ⟩` is noetherian for all `k ≥ 0` (Proposition & Definition 6.36 of Wedhorn, stated here
+  with `A`-level restricted
   series; Definition 6.36(i) verbatim is the condition on the completion `Â` — see
   `SheafyRing.lean`'s scope notes).
 

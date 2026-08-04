@@ -631,8 +631,8 @@ lemma continuous_boolToProp_pi :
   -- (continuous, `continuous_apply`) with `b ↦ b = true : Bool → Prop` (continuous
   -- since `Bool` is discrete).
   have h1 : Continuous (fun r : A × A → Bool ↦ r p) := continuous_apply p
-  have h2 : Continuous (fun b : Bool ↦ boolToProp b) := by
-    exact continuous_of_discreteTopology
+  have h2 : Continuous (fun b : Bool ↦ boolToProp b) :=
+    continuous_of_discreteTopology
   exact h2.comp h1
 
 /-! ### Closedness of `range ιSpv_bool` in the discrete Bool product

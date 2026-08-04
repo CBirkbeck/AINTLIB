@@ -2539,6 +2539,61 @@ private theorem locLift_open_on_image_at_zero_of_source_pair_noetherian
   refine locLift_open_on_image_at_zero_of_basis_form D₀ D h ?_
   exact cross_localization_basis_form_residual D₀ D h
 
+omit [PlusSubring A] [HasLocLiftPowerBounded A] in
+/-- In the localization topology, the `0`-neighbourhood filter is the comap along
+`D.coeRingHom` of the `0`-neighbourhood filter of the completion. -/
+theorem nhds_zero_eq_comap_coeRingHom (D : RationalLocData A) :
+    @nhds _ D.topology (0 : Localization.Away D.s) =
+      Filter.comap D.coeRingHom (@nhds _ _ (0 : presheafValue D)) := by
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  have hcoe_ind : @Topology.IsInducing _ _ D.topology _ (D.coeRingHom) :=
+    (UniformSpace.Completion.isUniformInducing_coe (Localization.Away D.s)).isInducing
+  have h := hcoe_ind.nhds_eq_comap (0 : Localization.Away D.s)
+  rw [h, map_zero]
+
+omit [PlusSubring A] [HasLocLiftPowerBounded A] in
+/-- The localization sits densely in its completion. -/
+theorem denseRange_coeRingHom (D : RationalLocData A) :
+    DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) := by
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  haveI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  haveI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  change DenseRange (UniformSpace.Completion.coeRingHom :
+    Localization.Away D.s → presheafValue D)
+  exact UniformSpace.Completion.denseRange_coe
+
+omit [PlusSubring A] [HasLocLiftPowerBounded A] in
+/-- The `D.coeRingHom`-preimage of a `0`-neighbourhood of the completion is a
+`0`-neighbourhood of the localization. -/
+theorem coeRingHom_preimage_mem_nhds_zero (D : RationalLocData A) {U : Set (presheafValue D)}
+    (hU : U ∈ nhds (0 : presheafValue D)) :
+    (D.coeRingHom : Localization.Away D.s → presheafValue D) ⁻¹' U ∈
+      @nhds _ D.topology (0 : Localization.Away D.s) := by
+  rw [nhds_zero_eq_comap_coeRingHom D]
+  exact Filter.preimage_mem_comap hU
+
+/-- Subtraction absorbs a neighbourhood of `c` into a neighbourhood of `c` times one of `0`. -/
+theorem exists_nhds_prod_sub_subset {X : Type*} [TopologicalSpace X] [AddGroup X]
+    [IsTopologicalAddGroup X] (c : X) {U : Set X} (hU : U ∈ nhds c) :
+    ∃ Uc ∈ nhds c, ∃ U0 ∈ nhds (0 : X),
+      Uc ×ˢ U0 ⊆ (fun p : X × X ↦ p.1 - p.2) ⁻¹' U := by
+  have hpre : (fun p : X × X ↦ p.1 - p.2) ⁻¹' U ∈ nhds ((c, (0 : X)) : X × X) :=
+    (continuous_sub.continuousAt (x := (c, (0 : X)))).preimage_mem_nhds (by simpa using hU)
+  rw [nhds_prod_eq] at hpre
+  exact Filter.mem_prod_iff.mp hpre
+
+/-- `restrictionMapHom` intertwines the localization inclusions with `locLift`. -/
+theorem restrictionMapHom_coeRingHom [IsTateRing A] [IsNoetherianRing A] [T2Space A]
+    [NonarchimedeanRing A] (D₀ D : RationalLocData A)
+    (h : rationalOpen D.T D.s ⊆ rationalOpen D₀.T D₀.s) (a : Localization.Away D₀.s) :
+    restrictionMapHom D₀ D h (D₀.coeRingHom a) = D.coeRingHom (locLift D₀ D h a) := by
+  change restrictionMapHom D₀ D h
+    (@UniformSpace.Completion.coeRingHom _ _ D₀.uniformSpace
+      D₀.isTopologicalRing D₀.isUniformAddGroup a) = _
+  rw [restrictionMapHom_coe' D₀ D h a, restrictionMapAlg_eq_comp_locLift]
+  rfl
+
 /-- **Step B ⊆ (closure form, sorry-free modulo narrower residual)**: every
 kernel element of the restriction map lies in the closure of the image,
 under `D₀.coeRingHom`, of the algebraic kernel of the localization-level
@@ -2570,67 +2625,29 @@ theorem ker_restrictionMapHom_subset_closure_algLift
   rw [mem_closure_iff_nhds]
   intro U hU
   -- Pick a sub-nbhd `U₀` of 0 and compatible `Uc` of `c` with `Uc - U₀ ⊆ U`.
-  have h_cont_sub : Continuous fun p : presheafValue D₀ × presheafValue D₀ ↦ p.1 - p.2 :=
-    continuous_sub
-  have h_sub_c0 : (fun p : presheafValue D₀ × presheafValue D₀ ↦ p.1 - p.2)
-      (c, (0 : presheafValue D₀)) = c := by
-    simp
-  have h_preimage_nhd : (fun p : presheafValue D₀ × presheafValue D₀ ↦ p.1 - p.2) ⁻¹' U ∈
-      nhds ((c, (0 : presheafValue D₀)) : presheafValue D₀ × presheafValue D₀) := by
-    have : U ∈ nhds ((fun p : presheafValue D₀ × presheafValue D₀ ↦ p.1 - p.2)
-        (c, (0 : presheafValue D₀))) := by
-      rw [h_sub_c0]; exact hU
-    exact h_cont_sub.continuousAt.preimage_mem_nhds this
-  rw [nhds_prod_eq] at h_preimage_nhd
-  obtain ⟨Uc, hUc, U0, hU0, hUcU0⟩ := Filter.mem_prod_iff.mp h_preimage_nhd
+  obtain ⟨Uc, hUc, U0, hU0, hUcU0⟩ := exists_nhds_prod_sub_subset c hU
   -- `U0` at 0 in presheafValue D₀; its preimage under `D₀.coeRingHom` is a nhd of 0.
-  have hcoe_cont : @Continuous _ _ D₀.topology
-      (@UniformSpace.toTopologicalSpace _
-        (@UniformSpace.Completion.uniformSpace _ D₀.uniformSpace))
-      (D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) :=
-    @UniformSpace.Completion.continuous_coe _ D₀.uniformSpace
-  have hV_nhd : (D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) ⁻¹' U0 ∈
-      @nhds _ D₀.topology (0 : Localization.Away D₀.s) := by
-    have h00 : (D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) 0 = 0 :=
-      map_zero _
-    have : U0 ∈ nhds ((D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) 0) := by
-      rw [h00]; exact hU0
-    exact hcoe_cont.continuousAt.preimage_mem_nhds this
+  have hV_nhd := coeRingHom_preimage_mem_nhds_zero D₀ hU0
   -- Narrower residual ⇒ nbhd `W` of 0 in D.topology matches.
   obtain ⟨W, hW_nhd, hW_lift⟩ :=
     locLift_open_on_image_at_zero D₀ D h _ hV_nhd
   -- Pull `W` through uniform inducing of `D.coeRingHom` to a nbhd `W'` of 0 in presheafValue D.
-  have hD_ui : @IsUniformInducing _ _ D.uniformSpace
-      (@UniformSpace.Completion.uniformSpace _ D.uniformSpace)
-      (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
-    UniformSpace.Completion.isUniformInducing_coe _
-  have h_nhd_D_comap : @nhds _ D.topology (0 : Localization.Away D.s) =
-      Filter.comap (D.coeRingHom : Localization.Away D.s → presheafValue D)
-        (nhds (0 : presheafValue D)) := by
-    have h00_D : (D.coeRingHom : Localization.Away D.s → presheafValue D) 0 = 0 :=
-      map_zero _
-    have := hD_ui.isInducing.nhds_eq_comap (0 : Localization.Away D.s)
-    rw [h00_D] at this; exact this
   obtain ⟨W', hW'_nhd, hW'_sub⟩ : ∃ W' : Set (presheafValue D),
       W' ∈ nhds (0 : presheafValue D) ∧
       (D.coeRingHom : Localization.Away D.s → presheafValue D) ⁻¹' W' ⊆ W := by
-    rw [h_nhd_D_comap, Filter.mem_comap] at hW_nhd
+    rw [nhds_zero_eq_comap_coeRingHom D, Filter.mem_comap] at hW_nhd
     exact hW_nhd
   -- Uc' := Uc ∩ restrictionMapHom⁻¹' W' is still a nbhd of c.
   have hrestr_cont : Continuous (restrictionMapHom D₀ D h :
       presheafValue D₀ → presheafValue D) :=
     restrictionMapHom_continuous D₀ D h
-  have hW'_pre_c : (restrictionMapHom D₀ D h) ⁻¹' W' ∈ nhds c := by
-    exact hrestr_cont.continuousAt.preimage_mem_nhds
+  have hW'_pre_c : (restrictionMapHom D₀ D h) ⁻¹' W' ∈ nhds c :=
+    hrestr_cont.continuousAt.preimage_mem_nhds
       (show W' ∈ nhds (restrictionMapHom D₀ D h c) by rw [hc]; exact hW'_nhd)
   have hUc' : Uc ∩ (restrictionMapHom D₀ D h) ⁻¹' W' ∈ nhds c :=
     Filter.inter_mem hUc hW'_pre_c
   -- Use density to pick `a₀ ∈ Localization.Away D₀.s` with `D₀.coeRingHom a₀ ∈ Uc'`.
-  have hdense : DenseRange (D₀.coeRingHom :
-      Localization.Away D₀.s → presheafValue D₀) := by
-    change DenseRange (UniformSpace.Completion.coeRingHom :
-      Localization.Away D₀.s → presheafValue D₀)
-    exact UniformSpace.Completion.denseRange_coe
+  have hdense := denseRange_coeRingHom D₀
   obtain ⟨y₀, hy₀_Uc', a₀, ha₀_eq⟩ :=
     mem_closure_iff_nhds.mp
       (by rw [hdense.closure_range]; trivial : c ∈ closure (Set.range D₀.coeRingHom))
@@ -2639,15 +2656,7 @@ theorem ker_restrictionMapHom_subset_closure_algLift
   have ha₀_Uc : D₀.coeRingHom a₀ ∈ Uc := (ha₀_eq ▸ hy₀_Uc').1
   have ha₀_W' : restrictionMapHom D₀ D h (D₀.coeRingHom a₀) ∈ W' := (ha₀_eq ▸ hy₀_Uc').2
   -- Transport through factorization `restrictionMapHom ∘ D₀.coeRingHom = D.coeRingHom ∘ locLift`.
-  have h_factor : restrictionMapHom D₀ D h (D₀.coeRingHom a₀) =
-      D.coeRingHom (locLift D₀ D h a₀) := by
-    -- `D₀.coeRingHom = UniformSpace.Completion.coeRingHom` definitionally (via
-    -- `RationalLocData.coeRingHom` definition). Use `show` to bridge the two forms.
-    change restrictionMapHom D₀ D h
-      (@UniformSpace.Completion.coeRingHom _ _ D₀.uniformSpace
-        D₀.isTopologicalRing D₀.isUniformAddGroup a₀) = _
-    rw [restrictionMapHom_coe' D₀ D h a₀, restrictionMapAlg_eq_comp_locLift]
-    rfl
+  have h_factor := restrictionMapHom_coeRingHom D₀ D h a₀
   have ha₀_lift_W' : D.coeRingHom (locLift D₀ D h a₀) ∈ W' := h_factor ▸ ha₀_W'
   have ha₀_lift_W : locLift D₀ D h a₀ ∈ W := hW'_sub ha₀_lift_W'
   -- Apply narrower residual: find `b ∈ V = D₀.coeRingHom⁻¹' U0` with same image.
@@ -2661,11 +2670,9 @@ theorem ker_restrictionMapHom_subset_closure_algLift
   have h_coe_sub : D₀.coeRingHom (a₀ - b) =
       D₀.coeRingHom a₀ - D₀.coeRingHom b := by
     rw [map_sub]
-  -- The pair `(D₀.coeRingHom a₀, D₀.coeRingHom b) ∈ Uc ×ˢ U0`.
-  have h_pair_in : (D₀.coeRingHom a₀, D₀.coeRingHom b) ∈ Uc ×ˢ U0 :=
-    ⟨ha₀_Uc, hb_coe_U0⟩
-  -- Hence the difference lies in `U`.
-  have h_diff_in_U : D₀.coeRingHom a₀ - D₀.coeRingHom b ∈ U := hUcU0 h_pair_in
+  -- The pair lies in `Uc ×ˢ U0`, hence the difference lies in `U`.
+  have h_diff_in_U : D₀.coeRingHom a₀ - D₀.coeRingHom b ∈ U :=
+    @hUcU0 (D₀.coeRingHom a₀, D₀.coeRingHom b) ⟨ha₀_Uc, hb_coe_U0⟩
   refine ⟨D₀.coeRingHom (a₀ - b), ?_, a₀ - b, hab_ker, rfl⟩
   rw [h_coe_sub]
   exact h_diff_in_U

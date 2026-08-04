@@ -139,6 +139,7 @@ to produce the direct Spa-point existence consumed by
 chain conditional on the pointwise Jacobson residual. -/
 theorem spa_point_nonOpen_of_rational_subset_via_jacobson_pointwise
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (D D' : RationalLocData A)
     [IsNoetherianRing (locSubring D'.P D'.T D'.s)]

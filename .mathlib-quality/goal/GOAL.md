@@ -13645,3 +13645,925 @@ than keeping it.
   with `repr()` in the message — an empty message means the assert fired on a blank line.
 
 Actionable over-50 count: 22 → 21.
+
+### `isOXAcyclic_interProd` 112 → 48: restate the hypothesis, don't extract around it
+
+Three rounds ago this was recorded as blocked — *"the blocker is not size but the interface:
+`g` and `hg` come from `choose g hg using fun P => (hV0 P.1 P.2).gluing …`, so their types are
+the `gluing` field's signature instantiated at a restricted cover."* That was the right
+diagnosis and the wrong conclusion. The fix was not to thread those types into extracted
+lemmas; it was to **stop having them in that shape**.
+
+Two facts made it collapse:
+
+```lean
+@[simp] theorem RationalCoveringData.restrictTo_base … : (V.restrictTo D hD hDP hVP).base = D := rfl
+theorem RationalCoveringData.restrictTo_covers … : (V.restrictTo D hD hDP hVP).covers = … := rfl
+```
+
+Both are `rfl`, and every remaining argument in those types (`by rw [hbase]; exact …`, the
+`_ ∈ _.covers` witnesses, the subset proofs) is a **`Prop`**, so Lean 4's definitional proof
+irrelevance makes them interchangeable. Together that means `hg` can be restated once, in the
+parent, in the only form the proof ever uses:
+
+```lean
+have hg' : ∀ (P : ↥Uf.covers) (Q : ↥V.covers),
+    restrictionMap P.1 (P.1.interSamePair Q.1 ((hVP Q.1 Q.2).trans (hUfP P.1 P.2).symm))
+        (RationalLocData.interSamePair_subset_left _ _ _) (g P)
+      = f ⟨_, mem_covers_interProd Uf V hbase hUfP hVP P.2 Q.2⟩ :=
+  fun P Q => hg P ⟨_, mem_covers_restrictTo V P.1 _ _ _ Q.2⟩
+```
+
+Four lines, once. It deleted **per side** inside `hcanon`: `hQPᵢ`, `hmemᵢ`, the four-line
+`hDmemᵢ`, and the shared `simp only [restrictTo_base] at hg₁ hg₂` — because the membership
+witness, the subset proof and the base rewrite now live inside `hg'`'s *statement* rather than
+being rebuilt at each use. `hcanon` went 51 → 25 on that alone, and every downstream signature
+became short enough to write.
+
+**The general rule: when a `choose`/`obtain` hands you a hypothesis in a shape driven by the
+source lemma rather than by your use, restate it once in use-shape before decomposing.** An
+extraction that inherits the awkward shape pays for it in every signature; a restatement pays
+once. Check `rfl`-ness of the projections and `Prop`-ness of the arguments first — that is what
+makes the restatement free.
+
+| | before | after |
+|---|---|---|
+| `hcanon` | 51 | 25 (inlined) |
+| `hgcoc` | 70 | lifted → `interProd_gluing_cocycle` (37) |
+| `isOXAcyclic_interProd` | 112 | **48** ✓ |
+
+Plus a 2-line `rationalOpen_interSamePair_subset` replacing the two 7-line `hEPᵢQ` blocks
+(`rationalOpen (M ∩ Q) ⊆ rationalOpen (P ∩ Q)` when `M ⊆ P`) — the earlier note that these are
+"nearly twins wanting two 3-line lemmas" was wrong; they are two instances of *one* monotonicity
+fact, and `Set.inter_subset_inter_left` proves it in a line.
+
+Both steps built green on the first try. Actionable over-50 count: 21 → 20.
+
+### Correction to the round-21 note
+
+The `[105, 12]` re-check suggested for `isOXAcyclic_interProd` did happen and the deeper outline
+*was* right that the interior is nested (`gluing 99 ⊃ hgcoc 70 ⊃ hcanon 51`). But the plan built
+from it — four lemmas, threading `g`/`hg` — was more work than the problem. Outlining tells you
+where the size is; it does not tell you that the size is caused by a *hypothesis shape*. Look at
+what the inner blocks are spending lines on before deciding what to extract: here, ~24 of
+`hcanon`'s 51 lines were re-deriving things `hg` should have said in the first place.
+
+### `ker_restrictionMapHom_subset_closure_algLift` 95 → 48: the long proof was mostly duplication
+
+This target looked like the WittF shape — a flat chain of fourteen 3-to-7-line blocks with no
+sub-argument worth a lemma. It wasn't. Reading what the blocks were *spending lines on* showed
+that most of them were re-deriving facts that either already existed elsewhere in the project or
+were general enough to be stated once:
+
+| block | was | became |
+|---|---|---|
+| `hD_ui` + `h_nhd_D_comap` | 11 | `nhds_zero_eq_comap_coeRingHom D` — **already existed**, in the wrong file |
+| `hdense` | 5 | `denseRange_coeRingHom D₀` — the same `change`/`exact` bridge as `Wedhorn828` |
+| `h_cont_sub` … `obtain Uc/U0` | 17 | `exists_nhds_prod_sub_subset c hU` |
+| `hcoe_cont` + `hV_nhd` | 12 | `coeRingHom_preimage_mem_nhds_zero D₀ hU0` |
+| `h_factor` | 10 | `restrictionMapHom_coeRingHom D₀ D h a₀` |
+
+### The lemma-in-the-wrong-file pattern, third confirmed instance
+
+`nhds_zero_eq_comap_coeRingHom` was declared **`private` in `Wedhorn828.lean`** — but
+`PresheafTateStructure.lean`, which `Wedhorn828` transitively *imports*, needs the same fact and
+therefore inlined the proof verbatim. A name-based duplication scan cannot see this: the copy is
+an anonymous `have` inside a proof, and the named lemma sits in a file that can never be a
+dependency of its other consumer.
+
+Both files are in `namespace ValuationSpectrum`, so hoisting to the earlier file and deleting the
+`private` copy left every call site unchanged. Same story for the
+`change DenseRange (UniformSpace.Completion.coeRingHom …)` / `exact denseRange_coe` bridge, which
+was copy-pasted into both.
+
+**The check that finds these: for each long proof, grep the distinctive middle of each multi-line
+`have` across the project.** If it hits a *named* lemma anywhere, compute the import direction —
+if the named one is downstream, hoist it up rather than leaving the inlined twin. `Presheaf.lean`
+also touches this fact twice, but as one-line `rw [hUI.isInducing.nhds_eq_comap, map_zero]`
+rewrites in a different shape; those are not duplicated proofs and were left alone.
+
+### Two build failures, both instance-context
+
+1. `denseRange_coeRingHom` needs `IsTopologicalRing` and `IsUniformAddGroup` on the localization
+   before `UniformSpace.Completion.coeRingHom` will elaborate — the `letI : UniformSpace` alone is
+   not enough. When lifting a body out from under a block of `letI`/`haveI`, carry **all** of the
+   instances the extracted term mentions, not just the one naming the structure.
+2. Copying `omit [IsHuberRing A] in` from a sibling lemma onto one that does use it (through
+   `presheafValue`) gives `cannot omit referenced section variable`, and the knock-on error at the
+   call site — `failed to infer have declaration type` — points at the *consumer*, not the cause.
+
+### `genPiece_relative_overlap_square₂` (94) — preamble-bound, cannot clear by extraction
+
+Measured split: **46 code lines of instance preamble, 48 of argument.** The preamble is four
+copies of the same triple, one per `RationalLocData` the proof mentions:
+
+```lean
+letI : UniformSpace     (Localization.Away E.s) := E.uniformSpace
+letI : IsTopologicalRing (Localization.Away E.s) := E.isTopologicalRing
+letI : IsUniformAddGroup (Localization.Away E.s) := E.isUniformAddGroup
+```
+
+with `E` ranging over `D₀ ∩ genPiece t₂`, `(D₀ ∩ genPiece t₁) ∩ genPiece t₂`, `imagePiece t₂`,
+and `imagePiece t₁ ∩ imagePiece t₂` — each spelled out in full twice (type and value), which is
+why one triple costs 5–6 lines rather than 3.
+
+**Extraction cannot fix this.** The 48-line argument touches all four carriers, so an extracted
+lemma needs the same preamble: the parent lands at 46 + 3 = 49 ✓ but the new lemma at 48 + 46 =
+94 ✗. The count moves from one declaration to another and the duplication doubles. This target is
+bound by its preamble, not by its argument, and is **deferred** on that basis rather than left
+un-analysed.
+
+**The fix that would work, with its measured payoff.** `RationalLocData.uniformSpace` /
+`.isTopologicalRing` / `.isUniformAddGroup` are `def`s, deliberately not `instance`s (four data
+instances on `Localization.Away E.s` for different `E` sharing an `s` would be a diamond). So
+every use site must re-`letI` them. A file-local tactic macro collapses each triple to one line:
+
+```lean
+local macro "locInstances " D:term : tactic =>
+  `(tactic| (letI : UniformSpace      (Localization.Away ($D).s) := ($D).uniformSpace
+             letI : IsTopologicalRing (Localization.Away ($D).s) := ($D).isTopologicalRing
+             letI : IsUniformAddGroup (Localization.Away ($D).s) := ($D).isUniformAddGroup))
+```
+
+Scale of the idiom (count of `… := E.uniformSpace` lines, i.e. triples):
+
+| file | triples | ≈ lines |
+|---|---|---|
+| `WedhornCechAcyclicity.lean` | 83 | ~250 |
+| `LaurentRefinementCore.lean` | 39 | ~120 |
+| `Presheaf.lean` | 30 | ~90 |
+| `RelativePieceKeystone{,Gen,Open}.lean` | 20 each | ~60 each |
+| `PresheafTateStructure.lean` | 20 | ~60 |
+| `RelativeDescent.lean` | 17 | ~50 |
+
+It would also remove a large share of the 517 over-width lines — `RelativePieceKeystone.lean`'s
+96 are mostly these `letI`s written on one long line.
+
+**Not done here, deliberately.** The project currently contains **zero** `macro`/`syntax`/`elab`
+declarations, so this would be its first, and it changes how several files read. That is an
+owner-level style decision, not something to introduce as a side effect of a decompose pass. It is
+recorded with numbers so it can be taken up as its own ticket.
+
+### A pre-existing breakage that a green `lake build` was hiding
+
+`PrimeExtensionClosed.lean:153` does not compile at `d36e26940`:
+
+```
+failed to synthesize instance of type class
+  IsRingOfIntegralElements A⁺
+```
+
+`spa_point_nonOpen_of_rational_subset_via_jacobson_pointwise` calls
+`spa_point_nonOpen_of_rational_subset_tate_of_prime_extension_closed` (`Cor832.lean:2259`), which
+takes `[IsRingOfIntegralElements (A⁺)]`, but the caller never declared it. Ordinary signature skew;
+fixed by threading the instance binder through — one line, no proof change.
+
+**What matters is why nobody saw it.** Every full `lake build` this session reported
+`EXIT=0, errors: 0` — including the one that gated the commit this breakage was already present in.
+Lake never recompiled the file: a stale `PrimeExtensionClosed.olean` was on disk and its trace was
+considered current, so the module was skipped. The error only surfaced when a killed build deleted
+the olean and forced a genuine recompile.
+
+I verified the attribution rather than assuming it: `git stash`-ed all three of my modified files,
+rebuilt the module on clean `HEAD`, and got the identical error. It is not mine.
+
+**Consequence for this goal: a green `lake build` is weaker evidence than it looks.** It certifies
+"nothing I touched broke anything that got recompiled", not "the library compiles". The gap is
+exactly the set of modules with stale-but-present oleans. Two cheap habits close it:
+
+1. Before trusting a gate, check for modules whose `.olean` is missing or older than its `.lean` —
+   a dozen lines of Python over `.lake/build/lib/lean/`, no build required. That is how the
+   remaining work was located here (3 missing, 5 stale out of 274).
+2. Treat a killed build as *information*, not just lost time. The deletions it leaves behind are
+   what expose skipped modules.
+
+### Builds keep being killed, and `lake` has no intra-file resume
+
+Several background builds this round were terminated externally, and machine load ran 23–33 from
+other sessions. Foreground `timeout 570 lake build …` chunks work for a *set* of modules — each
+chunk completes some and the next resumes — but **not for a single large file**: `lake` restarts
+that file's elaboration from scratch every time, so `FarguesFontaine/RobbaPresentation.lean` made
+no progress across two full chunks. Large single files have to run in the background to completion.
+
+### `mem_ideal_map_of_forall_coeff_mem` 157 → 37: four lemmas, all under the bar
+
+| new lemma | code | what it is |
+|---|---|---|
+| `exists_controlled_decomposition` | 32 | the `by_cases` shell over "does `h.val n` sit at every filtration level" |
+| `exists_controlled_decomposition_of_forall_fail` | 25 | degenerate branch — scale into `A₀`, decompose, scale back |
+| `exists_controlled_decomposition_of_first_failure` | 49 | main branch — Artin–Rees at `m + k₁` |
+| `tateAlgebra_eq_sum_of_coeff_decomp` | 20 | assemble the coefficientwise identity in `TateAlgebra A` |
+
+This is the first target where the *whole cascade* landed under 50, so the actionable count
+genuinely dropped rather than moving: 157 → 37 with no child over the bar.
+
+### `set`-locals cannot be re-created inside an extracted lemma
+
+The parent opened `set I₀ : Ideal P.A₀ := I.comap P.A₀.subtype` **before** obtaining `g₀`, so
+`g₀ : Fin numG → ↥I₀` from birth. Three attempts, and the failure mode is worth recording in full
+because each fix caused the next problem:
+
+1. **Give the lemma `g₀ : Fin numG → ↥(I.comap P.A₀.subtype)` and `set I₀ …` in the body.**
+   `set` rewrites the goal and hypotheses it can reach — but not the *binder* types. `g₀`'s type
+   changed while `hg₀`'s copy of it did not, so `hg₀` ended up about an inaccessible `g₀✝` and
+   every `hg₀ ▸ …` failed.
+2. **Make `I₀` a parameter with `hI₀ : I₀ = I.comap P.A₀.subtype`.** Binders now match the caller,
+   but the body had been relying on `I₀` being *definitionally* the comap — `y ∈ I₀` unfolding to
+   `P.A₀.subtype y ∈ I`. With `I₀` opaque, two `change`/`show` steps died.
+3. **`subst hI₀`** restores the defeq but *deletes the name*, so the body's fourteen textual `I₀`
+   references became unknown identifiers; re-`set`ting it walked straight back into (1).
+
+**What works: keep the parameter opaque and pass exactly the definitional fact the proof uses.**
+Here that is one iff — `hI₀mem : ∀ y : P.A₀, y ∈ I₀ ↔ P.A₀.subtype y ∈ I` — discharged at the call
+site by `fun _ => Iff.rfl`. Only two sites needed it; the other twelve `I₀` occurrences never cared
+whether it was opaque. This is the fourth appearance of the same manoeuvre (after `hDB_one`,
+`hnone`, `hEII_s`/`hDII_s`), and the sharpest statement of it: *don't restore the definition,
+restore the one consequence of it that the proof consumes.*
+
+### Splitting a `by_cases`: restate each branch hypothesis, don't pass the witness
+
+The branch condition came from `qn := Nat.find h_fail_ex` with three spec lemmas (`hqn_fail`,
+`hqn_valid`, `hqn_fail_above`) plus `hq0 : qn = 0`. Passing all of that into two lemmas would have
+made both signatures depend on `Nat.find`. Reading what each branch actually consumes:
+
+* branch 1 wants only *"fails at every level"* — `∀ l, h.val n ∉ …`;
+* branch 2 wants only *"holds at `m`, fails above `m`"* — one membership plus `∀ l, m + 1 ≤ l → …`.
+
+Neither mentions `qn`, so neither needs `Nat.find`. The caller bridges with `by omega` in both
+cases. Same lesson as the `hg'` restatement in `isOXAcyclic_interProd`, now confirmed on a
+different shape.
+
+### Two scripting gotchas
+
+* Computing a bullet's end as "last line indented ≥ 6" scanned **past the enclosing declaration**
+  into later ones (line 2968 instead of 2760). Bound every such scan by the next column-0 line.
+* `(qn - 1)` and `qn - 1` are different strings, and `hqn_fail_above` *contains* `qn` — a naive
+  `qn` → `m + 1` rewrite corrupts the identifier. Replace the longest and name-bearing patterns
+  first, then **assert the short name is gone**; that assert fired before anything was written and
+  saved a build.
+
+### Next unit, scoped but not executed: `presheafValue_mvRestricted_isUnit_mk_s` (72)
+
+Ranked highest of the remaining 18 because it is **count-reducing in one lift**: the `hkey` block
+is 34 code lines, so the parent lands at 39 and the child at ~49 — both under the bar.
+
+The obstacle is the one recorded earlier as "blocked", now understood precisely. `hkey` proves
+`∀ h, algebraMap … (example638_evalHom D h) = Ψ (ι h)`, and `ι` is a **`let`** built by
+`mvEvalHomBounded` under a 15-line `letI`/`haveI` preamble (τS, uS, `IsUniformAddGroup`,
+`CompleteSpace`, `NonarchimedeanRing`, `T2Space`, `T0Space`). Two consequences:
+
+1. `ι`'s *value* is needed, not just its type: the body opens with
+   `change Ψ (∑' v, mvEvalTerm … bι h v) = _`, which only typechecks because `ι h` unfolds to that
+   `tsum`. With `ι` abstract, pass the defining equation (the standard manoeuvre) — but
+2. that equation's *statement* mentions `∑'` over `restrictedMvPowerSeriesSubring (D.T.card + m) A`,
+   so it needs τS to elaborate. A hypothesis cannot be stated before the `letI`s that make it
+   well-formed.
+
+So the extracted lemma must carry the instances in its **signature**, either as instance binders
+(relying on the caller's `letI`s being syntactically `MvTateAlgebra.mvTateAlgebraTopology' …`, which
+they are, so unification should succeed) or by repeating the 15-line preamble in the body and
+keeping `ι`/`bι`/`hbι` as `let`s inside. The second is duplication but is the safer first attempt:
+34 + 15 = 49, still under the bar, and it needs no defining-equation hypothesis at all.
+
+Note this is the same instance-preamble tax as `genPiece_relative_overlap_square₂` (46 lines) and
+`presheafValue_mvRestricted_fU_uniformContinuous` (22). Three of the remaining 18 targets are
+gated on it, and the `letI`-triple macro written up above would dissolve all three.
+
+## Task 3 backlog, measured (analysis only — nothing applied)
+
+### Over-width lines: 517 across 43 files, ~half mechanically batchable
+
+Worst files: `RelativePieceKeystone.lean` 96, `WedhornCechAcyclicity.lean` 82,
+`FarguesFontaine/Groebner.lean` 72, `RelativePieceKeystoneOpen.lean` 56,
+`RelativePieceKeystoneGen.lean` 50, `SpvAITopology.lean` 23.
+
+By fix shape (measured in codepoints, not bytes — the earlier byte-based count inflated 517 to
+1610):
+
+| count | shape | fix |
+|---|---|---|
+| 118 | `binder := value` on one line | split at `:=` |
+| 100 | other `:=` overflow | split at `:=` |
+| 51 | unbalanced open paren | wrap at an argument |
+| 31 | comment / docstring prose | rewrap |
+| 217 | needs judgement | per-site |
+
+A large share of the first group is the `letI … := E.uniformSpace` idiom written on one long
+line — the same idiom the `letI`-triple macro would remove outright, so **do the macro decision
+before batching over-width fixes**, or the work is done twice.
+
+### Cross-file duplicated tactic blocks: 547 five-line blocks in ≥2 files
+
+Filtered to blocks containing real tactics (`rw`/`exact`/`simp`/`refine`/`obtain`/…) and excluding
+shared *signature* blocks, which are a separate and legitimate kind of repetition. Clearest
+clusters:
+
+| files | block |
+|---|---|
+| `Example638`, `LaurentOverlap` ×2, `PresheafIdentification` | `MvPowerSeries.coeff_C` / `Finsupp.single_ne_zero` |
+| `ExampleUnitDisc`, `FiniteJetRings`, `FiniteJetUniformDomain` | `Metric.mem_nhds_iff` ball argument |
+| `ArCompletion`, `Groebner`, `IntervalRing` | `ValueGroup₀.embedding` positivity |
+| `IteratedOverlapEquiv`, `LaurentRefinementCore` ×2, `RelativeRationalLocData` | `UniformSpace.Completion.ext'` |
+| `RelativePieceKeystone{,Gen,Open}`, `WedhornCechAcyclicity` | `locTopology_continuous_lift` |
+
+**The scan that finds the expensive kind.** For each long proof, grep a distinctive middle line of
+every multi-line `have` across the project. If it hits a *named* lemma, compute the import
+direction: when the named one is downstream of the file that inlined it, the copy can never be
+deduplicated by name-based search — the inlined twin is anonymous and the lemma is unreachable.
+That is how `nhds_zero_eq_comap_coeRingHom` was found (`private` in `Wedhorn828.lean`, inlined in
+`PresheafTateStructure.lean`, which `Wedhorn828` imports).
+
+### `exists_pairOfDefinition_le_subring` 179 → 46, and when `subst`-then-`set` is safe
+
+Two lifts: `comap_pow_le_pow_of_generators` (132, the Artin–Rees comparison) and
+`isOpen_closure_pow_image` (6). The parent keeps only the construction of `A₀'`, `ι`, `F'`, `I'`
+and the final assembly. The 132-line child needs its own pass; the count is unchanged at 18, so
+this is restructuring rather than reduction — recorded as such.
+
+**Five build cycles, all on the same root cause, and it sharpens the TateAlgebra rule.** The block
+sat under four `set`-locals (`A₀'`, `ι`, `F'`, `I'`). For each one the extracted lemma has to
+choose between two failure modes:
+
+* pass it **opaque** → the body loses the definitional unfolding it was silently using;
+* `subst` its defining equation → the defeq comes back but **the name disappears**, and every
+  textual reference in the body becomes `Unknown identifier`.
+
+The resolution depends on one question: *does any other binder's type mention this local?*
+
+| local | other binders mention it? | what works |
+|---|---|---|
+| `ι` | no | `subst hι_def` then **`set ι := … with ι_def`** — restores both defeq and name |
+| `F'` | no, and the body never names it | `subst hF'_def` alone |
+| `I'` | no, but the body names it 10× and needs the definition **once** | keep opaque, `rw [hI'_def]` at that one site |
+| `g₀`/`hg₀` (TateAlgebra) | **yes** — `hg₀`'s type mentions `g₀` | `set` is *unsafe*: it re-folds `g₀`'s type and desynchronises `hg₀`, which then refers to an inaccessible `g₀✝`. Keep opaque, pass the one consumed fact. |
+
+So the earlier rule ("keep it opaque and pass the consumed fact") is the **fallback**, not the first
+move. When nothing else depends on the local, `subst` + `set` is strictly better: it costs one line
+and needs no analysis of which facts the body consumes.
+
+Two smaller gotchas from the same run:
+
+* A `Finset.image` in the *signature* needs `DecidableEq`, which the parent gets from the
+  `classical` tactic in its body. Taking `[DecidableEq ↥A₀']` as an instance binder is safer here
+  than `open Classical in`, because the caller then supplies the *same* instance its `F'` was built
+  with — so the `rfl` discharging `hF'_def` still matches.
+* `subst` order matters: substituting `I'` before `F'` fails with an occurs-check
+  (`'F'' occurs at …`), because `hI'_def`'s right-hand side mentions `F'`. Substitute the
+  *dependency* first.
+
+**Next step on that file** (scoped, not executed): `comap_pow_le_pow_of_generators` (132) has a
+single `succ` branch containing one 93-line `· suffices h_span :` bullet plus two small ones
+(10, 11). The 93 is a `Submodule.smul_induction_on` whose four cases are 29 / 8 / 20 / 25 — all
+under the bar. So lifting `h_span` takes the parent to ~40, and splitting `h_span` by induction
+case takes it to ~22. Extracting induction cases needs the motive written out as an explicit
+predicate, which is why it is a separate unit rather than a continuation of this one.
+
+### `exists_pairOfDefinition_le_subring` fully decomposed: 179 → 46, nothing over the bar
+
+Completing the cascade begun above. The 132- and 85-line intermediates are gone:
+
+| declaration | code |
+|---|---|
+| `exists_pairOfDefinition_le_subring` | 46 |
+| `comap_pow_le_pow_of_generators` | 41 |
+| `span_mul_pow_mem_pow` | 37 |
+| `span_mul_pow_mem_pow_gen` | 30 |
+| `span_mul_pow_mem_pow_smul` | 23 |
+| `isOpen_closure_pow_image` | 6 |
+
+Actionable over-50 count **18 → 17** — the first genuine reduction since the TateAlgebra cascade.
+
+**Extracting induction cases.** `span_mul_pow_mem_pow`'s body is a `Submodule.span_induction`
+with cases 29 / 8 / 20 / 25. Two of the four lift out cleanly because the case *statement* is just
+the motive instantiated at that constructor's argument — write the motive once as a Python format
+string with a `{G}` hole and emit it at `f`, at `x'` (for the `hx'_ih` hypothesis) and at `c • x'`
+(for the conclusion). The `add` and `zero` cases were left inline: `zero` is 8 lines, and `add`
+needs the motive at *three* points (`x'`, `y'`, `x' + y'`), which costs more signature than the 19
+lines it saves.
+
+Note how little the two extracted cases need: `smul` uses only `PA`, `I'`, `m`, `n` — no `ι`, no
+`hI'_def`, no `ih`. Reading each case's actual dependencies before writing the signature is what
+keeps these small.
+
+### The end-of-scan bug, second occurrence — and it cost a restore
+
+`i_end = max(n for n in range(i_case, len(L)) if L[n].startswith('    ')) + 1` scanned to
+**end of file** and swallowed every subsequent declaration into the extracted lemma. The file still
+had 27 top-level declarations and `scope_code.py` still reported a *lower* count, so the corruption
+did not announce itself — only `wc -l` (711 → 749) and the case bounds printed by the script
+(`smul 313..700`, against a declaration that ends at 337) revealed it.
+
+This is the same bug recorded in the TateAlgebra section, and I reintroduced it in a fresh script.
+**The guard belongs in every slice, not in the reader's memory:**
+
+```python
+i_declend = find(lambda l: l and not l[0].isspace(), i_lem + 1)
+i_end = max(n for n in range(i_case, i_declend) if …) + 1
+assert i_end <= i_declend
+```
+
+Recovery was free because the working tree is backed up after every green build — restoring the
+last verified copy cost one `cp`. That habit is worth more than it looks when git is unavailable.
+
+## The remaining 17, classified by SHAPE rather than size
+
+Size alone has repeatedly been the wrong way to choose a target — a 179-line proof cleared in one
+session while a 131-line one is barely worth touching. What actually predicts the work is the
+*shape* of the body. Measured over all 17:
+
+### CLEAN — a few genuinely-sized units (4)
+
+| code | blocks | target |
+|---|---|---|
+| 90 | [44, 15, 4] | `xPresheaf_isSheafOfTopologicalRings` |
+| 124 | [33, 23, 5] | `locToQuotient_mul_small_constant_mem` |
+| 72 | [34, 4, 4] | `presheafValue_mvRestricted_isUnit_mk_s` |
+| 67 | [6, 5] | `presheafValue_mvRestricted_fU_uniformContinuous` |
+
+`xPresheaf_isSheafOfTopologicalRings` is the best single move left: **one lift of the 44-line
+`hginv` gives parent 47 and child 44, both under the bar** — a genuine count reduction. Note the
+earlier "universe wall" note on this target concerned an attempted *proof* fix; a lift carries the
+proof verbatim and does not touch it. The cost is the signature: `hginv` closes over the whole
+`intro`'d context (`T` with three instances, `ι`, `U`, `f`, `V'`, `U'`, `hle`, `hVS`, `hcov`,
+`stabV`, `stabU`, `hcompat'`, `g`, `hg`), and `g` comes from `homGlue`, so its type must be written
+out — the familiar obtain-shape tax.
+
+### Has a >50 child — restructures but does not reduce (6)
+
+`exists_continuous_valuation_of_valuationSubring_of_span_eq` 167 [133], `idealOfDef_pow_isClosed_aux`
+187 [89], `genRestrictedCover_gluing` 191 [59], `genRestrictedCover_isOXAcyclic_of_units_or_empty`
+213 [184], `tateAlgebra_flat` 253 [102], `wedhorn_lemma_834_propA3_part1_gluing` 349 [134].
+
+Each needs a cascade like `exists_pairOfDefinition_le_subring` (3 levels, 5 lemmas, ~8 builds).
+Worth doing, but budget accordingly — and the count only moves at the *end* of each cascade.
+
+### Flat chain of many tiny units (6)
+
+`wedhorn_lemma_834` 131 [20,14,13], `locToQuotientOneSubfX_gen_continuous_canonical` 136,
+`ideal_pullback_controlled` 146, `exists_spa_point_via_restrictToConvex` 157,
+`presheafValue_mvRestricted_surjection` 187, `unitCover_relOverlap_forward_witness` 217 [26,25,24].
+
+`wedhorn_lemma_834` is the cautionary case: thirteen `have`s of 4–20 lines, and clearing it needs
+**~11 lemmas**. That is gaming the measure, not decomposing a proof. The right treatment for this
+shape is a *phase* split (as in WittF) if a phase boundary exists, and otherwise to leave it —
+`unitCover_relOverlap_forward_witness` (blocks 26/25/24) is the one member of this group whose units
+are big enough to be real lemmas.
+
+### Preamble-bound (1)
+
+`genPiece_relative_overlap_square₂` 94, of which **46 lines are the `letI` instance triple** — see
+the macro note above. Not fixable by extraction at all.
+
+**Recommended order:** `xPresheaf_isSheafOfTopologicalRings` (1 lift, −1 count), then
+`presheafValue_mvRestricted_isUnit_mk_s` (1 lift, −1), then the cascades in increasing size.
+
+### Correction: the universe wall blocks the **extraction**, not just a proof fix
+
+I recommended `xPresheaf_isSheafOfTopologicalRings` above as "the best single move left", on the
+reasoning that the earlier universe-wall note concerned an attempted *proof* fix, whereas a lift
+carries the proof verbatim. **That reasoning is wrong, and the attempt failed on exactly that
+wall.** Retracting the recommendation.
+
+The proof opens `intro T _tc _tt _tr ι U f hcompat`, so `ι`'s universe is *inherited* from the
+`IsSheafOfTopologicalRings` statement and never written down. Extracting `hginv` forces it into a
+binder — and `IsLimitSheafOn.injective` constrains the index universe against `A = Ainf p F`'s:
+
+```
+hcov2      : … Set.iUnion.{u_1, u   + 1} fun i ↦ ↑(U' i)
+but expected  … Set.iUnion.{u_1, u_1 + 1} fun i ↦ ↑(?m i)
+```
+
+Whatever universe the binder is given, one of the two positions disagrees. So the wall is not a
+property of a particular proof tactic — it is a property of *naming the universe at all*, which
+extraction cannot avoid. `xPresheaf_isSheafOfTopologicalRings` is genuinely blocked until
+`IsLimitSheafOn.injective` is generalised in its index universe (a `/generalise` job), and it should
+be moved out of the CLEAN group into a fifth category:
+
+**UNIVERSE-BLOCKED (1):** `xPresheaf_isSheafOfTopologicalRings` 90.
+
+That makes the revised recommended order: `presheafValue_mvRestricted_isUnit_mk_s` (72, one lift,
+−1 count) first, then the cascades in increasing size.
+
+**Two mechanical notes from the attempt**, both already-known classes recurring:
+
+* The section variables `p F ϖ` lead the argument list of every extracted lemma in this file, so a
+  call written `xPresheaf_glued_mem_frobFixed T U f …` fails with *"T … expected to have type ℕ"* —
+  `p : ℕ` is the first explicit argument. Same shape as `PA` in `AdicMorphismsCore` and `p F` in
+  `WittF`; it is now the third file where this has cost a build.
+* Generating a signature by string-formatting a repeated subterm (here
+  `(yFunctor p F ϖ).obj (curvePreimage p F ϖ …)`) into type-ascription positions produced
+  unbalanced parentheses. Write signatures by hand; only *bodies* are safe to generate.
+
+**Reverting without git.** This file had no backup — the backup set covers only files already
+modified. The revert was reconstructed from the inserted lemma itself: its body *is* the original
+`have` body, so removing the lemma and re-indenting its body back into the call site restores the
+original exactly (45 lines out, 45 lines in), confirmed by a green build and by the measure
+returning to its pre-attempt value. **Back up a file before the first edit, not after the first
+green build** — otherwise the first failed attempt has nothing to fall back to.
+
+### `presheafValue_mvRestricted_isUnit_mk_s` 72 → 15: package the preamble behind an existential
+
+Count **17 → 16**. Three declarations, all under the bar:
+
+| declaration | code |
+|---|---|
+| `presheafValue_mvRestricted_isUnit_mk_s` | 15 |
+| `exists_mvRestricted_inclusion` | ~46 |
+| `mvEvalTerm_algebraMap_eq` | ~10 |
+
+**The move that unlocked it: return `∃ ι, …` instead of taking `ι` as a parameter.** This target
+was recorded as preamble-bound — `ι` is built by `mvEvalHomBounded` under fifteen lines of
+`letI`/`haveI` (topology, uniformity, `IsUniformAddGroup`, `CompleteSpace`, `NonarchimedeanRing`,
+`T2Space`, `T0Space`), and any lemma stating a *defining equation* for `ι` needs those instances
+just to elaborate `∑'` — which cannot be done before the `letI`s that make it well-formed. Taking
+them as instance binders risks a `UniformSpace.toTopologicalSpace` diamond against the separately
+supplied `TopologicalSpace`.
+
+Existential packaging sidesteps all of it. The caller only ever uses `ι` as a ring map and `hkey`
+as an equation, so `obtain ⟨ι, hkey⟩ := …` gives exactly that and the entire preamble stays inside
+one proof. **When an extracted lemma would need instance binders only in order to *state* how its
+output was built, existentially quantify the output instead.**
+
+Getting the extracted lemma itself under 50 took two further trims:
+
+* The termwise comparison inside `hkey` needs *no* topology — the coefficient crosses by `hΨ_alg`
+  and each generator power by `hΨ_genX`. Splitting `mvEvalTerm_algebraMap_eq` out (10 lines) is
+  free precisely because summing the series is what needs the analysis, not comparing the terms.
+* `have hkey : <4-line statement> := by intro h … ; exact ⟨ι, hkey⟩` → `refine ⟨ι, fun h => ?_⟩`.
+  Naming a `have` whose only use is the final `exact` costs its whole statement twice.
+
+Also the third file in which `omit [CompatiblePlusSubring A] in` on the caller had to be copied to
+the new lemma — a caller that omits a section instance forces every lemma it calls to omit it too,
+and the symptom is a `failed to synthesize` at the *call site*, not in the new lemma.
+
+## Session close: 22 → 16, and where the remaining work actually is
+
+Six units landed (one pushed as `d36e26940`, five verified green and uncommitted), plus a
+pre-existing `HEAD` breakage repaired and two cross-file duplicate lemmas hoisted. The full library
+was re-certified green after every unit — the last gate: *Build completed successfully (3360 jobs)*,
+0 errors.
+
+**The low-hanging fruit is gone.** Every one of the remaining 16 now needs either a multi-level
+cascade or ~10 lifts; there is no target left that clears in one or two moves. Ranked by *rebuild
+cost* (the size of the module's reverse-dependency cone), which matters as much as proof shape now
+that each gate is a full revalidation:
+
+| cone | code | target |
+|---|---|---|
+| 9 | 90 | `xPresheaf_isSheafOfTopologicalRings` — **universe-blocked** |
+| 12 | 146 | `ideal_pullback_controlled` — flat chain, ~10 lifts, but the cheapest gate |
+| 73 | 94–349 | six targets in `WedhornCechAcyclicity.lean` |
+| 92 | 67, 187 | two in `Wedhorn828.lean` |
+| 164–193 | 124–253 | five in foundational files — each edit forces a whole-library rebuild |
+
+`ideal_pullback_controlled` is the right place to iterate next: a 12-module cone means a gate costs
+minutes rather than the ~30 that `RobbaPresentation` alone takes when a foundational file changes.
+The five bottom rows should be batched — do all edits in a foundational file, then gate once.
+
+**Technique summary from this session**, in the order they generalise:
+
+1. *Restate a hypothesis in use-shape before decomposing.* A `choose`/`obtain`/`Nat.find` result is
+   shaped by the source lemma, not by your use; restating pays once, extracting around it pays in
+   every signature. (`isOXAcyclic_interProd`, both `TateAlgebra` splits.)
+2. *Existentially quantify an output whose construction needs instances.* If a lemma would need
+   instance binders only to *state* how its output was built, return `∃ x, …` instead.
+   (`presheafValue_mvRestricted_isUnit_mk_s`.)
+3. *For a `set`-local: `subst` then `set` to restore the name* — unless another binder's type
+   mentions it, in which case keep it opaque and pass only the consumed fact.
+4. *A long proof is often duplication.* Grep a distinctive middle line of every multi-line `have`
+   against the whole project; if it hits a named lemma downstream, hoist rather than inline.
+5. *Bound every slice by the enclosing declaration* and assert it — this bug cost a restore once.
+
+### `ideal_pullback_controlled` 146 → 37: split at the witness boundary
+
+The `refine ⟨1 + Bs * CrA, …, fun xb hxb xc hxc hcompat => ?_⟩` is a real phase boundary: everything
+before it builds the three Koszul constants (`hB`, `hC`, `z`) and the combined bound `Bs`; everything
+after constructs `xa` for one compatible pair. Lifting the second half gives
+`ideal_pullback_controlled_witness` (112) and leaves the parent at 37.
+
+**The constants can be abstract reals.** Grepping the post-`refine` half for each name showed it uses
+`Bs`, `CrC`, `CrA` only through the inequalities `hBsB` / `hBsC` / `hBszC` / `hBs0` / `hCrA1`, plus
+the two defining equations `hCrC` / `hCrA` (once each). So the extracted lemma takes six plain reals
+and their facts rather than re-deriving anything — a much smaller signature than the `set`-local
+cascades in `TateAlgebra` and `AdicMorphismsCore`. **Grep the candidate half for every local name
+before writing the signature; the count tells you which are facts and which are definitions.**
+
+Two slips worth noting, both in the *call site* rather than the lemma:
+
+* The replacement body was inserted as a bare term after a `refine … ?_`, where a tactic is
+  expected — `Invalid ⟨...⟩ notation: The expected type of this term could not be determined`,
+  pointing at the `refine` two lines above rather than at the offending line. It needed `exact`.
+* Repairing that by string-replacing the first call line silently dropped an argument (`hCrA1`)
+  because the replacement text ended one token earlier. When editing an argument list, replace the
+  *whole* list, not a prefix of it.
+
+**Remaining on this target:** the 112-line child clears in five lifts — the 31-line final bullet
+(`hd2bound` / `hv'n` / the norm chase), `hv'compat` (12), `hwn` (12), `hwd1` (9), `hsDn'` (4) —
+giving ~47. All five are `have`s at the same level, so they batch highest-index-first. That would
+take the actionable count 16 → 15.
+
+Note this file's rebuild cone is only 12 modules, so a full gate here costs minutes rather than the
+~30 that any foundational-file edit costs via `RobbaPresentation`. It is the right place to iterate.
+
+### `ideal_pullback_controlled` fully cleared — count 16 → 15
+
+| declaration | code |
+|---|---|
+| `ideal_pullback_controlled` | 40 |
+| `ideal_pullback_controlled_witness` | 50 |
+| `norm_d1_rA_le` | 32 |
+| `extRho_comp_eq` | 14 |
+| `norm_extRho_sub_le` | 11 |
+| `d1_rD_extRho_sub_eq_zero` | 8 |
+
+The last four lines came from ordinary cleanup, not extraction: two `have`s existing only to feed a
+`choose` folded into the `choose` itself (`choose sC hsC hsCn using fun p => …`), and a
+`rw`/`exact` pair that was really a term (`(hsCn p).le.trans …`). Worth trying before inventing
+another lemma — a `have` whose sole consumer is the next line is usually free to inline.
+
+### The end-of-block bug, THIRD occurrence — and why it keeps recurring
+
+Batch A used a `block()` helper with a contiguity check. Batch B, written minutes later in the same
+session, computed its bounds inline as *"the last line indented ≥ 4 before the next marker"* — no
+contiguity — and swallowed `hpull`, `choose a ha`, `refine ⟨…⟩` and three bullets into the extracted
+lemma, dedenting `choose a ha using hpull` to **column 0**.
+
+It again presented as success: `scope_code.py` reported the file *clear* and the declaration count
+rose by the expected 4. Only `wc -l` (1060 → 1102) and grepping for column-0 tactic keywords
+exposed it.
+
+**The recurrence is the lesson.** Writing the guard once in a helper does not protect the next slice
+written by hand ten minutes later. The rule is not "remember the guard", it is *"never compute a
+block end inline"* — define one `block(head)` and route every extraction through it:
+
+```python
+def block(head):
+    a = find(lambda l: l.strip().startswith(head), i_lem)
+    ind = len(L[a]) - len(L[a].lstrip())
+    b = a + 1
+    while b < i_end and (not L[b].strip() or (len(L[b]) - len(L[b].lstrip())) > ind):
+        b += 1
+    while b > a + 1 and not L[b-1].strip(): b -= 1
+    return a, b
+```
+
+Printing each block's line count next to the outline's expected size catches it immediately: the
+re-run showed `9 / 12 / 4 / 12 / 31`, matching the outline exactly, where the broken run had
+produced a 30-line "12-line" block.
+
+Two smaller notes: a `have h : ∀ i, … := fun i => by …` puts the binder on the *head* line, so
+extracting the body alone loses it — the lemma needs `intro i` (symptom: `Unknown identifier i`).
+And a file-local backup taken *before* the first edit is what made the recovery free; the backup
+here predated batch A, so re-applying A cost one script and no thought.
+
+## Task 3 begun: over-width lines 517 → 259
+
+Task 2's remaining 15 all need multi-level cascades or ~10 lifts, so this is the point to start
+Task 3 in parallel rather than stall.
+
+**A general safe-wrap covers 82% of them.** For each over-width line, scan right-to-left for a space
+that is (a) at paren/bracket depth ≥ 1, (b) outside string literals, and (c) leaves both halves ≤
+100 once the tail is re-indented by `indent + 2`. Depth ≥ 1 is what makes it safe: splitting inside
+an open bracket cannot terminate a tactic block or a `:=` body, so the parse is unchanged. Comment
+and docstring lines are skipped — rewrapping prose is an editorial change, not a formatting one.
+
+Dry run before applying: **409 of 495 wrappable**. Applied to 236 lines across 30 files, excluding
+the three `RelativePieceKeystone*` files (173 lines) because theirs are the `letI` triple that the
+macro decision would delete outright — wrapping them now would be redone later.
+
+**A classifier that mislabelled its own input.** My earlier shape survey called
+`FarguesFontaine/FrobeniusGauss.lean`'s twelve lines "`:=` splits" — they are not. The `:=` there is
+**named-argument syntax**, `(hσ₁0 := hσ₁0)`, and splitting at it would have been wrong. The real fix
+was wrapping the repeated four-argument block. Worth stating because the survey's `:= split`
+category is unreliable wherever named arguments appear; the general wrapper does not care, since it
+splits at spaces by depth rather than at tokens.
+
+The 86 lines the wrapper cannot reach are genuinely long single tokens or deeply-nested type
+expressions — `FarguesFontaine/Groebner.lean` (15 of its 72) is dominated by a repeated 60-character
+`↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))`. Those want a `local notation`, which is
+the same class of decision as the `letI` macro: an owner call, recorded rather than taken.
+
+### Task 3 dedup: two clusters hoisted, and the distinction that decides which are hoistable
+
+**Cluster 1 — value-group positivity (3 files, 28 lines → 1 lemma).** The same 9-line block proving
+`0 < ValueGroup₀.embedding γ.1` sat in `ArCompletion`, `Groebner` and `IntervalRing`. Those three
+form an import *chain* (`ArCompletion ← Groebner ← IntervalRing`), so the earliest already hosted a
+copy — it only needed a name. Now `valueGroup_embedding_pos`, called from all three.
+
+**Cluster 2 — constant coefficient (1 file, 3 copies, 15 lines saved).** Three byte-identical 6-line
+blocks in `LaurentOverlap.lean`, differing only in the `have`'s name. Because the block's statement
+*is* the lemma's conclusion, each call site collapses to a single `have := …`.
+
+**The distinction that decides hoistability.** Of the five clusters the repeated-block scan found,
+only these two were lemma-shaped. The others — `UniformSpace.Completion.ext'` (5 sites, 4 files),
+`locTopology_continuous_lift` (4 files), `Metric.mem_nhds_iff` (3 files) — are repeated **tactic
+idioms**: the same `refine`/`rw` sequence applied to a *different goal* at each site. There is no
+common statement to name, so deduplicating them needs a tactic macro, which is the same owner-level
+decision as the `letI` triple. **A repeated-block scan finds both kinds; only the ones whose block
+is a `have` with a shared conclusion can be hoisted to a lemma.** Check that before planning the
+work.
+
+Two small traps, both from generating call sites mechanically:
+
+* `have : …` is *anonymous*: taking `line.split()[1]` as the name yields `:`, producing
+  `have : := f x`. Two of the three sites were anonymous. Detect the `:` and emit `have := …`.
+* A `have` whose statement equals the new lemma's conclusion does not need the statement repeated
+  at the call site at all — `have h := lemma args` is enough, which is what turned a 3-line
+  replacement into a 1-line one.
+
+### Task 3: dead `have`s (40) and single-`exact` tactic blocks (15)
+
+Two mechanical batches, both with the build as the final oracle and a `.orig` per touched file plus
+a JSON manifest of every deletion, so a misjudged site is a one-file revert.
+
+**Unreferenced `have`s — ABANDONED, all 40 reverted.** See the post-mortem below; the heuristic is
+not sound and the whole batch was rolled back. The naive scan found 157, and it
+was unsafe in two independent ways. Both are worth stating because neither shows up as a compile
+error until after you have deleted the wrong thing:
+
+1. *A `have` can be consumed without being named.* `linarith`, `simp_all`, `omega`, `assumption`,
+   `aesop`, `positivity` and friends scavenge the local context. Any declaration containing one of
+   those is now skipped wholesale — name-reference analysis cannot see those uses.
+2. *The "is it a class?" test was matching the wrong `=`.* `have hcompat : (ValuativeRel.valuation
+   A).Compatible := inf…` passed a relation-typed filter because the regex found the `=` inside
+   `:=`. Splitting the line at `:=` and testing only the *type* dropped 10 false positives — every
+   one of them instance-bearing, i.e. exactly the class of `have` that must never be deleted.
+
+The surviving 40 are relation-typed (`≤ < ∈ ⊆ = ≠ ∣`), which cannot be instances, in declarations
+with no scavenging tactic.
+
+**`:= by exact e` → `:= e` — 15 rewritten across 13 files.** A first pass found 25; requiring every
+line after `exact` to be *strictly* more indented — so the block provably holds one tactic and not
+two — cut it to 15. The 10 rejected had a second tactic that a looser rewrite would have deleted.
+
+Also confirmed already clean project-wide: no same-line `by exact`, no `show … from by`, no
+non-prose `λ`. Those were finished in earlier rounds; re-checking cost nothing and removes them
+from the backlog for good.
+
+### Correction: `rwa` and `simpa` are context scavengers, and the build caught what I missed
+
+The first dead-`have` batch (40 deletions) **failed the gate** in four files. The cause is a gap in
+the scavenger list I had just finished congratulating myself on:
+
+* **`rwa` is `rw … ; assumption`.** It consumes a hypothesis by name-free search exactly like
+  `assumption`, but the word `assumption` never appears in the source.
+* **`simpa` without `using` closes the same way.**
+
+Confirmation was unambiguous: all four failing files contain `rwa` (1, 1, 4, 8 occurrences) and
+`simpa`, and **none contains a bare `assumption`** — so a filter listing only `assumption` skipped
+none of them.
+
+Rather than restore only the four files the build happened to reach (it stopped at 3169/3360, so
+later files were untested), I re-ran the corrected predicate over the saved `.orig` copies and
+reverted **every** deletion sitting in an `rwa`/`simpa`-containing declaration: 26 of 40, across 14
+files. 14 deletions in 9 files survive.
+
+**Two things this validates and one it indicts.** The `.orig`-per-file plus JSON manifest made the
+selective revert exact and free — no re-derivation, no guesswork about which sites were which. And
+using the build as the oracle worked: it found the flaw. What it indicts is the reasoning that
+produced the list — I enumerated scavenging tactics from memory rather than from what they *expand
+to*, and `rwa`/`simpa` are precisely the ones whose scavenging is invisible in the source text. For
+this class of analysis, enumerate by *behaviour*, and treat any tactic that can close a goal from
+the local context as suspect even when its name does not say so.
+
+### Post-mortem: the dead-`have` heuristic is unsound — batch abandoned
+
+Second gate, two *new* failures, neither explained by the `rwa`/`simpa` fix:
+
+* `SpvAITopology.lean` — **unsolved goals** at three sites. The `have` was being consumed without
+  being named, but not by a scavenging *tactic*: anonymous-hypothesis syntax `‹T›` selects a
+  hypothesis **by type**, so nothing in the source mentions the name at all.
+* `TateAlgebraTopology.lean` — **failed to synthesize `(𝓝 0).IsCountablyGenerated`**. The `have`
+  was supplying an *instance*, which the relation-typed filter was supposed to exclude and did not.
+
+That is three distinct invisible-use mechanisms found in two gates: name-free tactic scavenging
+(`assumption`, `omega`, …), name-free *expansion* scavenging (`rwa`, `simpa`), and name-free
+*type-directed* use (`‹T›`, instance synthesis). Each was discovered only by a full-library build.
+
+**Decision: abandon the batch.** All 40 deletions are reverted; the tree is back to the
+post-dedup state plus the `by exact` rewrites. Patching the filter a third time would cost another
+~20-minute gate to discover a fourth mechanism, and the payoff — 93 lines — never justified that.
+
+**What would make this safe** is Lean-level evidence rather than textual heuristics: build with the
+`unusedHave`-style linter enabled, or delete a candidate and check that the *declaration* still
+elaborates in isolation, one at a time. That is a per-site verification, not a batch, and should be
+scheduled as such if it is wanted at all.
+
+**What did work** is worth keeping: `.orig` per touched file plus a JSON manifest of every deletion
+made both the selective revert (26 of 40) and then the total revert exact and free. Without them
+this would have been unrecoverable with git down.
+
+**Kept from this round:** the 15 `:= by exact e` → `:= e` rewrites, which are a purely local
+syntactic transform with no hidden-use hazard — the block provably contains one tactic and `exact e`
+in tactic mode is `e` in term mode.
+
+### Linter-driven cleanup: use Lean's evidence, not text heuristics
+
+After the dead-`have` failure, the right source of truth for Task 3 is the compiler. Warning classes
+in the last green gate (3360 jobs):
+
+| count | class | verdict |
+|---|---|---|
+| 3181 | `Overlapping instance parameters` | pre-existing project-wide pattern; fix is out of cleanup scope |
+| 681 | `automatically included section variable(s) unused` | actionable — the linter prints the exact `omit … in` line |
+| 107 | `declaration uses sorry` | producer WIP — never fleet work |
+| 102 | `Variable name … is not explicitly referenced` | actionable (`_` prefix) |
+| 20 | `Definition … is a proposition; use theorem` | **all 18 non-Vendored are attributed — see below** |
+| 7 | `try 'simp' instead of 'simpa'` | actionable, safe |
+| 4 | unused `simp` argument | all in `Vendored/` — skip |
+
+**`def` → `theorem` is NOT mechanical here.** All 18 non-`Vendored` sites carry something that the
+conversion would change: `@[reducible, instance 1000]` (10), `noncomputable` (6), `@[reducible]` (2).
+Zero are plain `def`s. Converting a reducible Prop-valued *instance* to a `theorem` drops the
+reducibility that instance unfolding relies on, so each site needs judgement about whether it should
+become `instance`, `theorem` + `attribute [instance]`, or stay. Recorded, not batched.
+
+Also worth noting for whoever picks this up: the linter reports a declaration's *start line*, which
+is its docstring or first attribute — not the `def` keyword. Reading the reported line alone shows
+`/-- … -/` or `@[reducible]` and tells you nothing about the declaration's form.
+
+### `simpa using e` → `simp` (7 sites)
+
+All seven `try 'simp' instead of 'simpa'` warnings fixed. Safe to batch, unlike the two batches
+abandoned above, for a specific reason: a tactic either closes the goal or it does not, so the build
+is a *complete* oracle. There is no analogue of the hidden-use hazard that sank the dead-`have`
+batch — nothing downstream can depend on a tactic having been spelled `simpa` rather than `simp`.
+
+One nuance: `FarguesFontaine/YCharts.lean` had the *same* text twice (the linter reported lines 170
+and 171), so a single string replacement covered both. Asserting on the replacement count rather
+than assuming 1 is what makes that safe either way.
+
+### Status of the three tasks at this point
+
+* **Task 1** — complete and re-verified: 5 remaining `set_option` hits outside `Vendored/` are
+  2 historical comments plus 3 `maxSynthPendingDepth 1` *reductions*.
+* **Task 2** — 22 → 15 actionable. All 15 remaining need a multi-level cascade or ~10 lifts; the
+  cheapest gate among them (`FiniteJetStrictLocalization`, 12-module cone) is now clear, so the
+  remaining work concentrates in `WedhornCechAcyclicity` (6 targets, 73-module cone) and the
+  foundational files (5 targets, 164–193).
+* **Task 3** — over-width 517 → 259 with the residue fully characterised; two dedup clusters
+  hoisted; 15 `by exact` and 7 `simpa` rewrites; dead-`have` batch abandoned; `def`→`theorem`
+  triaged as per-site work.
+
+### `unitCover_relOverlap_forward_witness` (217) — measured cascade plan, not started
+
+Blocks: `[26, 25, 24, 19, 13, 13, 12, 12, 11, 10, 10, 5, 4]`, total 217. Every unit is genuinely
+lemma-sized (unlike `wedhorn_lemma_834`, whose thirteen 4–20 line `have`s make it metric-gaming), so
+this one is worth doing properly — but it needs ~13 lifts in four phases:
+
+1. `hclass₁` (24) and `hclass₂` (25) — each is `∀ p ∈ …, ∃ c, … ∧ (case)`, the same existential
+   shape that worked for `presheafValue_mvRestricted_isUnit_mk_s`. → 217 → 170.
+2. the four `rcases` bullets (26 / 13 / 13 / 19) plus `hLHS` (12) and `hRHS` (10) they depend on —
+   these form one "given the class decompositions, build the witness" phase, ~110 lines. → ~61.
+3. `haMbb` (12), `hsplit` (11), `hinvO` (10). → ~53.
+4. `hF_alg` (5), `heq_s` (4). → ~46 ✓
+
+The cost is the reason it is queued rather than begun: `WedhornCechAcyclicity.lean` is ~11k lines
+with a **73-module cone**, so each of those four phases costs a full-library revalidation. Batch all
+edits of one phase, gate once, and expect four gates — the same shape as the
+`exists_pairOfDefinition_le_subring` cascade, which took eight.
+
+### `unusedSectionVars` (680 sites, 93 files) — pilot first, then an owner decision
+
+This is the largest *actionable* warning class and, unlike every heuristic that failed this session,
+it is Lean-verified: the linter names the exact unused variables and prints the `omit … in` line.
+
+It is still not something to apply unilaterally. 680 inserted lines across 93 files is a large
+stylistic diff, and the linter itself offers two remedies — *"restructure your `variable`
+declarations so that the variables are not in scope **or** explicitly omit them"* — where
+restructuring is the better fix but is per-file design work. Same category as the `letI` macro and
+the `local notation`.
+
+So: pilot on `SpaVIso.lean` — **38 sites, cone of 7 modules**, which gates in minutes. If the
+transform is clean there, the scale-up is a decision with evidence behind it rather than a guess.
+The inserter walks back over docstrings, attributes and existing `omit`/`open … in` modifiers to
+place the line *above* the docstring (the ordering that caused a failure earlier in this session),
+applies edits in reverse line order, and skips any declaration that already carries an `omit`
+rather than stacking a second one.
+
+### `unusedSectionVars` pilot on `SpaVIso.lean` — NOT a safe bulk transform. Reverted.
+
+38 sites, cone of 7, three build iterations. Verdict: **do not batch this**; the linter's suggestion
+is correct advice but not a mechanically applicable patch. Three distinct obstacles, each found by
+building:
+
+1. **A `variable` may carry an inline `letI`.** `SpaVIso` has
+   `variable [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]`.
+   Omitting `[CompleteSpace A]` also removes the `UniformSpace A` that the `letI` provides — 10
+   `failed to synthesize instance UniformSpace A` errors. Any variable whose declaration carries a
+   `letI` must be excluded, which in turn means those declarations keep their warning (19 of the 38
+   here), so the class cannot be driven to zero this way at all.
+2. **The linter can list a variable that `omit` then rejects.** One site produced
+   `cannot omit referenced section variable inst✝¹¹` for a list the linter itself printed. At ~1 in
+   38, that is ~18 hand-fixes across the 680 sites.
+3. **Warning positions go stale.** They must come from a *current* build of the file, not from an
+   earlier gate log — any intervening edit shifts them silently.
+
+So the honest cost is: per-file, regenerate warnings, exclude `letI`-bearing variables, apply, build,
+hand-resolve the rejects — and even then the class only partly clears. That is a per-file cleanup
+job of real size, not a sweep, and it belongs with the `letI` macro / `local notation` decisions
+rather than being done unilaterally.
+
+**Pilot cost: three builds of a 7-module cone, zero risk taken.** This is what the cheap-cone
+ranking is for — the same experiment on `WedhornCechAcyclicity` (73-module cone) would have cost
+three full revalidations to learn the same thing.

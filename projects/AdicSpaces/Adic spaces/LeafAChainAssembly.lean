@@ -49,7 +49,8 @@ variable [IsRingOfIntegralElements (A⁺)]
 /-- **Prop 8.30 (assembled): restriction-map flatness for a rational pair.** For `D' ⊆ D` rational
 subsets, `𝒪_X(D) → 𝒪_X(D')` is flat. This is the *usable* form (what the structure-sheaf/OMT proof
 consumes): Wedhorn's first reduction "we may assume `X = V`" (`relativePiece_equiv`, the 8.16 keystone)
-identifies `𝒪_X(D') ≅ 𝒪_B(im D')` over `B = 𝒪_X(D)`, intertwining the restriction with the whole-space
+identifies `𝒪_X(D') ≅ 𝒪_B(im
+  D')` over `B = 𝒪_X(D)`, intertwining the restriction with the whole-space
 canonical map, so flatness transports (`Module.Flat.of_linearEquiv`) from the now-complete whole-space
 chain `prop_8_30_imagePiece_assembled`. The downstream, sorry-free-assembly counterpart of
 `prop_8_30_remark755_chain` (which routes through the RPK stub). -/

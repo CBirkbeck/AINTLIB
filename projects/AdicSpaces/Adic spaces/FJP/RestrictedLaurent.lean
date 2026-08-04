@@ -1265,7 +1265,8 @@ theorem negate_single_zero (x : R) : negate (single 0 x) = single 0 x := by
   · rw [if_neg (by omega), if_neg ha]
 
 theorem norm_restrictedC (x : R) : ‖PowerSeries.Restricted.C (1 : ℝ) x‖ = ‖x‖ := by
-  rw [← ofRestricted_norm (R := R) (PowerSeries.Restricted.C (1 : ℝ) x), ofRestricted_C, norm_single]
+  rw [← ofRestricted_norm (R := R) (PowerSeries.Restricted.C (1 : ℝ) x), ofRestricted_C,
+    norm_single]
 
 /-- The vendored univariate restricted ring has norm-one unit. -/
 instance : NormOneClass (PowerSeries.Restricted R (1 : ℝ)) :=

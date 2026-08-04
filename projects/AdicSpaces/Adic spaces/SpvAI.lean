@@ -291,8 +291,8 @@ theorem cofinalValue_ideal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace A]
     rw [map_mul]
     have hr_le : v (P.A₀.subtype r) ≤ 1 := h_le_one r
     calc v (P.A₀.subtype r) * v (P.A₀.subtype x)
-        ≤ 1 * v (P.A₀.subtype x) := by
-          exact mul_le_mul_left hr_le _
+        ≤ 1 * v (P.A₀.subtype x) :=
+          mul_le_mul_left hr_le _
       _ = v (P.A₀.subtype x) := one_mul _
       _ < γ := hx
 
@@ -329,8 +329,8 @@ theorem cofinalValue_principal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace
     ring
   rw [ha_eq, map_mul, map_pow]
   calc v (P.A₀.subtype π) ^ m * v (P.A₀.subtype (π * b))
-      ≤ v (P.A₀.subtype π) ^ m * 1 := by
-        exact mul_le_mul_right hπb_le _
+      ≤ v (P.A₀.subtype π) ^ m * 1 :=
+        mul_le_mul_right hπb_le _
     _ = v (P.A₀.subtype π) ^ m := mul_one _
     _ < γ := hm
 

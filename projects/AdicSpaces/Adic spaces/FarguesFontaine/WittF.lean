@@ -141,8 +141,8 @@ theorem gaussValue_teichmuller_sub_le_of_le {ρ : NNReal} (_hρ0 : 0 < ρ) (hρ1
     rw [gaussTerm]
     calc ρ ^ k * perfectoidValuation p F ((teichCoeff p F
         (WittVector.teichmuller p a - WittVector.teichmuller p b) k : OF F) : F)
-        ≤ 1 * (ε ^ p ^ (K - k)) := by
-          exact mul_le_mul (pow_le_one₀ zero_le hρ1.le) hbase zero_le zero_le
+        ≤ 1 * (ε ^ p ^ (K - k)) :=
+          mul_le_mul (pow_le_one₀ zero_le hρ1.le) hbase zero_le zero_le
       _ = ε ^ p ^ (K - k) := one_mul _
       _ ≤ ε ^ 1 := pow_le_pow_of_le_one zero_le hε1 (Nat.one_le_iff_ne_zero.mpr
           (pow_ne_zero _ (Nat.Prime.ne_zero Fact.out)))
@@ -1668,7 +1668,7 @@ theorem coe_p_ne_zero_wittF : (p : WittVector p F) ≠ 0 := by
   intro h
   have h1 : ((p : WittVector p F)).coeff 1 = 1 := by
     have h2 := WittVector.teichmuller_mul_pow_coeff (p := p) (R := F) 1 1
-    simpa using h2
+    simp
   rw [h] at h1
   simp at h1
 

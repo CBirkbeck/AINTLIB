@@ -405,21 +405,27 @@ that is `(∀ a ∈ I, rw(a) cofinal for Γ_{rw}) ∨ (Γ_{rw} = cΓ_{rw})` = th
 The faithful proof is the case-split of **Lemma 7.2** (`:2910`) on `v(I) ∩ cΓw =? ∅`:
   • `v(I) ∩ cΓw ≠ ∅` ⟹ `cΓw(I) = cΓw`, restriction is microbial (right disjunct);
   • `v(I) ∩ cΓw = ∅` ⟹ `cΓw(I)` = greatest convex `H` with `v(a)` cofinal `∀a∈I` (gen. by
-    `h := max{v(t) : t ∈ T}`, `T` gen `I`); after restriction the `I`-values are cofinal (left disjunct).
+    `h := max{v(t) : t ∈
+      T}`, `T` gen `I`); after restriction the `I`-values are cofinal (left disjunct).
 
 ⚠ **OBSTRUCTION (substantial missing infrastructure — NOT a divergence; this IS Wedhorn's route).**
 Two pieces are absent from the project and are each their own focused build:
-  (1) **Wedhorn §7.1 convex-subgroup cofinality**: Lemma 7.1 (`{a : v(a) cofinal for H}` is a radical
+  (1) **Wedhorn §7.1 convex-subgroup cofinality**: Lemma 7.1 (`{a : v(a) cofinal for H}` is a
+    radical
       ideal), Lemma 7.2 (greatest `H` cofinal for `v(I)`, via the single generator `max{v(t)}`), Lemma
       7.4 equivalence. The repo's `OrderedGroupConvex` has only the **single-generator** `convexGenerated`
-      cofinality API (`le_pow_of_mem_convexGenerated` etc.); the **multi-generator `minContain`** that
+      cofinality API (`le_pow_of_mem_convexGenerated`
+        etc.); the **multi-generator `minContain`** that
       `cGammaIdeal` actually uses, and the `max{v(t)}`-reduction, are not built.
   (2) **`CofinalValue` / `IsMicrobial` transfer** across `canon := ValuativeRel.valuation (ofValuation rw)`
-      vs `rw` (they are `IsEquiv` via `Valuation.Compatible.ofValuation`, but `CofinalValue v a := ∀γ:Γ,
+      vs `rw` (they are `IsEquiv` via `Valuation.Compatible.ofValuation`, but `CofinalValue v a :=
+        ∀γ:Γ,
       0<γ → ∃n, v(a)ⁿ<γ` quantifies over the *whole* codomain `Γ`, so the transfer is value-group-sensitive,
       not a vle-rewrite — must be proven via the image-generated structure of the canonical value group).
-Body kept as a named `sorry` (CLAUDE.md: decompose + document obstruction concretely). Discharging it
-= building Wedhorn §7.1 cofinality (a focused multi-lemma session), then this is a short assembly. -/
+Body kept as a named `sorry` (CLAUDE.md: decompose + document obstruction
+  concretely). Discharging it
+= building Wedhorn §7.1 cofinality (a focused multi-lemma
+  session), then this is a short assembly. -/
 theorem ofValuation_restrictIdeal_isInSpvAI
     {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
     (w : Valuation A Γ₀) (I : Ideal A) :
@@ -457,7 +463,8 @@ theorem ofValuation_restrictIdeal_isInSpvAI
       Valuation.CofinalValue (ValuativeRel.valuation A) a := by
     intro x hx δ hδ
     obtain ⟨a, b, hab⟩ := ValuativeRel.exists_valuation_div_valuation_eq (R := A) δ
-    have hcb : (ValuativeRel.valuation A) (b : A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero b
+    have hcb : (ValuativeRel.valuation A) (b :
+      A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero b
     have hlt : ∀ p q : A, ((ValuativeRel.valuation A) p < (ValuativeRel.valuation A) q ↔
         (w.restrictIdeal I) p < (w.restrictIdeal I) q) :=
       fun p q => le_iff_le_iff_lt_iff_lt.mp (hequiv q p)
@@ -480,7 +487,8 @@ theorem ofValuation_restrictIdeal_isInSpvAI
       Valuation.IsMicrobial (ValuativeRel.valuation A) := by
     intro hm δ hδ
     obtain ⟨p, q, hpq⟩ := ValuativeRel.exists_valuation_div_valuation_eq (R := A) δ
-    have hcq : (ValuativeRel.valuation A) (q : A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero q
+    have hcq : (ValuativeRel.valuation A) (q :
+      A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero q
     have hle : ∀ x y : A, ((ValuativeRel.valuation A) x ≤ (ValuativeRel.valuation A) y ↔
         (w.restrictIdeal I) x ≤ (w.restrictIdeal I) y) := hequiv
     have hlt : ∀ x y : A, ((ValuativeRel.valuation A) x < (ValuativeRel.valuation A) y ↔
@@ -558,7 +566,8 @@ theorem cofinalValue_canon_of_restricted {Γ' : Type*} [LinearOrderedCommGroupWi
   intro δ hδ
   obtain ⟨s, t, hst⟩ := ValuativeRel.exists_valuation_div_valuation_eq (R := A) δ
   have hct : (ValuativeRel.valuation A) (t : A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero t
-  have hlt : ∀ p q : A, ((ValuativeRel.valuation A) p < (ValuativeRel.valuation A) q ↔ rs p < rs q) :=
+  have hlt : ∀ p q : A, ((ValuativeRel.valuation A) p < (ValuativeRel.valuation A) q ↔ rs p < rs
+    q) :=
     fun p q => le_iff_le_iff_lt_iff_lt.mp (hequiv q p)
   have hrt : rs (t : A) ≠ 0 := by
     rw [← zero_lt_iff]; have hh := (hlt 0 (t : A)).mp
@@ -587,9 +596,11 @@ theorem isMicrobial_canon_of_restricted {Γ' : Type*} [LinearOrderedCommGroupWit
   intro δ hδ
   obtain ⟨p, q, hpq⟩ := ValuativeRel.exists_valuation_div_valuation_eq (R := A) δ
   have hcq : (ValuativeRel.valuation A) (q : A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero q
-  have hle : ∀ x y : A, ((ValuativeRel.valuation A) x ≤ (ValuativeRel.valuation A) y ↔ rs x ≤ rs y) :=
+  have hle : ∀ x y : A, ((ValuativeRel.valuation A) x ≤ (ValuativeRel.valuation A) y ↔ rs x ≤ rs
+    y) :=
     hequiv
-  have hlt : ∀ x y : A, ((ValuativeRel.valuation A) x < (ValuativeRel.valuation A) y ↔ rs x < rs y) :=
+  have hlt : ∀ x y : A, ((ValuativeRel.valuation A) x < (ValuativeRel.valuation A) y ↔ rs x < rs
+    y) :=
     fun x y => le_iff_le_iff_lt_iff_lt.mp (hequiv y x)
   have hrq : rs (q : A) ≠ 0 := by
     rw [← zero_lt_iff]; have hh := (hlt 0 (q : A)).mp
@@ -609,7 +620,8 @@ theorem isMicrobial_canon_of_restricted {Γ' : Type*} [LinearOrderedCommGroupWit
   refine ⟨a, h1, ?_, ?_⟩
   · rw [inv_le_comm₀ hca hδ, inv_div, div_le_iff₀ hcp, ← map_mul, hle, map_mul, ← div_le_iff₀ hrp]
     exact hainv'
-  · rw [div_le_iff₀ (zero_lt_iff.mpr hcq), ← map_mul, hle, map_mul, ← div_le_iff₀ (zero_lt_iff.mpr hrq)]
+  · rw [div_le_iff₀ (zero_lt_iff.mpr hcq), ← map_mul, hle, map_mul, ← div_le_iff₀ (zero_lt_iff.mpr
+    hrq)]
     exact hage
 
 /-- **MICROBIAL CASE (Wedhorn Def 7.3, `v((g)) ∩ cΓ_v ≠ ∅` branch).** If the single generator
@@ -754,7 +766,8 @@ theorem restrictIdealSingle_le_one {w : Valuation A Γ₀} {g : A} (hg : w g ≠
     · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_mem _ _ _ hva hm,
         ← WithZero.coe_one, WithZero.coe_le_coe, ← Subtype.coe_le_coe]
       exact_mod_cast Units.val_le_val.mp h
-    · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_not_mem _ _ _ hva hm]
+    · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_not_mem _ _ _ hva
+      hm]
       exact zero_le_one
 
 /-- `restrictIdealSingle` preserves `1 < ·` (a value `> 1` has its unit in `cGammaSingle`,
@@ -778,7 +791,8 @@ theorem restrictIdealSingle_lt_one {w : Valuation A Γ₀} {g : A} (hg : w g ≠
     · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_mem _ _ _ hva hm,
         ← WithZero.coe_one, WithZero.coe_lt_coe, ← Subtype.coe_lt_coe]
       exact_mod_cast Units.val_lt_val.mp h
-    · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_not_mem _ _ _ hva hm]
+    · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_not_mem _ _ _ hva
+      hm]
       exact zero_lt_one
 
 /-- **`IsInSpvAI` for a valuation that vanishes on `I`** (the degenerate `supp`-case): if `w a = 0`
