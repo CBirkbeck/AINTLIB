@@ -36234,3 +36234,28 @@ first two register entries.
 
 Do **not** restart on the `N = 3` shortcut: see the REDIRECT entry above — it needs finite-group
 generation facts that mathlib lacks over `ZMod 3` and that the general route does not need.
+
+### [WP-D3c-2a] the first brick of the transport, located (2026-08-04)
+
+`muNAlgebra k N hk` is `finiteEtaleOfπ (muNπ (Spec k) N)`, i.e. the global sections of
+`muN (Spec k) N`, and
+
+```
+muN S N = pullback (terminal.from S) (terminal.from (muNAbs N))      -- GroupScheme/MuN.lean:69
+muNAbs N = Spec (muNRing N)                                          -- :65
+```
+
+so `muN (Spec k) N = Spec k ×_{Spec ℤ} Spec (muNRing N)` and its ring of global sections is
+`k ⊗_ℤ muNRing N`. Base change along `k → k'` is then plain tensor associativity
+`(k ⊗_ℤ M) ⊗_k k' ≅ k' ⊗_ℤ M`, so the target
+
+**`(CommAlgCat.FiniteEtale.baseChange k k').obj (muNAlgebra k N hk) ≅ muNAlgebra k' N hk'`**
+
+needs exactly one geometric input: the identification
+`Γ(muN (Spec k) N, ⊤) ≅ k ⊗_ℤ muNRing N`. mathlib's `AlgebraicGeometry.pullbackSpecIso`
+supplies it modulo writing `terminal.from (Spec k)` as `Spec.map (Int.castRingHom k)` (i.e.
+`specZIsTerminal`). That is the first brick; `torsionPairAlgebra` follows the same pattern via
+`Algebra.TensorProduct` of the two `torsionAlgebra` factors.
+
+Recording this rather than starting it: it is a multi-lemma scheme-to-ring comparison and
+belongs at the start of a session, not the end of one.
