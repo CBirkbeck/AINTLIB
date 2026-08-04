@@ -35846,3 +35846,29 @@ the hypothesis was dropped after the linter flagged it unused.
 identify `A ⧸ p` with `Localization.Away e`, after which
 `Algebra.IsStandardSmoothOfRelativeDimension.localization_away` gives standard smoothness of
 the factor and WP-D3b finishes.
+
+## [WP-D3a-FACTOR step 2] DONE (2026-08-04) — each factor is a localization, axiom-verified
+
+* **`exists_isIdempotentElem_span_one_sub_eq`** — a minimal prime of such a ring is
+  `Ideal.span {1 - e}` for an **idempotent** `e`. Write `1 = a + b` with `a ∈ p` and
+  `b ∈ cominimal A p`; then `x·b ∈ p ⊓ cominimal A p = ⊥` for every `x ∈ p`, so `b` is
+  idempotent (take `x = a`) and every `x ∈ p` equals `x·a = x·(1-b)`.
+* **`exists_isLocalization_away_quotient_minimalPrime`** — hence `A ⧸ p` is
+  `IsLocalization.Away e`, via mathlib's
+  **`IsLocalization.Away.quotient_of_isIdempotentElem`**
+  (`RingTheory/Localization/Away/Lemmas.lean`), which does exactly
+  `IsIdempotentElem e → IsLocalization.Away e (R ⧸ Ideal.span {1 - e})`.
+
+So each factor of the decomposition is a localization of `A` away from an element, and
+`Algebra.IsStandardSmoothOfRelativeDimension.localization_away` transports standard smoothness
+to it — after which **WP-D3b gives that every factor is integrally closed**, which is what the
+root construction needs.
+
+`ForMathlib/SmoothCurveComponents.lean` is now twelve declarations, sorry-free, all
+axiom-verified, wired into the root import. Root green at **9645 jobs**.
+
+**Stage B's base side is complete end to end**: the base is standard smooth (already
+available), decomposes into finitely many factors (D3a-DOM), each factor is a localization
+hence standard smooth (D3a-FACTOR), hence a normal domain (D3b), and a root of unity in its
+fraction field descends to it (`exists_algebraMap_eq_of_pow_eq_one`, pre-existing). The only
+remaining input to `WeilPairingLocalData` is the root's `det`-transformation law.
