@@ -86,4 +86,10 @@ noncomputable def cancelPolyBaseChange (M : Type u) [CommRing M] [Algebra R[X] M
     TensorProduct R[X] M (TensorProduct R R[X] S) ≃ₐ[R[X]] TensorProduct R M S :=
   Algebra.TensorProduct.cancelBaseChange R R[X] R[X] M S
 
+/-- **(WP-D3c-2a)** `R[X] ⊗[R] S ≅ S[X]`, in the orientation `cancelPolyBaseChange` produces.
+`Polynomial.polyEquivTensor R S` is `S[X] ≃ₐ[R] S ⊗[R] R[X]`, so this is it composed with
+`Algebra.TensorProduct.comm` and inverted. -/
+noncomputable def tensorPolyEquiv : TensorProduct R R[X] S ≃ₐ[R] S[X] :=
+  (Algebra.TensorProduct.comm R R[X] S).trans (polyEquivTensor R S).symm
+
 end ModularCurves

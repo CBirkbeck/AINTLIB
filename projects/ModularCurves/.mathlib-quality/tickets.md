@@ -36466,3 +36466,25 @@ the three hypotheses in the signature.
 the root import. Of the six-step chain, steps 2 (`cancelBaseChange`), 5
 (`quotIdealMapEquivTensorQuot`) and 6 (`span_map_eq_map_span`) are done; what remains is
 `R[X] ⊗[R] S ≅ S[X]` and the two `Algebra.TensorProduct.comm`s, then the assembly.
+
+## [WP-D3c-2a] `tensorPolyEquiv` landed (2026-08-04) — axiom-verified
+
+`R[X] ⊗[R] S ≃ₐ[R] S[X]`, i.e. `Algebra.TensorProduct.comm` then `polyEquivTensor R S`
+inverted (mathlib's is `S[X] ≃ₐ[R] S ⊗[R] R[X]`, the other orientation).
+
+**Seven** declarations now in `ForMathlib/AdjoinRootBaseChange.lean`, sorry-free,
+axiom-verified, in the root import:
+
+| declaration | chain step |
+|---|---|
+| `polyAlgebra`, `isScalarTower_poly` | the instances |
+| `map_X_pow_sub_one` | the polynomial identity `μ_N` needs |
+| `tensorPolyEquiv` | step 3 |
+| `cancelPolyBaseChange` | step 2 |
+| `span_map_eq_map_span` | step 6 |
+| `quotSpanMapEquivTensor` | step 5 |
+
+All that is left of the base-change equivalence is **the assembly** — chaining these with the
+two `Algebra.TensorProduct.comm`s and reconciling the base rings of the `≃ₐ`s (the pieces are
+variously `≃ₐ[R]`, `≃ₐ[R[X]]` and `≃ₐ[S[X]]`, so the final statement is cleanest as a
+`RingEquiv` with `S`-linearity checked on `1 ⊗ₜ` generators).
