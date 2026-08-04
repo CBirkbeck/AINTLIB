@@ -36400,3 +36400,23 @@ This is the sixth and last step of the chain; steps one through five
 (`comm` → `cancelBaseChange` → `polyEquivTensor` → `comm` → `quotIdealMapEquivTensorQuot`)
 remain. `ForMathlib/AdjoinRootBaseChange.lean` is now four declarations, sorry-free,
 axiom-verified, in the root import.
+
+## [WP-D3c-2a] `quotSpanMapEquivTensor` landed (2026-08-04) — axiom-verified
+
+```
+(S[X] ⧸ span {f.map (algebraMap R S)}) ≃ₐ[S[X]] S[X] ⊗[R[X]] (R[X] ⧸ span {f})
+```
+
+`span_map_eq_map_span` then `Algebra.TensorProduct.quotIdealMapEquivTensorQuot`. Two gotchas
+recorded:
+
+* **State it with the explicit quotient, not `AdjoinRoot`.** `AdjoinRoot f` carries only the
+  `R`-algebra structure (through `AdjoinRoot.of`); `Module R[X] (AdjoinRoot f)` is **not**
+  synthesised, so `quotIdealMapEquivTensorQuot` does not apply to it. `R[X] ⧸ Ideal.span {f}`,
+  to which it is definitionally equal, does have the instances.
+* `Ideal.quotEquivOfEq` is a `RingEquiv`; the algebra version is
+  `Ideal.quotientEquivAlgOfEq R h` (`RingTheory/Ideal/Quotient/Operations.lean:766`).
+
+`ForMathlib/AdjoinRootBaseChange.lean` is now five declarations, sorry-free, axiom-verified,
+in the root import. Steps one to four of the six-step chain remain (`comm`,
+`cancelBaseChange` at the instantiation recorded above, `polyEquivTensor`, `comm`).

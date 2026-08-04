@@ -63,4 +63,17 @@ theorem span_map_eq_map_span (f : R[X]) :
   rw [Ideal.map_span, Set.image_singleton]
   rfl
 
+/-- **(WP-D3c-2a)** The quotient of `S[X]` by the mapped polynomial is the base change of the
+quotient of `R[X]`. Stated with the explicit quotient rather than `AdjoinRoot`, because
+`AdjoinRoot f` carries no `Module R[X]` instance (only the `R`-algebra structure through
+`AdjoinRoot.of`), while `R[X] ⧸ Ideal.span {f}` — to which it is definitionally equal — does.
+
+This is the half of the chain that `Algebra.TensorProduct.quotIdealMapEquivTensorQuot`
+supplies directly. -/
+noncomputable def quotSpanMapEquivTensor (f : R[X]) :
+    (S[X] ⧸ Ideal.span {f.map (algebraMap R S)}) ≃ₐ[S[X]]
+      TensorProduct R[X] S[X] (R[X] ⧸ Ideal.span {f}) :=
+  (Ideal.quotientEquivAlgOfEq S[X] (span_map_eq_map_span (S := S) f)).trans
+    (Algebra.TensorProduct.quotIdealMapEquivTensorQuot S[X] (Ideal.span {f}))
+
 end ModularCurves
