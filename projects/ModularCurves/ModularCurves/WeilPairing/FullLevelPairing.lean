@@ -231,6 +231,38 @@ theorem coverPairing_over (p : S' ⟶ S) (hinv : NIsInvertible S' N)
     (E.baseChange p).fullLevelPairing_over hinv L ζ, ← Category.assoc, hsnd]
   exact pullback.condition.symm
 
+/-- The trivialisation of the base change of the Weil-pairing source that the cover pairing is
+built from: the base-change identification followed by the level trivialisation of the square. -/
+noncomputable def coverTriv (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N) :
+    pullback (E.torsionSqπ N) p ≅
+      constScheme S' ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) :=
+  (E.torsionSqBaseChangeIso N p).trans ((E.baseChange p).fullLevelSqIso hinv L)
+
+theorem coverTriv_htriv (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N) :
+    (E.coverTriv p hinv L).hom ≫
+        constSchemeπ S' ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) =
+      pullback.snd (E.torsionSqπ N) p := by
+  rw [coverTriv, Iso.trans_hom, Category.assoc,
+    (E.baseChange p).fullLevelSqIso_hom_π hinv L, torsionSqBaseChangeIso, Iso.symm_hom,
+    Iso.inv_comp_eq]
+  exact (E.isPullback_torsionSq_baseChange N p).isoPullback_hom_snd.symm
+
+/-- **(route β, the two lines converge)** The cover pairing *is* the local determinant pairing of
+`WeilPairing/RootSplitting.lean` for the trivialisation `coverTriv`.
+
+Consequently the whole clopen-decomposition machinery of `WeilPairing/DetCocycle.lean`
+(`comp_localDetPairing_restrict`, `comp_localDetPairing_eq_of_pieces`,
+`nonempty_weilPairing_of_root_of_det`) applies to it verbatim — and `fullLevelPairing_glSmul` is the
+tool that discharges the surviving `hdet`. -/
+theorem coverPairing_eq_localDetPairing (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N)
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 }) :
+    E.coverPairing p hinv L ζ = localDetPairing E N p ζ (E.coverTriv p hinv L) := by
+  simp only [coverPairing, localDetPairing, coverTriv, fullLevelPairing, Iso.trans_hom,
+    Category.assoc]
+
 /-- **(route β, step 3, THE DESCENT)** An elliptic curve admits a Weil pairing as soon as it admits
 a trivialising fppf cover carrying a **full level structure** and an `N`-th root of unity, *and* the
 resulting cover pairing satisfies the cocycle condition on the kernel pair.

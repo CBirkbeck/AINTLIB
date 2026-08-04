@@ -37254,3 +37254,22 @@ Next concrete step: turn `hcoc` into the `ζ`-statement, i.e. prove
 not yet written: on each clopen piece of the kernel pair the two level structures are `glSmul`-related
 (`GLSchemeAction.lean` has `exists_glSchemeSmul_of_hOrbit` and `fullLevelIso_symm_trans_of_glSmul_eq`
 for exactly this comparison).
+
+### [route β] the two lines converge (2026-08-04)
+
+* **`coverTriv`** / **`coverTriv_htriv`** — the trivialisation of `pullback (E.torsionSqπ N) p` that
+  a full level structure on the cover provides: `torsionSqBaseChangeIso` followed by
+  `fullLevelSqIso`, with its over-`S'` compatibility.
+* **`coverPairing_eq_localDetPairing`** — `coverPairing` **is** `localDetPairing E N p ζ coverTriv`.
+
+So the new full-level line and the pre-existing `WeilPairing/RootSplitting.lean` +
+`WeilPairing/DetCocycle.lean` line are the *same* object: `comp_localDetPairing_restrict`,
+`comp_localDetPairing_eq_of_pieces` and `nonempty_weilPairing_of_root_of_det` apply to
+`coverPairing` verbatim, and `fullLevelPairing_glSmul` is the new tool for their surviving `hdet`.
+
+**The last unwritten geometric piece** is the *transition*: on the kernel pair, the two pulled-back
+level structures trivialise the same torsion, so they differ by a unique locally constant
+`GL₂(ℤ/N)`-valued function, and `hdet`'s `vw.1`, `vw.2` are related by it. Constructing that
+function (and its uniqueness) is what remains before `fullLevelPairing_glSmul` can be applied
+piecewise; `GLSchemeAction.lean`'s `exists_glSchemeSmul_of_hOrbit` /
+`fullLevelIso_symm_trans_of_glSmul_eq` are the per-`g` half of it.
