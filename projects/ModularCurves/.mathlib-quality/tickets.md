@@ -36542,3 +36542,18 @@ identifies `muN (Spec k) N` with `Spec (AdjoinRoot ((X : k[X])^N − 1))`. With
 `quotSpanBaseChange` and `map_X_pow_sub_one` the `μ_N`-side of the field-change transport is
 therefore complete at the ring level; what remains on that side is transporting through
 `muNSpecFieldIso` and `finiteEtaleOfπ`, then the same treatment for `torsionPairAlgebra`.
+
+### [WP-D3c-2b] next: transport `muNAlgebra` itself
+- **Status**: open · **File**: new, `WeilPairing/MuNBaseChange.lean` · **Depends on**: WP-D3c-2a
+- **Statement**: for fields `k → k'` with `N` invertible in both,
+  `(CommAlgCat.FiniteEtale.baseChange k k').obj (muNAlgebra k N hk) ≅ muNAlgebra k' N hk'`.
+- **Route**: `muNAlgebra k N hk = finiteEtaleOfπ (muNπ (Spec k) N)`, whose carrier is
+  `Γ(muN (Spec k) N, ⊤)`; `muNSpecFieldIso k N` identifies `muN (Spec k) N` with
+  `Spec (AdjoinRoot ((X : k[X])^N − 1))`, so the carrier is `AdjoinRoot ((X : k[X])^N − 1)`
+  through `Scheme.ΓSpecIso`. Then `quotSpanBaseChange` plus `map_X_pow_sub_one` give the
+  base change, and `CommAlgCat.FiniteEtale.isoMk` packages it.
+- **Care**: `muNSpecFieldIso_struct` is the compatibility that makes the carrier iso a
+  `k`-algebra iso (it says the identification lies over the base via `AdjoinRoot.of`).
+- **Then** `torsionPairAlgebra`: no explicit model, so it goes through
+  `torsion_baseChange_isPullback` and `Algebra.TensorProduct` of the two `torsionAlgebra`
+  factors instead.

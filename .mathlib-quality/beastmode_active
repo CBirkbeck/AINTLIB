@@ -1,1 +1,1 @@
-FOCUS: WP-D3c step 2 — transport muNAlgebra/torsionPairAlgebra along a field isomorphism; start from muNAlgebra (EtaleDescent.lean:235)
+FOCUS: WP-D3c-2b — transport muNAlgebra through muNSpecFieldIso + finiteEtaleOfπ using quotSpanBaseChange; then torsionPairAlgebra
