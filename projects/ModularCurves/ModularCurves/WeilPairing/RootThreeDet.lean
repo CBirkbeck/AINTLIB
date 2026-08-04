@@ -44,6 +44,28 @@ noncomputable def e3GlIso (hR : IsUnit (3 : R))
   (naiveLevelThreeRepresentableBy R hR hL hArb).uniqueUpToIso
     ((naiveLevelThreeRepresentableBy R hR hL hArb).ofIso (gammaFullNaiveGlAut R 3 g))
 
+/-- **(WP-D3c-N3, the characterisation)** `e3GlIso g` classifies the universal level-three
+structure **re-marked by `g⁻¹`**.
+
+This is what makes the determinant law computable: composing with the classifying-map rules
+`e3ClassifyingRingHom_gamma` / `_beta` turns the induced ring automorphism into the coordinate
+transformation of the ℰ₃ normal form under `glSmul`. -/
+theorem e3GlIso_hom_homEquiv (hR : IsUnit (3 : R))
+    (hL : (universalE3Obj R).curve.IsNaiveFullLevel 3
+      (universalE3P R) (universalE3Q R))
+    (hArb : ∀ (X : EllObj R) (L : X.curve.FullLevelPt 3), IsE3Datum X L)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod 3)) :
+    (naiveLevelThreeRepresentableBy R hR hL hArb).homEquiv (e3GlIso R hR hL hArb g).hom =
+      (universalE3Obj R).curve.glSmul g⁻¹
+        ((naiveLevelThreeRepresentableBy R hR hL hArb).homEquiv
+          (𝟙 (universalE3Obj R))) := by
+  show (naiveLevelThreeRepresentableBy R hR hL hArb).homEquiv
+      (((naiveLevelThreeRepresentableBy R hR hL hArb).ofIso
+          (gammaFullNaiveGlAut R 3 g)).homEquiv.symm
+        ((naiveLevelThreeRepresentableBy R hR hL hArb).homEquiv
+          (𝟙 (universalE3Obj R)))) = _
+  exact (naiveLevelThreeRepresentableBy R hR hL hArb).homEquiv.apply_symm_apply _
+
 /-- **(WP-D3c-N3)** The induced automorphism of the level-three moduli **scheme**. -/
 noncomputable def e3GlBaseIso (hR : IsUnit (3 : R))
     (hL : (universalE3Obj R).curve.IsNaiveFullLevel 3
