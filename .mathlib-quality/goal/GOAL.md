@@ -15408,3 +15408,32 @@ constraint arises. That gives `hginv` 44 → ~15 and the target 90 → ~61; comb
 
 Reverted to a clean tree (`git diff` empty); no build was spent on a broken state beyond the two
 diagnostic ones.
+
+### `xPresheaf_frobEq_on_piece` lands: 90 → 65, via the per-piece route
+
+The corrected route works. `xPresheaf_frobEq_on_piece` (27c) takes a **single piece** as an
+argument and so never quantifies over `ι` — which is exactly what dodges
+`IsLimitSheafOn.injective`'s `∀ {ι : Type u}` for the unnameable ambient `u`. `hginv` 44 → 19,
+target 90 → 65.
+
+**Section variables lead the argument list — sixth occurrence.** The call needed
+`xPresheaf_frobEq_on_piece p F V' …`, not `… V' …`; the error was
+`argument V' … of sort Type u_1 but is expected to have type ℕ`, which reads as a completely
+unrelated type confusion. `p` and `F` are auto-included (the statement uses `Ainf p F`); `ϖ` is
+not (nothing in the statement or body mentions it), so the count of leading arguments is *not*
+simply "all the section variables" — it is the ones actually used, which has to be read off the
+statement each time.
+
+**Also a repeat of the dedent slip**, caught by the measure this time rather than by the build:
+the source lines sit at indent 4 (inside `hginv`'s body) and a lemma body sits at 2, so the dedent
+is **2, not 4**. Dedenting by 4 put `have` in column 0 and the measure reported the new lemma as
+**0c** — that reading is the tell, and it is cheaper than the build error it would otherwise become.
+
+**Remaining to clear this target (65 → ~48), both verified as unblocked:**
+
+- the uniqueness leg, `rintro ⟨g'', hg''c⟩ hg''` (15c) — it only *receives* `huniq` rather than
+  calling `homGlue`, so a `{ι : Type*}` binder instantiated at the caller's `ι` is fine;
+- the existence leg, `refine RingHom.ext fun t => ?_` (4c) — per-`i`, no `ι` at all.
+
+`hginv` itself (now 19c) stays inline permanently: it *calls* `injective`, so it is the one piece
+the universe constraint genuinely blocks.

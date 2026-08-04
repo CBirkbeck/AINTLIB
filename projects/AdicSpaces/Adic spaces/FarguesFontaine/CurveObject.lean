@@ -1700,6 +1700,51 @@ private theorem xPresheaf_glue_compat (T : Type u) [CommRing T] [TopologicalSpac
     (inf_le_right (a := U' i) (b := U' j)) h0'
 
 
+/-- The per-piece half of Frobenius-invariance of the glued section: on each cover piece the
+frobenius image and the stability-restriction of `x` agree.
+
+Quantified over a SINGLE piece rather than over the index type. `IsLimitSheafOn.injective`
+quantifies its index as `Type u` for the ambient `u` — that of `Ainf p F`, hence of `F`, which
+`variable (F : Type*)` auto-binds and therefore leaves unnameable — so any helper that CALLS it
+cannot be extracted. Taking the piece as an argument sidesteps the constraint entirely. -/
+private theorem xPresheaf_frobEq_on_piece
+    (V' Ui : Opens ↥(SpaTop (Ainf p F))) (hlei : Ui ≤ V')
+    (stabV : frobOpens p F 1 V' = V') (stabUi : frobOpens p F 1 Ui = Ui)
+    (hle2i : Ui ≤ frobOpens p F 1 V')
+    (x : ↥(limitSections V')) (ai : ↥(limitSections Ui))
+    (hai : limitFrobHom p F 1 Ui ai = limitRestrict (le_of_eq stabUi) ai)
+    (hgai : limitRestrict hlei x = ai) :
+    limitRestrict hle2i (limitFrobHom p F 1 V' x)
+      = limitRestrict hle2i (limitRestrict (le_of_eq stabV) x) := by
+  have hLa := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (le_of_eq stabUi.symm) (frobOpens_mono p F 1 hlei)))
+    (limitFrobHom p F 1 V' x)
+  have hLb := limitFrobHom_limitRestrict p F 1 hlei x
+  have hLc := congrArg
+    (fun s => limitRestrict (le_of_eq stabUi.symm)
+      (limitFrobHom p F 1 Ui s)) (hgai)
+  have hLd : limitFrobHom p F 1 Ui ai
+      = limitRestrict (le_of_eq stabUi) ai :=
+    hai
+  have hLe := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (le_of_eq stabUi.symm) (le_of_eq stabUi))) ai
+  have hLf := congr_fun (congrArg DFunLike.coe
+    (limitRestrict_id Ui)) ai
+  have hL : limitRestrict hle2i (limitFrobHom p F 1 V' x)
+      = ai :=
+    (hLa.symm.trans (congrArg
+        (limitRestrict (le_of_eq stabUi.symm)) hLb)).trans
+      ((hLc.trans (congrArg
+        (limitRestrict (le_of_eq stabUi.symm)) hLd)).trans
+      (hLe.trans hLf))
+  have hRa := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    hle2i (le_of_eq stabV))) x
+  have hR : limitRestrict hle2i
+      (limitRestrict (le_of_eq stabV) x) = ai :=
+    hRa.trans (hgai)
+  exact hL.trans hR.symm
+
+
 /-- **The curve presheaf is a sheaf of topological rings** (D-iv-4, Wedhorn
 Remark 8.20 for the quotient): compatible continuous `T`-families of
 invariant sections glue uniquely — glue the underlying `𝒴`-sections over
@@ -1751,33 +1796,8 @@ theorem xPresheaf_isSheafOfTopologicalRings :
     refine (isLimitSheafOn_Y p F ϖ).injective hVS2 hle2 hcov2
       (fun i => ?_)
     -- the common value on the piece: the underlying section of `f i t`
-    have hLa := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
-      (le_of_eq (stabU i).symm) (frobOpens_mono p F 1 (hle i))))
-      (limitFrobHom p F 1 V' (g.1 t))
-    have hLb := limitFrobHom_limitRestrict p F 1 (hle i) (g.1 t)
-    have hLc := congrArg
-      (fun s => limitRestrict (le_of_eq (stabU i).symm)
-        (limitFrobHom p F 1 (U' i) s)) (DFunLike.congr_fun (hg i) t)
-    have hLd : limitFrobHom p F 1 (U' i) ((f i).1 t).1
-        = limitRestrict (le_of_eq (stabU i)) ((f i).1 t).1 :=
-      ((f i).1 t).2
-    have hLe := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
-      (le_of_eq (stabU i).symm) (le_of_eq (stabU i)))) ((f i).1 t).1
-    have hLf := congr_fun (congrArg DFunLike.coe
-      (limitRestrict_id (U' i))) ((f i).1 t).1
-    have hL : limitRestrict (hle2 i) (limitFrobHom p F 1 V' (g.1 t))
-        = ((f i).1 t).1 :=
-      (hLa.symm.trans (congrArg
-          (limitRestrict (le_of_eq (stabU i).symm)) hLb)).trans
-        ((hLc.trans (congrArg
-          (limitRestrict (le_of_eq (stabU i).symm)) hLd)).trans
-        (hLe.trans hLf))
-    have hRa := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
-      (hle2 i) (le_of_eq stabV))) (g.1 t)
-    have hR : limitRestrict (hle2 i)
-        (limitRestrict (le_of_eq stabV) (g.1 t)) = ((f i).1 t).1 :=
-      hRa.trans (DFunLike.congr_fun (hg i) t)
-    exact hL.trans hR.symm
+    exact xPresheaf_frobEq_on_piece p F V' (U' i) (hle i) stabV (stabU i) (hle2 i)
+      (g.1 t) ((f i).1 t).1 ((f i).1 t).2 (DFunLike.congr_fun (hg i) t)
   -- package the glued invariant section
   set gX : T →+* ↥(frobFixed p F ϖ (iSup U)) :=
     RingHom.codRestrict g.1 (frobFixed p F ϖ (iSup U)) hginv with hgXdef
