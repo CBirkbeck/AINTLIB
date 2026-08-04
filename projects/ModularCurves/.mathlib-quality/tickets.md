@@ -36451,3 +36451,18 @@ on generators.
 
 Remaining: `R[X] ⊗[R] S ≅ S[X]` (`Polynomial.polyEquivTensor` up to
 `Algebra.TensorProduct.comm`), and the two `comm`s.
+
+## [WP-D3c-2a] `cancelPolyBaseChange` landed (2026-08-04) — axiom-verified
+
+```
+M ⊗[R[X]] (R[X] ⊗[R] S) ≃ₐ[R[X]] M ⊗[R] S      for any R[X]-algebra M
+```
+
+`Algebra.TensorProduct.cancelBaseChange R R[X] R[X] M S`, at the instantiation recorded above
+— the one whose `T`-slot conditions degenerate. Typechecks with no instance plumbing beyond
+the three hypotheses in the signature.
+
+`ForMathlib/AdjoinRootBaseChange.lean`: **six** declarations, sorry-free, axiom-verified, in
+the root import. Of the six-step chain, steps 2 (`cancelBaseChange`), 5
+(`quotIdealMapEquivTensorQuot`) and 6 (`span_map_eq_map_span`) are done; what remains is
+`R[X] ⊗[R] S ≅ S[X]` and the two `Algebra.TensorProduct.comm`s, then the assembly.

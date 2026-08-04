@@ -76,4 +76,14 @@ noncomputable def quotSpanMapEquivTensor (f : R[X]) :
   (Ideal.quotientEquivAlgOfEq S[X] (span_map_eq_map_span (S := S) f)).trans
     (Algebra.TensorProduct.quotIdealMapEquivTensorQuot S[X] (Ideal.span {f}))
 
+/-- **(WP-D3c-2a)** Cancelling the intermediate base change: for an `R[X]`-algebra `M`,
+tensoring up to `R[X] ⊗[R] S` is the same as tensoring `M` up to `S` over `R`.
+
+The instantiation matters — see the board. Taking the `T`-slot to be `S` fails (it demands an
+`S`-algebra structure on `M`); taking it to be `R[X]` makes the two `T`-conditions trivial. -/
+noncomputable def cancelPolyBaseChange (M : Type u) [CommRing M] [Algebra R[X] M]
+    [Algebra R M] [IsScalarTower R R[X] M] :
+    TensorProduct R[X] M (TensorProduct R R[X] S) ≃ₐ[R[X]] TensorProduct R M S :=
+  Algebra.TensorProduct.cancelBaseChange R R[X] R[X] M S
+
 end ModularCurves
