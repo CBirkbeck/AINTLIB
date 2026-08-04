@@ -76,6 +76,7 @@ theorem fullLevelSqIso_hom_π (hinv : NIsInvertible S N) (L : E.FullLevelPt N) :
 
 /-- The computation rule for `fullLevelSqIso`: the `(v, w)`-th copy of `S` is the pair of torsion
 sections labelled `v` and `w` by the level structure. -/
+@[reassoc]
 theorem fullLevelSqIso_inv_ι (hinv : NIsInvertible S N) (L : E.FullLevelPt N)
     (v w : Fin 2 → ZMod N) :
     Sigma.ι (fun _ : (Fin 2 → ZMod N) × (Fin 2 → ZMod N) => S) (v, w) ≫
@@ -104,6 +105,43 @@ theorem fullLevelSqIso_inv_ι (hinv : NIsInvertible S N) (L : E.FullLevelPt N)
   refine pullback.hom_ext ?_ ?_
   · rw [Category.assoc, hfst, pullback.lift_fst_assoc, pullback.lift_fst]
   · rw [Category.assoc, hsnd, pullback.lift_snd_assoc, pullback.lift_snd]
+
+/-- **(route β, the square base-change)** `fullLevelSqIso` commutes with base change: the square
+trivialisation of the base-changed curve, followed by the torsion-square comparison, is
+`constSchemeMapAlong` followed by the original square trivialisation.
+
+The one-leg statement is the tree's `fullLevelHom_baseChange` (`GroupScheme/GLSchemeAction.lean`); the
+square version follows by checking on the coproduct inclusions with `fullLevelSqIso_inv_ι`, exactly as
+`fullLevelSqIso_glSmul_inv` below. -/
+theorem fullLevelSqIso_inv_baseChange {T' : Scheme.{u}} (σ : T' ⟶ S)
+    (hinv : NIsInvertible S N) (hinv' : NIsInvertible T' N) (L : E.FullLevelPt N) :
+    ((E.baseChange σ).fullLevelSqIso hinv' (L.pullAlong σ)).inv ≫
+        E.torsionSqBaseChangeHom N σ =
+      constSchemeMapAlong σ ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) ≫
+        (E.fullLevelSqIso hinv L).inv := by
+  refine Sigma.hom_ext _ _ fun vw => ?_
+  obtain ⟨v, w⟩ := vw
+  have hleg : ∀ u : Fin 2 → ZMod N,
+      (Sigma.ι (fun _ : Fin 2 → ZMod N => T') u ≫
+          ((E.baseChange σ).fullLevelIso hinv' (L.pullAlong σ)).hom) ≫
+        E.torsionBaseChangeHom N σ =
+      σ ≫ Sigma.ι (fun _ : Fin 2 → ZMod N => S) u ≫ (E.fullLevelIso hinv L).hom := by
+    intro u
+    have h := E.fullLevelHom_baseChange σ L
+    show (Sigma.ι (fun _ : Fin 2 → ZMod N => T') u ≫
+        (E.baseChange σ).fullLevelHom (L.pullAlong σ)) ≫ E.torsionBaseChangeHom N σ =
+      σ ≫ Sigma.ι (fun _ : Fin 2 → ZMod N => S) u ≫ E.fullLevelHom L
+    rw [Category.assoc, ← h, ← Category.assoc, ι_constSchemeMapAlong, Category.assoc]
+  rw [ι_constSchemeMapAlong_assoc,
+    (E.baseChange σ).fullLevelSqIso_inv_ι_assoc hinv' (L.pullAlong σ) v w,
+    E.fullLevelSqIso_inv_ι hinv L v w]
+  refine pullback.hom_ext ?_ ?_
+  · simp only [Category.assoc, E.torsionSqBaseChangeHom_fst N σ, pullback.lift_fst,
+      pullback.lift_fst_assoc]
+    exact hleg v
+  · simp only [Category.assoc, E.torsionSqBaseChangeHom_snd N σ, pullback.lift_snd,
+      pullback.lift_snd_assoc]
+    exact hleg w
 
 /-- **(route β, step 2, the equivariance)** Re-marking the level structure by `g ∈ GL₂(ℤ/N)`
 composes the trivialisation of the square with the diagonal action of `g`:

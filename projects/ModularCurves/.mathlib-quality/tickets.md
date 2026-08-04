@@ -37915,3 +37915,31 @@ builds directly on `fullLevelHom_baseChange` — the square version, by transpor
 (a)/(b) split recorded above.
 
 Root green at **9731 jobs**.
+
+## [route β] THE SQUARE BASE-CHANGE IS DONE (2026-08-04) — axiom-verified
+
+**`fullLevelSqIso_inv_baseChange`** (`WeilPairing/FullLevelPairing.lean`):
+
+`((E.baseChange σ).fullLevelSqIso hinv' (L.pullAlong σ)).inv ≫ E.torsionSqBaseChangeHom N σ
+   = constSchemeMapAlong σ ((Fin 2 → ZMod N) × _) ≫ (E.fullLevelSqIso hinv L).inv`
+
+— the square trivialisation commutes with base change. Built on the tree's own
+`fullLevelHom_baseChange` (the one-leg statement, which is what my removed duplicate had re-proved),
+checked on the coproduct inclusions with `fullLevelSqIso_inv_ι` — the third time that argument has
+worked, so it is now the standard move for `fullLevelSqIso` identities. `fullLevelSqIso_inv_ι` gained
+`@[reassoc]` for it.
+
+Elaboration notes: `ι_constSchemeMapAlong_assoc` (not `← Category.assoc` then the plain form) is what
+reduces the `constSchemeMapAlong` side; and the two `pullback.hom_ext` branches close with
+`simp only [Category.assoc, torsionSqBaseChangeHom_fst/​snd, pullback.lift_fst/​snd,
+pullback.lift_fst/​snd_assoc]` followed by `exact` — a `rw` chain fails there because the same
+`lift_fst_assoc` pattern is needed at two different associations.
+
+**What is left.** With this, the two kernel-pair projections' trivialisations are both expressed
+through the *pulled-back* level structures `α^*L`, `β^*L`, so `fullLevelHom_eq_of_levelCoord` applies
+to them and yields the reading relation `det w = det g · det v` on each clopen piece of
+`levelTransitionCols`. That plus `comp_localDetPairing_restrict`,
+`comp_rootPower_muNMapAlong_eq` and `detFun_gl2Both` — all proved — closes `hdet`, leaving **only
+WP-D3d** (`g^*ζ = ζ ^ det g`).
+
+Root green at **9731 jobs**.
