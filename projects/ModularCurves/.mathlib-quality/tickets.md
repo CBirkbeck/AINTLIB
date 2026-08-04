@@ -37891,3 +37891,27 @@ and it splits into
 
 `coverTriv_glSmul_hom` and `coverPairing_glSmul` are what (a) will be *proved against* once the
 transition is identified, and `fieldWeilPairing_det_of_galois` is (b)'s arithmetic core.
+
+## [route β] PROCESS FAILURE + CORRECTION: item (A) step 1 was already in the tree (2026-08-04)
+
+**`EllipticCurve.fullLevelHom_baseChange` (`GroupScheme/GLSchemeAction.lean:402`) already proves exactly
+what I spent this stretch proving as `fullLevelHom_pullAlong`** — same statement, character for
+character. My duplicate has been removed from `WeilPairing/FullLevelBaseChange.lean`.
+
+*Why it happened*: I grepped for the *ingredients* (`Point.asSection_add`, `Point.pull_add`,
+`comp_pointToTorsion`) but never for the *target*. The grep-first rule is "grep the concept before
+writing a declaration" — the concept here was "level trivialisation commutes with base change", and one
+grep for `fullLevelHom_baseChange` would have found it. Grep the **conclusion**, not just the inputs.
+
+*What survives*: the four supporting lemmas are **not** duplicates (checked individually) —
+`comp_pointToTorsion_of_eq` and `pointToTorsion_asSection_torsionBaseChangeHom`
+(`WeilPairing/TorsionSqBaseChange.lean`) are general and independently useful, and
+`asSection_pull_basisComb` / `basisComb_comp_mulByHom` are small, correctly-named facts. All are flagged
+in-file: if the square base-change step does not use them, **delete them**.
+
+*What this buys*: item (A) step 1 is **done, and was done before this session started**. The next step
+builds directly on `fullLevelHom_baseChange` — the square version, by transport through
+`fullLevelSqIso` with the `fullLevelSqIso_inv_ι` inclusion argument. Everything after that is the
+(a)/(b) split recorded above.
+
+Root green at **9731 jobs**.
