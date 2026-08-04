@@ -36963,3 +36963,80 @@ root import. Root green at **9723 jobs**.
 (which is `IsPullback.of_hasPullback` transported along that iso), giving
 `Spec Γ(E_{k'}[N],⊤) ≅ Spec (Γ(E[N],⊤) ⊗[k] k')`; then `ΓSpecIso` reads it as the ring
 isomorphism `Γ(E_{k'}[N],⊤) ≃+* Γ(E[N],⊤) ⊗[k] k'`, exactly as `muNCarrierRingEquiv` does.
+
+## [WP-D3c step 2] the obligation, traced to the bottom (2026-08-04)
+
+Tracing what `hdet` (`nonempty_weilPairing_of_root_of_det`, `WeilPairing/DetCocycle.lean:149`)
+actually consumes settles the shape of the remaining work, and it is **not** what the previous
+entry assumed.
+
+### What `hdet` is, ring-theoretically
+
+On the clopen piece where the two trivialisation readings are `v` and `w`, both sides are
+`(map to S') ≫ rootPower N ζ _ ≫ muNMapAlong`, so `hdet` says exactly
+
+`α(ζ) ^ (det v) = β(ζ) ^ (det w)`  in `Γ(piece)`,
+
+for the two ring maps `α, β : Γ(S') → Γ(piece)` induced by the two projections. Since a reading
+`v` of a *basis* has `det v ∈ (ℤ/N)ˣ`, this is equivalent to `α(ζ) = β(ζ) ^ det g` where
+`w = g · v`. So the obligation is: **the root transforms by `det` under the transition of the
+cover** — with no group action in sight for a general base, only a groupoid.
+
+### Two routes, and why the choice matters
+
+* **Route α — the semilinear transport.** Build `ζ` componentwise on the *given* cover from the
+  field pairing at each component's generic point. Then the two readings can sit on **different
+  components**, related by an isomorphism of function fields, so one needs
+  **(T)**: `weilPairing` transports along a ring isomorphism `σ : F ≃+* F'` of algebraically
+  closed fields carrying `V` to `V.map σ`. That is a semilinear mirror of
+  `WeilPairing/GaloisFunctionField.lean` — measured at **≈50 declarations / ≈1150 lines** (the
+  divisor-transport half, lines 108–900, and the translation-conjugation half, lines 931–1290).
+  Mathematically routine, mechanically large.
+* **Route β — the universal base.** Build the pairing over `Y(N)` first, where the torsion is
+  *already* trivialised: taking `p = id` in `nonempty_weilPairing_of_root_of_det` makes the two
+  projections of the kernel pair equal, so **`hdet` is vacuous** and only `ζ` with `ζ^N = 1` is
+  needed. Then a general `S` gets the pairing by pullback along its classifying map, and the
+  descent for general `S` needs the **`GL₂(ℤ/N)`-equivariance of the `Y(N)`-level pairing** —
+  which, because `GL₂` genuinely *acts* there, is an orbit/stabiliser argument:
+  * on the **stabiliser** of a component, the transition is an automorphism `τ` of that
+    component's function field **fixing the curve**, so the curve descends to `K^τ` (finite
+    over `K` by `FixedPoints.isIntegral`) and the transport is the **already-proved**
+    `weilPairing_galois` — no new machinery at all;
+  * on the rest of the orbit, `ζ` is **defined by transport** from the chosen representative, so
+    the transport identity holds by construction, and the general `g` reduces to the stabiliser
+    case via `h_{q'}⁻¹ g h_q ∈ Stab(p)`.
+
+  Cost: the stabiliser-case det law (≈150 lines, below, mostly done) plus a re-architecture of
+  the final assembly (classifying map + descent), whose geometry is not yet measured.
+
+### What is now proved (this session), usable by both routes
+
+`WeilPairing/PairingTransport.lean` (new, sorry-free, `propext / choice / Quot.sound`):
+
+* **`weilPairing_transport_core`** — the two-field generalisation of
+  `weilPairing_galois_core_of_algEquiv`: `σ₀ : F →+* F'`, curves `V/F` and `V'/F'`, and
+  `Φ : K(V) →+* K(V')`; the constant-ratio cancellation never uses `F' = F` nor bijectivity of
+  `Φ`. This is (T)'s endgame, already in place.
+* **`pointMapOfRingHom` / `pointEquivOfRingEquiv`** — the *semilinear* transport of affine
+  points, obtained by giving `F'` the `F`-algebra structure `σ.toAlgebra`, under which
+  `V.baseChange F' = V.map σ` holds by definition, so mathlib's `Affine.Point.map` (and its
+  `map_injective`) apply verbatim. This removes the one piece of (T) that looked like it needed
+  new mathlib API.
+* **`coordRingEquivOfRingEquiv` / `functionFieldEquivOfRingEquiv`** — the semilinear coordinate-
+  ring and function-field equivalences. `coordRingMap_surjective_of_ringEquiv` and
+  `coordRingMap_bijective_of_ringEquiv` (`GaloisFunctionField.lean`) were **widened in place** to
+  a ring equivalence between two different fields and an arbitrary curve; their proofs never used
+  that source and target coincide, and the single call site now instantiates.
+* **`fieldWeilPairing_det_of_galois`** — ***the root transforms by `det`*, at the field level, for
+  a Galois automorphism**: if `σ : L ≃ₐ[k] L` re-marks the basis `(P, Q)` by `g`, then
+  `σ (e_N(P,Q)) = e_N(P,Q) ^ det g`. Two lines: `fieldWeilPairing_galois` moves `σ` across, and
+  `fieldWeilPairing_gl2_zmod` evaluates the re-marked pairing. **This is route β's stabiliser
+  case, and it needed no new machinery.**
+
+### Recommendation
+
+Route β's stabiliser case is *already done* and cost 20 lines where route α's (T) costs 1150. The
+next measurement to take is route β's assembly side (does the tree's `Y(N)` representability give
+the classifying map in the form the descent needs?). Until that is measured, do **not** start the
+1150-line mirror: `weilPairing_transport_core` plus the semilinear point/coordinate-ring transport
+already de-risk (T)'s two hardest-looking pieces, so α stays available at a known price.

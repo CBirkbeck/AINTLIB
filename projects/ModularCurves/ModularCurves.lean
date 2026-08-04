@@ -219,6 +219,7 @@ import ModularCurves.ForMathlib.AdjoinRootBaseChange
 import ModularCurves.ForMathlib.SmoothCurveComponents
 import ModularCurves.WeilPairing.DetCocycle
 import ModularCurves.WeilPairing.MuNBaseChange
+import ModularCurves.WeilPairing.PairingTransport
 import ModularCurves.WeilPairing.TorsionBaseChange
 import ModularCurves.WeilPairing.FieldPairingUnique
 import ModularCurves.WeilPairing.FieldPairingDet

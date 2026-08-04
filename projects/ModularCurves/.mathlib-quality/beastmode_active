@@ -1,1 +1,1 @@
-FOCUS: WP-D3c-2c COMPLETE (torsionCarrierBaseChange green) — axiom-verify, commit, then WP-D3c step 2 (field-change naturality of fieldWeilPairingHom via uniqueness)
+FOCUS: WP-D3c-2g DONE (fieldWeilPairing_det_of_galois) — next: axiom-verify + commit, then package it as the Stab-case det law (curve descended to the fixed subfield of the automorphism)
