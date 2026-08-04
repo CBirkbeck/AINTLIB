@@ -35940,3 +35940,40 @@ Sits beside the two existing lemmas there (`exists_algebraMap_eq_of_pow_eq_one`,
 `pow_eq_one_of_algebraMap_eq`), so the three together are the whole "root descends to the
 integrally closed base, with its order" package that the DS4 root construction consumes —
 and it is what makes ChatGPT's C5 (the clopen primitive-root locus) unnecessary.
+
+## [WP-B5b] DS4 IS NOW ONE HYPOTHESIS (2026-08-04) — `nonempty_weilPairing_of_root_of_det`
+
+`WeilPairing/DetCocycle.lean`, axiom-verified:
+
+> An elliptic curve admits a Weil pairing — the DS4 register's `weilPairing` **and** its
+> `weilPairing_over` specification — as soon as it admits a trivialising fppf cover, a root of
+> unity `ζ` on it, and the **determinant law** relating the two readings on the kernel pair.
+
+Every other input of route A is discharged inside the proof: `localDetPairing` is the pairing
+field, `localDetPairing_over` the `overBase` field, `comp_localDetPairing_eq_of_pieces` the
+cocycle field, and `nonempty_weilPairing_of_localData` turns the record into the register
+entries.
+
+The surviving hypothesis is stated on the **clopen pieces of the joint trivialisation
+reading**, where the exponent is a constant `det v` — i.e. in the form
+`fieldWeilPairing_gl2_zmod` (proved) can actually discharge it. That is the shape of the
+remaining obligation, and it is the last one before DS4's first two entries fall.
+
+### DS4's critical path, final form
+
+```
+weilPairing (def) + weilPairing_over
+  ← nonempty_weilPairing_of_root_of_det                 ✅ (this session)
+      ← fppf cover           fullLevelSpaceStruct_fppf  ✅
+      ← trivialisation       (from the full-level cover) ✅
+      ← the root ζ           WP-D3d                     ✘  ← base side complete, needs assembly
+      ← the det law  hdet    WP-D3c step 2              ✘  ← the one genuinely new theorem
+  → WP-C2 → _add_left, _add_right, _self, _nondegenerate → weilPairing_torsionMapOfEllHom
+  → yRho_representable
+```
+
+Base side of the root (all landed this session): standard smooth (already available) →
+decomposition into factors (`WP-D3a-DOM`) → each factor a localization (`WP-D3a-FACTOR`) →
+each factor a normal domain (`WP-D3b`) → a root of unity descends with its order
+(`exists_algebraMap_eq_of_pow_eq_one`, `pow_eq_one_of_algebraMap_eq`,
+`pow_ne_one_of_algebraMap_eq`).

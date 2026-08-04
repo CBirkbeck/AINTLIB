@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.RootSplitting
+import ModularCurves.WeilPairing.CharZeroAssembly
 
 /-!
 # Reading the local determinant pairing on a clopen piece (WP-B5b)
@@ -123,5 +124,53 @@ theorem comp_localDetPairing_eq_of_pieces (N : ℕ) [NeZero N] {S' : Scheme.{u}}
     comp_localDetPairing_restrict E N p ζ triv htriv b vw.2 hb,
     Category.assoc, Category.assoc]
   simpa only [Category.assoc] using h vw
+
+/-! ### DS4 reduced to the root's determinant law -/
+
+/-- **(WP-B5b, THE REDUCTION)** An elliptic curve admits a Weil pairing — the DS4 register's
+`weilPairing` together with its `weilPairing_over` specification — as soon as it admits a
+trivialising fppf cover, a root of unity on it, and the **determinant law** relating the two
+readings on the kernel pair.
+
+Everything else in route A is discharged here: `localDetPairing` is the pairing,
+`localDetPairing_over` is the over-`S` field, `comp_localDetPairing_eq_of_pieces` is the
+cocycle field, and `nonempty_weilPairing_of_localData` (`WeilPairing/CharZeroAssembly.lean`)
+turns the record into the register entries.
+
+The surviving hypothesis `hdet` is exactly *"the root transforms by `det`"*, read on the
+clopen pieces of the joint trivialisation reading, where the exponent is constant. -/
+theorem nonempty_weilPairing_of_root_of_det (N : ℕ) [NeZero N] {S' : Scheme.{u}} (p : S' ⟶ S)
+    [Flat p] [LocallyOfFinitePresentation p] [Surjective p]
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 })
+    (triv : pullback (E.torsionSqπ N) p ≅
+      constScheme S' ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)))
+    (htriv : triv.hom ≫ constSchemeπ S' ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) =
+      pullback.snd (E.torsionSqπ N) p)
+    (hdet : ∀ vw,
+      (locConstPiece (jointReading E N p triv htriv
+          (pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p))
+          (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+            (pullback.fst (E.torsionSqπ N) p))) vw).ι ≫
+        (pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫
+            pullback.snd (E.torsionSqπ N) p) ≫
+          rootPower N ζ (detFun N vw.1) ≫ muNMapAlong p N =
+      (locConstPiece (jointReading E N p triv htriv
+          (pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p))
+          (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+            (pullback.fst (E.torsionSqπ N) p))) vw).ι ≫
+        (pullback.snd (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫
+            pullback.snd (E.torsionSqπ N) p) ≫
+          rootPower N ζ (detFun N vw.2) ≫ muNMapAlong p N) :
+    ∃ e : pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N,
+      e ≫ muNπ S N = E.torsionSqπ N :=
+  EllipticCurve.nonempty_weilPairing_of_localData
+    { cover := S'
+      p := p
+      flat := ‹Flat p›
+      lfp := ‹LocallyOfFinitePresentation p›
+      surj := ‹Surjective p›
+      pairing := localDetPairing E N p ζ triv
+      cocycle := comp_localDetPairing_eq_of_pieces E N p ζ triv htriv _ _ hdet
+      overBase := localDetPairing_over E N p ζ triv htriv }
 
 end ModularCurves
