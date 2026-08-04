@@ -37687,3 +37687,36 @@ Calibration notes (all three cost an iteration each, worth keeping):
    content.
 
 Root green at **9730 jobs**; sorry-census unchanged.
+
+### [route β] item (A) reframed once more — the *tautological reading* (2026-08-04)
+
+Both routes converge on the same remaining statement, and there is a clean frame for it that avoids
+both the base-change compatibility of `fullLevelPairing` and any pointwise range-chasing.
+
+`coverTriv.hom : pullback (E.torsionSqπ N) p ⟶ constScheme S' (V × V)` **is itself a point** over
+`pullback.snd` — that is exactly `coverTriv_htriv`. So it has a reading
+
+  `c : LocallyConstant (pullback (E.torsionSqπ N) p) (V × V)`,
+  `c := constSchemePointsEquiv S' (V × V) (pullback.snd _ p) ⟨coverTriv.hom, coverTriv_htriv⟩`,
+
+and by **`constSchemePointsEquiv_natural`** (`GroupScheme/MuN.lean:439`, restriction along `k` is
+`LocallyConstant.comap k`) the two readings appearing in `jointReading` are simply `c.comap a` and
+`c.comap b`. Hence `hdet`'s hypothesis becomes, at a point `t`:
+
+  `c (b t) = gl2Both N g (c (a t))`,
+
+where `a t` and `b t` are two points of `pullback (E.torsionSqπ N) p` with the **same**
+`E.torsionSq`-component (`a ≫ pullback.fst = b ≫ pullback.fst`, the kernel pair) and different
+`S'`-components, and `g` is the transition between the two level bases there.
+
+So the last unproved statement of route β is: **the tautological reading `c` labels a fixed torsion
+pair by `gl2Both g` when the `S'`-point moves by the transition `g`** — the pointwise shadow of
+`fullLevelHom_eq_of_levelCoord`, which is already proved at the scheme level. Combining it with:
+
+* `comp_localDetPairing_restrict` (proved) — on the piece the pairing is `ζ ^ det (reading)`;
+* `comp_rootPower_muNMapAlong_eq` (proved, item B) — two such agree iff their **values** agree;
+* `detFun_gl2Both` (proved) — `det (gl2Both g v) = det g · det v`;
+* `fieldWeilPairing_det_of_galois` (proved) — the arithmetic det law;
+
+closes `hdet`, hence `nonempty_weilPairing_of_cover_of_cocycle`, hence DS4's first two register
+entries for invertible `N`. Everything else on the path is proved.
