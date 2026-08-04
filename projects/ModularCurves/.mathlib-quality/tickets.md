@@ -37116,3 +37116,45 @@ determinant law of the root:
    formula on the cover) — never from a `choose`.
 
 Root green at **9726 jobs**, 849/849 modules.
+
+## [DS4] two structural findings about the register itself (2026-08-04)
+
+### 1. The cocycle becomes a genuine group action exactly when the cover is the frame bundle
+
+For a general fppf cover `S' → S` the two readings on `S' ×_S S'` are related by a *groupoid*, not
+a group, and the required identity `α(ζ) = β(ζ)^{det g}` compares `ζ` at two unrelated points of
+`S'`. But if `S'` is the **frame bundle** `Isom((ℤ/N)², E[N])` — the scheme of full level structures,
+an étale `GL₂(ℤ/N)`-torsor over `S` when `N` is invertible — then `S' ×_S S' ≅ S' × GL₂(ℤ/N)` and the
+two projections differ by the *action* of `g`. The cocycle is then exactly
+
+`g^*ζ = ζ ^ det g`  for every `g ∈ GL₂(ℤ/N)` acting on `S'`,
+
+a genuine equivariance statement, and the orbit/stabiliser reduction applies: on the stabiliser of a
+component the transition is an automorphism of that component's function field **fixing the curve**,
+which is `fieldWeilPairing_det_of_galois`; off the stabiliser `ζ` is *defined* by transport. This is
+why the frame bundle, not an arbitrary trivialising cover, is the right `S'`.
+
+### 2. The register is more general than any of its consumers, and the excess needs Cartier duality
+
+`weilPairing` is stated for an arbitrary `S : Scheme` and arbitrary `N` with `[NeZero N]`. Every
+consumer is in `ModularCurve/YRho.lean` and lives over `EllObj (CommRingCat.of ℚ)` — i.e. over a
+**ℚ-algebra base, where `N` is automatically invertible**. But the construction route needs an
+étale-locally-constant `E[N]`, which exists *only* where `N` is invertible: in characteristic
+`p ∣ N` the connected part of `E[p]` is never constant, even fppf-locally. So:
+
+* the `N`-invertible case is in reach and is all the `Y(ρ̄)` line uses;
+* the general case needs **Cartier duality for finite flat group schemes** (`E[N] ≅ E[N]^D`) — the
+  gap the register's own `weilPairingEval_nondegenerate` docstring already names *API gap AG-CD*,
+  and a multi-week/month development by mathlib standards.
+
+A global case split on "`N` invertible on `S`" does **not** rescue it: nondegeneracy is asserted at
+every geometric point where `N` is invertible in the residue field, and such points exist over bases
+(e.g. `S = Spec ℤ`, `N = 2`) on which `N` is not globally invertible — so the "trivial pairing"
+branch would falsify a claimed spec. A morphism defined on the open locus `S[1/N]` does not extend
+to `E[N] ×_S E[N]`.
+
+**Consequence for the plan.** Everything buildable here builds the `N`-invertible case. Closing the
+register's `sorry` in its stated generality is gated on AG-CD and is *not* what the `Y(ρ̄)` line
+needs; the register entries would have to carry `NIsInvertible S N` (or be stated over ℚ-algebras,
+as their consumers are) for the reachable construction to discharge them. That is a **statement**
+decision and therefore the user's, so it is recorded here rather than acted on.
