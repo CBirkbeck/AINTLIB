@@ -1745,6 +1745,33 @@ private theorem xPresheaf_frobEq_on_piece
   exact hL.trans hR.symm
 
 
+/-- The saturated cover data: transporting `hVS` / `hle` / `hcov` along `stabV`.
+
+Pure `stabV`-transport — it never touches the sheaf structure, which is what lets it out of
+`hginv`.  `hginv` itself cannot be extracted (it *calls* `IsLimitSheafOn.injective`, whose
+`∀ {ι : Type u}` binds the ambient unnameable universe), but the constraint attaches to that
+call, not to the block around it. -/
+private theorem xPresheaf_saturated_cover {ι : Type*}
+    (V' : Opens ↥(SpaTop (Ainf p F))) (U' : ι → Opens ↥(SpaTop (Ainf p F)))
+    (hle : ∀ i, U' i ≤ V')
+    (hVS : (V' : Set ↥(SpaTop (Ainf p F))) ⊆ Subtype.val ⁻¹' Y p F ϖ)
+    (hcov : (V' : Set ↥(SpaTop (Ainf p F)))
+      ⊆ ⋃ i, (U' i : Set ↥(SpaTop (Ainf p F))))
+    (stabV : frobOpens p F 1 V' = V') :
+    ((frobOpens p F 1 V'
+        : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        ⊆ Subtype.val ⁻¹' Y p F ϖ ∧
+      (∀ i, U' i ≤ frobOpens p F 1 V') ∧
+      ((frobOpens p F 1 V'
+        : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        ⊆ ⋃ i, (U' i : Set ↥(SpaTop (Ainf p F))) :=
+  ⟨fun v hv => hVS (stabV ▸ hv),
+   fun i => le_trans (hle i) (le_of_eq stabV.symm),
+   fun v hv => hcov (stabV ▸ hv)⟩
+
+
 /-- **The curve presheaf is a sheaf of topological rings** (D-iv-4, Wedhorn
 Remark 8.20 for the quotient): compatible continuous `T`-families of
 invariant sections glue uniquely — glue the underlying `𝒴`-sections over
@@ -1781,18 +1808,8 @@ theorem xPresheaf_isSheafOfTopologicalRings :
     intro t
     rw [mem_frobFixed]
     -- separation over the saturated pieces
-    have hVS2 : ((frobOpens p F 1 V'
-        : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
-        : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
-        ⊆ Subtype.val ⁻¹' Y p F ϖ :=
-      fun v hv => hVS (stabV ▸ hv)
-    have hle2 : ∀ i, U' i ≤ frobOpens p F 1 V' :=
-      fun i => le_trans (hle i) (le_of_eq stabV.symm)
-    have hcov2 : ((frobOpens p F 1 V'
-        : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
-        : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
-        ⊆ ⋃ i, (U' i : Set ↥(SpaTop (Ainf p F))) :=
-      fun v hv => hcov (stabV ▸ hv)
+    obtain ⟨hVS2, hle2, hcov2⟩ :=
+      xPresheaf_saturated_cover p F ϖ V' U' hle hVS hcov stabV
     refine (isLimitSheafOn_Y p F ϖ).injective hVS2 hle2 hcov2
       (fun i => ?_)
     -- the common value on the piece: the underlying section of `f i t`

@@ -15454,3 +15454,27 @@ Note `hginv` (19c) still cannot move as a unit — it calls `injective` — but 
 the `hVS2`/`hle2`/`hcov2` triple is pure `stabV`-transport and never touches the sheaf structure.
 That is the refinement worth keeping: *a proof blocked by a universe constraint may still have
 extractable interior*, because the constraint attaches to the call, not to the surrounding block.
+
+### `xPresheaf_saturated_cover` lands: 65 → 55
+
+The `hVS2`/`hle2`/`hcov2` triple (12c) out as one lemma returning the conjunction — confirming the
+refinement above: **`hginv` cannot move, but its interior can**, because the universe constraint
+attaches to the `injective` *call*, not to the block containing it. The extracted lemma is pure
+`stabV`-transport, three `fun v hv => … (stabV ▸ hv)` terms, and never mentions the sheaf structure.
+
+**One transcription error, and it is a specific trap.** I wrote the saturated open's carrier as
+`Opens ↥(SpaTop (Ainf p F))` — matching how `V'`/`U'` are spelled two lines above — but
+`frobOpens p F 1 V'` is `Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))`, and the two are *not*
+interchangeable in a signature even though they denote the same space.
+
+> **Copy coercion spellings verbatim; do not normalise them to whichever form is nearby.** The
+> error (`has type Opens ↑(Spa …⁺) but is expected to have type Set ↑(SpaTop …)`) reads as a real
+> type error, not as a spelling choice, and the surrounding lines using the *other* spelling are
+> exactly what makes the wrong one look right.
+
+**The last two lifts (55 → ~46) are blocked on reading, not on structure.** `hres` (9c) and the
+existence leg (4c) both quantify over data introduced by `rintro ⟨g'', hg''c⟩` and `set gX`, whose
+types come from unfolding `IsSheafOfTopologicalRings` and are never written explicitly in the
+proof. Extracting either means transcribing those types correctly; guessing costs a build per
+attempt. Neither is universe-blocked — this is a reading task, and it is the only thing between
+this target and ~46.
