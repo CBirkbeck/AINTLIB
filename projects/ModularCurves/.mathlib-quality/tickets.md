@@ -37362,3 +37362,28 @@ pointwise from `fullLevelFibreMap_bijective`, then `Matrix.GeneralLinearGroup` v
 After that, route β's *only* remaining input is the arithmetic one: `ζ` with `g^*ζ = ζ^{det g}`
 (WP-D3d), for which `fieldWeilPairing_det_of_galois` is the stabiliser case and
 `WeilPairing/UniversalRootBase.lean` descends the root from the generic fibre to the base.
+
+### [route β] the invertibility of the transition — three routes, measured (2026-08-04)
+
+`eq_glSmul_of_levelCoord` takes `g ∈ GL₂(ℤ/N)` as given. What is missing is *producing* it: the
+columns `c₀, c₁` are in hand (`levelTransitionCols`), so the only gap is that the matrix `[c₀ | c₁]`
+is **invertible**. Three routes, all measured against what exists:
+
+1. **Via linearity of the coordinate map.** Show `levelCoord L` is `ZMod N`-linear in the point, so
+   the transition *is* `mulVec [c₀|c₁]`; then invertibility follows from bijectivity of the
+   transition, which is free because the transition is the reading of the **isomorphism**
+   `fullLevelIso L' ≪≫ (fullLevelIso L).symm` of `constScheme S V` (read `hom_inv_id` on each
+   summand). Linearity itself is available from the tree's `val_smul_add` / `val_smul_mul` — the same
+   two lemmas `constGL_hom_fullLevelHom` uses — applied to `levelCoord_sigmaι` + `levelCoord_injective`.
+   Estimate **50–80 lines**, no new mathlib input.
+2. **Via `fullLevelFibreMap_bijective`.** At each geometric point both level structures give
+   *linear bijections* `(ℤ/N)² → E[N](k̄)`, so the transition there is a linear bijection, i.e. an
+   element of `GL₂`. Needs plumbing `levelCoord`'s value at a point through a geometric point
+   `Spec k̄ ⟶ S`. Estimate **100–150 lines**; the fibre-map half is already proved.
+3. **Via the reverse transition.** Symmetric: the reverse columns give `h`, and `g * h = 1`. Needs
+   the same linearity as route 1, so it is strictly weaker than route 1.
+
+**Recommendation: route 1.** It reuses exactly the two `val_smul_*` lemmas the transition statement
+already needed, keeps everything on the scheme side (no geometric points), and delivers the
+*linearity* of the coordinate map as a reusable by-product — which is also what any future
+`E[N] ≅ (ℤ/N)²_S` group-scheme statement will want.
