@@ -14596,3 +14596,24 @@ Consequences worth acting on:
   single lift too, but of a less convenient shape: a `by_cases` branch whose goal is a large
   existential (`approx_generation`), a structure-field proof (`resIHom`), and a `have` sitting under
   several `set`-locals (`genPiece_relOverlap_forward_backward`).
+
+### Width-regressions walked back: 2 of 4 fixed, 2 left with reasons
+
+* `exists_spa_point_not_vle_one_huber` 51 → 46 — `hbr` became `ofValuation_vle_iff`.
+* `genPiece_relOverlap_forward_backward` 54 → 43 — `hloc` became
+  `genPiece_relOverlap_forward_comp_backwardLocHom`. Re-outlining after the revert showed the useful
+  shape: 12 lines of `hloc`, then 24 lines of `letI` preamble, then an 18-line argument. `hloc` is a
+  ring-hom identity in `D₀/T/hspan/t₁/t₂` needing **none** of that preamble, so the lift is a plain
+  move with no instance threading.
+
+Left, both poor value for the ~3 lines each needs:
+
+* `resIHom` (53) is a `def … where` structure. Reducing it means lifting one field's proof, which
+  requires writing that law's statement explicitly — the "split def from packaging" pattern, verbose
+  here because the laws are about a `Subtype` of a product of completions.
+* `approx_generation` (53) — its zero-case bullet is 13 lines, but the enclosing lemma's signature
+  runs to ~30 lines of hypotheses that a case lemma would have to repeat.
+
+Neither is blocked; both are simply a poor trade at this size. Recorded rather than forced, because
+manufacturing a helper whose only purpose is to move a number is the failure mode this measure
+invites — the same reason `wedhorn_lemma_834` (~11 tiny lemmas to clear 131) is left alone.

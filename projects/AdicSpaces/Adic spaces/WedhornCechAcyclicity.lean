@@ -9716,6 +9716,28 @@ private theorem genPiece_relOverlap_forward_restriction
   rw [genPiece_relOverlap_forward_coe]
   exact congrArg _ (RingHom.congr_fun hRT2 z)
 
+/-- The forward map undoes the backward localization map: their composite is the
+canonical inclusion of the overlap datum. -/
+private theorem genPiece_relOverlap_forward_comp_backwardLocHom
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
+    (genPiece_relOverlap_forward D₀ T hspan t₁ t₂).comp
+      (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂) =
+      ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+      (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom := by
+  refine IsLocalization.ringHom_ext (Submonoid.powers (((imagePieceDatum D₀ T t₁
+    hspan).interSamePair
+    (imagePieceDatum D₀ T t₂ hspan) rfl).s)) ?_
+  ext x
+  simp only [RingHom.comp_apply]
+  rw [genPiece_relOverlap_backwardLocHom_algebraMap,
+    genPiece_relOverlap_forward_restriction]
+  rfl
+
 set_option linter.unusedSectionVars false in
 /-- G3b-8g: `forward ∘ backward = id`. -/
 private theorem genPiece_relOverlap_forward_backward
@@ -9729,18 +9751,7 @@ private theorem genPiece_relOverlap_forward_backward
       (imagePieceDatum D₀ T t₂ hspan) rfl)) :
     genPiece_relOverlap_forward D₀ T hspan t₁ t₂
       (genPiece_relOverlap_backward D₀ T hspan t₁ t₂ y) = y := by
-  have hloc : (genPiece_relOverlap_forward D₀ T hspan t₁ t₂).comp
-      (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂) =
-      ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom := by
-    refine IsLocalization.ringHom_ext (Submonoid.powers (((imagePieceDatum D₀ T t₁
-      hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).s)) ?_
-    ext x
-    simp only [RingHom.comp_apply]
-    rw [genPiece_relOverlap_backwardLocHom_algebraMap,
-      genPiece_relOverlap_forward_restriction]
-    rfl
+  have hloc := genPiece_relOverlap_forward_comp_backwardLocHom D₀ T hspan t₁ t₂
   letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan)
     rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁
