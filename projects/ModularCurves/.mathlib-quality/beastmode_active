@@ -1,1 +1,1 @@
-FOCUS: WP-D3c-2b — transport muNAlgebra through muNSpecFieldIso + finiteEtaleOfπ using quotSpanBaseChange; then torsionPairAlgebra
+FOCUS: WP-D3c-2b assembly — muNAlgebra base change: combine muNCarrierRingEquiv(+_symm_algebraMap), quotSpanBaseChange, map_X_pow_sub_one, FiniteEtale.isoMk

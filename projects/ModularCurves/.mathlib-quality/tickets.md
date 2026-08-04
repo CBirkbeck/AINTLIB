@@ -36665,3 +36665,39 @@ import. Root green at **9722 jobs**.
 **WP-D3c-2b now reduces to bookkeeping**: `quotSpanBaseChange` transports the model,
 `map_X_pow_sub_one` matches the polynomial, `muNCarrierRingEquiv` + this compatibility move it
 to the carrier, and `CommAlgCat.FiniteEtale.isoMk` packages the result.
+
+### [WP-D3c-2b] the assembly — shape and instance strategy
+
+Target (`FiniteEtale.baseChange` acts as `A ↦ S ⊗[R] A`, `RingTheory/Etale/Finite.lean:103`):
+
+```
+(CommAlgCat.FiniteEtale.baseChange k k').obj (muNAlgebra k N hk) ≅ muNAlgebra k' N hk'
+```
+
+i.e. by `FiniteEtale.isoMk` an algebra equivalence
+`k' ⊗[k] Γ(μ_{N,Spec k}, ⊤) ≃ₐ[k'] Γ(μ_{N,Spec k'}, ⊤)`.
+
+**Instance strategy** (the whole difficulty). The two carriers' `Algebra` structures live in
+`finiteEtaleOfπ`'s `letI`, so reconstruct them locally with the *same* expression before
+stating anything:
+
+```lean
+letI : Algebra k Γ(muN (Spec (CommRingCat.of k)) N, ⊤) :=
+  (((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (muNπ _ N).appTop).hom).toAlgebra
+```
+
+They are then definitionally the ones `muNAlgebra` carries. With that in scope:
+
+1. `AlgEquiv.ofRingEquiv` upgrades `muNCarrierRingEquiv k N` to `≃ₐ[k]`, its `commutes'`
+   being exactly `muNCarrierRingEquiv_symm_algebraMap` (applied through `.symm`);
+2. `Algebra.TensorProduct.congr (AlgEquiv.refl : k' ≃ₐ[k] k') (that)` base-changes it;
+3. `quotSpanBaseChange` + `map_X_pow_sub_one` identify
+   `k' ⊗[k] AdjoinRoot ((X:k[X])^N−1)` with `AdjoinRoot ((X:k'[X])^N−1)`;
+4. the `k'`-side `muNCarrierRingEquiv k' N` (upgraded the same way) closes the loop;
+5. `FiniteEtale.isoMk` packages it.
+
+Everything in steps 1–5 is now proved except the `letI` bookkeeping itself. **Then**
+`torsionPairAlgebra`, which has no explicit model and goes through
+`torsion_baseChange_isPullback` plus `Algebra.TensorProduct` of the two `torsionAlgebra`
+factors, and after that WP-D3c step 2 (the field-change naturality) is a uniqueness argument
+via `fieldWeilPairingHom_unique`.
