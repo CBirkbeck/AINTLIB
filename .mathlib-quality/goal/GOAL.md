@@ -15380,3 +15380,31 @@ instead would drag the `yFunctor`/`curvePreimage` definitional chain into the si
 
 Everything needed is above; the remaining work is transcribing `mem_frobFixed`'s unfolded form
 into the statement.
+
+**Correction to the entry above — the `hginv` seam is blocked, and not for the reason I gave.**
+
+I attempted the lift. The `mem_frobFixed`-in-`V'`-terms design was right: the lemma statement
+elaborated, both halves measured **41c + 50c** (from 90), and the abstraction of `f` into
+`a`/`ha`/`hga` worked. It fails on a **universe constraint** I had not anticipated:
+
+```
+Set.iUnion.{u_1, u + 1}   vs   Set.iUnion.{u_1, u_1 + 1}
+```
+
+`IsLimitSheafOn.injective` — which `hginv`'s proof calls — quantifies its index as
+`∀ {ι : Type u}` where **`u` is the universe of `A`**, i.e. of `Ainf p F`, i.e. of `F`. A lemma
+binding `{ι : Type*}` gets a *fresh* universe and cannot be applied. Matching the sibling helper's
+`{ι : Type u}` does not fix it either: that `u` is `T`'s universe, not `F`'s. And `F`'s universe is
+**auto-bound** by `variable (F : Type*)`, so it has no name to refer to.
+
+> **A structure field that quantifies over `Type u` for the ambient `u` makes any helper calling it
+> non-extractable unless the helper can name that universe.** The tell is a `Set.iUnion.{_, u+1}`
+> vs `.{_, u_1+1}` mismatch, which reads as an ordinary type error.
+
+**The route that avoids it**: extract the per-`i` computation instead — the `hLa…hLf`/`hRa` chain,
+L1752–1783 (~30c) — which takes `i` as an argument and never quantifies over `ι`, so no universe
+constraint arises. That gives `hginv` 44 → ~15 and the target 90 → ~61; combined with the
+`rintro ⟨g'', hg''c⟩` block (15c) it lands at ~47. **Two lemmas, not one.**
+
+Reverted to a clean tree (`git diff` empty); no build was spent on a broken state beyond the two
+diagnostic ones.
