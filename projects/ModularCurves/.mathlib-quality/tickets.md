@@ -36331,3 +36331,20 @@ DS4's first two register entries to the root's determinant law is proved
 (`nonempty_weilPairing_of_root_of_det`), the base side of the root is complete, the field
 pairing is canonical (`fieldWeilPairingHom_unique`), and the transport is reduced to this one
 piece of mathlib-standard algebra plus the same treatment for `torsionPairAlgebra`.
+
+## [WP-D3c-2a] scaffolding landed (2026-08-04) — `ForMathlib/AdjoinRootBaseChange.lean`
+
+Three declarations, sorry-free, axiom-verified, in the root import:
+
+* `polyAlgebra R S` — the `R[X]`-algebra structure on `S[X]` induced by `R → S`
+  (mathlib has `Polynomial.mapRingHom` but no such `Algebra` instance); marked `@[reducible]`
+  so instance search sees through it, and installed as a **local** instance so it cannot leak;
+* `isScalarTower_poly` — the tower `R → R[X] → S[X]`, which
+  `Algebra.TensorProduct.cancelBaseChange` requires;
+* `map_X_pow_sub_one` — `((X : R[X])^N − 1).map (algebraMap R S) = (X : S[X])^N − 1`.
+
+These are the two instances and the one polynomial identity the assembly needs; what remains
+is the three-step chain itself (`polyEquivTensor` → `cancelBaseChange` →
+`quotIdealMapEquivTensorQuot`), then the `muNAlgebra` transport through `muNSpecFieldIso`.
+
+Root green at **9721 jobs**.

@@ -1,0 +1,55 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import Mathlib.RingTheory.TensorProduct.Quotient
+import Mathlib.RingTheory.TensorProduct.Maps
+import Mathlib.RingTheory.AdjoinRoot
+import Mathlib.RingTheory.Polynomial.Basic
+
+/-!
+# `AdjoinRoot` commutes with base change (WP-D3c-2a)
+
+`μ_N` over a field `k` is `Spec (AdjoinRoot ((X : k[X])^N − 1))`
+(`GroupScheme/MuN.lean`'s `muNSpecFieldIso`), so transporting the field-level Weil pairing
+along a map of fields `k → k'` needs `AdjoinRoot` to commute with base change. That is the
+content here, for an arbitrary monic-or-not polynomial and an arbitrary algebra:
+
+`k' ⊗[k] (k[X] ⧸ (f))  ≅  k'[X] ⧸ (f.map)`.
+
+The proof is the standard three-step chain — `polyEquivTensor` to recognise `k'[X]` as
+`k' ⊗[k] k[X]`, `Algebra.TensorProduct.cancelBaseChange` to move the tensor over `k[X]`, and
+`Algebra.TensorProduct.quotIdealMapEquivTensorQuot` to identify the quotient.
+-/
+
+universe u
+
+namespace ModularCurves
+
+open Polynomial TensorProduct
+
+variable (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
+
+/-- The `R[X]`-algebra structure on `S[X]` induced by `R → S`, as a scoped instance for this
+file's chain (mathlib has `Polynomial.mapRingHom` but no such `Algebra` instance). -/
+@[reducible] noncomputable def polyAlgebra : Algebra R[X] S[X] :=
+  (Polynomial.mapRingHom (algebraMap R S)).toAlgebra
+
+attribute [local instance] polyAlgebra
+
+/-- The tower `R → R[X] → S[X]` is scalar. -/
+theorem isScalarTower_poly : @IsScalarTower R R[X] S[X] _ _ _ := by
+  refine IsScalarTower.of_algebraMap_eq fun r => ?_
+  show algebraMap R S[X] r = (Polynomial.mapRingHom (algebraMap R S)) (algebraMap R R[X] r)
+  rw [Polynomial.algebraMap_apply, Polynomial.algebraMap_apply]
+  simp
+
+attribute [local instance] isScalarTower_poly
+
+/-- **(WP-D3c-2a)** Mapping `X ^ N − 1` along `R → S` gives `X ^ N − 1`. -/
+theorem map_X_pow_sub_one (N : ℕ) :
+    ((X : R[X]) ^ N - 1).map (algebraMap R S) = (X : S[X]) ^ N - 1 := by
+  simp
+
+end ModularCurves
