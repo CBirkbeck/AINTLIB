@@ -38364,3 +38364,35 @@ by injectivity of `algebraMap K (AlgebraicClosure K)`, and then to the component
 `nonempty_weilPairing_of_cover_of_values`, DS4's `weilPairing` and `weilPairing_over` for invertible `N`.
 
 Root green at **9733 jobs**; census unchanged (7, all the Weil register).
+
+## [WP-D3d] CORRECTION: the σ-action form of the det law is VACUOUS for `K`-rational values (2026-08-04)
+
+Attempting move 3 exposed an error in my own framing of steps 1–4, and it is worth stating plainly.
+
+Moves 1–2 deliver the determinant law in **σ-action form**: for a `K`-algebra automorphism `σ` of
+`AlgebraicClosure K` carrying the geometric torsion pair per `g`,
+
+  `σ (algebraMap K (AlgebraicClosure K) ζ) = (algebraMap K (AlgebraicClosure K) ζ) ^ det g`.
+
+But `σ` is a **`K`-algebra** map, so it fixes `algebraMap K _ ζ` — the left side *is* the right side's
+base. The identity therefore collapses to `ζ = ζ ^ det g` in `K`, which is not the value equation
+`nonempty_weilPairing_of_cover_of_values` wants and is anyway near-vacuous. A first attempt at move 3
+made this concrete by "proving" `map_pow` with the conclusion assumed; that scaffolding has been removed.
+
+**The value equations compare `ζ` at two *different points of the cover*** — `Γ(α)(ζ)` against
+`Γ(β)(ζ)` — and no automorphism of a *single* geometric point can express that. So:
+
+* moves 1–3 as I framed them are **inputs at the generic point**, not the whole of step 4;
+* the actual remaining work is the **orbit/stabiliser bookkeeping over the components of the cover** —
+  already identified on this board twice (the "frame bundle" entry and the "tautological reading" entry)
+  and never superseded. There, `fieldWeilPairing_det_of_galois` bites with `K` = a component's *function
+  field* and `k` = the fixed subfield of the transition automorphism, **not** with `σ` a
+  `K`-automorphism of `AlgebraicClosure K`.
+
+What survives from steps 1–4 and is genuinely useful: `isIntegrallyClosed_quotient_minimalPrime`,
+`fieldPairingValue` (+ `algebraMap_fieldPairingValue`, `_eq_pairing`), `factorRootOfUnityDescend`
+(+ `algebraMap_` companion), `GaloisFibreChart.pairing_det`, and the three widened naturality lemmas.
+Each is a correct, named statement that the component argument will consume; none is dead. But the
+board's "steps 1–4 then done" framing was **too optimistic** and is corrected here.
+
+Root green at **9733 jobs**; census unchanged (7, all the Weil register).

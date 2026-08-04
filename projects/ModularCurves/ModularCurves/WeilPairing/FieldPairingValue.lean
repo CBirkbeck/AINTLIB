@@ -95,4 +95,28 @@ theorem algebraMap_fieldPairingValue_eq_pairing
   rw [algebraMap_fieldPairingValue, ← AlgHom.comp_assoc,
     fieldWeilPairingHom_spec, weilPairingFibreMap, Equiv.apply_symm_apply]
 
+/- **(WP-D3d step 4, move 3) — what it must actually say.** A first attempt here stated
+`σ (algebraMap … ζ) = algebraMap … (ζ ^ det g)` *taking the closure-level identity as a hypothesis* — i.e.
+`map_pow` with the conclusion assumed. That is scaffolding, not content, so it was removed.
+
+Moves 1 and 2 give the determinant law in **σ-action form**: for a `k`-automorphism `σ` of the geometric
+point carrying the torsion pair per `g`,
+
+  `σ (algebraMap K (AlgebraicClosure K) ζ) = (algebraMap K (AlgebraicClosure K) ζ) ^ det g`,   `ζ := fieldPairingValue …`
+
+by `algebraMap_fieldPairingValue_eq_pairing` then `GaloisFibreChart.pairing_det`. Since `σ` fixes `K`
+pointwise (it is a `K`-algebra map) the left side is `algebraMap … ζ`, so this *already* forces
+`ζ = ζ ^ det g` in `K` by injectivity — i.e. the σ-action form is **vacuous for `K`-rational values**.
+
+That is the real content of move 3, and it is a *finding*, not a gap: the value equations of
+`nonempty_weilPairing_of_cover_of_values` compare `ζ` at **two different points of the cover**
+(`Γ(α)(ζ)` versus `Γ(β)(ζ)`), which no automorphism of a single geometric point can express. Supplying
+them needs the **component transition**: the two points lie on components exchanged by the `GL₂`-action,
+and on a component's stabiliser the transition is an automorphism of that component's *function field*
+fixing the curve — which is where `fieldWeilPairing_det_of_galois` genuinely bites, with `K` the function
+field and `k` the fixed subfield, **not** with `σ` a `K`-automorphism of `AlgebraicClosure K`.
+
+So the remaining work is the orbit/stabiliser bookkeeping over the components of the cover (recorded on
+the board), and moves 1–2 are its *inputs at the generic point*, not the whole of it. -/
+
 end ModularCurves
