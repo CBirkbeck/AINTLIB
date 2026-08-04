@@ -37658,3 +37658,32 @@ and including the dependent rewrite is verified. Two facts learned there:
   application type mismatch.
 
 Root green at **9730 jobs**.
+
+## [route β] item (A) STEP 1 IS DONE (2026-08-04) — axiom-verified
+
+**`fullLevelHom_pullAlong`** (`WeilPairing/FullLevelBaseChange.lean`):
+
+`constSchemeMapAlong σ (Fin 2 → ZMod N) ≫ E.fullLevelHom L
+   = (E.baseChange σ).fullLevelHom (L.pullAlong σ) ≫ E.torsionBaseChangeHom N σ`.
+
+The level trivialisation commutes with base change. Assembled from `asSection_pull_basisComb`,
+`basisComb_comp_mulByHom`, `comp_pointToTorsion_of_eq` and
+`pointToTorsion_asSection_torsionBaseChangeHom`, with `lean_goal` used to read the exact goal after the
+dependent rewrite rather than guessing it — that is what closed it after several failed guesses.
+
+Calibration notes (all three cost an iteration each, worth keeping):
+* the dependent rewrite needs **`simp only [← …]`**; `rw` fails with *motive is not type correct*;
+* `comp_pointToTorsion_of_eq`'s point and `hy` arguments must be **spelled out**;
+* both lemmas from `TorsionSqBaseChange.lean` take **`N` explicitly** (it is an explicit section
+  variable there), so the call is `E.comp_pointToTorsion_of_eq N σ …`, not `… σ …`.
+
+**Remaining on route β**:
+1. *(step 2)* base-change compatibility of `fullLevelPairing`: transport `fullLevelHom_pullAlong`
+   through `fullLevelSqIso` (the square version), after which `detConstMor` and `rootSplitting` are
+   formal — they are `constSchemeMap`s and `muNMapAlong`-compatible;
+2. *(step 3)* decompose by `levelTransitionCols` and apply `fullLevelPairing_eq_of_fullLevelHom`
+   piecewise, gluing with `locConst_hom_ext`;
+3. **WP-D3d** — the root `ζ` with `g^*ζ = ζ^{det g}`, the only remaining item with mathematical
+   content.
+
+Root green at **9730 jobs**; sorry-census unchanged.

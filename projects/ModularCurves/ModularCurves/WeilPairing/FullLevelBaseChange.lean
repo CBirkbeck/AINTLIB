@@ -62,6 +62,22 @@ theorem basisComb_comp_mulByHom {L : E.FullLevelPt N} (v : Fin 2 → ZMod N) :
     rw [smul_add, smul_comm (N : ℤ) ((v 0).val : ℤ) L.1.1,
       smul_comm (N : ℤ) ((v 1).val : ℤ) L.1.2, L.2.1.1, L.2.1.2, smul_zero, smul_zero, add_zero])
 
+theorem fullLevelHom_pullAlong {T' : Scheme.{u}} (σ : T' ⟶ S) (L : E.FullLevelPt N) :
+    constSchemeMapAlong σ (Fin 2 → ZMod N) ≫ E.fullLevelHom L =
+      (E.baseChange σ).fullLevelHom (L.pullAlong σ) ≫ E.torsionBaseChangeHom N σ := by
+  refine Sigma.hom_ext _ _ fun v => ?_
+  rw [← Category.assoc, ι_constSchemeMapAlong]
+  simp only [fullLevelHom, Category.assoc, Sigma.ι_desc, Sigma.ι_desc_assoc]
+  simp only [← E.asSection_pull_basisComb σ L v]
+  have hy : ((EllipticCurve.Point.pull E σ
+      ((((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2 : E.Point (𝟙 S))) :
+        E.Point σ) : T' ⟶ E.E) ≫ E.mulByHom N = σ ≫ E.zero := by
+    show (σ ≫ _) ≫ _ = _
+    rw [Category.assoc, E.basisComb_comp_mulByHom v, Category.id_comp]
+  refine Eq.trans (E.comp_pointToTorsion_of_eq N σ _ (E.basisComb_comp_mulByHom v)
+      (Category.comp_id σ) hy) ?_
+  exact (E.pointToTorsion_asSection_torsionBaseChangeHom N σ _ hy _).symm
+
 /- **`fullLevelHom_pullAlong` — remaining choreography.** With the two lemmas above, plus
 `pointToTorsion_asSection_torsionBaseChangeHom` and `comp_pointToTorsion_of_eq`
 (`WeilPairing/TorsionSqBaseChange.lean`), the proof runs:
@@ -72,7 +88,7 @@ theorem basisComb_comp_mulByHom {L : E.FullLevelPt N} (v : Fin 2 → ZMod N) :
   simp only [← E.asSection_pull_basisComb σ L v]   -- `rw` FAILS here (motive not type correct: the
                                                   -- combination sits in `pointToTorsion`'s dependent
                                                   -- proof argument); `simp only` handles it.
-  refine Eq.trans (E.comp_pointToTorsion_of_eq σ _ (E.basisComb_comp_mulByHom v)
+  refine Eq.trans (E.comp_pointToTorsion_of_eq N σ _ (E.basisComb_comp_mulByHom v)
       (Category.comp_id σ) ?_) ?_
   · -- `(σ ≫ ↑comb) ≫ mulByHom N = σ ≫ zero`
   · exact (E.pointToTorsion_asSection_torsionBaseChangeHom σ _ _ _).symm
