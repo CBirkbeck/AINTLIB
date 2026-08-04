@@ -15288,3 +15288,29 @@ like progress: a `have` disappears, the line count does not move.
 next step for this target is the structural one — extracting the `set`-preamble (`DII`/`OD`/`F`)
 plus setup facts as a lemma — which the earlier phases showed is blocked on `F`'s `set`-local
 definition desynchronising. Recorded rather than forced.
+
+### `presheafValue_mvRestricted_fU_uniformContinuous` (67) — the `letI`-preamble wall, measured
+
+Scoped and **not attempted**, with the reason measured rather than guessed. The 67 lines split as:
+
+```
+  L2601-2635   32c   classical + 9 letI/haveI + hi_ind + huug + hNAQ/hUQ + P_T + 4 imports + hRbdd
+  L2637-2682   35c   the actual proof (reduce to continuity at 0, then the ψγ/Vg chase)
+```
+
+The preamble is almost entirely **instance installation** — `τT`/`uT`/`τS`/`τQ`/`uQ`/`uU`/`tLoc`
+and the `IsUniformAddGroup`/`IsTopologicalRing`/`NonarchimedeanRing` witnesses that depend on
+them. It cannot be lifted into a lemma: the instances are what the *statement* of any extracted
+piece would need, and several are definitionally specific (`uU = comap iU uT`), so passing them as
+ordinary binders reproduces the provenance mismatch that cost six builds on
+`genRestrictedCover_gluing`.
+
+The proof half is 35c — already under the bar. **The target is 67 only because the preamble and the
+proof must share a scope.** That is the `letI`-triple idiom recorded earlier as an owner decision
+(a tactic macro would delete ~250 lines in `RelativePieceKeystone*` alone); the same macro would
+land this target, and nothing short of it will.
+
+> Recorded as **blocked-with-evidence**, not as "hard". The distinction that matters: a target
+> blocked on an owner decision should be measured and named, so the decision can be made on
+> numbers — 32 lines here, ~250 in the keystone files — rather than re-derived each time someone
+> looks at it.
