@@ -53,4 +53,23 @@ theorem fieldPairingValue_pow
     (fieldPairingValue K E N hK f : K) ^ N = 1 :=
   (fieldPairingValue K E N hK f).2
 
+/-- **(WP-D3d step 4, the push-up)** The image of the field pairing value in the algebraic closure is
+the reading of `fieldWeilPairingHom` at the *closure-valued* point obtained from `f`.
+
+`muNAlgebraFibreEquiv_comp_algHom` (`WeilPairing/GaloisFibre.lean`) is what makes this work: the fibre
+dictionary is natural in the coefficient ring, so pushing the point up pushes its root of unity up. With
+this, `fieldWeilPairingHom_spec` — which is stated for closure-valued points — becomes applicable to the
+`K`-rational pairing value, and `fieldWeilPairing_det_of_galois` can be run upstairs and brought back by
+injectivity of `algebraMap K (AlgebraicClosure K)`. -/
+theorem algebraMap_fieldPairingValue
+    (f : (EllipticCurve.torsionPairAlgebra K E N hK).obj →ₐ[K] K) :
+    algebraMap K (AlgebraicClosure K) (fieldPairingValue K E N hK f : K) =
+      (muNAlgebraFibreEquiv K N hK (AlgebraicClosure K)
+        ((Algebra.ofId K (AlgebraicClosure K)).comp
+          (f.comp (fieldWeilPairingHom K E N hK).hom.hom)) : AlgebraicClosure K) := by
+  rw [fieldPairingValue_eq]
+  exact (muNAlgebraFibreEquiv_comp_algHom K N hK K (AlgebraicClosure K)
+    (Algebra.ofId K (AlgebraicClosure K))
+    (f.comp (fieldWeilPairingHom K E N hK).hom.hom)).symm
+
 end ModularCurves

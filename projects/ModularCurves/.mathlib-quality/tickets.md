@@ -38203,3 +38203,24 @@ completes WP-D3d, and with `nonempty_weilPairing_of_cover_of_values` closes DS4'
 entries for invertible `N`.
 
 Root green at **9733 jobs**; census unchanged (7, all the Weil register).
+
+### [WP-D3d step 4] the push-up is landed (2026-08-04) — axiom-verified
+
+**`algebraMap_fieldPairingValue`** (`WeilPairing/FieldPairingValue.lean`): the image of the `K`-rational
+pairing value in `AlgebraicClosure K` is the reading of `fieldWeilPairingHom` at the *closure-valued*
+point obtained from `f`.
+
+This is the piece that made the widening worth doing: `fieldWeilPairingHom_spec` is stated only for
+closure-valued points, so the `K`-rational value could not be connected to the Silverman pairing at all
+until the fibre dictionary was known to be natural in the coefficient ring
+(`muNAlgebraFibreEquiv_comp_algHom`).
+
+**Step 4's remaining three moves**, all against proved results:
+1. `fieldWeilPairingHom_spec` at `(Algebra.ofId K _).comp f` — identifies the pushed-up value with
+   `weilPairingFibreMap`, i.e. with the Silverman pairing `C.pairing` of the corresponding geometric
+   points;
+2. `fieldWeilPairing_det_of_galois` — gives `σ(ζ) = ζ ^ det g` upstairs;
+3. injectivity of `algebraMap K (AlgebraicClosure K)` to return to `K`, then
+   `algebraMap_factorRootOfUnityDescend` to descend to the component.
+
+Root green at **9733 jobs**; census unchanged (7, all the Weil register).
