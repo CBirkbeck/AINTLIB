@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
 import ModularCurves.Picard.RigidDescent
 
@@ -45,15 +46,23 @@ assembles:
 
 * `IsInvertible.exists_finiteAffineBaseCech_flat` — a finite affine trivialising cover whose base-linear
   Čech complex is termwise flat;
-* `IsInvertible.exists_away_orderedBaseCech_exact_of_residueField_exact` — exactness on **one residue
-  fibre spreads to a principal neighbourhood** (this is the seesaw's engine);
+* `baseSectionsIsoKernelOrderedBaseCechDifferential` — `H⁰` of that complex **is** `Γ(M)` over the base
+  ring, so the seesaw's `π_* M` is a *kernel*, computable degreewise;
+* `LinearMap.finrank_ker_baseChange_eq` (`ForMathlib/BaseChangeKerCoker.lean:586`) — a field extension
+  does not change that kernel's dimension, which reduces "every field-valued point" to "every residue
+  field";
 * `nonempty_unitObj_iso_of_normalized_glue` — local-to-global, with the overlap condition *forced* by
   zero-normalisation.
 
+Note that `IsInvertible.exists_away_orderedBaseCech_exact_of_residueField_exact`
+(`Picard/InvertibleSheafProperCechResidueSpread.lean`) is **not** usable here — it spreads *exactness*,
+and exactness is false for a fibrewise-trivial sheaf on a genus-1 fibre. See the rejected split below.
+
 ## Where reducedness is used
 
-Only in `exists_pullback_iso_of_residueField_exact` (`KM-SEESAW-2`), at the passage from "exact at every
-residue fibre" to "exact over `R`". Over a non-reduced base the statement is **false**: on
+Only in `exists_pullback_iso_of_kernel_finrank` (`KM-SEESAW-2′`), at the passage from "residue rank `1`
+at every point" to "`ker d⁰` locally free of rank `1` over the base". Over a non-reduced base the
+statement is **false**: on
 `T = Spec k[ε]/(ε²)` with `X = E₀ × T`, a nonzero class of `H¹(E₀, 𝒪)` gives transition functions
 `1 + ε a_{ij}` — trivial on the only fibre, rigidified along zero, still nontrivial. See the discussion
 at `Picard/SelfAdjointN.lean`'s module docstring.
@@ -72,56 +81,136 @@ universe u
 
 namespace ModularCurves
 
-/-- **(KM-SEESAW-1)** Fibrewise triviality supplies the residue-fibre exactness hypothesis of
-`IsInvertible.exists_away_orderedBaseCech_exact_of_residueField_exact`.
+/-!
+### A rejected split, and why (read before re-deriving it)
 
-On the fibre `X_p` the sheaf `M` is trivial, so the base-Čech complex base-changed to `p.ResidueField`
-is the Čech complex of the structure sheaf of `X_p`; its exactness in positive degrees is the vanishing
-of `H^q(X_p, 𝒪)` for `q > 0`, and in degree `0` it is `Γ(X_p, 𝒪) = κ(p)`, i.e. `UniversallyOConnected`
-read on the fibre. -/
-theorem orderedBaseCech_residueField_exact_of_fibre_trivial
-    {R : Type u} [CommRing R] [IsNoetherianRing R]
-    {X : Scheme.{u}} [IsNoetherian X] [X.IsSeparated]
-    {π : X ⟶ Spec (.of R)}
-    [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
-    (hπ : UniversallyOConnected π)
-    {M : X.Modules} (hM : IsInvertible M)
-    {ι : Type u} [Fintype ι] [LinearOrder ι]
-    (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
-    (p : Ideal Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))) [p.IsPrime]
-    (hfib : ∀ {k : Type u} [Field k] (x : Spec (.of k) ⟶ Spec (.of R)),
-      Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
-          (Limits.pullback.fst π x)).obj M ≅ unitObj (Limits.pullback π x))) :
-    ∀ q, q < Fintype.card ι →
-      let C := orderedBaseCechComplex π M U
-      Function.Exact
-        ((C.d q (q + 1)).hom.baseChange p.ResidueField)
-        ((C.d (q + 1) (q + 2)).hom.baseChange p.ResidueField) := by
+A first attempt fed the engine
+`IsInvertible.exists_away_orderedBaseCech_exact_of_residueField_exact` directly, via the sub-lemma
+"fibrewise trivial ⟹ the base-Čech complex is exact after `⊗ κ(p)` in every degree `q < card ι`".
+**That sub-lemma is false.** `Function.Exact` at index `q` asserts exactness at position `q + 1`, i.e.
+`H^{q+1}(X_p, M_p) = 0`; fibrewise *triviality* gives `M_p ≅ 𝒪_{X_p}`, and on a genus-1 fibre
+`H¹(E_p, 𝒪) ≅ κ(p) ≠ 0`. Counterexample: `R = k` a field, `X = E/k`, `M = 𝒪_E`, any affine cover with
+`card ι ≥ 2`.
+
+The tree's own results mark the boundary exactly:
+`FibrewiseElliptic.sectionPoleSheafPower_residueField_orderedBaseCech_exactAt_succ`
+(`EllipticCurve/PoleSheafBaseCechHigher.lean:295`) proves positive-degree exactness only for `𝒪(n[0])`
+under `hn : 1 ≤ n` — ample positive twists, where `H¹` vanishes. `n = 0`, the trivial sheaf, is excluded
+for precisely this reason.
+
+Stacks `0EX7` does not need exactness either. It needs `h⁰(X_s, M_s)` to be **constant** `= 1`, i.e. the
+*kernel* of `d⁰` to have constant residue rank — after which `π_* M` is invertible and the counit
+`π^* π_* M → M` is an isomorphism. So the split below goes through the kernel, and the tree already has
+that shape: `FibrewiseElliptic.sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank`
+(`…:360`) computes `finrank K (ker (d⁰ ⊗ K)) = n`, Riemann–Roch for `𝒪(n[0])`.
+Logged in `.mathlib-quality/b2_log.jsonl` under `KM-SEESAW-1`.
+-/
+
+/-- The scalar tower `Γ(S,⊤) → κ(s) → K` attached to a field-valued point of an affine `S`, where `s`
+is the point `K` lies over.
+
+**Duplication, deliberately recorded.** This fact is already proved in the tree, as the `private` pair
+`affineFieldFactor_isScalarTower` / `affineFieldFactor_residue_isScalarTower`
+(`EllipticCurve/PoleSheafBaseCechHigher.lean:55,84`). Both are pure affine-scheme infrastructure with no
+elliptic-curve content, so the right end state is one public home in `ForMathlib/` that this file and
+`PoleSheafBaseCechHigher` share; being `private` there is why it cannot simply be cited here. Logged in
+`.mathlib-quality/DEBT.md` as a dedup item — do **not** resolve it by copying the 60-line proof body. -/
+private theorem affineFieldFactor_residue_isScalarTower
+    {S : Scheme.{u}} [IsAffine S]
+    (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K] :
+    let t : Spec (.of K) ⟶ S :=
+      Spec.map (CommRingCat.ofHom (algebraMap Γ(S, (⊤ : S.Opens)) K)) ≫ S.isoSpec.inv
+    let x := Scheme.SpecToEquivOfField K S t
+    let s := x.1
+    let ψ := x.2
+    letI : Algebra Γ(S, (⊤ : S.Opens)) ↥(S.residueField s) :=
+      ((S.fromSpecResidueField s).appTop ≫
+        (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
+    letI : Algebra (↥(S.residueField s)) K := ψ.hom.toAlgebra
+    IsScalarTower Γ(S, (⊤ : S.Opens)) (↥(S.residueField s)) K := by
   sorry
 
-/-- **(KM-SEESAW-2)** Residue-fibre exactness at every prime, over a **reduced** base, descends to a
-global pullback: `M ≅ π^* N` for an invertible `N` on the base.
+/-- **(KM-SEESAW-1′-res)** The residue-field form: at a point `s` of the base, fibrewise triviality of
+`M` makes `ker (d⁰ ⊗ κ(s))` one-dimensional.
 
-Spread each prime's exactness to a principal neighbourhood with
-`exists_away_orderedBaseCech_exact_of_residueField_exact`, cover `Spec R` by finitely many of those
-(quasi-compactness), read `Γ(M)` off the exact base-Čech complex as a rank-1 projective module over each
-`R[1/r]` to get the local `N`, and glue with `nonempty_unitObj_iso_of_normalized_glue`. -/
-theorem exists_pullback_iso_of_residueField_exact
-    {R : Type u} [CommRing R] [IsNoetherianRing R] [IsReduced (Spec (.of R))]
-    {X : Scheme.{u}} [IsNoetherian X] [X.IsSeparated]
-    {π : X ⟶ Spec (.of R)}
+This is the whole geometric content of `KM-SEESAW-1′`. `H⁰` of the base-Čech complex is `Γ` of the
+module (`baseSectionsIsoKernelOrderedBaseCechDifferential`), base change along
+`Spec κ(s) ⟶ S` turns it into `Γ(X_s, M_s)` (`orderedBaseCechComplexBaseChangeIso`), fibrewise
+triviality replaces `M_s` by `𝒪_{X_s}`, and `UniversallyOConnected π` evaluates that to `κ(s)`. -/
+theorem orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial
+    {X S : Scheme.{u}} [IsAffine S] [IsNoetherian X] [X.IsSeparated]
+    {π : X ⟶ S}
     [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
     (hπ : UniversallyOConnected π)
     {M : X.Modules} (hM : IsInvertible M)
     {ι : Type u} [Fintype ι] [LinearOrder ι]
     (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
-    (hres : ∀ (p : Ideal Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))) [p.IsPrime],
-      ∀ q, q < Fintype.card ι →
-        let C := orderedBaseCechComplex π M U
-        Function.Exact
-          ((C.d q (q + 1)).hom.baseChange p.ResidueField)
-          ((C.d (q + 1) (q + 2)).hom.baseChange p.ResidueField)) :
-    ∃ N : (Spec (.of R)).Modules, IsInvertible N ∧
+    (s : S) [Algebra Γ(S, (⊤ : S.Opens)) ↥(S.residueField s)]
+    (hfib : ∀ {k : Type u} [Field k] (x : Spec (.of k) ⟶ S),
+      Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
+          (Limits.pullback.fst π x)).obj M ≅ unitObj (Limits.pullback π x))) :
+    let C := orderedBaseCechComplex π M U
+    Module.finrank ↥(S.residueField s)
+      (LinearMap.ker ((C.d 0 1).hom.baseChange ↥(S.residueField s))) = 1 := by
+  sorry
+
+/-- **(KM-SEESAW-1′)** Fibrewise triviality makes the residue rank of `ker d⁰` equal to `1` at every
+prime.
+
+`H⁰` of the base-Čech complex is `Γ(X_p, M_p)`, and `M_p ≅ 𝒪_{X_p}`, so this is
+`Γ(X_p, 𝒪) = κ(p)` — one-dimensional. That last identification is exactly `UniversallyOConnected π`
+read on the fibre `x : Spec κ(p) ⟶ Spec R`, which is why `hπ` is the hypothesis that carries it. -/
+theorem orderedBaseCech_kernel_finrank_of_fibre_trivial
+    {X S : Scheme.{u}} [IsAffine S] [IsNoetherian X] [X.IsSeparated]
+    {π : X ⟶ S}
+    [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
+    (hπ : UniversallyOConnected π)
+    {M : X.Modules} (hM : IsInvertible M)
+    {ι : Type u} [Fintype ι] [LinearOrder ι]
+    (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K]
+    (hfib : ∀ {k : Type u} [Field k] (x : Spec (.of k) ⟶ S),
+      Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
+          (Limits.pullback.fst π x)).obj M ≅ unitObj (Limits.pullback π x))) :
+    let C := orderedBaseCechComplex π M U
+    Module.finrank K (LinearMap.ker ((C.d 0 1).hom.baseChange K)) = 1 := by
+  dsimp only
+  let R := Γ(S, (⊤ : S.Opens))
+  let t : Spec (.of K) ⟶ S :=
+    Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ S.isoSpec.inv
+  let x := Scheme.SpecToEquivOfField K S t
+  let s := x.1
+  let ψ := x.2
+  letI : Algebra R ↥(S.residueField s) :=
+    ((S.fromSpecResidueField s).appTop ≫
+      (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
+  letI : Algebra (↥(S.residueField s)) K := ψ.hom.toAlgebra
+  letI : IsScalarTower R (↥(S.residueField s)) K :=
+    affineFieldFactor_residue_isScalarTower K
+  let C := orderedBaseCechComplex π M U
+  exact (LinearMap.finrank_ker_baseChange_eq (↥(S.residueField s)) K (C.d 0 1).hom).trans
+    (orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial hπ hM U hU hUaff s hfib)
+
+/-- **(KM-SEESAW-2′)** Constant residue rank `1` of `ker d⁰`, over a **reduced** base, makes
+`π_* M` invertible and the counit an isomorphism: `M ≅ π^* N`.
+
+Constant fibre rank over a reduced base is what forces `ker d⁰` — which is `Γ(M)` as a module over the
+base ring — to be locally free of rank `1`; that is the only place `IsReduced` is used, and over a
+non-reduced base the conclusion is false (`k[ε]/(ε²)`, see the module docstring). The counit
+`π^* π_* M → M` is then a map of invertible sheaves that is nonzero on every fibre, hence an
+isomorphism, which is where the local-to-global glue (`nonempty_unitObj_iso_of_normalized_glue`) enters. -/
+theorem exists_pullback_iso_of_kernel_finrank
+    {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian X] [X.IsSeparated]
+    {π : X ⟶ S}
+    [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
+    (hπ : UniversallyOConnected π)
+    {M : X.Modules} (hM : IsInvertible M)
+    {ι : Type u} [Fintype ι] [LinearOrder ι]
+    (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hrank : ∀ (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K],
+      let C := orderedBaseCechComplex π M U
+      Module.finrank K (LinearMap.ker ((C.d 0 1).hom.baseChange K)) = 1) :
+    ∃ N : S.Modules, IsInvertible N ∧
       Nonempty (M ≅ (AlgebraicGeometry.Scheme.Modules.pullback π).obj N) := by
   sorry
 
@@ -133,21 +222,20 @@ The composition of `orderedBaseCech_residueField_exact_of_fibre_trivial` (KM-SEE
 `exists_pullback_iso_of_residueField_exact` (KM-SEESAW-2), over the finite affine trivialising cover
 produced by `IsInvertible.exists_finiteAffineBaseCech_flat`. -/
 theorem exists_pullback_iso_of_fibrewise_trivial_of_isReduced
-    {R : Type u} [CommRing R] [IsNoetherianRing R] [IsReduced (Spec (.of R))]
-    {X : Scheme.{u}} [IsNoetherian X] [X.IsSeparated]
-    {π : X ⟶ Spec (.of R)}
+    {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian X] [X.IsSeparated]
+    {π : X ⟶ S}
     [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
     (hπ : UniversallyOConnected π)
     {M : X.Modules} (hM : IsInvertible M)
-    (hfib : ∀ {k : Type u} [Field k] (x : Spec (.of k) ⟶ Spec (.of R)),
+    (hfib : ∀ {k : Type u} [Field k] (x : Spec (.of k) ⟶ S),
       Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
           (Limits.pullback.fst π x)).obj M ≅ unitObj (Limits.pullback π x))) :
-    ∃ N : (Spec (.of R)).Modules, IsInvertible N ∧
+    ∃ N : S.Modules, IsInvertible N ∧
       Nonempty (M ≅ (AlgebraicGeometry.Scheme.Modules.pullback π).obj N) := by
   obtain ⟨ι, hι, U, hU, hUaff, htriv, hflat⟩ := hM.exists_finiteAffineBaseCech_flat π
   letI : Fintype ι := Fintype.ofFinite ι
   letI : LinearOrder ι := LinearOrder.lift' (Fintype.equivFin ι) (Equiv.injective _)
-  exact exists_pullback_iso_of_residueField_exact hπ hM U hU hUaff
-    fun p _ => orderedBaseCech_residueField_exact_of_fibre_trivial hπ hM U hU hUaff p hfib
+  exact exists_pullback_iso_of_kernel_finrank hπ hM U hU hUaff
+    fun K _ _ => orderedBaseCech_kernel_finrank_of_fibre_trivial hπ hM U hU hUaff K hfib
 
 end ModularCurves
