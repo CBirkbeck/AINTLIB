@@ -36825,3 +36825,27 @@ Registering them as instances is the point: the remaining steps of the recipe
 convert back with `ΓSpecIso`) all need `IsAffine` to be found automatically.
 
 Root green at **9723 jobs**.
+
+### [WP-D3c-2c] step 2 — the transport tool and its four commutation proofs (confirmed)
+
+`CategoryTheory.IsPullback.of_iso h e₁ e₂ e₃ e₄ commfst commsnd commf commg` — transport a
+cartesian square along isomorphisms of all four corners. Applied with
+
+```
+e₁ := ((E.baseChange g).torsion N).isoSpec      e₂ := (E.torsion N).isoSpec
+e₃ := T.isoSpec                                  e₄ := S.isoSpec
+```
+
+(all four now available as instances after step 1), it turns
+`torsion_baseChange_isPullback` into a cartesian square of `Spec`s of global-section rings.
+
+**The four commutation proofs are all one lemma**: `Scheme.isoSpec_hom_naturality`
+(`Mathlib/AlgebraicGeometry/AffineScheme.lean`) — the tree already uses it exactly this way in
+`ForMathlib/SmoothDescentScheme.lean:42`, in the shape
+`Spec.map (p.appTop) = Z.isoSpec.inv ≫ p ≫ Y.isoSpec.hom`.
+
+Then `AlgebraicGeometry.pullbackSpecIso k Γ(E[N],⊤) k'` matches the resulting square and
+gives `Γ(E[N],⊤) ⊗[k] k'`, and `Scheme.ΓSpecIso` converts back to the carrier exactly as
+`muNCarrierRingEquiv` does.
+
+Every tool in the recipe is now confirmed present. **This is the next session's first task.**
