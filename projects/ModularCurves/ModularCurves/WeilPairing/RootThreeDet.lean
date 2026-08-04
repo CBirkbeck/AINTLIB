@@ -30,6 +30,25 @@ open CategoryTheory AlgebraicGeometry
 
 namespace ModularCurves
 
+/-- **(WP-D3c-N3 step 2β)** Two primitive cube roots of unity in a commutative ring differ by
+the factorisation `x² + x + 1 = (x − z)(x − z²)`: the product of the two differences vanishes.
+
+Over a domain this forces `w = z` or `w = z²`, which is the binary determination the
+determinant law reduces to. Stated without a domain hypothesis because `E3ModuliRing R` is one
+only for suitable `R`; the product form is what a general `R` supports. -/
+theorem sub_mul_sub_sq_eq_zero_of_cyclotomic {A : Type*} [CommRing A] {z w : A}
+    (hz : z ^ 2 + z + 1 = 0) (hw : w ^ 2 + w + 1 = 0) :
+    (w - z) * (w - z ^ 2) = 0 := by
+  linear_combination hw + (-w + z - 1) * hz
+
+/-- **(WP-D3c-N3 step 2β)** …and over a domain the determination is binary. -/
+theorem eq_or_eq_sq_of_cyclotomic {A : Type*} [CommRing A] [IsDomain A] {z w : A}
+    (hz : z ^ 2 + z + 1 = 0) (hw : w ^ 2 + w + 1 = 0) :
+    w = z ∨ w = z ^ 2 := by
+  rcases mul_eq_zero.mp (sub_mul_sub_sq_eq_zero_of_cyclotomic hz hw) with h | h
+  · exact Or.inl (sub_eq_zero.mp h)
+  · exact Or.inr (sub_eq_zero.mp h)
+
 variable (R : CommRingCat.{u})
 
 /-- **(WP-D3c-N3)** The automorphism of the level-three moduli object induced by
