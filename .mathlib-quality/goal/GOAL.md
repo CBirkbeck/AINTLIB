@@ -15314,3 +15314,41 @@ land this target, and nothing short of it will.
 > blocked on an owner decision should be measured and named, so the decision can be made on
 > numbers — 32 lines here, ~250 in the keystone files — rather than re-derived each time someone
 > looks at it.
+
+### The `letI`-triple owner decision, finally quantified
+
+`genPiece_relative_overlap_square₂` (94) is the **third** target measured as blocked on this, after
+`presheafValue_mvRestricted_fU_uniformContinuous` (67) and the RelativePieceKeystone files. Its
+split: **45c of instance preamble** — twelve `letI`s forming four
+`UniformSpace` / `IsTopologicalRing` / `IsUniformAddGroup` triples, one per `Localization.Away`
+type — plus `hTateB'` and a 49c proof. Three targets, one cause, so the decision is worth numbers
+rather than adjectives.
+
+Two measurements, which count different things and are both reported because neither alone is the
+answer:
+
+| measure | definition | result |
+|---|---|---|
+| strict triples | the three classes as **adjacent** `letI`s, in order | **190 triples, ~1399 lines, 21 files** |
+| all declarations | any `letI`/`haveI` of one of the three classes | **1172 declarations, ~1928 lines** |
+
+Per class: `UniformSpace` 399, `IsTopologicalRing` 428, `IsUniformAddGroup` 345 — so at most 345
+can be complete triples, and 190 are strictly adjacent. The gap is the interleaved ones (a
+`UniformSpace` for one type, then another type's, then the ring instances), which a macro taking
+the datum as its argument would still absorb.
+
+Concentration: `WedhornCechAcyclicity` 222 declarations, `LaurentRefinementCore` 115,
+`Wedhorn828` 64, `TopologyComparison` 62.
+
+**Correction to an earlier entry in this file**: I estimated "~250 lines in RelativePieceKeystone
+alone". The measured figure for those three files is ~39 lines each, ~117 total — the estimate was
+high, and the real concentration is in `WedhornCechAcyclicity` (~520 lines by the strict-triple
+count), which I had not counted at all.
+
+> **A blocked target should be measured, not adjectivised.** "This needs the `letI` macro" was in
+> this file three times before anyone could say whether the macro was worth writing. It removes on
+> the order of 1400–1900 lines and unblocks at least three over-50 targets; that is a decision the
+> owner can now actually make.
+
+The macro itself remains an owner call — it changes how every proof in the project opens, which is
+a style commitment, not a cleanup.
