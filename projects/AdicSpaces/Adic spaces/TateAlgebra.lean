@@ -55,8 +55,8 @@ universe u
 
 /-- Any variable `MvPowerSeries.X i` is a restricted power series: it has exactly one
 nonzero coefficient (at `Finsupp.single i 1`). -/
-theorem MvPowerSeries.X_isRestricted {k : ℕ} {A : Type u} [CommRing A] [TopologicalSpace A]
-    (i : Fin k) : MvPowerSeries.IsRestricted (MvPowerSeries.X i : MvPowerSeries (Fin k) A) := by
+theorem MvPowerSeries.X_isRestrictedAdic {k : ℕ} {A : Type u} [CommRing A] [TopologicalSpace A]
+    (i : Fin k) : MvPowerSeries.IsRestrictedAdic (MvPowerSeries.X i : MvPowerSeries (Fin k) A) := by
   change Tendsto _ cofinite (nhds 0)
   apply tendsto_nhds.mpr
   intro U hU h0U
@@ -106,7 +106,7 @@ theorem coeff_tendsto_zero (f : ↥(TateAlgebra A)) :
 
 /-- The variable `X` as an element of `A⟨X⟩`. -/
 noncomputable def X : ↥(TateAlgebra A) :=
-  ⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩
+  ⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩
 
 /-- Two elements of `A⟨X⟩` are equal iff they have the same coefficients. -/
 @[ext]
@@ -129,7 +129,7 @@ noncomputable def evalZeroHom : ↥(TateAlgebra A) →+* A where
 constant power series `algebraMap A _ a`. -/
 theorem evalZeroHom_surjective : Function.Surjective (evalZeroHom (A := A)) := by
   intro a
-  exact ⟨⟨algebraMap A _ a, MvPowerSeries.IsRestricted_algebraMap a⟩, by
+  exact ⟨⟨algebraMap A _ a, MvPowerSeries.isRestrictedAdic_algebraMap a⟩, by
     simp only [evalZeroHom, coeff, toIndex_zero, MvPowerSeries.algebraMap_apply]
     norm_cast⟩
 
@@ -149,11 +149,11 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A] [NonarchimedeanRing A]
 
 /-- The variable `X` as an element of `A⟨X, Y⟩`. -/
 noncomputable def X : ↥(TateAlgebra₂ A) :=
-  ⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩
+  ⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestrictedAdic 0⟩
 
 /-- The variable `Y` as an element of `A⟨X, Y⟩`. -/
 noncomputable def Y : ↥(TateAlgebra₂ A) :=
-  ⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩
+  ⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestrictedAdic 1⟩
 
 /-- The element `XY - 1` in `A⟨X, Y⟩`. -/
 noncomputable def XY_sub_one : ↥(TateAlgebra₂ A) := X * Y - 1
@@ -308,8 +308,8 @@ noncomputable def varInclHom {k : ℕ} (j : Fin k) :
 omit [NonarchimedeanRing A] in
 /-- The variable inclusion preserves the restricted property. -/
 theorem varInclHom_isRestricted {k : ℕ} (j : Fin k) (f : MvPowerSeries (Fin 1) A)
-    (hf : MvPowerSeries.IsRestricted f) :
-    MvPowerSeries.IsRestricted (varInclHom j f) := by
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
+    MvPowerSeries.IsRestrictedAdic (varInclHom j f) := by
   change Tendsto _ cofinite (nhds 0)
   rw [tendsto_nhds]
   intro U hU h0U
@@ -466,7 +466,7 @@ omit [NonarchimedeanRing A] in
 /-- The shift of a restricted power series is restricted. The map `s ↦ s + single 0 1`
 is injective, so composing with it preserves the cofinite-filter condition. -/
 theorem shiftFun_isRestricted {f : MvPowerSeries (Fin 1) A}
-    (hf : MvPowerSeries.IsRestricted f) : MvPowerSeries.IsRestricted (shiftFun f) := by
+    (hf : MvPowerSeries.IsRestrictedAdic f) : MvPowerSeries.IsRestrictedAdic (shiftFun f) := by
   change Tendsto _ cofinite (nhds 0)
   change Tendsto _ cofinite (nhds 0) at hf
   have inj : Function.Injective fun s : Fin 1 →₀ ℕ ↦ s + Finsupp.single 0 1 :=
@@ -686,13 +686,13 @@ Under `[DiscreteTopology A]`, a power series is restricted iff it has finite sup
 This yields a linear equivalence with `(Fin 1 →₀ ℕ) →₀ A`, which is free hence flat. -/
 
 omit [NonarchimedeanRing A] in
-/-- Under discrete topology, `IsRestricted` is equivalent to having finite support:
+/-- Under discrete topology, `IsRestrictedAdic` is equivalent to having finite support:
 the coefficient function `s ↦ coeff s f` is eventually zero along the cofinite filter. -/
 theorem isRestricted_iff_finite_support [DiscreteTopology A]
     (f : MvPowerSeries (Fin 1) A) :
-    MvPowerSeries.IsRestricted f ↔
+    MvPowerSeries.IsRestrictedAdic f ↔
       {s : Fin 1 →₀ ℕ | MvPowerSeries.coeff s f ≠ 0}.Finite := by
-  unfold MvPowerSeries.IsRestricted
+  unfold MvPowerSeries.IsRestrictedAdic
   rw [nhds_discrete, tendsto_pure, Filter.Eventually, Filter.mem_cofinite]
   constructor
   · intro h
@@ -705,7 +705,7 @@ set_option backward.isDefEq.respectTransparency false in
 /-- A finitely supported function gives a restricted power series (discrete case). -/
 theorem finsupp_isRestricted [DiscreteTopology A]
     (g : (Fin 1 →₀ ℕ) →₀ A) :
-    MvPowerSeries.IsRestricted
+    MvPowerSeries.IsRestrictedAdic
       (fun s ↦ g s : MvPowerSeries (Fin 1) A) := by
   rw [isRestricted_iff_finite_support]
   apply g.support.finite_toSet.subset
@@ -2372,8 +2372,8 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
   refine ⟨c', hc'_decomp, fun j ↦ ?_⟩
   -- Goal: (fun n => c' n j) ∈ TateAlgebra A
   -- Show Tendsto (c'(·)(j)) cofinite (nhds 0) using the filtration property hc'_filt.
-  change MvPowerSeries.IsRestricted (fun n ↦ c' n j)
-  rw [MvPowerSeries.IsRestricted, P.hasBasis_nhds_zero.tendsto_right_iff]
+  change MvPowerSeries.IsRestrictedAdic (fun n ↦ c' n j)
+  rw [MvPowerSeries.IsRestrictedAdic, P.hasBasis_nhds_zero.tendsto_right_iff]
   intro m _
   rw [Filter.eventually_cofinite]
   -- Goal: {n | c' n j ∉ image(P.I^m)}.Finite
@@ -2381,8 +2381,8 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
   -- So {n | c' n j ∉ image(I^m)} ⊆ {n | ∃ i, (x i).val n ∉ image(I^{m+k₀})}.
   apply Set.Finite.subset (Set.finite_iUnion (fun i : Fin l ↦ by
       have hxi := (x i).prop
-      change MvPowerSeries.IsRestricted (x i).val at hxi
-      rw [MvPowerSeries.IsRestricted] at hxi
+      change MvPowerSeries.IsRestrictedAdic (x i).val at hxi
+      rw [MvPowerSeries.IsRestrictedAdic] at hxi
       have := P.hasBasis_nhds_zero.tendsto_right_iff.mp hxi (m + k₀) trivial
       rwa [Filter.eventually_cofinite] at this))
   intro n hn
@@ -2796,7 +2796,7 @@ each `q`-column `n ↦ c' n q` is restricted, then `h` is that combination in th
 private theorem tateAlgebra_eq_sum_of_coeff_decomp (P : PairOfDefinition A)
     (h : ↥(TateAlgebra A)) {I₀ : Ideal P.A₀} {numG : ℕ} (g₀ : Fin numG → ↥I₀)
     (c' : (Fin 1 →₀ ℕ) → Fin numG → A)
-    (hrestr : ∀ q : Fin numG, MvPowerSeries.IsRestricted (fun n ↦ c' n q))
+    (hrestr : ∀ q : Fin numG, MvPowerSeries.IsRestrictedAdic (fun n ↦ c' n q))
     (hc'_decomp : ∀ n : Fin 1 →₀ ℕ,
       h.val n = ∑ q, P.A₀.subtype (g₀ q : I₀).val * c' n q) :
     h = ∑ q : Fin numG,
@@ -2868,9 +2868,9 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
   -- Step 6: Choose the decomposition for all n.
   choose c' hc'_decomp hc'_filt using hdecomp_ctrl
   -- Step 7: Restrictedness.
-  have hrestr : ∀ q : Fin numG, MvPowerSeries.IsRestricted (fun n ↦ c' n q) := by
+  have hrestr : ∀ q : Fin numG, MvPowerSeries.IsRestrictedAdic (fun n ↦ c' n q) := by
     intro q
-    rw [MvPowerSeries.IsRestricted, P.hasBasis_nhds_zero.tendsto_right_iff]
+    rw [MvPowerSeries.IsRestrictedAdic, P.hasBasis_nhds_zero.tendsto_right_iff]
     intro l _; rw [Filter.eventually_cofinite]
     apply Set.Finite.subset (by
       have := P.hasBasis_nhds_zero.tendsto_right_iff.mp

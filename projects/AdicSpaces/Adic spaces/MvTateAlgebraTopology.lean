@@ -83,7 +83,7 @@ Sends `a ∈ A₀` to the constant restricted power series `C(a)`. Generalizes
 noncomputable def mvPairConstantHom (n : ℕ) (P : PairOfDefinition A) :
     P.A₀ →+* mvPairSubring n P where
   toFun a := ⟨⟨MvPowerSeries.C a.val,
-      MvPowerSeries.IsRestricted_algebraMap a.val⟩, by
+      MvPowerSeries.isRestrictedAdic_algebraMap a.val⟩, by
     intro s; classical
     simp only [MvPowerSeries.coeff_C]
     split
@@ -708,7 +708,7 @@ private theorem isRestrictedMv_limit_of_cauchy (n : ℕ) (P : PairOfDefinition A
     (c : (Fin n →₀ ℕ) → A)
     (hc : ∀ l, Filter.Tendsto (fun m => MvPowerSeries.coeff l (u m).val)
       Filter.atTop (nhds (c l))) :
-    MvPowerSeries.IsRestricted (fun l => c l : MvPowerSeries (Fin n) A) := by
+    MvPowerSeries.IsRestrictedAdic (fun l => c l : MvPowerSeries (Fin n) A) := by
   change Tendsto c cofinite (nhds 0)
   rw [tendsto_nhds]
   intro U hU h0U
@@ -1032,7 +1032,7 @@ at multi-indices with some component `≥ N` vanish) is restricted. Generalizes
 private theorem mvIsRestricted_of_eventually_zero (m : ℕ)
     (h : MvPowerSeries (Fin m) A) (N : ℕ)
     (hh : ∀ l : Fin m →₀ ℕ, (∃ i, N ≤ l i) → h l = 0) :
-    MvPowerSeries.IsRestricted h := by
+    MvPowerSeries.IsRestrictedAdic h := by
   classical
   change Filter.Tendsto (fun l => h l) Filter.cofinite (nhds 0)
   rw [tendsto_nhds]
@@ -1150,7 +1150,7 @@ all of whose elements are power-bounded (`PairOfDefinition.isBounded_A₀`). Nee
 Example-6.38 evaluation tuple (sub-leaf AG2 of the strong-noetherian propagation). -/
 theorem mvPowerSeries_X_isBounded [IsTateRing A] {m : ℕ} (j : Fin m) :
     @TopologicalRing.IsBounded _ _ (mvTateAlgebraTopology' m)
-      (Set.range ((⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+      (Set.range ((⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
         ↥(restrictedMvPowerSeriesSubring m A)) ^ · :
         ℕ → ↥(restrictedMvPowerSeriesSubring m A))) := by
   classical
@@ -1159,7 +1159,7 @@ theorem mvPowerSeries_X_isBounded [IsTateRing A] {m : ℕ} (j : Fin m) :
     mvTateAlgebraTopology'_isTopologicalRing m
   set P := (IsTateRing.principalPair A).toPairOfDefinition with hP
   set Xj : ↥(restrictedMvPowerSeriesSubring m A) :=
-    ⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ with hXj
+    ⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ with hXj
   have hX_in : Xj ∈ mvPairSubring m P := by
     intro s
     change MvPowerSeries.coeff s (MvPowerSeries.X j) ∈ P.A₀
@@ -1258,7 +1258,7 @@ noncomputable def mvPolynomialToTate (m : ℕ) :
 /-- `mvPolynomialToTate` sends the variable `X j` to the variable series. -/
 @[simp] theorem mvPolynomialToTate_X (m : ℕ) (j : Fin m) :
     mvPolynomialToTate m (MvPolynomial.X j) =
-      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
         ↥(restrictedMvPowerSeriesSubring m A)) := by
   apply Subtype.ext
   show (MvPolynomial.coeToMvPowerSeries.ringHom (MvPolynomial.X j) :

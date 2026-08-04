@@ -85,7 +85,7 @@ theorem exists_valued_ball_subset {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 restrictedness is exactly coefficientwise value decay. -/
 theorem isRestricted_iff_valued {k : ℕ} {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     (f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :
-    MvPowerSeries.IsRestricted f
+    MvPowerSeries.IsRestrictedAdic f
       ↔ ∀ ε : NNReal, 0 < ε → {s : Fin k →₀ ℕ |
           ε < Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
             : hatK p F hρ0 hρ1)}.Finite := by
@@ -105,7 +105,7 @@ theorem isRestricted_iff_valued {k : ℕ} {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : 
     simp only [Set.mem_compl_iff, Set.mem_preimage, Set.mem_setOf_eq] at hs ⊢
     exact not_le.mpr hs
   · intro hf
-    rw [MvPowerSeries.IsRestricted, Filter.tendsto_def]
+    rw [MvPowerSeries.IsRestrictedAdic, Filter.tendsto_def]
     intro U hU
     rw [nhds_subtype_eq_comap] at hU
     obtain ⟨V, hV, hVU⟩ := Filter.mem_comap.mp hU
@@ -180,7 +180,7 @@ def gaussNormRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
 /-- Nonzero restricted series have nonzero Gauss norm. -/
 theorem gaussNormRPS_ne_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hf0 : f ≠ 0) :
     gaussNormRPS p F ϖ hρ0 hρ1 f ≠ 0 := by
   intro h0
   refine hf0 (MvPowerSeries.ext fun s => ?_)
@@ -215,7 +215,7 @@ theorem gaussNormRPS_ne_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 are nonzero. -/
 theorem exists_gaussNormRPS_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hf0 : f ≠ 0) :
     ∃ s₀ : Fin k →₀ ℕ, gaussNormRPS p F ϖ hρ0 hρ1 f
         = Valued.v ((MvPowerSeries.coeff s₀ f : ↥(ArSub p F ϖ hρ0 hρ1))
           : hatK p F hρ0 hρ1)
@@ -237,7 +237,7 @@ def attainSetRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
 
 theorem attainSetRPS_finite {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hf0 : f ≠ 0) :
     (attainSetRPS p F ϖ hρ0 hρ1 f).Finite := by
   have hne := gaussNormRPS_ne_zero p F ϖ hf hf0
   have hfin := (isRestricted_iff_valued p F ϖ f).mp hf
@@ -250,7 +250,7 @@ theorem attainSetRPS_finite {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 
 theorem attainSetRPS_nonempty {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hf0 : f ≠ 0) :
     (attainSetRPS p F ϖ hρ0 hρ1 f).Nonempty := by
   obtain ⟨s₀, hs₀, -⟩ := exists_gaussNormRPS_eq p F ϖ hf hf0
   exact ⟨s₀, hs₀.symm⟩
@@ -260,7 +260,7 @@ open scoped Classical in
 norm-attaining multi-index (junk `0` off the restricted-nonzero locus). -/
 noncomputable def leadIdxRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
     (f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : Fin k →₀ ℕ :=
-  if h : MvPowerSeries.IsRestricted f ∧ f ≠ 0 then
+  if h : MvPowerSeries.IsRestrictedAdic f ∧ f ≠ 0 then
     (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn.symm
       ((((attainSetRPS_finite p F ϖ h.1 h.2).toFinset).image
         (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn).max'
@@ -273,7 +273,7 @@ noncomputable def leadIdxRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
 /-- The leading index attains the norm and degLex-dominates all attaining indices. -/
 theorem leadIdxRPS_spec {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hf0 : f ≠ 0) :
     leadIdxRPS p F ϖ hρ0 hρ1 f ∈ attainSetRPS p F ϖ hρ0 hρ1 f
       ∧ ∀ s ∈ attainSetRPS p F ϖ hρ0 hρ1 f,
         (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn s
@@ -313,7 +313,7 @@ noncomputable def leadCoeffRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
 /-- Bounded coefficient values for restricted series (the recurring bound). -/
 theorem bddAbove_coeff_valued {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     BddAbove (Set.range (fun s : Fin k →₀ ℕ =>
       Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
         : hatK p F hρ0 hρ1))) := by
@@ -334,9 +334,9 @@ theorem bddAbove_coeff_valued {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 /-- Monomials are restricted. -/
 theorem isRestricted_monomial {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {J : Fin k →₀ ℕ} (a : ↥(ArSub p F ϖ hρ0 hρ1)) :
-    MvPowerSeries.IsRestricted
+    MvPowerSeries.IsRestrictedAdic
       (MvPowerSeries.monomial J a : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := by
-  rw [MvPowerSeries.IsRestricted, Filter.tendsto_def]
+  rw [MvPowerSeries.IsRestrictedAdic, Filter.tendsto_def]
   intro U hU
   rw [Filter.mem_cofinite]
   refine (Set.finite_singleton J).subset ?_
@@ -405,8 +405,8 @@ theorem coeff_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 /-- Monomial shifts are restricted. -/
 theorem isRestricted_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (J : Fin k →₀ ℕ) :
-    MvPowerSeries.IsRestricted
+    (hf : MvPowerSeries.IsRestrictedAdic f) (J : Fin k →₀ ℕ) :
+    MvPowerSeries.IsRestrictedAdic
       ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f) :=
   Subring.mul_mem (restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))
     (isRestricted_monomial p F ϖ (1 : ↥(ArSub p F ϖ hρ0 hρ1)) (J := J)) hf
@@ -414,7 +414,7 @@ theorem isRestricted_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 /-- **Norm invariance of monomial shifts** (radius 1). -/
 theorem gaussNormRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (J : Fin k →₀ ℕ) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (J : Fin k →₀ ℕ) :
     gaussNormRPS p F ϖ hρ0 hρ1
         ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f)
       = gaussNormRPS p F ϖ hρ0 hρ1 f := by
@@ -453,7 +453,7 @@ theorem monomialShift_ne_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 /-- **Attainment sets shift**: the attainers of a monomial shift are the translates. -/
 theorem attainSetRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) (J : Fin k →₀ ℕ) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hf0 : f ≠ 0) (J : Fin k →₀ ℕ) :
     attainSetRPS p F ϖ hρ0 hρ1
         ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f)
       = (fun t => J + t) '' attainSetRPS p F ϖ hρ0 hρ1 f := by
@@ -478,7 +478,7 @@ theorem attainSetRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 /-- **The leading index shifts additively** (Kedlaya's monomial multiplication). -/
 theorem leadIdxRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) (J : Fin k →₀ ℕ) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hf0 : f ≠ 0) (J : Fin k →₀ ℕ) :
     leadIdxRPS p F ϖ hρ0 hρ1
         ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f)
       = J + leadIdxRPS p F ϖ hρ0 hρ1 f := by
@@ -509,7 +509,7 @@ theorem leadIdxRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 /-- **The leading coefficient is invariant under monomial shifts**. -/
 theorem leadCoeffRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) (J : Fin k →₀ ℕ) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hf0 : f ≠ 0) (J : Fin k →₀ ℕ) :
     leadCoeffRPS p F ϖ hρ0 hρ1
         ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f)
       = leadCoeffRPS p F ϖ hρ0 hρ1 f := by
@@ -540,7 +540,7 @@ theorem degSetIdx_subset {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   set mono : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) :=
     ⟨MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1)),
       isRestricted_monomial p F ϖ (1 : ↥(ArSub p F ϖ hρ0 hρ1)) (J := J)⟩ with hmono
-  have hxres : MvPowerSeries.IsRestricted
+  have hxres : MvPowerSeries.IsRestrictedAdic
       (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := x.2
   have hcoe : ((mono * x : ↥(restrictedMvPowerSeriesSubring k
         ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
@@ -680,7 +680,7 @@ theorem exists_leadIdx_degAr_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 /-- Every coefficient value is at most the Gauss norm. -/
 theorem valued_coeff_le_gaussNormRPS {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (s : Fin k →₀ ℕ) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (s : Fin k →₀ ℕ) :
     Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
       : hatK p F hρ0 hρ1) ≤ gaussNormRPS p F ϖ hρ0 hρ1 f :=
   le_ciSup (bddAbove_coeff_valued p F ϖ hf) s
@@ -690,7 +690,7 @@ open scoped Classical in
 leading index, coefficient values are uniformly below the Gauss norm. -/
 theorem exists_tail_bound_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hf0 : f ≠ 0) :
     ∃ ε : NNReal, ε < gaussNormRPS p F ϖ hρ0 hρ1 f
       ∧ ∀ J : Fin k →₀ ℕ,
         (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn
@@ -736,7 +736,7 @@ theorem exists_tail_bound_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 /-- The Gauss norm is the value of the leading coefficient. -/
 theorem valued_leadCoeffRPS {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hf0 : f ≠ 0) :
     Valued.v ((leadCoeffRPS p F ϖ hρ0 hρ1 f : ↥(ArSub p F ϖ hρ0 hρ1))
       : hatK p F hρ0 hρ1) = gaussNormRPS p F ϖ hρ0 hρ1 f :=
   (leadIdxRPS_spec p F ϖ hf hf0).1
@@ -769,7 +769,7 @@ theorem finite_degLex_le (Jtop : Fin k →₀ ℕ) :
 /-- The Gauss norm is ultrametric on sums. -/
 theorem gaussNormRPS_add_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hg : MvPowerSeries.IsRestricted g) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hg : MvPowerSeries.IsRestrictedAdic g) :
     gaussNormRPS p F ϖ hρ0 hρ1 (f + g)
       ≤ max (gaussNormRPS p F ϖ hρ0 hρ1 f) (gaussNormRPS p F ϖ hρ0 hρ1 g) := by
   refine ciSup_le fun s => ?_
@@ -800,10 +800,10 @@ theorem gaussNormRPS_neg {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 /-- The Gauss norm is ultrametric on differences. -/
 theorem gaussNormRPS_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hg : MvPowerSeries.IsRestricted g) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hg : MvPowerSeries.IsRestrictedAdic g) :
     gaussNormRPS p F ϖ hρ0 hρ1 (f - g)
       ≤ max (gaussNormRPS p F ϖ hρ0 hρ1 f) (gaussNormRPS p F ϖ hρ0 hρ1 g) := by
-  have hneg : MvPowerSeries.IsRestricted (-g) :=
+  have hneg : MvPowerSeries.IsRestrictedAdic (-g) :=
     Subring.neg_mem (restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) hg
   have h1 := gaussNormRPS_add_le p F ϖ hf hneg
   rw [← sub_eq_add_neg, gaussNormRPS_neg] at h1
@@ -841,8 +841,8 @@ theorem coeff_monomialMul_neg {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 theorem isRestricted_monomialMul {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     (D : Fin k →₀ ℕ) (zz : ↥(ArSub p F ϖ hρ0 hρ1))
     {x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hx : MvPowerSeries.IsRestricted x) :
-    MvPowerSeries.IsRestricted ((MvPowerSeries.monomial D zz) * x) :=
+    (hx : MvPowerSeries.IsRestrictedAdic x) :
+    MvPowerSeries.IsRestrictedAdic ((MvPowerSeries.monomial D zz) * x) :=
   Subring.mul_mem (restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))
     (isRestricted_monomial p F ϖ zz (J := D)) hx
 
@@ -906,7 +906,7 @@ theorem valued_coeff_monomialMul_le_tail {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : �
 conjunct of `groebner_step`. -/
 theorem gaussNormRPS_sub_monomialMul_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {x y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hx : MvPowerSeries.IsRestricted x) (hy : MvPowerSeries.IsRestricted y)
+    (hx : MvPowerSeries.IsRestrictedAdic x) (hy : MvPowerSeries.IsRestrictedAdic y)
     (D : Fin k →₀ ℕ) (z : ↥(ArSub p F ϖ hρ0 hρ1))
     (hzy : Valued.v ((z : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
         * gaussNormRPS p F ϖ hρ0 hρ1 x ≤ gaussNormRPS p F ϖ hρ0 hρ1 y) :
@@ -928,7 +928,7 @@ theorem gaussNormRPS_sub_monomialMul_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ
 
 theorem groebner_step {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNReal}
     {x y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hx : MvPowerSeries.IsRestricted x) (hy : MvPowerSeries.IsRestricted y)
+    (hx : MvPowerSeries.IsRestrictedAdic x) (hy : MvPowerSeries.IsRestrictedAdic y)
     {I J : Fin k →₀ ℕ} {c : ↥(ArSub p F ϖ hρ0 hρ1)}
     (hcx : MvPowerSeries.coeff I x = c)
     (hc0 : ((c : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) ≠ 0)
@@ -1005,7 +1005,7 @@ theorem groebner_step {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNReal
 uniformly `ε`-small relative to the Gauss norm, for some `ε < 1`. -/
 theorem exists_normalized_tail_bound {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hx : MvPowerSeries.IsRestricted x) (hx0 : x ≠ 0) :
+    (hx : MvPowerSeries.IsRestrictedAdic x) (hx0 : x ≠ 0) :
     ∃ ε : NNReal, ε < 1 ∧ ∀ K : Fin k →₀ ℕ,
       (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn
           (leadIdxRPS p F ϖ hρ0 hρ1 x)
@@ -1184,7 +1184,7 @@ elaborator does not re-derive it under large goals). -/
 theorem coe_sub_monomialMul {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     (y g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
     (m : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-    (hm : MvPowerSeries.IsRestricted m) :
+    (hm : MvPowerSeries.IsRestrictedAdic m) :
     ((y - (⟨m, hm⟩ : ↥(restrictedMvPowerSeriesSubring k
         ↥(ArSub p F ϖ hρ0 hρ1))) * g : ↥(restrictedMvPowerSeriesSubring k
         ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
@@ -1291,7 +1291,7 @@ theorem groebner_reduce {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNRe
               (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
               : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) := by
   classical
-  have hyres : MvPowerSeries.IsRestricted
+  have hyres : MvPowerSeries.IsRestrictedAdic
       (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := y.2
   have hdJ : dIdx p F ϖ hρ0 hρ1 H (leadIdxRPS p F ϖ hρ0 hρ1
       (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
@@ -1304,7 +1304,7 @@ theorem groebner_reduce {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNRe
     ne_top_of_le_ne_top (WithTop.natCast_ne_top _) hdJ
   have hgd := hGdom (leadIdxRPS p F ϖ hρ0 hρ1
       (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) hdJtop
-  have hgres : MvPowerSeries.IsRestricted
+  have hgres : MvPowerSeries.IsRestrictedAdic
       (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :=
     hgd.choose.2
   have hg0 := hG0 hgd.choose hgd.choose_spec.1
@@ -1481,7 +1481,7 @@ theorem gaussNormRPS_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} :
 
 theorem gaussNormRPS_eq_zero_iff {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     gaussNormRPS p F ϖ hρ0 hρ1 f = 0 ↔ f = 0 := by
   constructor
   · intro h
@@ -1779,7 +1779,7 @@ private theorem approx_generation_key {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ <
     hρ1)) ≤ c
   · exact approxRedGoal_of_gaussNormRPS_le p F ϖ y hsmall
   · push Not at hsmall
-    have hyres : MvPowerSeries.IsRestricted (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0
+    have hyres : MvPowerSeries.IsRestrictedAdic (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0
       hρ1)) := y.2
     have hy0 : (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0 := by
       intro h
@@ -1867,7 +1867,7 @@ theorem approx_generation {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NN
             mul_lt_mul_of_pos_right hε1 hBpos
         _ = gaussNormRPS p F ϖ hρ0 hρ1 (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0
           hρ1)) := one_mul _
-    have hy₀res : MvPowerSeries.IsRestricted (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0
+    have hy₀res : MvPowerSeries.IsRestrictedAdic (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0
       hρ1)) := y₀.2
     have hy₀0 : (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0 := by
       intro h
@@ -1963,7 +1963,7 @@ private theorem isRestricted_of_coeff_limit {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 
         (∀ l, n ≤ l → C l ≤ b) →
         Valued.v ((S K : hatK p F hρ0 hρ1) - ∑ l ∈ Finset.range n,
           ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) ≤ b) :
-    MvPowerSeries.IsRestricted (S : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := by
+    MvPowerSeries.IsRestrictedAdic (S : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := by
   set Ufun : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1) := S with hUfun
   rw [isRestricted_iff_valued]
   intro t ht
@@ -2051,7 +2051,7 @@ theorem exists_rps_series_limit {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       AddSubmonoidClass.coe_finsetSum _ _]
   -- restrictedness of the limit
   set Ufun : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1) := S with hUfun
-  have hres : MvPowerSeries.IsRestricted Ufun :=
+  have hres : MvPowerSeries.IsRestrictedAdic Ufun :=
     isRestricted_of_coeff_limit p F ϖ hC0 S hS
   refine ⟨⟨Ufun, hres⟩, fun n b hb0 hb => ?_⟩
   refine ciSup_le fun K => ?_
@@ -2074,7 +2074,7 @@ theorem exists_rps_series_limit {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
 /-- **Submultiplicativity of the Gauss norm**. -/
 theorem gaussNormRPS_mul_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hg : MvPowerSeries.IsRestricted g) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hg : MvPowerSeries.IsRestrictedAdic g) :
     gaussNormRPS p F ϖ hρ0 hρ1 (f * g)
       ≤ gaussNormRPS p F ϖ hρ0 hρ1 f * gaussNormRPS p F ϖ hρ0 hρ1 g := by
   refine ciSup_le fun K => ?_

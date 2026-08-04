@@ -303,7 +303,7 @@ theorem psi_coeff_v_le (g : PowerSeries (MvPolynomial (Fin k) F)) (s : Fin k →
 /-- The transpose image is a restricted power series (its `X`-layers are polynomials). -/
 theorem psi_mem_restricted (g : PowerSeries (MvPolynomial (Fin k) F)) :
     Psi F k g ∈ restrictedMvPowerSeriesSubring k K := by
-  show MvPowerSeries.IsRestricted _
+  show MvPowerSeries.IsRestrictedAdic _
   refine Filter.tendsto_def.mpr fun U hU => ?_
   obtain ⟨n, hn⟩ := (mem_nhds_iff_ball F).mp hU
   rw [Filter.mem_cofinite]
@@ -325,7 +325,7 @@ theorem psi_mem_restricted (g : PowerSeries (MvPolynomial (Fin k) F)) :
 /-- **Surjectivity onto the integral part**: every restricted power series over `K` with
 integral coefficients is a transpose image. -/
 theorem exists_psi_eq (f : MvPowerSeries (Fin k) K)
-    (hres : MvPowerSeries.IsRestricted f)
+    (hres : MvPowerSeries.IsRestrictedAdic f)
     (hint : ∀ s, Valued.v (MvPowerSeries.coeff s f) ≤ 1) :
     ∃ g, Psi F k g = f := by
   classical
@@ -371,7 +371,7 @@ theorem exists_psi_eq (f : MvPowerSeries (Fin k) K)
 theorem c_t_mem_restricted (a : K) :
     MvPowerSeries.C (σ := Fin k) a ∈ restrictedMvPowerSeriesSubring k K := by
   classical
-  show MvPowerSeries.IsRestricted _
+  show MvPowerSeries.IsRestrictedAdic _
   refine Filter.tendsto_def.mpr fun U hU => ?_
   rw [Filter.mem_cofinite]
   refine Set.Finite.subset (Set.finite_singleton (0 : Fin k →₀ ℕ)) ?_
@@ -386,7 +386,7 @@ theorem c_t_mem_restricted (a : K) :
 /-- Uniform integralization: some `tⁿ` multiple of a restricted series has all
 coefficients integral. -/
 theorem exists_t_pow_mul_integral (f : MvPowerSeries (Fin k) K)
-    (hres : MvPowerSeries.IsRestricted f) :
+    (hres : MvPowerSeries.IsRestrictedAdic f) :
     ∃ n : ℕ, ∀ s, Valued.v ((t F) ^ n * MvPowerSeries.coeff s f) ≤ 1 := by
   classical
   have hball := Filter.tendsto_def.mp hres _ (ball_mem_nhds F (0 : K) 0)

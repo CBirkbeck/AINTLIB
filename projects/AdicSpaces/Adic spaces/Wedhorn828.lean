@@ -1050,8 +1050,8 @@ theorem mvEvalHomBounded_algebraMap {n : ℕ} (g : R →+* S) (hg : Continuous g
 theorem mvEvalHomBounded_X {n : ℕ} (g : R →+* S) (hg : Continuous g) (b : Fin n → S)
     (hb : ∀ i, TopologicalRing.IsBounded (Set.range (b i ^ · : ℕ → S))) (j : Fin n) :
     mvEvalHomBounded g hg b hb
-      ⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ = b j := by
-  change ∑' v, mvEvalTerm g b (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+      ⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ = b j := by
+  change ∑' v, mvEvalTerm g b (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
     ↥(restrictedMvPowerSeriesSubring n R)) v = b j
   classical
   rw [tsum_eq_single (Finsupp.single j 1)]
@@ -1182,7 +1182,7 @@ set_option linter.unusedSectionVars false in
 /-- `example638_evalHom` sends the `j`-th variable `Xⱼ ↦ tⱼ/s` (the `j`-th rational generator). -/
 theorem example638_evalHom_X [IsTateRing A] [IsNoetherianRing A]
     (D : RationalLocData A) (j : Fin D.T.card) :
-    example638_evalHom D ⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ =
+    example638_evalHom D ⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ =
       example638_genTuple D j :=
   mvEvalHomBounded_X _ _ _ _ j
 
@@ -1213,7 +1213,7 @@ private theorem coeRingHom_locSubring_mem_range [IsTateRing A] [IsNoetherianRing
       erw [example638_evalHom_algebraMap]; rfl
     · -- `coeRingHom (divByS t s) = example638_genTuple (equivFin ⟨t, ht⟩) = evalHom Xⱼ`.
       refine ⟨⟨MvPowerSeries.X (D.T.equivFin ⟨t, ht⟩),
-        MvPowerSeries.X_isRestricted _⟩, ?_⟩
+        MvPowerSeries.X_isRestrictedAdic _⟩, ?_⟩
       erw [example638_evalHom_X]
       simp only [example638_genTuple, Equiv.symm_apply_apply]
   · -- 0
@@ -1656,7 +1656,7 @@ the `i`-th variable. From injectivity of `ē`: `ē(ψ(tᵢ/s)) = coeRingHom(tᵢ
 private theorem example638_locToQuot_divByS [IsTateRing A] [IsNoetherianRing A]
     (D : RationalLocData A) (i : Fin D.T.card) :
     example638_locToQuot D (divByS (↑(D.T.equivFin.symm i) : A) D.s) =
-      Ideal.Quotient.mk _ (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ :
+      Ideal.Quotient.mk _ (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestrictedAdic i⟩ :
         ↥(restrictedMvPowerSeriesSubring D.T.card A)) := by
   apply example638_kerLift_injective D
   rw [example638_kerLift_locToQuot_apply, example638_kerLift_mk, example638_evalHom_X]
@@ -1709,7 +1709,7 @@ private theorem example638_locToQuot_continuous (D : RationalLocData A) :
     rw [htval, example638_locToQuot_divByS D i]
     -- `Xᵢ` is power-bounded in `C` (it lies in the ring of definition `mvPairSubring`); the open
     -- continuous quotient map `mk` then makes `mk Xᵢ` power-bounded in `C ⧸ a`.
-    have hXi_mem : (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ :
+    have hXi_mem : (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestrictedAdic i⟩ :
         ↥(restrictedMvPowerSeriesSubring n A)) ∈
         MvTateAlgebra.mvPairSubring n (IsTateRing.principalPair A).toPairOfDefinition := by
       classical
@@ -1720,7 +1720,7 @@ private theorem example638_locToQuot_continuous (D : RationalLocData A) :
       · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.one_mem
       · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.zero_mem
     have hXi_pb : @TopologicalRing.IsPowerBounded _ _ τC
-        (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ :
+        (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestrictedAdic i⟩ :
           ↥(restrictedMvPowerSeriesSubring n A)) :=
       (MvTateAlgebra.mvTateAlgebra_pairOfDefinition n).mem_powerBoundedSubring hXi_mem
     -- Transport power-boundedness through the open continuous quotient map `mk`.
@@ -1963,12 +1963,12 @@ private lemma mem_boxFinset_iff {m N : ℕ} (l : Fin m →₀ ℕ) :
 private lemma coe_algebraMap_mul_prod_X_pow {B : Type*} [CommRing B] [TopologicalSpace B]
     [NonarchimedeanRing B] {m : ℕ} (v : Fin m →₀ ℕ) (c : B) :
     ((algebraMap B ↥(restrictedMvPowerSeriesSubring m B) c *
-        ∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+        ∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
           ↥(restrictedMvPowerSeriesSubring m B)) ^ (v j)
       : ↥(restrictedMvPowerSeriesSubring m B)) : MvPowerSeries (Fin m) B)
       = MvPowerSeries.monomial v c := by
   rw [Subring.coe_mul, MvPowerSeries.monomial_eq']
-  have hprod : (↑(∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+  have hprod : (↑(∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
         ↥(restrictedMvPowerSeriesSubring m B)) ^ (v j)) :
         MvPowerSeries (Fin m) B) =
       v.prod fun s e ↦ MvPowerSeries.X s ^ e := by
@@ -2084,7 +2084,7 @@ private lemma presheafValue_mvRestricted_iU_denseRange
       (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
         D.coeRingHom c)
     (hiU_X : ∀ j, iU (MvPolynomial.X j) =
-      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
         restrictedMvPowerSeriesSubring m (presheafValue D))) :
     @DenseRange (restrictedMvPowerSeriesSubring m (presheafValue D))
       (MvTateAlgebra.mvTateAlgebraTopology' m) _ iU := by
@@ -2106,7 +2106,7 @@ private lemma presheafValue_mvRestricted_iU_denseRange
     MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := presheafValue D) m
   have hconst := algebraMap_mem_closure_range_iU D m hcont hiU_C hiU_le
   -- Step 2: each variable `⟨Xⱼ, _⟩` lies in `R` (`= iU (X j) ∈ range iU ≤ R`).
-  have hX : ∀ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+  have hX : ∀ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
       restrictedMvPowerSeriesSubring m (presheafValue D)) ∈ R :=
     fun j ↦ hiU_le ⟨MvPolynomial.X j, hiU_X j⟩
   -- Step 3: each box-supported polynomial `g` lies in `R`, via the finite monomial decomposition
@@ -2123,7 +2123,7 @@ private lemma presheafValue_mvRestricted_iU_denseRange
     set term : (Fin m →₀ ℕ) → restrictedMvPowerSeriesSubring m (presheafValue D) :=
       fun v ↦ algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
           (g.val v) *
-        ∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+        ∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
           restrictedMvPowerSeriesSubring m (presheafValue D)) ^ (v j) with hterm_def
     -- `(term v).val = monomial v (g.val v)`.
     have hterm_val : ∀ v, (term v).val = MvPowerSeries.monomial v (g.val v) :=
@@ -2184,14 +2184,14 @@ private lemma mvEvalTerm_algebraMap_eq
       algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
         (D.canonicalMap x))
     (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
-        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+        MvPowerSeries.X_isRestrictedAdic _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
       algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
         (example638_genTuple D i))
     (h : restrictedMvPowerSeriesSubring D.T.card A) (v : Fin D.T.card →₀ ℕ) :
     algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
         (mvEvalTerm D.canonicalMap (example638_genTuple D) h v) =
       Ψ (mvEvalTerm (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
-        (fun i ↦ (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+        (fun i ↦ (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestrictedAdic _⟩ :
           restrictedMvPowerSeriesSubring (D.T.card + m) A)) h v) := by
   -- LHS term: `algebraMap _ T (canonicalMap(coeffᵥ) · ∏ (tᵢ/s)^vᵢ)`.
   rw [mvEvalTerm, mvEvalTerm, map_mul, map_prod]
@@ -2224,7 +2224,7 @@ private lemma exists_mvRestricted_inclusion
       algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
         (D.canonicalMap x))
     (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
-        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+        MvPowerSeries.X_isRestrictedAdic _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
       algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
         (example638_genTuple D i)) :
     ∃ ι : restrictedMvPowerSeriesSubring D.T.card A →+*
@@ -2251,7 +2251,7 @@ private lemma exists_mvRestricted_inclusion
   haveI : T0Space (restrictedMvPowerSeriesSubring (D.T.card + m) A) := inferInstance
   -- `ι : A⟨X₁..Xₙ⟩ → A⟨X₁..Xₙ₊ₘ⟩`, `Xᵢ ↦ X (castAdd m i)`, `algebraMap a ↦ algebraMap a`.
   let bι : Fin D.T.card → restrictedMvPowerSeriesSubring (D.T.card + m) A :=
-    fun i ↦ ⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩
+    fun i ↦ ⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestrictedAdic _⟩
   have hbι : ∀ i, TopologicalRing.IsBounded
       (Set.range (bι i ^ · : ℕ → restrictedMvPowerSeriesSubring (D.T.card + m) A)) :=
     fun i ↦ MvTateAlgebra.mvPowerSeries_X_isBounded (Fin.castAdd m i)
@@ -2309,7 +2309,7 @@ private lemma presheafValue_mvRestricted_isUnit_mk_s
       algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
         (D.canonicalMap x))
     (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
-        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+        MvPowerSeries.X_isRestrictedAdic _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
       algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
         (example638_genTuple D i)) :
     IsUnit ((Ideal.Quotient.mk (RingHom.ker Ψ)).comp
@@ -2346,7 +2346,7 @@ private lemma presheafValue_mvRestricted_iU_coeff
       (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
         D.coeRingHom c)
     (hiU_X : ∀ j, iU (MvPolynomial.X j) =
-      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
         restrictedMvPowerSeriesSubring m (presheafValue D)))
     (p : MvPolynomial (Fin m) (Localization.Away D.s)) (v : Fin m →₀ ℕ) :
     MvPowerSeries.coeff v (iU p).val = D.coeRingHom (MvPolynomial.coeff v p) := by
@@ -2384,7 +2384,7 @@ private lemma presheafValue_mvRestricted_psiGamma_genX
     (ψγ : Localization.Away D.s →+*
       (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
     (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
-        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+        MvPowerSeries.X_isRestrictedAdic _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
       algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
         (example638_genTuple D i))
     (hψ_round' : (RingHom.kerLift Ψ).comp ψγ =
@@ -2393,7 +2393,7 @@ private lemma presheafValue_mvRestricted_psiGamma_genX
     (i : Fin D.T.card) :
     ψγ (divByS (↑(D.T.equivFin.symm i) : A) D.s) =
       Ideal.Quotient.mk (RingHom.ker Ψ)
-        (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+        (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestrictedAdic _⟩ :
           restrictedMvPowerSeriesSubring (D.T.card + m) A) := by
   apply RingHom.kerLift_injective Ψ
   rw [show RingHom.kerLift Ψ (ψγ (divByS (↑(D.T.equivFin.symm i) : A) D.s)) =
@@ -2402,9 +2402,9 @@ private lemma presheafValue_mvRestricted_psiGamma_genX
         (divByS (↑(D.T.equivFin.symm i) : A) D.s) from
     RingHom.congr_fun hψ_round' (divByS (↑(D.T.equivFin.symm i) : A) D.s)]
   rw [show RingHom.kerLift Ψ (Ideal.Quotient.mk (RingHom.ker Ψ)
-      (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+      (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestrictedAdic _⟩ :
         restrictedMvPowerSeriesSubring (D.T.card + m) A)) =
-      Ψ (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+      Ψ (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestrictedAdic _⟩ :
         restrictedMvPowerSeriesSubring (D.T.card + m) A) from RingHom.kerLift_mk Ψ _]
   rw [hΨ_genX i, RingHom.comp_apply, example638_genTuple]
 
@@ -2419,7 +2419,7 @@ private lemma presheafValue_mvRestricted_psiGamma_continuous
     (ψγ : Localization.Away D.s →+*
       (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
     (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
-        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+        MvPowerSeries.X_isRestrictedAdic _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
       algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
         (example638_genTuple D i))
     (hψγ_alg : ψγ.comp (algebraMap A (Localization.Away D.s)) =
@@ -2454,7 +2454,7 @@ private lemma presheafValue_mvRestricted_psiGamma_continuous
     have htval : t = (↑(D.T.equivFin.symm i) : A) := by rw [hi, Equiv.symm_apply_apply]
     rw [htval, hψγval]
     -- `X (castAdd i)` ∈ pair-subring of source ⟹ power-bounded ⟹ `mk` power-bounded.
-    have hXi_mem : (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+    have hXi_mem : (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestrictedAdic _⟩ :
         restrictedMvPowerSeriesSubring (D.T.card + m) A) ∈
         MvTateAlgebra.mvPairSubring (D.T.card + m)
           (IsTateRing.principalPair A).toPairOfDefinition := by
@@ -2465,7 +2465,7 @@ private lemma presheafValue_mvRestricted_psiGamma_continuous
       · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.one_mem
       · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.zero_mem
     have hXi_pb : @TopologicalRing.IsPowerBounded _ _ τS
-        (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+        (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestrictedAdic _⟩ :
           restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
       (MvTateAlgebra.mvTateAlgebra_pairOfDefinition (D.T.card + m)).mem_powerBoundedSubring
         hXi_mem
@@ -2486,7 +2486,7 @@ private lemma presheafValue_mvRestricted_fU_X_isPowerBounded
       (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
     (hfU_X : ∀ j, fU (MvPolynomial.X j) =
       Ideal.Quotient.mk (RingHom.ker Ψ)
-        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestrictedAdic _⟩ :
           restrictedMvPowerSeriesSubring (D.T.card + m) A))
     (j : Fin m) :
     @TopologicalRing.IsPowerBounded _ _ (mvQuotTopology (D.T.card + m) (RingHom.ker Ψ))
@@ -2501,7 +2501,7 @@ private lemma presheafValue_mvRestricted_fU_X_isPowerBounded
   haveI hringQ : @IsTopologicalRing _ τQ _ :=
     mvQuot_isTopologicalRing (D.T.card + m) (RingHom.ker Ψ)
   rw [hfU_X j]
-  have hZ_mem : (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+  have hZ_mem : (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestrictedAdic _⟩ :
       restrictedMvPowerSeriesSubring (D.T.card + m) A) ∈
       MvTateAlgebra.mvPairSubring (D.T.card + m)
         (IsTateRing.principalPair A).toPairOfDefinition := by
@@ -2512,7 +2512,7 @@ private lemma presheafValue_mvRestricted_fU_X_isPowerBounded
     · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.one_mem
     · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.zero_mem
   have hZ_pb : @TopologicalRing.IsPowerBounded _ _ τS
-      (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+      (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestrictedAdic _⟩ :
         restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     (MvTateAlgebra.mvTateAlgebra_pairOfDefinition (D.T.card + m)).mem_powerBoundedSubring hZ_mem
   exact @isPowerBounded_map_of_isOpenMap _ _ _ τS _ τQ hringQ
@@ -2532,11 +2532,11 @@ private lemma fU_eq_sum_support
       (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
     (hfU_X : ∀ j, fU (MvPolynomial.X j) =
       Ideal.Quotient.mk (RingHom.ker Ψ)
-        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestrictedAdic _⟩ :
           restrictedMvPowerSeriesSubring (D.T.card + m) A))
     (hfU_eval : ⇑fU = MvPolynomial.eval₂ ψγ
       (fun j ↦ Ideal.Quotient.mk (RingHom.ker Ψ)
-        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestrictedAdic _⟩ :
           restrictedMvPowerSeriesSubring (D.T.card + m) A)))
     (p : MvPolynomial (Fin m) (Localization.Away D.s)) :
     fU p = ∑ v ∈ p.support, ψγ (MvPolynomial.coeff v p) *
@@ -2544,7 +2544,7 @@ private lemma fU_eq_sum_support
   have hfe : fU p = MvPolynomial.eval₂ ψγ (fun j ↦ fU (MvPolynomial.X j)) p := by
     have hvar : (fun j ↦ fU (MvPolynomial.X j)) =
         (fun j ↦ Ideal.Quotient.mk (RingHom.ker Ψ)
-          (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+          (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestrictedAdic _⟩ :
             restrictedMvPowerSeriesSubring (D.T.card + m) A)) := funext hfU_X
     rw [hvar]
     change (fU p : _) = _
@@ -2572,7 +2572,7 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
     (fU : MvPolynomial (Fin m) (Localization.Away D.s) →+*
       (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
     (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
-        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+        MvPowerSeries.X_isRestrictedAdic _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
       algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
         (example638_genTuple D i))
     (hψγ_alg : ψγ.comp (algebraMap A (Localization.Away D.s)) =
@@ -2585,15 +2585,15 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
       (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
         D.coeRingHom c)
     (hiU_X : ∀ j, iU (MvPolynomial.X j) =
-      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
         restrictedMvPowerSeriesSubring m (presheafValue D)))
     (hfU_X : ∀ j, fU (MvPolynomial.X j) =
       Ideal.Quotient.mk (RingHom.ker Ψ)
-        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestrictedAdic _⟩ :
           restrictedMvPowerSeriesSubring (D.T.card + m) A))
     (hfU_eval : ⇑fU = MvPolynomial.eval₂ ψγ
       (fun j ↦ Ideal.Quotient.mk (RingHom.ker Ψ)
-        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestrictedAdic _⟩ :
           restrictedMvPowerSeriesSubring (D.T.card + m) A))) :
     @UniformContinuous _ _
       (UniformSpace.comap iU (MvTateAlgebra.mvTateUniformSpace m))
@@ -2752,7 +2752,7 @@ private theorem presheafValue_mvRestricted_surjection
         algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
           (example638_genTuple D i))
       (fun j : Fin m ↦
-        (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+        (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
           restrictedMvPowerSeriesSubring m (presheafValue D)))
   have hb : ∀ i, TopologicalRing.IsBounded
       (Set.range (b i ^ · : ℕ → restrictedMvPowerSeriesSubring m (presheafValue D))) := by
@@ -2770,7 +2770,7 @@ private theorem presheafValue_mvRestricted_surjection
       exact ⟨example638_genTuple D i' ^ k, ⟨k, rfl⟩, by rw [map_pow]⟩
     · intro j'
       have hbj : b (Fin.natAdd D.T.card j') =
-          (⟨MvPowerSeries.X j', MvPowerSeries.X_isRestricted j'⟩ :
+          (⟨MvPowerSeries.X j', MvPowerSeries.X_isRestrictedAdic j'⟩ :
             restrictedMvPowerSeriesSubring m (presheafValue D)) := by
         simp only [b, Fin.addCases_right]
       rw [hbj]
@@ -2838,27 +2838,27 @@ private theorem presheafValue_mvRestricted_surjection
     MvPolynomial.eval₂Hom
       ((algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
         D.coeRingHom)
-      (fun j ↦ (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+      (fun j ↦ (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
         restrictedMvPowerSeriesSubring m (presheafValue D)))
   let fU : MvPolynomial (Fin m) (Localization.Away D.s) →+*
       (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) :=
     MvPolynomial.eval₂Hom ψγ
       (fun j ↦ Ideal.Quotient.mk (RingHom.ker Ψ)
-        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestrictedAdic _⟩ :
           restrictedMvPowerSeriesSubring (D.T.card + m) A))
   -- characterizing equations for the let-bound evaluation homs (make them rewritable).
   have hiU_C : ∀ c : Localization.Away D.s, iU (MvPolynomial.C c) =
       (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
         D.coeRingHom c := fun c ↦ MvPolynomial.eval₂Hom_C _ _ c
   have hiU_X : ∀ j, iU (MvPolynomial.X j) =
-      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestrictedAdic j⟩ :
         restrictedMvPowerSeriesSubring m (presheafValue D)) := fun j ↦ MvPolynomial.eval₂Hom_X' _ _
           j
   have hfU_C : ∀ c : Localization.Away D.s, fU (MvPolynomial.C c) = ψγ c :=
     fun c ↦ MvPolynomial.eval₂Hom_C _ _ c
   have hfU_X : ∀ j, fU (MvPolynomial.X j) =
       Ideal.Quotient.mk (RingHom.ker Ψ)
-        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestrictedAdic _⟩ :
           restrictedMvPowerSeriesSubring (D.T.card + m) A) := fun j ↦ MvPolynomial.eval₂Hom_X' _ _ j
   -- give `U` the pullback uniformity along `iU`, making `iU` uniform-inducing.
   letI uU : UniformSpace (MvPolynomial (Fin m) (Localization.Away D.s)) :=
@@ -3212,7 +3212,7 @@ private theorem psi_continuous_of_gen
       Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x))
     (hψ_gen : ∀ t ∈ D.T, ψ (divByS t D.s) =
       Ideal.Quotient.mk aI
-        (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+        (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩ :
           ↥(restrictedMvPowerSeriesSubring 1 A))) :
     @Continuous _ _ D.topology (mvQuotTopology 1 aI) ψ := by
   letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring 1 A) :=
@@ -3262,10 +3262,10 @@ private theorem ker_le_of_ext
     (hΦ_alg : ∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) =
       D.canonicalMap x)
     (hΦζ : ∃ y : Localization.Away D.s,
-      Φ (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+      Φ (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩ :
           ↥(restrictedMvPowerSeriesSubring 1 A)) = D.coeRingHom y ∧
       ψ y = Ideal.Quotient.mk aI
-        (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+        (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩ :
           ↥(restrictedMvPowerSeriesSubring 1 A))) :
     RingHom.ker Φ ≤ aI := by
   obtain ⟨y, hy1, hy2⟩ := hΦζ
@@ -3325,10 +3325,10 @@ omit [CompatiblePlusSubring A] in
 private theorem mk_mul_mkX_eq_one (b : A)
     (aI : Ideal ↥(restrictedMvPowerSeriesSubring 1 A))
     (hgen : (1 - algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b *
-      (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+      (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩ :
         ↥(restrictedMvPowerSeriesSubring 1 A))) ∈ aI) :
     Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b) *
-      Ideal.Quotient.mk aI (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+      Ideal.Quotient.mk aI (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩ :
         ↥(restrictedMvPowerSeriesSubring 1 A)) = 1 := by
   rw [← map_mul, show (1 : ↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) =
     Ideal.Quotient.mk aI 1 from (map_one _).symm, Ideal.Quotient.eq]
@@ -3344,10 +3344,10 @@ private theorem psi_divByS_one_eq_mkX (b : A)
     (hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away b) x) =
       Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x))
     (hmul : Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b) *
-      Ideal.Quotient.mk aI (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+      Ideal.Quotient.mk aI (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩ :
         ↥(restrictedMvPowerSeriesSubring 1 A)) = 1) :
     ψ (divByS (1 : A) b) = Ideal.Quotient.mk aI
-      (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+      (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩ :
         ↥(restrictedMvPowerSeriesSubring 1 A)) := by
   have hloc : algebraMap A (Localization.Away b) b * divByS (1 : A) b = 1 := by
     erw [show divByS (1 : A) b = IsLocalization.mk' (Localization.Away b) (1 : A)
@@ -3406,7 +3406,7 @@ theorem unitDatum_ker_le_span
     rfl
   -- the key congruence: `mk (algebraMap b) = mk ζ` modulo the principal ideal
   have hmk_bX : Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b) =
-      Ideal.Quotient.mk aI (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+      Ideal.Quotient.mk aI (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩ :
         ↥(restrictedMvPowerSeriesSubring 1 A)) := by
     rw [Ideal.Quotient.eq]
     exact Ideal.subset_span (Set.mem_singleton _)
@@ -3426,7 +3426,7 @@ theorem unitDatum_ker_le_span
         @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' 1) _ ⇑Φ ∧
         (∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) =
           D.canonicalMap x) ∧
-        (Φ (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+        (Φ (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩ :
             ↥(restrictedMvPowerSeriesSubring 1 A)) =
           D.coeRingHom (algebraMap A (Localization.Away D.s) b)) ∧
         RingHom.ker (example638_evalHom D) = RingHom.ker Φ := by
@@ -3464,7 +3464,7 @@ theorem coUnitDatum_ker_le_span
       (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A)) D.s) := by
     rw [isUnit_iff_exists_inv]
     exact ⟨Ideal.Quotient.mk aI
-      (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+      (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩ :
         ↥(restrictedMvPowerSeriesSubring 1 A)), hmkX_mul⟩
   set ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
     IsLocalization.Away.lift (x := D.s)
@@ -3488,7 +3488,7 @@ theorem coUnitDatum_ker_le_span
         @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' 1) _ ⇑Φ ∧
         (∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) =
           D.canonicalMap x) ∧
-        (Φ (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+        (Φ (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestrictedAdic 0⟩ :
             ↥(restrictedMvPowerSeriesSubring 1 A)) =
           D.coeRingHom (divByS (1 : A) D.s)) ∧
         RingHom.ker (example638_evalHom (coUnitDatum P b)) = RingHom.ker Φ := by

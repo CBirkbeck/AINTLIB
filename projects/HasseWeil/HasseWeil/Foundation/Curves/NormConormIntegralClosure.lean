@@ -1671,6 +1671,18 @@ theorem finrank_fractionRing_B_eq :
       Module.finrank C₂.FunctionField C₁.FunctionField :=
   finrank_fractionRing_B_eq_of_liftAlgebra
 
+attribute [local instance] FractionRing.liftAlgebra FractionRing.isScalarTower_liftAlgebra in
+/-- **Coordinate-ring form of `finrank_fractionRing_B_eq`**: `[B : C₂.CoordinateRing]` is the
+geometric extension degree `[K(C₁) : K(C₂)]`.  This is the exponent mathlib's
+`Ideal.relNorm_algebraMap` reports; `IsFractionRing.finrank_eq` identifies it with the
+fraction-field form above. -/
+theorem finrank_B_eq :
+    Module.finrank C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂)) =
+      Module.finrank C₂.FunctionField C₁.FunctionField :=
+  (IsFractionRing.finrank_eq C₂.CoordinateRing (FractionRing C₂.CoordinateRing)
+    (B (C₁ := C₁) (C₂ := C₂)) (FractionRing (B (C₁ := C₁) (C₂ := C₂)))).symm.trans
+    finrank_fractionRing_B_eq
+
 /-- **The relative-norm exponent of a prime over `m_Q` is positive**: if a prime `P'` of `B`
 lies over the maximal ideal `m_Q` of `C₂.CoordinateRing` and `relNorm(P') = m_Q ^ t`, then
 `1 ≤ t`.  Otherwise `t = 0` gives `relNorm(P') = ⊤`, contradicting
@@ -1825,7 +1837,7 @@ private theorem finrank_eq_sum_relNormExp_mul_ramificationIdx (Q : C₂.SmoothPo
       rw [Ideal.ramificationIdx'_eq_ramificationIdx' p P' hpS]] at hfact
   have hrel := congr_arg (Ideal.relNorm C₂.CoordinateRing) hfact
   rw [Ideal.relNorm_algebraMap (B (C₁ := C₁) (C₂ := C₂)) p, map_prod,
-    finrank_fractionRing_B_eq] at hrel
+    finrank_B_eq] at hrel
   have hrhs : ∏ P' ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset,
       Ideal.relNorm C₂.CoordinateRing (P' ^ ee P') =
       p ^ (∑ P' ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset, sfn P' * ee P') := by

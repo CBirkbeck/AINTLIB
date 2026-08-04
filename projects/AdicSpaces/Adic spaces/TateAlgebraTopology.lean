@@ -224,7 +224,7 @@ Sends `a ∈ A₀` to the constant restricted power series `C(a)`. -/
 noncomputable def pairConstantHom (P : PairOfDefinition A) :
     P.A₀ →+* pairSubring P where
   toFun a := ⟨⟨MvPowerSeries.C a.val,
-      MvPowerSeries.IsRestricted_algebraMap a.val⟩, by
+      MvPowerSeries.isRestrictedAdic_algebraMap a.val⟩, by
     intro s; classical
     simp only [MvPowerSeries.coeff_C]
     split
@@ -1090,8 +1090,8 @@ private theorem isRestricted_limit_of_cauchy (P : PairOfDefinition A)
     (c : (Fin 1 →₀ ℕ) → A)
     (hc : ∀ l, Filter.Tendsto (fun n => MvPowerSeries.coeff l (u n).val)
       Filter.atTop (nhds (c l))) :
-    MvPowerSeries.IsRestricted (fun l => c l : MvPowerSeries (Fin 1) A) := by
-  -- IsRestricted means: Tendsto (fun l => f l) cofinite (nhds 0),
+    MvPowerSeries.IsRestrictedAdic (fun l => c l : MvPowerSeries (Fin 1) A) := by
+  -- IsRestrictedAdic means: Tendsto (fun l => f l) cofinite (nhds 0),
   -- where f is viewed as a function (Fin 1 →₀ ℕ) → A.
   -- Since our f is (fun l => c l), we need Tendsto c cofinite (nhds 0).
   change Tendsto c cofinite (nhds 0)
@@ -1807,7 +1807,7 @@ Sends `a ∈ A₀` to the constant restricted bivariate power series `C(a)`. -/
 noncomputable def pairConstantHom₂ (P : PairOfDefinition A) :
     P.A₀ →+* pairSubring₂ P where
   toFun a := ⟨⟨MvPowerSeries.C a.val,
-      MvPowerSeries.IsRestricted_algebraMap a.val⟩, by
+      MvPowerSeries.isRestrictedAdic_algebraMap a.val⟩, by
     intro s; classical
     simp only [MvPowerSeries.coeff_C]
     split
@@ -2457,7 +2457,7 @@ private theorem isRestricted₂_limit_of_cauchy (P : PairOfDefinition A)
     (c : (Fin 2 →₀ ℕ) → A)
     (hc : ∀ l, Filter.Tendsto (fun n => MvPowerSeries.coeff l (u n).val)
       Filter.atTop (nhds (c l))) :
-    MvPowerSeries.IsRestricted (fun l => c l : MvPowerSeries (Fin 2) A) := by
+    MvPowerSeries.IsRestrictedAdic (fun l => c l : MvPowerSeries (Fin 2) A) := by
   change Tendsto c cofinite (nhds 0)
   rw [tendsto_nhds]
   intro U hU h0U
@@ -3062,7 +3062,7 @@ canonical bivariate Tate topology. Bivariate analog of the univariate density
 private theorem isRestricted₂_of_eventually_zero
     (h : MvPowerSeries (Fin 2) A) (N : ℕ)
     (hh : ∀ l : Fin 2 →₀ ℕ, N ≤ l 0 ∨ N ≤ l 1 → h l = 0) :
-    MvPowerSeries.IsRestricted h := by
+    MvPowerSeries.IsRestrictedAdic h := by
   change Filter.Tendsto (fun l => h l) Filter.cofinite (nhds 0)
   rw [tendsto_nhds]
   intro U hU h0U

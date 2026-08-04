@@ -960,8 +960,8 @@ because only finitely many coefficients are nonzero. -/
 private theorem isRestricted_of_eventually_zero
     (h : MvPowerSeries (Fin 1) A) (N : ℕ)
     (hh : ∀ s : Fin 1 →₀ ℕ, N ≤ s 0 → h s = 0) :
-    MvPowerSeries.IsRestricted h := by
-  -- IsRestricted = coefficients tend to 0 along cofinite filter.
+    MvPowerSeries.IsRestrictedAdic h := by
+  -- IsRestrictedAdic = coefficients tend to 0 along cofinite filter.
   -- Suffices to show: the set of nonzero coefficients is finite.
   change Filter.Tendsto (fun s ↦ h s) Filter.cofinite (nhds 0)
   rw [tendsto_nhds]

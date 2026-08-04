@@ -729,7 +729,10 @@ theorem relNorm_algebraMap_X_sub_C_eq_pow_two [IsAlgClosed F]
         ((Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).map
           (algebraMap (Polynomial F) C.CoordinateRing)) =
       (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ^ 2 := by
-  rw [Ideal.relNorm_algebraMap, C.finrank_functionField_over_fracPolynomialX]
+  -- bump: mathlib's `Ideal.relNorm_algebraMap` now yields `I ^ finrank R S` directly
+  -- (`R = F[X]`, `S = F[C]`) rather than the exponent over the fraction fields, so the
+  -- matching input is the coordinate-ring rank, not the function-field one.
+  rw [Ideal.relNorm_algebraMap, C.finrank_coordinateRing_over_polynomialX]
 
 /-- **Helper B keystone upper bound on s**: combining the existence form
     `relNorm M_P = (X-P.x)^s` with monotonicity of relNorm and the keystone

@@ -772,7 +772,7 @@ theorem coeffSeq_mul {A : Type*} [CommRing A] (f g : MvPowerSeries (Fin 1) A) (n
 /-- A restricted one-variable series over `A^r` has null coefficient values. -/
 theorem tendsto_valued_coeffSeq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     Filter.Tendsto (fun n => Valued.v ((coeffSeq f n : ↥(ArSub p F ϖ hρ0 hρ1))
       : hatK p F hρ0 hρ1)) Filter.atTop (nhds 0) := by
   refine tendsto_order.mpr ⟨fun c hc => absurd hc (not_lt.mpr zero_le), fun δ hδ => ?_⟩
@@ -834,7 +834,7 @@ theorem tendsto_evalAr (h12 : ρ₁ ≤ ρ₂)
 /-- The evaluation terms have null interval norm. -/
 theorem tendsto_wI_evalTerm (h12 : ρ₁ ≤ ρ₂)
     {f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     Filter.Tendsto (fun l => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
         ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 (coeffSeq f l) :
           ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
@@ -1150,8 +1150,8 @@ theorem wI_evalAr_le (h12 : ρ₁ ≤ ρ₂)
 /-- Each slice of a restricted `(k+1)`-variable series is restricted. -/
 theorem isRestricted_sliceSeries {k : ℕ}
     {f : MvPowerSeries (Fin (k + 1)) ↥(ArSub p F ϖ hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) (I : Fin k →₀ ℕ) :
-    MvPowerSeries.IsRestricted (sliceSeries f I) := by
+    (hf : MvPowerSeries.IsRestrictedAdic f) (I : Fin k →₀ ℕ) :
+    MvPowerSeries.IsRestrictedAdic (sliceSeries f I) := by
   rw [isRestricted_iff_valued]
   intro ε hε
   have hfin := (isRestricted_iff_valued p F ϖ f).mp hf ε hε
@@ -1176,7 +1176,7 @@ theorem isRestricted_of_wI {k : ℕ}
     (h : ∀ ε : NNReal, 0 < ε → {I : Fin k →₀ ℕ | ε < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
       ((MvPowerSeries.coeff I c : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
         : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}.Finite) :
-    MvPowerSeries.IsRestricted c := by
+    MvPowerSeries.IsRestrictedAdic c := by
   intro U hU
   obtain ⟨V, hV, hVU⟩ := (mem_nhds_subtype
     (BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
@@ -1358,7 +1358,7 @@ theorem isRestricted_evalArMvFun (h12 : ρ₁ ≤ ρ₂)
     (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
     (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1) {k : ℕ}
     (f : ↥(restrictedMvPowerSeriesSubring (k + 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))) :
-    MvPowerSeries.IsRestricted (evalArMvFun p F ϖ h12 hbmem hb f) := by
+    MvPowerSeries.IsRestrictedAdic (evalArMvFun p F ϖ h12 hbmem hb f) := by
   refine isRestricted_of_wI p F ϖ fun ε hε => ?_
   have hfin := (isRestricted_iff_valued p F ϖ
     (f : MvPowerSeries (Fin (k + 1)) ↥(ArSub p F ϖ hρ₂0 hρ₂1))).mp f.2 ε hε
@@ -1477,7 +1477,7 @@ theorem evalAr_monomial (h12 : ρ₁ ≤ ρ₂)
     (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
     (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1) (l : ℕ)
     (a : ↥(ArSub p F ϖ hρ₂0 hρ₂1))
-    (hres : MvPowerSeries.IsRestricted
+    (hres : MvPowerSeries.IsRestrictedAdic
       (MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) l) a)) :
     evalAr p F ϖ h12 hbmem hb ⟨_, hres⟩
       = ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 a :
@@ -2312,7 +2312,7 @@ theorem surjective_evalArHom (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
 cofinitely small (the converse of `isRestricted_of_wI`). -/
 theorem wI_finite_of_isRestricted {k : ℕ}
     {c : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hc : MvPowerSeries.IsRestricted c) {ε : NNReal} (hε : 0 < ε) :
+    (hc : MvPowerSeries.IsRestrictedAdic c) {ε : NNReal} (hε : 0 < ε) :
     {I : Fin k →₀ ℕ | ε < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
       ((MvPowerSeries.coeff I c : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
         : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}.Finite := by
@@ -2347,7 +2347,7 @@ theorem isRestricted_liftAssembly {k : ℕ}
           ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
           : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
           : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) :
-    MvPowerSeries.IsRestricted (fun s => coeffSeq
+    MvPowerSeries.IsRestrictedAdic (fun s => coeffSeq
       ((fI (Finsupp.tail s) : ↥(restrictedMvPowerSeriesSubring 1
         ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
         : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) (s 0)

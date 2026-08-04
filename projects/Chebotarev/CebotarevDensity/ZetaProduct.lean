@@ -254,19 +254,20 @@ private theorem charEval_apply {G : Type*} [CommGroup G] [Finite G] (σ : G) (φ
     charEval σ φ = φ σ := by rw [charEval, CommGroup.monoidHomMonoidHomEquiv_symm_apply_apply]
 
 /-- The kernel of `χ ↦ χ σ` consists of the characters trivial on `⟨σ⟩`, so it has order
-`|G ⧸ ⟨σ⟩| = |G| / orderOf σ` (`CommGroup.card_restrictHom_ker` + Lagrange + `Nat.card_zpowers`). -/
+`|G ⧸ ⟨σ⟩| = |G| / orderOf σ` (`CommGroup.card_domRestrictHom_ker` + Lagrange + `Nat.card_zpowers`). -/
 private theorem charEval_ker_card {G : Type*} [CommGroup G] [Finite G] (σ : G) :
     Nat.card (charEval σ).ker = Nat.card G / orderOf σ := by
-  have h1 : (charEval σ).ker = (MonoidHom.restrictHom (Subgroup.zpowers σ) ℂˣ).ker := by
+  have h1 : (charEval σ).ker = (MonoidHom.domRestrictHom (Subgroup.zpowers σ) ℂˣ).ker := by
     ext φ
-    simp only [MonoidHom.mem_ker, MonoidHom.restrictHom_apply, MonoidHom.restrict_eq_one_iff]
+    simp only [MonoidHom.mem_ker, MonoidHom.domRestrictHom_apply,
+      MonoidHom.domRestrict_eq_one_iff]
     refine ⟨fun hφ y hy ↦ ?_, fun hφ ↦ ?_⟩
     · rw [charEval_apply] at hφ
       obtain ⟨n, rfl⟩ := Subgroup.mem_zpowers_iff.mp hy
       rw [map_zpow, hφ, one_zpow]
     · rw [charEval_apply]
       exact hφ σ (Subgroup.mem_zpowers σ)
-  rw [h1, CommGroup.card_restrictHom_ker]
+  rw [h1, CommGroup.card_domRestrictHom_ker]
   have hpos : 0 < orderOf σ := orderOf_pos_iff.mpr (isOfFinOrder_of_finite σ)
   have key : Nat.card G = Nat.card (G ⧸ Subgroup.zpowers σ) * orderOf σ := by
     rw [Subgroup.card_eq_card_quotient_mul_card_subgroup (Subgroup.zpowers σ), Nat.card_zpowers]

@@ -222,8 +222,10 @@ theorem Ideal.relNorm_maximalIdeal_eq_pow_inertiaDeg_of_isLocalRing
   haveI : IsScalarTower R (FractionRing R) (FractionRing S) :=
     FractionRing.isScalarTower_liftAlgebra R _
   haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
-  have hef : e * f = Module.finrank (FractionRing R) (FractionRing S) :=
-    Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing S (FractionRing R) (FractionRing S) hp0
+  -- `relNorm_algebraMap`'s exponent is `finrank R S`, so transport `e·f` down the fraction fields.
+  have hef : e * f = Module.finrank R S :=
+    (Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing S (FractionRing R) (FractionRing S)
+      hp0).trans (IsFractionRing.finrank_eq R (FractionRing R) S (FractionRing S))
   -- `(relNorm 𝔪)^e = relNorm(𝔪^e) = relNorm(p · S) = p^{[Frac S:Frac R]} = p^{e·f}`.
   have h3 : (Ideal.relNorm R m) ^ e = p ^ (e * f) := by
     rw [← map_pow, ← hmap, Ideal.relNorm_algebraMap, hef]
@@ -913,20 +915,13 @@ theorem ClassGroup.map_mul (a b : ClassGroup R) :
 /-- The **ideal-level arithmetic core** of the dual relation: the relative norm of the extension of
 an integral ideal `I` of `R` is `I ^ n`, where `n = Module.finrank R S`.
 
-This is `Ideal.relNorm_algebraMap` (whose native exponent is
-`Module.finrank (FractionRing R) (FractionRing S)`), converted to `Module.finrank R S` via
-`Algebra.IsAlgebraic.finrank_of_isFractionRing`.  The non-instance `FractionRing.liftAlgebra`
-algebra on the fraction fields is supplied locally (the usual gotcha). -/
+Since mathlib moved `Ideal.relNorm_algebraMap`'s exponent from
+`Module.finrank (FractionRing R) (FractionRing S)` to `Module.finrank R S`, this is now *literally*
+that lemma — the fraction-field transport it used to perform is gone.  Kept as the name the
+class-group descent below cites; a cleanup pass can inline it. -/
 theorem Ideal.relNorm_map_algebraMap (I : Ideal R) :
-    Ideal.relNorm R (Ideal.map (algebraMap R S) I) = I ^ Module.finrank R S := by
-  letI : Algebra (FractionRing R) (FractionRing S) :=
-    FractionRing.liftAlgebra R (FractionRing S)
-  haveI : IsScalarTower R (FractionRing R) (FractionRing S) :=
-    FractionRing.isScalarTower_liftAlgebra R (FractionRing S)
-  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
-  have hrank : Module.finrank (FractionRing R) (FractionRing S) = Module.finrank R S :=
-    Algebra.IsAlgebraic.finrank_of_isFractionRing R (FractionRing R) S (FractionRing S)
-  rw [Ideal.relNorm_algebraMap S I, hrank]
+    Ideal.relNorm R (Ideal.map (algebraMap R S) I) = I ^ Module.finrank R S :=
+  Ideal.relNorm_algebraMap S I
 
 /-- **The target: the dual relation at the class-group level.**
 

@@ -15538,3 +15538,58 @@ tactics inside the bullet.**
 Note `Presheaf.lean` is foundational — its rebuild cone is most of the tree, so each gate here is a
 full-tree build. Batching the four lifts into one gate is worth it *because* every lift is
 independently under the bar: a failure can be reverted lift-by-lift without losing the others.
+
+## mathlib bump: fd1d54bcac5c → 3edb3c0658f6 (2026-07-17 → 07-29, 110 commits)
+
+Owner-directed, on this dev branch. Toolchain unchanged (v4.33.0-rc1); batteries moved along.
+
+**Target choice was the whole game.** Latest master (`98d2c1d1`) needs toolchain **v4.33.0-rc2** — a
+~2.7 GB download plus a fresh olean set, against **8.0 GiB free**. `main` was already 110 commits
+ahead of us *on rc1*, at `3edb3c0658f6`. Bumping to main's pin instead: `lake update` reported
+"toolchain not updated; already up-to-date", `cache get` reported "No files to download, already
+decompressed 8678 files", and disk did not move.
+
+**The decisive payoff: the repair set already existed.** Main's bump commit `fa3c5e6ee` moved main
+to this exact revision and fixed 15 Lean files doing it. Ten applied here (five were
+ModularCurves-only, absent from this branch; four already matched). Only one file needed original
+work — `Vendored/CoramRestrictedNorm.lean`, which is branch-only and main has never seen. On latest
+master every repair would have been mine to derive alone.
+
+**Storage note for future bumps.** Toolchains are *not* the reservoir — both installed ones totalled
+5.5 GB and pruning the stale one freed under 1 GB (APFS clones make `du` overcount). The real ~95 GB
+is in sibling worktrees' `.lake` directories (modular-curves 16 G, mc-fibrewise 14 G, …), which
+belong to other branches' sessions.
+
+### mathlib absorbed three things we had
+
+| ours | mathlib now | resolution |
+|---|---|---|
+| `isRestricted_iff_cofinite` | `PowerSeries.isRestricted_iff` — *verbatim* | delegate to mathlib |
+| `IsRestricted.{zero,one,C,add,neg,mul}` | `isRestricted_{zero,one,C}` / `isRestricted.{add,neg,mul}` | rename, 6 sites |
+| `MvPowerSeries.IsRestricted` | **a different notion of the same name** | *we* rename |
+
+That third row is the one that mattered. mathlib's is **normed, with a Gauss radius `c`**; ours is
+**purely topological** — Wedhorn's restrictedness for adic rings, no norm anywhere. Same name, and
+importing both is an environment collision, but adopting mathlib's would have been mathematically
+wrong. Ours became `IsRestrictedAdic`: 279 sites, 26 files.
+
+And `PowerSeries.IsRestricted` is now an `abbrev` for the `MvPowerSeries` form, so
+`rw [PowerSeries.IsRestricted]` no longer yields `Tendsto … atTop`. mathlib supplies
+`isRestricted_iff'` for exactly that shape — 4 sites in `FJP/FiniteJetChart.lean`, one substitution.
+
+### Three mistakes in my own rename, and the pattern in them
+
+> **Every one was my guard being narrower than my edit.**
+
+1. The regex had a trailing word-boundary but **no leading one**, so it could match inside longer
+   identifiers. Reverted all 26 files, redid it with both.
+2. It renamed genuine references to **mathlib's** `PowerSeries.IsRestricted` in files importing both
+   notions. My check found two — because it globbed `*.lean` **non-recursively**, so `FJP/` and
+   `FarguesFontaine/` were never examined. The build then found **15 more** across four files.
+   *A guard that scans a narrower set than the edit touched is not a guard.*
+3. I briefly called `X_isRestricted` bogus (101 hits, "no such lemma") because my verification grep
+   looked for an *unqualified* declaration while the real one is namespace-qualified. It is
+   legitimate, 98 uses, and that rename was correct — I nearly reverted a good edit on bad evidence.
+
+Dot-notation (`f.IsRestricted` where `f : PowerSeries`) cannot be caught textually at all. That is
+the residue only the compiler can find, and it is why the build — not another grep — is the arbiter.

@@ -86,8 +86,8 @@ noncomputable instance : CommRing (MvPowerSeries.Restricted R (fun _ : Fin k => 
 ultrametric base. -/
 theorem isRestrictedGauss_one_iff (f : MvPowerSeries (Fin k) R) :
     MvPowerSeries.IsRestrictedGauss (fun _ : Fin k => (1 : ℝ)) f ↔
-      MvPowerSeries.IsRestricted f := by
-  rw [MvPowerSeries.IsRestrictedGauss, MvPowerSeries.IsRestricted]
+      MvPowerSeries.IsRestrictedAdic f := by
+  rw [MvPowerSeries.IsRestrictedGauss, MvPowerSeries.IsRestrictedAdic]
   constructor
   · intro h
     rw [tendsto_zero_iff_norm_tendsto_zero]
@@ -103,7 +103,7 @@ theorem restrictedGauss_eq_restricted :
     MvPowerSeries.isSubring (R := R) (fun _ : Fin k => (1 : ℝ)) =
       (restrictedMvPowerSeriesSubring k R : Subring (MvPowerSeries (Fin k) R)) := by
   ext f
-  show MvPowerSeries.IsRestrictedGauss _ f ↔ MvPowerSeries.IsRestricted f
+  show MvPowerSeries.IsRestrictedGauss _ f ↔ MvPowerSeries.IsRestrictedAdic f
   exact isRestrictedGauss_one_iff R k f
 
 /-- Transport between the (vendored) Gauss-restricted ring and this project's

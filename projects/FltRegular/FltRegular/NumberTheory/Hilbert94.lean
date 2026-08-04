@@ -110,7 +110,11 @@ theorem Ideal.isPrincipal_pow_finrank_of_isPrincipal_map [IsDedekindDomain A] {I
     simpa only [Cardinal.toNat_lift] using! congr_arg Cardinal.toNat
       (Algebra.lift_rank_eq_of_equiv_equiv (FractionRing.algEquiv A K).symm.toRingEquiv
         (FractionRing.algEquiv B L).symm.toRingEquiv H).symm
-  rw [← hLK, ← Ideal.relNorm_algebraMap, ← (I.map (algebraMap A B)).span_singleton_generator,
+  -- mathlib's `Ideal.relNorm_algebraMap` reports the exponent as `finrank A B`, so route `hLK`
+  -- through `IsFractionRing.finrank_eq` before rewriting.
+  have hABK : finrank A B = finrank K L :=
+    (IsFractionRing.finrank_eq A (FractionRing A) B (FractionRing B)).symm.trans hLK
+  rw [← hABK, ← Ideal.relNorm_algebraMap, ← (I.map (algebraMap A B)).span_singleton_generator,
     Ideal.relNorm_singleton]
   exact ⟨⟨_, rfl⟩⟩
 

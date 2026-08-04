@@ -1317,7 +1317,7 @@ private theorem tsum_diag_head (i j : ℕ) :
 /-- The positive diagonal sums `g_n = ∑ₖ p_{n+k, k}` define a restricted univariate
 series: as `n → ∞` the coefficients tend to `0`. -/
 private theorem gRestr_of_restricted :
-    MvPowerSeries.IsRestricted
+    MvPowerSeries.IsRestrictedAdic
       (fun s : Fin 1 →₀ ℕ =>
         (∑' k, MvPowerSeries.coeff (idx (s 0 + k) k) p.val : A) :
         MvPowerSeries (Fin 1) A) := by
@@ -1352,7 +1352,7 @@ private theorem gRestr_of_restricted :
 /-- The negative diagonal sums `h_m = ∑ₖ p_{k, m+k}` (with `h_0 = 0`) define a
 restricted univariate series. -/
 private theorem hRestr_of_restricted :
-    MvPowerSeries.IsRestricted
+    MvPowerSeries.IsRestrictedAdic
       (fun s : Fin 1 →₀ ℕ =>
         (if s 0 = 0 then 0
          else ∑' k, MvPowerSeries.coeff (idx k (s 0 + k)) p.val : A) :
@@ -1395,7 +1395,7 @@ private theorem hRestr_of_restricted :
 /-- The witness `c_{i,j} = -∑ₖ p_{i+1+k, j+1+k}` (diagonal tail sums, negated)
 defines a restricted bivariate series. -/
 private theorem cRestr_of_restricted :
-    MvPowerSeries.IsRestricted
+    MvPowerSeries.IsRestrictedAdic
       (fun e : Fin 2 →₀ ℕ =>
         -(∑' k, MvPowerSeries.coeff (idx (e 0 + 1 + k) (e 1 + 1 + k)) p.val) :
         MvPowerSeries (Fin 2) A) := by

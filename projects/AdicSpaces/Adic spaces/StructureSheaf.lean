@@ -2172,7 +2172,7 @@ theorem isStronglyNoetherian_of_isNoetherianRing_isTateRing
     let e : ↥(restrictedMvPowerSeriesSubring 0 A) ≃+* A :=
       { toFun := fun f ↦ MvPowerSeries.constantCoeff (f : MvPowerSeries (Fin 0) A)
         invFun := fun a ↦ ⟨algebraMap A (MvPowerSeries (Fin 0) A) a,
-          MvPowerSeries.IsRestricted_algebraMap a⟩
+          MvPowerSeries.isRestrictedAdic_algebraMap a⟩
         left_inv := by
           intro ⟨f, hf⟩
           classical

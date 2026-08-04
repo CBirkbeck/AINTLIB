@@ -859,7 +859,7 @@ theorem ofPowerSeries_mul (f g : PowerSeries.Restricted R (1 : ℝ)) :
 /-- v4.33 (reducible-well-typed membership form): the `ℕ`-coefficient restriction of a
 nonnegatively-supported restricted Laurent series is a restricted power series, stated as
 membership in `PowerSeries.isSubring 1` — the syntactic field type of the subtype literal
-in `nonnegEquiv.invFun`. (An inline `show IsRestricted …` proof types only at default
+in `nonnegEquiv.invFun`. (An inline `show IsRestrictedAdic …` proof types only at default
 transparency and makes `kabstract` choke on every goal carrying the literal.) -/
 theorem mk_coeff_mem_isSubring (F : ↥(nonnegSubring R)) :
     (PowerSeries.mk fun n => (F : RestrictedLaurent R).coeff n) ∈

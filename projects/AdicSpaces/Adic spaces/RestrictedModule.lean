@@ -46,7 +46,7 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A] [NonarchimedeanRing A]
 
 /-- An element `f` of `MvPowerSeries (Fin 1) M` (i.e., a function `(Fin 1 →₀ ℕ) → M`) is
 **restricted** if its coefficients converge to `0` along the cofinite filter. This is the
-module-valued analogue of `MvPowerSeries.IsRestricted`. -/
+module-valued analogue of `MvPowerSeries.IsRestrictedAdic`. -/
 def MvPowerSeries.IsRestrictedModule {M : Type*} [Zero M] [TopologicalSpace M]
     (f : MvPowerSeries (Fin 1) M) : Prop :=
   Tendsto (fun s : Fin 1 →₀ ℕ ↦ f s) cofinite (nhds 0)

@@ -1855,20 +1855,20 @@ theorem presheafValue_iteratedOverlap_as_minus_at_plus_coeRingHom
 /-! #### Reusable naturality primitives: `TateAlgebra.mapRingHom` / `mapRingEquiv`
 
 `MvPowerSeries.map` applies a ring hom coefficient-wise. For restricted
-subrings, we need the map to preserve `IsRestricted`. A continuous ring hom
+subrings, we need the map to preserve `IsRestrictedAdic`. A continuous ring hom
 satisfies this: coefficients `aₙ → 0` in the source imply `f(aₙ) → f(0) = 0`
 in the target.
 
 These primitives port `restrictedPowerSeriesMap` from `ScottishBook/Stated/Problem029.lean`
 to a public, reusable form and extend to ring equivs. -/
 
-/-- `MvPowerSeries.map f` preserves `IsRestricted` when `f` is a continuous ring hom. -/
+/-- `MvPowerSeries.map f` preserves `IsRestrictedAdic` when `f` is a continuous ring hom. -/
 theorem MvPowerSeries_IsRestricted_map_pub {k : ℕ}
     {R S : Type*} [CommRing R] [TopologicalSpace R] [CommRing S] [TopologicalSpace S]
     {f : R →+* S} (hf : Continuous f) {g : MvPowerSeries (Fin k) R}
-    (hg : MvPowerSeries.IsRestricted g) :
-    MvPowerSeries.IsRestricted (MvPowerSeries.map f g) := by
-  unfold MvPowerSeries.IsRestricted at *
+    (hg : MvPowerSeries.IsRestrictedAdic g) :
+    MvPowerSeries.IsRestrictedAdic (MvPowerSeries.map f g) := by
+  unfold MvPowerSeries.IsRestrictedAdic at *
   simp only [MvPowerSeries.coeff_map]
   exact (f.map_zero ▸ hf.tendsto 0).comp hg
 
@@ -1972,13 +1972,13 @@ noncomputable def TateAlgebra_of_quotient_equiv
 
 **Construction outline**:
 - Forward via `MvPowerSeries.map (Ideal.Quotient.mk I) : MvPowerSeries σ R → MvPowerSeries σ (R/I)`
-  restricted to `IsRestricted` elements (preservation uses continuity of `Ideal.Quotient.mk`).
+  restricted to `IsRestrictedAdic` elements (preservation uses continuity of `Ideal.Quotient.mk`).
 - Backward via choice function `R/I → R` lifting coefficients; restrictedness
   preserved up to `I`-translate (which vanishes in the quotient).
 - Kernel of forward = `{series with coeffs in I}` = `Ideal.map (algebraMap R _) I`
   (using closedness of I for noetherian completion).
 
-**Estimated lines**: ~80 for the ring equiv + `~40` for IsRestricted preservation
+**Estimated lines**: ~80 for the ring equiv + `~40` for IsRestrictedAdic preservation
 + `~60` for kernel identification = ~180 lines of Mathlib-style proof.
 
 **Why not landed here**: depends on the `MvPowerSeries.map` package's behavior

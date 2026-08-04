@@ -45,9 +45,9 @@ still tends to `0`. -/
 private theorem MvPowerSeries.IsRestricted_map {k : ℕ} {A B : Type u}
     [CommRing A] [TopologicalSpace A] [CommRing B] [TopologicalSpace B]
     {f : A →+* B} (hf : Continuous f) {g : MvPowerSeries (Fin k) A}
-    (hg : MvPowerSeries.IsRestricted g) :
-    MvPowerSeries.IsRestricted (MvPowerSeries.map f g) := by
-  unfold MvPowerSeries.IsRestricted at *
+    (hg : MvPowerSeries.IsRestrictedAdic g) :
+    MvPowerSeries.IsRestrictedAdic (MvPowerSeries.map f g) := by
+  unfold MvPowerSeries.IsRestrictedAdic at *
   simp only [MvPowerSeries.coeff_map]
   exact (f.map_zero ▸ hf.tendsto 0).comp hg
 

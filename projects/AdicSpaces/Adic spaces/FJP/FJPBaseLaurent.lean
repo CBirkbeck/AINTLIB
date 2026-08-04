@@ -71,7 +71,7 @@ theorem isNoetherianRing_unitBall_gaussK_laurent (k : ℕ) :
     rwa [show (-(0 : ℕ) : ℤ) = 0 by omega, WithZero.exp_zero] at hv
   · -- surjectivity: integral restricted series are transpose images
     rintro ⟨y, hy⟩
-    have hyres : MvPowerSeries.IsRestricted y.1 :=
+    have hyres : MvPowerSeries.IsRestrictedAdic y.1 :=
       (UnitDiscExample.isRestrictedGauss_one_iff K k y.1).mp y.2
     have hyint : ∀ t, Valued.v (MvPowerSeries.coeff t y.1) ≤ 1 := fun t => by
       rw [← Valued.toNormedField.norm_le_one_iff]

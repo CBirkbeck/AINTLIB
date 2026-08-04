@@ -481,7 +481,7 @@ noncomputable def evalTerm₂ (g : A →+* B) (b₁ b₂ : B)
 omit [UniformSpace B] [IsUniformAddGroup B]
   [NonarchimedeanRing B] [CompleteSpace B] [T0Space B] in
 /-- Bivariate coefficients of a restricted series tend to `0` along the
-cofinite filter on `Fin 2 →₀ ℕ`. Direct projection of the `IsRestricted`
+cofinite filter on `Fin 2 →₀ ℕ`. Direct projection of the `IsRestrictedAdic`
 hypothesis carried by the subring element. -/
 private theorem coeff₂_tendsto_zero (h : ↥(TateAlgebra₂ A)) :
     Tendsto (fun n : Fin 2 →₀ ℕ ↦ MvPowerSeries.coeff n h.val)

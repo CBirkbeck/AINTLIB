@@ -86,7 +86,7 @@ noncomputable def rescaleRestricted {R : Type*} [NormedCommRing R] [IsUltrametri
   toFun f := ⟨PowerSeries.rescale a f.1, by
     show PowerSeries.IsRestricted (1 : ℝ) (PowerSeries.rescale a f.1)
     have hf : PowerSeries.IsRestricted (1 : ℝ) f.1 := f.2
-    rw [PowerSeries.IsRestricted] at hf ⊢
+    rw [PowerSeries.isRestricted_iff'] at hf ⊢
     refine squeeze_zero (fun n => by positivity) (fun n => ?_) hf
     rw [PowerSeries.coeff_rescale]
     refine mul_le_mul_of_nonneg_right ?_ (by positivity)
@@ -291,9 +291,9 @@ def unitFinOne : Unit ≃ Fin 1 where
 noncomputable def kwToTate :
     PowerSeries.Restricted K (1 : ℝ) →+* ↥(TateAlgebra K) where
   toFun f := ⟨MvPowerSeries.renameEquiv (R := K) unitFinOne f.1, by
-    show MvPowerSeries.IsRestricted _
+    show MvPowerSeries.IsRestrictedAdic _
     have hf : PowerSeries.IsRestricted (1 : ℝ) f.1 := f.2
-    rw [PowerSeries.IsRestricted] at hf
+    rw [PowerSeries.isRestricted_iff'] at hf
     simp only [one_pow, mul_one] at hf
     rw [← Nat.cofinite_eq_atTop] at hf
     have hf' : Filter.Tendsto (fun i : ℕ => PowerSeries.coeff i f.1)
@@ -1011,7 +1011,7 @@ theorem chartEval_continuous : Continuous (chartEval F) := by
 noncomputable def polyKW : Polynomial K →+* PowerSeries.Restricted K (1 : ℝ) where
   toFun p := ⟨(p : PowerSeries K), by
     show PowerSeries.IsRestricted (1 : ℝ) _
-    rw [PowerSeries.IsRestricted]
+    rw [PowerSeries.isRestricted_iff']
     refine tendsto_nhds_of_eventually_eq ?_
     rw [Filter.eventually_atTop]
     refine ⟨p.natDegree + 1, fun n hn => ?_⟩
@@ -1031,7 +1031,7 @@ theorem polyKW_denseRange : DenseRange (polyKW F) := by
   intro f ε hε
   have hfin : {n : ℕ | ε / 2 ≤ ‖PowerSeries.coeff n f.1‖}.Finite := by
     have hf : PowerSeries.IsRestricted (1 : ℝ) f.1 := f.2
-    rw [PowerSeries.IsRestricted] at hf
+    rw [PowerSeries.isRestricted_iff'] at hf
     simp only [one_pow, mul_one] at hf
     have hev := hf.eventually (eventually_lt_nhds (half_pos hε) (a := (0 : ℝ)))
     rw [Filter.eventually_atTop] at hev

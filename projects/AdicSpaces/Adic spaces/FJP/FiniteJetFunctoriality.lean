@@ -520,7 +520,7 @@ theorem bridgeEval_const (a : JetA F) :
 theorem bridgeEval_X (i : Fin e.m) :
     bridgeEval D e (polyToP (MvPolynomial.X i)) = bridgeGen D e i := by
   have hcast : bridgeToRestricted (F := F) e.m (polyToP (MvPolynomial.X i)) =
-      ⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ := by
+      ⟨MvPowerSeries.X i, MvPowerSeries.X_isRestrictedAdic i⟩ := by
     refine Subtype.ext ?_
     show ((polyToP (E := JetA F) (m := e.m) (MvPolynomial.X i)).1 :
       MvPowerSeries (Fin e.m) (JetA F)) = _
@@ -1309,7 +1309,7 @@ theorem bridgeEvalB_const (hD : D.IsRational) (a : JetB F) :
 theorem bridgeEvalB_X (hD : D.IsRational) (i : Fin e.m) :
     bridgeEvalB D e hD (polyToP (MvPolynomial.X i)) = bridgeGenB D e hD i := by
   have hcast : bridgeToRestrictedB (F := F) e.m (polyToP (MvPolynomial.X i)) =
-      ⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ := by
+      ⟨MvPowerSeries.X i, MvPowerSeries.X_isRestrictedAdic i⟩ := by
     refine Subtype.ext ?_
     show ((polyToP (E := JetB F) (m := e.m) (MvPolynomial.X i)).1 :
       MvPowerSeries (Fin e.m) (JetB F)) = _
@@ -1512,7 +1512,7 @@ theorem bridgeEvalC_const (hD : D.IsRational) (a : JetC F) :
 theorem bridgeEvalC_X (hD : D.IsRational) (i : Fin e.m) :
     bridgeEvalC D e hD (polyToP (MvPolynomial.X i)) = bridgeGenC D e hD i := by
   have hcast : bridgeToRestrictedC (F := F) e.m (polyToP (MvPolynomial.X i)) =
-      ⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ := by
+      ⟨MvPowerSeries.X i, MvPowerSeries.X_isRestrictedAdic i⟩ := by
     refine Subtype.ext ?_
     show ((polyToP (E := JetC F) (m := e.m) (MvPolynomial.X i)).1 :
       MvPowerSeries (Fin e.m) (JetC F)) = _

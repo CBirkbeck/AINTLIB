@@ -49,8 +49,8 @@ def restrictedMapHom (e : B →+* B') (he : Continuous e) (k : ℕ) :
     (restrictedMvPowerSeriesSubring k B')
     (by
       rintro ⟨f, hf⟩
-      show MvPowerSeries.IsRestricted (MvPowerSeries.map e f)
-      unfold MvPowerSeries.IsRestricted
+      show MvPowerSeries.IsRestrictedAdic (MvPowerSeries.map e f)
+      unfold MvPowerSeries.IsRestrictedAdic
       have hcoeff : (fun s : Fin k →₀ ℕ =>
           MvPowerSeries.coeff s (MvPowerSeries.map e f)) =
           (⇑e) ∘ (fun s : Fin k →₀ ℕ => MvPowerSeries.coeff s f) := by

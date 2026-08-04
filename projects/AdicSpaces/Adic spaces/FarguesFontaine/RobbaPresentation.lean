@@ -70,7 +70,7 @@ theorem BISub_coe_add {σ₁ σ₂ : NNReal} {h1 : 0 < σ₁} {h2 : σ₁ < 1}
 coefficients above every positive threshold. -/
 theorem isRestricted_iff_wI {k : ℕ}
     (f : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
-    MvPowerSeries.IsRestricted f
+    MvPowerSeries.IsRestrictedAdic f
       ↔ ∀ ε : NNReal, 0 < ε → {s : Fin k →₀ ℕ |
           ε < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
             ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
@@ -91,7 +91,7 @@ theorem isRestricted_iff_wI {k : ℕ}
     simp only [Set.mem_compl_iff, Set.mem_preimage, Set.mem_setOf_eq] at hs ⊢
     exact not_le.mpr hs
   · intro hf
-    rw [MvPowerSeries.IsRestricted, Filter.tendsto_def]
+    rw [MvPowerSeries.IsRestrictedAdic, Filter.tendsto_def]
     intro U hU
     rw [nhds_subtype_eq_comap] at hU
     obtain ⟨V, hV, hVU⟩ := Filter.mem_comap.mp hU
@@ -108,7 +108,7 @@ theorem isRestricted_iff_wI {k : ℕ}
 /-- A restricted one-variable series over `B^I` has null coefficient norms. -/
 theorem tendsto_wI_coeffSeq
     {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     Filter.Tendsto (fun n => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
         ((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
           : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
@@ -212,7 +212,7 @@ include hφ in
 /-- The evaluation terms have null interval norm. -/
 theorem tendsto_wI_evalBITerm
     {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     Filter.Tendsto (fun l => wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
         ((φ (coeffSeq f l) : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
           : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)))
@@ -480,7 +480,7 @@ def wIRPS (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂) (hρ
 /-- Restricted series have bounded coefficient norms. -/
 theorem bddAbove_wIRPS
     {f : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     BddAbove (Set.range (fun s : Fin k →₀ ℕ =>
       wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
         ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
@@ -505,7 +505,7 @@ theorem bddAbove_wIRPS
 /-- Each coefficient norm is bounded by the interval Gauss norm. -/
 theorem wI_coeff_le_wIRPS
     {f : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) (s : Fin k →₀ ℕ) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (s : Fin k →₀ ℕ) :
     wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
         ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
           : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
@@ -720,7 +720,7 @@ theorem isRestricted_column_limits
                   ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
               : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
               : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ≤ b) :
-    MvPowerSeries.IsRestricted
+    MvPowerSeries.IsRestrictedAdic
       (fun K => S K
         : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
   set Ufun : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
@@ -1486,10 +1486,10 @@ theorem wLoc_mk'_monomial_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
 /-- Monomials over `B^I` are restricted. -/
 theorem isRestricted_monomial_BI {J : Fin k →₀ ℕ}
     (a : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
-    MvPowerSeries.IsRestricted
+    MvPowerSeries.IsRestrictedAdic
       (MvPowerSeries.monomial J a
         : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
-  rw [MvPowerSeries.IsRestricted, Filter.tendsto_def]
+  rw [MvPowerSeries.IsRestrictedAdic, Filter.tendsto_def]
   intro U hU
   rw [Filter.mem_cofinite]
   refine (Set.finite_singleton J).subset ?_
@@ -1519,7 +1519,7 @@ theorem evalBI_monomial {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ
     (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
     (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1) (l : ℕ)
     (y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-    (hres : MvPowerSeries.IsRestricted
+    (hres : MvPowerSeries.IsRestrictedAdic
       (MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) l) y)) :
     evalBI p F ϖ φ hφ hbmem hb ⟨_, hres⟩
       = ((φ y : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
@@ -1589,7 +1589,7 @@ theorem wIRPS_monomial (J : Fin k →₀ ℕ)
 /-- Ultrametric bound for sums of restricted series. -/
 theorem wIRPS_add_le
     {f g : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) (hg : MvPowerSeries.IsRestricted g) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hg : MvPowerSeries.IsRestrictedAdic g) :
     wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (f + g)
       ≤ max (wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f)
           (wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 g) := by
@@ -2395,7 +2395,7 @@ def NsndRPS (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂) (h
 /-- The interval Gauss norm is the maximum of the component norms. -/
 theorem wIRPS_eq_max_NfstRPS_NsndRPS
     {f : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f
       = max (NfstRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f)
           (NsndRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f) := by
@@ -3090,7 +3090,7 @@ theorem isRestricted_kerSol (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ�
       ((kerSolElt p F ϖ gB hgu y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
         : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
       Filter.atTop (nhds 0)) :
-    MvPowerSeries.IsRestricted
+    MvPowerSeries.IsRestrictedAdic
       ((fun s => kerSolElt p F ϖ gB hgu y (s 0))
         : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
   set Ufun : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
@@ -3163,7 +3163,7 @@ theorem GeltElt_mul_kerSol (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂
     (hgu : IsUnit gB)
     (f : ↥(restrictedMvPowerSeriesSubring 1
       ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-    (hres : MvPowerSeries.IsRestricted
+    (hres : MvPowerSeries.IsRestrictedAdic
       ((fun s => kerSolElt p F ϖ gB hgu
         (fun n => coeffSeq (f : MvPowerSeries (Fin 1)
           ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n) (s 0))
@@ -3407,7 +3407,7 @@ end KerTransport
 /-- First-component valuation decay of a restricted series' coefficients. -/
 theorem tendsto_v_fst_coeffSeq
     {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     Filter.Tendsto (fun n => Valued.v
         (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
           : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
@@ -3420,7 +3420,7 @@ theorem tendsto_v_fst_coeffSeq
 /-- Second-component valuation decay of a restricted series' coefficients. -/
 theorem tendsto_v_snd_coeffSeq
     {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     Filter.Tendsto (fun n => Valued.v
         (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
           : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))
@@ -3434,7 +3434,7 @@ theorem tendsto_v_snd_coeffSeq
 coefficients. -/
 theorem bddAbove_v_fst_coeffSeq
     {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     BddAbove (Set.range (fun n => Valued.v
         (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
           : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))) :=
@@ -3445,7 +3445,7 @@ theorem exists_factor_of_isRestricted_kerSol
     (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (hgu : IsUnit gB)
     (f : ↥(restrictedMvPowerSeriesSubring 1
       ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-    (hres : MvPowerSeries.IsRestricted
+    (hres : MvPowerSeries.IsRestrictedAdic
       ((fun s => kerSolElt p F ϖ gB hgu
         (fun n => coeffSeq (f : MvPowerSeries (Fin 1)
           ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n) (s 0))
@@ -4219,7 +4219,7 @@ theorem robba_case1_presentation
 coefficients. -/
 theorem bddAbove_v_snd_coeffSeq
     {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) :
     BddAbove (Set.range (fun n => Valued.v
         (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
           : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))) :=
@@ -6372,7 +6372,7 @@ end CorrectionW
 (T910-M M2b-0: the unit ball of `B^I⟨T⟩` is multiplicatively closed). -/
 theorem wIRPS_mul_le
     {f g : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
-    (hf : MvPowerSeries.IsRestricted f) (hg : MvPowerSeries.IsRestricted g) :
+    (hf : MvPowerSeries.IsRestrictedAdic f) (hg : MvPowerSeries.IsRestrictedAdic g) :
     wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (f * g)
       ≤ wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f
         * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 g := by

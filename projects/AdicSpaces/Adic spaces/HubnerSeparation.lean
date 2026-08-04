@@ -68,7 +68,7 @@ injectivity requires a combined algebraic-topological argument:
 
 This argument works in principle but requires technical infrastructure
 for the Tate topology on `presheafValue D₀` — translating the
-`IsRestricted` condition on `c''` into explicit `f^n · a ∈ I^k`
+`IsRestrictedAdic` condition on `c''` into explicit `f^n · a ∈ I^k`
 membership, and linking to `T2Space`-based Hausdorffness for the
 `⋂ I^k = 0` conclusion.
 
@@ -387,7 +387,7 @@ theorem epsilonHom_gen_injective_noetherian_tate
 
 **Identified obstruction** (discovered during direct proof attempt this
 session): the proposed proof sketch (coefficient recurrence + general
-Krull + iteration + `IsRestricted`-convergence + Tate-ideal-basis ⋂ = 0)
+Krull + iteration + `IsRestrictedAdic`-convergence + Tate-ideal-basis ⋂ = 0)
 BREAKS at the final step because:
 
 * In a **Tate ring** B with pair of definition (B₀, I₀), the 0-nhd basis

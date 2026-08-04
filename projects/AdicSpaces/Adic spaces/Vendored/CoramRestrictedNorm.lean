@@ -139,17 +139,17 @@ variable {R : Type*} [NormedRing R] (c : ℝ)
 
 def isAddSubgroup (c : ℝ) : AddSubgroup (PowerSeries R) where
   carrier := IsRestricted c
-  zero_mem' := IsRestricted.zero c
-  add_mem' := IsRestricted.add c
-  neg_mem' := IsRestricted.neg c
+  zero_mem' := isRestricted_zero c
+  add_mem' := isRestricted.add c
+  neg_mem' := isRestricted.neg c
 
 variable [IsUltrametricDist R]
 
 /-- Ring structure on `MvPowerSeries σ R`. -/
 def isSubring (c : ℝ) :  Subring (PowerSeries R) where
   __ := isAddSubgroup c
-  one_mem' := IsRestricted.one c
-  mul_mem' := IsRestricted.mul c
+  one_mem' := isRestricted_one c
+  mul_mem' := isRestricted.mul c
 
 variable (R) in
 /-- The type of restricted `MvPowerSeries σ R`. -/
@@ -157,7 +157,7 @@ def Restricted (c : ℝ) : Type _ := isSubring (R := R) c
 
 noncomputable
 def Restricted.C (c : ℝ) (a : R) : Restricted R c :=
-  ⟨PowerSeries.C a, IsRestricted.C c a⟩
+  ⟨PowerSeries.C a, isRestricted_C c a⟩
 
 /-- Ring structure on `Restricted R c`. -/
 noncomputable
@@ -193,8 +193,8 @@ cofinite filter. -/
 lemma isRestricted_iff_cofinite {f : PowerSeries R} :
     PowerSeries.IsRestricted c f ↔
       Filter.Tendsto (fun i : ℕ => ‖PowerSeries.coeff i f‖ * c ^ i)
-        Filter.cofinite (nhds 0) := by
-  rw [PowerSeries.IsRestricted, Nat.cofinite_eq_atTop]
+        Filter.cofinite (nhds 0) :=
+  PowerSeries.isRestricted_iff c f
 
 lemma hasGaussNorm (f : PowerSeries.Restricted R c) :
     PowerSeries.HasGaussNorm norm c f.1 :=
@@ -306,7 +306,7 @@ instance isCompleteSpace [CompleteSpace R] : CompleteSpace (PowerSeries.Restrict
     have h_uN1' := h_uN1 (ε / 2) (by linarith)
     rw [Filter.eventually_cofinite] at h_uN1' ⊢
     refine h_uN1'.subset fun n hn => ?_
-    simp only [Set.mem_setOf_eq, dist_zero_right, Real.norm_eq_abs, not_lt] at hn ⊢
+    simp only [Set.mem_ofPred_eq, dist_zero_right, Real.norm_eq_abs, not_lt] at hn ⊢
     rw [coeff_f] at hn
     have hp1 : 0 ≤ ‖a n‖ * c ^ n := mul_nonneg (norm_nonneg _) (hcn n).le
     have hp2 : 0 ≤ ‖PowerSeries.coeff n (u N₁).1‖ * c ^ n :=
