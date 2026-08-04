@@ -36615,3 +36615,18 @@ Root green at **9722 jobs**.
 - **Then** WP-D3c-2b closes: `quotSpanBaseChange` + `map_X_pow_sub_one` transport the model,
   `CommAlgCat.FiniteEtale.isoMk` packages it, and the `μ_N` side of the field-change transport
   is done.
+
+## [WP-D3c-2b] `muNCarrierRingEquiv_symm_apply` landed (2026-08-04) — axiom-verified, by `rfl`
+
+```
+(muNCarrierRingEquiv k N).symm x =
+  (muNSpecFieldIso k N).hom.appTop.hom ((Scheme.ΓSpecIso _).inv.hom x)
+```
+
+The inverse direction unfolds definitionally, which is the useful orientation: it exposes
+`(muNSpecFieldIso k N).hom.appTop`, and `muNSpecFieldIso_struct` is stated for `.hom`. The
+direction trap flagged in the WP-D3c-2b-ALG ticket is therefore avoided by working with
+`.symm` throughout and inverting at the end.
+
+`WeilPairing/MuNBaseChange.lean`: two declarations, sorry-free, axiom-verified, in the root
+import. Root green at **9722 jobs**.

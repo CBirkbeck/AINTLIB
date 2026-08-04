@@ -43,4 +43,15 @@ noncomputable def muNCarrierRingEquiv :
       (Scheme.ΓSpecIso
         (CommRingCat.of (AdjoinRoot ((X : Polynomial k) ^ N - 1))))).commRingCatIsoToRingEquiv
 
+/-- **(WP-D3c-2b)** The inverse of `muNCarrierRingEquiv` is `Γ` of the model's structure map:
+it sends the model ring into the carrier exactly as `muNSpecFieldIso` prescribes. Recorded as
+the computation rule the algebra compatibility is proved from. -/
+theorem muNCarrierRingEquiv_symm_apply
+    (x : AdjoinRoot ((X : Polynomial k) ^ N - 1)) :
+    (muNCarrierRingEquiv k N).symm x =
+      (muNSpecFieldIso k N).hom.appTop.hom
+        ((Scheme.ΓSpecIso
+          (CommRingCat.of (AdjoinRoot ((X : Polynomial k) ^ N - 1)))).inv.hom x) :=
+  rfl
+
 end ModularCurves
