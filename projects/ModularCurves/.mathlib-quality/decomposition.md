@@ -233,3 +233,43 @@ Steps 1 and 2 done (this file). **Steps 2.5–6 not done**: no Lean skeleton yet
 pass, no `b2_log` consultation, gate not run. The route-β tickets on the board are now known to be
 unsourced and should be retired before any skeleton is written — that is a `/develop --continue`
 action, not a `--decompose` one.
+
+## Step 4 (partial) — L3.2 attacked, and the recommendation FLIPS
+
+Attack on the "target-specific instance is cheaper" hope: for `N` invertible in a normal `A`,
+`x^N − 1` factors into the `Φ_d`, `d | N`, which are pairwise coprime **only** because `N` is
+invertible, so `A[x]/(x^N−1) ≅ ∏_{d | N} A[ζ_d]`. Integral closedness of the product reduces to that of
+each `A[ζ_d] = A[x]/Φ_d(x)` — a finite free `A`-algebra, étale because `N` is invertible. So the
+instance reduces to: *`A` normal and `A → A[ζ_d]` étale ⟹ `A[ζ_d]` normal.* **That is the general
+étale-normality ascent again, not a cheaper special case.** The hope is dead; L3.2 is irreducible at
+this level and is a mathlib-scale theorem (Stacks 025P / 033C territory).
+
+**Therefore the recommendation flips.** The "cheap" route's single gap is a normality-ascent theorem
+absent from mathlib; the KM/Oda route's gaps are relative Picard/Poincaré infrastructure — expensive,
+but *the tree is already building exactly that* in `ModularCurves/Picard/` (normalized transition
+cocycles, glue effectivity, finite affine trivialising covers), and it is the **sourced** route, and it
+is the only one that discharges the register as stated (arbitrary `S`, arbitrary `N`).
+
+## Phase 1e status — the confidence gate has NOT passed
+
+| Step | Status |
+|---|---|
+| 1 — read the source's full proof | **done** (KM 2.8, pp. 87–91, verbatim quotes above) |
+| 2 — ordered lemma list mirroring the source | **done** for both routes |
+| 2.5 — Lean skeleton, `:= by sorry`, `lake build` green | **not done** |
+| 3 — verbatim quote + Lean↔source paragraph per leaf | partial (quotes for KM 2.8.1's steps; none for the KM tree's leaves, which Step 2 has not yet enumerated) |
+| 4 — provability per leaf | partial (L3.2 attacked and rejected as "cheap") |
+| 4.5 — adversarial pass, ≥3 attacks per leaf | **not done** |
+| 4.6 — prior-B2 log consultation | **not done** |
+| 5 — gate | **NOT PASSED** |
+| 6 — artifact | this file |
+
+**No tickets may be created from this pass.** What it has established is a redirect, not a plan:
+* route β is unsourced — retire its tickets (`/develop --continue`);
+* the generic-fibre route is blocked on one mathlib-scale theorem;
+* the KM 2.8 / Oda route is the sourced one, discharges the register as stated, and its infrastructure
+  is what `Picard/` is already for.
+
+**Next `--decompose` pass should transcribe KM 2.8.1 itself** into the Step-2 lemma list — the
+`K_E^×` sheaf, `Pic ≅ H¹(K^×)` with `H⁰ = 1`, Abel (KM 2.1), the unique `h_i/h_j` factorisation,
+the patching of `h_i ∘ P` — and check each leaf against `ModularCurves/Picard/`.
