@@ -91,6 +91,26 @@ theorem specMap_ofHom_algebraMap_torsionCarrier :
         Spec.map (Scheme.ΓSpecIso (CommRingCat.of k)).inv := by
   rw [ofHom_algebraMap_torsionCarrier, Spec.map_comp]
 
+variable (k' : Type u) [Field k'] [Algebra k k']
+
+attribute [local instance] torsionCarrierAlgebra
+
+/-- **(WP-D3c-2c step 3b)** The torsion base-change square, with the two base corners written
+as `Spec` of the *rings* rather than `Spec Γ(Spec _, ⊤)`.
+
+A second `IsPullback.of_iso`, this time with `Scheme.isoSpec_Spec_inv` at the `Y`- and
+`Z`-corners (`(Spec R).isoSpec.inv = Spec.map (ΓSpecIso R).inv`) — the shape
+`AlgebraicGeometry.pullbackSpecIso` is stated in. -/
+theorem isPullback_specMap_torsion_baseChange_algebraMap :
+    IsPullback
+      (Spec.map ((E.torsionBaseChangeHom N
+        (Spec.map (CommRingCat.ofHom (algebraMap k k')))).appTop))
+      (Spec.map (((E.baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap k k')))).torsionπ N).appTop))
+      (Spec.map ((E.torsionπ N).appTop))
+      (Spec.map ((Spec.map (CommRingCat.ofHom (algebraMap k k'))).appTop)) :=
+  E.isPullback_specMap_torsion_baseChange N (Spec.map (CommRingCat.ofHom (algebraMap k k')))
+
 end Carrier
 
 end ModularCurves

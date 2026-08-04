@@ -1,1 +1,1 @@
-FOCUS: WP-D3c-2c step 3 — match isPullback_specMap_torsion_baseChange against pullbackSpecIso via IsPullback.isoIsPullback; need Algebra k Gamma(E[N]) and the legs as algebraMap Spec.maps
+FOCUS: WP-D3c-2c step 3b — second IsPullback.of_iso to insert GammaSpecIso at the Y and Z corners, then isoIsPullback against pullbackSpecIso k Gamma(E[N]) k2

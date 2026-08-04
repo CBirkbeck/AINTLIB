@@ -36907,3 +36907,27 @@ returned `Interrupted system call` while `stat` still worked, so `lake`, `git` a
 reads failed for a stretch. It cleared on its own. **The in-flight edit did not survive** the
 stall (`git status` showed only the sentinels modified), so nothing unverified entered the
 tree; the declarations above are the re-done, compiled version.
+
+## [WP-D3c-2c] step 3b landed (2026-08-04) — the square at a field extension, axiom-verified
+
+`isPullback_specMap_torsion_baseChange_algebraMap` — the transported cartesian square
+instantiated at `g := Spec.map (ofHom (algebraMap k k'))`, i.e. exactly the leg
+`pullbackSpecIso k Γ(E[N],⊤) k'` has on its `Y`-side. Six declarations now in
+`WeilPairing/TorsionBaseChange.lean`, sorry-free, axiom-verified, in the root import.
+
+**Simpler than the ticket predicted.** The plan called for a *second* `IsPullback.of_iso` with
+`Scheme.isoSpec_Spec_inv` at the `Y`- and `Z`-corners. Not needed: `Spec k` and `Spec k'` are
+already `Spec` of the rings, so instantiating `g` at `Spec.map (ofHom (algebraMap k k'))` puts
+the square in the target shape directly. The one residual mismatch is
+`Spec.map ((Spec.map (ofHom (algebraMap k k'))).appTop)` versus
+`Spec.map (ofHom (algebraMap k k'))` — related by `ΓSpecIso` naturality, the same move
+`specMap_ofHom_algebraMap_torsionCarrier` already performs on the other leg.
+
+Root green at **9723 jobs**.
+
+**Remaining for WP-D3c-2c**: rewrite the two legs into `algebraMap` form
+(`specMap_ofHom_algebraMap_torsionCarrier` for the `X`-leg, `ΓSpecIso` naturality for the
+`Y`-leg), then `IsPullback.isoIsPullback` against
+`(AlgebraicGeometry.pullbackSpecIso k Γ(E[N],⊤) k').isPullback`-style square, and finally
+`ΓSpecIso` to read the apex comparison as the ring isomorphism
+`Γ(E_{k'}[N],⊤) ≃+* Γ(E[N],⊤) ⊗[k] k'`.
