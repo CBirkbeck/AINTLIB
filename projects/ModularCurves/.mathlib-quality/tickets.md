@@ -36388,3 +36388,15 @@ S ⊗[R] AdjoinRoot f
 
 The scaffolding (`polyAlgebra`, `isScalarTower_poly`, `map_X_pow_sub_one`) is already in
 `ForMathlib/AdjoinRootBaseChange.lean`; what remains is this six-step chain.
+
+## [WP-D3c-2a] `span_map_eq_map_span` landed (2026-08-04) — axiom-verified
+
+`Ideal.span {f.map (algebraMap R S)} = Ideal.map (algebraMap R[X] S[X]) (Ideal.span {f})`,
+two lines (`Ideal.map_span` + `Set.image_singleton` + `rfl` — the last step is where
+`polyAlgebra` being `@[reducible]` pays off, since `algebraMap R[X] S[X]` has to reduce to
+`Polynomial.map`).
+
+This is the sixth and last step of the chain; steps one through five
+(`comm` → `cancelBaseChange` → `polyEquivTensor` → `comm` → `quotIdealMapEquivTensorQuot`)
+remain. `ForMathlib/AdjoinRootBaseChange.lean` is now four declarations, sorry-free,
+axiom-verified, in the root import.
