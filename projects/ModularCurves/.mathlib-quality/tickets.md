@@ -36290,3 +36290,19 @@ both proved.
 `torsionPairAlgebra` has no such explicit model, so it stays on the general route:
 `torsionAlgebra` is `finiteEtaleOfπ (torsionπ)` and its base change is the base change of the
 torsion scheme, for which `torsion_baseChange_isPullback` is the input.
+
+### [WP-D3c-2a] the algebraic core, with mathlib's tools located
+
+`AdjoinRoot ((X : k[X])^N − 1) ⊗[k] k' ≅ AdjoinRoot ((X : k'[X])^N − 1)` is assembled from:
+
+* **`Algebra.TensorProduct.quotIdealMapEquivTensorQuot`**
+  (`RingTheory/TensorProduct/Quotient.lean`) —
+  `(B ⧸ Ideal.map (algebraMap A B) I) ≃ₐ[B] B ⊗[A] (A ⧸ I)`, applied with `A := k[X]`,
+  `B := k'[X]`, `I := span {X^N − 1}` (note `Ideal.map` of that span is the span of the mapped
+  polynomial, and `(X^N − 1).map = X^N − 1`);
+* **`Polynomial.polyEquivTensor`** — `k' ⊗[k] k[X] ≅ k'[X]` — plus
+  `Algebra.TensorProduct.assoc` to move between `_ ⊗[k[X]] _` and `_ ⊗[k] _`;
+* `AdjoinRoot` is definitionally `k[X] ⧸ span {f}`, so no extra bridge is needed.
+
+Every piece is mathlib API; nothing here is a gap. Sizing: comparable to the two-step
+localisation identification in `Moduli/LevelThreeSmooth.lean` (~60 lines).
