@@ -15258,3 +15258,33 @@ HEAD was empty afterwards, confirming a clean restore rather than a partial one.
 That is 5–6 further declarations, so this is the stopping point for a verified commit rather than
 a half-applied cascade — same reasoning as before: intermediate states score *worse* on the
 over-50 count than the starting point.
+
+### `unitCover_relOverlap_forward_witness` 62 → 53, and a genuinely dead hypothesis
+
+**`hps` was bound and used nowhere** — 3 lines, left over from the phase-1/2 refactors: it fed the
+old inline classification, and once `unitCover_class_left/right` were extracted they took `hsplit`
+instead. A real defect, not just length.
+
+This is the *first* dead `have` this campaign has removed, after the 40-deletion batch was abandoned
+earlier for being textually derived. The difference is the evidence:
+
+- the earlier batch used a textual filter over hundreds of sites and hit three invisible-use
+  mechanisms (`rwa`/`simpa` expansion, `‹T›` type-directed selection, instance synthesis);
+- here the check was **use-site enumeration for one named hypothesis in one proof**, plus an
+  explicit scan for the name-free scavengers (`assumption`, `rwa`, bare `simpa`, `‹…›`, `omega`,
+  `tauto`) anywhere after the binding — none present.
+
+> **Dead-`have` removal is safe per-hypothesis with enumerated uses; it is not safe as a batch
+> heuristic.** The mechanism that makes it unsafe is a tactic consuming a hypothesis without
+> naming it, so the guard is "no name-free scavenger in scope", checked in the actual proof.
+
+Six more lines came from inlining four bindings each used exactly once (`heq_s`, `hu_b`, `hp`,
+`hq`). **One "inline" I attempted was metric-neutral and I kept it only because it read better:**
+folding `hclass₁`/`hclass₂` into their `obtain`s traded two 1-line `have`s for two 2-line
+`obtain`s — zero net code lines. Worth recording because it is the shape of golf that *looks*
+like progress: a `have` disappears, the line count does not move.
+
+**53, so the over-50 count is unchanged at 15.** The remaining 3 lines are pure golf; the honest
+next step for this target is the structural one — extracting the `set`-preamble (`DII`/`OD`/`F`)
+plus setup facts as a lemma — which the earlier phases showed is blocked on `F`'s `set`-local
+definition desynchronising. Recorded rather than forced.

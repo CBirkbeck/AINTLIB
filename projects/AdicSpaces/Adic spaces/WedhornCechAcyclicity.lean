@@ -4842,40 +4842,31 @@ private theorem unitCover_relOverlap_forward_witness
   have hu : IsUnit (F (algebraMap A (Localization.Away DII.s) DII.s)) := by
     rw [hF_alg]
     exact (unitCover_relOverlap_baseHom_isUnit D₀ f).map OD.coeRingHom
-  have hps : ∀ p : A, D₀.canonicalMap p =
-      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) :=
-    canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀
   have hA₀ : ∀ p ∈ insert D₀.s D₀.T,
       D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ :=
     fun p hp => coeRingHom_divByS_mem_concretePair_A₀ D₀ (Finset.mem_insert.mp hp)
   -- splitting of `divByS` along a product numerator
   have hsplit := divByS_mul_eq D₀
   -- the B-side element identities
-  have heq_s := unitCover_overlapDatum_B_s_eq D₀ f
   have haM_s : algebraMap (presheafValue D₀) (Localization.Away OD.s) OD.s =
       algebraMap (presheafValue D₀) (Localization.Away OD.s) (D₀.canonicalMap f) :=
-    congrArg _ heq_s
-  have hu_b : IsUnit (OD.canonicalMap (D₀.canonicalMap f)) :=
-    (unitCover_relOverlap_aMb_isUnit D₀ f).map OD.coeRingHom
+    congrArg _ (unitCover_overlapDatum_B_s_eq D₀ f)
   have hinvO := unitCover_canonicalMap_mul_invS_eq_one D₀ f OD haM_s
-  have haMbb := unitCover_divByS_sq_eq D₀ f OD haM_s hu_b
-  -- classification of the first factor
-  have hclass₁ := unitCover_class_left D₀ f rfl hA₀ hsplit
-  -- classification of the second factor
-  have hclass₂ := unitCover_class_right D₀ f rfl hA₀ hsplit
+  have haMbb := unitCover_divByS_sq_eq D₀ f OD haM_s
+    ((unitCover_relOverlap_aMb_isUnit D₀ f).map OD.coeRingHom)
+
   -- decompose `t = p · q`
   have ht' : t ∈ ((insert (D₀.s * 1) (D₀.interSamePair (unitDatum D₀.P f) rfl).T).product
       (insert (D₀.s * f) (D₀.interSamePair (coUnitDatum D₀.P f) rfl).T)).image
       (fun r : A × A => r.1 * r.2) := ht
   rw [Finset.mem_image] at ht'
   obtain ⟨⟨p, q⟩, hpq, rfl⟩ := ht'
-  have hp : p ∈ insert (D₀.s * 1) (D₀.interSamePair (unitDatum D₀.P f) rfl).T :=
-    (Finset.mem_product.mp hpq).1
-  have hq : q ∈ insert (D₀.s * f) (D₀.interSamePair (coUnitDatum D₀.P f) rfl).T :=
-    (Finset.mem_product.mp hpq).2
   rw [show (((p, q).1 : A) * (p, q).2 : A) = p * q from rfl]
-  obtain ⟨c_p, hc_p, hcase_p⟩ := hclass₁ p hp
-  obtain ⟨c_q, hc_q, hcase_q⟩ := hclass₂ q hq
+  -- classification of each factor
+  obtain ⟨c_p, hc_p, hcase_p⟩ :=
+    unitCover_class_left D₀ f rfl hA₀ hsplit p (Finset.mem_product.mp hpq).1
+  obtain ⟨c_q, hc_q, hcase_q⟩ :=
+    unitCover_class_right D₀ f rfl hA₀ hsplit q (Finset.mem_product.mp hpq).2
   have hs_eq : (DII.s : A) = (D₀.s * 1) * (D₀.s * f) := rfl
   -- common expansion of both sides of the `hF_div` equation
   have hLHS := unitCover_F_mul_expand D₀ f DII OD F hF_alg p q
