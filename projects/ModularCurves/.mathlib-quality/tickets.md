@@ -38120,3 +38120,35 @@ Step 4 is: transport `fieldWeilPairing_det_of_galois` (`WeilPairing/PairingTrans
 `nonempty_weilPairing_of_cover_of_values`.
 
 Root green at **9733 jobs**; census unchanged (7, all the Weil register).
+
+### [WP-D3d step 4] the last unknown, located: naturality of `muNAlgebraFibreEquiv` in `R` (2026-08-04)
+
+Step 4 has to connect two levels:
+
+* `fieldPairingValue K E N hK f` reads `fieldWeilPairingHom` at a **`K`-rational** point (values in `K`);
+* `fieldWeilPairing_det_of_galois` is about the **Silverman** pairing over the algebraically closed
+  `AlgebraicClosure K`, and `fieldWeilPairingHom_spec` is likewise stated for points valued in
+  `AlgebraicClosure K`.
+
+The bridge is the naturality of `muNAlgebraFibreEquiv` **in `R`**, along `algebraMap K (AlgebraicClosure K)`:
+pushing a `K`-valued point up to the closure should push its root-of-unity reading up too. Grepping the
+conclusion shows this does **not** exist — the only companions are
+`muNAlgebraFibreEquiv_comp_algEquiv` and `muNAlgebraFibreEquiv_symm_algEquiv`
+(`WeilPairing/GaloisFibre.lean:187`, `WeilPairing/FibreGalois.lean:164`), both for an `R ≃ₐ[k] R`
+with **one and the same** `R`.
+
+**The missing lemma** (estimated 20–40 lines, no new mathlib input):
+
+  `muNAlgebraFibreEquiv_comp_algHom` : for `φ : R →ₐ[k] R'` and
+  `f : (muNAlgebra k N hk).obj →ₐ[k] R`,
+  `((muNAlgebraFibreEquiv k N hk R' (φ.comp f)) : R') = φ ((muNAlgebraFibreEquiv k N hk R f) : R)`.
+
+Prove it as `muNAlgebraFibreEquiv_comp_algEquiv` is proved, but with `muNPointsEquiv_natural` supplying
+the transport between the two targets instead of an `AlgEquiv`; `muNAlgebraFibreEquiv_val` spells the
+value out through the `Γ ⊣ Spec` transport and is the right entry point.
+
+With it, step 4 runs: push `fieldPairingValue`'s value up to `AlgebraicClosure K`, identify it with the
+Silverman pairing by `fieldWeilPairingHom_spec`, apply `fieldWeilPairing_det_of_galois`, come back down
+by injectivity of `algebraMap K (AlgebraicClosure K)`, and finally descend to the component with
+`algebraMap_factorRootOfUnityDescend`. That completes WP-D3d and therefore DS4's first two register
+entries for invertible `N`.
