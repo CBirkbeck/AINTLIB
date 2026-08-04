@@ -178,3 +178,58 @@ integrally-closed argument, with `IsIntegrallyClosed.algebraMap_eq_of_integral` 
 * **normal integral `S` over ℚ**: the generic-fibre + 0BQI route, which reuses the field pairing and the
   descent engine already proved. Cheapest by far.
 * **abandon** the level-cover ζ-cocycle as a reduction.
+
+## Step 2 — ordered lemma list for the CHEAP route (normal integral `S` over ℚ)
+
+Transcribing the route's structure, with each leaf's status against the tree and mathlib.
+
+```
+R: e_N over a normal integral base S/ℚ, with bilinearity, alternation, nondegeneracy
+   Source: Stacks 0BQI for the extension step; Silverman AEC III.8 + KM 2.8.5 for the field pairing.
+
+  L1  the pairing over K̄                        → LEAF, DONE  (fieldWeilPairing + its API)
+  L2  descent K̄ → K by Galois equivariance      → LEAF, DONE  (fieldWeilPairingHom, _spec, _unique)
+  L3  FÉt(S) → FÉt(K) is fully faithful          → **API GAP** (Stacks Lemma 58.10.7, Tag 0BQI)
+      L3.1 affine case: A integrally closed domain, Frac A = K, B C finite étale A-algebras
+             ⟹ Hom_A(B,C) ≅ Hom_K(B⊗K, C⊗K)
+           L3.1a faithfulness: B → B⊗K injective (B torsion-free over A)     → easy
+           L3.1b fullness: a K-map carries B into C because **C is integrally
+                 closed in C⊗K** — the "standard integrally-closed argument"  → see L3.2
+      L3.2 finite étale over an integrally closed domain is integrally closed → **the real gap**
+  L4  extend e_{N,K} to e_{N,S}                  → one line given L3
+  L5  bilinearity / alternation / antisymmetry   → one line each: equalities of morphisms of
+                                                    finite étale S-schemes, true generically,
+                                                    transported by faithfulness
+  L6  nondegeneracy at EVERY geometric point     → Φ : E[N] → Hom(E[N], μ_N) is generically iso;
+                                                    extend the inverse by L3; composites are
+                                                    identities because they are generically
+```
+
+**So the cheap route has exactly one API gap, L3.2**, and it is the statement my own memory already
+flagged: *mathlib has no normality/regularity ascent along étale.* Verified again just now — no
+`IsIntegrallyClosed` results anywhere in `Mathlib/RingTheory/Etale/`, `Smooth/`, or `Unramified/`, and
+no `Morphisms/Normal.lean` under `AlgebraicGeometry/`.
+
+**But note the target-specific instance may be much cheaper than the general lemma.** L3.1b only needs
+`C` integrally closed for the *two* algebras actually in play:
+* `C = A[x]/(xᴺ − 1)` — the coordinate ring of `μ_{N,S}`, with `N` invertible;
+* `C = ` the coordinate ring of `E[N]` over an affine chart.
+For the first, `A[x]/(xᴺ−1)` with `N` invertible in a normal `A` decomposes over the divisors of `N`
+and might be handled directly. **Attack this before attempting general étale-normality ascent** — the
+general lemma is a mathlib-scale project, the instance may not be.
+
+### Comparison of the two routes, as decomposed
+
+| | arbitrary `S` (register as stated) | normal integral `S`/ℚ (cheap route) |
+|---|---|---|
+| source | KM 2.8.1 / Oda §1 Thm 1.1 | Stacks 0BQI + Silverman III.8 |
+| construction | rigidified line bundles + Čech cocycles | extend the generic-fibre morphism |
+| already proved in tree | `Picard/` normalized cocycles (aimed at it) | L1, L2 — *the whole field side* |
+| API gaps | relative Picard/Poincaré; Cartier–Nishi for perfectness (finite-étale dual only if `N` invertible) | **one**: L3.2 étale-normality ascent (or its two instances) |
+| discharges the register? | yes | **no** — fixed `S` only |
+
+### Status of Phase 1e
+Steps 1 and 2 done (this file). **Steps 2.5–6 not done**: no Lean skeleton yet, no per-leaf adversarial
+pass, no `b2_log` consultation, gate not run. The route-β tickets on the board are now known to be
+unsourced and should be retired before any skeleton is written — that is a `/develop --continue`
+action, not a `--decompose` one.
