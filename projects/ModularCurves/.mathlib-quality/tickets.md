@@ -36259,3 +36259,34 @@ supplies it modulo writing `terminal.from (Spec k)` as `Spec.map (Int.castRingHo
 
 Recording this rather than starting it: it is a multi-lemma scheme-to-ring comparison and
 belongs at the start of a session, not the end of one.
+
+### [WP-D3c-2a] AMENDED — the tree already has the affine model, so no `pullbackSpecIso` is needed
+
+Grep-first again. `GroupScheme/MuN.lean:1193` proves
+
+**`muNSpecFieldIso (K) [Field K] (N) [NeZero N] : muN (Spec K) N ≅ Spec (AdjoinRoot ((X : K[X])^N − 1))`**
+
+with `muNSpecFieldIso_struct` (it lies over the base via `AdjoinRoot.of`), plus `_inv_π`,
+`_inv_snd`, `_pow`. So over a **field** the affine model of `μ_N` is already available and the
+terminal-object / `pullbackSpecIso` route described in the previous entry is unnecessary.
+
+Revised first brick:
+
+```
+(CommAlgCat.FiniteEtale.baseChange k k').obj (muNAlgebra k N hk) ≅ muNAlgebra k' N hk'
+```
+
+reduces, through `muNSpecFieldIso` at both fields, to the purely algebraic
+
+```
+AdjoinRoot ((X : k[X])^N − 1) ⊗[k] k'  ≅  AdjoinRoot ((X : k'[X])^N − 1)
+```
+
+— base change of `AdjoinRoot` along a monic polynomial, which is standard `Polynomial` /
+`AdjoinRoot` API rather than scheme theory. `muNModel_finite` and
+`muNModel_algebra_etale_of_isUnit` (`MuN.lean:1186, 1157`) are the finiteness/étaleness inputs,
+both proved.
+
+`torsionPairAlgebra` has no such explicit model, so it stays on the general route:
+`torsionAlgebra` is `finiteEtaleOfπ (torsionπ)` and its base change is the base change of the
+torsion scheme, for which `torsion_baseChange_isPullback` is the input.
