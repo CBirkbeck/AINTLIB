@@ -35907,3 +35907,25 @@ real — they were regex false positives or already fixed.
 Consequence: `lake build ModularCurves` is now a **complete** check of the project. The
 recorded recipe for building the orphan list explicitly is obsolete, and any `sorry`, error or
 duplicate anywhere in the tree is visible to the routine build.
+
+## Authoritative `sorry` census (2026-08-04, first one with complete coverage)
+
+`lake build ModularCurves` now reaches every module, so the `declaration uses sorry` warnings
+are the whole truth: **95** across the two projects (ModularCurves + its HasseWeil imports).
+Previously 74 modules were invisible to this check.
+
+| n | file |
+|---|---|
+| 19 | `GroupScheme/NIsogeny.lean` |
+| 7 | `WeilPairing/Basic.lean` ← **the DS4 register** |
+| 7 | `EllipticCurve/EndomorphismDegree.lean` |
+| 6 | `LevelStructure/Factorization.lean` |
+| 5 | `Moduli/GammaH.lean`, `ForMathlib/BuchsbaumEisenbud.lean` |
+| 4 | `LevelStructure/ExactOrder.lean` |
+| 3 | `Moduli/Coarse.lean` |
+| 2 | `Picard/SelfAdjointN.lean`, `Moduli/SqrtCoverGlue.lean`, `Moduli/MellWStack.lean`, `Moduli/EllCategory.lean`, `ModularCurve/YRho.lean`, `ModularCurve/YFullRoute.lean`, `LevelStructure/CartierDivisor.lean`, `LevelStructure/Basic.lean`, `GroupScheme/DeligneOrder.lean`, `ForMathlib/SmoothDescent.lean`, `ForMathlib/NoethApprox.lean`, `ForMathlib/LocalFlatnessCriterion.lean`, `EllipticCurve/GroupLaw.lean`, `HasseWeil/Isogeny/OmegaCoeffViaFormalGroup.lean` |
+| 1 | `Moduli/Stack.lean`, `Moduli/Groupoid.lean`, `Moduli/GammaHRepresentability.lean`, `Moduli/DrinfeldRegularity.lean`, `ForMathlib/GenericFlatness.lean`, `ForMathlib/FlatLocus.lean`, `ForMathlib/FinitePresentationDescent.lean`, `EllipticCurve/WeierstrassModel.lean`, `EllipticCurve/RigiditySpreadingOut.lean`, `HasseWeil/Isogeny/FormalSeries.lean`, `HasseWeil/Foundation/OmegaPullbackCoeff.lean` |
+
+Only **7** of the 95 are on `yRho_representable`'s path (`WeilPairing/Basic.lean`'s six plus
+`weilPairing_torsionMapOfEllHom` in `YRho.lean`) — everything else is off the critical path,
+per `scripts/sorry-roots.lean`.
