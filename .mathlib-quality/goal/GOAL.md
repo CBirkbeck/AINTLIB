@@ -15478,3 +15478,34 @@ types come from unfolding `IsSheafOfTopologicalRings` and are never written expl
 proof. Extracting either means transcribing those types correctly; guessing costs a build per
 attempt. Neither is universe-blocked — this is a reading task, and it is the only thing between
 this target and ~46.
+
+### `xPresheaf_isSheafOfTopologicalRings` CLEARED: 90 → 47
+
+Three helpers: `xPresheaf_frobEq_on_piece` (27), `xPresheaf_saturated_cover` (3),
+`xPresheaf_glue_res` (5). Target **47** — off the board.
+
+**The last lift was blocked on reading, and reading resolved it.** `g''`/`hg''` come from
+destructuring the `∃!` in `IsSheafOfTopologicalRings`, whose types the proof never writes. Rather
+than guess (one build per attempt), I read the definition at `HomSheafPredicate.lean:64`:
+
+```lean
+∃! g : {g : T →+* (F.obj (op (iSup U)) : Type u) // Continuous g},
+  ∀ i, (F.map (homOfLE (le_iSup U i)).op).1.comp g.1 = (f i).1
+```
+
+> **When a proof destructures something whose types it never writes, read the definition — do not
+> infer the types from how the variables are used.** The usage is consistent with many wrong
+> types; the definition is one lookup.
+
+**One universe trap on the way.** Transcribing `(F.obj (op (U i)) : Type u)` literally failed:
+that ascription is valid *in the definition*, where `u` is bound, but in my lemma `u` was a
+different variable and the object is a bundled `CompleteTopCommRingCat` at its own level. Writing
+`↥(… .presheaf.obj (op (U i)))` and leaving `ι`, `T` as `Type*` lets inference place them.
+
+> **Copy the *term*, not the *ascription*.** A `(e : Type u)` in a definition is that definition's
+> universe discipline, not part of the term's meaning; carrying it into a new declaration pins a
+> universe that has no reason to match.
+
+Together with the two earlier entries this target took **five builds and three helpers**, and every
+failure was a *spelling* of a type — the `SpaTop` vs `Spa … (ringPlus …)` carrier, the `Type u`
+ascription, the leading section variables — never the mathematics or the decomposition.

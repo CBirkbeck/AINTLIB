@@ -1772,6 +1772,30 @@ private theorem xPresheaf_saturated_cover {ι : Type*}
    fun v hv => hcov (stabV ▸ hv)⟩
 
 
+/-- The restriction-compatibility a competing glue must satisfy, in the form
+`IsLimitSheafOn.homGlue`'s uniqueness clause consumes.
+
+`g''` and `hg''` come from destructuring the `∃!` in `IsSheafOfTopologicalRings`, whose types
+are never written out in the proof; they are transcribed here from the definition
+(`HomSheafPredicate.lean:64`) rather than guessed. -/
+private theorem xPresheaf_glue_res {ι : Type*} (U : ι → Opens (Curve p F ϖ))
+    {T : Type*} [CommRing T] [TopologicalSpace T] [IsTopologicalRing T]
+    (f : ∀ i, {g : T →+*
+      ↥((curveSpace p F ϖ).presheaf.obj (op (U i))) // Continuous g})
+    (g'' : T →+* ↥((curveSpace p F ϖ).presheaf.obj (op (iSup U))))
+    (hg'' : ∀ i, ((curveSpace p F ϖ).presheaf.map
+      (homOfLE (le_iSup U i)).op).1.comp g'' = (f i).1)
+    (hle : ∀ i, (yFunctor p F ϖ).obj (curvePreimage p F ϖ (U i))
+      ≤ (yFunctor p F ϖ).obj (curvePreimage p F ϖ (iSup U))) :
+    ∀ i, (limitRestrict (hle i)).comp ((piComponent p F ϖ (iSup U)).comp g'')
+      = (piComponent p F ϖ (U i)).comp (f i).1 := by
+  intro i
+  refine RingHom.ext fun t => ?_
+  exact congrArg Subtype.val
+    ((xPresheaf_map_apply p F ϖ (le_iSup U i) (g'' t)).symm.trans
+      (DFunLike.congr_fun (hg'' i) t))
+
+
 /-- **The curve presheaf is a sheaf of topological rings** (D-iv-4, Wedhorn
 Remark 8.20 for the quotient): compatible continuous `T`-families of
 invariant sections glue uniquely — glue the underlying `𝒴`-sections over
@@ -1827,15 +1851,7 @@ theorem xPresheaf_isSheafOfTopologicalRings :
     refine Subtype.ext ?_
     exact DFunLike.congr_fun (hg i) t
   · rintro ⟨g'', hg''c⟩ hg''
-    have hres : ∀ i, (limitRestrict (hle i)).comp
-        ((piComponent p F ϖ (iSup U)).comp g'')
-        = (piComponent p F ϖ (U i)).comp (f i).1 := by
-      intro i
-      refine RingHom.ext fun t => ?_
-      have h1 := congrArg Subtype.val
-        ((xPresheaf_map_apply p F ϖ (le_iSup U i) (g'' t)).symm.trans
-          (DFunLike.congr_fun (hg'' i) t))
-      exact h1
+    have hres := xPresheaf_glue_res p F ϖ U f g'' hg'' hle
     have := huniq ⟨(piComponent p F ϖ (iSup U)).comp g'',
       continuous_subtype_val.comp hg''c⟩ hres
     have hval := congrArg Subtype.val this
