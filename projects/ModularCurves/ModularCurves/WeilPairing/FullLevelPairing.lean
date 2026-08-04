@@ -229,6 +229,37 @@ pattern (6) of the elaboration notes. So the last missing piece is a five-line `
 
 With that in hand the two sides meet. -/
 
+/- ### `fullLevelHom_pullAlong` (route β, item (A) step 1) — assembly written, ONE import missing
+
+Every ingredient is proved and the assembly is written out below in comment form; the only thing
+blocking it is that **`Point.asSection_add` is not in this file's import closure**. It lives at
+`Moduli/GammaHRepresentability.lean:3839` and — note — in namespace `ModularCurves`, *not*
+`ModularCurves.EllipticCurve` (so it is `ModularCurves.Point.asSection_add`, while
+`Point.asSection_zsmul` is `ModularCurves.EllipticCurve.Point.asSection_zsmul`). Next session: either
+add `import ModularCurves.Moduli.GammaHRepresentability` here (check it does not create a cycle — that
+file is downstream of the moduli representability chain, so the safer move is probably to place
+`fullLevelHom_pullAlong` in a *new* file importing both), or relocate `Point.asSection_add` to
+`EllipticCurve/GroupLaw.lean` next to `Point.asSection_zsmul`.
+
+The assembly, verified against every lemma's actual statement:
+
+  refine Sigma.hom_ext _ _ fun v => ?_
+  rw [← Category.assoc, ι_constSchemeMapAlong]
+  have hcomb : Point.asSection E σ (Point.pull E σ (v₀ • L.1.1 + v₁ • L.1.2))
+      = v₀ • (L.pullAlong σ).1.1 + v₁ • (L.pullAlong σ).1.2 := by
+    rw [Point.pull_add, Point.pull_zsmul, Point.pull_zsmul, Point.asSection_add,
+      Point.asSection_zsmul, Point.asSection_zsmul]; rfl
+  have htor : ↑(v₀ • L.1.1 + v₁ • L.1.2) ≫ E.mulByHom N = 𝟙 S ≫ E.zero :=
+    (E.smul_eq_zero_iff_comp_mulByHom _ N _).mp (by
+      rw [smul_add, smul_comm .., smul_comm .., L.2.1.1, L.2.1.2, smul_zero, smul_zero, add_zero])
+  rw [fullLevelHom, Sigma.ι_desc, fullLevelHom, Sigma.ι_desc, ← hcomb]
+  refine Eq.trans (E.comp_pointToTorsion_of_eq σ _ htor (Category.comp_id σ)
+      (by rw [Category.assoc, htor, Category.id_comp])) ?_
+  exact (E.pointToTorsion_asSection_torsionBaseChangeHom σ _ _ _).symm
+
+(the `v₀`/`v₁` abbreviate `((v 0).val : ℤ)` / `((v 1).val : ℤ)`; `htor` is copied verbatim from
+`fullLevelHom`'s own definition, `GroupScheme/GLSchemeAction.lean:48`.) -/
+
 /-! ### Linearity of the trivialisation, for a **bare** matrix — invertibility is not needed
 
 `constGL g` and `glSmul g L` require `g ∈ GL₂(ℤ/N)`, which made the transition look as though it had

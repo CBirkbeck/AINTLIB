@@ -37615,3 +37615,22 @@ So step 1's ingredient list is now **complete and all proved**:
 `fullLevelHom_pullAlong` is assembling them in the order recorded in `FullLevelPairing.lean`'s comment
 (right-hand side first — rewriting the left side first unfolds `↑(v₀ • P + v₁ • Q)` into a
 `CartesianMonoidalCategory.lift` normal form that nothing matches afterwards).
+
+### [route β] step 1's assembly is written; one **import** blocks it (2026-08-04)
+
+Every ingredient of `fullLevelHom_pullAlong` is proved, and the assembly — verified line by line
+against each lemma's actual statement — is recorded in `WeilPairing/FullLevelPairing.lean` as a
+comment. The single blocker is an **import**, not mathematics:
+
+`Point.asSection_add` lives at `Moduli/GammaHRepresentability.lean:3839` and, unlike its siblings, in
+namespace `ModularCurves` rather than `ModularCurves.EllipticCurve` — so it is
+`ModularCurves.Point.asSection_add`, while `Point.asSection_zsmul` is
+`ModularCurves.EllipticCurve.Point.asSection_zsmul` (`EllipticCurve/GroupLaw.lean:275`). It is not in
+`FullLevelPairing.lean`'s import closure.
+
+**Recommended fix**: relocate `Point.asSection_add` to `EllipticCurve/GroupLaw.lean` beside
+`Point.asSection_zsmul` (where it belongs — it is a statement about `asSection`, not about moduli
+representability), and give it the `EllipticCurve` namespace. That is a *move*, not a re-proof, and it
+unblocks step 1 immediately. The alternative — importing `Moduli/GammaHRepresentability` into
+`WeilPairing/FullLevelPairing` — inverts the intended dependency direction (moduli representability is
+downstream of the group-scheme layer) and should be avoided.
