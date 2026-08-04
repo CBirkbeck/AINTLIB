@@ -1,1 +1,1 @@
-FOCUS: route beta plumbing DONE (isPullback_torsionSq_baseChange + torsionSqBaseChangeIso). NEXT: assemble the descent — WeilPairingLocalData from a cover with a level structure, cocycle from fullLevelPairing_glSmul.
+FOCUS: route beta step 3 skeleton DONE (coverPairing + _over + nonempty_weilPairing_of_cover_of_cocycle). ONE input remains: the cocycle, i.e. a root zeta on the cover with g^*zeta = zeta^{det g}. NEXT: reduce hcoc to that statement about zeta alone.

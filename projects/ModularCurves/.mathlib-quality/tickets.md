@@ -37221,3 +37221,36 @@ torsion square, and the two are now known to be the same object.
 `ζ^N = 1` on a cover carrying a full level structure, satisfying `g^*ζ = ζ^{det g}` for the
 transition — everything else (the pairing, its over-`S` compatibility, and the determinant law that
 turns the transition into the cocycle) is proved. Root green at **9727 jobs**.
+
+## [route β] step 3 — the descent skeleton is closed except for the cocycle (2026-08-04)
+
+`WeilPairing/FullLevelPairing.lean`, final section (axiom-verified):
+
+* **`coverPairing`** — `fullLevelPairing` of the base-changed curve, read through
+  `torsionSqBaseChangeIso` and pushed back over `S` by `muNMapAlong`: a morphism
+  `pullback (E.torsionSqπ N) p ⟶ muN S N`, i.e. exactly the `pairing` field of a
+  `WeilPairingLocalData`.
+* **`coverPairing_over`** — its over-`S` compatibility (`muNMapAlong_π`, then
+  `fullLevelPairing_over`, then `isoPullback_hom_snd` and `pullback.condition`).
+* **`nonempty_weilPairing_of_cover_of_cocycle`** — the descent: **every field of
+  `WeilPairingLocalData` except `cocycle` is now discharged** for a cover carrying a full level
+  structure and a root of unity.
+
+### The single remaining input
+
+`hcoc`. And `fullLevelPairing_glSmul` says precisely how to get it: on the kernel pair the two
+pulled-back level structures differ by the transition `g`, so the two pairings agree exactly when
+
+`g^*ζ = ζ ^ det g`.
+
+So the whole of route β is now: **construct `ζ` on a trivialising cover with `g^*ζ = ζ^{det g}`.**
+That is WP-D3d, whose base side is already in place (`WP-D3a-DOM`, `WP-D3a-FACTOR`, `WP-D3b`,
+`exists_algemap_eq_of_pow_eq_one`, `pow_ne_one_of_algebraMap_eq`) and whose arithmetic core — the
+determinant law of the field pairing along an automorphism fixing the curve — is
+`fieldWeilPairing_det_of_galois`.
+
+Next concrete step: turn `hcoc` into the `ζ`-statement, i.e. prove
+`hcoc ← (transition analysis + fullLevelPairing_glSmul)`. The transition analysis is the only piece
+not yet written: on each clopen piece of the kernel pair the two level structures are `glSmul`-related
+(`GLSchemeAction.lean` has `exists_glSchemeSmul_of_hOrbit` and `fullLevelIso_symm_trans_of_glSmul_eq`
+for exactly this comparison).

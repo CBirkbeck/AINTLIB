@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.DetCocycle
+import ModularCurves.WeilPairing.TorsionSqBaseChange
 import ModularCurves.GroupScheme.ConstSchemeSquare
 import ModularCurves.GroupScheme.GLSchemeAction
 
@@ -195,6 +196,68 @@ theorem nonempty_weilPairing_of_fullLevel (hinv : NIsInvertible S N) (L : E.Full
       e ≫ muNπ S N = E.torsionSqπ N :=
   nonempty_weilPairing_of_root_of_trivialised E N ζ (E.fullLevelSqIso hinv L)
     (E.fullLevelSqIso_hom_π hinv L)
+
+/-! ### The pairing on a trivialising cover, and the descent
+
+`WeilPairingLocalData` wants a pairing out of `pullback (E.torsionSqπ N) p`; `fullLevelPairing`
+produces one out of the base-changed curve's torsion square. `torsionSqBaseChangeIso`
+(`WeilPairing/TorsionSqBaseChange.lean`) identifies the two, and `muNMapAlong` brings the values
+back over `S`. Everything then goes through except the cocycle, which is the one remaining
+arithmetic input. -/
+
+variable {S' : Scheme.{u}}
+
+/-- **(route β, step 3)** The pairing on the base change of the Weil-pairing source along a cover
+carrying a full level structure: `fullLevelPairing` of the base-changed curve, read through
+`torsionSqBaseChangeIso` and pushed back over `S` by `muNMapAlong`. -/
+noncomputable def coverPairing (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N) (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 }) :
+    pullback (E.torsionSqπ N) p ⟶ muN S N :=
+  (E.torsionSqBaseChangeIso N p).hom ≫
+    (E.baseChange p).fullLevelPairing hinv L ζ ≫ muNMapAlong p N
+
+/-- The cover pairing is a morphism over `S` — the `overBase` field of a
+`WeilPairingLocalData`. -/
+theorem coverPairing_over (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N) (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 }) :
+    E.coverPairing p hinv L ζ ≫ muNπ S N =
+      pullback.fst (E.torsionSqπ N) p ≫ E.torsionSqπ N := by
+  have hsnd : (E.torsionSqBaseChangeIso N p).hom ≫ (E.baseChange p).torsionSqπ N =
+      pullback.snd (E.torsionSqπ N) p := by
+    rw [torsionSqBaseChangeIso, Iso.symm_hom, Iso.inv_comp_eq]
+    exact (E.isPullback_torsionSq_baseChange N p).isoPullback_hom_snd.symm
+  simp only [coverPairing, Category.assoc]
+  rw [muNMapAlong_π, ← Category.assoc ((E.baseChange p).fullLevelPairing hinv L ζ),
+    (E.baseChange p).fullLevelPairing_over hinv L ζ, ← Category.assoc, hsnd]
+  exact pullback.condition.symm
+
+/-- **(route β, step 3, THE DESCENT)** An elliptic curve admits a Weil pairing as soon as it admits
+a trivialising fppf cover carrying a **full level structure** and an `N`-th root of unity, *and* the
+resulting cover pairing satisfies the cocycle condition on the kernel pair.
+
+Every field of `WeilPairingLocalData` except `cocycle` is discharged here. The cocycle is the one
+remaining arithmetic input, and `fullLevelPairing_glSmul` is what turns it into a statement about
+`ζ` alone: on the kernel pair the two level structures differ by the transition matrix `g`, so the
+two pairings agree exactly when `g^*ζ = ζ ^ det g`. -/
+theorem nonempty_weilPairing_of_cover_of_cocycle (p : S' ⟶ S)
+    [Flat p] [LocallyOfFinitePresentation p] [Surjective p]
+    (hinv : NIsInvertible S' N) (L : (E.baseChange p).FullLevelPt N)
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 })
+    (hcoc : pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫
+        E.coverPairing p hinv L ζ =
+      pullback.snd (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫
+        E.coverPairing p hinv L ζ) :
+    ∃ e : pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N,
+      e ≫ muNπ S N = E.torsionSqπ N :=
+  nonempty_weilPairing_of_localData
+    { cover := S'
+      p := p
+      flat := ‹Flat p›
+      lfp := ‹LocallyOfFinitePresentation p›
+      surj := ‹Surjective p›
+      pairing := E.coverPairing p hinv L ζ
+      cocycle := hcoc
+      overBase := E.coverPairing_over p hinv L ζ }
 
 end EllipticCurve
 
