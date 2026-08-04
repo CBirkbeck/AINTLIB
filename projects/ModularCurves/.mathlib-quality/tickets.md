@@ -36756,3 +36756,31 @@ import. Root green at **9722 jobs**.
    `fieldWeilPairingHom` is a uniqueness argument through `fieldWeilPairingHom_unique`.
 3. Then **WP-D3d** (assemble ζ; base side already complete) and
    `nonempty_weilPairing_of_root_of_det` closes DS4's first two register entries.
+
+### [WP-D3c-2c] `torsionAlgebra` base change — the route, and why it differs from `μ_N`
+- **Status**: open · **File**: `WeilPairing/MuNBaseChange.lean` (or a sibling) ·
+  **Depends on**: none new
+- **Statement**: for fields `k → k'` and `E/k` with `N` invertible in both,
+  `k' ⊗[k] Γ(E[N], ⊤) ≃+* Γ((E ×_k k')[N], ⊤)`, and the same for `torsionPairAlgebra` (the
+  tensor square).
+- **Why the `μ_N` route does not transfer**: `μ_N` had an explicit affine model
+  (`muNSpecFieldIso`) that reduced everything to `AdjoinRoot` algebra. `E[N]` has **no**
+  explicit model, so the identification has to come from the cartesian square itself:
+  `torsion_baseChange_isPullback` (`EllipticCurve/TorsionFibre.lean:251`) —
+  `IsPullback (torsionBaseChangeHom N g) ((E.baseChange g).torsionπ N) (E.torsionπ N) g`.
+- **The missing direction**: the tree uses `AlgebraicGeometry.isPullback_SpecMap_of_isPushout`
+  (`EllipticCurve/WeierstrassModel.lean:2260`, `EllipticCurve/MulByHomFlat.lean:101`) —
+  *pushout of rings ⟹ pullback of `Spec`s*. Here the **converse** is needed: a cartesian
+  square of affine schemes gives a pushout of the global-section rings. Searched: mathlib has
+  `pullbackSpecIso` (for a square of `Spec.map`s of `algebraMap`s) and
+  `CommRingCat.tensorProdObjIsoPushoutObj`, but not the "cartesian square of affines ⟹
+  `Γ` is a pushout" statement in the form needed here.
+- **Route that avoids the gap**: both `E[N]` and `(E ×_k k')[N]` are affine (finite over
+  `Spec k`, `Spec k'`), and `Spec` is fully faithful on affines, so
+  `torsion_baseChange_isPullback` transported through `Scheme.isoSpec` *becomes* a
+  `pullbackSpecIso`-shaped square. That is the concrete plan: apply `Scheme.isoSpec` to the
+  three corners, rewrite the cartesian square, and read off the tensor product via
+  `pullbackSpecIso`.
+- **Sizing**: comparable to `muNSpecFieldIso`'s own proof
+  (`GroupScheme/MuN.lean:1193`, ~25 lines of `IsPullback` gymnastics), plus the `Γ`/`isoSpec`
+  bookkeeping this session has now done twice.
