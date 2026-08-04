@@ -422,6 +422,36 @@ theorem restrictToConvex_comap_toFractionQuotient_eq_zero_of_mem_prime
         Ideal.Quotient.eq_zero_iff_mem.mpr hb, map_zero, map_zero]
   rw [Valuation.restrictToConvex_unfold, dif_pos hv₀_zero]
 
+/-- Packaging step of `exists_spa_point_via_restrictToConvex`: a valuation on `A` that
+vanishes on `𝔭`, restricts to `v_r` on the ring of definition, is continuous, and is bounded
+by `1` on `A⁺` yields a point of `Spa A A⁺` whose support contains `𝔭` but not the ideal of
+definition.
+
+Generic in the value group and in `v_r` — it mentions neither `convexGenerated` nor
+`restrictToConvex`. -/
+private theorem exists_spa_point_of_valuation_package
+    (P : PairOfDefinition A) [PlusSubring A] {𝔭 : Ideal A}
+    {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+    {a₀ : P.A₀} (ha₀_I : a₀ ∈ P.I) {v_r : Valuation P.A₀ Γ₀}
+    (hv_r_s_ne : v_r a₀ ≠ 0)
+    (h_ext : ∃ v_ext : Valuation A Γ₀,
+      (∀ a ∈ 𝔭, v_ext a = 0) ∧
+      (∀ a : P.A₀, v_ext (P.A₀.subtype a) = v_r a) ∧
+      v_ext.IsContinuous ∧
+      (∀ f ∈ (A⁺ : Set A), v_ext f ≤ 1)) :
+    ∃ v ∈ Spa A A⁺, 𝔭 ≤ v.supp ∧ ¬P.idealOfDefinition ≤ v.supp := by
+  obtain ⟨v_ext, hfwd, h_ext_A₀, hcont, hAplus⟩ := h_ext
+  refine ⟨ofValuation v_ext, ⟨isContinuous_ofValuation_of _ hcont, ?_⟩, ?_, ?_⟩
+  · intro f hf; change v_ext f ≤ v_ext 1; rw [map_one]; exact hAplus f hf
+  · intro a ha; rw [supp_ofValuation]; exact (Valuation.mem_supp_iff _ _).mpr (hfwd a ha)
+  · intro h_le
+    have ha₀_in_J : (P.A₀.subtype a₀ : A) ∈ P.idealOfDefinition :=
+      Ideal.mem_map_of_mem _ ha₀_I
+    have ha₀_supp : (P.A₀.subtype a₀ : A) ∈ (ofValuation v_ext).supp :=
+      h_le ha₀_in_J
+    rw [supp_ofValuation, Valuation.mem_supp_iff] at ha₀_supp
+    exact hv_r_s_ne (h_ext_A₀ a₀ ▸ ha₀_supp)
+
 /-- **Rank-1 extension (Wedhorn Lemma 7.45, Steps 3-7).**
 
 Constructs a valuation `v_ext : Valuation A (WithZero H_gen.toSubgroup)` that is
@@ -527,22 +557,7 @@ theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
   have hv_r_s_ne : v_r a₀ ≠ 0 :=
     ne_of_gt (Valuation.restrictToConvex_pos_of_mem
       v₀_A₀ H_gen hle_A₀ hv₀_a₀_ne hu_a₀_mem)
-  suffices h_ext : ∃ (v_ext : Valuation A (WithZero H_gen.toSubgroup)),
-      (∀ a ∈ 𝔭, v_ext a = 0) ∧
-      (∀ a : P.A₀, v_ext (P.A₀.subtype a) = v_r a) ∧
-      v_ext.IsContinuous ∧
-      (∀ f ∈ (A⁺ : Set A), v_ext f ≤ 1) by
-    obtain ⟨v_ext, hfwd, h_ext_A₀, hcont, hAplus⟩ := h_ext
-    refine ⟨ofValuation v_ext, ⟨isContinuous_ofValuation_of _ hcont, ?_⟩, ?_, ?_⟩
-    · intro f hf; change v_ext f ≤ v_ext 1; rw [map_one]; exact hAplus f hf
-    · intro a ha; rw [supp_ofValuation]; exact (Valuation.mem_supp_iff _ _).mpr (hfwd a ha)
-    · intro h_le
-      have ha₀_in_J : (P.A₀.subtype a₀ : A) ∈ P.idealOfDefinition :=
-        Ideal.mem_map_of_mem _ ha₀_I
-      have ha₀_supp : (P.A₀.subtype a₀ : A) ∈ (ofValuation v_ext).supp :=
-        h_le ha₀_in_J
-      rw [supp_ofValuation, Valuation.mem_supp_iff] at ha₀_supp
-      exact hv_r_s_ne (h_ext_A₀ a₀ ▸ ha₀_supp)
+  refine exists_spa_point_of_valuation_package P ha₀_I hv_r_s_ne ?_
   classical
   have h_pow_mul : ∀ a : A, ∃ n : ℕ, s ^ n * a ∈ P.A₀ :=
     P.exists_pow_mul_mem_A₀ hs_nil
@@ -555,27 +570,17 @@ theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
       exact (Valuation.mem_supp_iff v_ext a).mpr (h_ext_zero a ha_p)
     · set g_cont : WithZero H_gen.toSubgroup :=
         ((⟨u_max, hu_max_mem⟩ : H_gen.toSubgroup) : WithZero H_gen.toSubgroup) with g_cont_def
-      have hg_bound : ∀ a : P.A₀, a ∈ P.I → v_ext (P.A₀.subtype a) ≤ g_cont := by
-        intro a ha
-        rw [h_ext_A₀ a]
-        rw [v_r_def]
-        by_cases hv_eq : v₀_A₀ a = 0
-        · rw [Valuation.restrictToConvex_unfold, dif_pos hv_eq]; exact bot_le
-        · by_cases hm : Units.mk0 (v₀_A₀ a) hv_eq ∈ H_gen
-          · rw [Valuation.restrictToConvex_unfold, dif_neg hv_eq, dif_pos hm]
-            rw [g_cont_def]
-            exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr
-              (Units.val_le_val.mp (hpb_le_gmax a ha)))
-          · rw [Valuation.restrictToConvex_unfold, dif_neg hv_eq, dif_neg hm]; exact bot_le
+      have hg_bound : ∀ a : P.A₀, a ∈ P.I → v_ext (P.A₀.subtype a) ≤ g_cont :=
+        fun a ha ↦ by
+          rw [h_ext_A₀ a]
+          exact Valuation.restrictToConvex_le_coe_of_le v₀_A₀ H_gen hle_A₀ hu_max_mem
+            (hpb_le_gmax a ha)
       have h_le_ext : ∀ a : P.A₀, v_ext (P.A₀.subtype a) ≤ 1 := by
         intro a; rw [h_ext_A₀ a]
         exact Valuation.restrictToConvex_le_one v₀_A₀ H_gen hle_A₀ a
       have h_cofinal : ∀ γ : WithZero H_gen.toSubgroup, 0 < γ →
-          ∃ n : ℕ, g_cont ^ n < γ := by
-        intro γ hγ
-        obtain ⟨n, hn⟩ := ConvexSubgroup.withZero_inv_pow_cofinal_of_convexGenerated
-          hu_max_inv_gt1 γ hγ
-        exact ⟨n, by simpa only [g_cont_def, inv_inv] using hn⟩
+          ∃ n : ℕ, g_cont ^ n < γ :=
+        ConvexSubgroup.withZero_pow_cofinal_of_mem_convexGenerated hu_max_inv_gt1 hu_max_mem
       exact Valuation.isContinuous_of_le_one_and_pow_cofinal P v_ext h_le_ext
         hg_bound h_cofinal
     · intro f hf

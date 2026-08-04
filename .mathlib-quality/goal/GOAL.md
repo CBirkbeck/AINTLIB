@@ -16171,3 +16171,22 @@ sits in `Presheaf.lean`, but `Lemma745.lean` — its second natural consumer —
 cannot import it. The shared construction belongs in `Lemma745.lean`. That is the
 lemma-in-the-wrong-file pattern: a lemma placed for its first consumer forces every earlier
 consumer to keep its own copy.
+
+### `exists_spa_point_via_restrictToConvex` 158 → 133, mostly by dedup
+
+* **dedup** (10 lines): `hg_bound` → `Valuation.restrictToConvex_le_coe_of_le`, `h_cofinal` →
+  `ConvexSubgroup.withZero_pow_cofinal_of_mem_convexGenerated`. Both lemmas were extracted
+  earlier this session; the second lives **in this same file, 350 lines above the inlining**.
+* `exists_spa_point_of_valuation_package` — the outer `suffices`: from a valuation vanishing on
+  `𝔭`, restricting to `v_r` on `A₀`, continuous, and `≤ 1` on `A⁺`, build the `Spa` point.
+  Generic in the value group and in `v_r`; mentions neither `convexGenerated` nor
+  `restrictToConvex`.
+
+**Third scoped-anchor abort this session, and the pattern is now unmistakable.** `classical`
+occurs 3× in this file; `intro n` was not unique in `TateAlgebra.lean`; `set_option
+linter.unusedSectionVars false in` occurs 170× in `WedhornCechAcyclicity.lean`. All three were
+caught by the uniqueness assertion at zero build cost.
+
+> Tactic lines are never anchors. `classical`, `intro n`, `simp`, `constructor` — these are
+> vocabulary, not identifiers. Anchor on a *declaration name*, then locate everything else
+> relative to it, and assert uniqueness **within that scope** rather than file-wide.
