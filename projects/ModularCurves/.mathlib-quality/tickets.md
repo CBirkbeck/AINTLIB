@@ -36510,3 +36510,35 @@ the finished base-change equivalence.
 **[WP-D3c-2a-LIN]** upgrade `tensorPolyEquiv` to `≃ₐ[R[X]]`: check `commutes'` on
 `algebraMap R[X] (R[X] ⊗[R] S) q = q ⊗ₜ 1` and use `polyEquivTensor_symm_apply_tmul`
 (`RingTheory/PolynomialAlgebra.lean:182`) to evaluate the image.
+
+## [WP-D3c-2a] COMPLETE (2026-08-04) — `AdjoinRoot` commutes with base change, axiom-verified
+
+```
+quotSpanBaseChange (f : R[X]) :
+  S ⊗[R] (R[X] ⧸ Ideal.span {f})  ≃+*  S[X] ⧸ Ideal.span {f.map (algebraMap R S)}
+```
+
+`ForMathlib/AdjoinRootBaseChange.lean`, **nine** declarations, sorry-free, axiom-verified, in
+the root import. The five-arrow chain, assembled:
+
+```
+S ⊗[R] M  --comm-->  M ⊗[R] S  --cancelPolyBaseChange.symm-->  M ⊗[R[X]] (R[X] ⊗[R] S)
+          --congr refl tensorPolyAlgEquiv-->  M ⊗[R[X]] S[X]
+          --comm-->  S[X] ⊗[R[X]] M  --quotSpanMapEquivTensor.symm-->  S[X] ⧸ (f.map)
+```
+
+The gap flagged last pass — that `Algebra.TensorProduct.congr` over `R[X]` needs the
+polynomial identification as an `≃ₐ[R[X]]` — is closed by `tensorPolyAlgEquiv`, whose
+`commutes'` is one line from `tensorPolyEquiv_tmul` (`p ⊗ₜ s ↦ s • p.map`, itself
+`polyEquivTensor_symm_apply_tmul_eq_smul`).
+
+**Elaboration gotcha, recorded**: after `variable {R S}` every piece has `R`, `S` implicit, and
+in the assembly they are *not* inferable from the explicit arguments (`M` alone does not pin
+the `R` inside `R[X]`). Three separate `failed to synthesize` errors were fixed by writing
+`(R := R) (S := S)` on `cancelPolyBaseChange` and `tensorPolyAlgEquiv`.
+
+**What this unlocks**: `muNAlgebra k N hk` is `Γ(muN (Spec k) N)`, and `muNSpecFieldIso`
+identifies `muN (Spec k) N` with `Spec (AdjoinRoot ((X : k[X])^N − 1))`. With
+`quotSpanBaseChange` and `map_X_pow_sub_one` the `μ_N`-side of the field-change transport is
+therefore complete at the ring level; what remains on that side is transporting through
+`muNSpecFieldIso` and `finiteEtaleOfπ`, then the same treatment for `torsionPairAlgebra`.

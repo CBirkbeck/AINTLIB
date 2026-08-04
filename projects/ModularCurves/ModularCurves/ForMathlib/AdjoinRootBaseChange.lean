@@ -92,18 +92,47 @@ noncomputable def cancelPolyBaseChange (M : Type u) [CommRing M] [Algebra R[X] M
 noncomputable def tensorPolyEquiv : TensorProduct R R[X] S ≃ₐ[R] S[X] :=
   (Algebra.TensorProduct.comm R R[X] S).trans (polyEquivTensor R S).symm
 
-/- **The assembly**, `S ⊗[R] (R[X] ⧸ (f)) ≅ S[X] ⧸ (f.map)`, chains the pieces above as
+/-- **(WP-D3c-2a-LIN)** `tensorPolyEquiv` sends `p ⊗ₜ s` to `s • p.map`. -/
+theorem tensorPolyEquiv_tmul (p : R[X]) (s : S) :
+    (tensorPolyEquiv : TensorProduct R R[X] S ≃ₐ[R] S[X]) (p ⊗ₜ[R] s) =
+      s • p.map (algebraMap R S) := by
+  show (polyEquivTensor R S).symm (s ⊗ₜ[R] p) = _
+  rw [polyEquivTensor_symm_apply_tmul_eq_smul]
+
+/-- **(WP-D3c-2a-LIN)** …hence it is `R[X]`-linear, not merely `R`-linear: the `R[X]`-algebra
+structure on the left is via the first tensor factor and on the right is `Polynomial.map`. -/
+noncomputable def tensorPolyAlgEquiv : TensorProduct R R[X] S ≃ₐ[R[X]] S[X] :=
+  { (tensorPolyEquiv : TensorProduct R R[X] S ≃ₐ[R] S[X]) with
+    commutes' := fun q => by
+      show (tensorPolyEquiv : TensorProduct R R[X] S ≃ₐ[R] S[X]) (q ⊗ₜ[R] 1) =
+        q.map (algebraMap R S)
+      rw [tensorPolyEquiv_tmul, one_smul] }
+
+/-- **(WP-D3c-2a, the assembly)** `AdjoinRoot` commutes with base change:
+
+`S ⊗[R] (R[X] ⧸ (f))  ≅  S[X] ⧸ (f.map)`,
+
+as a ring isomorphism. Chained from the pieces above, with `M := R[X] ⧸ Ideal.span {f}`:
 
 ```
 S ⊗[R] M  --comm-->  M ⊗[R] S  --cancelPolyBaseChange.symm-->  M ⊗[R[X]] (R[X] ⊗[R] S)
-          --congr (refl, tensorPolyEquiv)-->  M ⊗[R[X]] S[X]
+          --congr refl tensorPolyAlgEquiv-->  M ⊗[R[X]] S[X]
           --comm-->  S[X] ⊗[R[X]] M  --quotSpanMapEquivTensor.symm-->  S[X] ⧸ (f.map)
 ```
 
-with `M := R[X] ⧸ Ideal.span {f}`. The one gap is the third arrow: `Algebra.TensorProduct.congr`
-over `R[X]` needs `tensorPolyEquiv` as an `≃ₐ[R[X]]`, whereas it is proved here only as an
-`≃ₐ[R]`. It *is* `R[X]`-linear — `q · (p ⊗ s) = (qp) ⊗ s ↦ s · (qp).map = q.map · (s · p.map)`
-— but that upgrade has to be proved, and it is the only thing between these seven declarations
-and the finished equivalence. See the board's [WP-D3c-2a] entries. -/
+Stated as a `RingEquiv` because the five arrows are `R`-, `R[X]`- and `S[X]`-algebra
+equivalences; the `S`-algebra structure is recovered at the use site from
+`tensorPolyEquiv_tmul` and the `comm`/`congr` computation lemmas. -/
+noncomputable def quotSpanBaseChange (f : R[X]) :
+    TensorProduct R S (R[X] ⧸ Ideal.span {f}) ≃+*
+      (S[X] ⧸ Ideal.span {f.map (algebraMap R S)}) :=
+  ((Algebra.TensorProduct.comm R S (R[X] ⧸ Ideal.span {f})).toRingEquiv.trans
+      ((cancelPolyBaseChange (R := R) (S := S)
+            (R[X] ⧸ Ideal.span {f})).toRingEquiv.symm.trans
+        (((Algebra.TensorProduct.congr (AlgEquiv.refl :
+              (R[X] ⧸ Ideal.span {f}) ≃ₐ[R[X]] _)
+            (tensorPolyAlgEquiv (R := R) (S := S))).toRingEquiv.trans
+            (Algebra.TensorProduct.comm R[X] (R[X] ⧸ Ideal.span {f}) S[X]).toRingEquiv).trans
+          (quotSpanMapEquivTensor (S := S) f).toRingEquiv.symm)))
 
 end ModularCurves
