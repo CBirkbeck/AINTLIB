@@ -38224,3 +38224,37 @@ until the fibre dictionary was known to be natural in the coefficient ring
    `algebraMap_factorRootOfUnityDescend` to descend to the component.
 
 Root green at **9733 jobs**; census unchanged (7, all the Weil register).
+
+### [WP-D3d step 4, move 1] the recipe, read off `weilPairingFibreMap`'s definition (2026-08-04)
+
+`weilPairingFibreMap` (`WeilPairing/FibreGalois.lean:189`) is *by definition*
+
+  `fun x => (muNAlgebraFibreEquiv k N hk (AlgebraicClosure k)).symm (C.pairing N _ (…x.1) (…x.2) _ _)`,
+
+so applying `muNAlgebraFibreEquiv` to it is `Equiv.apply_symm_apply` — the Silverman pairing comes out
+with **no unfolding of the fibre dictionary at all**. Move 1 is therefore:
+
+```
+theorem algebraMap_fieldPairingValue_eq_pairing (f : (torsionPairAlgebra K E N hK).obj →ₐ[K] K) :
+    algebraMap K (AlgebraicClosure K) (fieldPairingValue K E N hK f : K) =
+      ((globalGaloisFibreChart K (AlgebraicClosure K) E).pairing N
+        (natCast_ne_zero_of_algebra K N hK)
+        (torsionFibrePoint K N hK E (torsionPairAlgebraPointsEquiv K E N hK
+          ((Algebra.ofId K (AlgebraicClosure K)).comp f)).1)
+        (torsionFibrePoint K N hK E (torsionPairAlgebraPointsEquiv K E N hK
+          ((Algebra.ofId K (AlgebraicClosure K)).comp f)).2)
+        (torsionFibrePoint_torsion K N hK E _) (torsionFibrePoint_torsion K N hK E _) :
+      AlgebraicClosure K) := by
+  rw [algebraMap_fieldPairingValue]
+  -- `algebraMap_fieldPairingValue`'s RHS is `muNAlgebraFibreEquiv … (ofId.comp (f.comp hom))`, while
+  -- `fieldWeilPairingHom_spec` speaks of `(ofId.comp f).comp hom`: bridge with `AlgHom.comp_assoc`.
+  rw [← AlgHom.comp_assoc, fieldWeilPairingHom_spec, weilPairingFibreMap, Equiv.apply_symm_apply]
+```
+
+Then move 2 is `fieldWeilPairing_det_of_galois` applied to those two points (the chart's `pairing` is
+`fieldWeilPairing` of `C.dict`-transported points — `GaloisFibreChart.pairing_galois`
+(`FibreGalois.lean:122`) is the template for how the two are matched up), and move 3 is
+`IsFractionRing`-style injectivity of `algebraMap K (AlgebraicClosure K)` followed by
+`algebraMap_factorRootOfUnityDescend`.
+
+Root green at **9733 jobs**; census unchanged (7, all the Weil register).
