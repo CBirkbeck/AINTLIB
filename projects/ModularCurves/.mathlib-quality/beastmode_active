@@ -1,1 +1,1 @@
-FOCUS: route beta step 1 DONE (nonempty_weilPairing_of_root_of_mono + _of_trivialised: pairing over a trivialised base needs only a root, hdet vacuous). NEXT: measure the assembly side — does the tree give a trivialisation of E[N]^2 over the universal base + the classifying map for general S?
+FOCUS: route beta step 1 ASSEMBLED (nonempty_weilPairing_of_fullLevel: full level structure + N invertible + root => DS4 def/_over). NEXT: axiom-verify, add to root, commit; then measure the descent step (GL2-equivariance of this pairing).

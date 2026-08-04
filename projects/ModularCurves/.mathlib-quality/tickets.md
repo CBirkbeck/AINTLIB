@@ -37077,3 +37077,42 @@ the right **feasibility** statements but the wrong **definition**; the register 
 `WeilPairingLocalData.toPairing` of a canonical record, with `toPairing_restrict` as the bridge to
 `WP-C2` and the four computational specs. Recorded here so no session fills the data-sorry with a
 `choose` and then finds the specs unreachable.
+
+## [route β] step 1 is ASSEMBLED end to end (2026-08-04) — axiom-verified
+
+`GroupScheme/ConstSchemeSquare.lean` (new) and `WeilPairing/FullLevelPairing.lean` (new):
+
+* **`constSchemeSigmaIso`** — the double coproduct `∐_B ∐_A S ≅ ∐_{B × A} S`. Both directions are
+  assembled from `Sigma.desc`/`Sigma.ι` and shown inverse by `Sigma.hom_ext`: **no universality of
+  coproducts is needed**, which is what made this cheap.
+* **`constSchemeSqIso`** — `constScheme S B ×_S constScheme S A ≅ constScheme S (B × A)`, from
+  `isPullback_constSchemeMapAlong` (already in `GroupScheme/MuN.lean`: constant schemes are stable
+  under base change) composed with the reindexing. Plus `constSchemeSqIso_hom_π`, the
+  over-`S` compatibility.
+* **`fullLevelSqIso`** — a full level structure trivialises the *square* `E[N] ×_S E[N]`: one
+  `IsPullback.of_iso` transports the torsion square onto the constant-scheme square along
+  `fullLevelIso` on both legs, then `constSchemeSqIso`. Plus `fullLevelSqIso_hom_π`.
+* **`nonempty_weilPairing_of_fullLevel`** — ***the route-β entry point***: an elliptic curve over a
+  base carrying a full level-`N` structure, with `N` invertible and an `N`-th root of unity on the
+  base, admits a Weil pairing (DS4's `weilPairing` + `weilPairing_over`). No determinant law, no
+  cover, no descent.
+
+### Where this leaves DS4
+
+The remaining gap between here and the register is now sharply delimited, and it is **not** the
+determinant law of the root:
+
+1. **the descent** — a general base `S` has no level structure, so the pairing must descend from
+   an étale cover that trivialises `E[N]`; the cocycle for *that* descent is the
+   `GL₂(ℤ/N)`-equivariance of the pairing just built. Its stabiliser case is
+   `fieldWeilPairing_det_of_galois`; the rest is the orbit/stabiliser bookkeeping recorded in the
+   previous entry.
+2. **the root** — `ζ` must be *primitive* (else the specs below are false), which is where the
+   field pairing at generic points (WP-D3d) comes back in. Note the entry point above takes any
+   `ζ` with `ζ^N = 1`: as recorded in the architectural correction, that is enough for
+   `weilPairing`/`weilPairing_over` but *not* for the computational specs.
+3. **the specs** — `WP-C2` and the four computational entries must be proved for the *definition*
+   `WeilPairingLocalData.toPairing`, via `toPairing_restrict` (the pairing is the determinant
+   formula on the cover) — never from a `choose`.
+
+Root green at **9726 jobs**, 849/849 modules.

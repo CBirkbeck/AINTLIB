@@ -150,6 +150,7 @@ import ModularCurves.GroupScheme.ChartBridges
 import ModularCurves.GroupScheme.ChartPrecursorImmersion
 import ModularCurves.GroupScheme.GroupRingFree
 import ModularCurves.GroupScheme.MuN
+import ModularCurves.GroupScheme.ConstSchemeSquare
 import ModularCurves.GroupScheme.NIsogeny
 import ModularCurves.GroupScheme.StableCover
 import ModularCurves.GroupScheme.SubgroupQuotient
@@ -222,6 +223,7 @@ import ModularCurves.WeilPairing.MuNBaseChange
 import ModularCurves.WeilPairing.PairingTransport
 import ModularCurves.WeilPairing.TorsionBaseChange
 import ModularCurves.WeilPairing.FieldPairingUnique
+import ModularCurves.WeilPairing.FullLevelPairing
 import ModularCurves.WeilPairing.FieldPairingDet
 import ModularCurves.WeilPairing.FullLevelCover
 import ModularCurves.WeilPairing.RootSplitting
