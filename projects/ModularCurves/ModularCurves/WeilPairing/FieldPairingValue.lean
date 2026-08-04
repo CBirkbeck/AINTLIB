@@ -72,4 +72,27 @@ theorem algebraMap_fieldPairingValue
     (Algebra.ofId K (AlgebraicClosure K))
     (f.comp (fieldWeilPairingHom K E N hK).hom.hom)).symm
 
+/-- **(WP-D3d step 4, move 1)** …and that reading **is** the Silverman pairing of the corresponding
+geometric points.
+
+`weilPairingFibreMap` is by definition `(muNAlgebraFibreEquiv …).symm (C.pairing …)`, so applying the
+fibre dictionary to it is `Equiv.apply_symm_apply` — no unfolding of the dictionary is needed. The only
+bridge is `AlgHom.comp_assoc`, since the push-up produces `ofId.comp (f.comp hom)` while
+`fieldWeilPairingHom_spec` speaks of `(ofId.comp f).comp hom`. -/
+theorem algebraMap_fieldPairingValue_eq_pairing
+    (f : (EllipticCurve.torsionPairAlgebra K E N hK).obj →ₐ[K] K) :
+    algebraMap K (AlgebraicClosure K) (fieldPairingValue K E N hK f : K) =
+      (((globalGaloisFibreChart K (AlgebraicClosure K) E).pairing N
+          (natCast_ne_zero_of_algebra K N hK)
+          (torsionFibrePoint K N hK E
+            (EllipticCurve.torsionPairAlgebraPointsEquiv K E N hK
+              ((Algebra.ofId K (AlgebraicClosure K)).comp f)).1)
+          (torsionFibrePoint K N hK E
+            (EllipticCurve.torsionPairAlgebraPointsEquiv K E N hK
+              ((Algebra.ofId K (AlgebraicClosure K)).comp f)).2)
+          (torsionFibrePoint_torsion K N hK E _)
+          (torsionFibrePoint_torsion K N hK E _) : AlgebraicClosure K)) := by
+  rw [algebraMap_fieldPairingValue, ← AlgHom.comp_assoc,
+    fieldWeilPairingHom_spec, weilPairingFibreMap, Equiv.apply_symm_apply]
+
 end ModularCurves

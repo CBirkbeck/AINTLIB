@@ -38258,3 +38258,25 @@ Then move 2 is `fieldWeilPairing_det_of_galois` applied to those two points (the
 `algebraMap_factorRootOfUnityDescend`.
 
 Root green at **9733 jobs**; census unchanged (7, all the Weil register).
+
+### [WP-D3d step 4, move 1] LANDED (2026-08-04) — axiom-verified
+
+**`algebraMap_fieldPairingValue_eq_pairing`** (`WeilPairing/FieldPairingValue.lean`): the `K`-rational
+pairing value, pushed up to `AlgebraicClosure K`, **is** the Silverman pairing
+`(globalGaloisFibreChart K (AlgebraicClosure K) E).pairing` of the corresponding geometric points.
+
+Four rewrites, exactly as the recipe predicted: `algebraMap_fieldPairingValue`, `← AlgHom.comp_assoc`,
+`fieldWeilPairingHom_spec`, then `weilPairingFibreMap` + `Equiv.apply_symm_apply`. Reading
+`weilPairingFibreMap`'s *definition* first — rather than trying to unfold the fibre dictionary — is what
+made it four lines.
+
+**Step 4's remaining two moves:**
+2. `fieldWeilPairing_det_of_galois` against those two points. `GaloisFibreChart.pairing_galois`
+   (`WeilPairing/FibreGalois.lean:122`) is the template for matching the chart's `pairing` with
+   `fieldWeilPairing` of `C.dict`-transported points — it does exactly this matching for the Galois
+   action, and the `σ`-side torsion hypotheses come free from `zsmul_galoisPointEquiv_eq_zero`;
+3. injectivity of `algebraMap K (AlgebraicClosure K)` to return to `K`, then
+   `algebraMap_factorRootOfUnityDescend` to descend to the component, and the value equations of
+   `nonempty_weilPairing_of_cover_of_values` are discharged.
+
+Root green at **9733 jobs**; census unchanged (7, all the Weil register).
