@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.DetCocycle
+import ModularCurves.WeilPairing.RootPowerPoints
 import ModularCurves.WeilPairing.TorsionSqBaseChange
 import ModularCurves.GroupScheme.ConstSchemeSquare
 import ModularCurves.GroupScheme.GLSchemeAction
@@ -574,6 +575,68 @@ theorem coverPairing_glSmul (p : S' ⟶ S) (hinv : NIsInvertible S' N)
           rw [← pow_mul, mul_comm, pow_mul, ζ.2, one_pow]⟩ =
       E.coverPairing p hinv L ζ := by
   rw [coverPairing, coverPairing, (E.baseChange p).fullLevelPairing_glSmul hinv g L ζ]
+
+/-- The `S'`-point of the cover that a map into the base change reads, restricted to a clopen piece.
+Introduced only to keep the value-form statement below readable. -/
+noncomputable abbrev pieceCoverPt (p : S' ⟶ S) {W : Scheme.{u}} (U : W.Opens)
+    (c : W ⟶ pullback (E.torsionSqπ N) p) : U.toScheme ⟶ S' :=
+  U.ι ≫ c ≫ pullback.snd (E.torsionSqπ N) p
+
+/-- **(route β, THE DESCENT IN VALUE FORM)** An elliptic curve admits a Weil pairing as soon as it
+admits a trivialising fppf cover carrying a **full level structure**, an `N`-th root of unity `ζ` on the
+cover, and — in place of the cocycle — the purely **ring-theoretic** value equations on the clopen
+pieces of the joint trivialisation reading.
+
+`comp_rootPower_muNMapAlong_eq` (`WeilPairing/RootPowerPoints.lean`) turns each value equation into the
+corresponding instance of `hdet`; the two points lie over the same point of the base because the kernel
+pair's projections agree after `→ E[N] ×_S E[N]`.
+
+This is DS4's first two register entries (for invertible `N`) reduced to a statement about `ζ` alone. -/
+theorem nonempty_weilPairing_of_cover_of_values (p : S' ⟶ S)
+    [Flat p] [LocallyOfFinitePresentation p] [Surjective p]
+    (hinv : NIsInvertible S' N) (L : (E.baseChange p).FullLevelPt N)
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 })
+    (hval : ∀ vw,
+      (Scheme.Γ.map (E.pieceCoverPt p
+          (locConstPiece (jointReading E N p (E.coverTriv p hinv L) (E.coverTriv_htriv p hinv L)
+            (pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p))
+            (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+              (pullback.fst (E.torsionSqπ N) p))) vw)
+          (pullback.fst (pullback.fst (E.torsionSqπ N) p)
+            (pullback.fst (E.torsionSqπ N) p))).op).hom
+        (ζ : Γ(S', (⊤ : S'.Opens))) ^ (detFun N vw.1).val =
+      (Scheme.Γ.map (E.pieceCoverPt p
+          (locConstPiece (jointReading E N p (E.coverTriv p hinv L) (E.coverTriv_htriv p hinv L)
+            (pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p))
+            (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+              (pullback.fst (E.torsionSqπ N) p))) vw)
+          (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+            (pullback.fst (E.torsionSqπ N) p))).op).hom
+        (ζ : Γ(S', (⊤ : S'.Opens))) ^ (detFun N vw.2).val) :
+    ∃ e : pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N,
+      e ≫ muNπ S N = E.torsionSqπ N := by
+  refine nonempty_weilPairing_of_root_of_det E N p ζ (E.coverTriv p hinv L)
+    (E.coverTriv_htriv p hinv L) fun vw => ?_
+  have hp : (E.pieceCoverPt p _ (pullback.fst (pullback.fst (E.torsionSqπ N) p)
+        (pullback.fst (E.torsionSqπ N) p))) ≫ p =
+      (E.pieceCoverPt p (locConstPiece (jointReading E N p (E.coverTriv p hinv L)
+          (E.coverTriv_htriv p hinv L)
+          (pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p))
+          (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+            (pullback.fst (E.torsionSqπ N) p))) vw)
+        (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+          (pullback.fst (E.torsionSqπ N) p))) ≫ p := by
+    have hker : (pullback.fst (pullback.fst (E.torsionSqπ N) p)
+          (pullback.fst (E.torsionSqπ N) p)) ≫ pullback.fst (E.torsionSqπ N) p =
+        (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+          (pullback.fst (E.torsionSqπ N) p)) ≫ pullback.fst (E.torsionSqπ N) p :=
+      pullback.condition
+    have houter : pullback.fst (E.torsionSqπ N) p ≫ E.torsionSqπ N =
+        pullback.snd (E.torsionSqπ N) p ≫ p := pullback.condition
+    simp only [pieceCoverPt, Category.assoc, ← houter]
+    rw [reassoc_of% hker]
+  simpa only [pieceCoverPt, Category.assoc] using
+    comp_rootPower_muNMapAlong_eq N p ζ _ _ (detFun N vw.1) (detFun N vw.2) hp (hval vw)
 
 /-- **(route β, step 3, THE DESCENT)** An elliptic curve admits a Weil pairing as soon as it admits
 a trivialising fppf cover carrying a **full level structure** and an `N`-th root of unity, *and* the

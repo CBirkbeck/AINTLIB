@@ -37965,3 +37965,31 @@ The second is exactly the shape the piecewise argument consumes: on each clopen 
 
 Everything else on the path to DS4's first two register entries (invertible `N`) is proved and
 axiom-verified. Root green at **9731 jobs**.
+
+# ══════════════════════════════════════════════════════════════════════════
+# [route β] DS4 (invertible N) IS NOW A STATEMENT ABOUT ζ ALONE (2026-08-04)
+# ══════════════════════════════════════════════════════════════════════════
+
+**`nonempty_weilPairing_of_cover_of_values`** (`WeilPairing/FullLevelPairing.lean`, axiom-verified):
+
+> an elliptic curve admits a Weil pairing — DS4's `weilPairing` **and** `weilPairing_over` — as soon as
+> it admits a trivialising fppf cover carrying a **full level structure**, an `N`-th root of unity `ζ`
+> on the cover, and the purely **ring-theoretic** value equations
+> `Γ(α)(ζ) ^ (det vw.1).val = Γ(β)(ζ) ^ (det vw.2).val` on the clopen pieces of the joint
+> trivialisation reading.
+
+No schemes, no cocycles, no descent left in the hypothesis: `comp_rootPower_muNMapAlong_eq` converts
+each value equation into its instance of `hdet`, and the two points lie over the same point of the base
+because the kernel pair's projections agree after `→ E[N] ×_S E[N]` (`reassoc_of% pullback.condition`
+does that step). `pieceCoverPt` was introduced purely to keep the statement readable — the earlier
+inline version did not even parse.
+
+**Everything that remains is WP-D3d**: construct `ζ` satisfying those value equations. Its two halves
+are both in place —
+* the arithmetic: `fieldWeilPairing_det_of_galois` (the root transforms by `det` at the field level),
+  with `fullLevelPairing_eq_of_levelCoord` / `coverPairing_glSmul` as the scheme-level consumers;
+* the descent from the generic fibre: `WeilPairing/UniversalRootBase.lean`
+  (`exists_algebraMap_eq_of_pow_eq_one`, `pow_ne_one_of_algebraMap_eq`) on top of the componentwise
+  decomposition `WP-D3a-DOM` / `WP-D3a-FACTOR` / `WP-D3b`.
+
+Root green at **9731 jobs**; sorry-census unchanged (7, all the Weil register).
