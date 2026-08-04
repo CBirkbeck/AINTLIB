@@ -203,6 +203,21 @@ theorem withZero_inv_pow_cofinal_of_convexGenerated {y : Γ} (hy : 1 < y) :
   rw [← WithZero.coe_pow]
   exact WithZero.coe_lt_coe.mpr (Subtype.mk_lt_mk.mpr hn)
 
+/-- `withZero_inv_pow_cofinal_of_convexGenerated` with the generator presented directly as
+`u` rather than as `(u⁻¹)⁻¹`: for `u < 1`, the powers of `u` in
+`WithZero (convexGenerated hu).toSubgroup` are cofinal below every positive element. -/
+theorem withZero_pow_cofinal_of_mem_convexGenerated {u : Γ} (hu : 1 < u⁻¹)
+    (hmem : u ∈ convexGenerated hu) :
+    ∀ γ : WithZero (convexGenerated hu).toSubgroup, 0 < γ →
+      ∃ n : ℕ,
+        ((⟨u, hmem⟩ : (convexGenerated hu).toSubgroup) : WithZero _) ^ n < γ := by
+  intro γ hγ
+  obtain ⟨n, hn⟩ := withZero_inv_pow_cofinal_of_convexGenerated hu γ hγ
+  exact ⟨n, by
+    convert hn using 2
+    exact WithZero.coe_inj.mpr (Subtype.ext (inv_inv u).symm)⟩
+
+
 end ConvexSubgroup
 
 namespace PairOfDefinition

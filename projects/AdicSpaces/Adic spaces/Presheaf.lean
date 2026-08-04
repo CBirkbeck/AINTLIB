@@ -2262,6 +2262,75 @@ private theorem exists_continuous_valuation_of_span_eq_of_sup_eq_zero
     rw [hg_ne0] at h2; exact lt_of_le_of_lt h2 hγ
 
 
+/-- **Wedhorn Lemma 7.45**, in the generality its proof actually uses. Given
+
+* a valuation `v₀` on the ring of definition `P.A₀` bounded by `1`;
+* an element `t₀` of the ideal of definition with `v₀ t₀ ≠ 0` and `v₀ t₀ < 1`, dominating
+  `v₀` on all of `P.I`;
+* the comparison `v₀ ⟨t₀ ^ n * b, _⟩ ≤ v₀ (t₀ ^ n)` for every `b ∈ B`;
+* the strict comparison `v₀ ⟨t₀ ^ n, _⟩ < v₀ ⟨t₀ ^ n * x, _⟩`,
+
+there is a *continuous* valuation on `R` that is `≤ 1` on `B` and `> 1` at `x`.
+
+The construction coarsens `v₀` by `ConvexSubgroup.convexGenerated` — which is what makes the
+value group `MulArchimedean`, hence the continuity criterion applicable — and then extends
+from `P.A₀` to `R` via `exists_valuation_extension`.
+
+The four hypotheses are precisely how a valuation subring enters the caller. Stating them
+abstractly is what keeps `FractionRing`, the `ValuationSubring` and the integral closure out
+of this argument entirely. -/
+theorem exists_continuous_valuation_of_convexGenerated_data
+    {R : Type u} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
+    (P : PairOfDefinition R) (B : Subring R) (x : R)
+    {Γ₀ : Type u} [LinearOrderedCommGroupWithZero Γ₀]
+    (v₀ : Valuation P.A₀ Γ₀) (hle : ∀ a : P.A₀, v₀ a ≤ 1)
+    {t₀ : P.A₀} (ht₀_I : t₀ ∈ P.I) (hv₀_ne : v₀ t₀ ≠ 0) (hv₀_lt1 : v₀ t₀ < 1)
+    (hgen : ∀ a : P.A₀, a ∈ P.I → v₀ a ≤ v₀ t₀)
+    (hB : ∀ b ∈ B, ∀ (n : ℕ) (hn : (P.A₀.subtype t₀) ^ n * b ∈ P.A₀),
+      v₀ ⟨(P.A₀.subtype t₀) ^ n * b, hn⟩ ≤ v₀ (t₀ ^ n))
+    (hx : ∀ (n : ℕ) (_ : (P.A₀.subtype t₀) ^ n ∈ P.A₀)
+      (hn : (P.A₀.subtype t₀) ^ n * x ∈ P.A₀),
+      v₀ ⟨(P.A₀.subtype t₀) ^ n, P.A₀.pow_mem (Subtype.coe_prop t₀) n⟩ <
+        v₀ ⟨(P.A₀.subtype t₀) ^ n * x, hn⟩) :
+    ∃ (Γ : Type u) (_ : LinearOrderedCommGroupWithZero Γ) (wVal : Valuation R Γ),
+      (∀ b ∈ B, wVal b ≤ 1) ∧ 1 < wVal x ∧ wVal.IsContinuous := by
+  set u_max := Units.mk0 (v₀ t₀) hv₀_ne with u_max_def
+  have hu_inv_gt1 : (1 : Γ₀ˣ) < u_max⁻¹ :=
+    one_lt_inv_of_inv (show (u_max : Γ₀) < 1 from hv₀_lt1)
+  set H := ConvexSubgroup.convexGenerated hu_inv_gt1 with H_def
+  have hu_mem : u_max ∈ H := by
+    rw [show u_max = (u_max⁻¹)⁻¹ from (inv_inv u_max).symm]
+    exact inv_mem (ConvexSubgroup.self_mem_convexGenerated hu_inv_gt1)
+  set v_r := v₀.restrictToConvex H hle with v_r_def
+  have hv_r_ne : v_r t₀ ≠ 0 :=
+    ne_of_gt (Valuation.restrictToConvex_pos_of_mem v₀ H hle hv₀_ne hu_mem)
+  set s := (P.A₀.subtype t₀ : R) with s_def
+  have hs_nil : IsTopologicallyNilpotent s := P.isTopologicallyNilpotent_of_mem ht₀_I
+  have hs_A₀ : s ∈ P.A₀ := Subtype.coe_prop t₀
+  obtain ⟨v_ext, ⟨h_ext, h_ext_at⟩⟩ :=
+    PairOfDefinition.exists_valuation_extension P v_r hs_A₀ hs_nil hv_r_ne
+  refine ⟨WithZero H.toSubgroup, inferInstance, v_ext, ?_, ?_, ?_⟩
+  · intro b hb
+    obtain ⟨n, hn⟩ := P.exists_pow_mul_mem_A₀ hs_nil b
+    rw [h_ext_at b n hn]
+    exact Valuation.restrictToConvex_mul_inv_pow_le_one v₀ H hle
+      (Subtype.ext rfl) hv₀_ne hu_mem (hB b hb n hn)
+  · obtain ⟨n, hn⟩ := P.exists_pow_mul_mem_A₀ hs_nil x
+    rw [h_ext_at x n hn]
+    exact Valuation.one_lt_restrictToConvex_mul_inv_pow v₀ H hle
+      (Subtype.ext rfl) (Subtype.ext rfl) hv₀_ne hu_mem
+      (hx n (P.A₀.pow_mem (Subtype.coe_prop t₀) n) hn)
+  · set g_cont : WithZero H.toSubgroup :=
+      ((⟨u_max, hu_mem⟩ : H.toSubgroup) : WithZero H.toSubgroup) with g_cont_def
+    have hg_bound : ∀ a : P.A₀, a ∈ P.I → v_ext (P.A₀.subtype a) ≤ g_cont := fun a ha ↦ by
+      rw [h_ext a]
+      exact Valuation.restrictToConvex_le_coe_of_le v₀ H hle hu_mem (hgen a ha)
+    have h_le_ext : ∀ a : P.A₀, v_ext (P.A₀.subtype a) ≤ 1 := fun a ↦ by
+      rw [h_ext a]; exact Valuation.restrictToConvex_le_one v₀ H hle a
+    have h_cofinal : ∀ γ : WithZero H.toSubgroup, 0 < γ → ∃ n : ℕ, g_cont ^ n < γ :=
+      ConvexSubgroup.withZero_pow_cofinal_of_mem_convexGenerated hu_inv_gt1 hu_mem
+    exact Valuation.isContinuous_of_le_one_and_pow_cofinal P v_ext h_le_ext hg_bound h_cofinal
+
 /-- **Phases B and C of Wedhorn Lemma 7.18**, the standard case: given a valuation subring
 `V` that dominates the integral closure of `B`, misses `x`, and is `< 1` on the ideal of
 definition, and given a NONEMPTY generating set `S` of `P.I`, the comap of `V.valuation`
@@ -2291,161 +2360,52 @@ theorem exists_continuous_valuation_of_valuationSubring_of_span_eq
       (∀ b ∈ B, wVal b ≤ 1) ∧ 1 < wVal x ∧ wVal.IsContinuous := by
   let ι := algebraMap R (FractionRing R)
   let K := FractionRing R
-  -- g_max < 1 strictly from hI_lt_one.
+  -- g_max, the largest value of V on the chosen generators of P.I, is < 1 by hI_lt_one.
   set g_max := S.sup' hSne (fun s ↦ V.valuation (ι (P.A₀.subtype s)))
   have hg_lt1 : g_max < 1 := by
     rw [Finset.sup'_lt_iff]
     intro s hs
     exact hI_lt_one s (hS ▸ Ideal.subset_span (Finset.mem_coe.mpr hs))
-  -- Need g_max ≠ 0 for the Units.mk0 construction.
-  -- g_max = 0 iff ALL generators map to support of V. This would mean
-  -- P.I maps entirely to supp(V), so the ideal of definition has no
-  -- "non-trivial" topologically nilpotent element modulo supp(V).
-  -- For now, handle via sorry (minor edge case).
+  have hle_gen : ∀ t ∈ S, (fun t ↦ V.valuation (ι (P.A₀.subtype t))) t ≤ g_max :=
+    fun t ht ↦ Finset.le_sup' (f := fun t ↦ V.valuation (ι (P.A₀.subtype t))) ht
+  -- g_max = 0 means every generator lands in supp V, and the ideal of definition carries no
+  -- information; that degenerate branch needs none of the coarsening below.
   by_cases hg_ne0 : g_max = 0
   · exact exists_continuous_valuation_of_span_eq_of_sup_eq_zero P hA₀B x V hV_le
-      hx_notV hS g_max hg_ne0
-      (fun s hs ↦ Finset.le_sup' (f := fun s ↦ V.valuation (ι (P.A₀.subtype s))) hs)
-  · -- Main case: g_max ≠ 0 and g_max < 1.
-    -- Following Lemma 7.45: restrictToConvex on A₀ + extend to R.
-    -- Step 1: Build v₀ on A₀ and prove it's ≤ 1.
+      hx_notV hS g_max hg_ne0 hle_gen
+  · -- Main case. Everything V contributes below is one of the four facts that
+    -- `exists_continuous_valuation_of_convexGenerated_data` asks for.
     set v₀_A₀ : Valuation P.A₀ V.ValueGroup :=
       (V.valuation.comap ι).comap P.A₀.subtype with v₀_A₀_def
     have hle_A₀ : ∀ (a : P.A₀), v₀_A₀ a ≤ 1 := fun a ↦ by
       change V.valuation (ι (P.A₀.subtype a)) ≤ 1
       rw [ValuationSubring.valuation_le_one_iff]
       exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨_, hA₀B a.property⟩)
-    -- Step 2: Find generator achieving g_max.
     obtain ⟨t₀, ht₀_S, ht₀_val⟩ :=
-      Finset.exists_mem_eq_sup' hSne (fun s ↦ V.valuation (ι (P.A₀.subtype s)))
+      Finset.exists_mem_eq_sup' hSne (fun t ↦ V.valuation (ι (P.A₀.subtype t)))
     have ht₀_I : t₀ ∈ P.I := hS ▸ Ideal.subset_span (Finset.mem_coe.mpr ht₀_S)
     have ha₀_val_eq : v₀_A₀ t₀ = g_max := ht₀_val.symm
     have hv₀_ne : v₀_A₀ t₀ ≠ 0 := ha₀_val_eq ▸ hg_ne0
-    -- Step 3: Define u_max, H_gen, v_r.
-    set u_max := Units.mk0 g_max hg_ne0
-    have hu_lt1 : (u_max : V.ValueGroup) < 1 := hg_lt1
-    have hu_inv_gt1 : (1 : V.ValueGroupˣ) < u_max⁻¹ := one_lt_inv_of_inv hu_lt1
-    set H_gen := ConvexSubgroup.convexGenerated hu_inv_gt1
-    have hu_mem : u_max ∈ H_gen := by
-      rw [show u_max = (u_max⁻¹)⁻¹ from (inv_inv u_max).symm]
-      exact inv_mem (ConvexSubgroup.self_mem_convexGenerated hu_inv_gt1)
-    have hu_a₀_mem : Units.mk0 (v₀_A₀ t₀) hv₀_ne ∈ H_gen :=
-      (Units.ext ha₀_val_eq : Units.mk0 (v₀_A₀ t₀) hv₀_ne = u_max) ▸ hu_mem
-    set v_r := v₀_A₀.restrictToConvex H_gen hle_A₀ with v_r_def
-    -- Step 4: v_r(t₀) ≠ 0 and topological nilpotency.
-    have hv_r_ne : v_r t₀ ≠ 0 := ne_of_gt
-      (Valuation.restrictToConvex_pos_of_mem v₀_A₀ H_gen hle_A₀ hv₀_ne hu_a₀_mem)
-    set s := (P.A₀.subtype t₀ : R)
-    have hs_nil : IsTopologicallyNilpotent s := P.isTopologicallyNilpotent_of_mem ht₀_I
-    have hs_A₀ : s ∈ P.A₀ := Subtype.coe_prop t₀
-    -- Step 5: Extend v_r from A₀ to R.
-    obtain ⟨v_ext, ⟨h_ext, h_ext_at⟩⟩ :=
-      PairOfDefinition.exists_valuation_extension P v_r hs_A₀ hs_nil hv_r_ne
-    -- Step 6: Package the result.
-    refine ⟨WithZero H_gen.toSubgroup, inferInstance, v_ext, ?_, ?_, ?_⟩
-    · -- v_ext ≤ 1 on B.
-      intro b hb
-      obtain ⟨n, hn⟩ := P.exists_pow_mul_mem_A₀ hs_nil b
-      rw [h_ext_at b n hn]
-      have hval_b : V.valuation (ι b) ≤ 1 :=
+    set s := (P.A₀.subtype t₀ : R) with s_def
+    refine exists_continuous_valuation_of_convexGenerated_data P B x v₀_A₀ hle_A₀
+      ht₀_I hv₀_ne (ha₀_val_eq.trans_lt hg_lt1) (fun a ha ↦ ?_) (fun b hb n hn ↦ ?_)
+      (fun n _ hn ↦ ?_)
+    · exact (PairOfDefinition.valuation_le_on_ideal_of_le_on_generators
+        (V.valuation.comap ι) hle_A₀ hS hle_gen ha).trans_eq ha₀_val_eq.symm
+    · have hval_b : V.valuation (ι b) ≤ 1 :=
         (ValuationSubring.valuation_le_one_iff V _).mpr
           (hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨b, hb⟩))
-      have hb_le : v₀_A₀ ⟨s ^ n * b, hn⟩ ≤ v₀_A₀ (t₀ ^ n) := by
-        change V.valuation (ι (s ^ n * b)) ≤ V.valuation (ι (P.A₀.subtype (t₀ ^ n)))
-        simp only [map_mul, map_pow, Subring.coe_subtype]
-        calc V.valuation (ι s) ^ n * V.valuation (ι b)
-            ≤ V.valuation (ι s) ^ n * 1 := mul_le_mul_right hval_b _
-          _ = V.valuation (ι s) ^ n := mul_one _
-      have ht_pow_ne : v₀_A₀ (t₀ ^ n) ≠ 0 := by
-        rw [show (t₀ ^ n : P.A₀) = t₀ ^ n from rfl, map_pow]
-        exact pow_ne_zero n hv₀_ne
-      have ht_pow_mem : Units.mk0 (v₀_A₀ (t₀ ^ n)) ht_pow_ne ∈ H_gen := by
-        have : Units.mk0 (v₀_A₀ (t₀ ^ n)) ht_pow_ne =
-            (Units.mk0 (v₀_A₀ t₀) hv₀_ne) ^ n :=
-          Units.ext (map_pow v₀_A₀ t₀ n)
-        rw [this]; exact Subgroup.pow_mem H_gen.toSubgroup hu_a₀_mem n
-      have h_mono : v_r ⟨s ^ n * b, hn⟩ ≤ v_r (t₀ ^ n) :=
-        Valuation.restrictToConvex_mono_of_le_one v₀_A₀ H_gen hle_A₀
-          hb_le ht_pow_ne ht_pow_mem
-      have hv_r_pow : v_r (t₀ ^ n) = v_r t₀ ^ n := map_pow v_r t₀ n
-      have hcancel : v_r t₀ ^ n * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n = 1 := by
-        have : ⟨s, hs_A₀⟩ = t₀ := Subtype.ext rfl
-        rw [this, ← mul_pow, mul_inv_cancel₀ hv_r_ne, one_pow]
-      calc v_r ⟨s ^ n * b, hn⟩ * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n
-          ≤ v_r (t₀ ^ n) * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by
-            apply mul_le_mul_left h_mono
-        _ = v_r t₀ ^ n * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by rw [hv_r_pow]
-        _ = 1 := hcancel
-    · -- 1 < v_ext(x): use extension formula.
-      obtain ⟨n, hn⟩ := P.exists_pow_mul_mem_A₀ hs_nil x
-      rw [h_ext_at x n hn]
-      have hsn_A₀ : s ^ n ∈ P.A₀ := P.A₀.pow_mem (Subtype.coe_prop t₀) n
-      have hsn_eq : (⟨s ^ n, hsn_A₀⟩ : P.A₀) = t₀ ^ n := Subtype.ext rfl
-      have hv₀_lt : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ < v₀_A₀ ⟨s ^ n * x, hn⟩ := by
-        change V.valuation (ι (s ^ n)) < V.valuation (ι (s ^ n * x))
-        rw [show ι (s ^ n * x) = ι s ^ n * ι x by rw [map_mul, map_pow],
-            show ι (s ^ n) = ι s ^ n from map_pow ι s n, map_mul, map_pow]
-        exact lt_mul_of_one_lt_right
-          (pow_pos (zero_lt_iff.mpr (ha₀_val_eq ▸ hg_ne0)) n)
-          (not_le.mp (by rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV))
-      have hsnx_ne : v₀_A₀ ⟨s ^ n * x, hn⟩ ≠ 0 :=
-        ne_of_gt (lt_of_le_of_lt zero_le hv₀_lt)
-      have hv₀_sn_eq : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ = (v₀_A₀ t₀) ^ n :=
-        hsn_eq ▸ map_pow v₀_A₀ t₀ n
-      have hsn_ne : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ ≠ 0 := by
-        rw [hv₀_sn_eq]; exact pow_ne_zero n hv₀_ne
-      have hsn_mem : Units.mk0 (v₀_A₀ ⟨s ^ n, hsn_A₀⟩) hsn_ne ∈ H_gen := by
-        have heq : Units.mk0 (v₀_A₀ ⟨s ^ n, hsn_A₀⟩) hsn_ne =
-            (Units.mk0 (v₀_A₀ t₀) hv₀_ne) ^ n := Units.ext hv₀_sn_eq
-        rw [heq]; exact Subgroup.pow_mem H_gen.toSubgroup hu_a₀_mem n
-      have hsnx_mem : Units.mk0 (v₀_A₀ ⟨s ^ n * x, hn⟩) hsnx_ne ∈ H_gen :=
-        H_gen.convex hsn_mem (one_mem H_gen)
-          (Units.val_le_val.mp hv₀_lt.le) (Units.val_le_val.mp (hle_A₀ _))
-      have h_r_lt : v_r ⟨s ^ n, hsn_A₀⟩ < v_r ⟨s ^ n * x, hn⟩ := by
-        have h1 : v_r ⟨s ^ n, hsn_A₀⟩ =
-            v₀_A₀.restrictToConvex H_gen hle_A₀ ⟨s ^ n, hsn_A₀⟩ := rfl
-        have h2 : v_r ⟨s ^ n * x, hn⟩ =
-            v₀_A₀.restrictToConvex H_gen hle_A₀ ⟨s ^ n * x, hn⟩ := rfl
-        rw [h1, Valuation.restrictToConvex_unfold, dif_neg hsn_ne, dif_pos hsn_mem,
-            h2, Valuation.restrictToConvex_unfold, dif_neg hsnx_ne, dif_pos hsnx_mem]
-        exact WithZero.coe_lt_coe.mpr (Subtype.mk_lt_mk.mpr (Units.val_lt_val.mp hv₀_lt))
-      have hvr_sn : v_r ⟨s ^ n, hsn_A₀⟩ = (v_r ⟨s, hs_A₀⟩) ^ n := by
-        rw [show (⟨s ^ n, hsn_A₀⟩ : P.A₀) = ⟨s, hs_A₀⟩ ^ n from Subtype.ext rfl, map_pow]
-      have hvr_s_eq : v_r ⟨s, hs_A₀⟩ = v_r t₀ := congrArg v_r (Subtype.ext rfl)
-      calc 1 = (v_r ⟨s, hs_A₀⟩) ^ n * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by
-              rw [← mul_pow, hvr_s_eq, mul_inv_cancel₀ hv_r_ne, one_pow]
-        _ = v_r ⟨s ^ n, hsn_A₀⟩ * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by rw [hvr_sn]
-        _ < v_r ⟨s ^ n * x, hn⟩ * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by
-            apply mul_lt_mul_of_pos_right h_r_lt
-            exact pow_pos (inv_pos_of_pos (zero_lt_iff.mpr hv_r_ne)) n
-    · -- Continuity via isContinuous_of_le_one_and_pow_cofinal.
-      set g_cont : WithZero H_gen.toSubgroup :=
-        ((⟨u_max, hu_mem⟩ : H_gen.toSubgroup) : WithZero H_gen.toSubgroup)
-      have hg_bound : ∀ a : P.A₀, a ∈ P.I → v_ext (P.A₀.subtype a) ≤ g_cont := by
-        intro a ha; rw [h_ext a, v_r_def]
-        by_cases hv_eq : v₀_A₀ a = 0
-        · rw [Valuation.restrictToConvex_unfold, dif_pos hv_eq]; exact bot_le
-        · by_cases hm : Units.mk0 (v₀_A₀ a) hv_eq ∈ H_gen
-          · rw [Valuation.restrictToConvex_unfold, dif_neg hv_eq, dif_pos hm]
-            exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr
-              (Units.val_le_val.mp (PairOfDefinition.valuation_le_on_ideal_of_le_on_generators
-                (V.valuation.comap ι) (fun a ↦ hle_A₀ a) hS
-                (fun t ht ↦ Finset.le_sup'
-                  (f := fun t ↦ V.valuation (ι (P.A₀.subtype t))) ht) ha)))
-          · rw [Valuation.restrictToConvex_unfold, dif_neg hv_eq, dif_neg hm]; exact bot_le
-      have h_le_ext : ∀ a : P.A₀, v_ext (P.A₀.subtype a) ≤ 1 := by
-        intro a; rw [h_ext a]
-        exact Valuation.restrictToConvex_le_one v₀_A₀ H_gen hle_A₀ a
-      have h_cofinal : ∀ γ : WithZero H_gen.toSubgroup, 0 < γ →
-          ∃ n : ℕ, g_cont ^ n < γ := by
-        intro γ hγ
-        obtain ⟨n, hn⟩ := ConvexSubgroup.withZero_inv_pow_cofinal_of_convexGenerated
-          hu_inv_gt1 γ hγ
-        exact ⟨n, by
-          convert hn using 2
-          exact WithZero.coe_inj.mpr (Subtype.ext (inv_inv u_max).symm)⟩
-      exact Valuation.isContinuous_of_le_one_and_pow_cofinal P v_ext h_le_ext
-        hg_bound h_cofinal
+      change V.valuation (ι (s ^ n * b)) ≤ V.valuation (ι (P.A₀.subtype (t₀ ^ n)))
+      simp only [map_mul, map_pow, Subring.coe_subtype]
+      calc V.valuation (ι s) ^ n * V.valuation (ι b)
+          ≤ V.valuation (ι s) ^ n * 1 := mul_le_mul_right hval_b _
+        _ = V.valuation (ι s) ^ n := mul_one _
+    · change V.valuation (ι (s ^ n)) < V.valuation (ι (s ^ n * x))
+      rw [show ι (s ^ n * x) = ι s ^ n * ι x by rw [map_mul, map_pow],
+          show ι (s ^ n) = ι s ^ n from map_pow ι s n, map_mul, map_pow]
+      exact lt_mul_of_one_lt_right
+        (pow_pos (zero_lt_iff.mpr hv₀_ne) n)
+        (not_le.mp (by rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV))
 
 /-- **Wedhorn Lemma 7.18 / [Hu2] Lemma 3.3**: if `x` is not integral over the open subring
 `B` — equivalently, its image misses the integral closure of `B` in `Frac R` — then some

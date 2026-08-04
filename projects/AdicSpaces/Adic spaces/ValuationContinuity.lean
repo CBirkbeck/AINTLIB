@@ -807,6 +807,81 @@ theorem restrictToConvex_mono_of_le_one
       exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr (Units.val_le_val.mp hab))
     · rw [restrictToConvex_unfold, dif_neg ha_ne, dif_neg ha_mem]; exact bot_le
 
+/-- The normalised value `v_r a * (v_r s)⁻¹ ^ n` is at most `1` whenever `v a ≤ v (t₀ ^ n)`
+and `v t₀` lies in the convex subgroup `H`, where `v_r = v.restrictToConvex H hle` and
+`s = t₀`. This is the bound behind the "`≤ 1` on the ring of definition" leg of the
+`vExtFun` construction. -/
+theorem restrictToConvex_mul_inv_pow_le_one
+    (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ) (hle : ∀ r : R, v r ≤ 1)
+    {t₀ s a : R} {n : ℕ} (hs : s = t₀)
+    (ht₀_ne : v t₀ ≠ 0) (ht₀_mem : Units.mk0 (v t₀) ht₀_ne ∈ H)
+    (ha_le : v a ≤ v (t₀ ^ n)) :
+    v.restrictToConvex H hle a * (v.restrictToConvex H hle s)⁻¹ ^ n ≤ 1 := by
+  have ht_pow_ne : v (t₀ ^ n) ≠ 0 := by rw [map_pow]; exact pow_ne_zero n ht₀_ne
+  have ht_pow_mem : Units.mk0 (v (t₀ ^ n)) ht_pow_ne ∈ H := by
+    have heq : Units.mk0 (v (t₀ ^ n)) ht_pow_ne = (Units.mk0 (v t₀) ht₀_ne) ^ n :=
+      Units.ext (map_pow v t₀ n)
+    rw [heq]; exact Subgroup.pow_mem H.toSubgroup ht₀_mem n
+  have h_mono : v.restrictToConvex H hle a ≤ v.restrictToConvex H hle (t₀ ^ n) :=
+    restrictToConvex_mono_of_le_one v H hle ha_le ht_pow_ne ht_pow_mem
+  have hv_r_ne : v.restrictToConvex H hle t₀ ≠ 0 :=
+    ne_of_gt (restrictToConvex_pos_of_mem v H hle ht₀_ne ht₀_mem)
+  calc v.restrictToConvex H hle a * (v.restrictToConvex H hle s)⁻¹ ^ n
+      ≤ v.restrictToConvex H hle (t₀ ^ n) * (v.restrictToConvex H hle s)⁻¹ ^ n := by
+        apply mul_le_mul_left h_mono
+    _ = v.restrictToConvex H hle t₀ ^ n * (v.restrictToConvex H hle s)⁻¹ ^ n := by
+        rw [map_pow]
+    _ = 1 := by rw [hs, ← mul_pow, mul_inv_cancel₀ hv_r_ne, one_pow]
+
+/-- Companion of `restrictToConvex_mul_inv_pow_le_one` for the strict lower bound: if
+`v sn < v a` where `sn = t₀ ^ n`, then `1 < v_r a * (v_r s)⁻¹ ^ n`. This is the
+"`1 < v_ext x`" leg of the `vExtFun` construction. -/
+theorem one_lt_restrictToConvex_mul_inv_pow
+    (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ) (hle : ∀ r : R, v r ≤ 1)
+    {t₀ s sn a : R} {n : ℕ} (hs : s = t₀) (hsn : sn = t₀ ^ n)
+    (ht₀_ne : v t₀ ≠ 0) (ht₀_mem : Units.mk0 (v t₀) ht₀_ne ∈ H)
+    (hlt : v sn < v a) :
+    1 < v.restrictToConvex H hle a * (v.restrictToConvex H hle s)⁻¹ ^ n := by
+  have ha_ne : v a ≠ 0 := ne_of_gt (lt_of_le_of_lt zero_le hlt)
+  have hsn_eq : v sn = v t₀ ^ n := by rw [hsn, map_pow]
+  have hsn_ne : v sn ≠ 0 := by rw [hsn_eq]; exact pow_ne_zero n ht₀_ne
+  have hsn_mem : Units.mk0 (v sn) hsn_ne ∈ H := by
+    have heq : Units.mk0 (v sn) hsn_ne = (Units.mk0 (v t₀) ht₀_ne) ^ n := Units.ext hsn_eq
+    rw [heq]; exact Subgroup.pow_mem H.toSubgroup ht₀_mem n
+  have ha_mem : Units.mk0 (v a) ha_ne ∈ H :=
+    H.convex hsn_mem (one_mem H) (Units.val_le_val.mp hlt.le) (Units.val_le_val.mp (hle _))
+  have h_r_lt : v.restrictToConvex H hle sn < v.restrictToConvex H hle a := by
+    rw [restrictToConvex_unfold, dif_neg hsn_ne, dif_pos hsn_mem,
+        restrictToConvex_unfold, dif_neg ha_ne, dif_pos ha_mem]
+    exact WithZero.coe_lt_coe.mpr (Subtype.mk_lt_mk.mpr (Units.val_lt_val.mp hlt))
+  have hvr_sn : v.restrictToConvex H hle sn = (v.restrictToConvex H hle s) ^ n := by
+    rw [hsn, hs, map_pow]
+  have hv_r_ne : v.restrictToConvex H hle s ≠ 0 := by
+    rw [hs]; exact ne_of_gt (restrictToConvex_pos_of_mem v H hle ht₀_ne ht₀_mem)
+  calc 1 = (v.restrictToConvex H hle s) ^ n * (v.restrictToConvex H hle s)⁻¹ ^ n := by
+          rw [← mul_pow, mul_inv_cancel₀ hv_r_ne, one_pow]
+    _ = v.restrictToConvex H hle sn * (v.restrictToConvex H hle s)⁻¹ ^ n := by rw [hvr_sn]
+    _ < v.restrictToConvex H hle a * (v.restrictToConvex H hle s)⁻¹ ^ n := by
+        apply mul_lt_mul_of_pos_right h_r_lt
+        exact pow_pos (inv_pos_of_pos (zero_lt_iff.mpr hv_r_ne)) n
+
+/-- If `v a` is bounded by a unit `u` of the value group that lies in `H`, then
+`v.restrictToConvex H hle a` is bounded by the image of `u` in `WithZero H.toSubgroup`.
+This is the "bounded on the ideal of definition" input to
+`isContinuous_of_le_one_and_pow_cofinal`. -/
+theorem restrictToConvex_le_coe_of_le
+    (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ) (hle : ∀ r : R, v r ≤ 1)
+    {a : R} {u : Γ₀ˣ} (hu : u ∈ H) (ha_le : v a ≤ (u : Γ₀)) :
+    v.restrictToConvex H hle a ≤ ((⟨u, hu⟩ : H.toSubgroup) : WithZero H.toSubgroup) := by
+  by_cases hv_eq : v a = 0
+  · rw [restrictToConvex_unfold, dif_pos hv_eq]; exact bot_le
+  · by_cases hm : Units.mk0 (v a) hv_eq ∈ H
+    · rw [restrictToConvex_unfold, dif_neg hv_eq, dif_pos hm]
+      exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr (Units.val_le_val.mp ha_le))
+    · rw [restrictToConvex_unfold, dif_neg hv_eq, dif_neg hm]; exact bot_le
+
+
+
 end RestrictToConvexAPI
 
 end Valuation

@@ -15621,3 +15621,50 @@ That is the fourth indentation-class bug in this campaign (after two dedent-by-4
 one column-0 `have`). The through-line: **every one was a substitution whose text was correct and
 whose position was not.** Term mode, where it applies, removes the failure mode rather than
 guarding against it.
+
+### `exists_continuous_valuation_…_span_eq` CLEARED: 167 → 44
+
+Six declarations, none over 36. Four of them are general API that landed in the file that
+owns the concept, not in `Presheaf.lean` where the proof happened to need them:
+
+| decl | file | c |
+|---|---|---|
+| `restrictToConvex_mul_inv_pow_le_one` | ValuationContinuity | 15 |
+| `one_lt_restrictToConvex_mul_inv_pow` | ValuationContinuity | 22 |
+| `restrictToConvex_le_coe_of_le` | ValuationContinuity | 6 |
+| `withZero_pow_cofinal_of_mem_convexGenerated` | Lemma745 | 12 |
+| `exists_continuous_valuation_of_convexGenerated_data` | Presheaf | 36 |
+| `exists_continuous_valuation_of_span_eq_of_sup_eq_zero` | Presheaf | 24 |
+| **target** | Presheaf | **44** |
+
+**THE SEAM WAS NOT WHERE THE BULLETS WERE.** My committed plan said "four lifts, one per
+`refine` leg, target → ≈42". Reading the legs showed that was wrong: each leg mixes two
+different kinds of reasoning, and lifting a leg *whole* drags the entire `set`-preamble
+(`v₀_A₀`, `H_gen`, `v_r`, `u_max`, `s`, `t₀` and eight supporting facts) into the signature —
+the same preamble wall that blocks six other targets on this board.
+
+The legs split cleanly one level down instead. Each is a short `V`-specific head — "this
+valuation of the fraction field compares thus" — followed by a long tail that is pure
+`restrictToConvex` algebra and never mentions `V`, `FractionRing` or the integral closure.
+The tails are lemmas A–D above; they are the general statements, so they belong in
+`ValuationContinuity.lean` next to `restrictToConvex_mono_of_le_one`, and are now available
+to any consumer rather than buried in one proof.
+
+That got 167 → 92, still over. The finish was the *other* direction:
+
+> **Abstract the ambient object, not the syntax.** `V` appears throughout the `g_max ≠ 0`
+> branch, but only ever through four facts: `v₀ ≤ 1`, and one comparison each at `B`, at `x`,
+> and on the ideal. Taking `v₀ : Valuation P.A₀ Γ₀` as a parameter and those four as
+> hypotheses makes the valuation subring, the fraction field and the integral closure vanish
+> from the branch entirely.
+
+What comes out is Wedhorn 7.45 in the generality its proof actually has, instead of the
+`ValuationSubring`-specialised form it was written in. The preamble wall dissolved because
+the preamble was never the obstacle — `v₀_A₀` only needed to be *spelled out* while it was
+required to be a specific comap; as a parameter it is opaque and the `set` block travels
+with the abstract lemma.
+
+Universe note: `Γ₀` must be in `R`'s universe, since the conclusion existentially quantifies
+`Γ : Type u`. Auto-bound `u` handles this as long as both binders name it — which is why the
+abstract lemma sits in `Presheaf.lean` (where `{R : Type u}` is the idiom) rather than in
+`Lemma745.lean`, whose `variable` block is `Type*`.
