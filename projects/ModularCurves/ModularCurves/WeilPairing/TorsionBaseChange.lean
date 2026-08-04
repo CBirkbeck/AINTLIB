@@ -141,6 +141,38 @@ theorem isPullback_torsion_baseChange_specAlgebraMap :
     congr 1
     exact (Scheme.ΓSpecIso_inv_naturality (CommRingCat.ofHom (algebraMap k k'))).symm
 
+/-- **(WP-D3c-2c step 4)** The comparison of apexes: `Spec` of the base-changed torsion's
+coordinate ring is `Spec` of the tensor product.
+
+`IsPullback.isoIsPullback` applied to step 3c's square and the standard pullback of the same
+two legs, then `pullbackSpecIso` to name the latter. -/
+noncomputable def specTorsionBaseChangeIso :
+    Spec Γ((E.baseChange (Spec.map (CommRingCat.ofHom (algebraMap k k')))).torsion N, ⊤) ≅
+      Spec (CommRingCat.of (TensorProduct k Γ(E.torsion N, ⊤) k')) :=
+  (IsPullback.isoIsPullback _ _
+      (isPullback_torsion_baseChange_specAlgebraMap k E N k')
+      (IsPullback.of_hasPullback
+        (Spec.map (CommRingCat.ofHom (algebraMap k Γ(E.torsion N, ⊤))))
+        (Spec.map (CommRingCat.ofHom (algebraMap k k'))))).trans
+    (AlgebraicGeometry.pullbackSpecIso k Γ(E.torsion N, ⊤) k')
+
+/-- **(WP-D3c-2c, THE RESULT)** The torsion algebra's carrier commutes with base change of the
+field: as rings,
+
+`Γ(E_{k'}[N], ⊤)  ≅  Γ(E[N], ⊤) ⊗[k] k'`.
+
+`Scheme.Γ` applied to `specTorsionBaseChangeIso`, read through `Scheme.ΓSpecIso` — the same
+final move as `muNCarrierRingEquiv`. Together with `muNCarrierBaseChange`
+(`WeilPairing/MuNBaseChange.lean`) this is both carriers of the field-change transport. -/
+noncomputable def torsionCarrierBaseChange :
+    Γ((E.baseChange (Spec.map (CommRingCat.ofHom (algebraMap k k')))).torsion N, ⊤) ≃+*
+      TensorProduct k Γ(E.torsion N, ⊤) k' :=
+  ((Scheme.ΓSpecIso
+        Γ((E.baseChange (Spec.map (CommRingCat.ofHom (algebraMap k k')))).torsion N, ⊤)).symm.trans
+      ((Scheme.Γ.mapIso (specTorsionBaseChangeIso k E N k').symm.op).trans
+        (Scheme.ΓSpecIso
+          (CommRingCat.of (TensorProduct k Γ(E.torsion N, ⊤) k'))))).commRingCatIsoToRingEquiv
+
 end Carrier
 
 end ModularCurves

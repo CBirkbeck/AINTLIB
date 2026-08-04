@@ -1,1 +1,1 @@
-FOCUS: WP-D3c-2c step 3c — rewrite both legs into algebraMap form (GammaSpecIso naturality), then isoIsPullback against pullbackSpecIso
+FOCUS: WP-D3c-2c COMPLETE (torsionCarrierBaseChange green) — axiom-verify, commit, then WP-D3c step 2 (field-change naturality of fieldWeilPairingHom via uniqueness)
