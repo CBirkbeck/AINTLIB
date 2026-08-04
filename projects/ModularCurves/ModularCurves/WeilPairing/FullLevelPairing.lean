@@ -415,6 +415,30 @@ theorem coverTriv_htriv (p : S' ⟶ S) (hinv : NIsInvertible S' N)
     Iso.inv_comp_eq]
   exact (E.isPullback_torsionSq_baseChange N p).isoPullback_hom_snd.symm
 
+/-- **(route β, item (A))** The *tautological reading* of the cover trivialisation: `coverTriv.hom`
+is itself a point of `constScheme S' (V × V)` over `pullback.snd` (that is exactly
+`coverTriv_htriv`), so it has a locally constant label, and **every** reading appearing in
+`jointReading` is a `comap` of this one. -/
+noncomputable def coverTrivReading (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N) :
+    LocallyConstant ((pullback (E.torsionSqπ N) p : Scheme.{u}) : Type u)
+      ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) :=
+  constSchemePointsEquiv S' ((Fin 2 → ZMod N) × (Fin 2 → ZMod N))
+    (pullback.snd (E.torsionSqπ N) p)
+    ⟨(E.coverTriv p hinv L).hom, E.coverTriv_htriv p hinv L⟩
+
+/- …and each reading appearing in `jointReading` is the `comap` of this one:
+
+  `constSchemePointsEquiv S' (V × V) (k ≫ pullback.snd _ p) ⟨k ≫ coverTriv.hom, _⟩
+     = (coverTrivReading p hinv L).comap k.base.hom`,
+
+which is literally `constSchemePointsEquiv_natural S' (V × V) (pullback.snd _ p) k _`
+(`GroupScheme/MuN.lean:439`). Stating it as a theorem here times out at `isDefEq` — the unification
+against `constSchemePointsEquiv_natural`'s statement is heavy at this instantiation. Next attempt:
+either apply it *at the use site* (where `k` is a concrete projection of the kernel pair, so the
+unifier has more to work with), or introduce the point `⟨coverTriv.hom, coverTriv_htriv⟩` as a named
+abbreviation first so that the `Subtype.mk` is not re-elaborated. -/
+
 /-- **(route β, the two lines converge)** The cover pairing *is* the local determinant pairing of
 `WeilPairing/RootSplitting.lean` for the trivialisation `coverTriv`.
 

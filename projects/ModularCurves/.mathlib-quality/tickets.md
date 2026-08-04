@@ -37720,3 +37720,19 @@ pair by `gl2Both g` when the `S'`-point moves by the transition `g`** — the po
 
 closes `hdet`, hence `nonempty_weilPairing_of_cover_of_cocycle`, hence DS4's first two register
 entries for invertible `N`. Everything else on the path is proved.
+
+### [route β] `coverTrivReading` landed (2026-08-04) — axiom-verified
+
+**`coverTrivReading`** (`WeilPairing/FullLevelPairing.lean`): the tautological reading of the cover
+trivialisation, `constSchemePointsEquiv` applied to `⟨coverTriv.hom, coverTriv_htriv⟩`.
+
+One elaboration note: `LocallyConstant (pullback (E.torsionSqπ N) p) _` does **not** elaborate — Lean
+picks `pullback` in `Type` (the `types` category) because `LocallyConstant` wants a topological space,
+and then fails to synthesise `TopologicalSpace`. Ascribing
+`((pullback (E.torsionSqπ N) p : Scheme.{u}) : Type u)` forces the scheme coercion and fixes it.
+(`jointReading` avoided this only because its `W` is a *variable* of type `Scheme`.)
+
+The `comap` identification is recorded as a comment in the file: it is literally
+`constSchemePointsEquiv_natural`, but stating it standalone times out at `isDefEq` at this
+instantiation. Apply it at the use site, where `k` is a concrete kernel-pair projection, or name the
+point `⟨coverTriv.hom, coverTriv_htriv⟩` first so the `Subtype.mk` is not re-elaborated.
