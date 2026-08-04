@@ -93,3 +93,88 @@ patching `h_i ∘ P` → bilinearity → lands in `μ_N` → self-dual case give
 (2.8.3, via Oda) → isotropy (2.8.7). Then Steps 2.5 (Lean skeleton), 3 (verbatim quotes per leaf —
 several are already above), 4 (provability against `Picard/`), 4.5 (adversarial), 4.6 (b2 log),
 5 (gate), 6 (this file).
+
+## Second opinion (ChatGPT gpt-5.6-sol, max effort) — corroborates, and corrects one claim
+
+**Corroborated.** Route β is not the standard construction. KM §2.8 and **Oda §1 Thm 1.1 / Cor 1.3**
+both construct the pairing from rigidified line bundles and Čech cocycles, descending *line bundles
+along the isogeny* — not a determinant formula along a level cover. And
+**Deligne–Rapoport IV.3.20 runs the opposite way**: it calls `e_n` "well known" and then *uses* it to
+send a level structure to a primitive root of unity via the determinant. So the determinant formula is
+standard as a *calculation*, and as the way to extract the cyclotomic component of a level structure —
+never as the construction.
+
+**Correction to claim (2) above — I overstated it.** KM's *construction* needs no Cartier duality, which
+is right; but KM does invoke **Cartier–Nishi duality for perfectness** (2.8.2). So: not needed to build
+`e_N`, needed for nondegeneracy in general. In the `N`-invertible case it can be avoided: define only
+the finite-étale internal dual `G^♯ = Hom_{ℤ/N}(G, μ_N)` and check alternation/perfectness after
+geometric base change using the field theorem — "merely Cartier duality restricted to finite local
+systems". *The expensive part for Lean is instead the relative Picard/Poincaré infrastructure.*
+
+**Refinement of the circularity diagnosis.** Alternating bilinear `L × L → μ_N` for `L = E[N]`
+correspond to `Hom(∧²L, μ_N)`, and in a basis are determined by `ζ = e(b(e₁), b(e₂))` with
+`e(b(v),b(w)) = ζ^{det(v,w)}` — the transition rule being exactly (★). Hence:
+* solutions of (★) ↔ arbitrary alternating pairings;
+* **literal existence of a solution is NOT equivalent to the Weil pairing — `ζ = 1` always satisfies
+  (★) and gives the trivial pairing.** (This is precisely the "architectural correction" found
+  independently earlier in this session: `nonempty_weilPairing_of_cover_of_values` is satisfiable with
+  `ζ = 1`. Independent corroboration.)
+* with **primitivity in every geometric fibre**, (★) ⟺ an isomorphism `∧²E[N] ≅ μ_N`, i.e. a *perfect*
+  alternating pairing;
+* even that is not the *canonical* one — perfect pairings differ by a locally constant element of
+  `(ℤ/N)^×`, and a normalisation at one fibre pins it down. The relevant torsor is under
+  `(ℤ/N)^×` (it is `Isom(ℤ/N, μ_N)`), not under `μ_N`.
+* In monodromy language the missing statement is `det ρ_{E,N} = χ_N`, which is normally *deduced* from
+  the Weil pairing.
+
+Verdict quoted: "Do not spend 1100 lines proving the level-cover ζ-cocycle merely as a 'reduction';
+that cocycle is the missing symplectic orientation in disguise."
+
+## THE CHEAP ROUTE (new, and recommended for the ℚ-case)
+
+For a **fixed irreducible, geometrically unibranch** base `S` (normal integral suffices) with generic
+point `η = Spec K`:
+
+> **Stacks Project, Lemma 58.10.7 ([Tag 0BQI](https://stacks.math.columbia.edu/tag/0BQI))** — if `S` is
+> irreducible and geometrically unibranch then `FÉt(S) → FÉt(K)` is **fully faithful**; i.e. for finite
+> étale `X, Y` over `S`, `Hom_S(X,Y) ≅ Hom_K(X_η, Y_η)`.
+
+No Noetherian or Nagata hypothesis. *Not* essentially surjective — but we do not need that: `E[N]²` and
+`μ_{N,S}` already exist over `S`; only a **morphism between their generic fibres** is being extended.
+Connectedness alone is insufficient (irreducible nodal curve: monodromy at the node's branches is
+invisible generically) — geometric unibranchness is the precise hypothesis.
+
+The route:
+1. over `K̄`: the pointwise pairing is a morphism (finite étale `K̄`-schemes are finite disjoint unions
+   of points) — **this is exactly what the tree already has**;
+2. Galois equivariance ⟹ a `G_K`-equivariant map of finite `G_K`-sets ⟹ a `K`-morphism
+   `e_{N,K} : E_K[N]² → μ_{N,K}` — **also already in the tree** (`fieldWeilPairingHom` and the
+   finite-étale descent engine);
+3. full faithfulness (0BQI) extends it **uniquely** to `e_{N,S} : E[N]² → μ_{N,S}`;
+4. bilinearity, alternation, antisymmetry and the isogeny identities are *equalities of morphisms* of
+   finite étale `S`-schemes; they hold generically, so **faithfulness** gives them over `S`;
+5. **nondegeneracy at every geometric point**, not just generically: `Φ : E[N] → Hom(E[N], μ_N)` has
+   both sides finite étale of rank `N²`; the generic inverse extends by 0BQI and the composites are
+   identities because they are generically, so `Φ` is an isomorphism over `S`. (Equivalently: the
+   isomorphism locus is open and closed, and contains `η`.)
+
+Two caveats, both recorded as they were given:
+* **isogeny functoriality** between two *different* curves still needs the field-level adjointness
+  theorem; the determinant law alone does not give it;
+* this constructs the pairing for a **fixed** normal integral `S`. Base change *from that `S`* is by
+  pullback; comparing with a separately-constructed pairing on a general `T` needs extra naturality.
+  **So this route does not, by itself, discharge the register as stated (arbitrary `S`).**
+
+**Mathlib status**: `CommAlgCat.FiniteEtale`, `FiniteEtale.baseChange`, `FiniteEtale.fiber`,
+`FiniteEtale.equivOfIsSepClosed` (`Mathlib/RingTheory/Etale/Finite.lean`) exist; **no packaged
+generic-fibre full-faithfulness theorem**. For an affine formalisation the proof is the standard
+integrally-closed argument, with `IsIntegrallyClosed.algebraMap_eq_of_integral` among the ingredients.
+
+## Recommendation of record
+
+* **arbitrary `S`** (what the register demands): follow **KM 2.8 / Oda §1** — rigidified line bundles
+  and Čech cocycles. Expensive in Lean because of the relative Picard/Poincaré infrastructure, but the
+  tree's `ModularCurves/Picard/` normalized-cocycle development is aimed at exactly this.
+* **normal integral `S` over ℚ**: the generic-fibre + 0BQI route, which reuses the field pairing and the
+  descent engine already proved. Cheapest by far.
+* **abandon** the level-cover ζ-cocycle as a reduction.
