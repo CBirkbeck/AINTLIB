@@ -415,6 +415,29 @@ theorem coverTriv_htriv (p : S' ⟶ S) (hinv : NIsInvertible S' N)
     Iso.inv_comp_eq]
   exact (E.isPullback_torsionSq_baseChange N p).isoPullback_hom_snd.symm
 
+/- **THE ONE REMAINING PLUMBING LEMMA (route β).** The square version of `fullLevelHom_pullAlong`:
+how `coverTriv.hom` behaves under precomposition with a map into the base-changed torsion square.
+
+Target shape — for `k : W ⟶ pullback (E.torsionSqπ N) p` and `κ := k ≫ pullback.snd _ p`:
+
+  `k ≫ (E.coverTriv p hinv L).hom
+     = (the `coverTriv` of the data pulled back to `W`) ≫ constSchemeMapAlong κ ((Fin 2 → ZMod N) × _)`,
+
+the pulled-back data being `L.pullAlong κ` on `E ×_S W`. Route: transport `fullLevelHom_pullAlong`
+(`WeilPairing/FullLevelBaseChange.lean`, proved) through `fullLevelSqIso`, checking on the coproduct
+inclusions with `fullLevelSqIso_inv_ι` — the same argument as `fullLevelSqIso_glSmul_inv` below, which
+has now worked three times.
+
+With it, applying `fullLevelHom_eq_of_levelCoord` to the two pulled-back level structures
+`α^*L`, `β^*L` (`α = a ≫ pullback.snd`, `β = b ≫ pullback.snd`, the kernel-pair projections) gives
+
+  `b ≫ coverTriv.hom = (a ≫ coverTriv.hom) ≫ constSchemeMap (gl2Both N g)`,
+
+and `constSchemePointsEquiv_comp_constSchemeMap` (`WeilPairing/ConstReading.lean`, proved) converts
+that into the reading identity `c ∘ b = gl2Both N g ∘ (c ∘ a)` that `hdet` consumes, via
+`detFun_gl2Both` (`CharZeroDescent.lean:73`), `comp_localDetPairing_restrict` and
+`comp_rootPower_muNMapAlong_eq`. -/
+
 /-- **(route β, item (A))** The *tautological reading* of the cover trivialisation: `coverTriv.hom`
 is itself a point of `constScheme S' (V × V)` over `pullback.snd` (that is exactly
 `coverTriv_htriv`), so it has a locally constant label, and **every** reading appearing in
