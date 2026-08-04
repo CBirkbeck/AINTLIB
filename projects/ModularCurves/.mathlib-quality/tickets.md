@@ -37781,3 +37781,30 @@ available, but route β does not need it).
 
 **Out of scope / user decision**: the register's arbitrary-`N` generality needs Cartier duality
 (AG-CD), while every consumer lives over ℚ-algebras. See the "two structural findings" entry.
+
+## [route β] the reading transforms by `f` — the last gap's TOOL is proved (2026-08-04)
+
+`WeilPairing/ConstReading.lean` (new, axiom-verified):
+
+* **`constSchemePointsEquiv_comp_sigmaι`** — reading a point that factors through the `a`-component
+  gives `LocallyConstant.const _ a`. (Index taken as a variable + `subst`, per pattern 6: `rw
+  [Category.comp_id] at hnat` is not type-correct.)
+* **`constSchemePointsEquiv_comp_constSchemeMap`** — ***postcomposing with `constSchemeMap f` applies
+  `f` to the reading***: `reading (h ≫ constSchemeMap f) = (reading h).map f`.
+
+`constIndex` is `private` in `GroupScheme/MuN.lean`, so this is proved entirely from the **public**
+face of the fibre decomposition: at `t`, the reading `a` of `h` puts `t` in `locConstPiece … a`
+(`mem_locConstPiece`), there `h` factors through the `a`-component (`constMap_factor_of_le` at
+`le_refl`), hence `h ≫ constSchemeMap f` factors through the `f a`-component, and
+`constSchemePointsEquiv_natural` + `constSchemePointsEquiv_comp_sigmaι` read that off.
+
+Elaboration notes: the two dependent-position rewrites both had to become `congrArg`/`Subtype.ext`
+plus `Eq.trans`; and the final goal's right side is `(f ∘ ⇑reading) t`, **not** `f (reading t)`, so
+`Function.comp_apply` must be simped before the hypothesis matches.
+
+**This closes the toolchain.** The remaining pointwise statement
+`c (b t) = gl2Both N g (c (a t))` is now: `fullLevelHom_eq_of_levelCoord` gives the scheme-level
+identity `coverTriv_b.hom = coverTriv_a.hom ≫ constSchemeMap (gl2Both N g)` (via `fullLevelSqIso`),
+and `constSchemePointsEquiv_comp_constSchemeMap` converts that into the reading identity.
+
+Root green at **9731 jobs**.
