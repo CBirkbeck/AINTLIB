@@ -1433,6 +1433,31 @@ private theorem exists_ideal_pow_coeffs_of_mem_smul {R : Type u} [CommRing R] {l
       exact Finset.sum_congr rfl (fun j _ ↦ by ring)⟩
 
 
+/-- **Artin-Rees extraction.** If every component of `v` lies in `I ^ (m + k₀)` and `v` lies in
+`K`, then `v` is an `I ^ m`-combination of any finite generating family of `K`.
+
+`hAR` is the Artin-Rees conclusion for `K` (`Ideal.exists_pow_inf_eq_pow_smul`); this lemma is
+the step that turns it into explicit coefficients. -/
+private theorem exists_ideal_pow_coeffs_of_forall_mem {R : Type u} [CommRing R]
+    {l k k₀ : ℕ} (I : Ideal R) (m : ℕ) {K : Submodule R (Fin l → R)}
+    (hAR : ∀ n ≥ k₀, (I ^ n • ⊤ ⊓ K : Submodule R (Fin l → R)) =
+      I ^ (n - k₀) • (I ^ k₀ • ⊤ ⊓ K))
+    (s : Fin k → ↥K) (hs : Submodule.span R (Set.range s) = ⊤)
+    (v : Fin l → R) (hv_mem : ∀ i, v i ∈ I ^ (m + k₀)) (hv_ker : v ∈ K) :
+    ∃ c : Fin k → R, (∀ j, c j ∈ I ^ m) ∧
+      ∀ i, v i = ∑ j, c j * (s j : Fin l → R) i := by
+  have h_smul_top : v ∈ (I ^ (m + k₀) • ⊤ : Submodule R (Fin l → R)) := by
+    rw [show v = ∑ i, v i • Pi.single i 1 by
+      ext j; simp [Finset.sum_apply, Pi.single_apply]]
+    exact Submodule.sum_mem _ (fun i ↦
+      fun _ ↦ Submodule.smul_mem_smul (hv_mem i) Submodule.mem_top)
+  have h_in_inf : v ∈ (I ^ (m + k₀) • ⊤ ⊓ K : Submodule R (Fin l → R)) :=
+    Submodule.mem_inf.mpr ⟨h_smul_top, hv_ker⟩
+  rw [hAR (m + k₀) (by omega : k₀ ≤ m + k₀), show m + k₀ - k₀ = m by omega] at h_in_inf
+  exact exists_ideal_pow_coeffs_of_mem_smul I m s hs
+    (Submodule.smul_mono le_rfl inf_le_right h_in_inf)
+
+
 /-- The relation map for syzygies: sends `r` to `∑ f(i) * r(i)`. -/
 private noncomputable def relMapFlat {R : Type u} [CommRing R] {l : ℕ}
     (f : Fin l → R) : (Fin l → R) →ₗ[R] R where
@@ -2153,32 +2178,6 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
       change (fun i ↦ lift₀ i) ∈ LinearMap.ker relMap₀
       rw [LinearMap.mem_ker]
       exact h_eq_zero
-    have h_smul_top : (fun i ↦ lift₀ i) ∈
-        (P.I ^ (m + k₀) • ⊤ : Submodule P.A₀ (Fin l → P.A₀)) := by
-      rw [show (fun i ↦ lift₀ i) = ∑ i, lift₀ i • Pi.single i 1 by
-        ext j; simp [Finset.sum_apply, Pi.single_apply]]
-      exact Submodule.sum_mem _ (fun i _ ↦
-        Submodule.smul_mem_smul (hlift₀_mem i) Submodule.mem_top)
-    have h_in_inf : (fun i ↦ lift₀ i) ∈
-        (P.I ^ (m + k₀) • ⊤ ⊓ K₀ : Submodule P.A₀ (Fin l → P.A₀)) :=
-      Submodule.mem_inf.mpr ⟨h_smul_top, h_ker⟩
-    rw [hAR (m + k₀) (by omega : k₀ ≤ m + k₀),
-      show m + k₀ - k₀ = m by omega] at h_in_inf
-    -- h_in_inf : lift₀ ∈ I^m • (I^{k₀} • ⊤ ⊓ K₀) in (Fin l → A₀)
-    -- Since I^{k₀} • ⊤ ⊓ K₀ ≤ K₀, lift₀ ∈ I^m • K₀.
-    -- In the submodule K₀, this means ⟨lift₀, h_ker⟩ ∈ I^m • ⊤ as a K₀-element.
-    -- Then decompose over the generators s₀ to get coefficients in I^m.
-    -- We use Submodule.smul_mono_right to pass to I^m • K₀,
-    -- then the generating family to extract Fin k coefficients.
-    have h_in_smul_K₀ : (fun i ↦ lift₀ i) ∈
-        (P.I ^ m • K₀ : Submodule P.A₀ (Fin l → P.A₀)) :=
-      Submodule.smul_mono le_rfl inf_le_right h_in_inf
-    -- Now extract coefficients. An element of I^m • K₀ is a finite sum ∑ aⱼ • vⱼ
-    -- with aⱼ ∈ I^m and vⱼ ∈ K₀. Each vⱼ ∈ span(s₀) over A₀.
-    -- So the total element decomposes over s₀ with I^m-coefficients.
-    -- We extract this using Submodule.smul_induction_on.
-    -- The element (as a K₀-element) decomposes over the span of s₀.
-    -- Step A: Prove that any element of I^m • K₀ decomposes over s₀ with I^m coeffs.
     suffices ∃ c₀ : Fin k → P.A₀, (∀ j, c₀ j ∈ P.I ^ m) ∧
         ∀ i, lift₀ i = ∑ j, c₀ j * (s₀ j : Fin l → P.A₀) i by
       obtain ⟨c₀, hc₀_mem, hc₀_eq⟩ := this
@@ -2186,7 +2185,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
       have h := congr_arg P.A₀.subtype (hc₀_eq i)
       simp only [map_sum, map_mul] at h
       rw [← hlift₀_eq i]; exact h
-    exact exists_ideal_pow_coeffs_of_mem_smul P.I m s₀ hs₀ h_in_smul_K₀
+    exact exists_ideal_pow_coeffs_of_forall_mem P.I m hAR s₀ hs₀ _ hlift₀_mem h_ker
   -- Step 7: Assemble the IsTrivialRelation witness.
   -- For each n, hdecomp_A gives a decomposition over the A₀-generators.
   -- For convergence, hAR_ctrl gives controlled coefficients.

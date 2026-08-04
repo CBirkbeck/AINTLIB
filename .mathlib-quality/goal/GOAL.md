@@ -15214,3 +15214,47 @@ and the build stayed green, because the file was simply unchanged.
 
 The guard itself was right to fire — matching a keyword across a block counts comments. Match
 **code lines** (or the declaration's structure), never a bare keyword count.
+
+### G2, and a 758-line deletion caught by the backup
+
+`exists_ideal_pow_coeffs_of_forall_mem` (16 lines) — Artin–Rees extraction: components in
+`I^(m+k₀)` plus membership in `K` gives `I^m` coefficients over a generating family. `hAR_ctrl`
+66 → ~40, `tateAlgebra_flat` 222 → 208.
+
+**The first attempt deleted 758 lines**, and the cause is worth naming precisely.
+
+The script inserted G2 (which contains `have h_smul_top : …`) and *then* searched for
+`have h_smul_top` to find the block in `hAR_ctrl` it was replacing. The search found **the copy it
+had just inserted**, 700 lines earlier, and the range `[a, b)` spanned everything between.
+
+This is the same shape as the `restrictionMap_restrictionMap` self-reference: **a lemma you extract
+contains, by construction, the text you are extracting it from.** There it was the helper's own
+body matching the idiom pattern; here it is the new lemma's body matching the block search. Both
+times the search ran *after* the insertion.
+
+Two rules, and they compose:
+
+> **Compute every index against the original file, before any insertion.**
+> **Apply edits bottom-up, so earlier indices stay valid.**
+
+Plus a scoping guard that would have caught it independently: search **within the target
+declaration's line range**, not the whole file, and assert `t0 < a < b < c < t1`.
+
+The `.orig` backup taken before every edit made the recovery exact and free — `git diff` against
+HEAD was empty afterwards, confirming a clean restore rather than a partial one.
+
+**Measured remaining path for `tateAlgebra_flat` (208).** The body now decomposes as
+
+```
+  13c  hsyz                 30c  hAR_ctrl            97c  hdecomp_or_ctrl
+  28c  suffices ∃ c' …       6c  apply Set.Finite…   34c  setup + small blocks
+```
+
+`hAR_ctrl` is already under the bar at 30, so G1+G2 did their job — but lifting only it and
+`hdecomp_or_ctrl` leaves the main body at 83, still over. To land under 50 the cascade needs
+**four** lifts (`hdecomp_or_ctrl`, `hAR_ctrl`, `hsyz`, the `suffices`) → main ≈ 44, plus a split of
+`hdecomp_or_ctrl` itself (97, whose `q = 0` branch is ~50).
+
+That is 5–6 further declarations, so this is the stopping point for a verified commit rather than
+a half-applied cascade — same reasoning as before: intermediate states score *worse* on the
+over-50 count than the starting point.
