@@ -15509,3 +15509,32 @@ different variable and the object is a bundled `CompleteTopCommRingCat` at its o
 Together with the two earlier entries this target took **five builds and three helpers**, and every
 failure was a *spelling* of a type — the `SpaTop` vs `Spa … (ringPlus …)` carrier, the `Type u`
 ascription, the leading section variables — never the mathematics or the decomposition.
+
+### Next target scoped: `exists_continuous_valuation_of_valuationSubring_of_span_eq` (167, Presheaf.lean)
+
+**Zero `letI`** — not instance-blocked. Structure is two top-level `·` branches, and the main one
+splits three ways:
+
+```
+  L2260   26c   · edge case: g_max = 0
+  L2287  133c   · main case: g_max ≠ 0 ∧ g_max < 1
+                    ~30c  setup
+                    L2324  33c   · v_ext ≤ 1 on B
+                    L2357  42c   · 1 < v_ext x  (extension formula)
+                    L2399  28c   · continuity via isContinuous_of_le_one_and_pow_cofinal
+```
+
+**Four lifts, all landing under 50 on their own**: the edge case (26 → 1) and the three inner
+bullets (33 / 42 / 28 → 1 each). Target → ≈ **42**. No lift exceeds the bar, so unlike
+`tateAlgebra_flat` there is no intermediate state that scores worse — each one is independently
+committable.
+
+The care needed is that all four are `·` bullets whose goals come from the enclosing
+`refine`/`rcases`, so each statement has to be read off the goal rather than copied from a `have`.
+That is the same reading task that `xPresheaf_glue_res` turned out to need, and the same rule
+applies: **read the enclosing definition/`refine` to get the goal, do not infer it from the
+tactics inside the bullet.**
+
+Note `Presheaf.lean` is foundational — its rebuild cone is most of the tree, so each gate here is a
+full-tree build. Batching the four lifts into one gate is worth it *because* every lift is
+independently under the bar: a failure can be reverted lift-by-lift without losing the others.
