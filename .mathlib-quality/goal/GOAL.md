@@ -14678,3 +14678,57 @@ was exactly 1 per lemma, which is what confirmed the fix.
 Remaining phases for this target (measured, not started): the four `rcases` bullets plus the
 `hLHS`/`hRHS` they depend on (~110 lines → ~61), then `haMbb`/`hsplit`/`hinvO`, then
 `hF_alg`/`heq_s` → ~46.
+
+### Phase 2 groundwork: the types, and a limit of the type-oracle trick
+
+Before writing Phase 2's signatures I checked the types rather than guessing — `lake env lean` on a
+scratch file importing the built module. Two results:
+
+* **`OD` is not a datum over `A`.** `RationalLocData.canonicalMap D : A →+* presheafValue D`, so
+  `OD.canonicalMap (D₀.canonicalMap a)` only typechecks if
+  `OD : RationalLocData (presheafValue D₀)` — a datum one level up. Hence
+  `F : Localization.Away DII.s →+* presheafValue OD`. Guessing `OD : RationalLocData A` (the
+  obvious reading) would have produced a signature that could never elaborate.
+* **The oracle cannot see `private` names from outside the file.**
+  `unitCover_relOverlap_forwardLocHom` and `unitCover_overlapDatum_B` are both private, so
+  `#check` from a scratch file reports `Unknown constant`. For private helpers the types have to
+  come from reading their declarations in place, or from a `#check` inserted *inside* the file.
+
+So the Phase-2 signature is now writable:
+
+```lean
+private theorem … (D₀ : RationalLocData A) (f : A)
+    (DII : RationalLocData A) (OD : RationalLocData (presheafValue D₀))
+    (F : Localization.Away DII.s →+* presheafValue OD)
+    (hF_alg : ∀ a : A, F (algebraMap A (Localization.Away DII.s) a)
+      = OD.canonicalMap (D₀.canonicalMap a))
+    (p q : A) : …
+```
+
+`hRHS` additionally needs `hs_eq : (DII.s : A) = (D₀.s * 1) * (D₀.s * f)` passed as a hypothesis and
+discharged by `rfl` at the call site — `DII` is a `set`-local and the step is defeq only in the
+caller, exactly the situation `hT` handled in Phase 1.
+
+### Phase 2: `unitCover_relOverlap_forward_witness` 170 → 130
+
+Four more lemmas, all green on the first build now that the types are known:
+
+| lemma | what it is |
+|---|---|
+| `unitCover_F_mul_expand` | `F` of the product numerator splits into four `s`-scaled factors |
+| `unitCover_F_denom_expand` | `F` of the denominator `DII.s` |
+| `unitCover_canonicalMap_mul_invS_eq_one` | `aM f` is invertible with inverse `1/s` |
+| `unitCover_divByS_sq_eq` | dividing `f²` by `s` returns `aM f` |
+
+`unitCover_F_denom_expand` again needed a `set`-local identity passed across —
+`hs_eq : (DII.s : A) = (D₀.s * 1) * (D₀.s * f)`, `rfl` at the call site. That is now the routine
+move for this file rather than a discovery.
+
+**The one failure was instance binders, not types.** The two `OD`-facts live over
+`RationalLocData (presheafValue D₀)`, which needs `IsHuberRing (presheafValue D₀)` — derived in the
+parent from its own `[IsTateRing A] … [CompleteSpace A]` block. A lemma stated over a datum *one
+level up* must carry the base-level binders that manufacture the upper-level instances, even though
+nothing in its statement mentions `A`'s topology. Copying the parent's binder block fixed both.
+
+Remaining for this target: the four `rcases` bullets (26/13/13/19, −67) and then
+`hsplit`/`hF_alg`/`heq_s` → ~46.

@@ -4435,6 +4435,92 @@ private theorem unitCover_class_right [DecidableEq A] (D₀ : RationalLocData A)
     · refine Or.inl ?_
       rw [Finset.mem_singleton.mp h1, hsplit p' 1, map_mul, map_one, map_one, mul_one]
 
+/-- Left-hand expansion: `F` of the product numerator splits into the four `s`-scaled factors. -/
+private theorem unitCover_F_mul_expand
+    (D₀ : RationalLocData A) (f : A) (DII : RationalLocData A)
+    (OD : RationalLocData (presheafValue D₀))
+    (F : Localization.Away DII.s →+* presheafValue OD)
+    (hF_alg : ∀ a : A, F (algebraMap A (Localization.Away DII.s) a) =
+      OD.canonicalMap (D₀.canonicalMap a)) (p q : A) :
+    ∀ _ : A, F (algebraMap A (Localization.Away DII.s) (p * q)) =
+      OD.canonicalMap (D₀.canonicalMap D₀.s) *
+        OD.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
+        (OD.canonicalMap (D₀.canonicalMap D₀.s) *
+          OD.canonicalMap (D₀.coeRingHom (divByS q D₀.s))) := by
+  have hps := canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀
+  intro _
+  rw [hF_alg, map_mul (D₀.canonicalMap)]
+  rw [show D₀.canonicalMap p = D₀.canonicalMap D₀.s *
+    D₀.coeRingHom (divByS p D₀.s) from hps p]
+  rw [show D₀.canonicalMap q = D₀.canonicalMap D₀.s *
+    D₀.coeRingHom (divByS q D₀.s) from hps q]
+  rw [map_mul (OD.canonicalMap), map_mul (OD.canonicalMap), map_mul (OD.canonicalMap)]
+
+/-- Right-hand expansion: `F` of the denominator `DII.s`.
+
+`hs_eq` carries the `set`-local identity `DII.s = (D₀.s * 1) * (D₀.s * f)` across; it is `rfl` in
+the caller, where `DII` is still unfolded. -/
+private theorem unitCover_F_denom_expand
+    (D₀ : RationalLocData A) (f : A) (DII : RationalLocData A)
+    (OD : RationalLocData (presheafValue D₀))
+    (F : Localization.Away DII.s →+* presheafValue OD)
+    (hF_alg : ∀ a : A, F (algebraMap A (Localization.Away DII.s) a) =
+      OD.canonicalMap (D₀.canonicalMap a))
+    (hs_eq : (DII.s : A) = (D₀.s * 1) * (D₀.s * f)) :
+    F (algebraMap A (Localization.Away DII.s) DII.s) =
+      OD.canonicalMap (D₀.canonicalMap D₀.s) * OD.canonicalMap (D₀.canonicalMap D₀.s) *
+        OD.canonicalMap (D₀.canonicalMap f) := by
+  rw [hF_alg]
+  rw [show D₀.canonicalMap DII.s = D₀.canonicalMap ((D₀.s * 1) * (D₀.s * f)) by
+    rw [hs_eq]]
+  rw [map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap),
+    map_one, mul_one]
+  rw [map_mul (OD.canonicalMap), map_mul (OD.canonicalMap)]
+  ring
+
+/-- `aM f` is invertible in the overlap localization, with inverse `1/s`. -/
+private theorem unitCover_canonicalMap_mul_invS_eq_one
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) (OD : RationalLocData (presheafValue D₀))
+    (haM_s : algebraMap (presheafValue D₀) (Localization.Away OD.s) OD.s =
+      algebraMap (presheafValue D₀) (Localization.Away OD.s) (D₀.canonicalMap f)) :
+    OD.canonicalMap (D₀.canonicalMap f) *
+      OD.coeRingHom (divByS (1 : presheafValue D₀) OD.s) = 1 := by
+  have h8 := algebraMap_s_mul_divByS OD (1 : presheafValue D₀)
+  rw [haM_s] at h8
+  rw [show OD.canonicalMap (D₀.canonicalMap f) *
+      OD.coeRingHom (divByS (1 : presheafValue D₀) OD.s) =
+    OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s)
+      (D₀.canonicalMap f) * divByS (1 : presheafValue D₀) OD.s) by
+    rw [map_mul]; rfl]
+  rw [h8, map_one, map_one]
+
+/-- Dividing `f²` by `s` gives back `aM f`, since `s = aM f` in the localization. -/
+private theorem unitCover_divByS_sq_eq
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) (OD : RationalLocData (presheafValue D₀))
+    (haM_s : algebraMap (presheafValue D₀) (Localization.Away OD.s) OD.s =
+      algebraMap (presheafValue D₀) (Localization.Away OD.s) (D₀.canonicalMap f))
+    (hu_b : IsUnit (OD.canonicalMap (D₀.canonicalMap f))) :
+    OD.coeRingHom (divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) =
+      OD.canonicalMap (D₀.canonicalMap f) := by
+  refine hu_b.mul_left_cancel ?_
+  have h9 := algebraMap_s_mul_divByS OD (D₀.canonicalMap f * D₀.canonicalMap f)
+  rw [haM_s] at h9
+  rw [show OD.canonicalMap (D₀.canonicalMap f) *
+      OD.coeRingHom (divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) =
+    OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s)
+      (D₀.canonicalMap f) * divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) by
+    rw [map_mul]; rfl]
+  rw [h9, map_mul, map_mul]
+  rfl
+
 set_option linter.unusedSectionVars false in
 /-- **Relative-overlap per-generator witnesses (O4)**: every `t ∈ T_inter` (a product
 `p·q` over the two factor-data) has a `locSubring`-witness over the B-side annulus datum.
@@ -4497,28 +4583,8 @@ private theorem unitCover_relOverlap_forward_witness
     congrArg _ heq_s
   have hu_b : IsUnit (OD.canonicalMap (D₀.canonicalMap f)) :=
     (unitCover_relOverlap_aMb_isUnit D₀ f).map OD.coeRingHom
-  have hinvO : OD.canonicalMap (D₀.canonicalMap f) *
-      OD.coeRingHom (divByS (1 : presheafValue D₀) OD.s) = 1 := by
-    have h8 := algebraMap_s_mul_divByS OD (1 : presheafValue D₀)
-    rw [haM_s] at h8
-    rw [show OD.canonicalMap (D₀.canonicalMap f) *
-        OD.coeRingHom (divByS (1 : presheafValue D₀) OD.s) =
-      OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s)
-        (D₀.canonicalMap f) * divByS (1 : presheafValue D₀) OD.s) by
-      rw [map_mul]; rfl]
-    rw [h8, map_one, map_one]
-  have haMbb : OD.coeRingHom (divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) =
-      OD.canonicalMap (D₀.canonicalMap f) := by
-    refine hu_b.mul_left_cancel ?_
-    have h9 := algebraMap_s_mul_divByS OD (D₀.canonicalMap f * D₀.canonicalMap f)
-    rw [haM_s] at h9
-    rw [show OD.canonicalMap (D₀.canonicalMap f) *
-        OD.coeRingHom (divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) =
-      OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s)
-        (D₀.canonicalMap f) * divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) by
-      rw [map_mul]; rfl]
-    rw [h9, map_mul, map_mul]
-    rfl
+  have hinvO := unitCover_canonicalMap_mul_invS_eq_one D₀ f OD haM_s
+  have haMbb := unitCover_divByS_sq_eq D₀ f OD haM_s hu_b
   -- classification of the first factor
   have hclass₁ := unitCover_class_left D₀ f rfl hA₀ hsplit
   -- classification of the second factor
@@ -4538,28 +4604,8 @@ private theorem unitCover_relOverlap_forward_witness
   obtain ⟨c_q, hc_q, hcase_q⟩ := hclass₂ q hq
   have hs_eq : (DII.s : A) = (D₀.s * 1) * (D₀.s * f) := rfl
   -- common expansion of both sides of the `hF_div` equation
-  have hLHS : ∀ a : A, F (algebraMap A (Localization.Away DII.s) (p * q)) =
-      OD.canonicalMap (D₀.canonicalMap D₀.s) *
-        OD.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
-        (OD.canonicalMap (D₀.canonicalMap D₀.s) *
-          OD.canonicalMap (D₀.coeRingHom (divByS q D₀.s))) := by
-    intro _
-    rw [hF_alg, map_mul (D₀.canonicalMap)]
-    rw [show D₀.canonicalMap p = D₀.canonicalMap D₀.s *
-      D₀.coeRingHom (divByS p D₀.s) from hps p]
-    rw [show D₀.canonicalMap q = D₀.canonicalMap D₀.s *
-      D₀.coeRingHom (divByS q D₀.s) from hps q]
-    rw [map_mul (OD.canonicalMap), map_mul (OD.canonicalMap), map_mul (OD.canonicalMap)]
-  have hRHS : F (algebraMap A (Localization.Away DII.s) DII.s) =
-      OD.canonicalMap (D₀.canonicalMap D₀.s) * OD.canonicalMap (D₀.canonicalMap D₀.s) *
-        OD.canonicalMap (D₀.canonicalMap f) := by
-    rw [hF_alg]
-    rw [show D₀.canonicalMap DII.s = D₀.canonicalMap ((D₀.s * 1) * (D₀.s * f)) by
-      rw [hs_eq]]
-    rw [map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap),
-      map_one, mul_one]
-    rw [map_mul (OD.canonicalMap), map_mul (OD.canonicalMap)]
-    ring
+  have hLHS := unitCover_F_mul_expand D₀ f DII OD F hF_alg p q
+  have hRHS := unitCover_F_denom_expand D₀ f DII OD F hF_alg hs_eq
   rcases hcase_p with hk_p | hk_p <;> rcases hcase_q with hk_q | hk_q
   · -- K = 0: witness `aM c_p · aM c_q · (1/b)`
     refine ⟨algebraMap (presheafValue D₀) (Localization.Away OD.s) c_p *
