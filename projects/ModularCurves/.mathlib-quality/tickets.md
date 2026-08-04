@@ -38624,3 +38624,79 @@ statement-ticket skeleton in its own header).
 **No `CLEANUP-*` tickets proposed.** `CLAUDE.md` binds producers out of cleanup/dedup/golf — that is
 fleet work on `main`. The `/develop` cadence rule (§1g) is superseded here by AINTLIB's producer/cleaner
 split.
+
+---
+
+## [KM-SEESAW] PHASE 1/2 — the ticket's own first move paid off twice (2026-08-05)
+
+**Move 1: read Stacks §37.33's index (the ticket said to do this first).** Answered: the section has
+**eight** results and **does not** state the theorem of the square or anything about abelian/group
+schemes. So the leaf `exists_invertible_tensor_idealModule_add` is *not* a Stacks transcription. What the
+section does contain is **Theorem 37.33.8 (tag `0BF4`), the theorem of the cube** — verbatim:
+
+> "Let $S$ be a scheme, $X, Y, Z$ schemes over $S$ with sections $x : S \to X$, $y : S \to Y$. Let
+> $\mathcal{L}$ be invertible on $X \times_S Y \times_S Z$. Assume (1) $X \to S$ and $Y \to S$ are flat,
+> proper morphisms of finite presentation with geometrically integral fibres; (2) pullbacks of
+> $\mathcal{L}$ via $x \times \mathrm{id}_Y \times \mathrm{id}_Z$ and $\mathrm{id}_X \times y \times
+> \mathrm{id}_Z$ are trivial over $Y \times_S Z$ and $X \times_S Z$; (3) there is a point $z \in Z$ such
+> that $\mathcal{L}$ restricted to $X \times_S Y \times_S z$ is trivial; (4) $Z$ is connected. Then
+> $\mathcal{L}$ is trivial."
+
+**This is the classical route to the leaf**, and it is a *better* route than either section of
+`SelfAdjointN.lean`: instantiate at `X = Y = Z = E_T` (an elliptic curve is flat, proper, of finite
+presentation, with geometrically integral fibres — all four hypotheses hold) with the cube bundle built
+from `𝒪(D_0)` and the addition maps; hypotheses (2)/(3) hold because setting any argument to `0`
+collapses the alternating tensor to `𝒪`; restrict the resulting triviality along `(Q, Q', 0)` and the
+theorem of the square drops out. The tree's own field-level `tos_divisor` is already stated in exactly
+this `f Q = g Q + h Q` homomorphism shape (`HasseWeil/Pic0/TheoremOfSquareDivisorForm.lean:53`).
+**Record this as the leaf's route; retire the universal-pair-vs-bricks-(A)/(B) ambiguity in favour of it.**
+
+**Move 2: Stacks' own foundation is mathlib-unreachable, but the tree has a surrogate.**
+`0BF4` cites `0BDP` (Lemma 37.33.1), whose standing hypothesis *"for all `g : T → S`, `O_T → p_* O_{X_T}`
+is an isomorphism"* **is definitionally the tree's `UniversallyOConnected`** — the section and the tree
+agree on their standing hypothesis. But `0BDP`'s proof needs Derived Categories of Schemes **36.31.4**
+("construction of immersions for perfect objects") + **36.30.4** (cohomology and base change) +
+Cohomology 20.54.2. Verified absent (G2, three searches): `lean_leansearch` on cohomology-and-base-change
+/ Grauert returns only `Sheaf.pushforward*` plumbing; `lean_local_search "cohomologyBaseChange"` → empty;
+`lean_loogle` on `IsProper ?f → (Modules.pushforward ?f).obj ?M` → empty. **mathlib has no
+cohomology-and-base-change at all.**
+
+**And `Picard/` has been building the surrogate.** Grepping the *conclusion* rather than the concept
+(again — see [[grep-the-conclusion-not-the-inputs]]) turns up a purpose-built Čech replacement for
+cohomology-and-base-change, derived-category-free:
+
+| decl | file | content |
+|---|---|---|
+| `IsInvertible.exists_finiteAffineBaseCech_flat` | `Picard/InvertibleSheafBaseCechFlat.lean:23` | finite affine trivialising cover with **termwise-flat** base-linear Čech complex |
+| `IsInvertible.exists_away_orderedBaseCech_exact_of_residueField_exact` | `Picard/InvertibleSheafProperCechResidueSpread.lean:23` | **exactness on ONE residue fibre spreads to a principal neighbourhood** — this is the seesaw's engine |
+| `orderedBaseCechObject_flat_of_isInvertible`, `orderedBaseCechHomologyFinite_of_isProper` | ibid. | flatness + finite homology, the engine's inputs |
+| `HomologicalComplex.exists_away_functionExact_of_residueField_exact_of_finite_homology` | ibid. | the pure-algebra spreading lemma |
+| `exists_noetherianStageModel…_of_isProper` | `Picard/InvertibleSheafNoetherianSmoothStage.lean:257` | Noetherian approximation, so the finite-presentation reduction is available |
+| `nonempty_unitObj_iso_of_glue` / `…_of_normalized_glue` | `Picard/{GlueTrivialization,RigidDescent}.lean` | local-to-global |
+
+So `[KM-SEESAW]` is **assemblable from existing pieces**, not a cohomology-and-base-change build. Split
+per Tier A2 into the converter and the descent:
+
+### [KM-SEESAW-1] fibrewise triviality ⟹ residue-fibre base-Čech exactness
+- **Status**: open · **File**: `ForMathlib/Seesaw.lean` · **Parent**: KM-SEESAW · **Type**: lemma
+- **Statement**: for `M` invertible on `X`, `π : X ⟶ Spec R` proper flat of finite presentation with a
+  finite affine cover `U`, and a prime `p` with `M` trivial on the fibre `X_p`: the base-Čech
+  differentials of `orderedBaseCechComplex π M U` are exact after `⊗ p.ResidueField` in every degree
+  `q < Fintype.card ι`. (This is precisely `exists_away_orderedBaseCech_exact_of_residueField_exact`'s
+  `hresidue` hypothesis, supplied from geometry rather than assumed.)
+- **Sketch**: base-change the Čech complex to the fibre (`baseChange` commutes with the cover's
+  restriction); on the fibre `M_p ≅ 𝒪_{X_p}`, so the complex becomes the Čech complex of the structure
+  sheaf; its exactness in degrees `> 0` is `H^q(X_p, 𝒪) = 0` for `q > 0` on a curve fibre, and in degree
+  `0` it is `Γ(X_p, 𝒪) = k(p)`, i.e. `UniversallyOConnected` on the fibre.
+
+### [KM-SEESAW-2] residue exactness at every prime + reduced base ⟹ `M ≅ π^* N`
+- **Status**: blocked (KM-SEESAW-1) · **File**: `ForMathlib/Seesaw.lean` · **Parent**: KM-SEESAW
+- **Statement**: `∃ N : S.Modules, IsInvertible N ∧ Nonempty (M ≅ (Modules.pullback π).obj N)`.
+- **Sketch**: run `exists_away_orderedBaseCech_exact_of_residueField_exact` at each prime to get a
+  principal neighbourhood `Spec R[1/r]` where the Čech complex is exact; `Spec R` is covered by finitely
+  many such (quasi-compactness); on each, exactness of the base-Čech complex identifies `Γ(M)` with a
+  rank-1 projective `R[1/r]`-module, giving the local `N`; glue with
+  `nonempty_unitObj_iso_of_normalized_glue`, whose overlap condition is *forced* by zero-normalisation.
+  **`IsReduced S` enters only here**, at the step from "exact at every residue fibre" to "exact over
+  `R`" — over a non-reduced base the nilpotent direction is exactly the `H¹(E₀, 𝒪)`-worth of
+  counterexample recorded in `SelfAdjointN.lean:74` (`k[ε]/(ε²)`), i.e. [[seesaw-needs-reduced-base]].
