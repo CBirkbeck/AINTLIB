@@ -172,9 +172,8 @@ theorem RationalCoveringData.RationalRefinementCompatible.allData_huber
   have hIval : I.IsRational :=
     RationalLocData.interValid_isRational _ _ (hC.piece D₁.2) (hC.piece D₂.2)
   have hagree := hf D₁ D₂ I hIval hIL hIR
-  have c₁ := congr_fun (restrictionMap_comp D₁.1 I D₃ hIL h₃I) (f D₁)
-  have c₂ := congr_fun (restrictionMap_comp D₂.1 I D₃ hIR h₃I) (f D₂)
-  simp only [Function.comp_apply] at c₁ c₂
+  have c₁ := restrictionMap_restrictionMap D₁.1 I D₃ hIL h₃I (f D₁)
+  have c₂ := restrictionMap_restrictionMap D₂.1 I D₃ hIR h₃I (f D₂)
   calc restrictionMap D₁.1 D₃ h₃₁ (f D₁)
       = restrictionMap I D₃ h₃I (restrictionMap D₁.1 I hIL (f D₁)) := c₁.symm
     _ = restrictionMap I D₃ h₃I (restrictionMap D₂.1 I hIR (f D₂)) := by
@@ -275,10 +274,8 @@ private theorem exists_glue_at_rational_on {S : Set (Spv A)} (hOn : IsSheafyOn S
   have hi₀ := (hexE E₀).2.choose_spec
   have hFU_i₀ : spaOpen q.1 ⊆ (U (hexE E₀).2.choose : Set ↥(Spa A A⁺)) :=
     (spaOpen_subset_of_rationalOpen_subset hFE₀).trans hi₀
-  have hcompL := congr_fun (restrictionMap_comp D₀ E₀.1 q.1 (C.hsubset E₀.1 E₀.2) hFE₀) z
-  simp only [Function.comp_apply] at hcompL
-  have hcompR := congr_fun (restrictionMap_comp D₀ E q.1 hED hFE) z
-  simp only [Function.comp_apply] at hcompR
+  have hcompL := restrictionMap_restrictionMap D₀ E₀.1 q.1 (C.hsubset E₀.1 E₀.2) hFE₀ z
+  have hcompR := restrictionMap_restrictionMap D₀ E q.1 hED hFE z
   show restrictionMap E q.1 hFE (restrictionMap D₀ E hED z) =
     restrictionMap E q.1 hFE ((s i).1 ⟨E, hErat, hEUi⟩)
   calc restrictionMap E q.1 hFE (restrictionMap D₀ E hED z)
@@ -320,9 +317,8 @@ theorem exists_limitSections_glue_on {S : Set (Spv A)} (hOn : IsSheafyOn S)
     have hE'D' : rationalOpen q'.1.1.T q'.1.1.s ⊆ rationalOpen D'.D.T D'.D.s :=
       spaOpen_subset_iff.mp (q'.2.2.trans Set.inter_subset_left)
     have hE'U : spaOpen q'.1.1 ⊆ (U q'.1.2 : Set ↥(Spa A A⁺)) := q'.2.2.trans Set.inter_subset_right
-    have hcomp' := congr_fun (restrictionMap_comp D.D D'.D q'.1.1 hD'D hE'D')
+    have hcomp' := restrictionMap_restrictionMap D.D D'.D q'.1.1 hD'D hE'D'
       (z D.D D.isRational D.subset)
-    simp only [Function.comp_apply] at hcomp'
     show restrictionMap D'.D q'.1.1 hE'D'
         (restrictionMap D.D D'.D hD'D (z D.D D.isRational D.subset)) =
       restrictionMap D'.D q'.1.1 hE'D' (z D'.D D'.isRational D'.subset)

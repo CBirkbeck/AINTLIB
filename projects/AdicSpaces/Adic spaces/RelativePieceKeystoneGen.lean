@@ -857,9 +857,9 @@ theorem relativePiece_equiv_restrictionMap
       restrictionMap D₀
         (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl)
         (RationalLocData.interSamePair_subset_left _ _ _) x :=
-    congrFun (restrictionMap_comp D₀ E
+    restrictionMap_restrictionMap D₀ E
       (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl)
-      hE_sub h_eq.symm.le) x
+      hE_sub h_eq.symm.le x
   rw [hcomp]
   exact genPiece_relative_equiv_restrictionMap D₀ E.T E.s hspanE x
 

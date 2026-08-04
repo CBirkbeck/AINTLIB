@@ -5346,17 +5346,13 @@ theorem V_cover_gluing_from_laurentPair_via_compatible_bridge
   refine ⟨x, fun D => ?_⟩
   rcases hrefine D with hD_plus | hD_minus
   · -- D refines plus half: compose restrictionMap D₀ → plus → D.1.
-    have hcomp := congr_fun
-      (restrictionMap_comp D₀ (laurentPlusDatum D₀ f) D.1
-        (laurentPlus_subset D₀ f) hD_plus) x
-    simp only [Function.comp_apply] at hcomp
+    have hcomp := restrictionMap_restrictionMap D₀ (laurentPlusDatum D₀ f) D.1
+        (laurentPlus_subset D₀ f) hD_plus x
     rw [hx_plus, hfV_plus D hD_plus] at hcomp
     exact hcomp.symm
   · -- D refines minus half: symmetric.
-    have hcomp := congr_fun
-      (restrictionMap_comp D₀ (laurentMinusDatum D₀ f) D.1
-        (laurentMinus_subset D₀ f) hD_minus) x
-    simp only [Function.comp_apply] at hcomp
+    have hcomp := restrictionMap_restrictionMap D₀ (laurentMinusDatum D₀ f) D.1
+        (laurentMinus_subset D₀ f) hD_minus x
     rw [hx_minus, hfV_minus D hD_minus] at hcomp
     exact hcomp.symm
 
@@ -5466,16 +5462,12 @@ theorem laurentAndVCover_gluing_unified_via_compatible_bridge
   -- Step 2: extract the V-cover conclusion on the same `x` via refinement.
   refine ⟨x, hx_plus, hx_minus, fun D => ?_⟩
   rcases hrefine D with hD_plus | hD_minus
-  · have hcomp := congr_fun
-      (restrictionMap_comp D₀ (laurentPlusDatum D₀ f) D.1
-        (laurentPlus_subset D₀ f) hD_plus) x
-    simp only [Function.comp_apply] at hcomp
+  · have hcomp := restrictionMap_restrictionMap D₀ (laurentPlusDatum D₀ f) D.1
+        (laurentPlus_subset D₀ f) hD_plus x
     rw [hx_plus, hfV_plus D hD_plus] at hcomp
     exact hcomp.symm
-  · have hcomp := congr_fun
-      (restrictionMap_comp D₀ (laurentMinusDatum D₀ f) D.1
-        (laurentMinus_subset D₀ f) hD_minus) x
-    simp only [Function.comp_apply] at hcomp
+  · have hcomp := restrictionMap_restrictionMap D₀ (laurentMinusDatum D₀ f) D.1
+        (laurentMinus_subset D₀ f) hD_minus x
     rw [hx_minus, hfV_minus D hD_minus] at hcomp
     exact hcomp.symm
 

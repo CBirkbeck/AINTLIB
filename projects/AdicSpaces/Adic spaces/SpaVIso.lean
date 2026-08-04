@@ -572,14 +572,13 @@ theorem imgSection_compat {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
   have hj := pieceEquiv_restrict' D₀ hV y j (interIdx i j) (interIdx_le_right i j)
   show restrictionMap (imgDatum D₀ i.isRational) k.D _ _
     = restrictionMap (imgDatum D₀ j.isRational) k.D _ _
-  have hfi := congrFun (restrictionMap_comp (imgDatum D₀ i.isRational)
-    (imgDatum D₀ (interIdx i j).isRational) k.D hmi hk)
+  have hfi := restrictionMap_restrictionMap (imgDatum D₀ i.isRational)
+    (imgDatum D₀ (interIdx i j).isRational) k.D hmi hk
     (pieceEquiv D₀ i.isRational (index_sub D₀ hV i) (limitEvalHom i y))
-  have hfj := congrFun (restrictionMap_comp (imgDatum D₀ j.isRational)
-    (imgDatum D₀ (interIdx i j).isRational) k.D hmj hk)
+  have hfj := restrictionMap_restrictionMap (imgDatum D₀ j.isRational)
+    (imgDatum D₀ (interIdx i j).isRational) k.D hmj hk
     (pieceEquiv D₀ j.isRational (index_sub D₀ hV j) (limitEvalHom j y))
   rw [← hfi, ← hfj]
-  simp only [Function.comp_apply]
   rw [hi, hj]
 
 /-- **The comparison map hits everything** (P5-K5): the keystone comparisons
@@ -683,7 +682,7 @@ theorem pieceEquiv_symm_continuous {E : RationalLocData A} (hE : E.IsRational)
           (certExp_spec D₀ hE) z) = _
     refine ofBijective_symm_apply _ hbij (restrictionMapHom _ E hEeq.le)
       (fun x => ?_) _
-    exact congrFun (restrictionMap_comp E _ E hEeq.symm.le hEeq.le) x |>.trans
+    exact restrictionMap_restrictionMap E _ E hEeq.symm.le hEeq.le x |>.trans
       (congrFun (restrictionMap_id E) x)
   rw [show ((pieceEquiv D₀ hE hE_sub).symm : _ → _) = _ from funext hfun]
   exact (restrictionMapHom_continuous _ _ _).comp

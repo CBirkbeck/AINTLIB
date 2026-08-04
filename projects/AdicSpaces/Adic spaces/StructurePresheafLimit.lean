@@ -271,8 +271,7 @@ def limitOfValue (D₀ : RationalLocData A) :
     presheafValue D₀ →+* ↥(limitSections (spaOpens D₀)) where
   toFun x := ⟨fun i => restrictionMap D₀ i.D i.rationalOpen_subset x, by
     intro i j hij
-    have h := congr_fun (restrictionMap_comp D₀ i.D j.D i.rationalOpen_subset hij) x
-    simp only [Function.comp_apply] at h
+    have h := restrictionMap_restrictionMap D₀ i.D j.D i.rationalOpen_subset hij x
     exact h⟩
   map_one' := Subtype.ext (funext fun i => map_one (restrictionMapHom D₀ i.D _))
   map_mul' x y := Subtype.ext (funext fun i => map_mul (restrictionMapHom D₀ i.D _) x y)

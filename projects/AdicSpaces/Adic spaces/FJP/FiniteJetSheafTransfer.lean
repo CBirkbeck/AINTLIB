@@ -271,13 +271,12 @@ theorem pushedCompatB (d₁ d₂ : ↥C.covers) (D₃ : RationalLocData (JetB F)
     presheafValueMapB_restriction d₂.1 (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece
       d₂.2)) (hC.piece d₂.2) hIrat hsub₂ hpush₂ (f d₂)]
     at hpushed
-  have hfac₁ := congrFun (restrictionMap_comp (pushDatumB d₁.1 (hC.piece d₁.2))
+  have hfac₁ := restrictionMap_restrictionMap (pushDatumB d₁.1 (hC.piece d₁.2))
     (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
-      hIrat) D₃ hpush₁ h₃I) (presheafValueMapB d₁.1 (hC.piece d₁.2) (f d₁))
-  have hfac₂ := congrFun (restrictionMap_comp (pushDatumB d₂.1 (hC.piece d₂.2))
+      hIrat) D₃ hpush₁ h₃I (presheafValueMapB d₁.1 (hC.piece d₁.2) (f d₁))
+  have hfac₂ := restrictionMap_restrictionMap (pushDatumB d₂.1 (hC.piece d₂.2))
     (pushDatumB (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
-      hIrat) D₃ hpush₂ h₃I) (presheafValueMapB d₂.1 (hC.piece d₂.2) (f d₂))
-  simp only [Function.comp_apply] at hfac₁ hfac₂
+      hIrat) D₃ hpush₂ h₃I (presheafValueMapB d₂.1 (hC.piece d₂.2) (f d₂))
   rw [← hfac₁, ← hfac₂, hpushed]
 
 include hcompat in
@@ -327,13 +326,12 @@ theorem pushedCompatC (d₁ d₂ : ↥C.covers) (D₃ : RationalLocData (JetC F)
     presheafValueMapC_restriction d₂.1 (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece
       d₂.2)) (hC.piece d₂.2) hIrat hsub₂ hpush₂ (f d₂)]
     at hpushed
-  have hfac₁ := congrFun (restrictionMap_comp (pushDatumC d₁.1 (hC.piece d₁.2))
+  have hfac₁ := restrictionMap_restrictionMap (pushDatumC d₁.1 (hC.piece d₁.2))
     (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
-      hIrat) D₃ hpush₁ h₃I) (presheafValueMapC d₁.1 (hC.piece d₁.2) (f d₁))
-  have hfac₂ := congrFun (restrictionMap_comp (pushDatumC d₂.1 (hC.piece d₂.2))
+      hIrat) D₃ hpush₁ h₃I (presheafValueMapC d₁.1 (hC.piece d₁.2) (f d₁))
+  have hfac₂ := restrictionMap_restrictionMap (pushDatumC d₂.1 (hC.piece d₂.2))
     (pushDatumC (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2))
-      hIrat) D₃ hpush₂ h₃I) (presheafValueMapC d₂.1 (hC.piece d₂.2) (f d₂))
-  simp only [Function.comp_apply] at hfac₁ hfac₂
+      hIrat) D₃ hpush₂ h₃I (presheafValueMapC d₂.1 (hC.piece d₂.2) (f d₂))
   rw [← hfac₁, ← hfac₂, hpushed]
 
 /-- Joint injectivity of the vertex pushes at a single rational datum

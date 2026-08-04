@@ -764,9 +764,7 @@ theorem restrictionMap_cross_eq_id (D E : RationalLocData A)
     (hDE : rationalOpen D.T D.s = rationalOpen E.T E.s) (x : presheafValue D) :
     restrictionMap E D (le_of_eq hDE)
       (restrictionMap D E (ge_of_eq hDE) x) = x := by
-  have hcomp := congr_fun
-    (restrictionMap_comp D E D (ge_of_eq hDE) (le_of_eq hDE)) x
-  simp only [Function.comp_apply] at hcomp
+  have hcomp := restrictionMap_restrictionMap D E D (ge_of_eq hDE) (le_of_eq hDE) x
   refine hcomp.trans ?_
   have hid := congr_fun (restrictionMap_id D) x
   exact (by simpa using hid :
@@ -920,15 +918,14 @@ theorem imgFamily_agreement
       (hcertAll _ hIrat)]
     exact Set.subset_inter hX₁ hX₂
   -- collapse both sides through the intersection
-  have hc₁ := congr_fun (restrictionMap_comp (imgDatumO D₀ E₁ (hcertAll E₁ (hC.piece h₁)))
+  have hc₁ := restrictionMap_restrictionMap (imgDatumO D₀ E₁ (hcertAll E₁ (hC.piece h₁)))
     (imgDatumO D₀ I (hcertAll _ hIrat)) X
-    (imgDatumO_rationalOpen_subset D₀ (hcertAll E₁ (hC.piece h₁)) (hcertAll _ hIrat) hIsub₁) hXI)
+    (imgDatumO_rationalOpen_subset D₀ (hcertAll E₁ (hC.piece h₁)) (hcertAll _ hIrat) hIsub₁) hXI
     (keystoneHomO D₀ (hcertAll E₁ (hC.piece h₁)) (f ⟨E₁, h₁⟩))
-  have hc₂ := congr_fun (restrictionMap_comp (imgDatumO D₀ E₂ (hcertAll E₂ (hC.piece h₂)))
+  have hc₂ := restrictionMap_restrictionMap (imgDatumO D₀ E₂ (hcertAll E₂ (hC.piece h₂)))
     (imgDatumO D₀ I (hcertAll _ hIrat)) X
-    (imgDatumO_rationalOpen_subset D₀ (hcertAll E₂ (hC.piece h₂)) (hcertAll _ hIrat) hIsub₂) hXI)
+    (imgDatumO_rationalOpen_subset D₀ (hcertAll E₂ (hC.piece h₂)) (hcertAll _ hIrat) hIsub₂) hXI
     (keystoneHomO D₀ (hcertAll E₂ (hC.piece h₂)) (f ⟨E₂, h₂⟩))
-  simp only [Function.comp_apply] at hc₁ hc₂
   calc restrictionMap _ X hX₁ (keystoneHomO D₀ (hcertAll E₁ (hC.piece h₁)) (f ⟨E₁, h₁⟩))
       = restrictionMap _ X hXI (restrictionMap _ _
           (imgDatumO_rationalOpen_subset D₀ (hcertAll E₁ (hC.piece h₁)) (hcertAll _ hIrat) hIsub₁)
@@ -983,14 +980,13 @@ theorem imgFamily_restriction
           ((C.hsubset h.choose h.choose_spec.choose).trans hCD₀)
           (f ⟨h.choose, h.choose_spec.choose⟩)) := rfl
   rw [hval, restrictionMap_cast _ _ h.choose_spec.choose_spec.symm _]
-  have hc := congr_fun (restrictionMap_comp
+  have hc := restrictionMap_restrictionMap
     (imgDatumO D₀ h.choose (hcertP h.choose h.choose_spec.choose))
     D'.1 X
     (le_of_eq (congrArg (fun E => rationalOpen E.T E.s)
-      h.choose_spec.choose_spec)) hX)
+      h.choose_spec.choose_spec)) hX
     (keystoneHomO D₀ (hcertP h.choose h.choose_spec.choose)
       (f ⟨h.choose, h.choose_spec.choose⟩))
-  simp only [Function.comp_apply] at hc
   exact hc
 
 /-- **The transported family at an image piece**: the value of `imgFamily` at
@@ -1196,7 +1192,7 @@ private theorem keystone_comp_productRestrictionSub_eq
     (C.hsubset _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
     x
   rw [hsq]
-  have hc := congr_fun (restrictionMap_comp
+  have hc := restrictionMap_restrictionMap
     (imgDatumO D₀ C.base hcertB)
     (imgDatumO D₀ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose
       (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose))
@@ -1205,9 +1201,8 @@ private theorem keystone_comp_productRestrictionSub_eq
       (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
       (C.hsubset _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose))
     (le_of_eq (congrArg (fun E => rationalOpen E.T E.s)
-      ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec)))
+      ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec))
     (keystoneHomO D₀ hcertB x)
-  simp only [Function.comp_apply] at hc
   exact hc
 
 /-- **The embedding transport** (the topological half of the single-`D₀`

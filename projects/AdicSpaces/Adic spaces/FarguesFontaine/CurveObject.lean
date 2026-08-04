@@ -840,10 +840,10 @@ theorem limitFrobHom_add (k l : ℤ)
   have h2 := ValuationSpectrum.presheafValueRingEquivHuber_congr_e_symm
     hct hct' hckl hckl' (frobPow_trans_neg p F k l) E.D hle2
     (restrictionMap _ _ hle' sv)
-  have h3 := congr_fun (restrictionMap_comp
+  have h3 := restrictionMap_restrictionMap
     ((E.D.mapHuber (frobPow p F (-k)) hck hck').mapHuber (frobPow p F (-l)) hcl hcl')
     (E.D.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l))) hct hct')
-    (E.D.mapHuber (frobPow p F (-(k + l))) hckl hckl') hle' hle2) sv
+    (E.D.mapHuber (frobPow p F (-(k + l))) hckl hckl') hle' hle2 sv
   have h4 := s.2 (frobIndex p F l (frobIndex p F k Elift))
     (frobIndex p F (k + l) E) hle3
   show (presheafValueRingEquivHuber (frobPow p F (-(k + l))) hckl hckl' E.D).symm

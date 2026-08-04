@@ -14913,3 +14913,101 @@ lemma a helper wraps still has consumers, the helper did not land; it was only w
 running once per newly-added helper, as the last step of adding it.
 
 Queued for the `tateAlgebra_flat` batch (4 sites, same file, free with that decomposition).
+
+### Rewiring 75 sites onto `restrictionMap_restrictionMap` — two guards earned their keep
+
+The mechanical half of the dedup finding above. The transform is structural:
+
+```
+congrFun (restrictionMap_comp A B C h₁ h₂) x  ->  restrictionMap_restrictionMap A B C h₁ h₂ x
+```
+
+— delete the `congrFun (` prefix and its *matching* `)`, rename the head. The argument that
+followed the close-paren becomes the lemma's own last explicit argument, so nothing is moved,
+reordered or invented. It works point-free too: `congrFun (restrictionMap_comp …)` alone is
+`∀ y, … = …`, and so is `restrictionMap_restrictionMap A B C h₁ h₂`.
+
+**Three defects, each caught by a guard rather than a build.**
+
+1. `inner.strip()` ate a newline before the `)`. Guard: newline count unchanged. (Relaxed
+   afterwards — `congrFun` and its `(` are legitimately on separate lines at some sites, so a
+   site may *absorb* one newline; it may never add one.)
+2. A guard on max line width, because a pure deletion must never widen a line.
+3. **The one that mattered**: the first real run rewrote
+   `restrictionMap_restrictionMap`'s *own body* — which is literally
+   `congrFun (restrictionMap_comp D D' D'' h₁ h₂) y` — into a self-reference, and Lean said
+   `fail to show termination`. It also rewrote the *docstring* that described the idiom.
+
+Defect 3 is the general one and is worth stating as a rule:
+
+> **A mechanical rewrite of an idiom onto a helper must exclude the helper's own definition
+> and every comment.** The helper's body *is* the idiom — that is what makes it the helper —
+> so a pattern that matches the idiom always matches the definition. And its docstring almost
+> always quotes the idiom too, for the same reason.
+
+Implemented as a comment mask (`--` lines and nested `/- … -/`) plus a range exclusion over
+the target declaration. That dropped Presheaf.lean out of the batch entirely — its only two
+hits *were* the docstring and the body — which incidentally shrank the rebuild cone, since the
+foundational file is now untouched.
+
+75 sites, 20 files. `git stash push -u` + `git stash drop` was the revert (`git checkout --`
+is blocked here).
+
+**A fourth defect, and the most interesting one: the helper subsumed a follow-up tactic.**
+
+The rewired module failed with four `simp made no progress`. Not a transform bug — a *correct*
+consequence. The hand-written idiom was never four lines, it was five:
+
+```lean
+have hcomp := congr_fun (restrictionMap_comp D₀ (laurentPlusDatum D₀ f) D.1 …) x
+simp only [Function.comp_apply] at hcomp
+```
+
+`congr_fun` on a composition-shaped equality leaves `(g ∘ f) x`, so every site needed the
+`Function.comp_apply` to unfold it. `restrictionMap_restrictionMap` states the *applied* form,
+so the `∘` never appears and the simp has nothing to do.
+
+Sixteen such lines, all `Function.comp_apply` alone, across 7 files — found by asking for
+`simp only [Function.comp_apply] at h` where `h` was bound by a rewritten
+`have h := restrictionMap_restrictionMap` in the preceding four lines, then checking the simp
+set was *only* that lemma (it was, at all 16 — a mixed set would need surgery, not deletion).
+
+> **When a helper replaces an idiom, check what the idiom's *callers* did next.** A helper that
+> states a stronger normal form silently retires the tactic that used to bridge the gap, and
+> the leftover shows up as `made no progress` — an error whose text points at the tactic, not
+> at the rewrite that caused it.
+
+Real saving is therefore 5 lines → 2 per site, not 4 → 3.
+
+**Full accounting of the bridging-tactic repair: 35 tactics across 4 shapes.**
+
+The first 16 (single-hypothesis `simp only [Function.comp_apply] at h`) were the easy half. The
+rest needed a proper analysis, keyed on *which lines this batch introduced* — read from the git
+diff, so a pre-existing `restrictionMap_restrictionMap` use, already green, is never touched:
+
+```
+simp only [Function.comp_apply] at H…    every H introduced   -> delete
+simp only [Function.comp_def]   at H…    every H introduced   -> delete
+rw   [Function.comp_apply] at H          H introduced         -> delete
+rw   [Function.comp_apply, REST] at H    H introduced         -> rw [REST] at H
+simp only [Function.comp_apply]          goal-directed, after `rw [← H]`  -> delete
+```
+
+Two sites the analysis refused, and both refusals were right:
+
+- `RelativeDescentHuber:1208` — `hc`'s binder spans **13 lines**, past an 8-line lookback. The
+  fix is not just a bigger window: search **upward** so the *nearest* binder wins. Searching
+  downward from `n-k` finds the earliest binder in the window, which is the wrong one whenever
+  two hypotheses of the same shape sit close together.
+- `GeometricReduction:5789` — a genuinely different idiom, split across two `have`s:
+  ```lean
+  have hcomp1 := restrictionMap_comp (D_E D₁) D₁.1 D₃ (D_sub_DE D₁) h₃₁
+  have step1  := congr_fun hcomp1 (fC ⟨D_E D₁, D_E_mem D₁⟩)
+  ```
+  The rewrite pattern requires `congr_fun (restrictionMap_comp`, so the two-step form was never
+  matched. It is the same duplication and could collapse three lines to one, but that is a *new*
+  rewrite, not repair of this one — recorded, not done.
+
+> **Rule: a repair pass must distinguish "I broke this" from "this was already like that."**
+> The git diff is the only reliable oracle. A textual scan for the idiom finds pre-existing uses
+> that already compile, and "fixing" them is how a mechanical batch turns into a regression.

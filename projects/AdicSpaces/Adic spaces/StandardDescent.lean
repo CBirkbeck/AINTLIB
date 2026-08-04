@@ -302,8 +302,8 @@ private theorem isEmbedding_productRestrictionSub_of_standard
           restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) ∘
       (productRestrictionSub A C) := by
     funext x P
-    exact (congr_fun (restrictionMap_comp C.base (r P) P.1
-      (C.hsubset (r P) (hrC P)) (hrsub P)) x).symm
+    exact (restrictionMap_restrictionMap C.base (r P) P.1
+      (C.hsubset (r P) (hrC P)) (hrsub P) x).symm
   have hΦcont : Continuous (fun y : ∀ E : ↥C.covers, presheafValue E.1 =>
       fun P : ↥Std.toCovering.covers =>
         restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) := by
@@ -374,11 +374,11 @@ private theorem restrictionMap_eq_of_standard_glue
       restrictionMap P.1 Q.1 hQP (g P) := by
     calc restrictionMap E Q.1 hQE (restrictionMap C.base E (C.hsubset E hEC) x)
         = restrictionMap C.base Q.1 (hQE.trans (C.hsubset E hEC)) x :=
-          congr_fun (restrictionMap_comp C.base E Q.1 (C.hsubset E hEC) hQE) x
+          restrictionMap_restrictionMap C.base E Q.1 (C.hsubset E hEC) hQE x
       _ = restrictionMap P.1 Q.1 hQP
           (restrictionMap C.base P.1 (Std.toCovering.hsubset P.1 P.2) x) :=
-          (congr_fun (restrictionMap_comp C.base P.1 Q.1
-            (Std.toCovering.hsubset P.1 P.2) hQP) x).symm
+          (restrictionMap_restrictionMap C.base P.1 Q.1
+            (Std.toCovering.hsubset P.1 P.2) hQP x).symm
       _ = restrictionMap P.1 Q.1 hQP (g P) :=
           congrArg (restrictionMap P.1 Q.1 hQP) (hx P)
   -- right side: the family agrees with the `E`-value on `Q`
@@ -386,7 +386,7 @@ private theorem restrictionMap_eq_of_standard_glue
       restrictionMap E Q.1 hQE (f ⟨E, hEC⟩) := by
     calc restrictionMap P.1 Q.1 hQP (g P)
         = restrictionMap (r P) Q.1 (hQP.trans (hrsub P)) (f ⟨r P, hrC P⟩) :=
-          congr_fun (restrictionMap_comp (r P) P.1 Q.1 (hrsub P) hQP)
+          restrictionMap_restrictionMap (r P) P.1 Q.1 (hrsub P) hQP
             (f ⟨r P, hrC P⟩)
       _ = restrictionMap E Q.1 hQE (f ⟨E, hEC⟩) :=
           hcompat ⟨r P, hrC P⟩ ⟨E, hEC⟩ Q.1 (hQP.trans (hrsub P)) hQE
@@ -436,13 +436,13 @@ theorem isSheafy_of_standardSheafCondition_at
       intro P₁ P₂ D₃ h₃₁ h₃₂
       calc restrictionMap P₁.1 D₃ h₃₁ (g P₁)
           = restrictionMap (r P₁) D₃ (h₃₁.trans (hrsub P₁)) (f ⟨r P₁, hrC P₁⟩) :=
-            congr_fun (restrictionMap_comp (r P₁) P₁.1 D₃ (hrsub P₁) h₃₁)
+            restrictionMap_restrictionMap (r P₁) P₁.1 D₃ (hrsub P₁) h₃₁
               (f ⟨r P₁, hrC P₁⟩)
         _ = restrictionMap (r P₂) D₃ (h₃₂.trans (hrsub P₂)) (f ⟨r P₂, hrC P₂⟩) :=
             hcompat ⟨r P₁, hrC P₁⟩ ⟨r P₂, hrC P₂⟩ D₃ (h₃₁.trans (hrsub P₁))
               (h₃₂.trans (hrsub P₂))
         _ = restrictionMap P₂.1 D₃ h₃₂ (g P₂) :=
-            (congr_fun (restrictionMap_comp (r P₂) P₂.1 D₃ (hrsub P₂) h₃₂)
+            (restrictionMap_restrictionMap (r P₂) P₂.1 D₃ (hrsub P₂) h₃₂
               (f ⟨r P₂, hrC P₂⟩)).symm
     obtain ⟨x, hx⟩ := hkey.2 g hgcompat
     refine ⟨x, ?_⟩

@@ -247,9 +247,8 @@ theorem RationalCoveringData.ExactIntersectionCompatible.allData
     RationalLocData.interRational_subset_left _ _ _ _
   have hIR : rationalOpen I.T I.s ⊆ rationalOpen D₂.1.T D₂.1.s :=
     RationalLocData.interRational_subset_right _ _ _ _
-  have c₁ := congr_fun (restrictionMap_comp D₁.1 I D₃ hIL h₃I) (f D₁)
-  have c₂ := congr_fun (restrictionMap_comp D₂.1 I D₃ hIR h₃I) (f D₂)
-  simp only [Function.comp_apply] at c₁ c₂
+  have c₁ := restrictionMap_restrictionMap D₁.1 I D₃ hIL h₃I (f D₁)
+  have c₂ := restrictionMap_restrictionMap D₂.1 I D₃ hIR h₃I (f D₂)
   calc restrictionMap D₁.1 D₃ h₃₁ (f D₁)
       = restrictionMap I D₃ h₃I (restrictionMap D₁.1 I hIL (f D₁)) := c₁.symm
     _ = restrictionMap I D₃ h₃I (restrictionMap D₂.1 I hIR (f D₂)) := by

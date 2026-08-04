@@ -619,11 +619,11 @@ theorem RationalCoveringData.plusHalf_presheaf_transport_eq_single
         ((iteratedLaurentPlus_swap_rationalOpen C.base f₀ g).le.trans
           (laurentPlus_subset (C.plusDatum g) f₀)) u := by
   unfold RationalCoveringData.plusHalf_presheaf_transport
-  exact congr_fun (restrictionMap_comp (C.plusDatum g)
+  exact restrictionMap_restrictionMap (C.plusDatum g)
     (laurentPlusDatum (C.plusDatum g) f₀)
     (laurentPlusDatum (laurentPlusDatum C.base f₀) g)
     (laurentPlus_subset (C.plusDatum g) f₀)
-    (iteratedLaurentPlus_swap_rationalOpen C.base f₀ g).le) u
+    (iteratedLaurentPlus_swap_rationalOpen C.base f₀ g).le u
 
 /-! ### Restriction-property transfer at the recursion boundary (item 3)
 
@@ -657,11 +657,11 @@ theorem RationalCoveringData.plusHalf_transport_restrictionMap_eq
         (h₃.trans ((iteratedLaurentPlus_swap_rationalOpen C.base f₀ g).le.trans
           (laurentPlus_subset (C.plusDatum g) f₀))) u := by
   rw [C.plusHalf_presheaf_transport_eq_single f₀ g u]
-  exact congr_fun (restrictionMap_comp (C.plusDatum g)
+  exact restrictionMap_restrictionMap (C.plusDatum g)
     (laurentPlusDatum (laurentPlusDatum C.base f₀) g) D₃
     ((iteratedLaurentPlus_swap_rationalOpen C.base f₀ g).le.trans
       (laurentPlus_subset (C.plusDatum g) f₀))
-    h₃) u
+    h₃ u
 
 /-! ### Plus-half `fV` transport at each `g ∈ S.erase f₀`
 
@@ -843,9 +843,9 @@ theorem RationalCoveringData.minusHalf_fV_restriction_at_g_restrictionMap_eq
           (C.mem_standardCoverVCovers S).mpr
             ⟨g, Finset.mem_of_mem_erase hg_mem, rfl⟩⟩) := by
   unfold RationalCoveringData.minusHalf_fV_restriction_at_g
-  exact congr_fun (restrictionMap_comp (C.plusDatum g)
+  exact restrictionMap_restrictionMap (C.plusDatum g)
     (laurentMinusDatum (C.plusDatum g) f₀) D₃
-    (laurentMinus_subset (C.plusDatum g) f₀) h₃) _
+    (laurentMinus_subset (C.plusDatum g) f₀) h₃ _
 
 /-! ### Outer-vs-inner `plusDatum` equality under `hD_plus`
 
@@ -1518,19 +1518,15 @@ theorem RationalCoveringData.standardCover_gluing_induction_step
   refine ⟨x, fun D => ?_⟩
   rcases hrefine D with hD | hD
   · -- D refines plus half: compose restriction C.base → plus → D.1.
-    have hcomp := congr_fun
-      (restrictionMap_comp C.base (laurentPlusDatum C.base f₀) D.1
-        (laurentPlus_subset C.base f₀) hD) x
+    have hcomp := restrictionMap_restrictionMap C.base (laurentPlusDatum C.base f₀) D.1
+        (laurentPlus_subset C.base f₀) hD x
     -- `hcomp` has the form `(f ∘ g) x = h x`; beta-reduce `∘` first so
     -- `rw` can match `g x = u_plus` / `f u_plus = fV D` syntactically.
-    simp only [Function.comp_apply] at hcomp
     rw [hx_p, hfV_plus D hD] at hcomp
     exact hcomp.symm
   · -- D refines minus half: compose C.base → minus → D.1.
-    have hcomp := congr_fun
-      (restrictionMap_comp C.base (laurentMinusDatum C.base f₀) D.1
-        (laurentMinus_subset C.base f₀) hD) x
-    simp only [Function.comp_apply] at hcomp
+    have hcomp := restrictionMap_restrictionMap C.base (laurentMinusDatum C.base f₀) D.1
+        (laurentMinus_subset C.base f₀) hD x
     rw [hx_m, hfV_minus D hD] at hcomp
     exact hcomp.symm
 
@@ -2522,11 +2518,10 @@ theorem RationalCoveringData.plusLaurent_compat_transfer
           (restrictionMap D₂.1 (laurentPlusDatum D₂.1 f₀)
             (laurentPlus_subset D₂.1 f₀) (fV D₂)) := by
   intro D₁ D₂ D₃ h₃₁ h₃₂
-  have hcompL := congr_fun (restrictionMap_comp D₁.1 (laurentPlusDatum D₁.1 f₀) D₃
-    (laurentPlus_subset D₁.1 f₀) h₃₁) (fV D₁)
-  have hcompR := congr_fun (restrictionMap_comp D₂.1 (laurentPlusDatum D₂.1 f₀) D₃
-    (laurentPlus_subset D₂.1 f₀) h₃₂) (fV D₂)
-  simp only [Function.comp_apply] at hcompL hcompR
+  have hcompL := restrictionMap_restrictionMap D₁.1 (laurentPlusDatum D₁.1 f₀) D₃
+    (laurentPlus_subset D₁.1 f₀) h₃₁ (fV D₁)
+  have hcompR := restrictionMap_restrictionMap D₂.1 (laurentPlusDatum D₂.1 f₀) D₃
+    (laurentPlus_subset D₂.1 f₀) h₃₂ (fV D₂)
   rw [hcompL, hcompR]
   exact hV_compat D₁ D₂ D₃
     (h₃₁.trans (laurentPlus_subset D₁.1 f₀))
@@ -2556,11 +2551,10 @@ theorem RationalCoveringData.minusLaurent_compat_transfer
           (restrictionMap D₂.1 (laurentMinusDatum D₂.1 f₀)
             (laurentMinus_subset D₂.1 f₀) (fV D₂)) := by
   intro D₁ D₂ D₃ h₃₁ h₃₂
-  have hcompL := congr_fun (restrictionMap_comp D₁.1 (laurentMinusDatum D₁.1 f₀) D₃
-    (laurentMinus_subset D₁.1 f₀) h₃₁) (fV D₁)
-  have hcompR := congr_fun (restrictionMap_comp D₂.1 (laurentMinusDatum D₂.1 f₀) D₃
-    (laurentMinus_subset D₂.1 f₀) h₃₂) (fV D₂)
-  simp only [Function.comp_apply] at hcompL hcompR
+  have hcompL := restrictionMap_restrictionMap D₁.1 (laurentMinusDatum D₁.1 f₀) D₃
+    (laurentMinus_subset D₁.1 f₀) h₃₁ (fV D₁)
+  have hcompR := restrictionMap_restrictionMap D₂.1 (laurentMinusDatum D₂.1 f₀) D₃
+    (laurentMinus_subset D₂.1 f₀) h₃₂ (fV D₂)
   rw [hcompL, hcompR]
   exact hV_compat D₁ D₂ D₃
     (h₃₁.trans (laurentMinus_subset D₁.1 f₀))
@@ -4569,17 +4563,13 @@ theorem RationalCoveringData.hV_glue_refined_from_laurent_halves
   -- dichotomy lemma. Case-split and use the corresponding huplus / huminus.
   rcases C.refinedVCovers_plusMinus_dichotomy S f₀ D.1 D.2 with hDplus | hDminus
   · -- D ⊆ plus-half: compose restriction C.base → plus-half → D.1.
-    have hcomp := congr_fun
-      (restrictionMap_comp C.base (laurentPlusDatum C.base f₀) D.1
-        (laurentPlus_subset C.base f₀) hDplus) x
-    simp only [Function.comp_apply] at hcomp
+    have hcomp := restrictionMap_restrictionMap C.base (laurentPlusDatum C.base f₀) D.1
+        (laurentPlus_subset C.base f₀) hDplus x
     rw [hx_p, huplus D hDplus] at hcomp
     exact hcomp.symm
   · -- D ⊆ minus-half: compose restriction C.base → minus-half → D.1.
-    have hcomp := congr_fun
-      (restrictionMap_comp C.base (laurentMinusDatum C.base f₀) D.1
-        (laurentMinus_subset C.base f₀) hDminus) x
-    simp only [Function.comp_apply] at hcomp
+    have hcomp := restrictionMap_restrictionMap C.base (laurentMinusDatum C.base f₀) D.1
+        (laurentMinus_subset C.base f₀) hDminus x
     rw [hx_m, huminus D hDminus] at hcomp
     exact hcomp.symm
 

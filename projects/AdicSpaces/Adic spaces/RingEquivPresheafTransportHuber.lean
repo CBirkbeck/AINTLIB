@@ -628,10 +628,10 @@ theorem presheafValueRingEquivHuber_comp_symm_apply
       (restrictionMap ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂')
         (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
         hle' z) = z := by
-    have hcomp := congr_fun (restrictionMap_comp
+    have hcomp := restrictionMap_restrictionMap
       ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂')
       (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
-      ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hle' hle) z
+      ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hle' hle z
     have hid := congr_fun (restrictionMap_id
       ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂')) z
     exact hcomp.trans hid
@@ -768,9 +768,9 @@ theorem presheafValueRingEquivHuber_symm_apply_of_eq_refl
   subst hE
   rw [(presheafValueRingEquivHuber (RingEquiv.refl A) he he' D).symm_apply_eq]
   rw [presheafValueRingEquivHuber_refl_apply he he' D hle]
-  have hcomp := congr_fun (restrictionMap_comp
+  have hcomp := restrictionMap_restrictionMap
     (D.mapHuber (RingEquiv.refl A) he he') D
-    (D.mapHuber (RingEquiv.refl A) he he') hle' hle) z
+    (D.mapHuber (RingEquiv.refl A) he he') hle' hle z
   have hid := congr_fun (restrictionMap_id
     (D.mapHuber (RingEquiv.refl A) he he')) z
   refine ((?_ : _ = restrictionMap _ _ (hle.trans hle') z).trans ?_).symm

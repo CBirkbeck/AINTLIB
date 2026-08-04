@@ -343,11 +343,9 @@ private theorem exists_glue_at_rational [IsSheafy A]
   have hFU_i₀ : spaOpen q.1 ⊆ (U (hexE E₀).2.choose : Set ↥(Spa A A⁺)) :=
     (spaOpen_subset_of_rationalOpen_subset hFE₀).trans hi₀
   -- left composite: through the refinement piece `E₀`
-  have hcompL := congr_fun (restrictionMap_comp D₀ E₀.1 q.1 (C.hsubset E₀.1 E₀.2) hFE₀) z
-  simp only [Function.comp_apply] at hcompL
+  have hcompL := restrictionMap_restrictionMap D₀ E₀.1 q.1 (C.hsubset E₀.1 E₀.2) hFE₀ z
   -- right composite: through `E`
-  have hcompR := congr_fun (restrictionMap_comp D₀ E q.1 hED hFE) z
-  simp only [Function.comp_apply] at hcompR
+  have hcompR := restrictionMap_restrictionMap D₀ E q.1 hED hFE z
   show restrictionMap E q.1 hFE (restrictionMap D₀ E hED z) =
     restrictionMap E q.1 hFE ((s i).1 ⟨E, hErat, hEUi⟩)
   calc restrictionMap E q.1 hFE (restrictionMap D₀ E hED z)
@@ -396,9 +394,8 @@ theorem exists_limitSections_glue [IsSheafy A]
     have hE'D' : rationalOpen q'.1.1.T q'.1.1.s ⊆ rationalOpen D'.D.T D'.D.s :=
       spaOpen_subset_iff.mp (q'.2.2.trans Set.inter_subset_left)
     have hE'U : spaOpen q'.1.1 ⊆ (U q'.1.2 : Set ↥(Spa A A⁺)) := q'.2.2.trans Set.inter_subset_right
-    have hcomp := congr_fun (restrictionMap_comp D.D D'.D q'.1.1 hD'D hE'D')
+    have hcomp := restrictionMap_restrictionMap D.D D'.D q'.1.1 hD'D hE'D'
       (z D.D D.isRational D.subset)
-    simp only [Function.comp_apply] at hcomp
     show restrictionMap D'.D q'.1.1 hE'D'
         (restrictionMap D.D D'.D hD'D (z D.D D.isRational D.subset)) =
       restrictionMap D'.D q'.1.1 hE'D' (z D'.D D'.isRational D'.subset)
@@ -669,11 +666,10 @@ private theorem productRestrictionSub_injective_of_isLimitSheaf (h : IsLimitShea
     refine Subtype.ext (funext fun F => ?_)
     have hFE : rationalOpen F.D.T F.D.s ⊆ rationalOpen E.1.T E.1.s :=
       spaOpen_subset_iff.mp F.subset
-    have h1 := congr_fun (restrictionMap_comp C.base E.1 F.D
-      (C.hsubset E.1 E.2) hFE) g
-    have h1' := congr_fun (restrictionMap_comp C.base E.1 F.D
-      (C.hsubset E.1 E.2) hFE) g'
-    simp only [Function.comp_apply] at h1 h1'
+    have h1 := restrictionMap_restrictionMap C.base E.1 F.D
+      (C.hsubset E.1 E.2) hFE g
+    have h1' := restrictionMap_restrictionMap C.base E.1 F.D
+      (C.hsubset E.1 E.2) hFE g'
     have h2 : restrictionMap C.base E.1 (C.hsubset E.1 E.2) g =
         restrictionMap C.base E.1 (C.hsubset E.1 E.2) g' := congr_fun hgg' E
     show restrictionMap C.base F.D _ g = restrictionMap C.base F.D _ g'

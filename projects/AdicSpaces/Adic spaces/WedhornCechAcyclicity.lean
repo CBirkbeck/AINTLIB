@@ -1070,12 +1070,10 @@ noncomputable def presheafValueCongr [HasLocLiftPowerBounded A]
   toFun := restrictionMap D D' h.ge
   invFun := restrictionMap D' D h.le
   left_inv x := by
-    have hc := congrFun (restrictionMap_comp D D' D h.ge h.le) x
-    rw [Function.comp_apply] at hc
+    have hc := restrictionMap_restrictionMap D D' D h.ge h.le x
     rw [hc]; exact congrFun (restrictionMap_id D) x
   right_inv x := by
-    have hc := congrFun (restrictionMap_comp D' D D' h.le h.ge) x
-    rw [Function.comp_apply] at hc
+    have hc := restrictionMap_restrictionMap D' D D' h.le h.ge x
     rw [hc]; exact congrFun (restrictionMap_id D') x
   map_mul' x y := (restrictionMapHom D D' h.ge).map_mul x y
   map_add' x y := (restrictionMapHom D D' h.ge).map_add x y
@@ -1107,9 +1105,8 @@ theorem isOXAcyclic_congr [HasLocLiftPowerBounded A] (C C' : RationalCoveringDat
     -- `cov`-piece `ψ D'` via `hψR`, on which `x = 0`) ⇒ `x = 0` by `hC'.separation`.
     refine hC'.separation x (fun D' hD' => ?_)
     have h : rationalOpen (ψ D' hD').T (ψ D' hD').s = rationalOpen D'.T D'.s := hψR D' hD'
-    have hcomp := congrFun
-      (restrictionMap_comp b (ψ D' hD') D' (hsub _ (hψmem D' hD')) h.ge) x
-    rw [Function.comp_apply, hx _ (hψmem D' hD')] at hcomp
+    have hcomp := restrictionMap_restrictionMap b (ψ D' hD') D' (hsub _ (hψmem D' hD')) h.ge x
+    rw [hx _ (hψmem D' hD')] at hcomp
     rw [← hcomp]
     exact map_zero (restrictionMapHom (ψ D' hD') D' h.ge)
   · -- GLUING: transfer the `cov`-cocycle `f` to a `cov'`-cocycle via `ψ` + the piece
@@ -1120,26 +1117,24 @@ theorem isOXAcyclic_congr [HasLocLiftPowerBounded A] (C C' : RationalCoveringDat
         (f ⟨ψ D'.1 D'.2, hψmem D'.1 D'.2⟩) with hg_def
     obtain ⟨x, hx⟩ := hC'.gluing g (fun D'₁ D'₂ D₃ h₃₁ h₃₂ => by
       simp only [hg_def]
-      have c1 := congrFun (restrictionMap_comp (ψ D'₁.1 D'₁.2) D'₁.1 D₃
-        (hψR D'₁.1 D'₁.2).ge h₃₁) (f ⟨ψ D'₁.1 D'₁.2, hψmem D'₁.1 D'₁.2⟩)
-      have c2 := congrFun (restrictionMap_comp (ψ D'₂.1 D'₂.2) D'₂.1 D₃
-        (hψR D'₂.1 D'₂.2).ge h₃₂) (f ⟨ψ D'₂.1 D'₂.2, hψmem D'₂.1 D'₂.2⟩)
-      simp only [Function.comp_def] at c1 c2
+      have c1 := restrictionMap_restrictionMap (ψ D'₁.1 D'₁.2) D'₁.1 D₃
+        (hψR D'₁.1 D'₁.2).ge h₃₁ (f ⟨ψ D'₁.1 D'₁.2, hψmem D'₁.1 D'₁.2⟩)
+      have c2 := restrictionMap_restrictionMap (ψ D'₂.1 D'₂.2) D'₂.1 D₃
+        (hψR D'₂.1 D'₂.2).ge h₃₂ (f ⟨ψ D'₂.1 D'₂.2, hψmem D'₂.1 D'₂.2⟩)
       rw [c1, c2]
       exact hf ⟨ψ D'₁.1 D'₁.2, hψmem D'₁.1 D'₁.2⟩
         ⟨ψ D'₂.1 D'₂.2, hψmem D'₂.1 D'₂.2⟩ D₃ _ _)
     refine ⟨x, fun D => ?_⟩
     have hRD : rationalOpen D.1.T D.1.s = rationalOpen (φ D.1 D.2).T (φ D.1 D.2).s :=
       hφR D.1 D.2
-    have cD := congrFun (restrictionMap_comp b (φ D.1 D.2) D.1
-      (hsub' (φ D.1 D.2) (hφmem D.1 D.2)) hRD.le) x
-    rw [Function.comp_apply, hx ⟨φ D.1 D.2, hφmem D.1 D.2⟩] at cD
+    have cD := restrictionMap_restrictionMap b (φ D.1 D.2) D.1
+      (hsub' (φ D.1 D.2) (hφmem D.1 D.2)) hRD.le x
+    rw [hx ⟨φ D.1 D.2, hφmem D.1 D.2⟩] at cD
     rw [← cD]
     simp only [hg_def]
-    have cD2 := congrFun (restrictionMap_comp (ψ (φ D.1 D.2) (hφmem D.1 D.2))
-      (φ D.1 D.2) D.1 (hψR (φ D.1 D.2) (hφmem D.1 D.2)).ge hRD.le)
+    have cD2 := restrictionMap_restrictionMap (ψ (φ D.1 D.2) (hφmem D.1 D.2))
+      (φ D.1 D.2) D.1 (hψR (φ D.1 D.2) (hφmem D.1 D.2)).ge hRD.le
       (f ⟨ψ (φ D.1 D.2) (hφmem D.1 D.2), hψmem (φ D.1 D.2) (hφmem D.1 D.2)⟩)
-    rw [Function.comp_apply] at cD2
     rw [cD2, hf ⟨ψ (φ D.1 D.2) (hφmem D.1 D.2),
       hψmem (φ D.1 D.2) (hφmem D.1 D.2)⟩ D D.1 _ (le_refl _)]
     exact congrFun (restrictionMap_id D.1) (f D)
@@ -6338,12 +6333,12 @@ private theorem unitCover_sq_plus_comp_C
       (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) c) from rfl]
   rw [unitCover_relOverlap_backward_coe,
     unitCover_relOverlap_backwardLocHom_algebraMap]
-  exact congrFun (restrictionMap_comp D₀
+  exact restrictionMap_restrictionMap D₀
     (D₀.interSamePair (unitDatum D₀.P f) rfl)
     ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
     (RationalLocData.interSamePair_subset_left _ _ _)
-    (RationalLocData.interSamePair_subset_left _ _ _)) c
+    (RationalLocData.interSamePair_subset_left _ _ _) c
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
@@ -6731,12 +6726,12 @@ private theorem unitCover_sq_minus_comp_C
       (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) c) from rfl]
   rw [unitCover_relOverlap_backward_coe,
     unitCover_relOverlap_backwardLocHom_algebraMap]
-  exact congrFun (restrictionMap_comp D₀
+  exact restrictionMap_restrictionMap D₀
     (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
     ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
       (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
     (RationalLocData.interSamePair_subset_left _ _ _)
-    (RationalLocData.interSamePair_subset_right _ _ _)) c
+    (RationalLocData.interSamePair_subset_right _ _ _) c
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
@@ -7823,7 +7818,7 @@ theorem wedhorn_lemma_834_propA3_part1_separation
     (restrictionMap C.base V_j hsub_C x)]
   have h_factored : restrictionMap V_j D' hsub_Vj (restrictionMap C.base V_j hsub_C x) =
       restrictionMap C.base D' (hsub_Vj.trans hsub_C) x :=
-    congr_fun (restrictionMap_comp (A := A) C.base V_j D' hsub_C hsub_Vj) x
+    restrictionMap_restrictionMap (A := A) C.base V_j D' hsub_C hsub_Vj x
   rw [h_factored]
   -- Pick D ∈ C.covers with D' ⊆ D, factor through D, and kill via hx.
   obtain ⟨D, hD_in_C, hD'_sub_D⟩ := hC_restr_pieces ⟨V_j, hV_j⟩ D' hD'
@@ -7831,8 +7826,8 @@ theorem wedhorn_lemma_834_propA3_part1_separation
       restrictionMap C.base D' (hsub_Vj.trans hsub_C) x =
       restrictionMap D D' hD'_sub_D
         (restrictionMap C.base D (C.hsubset D hD_in_C) x) :=
-    (congr_fun (restrictionMap_comp (A := A) C.base D D'
-      (C.hsubset D hD_in_C) hD'_sub_D) x).symm
+    (restrictionMap_restrictionMap (A := A) C.base D D'
+      (C.hsubset D hD_in_C) hD'_sub_D x).symm
   rw [h_factored₂, hx D hD_in_C]
   exact (restrictionMapHom D D' hD'_sub_D).map_zero
 
@@ -10580,8 +10575,8 @@ theorem genRestrictedCover_gluing
             (imagePieceDatum D₀ T (tof E₂) hspan) rfl)
           (RationalLocData.interSamePair_subset_left _ _ _)
           (genPiece_relative_equiv D₀ T (tof E₁) hspan (f (tof E₁) (htof_mem E₁)))) from
-      (congrFun (restrictionMap_comp (imagePieceDatum D₀ T (tof E₁) hspan) _ E₃
-        (RationalLocData.interSamePair_subset_left _ _ _) hE₁₂) _).symm]
+      (restrictionMap_restrictionMap (imagePieceDatum D₀ T (tof E₁) hspan) _ E₃
+        (RationalLocData.interSamePair_subset_left _ _ _) hE₁₂ _).symm]
     rw [show restrictionMap (genPieceDatum (presheafValue_concretePair D₀)
         (T.image D₀.canonicalMap) (D₀.canonicalMap (tof E₂))
         (imageGenCover_span D₀ T hspan)) E₃ (by rw [← htof_eq E₂]; exact h₃₂)
@@ -10592,8 +10587,8 @@ theorem genRestrictedCover_gluing
             (imagePieceDatum D₀ T (tof E₂) hspan) rfl)
           (RationalLocData.interSamePair_subset_right _ _ _)
           (genPiece_relative_equiv D₀ T (tof E₂) hspan (f (tof E₂) (htof_mem E₂)))) from
-      (congrFun (restrictionMap_comp (imagePieceDatum D₀ T (tof E₂) hspan) _ E₃
-        (RationalLocData.interSamePair_subset_right _ _ _) hE₁₂) _).symm]
+      (restrictionMap_restrictionMap (imagePieceDatum D₀ T (tof E₂) hspan) _ E₃
+        (RationalLocData.interSamePair_subset_right _ _ _) hE₁₂ _).symm]
     congr 1
     exact genPiece_family_pair_compat D₀ T hspan (tof E₁) (tof E₂)
       (f (tof E₁) (htof_mem E₁)) (f (tof E₂) (htof_mem E₂))
@@ -12821,12 +12816,12 @@ private theorem imageCover_keystone_compat [DecidableEq A]
     ((hC.piece D₁.2).span_eq_top) hspanD₁₂ hD₁₂_sub₁
   have hmono₂ := imagePieceDatum_rationalOpen_mono C.base D₂.1 D₁₂
     ((hC.piece D₂.2).span_eq_top) hspanD₁₂ hD₁₂_sub₂
-  rw [← congrFun (restrictionMap_comp (imagePieceDatum C.base D₁.1.T D₁.1.s
+  rw [← restrictionMap_restrictionMap (imagePieceDatum C.base D₁.1.T D₁.1.s
       ((hC.piece D₁.2).span_eq_top)) (imagePieceDatum C.base D₁₂.T D₁₂.s hspanD₁₂)
-      G hmono₁ hG_sub) _,
-    ← congrFun (restrictionMap_comp (imagePieceDatum C.base D₂.1.T D₂.1.s
+      G hmono₁ hG_sub _,
+    ← restrictionMap_restrictionMap (imagePieceDatum C.base D₂.1.T D₂.1.s
       ((hC.piece D₂.2).span_eq_top)) (imagePieceDatum C.base D₁₂.T D₁₂.s hspanD₁₂)
-      G hmono₂ hG_sub) _]
+      G hmono₂ hG_sub _]
   show restrictionMap _ G hG_sub
       (restrictionMap _ (imagePieceDatum C.base D₁₂.T D₁₂.s hspanD₁₂) hmono₁
         (relativePiece_equiv C.base D₁.1 (C.hsubset D₁.1 D₁.2)

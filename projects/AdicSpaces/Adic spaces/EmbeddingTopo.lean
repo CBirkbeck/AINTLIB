@@ -779,8 +779,8 @@ theorem naturalRefinementMap_comp
       fun d => restrictionMap C.base d.1
         ((hτ d).trans (C.hsubset (τ d).1 (τ d).2)) x := by
   funext d
-  exact congr_fun (restrictionMap_comp C.base (τ d).1 d.1
-    (C.hsubset (τ d).1 (τ d).2) (hτ d)) x
+  exact restrictionMap_restrictionMap C.base (τ d).1 d.1
+    (C.hsubset (τ d).1 (τ d).2) (hτ d) x
 
 /-- **T284**: Lane C single-step closer via laurent refinement. Given
 the bridges hypothesis bundle + laurent refinement data + commutativity
@@ -1643,8 +1643,8 @@ theorem productRestrictionSub_isInducing_depth2_via_iterated_inducing
               (Set.Subset.trans (hV₂_subset p q.1 q.2)
                 (hV₁_subset p.1 p.2)) x))) := by
     funext x p q
-    exact congr_fun (restrictionMap_comp Base p.1 q.1
-      (hV₁_subset p.1 p.2) (hV₂_subset p q.1 q.2)) x
+    exact restrictionMap_restrictionMap Base p.1 q.1
+      (hV₁_subset p.1 p.2) (hV₂_subset p q.1 q.2) x
   rw [← h_eq]
   exact h_comp
 
@@ -1929,9 +1929,9 @@ theorem productRestrictionSub_isInducing_via_tree_node
     show productRestrictionSub A (L.toCovering (laurentPlusDatum D₀ f))
         (restrictionMap D₀ (laurentPlusDatum D₀ f) (laurentPlus_subset D₀ f) x)
         ⟨D, hL⟩ = _
-    exact congr_fun (restrictionMap_comp D₀ (laurentPlusDatum D₀ f) D
+    exact restrictionMap_restrictionMap D₀ (laurentPlusDatum D₀ f) D
       (laurentPlus_subset D₀ f)
-      ((L.toCovering (laurentPlusDatum D₀ f)).hsubset D hL)) x
+      ((L.toCovering (laurentPlusDatum D₀ f)).hsubset D hL) x
   · change (Homeomorph.piFinsetUnion (fun D : RationalLocData A => presheafValue D) h_disj)
         (productRestrictionSub A (L.toCovering (laurentPlusDatum D₀ f))
           (restrictionMap D₀ (laurentPlusDatum D₀ f) (laurentPlus_subset D₀ f) x),
@@ -1942,9 +1942,9 @@ theorem productRestrictionSub_isInducing_via_tree_node
     show productRestrictionSub A (R.toCovering (laurentMinusDatum D₀ f))
         (restrictionMap D₀ (laurentMinusDatum D₀ f) (laurentMinus_subset D₀ f) x)
         ⟨D, hR⟩ = _
-    exact congr_fun (restrictionMap_comp D₀ (laurentMinusDatum D₀ f) D
+    exact restrictionMap_restrictionMap D₀ (laurentMinusDatum D₀ f) D
       (laurentMinus_subset D₀ f)
-      ((R.toCovering (laurentMinusDatum D₀ f)).hsubset D hR)) x
+      ((R.toCovering (laurentMinusDatum D₀ f)).hsubset D hR) x
 
 /-! ## Tree-induction predicate: distinct and disjoint at every node
 

@@ -287,9 +287,8 @@ theorem productRestrictionSub_mem_sectionEqualizer (C : RationalCoveringData A)
   intro D₁ D₂ D₃ h₃₁ h₃₂
   obtain ⟨D₁, hD₁⟩ := D₁
   obtain ⟨D₂, hD₂⟩ := D₂
-  have e₁ := congr_fun (restrictionMap_comp C.base D₁ D₃ (C.hsubset D₁ hD₁) h₃₁) x
-  have e₂ := congr_fun (restrictionMap_comp C.base D₂ D₃ (C.hsubset D₂ hD₂) h₃₂) x
-  simp only [Function.comp_apply] at e₁ e₂
+  have e₁ := restrictionMap_restrictionMap C.base D₁ D₃ (C.hsubset D₁ hD₁) h₃₁ x
+  have e₂ := restrictionMap_restrictionMap C.base D₂ D₃ (C.hsubset D₂ hD₂) h₃₂ x
   change restrictionMap D₁ D₃ h₃₁ (restrictionMap C.base D₁ (C.hsubset D₁ hD₁) x) =
       restrictionMap D₂ D₃ h₃₂ (restrictionMap C.base D₂ (C.hsubset D₂ hD₂) x)
   rw [e₁, e₂]

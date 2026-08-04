@@ -822,10 +822,9 @@ private theorem restrictionMap_mapRationalRingEquiv_factor (E : RationalLocData 
         (restrictionMap D (E.mapRationalRingEquiv e he he' hE) hiB v)) := by
   have hBsub := rationalOpen_mapRationalRingEquiv_subset_of_subset e.symm he' he
     (ringPlus_map_symm_of_map e hplus) (E.mapRationalRingEquiv e he he' hE) hÊ D hD hiB
-  have hcompose := congr_fun (restrictionMap_comp (D.mapRationalRingEquiv e.symm he' he hD)
-    ((E.mapRationalRingEquiv e he he' hE).mapRationalRingEquiv e.symm he' he hÊ) E hBsub hEeq)
+  have hcompose := restrictionMap_restrictionMap (D.mapRationalRingEquiv e.symm he' he hD)
+    ((E.mapRationalRingEquiv e he he' hE).mapRationalRingEquiv e.symm he' he hÊ) E hBsub hEeq
     (presheafValueRingEquivOfRingEquiv e.symm he' he D hD v)
-  simp only [Function.comp_apply] at hcompose
   rw [presheafValueRingEquivOfRingEquiv_restriction e.symm he' he D hD
     (E.mapRationalRingEquiv e he he' hE) hÊ hiB hBsub v, hcompose]
 
