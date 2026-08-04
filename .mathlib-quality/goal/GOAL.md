@@ -15836,3 +15836,84 @@ carry the caller's `letI`s; and check what the *statement's* head symbol does ab
 before choosing binders.
 
 Over-50 count 74 → 73; no new declaration is over the bar.
+
+### `tateAlgebra_flat` stage 1 — and a dedent slip caught for free
+
+Two lifts that are *not* coupled to the proof's `set`-chain:
+
+* `eq_zero_of_mem_all_idealOfDefinition_pow_image` — a point in the image of `P.I ^ m` for
+  every `m` is zero (`T2` + the nhds basis). Stated generally, so the `m + k₀` shift the
+  caller needs moves out to the call site as one `Set.image_mono`.
+* `mem_tateAlgebra_of_filtration_control` — restrictedness of the coefficient family from the
+  Artin–Rees filtration control.
+
+**Why only these two.** The proof's spine is `set g` → `set relMap₀` → `set K₀` → `s₀`, and
+`hsyz` contains `simp only [relMap₀, …]` — it unfolds a `set`-local **by name**. A parameter
+has no such equation, so every block touching `relMap₀`/`K₀` needs the abstraction treatment
+(pass the map plus its defining equation) rather than a plain lift. Recorded rather than
+forced; the two blocks above needed none of it.
+
+**The dedent guard paid for itself.** I dedented L1's body by 8 when the target indent was 2
+(source at 8), putting the body in column 0. The *content* guard caught it — the post-dedent
+`replace` of the `h_all_levels` step no longer matched its expected indentation, and the
+script aborted with the body printed. Fifth indentation-arithmetic slip this campaign, first
+one that cost nothing.
+
+> Guards that assert on *content after transformation* catch position errors too, because a
+> mis-positioned line is also a non-matching line. That is strictly better than checking
+> position directly — one assertion covers both failure modes.
+
+**`rw [SomeDef]` does not survive a lift.** The moved body opened with
+
+```lean
+change MvPowerSeries.IsRestrictedAdic (fun n ↦ c' n j)
+rw [MvPowerSeries.IsRestrictedAdic, P.hasBasis_nhds_zero.tendsto_right_iff]
+```
+
+which compiles at its original site and fails inside the new lemma with
+`Failed to rewrite using equation theorems for IsRestrictedAdic` — same tactic, same goal
+shape, different declaration.
+
+`rw` on a *definition* goes through its auto-generated equation lemmas, and whether those
+apply depends on the ambient elaboration context (which section variables were auto-included,
+how the implicit `{k : ℕ}` got fixed). None of that is visible in the tactic. Rather than
+chase it, both sites now bypass the machinery — the definition unfolds definitionally, so
+`show`/a typed `have` states the unfolded form directly:
+
+```lean
+show Filter.Tendsto (fun s : Fin 1 →₀ ℕ ↦
+  MvPowerSeries.coeff s (fun n ↦ c' n j)) Filter.cofinite (nhds 0)
+rw [P.hasBasis_nhds_zero.tendsto_right_iff]
+```
+
+> A body that unfolds a definition **by name** — `rw [D]`, `simp only [D]`, `unfold D` — is
+> not context-free, so it is not safe to move. Prefer `show`/`change` to the unfolded form,
+> which is checked by defeq and travels anywhere.
+
+Same family as `hsyz`'s `simp only [relMap₀, …]` unfolding a `set`-local, and the reason that
+block still cannot be lifted without abstracting the map plus its defining equation.
+
+### The lemma I just extracted was already inlined a second time, 500 lines away
+
+Scoping stage 2 turned up `exists_controlled_decomposition` (TateAlgebra.lean:2764) — the *same*
+Artin–Rees argument as `hdecomp_or_ctrl`, already decomposed, into
+`exists_controlled_decomposition_of_forall_fail` and `…_of_first_failure`. Its body is
+structurally identical to `hdecomp_or_ctrl`'s: `by_cases` on all-levels-valid, `Nat.find` for
+the first failure, then a two-way split.
+
+And lines 2782–2789 are a **verbatim copy of the `T2`/nhds-basis separation argument** I
+extracted this session as `eq_zero_of_mem_all_idealOfDefinition_pow_image`. The two copies use
+different names throughout — `k₀`/`h_all_levels`/`(x i).val n` versus `k₁`/`h_all`/`h.val n` —
+so nothing name-based finds them. Only comparing *statement shape* does.
+
+Two consequences:
+
+1. **An immediate dedup**: 8 lines in `exists_controlled_decomposition` become a 2-line call.
+2. **The decomposition of `hdecomp_or_ctrl` is already designed.** Its sibling shows the
+   intended shape: the `q = 0` and `q ≥ 1` branches are each their own lemma, leaving a ~12-line
+   dispatcher. Mirroring that is better than inventing a split, and it makes the two proofs
+   read the same.
+
+> When a proof resists decomposition, look for a sibling that already did it. This file had the
+> answer 500 lines below the problem, and the reason I did not see it earlier is that I was
+> searching for *my* target's names.

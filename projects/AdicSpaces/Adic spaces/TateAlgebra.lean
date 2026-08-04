@@ -2084,6 +2084,49 @@ private noncomputable def tateRelMap {l : ℕ}
   map_add' r s := by simp [mul_add, Finset.sum_add_distrib]
   map_smul' a r := by simp [smul_eq_mul, mul_left_comm, Finset.mul_sum]
 
+/-- A point of `A` lying in the image of `P.I ^ m` for *every* `m` is zero: the images of the
+powers of the ideal of definition form a neighbourhood basis of `0`, and `A` is Hausdorff. -/
+theorem eq_zero_of_mem_all_idealOfDefinition_pow_image
+    (P : PairOfDefinition A) {y : A}
+    (hy : ∀ m : ℕ, y ∈ Subtype.val '' ((P.I ^ m : Ideal P.A₀) : Set P.A₀)) :
+    y = 0 := by
+  by_contra hne
+  obtain ⟨U, _, hU_open, _, h0U, hxV, hUV⟩ := t2_separation (Ne.symm hne)
+  obtain ⟨p, _, hp⟩ := P.hasBasis_nhds_zero.mem_iff.mp (hU_open.mem_nhds h0U)
+  exact Set.disjoint_left.mp hUV (hp (hy p)) hxV
+
+/-- Restrictedness of the coefficient family produced by the Artin–Rees decomposition: if
+`c' n j` lies in the image of `P.I ^ m` whenever every `(x i).val n` lies in the image of
+`P.I ^ (m + k₀)`, then each `fun n ↦ c' n j` is a restricted power series. -/
+theorem mem_tateAlgebra_of_filtration_control
+    (P : PairOfDefinition A) {l k k₀ : ℕ} (x : Fin l → ↥(TateAlgebra A))
+    (c' : (Fin 1 →₀ ℕ) → Fin k → A)
+    (hc'_filt : ∀ (n : Fin 1 →₀ ℕ) (m : ℕ),
+      (∀ i, (x i).val n ∈
+        Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀)) →
+      ∀ j, c' n j ∈ Subtype.val '' ((P.I ^ m : Ideal P.A₀) : Set P.A₀))
+    (j : Fin k) : (fun n ↦ c' n j) ∈ TateAlgebra A := by
+  -- Goal: (fun n => c' n j) ∈ TateAlgebra A
+  -- Show Tendsto (c'(·)(j)) cofinite (nhds 0) using the filtration property hc'_filt.
+  show Filter.Tendsto (fun s : Fin 1 →₀ ℕ ↦
+    MvPowerSeries.coeff s (fun n ↦ c' n j)) Filter.cofinite (nhds 0)
+  rw [P.hasBasis_nhds_zero.tendsto_right_iff]
+  intro m _
+  rw [Filter.eventually_cofinite]
+  -- Goal: {n | c' n j ∉ image(P.I^m)}.Finite
+  -- By hc'_filt: if all (x i).val n ∈ image(I^{m+k₀}), then c' n j ∈ image(I^m).
+  -- So {n | c' n j ∉ image(I^m)} ⊆ {n | ∃ i, (x i).val n ∉ image(I^{m+k₀})}.
+  apply Set.Finite.subset (Set.finite_iUnion (fun i : Fin l ↦ by
+      have hxi : Filter.Tendsto (fun s : Fin 1 →₀ ℕ ↦
+          MvPowerSeries.coeff s (x i).val) Filter.cofinite (nhds 0) := (x i).prop
+      have := P.hasBasis_nhds_zero.tendsto_right_iff.mp hxi (m + k₀) trivial
+      rwa [Filter.eventually_cofinite] at this))
+  intro n hn
+  simp only [Set.mem_setOf_eq] at hn
+  simp only [Set.mem_iUnion, Set.mem_setOf_eq]
+  by_contra h_all; push Not at h_all
+  exact hn (hc'_filt n m h_all j)
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **Flatness of the Tate algebra** (`A⟨X⟩` is flat over noetherian `A`).
 
@@ -2236,15 +2279,9 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
         ∀ m, ∀ i, (x i).val n ∈
           Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀)
     · -- All levels valid: each component ∈ ⋂ image(I^{m+k₀}) = {0} (by T2).
-      have h_zero : ∀ i, (x i).val n = 0 := by
-        intro i
-        by_contra hne
-        obtain ⟨U, _, hU_open, _, h0U, hxV, hUV⟩ := t2_separation (Ne.symm hne)
-        obtain ⟨p, _, hp⟩ := P.hasBasis_nhds_zero.mem_iff.mp (hU_open.mem_nhds h0U)
-        exact Set.disjoint_left.mp hUV (hp (Set.image_mono
-          (show (↑(P.I ^ (p + k₀)) : Set ↥P.A₀) ⊆ ↑(P.I ^ p) from
-            Ideal.pow_le_pow_right (by omega))
-          (h_all_levels p i))) hxV
+      have h_zero : ∀ i, (x i).val n = 0 := fun i ↦
+        eq_zero_of_mem_all_idealOfDefinition_pow_image P (fun m ↦
+          Set.image_mono (Ideal.pow_le_pow_right (by omega)) (h_all_levels m i))
       refine ⟨0, fun i ↦ by simp [h_zero i],
         fun m _ j ↦ ⟨0, (P.I ^ m).zero_mem, by simp⟩⟩
     · -- Some level fails. Find the smallest failing level q.
@@ -2370,26 +2407,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
     · exact fun j ↦ hsyz j
   -- Prove the suffices using c' from the diagonal construction.
   refine ⟨c', hc'_decomp, fun j ↦ ?_⟩
-  -- Goal: (fun n => c' n j) ∈ TateAlgebra A
-  -- Show Tendsto (c'(·)(j)) cofinite (nhds 0) using the filtration property hc'_filt.
-  change MvPowerSeries.IsRestrictedAdic (fun n ↦ c' n j)
-  rw [MvPowerSeries.IsRestrictedAdic, P.hasBasis_nhds_zero.tendsto_right_iff]
-  intro m _
-  rw [Filter.eventually_cofinite]
-  -- Goal: {n | c' n j ∉ image(P.I^m)}.Finite
-  -- By hc'_filt: if all (x i).val n ∈ image(I^{m+k₀}), then c' n j ∈ image(I^m).
-  -- So {n | c' n j ∉ image(I^m)} ⊆ {n | ∃ i, (x i).val n ∉ image(I^{m+k₀})}.
-  apply Set.Finite.subset (Set.finite_iUnion (fun i : Fin l ↦ by
-      have hxi := (x i).prop
-      change MvPowerSeries.IsRestrictedAdic (x i).val at hxi
-      rw [MvPowerSeries.IsRestrictedAdic] at hxi
-      have := P.hasBasis_nhds_zero.tendsto_right_iff.mp hxi (m + k₀) trivial
-      rwa [Filter.eventually_cofinite] at this))
-  intro n hn
-  simp only [Set.mem_setOf_eq] at hn
-  simp only [Set.mem_iUnion, Set.mem_setOf_eq]
-  by_contra h_all; push Not at h_all
-  exact hn (hc'_filt n m h_all j)
+  exact mem_tateAlgebra_of_filtration_control P x c' hc'_filt j
 
 end TateAlgebraFlat
 
