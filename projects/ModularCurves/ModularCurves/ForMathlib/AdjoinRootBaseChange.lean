@@ -92,4 +92,18 @@ noncomputable def cancelPolyBaseChange (M : Type u) [CommRing M] [Algebra R[X] M
 noncomputable def tensorPolyEquiv : TensorProduct R R[X] S ≃ₐ[R] S[X] :=
   (Algebra.TensorProduct.comm R R[X] S).trans (polyEquivTensor R S).symm
 
+/- **The assembly**, `S ⊗[R] (R[X] ⧸ (f)) ≅ S[X] ⧸ (f.map)`, chains the pieces above as
+
+```
+S ⊗[R] M  --comm-->  M ⊗[R] S  --cancelPolyBaseChange.symm-->  M ⊗[R[X]] (R[X] ⊗[R] S)
+          --congr (refl, tensorPolyEquiv)-->  M ⊗[R[X]] S[X]
+          --comm-->  S[X] ⊗[R[X]] M  --quotSpanMapEquivTensor.symm-->  S[X] ⧸ (f.map)
+```
+
+with `M := R[X] ⧸ Ideal.span {f}`. The one gap is the third arrow: `Algebra.TensorProduct.congr`
+over `R[X]` needs `tensorPolyEquiv` as an `≃ₐ[R[X]]`, whereas it is proved here only as an
+`≃ₐ[R]`. It *is* `R[X]`-linear — `q · (p ⊗ s) = (qp) ⊗ s ↦ s · (qp).map = q.map · (s · p.map)`
+— but that upgrade has to be proved, and it is the only thing between these seven declarations
+and the finished equivalence. See the board's [WP-D3c-2a] entries. -/
+
 end ModularCurves

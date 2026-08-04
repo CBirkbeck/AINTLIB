@@ -36488,3 +36488,25 @@ All that is left of the base-change equivalence is **the assembly** — chaining
 two `Algebra.TensorProduct.comm`s and reconciling the base rings of the `≃ₐ`s (the pieces are
 variously `≃ₐ[R]`, `≃ₐ[R[X]]` and `≃ₐ[S[X]]`, so the final statement is cleanest as a
 `RingEquiv` with `S`-linearity checked on `1 ⊗ₜ` generators).
+
+### [WP-D3c-2a] the assembly's one remaining gap — measured, and recorded in the file
+
+Attempted the chain; it fails at exactly one arrow, and the failure is recorded as a comment
+at the end of `ForMathlib/AdjoinRootBaseChange.lean` (the broken attempt was reverted, so the
+file stays sorry-free and green).
+
+```
+S ⊗[R] M  --comm-->  M ⊗[R] S  --cancelPolyBaseChange.symm-->  M ⊗[R[X]] (R[X] ⊗[R] S)
+          --congr (refl, tensorPolyEquiv)-->  M ⊗[R[X]] S[X]
+          --comm-->  S[X] ⊗[R[X]] M  --quotSpanMapEquivTensor.symm-->  S[X] ⧸ (f.map)
+```
+
+**The gap is the third arrow.** `Algebra.TensorProduct.congr` over `R[X]` needs
+`tensorPolyEquiv` as an `≃ₐ[R[X]]`; it is proved here only as an `≃ₐ[R]`. It *is* `R[X]`-linear
+— `q · (p ⊗ s) = (qp) ⊗ s ↦ s · (qp).map = q.map · (s · p.map)` — but the upgrade must be
+proved. That is the single obligation between the seven proved declarations in the file and
+the finished base-change equivalence.
+
+**[WP-D3c-2a-LIN]** upgrade `tensorPolyEquiv` to `≃ₐ[R[X]]`: check `commutes'` on
+`algebraMap R[X] (R[X] ⊗[R] S) q = q ⊗ₜ 1` and use `polyEquivTensor_symm_apply_tmul`
+(`RingTheory/PolynomialAlgebra.lean:182`) to evaluate the image.
