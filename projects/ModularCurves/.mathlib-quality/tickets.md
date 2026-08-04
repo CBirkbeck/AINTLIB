@@ -37516,3 +37516,34 @@ section-condition proof terms into their statements.
 **Route β's remaining work is now exactly two items**: (A) the reading comparison
 `vw.2 = gl2Both N g (vw.1)` on each clopen piece (~100–150 lines, modelled on
 `constSchemePointsEquiv_mapAlong`), and **WP-D3d** — the root `ζ` with `g^*ζ = ζ^{det g}`.
+
+### [route β] item (A) — REVISED ROUTE: decompose by the transition, not by `jointReading` (2026-08-04)
+
+Reading `constSchemePointsEquiv`'s internals (`GroupScheme/MuN.lean:392`) settles how item (A) should
+be done, and it is **not** by comparing `jointReading`'s two readings.
+
+`constSchemePointsEquiv` is `constIndex`-based, and `constIndex h t = a ↔ h t ∈ Set.range (Sigma.ι _ a)`
+(`constIndex_eq_iff`) — a *pointwise, topological* characterisation. Chasing `vw.2 = gl2Both N g (vw.1)`
+through it means pushing range-membership through `constSchemeSqIso`, `torsionSqBaseChangeIso` and
+`fullLevelSqIso` — three levels of pointwise reasoning for what is really one statement about level
+bases.
+
+**The better decomposition.** `locConst_hom_ext` (public, general) glues along *any* locally constant
+function, not just `jointReading`. So decompose `W` by **`levelTransitionCols (α^*L) (β^*L)`** instead:
+
+1. base-change the pairing datum along `α = a ≫ pullback.snd` and `β = b ≫ pullback.snd` to `W`
+   (**the one new plumbing item**: base-change compatibility of `fullLevelPairing`, i.e. that
+   `α ≫ coverPairing` is the `fullLevelPairing` of `(α^*L, α^*ζ)` on `E ×_S W`);
+2. on each clopen piece of `levelTransitionCols` the transition is a **constant** matrix `g`;
+3. apply **`fullLevelPairing_eq_of_fullLevelHom`** there — already proved, and already
+   invertibility-free, which is exactly why a merely locally-constant, not-obviously-invertible
+   transition is now harmless;
+4. glue by `locConst_hom_ext`.
+
+This replaces item (A)'s "reading comparison" by step 1 alone, and step 1 is a base-change statement
+about a *named* pairing rather than pointwise range-chasing. `comp_localDetPairing_eq_of_pieces` and
+`jointReading` are then bypassed for this construction (they remain the general-cover statements).
+
+Estimate for step 1: **80–120 lines**, of the same flavour as `TorsionSqBaseChange.lean`
+(`fullLevelHom` and `fullLevelIso` base-change along `σ : T' ⟶ T` via `FullLevelPt.pullAlong`, which
+already exists at `Moduli/GammaH.lean:374`).
