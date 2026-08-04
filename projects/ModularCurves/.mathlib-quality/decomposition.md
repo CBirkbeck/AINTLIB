@@ -273,3 +273,65 @@ is the only one that discharges the register as stated (arbitrary `S`, arbitrary
 **Next `--decompose` pass should transcribe KM 2.8.1 itself** into the Step-2 lemma list — the
 `K_E^×` sheaf, `Pic ≅ H¹(K^×)` with `H⁰ = 1`, Abel (KM 2.1), the unique `h_i/h_j` factorisation,
 the patching of `h_i ∘ P` — and check each leaf against `ModularCurves/Picard/`.
+
+## Step 2 (KM route) — checked against `Picard/`, and the answer is that IT IS ALREADY BUILT
+
+The instruction at the end of the last block was "transcribe KM 2.8.1 into the Step-2 lemma list and
+check each leaf against `Picard/`". Doing that produces a finding that dominates everything above.
+
+`Picard/SelfAdjointN.lean` (505 lines) is **exactly this transcription, already written**. Its module
+docstring opens: *"The decisive input for the Katz–Mazur / GME construction of the relative Weil
+pairing"*, and it is labelled **DS4 Gap A**. It proves, for `κ_T(Q) = [𝒪(Q − 0)]` and `m_N = [N]`:
+
+| decl | content | status |
+|---|---|---|
+| `kappa`, `sectionCls`, `zeroCls` | the Abel map `E(T) → Pic(E_T)` | proved |
+| `kappa_mem_ker` | lands in `picRel = Ker(0^*)` | proved |
+| `kappa_add`, `kappa_nsmul`, `kappa_zsmul` | `κ` is a group hom (Abel / KM 2.1) | proved |
+| `picMap_mulByHom_kappa_pow` | `(★)` `m_N^* κ(Q) = κ(Q)^N` | proved from the leaf |
+| **`picMap_mulByHom_kappa_eq_one`** | **`(★′)` `[N]Q = 0 ⟹ m_N^* κ(Q) = 1`** | **proved from the leaf** |
+
+`(★′)` is precisely the input KM 2.8.1 constructs `e_N` from: it is what supplies the function
+`f_Q` on `E_T` with `div f_Q = m_N^*(Q) − m_N^*(0)`, whose evaluation on `E[N]` is the pairing.
+
+**The whole file rests on ONE classical leaf** (`:= by sorry`, line 267):
+
+    exists_invertible_tensor_idealModule_add :
+      ∃ N, IsInvertible N ∧ Nonempty (I(D_Q) ⊗ I(D_{Q'}) ≅ (I(D_{Q+Q'}) ⊗ I(D_0)) ⊗ π^* N)
+
+— the **relative theorem of the square**, Silverman III.3.5 sheafified. The second sorry (line 488,
+`exists_pic_map_snd_picMap_mulByHom_kappa`) is documented in-file as *"NOT AN INDEPENDENT LEAF —
+formal consequence of leaf (i)"*, discharged by building the normalized Poincaré bundle `𝒫` and its
+symmetry `τ^*𝒫 ≅ 𝒫` (from `m ∘ τ = m`). Its route is written out in the docstring.
+
+The leaf's route is written out too, and it already survives the attacks I would have run:
+1. universal pair `B = C ×_U C` over the universal smooth cubic — **reduced**, in fact integral;
+2. fibrewise triviality of the rigidified discrepancy `Δ^rig` from the *field* theorem
+   `HasseWeil.Pic0.RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv` (proved, any characteristic);
+3. reduced seesaw ⟹ `Δ^rig ≅ f_B^* M`, then `0^*` gives `M ≅ 𝒪_B`;
+4. base-change down to arbitrary, **possibly non-reduced**, `T`.
+Two alternatives are recorded as *rejected with reasons*: arbitrary-base fibrewise seesaw is **false**
+(the `k[ε]/(ε²)` counterexample — this is [[seesaw-needs-reduced-base]]), and the explicit Weierstrass
+line-and-vertical function needs the degenerate loci as closed subschemes. Two feeders are proved
+(`_of_tensor_iso`, `Modules.nonempty_iso_of_tensorObj_unitObj`), and the remaining bricks are named
+**(A)** the chart-local exact iso and **(B)** the normalized-glue descent assembly.
+
+### Verdict of the decompose pass
+
+| route | leaves outstanding | generality | status |
+|---|---|---|---|
+| β (level-cover determinant descent) | — | invertible `N` | **unsourced — dead** |
+| generic fibre + Stacks 0BQI | 1, **mathlib-scale** (étale-normality ascent) | normal integral `S` only | dominated |
+| **KM 2.8 / GME via `Picard/`** | **1 classical** (rel. thm of the square) + 1 bookkeeping | **arbitrary `S`, arbitrary `N`** | **take this** |
+
+The KM route is the sourced one, the general one, *and* the one with the fewest outstanding leaves —
+and 95% of it is already in the tree with the leaf isolated and its route written.
+
+### The meta-finding (third instance this window)
+
+This is [[grep-the-conclusion-not-the-inputs]] at the level of **routes**, not lemmas. The tree already
+contained the answer, in a file whose docstring names DS4 and Katz–Mazur explicitly. I built route β
+and costed a "cheap route" without ever grepping `Picard/` for the conclusion `[N]^* κ(Q)`. The rule
+needs extending: **before choosing a route, grep the tree for the route's characteristic conclusion,
+not just for the target theorem's statement.** A 505-line file named after the route's key property
+will not surface from greps for `weilPairing`.
