@@ -37451,3 +37451,21 @@ mathematical content, and whose two halves are `fieldWeilPairing_det_of_galois` 
 and `WeilPairing/UniversalRootBase.lean` (the descent from the generic fibre, done). What WP-D3d still
 needs is the *geometry*: the identification of the transition on a component's generic fibre with an
 automorphism of that fibre's function field fixing the curve.
+
+### [route β] (B) sharpened — the tool is `muNPointsEquiv_natural` (2026-08-04)
+
+Both sides of `hdet` are `W`-points of `muN S N` (not of `muN S' N`) — that matters: their structure
+maps to `S` are `α ≫ p` and `β ≫ p`, which **are equal** (the two projections of the kernel pair agree
+after `→ S`), so the two sides live in the *same* fibre of `muNPointsEquiv S N (α ≫ p)` and may be
+compared by their values. The values are
+
+`Γ(α)(ζ) ^ (detFun vw.1).val`  vs  `Γ(β)(ζ) ^ (detFun vw.2).val`,
+
+by `muNPointsEquiv_natural` (`GroupScheme/MuN.lean:1383`) — restriction along `k` corresponds to
+`Γ.map k.op` — together with the definition `rootPower N ζ k = ` the point with value `ζ ^ k.val`.
+
+**What is still missing for (B)** is the one bridging lemma: the effect of `muNMapAlong p N` on
+points, i.e. `muNPointsEquiv S N (g ≫ p) ⟨h ≫ muNMapAlong p N, _⟩ = muNPointsEquiv S' N g ⟨h, _⟩`.
+`constSchemePointsEquiv_mapAlong` (`GroupScheme/MuN.lean:580`) is the constant-scheme analogue and the
+model; `muNMapAlong_π` gives the compatibility the statement needs. Estimate **30–50 lines**, and it
+is the same lemma item (A) will want.
