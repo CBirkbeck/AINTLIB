@@ -1400,6 +1400,39 @@ private lemma mem_span_range_iff_exists_fin {R : Type u} [CommRing R] {M : Type 
     exact Submodule.sum_mem _
       (fun j _ ↦ Submodule.smul_mem _ _ (Submodule.subset_span ⟨j, rfl⟩))
 
+/-- An element of `I ^ m • K`, for `K` a submodule of a finite product, is an
+`I ^ m`-combination of any finite generating family of `K`.
+
+This is the extraction step of an Artin-Rees argument: Artin-Rees puts the element in
+`I ^ m • K`, and this turns that membership into explicit coefficients. -/
+private theorem exists_ideal_pow_coeffs_of_mem_smul {R : Type u} [CommRing R] {l k : ℕ}
+    (I : Ideal R) (m : ℕ) {K : Submodule R (Fin l → R)}
+    (s : Fin k → ↥K) (hs : Submodule.span R (Set.range s) = ⊤)
+    {v : Fin l → R} (hv : v ∈ (I ^ m • K : Submodule R (Fin l → R))) :
+    ∃ c : Fin k → R, (∀ j, c j ∈ I ^ m) ∧
+      ∀ i, v i = ∑ j, c j * (s j : Fin l → R) i := by
+  refine Submodule.smul_induction_on (p := fun v ↦
+      ∃ c : Fin k → R, (∀ j, c j ∈ I ^ m) ∧
+        ∀ i, v i = ∑ j, c j * (s j : Fin l → R) i) hv
+    (fun a ha u hu ↦ ?_) (fun u v ⟨cu, hcu, heu⟩ ⟨cv, hcv, hev⟩ ↦ ?_)
+  · obtain ⟨cf, hcf_sum⟩ := mem_span_range_iff_exists_fin.mp
+      (hs ▸ Submodule.mem_top : (⟨u, hu⟩ : K) ∈ Submodule.span R (Set.range s))
+    have hu_eq : ∀ i, u i = ∑ j, cf j * (s j : Fin l → R) i := by
+      intro i
+      have := congr_arg (fun (w : K) ↦ (w : Fin l → R) i) hcf_sum
+      simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower,
+        Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at this
+      exact this
+    refine ⟨fun j ↦ a * cf j, fun j ↦ Ideal.mul_mem_right _ _ ha, fun i ↦ ?_⟩
+    have hsm : (a • u) i = a * u i := by simp [Pi.smul_apply, smul_eq_mul]
+    rw [hsm, hu_eq i, Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun j _ ↦ by ring)
+  · exact ⟨fun j ↦ cu j + cv j, fun j ↦ (I ^ m).add_mem (hcu j) (hcv j), fun i ↦ by
+      have hadd : (u + v) i = u i + v i := Pi.add_apply u v i
+      rw [hadd, heu i, hev i, ← Finset.sum_add_distrib]
+      exact Finset.sum_congr rfl (fun j _ ↦ by ring)⟩
+
+
 /-- The relation map for syzygies: sends `r` to `∑ f(i) * r(i)`. -/
 private noncomputable def relMapFlat {R : Type u} [CommRing R] {l : ℕ}
     (f : Fin l → R) : (Fin l → R) →ₗ[R] R where
@@ -2153,34 +2186,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
       have h := congr_arg P.A₀.subtype (hc₀_eq i)
       simp only [map_sum, map_mul] at h
       rw [← hlift₀_eq i]; exact h
-    -- Step B: Use smul_induction_on on h_in_smul_K₀ with the predicate
-    -- "can be decomposed over s₀ with I^m coefficients".
-    refine Submodule.smul_induction_on (p := fun v ↦
-        ∃ c₀ : Fin k → ↥P.A₀, (∀ j, c₀ j ∈ P.I ^ m) ∧
-          ∀ i, v i = ∑ j, c₀ j * (s₀ j : Fin l → ↥P.A₀) i) h_in_smul_K₀
-      (fun a ha v hv ↦ ?_) (fun u v ⟨cu, hcu, heu⟩ ⟨cv, hcv, hev⟩ ↦ ?_)
-    · -- Base case: a • v with a ∈ I^m and v ∈ K₀.
-      -- Decompose v ∈ K₀ over s₀ using the spanning hypothesis.
-      have hv_span : (⟨v, hv⟩ : K₀) ∈ Submodule.span P.A₀ (Set.range s₀) :=
-        hs₀ ▸ Submodule.mem_top
-      obtain ⟨cf, hcf_sum⟩ := mem_span_range_iff_exists_fin.mp hv_span
-      -- Extract component-wise equality
-      have hv_eq : ∀ i, v i = ∑ j, (cf j : P.A₀) * (s₀ j : Fin l → P.A₀) i := by
-        intro i
-        have := congr_arg (fun (w : K₀) ↦ (w : Fin l → P.A₀) i) hcf_sum
-        simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower,
-          Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at this
-        exact this
-      -- Set c₀(j) = a * cf(j), which are in I^m since a ∈ I^m.
-      refine ⟨fun j ↦ a * cf j, fun j ↦ Ideal.mul_mem_right _ _ ha, fun i ↦ ?_⟩
-      have : (a • v) i = a * v i := by simp [Pi.smul_apply, smul_eq_mul]
-      rw [this, hv_eq i, Finset.mul_sum]
-      exact Finset.sum_congr rfl (fun j _ ↦ by ring)
-    · -- Addition case: combine coefficients.
-      exact ⟨fun j ↦ cu j + cv j, fun j ↦ (P.I ^ m).add_mem (hcu j) (hcv j), fun i ↦ by
-        have : (u + v) i = u i + v i := Pi.add_apply u v i
-        rw [this, heu i, hev i, ← Finset.sum_add_distrib]
-        exact Finset.sum_congr rfl (fun j _ ↦ by ring)⟩
+    exact exists_ideal_pow_coeffs_of_mem_smul P.I m s₀ hs₀ h_in_smul_K₀
   -- Step 7: Assemble the IsTrivialRelation witness.
   -- For each n, hdecomp_A gives a decomposition over the A₀-generators.
   -- For convergence, hAR_ctrl gives controlled coefficients.

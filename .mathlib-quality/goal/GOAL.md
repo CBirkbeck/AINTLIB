@@ -15188,3 +15188,29 @@ currently unfold `g` inside `h_ker` collapse to a single hypothesis
 Note the metric subtlety this design is shaped around: **splitting a 244-line proof into
 40 + 88 + 118 makes the over-50 count worse, not better** (one item becomes two). Only the full
 cascade reduces it, so the intermediate state is not a valid stopping point.
+
+### `tateAlgebra_flat` cascade, step G1: 244 → 222
+
+`exists_ideal_pow_coeffs_of_mem_smul` (20 lines) — an element of `I^m • K`, for `K` a submodule
+of a finite product, is an `I^m`-combination of any finite generating family. That is the
+*extraction* half of an Artin–Rees argument: Artin–Rees puts the element in `I^m • K`, and this
+turns the membership into explicit coefficients. Compiled first try; `hAR_ctrl` 88 → 66.
+
+It is stated **pointwise** (`∀ i, v i = ∑ j, c j * (s j) i`) rather than with `•`, to match its
+consumer exactly. The second `smul_induction_on` in this file (~L2738) is over a submodule of
+`P.A₀` itself, not of a product, so the pointwise form does not reach it — generalising to an
+arbitrary module would, at the cost of a `Pi.smul_apply`/`smul_eq_mul` conversion at *this* site.
+Recorded as a judgement, not an oversight: one call site with no conversion beat two with one.
+
+**An over-strict guard refused a correct edit, which is the right failure.** The rewiring asserted
+`sum(1 for l in block if 'smul_induction_on' in l) == 1`; the count was 2, because the block's own
+`-- Step B: Use smul_induction_on …` comment contains the word. The edit silently did not apply —
+and the build stayed green, because the file was simply unchanged.
+
+> **A no-op edit and a successful edit look identical from the build.** Only re-measuring the
+> target distinguishes them. The measure said `244` twice in a row, which is what exposed it;
+> without that check the "green build" would have been read as success. Re-measure after every
+> extraction, not just after the ones you expect to be delicate.
+
+The guard itself was right to fire — matching a keyword across a block counts comments. Match
+**code lines** (or the declaration's structure), never a bare keyword count.
