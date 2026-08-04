@@ -2216,6 +2216,52 @@ theorem exists_valuationSubring_of_notMem_integralClosure
     haveI : IsLocalHom (Subring.inclusion hV_dom.1) := hV_dom.2
     exact map_nonunit (Subring.inclusion hV_dom.1) _ ha_maxL
 
+/-- The degenerate branch of `exists_continuous_valuation_of_valuationSubring_of_span_eq`:
+when every generator of `P.I` has `V`-value `0`, the comap valuation already works, and its
+continuity is immediate because `I` lands in the support.
+
+`g_max` enters only through `hg_ne0` and `hle_gen` — never as the `sup'` it is at the call
+site — so this branch needs nothing about how it was built. -/
+private theorem exists_continuous_valuation_of_span_eq_of_sup_eq_zero
+    {R : Type u} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R] [IsDomain R]
+    (P : PairOfDefinition R) {B : Subring R} (hA₀B : (P.A₀ : Set R) ⊆ B) (x : R)
+    (V : ValuationSubring (FractionRing R))
+    (hV_le : (integralClosure B (FractionRing R)).toSubring ≤ V.toSubring)
+    (hx_notV : algebraMap R (FractionRing R) x ∉ V)
+    {S : Finset P.A₀} (hS : Ideal.span (S : Set P.A₀) = P.I)
+    (g_max : V.ValueGroup) (hg_ne0 : g_max = 0)
+    (hle_gen : ∀ s ∈ S,
+      (fun s ↦ V.valuation (algebraMap R (FractionRing R) (P.A₀.subtype s))) s ≤ g_max) :
+    ∃ (Γ₀ : Type u) (_ : LinearOrderedCommGroupWithZero Γ₀)
+      (wVal : Valuation R Γ₀),
+      (∀ b ∈ B, wVal b ≤ 1) ∧ 1 < wVal x ∧ wVal.IsContinuous := by
+  let ι := algebraMap R (FractionRing R)
+  let K := FractionRing R
+  -- V.valuation.comap ι is trivially continuous: I^n maps to {0} ⊂ {< γ}.
+  have hle_A₀ : ∀ (a : P.A₀), (V.valuation.comap ι) (P.A₀.subtype a) ≤ 1 :=
+    fun a ↦ by
+      change V.valuation (ι (P.A₀.subtype a : R)) ≤ 1
+      rw [ValuationSubring.valuation_le_one_iff]
+      exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K)
+        ⟨_, hA₀B a.property⟩)
+  refine ⟨V.ValueGroup, inferInstance, V.valuation.comap ι, ?_, ?_, ?_⟩
+  · -- v ≤ 1 on B
+    intro b hb; change V.valuation (ι b) ≤ 1
+    rw [ValuationSubring.valuation_le_one_iff]
+    exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨b, hb⟩)
+  · -- 1 < v(x)
+    exact not_le.mp (show ¬ V.valuation (ι x) ≤ 1 by
+      rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV)
+  · -- Continuity: g_max = 0 means V.valuation(ι(I^n)) ≤ 0 < γ.
+    apply Valuation.isContinuous_of_ideal_pow_lt P (V.valuation.comap ι)
+    intro γ hγ; refine ⟨1, fun a ha ↦ ?_⟩; rw [pow_one] at ha
+    change V.valuation (ι (P.A₀.subtype a)) < γ
+    have h2 : V.valuation (ι (P.A₀.subtype a)) ≤ g_max :=
+      PairOfDefinition.valuation_le_on_ideal_of_le_on_generators
+        (V.valuation.comap ι) hle_A₀ hS hle_gen ha
+    rw [hg_ne0] at h2; exact lt_of_le_of_lt h2 hγ
+
+
 /-- **Phases B and C of Wedhorn Lemma 7.18**, the standard case: given a valuation subring
 `V` that dominates the integral closure of `B`, misses `x`, and is `< 1` on the ideal of
 definition, and given a NONEMPTY generating set `S` of `P.I`, the comap of `V.valuation`
@@ -2257,33 +2303,9 @@ theorem exists_continuous_valuation_of_valuationSubring_of_span_eq
   -- "non-trivial" topologically nilpotent element modulo supp(V).
   -- For now, handle via sorry (minor edge case).
   by_cases hg_ne0 : g_max = 0
-  · -- Edge case: g_max = 0 means ALL P.I generators have V-value 0.
-    -- V.valuation.comap ι is trivially continuous: I^n maps to {0} ⊂ {< γ}.
-    have hle_A₀ : ∀ (a : P.A₀), (V.valuation.comap ι) (P.A₀.subtype a) ≤ 1 :=
-      fun a ↦ by
-        change V.valuation (ι (P.A₀.subtype a : R)) ≤ 1
-        rw [ValuationSubring.valuation_le_one_iff]
-        exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K)
-          ⟨_, hA₀B a.property⟩)
-    refine ⟨V.ValueGroup, inferInstance, V.valuation.comap ι, ?_, ?_, ?_⟩
-    · -- v ≤ 1 on B
-      intro b hb; change V.valuation (ι b) ≤ 1
-      rw [ValuationSubring.valuation_le_one_iff]
-      exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨b, hb⟩)
-    · -- 1 < v(x)
-      exact not_le.mp (show ¬ V.valuation (ι x) ≤ 1 by
-        rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV)
-    · -- Continuity: g_max = 0 means V.valuation(ι(I^n)) ≤ 0 < γ.
-      apply Valuation.isContinuous_of_ideal_pow_lt P (V.valuation.comap ι)
-      intro γ hγ; refine ⟨1, fun a ha ↦ ?_⟩; rw [pow_one] at ha
-      change V.valuation (ι (P.A₀.subtype a)) < γ
-      have h2 : V.valuation (ι (P.A₀.subtype a)) ≤ g_max := by
-        have : (fun s ↦ V.valuation (ι (P.A₀.subtype s))) a ≤ g_max :=
-          PairOfDefinition.valuation_le_on_ideal_of_le_on_generators
-            (V.valuation.comap ι) hle_A₀ hS
-            (fun s hs ↦ Finset.le_sup' (f := fun s ↦ V.valuation (ι (P.A₀.subtype s))) hs) ha
-        exact this
-      rw [hg_ne0] at h2; exact lt_of_le_of_lt h2 hγ
+  · exact exists_continuous_valuation_of_span_eq_of_sup_eq_zero P hA₀B x V hV_le
+      hx_notV hS g_max hg_ne0
+      (fun s hs ↦ Finset.le_sup' (f := fun s ↦ V.valuation (ι (P.A₀.subtype s))) hs)
   · -- Main case: g_max ≠ 0 and g_max < 1.
     -- Following Lemma 7.45: restrictToConvex on A₀ + extend to R.
     -- Step 1: Build v₀ on A₀ and prove it's ≤ 1.

@@ -15593,3 +15593,31 @@ And `PowerSeries.IsRestricted` is now an `abbrev` for the `MvPowerSeries` form, 
 
 Dot-notation (`f.IsRestricted` where `f : PowerSeries`) cannot be caught textually at all. That is
 the residue only the compiler can find, and it is why the build — not another grep — is the arbiter.
+
+### Lift 1 of 4 on `exists_continuous_valuation_…_span_eq`: 167 → 144
+
+`exists_continuous_valuation_of_span_eq_of_sup_eq_zero` (24c) — the `g_max = 0` branch. `g_max`
+enters only through `hg_ne0` and a "each generator ≤ g_max" fact, never as the `sup'` it is at the
+call site, so the branch needs nothing about how it was built. The one inline
+`fun s hs ↦ Finset.le_sup' …` (which *did* depend on that) became the `hle_gen` hypothesis,
+discharged verbatim at the call site.
+
+**Two placement bugs, both mine, both about where text lands rather than what it says.**
+
+1. **The lemma was inserted inside the theorem's docstring.** My "walk back to the declaration"
+   loop stopped at a blank line — and a multi-paragraph docstring *contains* blank lines. Lean's
+   block comments nest, so the outer `/-- … -/` silently swallowed the entire new lemma, and the
+   only symptom was `Unknown identifier` at the call site 80 lines below.
+
+   > **Walk back to the docstring's `/--`, never to "the first blank line".** The failure is
+   > invisible in the diff — the lemma is right there in the file, correctly formed, and simply
+   > not part of the program.
+
+2. The substituted `have … := by`-body was written at the *outer* indent, so the `by` block was
+   empty (`unsolved goals`) and the replacement became its sibling (`Type mismatch`). Fixed by
+   making it a term-mode `have`, which sidesteps the indentation question entirely.
+
+That is the fourth indentation-class bug in this campaign (after two dedent-by-4-not-2 slips and
+one column-0 `have`). The through-line: **every one was a substitution whose text was correct and
+whose position was not.** Term mode, where it applies, removes the failure mode rather than
+guarding against it.
