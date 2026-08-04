@@ -63,4 +63,29 @@ theorem pow_ne_one_of_algebraMap_eq {A : Type u} {K : Type v}
   intro h
   exact hx (by rw [← ha, ← map_pow, h, map_one])
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-A7.2, packaged — the form WP-D3d consumes)** A root of unity in the fraction field of an
+integrally closed domain descends to one in the ring, **bundled**: the subtype element
+`{ a : A // a ^ N = 1 }` that `nonempty_weilPairing_of_cover_of_values` wants for `ζ`. -/
+noncomputable def rootOfUnityDescend {A : Type u} {K : Type v}
+    [CommRing A] [IsDomain A] [IsIntegrallyClosed A] [Field K] [Algebra A K] [IsFractionRing A K]
+    {N : ℕ} (hN : N ≠ 0) (x : { u : K // u ^ N = 1 }) : { a : A // a ^ N = 1 } :=
+  ⟨(exists_algebraMap_eq_of_pow_eq_one hN x.2).choose,
+    pow_eq_one_of_algebraMap_eq (exists_algebraMap_eq_of_pow_eq_one hN x.2).choose_spec x.2⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- …and it does map to the given root of unity. -/
+theorem algebraMap_rootOfUnityDescend {A : Type u} {K : Type v}
+    [CommRing A] [IsDomain A] [IsIntegrallyClosed A] [Field K] [Algebra A K] [IsFractionRing A K]
+    {N : ℕ} (hN : N ≠ 0) (x : { u : K // u ^ N = 1 }) :
+    algebraMap A K (rootOfUnityDescend hN x).1 = (x : K) :=
+  (exists_algebraMap_eq_of_pow_eq_one hN x.2).choose_spec
+
+/- The primitivity companion is `pow_ne_one_of_algebraMap_eq` above, composed with
+`algebraMap_rootOfUnityDescend` at the use site: from `(x : K) ^ k ≠ 1` it gives
+`(rootOfUnityDescend hN x).1 ^ k ≠ 1`. Stating that as its own lemma here makes the elaborator unify
+`A` with `ℕ` (it reports `failed to synthesize CommRing ℕ`), so it is left to the caller. -/
+
 end ModularCurves

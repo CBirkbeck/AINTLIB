@@ -37993,3 +37993,28 @@ are both in place —
   decomposition `WP-D3a-DOM` / `WP-D3a-FACTOR` / `WP-D3b`.
 
 Root green at **9731 jobs**; sorry-census unchanged (7, all the Weil register).
+
+### [WP-D3d] the ζ-descent is packaged (2026-08-04) — axiom-verified
+
+**`rootOfUnityDescend`** + **`algebraMap_rootOfUnityDescend`** (`WeilPairing/UniversalRootBase.lean`):
+a root of unity in the fraction field of an integrally closed domain descends to one in the ring,
+**bundled** as `{ a : A // a ^ N = 1 }` — exactly the shape
+`nonempty_weilPairing_of_cover_of_values` wants for `ζ`, and it maps to the given root of unity.
+
+The primitivity companion is deliberately **not** stated as its own lemma: doing so makes the
+elaborator unify `A` with `ℕ` (`failed to synthesize CommRing ℕ`). Compose
+`pow_ne_one_of_algebraMap_eq` with `algebraMap_rootOfUnityDescend` at the use site instead; noted
+in-file.
+
+**WP-D3d's remaining shape**, with every tool now named and proved:
+1. decompose the cover's ring into integrally closed domains — `WP-D3a-DOM`, `WP-D3a-FACTOR`, `WP-D3b`
+   (`ForMathlib/SmoothCurveComponents.lean`, `ForMathlib/StandardSmoothIntegrallyClosed.lean`);
+2. on each factor, take the **field pairing value** at the generic point — `fieldWeilPairingHom` and
+   its `_spec` / `_unique` (`WeilPairing/FieldPairingUnique.lean`);
+3. descend it with `rootOfUnityDescend`;
+4. verify the value equations of `nonempty_weilPairing_of_cover_of_values` using
+   `fieldWeilPairing_det_of_galois` (`WeilPairing/PairingTransport.lean`) — the transition on a
+   component's stabiliser is an automorphism of its function field fixing the curve, so the field-level
+   det law applies, and `algebraMap_rootOfUnityDescend` transports the identity back down.
+
+Root green at **9731 jobs**; census unchanged (7, all the Weil register).
