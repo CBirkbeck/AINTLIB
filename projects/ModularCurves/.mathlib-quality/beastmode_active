@@ -1,1 +1,1 @@
-FOCUS: route beta step 2 DONE (fullLevelPairing named + _over + _glSmul cocycle law). NEXT: the frame-bundle descent — the cover S-prime with a tautological level structure and the GL2-torsor structure of its kernel pair.
+FOCUS: route beta plumbing DONE (isPullback_torsionSq_baseChange + torsionSqBaseChangeIso). NEXT: assemble the descent — WeilPairingLocalData from a cover with a level structure, cocycle from fullLevelPairing_glSmul.

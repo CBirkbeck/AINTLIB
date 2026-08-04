@@ -37198,3 +37198,26 @@ For the descent from the frame bundle, what is left is **geometric**, not arithm
    into `fullLevelPairing_glSmul`, which is proved.
 
 Root green at 9726 jobs.
+
+## [route β] the descent's plumbing is in place (2026-08-04) — axiom-verified
+
+`WeilPairing/TorsionSqBaseChange.lean` (new): **the torsion square commutes with base change.**
+
+* `torsionSqBaseChangeHom` — `pullback.map` of `torsionBaseChangeHom` on both factors;
+* `isPullback_torsionSq_baseChange_fst` — the intermediate square, against the *first* projections:
+  pasting the flipped standard square of `E_{S'}[N] ×_{S'} E_{S'}[N]` horizontally with
+  `torsion_baseChange_isPullback` exhibits it as `E_{S'}[N] ×_S E[N]`, then `IsPullback.of_right`
+  against the flipped standard square of `E[N] ×_S E[N]`;
+* **`isPullback_torsionSq_baseChange`** — the same square for the structure morphisms `torsionSqπ`,
+  by one vertical paste (since `torsionSqπ = pullback.fst ≫ torsionπ` on both sides);
+* **`torsionSqBaseChangeIso`** — `pullback (E.torsionSqπ N) p ≅ E_{S'}[N] ×_{S'} E_{S'}[N]`.
+
+This is the identification along which `fullLevelPairing` on the cover becomes the `pairing` field
+of a `WeilPairingLocalData`: `WeilPairingLocalData` wants a morphism out of
+`pullback (E.torsionSqπ N) p`, `fullLevelPairing` produces one out of the base-changed curve's
+torsion square, and the two are now known to be the same object.
+
+**The descent is therefore reduced to a single arithmetic input**: a root `ζ ∈ Γ(S',⊤)` with
+`ζ^N = 1` on a cover carrying a full level structure, satisfying `g^*ζ = ζ^{det g}` for the
+transition — everything else (the pairing, its over-`S` compatibility, and the determinant law that
+turns the transition into the cocycle) is proved. Root green at **9727 jobs**.
