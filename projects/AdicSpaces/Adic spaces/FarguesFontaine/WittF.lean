@@ -911,6 +911,135 @@ theorem bddAbove_gaussTermF_teichmuller_sub {ρ : NNReal} (hρ1 : ρ < 1)
   rw [hvinv]
   exact mul_le_of_le_one_right zero_le (gaussTerm_le_one p F hρ1.le _ n)
 
+/-- The `0`-th Teichmüller digits of `x` and `y` differ by at most the Gauss value of `x - y`:
+digit `0` is the constant coefficient, which is additive, and `gaussTermF … 0` is that digit
+unscaled. -/
+private theorem perfectoidValuation_teichCoeff_zero_sub_le {ρ : NNReal} (x y : WittVector p F)
+    (hBxy : BddAbove (Set.range (gaussTermF p F ρ (x - y)))) {δT : NNReal}
+    (hab : gaussValueF p F ρ (x - y) ≤ δT) :
+    perfectoidValuation p F (teichCoeffF p F y 0 - teichCoeffF p F x 0) ≤ δT := by
+    have h00 : teichCoeffF p F y 0 - teichCoeffF p F x 0
+        = teichCoeffF p F (y - x) 0 := by
+      rw [teichCoeffF, teichCoeffF, teichCoeffF]
+      simp only [pow_zero]
+      exact (RingHom.map_sub WittVector.constantCoeff y x).symm
+    -- |(y−x)₀| = |(x−y)₀| : digit-0 is additive so it is exact negation
+    have hneg0 : teichCoeffF p F (y - x) 0 = -(teichCoeffF p F (x - y) 0) := by
+      rw [teichCoeffF, teichCoeffF]
+      simp only [pow_zero]
+      have := RingHom.map_neg WittVector.constantCoeff (x - y)
+      rw [show (-(x - y)) = y - x by ring] at this
+      exact this
+    rw [h00, hneg0, Valuation.map_neg]
+    have hterm : perfectoidValuation p F (teichCoeffF p F (x - y) 0)
+        = gaussTermF p F ρ (x - y) 0 := by
+      rw [gaussTermF, pow_zero, one_mul]
+    rw [hterm]
+    exact (gaussTermF_le_gaussValueF p F hBxy 0).trans hab
+
+/-- Shifting the Teichmüller digits down by one divides the Gauss value by at least `ρ`, so a
+bound `c⁻ᵐ` upstairs becomes `c⁻⁽ᵐ⁺ᴷ⁾` downstairs whenever `cᴷ < ρ`. -/
+private theorem gaussValueF_shift_le {ρ : NNReal} (hρ0 : 0 < ρ) {c : NNReal} (hc0 : 0 < c)
+    (m K : ℕ) (hK : c ^ K < ρ) (z' z : WittVector p F)
+    (hzc : ∀ k, teichCoeffF p F z' k = teichCoeffF p F z (k + 1))
+    (hBz : BddAbove (Set.range (gaussTermF p F ρ z)))
+    (hVz : gaussValueF p F ρ z ≤ (c⁻¹) ^ m) :
+    gaussValueF p F ρ z' ≤ (c⁻¹) ^ (m + K) := by
+    have h1 : ρ * gaussValueF p F ρ z' ≤ (c⁻¹) ^ m :=
+      (mul_gaussValueF_le_of_tail p F hBz hzc).trans hVz
+    have h2 : (c⁻¹) ^ m = (c⁻¹) ^ (m + K) * c ^ K := by
+      rw [pow_add, mul_assoc, ← mul_pow, inv_mul_cancel₀ hc0.ne', one_pow, mul_one]
+    have h3 : ρ * gaussValueF p F ρ z' ≤ (c⁻¹) ^ (m + K) * ρ := by
+      rw [h2] at h1
+      exact h1.trans (mul_le_mul_of_nonneg_left hK.le zero_le)
+    rw [mul_comm ((c⁻¹) ^ (m + K)) ρ] at h3
+    exact le_of_mul_le_mul_left h3 hρ0
+
+/-- The tail of the Teichmüller head-split: `p · x'` is `x` minus its leading Teichmüller term. -/
+private theorem p_mul_head_split_eq {x x' : WittVector p F}
+    (hx'eq : x = WittVector.teichmuller p (teichCoeffF p F x 0) + (p : WittVector p F) * x') :
+    (p : WittVector p F) * x' = x - WittVector.teichmuller p (teichCoeffF p F x 0) :=
+  eq_sub_of_add_eq (by rw [add_comm]; exact hx'eq.symm)
+
+/-- The `0`-th Teichmüller digit is bounded by any bound on the Gauss value, because
+`gaussTermF … 0` is that digit unscaled. -/
+private theorem perfectoidValuation_teichCoeff_zero_le {ρ b : NNReal} {x : WittVector p F}
+    (hBx : BddAbove (Set.range (gaussTermF p F ρ x))) (hVx : gaussValueF p F ρ x ≤ b) :
+    perfectoidValuation p F (teichCoeffF p F x 0) ≤ b := by
+  have h0 := gaussTermF_le_gaussValueF p F hBx 0
+  rw [gaussTermF, pow_zero, one_mul] at h0
+  exact h0.trans hVx
+
+/-- The inductive step of `exists_delta_teichCoeffF_sub`, with the scale `c` left abstract.
+
+Split `x` and `y` at their leading Teichmüller digits.  The heads differ by at most `δT`, so
+`hδT` bounds the difference of their Teichmüller lifts; subtracting that from `x - y` leaves
+`p · (x' - y')`, whose Gauss value is therefore at most `ρ * δn`.  Dividing by `p` shifts every
+digit down by one, and `hδn` — the induction hypothesis at `m + K` — closes digit `n` of the
+tails, which is digit `n + 1` of `x` and `y`. -/
+private theorem perfectoidValuation_teichCoeff_succ_sub_le {ρ : NNReal} (hρ0 : 0 < ρ)
+    (hρ1 : ρ < 1) (ϖ : PseudoUniformizer F) (n m K : ℕ) {c ε δn δT : NNReal} (hc0 : 0 < c)
+    (hK : c ^ K < ρ)
+    (hδn : ∀ x y : WittVector p F,
+      BddAbove (Set.range (gaussTermF p F ρ x)) →
+      BddAbove (Set.range (gaussTermF p F ρ y)) →
+      BddAbove (Set.range (gaussTermF p F ρ (x - y))) →
+      gaussValueF p F ρ x ≤ (c⁻¹) ^ (m + K) → gaussValueF p F ρ y ≤ (c⁻¹) ^ (m + K) →
+      gaussValueF p F ρ (x - y) ≤ δn →
+      perfectoidValuation p F (teichCoeffF p F x n - teichCoeffF p F y n) ≤ ε)
+    (hδT : ∀ a b : F, perfectoidValuation p F a ≤ (c⁻¹) ^ m →
+      perfectoidValuation p F b ≤ (c⁻¹) ^ m → perfectoidValuation p F (a - b) ≤ δT →
+      gaussValueF p F ρ (WittVector.teichmuller p a - WittVector.teichmuller p b)
+        ≤ min (ρ * δn) 1)
+    (x y : WittVector p F) (hBx : BddAbove (Set.range (gaussTermF p F ρ x)))
+    (hBy : BddAbove (Set.range (gaussTermF p F ρ y)))
+    (hBxy : BddAbove (Set.range (gaussTermF p F ρ (x - y))))
+    (hVx : gaussValueF p F ρ x ≤ (c⁻¹) ^ m) (hVy : gaussValueF p F ρ y ≤ (c⁻¹) ^ m)
+    (hab : gaussValueF p F ρ (x - y) ≤ min (min δT (ρ * δn)) 1) :
+    perfectoidValuation p F (teichCoeffF p F x (n + 1) - teichCoeffF p F y (n + 1)) ≤ ε := by
+  obtain ⟨x', hx'eq, hx'c⟩ := exists_head_splitF p F x
+  obtain ⟨y', hy'eq, hy'c⟩ := exists_head_splitF p F y
+  have hsub : (p : WittVector p F) * (x' - y')
+      = (x - y) + (WittVector.teichmuller p (teichCoeffF p F y 0)
+        - WittVector.teichmuller p (teichCoeffF p F x 0)) := by
+    rw [mul_sub, p_mul_head_split_eq p F hx'eq, p_mul_head_split_eq p F hy'eq]
+    ring
+  -- head values are within the scale, and the head difference is small
+  have hheadx := perfectoidValuation_teichCoeff_zero_le p F hBx hVx
+  have hheady := perfectoidValuation_teichCoeff_zero_le p F hBy hVy
+  have hhead0 : perfectoidValuation p F
+      (teichCoeffF p F y 0 - teichCoeffF p F x 0) ≤ δT :=
+    perfectoidValuation_teichCoeff_zero_sub_le p F x y hBxy
+      (hab.trans ((min_le_left _ _).trans (min_le_left _ _)))
+  have hT := hδT _ _ hheady hheadx hhead0
+  -- the p-scaled tail difference
+  have hBTsub := bddAbove_gaussTermF_teichmuller_sub p F hρ1 ϖ
+    (teichCoeffF p F y 0) (teichCoeffF p F x 0)
+  have hBS : BddAbove (Set.range (gaussTermF p F ρ ((x - y)
+      + (WittVector.teichmuller p (teichCoeffF p F y 0)
+        - WittVector.teichmuller p (teichCoeffF p F x 0))))) :=
+    bddAbove_gaussTermF_add p F hρ0 hρ1 hBxy hBTsub
+  have hBxy' : BddAbove (Set.range (gaussTermF p F ρ (x' - y'))) := by
+    refine bddAbove_gaussTermF_of_tail p F hρ0 (x := (p : WittVector p F) * (x' - y'))
+      (fun k => (teichCoeffF_p_mul p F (x' - y') k).symm) ?_
+    rw [hsub]
+    exact hBS
+  have hw : ρ * gaussValueF p F ρ (x' - y') ≤ ρ * δn := by
+    rw [← gaussValueF_p_mul p F hBxy', hsub]
+    refine (gaussValueF_add_le p F hρ0 hρ1 hBxy hBTsub).trans (max_le
+      (hab.trans ((min_le_left _ _).trans (min_le_right _ _)))
+      (hT.trans (min_le_left _ _)))
+  have hxy' : gaussValueF p F ρ (x' - y') ≤ δn := le_of_mul_le_mul_left hw hρ0
+  -- tail hypotheses for the inductive step
+  have hBx' : BddAbove (Set.range (gaussTermF p F ρ x')) :=
+    bddAbove_gaussTermF_of_tail p F hρ0 hx'c hBx
+  have hBy' : BddAbove (Set.range (gaussTermF p F ρ y')) :=
+    bddAbove_gaussTermF_of_tail p F hρ0 hy'c hBy
+  have hres := hδn x' y' hBx' hBy' hBxy'
+    (gaussValueF_shift_le p F hρ0 hc0 m K hK x' x hx'c hBx hVx)
+    (gaussValueF_shift_le p F hρ0 hc0 m K hK y' y hy'c hBy hVy) hxy'
+  rwa [hx'c n, hy'c n] at hres
+
 /-- **Per-coordinate uniform continuity over `W(F)`** on value-bounded sets: for each
 level `n`, bound scale `m`, and `ε > 0` there is `δ > 0` such that any boundedly-termed
 pair with values `≤ (vϖ)⁻ᵐ` and `w_ρ(x−y) ≤ δ` has `|xₙ − yₙ| ≤ ε`. This is the
@@ -954,92 +1083,8 @@ theorem exists_delta_teichCoeffF_sub (ϖ : PseudoUniformizer F) (n : ℕ) {ρ : 
     refine ⟨min (min δT (ρ * δn)) 1,
       lt_min (lt_min hδT0 (mul_pos hρ0 hδn0)) one_pos,
       fun x y hBx hBy hBxy hVx hVy hab => ?_⟩
-    obtain ⟨x', hx'eq, hx'c⟩ := exists_head_splitF p F x
-    obtain ⟨y', hy'eq, hy'c⟩ := exists_head_splitF p F y
-    have hpx : (p : WittVector p F) * x'
-        = x - WittVector.teichmuller p (teichCoeffF p F x 0) :=
-      eq_sub_of_add_eq (by rw [add_comm]; exact hx'eq.symm)
-    have hpy : (p : WittVector p F) * y'
-        = y - WittVector.teichmuller p (teichCoeffF p F y 0) :=
-      eq_sub_of_add_eq (by rw [add_comm]; exact hy'eq.symm)
-    have hsub : (p : WittVector p F) * (x' - y')
-        = (x - y) + (WittVector.teichmuller p (teichCoeffF p F y 0)
-          - WittVector.teichmuller p (teichCoeffF p F x 0)) := by
-      rw [mul_sub, hpx, hpy]
-      ring
-    -- head values are within the scale
-    have hheadx : perfectoidValuation p F (teichCoeffF p F x 0) ≤ (c⁻¹) ^ m := by
-      have h0 := gaussTermF_le_gaussValueF p F hBx 0
-      rw [gaussTermF, pow_zero, one_mul] at h0
-      exact h0.trans hVx
-    have hheady : perfectoidValuation p F (teichCoeffF p F y 0) ≤ (c⁻¹) ^ m := by
-      have h0 := gaussTermF_le_gaussValueF p F hBy 0
-      rw [gaussTermF, pow_zero, one_mul] at h0
-      exact h0.trans hVy
-    -- head difference is small
-    have hhead0 : perfectoidValuation p F
-        (teichCoeffF p F y 0 - teichCoeffF p F x 0) ≤ δT := by
-      have h00 : teichCoeffF p F y 0 - teichCoeffF p F x 0
-          = teichCoeffF p F (y - x) 0 := by
-        rw [teichCoeffF, teichCoeffF, teichCoeffF]
-        simp only [pow_zero]
-        exact (RingHom.map_sub WittVector.constantCoeff y x).symm
-      -- |(y−x)₀| = |(x−y)₀| : digit-0 is additive so it is exact negation
-      have hneg0 : teichCoeffF p F (y - x) 0 = -(teichCoeffF p F (x - y) 0) := by
-        rw [teichCoeffF, teichCoeffF]
-        simp only [pow_zero]
-        have := RingHom.map_neg WittVector.constantCoeff (x - y)
-        rw [show (-(x - y)) = y - x by ring] at this
-        exact this
-      rw [h00, hneg0, Valuation.map_neg]
-      have hterm : perfectoidValuation p F (teichCoeffF p F (x - y) 0)
-          = gaussTermF p F ρ (x - y) 0 := by
-        rw [gaussTermF, pow_zero, one_mul]
-      rw [hterm]
-      exact (gaussTermF_le_gaussValueF p F hBxy 0).trans
-        (hab.trans ((min_le_left _ _).trans (min_le_left _ _)))
-    have hT := hδT _ _ hheady hheadx hhead0
-    -- the p-scaled tail difference
-    have hBTsub := bddAbove_gaussTermF_teichmuller_sub p F hρ1 ϖ
-      (teichCoeffF p F y 0) (teichCoeffF p F x 0)
-    have hBS : BddAbove (Set.range (gaussTermF p F ρ ((x - y)
-        + (WittVector.teichmuller p (teichCoeffF p F y 0)
-          - WittVector.teichmuller p (teichCoeffF p F x 0))))) :=
-      bddAbove_gaussTermF_add p F hρ0 hρ1 hBxy hBTsub
-    have hBxy' : BddAbove (Set.range (gaussTermF p F ρ (x' - y'))) := by
-      refine bddAbove_gaussTermF_of_tail p F hρ0 (x := (p : WittVector p F) * (x' - y'))
-        (fun k => (teichCoeffF_p_mul p F (x' - y') k).symm) ?_
-      rw [hsub]
-      exact hBS
-    have hw : ρ * gaussValueF p F ρ (x' - y') ≤ ρ * δn := by
-      rw [← gaussValueF_p_mul p F hBxy', hsub]
-      refine (gaussValueF_add_le p F hρ0 hρ1 hBxy hBTsub).trans (max_le
-        (hab.trans ((min_le_left _ _).trans (min_le_right _ _)))
-        (hT.trans (min_le_left _ _)))
-    have hxy' : gaussValueF p F ρ (x' - y') ≤ δn := le_of_mul_le_mul_left hw hρ0
-    -- tail hypotheses for the inductive step
-    have hBx' : BddAbove (Set.range (gaussTermF p F ρ x')) :=
-      bddAbove_gaussTermF_of_tail p F hρ0 hx'c hBx
-    have hBy' : BddAbove (Set.range (gaussTermF p F ρ y')) :=
-      bddAbove_gaussTermF_of_tail p F hρ0 hy'c hBy
-    have hscaleup : ∀ z' z : WittVector p F,
-        (∀ k, teichCoeffF p F z' k = teichCoeffF p F z (k + 1)) →
-        BddAbove (Set.range (gaussTermF p F ρ z)) →
-        gaussValueF p F ρ z ≤ (c⁻¹) ^ m →
-        gaussValueF p F ρ z' ≤ (c⁻¹) ^ (m + K) := by
-      intro z' z hzc hBz hVz
-      have h1 : ρ * gaussValueF p F ρ z' ≤ (c⁻¹) ^ m :=
-        (mul_gaussValueF_le_of_tail p F hBz hzc).trans hVz
-      have h2 : (c⁻¹) ^ m = (c⁻¹) ^ (m + K) * c ^ K := by
-        rw [pow_add, mul_assoc, ← mul_pow, inv_mul_cancel₀ hc0.ne', one_pow, mul_one]
-      have h3 : ρ * gaussValueF p F ρ z' ≤ (c⁻¹) ^ (m + K) * ρ := by
-        rw [h2] at h1
-        exact h1.trans (mul_le_mul_of_nonneg_left hK.le zero_le)
-      rw [mul_comm ((c⁻¹) ^ (m + K)) ρ] at h3
-      exact le_of_mul_le_mul_left h3 hρ0
-    have hres := hδn x' y' hBx' hBy' hBxy'
-      (hscaleup x' x hx'c hBx hVx) (hscaleup y' y hy'c hBy hVy) hxy'
-    rwa [hx'c n, hy'c n] at hres
+    exact perfectoidValuation_teichCoeff_succ_sub_le p F hρ0 hρ1 ϖ n m K hc0 hK hδn hδT
+      x y hBx hBy hBxy hVx hVy hab
 
 /-- Boundedness for `p`-power multiples (iterated). -/
 theorem bddAbove_gaussTermF_p_pow_mul {ρ : NNReal} {x : WittVector p F}

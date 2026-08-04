@@ -13583,3 +13583,65 @@ The blocker on 2 and 3 is not size but the interface: `g` and `hg` come from
 `choose g hg using fun P => (hV0 P.1 P.2).gluing …`, so their types are the `gluing` field's
 signature instantiated at a restricted cover — several lines each to write out, and `f`/`hf` come
 from the enclosing `intro`. That is threadable but wants a dedicated pass.
+
+### `exists_delta_teichCoeffF_sub` 108 → 29: abstract the scale, then the branch body lifts whole
+
+The second single-branch target cracked, and the first one where reading the interior gave a
+**flat** profile rather than a nested one. After two preliminary lifts (108 → 83) the `succ`
+branch was ~30 steps of 1–6 code lines each — no sub-argument big enough to be worth a lemma.
+The instinct at that point is to lift eight 4-line `have`s to make the number go down. That is
+gaming the measure, and the result is eight lemmas nobody will ever cite.
+
+The right unit was one level up: **everything after the `refine` that supplies the witness**.
+
+| new lemma | code | what it is |
+|---|---|---|
+| `perfectoidValuation_teichCoeff_succ_sub_le` | 40 | the whole inductive step, given `δT`, `δn`, `K` |
+| `gaussValueF_shift_le` | 15 | digit-shift divides the Gauss value by `ρ`, so `c⁻ᵐ ↦ c⁻⁽ᵐ⁺ᴷ⁾` |
+| `perfectoidValuation_teichCoeff_zero_sub_le` | 20 | digit `0` of `x − y` is bounded by the Gauss value |
+| `perfectoidValuation_teichCoeff_zero_le` | 4 | …and digit `0` of `x` alone, against any bound |
+| `p_mul_head_split_eq` | 1 | `p · x' = x − teichmuller (x₀)` from the head-split |
+
+The parent keeps only the induction, the `zero` case, and the `succ` preamble that *builds* the
+witness `min (min δT (ρ·δn)) 1` — which is the part that genuinely belongs there.
+
+**The move that made the big lemma clean: `c` is fully abstract.** The parent opens with
+`set c := perfectoidValuation p F ϖ`, and every bound downstream reads `(c⁻¹) ^ m`. My first
+instinct was to carry the definition across as `hcdef` so the extracted lemma could still see
+what `c` was. Scanning the body showed nothing needs it — the head bounds, the `hδT`/`hδn`
+applications, the shift lemma and the `max_le`/`min_le` chase all treat `c` as an opaque
+`NNReal` with `0 < c` and `c ^ K < ρ`. So the lemma takes `{c : NNReal} (hc0 : 0 < c)
+(hK : c ^ K < ρ)` and nothing else, and the call site needs no bridging at all: after `set`,
+the parent's hypotheses *already display* in terms of `c`, so they match by syntax.
+
+This is the counterpart to the "abstract the carrier, let `rfl` identify at the call site"
+rule. Here there is not even an `rfl` to do — **when a `set`-local is only ever used through
+its order/algebraic properties, abstracting it costs exactly the hypotheses those uses need,
+and `set` makes the call site free.** Worth trying `set`-locals first on any target whose
+preamble opens with one.
+
+### Collapsing `x`/`y` twins is dedup, not measure-gaming
+
+Three near-identical pairs in the branch (`hpx`/`hpy`, `hheadx`/`hheady`, `hBx'`/`hBy'`) —
+each the same two or four lines with `x` swapped for `y`. Two of the three collapsed to a
+single parameterised lemma used twice; the third (`hBx'`/`hBy'`) was already a one-line
+application of an existing lemma and stayed inline. `perfectoidValuation_teichCoeff_zero_le`
+came out *more general* than either twin: the twins bound digit 0 by `(c⁻¹) ^ m` specifically,
+the lemma bounds it by whatever bounds the Gauss value.
+
+`hscaleup` also disappeared: once `gaussValueF_shift_le` existed, the local `have` was a
+five-line `fun z' z => …` wrapper around it, so inlining it at its two use sites was shorter
+than keeping it.
+
+### Two mechanical notes
+
+- The section variables `(p : ℕ)` and `(F : Type u)` are **explicit**, so every extracted lemma
+  in this file leads with `p F` at the call site. The symptom when you forget is
+  `argument hρ0 … but is expected to have type ℕ`, which reads like a binder-order bug and is
+  not one.
+- Asserting on the block boundary caught an off-by-one before it could write: the `rwa` tail
+  was at index 1059, not 1060 (`sed -n 'a,bp'` counts 1-indexed and I had matched `b` against
+  the last *printed* line, which was the blank after it). `assert` on both ends of every slice,
+  with `repr()` in the message — an empty message means the assert fired on a blank line.
+
+Actionable over-50 count: 22 → 21.
