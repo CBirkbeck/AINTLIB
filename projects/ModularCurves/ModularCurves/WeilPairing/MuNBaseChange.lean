@@ -107,4 +107,24 @@ noncomputable def muNCarrierAlgEquiv :
       ((muNCarrierRingEquiv k N).symm_apply_eq.mp
         (muNCarrierRingEquiv_symm_algebraMap k N a)).symm }
 
+variable (k' : Type u) [Field k'] [Algebra k k']
+
+attribute [local instance] polyAlgebra
+
+/-- **(WP-D3c-2b)** The `μ_N` carrier commutes with base change of the field: as rings,
+
+`k' ⊗[k] Γ(μ_{N,Spec k}, ⊤)  ≅  Γ(μ_{N,Spec k'}, ⊤)`.
+
+Both ends are identified with the `AdjoinRoot` model by `muNCarrierAlgEquiv`, and the models
+are matched by `quotSpanBaseChange` together with `map_X_pow_sub_one`. -/
+noncomputable def muNCarrierBaseChange :
+    TensorProduct k k' Γ(muN (Spec (CommRingCat.of k)) N, ⊤) ≃+*
+      Γ(muN (Spec (CommRingCat.of k')) N, ⊤) :=
+  by
+  refine (Algebra.TensorProduct.congr (AlgEquiv.refl : k' ≃ₐ[k] k')
+      (muNCarrierAlgEquiv k N)).toRingEquiv.trans ?_
+  refine (quotSpanBaseChange (S := k') ((X : Polynomial k) ^ N - 1)).trans ?_
+  rw [map_X_pow_sub_one]
+  exact (muNCarrierAlgEquiv k' N).symm.toRingEquiv
+
 end ModularCurves

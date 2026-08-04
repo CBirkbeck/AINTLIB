@@ -36724,3 +36724,35 @@ root import. Root green at **9722 jobs**.
 → `(muNCarrierAlgEquiv k' N).symm`, packaged by `CommAlgCat.FiniteEtale.isoMk`. The only care
 needed is that `quotSpanBaseChange` is a `RingEquiv` while the outer pieces are `≃ₐ`, so the
 `k'`-linearity of the composite is checked on `1 ⊗ₜ` generators.
+
+## [WP-D3c-2b] the `μ_N` side is DONE (2026-08-04) — `muNCarrierBaseChange`, axiom-verified
+
+```
+muNCarrierBaseChange (k) [Field k] (N) [NeZero N] (k') [Field k'] [Algebra k k'] :
+  k' ⊗[k] Γ(μ_{N,Spec k}, ⊤)  ≃+*  Γ(μ_{N,Spec k'}, ⊤)
+```
+
+The `μ_N` finite étale algebra commutes with base change of the field. Composed from
+`muNCarrierAlgEquiv` at `k`, `quotSpanBaseChange`, `map_X_pow_sub_one`, and
+`muNCarrierAlgEquiv` at `k'`.
+
+Notes:
+
+* **It needs no invertibility hypothesis.** `hk : (N : k) ≠ 0` is what makes the algebra
+  *étale*; the carrier identification itself is unconditional, so the statement is cleaner
+  than expected.
+* **Write the composite as a tactic proof, not a term.** The middle step changes the
+  polynomial (`f.map` vs `X^N − 1`), and doing that with `▸` produces
+  `declaration has metavariables`. `refine … ?_ ; rw [map_X_pow_sub_one] ; exact …` works.
+
+`WeilPairing/MuNBaseChange.lean`: six declarations, sorry-free, axiom-verified, in the root
+import. Root green at **9722 jobs**.
+
+### What is left on the transport
+
+1. **`torsionPairAlgebra`** — no explicit model, so via `torsion_baseChange_isPullback` and
+   `Algebra.TensorProduct` of the two `torsionAlgebra` factors.
+2. **WP-D3c step 2 proper** — with both carriers transported, the field-change naturality of
+   `fieldWeilPairingHom` is a uniqueness argument through `fieldWeilPairingHom_unique`.
+3. Then **WP-D3d** (assemble ζ; base side already complete) and
+   `nonempty_weilPairing_of_root_of_det` closes DS4's first two register entries.
