@@ -1,1 +1,1 @@
-FOCUS: WP-D3c-2g DONE (fieldWeilPairing_det_of_galois) — next: axiom-verify + commit, then package it as the Stab-case det law (curve descended to the fixed subfield of the automorphism)
+FOCUS: route beta step 1 DONE (nonempty_weilPairing_of_root_of_mono + _of_trivialised: pairing over a trivialised base needs only a root, hdet vacuous). NEXT: measure the assembly side — does the tree give a trivialisation of E[N]^2 over the universal base + the classifying map for general S?

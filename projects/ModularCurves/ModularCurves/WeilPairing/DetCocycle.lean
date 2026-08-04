@@ -173,4 +173,58 @@ theorem nonempty_weilPairing_of_root_of_det (N : ℕ) [NeZero N] {S' : Scheme.{u
       cocycle := comp_localDetPairing_eq_of_pieces E N p ζ triv htriv _ _ hdet
       overBase := localDetPairing_over E N p ζ triv htriv }
 
+/-- **(route β, step 1)** When the trivialising cover is a **monomorphism** the determinant law is
+not needed at all: `pullback.fst (E.torsionSqπ N) p` is then a monomorphism too, so the two
+projections of its self-pullback coincide and the cocycle field is free.
+
+The case of interest is `p = 𝟙 S`, i.e. a base over which `E[N] ×_S E[N]` is *already*
+trivialised — the universal base of the full-level moduli problem. There the pairing is the
+determinant formula itself, and the only input is a root of unity on the base. This is what makes
+the universal base the right place to construct the pairing: the determinant law is needed only
+afterwards, to descend along a genuine cover, where it becomes the `GL₂(ℤ/N)`-equivariance of the
+universal pairing. -/
+theorem nonempty_weilPairing_of_root_of_mono (N : ℕ) [NeZero N] {S' : Scheme.{u}} (p : S' ⟶ S)
+    [Flat p] [LocallyOfFinitePresentation p] [Surjective p] [Mono p]
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 })
+    (triv : pullback (E.torsionSqπ N) p ≅
+      constScheme S' ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)))
+    (htriv : triv.hom ≫ constSchemeπ S' ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) =
+      pullback.snd (E.torsionSqπ N) p) :
+    ∃ e : pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N,
+      e ≫ muNπ S N = E.torsionSqπ N := by
+  haveI hmono : Mono (pullback.fst (E.torsionSqπ N) p) := pullback.fst_of_mono
+  refine EllipticCurve.nonempty_weilPairing_of_localData
+    { cover := S'
+      p := p
+      flat := ‹Flat p›
+      lfp := ‹LocallyOfFinitePresentation p›
+      surj := ‹Surjective p›
+      pairing := localDetPairing E N p ζ triv
+      cocycle := ?_
+      overBase := localDetPairing_over E N p ζ triv htriv }
+  rw [(cancel_mono (pullback.fst (E.torsionSqπ N) p)).mp pullback.condition]
+
+/-- **(route β, step 1, THE UNIVERSAL CASE)** Over a base on which `E[N] ×_S E[N]` is *already*
+trivialised — i.e. a base carrying a full level structure, such as the universal base of the
+full-level moduli problem — an `N`-th root of unity on the base is the **only** input the Weil
+pairing needs. No determinant law, no cover, no descent.
+
+`nonempty_weilPairing_of_root_of_mono` at `p = 𝟙 S`, with the trivialisation transported along
+`IsPullback.of_id_fst`. -/
+theorem nonempty_weilPairing_of_root_of_trivialised (N : ℕ) [NeZero N]
+    (ζ : { a : Γ(S, (⊤ : S.Opens)) // a ^ N = 1 })
+    (triv : pullback (E.torsionπ N) (E.torsionπ N) ≅
+      constScheme S ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)))
+    (htriv : triv.hom ≫ constSchemeπ S ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) =
+      E.torsionSqπ N) :
+    ∃ e : pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N,
+      e ≫ muNπ S N = E.torsionSqπ N := by
+  have hsq : IsPullback (𝟙 (pullback (E.torsionπ N) (E.torsionπ N))) (E.torsionSqπ N)
+      (E.torsionSqπ N) (𝟙 S) :=
+    IsPullback.of_id_fst
+  refine nonempty_weilPairing_of_root_of_mono E N (𝟙 S) ζ
+    (hsq.isoPullback.symm.trans triv) ?_
+  rw [Iso.trans_hom, Iso.symm_hom, Category.assoc, htriv, Iso.inv_comp_eq]
+  exact hsq.isoPullback_hom_snd.symm
+
 end ModularCurves

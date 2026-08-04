@@ -37040,3 +37040,40 @@ next measurement to take is route β's assembly side (does the tree's `Y(N)` rep
 the classifying map in the form the descent needs?). Until that is measured, do **not** start the
 1150-line mirror: `weilPairing_transport_core` plus the semilinear point/coordinate-ring transport
 already de-risk (T)'s two hardest-looking pieces, so α stays available at a known price.
+
+## [route β] step 1 is DONE — and an architectural correction (2026-08-04)
+
+`WeilPairing/DetCocycle.lean` (axiom-verified):
+
+* **`nonempty_weilPairing_of_root_of_mono`** — if the trivialising cover `p` is a
+  **monomorphism** the cocycle field is free: `pullback.fst (E.torsionSqπ N) p` is then a
+  monomorphism too (`pullback.fst_of_mono`), so the two projections of its self-pullback agree
+  (`cancel_mono` on `pullback.condition`). No determinant law.
+* **`nonempty_weilPairing_of_root_of_trivialised`** — the case `p = 𝟙 S`: over a base on which
+  `E[N] ×_S E[N]` is *already* trivialised, an `N`-th root of unity on the base is the only
+  input. The trivialisation is transported along `IsPullback.of_id_fst` (`Iso.inv_comp_eq`, then
+  `isoPullback_hom_snd`).
+
+**This confirms route β's shape**: the determinant law is *not* needed to build the pairing over
+the universal base — only to descend from it to a general base, where it becomes the
+`GL₂(ℤ/N)`-equivariance of the universal pairing, i.e. the orbit/stabiliser argument whose
+stabiliser case is `fieldWeilPairing_det_of_galois` (already proved).
+
+### Architectural correction: existence alone is too weak for the register
+
+Filling the DS4 data-sorry by `weilPairing := (nonempty_weilPairing_of_localData d).choose`
+would make the register's *other* entries unprovable: the conclusion `∃ e, e ≫ muNπ = torsionSqπ`
+is satisfied by the **trivial** pairing (take `ζ = 1` in the theorems above), so nothing about
+bilinearity, alternation or nondegeneracy can be recovered from a bare `choose`.
+
+The definition must therefore be `d.toPairing` **directly**, not a `choose` from an existence
+statement. That is exactly what makes the remaining specs reachable:
+`WeilPairingLocalData.toPairing_restrict` pins `pullback.fst (E.torsionSqπ N) d.p ≫ d.toPairing =
+d.pairing`, i.e. *on the cover the pairing is the explicit determinant formula* — and since the
+cover is faithfully flat, each spec can be checked there, where `localDetPairing` computes.
+
+So `nonempty_weilPairing_of_localData` and the three `nonempty_weilPairing_of_root_*` wrappers are
+the right **feasibility** statements but the wrong **definition**; the register entry must be
+`WeilPairingLocalData.toPairing` of a canonical record, with `toPairing_restrict` as the bridge to
+`WP-C2` and the four computational specs. Recorded here so no session fills the data-sorry with a
+`choose` and then finds the specs unreachable.
