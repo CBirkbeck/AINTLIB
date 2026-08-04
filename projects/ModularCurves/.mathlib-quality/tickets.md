@@ -36557,3 +36557,30 @@ therefore complete at the ring level; what remains on that side is transporting 
 - **Then** `torsionPairAlgebra`: no explicit model, so it goes through
   `torsion_baseChange_isPullback` and `Algebra.TensorProduct` of the two `torsionAlgebra`
   factors instead.
+
+## [WP-D3c-2b] first step landed (2026-08-04) — `muNCarrierRingEquiv`, axiom-verified
+
+`WeilPairing/MuNBaseChange.lean` (new, sorry-free, in the root import):
+
+```
+muNCarrierRingEquiv : Γ(muN (Spec k) N, ⊤) ≃+* AdjoinRoot ((X : k[X])^N − 1)
+```
+
+`Scheme.Γ.mapIso (muNSpecFieldIso k N).symm.op` followed by `Scheme.ΓSpecIso`.
+
+**Instance gotcha, recorded.** The carrier of `muNAlgebra k N hk` *is* `Γ(muN (Spec k) N, ⊤)`,
+but its `Algebra k` structure is installed by a `letI` **inside** `finiteEtaleOfπ`
+(`WeilPairing/EtaleDescent.lean:99`), so it is invisible to instance search from another file
+— even `theorem muNAlgebra_obj : … = CommAlgCat.of k Γ(…) := rfl` fails to elaborate. Anything
+stated outside `finiteEtaleOfπ`'s scope must therefore be at the **ring** level, with the
+algebra structure reattached where the `letI` is in scope. That is why this equivalence is a
+`≃+*` and not a `≃ₐ[k]`.
+
+**Consequence for WP-D3c-2b**: the remaining step is not "prove the carrier iso" — that is
+done — but "reattach the `k`-algebra structure", for which `muNSpecFieldIso_struct`
+(`GroupScheme/MuN.lean:1218`, the statement that the identification lies over the base via
+`AdjoinRoot.of`) is exactly the input. The cleanest shape is probably to prove the algebra
+compatibility as a lemma *about* `muNCarrierRingEquiv` and `algebraMap`, rather than to
+re-derive the whole equivalence in the algebra category.
+
+Root green at **9722 jobs**.
