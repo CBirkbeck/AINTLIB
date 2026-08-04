@@ -37849,3 +37849,24 @@ transport `fullLevelHom_pullAlong` through `fullLevelSqIso` exactly as
 
 Steps 1 and 3–6 are proved; step 2 is the lemma above; step 7 is WP-D3d, the only item left with
 mathematical content.
+
+### [route β] the determinant law now holds at COVER level (2026-08-04) — axiom-verified
+
+Two corollaries that were free once `fullLevelSqIso_glSmul_hom` and `fullLevelPairing_glSmul` were in
+place, and both are the forms the descent actually consumes:
+
+* **`coverTriv_glSmul_hom`** — the cover trivialisation changes by `constSchemeMap (gl2Both N g)` when
+  the level structure on the cover is re-marked by `g`;
+* **`coverPairing_glSmul`** — ***the cover-level determinant law***:
+  `coverPairing (g • L) ⟨ζ ^ det g⟩ = coverPairing L ζ` on `pullback (E.torsionSqπ N) p`.
+
+So the descent's cocycle `a ≫ coverPairing = b ≫ coverPairing` is now separated cleanly into
+(i) *identify the kernel-pair transition* — the two projections present the same torsion pair in level
+structures differing by some locally constant `g` — and (ii) *the root's determinant law*
+`g^*ζ = ζ ^ det g` (WP-D3d). Nothing else remains: `coverPairing_glSmul` is (ii)'s consumer and it is
+proved.
+
+For (i) the remaining lemma is the square base-change of `coverTriv`, whose target shape and route are
+written into `WeilPairing/FullLevelPairing.lean` immediately above the `coverTrivReading` section.
+
+Root green at **9731 jobs**.

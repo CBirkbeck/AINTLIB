@@ -476,6 +476,35 @@ theorem coverPairing_eq_localDetPairing (p : S' ⟶ S) (hinv : NIsInvertible S' 
   simp only [coverPairing, localDetPairing, coverTriv, fullLevelPairing, Iso.trans_hom,
     Category.assoc]
 
+/-- **(route β)** The cover trivialisation changes by the diagonal action of `g` when the level
+structure is re-marked by `g` — the `coverTriv`-level form of `fullLevelSqIso_glSmul_hom`. -/
+theorem coverTriv_glSmul_hom (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (L : (E.baseChange p).FullLevelPt N) :
+    (E.coverTriv p hinv L).hom =
+      (E.coverTriv p hinv ((E.baseChange p).glSmul g L)).hom ≫
+        constSchemeMap (S := S') (gl2Both N (g : Matrix (Fin 2) (Fin 2) (ZMod N))) := by
+  rw [coverTriv, coverTriv, Iso.trans_hom, Iso.trans_hom, Category.assoc,
+    ← (E.baseChange p).fullLevelSqIso_glSmul_hom hinv g L]
+
+/-- **(route β, THE COVER-LEVEL DETERMINANT LAW)** Re-marking the level structure on the cover by `g`
+and simultaneously raising the root to `det g` leaves the cover pairing unchanged:
+
+`e_{g • L, ζ ^ det g} = e_{L, ζ}`  on  `pullback (E.torsionSqπ N) p`.
+
+Immediate from `fullLevelPairing_glSmul`, since `coverPairing` is `fullLevelPairing` read through
+`torsionSqBaseChangeIso` and pushed forward by `muNMapAlong`. This is the form the descent's cocycle
+consumes once the kernel pair's transition is identified. -/
+theorem coverPairing_glSmul (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (L : (E.baseChange p).FullLevelPt N)
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 }) :
+    E.coverPairing p hinv ((E.baseChange p).glSmul g L)
+        ⟨(ζ : Γ(S', (⊤ : S'.Opens))) ^ (g : Matrix (Fin 2) (Fin 2) (ZMod N)).det.val, by
+          rw [← pow_mul, mul_comm, pow_mul, ζ.2, one_pow]⟩ =
+      E.coverPairing p hinv L ζ := by
+  rw [coverPairing, coverPairing, (E.baseChange p).fullLevelPairing_glSmul hinv g L ζ]
+
 /-- **(route β, step 3, THE DESCENT)** An elliptic curve admits a Weil pairing as soon as it admits
 a trivialising fppf cover carrying a **full level structure** and an `N`-th root of unity, *and* the
 resulting cover pairing satisfies the cocycle condition on the kernel pair.
