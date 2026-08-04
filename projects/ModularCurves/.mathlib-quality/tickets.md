@@ -38463,3 +38463,164 @@ So the redirect stands — the descent itself is **not** to be rebuilt — but i
 the residuals so the next session neither re-derives the descent nor assumes the twist away.
 
 Root green at **9733 jobs**; census unchanged (7, all the Weil register).
+
+---
+
+# `/develop --continue` audit — 2026-08-04 (post-decompose board reconciliation)
+
+Applied after the `--decompose` verdict (`.mathlib-quality/decomposition.md`): DS4's route is
+**Katz–Mazur §2.8 via `Picard/SelfAdjointN.lean`**, already built up to `(★′)`. Everything below is a
+board correction; the code was not touched except for a docstring citation fix.
+
+## 1. Route β — SUPERSEDED (all `### [route β]` entries above)
+
+The route is **unsourced**: KM 2.8.1, Oda §1 Thm 1.1 and Mumford all construct `e_N` from rigidified
+line bundles; Deligne–Rapoport IV.3.20 runs the *opposite* way (uses `e_N` to extract a primitive root
+from a level structure). The ζ-cocycle route β reduces to *is* the missing symplectic orientation —
+`ζ = 1` satisfies it and yields the trivial pairing.
+
+Its declarations are **proved and axiom-verified**, and **unconsumed outside their own files**
+(checked: `nonempty_weilPairing_of_cover_of_values`, `fullLevelPairing`, `coverPairing`,
+`nonempty_weilPairing_of_fullLevel` appear only in `WeilPairing/{FullLevelPairing,FactorRoot,
+UniversalRootBase,FieldPairingValue}.lean` + `GroupScheme/{ConstSchemeSquare,LevelCoord}.lean`).
+So: a **dead branch, not a broken one**. Logged in `DEBT.md` as post-merge dedup for the fleet.
+Genuinely reusable pieces to keep in mind: `constSchemeSigmaIso`, `levelCoord`,
+`fullLevelHom_eq_constSchemeMap_comp`, `torsionSqBaseChangeIso`, `muNPointsEquiv_rootPower`.
+
+## 2. `[WP-D3b-ET]` (finite étale ascent of `IsIntegrallyClosed`) — DOMINATED, not wrong
+
+It was the generic-fibre route's single gap. That route reaches only **normal integral `S`**, while the
+register is stated for arbitrary `S`; and the gap is mathlib-scale (Stacks 025P / 033C). The hope that
+the *target-specific instance* is cheaper is **false**: for `N` invertible `A[x]/(xᴺ−1) ≅ ∏_{d|N} A[ζ_d]`,
+so it reduces to `A[ζ_d] = A[x]/Φ_d` normal — the general étale-normality ascent again. Statement stays
+valid; off the critical path. Same for `[WP-D3a']`.
+
+## 3. `Picard/SelfAdjointN.lean`'s citations — ALL VERIFIED PRESENT (no code change)
+
+A first pass of this audit reported the field-level citations as stale post-reorg. **That was wrong** —
+an artifact of a `head -1` truncating the grep. Every cited name exists:
+
+| cited in `SelfAdjointN.lean` | actual location | ✓ |
+|---|---|---|
+| `…RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv` | `HasseWeil/Pic0/TheoremOfSquareDivisorForm.lean:46` | ✓ |
+| `TheoremOfSquareDivisorForm.tos_divisor`, `tos_toClass` | same file, `:53`, `:84` | ✓ |
+| `PicDualPullbackTheoremOfSquare.tos_pullback_principal_of_sigma_eq_zero` | `HasseWeil/Pic0/PicDualPullbackTheoremOfSquare.lean:224` | ✓ |
+| `RelEffCartierDiv.sectionDivisor_baseChange` | `EllipticCurve/PoleSheaf.lean:93` | ✓ |
+
+The docstring prefixes are *filenames*, not namespaces (real namespaces:
+`HasseWeil.Pic0.RouteCTheoremOfSquareDiv`, `HasseWeil.Pic0.RouteCAddFormula`) — a local convention, not
+drift. Also present and useful: the `HasseWeil.Curves.kappaDivisor_{add,neg,nsmul,zsmul}_linEquiv_of_miller`
+family (`Foundation/Curves/Divisor/EffectiveSumReduce.lean:231+`) — the conditional forms the `Pic0`
+wrappers are built from, **richer than the docstring advertises** (nsmul/zsmul versions exist).
+
+**One real refinement for the leaf's step 3.** `kappaDivisor_add_linEquiv` discharges its
+`MillerHypothesis` via `Curves.miller_hypothesis_holds_allChar`, which carries
+`[IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]`. So the docstring's "proved
+**unconditionally** in any characteristic" is right about *characteristic* but the lemma still takes that
+instance argument — step 3 must supply it for each residue-field fibre. Satisfiable for a smooth
+Weierstrass curve over a field, but it is not literally hypothesis-free; note it before writing step 3.
+
+## 4. `[KM-SEESAW]` — the gap the leaf's route needs and nobody recorded  ← START HERE
+
+- **Status**: open · **File**: new, `ForMathlib/Seesaw.lean` · **Depends on**: none · **Type**: theorem
+- **Mathlib check**: **absent.** No `seesaw` declaration in ModularCurves or HasseWeil (grepped);
+  `leansearch` for "line bundle trivial on every fibre over a reduced base is pulled back" returns only
+  `Trivialization.pullback*` (topological fibre bundles) — unrelated.
+- **Why this is new**: `SelfAdjointN.lean`'s route step 4 reads *"`B` is reduced — integral, in fact — so
+  the reduced seesaw gives `Δ^rig ≅ f_B^* M`"*, and the docstring says *"the expected bottleneck is not
+  the seesaw but the comparison…"*. There is **no seesaw in the tree** to be un-bottlenecked. Stacks 0EX7
+  is cited there only to explain why the *non-reduced* case fails.
+
+#### Statement (tree vocabulary; two names to verify at pickup, marked ⚠)
+
+```lean
+theorem nonempty_pullback_iso_of_fibrewise_trivial_of_isReduced
+    {X S : Scheme.{u}} (p : X ⟶ S) (hp : UniversallyOConnected p)
+    [⚠IsProper p] [⚠Flat p] [⚠LocallyOfFinitePresentation p] [IsReduced S]
+    (L : X.Modules) (hL : IsInvertible L)
+    (hfib : ∀ s : S, ⚠Nonempty (L restricted to the fibre X_s ≅ unitObj X_s)) :
+    ∃ N : S.Modules, IsInvertible N ∧
+      Nonempty (L ≅ (AlgebraicGeometry.Scheme.Modules.pullback p).obj N)
+```
+
+`UniversallyOConnected p` (`EllipticCurve/Rigidity.lean:54`) unfolds to
+`∀ ⦃T⦄ (g : T ⟶ S) (U : T.Opens), IsIso ((pullback.snd p g).app U)` — this **is** 0EX7's hypothesis
+"`f_*O_X = O_S`, and this remains true after arbitrary base change", verbatim. The alignment is exact;
+do not re-derive it. ⚠ = confirm the tree/mathlib class name and the fibre-restriction spelling
+(`Scheme.Modules` restriction along `X_s ⟶ X`) before writing the signature.
+
+#### Source (verbatim)
+
+Stacks Project, **Lemma 37.33.2, tag `0EX7`** — Chapter 37 *More on Morphisms*, §37.33 **Theorem of the
+cube**:
+
+> "Let $f : X \to S$ be a flat, proper morphism of finite presentation such that $f_*\mathcal{O}_X =
+> \mathcal{O}_S$ and this remains true after arbitrary base change. Let $\mathcal{E}$ be a finite locally
+> free $\mathcal{O}_X$-module. Assume (1) $\mathcal{E}|_{X_s}$ is isomorphic to
+> $\mathcal{O}_{X_s}^{\oplus r_s}$ for all $s \in S$, and (2) $S$ is reduced. Then $\mathcal{E} =
+> f^*\mathcal{N}$ for some finite locally free $\mathcal{O}_S$-module $\mathcal{N}$."
+
+Lean ↔ source match: `IsInvertible L` is the rank-1 case of "finite locally free" (`r_s ≡ 1`);
+`hfib` is hypothesis (1) at `r_s = 1`; `IsReduced S` is (2); `hp` + the three instances are the
+morphism hypotheses. The conclusion `∃ N, IsInvertible N ∧ Nonempty (L ≅ p^* N)` is `E = f^*N` with
+`Nonempty` because `Pic` goes through `Skeleton` (see `SelfAdjointN.lean`'s "rigidification trap").
+
+#### Generality decision
+
+State at **rank 1 (`IsInvertible`) first**, not general finite-locally-free. Reason: the leaf consumes
+only rank 1, and the general case's extra work is entirely the *non-constant* `r_s` bookkeeping
+(0EX7 allows `r_s` to vary over `S`), which is orthogonal to the seesaw argument itself. This is a
+deliberate deviation from the maximum-generality default, recorded here; generalising afterwards is a
+`/cleanup`-lane `/generalise` ticket, not producer work. Universe-polymorphic in `X S : Scheme.{u}`.
+
+#### Proof sketch
+
+Follow 0EX7's own proof (which leans on Lemma 37.33.1) — read that proof before writing tactics; the
+sketch below is the shape, not a substitute.
+1. Reduce to `S` affine and, by finite presentation, to `S` of finite type over a noetherian base
+   (`ForMathlib/NoethApprox.lean` has approximation machinery — check `:343`/`:353`, both sorry'd).
+2. Push forward: `N := p_* L`. Cohomological flatness + `f_*O = O` universally gives `N` invertible
+   and the counit `p^* N → L` defined.
+3. Fibrewise triviality + reducedness ⟹ the counit is an isomorphism: it is one on every fibre, and on
+   a reduced base a map of locally free modules that is fibrewise iso is iso.
+4. Feed `nonempty_unitObj_iso_of_glue` / `nonempty_unitObj_iso_of_normalized_glue`
+   (`Picard/{GlueTrivialization,RigidDescent}.lean`, both proved) for the local-to-global step.
+
+#### Open question to settle FIRST (cheap, and it may collapse the leaf)
+
+0EX7 lives in Stacks §37.33 **"Theorem of the cube"** — the same section that proves the theorem of the
+cube, whose corollary *is* the theorem of the square, i.e. **the leaf**
+(`exists_invertible_tensor_idealModule_add`). Before proving the seesaw, read §37.33's other tags: if
+Stacks states the relative theorem of the square for a flat proper group scheme with sections, the leaf
+is a transcription rather than a construction, and the seesaw may be needed only as *its* input (or not
+at all). One fetch of the §37.33 index answers this.
+
+## 5. `SelfAdjointN.lean` records TWO unreconciled routes to its leaf
+
+The 2026-07-27 section ("The route (revised …)") takes the **universal pair + reduced seesaw** and
+explicitly *rejects* the explicit-Weierstrass-line alternative. The 2026-07-29 section ("State …") names
+the two remaining bricks as **(A)** the chart-local exact iso from *"the line-and-vertical function of the
+addition law"* — the rejected alternative — and **(B)** the normalized-glue descent. (A)'s own closing
+note then sends the degenerate loci back to the universal pair. So the seesaw is required on either
+reading, which is why `[KM-SEESAW]` is unblocked and first. Reconcile the two sections into one current
+route when `[KM-SEESAW]` lands, and only then open tickets for (A) and (B).
+
+## 6. Retired: `[WP-B1] [WP-B2] [WP-B3] [WP-B4] [WP-B5] [WP-B5b] [WP-C1] [WP-C2] [WP-C3…C8]`
+
+All presuppose route β's ζ-descent (`WP-B4`'s "universal root" feeding `WP-B5`'s "transport, det twist,
+and DS4"; `WP-C1/C2`'s descent-faithfulness feeding the six computational specs from a cover-level
+`ζ`). With the route retired they are moot. `[WP-D3c-*]`, `[WP-D3d]`, `[WP-D3a-DOM]`,
+`[WP-D3a-FACTOR]`, `[WP-D3c-N3]` likewise. **Nothing is deleted** — this board is append-only; the
+entries stand as the record of why the route was tried.
+
+## Census at audit time (verified, not copied from the board)
+
+Project-wide `sorry`: **114**. `WeilPairing/Basic.lean` (DS4 register): **7** — `weilPairing` `:49`,
+`weilPairing_over` `:53`, `_add_left` `:111`, `_add_right` `:122`, `_self` `:202`, `_nondegenerate`
+`:270`, `_mul` `:328`. `Picard/SelfAdjointN.lean`: **2** — `:267` the leaf, `:488` the documented
+non-leaf. `GroupScheme/NIsogeny.lean`: 20. `ForMathlib/BuchsbaumEisenbud.lean`: 6 (declared a
+statement-ticket skeleton in its own header).
+
+**No `CLEANUP-*` tickets proposed.** `CLAUDE.md` binds producers out of cleanup/dedup/golf — that is
+fleet work on `main`. The `/develop` cadence rule (§1g) is superseded here by AINTLIB's producer/cleaner
+split.
