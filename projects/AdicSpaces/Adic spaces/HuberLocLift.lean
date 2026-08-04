@@ -516,6 +516,15 @@ private theorem valuation_lt_one_of_isEquiv {S : Type*} [CommRing S] {R : Type*}
   exact absurd h2 (not_le.mpr hs_r)
 
 
+/-- For a valuation `rs`, the induced `vle` is exactly `≤` on values. -/
+private theorem ofValuation_vle_iff {D' : RationalLocData A} {Γ' : Type*}
+    [LinearOrderedCommGroupWithZero Γ'] (rs : Valuation (presheafValue D') Γ') :
+    ∀ a b : presheafValue D', (ValuationSpectrum.ofValuation rs).vle a b ↔ rs a ≤ rs b := by
+  intro a b
+  letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
+  haveI : rs.Compatible := Valuation.Compatible.ofValuation rs
+  exact Valuation.Compatible.vle_iff_le (v := rs) a b
+
 set_option linter.unusedSectionVars false in
 /-- **Huber [Hu2] 3.3(i)**: an element of `presheafValue D'` outside the ring of integral
 elements admits a Spa point valuing it above `1`.
@@ -584,12 +593,7 @@ theorem exists_spa_point_not_vle_one_huber
     exact one_ne_zero
   set rs := (t.comap algB).restrictIdealSingle 1 hW1 with hrs_def
   -- Bridge: `(ofValuation rs).vle a b ↔ rs a ≤ rs b`.
-  have hbr : ∀ a b : presheafValue D', (ValuationSpectrum.ofValuation
-    rs).vle a b ↔ rs a ≤ rs b := by
-    intro a b
-    letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
-    haveI : rs.Compatible := Valuation.Compatible.ofValuation rs
-    exact Valuation.Compatible.vle_iff_le (v := rs) a b
+  have hbr := ofValuation_vle_iff rs
   -- `W a = t(algB a)` definitionally, so the `hW_*` facts are facts about `W = t.comap algB`.
   refine ⟨ValuationSpectrum.ofValuation rs, ?_, ?_⟩
   · exact huber_ofValuation_mem_spa D' x t hW1 hW_le hW_lt_AOO hbr

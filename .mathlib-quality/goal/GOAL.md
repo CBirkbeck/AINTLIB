@@ -14567,3 +14567,32 @@ rather than being done unilaterally.
 **Pilot cost: three builds of a 7-module cone, zero risk taken.** This is what the cheap-cone
 ranking is for — the same experiment on `WedhornCechAcyclicity` (73-module cone) would have cost
 three full revalidations to learn the same thing.
+
+### Correction: Task 3's line-wrapping pushed four proofs back over Task 2's bar
+
+Measuring after the width batch showed **19** actionable over-50 proofs, not the 15 recorded
+earlier. The four additions are all in files the wrapper touched and all sit at 51–54:
+
+| code | target | file |
+|---|---|---|
+| 54 | `genPiece_relOverlap_forward_backward` | `WedhornCechAcyclicity.lean` |
+| 53 | `approx_generation` | `FarguesFontaine/Groebner.lean` |
+| 53 | `resIHom` | `FarguesFontaine/IntervalRing.lean` |
+| 51 | `exists_spa_point_not_vle_one_huber` | `HuberLocLift.lean` |
+
+**The two tasks are in direct tension and I did not anticipate it.** Wrapping one long line produces
+two code lines, so every over-width fix inside a proof body lengthens that proof by the Task-2
+measure. 236 lines were wrapped; four proofs crossed the threshold. "22 → 15" was true when
+measured and is now 19 → 18 after fixing the first of them.
+
+Consequences worth acting on:
+
+* **Re-measure Task 2 after any Task-3 width work in the same files** — the number is not stable
+  across tasks.
+* When wrapping inside a proof that is already near 50, prefer a *different* remedy (extract a
+  helper, shorten a term) over splitting the line, since the split trades one metric for another.
+* `exists_spa_point_not_vle_one_huber` 51 → 46 by lifting `hbr` into `ofValuation_vle_iff`
+  (a general fact: the `vle` induced by a valuation is `≤` on values). The other three each need a
+  single lift too, but of a less convenient shape: a `by_cases` branch whose goal is a large
+  existential (`approx_generation`), a structure-field proof (`resIHom`), and a `have` sitting under
+  several `set`-locals (`genPiece_relOverlap_forward_backward`).
