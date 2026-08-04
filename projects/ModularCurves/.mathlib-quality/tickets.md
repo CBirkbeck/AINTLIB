@@ -36806,3 +36806,22 @@ So:
 Sized against `muNSpecFieldIso`'s own proof (~25 lines of `IsPullback` gymnastics) plus the
 `Γ`/`isoSpec` bookkeeping already done twice this session. **This is where the next session
 starts.**
+
+## [WP-D3c-2c] step 1 landed (2026-08-04) — the torsion schemes are affine, axiom-verified
+
+`WeilPairing/TorsionBaseChange.lean` (new, sorry-free, in the root import):
+
+* `EllipticCurve.isAffine_torsion` — `[IsAffine S] → IsAffine (E.torsion N)`;
+* `EllipticCurve.isAffine_torsion_baseChange` — the same for `(E.baseChange g).torsion N`
+  when the source of `g` is affine.
+
+Both are `isAffine_of_isAffineHom` on `torsionπ`, whose finiteness is `torsionπ_isFinite`
+(the two lines `finiteEtaleOfπ` runs internally, now available as **instances** so that
+`Scheme.isoSpec` fires on all three corners of `torsion_baseChange_isPullback` without
+per-use `haveI`s).
+
+Registering them as instances is the point: the remaining steps of the recipe
+(transport the cartesian square along `isoSpec`, match `pullbackSpecIso k Γ(E[N],⊤) k'`,
+convert back with `ΓSpecIso`) all need `IsAffine` to be found automatically.
+
+Root green at **9723 jobs**.
