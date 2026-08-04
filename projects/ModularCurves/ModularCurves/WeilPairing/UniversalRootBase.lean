@@ -48,4 +48,19 @@ theorem pow_eq_one_of_algebraMap_eq {A : Type u} {K : Type v}
     rw [map_pow, ha, hx, map_one]
   exact IsFractionRing.injective A K h
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-A7.2, primitivity)** …and it has the *same order*: a root of unity descending from
+the fraction field is primitive in the ring exactly when it is primitive in the field.
+
+This is what replaces the clopen primitive-root-locus argument on the scheme side. The
+nondegeneracy of the field-level Weil pairing gives primitivity at the generic point; because
+`A ↪ K` is injective, no separate argument is needed downstairs. -/
+theorem pow_ne_one_of_algebraMap_eq {A : Type u} {K : Type v}
+    [CommRing A] [IsDomain A] [Field K] [Algebra A K] [IsFractionRing A K]
+    {x : K} {a : A} {k : ℕ} (ha : algebraMap A K a = x) (hx : x ^ k ≠ 1) :
+    a ^ k ≠ 1 := by
+  intro h
+  exact hx (by rw [← ha, ← map_pow, h, map_one])
+
 end ModularCurves

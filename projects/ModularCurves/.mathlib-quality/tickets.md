@@ -35929,3 +35929,14 @@ Previously 74 modules were invisible to this check.
 Only **7** of the 95 are on `yRho_representable`'s path (`WeilPairing/Basic.lean`'s six plus
 `weilPairing_torsionMapOfEllHom` in `YRho.lean`) — everything else is off the critical path,
 per `scripts/sorry-roots.lean`.
+
+## [WP-D3d, C5] the primitivity replacement is now a lemma (2026-08-04)
+
+`pow_ne_one_of_algebraMap_eq` (`WeilPairing/UniversalRootBase.lean`, axiom-verified — in fact
+only `propext / Quot.sound`, no choice): a root of unity descending from the fraction field
+of a domain has the **same order** in the ring.
+
+Sits beside the two existing lemmas there (`exists_algebraMap_eq_of_pow_eq_one`,
+`pow_eq_one_of_algebraMap_eq`), so the three together are the whole "root descends to the
+integrally closed base, with its order" package that the DS4 root construction consumes —
+and it is what makes ChatGPT's C5 (the clopen primitive-root locus) unnecessary.
