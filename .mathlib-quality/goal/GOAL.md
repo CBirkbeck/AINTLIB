@@ -16076,3 +16076,98 @@ Stage 5 is written and queued: `hsyz` → `syzygy_relation_of_ker`, and `hdecomp
 `exists_syzygy_decomp_or_ctrl`, the latter absorbing the `hAR_ctrl` restatement by calling
 `exists_ideal_pow_decomp_of_forall_mem` directly. Projected: 100 − 40 − 11 ≈ **49**, clearing
 the bar.
+
+**The `sorry`-in-diff check was measuring the wrong thing.** The stage-3/4 gate reported
+`sorry in diff: 2` on a clean run. Both hits were in **this file** — my own prose about the
+deletion incident, the words "no new `sorry`" and "sorry counts". The check was
+
+```bash
+git diff -U0 | grep -c '^+.*sorry'
+```
+
+— unscoped, so it reads the tracker's markdown as if it were Lean, and substring-matching, so
+it would equally flag `sorry-free`. Scoped and tokenised:
+
+```bash
+git diff -U0 -- '*.lean' | grep -cP '^\+.*(?<![A-Za-z_0-9'\''-])sorry(?![A-Za-z_0-9'\''-])'
+```
+
+Third false positive of this kind in the session (the FJP count, the `sorry`-backed
+docstrings, now this). The pattern is stable enough to state:
+
+> Searching prose for a *code* token will find the word wherever it is discussed, and the
+> places most likely to discuss `sorry` are exactly the comments explaining that there isn't
+> one. Scope to the file types that can contain code, match tokens not substrings, and treat
+> any nonzero count as "look at the lines", never as "it happened".
+
+### `tateAlgebra_flat` CLEARED: 209 → 31
+
+Eight declarations, largest 46:
+
+| decl | c |
+|---|---|
+| `eq_zero_of_mem_all_idealOfDefinition_pow_image` | 4 |
+| `syzygy_relation_of_ker` | 11 |
+| `mem_tateAlgebra_of_filtration_control` | 15 |
+| `isTrivialRelation_of_coeff_decomp` | 23 |
+| `exists_ideal_pow_decomp_of_forall_mem` | 24 |
+| `exists_syzygy_decomp_of_clear_denominators` | 39 |
+| `exists_syzygy_decomp_or_ctrl` | 46 |
+| **target** | **31** |
+
+Five stages. The target had defeated two earlier attempts in this campaign (244 → 222 → 208),
+and the recorded verdict was that intermediate states would score *worse* than the start. That
+was right about the naive route and wrong about the target: what unlocked it was reading the
+file rather than the proof.
+
+**`exists_controlled_decomposition`, 500 lines below, is the same Artin–Rees argument already
+decomposed** — into `…_of_forall_fail` and `…_of_first_failure` with a short dispatcher. Once
+seen, the whole plan followed: mirror that shape, so the two proofs now read alike instead of
+each carrying its own ad-hoc division. It also handed over a free dedup (a verbatim copy of the
+separation argument) and, later, the exact type of `hAR`.
+
+The `set`-chain that looked like a wall cost **one hypothesis per definitional use** — `hg` and
+`hrel`, both `fun _ ↦ rfl` at every call site. Grepping each block for the set-local's name
+listed those uses in advance, so all five crossings were predicted before building.
+
+Over-50 count 73 → 72. Nearest remaining in this file: `Module.Flat.quotient_of_flat_of_saturated`
+at 51 — one line over.
+
+### I extracted a lemma into a file whose own proof inlines it
+
+Scoping the next target, `exists_spa_point_via_restrictToConvex` (Lemma745.lean:437, 158c),
+turned up that it builds the **same object** as the first target cleared this session — the
+`convexGenerated` + `restrictToConvex` + `exists_valuation_extension` construction — line for
+line:
+
+| Lemma745 | Presheaf | step |
+|---|---|---|
+| 500 | 2297 | `set u_max := Units.mk0 g_max hg_ne0` |
+| 504 | 2300 | `set H_gen := ConvexSubgroup.convexGenerated …` |
+| 507 | 2303 | `inv_mem (self_mem_convexGenerated …)` |
+| 512 | 2304 | `set v_r := v₀_A₀.restrictToConvex H_gen hle_A₀` |
+| 528 | 2306 | `ne_of_gt (restrictToConvex_pos_of_mem …)` |
+| 572 | 2329 | `restrictToConvex_le_one` |
+| 579 | 2332 | `isContinuous_of_le_one_and_pow_cofinal` |
+| 593 | 2311 | `exists_valuation_extension` |
+
+Two of its blocks are verbatim inlinings of lemmas that already exist **and are in scope**:
+
+* `hg_bound` (12 lines) is `Valuation.restrictToConvex_le_coe_of_le`, which I extracted this
+  session into `ValuationContinuity.lean` — imported here.
+* `h_cofinal` (6 lines) is `ConvexSubgroup.withZero_pow_cofinal_of_mem_convexGenerated`, which I
+  extracted this session into **Lemma745.lean itself, 350 lines above the inlining**.
+
+The second is the one worth sitting with. I created that lemma to serve `Presheaf.lean`, put it
+in this file because that is where `convexGenerated` lives, and never looked *down* the file to
+see who else needed it.
+
+> Extracting a lemma is only half the job; the other half is finding its existing consumers.
+> Do it in the file you just edited first — proximity is not visibility, and "I wrote this
+> lemma" is precisely the state in which you stop searching for it.
+
+**Also a structural note, not yet acted on.** `exists_continuous_valuation_of_convexGenerated_data`
+sits in `Presheaf.lean`, but `Lemma745.lean` — its second natural consumer — is *upstream* and
+cannot import it. The shared construction belongs in `Lemma745.lean`. That is the
+lemma-in-the-wrong-file pattern: a lemma placed for its first consumer forces every earlier
+consumer to keep its own copy.

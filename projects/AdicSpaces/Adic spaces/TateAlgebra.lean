@@ -2285,6 +2285,118 @@ private theorem isTrivialRelation_of_coeff_decomp
     exact Finset.sum_congr rfl (fun j _ ↦ by ring)
   · exact fun j ↦ hsyz j
 
+/-- An `A₀`-syzygy of the scaled family `g` is an `A`-syzygy of `f`: the scaling factor
+`w ^ N` is a unit, so it cancels. -/
+private theorem syzygy_relation_of_ker
+    (P : PairOfDefinition A) {l k : ℕ} (w : Aˣ)
+    (f : Fin l → A) (N : ℕ) (g : Fin l → P.A₀)
+    (hg : ∀ i, P.A₀.subtype (g i) = (w : A) ^ N * f i)
+    (relMap₀ : (Fin l → P.A₀) →ₗ[P.A₀] P.A₀)
+    (hrel : ∀ r, relMap₀ r = ∑ i, g i * r i)
+    (s₀ : Fin k → ↥(LinearMap.ker relMap₀)) (j : Fin k) :
+    ∑ i, f i * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) = 0 := by
+  have hw_unit : IsUnit ((w : A) ^ N) := w.isUnit.pow N
+  have hker : relMap₀ (s₀ j : Fin l → P.A₀) = 0 := (s₀ j).prop
+  have h_A := congr_arg P.A₀.subtype hker
+  simp only [hrel, map_sum, map_zero, map_mul, Subring.coe_subtype, hg] at h_A
+  have h_scaled : (↑w : A) ^ N *
+      ∑ i, f i * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) = 0 := by
+    trans ∑ i, ((↑w : A) ^ N * f i) *
+      P.A₀.subtype ((s₀ j : Fin l → ↥P.A₀) i)
+    · rw [Finset.mul_sum]; exact Finset.sum_congr rfl (fun i _ ↦ by ring)
+    · exact h_A
+  exact (hw_unit.mul_left_cancel (by rw [h_scaled, mul_zero])).symm
+
+/-- The diagonal step: for each multi-index, either the coefficients vanish to all orders (so
+the decomposition is trivial), or there is a smallest failing level `q`, and the decomposition
+is taken at level `q - 1` — controlled by Artin–Rees — or unconditionally when `q = 0`.
+
+This mirrors `exists_controlled_decomposition`, which does the same for a single element
+against ideal generators. -/
+private theorem exists_syzygy_decomp_or_ctrl
+    (P : PairOfDefinition A) {l k : ℕ} (w : Aˣ)
+    (f : Fin l → A) (N : ℕ) (g : Fin l → P.A₀)
+    (hg : ∀ i, P.A₀.subtype (g i) = (w : A) ^ N * f i)
+    (relMap₀ : (Fin l → P.A₀) →ₗ[P.A₀] P.A₀)
+    (hrel : ∀ r, relMap₀ r = ∑ i, g i * r i)
+    (s₀ : Fin k → ↥(LinearMap.ker relMap₀))
+    (hs₀ : Submodule.span P.A₀ (Set.range s₀) = ⊤)
+    (x : Fin l → ↥(TateAlgebra A))
+    (hcoord : ∀ s : Fin 1 →₀ ℕ, ∑ i, f i * (x i).val s = 0)
+    (hw_event : ∀ a : A, ∀ᶠ n in Filter.atTop, (w : A) ^ n * a ∈ P.A₀)
+    [IsNoetherianRing P.A₀]
+    (k₀ : ℕ)
+    (hAR : ∀ nn ≥ k₀, (P.I ^ nn • ⊤ ⊓ LinearMap.ker relMap₀ :
+        Submodule P.A₀ (Fin l → P.A₀)) =
+      P.I ^ (nn - k₀) • (P.I ^ k₀ • ⊤ ⊓ LinearMap.ker relMap₀))
+    (n : Fin 1 →₀ ℕ) :
+    ∃ c₀ : Fin k → A,
+      (∀ i, (x i).val n = ∑ j, c₀ j * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i)) ∧
+      (∀ m, (∀ i, (x i).val n ∈
+          Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀)) →
+        ∀ j, c₀ j ∈ Subtype.val '' ((P.I ^ m : Ideal P.A₀) : Set P.A₀)) := by
+  -- The set of valid levels S = {m | ∀ i, (x i).val n ∈ image(I^{m+k₀})} is downward
+  -- closed (hyp(m+1) → hyp(m) since I^{m+1+k₀} ⊆ I^{m+k₀}).
+  -- Case split: either all levels valid (components = 0) or some level fails.
+  by_cases h_all_levels :
+      ∀ m, ∀ i, (x i).val n ∈
+        Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀)
+  · -- All levels valid: each component ∈ ⋂ image(I^{m+k₀}) = {0} (by T2).
+    have h_zero : ∀ i, (x i).val n = 0 := fun i ↦
+      eq_zero_of_mem_all_idealOfDefinition_pow_image P (fun m ↦
+        Set.image_mono (Ideal.pow_le_pow_right (by omega)) (h_all_levels m i))
+    refine ⟨0, fun i ↦ by simp [h_zero i],
+      fun m _ j ↦ ⟨0, (P.I ^ m).zero_mem, by simp⟩⟩
+  · -- Some level fails. Find the smallest failing level q.
+    push Not at h_all_levels
+    obtain ⟨m_fail, hm_fail⟩ := h_all_levels
+    -- The set of failing levels is upward closed: if hyp(m) fails,
+    -- then hyp(m') fails for m' ≥ m (contrapositively, hyp(m'+1) → hyp(m')).
+    -- So there exists a smallest failing level.
+    have h_fail_exists : ∃ m, ∃ i, (x i).val n ∉
+        Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀) :=
+      ⟨m_fail, hm_fail⟩
+    -- Nat.find gives the smallest failing level q.
+    classical
+    set q := Nat.find h_fail_exists with hq_def
+    have hq_fail := Nat.find_spec h_fail_exists
+    -- For m < q, the hypothesis holds (by minimality of q).
+    have hq_valid : ∀ m < q, ∀ i, (x i).val n ∈
+        Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀) := by
+      intro m hm
+      by_contra h; push Not at h
+      exact Nat.find_min h_fail_exists hm h
+    -- For m ≥ q, the hypothesis fails (upward closure).
+    have hq_fail_above : ∀ m, q ≤ m → ¬(∀ i, (x i).val n ∈
+        Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀)) := by
+      intro m hm hall
+      obtain ⟨i₀, hi₀⟩ := hq_fail
+      exact hi₀ (Set.image_mono (Ideal.pow_le_pow_right (by omega)) (hall i₀))
+    -- Case split on q: either q = 0 or q ≥ 1.
+    by_cases hq0 : q = 0
+    · -- q = 0: the filtration hypothesis fails at every level, so control is vacuous
+      -- and only the unconditional denominator-clearing decomposition is needed.
+      obtain ⟨c₀, hc₀⟩ := exists_syzygy_decomp_of_clear_denominators P w hw_event f x
+        hcoord N g hg relMap₀ hrel s₀ hs₀ n
+      exact ⟨c₀, hc₀, fun m hm _ ↦ absurd hm (hq_fail_above m (by omega))⟩
+    · -- q ≥ 1: use hAR_ctrl at level q - 1.
+      have hq_hyp : ∀ i, (x i).val n ∈
+          Subtype.val '' ((P.I ^ ((q - 1) + k₀) : Ideal P.A₀) : Set P.A₀) :=
+        hq_valid (q - 1) (by omega)
+      obtain ⟨c₀, hc₀_mem, hc₀_decomp⟩ :=
+        exists_ideal_pow_decomp_of_forall_mem P w f x hcoord N g hg relMap₀ hrel
+          s₀ hs₀ k₀ hAR n (q - 1) hq_hyp
+      refine ⟨c₀, hc₀_decomp, fun m hm j ↦ ?_⟩
+      -- Need: c₀ j ∈ image(I^m).
+      -- We have: c₀ j ∈ image(I^{q-1}).
+      -- If m ≤ q-1: I^{q-1} ⊆ I^m, so image(I^{q-1}) ⊆ image(I^m). Done.
+      -- If m ≥ q: hypothesis fails, contradiction.
+      by_cases hmq : m < q
+      · -- m ≤ q-1: use monotonicity
+        exact Set.image_mono (Ideal.pow_le_pow_right (by omega)) (hc₀_mem j)
+      · -- m ≥ q: hypothesis fails, contradiction
+        exact absurd hm (hq_fail_above m (by omega))
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **Flatness of the Tate algebra** (`A⟨X⟩` is flat over noetherian `A`).
 
@@ -2335,132 +2447,14 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
   obtain ⟨k, s₀, hs₀⟩ := Submodule.fg_iff_exists_fin_generating_family.mp
     (IsNoetherian.noetherian (⊤ : Submodule P.A₀ ↥K₀))
   -- Step 4: A₀-syzygies give A-syzygies of f.
-  have hsyz : ∀ j : Fin k, ∑ i, f i * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) = 0 := by
-    intro j
-    have hker : relMap₀ (s₀ j : Fin l → P.A₀) = 0 := (s₀ j).prop
-    have h_A := congr_arg P.A₀.subtype hker
-    simp only [relMap₀, LinearMap.coe_mk, AddHom.coe_mk, map_sum, map_zero,
-      map_mul, Subring.coe_subtype] at h_A
-    have h_scaled : (↑w : A) ^ N *
-        ∑ i, f i * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) = 0 := by
-      trans ∑ i, ((↑w : A) ^ N * f i) *
-        P.A₀.subtype ((s₀ j : Fin l → ↥P.A₀) i)
-      · rw [Finset.mul_sum]; exact Finset.sum_congr rfl (fun i _ ↦ by ring)
-      · exact h_A
-    exact (hw_unit.mul_left_cancel (by rw [h_scaled, mul_zero])).symm
+  have hsyz : ∀ j : Fin k, ∑ i, f i * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) = 0 :=
+    fun j ↦ syzygy_relation_of_ker P w f N g (fun _ ↦ rfl) relMap₀ (fun _ ↦ rfl) s₀ j
   -- Step 5: Artin-Rees over A₀.
   obtain ⟨k₀, hAR⟩ := Ideal.exists_pow_inf_eq_pow_smul P.I K₀
   -- Step 6: For each n and m, if all components ∈ image(I^{m+k₀}), get controlled decomp.
   -- This is the core Artin-Rees argument.
-  have hAR_ctrl : ∀ n : Fin 1 →₀ ℕ, ∀ m : ℕ,
-      (∀ i, (x i).val n ∈ Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀)) →
-      ∃ c₀ : Fin k → A, (∀ j, c₀ j ∈
-          Subtype.val '' ((P.I ^ m : Ideal P.A₀) : Set P.A₀)) ∧
-        ∀ i, (x i).val n = ∑ j, c₀ j * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) :=
-    fun n m hn ↦ exists_ideal_pow_decomp_of_forall_mem P w f x hcoord N g (fun _ ↦ rfl)
-      relMap₀ (fun _ ↦ rfl) s₀ hs₀ k₀ hAR n m hn
-  -- Step 7: Assemble the IsTrivialRelation witness.
-  -- For each n, hdecomp_A gives a decomposition over the A₀-generators.
-  -- For convergence, hAR_ctrl gives controlled coefficients.
-  -- We use the diagonal construction: for each n, pick the best available level.
-  -- The hAR_ctrl decomposition at level m gives c₀ ∈ image(I^m) satisfying the decomp.
-  -- For each n, we use the level-0 decomposition (from hdecomp_A below), and
-  -- prove convergence by showing that for each m, cofinitely many n admit
-  -- the level-m decomposition (from hAR_ctrl), hence the level-0 choice
-  -- coincides with a controlled choice.
-  --
-  -- ACTUALLY: we cannot control the `choose`-based coefficients.
-  -- Instead, for each n, we directly use hAR_ctrl at the appropriate level.
-  -- For n where all components ∈ image(I^{0+k₀}), use hAR_ctrl at m=0.
-  -- For other n (finitely many), use any decomposition (from hdecomp below).
-  --
-  -- KEY: we use hAR_ctrl(n, 0) for ALL n where components are in image(I^{k₀}).
-  -- For the finitely many other n, use any A-decomposition.
-  -- The resulting c' satisfies: for m, cofinitely many n have c'(n)(j) ∈ image(I^m)
-  -- because hAR_ctrl(n, m) gives image(I^m)-coefficients (a DIFFERENT decomposition,
-  -- but the suffices only needs EXISTENCE of c' with both properties, not that
-  -- a specific c' satisfies both).
-  --
-  -- WAIT: the suffices asks for ∃ c', (∀ n i, decomp(c')) ∧ (∀ j, restricted(c')).
-  -- A SINGLE c' must satisfy BOTH. We can't use different c' for different m.
-  --
-  -- The solution: for each n, define c'(n) from hAR_ctrl at some level q(n).
-  -- For cofinitely many n, q(n) is large, giving c'(n)(j) ∈ image(I^{q(n)}).
-  -- As q(n) → ∞, the coefficients → 0.
-  --
-  -- Define q(n) = max {m | ∀ i, (x i).val n ∈ image(I^{m+k₀})} (capped or defaulted).
-  -- Use hAR_ctrl(n, q(n)) for the decomposition.
-  -- For finitely many n where no level works, use arbitrary decomposition.
-  --
-  -- This is the DIAGONAL CONSTRUCTION.
-  -- For each n, we define c'(n) by choosing from the highest available level.
-  have hdecomp_or_ctrl : ∀ n : Fin 1 →₀ ℕ,
-      ∃ c₀ : Fin k → A,
-        (∀ i, (x i).val n =
-          ∑ j, c₀ j * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i)) ∧
-        (∀ m, (∀ i, (x i).val n ∈
-            Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀)) →
-          ∀ j, c₀ j ∈ Subtype.val '' ((P.I ^ m : Ideal P.A₀) : Set P.A₀)) := by
-    intro n
-    -- The set of valid levels S = {m | ∀ i, (x i).val n ∈ image(I^{m+k₀})} is downward
-    -- closed (hyp(m+1) → hyp(m) since I^{m+1+k₀} ⊆ I^{m+k₀}).
-    -- Case split: either all levels valid (components = 0) or some level fails.
-    by_cases h_all_levels :
-        ∀ m, ∀ i, (x i).val n ∈
-          Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀)
-    · -- All levels valid: each component ∈ ⋂ image(I^{m+k₀}) = {0} (by T2).
-      have h_zero : ∀ i, (x i).val n = 0 := fun i ↦
-        eq_zero_of_mem_all_idealOfDefinition_pow_image P (fun m ↦
-          Set.image_mono (Ideal.pow_le_pow_right (by omega)) (h_all_levels m i))
-      refine ⟨0, fun i ↦ by simp [h_zero i],
-        fun m _ j ↦ ⟨0, (P.I ^ m).zero_mem, by simp⟩⟩
-    · -- Some level fails. Find the smallest failing level q.
-      push Not at h_all_levels
-      obtain ⟨m_fail, hm_fail⟩ := h_all_levels
-      -- The set of failing levels is upward closed: if hyp(m) fails,
-      -- then hyp(m') fails for m' ≥ m (contrapositively, hyp(m'+1) → hyp(m')).
-      -- So there exists a smallest failing level.
-      have h_fail_exists : ∃ m, ∃ i, (x i).val n ∉
-          Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀) :=
-        ⟨m_fail, hm_fail⟩
-      -- Nat.find gives the smallest failing level q.
-      classical
-      set q := Nat.find h_fail_exists with hq_def
-      have hq_fail := Nat.find_spec h_fail_exists
-      -- For m < q, the hypothesis holds (by minimality of q).
-      have hq_valid : ∀ m < q, ∀ i, (x i).val n ∈
-          Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀) := by
-        intro m hm
-        by_contra h; push Not at h
-        exact Nat.find_min h_fail_exists hm h
-      -- For m ≥ q, the hypothesis fails (upward closure).
-      have hq_fail_above : ∀ m, q ≤ m → ¬(∀ i, (x i).val n ∈
-          Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀)) := by
-        intro m hm hall
-        obtain ⟨i₀, hi₀⟩ := hq_fail
-        exact hi₀ (Set.image_mono (Ideal.pow_le_pow_right (by omega)) (hall i₀))
-      -- Case split on q: either q = 0 or q ≥ 1.
-      by_cases hq0 : q = 0
-      · -- q = 0: the filtration hypothesis fails at every level, so control is vacuous
-        -- and only the unconditional denominator-clearing decomposition is needed.
-        obtain ⟨c₀, hc₀⟩ := exists_syzygy_decomp_of_clear_denominators P w hw_event f x
-          hcoord N g (fun i ↦ rfl) relMap₀ (fun r ↦ rfl) s₀ hs₀ n
-        exact ⟨c₀, hc₀, fun m hm _ ↦ absurd hm (hq_fail_above m (by omega))⟩
-      · -- q ≥ 1: use hAR_ctrl at level q - 1.
-        have hq_hyp : ∀ i, (x i).val n ∈
-            Subtype.val '' ((P.I ^ ((q - 1) + k₀) : Ideal P.A₀) : Set P.A₀) :=
-          hq_valid (q - 1) (by omega)
-        obtain ⟨c₀, hc₀_mem, hc₀_decomp⟩ := hAR_ctrl n (q - 1) hq_hyp
-        refine ⟨c₀, hc₀_decomp, fun m hm j ↦ ?_⟩
-        -- Need: c₀ j ∈ image(I^m).
-        -- We have: c₀ j ∈ image(I^{q-1}).
-        -- If m ≤ q-1: I^{q-1} ⊆ I^m, so image(I^{q-1}) ⊆ image(I^m). Done.
-        -- If m ≥ q: hypothesis fails, contradiction.
-        by_cases hmq : m < q
-        · -- m ≤ q-1: use monotonicity
-          exact Set.image_mono (Ideal.pow_le_pow_right (by omega)) (hc₀_mem j)
-        · -- m ≥ q: hypothesis fails, contradiction
-          exact absurd hm (hq_fail_above m (by omega))
+  have hdecomp_or_ctrl := fun n ↦ exists_syzygy_decomp_or_ctrl P w f N g (fun _ ↦ rfl)
+    relMap₀ (fun _ ↦ rfl) s₀ hs₀ x hcoord hw_event k₀ hAR n
   choose c' hc'_decomp hc'_filt using hdecomp_or_ctrl
   exact isTrivialRelation_of_coeff_decomp f x
     (fun i j ↦ P.A₀.subtype ((s₀ j : Fin l → P.A₀) i)) hsyz c' hc'_decomp
