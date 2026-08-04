@@ -38176,3 +38176,30 @@ proof, and it is the *whole* of what step 4 lacks.
 
 **Grep the conclusion first** (twice bitten today): before widening, check that no
 `_comp_algHom` variant already exists.
+
+## [WP-D3d step 4] THE BRIDGE IS LANDED (2026-08-04) — axiom-verified
+
+Three widenings, each free once the previous was in place, and the cascade bottomed out one level
+deeper than predicted:
+
+* **`ΓSpecIso_hom_appTop_specMap_comp`** — was stated for an **endomorphism** `φ : R ⟶ R` of a single
+  `CommRingCat` object; widened to `φ : R ⟶ R'`. **This was the real obstruction**: the `isDefEq`
+  timeouts higher up were all Lean trying to unify `R'` with `R` through this lemma. Its proof uses
+  `Scheme.ΓSpecIso_naturality`, which is already general, so the widening cost one line;
+* **`algHomEquivSpecOver_comp_algHom`** — postcomposing a fibre point with any `φ : R →ₐ[k] R'` is
+  precomposition with `Spec φ`; the `AlgEquiv` version is now derived from it by instantiation;
+* **`muNAlgebraFibreEquiv_comp_algHom`** — ***WP-D3d step 4's bridge***: postcomposing with `φ` applies
+  `φ` to the associated root of unity. Neither bijectivity nor `R' = R` is needed.
+
+`muNAlgebraFibreEquiv_comp_algEquiv` is left with its own four-line proof rather than derived: the two
+statements apply `σ` through different coercion paths (`AlgEquiv` vs `AlgHom`) and reconciling that costs
+more than the proof. Noted in-file.
+
+**Step 4 is now an assembly of proved results**: push `fieldPairingValue`'s value up to
+`AlgebraicClosure K` with `muNAlgebraFibreEquiv_comp_algHom`, identify it with the Silverman pairing by
+`fieldWeilPairingHom_spec`, apply `fieldWeilPairing_det_of_galois`, return by injectivity of
+`algebraMap K (AlgebraicClosure K)`, and descend with `algebraMap_factorRootOfUnityDescend`. That
+completes WP-D3d, and with `nonempty_weilPairing_of_cover_of_values` closes DS4's first two register
+entries for invertible `N`.
+
+Root green at **9733 jobs**; census unchanged (7, all the Weil register).
