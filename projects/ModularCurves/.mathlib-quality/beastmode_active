@@ -1,1 +1,1 @@
-FOCUS: route beta step 1 ASSEMBLED (nonempty_weilPairing_of_fullLevel: full level structure + N invertible + root => DS4 def/_over). NEXT: axiom-verify, add to root, commit; then measure the descent step (GL2-equivariance of this pairing).
+FOCUS: route beta step 2 DONE (fullLevelPairing named + _over + _glSmul cocycle law). NEXT: the frame-bundle descent — the cover S-prime with a tautological level structure and the GL2-torsor structure of its kernel pair.

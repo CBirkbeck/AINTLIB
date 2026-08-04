@@ -37158,3 +37158,43 @@ register's `sorry` in its stated generality is gated on AG-CD and is *not* what 
 needs; the register entries would have to carry `NIsInvertible S N` (or be stated over ℚ-algebras,
 as their consumers are) for the reachable construction to discharge them. That is a **statement**
 decision and therefore the user's, so it is recorded here rather than acted on.
+
+## [route β] step 2 is DONE — the pairing's determinant law is a THEOREM (2026-08-04)
+
+`WeilPairing/FullLevelPairing.lean` (axiom-verified), on top of the step-1 entry point:
+
+* **`isPullback_constSchemeπ_of_fullLevel`** — the torsion square transported along the level
+  trivialisation, named separately from `fullLevelSqIso` so `IsPullback.isoPullback_inv_fst/_snd`
+  are available downstream (the refactor that unblocked the computation rules).
+* **`constSchemeSqIso_inv_ι`** (`GroupScheme/ConstSchemeSquare.lean`) and
+  **`fullLevelSqIso_inv_ι`** — the computation rules: the `(v, w)`-th copy of `S` is the pair of
+  torsion sections labelled `v` and `w`. Both proved by `pullback.hom_ext` on the two projections.
+* **`fullLevelSqIso_glSmul_inv` / `_hom`** — re-marking the level structure by `g` composes the
+  square trivialisation with the diagonal action `constSchemeMap (gl2Both N g)`. The one-leg
+  statement is the tree's `fullLevelIso_glSmul`; the square version is checked on the coproduct
+  inclusions.
+* **`fullLevelPairing`** — the pairing **named as a definition** (per the architectural correction):
+  `(fullLevelSqIso hinv L).hom ≫ detConstMor N ≫ rootSplitting N ζ`, with
+  **`fullLevelPairing_over`**.
+* **`fullLevelPairing_glSmul`** — ***the determinant law of the pairing***:
+
+  `e_{g • L, ζ ^ det g} = e_{L, ζ}`.
+
+  `fullLevelSqIso_glSmul_hom` moves the re-marking onto the constant scheme, where WP-A4
+  (`constSchemeMap_gl2Both_comp_detConstMor_rootSplitting`) converts the diagonal `GL₂`-action into
+  the `det g`-th power of the root. Note the direction: the pairing is invariant only when `ζ` is
+  *simultaneously* twisted — which is the precise sense in which the root must transform by `det`,
+  and it is now a theorem rather than the hypothesis `hdet`.
+
+### The remaining gap, restated
+
+For the descent from the frame bundle, what is left is **geometric**, not arithmetic:
+
+1. the frame bundle `S' = Isom((ℤ/N)², E[N])` as a scheme over `S`, with its *tautological* level
+   structure and the fact that `S' → S` is a `GL₂(ℤ/N)`-torsor (so `S' ×_S S' ≅ S' × GL₂`);
+2. a root `ζ` on `S'` with `g^*ζ = ζ^{det g}` — where the componentwise/generic-point construction
+   (WP-D3d) and `fieldWeilPairing_det_of_galois` do their work;
+3. `fullLevelPairing` on `S'` then descends by `WeilPairingLocalData` because (1) turns the cocycle
+   into `fullLevelPairing_glSmul`, which is proved.
+
+Root green at 9726 jobs.

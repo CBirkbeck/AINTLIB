@@ -74,6 +74,23 @@ noncomputable def constSchemeSqIso :
   (isPullback_constSchemeMapAlong (S := S) (constSchemeπ S A) B).isoPullback.symm.trans
     (constSchemeSigmaIso S A B)
 
+/-- The computation rule for `constSchemeSqIso`: the `(b, a)`-th copy of `S` is the pair of the
+`b`-th and `a`-th copies. Checked on the two pullback projections. -/
+theorem constSchemeSqIso_inv_ι (b : B) (a : A) :
+    Sigma.ι (fun _ : B × A => S) (b, a) ≫ (constSchemeSqIso S A B).inv =
+      pullback.lift (Sigma.ι (fun _ : B => S) b) (Sigma.ι (fun _ : A => S) a)
+        (by simp [constSchemeπ]) := by
+  refine pullback.hom_ext ?_ ?_
+  · rw [Category.assoc, constSchemeSqIso, Iso.trans_inv, Iso.symm_inv, Category.assoc,
+      IsPullback.isoPullback_hom_fst, pullback.lift_fst, constSchemeSigmaIso]
+    simp only [Iso.symm_inv, Sigma.ι_desc_assoc, Sigma.ι_desc, Category.assoc]
+    rw [ι_constSchemeMapAlong]
+    simp [constSchemeπ]
+  · rw [Category.assoc, constSchemeSqIso, Iso.trans_inv, Iso.symm_inv, Category.assoc,
+      IsPullback.isoPullback_hom_snd, pullback.lift_snd, constSchemeSigmaIso]
+    simp only [Iso.symm_inv, Sigma.ι_desc_assoc, Sigma.ι_desc, Category.assoc]
+    simp [constSchemeπ]
+
 /-- …and it is an isomorphism over `S`. -/
 theorem constSchemeSqIso_hom_π :
     (constSchemeSqIso S A B).hom ≫ constSchemeπ S (B × A) =
