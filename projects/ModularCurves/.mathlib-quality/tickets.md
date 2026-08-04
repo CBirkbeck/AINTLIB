@@ -36584,3 +36584,34 @@ compatibility as a lemma *about* `muNCarrierRingEquiv` and `algebraMap`, rather 
 re-derive the whole equivalence in the algebra category.
 
 Root green at **9722 jobs**.
+
+### [WP-D3c-2b-ALG] the algebra compatibility — exact statement and input
+- **Status**: open · **File**: `WeilPairing/MuNBaseChange.lean` · **Depends on**: none
+- **Statement to prove**:
+
+  ```
+  muNCarrierRingEquiv k N
+      (((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫
+        (muNπ (Spec (CommRingCat.of k)) N).appTop).hom a)
+    = AdjoinRoot.of ((X : k[X]) ^ N - 1) (algebraMap k k[X] a)          for all a : k
+  ```
+
+  i.e. `muNCarrierRingEquiv` intertwines the `k`-algebra structure that `finiteEtaleOfπ`
+  installs on the carrier with `AdjoinRoot.of` on the model. That map — the composite
+  `(ΓSpecIso k).inv ≫ (muNπ).appTop` — is *literally* the `letI` in `finiteEtaleOfπ`
+  (`WeilPairing/EtaleDescent.lean:104`), so proving this is what lets the carrier equivalence
+  be re-read as a `≃ₐ[k]` wherever that `letI` is in scope.
+- **The input is `muNSpecFieldIso_struct`** (`GroupScheme/MuN.lean:1218`):
+  `(muNSpecFieldIso k N).hom ≫ Spec.map (ofHom (AdjoinRoot.of _)) = muNπ (Spec k) N`.
+  Apply `Scheme.Hom.appTop` (contravariant, so `(f ≫ g).appTop = g.appTop ≫ f.appTop`) to get
+  `(muNπ).appTop = (Spec.map (ofHom (AdjoinRoot.of _))).appTop ≫ (muNSpecFieldIso k N).hom.appTop`,
+  then push through `Scheme.ΓSpecIso`'s naturality (`Scheme.ΓSpecIso_naturality`, the same
+  lemma `isStandardSmoothOfRelativeDimension_specMap_appTop` uses in
+  `ForMathlib/SmoothDescentScheme.lean:85`).
+- **Watch the direction**: `muNCarrierRingEquiv` is built from
+  `Scheme.Γ.mapIso (muNSpecFieldIso k N).symm.op`, so its underlying map is
+  `(muNSpecFieldIso k N).inv.appTop`-flavoured; `muNSpecFieldIso_struct` is stated for `.hom`.
+  Compose with `Iso.hom_inv_id` rather than trying to match directly.
+- **Then** WP-D3c-2b closes: `quotSpanBaseChange` + `map_X_pow_sub_one` transport the model,
+  `CommAlgCat.FiniteEtale.isoMk` packages it, and the `μ_N` side of the field-change transport
+  is done.
