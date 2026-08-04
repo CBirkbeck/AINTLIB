@@ -38018,3 +38018,31 @@ in-file.
    det law applies, and `algebraMap_rootOfUnityDescend` transports the identity back down.
 
 Root green at **9731 jobs**; census unchanged (7, all the Weil register).
+
+## [WP-D3a-FACTOR] BOARD ERROR: this was recorded as done, but it is not stated anywhere (2026-08-04)
+
+Grepping for the conclusion (lesson learned earlier this session) shows **no theorem asserting that each
+factor `A ⧸ p` is an integrally closed domain**. What exists is the two *ends* of the argument:
+
+* `ForMathlib/StandardSmoothIntegrallyClosed.lean` —
+  `isIntegrallyClosed_of_isStandardSmoothOfRelativeDimension_one`: a **domain** standard smooth of
+  relative dimension 1 over a field is integrally closed;
+* `ForMathlib/SmoothCurveComponents.lean` —
+  `exists_isLocalization_away_quotient_minimalPrime`: for `p ∈ minimalPrimes A`, `A ⧸ p` is a
+  localization of `A` **away from an idempotent**.
+
+The join is missing. It is small — route 2 of the old `[WP-D3a-FACTOR]` entry, now with both ends
+proved:
+
+  `p ∈ minimalPrimes A` ⟹ `p.IsPrime` ⟹ `IsDomain (A ⧸ p)`;
+  `IsLocalization.Away e (A ⧸ p)` + `Algebra.IsStandardSmoothOfRelativeDimension.localization_away`
+  (mathlib, already used in `Moduli/LevelThreeSmooth.lean`) ⟹ `A ⧸ p` is standard smooth of relative
+  dimension 1 over `k`;
+  then `isIntegrallyClosed_of_isStandardSmoothOfRelativeDimension_one`.
+
+**This is WP-D3d's step 1 and it must be written before steps 2–4 can be assembled** — `rootOfUnityDescend`
+needs `[IsIntegrallyClosed A]` on each factor. Estimated **20–40 lines**, no new mathlib input.
+
+*Why the board was wrong*: the earlier entry recorded the *recommendation* ("route 2 — its missing
+ingredient is bookkeeping with lemmas that exist") and a later summary read that as completion. When a
+ticket's status is asserted, grep its conclusion before relying on it.
