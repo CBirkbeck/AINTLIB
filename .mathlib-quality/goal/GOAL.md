@@ -14732,3 +14732,64 @@ nothing in its statement mentions `A`'s topology. Copying the parent's binder bl
 
 Remaining for this target: the four `rcases` bullets (26/13/13/19, −67) and then
 `hsplit`/`hF_alg`/`heq_s` → ~46.
+
+### Phase 3 attempted and reverted — and it confirms the `set`-local rule from the other direction
+
+The four `rcases` bullets (26/13/13/19) extract structurally: same signature, same conclusion
+`∃ y ∈ locSubring OD.P OD.T OD.s, F (divByS (p * q) DII.s) = OD.coeRingHom y`, differing only in
+which of `hk_p`/`hk_q` carries the `f`. Two attempts, both red, both informative:
+
+1. **`OD` abstract loses defeqs the bodies rely on.** In the parent `OD` is a `set`-local for
+   `unitCover_overlapDatum_B D₀ f`, so `OD.P` *is* `presheafValue_concretePair D₀` and `1 ∈ OD.T`
+   holds by `unitCoUnit_inter_one_mem`. Abstract, neither is available:
+   `hc_p : c_p ∈ (presheafValue_concretePair D₀).A₀` no longer matches `c_p ∈ OD.P.A₀`.
+2. **`subst hOD` + `set OD := …` — the fix that worked for `ι` — is *unsafe here*.** `F`'s type is
+   `Localization.Away DII.s →+* presheafValue OD`, i.e. **another binder's type mentions `OD`**.
+   `set` re-folds it and desynchronises the binder from the hypothesis: `hu : IsUnit (F✝ …)` against
+   an expected `IsUnit (F …)`. This is precisely the `g₀`/`hg₀` failure from `TateAlgebra`, hit from
+   the opposite direction, and it confirms the rule as stated: *`subst`+`set` only when no other
+   binder's type mentions the local; otherwise keep it opaque and pass the consumed facts.*
+
+**So the next attempt should not touch `OD` at all.** State the hypotheses in `OD` terms and let the
+caller's defeq discharge them:
+
+```lean
+(hc_p : c_p ∈ OD.P.A₀) (hc_q : c_q ∈ OD.P.A₀) (hone : (1 : presheafValue D₀) ∈ OD.T)
+```
+
+The caller passes its existing `hc_p`, `hc_q` and `unitCoUnit_inter_one_mem _ _` — all defeq in the
+caller, none defeq under an abstract `OD`. That is three facts, against the two failed attempts'
+attempts to restore the whole definition.
+
+Also recorded: a signature fragment shared by six lemmas — the Phase-2 pair reuse the same `OD`/`F`
+binder block — so a whole-file `str.replace` scoped to "the four case lemmas" silently hit six. The
+count assertion caught it before anything was written; patch by locating each lemma by name.
+
+Reverted to the Phase-2 state (target at 130); tree matches `4d68fe048`.
+
+### Phase 3 + 4: `unitCover_relOverlap_forward_witness` 130 → 62
+
+The fact-passing form the previous entry prescribed worked. The four `rcases` bullets became
+`unitCover_witness_case_{pq,pFq,pqF,pFqF}` (25 / 12 / 12 / 18), each taking the three OD-facts
+
+```lean
+(hc_p : c_p ∈ OD.P.A₀) (hc_q : c_q ∈ OD.P.A₀) (hone : (1 : presheafValue D₀) ∈ OD.T)
+```
+
+plus a fourth the first attempt missed — `hbb : D₀.canonicalMap f * D₀.canonicalMap f ∈ OD.T` —
+and the caller discharges all four with the terms it already has
+(`unitCoUnit_inter_one_mem _ _`, `unitCoUnit_inter_bb_mem _ _`). Nothing about `OD` is restored;
+`OD` stays abstract throughout, which is exactly what makes it work where `subst`+`set` could not.
+
+Then `hsplit` → `divByS_mul_eq` (a general fact, reusable) and `heq_s` →
+`unitCover_overlapDatum_B_s_eq`. **217 → 62 overall across four phases.**
+
+**Why the fact-passing form beat definition-restoring.** Two attempts tried to give the lemma
+`OD`'s definition back (`hOD` + `subst` + `set`). Both failed, the second because `F`'s type is
+`Localization.Away DII.s →+* presheafValue OD` — another binder mentions `OD`, so `set` re-folded it
+and desynchronised `hu : IsUnit (F✝ …)`. Passing four small membership facts instead is both smaller
+and immune: an abstract `OD` cannot desynchronise anything.
+
+Left at 62: `hF_alg` (5) is the only remaining real unit, and it needs `F`'s `set`-local definition
+passed — the same shape, so tractable. The rest is eight 3-4 line `have`s whose statements are
+longer than their proofs; compressing those is metric-work, not decomposition.
