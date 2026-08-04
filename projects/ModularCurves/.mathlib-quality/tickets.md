@@ -37293,3 +37293,18 @@ needed, since `fullLevelHom L'` already sends the `j`-th standard basis vector t
 point of `L'`. Then, on each clopen piece where that matrix is a constant `g`, identify
 `L' = glSmul g L` (`Sigma.hom_ext` plus the linearity of `v ↦ v₀P + v₁Q` built into
 `fullLevelHom`), and `fullLevelPairing_glSmul` closes `hdet` there.
+
+### [route β] the transition itself (2026-08-04)
+
+* **`levelBasisPt`** (+ `_torsionπ`) — the `j`-th basis point of a level structure as a section of
+  the torsion: the image of the `j`-th standard vector under `fullLevelHom`. No `pointToTorsion`
+  plumbing needed.
+* **`levelTransitionCols`** — the transition between two full level bases as the locally constant
+  *pair of columns* (the coordinate vectors of `L'`'s basis points in the basis `L`). Local
+  constancy is free, and the pair form is what `detFun` consumes directly.
+* `levelTransitionCols_self` — the transition of a basis with itself is the identity pair.
+
+**Remaining for `hdet`**: (a) read the pair of columns as a matrix and show it is invertible
+(pointwise, from `fullLevelFibreMap_bijective`); (b) on each clopen piece where it is a constant
+`g`, identify `L' = glSmul g L`; (c) apply `fullLevelPairing_glSmul`. Then the only arithmetic
+input left is the root `ζ` with `g^*ζ = ζ^{det g}` (WP-D3d).

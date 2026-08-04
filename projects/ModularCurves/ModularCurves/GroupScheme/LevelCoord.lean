@@ -76,6 +76,45 @@ theorem levelCoord_injective (hinv : NIsInvertible S N) (L : E.FullLevelPt N)
     congrArg Subtype.val ((constSchemePointsEquiv S (Fin 2 → ZMod N) g).injective h)
   exact (Iso.cancel_iso_inv_right _ _ _).mp h'
 
+/-! ### The transition between two level bases -/
+
+/-- The `j`-th basis point of a full level structure, as a section of the torsion: the image of the
+`j`-th standard basis vector under `fullLevelHom`. No `pointToTorsion` plumbing is needed —
+`fullLevelHom` already sends the `j`-th standard vector to the `j`-th basis point. -/
+noncomputable def levelBasisPt (L : E.FullLevelPt N) (j : Fin 2) : S ⟶ E.torsion N :=
+  Sigma.ι (fun _ : Fin 2 → ZMod N => S) (Pi.single j 1) ≫ E.fullLevelHom L
+
+theorem levelBasisPt_torsionπ (L : E.FullLevelPt N) (j : Fin 2) :
+    E.levelBasisPt L j ≫ E.torsionπ N = 𝟙 S := by
+  rw [levelBasisPt, Category.assoc, E.fullLevelHom_torsionπ L]
+  simp [constSchemeπ]
+
+/-- **(route β, THE TRANSITION)** The transition between two full level bases, as the locally
+constant *pair of columns*: the coordinate vectors of `L'`'s two basis points in the basis `L`.
+
+Local constancy is free — each column is a `levelCoord`, i.e. the reading of a map into a constant
+scheme — and the pair form is the one `detFun` consumes directly. -/
+noncomputable def levelTransitionCols (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N) :
+    LocallyConstant S ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) where
+  toFun t :=
+    (E.levelCoord hinv L (E.levelBasisPt L' 0) (E.levelBasisPt_torsionπ L' 0) t,
+      E.levelCoord hinv L (E.levelBasisPt L' 1) (E.levelBasisPt_torsionπ L' 1) t)
+  isLocallyConstant :=
+    IsLocallyConstant.prodMk
+      (E.levelCoord hinv L (E.levelBasisPt L' 0) (E.levelBasisPt_torsionπ L' 0)).isLocallyConstant
+      (E.levelCoord hinv L (E.levelBasisPt L' 1) (E.levelBasisPt_torsionπ L' 1)).isLocallyConstant
+
+/-- The transition of a basis with itself is the identity pair: `levelCoord` of the `j`-th basis
+point in its own basis is the `j`-th standard vector (`levelCoord_sigmaι`). -/
+theorem levelTransitionCols_self (hinv : NIsInvertible S N) (L : E.FullLevelPt N) (t : S) :
+    E.levelTransitionCols hinv L L t = (Pi.single 0 1, Pi.single 1 1) := by
+  have h : ∀ j : Fin 2,
+      E.levelCoord hinv L (E.levelBasisPt L j) (E.levelBasisPt_torsionπ L j) t =
+        Pi.single j 1 := fun j => by
+    have := E.levelCoord_sigmaι hinv L (Pi.single j 1)
+    exact congrArg (fun f => LocallyConstant.toFun f t) this
+  exact Prod.ext (h 0) (h 1)
+
 end EllipticCurve
 
 end ModularCurves
