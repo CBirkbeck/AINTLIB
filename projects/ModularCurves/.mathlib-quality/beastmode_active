@@ -1,1 +1,1 @@
-FOCUS: route beta step 3 skeleton DONE (coverPairing + _over + nonempty_weilPairing_of_cover_of_cocycle). ONE input remains: the cocycle, i.e. a root zeta on the cover with g^*zeta = zeta^{det g}. NEXT: reduce hcoc to that statement about zeta alone.
+FOCUS: route beta transition — levelCoord DONE. NEXT: levelTransition (the locally constant GL2 matrix between two level bases) and the piecewise glSmul identification.

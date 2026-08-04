@@ -37273,3 +37273,23 @@ level structures trivialise the same torsion, so they differ by a unique locally
 function (and its uniqueness) is what remains before `fullLevelPairing_glSmul` can be applied
 piecewise; `GLSchemeAction.lean`'s `exists_glSchemeSmul_of_hOrbit` /
 `fullLevelIso_symm_trans_of_glSmul_eq` are the per-`g` half of it.
+
+### [route β] the transition's first brick (2026-08-04) — `GroupScheme/LevelCoord.lean` (new)
+
+* `fullLevelIso_inv_constSchemeπ` — the inverse form of `fullLevelHom_torsionπ`, used everywhere
+  below.
+* **`levelCoord`** — the coordinate vector of a `T`-point of `E[N]` in a full level basis: transport
+  through `fullLevelIso` into the constant scheme and read the locally constant `(ℤ/N)²`-label. This
+  is the mechanism by which the transition matrix becomes *locally constant* for free — it is a
+  reading of a map into a constant scheme, and `constSchemePointsEquiv` already packages those as
+  `LocallyConstant`.
+* `levelCoord_sigmaι` — the computation rule: the coordinate vector of the basis combination
+  labelled `v` is `LocallyConstant.const S v`.
+* `levelCoord_injective` — the coordinate vector determines the point.
+
+**Next**: `levelTransition L L' : LocallyConstant S (Matrix (Fin 2) (Fin 2) (ZMod N))`, whose `j`-th
+column is `levelCoord hinv L (Sigma.ι (e j) ≫ fullLevelHom L')` — no `pointToTorsion` plumbing is
+needed, since `fullLevelHom L'` already sends the `j`-th standard basis vector to the `j`-th basis
+point of `L'`. Then, on each clopen piece where that matrix is a constant `g`, identify
+`L' = glSmul g L` (`Sigma.hom_ext` plus the linearity of `v ↦ v₀P + v₁Q` built into
+`fullLevelHom`), and `fullLevelPairing_glSmul` closes `hdet` there.
