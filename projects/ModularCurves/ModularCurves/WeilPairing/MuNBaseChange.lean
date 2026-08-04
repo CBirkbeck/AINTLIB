@@ -88,4 +88,23 @@ theorem muNCarrierRingEquiv_symm_algebraMap (a : k) :
   rw [hfinal]
   rfl
 
+/-- The `k`-algebra structure that `finiteEtaleOfπ` installs on `Γ(μ_N, ⊤)`, reconstructed
+here by the same expression so that it is available to statements outside that definition's
+scope. Definitionally the one `muNAlgebra k N hk` carries. -/
+@[reducible] noncomputable def muNCarrierAlgebra :
+    Algebra k Γ(muN (Spec (CommRingCat.of k)) N, ⊤) :=
+  (((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫
+    (muNπ (Spec (CommRingCat.of k)) N).appTop).hom).toAlgebra
+
+attribute [local instance] muNCarrierAlgebra
+
+/-- **(WP-D3c-2b)** The carrier identification as a `k`-**algebra** equivalence. Its
+`commutes'` is `muNCarrierRingEquiv_symm_algebraMap`, read through `.symm`. -/
+noncomputable def muNCarrierAlgEquiv :
+    Γ(muN (Spec (CommRingCat.of k)) N, ⊤) ≃ₐ[k] AdjoinRoot ((X : Polynomial k) ^ N - 1) :=
+  { muNCarrierRingEquiv k N with
+    commutes' := fun a =>
+      ((muNCarrierRingEquiv k N).symm_apply_eq.mp
+        (muNCarrierRingEquiv_symm_algebraMap k N a)).symm }
+
 end ModularCurves

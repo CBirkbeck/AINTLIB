@@ -36701,3 +36701,26 @@ Everything in steps 1–5 is now proved except the `letI` bookkeeping itself. **
 `torsion_baseChange_isPullback` plus `Algebra.TensorProduct` of the two `torsionAlgebra`
 factors, and after that WP-D3c step 2 (the field-change naturality) is a uniqueness argument
 via `fieldWeilPairingHom_unique`.
+
+## [WP-D3c-2b] `muNCarrierAlgEquiv` landed (2026-08-04) — axiom-verified
+
+```
+muNCarrierAlgEquiv : Γ(μ_{N,Spec k}, ⊤) ≃ₐ[k] AdjoinRoot ((X : k[X])^N − 1)
+```
+
+The `letI` strategy works as planned: `muNCarrierAlgebra` reconstructs
+`finiteEtaleOfπ`'s algebra structure by the same expression, `@[reducible]` and installed as a
+**local** instance; the upgrade's `commutes'` is then one term —
+`(muNCarrierRingEquiv k N).symm_apply_eq.mp (muNCarrierRingEquiv_symm_algebraMap k N a)`,
+symmetrised. `algebraMap k (AdjoinRoot f) = AdjoinRoot.of f` holds definitionally, so no
+bridging lemma is needed there.
+
+`WeilPairing/MuNBaseChange.lean`: **five** declarations, sorry-free, axiom-verified, in the
+root import. Root green at **9722 jobs**.
+
+**Remaining for WP-D3c-2b**: with `muNCarrierAlgEquiv` at both `k` and `k'`, plus
+`quotSpanBaseChange` and `map_X_pow_sub_one`, the base-change isomorphism is
+`Algebra.TensorProduct.congr (AlgEquiv.refl) (muNCarrierAlgEquiv k N)` → `quotSpanBaseChange`
+→ `(muNCarrierAlgEquiv k' N).symm`, packaged by `CommAlgCat.FiniteEtale.isoMk`. The only care
+needed is that `quotSpanBaseChange` is a `RingEquiv` while the outer pieces are `≃ₐ`, so the
+`k'`-linearity of the composite is checked on `1 ⊗ₜ` generators.
