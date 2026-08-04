@@ -38396,3 +38396,41 @@ Each is a correct, named statement that the component argument will consume; non
 board's "steps 1–4 then done" framing was **too optimistic** and is corrected here.
 
 Root green at **9733 jobs**; census unchanged (7, all the Weil register).
+
+## [WP-D3d] THE COMPONENT-TRANSITION MACHINERY ALREADY EXISTS (2026-08-04)
+
+Grepping for the group-action-on-the-base setting turns up **`ForMathlib/QuotientCurveModel.lean`** and
+**`ForMathlib/WeierstrassInvariant.lean`**, whose stated purpose is exactly the step I had costed at
+~150 lines of new work:
+
+> Given a free `G`-action on `A`, with `Aᴳ` local, and a `VariableChange`-cocycle action on
+> `W₀ : WeierstrassCurve A`, `exists_invariant_descent` produces `E` and a descended model
+> `W₁ : WeierstrassCurve Aᴳ` satisfying `W₁.map (Aᴳ ↪ A) = E⁻¹ • W₀`.
+
+and `QuotientCurveModel` supplies the geometric consequence
+`projModel W₀ ≅ (projModel W₁) ×_{Spec Aᴳ} Spec A`, compatibly with structure maps and zero sections.
+
+Named results there that the component argument consumes directly:
+* `exists_vc_of_curveAction` / `exists_vc_of_pointedIso` — a `g`-action fixing the curve gives a
+  `VariableChange`;
+* `isVCocycle_of_curveActionFamily` (+ `'`) — that family is a cocycle;
+* `exists_descended_model_of_curveActionFamily` — **the curve descends to `Aᴳ`**;
+* `descentComparison` and its `G`-invariance.
+
+**This is `fieldWeilPairing_det_of_galois`'s missing precondition.** That lemma needs the curve defined
+over a field `k` with `σ` `k`-linear; for a component's function field `K` and a transition automorphism
+`τ`, the curve descends to `K^τ` — and the descent is the theorem above, not something to build.
+
+**Redirect for WP-D3d**: start from `exists_descended_model_of_curveActionFamily` at
+`A := ` a component's function field, `G := ⟨τ⟩` (finite, since the `GL₂(ℤ/N)`-action is), and
+`W₀ := ` the component's Weierstrass model; that yields `W : WeierstrassCurve K^τ` with
+`W.baseChange K = E_K`, which is precisely `fieldWeilPairing_det_of_galois`'s `W` and `k`. Check the
+`Aᴳ`-local hypothesis: for a *field* `K` the fixed subfield `K^τ` is a field, hence local, so it should be
+discharged immediately.
+
+**Third time today** that grepping the conclusion has found existing machinery for planned work (after
+`fullLevelHom_baseChange` and `WP-D3a-FACTOR`'s two halves). See
+[[grep-the-conclusion-not-the-inputs]] — the lesson generalises: before costing a step, grep for the
+*step's own name-shape* in `ForMathlib/`.
+
+Root green at **9733 jobs**; census unchanged (7, all the Weil register).
