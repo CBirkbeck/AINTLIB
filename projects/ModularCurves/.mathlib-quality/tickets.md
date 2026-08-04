@@ -37601,3 +37601,17 @@ pattern (6) in the elaboration notes. Instead, after `Sigma.hom_ext`, split each
 
 Every lemma named here has been verified to exist. Re-associate with
 `(Category.assoc _ _ _).symm.trans`, never `← Category.assoc`.
+
+### [route β] the last missing brick for step 1 is landed (2026-08-04) — axiom-verified
+
+**`comp_pointToTorsion_of_eq`** (`WeilPairing/TorsionSqBaseChange.lean`): `comp_pointToTorsion` with
+the target point's base map taken as a **variable** `q` plus `hq : w ≫ g = q`, discharged by `subst`.
+This is the index-as-variable idiom again (pattern 6), and it is what `fullLevelHom_pullAlong` needs
+on its left-hand side, since at `g = 𝟙 S` the literal index is `σ ≫ 𝟙 S`.
+
+So step 1's ingredient list is now **complete and all proved**:
+`ι_constSchemeMapAlong`, `Sigma.ι_desc`, `Point.asSection_add`/`_zsmul`, `Point.pull_add`/`_zsmul`,
+`pointToTorsion_asSection_torsionBaseChangeHom`, `comp_pointToTorsion_of_eq`. The remaining work on
+`fullLevelHom_pullAlong` is assembling them in the order recorded in `FullLevelPairing.lean`'s comment
+(right-hand side first — rewriting the left side first unfolds `↑(v₀ • P + v₁ • Q)` into a
+`CartesianMonoidalCategory.lift` normal form that nothing matches afterwards).

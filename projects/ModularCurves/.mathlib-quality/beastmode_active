@@ -1,1 +1,1 @@
-FOCUS: route beta item (A) step 1 — pointToTorsion_asSection_torsionBaseChangeHom DONE. NEXT: fullLevelHom_pullAlong (constSchemeMapAlong sigma V then fullLevelHom L = fullLevelHom (L.pullAlong sigma) then torsionBaseChangeHom), then the base-change compatibility of fullLevelPairing, then decompose by levelTransitionCols.
+FOCUS: route beta item (A) step 1 — obstacle localised to ONE missing 5-line lemma: comp_pointToTorsion_of_eq (index as variable + subst, pattern 6). Write it, then fullLevelHom_pullAlong closes per the recipe in FullLevelPairing.lean.

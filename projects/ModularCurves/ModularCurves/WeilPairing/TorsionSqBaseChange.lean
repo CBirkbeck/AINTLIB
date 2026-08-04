@@ -143,6 +143,23 @@ theorem pointToTorsion_asSection_torsionBaseChangeHom {T' : Scheme.{u}} (σ : T'
       Category.id_comp]
     exact (E.pointToTorsion_torsionπ x hx).symm
 
+/-- **(route β, item (A) step 1)** `comp_pointToTorsion` with the base map of the target point taken
+as a **variable** `q` plus an equation, so that it can be used at `q = σ` rather than at the literal
+`w ≫ g` that `comp_pointToTorsion` produces.
+
+At `g = 𝟙 S` the literal index is `σ ≫ 𝟙 S`, which is only *propositionally* equal to `σ` (a category
+axiom, not `rfl`), and rewriting it inside `pointToTorsion`'s index is not type-correct — the
+index-as-variable-plus-`subst` idiom is the standard fix. -/
+theorem comp_pointToTorsion_of_eq {T T' : Scheme.{u}} {g : T ⟶ S} (w : T' ⟶ T)
+    (x : E.Point g) (hx : (x : T ⟶ E.E) ≫ E.mulByHom N = g ≫ E.zero)
+    {q : T' ⟶ S} (hq : w ≫ g = q)
+    (hy : (w ≫ (x : T ⟶ E.E)) ≫ E.mulByHom N = q ≫ E.zero) :
+    w ≫ E.pointToTorsion x hx =
+      E.pointToTorsion
+        (⟨w ≫ (x : T ⟶ E.E), by rw [Category.assoc, x.2, hq]⟩ : E.Point q) hy := by
+  subst hq
+  exact E.comp_pointToTorsion w x hx
+
 end EllipticCurve
 
 end ModularCurves

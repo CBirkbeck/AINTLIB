@@ -198,6 +198,37 @@ theorem nonempty_weilPairing_of_fullLevel (hinv : NIsInvertible S N) (L : E.Full
   nonempty_weilPairing_of_root_of_trivialised E N ζ (E.fullLevelSqIso hinv L)
     (E.fullLevelSqIso_hom_π hinv L)
 
+/- ### `fullLevelHom_pullAlong` (route β, item (A) step 1) — IN PROGRESS, obstacle localised
+
+Statement: `constSchemeMapAlong σ (Fin 2 → ZMod N) ≫ E.fullLevelHom L =
+  (E.baseChange σ).fullLevelHom (L.pullAlong σ) ≫ E.torsionBaseChangeHom N σ`.
+
+`Sigma.hom_ext` then `← Category.assoc, ι_constSchemeMapAlong` puts the goal in the form
+
+  `σ ≫ Sigma.ι v ≫ E.fullLevelHom L
+     = Sigma.ι v ≫ (E.baseChange σ).fullLevelHom (L.pullAlong σ) ≫ E.torsionBaseChangeHom N σ`.
+
+**Do not rewrite the left side first.** Applying `pointToTorsion_torsionι` there unfolds
+`↑(v₀ • P + v₁ • Q)` into a `CartesianMonoidalCategory.lift …` normal form that nothing subsequently
+matches. Work the *right* side down to `E.pointToTorsion (Point.pull E σ (v₀ • P + v₁ • Q)) _`:
+
+1. `Sigma.ι_desc` — the right side is `(E.baseChange σ).pointToTorsion (comb of (L.pullAlong σ)) _ ≫
+   torsionBaseChangeHom`;
+2. `(L.pullAlong σ).1.i = Point.asSection E σ (Point.pull E σ L.1.i)` is `rfl`, so
+   `Point.asSection_zsmul` + `Point.asSection_add` + `Point.pull_zsmul` + `Point.pull_add` rewrite the
+   combination to `Point.asSection E σ (Point.pull E σ (v₀ • P + v₁ • Q))`;
+3. `pointToTorsion_asSection_torsionBaseChangeHom` (`WeilPairing/TorsionSqBaseChange.lean`, **proved**)
+   turns that into `E.pointToTorsion (Point.pull E σ (v₀ • P + v₁ • Q)) _`.
+
+The left side then needs `σ ≫ E.pointToTorsion x hx = E.pointToTorsion (Point.pull E σ x) _`, which is
+`comp_pointToTorsion` — **except that its conclusion is indexed by `σ ≫ 𝟙 S`, not `σ`**, exactly
+pattern (6) of the elaboration notes. So the last missing piece is a five-line `_of_eq` variant:
+
+  `comp_pointToTorsion_of_eq (w) (x) (hx) {q} (hq : w ≫ g = q) (hx' : … = q ≫ E.zero) :
+     w ≫ E.pointToTorsion x hx = E.pointToTorsion ⟨w ≫ ↑x, _⟩ hx'`   — by `subst hq`.
+
+With that in hand the two sides meet. -/
+
 /-! ### Linearity of the trivialisation, for a **bare** matrix — invertibility is not needed
 
 `constGL g` and `glSmul g L` require `g ∈ GL₂(ℤ/N)`, which made the transition look as though it had
