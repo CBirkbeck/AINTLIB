@@ -15917,3 +15917,78 @@ Two consequences:
 > When a proof resists decomposition, look for a sibling that already did it. This file had the
 > answer 500 lines below the problem, and the reason I did not see it earlier is that I was
 > searching for *my* target's names.
+
+**A guard whose diagnostic you cannot read is half a guard.** The stage-2 abort printed
+
+```
+ABORT: K₀ still present in lifted body:
+```
+
+and then nothing. The script *did* print the offending line; my **monitor filter** was
+`grep -E "^EXIT=|ABORT|raw lines|error[:(]"`, which matched the `ABORT:` header and dropped the
+detail line beneath it. I briefly took that as the guard misfiring.
+
+The offending `K₀` was in a **comment** — `-- The scaled vector is in K₀.` — a reference to a
+caller-local that does not exist in the lifted lemma. Harmless to Lean, wrong for a reader.
+
+Two things follow:
+
+> When a guard aborts, read its **whole** output, not a filtered view. Filters are for
+> success paths; failures are exactly where the unexpected line lives.
+
+> Renaming a lifted body's identifiers must cover **comments** too. The compiler will never
+> tell you: a comment naming a binder that no longer exists is a silent lie in the source.
+
+### `tateAlgebra_flat` stage 2: 189 → 150, plus the dedup
+
+* `exists_syzygy_decomp_of_clear_denominators` (39c) — the `q = 0` branch, mirroring the
+  sibling `exists_controlled_decomposition_of_forall_fail` rather than inventing a split.
+* the duplicated separation argument in `exists_controlled_decomposition` now calls the
+  stage-1 lemma: 8 lines → 3, and that proof drops 31c → 27c.
+
+**The set-chain crossing worked, and the two edits it needed were predicted in advance.**
+`g` and `relMap₀` cannot cross a declaration boundary as `set`-locals, so they became
+parameters carrying their defining equations, and exactly two body steps changed:
+
+```
+rw [LinearMap.mem_ker]                          ->  rw [LinearMap.mem_ker, hrel]
+simp only [map_sum, map_mul, Subring.coe_subtype] ->  … , hg]
+```
+
+Both were guarded by a `count == 1` assertion, so "I found the right spot" was checked rather
+than hoped, and the build was green first try. At the call site both hypotheses are `fun _ ↦ rfl`
+— the `set` still supplies the definitional content, it just has to be *named* to travel.
+
+> A `set`-local crossing a boundary costs one hypothesis per definitional use, and those uses
+> are findable in advance: grep the block for the local's name and every hit is either a type
+> (fine) or an unfolding (needs the equation).
+
+**Remaining path**, now that the pattern is established: `hAR_ctrl` (30 → 2) and the `suffices`
+block (28 → 2) take it to ~92; `hdecomp_or_ctrl` (now ~35 → 2) to ~59; `hsyz` (13 → 2, needs
+`hrel` exactly as above) to ~48.
+
+**Read the hypothesis's type off its consumer, not off the sibling that looks like it.**
+Writing stage 3 I typed `hAR`'s signature from memory of the sibling
+`exists_controlled_decomposition`, which has
+
+```lean
+(hAR : ∀ n ≥ k₁, P.I ^ n • (⊤ : Submodule P.A₀ P.A₀) ⊓ (I₀.restrictScalars P.A₀) = …)
+```
+
+The real one, read off `exists_ideal_pow_coeffs_of_forall_mem` — the lemma that *consumes*
+`hAR` — is a different shape: no `restrictScalars`, and `⊤` inside the ascription rather than
+outside:
+
+```lean
+(hAR : ∀ n ≥ k₀, (I ^ n • ⊤ ⊓ K : Submodule R (Fin l → R)) = I ^ (n - k₀) • (I ^ k₀ • ⊤ ⊓ K))
+```
+
+The sibling's version is right *for the sibling*: there `K` is an `Ideal P.A₀`
+(`Submodule P.A₀ P.A₀`), here it is a submodule of `Fin l → P.A₀`, so the ambient module
+differs and `restrictScalars` is needed there and not here.
+
+> Two lemmas being "the same argument" does not make their hypotheses interchangeable —
+> the analogy holds at the level of the proof, not of the types. Take the type from the
+> declaration that consumes it; that one cannot be wrong.
+
+Caught before building, at the cost of one `grep`.

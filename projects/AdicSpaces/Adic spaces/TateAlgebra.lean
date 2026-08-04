@@ -2127,6 +2127,72 @@ theorem mem_tateAlgebra_of_filtration_control
   by_contra h_all; push Not at h_all
   exact hn (hc'_filt n m h_all j)
 
+/-- Unconditional decomposition by denominator-clearing, the `q = 0` half of the diagonal
+Artin–Rees argument (compare `exists_controlled_decomposition_of_forall_fail`, which does the
+same for a single element against ideal generators).
+
+Scale the coefficient vector by `w ^ M` into the ring of definition, where it lies in the
+kernel of `relMap₀`, decompose it over the generating family `s₀` of that kernel, then unscale
+by the unit `w ^ M`. No filtration control is claimed: at `q = 0` it is vacuous. -/
+private theorem exists_syzygy_decomp_of_clear_denominators
+    (P : PairOfDefinition A) {l k : ℕ} (w : Aˣ)
+    (hw_event : ∀ a : A, ∀ᶠ n in Filter.atTop, (w : A) ^ n * a ∈ P.A₀)
+    (f : Fin l → A) (x : Fin l → ↥(TateAlgebra A))
+    (hcoord : ∀ s : Fin 1 →₀ ℕ, ∑ i, f i * (x i).val s = 0)
+    (N : ℕ) (g : Fin l → P.A₀)
+    (hg : ∀ i, P.A₀.subtype (g i) = (w : A) ^ N * f i)
+    (relMap₀ : (Fin l → P.A₀) →ₗ[P.A₀] P.A₀)
+    (hrel : ∀ r, relMap₀ r = ∑ i, g i * r i)
+    (s₀ : Fin k → ↥(LinearMap.ker relMap₀))
+    (hs₀ : Submodule.span P.A₀ (Set.range s₀) = ⊤)
+    (n : Fin 1 →₀ ℕ) :
+    ∃ c₀ : Fin k → A, ∀ i, (x i).val n =
+      ∑ j, c₀ j * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) := by
+  have h_clear : ∃ M : ℕ, ∀ i, (w : A) ^ M * (x i).val n ∈ P.A₀ :=
+    (Filter.eventually_all.mpr (fun i ↦ hw_event ((x i).val n))).exists
+  obtain ⟨M, hM⟩ := h_clear
+  -- The scaled vector lies in the kernel.
+  have h_scaled_ker : (fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀)) ∈ LinearMap.ker relMap₀ := by
+    have h_zero : P.A₀.subtype
+      (∑ i : Fin l, g i * (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀)) = 0 := by
+      simp only [map_sum, map_mul, Subring.coe_subtype, hg]
+      trans (↑w : A) ^ (N + M) * ∑ i, f i * (x i).val n
+      · rw [Finset.mul_sum]
+        exact Finset.sum_congr rfl (fun i _ ↦ by rw [pow_add]; ring)
+      · rw [hcoord n, mul_zero]
+    have h_eq : ∑ i : Fin l, g i * (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀) = 0 := by
+      ext; simpa [Subring.coe_subtype] using h_zero
+    change (fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀)) ∈ LinearMap.ker relMap₀
+    rw [LinearMap.mem_ker, hrel]
+    exact h_eq
+  -- Decompose over s₀.
+  have h_in_span : (⟨fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀),
+      h_scaled_ker⟩ : ↥(LinearMap.ker relMap₀)) ∈ Submodule.span P.A₀ (Set.range s₀) :=
+    hs₀ ▸ Submodule.mem_top
+  obtain ⟨cf, hcf_sum⟩ := mem_span_range_iff_exists_fin.mp h_in_span
+  -- Extract component-wise equality (in A₀).
+  have hcf_eq : ∀ i, (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀) =
+      ∑ j, cf j * (s₀ j : Fin l → P.A₀) i := by
+    intro i
+    have := congr_arg (fun (v : ↥(LinearMap.ker relMap₀)) ↦ (v : Fin l → P.A₀) i) hcf_sum
+    simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower,
+      Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at this
+    exact this
+  -- Unscale: divide by w^M (which is a unit).
+  have hw_M_unit : IsUnit ((w : A) ^ M) := w.isUnit.pow M
+  set c₀ := fun j ↦ ↑(hw_M_unit.unit⁻¹ : Aˣ) * P.A₀.subtype (cf j)
+  refine ⟨c₀, fun i ↦ ?_⟩
+  · -- Decomposition: (x i).val n = ∑ c₀ j * s₀(j)(i)
+    have h_scaled := congr_arg P.A₀.subtype (hcf_eq i)
+    simp only [map_sum, map_mul, Subring.coe_subtype] at h_scaled
+    -- h_scaled : w^M * (x i).val n = ∑ j, ↑(cf j) * s₀(j)(i) in A
+    have : (x i).val n = ↑(hw_M_unit.unit⁻¹ : Aˣ) *
+        ((w : A) ^ M * (x i).val n) := by
+      rw [← mul_assoc, hw_M_unit.val_inv_mul, one_mul]
+    rw [this, h_scaled, Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun j _ ↦ by
+      simp only [c₀, Subring.coe_subtype]; ring)
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **Flatness of the Tate algebra** (`A⟨X⟩` is flat over noetherian `A`).
 
@@ -2311,56 +2377,11 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
         exact hi₀ (Set.image_mono (Ideal.pow_le_pow_right (by omega)) (hall i₀))
       -- Case split on q: either q = 0 or q ≥ 1.
       by_cases hq0 : q = 0
-      · -- q = 0: hypothesis fails at all levels. Filtration is vacuous.
-        -- Need unconditional decomposition via denominator-clearing.
-        -- Clear denominators: find M with w^M * (x i).val n ∈ A₀ for all i.
-        have h_clear : ∃ M : ℕ, ∀ i, (w : A) ^ M * (x i).val n ∈ P.A₀ :=
-          (Filter.eventually_all.mpr (fun i ↦ hw_event ((x i).val n))).exists
-        obtain ⟨M, hM⟩ := h_clear
-        -- The scaled vector is in K₀.
-        have h_scaled_ker : (fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀)) ∈ K₀ := by
-          have h_zero : P.A₀.subtype
-            (∑ i : Fin l, g i * (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀)) = 0 := by
-            simp only [map_sum, map_mul, Subring.coe_subtype]
-            trans (↑w : A) ^ (N + M) * ∑ i, f i * (x i).val n
-            · rw [Finset.mul_sum]
-              exact Finset.sum_congr rfl (fun i _ ↦ by rw [pow_add]; ring)
-            · rw [hcoord n, mul_zero]
-          have h_eq : ∑ i : Fin l, g i * (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀) = 0 := by
-            ext; simpa [Subring.coe_subtype] using h_zero
-          change (fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀)) ∈ LinearMap.ker relMap₀
-          rw [LinearMap.mem_ker]
-          exact h_eq
-        -- Decompose over s₀.
-        have h_in_span : (⟨fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀),
-            h_scaled_ker⟩ : K₀) ∈ Submodule.span P.A₀ (Set.range s₀) :=
-          hs₀ ▸ Submodule.mem_top
-        obtain ⟨cf, hcf_sum⟩ := mem_span_range_iff_exists_fin.mp h_in_span
-        -- Extract component-wise equality (in A₀).
-        have hcf_eq : ∀ i, (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀) =
-            ∑ j, cf j * (s₀ j : Fin l → P.A₀) i := by
-          intro i
-          have := congr_arg (fun (v : K₀) ↦ (v : Fin l → P.A₀) i) hcf_sum
-          simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower,
-            Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at this
-          exact this
-        -- Unscale: divide by w^M (which is a unit).
-        have hw_M_unit : IsUnit ((w : A) ^ M) := w.isUnit.pow M
-        set c₀ := fun j ↦ ↑(hw_M_unit.unit⁻¹ : Aˣ) * P.A₀.subtype (cf j)
-        refine ⟨c₀, fun i ↦ ?_, fun m hm ↦ ?_⟩
-        · -- Decomposition: (x i).val n = ∑ c₀ j * s₀(j)(i)
-          have h_scaled := congr_arg P.A₀.subtype (hcf_eq i)
-          simp only [map_sum, map_mul, Subring.coe_subtype] at h_scaled
-          -- h_scaled : w^M * (x i).val n = ∑ j, ↑(cf j) * s₀(j)(i) in A
-          have : (x i).val n = ↑(hw_M_unit.unit⁻¹ : Aˣ) *
-              ((w : A) ^ M * (x i).val n) := by
-            rw [← mul_assoc, hw_M_unit.val_inv_mul, one_mul]
-          rw [this, h_scaled, Finset.mul_sum]
-          exact Finset.sum_congr rfl (fun j _ ↦ by
-            simp only [c₀, Subring.coe_subtype]; ring)
-        · -- Filtration: vacuously true since q = 0 means hypothesis fails for all m.
-          exfalso
-          exact hq_fail_above m (by omega) hm
+      · -- q = 0: the filtration hypothesis fails at every level, so control is vacuous
+        -- and only the unconditional denominator-clearing decomposition is needed.
+        obtain ⟨c₀, hc₀⟩ := exists_syzygy_decomp_of_clear_denominators P w hw_event f x
+          hcoord N g (fun i ↦ rfl) relMap₀ (fun r ↦ rfl) s₀ hs₀ n
+        exact ⟨c₀, hc₀, fun m hm _ ↦ absurd hm (hq_fail_above m (by omega))⟩
       · -- q ≥ 1: use hAR_ctrl at level q - 1.
         have hq_hyp : ∀ i, (x i).val n ∈
             Subtype.val '' ((P.I ^ ((q - 1) + k₀) : Ideal P.A₀) : Set P.A₀) :=
@@ -2779,14 +2800,9 @@ private theorem exists_controlled_decomposition (I : Ideal A) (P : PairOfDefinit
   by_cases h_all :
       ∀ l, h.val n ∈ Subtype.val '' ((P.I ^ (l + k₁) : Ideal P.A₀) : Set P.A₀)
   · -- All levels valid ⟹ h.val n = 0.
-    have h_zero : h.val n = 0 := by
-      by_contra hne
-      obtain ⟨U, _, hU_open, _, h0U, hxV, hUV⟩ := t2_separation (Ne.symm hne)
-      obtain ⟨p, _, hp⟩ := P.hasBasis_nhds_zero.mem_iff.mp (hU_open.mem_nhds h0U)
-      exact Set.disjoint_left.mp hUV (hp (Set.image_mono
-        (Ideal.pow_le_pow_right (by omega) :
-          (↑(P.I ^ (p + k₁)) : Set ↥P.A₀) ⊆ ↑(P.I ^ p))
-        (h_all p))) hxV
+    have h_zero : h.val n = 0 :=
+      eq_zero_of_mem_all_idealOfDefinition_pow_image P (fun m ↦
+        Set.image_mono (Ideal.pow_le_pow_right (by omega)) (h_all m))
     exact ⟨0, by simp [h_zero], fun l _ q ↦ ⟨0, (P.I ^ l).zero_mem, by simp⟩⟩
   · push Not at h_all
     obtain ⟨l_fail, hl_fail⟩ := h_all
