@@ -37420,3 +37420,34 @@ the generic fibre is `WeilPairing/UniversalRootBase.lean`.
 *Note on elaboration*: `fullLevelHom_eq_of_levelCoord` first hit a `whnf` timeout; the cause was the
 `_` placeholders for the column vectors, and writing `(fun i => g i 0)` / `(fun i => g i 1)`
 explicitly fixed it — **no heartbeat option was added**.
+
+### [route β] the `hdet` assembly, refined (2026-08-04)
+
+The earlier note called the assembly "bookkeeping, no new mathematics". Sharpening it, it splits into
+two items of unequal size:
+
+**(A) the reading comparison.** `hdet`'s pieces are indexed by `jointReading`'s value
+`vw = (vw.1, vw.2)`: the labels of *one and the same* pair of torsion points (the two projections of
+the kernel pair agree on the `E.torsionSq` component, `a ≫ pullback.fst = b ≫ pullback.fst`) in the
+two trivialisations `α^*coverTriv` and `β^*coverTriv`. What is needed is
+
+`vw.2 = gl2Both N g (vw.1)`  on the piece,
+
+where `g` is the transition between the pulled-back level structures `α^*L` and `β^*L`. This is *not*
+pure bookkeeping: it needs the compatibility of `constSchemePointsEquiv`'s reading with pullback of
+the trivialisation, i.e. that `levelCoord` of a pulled-back point in a pulled-back basis is the
+pullback of the `levelCoord`. `constSchemePointsEquiv_mapAlong` (`GroupScheme/MuN.lean:580`) is the
+analogous statement for the base-change comparison map and is the model to follow. Estimate
+**100–150 lines**.
+
+**(B) the exponent step.** Given (A), `detFun vw.2 = det g · detFun vw.1`
+(`detFun_gl2Both`-style, already in `WeilPairing/CharZeroDescent.lean:70`), so `hdet` follows from the
+single relation `β^*ζ = (α^*ζ) ^ (det g)⁻¹` by raising both sides to `detFun vw.1`. **Genuinely
+bookkeeping**, ~20 lines.
+
+So the honest remaining tally for DS4's first two register entries is: (A) ~100–150 lines of reading
+plumbing, (B) ~20 lines, and **WP-D3d** — the construction of `ζ` — which is the only item carrying
+mathematical content, and whose two halves are `fieldWeilPairing_det_of_galois` (the arithmetic, done)
+and `WeilPairing/UniversalRootBase.lean` (the descent from the generic fibre, done). What WP-D3d still
+needs is the *geometry*: the identification of the transition on a component's generic fibre with an
+automorphism of that fibre's function field fixing the curve.
