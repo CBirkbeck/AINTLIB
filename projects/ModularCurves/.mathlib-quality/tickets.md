@@ -36784,3 +36784,25 @@ import. Root green at **9722 jobs**.
 - **Sizing**: comparable to `muNSpecFieldIso`'s own proof
   (`GroupScheme/MuN.lean:1193`, ~25 lines of `IsPullback` gymnastics), plus the `Γ`/`isoSpec`
   bookkeeping this session has now done twice.
+
+### [WP-D3c-2c] the concrete recipe (tool confirmed)
+
+`AlgebraicGeometry.Scheme.isoSpec X : X ≅ Spec Γ(X, ⊤)` for `[IsAffine X]`, with
+`isoSpec_hom`, `isoSpec_Spec_hom/_inv` and `toSpecΓ_isoSpec_inv` as the computation rules.
+So:
+
+1. `IsAffine (E.torsion N)` and `IsAffine ((E.baseChange g).torsion N)` —
+   `isAffine_of_isAffineHom` applied to `torsionπ`, whose finiteness is `torsionπ_isFinite`
+   (the same two lines `finiteEtaleOfπ` already runs internally).
+2. Transport `torsion_baseChange_isPullback` along `isoSpec` at all three corners
+   (`IsPullback.of_iso` / `IsPullback.isoIsPullback`), turning it into a cartesian square of
+   `Spec`s of the global-section rings.
+3. Match against `AlgebraicGeometry.pullbackSpecIso ℤ … …` — or, better, against
+   `pullbackSpecIso k Γ(E[N],⊤) k'`, since the base is `Spec k` and the other leg is
+   `Spec k' ⟶ Spec k`; that is exactly its shape, and it yields
+   `Γ(E[N], ⊤) ⊗[k] k'` on the nose.
+4. `Scheme.ΓSpecIso` converts back to the carrier, exactly as in `muNCarrierRingEquiv`.
+
+Sized against `muNSpecFieldIso`'s own proof (~25 lines of `IsPullback` gymnastics) plus the
+`Γ`/`isoSpec` bookkeeping already done twice this session. **This is where the next session
+starts.**
