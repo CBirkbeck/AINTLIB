@@ -36420,3 +36420,34 @@ recorded:
 `ForMathlib/AdjoinRootBaseChange.lean` is now five declarations, sorry-free, axiom-verified,
 in the root import. Steps one to four of the six-step chain remain (`comm`,
 `cancelBaseChange` at the instantiation recorded above, `polyEquivTensor`, `comm`).
+
+### [WP-D3c-2a] `cancelBaseChange` — the instantiation, corrected a second time (measured)
+
+Both earlier readings fail on instances. Recording the one that actually type-checks, since
+this has now cost two passes.
+
+`Algebra.TensorProduct.cancelBaseChange R S T A B : A ⊗[S] (S ⊗[R] B) ≃ₐ[T] A ⊗[R] B`
+requires, among others, `[Algebra T A]`, `[Algebra S A]`, `[IsScalarTower R T A]`,
+`[Algebra S T]`, `[IsScalarTower S T A]`.
+
+* ✗ `A := S[X]`, `S := R[X]`, `B := M` — inner factor is `R[X] ⊗[R] M`, not `M`.
+* ✗ `R := R`, `S := R[X]`, `T := S`, `A := M`, `B := S` — needs `[Algebra S M]`, and
+  `M = R[X] ⧸ (f)` is not an `S`-algebra.
+* ✅ **`R := R`, `S := R[X]`, `T := R[X]`, `A := M`, `B := S`**:
+
+  ```
+  Algebra.TensorProduct.cancelBaseChange R R[X] R[X] M S
+    : M ⊗[R[X]] (R[X] ⊗[R] S) ≃ₐ[R[X]] M ⊗[R] S
+  ```
+
+  Every instance is present: `[Algebra R[X] M]` and `[IsScalarTower R R[X] M]` from
+  `Ideal.Quotient`, and the `T := S`-slot conditions become `[Algebra R[X] R[X]]` and
+  `[IsScalarTower R[X] R[X] M]`, both trivial.
+
+The result is an `R[X]`-algebra equivalence; the `S`-algebra structure on the two sides is put
+back afterwards (both are `S`-algebras through `Algebra.TensorProduct.includeRight` /
+`includeLeft`), or the final statement is given as a `RingEquiv` and the `S`-linearity checked
+on generators.
+
+Remaining: `R[X] ⊗[R] S ≅ S[X]` (`Polynomial.polyEquivTensor` up to
+`Algebra.TensorProduct.comm`), and the two `comm`s.
