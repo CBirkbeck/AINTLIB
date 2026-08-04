@@ -38046,3 +38046,27 @@ needs `[IsIntegrallyClosed A]` on each factor. Estimated **20–40 lines**, no n
 *Why the board was wrong*: the earlier entry recorded the *recommendation* ("route 2 — its missing
 ingredient is bookkeeping with lemmas that exist") and a later summary read that as completion. When a
 ticket's status is asserted, grep its conclusion before relying on it.
+
+## [WP-D3a-FACTOR] NOW GENUINELY PROVED (2026-08-04) — axiom-verified
+
+**`isIntegrallyClosed_quotient_minimalPrime`** (`ForMathlib/FactorIntegrallyClosed.lean`, new leaf):
+for `A` standard smooth of relative dimension `1` over a field `k` whose localizations at maximal
+ideals are domains, **every minimal-prime quotient `A ⧸ p` is an integrally closed domain**.
+
+The join the board had wrongly recorded as done: `p` minimal prime gives `IsDomain (A ⧸ p)`;
+`exists_isLocalization_away_quotient_minimalPrime` makes `A ⧸ p` a localization away from an idempotent,
+hence standard smooth of relative dimension `0` over `A`
+(`Algebra.IsStandardSmoothOfRelativeDimension.localization_away`); transitivity gives relative dimension
+`0 + 1` over `k`; then `isIntegrallyClosed_of_isStandardSmoothOfRelativeDimension_one`.
+
+Calibration worth keeping: `Algebra.IsStandardSmoothOfRelativeDimension.trans` takes the **dimensions
+positionally, after** the named ring arguments — `trans (R := k) (S := A) (T := A ⧸ p) 1 0`. Naming only
+the rings leaves `n` unassigned and the instance search fails on `IsStandardSmoothOfRelativeDimension n✝
+k A`. `Moduli/LevelThreeSmooth.lean:155` is the working template.
+
+**WP-D3d step 1 is therefore done.** Steps 2–4 remain: the field pairing value at each factor's generic
+point (`fieldWeilPairingHom`), its descent (`rootOfUnityDescend` — whose `[IsIntegrallyClosed]`
+hypothesis is exactly what this supplies), and the value equations via
+`fieldWeilPairing_det_of_galois`.
+
+Root green at **9732 jobs**; census unchanged (7, all the Weil register).
