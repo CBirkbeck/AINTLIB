@@ -1,1 +1,1 @@
-FOCUS: route beta item (B) — muNPointsEquiv_rootPower landed; comp_rootPower_muNMapAlong_eq NOT landed (isDefEq timeouts from rw on muNPointsEquiv; next attempt must state the value lemma in muNPointsEquiv_mapAlong shape and thread by Eq.trans, not rw). Then item (A) the reading comparison, then WP-D3d.
+FOCUS: route beta item (B) COMPLETE (comp_rootPower_muNMapAlong_eq). REMAINING: item (A) the reading comparison (vw.2 = gl2Both g vw.1 on each piece), then WP-D3d (zeta with g^*zeta = zeta^{det g}).

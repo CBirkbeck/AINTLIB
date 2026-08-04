@@ -37491,3 +37491,28 @@ terms are defeq but not syntactically equal, and the `rw`-based script hits `isD
 `muNPointsEquiv_mapAlong` produces, so that no reassociation rewrite is needed.
 
 Root green at **9729 jobs**; sorry-census unchanged (`yRho_representable`: 7, all the Weil register).
+
+### [route β] item (B) IS DONE (2026-08-04) — axiom-verified
+
+`WeilPairing/RootPowerPoints.lean`:
+
+* `muNPointsEquiv_rootPower` — the value of `rootPower N ζ k` is `ζ ^ k.val`;
+* **`muNPointsEquiv_comp_rootPower`** — the value of `γ ≫ rootPower N ζ k` is `Γ(γ)(ζ) ^ k.val`. The
+  base map is taken as a **variable** `q` with `hq : γ ≫ 𝟙 S' = q`, so `subst` can align it with the
+  index `k ≫ g` that `muNPointsEquiv_natural` produces — `γ ≫ 𝟙 S' = γ` is a category *axiom*, not
+  `rfl`, and rewriting it inside the equiv's index is not type-correct. **That `rw` was the whole
+  obstruction reported in the previous entry.**
+* `muNPointsEquiv_comp_rootPower_mapAlong` (+ `_of_eq`) — the same after `muNMapAlong`, via
+  `muNPointsEquiv_mapAlong`;
+* **`comp_rootPower_muNMapAlong_eq`** — ***`hdet`'s exponent step***: for `α β : W ⟶ S'` with
+  `α ≫ p = β ≫ p`, and `Γ(α)(ζ)^m.val = Γ(β)(ζ)^m'.val`,
+  `α ≫ rootPower N ζ m ≫ muNMapAlong p N = β ≫ rootPower N ζ m' ≫ muNMapAlong p N`.
+
+Lessons worth keeping: (i) whenever a base/index map appears inside a `muNPointsEquiv`/`constScheme…`
+index, take it as a variable plus an equation and `subst` — never `rw` it; (ii) chain value
+computations with `Eq.trans`/`exact`, never `rw`, because the points lemmas bake specific
+section-condition proof terms into their statements.
+
+**Route β's remaining work is now exactly two items**: (A) the reading comparison
+`vw.2 = gl2Both N g (vw.1)` on each clopen piece (~100–150 lines, modelled on
+`constSchemePointsEquiv_mapAlong`), and **WP-D3d** — the root `ζ` with `g^*ζ = ζ^{det g}`.
