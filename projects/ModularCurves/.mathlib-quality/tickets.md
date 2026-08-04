@@ -37943,3 +37943,25 @@ to them and yields the reading relation `det w = det g · det v` on each clopen 
 WP-D3d** (`g^*ζ = ζ ^ det g`).
 
 Root green at **9731 jobs**.
+
+### [route β] transition columns ⟹ determinant law, directly (2026-08-04) — axiom-verified
+
+Two one-line composites that close the gap between the *transition* and the *determinant law*:
+
+* **`fullLevelSqIso_inv_eq_of_levelCoord`** — two level structures whose transition columns are the
+  constant columns of `g` have square trivialisations differing by `constSchemeMap (gl2Both N g)`;
+* **`fullLevelPairing_eq_of_levelCoord`** — hence `e_{L', ζ ^ det g} = e_{L, ζ}` **straight from the
+  transition columns**, with no invertibility of `g` anywhere.
+
+The second is exactly the shape the piecewise argument consumes: on each clopen piece of
+`levelTransitionCols` the transition *is* a constant matrix, so it applies there verbatim.
+
+**Route β's remaining work is now two items, in order:**
+
+1. *the piecewise glue* — decompose the kernel pair by `levelTransitionCols (α^*L) (β^*L)`, use
+   `fullLevelSqIso_inv_baseChange` to express both projections' trivialisations through the pulled-back
+   structures, apply `fullLevelPairing_eq_of_levelCoord` on each piece, glue with `locConst_hom_ext`;
+2. **WP-D3d** — the root `ζ` with `g^*ζ = ζ ^ det g`.
+
+Everything else on the path to DS4's first two register entries (invertible `N`) is proved and
+axiom-verified. Root green at **9731 jobs**.

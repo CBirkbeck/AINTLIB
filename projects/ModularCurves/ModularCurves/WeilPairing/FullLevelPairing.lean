@@ -401,6 +401,38 @@ theorem fullLevelPairing_eq_of_fullLevelHom (hinv : NIsInvertible S N) (L L' : E
     E.fullLevelSqIso_hom_eq_of_fullLevelHom hinv L L' g h, Category.assoc,
     constSchemeMap_gl2Both_comp_detConstMor_rootSplitting]
 
+/-- **(route β)** The square trivialisations of two level structures whose **transition columns** are
+the constant columns of `g` differ by the diagonal action `gl2Both N g`. -/
+theorem fullLevelSqIso_inv_eq_of_levelCoord (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (hc : ∀ j : Fin 2,
+      E.levelCoord hinv L (E.levelBasisPt L' j) (E.levelBasisPt_torsionπ L' j) =
+        LocallyConstant.const S (fun i => g i j)) :
+    (E.fullLevelSqIso hinv L').inv =
+      constSchemeMap (S := S) (gl2Both N g) ≫ (E.fullLevelSqIso hinv L).inv :=
+  E.fullLevelSqIso_inv_eq_of_fullLevelHom hinv L L' g
+    (E.fullLevelHom_eq_of_levelCoord hinv L L' g hc)
+
+/-- **(route β, THE DETERMINANT LAW FROM THE TRANSITION COLUMNS)** …hence the pairings agree once the
+root is twisted by `det g`:
+
+`e_{L', ζ ^ det g} = e_{L, ζ}`  whenever the transition columns of `L'` against `L` are `g`'s.
+
+This is the form the piecewise argument consumes: on each clopen piece of `levelTransitionCols` the
+transition **is** a constant matrix, so this applies there verbatim, with no invertibility of `g`. -/
+theorem fullLevelPairing_eq_of_levelCoord (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (hc : ∀ j : Fin 2,
+      E.levelCoord hinv L (E.levelBasisPt L' j) (E.levelBasisPt_torsionπ L' j) =
+        LocallyConstant.const S (fun i => g i j))
+    (ζ : { a : Γ(S, (⊤ : S.Opens)) // a ^ N = 1 }) :
+    E.fullLevelPairing hinv L'
+        ⟨(ζ : Γ(S, (⊤ : S.Opens))) ^ g.det.val, by
+          rw [← pow_mul, mul_comm, pow_mul, ζ.2, one_pow]⟩ =
+      E.fullLevelPairing hinv L ζ :=
+  E.fullLevelPairing_eq_of_fullLevelHom hinv L L' g
+    (E.fullLevelHom_eq_of_levelCoord hinv L L' g hc) ζ
+
 /-! ### The pairing on a trivialising cover, and the descent
 
 `WeilPairingLocalData` wants a pairing out of `pullback (E.torsionSqπ N) p`; `fullLevelPairing`
