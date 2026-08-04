@@ -37634,3 +37634,27 @@ representability), and give it the `EllipticCurve` namespace. That is a *move*, 
 unblocks step 1 immediately. The alternative — importing `Moduli/GammaHRepresentability` into
 `WeilPairing/FullLevelPairing` — inverts the intended dependency direction (moduli representability is
 downstream of the group-scheme layer) and should be avoided.
+
+### [route β] step 1: the import question is settled and both section lemmas are landed (2026-08-04)
+
+`WeilPairing/FullLevelBaseChange.lean` (new **leaf**, importing both `WeilPairing.FullLevelPairing` and
+`Moduli.GammaHRepresentability` — no cycle, and it builds; **no relocation of `Point.asSection_add` is
+needed after all**):
+
+* **`asSection_pull_basisComb`** — `asSection ∘ pull` is `ℤ`-linear on the basis combination:
+  `asSection E σ (pull E σ (v₀·P + v₁·Q)) = v₀·(L.pullAlong σ).1.1 + v₁·(L.pullAlong σ).1.2`.
+  (`Point.pull_add`/`_zsmul`, `Point.asSection_add`/`_zsmul`, then `rfl` — the pulled-back level
+  structure's basis points *are* `asSection (pull …)` by definition.)
+* **`basisComb_comp_mulByHom`** — the combination is killed by `N`, extracted from `fullLevelHom`'s own
+  side condition. Note `smul_comm` needs its **third** argument given explicitly here.
+
+`fullLevelHom_pullAlong`'s remaining choreography is recorded verbatim in that file; everything up to
+and including the dependent rewrite is verified. Two facts learned there:
+
+* `rw [← asSection_pull_basisComb …]` fails with *motive is not type correct* (the combination sits in
+  `pointToTorsion`'s dependent proof argument) — **`simp only [← …]` handles it**, which is the general
+  escape for dependent rewrites of this shape;
+* `comp_pointToTorsion_of_eq`'s point and `hy` arguments must be spelled out; leaving them `_` gives an
+  application type mismatch.
+
+Root green at **9730 jobs**.
