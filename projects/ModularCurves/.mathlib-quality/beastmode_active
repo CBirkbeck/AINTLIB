@@ -1,1 +1,1 @@
-FOCUS: route beta transition — forward direction DONE (levelBasisPt_glSmul, levelCoord_levelBasisPt_glSmul). NEXT: the CONVERSE (columns => L = glSmul g L) needing the ZMod.val arithmetic mirroring constGL_hom_fullLevelHom, then invertibility of the transition matrix.
+FOCUS: route beta transition COMPLETE (eq_glSmul_of_levelCoord: constant transition columns => L = g dot L). NEXT: invertibility of the transition matrix (pointwise from fullLevelFibreMap_bijective), then hdet piecewise via fullLevelPairing_glSmul; then WP-D3d (zeta with the det law).

@@ -37338,3 +37338,27 @@ bookkeeping cannot be borrowed: it needs `pointToTorsion` injectivity plus
 same computation as `constGL_hom_fullLevelHom`'s `harith`, run in reverse. After that, invertibility
 of the transition matrix (pointwise, from `fullLevelFibreMap_bijective`) puts it in
 `Matrix.GeneralLinearGroup`, and `fullLevelPairing_glSmul` closes `hdet` piecewise.
+
+### [route β] THE TRANSITION STATEMENT IS PROVED (2026-08-04) — axiom-verified
+
+The converse direction closed with no surprises:
+
+* `basisComb_eq_of_levelBasisPt_eq` — equal basis points give equal basis *combinations* as sections
+  (`pointToTorsion_torsionι` + `Subtype.ext`);
+* `one_val_zsmul` / `zero_val_zsmul` — the `ZMod.val` bookkeeping: `(1 : ZMod N).val • R = R` for an
+  `N`-torsion section (via `zsmul_eq_of_intCast_eq`), and `(0 : ZMod N).val • R = 0`. **These two
+  lines are the whole of the arithmetic that could not be borrowed from
+  `constGL_hom_fullLevelHom`** — the estimate of "80–150 lines" was pessimistic;
+* **`FullLevelPt.ext_of_levelBasisPt`** — a full level structure is determined by its two basis
+  points;
+* **`eq_glSmul_of_levelCoord`** — *if the transition columns of `L'` against `L` are the constant
+  columns of `g ∈ GL₂(ℤ/N)`, then `L' = g • L`.*
+
+So the chain `transition columns → L' = g • L → fullLevelPairing_glSmul` is complete as soon as the
+transition matrix is known to be **invertible**, which is the only remaining item before `hdet`:
+pointwise from `fullLevelFibreMap_bijective`, then `Matrix.GeneralLinearGroup` via
+`isUnit_iff_isUnit_det`-style packaging.
+
+After that, route β's *only* remaining input is the arithmetic one: `ζ` with `g^*ζ = ζ^{det g}`
+(WP-D3d), for which `fieldWeilPairing_det_of_galois` is the stabiliser case and
+`WeilPairing/UniversalRootBase.lean` descends the root from the generic fibre to the base.

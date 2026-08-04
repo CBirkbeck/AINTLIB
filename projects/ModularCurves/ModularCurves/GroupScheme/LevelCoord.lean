@@ -170,6 +170,68 @@ theorem levelCoord_levelBasisPt_glSmul (hinv : NIsInvertible S N)
     (E.levelBasisPt_glSmul g L j)]
   exact E.levelCoord_sigmaι hinv L _
 
+/-! ### The converse: equal basis points force equal level structures
+
+This is the one step whose `ZMod.val` bookkeeping cannot be borrowed from
+`constGL_hom_fullLevelHom`: it is the same computation run in reverse. -/
+
+/-- Equal basis points give equal basis *combinations* as sections: `pointToTorsion` is injective
+(compose with `torsionι`). -/
+theorem basisComb_eq_of_levelBasisPt_eq (L L' : E.FullLevelPt N) (j : Fin 2)
+    (h : E.levelBasisPt L j = E.levelBasisPt L' j) :
+    (((Pi.single j 1 : Fin 2 → ZMod N) 0).val : ℤ) • L.1.1 +
+        (((Pi.single j 1 : Fin 2 → ZMod N) 1).val : ℤ) • L.1.2 =
+      (((Pi.single j 1 : Fin 2 → ZMod N) 0).val : ℤ) • L'.1.1 +
+        (((Pi.single j 1 : Fin 2 → ZMod N) 1).val : ℤ) • L'.1.2 := by
+  have h' := congrArg (fun m => m ≫ E.torsionι N) h
+  simp only [levelBasisPt, fullLevelHom, Category.assoc, Sigma.ι_desc,
+    E.pointToTorsion_torsionι] at h'
+  exact Subtype.ext h'
+
+/-- `(1 : ZMod N).val • R = R` for an `N`-torsion section: the valuation of `1` is congruent to `1`
+mod `N`, and `zsmul_eq_of_intCast_eq` turns that into equality of the scalar actions. -/
+theorem one_val_zsmul {R : E.Section} (hR : (N : ℤ) • R = 0) :
+    (((1 : ZMod N)).val : ℤ) • R = R := by
+  rw [zsmul_eq_of_intCast_eq R hR (b := 1) (by simp), one_smul]
+
+/-- …and `(0 : ZMod N).val • R = 0`. -/
+theorem zero_val_zsmul (R : E.Section) :
+    (((0 : ZMod N)).val : ℤ) • R = 0 := by
+  simp
+
+/-- **(the converse, THE RESULT)** A full level structure is determined by its two basis points: if
+two level structures have the same basis points they are equal.
+
+Together with `levelBasisPt_eq_sigmaι` and `levelBasisPt_glSmul` this closes the transition
+statement: two level structures whose transition columns are the constant columns of `g` satisfy
+`L' = g • L`, so `fullLevelPairing_glSmul` applies. -/
+theorem FullLevelPt.ext_of_levelBasisPt (L L' : E.FullLevelPt N)
+    (h : ∀ j : Fin 2, E.levelBasisPt L j = E.levelBasisPt L' j) : L = L' := by
+  have e00 : (Pi.single (0 : Fin 2) (1 : ZMod N) : Fin 2 → ZMod N) 0 = 1 := by simp
+  have e01 : (Pi.single (0 : Fin 2) (1 : ZMod N) : Fin 2 → ZMod N) 1 = 0 := by simp
+  have e10 : (Pi.single (1 : Fin 2) (1 : ZMod N) : Fin 2 → ZMod N) 0 = 0 := by simp
+  have e11 : (Pi.single (1 : Fin 2) (1 : ZMod N) : Fin 2 → ZMod N) 1 = 1 := by simp
+  have h0 := E.basisComb_eq_of_levelBasisPt_eq L L' 0 (h 0)
+  have h1 := E.basisComb_eq_of_levelBasisPt_eq L L' 1 (h 1)
+  rw [e00, e01, E.one_val_zsmul L.2.1.1, E.one_val_zsmul L'.2.1.1, E.zero_val_zsmul,
+    E.zero_val_zsmul, add_zero, add_zero] at h0
+  rw [e10, e11, E.one_val_zsmul L.2.1.2, E.one_val_zsmul L'.2.1.2, E.zero_val_zsmul,
+    E.zero_val_zsmul, zero_add, zero_add] at h1
+  exact Subtype.ext (Prod.ext h0 h1)
+
+/-- **(route β, THE TRANSITION STATEMENT)** If the transition columns of `L'` against `L` are the
+*constant* columns of a matrix `g ∈ GL₂(ℤ/N)`, then `L' = g • L`.
+
+This is what `fullLevelPairing_glSmul` consumes on each clopen piece of `levelTransitionCols`. -/
+theorem eq_glSmul_of_levelCoord (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (hc : ∀ j : Fin 2,
+      E.levelCoord hinv L (E.levelBasisPt L' j) (E.levelBasisPt_torsionπ L' j) =
+        LocallyConstant.const S (fun i => (g : Matrix (Fin 2) (Fin 2) (ZMod N)) i j)) :
+    L' = E.glSmul g L :=
+  FullLevelPt.ext_of_levelBasisPt E L' (E.glSmul g L) fun j => by
+    rw [E.levelBasisPt_eq_sigmaι hinv L L' j _ (hc j), E.levelBasisPt_glSmul g L j]
+
 end EllipticCurve
 
 end ModularCurves
