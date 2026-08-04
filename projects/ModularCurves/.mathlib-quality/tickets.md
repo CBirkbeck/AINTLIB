@@ -38700,3 +38700,40 @@ per Tier A2 into the converter and the descent:
   **`IsReduced S` enters only here**, at the step from "exact at every residue fibre" to "exact over
   `R`" — over a non-reduced base the nilpotent direction is exactly the `H¹(E₀, 𝒪)`-worth of
   counterexample recorded in `SelfAdjointN.lean:74` (`k[ε]/(ε²)`), i.e. [[seesaw-needs-reduced-base]].
+
+### [KM-SEESAW] progress — 2026-08-05, status in_progress
+
+- **2026-08-05**: PHASE 1's mandated first move (read Stacks §37.33's index) returned two findings, both
+  recorded above: the section does **not** contain the theorem of the square, but it does contain the
+  **theorem of the cube** (`0BF4`, verbatim quoted above) which *is* the classical route to the leaf; and
+  the section's foundation `0BDP` needs derived-category machinery mathlib lacks, while `Picard/` already
+  has a Čech surrogate.
+- **2026-08-05**: skeleton written, `ForMathlib/Seesaw.lean`, `lake build` green (4587 jobs). The parent
+  `exists_pullback_iso_of_fibrewise_trivial_of_isReduced` — 0EX7 at rank 1 — is **proved** from the two
+  sub-lemmas; the `Finite → Fintype + LinearOrder` upgrade on the cover works via `Fintype.ofFinite` and
+  `LinearOrder.lift' (Fintype.equivFin _)`.
+- **2026-08-05, B2 on my own first split (logged to `b2_log.jsonl`)**: feeding
+  `exists_away_orderedBaseCech_exact_of_residueField_exact` requires "fibrewise trivial ⟹ base-Čech exact
+  after `⊗ κ(p)` in every degree", which is **false** — `Function.Exact` at index `q` is exactness at
+  position `q+1`, i.e. `H^{q+1}(X_p, M_p) = 0`, and a fibrewise-*trivial* sheaf on a genus-1 fibre has
+  `H¹(E_p, 𝒪) = κ(p) ≠ 0`. Counterexample: `R = k`, `X = E/k`, `M = 𝒪_E`, any affine cover with
+  `card ι ≥ 2`. The tree's own `…_exactAt_succ` needing `hn : 1 ≤ n` (ample twists only) is the same
+  boundary. Statement of the *parent* (0EX7) is untouched and true.
+- **2026-08-05**: replanned to the **kernel** route — 0EX7 needs `h⁰(X_s, M_s)` constant `= 1`, i.e.
+  constant residue rank of `ker d⁰`, not exactness. `orderedBaseCech_kernel_finrank_of_fibre_trivial`
+  (arbitrary field `K`) is now **proved** from the residue-field form via
+  `LinearMap.finrank_ker_baseChange_eq` (`ForMathlib/BaseChangeKerCoker.lean:586`) and the
+  `Scheme.SpecToEquivOfField` bridging pattern lifted from `PoleSheafBaseCechHigher.lean:388`.
+- **Remaining leaves** (three, all in `ForMathlib/Seesaw.lean`, all documented in-file):
+  - `:118` the scalar tower `Γ(S,⊤) → κ(s) → K` — **already proved in the tree** but `private`
+    (`EllipticCurve/PoleSheafBaseCechHigher.lean:84`). Resolve by relocating to `ForMathlib/`, per
+    `DEBT.md` **KM-SEESAW-DEDUP**; do **not** copy the body.
+  - `:140` `orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial` — the geometric content:
+    `H⁰` of the base-Čech complex is `Γ(M)` (`baseSectionsIsoKernelOrderedBaseCechDifferential`),
+    base-change to `κ(s)` (`orderedBaseCechComplexBaseChangeIso`), `hfib` replaces `M_s` by `𝒪`, and
+    `hπ` evaluates `Γ(X_s, 𝒪) = κ(s)`.
+  - `:202` `exists_pullback_iso_of_kernel_finrank` — constant residue rank `1` + `IsReduced` ⟹ `ker d⁰`
+    locally free of rank `1` and the counit an isomorphism; glue with
+    `nonempty_unitObj_iso_of_normalized_glue`. **The only place `IsReduced` is used.**
+- Axioms on the two proved declarations: `propext` / `Classical.choice` / `Quot.sound` **+ `sorryAx`**
+  inherited from the three leaves — they are derivations, not axiom-verified results.
