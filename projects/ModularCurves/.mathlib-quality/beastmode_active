@@ -1,1 +1,1 @@
-FOCUS: WP-D3c-2c — transport torsionAlgebra/torsionPairAlgebra along a field extension; survey torsion_baseChange_isPullback and torsionAlgebra first
+FOCUS: WP-D3c-2c step 2 — transport torsion_baseChange_isPullback along isoSpec via IsPullback.of_iso; four commutations = isoSpec_hom_naturality

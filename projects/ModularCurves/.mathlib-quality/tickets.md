@@ -36849,3 +36849,32 @@ gives `Γ(E[N],⊤) ⊗[k] k'`, and `Scheme.ΓSpecIso` converts back to the carr
 `muNCarrierRingEquiv` does.
 
 Every tool in the recipe is now confirmed present. **This is the next session's first task.**
+
+## [WP-D3c-2c] step 2 landed (2026-08-04) — the square is now one of `Spec.map`s, axiom-verified
+
+`isPullback_specMap_torsion_baseChange` (`WeilPairing/TorsionBaseChange.lean`):
+
+```
+IsPullback (Spec.map ((E.torsionBaseChangeHom N g).appTop))
+           (Spec.map (((E.baseChange g).torsionπ N).appTop))
+           (Spec.map ((E.torsionπ N).appTop))
+           (Spec.map (g.appTop))
+```
+
+for `[IsAffine S]`, `[IsAffine T]`. **Five lines**: `IsPullback.of_iso` on
+`torsion_baseChange_isPullback` with the four `isoSpec`s, and — as predicted — all four
+commutation obligations are `(Scheme.isoSpec_hom_naturality _).symm`, written four times
+identically.
+
+The step-1 instances are what make this work: without `isAffine_torsion` /
+`isAffine_torsion_baseChange` registered, `isoSpec` does not elaborate at three of the four
+corners.
+
+`WeilPairing/TorsionBaseChange.lean`: three declarations, sorry-free, axiom-verified, in the
+root import. Root green at **9723 jobs**.
+
+**Remaining for WP-D3c-2c**: match this square against
+`AlgebraicGeometry.pullbackSpecIso k Γ(E[N],⊤) k'` — both are cartesian squares over
+`Spec k` with the same two legs, so `IsPullback.uniqueUpToIso` (or
+`IsPullback.isoIsPullback`) gives `Spec Γ(E_{k'}[N],⊤) ≅ Spec (Γ(E[N],⊤) ⊗[k] k')`, and
+`Scheme.ΓSpecIso` reads it back as a ring isomorphism, exactly as `muNCarrierRingEquiv` does.
