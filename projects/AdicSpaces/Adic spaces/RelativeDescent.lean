@@ -317,6 +317,7 @@ def keystoneHom : presheafValue E →+* presheafValue (imgDatum D₀ E hspanE) :
   exact UniformSpace.Completion.extensionHom (keystoneAlg D₀ hspanE)
     (keystoneAlg_continuous D₀ hspanE)
 
+omit [HasLocLiftPowerBounded A] in
 theorem keystoneHom_coe (x : Localization.Away E.s) :
     keystoneHom D₀ hspanE
       (@UniformSpace.Completion.coeRingHom _ _ E.uniformSpace
@@ -326,6 +327,7 @@ theorem keystoneHom_coe (x : Localization.Away E.s) :
   letI : IsUniformAddGroup (Localization.Away E.s) := E.isUniformAddGroup
   exact UniformSpace.Completion.extensionHom_coe _ _ x
 
+omit [HasLocLiftPowerBounded A] in
 theorem keystoneHom_continuous : Continuous (keystoneHom D₀ hspanE) := by
   letI : UniformSpace (Localization.Away E.s) := E.uniformSpace
   exact UniformSpace.Completion.continuous_extension
@@ -465,6 +467,7 @@ def keystoneInv : presheafValue (imgDatum D₀ E hspanE) →+* presheafValue E :
   exact UniformSpace.Completion.extensionHom (keystoneInvAlg D₀ hspanE hE)
     (keystoneInvAlg_continuous D₀ hspanE hE)
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem keystoneInv_coe (x : Localization.Away (imgDatum D₀ E hspanE).s) :
     keystoneInv D₀ hspanE hE
       (@UniformSpace.Completion.coeRingHom _ _ (imgDatum D₀ E hspanE).uniformSpace
@@ -479,6 +482,7 @@ theorem keystoneInv_coe (x : Localization.Away (imgDatum D₀ E hspanE).s) :
     (imgDatum D₀ E hspanE).isUniformAddGroup
   exact UniformSpace.Completion.extensionHom_coe _ _ x
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem keystoneInv_continuous : Continuous (keystoneInv D₀ hspanE hE) := by
   letI : UniformSpace (Localization.Away (imgDatum D₀ E hspanE).s) :=
     (imgDatum D₀ E hspanE).uniformSpace

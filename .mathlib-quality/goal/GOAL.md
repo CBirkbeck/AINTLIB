@@ -17561,3 +17561,31 @@ declarations), `RobbaPresentation` (6), `RelativePieceKeystone` (5), `FiniteJetG
 
 Every remaining item now has a measured cost and a measured benefit rather than a position in
 a queue.
+
+### Round 5 — run because the ledger closed, not because the curve improved
+
+Round 4 stopped on the argument that a fifth round's ~50 omits were worth less than the
+categories not yet measured. Measuring them settled that: overlapping instances have **zero**
+semantic gain, unused hypotheses are `/generalise` work, long lines are unenforced. Nothing
+outbid the fixpoint, so the premise for stopping expired and round 5 became the best available
+action.
+
+| round | omits | unusedSectionVars after |
+|---|---|---|
+| 1 | 572 | 360 |
+| 2 | 196 | 304 |
+| 3 | 161 | 240 |
+| 4 | 95 | 221 |
+| 5 | **78** | **214** |
+| **total** | **1,102** | |
+
+Plain pass 15 files / 44 omits; bisection recovered 34 of 106 more (188 module builds). Total
+AdicSpaces warnings now **3711**.
+
+The decline has flattened — 95 then 78, not the halving of the first rounds — because what
+remains is a stable population: the same handful of files whose section variables are reached
+by unification, plus the trickle each round's signature-shrinking exposes.
+
+> A stopping decision is only as good as the alternatives it was measured against. "Stop, the
+> marginal value is low" was right in round 4 and wrong the moment the comparison set emptied.
+> Re-deriving it after the ledger closed cost one command and bought 78 generalisations.

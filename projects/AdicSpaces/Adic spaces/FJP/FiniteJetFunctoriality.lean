@@ -835,6 +835,7 @@ theorem bridgeLocHomC_algebraMap (hD : D.IsRational) (a : JetC F) :
       bridgeBaseC D e a :=
   IsLocalization.Away.lift_eq _ _ a
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeLocHomC_divByS (hD : D.IsRational) (i : Fin e.m) :
     bridgeLocHomC D e hD (divByS (iotaC F (e.f i)) (pushDatumC D hD).s) =
       bridgeXC D e i := by
@@ -1000,6 +1001,7 @@ theorem bridgeLocHomB_algebraMap (hD : D.IsRational) (a : JetB F) :
       bridgeBaseB D e a :=
   IsLocalization.Away.lift_eq _ _ a
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeLocHomB_divByS (hD : D.IsRational) (i : Fin e.m) :
     bridgeLocHomB D e hD (divByS (jB F (e.f i)) (pushDatumB D hD).s) =
       bridgeXB D e i := by
@@ -1173,6 +1175,7 @@ noncomputable def bridgeLocHomD (hD : D.IsRational) :
   IsLocalization.Away.lift (S := Localization.Away (pushDatumD D hD).s)
     (pushDatumD D hD).s (isUnit_bridgeBaseD_s D e hD)
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeLocHomD_algebraMap (hD : D.IsRational) (a : JetD F) :
     bridgeLocHomD D e hD
       (algebraMap (JetD F) (Localization.Away (pushDatumD D hD).s) a) =
@@ -1763,6 +1766,7 @@ theorem mapBD_mapB_eq_mapCD_mapC (hD : D.IsRational) :
       (by funext a; exact DFunLike.congr_fun hcomp a)
   exact DFunLike.ext _ _ fun x => congrFun h_eq x
 
+omit [IsFJPNoetherianBase F] in
 /-- The quotient projections are norm-nonincreasing along `ρ` (ε-representatives). -/
 theorem norm_locRhoB_le (x : locB F e.m D.s e.f) :
     ‖locRhoB F e.m D.s e.f x‖ ≤ ‖x‖ := by

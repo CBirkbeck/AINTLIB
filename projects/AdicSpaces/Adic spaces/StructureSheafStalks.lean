@@ -559,6 +559,7 @@ theorem exists_common_rep (v : ↥(Spa A A⁺))
   · exact germ_limitRestrict inf_le_left ⟨h₁, h₂⟩ f
   · exact germ_limitRestrict inf_le_right ⟨h₁, h₂⟩ g
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Witness transport**: a `stalkVle`-witness descends to any pair of
 representatives after shrinking the neighbourhood. -/
 theorem stalkVle_elim {v : ↥(Spa A A⁺)}

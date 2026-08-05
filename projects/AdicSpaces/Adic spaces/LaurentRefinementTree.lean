@@ -510,6 +510,7 @@ theorem LaurentTree.toCoveringCovers_cover_base (t : LaurentTree A)
   exact ⟨D, (t.mem_toCoveringCovers_iff_mem_leaves D₀ D).mpr hD, hvD⟩
 
 omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
+omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in

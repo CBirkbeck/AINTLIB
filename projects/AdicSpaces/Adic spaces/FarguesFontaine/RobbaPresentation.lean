@@ -1115,6 +1115,7 @@ theorem wLoc_mk'_monomial {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
   rw [wLoc_mk' p F ϖ hρ0 hρ1, gaussValue_sPow p F ϖ hρ0 hρ1 k,
     gaussValue_p_pow_mul_teichmuller p F hρ1.le]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- **The twisted factorization of a monomial fraction**: extracting `zb^j`
 from the Teichmüller coordinate is multiplication by the generator's `j`-th
 power. -/
@@ -4631,6 +4632,7 @@ theorem teichPowGen₂_pow_mul_twist (zb : OF F)
           Nat.add_sub_cancel' hji,
           map_mul (algebraMap (Ainf p F) (Bloc p F ϖ))]
 
+omit [CharP F p] in
 /-- **The case-2 per-monomial twist at the fraction level.** -/
 theorem mk'_monomial_twist_factor₂ (zb : OF F)
     (hzb : perfectoidValuation p F (zb : F) ≠ 0)

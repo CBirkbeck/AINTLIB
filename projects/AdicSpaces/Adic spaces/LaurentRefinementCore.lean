@@ -448,6 +448,7 @@ theorem RationalLocData.interSamePair_span_eq_top' (D₁ D₂ : RationalLocData 
     rw [Finset.mul_def]; rfl
   rw [hT, Finset.coe_mul, ← Ideal.span_mul_span, h₁, h₂, Ideal.top_mul]
 
+omit [PlusSubring A] in
 open scoped Pointwise in
 /-- **Spanning is stable under `interSamePair`**: if both factors satisfy Wedhorn
 Definition 7.29's spanning condition `span Tᵢ = ⊤`, so does the intersection datum. -/
@@ -524,6 +525,7 @@ Base-INDEPENDENT (condition is `v(1) ≤ v(f)`).
       (algebraMap_mem_locSubring P {1} f b.2)
       (divByS_mem_locSubring P {1} f (Finset.mem_singleton_self 1))⟩
 
+omit [PlusSubring A] in
 /-- `interSamePair` with a `unitDatum` second factor spans as soon as the first
 factor is rational: the inserted denominator `s = 1` of `unitDatum` makes the second
 inserted set span outright (Wedhorn's Laurent piece `U₀ ∩ {v(f) ≤ 1}` is rational,
@@ -536,6 +538,7 @@ theorem RationalLocData.interSamePair_unitDatum_span_eq_top [IsTateRing A]
     (span_insert_eq_top_of_span_eq_top D₁.s h₁.span_eq_top)
     (span_eq_top_of_one_mem (Finset.mem_insert_self 1 {f}))
 
+omit [PlusSubring A] in
 /-- `interSamePair` with a `coUnitDatum` second factor spans as soon as the first
 factor is rational: `coUnitDatum`'s `T = {1}` spans outright (Wedhorn's Laurent piece
 `U₀ ∩ {v(f) ≥ 1}` is rational, Lemma 8.34(i) / wedhorn.txt:4230). -/
@@ -1189,6 +1192,7 @@ private theorem iteratedPlus_forwardLocHom_comp_algebraMap_continuous
   exact (algebraMap_continuous_loc (iteratedPlusDatum_B P D₀ f)).comp
     (canonicalMap_continuous D₀)
 
+omit [PlusSubring A] in
 /-- Continuity of the forward uncompleted hom to the completion (plus branch). -/
 theorem iteratedPlus_forwardToCompletion_continuous
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -2253,6 +2257,7 @@ noncomputable def iteratedMinus_backwardHom
     (iteratedMinus_backwardLocHom D₀ f hsub)
     (iteratedMinus_backwardLocHom_continuous P D₀ f hsub)
 
+omit [PlusSubring A] in
 /-- Forward completion hom acting on `coeRingHom a`: definitional unwind
 via `extensionHom_coe`. -/
 theorem iteratedMinus_forwardHom_coeRingHom
@@ -2554,6 +2559,7 @@ of (uncompleted) continuous ring homs, hence continuous via
 equiv `presheafValue_iteratedMinus_equiv` is therefore
 `Topology.IsInducing` in both directions. -/
 
+omit [PlusSubring A] in
 /-- Continuity of the minus-branch forward completion hom. -/
 theorem iteratedMinus_forwardHom_continuous
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]

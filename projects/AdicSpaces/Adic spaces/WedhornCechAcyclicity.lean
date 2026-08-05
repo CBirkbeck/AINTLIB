@@ -4370,6 +4370,7 @@ private theorem unitCover_relOverlap_aMb_isUnit
       ((unitCover_overlapDatum_B D₀ f).s)
   exact isUnit_of_mul_isUnit_right h4
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [DecidableEq (RationalLocData A)] in
 /-- v4.33 pair-equality proof for the **annulus datum** `R(f/1) ∩ R(1/f) ∩ D₀`: the shared
 pair of `R(f/1) ∩ D₀` and `R(1/f) ∩ D₀`, built from `interSamePair_P` applications so the
@@ -8193,6 +8194,7 @@ private theorem propA3_part1_gluing_restrict_eq
       hM_base_open hM_pieces hM_acyclic y hy U ⟨Vj, hVj⟩ hI_Vj hI_U).symm).symm
 
 
+omit [DecidableEq (RationalLocData A)] in
 omit [IsRingOfIntegralElements A⁺] in
 /-- **Part (iv) sub-lemma (c) sub-(glu)**: under the bilateral
 refinement-acyclicity hypotheses, gluing transfers from `V` (with

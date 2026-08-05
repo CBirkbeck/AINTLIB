@@ -152,6 +152,7 @@ theorem v_teichPi_ne_zero (hv : v ∈ Y p F ϖ) : ¬ v.vle (teichPi p F ϖ) 0 :=
     have := v.mul_vle_mul_left h ((p : Ainf p F))
     rwa [zero_mul, mul_comm] at this)
 
+omit [CharP F p] in
 /-- On `𝒴`, `v(p) < 1` strictly. From continuity of `v` and `p ∈ I`: the open set
 `{a : v(a) < v(p)}` contains some `I^N ∋ p^N`, so `v(p)^N < v(p)`, forcing `v(p) < 1`.
 
@@ -163,12 +164,14 @@ theorem vlt_p_one (hv : v ∈ Y p F ϖ) : vlt p F v (p : Ainf p F) 1 := by
     exists_pow_succ_vlt p F ϖ hv.1 (p_mem_Iinf p F ϖ) (v_p_ne_zero hv)
   exact vlt_one_of_not_vle_pow p F h2
 
+omit [CharP F p] in
 /-- On `𝒴`, `v([ϖ]) < 1` strictly. Same continuity argument as `vlt_p_one`. -/
 theorem vlt_teichPi_one (hv : v ∈ Y p F ϖ) : vlt p F v (teichPi p F ϖ) 1 := by
   obtain ⟨n, -, h2⟩ :=
     exists_pow_succ_vlt p F ϖ hv.1 (teichPi_mem_Iinf p F ϖ) (v_teichPi_ne_zero hv)
   exact vlt_one_of_not_vle_pow p F h2
 
+omit [CharP F p] in
 /-- Cofinality of `p`-powers: for `v ∈ 𝒴` and any `g` with `v(g) ≠ 0`, some `v(p^n)` lies
 strictly below `v(g)`. From continuity: `{a : v(a) < v(g)}` is an open neighbourhood of
 `0`, hence contains `I^n ∋ p^n`.
@@ -180,6 +183,7 @@ theorem exists_pow_p_vlt (hv : v ∈ Y p F ϖ) {g : Ainf p F} (hg : ¬ v.vle g 0
   obtain ⟨n, h⟩ := exists_pow_succ_vlt p F ϖ hv.1 (p_mem_Iinf p F ϖ) hg
   exact ⟨n + 1, h⟩
 
+omit [CharP F p] in
 /-- Cofinality of `[ϖ]`-powers, as for `exists_pow_p_vlt`. -/
 theorem exists_pow_teichPi_vlt (hv : v ∈ Y p F ϖ) {g : Ainf p F} (hg : ¬ v.vle g 0) :
     ∃ n : ℕ, vlt p F v (teichPi p F ϖ ^ n) g := by

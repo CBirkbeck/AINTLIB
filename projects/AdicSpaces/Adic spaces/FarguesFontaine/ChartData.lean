@@ -241,6 +241,7 @@ def chartData (u v a b : ℕ) : RationalLocData (Ainf p F) where
     exact span_chartMonomials_le_divBySIdeal p F ϖ u v a b
       (Iinf_pow_le_span_chartMonomials p F ϖ (a + b + 2) h1)
 
+omit [CharP F p] in
 /-- **The chart datum is rational** (Wedhorn Definition 7.29's openness): the span of
 `{p^{a+1}, [ϖ]^{b+1}}` contains the open `I_inf^{a+b+2}`. -/
 theorem isRational_chartData (u v a b : ℕ) :
@@ -717,6 +718,7 @@ theorem blocEquiv_divByS_teichPi (b : ℕ) (hb : 0 < b) :
         rw [map_mul]
         ring
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- Under the localization identification, the fraction `p^{a+1}/s` is `p^a/[ϖ]^b`. -/
 theorem blocEquiv_divByS_p (a b : ℕ) (hb : 0 < b) :
     blocEquivAwayChartS p F ϖ b hb
@@ -1121,6 +1123,7 @@ theorem tendsto_chartToBIProd_coe (a b : ℕ) (hb : 0 < b)
   refine (tendsto_chartToBIProd p F ϖ a b hb hπ1 hπ2 hr1 hr2).congr fun z => ?_
   rfl
 
+omit [CharP F p] in
 /-- The ring-topology instance at the opaque chart topology (elaborated once). -/
 theorem chartTopologicalRing (a b : ℕ) :
     @IsTopologicalRing (Localization.Away (chartS p F ϖ 1 b))
@@ -1281,6 +1284,7 @@ theorem chartFracPi_pow_mul_p_pow (e : ℕ) :
     rw [chartFracPi, mul_assoc, IsUnit.val_inv_mul, mul_one]
   rw [map_pow, map_pow, ← mul_pow, hone]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- `(p^a/[ϖ]^b)^t · [ϖ]^{bt} = p^{at}` in `Bloc`. -/
 theorem chartFracP_pow_mul_teichPi_pow (a b t : ℕ) :
     chartFracP p F ϖ a b ^ t

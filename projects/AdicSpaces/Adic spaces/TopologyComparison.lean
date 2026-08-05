@@ -762,6 +762,7 @@ noncomputable def presheafValueToQuotient (D : RationalLocData A)
     (locToQuotientOneSubfX_gen D.s)
     (locToQuotientOneSubfX_gen_continuous D) hcs ht0
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- `presheafValueToQuotient` on the dense image agrees with
 `locToQuotientOneSubfX_gen`. -/
 theorem presheafValueToQuotient_coe (D : RationalLocData A)
@@ -1197,6 +1198,7 @@ private theorem polynomial_quotient_in_range (s : A) (g : ↥(TateAlgebra A))
     obtain ⟨y, hy⟩ := hgk_range
     exact ⟨x + y, by rw [map_add, hx, hy]⟩
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [T2Space A] in
 /-- The localization `A[1/s]` maps densely into `A⟨X⟩/(1-sX)` for the quotient
 T-topology (Wedhorn Example 6.38).
 
@@ -2262,6 +2264,7 @@ theorem tateQuotientToPresheaf_comp_presheafToCanonicalQuotient (D : RationalLoc
     tateQuotient_roundtrip_apply D hb a,
     locLiftToPresheaf_eq_coeRingHom D]
 
+omit [PlusSubring A] in
 /-- The composite `presheafValueToCanonicalQuotient ∘ tateQuotientToPresheafHom`
 is the identity on `A⟨X⟩/(1-sX)` with the canonical quotient topology.
 

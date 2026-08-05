@@ -994,6 +994,7 @@ private theorem mk_Y_mul_mk_algebraMap_eq_one (b : B) :
   unfold TateAlgebra.bivariateOverlapIdeal
   exact neg_mem (Ideal.subset_span (Set.mem_insert_of_mem _ rfl))
 
+omit [PlusSubring B] in
 omit [IsHuberRing B] [HasLocLiftPowerBounded B] [IsTateRing B] [IsNoetherianRing B] [T2Space B] in
 /-- First hypothesis of `locTopology_continuous_lift`: the composite with `algebraMap B` is
 the quotient map on constants, whose continuity is supplied by the caller (the topology here
@@ -1020,6 +1021,7 @@ private theorem bivariateLocToQuotient_comp_algebraMap_continuous
           (algebraMap B ↥(TateAlgebra₂ B) a)) from funext heq]
   exact hmk
 
+omit [PlusSubring B] in
 omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 omit [IsTateRing B] [IsNoetherianRing B] [T2Space B] in
 /-- Second hypothesis of `locTopology_continuous_lift`: every `t ∈ T = {1, b, b²}` has
@@ -1177,6 +1179,7 @@ noncomputable def example638Bivariate_backwardHom
     hQ_complete
     hT0Q
 
+omit [HasLocLiftPowerBounded B] [IsNoetherianRing B] in
 /-- On the dense image `coeRingHom a`, `example638Bivariate_backwardHom` agrees
 with `bivariateLocToQuotient_atOverlap`. -/
 theorem example638Bivariate_backwardHom_coe
@@ -1387,6 +1390,7 @@ Uses `tateAlgebra₂_polynomial_decomp` (polynomial finite-support decomposition
 (`algebraMap`, `X`, `Y`) via `_canonicalMap`, `quotient_algebraMap_b_eq_X_bivariate`,
 and `_backwardHom_invS` implies agreement through the monomial decomposition. -/
 
+omit [HasLocLiftPowerBounded B] [IsNoetherianRing B] in
 /-- `example638Bivariate_backwardHom` is continuous (from the `presheafValue` canonical
 topology to `quotientBivariateOverlapIdealTopology` on the target) — it is a
 `UniformSpace.Completion.extension` of a continuous ring hom into a complete Hausdorff

@@ -657,6 +657,7 @@ theorem moduleFinite_of_ker_jB_fg (h : (RingHom.ker (jB F)).FG) :
   exact Submodule.smul_mem _ _ (Submodule.subset_span
     (Finset.mem_coe.mpr (Finset.mem_image_of_mem _ hx)))
 
+omit [IsFJPBase F] in
 /-- The ideal `Q²𝒞 ⊂ 𝓐` is not finitely generated ([FJP] Prop 2.4). -/
 theorem ker_jB_not_fg : ¬ (RingHom.ker (jB F)).FG := fun h =>
   not_moduleFinite_L F (moduleFinite_of_ker_jB_fg F h)

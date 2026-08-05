@@ -1347,6 +1347,7 @@ theorem _aux_nonOpen_hSpa_points_of_stronglyNoetherianTate
   exact _aux_nonOpen_hSpa_rationalOpen_lift (A := A) T s p hp hs
     (_aux_nonOpen_hSpa_spaPoint_exists (A := A) p hp hopen)
 
+omit [HasLocLiftPowerBounded A] in
 /-- **(Wedhorn 7.45 axiom-clean discharge — for use in Cor 8.32 proof, relocated
 upstream of `productRestrictionSub_injective_flat` so the latter's empty-cover
 edge case can route through it.)** Wedhorn's direct construction of a Spa-point

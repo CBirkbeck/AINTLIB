@@ -117,6 +117,7 @@ noncomputable def iteratedOverlap_forwardLocHom_to_B
     (R := A) (D₀.s * f)
     (iteratedOverlap_baseHom_DsTimes_f_isUnit P D₀ f hLocLift_B)
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 theorem iteratedOverlap_forwardLocHom_to_B_algebraMap
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (D₀ : RationalLocData A) [IsNoetherianRing (locSubring D₀.P D₀.T D₀.s)]
@@ -182,6 +183,7 @@ private theorem algebraMap_canMap_f_mul_divByS_one
       ← IsLocalization.mk'_mul, mul_one, one_mul]
   exact IsLocalization.mk'_self _ _
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- Forward image of `divByS (x * D₀.s) (D₀.s * f)`: equals
 `algebraMap_B (canMap x) * divByS 1 s_B`. Shared by the `(a, b = D₀.s)` cases. -/
 private theorem forward_divByS_mul_s_eq
@@ -218,6 +220,7 @@ private theorem forward_divByS_mul_s_eq
     (· * divByS (1 : presheafValue D₀) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s) hcm
   rwa [mul_assoc, algebraMap_canMap_f_mul_divByS_one P D₀ f hLocLift_B hs_B_eq, mul_one] at hmm
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- Forward image of `divByS (f * f) (D₀.s * f)`: equals
 `algebraMap_B (canMap f) * algebraMap_B (invS D₀)`. -/
 private theorem forward_divByS_ff_eq
@@ -263,6 +266,7 @@ private theorem forward_divByS_ff_eq
       mul_comm (algebraMap B _ (invS D₀)) (algebraMap B _ (D₀.canonicalMap D₀.s)),
       ← map_mul, hinv_canSs, map_one, mul_one]
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- Forward image of `divByS (a * f) (D₀.s * f)`: equals
 `algebraMap_B (coeRingHom (divByS a D₀.s))`. -/
 private theorem forward_divByS_mul_f_eq

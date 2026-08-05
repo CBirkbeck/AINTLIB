@@ -823,6 +823,7 @@ theorem locRhoC_mk (p : PC F m) :
     locRhoC F m g f (Ideal.Quotient.mk (IC F m g f) p) =
       Ideal.Quotient.mk (ID F m g f) (extRhoC F m p) := rfl
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem loc_square_commutes (x : locA F m g f) :
     locRhoB F m g f (locJB F m g f x) = locRhoC F m g f (locIotaC F m g f x) := by
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x

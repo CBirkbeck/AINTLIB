@@ -142,6 +142,7 @@ theorem isTopologicallyNilpotent_of_mem_Iinf {x : Ainf p F}
     Filter.eventually_atTop.mpr ⟨n, fun m hm ↦
       Ideal.pow_le_pow_right hm (Ideal.pow_mem_pow hx m)⟩
 
+omit [CharP F p] in
 /-- `p·[ϖ]` is topologically nilpotent in `A_inf`. -/
 theorem isTopologicallyNilpotent_p_teichPi :
     IsTopologicallyNilpotent ((p : Ainf p F) * teichPi p F ϖ) := by

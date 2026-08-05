@@ -1612,6 +1612,7 @@ theorem norm_sub_polyBall_trnc_le (n : ℕ) (F : ↥(unitBall (P E m))) :
 
 include htu hscale
 
+omit [CompleteSpace E] in
 /-- The workhorse: any `‖t‖ⁿ`-close polynomial has the same level-`n` class as the
 truncation. -/
 theorem mk_trnc_eq (n : ℕ) (F : ↥(unitBall (P E m)))
@@ -2033,6 +2034,7 @@ private theorem ballDenoms_isLocalization
       MvPolynomial.map_injective _ Subtype.val_injective
     rw [hinj h]
 
+omit [CompleteSpace E] in
 /-- `P E m` is the localization of its unit ball at the image of the powers of `t`. -/
 private theorem algebraMapSubmonoid_ballDenoms_isLocalization
     (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)

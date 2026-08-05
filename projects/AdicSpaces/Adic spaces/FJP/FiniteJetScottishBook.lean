@@ -87,6 +87,7 @@ theorem norm_Qa : ‖Qa F‖ = 1 := by
   rw [norm_sectionD, JetNorm.norm_def]
   simp
 
+omit [IsFJPBase F] in
 /-- `‖Q²‖ = 1` (the Gauss norm on `𝓐` is multiplicative). -/
 theorem norm_scottishWitness : ‖scottishWitness F‖ = 1 := by
   rw [scottishWitness, norm_JetA_pow, norm_Qa, one_pow]

@@ -236,6 +236,7 @@ theorem exists_ball_approx (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
   · have h2 := le_trans (le_max_right _ _) hmax
     rwa [BIProd_snd, valued_BlocToHatK] at h2
 
+omit [CharP F p] in
 /-- The completed plus-subring of a chart datum is closed: it is open
 (`presheafValuePlus_isRingOfIntegralElements`), and an open subgroup of a topological group is
 closed. -/
@@ -370,6 +371,7 @@ theorem teich_div_p_pow_mem_chartSubring (a b : ℕ) (j : ℕ) (c : OF F)
   · exact Set.mem_union_right _ (Set.mem_insert _ _)
   · exact Set.mem_union_left _ ⟨_, rfl⟩
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The `pow`-outside form of `AlocToBloc_teichPiInv_mul`: the two Teichmüller atoms are
 mutually inverse in `Bloc`, with the exponent outside the ring maps. -/
 private theorem AlocToBloc_teichPiInv_pow_mul (k : ℕ) :
@@ -555,6 +557,7 @@ private theorem mk_monomial_eq_chartFracP_pow_mul {a k i : ℕ} (c : OF F)
         generalize algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) = T
         ring
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- **(M3'') Large-exponent monomials are chart-subring elements directly**
 (`b = 1`): for `i ≥ ka + k`, the monomial fraction `p^i[c]/(p[ϖ])^k` is
 `chartFracP^k` times an `A_inf`-image. -/
@@ -648,6 +651,7 @@ private theorem mk_monomial_eq_teich_mul_pInv_pow {k i : ℕ} (hik : i ≤ k) {c
           congr 1
           omega]
 
+omit [CharP F p] in
 /-- **(M1'') Small-exponent monomials are chart-subring elements**: for
 `i ≤ k` with the left-endpoint bound `|c| ≤ |ϖ|^{2k−i}`, the monomial
 fraction `p^i[c]/(p[ϖ])^k` is an `m1`-form element. -/
@@ -749,6 +753,7 @@ private theorem chartFracP_pow_regroup (a k d : ℕ) (hd : d ≤ k * a) (c'' : O
   generalize (algebraMap (Ainf p F) (Bloc p F ϖ)) (teichPi p F ϖ) = T
   ring
 
+omit [CharP F p] in
 /-- **(M2'') Middle-zone monomials: the `a`-th power identity** (`b = 1`):
 for `0 < d ≤ ka`, the `a`-th power of the monomial fraction
 `p^{k+d}[c]/(p[ϖ])^k` with the right-endpoint bound `|c|^a ≤ |ϖ|^{ka−d}` is
@@ -1194,6 +1199,7 @@ theorem tendsto_max_const_mul_pow (c₁ c₂ : NNReal) :
   have := h1.max h2
   simpa using this
 
+omit [CharP F p] in
 /-- The completed plus-subring of the chart datum is closed: it is an open additive
 subgroup, and open subgroups are closed. -/
 private theorem isClosed_completedPlusSubring (a : ℕ) :
