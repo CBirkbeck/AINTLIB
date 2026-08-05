@@ -442,3 +442,97 @@ log has a **dominant failure shape** across the project, and it is the one that 
 **Actionable rule for this project**: when a leaf replaces a source hypothesis with something derived
 from it, that substitution is the first thing to attack. In both of today's cases one edge-case
 instantiation (genus-1 `H¹ ≠ 0`; `𝒪(P)` of degree 1) killed the leaf immediately.
+
+## Round 3 — second opinion (gpt-5.6-sol, max effort), and the primary-source verification that settles it
+
+### First: the reviewer's headline objection does NOT apply to the code — my question was defective
+
+The review opens with a "preliminary fatal issue": that `κ_raw(Q) = 𝒪(D_Q) ⊗ 𝒪(D_0)^{-1}` does not land in
+`ker(0^*)`, so `kappa_mem_ker` and `(★)` would both be false. Its counterexample is correct *for the raw
+class*: with `T = C`, `E_T = C × C → C`, `Q(t) = (t,t)`, one gets `0^*κ_raw(Q) ≅ 𝒪_C([0])`, of degree `1`.
+
+**But the tree does not use the raw class.** Verified directly:
+* `kappa E hsm t Q := (sectionToPicRel …).1` (`Picard/SelfAdjointN.lean:173`);
+* `kappa_eq_picRelProj` (`:222`) — `kappa = picRelProj (sectionCls Q * zeroCls⁻¹)`;
+* `picRelProj` (`Picard/RelativePic.lean:81`) is exactly `x ↦ x * (f_T^*(0_T^* x))⁻¹`, and
+  `picRel := (Pic.map (baseChangeZero …)).ker` (`:57`);
+* so `kappa_mem_ker` (`:230`) is true **by construction** — it is `MonoidHom.mem_ker.mp (…).2`.
+
+That is precisely the `κ⁰ = κ_raw ⊗ f^*(0^*κ_raw)^{-1}` normalisation the review prescribes as the fix.
+**I wrote the question with the normalisation dropped**, so the reviewer correctly attacked what I wrote
+rather than what the tree does. Recorded because the same slip in a docstring would mislead the next
+reader: `SelfAdjointN.lean`'s `κ_T(Q) = [𝒪(Q − 0)]` shorthand reads as the raw class and is not.
+
+### Findings that DO survive against the code
+
+| # | finding | status |
+|---|---|---|
+| 1 | the 7-term cube I proposed is wrong — needs an 8th factor `p_{E³}^*(e^*A)^{-1}`, or `A^{rig} = A ⊗ f^*(e^*A)^{-1}`, else 0BF4's hypothesis (2) fails since `e^*𝒪(D_0) ≅ ω^{-1}` | **my plan was wrong** |
+| 2 | 0BF4 hypothesis (4) — `Z` connected — **fails for arbitrary `T`**; must reuse 0BF4's *proof* (the triviality locus is open-and-closed and meets the zero section on every component) rather than instantiate its statement | **my plan was wrong** |
+| 3 | pulling back along `(Q,Q',0) : T → E_T³` yields a bundle on `T`, not an iso on `E_T`; the correct map is `u ↦ (u, −Q, −Q')` | **my plan was wrong** |
+| 4 | **0EX7 is not used in 0BF4's proof** (chain: 0BDP → 0BF0 → 0BF3 + Künneth/base-change) | confirms Q3's suspicion |
+| 5 | the `ℓ/v` line-and-vertical route cannot work globally — a global `ℓ/v` would make `(P)+(Q)−(P+Q)−(0)` principal, i.e. give the exact iso already disproved | agrees with `SelfAdjointN`'s own rejection |
+| 6 | my degree-`2`-vs-`4` argument is **valid**, but its stated *reason* is not what the counterexample shows: in the constant family the normal bundle is **trivial**; `0^*I(D_Q)^{⊗2}` has degree `−2` and `0^*I(D_{2Q}) ≅ 𝒪(−[2]^*[0])` degree `−4`. `SelfAdjointN.lean:236`'s "the normal bundle is generally nontrivial" is a *different* (also true) point | docstring reason to correct |
+| 7 | **Katz–Mazur Theorem 2.1.2 states the leaf verbatim for arbitrary `S`** | **the answer — verified below** |
+| 8 | a Picard-*class* equality does not yield a pairing; normalized isomorphisms + base-change compatibility + cubical cocycle/symmetry are a separate coherence leaf | real, and consistent with `SelfAdjointN`'s "rigidification trap" note |
+
+### The primary-source verification — KM 2.1.2, book p. 63 (`refs/…/katz-mazur-arithmetic-moduli-FULL.pdf` p. 74)
+
+(2.1.1) fixes the notation: `I(P)` is "the ideal sheaf of `P` viewed as an effective Cartier divisor of
+degree one in `E`", and `I⁻¹(P)` the inverse ideal sheaf. Then, verbatim:
+
+> "**THEOREM 2.1.2 (Abel).** There exists a unique structure of commutative group-scheme on `E/S` such
+> that for any `S`-scheme `T`, and any three points `P, Q, R` in `E(T) = E_T(T)`, we have
+> `P + Q = R`
+> if and only if there exists an invertible sheaf `ℒ₀` on `T` and an isomorphism of invertible sheaves on
+> `E_T`
+> `I⁻¹(P) ⊗ I⁻¹(Q) ⊗ I(0) ≃ I⁻¹(R) ⊗ f_T^*(ℒ₀)`."
+
+**Lean ↔ source match.** Put `R = P + Q` and invert: `I(P) ⊗ I(Q) ≅ I(P+Q) ⊗ I(0) ⊗ f_T^*(ℒ₀^{-1})`.
+That **is** `exists_invertible_tensor_idealModule_add` (`Picard/SelfAdjointN.lean:267`) with `N' = ℒ₀^{-1}`
+— same four ideal sheaves, same `f^*`-correction, arbitrary `S`, no reducedness, no invertibility of `N`.
+The leaf is a **transcription**, not a derivation.
+
+### KM's proof (book pp. 64–66) — and why it needs neither the cube nor the seesaw
+
+1. Reduce to: `E(T) → Pic^{(1)}(E_T/T)`, `P ↦ [I⁻¹(P)]`, is **bijective**, where `Pic^{(1)}` is
+   fibrewise-degree-one invertible sheaves modulo `ℒ ∼ ℒ ⊗ f_T^*ℒ₀`. Given bijectivity, `I⁻¹(P) ⊗ I⁻¹(Q) ⊗
+   I(0)` is fibrewise degree one, hence of the form `I⁻¹(R) ⊗ f^*ℒ₀` for a **unique** `R` — which both
+   defines the group law and proves the theorem.
+2. Zariski-local on `S`, using `f_*(𝒪_E) = 𝒪_S` — **this is the tree's `UniversallyOConnected`**.
+3. Finite presentation reduces to `S` affine **noetherian**.
+4. The crux: for `ℒ` fibre-by-fibre of degree one, `f_*ℒ` is invertible and of formation compatible with
+   arbitrary base change, and `R¹f_*ℒ = 0`. KM's reason: `R¹f_*` is compatible with base change (`f`
+   proper and flat) and over an algebraically closed field `H¹(E, ℒ) = 0` because `deg ℒ = 1 > 2g − 2 = 0`;
+   then Nakayama. Cites **[Mum 4, p. 53]** (Mumford, *Abelian Varieties*) for "`R¹f_*ℒ = 0` ⟹ `f_*ℒ`
+   locally free and base-change compatible".
+5. Pick an `𝒪_S`-basis `ℓ` of `f_*ℒ` Zariski-locally; `(ℒ, ℓ)` defines an effective Cartier divisor.
+
+**The decisive structural point.** KM needs `H¹ = 0`, and it *has* it — because the sheaves in play are
+**fibrewise degree one**, where `deg > 2g − 2`. Nothing here is a seesaw, and nothing needs the base
+reduced. That is exactly why KM 2.1.2 is stated over an arbitrary `S`.
+
+**Consequence: `ForMathlib/Seesaw.lean` is off the critical path.** 0EX7 is used neither by 0BF4 (per the
+review) nor by KM 2.1.2 (per the source). Its two remaining leaves need not be proved for DS4. And the
+reducedness / universal-pair / reduced-seesaw apparatus in `SelfAdjointN.lean`'s route sections is
+likewise unnecessary — it was solving a problem (`H¹ ≠ 0` for degree-zero sheaves) that KM sidesteps by
+never leaving degree one.
+
+**And the tree already has KM's step 4, for exactly the right sheaf.**
+`FibrewiseElliptic.sectionPoleSheafPower_residueField_orderedBaseCech_exactAt_succ`
+(`EllipticCurve/PoleSheafBaseCechHigher.lean:295`) gives positive-degree Čech exactness for `𝒪(n[0])`
+under `hn : 1 ≤ n` — i.e. `H¹ = 0` in exactly the degree-`≥ 1` range KM uses — and
+`…_field_orderedBaseCech_kernel_finrank` (`:360`) gives `h⁰ = n`, so `h⁰ = 1` at `n = 1`. The `hn : 1 ≤ n`
+that made those results *useless* for the seesaw is precisely what makes them *right* for KM 2.1.2.
+
+### Verdict of the three rounds
+
+The route is **KM 2.1.2, transcribed**, and the tree is much closer to it than to anything I planned:
+`UniversallyOConnected` (step 2) ✓ proved; Noetherian approximation (step 3) ✓ in `Picard/InvertibleSheaf
+NoetherianSmoothStage.lean`; `H¹ = 0` and `h⁰ = 1` for degree-one sheaves (step 4) ✓ in
+`PoleSheafBaseCechHigher.lean`; effective-Cartier-divisor-from-a-section (step 5) ✓ in
+`EllipticCurve/PoleSheaf.lean`. What is genuinely missing is the **bijectivity of
+`E(T) → Pic^{(1)}(E_T/T)`** — one internal node with the four steps above as its children — plus finding 8's
+coherence leaf.
+
+**Do not** build: the cube, the seesaw, the universal-pair/reduced-seesaw route, or the `ℓ/v` route.
