@@ -684,3 +684,89 @@ out. Flagged as the node most likely to expand.
 **Gate NOT passed.** But the tree is now a transcription with a page per node, the one real API gap is
 named and sourced (Mumford AV p. 53 Cor. 3), and the two false-leaf traps are understood well enough that
 the attack on L4 caught the same collapse *before* it was written this time.
+
+---
+
+# Rounds 7–9
+
+## Round 7 — L7's source secured (KM Lemma 1.2.7, book p. 11 = pdf 22)
+
+The converse half, verbatim:
+
+> "Conversely, if `D` is an effective Cartier divisor in `C/S`, proper over `S` of degree one, then we have
+> a diagram `D ↪ C → S` in which the diagonal arrow is an isomorphism (because locally on `S`, say
+> `S = Spec(R)`, it turns the affine ring of `D` into an `R`-algebra which is an invertible `R`-module,
+> i.e., into `R` itself). Q.E.D."
+
+**Lean ↔ source match.** L7 asserts: a `RelEffCartierDiv π` proper over `S` with fibre degree `1`
+everywhere is `sectionDivisor π z hz` for some section `z`. The quote gives exactly that, and gives the
+proof in one sentence — `Γ(D)` is an invertible `R`-module, hence free of rank one, hence `D ≅ S`. A
+genuine leaf, and a cheap one.
+
+**Attacks.** [1] No contradicting statement in the tree; the *forward* direction is `sectionDivisor_degree`
+(`LevelStructure/CartierDivisor.lean:186`) and agrees. [2] Edge cases: degree `0` (`D = ∅`) and degree
+`≥ 2` are excluded by hypothesis and would both make the diagonal non-iso, so the hypothesis is not
+over-specified. [3] Properness over `S` is needed — without it `Γ(D)` need not be finite locally free.
+[4] No drift. **SURVIVED.**
+
+## Round 8 — Step 2.5 attempted, and it is BLOCKED on two missing definitions
+
+The skeleton cannot be written yet. Checked, not assumed:
+
+| vocabulary the tree needs for the KM tree | status |
+|---|---|
+| `RelEffCartierDiv.degree D s` | **exists** — `LevelStructure/CartierDivisor.lean:108` |
+| fibrewise degree of an *invertible sheaf* | **absent** — only prose mentions of "fibrewise" |
+| `Pic⁽¹⁾(E_T/T)` = fibrewise-degree-one classes modulo `f_T^*` | **absent** — the notion does not exist |
+| `R¹f_*` / higher pushforward | **absent entirely** |
+| KM 1.2.7's converse (degree-one divisor ⟹ section) | **absent** |
+
+So gate condition 2 is blocked behind **two prerequisite definitions** (fibrewise degree of an invertible
+sheaf; `Pic⁽¹⁾`), which are themselves an API-design step, not leaves.
+
+**But `R¹f_*` is not needed.** The tree's Čech formulation expresses L3 and L4 without any derived functor:
+L3 becomes "the base-Čech complex is exact at position 1 after base change to each residue field" — which
+is literally `PoleSheafBaseCechHigher`'s `exactAt_succ` shape, already proved for `𝒪(n[0])`, `n ≥ 1` — and
+L4 becomes "`ker d⁰` is invertible", the `kernel_finrank` shape. This is why the Čech layer exists: it is
+the derived-functor-free surrogate, and the degree-one restriction that made it useless for a seesaw is
+exactly the range KM works in.
+
+## Round 9 — a structural simplification the source's own framing hides
+
+KM proves *full bijectivity* of `E(T) → Pic⁽¹⁾` because KM is **constructing the group law** — 2.1.2 says
+"there exists a unique structure of commutative group-scheme … such that …". **The tree already has the
+group law**: `(E.baseChange t).Point (𝟙 T)` carries `AddCommGroup`, and `kappa`/`kappa_add`/`kappa_nsmul`
+are proved against it.
+
+So the leaf `R` is not "construct the group law". It is: **the tree's existing group law agrees with the
+Abel/Picard one on the specific sheaf `I⁻¹(P) ⊗ I⁻¹(Q) ⊗ I(0)`.** That needs the Abel map's injectivity
+plus a surjectivity statement *only for that sheaf*, not the full `Pic⁽¹⁾` bijection — and it is why the
+leaf can be stated (as it already is in `SelfAdjointN.lean:267`) with no mention of `Pic⁽¹⁾` at all.
+
+**This cuts L0's eight leaves down to what R actually consumes**: L3 + L4 for that sheaf (Čech form,
+partially present), L5 + L6 + L7 to turn the resulting basis into a section, and an identification of that
+section with `P + Q` in the tree's group law. L1, L2, L8, L10 and the `Pic⁽¹⁾` definition are needed only
+for KM's *uniqueness* claim, which the tree does not need.
+
+**Caution recorded.** This is a deviation from the source's structure — exactly the move that produced two
+false leaves earlier this session. It is admissible here only because the omitted parts are KM's
+*construction of a group law the tree already has*, not steps of the isomorphism argument. The next round
+must verify that claim by checking how the tree's group law was in fact constructed; if it was built from
+a Weierstrass chart, then "the two group laws agree" is itself a theorem needing its own decomposition,
+and this simplification is premature.
+
+## Gate after nine rounds
+
+| # | condition | verdict |
+|---|---|---|
+| 1 | leaves discharged or explicit API gap | **partial** — L4 named + sourced; L5/L8 unlocated; L3 partial |
+| 2 | skeleton compiles | **BLOCKED** — needs the two prerequisite definitions above |
+| 3 | verbatim quote per leaf | R ✓, L0's five steps ✓, L3 ✓, L4 ✓, **L7 ✓ (this round)** |
+| 4 | adversarial pass | L3, L4, L0, **L7** done; L1/L2/L5/L6/L8/L9/L10 not |
+| 5 | prior-B2 log | ✓ — both prior B2s are structurally avoided, since KM stays in degree one |
+| 6 | mirrors the source | ✓ for rounds 4–7; **round 9's simplification deliberately departs from it and is flagged, not adopted** |
+| 7 | single-conclusion | ✓ |
+
+**Still not passed**, and the binding blocker is now precise: two definitions (fibrewise degree of an
+invertible sheaf, `Pic⁽¹⁾`) must be designed before any skeleton exists, unless round 9's simplification
+survives its verification — in which case neither definition is needed.
