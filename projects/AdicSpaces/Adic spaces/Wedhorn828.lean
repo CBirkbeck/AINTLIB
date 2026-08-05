@@ -199,6 +199,25 @@ private theorem tateAlgebra_flat_faithful : Module.Flat A ↥(TateAlgebra A) := 
 
 omit [PlusSubring A] [HasLocLiftPowerBounded A] [IsStronglyNoetherian A]
   [CompatiblePlusSubring A] in
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [IsStronglyNoetherian A] in
+/-- The `μ`-image of a pure tensor `a ⊗ₜ p`, transported through `restrictedModuleA_equiv`, is
+just multiplication by `algebraMap a`. Both sides are checked coefficientwise. -/
+private theorem restrictedModuleA_equiv_muMap_tmul (a : A) (p : ↥(TateAlgebra A)) :
+    restrictedModuleA_equiv (muMap (A := A) (M := A) (a ⊗ₜ[A] p)) =
+      algebraMap A ↥(TateAlgebra A) a * p := by
+  have hval : ∀ s, (restrictedModuleA_equiv (muMap (A := A) (M := A)
+      (a ⊗ₜ[A] p))).val s = a * p.val s := by
+    intro s
+    change (muMap (A := A) (M := A) (a ⊗ₜ[A] p)).val s = a * p.val s
+    simp only [muMap, TensorProduct.lift.tmul, LinearMap.mk₂_apply]
+    rw [smul_eq_mul, mul_comm]
+  apply TateAlgebra.ext; intro n
+  rw [TateAlgebra.coeff_algebraMap_mul]
+  change (restrictedModuleA_equiv (muMap (A := A) (M := A) (a ⊗ₜ[A] p))).val
+    (TateAlgebra.toIndex n) = a * TateAlgebra.coeff n p
+  rw [hval]; rfl
+
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [IsStronglyNoetherian A] in
 /-- **Faithful `mem_ideal_map_of_forall_coeff_mem`** (Lemma 8.31(2) input, no ring of
 definition `A₀`): if every coefficient of `h ∈ A⟨X⟩` lies in the ideal `I`, then
 `h ∈ I · A⟨X⟩`.
@@ -260,20 +279,7 @@ private theorem mem_idealMap_of_forall_coeff_mem (I : Ideal A) (h : ↥(TateAlge
   -- Generator case: `μ_A ((I.subtype ⊗ id) (i₀ ⊗ p)) = i₀ • (coeffs of p)`,
   -- which through `restrictedModuleA_equiv` is `algebraMap ↑i₀ * p`.
   simp only [TensorProduct.map_tmul, LinearMap.id_coe, id_eq, Submodule.subtype_apply]
-  have hval : ∀ s, (restrictedModuleA_equiv (muMap (A := A) (M := A)
-      ((i₀ : A) ⊗ₜ[A] p))).val s = (i₀ : A) * p.val s := by
-    intro s
-    change (muMap (A := A) (M := A) ((i₀ : A) ⊗ₜ[A] p)).val s = (i₀ : A) * p.val s
-    simp only [muMap, TensorProduct.lift.tmul, LinearMap.mk₂_apply]
-    rw [smul_eq_mul, mul_comm]
-  have : restrictedModuleA_equiv (muMap (A := A) (M := A) ((i₀ : A) ⊗ₜ[A] p)) =
-      algebraMap A ↥(TateAlgebra A) (i₀ : A) * p := by
-    apply TateAlgebra.ext; intro n
-    rw [TateAlgebra.coeff_algebraMap_mul]
-    change (restrictedModuleA_equiv (muMap (A := A) (M := A) ((i₀ : A) ⊗ₜ[A] p))).val
-      (TateAlgebra.toIndex n) = (i₀ : A) * TateAlgebra.coeff n p
-    rw [hval]; rfl
-  rw [this]
+  rw [restrictedModuleA_equiv_muMap_tmul (i₀ : A) p]
   exact Ideal.mul_mem_right _ _ (Ideal.mem_map_of_mem _ i₀.2)
 
 omit [PlusSubring A] [HasLocLiftPowerBounded A] [IsStronglyNoetherian A]

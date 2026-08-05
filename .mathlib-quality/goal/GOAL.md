@@ -16651,3 +16651,70 @@ statement about `pairSubring₂` / `mvPairSubring`, but not one about what both 
 Re-stating the core over bare `MvPowerSeries (Fin n) A` put it below both vocabularies. The rest
 of that duplication (the surrounding 40c, which does mention the subrings) still needs the file
 reorganisation.
+
+**A uniform dedent is wrong when the lifted region has two nesting levels.** Lifting the tail of
+`mem_idealMap_of_forall_coeff_mem` I took a region containing
+
+```lean
+  have hval : ∀ s, … := by      -- indent 2, body at 4  → must stay exactly as-is
+    intro s
+    …
+  have : … := by                -- header dropped; its body at 4 → becomes the lemma's proof at 2
+    apply TateAlgebra.ext
+    …
+```
+
+and dedented *everything* at indent ≥ 4 by two. That moved `hval`'s body out of its own `by`
+block, producing `unsolved goals` on the `have` and `introN failed` on the orphaned `intro s`.
+
+> Dedent per *fragment*, not per region. A lift that keeps some `have`s intact while promoting
+> another's body to top level has two indentation regimes in one slice, and only the promoted
+> part shifts.
+
+Sixth indentation-class error of the campaign, and the first where the *region* rather than the
+*amount* was wrong.
+
+**A lifted lemma's section-variable appetite propagates to the target's *callers*.** Second
+occurrence, and the symptom is at two removes from the cause:
+
+```
+Wedhorn828.lean:324  failed to synthesize PlusSubring A     (in fSubX_saturated_faithful)
+Wedhorn828.lean:361  failed to synthesize PlusSubring A     (in oneSubfX_saturated_faithful)
+```
+
+Neither line is in my lemma, nor in the target. The chain: the new lemma auto-included
+`[PlusSubring A]`; the target inherited the requirement by *calling* it; the target's callers
+cannot supply it. `Wedhorn828.lean` has **96** `omit [PlusSubring A] [HasLocLiftPowerBounded A]
+[IsStronglyNoetherian A]` lines — it is the file's default posture, and the neighbouring
+declaration carries exactly that line.
+
+> **Before lifting, copy the neighbouring declaration's `omit` line.** Auto-inclusion is
+> per-declaration and invisible in the source, so a new lemma silently widens the instance
+> requirements of everything downstream of its caller. In a file where nearly every
+> declaration omits the same variables, omitting them is the *default*, not an optimisation.
+
+Cheap pre-flight check, now standard: `grep -c '^omit ' <file>` and read the `omit` line above
+the nearest neighbour.
+
+### `mem_idealMap_of_forall_coeff_mem` CLEARED 51 → 36 (board 19 → 18) — and my omit diagnosis was wrong twice
+
+`restrictedModuleA_equiv_muMap_tmul` (11c): the `μ`-image of a pure tensor, transported through
+`restrictedModuleA_equiv`, is multiplication by `algebraMap a`. Checked coefficientwise.
+
+**Correction to the entry above.** I wrote that the fix was to copy the neighbour's `omit` onto
+the *new lemma*. That did not work — the errors moved by one line and stayed. The requirement
+had to be omitted on the **target** as well:
+
+* the new lemma auto-includes `[PlusSubring A]`;
+* the target inherits it by calling the lemma;
+* the target's *callers* (`fSubX_saturated_faithful`, `oneSubfX_saturated_faithful`) omit it,
+  so the call fails **in them**.
+
+Omitting on the lemma alone leaves the target still demanding it. The honest rule:
+
+> When a lift introduces a section-variable requirement, `omit` it on **every declaration in the
+> new call chain** — the lemma *and* the caller that now invokes it. The error surfaces two
+> removes away, in the caller's callers, which is why one `omit` looked sufficient and was not.
+
+Four builds for a 15-line lift: dedent region (two nesting levels in one slice), `rw [this]`
+as an anchor (2 occurrences), omit on the lemma, omit on the target. None about the mathematics.
