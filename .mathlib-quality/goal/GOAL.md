@@ -17516,3 +17516,48 @@ Total AdicSpaces warnings 3,726 → 3,703.
 The right fix for this category is not per-declaration `omit`s at all — it is editing the
 ~30 `variable` blocks these binders come from, which is a cross-cutting change and coordinator
 work under a freeze. Recorded as such.
+
+## The 109 unreferenced variable names are 107 unused *hypotheses*
+
+Classified against the source, 107 of the 109 sit in a **declaration's binder list**, not in a
+tactic block or a structure field. Each one is a hypothesis the proof never touches — which
+means the declaration is strictly **stronger than its statement claims**.
+
+47 declarations, 109 binders, written out in full as
+`projects/AdicSpaces/.mathlib-quality/goal/UNUSED-HYPOTHESES.md`
+(file, line, declaration name, binder names). Concentrated in `WedhornCechAcyclicity` (13
+declarations), `RobbaPresentation` (6), `RelativePieceKeystone` (5), `FiniteJetGraphKoszul` (5).
+
+**Deliberately not fixed, and deliberately not silenced.** The two available actions are:
+
+* rename to `_h` — the mathlib marker for a binder that is *intentionally* unused. That is
+  false here: these are *accidentally* unused, and the warning is the only record of it.
+  Silencing would delete the finding.
+* drop the hypothesis — the correct fix, and a real generalisation, but it is a **statement**
+  change: every call site loses a positional argument. That is `/generalise` lane work, which
+  under this project's worker system stops at `state:review` for the coordinator rather than
+  being merged by the producer.
+
+> Not every linter warning wants to be zero. This one is carrying information — 47 theorems
+> that can be strengthened — and the cheap fix is the one that destroys it. The deliverable is
+> the list, not a clean build log.
+
+### Category ledger, closed
+
+| category | count | disposition |
+|---|---|---|
+| heartbeat raises | 0 | **Task 1 complete** |
+| proofs > 50 LOC | 6 | **Task 2 complete** — 2 producer `sorry`s, 4 `letI` walls |
+| unusedSectionVars | 714 → ~221 | 1,024 omits landed; halving curve, stopped on the curve |
+| overlapping instances | 3,059 | **measured and closed** — 26% acceptance, ~30h, zero semantic gain |
+| unused hypotheses | 109 | **listed** as a `/generalise` backlog; silencing rejected |
+| no-op `change` / `intro` | 8 | fixed |
+| duplicate lemmas | 3 families | merged; causes recorded |
+| dead private code | 3 | removed |
+| copyright headers | 16 | added |
+| `haveI` → `have` | 1,288 | 1,229 converted, 59 justified exceptions |
+| long lines | 294 | not taken — linter disabled, 2/3 in three 4.8k-line files |
+| `letI` triple | ~1,109 blocks | design decision, not a cleanup pass |
+
+Every remaining item now has a measured cost and a measured benefit rather than a position in
+a queue.
