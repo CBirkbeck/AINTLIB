@@ -17239,3 +17239,53 @@ Converting them is a different change with a different risk, and it is not a sty
 | `letI` → `let` | 2394 | semantics, not style — see above |
 | `_sub_lemma_L5_x_y_…` rename | 10 uses / 4 files | cross-file rename = coordinator work under a freeze |
 | the `letI` instance triple | ~1109 repeated blocks | needs a bundled structure or a `local macro` — a design decision |
+
+## The `unusedSectionVars` sweep: 696 linter-supplied fixes that are **not independent**
+
+The green full build is itself the best audit available. Classified, its 4,398 AdicSpaces
+warnings are:
+
+| warning | count |
+|---|---|
+| overlapping instance parameters | 3235 |
+| automatically included section variable unused | 714 |
+| variable name not explicitly referenced | 109 |
+| declaration uses `sorry` | 107 |
+| `change` tactic does nothing | 5 |
+| unused simp argument | 4 (all in `Vendored/`) |
+
+The second row looked like the ideal mechanical target: the linter names the file, the line,
+**and the exact `omit … in` line to insert**, and each fix is a genuine *generalisation* — the
+declaration sheds hypotheses it never used. 696 records, 652 with a supplied fix, 94 files.
+
+Validated on `SpaVIso` (37 records, 6 dependants): 28 omits inserted, module green. Swept the
+other 93 files. Then four full-library gates, in order:
+
+1. **6 files failed.** One was a placement bug of mine — `omit` landed *between* a docstring
+   and an `@[simp]`, because the walk-up checked "docstring, then modifiers" once instead of
+   alternating. Docstring→attribute→decl is common, and this is the **third** time this class
+   of bug has appeared in this project. Fixed to loop until neither is above.
+2. **3 files failed**, all semantic. 3. **1 file.** 4. **2 more.**
+
+It was not converging, and the reason is in the error text:
+
+```
+error: GaussNorm.lean:230:0: cannot omit referenced section variable `inst✝⁴`
+```
+
+That is Lean rejecting an omit **the linter itself proposed**. The suggestions were all
+computed against the *unmodified* tree, and they are not independent: omitting from lemma `X`
+changes `X`'s signature, so every consumer of `X` in the same file now needs a different
+instance set — and its own suggestion is stale. Batch application invalidates its own inputs.
+
+> **A linter that emits per-declaration fixes does not thereby emit a batch patch.** When the
+> fix changes a *signature*, the suggestions interact, and applying all of them at once is
+> guaranteed to break the ones that depend on each other. This needs a fixpoint — apply, build,
+> re-lint, re-apply — at file granularity, which is 94 files × a build each, not one sweep.
+
+Kept: the `SpaVIso` file, which was verified standalone before the sweep — 28 declarations
+generalised. The remaining 93 files are queued as a fixpoint job, with the method above.
+
+> Contrast with the `haveI` sweep, which *was* safely batchable: it changes proof **bodies**,
+> never signatures, so the sites cannot interact. The distinguishing question for any mass edit
+> is not "is the fix mechanical?" but **"does the fix change anything another site can see?"**

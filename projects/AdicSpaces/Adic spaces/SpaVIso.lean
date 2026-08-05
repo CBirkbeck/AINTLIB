@@ -76,11 +76,13 @@ def spaOpensEquivInter (D : RationalLocData A) :
   left_inv _ := rfl
   right_inv _ := rfl
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem spaOpensEquivInter_continuous (D : RationalLocData A) :
     Continuous (spaOpensEquivInter D) := by
   refine Continuous.subtype_mk ?_ _
   exact continuous_subtype_val.comp continuous_subtype_val
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem spaOpensEquivInter_symm_continuous (D : RationalLocData A) :
     Continuous (spaOpensEquivInter D).symm := by
   exact ((continuous_subtype_val (p := fun w : Spv A =>
@@ -614,6 +616,7 @@ theorem phiHom_surjective {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
   rw [hcomp, RingEquiv.symm_apply_apply]
   rfl
 
+omit [DecidableEq A] in
 /-- `genPiece_rel_forward` is continuous (it is a completion extension). -/
 theorem genPiece_rel_forward_continuous
     (T : Finset A) (t : A) (M : ℕ)
@@ -626,6 +629,7 @@ theorem genPiece_rel_forward_continuous
     (D₀.interSamePair (OpenKeystone.genPieceDatumOpen D₀.P T t M hle) rfl).uniformSpace
   exact UniformSpace.Completion.continuous_extension
 
+omit [DecidableEq A] in
 /-- `genPiece_rel_backward` is continuous (it is a completion extension). -/
 theorem genPiece_rel_backward_continuous
     (T : Finset A) (t : A) (M : ℕ)
@@ -646,6 +650,7 @@ theorem pieceEquiv_continuous {E : RationalLocData A} (hE : E.IsRational)
   exact (genPiece_rel_forward_continuous D₀ E.T E.s (certExp D₀ hE)
     (certExp_spec D₀ hE)).comp (restrictionMapHom_continuous _ _ _)
 
+omit [DecidableEq A] in
 /-- The open-equality behind the keystone comparison. -/
 theorem pieceEquiv_open_eq {E : RationalLocData A} (hE : E.IsRational)
     (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) :
@@ -706,6 +711,7 @@ noncomputable def phiEquiv [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
   RingEquiv.ofBijective (phiHom D₀ hV hVW)
     ⟨phiHom_injective D₀ hV hVW, phiHom_surjective D₀ hV hVW⟩
 
+omit [DecidableEq A] in
 /-- The inverse of the comparison restricts to the candidate sections. -/
 theorem phiEquiv_symm_restrict [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
     (hV : V ≤ spaOpens D₀)
@@ -737,6 +743,7 @@ theorem phiEquiv_symm_restrict [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
   rw [hval]
   rfl
 
+omit [DecidableEq A] in
 /-- **The comparison inverse is continuous** — via the embedding of sections
 into the product over the image-open cover. -/
 theorem phiEquiv_symm_continuous [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
@@ -799,6 +806,7 @@ theorem paired_aOpen_bOpen (U : Opens ↥(spaOpens D₀)) :
   · intro hw
     exact ⟨baseHomeo D₀ u hu w, hw, rfl⟩
 
+omit [DecidableEq A] in
 /-- **Naturality of the comparison map**: it commutes with restriction on
 both sides. Componentwise both sides are the same keystone comparison of the
 same `B`-component (the two `RationalIndex` spellings differ only in
@@ -812,6 +820,7 @@ theorem phiHom_naturality {V V' : Opens ↥(Spa A A⁺)}
       = phiHom D₀ hV' hVW' (limitRestrict hWW' x) :=
   rfl
 
+omit [DecidableEq A] in
 /-- The keystone comparison factors the canonical maps: the `A`-side
 canonical map of `E` followed by the comparison is the `B`-side canonical map
 of the image datum precomposed with `D₀`'s canonical map. -/
@@ -824,6 +833,7 @@ theorem pieceEquiv_canonicalMap {E : RationalLocData A} (hE : E.IsRational)
   exact OpenKeystone.relativePiece_equiv_restrictionMap D₀ E hE_sub
     (certExp D₀ hE) (certExp_spec D₀ hE) (D₀.canonicalMap a)
 
+omit [DecidableEq A] in
 /-- **The comparison intertwines the point valuations** (the stalk-valuation
 core): the `B`-side point value of the image datum pulls back along the
 keystone comparison to the `A`-side point value of `E`. -/
@@ -859,6 +869,7 @@ theorem comap_pieceEquiv_pointValue [DecidableEq A]
             (pointValue (imgDatum D₀ hE) hwB)) from h1.symm]
     rw [comap_pointValue (imgDatum D₀ hE) hwB]
 
+omit [DecidableEq A] in
 /-- The comparison carries the `A`-side point value of an index to the
 `B`-side point value of its image index. -/
 theorem comap_pieceEquiv_symm_pointValue [DecidableEq A]
@@ -886,6 +897,7 @@ theorem comap_pieceEquiv_symm_pointValue [DecidableEq A]
         (pointValue (imgDatum D₀ hE) hwB) from rfl, hcomp]
   exact congr_fun comap_id _
 
+omit [DecidableEq A] in
 /-- **The comparison intertwines the open values** — the presheaf-level form
 of the stalk-valuation agreement. -/
 theorem comap_phiHom_openValue [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
@@ -921,6 +933,7 @@ theorem comap_phiHom_openValue [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
     (comap_pieceEquiv_symm_pointValue D₀ hE (index_sub D₀ hV i) w hwB hwA))
   exact congrFun (congrArg comap hcomp) (pointValue i.D hwA)
 
+omit [DecidableEq A] in
 /-- **The inverse comparison intertwines the open values.** -/
 theorem comap_phiEquiv_symm_openValue [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
     (hV : V ≤ spaOpens D₀)
@@ -1032,6 +1045,7 @@ def shadowPre (U : Opens ↥(Spa A A⁺)) :
     exact (U.2.preimage continuous_subtype_val).preimage
       (baseHomeo D₀ u hu).continuous
 
+omit [DecidableEq A] in
 theorem shadowPre_paired (U : Opens ↥(Spa A A⁺)) :
     Paired D₀ (U ⊓ spaOpens D₀) (shadowPre D₀ u hu U) := by
   intro w
@@ -1047,6 +1061,7 @@ noncomputable def ambComp [DecidableEq A] (U : Opens ↥(Spa A A⁺)) :
       (shadowPre_paired D₀ u hu U)).symm.toRingHom).comp
     (limitRestrict (inf_le_left : U ⊓ spaOpens D₀ ≤ U))
 
+omit [DecidableEq A] in
 /-- **The ambient comparison intertwines the open values.** -/
 theorem comap_ambComp_openValue [DecidableEq A] (U : Opens ↥(Spa A A⁺))
     (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
@@ -1065,6 +1080,7 @@ theorem comap_ambComp_openValue [DecidableEq A] (U : Opens ↥(Spa A A⁺))
           (shadowPre_paired D₀ u hu U)).symm.toRingHom)
           (openValue (shadowPre D₀ u hu U) hw)) from rfl, h1, h2]
 
+omit [DecidableEq A] in
 /-- Naturality of the inverse comparison. -/
 theorem phiEquiv_symm_naturality [DecidableEq A] {V V' : Opens ↥(Spa A A⁺)}
     (hV : V ≤ spaOpens D₀) (hV' : V' ≤ spaOpens D₀) (hVV' : V' ≤ V)
@@ -1084,6 +1100,7 @@ def shadowMap : SpaTop (presheafValue D₀) ⟶ SpaTop A :=
   TopCat.ofHom ⟨fun w => shadow D₀ w,
     (baseHomeo D₀ u hu).continuous.subtype_val⟩
 
+omit [DecidableEq A] in
 theorem ambComp_continuous [DecidableEq A] (U : Opens ↥(Spa A A⁺)) :
     Continuous (ambComp D₀ u hu U) :=
   (phiEquiv_symm_continuous D₀ _ (shadowPre_paired D₀ u hu U)).comp
@@ -1107,6 +1124,7 @@ noncomputable def spaCompHom [DecidableEq A] :
           (leOfHom ((Opens.map (shadowMap D₀ u hu)).map f.unop))
           (limitRestrict inf_le_left x)).symm }
 
+omit [DecidableEq A] in
 /-- Germ naturality for the comparison morphism, in the concrete
 `spaRingPresheaf` spelling. -/
 theorem ringStalkMap_spaCompHom_germ [DecidableEq A]
@@ -1135,6 +1153,7 @@ private theorem ringStalkMap_spaCompHom_germ_restrict
   have h := ringStalkMap_spaCompHom_germ D₀ u hu w W hwW (limitRestrict hWU f)
   rwa [germ_limitRestrict hWU hwW f] at h
 
+omit [DecidableEq A] in
 theorem shadow_injective (u : (presheafValue D₀)ˣ)
     (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀)) :
     Function.Injective (shadow D₀) := by
@@ -1142,6 +1161,7 @@ theorem shadow_injective (u : (presheafValue D₀)ˣ)
   have h1 : baseHomeo D₀ u hu w₁ = baseHomeo D₀ u hu w₂ := Subtype.ext h
   exact (baseHomeo D₀ u hu).injective h1
 
+omit [DecidableEq A] in
 theorem shadow_isOpenMap (u : (presheafValue D₀)ˣ)
     (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀)) :
     IsOpenMap (shadow D₀ (A := A)) := by
@@ -1171,10 +1191,12 @@ theorem shadowPre_shadowImage (u : (presheafValue D₀)ˣ)
     exact (shadow_injective D₀ u hu heq) ▸ hw'
   · exact fun hw => ⟨w, hw, rfl⟩
 
+omit [DecidableEq A] in
 theorem shadowPre_mono {U U' : Opens ↥(Spa A A⁺)} (h : U' ≤ U) :
     shadowPre D₀ u hu U' ≤ shadowPre D₀ u hu U :=
   fun _w hw => h hw
 
+omit [DecidableEq A] in
 /-- Naturality of the ambient comparison. -/
 theorem ambComp_naturality [DecidableEq A] {U U' : Opens ↥(Spa A A⁺)}
     (h : U' ≤ U) (x : ↥(limitSections U)) :
@@ -1184,6 +1206,7 @@ theorem ambComp_naturality [DecidableEq A] {U U' : Opens ↥(Spa A A⁺)}
     (shadowPre_paired D₀ u hu U) (shadowPre_paired D₀ u hu U')
     (shadowPre_mono D₀ u hu h) (limitRestrict inf_le_left x)).symm
 
+omit [DecidableEq A] in
 /-- **The comparison morphism intertwines the stalk valuations** (P5-K12,
 the last mathematical step of Wedhorn 8.15 at the `𝒱` level). -/
 theorem comap_ringStalkMap_spaCompHom_stalkValue [DecidableEq A]
@@ -1270,6 +1293,7 @@ noncomputable def spaCompVPreHom [DecidableEq A]
       (maximalIdeal_stalk_eq_supp (stalkShrink_tate w)).symm
   val_compat := fun w => comap_ringStalkMap_spaCompHom_stalkValue D₀ u hu w
 
+omit [DecidableEq A] in
 theorem range_shadow (u : (presheafValue D₀)ˣ)
     (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀)) :
     Set.range (shadow D₀ (A := A)) = (spaOpens D₀ : Set ↥(Spa A A⁺)) := by
@@ -1281,6 +1305,7 @@ theorem range_shadow (u : (presheafValue D₀)ˣ)
     exact ⟨(baseHomeo D₀ u hu).symm ⟨v, hv⟩,
       congrArg Subtype.val ((baseHomeo D₀ u hu).apply_symm_apply ⟨v, hv⟩)⟩
 
+omit [DecidableEq A] in
 theorem shadow_isOpenEmbedding [DecidableEq A] (u : (presheafValue D₀)ˣ)
     (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀)) :
     Topology.IsOpenEmbedding (shadow D₀ (A := A)) := by
@@ -1304,6 +1329,7 @@ theorem limitRestrict_bijective_of_eq {R : Type u} [CommRing R]
   · exact Subtype.ext (funext fun i => congrFun (congrArg Subtype.val hxy) i)
   · exact Subtype.ext (funext fun i => rfl)
 
+omit [DecidableEq A] in
 /-- **The comparison is an open immersion in `𝒱^pre`** (P5-K14): the
 Wedhorn-8.22 chart condition in the form the affinoid charts produce. -/
 theorem spaCompVPreHom_isOpenImmersion [DecidableEq A]
@@ -1362,12 +1388,14 @@ def ambCompCatIso [DecidableEq A] (W : Opens ↥(Spa A A⁺))
     (phiCatIso' D₀ (inf_le_right : W ⊓ spaOpens D₀ ≤ spaOpens D₀)
       (shadowPre_paired D₀ u hu W)).symm
 
+omit [DecidableEq A] in
 theorem ambCompCatIso_hom [DecidableEq A] (W : Opens ↥(Spa A A⁺))
     (hW : W ≤ spaOpens D₀) :
     (ambCompCatIso D₀ u hu W hW).hom
       = ⟨ambComp D₀ u hu W, ambComp_continuous D₀ u hu W⟩ :=
   Subtype.ext (RingHom.ext fun _x => rfl)
 
+omit [DecidableEq A] in
 theorem shadowImage_le [DecidableEq A]
     (U : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) :
     shadowImage D₀ u hu U ≤ spaOpens D₀ := by
