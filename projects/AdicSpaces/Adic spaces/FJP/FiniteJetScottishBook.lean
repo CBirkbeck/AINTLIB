@@ -117,21 +117,25 @@ theorem scottishWitness_mul_isometry :
   refine Isometry.of_dist_eq fun a b => ?_
   rw [dist_eq_norm, dist_eq_norm, ← mul_sub, norm_scottishWitness_mul]
 
+omit [IsFJPBase F] in
 /-- `Q²` is a non-zero-divisor: multiplication by it is injective. -/
 theorem scottishWitness_mul_injective :
     Function.Injective (fun a : JetA F => scottishWitness F * a) :=
   (scottishWitness_mul_isometry F).injective
 
+omit [IsFJPBase F] in
 theorem scottishWitness_mul_continuous :
     Continuous (fun a : JetA F => scottishWitness F * a) :=
   (scottishWitness_mul_isometry F).continuous
 
+omit [IsFJPBase F] in
 /-- The image `Q²𝓐` is **closed**: an isometric embedding of a complete space has closed
 range. -/
 theorem scottishWitness_mul_range_isClosed :
     IsClosed (Set.range fun a : JetA F => scottishWitness F * a) :=
   (scottishWitness_mul_isometry F).isClosedEmbedding.isClosed_range
 
+omit [IsFJPBase F] in
 /-- Multiplication by `Q²` is **strict**: open onto its image (the range factorization is
 the isometric equivalence `𝓐 ≃ᵢ Q²𝓐`, hence a homeomorphism). -/
 theorem scottishWitness_mul_isStrictMap :

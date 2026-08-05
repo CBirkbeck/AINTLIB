@@ -63,6 +63,7 @@ and we are left with the canonical-topology hypotheses
 `hA_complete_B`, `hnoeth_B`, `hcont_eval_B`.
 
 Stated as a helper to declutter `restrictionMap_flat_via_iteratedMinus`. -/
+omit [PlusSubring A] in
 omit [HasLocLiftPowerBounded A] in
 theorem iteratedMinus_B_flat_of_canonical
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -263,6 +264,7 @@ theorem restrictionMap_flat_via_iteratedMinus
 `IsPowerBounded (D₀.canonicalMap f)` — an EXTERNAL hypothesis the caller
 must supply (in contrast to the minus side where `T = {1}` collapses
 trivially). -/
+omit [PlusSubring A] in
 omit [HasLocLiftPowerBounded A] in
 theorem iteratedPlus_B_flat_of_canonical
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]

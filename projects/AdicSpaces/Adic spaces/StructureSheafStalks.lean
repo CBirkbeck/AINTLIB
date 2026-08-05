@@ -868,6 +868,7 @@ noncomputable def stalkValue (v : ↥(Spa A A⁺)) :
     Spv (ToType ((spaRingPresheaf A).stalk v)) :=
   ⟨stalkValuativeRel v⟩
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The stalk valuation pulls back to the point's valuation on the sections
 over any open neighbourhood. -/
 theorem comap_germ_stalkValue {v : ↥(Spa A A⁺)} (U : Opens ↥(Spa A A⁺))
@@ -884,6 +885,7 @@ theorem comap_germ_stalkValue {v : ↥(Spa A A⁺)} (U : Opens ↥(Spa A A⁺))
 
 /-! ### Locality of the stalk (S4: Wedhorn 8.14, reduced to the shrink claim) -/
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- A stalk unit has nonzero stalk value. -/
 theorem not_stalkValue_vle_zero_of_isUnit {v : ↥(Spa A A⁺)}
     {x : ToType ((spaRingPresheaf A).stalk v)} (hx : IsUnit x) :
@@ -901,6 +903,7 @@ theorem isUnit_germ_of_isUnit {v : ↥(Spa A A⁺)} {U : Opens ↥(Spa A A⁺)}
     IsUnit ((spaRingPresheaf A).germ U v hvU f) :=
   hf.map ((spaRingPresheaf A).germ U v hvU).hom
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The stalk is nontrivial. -/
 theorem stalk_nontrivial (v : ↥(Spa A A⁺)) :
     Nontrivial (ToType ((spaRingPresheaf A).stalk v)) := by
@@ -963,6 +966,7 @@ def RationalShrink : Prop :=
       (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s),
       v' ∈ rationalOpen D'.T D'.s ∧ IsUnit (restrictionMapHom D D' h b)
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Reduction of the stalk shrink claim to the rational one**: representing
 a nonzero-value germ over a rational neighbourhood, shrinking by
 `RationalShrink`, and transporting the unit through the rational-open

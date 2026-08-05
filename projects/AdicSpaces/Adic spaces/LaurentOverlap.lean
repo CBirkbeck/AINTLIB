@@ -1230,6 +1230,7 @@ theorem example638Bivariate_backwardHom_coe
     hQ_complete
     hT0Q a
 
+omit [PlusSubring B] in
 omit [HasLocLiftPowerBounded B] [IsNoetherianRing B] in
 /-- `example638Bivariate_backwardHom` sends `canonicalMap a` to `mk(algebraMap a)`. -/
 theorem example638Bivariate_backwardHom_canonicalMap

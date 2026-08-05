@@ -956,6 +956,7 @@ theorem separation_ofStronglyNoetherianTate
 
 /-! ### Flatness of presheafValue (Wedhorn Proposition 8.30, via TopologyComparison) -/
 
+omit [PlusSubring A] in
 omit [HasLocLiftPowerBounded A] in
 /-- `presheafValue D` is flat over `A` (Wedhorn Proposition 8.30), assuming
 the TopologyComparison isomorphism hypotheses are satisfied. -/
@@ -1084,6 +1085,7 @@ theorem presheafValue_isNoetherian_via_canonical
   let e := presheafValueCanonicalQuotientEquiv D hb hA_complete hnoeth hT_pb hcont_eval
   exact isNoetherianRing_of_ringEquiv _ e.symm
 
+omit [PlusSubring A] in
 omit [HasLocLiftPowerBounded A] in
 /-- `presheafValue D` is flat over `A` when `D` is `LaurentNormalized` (`1 ∈ D.T`)
 and when `T = {1}` (the Laurent-minus case — all non-base elements of `D.T` are

@@ -601,6 +601,7 @@ private theorem iteratedOverlap_forwardLocHom_to_B_comp_algebraMap_continuous
   exact (algebraMap_continuous_loc (iteratedOverlapDatum_B P D₀ f hLocLift_B)).comp
     (canonicalMap_continuous D₀)
 
+omit [HasLocLiftPowerBounded A] [T2Space A] in
 /-- Continuity of `iteratedOverlap_forwardToCompletion` from `(laurentOverlap).topology`
 to the completion. -/
 theorem iteratedOverlap_forwardToCompletion_continuous

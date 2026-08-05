@@ -17648,3 +17648,30 @@ returned; green.
 
 Every one of the 24 omits kept was individually gated by a module build before the interruption,
 and the retried full-library gate confirms them together.
+
+### Round 8 — the plain pass is exhausted; bisection is now the whole yield
+
+Round 8 kept **11 omits** from its plain per-file pass and **32** from bisecting the 16
+failures — 43 total, 1,240 cumulative. `unusedSectionVars` → **173**, AdicSpaces warnings →
+**3668**.
+
+That split is the news. Across rounds the plain pass has gone **572 → 162 → 118 → 63 → 44 →
+36 → 19 → 11**, while bisection's contribution has held roughly flat at 30–40. The cheap
+mechanism is finished; what is left responds only to the expensive one.
+
+| round | plain pass | bisection | total |
+|---|---|---|---|
+| 1 | 572 | — | 572 |
+| 3 | 118 | 43 | 161 |
+| 5 | 44 | 34 | 78 |
+| 6 | 36 | 35 | 71 |
+| 8 | **11** | **32** | **43** |
+
+Bisection costs ~180 module builds per round to find ~32 acceptable omits among ~104
+candidates, i.e. roughly **6 builds per generalisation landed**. That is the real price now,
+and it is stable.
+
+> When a two-stage process has one cheap stage and one expensive one, the ratio between them is
+> the honest progress signal — not the total. Here the cheap stage decayed by 50× while the
+> expensive one held flat, which says the remaining population is *qualitatively* different
+> from what the first rounds cleared, not merely smaller.

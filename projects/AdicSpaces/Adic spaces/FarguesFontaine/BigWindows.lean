@@ -343,6 +343,7 @@ theorem bigWindow_inter_succ_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
       exact h
 
 
+omit [CharP F p] in
 /-- **The overlap circle is a rational subset (negative side)**: the `κ' = p`
 edge at the `p^m`-th power uniformizer (circle `κ = p^{-m+1}`). -/
 theorem bigWindow_inter_succ_eq_rationalOpen_neg (m : ℕ) (hp : 1 < p) :

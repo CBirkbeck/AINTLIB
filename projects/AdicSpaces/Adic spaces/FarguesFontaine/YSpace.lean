@@ -596,6 +596,7 @@ private theorem exists_KGE_KLE_adjacent {v : Spv (Ainf p F)} (hv : v ∈ Y p F �
   have := hn₀max _ hge
   omega
 
+omit [CharP F p] in
 theorem Y_eq_iUnion_windows :
     Y p F ϖ = (⋃ n : ℤ, windowU p F ϖ n) ∪ ⋃ n : ℤ, windowV p F ϖ n := by
   have hp1 : 1 < p := (Fact.out : Nat.Prime p).one_lt
