@@ -94,6 +94,7 @@ private theorem teichPi_mem_Iinf : teichPi p F ϖ ∈ Iinf p F ϖ := by
   rw [Iinf]
   exact Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
 
+omit [CharP F p] in
 private theorem exists_pow_succ_vlt {v : Spv (Ainf p F)}
     (hv : v ∈ Spa (Ainf p F) (ringPlus (Ainf p F))) {a b : Ainf p F}
     (ha : a ∈ Iinf p F ϖ) (hb : ¬ v.vle b 0) :

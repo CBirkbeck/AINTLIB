@@ -107,6 +107,7 @@ private theorem exists_min_norm_psCoeff_eq (f : PowerSeries.Restricted R (1 : �
   · have := himin m h
     omega
 
+omit [NormOneClass R] in
 /-- Multiplicativity of the radius-one Gauss norm over a base with multiplicative,
 zero-faithful norm (the minimal-achiever argument through the vendored
 `PowerSeries.gaussNorm_mul_eq_mul`). -/
@@ -213,6 +214,7 @@ theorem norm_JetA_mul (a b : JetA F) : ‖a * b‖ = ‖a‖ * ‖b‖ := by
     norm_JetC_mul]
   rfl
 
+omit [IsFJPBase F] in
 theorem norm_JetA_pow (a : JetA F) (n : ℕ) : ‖a ^ n‖ = ‖a‖ ^ n := by
   induction n with
   | zero => simp

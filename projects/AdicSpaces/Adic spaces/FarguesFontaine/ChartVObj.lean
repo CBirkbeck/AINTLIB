@@ -590,6 +590,7 @@ private theorem pInv_pow_mul_p_pow (n : ℕ) :
   rw [(isUnit_p_image p F ϖ).unit_spec] at h
   rw [← mul_pow, h, one_pow]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- **Normal form for a monomial fraction.** Once the numerator's Teichmüller
 argument is written as `ϖ^k * c'`, the fraction `p^i[c]/(p[ϖ])^k` collapses to
 `[c']` times a power of the inverse of the image of `p`. -/

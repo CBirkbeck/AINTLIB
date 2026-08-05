@@ -932,6 +932,7 @@ noncomputable def bivariateLocToQuotient_atOverlap
     rw [overlapDatum_s B P b]; infer_instance
   exact IsLocalization.Away.lift (x := b) (isUnit_b_in_bivariate_quotient B b)
 
+omit [PlusSubring B] in
 omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 omit [IsTateRing B] [IsNoetherianRing B] [T2Space B] in
 /-- `bivariateLocToQuotient_atOverlap` sends `algebraMap a` to `mk(algebraMap a)`. -/
@@ -947,6 +948,7 @@ theorem bivariateLocToQuotient_atOverlap_algebraMap
   rw [IsLocalization.Away.lift_eq]
   rfl
 
+omit [PlusSubring B] in
 omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 omit [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B] in
 /-- The three `divByS` values of the overlap datum: `b/s = 1`, `b²/s = b`, and `1/s` is
@@ -1071,6 +1073,7 @@ private theorem bivariateLocToQuotient_isPowerBounded_of_mem_T
     exact hb
 
 
+omit [IsHuberRing B] [HasLocLiftPowerBounded B] [IsNoetherianRing B] [T2Space B] in
 /-- The three distinct values of `bivariateLocToQuotient_atOverlap (divByS t (overlap).s)`
 for `t ∈ (overlapDatum B P b).T` (i.e., `{1, b, b²}`) are respectively
 `mk(Y)` (the inverse of `mk(algMap b)` in the quotient), `1`, and

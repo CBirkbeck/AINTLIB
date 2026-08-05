@@ -125,6 +125,7 @@ noncomputable def blocTwistEquiv {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 <
   (IsLocalization.algEquiv (Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ'))
     (Bloc p F ϖ') (Bloc p F ϖ)).toRingEquiv
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 @[simp]
 theorem blocTwistEquiv_algebraMap {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 < k)
     (h : teichPi p F ϖ' ^ k = teichPi p F ϖ) (y : Ainf p F) :

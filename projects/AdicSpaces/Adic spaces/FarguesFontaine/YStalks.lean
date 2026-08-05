@@ -892,6 +892,7 @@ theorem isSheafyOn_runChart (n : ℤ) (k : ℕ) :
       (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)
       (fun E hE => span_image_runChart_eq_top p F ϖ n k E hE) C hC hCS f hf
 
+omit [CharP F p] in
 /-- **Valid rational subsets of `Spa(A_inf, A_inf)` are quasi-compact**
 (Wedhorn 7.35(2) at the two-generator ideal `(p, [ϖ])`): openness of the
 tray span gives `I_inf ≤ √(span T)`. -/

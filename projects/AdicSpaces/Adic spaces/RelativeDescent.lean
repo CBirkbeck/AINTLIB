@@ -282,6 +282,7 @@ theorem keystoneAlg_divByS {t : A} (_ht : t ∈ E.T) :
           IsLocalization.Away.lift_eq _ _ _
   rw [hL, hR]
 
+omit [HasLocLiftPowerBounded A] in
 /-- Continuity of the forward lift for the `E`-localization topology (through the
 general engine `locTopology_continuous_lift`: the composed canonical map is
 continuous, and the `t/s`-lifts are power-bounded by the `B`-level
@@ -431,6 +432,7 @@ theorem keystoneInvAlg_divByS {t : A} (_ht : t ∈ E.T) :
       _ = E.canonicalMap t := IsLocalization.Away.lift_eq E.s _ t
   rw [hL, hR]
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- Continuity of the backward lift for the image localization topology over `B`. -/
 theorem keystoneInvAlg_continuous :
     @Continuous _ _ (imgDatum D₀ E hspanE).topology _ (keystoneInvAlg D₀ hspanE hE) := by

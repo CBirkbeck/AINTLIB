@@ -820,6 +820,7 @@ def convPartialAloc (a b : ℕ → F) (N : ℕ) : Aloc p F ϖ :=
   ∑ n ∈ Finset.range N, (p : Aloc p F ϖ) ^ n
     * ∑ k ∈ Finset.range (n + 1), alocTeich p F ϖ (a k * b (n - k))
 
+omit [CharP F p] in
 /-- `alocToWittF` sends the convolution partial to the Witt-side double sum. -/
 theorem alocToWittF_convPartialAloc (a b : ℕ → F) (N : ℕ) :
     alocToWittF p F ϖ (convPartialAloc p F ϖ a b N)

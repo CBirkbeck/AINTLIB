@@ -618,6 +618,7 @@ For `g = algebraMap(b) * X^k`, the only nonzero coefficient is at `n = k`,
 giving `s^k * b ∈ U`. Since `b ∈ I^m` and the topology on `A` is nonarchimedean,
 `s^k * I^m ⊆ U` for `m` large enough (continuity of scalar multiplication). -/
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- The map `locToQuotientOneSubfX_gen D.s` is continuous from the localization
 topology on `Localization.Away D.s` to the quotient T-topology on
 `A⟨X⟩/(1-sX)`.
@@ -1083,6 +1084,7 @@ private theorem scaleIncl_truncTate_eq (g : ↥(TateAlgebra A)) (N : ℕ) (s : A
     TateAlgebraWedhorn.scaleIncl s g idx := by
   simp only [TateAlgebraWedhorn.scaleIncl_apply, truncTate_coeff_low g N idx h]
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [T2Space A] in
 set_option backward.isDefEq.respectTransparency false in
 /-- Polynomials (elements with finitely many nonzero coefficients) are dense
 in the Tate algebra for the T-topology. The T-topology is induced from the
@@ -1634,6 +1636,7 @@ theorem tateAlgebra_polynomials_dense_canonical [IsTateRing A] :
   change truncTateC g N - g ∈ tateAlgNhd P n
   rw [show truncTateC g N - g = -(g - truncTateC g N) by ring]; exact neg_mem hg_diff_mem
 
+omit [PlusSubring A] [IsHuberRing A] in
 omit [T2Space A] in
 /-- The localization `A[1/s]` maps densely into `A⟨X⟩/(1-sX)` for the canonical
 quotient topology (Wedhorn Example 6.38, canonical topology version).

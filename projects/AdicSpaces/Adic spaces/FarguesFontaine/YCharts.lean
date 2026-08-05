@@ -134,6 +134,7 @@ theorem ChartRatIdx.trace_subset_Y (i : ChartRatIdx p F ϖ) :
     rw [hcov]
     exact Set.mem_iUnion.mpr ⟨(-((m + 1 : ℕ) : ℤ)), hw.1⟩
 
+omit [CharP F p] in
 /-- Elements of the ideal of definition are topologically nilpotent. -/
 theorem isTopologicallyNilpotent_of_mem_Iinf {x : Ainf p F}
     (hx : x ∈ Iinf p F ϖ) : IsTopologicallyNilpotent x :=

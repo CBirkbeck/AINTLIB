@@ -479,6 +479,7 @@ theorem comap_limitRestrict_openValue {V W : Opens ↥(Spa A A⁺)} (h : W ≤ V
       = limitEvalHom (k.mono h) from RingHom.ext fun x => rfl]
   exact comap_limitEvalHom_pointValue (h hvW) (k.mono h) hk
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The `vle`-relation of the point is restriction-invariant. -/
 theorem openValue_vle_restrict {V W : Opens ↥(Spa A A⁺)} (h : W ≤ V)
     {v : ↥(Spa A A⁺)} (hvW : v ∈ W) (f g : ↥(limitSections V)) :

@@ -562,13 +562,16 @@ noncomputable def bridgeRev : locA F e.m D.s e.f →+* presheafValue D :=
   Ideal.Quotient.lift (IA F e.m D.s e.f) (bridgeEval D e)
     (fun _ ha => RingHom.mem_ker.mp (IA_le_ker_bridgeEval D e ha))
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeRev_mk (p : PA F e.m) :
     bridgeRev D e (Ideal.Quotient.mk (IA F e.m D.s e.f) p) = bridgeEval D e p := rfl
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeRev_bridgeBase (a : JetA F) :
     bridgeRev D e (bridgeBase D e a) = D.canonicalMap a :=
   bridgeEval_const D e a
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeRev_bridgeX (i : Fin e.m) :
     bridgeRev D e (bridgeX D e i) = bridgeGen D e i :=
   bridgeEval_X D e i
@@ -629,6 +632,7 @@ theorem bridgeEval_continuous : Continuous (bridgeEval D e) := by
     rw [mvEvalTerm]; exact mul_comm _ _]
   exact hVR (Set.mul_mem_mul ⟨v, rfl⟩ hVmem)
 
+omit [IsFJPNoetherianBase F] in
 /-- Continuity of the reverse map (the graph quotient carries the quotient topology). -/
 theorem bridgeRev_continuous : Continuous (bridgeRev D e) := by
   rw [(QuotientRing.isOpenQuotientMap_mk (IA F e.m D.s e.f)).isQuotientMap.continuous_iff]
@@ -824,6 +828,7 @@ noncomputable def bridgeLocHomC (hD : D.IsRational) :
     Localization.Away (pushDatumC D hD).s →+* locC F e.m D.s e.f :=
   IsLocalization.Away.lift (pushDatumC D hD).s (isUnit_bridgeBaseC_s D e hD)
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeLocHomC_algebraMap (hD : D.IsRational) (a : JetC F) :
     bridgeLocHomC D e hD
       (algebraMap (JetC F) (Localization.Away (pushDatumC D hD).s) a) =
@@ -988,6 +993,7 @@ noncomputable def bridgeLocHomB (hD : D.IsRational) :
     Localization.Away (pushDatumB D hD).s →+* locB F e.m D.s e.f :=
   IsLocalization.Away.lift (pushDatumB D hD).s (isUnit_bridgeBaseB_s D e hD)
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeLocHomB_algebraMap (hD : D.IsRational) (a : JetB F) :
     bridgeLocHomB D e hD
       (algebraMap (JetB F) (Localization.Away (pushDatumB D hD).s) a) =
@@ -1108,6 +1114,7 @@ theorem bridgeBaseD_s_mul_X (i : Fin e.m) :
   rw [← RingHom.map_mul (Ideal.Quotient.mk (ID F e.m D.s e.f))]
   exact Ideal.Quotient.eq.mpr hmem
 
+omit [IsFJPNoetherianBase F] in
 theorem isUnit_bridgeBaseD_s (hD : D.IsRational) :
     IsUnit (bridgeBaseD D e (rhoC F (iotaC F D.s))) := by
   have h1 : (1 : JetD F) ∈
@@ -1367,6 +1374,7 @@ noncomputable def bridgeRevB (hD : D.IsRational) :
   Ideal.Quotient.lift (IB F e.m D.s e.f) (bridgeEvalB D e hD)
     (fun _ ha => RingHom.mem_ker.mp (IB_le_ker_bridgeEvalB D e hD ha))
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeRevB_bridgeBaseB (hD : D.IsRational) (a : JetB F) :
     bridgeRevB D e hD (bridgeBaseB D e a) = (pushDatumB D hD).canonicalMap a :=
   bridgeEvalB_const D e hD a
@@ -1430,6 +1438,7 @@ theorem bridgeEvalB_continuous (hD : D.IsRational) :
     rw [mvEvalTerm]; exact mul_comm _ _]
   exact hVR (Set.mul_mem_mul ⟨v, rfl⟩ hVmem)
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeRevB_continuous (hD : D.IsRational) :
     Continuous (bridgeRevB D e hD) := by
   rw [(QuotientRing.isOpenQuotientMap_mk (IB F e.m D.s e.f)).isQuotientMap.continuous_iff]
@@ -1576,6 +1585,7 @@ noncomputable def bridgeRevC (hD : D.IsRational) :
   Ideal.Quotient.lift (IC F e.m D.s e.f) (bridgeEvalC D e hD)
     (fun _ ha => RingHom.mem_ker.mp (IC_le_ker_bridgeEvalC D e hD ha))
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeRevC_bridgeBaseC (hD : D.IsRational) (a : JetC F) :
     bridgeRevC D e hD (bridgeBaseC D e a) = (pushDatumC D hD).canonicalMap a :=
   bridgeEvalC_const D e hD a
@@ -1639,6 +1649,7 @@ theorem bridgeEvalC_continuous (hD : D.IsRational) :
     rw [mvEvalTerm]; exact mul_comm _ _]
   exact hVR (Set.mul_mem_mul ⟨v, rfl⟩ hVmem)
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeRevC_continuous (hD : D.IsRational) :
     Continuous (bridgeRevC D e hD) := by
   rw [(QuotientRing.isOpenQuotientMap_mk (IC F e.m D.s e.f)).isQuotientMap.continuous_iff]
@@ -1782,6 +1793,7 @@ theorem locRhoB_continuous : Continuous (locRhoB F e.m D.s e.f) :=
   AddMonoidHomClass.continuous_of_bound (locRhoB F e.m D.s e.f) 1 fun x => by
     rw [one_mul]; exact norm_locRhoB_le D e x
 
+omit [IsFJPNoetherianBase F] in
 theorem locRhoC_continuous : Continuous (locRhoC F e.m D.s e.f) :=
   AddMonoidHomClass.continuous_of_bound (locRhoC F e.m D.s e.f) 1 fun x => by
     rw [one_mul]; exact norm_locRhoC_le D e x

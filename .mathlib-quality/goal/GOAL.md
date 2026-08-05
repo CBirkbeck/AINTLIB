@@ -17457,3 +17457,29 @@ flagged: the identical line
 Second gotcha, same family: for `Try this: intro`, the warning points at the **first** `intro`,
 not the second, and for the bulleted ones the column lands inside `· intro h`. Assuming the
 warning marks the line to be *replaced* aborted the script; reading the column told the truth.
+
+### Round 4 — the curve holds, and that is the useful output
+
+| round | omits landed | unusedSectionVars after | AdicSpaces warnings after |
+|---|---|---|---|
+| baseline | — | 714 | 4,398 |
+| 1 | 572 | 360 | 3,921 |
+| 2 | 196 | 304 | 3,832 |
+| 3 | 161 | 240 | 3,759 |
+| 4 | **95** | **204** | **3,720** |
+| **total** | **1,024** | | |
+
+Round 4: the plain per-file pass kept 23 files / 63 omits, bisection recovered 32 of the 103
+its 15 failures held (184 module builds). Yield per round is roughly halving — 572, 196, 161,
+95 — and the per-round build cost is flat, so the marginal value of a fifth round is now well
+below that of the untouched categories.
+
+The residual 204 is dominated by files that have refused every omit across **four** independent
+bisections (`Wedhorn828` 0/14 ×4, `SheafyPair` 0/3 ×4, `StandardDescent` 0/1 ×4,
+`RelativePieceKeystone` 0/3 ×4, `GaussNorm` 0/1 ×4, `CurveObject` 0/1). Those are not backlog;
+they are a *characterised* set — declarations whose section variables are reached by
+unification, where the linter's premise does not hold.
+
+> **A convergent process should be stopped by its own curve, not by exhaustion.** Four rounds
+> establish the rate; the fifth is predictable at ~50 omits for the same two hours, which is
+> the moment to switch to whatever has not been measured yet.

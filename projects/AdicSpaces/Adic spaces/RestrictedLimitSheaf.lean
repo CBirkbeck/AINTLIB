@@ -44,6 +44,7 @@ theorem RationalLocData.interValid_rationalOpen (D E : RationalLocData A)
       rationalOpen D.T D.s ∩ rationalOpen E.T E.s :=
   D.interDatumOpen_rationalOpen E _ _ _ _
 
+omit [PlusSubring A] in
 omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] [HasLocLiftPowerBounded A] in
 theorem RationalLocData.interValid_isRational (D E : RationalLocData A)
     (hD : D.IsRational) (hE : E.IsRational) :

@@ -1542,6 +1542,7 @@ theorem norm_polyBall_le_one (q : MvPolynomial (Fin m) ↥(unitBall E)) :
 
 include hscale
 
+omit [CompleteSpace E] in
 /-- Membership of `I₀ⁿ`-elements is norm-detected after mapping to `P_E`. -/
 theorem norm_polyBall_le_of_mem_span_pow (n : ℕ)
     (q : MvPolynomial (Fin m) ↥(unitBall E))
@@ -1593,6 +1594,7 @@ theorem coeff_polyBall_trnc (n : ℕ) (F : ↥(unitBall (P E m))) (s : Fin m →
       rw [hbs] at hb
       exact hs ((finite_setOf_le_norm_coeff F.1 (pow_pos ht0 n)).mem_toFinset.mp hb)
 
+omit [CompleteSpace E] in
 /-- The truncation tail is `‖t‖ⁿ`-small. -/
 theorem norm_sub_polyBall_trnc_le (n : ℕ) (F : ↥(unitBall (P E m))) :
     ‖F.1 - polyBall (trnc t ht0 n F)‖ ≤ ‖t‖ ^ n := by
@@ -1961,6 +1963,7 @@ private theorem ballDenoms_surj
     rfl
 
 
+omit [CompleteSpace E] in
 /-- `surj` field of `IsLocalization (algebraMapSubmonoid _ (ballDenoms t ht1.le)) (P E m)`:
 scale `F` by a power of `t` until it lies in the unit ball. -/
 private theorem algebraMapSubmonoid_ballDenoms_surj

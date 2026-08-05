@@ -177,6 +177,7 @@ theorem Iinf_pow_le_span_chartMonomials (N : ℕ) :
       rw [show N + 1 - i = (N - i) + 1 by omega, pow_succ]
       ring
 
+omit [CharP F p] in
 /-- Every degree-`(a+b+2)` monomial divided by `s = p[ϖ]^b` lies in the ring of
 definition of the localization: factor out `[ϖ]^{b+1}` (when `i ≤ a`) or `p^{a+1}`
 (when `i > a`). -/
@@ -678,6 +679,7 @@ theorem closure_chart_le_blocUnitBall (a b : ℕ)
     · rw [Set.mem_singleton_iff.mp hx]
       exact wI_chartFracP_le_one p F ϖ a b hr1 hr2
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- Under the localization identification, the fraction `[ϖ]^{b+1}/s` is `[ϖ]/p`. -/
 theorem blocEquiv_divByS_teichPi (b : ℕ) (hb : 0 < b) :
     blocEquivAwayChartS p F ϖ b hb
@@ -755,6 +757,7 @@ theorem blocEquiv_divByS_p (a b : ℕ) (hb : 0 < b) :
         rw [map_mul]
         ring
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The localization identification commutes with the structure maps. -/
 theorem blocEquivAwayChartS_algebraMap (b : ℕ) (hb : 0 < b) (y : Ainf p F) :
     blocEquivAwayChartS p F ϖ b hb
@@ -1316,6 +1319,7 @@ theorem teich_cross (e f : ℕ) (c c' : OF F)
   rw [teichPi_pow, teichPi_pow, ← map_mul (WittVector.teichmuller p),
     ← map_mul (WittVector.teichmuller p), ← hc]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- **The low-term identity**: for `m ≤ k` and `c = c'·ϖ^{2k-m}`, the subring
 element `([ϖ]/p)^{k-m}·[c']` multiplies with the denominator to `[c]·p^m`. -/
 theorem chart_term_low_eq (k m : ℕ) (hm : m ≤ k) (c c' : OF F)

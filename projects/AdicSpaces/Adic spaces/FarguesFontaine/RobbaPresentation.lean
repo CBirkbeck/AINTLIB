@@ -934,6 +934,7 @@ theorem algebraMap_p_pow_mul_vp_pow (m : ℕ) :
     rwa [(isUnit_p_image p F ϖ).unit_spec] at h
   rw [map_pow, ← mul_pow, hvpmul, one_pow]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- **The exact per-monomial lift identity** (Kedlaya ln 546–551, the
 substitution side): a Teichmüller monomial whose coordinate is divisible by
 `zb^j` is the generator's `j`-th power times the twisted monomial. -/
@@ -3902,6 +3903,7 @@ theorem isUnit_teichmuller_image (zb : OF F)
   rw [hteich, map_pow]
   exact (isUnit_teichPi_image p F ϖ).pow j
 
+omit [CharP F p] in
 /-- **The case-1 generator is a unit of `B_loc`.** -/
 theorem isUnit_teichPowGen (zb : OF F)
     (hzb : perfectoidValuation p F (zb : F) ≠ 0) (m₀ : ℕ) :
@@ -4535,6 +4537,7 @@ def teichPowGen₂ (zb : OF F) (m : ℕ) : Bloc p F ϖ :=
     * Ring.inverse (algebraMap (Ainf p F) (Bloc p F ϖ)
         (WittVector.teichmuller p zb))
 
+omit [CharP F p] in
 /-- The inverse-Teichmüller cancellation. -/
 theorem teichmuller_image_mul_inverse (zb : OF F)
     (hzb : perfectoidValuation p F (zb : F) ≠ 0) :
@@ -4578,6 +4581,7 @@ theorem perfectoidValuation_pow_ne_zero (zb : OF F)
   rw [hcoe, map_pow]
   exact pow_ne_zero j hzb
 
+omit [CharP F p] in
 /-- **The case-2 lift identity at the algebra-map level**: the generator
 power times the twisted monomial recovers the original. -/
 theorem teichPowGen₂_pow_mul_twist (zb : OF F)
@@ -5841,6 +5845,7 @@ theorem valued_blocToBI_teichPowGen₂_snd (zb : OF F)
     = BlocToHatK p F ϖ hρ₂0 hρ₂1 (teichPowGen₂ p F ϖ zb m₀) from rfl,
     valued_BlocToHatK, wLoc_teichPowGen₂ p F ϖ hρ₂0 hρ₂1 zb hzb]
 
+omit [CharP F p] in
 /-- **The case-2 generator is a unit of `B_loc`.** -/
 theorem isUnit_teichPowGen₂ (zb : OF F)
     (hzb : perfectoidValuation p F (zb : F) ≠ 0) (m₀ : ℕ) :

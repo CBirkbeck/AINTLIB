@@ -387,6 +387,7 @@ noncomputable def RationalLocData.interSamePair (D₁ D₂ : RationalLocData A)
 @[simp] theorem RationalLocData.interSamePair_s (D₁ D₂ : RationalLocData A)
     (hP : D₂.P = D₁.P) : (D₁.interSamePair D₂ hP).s = D₁.s * D₂.s := rfl
 
+omit [PlusSubring A] in
 /-- The pair of definition of `interSamePair` is the shared pair `D₁.P`.
 
 Stated as a named lemma so that pair-equality proofs of the form
@@ -430,6 +431,7 @@ theorem span_insert_eq_top_of_span_eq_top {S : Finset A} (s : A)
     Ideal.span ((insert s S : Finset A) : Set A) = ⊤ :=
   top_unique (h ▸ Ideal.span_mono (by rw [Finset.coe_insert]; exact Set.subset_insert s _))
 
+omit [PlusSubring A] in
 open scoped Pointwise in
 /-- **Spanning is stable under `interSamePair` (primitive form)**: if both inserted
 generator sets `insert sᵢ Tᵢ` span the unit ideal, so does the intersection datum's
@@ -1107,6 +1109,7 @@ theorem iteratedPlus_forwardLocHom_divByS
     D₀.coeRingHom (divByS x D₀.s) * D₀.coeRingHom (algebraMap A _ D₀.s)
   rw [← map_mul, hrel]
 
+omit [PlusSubring A] in
 /-- **Power-boundedness of the plus forward generator images** (Wedhorn
 Prop 8.2 analogue, plus branch generator). -/
 theorem iteratedPlus_forwardLocHom_generators_powerBounded
@@ -1929,6 +1932,7 @@ theorem iteratedMinus_forwardLocHom_generators_powerBounded
       hu_s_tgt hforward_alg hb_s
   · exact iteratedMinus_forward_mem_locSubring_of_eq_f P D₀ f a b ha ha_A₀ hcan_a
       hu_s_tgt hforward_alg hb_f
+omit [PlusSubring A] in
 set_option backward.isDefEq.respectTransparency false in
 /-- Continuity of the forward uncompleted hom to the completion
 (Wedhorn Prop 8.2 analogue, minus branch).

@@ -1551,6 +1551,7 @@ theorem teichPiInvAloc_mul :
     (Aloc p F ϖ) (⟨teichPi p F ϖ, Submonoid.mem_powers _⟩)).unit_spec] at h
 
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 theorem AlocToBloc_teichPiInv_mul (k : ℕ) :
     AlocToBloc p F ϖ (teichPiInvAloc p F ϖ ^ k)
       * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ k) = 1 := by

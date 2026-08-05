@@ -484,6 +484,7 @@ theorem LaurentTree.toCoveringCovers_eq_leaves_toFinset
     simp [LaurentTree.toCoveringCovers, LaurentTree.leaves, ihL, ihR,
       List.toFinset_append]
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 theorem LaurentTree.mem_toCoveringCovers_iff_mem_leaves
     (t : LaurentTree A) (D₀ : RationalLocData A) (D : RationalLocData A) :
@@ -508,6 +509,7 @@ theorem LaurentTree.toCoveringCovers_cover_base (t : LaurentTree A)
   obtain ⟨D, hD, hvD⟩ := t.cover_base D₀ hv
   exact ⟨D, (t.mem_toCoveringCovers_iff_mem_leaves D₀ D).mpr hD, hvD⟩
 
+omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in

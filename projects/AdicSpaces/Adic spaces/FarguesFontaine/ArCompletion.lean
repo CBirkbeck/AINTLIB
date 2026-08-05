@@ -1017,6 +1017,7 @@ theorem exists_finite_teichmuller_sum_close {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 
 def prefixAloc (b : ℕ → F) (N : ℕ) : Aloc p F ϖ :=
   ∑ n ∈ Finset.range N, (p : Aloc p F ϖ) ^ n * alocTeich p F ϖ (b n)
 
+omit [CharP F p] in
 theorem alocToWittF_prefixAloc (b : ℕ → F) (N : ℕ) :
     alocToWittF p F ϖ (prefixAloc p F ϖ b N)
       = ∑ n ∈ Finset.range N,

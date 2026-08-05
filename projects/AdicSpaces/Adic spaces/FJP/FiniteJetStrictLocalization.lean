@@ -540,6 +540,7 @@ private theorem norm_d1_rA_le (hB hC z CrC CrA Bs M : ℝ)
         refine mul_le_mul_of_nonneg_right ?_ hM0
         linarith [mul_nonneg hBs0 (zero_le_one.trans hCrA1)]
 
+omit [IsFJPBase F] in
 /-- The per-pair core of `ideal_pullback_controlled`: given the three Koszul lifting constants
 (`hB`, `hC`, `z`) and the combined bound `Bs`, a compatible pair `(xb, xc)` pulls back to a single
 `xa` with the stated norm control.
@@ -812,6 +813,7 @@ theorem locIotaC_mk (p : PA F m) :
     locIotaC F m g f (Ideal.Quotient.mk (IA F m g f) p) =
       Ideal.Quotient.mk (IC F m g f) (extIotaC F m p) := rfl
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem locRhoB_mk (p : PB F m) :
     locRhoB F m g f (Ideal.Quotient.mk (IB F m g f) p) =
       Ideal.Quotient.mk (ID F m g f) (extRhoB F m p) := rfl

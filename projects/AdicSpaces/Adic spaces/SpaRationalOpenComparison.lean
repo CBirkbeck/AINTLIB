@@ -396,6 +396,7 @@ theorem spa_completion_of_spa_localization
       show Valued.v ((scResHom D w a : WithVal val) : val.Completion) = _
       rw [Valued.valuedCompletion_apply]; exact scResHom_val D w a
     exact comap_coeRingHom_extensionHom_ofValuation_eq w φ hφ hval_φ
+omit [IsHuberRing A] in
 /-- **Genuine ⊇ direction**: every Spa-point `v` of `A` in `rationalOpen D.T D.s`
 is the `D.canonicalMap`-pullback of a Spa-point of `presheafValue D`. Composes the
 sorry-free `valuation_extends_to_localization_of_rationalOpen` (to `Localization.Away`)

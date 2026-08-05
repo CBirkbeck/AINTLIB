@@ -1322,6 +1322,7 @@ theorem _aux_nonOpen_hSpa_rationalOpen_lift
     (IsTateRing.principalPair A).toPairOfDefinition
     (_aux_nonOpen_hSpa_Aplus_le_principalPair_A₀ A) T s hs
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Sub-lemma — Wedhorn 7.45 non-open prime case (Spa-point above a non-open
 prime in a rational subset).**
 

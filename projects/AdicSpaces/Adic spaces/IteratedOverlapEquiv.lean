@@ -81,6 +81,7 @@ private theorem iteratedOverlap_isLocalization_target
 
 /-! ### Phase 1: forward uncompleted hom landing in target localization -/
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 private theorem iteratedOverlap_baseHom_DsTimes_f_isUnit
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (D₀ : RationalLocData A) [IsNoetherianRing (locSubring D₀.P D₀.T D₀.s)]
@@ -739,6 +740,7 @@ private theorem laurentOverlap_canonicalMap_isPowerBounded
   exact ⟨_, (locSubring _ _ _).pow_mem
     (algebraMap_f_mem_locSubring_laurentOverlap D₀ f) n, map_pow _ _ _⟩
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A] in
 /-- The inverse direction: `divByS D₀.s (D₀.s · f)` is also in the localization subring

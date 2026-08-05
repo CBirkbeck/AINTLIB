@@ -3007,6 +3007,7 @@ theorem fSubX_saturated
   -- Step 5: Conclude h ∈ Ideal.map I.
   exact mem_ideal_map_of_forall_coeff_mem I P h hall
 
+omit [IsNoetherianRing A] in
 /-- The element `1 - f·X` is universally saturated in `A⟨X⟩` over noetherian `A`.
 
 Similar coefficient analysis as `fSubX_saturated`: the equations from `(1-fX)*h ∈ I·A⟨X⟩`
@@ -3073,6 +3074,7 @@ theorem flat_quotient_oneSubfX_general
   exact Module.Flat.quotient_of_flat_of_saturated
     (mul_oneSubfX_regular f) (fun I s hmem ↦ oneSubfX_saturated P f I s hmem)
 
+omit [IsNoetherianRing A] in
 /-- **Lemma 8.31(1), general case**: `A⟨X⟩` is **faithfully flat** over a
 noetherian Tate ring `A`.
 

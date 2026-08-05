@@ -2599,6 +2599,7 @@ theorem coeRingHom_preserves_proper_of_stacks00MA
       hπ_nil hπ_A₀ hπ_unit q
   exact coeRingHom_preserves_proper_of_closed D q h_proper h_closed
 
+omit [HasLocLiftPowerBounded A] in
 /-- **End-to-end `coeRingHom_preserves_proper` via the Jacobson hypothesis**
 (cleaner conditional form of `coeRingHom_preserves_proper_of_stacks00MA`).
 
