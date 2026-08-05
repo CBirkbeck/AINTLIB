@@ -770,3 +770,78 @@ and this simplification is premature.
 **Still not passed**, and the binding blocker is now precise: two definitions (fibrewise degree of an
 invertible sheaf, `Pic⁽¹⁾`) must be designed before any skeleton exists, unless round 9's simplification
 survives its verification — in which case neither definition is needed.
+
+---
+
+# Round 10 — the verification round 9 required, and it terminates the pass
+
+Round 9 flagged a simplification and made it conditional on one check: **how was the tree's group law
+actually constructed?** Answer, verified in `EllipticCurve/GroupLaw.lean`:
+
+```lean
+structure EllipticCurve (S : Scheme.{u}) extends EllipticCurveGeom S where
+  grp : GrpObj (Over.mk π)                    -- the group-object structure, as DATA
+  comm : letI := grp; IsCommMonObj (Over.mk π)
+  one_eq_zero : …                              -- the unit is the zero section
+```
+
+and `pointAddCommGroup` (`:124`) is transported from that carried field via `Hom.commGroup`. **The group
+law is a hypothesis, not a theorem.**
+
+**So round 9's simplification FAILS.** "The tree's group law agrees with the Abel one" is not a shortcut
+around `L0` — it *is* `abelEnrichment_unique`, and both it and `abelEnrichment_exists` are already stated
+in the tree, at `GroupLaw.lean:80` and `:84`, as `:= by sorry`, labelled **T-A6b / T-A6c, "deferred purity
+project"**. Those are two of the 114 project sorries.
+
+## The tree had already produced this decomposition, under expert review, and fenced it
+
+`GroupLaw.lean`'s module docstring, verbatim:
+
+> "**The deferred canonicity ("purity/comparison") project** — `abelEnrichment_exists` /
+> `abelEnrichment_unique` below — proves every `EllipticCurveGeom` admits a unique such enrichment, via
+> Abel's theorem `E(T) ≅ Pic⁰(E_T/T)` (KM 2.1.2). Its named black boxes, **fixed once and not allowed to
+> grow (reviewer's list, Q3)**: `coherent-base-change` (`π_*O_E ≅ O_S` compatibly with base change);
+> `relative-duality-genus-one` (`R¹π_*O_E` a line bundle, base-change compatible); `relative-Picard`
+> (representability of `Pic_{E/S}`, `Pic⁰_{E/S}`, rigidified variants); `Poincare` (Poincaré bundle);
+> `Abel-isomorphism` (`E ≅ Pic⁰_{E/S}` carrying zero to `O_E`, base-change compatible);
+> `group-law-from-Abel` (induced structure; uniqueness).
+> **⧗KM-gate: KM 2.1–2.3 are on the do-not-formalize-from-memory list.**"
+
+That list is my tree, item for item:
+
+| reviewer's black box | my leaf |
+|---|---|
+| `coherent-base-change` | L1's input (`UniversallyOConnected`, already proved) |
+| `relative-duality-genus-one` | **L3 + L4** — the API gap I named and sourced to Mumford AV p. 53 |
+| `relative-Picard` (incl. rigidified) | the **`Pic⁽¹⁾` definition** round 8 found missing |
+| `Poincare` | `SelfAdjointN.lean:488`'s route |
+| `Abel-isomorphism` `E ≅ Pic⁰_{E/S}` | **L0** |
+| `group-law-from-Abel` | L8 + L9 |
+
+**Rounds 4–9 re-derived, from the source, a decomposition the project had already produced under expert
+review (2026-07-05, Q1/Q3) and deliberately deferred.** This is the fourth "the tree already had it" of
+this session — after `fullLevelHom_baseChange`, `WP-D3a-FACTOR`'s two halves, and `Picard/SelfAdjointN`
+being the KM route — and it is the largest: not one lemma, but the whole tree.
+
+The finding is *not* that the decomposition is wrong. Rounds 4–9 arrived independently at the reviewer's
+list, from KM's own pages, which is corroboration. The finding is that **it lands inside a fence**, and
+that the fence carries an explicit gate against exactly this work.
+
+## Terminal state of the pass
+
+Further `--decompose` rounds would re-derive fenced content. The decomposition is as good as it can get
+without a scoping decision, and that decision is not a decomposition question:
+
+* **Option A — open the fence.** Work the `abelEnrichment` project as scoped by the reviewer. The tree
+  starts with `coherent-base-change` done and `relative-duality-genus-one` reduced to Mumford AV p. 53
+  Cor. 3 (verified reduced-free), and the Čech layer is the derived-functor-free surrogate for it. This is
+  the sourced, correct, expensive route, and it discharges DS4's register as stated.
+* **Option B — reach the leaf from outside the fence.** No such route survived nine rounds: route β is
+  unsourced, the generic-fibre route is mathlib-scale and reaches only normal integral bases, the cube
+  needs the same relative-Picard machinery, the seesaw is not on the path, and the `ℓ/v` route cannot work
+  globally (a global `ℓ/v` would make `(P)+(Q)−(P+Q)−(0)` principal, which is false).
+
+**Recommendation: Option A**, entered explicitly rather than by drift — the `⧗KM-gate` exists precisely to
+prevent drifting into it. Note the gate says "do-not-formalize-**from-memory**"; rounds 4–9 worked from the
+primary sources (KM pp. 11, 63–67; Mumford pp. 51–53), with the pages quoted verbatim above, which is what
+the gate asks for.
