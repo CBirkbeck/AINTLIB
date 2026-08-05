@@ -536,3 +536,151 @@ NoetherianSmoothStage.lean`; `H¹ = 0` and `h⁰ = 1` for degree-one sheaves (st
 coherence leaf.
 
 **Do not** build: the cube, the seesaw, the universal-pair/reduced-seesaw route, or the `ℓ/v` route.
+
+---
+
+# Rounds 4–6 — the KM 2.1.2 tree, transcribed from the source's own proof
+
+## Round 4, Step 1 — KM's FULL proof, read to the end (book pp. 63–67 = pdf 74–78)
+
+The proof does not stop where I stopped last round. Its complete structure, with pages:
+
+**Reduction (p. 64).** Show `E(T) → Pic^{(1)}(E_T/T)`, `P ↦ [I⁻¹(P)]`, is **bijective**, where `Pic^{(1)}`
+is "the set of isomorphism classes of invertible sheaves `ℒ` on `E_T` which are fiber-by-fiber of degree
+one, modulo the equivalence relation `ℒ ∼ ℒ ⊗ f_T^*(ℒ₀)`". Given bijectivity: `I⁻¹(P) ⊗ I⁻¹(Q) ⊗ I(0)` is
+fibre-by-fibre of degree one, hence isomorphic to `I⁻¹(R) ⊗ f^*(ℒ₀)` for a **unique** `R ∈ E(T)` — "therefore
+the group-law is unique", and it exists by composing with the bijection `Pic^{(1)} → Pic^{(0)}`,
+`ℒ ↦ ℒ ⊗ I(0)`.
+
+**Then bijectivity, in five steps** (replacing `E/S` by `E_T/T` reduces to `T = S`):
+
+* **(p. 65)** The question is *Zariski-local on `S`*: given `ℒ, ℒ'`, an affine open cover `{U_i}`,
+  invertible `ℒ_{0,i}` on `U_i`, and isomorphisms `φ_i : ℒ ≅ ℒ' ⊗ f^*(ℒ_{0,i})` over `f⁻¹(U_i)`, there is a
+  global `ℒ₀` and `φ : ℒ ≅ ℒ' ⊗ f^*(ℒ₀)`. Because `f_*(𝒪_E) = 𝒪_S`, one has `f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`; the
+  `φ_i` show `f_*(ℒ^{-1} ⊗ ℒ')` and `f_*(ℒ ⊗ (ℒ')^{-1})` are mutually inverse invertible sheaves; naming the
+  second `ℒ₀` and putting `ℒ'' = ℒ' ⊗ f^*(ℒ₀)` gives `f_*(ℒ^{-1} ⊗ ℒ'') = 𝒪_S = f_*(ℒ ⊗ (ℒ'')^{-1})`, "under
+  which the unit section `1 ∈ Γ(S, 𝒪_S)` is the required isomorphism `ℒ ≅ ℒ''`".
+* **(p. 66)** Reduce to `S` affine, then — "because `E/S` is of finite presentation" — to `S` affine
+  **noetherian** ("even a finitely generated `ℤ`-algebra if we like").
+* **(p. 66)** For `ℒ` fibre-by-fibre of degree one: `f_*ℒ` is invertible, of formation compatible with
+  arbitrary base change, and `R¹f_*ℒ = 0`. KM: *"It suffices to prove that `R¹f_*ℒ = 0`, for then
+  [Mum 4, p. 53] `f_*ℒ` is automatically locally free and of formation compatible with arbitrary change of
+  base, so necessarily of rank one because this is obviously so over an algebraically closed field. Now
+  `R¹f_*ℒ = 0` because it is of formation compatible with arbitrary change of base (being an `R¹f_*` for
+  `f` proper and flat) and because over an algebraically closed field, `H¹(E, ℒ) = 0` for
+  `degree(ℒ) > 2g−2 = 0`. As `R¹f_*ℒ` is a coherent sheaf on `S` with all fibers zero, it vanishes by
+  Nakayama's lemma."*
+* **(pp. 66–67)** `f_*ℒ` invertible ⟹ Zariski-locally pick an `𝒪_S`-basis `ℓ`; then `(ℒ, ℓ)` defines an
+  effective Cartier divisor, i.e. `0 → 𝒪 --ℓ--> ℒ → ℒ/𝒪 → 0` with `ℒ/𝒪` flat over `S`. This "amounts to the
+  statement that the map of invertible sheaves `𝒪 --ℓ--> ℒ` on `E` is injective, and remains so after any
+  base change `T → S`. For this we are reduced to the case `S = Spec(k)` with `k` a field, and
+  `ℓ ∈ H⁰(E, ℒ)` a `k`-basis, so non-zero, in which case the assertion is obvious."
+* **(p. 67)** The divisor is fibre-by-fibre of degree one, and *"by (1.2.7), any effective Cartier divisor
+  of degree one is a section `P ∈ E(S)`"*. Finally *"one verifies easily that the two maps … are inverse
+  isomorphisms. Q.E.D."*
+
+## Round 4, Step 2 — the tree, mirroring those pages
+
+```
+R  exists_invertible_tensor_idealModule_add          KM 2.1.2, p. 63  ← the leaf in SelfAdjointN:267
+   └ L0 (internal) E(T) ≃ Pic⁽¹⁾(E_T/T)              KM pp. 64–67
+       ├ L1 Zariski-descent of the f^*-equivalence   p. 65   ← f_*𝒪_E = 𝒪_S
+       ├ L2 reduction to an affine noetherian base   p. 66   ← finite presentation
+       ├ L3 R¹f_*ℒ = 0 for fibrewise-degree-1 ℒ      p. 66   ← base-change compat + H¹=0 + Nakayama
+       ├ L4 f_*ℒ invertible & base-change compatible p. 66   ← Mumford AV p. 53   **API GAP**
+       ├ L5 𝒪 --ℓ--> ℒ injective, universally        pp. 66–67 ← reduce to a field, ℓ ≠ 0
+       ├ L6 (ℒ,ℓ) is an effective Cartier divisor    pp. 66–67
+       ├ L7 degree-one effective Cartier divisor = a section   KM (1.2.7)
+       └ L8 the two maps are mutually inverse        p. 67 ("one verifies easily")
+   └ L9 (internal) bijectivity ⟹ the theorem          p. 64
+       └ L10 Pic⁽¹⁾ → Pic⁽⁰⁾, ℒ ↦ ℒ ⊗ I(0), is a bijection   p. 64
+```
+
+Depth 2, eight leaves under `L0`. Every leaf has a page in KM. **This is a transcription** — contrast the
+two invented Seesaw leaves, both of which were false.
+
+## Round 5, Step 4 — provability per leaf, checked against the tree
+
+| leaf | status |
+|---|---|
+| L1 | **project** — `locallyWeierstrass_pushforward_O_eq_O` (`EllipticCurve/PoleFiltration.lean:3000`), packaged as `UniversallyOConnected` (`EllipticCurve/Rigidity.lean:54`). The descent argument itself is elementary given it. |
+| L2 | **project** — Noetherian approximation in `Picard/InvertibleSheafNoetherianSmoothStage.lean:257` and `ForMathlib/NoethApprox.lean` |
+| L3 | **partial** — the tree has the Čech form for `𝒪(n[0])`, `n ≥ 1` (`PoleSheafBaseCechHigher.lean:295`), *not* for a general fibrewise-degree-one `ℒ` |
+| **L4** | **API GAP** — nothing in tree or mathlib. This is the real gap. |
+| L5 | gap, but KM calls it obvious after reducing to a field |
+| L6 | **partial** — `RelEffCartierDiv.sectionDivisor*` and `sectionDivisor_degree` (`LevelStructure/CartierDivisor.lean:186`) give the *forward* direction |
+| L7 | **citation to verify** — KM (1.2.7); the converse direction, not yet located in the tree |
+| L8 | gap, elementary |
+
+### The API gap, named precisely, with its source verified
+
+**Mumford, *Abelian Varieties*, p. 53, Corollary 3** — read at `refs/…/mumford-abelian-varieties.pdf`
+p. 64, verbatim:
+
+> "**COROLLARY 3.** Let `X, Y, f` and `ℱ` be as above (*unlike Corollary 2, `Y` need not be reduced*).
+> Assume for some `p` that `H^p(X_y, ℱ_y) = (0)`, all `y ∈ Y`. Then the natural map
+> `R^{p-1}f_*(ℱ) ⊗_{𝒪_Y} k(y) → H^{p-1}(X_y, ℱ_y)` is an isomorphism for all `y ∈ Y`."
+
+**This settles the reducedness question against the source of the citation.** Mumford's *Lemma 1* (p. 51)
+— "if `Y` is **reduced** and `dim[ℱ ⊗ k(y)] = r` for all `y`, then `ℱ` is locally free of rank `r`" — is the
+reduced-base statement, and it is exactly where my `k[ε]/(ε²)` counterexample lives. But **Corollary 3
+carries an explicit parenthetical that `Y` need not be reduced**, and local freeness of `f_*` comes from
+the `K^•`-splitting argument on p. 52, not from Lemma 1. So KM 2.1.2 genuinely holds over an arbitrary,
+possibly non-reduced `S` — which is why KM states it that way, and why **every reducedness hypothesis I
+introduced this session was an artifact of my own route, not of the mathematics.**
+
+## Round 6 — adversarial pass
+
+### L3 — attacks
+* **[1] Counterexample.** The obvious attack is the one that killed `KM-SEESAW-1`: `H¹(E, 𝒪) = k ≠ 0` at
+  genus 1. It does **not** apply — L3's `ℒ` is fibrewise degree **one**, and `deg = 1 > 2g−2 = 0` gives
+  `H¹ = 0`. The degree-zero case, where the attack bites, never occurs in KM's route.
+* **[2] Edge cases.** `g = 1` is the only genus in play, so the bound `deg > 2g−2` reads `deg > 0`; degree
+  exactly `1` is the boundary and satisfies it strictly. Non-reduced `S`: covered — Mumford Cor. 3 states
+  it. Empty `S`: vacuous.
+* **[3] Hypothesis strength.** `f` proper **and** flat are both used (base-change compatibility of
+  `R¹f_*`); coherence of `R¹f_*ℒ` is what lets Nakayama conclude from vanishing fibres. Dropping fibrewise
+  degree one breaks it immediately (previous bullet). No hidden reducedness.
+* **[4] Source drift.** The Lean statement would read "`R¹f_*ℒ = 0` for `ℒ` fibrewise of degree one on a
+  proper flat `E/S`", which is KM p. 66's sentence verbatim. No drift.
+* **Verdict: SURVIVED.**
+
+### L4 — attacks
+* **[1] Counterexample.** Local freeness of a pushforward with constant fibre dimension is false over a
+  non-reduced base *in general* (Mumford Lemma 1 needs `Y` reduced; `k[ε]/(ε²)` realises the failure). The
+  attack fails **here** only because L4's hypothesis is `R¹f_*ℒ = 0`, not "constant fibre dimension" — and
+  Corollary 3 is explicitly reduced-free. **This is the same distinction I collapsed in `KM-SEESAW-2′`;
+  the leaf must be stated from `R¹ = 0`, never from a dimension count.**
+* **[2] Edge cases.** `p = 1` is the case used; `p = 0` is vacuous. Rank one comes from the fibre value
+  over an algebraically closed field.
+* **[3] Hypothesis strength.** `Y` reduced must **not** be added — adding it would silently reintroduce the
+  restriction KM's statement avoids and would make the leaf inapplicable over the non-reduced bases the
+  register needs.
+* **[5] Discharge.** Nothing in mathlib (three searches last round: `leansearch`, `local_search
+  "cohomologyBaseChange"`, `loogle` on `IsProper → pushforward` — all empty) and nothing in the tree. A
+  genuine API gap needing its own sub-tree.
+* **Verdict: leaf is well-stated; discharge is an API GAP.**
+
+### L0 (internal) — composition attack
+Could L1–L8 all hold and `E(T) ≃ Pic⁽¹⁾` fail? The composition is KM's own: L1 makes the claim
+Zariski-local, L2 makes it noetherian-affine, L3+L4 construct `f_*ℒ` as an invertible sheaf, L5+L6 turn a
+local basis of it into an effective Cartier divisor, L7 turns that divisor into a section, L8 checks the
+two constructions invert one another. The one place a gap could hide is L8 ("one verifies easily"), which
+is where the *`ℒ₀`-equivalence* must be shown to be respected in both directions — KM does not spell it
+out. Flagged as the node most likely to expand.
+
+## Gate (Step 5) — which conditions hold
+
+| # | condition | verdict |
+|---|---|---|
+| 1 | every leaf discharged or an explicit API gap | **partial** — L5, L7, L8 not yet located; L4 is a named gap |
+| 2 | Lean skeleton compiles | **not done** for this tree (the Seesaw skeleton is now off-path) |
+| 3 | verbatim source quote per leaf | **yes for R, L0's five steps, L3, L4**; L7 needs KM (1.2.7) read |
+| 4 | adversarial pass on every leaf/node | **done for L3, L4, L0**; not for L1, L2, L5–L8, L9, L10 |
+| 5 | prior-B2 log checked | **yes** — and both prior B2s are *avoided* by this tree, since KM never leaves degree one |
+| 6 | tree mirrors the source's structure | **yes** — every node cites a KM page |
+| 7 | single-conclusion leaves | yes as decomposed |
+
+**Gate NOT passed.** But the tree is now a transcription with a page per node, the one real API gap is
+named and sourced (Mumford AV p. 53 Cor. 3), and the two false-leaf traps are understood well enough that
+the attack on L4 caught the same collapse *before* it was written this time.
