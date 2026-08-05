@@ -38737,3 +38737,184 @@ per Tier A2 into the converter and the descent:
     `nonempty_unitObj_iso_of_normalized_glue`. **The only place `IsReduced` is used.**
 - Axioms on the two proved declarations: `propext` / `Classical.choice` / `Quot.sound` **+ `sorryAx`**
   inherited from the three leaves — they are derivations, not axiom-verified results.
+
+---
+
+# DS4 / Abel–Pairing board — created 2026-08-05 by `/develop` after eleven decompose rounds
+
+Plan: `.mathlib-quality/plan-ds4-abel-pairing.md`. Decomposition + attack record:
+`.mathlib-quality/decomposition.md` (rounds 1–11). **Every ticket below is sourced to a page of
+Katz–Mazur or Mumford that has been read this session.** Traps to re-read before starting any of them are
+in the plan's "Known traps".
+
+## Group A — degree-one cohomology and base change (the one genuinely new package)
+
+### [AP-A1] `H¹(E_s, L_s) = 0` and `h⁰(E_s, L_s) = 1` for an arbitrary degree-one `L_s` over a field
+- **Status**: open · **File**: new, `EllipticCurve/DegreeOneFibreCohomology.lean` · **Depends on**: none
+- **Parallel**: yes · **Type**: theorem
+- **Statement**: for `k` a field, `C/k` a proper smooth geometrically connected genus-one curve and `L`
+  an invertible sheaf on `C` of degree `1`: `H¹(C, L) = 0` and `dim_k H⁰(C, L) = 1`.
+- **Proof sketch**: Riemann–Roch `h⁰ − h¹ = deg + 1 − g = 1`; Serre duality `h¹(L) = h⁰(ω ⊗ L^{-1})` with
+  `ω ≅ 𝒪` in genus one, so `h¹(L) = h⁰(L^{-1})` and `deg L^{-1} = −1 < 0` forces `h⁰(L^{-1}) = 0`.
+- **Mathlib lemmas needed**: Riemann–Roch for curves — **verify at pickup**; if absent this ticket
+  expands and mathlib's `Mathlib/AlgebraicGeometry/RiemannRoch` (if any) must be checked first.
+- **Sources**: KM p. 66 — *"over an algebraically closed field, `H¹(E, ℒ) = 0` for `degree(ℒ) > 2g−2 = 0`"*.
+- **Generality**: any genus-one proper smooth geometrically connected curve, not just one with a section —
+  KM's step (d) uses no section here.
+
+### [AP-A2] `R¹f_*L = 0` for `L` fibrewise of degree one
+- **Status**: blocked (AP-A1) · **File**: `EllipticCurve/DegreeOneFibreCohomology.lean` · **Type**: theorem
+- **Statement**: `f : E → S` proper flat of finite presentation, `L` invertible on `E` with every fibre
+  restriction of degree one ⟹ the first higher pushforward vanishes.
+- **Proof sketch**: KM p. 66 verbatim — `R¹f_*` is of formation compatible with arbitrary base change (`f`
+  proper and flat); fibres vanish by AP-A1; `R¹f_*L` is coherent with all fibres zero, so **Nakayama**.
+- **Sources**: KM p. 66.
+- **Note**: the tree has no `R¹f_*`. Two options at pickup — introduce it, or state the whole of group A in
+  the Čech vocabulary (`orderedBaseCechComplex`) that `Picard/` already uses. **Prefer the Čech form**: it
+  is derived-functor-free and `IsInvertible.exists_finiteAffineBaseCech_flat` supplies the cover for an
+  *arbitrary* invertible `L`. See the plan's generality note — do **not** specialise to `𝒪(n[0])`.
+
+### [AP-A3] `f_*L` is invertible and of formation compatible with arbitrary base change
+- **Status**: blocked (AP-A2) · **File**: `EllipticCurve/DegreeOneFibreCohomology.lean` · **Type**: theorem
+- **Proof sketch**: Mumford AV p. 53 Cor. 3 at `p = 1` gives the base-change isomorphism
+  `f_*L ⊗ k(y) ≅ H⁰(E_y, L_y)`; local freeness from the `K^•`-splitting argument on p. 52; rank one because
+  `h⁰ = 1` (AP-A1).
+- **Sources**: Mumford, *Abelian Varieties*, p. 53 Corollary 3 — *"(unlike Corollary 2, `Y` need not be
+  reduced)"*; the splitting argument p. 52.
+- **TRAP**: state from `R¹ = 0`, **never** from a constant-fibre-dimension hypothesis. Constant fibre
+  dimension needs a reduced base (Mumford Lemma 1, p. 51) and that route is `b2_log.jsonl`'s
+  `KM-SEESAW-2prime`.
+
+## Group B — the Abel equivalence (KM 2.1.2)
+
+### [AP-B1] a local basis of `f_*L` gives a relative effective Cartier divisor
+- **Status**: blocked (AP-A3) · **File**: new, `EllipticCurve/AbelEquivalence.lean` · **Type**: theorem
+- **Statement**: for `ℓ` an `𝒪_S`-basis of `f_*L` over an open of `S`, the map `𝒪 --ℓ--> L` is injective and
+  remains injective after every base change; hence `(L, ℓ)` is an effective Cartier divisor with flat
+  cokernel.
+- **Proof sketch**: KM pp. 66–67 — reduce to `S = Spec k`, where `ℓ ∈ H⁰(E, L)` is a `k`-basis, hence
+  non-zero, "in which case the assertion is obvious".
+- **Sources**: KM pp. 66–67.
+
+### [AP-B2] the divisor is fibrewise of degree one, hence a section
+- **Status**: blocked (AP-B1) · **File**: `EllipticCurve/AbelEquivalence.lean` · **Type**: theorem
+- **Proof sketch**: fibre degree is `h⁰ = 1` (AP-A1); then **mathlib** `Scheme.Hom.isIso_iff_finrank_eq`
+  makes `D → S` an isomorphism, i.e. `D` is a section.
+- **Mathlib lemmas needed**: `AlgebraicGeometry.Scheme.Hom.isIso_iff_finrank_eq` (**verified present**,
+  `Morphisms/FlatRank.lean:273`).
+- **Sources**: KM Lemma 1.2.7, p. 11 — *"the diagonal arrow is an isomorphism (because locally on `S` …
+  it turns the affine ring of `D` into an `R`-algebra which is an invertible `R`-module, i.e. into `R`
+  itself)"*.
+
+### [AP-B3] `abelSum`, and the Abel equivalence `E(T) ≃ Pic⁽¹⁾(E_T/T)`, natural in `T`
+- **Status**: blocked (AP-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · **Type**: def + theorem
+- **Statement**: `Pic⁽¹⁾(E_T/T)` as a **set** of iso classes of fibrewise-degree-one invertible sheaves
+  modulo `L ∼ L ⊗ f_T^*L₀`; the two maps `P ↦ [I⁻¹(P)]` and `L ↦ ` the zero-scheme of a local basis of
+  `f_*L`; they are mutually inverse, naturally in `T`. `abelSum P Q` is defined **without mentioning
+  `E.grp`** as the unique section representing `I⁻¹(P) ⊗ I⁻¹(Q) ⊗ I(0)`.
+- **Proof sketch**: KM p. 65 for the Zariski-locality (uses `f_*𝒪 = 𝒪`, i.e. `UniversallyOConnected`);
+  p. 66 for the reduction to affine noetherian; AP-A3 + AP-B1 + AP-B2 for the inverse map; p. 67 for
+  "inverse isomorphisms".
+- **Sources**: KM pp. 64–67.
+- **Generality**: `Pic⁽¹⁾` is a **set**, not a representable functor — representability is *not* used and
+  must not be introduced (plan §"scope reductions").
+
+### [AP-B4] `abelSum = +` in the carried group law
+- **Status**: blocked (AP-B3) · **File**: `EllipticCurve/AbelEquivalence.lean` · **Type**: theorem
+- **Proof sketch**: package `abelSum` as a commutative group object via **mathlib**
+  `CommGrpObj.ofRepresentableBy` (**verified present**, `CommGrp_.lean:34`), then apply the project's
+  **already-proved** `grpObj_mul_unique` (`RecordGroupUnique.lean:414`, sorry-free): two group-object
+  structures on the same pointed genus-one curve with unit `0` coincide.
+- **TRAP**: this ordering is what avoids the circularity. Do **not** argue "KM proves the Abel law is
+  unique, so it is the carried law" — KM's uniqueness is uniqueness among laws satisfying the Abel
+  criterion, which is what is being proved.
+
+## Group C — the leaf
+
+### [AP-C1] `exists_invertible_tensor_idealModule_add` — fill `Picard/SelfAdjointN.lean:267`
+- **Status**: blocked (AP-B4) · **File**: `Picard/SelfAdjointN.lean` · **Type**: theorem (existing sorry)
+- **Proof sketch**: KM 2.1.2 at `R = P + Q` gives `I⁻¹(P) ⊗ I⁻¹(Q) ⊗ I(0) ≅ I⁻¹(R) ⊗ f_T^*L₀`; invert and
+  tensor by `I(0)` to get `I(P) ⊗ I(Q) ≅ (I(R) ⊗ I(0)) ⊗ f_T^*(L₀^∨)`; take `N' = L₀^∨`; rewrite `R = P+Q`
+  by AP-B4.
+- **Sources**: KM Thm 2.1.2, p. 63 (statement quoted verbatim in `decomposition.md`).
+- **Note**: `SelfAdjointN.lean:488` (`exists_pic_map_snd_picMap_mulByHom_kappa`) is documented in-file as a
+  formal consequence of this leaf via the normalized Poincaré bundle's symmetry — it becomes workable once
+  AP-C1 lands, and gets its own ticket then.
+
+## Group D — KM 2.8.1's pairing, specialised to `π = [N]`
+
+### [AP-D1] the sheaf `K_E^×` of units trivial along the zero section
+- **Status**: open (independent of A–C) · **File**: new, `WeilPairing/UnitSheaf.lean` · **Type**: def + API
+- **Statement**: `K_E^× ⊆ 𝒪_E^×`, the subsheaf of invertible functions taking the value `1` along the zero
+  section, with its group structure and restriction/base-change API.
+- **Sources**: KM p. 88 — *"Let `K_E^× ⊂ 𝒪_E^×` denote the subsheaf of invertible functions on `E` which
+  take the value `1` along the zero-section."*
+
+### [AP-D2] `H⁰(E, K_E^×) = {1}`
+- **Status**: blocked (AP-D1) · **File**: `WeilPairing/UnitSheaf.lean` · **Type**: theorem
+- **Proof sketch**: **already proved** — `eq_one_of_pullback_eq_one` (`SectionRigidity.lean:83`) is exactly
+  this statement. This ticket is the restatement in `K_E^×` vocabulary plus the one-line citation.
+- **Sources**: KM (2.8.1.6), p. 88.
+
+### [AP-D3] `Pic(E/S) ≅ H¹(E, K_E^×)`
+- **Status**: blocked (AP-D1) · **File**: `WeilPairing/UnitSheaf.lean` · **Type**: theorem
+- **Sources**: KM (2.8.1.5), p. 88, citing **[K5 §5, esp. 5.2, pp. 186–187]** — *resolve this bibliography
+  entry before starting*; if the cited source is unavailable the ticket needs its own decomposition.
+- **Note**: the tree's normalized-cocycle layer (`Picard/InvertibleSheafCocycle.lean:44`,
+  `GlueTrivialization.lean:98`, `RigidDescent.lean:65`) is the `K^×`-valued Čech machinery this needs;
+  `RigidDescent`'s "overlap comparison units are `1` along the zero section" is literally a `K_E^×` cocycle.
+
+### [AP-D4] `E[N](S) = Ker([N]^* : Pic⁰(E/S) → Pic⁰(E/S))`
+- **Status**: blocked (AP-C1) · **File**: new, `WeilPairing/KMPairing.lean` · **Type**: theorem
+- **Proof sketch**: KM (2.8.1.7) specialised to the self-dual `π = [N]`. The `⊆` direction **is** the
+  tree's `(★′)` `picMap_mulByHom_kappa_eq_one` (`SelfAdjointN.lean:497`); the `⊇` direction is Abel
+  (AP-B3) applied to a class killed by `[N]^*`.
+- **Sources**: KM (2.8.1.7), p. 88; self-duality of `[N]` is KM 2.6.2.1.
+
+### [AP-D5] the unique factorisation `f_{i,j} ∘ [N] = h_i / h_j`
+- **Status**: blocked (AP-D2, AP-D3, AP-D4) · **File**: `WeilPairing/KMPairing.lean` · **Type**: theorem
+- **Proof sketch**: KM p. 88 — triviality of `[N]^*ℒ` in `Pic(E/S)` means the normalized cocycle
+  `f_{i,j} ∘ [N]` is a coboundary; **uniqueness** of the `h_i` is AP-D2 (`H⁰(K^×) = {1}`).
+- **Sources**: KM p. 88.
+
+### [AP-D6] the patching: `h_i ∘ P` glue to `"h(P)" ∈ Γ(S, 𝒪_S^×)`
+- **Status**: blocked (AP-D5) · **File**: `WeilPairing/KMPairing.lean` · **Type**: def + theorem
+- **Proof sketch**: KM p. 89 — over the cover of `S` by `P^{-1}([N]^{-1}U_i)`, the units `h_i ∘ P` agree on
+  overlaps *"in view of the relations `f_{i,j} ∈ K^×`, `h_i/h_j = f_{i,j} ∘ π`, `πP = 0`"*, so they patch.
+- **Sources**: KM p. 89.
+
+### [AP-D7] bilinearity, and landing in `μ_N`
+- **Status**: blocked (AP-D6) · **File**: `WeilPairing/KMPairing.lean` · **Type**: theorem (×2, split)
+- **Proof sketch**: KM p. 89 — *"One verifies easily that this construction defines a bilinear pairing"*;
+  and *"Because `(Ker π)(S)` is killed by `N`, the pairing lands in `μ_N(S)`"*. **Two tickets** (one per
+  conclusion) per the one-conclusion rule; the source's "easily" is a flag that this may expand.
+- **Sources**: KM p. 89.
+
+## Group E — the DS4 register
+
+### [AP-E1] `weilPairing` as a scheme morphism, and `weilPairing_over`
+- **Status**: blocked (AP-D7) · **File**: `WeilPairing/Basic.lean` (`:49`, `:53`) · **Type**: def + theorem
+- **Proof sketch**: AP-D7 gives a pairing on `T`-points natural in `T`; Yoneda turns it into
+  `pullback (torsionπ N) (torsionπ N) ⟶ muN S N`. `weilPairing_over` is then the naturality square.
+- **Sources**: KM 2.8.5, p. 90.
+
+### [AP-E2 … E6] the register's five spec theorems
+- **Status**: blocked (AP-E1) · **File**: `WeilPairing/Basic.lean` · one ticket each
+- `_add_left` (`:111`), `_add_right` (`:122`) — bilinearity, from AP-D7
+- `_self` (`:202`) — KM p. 90 footnote: *"In fact, `e_N(P,P) = 1`, cf. Notes Added in Proof"* — **read that
+  note before starting**; 2.8.3 gives only alternation `⟨P,P'⟩⟨P',P⟩ = 1`, which is weaker
+- `_nondegenerate` (`:270`) — KM 2.8.2, Cartier–Nishi duality [cf. Oda]. **This is the one register entry
+  that genuinely needs Cartier duality**, and it is absent from mathlib — expect its own sub-development
+- `_mul` (`:328`) — KM 2.8.4.1, the composability formula
+
+## Cleanup cadence
+
+Per `CLAUDE.md` producers do not run cleanup on dev branches — it is fleet work on `main`. **No
+`CLEANUP-*` tickets are created here**, deliberately departing from `/develop` §1g, which is superseded by
+AINTLIB's producer/cleaner split.
+
+## Readiness
+
+**Ready to start now, in parallel**: AP-A1 and AP-D1 (no dependencies).
+**Not ready**: AP-D3 (bibliography entry [K5] unresolved), AP-E5 `_nondegenerate` (needs Cartier duality,
+absent from mathlib), AP-E4 `_self` (needs KM's "Notes Added in Proof").
