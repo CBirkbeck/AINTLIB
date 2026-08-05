@@ -1045,6 +1045,7 @@ theorem presheafValue_flat_of_canonical
       left_inv := e.symm_apply_apply
       right_inv := e.apply_symm_apply }
 
+omit [PlusSubring A] in
 omit [HasLocLiftPowerBounded A] in
 /-- **T-STRONG-NOETH-PRESERVATION (rational-locale case)**: for strongly noetherian
 Tate `A` and any rational locale `D : RationalLocData A`, `presheafValue D` is a
@@ -1373,6 +1374,7 @@ theorem exists_hSpa_points_global_of_stronglyNoetherianTate
   · exact _aux_nonOpen_hSpa_points_of_stronglyNoetherianTate
       (A := A) T s p hp hs hopen
 
+omit [HasLocLiftPowerBounded A] in
 /-- **(L.1) Spa-point existence above any prime, combining open and non-open
 cases.** This is the discharge of the `hSpa_points` hypothesis used by
 `base_s_in_annihilator_radical_of_covering` etc. — case-split on `IsOpen (p : Set A)`

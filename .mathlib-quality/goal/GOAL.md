@@ -17589,3 +17589,37 @@ by unification, plus the trickle each round's signature-shrinking exposes.
 > A stopping decision is only as good as the alternatives it was measured against. "Stop, the
 > marginal value is low" was right in round 4 and wrong the moment the comparison set emptied.
 > Re-deriving it after the ledger closed cost one command and bought 78 generalisations.
+
+### Round 6, and the rate law: this process is generative, not convergent
+
+| round | omits landed | unusedSectionVars after | net warnings removed |
+|---|---|---|---|
+| 1 | 572 | 360 | 354 |
+| 2 | 196 | 304 | 56 |
+| 3 | 161 | 240 | 64 |
+| 4 | 95 | 221 | 19 |
+| 5 | 78 | 214 | 7 |
+| 6 | **71** | **196** | 18 |
+| **total** | **1,173** | | |
+
+Six rounds is enough data to state the rate law, and it is not what "converging" implies:
+
+> Since round 4, each round lands **~75 omits** but removes only **~15 warnings**. Every omit
+> applied exposes roughly **0.8 new ones** downstream — shrinking a signature makes the next
+> declaration's variables unused in turn. The population is very nearly self-sustaining.
+
+That reframes the endpoint. At ~15 net per round, reaching zero takes ~13 more rounds, roughly
+**30 hours of builds**. But the omits are not warning-suppression — each is a real
+generalisation, landing at ~2 minutes of build time apiece. So the honest statement is not
+"nearly done" and not "stalled":
+
+* **as a warning-elimination project** it is barely moving and should not be judged that way;
+* **as a generalisation generator** it produces ~71 verified, individually-gated hypothesis
+  reductions per ~2.5-hour round, and will keep doing so.
+
+Total AdicSpaces warnings 4,398 → **3,691**. The library has been green under a full
+`lake build '«Adic spaces»'` at every one of the six round boundaries.
+
+> Measuring the *rate* rather than the remaining count is what distinguishes "this is nearly
+> finished" from "this will produce output for as long as it is run". Only the second is true
+> here, and it is a decision for the owner rather than a queue to drain.

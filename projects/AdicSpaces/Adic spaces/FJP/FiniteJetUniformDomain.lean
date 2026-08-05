@@ -662,6 +662,7 @@ omit [IsFJPBase F] in
 theorem ker_jB_not_fg : ¬ (RingHom.ker (jB F)).FG := fun h =>
   not_moduleFinite_L F (moduleFinite_of_ker_jB_fg F h)
 
+omit [IsFJPBase F] in
 /-- **𝓐 is not noetherian** ([FJP] Prop 2.4: "The underlying ring 𝒜 is not noetherian"). -/
 theorem not_isNoetherianRing_JetA : ¬ IsNoetherianRing (JetA F) := fun h =>
   ker_jB_not_fg F (h.noetherian _)

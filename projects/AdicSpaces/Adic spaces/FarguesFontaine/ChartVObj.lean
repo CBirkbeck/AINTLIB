@@ -396,6 +396,7 @@ private theorem teichmuller_pow_eq_teichPi_pow_mul {a b d : ℕ} {c' c'' : OF F}
     map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
   rfl
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- **The chart-generator identity.** Once `c' ^ a` factors as `ϖ ^ (d(a-b)) * c''` in `OF F`,
 the `a`-th power of the chart generator `p^d * (π⁻¹)^d * [c']` collapses to
 `chartFracP a b ^ d * [c'']`. Extracted from `p_div_teich_pow_a_mem_chartSubring`, where it was
@@ -879,6 +880,7 @@ theorem presheafChartRingEquivBISub_symm_blocToBI (a b : ℕ) (ha : 0 < a)
           ((blocEquivAwayChartS p F ϖ b hb).symm h))
   rw [RingEquiv.apply_symm_apply]
 
+omit [CharP F p] in
 /-- **The chart generators land in the localization plus-subring** under the
 chart identification: `S ⊆ (A⁺[T/s])`-image. -/
 theorem chartSubring_le_locPlusSubring_map (a b : ℕ) (hb : 0 < b) :

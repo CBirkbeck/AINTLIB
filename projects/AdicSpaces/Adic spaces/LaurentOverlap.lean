@@ -1075,6 +1075,7 @@ private theorem bivariateLocToQuotient_isPowerBounded_of_mem_T
     exact hb
 
 
+omit [PlusSubring B] in
 omit [IsHuberRing B] [HasLocLiftPowerBounded B] [IsNoetherianRing B] [T2Space B] in
 /-- The three distinct values of `bivariateLocToQuotient_atOverlap (divByS t (overlap).s)`
 for `t ∈ (overlapDatum B P b).T` (i.e., `{1, b, b²}`) are respectively
@@ -1228,6 +1229,7 @@ theorem example638Bivariate_backwardHom_coe
     hQ_complete
     hT0Q a
 
+omit [HasLocLiftPowerBounded B] [IsNoetherianRing B] in
 /-- `example638Bivariate_backwardHom` sends `canonicalMap a` to `mk(algebraMap a)`. -/
 theorem example638Bivariate_backwardHom_canonicalMap
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)

@@ -4827,6 +4827,7 @@ private theorem unitCover_overlapDatum_B_s_eq
   rw [show ((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) =
     (1 : presheafValue D₀) * D₀.canonicalMap f from rfl, one_mul]
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [DecidableEq (RationalLocData A)] in
 open Classical in
 /-- Every element of the doubly-intersected datum's `T` is a product of one element from each
@@ -8283,6 +8284,7 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
       Vj.1 (V.hsubset Vj.1 Vj.2) h,
     RingEquiv.apply_symm_apply]
   exact hx' Vj
+omit [DecidableEq (RationalLocData A)] in
 omit [IsRingOfIntegralElements A⁺] in
 /-- **Part (iv) sub-lemma (c)**: the Prop A.3(1) bridge step. Given a
 Laurent cover `V` of `C.base` that's `O_X`-acyclic, with a specific

@@ -852,6 +852,7 @@ theorem bridgeLocHomC_divByS (hD : D.IsRational) (i : Fin e.m) :
     (bridgeLocHomC D e hD (divByS (iotaC F (e.f i)) (pushDatumC D hD).s))]
   exact happ
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeLocHomC_continuous (hD : D.IsRational) :
     @Continuous _ _ (pushDatumC D hD).topology _ (bridgeLocHomC D e hD) := by
   refine locTopology_continuous_lift (pushDatumC D hD).P (pushDatumC D hD).T
@@ -1018,6 +1019,7 @@ theorem bridgeLocHomB_divByS (hD : D.IsRational) (i : Fin e.m) :
     (bridgeLocHomB D e hD (divByS (jB F (e.f i)) (pushDatumB D hD).s))]
   exact happ
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeLocHomB_continuous (hD : D.IsRational) :
     @Continuous _ _ (pushDatumB D hD).topology _ (bridgeLocHomB D e hD) := by
   refine locTopology_continuous_lift (pushDatumB D hD).P (pushDatumB D hD).T
@@ -1182,6 +1184,7 @@ theorem bridgeLocHomD_algebraMap (hD : D.IsRational) (a : JetD F) :
       bridgeBaseD D e a :=
   IsLocalization.Away.lift_eq _ _ a
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeLocHomD_divByS (hD : D.IsRational) (i : Fin e.m) :
     bridgeLocHomD D e hD (divByS (rhoC F (iotaC F (e.f i))) (pushDatumD D hD).s) =
       bridgeXD D e i := by
@@ -1793,6 +1796,7 @@ theorem norm_locRhoC_le (x : locC F e.m D.s e.f) :
     _ ≤ ‖p‖ := norm_mapRestricted_le _ _ _ p
     _ ≤ ‖x‖ + ε := hpn.le
 
+omit [IsFJPNoetherianBase F] in
 theorem locRhoB_continuous : Continuous (locRhoB F e.m D.s e.f) :=
   AddMonoidHomClass.continuous_of_bound (locRhoB F e.m D.s e.f) 1 fun x => by
     rw [one_mul]; exact norm_locRhoB_le D e x

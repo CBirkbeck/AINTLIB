@@ -797,6 +797,7 @@ theorem presheafValueToQuotient_coe (D : RationalLocData A)
 Using the round-trip lemma `tateQuotient_roundtrip_eq_locLift` (already proved)
 and T2 uniqueness of continuous extensions, we show both composites are identity. -/
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- The composite `tateQuotientToPresheafHom ∘ presheafValueToQuotient` is the
 identity on `presheafValue D`.
 
@@ -840,6 +841,7 @@ theorem tateQuotientToPresheaf_comp_presheafToQuotient (D : RationalLocData A)
     tateQuotient_roundtrip_apply D hb a,
     locLiftToPresheaf_eq_coeRingHom D]
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- The composite `presheafValueToQuotient ∘ tateQuotientToPresheafHom` is the
 identity on `A⟨X⟩/(1-sX)`.
 
@@ -2408,6 +2410,7 @@ noncomputable def presheafValueCanonicalQuotientHomeomorph (D : RationalLocData 
     D hA_complete hnoeth hT_pb
   continuous_invFun := hcont_eval
 
+omit [PlusSubring A] in
 /-- The canonical isomorphism sends `canonicalMap(a)` to `mk(algebraMap a)`. -/
 theorem presheafValueCanonicalQuotientEquiv_canonicalMap (D : RationalLocData A)
     [IsTateRing A]
@@ -2428,6 +2431,7 @@ theorem presheafValueCanonicalQuotientEquiv_canonicalMap (D : RationalLocData A)
     (D.coeRingHom (algebraMap A _ a)) = _
   rw [presheafValueToCanonicalQuotient_coe, locToQuotientOneSubfX_gen_algebraMap]
 
+omit [PlusSubring A] in
 /-- The inverse sends `mk(algebraMap a)` back to `canonicalMap(a)`. -/
 theorem presheafValueCanonicalQuotientEquiv_symm_algebraMap (D : RationalLocData A)
     [IsTateRing A]
@@ -2482,6 +2486,7 @@ noncomputable instance quotientOneSubfXIdeal_firstCountableTopology [IsTateRing 
     (oneSubfXIdeal f) instIsTopologicalRingTateAlgebra).map_nhds_eq
     continuous_coinduced_rng.continuousAt).symm
 
+omit [PlusSubring A] in
 /-- **Banach OMP for `tateQuotientToPresheafHom`**: the inverse map of the
 canonical isomorphism is a homeomorphism.
 
@@ -2853,6 +2858,7 @@ theorem presheafValue_tateAlgebra_quotient_iso_symm_algebraMap
   exact presheafValueCanonicalQuotientEquiv_symm_algebraMap D hb hA_complete hnoeth hT_pb
     (tateQuotientToPresheafHom_continuous_of_tate D hb) a
 
+omit [PlusSubring A] in
 /-- The inverse of the packaged Example 6.38 iso is `tateQuotientToPresheafHom`. -/
 theorem presheafValue_tateAlgebra_quotient_iso_symm
     [IsTateRing A] (D : RationalLocData A)

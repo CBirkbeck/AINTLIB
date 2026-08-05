@@ -315,6 +315,7 @@ private theorem forward_divByS_mul_f_eq
   apply hu_s_tgt.mul_right_cancel
   rw [hcm, ← hcoeB, map_mul]; ring
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- Generator case `a = D₀.s`: for `b ∈ {D₀.s, f}`, the forward image of
 `divByS (D₀.s * b) (laurentOverlap).s` lies in the target `locSubring`. -/
 private theorem iteratedOverlap_forwardLocHom_to_B_genPB_s
@@ -357,6 +358,7 @@ private theorem iteratedOverlap_forwardLocHom_to_B_genPB_s
           unfold divByS; exact IsLocalization.mk'_self _ _, map_one]
     exact (locSubring _ _ _).one_mem
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- Generator case `a = f`: for `b ∈ {D₀.s, f}`, the forward image of
 `divByS (f * b) (laurentOverlap).s` lies in the target `locSubring`. The
 `b = f` sub-case is new relative to `iteratedMinus`. -/
@@ -414,6 +416,7 @@ private theorem iteratedOverlap_forwardLocHom_to_B_genPB_f
       exact Subring.le_topologicalClosure _ ⟨⟨divByS (1 : A) D₀.s,
         divByS_mem_locSubring _ _ _ LaurentNormalized.one_mem_T⟩, rfl⟩
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- Generator case `a ∈ D₀.T`: for `b ∈ {D₀.s, f}`, the forward image of
 `divByS (a * b) (laurentOverlap).s` lies in the target `locSubring`. -/
 private theorem iteratedOverlap_forwardLocHom_to_B_genPB_T
@@ -558,6 +561,7 @@ noncomputable def iteratedOverlap_forwardToCompletion
   (iteratedOverlapDatum_B P D₀ f hLocLift_B).coeRingHom.comp
     (iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B)
 
+omit [HasLocLiftPowerBounded A] [T2Space A] in
 /-- The composite `iteratedOverlap_forwardLocHom_to_B ∘ algebraMap A` is continuous for the
 `B`-datum topology: it equals `algebraMap_B ∘ D₀.canonicalMap`, and both factors are
 continuous. -/

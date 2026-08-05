@@ -92,12 +92,14 @@ omit [IsFJPBase F] in
 theorem norm_scottishWitness : ‖scottishWitness F‖ = 1 := by
   rw [scottishWitness, norm_JetA_pow, norm_Qa, one_pow]
 
+omit [IsFJPBase F] in
 /-- **The central analytic fact**: multiplication by `Q²` preserves the norm exactly.
 Elementary in coefficients — it shifts every `Q`-coefficient two places to the right,
 with no cancellation. -/
 theorem norm_scottishWitness_mul (a : JetA F) : ‖scottishWitness F * a‖ = ‖a‖ := by
   rw [norm_JetA_mul, norm_scottishWitness, one_mul]
 
+omit [IsFJPBase F] in
 theorem scottishWitness_ne_zero : scottishWitness F ≠ 0 := by
   intro h
   have := norm_scottishWitness F

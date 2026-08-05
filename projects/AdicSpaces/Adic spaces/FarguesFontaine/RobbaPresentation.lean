@@ -6016,6 +6016,7 @@ theorem wIRPS_balancedMonomial (c' : OF F) (n j : ℕ) :
   rw [valued_BlocToHatK, valued_BlocToHatK]
   rw [wLoc_balanced p F ϖ hρ₁0 hρ₁1, wLoc_balanced p F ϖ hρ₂0 hρ₂1, max_self]
 
+omit [CharP F p] in
 /-- **The balanced `m`-power twist** (T910-M M1a): the `m`-th power of a
 monomial fraction with divisibility-controlled coefficient factors through
 the generator with an exactly `p`-balanced remainder monomial. -/

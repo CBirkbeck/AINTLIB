@@ -332,6 +332,7 @@ theorem keystoneHom_continuous : Continuous (keystoneHom D₀ hspanE) := by
   letI : UniformSpace (Localization.Away E.s) := E.uniformSpace
   exact UniformSpace.Completion.continuous_extension
 
+omit [HasLocLiftPowerBounded A] in
 /-- The keystone intertwines the canonical maps. -/
 theorem keystoneHom_canonicalMap (a : A) :
     keystoneHom D₀ hspanE (E.canonicalMap a) =
@@ -488,6 +489,7 @@ theorem keystoneInv_continuous : Continuous (keystoneInv D₀ hspanE hE) := by
     (imgDatum D₀ E hspanE).uniformSpace
   exact UniformSpace.Completion.continuous_extension
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The backward keystone intertwines the `B`-canonical map with the restriction. -/
 theorem keystoneInv_canonicalMap (b : presheafValue D₀) :
     keystoneInv D₀ hspanE hE ((imgDatum D₀ E hspanE).canonicalMap b) =

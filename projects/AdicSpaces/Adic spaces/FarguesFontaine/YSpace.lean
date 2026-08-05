@@ -369,6 +369,7 @@ theorem KGE_or_KLE {v : Spv (Ainf p F)} (_hv : v ∈ Y p F ϖ) {q : ℚ} (_hq : 
     KGE p F ϖ q v ∨ KLE p F ϖ q v :=
   v.vle_total _ _
 
+omit [CharP F p] in
 /-- Order-incompatibility: `κ(v) ≤ q'` and `κ(v) ≥ q` cannot both hold when `q' < q`
 (on `𝒴`, where `0 < v(p) < 1`). Cross-multiply and use the exponent-flip rule
 `v(p)^m ≤ v(p)^k → m ≥ k`.
@@ -457,6 +458,7 @@ Source: [Kedlaya-AWS, Rem. 3.1.9]. -/
 def windowV (n : ℤ) : Set (Spv (Ainf p F)) :=
   {v ∈ Y p F ϖ | KGE p F ϖ (cFF p * (p : ℚ) ^ n) v ∧ KLE p F ϖ ((p : ℚ) ^ (n + 1)) v}
 
+omit [CharP F p] in
 /-- **The covering**: `𝒴 = ⋃_n (U_n ∪ V_n)`.
 
 Proof plan: cofinality (`exists_pow_p_vlt`, `exists_pow_teichPi_vlt`) pins κ(v) into some
@@ -507,6 +509,7 @@ theorem KGE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
     _ = (ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ q'.num.toNat) ^ q.den :=
         pow_mul _ _ _
 
+omit [CharP F p] in
 theorem KLE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
     (hq : 0 < q) (hle : q ≤ q') (h : KLE p F ϖ q v) : KLE p F ϖ q' v := by
   letI : ValuativeRel (Ainf p F) := v.toValuativeRel

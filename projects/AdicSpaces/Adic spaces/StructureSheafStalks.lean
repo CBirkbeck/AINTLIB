@@ -633,6 +633,7 @@ theorem stalkVle_total (v : ↥(Spa A A⁺))
   · exact Or.inl (hf ▸ hg ▸ stalkVle_intro h)
   · exact Or.inr (hg ▸ hf ▸ stalkVle_intro h)
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem stalkVle_add {v : ↥(Spa A A⁺)}
     {x y z : ToType ((spaRingPresheaf A).stalk v)}
     (hxz : stalkVle v x z) (hyz : stalkVle v y z) :
@@ -687,6 +688,7 @@ theorem stalkVle_add {v : ↥(Spa A A⁺)}
     (germ_add _ hvW _ _).trans (congrArg₂ (· + ·) hgx hgy)
   exact hsum ▸ hgz ▸ hfin
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem stalkVle_mul_left {v : ↥(Spa A A⁺)}
     {x y : ToType ((spaRingPresheaf A).stalk v)}
     (h : stalkVle v x y) (z : ToType ((spaRingPresheaf A).stalk v)) :
@@ -735,6 +737,7 @@ theorem stalkVle_mul_comm {v : ↥(Spa A A⁺)}
     (germ_mul _ hvU _ _).trans (congrArg₂ (· * ·) hg hf)
   exact h1 ▸ h2 ▸ hfin
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem not_stalkVle_one_zero (v : ↥(Spa A A⁺)) :
     ¬ stalkVle v (1 : ToType ((spaRingPresheaf A).stalk v)) 0 := by
   intro hcon
@@ -748,6 +751,7 @@ theorem not_stalkVle_one_zero (v : ↥(Spa A A⁺)) :
   rw [hone, hzero] at hres
   exact (openValue W hvW).not_vle_one_zero hres
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem stalkVle_trans {v : ↥(Spa A A⁺)}
     {c b a : ToType ((spaRingPresheaf A).stalk v)}
     (hab : stalkVle v a b) (hbc : stalkVle v b c) : stalkVle v a c := by
@@ -798,6 +802,7 @@ theorem stalkVle_trans {v : ↥(Spa A A⁺)}
       ((germ_limitRestrict _ hvW₂ _).trans hc0)
   exact hga ▸ hgc ▸ hfin
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem stalkVle_mul_cancel {v : ↥(Spa A A⁺)}
     {x y z : ToType ((spaRingPresheaf A).stalk v)}
     (hz : ¬ stalkVle v z 0) (hmul : stalkVle v (x * z) (y * z)) :

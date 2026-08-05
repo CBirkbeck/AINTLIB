@@ -461,6 +461,7 @@ theorem RationalLocData.interSamePair_span_eq_top (D₁ D₂ : RationalLocData A
     (span_insert_eq_top_of_span_eq_top D₁.s h₁)
     (span_insert_eq_top_of_span_eq_top D₂.s h₂)
 
+omit [PlusSubring A] in
 /-- `interSamePair` of rational data over a Tate ring is rational (Wedhorn
 Proposition 7.31(2): the intersection of rational subsets is rational). -/
 theorem RationalLocData.interSamePair_isRational [IsTateRing A]
@@ -1399,6 +1400,7 @@ noncomputable def iteratedPlus_backwardHom
     (iteratedPlus_backwardLocHom D₀ f hsub)
     (iteratedPlus_backwardLocHom_continuous P D₀ f hsub)
 
+omit [PlusSubring A] in
 /-- Forward completion hom acting on `coeRingHom a`. -/
 theorem iteratedPlus_forwardHom_coeRingHom
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -1658,6 +1660,7 @@ theorem presheafValue_iteratedPlus_equiv_coeRingHom
   rw [presheafValue_iteratedPlus_equiv_apply, iteratedPlus_forwardHom_coeRingHom]
   rfl
 
+omit [PlusSubring A] in
 /-- Continuity of the plus-branch forward completion hom. -/
 theorem iteratedPlus_forwardHom_continuous
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
