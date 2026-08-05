@@ -2510,6 +2510,44 @@ applies there. Continuity of `tateEvalPresheafHom` follows from:
 
 No `IsNoetherianRing`-on-A⟨X⟩ required; the input is just `IsTateRing A`. -/
 
+omit [PlusSubring A] [IsHuberRing A] [T2Space A] in
+open Pointwise in
+/-- Each term of the evaluation series lands in `W`: its coefficient is carried into `U` by
+`hN` (the coefficient lies `N` levels deep in the ideal of definition), and multiplying by a
+power of `invS D` stays inside `W` by the boundedness witness `hUW`.
+
+`open Pointwise` is needed to *write* the `Set * Set` in `hUW`'s type; this file does not open
+it globally, and the caller never had to because it receives that type from `IsBounded`. -/
+private theorem evalTerm_mem_of_tateAlgNhd [IsTateRing A] (D : RationalLocData A)
+    {W U : Set (presheafValue D)}
+    (hUW : Set.range (fun k : ℕ ↦ invS D ^ k) * U ⊆ W)
+    (P : PairOfDefinition A) {N : ℕ}
+    (hN : Subtype.val '' ((P.I ^ N : Ideal P.A₀) : Set P.A₀) ⊆ D.canonicalMap ⁻¹' U)
+    {h : ↥(TateAlgebra A)} (hh : h ∈ TateAlgebra.tateAlgNhd P N) (k : ℕ) :
+    TateAlgebraWedhorn.evalTerm D.canonicalMap (invS D) h k ∈ W := by
+  -- evalTerm = canonicalMap(coeff_k h) * (invS D)^k.
+  change D.canonicalMap (TateAlgebra.coeff k h) * (invS D) ^ k ∈
+    W
+  -- Apply hUW: (Set.range invS^·) * U ⊆ W. Order: range on left, U on right.
+  -- Rewrite via commutativity.
+  rw [mul_comm]
+  apply hUW
+  refine ⟨(invS D) ^ k, ⟨k, rfl⟩, D.canonicalMap (TateAlgebra.coeff k h),
+    ?_, rfl⟩
+  · -- canonicalMap(coeff_k h) ∈ U.
+    apply hN
+    -- Need coeff_k h ∈ image P.I^N.
+    have := TateAlgebra.tateAlgNhd_coeff_mem P N hh (TateAlgebra.toIndex k)
+    obtain ⟨b, hbI, hbeq⟩ := this
+    -- `coeff_k h = MvPowerSeries.coeff (toIndex k) h.val`, which equals (b : A).
+    rw [show (TateAlgebra.coeff k h : A) = (b : A) from hbeq.symm]
+    exact ⟨b, hbI, rfl⟩
+-- Now, tsum is in W because:
+--   (a) each partial sum is in W (W is a subgroup),
+--   (b) partial sums tend to tsum (since summable),
+--   (c) W is closed (open subgroup).
+-- tsum is the limit of partial sums over finite sets (for unconditional summation).
+
 open Filter Topology in
 omit [PlusSubring A] [IsHuberRing A] [T2Space A] in
 /-- **Canonical-topology continuity of `tateEvalPresheafHom` (Wedhorn Prop 6.18).**
@@ -2579,30 +2617,8 @@ theorem tateEvalPresheafHom_continuous_canonical
   -- Show each evalTerm is in W.
   have hterm_mem : ∀ k : ℕ,
       TateAlgebraWedhorn.evalTerm D.canonicalMap (invS D) h k ∈
-        (W : Set (presheafValue D)) := by
-    intro k
-    -- evalTerm = canonicalMap(coeff_k h) * (invS D)^k.
-    change D.canonicalMap (TateAlgebra.coeff k h) * (invS D) ^ k ∈
-      (W : Set (presheafValue D))
-    -- Apply hUW: (Set.range invS^·) * U ⊆ W. Order: range on left, U on right.
-    -- Rewrite via commutativity.
-    rw [mul_comm]
-    apply hUW
-    refine ⟨(invS D) ^ k, ⟨k, rfl⟩, D.canonicalMap (TateAlgebra.coeff k h),
-      ?_, rfl⟩
-    · -- canonicalMap(coeff_k h) ∈ U.
-      apply hN
-      -- Need coeff_k h ∈ image P.I^N.
-      have := TateAlgebra.tateAlgNhd_coeff_mem P N hh (TateAlgebra.toIndex k)
-      obtain ⟨b, hbI, hbeq⟩ := this
-      -- `coeff_k h = MvPowerSeries.coeff (toIndex k) h.val`, which equals (b : A).
-      rw [show (TateAlgebra.coeff k h : A) = (b : A) from hbeq.symm]
-      exact ⟨b, hbI, rfl⟩
-  -- Now, tsum is in W because:
-  --   (a) each partial sum is in W (W is a subgroup),
-  --   (b) partial sums tend to tsum (since summable),
-  --   (c) W is closed (open subgroup).
-  -- tsum is the limit of partial sums over finite sets (for unconditional summation).
+        (W : Set (presheafValue D)) :=
+    fun k ↦ evalTerm_mem_of_tateAlgNhd D hUW P hN hh k
   have hhs : HasSum (TateAlgebraWedhorn.evalTerm D.canonicalMap (invS D) h)
       (tateEvalPresheafHom D hb h) := by
     change HasSum _ (∑' n, TateAlgebraWedhorn.evalTerm D.canonicalMap (invS D) h n)

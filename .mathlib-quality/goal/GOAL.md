@@ -16493,3 +16493,95 @@ be needed.
 
 Recorded, not acted on. Estimated payoff when it is done: ~51c deleted and one board entry
 cleared, plus the same treatment likely applies to the other `₂`/`mv` pairs in these two files.
+
+**Scoped notation does not travel either — and `decl_top` guarantees it won't.** Lifting
+`hterm_mem` out of `tateEvalPresheafHom_continuous_canonical` failed with
+
+```
+failed to synthesize  HMul (Set (presheafValue D)) (Set (presheafValue D)) ?m
+```
+
+because the new lemma's signature *writes* `Set.range (…) * U`, and `Set * Set` is `Pointwise`
+scoped notation that `TopologyComparison.lean` never opens. The caller never needed it: it
+**receives** that type from `IsBounded` in `Bounded.lean` rather than writing it.
+
+> A type you only ever *consume* can use notation your file does not open. The moment you
+> **write** it in a new signature, you need the scope. Fixed with a local `open Pointwise in`.
+
+Note this is structural, not accidental: `decl_top` deliberately inserts *above* a
+declaration's `set_option … in` / `open … in` modifiers, so those stay attached to the original
+declaration — which means a lifted lemma **never** inherits them. That is right for
+`set_option` (a linter suppression should not silently spread) and wrong for `open … in`, which
+the lifted body may well need. Check the target's modifiers before lifting, and re-attach the
+`open`s to the new declaration.
+
+**Modifier order: `open … in` goes *above* the docstring, not between it and the declaration.**
+My first fix put it after the `-/`, which fails with a message that names neither:
+
+```
+2518:91: unexpected token 'open'; expected 'lemma'
+```
+
+A `/-- … -/` docstring must be immediately followed by the declaration it documents. The
+correct shape — and the one this codebase already uses everywhere for
+`set_option linter.unusedSectionVars false in` — is
+
+```lean
+open Pointwise in
+/-- doc -/
+private theorem foo …
+```
+
+which is exactly what `decl_top` assumes when it walks back over modifiers *above* the
+docstring. I had the ordering encoded correctly in the helper and got it wrong by hand.
+
+### `decl_top` inserts *above* the modifiers — so a lifted lemma inherits **none** of them
+
+Lifting `hterm_mem` cost four builds, and every failure was one modifier the new lemma did not
+get. The target is
+
+```lean
+omit [PlusSubring A] [IsHuberRing A] [T2Space A] in
+/-- … -/
+theorem tateEvalPresheafHom_continuous_canonical …
+```
+
+and `decl_top` correctly walks back over that `omit … in` so it stays attached to the original.
+The consequence I had not drawn: **the new declaration starts with a blank slate.**
+
+| build | error | cause |
+|---|---|---|
+| 1 | `failed to synthesize HMul (Set …) (Set …)` | wrote `Set * Set` without `open Pointwise` |
+| 2 | `unexpected token 'open'; expected 'lemma'` | put `open … in` *between* docstring and decl |
+| 3 | `failed to synthesize PlusSubring A` **at the call site** | missing the target's `omit` |
+| 4 | — | green |
+
+Three distinct rules, one root:
+
+> **Before lifting, read the target's modifier stack and decide each one explicitly.**
+> `open … in` — the lifted body usually needs it. `omit … in` — the lifted lemma usually needs
+> it too, or it auto-includes section variables the *caller* has omitted, and the mismatch
+> surfaces at the **call site**, not in the new lemma. `set_option linter.… in` — usually
+> should *not* be copied.
+
+And the ordering, which this codebase already uses consistently and I got wrong by hand:
+
+```lean
+omit … in
+open … in
+/-- doc -/
+private theorem …
+```
+
+Modifiers first, docstring last, declaration immediately after the docstring.
+
+### `tateEvalPresheafHom_continuous_canonical` CLEARED: 51 → 37 (board 22 → 21)
+
+`evalTerm_mem_of_tateAlgNhd` (13c) — each term of the evaluation series lies in `W`: its
+coefficient is carried into `U` by `hN`, and multiplying by a power of `invS D` stays in `W` by
+the boundedness witness `hUW`. Both parameters that matter are opaque (`W`, `U` are plain
+`Set`s), so the signature is short despite the block sitting deep in the proof.
+
+Cost four builds, all one root cause — see the modifier-stack entry above. The proof carried
+`omit [PlusSubring A] [IsHuberRing A] [T2Space A] in`, and `decl_top` inserts *above* modifiers
+so the lifted lemma inherited none of them.
