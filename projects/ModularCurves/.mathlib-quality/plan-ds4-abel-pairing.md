@@ -83,3 +83,79 @@ by transcribing Katz–Mazur §2.8.1 and §2.8.5.
    by the second opinion.)
 3. **Grep the conclusion, in the route's own vocabulary, before building anything.** Four times this
    session the tree already contained the target.
+
+---
+
+## Reference acquisition (2026-08-05) — all three gaps closed
+
+Resolved from KM's own bibliography (book pp. 511–513), then obtained. **All live in `refs/ModularCurves/`,
+which is a symlink to the main checkout's `refs/`, gitignored at `.gitignore:12:/refs` — verified invisible
+to git in this worktree. Never commit them.**
+
+| ref | citation | status |
+|---|---|---|
+| `[K-5]` | Katz, N., *Serre-Tate local moduli*, in **Surfaces Algébriques**, Springer LNM **868** (1981), 138–202 | **downloaded** `katz-serre-tate-local-moduli.pdf` (65 pp. = pp. 138–202, so pdf page = book page − 137); §5.0.1 and §5.2 **read** |
+| `[Oda]` | Oda, T., *The first de Rham cohomology group and Dieudonné modules*, **Ann. Sci. ÉNS** 4e sér. **2** (1969), 63–135 | **downloaded** from NUMDAM, `oda-de-rham-dieudonne-1969.pdf` |
+| Notes Added in Proof | KM, *Notes on Chapter 2*, book p. 505 | **read** |
+| `[Mum 4]` | Mumford, *Abelian Varieties*, OUP 1970 | already local, already read |
+
+### AP-D3 is cheaper than the citation suggests — and needs no hypothesis
+
+Katz **Lemma 5.0.1** (p. 185), verbatim:
+
+> "If `Pic(S) = 0` (e.g. **if `S` is the spectrum of a local ring**) the inclusion `K^× ⊂ (𝒪_X)^×` induces
+> an isomorphism `Pic(X/S) = H¹(X, K^×) ⟶ H¹(X, 𝒪_X^×) = Pic(X)`."
+> **"PROOF. Obvious from the long cohomology sequences."**
+
+Note the hypothesis `Pic(S) = 0`. But that hypothesis is needed only for the *second* identification. From
+the short exact sequence `1 → K^× → 𝒪_X^× → x_*(𝒪_S^×) → 1` the long sequence reads
+
+`Γ(X,𝒪_X^×) → Γ(S,𝒪_S^×) → H¹(K^×) → Pic(X) → Pic(S)`,
+
+and `f_*𝒪_X = 𝒪_S` (our `UniversallyOConnected`) makes the first map an isomorphism, giving
+
+`1 → H¹(X, K^×) → Pic(X) → Pic(S)`,  i.e.  **`H¹(X, K^×) ≅ ker(0^* : Pic(X) → Pic(S))`**
+
+with **no hypothesis on `Pic(S)`**. And `ker(0^*)` is exactly the tree's `picRel`
+(`Picard/RelativePic.lean:57`). So AP-D3 in the form we need is the five-term sequence plus
+`UniversallyOConnected` — not a citation-transcription. Katz's `Pic(S) = 0` enters only if one wants
+`H¹(K^×) ≅ Pic(X)` itself, which we do not.
+
+### A sign convention that must be fixed before AP-D6
+
+Katz §5.2 (pp. 186–187) gives the same construction and ends with
+
+> "`e_N(Y, λ) =` the global section of `𝒪_S^×` given locally by **`1/f_i(Y)`**."
+
+while KM p. 89 defines `⟨P,P'⟩_π = "h(P)"` and says explicitly it is *"the **opposite** of [K-5, §5]"*.
+**The two sources differ by inversion.** The formalisation must pick one and state it; `AP-D6`'s ticket now
+carries this. Getting it wrong flips `e_N` to `e_N^{-1}`, which is invisible in the alternating and
+bilinearity specs and only shows up in the determinant/Galois compatibilities downstream.
+
+### `_self` is not a sibling of `_mul` — it DEPENDS on it
+
+KM, Notes on Chapter 2, p. 505, gives a complete proof of `e_N(R,R) = 1`:
+
+> "Let `E/S` be an elliptic curve, `N ≥ 1` and `M ≥ 1` two integers, and `P, Q ∈ E[NM](S)`. Then we have
+> `(e_{NM}(P,Q))^M = e_{NM}(MP, Q) = e_N(MP, MQ)`, the last equality by applying **(2.8.4.1)** … Taking
+> `M = 2` and `P = Q`, we find `1 = (e_{2N}(P,P))² = e_N(2P, 2P)`, for `P ∈ E[2N](S)`, the first equality
+> by **2.8.3**. Because `[2] : E → E` is f.p.p.f. surjective, any point `R` in `E[N](S)` is locally
+> f.p.p.f. of the form `2P` for `P ∈ E[2N](S)`, whence we have `e_N(R,R) = 1` for `R ∈ E[N](S)`."
+
+So `weilPairingEval_self` (`Basic.lean:202`) needs **2.8.4.1 — the composability formula, which is
+`_mul`** — plus 2.8.3 (alternation) and f.p.p.f. descent along `[2]`. **The board had `_self` and `_mul`
+as siblings; they are not.** Corrected below. Note also that the argument is genuinely f.p.p.f.-local, so
+`_self` needs descent, not just a pointwise argument.
+
+### Board corrections following the acquisition
+
+* **AP-D3**: no longer blocked on an unavailable reference. Route is the five-term sequence; source quote
+  is Katz Lemma 5.0.1 with the hypothesis-scope note above. **Status: ready.**
+* **AP-D6**: gains the sign-convention obligation (KM is the opposite of Katz).
+* **AP-E4 `_self`**: now sourced with a complete proof, and **re-blocked on AP-E6 `_mul`** rather than
+  parallel to it. Additional input: f.p.p.f. surjectivity of `[2]` and descent.
+* **AP-E5 `_nondegenerate`**: reference now in hand (`[Oda]`), but the substance is unchanged — Cartier–
+  Nishi duality is absent from mathlib and this remains a sub-development, not a ticket.
+
+**Readiness after acquisition**: AP-A1, AP-D1 and **AP-D3** can start now. One ticket (AP-E5) still needs
+its own sub-development; no ticket is now blocked on an *unobtainable* reference.
