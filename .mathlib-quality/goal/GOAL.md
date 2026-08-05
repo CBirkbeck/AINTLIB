@@ -16585,3 +16585,69 @@ the boundedness witness `hUW`. Both parameters that matter are opaque (`W`, `U` 
 Cost four builds, all one root cause — see the modifier-stack entry above. The proof carried
 `omit [PlusSubring A] [IsHuberRing A] [T2Space A] in`, and `decl_top` inserts *above* modifiers
 so the lifted lemma inherited none of them.
+
+### Part of the ₂/mv duplication *is* fixable without the reorganisation
+
+The structural note above said the `tateAlgNhd₂` / `mvTateAlgNhd` duplication needs the `mv`
+layer moved upstream. That is true for the *whole* proof — but not for its largest block.
+
+`hterm` (15c) is **byte-identical in both**, differing in exactly one token (`Fin 2` vs
+`Fin n`). And it is genuinely arity-generic: it only ever touches `MvPowerSeries.coeff l x.val`
+and `… y.val.val`. Taking those as bare `MvPowerSeries (Fin n) A` instead of subring elements
+decouples it from `pairSubring₂` / `mvPairSubring` entirely — which is what makes a single
+lemma possible despite the two files having different subring vocabularies.
+
+Placed in `TateAlgebraTopology.lean`, which `MvTateAlgebraTopology` imports, so **both** call it.
+
+> The import direction blocks sharing a *statement about the specialised types*; it does not
+> block sharing a *statement about what both specialise from*. When a duplication looks
+> structurally unfixable, check whether its core can be re-stated below both vocabularies.
+
+Expected: two board entries (51, 51) → ~38 each, and 15 duplicated lines become one lemma.
+
+**A lifted block can end up with *more* proof than it needs.** The shared `hterm` closed both
+branches with a trailing `rfl`. Inside the new lemma those became
+`No goals to be solved` — the preceding `rw` now finishes the job.
+
+The reason is the caller's `set xy := x * (…).subtype y with hxy_def`: in situ the goal was
+phrased through `xy`, so after rewriting there was still a defeq step to discharge. The lifted
+lemma states the goal directly in terms of the two coefficients, so there is nothing left.
+
+> Lifting can make a tactic *unnecessary* as easily as it can break one. `No goals to be
+> solved` is the signature — read it as "the surrounding context used to add an obligation
+> that no longer exists", not as a transcription error.
+
+**A shared helper cannot be `private`, and it lands in the *donor's* namespace.** Two more
+builds on the cross-file dedup, both about visibility rather than mathematics:
+
+* `private` in Lean 4 is **module-scoped**, so `MvTateAlgebraTopology` could not see the helper
+  at all: `Unknown identifier exists_coeff_mul_mem_pow`. Every other lemma I lifted this session
+  was `private` and correct, because it stayed in its own file. The moment a lift is *for*
+  sharing, `private` is exactly wrong.
+* the two files sit in different namespaces (`TateAlgebra` vs `MvTateAlgebra`), computed by
+  walking the `namespace`/`end` stack rather than eyeballing the nearest header — so the call
+  needs `TateAlgebra.exists_coeff_mul_mem_pow`.
+
+> Decide visibility from the *purpose* of the lift, not from habit. In-file decomposition →
+> `private`. Cross-file dedup → public, and qualified at the call site by the donor file's
+> namespace.
+
+### Cross-file dedup: two entries cleared by one lemma (board 21 → 19)
+
+`TateAlgebra.exists_coeff_mul_mem_pow` (11c) now serves both
+`tateAlgNhd₂_leftMul_of_principal` and `mvTateAlgNhd_leftMul_of_principal`, each **51 → 40**.
+15 byte-identical lines in two files became one lemma.
+
+Four builds, none about the mathematics:
+
+| error | cause |
+|---|---|
+| `No goals to be solved` ×2 | the caller's `set xy` created a defeq obligation the lifted goal does not have, so the trailing `rfl`s became redundant |
+| `Unknown identifier` | `private` is module-scoped — invisible to the importing file |
+| namespace | helper lands in `TateAlgebra`, call site is in `MvTateAlgebra` |
+
+This also **partially answers the structural note above**: the import direction blocks sharing a
+statement about `pairSubring₂` / `mvPairSubring`, but not one about what both specialise *from*.
+Re-stating the core over bare `MvPowerSeries (Fin n) A` put it below both vocabularies. The rest
+of that duplication (the surrounding 40c, which does mention the subrings) still needs the file
+reorganisation.

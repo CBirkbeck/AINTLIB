@@ -418,19 +418,9 @@ theorem mvTateAlgNhd_leftMul_of_principal [IsTateRing A] (n : ℕ) (P : PairOfDe
   set xy : ↥(restrictedMvPowerSeriesSubring n A) := x * (mvPairSubring n P).subtype y with hxy_def
   have hterm : ∀ p : (Fin n →₀ ℕ) × (Fin n →₀ ℕ),
       ∃ c : P.A₀, c ∈ P.I ^ i ∧
-        (c : A) = MvPowerSeries.coeff p.1 x.val * MvPowerSeries.coeff p.2 y.val.val := by
-    intro p; obtain ⟨b_p, hb_p_mem, hb_p_eq⟩ := hy_coeff p.2
-    by_cases hp : p.1 ∈ S
-    · have hb_lower : b_p ∈ P.I ^ (m_fn p.1) := by
-        have hle : m_fn p.1 ≤ j := hj_ge_m p.1 (hS_finite.mem_toFinset.mpr hp)
-        exact Ideal.pow_le_pow_right hle hb_p_mem
-      obtain ⟨c, hc_mem, hc_eq⟩ := hm_spec p.1 b_p hb_lower; refine ⟨c, hc_mem, ?_⟩
-      rw [hc_eq, hb_p_eq]; rfl
-    · rw [hS_def] at hp
-      simp only [Set.mem_setOf_eq, not_not] at hp; obtain ⟨a, ha_mem, ha_eq⟩ := hp
-      refine ⟨a * b_p, Ideal.mul_mem_left _ _ (Ideal.pow_le_pow_right hj_ge_i hb_p_mem), ?_⟩
-      push_cast; rw [ha_eq, hb_p_eq]
-      rfl
+        (c : A) = MvPowerSeries.coeff p.1 x.val * MvPowerSeries.coeff p.2 y.val.val :=
+    fun p ↦ TateAlgebra.exists_coeff_mul_mem_pow P x.val ((mvPairSubring n P).subtype y).val i j hj_ge_i
+      m_fn hm_spec S hS_def hS_finite hj_ge_m hy_coeff p
   have hxy_coeff : ∀ l, ∃ c : P.A₀, c ∈ P.I ^ i ∧ (c : A) = MvPowerSeries.coeff l xy.val := by
     intro l; have hcoeff : MvPowerSeries.coeff l xy.val =
         ∑ p ∈ Finset.antidiagonal l,

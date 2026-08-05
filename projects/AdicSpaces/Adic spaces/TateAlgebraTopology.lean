@@ -2176,6 +2176,39 @@ theorem tateAlgNhd₂_of_coeff_mem_principal (P : PairOfDefinition A) (n : ℕ)
 
 /-! #### Phase 2 Sub-task F: bivariate leftMul assembly (principal case) -/
 
+/-- A coefficient of a product lands `i` levels deep in the ideal of definition: if the
+left coefficient is already deep enough (the `p.1 ∉ S` branch) the product is, and otherwise
+`hm_spec` supplies the witness from the `m_fn p.1`-level bound on the right coefficient.
+
+Stated for bare `MvPowerSeries` in any arity — this is the shared core of
+`tateAlgNhd₂_leftMul_of_principal` and `mvTateAlgNhd_leftMul_of_principal`, which previously
+carried byte-identical copies differing only in `Fin 2` versus `Fin n`. -/
+theorem exists_coeff_mul_mem_pow {n : ℕ} (P : PairOfDefinition A)
+    (xv yv : MvPowerSeries (Fin n) A) (i j : ℕ) (hj_ge_i : i ≤ j)
+    (m_fn : (Fin n →₀ ℕ) → ℕ)
+    (hm_spec : ∀ (l : Fin n →₀ ℕ), ∀ b : P.A₀, b ∈ P.I ^ (m_fn l) →
+      ∃ c : P.A₀, c ∈ P.I ^ i ∧ (c : A) = MvPowerSeries.coeff l xv * (b : A))
+    (S : Set (Fin n →₀ ℕ))
+    (hS_def : S = {l | MvPowerSeries.coeff l xv ∉
+      (Subtype.val '' ((P.I ^ i : Ideal P.A₀) : Set P.A₀) : Set A)})
+    (hS_finite : S.Finite)
+    (hj_ge_m : ∀ l ∈ hS_finite.toFinset, m_fn l ≤ j)
+    (hy_coeff : ∀ l, ∃ b : P.A₀, b ∈ P.I ^ j ∧ (b : A) = MvPowerSeries.coeff l yv)
+    (p : (Fin n →₀ ℕ) × (Fin n →₀ ℕ)) :
+    ∃ c : P.A₀, c ∈ P.I ^ i ∧
+      (c : A) = MvPowerSeries.coeff p.1 xv * MvPowerSeries.coeff p.2 yv := by
+  obtain ⟨b_p, hb_p_mem, hb_p_eq⟩ := hy_coeff p.2
+  by_cases hp : p.1 ∈ S
+  · have hb_lower : b_p ∈ P.I ^ (m_fn p.1) := by
+      have hle : m_fn p.1 ≤ j := hj_ge_m p.1 (hS_finite.mem_toFinset.mpr hp)
+      exact Ideal.pow_le_pow_right hle hb_p_mem
+    obtain ⟨c, hc_mem, hc_eq⟩ := hm_spec p.1 b_p hb_lower; refine ⟨c, hc_mem, ?_⟩
+    rw [hc_eq, hb_p_eq]
+  · rw [hS_def] at hp
+    simp only [Set.mem_setOf_eq, not_not] at hp; obtain ⟨a, ha_mem, ha_eq⟩ := hp
+    refine ⟨a * b_p, Ideal.mul_mem_left _ _ (Ideal.pow_le_pow_right hj_ge_i hb_p_mem), ?_⟩
+    push_cast; rw [ha_eq, hb_p_eq]
+
 /-- **Bivariate leftMul (principal case):** for a principal pair `P.I = (π)`
 with `π` a unit in `A`, the condition `∃ j, x · tateAlgNhd₂ P j ⊆ tateAlgNhd₂ P i`
 holds for every `x ∈ TateAlgebra₂ A` and every `i : ℕ`. Bivariate analog of
@@ -2209,19 +2242,9 @@ theorem tateAlgNhd₂_leftMul_of_principal [IsTateRing A] (P : PairOfDefinition 
   set xy : ↥(TateAlgebra₂ A) := x * (pairSubring₂ P).subtype y with hxy_def
   have hterm : ∀ p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ),
       ∃ c : P.A₀, c ∈ P.I ^ i ∧
-        (c : A) = MvPowerSeries.coeff p.1 x.val * MvPowerSeries.coeff p.2 y.val.val := by
-    intro p; obtain ⟨b_p, hb_p_mem, hb_p_eq⟩ := hy_coeff p.2
-    by_cases hp : p.1 ∈ S
-    · have hb_lower : b_p ∈ P.I ^ (m_fn p.1) := by
-        have hle : m_fn p.1 ≤ j := hj_ge_m p.1 (hS_finite.mem_toFinset.mpr hp)
-        exact Ideal.pow_le_pow_right hle hb_p_mem
-      obtain ⟨c, hc_mem, hc_eq⟩ := hm_spec p.1 b_p hb_lower; refine ⟨c, hc_mem, ?_⟩
-      rw [hc_eq, hb_p_eq]; rfl
-    · rw [hS_def] at hp
-      simp only [Set.mem_setOf_eq, not_not] at hp; obtain ⟨a, ha_mem, ha_eq⟩ := hp
-      refine ⟨a * b_p, Ideal.mul_mem_left _ _ (Ideal.pow_le_pow_right hj_ge_i hb_p_mem), ?_⟩
-      push_cast; rw [ha_eq, hb_p_eq]
-      rfl
+        (c : A) = MvPowerSeries.coeff p.1 x.val * MvPowerSeries.coeff p.2 y.val.val :=
+    fun p ↦ exists_coeff_mul_mem_pow P x.val ((pairSubring₂ P).subtype y).val i j hj_ge_i
+      m_fn hm_spec S hS_def hS_finite hj_ge_m hy_coeff p
   have hxy_coeff : ∀ l, ∃ c : P.A₀, c ∈ P.I ^ i ∧ (c : A) = MvPowerSeries.coeff l xy.val := by
     intro l; have hcoeff : MvPowerSeries.coeff l xy.val =
         ∑ p ∈ Finset.antidiagonal l,
