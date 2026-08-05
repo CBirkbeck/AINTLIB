@@ -17466,7 +17466,7 @@ warning marks the line to be *replaced* aborted the script; reading the column t
 | 1 | 572 | 360 | 3,921 |
 | 2 | 196 | 304 | 3,832 |
 | 3 | 161 | 240 | 3,759 |
-| 4 | **95** | **204** | **3,720** |
+| 4 | **95** | **221** | **3,726** |
 | **total** | **1,024** | | |
 
 Round 4: the plain per-file pass kept 23 files / 63 omits, bisection recovered 32 of the 103
@@ -17474,7 +17474,10 @@ its 15 failures held (184 module builds). Yield per round is roughly halving —
 95 — and the per-round build cost is flat, so the marginal value of a fifth round is now well
 below that of the untouched categories.
 
-The residual 204 is dominated by files that have refused every omit across **four** independent
+(The 204/3,720 written into the commit message for this round were predicted from the
+curve before the gate reported; the measured figures are 221 and 3,726.)
+
+The residual 221 is dominated by files that have refused every omit across **four** independent
 bisections (`Wedhorn828` 0/14 ×4, `SheafyPair` 0/3 ×4, `StandardDescent` 0/1 ×4,
 `RelativePieceKeystone` 0/3 ×4, `GaussNorm` 0/1 ×4, `CurveObject` 0/1). Those are not backlog;
 they are a *characterised* set — declarations whose section variables are reached by
