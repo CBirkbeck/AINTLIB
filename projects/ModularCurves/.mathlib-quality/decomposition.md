@@ -936,3 +936,96 @@ LEAF
 Boxes 2, 3, 4 postponed off the critical path; box 5 replaced by the narrower natural equivalence [B];
 box 6 split, with its comparison half already in hand. **The one genuinely new package is [A]**, and it is
 substantially cheaper than the six-box fence — three of whose boxes turn out not to be needed at all.
+
+---
+
+# Round 12 — the finished plan reviewed. Both skeleton statements are FALSE, and `_self` has a cycle.
+
+## (A2) is false — and the fix is already in the project
+
+Counterexample (reviewer's, cleaner than the `ℚ/ℤ` one I had reached independently): over `R = ℤ`, the
+complex `ℤ ↪ ℚ → 0`. All terms flat. Homology at `ℚ` is `ℚ/ℤ ≠ 0`, so it is **not** exact. But over every
+field `K/ℤ`: char `0` makes `K → ℚ ⊗ K ≅ K` an isomorphism; char `p` makes `ℚ ⊗ K = 0`. **Every field fibre
+is exact while the complex is not.** Fields cannot detect a non-finitely-generated homology module.
+
+Also noted: quantifying over *all* fields is no stronger than over residue fields — every `R → K` factors
+through `κ(𝔭)` for `𝔭` its kernel. My extra generality bought nothing.
+
+I had reached the same verdict independently before the review landed, by a different route: the tree's own
+`exists_away_orderedBaseCech_exact_of_residueField_exact` establishes `Module.Finite B (C.homology q)` via
+`orderedBaseCechHomologyFinite_of_isProper` and feeds it to its engine — and my (A2) has **no finiteness
+hypothesis at all**. That is exactly what KM's own proof uses: *"As `R¹f_*ℒ` is a coherent sheaf on `S` with
+all fibers zero, it vanishes by **Nakayama's lemma**."* Dropped hypothesis, again.
+
+**The fix exists in the tree** (verified): `LinearMap.exact_of_forall_field_baseChange_exact_of_finite`
+(`ForMathlib/BaseChangeKerCoker.lean:816`), needing `g ∘ f = 0`, `C²` flat, `coker g` flat, `H¹` finitely
+generated, and field-fibre exactness. Also `exact_of_bounded_forall_field_baseChange_exact` (`:1155`) and
+`Module.rankAtStalk_ker_eq_of_bounded_forall_field_baseChange_exact`. **Fifth "the tree already had it".**
+
+## (A3) is false — projective is the wrong conclusion, and the rank hypothesis does not give it
+
+Counterexample: `R = k[ε]/(ε²)`, complex `R --ε--> R --ε--> R`. Exact at the middle, since
+`im(ε) = (ε) = ker(ε)`. Every field over `R` kills `ε`, so each base-changed `d⁰` is zero and
+`dim_K ker(d⁰ ⊗ K) = 1`. Yet `ker(ε) = (ε) ≅ k` is **not flat, hence not projective** over `R`.
+
+The missing datum is the comparison `K ⊗_R ker d⁰ → ker(d⁰_K)`, which fails here. And `Module.Projective`
+is the wrong target anyway — it omits finite generation. The conclusion should be **`Module.Invertible R H`**
+(mathlib's `RingTheory.PicardGroup` notion) or the triple finite + projective + local rank one, obtained in
+the order: finite projective first, base-change comparison second, fibre rank third.
+
+## (B1)'s scalar-tower problem was masking a geometric error
+
+Presenting `f_*L` as `LinearMap.ker (d 0 1)` is fine computationally but wrong as the public interface; the
+tree already has `Scheme.Modules.baseSections π M` with `baseSectionsIsoKernelOrderedBaseCechDifferential`
+carrying the `Γ(S,𝒪_S)`-structure intrinsically. **More seriously: an invertible `f_*L` need not have a
+global basis.** KM chooses `ℓ` **Zariski-locally on `S`**. My B1 assumed a global one — a genuine geometric
+error that the elaboration failure happened to hide.
+
+## `π = [N]` needs *typed* slots — self-duality is not symmetry
+
+The correct specialisation is `e_N(P,Q) = ⟨P, λ_E(Q)⟩_{[N]}` for the canonical principal polarisation
+`λ_E : E ≅ E^∨`. The two slots must **not** be definitionally identified: depending on whether one uses
+`λ_E`, `−λ_E`, or an inverse convention, the result is `e_N` or `e_N^{-1}`, and **bilinearity, alternation
+and nondegeneracy cannot distinguish them**. This compounds the KM-vs-Katz inversion already recorded. So
+`E[N](T) = Ker([N]^*)` must be a *natural equivalence*, not an untyped equality, and its reverse inclusion
+needs injectivity of the Abel equivalence — not merely `(★)`.
+
+Also: in characteristic dividing `N`, nondegeneracy **cannot** be phrased pointwise; the arbitrary-base
+statement is Cartier-dual perfectness. `AP-E5` was already flagged; this sharpens why.
+
+## The cycle, verified in the code — `AP-E4 _self` is impossible as planned
+
+Two separate defects, both confirmed by reading `WeilPairing/Basic.lean`:
+
+1. **Dependency cycle.** `weilPairingEval_antisymm` (`:217`) is *already proved in the tree*, and its proof
+   body calls `weilPairingEval_self (x+y)`, `_self x`, `_self y`. So **antisymmetry ⟸ `_self`**. But KM's
+   Notes-on-Chapter-2 proof of `e_N(R,R) = 1` invokes **2.8.3, skew-symmetry**, to get
+   `(e_{2N}(P,P))² = 1`. Proving `_self` that way is therefore circular against the tree's own derivation.
+   Skew-symmetry must be proved **directly from the two-slot KM construction** first.
+2. **`_mul` is the wrong statement for the job.** The registered `weilPairingEval_mul` (`:321`) carries
+   *both* `hx : x` killed by `N` and `hx' : x` killed by `N*M` — i.e. it is about `N`-torsion points — and
+   concludes `e_{NM}(x,y) = e_N(x,y)^M`. KM's note needs `P, Q ∈ E[NM]` with
+   `(e_{NM}(P,Q))^M = e_N(MP, MQ)`, where `P, Q` are **not** assumed `N`-torsion. **These are different
+   compatibility statements**; the registered one cannot discharge the note's step.
+
+So `AP-E4` needs, in order: (i) direct skew-symmetry from the construction; (ii) a *new* composability
+statement for `NM`-torsion inputs; (iii) fpqc-local divisibility by `2`; (iv) then diagonal alternation.
+
+## Where the next error is predicted to be
+
+The **D5 → E1 passage from cocycles to a scheme morphism**. Uniqueness of the normalized `h_i` handles the
+choice of cocycle, but Yoneda needs explicit compatibility with arbitrary base change *and refinements of
+the cover*; constructing the pairing separately on each `T`-point is not enough unless that naturality is
+proved before representability is invoked.
+
+## Gate after round 12
+
+**NOT passed, and further from passing than after round 11** — which is the pass working. Two skeleton
+statements must be re-stated (with `Module.Finite` on the homology, and with `Module.Invertible` plus the
+base-change comparison), `AP-B1` re-planned around local bases and `baseSections`, `AP-D4` re-typed with
+`λ_E`, and `AP-E4` re-decomposed into four steps with direct skew-symmetry first.
+
+**Score for the session's error-family**: five of the defects found across twelve rounds are the *same*
+shape — a hypothesis the source maintains, dropped in transcription (`hn : 1 ≤ n`; fibrewise triviality;
+coherence/Nakayama; global-vs-local basis; `N`-torsion in `_mul`). That is now the first thing to check on
+any new statement.
