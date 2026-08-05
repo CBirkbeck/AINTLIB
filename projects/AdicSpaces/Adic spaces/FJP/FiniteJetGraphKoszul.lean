@@ -858,6 +858,7 @@ theorem norm_pow_of_scale {c : A} (hc : ∀ x : A, ‖c * x‖ = ‖c‖ * ‖x�
   have h := norm_pow_mul_of_scale (E := A) hc n (1 : A)
   rwa [mul_one, norm_one, mul_one] at h
 
+omit [IsUltrametricDist A] in
 omit [CompleteSpace A] in
 /-- Sup norms of tuples scale exactly under a *power* of a scaling element — the `pow`
 companion to `pi_norm_scale`.
@@ -1022,6 +1023,7 @@ private theorem norm_le_of_hasSum_of_forall_norm_le {U : ℕ → ι → A} {US :
       Filter.atTop (𝓝 ‖US‖) := (continuous_norm.tendsto US).comp hUS
   exact le_of_tendsto hn (Filter.Eventually.of_forall hpartial)
 
+omit [NormOneClass A] in
 /-- **The geometric correction.** Iterating `exists_lift_approx_step` from a `δ`-small `y` gives
 a sequence whose partial sums telescope to `y`; ultrametric summability makes the series converge,
 and every term obeys the same bound `R`, so the limit lifts `y` with `‖u‖ ≤ R` exactly. -/
@@ -1438,6 +1440,7 @@ theorem isUnit_tP (t : E) (htu : IsUnit t) :
     IsUnit (polyToP (MvPolynomial.C t) : P E m) :=
   (htu.map MvPolynomial.C).map (polyToP (E := E) (m := m))
 
+omit [CompleteSpace E] in
 /-- Ball division on `P_E` (instance of the generic lemma at `(P_E, C t)`). -/
 theorem exists_ball_eq_tP_pow_mul {t : E} (htu : IsUnit t) (ht0 : 0 < ‖t‖)
     (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) (n : ℕ) (F : P E m) (hF : ‖F‖ ≤ ‖t‖ ^ n) :
@@ -1529,6 +1532,7 @@ theorem coeff_polyBall (q : MvPolynomial (Fin m) ↥(unitBall E)) (s : Fin m →
   rw [coeff_polyToP, MvPolynomial.coeff_map]
   rfl
 
+omit [CompleteSpace E] in
 theorem norm_polyBall_le_one (q : MvPolynomial (Fin m) ↥(unitBall E)) :
     ‖polyBall (E := E) (m := m) q‖ ≤ 1 := by
   rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
@@ -1569,6 +1573,7 @@ noncomputable def trnc (n : ℕ) (F : ↥(unitBall (P E m))) :
     MvPolynomial.monomial s (⟨MvPowerSeries.coeff s F.1.1,
       (norm_coeff_le_gauss F.1 s).trans F.2⟩ : ↥(unitBall E))
 
+omit [CompleteSpace E] in
 theorem coeff_polyBall_trnc (n : ℕ) (F : ↥(unitBall (P E m))) (s : Fin m →₀ ℕ) :
     MvPowerSeries.coeff s ((polyBall (trnc t ht0 n F) : P E m).1) =
       if ‖t‖ ^ n ≤ ‖MvPowerSeries.coeff s F.1.1‖ then MvPowerSeries.coeff s F.1.1 else 0 := by

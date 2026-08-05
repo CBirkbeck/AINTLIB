@@ -534,6 +534,7 @@ theorem bridgeEval_X (i : Fin e.m) :
   rw [bridgeEval, RingHom.comp_apply, hcast]
   exact mvEvalHomBounded_X _ _ _ _ i
 
+omit [IsFJPNoetherianBase F] in
 /-- The evaluation kills the graph ideal (`s·(fᵢ/s) = fᵢ` in the localization). -/
 theorem IA_le_ker_bridgeEval : IA F e.m D.s e.f ≤ RingHom.ker (bridgeEval D e) := by
   rw [IA, Ideal.span_le]
@@ -592,6 +593,7 @@ private theorem bridgeRangeProd_isBounded :
       rw [Finset.prod_insert ha]
       exact Set.mul_mem_mul ⟨v a, rfl⟩ ⟨v, rfl⟩
 
+omit [IsFJPNoetherianBase F] in
 /-- **Continuity of the evaluation** from the norm topology on `P_𝓐` ([FJP] (1.3) bound;
 mirrors `mvEvalHomBounded_continuous` with the Gauss-norm ball basis in place of the
 Tate-algebra basis: coefficients of a small series are small). -/
@@ -766,6 +768,7 @@ theorem bridgeBaseC_s_mul_X (i : Fin e.m) :
   rw [← RingHom.map_mul (Ideal.Quotient.mk (IC F e.m D.s e.f))]
   exact Ideal.Quotient.eq.mpr hmem
 
+omit [IsFJPNoetherianBase F] in
 theorem isUnit_bridgeBaseC_s (hD : D.IsRational) :
     IsUnit (bridgeBaseC D e (iotaC F D.s)) := by
   have h1 : (1 : JetC F) ∈
@@ -929,6 +932,7 @@ theorem bridgeBaseB_s_mul_X (i : Fin e.m) :
   rw [← RingHom.map_mul (Ideal.Quotient.mk (IB F e.m D.s e.f))]
   exact Ideal.Quotient.eq.mpr hmem
 
+omit [IsFJPNoetherianBase F] in
 theorem isUnit_bridgeBaseB_s (hD : D.IsRational) :
     IsUnit (bridgeBaseB D e (jB F D.s)) := by
   have h1 : (1 : JetB F) ∈
@@ -1087,6 +1091,7 @@ noncomputable def bridgeBaseD : JetD F →+* locD F e.m D.s e.f :=
 noncomputable def bridgeXD (i : Fin e.m) : locD F e.m D.s e.f :=
   Ideal.Quotient.mk (ID F e.m D.s e.f) (polyToP (MvPolynomial.X i))
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeBaseD_s_mul_X (i : Fin e.m) :
     bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeXD D e i =
       bridgeBaseD D e (rhoC F (iotaC F (e.f i))) := by
@@ -1326,6 +1331,7 @@ theorem bridgeEvalB_X (hD : D.IsRational) (i : Fin e.m) :
   rw [bridgeEvalB, RingHom.comp_apply, hcast]
   exact mvEvalHomBounded_X _ _ _ _ i
 
+omit [IsFJPNoetherianBase F] in
 theorem IB_le_ker_bridgeEvalB (hD : D.IsRational) :
     IB F e.m D.s e.f ≤ RingHom.ker (bridgeEvalB D e hD) := by
   rw [IB, Ideal.span_le]
@@ -1385,6 +1391,7 @@ private theorem bridgeRangeProdB_isBounded (hD : D.IsRational) :
       rw [Finset.prod_insert ha]
       exact Set.mul_mem_mul ⟨v a, rfl⟩ ⟨v, rfl⟩
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeEvalB_continuous (hD : D.IsRational) :
     Continuous (bridgeEvalB D e hD) := by
   classical
@@ -1533,6 +1540,7 @@ theorem bridgeEvalC_X (hD : D.IsRational) (i : Fin e.m) :
   rw [bridgeEvalC, RingHom.comp_apply, hcast]
   exact mvEvalHomBounded_X _ _ _ _ i
 
+omit [IsFJPNoetherianBase F] in
 theorem IC_le_ker_bridgeEvalC (hD : D.IsRational) :
     IC F e.m D.s e.f ≤ RingHom.ker (bridgeEvalC D e hD) := by
   rw [IC, Ideal.span_le]
@@ -1592,6 +1600,7 @@ private theorem bridgeRangeProdC_isBounded (hD : D.IsRational) :
       rw [Finset.prod_insert ha]
       exact Set.mul_mem_mul ⟨v a, rfl⟩ ⟨v, rfl⟩
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeEvalC_continuous (hD : D.IsRational) :
     Continuous (bridgeEvalC D e hD) := by
   classical
@@ -1708,6 +1717,7 @@ theorem mapCD_continuous (hD : D.IsRational) : Continuous (mapCD D hD) := by
   unfold mapCD
   exact presheafValueMapOfHom_continuous _ _ _ _ _ _
 
+omit [IsFJPNoetherianBase F] in
 /-- The 𝓓-coherence of the two composite pushes ([FJP] (4.9): the square commutes on
 sections). -/
 theorem mapBD_mapB_eq_mapCD_mapC (hD : D.IsRational) :
@@ -1755,6 +1765,7 @@ theorem norm_locRhoB_le (x : locB F e.m D.s e.f) :
     _ ≤ ‖p‖ := norm_mapRestricted_le _ _ _ p
     _ ≤ ‖x‖ + ε := hpn.le
 
+omit [IsFJPNoetherianBase F] in
 theorem norm_locRhoC_le (x : locC F e.m D.s e.f) :
     ‖locRhoC F e.m D.s e.f x‖ ≤ ‖x‖ := by
   refine le_of_forall_pos_le_add fun ε hε => ?_
@@ -2302,6 +2313,7 @@ def pushCoveringD (C : RationalCoveringData (JetA F)) (hC : C.IsRational) :
       Finset.mem_image.mpr ⟨⟨D₀, hD₀⟩, Finset.mem_attach _ _, rfl⟩,
       (mem_rationalOpen_pushDatumD_iff D₀ (hC.piece hD₀) v hvspa).mpr hmem⟩
 
+omit [IsFJPNoetherianBase F] in
 theorem pushCoveringB_isRational {C : RationalCoveringData (JetA F)} (hC : C.IsRational) :
     (pushCoveringB C hC).IsRational := by
   refine ⟨pushDatumB_isRational hC.base, ?_⟩
@@ -2309,6 +2321,7 @@ theorem pushCoveringB_isRational {C : RationalCoveringData (JetA F)} (hC : C.IsR
   obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD'
   exact pushDatumB_isRational (hC.piece d.2)
 
+omit [IsFJPNoetherianBase F] in
 theorem pushCoveringC_isRational {C : RationalCoveringData (JetA F)} (hC : C.IsRational) :
     (pushCoveringC C hC).IsRational := by
   refine ⟨pushDatumC_isRational hC.base, ?_⟩
@@ -2316,6 +2329,7 @@ theorem pushCoveringC_isRational {C : RationalCoveringData (JetA F)} (hC : C.IsR
   obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD'
   exact pushDatumC_isRational (hC.piece d.2)
 
+omit [IsFJPNoetherianBase F] in
 theorem pushCoveringD_isRational {C : RationalCoveringData (JetA F)} (hC : C.IsRational) :
     (pushCoveringD C hC).IsRational := by
   refine ⟨pushDatumD_isRational hC.base, ?_⟩

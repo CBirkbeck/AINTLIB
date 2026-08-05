@@ -37,6 +37,7 @@ theorem finiteJet_isSheafy [IsFJPNoetherianBase F] :
 theorem finiteJet_isUniform : TopologicalRing.IsUniform (JetA F) :=
   isUniform_JetA F
 
+omit [IsFJPBase F] in
 /-- **[FJP] Theorem 1.3 (domain)**: 𝓐 is an integral domain. -/
 theorem finiteJet_isDomain : IsDomain (JetA F) :=
   inferInstance

@@ -403,6 +403,7 @@ private theorem norm_Wu_inv_pow (n : ℕ) : ‖((Wu (R := K))⁻¹).val ^ n‖ =
         push_cast
         ring
 
+omit [IsFJPBase F] in
 /-- The collapse family is norm-bounded: `‖W⁻ⁿQ²‖ ≤ ‖Q‖²` (unit `W`-multiples are
 isometric in 𝓒). -/
 theorem norm_yQ_le (n : ℕ) : ‖yQ F n‖ ≤ ‖Qa F‖ * ‖Qa F‖ := by
@@ -587,6 +588,7 @@ theorem Wa_pow_mul_yGen (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) =
       rw [one_pow],
     map_one, one_mul]
 
+omit [IsFJPBase F] in
 theorem norm_yGen_le (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) = 0)
     (hy1 : qCoeff F 1 ((y : JetA F) : JetC F) = 0) (n : ℕ) :
     ‖yGen F y hy0 hy1 n‖ ≤ ‖y‖ := by
@@ -1124,6 +1126,7 @@ theorem rescale_jBWa_fst :
     rw [if_pos rfl, pow_one]
   · rw [if_neg hn, mul_zero, mul_zero]
 
+omit [IsFJPBase F] in
 /-- `polyKW` sends `X` to the disc variable. -/
 theorem polyKW_X : polyKW F Polynomial.X = (jB F (Wa F)).fst := by
   refine Subtype.ext ?_

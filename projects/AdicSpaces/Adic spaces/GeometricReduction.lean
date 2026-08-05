@@ -2403,6 +2403,7 @@ cover piece and membership certificate. We provide this as a *pointwise
 containment* statement below (the weakest reusable form), leaving the
 outer caller to harvest a uniform `D` if needed. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Minus-half pointwise containment** (reusable, hypothesis-light).
 For each `g ∈ S` and each valuation `v` in the plus-piece at `g` on the
 Laurent-minus base, the covering hypothesis yields a minus cover piece
@@ -5362,6 +5363,7 @@ theorem RationalCoveringData.mem_refinedVCovers_at
   · rintro ⟨hD, hτ⟩
     exact ⟨⟨D, hD⟩, hτ, rfl⟩
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Per-E subset-to-base**. Each refined V-piece mapping to `E`
 has its rational open contained in `E.1`'s rational open, via the τ
 composition `refinedVCoversTau_subset` + `standardCoverTau_subset`. -/
@@ -5596,6 +5598,7 @@ theorem RationalCoveringData.mem_per_E_local_covering_covers
     · exact Or.inl ⟨f, ⟨hf, h_in_E⟩, hD⟩
     · exact Or.inr ⟨f, ⟨hf, h_in_E⟩, hD⟩
 
+omit [HasLocLiftPowerBounded A] in
 /-- The direct per-E local covering is nonempty whenever the cover piece
 `E` itself has a point.
 

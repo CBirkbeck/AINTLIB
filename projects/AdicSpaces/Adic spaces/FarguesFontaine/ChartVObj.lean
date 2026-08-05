@@ -340,6 +340,7 @@ theorem exists_eq_toOF_pow_mul (j : ℕ) (c : OF F)
       map_pow]
     exact hc
 
+omit [CharP F p] in
 /-- **(m1) Negative-monomial membership**: a Teichmüller monomial `[c]/p^j`
 whose coordinate satisfies the left-endpoint bound `|c| ≤ |ϖ|^j` is
 `chartFracPi^j · [c']` and lies in the chart subring. -/
@@ -495,6 +496,7 @@ theorem mk'_sPow_pow (w : Ainf p F) (k a : ℕ) :
   rw [← sPow_pow p F ϖ k a]
   exact (IsLocalization.mk'_pow _ _ a).symm
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- **Normal form for a large-exponent monomial fraction.** With `k*a + k ≤ i`, the
 fraction `p^i[c]/(p[ϖ])^k` factors as `chartFracP^k` times an integral monomial. -/
 private theorem mk_monomial_eq_chartFracP_pow_mul {a k i : ℕ} (c : OF F)
@@ -579,6 +581,7 @@ theorem mk_monomial_mem_of_large (a k i : ℕ) (hik : k * a + k ≤ i) (c : OF F
   · exact Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
   · exact Set.mem_union_left _ ⟨_, rfl⟩
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The inverse of the image of `p` cancels its `n`-th power. -/
 private theorem pInv_pow_mul_p_pow (n : ℕ) :
     ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ n
@@ -713,6 +716,7 @@ private theorem numerator_pow_factor (a k d : ℕ) (c c'' : OF F)
   rw [show WittVector.teichmuller p
     (PseudoUniformizer.toOF F ϖ : OF F) = teichPi p F ϖ from rfl]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- Regroup the factored numerator into `chartFracP ^ d` times the Teichmüller factor
 times `alg (s ^ (k*a))`: the `teichPi`-powers split as `(k*a - d) + d`, and the rest
 is `ring`. -/

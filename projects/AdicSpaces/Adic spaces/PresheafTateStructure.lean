@@ -1612,6 +1612,7 @@ The proof decomposes into:
   below. Combined with closedness of the annihilator (the lemma above),
   the torsion result follows. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Basis-form reduction for `locLift_open_on_image_at_zero`** (T089
 strict structural helper, fully proved).
 
@@ -1750,6 +1751,7 @@ private theorem away_eq_algebraMap_mul_invS_pow
     _ = algebraMap A (Localization.Away s) α *
         (divByS (1 : A) s) ^ k := by rw [hsec]
 
+omit [HasLocLiftPowerBounded A] in
 /-- The `locLift` of a difference of two `algebraMap`-scaled powers vanishes when
 the two numerators already agree downstairs. -/
 private theorem locLift_sub_mul_pow_eq_zero [IsTateRing A] [IsNoetherianRing A]

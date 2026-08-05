@@ -2397,6 +2397,7 @@ private theorem exists_syzygy_decomp_or_ctrl
       · -- m ≥ q: hypothesis fails, contradiction
         exact absurd hm (hq_fail_above m (by omega))
 
+omit [IsNoetherianRing A] in
 set_option backward.isDefEq.respectTransparency false in
 /-- **Flatness of the Tate algebra** (`A⟨X⟩` is flat over noetherian `A`).
 
@@ -2895,6 +2896,7 @@ private theorem tateAlgebra_eq_sum_of_coeff_decomp (P : PairOfDefinition A)
       rfl
   rw [lhs, rhs]
 
+omit [IsNoetherianRing A] in
 set_option backward.isDefEq.respectTransparency false in
 /-- A restricted power series with all coefficients in `I` belongs to `Ideal.map I`
 in the Tate algebra. This is the reverse direction of `forall_coeff_mem_of_mem_ideal_map`.

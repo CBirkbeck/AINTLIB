@@ -498,6 +498,7 @@ private theorem exists_indexData_of_mem_nhds_quotient [T2Space A] (P : PairOfDef
   choose m_fn hm_fn using hm_exists
   exact ⟨Idx, t_set, m_fn, hm_fn, fun g hg ↦ hW_incl (hIt fun i hi ↦ hg i hi)⟩
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- For any neighborhood W of 0 in the quotient T-topology, there exists m such that
 for all r in locSubring and b in I^m, the product phi(r) * mk(algebraMap(b)) lands in W.
 
@@ -1074,6 +1075,7 @@ private theorem truncTate_coeff_low (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 
     (hs : s 0 < N) : (truncTate g N).val s = g.val s := by
   simp [truncTate_val, hs]
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [T2Space A] in
 /-- `scaleIncl s (truncTate g N)` agrees with `scaleIncl s g` at any index with `s 0 < N`. -/
 private theorem scaleIncl_truncTate_eq (g : ↥(TateAlgebra A)) (N : ℕ) (s : A)
     (idx : Fin 1 →₀ ℕ) (h : idx 0 < N) :
@@ -1564,6 +1566,7 @@ private theorem truncTateC_coeff_high (g : ↥(TateAlgebra A)) (N : ℕ)
     (truncTateC g N).val s = 0 := by
   simp [truncTateC_val, show ¬(s 0 < N) by omega]
 
+omit [PlusSubring A] [IsHuberRing A] [T2Space A] in
 /-- Polynomials (elements with finitely many nonzero coefficients) are dense
 in the Tate algebra for the canonical (natural Tate) topology.
 

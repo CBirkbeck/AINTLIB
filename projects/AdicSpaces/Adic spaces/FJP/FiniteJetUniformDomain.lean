@@ -84,6 +84,7 @@ theorem exists_norm_psCoeff_eq (f : PowerSeries.Restricted R (1 : ℝ)) (hf : f 
     · exact ((not_le.mp hm).le.trans hnS)
   · exact norm_pos_iff.mp (lt_of_lt_of_le hpos hnS)
 
+omit [NormOneClass R] in
 /-- The Gauss norm of a nonzero radius-one restricted series is attained at a
 *least* index, strictly below which no coefficient reaches it. This minimal
 achiever is what drives multiplicativity: in a product, the pair `(i, j)` of
@@ -205,6 +206,7 @@ instance : IsDomain (JetA F) := NoZeroDivisors.to_isDomain _
 
 /-! ### The power-bounded subring of 𝓐 is the unit ball ([FJP] Prop 2.3) -/
 
+omit [IsFJPBase F] in
 theorem norm_JetA_mul (a b : JetA F) : ‖a * b‖ = ‖a‖ * ‖b‖ := by
   show ‖((a * b : JetA F) : JetC F)‖ = _
   rw [show ((a * b : JetA F) : JetC F) = (a : JetC F) * (b : JetC F) from rfl,
@@ -513,6 +515,7 @@ theorem winv_not_integral :
     if_pos (Finset.self_mem_range_succ n)] at hc
   exact one_ne_zero hc
 
+omit [IsFJPBase F] in
 /-- `L` is not module-finite over `K⟨W⟩` ([FJP] Prop 2.4: "It would follow that `L` is a
 finite `R_W`-module. A module-finite algebra is integral, so `W⁻¹` would satisfy a monic
 equation"). -/
@@ -602,6 +605,7 @@ theorem q2elt_mem_jetSupport (ℓ : L F) : q2elt F ℓ ∈ jetSupport F := by
       rw [qCoeff_q2elt, if_neg (by norm_num)]]
     exact zero_mem _
 
+omit [IsFJPBase F] in
 /-- If the ideal `J = ker(jB) = Q²𝒞` of 𝓐 were finitely generated, `L` would be
 module-finite over `K⟨W⟩` ([FJP] Prop 2.4: `KJ = Q³𝒞`, `J/KJ ≅ 𝒞/Q𝒞 = L` as
 `𝒜/K ≅ R_W`-modules, and generators of `J` generate `J/KJ`). -/

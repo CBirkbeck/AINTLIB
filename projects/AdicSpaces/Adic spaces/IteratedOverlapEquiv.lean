@@ -64,6 +64,7 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 
 /-! ### Phase 0: target-side IsLocalization instance via transport -/
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- IsLocalization instance for the target localization. -/
 private theorem iteratedOverlap_isLocalization_target
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
@@ -654,6 +655,7 @@ theorem iteratedOverlap_forwardToCompletion_continuous
 
 /-! ### Phase 4: backward loc hom generator power-boundedness -/
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A] in
 /-- `D₀.s ∈ (laurentOverlapDatum D₀ f).T`, witnessed by `(1, D₀.s)` with
@@ -674,6 +676,7 @@ private theorem D₀s_mem_laurentOverlap_T
     change D₀.s ∈ ({D₀.s, f} : Finset A)
     exact Finset.mem_insert_self _ _
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A] in
 /-- `f * f ∈ (laurentOverlapDatum D₀ f).T`, witnessed by `(f, f)` with

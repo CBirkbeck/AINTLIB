@@ -3035,6 +3035,7 @@ theorem quotient_algebraMap_b_eq_X_bivariate [IsTateRing A] (b : A) :
   unfold bivariateOverlapIdeal
   exact Ideal.subset_span (Set.mem_insert _ _)
 
+omit [IsTopologicalRing A] in
 /-- `mk(algebraMap b)` is power-bounded in the bivariate quotient (via
 `mk(algebraMap b) = mk(X)` and `mk_X_isPowerBounded_in_bivariateOverlap`). -/
 theorem mk_algebraMap_b_isPowerBounded_in_bivariateOverlap [IsTateRing A] (b : A) :

@@ -101,6 +101,7 @@ noncomputable def quotientToCont :
   Quotient.lift (restrictToCont G A)
     (fun a b ⟨g, hg⟩ => by rw [← hg, restrictToCont_smul_eq])
 
+omit [Finite G] [IsTopologicalRing A] in
 /-- `quotientToCont` is continuous. -/
 theorem continuous_quotientToCont : Continuous (quotientToCont G A) :=
   Continuous.quotient_lift (Continuous.subtype_mk

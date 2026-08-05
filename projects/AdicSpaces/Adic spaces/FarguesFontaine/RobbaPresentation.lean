@@ -923,6 +923,7 @@ def teichPowGen (zb : OF F) (m : ℕ) : Bloc p F ϖ :=
   algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p zb)
     * (↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ) ^ m
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- `p`-cancellation against the generator's inverse powers. -/
 theorem algebraMap_p_pow_mul_vp_pow (m : ℕ) :
     algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ m)
@@ -1151,6 +1152,7 @@ theorem mk'_monomial_twist_factor (zb : OF F) (m : ℕ) (i j k : ℕ)
           * IsLocalization.mk' (Bloc p F ϖ) 1 (sPow p F ϖ k)) := by
         ring
 
+omit [CharP F p] in
 /-- **The zone-dispatched twist data of a monomial coordinate**: in the
 numerator zone no twist; in the denominator zone the deficit-bounded maximal
 twist supplied by the `σ₁`-Gauss bound. -/
@@ -3881,6 +3883,7 @@ theorem dvd_pow_pseudoUniformizer (zb : OF F)
         rw [hcoe, map_pow]
     _ ≤ perfectoidValuation p F (zb : F) := hj.le
 
+omit [CharP F p] in
 /-- **The generator's Teichmüller factor is a unit of `B_loc`**: its
 coordinate divides a pseudo-uniformizer power, whose Teichmüller image is
 inverted. -/

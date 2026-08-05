@@ -207,6 +207,7 @@ theorem bigWindow_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
       exact h
 
 
+omit [CharP F p] in
 /-- **The Big window is a rational subset (negative side)**: for `m > 0`,
 `bigWindow (-m)` is the `κ' ∈ [1, p]` chart of the `p^m`-th power uniformizer. -/
 theorem bigWindow_eq_rationalOpen_neg (m : ℕ) (hp : 1 < p) :

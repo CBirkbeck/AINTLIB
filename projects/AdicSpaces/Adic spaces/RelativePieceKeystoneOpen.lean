@@ -84,6 +84,7 @@ theorem span_idealOfDef_image (D₀ : RationalLocData A) :
     (congrArg (fun f : D₀.P.A₀ →+* presheafValue D₀ => Ideal.map f D₀.P.I)
       (subtype_comp_locSubringToRingOfDef_comp_algebraMapD D₀)))
 
+omit [PlusSubring A] in
 /-- **The image power certificate** (P5-3b core): an `A`-side power certificate
 for `span T` transports to a `B`-side power certificate for the image tray.
 This is what replaces the `span T = ⊤` hypothesis of the keystone chain. -/

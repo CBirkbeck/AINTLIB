@@ -216,6 +216,7 @@ theorem ev00_continuous : Continuous (ev00 F) := by
     exact norm_ev00_le F _
   exact hlip.continuous
 
+omit [IsFJPBase F] in
 /-- The origin kills `W` — this is what puts the point inside `{|W| ≤ |ϖ|}`. -/
 theorem ev00_Wa : ev00 F (Wa F) = 0 := by
   show PowerSeries.constantCoeff ((jB F (Wa F)).fst).1 = 0

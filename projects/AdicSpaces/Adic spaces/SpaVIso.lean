@@ -696,6 +696,7 @@ theorem pieceEquiv_symm_continuous {E : RationalLocData A} (hE : E.IsRational)
     (genPiece_rel_backward_continuous D₀ E.T E.s (certExp D₀ hE)
       (certExp_spec D₀ hE))
 
+omit [DecidableEq A] in
 /-- **The comparison map is continuous.** -/
 theorem phiHom_continuous {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
     {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}

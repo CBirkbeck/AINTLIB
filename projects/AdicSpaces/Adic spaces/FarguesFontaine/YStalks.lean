@@ -643,6 +643,7 @@ theorem runWindow_eq_rationalOpen_ofNat (n : ℕ) (k : ℕ) (_hp : 1 < p) :
       rw [pow_one]
       exact h
 
+omit [CharP F p] in
 /-- **The run window is a rational open (negative side)**: as
 `runWindow_eq_rationalOpen_ofNat`, at the `p^m`-th power uniformizer. -/
 theorem runWindow_eq_rationalOpen_neg (m k : ℕ) (_hp : 1 < p) :

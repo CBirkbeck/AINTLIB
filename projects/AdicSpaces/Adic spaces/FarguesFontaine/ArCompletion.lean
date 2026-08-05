@@ -219,6 +219,7 @@ theorem wittMap_teichPi :
     WittVector.map_teichmuller]
   rfl
 
+omit [CharP F p] in
 /-- `alocToWittF` sends a Teichmüller power in `Aloc` to the corresponding Teichmüller power
 in `WittF`. -/
 theorem alocToWittF_algebraMap_teichPi_pow (k : ℕ) :
@@ -778,6 +779,7 @@ def alocTeich (c : F) : Aloc p F ϖ :=
       (exists_mul_pow_isPowerBounded p F ϖ c).choose, rfl⟩ :
         Submonoid.powers (teichPi p F ϖ))
 
+omit [CharP F p] in
 /-- In `W(F)`, `alocTeich c` really is the Teichmüller lift of `c`. -/
 theorem alocToWittF_alocTeich (c : F) :
     alocToWittF p F ϖ (alocTeich p F ϖ c) = WittVector.teichmuller p c := by

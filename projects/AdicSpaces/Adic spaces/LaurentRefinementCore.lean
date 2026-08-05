@@ -339,6 +339,7 @@ theorem divByS_mul_secondS_mem {P : PairOfDefinition A} {T₁ T₂ : Finset A}
   · intro x _ hx; rw [map_neg]; exact (locSubring P T (s₁ * s₂)).neg_mem hx
   · intro x y _ _ hx hy; rw [map_mul]; exact (locSubring P T (s₁ * s₂)).mul_mem hx hy
 
+omit [PlusSubring A] [IsTopologicalRing A] in
 /-- For `b ∈ I^N₂` (second datum), `divByS (b·s₁) (s₁·s₂)` lands in the product
 `locSubring`. Derived from `divByS_mul_secondS_mem` by commuting the factors
 (`prodImage_mul_comm` + `mul_comm` on the denominator). -/
@@ -764,6 +765,7 @@ noncomputable def ratioCovering (D₀ : RationalLocData A) (f g f_inv g_inv : A)
       {ratioPlusDatum D₀ f g g_inv hg hg_inv,
        ratioMinusDatum D₀ f g f_inv hf hf_inv} := rfl
 
+omit [PlusSubring A] in
 /-- **Distinctness**: `ratioPlusDatum` and `ratioMinusDatum` differ. -/
 theorem ratioPlus_ne_ratioMinus [IsDomain A] (D₀ : RationalLocData A)
     (f g f_inv g_inv : A) (hf : f * f_inv = 1) (hf_inv : f_inv ∈ D₀.P.A₀)
@@ -777,6 +779,7 @@ theorem ratioPlus_ne_ratioMinus [IsDomain A] (D₀ : RationalLocData A)
     simpa [ratioPlusDatum, ratioMinusDatum] using this
   exact hfg (mul_left_cancel₀ hs hs_eq).symm
 
+omit [PlusSubring A] in
 /-- **T277**: the standard Laurent plus and minus data at `f` are distinct
 provided `f` is not a unit and `D₀.s ≠ 0`. -/
 theorem laurentPlus_ne_laurentMinus_of_nonunit
@@ -797,6 +800,7 @@ theorem laurentPlus_ne_laurentMinus_of_nonunit
     rw [hfeq, map_one]
     exact isUnit_one
 
+omit [PlusSubring A] in
 /-- The images of the Laurent-piece generators span `⊤` in the base localization. -/
 theorem span_top_of_laurentCover
     [IsTateRing A] [IsNoetherianRing A] [T2Space A]
@@ -1003,6 +1007,7 @@ theorem algebraMap_f_isUnit_in_laurentMinus
   rw [map_mul] at hu
   exact isUnit_of_mul_isUnit_right hu
 
+omit [PlusSubring A] in
 /-- In `presheafValue (laurentMinusDatum D₀ f)`, the canonical image of `f` is a unit. -/
 theorem canonicalMap_f_isUnit_in_laurentMinus
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -1071,6 +1076,7 @@ theorem iteratedMinus_backward_forward_locHom
 
 /-! ### iteratedPlus continuity chain (Wedhorn Prop 8.2 analogue) -/
 
+omit [PlusSubring A] in
 /-- Helper: the forward loc-hom sends `divByS x D₀.s` to
 `algebraMap_B(D₀.coeRingHom(divByS x D₀.s))`. -/
 theorem iteratedPlus_forwardLocHom_divByS
@@ -1143,6 +1149,7 @@ theorem iteratedPlus_forwardLocHom_generators_powerBounded
       Subring.le_topologicalClosure _ ⟨⟨divByS t D₀.s, hdiv_mem⟩, rfl⟩
     exact algebraMap_mem_locSubring _ _ _ hcoe_mem
 
+omit [PlusSubring A] in
 set_option backward.isDefEq.respectTransparency false in
 /-- The composite `iteratedPlus_forwardLocHom ∘ algebraMap A` is continuous for the
 `B`-datum topology: it equals `algebraMap_B ∘ D₀.canonicalMap`, and both factors are
@@ -1873,6 +1880,7 @@ private theorem iteratedMinus_forward_mem_locSubring_of_eq_f
 
 
 
+omit [PlusSubring A] in
 theorem iteratedMinus_forwardLocHom_generators_powerBounded
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]

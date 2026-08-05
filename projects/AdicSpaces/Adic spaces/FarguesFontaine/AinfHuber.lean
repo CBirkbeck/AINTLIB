@@ -145,6 +145,7 @@ open additive subgroups. -/
 instance instNonarchimedeanRingAinf : NonarchimedeanRing (Ainf p F) :=
   Ideal.nonarchimedean _
 
+omit [CharP F p] in
 /-- The topology on `A_inf` is `(p,[ϖ])`-adic for EVERY pseudo-uniformizer `ϖ` (not just
 the canonical one used to define the instance). In particular the construction is
 independent of the choice of `ϖ`.

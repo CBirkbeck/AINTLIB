@@ -59,12 +59,14 @@ theorem isLimitSheafOn_Y :
 def yFunctor : Opens ↥(yTop p F ϖ) ⥤ Opens ↥(SpaTop (Ainf p F)) :=
   (yIncl_isOpenEmbedding p F ϖ).isOpenMap.functor
 
+omit [CharP F p] in
 theorem yFunctor_trace (W : Opens ↥(yTop p F ϖ)) :
     ((yFunctor p F ϖ).obj W : Set ↥(SpaTop (Ainf p F)))
       ⊆ Subtype.val ⁻¹' Y p F ϖ := by
   rintro v ⟨x, -, rfl⟩
   exact x.2
 
+omit [CharP F p] in
 theorem yFunctor_cov {ι : Type*} (U : ι → Opens ↥(yTop p F ϖ)) :
     (((yFunctor p F ϖ).obj (iSup U)) : Set ↥(SpaTop (Ainf p F)))
       ⊆ ⋃ i, ((yFunctor p F ϖ).obj (U i) : Set ↥(SpaTop (Ainf p F))) := by
@@ -72,6 +74,7 @@ theorem yFunctor_cov {ι : Type*} (U : ι → Opens ↥(yTop p F ϖ)) :
   rw [Opens.coe_iSup, Set.image_iUnion]
   exact Set.iUnion_mono fun i => subset_rfl
 
+omit [CharP F p] in
 theorem yFunctor_inf (W₁ W₂ : Opens ↥(yTop p F ϖ)) :
     (yFunctor p F ϖ).obj (W₁ ⊓ W₂)
       = (yFunctor p F ϖ).obj W₁ ⊓ (yFunctor p F ϖ).obj W₂ := by

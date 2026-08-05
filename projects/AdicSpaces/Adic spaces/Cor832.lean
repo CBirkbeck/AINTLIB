@@ -2569,6 +2569,7 @@ The wrapper below makes this visible as a single named theorem, making
 it trivial to plug in once the Stacks 00MA residual lands (either in
 Mathlib or as project infrastructure). -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **End-to-end `coeRingHom_preserves_proper` via Stacks 00MA** (Lane B,
 S-IDEAL-ASM). Given the Stacks-00MA faithful-flatness instance
 `Module.FaithfullyFlat locSubring (AdicCompletion locIdeal locSubring)`,

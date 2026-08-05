@@ -57,6 +57,7 @@ private theorem p_teichPi_pow_mul (ϖ' : PseudoUniformizer F) (k m : ℕ) (hk : 
     rw [mul_pow, mul_pow, hteich', hpsplit]
     ring
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- **`Bloc` is uniformizer-invariant**: if `[ϖ']^k = [ϖ]` then `Bloc-in-ϖ` is
 also the localization away from `p·[ϖ']`. -/
 theorem isLocalization_twist_Bloc {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 < k)

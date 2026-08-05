@@ -17410,3 +17410,27 @@ Campaign total: **768 omits**, `unusedSectionVars` 714 → ~305, total AdicSpace
 > bisection, a rejected omit has been individually tried and individually refused. That is a
 > much stronger statement than "the file did not build", and it is what makes the residue
 > honest rather than merely unfinished.
+
+### Iteration 3, and the shape of the convergence
+
+| round | omits landed | unusedSectionVars after | AdicSpaces warnings after |
+|---|---|---|---|
+| baseline | — | 714 | 4,398 |
+| 1 (sweep + per-file + bisect) | 572 | 360 | 3,921 |
+| 2 (re-lint + bisect) | 196 | 304 | 3,832 |
+| 3 (re-lint + bisect) | **161** | **240** | **3,759** |
+| **total** | **929** | | |
+
+Iteration 3 found 246 fresh records — 225 of them in files *outside* the certified-hard set,
+which is why it was worth running at all. Bisection recovered 43 of the 114 its plain pass
+rejected (190 module builds).
+
+Each round is roughly two-thirds as productive as the last and the residue is increasingly the
+same four files (`Wedhorn828` 0/14 three times running, `SheafyPair` 0/3, `StandardDescent`
+0/1, `RelativePieceKeystone` 0/3). The campaign is converging on a fixed point, not stalling:
+929 declarations have shed hypotheses they never used, and every one of the ~240 remaining
+warnings is either newly-surfaced or has been individually tried and individually refused.
+
+> Worth naming the shape: a linter whose fix changes a signature generates a **cascade**, not a
+> worklist. You cannot count the work up front — 714 warnings did not mean 714 fixes, it meant
+> 929 fixes so far across three re-lints, because each round of shrinking exposes the next.

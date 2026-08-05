@@ -224,15 +224,18 @@ noncomputable def pPowM (m : ℕ) : PseudoUniformizer F :=
   PseudoUniformizer.pPow F ϖ (p ^ m)
     (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 theorem teichPi_pPowM (m : ℕ) :
     teichPi p F ϖ ^ p ^ m = teichPi p F (pPowM p F ϖ m) :=
   (teichPi_pPow p F ϖ (p ^ m)
     (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)).symm
 
+omit [CharP F p] in
 theorem vpiQ_pPowM_one (m : ℕ) :
     vpiQ p F (pPowM p F ϖ m) 1 = vpiQ p F ϖ ((p ^ m : ℚ)) :=
   vpiQ_pPow_one p F ϖ m
 
+omit [CharP F p] in
 theorem vpiQ_pPowM_invP (m : ℕ) :
     vpiQ p F (pPowM p F ϖ m) (1 / (p : ℚ))
       = vpiQ p F ϖ ((p ^ m : ℚ) / (p : ℚ)) :=

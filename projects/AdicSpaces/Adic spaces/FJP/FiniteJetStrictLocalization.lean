@@ -312,10 +312,12 @@ theorem isNoetherianRing_unitBall_PB : IsNoetherianRing (unitBall (PB F m)) :=
     (isNoetherianRing_unitBall_restricted_univariate (F) m
       (isNoetherianRing_unitBall_gaussK F (m + 1)))
 
+omit [IsFJPBase F] in
 theorem isNoetherianRing_unitBall_PC : IsNoetherianRing (unitBall (PC F m)) :=
   isNoetherianRing_unitBall_restricted_univariate (L F) m
     (isNoetherianRing_unitBall_restricted_L F (m + 1))
 
+omit [IsFJPBase F] in
 theorem isNoetherianRing_unitBall_PD : IsNoetherianRing (unitBall (PD F m)) :=
   isNoetherianRing_unitBall_restricted_dualNumber (L F) m
     (isNoetherianRing_unitBall_restricted_L F m)
@@ -437,6 +439,7 @@ private theorem norm_sum_mul_le {S : Type*} [NormedCommRing S] [IsUltrametricDis
     (mul_nonneg hK (zero_le_one.trans hCr1)) fun b _ => hterm b
 
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- The 𝓓-vertex difference of the two lifts is a `d₁`-cycle. -/
 private theorem d1_rD_extRho_sub_eq_zero (u : Fin m → PB F m) (v : Fin m → PC F m)
     (xb : PB F m) (xc : PC F m) (hu : d1 (rB F m g f) u = xb) (hv : d1 (rC F m g f) v = xc)
@@ -754,6 +757,7 @@ theorem extIotaC_mem_IC {y : PA F m} (hy : y ∈ IA F m g f) :
     exact Ideal.subset_span ⟨i, rfl⟩
   exact hmap (Ideal.mem_map_of_mem _ hy)
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem extRhoB_mem_ID {y : PB F m} (hy : y ∈ IB F m g f) :
     extRhoB F m y ∈ ID F m g f := by
   have hmap : Ideal.map (extRhoB F m) (IB F m g f) ≤ ID F m g f := by
@@ -881,6 +885,7 @@ theorem loc_row_exact (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤)
         sub_add_cancel_left]
       exact (IC F m g f).neg_mem hxc
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- The quotient projections are 1-Lipschitz for the quotient seminorms. -/
 theorem locJB_lipschitz : LipschitzWith 1 (locJB F m g f) :=
   LipschitzWith.of_dist_le_mul fun a b => by
@@ -901,6 +906,7 @@ theorem locJB_lipschitz : LipschitzWith 1 (locJB F m g f) :=
       _ ≤ ‖q‖ := norm_mapRestricted_le _ _ _ _
       _ ≤ ‖Ideal.Quotient.mk (IA F m g f) p‖ + ε := hqn.le
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem locIotaC_lipschitz : LipschitzWith 1 (locIotaC F m g f) :=
   LipschitzWith.of_dist_le_mul fun a b => by
     rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm, ← map_sub]
@@ -1032,6 +1038,7 @@ theorem loc_pair_isEmbedding (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     exact hest
   exact hanti.isEmbedding hcont
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- `𝓒_α → 𝓓_α` is a continuous open surjection ([FJP] Prop 4.5: "`C_α → D_α` is a strict
 surjection"). -/
 theorem locRhoC_surjective (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
@@ -1057,6 +1064,7 @@ theorem extRhoC_isOpenMap : IsOpenMap (extRhoC F m) := by
   · rw [map_add, hc]
     ring
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem locRhoC_isOpenMap (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     IsOpenMap (locRhoC F m g f) := by
   intro U hU

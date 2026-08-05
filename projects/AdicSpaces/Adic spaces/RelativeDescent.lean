@@ -224,6 +224,7 @@ theorem keystoneAlg_algebraMap (a : A) :
       (imgDatum D₀ E hspanE).canonicalMap (D₀.canonicalMap a) :=
   IsLocalization.Away.lift_eq E.s (imgCanonical_isUnit_s D₀ hspanE) a
 
+omit [HasLocLiftPowerBounded A] in
 /-- The forward lift sends the `t/s`-generators to the image datum's own
 `t/s`-lifts (uniqueness of division by the unit `can E.s`). -/
 theorem keystoneAlg_divByS {t : A} (_ht : t ∈ E.T) :
@@ -371,6 +372,7 @@ theorem keystoneInvAlg_algebraMap (b : presheafValue D₀) :
   IsLocalization.Away.lift_eq (imgDatum D₀ E hspanE).s
     (restriction_isUnit_imgS D₀ hspanE hE) b
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The backward lift sends the image `t/s`-generators to the `A`-side `t/s`-lifts. -/
 theorem keystoneInvAlg_divByS {t : A} (_ht : t ∈ E.T) :
     keystoneInvAlg D₀ hspanE hE

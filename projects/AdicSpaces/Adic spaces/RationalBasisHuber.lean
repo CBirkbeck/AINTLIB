@@ -257,6 +257,7 @@ noncomputable def RationalLocData.interDatumOpen (D E : RationalLocData A)
                   ⟨Finset.mem_insert_of_mem ht,
                     Finset.mem_insert_of_mem hu⟩)) }
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- The certificate of the intersection datum. -/
 theorem RationalLocData.interDatumOpen_pow_le (D E : RationalLocData A)
     (M₁ M₂ : ℕ)
@@ -286,6 +287,7 @@ theorem RationalLocData.interDatumOpen_pow_le (D E : RationalLocData A)
           exact Finset.mem_product.mpr
             ⟨Finset.mem_insert_of_mem ht, Finset.mem_insert_of_mem hu⟩)
 
+omit [IsHuberRing A] in
 omit [PlusSubring A] in
 /-- The intersection datum realises the intersection (open-span form;
 `rationalOpen` never mentions the pair). -/

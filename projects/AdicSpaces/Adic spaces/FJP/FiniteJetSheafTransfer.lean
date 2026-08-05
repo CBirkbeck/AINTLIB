@@ -159,6 +159,7 @@ theorem productRestrictionSub_injective_JetA (C : RationalCoveringData (JetA F))
   rw [← sub_eq_zero]
   exact hz0
 
+omit [IsFJPNoetherianBase F] in
 /-- Pushed opens of intersection data cut out the intersections of the pushed opens
 (𝓑-side; [FJP] Lemma 5.2 `(U_{ij})_E = (U_i)_E ∩ (U_j)_E`). -/
 theorem pushDatumB_interOpen (d₁ d₂ : RationalLocData (JetA F))
@@ -185,6 +186,7 @@ theorem pushDatumB_interOpen (d₁ d₂ : RationalLocData (JetA F))
     exact ⟨(mem_rationalOpen_pushDatumB_iff d₁ h₁ v hvspa).mp hv₁,
       (mem_rationalOpen_pushDatumB_iff d₂ h₂ v hvspa).mp hv₂⟩
 
+omit [IsFJPNoetherianBase F] in
 /-- 𝓒-side analogue of `pushDatumB_interOpen`. -/
 theorem pushDatumC_interOpen (d₁ d₂ : RationalLocData (JetA F))
     (h₁ : d₁.IsRational) (h₂ : d₂.IsRational) :
@@ -507,6 +509,7 @@ private noncomputable def pushedFamilyC :
       (hC.piece (Finset.mem_image.mp D'.2).choose.2)
       (f (Finset.mem_image.mp D'.2).choose)
 
+omit [IsFJPNoetherianBase F] in
 /-- Restricting a `pushedFamilyB` value factors through the chosen preimage piece: the
 `choose_spec` transport is eliminated by `restrictionMap_cast_restrictionMap`. -/
 private theorem pushedFamilyB_restrictionMap
@@ -526,6 +529,7 @@ private theorem pushedFamilyB_restrictionMap
         (f (Finset.mem_image.mp D'.2).choose)) = _
   exact restrictionMap_cast_restrictionMap _ D₃ h₃ _
 
+omit [IsFJPNoetherianBase F] in
 /-- The 𝓒-mirror of `pushedFamilyB_restrictionMap`. -/
 private theorem pushedFamilyC_restrictionMap
     (D' : ↥(pushCoveringC C hC).covers) (D₃ : RationalLocData (JetC F))

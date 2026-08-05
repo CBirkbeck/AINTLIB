@@ -187,6 +187,7 @@ theorem exists_pow_teichPi_vlt (hv : v ∈ Y p F ϖ) {g : Ainf p F} (hg : ¬ v.v
 
 end ElementFacts
 
+omit [CharP F p] in
 /-- `𝒴` does not depend on the choice of pseudo-uniformizer: any two pseudo-uniformizers
 divide powers of each other in `O_F`, and Teichmüller is multiplicative.
 
@@ -941,6 +942,7 @@ theorem not_vle_pow_teichPi_zero {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) (k :
   v_teichPi_ne_zero hv ((v.mem_supp_iff _).mp
     ((inferInstance : (v.supp).IsPrime).mem_of_pow_mem _ ((v.mem_supp_iff _).mpr h)))
 
+omit [CharP F p] in
 /-- Windows are open: `U_n` is the intersection of `𝒴` with two `basicOpen` conditions
 (each `KGE`/`KLE` inequality together with the nonvanishing from `𝒴` is a rational-open
 condition). -/
@@ -965,6 +967,7 @@ theorem isOpen_windowU (n : ℤ) :
     (isOpen_basicOpen _ _)).inter (continuous_subtype_val.isOpen_preimage _
       (isOpen_basicOpen _ _)))
 
+omit [CharP F p] in
 /-- Windows are open (`V`-family). -/
 theorem isOpen_windowV (n : ℤ) :
     IsOpen (Subtype.val ⁻¹' windowV p F ϖ n :

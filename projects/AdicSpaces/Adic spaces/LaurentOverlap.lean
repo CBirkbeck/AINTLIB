@@ -122,6 +122,7 @@ noncomputable def overlapDatum (P : PairOfDefinition B) (b : B) :
     RationalLocData B :=
   laurentMinusDatum (trivialPlusDatum B P b) b
 
+omit [PlusSubring B] in
 omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 /-- The `s` of `overlapDatum B P b` is `b` (unfolding `laurentMinusDatum` then
 `trivialPlusDatum`: `s = 1 * b = b`). -/
@@ -131,6 +132,7 @@ theorem overlapDatum_s (P : PairOfDefinition B) (b : B) :
   change (1 : B) * b = b
   exact one_mul b
 
+omit [PlusSubring B] in
 omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 /-- The pair of definition of `overlapDatum B P b` is `P` (inherited through
 both `laurentMinusDatum` and `trivialPlusDatum`, neither of which modifies `P`). -/
@@ -147,6 +149,7 @@ theorem overlapDatum_subset_plus (P : PairOfDefinition B) (b : B) :
       rationalOpen (trivialPlusDatum B P b).T (trivialPlusDatum B P b).s :=
   laurentMinus_subset (trivialPlusDatum B P b) b
 
+omit [PlusSubring B] in
 omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 /-- `1 ∈ (overlapDatum B P b).T`. Witnessed by the pair `(1, 1)`: both entries
 are in the factors `insert 1 {b}` and `{1, b}` respectively, and `1 · 1 = 1`.
@@ -161,6 +164,7 @@ theorem one_mem_overlapDatum_T (P : PairOfDefinition B) (b : B) :
   exact Finset.mem_product.mpr
     ⟨Finset.mem_insert_self _ _, Finset.mem_insert_self _ _⟩
 
+omit [PlusSubring B] in
 omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 /-- `b · b ∈ (overlapDatum B P b).T`. Witnessed by the pair `(b, b)`: both
 entries are in the factors, and `b · b = b²`.
@@ -972,6 +976,7 @@ private theorem overlap_divByS_values (P : PairOfDefinition B) [IsNoetherianRing
     rw [IsLocalization.mk'_spec]
     exact map_one _
 
+omit [IsTopologicalRing B] [PlusSubring B] [IsHuberRing B] [HasLocLiftPowerBounded B] in
 omit [IsTateRing B] [IsNoetherianRing B] [T2Space B] in
 /-- `Y` inverts `b` in `B⟨X,Y⟩/(b − X, 1 − bY)`: the difference is minus the second
 generator of the ideal. -/
@@ -987,6 +992,7 @@ private theorem mk_Y_mul_mk_algebraMap_eq_one (b : B) :
   unfold TateAlgebra.bivariateOverlapIdeal
   exact neg_mem (Ideal.subset_span (Set.mem_insert_of_mem _ rfl))
 
+omit [IsHuberRing B] [HasLocLiftPowerBounded B] [IsTateRing B] [IsNoetherianRing B] [T2Space B] in
 /-- First hypothesis of `locTopology_continuous_lift`: the composite with `algebraMap B` is
 the quotient map on constants, whose continuity is supplied by the caller (the topology here
 is a binder, so the concrete-topology lemma cannot be named inside). -/
@@ -1012,6 +1018,7 @@ private theorem bivariateLocToQuotient_comp_algebraMap_continuous
           (algebraMap B ↥(TateAlgebra₂ B) a)) from funext heq]
   exact hmk
 
+omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 omit [IsTateRing B] [IsNoetherianRing B] [T2Space B] in
 /-- Second hypothesis of `locTopology_continuous_lift`: every `t ∈ T = {1, b, b²}` has
 power-bounded image — `mk Y`, `1`, `mk (algebraMap b)` respectively. -/
@@ -1621,6 +1628,7 @@ noncomputable def iteratedOverlapDatum_B
   exact overlapDatum (presheafValue D₀) (presheafValue_pairOfDefinition_concrete P D₀)
     (D₀.canonicalMap f)
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [IsTateRing A] [IsNoetherianRing A] in
 omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- The source localization of the iterated overlap equals the source localization
@@ -1662,6 +1670,7 @@ noncomputable def iteratedOverlap_forwardLocHom
       Localization.Away (D₀.canonicalMap f) :=
   iteratedMinus_forwardLocHom D₀ f
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- Forward loc hom acts on `algebraMap a` as the canonical map
 `A → B → Loc_B(f_B)`. -/
@@ -1680,6 +1689,7 @@ on the same underlying ring). We build it via `IsLocalization.Away.lift`
 using that `restrictionMapHom D₀ (laurentOverlapDatum D₀ f) hsub (D₀.canonicalMap f)`
 is a unit (since `f ∈ overlap.T` effectively via insertion). -/
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The canonical image of `f` is a unit in `presheafValue (laurentOverlapDatum D₀ f)`.
 Because `(laurentOverlapDatum D₀ f).s = D₀.s * f`, `algebraMap f` is a unit

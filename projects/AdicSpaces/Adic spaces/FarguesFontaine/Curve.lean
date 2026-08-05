@@ -236,6 +236,7 @@ theorem curve_eq_image_window_zero :
       exact ⟨y.1, hn, rfl⟩
     simpa using this
 
+omit [CharP F p] in
 private theorem isOpen_windowU_Y (n : ℤ) :
     IsOpen {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ n} := by
   have heq : {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ n} =
@@ -253,6 +254,7 @@ private theorem isOpen_windowU_Y (n : ℤ) :
   exact (continuous_subtype_val.isOpen_preimage _ (isOpen_basicOpen _ _)).inter
     (continuous_subtype_val.isOpen_preimage _ (isOpen_basicOpen _ _))
 
+omit [CharP F p] in
 private theorem isOpen_windowV_Y (n : ℤ) :
     IsOpen {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ n} := by
   have heq : {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ n} =
@@ -438,6 +440,7 @@ private theorem windowV_zero_trace_eq :
             omega)))
     exact ⟨hY, hKGE.mpr h₁, hKLE.mpr h₂⟩
 
+omit [CharP F p] in
 private theorem iinf_le_radical_of_pure_powers {T : Finset (Ainf p F)}
     (hp : ∃ n : ℕ, (p : Ainf p F) ^ n ∈ T)
     (hϖ : ∃ m : ℕ, 0 < m ∧ teichPi p F ϖ ^ m ∈ T) :

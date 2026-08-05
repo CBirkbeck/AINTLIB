@@ -167,6 +167,7 @@ def AlocToBloc : Aloc p F ϖ →+* Bloc p F ϖ :=
       rw [map_pow]
       exact (isUnit_teichPi_image p F ϖ).pow k)
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 @[simp]
 theorem AlocToBloc_algebraMap (x : Ainf p F) :
     AlocToBloc p F ϖ (algebraMap (Ainf p F) (Aloc p F ϖ) x)

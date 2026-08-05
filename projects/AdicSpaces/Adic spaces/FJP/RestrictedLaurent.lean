@@ -1251,6 +1251,7 @@ noncomputable def truncNonpos (h : RestrictedLaurent R) : RestrictedLaurent R :=
 @[simp] theorem negate_negate (f : RestrictedLaurent R) : negate (negate f) = f := by
   ext a; simp
 
+omit [CompleteSpace R] [NormOneClass R] in
 theorem innerToSeries_symm_norm (g : PowerSeries.Restricted R (1 : ℝ)) :
     ‖(innerToSeries (R := R)).symm g‖ = ‖g‖ := by
   conv_rhs => rw [← RingEquiv.apply_symm_apply (innerToSeries (R := R)) g]

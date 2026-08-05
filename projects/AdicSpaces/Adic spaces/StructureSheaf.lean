@@ -1254,6 +1254,7 @@ theorem _aux_nonOpen_hSpa_Aplus_le_principalPair_A₀
         exact algebraMap_mem_locSubring P {1} (1 : A) b.property⟩ }
   exact CompatiblePlusSubring.aplus_le_A₀ D
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Sub-lemma (a) — Wedhorn 7.45 raw Spa-point output above a non-open prime.**
 
 Named sub-lemma isolating the pure Wedhorn 7.45 step: from a non-open prime `p`
@@ -1287,6 +1288,7 @@ theorem _aux_nonOpen_hSpa_spaPoint_exists
       (_aux_nonOpen_hSpa_Aplus_le_principalPair_A₀ A)
   exact ⟨v, hv, hpv⟩
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Sub-lemma (b) — rational-open membership lift for a Spa-point above a
 non-open prime.**
 

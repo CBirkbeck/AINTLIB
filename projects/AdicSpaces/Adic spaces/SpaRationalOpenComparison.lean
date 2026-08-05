@@ -336,6 +336,7 @@ private theorem vle_one_of_mem_completedPlusSubring (D : RationalLocData A)
     (fun d hd => (Valuation.mem_integer_iff _ _).mp (Subring.mem_comap.mp (hbase_le hd)))
     ((mem_integralClosure_iff _ _).mp (Subalgebra.mem_toSubring.mp hf))
 
+omit [IsHuberRing A] in
 /-- **Completion step (Wedhorn Lemma 8.2, completion half).** A Spa-point `w`
 of the rational localization `Localization.Away D.s` extends to a Spa-point `w'`
 of its completion `presheafValue D`, pulling back along `D.coeRingHom`.

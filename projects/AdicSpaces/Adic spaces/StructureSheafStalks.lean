@@ -462,6 +462,7 @@ theorem comap_limitEvalHom_pointValue {V : Opens ↥(Spa A A⁺)}
   rw [key i hvi hEi, ← key j hj hEj]
   rfl
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Restriction coherence**: the point's valuation is intertwined by the
 presheaf restrictions. -/
 theorem comap_limitRestrict_openValue {V W : Opens ↥(Spa A A⁺)} (h : W ≤ V)
@@ -621,6 +622,7 @@ theorem germ_zero {v : ↥(Spa A A⁺)} (U : Opens ↥(Spa A A⁺)) (hvU : v ∈
     (spaRingPresheaf A).germ U v hvU 0 = 0 :=
   map_zero ((spaRingPresheaf A).germ U v hvU).hom
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem stalkVle_total (v : ↥(Spa A A⁺))
     (a b : ToType ((spaRingPresheaf A).stalk v)) :
     stalkVle v a b ∨ stalkVle v b a := by
@@ -718,6 +720,7 @@ theorem stalkVle_mul_left {v : ↥(Spa A A⁺)}
       ((germ_limitRestrict _ hvW _).trans hfy') hgz)
   exact hprodx ▸ hprody ▸ hfin
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem stalkVle_mul_comm {v : ↥(Spa A A⁺)}
     {x y : ToType ((spaRingPresheaf A).stalk v)} :
     stalkVle v (x * y) (y * x) := by

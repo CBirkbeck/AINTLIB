@@ -377,6 +377,7 @@ private theorem span_mul_pow_mem_pow (PA : PairOfDefinition A) (m n : ℕ)
   | smul c x' _ hx'_ih =>
     exact span_mul_pow_mem_pow_smul PA m n I' c x' hx'_ih
 
+omit [IsTopologicalRing A] in
 omit [IsHuberRing A] in
 /-- The Artin–Rees-style comparison driving `exists_pairOfDefinition_le_subring`: pulling
 `PA.I ^ ((n + 2) * m)` back along the inclusion `ι : A₀' → PA.A₀` lands inside `I' ^ n`.

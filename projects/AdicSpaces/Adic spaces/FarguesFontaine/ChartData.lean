@@ -405,6 +405,7 @@ theorem mem_rationalOpen_chartData_iff (a₁ b₁ a₂ b₂ : ℕ)
       · exact hpϖ.1 (pow_eq_zero_iff ha₁.ne' |>.mp h)
       · exact hpϖ.2 (pow_eq_zero_iff hb₂.ne' |>.mp h)
 
+omit [CharP F p] in
 /-- **The chart `U₀` is a rational subset**: the window `κ ∈ [1, c]`
 (`c = (p+1)/2`) is `R({p^{p+2}, [ϖ]³} / p·[ϖ]²)`. -/
 theorem windowU_zero_eq_rationalOpen (hp : 1 < p) :
@@ -436,6 +437,7 @@ theorem windowU_zero_eq_rationalOpen (hp : 1 < p) :
         (a := p + 1) (b := 2) (by norm_num)
         (by rw [zpow_zero, mul_one, cFF]; push_cast; ring)).mpr h2
 
+omit [CharP F p] in
 /-- **The chart `V₀` is a rational subset**: the window `κ ∈ [c, p]` is
 `R({p^{2p+1}, [ϖ]³} / p^{p+1}·[ϖ])`. -/
 theorem windowV_zero_eq_rationalOpen (hp : 1 < p) :
@@ -478,6 +480,7 @@ theorem chartS_pow_eq (b k : ℕ) (hb : 0 < b) :
   calc b * k = (1 + (b - 1)) * k := by rw [← this]
     _ = k + k * (b - 1) := by ring
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- **`Bloc` is also the localization away from the chart denominator `p·[ϖ]^b`**
 (the two multiplicative sets have the same saturation). -/
 theorem isLocalization_chartS_Bloc (b : ℕ) (hb : 0 < b) :
@@ -1264,6 +1267,7 @@ theorem exists_factor_toOF (e : ℕ) (c : OF F)
     ring
   rw [hcoe, hu', mul_assoc, inv_mul_cancel₀ (pow_ne_zero e hπne), mul_one]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- `([ϖ]/p)^e · p^e = [ϖ]^e` in `Bloc`. -/
 theorem chartFracPi_pow_mul_p_pow (e : ℕ) :
     chartFracPi p F ϖ ^ e
@@ -1332,6 +1336,7 @@ theorem chart_term_low_eq (k m : ℕ) (hm : m ≤ k) (c c' : OF F)
     map_mul, ← mul_assoc, chartFracPi_pow_mul_p_pow, ← map_mul,
     teich_shift_low p F ϖ k m hm c c' hc]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The `A_inf`-side regrouping for the high terms. -/
 theorem high_arg_split (b k t j : ℕ) (c c' : OF F)
     (hc : c * PseudoUniformizer.toOF F ϖ ^ (b * t)

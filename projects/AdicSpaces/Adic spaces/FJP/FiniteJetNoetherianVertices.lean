@@ -445,6 +445,7 @@ theorem isNoetherianRing_unitBall_dualNumber
 
 end DualBall
 
+omit [IsFJPBase F] in
 theorem isNoetherianRing_unitBall_JetB : IsNoetherianRing (unitBall (JetB F)) :=
   isNoetherianRing_unitBall_dualNumber (PowerSeries.Restricted K (1 : ℝ))
     (isNoetherianRing_unitBall_KW F)
@@ -488,6 +489,7 @@ theorem isNoetherianRing_unitBall_JetC : IsNoetherianRing (unitBall (JetC F)) :=
   exact isNoetherianRing_unitBall_of_isometry (innerToSeries (R := L F))
     (innerToSeries_norm (R := L F)) h4
 
+omit [IsFJPBase F] in
 theorem isNoetherianRing_unitBall_JetD : IsNoetherianRing (unitBall (JetD F)) :=
   isNoetherianRing_unitBall_dualNumber (L F) (isNoetherianRing_unitBall_L F)
 

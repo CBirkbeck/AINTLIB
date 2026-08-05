@@ -254,6 +254,7 @@ noncomputable def LaurentTree.leaves :
   | .node f L R, D₀ =>
       L.leaves (laurentPlusDatum D₀ f) ++ R.leaves (laurentMinusDatum D₀ f)
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The leaves of `t.graftUniform t_inner` at root D₀ are the leaves of
 `t_inner` walked from each leaf of `t` at D₀. -/
@@ -287,6 +288,7 @@ noncomputable def LaurentTree.graftAt :
       .node f (L.graftAt (laurentPlusDatum D₀ f) h)
              (R.graftAt (laurentMinusDatum D₀ f) h) := rfl
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The leaves of `t.graftAt D₀ h` are the leaves of `h L` walked from
 each leaf base L of `t` at D₀. -/
@@ -467,6 +469,7 @@ open Classical in
       L.toCoveringCovers (laurentPlusDatum D₀ f) ∪
       R.toCoveringCovers (laurentMinusDatum D₀ f) := rfl
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 open Classical in
 /-- The recursive `toCoveringCovers` equals the `toFinset` of the leaves
@@ -505,6 +508,7 @@ theorem LaurentTree.toCoveringCovers_cover_base (t : LaurentTree A)
   obtain ⟨D, hD, hvD⟩ := t.cover_base D₀ hv
   exact ⟨D, (t.mem_toCoveringCovers_iff_mem_leaves D₀ D).mpr hD, hvD⟩
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The rational covering of `D₀` induced by the leaves of a Laurent tree.
@@ -617,6 +621,7 @@ noncomputable def LaurentTree.balancedLeafBase :
     (D₀ : RationalLocData A) (σ : Fin 0 → Bool) :
     LaurentTree.balancedLeafBase D₀ [] σ = D₀ := rfl
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 theorem LaurentTree.balancedLeafBase_cons (D₀ : RationalLocData A)
     (f : A) (rest : List A) (σ : Fin (rest.length + 1) → Bool) :
