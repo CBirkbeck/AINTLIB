@@ -390,6 +390,100 @@ private theorem exists_lift_stable_of_mem_locSubring (D : RationalLocData A)
     exact ⟨rx * ry, by rw [map_mul, hrx_eq, hry_eq, map_mul],
       fun g hg ↦ by rw [mul_assoc]; exact hrx_stab _ (hry_stab g hg)⟩
 
+/-- One Artin–Rees shift constant that works for every `t ∈ T` at once: take the maximum of
+the per-`t` constants supplied by `mul_st_ideal_shift`. -/
+private theorem exists_uniform_mul_st_ideal_shift (P : PairOfDefinition A) (s : A)
+    (T : Finset A) :
+    ∃ C : ℕ, ∀ (t : T) (k : ℕ) (b : P.A₀), (b : P.A₀) ∈ P.I ^ (k + C) →
+      s * t * (b : A) ∈ Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀) := by
+  classical
+  have hC_exists : ∀ t : T, ∃ C : ℕ, ∀ (k : ℕ) (b : P.A₀),
+      (b : P.A₀) ∈ P.I ^ (k + C) →
+        s * t * (b : A) ∈ Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀) :=
+    fun t ↦ mul_st_ideal_shift P s t
+  choose C_fn hC_fn using hC_exists
+  refine ⟨(T.attach.image C_fn).sup id, fun t k b hb ↦ ?_⟩
+  have hC_bound : C_fn t ≤ (T.attach.image C_fn).sup id :=
+    Finset.le_sup (f := id) (Finset.mem_image_of_mem _ (Finset.mem_attach _ _))
+  exact hC_fn t k b (Ideal.pow_le_pow_right (by omega) hb)
+
+/-- Every element of the Artin–Rees neighbourhood has its `i`-th scaled coefficient inside
+`t_set i`, for each index `i` of the basic product neighbourhood. The shift budget only has to
+beat `m_fn i`, which is what `hN` (degrees) and `hM` (the `m_fn`) supply. -/
+private theorem artinReesNhd_scaleIncl_mem (P : PairOfDefinition A) (s : A) (C : ℕ)
+    (Idx : Finset (Fin 1 →₀ ℕ)) (t_set : (Fin 1 →₀ ℕ) → Set A) (m_fn : (Fin 1 →₀ ℕ) → ℕ)
+    (hm_fn : ∀ i, Subtype.val '' ((P.I ^ m_fn i : Ideal P.A₀) : Set P.A₀) ⊆ t_set i)
+    (M N : ℕ) (hN : ∀ i ∈ Idx, i 0 ≤ N) (hM : ∀ i ∈ Idx, m_fn i ≤ M)
+    {g : ↥(TateAlgebra A)} (hg : g ∈ artinReesNhd P s C M N) :
+    ∀ i ∈ Idx, TateAlgebraWedhorn.scaleIncl s g i ∈ t_set i := by
+  intro i hi
+  have hi_le : i 0 ≤ N := hN i hi
+  have hg_i := hg (i 0) hi_le
+  have hM_bound : m_fn i ≤ M := hM i hi
+  have hpow_le : M + (N - i 0) * C ≥ m_fn i := by omega
+  have hsub : Subtype.val '' ((P.I ^ (M + (N - i 0) * C) : Ideal P.A₀) : Set P.A₀) ⊆
+      Subtype.val '' ((P.I ^ (m_fn i) : Ideal P.A₀) : Set P.A₀) :=
+    Set.image_mono (Ideal.pow_le_pow_right hpow_le)
+  -- scaleIncl s g i = s^(i 0) * g.val i = s^(i 0) * coeff(i 0) g
+  -- For Fin 1, i = Finsupp.single 0 (i 0), and TateAlgebra.coeff (i 0) g = g.val i.
+  have hi_eq : i = Finsupp.single 0 (i 0) := by
+    apply Finsupp.ext; intro j; fin_cases j; simp
+  change TateAlgebraWedhorn.scaleIncl s g i ∈ t_set i
+  rw [TateAlgebraWedhorn.scaleIncl_apply]
+  -- Goal: s ^ (i 0) * g.val i ∈ t_set i
+  -- hg_i : s ^ (i 0) * TateAlgebra.coeff (i 0) g ∈ val(I^{M+(N-i 0)*C})
+  -- TateAlgebra.coeff (i 0) g = MvPowerSeries.coeff A (Finsupp.single 0 (i 0)) g
+  --                            = g.val (Finsupp.single 0 (i 0)) = g.val i
+  -- So the result follows from hg_i + hsub + hm_fn.
+  have hscale : s ^ i 0 * g.val i =
+      s ^ i 0 * TateAlgebra.coeff (i 0) g := by
+    congr 1; change g.val i = g.val (Finsupp.single 0 (i 0)); rw [← hi_eq]
+  rw [hscale]
+  exact hm_fn i (hsub hg_i)
+
+/-- Unpack a `0`-neighbourhood of the quotient into finitary index data: a finite set of
+exponents `Idx`, a factor `t_set i` for each, and an exponent `m_fn i` whose ideal power lands
+in that factor — such that any `g` whose scaled coefficients lie in the factors has its class
+in `W`. This is the whole "descend the induced product topology" half of
+`locToQuotient_mul_small_constant_mem`. -/
+private theorem exists_indexData_of_mem_nhds_quotient [T2Space A] (P : PairOfDefinition A)
+    (s : A) (W : Set (↥(TateAlgebra A) ⧸ oneSubfXIdeal s))
+    (hW_top : W ∈ @nhds _ (quotientTTopology s) 0) :
+    ∃ (Idx : Finset (Fin 1 →₀ ℕ)) (t_set : (Fin 1 →₀ ℕ) → Set A) (m_fn : (Fin 1 →₀ ℕ) → ℕ),
+      (∀ i, Subtype.val '' ((P.I ^ m_fn i : Ideal P.A₀) : Set P.A₀) ⊆ t_set i) ∧
+      ∀ g : ↥(TateAlgebra A), (∀ i ∈ Idx, TateAlgebraWedhorn.scaleIncl s g i ∈ t_set i) →
+        Ideal.Quotient.mk (oneSubfXIdeal s) g ∈ W := by
+  classical
+  letI τT : TopologicalSpace ↥(TateAlgebra A) := TateAlgebraWedhorn.tateTopologyT s
+  letI τQ : TopologicalSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) := quotientTTopology s
+  haveI hTR_T : IsTopologicalRing ↥(TateAlgebra A) :=
+    TateAlgebraWedhorn.tateTopologyT_isTopologicalRing s
+  haveI hTR_Q : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) :=
+    quotientTTopology_isTopologicalRing s
+  let mk := Ideal.Quotient.mk (oneSubfXIdeal s)
+  have hmk_cont : @Continuous _ _ τT τQ mk := continuous_quotient_mk'
+  have hmk_pre_W : mk ⁻¹' W ∈ @nhds _ τT 0 :=
+    hmk_cont.continuousAt.preimage_mem_nhds (by rwa [map_zero])
+  -- Step 3: Decompose the T-topology neighborhood.
+  rw [@nhds_induced _ _ (MvPowerSeries.WithPiTopology.instTopologicalSpace A)
+    (TateAlgebraWedhorn.scaleIncl s) 0, Filter.mem_comap] at hmk_pre_W
+  obtain ⟨W_prod, hW_prod, hW_incl⟩ := hmk_pre_W
+  rw [map_zero] at hW_prod
+  change W_prod ∈ @nhds _ (@Pi.topologicalSpace (Fin 1 →₀ ℕ)
+    (fun _ ↦ A) (fun _ ↦ ‹_›)) 0 at hW_prod
+  rw [nhds_pi] at hW_prod
+  simp only [show ∀ i : Fin 1 →₀ ℕ,
+    (0 : (Fin 1 →₀ ℕ) → A) i = (0 : A) from fun _ ↦ rfl] at hW_prod
+  obtain ⟨Idx, t_set, ht_set, hIt⟩ := Filter.mem_pi'.mp hW_prod
+  -- Step 4: For each index in Idx, find m_i with Im(I^{m_i}) ⊆ t_set(i).
+  have hm_exists : ∀ i : Fin 1 →₀ ℕ,
+      ∃ m : ℕ, Subtype.val '' ((P.I ^ m : Ideal P.A₀) : Set P.A₀) ⊆ t_set i :=
+    fun i ↦ by
+      obtain ⟨m, _, hm⟩ := P.hasBasis_nhds_zero.mem_iff.mp (ht_set i)
+      exact ⟨m, hm⟩
+  choose m_fn hm_fn using hm_exists
+  exact ⟨Idx, t_set, m_fn, hm_fn, fun g hg ↦ hW_incl (hIt fun i hi ↦ hg i hi)⟩
+
 /-- For any neighborhood W of 0 in the quotient T-topology, there exists m such that
 for all r in locSubring and b in I^m, the product phi(r) * mk(algebraMap(b)) lands in W.
 
@@ -421,76 +515,22 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
   let mk := Ideal.Quotient.mk (oneSubfXIdeal D.s)
   let P := D.P; let s := D.s; let T := D.T
   -- Step 1: Get Artin-Rees shift constant C (max over all t ∈ T).
-  have hC_exists : ∀ t : T, ∃ C : ℕ, ∀ (k : ℕ) (b : P.A₀),
-      (b : P.A₀) ∈ P.I ^ (k + C) →
-        s * t * (b : A) ∈ Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀) :=
-    fun t ↦ mul_st_ideal_shift P s t
-  choose C_fn hC_fn using hC_exists
-  let C := (T.attach.image C_fn).sup id
-  have hC_bound : ∀ (t : T), C_fn t ≤ C := fun t ↦
-    Finset.le_sup (f := id) (Finset.mem_image_of_mem _ (Finset.mem_attach _ _))
-  have hC_shift : ∀ (t : T) (k : ℕ) (b : P.A₀), (b : P.A₀) ∈ P.I ^ (k + C) →
-      s * t * (b : A) ∈ Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀) := by
-    intro t k b hb
-    have := hC_bound t
-    exact hC_fn t k b (Ideal.pow_le_pow_right (by omega) hb)
+  obtain ⟨C, hC_shift⟩ := exists_uniform_mul_st_ideal_shift P s T
   -- Step 2: Pull W back to T-topology via mk.
-  have hmk_cont : @Continuous _ _ τT τQ mk := continuous_quotient_mk'
-  have hmk_pre_W : mk ⁻¹' W ∈ @nhds _ τT 0 :=
-    hmk_cont.continuousAt.preimage_mem_nhds (by rwa [map_zero])
-  -- Step 3: Decompose the T-topology neighborhood.
-  rw [@nhds_induced _ _ (MvPowerSeries.WithPiTopology.instTopologicalSpace A)
-    (TateAlgebraWedhorn.scaleIncl s) 0, Filter.mem_comap] at hmk_pre_W
-  obtain ⟨W_prod, hW_prod, hW_incl⟩ := hmk_pre_W
-  rw [map_zero] at hW_prod
-  change W_prod ∈ @nhds _ (@Pi.topologicalSpace (Fin 1 →₀ ℕ)
-    (fun _ ↦ A) (fun _ ↦ ‹_›)) 0 at hW_prod
-  rw [nhds_pi] at hW_prod
-  simp only [show ∀ i : Fin 1 →₀ ℕ,
-    (0 : (Fin 1 →₀ ℕ) → A) i = (0 : A) from fun _ ↦ rfl] at hW_prod
-  obtain ⟨Idx, t_set, ht_set, hIt⟩ := Filter.mem_pi'.mp hW_prod
-  -- Step 4: For each index in Idx, find m_i with Im(I^{m_i}) ⊆ t_set(i).
-  have hm_exists : ∀ i : Fin 1 →₀ ℕ,
-      ∃ m : ℕ, Subtype.val '' ((P.I ^ m : Ideal P.A₀) : Set P.A₀) ⊆ t_set i :=
-    fun i ↦ by
-      obtain ⟨m, _, hm⟩ := P.hasBasis_nhds_zero.mem_iff.mp (ht_set i)
-      exact ⟨m, hm⟩
-  choose m_fn hm_fn using hm_exists
+  -- Steps 2-4: descend `W` to finitary index data.
+  obtain ⟨Idx, t_set, m_fn, hm_fn, hIdx⟩ :=
+    exists_indexData_of_mem_nhds_quotient P s W hW_top
   let N := (Idx.image (fun i : Fin 1 →₀ ℕ ↦ i 0)).sup id
   let M := (Idx.image m_fn).sup id
   -- Step 5: Construct G — the self-preserving neighborhood (see `artinReesNhd`).
   let G : Set ↥(TateAlgebra A) := artinReesNhd P s C M N
   -- Step 5a: G is contained in mk⁻¹(W).
-  have hG_sub_W : G ⊆ mk ⁻¹' W := by
-    intro g hg
-    apply hW_incl
-    apply hIt
-    intro i hi
-    have : i 0 ≤ N :=
-      Finset.le_sup (f := id) (Finset.mem_image_of_mem (fun i : Fin 1 →₀ ℕ ↦ i 0) hi)
-    have hg_i := hg (i 0) this
-    have hM_bound : m_fn i ≤ M :=
-      Finset.le_sup (f := id) (Finset.mem_image_of_mem m_fn hi)
-    have hpow_le : M + (N - i 0) * C ≥ m_fn i := by omega
-    have hsub : Subtype.val '' ((P.I ^ (M + (N - i 0) * C) : Ideal P.A₀) : Set P.A₀) ⊆
-        Subtype.val '' ((P.I ^ (m_fn i) : Ideal P.A₀) : Set P.A₀) :=
-      Set.image_mono (Ideal.pow_le_pow_right hpow_le)
-    -- scaleIncl s g i = s^(i 0) * g.val i = s^(i 0) * coeff(i 0) g
-    -- For Fin 1, i = Finsupp.single 0 (i 0), and TateAlgebra.coeff (i 0) g = g.val i.
-    have hi_eq : i = Finsupp.single 0 (i 0) := by
-      apply Finsupp.ext; intro j; fin_cases j; simp
-    change TateAlgebraWedhorn.scaleIncl s g i ∈ t_set i
-    rw [TateAlgebraWedhorn.scaleIncl_apply]
-    -- Goal: s ^ (i 0) * g.val i ∈ t_set i
-    -- hg_i : s ^ (i 0) * TateAlgebra.coeff (i 0) g ∈ val(I^{M+(N-i 0)*C})
-    -- TateAlgebra.coeff (i 0) g = MvPowerSeries.coeff A (Finsupp.single 0 (i 0)) g
-    --                            = g.val (Finsupp.single 0 (i 0)) = g.val i
-    -- So the result follows from hg_i + hsub + hm_fn.
-    have hscale : s ^ i 0 * g.val i =
-        s ^ i 0 * TateAlgebra.coeff (i 0) g := by
-      congr 1; change g.val i = g.val (Finsupp.single 0 (i 0)); rw [← hi_eq]
-    rw [hscale]
-    exact hm_fn i (hsub hg_i)
+  have hN_le : ∀ i ∈ Idx, i 0 ≤ N := fun i hi ↦
+    Finset.le_sup (f := id) (Finset.mem_image_of_mem (fun i : Fin 1 →₀ ℕ ↦ i 0) hi)
+  have hM_le : ∀ i ∈ Idx, m_fn i ≤ M := fun i hi ↦
+    Finset.le_sup (f := id) (Finset.mem_image_of_mem m_fn hi)
+  have hG_sub_W : G ⊆ mk ⁻¹' W := fun g hg ↦
+    hIdx g (artinReesNhd_scaleIncl_mem P s C Idx t_set m_fn hm_fn M N hN_le hM_le hg)
   -- Step 5b/5c: G is an additive subgroup and a T-topology neighborhood of 0.
   have hG_zero : (0 : ↥(TateAlgebra A)) ∈ G := zero_mem_artinReesNhd P s C M N
   have hG_add : ∀ {a b}, a ∈ G → b ∈ G → a + b ∈ G :=
@@ -1753,6 +1793,139 @@ private theorem exists_lift_stabilizing_coeffIdealNhd
       fun g hg ↦ by rw [mul_assoc]; exact hrx_stab _ (hry_stab g hg)⟩
 
 omit [PlusSubring A] [IsHuberRing A] in
+/-- The canonical quotient topology on `A⟨X⟩ ⧸ (1 - sX)` is nonarchimedean. `A⟨X⟩` itself is,
+from its `RingSubgroupsBasis`, and the quotient map is open — so the image of an open subgroup
+sitting inside the preimage of `U` is an open subgroup inside `U`. -/
+private theorem quotientOneSubfXIdealTopology_nonarchimedean [IsTateRing A] (s : A) :
+    @NonarchimedeanRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) _
+      (quotientOneSubfXIdealTopology s) := by
+  letI τC : TopologicalSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) :=
+    quotientOneSubfXIdealTopology s
+  letI : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) :=
+    quotientOneSubfXIdealTopology_isTopologicalRing s
+  haveI : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) :=
+    @IsTopologicalRing.to_topologicalAddGroup _ _
+      (quotientOneSubfXIdealTopology s) (quotientOneSubfXIdealTopology_isTopologicalRing s)
+  haveI hNA_tate : @NonarchimedeanRing ↥(TateAlgebra A) _ instTopologicalSpaceTateAlgebra :=
+    tateAlgBasis'.nonarchimedean
+  constructor; intro U hU
+  have hcont : @Continuous _ _ instTopologicalSpaceTateAlgebra
+      (quotientOneSubfXIdealTopology s)
+      (Ideal.Quotient.mk (oneSubfXIdeal s)) :=
+    continuous_quotient_mk'
+  have hU' : (Ideal.Quotient.mk (oneSubfXIdeal s)) ⁻¹' (U : Set _) ∈
+      @nhds _ instTopologicalSpaceTateAlgebra (0 : ↥(TateAlgebra A)) :=
+    hcont.continuousAt.preimage_mem_nhds hU
+  obtain ⟨V, hVU⟩ := @NonarchimedeanRing.is_nonarchimedean _ _ _ hNA_tate _ hU'
+  exact ⟨{
+    toAddSubgroup := V.toAddSubgroup.map
+      (Ideal.Quotient.mk (oneSubfXIdeal s)).toAddMonoidHom
+    isOpen' := @QuotientRing.isOpenMap_coe _ instTopologicalSpaceTateAlgebra _
+      (oneSubfXIdeal s) instIsTopologicalRingTateAlgebra _ V.isOpen
+  }, fun x hx ↦ by obtain ⟨y, hy, rfl⟩ := hx; exact hVU hy⟩
+
+omit [PlusSubring A] [IsHuberRing A] in
+/-- The generic closing step of `locToQuotientOneSubfX_gen_continuous_canonical`. If `G` maps
+into `W`, absorbs `algebraMap` of `P.I ^ M`, and is stabilised by an `A⟨X⟩`-lift of every element
+of `locSubring`, then all of `locNhd P T s M` lands in `W`. Proved by `Submodule.span_induction`
+over the generators of `locIdeal ^ M`; how `G`, `M` and `W` were produced is irrelevant. -/
+private theorem locNhd_subset_preimage_of_lift_stabilizing [IsTateRing A] [T2Space A]
+    (P : PairOfDefinition A) (T : Finset A) (s : A) (M : ℕ)
+    (W : AddSubgroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal s))
+    (G : Set ↥(TateAlgebra A))
+    (hG_sub_W : G ⊆ Ideal.Quotient.mk (oneSubfXIdeal s) ⁻¹' (W : Set _))
+    (halg_in_G : ∀ b : P.A₀, b ∈ P.I ^ M → algebraMap A ↥(TateAlgebra A) (b : A) ∈ G)
+    (hlift : ∀ x : Localization.Away s, x ∈ locSubring P T s →
+      ∃ r' : ↥(TateAlgebra A),
+        Ideal.Quotient.mk (oneSubfXIdeal s) r' = locToQuotientOneSubfX_gen s x ∧
+          ∀ g ∈ G, r' * g ∈ G) :
+    ∀ x ∈ locNhd P T s M, locToQuotientOneSubfX_gen s x ∈ (W : Set _) := by
+  rintro x ⟨d, hd, rfl⟩
+  rw [locIdeal, ← Ideal.map_pow] at hd
+  suffices ∀ (r : locSubring P T s),
+      locToQuotientOneSubfX_gen s
+        ((locSubring P T s).subtype (r * d)) ∈ (W : Set _) by
+    simpa using this 1
+  intro r₀
+  revert r₀
+  refine Submodule.span_induction (p := fun d _ ↦
+      ∀ (r : locSubring P T s),
+        locToQuotientOneSubfX_gen s
+          ((locSubring P T s).subtype (r * d)) ∈ (W : Set _)) ?_ ?_ ?_ ?_ hd
+  · -- Generator: d = algebraMapD(b) for b ∈ D.P.I^M.
+    rintro d ⟨b, hb, rfl⟩ r
+    -- φ(subtype(r) * algebraMap(b.val)) = mk(r') * mk(algebraMap(b.val))
+    -- = mk(r' * algebraMap(b.val)) ∈ mk(G) ⊆ W.
+    obtain ⟨r', hr'_eq, hr'_stab⟩ := hlift r.val r.property
+    have hb_in_G : algebraMap A ↥(TateAlgebra A) (b : A) ∈ G := halg_in_G b hb
+    -- subtype(r * algebraMapD(b)) = subtype(r) * subtype(algebraMapD(b))
+    --                              = r.val * algebraMap(b.val)
+    have hrw : (locSubring P T s).subtype (r * algebraMapD P T s b) =
+        r.val * algebraMap A (Localization.Away s) (b : A) := by
+      simp [map_mul, algebraMapD]
+    rw [hrw, map_mul, locToQuotientOneSubfX_gen_algebraMap, ← hr'_eq, ← map_mul]
+    exact hG_sub_W (hr'_stab _ hb_in_G)
+  · -- Zero
+    intro r; simp [mul_zero, map_zero]
+  · -- Addition: d₁ + d₂
+    intro d₁ d₂ _ _ h₁ h₂ r
+    have : (locSubring P T s).subtype (r * (d₁ + d₂)) =
+        (locSubring P T s).subtype (r * d₁) +
+        (locSubring P T s).subtype (r * d₂) := by
+      simp [mul_add]
+    rw [this, map_add]
+    exact W.add_mem (h₁ r) (h₂ r)
+  · -- Scalar: s • d for s ∈ locSubring.
+    intro s' d _ hd r
+    have : (locSubring P T s).subtype (r * (s' • d)) =
+        (locSubring P T s).subtype ((r * s') * d) := by
+      simp [mul_assoc]
+    rw [this]
+    exact hd (r * s')
+
+omit [PlusSubring A] [IsHuberRing A] in
+/-- Steps 3–5a of `locToQuotientOneSubfX_gen_continuous_canonical`: a fixed-ideal coefficient
+neighbourhood of `A⟨X⟩` that the quotient map carries into `W`. Pull `W` back along the
+continuous `mk` to get a basic `tateAlgNhd` index `k₀`, then use cofinality of the two
+pair-of-definition bases to find an `M` with `image (P_common.I ^ M) ⊆ image (P'.I ^ k₀)`. -/
+private theorem exists_coeffIdealNhd_subset_preimage [IsTateRing A] [T2Space A]
+    (P_common : PairOfDefinition A) (s : A)
+    (W : Set (↥(TateAlgebra A) ⧸ oneSubfXIdeal s))
+    (hW : W ∈ @nhds _ (quotientOneSubfXIdealTopology s) 0) :
+    ∃ M : ℕ, coeffIdealNhd P_common M ⊆
+      Ideal.Quotient.mk (oneSubfXIdeal s) ⁻¹' W := by
+  letI τC : TopologicalSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) :=
+    quotientOneSubfXIdealTopology s
+  let mk := Ideal.Quotient.mk (oneSubfXIdeal s)
+  let P' := (IsTateRing.principalPair A).toPairOfDefinition
+  have hW_nhds : W ∈ @nhds _ τC 0 := hW
+  have hmk_cont : @Continuous _ _ instTopologicalSpaceTateAlgebra τC
+      (Ideal.Quotient.mk (oneSubfXIdeal s)) := continuous_quotient_mk'
+  have hmk_pre_W : mk ⁻¹' (W : Set _) ∈
+      @nhds _ instTopologicalSpaceTateAlgebra (0 : ↥(TateAlgebra A)) :=
+    hmk_cont.continuousAt.preimage_mem_nhds (by rwa [map_zero])
+  obtain ⟨k₀, -, hk₀⟩ := tateAlgBasis'.hasBasis_nhds_zero.mem_iff.mp hmk_pre_W
+  -- Step 4: Get M such that image(P_common.I^M) ⊆ image(P'.I^k₀) (cofinality).
+  -- Since P'.hasBasis_nhds_zero gives image(P'.I^k₀) as a nhd of 0,
+  -- and P_common.hasBasis_nhds_zero gives a basis of nhds, there exists M with
+  -- image(P_common.I^M) ⊆ image(P'.I^k₀).
+  have hPcI_nhds : Subtype.val '' ((P'.I ^ k₀ : Ideal P'.A₀) : Set P'.A₀) ∈ nhds (0 : A) :=
+    (P'.pow_image_isOpen k₀).mem_nhds ⟨0, (P'.I ^ k₀).zero_mem, rfl⟩
+  obtain ⟨M, -, hM⟩ := P_common.hasBasis_nhds_zero.mem_iff.mp hPcI_nhds
+  refine ⟨M, ?_⟩
+  intro g hg
+  apply hk₀
+  have hg_pair : g ∈ pairSubring P' := by
+    intro l; obtain ⟨c, _, hc_eq⟩ := hM (hg l); rw [← hc_eq]; exact c.property
+  have hg_coeff : ∀ l, ∃ b : P'.A₀, b ∈ P'.I ^ k₀ ∧
+      (b : A) = MvPowerSeries.coeff l g.val := fun l ↦ hM (hg l)
+  exact tateAlgNhd_of_coeff_mem_principal P' k₀
+    (IsTateRing.principalPair A).π
+    (IsTateRing.principalPair A).I_eq_span
+    (IsTateRing.principalPair A).π_isUnit
+    hg_pair hg_coeff
+
+omit [PlusSubring A] [IsHuberRing A] in
 /-- The map `locToQuotientOneSubfX_gen D.s` is continuous from the localization
 topology on `Localization.Away D.s` to the canonical quotient topology on
 `A⟨X⟩/(1-sX)`.
@@ -1788,27 +1961,9 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
   intro S hS
   have hbasis := locBasis D.P D.T D.s D.hopen
   let hb := hbasis.toRingFilterBasis.toAddGroupFilterBasis
-  -- TateAlgebra A is nonarchimedean with canonical topology (from RingSubgroupsBasis).
-  haveI hNA_tate : @NonarchimedeanRing ↥(TateAlgebra A) _ instTopologicalSpaceTateAlgebra :=
-    tateAlgBasis'.nonarchimedean
-  -- The canonical quotient topology is nonarchimedean.
   haveI : @NonarchimedeanRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s)
-      _ (quotientOneSubfXIdealTopology D.s) := by
-    constructor; intro U hU
-    have hcont : @Continuous _ _ instTopologicalSpaceTateAlgebra
-        (quotientOneSubfXIdealTopology D.s)
-        (Ideal.Quotient.mk (oneSubfXIdeal D.s)) :=
-      continuous_quotient_mk'
-    have hU' : (Ideal.Quotient.mk (oneSubfXIdeal D.s)) ⁻¹' (U : Set _) ∈
-        @nhds _ instTopologicalSpaceTateAlgebra (0 : ↥(TateAlgebra A)) :=
-      hcont.continuousAt.preimage_mem_nhds hU
-    obtain ⟨V, hVU⟩ := @NonarchimedeanRing.is_nonarchimedean _ _ _ hNA_tate _ hU'
-    exact ⟨{
-      toAddSubgroup := V.toAddSubgroup.map
-        (Ideal.Quotient.mk (oneSubfXIdeal D.s)).toAddMonoidHom
-      isOpen' := @QuotientRing.isOpenMap_coe _ instTopologicalSpaceTateAlgebra _
-        (oneSubfXIdeal D.s) instIsTopologicalRingTateAlgebra _ V.isOpen
-    }, fun x hx ↦ by obtain ⟨y, hy, rfl⟩ := hx; exact hVU hy⟩
+      _ (quotientOneSubfXIdealTopology D.s) :=
+    quotientOneSubfXIdealTopology_nonarchimedean D.s
   obtain ⟨W, hWS⟩ := NonarchimedeanRing.is_nonarchimedean S hS
   suffices ∃ n, ∀ x ∈ locNhd D.P D.T D.s n,
       locToQuotientOneSubfX_gen D.s x ∈ (W : Set _) by
@@ -1832,66 +1987,17 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
   -- (4) φ(locSubring) is bounded in canonical quotient.
   -- (5) Bounded · (small nhd) ⊆ W.
   -- ====================================================================
-  -- Step 1: mk(algebraMap(π^n)) → 0 in canonical quotient.
-  -- mk ∘ algebraMap : A → quotient is continuous for canonical topology.
   let mk := Ideal.Quotient.mk (oneSubfXIdeal D.s)
-  have hmk_alg_cont : @Continuous _ _
-      (inferInstance : TopologicalSpace A) τC
-      (mk.comp (algebraMap A ↥(TateAlgebra A))) := by
-    exact continuous_quotient_mk'.comp tateAlgebra_algebraMap_continuous
-  -- π is topologically nilpotent in A.
-  let P' := (IsTateRing.principalPair A).toPairOfDefinition
-  have hπ := P'.isTopologicallyNilpotent_of_mem
-    (show (IsTateRing.principalPair A).π ∈ P'.I by
-      rw [(IsTateRing.principalPair A).I_eq_span]; exact Ideal.mem_span_singleton_self _)
-  -- mk(algebraMap(π^n)) → 0 in canonical quotient.
-  have hmk_pi_tendsto : Filter.Tendsto
-      (fun n ↦ mk (algebraMap A ↥(TateAlgebra A) ((IsTateRing.principalPair A).π ^ n : A)))
-      Filter.atTop (@nhds _ τC 0) := by
-    have h0 : mk (algebraMap A ↥(TateAlgebra A) 0) = 0 := by simp
-    rw [← h0]
-    exact (hmk_alg_cont.tendsto 0).comp (by
-      change Filter.Tendsto (fun n ↦ ((IsTateRing.principalPair A).π : A) ^ n) _ _
-      exact hπ)
   -- Step 2: Construct P_common = D.P.adjoin D.T (Wedhorn 6.3).
   -- P_common.A₀ = Subring.closure(D.P.A₀ ∪ D.T), which contains both D.P.A₀ and D.T.
   -- P_common.I = Ideal.map incl D.P.I. Both generators of locSubring lie in P_common.A₀,
   -- so multiplication by their lifts preserves image(P_common.I^M) — self-preserving!
   let P_common := D.P.adjoin D.T hT_pb
   let P := D.P; let s := D.s; let T := D.T
-  -- Step 3: Pull back W through mk to the canonical Tate topology.
-  have hW_nhds : (W : Set _) ∈ @nhds _ τC 0 := W.isOpen.mem_nhds W.zero_mem
-  have hmk_cont : @Continuous _ _ instTopologicalSpaceTateAlgebra τC
-      (Ideal.Quotient.mk (oneSubfXIdeal s)) := continuous_quotient_mk'
-  have hmk_pre_W : mk ⁻¹' (W : Set _) ∈
-      @nhds _ instTopologicalSpaceTateAlgebra (0 : ↥(TateAlgebra A)) :=
-    hmk_cont.continuousAt.preimage_mem_nhds (by rwa [map_zero])
-  obtain ⟨k₀, -, hk₀⟩ := tateAlgBasis'.hasBasis_nhds_zero.mem_iff.mp hmk_pre_W
-  -- Step 4: Get M such that image(P_common.I^M) ⊆ image(P'.I^k₀) (cofinality).
-  -- Since P'.hasBasis_nhds_zero gives image(P'.I^k₀) as a nhd of 0,
-  -- and P_common.hasBasis_nhds_zero gives a basis of nhds, there exists M with
-  -- image(P_common.I^M) ⊆ image(P'.I^k₀).
-  have hPcI_nhds : Subtype.val '' ((P'.I ^ k₀ : Ideal P'.A₀) : Set P'.A₀) ∈ nhds (0 : A) :=
-    (P'.pow_image_isOpen k₀).mem_nhds ⟨0, (P'.I ^ k₀).zero_mem, rfl⟩
-  obtain ⟨M, -, hM⟩ := P_common.hasBasis_nhds_zero.mem_iff.mp hPcI_nhds
-  -- hM : image(P_common.I^M) ⊆ image(P'.I^k₀)
-  -- Step 5: G = fixed-ideal coefficient neighborhood for the enlarged pair
-  -- (all coefficients in image(P_common.I^M)); see `coeffIdealNhd`.
+  -- Steps 3-5a: a coefficient neighbourhood of `A⟨X⟩` carried into `W` by `mk`.
+  obtain ⟨M, hG_sub_W⟩ := exists_coeffIdealNhd_subset_preimage P_common s
+    (W : Set _) (W.isOpen.mem_nhds W.zero_mem)
   let G : Set ↥(TateAlgebra A) := coeffIdealNhd P_common M
-  -- Step 5a: G ⊆ mk⁻¹(W) via cofinality image(P_common.I^M) ⊆ image(P'.I^k₀)
-  -- (`hM`) and `tateAlgNhd_of_coeff_mem_principal`.
-  have hG_sub_W : G ⊆ mk ⁻¹' (W : Set _) := by
-    intro g hg
-    apply hk₀
-    have hg_pair : g ∈ pairSubring P' := by
-      intro l; obtain ⟨c, _, hc_eq⟩ := hM (hg l); rw [← hc_eq]; exact c.property
-    have hg_coeff : ∀ l, ∃ b : P'.A₀, b ∈ P'.I ^ k₀ ∧
-        (b : A) = MvPowerSeries.coeff l g.val := fun l ↦ hM (hg l)
-    exact tateAlgNhd_of_coeff_mem_principal P' k₀
-      (IsTateRing.principalPair A).π
-      (IsTateRing.principalPair A).I_eq_span
-      (IsTateRing.principalPair A).π_isUnit
-      hg_pair hg_coeff
   -- Step 6: algebraMap(b) ∈ G for b ∈ D.P.I^M (D.P.I ↪ P_common.I via inclusion).
   have halg_in_G : ∀ (b : P.A₀), b ∈ P.I ^ M →
       algebraMap A ↥(TateAlgebra A) (b : A) ∈ G := fun b hb ↦
@@ -1908,49 +2014,8 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
     exists_lift_stabilizing_coeffIdealNhd P T s P_common M
       (P.adjoin_A₀_le D.T hT_pb) (fun t ht ↦ P.mem_adjoin_of_mem_T D.T hT_pb ht) hx
   -- Step 9: Assemble via Submodule.span_induction (same as T-topology proof).
-  refine ⟨M, ?_⟩
-  rintro x ⟨d, hd, rfl⟩
-  rw [locIdeal, ← Ideal.map_pow] at hd
-  suffices ∀ (r : locSubring P T s),
-      locToQuotientOneSubfX_gen s
-        ((locSubring P T s).subtype (r * d)) ∈ (W : Set _) by
-    simpa using this 1
-  intro r₀
-  revert r₀
-  refine Submodule.span_induction (p := fun d _ ↦
-      ∀ (r : locSubring P T s),
-        locToQuotientOneSubfX_gen s
-          ((locSubring P T s).subtype (r * d)) ∈ (W : Set _)) ?_ ?_ ?_ ?_ hd
-  · -- Generator: d = algebraMapD(b) for b ∈ D.P.I^M.
-    rintro d ⟨b, hb, rfl⟩ r
-    -- φ(subtype(r) * algebraMap(b.val)) = mk(r') * mk(algebraMap(b.val))
-    -- = mk(r' * algebraMap(b.val)) ∈ mk(G) ⊆ W.
-    obtain ⟨r', hr'_eq, hr'_stab⟩ := hlift r.val r.property
-    have hb_in_G : algebraMap A ↥(TateAlgebra A) (b : A) ∈ G := halg_in_G b hb
-    -- subtype(r * algebraMapD(b)) = subtype(r) * subtype(algebraMapD(b))
-    --                              = r.val * algebraMap(b.val)
-    have hrw : (locSubring P T s).subtype (r * algebraMapD P T s b) =
-        r.val * algebraMap A (Localization.Away s) (b : A) := by
-      simp [map_mul, algebraMapD]
-    rw [hrw, map_mul, locToQuotientOneSubfX_gen_algebraMap, ← hr'_eq, ← map_mul]
-    exact hG_sub_W (hr'_stab _ hb_in_G)
-  · -- Zero
-    intro r; simp [mul_zero, map_zero]
-  · -- Addition: d₁ + d₂
-    intro d₁ d₂ _ _ h₁ h₂ r
-    have : (locSubring P T s).subtype (r * (d₁ + d₂)) =
-        (locSubring P T s).subtype (r * d₁) +
-        (locSubring P T s).subtype (r * d₂) := by
-      simp [mul_add]
-    rw [this, map_add]
-    exact W.toAddSubgroup.add_mem (h₁ r) (h₂ r)
-  · -- Scalar: s • d for s ∈ locSubring.
-    intro s' d _ hd r
-    have : (locSubring P T s).subtype (r * (s' • d)) =
-        (locSubring P T s).subtype ((r * s') * d) := by
-      simp [mul_assoc]
-    rw [this]
-    exact hd (r * s')
+  exact ⟨M, locNhd_subset_preimage_of_lift_stabilizing P T s M W.toAddSubgroup G hG_sub_W
+    halg_in_G hlift⟩
 
 /-! ### Step 5: Extension to completion via extensionHom (Canonical Topology)
 
