@@ -254,6 +254,7 @@ noncomputable def LaurentTree.leaves :
   | .node f L R, D₀ =>
       L.leaves (laurentPlusDatum D₀ f) ++ R.leaves (laurentMinusDatum D₀ f)
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The leaves of `t.graftUniform t_inner` at root D₀ are the leaves of
 `t_inner` walked from each leaf of `t` at D₀. -/
 theorem LaurentTree.leaves_graftUniform (t t_inner : LaurentTree A)
@@ -286,6 +287,7 @@ noncomputable def LaurentTree.graftAt :
       .node f (L.graftAt (laurentPlusDatum D₀ f) h)
              (R.graftAt (laurentMinusDatum D₀ f) h) := rfl
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The leaves of `t.graftAt D₀ h` are the leaves of `h L` walked from
 each leaf base L of `t` at D₀. -/
 theorem LaurentTree.leaves_graftAt (t : LaurentTree A)
@@ -465,6 +467,7 @@ open Classical in
       L.toCoveringCovers (laurentPlusDatum D₀ f) ∪
       R.toCoveringCovers (laurentMinusDatum D₀ f) := rfl
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 open Classical in
 /-- The recursive `toCoveringCovers` equals the `toFinset` of the leaves
 list (the two ways to compute the leaf Finset agree, by
@@ -501,6 +504,7 @@ theorem LaurentTree.toCoveringCovers_cover_base (t : LaurentTree A)
   obtain ⟨D, hD, hvD⟩ := t.cover_base D₀ hv
   exact ⟨D, (t.mem_toCoveringCovers_iff_mem_leaves D₀ D).mpr hD, hvD⟩
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The rational covering of `D₀` induced by the leaves of a Laurent tree.
 Uses `toCoveringCovers` (the recursive Finset form) for the covers field. -/
 noncomputable def LaurentTree.toCovering (t : LaurentTree A)
@@ -611,6 +615,7 @@ noncomputable def LaurentTree.balancedLeafBase :
     (D₀ : RationalLocData A) (σ : Fin 0 → Bool) :
     LaurentTree.balancedLeafBase D₀ [] σ = D₀ := rfl
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 theorem LaurentTree.balancedLeafBase_cons (D₀ : RationalLocData A)
     (f : A) (rest : List A) (σ : Fin (rest.length + 1) → Bool) :
     LaurentTree.balancedLeafBase D₀ (f :: rest) σ =
@@ -827,6 +832,7 @@ For specific structured covers we can exhibit explicit refining trees.
 These are the building blocks; the general Wedhorn 8.34 construction
 combines them via iterated splitting. -/
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The trivial Laurent tree `leaf` refines any covering containing the
 base datum `D₀` in its `covers`. -/
 theorem LaurentTree.leaf_refines_singleton (D₀ : RationalLocData A)
@@ -835,6 +841,7 @@ theorem LaurentTree.leaf_refines_singleton (D₀ : RationalLocData A)
   refine ⟨D₀, hcovers, ?_⟩
   exact subset_refl _
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The depth-1 Laurent tree `node f leaf leaf` at root `D₀` refines the
 Laurent cover `laurentCovering D₀ f`: the plus-leaf datum is
 `laurentPlusDatum D₀ f` (a piece of `laurentCovering`'s covers), and
@@ -866,6 +873,7 @@ theorem LaurentTree.Refines.mono (t : LaurentTree A) (D₀ : RationalLocData A)
   obtain ⟨E', hE', hEE'⟩ := hCC' E hE
   exact ⟨E', hE', hDE.trans hEE'⟩
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- **Node combinator**: if `L` refines `C` from `laurentPlusDatum D₀ f`
 and `R` refines `C` from `laurentMinusDatum D₀ f`, then `node f L R`
 refines `C` from `D₀`. (Definitional from `LaurentTree.refines_node`.) -/
@@ -896,6 +904,7 @@ theorem LaurentTree.ofRightBranchList_refines (D₀ : RationalLocData A)
   · rcases List.mem_singleton.mp hTerm with rfl
     exact h_terminal
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- **Singleton-cover refinement**: a rational covering whose `covers`
 is a singleton `{E}` has `leaf` as a refining tree. The leaf datum is
 `C.base`, and the refinement witness uses `C.hcover` (which guarantees

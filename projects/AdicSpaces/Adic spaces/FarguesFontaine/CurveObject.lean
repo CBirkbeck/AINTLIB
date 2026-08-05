@@ -31,6 +31,7 @@ variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A]
   [NonarchimedeanRing A]
 
+omit [HasLocLiftPowerBounded A] in
 /-- **The value over an empty rational is trivial — general Huber form**
 (Wedhorn: `𝒪(∅) = 0`): a nonzero value would carry a `Spa`-point whose
 `comap` lies in the empty rational open. -/
@@ -274,6 +275,7 @@ noncomputable def piYHom : yPresheafedSpace p F ϖ ⟶ curveSpace p F ϖ where
         (funext fun j => ?_))
       rfl }
 
+omit [CharP F p] in
 /-- `yTopToY` is a bijection. -/
 theorem yTopToY_bijective : Function.Bijective (yTopToY p F ϖ) := by
   constructor

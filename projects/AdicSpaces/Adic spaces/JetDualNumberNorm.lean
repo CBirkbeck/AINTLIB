@@ -145,6 +145,7 @@ instance [CompleteSpace R] : CompleteSpace (DualNumber R) := by
   · have := hN₂ n (le_of_max_le_right hn)
     rwa [dist_eq_norm] at this
 
+omit [IsUltrametricDist R] in
 /-- The jet-power formula `(f + εg)ⁿ = fⁿ + n f^(n-1) ε g` ([FJP] (5.2), verbatim:
 "`(f + Qg)ⁿ = fⁿ + n f^(n-1) Q g` is bounded independently of `n`"). -/
 theorem pow_eq (a b : R) (n : ℕ) :

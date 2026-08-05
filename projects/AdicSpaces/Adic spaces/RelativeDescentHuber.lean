@@ -49,6 +49,7 @@ def imgDatumO (D₀ : RationalLocData A) (E : RationalLocData A)
       : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤) :
     (imgDatumO D₀ E hspanE).s = D₀.canonicalMap E.s := rfl
 
+omit [PlusSubring A] in
 theorem imgDatumO_isRational (D₀ E : RationalLocData A)
     [DecidableEq (presheafValue D₀)]
     (hspanE : Ideal.span ((E.T.image D₀.canonicalMap
@@ -58,6 +59,7 @@ theorem imgDatumO_isRational (D₀ E : RationalLocData A)
 
 variable [HasLocLiftPowerBounded A]
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Containment transfer** (through `Spa`-restriction): an `A⁺`-level containment
 of rational opens transfers to the `B⁺`-level containment of the image opens.
 This is what makes the `B`-side restriction maps between image data available. -/
@@ -1135,6 +1137,7 @@ variable [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺ : Subring A)
   [DecidableEq A]
 variable (D₀ : RationalLocData A) [DecidableEq (presheafValue D₀)]
 
+omit [HasLocLiftPowerBounded A] in
 /-- Casting along a datum equality is continuous (subst-form). -/
 theorem continuous_cast_presheafValue {E₁ E₂ : RationalLocData (presheafValue D₀)}
     (heq : E₁ = E₂) :

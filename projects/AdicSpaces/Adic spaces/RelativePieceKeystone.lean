@@ -51,6 +51,7 @@ attribute [local instance] presheafValue_isTateRing_faithful
   presheafValue_isStronglyNoetherian_faithful
   hasLocLiftPowerBounded_faithful
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- `s · (t/s) = t` in the localization. (Relocated with the G1 stack from
 `WedhornCechAcyclicity.lean`, 2026-06-11.) -/
 theorem algebraMap_s_mul_divByS (D : RationalLocData A) (t : A) :
@@ -1389,6 +1390,7 @@ theorem prop_8_30_basic_laurent_step_flat
       left_inv := e.symm_apply_apply
       right_inv := e.apply_symm_apply }
 
+omit [IsRingOfIntegralElements A⁺] in
 omit [CompatiblePlusSubring A] in
 /-- **A1a engine — `presheafValue(R(f/1))` is flat over `A`, ARBITRARY `f`** (Wedhorn Lemma 8.31(2),
 fSubX shape). Transports the proven faithful `lemma_8_31_fSubX_flat` (`A⟨X⟩/(f − X)` flat over `A`,
@@ -1423,6 +1425,7 @@ theorem presheafValue_flat_of_unitDatum_faithful (P : PairOfDefinition A) (f : A
       left_inv := e.symm_apply_apply
       right_inv := e.apply_symm_apply }
 
+omit [IsRingOfIntegralElements A⁺] in
 omit [CompatiblePlusSubring A] in
 /-- **coUnit engine — `presheafValue(R(1/f))` is flat over `A`, ARBITRARY `f`** (Wedhorn Lemma 8.31(2),
 oneSubfX shape; the dual of `presheafValue_flat_of_unitDatum_faithful`). Transports the proven
@@ -1481,6 +1484,7 @@ theorem remark755_dominating_unit_over_presheafValue
     (fun y hy => (Set.mem_preimage.mp hy).2.2)
   exact ⟨u, fun y hy => hu y (Set.mem_preimage.mpr hy)⟩
 
+omit [IsRingOfIntegralElements A⁺] in
 omit [CompatiblePlusSubring A] in
 /-- **`s`-absorption `rationalOpen` equality** (Remark 7.55 single-step over `B = 𝒪_X(D₀)`).
 The image piece `imagePieceDatum D₀ {f, s} s` (the `genPiece` with the denominator `s` included
@@ -1528,6 +1532,7 @@ theorem imagePieceDatum_denomGen_rationalOpen_eq [DecidableEq A] (D₀ : Rationa
       exact h2
     · exact w.vle_refl cs
 
+omit [IsRingOfIntegralElements A⁺] in
 omit [CompatiblePlusSubring A] in
 /-- **domUnit `rationalOpen`-eq (Remark 7.55 chain step over `B`, two-level)** — the image piece
 `imagePieceDatum D₀ {g, ↑u, s} s` (denominator `s`, generators `g`, the *unit* `↑u`, and `s`; so

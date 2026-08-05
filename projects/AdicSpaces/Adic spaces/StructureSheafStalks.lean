@@ -394,6 +394,7 @@ variable [IsRingOfIntegralElements (A⁺ : Subring A)]
 
 noncomputable local instance : DecidableEq A := Classical.decEq _
 
+omit [IsRingOfIntegralElements A⁺] [HasLocLiftPowerBounded A] in
 /-- Every open neighbourhood admits a valid rational index containing the
 point (the rational basis, in `RationalIndex` form). -/
 theorem exists_rationalIndex_mem {V : Opens ↥(Spa A A⁺)} {v : ↥(Spa A A⁺)}
@@ -410,6 +411,7 @@ noncomputable def openValue (V : Opens ↥(Spa A A⁺)) {v : ↥(Spa A A⁺)}
   comap (limitEvalHom (exists_rationalIndex_mem hv).choose)
     (pointValue _ (exists_rationalIndex_mem hv).choose_spec)
 
+omit [IsTopologicalRing A] [IsRingOfIntegralElements A⁺] in
 /-- Evaluation-restriction compatibility: restricting a compatible family and
 evaluating is evaluating (the defining property of the limit). -/
 theorem restrictionMapHom_comp_limitEvalHom {V : Opens ↥(Spa A A⁺)}
@@ -519,6 +521,7 @@ variable (A) in
 abbrev spaRingPresheaf : TopCat.Presheaf CommRingCat.{u} (SpaTop A) :=
   structurePresheaf A ⋙ CompleteTopCommRingCat.forgetToCommRingCat
 
+omit [IsTopologicalRing A] [IsRingOfIntegralElements A⁺] in
 /-- Germs commute with restriction (the `limitRestrict` form). -/
 theorem germ_limitRestrict {V W : Opens ↥(Spa A A⁺)} (h : W ≤ V)
     {v : ↥(Spa A A⁺)} (hvW : v ∈ W) (f : ↥(limitSections V)) :
@@ -588,6 +591,7 @@ theorem stalkVle_intro {v : ↥(Spa A A⁺)} {U : Opens ↥(Spa A A⁺)}
       ((spaRingPresheaf A).germ U v hvU g) :=
   ⟨U, hvU, f, g, rfl, rfl, h⟩
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem germ_add {v : ↥(Spa A A⁺)} (U : Opens ↥(Spa A A⁺)) (hvU : v ∈ U)
     (f g : ↥(limitSections U)) :
     (spaRingPresheaf A).germ U v hvU (f + g)
@@ -595,6 +599,7 @@ theorem germ_add {v : ↥(Spa A A⁺)} (U : Opens ↥(Spa A A⁺)) (hvU : v ∈ 
         + (spaRingPresheaf A).germ U v hvU g :=
   map_add ((spaRingPresheaf A).germ U v hvU).hom f g
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem germ_mul {v : ↥(Spa A A⁺)} (U : Opens ↥(Spa A A⁺)) (hvU : v ∈ U)
     (f g : ↥(limitSections U)) :
     (spaRingPresheaf A).germ U v hvU (f * g)
@@ -602,10 +607,12 @@ theorem germ_mul {v : ↥(Spa A A⁺)} (U : Opens ↥(Spa A A⁺)) (hvU : v ∈ 
         * (spaRingPresheaf A).germ U v hvU g :=
   map_mul ((spaRingPresheaf A).germ U v hvU).hom f g
 
+omit [IsTopologicalRing A] [IsRingOfIntegralElements A⁺] in
 theorem germ_one {v : ↥(Spa A A⁺)} (U : Opens ↥(Spa A A⁺)) (hvU : v ∈ U) :
     (spaRingPresheaf A).germ U v hvU 1 = 1 :=
   map_one ((spaRingPresheaf A).germ U v hvU).hom
 
+omit [IsTopologicalRing A] [IsRingOfIntegralElements A⁺] in
 theorem germ_zero {v : ↥(Spa A A⁺)} (U : Opens ↥(Spa A A⁺)) (hvU : v ∈ U) :
     (spaRingPresheaf A).germ U v hvU 0 = 0 :=
   map_zero ((spaRingPresheaf A).germ U v hvU).hom
@@ -873,6 +880,7 @@ theorem not_stalkValue_vle_zero_of_isUnit {v : ↥(Spa A A⁺)}
   rw [Units.mul_inv, zero_mul] at h1
   exact (stalkValue v).not_vle_one_zero h1
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The germ of a section that is a unit is a stalk unit. -/
 theorem isUnit_germ_of_isUnit {v : ↥(Spa A A⁺)} {U : Opens ↥(Spa A A⁺)}
     (hvU : v ∈ U) {f : ↥(limitSections U)} (hf : IsUnit f) :

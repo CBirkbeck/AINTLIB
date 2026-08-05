@@ -60,9 +60,11 @@ def Y : Set (Spv (Ainf p F)) :=
   {v ∈ Spa (Ainf p F) (ringPlus (Ainf p F)) |
     ¬ v.vle ((p : Ainf p F) * teichPi p F ϖ) 0}
 
+omit [CharP F p] in
 theorem Y_subset_spa : Y p F ϖ ⊆ Spa (Ainf p F) (ringPlus (Ainf p F)) :=
   fun _ hv => hv.1
 
+omit [CharP F p] in
 /-- `𝒴` is the trace on `Spa` of the basic open subset attached to `p·[ϖ]`. -/
 theorem Y_eq_spa_inter_basicOpen :
     Y p F ϖ =
@@ -71,6 +73,7 @@ theorem Y_eq_spa_inter_basicOpen :
   rw [basicOpen_self]
   rfl
 
+omit [CharP F p] in
 /-- `𝒴` is open in `Spa(A_inf, A_inf)` (subspace topology). -/
 theorem isOpen_Y :
     IsOpen (Subtype.val ⁻¹' Y p F ϖ :
@@ -81,10 +84,12 @@ theorem isOpen_Y :
   ext v
   simp only [Set.mem_preimage, Y, basicOpen_self, Set.mem_setOf_eq, v.2, true_and]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 private theorem p_mem_Iinf : (p : Ainf p F) ∈ Iinf p F ϖ := by
   rw [Iinf]
   exact Ideal.subset_span (Set.mem_insert _ _)
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 private theorem teichPi_mem_Iinf : teichPi p F ϖ ∈ Iinf p F ϖ := by
   rw [Iinf]
   exact Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
@@ -114,6 +119,7 @@ private theorem exists_pow_succ_vlt {v : Spv (Ainf p F)}
   exact SetLike.mem_coe.mpr
     (Ideal.pow_le_pow_right (Nat.le_succ N) (Ideal.pow_mem_pow ha (N + 1)))
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 private theorem vlt_one_of_not_vle_pow {v : Spv (Ainf p F)} {a : Ainf p F} {n : ℕ}
     (h2 : ¬ v.vle a (a ^ (n + 1))) : vlt p F v a 1 := by
   have hnot : ¬ v.vle 1 a := fun h1a => h2 (by
@@ -133,10 +139,12 @@ section ElementFacts
 variable {p F ϖ}
 variable {v : Spv (Ainf p F)}
 
+omit [CharP F p] in
 /-- On `𝒴`, `v(p) ≠ 0`. -/
 theorem v_p_ne_zero (hv : v ∈ Y p F ϖ) : ¬ v.vle (p : Ainf p F) 0 := fun h =>
   hv.2 (by have := v.mul_vle_mul_left h (teichPi p F ϖ); rwa [zero_mul] at this)
 
+omit [CharP F p] in
 /-- On `𝒴`, `v([ϖ]) ≠ 0`. -/
 theorem v_teichPi_ne_zero (hv : v ∈ Y p F ϖ) : ¬ v.vle (teichPi p F ϖ) 0 := fun h =>
   hv.2 (by
@@ -312,6 +320,7 @@ private theorem cross_eq {q : ℚ} (hq : 0 < q) {a b : ℕ} (hb : 0 < b)
     rw [Int.toNat_of_nonneg (Rat.num_pos.mpr hq).le]
   exact_mod_cast h2 ▸ h1
 
+omit [CharP F p] in
 /-- Representation-independence of `KGE`: for any fraction `a/b = q` with `b > 0`,
 `KGE q v ↔ v([ϖ]^b) ≤ v(p^a)`. This is the denominator-clearing workhorse
 (cross-multiplication inside the value monoid). -/
@@ -325,6 +334,7 @@ theorem KGE_iff {v : Spv (Ainf p F)} (_hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < 
   rw [KGE, hbridge, hbridge, map_pow, map_pow, map_pow, map_pow]
   exact pow_le_pow_iff_cross (cross_eq hq hb hab) hb.ne' q.den_nz
 
+omit [CharP F p] in
 /-- Representation-independence of `KLE`, as for `KGE_iff`. -/
 theorem KLE_iff {v : Spv (Ainf p F)} (_hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < q)
     {a b : ℕ} (hb : 0 < b) (hab : q = (a : ℚ) / b) :
@@ -346,6 +356,7 @@ theorem KLE_iff {v : Spv (Ainf p F)} (_hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < 
     (show b * q.num.toNat = q.den * a by rw [mul_comm b, mul_comm q.den]; exact hcross.symm)
     ha hnum
 
+omit [CharP F p] in
 /-- Totality: at every positive rational `q`, either `κ(v) ≥ q` or `κ(v) ≤ q`
 (linearity of the valuative order). -/
 theorem KGE_or_KLE {v : Spv (Ainf p F)} (_hv : v ∈ Y p F ϖ) {q : ℚ} (_hq : 0 < q) :
@@ -611,6 +622,7 @@ theorem Y_eq_iUnion_windows :
     · obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hv
       exact hn.1
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- **Translation**: the action shifts windows, `φ^k(U_n) = U_{n-k}` in the convention
 `g • v = v ∘ φ^{-g}` (so κ(g • v) = κ(v)/p^g).
 
@@ -656,6 +668,7 @@ private theorem smul_natCast_p (g : Multiplicative ℤ) :
   rw [← ofAdd_toAdd g, ofAdd_zsmul_def]
   exact map_natCast _ p
 
+omit [Fact (Nat.Prime p)] in
 private theorem zpow_eq_natCast_div (n : ℤ) :
     ((p : ℚ)) ^ n = ((p ^ n.toNat : ℕ) : ℚ) / ((p ^ (-n).toNat : ℕ) : ℚ) := by
   obtain ⟨m, rfl | rfl⟩ := Int.eq_nat_or_neg n

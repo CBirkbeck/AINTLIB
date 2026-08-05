@@ -80,6 +80,7 @@ theorem finiteJet_witnessRing_quality [IsFJPNoetherianBase F] :
 `𝓒`-component, hence is a nonzero element of `𝓐`. -/
 def scottishWitness : JetA F := Qa F ^ 2
 
+omit [IsFJPBase F] in
 /-- `‖Q‖ = 1`: the jet of `Q` is the square-zero generator, of dual-number norm one. -/
 theorem norm_Qa : ‖Qa F‖ = 1 := by
   show ‖sectionD F (TrivSqZeroExt.inr (1 : L F))‖ = 1
@@ -154,6 +155,7 @@ theorem canonicalMap_scottishWitness :
   rw [scottishWitness, sq, map_mul]
   exact canonicalMap_Qa_sq F
 
+omit [IsFJPBase F] in
 /-- The square-zero disc algebra `𝓑 = K⟨X⟩[Q]/(Q²)` is a nonzero ring (`‖1‖ = 1 ≠ 0`). -/
 theorem nontrivial_JetB : Nontrivial (JetB F) := by
   refine ⟨⟨0, 1, fun h => ?_⟩⟩
@@ -197,6 +199,7 @@ terms of `Q`-degree `≥ 1` (the map to `𝓑`), then evaluate the disc componen
 def ev00 : JetA F →+* K :=
   (constCoeffKW F).comp ((jetBFst F).comp (jB F))
 
+omit [IsFJPBase F] in
 /-- `ev₀₀` is norm-nonincreasing (each of the three factors is). -/
 theorem norm_ev00_le (a : JetA F) : ‖ev00 F a‖ ≤ ‖a‖ := by
   calc ‖ev00 F a‖ = ‖PowerSeries.coeff 0 ((jB F a).fst).1‖ := by

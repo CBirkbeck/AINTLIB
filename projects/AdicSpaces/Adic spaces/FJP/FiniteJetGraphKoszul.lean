@@ -818,6 +818,7 @@ variable {A : Type*} [NormedCommRing A] [IsUltrametricDist A] [NormOneClass A]
   [CompleteSpace A]
 variable {ι κ : Type*} [Fintype ι] [Fintype κ]
 
+omit [IsUltrametricDist A] [NormOneClass A] [CompleteSpace A] in
 /-- Sup norms of tuples scale exactly under a scaling element. -/
 theorem pi_norm_scale {c : A} (hc : ∀ x : A, ‖c * x‖ = ‖c‖ * ‖x‖) (u : ι → A) :
     ‖fun i => c * u i‖ = ‖c‖ * ‖u‖ := by
@@ -841,12 +842,14 @@ theorem pi_norm_scale {c : A} (hc : ∀ x : A, ‖c * x‖ = ‖c‖ * ‖x‖) 
         _ = ‖fun j => c * u j‖ := by
             rw [← mul_assoc, mul_inv_cancel₀ hc0, one_mul]
 
+omit [NormOneClass A] [CompleteSpace A] in
 /-- Ultrametric triangle inequality for sup norms of tuples. -/
 theorem pi_norm_add_le_max (u v : ι → A) : ‖u + v‖ ≤ max ‖u‖ ‖v‖ := by
   refine pi_norm_le_iff_of_nonneg (le_max_of_le_left (norm_nonneg u)) |>.mpr fun i => ?_
   refine (IsUltrametricDist.norm_add_le_max _ _).trans ?_
   exact max_le_max (norm_le_pi_norm u i) (norm_le_pi_norm v i)
 
+omit [CompleteSpace A] in
 /-- A scaling element's powers have the norm one expects. -/
 theorem norm_pow_of_scale {c : A} (hc : ∀ x : A, ‖c * x‖ = ‖c‖ * ‖x‖) (n : ℕ) :
     ‖c ^ n‖ = ‖c‖ ^ n := by
@@ -866,6 +869,7 @@ theorem pi_norm_pow_mul_of_scale {c : A} (hc : ∀ x : A, ‖c * x‖ = ‖c‖ 
     rw [norm_pow_mul_of_scale (E := A) hc n x, norm_pow_of_scale hc n]
   rw [pi_norm_scale hc' u, norm_pow_of_scale hc n]
 
+omit [IsUltrametricDist A] [NormOneClass A] [CompleteSpace A] [Fintype ι] [Fintype κ] in
 /-- A `c`-equivariant additive map between tuple spaces is `c ^ n`-equivariant.
 
 Stated for an arbitrary scaling element so that one lemma covers both the equivariance
@@ -885,6 +889,7 @@ theorem map_pow_mul_of_equivariant {c : A} (f : (ι → A) →+ (κ → A))
     show c * (c ^ n * f u k) = c ^ (n + 1) * f u k
     ring
 
+omit [IsUltrametricDist A] [NormOneClass A] [CompleteSpace A] in
 /-- The inverse of a norm-scaling unit scales by the inverse norm. -/
 theorem norm_inv_unit_mul {t : A} (htu : IsUnit t) (ht0 : 0 < ‖t‖)
     (hscale : ∀ x : A, ‖t * x‖ = ‖t‖ * ‖x‖) (x : A) :
@@ -895,6 +900,7 @@ theorem norm_inv_unit_mul {t : A} (htu : IsUnit t) (ht0 : 0 < ‖t‖)
   rw [eq_inv_mul_iff_mul_eq₀ (ne_of_gt ht0)]
   exact h1.symm
 
+omit [IsUltrametricDist A] [NormOneClass A] [CompleteSpace A] [Fintype ι] [Fintype κ] in
 /-- A `t`-equivariant map is also `t⁻¹`-equivariant. -/
 theorem map_inv_unit_mul_of_equivariant {t : A} (htu : IsUnit t) (f : (ι → A) →+ (κ → A))
     (hequiv : ∀ u, f (fun i => t * u i) = fun k => t * f u k) (u : ι → A) :
@@ -910,6 +916,7 @@ theorem map_inv_unit_mul_of_equivariant {t : A} (htu : IsUnit t) (f : (ι → A)
     ((htu.unit⁻¹ : Aˣ) : A) * (t * f (fun i => ((htu.unit⁻¹ : Aˣ) : A) * u i) k)
   rw [← mul_assoc, IsUnit.val_inv_mul, one_mul]
 
+omit [IsUltrametricDist A] [NormOneClass A] [Fintype κ] in
 omit [CompleteSpace A] in
 /-- The scaled closed balls cover the range: every `y` in `range f` is `f v` for some `v`,
 and some power of `t` scales `v` into the ball of radius `(‖t‖ ^ N)⁻¹`. -/
@@ -941,6 +948,7 @@ private theorem iUnion_preimage_closure_ball_eq_univ
 -- Baire: some ball-image closure has interior
 
 
+omit [IsUltrametricDist A] [NormOneClass A] [CompleteSpace A] in
 /-- **One approximation step of the open-mapping argument.** If `z` is in the range and is
 `δ‖t‖ᵏ`-small, it is matched to within `δ‖t‖ᵏ⁺¹` by `f u` for some `u` of norm at most `R‖t‖ᵏ`,
 with the residual still in the range. Rescaling by `t⁻ᵏ` reduces this to the `k = 0` case, which
@@ -1068,6 +1076,7 @@ private theorem exists_lift_norm_le_of_approx_step {t : A} (ht1 : ‖t‖ < 1)
   exact ⟨US, hfy, norm_le_of_hasSum_of_forall_norm_le hUS R hRpos.le hURb⟩
 
 
+omit [IsUltrametricDist A] [NormOneClass A] [CompleteSpace A] in
 /-- **The scaling window.** For `0 < c < δ` and `0 < ‖t‖ < 1` there is a power `n` putting
 `‖t‖⁻ⁿ c` into `[δ‖t‖, δ)`. Take `n` least with `δ‖t‖ ≤ ‖t‖⁻ⁿ c` — it exists because `‖t‖⁻¹ > 1` —
 and minimality of `n` gives the strict upper bound. -/
@@ -1098,6 +1107,7 @@ private theorem exists_pow_inv_mul_mem_window {t : A} (ht0 : 0 < ‖t‖) (ht1 :
       _ = δ := by field_simp
 
 
+omit [IsUltrametricDist A] [NormOneClass A] [CompleteSpace A] in
 /-- **The scaling window, downward.** Companion to `exists_pow_inv_mul_mem_window` for the other
 side of the dichotomy: when `δ ≤ c`, multiplying *down* by a power of `‖t‖` lands `‖t‖ᵐ c` in
 `[δ‖t‖, δ)`. Take `m` least with `‖t‖ᵐ c < δ`; `m = 0` would contradict `δ ≤ c`, and minimality of
@@ -1391,10 +1401,12 @@ noncomputable def polyToP : MvPolynomial (Fin m) E →+* P E m where
   map_add' q r := Subtype.ext (map_add (MvPolynomial.coeToMvPowerSeries.ringHom
     (σ := Fin m) (R := E)) q r)
 
+omit [NormOneClass E] [CompleteSpace E] in
 theorem coeff_polyToP (q : MvPolynomial (Fin m) E) (s : Fin m →₀ ℕ) :
     MvPowerSeries.coeff s ((polyToP (E := E) (m := m) q).1) = MvPolynomial.coeff s q :=
   MvPolynomial.coeff_coe q s
 
+omit [NormOneClass E] [CompleteSpace E] in
 /-- Scaling by the constant `C t` on `P_E` scales the Gauss norm. -/
 theorem norm_tP_mul (t : E) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) (F : P E m) :
     ‖polyToP (MvPolynomial.C t) * F‖ = ‖t‖ * ‖F‖ := by
@@ -1413,6 +1425,7 @@ theorem norm_tP (t : E) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) :
   have h := norm_tP_mul (E := E) (m := m) t hscale 1
   rwa [mul_one, norm_one, mul_one] at h
 
+omit [NormOneClass E] [CompleteSpace E] in
 theorem isUnit_tP (t : E) (htu : IsUnit t) :
     IsUnit (polyToP (MvPolynomial.C t) : P E m) :=
   (htu.map MvPolynomial.C).map (polyToP (E := E) (m := m))
@@ -1426,6 +1439,7 @@ theorem exists_ball_eq_tP_pow_mul {t : E} (htu : IsUnit t) (ht0 : 0 < ‖t‖)
     (fun G => by rw [norm_tP t hscale]; exact norm_tP_mul t hscale G) n F
     (by rw [norm_tP t hscale]; exact hF)
 
+omit [CompleteSpace E] in
 /-- Polynomial division over the unit ball: a polynomial all of whose coefficients have
 norm `≤ ‖t‖ⁿ` lies in the `n`-th power of the constant ideal `(C t₀) ⊂ E₀[T]`. -/
 theorem mem_span_C_pow_of_coeff_norm_le {t : E} (htu : IsUnit t) (ht1 : ‖t‖ ≤ 1)
@@ -1473,6 +1487,7 @@ section AdicBridge
 variable (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
   (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖)
 
+omit [NormOneClass E] [CompleteSpace E] in
 theorem norm_coeff_le_gauss (F : P E m) (s : Fin m →₀ ℕ) :
     ‖MvPowerSeries.coeff s F.1‖ ≤ ‖F‖ := by
   have h := MvPowerSeries.le_gaussNorm _ _ _ (MvRestricted.hasGaussNorm _ F) s
@@ -1480,6 +1495,7 @@ theorem norm_coeff_le_gauss (F : P E m) (s : Fin m →₀ ℕ) :
   rw [MvRestricted.norm_eq]
   exact h
 
+omit [NormOneClass E] [CompleteSpace E] in
 /-- Superlevel sets of a restricted series are finite. -/
 theorem finite_setOf_le_norm_coeff (F : P E m) {ε : ℝ} (hε : 0 < ε) :
     {s : Fin m →₀ ℕ | ε ≤ ‖MvPowerSeries.coeff s F.1‖}.Finite := by
@@ -1632,6 +1648,7 @@ noncomputable abbrev I0 : Ideal (MvPolynomial (Fin m) ↥(unitBall E)) :=
       ↥(unitBall E)) :
     MvPolynomial (Fin m) ↥(unitBall E))}
 
+omit [CompleteSpace E] in
 theorem I0_pow_smul_top (n : ℕ) :
     ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ : Ideal (MvPolynomial (Fin m) ↥(unitBall E))) =
       (I0 (E := E) (m := m) t ht1) ^ n := by
@@ -1971,6 +1988,7 @@ private theorem algebraMapSubmonoid_ballDenoms_surj
   ring
 
 
+omit [CompleteSpace E] in
 /-- `E[T]` is the localization of `E₀[T]` at the powers of `t`. -/
 private theorem ballDenoms_isLocalization
     (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1)

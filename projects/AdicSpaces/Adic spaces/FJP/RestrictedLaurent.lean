@@ -252,6 +252,7 @@ theorem summable_conv_triple (f g h : RestrictedLaurent R) (m : ℤ) :
     rw [Set.mem_setOf_eq, div_le_iff₀ (by positivity)]
     nlinarith [norm_nonneg (g.coeff (p.1 - p.2))]
 
+omit [CompleteSpace R] in
 theorem coeff_mul (f g : RestrictedLaurent R) (m : ℤ) :
     (f * g).coeff m = ∑' a : ℤ, f.coeff a * g.coeff (m - a) := rfl
 
@@ -388,9 +389,11 @@ theorem norm_coeff_le_gaussNorm (f : RestrictedLaurent R) (a : ℤ) :
     ‖f.coeff a‖ ≤ gaussNorm f :=
   le_ciSup f.tendsto_coeff.bddAbove_range_of_cofinite a
 
+omit [IsUltrametricDist R] in
 theorem gaussNorm_nonneg (f : RestrictedLaurent R) : 0 ≤ gaussNorm f :=
   (norm_nonneg _).trans (norm_coeff_le_gaussNorm f 0)
 
+omit [IsUltrametricDist R] in
 /-- The sup defining the Gauss norm is attained ([FJP] Prop 2.3: "the coefficient family of a
 restricted Laurent series tends to zero, so its nonzero coefficient supremum is attained"). -/
 theorem exists_gaussNorm_eq (f : RestrictedLaurent R) (hf : f ≠ 0) :
@@ -486,6 +489,7 @@ theorem norm_W_mul [CompleteSpace R] [NormOneClass R] (f : RestrictedLaurent R) 
     rw [coeff_Wu_mul] at h
     simpa using h
 
+omit [IsUltrametricDist R] in
 /-- If the coefficients of `u i` approximate a family `a` uniformly in the index, then `a` is
 itself restricted: `‖a n‖ → 0` along `cofinite`. A three-ε argument against a single `u N₁`,
 using nothing about `u` beyond that one member being restricted. -/
@@ -717,6 +721,7 @@ theorem norm_C_mul (t : K) (f : RestrictedLaurent K) : ‖C t * f‖ = ‖t‖ *
   rw [norm_def, norm_def, gaussNorm, gaussNorm, Real.mul_iSup_of_nonneg (norm_nonneg t)]
   exact iSup_congr fun a => by rw [coeff_C_mul, norm_mul]
 
+omit [CompleteSpace K] in
 /-- Multiplication by a scalar constant scales the vendored univariate Gauss norm. -/
 theorem norm_restrictedC_mul (t : K) (f : PowerSeries.Restricted K (1 : ℝ)) :
     ‖PowerSeries.Restricted.C (1 : ℝ) t * f‖ = ‖t‖ * ‖f‖ := by
@@ -864,6 +869,7 @@ theorem ofPowerSeries_mul (f g : PowerSeries.Restricted R (1 : ℝ)) :
       · rw [coeff_ofPowerSeries (a := a - x), if_neg (by omega), mul_zero]
     rw [(tsum_congr hz).trans tsum_zero, coeff_ofPowerSeries, if_neg h0]
 
+omit [NormOneClass R] in
 /-- v4.33 (reducible-well-typed membership form): the `ℕ`-coefficient restriction of a
 nonnegatively-supported restricted Laurent series is a restricted power series, stated as
 membership in `PowerSeries.isSubring 1` — the syntactic field type of the subtype literal
@@ -1169,6 +1175,7 @@ theorem restrictedCongr_norm {A B : Type*} [NormedCommRing A] [IsUltrametricDist
   refine iSup_congr fun i => ?_
   rw [coeff_restrictedCongr, he]
 
+omit [CompleteSpace R] [NormOneClass R] in
 /-- v4.33 (reducible-well-typed coe form): norm-preservation of the `Fin 0`-collapse
 `foo`, stated at the `RingEquiv` coercion — the syntactic shape `restrictedCongr`'s
 `he`-argument expects. (The bare `RingHomIsometric.norm_map (σ := ….toRingHom)` proof
@@ -1204,6 +1211,7 @@ theorem norm_negOfSeries (f : MvPowerSeries.Restricted R (fun _ : Fin 1 => (1 : 
   show ‖negate (ofRestricted (innerToSeries f))‖ = ‖f‖
   rw [norm_negate, ofRestricted_norm, innerToSeries_norm]
 
+omit [NormOneClass R] in
 /-- Powers of `W` are monomials. -/
 theorem Wu_pow (i : ℕ) : ((Wu (R := R)).val) ^ i = single (i : ℤ) 1 := by
   induction i with

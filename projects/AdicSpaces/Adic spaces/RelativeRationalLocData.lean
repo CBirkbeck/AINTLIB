@@ -536,6 +536,7 @@ The right factor is `D_at_E.coeRingHom` (continuous, completion embedding).
 The left factor is the algebraic inner forward hom, defined below.
 Continuity of the inner is by `locTopology_continuous_lift`. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- D.s is a unit (via algebraMap A) in `Loc_{presheafValue E}(E.canonicalMap D.s)`:
 the natural map A → presheafValue E → Loc sends D.s to E.canonicalMap D.s, which
 equals `D_at_E.s` and is the localization's unit-element. -/

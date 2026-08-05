@@ -37,12 +37,14 @@ noncomputable def RationalLocData.interValid (D E : RationalLocData A)
     (exists_pow_le_of_isRational_pair D.P D hD).choose_spec
     (exists_pow_le_of_isRational_pair D.P E hE).choose_spec
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] [HasLocLiftPowerBounded A] in
 theorem RationalLocData.interValid_rationalOpen (D E : RationalLocData A)
     (hD : D.IsRational) (hE : E.IsRational) :
     rationalOpen (D.interValid E hD hE).T (D.interValid E hD hE).s =
       rationalOpen D.T D.s ∩ rationalOpen E.T E.s :=
   D.interDatumOpen_rationalOpen E _ _ _ _
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] [HasLocLiftPowerBounded A] in
 theorem RationalLocData.interValid_isRational (D E : RationalLocData A)
     (hD : D.IsRational) (hE : E.IsRational) :
     (D.interValid E hD hE).IsRational :=
@@ -63,6 +65,7 @@ theorem RationalLocData.interValid_subset_right (D E : RationalLocData A)
   rw [D.interValid_rationalOpen E hD hE]
   exact Set.inter_subset_right
 
+omit [DecidableEq A] [DecidableEq (RationalLocData A)] in
 /-- Separation from the subset-relative sheaf condition. -/
 theorem IsSheafyOn.separationSub [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
@@ -73,6 +76,7 @@ theorem IsSheafyOn.separationSub [T2Space A] [NonarchimedeanRing A]
     Function.Injective (productRestrictionSub A C) :=
   (hOn.embedding C hC hbase).injective
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] [HasLocLiftPowerBounded A] in
 /-- A rational datum whose trace lies in a trace-subset of `S` has its
 rational open inside `S`. -/
 theorem RationalLocData.rationalOpen_subset_of_trace {S : Set (Spv A)}

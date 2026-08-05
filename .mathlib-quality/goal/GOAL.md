@@ -17324,3 +17324,38 @@ by iterating per file rather than per sweep.
 > files do I exclude?" but **"what is the smallest unit whose failure I can observe cheaply?"**
 > Four full-library gates found 12 bad files; the per-file driver found all 17 in the time one
 > of those gates took, and kept 434 fixes instead of 28.
+
+### Bisection on the 17 interacting files: 110 of 182 recovered
+
+Whole-file exclusion is far too coarse. Within a file, the omits that interact are a *small
+subset* — so delta-debugging finds them in O(k log n) module builds instead of the n a
+one-at-a-time loop needs. Every attempt renders the **pristine** file plus the candidate
+subset, so an accepted omit never depends on the order it was tried in.
+
+```
+18/19  FiniteJetGraphKoszul      13/14  YSpace          25/34  LaurentRefinementTree
+11/12  RestrictedLaurent          3/ 4  JetDualNumberNorm   14/32  RelativeDescentHuber
+ 7/ 9  AinfHuber                  5/ 8  RelativePieceKeystone   5/19  Wedhorn828
+ …                                0/ 1  GaussNorm  0/3 SheafyPair  0/1 StandardDescent
+```
+
+**232 module builds, 110 of 182 omits recovered.** Typically exactly *one* omit per file was
+bad — so the previous round's whole-file revert was discarding ~90% of good fixes for each
+file it dropped.
+
+Cumulative for the `unusedSectionVars` campaign:
+
+| | baseline | after fixpoint | after bisection |
+|---|---|---|---|
+| unusedSectionVars warnings | 714 | 411 | **360** |
+| total AdicSpaces warnings | 4,398 | 3,994 | **3,921** |
+| omits applied | 0 | 434 + 28 | **572** |
+
+Three files yield nothing at all (`GaussNorm` 0/1, `SheafyPair` 0/3, `StandardDescent` 0/1):
+there the linter's suggestion is simply wrong for the file as it stands, which is the honest
+end state for those.
+
+> The progression is the lesson: **batch → per-file → per-omit**, each step chosen because the
+> previous failure told you the granularity was too coarse. 28 fixes, then 434, then 572 — same
+> input data, same linter, three orders of magnitude of difference in what survived, purely
+> from how small a unit the gate could observe.

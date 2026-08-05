@@ -1892,6 +1892,7 @@ private theorem example638_multivariate_surjection
       Function.Surjective φ :=
   ⟨example638_evalHom D, example638_evalHom_surjective D⟩
 
+omit [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] in
 omit [CompatiblePlusSubring A] in
 /-- **Step 1 of Prop 8.30 — Example 6.38, noetherian part** (Wedhorn p. 81, `wedhorn.txt:4099`).
 `B := presheafValue D` is a **noetherian** ring. FAITHFUL: depends only on the ambient `A`-bundle
@@ -1914,6 +1915,7 @@ private theorem presheafValue_isNoetherianRing_residual
   obtain ⟨φ, hφ⟩ := example638_multivariate_surjection D
   exact isNoetherianRing_of_surjective _ _ φ hφ
 
+omit [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] in
 omit [CompatiblePlusSubring A] in
 theorem presheafValue_isNoetherianRing_faithful
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] (D : RationalLocData A) :
@@ -2661,6 +2663,7 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
 -- nbhd-basis chases (`hUnitS`, `hi_dense`, `hf_unif`) over the heavy reducible quotient-Tate
 -- uniform structures on `γ = C ⧸ ker Ψ`; the cumulative `isDefEq`/`whnf` cost exceeds the default
 -- heartbeat budget even though each step is elementary.
+omit [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] in
 omit [CompatiblePlusSubring A] in
 /-- **Relative Example 6.38 surjection** (the genuine residual for strong-noetherian propagation).
 For `n = |D.T|` and any `m : ℕ`, the `(n+m)`-variable restricted power series over `A` surject
@@ -2909,6 +2912,7 @@ private theorem presheafValue_mvRestricted_surjection
     have := RingHom.congr_fun hround y
     simpa using this⟩
 
+omit [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] in
 omit [CompatiblePlusSubring A] in
 /-- **Example 6.38, strong-noetherian propagation** (Wedhorn p. 56: "In particular, `Â⟨T/s⟩` is
 again strongly noetherian"). FAITHFUL: `A` strongly noetherian ⟹ `presheafValue D` strongly
@@ -3172,6 +3176,7 @@ theorem coUnitDatum_span_le_ker
       _ = 1 := by rw [hloc]; exact map_one _
   rw [hmul, sub_self]
 
+omit [HasLocLiftPowerBounded A] [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] in
 omit [CompatiblePlusSubring A] in
 /-- Continuity of a localization lift `ψ : A[1/s] → A⟨ζ⟩ ⧸ aI` for the localization
 topology: on constants it is `mk ∘ algebraMap`, and on the single generator ratio it is
