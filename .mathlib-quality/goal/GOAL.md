@@ -17486,3 +17486,33 @@ unification, where the linter's premise does not hold.
 > **A convergent process should be stopped by its own curve, not by exhaustion.** Four rounds
 > establish the rate; the fifth is predictable at ~50 omits for the same two hours, which is
 > the moment to switch to whatever has not been measured yet.
+
+## The overlapping-instance category: measured, and deliberately not run
+
+3,064 warnings / **3,063 distinct declarations** across 125 files, every one carrying an
+explicit "of these, `[X]` `[Y]` may be removed" list. Structurally identical to the
+`unusedSectionVars` campaign — same `omit` mechanism, same driver, same bisector — so the only
+open question was the **rate**.
+
+Measured on `SpaVIso` (104 warnings, 6 dependants, the same validation file as before):
+
+* whole-file application: **fails**;
+* bisected: **27 of 104 accepted**, in ~**60 minutes** of module builds for one file.
+
+Extrapolated over 125 files that is on the order of **30 hours of builds for ~800 omits**.
+And the decisive difference from the other campaign:
+
+> `unusedSectionVars` omits are **generalisations** — the declaration sheds a hypothesis it
+> never used, so the theorem genuinely applies more widely. Overlapping-instance omits are
+> **not**: the binder being removed is *implied by another binder that stays*. `[IsTateRing A]`
+> already gives `[IsTopologicalRing A]`. The theorem's strength is unchanged; only the
+> signature gets tidier.
+
+30 hours of builds, a 26% acceptance rate, and zero change in what any theorem says. This
+category is therefore **measured and closed, not deferred**: the 27 verified omits `SpaVIso`
+produced are kept (they were built and gated green), and the remaining ~2,960 warnings stay.
+Total AdicSpaces warnings 3,726 → 3,703.
+
+The right fix for this category is not per-declaration `omit`s at all — it is editing the
+~30 `variable` blocks these binders come from, which is a cross-cutting change and coordinator
+work under a freeze. Recorded as such.

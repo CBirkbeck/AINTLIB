@@ -66,6 +66,7 @@ theorem ofBijective_symm_apply {R S : Type*} [CommRing R] [CommRing S]
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A] [IsRingOfIntegralElements (A⁺ : Subring A)]
 
+omit [IsTopologicalRing A] in
 /-- The two presentations of a rational subset as a topological space —
 the double subtype `↥(spaOpens D)` inside `↥(Spa A A⁺)` and the
 intersection subtype inside `Spv A` — agree. -/
@@ -88,6 +89,7 @@ theorem spaOpensEquivInter_symm_continuous (D : RationalLocData A) :
   exact ((continuous_subtype_val (p := fun w : Spv A =>
     w ∈ (rationalOpen D.T D.s ∩ Spa A A⁺ : Set (Spv A)))).subtype_mk _).subtype_mk _
 
+omit [IsTopologicalRing A] in
 /-- The double-subtype and intersection presentations are homeomorphic. -/
 def spaOpensHomeoInter (D : RationalLocData A) :
     ↥(spaOpens D) ≃ₜ ↥(rationalOpen D.T D.s ∩ Spa A A⁺ : Set (Spv A)) :=
@@ -106,6 +108,7 @@ variable (D₀ : RationalLocData A) [IsTateRing (presheafValue D₀)]
 
 open OpenKeystone
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- The power certificate of a valid datum at the base pair of `D₀`. -/
 def certExp {E : RationalLocData A} (hE : E.IsRational) : ℕ :=
   (exists_pow_le_of_isRational_pair D₀.P E hE).choose
@@ -115,6 +118,7 @@ theorem certExp_spec {E : RationalLocData A} (hE : E.IsRational) :
       ≤ Ideal.span ((E.T : Finset A) : Set A) :=
   (exists_pow_le_of_isRational_pair D₀.P E hE).choose_spec
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- **The image datum of a valid `A`-side datum** — the `B`-side rational
 datum presenting the same subset through the canonical homeomorphism. -/
 noncomputable def imgDatum {E : RationalLocData A} (hE : E.IsRational) :
@@ -136,6 +140,7 @@ theorem mem_imgDatum_iff {E : RationalLocData A} (hE : E.IsRational)
     (certExp_spec D₀ hE) (w : Spv (presheafValue D₀))
   exact ⟨fun hw => (h.mp hw).2, fun hw => h.mpr ⟨w.2, hw⟩⟩
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- The `B`-side index attached to a valid `A`-side datum whose shadow-preimage
 lands in `W`. -/
 def imgIdx (W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
@@ -156,6 +161,7 @@ def imgIdx (W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
       w ∈ W) :
     (imgIdx D₀ W hE hsub).D = imgDatum D₀ hE := rfl
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- The keystone comparison at a valid `A`-side datum inside `D₀`. -/
 noncomputable def pieceEquiv {E : RationalLocData A} (hE : E.IsRational)
     (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) :
@@ -197,10 +203,12 @@ theorem comap_mem_spa (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)
   ValuationSpectrum.comap_mem_spa (canonicalMap_continuous D₀)
     D₀.canonicalMap_integral w.2
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- The `A`-shadow as a `Spa A`-point. -/
 def shadow (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) : ↥(Spa A A⁺) :=
   ⟨comap D₀.canonicalMap (w : Spv (presheafValue D₀)), comap_mem_spa D₀ w⟩
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- `W` is the shadow-preimage of `V`: a `Spa B`-point lies in `W` exactly
 when its `A`-shadow lies in `V`. -/
 def Paired (V : Opens ↥(Spa A A⁺))
@@ -220,6 +228,7 @@ theorem paired_shadow {V : Opens ↥(Spa A A⁺)}
     (hw : w ∈ W) : shadow D₀ w ∈ V :=
   (h w).mpr hw
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- Under a pairing, a valid `A`-index of `V` produces a `B`-index of `W`. -/
 def idxOf {V : Opens ↥(Spa A A⁺)}
     {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
@@ -238,6 +247,7 @@ theorem index_sub {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
     rationalOpen i.D.T i.D.s ⊆ rationalOpen D₀.T D₀.s :=
   spaOpen_subset_iff.mp (i.subset.trans hV)
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- **The comparison map, componentwise**: the `A`-side value of a `B`-side
 compatible family at a valid `A`-index. -/
 noncomputable def phiComp {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
@@ -275,6 +285,7 @@ theorem phiComp_compat {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
   have := congrArg (pieceEquiv D₀ j.isRational (index_sub D₀ hV j)).symm hsq
   rwa [RingEquiv.symm_apply_apply] at this
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- **The comparison ring homomorphism** `𝒪_B(W) → 𝒪_A(V)`: componentwise the
 inverse keystone comparison at the image index. -/
 noncomputable def phiHom {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
@@ -371,6 +382,7 @@ theorem exists_index_mem [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
     (V := (V : Set ↥(Spa A A⁺))) V.2 (paired_shadow D₀ hVW w hw)
   exact ⟨⟨E, hE, hEsub⟩, (mem_imgDatum_iff D₀ hE w).mpr hEmem⟩
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- The `B`-side open of an `A`-index. -/
 def imgOpens {V : Opens ↥(Spa A A⁺)} (i : RationalIndex V) :
     Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺) :=
@@ -468,6 +480,7 @@ theorem pieceEquiv_restrict' {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D�
 
 variable [DecidableEq A]
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- Membership in the intersection datum's open implies membership in the
 left one (extracted so `interIdx`'s field is a one-liner). -/
 theorem interDatumOpen_left_aux {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V)
@@ -481,6 +494,7 @@ theorem interDatumOpen_left_aux {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex
   ((Set.ext_iff.mp (RationalLocData.interDatumOpen_rationalOpen i.D j.D _ _ _ _)
     ((v : ↥(Spa A A⁺)) : Spv A)).mp hv).1
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- The `A`-index of the intersection of two indices (openness certificates
 from `exists_pow_le_of_isRational_pair` at the shared pair `i.D.P`). -/
 noncomputable def interIdx {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V) :
@@ -494,6 +508,7 @@ noncomputable def interIdx {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V) :
     (RationalLocData.interDatumOpen_pow_le _ _ _ _ _ _)
   subset := fun v hv => i.subset (interDatumOpen_left_aux i j v hv)
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 theorem interIdx_rationalOpen {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V) :
     rationalOpen (interIdx i j).D.T (interIdx i j).D.s
       = rationalOpen i.D.T i.D.s ∩ rationalOpen j.D.T j.D.s :=
@@ -503,12 +518,14 @@ theorem interIdx_rationalOpen {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V
     (exists_pow_le_of_isRational_pair i.D.P i.D i.isRational).choose_spec
     (exists_pow_le_of_isRational_pair i.D.P j.D j.isRational).choose_spec
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 theorem interIdx_le_left {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V) :
     rationalOpen (interIdx i j).D.T (interIdx i j).D.s
       ⊆ rationalOpen i.D.T i.D.s := by
   rw [interIdx_rationalOpen]
   exact Set.inter_subset_left
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 theorem interIdx_le_right {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V) :
     rationalOpen (interIdx i j).D.T (interIdx i j).D.s
       ⊆ rationalOpen j.D.T j.D.s := by
@@ -535,6 +552,7 @@ theorem mem_imgDatum_interIdx {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V
     interIdx_rationalOpen i j]
   exact Set.mem_inter_iff _ _ _
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- The candidate `B`-side section on the image open of an `A`-index. -/
 noncomputable def imgSection {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
     (y : ↥(limitSections V)) (i : RationalIndex V) :
@@ -705,6 +723,7 @@ theorem phiHom_continuous {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
   exact (pieceEquiv_symm_continuous D₀ i.isRational (index_sub D₀ hV i)).comp
     (limitEvalHom_continuous (idxOf D₀ hVW i))
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- **The comparison ring isomorphism** (P5-K6). -/
 noncomputable def phiEquiv [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
     (hV : V ≤ spaOpens D₀)
@@ -767,6 +786,7 @@ theorem phiEquiv_symm_continuous [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
     ((pieceEquiv_continuous D₀ i.isRational (index_sub D₀ hV i)).comp
       (limitEvalHom_continuous i))
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- **The base homeomorphism**: `Spa B` is the rational subset, as a subspace
 of `Spa A`. -/
 def baseHomeo (u : (presheafValue D₀)ˣ)
@@ -783,11 +803,13 @@ def baseHomeo (u : (presheafValue D₀)ˣ)
 variable (u : (presheafValue D₀)ˣ)
   (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀))
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- The `A`-side open attached to an open of the restricted space. -/
 def aOpen (U : Opens ↥(spaOpens D₀)) : Opens ↥(Spa A A⁺) where
   carrier := Subtype.val '' (U : Set ↥(spaOpens D₀))
   is_open' := ((spaOpens D₀).2.isOpenEmbedding_subtypeVal).isOpenMap _ U.2
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 /-- The `B`-side open attached to an open of the restricted space. -/
 def bOpen (U : Opens ↥(spaOpens D₀)) :
     Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺) where
@@ -978,6 +1000,7 @@ def spaSpace : TopRingPresheafedSpace where
 def spaOpensIncl (U : Opens ↥(Spa A A⁺)) : TopCat.of ↥U ⟶ SpaTop A :=
   TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
 
+omit [IsTopologicalRing A] [NonarchimedeanRing A] in
 theorem spaOpensIncl_isOpenEmbedding (U : Opens ↥(Spa A A⁺)) :
     Topology.IsOpenEmbedding (spaOpensIncl U) :=
   U.2.isOpenEmbedding_subtypeVal
