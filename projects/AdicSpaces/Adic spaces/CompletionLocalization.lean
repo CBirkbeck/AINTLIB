@@ -515,6 +515,33 @@ private theorem locSubring_mul_locNhd_subset (D : RationalLocData A) (k : ℕ) :
 omit [PlusSubring A] [IsHuberRing A] [IsTateRing A]
     [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     in
+/-- Continuity of `coeRingHom` at `0`, in pullback form: a neighbourhood of `0` in the
+completion pulls back to a neighbourhood of `0` in the localisation.
+
+The instance arguments are given explicitly because the two topologies in play (`D.topology`
+on the source, the completion's on the target) are not the ambient ones. -/
+private theorem coeRingHom_preimage_mem_nhds (D : RationalLocData A)
+    {W : Set (presheafValue D)}
+    (hW0 : W ∈ @nhds _ (@UniformSpace.toTopologicalSpace _
+      (@UniformSpace.Completion.uniformSpace _ D.uniformSpace)) 0) :
+    D.coeRingHom ⁻¹' W ∈ @nhds _ D.topology 0 := by
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : TopologicalSpace (Localization.Away D.s) := D.topology
+  have hcoe_cont : @Continuous _ _ D.topology
+      (@UniformSpace.toTopologicalSpace _
+        (@UniformSpace.Completion.uniformSpace _ D.uniformSpace)) D.coeRingHom :=
+    @UniformSpace.Completion.continuous_coe _ D.uniformSpace
+  have : W ∈ @nhds _ (@UniformSpace.toTopologicalSpace _
+      (@UniformSpace.Completion.uniformSpace _ D.uniformSpace))
+      (D.coeRingHom (0 : Localization.Away D.s)) := by
+    rwa [map_zero]
+  exact @ContinuousAt.preimage_mem_nhds _ _ D.topology
+    (@UniformSpace.toTopologicalSpace _
+      (@UniformSpace.Completion.uniformSpace _ D.uniformSpace))
+    _ _ _ (hcoe_cont.continuousAt) this
+
+omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] [IsTateRing A]
+  [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A] in
 /-- The image of `locSubring` under `coeRingHom` is bounded in `presheafValue D`.
 Proof: `locSubring * locNhd k ⊆ locNhd k` (ideal absorption), so
 `(coe '' locSubring) * (coe '' locNhd k) ⊆ coe '' locNhd k` by the ring hom
@@ -538,19 +565,7 @@ theorem coeRingHom_image_locSubring_isBounded (D : RationalLocData A) :
   -- Step 1: Find a closed W ∈ nhds 0 with W ⊆ U (completion is regular as a uniform space)
   obtain ⟨W, hW_nhds, hW_closed, hWU⟩ := exists_mem_nhds_isClosed_subset hU
   -- Step 2: Pull back W to the source (coeRingHom is continuous, coeRingHom 0 = 0)
-  have hcoe_cont : @Continuous _ _ D.topology
-      (@UniformSpace.toTopologicalSpace _
-        (@UniformSpace.Completion.uniformSpace _ D.uniformSpace)) D.coeRingHom :=
-    @UniformSpace.Completion.continuous_coe _ D.uniformSpace
-  have hpull : D.coeRingHom ⁻¹' W ∈ @nhds _ D.topology 0 := by
-    have : W ∈ @nhds _ (@UniformSpace.toTopologicalSpace _
-        (@UniformSpace.Completion.uniformSpace _ D.uniformSpace))
-        (D.coeRingHom (0 : Localization.Away D.s)) := by
-      rwa [map_zero]
-    exact @ContinuousAt.preimage_mem_nhds _ _ D.topology
-      (@UniformSpace.toTopologicalSpace _
-        (@UniformSpace.Completion.uniformSpace _ D.uniformSpace))
-      _ _ _ (hcoe_cont.continuousAt) this
+  have hpull := coeRingHom_preimage_mem_nhds D hW_nhds
   -- Step 3: Get basis neighborhood locNhd k ⊆ coe⁻¹'(W)
   obtain ⟨_, ⟨k, rfl⟩, hkW⟩ :=
     hbasis.toRingFilterBasis.toAddGroupFilterBasis.nhds_zero_hasBasis.mem_iff.mp hpull

@@ -16718,3 +16718,79 @@ Omitting on the lemma alone leaves the target still demanding it. The honest rul
 
 Four builds for a 15-line lift: dedent region (two nesting levels in one slice), `rw [this]`
 as an anchor (2 occurrences), omit on the lemma, omit on the target. None about the mathematics.
+
+### Pre-flight checklist, assembled from this session's failures
+
+Run *before* writing any lift. Every item is a build this campaign already paid for:
+
+1. **Anchor on the declaration name, token-exact** — `(?![A-Za-z_0-9'])`, or a prefix matches a
+   longer name (`wedhorn_lemma_834` vs `…_propA3_part1_bridge`, 4700 lines apart).
+2. **Never anchor on a tactic line** — `classical` ×3, `intro n`, `rw [this]` ×2,
+   `set_option … in` ×170. Scope every secondary marker to the range between two verified ones.
+3. **Read the target's modifier stack** — `omit … in`, `open … in`, `set_option … in`.
+   `decl_top` inserts *above* them, so the new lemma inherits **none**.
+4. **Check the file's `omit` convention** — `grep -c '^omit '`. If it is the file's default
+   posture, the new lemma needs it *and so may the target*, since the requirement propagates
+   along the new call chain and fails in the caller's callers.
+5. **Check for scoped notation the new signature will *write*** — `Set * Set` needs
+   `open Pointwise`; a type you only *consume* does not.
+6. **Compute the namespace by walking `namespace`/`end`**, not by eyeballing the nearest header.
+7. **Decide visibility from purpose** — in-file decomposition `private`; cross-file dedup public
+   and qualified.
+8. **Dedent per fragment**, not per region: a slice can contain a `have` that stays and a body
+   that gets promoted.
+9. **Assert no declaration disappears** — `DECL.findall` before/after. A green build cannot
+   detect deletion.
+10. **Measure the new lemma too.** A lift that relocates >50 lines has not finished.
+
+**Add item 11 to the checklist: `letI`-established instances are part of the block's context.**
+The `coeRingHom_image_locSubring_isBounded` lift needed
+
+```lean
+letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+letI : TopologicalSpace (Localization.Away D.s) := D.topology
+```
+
+which the target sets up in its first two lines. I identified them while planning and then
+simply did not write them into the lemma — `failed to synthesize TopologicalSpace
+(Localization.Away D.s)`.
+
+This is the same class as the `letI : DecidableEq (presheafValue D₀) := Classical.decEq _` case
+in `WedhornCechAcyclicity` earlier: **an instance introduced by `letI` in the proof body is
+invisible to any grep for the block's *identifiers*, because the block never names it.** It is
+only discoverable by reading the proof's opening lines.
+
+> Before lifting, read the target's first few tactic lines for `letI`/`haveI`. They establish
+> context the block silently depends on, and unlike hypotheses they leave no trace in the block
+> itself.
+
+### `coeRingHom_image_locSubring_isBounded` CLEARED 52 → 37 (board 18 → 17)
+
+`coeRingHom_preimage_mem_nhds` (14c): continuity of `coeRingHom` at `0` in pullback form.
+Instance arguments given explicitly, since neither topology in play is the ambient one.
+
+**I repeated a mistake I had already written the rule for.** Three builds ago I recorded
+"modifiers go *above* the docstring, not between it and the declaration", after the
+`open Pointwise in` failure. Then I inserted the `omit` between docstring and declaration and
+got the identical error:
+
+```
+unexpected token 'omit'; expected 'lemma'
+```
+
+Writing a rule down is not the same as having a step that applies it. The checklist entry is now
+phrased as an action — *insert modifiers at `decl_top`, never at the declaration line* — rather
+than as a fact about ordering.
+
+**The linter told me the answer and I read it as noise.** The failing build printed
+
+```
+automatically included section variable(s) unused in theorem `…isBounded`:
+  [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] [IsTateRing A]
+  [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+consider … explicitly omit them: omit … in theorem ...
+```
+
+— i.e. the exact `omit` line to add, in the output of the build *before* the one where I
+finally added it. `unusedSectionVars` warnings after a lift are not noise: they are the
+diff between the target's old and new instance appetite, which is precisely what breaks callers.
