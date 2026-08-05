@@ -16463,3 +16463,33 @@ success case looks like failure.
 
 > Never end a verification command with a bare `grep -c` — its exit status inverts the meaning
 > you want. Append `|| true`, or put the build's own `EXIT=$?` last.
+
+### A 51-line duplication that a lift cannot fix: the general lemma is DOWNSTREAM of its specialisation
+
+The board survey flagged two entries with **identical profiles** — 51c, zero `letI`, 12 blocks,
+biggest [15, 10, 4]:
+
+* `tateAlgNhd₂_leftMul_of_principal`  (TateAlgebraTopology.lean)
+* `mvTateAlgNhd_leftMul_of_principal` (MvTateAlgebraTopology.lean)
+
+Diffing confirms they are **the same proof**: 57 lines each, 10 hunks, differing only by a
+systematic renaming — `TateAlgebra₂ A` ↔ `restrictedMvPowerSeriesSubring n A`, `Fin 2` ↔ `Fin n`,
+`tateAlgNhd₂ P` ↔ `mvTateAlgNhd n P`, `exists_mul_pow_subset_pow` ↔ `mvExists_mul_pow_subset_pow`.
+The `₂` version is a specialisation copy at `n := 2`.
+
+`TateAlgebra₂ A` is already an `abbrev` for `restrictedMvPowerSeriesSubring 2 A`, so the types
+line up. **But `MvTateAlgebraTopology` imports `TateAlgebraTopology`, not the reverse** — the
+general lemma is downstream of the thing it should generalise, so the specialisation is forced
+to keep its own copy. And `pairSubring₂ P` / `mvPairSubring 2 P` (likewise `pairIdeal₂`) are
+parallel-but-distinct `where`-definitions, so even with the import fixed a bridge lemma would
+be needed.
+
+> **A duplication can be structural rather than textual.** No amount of lifting removes this
+> one; it needs the `mv*` layer moved upstream of the `₂` specialisations, with the `₂` names
+> becoming abbrevs at `n = 2`. That touches the definitional structure of two files and every
+> consumer of `pairSubring₂` / `pairIdeal₂` / `tateAlgNhd₂` — an owner-level design decision,
+> and precisely the wrong thing to attempt while the volume is at 100% and verification is
+> unreliable.
+
+Recorded, not acted on. Estimated payoff when it is done: ~51c deleted and one board entry
+cleared, plus the same treatment likely applies to the other `₂`/`mv` pairs in these two files.
