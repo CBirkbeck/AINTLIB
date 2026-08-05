@@ -1810,6 +1810,36 @@ private theorem approx_generation_key {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ <
     exact ⟨Function.update b g (b g + m),
       update_gaussNormRPS_mul_le p F ϖ hbB hmg hyB,
       update_remainder_gaussNormRPS_le p F ϖ hgG hbrem⟩
+
+/-- The degenerate branch of `approx_generation`: when `y₀` has Gauss norm `0`, the zero
+family works — every product term vanishes, so the remainder is `y₀` itself. -/
+private theorem approx_generation_of_gaussNormRPS_eq_zero {ρ : NNReal} {hρ0 : 0 < ρ}
+    {hρ1 : ρ < 1} {ε : NNReal}
+    {G : Finset ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    {y₀ : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    (hB0 : gaussNormRPS p F ϖ hρ0 hρ1
+      (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = 0) :
+    ∃ a : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0
+      hρ1)) → ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)),
+      (∀ g ∈ G, gaussNormRPS p F ϖ hρ0 hρ1 ((a g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) * gaussNormRPS p F ϖ hρ0 hρ1 (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+        ≤ gaussNormRPS p F ϖ hρ0 hρ1 (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+      ∧ gaussNormRPS p F ϖ hρ0 hρ1 (((y₀ - ∑ g ∈ G, a g * g : ↥(restrictedMvPowerSeriesSubring k
+        ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+        ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1 (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := by
+  refine ⟨fun _ => 0, fun g hg => ?_, ?_⟩
+  · rw [ZeroMemClass.coe_zero, gaussNormRPS_zero, zero_mul]
+    exact zero_le
+  · have hsum : (∑ g ∈ G, (0 : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) *
+    g) = 0 :=
+      Finset.sum_eq_zero fun g _ => zero_mul g
+    refine (((congrArg (fun t => gaussNormRPS p F ϖ hρ0 hρ1
+      ((y₀ - t : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin
+        k) ↥(ArSub p F ϖ hρ0 hρ1))) hsum).trans
+      (congrArg (fun t : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) =>
+        gaussNormRPS p F ϖ hρ0 hρ1
+        (t : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0
+          hρ1))) (sub_zero y₀))).trans hB0).trans_le zero_le
+
 theorem approx_generation {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNReal}
     {H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
     {G : Finset ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
@@ -1841,19 +1871,7 @@ theorem approx_generation {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NN
         ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1 (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := by
   classical
   by_cases hB0 : gaussNormRPS p F ϖ hρ0 hρ1 (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = 0
-  · refine ⟨fun _ => 0, fun g hg => ?_, ?_⟩
-    · rw [ZeroMemClass.coe_zero, gaussNormRPS_zero, zero_mul]
-      exact zero_le
-    · have hsum : (∑ g ∈ G, (0 : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) *
-      g) = 0 :=
-        Finset.sum_eq_zero fun g _ => zero_mul g
-      refine (((congrArg (fun t => gaussNormRPS p F ϖ hρ0 hρ1
-        ((y₀ - t : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin
-          k) ↥(ArSub p F ϖ hρ0 hρ1))) hsum).trans
-        (congrArg (fun t : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) =>
-          gaussNormRPS p F ϖ hρ0 hρ1
-          (t : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0
-            hρ1))) (sub_zero y₀))).trans hB0).trans_le zero_le
+  · exact approx_generation_of_gaussNormRPS_eq_zero p F ϖ hB0
   · have hBpos : 0 < gaussNormRPS p F ϖ hρ0 hρ1 (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0
     hρ1)) :=
       pos_iff_ne_zero.mpr hB0

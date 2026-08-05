@@ -3246,6 +3246,44 @@ private theorem psi_continuous_of_gen
 
 
 omit [CompatiblePlusSubring A] in
+/-- A continuous lift `ψ` of the localization into the quotient `A⟨ζ⟩ ⧸ aI` extends along the
+completion to a continuous ring hom out of `presheafValue D` agreeing with `ψ` on the image of
+the localization.
+
+The quotient is complete (`hA_complete`) and Hausdorff (`haI_closed`), which is exactly what
+`UniformSpace.Completion.extensionHom` asks for. -/
+private theorem exists_completionExtension_of_quotient
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]
+    [HasLocLiftPowerBounded A]
+    (D : RationalLocData A) (aI : Ideal ↥(restrictedMvPowerSeriesSubring 1 A))
+    (haI_closed : IsClosed (aI : Set ↥(restrictedMvPowerSeriesSubring 1 A)))
+    (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A))
+    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI))
+    (hψ_cont : @Continuous _ _ D.topology (mvQuotTopology 1 aI) ψ) :
+    ∃ β : presheafValue D →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI),
+      (∀ y : Localization.Away D.s, β (D.coeRingHom y) = ψ y) ∧
+        @Continuous _ _ _ (mvQuotTopology 1 aI) ⇑β := by
+  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
+    mvQuotTopology 1 aI
+  letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
+    mvQuotUniformSpace 1 aI
+  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup 1 aI
+  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace 1 aI hA_complete
+  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space 1 aI haI_closed
+  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
+    (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
+    (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
+  · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
+      _ _ (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
+      (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_› y
+  · exact @UniformSpace.Completion.continuous_extension (Localization.Away D.s)
+      D.uniformSpace _ uQ (⇑ψ) ‹_›
+
+omit [CompatiblePlusSubring A] in
 /-- If a continuous localization lift `ψ` and a continuous `Φ` with the same kernel as
 `example638_evalHom D` agree at the variable (via `hΦζ`), then `ker (example638_evalHom D) ≤
 aI`: extend `ψ` to the completion as `β`, check `β ∘ Φ = mk aI` on the dense polynomials, and
@@ -3279,27 +3317,9 @@ private theorem ker_le_of_ext
     MvTateAlgebra.mvTateAlgebraTopology' 1
   letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
     mvQuotTopology 1 aI
-  letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
-    mvQuotUniformSpace 1 aI
-  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup 1 aI
-  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace 1 aI hA_complete
   haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space 1 aI haI_closed
-  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
-  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  obtain ⟨β, hβ_coe, hβ_cont⟩ :
-      ∃ β : presheafValue D →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI),
-        (∀ y : Localization.Away D.s, β (D.coeRingHom y) = ψ y) ∧
-          @Continuous _ _ _ τQ ⇑β := by
-    refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
-      (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
-      (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
-    · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
-        _ _ (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
-        (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_› y
-    · exact @UniformSpace.Completion.continuous_extension (Localization.Away D.s)
-        D.uniformSpace _ uQ (⇑ψ) ‹_›
+  obtain ⟨β, hβ_coe, hβ_cont⟩ :=
+    exists_completionExtension_of_quotient D aI haI_closed hA_complete ψ hψ_cont
   have hext : (⇑β ∘ ⇑Φ :
       ↥(restrictedMvPowerSeriesSubring 1 A) → _) = ⇑(Ideal.Quotient.mk aI) := by
     refine Continuous.ext_on

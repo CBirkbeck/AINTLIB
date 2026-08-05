@@ -5553,6 +5553,33 @@ theorem exists_p_scaling₂
           exact mul_lt_mul_of_pos_right hk (pos_of_ne_zero hne)
       _ = 1 := inv_mul_cancel₀ hne
 
+/-- Cancelling the `p`-power rescaling: multiplying by the `BIProd`-image of `u⁻¹ ^ k`
+undoes multiplication by `pImage ^ k`, because `u⁻¹ * p = 1` in `Bloc` and `BIProd` is a ring
+hom. -/
+private theorem BIProd_inv_pow_mul_pImage_pow (k : ℕ)
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)) :
+    BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
+      * (pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k * z) = z := by
+  have hinv : (↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) = 1 := by
+    have h := (isUnit_p_image p F ϖ).unit.inv_mul
+    rwa [(isUnit_p_image p F ϖ).unit_spec] at h
+  have hvpalg : ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k = 1 := by
+    rw [← mul_pow, hinv, one_pow]
+  have h1 : pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k) :=
+    (map_pow (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+      (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)) k).symm
+  have h2 : BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
+      * BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k) = 1 :=
+    ((map_mul (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+        (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
+        (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k)).symm).trans
+      ((congrArg (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1) hvpalg).trans (map_one _))
+  rw [h1, ← mul_assoc, h2, one_mul]
+
 include hφb in
 /-- **Surjectivity of the case-2 evaluation** (Kedlaya Lemma 4.9, case 1):
 every element of the cut interval ring is a value, by `p`-power rescaling
@@ -5577,32 +5604,9 @@ theorem surjective_evalBIHom₂
     hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz'mem hk
   refine ⟨GeltEltM0 p F ϖ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
     (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)) * U', ?_⟩
-  have hinv : (↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)
-      * algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) = 1 := by
-    have h := (isUnit_p_image p F ϖ).unit.inv_mul
-    rwa [(isUnit_p_image p F ϖ).unit_spec] at h
-  have hvpalg : ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k
-      * algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k = 1 := by
-    rw [← mul_pow, hinv, one_pow]
-  have h1 : pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
-        (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k) :=
-    (map_pow (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
-      (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)) k).symm
-  have h2 : BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
-      * BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
-        (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k) = 1 :=
-    ((map_mul (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
-        (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
-        (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k)).symm).trans
-      ((congrArg (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1) hvpalg).trans (map_one _))
-  have hfinal : BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
-        (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
-      * (pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k
-        * ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)))
-      = ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)) := by
-    rw [h1, ← mul_assoc, h2, one_mul]
+  have hfinal := BIProd_inv_pow_mul_pImage_pow p F ϖ k
+    ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
   refine Subtype.ext ?_
   rw [evalBIHom_coe₂ p F ϖ φ hφ hbmem hb,
     evalBI_mul p F ϖ φ hφ hbmem hb,
