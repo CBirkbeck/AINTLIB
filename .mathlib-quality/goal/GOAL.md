@@ -16297,3 +16297,50 @@ it real.
 > **Report the pair, not the target.** A decomposition is worth what the *worst* declaration it
 > leaves behind is worth. Measure every new lemma the moment it exists, and treat a lifted body
 > over 50 lines as an unfinished lift, not a completed one.
+
+### Starting `wedhorn_lemma_834` (132c) — two anchor/substitution lessons in one run
+
+**Prefix matching bit again, this time on a declaration name.** `l.startswith("theorem
+wedhorn_lemma_834")` also matches `theorem wedhorn_lemma_834_propA3_part1_bridge`, which is 4700
+lines earlier — so the block survey ran on the wrong proof and reported "1 top-level block".
+Declaration names are unique, but only as *tokens*:
+
+```python
+re.match(r"^(?:private )?theorem wedhorn_lemma_834(?![A-Za-z_0-9'])", l)
+```
+
+Every anchor failure this session has now been a form of the same thing — a pattern matching
+more than the thing it names (`set_option … in` ×170, `classical` ×3, `intro n`, and now a
+declaration *prefix*).
+
+**The edit was narrower than the guard — which is how it should be.** I substituted the compound
+`U.1.interSamePair Vj.1 (hP_UV U Vj)` but missed `U.1` and `Vj.1` in plain *argument* position
+two lines below (`interSamePair_rationalOpen U.1 Vj.1 (hP_UV U Vj)`). The broad guard
+("no caller-local may survive") caught what the narrow edit missed, and printed both lines.
+
+> Substitute at **token** level and guard at **token** level; matching a compound expression
+> only rewrites the occurrences that happen to be written that way. The earlier failures in this
+> campaign were guards narrower than the edit — this is the same principle from the other side.
+
+### The over-50 *total* is not trustworthy to ±2 — track per-target sizes instead
+
+Lifting `hM_trace_sub` out of `wedhorn_lemma_834` (132 → 123, new lemma 9c) should not have
+changed the total. It read **71 → 72**.
+
+Investigated rather than shrugged at. The insertion is purely additive and lands *after*
+`wedhorn_lemma_834_pair_package_exists` ends (git diff confirms a clean `+27` hunk), and that
+neighbour measures **49c both before and after** under the "count lines after `:= by`"
+convention. `scope.py` calls it **51c**.
+
+The two disagree because `scope.py` splits the body at the first `:=` at bracket depth 0 and
+counts from *mid-line*, so the remainder of the signature line and its continuation land in the
+body. That is the same ~2-line bias that made my rebuilt script report 74 over-50 against the
+lost original's 14, and I noted it then without drawing the consequence:
+
+> **A borderline declaration can flip the total without any edit touching it.** Report per-target
+> before/after sizes, which are stable and verifiable, and treat the aggregate as a trend only.
+> Never claim "the count went down" as evidence that a lift helped.
+
+Concretely: `…_pair_package_exists` sits at 49–51 depending on convention, so it drifts in and
+out of the list. The substantive result here is `wedhorn_lemma_834` **132 → 123**, which both
+conventions agree on.
