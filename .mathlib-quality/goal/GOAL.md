@@ -16252,3 +16252,48 @@ the `clear` too.
 > real uses will miss them entirely.
 
 Caught by reading the block's exports before writing, not by the compiler.
+
+### Block 5 cleared the target and *moved* the problem — the count did not improve
+
+`exists_spa_point_of_generator_attaining_sup` lifted the whole post-`clear` phase, and the
+target fell 77 → **24**. But the new lemma came out at **54c** — over the bar. Over-50 count:
+**72 → 72.** One declaration left the list and another joined it.
+
+This is the failure mode the `tateAlgebra_flat` notes warned about in the abstract ("intermediate
+states score worse than the start") and I walked into it anyway, because the *target* number
+looked like success.
+
+> A lift that relocates more than ~50 code lines has not finished until the **new** declaration
+> is measured. Report the pair, never just the target: "158 → 24" is false advertising if it is
+> really "158 → 24 plus a fresh 54".
+
+The fix is one more lift *inside* the new lemma — the extension-and-vanishing block (11 lines,
+`exists_valuation_extension_vanishing_on_prime`), which is self-contained and takes it to ~45.
+
+Cheap rule that would have caught it at planning time: **a lifted body of size N leaves a lemma
+of roughly N; if N > 50 the lift needs its own decomposition before it is worth doing.** Block
+5's body was 55 raw lines, which was visible in the script's own output before the build ran.
+
+### `exists_spa_point_via_restrictToConvex` CLEARED: 158 → 24, count 72 → 71
+
+Eight declarations, largest 44:
+
+| decl | c |
+|---|---|
+| `withZero_pow_cofinal_of_mem_convexGenerated` | 5 |
+| `exists_spa_point_of_valuation_package` | 11 |
+| `exists_valuation_extension_vanishing_on_prime` | 14 |
+| `exists_generator_attaining_sup` | 15 |
+| `valuation_package_of_extension` | 22 |
+| `sup_valuation_generators_lt_one_and_ne_zero` | 26 |
+| `exists_spa_point_of_generator_attaining_sup` | 44 |
+| **target** | **24** |
+
+The count moved only after the *sixth* lift. Blocks 1–5 took the target 158 → 24 but parked a
+54c helper, so the board read 72 → 72 throughout — three commits of apparent progress that
+changed nothing measurable. Only `exists_valuation_extension_vanishing_on_prime` (11 lines) made
+it real.
+
+> **Report the pair, not the target.** A decomposition is worth what the *worst* declaration it
+> leaves behind is worth. Measure every new lemma the moment it exists, and treat a lifted body
+> over 50 lines as an unfinished lift, not a completed one.

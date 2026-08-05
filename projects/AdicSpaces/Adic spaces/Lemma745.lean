@@ -564,45 +564,53 @@ private theorem sup_valuation_generators_lt_one_and_ne_zero (P : PairOfDefinitio
     lt_of_lt_of_le (zero_lt_iff.mpr ha₀_val_ne) ha₀_val_le_gmax
   exact ⟨hpb_le_gmax, hg_lt1, hg_ne0⟩
 
-/-- **Rank-1 extension (Wedhorn Lemma 7.45, Steps 3-7).**
-
-Constructs a valuation `v_ext : Valuation A (WithZero H_gen.toSubgroup)` that is
-continuous, has `supp(v_ext) ⊇ 𝔭`, and `v_ext ≤ 1` on `A⁺`. The value group
-`WithZero(H_gen.toSubgroup)` admits cofinal powers (from `convexGenerated`),
-which yields continuity without requiring `MulArchimedean`.
-
-The proof uses `restrictToConvex` on `A₀` and extends to `A` via the
-`v_ext(a) = v_r(s^n * a) * v_r(s)^{-n}` construction (Wedhorn Lemma 7.44(3)).
-The algebraic sub-proofs (well-definedness, multiplicativity, ultrametric
-inequality) are factored into `vExtFun_step`,
-`vExtFun_well_defined`, `vExtFun_map_mul`, `vExtFun_map_add_le_max`. -/
-theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
-    [IsAdicComplete P.I P.A₀] [PlusSubring A] {𝔭 : Ideal A} [𝔭.IsPrime]
-    (h𝔭 : ¬IsOpen (𝔭 : Set A)) (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀) :
-    ∃ v ∈ Spa A A⁺, 𝔭 ≤ v.supp ∧ ¬P.idealOfDefinition ≤ v.supp := by
-  haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
-  obtain ⟨V₀, hrange₀, hnonunits₀⟩ := P.exists_valuationSubring_of_prime (𝔭 := 𝔭)
-  obtain ⟨a₀, ha₀_I, ha₀_notp⟩ := P.exists_mem_I_not_mem_of_not_isOpen h𝔭
+/-- Extend the convex restriction of the pulled-back valuation from `P.A₀` to all of `A`, and
+check that the extension vanishes on `𝔭`. The extension is Wedhorn 7.44(3); vanishing follows
+because `s ^ n * a` lands in `𝔭` whenever `a` does. -/
+private theorem exists_valuation_extension_vanishing_on_prime (P : PairOfDefinition A)
+    {𝔭 : Ideal A} [𝔭.IsPrime] (V₀ : ValuationSubring (FractionRing (A ⧸ 𝔭)))
+    (H : ConvexSubgroup V₀.ValueGroupˣ)
+    (hle : ∀ r : P.A₀, (V₀.valuation.comap (P.toFractionQuotient 𝔭)) r ≤ 1) (a₀ : P.A₀)
+    (hs_nil : IsTopologicallyNilpotent (P.A₀.subtype a₀ : A))
+    (hv_r_ne : (V₀.valuation.comap (P.toFractionQuotient 𝔭)).restrictToConvex H hle a₀ ≠ 0) :
+    ∃ v_ext : Valuation A (WithZero H.toSubgroup),
+      (∀ a : P.A₀, v_ext (P.A₀.subtype a) = (V₀.valuation.comap (P.toFractionQuotient 𝔭)).restrictToConvex H hle a) ∧
+      (∀ a : A, a ∈ 𝔭 → v_ext a = 0) := by
   set s := (P.A₀.subtype a₀ : A)
-  have hs_nil : IsTopologicallyNilpotent s := P.isTopologicallyNilpotent_of_mem ha₀_I
-  have _h_pow_mul : ∀ a : A, ∃ n : ℕ, s ^ n * a ∈ P.A₀ :=
-    P.exists_pow_mul_mem_A₀ hs_nil
+  set v_r := (V₀.valuation.comap (P.toFractionQuotient 𝔭)).restrictToConvex H hle with v_r_def
+  have h_pow_mul : ∀ a : A, ∃ n : ℕ, s ^ n * a ∈ P.A₀ := P.exists_pow_mul_mem_A₀ hs_nil
+  have hs_A₀ : s ∈ P.A₀ := Subtype.coe_prop a₀
+  have hv_r_s_ne' : v_r ⟨s, hs_A₀⟩ ≠ 0 := by
+    rwa [show (⟨s, hs_A₀⟩ : P.A₀) = a₀ from Subtype.ext rfl]
+  obtain ⟨v_ext, h_ext_A₀, h_ext_at⟩ :=
+    P.exists_valuation_extension v_r hs_A₀ hs_nil hv_r_s_ne'
+  refine ⟨v_ext, h_ext_A₀, fun a ha_p ↦ ?_⟩
+  obtain ⟨n, hn⟩ := h_pow_mul a
+  have hv_r_zero : v_r ⟨s ^ n * a, hn⟩ = 0 :=
+    P.restrictToConvex_comap_toFractionQuotient_eq_zero_of_mem_prime V₀ H hle
+      (𝔭.mul_mem_left _ ha_p)
+  rw [h_ext_at a n hn, hv_r_zero, zero_mul]
+
+/-- Given a generator `a₀` of the ideal of definition attaining the maximum `g_max` of
+`V₀.valuation ∘ φ`, with `g_max` strictly between `0` and `1` and dominating the pulled-back
+valuation on `P.I`, the `convexGenerated` + `restrictToConvex` + extension construction yields
+a point of `Spa A A⁺` supported above `𝔭` but not above the ideal of definition.
+
+This is the second phase of `exists_spa_point_via_restrictToConvex`; the first phase exists
+only to produce `a₀` and the bounds on `g_max`, and is `clear`ed before this one begins. -/
+private theorem exists_spa_point_of_generator_attaining_sup (P : PairOfDefinition A)
+    [IsAdicComplete P.I P.A₀] [PlusSubring A] {𝔭 : Ideal A} [𝔭.IsPrime]
+    (V₀ : ValuationSubring (FractionRing (A ⧸ 𝔭)))
+    (hrange₀ : (P.toFractionQuotient 𝔭).range ≤ V₀.toSubring)
+    (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
+    (a₀ : P.A₀) (ht₀_I : a₀ ∈ P.I)
+    (ht₀_notp : (P.A₀.subtype a₀ : A) ∉ 𝔭)
+    {g_max : V₀.ValueGroup} (ht₀_val : g_max = V₀.valuation (P.toFractionQuotient 𝔭 a₀))
+    (hg_lt1 : g_max < 1) (hg_ne0 : g_max ≠ 0)
+    (hpb_le_gmax : ∀ a : P.A₀, a ∈ P.I →
+      P.pulledBackValuation V₀ (P.A₀.subtype a) ≤ g_max) :
+    ∃ v ∈ Spa A A⁺, 𝔭 ≤ v.supp ∧ ¬P.idealOfDefinition ≤ v.supp := by
   set φ := P.toFractionQuotient 𝔭
-  obtain ⟨S, hS⟩ := P.fg
-  have hSne : S.Nonempty := by
-    rw [Finset.nonempty_iff_ne_empty]; intro hS_eq
-    have hI_bot : P.I = ⊥ := by rw [← hS, hS_eq, Finset.coe_empty, Ideal.span_empty]
-    have ha₀_zero : a₀ = 0 := Ideal.mem_bot.mp (hI_bot ▸ ha₀_I)
-    exact ha₀_notp (by rw [show s = P.A₀.subtype a₀ from rfl, ha₀_zero, map_zero]
-                       exact 𝔭.zero_mem)
-  set g_max := S.sup' hSne (fun t ↦ V₀.valuation (φ t)) with g_max_def
-  obtain ⟨hpb_le_gmax, hg_lt1, hg_ne0⟩ :=
-    sup_valuation_generators_lt_one_and_ne_zero P V₀ hrange₀ hnonunits₀ hS hSne ha₀_I ha₀_notp
-  obtain ⟨t₀, ht₀_I, ht₀_notp, ht₀_val'⟩ :=
-    exists_generator_attaining_sup P V₀ hS hSne hg_ne0
-  have ht₀_val : g_max = V₀.valuation (φ t₀) := ht₀_val'.symm
-  clear a₀ ha₀_I ha₀_notp s hs_nil _h_pow_mul
-  set a₀ := t₀
   set s := (P.A₀.subtype a₀ : A)
   have ha₀_I : a₀ ∈ P.I := ht₀_I
   have ha₀_notp : s ∉ 𝔭 := ht₀_notp
@@ -647,17 +655,47 @@ theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
     hpb_le_gmax hAplus_le_A₀ ?_
   -- The valuation `v_ext` extending `v_r` from `A₀` to `A` is `exists_valuation_extension`
   -- (Wedhorn 7.44(3)); it remains to check it vanishes on `𝔭`.
-  have hs_A₀ : s ∈ P.A₀ := Subtype.coe_prop a₀
-  have hv_r_s_ne' : v_r ⟨s, hs_A₀⟩ ≠ 0 := by
-    rwa [show (⟨s, hs_A₀⟩ : P.A₀) = a₀ from Subtype.ext rfl]
-  obtain ⟨v_ext, h_ext_A₀, h_ext_at⟩ :=
-    P.exists_valuation_extension v_r hs_A₀ hs_nil hv_r_s_ne'
-  refine ⟨v_ext, h_ext_A₀, fun a ha_p ↦ ?_⟩
-  obtain ⟨n, hn⟩ := h_pow_mul a
-  have hv_r_zero : v_r ⟨s ^ n * a, hn⟩ = 0 :=
-    P.restrictToConvex_comap_toFractionQuotient_eq_zero_of_mem_prime V₀ H_gen hle_A₀
-      (𝔭.mul_mem_left _ ha_p)
-  rw [h_ext_at a n hn, hv_r_zero, zero_mul]
+  exact exists_valuation_extension_vanishing_on_prime P V₀ H_gen hle_A₀ a₀ hs_nil hv_r_s_ne
+
+/-- **Rank-1 extension (Wedhorn Lemma 7.45, Steps 3-7).**
+
+Constructs a valuation `v_ext : Valuation A (WithZero H_gen.toSubgroup)` that is
+continuous, has `supp(v_ext) ⊇ 𝔭`, and `v_ext ≤ 1` on `A⁺`. The value group
+`WithZero(H_gen.toSubgroup)` admits cofinal powers (from `convexGenerated`),
+which yields continuity without requiring `MulArchimedean`.
+
+The proof uses `restrictToConvex` on `A₀` and extends to `A` via the
+`v_ext(a) = v_r(s^n * a) * v_r(s)^{-n}` construction (Wedhorn Lemma 7.44(3)).
+The algebraic sub-proofs (well-definedness, multiplicativity, ultrametric
+inequality) are factored into `vExtFun_step`,
+`vExtFun_well_defined`, `vExtFun_map_mul`, `vExtFun_map_add_le_max`. -/
+theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
+    [IsAdicComplete P.I P.A₀] [PlusSubring A] {𝔭 : Ideal A} [𝔭.IsPrime]
+    (h𝔭 : ¬IsOpen (𝔭 : Set A)) (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀) :
+    ∃ v ∈ Spa A A⁺, 𝔭 ≤ v.supp ∧ ¬P.idealOfDefinition ≤ v.supp := by
+  haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
+  obtain ⟨V₀, hrange₀, hnonunits₀⟩ := P.exists_valuationSubring_of_prime (𝔭 := 𝔭)
+  obtain ⟨a₀, ha₀_I, ha₀_notp⟩ := P.exists_mem_I_not_mem_of_not_isOpen h𝔭
+  set s := (P.A₀.subtype a₀ : A)
+  have hs_nil : IsTopologicallyNilpotent s := P.isTopologicallyNilpotent_of_mem ha₀_I
+  have _h_pow_mul : ∀ a : A, ∃ n : ℕ, s ^ n * a ∈ P.A₀ :=
+    P.exists_pow_mul_mem_A₀ hs_nil
+  set φ := P.toFractionQuotient 𝔭
+  obtain ⟨S, hS⟩ := P.fg
+  have hSne : S.Nonempty := by
+    rw [Finset.nonempty_iff_ne_empty]; intro hS_eq
+    have hI_bot : P.I = ⊥ := by rw [← hS, hS_eq, Finset.coe_empty, Ideal.span_empty]
+    have ha₀_zero : a₀ = 0 := Ideal.mem_bot.mp (hI_bot ▸ ha₀_I)
+    exact ha₀_notp (by rw [show s = P.A₀.subtype a₀ from rfl, ha₀_zero, map_zero]
+                       exact 𝔭.zero_mem)
+  set g_max := S.sup' hSne (fun t ↦ V₀.valuation (φ t)) with g_max_def
+  obtain ⟨hpb_le_gmax, hg_lt1, hg_ne0⟩ :=
+    sup_valuation_generators_lt_one_and_ne_zero P V₀ hrange₀ hnonunits₀ hS hSne ha₀_I ha₀_notp
+  obtain ⟨t₀, ht₀_I, ht₀_notp, ht₀_val'⟩ :=
+    exists_generator_attaining_sup P V₀ hS hSne hg_ne0
+  have ht₀_val : g_max = V₀.valuation (φ t₀) := ht₀_val'.symm
+  exact exists_spa_point_of_generator_attaining_sup P V₀ hrange₀ hAplus_le_A₀ t₀ ht₀_I
+    ht₀_notp ht₀_val hg_lt1 hg_ne0 hpb_le_gmax
 
 /-! ### Full proof assembly -/
 
