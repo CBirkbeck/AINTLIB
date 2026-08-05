@@ -16384,3 +16384,82 @@ Large targets shift by 1; the *count* collapses because the 51-spike was entirel
 
 The real remaining board is 22 declarations, top: two at 188 (`presheafValue_mvRestricted_surjection`,
 `idealOfDef_pow_isClosed_aux`), 136, 124, 122.
+
+### Task 1 re-verified complete (2026-08-05)
+
+Checked rather than assumed, after the `scope.py` bug showed that a metric I trusted was wrong.
+Project source only (`Adic spaces/`, excluding `.lake/` and `Vendored/`):
+
+| raise | count | verdict |
+|---|---|---|
+| `set_option maxHeartbeats` | **0** | the 2 grep hits are historical *comments* ("needed 4000000 until the three-way split below") |
+| `set_option synthInstance.maxHeartbeats` | **0** | — |
+| `set_option maxSynthPendingDepth 1` | 3 | a *reduction*; directive says KEEP |
+| `set_option maxSynthPendingDepth 8` | 1 | `Vendored/CoramRestrictedIso.lean:176` — third-party, directive says SKIP |
+
+The directive's note "Biggest remaining: WedhornCechAcyclicity.lean (56)" is stale; that file
+was cleared earlier in the campaign and now has zero raises.
+
+**Two grep traps hit while checking this**, both worth the note:
+
+* the first sweep matched `_blueprint/.lake/packages/mathlib/**` — mathlib's own sources —
+  inflating the count to 59. **Exclude `.lake/` explicitly**; a project-relative `--include`
+  is not enough when a build tree sits under the project.
+* the value histogram used `grep -rhn`, and `-h` **suppresses filenames**, so the downstream
+  `grep -v /Vendored/` had nothing to match and a vendored hit leaked in — briefly suggesting
+  a live depth-8 raise. A filter can only see what the previous stage left in the stream.
+
+### Target selection on the corrected board: conditioning beats size
+
+With the real board at 22, I compared the top candidates by *shape* rather than taking the
+largest:
+
+| target | c | blocks | letI/haveI | biggest blocks |
+|---|---|---|---|---|
+| `presheafValue_mvRestricted_surjection` | 188 | — | — | iU/fU/ē uniform-space wall (recorded) |
+| `idealOfDef_pow_isClosed_aux` | 188 | 13 | many | `@`-applications over a 70-line letI stack |
+| `locToQuotientOneSubfX_gen_continuous_canonical` | 136 | 24 | 8 | 30, 20, 12 |
+| **`locToQuotient_mul_small_constant_mem`** | **124** | **29** | **4** | **33, 23** |
+| `genPiece_relative_overlap_square₂` | 95 | 2 | 14 | nested inside 2 blocks |
+| `isSheafy_presheafChart` | 80 | 6 | 12 | dense instance wall |
+
+Picked the 124 over both 188s. `letI`/`haveI` density is the single best predictor of how hard a
+proof is to decompose — instances do not travel, so a proof with 12–14 of them in <120 lines is
+a wall regardless of its block structure. Conversely `genPiece_relative_overlap_square₂` has only
+2 top-level blocks, which looks tidy but means all the work is *nested* and there is no seam at
+the top level at all.
+
+Also abandoned `wedhorn_lemma_834` at 122 after the first lift: its remaining blocks are 5–16c
+with heavy mutual dependency (`hTpos_*` → `hM_*` → the bridge), so each lift drags 7+ hypotheses
+for ~13c of body. That shape wants *bundling* into conjunction-returning lemmas, which is a
+bigger redesign than the remaining budget justifies.
+
+First lift on the new target: `exists_lift_stable_of_mem_locSubring` — the 33c
+`Subring.closure_induction`. `G` is opaque (it enters only through five stability facts), but
+`mk` had to be spelled out as `Ideal.Quotient.mk (oneSubfXIdeal D.s)` rather than parameterised,
+because `rw [← locToQuotientOneSubfX_gen_algebraMap]` needs it to *be* that map.
+
+### `locToQuotient_mul_small_constant_mem` 124 → 96 via `exists_lift_stable_of_mem_locSubring` (29c)
+
+The 33c `Subring.closure_induction`: lift an element of the localisation subring to the Tate
+algebra along the quotient map, preserving `G`-stability. `G` is **opaque** — it enters only
+through five facts (`hG_zero`, `hG_add`, `hG_neg`, and the two generator-case stability
+hypotheses) — but `mk` had to be **spelled out** as `Ideal.Quotient.mk (oneSubfXIdeal D.s)`
+rather than parameterised, because `rw [← locToQuotientOneSubfX_gen_algebraMap]` needs it to
+*be* that map, not merely a ring hom with the same behaviour.
+
+> Two `let`s in the same preamble can need opposite treatment. Whether one can be a parameter
+> depends on whether any tactic in the body identifies it *by name or by definition* — `G` is
+> only ever a membership target, `mk` is the subject of a rewrite.
+
+**Verified by module build, and that is sufficient here** — both declarations are `private` and
+a grep confirms no consumer outside `TopologyComparison.lean`, so nothing observable changed
+beyond the module. 2626 jobs, 0 errors. (The full-library gate was killed again mid-run: the
+volume is still at 100%.)
+
+**A harness trap worth recording.** The task reported "failed with exit code 1" on a *green*
+build: my command ended with `grep -c "error…"`, which exits 1 when the count is **zero**. The
+success case looks like failure.
+
+> Never end a verification command with a bare `grep -c` — its exit status inverts the meaning
+> you want. Append `|| true`, or put the build's own `EXIT=$?` last.

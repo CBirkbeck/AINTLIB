@@ -342,6 +342,54 @@ private theorem mul_algebraMap_X_mem_artinReesNhd (P : PairOfDefinition A) (s t 
       rw [this, add_mul, one_mul]; omega
     exact hC_shift (M + (N - (n' + 1)) * C) b (hkey ▸ hb)
 
+/-- Lift an element of the localisation subring to the Tate algebra along the quotient map,
+keeping a `G`-stability property. Proved by `Subring.closure_induction`: the two generator
+cases are the hypotheses `hG_stable_alg` / `hG_stable_tX`, and the algebraic cases only need
+`G` closed under `0`, `+` and `-`.
+
+`G` is opaque here — it enters solely through those five facts. -/
+private theorem exists_lift_stable_of_mem_locSubring (D : RationalLocData A)
+    (G : Set ↥(TateAlgebra A)) (hG_zero : (0 : ↥(TateAlgebra A)) ∈ G)
+    (hG_add : ∀ {a b}, a ∈ G → b ∈ G → a + b ∈ G)
+    (hG_neg : ∀ {a}, a ∈ G → -a ∈ G)
+    (hG_stable_alg : ∀ (a₀ : D.P.A₀) (g : ↥(TateAlgebra A)),
+      g ∈ G → algebraMap A _ (a₀ : A) * g ∈ G)
+    (hG_stable_tX : ∀ (t : D.T) (g : ↥(TateAlgebra A)),
+      g ∈ G → algebraMap A _ (t : A) * TateAlgebra.X * g ∈ G)
+    (x : Localization.Away D.s) (hx : x ∈ locSubring D.P D.T D.s) :
+    ∃ r' : ↥(TateAlgebra A),
+      Ideal.Quotient.mk (oneSubfXIdeal D.s) r' = locToQuotientOneSubfX_gen D.s x ∧
+      ∀ g ∈ G, r' * g ∈ G := by
+  induction hx using Subring.closure_induction with
+  | mem x hx =>
+    rcases hx with ⟨a₀, ha₀, rfl⟩ | ⟨⟨t, ht⟩, rfl⟩
+    · -- Case: x = algebraMap(a₀) with a₀ ∈ A₀.
+      refine ⟨algebraMap A _ a₀, ?_, ?_⟩
+      · rw [← locToQuotientOneSubfX_gen_algebraMap]
+      · exact hG_stable_alg ⟨a₀, ha₀⟩
+    · -- Case: x = divByS(t, s) with t ∈ T.
+      refine ⟨algebraMap A _ t * TateAlgebra.X, ?_, ?_⟩
+      · rw [← locToQuotientOneSubfX_gen_divByS]
+      · exact hG_stable_tX ⟨t, ht⟩
+  | zero =>
+    exact ⟨0, by simp [map_zero], fun g _ ↦ by simp [zero_mul, hG_zero]⟩
+  | one =>
+    exact ⟨1, by simp [map_one], fun g hg ↦ by simp [one_mul, hg]⟩
+  | add x y _ _ ihx ihy =>
+    obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
+    obtain ⟨ry, hry_eq, hry_stab⟩ := ihy
+    exact ⟨rx + ry, by rw [map_add, hrx_eq, hry_eq, map_add],
+      fun g hg ↦ by rw [add_mul]; exact hG_add (hrx_stab g hg) (hry_stab g hg)⟩
+  | neg x _ ihx =>
+    obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
+    exact ⟨-rx, by rw [map_neg, hrx_eq, map_neg],
+      fun g hg ↦ by rw [neg_mul]; exact hG_neg (hrx_stab g hg)⟩
+  | mul x y _ _ ihx ihy =>
+    obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
+    obtain ⟨ry, hry_eq, hry_stab⟩ := ihy
+    exact ⟨rx * ry, by rw [map_mul, hrx_eq, hry_eq, map_mul],
+      fun g hg ↦ by rw [mul_assoc]; exact hrx_stab _ (hry_stab g hg)⟩
+
 /-- For any neighborhood W of 0 in the quotient T-topology, there exists m such that
 for all r in locSubring and b in I^m, the product phi(r) * mk(algebraMap(b)) lands in W.
 
@@ -487,37 +535,9 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
   -- Then the conclusion follows: φ(r) * mk(algebraMap(b)) = mk(r' * algebraMap(b)) ∈ W.
   have hlift : ∀ (x : Localization.Away D.s),
       x ∈ locSubring D.P D.T D.s → ∃ r' : ↥(TateAlgebra A),
-        mk r' = locToQuotientOneSubfX_gen D.s x ∧ ∀ g ∈ G, r' * g ∈ G := by
-    intro x hx
-    induction hx using Subring.closure_induction with
-    | mem x hx =>
-      rcases hx with ⟨a₀, ha₀, rfl⟩ | ⟨⟨t, ht⟩, rfl⟩
-      · -- Case: x = algebraMap(a₀) with a₀ ∈ A₀.
-        refine ⟨algebraMap A _ a₀, ?_, ?_⟩
-        · rw [← locToQuotientOneSubfX_gen_algebraMap]
-        · exact hG_stable_alg ⟨a₀, ha₀⟩
-      · -- Case: x = divByS(t, s) with t ∈ T.
-        refine ⟨algebraMap A _ t * TateAlgebra.X, ?_, ?_⟩
-        · rw [← locToQuotientOneSubfX_gen_divByS]
-        · exact hG_stable_tX ⟨t, ht⟩
-    | zero =>
-      exact ⟨0, by simp [map_zero], fun g _ ↦ by simp [zero_mul, hG_zero]⟩
-    | one =>
-      exact ⟨1, by simp [map_one], fun g hg ↦ by simp [one_mul, hg]⟩
-    | add x y _ _ ihx ihy =>
-      obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
-      obtain ⟨ry, hry_eq, hry_stab⟩ := ihy
-      exact ⟨rx + ry, by rw [map_add, hrx_eq, hry_eq, map_add],
-        fun g hg ↦ by rw [add_mul]; exact hG_add (hrx_stab g hg) (hry_stab g hg)⟩
-    | neg x _ ihx =>
-      obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
-      exact ⟨-rx, by rw [map_neg, hrx_eq, map_neg],
-        fun g hg ↦ by rw [neg_mul]; exact hG_neg (hrx_stab g hg)⟩
-    | mul x y _ _ ihx ihy =>
-      obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
-      obtain ⟨ry, hry_eq, hry_stab⟩ := ihy
-      exact ⟨rx * ry, by rw [map_mul, hrx_eq, hry_eq, map_mul],
-        fun g hg ↦ by rw [mul_assoc]; exact hrx_stab _ (hry_stab g hg)⟩
+        mk r' = locToQuotientOneSubfX_gen D.s x ∧ ∀ g ∈ G, r' * g ∈ G :=
+    fun x hx ↦ exists_lift_stable_of_mem_locSubring D G hG_zero hG_add hG_neg
+      hG_stable_alg hG_stable_tX x hx
   obtain ⟨r', hr'_eq, hr'_stab⟩ := hlift r.val r.property
   -- Goal: φ(subtype(r) * algebraMap(b.val)) ∈ W
   -- Rewrite to: mk(r' * algebraMap(b.val)) ∈ W
