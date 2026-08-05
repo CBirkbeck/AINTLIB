@@ -17434,3 +17434,26 @@ warnings is either newly-surfaced or has been individually tried and individuall
 > Worth naming the shape: a linter whose fix changes a signature generates a **cascade**, not a
 > worklist. You cannot count the work up front — 714 warnings did not mean 714 fixes, it meant
 > 929 fixes so far across three re-lints, because each round of shrinking exposes the next.
+
+### The eight small warnings — and why "same text" is not "same site"
+
+Cleared the two remaining non-`Vendored` warning categories the build reports:
+
+* **5 no-op `change` tactics** (`'change …' tactic does nothing`). Four of them open a `·`
+  bullet, so deleting the lines would leave the bullet empty — the next tactic has to be
+  promoted onto the dot.
+* **3 `Try this: intro …`** — consecutive `intro`s the linter wants merged.
+
+First attempt matched the `change` lines **by text** and removed **7** where only 5 were
+flagged: the identical line
+`· change ((∑ p ∈ Finset.antidiagonal l, f p : P.A₀) : A) =` occurs at sites the linter did
+*not* flag, where the `change` is load-bearing. Reverted and redone by the exact
+(file, line, span) the warning names.
+
+> **A linter warning identifies a site, not a pattern.** In a codebase with repeated proof
+> shapes, matching the flagged text will hit siblings that are doing real work — and a deleted
+> load-bearing `change` fails at elaboration, not at parse, so it surfaces far from the edit.
+
+Second gotcha, same family: for `Try this: intro`, the warning points at the **first** `intro`,
+not the second, and for the bulleted ones the column lands inside `· intro h`. Assuming the
+warning marks the line to be *replaced* aborted the script; reading the column told the truth.

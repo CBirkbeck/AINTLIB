@@ -297,9 +297,7 @@ private theorem span_mul_pow_mem_pow_smul (PA : PairOfDefinition A) (m n : ℕ)
   obtain ⟨hx'cw'_A₀', hx'_res⟩ :=
     hx'_ih (c * w') hcw'_mem
   constructor
-  · change (PA.A₀.subtype (c • x' * w') :
-        A) ∈ A₀'
-    rw [show (c • x' * w' : PA.A₀) =
+  · rw [show (c • x' * w' : PA.A₀) =
         x' * (c * w') from Subtype.ext (by
       simp only [smul_eq_mul, Subring.coe_mul]
       ring)]

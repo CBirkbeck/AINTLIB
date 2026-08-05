@@ -458,9 +458,7 @@ theorem coeffInIdealIdeal_mul_mono (P : PairOfDefinition A) {I₁ I₂ : Ideal P
     refine ⟨∑ p ∈ Finset.antidiagonal l, f p, ?_, ?_⟩
     · refine (I₁ * I₂).sum_mem fun p _ => ?_
       exact Ideal.mul_mem_mul (ha' p.1).choose_spec.1 (hb' p.2).choose_spec.1
-    · change ((∑ p ∈ Finset.antidiagonal l, f p : P.A₀) : A) =
-        MvPowerSeries.coeff l (a * b).val.val
-      push_cast [f]
+    · push_cast [f]
       change (∑ p ∈ Finset.antidiagonal l,
           ((ha' p.1).choose : A) * ((hb' p.2).choose : A)) =
         MvPowerSeries.coeff l (a * b).val.val
@@ -2015,9 +2013,7 @@ theorem coeffInIdealIdeal₂_mul_mono (P : PairOfDefinition A) {I₁ I₂ : Idea
     refine ⟨∑ p ∈ Finset.antidiagonal l, f p, ?_, ?_⟩
     · refine (I₁ * I₂).sum_mem fun p _ => ?_
       exact Ideal.mul_mem_mul (ha' p.1).choose_spec.1 (hb' p.2).choose_spec.1
-    · change ((∑ p ∈ Finset.antidiagonal l, f p : P.A₀) : A) =
-        MvPowerSeries.coeff l (a * b).val.val
-      push_cast [f]
+    · push_cast [f]
       change (∑ p ∈ Finset.antidiagonal l,
           ((ha' p.1).choose : A) * ((hb' p.2).choose : A)) =
         MvPowerSeries.coeff l (a * b).val.val

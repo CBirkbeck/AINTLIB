@@ -311,7 +311,6 @@ private theorem locNhd_sub_idealOfDef_pow_val (D₀ : RationalLocData A) (n : �
   obtain ⟨d, hd, hdy⟩ := hy
   refine ⟨(locSubringToRingOfDef D₀) d,
     Ideal.mem_map_of_mem _ hd, ?_⟩
-  change ((locSubringToRingOfDef D₀) d).val = x
   exact hyx ▸ congrArg D₀.coeRingHom hdy
 
 omit [PlusSubring A] in

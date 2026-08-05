@@ -246,8 +246,7 @@ theorem isPowerBounded_JetA_iff (a : JetA F) :
         _ ≤ ‖a‖ ^ n * ‖tA F‖ ^ m :=
             mul_le_mul_of_nonneg_right hn.le hpos.le
     exact absurd hmem (not_lt.mpr hge)
-  · intro h
-    intro U hU
+  · intro h U hU
     obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
     refine ⟨Metric.ball 0 ε, Metric.ball_mem_nhds 0 hε, ?_⟩
     rintro z ⟨s, ⟨k, rfl⟩, y, hy, rfl⟩
@@ -359,8 +358,7 @@ theorem isPowerBounded_dualNumber_iff {R : Type*} [NormedCommRing R] [IsUltramet
         _ = ‖t‖ ^ m * ‖x.fst‖ ^ n := by ring
         _ ≤ ‖t‖ ^ m * ‖x ^ n‖ := mul_le_mul_of_nonneg_left hxn hpos.le
     exact absurd hmem (not_lt.mpr hge)
-  · intro h
-    intro U hU
+  · intro h U hU
     obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
     have hC : (0 : ℝ) < max 1 ‖x.snd‖ + 1 := by positivity
     refine ⟨Metric.ball 0 (ε / (max 1 ‖x.snd‖ + 1)), Metric.ball_mem_nhds 0 (by positivity), ?_⟩

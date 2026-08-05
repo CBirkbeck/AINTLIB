@@ -46,8 +46,7 @@ variable (F : Type u) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
 (positivity off zero, from multiplicativity). -/
 theorem gaussVal_nonZeroDivisors_le_primeCompl {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
     nonZeroDivisors (Ainf p F) ≤ (gaussVal p F hρ0 hρ1).supp.primeCompl := by
-  intro x hx
-  intro hmem
+  intro x hx hmem
   have hx0 : x ≠ 0 := nonZeroDivisors.ne_zero hx
   have hval : gaussVal p F hρ0 hρ1 x = 0 := by
     have := hmem
