@@ -89,6 +89,7 @@ theorem teichPi_ne_zero (ϖ : PseudoUniformizer F) : teichPi p F ϖ ≠ 0 := fun
     simpa [teichPi, WittVector.teichmuller_coeff_zero] using
       congrArg (fun x : Ainf p F => x.coeff 0) h)
 
+omit [CharP F p] in
 /-- Mutual divisibility of Teichmüller lifts: for pseudo-uniformizers `ϖ, ϖ'` some power
 of `[ϖ']` lies in the ideal `([ϖ])`. In `F` the set `ϖ·F°` is a neighbourhood of `0` and
 `ϖ'` is topologically nilpotent, so `ϖ'^k ∈ ϖ·F°`; apply the multiplicative Teichmüller
@@ -196,6 +197,7 @@ theorem isPowerBounded_Ainf (x : Ainf p F) : IsPowerBounded x := by
   rintro z ⟨s, -, v, hv, rfl⟩
   exact hn (Ideal.mul_mem_left _ s hv)
 
+omit [CharP F p] in
 /-- `A_inf⁺ = A_inf` is a ring of integral elements: open, integrally closed, and
 contained in the power-bounded subring (here: equal to it).
 
@@ -228,6 +230,7 @@ cofinal with the diagonal family `(p^n, [ϖ]^n)` (see `Iinf_pow_le_jointIdeal` /
 private def jointIdeal (ϖ : PseudoUniformizer F) (r s : ℕ) : Ideal (Ainf p F) :=
   Ideal.span {(p : Ainf p F) ^ r, teichPi p F ϖ ^ s}
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 private theorem Iinf_pow_le_jointIdeal (ϖ : PseudoUniformizer F) (n : ℕ) :
     Iinf p F ϖ ^ (2 * n) ≤ jointIdeal p F ϖ n n := by
   rw [jointIdeal]

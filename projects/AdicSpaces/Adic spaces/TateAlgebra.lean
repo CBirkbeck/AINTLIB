@@ -2306,6 +2306,7 @@ private theorem syzygy_relation_of_ker
     · exact h_A
   exact (hw_unit.mul_left_cancel (by rw [h_scaled, mul_zero])).symm
 
+omit [IsNoetherianRing A] [IsTateRing A] in
 /-- The diagonal step: for each multi-index, either the coefficients vanish to all orders (so
 the decomposition is trivial), or there is a smallest failing level `q`, and the decomposition
 is taken at level `q - 1` — controlled by Artin–Rees — or unconditionally when `q = 0`.
@@ -2808,6 +2809,7 @@ private theorem exists_controlled_decomposition_of_first_failure (I : Ideal A) (
     · exact ⟨c₀ j, Ideal.pow_le_pow_right (by omega) (hc₀_mem j), rfl⟩
     · exact absurd hl (hfail_above l (by omega))
 
+omit [IsNoetherianRing A] [IsTateRing A] in
 /-- The diagonal Artin–Rees decomposition underlying `mem_ideal_map_of_forall_coeff_mem`.
 
 For each multi-index `n`, the coefficient `h.val n` is a combination of the generators `g₀` of

@@ -141,6 +141,7 @@ def imgDatum (D₀ : RationalLocData A) (E : RationalLocData A)
     (hspanE : Ideal.span (E.T : Set A) = ⊤) :
     (imgDatum D₀ E hspanE).s = D₀.canonicalMap E.s := rfl
 
+omit [PlusSubring A] [DecidableEq A] in
 theorem imgDatum_isRational (D₀ E : RationalLocData A) [DecidableEq (presheafValue D₀)]
     (hspanE : Ideal.span (E.T : Set A) = ⊤) :
     (imgDatum D₀ E hspanE).IsRational :=
@@ -217,6 +218,7 @@ theorem imgCanonical_isUnit_s : IsUnit ((imgCanonical D₀ hspanE) E.s) := by
 def keystoneAlg : Localization.Away E.s →+* presheafValue (imgDatum D₀ E hspanE) :=
   IsLocalization.Away.lift E.s (imgCanonical_isUnit_s D₀ hspanE)
 
+omit [HasLocLiftPowerBounded A] in
 theorem keystoneAlg_algebraMap (a : A) :
     keystoneAlg D₀ hspanE (algebraMap A (Localization.Away E.s) a) =
       (imgDatum D₀ E hspanE).canonicalMap (D₀.canonicalMap a) :=
@@ -361,6 +363,7 @@ def keystoneInvAlg :
   IsLocalization.Away.lift (imgDatum D₀ E hspanE).s
     (restriction_isUnit_imgS D₀ hspanE hE)
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem keystoneInvAlg_algebraMap (b : presheafValue D₀) :
     keystoneInvAlg D₀ hspanE hE
       (algebraMap (presheafValue D₀) (Localization.Away (imgDatum D₀ E hspanE).s) b) =

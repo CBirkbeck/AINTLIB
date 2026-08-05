@@ -272,6 +272,7 @@ theorem plusFSubXIdeal_isClosed
   have : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := B)).A₀ := hnoeth
   exact tateAlgebra_isClosed_ideal hA_complete (plusFSubXIdeal B b)
 
+omit [PlusSubring B] [HasLocLiftPowerBounded B] [IsNoetherianRing B] in
 /-- The quotient `TateAlgebra B ⧸ plusFSubXIdeal b` is T2. -/
 theorem quotient_plusFSubXIdeal_t2Space
     (hA_complete : @CompleteSpace B (IsTopologicalAddGroup.rightUniformSpace B))
@@ -283,6 +284,7 @@ theorem quotient_plusFSubXIdeal_t2Space
     plusFSubXIdeal_isClosed B hA_complete hnoeth b
   infer_instance
 
+omit [PlusSubring B] [HasLocLiftPowerBounded B] [IsNoetherianRing B] in
 /-- The quotient `TateAlgebra B ⧸ plusFSubXIdeal b` is complete under the
 canonical quotient topology. Mirror of `quotient_oneSubfXIdeal_completeSpace`. -/
 theorem quotient_plusFSubXIdeal_completeSpace

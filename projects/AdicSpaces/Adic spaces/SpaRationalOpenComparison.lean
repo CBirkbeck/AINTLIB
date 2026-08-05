@@ -205,6 +205,7 @@ theorem scResHom_val (D : RationalLocData A) (w : Spv (Localization.Away D.s))
   rw [heq, ValuationSpectrum.residueFieldValuation, Valuation.extendToLocalization_apply_map_apply]
   rfl
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- `scResHom D w` is continuous (w.r.t. `D.topology`): preimages of valuation-nbhds are the
 `w`-continuity nbhds, via the value-group embedding bridge and `scResHom_val`. (Own-budget
   extraction
@@ -289,6 +290,7 @@ private theorem vle_image_le_one_of_isIntegral_of_subring
   exact (Valuation.mem_integer_iff _ _).mp
     ((Valuation.integer.integers v).mem_of_integral hφc_int)
 
+omit [IsHuberRing A] in
 /-- **The completed plus-subring lands in the valuation integer.** Abstracted over
 the two ring homs, so the argument does not depend on how the extension is built:
 `φ` is the map to the residue-field completion and `ψ` any continuous extension of
@@ -484,6 +486,7 @@ theorem comap_coeRingHom_injOn_spa (D : RationalLocData A)
   exact ValuationSpectrum.eq_of_isContinuous_of_comap_eq_of_denseRange hdense
     ((mem_spa_iff w₁).mp hw₁).1 ((mem_spa_iff w₂).mp hw₂).1 h
 
+omit [IsHuberRing A] in
 /-- **(Wedhorn 8.2:3740 — `j = Spa(ρ)` is injective)** The Spa-pullback along the canonical
 map `A → presheafValue D` is injective on Spa-points of the completion. Composes the
 localization-uniqueness and completion-uniqueness halves via `canonicalMap = coeRingHom ∘
@@ -513,6 +516,7 @@ theorem comap_coeRingHom_inj_of_isContinuous (D : RationalLocData A)
     exact @UniformSpace.Completion.denseRange_coe (Localization.Away D.s) D.uniformSpace y
   exact ValuationSpectrum.eq_of_isContinuous_of_comap_eq_of_denseRange hdense h₁ h₂ h
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- **Continuity-only form of `comap_canonicalMap_injOn_spa`** (`comap D.canonicalMap` is
 injective on *continuous* points of `Spv (presheafValue D)`). -/
 theorem comap_canonicalMap_inj_of_isContinuous (D : RationalLocData A)

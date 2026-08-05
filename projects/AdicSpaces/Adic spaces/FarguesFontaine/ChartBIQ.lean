@@ -197,6 +197,7 @@ theorem powQ_div_pos (m : ℕ) : (0 : ℚ) < (p ^ m : ℚ) / (p : ℚ) := by
   have hp : 0 < p := Nat.Prime.pos (Fact.out : Nat.Prime p)
   positivity
 
+omit [CharP F p] in
 theorem vpiQ_pPow_one (m : ℕ) :
     vpiQ p F (PseudoUniformizer.pPow F ϖ (p ^ m)
         (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) 1
@@ -206,6 +207,7 @@ theorem vpiQ_pPow_one (m : ℕ) :
   push_cast
   ring
 
+omit [CharP F p] in
 theorem vpiQ_pPow_invP (m : ℕ) :
     vpiQ p F (PseudoUniformizer.pPow F ϖ (p ^ m)
         (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) (1 / (p : ℚ))

@@ -282,6 +282,7 @@ theorem vle_pow_of_le_of_vle_pow (x : ↥(Spa A A⁺)) (t f : A)
     (le_trans ?_ ((Valuation.Compatible.vle_iff_le (v := w) _ _).mp h))
   simpa only [map_pow] using pow_le_pow_of_le_one zero_le h_t_le_one hnk
 
+omit [IsTopologicalRing A] in
 /-- **(T-B.1.a)** For QC `X ⊆ Spa A`, finite `T ⊆ A°°`, and `f ∈ A` nonvanishing
 on `X`, there exists `m : ℕ` such that for every `x ∈ X` and every `t ∈ T^m`,
 `v(t) ≤ v(f)`. (The open-cover step in Wedhorn 7.31.) -/

@@ -56,6 +56,7 @@ theorem exists_mk'_sPow (u : Bloc p F ϖ) :
 noncomputable def blocRep (u : Bloc p F ϖ) : (Ainf p F) × ℕ :=
   (exists_mk'_sPow p F ϖ u).choose
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 theorem blocRep_spec (u : Bloc p F ϖ) :
     u = IsLocalization.mk' (Bloc p F ϖ) (blocRep p F ϖ u).1
       (sPow p F ϖ (blocRep p F ϖ u).2) :=

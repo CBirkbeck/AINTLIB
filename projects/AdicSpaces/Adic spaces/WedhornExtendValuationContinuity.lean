@@ -174,6 +174,7 @@ private theorem mem_adjoin_of_mem_locSubring_insert [DecidableEq A]
     · exact Algebra.subset_adjoin rfl
   exact h_le (hinsert_le hx)
 
+omit [IsTopologicalRing A] in
 /-- **(Wedhorn §8.1 absorption — valuation version)** For `x ∈ locSubring P T s`
 and `b ∈ P.Iᵐ`, the extended valuation satisfies `ν_loc(x · algebraMap b) < γ`,
 **given only** `ν(Iᵐ) < γ` (the `A`-continuity bound) and `ν(tᵢ) ≤ ν(s)` — with **no

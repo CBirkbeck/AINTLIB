@@ -139,6 +139,7 @@ theorem not_vle_zero_prod {ι : Type v} (w : Spv B) (fam : Finset ι) (G : ι �
   obtain ⟨i, hi, hGi⟩ := (Ideal.IsPrime.prod_mem_iff).mp hc
   exact hG i hi ((mem_supp_iff w _).mp hGi)
 
+omit [IsTopologicalRing B] in
 /-- **The rational-basis trick** (Wedhorn Remark 7.30-adjacent): a Spa-point in a
 finite intersection of basic opens lies in an indexed rational set with
 *spanning* parameters contained in that intersection. The numerators are
@@ -349,6 +350,7 @@ private theorem mem_basicOpen_of_comap_mem
 
 
 
+omit [IsHuberRing A] in
 /-- **The A-level open presentation, without a Tate hypothesis** (Wedhorn 8.2(2)): the
 statement of `exists_A_level_open_presentation` with the topologically nilpotent unit of
 `presheafValue D` supplied as a hypothesis rather than produced from `[IsTateRing A]`. The

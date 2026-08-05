@@ -389,6 +389,7 @@ theorem vpiQ_pos (q : ℚ) : 0 < vpiQ p F ϖ q := by
   refine pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr ?_)
   exact fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
 
+omit [CharP F p] in
 theorem vpiQ_lt_one {q : ℚ} (hq : 0 < q) : vpiQ p F ϖ q < 1 := by
   rw [vpiQ]
   refine NNReal.rpow_lt_one (perfectoidValuation_toOF_lt_one p F ϖ) ?_
@@ -481,6 +482,7 @@ theorem biCongr_continuous (h₁ : ρ₁ = ρ₁') (h₂ : ρ₂ = ρ₂')
   subst h₂
   exact continuous_id
 
+omit [CharP F p] in
 /-- The rational radii are antitone in the exponent. -/
 theorem vpiQ_antitone {q q' : ℚ} (h : q ≤ q') :
     vpiQ p F ϖ q' ≤ vpiQ p F ϖ q := by
@@ -502,6 +504,7 @@ theorem vpiQ_natCast (n : ℕ) :
   rw [show (((n : ℚ) : ℝ)) = (n : ℝ) by push_cast; rfl]
   exact NNReal.rpow_natCast _ n
 
+omit [CharP F p] in
 /-- `vpiQ 1` is the base radius `|ϖ|`. -/
 theorem vpiQ_one :
     vpiQ p F ϖ 1

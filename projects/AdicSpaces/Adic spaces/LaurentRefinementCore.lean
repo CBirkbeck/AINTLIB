@@ -90,6 +90,7 @@ theorem divByS_factor' (a b s f : A) :
   unfold divByS; rw [← IsLocalization.mk'_mul]
   exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
 
+omit [TopologicalSpace A] [PlusSubring A] [IsTopologicalRing A] in
 /-- `divByS (b * s) (s * f) = divByS (b * f) (s * f) * divByS (s * s) (s * f)`. -/
 theorem divByS_factor2' (b s f : A) :
     divByS (b * s) (s * f) = divByS (b * f) (s * f) * divByS (s * s) (s * f) :=
@@ -130,6 +131,7 @@ theorem lift_divByS_eq' (s₀ f : A)
         = algebraMap A S s₀ * algebraMap A S f * v := by ring
     _ = algebraMap A S b * algebraMap A S f := h)).symm
 
+omit [PlusSubring A] [IsTopologicalRing A] in
 /-- For `b ∈ I^N₀`, `divByS (↑b * f) (s₀ * f) ∈ locSubring P T_product (s₀ * f)`. -/
 theorem divByS_mul_f_mem' {P : PairOfDefinition A} {T₀ : Finset A}
     {s₀ : A} {N₀ : ℕ}
@@ -254,6 +256,7 @@ noncomputable def laurentCovering (D₀ : RationalLocData A) (f : A) :
 
 /-! ### Ratio Laurent datum (Wedhorn 8.34 second-stage ratio splits) -/
 
+omit [PlusSubring A] [IsTopologicalRing A] in
 /-- For `b ∈ I^N₀`, `divByS (b * g) (D₀.s * g) ∈ locSubring P T_ratio (D₀.s * g)`. -/
 theorem divByS_mul_g_mem_T_ratio {P : PairOfDefinition A} {T₀ : Finset A}
     {s₀ : A} {N₀ : ℕ}
@@ -302,6 +305,7 @@ theorem prodImage_mul_comm (T₁ T₂ : Finset A) :
     exact ⟨b, a, Finset.mem_product.mpr (Finset.mem_product.mp hp).symm, mul_comm b a⟩
 
 -- heavy `Subring.closure_induction` over `locSubring` (6 cases × ring ops)
+omit [PlusSubring A] [IsTopologicalRing A] in
 /-- For `b ∈ I^N₁` (first datum), `divByS (b·s₂) (s₁·s₂)` lands in the product
 `locSubring` (lift of `D₁`'s `locSubring` along `Away s₁ → Away (s₁·s₂)`). -/
 theorem divByS_mul_secondS_mem {P : PairOfDefinition A} {T₁ T₂ : Finset A}
@@ -869,6 +873,7 @@ noncomputable def iteratedPlus_forwardLocHom
   IsLocalization.Away.lift (S := Localization.Away D₀.s) (R := A) D₀.s
     (iteratedPlus_D₀s_isUnit_in_Loc_B_one D₀)
 
+omit [PlusSubring A] in
 /-- `iteratedPlus_forwardLocHom` on `algebraMap A _ a` equals
 `algebraMap B _ (canonicalMap a)`. -/
 theorem iteratedPlus_forwardLocHom_algebraMap
@@ -966,6 +971,7 @@ noncomputable def iteratedMinus_forwardLocHom
   IsLocalization.Away.lift (S := Localization.Away (D₀.s * f)) (R := A)
     (D₀.s * f) (iteratedMinus_D₀s_mul_f_isUnit D₀ f)
 
+omit [PlusSubring A] in
 /-- `iteratedMinus_forwardLocHom` on `algebraMap a` equals `iteratedMinus_baseHom a`. -/
 theorem iteratedMinus_forwardLocHom_algebraMap
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -1717,6 +1723,7 @@ theorem presheafValue_iteratedPlus_equiv_symm_isInducing
           presheafValue (laurentPlusDatum D₀ f)) :=
   (presheafValue_iteratedPlus_equiv_homeomorph P D₀ f).symm.isInducing
 
+omit [PlusSubring A] in
 /-- The `b = D₀.s` case: `(a·s)/(s·f)` is `a/f`, whose forward image is `canonicalMap a` times
 `1/canonicalMap f` — a product of a ring-of-definition element and a listed generator, so it lies
 in the target's `locSubring`. -/
@@ -1781,6 +1788,7 @@ private theorem iteratedMinus_forward_mem_locSubring_of_eq_s
   · exact algebraMap_mem_locSubring _ _ _ hcan_a
   · exact divByS_mem_locSubring _ _ _ (Finset.mem_singleton_self 1)
 
+omit [PlusSubring A] in
 /-- The `b = f` case: `(a·f)/(s·f)` is `a/s`, whose forward image is `canonicalMap a` times the
 inverse of the unit `canonicalMap s`; being a unit multiple of a ring-of-definition element it
 again lies in the target's `locSubring`. -/

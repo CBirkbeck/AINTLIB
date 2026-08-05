@@ -2491,6 +2491,7 @@ theorem Ideal.isClosed_in_locSubring_subspace_of_ringOfDef_faithfullyFlat
     (locSubring_isAdic D.P D.T D.s D.hopen)
     (locIdeal_le_jacobson_bot_of_ringOfDef_faithfullyFlat P D hff) q
 
+omit [HasLocLiftPowerBounded A] in
 /-- **End-to-end closedness of proper ideals in `Localization.Away D.s`**
 under faithful-flatness of `locSubringToRingOfDef`.
 Combines `Ideal.isClosed_in_locSubring_subspace_of_ringOfDef_faithfullyFlat`

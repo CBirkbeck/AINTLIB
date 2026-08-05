@@ -177,6 +177,7 @@ def alocToWittF : Aloc p F ϖ →+* WittVector p F :=
       rw [← hk', map_pow]
       exact (isUnit_map_teichPi p F ϖ).pow k)
 
+omit [CharP F p] in
 @[simp]
 theorem alocToWittF_algebraMap (x : Ainf p F) :
     alocToWittF p F ϖ (algebraMap (Ainf p F) (Aloc p F ϖ) x)
@@ -702,6 +703,7 @@ theorem eventually_wAloc_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   rw [← valued_AlocToHatK p F ϖ hρ0 hρ1 u, hu]
   exact hveq
 
+omit [CharP F p] in
 include ϖ in
 /-- Closed valuation balls are closed in `F` (they are subgroups with nonempty
 interior, hence open, hence closed). -/
@@ -1128,6 +1130,7 @@ theorem cauchySeq_of_valued_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     exact hlt
   exact hres
 
+omit [CharP F p] in
 /-- Segments of prefix sums factor as `p^N`-shifts of shifted prefixes. -/
 theorem prefixAloc_sub (b : ℕ → F) {N M : ℕ} (hNM : N ≤ M) :
     prefixAloc p F ϖ b M - prefixAloc p F ϖ b N

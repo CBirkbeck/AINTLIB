@@ -214,6 +214,7 @@ theorem RationalCoveringData.mem_standardCoverVCovers
   change D ∈ (S.image C.plusDatum) ↔ _
   exact Finset.mem_image
 
+omit [HasLocLiftPowerBounded A] in
 /-- Each element of `standardCoverVCovers S` is contained in `C.base`. -/
 theorem RationalCoveringData.standardCoverVCovers_subset_base
     (C : RationalCoveringData A) (S : Finset A) (D : RationalLocData A)
@@ -298,6 +299,7 @@ noncomputable def RationalCoveringData.standardCoverVTau
   let hf := h.choose_spec.1
   ⟨(hS_contain f hf).choose, (hS_contain f hf).choose_spec.1⟩
 
+omit [HasLocLiftPowerBounded A] in
 /-- **τ subset property** (S-GEOM-TAU): each V-piece is contained in its
 τ-target cover piece (as rational opens). The proof bridges the
 `DecidableEq` diamond between `(C.plusDatum f).T` (built with
@@ -1236,6 +1238,7 @@ noncomputable def RationalCoveringData.standardCoverTau
     { E // E ∈ C.covers } :=
   (C.standardCoverTauPair S hS_contain d).1
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Containment property of `standardCoverTau`.** Each V-piece
 `d.1`'s rational open is contained in the rational open of its
 τ-image `(C.standardCoverTau S hS_contain d).1 ∈ C.covers`. -/
@@ -2220,6 +2223,7 @@ theorem rationalOpen_laurentMinusDatum_decomp [DecidableEq A]
   congr 2 with x
   simp [Finset.mem_insert, Finset.mem_singleton]
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Minus-half `hCov` discharge for standard-cover V-covers**. Under
 `refines_cover C S`, every valuation in the Laurent-minus base's rational
 open is covered by the corresponding iterated Laurent-minus V-piece.
@@ -2956,6 +2960,7 @@ theorem RationalCoveringData.mem_refinedVCovers
   unfold RationalCoveringData.refinedVCovers
   rw [Finset.mem_union, Finset.mem_image, Finset.mem_image]
 
+omit [HasLocLiftPowerBounded A] in
 /-- Refined pieces each lie in the `C.base` rational open. Follows from
 `laurentPlus_subset`/`laurentMinus_subset` composed with
 `plusDatum_subset_base`. -/
@@ -2969,6 +2974,7 @@ theorem RationalCoveringData.refinedVCovers_subset_base
   · -- Minus-refined: ⊆ (C.plusDatum f) ⊆ C.base.
     exact (laurentMinus_subset (C.plusDatum f) f₀).trans (C.plusDatum_subset_base f)
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Refined V-cover covers `C.base`**. Given `refines_cover C S`,
 every valuation in `C.base`'s rational open lies in some refined
 piece: first find `f ∈ S` with `v ∈ plus-piece-at-f` (outer
@@ -2993,6 +2999,7 @@ theorem RationalCoveringData.refinedVCovers_covers
   · exact ⟨laurentMinusDatum (C.plusDatum f) f₀,
       (C.mem_refinedVCovers S f₀).mpr (Or.inr ⟨f, hf, rfl⟩), hv_minus⟩
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Plus/minus dichotomy for refined V-cover**. Every refined piece
 is contained entirely in plus-half OR minus-half at `f₀`, by
 construction — the key property enabling the `hrefine` discharge in
@@ -3058,6 +3065,7 @@ noncomputable def RationalCoveringData.refinedVCoversTau
     { E // E ∈ C.standardCoverVCovers S } :=
   (C.refinedVCoversTauPair S f₀ D).1
 
+omit [HasLocLiftPowerBounded A] in
 /-- **`τ_refined` is containment-preserving**. Each refined piece's
 rational open is contained in its `τ`-image's rational open. -/
 theorem RationalCoveringData.refinedVCoversTau_subset
@@ -5332,6 +5340,7 @@ noncomputable def RationalCoveringData.refinedVCovers_at
       C.standardCoverTau S hS_contain (C.refinedVCoversTau S f₀ d) = E)
     |>.image Subtype.val
 
+omit [HasLocLiftPowerBounded A] in
 /-- Membership in `refinedVCovers_at E`: a `RationalLocData A` is in
 the per-E filter iff it lies in `refinedVCovers S f₀` AND its
 τ-image equals `E`. -/
@@ -5559,6 +5568,7 @@ noncomputable def RationalCoveringData.per_E_local_covering
         simp only [Finset.mem_filter]
         exact ⟨hf, h_plus_in_E⟩ }
 
+omit [HasLocLiftPowerBounded A] in
 /-- Membership in the direct per-E local covering: a `RationalLocData A`
 is in `(per_E_local_covering E hprecise).covers` iff it is plus- or
 minus-refined-at-f for some f ∈ S with plus-piece-at-f ⊆ E. -/

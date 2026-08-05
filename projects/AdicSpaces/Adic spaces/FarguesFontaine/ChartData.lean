@@ -342,6 +342,7 @@ private lemma valuation_p_teichPi_ne_zero_of_chartS (v : Spv (Ainf p F)) {a₁ b
     fun h => hsval (by rw [h, zero_pow hb₂.ne', mul_zero])⟩
 
 
+omit [CharP F p] in
 /-- **The chart datum presents the two-sided window** (raw-exponent form): a
 valuation lies in `R({p^{a₁+a₂}, [ϖ]^{b₁+b₂}}/p^{a₁}[ϖ]^{b₂})` iff it lies in `𝒴`
 with `v([ϖ])^{b₁} ≤ v(p)^{a₁}` (κ ≥ a₁/b₁) and `v(p)^{a₂} ≤ v([ϖ])^{b₂}`
@@ -1286,6 +1287,7 @@ theorem chartFracP_pow_mul_teichPi_pow (a b t : ℕ) :
     ← pow_mul]
 
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The `A_inf`-side of the low-term split: `[ϖ]^{k-m}·([c']·(p^m·[ϖ]^k)) = [c]·p^m`
 when `c = c'·ϖ^{2k-m}`. -/
 theorem teich_shift_low (k m : ℕ) (hm : m ≤ k) (c c' : OF F)
@@ -1300,6 +1302,7 @@ theorem teich_shift_low (k m : ℕ) (hm : m ≤ k) (c c' : OF F)
     teichPi_pow, teichPi_pow]
   ring
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The `A_inf`-side of the high-term cross identity: `[c']·[ϖ]^k = [c]·[ϖ]^e`
 when `c·ϖ^e = c'·ϖ^k`. -/
 theorem teich_cross (e f : ℕ) (c c' : OF F)

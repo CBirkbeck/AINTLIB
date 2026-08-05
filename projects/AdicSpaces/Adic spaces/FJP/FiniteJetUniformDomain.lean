@@ -59,6 +59,7 @@ theorem norm_psCoeff_le (f : PowerSeries.Restricted R (1 : ℝ)) (n : ℕ) :
   have h := PowerSeries.le_gaussNorm norm 1 f.1 (Restricted.hasGaussNorm (R := R) 1 f) n
   rwa [one_pow, mul_one] at h
 
+omit [NormOneClass R] in
 /-- The Gauss norm of a nonzero radius-one restricted series is attained. -/
 theorem exists_norm_psCoeff_eq (f : PowerSeries.Restricted R (1 : ℝ)) (hf : f ≠ 0) :
     ∃ n : ℕ, ‖f‖ = ‖PowerSeries.coeff n f.1‖ ∧ PowerSeries.coeff n f.1 ≠ 0 := by
@@ -152,6 +153,7 @@ theorem norm_restricted_mul (hmul : ∀ a b : R, ‖a * b‖ = ‖a‖ * ‖b‖
 
 end GenericMult
 
+omit [IsFJPBase F] in
 /-- The Gauss norm on `𝒞 = L⟨Q⟩` is multiplicative ([FJP] Prop 2.3: "The Laurent Gauss norm
 on 𝒞 = L⟨Q⟩ is multiplicative"). -/
 theorem norm_JetC_mul (f g : JetC F) : ‖f * g‖ = ‖f‖ * ‖g‖ :=
@@ -475,6 +477,7 @@ theorem coeff_ofRestricted' (f : PowerSeries.Restricted K (1 : ℝ)) (a : ℤ) :
     (ofRestricted (R := K) f).coeff a =
       if 0 ≤ a then PowerSeries.coeff a.toNat f.1 else 0 := rfl
 
+omit [IsFJPBase F] in
 /-- `W⁻¹ ∈ L` is not integral over `K⟨W⟩` ([FJP] Prop 2.4: multiplying a monic equation
 `(W⁻¹)ⁿ + a_{n-1}(W)(W⁻¹)^{n-1} + ⋯ + a₀(W) = 0` by `Wⁿ` and evaluating at `W = 0`
 gives `1 = 0`; here realised as reading off the `W^{-n}`-coefficient). -/
@@ -589,6 +592,7 @@ theorem qCoeff_q2elt (ℓ : L F) (n : ℕ) :
   show PowerSeries.coeff n (PowerSeries.mk fun m => if m = 2 then ℓ else 0) = _
   rw [PowerSeries.coeff_mk]
 
+omit [IsFJPBase F] in
 theorem q2elt_mem_jetSupport (ℓ : L F) : q2elt F ℓ ∈ jetSupport F := by
   constructor
   · rw [show qCoeff F 0 (q2elt F ℓ) = 0 by

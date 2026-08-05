@@ -2981,6 +2981,7 @@ theorem IsBounded_mk_image_of_IsBounded_bivariate [IsTateRing A] (b : A)
   rw [← map_mul]
   exact hSV ⟨s, hs, w, hWV hw, rfl⟩
 
+omit [IsTopologicalRing A] in
 /-- `mk(TateAlgebra₂.X)` is power-bounded in the bivariate quotient. -/
 theorem mk_X_isPowerBounded_in_bivariateOverlap [IsTateRing A] (b : A) :
     @TopologicalRing.IsPowerBounded _ _ (quotientBivariateOverlapIdealTopology b)
@@ -3002,6 +3003,7 @@ theorem mk_X_isPowerBounded_in_bivariateOverlap [IsTateRing A] (b : A) :
   rw [hrange_eq]
   exact IsBounded_mk_image_of_IsBounded_bivariate b hX_pb
 
+omit [IsTopologicalRing A] in
 /-- `mk(TateAlgebra₂.Y)` is power-bounded in the bivariate quotient. -/
 theorem mk_Y_isPowerBounded_in_bivariateOverlap [IsTateRing A] (b : A) :
     @TopologicalRing.IsPowerBounded _ _ (quotientBivariateOverlapIdealTopology b)
@@ -3137,10 +3139,12 @@ private noncomputable def truncTateC₂ (g : ↥(TateAlgebra₂ A)) (N : ℕ) :
       intro h0 h1
       omega)⟩
 
+omit [IsTopologicalRing A] in
 private theorem truncTateC₂_val (g : ↥(TateAlgebra₂ A)) (N : ℕ)
     (l : Fin 2 →₀ ℕ) :
     (truncTateC₂ g N).val l = if l 0 < N ∧ l 1 < N then g.val l else 0 := rfl
 
+omit [IsTopologicalRing A] in
 private theorem truncTateC₂_coeff_outside (g : ↥(TateAlgebra₂ A)) (N : ℕ)
     (l : Fin 2 →₀ ℕ) (hl : N ≤ l 0 ∨ N ≤ l 1) :
     (truncTateC₂ g N).val l = 0 := by
@@ -3260,6 +3264,7 @@ theorem TateAlgebra₂_monomial_val (c : A) (i j : ℕ) :
   rw [MvPowerSeries.monomial_mul_monomial, MvPowerSeries.monomial_mul_monomial,
       zero_add, mul_one, mul_one]
 
+omit [IsTopologicalRing A] in
 /-- Coefficient of a generator-monomial: for `(i, j) ∈ ℕ × ℕ` and `c : A`,
 `MvPowerSeries.coeff l (algebraMap c * X^i * Y^j).val = c * [l = single 0 i + single 1 j]`. -/
 theorem TateAlgebra₂_monomial_coeff [DecidableEq (Fin 2)] (c : A) (i j : ℕ)

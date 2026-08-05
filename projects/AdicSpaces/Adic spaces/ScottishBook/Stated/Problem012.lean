@@ -80,6 +80,7 @@ noncomputable def restrictToCont :
     ↥(Cont A) → ↥(Cont ↥(fixedSubring G A)) :=
   fun v => ⟨comap (fixedSubringInclusion G A) v.1, restrictToFixed_mem_cont G A v⟩
 
+omit [Finite G] [IsTopologicalRing A] in
 /-- The restriction map is constant on `G`-orbits: for all `g : G` and `v ∈ Cont(A)`, the
 valuations `g • v` and `v` agree on `A^G`, since `(g • v)(a) = v(g⁻¹ • a) = v(a)` for
 `a ∈ A^G`. -/

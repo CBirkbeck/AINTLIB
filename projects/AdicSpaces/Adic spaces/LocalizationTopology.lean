@@ -401,6 +401,7 @@ private theorem locSubring_base_mul_mem {B : Type*} [CommRing B] [TopologicalSpa
   exact hm ⟨(a₀ : A) * (b : A), P.A₀.mul_mem ha₀ b.property⟩
     (Ideal.mul_mem_left _ ⟨a₀, ha₀⟩ hb)
 
+omit [IsTopologicalRing A] in
 /-- The same estimate on all of `locSubring P U s`, by induction on `U`: adjoining one
 power-bounded `divByS t s` keeps it. Stated for an arbitrary `U` because that generality is
 what the induction needs — the caller instantiates it at `T`. -/

@@ -1110,6 +1110,7 @@ private theorem rad_relation_of_rational_subset
   obtain ⟨e, he⟩ := Ideal.mem_span_singleton'.mp hN
   exact ⟨N, e, he⟩
 
+omit [HasLocLiftPowerBounded A] in
 /-- `D₀.s` is a unit in `Localization.Away D.s` when `R(D.T/D.s) ⊆ R(D₀.T/D₀.s)`.
 
 This is the localization-level analogue of `isUnit_canonicalMap_s`. The proof uses

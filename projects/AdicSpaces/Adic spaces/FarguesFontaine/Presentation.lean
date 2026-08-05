@@ -1742,6 +1742,7 @@ theorem exists_evalAr_eq_pInv_pow (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
       AlocToBloc_teichPiInv_mul, one_mul]
   · rw [gaussNormRPS_monomial, valued_teichPiInv_pow]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- Multiplying the `[ϖ]`-power image by the inverse power gives `1`. -/
 theorem teichPiInvAloc_pow_mul (m : ℕ) :
     algebraMap (Ainf p F) (Aloc p F ϖ) (teichPi p F ϖ ^ m)

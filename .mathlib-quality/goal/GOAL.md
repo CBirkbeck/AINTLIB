@@ -17359,3 +17359,29 @@ end state for those.
 > previous failure told you the granularity was too coarse. 28 fixes, then 434, then 572 — same
 > input data, same linter, three orders of magnitude of difference in what survived, purely
 > from how small a unit the gate could observe.
+
+### The fixpoint has a second iteration — 185 more omits
+
+Shrinking a signature *creates* new unused variables downstream, so re-linting the green tree
+yields a fresh crop: **302 new records across 67 files** in the gate log that had just passed.
+Running the same per-file driver on those, then bisecting its failures:
+
+| | round 1 | round 2 | running total |
+|---|---|---|---|
+| omits applied | 572 | **185** | **757** |
+| unusedSectionVars | 714 → 360 | 360 → **311** | |
+| total AdicSpaces warnings | 4,398 → 3,921 | → **3,840** | |
+
+Round 2 kept 49 files / 162 omits from the plain pass, plus 23 more recovered by bisecting 9 of
+its 17 failures before the run was cut short.
+
+**Cut short by a disk-full, mid-`write_text`.** The traceback landed on
+`RelativeDescentHuber.lean`, and the first thing to check was whether the file had been
+truncated: 1,267 lines against HEAD's 1,266, so `open()` had failed *before* writing and the
+content was intact. Restored it to HEAD anyway rather than trust a half-finished bisection
+state, and dropped ~120 MB of this session's own build logs.
+
+> When an ENOSPC lands inside a file-rewriting loop, the question is not "did the tool crash"
+> but **"is the file it was writing still whole?"** Compare the line count against `git show
+> HEAD:` before doing anything else — a truncated `.lean` still parses as far as it goes and
+> can build green while silently missing declarations.

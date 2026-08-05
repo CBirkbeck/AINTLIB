@@ -253,6 +253,7 @@ agree on the intersection", "separate over the acyclic cover" — instead of the
 `Eq.rec`-transport bookkeeping.
 -/
 
+omit [DecidableEq (RationalLocData A)] in
 /-- **Two-section separation, across a base cast.** If `K` is an `F`-acyclic covering
 whose base is `I`, then two sections of `presheafValue I` that agree after restriction to
 every piece of `K` are equal.
@@ -308,6 +309,7 @@ private theorem restrictionMap_eq_of_eq_on_inter [HasLocLiftPowerBounded A]
     (restrictionMap_restrictionMap X₂ I Y hI₂ hYI v).symm
   rw [hL, hR, hI_eq]
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Restriction commutes with `presheafValueCast`, in applied rather than `Eq.rec` form.
 
 `presheafValueCast_restrictionMap` states this with the raw `Eq.rec` term, so every use
@@ -371,6 +373,7 @@ The Prop A.3(2) bridge transfers acyclicity from a refinement `C'` to `C`.
 Moved earlier in the file so it can be used by `wedhorn_lemma_834_C_restr_acyclic`
 and `wedhorn_lemma_834` body. -/
 
+omit [DecidableEq (RationalLocData A)] in
 /-- **Project Prop A.3(2) sub-lemma (separation transfer)**: refinement
 + C'-separation ⇒ C-separation. The separation field of `IsOXAcyclic`
 transfers under refinement (an injective composite remains injective). -/
@@ -444,6 +447,7 @@ private theorem propA3_part2_refined_compat
   exact h_compat (ch D'₁).1 (ch D'₂).1 D'₃
     (h₃₁.trans (ch D'₁).2) (h₃₂.trans (ch D'₂).2)
 
+omit [DecidableEq (RationalLocData A)] in
 /-- The glued section restricts correctly to a single refinement piece `E'`: factor
 `E'` through the `C'`-piece `Q` containing it, use the `C'`-gluing spec there, and
 land back on `h_compat`. -/
@@ -4786,6 +4790,7 @@ private theorem unitCover_witness_case_pFqF
   rw [haMbb, map_mul (OD.canonicalMap), map_mul (OD.canonicalMap)]
   ring
 
+omit [PlusSubring A] [IsHuberRing A] in
 omit [DecidableEq (RationalLocData A)] in
 /-- `divByS` splits off a second factor as an `algebraMap` image. -/
 private theorem divByS_mul_eq (D₀ : RationalLocData A) : ∀ p' q' : A,
@@ -4812,6 +4817,7 @@ private theorem unitCover_overlapDatum_B_s_eq
   rw [show ((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) =
     (1 : presheafValue D₀) * D₀.canonicalMap f from rfl, one_mul]
 
+omit [IsHuberRing A] [DecidableEq (RationalLocData A)] in
 open Classical in
 /-- Every element of the doubly-intersected datum's `T` is a product of one element from each
 side: that `T` is by construction the image of the product Finset under multiplication. -/
@@ -5996,6 +6002,7 @@ private theorem unitCover_bridgePlus_restrictionMap
     unitCover_relativePlus_restrictionMap D₀ f x,
     unitCover_example638Plus_canonicalMap D₀ f x]
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Minus bridge intertwining**: `unitCover_bridgeMinus` carries the restriction
 `O_X(D₀) → O_X(U₂)` to the second component of the diagonal `epsilonHom_gen b`.
 
@@ -7369,6 +7376,7 @@ noncomputable def genRestrictedCover
 
 /-! ##### Sub-lemmas for Lemma 8.34 part (ii) — Cor 7.32 application -/
 
+omit [IsTopologicalRing A] [IsHuberRing A] in
 omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- **Part (ii) sub-lemma 1**: `T · A = A` (T spans the unit ideal)
 implies the "no common zero" property: every Spa-point has nonzero
@@ -7398,6 +7406,7 @@ theorem noCommonZero_of_idealGen
 -- have height > 1). Both were UNNECESSARY: the no-height Cor 7.32 (`exists_dominating_unit_noHArch_finset`,
 -- Cor732) needs neither. See b2_log #61 + T-CECH-740-6 / T-CECH-PAIR.
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- **Cor 7.32 (Wedhorn) — dominating unit, NO height.** Given a finite `T` with no common
 zero on `Spa A A⁺`, there is a unit `s ∈ A^×` with `v(s) < v(t)` for some `t ∈ T`, for every
 `v ∈ Spa A A⁺`. Re-routed (2026-06-04, reviewer round-2 Q4) through the no-height
@@ -7539,6 +7548,7 @@ theorem laurentProdLeaves_cover_sign_select [DecidableEq A] (fs : List A)
         · exact absurd (hP f List.mem_cons_self hPf) hg
         · exact hbound w hw f hf' hPf
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Step (a)**: on each Laurent piece `V_j` of the dominating cover,
 there exists an index `i` such that `v(t_i) ≥ v(s)` for every
 `v ∈ V_j`. (This is the "selection" step: the Laurent piece picks out a
@@ -7775,6 +7785,7 @@ theorem wedhorn_lemma_834_part_ii_unit_gen_via_dominating [DecidableEq A]
   exact unit_gen_restriction_of_dominating_laurent C T hC_gen s hs V fs hV_laurent
     hV_eq Vj hVj
 
+omit [DecidableEq (RationalLocData A)] in
 omit [IsRingOfIntegralElements A⁺] in
 /-- **Part (iv) sub-lemma (c) sub-(sep)** — Wedhorn Prop A.3(1) separation
 transfer, p. 105 (wedhorn.txt:5315-5325), refinement-free form.
@@ -7962,6 +7973,7 @@ private theorem propA3_part1_gluing_family_compat
     restrictionMap_restrictionMap]
   exact h_compat Dc₁ Dc₂ W' (hW'_sub_D'₁.trans hc₁) (hW'_sub_D'₂.trans hc₂)
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Prop A.3(1) transfer, steps 1-5**: the compatible family `f` on `C` induces a
 compatible family on `V`, agreeing piecewise with `f`-values.
 
@@ -8100,6 +8112,7 @@ private theorem propA3_part1_gluing_mixed_trace
   rw [e, h_inner, restrictionMap_restrictionMap, restrictionMap_restrictionMap]
   exact h_compat Dc U E (hE_sub_D''.trans hc) (hE_sub_I.trans hI_U)
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Prop A.3(1) transfer, step 8**: a section of `C` restricting to `y` on every
 `V`-piece restricts to `f U` on every `C`-piece.
 
@@ -10871,6 +10884,7 @@ theorem genRestrictedCover_isOXAcyclic_of_B
     obtain ⟨t, ht, rfl⟩ := hD'
     exact hx t ht
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Pairwise comparability on a Laurent leaf.** On any leaf of the ratio-Laurent cover,
 the sign dichotomy for `f/g` makes every pair of units comparable. -/
 private theorem ratio_pairwise_comparable_on_leaf [DecidableEq A]
@@ -10977,6 +10991,7 @@ theorem ratio_laurent_refines_unitGen_cover [DecidableEq A]
   exact ⟨hv.1, fun g hg => hmmax g hg v hv,
     not_vle_zero_of_isUnit (h_units m hm) v⟩
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The **refines** half of `ratio_laurent_unitGen_bundle`: every leaf of the ratio cover sits
 inside some piece of `C`. On a leaf the unit generators are totally ordered by `vle` (the
 σ-walk dichotomy), so the `vle`-maximal one names the containing piece. -/
@@ -11032,6 +11047,7 @@ private theorem ratio_laurent_refines_leaf
   exact ⟨hv.1, fun g hg => hmmax g hg v hv,
     not_vle_zero_of_isUnit (h_units m hm) v⟩
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The **cover-each** half: every point of every piece of `C` lies in a leaf of the ratio cover
 that is still contained in that piece. Choose the leaf by the sign-selecting σ-walk that keeps
 the piece's own denominator dominant. -/

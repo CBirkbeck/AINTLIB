@@ -66,6 +66,7 @@ theorem exists_not_vle_zero_of_span_eq_top {v : Spv A} {F : Finset A}
     exact le_antisymm hle zero_le
   exact v.not_vle_one_zero ((vle_zero_iff_canonical v 1).mpr hzero)
 
+omit [TopologicalSpace A] [IsTopologicalRing A] in
 /-- **The maximum argument**: for every valuation and every family generating the
 unit ideal there is an element of maximal — and nonzero — value. This is why the
 generated cover covers every `Spa (A, A⁺)` simultaneously (Kedlaya 1.6.2). -/

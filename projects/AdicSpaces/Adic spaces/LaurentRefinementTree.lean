@@ -481,6 +481,7 @@ theorem LaurentTree.toCoveringCovers_eq_leaves_toFinset
     simp [LaurentTree.toCoveringCovers, LaurentTree.leaves, ihL, ihR,
       List.toFinset_append]
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 theorem LaurentTree.mem_toCoveringCovers_iff_mem_leaves
     (t : LaurentTree A) (D₀ : RationalLocData A) (D : RationalLocData A) :
     D ∈ t.toCoveringCovers D₀ ↔ D ∈ t.leaves D₀ := by
@@ -504,6 +505,7 @@ theorem LaurentTree.toCoveringCovers_cover_base (t : LaurentTree A)
   obtain ⟨D, hD, hvD⟩ := t.cover_base D₀ hv
   exact ⟨D, (t.mem_toCoveringCovers_iff_mem_leaves D₀ D).mpr hD, hvD⟩
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The rational covering of `D₀` induced by the leaves of a Laurent tree.
 Uses `toCoveringCovers` (the recursive Finset form) for the covers field. -/

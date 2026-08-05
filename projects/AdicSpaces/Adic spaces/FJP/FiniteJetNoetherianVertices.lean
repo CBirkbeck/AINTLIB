@@ -390,12 +390,14 @@ theorem isNoetherianRing_unitBall_gaussK (k : ℕ) :
     IsNoetherianRing (unitBall (MvPowerSeries.Restricted K (fun _ : Fin k => (1 : ℝ)))) :=
   IsFJPNoetherianBase.isNoetherianRing_unitBall_gauss (E := F) k
 
+omit [IsFJPBase F] in
 /-- `L° = 𝒪_K⟨W,W⁻¹⟩` is noetherian: the `evalHom`-image of the integral `K⟨W,V⟩`
 ([FJP] Lemma 4.2 for the annulus vertex). -/
 theorem isNoetherianRing_unitBall_L : IsNoetherianRing (unitBall (L F)) :=
   isNoetherianRing_unitBall_of_section (evalHom (R := K)) (evalHom_norm_le (R := K))
     (evalHom_exists_norm_le (R := K)) (isNoetherianRing_unitBall_gaussK F 2)
 
+omit [IsFJPBase F] in
 /-- `k°⟨W⟩` (the unit ball of the disc coefficient ring) is noetherian. -/
 theorem isNoetherianRing_unitBall_KW :
     IsNoetherianRing (unitBall (PowerSeries.Restricted K (1 : ℝ))) :=
@@ -447,6 +449,7 @@ theorem isNoetherianRing_unitBall_JetB : IsNoetherianRing (unitBall (JetB F)) :=
   isNoetherianRing_unitBall_dualNumber (PowerSeries.Restricted K (1 : ℝ))
     (isNoetherianRing_unitBall_KW F)
 
+omit [IsFJPBase F] in
 /-- `𝒞° = L°⟨Q⟩` is noetherian: reached from the integral `K⟨W,V,Q⟩` by the flattening
 isometries and the coefficientwise `evalHom`. -/
 theorem isNoetherianRing_unitBall_JetC : IsNoetherianRing (unitBall (JetC F)) := by
@@ -490,6 +493,7 @@ theorem isNoetherianRing_unitBall_JetD : IsNoetherianRing (unitBall (JetD F)) :=
 
 /-! ### Arity-`m` unit balls (inputs to the strict-localization layer, [FJP] §4) -/
 
+omit [IsFJPBase F] in
 /-- The unit ball of `L⟨T₁,…,Tₘ⟩` is noetherian (the transfer chain at arity `m`). -/
 theorem isNoetherianRing_unitBall_restricted_L (m : ℕ) :
     IsNoetherianRing (unitBall

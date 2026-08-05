@@ -140,6 +140,7 @@ theorem iteratedOverlap_forwardLocHom_to_B_algebraMap
 
 /-! ### Phase 2: forward loc hom power-boundedness for the overlap T -/
 
+omit [PlusSubring A] [IsHuberRing A] [IsTateRing A] [IsNoetherianRing A] in
 omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- Source-level clearing identity: in `Loc_A(D₀.s * f)`,
 `divByS p (D₀.s * f) * algebraMap q = algebraMap r` whenever `p * q = (D₀.s * f) * r`. -/
@@ -156,6 +157,7 @@ private theorem divByS_mul_algebraMap_clear (D₀ : RationalLocData A) (f p q r 
   exact IsLocalization.mk'_eq_of_eq
     (by simp only [Submonoid.coe_mul, Submonoid.coe_one]; rw [h]; ring)
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- Target-level fact: `algebraMap_B (canMap f) * divByS 1 s_B = 1` (the canonical
 unit `canMap f` is inverted in `Loc_B(s_B)`). -/
 private theorem algebraMap_canMap_f_mul_divByS_one
@@ -734,6 +736,7 @@ private theorem laurentOverlap_canonicalMap_isPowerBounded
   exact ⟨_, (locSubring _ _ _).pow_mem
     (algebraMap_f_mem_locSubring_laurentOverlap D₀ f) n, map_pow _ _ _⟩
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A] in
 /-- The inverse direction: `divByS D₀.s (D₀.s · f)` is also in the localization subring
 (because `D₀.s ∈ (laurentOverlap).T`), hence power-bounded after `coeRingHom`. -/

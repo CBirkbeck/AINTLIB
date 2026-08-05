@@ -209,6 +209,7 @@ theorem rationalOpen_laurentMinusNormalized_eq
            Finset.mem_insert_self _ _⟩, one_mul _⟩))
     · exact hvT t ht'
 
+omit [HasLocLiftPowerBounded A] in
 /-- The normalized minus half is contained in the base. -/
 theorem laurentMinusNormalized_subset
     (D₀ : RationalLocData A) [LaurentNormalized D₀] (f : A) :

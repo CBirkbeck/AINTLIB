@@ -314,6 +314,7 @@ private theorem span_mul_pow_mem_pow_smul (PA : PairOfDefinition A) (m n : ℕ)
         ring)
     rw [this]; exact hx'_res hx'cw'_A₀'
 
+omit [IsTopologicalRing A] in
 omit [IsHuberRing A] in
 /-- The `mem` step of the Artin–Rees induction, pulled out: a product `g' * w'` with `g'` in the
 span of the generators `F` and `w'` deep in the filtration lands in `I' ^ (n + 1)`.

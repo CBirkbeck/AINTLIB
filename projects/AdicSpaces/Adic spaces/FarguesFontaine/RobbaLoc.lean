@@ -93,6 +93,7 @@ theorem isUnit_p_teichPi_image :
   IsLocalization.map_units _ (⟨_, Submonoid.mem_powers _⟩ :
     Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ))
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The image of `[ϖ]` is a unit of `Bloc` (it divides the inverted element). -/
 theorem isUnit_teichPi_image :
     IsUnit (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ)) := by
@@ -102,6 +103,7 @@ theorem isUnit_teichPi_image :
   rw [h]
   exact isUnit_p_teichPi_image p F ϖ
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The image of `p` is a unit of `Bloc`. -/
 theorem isUnit_p_image :
     IsUnit (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)) := by

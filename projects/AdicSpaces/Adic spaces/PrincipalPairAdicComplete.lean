@@ -59,6 +59,7 @@ theorem principalPair_A₀_completeSpace_of_stronglyNoetherianTate
   have : IsClosed ((P.A₀ : Set A) : Set A) := hclosed
   exact IsClosed.completeSpace_coe (s := (P.A₀ : Set A))
 
+omit [PlusSubring A] in
 /-- **Adic-completeness of the canonical principal pair.** The principal pair of
 a (strongly noetherian) Tate ring is adically complete with respect to its
 principal ideal of definition.

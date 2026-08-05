@@ -209,6 +209,7 @@ theorem norm_ev00_le (a : JetA F) : ‖ev00 F a‖ ≤ ‖a‖ := by
     _ ≤ ‖jB F a‖ := by rw [JetNorm.norm_def]; exact le_max_left _ _
     _ ≤ ‖a‖ := norm_jB_le F a
 
+omit [IsFJPBase F] in
 theorem ev00_continuous : Continuous (ev00 F) := by
   have hlip : LipschitzWith 1 (ev00 F) := LipschitzWith.of_dist_le_mul fun a b => by
     rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm, ← map_sub]
@@ -243,6 +244,7 @@ noncomputable def ev00Val : Valuation (JetA F) NNReal where
 
 @[simp] theorem ev00Val_apply (a : JetA F) : ev00Val F a = ‖ev00 F a‖₊ := rfl
 
+omit [IsFJPBase F] in
 theorem ev00Val_isContinuous : (ev00Val F).IsContinuous := by
   intro γ
   have hset : {a : JetA F | ev00Val F a < γ} = ev00 F ⁻¹' Metric.ball 0 ((γ : ℝ)) := by

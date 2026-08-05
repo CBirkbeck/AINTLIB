@@ -336,6 +336,7 @@ noncomputable instance : CommRing (RestrictedLaurent R) where
 
 /-! ### Monomials and the algebra structure -/
 
+omit [CompleteSpace R] in
 theorem single_mul_single (a b : ℤ) (c d : R) :
     single a c * single b d = single (a + b) (c * d) := by
   ext m
@@ -1194,6 +1195,7 @@ noncomputable def innerToSeries :
     (restrictedCongr (foo R (fun _ : Fin 0 => (1 : ℝ)))
       (fun x => foo_norm_map x))
 
+omit [CompleteSpace R] [NormOneClass R] in
 theorem innerToSeries_norm (f : MvPowerSeries.Restricted R (fun _ : Fin 1 => (1 : ℝ))) :
     ‖innerToSeries (R := R) f‖ = ‖f‖ := by
   rw [innerToSeries, RingEquiv.trans_apply, restrictedCongr_norm,

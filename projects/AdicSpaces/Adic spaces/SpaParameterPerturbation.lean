@@ -72,6 +72,7 @@ theorem Spv.vleAdd {v : Spv B} {x y z : B} (hx : v.vle x z) (hy : v.vle y z) :
     v.vle (x + y) z :=
   @ValuativeRel.vle_add B _ v.toValuativeRel x y z hx hy
 
+omit [TopologicalSpace B] in
 /-- The ultrametric maximum principle for finite sums: a finite sum is
 `vle`-dominated by one of its terms (or the sum is empty and `0 ≤ᵥ` anything). -/
 theorem Spv.exists_sum_vle {ι : Type v} (v : Spv B) {s : Finset ι} (hs : s.Nonempty)
@@ -320,6 +321,7 @@ private theorem indexedRationalSet_perturb_reverse
     exact hg'_ne
 
 
+omit [IsTopologicalRing B] in
 /-- **The perturbation theorem** (Kedlaya Ex. 1.2.2(b) / the approximation step of
 Wedhorn 7.48): if `M` is a uniform spanning bound for the presentation
 `(f, g)` on `Spa B B⁺`, then perturbing every parameter by an element of

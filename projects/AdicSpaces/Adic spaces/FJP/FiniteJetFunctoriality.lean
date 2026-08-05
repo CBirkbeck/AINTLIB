@@ -508,6 +508,7 @@ noncomputable def bridgeEval : PA F e.m →+* presheafValue D :=
   (mvEvalHomBounded D.canonicalMap (canonicalMap_continuous D)
     (bridgeGen D e) (bridgeGen_isBounded D e)).comp (bridgeToRestricted e.m)
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeEval_const (a : JetA F) :
     bridgeEval D e (polyToP (MvPolynomial.C a)) = D.canonicalMap a := by
   have hcast : bridgeToRestricted (F := F) e.m (polyToP (MvPolynomial.C a)) =
@@ -521,6 +522,7 @@ theorem bridgeEval_const (a : JetA F) :
   rw [bridgeEval, RingHom.comp_apply, hcast]
   exact mvEvalHomBounded_algebraMap _ _ _ _ a
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeEval_X (i : Fin e.m) :
     bridgeEval D e (polyToP (MvPolynomial.X i)) = bridgeGen D e i := by
   have hcast : bridgeToRestricted (F := F) e.m (polyToP (MvPolynomial.X i)) =
@@ -570,6 +572,7 @@ theorem bridgeRev_bridgeX (i : Fin e.m) :
     bridgeRev D e (bridgeX D e i) = bridgeGen D e i :=
   bridgeEval_X D e i
 
+omit [IsFJPNoetherianBase F] in
 /-- The range of the generator product powers is bounded (local copy of the private
 Wedhorn828 helper, at our tuple). -/
 private theorem bridgeRangeProd_isBounded :
@@ -746,6 +749,7 @@ noncomputable def bridgeBaseC : JetC F →+* locC F e.m D.s e.f :=
 noncomputable def bridgeXC (i : Fin e.m) : locC F e.m D.s e.f :=
   Ideal.Quotient.mk (IC F e.m D.s e.f) (polyToP (MvPolynomial.X i))
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeBaseC_s_mul_X (i : Fin e.m) :
     bridgeBaseC D e (iotaC F D.s) * bridgeXC D e i =
       bridgeBaseC D e (iotaC F (e.f i)) := by
@@ -908,6 +912,7 @@ noncomputable def bridgeBaseB : JetB F →+* locB F e.m D.s e.f :=
 noncomputable def bridgeXB (i : Fin e.m) : locB F e.m D.s e.f :=
   Ideal.Quotient.mk (IB F e.m D.s e.f) (polyToP (MvPolynomial.X i))
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeBaseB_s_mul_X (i : Fin e.m) :
     bridgeBaseB D e (jB F D.s) * bridgeXB D e i =
       bridgeBaseB D e (jB F (e.f i)) := by
@@ -1294,6 +1299,7 @@ noncomputable def bridgeEvalB (hD : D.IsRational) :
     (canonicalMap_continuous (pushDatumB D hD))
     (bridgeGenB D e hD) (bridgeGenB_isBounded D e hD)).comp (bridgeToRestrictedB e.m)
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeEvalB_const (hD : D.IsRational) (a : JetB F) :
     bridgeEvalB D e hD (polyToP (MvPolynomial.C a)) =
       (pushDatumB D hD).canonicalMap a := by
@@ -1308,6 +1314,7 @@ theorem bridgeEvalB_const (hD : D.IsRational) (a : JetB F) :
   rw [bridgeEvalB, RingHom.comp_apply, hcast]
   exact mvEvalHomBounded_algebraMap _ _ _ _ a
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeEvalB_X (hD : D.IsRational) (i : Fin e.m) :
     bridgeEvalB D e hD (polyToP (MvPolynomial.X i)) = bridgeGenB D e hD i := by
   have hcast : bridgeToRestrictedB (F := F) e.m (polyToP (MvPolynomial.X i)) =
@@ -1358,6 +1365,7 @@ theorem bridgeRevB_bridgeBaseB (hD : D.IsRational) (a : JetB F) :
     bridgeRevB D e hD (bridgeBaseB D e a) = (pushDatumB D hD).canonicalMap a :=
   bridgeEvalB_const D e hD a
 
+omit [IsFJPNoetherianBase F] in
 private theorem bridgeRangeProdB_isBounded (hD : D.IsRational) :
     TopologicalRing.IsBounded
       (Set.range (fun v : Fin e.m →₀ ℕ => ∏ i, bridgeGenB D e hD i ^ (v i))) := by
@@ -1498,6 +1506,7 @@ noncomputable def bridgeEvalC (hD : D.IsRational) :
     (canonicalMap_continuous (pushDatumC D hD))
     (bridgeGenC D e hD) (bridgeGenC_isBounded D e hD)).comp (bridgeToRestrictedC e.m)
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeEvalC_const (hD : D.IsRational) (a : JetC F) :
     bridgeEvalC D e hD (polyToP (MvPolynomial.C a)) =
       (pushDatumC D hD).canonicalMap a := by
@@ -1512,6 +1521,7 @@ theorem bridgeEvalC_const (hD : D.IsRational) (a : JetC F) :
   rw [bridgeEvalC, RingHom.comp_apply, hcast]
   exact mvEvalHomBounded_algebraMap _ _ _ _ a
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeEvalC_X (hD : D.IsRational) (i : Fin e.m) :
     bridgeEvalC D e hD (polyToP (MvPolynomial.X i)) = bridgeGenC D e hD i := by
   have hcast : bridgeToRestrictedC (F := F) e.m (polyToP (MvPolynomial.X i)) =
@@ -1562,6 +1572,7 @@ theorem bridgeRevC_bridgeBaseC (hD : D.IsRational) (a : JetC F) :
     bridgeRevC D e hD (bridgeBaseC D e a) = (pushDatumC D hD).canonicalMap a :=
   bridgeEvalC_const D e hD a
 
+omit [IsFJPNoetherianBase F] in
 private theorem bridgeRangeProdC_isBounded (hD : D.IsRational) :
     TopologicalRing.IsBounded
       (Set.range (fun v : Fin e.m →₀ ℕ => ∏ i, bridgeGenC D e hD i ^ (v i))) := by
@@ -1687,6 +1698,7 @@ noncomputable def mapCD (hD : D.IsRational) :
       obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
       exact Finset.mem_image_of_mem _ ht₀)
 
+omit [IsFJPNoetherianBase F] in
 theorem mapBD_continuous (hD : D.IsRational) : Continuous (mapBD D hD) := by
   unfold mapBD
   exact presheafValueMapOfHom_continuous _ _ _ _ _ _
@@ -2135,6 +2147,7 @@ theorem plus_le_comap_of_norm_le {E : Type*} [SeminormedCommRing E]
   isPowerBounded_of_norm_le_one
     (le_trans (hφ x) ((isPowerBounded_JetA_iff F x).mp hx))
 
+omit [IsFJPNoetherianBase F] in
 /-- Inverse images preserve the rational inequalities: pushed rational opens are the
 `spaComap`-preimages. (Pointwise: `v ∈ rationalOpen (T_E, s_E) ↔ v ∘ ι ∈ rationalOpen (T, s)`
 for `v` in the vertex spectrum.) -/
@@ -2166,6 +2179,7 @@ theorem mem_rationalOpen_pushDatumC_iff (D : RationalLocData (JetA F))
 
 -- (this declaration elaborated fine at the default; the file-wide `false` above makes
 -- its `whnf`-checks explode — restore the default here)
+omit [IsFJPNoetherianBase F] in
 set_option backward.isDefEq.respectTransparency true in
 theorem mem_rationalOpen_pushDatumB_iff (D : RationalLocData (JetA F))
     (hD : D.IsRational) (v : Spv (JetB F)) (hv : v ∈ Spa (JetB F) (ringPlus (JetB F))) :
@@ -2193,6 +2207,7 @@ theorem mem_rationalOpen_pushDatumB_iff (D : RationalLocData (JetA F))
       rw [this]
       exact h0
 
+omit [IsFJPNoetherianBase F] in
 /-- The 𝓓-side pointwise coverage transfer (supporting lemma for `pushCoveringD`). -/
 theorem mem_rationalOpen_pushDatumD_iff (D : RationalLocData (JetA F))
     (hD : D.IsRational) (v : Spv (JetD F)) (hv : v ∈ Spa (JetD F) (ringPlus (JetD F))) :
@@ -2357,6 +2372,7 @@ def interDatum (D₁ D₂ : RationalLocData (JetA F))
     ((insert D₁.s D₁.T ×ˢ insert D₂.s D₂.T).image fun p => p.1 * p.2)
     (D₁.s * D₂.s) (interDatum_span_eq_top D₁ D₂ h₁ h₂)
 
+omit [IsFJPNoetherianBase F] in
 theorem rationalOpen_interDatum (D₁ D₂ : RationalLocData (JetA F))
     (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) :
     rationalOpen (interDatum D₁ D₂ h₁ h₂).T (interDatum D₁ D₂ h₁ h₂).s =
@@ -2405,6 +2421,7 @@ theorem rationalOpen_interDatum (D₁ D₂ : RationalLocData (JetA F))
         show (0 : JetA F) = 0 * D₂.s from (zero_mul _).symm] at h0
       exact hs₁0 (v.vle_mul_cancel hs₂0 h0)
 
+omit [IsFJPNoetherianBase F] in
 theorem interDatum_isRational {D₁ D₂ : RationalLocData (JetA F)}
     (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) : (interDatum D₁ D₂ h₁ h₂).IsRational :=
   RationalLocData.isRational_of_span_eq_top (interDatum_span_eq_top D₁ D₂ h₁ h₂)

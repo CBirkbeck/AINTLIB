@@ -59,6 +59,7 @@ private theorem generators_mem_span (P : PairOfDefinition A) (T : Finset A) (M :
   rw [Ideal.map_pow] at hmap
   exact hmap
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- **The `hopen`-condition at open span** (the general-Huber replacement
 for `genPiece_hopen`'s `span T = ⊤`): a power of the ambient ideal of
 definition inside `span T` suffices. A₀-side generator decomposition of
@@ -453,6 +454,7 @@ theorem exists_pow_le_of_isRational_pair (P : PairOfDefinition A)
   intro x hx
   exact hM hx
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- The own-pair form. -/
 theorem exists_pow_le_of_isRational (D : RationalLocData A)
     (hD : D.IsRational) :

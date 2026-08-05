@@ -348,6 +348,7 @@ theorem vpiQ_pow (q : ℚ) (a : ℕ) :
   push_cast
   ring
 
+omit [CharP F p] in
 /-- The rational radii compare antitonically, as an iff. -/
 theorem vpiQ_le_vpiQ_iff {x y : ℚ} :
     vpiQ p F ϖ x ≤ vpiQ p F ϖ y ↔ y ≤ x := by

@@ -270,6 +270,7 @@ theorem rC_eq (i : Fin m) : rC F m g f i =
   congr 1
   rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem rD_eq (i : Fin m) : rD F m g f i =
     polyToP (MvPolynomial.C (rhoC F (iotaC F g)) * MvPolynomial.X i -
       MvPolynomial.C (rhoC F (iotaC F (f i)))) := by
@@ -278,6 +279,7 @@ theorem rD_eq (i : Fin m) : rD F m g f i =
   congr 1
   rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- The pushed generators are compatible across the square. -/
 theorem extRhoB_rB (i : Fin m) : extRhoB F m (rB F m g f i) = rD F m g f i :=
   ext_square_commutes F m (rA F m g f i)
@@ -290,16 +292,19 @@ theorem isNoetherianRing_PB : IsNoetherianRing (PB F m) := by
   exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m (JetB F)) _
     (UnitDiscExample.restrictedGaussEquiv (JetB F) m).symm.toRingHom (RingEquiv.surjective _)
 
+omit [IsFJPBase F] in
 theorem isNoetherianRing_PC : IsNoetherianRing (PC F m) := by
   have hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetC F) m
   exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m (JetC F)) _
     (UnitDiscExample.restrictedGaussEquiv (JetC F) m).symm.toRingHom (RingEquiv.surjective _)
 
+omit [IsFJPBase F] in
 theorem isNoetherianRing_PD : IsNoetherianRing (PD F m) := by
   have hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetD F) m
   exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m (JetD F)) _
     (UnitDiscExample.restrictedGaussEquiv (JetD F) m).symm.toRingHom (RingEquiv.surjective _)
 
+omit [IsFJPBase F] in
 /-- The vertex Tate-extension unit balls are noetherian. -/
 theorem isNoetherianRing_unitBall_PB : IsNoetherianRing (unitBall (PB F m)) :=
   isNoetherianRing_unitBall_restricted_dualNumber
@@ -486,6 +491,7 @@ private theorem extRho_comp_eq (u : Fin m → PB F m) (v : Fin m → PC F m)
     extRhoC F m (v i) + (extRhoB F m (u i) - extRhoC F m (v i))
   ring
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- The norm bound closing the witness construction. -/
 private theorem norm_d1_rA_le (hB hC z CrC CrA Bs M : ℝ)
     (hM0 : 0 ≤ M) (hBs0 : 0 ≤ Bs) (hCrA1 : 1 ≤ CrA)
@@ -792,10 +798,12 @@ noncomputable def locRhoC : locC F m g f →+* locD F m g f :=
       rw [RingHom.comp_apply, Ideal.Quotient.eq_zero_iff_mem]
       exact extRhoC_mem_ID F m g f ha)
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem locJB_mk (p : PA F m) :
     locJB F m g f (Ideal.Quotient.mk (IA F m g f) p) =
       Ideal.Quotient.mk (IB F m g f) (extJB F m p) := rfl
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem locIotaC_mk (p : PA F m) :
     locIotaC F m g f (Ideal.Quotient.mk (IA F m g f) p) =
       Ideal.Quotient.mk (IC F m g f) (extIotaC F m p) := rfl
@@ -804,6 +812,7 @@ theorem locRhoB_mk (p : PB F m) :
     locRhoB F m g f (Ideal.Quotient.mk (IB F m g f) p) =
       Ideal.Quotient.mk (ID F m g f) (extRhoB F m p) := rfl
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem locRhoC_mk (p : PC F m) :
     locRhoC F m g f (Ideal.Quotient.mk (IC F m g f) p) =
       Ideal.Quotient.mk (ID F m g f) (extRhoC F m p) := rfl
@@ -1032,6 +1041,7 @@ theorem locRhoC_surjective (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
   obtain ⟨c, hc, -⟩ := extRhoC_strict_surjective F m pd
   exact ⟨Ideal.Quotient.mk _ c, by rw [locRhoC_mk, hc]⟩
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- `extRhoC` is open (constant-1 sections). -/
 theorem extRhoC_isOpenMap : IsOpenMap (extRhoC F m) := by
   intro U hU

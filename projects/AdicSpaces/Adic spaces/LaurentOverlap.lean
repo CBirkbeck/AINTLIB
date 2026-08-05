@@ -928,6 +928,7 @@ noncomputable def bivariateLocToQuotient_atOverlap
     rw [overlapDatum_s B P b]; infer_instance
   exact IsLocalization.Away.lift (x := b) (isUnit_b_in_bivariate_quotient B b)
 
+omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 omit [IsTateRing B] [IsNoetherianRing B] [T2Space B] in
 /-- `bivariateLocToQuotient_atOverlap` sends `algebraMap a` to `mk(algebraMap a)`. -/
 theorem bivariateLocToQuotient_atOverlap_algebraMap
@@ -942,6 +943,7 @@ theorem bivariateLocToQuotient_atOverlap_algebraMap
   rw [IsLocalization.Away.lift_eq]
   rfl
 
+omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 omit [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B] in
 /-- The three `divByS` values of the overlap datum: `b/s = 1`, `b²/s = b`, and `1/s` is
 inverse to `b`. All three are `mk'` identities once `s` is rewritten to `b` — `rw [hs]`
@@ -970,6 +972,7 @@ private theorem overlap_divByS_values (P : PairOfDefinition B) [IsNoetherianRing
     rw [IsLocalization.mk'_spec]
     exact map_one _
 
+omit [IsTateRing B] [IsNoetherianRing B] [T2Space B] in
 /-- `Y` inverts `b` in `B⟨X,Y⟩/(b − X, 1 − bY)`: the difference is minus the second
 generator of the ideal. -/
 private theorem mk_Y_mul_mk_algebraMap_eq_one (b : B) :
@@ -1009,6 +1012,7 @@ private theorem bivariateLocToQuotient_comp_algebraMap_continuous
           (algebraMap B ↥(TateAlgebra₂ B) a)) from funext heq]
   exact hmk
 
+omit [IsTateRing B] [IsNoetherianRing B] [T2Space B] in
 /-- Second hypothesis of `locTopology_continuous_lift`: every `t ∈ T = {1, b, b²}` has
 power-bounded image — `mk Y`, `1`, `mk (algebraMap b)` respectively. -/
 private theorem bivariateLocToQuotient_isPowerBounded_of_mem_T
@@ -1617,6 +1621,7 @@ noncomputable def iteratedOverlapDatum_B
   exact overlapDatum (presheafValue D₀) (presheafValue_pairOfDefinition_concrete P D₀)
     (D₀.canonicalMap f)
 
+omit [IsHuberRing A] [IsTateRing A] [IsNoetherianRing A] in
 omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- The source localization of the iterated overlap equals the source localization
 of the iterated minus (both are `Loc_A(D₀.s * f)`). -/
@@ -1624,6 +1629,7 @@ theorem iteratedOverlap_s_eq_laurentMinus_s
     (D₀ : RationalLocData A) (f : A) :
     (laurentOverlapDatum D₀ f).s = (laurentMinusDatum D₀ f).s := rfl
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- The target localization of the iterated overlap equals the target of
 iterated minus (both are `Loc_B(D₀.canonicalMap f)`). -/
 theorem iteratedOverlapDatum_B_s_eq
@@ -2173,6 +2179,7 @@ theorem presheafValue_trivialPlus_fSubX_equiv_symm_continuous
   -- whose toFun is `example638Plus_forwardHom`. Continuity = hcont_forward_B.
   hcont_forward_B
 
+omit [HasLocLiftPowerBounded A] in
 /-- **`laurentPlusBridge` is continuous** — composition of two continuous pieces
 (`presheafValue_iteratedPlus_equiv` and `presheafValue_trivialPlus_fSubX_equiv`),
 both extensionHom-based, so no `hcont_forward_B` dependency for THIS direction.
@@ -2223,6 +2230,7 @@ theorem laurentPlusBridge_continuous
       hNoeth_B hLocLift_B hA₀Noeth_B hA_complete_B hnoeth_B hcont_forward_B).comp
     (presheafValue_iteratedPlus_equiv_continuous P D₀ f)
 
+omit [HasLocLiftPowerBounded A] in
 /-- **`laurentPlusBridge.symm` is continuous** — uses `hcont_forward_B`
 (the hypothesis present in the bridge's constructor) for the plus-side
 forward continuity, combined with the structural continuity of the

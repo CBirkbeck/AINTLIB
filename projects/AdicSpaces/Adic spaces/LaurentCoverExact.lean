@@ -1081,6 +1081,7 @@ theorem Summable.nat_add {f : ℕ → G} (hf : Summable f) (n : ℕ) :
   exact hf.tendsto_cofinite_zero.comp
     ((add_right_injective n).tendsto_cofinite)
 
+omit [T2Space G] in
 /-- **Nonarchimedean tail sum lemma**: for a summable `f : ℕ → G` in a complete
 nonarchimedean group, `∑' k, f(n + k) → 0` as `n → ∞`.
 

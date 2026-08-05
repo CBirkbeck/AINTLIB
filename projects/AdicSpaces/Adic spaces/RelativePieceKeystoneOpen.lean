@@ -57,6 +57,7 @@ theorem subtype_comp_locSubringToRingOfDef_comp_algebraMapD
       = D₀.canonicalMap.comp D₀.P.A₀.subtype :=
   rfl
 
+omit [PlusSubring A] in
 /-- **The `B`-side ideal of definition is the image of the `A`-side one**:
 `span (I_B)` in `B` is the `canonicalMap`-image of `span (I_A)` in `A`. -/
 theorem span_idealOfDef_image (D₀ : RationalLocData A) :

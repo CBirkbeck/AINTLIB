@@ -656,6 +656,7 @@ private theorem ideal_map_heq_of_coe_fix' {S S' : Subring A} (h : S' = S)
   rw [show φ = RingHom.id _ from RingHom.ext fun x => Subtype.ext (hφ x),
     Ideal.map_id]
 
+omit [DecidableEq A] in
 /-- The pair transport at the identity equivalence. -/
 theorem PairOfDefinition.mapRingEquiv_refl (hc : Continuous
       (RingEquiv.refl A)) (hc' : Continuous (RingEquiv.refl A).symm)

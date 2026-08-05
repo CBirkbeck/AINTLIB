@@ -56,6 +56,7 @@ theorem natCast_zpow_eq_natCast_div_one (a m : ℕ) (z : ℤ) (hz : z = (m : ℤ
   rw [zpow_natCast]
   ring
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The Teichmüller identity of the power: `[ϖ^m] = [ϖ]^m`. -/
 theorem teichPi_pPow (m : ℕ) (hm : 0 < m) :
     teichPi p F (PseudoUniformizer.pPow F ϖ m hm) = teichPi p F ϖ ^ m := by

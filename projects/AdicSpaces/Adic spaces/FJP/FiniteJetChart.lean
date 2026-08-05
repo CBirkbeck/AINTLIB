@@ -227,6 +227,7 @@ theorem ofRestricted_jB_Wa_fst :
   norm_num
   rfl
 
+omit [IsFJPBase F] in
 /-- Power-series coefficients of the 𝓑-jet of `W`. -/
 theorem coeff_jB_Wa_fst (n : ℕ) :
     PowerSeries.coeff n ((jB F (Wa F)).fst).1 = if n = 1 then 1 else 0 := by
@@ -370,6 +371,7 @@ noncomputable def yQ (n : ℕ) : JetA F :=
         add_zero]
       exact zero_mem _⟩
 
+omit [IsFJPBase F] in
 /-- The collapse identity in 𝓐: `Wⁿ · (W⁻ⁿQ²) = Q²`. -/
 theorem Wa_pow_mul_yQ (n : ℕ) : Wa F ^ n * yQ F n = Qa F * Qa F := by
   refine Subtype.ext ?_
@@ -570,6 +572,7 @@ noncomputable def yGen (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) = 
         add_zero]
       exact zero_mem _⟩
 
+omit [IsFJPBase F] in
 theorem Wa_pow_mul_yGen (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) = 0)
     (hy1 : qCoeff F 1 ((y : JetA F) : JetC F) = 0) (n : ℕ) :
     Wa F ^ n * yGen F y hy0 hy1 n = y := by
@@ -824,6 +827,7 @@ theorem chartLocHom_divByS_tA :
   refine (isUnit_tB F).mul_left_cancel ?_
   rw [mul_comm (tB F) (chartLocHom F (divByS (tA F) (chartDatum F).s)), happ, mul_one]
 
+omit [IsFJPBase F] in
 /-- `‖jB(W)‖ = 1`. -/
 theorem norm_jB_Wa : ‖jB F (Wa F)‖ = 1 := by
   have h1 : ‖(jB F (Wa F)).fst‖ = 1 := by
@@ -1090,6 +1094,7 @@ theorem constKW_const (r : K) : constKW F (constHomPS F r) = constA F r := by
   rw [show ofRestricted (R := K) (constHomPS F r) = single 0 r from ofRestricted_C r]
   rfl
 
+omit [IsFJPBase F] in
 theorem constKW_X : constKW F ((jB F (Wa F)).fst) = Wa F := by
   refine Subtype.ext ?_
   show constHomC F (ofRestricted (R := K) ((jB F (Wa F)).fst)) = ((Wa F : JetA F) : JetC F)

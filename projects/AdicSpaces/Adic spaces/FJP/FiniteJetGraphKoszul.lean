@@ -792,6 +792,7 @@ section BallDivision
 
 variable {A : Type*} [NormedCommRing A] [IsUltrametricDist A] [NormOneClass A]
 
+omit [IsUltrametricDist A] [NormOneClass A] in
 /-- Ball division along a scaling unit: `‖x‖ ≤ ‖t‖ⁿ` forces `x ∈ tⁿ·(unit ball)`. -/
 theorem exists_norm_le_one_eq_pow_mul {t : A} (htu : IsUnit t) (ht0 : 0 < ‖t‖)
     (hscale : ∀ x : A, ‖t * x‖ = ‖t‖ * ‖x‖) (n : ℕ) (x : A) (hx : ‖x‖ ≤ ‖t‖ ^ n) :
@@ -849,6 +850,7 @@ theorem pi_norm_add_le_max (u v : ι → A) : ‖u + v‖ ≤ max ‖u‖ ‖v�
   refine (IsUltrametricDist.norm_add_le_max _ _).trans ?_
   exact max_le_max (norm_le_pi_norm u i) (norm_le_pi_norm v i)
 
+omit [IsUltrametricDist A] in
 omit [CompleteSpace A] in
 /-- A scaling element's powers have the norm one expects. -/
 theorem norm_pow_of_scale {c : A} (hc : ∀ x : A, ‖c * x‖ = ‖c‖ * ‖x‖) (n : ℕ) :
@@ -856,6 +858,7 @@ theorem norm_pow_of_scale {c : A} (hc : ∀ x : A, ‖c * x‖ = ‖c‖ * ‖x�
   have h := norm_pow_mul_of_scale (E := A) hc n (1 : A)
   rwa [mul_one, norm_one, mul_one] at h
 
+omit [CompleteSpace A] in
 /-- Sup norms of tuples scale exactly under a *power* of a scaling element — the `pow`
 companion to `pi_norm_scale`.
 
@@ -1003,6 +1006,7 @@ private theorem exists_lift_approx_step {t : A} (ht0 : 0 < ‖t‖) (tinv : A) (
       _ = δ * ‖t‖ ^ (k + 1) := by ring
 
 
+omit [NormOneClass A] [CompleteSpace A] in
 /-- Ultrametric: a summable family whose every term is bounded by `R` has sum bounded by `R`.
 Each partial sum is, by `pi_norm_add_le_max` and induction, and the bound passes to the limit. -/
 private theorem norm_le_of_hasSum_of_forall_norm_le {U : ℕ → ι → A} {US : ι → A}
@@ -1140,6 +1144,7 @@ private theorem exists_pow_mul_mem_window {t : A} (ht1 : ‖t‖ < 1) {δ c : �
           mul_le_mul_of_nonneg_left hmin (norm_nonneg t)
 
 
+omit [IsUltrametricDist A] [NormOneClass A] [CompleteSpace A] in
 /-- The `‖y‖ < δ` half of the constant: scale `y` **up** by `t⁻ⁿ` until its norm sits in the
 window `[δ‖t‖, δ)`, lift it there with `key`, then scale the lift back down by `tⁿ`. The window's
 lower bound is what converts `key`'s absolute bound `R` into the relative bound `h‖y‖`. -/
@@ -1193,6 +1198,7 @@ private theorem exists_lift_norm_le_of_norm_lt {t : A} (ht0 : 0 < ‖t‖) (ht1 
           exact mul_le_mul_of_nonneg_left hy'ge (pow_nonneg (norm_nonneg t) n)
 
 
+omit [IsUltrametricDist A] [NormOneClass A] [CompleteSpace A] in
 /-- The `δ ≤ ‖y‖` half of the constant: the mirror of `exists_lift_norm_le_of_norm_lt`, scaling
 `y` **down** by `tᵐ` into the same window and scaling the lift back up by `t⁻ᵐ`. -/
 private theorem exists_lift_norm_le_of_le_norm {t : A} (ht0 : 0 < ‖t‖) (ht1 : ‖t‖ < 1)
@@ -1260,6 +1266,7 @@ private def closedBallAddSubgroup (R : ℝ) (hR : 0 ≤ R) : AddSubgroup (ι →
     rw [Metric.mem_closedBall, dist_zero_right] at hu ⊢
     rwa [norm_neg]
 
+omit [NormOneClass A] in
 /-- **The Baire step.** The closures of the images of the balls `‖u‖ ≤ ‖t‖⁻ᴺ` cover the (closed,
 hence complete) range, so one of them has interior; that ball's image-closure is an open subgroup,
 so it contains a `δ`-ball. This produces the radius `R` and the threshold `δ` that the rest of the
@@ -1420,6 +1427,7 @@ theorem norm_tP_mul (t : E) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖
       MvPowerSeries.C (σ := Fin m) (R := E) t from MvPolynomial.coe_C t,
     MvPowerSeries.coeff_C_mul, hscale, mul_assoc]
 
+omit [CompleteSpace E] in
 theorem norm_tP (t : E) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) :
     ‖(polyToP (MvPolynomial.C t) : P E m)‖ = ‖t‖ := by
   have h := norm_tP_mul (E := E) (m := m) t hscale 1
@@ -1513,6 +1521,7 @@ theorem finite_setOf_le_norm_coeff (F : P E m) {ε : ℝ} (hε : 0 < ε) :
 noncomputable def polyBall : MvPolynomial (Fin m) ↥(unitBall E) →+* P E m :=
   (polyToP (E := E) (m := m)).comp (MvPolynomial.map (unitBall E).subtype)
 
+omit [CompleteSpace E] in
 theorem coeff_polyBall (q : MvPolynomial (Fin m) ↥(unitBall E)) (s : Fin m →₀ ℕ) :
     MvPowerSeries.coeff s ((polyBall (E := E) (m := m) q).1) =
       ((MvPolynomial.coeff s q : ↥(unitBall E)) : E) := by
@@ -1869,6 +1878,7 @@ private noncomputable def ballDenoms (t : E) (ht : ‖t‖ ≤ 1) :
     Submonoid (MvPolynomial (Fin m) ↥(unitBall E)) :=
   Submonoid.powers (MvPolynomial.C (⟨t, ht⟩ : ↥(unitBall E)))
 
+omit [IsUltrametricDist E] [NormOneClass E] in
 omit [CompleteSpace E] in
 /-- Raising the exponent preserves a unit-ball bound: if `‖t ^ k * a‖ ≤ 1` and `k ≤ N`, then
 `‖t ^ N * a‖ ≤ 1`, since `‖t‖ ≤ 1`. -/
@@ -1881,6 +1891,7 @@ private theorem pow_mul_norm_le_one_of_le (t : E) (ht1 : ‖t‖ ≤ 1)
       ≤ 1 * 1 := mul_le_mul (pow_le_one₀ (norm_nonneg t) ht1) h (norm_nonneg _) zero_le_one
     _ = 1 := one_mul 1
 
+omit [IsUltrametricDist E] [NormOneClass E] in
 omit [CompleteSpace E] in
 /-- Some power of a norm-`< 1` scaling element carries any element of `E` into the unit
 ball. Extracted from `flat_polyToP`, where it was stated for `MvPolynomial.coeff s z`

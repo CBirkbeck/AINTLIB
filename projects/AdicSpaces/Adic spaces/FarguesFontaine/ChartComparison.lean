@@ -604,10 +604,12 @@ theorem vpi_pos :
   refine pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr ?_)
   exact fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
 
+omit [CharP F p] in
 theorem rhoRight_pos (a b : ℕ) : 0 < rhoRight p F ϖ a b := by
   rw [rhoRight]
   exact NNReal.rpow_pos (vpi_pos p F ϖ)
 
+omit [CharP F p] in
 theorem rhoRight_lt_one (a b : ℕ) (ha : 0 < a) (hb : 0 < b) :
     rhoRight p F ϖ a b < 1 := by
   rw [rhoRight]

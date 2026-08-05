@@ -276,6 +276,7 @@ theorem rho1_AD9_pos (j n : ℕ) :
   refine pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr ?_)
   exact fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
 
+omit [CharP F p] in
 /-- `|ϖ|^{jn} < 1` whenever `j·n ≥ 1`. -/
 theorem rho1_AD9_lt_one (j n : ℕ) (hjn : 0 < j * n) :
     perfectoidValuation p F

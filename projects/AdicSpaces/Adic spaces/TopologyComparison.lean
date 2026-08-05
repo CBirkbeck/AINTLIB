@@ -293,6 +293,7 @@ private theorem neg_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : �
   obtain ⟨x, hx, hx_eq⟩ := ha n hn
   exact ⟨-x, (P.I ^ _).neg_mem hx, by rw [NegMemClass.coe_neg, ← hx_eq]⟩
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- `artinReesNhd` is a neighborhood of `0` in the T-topology: it is the finite
 intersection (over `n ≤ N`) of preimages of the open sets `val '' I^…` under the
 continuous scaled-coefficient maps. -/
@@ -314,6 +315,7 @@ private theorem artinReesNhd_mem_nhds (P : PairOfDefinition A) (s : A) (C M N : 
     (P.pow_image_isOpen _).preimage
       (TateAlgebraWedhorn.tateTopologyT_continuous_scaledCoeff s n)
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] in
 /-- `artinReesNhd` is stable under multiplication by `algebraMap a₀` for `a₀ ∈ A₀`:
 multiplying scales each coefficient by `a₀`, and `a₀ · I^k ⊆ I^k`. -/
 private theorem mul_algebraMap_mem_artinReesNhd (P : PairOfDefinition A) (s : A)
@@ -325,6 +327,7 @@ private theorem mul_algebraMap_mem_artinReesNhd (P : PairOfDefinition A) (s : A)
   obtain ⟨b, hb, hb_eq⟩ := hg n hn
   exact ⟨a₀ * b, Ideal.mul_mem_left _ _ hb, by rw [MulMemClass.coe_mul, ← hb_eq]⟩
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] in
 /-- `artinReesNhd` is stable under multiplication by `algebraMap t * X` for any `t`
 with the Artin-Rees shift property `hC_shift`: the `X` shifts the coefficient index
 up by one (consuming one unit of the `(N - n) * C` budget), and `s * t` carries
@@ -1057,13 +1060,16 @@ private noncomputable def truncTate (g : ↥(TateAlgebra A)) (N : ℕ) :
   ⟨fun s ↦ if s 0 < N then g.val s else 0,
    isRestricted_of_eventually_zero _ N (fun s hs ↦ by simp [show ¬(s 0 < N) by omega])⟩
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [T2Space A] in
 private theorem truncTate_val (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ) :
     (truncTate g N).val s = if s 0 < N then g.val s else 0 := rfl
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [T2Space A] in
 private theorem truncTate_coeff_high (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ)
     (hs : N ≤ s 0) : (truncTate g N).val s = 0 := by
   simp [truncTate_val, show ¬(s 0 < N) by omega]
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [T2Space A] in
 private theorem truncTate_coeff_low (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ)
     (hs : s 0 < N) : (truncTate g N).val s = g.val s := by
   simp [truncTate_val, hs]
@@ -1547,10 +1553,12 @@ private noncomputable def truncTateC (g : ↥(TateAlgebra A)) (N : ℕ) :
    isRestricted_of_eventually_zero _ N
     (fun s hs ↦ by simp [show ¬(s 0 < N) by omega])⟩
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [T2Space A] in
 private theorem truncTateC_val (g : ↥(TateAlgebra A)) (N : ℕ)
     (s : Fin 1 →₀ ℕ) :
     (truncTateC g N).val s = if s 0 < N then g.val s else 0 := rfl
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [T2Space A] in
 private theorem truncTateC_coeff_high (g : ↥(TateAlgebra A)) (N : ℕ)
     (s : Fin 1 →₀ ℕ) (hs : N ≤ s 0) :
     (truncTateC g N).val s = 0 := by
@@ -1761,6 +1769,7 @@ private theorem algebraMap_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
   · exact ⟨b, hb, rfl⟩
   · exact ⟨0, (P.I ^ M).zero_mem, rfl⟩
 
+omit [IsTopologicalRing A] [T2Space A] in
 omit [PlusSubring A] [IsHuberRing A] in
 /-- Every element `x` of `locSubring P T s` has a lift `r' : A⟨X⟩` with
 `mk r' = locToQuotientOneSubfX_gen s x` that **stabilizes** `coeffIdealNhd P_M M`,
@@ -2189,6 +2198,7 @@ theorem presheafValueToCanonicalQuotient_coe (D : RationalLocData A)
 
 /-! ### Step 6: Round-trip composites are identity (Canonical Topology) -/
 
+omit [PlusSubring A] in
 /-- The composite `tateQuotientToPresheafHom ∘ presheafValueToCanonicalQuotient`
 is the identity on `presheafValue D`.
 

@@ -1035,6 +1035,7 @@ theorem exists_twist (zb c : OF F)
       map_pow]
     exact hPj
 
+omit [CharP F p] in
 /-- **The twist reaches within one generator-step of the denominator**: under
 the `σ₁`-Gauss bound (in the `m`-th-power multiplicative form
 `|c|^m ≤ |zb|^{k−i}`), the maximal twist depth `j` satisfies
@@ -3863,6 +3864,7 @@ theorem nonempty_case1_quotient_equiv
 
 end Case1Iso
 
+omit [CharP F p] in
 /-- A nonzero-valuation integral element divides a pseudo-uniformizer power. -/
 theorem dvd_pow_pseudoUniformizer (zb : OF F)
     (hzb : perfectoidValuation p F (zb : F) ≠ 0) :

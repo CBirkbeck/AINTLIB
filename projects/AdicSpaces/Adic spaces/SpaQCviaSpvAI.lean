@@ -296,6 +296,7 @@ theorem restrictIdealSingleSpv_mem_SpvAI (v : Spv A) (g : A) :
     letI : ValuativeRel A := v.toValuativeRel
     exact ofValuation_restrictIdealSingle_isInSpvAI (ValuativeRel.valuation A) g _
 
+omit [TopologicalSpace A] in
 /-- **Wedhorn 7.5(2), principal case (fixed points).** `r(v) = v` for
 `v ∈ Spv(A, (g))`. -/
 theorem restrictIdealSingleSpv_eq_self_of_mem {v : Spv A} {g : A}
@@ -934,6 +935,7 @@ open Classical in
 noncomputable def restrictIdealPairSpv (v : Spv A) (g₁ g₂ : A) : Spv A :=
   if v.vle g₂ g₁ then restrictIdealSingleSpv v g₁ else restrictIdealSingleSpv v g₂
 
+omit [TopologicalSpace A] [PlusSubring A] in
 /-- The pair retraction lands in `Spv(A, (g₁, g₂))`. -/
 theorem restrictIdealPairSpv_mem_SpvAI (v : Spv A) (g₁ g₂ : A) :
     restrictIdealPairSpv v g₁ g₂ ∈ SpvAI A (Ideal.span ({g₁, g₂} : Set A)) := by
@@ -963,6 +965,7 @@ def spaProfileConditions₂ (I : Ideal A) (g₁ g₂ : A) : Set (RCoord A I → 
   { y | y (RCoord.oneOver I g₁) = false ∧ y (RCoord.oneOver I g₂) = false ∧
         ∀ f ∈ (A⁺ : Subring A), y (RCoord.leOne I f) = true }
 
+omit [TopologicalSpace A] in
 theorem isClosed_spaProfileConditions₂ (I : Ideal A) (g₁ g₂ : A) :
     IsClosed (spaProfileConditions₂ I g₁ g₂) := by
   have heq : spaProfileConditions₂ I g₁ g₂ =

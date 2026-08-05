@@ -642,6 +642,7 @@ theorem genPiece_rel_backward_continuous
     (OpenKeystone.imagePieceDatumOpen D₀ T t M hle).uniformSpace
   exact UniformSpace.Completion.continuous_extension
 
+omit [DecidableEq A] in
 /-- The keystone comparison is continuous. -/
 theorem pieceEquiv_continuous {E : RationalLocData A} (hE : E.IsRational)
     (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) :
@@ -668,6 +669,7 @@ theorem pieceEquiv_open_eq {E : RationalLocData A} (hE : E.IsRational)
   rw [OpenKeystone.genPieceDatumOpen_T, OpenKeystone.genPieceDatumOpen_s] at h
   exact (h.trans (Set.inter_eq_right.mpr hE_sub)).symm
 
+omit [DecidableEq A] in
 /-- The keystone comparison has continuous inverse. -/
 theorem pieceEquiv_symm_continuous {E : RationalLocData A} (hE : E.IsRational)
     (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) :
@@ -1181,6 +1183,7 @@ def shadowImage (u : (presheafValue D₀)ˣ)
   carrier := shadow D₀ '' (W : Set ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
   is_open' := shadow_isOpenMap D₀ u hu _ W.2
 
+omit [DecidableEq A] in
 theorem shadowPre_shadowImage (u : (presheafValue D₀)ˣ)
     (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀))
     (W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) :

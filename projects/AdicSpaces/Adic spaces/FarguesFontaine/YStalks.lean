@@ -244,6 +244,7 @@ def yTop : TopCat := TopCat.of ↥(ySpaSet p F ϖ)
 def yIncl : yTop p F ϖ ⟶ SpaTop (Ainf p F) :=
   TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
 
+omit [CharP F p] in
 /-- The inclusion is an open embedding (`𝒴` is open in `Spa`). -/
 theorem yIncl_isOpenEmbedding :
     Topology.IsOpenEmbedding (yIncl p F ϖ) :=

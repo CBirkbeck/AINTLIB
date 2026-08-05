@@ -153,6 +153,7 @@ theorem completionModel_isStronglyNoetherian_congr (P P' : PairOfDefinition A) :
     (completionModelCompare_continuous P P')
     (completionModelCompare_symm_continuous P P')
 
+omit [IsTopologicalRing A] in
 /-- **The one-model wrapper** (Wedhorn Theorem 8.28(b) with the Definition 6.36
 hypothesis in its `∃`-model form): a Tate ring one of whose completion models is
 strongly noetherian is sheafy in the ring-level sense. Hypothesis-clean (the
@@ -163,6 +164,7 @@ theorem isSheafyTateRing_of_stronglyNoetherianTateRing [IsTateRing A]
   refine isSheafyTateRing_of_stronglyNoetherian_completion (fun P => ?_)
   exact (completionModel_isStronglyNoetherian_congr P₀ P).mp hP₀
 
+omit [IsTopologicalRing A] in
 /-- One model strongly noetherian iff all models are (the `∃ ↔ ∀` collapse). -/
 theorem isStronglyNoetherianTateRing_iff_forall [IsTateRing A] :
     IsStronglyNoetherianTateRing A ↔

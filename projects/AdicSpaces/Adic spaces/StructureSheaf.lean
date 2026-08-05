@@ -1182,6 +1182,7 @@ theorem _aux_nonOpen_hSpa_principalPair_A₀_completeSpace
   have : IsClosed ((P.A₀ : Set A) : Set A) := hclosed
   exact IsClosed.completeSpace_coe (s := (P.A₀ : Set A))
 
+omit [PlusSubring A] [HasLocLiftPowerBounded A] in
 /-- **Sub-lemma (a.1) — `IsAdicComplete` instance for the principal pair of a
 strongly-noetherian Tate ring.**
 
