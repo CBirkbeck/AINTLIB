@@ -1928,28 +1928,6 @@ private theorem datum_ker_eq_span_taut
     (datum_span_le_ker D)
 
 set_option linter.unusedSectionVars false in
-/-- **Wedhorn Example 6.38, quotient form (tautological span), for any datum with
-`1 ∈ T`**: `O_X(R(T/s)) ≃+* A⟨X₁..Xₙ⟩/({tᵢ − s·Xᵢ})`. Combines
-`example638_evalHom_surjective` with the explicit kernel `datum_ker_eq_span_taut`. -/
-private noncomputable def datum_quotEquiv_taut
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
-    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
-      CompleteSpace A]
-    (D : RationalLocData A) (h1 : (1 : A) ∈ D.T) :
-    presheafValue D ≃+*
-      (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸
-        Ideal.span (Set.range (fun i : Fin D.T.card =>
-          algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A)
-            ((D.T.equivFin.symm i : D.T) : A) -
-          algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) D.s *
-            (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestrictedAdic i⟩ :
-              ↥(restrictedMvPowerSeriesSubring D.T.card A))))) :=
-  ((RingHom.quotientKerEquivOfSurjective
-      (example638_evalHom_surjective D)).symm).trans
-    (Ideal.quotEquivOfEq (datum_ker_eq_span_taut D h1))
-
-set_option linter.unusedSectionVars false in
 /-- The two bivariate presentations of the annulus ring agree as ideals of `A⟨X,Y⟩`:
 `(b − X, 1 − bY) = (XY − 1, b − X)` (Wedhorn (8.2.1): `1 − bY ≡ 1 − XY (mod b − X)`). -/
 private theorem bivariateSpan_eq_laurentSup (b : A) :

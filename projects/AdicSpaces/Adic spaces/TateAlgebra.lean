@@ -2077,13 +2077,6 @@ private theorem tate_coord_relation {l : ℕ} {f : Fin l → A}
         (fun i ↦ (f i • x i : ↥(TateAlgebra A)).val) ▸ h'
   exact fun i ↦ TateAlgebra.smul_val_eq (f i) (x i) s
 
-/-- The relation map for syzygies in the Tate algebra flatness proof. -/
-private noncomputable def tateRelMap {l : ℕ}
-    (f : Fin l → A) : (Fin l → A) →ₗ[A] A where
-  toFun r := ∑ i, f i * r i
-  map_add' r s := by simp [mul_add, Finset.sum_add_distrib]
-  map_smul' a r := by simp [smul_eq_mul, mul_left_comm, Finset.mul_sum]
-
 /-- A point of `A` lying in the image of `P.I ^ m` for *every* `m` is zero: the images of the
 powers of the ideal of definition form a neighbourhood basis of `0`, and `A` is Hausdorff. -/
 theorem eq_zero_of_mem_all_idealOfDefinition_pow_image

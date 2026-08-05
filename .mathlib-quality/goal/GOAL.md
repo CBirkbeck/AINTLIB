@@ -17126,3 +17126,42 @@ genuinely needs, and the other six went.
 
 Applied in this batch: `presheafValue_eq_id_of_coeRingHom` un-privated in
 `RingEquivPresheafTransport`, the Huber copy deleted, its 2 call sites repointed.
+
+## Task 3 — junk and naming audits
+
+### Dead private code: three declarations, and one false positive worth the note
+
+A `private` declaration unreferenced in its own file can never be used, by anyone. Scanning
+all 272 files finds **four** candidates, of which three are real:
+
+| decl | size | what it was |
+|---|---|---|
+| `TateAlgebra.tateRelMap` | 7 | "the relation map for syzygies in the Tate algebra flatness proof" — scaffolding for an approach that was abandoned |
+| `Wedhorn828.coeRingHom_mem_range` | 33 | a documented theorem that the surjectivity proof stopped routing through |
+| `WedhornCechAcyclicity.datum_quotEquiv_taut` | 22 | a packaging `≃+*` combining two lemmas that are used directly instead |
+
+All three predate this session (checked against `d893fbbc0^`), so nothing here orphaned them.
+Both of the substantive ones carry `set_option linter.unusedSectionVars false in` — the trace of
+a declaration that was once wired up and then bypassed without being removed.
+
+> **False positive worth keeping:** `RationalCoveringData.standardCoverTauPair` looked dead
+> because the reference scan excluded matches preceded by a dot — and its two uses are
+> `C.standardCoverTauPair`. **A dot-notation-eligible declaration is used through its
+> namespace, not its bare name.** Any "unused" scan over Lean must allow the `.name` form, or
+> it will propose deleting live code.
+
+### Naming: clean, and two patterns that only *look* like violations
+
+The forbidden-pattern scan returns 8 digit-run names and 14 single-letter public declarations,
+and essentially none of them is a defect here:
+
+* `berkeley_6_2_8`, `wedhorn_7_52_2_isUnit_iff_forall_not_vle_zero` — **published** theorem
+  numbers. Renaming would destroy the reader's route back to the source; the rule targets
+  *internal* scheme numbers, and the second one already carries a descriptive tail.
+* `TateAlgebra.X`, `ExampleUnitDisc.D`, `RestrictedLaurent.W`, … — single-letter but
+  **namespaced**, exactly as `Polynomial.X` is. The rule is about undiscoverable names, and
+  `TateAlgebra.X` is the discoverable one.
+
+The one genuine smell is the `_sub_lemma_L5_x_y_…` family (10 uses across 4 files), which does
+encode an internal plan numbering — but it is a **cross-file rename**, which is coordinator
+work under a freeze, not a producer-side cleanup. Left, and recorded.

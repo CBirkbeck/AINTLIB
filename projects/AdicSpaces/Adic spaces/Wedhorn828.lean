@@ -1290,39 +1290,6 @@ private theorem invS_mem_range [IsTateRing A] [IsNoetherianRing A] (D : Rational
   rw [hfinal]
   exact (example638_evalHom D).range.mul_mem hinv_range hrange_w
 
-set_option linter.unusedSectionVars false in
-/-- **The whole dense subring `range D.coeRingHom` lies in `range (example638_evalHom D)`.**
-Every element of `Localization.Away D.s` is `a/sᵏ`, whose `coeRingHom`-image is
-`D.canonicalMap a · (invS D)ᵏ`; both factors lie in the range (`example638_evalHom_algebraMap`
-and `invS_mem_range`), so the product does. NO topology on `A⟨X₁..Xₙ⟩` is used. -/
-private theorem coeRingHom_mem_range [IsTateRing A] [IsNoetherianRing A]
-    (D : RationalLocData A) (y : Localization.Away D.s) :
-    D.coeRingHom y ∈ (example638_evalHom D).range := by
-  induction y using Localization.induction_on with
-  | H p =>
-    obtain ⟨a, sk, hk⟩ := p
-    obtain ⟨k, rfl⟩ := hk
-    -- `coeRingHom (mk a ⟨sᵏ, _⟩) = canonicalMap a · invSᵏ`.
-    have hformula : D.coeRingHom (Localization.mk a ⟨D.s ^ k, k, rfl⟩) =
-        D.canonicalMap a * (invS D) ^ k := by
-      have key : D.coeRingHom (Localization.mk a ⟨D.s ^ k, k, rfl⟩) *
-          (D.canonicalMap D.s) ^ k = D.canonicalMap a := by
-        rw [← map_pow]
-        change D.coeRingHom _ * D.coeRingHom _ = D.coeRingHom _
-        rw [← map_mul]
-        congr 1
-        rw [← Localization.mk_one_eq_algebraMap, ← Localization.mk_one_eq_algebraMap,
-          Localization.mk_mul, Localization.mk_eq_mk_iff, Localization.r_iff_exists]
-        exact ⟨1, by simp [mul_comm]⟩
-      rw [← key, mul_assoc,
-        show (D.canonicalMap D.s) ^ k * (invS D) ^ k = 1 by
-          rw [← mul_pow, canonicalMap_s_mul_invS, one_pow],
-        mul_one]
-    rw [hformula]
-    exact (example638_evalHom D).range.mul_mem
-      ⟨algebraMap A _ a, example638_evalHom_algebraMap D a⟩
-      ((example638_evalHom D).range.pow_mem (invS_mem_range D) k)
-
 /-! ### Example 6.38 — the completion-comparison isomorphism `presheafValue D ≃+* C ⧸ ker`
 
 Wedhorn Example 6.38 (p. 56, `wedhorn.txt:2700`–`2707`): "Set `C = Â⟨X⟩`, `a = (t − sᵢXᵢ)`;
