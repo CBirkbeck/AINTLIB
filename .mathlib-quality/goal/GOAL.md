@@ -16794,3 +16794,30 @@ consider … explicitly omit them: omit … in theorem ...
 — i.e. the exact `omit` line to add, in the output of the build *before* the one where I
 finally added it. `unusedSectionVars` warnings after a lift are not noise: they are the
 diff between the target's old and new instance appetite, which is precisely what breaks callers.
+
+### Three of the 17 are structure instances, not proofs — the real board is 14
+
+Classifying the board by *kind* rather than size:
+
+| c | kind | fields | longest field | decl |
+|---|---|---|---|---|
+| 67 | `where`-instance | 20 | **30** | `CommRing (RestrictedLaurent R)` |
+| 61 | `where`-instance | 7 | **20** | `CompleteSpace (RestrictedLaurent R)` |
+| 56 | `where`-instance | 5 | **18** | `resIHom` |
+
+A structure instance body is not a proof body — it is a list of independent field proofs. In
+`CommRing (RestrictedLaurent R)`, 20 fields totalling 71 lines: `mul_assoc` is 30c, `mul_one`
+6c, the distributivity pair 5c each, the rest 1–4c. **Every field of all three is under 50.**
+
+The rule is "no proof **body** over 50 lines". By that rule these are already compliant, and
+decomposing them would promote twenty one-line field proofs into twenty named lemmas — strictly
+worse code for a metric that never asked for it.
+
+> Measure the unit the rule is about. `scope.py` sums a `where`-block into one number because it
+> splits on the declaration s `:=`; for an instance that number is the sum of independent
+> obligations, not the length of any argument.
+
+This also explains the earlier "0 blocks" readings and the two blank target names: anonymous
+`instance` declarations have no name to extract and no `have`-chain to survey.
+
+**Actionable board: 14 proofs**; excluding the two sorry-bearing ones leaves **12** that are mine.
