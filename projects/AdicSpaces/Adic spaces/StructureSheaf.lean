@@ -994,6 +994,7 @@ theorem presheafValue_flat_of_tateQuotient
       left_inv := e.symm_apply_apply
       right_inv := e.apply_symm_apply }
 
+omit [PlusSubring A] in
 omit [HasLocLiftPowerBounded A] in
 /-- `presheafValue D` is flat over `A` (Wedhorn Proposition 8.30), proved via the
 **canonical-topology** isomorphism `presheafValueCanonicalQuotientEquiv`.

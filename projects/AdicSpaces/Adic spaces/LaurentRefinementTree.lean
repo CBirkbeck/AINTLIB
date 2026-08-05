@@ -512,6 +512,7 @@ theorem LaurentTree.toCoveringCovers_cover_base (t : LaurentTree A)
 omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
+omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in

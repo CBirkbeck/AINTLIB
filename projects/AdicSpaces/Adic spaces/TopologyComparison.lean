@@ -974,6 +974,7 @@ noncomputable def presheafValueTateQuotientEquiv (D : RationalLocData A)
   map_mul' := map_mul _
   map_add' := map_add _
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- The isomorphism sends `canonicalMap(a)` to `mk(algebraMap a)`. -/
 theorem presheafValueTateQuotientEquiv_canonicalMap (D : RationalLocData A)
     [T2Space A]
@@ -995,6 +996,7 @@ theorem presheafValueTateQuotientEquiv_canonicalMap (D : RationalLocData A)
     (D.coeRingHom (algebraMap A _ a)) = _
   rw [presheafValueToQuotient_coe, locToQuotientOneSubfX_gen_algebraMap]
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- The inverse sends `mk(algebraMap a)` back to `canonicalMap(a)`. -/
 theorem presheafValueTateQuotientEquiv_symm_algebraMap (D : RationalLocData A)
     [T2Space A]
@@ -2547,6 +2549,7 @@ theorem tateQuotientToPresheafHom_isHomeomorph (D : RationalLocData A)
     bijective := hbij
   }
 
+omit [PlusSubring A] in
 /-- **T142: `presheafValueCanonicalQuotientEquiv` is `IsInducing`.**
 
 Forward-direction analogue of `tateQuotientToPresheafHom_isHomeomorph`:
@@ -2826,6 +2829,7 @@ noncomputable def presheafValue_tateAlgebra_quotient_iso
   presheafValueCanonicalQuotientEquiv D hb hA_complete hnoeth hT_pb
     (tateQuotientToPresheafHom_continuous_of_tate D hb)
 
+omit [PlusSubring A] in
 /-- The packaged Example 6.38 iso sends `D.canonicalMap a` to
 `mk(algebraMap a)`. -/
 theorem presheafValue_tateAlgebra_quotient_iso_canonicalMap
@@ -2842,6 +2846,7 @@ theorem presheafValue_tateAlgebra_quotient_iso_canonicalMap
   exact presheafValueCanonicalQuotientEquiv_canonicalMap D hb hA_complete hnoeth hT_pb
     (tateQuotientToPresheafHom_continuous_of_tate D hb) a
 
+omit [PlusSubring A] in
 /-- The packaged Example 6.38 iso, on the inverse direction, sends
 `mk(algebraMap a)` back to `D.canonicalMap a`. -/
 theorem presheafValue_tateAlgebra_quotient_iso_symm_algebraMap

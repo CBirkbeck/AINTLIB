@@ -1201,6 +1201,7 @@ theorem bridgeLocHomD_divByS (hD : D.IsRational) (i : Fin e.m) :
     (bridgeLocHomD D e hD (divByS (rhoC F (iotaC F (e.f i))) (pushDatumD D hD).s))]
   exact happ
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeLocHomD_continuous (hD : D.IsRational) :
     @Continuous _ _ (pushDatumD D hD).topology _ (bridgeLocHomD D e hD) := by
   refine locTopology_continuous_lift (pushDatumD D hD).P (pushDatumD D hD).T

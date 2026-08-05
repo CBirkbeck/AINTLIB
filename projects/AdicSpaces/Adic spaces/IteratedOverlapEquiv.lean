@@ -466,6 +466,7 @@ private theorem iteratedOverlap_forwardLocHom_to_B_genPB_T
     refine algebraMap_mem_locSubring _ _ _ (Subring.le_topologicalClosure _ ?_)
     exact ⟨⟨divByS a D₀.s, divByS_mem_locSubring _ _ _ ha_T⟩, rfl⟩
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- **Forward loc hom power-boundedness, overlap case.**
 
 For each `t ∈ (laurentOverlapDatum D₀ f).T`, `iteratedOverlap_forwardLocHom_to_B`

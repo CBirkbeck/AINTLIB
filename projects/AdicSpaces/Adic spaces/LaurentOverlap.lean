@@ -1180,6 +1180,7 @@ noncomputable def example638Bivariate_backwardHom
     hQ_complete
     hT0Q
 
+omit [PlusSubring B] in
 omit [HasLocLiftPowerBounded B] [IsNoetherianRing B] in
 /-- On the dense image `coeRingHom a`, `example638Bivariate_backwardHom` agrees
 with `bivariateLocToQuotient_atOverlap`. -/
@@ -1392,6 +1393,7 @@ Uses `tateAlgebra₂_polynomial_decomp` (polynomial finite-support decomposition
 (`algebraMap`, `X`, `Y`) via `_canonicalMap`, `quotient_algebraMap_b_eq_X_bivariate`,
 and `_backwardHom_invS` implies agreement through the monomial decomposition. -/
 
+omit [PlusSubring B] in
 omit [HasLocLiftPowerBounded B] [IsNoetherianRing B] in
 /-- `example638Bivariate_backwardHom` is continuous (from the `presheafValue` canonical
 topology to `quotientBivariateOverlapIdealTopology` on the target) — it is a

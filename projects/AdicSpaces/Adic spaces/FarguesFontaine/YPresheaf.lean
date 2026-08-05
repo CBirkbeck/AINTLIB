@@ -50,6 +50,7 @@ theorem bigWindow_eq_intervalTrace (n : ℤ) :
         ∧ KLE p F ϖ (1 / (1 / (p : ℚ) ^ (n + 1))) v)
   rw [one_div_one_div, one_div_one_div]
 
+omit [CharP F p] in
 /-- Interval traces are monotone: a smaller exponent interval has a smaller
 trace. -/
 theorem intervalTrace_mono {q₁ q₂ r₁ r₂ : ℚ} (hq₁ : 0 < q₁) (hq₂ : 0 < q₂)

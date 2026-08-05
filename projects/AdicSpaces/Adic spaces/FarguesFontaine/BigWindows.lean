@@ -112,6 +112,7 @@ theorem vle_pow_iff {v : Spv (Ainf p F)} {k : ℕ} (hk : 0 < k) (x y : Ainf p F)
 def bigWindow (n : ℤ) : Set (Spv (Ainf p F)) :=
   {v ∈ Y p F ϖ | KGE p F ϖ ((p : ℚ) ^ n) v ∧ KLE p F ϖ ((p : ℚ) ^ (n + 1)) v}
 
+omit [CharP F p] in
 /-- The Big window splits at `c·p^n` into the two Kedlaya windows. -/
 theorem bigWindow_eq_union (n : ℤ) (hp : 1 < p) :
     bigWindow p F ϖ n = windowU p F ϖ n ∪ windowV p F ϖ n := by
@@ -262,6 +263,7 @@ theorem bigWindow_eq_rationalOpen_neg (m : ℕ) (hp : 1 < p) :
       exact hge
     · exact (KLE_iff hY hq2 hpk hab2).mpr hle
 
+omit [CharP F p] in
 /-- **The overlap of consecutive Big windows is the `κ = p^{n+1}` circle.** -/
 theorem bigWindow_inter_succ (n : ℤ) (hp : 1 < p) :
     bigWindow p F ϖ n ∩ bigWindow p F ϖ (n + 1)

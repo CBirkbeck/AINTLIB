@@ -108,6 +108,7 @@ theorem scottishWitness_ne_zero : scottishWitness F ≠ 0 := by
 
 /-! ### Multiplication by `Q²` is a strict inclusion with closed image -/
 
+omit [IsFJPBase F] in
 /-- Multiplication by `Q²` is an **isometry** of `𝓐`. This single fact gives injectivity,
 strictness and closedness of the image at once, with no appeal to a nonarchimedean open
 mapping theorem. -/
@@ -142,6 +143,7 @@ theorem scottishWitness_mul_isStrictMap :
   rw [hfun]
   exact hm.isometryEquivOnRange.toHomeomorph.isOpenMap
 
+omit [IsFJPBase F] in
 /-- `Q²` is a nonzerodivisor of `𝓐` (`𝓐` is a domain and `Q² ≠ 0`). -/
 theorem scottishWitness_mem_nonZeroDivisors :
     scottishWitness F ∈ nonZeroDivisors (JetA F) :=

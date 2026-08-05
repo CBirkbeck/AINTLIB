@@ -561,6 +561,7 @@ private theorem natCast_lt_p_pow {k N : ℕ} (hp1 : 1 < p) (hkN : k ≤ N) :
     _ ≤ ((p ^ N : ℕ) : ℚ) := by exact_mod_cast Nat.pow_le_pow_right (by omega) hkN
     _ = (p : ℚ) ^ N := by push_cast; ring
 
+omit [CharP F p] in
 /-- For `v ∈ Y`, the set of exponents `n` with `KGE p^n v` is nonempty and bounded
 above, so it has a greatest element `n₀` — and past it the next power falls on the
 `KLE` side. This is the pigeonhole that lands every point of `Y` in some window:
@@ -898,6 +899,7 @@ theorem zsmul_windowV (k n : ℤ) :
     exact ⟨smul_mem_Y p F ϖ _ hwY, (KGE_cFF_smul_iff p F ϖ hwY k n).mpr hge,
       (KLE_zpow_smul_iff p F ϖ hwY k (n + 1)).mpr (harith n ▸ hle)⟩
 
+omit [CharP F p] in
 /-- **Within-family disjointness** for the `U`-family: `U_n ∩ U_m = ∅` for `n ≠ m`.
 Uses `1 < c < p` strictly, via `not_KGE_of_KLE_of_lt` (the κ-intervals `[p^n, c·p^n]` are
 pairwise disjoint because `c < p`).
@@ -919,6 +921,7 @@ theorem windowU_disjoint {n m : ℤ} (h : n ≠ m) :
       _ = (p : ℚ) ^ (n + 1) := by rw [zpow_add_one₀ hp0.ne']; ring
       _ ≤ (p : ℚ) ^ m := zpow_le_zpow_right₀ hpQ.le (by omega)
 
+omit [CharP F p] in
 /-- Within-family disjointness for the `V`-family (κ-intervals `[c·p^n, p^{n+1}]`,
 disjoint because `1 < c`). -/
 theorem windowV_disjoint {n m : ℤ} (h : n ≠ m) :

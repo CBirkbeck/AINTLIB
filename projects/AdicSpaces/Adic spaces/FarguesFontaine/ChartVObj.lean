@@ -449,6 +449,7 @@ private theorem chartGen_pow_eq_chartFracP_pow_mul {a b d : ℕ} (hab : b ≤ a)
       * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'') := by
       rw [h2, mul_pow]
 
+omit [CharP F p] in
 /-- **(m3) Positive-monomial `a`-th-power membership**: for a fraction
 monomial `(p/[ϖ])^d·[c']` whose coordinate satisfies the right-endpoint bound
 `|c'|^a ≤ |ϖ|^{d(a−b)}`, the `a`-th power is `chartFracP^d·[c'']` and lies in
@@ -908,6 +909,7 @@ theorem chartSubring_le_locPlusSubring_map (a b : ℕ) (hb : 0 < b) :
               from rfl, chartT]; simp),
         blocEquiv_divByS_p p F ϖ a b hb⟩
 
+omit [CharP F p] in
 /-- Chart-subring elements are carried into the completed plus-base. -/
 theorem coeRingHom_mem_completedPlusSubringBase_of_mem (a b : ℕ) (hb : 0 < b)
     {h : Bloc p F ϖ}

@@ -17623,3 +17623,28 @@ Total AdicSpaces warnings 4,398 → **3,691**. The library has been green under 
 > Measuring the *rate* rather than the remaining count is what distinguishes "this is nearly
 > finished" from "this will produce output for as long as it is run". Only the second is true
 > here, and it is a decision for the owner rather than a queue to drain.
+
+### Round 7 — cut short by the disk, and what survived is still verified
+
+Plain pass 11 files / 19 omits. Bisection got through 9 of its 16 files before an ENOSPC
+landed mid-`write_text` on `RelativePieceKeystone.lean` — the second time this session.
+
+The check that matters, again first: **2,457 lines on disk against HEAD's 2,456**, so `open()`
+failed *before* writing and the file was whole. Restored to HEAD regardless rather than keep a
+half-finished bisection state.
+
+Round 7 total: **24 omits across 14 files** (1,197 cumulative), `unusedSectionVars` → **186**,
+AdicSpaces warnings → **3681**.
+
+The first full gate afterwards returned **EXIT=143 with zero errors in the log** — SIGTERM, the
+*reaped-under-disk-pressure* signature rather than a compile failure. Retried once space
+returned; green.
+
+> Two different disk symptoms, both seen this session, both worth telling apart from real
+> failures: **ENOSPC inside a write loop** (check the file's line count against `git show HEAD:`
+> before anything else) and **a gate killed at EXIT=143 with an empty error list** (not a
+> broken build — rerun it). Neither is a reason to distrust the work; both are reasons to
+> re-check rather than re-do.
+
+Every one of the 24 omits kept was individually gated by a module build before the interruption,
+and the retried full-library gate confirms them together.

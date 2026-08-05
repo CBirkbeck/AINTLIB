@@ -42,6 +42,7 @@ omit [IsFJPBase F] in
 theorem finiteJet_isDomain : IsDomain (JetA F) :=
   inferInstance
 
+omit [IsFJPBase F] in
 /-- **[FJP] Theorem 1.3 (nonnoetherian)**: 𝓐 is not noetherian. -/
 theorem finiteJet_not_noetherian : ¬ IsNoetherianRing (JetA F) :=
   not_isNoetherianRing_JetA F

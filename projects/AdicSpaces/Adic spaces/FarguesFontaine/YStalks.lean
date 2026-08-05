@@ -725,6 +725,7 @@ theorem runWindow_subset_Y (n : ℤ) (k : ℕ) :
     runWindow p F ϖ n k ⊆ Y p F ϖ :=
   fun _ hv => hv.1
 
+omit [CharP F p] in
 /-- **Each Big window of the run lies in the run window.** -/
 theorem bigWindow_subset_runWindow (n : ℤ) (k : ℕ) {j : ℤ}
     (hj1 : n ≤ j) (hj2 : j ≤ n + k) :
