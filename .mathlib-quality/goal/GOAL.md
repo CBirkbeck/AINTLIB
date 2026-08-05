@@ -17289,3 +17289,38 @@ generalised. The remaining 93 files are queued as a fixpoint job, with the metho
 > Contrast with the `haveI` sweep, which *was* safely batchable: it changes proof **bodies**,
 > never signatures, so the sites cannot interact. The distinguishing question for any mass edit
 > is not "is the fix mechanical?" but **"does the fix change anything another site can see?"**
+
+### …and it *is* applicable — one file at a time. 434 omits landed.
+
+The batch sweep failed, but the diagnosis pointed at the fix. Two facts:
+
+* every failure observed was **inside a file the sweep had itself modified** — no innocent
+  downstream file broke;
+* `lake build '«Adic spaces».X'` compiles `X` **plus its dependencies** (already cached), *not*
+  its dependents.
+
+Together those make a per-file gate both **sufficient** and **cheap**: a failing file costs one
+~45-second module build instead of one ~45-minute full-library build. A sequential driver
+(`scratchpad/omit_fixpoint.py`) walks the 93 files, applies that file's omits, builds just its
+module, and keeps or restores it — one lake at a time throughout.
+
+| | |
+|---|---|
+| files kept | **75** |
+| omits applied | **434** |
+| files auto-reverted | 17 |
+| `unusedSectionVars` warnings | 714 → **411** |
+| total AdicSpaces warnings | 4,398 → **3,994** |
+
+The full-library gate on the result is **green**, which also confirms the hypothesis: no
+cross-file interaction, so the cheap gate was the right gate.
+
+The 17 reverted files are where the suggestions genuinely interact (`RelativeDescentHuber` 32,
+`Wedhorn828` 19, `FiniteJetGraphKoszul` 19, `YSpace` 14, `LaurentRefinementTree` 18, …). Those
+need the *within-file* fixpoint — apply, build, re-lint, repeat — which the same driver can do
+by iterating per file rather than per sweep.
+
+> The general lesson, now paid for twice: when a batch edit fails, the question is not "which
+> files do I exclude?" but **"what is the smallest unit whose failure I can observe cheaply?"**
+> Four full-library gates found 12 bad files; the per-file driver found all 17 in the time one
+> of those gates took, and kept 434 fixes instead of 28.

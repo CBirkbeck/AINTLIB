@@ -46,6 +46,7 @@ open GenKeystone
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A]
 
+omit [PlusSubring A] in
 /-- The `A₀`-to-`B` composite of the `B`-side pair is the canonical map
 restricted to `A₀` (all three legs are `codRestrict`s of the same map). -/
 theorem subtype_comp_locSubringToRingOfDef_comp_algebraMapD
@@ -172,6 +173,7 @@ theorem imagePieceDatum_P
       ≤ Ideal.span ((T : Finset A) : Set A)) :
     (imagePieceDatumOpen D₀ T t M hle).P = presheafValue_concretePair D₀ := rfl
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The image piece is rational (Wedhorn 7.29): its tray is the `canonicalMap`-image of
 a `⊤`-spanning family, which spans `⊤` (`span_image_canonicalMap_eq_top`). -/
 theorem imagePieceDatum_isRational
@@ -1169,6 +1171,7 @@ private theorem relativePiece_restrict_square_locLevel
     (imagePieceDatum_rationalOpen_mono D₀ E E' ME hleE ME' hleE' hE'_sub)
     (D₀.canonicalMap a)).symm
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **The keystone restriction square** (Wedhorn Prop 8.16 naturality for nested
 pieces, [Hu2] 1.4.4): for rational pieces `E' ⊆ E ⊆ D₀` the base-change
 isomorphisms intertwine the `A`-side and `B`-side restriction maps:

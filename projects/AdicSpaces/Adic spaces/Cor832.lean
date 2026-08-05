@@ -1544,6 +1544,7 @@ theorem tate_proper_ideal_not_open
 -- `isUnit_canonicalMap_s_faithful`, `FaithfulLocLift`) and relied on the now-deleted
 -- `completedPlusSubring_le_completedLocSubring`.
 
+omit [PlusSubring A] in
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- **Lifting non-open primes from `presheafValue C.base` via Lemma 7.45.**
 
@@ -2464,6 +2465,7 @@ theorem locIdeal_le_jacobson_bot_of_ringOfDef_faithfullyFlat
   exact locIdeal_le_jacobson_bot_of_faithfullyFlat
     (S := presheafValue_ringOfDef D) D.P D.T D.s h_jac
 
+omit [PlusSubring A] [HasLocLiftPowerBounded A] in
 /-- **Closedness of any ideal of `locSubring` in the subspace topology**
 under faithful-flatness of `locSubringToRingOfDef`.
 Combines `locIdeal_le_jacobson_bot_of_ringOfDef_faithfullyFlat` with

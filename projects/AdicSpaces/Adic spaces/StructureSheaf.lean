@@ -385,6 +385,7 @@ class IsSheafy (A : Type u) [CommRing A] [TopologicalSpace A]
     ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
       restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D
 
+omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- Sheafy implies separation (injectivity of `productRestrictionSub`),
 extracted from the embedding field. -/
 theorem IsSheafy.separationSub [IsTopologicalRing A] [PlusSubring A]
@@ -395,6 +396,7 @@ theorem IsSheafy.separationSub [IsTopologicalRing A] [PlusSubring A]
     Function.Injective (productRestrictionSub A C) :=
   (IsSheafy.embedding (A := A) C hC).injective
 
+omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- Sheafy implies separation (injectivity of `productRestriction`). -/
 theorem IsSheafy.separation_injective [IsTopologicalRing A] [PlusSubring A]
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
@@ -773,6 +775,7 @@ theorem exists_spa_point_in_rationalOpen_of_isOpen_prime
 -- directly, or `PairOfDefinition.exists_mem_spa_supp_ge_of_nonOpen_prime`
 -- (Lemma745.lean:691) on `presheafValue_pairOfDefinition` for the non-open case.
 
+omit [HasLocLiftPowerBounded A] in
 /-- If `D.s^k * a = 0` for each covering piece `D`, then `C.base.s ∈ radical(ann(a))`
 (Wedhorn Theorem 8.28). Uses the Spa-point construction at primes. -/
 theorem base_s_in_annihilator_radical_of_covering
@@ -1042,6 +1045,7 @@ theorem presheafValue_flat_of_canonical
       left_inv := e.symm_apply_apply
       right_inv := e.apply_symm_apply }
 
+omit [HasLocLiftPowerBounded A] in
 /-- **T-STRONG-NOETH-PRESERVATION (rational-locale case)**: for strongly noetherian
 Tate `A` and any rational locale `D : RationalLocData A`, `presheafValue D` is a
 Noetherian ring.
@@ -1078,6 +1082,7 @@ theorem presheafValue_isNoetherian_via_canonical
   let e := presheafValueCanonicalQuotientEquiv D hb hA_complete hnoeth hT_pb hcont_eval
   exact isNoetherianRing_of_ringEquiv _ e.symm
 
+omit [HasLocLiftPowerBounded A] in
 /-- `presheafValue D` is flat over `A` when `D` is `LaurentNormalized` (`1 ∈ D.T`)
 and when `T = {1}` (the Laurent-minus case — all non-base elements of `D.T` are
 power-bounded).
@@ -1145,6 +1150,7 @@ theorem productRestriction_injective_of_laurentRefinement
 -- This used the FALSE restrictionMapHom_isInducing. No longer needed since
 -- IsSheafy was weakened to just require separation (injectivity) + gluing.
 
+omit [PlusSubring A] [HasLocLiftPowerBounded A] in
 /-- **Sub-lemma (a.1.i) — `CompleteSpace` for the principal pair's ring of
 definition (sub-atom of `_aux_nonOpen_hSpa_principalPair_isAdicComplete`).**
 
@@ -1218,6 +1224,7 @@ theorem _aux_nonOpen_hSpa_principalPair_isAdicComplete
   exact ((IsTateRing.principalPair A).toPairOfDefinition.isAdic.isAdicComplete_iff).mpr
     ⟨_aux_nonOpen_hSpa_principalPair_A₀_completeSpace A, inferInstance⟩
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Sub-lemma (a.2) — `A⁺ ⊆ A₀` containment for the principal pair.**
 
 The second infrastructure obligation surfaced by the discharge plan for
@@ -2237,6 +2244,7 @@ noncomputable def Spa.comap_of_continuousRingHom
        rw [ValuationSpectrum.comap_vle, map_one]
        exact v.property.2 (φ a) (hφ_plus a ha)⟩⟩
 
+omit [IsTopologicalRing A] [IsHuberRing A] in
 /-- **(Wedhorn 8.7 — Spa pullback continuity)** Continuity of
 `Spa.comap_of_continuousRingHom`. Subtype-topology + `Spv.comap_continuous`. -/
 theorem Spa.comap_of_continuousRingHom_continuous

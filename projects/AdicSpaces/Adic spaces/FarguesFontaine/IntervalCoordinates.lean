@@ -38,6 +38,7 @@ theorem p_teichPi_ne_zero : (p : Ainf p F) * teichPi p F ϖ ≠ 0 := by
   rw [h0]
   exact map_zero (gaussVal p F (by norm_num) (by norm_num))
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- Every element of `Bloc` has an `mk'`-representation with an explicit
 `sPow`-denominator. -/
 theorem exists_mk'_sPow (u : Bloc p F ϖ) :
@@ -67,6 +68,7 @@ theorem algebraMap_Bloc_injective :
   IsLocalization.injective (Bloc p F ϖ)
     (powers_le_nonZeroDivisors_of_noZeroDivisors (p_teichPi_ne_zero p F ϖ))
 
+omit [CharP F p] in
 /-- The `W(F)`-image of `p·[ϖ]` is `p` times the Teichmüller lift of the
 uniformizer. -/
 theorem map_p_teichPi :

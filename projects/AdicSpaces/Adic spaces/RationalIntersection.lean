@@ -216,6 +216,7 @@ def RationalCoveringData.ExactIntersectionCompatible (C : RationalCoveringData A
     restrictionMap D₂.1 (D₁.1.interRational D₂.1 (hC.piece D₁.2) (hC.piece D₂.2))
       (RationalLocData.interRational_subset_right _ _ _ _) (f D₂)
 
+omit [DecidableEq A] [IsTateRing A] in
 theorem RationalCoveringData.AllDataCompatible.rationalRefinement
     {C : RationalCoveringData A} {f : ∀ D : ↥C.covers, presheafValue D.1}
     (hf : C.AllDataCompatible f) : C.RationalRefinementCompatible f :=

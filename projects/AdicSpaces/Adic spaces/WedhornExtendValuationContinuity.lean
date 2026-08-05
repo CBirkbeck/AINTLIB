@@ -133,6 +133,7 @@ theorem extendToLocalization_le_one_of_locSubring
     rw [map_mul]
     exact mul_le_one' ha hb
 
+omit [IsTopologicalRing A] in
 /-- With no generators adjoined, `locSubring` is just the image of `P.A₀`. -/
 private theorem locSubring_empty (P : PairOfDefinition A) (s : A) :
     locSubring P ∅ s = P.A₀.map (algebraMap A (Localization.Away s)) := by
@@ -140,6 +141,7 @@ private theorem locSubring_empty (P : PairOfDefinition A) (s : A) :
   simp only [Set.range_eq_empty, Set.union_empty]
   rw [← Subring.coe_map]; exact Subring.closure_eq _
 
+omit [IsTopologicalRing A] in
 /-- Adjoining one more generator `t` keeps you inside the algebra generated over the
 smaller `locSubring` by `t/s`. This is the step that lets the induction in
 `extendToLocalization_mul_pow_lt` peel generators one at a time: everything in

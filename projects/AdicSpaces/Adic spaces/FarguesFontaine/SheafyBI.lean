@@ -267,6 +267,7 @@ For every `j, n` with `j·n ≥ 1` and every `ρ₂ ∈ [|ϖ|^{jn}, 1)`, taking
 sheafiness theorem applies to a nonempty (and, by AD-9, chart-covering) family
 of intervals. -/
 
+omit [CharP F p] in
 /-- `|ϖ|^{jn}` is a valid left endpoint. -/
 theorem rho1_AD9_pos (j n : ℕ) :
     0 < perfectoidValuation p F
@@ -281,6 +282,7 @@ theorem rho1_AD9_lt_one (j n : ℕ) (hjn : 0 < j * n) :
       ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) < 1 :=
   pow_lt_one₀ zero_le (perfectoidValuation_toOF_lt_one p F ϖ) (Nat.pos_iff_ne_zero.mp hjn)
 
+omit [CharP F p] in
 /-- The valuation of the Tate-variable base: `|ϖʲ|ⁿ = |ϖ|^{jn}`. -/
 theorem perfectoidValuation_pow_toOF (j n : ℕ) :
     perfectoidValuation p F (((PseudoUniformizer.toOF F ϖ) ^ j : OF F) : F) ^ n

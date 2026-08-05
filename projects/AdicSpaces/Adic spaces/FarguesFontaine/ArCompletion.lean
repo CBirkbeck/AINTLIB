@@ -147,6 +147,7 @@ def BlocToHatK {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
 def BrSub {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) : Subring (hatK p F hρ0 hρ1) :=
   (BlocToHatK p F ϖ hρ0 hρ1).range.topologicalClosure
 
+omit [CharP F p] in
 /-- `[ϖ]` becomes a unit in `W(F)`: its inverse is `[ϖ⁻¹]`. -/
 theorem isUnit_map_teichPi :
     IsUnit (WittVector.map ((powerBoundedSubring.toSubring F).subtype) (teichPi p F ϖ)) := by
@@ -207,6 +208,7 @@ theorem wAloc_algebraMap {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x : Ainf
       = gaussValue p F ρ x :=
   Valuation.extendToLocalization_apply_map_apply _ _ _ _
 
+omit [CharP F p] in
 /-- The Witt-coordinate image of the Teichmüller lift: pushing `[ϖ]` through the
 power-bounded-subring inclusion gives the Teichmüller lift of `ϖ` in `F`. -/
 theorem wittMap_teichPi :
@@ -379,6 +381,7 @@ def teichCoeffAr {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x : hatK p F hρ
   Filter.limUnder (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x))
     (fun u => teichCoeffF p F (alocToWittF p F ϖ u) n)
 
+omit [CharP F p] in
 /-- Valuation balls are neighborhoods of `0` in `F`: `ϖ^m·O_F ⊆ {v ≤ c^m}` and the
 left side is open. -/
 theorem ball_mem_nhds_zero (m : ℕ) :
@@ -403,6 +406,7 @@ theorem ball_mem_nhds_zero (m : ℕ) :
         rw [mul_one]
         rfl
 
+omit [CharP F p] in
 /-- Every neighborhood of `0` in `F` contains a valuation ball (the power-bounded
 subring is bounded; scale by `ϖ^N`). -/
 theorem exists_ball_subset_nhds {V : Set F} (hV : V ∈ nhds (0 : F)) :
@@ -1722,6 +1726,7 @@ private theorem tailValueF_alocToWittF_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : 
   exact le_trans (tailValueF_add_le_gaussValueF p F hρ0 hρ1 hB₀ hBdiff N)
     (max_le (max_le htail₀ hhead₀) hval)
 
+omit [CharP F p] in
 include ϖ in
 /-- The pseudo-uniformizer has nonzero perfectoid valuation. -/
 private theorem perfectoidValuation_toOF_pos :

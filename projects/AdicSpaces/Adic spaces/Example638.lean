@@ -258,6 +258,7 @@ noncomputable instance quotientPlusFSubXIdeal_isUniformAddGroup (b : B) :
   @isUniformAddGroup_of_addCommGroup _ _ (quotientPlusFSubXIdealTopology B b)
     (quotientPlusFSubXIdealTopology_isTopologicalAddGroup B b)
 
+omit [PlusSubring B] [HasLocLiftPowerBounded B] [IsNoetherianRing B] in
 /-- The ideal `(algebraMap b − X)` is closed in `TateAlgebra B` under the canonical
 topology. Corollary of `tateAlgebra_isClosed_ideal` which applies to any ideal
 when `pairSubring.A₀` is noetherian. -/
@@ -345,6 +346,7 @@ variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
 
 open TateAlgebra
 
+omit [PlusSubring B] [IsHuberRing B] [HasLocLiftPowerBounded B] [IsNoetherianRing B] [T2Space B] in
 /-- The composite `mk ∘ algebraMap : B → TateAlgebra B ⧸ plusFSubXIdeal B b`
 is continuous. Uses `tateAlgebra_algebraMap_continuous` for the first factor
 and `continuous_quotient_mk'` for the second. -/

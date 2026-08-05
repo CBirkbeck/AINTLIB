@@ -82,6 +82,7 @@ theorem exists_pow_vle_of_isContinuous {v : Spv B} (hv : v.IsContinuous)
 
 variable [IsTopologicalRing B] [PlusSubring B]
 
+omit [IsTopologicalRing B] in
 /-- Scaling all parameters of an indexed rational set by a unit does not change
 it. -/
 theorem indexedRationalSet_unit_mul_eq {ι : Type v} {u : B} (hu : IsUnit u)
@@ -128,6 +129,7 @@ theorem exists_uniform_bound_insert [IsRingOfIntegralElements (B⁺ : Subring B)
   · obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp ht'
     exact Or.inr ⟨i, hi, hvle⟩
 
+omit [TopologicalSpace B] [IsTopologicalRing B] [PlusSubring B] in
 /-- A finite product of elements outside the support of `w` is outside the support: the
 support is a prime ideal, so a product in it forces some factor in it. -/
 theorem not_vle_zero_prod {ι : Type v} (w : Spv B) (fam : Finset ι) (G : ι → B)
@@ -215,6 +217,7 @@ section PresheafValue
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A]
 
+omit [IsHuberRing A] in
 /-- Density of `D.coeRingHom` plus openness of the integral subring: every element of
 `presheafValue D` is, modulo `uᴹ⁺¹ · (something integral)`, in the image of the localization.
 This is the approximation step that lets an `A`-level presentation be found. -/
@@ -249,6 +252,7 @@ private theorem exists_coset_approx [IsRingOfIntegralElements (A⁺ : Subring A)
   rw [hcalc]
   ring
 
+omit [IsHuberRing A] in
 /-- Replacing each `lf o` by its cleared-denominator representative `hA o`, and `lg` by `q`,
 does not change the indexed rational set: both differ from the originals by the same unit `U`,
 and `indexedRationalSet` is invariant under scaling by a unit. -/
@@ -279,6 +283,7 @@ private theorem indexedRationalSet_canonicalMap_eq {ι : Type v} [DecidableEq ι
   rw [hstep, indexedRationalSet_unit_mul_eq hU_unit]
 
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- Clearing a denominator: if `algebraMap y = b • l` upstairs, then downstairs
 `canonicalMap y` is `coeRingHom (algebraMap b)` times `coeRingHom l`. Used for both the
 scalar `q` and each family member `hA o`. -/
@@ -291,6 +296,7 @@ private theorem canonicalMap_eq_unit_mul {D : RationalLocData A} (b : A) {y : A}
   rw [Algebra.smul_def, map_mul] at hstep
   exact hstep
 
+omit [IsHuberRing A] in
 /-- The chosen point lies in the downstairs open: `hchain` transports its membership of the
 upstairs rational set to the `hA`/`q` presentation, whose conditions are exactly the defining
 inequalities of the `basicOpen`s. -/
@@ -311,6 +317,7 @@ private theorem comap_mem_biInter_basicOpen
   intro o ho
   exact ⟨hT o ho, by rwa [comap_vle, map_zero]⟩
 
+omit [IsHuberRing A] in
 /-- Conversely, any Spa point of `presheafValue D` whose comap lies in the downstairs open is
 in every `basicOpen (F i) (G i)`: rewrite back along `hchain` and apply `hsubset`. -/
 private theorem mem_basicOpen_of_comap_mem

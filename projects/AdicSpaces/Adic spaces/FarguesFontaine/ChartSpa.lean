@@ -142,6 +142,7 @@ noncomputable def spaChartHomeoBigWindowNeg (m : ℕ) (hp : 1 < p) :
       rw [bigWindow_eq_rationalOpen_neg p F ϖ m hp]
       rfl))
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- `chartT` is nonempty. -/
 theorem chartT_nonempty (ϖ' : PseudoUniformizer F) (a b : ℕ) :
     (chartT p F ϖ' a b).Nonempty := by

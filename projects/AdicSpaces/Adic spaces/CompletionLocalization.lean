@@ -243,6 +243,7 @@ variable [IsTateRing A] [IsNoetherianRing A] [T2Space A]
 
 omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     in
+omit [HasLocLiftPowerBounded A] in
 /-- `D₀.s` is a unit in `Localization.Away D.s` when `R(D.T/D.s) ⊆ R(D₀.T/D₀.s)`.
 This is the localization-level unit witness (not the presheafValue-level one). -/
 private theorem isUnit_algebraMap_s_of_subset

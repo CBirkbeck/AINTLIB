@@ -1072,6 +1072,7 @@ completion.
 
 **Wedhorn reference**: Proposition 8.15 + Lemma 8.5 (Noetherian adic completion). -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Radical relation from rational-open containment** (T089 strict
 algebraic helper, fully proved).
 
@@ -1716,6 +1717,7 @@ ideal `K := RingHom.ker (locLift ∘ subtype)`, and uses T092's
 denominator-lifting identity. The remaining content is the **per-`n`
 basis-form assembly** from these ingredients. -/
 
+omit [TopologicalSpace A] [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- **`Localization.Away` normal form via explicit inverse**
 (T089 normal-form helper, fully proved).
 

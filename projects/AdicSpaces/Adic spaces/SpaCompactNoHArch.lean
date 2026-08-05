@@ -86,6 +86,7 @@ lemma exists_pow_lt_of_topNilp_of_ne_zero
     (v := ValuativeRel.valuation A) a (π ^ N)).mp h_vle
   exact absurd h_le (not_le.mpr hN)
 
+omit [IsTopologicalRing A] in
 /-- **Uniform `π`-power domination on a compact set.** Given a compact set
 `K ⊆ ↥(Spa A A⁺)`, a topologically nilpotent `π : A`, and `a : A` with
 `v(a) ≠ 0` for every `v ∈ K`, there exists a uniform `N : ℕ` such that
@@ -338,6 +339,7 @@ lemma image_spa_ιSpv_bool_noHArch :
     isClosed_image_spa_ιSpv_bool_noHArch_aux,
     (Set.inter_eq_right.mpr (Set.image_subset_range _ _)).symm⟩
 
+omit [IsHuberRing A] [IsTateRing A] in
 /-- **Sub-lemma 1.3 of T-COMPACT-NO-HARCH (work plan, `TATE-ACYCLICITY-WORK-PLAN.md`).**
 Quasi-compactness of the preimage of a rational open `rationalOpen L.T L.s` in
 `↥(Spa A A⁺)`, **without** any mul-archimedean assumption on valuation value groups.
@@ -363,6 +365,7 @@ theorem isCompact_preimage_rationalOpen_noHArch
   rw [hRat.span_eq_top, Ideal.radical_top]
   exact le_top
 
+omit [IsTateRing A] in
 /-- **(T-COMPACT-NO-HARCH, round-22 reviewer-mandated.) Half-space compactness
 without `hArch`.** The half-space `R(L) ∩ {v(g) ≤ v(h)}` in
 `↥(Spa A A⁺)` is compact, **without** any mul-archimedean assumption on

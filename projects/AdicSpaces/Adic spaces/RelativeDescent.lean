@@ -114,6 +114,7 @@ section ImgDatum
 
 variable [DecidableEq A]
 
+omit [PlusSubring A] [IsHuberRing A] [DecidableEq A] in
 /-- The span of the image parameters is the unit ideal. -/
 theorem imgSpan (D₀ : RationalLocData A) {E : RationalLocData A}
     [DecidableEq (presheafValue D₀)]
@@ -147,6 +148,7 @@ theorem imgDatum_isRational (D₀ E : RationalLocData A) [DecidableEq (presheafV
 
 variable [HasLocLiftPowerBounded A]
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Containment transfer** (through `Spa`-restriction): an `A⁺`-level containment
 of rational opens transfers to the `B⁺`-level containment of the image opens.
 This is what makes the `B`-side restriction maps between image data available. -/
@@ -202,6 +204,7 @@ variable (D₀ : RationalLocData A) {E : RationalLocData A}
 def imgCanonical : A →+* presheafValue (imgDatum D₀ E hspanE) :=
   ((imgDatum D₀ E hspanE).canonicalMap).comp D₀.canonicalMap
 
+omit [HasLocLiftPowerBounded A] in
 /-- `E.s` becomes a unit in the doubly-localized completion (it is the image
 datum's own denominator, a unit in its own section ring). -/
 theorem imgCanonical_isUnit_s : IsUnit ((imgCanonical D₀ hspanE) E.s) := by
@@ -345,6 +348,7 @@ variable (D₀ : RationalLocData A) {E : RationalLocData A}
   (hspanE : Ideal.span (E.T : Set A) = ⊤)
   (hE : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s)
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- `imgDatum`'s denominator maps to a unit under the restriction map. -/
 theorem restriction_isUnit_imgS :
     IsUnit ((restrictionMapHom D₀ E hE) (imgDatum D₀ E hspanE).s) := by

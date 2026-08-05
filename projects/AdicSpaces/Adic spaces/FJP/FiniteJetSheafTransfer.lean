@@ -376,6 +376,7 @@ theorem pairMapBC_injective (D : RationalLocData (JetA F)) (hD : D.IsRational)
   rw [← sub_eq_zero]
   exact hz0
 
+omit [IsFJPNoetherianBase F] in
 /-- The `𝓑`-push of a datum's generators lands in the `𝓓`-push's, via the coherence square
 `rhoB ∘ jB = rhoC ∘ iotaC`. Used at both the base and the piece in the naturality steps. -/
 private theorem rhoB_mem_pushDatumD_T (D : RationalLocData (JetA F)) (hD : D.IsRational) :
@@ -385,6 +386,7 @@ private theorem rhoB_mem_pushDatumD_T (D : RationalLocData (JetA F)) (hD : D.IsR
   rw [square_commutes F t₀]
   exact Finset.mem_image_of_mem _ ht₀
 
+omit [IsFJPNoetherianBase F] in
 /-- The `𝓒`-push of a datum's generators lands in the `𝓓`-push's — here `pushDatumD` is
 `rhoC ∘ iotaC` on the nose, so no square is needed. -/
 private theorem rhoC_mem_pushDatumD_T (D : RationalLocData (JetA F)) (hD : D.IsRational) :

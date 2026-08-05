@@ -86,6 +86,7 @@ theorem gaussValue_p_teichPi {ρ : NNReal} (hρ1 : ρ < 1) :
       = ρ * perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) := by
   rw [gaussValue_p_mul p F hρ1.le, teichPi, gaussValue_teichmuller p F hρ1.le]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The image of `p·[ϖ]` is a unit of `Bloc`. -/
 theorem isUnit_p_teichPi_image :
     IsUnit (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) * teichPi p F ϖ)) :=

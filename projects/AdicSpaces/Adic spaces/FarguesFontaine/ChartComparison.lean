@@ -344,6 +344,7 @@ noncomputable def chartCompletionUniformEquiv (a b : ℕ) (ha : 0 < a) (hb : 0 <
       (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2)
 
 
+omit [CharP F p] in
 include hρ₁1 in
 /-- At the exact chart interval, `|ϖ| ≤ ρ₂`. -/
 theorem vpi_le_rho2_of_exact (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a)
@@ -362,6 +363,7 @@ theorem vpi_le_rho2_of_exact (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ 
     _ = (ρ₂ ^ a) ^ b := by rw [hexact2]
     _ = ρ₂ ^ (a * b) := by rw [← pow_mul]
 
+omit [CharP F p] in
 include hρ₁1 in
 /-- At the exact chart interval, `ρ₁^a ≤ |ϖ|^b`. -/
 theorem rho1_pow_le_of_exact (a b : ℕ) (hab : b ≤ a)
@@ -596,6 +598,7 @@ noncomputable def rhoRight (a b : ℕ) : NNReal :=
   perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
     ^ ((b : ℝ) / (a : ℝ))
 
+omit [CharP F p] in
 theorem vpi_pos :
     0 < perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) := by
   refine pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr ?_)
@@ -613,6 +616,7 @@ theorem rhoRight_lt_one (a b : ℕ) (ha : 0 < a) (hb : 0 < b) :
   have ha' : (0 : ℝ) < (a : ℝ) := by exact_mod_cast ha
   positivity
 
+omit [CharP F p] in
 /-- The exactness equation `ρ₂^a = |ϖ|^b` for the rpow right endpoint. -/
 theorem rhoRight_pow_exact (a b : ℕ) (ha : 0 < a) :
     rhoRight p F ϖ a b ^ a

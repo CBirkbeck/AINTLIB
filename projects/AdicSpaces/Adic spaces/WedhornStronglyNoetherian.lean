@@ -74,6 +74,7 @@ The forward direction (Tate noeth → strongly noeth) is the substantive one.
 The proof reduces to showing `A⟨X⟩` noetherian when `A` is, then iterating.
 -/
 
+omit [IsTopologicalRing A] in
 /-- **Sub-lemma L5.1.1 — A⟨X⟩ as adic completion**.
 
 For a complete Tate ring `A` with ideal of definition `I` of a ring of
@@ -170,6 +171,7 @@ general; see `decomposition.md` "RESOLUTION (2026-05-17)". -/
 
 /-! ### L5.4 sub-lemmas (Spa-point existence) -/
 
+omit [IsTopologicalRing A] in
 /-- **Sub-lemma L5.4.1 — Open prime ⇒ Spa-point via trivial valuation**.
 
 Already in project: `exists_spa_point_in_rationalOpen_of_isOpen_prime`

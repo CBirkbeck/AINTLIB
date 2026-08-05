@@ -42,6 +42,7 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [IsHuberRing A] [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
 
+omit [NonarchimedeanRing A] in
 /-- **Span preservation under perturbation** (Kedlaya Exercise 1.2.2, second half):
 for a finite family `T` spanning the unit ideal there is a zero-neighborhood `O`
 such that perturbing each `t ∈ T` by any `δ t ∈ O` keeps the family spanning the

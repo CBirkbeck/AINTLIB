@@ -768,6 +768,7 @@ theorem exists_dominating_unit_from_covering
       v.vle (σ : A) t ∧ ¬ v.vle t (σ : A) :=
   exists_dominating_unit P hA₀_le π hI hπ_tn hπ_unit hArch T hT
 
+omit [IsTopologicalRing A] in
 /-- **Spa-point producer for arbitrary primes** (combining open + non-open
 cases). For a prime `p` of `A` with `s ∉ p`:
 
@@ -828,6 +829,7 @@ theorem refines_span_top_image_unit_mul [DecidableEq A]
   refine Ideal.mul_mem_left _ (σ : A) (Ideal.subset_span ?_)
   exact Finset.mem_coe.mpr (Finset.mem_image.mpr ⟨t, ht, rfl⟩)
 
+omit [IsTopologicalRing A] in
 /-- **Span-top ⟺ no-common-zero on Spa.** Given `exists_spa_point_with_supp_ge_of_prime`
 (which lifts every prime `p` of `A` to a Spa point `v` with `p ≤ supp(v)`), the
 two conditions are equivalent:

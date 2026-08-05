@@ -516,6 +516,7 @@ private theorem valuation_lt_one_of_isEquiv {S : Type*} [CommRing S] {R : Type*}
   exact absurd h2 (not_le.mpr hs_r)
 
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- For a valuation `rs`, the induced `vle` is exactly `≤` on values. -/
 private theorem ofValuation_vle_iff {D' : RationalLocData A} {Γ' : Type*}
     [LinearOrderedCommGroupWithZero Γ'] (rs : Valuation (presheafValue D') Γ') :

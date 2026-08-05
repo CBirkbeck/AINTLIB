@@ -64,6 +64,7 @@ theorem comap_presheafValueRingEquivHuber_pointValue
     _ = comap e.toRingHom v' := by
         rw [comap_pointValue (D.mapHuber e he he') hv']
 
+omit [PlusSubring A] [PlusSubring B] [IsHuberRing A] [IsHuberRing B] in
 /-- The symm-direction canonical-map naturality of the Huber value
 equivalence. -/
 theorem presheafValueRingEquivHuber_symm_canonicalMap

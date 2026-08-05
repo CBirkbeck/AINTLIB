@@ -142,6 +142,7 @@ underlying `∃`-statement would typecheck for any Huber ring. -/
 def IsStronglyNoetherianTateRing [IsTateRing A] : Prop :=
   ∃ P : PairOfDefinition A, IsStronglyNoetherian (CompletionModel A P)
 
+omit [IsTopologicalRing A] in
 /-- **Model-independence of strong noetherianity** — one completion model is
 strongly noetherian iff every model is, through the clean canonical comparison
 equivalence and the restricted-series transport — no ambient hypotheses. -/

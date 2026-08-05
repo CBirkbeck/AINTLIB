@@ -70,6 +70,7 @@ carries a strict Milnor square to a strict Milnor square. With Gauss norms, the 
 and ρ above continue to work." (For the finite-jet square both may be taken equal to one,
 [FJP] §4 after (4.2).) -/
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem ext_square_commutes (p : PA F m) :
     extRhoB F m (extJB F m p) = extRhoC F m (extIotaC F m p) := by
   refine Subtype.ext ?_
@@ -83,6 +84,7 @@ theorem ext_square_commutes (p : PA F m) :
 -- v4.33: the goal carries `↑d` at the (defeq-only) `PD`-def type plus raw
 -- `MvPowerSeries`-lambdas; restore pre-v4.33 defeq behaviour for this declaration
 -- (established bump-repair pattern).
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 set_option backward.isDefEq.respectTransparency false in
 /-- Coefficientwise sectioning: the extended `ρC` is strictly surjective with constant 1. -/
 theorem extRhoC_strict_surjective (d : PD F m) :
@@ -113,6 +115,7 @@ theorem extRhoC_strict_surjective (d : PD F m) :
 
 -- v4.33: goals carry `↑b`/`↑c` at the (defeq-only) `PB`/`PC`-def types plus raw
 -- subtype-valued `MvPowerSeries`-lambdas; restore pre-v4.33 defeq behaviour.
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 set_option backward.isDefEq.respectTransparency false in
 /-- The extended square is cartesian: a compatible pair comes from a unique element of
 `P_𝓐` ([FJP] Lemma 4.1: "If `b = ∑ b_ν T^ν` and `c = ∑ c_ν T^ν` have the same image, each
@@ -162,6 +165,7 @@ theorem ext_milnorRow_exact (b : PB F m) (c : PC F m)
     show MvPowerSeries.coeff s q.1 = _
     exact Subtype.ext h2
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- Pullback-norm identity for the extended square (constants 1). -/
 theorem ext_max_norm_eq (p : PA F m) :
     max ‖extJB F m p‖ ‖extIotaC F m p‖ = ‖p‖ := by
@@ -175,6 +179,7 @@ theorem ext_max_norm_eq (p : PA F m) :
   rw [h1]
   exact max_eq_right h2
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- `P_𝓐 → P_𝓑 ⊕ P_𝓒` is injective (left exactness of the extended row). -/
 theorem ext_pair_injective :
     Function.Injective (fun p : PA F m => (extJB F m p, extIotaC F m p)) := by
@@ -202,6 +207,7 @@ noncomputable def IB : Ideal (PB F m) := Ideal.span (Set.range (rB F m g f))
 noncomputable def IC : Ideal (PC F m) := Ideal.span (Set.range (rC F m g f))
 noncomputable def ID : Ideal (PD F m) := Ideal.span (Set.range (rD F m g f))
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- The pushed data generate the unit ideal at each vertex ([FJP] §4 after (4.6): "Because
 the rational datum is open, its defining ideal contains a power of ϖ. After mapping to each
 of the k-algebras B, C, D, the tuple therefore generates the unit ideal"). -/
@@ -214,6 +220,7 @@ theorem span_pushed_B (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
   rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
   rfl
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem span_pushed_C (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     Ideal.span ({iotaC F g} ∪ Set.range (fun i => iotaC F (f i))) = ⊤ := by
   have h := congrArg (Ideal.map (iotaC F)) hspan
@@ -223,6 +230,7 @@ theorem span_pushed_C (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
   rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
   rfl
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem span_pushed_D (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     Ideal.span ({rhoC F (iotaC F g)} ∪
       Set.range (fun i => rhoC F (iotaC F (f i)))) = ⊤ := by
@@ -244,6 +252,7 @@ theorem mapRestricted_polyToP {E E' : Type*} [NormedCommRing E] [IsUltrametricDi
   show MvPowerSeries.coeff s (MvPowerSeries.map φ ((polyToP (E := E) (m := m) q)).1) = _
   rw [MvPowerSeries.coeff_map, coeff_polyToP, coeff_polyToP, MvPolynomial.coeff_map]
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem rB_eq (i : Fin m) : rB F m g f i =
     polyToP (MvPolynomial.C (jB F g) * MvPolynomial.X i -
       MvPolynomial.C (jB F (f i))) := by
@@ -252,6 +261,7 @@ theorem rB_eq (i : Fin m) : rB F m g f i =
   congr 1
   rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem rC_eq (i : Fin m) : rC F m g f i =
     polyToP (MvPolynomial.C (iotaC F g) * MvPolynomial.X i -
       MvPolynomial.C (iotaC F (f i))) := by
@@ -272,6 +282,7 @@ theorem rD_eq (i : Fin m) : rD F m g f i =
 theorem extRhoB_rB (i : Fin m) : extRhoB F m (rB F m g f i) = rD F m g f i :=
   ext_square_commutes F m (rA F m g f i)
 
+omit [IsFJPBase F] in
 /-- The vertex Tate extensions are noetherian (transfer of strong noetherianity to the
 Gauss form). -/
 theorem isNoetherianRing_PB : IsNoetherianRing (PB F m) := by
@@ -435,6 +446,7 @@ private theorem d1_rD_extRho_sub_eq_zero (u : Fin m → PB F m) (v : Fin m → P
     rfl
   rw [d1_sub, h1, h2, hcompat, sub_self]
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- Ultrametric bound on that difference. -/
 private theorem norm_extRho_sub_le (hB hC M : ℝ) (hB0 : 0 ≤ hB) (hC0 : 0 ≤ hC) (hM0 : 0 ≤ M)
     (u : Fin m → PB F m) (v : Fin m → PC F m)
@@ -452,6 +464,7 @@ private theorem norm_extRho_sub_le (hB hC M : ℝ) (hB0 : 0 ≤ hB) (hC0 : 0 ≤
       _ ≤ hC * M := hvn'
       _ ≤ (hB + hC) * M := mul_le_mul_of_nonneg_right (by linarith) hM0
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- The corrected 𝓒-lift is compatible with `u`: the `d₂`-correction is exactly the difference. -/
 private theorem extRho_comp_eq (u : Fin m → PB F m) (v : Fin m → PC F m)
     (sC : Pairs m → PC F m) (sD : Pairs m → PD F m)
@@ -715,6 +728,7 @@ abbrev locB : Type _ := PB F m ⧸ IB F m g f
 abbrev locC : Type _ := PC F m ⧸ IC F m g f
 abbrev locD : Type _ := PD F m ⧸ ID F m g f
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- Graph ideals push forward along the square's maps. -/
 theorem extJB_mem_IB {y : PA F m} (hy : y ∈ IA F m g f) : extJB F m y ∈ IB F m g f := by
   have hmap : Ideal.map (extJB F m) (IA F m g f) ≤ IB F m g f := by
@@ -724,6 +738,7 @@ theorem extJB_mem_IB {y : PA F m} (hy : y ∈ IA F m g f) : extJB F m y ∈ IB F
     exact Ideal.subset_span ⟨i, rfl⟩
   exact hmap (Ideal.mem_map_of_mem _ hy)
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem extIotaC_mem_IC {y : PA F m} (hy : y ∈ IA F m g f) :
     extIotaC F m y ∈ IC F m g f := by
   have hmap : Ideal.map (extIotaC F m) (IA F m g f) ≤ IC F m g f := by
@@ -742,6 +757,7 @@ theorem extRhoB_mem_ID {y : PB F m} (hy : y ∈ IB F m g f) :
     exact Ideal.subset_span ⟨i, (extRhoB_rB F m g f i).symm⟩
   exact hmap (Ideal.mem_map_of_mem _ hy)
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem extRhoC_mem_ID {y : PC F m} (hy : y ∈ IC F m g f) :
     extRhoC F m y ∈ ID F m g f := by
   have hmap : Ideal.map (extRhoC F m) (IC F m g f) ≤ ID F m g f := by
@@ -908,6 +924,7 @@ private lemma one_add_mul_div_two_le {C ε : ℝ} (hC : 0 ≤ C) (hε : 0 < ε) 
   calc (1 + C) * (ε / (2 * (1 + C))) = ε / 2 := by field_simp
     _ ≤ ε := by linarith
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- The lifted element's norm bound: `‖p'‖ = max ‖pb‖ ‖pc + xc‖`, and the ultrametric
 inequality turns the three input bounds into the `(1 + C)` one. -/
 private lemma norm_max_le_one_add_mul (pb : PB F m) (pc xc : PC F m) {C M δ : ℝ}

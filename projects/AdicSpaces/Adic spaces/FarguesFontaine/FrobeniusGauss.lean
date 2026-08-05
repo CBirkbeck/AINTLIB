@@ -506,6 +506,7 @@ noncomputable def biPhiEquiv (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 
   map_add' x y := map_add (biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
     (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) x y
 
+omit [CharP F p] in
 /-- The `p`-th power of a rational radius is the radius at `p`-times the
 exponent. -/
 theorem vpiQ_pow_p (q : ℚ) :

@@ -569,6 +569,7 @@ theorem isOpen_unitBall : IsOpen ((unitBall E : Set E)) := by
 
 variable {E}
 
+omit [IsUltrametricDist E] [NormOneClass E] in
 /-- Powers of a scaling element scale norms. -/
 theorem norm_pow_mul_of_scale {t : E} (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) (n : ℕ)
     (x : E) : ‖t ^ n * x‖ = ‖t‖ ^ n * ‖x‖ := by
@@ -674,6 +675,7 @@ noncomputable def constHomPS : K →+* PowerSeries.Restricted K (1 : ℝ) where
   map_zero' := Subtype.ext (map_zero PowerSeries.C)
   map_add' x y := Subtype.ext (map_add PowerSeries.C x y)
 
+omit [IsFJPBase F] in
 /-- Scaling by a `K`-constant in `𝒞`. -/
 theorem norm_constC_mul (a : K) (f : JetC F) : ‖constC F a * f‖ = ‖a‖ * ‖f‖ := by
   rw [Restricted.norm_eq, Restricted.norm_eq, PowerSeries.gaussNorm_eq,

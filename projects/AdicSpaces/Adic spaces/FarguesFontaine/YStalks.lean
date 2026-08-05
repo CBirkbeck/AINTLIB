@@ -282,6 +282,7 @@ def ySpaPoint (x : yTop p F ϖ) :
   show ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))
     from (ConcreteCategory.hom (yIncl p F ϖ)) x
 
+omit [CharP F p] in
 /-- The `Y`-membership of the ambient point. -/
 theorem ySpaPoint_mem_Y (x : yTop p F ϖ) :
     ((ySpaPoint p F ϖ x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
@@ -716,6 +717,7 @@ theorem runWindow_eq_rationalOpen (n : ℤ) (k : ℕ) :
       runWindow_eq_rationalOpen_neg p F ϖ (m + 1) k (one_lt_p p)]
     rfl
 
+omit [CharP F p] in
 /-- Run windows lie inside `Y`. -/
 theorem runWindow_subset_Y (n : ℤ) (k : ℕ) :
     runWindow p F ϖ n k ⊆ Y p F ϖ :=

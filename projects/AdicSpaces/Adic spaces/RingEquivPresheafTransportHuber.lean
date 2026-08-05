@@ -411,6 +411,7 @@ private theorem ideal_map_heq_of_targets_eq {R₀ : Type*} [CommRing R₀]
   subst h
   rw [show φ₁ = φ₂ from RingHom.ext fun x => Subtype.ext (hφ x)]
 
+omit [DecidableEq B] [DecidableEq C] in
 /-- Composition law for the pair transport. -/
 theorem PairOfDefinition.mapRingEquiv_comp (e₁ : A ≃+* B) (he₁ : Continuous e₁)
     (he₁' : Continuous e₁.symm) (e₂ : B ≃+* C) (he₂ : Continuous e₂)
@@ -647,6 +648,7 @@ section Refl
 
 variable [DecidableEq A]
 
+omit [TopologicalSpace A] [IsTopologicalRing A] [DecidableEq A] in
 private theorem ideal_map_heq_of_coe_fix' {S S' : Subring A} (h : S' = S)
     (φ : S →+* S') (hφ : ∀ x : S, ((φ x : S') : A) = (x : A)) (I : Ideal S) :
     HEq (I.map φ) I := by
@@ -683,6 +685,7 @@ section ReflValue
 
 variable [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
 
+omit [DecidableEq A] [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
 private theorem presheafValue_eq_of_coeRingHom {E : RationalLocData A}
     {E' : RationalLocData A} {G H : presheafValue E → presheafValue E'}
     (hG : Continuous G) (hH : Continuous H)
@@ -787,6 +790,7 @@ theorem presheafValueRingEquivHuber_congr_e_symm
     exact hcomp ▸ rfl
   rw [hid]
 
+omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The datum transport is proof-irrelevant in the equivalence equality. -/
 theorem RationalLocData.mapHuber_congr_e {e e' : A ≃+* A}
     (he : Continuous e) (he' : Continuous e.symm) (hf : Continuous e')

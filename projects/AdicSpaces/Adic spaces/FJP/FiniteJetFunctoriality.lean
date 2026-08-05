@@ -147,14 +147,17 @@ needed, unlike the restriction maps); completing gives `𝒪(D) →+* 𝒪(D')`.
 
 /-! ### Continuity of the square's maps (norm bounds ⇒ 1-Lipschitz) -/
 
+omit [IsFJPBase F] in
 theorem continuous_jB : Continuous (jB F) :=
   AddMonoidHomClass.continuous_of_bound (jB F) 1 fun a => by
     rw [one_mul]; exact norm_jB_le F a
 
+omit [IsFJPBase F] in
 theorem continuous_iotaC : Continuous (iotaC F) :=
   AddMonoidHomClass.continuous_of_bound (iotaC F) 1 fun a => by
     rw [one_mul, norm_iotaC]
 
+omit [IsFJPBase F] in
 theorem continuous_rhoC : Continuous (rhoC F) :=
   AddMonoidHomClass.continuous_of_bound (rhoC F) 1 fun a => by
     rw [one_mul]; exact norm_rhoC_le F a
@@ -486,6 +489,7 @@ noncomputable def bridgeToRestricted (m : ℕ) :
 noncomputable def bridgeGen (i : Fin e.m) : presheafValue D :=
   D.coeRingHom (divByS (e.f i) D.s)
 
+omit [IsFJPNoetherianBase F] in
 /-- Each generator is power-bounded (its powers lie in the image of the bounded
 `locSubring`; mirrors `example638_genTuple_isBounded`). -/
 theorem bridgeGen_isBounded (i : Fin e.m) :
@@ -627,6 +631,7 @@ theorem bridgeRev_continuous : Continuous (bridgeRev D e) := by
 
 /-! #### Round trips (density + Hausdorff equalizers) -/
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 /-- Polynomials are dense in `P_𝓐` (truncate below any coefficient-norm level). -/
 theorem polyToP_denseRange (m : ℕ) :
     DenseRange (polyToP : MvPolynomial (Fin m) (JetA F) → PA F m) := by
@@ -686,6 +691,7 @@ theorem bridgeRev_bridgeFwd (hD : D.IsRational) (x : presheafValue D) :
       continuous_id hagree
   exact congrFun h_eq x
 
+omit [IsFJPNoetherianBase F] in
 /-- The graph-quotient projection is continuous (`1`-Lipschitz for the quotient norm). -/
 theorem mkIA_continuous :
     Continuous (Ideal.Quotient.mk (IA F e.m D.s e.f)) :=
@@ -791,11 +797,13 @@ theorem isUnit_bridgeBaseC_s (hD : D.IsRational) :
       _ = 1 := happ
   exact IsUnit.of_mul_eq_one _ hmul
 
+omit [IsFJPNoetherianBase F] in
 theorem norm_bridgeXC_le_one (i : Fin e.m) : ‖bridgeXC D e i‖ ≤ 1 := by
   refine (Ideal.Quotient.norm_mk_le _ _).trans ?_
   rw [MvRestricted.norm_eq]
   exact gaussNorm_X_le_one (S := JetC F) i
 
+omit [IsFJPNoetherianBase F] in
 theorem norm_bridgeBaseC_le (a : JetC F) : ‖bridgeBaseC D e a‖ ≤ ‖a‖ := by
   refine (Ideal.Quotient.norm_mk_le _ _).trans ?_
   show ‖(polyToP (E := JetC F) (m := e.m) (MvPolynomial.C a) : PC F e.m)‖ ≤ ‖a‖
@@ -951,11 +959,13 @@ theorem isUnit_bridgeBaseB_s (hD : D.IsRational) :
       _ = 1 := happ
   exact IsUnit.of_mul_eq_one _ hmul
 
+omit [IsFJPNoetherianBase F] in
 theorem norm_bridgeXB_le_one (i : Fin e.m) : ‖bridgeXB D e i‖ ≤ 1 := by
   refine (Ideal.Quotient.norm_mk_le _ _).trans ?_
   rw [MvRestricted.norm_eq]
   exact gaussNorm_X_le_one (S := JetB F) i
 
+omit [IsFJPNoetherianBase F] in
 theorem norm_bridgeBaseB_le (a : JetB F) : ‖bridgeBaseB D e a‖ ≤ ‖a‖ := by
   refine (Ideal.Quotient.norm_mk_le _ _).trans ?_
   show ‖(polyToP (E := JetB F) (m := e.m) (MvPolynomial.C a) : PB F e.m)‖ ≤ ‖a‖
@@ -1125,11 +1135,13 @@ theorem isUnit_bridgeBaseD_s (hD : D.IsRational) :
       _ = 1 := happ
   exact IsUnit.of_mul_eq_one _ hmul
 
+omit [IsFJPNoetherianBase F] in
 theorem norm_bridgeXD_le_one (i : Fin e.m) : ‖bridgeXD D e i‖ ≤ 1 := by
   refine (Ideal.Quotient.norm_mk_le _ _).trans ?_
   rw [MvRestricted.norm_eq]
   exact gaussNorm_X_le_one (S := JetD F) i
 
+omit [IsFJPNoetherianBase F] in
 theorem norm_bridgeBaseD_le (a : JetD F) : ‖bridgeBaseD D e a‖ ≤ ‖a‖ := by
   refine (Ideal.Quotient.norm_mk_le _ _).trans ?_
   show ‖(polyToP (E := JetD F) (m := e.m) (MvPolynomial.C a) : PD F e.m)‖ ≤ ‖a‖
@@ -1261,6 +1273,7 @@ noncomputable def bridgeGenB (hD : D.IsRational) (i : Fin e.m) :
     presheafValue (pushDatumB D hD) :=
   (pushDatumB D hD).coeRingHom (divByS (jB F (e.f i)) (pushDatumB D hD).s)
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeGenB_isBounded (hD : D.IsRational) (i : Fin e.m) :
     TopologicalRing.IsBounded
       (Set.range (bridgeGenB D e hD i ^ · : ℕ → presheafValue (pushDatumB D hD))) := by
@@ -1464,6 +1477,7 @@ noncomputable def bridgeGenC (hD : D.IsRational) (i : Fin e.m) :
     presheafValue (pushDatumC D hD) :=
   (pushDatumC D hD).coeRingHom (divByS (iotaC F (e.f i)) (pushDatumC D hD).s)
 
+omit [IsFJPNoetherianBase F] in
 theorem bridgeGenC_isBounded (hD : D.IsRational) (i : Fin e.m) :
     TopologicalRing.IsBounded
       (Set.range (bridgeGenC D e hD i ^ · : ℕ → presheafValue (pushDatumC D hD))) := by
@@ -1647,6 +1661,7 @@ theorem bridgeFwdC_injective (hD : D.IsRational) :
 /-! #### Second-level covariant maps `𝒪_𝓑(D_B) → 𝒪_𝓓(D_D)`, `𝒪_𝓒(D_C) → 𝒪_𝓓(D_D)`
 and the coherence/naturality squares consumed by the 𝓓-matching step -/
 
+omit [IsFJPBase F] [IsFJPNoetherianBase F] in
 theorem continuous_rhoB : Continuous (rhoB F) :=
   AddMonoidHomClass.continuous_of_bound (rhoB F) 1 fun a => by
     rw [one_mul, norm_rhoB]
@@ -1676,6 +1691,7 @@ theorem mapBD_continuous (hD : D.IsRational) : Continuous (mapBD D hD) := by
   unfold mapBD
   exact presheafValueMapOfHom_continuous _ _ _ _ _ _
 
+omit [IsFJPNoetherianBase F] in
 theorem mapCD_continuous (hD : D.IsRational) : Continuous (mapCD D hD) := by
   unfold mapCD
   exact presheafValueMapOfHom_continuous _ _ _ _ _ _
@@ -2032,6 +2048,7 @@ all four rings, and the covariant maps commute with it. -/
 -- `presheafValueMapOfHom_restriction` moved to `PresheafFunctoriality.lean`,
 -- `namespace ValuationSpectrum`; reused here via `open`.)
 
+omit [IsFJPNoetherianBase F] in
 theorem presheafValueMapC_restriction (D D' : RationalLocData (JetA F))
     (hD : D.IsRational) (hD' : D'.IsRational)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
@@ -2068,6 +2085,7 @@ theorem presheafValueMapC_restriction (D D' : RationalLocData (JetA F))
       (by funext a; exact DFunLike.congr_fun hcomp a)
   exact congrFun h_eq x
 
+omit [IsFJPNoetherianBase F] in
 theorem presheafValueMapB_restriction (D D' : RationalLocData (JetA F))
     (hD : D.IsRational) (hD' : D'.IsRational)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
@@ -2106,6 +2124,7 @@ theorem presheafValueMapB_restriction (D D' : RationalLocData (JetA F))
 
 /-! ### Coverage transfer ([FJP] Lemma 5.2, first display: `U_E = ⋃ᵢ (Uᵢ)_E`) -/
 
+omit [IsFJPNoetherianBase F] in
 /-- Power-bounded elements of 𝓐 stay power-bounded under any norm-nonincreasing ring map
 (the [FJP] "never bare continuity" transfer: 𝓐° = unit ball by Prop 2.3, and
 norm-≤-1 elements are power-bounded in any seminormed ring). -/
@@ -2314,6 +2333,7 @@ theorem span_insert_eq_top {A : Type*} [CommRing A] [DecidableEq A] {T : Finset 
   rw [← top_le_iff, ← h]
   exact Ideal.span_mono (by rw [Finset.coe_insert]; exact Set.subset_insert a _)
 
+omit [IsFJPNoetherianBase F] in
 /-- The product-datum span fact, stated at 𝓐 (`s`-normalized factors). -/
 theorem interDatum_span_eq_top (D₁ D₂ : RationalLocData (JetA F))
     (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) :

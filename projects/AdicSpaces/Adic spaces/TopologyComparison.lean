@@ -214,6 +214,7 @@ private theorem divByS_eq_algebraMap_mul_invSelf (t s : A) :
 
 omit [PlusSubring A] [IsHuberRing A] in
 -- Helper: `φ(divByS t s) = mk(algebraMap t * X)`.
+omit [IsTopologicalRing A] in
 private theorem locToQuotientOneSubfX_gen_divByS (s t : A) :
     locToQuotientOneSubfX_gen s (divByS t s) =
       Ideal.Quotient.mk (oneSubfXIdeal s)
@@ -223,6 +224,7 @@ private theorem locToQuotientOneSubfX_gen_divByS (s t : A) :
     locToQuotientOneSubfX_gen_invSelf, ← map_mul]
 
 -- Helper: scaled coefficient of `algebraMap(a) * g`.
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] in
 private theorem scaledCoeff_algebraMap_mul (f a : A)
     (g : ↥(TateAlgebra A)) (n : ℕ) :
     f ^ n * TateAlgebra.coeff n (algebraMap A _ a * g) =
@@ -230,6 +232,7 @@ private theorem scaledCoeff_algebraMap_mul (f a : A)
   rw [TateAlgebra.coeff_algebraMap_mul, ← mul_assoc, mul_comm (f ^ n) a, mul_assoc]
 
 -- Helper: scaled coefficient of `algebraMap(t) * X * g` at n+1.
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] in
 private theorem scaledCoeff_succ_tX_mul (f t : A)
     (g : ↥(TateAlgebra A)) (n : ℕ) :
     f ^ (n + 1) * TateAlgebra.coeff (n + 1) (algebraMap A _ t * TateAlgebra.X * g) =
@@ -240,6 +243,7 @@ private theorem scaledCoeff_succ_tX_mul (f t : A)
   ring
 
 -- Helper: scaled coefficient of `algebraMap(t) * X * g` at 0.
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] in
 private theorem scaledCoeff_zero_tX_mul (f t : A) (g : ↥(TateAlgebra A)) :
     f ^ 0 * TateAlgebra.coeff 0 (algebraMap A _ t * TateAlgebra.X * g) = 0 := by
   rw [show algebraMap A _ t * TateAlgebra.X * g =
@@ -256,6 +260,7 @@ private def artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
     s ^ n * TateAlgebra.coeff n g ∈
       Subtype.val '' ((P.I ^ (M + (N - n) * C) : Ideal P.A₀) : Set P.A₀)
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] in
 /-- `0 ∈ artinReesNhd`. -/
 private theorem zero_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
     (0 : ↥(TateAlgebra A)) ∈ artinReesNhd P s C M N := by
@@ -264,6 +269,7 @@ private theorem zero_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : 
   rw [this, mul_zero]
   exact ⟨0, (P.I ^ _).zero_mem, rfl⟩
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] in
 /-- `artinReesNhd` is closed under addition. -/
 private theorem add_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ)
     {a b : ↥(TateAlgebra A)} (ha : a ∈ artinReesNhd P s C M N)
@@ -276,6 +282,7 @@ private theorem add_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : �
   obtain ⟨y, hy, hy_eq⟩ := hb n hn
   exact ⟨x + y, (P.I ^ _).add_mem hx hy, by rw [Subring.coe_add, ← hx_eq, ← hy_eq]⟩
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] in
 /-- `artinReesNhd` is closed under negation. -/
 private theorem neg_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ)
     {a : ↥(TateAlgebra A)} (ha : a ∈ artinReesNhd P s C M N) :
@@ -342,6 +349,7 @@ private theorem mul_algebraMap_X_mem_artinReesNhd (P : PairOfDefinition A) (s t 
       rw [this, add_mul, one_mul]; omega
     exact hC_shift (M + (N - (n' + 1)) * C) b (hkey ▸ hb)
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- Lift an element of the localisation subring to the Tate algebra along the quotient map,
 keeping a `G`-stability property. Proved by `Subring.closure_induction`: the two generator
 cases are the hypotheses `hG_stable_alg` / `hG_stable_tX`, and the algebraic cases only need
@@ -390,6 +398,7 @@ private theorem exists_lift_stable_of_mem_locSubring (D : RationalLocData A)
     exact ⟨rx * ry, by rw [map_mul, hrx_eq, hry_eq, map_mul],
       fun g hg ↦ by rw [mul_assoc]; exact hrx_stab _ (hry_stab g hg)⟩
 
+omit [PlusSubring A] [IsHuberRing A] [NonarchimedeanRing A] in
 /-- One Artin–Rees shift constant that works for every `t ∈ T` at once: take the maximum of
 the per-`t` constants supplied by `mul_st_ideal_shift`. -/
 private theorem exists_uniform_mul_st_ideal_shift (P : PairOfDefinition A) (s : A)
@@ -407,6 +416,7 @@ private theorem exists_uniform_mul_st_ideal_shift (P : PairOfDefinition A) (s : 
     Finset.le_sup (f := id) (Finset.mem_image_of_mem _ (Finset.mem_attach _ _))
   exact hC_fn t k b (Ideal.pow_le_pow_right (by omega) hb)
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] in
 /-- Every element of the Artin–Rees neighbourhood has its `i`-th scaled coefficient inside
 `t_set i`, for each index `i` of the basic product neighbourhood. The shift budget only has to
 beat `m_fn i`, which is what `hN` (degrees) and `hM` (the `m_fn`) supply. -/
@@ -441,6 +451,7 @@ private theorem artinReesNhd_scaleIncl_mem (P : PairOfDefinition A) (s : A) (C :
   rw [hscale]
   exact hm_fn i (hsub hg_i)
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- Unpack a `0`-neighbourhood of the quotient into finitary index data: a finite set of
 exponents `Idx`, a factor `t_set i` for each, and an exponent `m_fn i` whose ideal power lands
 in that factor — such that any `g` whose scaled coefficients lie in the factors has its class
@@ -1015,6 +1026,7 @@ T-topology. The image contains `mk(a)` for all `a ∈ A` and `mk(X)` (since
 Polynomials are dense in `A⟨X⟩` for the T-topology because truncations
 converge in the induced product topology. -/
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [NonarchimedeanRing A] [T2Space A] in
 /-- A power series whose coefficients are zero above degree `N` is restricted,
 because only finitely many coefficients are nonzero. -/
 private theorem isRestricted_of_eventually_zero
@@ -1129,6 +1141,7 @@ theorem tateAlgebra_polynomials_dense (s : A) :
   · -- truncTate g N has finitely many nonzero coefficients
     exact ⟨N, fun n hn ↦ truncTate_coeff_high g N n hn⟩
 
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [T2Space A] in
 /-- Every polynomial element in `A⟨X⟩` (coefficients zero above degree N) has its
 quotient class in the range of `locToQuotientOneSubfX_gen`. By induction on N:
 the image contains `mk(algebraMap a)` and `mk(X)`, hence all finite sums of
@@ -1610,6 +1623,7 @@ theorem tateAlgebra_polynomials_dense_canonical [IsTateRing A] :
   change truncTateC g N - g ∈ tateAlgNhd P n
   rw [show truncTateC g N - g = -(g - truncTateC g N) by ring]; exact neg_mem hg_diff_mem
 
+omit [T2Space A] in
 /-- The localization `A[1/s]` maps densely into `A⟨X⟩/(1-sX)` for the canonical
 quotient topology (Wedhorn Example 6.38, canonical topology version).
 
@@ -1661,6 +1675,7 @@ private def coeffIdealNhd (P : PairOfDefinition A) (M : ℕ) : Set ↥(TateAlgeb
     MvPowerSeries.coeff l g.val ∈
       Subtype.val '' ((P.I ^ M : Ideal P.A₀) : Set P.A₀)
 
+omit [IsTopologicalRing A] [T2Space A] in
 omit [PlusSubring A] [IsHuberRing A] in
 omit [PlusSubring A] [IsHuberRing A] in
 /-- `0 ∈ coeffIdealNhd`. -/
@@ -1670,6 +1685,7 @@ private theorem zero_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ) :
   rw [ZeroMemClass.coe_zero, map_zero]
   exact ⟨0, (P.I ^ M).zero_mem, rfl⟩
 
+omit [IsTopologicalRing A] [T2Space A] in
 omit [PlusSubring A] [IsHuberRing A] in
 /-- `coeffIdealNhd` is closed under addition. -/
 private theorem add_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
@@ -1682,6 +1698,7 @@ private theorem add_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
   exact ⟨x + y, (P.I ^ M).add_mem hx hy,
     by rw [Subring.coe_add]; exact congrArg₂ (· + ·) hx_eq hy_eq⟩
 
+omit [IsTopologicalRing A] [T2Space A] in
 omit [PlusSubring A] [IsHuberRing A] in
 /-- `coeffIdealNhd` is closed under negation. -/
 private theorem neg_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
@@ -1693,6 +1710,7 @@ private theorem neg_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
   exact ⟨-x, (P.I ^ M).neg_mem hx,
     by rw [NegMemClass.coe_neg]; exact congrArg (- ·) hx_eq⟩
 
+omit [IsTopologicalRing A] [T2Space A] in
 omit [PlusSubring A] [IsHuberRing A] in
 /-- `coeffIdealNhd` is stable under multiplication by `algebraMap a₀` for
 `a₀ ∈ P.A₀`: it scales every coefficient by `a₀`, and `a₀ · I^M ⊆ I^M`. -/
@@ -1708,6 +1726,7 @@ private theorem mul_algebraMap_mem_coeffIdealNhd (P : PairOfDefinition A) (M : �
   exact ⟨⟨a₀, ha₀⟩ * c, Ideal.mul_mem_left _ _ hc,
     by rw [MulMemClass.coe_mul]; exact congrArg (a₀ * ·) hc_eq⟩
 
+omit [IsTopologicalRing A] [T2Space A] in
 omit [PlusSubring A] [IsHuberRing A] in
 /-- `coeffIdealNhd` is stable under multiplication by `X`: multiplying by `X`
 shifts coefficients up by one (and inserts `0` at index `0`), which preserves the
@@ -1727,6 +1746,7 @@ private theorem mul_X_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
     rw [TateAlgebra.coeff_succ_X_mul]
     exact hg (Finsupp.single 0 n)
 
+omit [IsTopologicalRing A] [T2Space A] in
 omit [PlusSubring A] [IsHuberRing A] in
 /-- The constant series `algebraMap b` lies in `coeffIdealNhd P M` whenever
 `b ∈ P.I ^ M`: its only nonzero coefficient is `b` at index `0`. -/
@@ -1792,6 +1812,7 @@ private theorem exists_lift_stabilizing_coeffIdealNhd
     exact ⟨rx * ry, by rw [map_mul, hrx_eq, hry_eq, map_mul],
       fun g hg ↦ by rw [mul_assoc]; exact hrx_stab _ (hry_stab g hg)⟩
 
+omit [IsTopologicalRing A] [T2Space A] in
 omit [PlusSubring A] [IsHuberRing A] in
 /-- The canonical quotient topology on `A⟨X⟩ ⧸ (1 - sX)` is nonarchimedean. `A⟨X⟩` itself is,
 from its `RingSubgroupsBasis`, and the quotient map is open — so the image of an open subgroup
@@ -1824,6 +1845,7 @@ private theorem quotientOneSubfXIdealTopology_nonarchimedean [IsTateRing A] (s :
       (oneSubfXIdeal s) instIsTopologicalRingTateAlgebra _ V.isOpen
   }, fun x hx ↦ by obtain ⟨y, hy, rfl⟩ := hx; exact hVU hy⟩
 
+omit [IsTopologicalRing A] [T2Space A] in
 omit [PlusSubring A] [IsHuberRing A] in
 /-- The generic closing step of `locToQuotientOneSubfX_gen_continuous_canonical`. If `G` maps
 into `W`, absorbs `algebraMap` of `P.I ^ M`, and is stabilised by an `A⟨X⟩`-lift of every element
@@ -1883,6 +1905,7 @@ private theorem locNhd_subset_preimage_of_lift_stabilizing [IsTateRing A] [T2Spa
     rw [this]
     exact hd (r * s')
 
+omit [T2Space A] in
 omit [PlusSubring A] [IsHuberRing A] in
 /-- Steps 3–5a of `locToQuotientOneSubfX_gen_continuous_canonical`: a fixed-ideal coefficient
 neighbourhood of `A⟨X⟩` that the quotient map carries into `W`. Pull `W` back along the
@@ -1925,6 +1948,7 @@ private theorem exists_coeffIdealNhd_subset_preimage [IsTateRing A] [T2Space A]
     (IsTateRing.principalPair A).π_isUnit
     hg_pair hg_coeff
 
+omit [T2Space A] in
 omit [PlusSubring A] [IsHuberRing A] in
 /-- The map `locToQuotientOneSubfX_gen D.s` is continuous from the localization
 topology on `Localization.Away D.s` to the canonical quotient topology on
@@ -2082,6 +2106,7 @@ noncomputable def presheafValueToCanonicalQuotient (D : RationalLocData A)
     (quotient_oneSubfXIdeal_completeSpace hA_complete hnoeth D.s)
     hT0Q
 
+omit [PlusSubring A] in
 /-- **Continuity of `presheafValueToCanonicalQuotient`** (T-EMBED-TOPO-EXAMPLE638
 ingredient). The backward direction of the canonical-quotient equivalence is
 continuous: as a `UniformSpace.Completion.extensionHom` it inherits continuity
@@ -2122,6 +2147,7 @@ theorem presheafValueToCanonicalQuotient_continuous (D : RationalLocData A)
   -- Apply continuous_extension with the explicit target uniform structure.
   exact UniformSpace.Completion.continuous_extension
 
+omit [PlusSubring A] in
 /-- `presheafValueToCanonicalQuotient` on the dense image agrees with
 `locToQuotientOneSubfX_gen`. -/
 theorem presheafValueToCanonicalQuotient_coe (D : RationalLocData A)

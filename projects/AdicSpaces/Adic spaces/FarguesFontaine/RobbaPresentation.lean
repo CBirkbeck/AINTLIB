@@ -974,6 +974,7 @@ theorem teichPowGen_pow_mul_twist (zb : OF F) (m : ℕ) (i j : ℕ)
   calc A * V * (P1 * P2 * C) = P1 * (A * C) * (P2 * V) := by ring
     _ = P1 * (A * C) := by rw [hcancel, mul_one]
 
+omit [CharP F p] in
 /-- **The maximal-twist normalization** (Kedlaya's `j`-choice, in the
 integral-coordinate direction): a nonzero integral coordinate factors as
 `zb^j · c'` with the cofactor's value strictly above `|zb|`. -/
@@ -1182,6 +1183,7 @@ theorem exists_monomial_twist_data (zb : OF F) (m : ℕ) (hm : 0 < m)
   · refine ⟨0, c, by rw [pow_zero, one_mul], hc0,
       fun h => absurd h hik, fun _ => rfl⟩
 
+omit [CharP F p] in
 /-- **The floor-division twist**: under the direct divisibility bound the
 coordinate factors through `zb^{(k−i)/m}`, with the twisted exponent landing
 in the window `(k − m, k]` — no overshoot. -/
@@ -4560,6 +4562,7 @@ theorem wLoc_teichPowGen₂ {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
   rw [← gaussVal_apply p F hρ0 hρ1, map_pow, gaussVal_apply,
     gaussValue_p p F hρ1.le]
 
+omit [CharP F p] in
 /-- The valuation of a Teichmüller power is nonzero off zero. -/
 theorem perfectoidValuation_pow_ne_zero (zb : OF F)
     (hzb : perfectoidValuation p F (zb : F) ≠ 0) (j : ℕ) :
@@ -5922,6 +5925,7 @@ theorem map_BIPlusIn_le_BIPlusIn {θ η : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 
   rintro _ ⟨z, hz, rfl⟩
   exact le_trans (wI_resIHom_le p F ϖ hθ0 hθ1 hη0 hη1 hσ₁0 hσ₁1 hσ₂0 hσ₂1 z) hz
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- Powers of monomial fractions are monomial fractions. -/
 theorem mk'_monomial_pow (i k m : ℕ) (c : OF F) :
     (IsLocalization.mk' (Bloc p F ϖ)

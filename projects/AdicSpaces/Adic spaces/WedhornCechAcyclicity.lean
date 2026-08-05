@@ -185,6 +185,7 @@ noncomputable def RationalCoveringData.presheafValueCast
     (fun b _ => presheafValue C.base ≃+* presheafValue b)
     (RingEquiv.refl _) C'.base h.symm
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Eq.rec double cancellation for presheafValue (forward direction): for h : a = b
 and x : presheafValue b, casting back via h.symm then forward via h recovers x. -/
 theorem RationalCoveringData.presheafValue_eqRec_double_cancel_forward
@@ -197,6 +198,7 @@ theorem RationalCoveringData.presheafValue_eqRec_double_cancel_forward
   subst h
   rfl
 
+omit [DecidableEq (RationalLocData A)] in
 /-- A direct Eq.rec base cast on presheafValue vanishes iff the original
 element vanishes. Used by the refinement-free Prop A.3(1) separation
 transfer (2026-06-10) to pull `x|Vⱼ = 0` back through the
@@ -209,6 +211,7 @@ theorem RationalCoveringData.presheafValue_eqRec_eq_zero_iff
   subst h
   exact Iff.rfl
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Restriction map respects a direct Eq.rec base cast on presheafValue.
 This is a generalized version (without RingEquiv motive) of
 `presheafValueCast_restrictionMap`, used by propA3_part1_gluing Step 8. -/
@@ -224,6 +227,7 @@ theorem RationalCoveringData.eqRec_restrictionMap_direct
   subst h
   rfl
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Restriction map respects the base cast (variable-base form). -/
 theorem RationalCoveringData.presheafValueCast_restrictionMap
     [HasLocLiftPowerBounded A] (baseC baseC' : RationalLocData A)
@@ -650,6 +654,7 @@ noncomputable def laurentLeaves [DecidableEq A] (D₀ : RationalLocData A) :
 @[simp] theorem laurentLeaves_nil [DecidableEq A] (D₀ : RationalLocData A) :
     laurentLeaves D₀ ([] : List A) = {D₀} := rfl
 
+omit [IsHuberRing A] in
 theorem laurentLeaves_cons [DecidableEq A] (D₀ : RationalLocData A) (f : A)
     (gs : List A) :
     laurentLeaves D₀ (f :: gs) = laurentLeaves (laurentPlusDatum D₀ f) gs ∪
@@ -807,6 +812,7 @@ theorem RationalCoveringData.restrictTo_mem_interProd (Uf V : RationalCoveringDa
 -- `RationalLocData.ext_of_fields` was relocated to `Presheaf.lean` (T0, 2026-07-21):
 -- it is generic extensionality for the structure and belongs next to its definition.
 
+omit [DecidableEq (RationalLocData A)] in
 omit [IsHuberRing A] in
 open Classical in
 /-- `interSamePair` only depends on the field data: two intersections agree
@@ -1148,6 +1154,7 @@ theorem restrictionMap_sub [HasLocLiftPowerBounded A] (D D' : RationalLocData A)
       restrictionMap D D' h a - restrictionMap D D' h b :=
   map_sub (restrictionMapHom D D' h) a b
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Two routes from `P` down to `E` agree once you know how `y` restricts to the intermediate:
 if `y` restricts to `z` on `X`, then going `P → M → E` and `P → X → E` give the same section.
 Both legs of the Čech cocycle comparison in `isOXAcyclic_interProd` are this fact. -/
@@ -1165,6 +1172,7 @@ theorem restrictionMap_eq_of_restrictionMap_eq [HasLocLiftPowerBounded A]
   rw [c1, ← c2, hz]
 
 
+omit [DecidableEq (RationalLocData A)] in
 omit [IsHuberRing A] in
 /-- Intersecting with a fixed `Q` preserves inclusion of rational opens. -/
 private theorem rationalOpen_interSamePair_subset (M P Q : RationalLocData A)
@@ -1370,6 +1378,7 @@ theorem laurentLeaves_singleton [DecidableEq A] (D₀ : RationalLocData A) (f : 
 -- singleton. This removed a dead `sorry` (the old `_gluing`) and a Cor-8.32
 -- dependency from the base case.)
 
+omit [DecidableEq (RationalLocData A)] in
 /-- **Part (i) base case (relative)**: the trivial cover `{C.base}` of its own
 base is `O_X`-acyclic. The single restriction `O_X(base) → O_X(base)` is the
 identity (`restrictionMap_id`), so separation and gluing are immediate. This is
@@ -1419,6 +1428,7 @@ noncomputable def laurentProdLeaves [DecidableEq A] (D₀ : RationalLocData A) :
 @[simp] theorem laurentProdLeaves_nil [DecidableEq A] (D₀ : RationalLocData A) :
     laurentProdLeaves D₀ ([] : List A) = {D₀} := rfl
 
+omit [IsHuberRing A] in
 theorem laurentProdLeaves_cons [DecidableEq A] (D₀ : RationalLocData A) (f : A)
     (gs : List A) :
     laurentProdLeaves D₀ (f :: gs) =
@@ -3208,6 +3218,7 @@ private theorem unitCover_relPlus_forward_coe
       (unitCover_relPlus_forwardLocHom D₀ f))
     (unitCover_relPlus_forwardCompletion_continuous D₀ f) y
 
+omit [DecidableEq (RationalLocData A)] in
 /-- **Relative-plus backward base unit (piece 7a)**: the restriction map
 `O_X(D₀) → O_X(U₁)` sends `s_B = 1` to a unit (trivially). -/
 private theorem unitCover_relPlus_backward_baseHom_isUnit
@@ -3281,6 +3292,7 @@ private theorem unitCover_relPlus_canonicalMap_f_eq
   rw [show DI.canonicalMap DI.s = DI.canonicalMap D₀.s by
     rw [show (DI.s : A) = D₀.s * 1 from rfl, mul_one]]
 
+omit [IsHuberRing A] [DecidableEq (RationalLocData A)] in
 /-- `D₀.s * f` is a generator of the intersection datum (piece 7d′). -/
 private theorem unitCover_relPlus_sf_mem_T_inter
     [IsTateRing A] [IsNoetherianRing A]
@@ -3672,6 +3684,7 @@ private theorem unitCover_relMinus_forwardLocHom_algebraMap
   rw [unitCover_relMinus_forwardLocHom, IsLocalization.Away.lift_eq]
   rfl
 
+omit [DecidableEq (RationalLocData A)] in
 open Classical in
 /-- The two-case core of `unitCover_relMinus_forward_witness`: `t = p·q` with `q` either the
 generator `f` or `1`, and in each case the witness is the `p/s`-element of the `B`-pair's `A₀`,
@@ -3978,6 +3991,7 @@ private theorem unitCover_relMinus_inv_f_eq
     _ = DI.canonicalMap D₀.s := by rw [mul_one]
     _ = DI.canonicalMap D₀.s * 1 := (mul_one _).symm
 
+omit [IsHuberRing A] [DecidableEq (RationalLocData A)] in
 /-- `D₀.s · 1` is a generator of the minus intersection datum (M7d′). -/
 private theorem unitCover_relMinus_s1_mem_T_inter
     [IsTateRing A] [IsNoetherianRing A]
@@ -4345,6 +4359,7 @@ private theorem unitCover_relOverlap_aMb_isUnit
       ((unitCover_overlapDatum_B D₀ f).s)
   exact isUnit_of_mul_isUnit_right h4
 
+omit [IsHuberRing A] [DecidableEq (RationalLocData A)] in
 /-- v4.33 pair-equality proof for the **annulus datum** `R(f/1) ∩ R(1/f) ∩ D₀`: the shared
 pair of `R(f/1) ∩ D₀` and `R(1/f) ∩ D₀`, built from `interSamePair_P` applications so the
 proof term is well-typed at *reducible* transparency. A bare `rfl` here type-checks only
@@ -4417,6 +4432,7 @@ private theorem unitCover_relOverlap_forwardLocHom_algebraMap
   rw [unitCover_relOverlap_forwardLocHom, IsLocalization.Away.lift_eq]
   rfl
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Classification of the first factor: each `p` contributes `c` or `c · f`.
 
 `hT` carries across a definitional identity available only in the caller: `.T` is built with the
@@ -4454,6 +4470,7 @@ private theorem unitCover_class_left [DecidableEq A] (D₀ : RationalLocData A) 
       rw [Finset.mem_singleton.mp hf, hsplit p' f, map_mul]
       rfl
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Classification of the second factor. -/
 private theorem unitCover_class_right [DecidableEq A] (D₀ : RationalLocData A) (f : A)
     (hT : (D₀.interSamePair (coUnitDatum D₀.P f) rfl).T =
@@ -4488,6 +4505,7 @@ private theorem unitCover_class_right [DecidableEq A] (D₀ : RationalLocData A)
     · refine Or.inl ?_
       rw [Finset.mem_singleton.mp h1, hsplit p' 1, map_mul, map_one, map_one, mul_one]
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Left-hand expansion: `F` of the product numerator splits into the four `s`-scaled factors. -/
 private theorem unitCover_F_mul_expand
     (D₀ : RationalLocData A) (f : A) (DII : RationalLocData A)
@@ -4509,6 +4527,7 @@ private theorem unitCover_F_mul_expand
     D₀.coeRingHom (divByS q D₀.s) from hps q]
   rw [map_mul (OD.canonicalMap), map_mul (OD.canonicalMap), map_mul (OD.canonicalMap)]
 
+omit [PlusSubring A] [IsHuberRing A] [DecidableEq (RationalLocData A)] in
 /-- Right-hand expansion: `F` of the denominator `DII.s`.
 
 `hs_eq` carries the `set`-local identity `DII.s = (D₀.s * 1) * (D₀.s * f)` across; it is `rfl` in
@@ -4531,6 +4550,7 @@ private theorem unitCover_F_denom_expand
   rw [map_mul (OD.canonicalMap), map_mul (OD.canonicalMap)]
   ring
 
+omit [DecidableEq (RationalLocData A)] in
 /-- `aM f` is invertible in the overlap localization, with inverse `1/s`. -/
 private theorem unitCover_canonicalMap_mul_invS_eq_one
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
@@ -4551,6 +4571,7 @@ private theorem unitCover_canonicalMap_mul_invS_eq_one
     rw [map_mul]; rfl]
   rw [h8, map_one, map_one]
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Dividing `f²` by `s` gives back `aM f`, since `s = aM f` in the localization. -/
 private theorem unitCover_divByS_sq_eq
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
@@ -4574,6 +4595,7 @@ private theorem unitCover_divByS_sq_eq
   rw [h9, map_mul, map_mul]
   rfl
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Witness construction, case: both factors plain. -/
 private theorem unitCover_witness_case_pq
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
@@ -4629,6 +4651,7 @@ private theorem unitCover_witness_case_pq
         OD.coeRingHom (divByS (1 : presheafValue D₀) OD.s)) by ring]
   rw [hinvO, mul_one]
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Witness construction, case: the `q` factor carries `f`. -/
 private theorem unitCover_witness_case_pFq
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
@@ -4671,6 +4694,7 @@ private theorem unitCover_witness_case_pFq
   rw [map_mul (OD.canonicalMap)]
   ring
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Witness construction, case: the `p` factor carries `f`. -/
 private theorem unitCover_witness_case_pqF
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
@@ -4713,6 +4737,7 @@ private theorem unitCover_witness_case_pqF
   rw [map_mul (OD.canonicalMap)]
   ring
 
+omit [DecidableEq (RationalLocData A)] in
 /-- Witness construction, case: both factors carry `f`. -/
 private theorem unitCover_witness_case_pFqF
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
@@ -4775,6 +4800,7 @@ private theorem divByS_mul_eq (D₀ : RationalLocData A) : ∀ p' q' : A,
       algebraMap A (Localization.Away D₀.s) q' by ring]
   rw [algebraMap_s_mul_divByS, ← map_mul]
 
+omit [DecidableEq (RationalLocData A)] in
 /-- The overlap datum's `s` is the image of `f`. -/
 private theorem unitCover_overlapDatum_B_s_eq
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
@@ -5751,6 +5777,7 @@ private noncomputable def unitCover_relativePlus
     (RingHom.ext (unitCover_relPlus_forward_backward D₀ f))
     (RingHom.ext (unitCover_relPlus_backward_forward D₀ f))
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The relative-plus iso intertwines `restrictionMap D₀ U₁` with `canonicalMap` over `B`
 (Wedhorn Prop 8.2 base-change naturality). Honest leaf. -/
 private theorem unitCover_relativePlus_restrictionMap
@@ -5784,6 +5811,7 @@ private noncomputable def unitCover_example638Plus
     presheafValue_completeSpace_rightUniformSpace D₀
   exact unitDatum_quotEquiv (presheafValue_concretePair D₀) (D₀.canonicalMap f)
 
+omit [DecidableEq (RationalLocData A)] in
 /-- The Example-6.38-plus iso sends `(R(b/1)).canonicalMap x` to `mk(algebraMap_B x)`
 (the constant-section image), i.e. the first component of `epsilonHom_gen b x`. Honest leaf. -/
 private theorem unitCover_example638Plus_canonicalMap
@@ -5852,6 +5880,7 @@ private noncomputable def unitCover_relativeMinus
     (RingHom.ext (unitCover_relMinus_forward_backward D₀ f))
     (RingHom.ext (unitCover_relMinus_backward_forward D₀ f))
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The relative-minus iso intertwines `restrictionMap D₀ U₂` with `canonicalMap` over `B`.
 Honest leaf. -/
 private theorem unitCover_relativeMinus_restrictionMap
@@ -5898,6 +5927,7 @@ private noncomputable def unitCover_example639Minus
   -- The faithful univariate iso; target `B⟨X⟩/(1 − D.s·X) = B⟨X⟩/(1 − b·X) = B₂_gen b` (defeq).
   presheafValueCanonicalQuotientEquiv_faithful D hb hAc hT_pb
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- The Example-6.39-minus iso sends `(R(1/b)).canonicalMap x` to `mk(algebraMap_B x)`,
 i.e. the second component of `epsilonHom_gen b x`. Honest leaf. -/
 private theorem unitCover_example639Minus_canonicalMap
@@ -6206,12 +6236,14 @@ R(1/f) ∩ D₀`, `…annulusDatumA` their intersection (plus ∩ minus). -/
   (unitCover_relPlusDatumA D₀ f).interSamePair (unitCover_relMinusDatumA D₀ f)
     (by unfold unitCover_relPlusDatumA unitCover_relMinusDatumA; rfl)
 
+omit [IsHuberRing A] [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 theorem unitCover_annulusDatumA_subset_plus (D₀ : RationalLocData A) (f : A) :
     rationalOpen (unitCover_annulusDatumA D₀ f).T (unitCover_annulusDatumA D₀ f).s ⊆
       rationalOpen (unitCover_relPlusDatumA D₀ f).T (unitCover_relPlusDatumA D₀ f).s := by
   unfold unitCover_annulusDatumA
   exact RationalLocData.interSamePair_subset_left _ _ _
 
+omit [IsHuberRing A] [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 theorem unitCover_annulusDatumA_subset_minus (D₀ : RationalLocData A) (f : A) :
     rationalOpen (unitCover_annulusDatumA D₀ f).T (unitCover_annulusDatumA D₀ f).s ⊆
       rationalOpen (unitCover_relMinusDatumA D₀ f).T (unitCover_relMinusDatumA D₀ f).s := by
@@ -7031,6 +7063,7 @@ theorem unitCover_isOXAcyclic
       apply (unitCover_bridgeMinus D₀ f).injective
       exact (unitCover_bridgeMinus_restrictionMap D₀ f a).trans ha₂
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- Backward leg of the `cons` step: every leaf of the `(f :: gs)`-cover is R-equal to a piece of
 the product cover, by `laurentProdLeaves_restrict` at whichever of the two unit halves it came
 from. -/
@@ -7081,6 +7114,7 @@ private theorem laurentProdCoverOf_cons_congr_left [DecidableEq A]
         ((laurentProdLeaves_pair gs D₀ hQ).trans
           (RationalLocData.interSamePair_P D₀ (coUnitDatum D₀.P f) rfl).symm)).symm
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- Forward leg: every piece of the product cover is R-equal to a leaf of the `(f :: gs)`-cover. -/
 private theorem laurentProdCoverOf_cons_congr_right [DecidableEq A]
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
@@ -7256,6 +7290,7 @@ def RationalCoveringData.IsGeneratedByUnits (C : RationalCoveringData A) : Prop 
   ∃ units : Finset A,
     C.IsGeneratedBy units ∧ ∀ u ∈ units, IsUnit (C.base.canonicalMap u)
 
+omit [IsHuberRing A] [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- A `IsGeneratedByUnits` cover is in particular `IsUnitGenerated`
 (each piece-generator is a unit). The pieces of an `IsGeneratedBy units`
 cover have `T`-set `= units`, all of which are units. -/
@@ -7334,6 +7369,7 @@ noncomputable def genRestrictedCover
 
 /-! ##### Sub-lemmas for Lemma 8.34 part (ii) — Cor 7.32 application -/
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- **Part (ii) sub-lemma 1**: `T · A = A` (T spans the unit ideal)
 implies the "no common zero" property: every Spa-point has nonzero
 valuation on at least one element of T. -/
@@ -7383,6 +7419,7 @@ theorem cor_7_32_dominating_unit
     compactSpace_spa_noHArch P hπ (fun x => hA₀le x.2) (Ideal.span {((π : A))}) rfl
   exact exists_dominating_unit_noHArch_finset T hT_noCommonZero
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Part (ii) sub-lemma 3** (Wedhorn 8.34(ii), wedhorn.txt:4241): from a
 dominating unit `s`, the Laurent cover of `D₀` generated by `s⁻¹·T = {s⁻¹·t : t ∈ T}`.
 For Wedhorn's (ii) the base `D₀` is the whole space `X` (the caller passes `C.base`,
@@ -7409,6 +7446,7 @@ theorem laurent_cover_from_dominating_unit [DecidableEq A]
 
 /-! ##### Sub-lemmas for `unit_gen_restriction_of_dominating_laurent` -/
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Sign dichotomy**: every leaf of the base-independent Laurent-product cover
 decides each generator's sign — on the leaf, either `v(f) ≤ 1` throughout or
 `v(f) ≥ 1` throughout (the leaf accumulated the `R(f/1)`- resp. `R(1/f)`-condition
@@ -7441,6 +7479,7 @@ theorem laurentProdLeaves_sign_dichotomy [DecidableEq A] (fs : List A) :
       · exact ih _ hVj f hf'
       · exact ih _ hVj f hf'
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Sign-selecting leaf choice** (refines `laurentProdLeaves_cover`): a point
 `v` of the base lies in a Laurent leaf that piece-wide satisfies `w(f) ≤ 1`
 for every listed `f` marked by `P` — provided `v` itself satisfies `v(f) ≤ 1`
@@ -7562,6 +7601,7 @@ theorem index_selection_on_laurent_piece [DecidableEq A]
     obtain ⟨t, ht, _, hstrict⟩ := h_dom v hv.1
     exact hstrict (hall t ht)
 
+omit [DecidableEq (RationalLocData A)] in
 /-- **Step (b)**: the canonical image of `t` in `𝒪_X(V_j)` is a unit when
 `v(t) ≥ v(s)` holds on all of `V_j` (which is a rational subset). -/
 theorem canonical_unit_of_pointwise_lower_bound
@@ -7594,6 +7634,7 @@ theorem canonical_unit_of_pointwise_lower_bound
   letI : ValuativeRel A := (comap Vj.canonicalMap w).toValuativeRel
   exact ValuativeRel.vle_trans h1 h2
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- **Step (c)**: construct the restricted cover of `V_j` by the rational
 subsets `R(T|V_j / t_i|V_j)`. -/
 theorem restricted_cover_construction
@@ -7694,6 +7735,7 @@ theorem unit_gen_restriction_of_dominating_laurent [DecidableEq A]
     obtain ⟨u, hu, -, hstrict⟩ := _h_dom v hv.1.1
     exact hstrict (v.vle_trans (hcond u hu) (hle v hv.1))
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem wedhorn_lemma_834_part_ii_unit_gen_via_dominating [DecidableEq A]
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
@@ -7733,6 +7775,7 @@ theorem wedhorn_lemma_834_part_ii_unit_gen_via_dominating [DecidableEq A]
   exact unit_gen_restriction_of_dominating_laurent C T hC_gen s hs V fs hV_laurent
     hV_eq Vj hVj
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Part (iv) sub-lemma (c) sub-(sep)** — Wedhorn Prop A.3(1) separation
 transfer, p. 105 (wedhorn.txt:5315-5325), refinement-free form.
 
@@ -7811,6 +7854,7 @@ theorem wedhorn_lemma_834_propA3_part1_separation
   rw [h_factored₂, hx D hD_in_C]
   exact (restrictionMapHom D D' hD'_sub_D).map_zero
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- The family "restrict `f` from a chosen containing `C`-piece" is compatible on any
 covering `K` whose pieces sit inside `C`-pieces.
 
@@ -7840,6 +7884,7 @@ private theorem restrictionMap_chosenPiece_compat
   exact h_compat (choose D'₁).1 (choose D'₂).1 D'₃
     (h₃₁.trans (choose D'₁).2) (h₃₂.trans (choose D'₂).2)
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Prop A.3(1) transfer, step 5**: a family `y` on `V` that agrees piecewise with
 `f`-values is compatible.
 
@@ -8001,6 +8046,7 @@ private theorem propA3_part1_gluing_exists_family
     propA3_part1_gluing_family_compat C V f h_compat C_restr_at hC_restr_base I_at
       hI_open W_at hW_base hW_pieces₁ hW_pieces₂ hW_acyclic yV hyV Vj₁ Vj₂ Vj₃ h₃₁ h₃₂⟩
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Prop A.3(1) transfer, the mixed `(U, Vⱼ)` identity**: on the trace `U ∩ Vⱼ`, a family
 agreeing piecewise with `f`-values agrees with `f U` itself.
 
@@ -8290,6 +8336,7 @@ theorem wedhorn_lemma_834_propA3_part1_bridge
 -- leaf containing v need not sit inside R(T/t_α)). The trace covers used
 -- by the part-1 bridge always cover — no σ-walk cover-each is needed.
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- Units of `𝒪_X(D₀)` restrict to units of `𝒪_X(D')` for `D' ⊆ D₀`
 (restriction is a ring homomorphism; Wedhorn p. 84 uses this to transfer
 the part-(ii) units to the multi-index intersections). -/
@@ -8302,6 +8349,7 @@ theorem isUnit_canonicalMap_of_subset
   rw [← restrictionMapHom_canonicalMap D₀ D' h a]
   exact ha.map (restrictionMapHom D₀ D' h)
 
+omit [IsRingOfIntegralElements A⁺] in
 open Classical in
 /-- The product cover `interProdOn` of two unit-generated restrictions is
 itself generated by units: the products of the two unit sets (Wedhorn p. 84 —
@@ -8551,6 +8599,7 @@ theorem rationalOpen_distinguished_eq_on [DecidableEq A] (Y : Set (Spv A))
       distinguishedProducts_cover LP hts h1 hvspa (hcovY v hvY)
     exact ⟨hvY, hvspa, fun p hp => v.vle_trans (hvP' p hp) (hvS s' hs'), hvs0⟩
 
+omit [IsHuberRing A] [IsRingOfIntegralElements A⁺] in
 /-- **Step 5 (Wedhorn 7.54 / Huber product trick):** the distinguished set `S` spans
 the unit ideal, `Ideal.span S = ⊤`. From Step 4 (`distinguishedProducts_cover`) the
 `(R(P/s))_{s∈S}` cover `Spa A`, so for every `v` some `s ∈ S` has `v(s) ≠ 0`
@@ -9075,6 +9124,7 @@ private theorem genPiece_relOverlap_forwardLocHom_algebraMap
   rw [genPiece_relOverlap_forwardLocHom, IsLocalization.Away.lift_eq]
   rfl
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 open Classical in
 /-- The merge identity: multiplying by the pair generator `t₁t₂` and then dividing by `EII.s`
 is the identity on `EII`'s canonical image, because `EII.s` *is* that product. -/
@@ -9102,6 +9152,7 @@ private theorem genPiece_relOverlap_merge
   rfl
 
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 open Classical in
 /-- Every generator of the singly-intersected datum factors as a base generator times a
 `t₁`-generator: either it is the distinguished `s·t₁`, or it already came from the product. -/
@@ -9124,6 +9175,7 @@ private theorem genPiece_relOverlap_p_decomp
     exact ⟨p', (Finset.mem_product.mp hpq').1, q', (Finset.mem_product.mp hpq').2, rfl⟩
 
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 open Classical in
 /-- Membership of the generator pair in the doubly-intersected datum's generator set. -/
 private theorem genPiece_relOverlap_gen_mem
@@ -9149,6 +9201,7 @@ private theorem genPiece_relOverlap_gen_mem
     · exact Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ hq'')
 
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 open Classical in
 /-- The witness and its defining equation for `genPiece_relOverlap_forward_witness`: the pair
 `(p'/s) · (q'q)⁻¹` lies in the target's `locSubring`, and pushing it through `F` reproduces the
@@ -10855,6 +10908,7 @@ private theorem ratio_pairwise_comparable_on_leaf [DecidableEq A]
     have h2 := v.mul_vle_mul_left (h v hv) g
     rwa [one_mul, mul_assoc, hinv, mul_one] at h2
 
+omit [IsHuberRing A] [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- On a leaf where the unit ratios are pairwise `vle`-comparable, every
 nonempty finite subset of `units` has a `vle`-maximum. -/
 private theorem exists_max_vle_of_pairwise_comparable {V' : RationalLocData A}
@@ -11839,6 +11893,7 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
       _hsub hTne _h_units hkey hB_empty
     exact genRestrictedCover_isOXAcyclic_of_B D₀ T hspan hC_full_acyclic
 
+omit [IsHuberRing A] [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- The product-piece open of a two-fold intersection lies inside both
 single-index piece opens. Proving the containment into the intersection
 once lets each flavour be a projection. -/
@@ -12006,6 +12061,7 @@ private theorem interSamePair_genPiece_trace_subset
     genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s]
   exact fun v hv => ⟨hv.1.2, hv.2⟩
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The trace covers `V|U`, one per piece `U` of `C`, packaged with everything Prop A.3(1)
 asks about them: their base, that each of their pieces sits inside a piece of `V`, that they
 are acyclic, and that they cover `U`. -/
@@ -12061,6 +12117,7 @@ private theorem exists_traceCover_package [DecidableEq A]
       exact ⟨hv, hvQ⟩
   exact ⟨V_restr_at, hV_restr_base, hV_restr_pieces, hV_restr_acyclic, hV_restr_covers⟩
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The mixed `(U, Vj)` package: on each trace `U ∩ Vj` put the `genRestrictedCover` over the
 full spanning set `T`. Its base opens as the intersection, its pieces sit inside the matching
 pieces of `C|Vj`, and it is acyclic by the σ₊-dichotomy engine run with `Vj`'s unit/empty data
@@ -12133,6 +12190,7 @@ private theorem exists_mixedCover_package [DecidableEq A]
           (le_of_eq (hTpos_empty Vj.1 Vj.2 t ht htn)))
   exact ⟨M_at, hM_base_open, hM_pieces, hM_acyclic⟩
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- Every piece of `genRestrictedCover Vj T` sits inside a piece of `C`. The piece is
 `Vj ∩ R(T/t)`, and because `C` is generated by `T`, the datum `R(T/t)` IS a piece of `C` —
 which is exactly what the generation bijection `φC` names. -/
@@ -12155,6 +12213,7 @@ private theorem genRestrictedCover_pieces_subset_covers [DecidableEq A]
     (genPieceDatum Vj.1.P T t hC_gen.1) rfl
   rwa [genPieceDatum_T, genPieceDatum_s] at h
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Wedhorn Lemma 8.34** (p. 84). *Let `A` be a complete strongly
 noetherian Tate ring and `𝒰` be a rational cover generated by some
 finite subset `T ⊆ A` with `T · A = A`. Then `𝒰` is `𝒪_X`-acyclic.*
@@ -12249,6 +12308,7 @@ theorem wedhorn_lemma_834 [DecidableEq A]
     obtain ⟨D', hD'_in, hv_in⟩ := (C_restr_at Vj).hcover v hv
     exact ⟨D', hD'_in, hv_in, (C_restr_at Vj).hsubset D' hD'_in⟩
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Sub-lemma for `exists_ideal_gen_refinement`** — converting a
 standard cover (Finset S spanning top + refinement data) into a concrete
 `RationalCoveringData A` whose pieces are `{R(S/t) | t ∈ S}`.
@@ -12342,6 +12402,7 @@ theorem rationalCovering_from_idealGenSet [DecidableEq A]
     obtain ⟨f, hf, hv_mem, hsub⟩ := h_cover_rel D hD v hv
     exact ⟨piece f, Finset.mem_image_of_mem piece hf, hv_mem, hsub⟩
 
+omit [IsHuberRing A] [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- **Step 1a — per-point normalisation (Huber [Hu3] 2.6).** For `v ∈ R(D.T/D.s)`
 there is a normalised rational datum `R(T'/s') ∋ v` with `R(T'/s') ⊆ R(D.T/D.s)`,
 `1 ∈ T'` and `s' ∈ T'`. Construction: the dominating unit `π`
@@ -12395,6 +12456,7 @@ private theorem exists_normalized_datum_of_mem [DecidableEq A] [IsTateRing A]
       have h2 := w.mul_vle_mul_left h (↑π⁻¹ : A)
       rwa [zero_mul] at h2
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- **The hArch-free Spa quasi-compactness keystone (Wedhorn Thm 7.30, Tate case)**:
 `Spa(A, A⁺)` is quasi-compact for a complete strongly noetherian Tate ring. The
 in-repo `isCompact_spa_of_tate_pseudouniformizer` proves this WITH the per-point
@@ -12544,6 +12606,7 @@ theorem exists_finite_normalized_rational_refinement [DecidableEq A]
       (∀ p ∈ LP, ∃ D ∈ 𝒱, rationalOpen p.1 p.2 ⊆ rationalOpen D.T D.s) :=
   exists_finite_normalized_rational_refinement_on (Spa A A⁺) Set.Subset.rfl 𝒱 h𝒱 hcov
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Wedhorn Lemma 7.54 (whole space, FAITHFUL — Huber [Hu3] 2.6 product trick).**
 *"Every open covering of `X = Spa A` has a refinement `𝒰 = (U_t)_{t∈T}` of the form
 `U_t := R(T/t)` with `T ⊆ A` generating `A` as an ideal."* (Wedhorn p. 84.)
@@ -12605,6 +12668,7 @@ Nullstellensatz content) supplies `S` + the form-(a) pieces `R(S/f)`; then
 — it produces the Zavyalov "f small" pieces, a different cover than Wedhorn's
 8.34 "f dominates" `R(T/t)`.) -/
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **⚠️ FALSE FOR PROPER BASE (B2 logged 2026-06-04).** This general-`C` form is
 mathematically false whenever `R(C.base.T/C.base.s) ⊊ Spa A`: the conclusion forces
 `Ideal.span (S:Set A) = ⊤` together with every `R(S/f) ⊆ R(C.base.T/C.base.s)`, but
@@ -12699,6 +12763,7 @@ theorem exists_form_a_refinement [DecidableEq A]
       ← rationalOpen_distinguished_eq LP hts h1 hcovLP]
     exact hsub.trans hDsub
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem exists_ideal_gen_refinement [DecidableEq A]
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
@@ -12731,6 +12796,7 @@ theorem exists_ideal_gen_refinement [DecidableEq A]
 -- faithful 7.54-package (Huber's normalisation is per-point-in-piece).
 
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Strengthened version** (T-WC-EXISTS-IDEAL-GEN-COVERS-EACH, 2026-05-28):
 `exists_ideal_gen_refinement` augmented with the covering-each-D direction.
 
@@ -12822,6 +12888,7 @@ noncomputable def RationalCoveringData.toRefinement [IsHuberRing A]
 -- augmentation/restriction maps — substantive bridging work not blocking the
 -- main 8.28(b) sheafiness chain. Tracked separately.
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] in
 /-- **Double-restriction sub-lemma (RESTRICTED-TO-PIECE form, 2026-05-28)**:
 The restrict-to-piece of `C'` at `D` inherits `IsUnitGenerated` from `C'`'s
 `IsUnitGenerated`.
@@ -12916,6 +12983,7 @@ The substantive content of Wedhorn's proof of 8.28(b). Composes Lemma 7.54
 + Lemma 8.34 + Prop A.3(2).
 -/
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Wedhorn's main intermediate** (Wedhorn p. 83's reduction): every
 rational covering of every rational subset is `O_X`-acyclic.
 

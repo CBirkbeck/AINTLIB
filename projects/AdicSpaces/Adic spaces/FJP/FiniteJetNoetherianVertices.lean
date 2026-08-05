@@ -178,6 +178,7 @@ attribute [instance] IsFJPNoetherianBase.isStronglyNoetherian
 
 variable [IsFJPBase F] [IsFJPNoetherianBase F]
 
+omit [IsFJPBase F] in
 /-- Restricted extensions of the Laurent ring are noetherian: `L⟨Z₁,…,Zₘ⟩` is a quotient of
 the noetherian `K⟨W,V,Z₁,…,Zₘ⟩` ([FJP] Prop 2.1; the presentation `L = k⟨W,V⟩/(WV−1)`).
 The surjection is `evalHom` applied coefficientwise (with its norm-nonincreasing monomial
@@ -382,6 +383,7 @@ theorem isNoetherianRing_unitBall_of_isometry (e : A ≃+* B) (he : ∀ x, ‖e 
 
 end BallTransfer
 
+omit [IsFJPBase F] in
 /-- **The Gauss unit ball of `K⟨T₁,…,T_k⟩` is noetherian** ([FJP] Lemma 4.2: noetherian
 rings of definition) — now an assumption on the base rather than a theorem about `F((t))`. -/
 theorem isNoetherianRing_unitBall_gaussK (k : ℕ) :

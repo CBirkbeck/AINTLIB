@@ -29,11 +29,13 @@ local notation "K" => F
 
 /-! ### Norm multiplicativity and the domain property ([FJP] Prop 2.3) -/
 
+omit [IsFJPBase F] in
 /-- The Gauss norm on `L = K⟨W,W⁻¹⟩` is multiplicative (specialisation of
 `RestrictedLaurent.norm_mul_eq` to the discretely valued `K`). -/
 theorem norm_L_mul (f g : L F) : ‖f * g‖ = ‖f‖ * ‖g‖ :=
   RestrictedLaurent.norm_mul_eq f g
 
+omit [IsFJPBase F] in
 theorem norm_L_eq_zero {f : L F} (hf : ‖f‖ = 0) : f = 0 :=
   norm_eq_zero.mp hf
 
@@ -41,6 +43,7 @@ section GenericMult
 
 variable {R : Type*} [NormedCommRing R] [IsUltrametricDist R] [NormOneClass R]
 
+omit [NormOneClass R] in
 /-- Coefficient decay of a radius-one restricted series, super-level-set form. -/
 theorem finite_setOf_le_norm_psCoeff (f : PowerSeries.Restricted R (1 : ℝ)) {ε : ℝ}
     (hε : 0 < ε) : {n : ℕ | ε ≤ ‖PowerSeries.coeff n f.1‖}.Finite := by
@@ -50,6 +53,7 @@ theorem finite_setOf_le_norm_psCoeff (f : PowerSeries.Restricted R (1 : ℝ)) {�
   rw [Filter.eventually_cofinite] at hev
   exact hev.subset fun n hn => by simpa using not_lt.mpr hn
 
+omit [NormOneClass R] in
 theorem norm_psCoeff_le (f : PowerSeries.Restricted R (1 : ℝ)) (n : ℕ) :
     ‖PowerSeries.coeff n f.1‖ ≤ ‖f‖ := by
   have h := PowerSeries.le_gaussNorm norm 1 f.1 (Restricted.hasGaussNorm (R := R) 1 f) n
@@ -153,6 +157,7 @@ on 𝒞 = L⟨Q⟩ is multiplicative"). -/
 theorem norm_JetC_mul (f g : JetC F) : ‖f * g‖ = ‖f‖ * ‖g‖ :=
   norm_restricted_mul (norm_L_mul F) (fun _x hx => norm_L_eq_zero F hx) f g
 
+omit [CompleteSpace F] [IsFJPBase F] in
 /-- Multiplicativity of the `K⟨W⟩` Gauss norm (base of `𝓑`). -/
 theorem norm_KW_mul (f g : PowerSeries.Restricted K (1 : ℝ)) : ‖f * g‖ = ‖f‖ * ‖g‖ :=
   norm_restricted_mul norm_mul (fun _x hx => norm_eq_zero.mp hx) f g
@@ -438,10 +443,12 @@ theorem not_isUniform_JetB : ¬ TopologicalRing.IsUniform (JetB F) := by
 noncomputable instance : Algebra (PowerSeries.Restricted K (1 : ℝ)) (L F) :=
   (ofRestricted (R := K)).toAlgebra
 
+omit [IsFJPBase F] in
 /-- The algebra map is the nonnegative-support embedding, definitionally. -/
 theorem algebraMap_L_eq :
     algebraMap (PowerSeries.Restricted K (1 : ℝ)) (L F) = ofRestricted (R := K) := rfl
 
+omit [IsFJPBase F] in
 /-- Multiplying by a norm-one monomial shifts coefficients. -/
 theorem coeff_mul_single_one (f : L F) (a m : ℤ) :
     (f * single a (1 : K)).coeff m = f.coeff (m - a) := by
@@ -449,6 +456,7 @@ theorem coeff_mul_single_one (f : L F) (a m : ℤ) :
     rw [coeff_single, if_neg hx, zero_mul])]
   rw [coeff_single, if_pos rfl, one_mul]
 
+omit [IsFJPBase F] in
 /-- Powers of `W⁻¹` are the monomials at negative exponents. -/
 theorem winv_pow_val (i : ℕ) :
     (((Wu (R := K))⁻¹ : (L F)ˣ).val) ^ i = single (-(i : ℤ)) (1 : K) := by
@@ -461,6 +469,7 @@ theorem winv_pow_val (i : ℕ) :
     push_cast
     ring
 
+omit [IsFJPBase F] in
 /-- The coefficient of `ofRestricted`, by definition: extension by zero. -/
 theorem coeff_ofRestricted' (f : PowerSeries.Restricted K (1 : ℝ)) (a : ℤ) :
     (ofRestricted (R := K) f).coeff a =
@@ -509,6 +518,7 @@ theorem not_moduleFinite_L : ¬ Module.Finite (PowerSeries.Restricted K (1 : ℝ
   exact winv_not_integral F
     ((Algebra.IsIntegral.of_finite (PowerSeries.Restricted K (1 : ℝ)) (L F)).isIntegral _)
 
+omit [IsFJPBase F] in
 /-- Second-order coefficient of a product in `𝒞`. -/
 theorem qCoeff_two_mul (f g : JetC F) :
     qCoeff F 2 (f * g) = qCoeff F 0 f * qCoeff F 2 g +
@@ -519,6 +529,7 @@ theorem qCoeff_two_mul (f g : JetC F) :
     Finset.sum_insert (by simp), Finset.sum_insert (by simp), Finset.sum_singleton]
   rfl
 
+omit [IsFJPBase F] in
 theorem qCoeff_sum {ι : Type*} (s : Finset ι) (f : ι → JetC F) (n : ℕ) :
     qCoeff F n (∑ i ∈ s, f i) = ∑ i ∈ s, qCoeff F n (f i) := by
   classical
@@ -526,6 +537,7 @@ theorem qCoeff_sum {ι : Type*} (s : Finset ι) (f : ι → JetC F) (n : ℕ) :
   | empty => simp [qCoeff_zero]
   | insert a s ha ih => rw [Finset.sum_insert ha, Finset.sum_insert ha, qCoeff_add, ih]
 
+omit [IsFJPBase F] in
 /-- The kernel of the 2-jet map consists of the elements with vanishing `Q⁰`- and
 `Q¹`-coefficients, i.e. `ker(jB) = Q²𝒞` ([FJP] Prop 2.4: "Let `J = Q²𝒞`"). -/
 theorem jB_eq_zero_iff (a : JetA F) :
@@ -571,6 +583,7 @@ noncomputable def q2elt (ℓ : L F) : JetC F :=
     rw [Set.mem_singleton_iff] at hmem
     exact hn (by rw [if_neg hmem, norm_zero])⟩
 
+omit [IsFJPBase F] in
 theorem qCoeff_q2elt (ℓ : L F) (n : ℕ) :
     qCoeff F n (q2elt F ℓ) = if n = 2 then ℓ else 0 := by
   show PowerSeries.coeff n (PowerSeries.mk fun m => if m = 2 then ℓ else 0) = _

@@ -82,6 +82,7 @@ noncomputable instance : CommRing (MvPowerSeries.Restricted R (fun _ : Fin k => 
   { (inferInstance : Ring (MvPowerSeries.Restricted R (fun _ : Fin k => (1 : ℝ)))) with
     mul_comm := fun a b => Subtype.ext (mul_comm a.1 b.1) }
 
+omit [IsUltrametricDist R] in
 /-- Radius-one Gauss restrictedness is the topological restrictedness over a normed
 ultrametric base. -/
 theorem isRestrictedGauss_one_iff (f : MvPowerSeries (Fin k) R) :
@@ -126,6 +127,7 @@ variable {R S : Type*} [NormedCommRing R] [NormedCommRing S]
 noncomputable def psCongr (e : R ≃+* S) : PowerSeries R ≃+* PowerSeries S :=
   (MvPowerSeries.congrRingEquiv Unit e : MvPowerSeries Unit R ≃+* MvPowerSeries Unit S)
 
+omit [IsUltrametricDist R] [IsUltrametricDist S] in
 theorem psCongr_coeff (e : R ≃+* S) (f : PowerSeries R) (n : ℕ) :
     PowerSeries.coeff n (psCongr e f) = e (PowerSeries.coeff n f) := by
   show MvPowerSeries.coeff _ (MvPowerSeries.map (e : R →+* S) f) = _

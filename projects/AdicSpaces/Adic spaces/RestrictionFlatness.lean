@@ -858,6 +858,7 @@ theorem restrictionMapHom_refl_flat (E : RationalLocData A)
   rw [hid]
   exact Module.Flat.self
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Cumulative containment of a descending chain of rational locales**: if each
 `rationalOpen (X (i+1)) ⊆ rationalOpen (X i)`, then `rationalOpen (X n) ⊆ rationalOpen (X 0)`
 for every `n`. Defined by the obvious recursion so that the `n+1` case is *definitionally*

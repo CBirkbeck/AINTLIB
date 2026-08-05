@@ -1541,6 +1541,7 @@ def teichPiInvAloc : Aloc p F ϖ :=
   ↑(IsLocalization.map_units (M := Submonoid.powers (teichPi p F ϖ)) (Aloc p F ϖ)
     (⟨teichPi p F ϖ, Submonoid.mem_powers _⟩)).unit⁻¹
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 theorem teichPiInvAloc_mul :
     algebraMap (Ainf p F) (Aloc p F ϖ) (teichPi p F ϖ) * teichPiInvAloc p F ϖ = 1 := by
   have h := (IsLocalization.map_units (M := Submonoid.powers (teichPi p F ϖ))

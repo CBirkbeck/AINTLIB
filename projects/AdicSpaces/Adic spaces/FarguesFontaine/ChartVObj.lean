@@ -314,6 +314,7 @@ theorem chartPlus_le_completedPlusSubring_of_dense (a b : ℕ) (ha : 0 < a)
 
 /-! ### Dense-level monomial membership (ChartDensePlus bricks m1/m3) -/
 
+omit [CharP F p] in
 /-- Divisibility in `O_F` from the valuation comparison: an element of value
 at most `|ϖ|^j` is `ϖ^j` times an integral element. -/
 theorem exists_eq_toOF_pow_mul (j : ℕ) (c : OF F)
@@ -376,6 +377,7 @@ private theorem AlocToBloc_teichPiInv_pow_mul (k : ℕ) :
   rw [← map_pow (AlocToBloc p F ϖ), ← map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
   exact AlocToBloc_teichPiInv_mul p F ϖ k
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- Transport of the `OF F`-level factorisation `c' ^ a = ϖ ^ (d(a-b)) * c''` through the
 Teichmüller lift and `algebraMap`. -/
 private theorem teichmuller_pow_eq_teichPi_pow_mul {a b d : ℕ} {c' c'' : OF F}

@@ -63,6 +63,7 @@ universe u
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A]
 
+omit [IsHuberRing A] in
 /-- **(C3.1, NEW-A2.1)**: a Spa-point `v` of `A` lying in
 `rationalOpen D.T D.s` extends to a Spa-point `w` of `Localization.Away D.s`
 (with the localization topology `D.topology`, bounded by the canonical
@@ -133,6 +134,7 @@ theorem vle_one_iff_canonicalValuation_le {R : Type*} [CommRing R] [TopologicalS
   letI : ValuativeRel R := w.toValuativeRel
   exact Valuation.vle_iff_le (ValuativeRel.valuation R) (x := d) (y := 1)
 
+omit [IsHuberRing A] in
 /-- **`hw_loc` threading (Wedhorn 8.2, wedhorn.txt:3739-3740).** If `v ∈ rationalOpen D.T D.s`
 (`v(t) ≤ v(s)`, `v(s) ≠ 0`) and `w` extends `v` to `Localization.Away D.s` (`comap algebraMap w =
   v`),
@@ -188,6 +190,7 @@ noncomputable def scResHom (D : RationalLocData A) (w : Spv (Localization.Away D
         (FractionRing ((Localization.Away D.s) ⧸ w.supp))).comp
       (Ideal.Quotient.mk w.supp))
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- The residue valuation of `scResHom D w a` equals `w`'s canonical valuation at `a`. -/
 theorem scResHom_val (D : RationalLocData A) (w : Spv (Localization.Away D.s))
     (a : Localization.Away D.s) :
@@ -420,6 +423,7 @@ Wedhorn 8.2:3721 factors `j = Spa(ρ)` as `Spa(ρ') ∘ Spa(ι)`:
   image of `Aₛ` (wedhorn.txt:3729–3730: "Spa(ι) is a homeomorphism … by Proposition
   7.48"; Wedhorn defers 7.48 to [Hu2] Prop 3.9). -/
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- **(Wedhorn 8.2:3736 — localization extension is unique)** A valuation on the rational
 localisation `Localization.Away D.s` is determined by its restriction to `A` (every element
 is `a/sⁿ`, and `v(a/sⁿ)` is fixed by `v(a)`, `v(s) ≠ 0`): `comap (algebraMap A Aₛ)` is
@@ -459,6 +463,7 @@ theorem comap_algebraMap_injective (D : RationalLocData A) :
     rw [comap_vle, ← hxa, ← hyb, vle_unit_iff]
   rw [key w₁, key w₂, h]
 
+omit [IsHuberRing A] in
 /-- **(Wedhorn 8.2:3729 / Prop 7.48 — completion extension is unique)** A *continuous*
 valuation on the completion `presheafValue D = Â⟨T/s⟩` is determined by its restriction to
 the dense image of `Localization.Away D.s`: `comap D.coeRingHom` is injective on Spa-points.
@@ -495,6 +500,7 @@ theorem comap_canonicalMap_injOn_spa (D : RationalLocData A)
   simp only [Function.comp_apply] at h
   exact comap_coeRingHom_injOn_spa D hw₁ hw₂ (comap_algebraMap_injective D h)
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- **Continuity-only form of `comap_coeRingHom_injOn_spa`.** The completion Spa-injectivity
 needs only *continuity* of the two valuations (not the full plus-bounded Spa-membership): this
 is exactly the hypothesis of the T-SUM-7 keystone. Useful for lifting points along restrictions

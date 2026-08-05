@@ -433,6 +433,7 @@ private theorem coeff_X_pow_ne' {k n : ℕ} (h : k ≠ n) :
       (TateAlgebra.X ^ n : ↥(TateAlgebra A)) = 0 := by
   rw [TateAlgebra.coeff_X_pow, if_neg h]
 
+omit [IsTopologicalRing A] in
 /-- From `(1 - f·X)·q = a·Xⁿ`, the base case: the constant coefficient of `q`.
 
 Extracted from `coeff_of_oneSubfX_eq_aXn`, where it was a `have` using only that
@@ -455,6 +456,7 @@ private theorem coeff_zero_of_oneSubfX_eq_aXn
   · next heq => subst heq; rw [coeff_X_pow_eq', mul_one]
   · next hne => rw [coeff_X_pow_ne' hne, mul_zero]
 
+omit [IsTopologicalRing A] in
 /-- From `(1 - f·X)·q = a·Xⁿ`, the one-step recursion for the coefficients of `q`.
 
 Extracted from `coeff_of_oneSubfX_eq_aXn`, where it was a `have` using only that

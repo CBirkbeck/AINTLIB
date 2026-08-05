@@ -404,6 +404,7 @@ theorem exists_valuation_extension (P : PairOfDefinition A) {Γ₀ : Type*}
     exact congrArg v_r (Subtype.ext rfl)
   · exact v_ext_at a n hn
 
+omit [IsTopologicalRing A] in
 /-- The convex restriction of `V₀.valuation.comap (toFractionQuotient 𝔭)` vanishes on any
 element of `A₀` whose image in `A` lies in the prime `𝔭` (since `toFractionQuotient 𝔭`
 factors through `A / 𝔭`). -/
@@ -422,6 +423,7 @@ theorem restrictToConvex_comap_toFractionQuotient_eq_zero_of_mem_prime
         Ideal.Quotient.eq_zero_iff_mem.mpr hb, map_zero, map_zero]
   rw [Valuation.restrictToConvex_unfold, dif_pos hv₀_zero]
 
+omit [IsTopologicalRing A] in
 /-- Packaging step of `exists_spa_point_via_restrictToConvex`: a valuation on `A` that
 vanishes on `𝔭`, restricts to `v_r` on the ring of definition, is continuous, and is bounded
 by `1` on `A⁺` yields a point of `Spa A A⁺` whose support contains `𝔭` but not the ideal of
@@ -499,6 +501,7 @@ private theorem valuation_package_of_extension
     rw [this, h_ext_A₀ ⟨f, hf_A₀⟩]
     exact Valuation.restrictToConvex_le_one v₀_A₀ H hle_A₀ ⟨f, hf_A₀⟩
 
+omit [IsTopologicalRing A] in
 /-- The generator attaining the maximum of `V₀.valuation ∘ φ` over a generating set `S` of the
 ideal of definition lies in that ideal and misses `𝔭`, provided the maximum is nonzero. -/
 private theorem exists_generator_attaining_sup (P : PairOfDefinition A)
@@ -524,6 +527,7 @@ private theorem exists_generator_attaining_sup (P : PairOfDefinition A)
     exact hg_ne0 (by convert this using 1)
   exact ⟨t₀, ht₀_I, ht₀_notp, ht₀_val.symm⟩
 
+omit [IsTopologicalRing A] in
 /-- The maximum of `V₀.valuation ∘ φ` over a generating set of the ideal of definition lies
 strictly between `0` and `1` — below `1` because the generators land in `V₀.nonunits`, nonzero
 because `a₀ ∈ P.I` misses `𝔭` — and dominates the pulled-back valuation on all of `P.I`. -/
@@ -734,6 +738,7 @@ theorem exists_cont_analytic_supp_ge_of_nonOpen_prime (P : PairOfDefinition A)
     P.exists_spa_point_via_restrictToConvex h𝔭 (le_refl (P.A₀ : Set A))
   exact ⟨v, hv_spa.1, hsupp, hanalytic⟩
 
+omit [IsTopologicalRing A] in
 /-- **Containment form of complete-affinoid Spa-point existence (Wedhorn 7.45 + 7.51).**
 For a maximal ideal `𝔪` of a complete affinoid ring `(A, A⁺)` with pair of definition `P`,
 there is `v ∈ Spa(A, A⁺)` with `𝔪 ≤ supp(v)`.
@@ -760,6 +765,7 @@ theorem exists_spa_point_supp_ge_maxIdeal_of_complete
       P.exists_mem_spa_supp_ge_of_nonOpen_prime h𝔪_open hAplus_le_A₀
     exact ⟨v, hv, hsupp⟩
 
+omit [IsTopologicalRing A] in
 /-- **Wedhorn 7.52(2) for complete affinoid rings (Nullstellensatz unit criterion).**
 For a complete affinoid ring `(A, A⁺)` with pair of definition `P`, an element `f` is a
 unit iff `v(f) ≠ 0` for every `v ∈ Spa(A, A⁺)`.
@@ -863,6 +869,7 @@ theorem idealOfDefinition_le_of_isOpen_of_isPrime (P : PairOfDefinition A)
 
 end PairOfDefinition
 
+omit [TopologicalSpace A] [IsTopologicalRing A] in
 /-- `MulArchimedean` descends to the canonical value group of `ofValuation w` from the
 codomain of `w`, along the strictly monotone `embed`/`embedding` chain. -/
 theorem mulArchimedean_valueGroupWithZero_ofValuation {Γ₀' : Type*}

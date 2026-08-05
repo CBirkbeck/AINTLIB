@@ -1015,6 +1015,7 @@ theorem mvTate_isClosed_ideal [IsTateRing A] [T2Space A] [IsStronglyNoetherian A
   exact ValuationSpectrum.fg_topologicalClosure_isClosed J
     (Module.Finite.iff_fg.mpr (isNoetherian_def.mp hnoeth _))
 
+omit [NonarchimedeanRing A] in
 omit [IsTopologicalRing A] in
 /-- A multivariate power series whose support is contained in the box `[0, N)^m` (all coefficients
 at multi-indices with some component `≥ N` vanish) is restricted. Generalizes
@@ -1053,10 +1054,12 @@ private noncomputable def truncMv (m : ℕ) (g : ↥(restrictedMvPowerSeriesSubr
      intro hbox
      exact absurd (hbox i) (by omega))⟩
 
+omit [IsTopologicalRing A] in
 private theorem truncMv_val (m : ℕ) (g : ↥(restrictedMvPowerSeriesSubring m A)) (N : ℕ)
     (l : Fin m →₀ ℕ) :
     (truncMv m g N).val l = if ∀ i, l i < N then g.val l else 0 := rfl
 
+omit [IsTopologicalRing A] in
 private theorem truncMv_coeff_outside (m : ℕ) (g : ↥(restrictedMvPowerSeriesSubring m A)) (N : ℕ)
     (l : Fin m →₀ ℕ) (hl : ∃ i, N ≤ l i) :
     (truncMv m g N).val l = 0 := by
@@ -1134,6 +1137,7 @@ theorem mvTateAlgebra_polynomials_dense [IsTateRing A] (m : ℕ) :
   rw [show truncMv m g N - g = -(g - truncMv m g N) by ring]
   exact neg_mem hg_diff_mem
 
+omit [IsTopologicalRing A] in
 /-- **The variable `Xⱼ` is power-bounded in `A⟨X₁,…,Xₘ⟩`** (the canonical Tate topology).
 `Xⱼ` lies in the ring of definition `mvPairSubring` (its coefficients are `0`/`1`, both in `A₀`),
 all of whose elements are power-bounded (`PairOfDefinition.isBounded_A₀`). Needed for the relative

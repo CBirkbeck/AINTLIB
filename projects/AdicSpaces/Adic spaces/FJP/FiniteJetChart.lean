@@ -113,6 +113,7 @@ noncomputable def twistB : JetB F →+* JetB F :=
 noncomputable def thetaChart : JetA F →+* JetB F :=
   (twistB F).comp (jB F)
 
+omit [CompleteSpace F] [IsFJPBase F] in
 /-- Rescaling fixes constant power series (`rescale a (C r) = C r`). -/
 theorem rescaleRestricted_const (a : K) (ha : ‖a‖ ≤ 1) (r : K) :
     rescaleRestricted a ha (constHomPS F r) = constHomPS F r := by
@@ -202,6 +203,7 @@ theorem continuous_thetaChart : Continuous (thetaChart F) := by
         max_le_max (norm_rescaleRestricted_le _ _ _) (norm_rescaleRestricted_le _ _ _)
     _ = ‖jB F x‖ := (JetNorm.norm_def _).symm
 
+omit [IsFJPBase F] in
 /-- The 𝓑-jet of `W` has vanishing `Q`-part. -/
 theorem jB_Wa_snd : (jB F (Wa F)).snd = 0 := by
   refine ofRestricted_injective (R := K) ?_
@@ -213,6 +215,7 @@ theorem jB_Wa_snd : (jB F (Wa F)).snd = 0 := by
   rw [qCoeff_sectionD]
   norm_num
 
+omit [IsFJPBase F] in
 /-- The Laurent shadow of the 𝓑-jet of `W` is the degree-one monomial. -/
 theorem ofRestricted_jB_Wa_fst :
     ofRestricted (R := K) (jB F (Wa F)).fst = single 1 1 := by
@@ -332,6 +335,7 @@ noncomputable def kwToTate :
 
 /-! ### The (3.3) collapse data: `Q² = Wⁿ · (W⁻ⁿQ²)` with unit `W`-multiples -/
 
+omit [IsFJPBase F] in
 /-- `W`'s underlying jet is the `Q⁰`-constant at the Laurent unit `W`. -/
 theorem Wa_val_eq : ((Wa F : JetA F) : JetC F) = constHomC F (Wu (R := K)).val := by
   refine Subtype.ext ?_
@@ -379,6 +383,7 @@ theorem Wa_pow_mul_yQ (n : ℕ) : Wa F ^ n * yQ F n = Qa F * Qa F := by
       rw [one_pow],
     map_one, one_mul]
 
+omit [IsFJPBase F] in
 /-- The inverse of the Weierstrass unit has norm one in every power. -/
 private theorem norm_Wu_inv_pow (n : ℕ) : ‖((Wu (R := K))⁻¹).val ^ n‖ = 1 := by
   rw [show ((Wu (R := K))⁻¹).val = single (-1) 1 from rfl]
@@ -705,6 +710,7 @@ theorem canonicalMap_eq_zero_of_qSq (y : JetA F)
 
 /-! ### The 2-jet decomposition of 𝓐 (step 2 of the roundtrip plan) -/
 
+omit [IsFJPBase F] in
 /-- `Q`'s underlying jet is the power-series variable. -/
 theorem Qa_val_eq : (((Qa F : JetA F) : JetC F)).1 = (PowerSeries.X : PowerSeries (L F)) := by
   refine PowerSeries.ext fun n => ?_
@@ -731,6 +737,7 @@ noncomputable def constNN (b : L F) (hb : b ∈ nonnegSubring K) : JetA F :=
     · rw [qCoeff_constHomC, if_neg one_ne_zero]
       exact zero_mem _⟩
 
+omit [IsFJPBase F] in
 /-- The 2-jet decomposition: every `a ∈ 𝓐` splits as
 `constNN(a₀) + Q·constNN(a₁) + (Q²-part)`. -/
 theorem jet_decomposition (a : JetA F) :
@@ -909,6 +916,7 @@ noncomputable def chartEval :
   (TateAlgebraWedhorn.evalHomBounded (chartConst F) (chartConst_continuous F)
     (gChart F) (gChart_isBounded F)).comp (kwToTate F)
 
+omit [CompleteSpace F] [IsFJPBase F] in
 /-- Coefficients pass through the reindexing bridge. -/
 theorem coeff_kwToTate (f : PowerSeries.Restricted K (1 : ℝ)) (n : ℕ) :
     TateAlgebra.coeff n (kwToTate F f) = PowerSeries.coeff n f.1 := by
@@ -1013,6 +1021,7 @@ noncomputable def polyKW : Polynomial K →+* PowerSeries.Restricted K (1 : ℝ)
   map_add' p q := Subtype.ext
     (map_add (Polynomial.coeToPowerSeries.ringHom (R := K)) p q)
 
+omit [CompleteSpace F] [IsFJPBase F] in
 /-- Polynomials are dense in `K⟨X⟩` (truncate below any coefficient level). -/
 theorem polyKW_denseRange : DenseRange (polyKW F) := by
   classical
@@ -1067,12 +1076,14 @@ noncomputable def constKW : PowerSeries.Restricted K (1 : ℝ) →+* JetA F :=
       rw [qCoeff_constHomC, if_neg one_ne_zero]
       exact zero_mem _)
 
+omit [IsFJPBase F] in
 theorem constKW_continuous : Continuous (constKW F) :=
   AddMonoidHomClass.continuous_of_bound (constKW F) 1 fun f => by
     rw [one_mul]
     show ‖constHomC F (ofRestricted (R := K) f)‖ ≤ ‖f‖
     rw [norm_constHomC, ofRestricted_norm]
 
+omit [IsFJPBase F] in
 theorem constKW_const (r : K) : constKW F (constHomPS F r) = constA F r := by
   refine Subtype.ext ?_
   show constHomC F (ofRestricted (R := K) (constHomPS F r)) = constC F r
@@ -1116,6 +1127,7 @@ theorem polyKW_X : polyKW F Polynomial.X = (jB F (Wa F)).fst := by
   rw [Polynomial.coeff_coe, coeff_jB_Wa_fst]
   simp [Polynomial.coeff_X, eq_comm]
 
+omit [CompleteSpace F] [IsFJPBase F] in
 theorem polyKW_C (r : K) : polyKW F (Polynomial.C r) = constHomPS F r := by
   refine Subtype.ext ?_
   show ((Polynomial.C r : Polynomial K) : PowerSeries K) = PowerSeries.C r
@@ -1204,6 +1216,7 @@ theorem chartRev_inr_one :
       (chartDatum F).canonicalMap (Qa F) = _
   rw [TrivSqZeroExt.fst_inr, TrivSqZeroExt.snd_inr, map_zero, map_one, one_mul, zero_add]
 
+omit [IsFJPBase F] in
 /-- The 2-jet of a constant lift is the disc-only constant. -/
 theorem jB_constNN (b : L F) (hb : b ∈ nonnegSubring K) :
     jB F (constNN F b hb) = TrivSqZeroExt.inl ((nonnegEquiv (R := K)).symm ⟨b, hb⟩) := by
@@ -1236,6 +1249,7 @@ theorem theta_constNN (b : L F) (hb : b ∈ nonnegSubring K) :
   · show rescaleRestricted (ϖ F) (norm_t_lt_one F).le 0 = 0
     exact map_zero _
 
+omit [IsFJPBase F] in
 /-- `constKW` inverts the nonnegative-shadow equivalence. -/
 theorem constKW_nonnegEquiv_symm (b : L F) (hb : b ∈ nonnegSubring K) :
     constKW F ((nonnegEquiv (R := K)).symm ⟨b, hb⟩) = constNN F b hb := by
@@ -1372,6 +1386,7 @@ theorem chartRev_chartFwd (x : presheafValue (chartDatum F)) :
     exact DFunLike.congr_fun hloc a
   exact congrFun h_eq x
 
+omit [IsFJPBase F] in
 /-- The 2-jet of a disc constant lift is the disc-only jet. -/
 theorem jB_constKW (g : PowerSeries.Restricted K (1 : ℝ)) :
     jB F (constKW F g) = TrivSqZeroExt.inl g := by

@@ -44,6 +44,7 @@ variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type u) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
   [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
 
+omit [CharP F p] in
 /-- The rank-1 valuation of `F` is strictly below `1` on a pseudo-uniformizer:
 otherwise its inverse would be power-bounded, making `ϖ` a unit of `O_F`,
 contradicting `PseudoUniformizer.not_isUnit_toOF`. -/

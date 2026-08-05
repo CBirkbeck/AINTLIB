@@ -103,18 +103,21 @@ noncomputable def laurentMinusNormalizedDatum
     · exact algebraMap_mem_locSubring _ _ _ b.2
     · exact divByS_mem_locSubring _ _ _ (Finset.mem_insert_self _ _)⟩ }
 
+omit [HasLocLiftPowerBounded A] in
 /-- The normalized minus datum has `s = D₀.s * f` (same as ordinary minus). -/
 @[simp]
 theorem laurentMinusNormalizedDatum_s
     (D₀ : RationalLocData A) [LaurentNormalized D₀] (f : A) :
     (laurentMinusNormalizedDatum D₀ f).s = D₀.s * f := rfl
 
+omit [HasLocLiftPowerBounded A] in
 /-- The normalized minus datum has `P = D₀.P` (same as ordinary minus). -/
 @[simp]
 theorem laurentMinusNormalizedDatum_P
     (D₀ : RationalLocData A) [LaurentNormalized D₀] (f : A) :
     (laurentMinusNormalizedDatum D₀ f).P = D₀.P := rfl
 
+omit [HasLocLiftPowerBounded A] in
 /-- The normalized minus datum has `T = insert 1 (oldT)`. -/
 @[simp]
 theorem laurentMinusNormalizedDatum_T
@@ -129,6 +132,7 @@ The instance requires `f ∈ D₀.P.A₀` for the `insert_s_T_subset_A₀` field
 (the new `T` elements include products with `f`, which need to lie in
 `P.A₀`). -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- The normalized minus datum is `LaurentNormalized`, provided `f ∈ D₀.P.A₀`.
 
 The `one_mem_T` field holds by construction (we inserted `1`). The
@@ -173,6 +177,7 @@ which is forced by the existing constraints `v(D₀.s) ≤ v(D₀.s * f)` and
 `v(f) ≤ v(D₀.s * f)` (both numerators in the ordinary minus) together with
 `v(D₀.s * f) ≠ 0` (the denominator nonvanishing). -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- The normalized minus's rational open equals the ordinary minus's. -/
 theorem rationalOpen_laurentMinusNormalized_eq
     (D₀ : RationalLocData A) [LaurentNormalized D₀] (f : A) :

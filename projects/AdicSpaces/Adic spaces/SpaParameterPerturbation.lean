@@ -60,11 +60,13 @@ variable {B : Type u} [CommRing B] [TopologicalSpace B]
 
 /-! ### `vle` toolkit (per-point wrappers of the `ValuativeRel` calculus) -/
 
+omit [TopologicalSpace B] in
 /-- Transitivity of `vle` at a point. -/
 theorem Spv.vleTrans {v : Spv B} {a b c : B} (h₁ : v.vle a b) (h₂ : v.vle b c) :
     v.vle a c :=
   @ValuativeRel.vle_trans B _ v.toValuativeRel c b a h₁ h₂
 
+omit [TopologicalSpace B] in
 /-- The ultrametric axiom at a point. -/
 theorem Spv.vleAdd {v : Spv B} {x y z : B} (hx : v.vle x z) (hy : v.vle y z) :
     v.vle (x + y) z :=
@@ -185,6 +187,7 @@ def indexedRationalSet {ι : Type v} [PlusSubring B] (s : Finset ι) (f : ι →
     (g : B) : Set (Spv B) :=
   {v ∈ Spa B B⁺ | (∀ i ∈ s, v.vle (f i) g) ∧ ¬ v.vle g 0}
 
+omit [IsTopologicalRing B] in
 theorem indexedRationalSet_eq_rationalOpen {ι : Type v} [PlusSubring B]
     [DecidableEq B] (s : Finset ι) (f : ι → B) (g : B) :
     indexedRationalSet B s f g = rationalOpen (s.image f) g ∩ Spa B B⁺ := by
@@ -197,6 +200,7 @@ theorem indexedRationalSet_eq_rationalOpen {ι : Type v} [PlusSubring B]
   · rintro ⟨⟨hv, hT, hg⟩, -⟩
     exact ⟨hv, fun i hi => hT (f i) (Finset.mem_image_of_mem f hi), hg⟩
 
+omit [IsTopologicalRing B] in
 /-- **Perturbation, forward**: at a point of `Spa B B⁺`, membership of the presented set
 for `(f, g)` gives membership for the perturbed `(f', g')`. The bound `M` forces
 `v(ϖ^(M+1)·b) < v(g)`, so `v(g') = v(g)` and every `v(f' i) ≤ v(g')` follows from
@@ -243,6 +247,7 @@ private theorem indexedRationalSet_perturb_forward
   · rw [hzero, hg'_eq]
     exact hg_ne
 
+omit [IsTopologicalRing B] in
 /-- **Perturbation, reverse**. Longer than the forward direction for one reason: `hbound`
 bounds `v(ϖ^M)` against `g` and the `f i`, not against `g'`, so `v(ϖ^M) ≤ v(g')` has to be
 re-derived — by contradiction in the `g` case, and through `v(f' i) = v(f i)` in the other. -/

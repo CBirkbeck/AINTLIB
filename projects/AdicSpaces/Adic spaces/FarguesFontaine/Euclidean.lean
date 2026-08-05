@@ -81,6 +81,7 @@ theorem gaussValueF_zero {ρ : NNReal} :
   rw [gaussValueF]
   simp [h]
 
+omit [CharP F p] in
 /-- Every pair admits a max-attaining nonzero coefficient (given the max is
 nonzero). -/
 theorem exists_attaining_coeff {a b : F}
@@ -97,6 +98,7 @@ theorem exists_attaining_coeff {a b : F}
   · refine ⟨b, fun h0 => hmax ?_, heq.symm, hle.le, le_rfl⟩
     rw [heq, h0, Valuation.map_zero]
 
+omit [CharP F p] in
 /-- Both entries vanish when the maximum of their valuations does. -/
 private theorem eq_zero_of_max_perfectoidValuation_eq_zero {a b : F}
     (hmax : max (perfectoidValuation p F a) (perfectoidValuation p F b) = 0) :
@@ -108,6 +110,7 @@ private theorem eq_zero_of_max_perfectoidValuation_eq_zero {a b : F}
   · rw [← hmax]
     exact le_max_right _ _
 
+omit [CharP F p] in
 /-- **Normalisation step.** If `a` is dominated by a nonzero `c`, then `a * c⁻¹` is
 integral, so it lifts to `O_F`. -/
 private theorem exists_integral_mul_inv {a c : F}
@@ -468,6 +471,7 @@ two series). -/
 def convF (a b : ℕ → F) (n : ℕ) : F :=
   ∑ i ∈ Finset.range (n + 1), a i * b (n - i)
 
+omit [CharP F p] in
 /-- Decay is preserved under convolution (Cauchy-product vanishing). -/
 theorem tendsto_convF {ρ : NNReal} {a b : ℕ → F}
     (ha : Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F (a n))
@@ -585,6 +589,7 @@ private theorem valued_prefix_sub_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : �
   · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hx k) (le_max_left _ _)
   · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hy k) (le_max_right _ _)
 
+omit [CharP F p] in
 /-- **Pointwise differences of decaying sequences decay.** The scaled value of `aₖ − bₖ` is
 at most the max of the two scaled values (ultrametric), and the max of two null sequences
 is null. -/
@@ -827,6 +832,7 @@ theorem alocToWittF_convPartialAloc (a b : ℕ → F) (N : ℕ) :
   refine congrArg _ (Finset.sum_congr rfl fun k _ => ?_)
   rw [alocToWittF_alocTeich]
 
+omit [CharP F p] in
 /-- **The scaled convolution bound**: `ρⁿ · sup_{k ≤ n} |aₖ·b_{n−k}| ≤ A·B`, given the
 per-index bounds on `a` and `b`. The `Finset.sup` over a nonempty range is attained,
 and at the attained index `k₀` the factor `ρⁿ` splits as `ρ^{k₀}·ρ^{n−k₀}`. -/
@@ -1020,6 +1026,7 @@ theorem gaussValueF_prefix_mul_sub_convPartial_le {ρ : NNReal} (hρ0 : 0 < ρ)
         ring
     _ ≤ T := hT q.1 q.2 hqN
 
+omit [CharP F p] in
 /-- **Past the joint threshold, one factor is already `ρ`-damped.** If `i + j ≥ Ka + Kb`
 then `i ≥ Ka` or `j ≥ Kb`; that factor is below `ρ·A` (resp. `ρ·B`) while the other is
 bounded by its own norm, so the product is at most `ρ·(A·B)`. -/
@@ -1124,6 +1131,7 @@ private theorem valued_mul_sub_PhiHatK_convF_le_of_ne_zero {ρ : NNReal} {hρ0 :
       ← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_sub]
     exact gaussValueF_convPartial_sub_prefix_le p F ϖ hρ0 hρ1 a b hA hB N
 
+omit [CharP F p] in
 /-- Scaled convolution terms are bounded by the product of the input bounds. -/
 theorem gaussTerm_convF_le {ρ : NNReal} (a b : ℕ → F) {A B : NNReal}
     (hA : ∀ n, ρ ^ n * perfectoidValuation p F (a n) ≤ A)
@@ -1209,6 +1217,7 @@ private theorem gaussTerm_mul_lt_of_ne_dominant {ρ : NNReal} {hρ0 : 0 < ρ} {h
       (gaussTerm_teichCoeffAr_le p F ϖ hx k) zero_le)
       (mul_lt_mul_of_pos_left (gaussTerm_lt_of_degAr_lt p F ϖ hy hy0 hcase) hvxpos)
 
+omit [CharP F p] in
 /-- **Antidiagonal sums away from the dominant pair are strictly dominated.** If every
 index `k` of the finite set `S` gives an antidiagonal pair `(k, n − k)` whose scaled
 coordinate product is `< c`, then the whole sum `∑_{k ∈ S} a k · b (n − k)` scales to
@@ -1551,6 +1560,7 @@ theorem valued_sub_sub_PhiHatK_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       rw [map_sub, map_sub]
     exact valued_le_of_tendsto_of_forall_le p F hρM hlim hPNval
 
+omit [TopologicalSpace F] [IsTopologicalRing F] [UniformSpace F] [NonarchimedeanRing F] in
 /-- **The divided convolution reproduces `aₙ` exactly at `k = n − m`.** The `k = n − m`
 term is `a n / b m · b m = a n`, so subtracting it from `a n` leaves only the erased sum,
 negated — the exact cancellation that makes the division step work. -/
@@ -1643,6 +1653,7 @@ private theorem gaussTerm_pair_le_of_ne {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ
     exact mul_le_mul (hw2 (k₀ + m) hk)
       (gaussTerm_teichCoeffAr_le p F ϖ hx (n - k₀)) zero_le zero_le
 
+omit [CharP F p] in
 /-- **A scaled sum is bounded by its largest scaled term.** The valuation of a finite sum
 is at most the sup of the terms' valuations, so if every term of `∑_{k ∈ S} g k` scales
 below `c` at rate `ρⁿ`, so does the sum.  The empty sum is `0 ≤ c`. -/

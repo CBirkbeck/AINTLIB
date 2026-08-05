@@ -192,6 +192,7 @@ application needs (`IsTateRing.exists_principal_pairOfDefinition`) — is faithf
 `ofValuation_restrictIdealSingle_isInSpvAI` is proven. We build the `Spv`-level
 retraction on `restrictIdealSingle` and prove Wedhorn 7.5(iii) for it. -/
 
+omit [TopologicalSpace A] in
 /-- **Wedhorn 7.4(iii), principal case.** For `v ∈ Spv(A, (g))` (with `v(g) ≠ 0`) the
 window `cΓ_v((g))` contains every nonzero value-unit — i.e. it is all of `Γ_v`.
 
@@ -381,6 +382,7 @@ noncomputable def profileCarrier (A : Type*) [CommRing A] (I : Ideal A) :
     Set (RCoord A I → Bool) :=
   rhoR I '' Set.range (ιSpv_bool : Spv A → A × A → Bool)
 
+omit [TopologicalSpace A] in
 theorem isCompact_profileCarrier (I : Ideal A) : IsCompact (profileCarrier A I) :=
   (isCompact_range_ιSpv_bool).image (continuous_rhoR I)
 
@@ -417,6 +419,7 @@ def spaProfileConditions (I : Ideal A) (g : A) : Set (RCoord A I → Bool) :=
   { y | y (RCoord.oneOver I g) = false ∧
         ∀ f ∈ (A⁺ : Subring A), y (RCoord.leOne I f) = true }
 
+omit [TopologicalSpace A] in
 /-- The conditions cut out a closed subset (coordinate cylinders in a product of
 discrete spaces). -/
 theorem isClosed_spaProfileConditions (I : Ideal A) (g : A) :
@@ -452,6 +455,7 @@ private lemma valuation_le_one_of_leOne (P : PairOfDefinition A) (I : Ideal A) (
   have h2 := (vle_iff_canonical w ((a : A)) 1).mp hle
   simpa using h2
 
+omit [TopologicalSpace A] [PlusSubring A] in
 /-- A `false` `oneOver` coordinate is exactly a strict valuation bound. -/
 private lemma valuation_lt_one_of_oneOver_false (I : Ideal A) (w : Spv A) (g : A)
     (hone_w : ιSpvR I w (RCoord.oneOver I g) = false) :
@@ -646,6 +650,7 @@ continuous image of the (compact) Bool profile image. -/
 noncomputable def ιSpvPropR (I : Ideal A) (v : Spv A) : RCoord A I → Prop :=
   fun p => ιSpvR I v p = true
 
+omit [TopologicalSpace A] [PlusSubring A] in
 /-- The Bool-to-Sierpinski comparison map on the `R`-cube is continuous. -/
 theorem continuous_toProp_rcoord (I : Ideal A) :
     Continuous (fun (y : RCoord A I → Bool) (p : RCoord A I) => y p = true) :=
@@ -871,6 +876,7 @@ theorem isCompact_subtype_rationalOpen [IsTopologicalRing A] (P : PairOfDefiniti
 `I = (g₁, g₂)`: pointwise, the retraction is the single-generator retraction at the
 dominant generator) -/
 
+omit [TopologicalSpace A] [PlusSubring A] in
 /-- The single-generator retraction is monotone for `vle`. -/
 theorem restrictIdealSingleSpv_vle_of_vle {v : Spv A} (g : A) {x y : A}
     (hxy : v.vle x y) : (restrictIdealSingleSpv v g).vle x y := by
@@ -883,6 +889,7 @@ theorem restrictIdealSingleSpv_vle_of_vle {v : Spv A} (g : A) {x y : A}
     rw [Valuation.restrictIdealSingle]
     exact restrictToConvexBounded_le_of_le _ _ _ ((vle_iff_canonical v x y).mp hxy)
 
+omit [TopologicalSpace A] [PlusSubring A] in
 /-- `Spv(A, (g₁))`-membership upgrades to `Spv(A, (g₁, g₂))`-membership when `g₂` is
 dominated by `g₁`: with the whole-group cofinality predicate, every
 `a = c₁g₁ + c₂g₂` has value bounded by `max(v(c₁g₁), v(c₂g₁))`, both cofinal. -/
@@ -939,6 +946,7 @@ theorem restrictIdealPairSpv_mem_SpvAI (v : Spv A) (g₁ g₂ : A) :
       (restrictIdealSingleSpv_vle_of_vle g₂ h')
     rwa [show ({g₂, g₁} : Set A) = ({g₁, g₂} : Set A) from Set.pair_comm g₂ g₁] at hmem
 
+omit [TopologicalSpace A] [PlusSubring A] in
 /-- Wedhorn 7.5(iii) for the pair retraction: the `R`-profile is unchanged. -/
 theorem ιSpvR_retractionPair_eq (g₁ g₂ : A) (I : Ideal A) (h₁ : g₁ ∈ I) (h₂ : g₂ ∈ I)
     (v : Spv A) (p : RCoord A I) :

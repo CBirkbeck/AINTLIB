@@ -82,6 +82,7 @@ noncomputable def PseudoUniformizer.pPow (ϖ : PseudoUniformizer F) (m : ℕ)
     exact h.comp (Filter.tendsto_atTop_atTop.mpr
       (fun b => ⟨b, fun a ha => le_trans ha (Nat.le_mul_of_pos_left a hm)⟩))⟩
 
+omit [IsTopologicalRing F] [UniformSpace F] in
 @[simp]
 theorem PseudoUniformizer.toOF_pPow (ϖ : PseudoUniformizer F) (m : ℕ)
     (hm : 0 < m) :

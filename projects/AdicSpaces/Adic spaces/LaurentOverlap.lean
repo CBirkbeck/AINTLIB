@@ -122,6 +122,7 @@ noncomputable def overlapDatum (P : PairOfDefinition B) (b : B) :
     RationalLocData B :=
   laurentMinusDatum (trivialPlusDatum B P b) b
 
+omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 /-- The `s` of `overlapDatum B P b` is `b` (unfolding `laurentMinusDatum` then
 `trivialPlusDatum`: `s = 1 * b = b`). -/
 @[simp]
@@ -130,12 +131,14 @@ theorem overlapDatum_s (P : PairOfDefinition B) (b : B) :
   change (1 : B) * b = b
   exact one_mul b
 
+omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 /-- The pair of definition of `overlapDatum B P b` is `P` (inherited through
 both `laurentMinusDatum` and `trivialPlusDatum`, neither of which modifies `P`). -/
 @[simp]
 theorem overlapDatum_P (P : PairOfDefinition B) (b : B) :
     (overlapDatum B P b).P = P := rfl
 
+omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 /-- The rational open of `overlapDatum B P b` is contained in the plus half
 (the plus datum at `b` being `trivialPlusDatum B P b`). Immediate from
 `laurentMinus_subset`. -/
@@ -144,6 +147,7 @@ theorem overlapDatum_subset_plus (P : PairOfDefinition B) (b : B) :
       rationalOpen (trivialPlusDatum B P b).T (trivialPlusDatum B P b).s :=
   laurentMinus_subset (trivialPlusDatum B P b) b
 
+omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 /-- `1 ∈ (overlapDatum B P b).T`. Witnessed by the pair `(1, 1)`: both entries
 are in the factors `insert 1 {b}` and `{1, b}` respectively, and `1 · 1 = 1`.
 
@@ -157,6 +161,7 @@ theorem one_mem_overlapDatum_T (P : PairOfDefinition B) (b : B) :
   exact Finset.mem_product.mpr
     ⟨Finset.mem_insert_self _ _, Finset.mem_insert_self _ _⟩
 
+omit [IsHuberRing B] [HasLocLiftPowerBounded B] in
 /-- `b · b ∈ (overlapDatum B P b).T`. Witnessed by the pair `(b, b)`: both
 entries are in the factors, and `b · b = b²`.
 
@@ -923,6 +928,7 @@ noncomputable def bivariateLocToQuotient_atOverlap
     rw [overlapDatum_s B P b]; infer_instance
   exact IsLocalization.Away.lift (x := b) (isUnit_b_in_bivariate_quotient B b)
 
+omit [IsTateRing B] [IsNoetherianRing B] [T2Space B] in
 /-- `bivariateLocToQuotient_atOverlap` sends `algebraMap a` to `mk(algebraMap a)`. -/
 theorem bivariateLocToQuotient_atOverlap_algebraMap
     (P : PairOfDefinition B) (b a : B) :
@@ -936,6 +942,7 @@ theorem bivariateLocToQuotient_atOverlap_algebraMap
   rw [IsLocalization.Away.lift_eq]
   rfl
 
+omit [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B] in
 /-- The three `divByS` values of the overlap datum: `b/s = 1`, `b²/s = b`, and `1/s` is
 inverse to `b`. All three are `mk'` identities once `s` is rewritten to `b` — `rw [hs]`
 rather than `subst`, because `b` occurs inside `overlapDatum B P b`. -/
@@ -1610,6 +1617,7 @@ noncomputable def iteratedOverlapDatum_B
   exact overlapDatum (presheafValue D₀) (presheafValue_pairOfDefinition_concrete P D₀)
     (D₀.canonicalMap f)
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- The source localization of the iterated overlap equals the source localization
 of the iterated minus (both are `Loc_A(D₀.s * f)`). -/
 theorem iteratedOverlap_s_eq_laurentMinus_s
@@ -1648,6 +1656,7 @@ noncomputable def iteratedOverlap_forwardLocHom
       Localization.Away (D₀.canonicalMap f) :=
   iteratedMinus_forwardLocHom D₀ f
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- Forward loc hom acts on `algebraMap a` as the canonical map
 `A → B → Loc_B(f_B)`. -/
 theorem iteratedOverlap_forwardLocHom_algebraMap
@@ -1665,6 +1674,7 @@ on the same underlying ring). We build it via `IsLocalization.Away.lift`
 using that `restrictionMapHom D₀ (laurentOverlapDatum D₀ f) hsub (D₀.canonicalMap f)`
 is a unit (since `f ∈ overlap.T` effectively via insertion). -/
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- The canonical image of `f` is a unit in `presheafValue (laurentOverlapDatum D₀ f)`.
 Because `(laurentOverlapDatum D₀ f).s = D₀.s * f`, `algebraMap f` is a unit
 in the source localization, hence a unit under `coeRingHom`. -/
@@ -1832,6 +1842,7 @@ noncomputable def presheafValue_iteratedOverlap_as_minus_at_plus
   -- `laurentOverlapDatum D₀ f` unfolds to `laurentMinusDatum (laurentPlusDatum D₀ f) f`
   presheafValue_iteratedMinus_equiv P (laurentPlusDatum D₀ f) f
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- Composition step 1, naturality on `coeRingHom`: the equiv sends
 `(laurentOverlapDatum D₀ f).coeRingHom a` (for `a : Loc_A(D₀.s * f)`) to the
 image under the underlying forward loc hom + coeRingHom on the B_plus side.
@@ -2043,6 +2054,7 @@ The two completion-extension continuity primitives
 live upstream in `Adic spaces/LaurentRefinement.lean` (T146); the wrappers
 below thread them through to the equiv level. -/
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- `presheafValue_iteratedPlus_equiv` is continuous (its underlying function
 equals `iteratedPlus_forwardHom`). -/
 theorem presheafValue_iteratedPlus_equiv_continuous
@@ -2053,6 +2065,7 @@ theorem presheafValue_iteratedPlus_equiv_continuous
     Continuous (presheafValue_iteratedPlus_equiv P D₀ f) :=
   iteratedPlus_forwardHom_continuous P D₀ f
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- `presheafValue_iteratedPlus_equiv.symm` is continuous. -/
 theorem presheafValue_iteratedPlus_equiv_symm_continuous
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
@@ -2062,6 +2075,7 @@ theorem presheafValue_iteratedPlus_equiv_symm_continuous
     Continuous (presheafValue_iteratedPlus_equiv P D₀ f).symm :=
   iteratedPlus_backwardHom_continuous P D₀ f (laurentPlus_subset D₀ f)
 
+omit [HasLocLiftPowerBounded A] in
 /-- `presheafValue_trivialPlus_fSubX_equiv` is continuous — its underlying
 function is `example638Plus_equiv.symm.toFun = example638Plus_backwardHom`,
 hence continuous by `example638Plus_backwardHom_continuous`. -/
@@ -2114,6 +2128,7 @@ theorem presheafValue_trivialPlus_fSubX_equiv_continuous
     (D₀.canonicalMap f)
     hA_complete_B hnoeth_B
 
+omit [HasLocLiftPowerBounded A] in
 /-- `presheafValue_trivialPlus_fSubX_equiv.symm` is continuous — follows from
 `hcont_forward_B` (the hypothesis on `example638Plus_forwardHom`'s continuity),
 since `.symm.toFun = example638Plus_forwardHom`. -/
@@ -2411,6 +2426,7 @@ theorem TA_B_to_bivariateOverlap_evalHom_algebraMap
     have h0 := coeff_single_algebraMap_eq_zero B hn a
     rw [h0, RingHom.map_zero, zero_mul]
 
+omit [PlusSubring B] [HasLocLiftPowerBounded B] [IsNoetherianRing B] in
 /-- The first-stage evalHom sends `TateAlgebra.X` to `mk TateAlgebra₂.X`.
 
 Proof pattern mirrors `example638Plus_evalHom_X`: expand `evalHomBounded`,

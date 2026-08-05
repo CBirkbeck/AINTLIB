@@ -140,6 +140,7 @@ theorem iteratedOverlap_forwardLocHom_to_B_algebraMap
 
 /-! ### Phase 2: forward loc hom power-boundedness for the overlap T -/
 
+omit [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] in
 /-- Source-level clearing identity: in `Loc_A(D₀.s * f)`,
 `divByS p (D₀.s * f) * algebraMap q = algebraMap r` whenever `p * q = (D₀.s * f) * r`. -/
 private theorem divByS_mul_algebraMap_clear (D₀ : RationalLocData A) (f p q r : A)
@@ -651,6 +652,7 @@ theorem iteratedOverlap_forwardToCompletion_continuous
 
 /-! ### Phase 4: backward loc hom generator power-boundedness -/
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A] in
 /-- `D₀.s ∈ (laurentOverlapDatum D₀ f).T`, witnessed by `(1, D₀.s)` with
 `1 ∈ insert (laurentPlusDatum D₀ f).s (laurentPlusDatum D₀ f).T` (via
@@ -670,6 +672,7 @@ private theorem D₀s_mem_laurentOverlap_T
     change D₀.s ∈ ({D₀.s, f} : Finset A)
     exact Finset.mem_insert_self _ _
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A] in
 /-- `f * f ∈ (laurentOverlapDatum D₀ f).T`, witnessed by `(f, f)` with
 `f ∈ insert (laurentPlusDatum D₀ f).s (laurentPlusDatum D₀ f).T = insert D₀.s (insert f D₀.T)`
@@ -731,6 +734,7 @@ private theorem laurentOverlap_canonicalMap_isPowerBounded
   exact ⟨_, (locSubring _ _ _).pow_mem
     (algebraMap_f_mem_locSubring_laurentOverlap D₀ f) n, map_pow _ _ _⟩
 
+omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A] in
 /-- The inverse direction: `divByS D₀.s (D₀.s · f)` is also in the localization subring
 (because `D₀.s ∈ (laurentOverlap).T`), hence power-bounded after `coeRingHom`. -/
 private theorem laurentOverlap_coeRingHom_divByS_isPowerBounded

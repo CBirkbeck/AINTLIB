@@ -112,6 +112,7 @@ lemma isClosed_image_spa_ιSpv_bool [DiscreteTopology A] :
   exact isClosed_range_ιSpv_bool.inter
     (isClosed_iInter fun a ↦ isClosed_iInter fun _ ↦ isClosed_coord_true (a, 1))
 
+omit [TopologicalSpace A] [PlusSubring A] in
 /-- The `ιSpv`-image of ANY set of valuations factors through its `ιSpv_bool`
 image via `boolToProp`. The proof uses nothing about the set. -/
 private theorem ιSpv_image_eq_boolToProp_image (S : Set (Spv A)) :

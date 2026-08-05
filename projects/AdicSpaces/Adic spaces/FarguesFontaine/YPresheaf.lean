@@ -39,6 +39,7 @@ exponents; the `BIQ q₁ q₂`-indexing convention). -/
 def intervalTrace (q₁ q₂ : ℚ) : Set (Spv (Ainf p F)) :=
   {v ∈ Y p F ϖ | KGE p F ϖ (1 / q₁) v ∧ KLE p F ϖ (1 / q₂) v}
 
+omit [CharP F p] in
 /-- The Big windows are interval traces. -/
 theorem bigWindow_eq_intervalTrace (n : ℤ) :
     bigWindow p F ϖ n
@@ -164,6 +165,7 @@ def q₂ (i : DyadicIdx) : ℚ := (i.j₂ : ℚ) / ((p : ℚ) ^ i.s)
 
 theorem hj₁ (i : DyadicIdx) : 0 < i.j₁ := lt_trans i.hj₂ i.hlt
 
+omit [Fact (Nat.Prime p)] in
 theorem q₁_pos [Fact (Nat.Prime p)] (i : DyadicIdx) : 0 < i.q₁ p := by
   have hp : (0 : ℚ) < p := by
     exact_mod_cast Nat.Prime.pos (Fact.out : Nat.Prime p)
@@ -171,6 +173,7 @@ theorem q₁_pos [Fact (Nat.Prime p)] (i : DyadicIdx) : 0 < i.q₁ p := by
   rw [q₁]
   positivity
 
+omit [Fact (Nat.Prime p)] in
 theorem q₂_pos [Fact (Nat.Prime p)] (i : DyadicIdx) : 0 < i.q₂ p := by
   have hp : (0 : ℚ) < p := by
     exact_mod_cast Nat.Prime.pos (Fact.out : Nat.Prime p)
@@ -178,6 +181,7 @@ theorem q₂_pos [Fact (Nat.Prime p)] (i : DyadicIdx) : 0 < i.q₂ p := by
   rw [q₂]
   positivity
 
+omit [Fact (Nat.Prime p)] in
 theorem q₂_lt_q₁ [Fact (Nat.Prime p)] (i : DyadicIdx) : i.q₂ p < i.q₁ p := by
   have hp : (0 : ℚ) < (p : ℚ) ^ i.s := by
     have : (0 : ℚ) < p := by
@@ -191,10 +195,12 @@ theorem q₂_lt_q₁ [Fact (Nat.Prime p)] (i : DyadicIdx) : i.q₂ p < i.q₁ p 
 def Nested (i' i : DyadicIdx) : Prop :=
   i.q₂ p ≤ i'.q₂ p ∧ i'.q₁ p ≤ i.q₁ p
 
+omit [Fact (Nat.Prime p)] in
 theorem Nested.mem₁ [Fact (Nat.Prime p)] {i' i : DyadicIdx}
     (h : Nested p i' i) : i.q₂ p ≤ i'.q₁ p ∧ i'.q₁ p ≤ i.q₁ p :=
   ⟨le_trans (le_trans h.1 (i'.q₂_lt_q₁ p).le) le_rfl, h.2⟩
 
+omit [Fact (Nat.Prime p)] in
 theorem Nested.mem₂ [Fact (Nat.Prime p)] {i' i : DyadicIdx}
     (h : Nested p i' i) : i.q₂ p ≤ i'.q₂ p ∧ i'.q₂ p ≤ i.q₁ p :=
   ⟨h.1, le_trans (i'.q₂_lt_q₁ p).le h.2⟩
@@ -209,6 +215,7 @@ def splitR (i : DyadicIdx) (j : ℕ) (hj : i.j₂ < j) (_hj' : j < i.j₁) :
     DyadicIdx :=
   ⟨i.s, j, i.j₂, i.hj₂, hj⟩
 
+omit [Fact (Nat.Prime p)] in
 theorem splitL_nested [Fact (Nat.Prime p)] (i : DyadicIdx) (j : ℕ)
     (hj : i.j₂ < j) (hj' : j < i.j₁) :
     Nested p (splitL i j hj hj') i := by
@@ -221,6 +228,7 @@ theorem splitL_nested [Fact (Nat.Prime p)] (i : DyadicIdx) (j : ℕ)
     gcongr
   · exact le_rfl
 
+omit [Fact (Nat.Prime p)] in
 theorem splitR_nested [Fact (Nat.Prime p)] (i : DyadicIdx) (j : ℕ)
     (hj : i.j₂ < j) (hj' : j < i.j₁) :
     Nested p (splitR i j hj hj') i := by
@@ -470,6 +478,7 @@ theorem dyadicTrace_subset_nested {i' i : DyadicIdx}
     (i.q₂_pos p)).mp (h h₂)
   exact ⟨m₂.1, m₁.2⟩
 
+omit [Fact (Nat.Prime p)] in
 /-- Nesting is transitive. -/
 theorem DyadicIdx.Nested.trans {i'' i' i : DyadicIdx}
     (h₁ : DyadicIdx.Nested p i'' i') (h₂ : DyadicIdx.Nested p i' i) :

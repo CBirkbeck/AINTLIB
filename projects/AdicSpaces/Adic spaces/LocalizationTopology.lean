@@ -368,6 +368,7 @@ Both conditions are necessary: (a) alone does not imply continuity because
 The proof is split into three private helpers below, culminating in
 `locTopology_continuous_lift`. -/
 
+omit [IsTopologicalRing A] in
 /-- Over the empty generator set, `locSubring` is just the image of the ring of definition. -/
 private theorem locSubring_empty (P : PairOfDefinition A) (s : A) :
     locSubring P ∅ s = P.A₀.map (algebraMap A (Localization.Away s)) := by

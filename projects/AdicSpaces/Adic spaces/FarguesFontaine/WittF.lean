@@ -42,6 +42,7 @@ variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type u) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
   [UniformSpace F] [NonarchimedeanRing F] [hPF : IsPerfectoidField p F] [CharP F p]
 
+omit [IsTopologicalRing F] [UniformSpace F] hPF [CharP F p] in
 /-- **Diagonal divisibility**: every Witt coefficient of `[x] − [y]` is divisible by
 `x − y`. (For `k = 0` this is the identity `x − y = (x−y)·1` since `constantCoeff` is
 additive on Teichmüller lifts; the content is `k ≥ 1`.) Proof by naturality: in
@@ -210,6 +211,7 @@ theorem exists_delta_teichCoeff_sub (n : ℕ) {ρ : NNReal} (hρ0 : 0 < ρ) (hρ
     have hres := hδn x' y' hxy'
     rwa [hx'c n, hy'c n] at hres
 
+omit [CharP F p] in
 include hPF in
 /-- **Tate absorption**: every element of `F` lands in `O_F` after enough `ϖ`-scaling. -/
 theorem exists_mul_pow_isPowerBounded (ϖ : PseudoUniformizer F) (x : F) :
@@ -709,6 +711,7 @@ theorem gaussValueF_teichmuller_mul {ρ : NNReal} (w : F) (s : WittVector p F) :
   rw [gaussValueF, gaussValueF, NNReal.mul_iSup]
   exact iSup_congr fun n => gaussTermF_teichmuller_mul p F w s n
 
+omit [CharP F p] in
 /-- Scaling into the unit ball: if `|x| ≤ |w|⁻¹ ^ m` then `|x * w ^ m| ≤ 1`. -/
 theorem perfectoidValuation_mul_pow_le_one (x w : F) (m : ℕ)
     (hw0 : 0 < perfectoidValuation p F w)
@@ -1664,6 +1667,7 @@ theorem valuation_teichCoeffF_prefix_add_le (x y : WittVector p F) (N : ℕ) (j 
     rw [hfactor, teichCoeffF_teichmuller_mul, Valuation.map_mul, teichCoeffF_map, hvc]
     exact mul_le_of_le_one_right zero_le (perfectoidValuation_le_one p F _)
 
+omit [TopologicalSpace F] [IsTopologicalRing F] [UniformSpace F] [NonarchimedeanRing F] hPF in
 theorem coe_p_ne_zero_wittF : (p : WittVector p F) ≠ 0 := by
   intro h
   have h1 : ((p : WittVector p F)).coeff 1 = 1 := by

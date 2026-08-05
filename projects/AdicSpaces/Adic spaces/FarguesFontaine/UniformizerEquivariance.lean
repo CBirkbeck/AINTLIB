@@ -39,6 +39,7 @@ variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
 variable (ϖ : PseudoUniformizer F)
 variable {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- Splitting `(p·[ϖ'])^(k·m)` when `[ϖ']^k = [ϖ]`: the Teichmüller part
 collapses to `[ϖ]^m` and the surplus is a power of `p`. -/
 private theorem p_teichPi_pow_mul (ϖ' : PseudoUniformizer F) (k m : ℕ) (hk : 0 < k)
@@ -381,6 +382,7 @@ is an opaque atom for instance search — PERF). -/
 @[irreducible] noncomputable def vpiQ (q : ℚ) : NNReal :=
   perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (q : ℝ)
 
+omit [CharP F p] in
 theorem vpiQ_pos (q : ℚ) : 0 < vpiQ p F ϖ q := by
   rw [vpiQ]
   refine NNReal.rpow_pos ?_
@@ -392,6 +394,7 @@ theorem vpiQ_lt_one {q : ℚ} (hq : 0 < q) : vpiQ p F ϖ q < 1 := by
   refine NNReal.rpow_lt_one (perfectoidValuation_toOF_lt_one p F ϖ) ?_
   exact_mod_cast hq
 
+omit [CharP F p] in
 /-- Interpolation of the rational radii: `vpiQ r = (vpiQ q₁)^θ·(vpiQ q₂)^{1-θ}`
 for the affine parameter `θ = (q₂ - r)/(q₂ - q₁)`. -/
 theorem vpiQ_interpolate {q₁ q₂ r : ℚ} (hne : q₁ ≠ q₂) :
@@ -489,6 +492,7 @@ theorem vpiQ_antitone {q q' : ℚ} (h : q ≤ q') :
     (perfectoidValuation_toOF_lt_one p F ϖ).le
     (by exact_mod_cast h)
 
+omit [CharP F p] in
 /-- The nat-power radii are the rational radii at nat exponents:
 `vpiQ n = |ϖ|^n`. -/
 theorem vpiQ_natCast (n : ℕ) :
@@ -533,6 +537,7 @@ theorem vpiQ_frobRoot (s : ℕ) (q : ℚ) :
   push_cast
   field_simp
 
+omit [CharP F p] in
 /-- **The twist bridge for rational radii (power side)**:
 `vpiQ-in-ϖ^m(q) = vpiQ-in-ϖ(q·m)`. -/
 theorem vpiQ_pPow (m : ℕ) (hm : 0 < m) (q : ℚ) :

@@ -42,6 +42,7 @@ namespace ValuationSpectrum
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
   [IsTopologicalRing A]
 
+omit [IsTopologicalRing A] in
 /-- **Lemma 7.54 of Wedhorn**: `R({t₁,...,tₙ}/s) = ⋂ᵢ R({tᵢ}/s)` for nonempty T.
 Migrated from `LaurentRefinement.lean` (F12 file split 2026-05-23). -/
 theorem rationalOpen_eq_iInter_singleton (T : Finset A) (hT : T.Nonempty) (s : A) :
@@ -82,6 +83,7 @@ noncomputable def laurentPlusDatum (D₀ : RationalLocData A) (f : A) :
 
 /-! ### divByS algebraic helpers (Wedhorn-style identities) -/
 
+omit [TopologicalSpace A] [PlusSubring A] [IsTopologicalRing A] in
 /-- `divByS (a * b) (s * f) = divByS (a * f) (s * f) * divByS (b * s) (s * f)`. -/
 theorem divByS_factor' (a b s f : A) :
     divByS (a * b) (s * f) = divByS (a * f) (s * f) * divByS (b * s) (s * f) := by
@@ -93,12 +95,14 @@ theorem divByS_factor2' (b s f : A) :
     divByS (b * s) (s * f) = divByS (b * f) (s * f) * divByS (s * s) (s * f) :=
   divByS_factor' b s s f
 
+omit [TopologicalSpace A] [PlusSubring A] [IsTopologicalRing A] in
 /-- `divByS` is additive in the numerator. -/
 theorem divByS_add' (a b s : A) :
     divByS (a + b) s = divByS a s + divByS b s := by
   unfold divByS; rw [← IsLocalization.mk'_add]
   exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
 
+omit [TopologicalSpace A] [PlusSubring A] [IsTopologicalRing A] in
 /-- The canonical lift `Away s₀ →+* Away (s₀ * f)` sends `divByS b s₀` to
 `divByS (b * f) (s₀ * f)`. -/
 theorem lift_divByS_eq' (s₀ f : A)
@@ -405,6 +409,7 @@ theorem RationalLocData.interSamePair_rationalOpen (D₁ D₂ : RationalLocData 
       (Finset.mem_insert_self _ _) (Finset.mem_insert_self _ _),
     rationalOpen_insert_s, rationalOpen_insert_s]
 
+omit [TopologicalSpace A] [PlusSubring A] [IsTopologicalRing A] in
 /-- A finite set whose coercion contains `1` spans the unit ideal. Discharges
 Wedhorn Definition 7.29's openness (`RationalLocData.isRational_of_span_eq_top`)
 for cover constructors whose `T` picks up a `1` (e.g. `unitDatum`/`coUnitDatum`
@@ -413,6 +418,7 @@ theorem span_eq_top_of_one_mem {S : Finset A} (h : (1 : A) ∈ S) :
     Ideal.span (S : Set A) = ⊤ :=
   Ideal.eq_top_of_isUnit_mem _ (Ideal.subset_span (by exact_mod_cast h)) isUnit_one
 
+omit [TopologicalSpace A] [PlusSubring A] [IsTopologicalRing A] in
 /-- Inserting an element preserves spanning. -/
 theorem span_insert_eq_top_of_span_eq_top {S : Finset A} (s : A)
     (h : Ideal.span (S : Set A) = ⊤) :
@@ -842,6 +848,7 @@ noncomputable def iteratedMinusDatum_B
 
 /-! ### iteratedPlus uncompleted forward/backward homs -/
 
+omit [PlusSubring A] in
 /-- `D₀.s` maps to a unit in `Localization.Away (1 : B)` under the composite
 `A → B = presheafValue D₀ → Loc_B(1)`. -/
 theorem iteratedPlus_D₀s_isUnit_in_Loc_B_one
@@ -939,6 +946,7 @@ noncomputable def iteratedMinus_baseHom
   (algebraMap (presheafValue D₀) (Localization.Away (D₀.canonicalMap f))).comp
     D₀.canonicalMap
 
+omit [PlusSubring A] in
 /-- `D₀.s * f` becomes a unit in `Localization.Away (canonicalMap f)` via the base hom. -/
 theorem iteratedMinus_D₀s_mul_f_isUnit
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -978,6 +986,7 @@ noncomputable def iteratedMinus_forwardToCompletion
   (iteratedMinusDatum_B P D₀ f).coeRingHom.comp
     (iteratedMinus_forwardLocHom D₀ f)
 
+omit [PlusSubring A] in
 /-- In `Localization.Away (D₀.s * f)`, the algebraMap of `f` is a unit. -/
 theorem algebraMap_f_isUnit_in_laurentMinus
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -2716,6 +2725,7 @@ theorem _root_.Function.Surjective.sigmaCompactSpace
   rw [← isSigmaCompact_univ_iff, ← hf_surj.range_eq]
   exact isSigmaCompact_range hf_cont
 
+omit [IsTopologicalRing A] in
 omit [PlusSubring A] in
 /-- **T152 supplier (plus-side): SigmaCompactSpace of the plus quotient under
 the canonical quotient topology, given `SigmaCompactSpace (TateAlgebra B)`.**
@@ -2744,6 +2754,7 @@ theorem quotientPlusFSubXIdeal_sigmaCompactSpace_of_source
     Ideal.Quotient.mk_surjective
   exact hsurj.sigmaCompactSpace hcont
 
+omit [IsTopologicalRing A] in
 omit [PlusSubring A] in
 /-- **T152 supplier (minus-side): SigmaCompactSpace of the `oneSubfXIdeal`
 quotient under its canonical quotient topology, given

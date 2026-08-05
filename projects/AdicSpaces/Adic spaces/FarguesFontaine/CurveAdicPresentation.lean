@@ -574,6 +574,7 @@ private theorem exists_windowNbhd_spec (hp : 1 < p) (n : ℤ) (y : ↥(yTop p F 
     refine ⟨e₁.trans (windowTraceHomeomorph p F ϖ hp n (rationalOpen D'.T D'.s) G₂
       (by rw [hG₂eq, hIM, hRT]))⟩
 
+omit [CharP F p] in
 /-- **Opens of the `𝒴`-carrier come from opens of `Spv A_inf`.** The carrier sits inside
 `Spa(A_inf, A_inf⁺)` which sits inside `Spv A_inf`, so an open of the carrier is cut out
 by an open of `Spv A_inf` — this peels both induced topologies in one step, which is what

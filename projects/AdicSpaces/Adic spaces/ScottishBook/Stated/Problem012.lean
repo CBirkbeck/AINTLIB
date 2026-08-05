@@ -68,6 +68,7 @@ abbrev fixedSubring := FixedPoints.subring A G
 def fixedSubringInclusion : ↥(fixedSubring G A) →+* A :=
   (fixedSubring G A).subtype
 
+omit [Finite G] [IsTopologicalRing A] [ContinuousConstSMul G A] in
 /-- The restriction map lands in `Cont(A^G)`: if `v` is a continuous valuation on `A`, then
 its restriction to `A^G` (via the inclusion `A^G ↪ A`) is a continuous valuation on `A^G`. -/
 theorem restrictToFixed_mem_cont (v : ↥(Cont A)) :

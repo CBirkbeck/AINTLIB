@@ -1072,6 +1072,7 @@ section TailSum
 variable {G : Type*} [AddCommGroup G] [UniformSpace G] [IsUniformAddGroup G]
   [NonarchimedeanAddGroup G] [CompleteSpace G] [T2Space G]
 
+omit [T2Space G] in
 /-- In a complete nonarchimedean additive group, if `f` is summable then
 `f(n + ·)` is summable for all `n`. -/
 theorem Summable.nat_add {f : ℕ → G} (hf : Summable f) (n : ℕ) :

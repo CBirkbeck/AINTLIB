@@ -188,6 +188,7 @@ noncomputable
 abbrev gaussNorm (f : PowerSeries.Restricted R c) : ℝ :=
   PowerSeries.gaussNorm (norm : R → ℝ) c f.1
 
+omit [IsUltrametricDist R] in
 /-- Merged mathlib states `PowerSeries.IsRestricted` via `atTop`; on `ℕ` this is the
 cofinite filter. -/
 lemma isRestricted_iff_cofinite {f : PowerSeries R} :

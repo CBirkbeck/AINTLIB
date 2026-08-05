@@ -590,6 +590,7 @@ because it's the product of `y` (a restricted series) with the constant
 series `π^{-n}` in `TateAlgebra A`.
 -/
 
+omit [IsTopologicalRing A] in
 /-- The `π^n`-divided series of a `pairSubring` element whose coefficients all lie in
 `P.I ^ n` again has all coefficients in `P.A₀`.
 
@@ -704,6 +705,7 @@ theorem tateAlgNhd_of_coeff_mem_principal (P : PairOfDefinition A) (n : ℕ)
     exact Ideal.pow_mem_pow hπ_in n
   exact ((pairIdeal P) ^ n).mul_mem_right g_in_subring hπn_in
 
+omit [IsTopologicalRing A] in
 /-- Every antidiagonal coefficient of `x * y` has a witness in `P.I ^ i`,
 given the bad-index set `S`, the per-index bounds `m_fn`, and a uniform `j`.
 Extracted from `tateAlgNhd_leftMul_of_principal`. -/
@@ -2080,6 +2082,7 @@ theorem tateAlgebra₂_coeff_eventually_in_pow (P : PairOfDefinition A)
 
 /-! #### Phase 2 Sub-task D: bivariate reverse coefficient characterization -/
 
+omit [IsTopologicalRing A] in
 /-- The bivariate counterpart of `divided_mem_pairSubring_of_coeff_mem_pow`.
 
 Extracted from `tateAlgNhd₂_of_coeff_mem_principal`, where it was the dominant `have`;
@@ -2176,6 +2179,7 @@ theorem tateAlgNhd₂_of_coeff_mem_principal (P : PairOfDefinition A) (n : ℕ)
 
 /-! #### Phase 2 Sub-task F: bivariate leftMul assembly (principal case) -/
 
+omit [NonarchimedeanRing A] [IsTopologicalRing A] in
 /-- A coefficient of a product lands `i` levels deep in the ideal of definition: if the
 left coefficient is already deep enough (the `p.1 ∉ S` branch) the product is, and otherwise
 `hm_spec` supplies the witness from the `m_fn p.1`-level bound on the right coefficient.
@@ -2902,6 +2906,7 @@ theorem TateAlgebra₂_Y_mem_pairSubring₂ (P : PairOfDefinition A) :
   · exact P.A₀.one_mem
   · exact P.A₀.zero_mem
 
+omit [IsTopologicalRing A] in
 /-- `TateAlgebra₂.X` is power-bounded in `TateAlgebra₂ A` under the canonical
 bivariate Tate topology. Bivariate analog of `TateAlgebra_X_isPowerBounded`. -/
 theorem TateAlgebra₂_X_isPowerBounded [IsTateRing A] :
@@ -2922,6 +2927,7 @@ theorem TateAlgebra₂_X_isPowerBounded [IsTateRing A] :
       (A := ↥(TateAlgebra₂ A)) (tateAlgebra₂_pairOfDefinition (A := A))
   exact hbd.subset (by rintro _ ⟨n, rfl⟩; exact hpow n)
 
+omit [IsTopologicalRing A] in
 /-- `TateAlgebra₂.Y` is power-bounded in `TateAlgebra₂ A`. -/
 theorem TateAlgebra₂_Y_isPowerBounded [IsTateRing A] :
     @TopologicalRing.IsPowerBounded _ _ instTopologicalSpaceTateAlgebra₂
@@ -2941,6 +2947,7 @@ theorem TateAlgebra₂_Y_isPowerBounded [IsTateRing A] :
       (A := ↥(TateAlgebra₂ A)) (tateAlgebra₂_pairOfDefinition (A := A))
   exact hbd.subset (by rintro _ ⟨n, rfl⟩; exact hpow n)
 
+omit [IsTopologicalRing A] in
 /-- The quotient map `TateAlgebra₂ A → TateAlgebra₂ A ⧸ bivariateOverlapIdeal b`
 preserves boundedness of subsets. Bivariate analog of `IsBounded_mk_image_of_IsBounded`. -/
 theorem IsBounded_mk_image_of_IsBounded_bivariate [IsTateRing A] (b : A)
@@ -3016,6 +3023,7 @@ theorem mk_Y_isPowerBounded_in_bivariateOverlap [IsTateRing A] (b : A) :
   rw [hrange_eq]
   exact IsBounded_mk_image_of_IsBounded_bivariate b hY_pb
 
+omit [IsTopologicalRing A] in
 /-- In the bivariate quotient, `mk(algebraMap b) = mk(X)`. -/
 theorem quotient_algebraMap_b_eq_X_bivariate [IsTateRing A] (b : A) :
     (Ideal.Quotient.mk (bivariateOverlapIdeal b))
@@ -3047,6 +3055,7 @@ theorem mk_algebraMap_continuous_bivariateOverlap [IsTateRing A] (b : A) :
       (Ideal.Quotient.mk (bivariateOverlapIdeal b)) := continuous_quotient_mk'
   exact h2.comp h1
 
+omit [IsTopologicalRing A] in
 /-- The canonical bivariate quotient topology is nonarchimedean (quotient of a
 nonarchimedean topological ring by an additive subgroup). -/
 theorem quotientBivariateOverlapIdealTopology_nonarchimedean [IsTateRing A] (b : A) :
@@ -3079,6 +3088,7 @@ finite-support ("polynomial") elements of `TateAlgebra₂ A` are dense in the
 canonical bivariate Tate topology. Bivariate analog of the univariate density
 `tateAlgebra_polynomials_dense_canonical` in `TopologyComparison.lean`. -/
 
+omit [NonarchimedeanRing A] [IsTopologicalRing A] in
 /-- A bivariate power series whose coefficients vanish outside a finite box
 `[0, N) × [0, N)` is restricted. Bivariate analog of
 `isRestricted_of_eventually_zero`. -/
@@ -3211,18 +3221,22 @@ Used to reduce the `backward ∘ forward = id` round trip of
 `example638Bivariate_equiv` to ring-hom agreement on the generators
 `algebraMap B`, `TateAlgebra₂.X`, `TateAlgebra₂.Y`. -/
 
+omit [IsTopologicalRing A] in
 /-- Helper: `(algebraMap A ↥(TateAlgebra₂ A) c).val = MvPowerSeries.C c`. -/
 theorem TateAlgebra₂_algebraMap_val (c : A) :
     (algebraMap A ↥(TateAlgebra₂ A) c).val = MvPowerSeries.C c := rfl
 
+omit [IsTopologicalRing A] in
 /-- Helper: `TateAlgebra₂.X.val = MvPowerSeries.X 0`. -/
 theorem TateAlgebra₂_X_val :
     (TateAlgebra₂.X (A := A)).val = MvPowerSeries.X (0 : Fin 2) := rfl
 
+omit [IsTopologicalRing A] in
 /-- Helper: `TateAlgebra₂.Y.val = MvPowerSeries.X 1`. -/
 theorem TateAlgebra₂_Y_val :
     (TateAlgebra₂.Y (A := A)).val = MvPowerSeries.X (1 : Fin 2) := rfl
 
+omit [IsTopologicalRing A] in
 /-- The monomial `algebraMap A _ c * X^i * Y^j` has MvPowerSeries value equal to
 `monomial (single 0 i + single 1 j) c`. -/
 theorem TateAlgebra₂_monomial_val (c : A) (i j : ℕ) :
@@ -3283,6 +3297,7 @@ private theorem tateAlgebra₂_decomp_val_eq (g : ↥(TateAlgebra₂ A)) (N : �
   rw [map_sum]
   exact Finset.sum_congr rfl fun j _ => TateAlgebra₂_monomial_val _ i j
 
+omit [IsTopologicalRing A] in
 /-- Evaluating that sum of monomials at `l` gives the corresponding sum of `if`-terms. -/
 private theorem tateAlgebra₂_decomp_sum_apply (g : ↥(TateAlgebra₂ A)) (N : ℕ)
     (l : Fin 2 →₀ ℕ) :

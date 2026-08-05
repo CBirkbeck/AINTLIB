@@ -225,6 +225,7 @@ private theorem isOpen_closure_pow_image (PA : PairOfDefinition A) (m : ℕ) {S 
       (pow_2m_image_sub_closure PA S_def))
 
 
+omit [IsTopologicalRing A] in
 omit [IsHuberRing A] in
 /-- The generator case of `span_mul_pow_mem_pow`: `f` is one of the chosen generators of
 `PA.I ^ m`, so `f * w'` pairs a generator with something `(n+2)m` deep, and the outer induction
@@ -274,6 +275,7 @@ private theorem span_mul_pow_mem_pow_gen (PA : PairOfDefinition A) (m n : ℕ)
   rw [this, pow_succ']
   exact Ideal.mul_mem_mul hf'_mem hw'_In
 
+omit [IsTopologicalRing A] in
 omit [IsHuberRing A] in
 /-- The scalar case of `span_mul_pow_mem_pow`: `(c • x') * w' = x' * (c * w')`, and `c * w'` is
 still `(n+2)m` deep because that filtration level is an ideal. -/

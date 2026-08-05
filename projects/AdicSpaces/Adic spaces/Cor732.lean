@@ -264,6 +264,7 @@ Wedhorn's proof (p.63) constructs the neighborhood by:
    finite subcover, hence X ⊆ X_m for some m.
 4. Set I := T^m · A°° — a neighborhood of zero with the desired property. -/
 
+omit [IsTopologicalRing A] in
 /-- **Powers of a topologically nilpotent element only get smaller**: for a Spa-point `x` and
 `t` topologically nilpotent, `t ^ n ≤ f` and `n ≤ k` give `t ^ k ≤ f`. (Membership of `Spa`
 forces `w t ≤ 1`, so raising the exponent can only decrease the value.) -/
@@ -405,6 +406,7 @@ theorem exists_zero_nbhd_lt_on_qc [IsTateRing A]
     refine ⟨(Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h_lt.le, fun hvle => ?_⟩
     exact absurd ((Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvle) (not_le.mpr h_lt)
 
+omit [IsTopologicalRing A] [PlusSubring A] in
 /-- **(T-B.2.a, audit-identified)** Tate-ring axiom: every open neighborhood of
 zero in a Tate ring contains a unit. Wedhorn 7.32 proof uses this directly:
 "as A is Tate, there exists a unit π of A in I." Wedhorn defines Tate (6.5)
@@ -557,6 +559,7 @@ theorem exists_dominating_unit_noHArch_finset_on
     rw [Units.val_pow_eq_pow_val] at h_le
     exact absurd h_le (not_le.mpr h_lt_t)
 
+omit [IsTopologicalRing A] in
 /-- **Wedhorn Cor 7.32 (no hArch), Finset form.** For a finite family `T` with
 no common zero on `Spa A A⁺`, there exists a unit `s ∈ Aˣ` such that for every
 `v ∈ Spa A A⁺`, some `t ∈ T` satisfies `v(s) < v(t)`. This is the form consumed

@@ -64,6 +64,7 @@ theorem teichPi_pPow (m : ℕ) (hm : 0 < m) :
     (PseudoUniformizer.toOF F (PseudoUniformizer.pPow F ϖ m hm)) = _
   rw [PseudoUniformizer.toOF_pPow]
 
+omit [CharP F p] in
 /-- **`Y` does not depend on the pseudo-uniformizer through powers**: two
 pseudo-uniformizers whose Teichmüller lifts are related by powers cut out the
 same locus. -/
@@ -95,6 +96,7 @@ theorem Y_eq_of_teichPi_pow {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 < k)
 
 
 variable {p F ϖ} in
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- Power-congruence for `vle`. -/
 theorem vle_pow_iff {v : Spv (Ainf p F)} {k : ℕ} (hk : 0 < k) (x y : Ainf p F) :
     v.vle (x ^ k) (y ^ k) ↔ v.vle x y := by

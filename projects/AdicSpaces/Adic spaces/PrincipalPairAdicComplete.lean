@@ -32,6 +32,7 @@ namespace ValuationSpectrum
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
 
+omit [PlusSubring A] in
 /-- **Completeness of `A₀` for the canonical principal pair.** The ring of
 definition of a strongly noetherian Tate ring is a complete uniform space, when
 `A₀` is equipped with the subspace uniformity inherited (via `Subtype.val`) from

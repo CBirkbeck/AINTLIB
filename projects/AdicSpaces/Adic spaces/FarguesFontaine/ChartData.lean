@@ -133,6 +133,7 @@ def chartMonomials (N : ℕ) : Finset (Ainf p F) :=
   (Finset.range (N + 1)).image
     (fun i => (p : Ainf p F) ^ i * teichPi p F ϖ ^ (N - i))
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- `I_inf^N` is spanned by the degree-`N` monomials. -/
 theorem Iinf_pow_le_span_chartMonomials (N : ℕ) :
     Iinf p F ϖ ^ N ≤ Ideal.span (chartMonomials p F ϖ N : Set (Ainf p F)) := by
@@ -303,6 +304,7 @@ private lemma le_of_mul_le_mul_left₀ {Γ : Type*} [LinearOrderedCommGroupWithZ
     {x y c : Γ} (hc : c ≠ 0) (h : c * x ≤ c * y) : x ≤ y :=
   le_of_mul_le_mul_right₀ hc (by rwa [mul_comm x c, mul_comm y c])
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- `p·[ϖ]` is nonzero at `v` exactly when both factors are. The `ValuativeRel` instance is
 supplied EXPLICITLY — a `letI` in the statement leaves Lean nothing to synthesize from. -/
 private lemma not_vle_p_mul_teichPi_zero (v : Spv (Ainf p F))
@@ -315,6 +317,7 @@ private lemma not_vle_p_mul_teichPi_zero (v : Spv (Ainf p F))
   rcases mul_eq_zero.mp (le_zero_iff.mp hle) with h | h
   exacts [h1 h, h2 h]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 private lemma valuation_p_teichPi_ne_zero_of_not_vle (v : Spv (Ainf p F))
     (hY2 : ¬ v.vle ((p : Ainf p F) * teichPi p F ϖ) 0) :
     @ValuativeRel.valuation (Ainf p F) _ v.toValuativeRel (p : Ainf p F) ≠ 0
@@ -326,6 +329,7 @@ private lemma valuation_p_teichPi_ne_zero_of_not_vle (v : Spv (Ainf p F))
   exact ⟨fun h => hY2 (by rw [hbridge, map_mul, map_zero, h, zero_mul]),
     fun h => hY2 (by rw [hbridge, map_mul, map_zero, h, mul_zero])⟩
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 private lemma valuation_p_teichPi_ne_zero_of_chartS (v : Spv (Ainf p F)) {a₁ b₂ : ℕ}
     (ha₁ : 0 < a₁) (hb₂ : 0 < b₂)
     (hsval : @ValuativeRel.valuation (Ainf p F) _ v.toValuativeRel
@@ -461,6 +465,7 @@ theorem windowV_zero_eq_rationalOpen (hp : 1 < p) :
         (by simp; omega) (a := p) (b := 1) (by omega) (by simp)).mpr ?_
       simpa using h2
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The chart denominator decomposes off the standard `Bloc`-denominator:
 `(p·[ϖ]^b)^k = (p·[ϖ])^k · [ϖ]^{k(b-1)}`. -/
 theorem chartS_pow_eq (b k : ℕ) (hb : 0 < b) :
@@ -1227,6 +1232,7 @@ theorem presheafChartToBIProd_coe (a b : ℕ) (hb : 0 < b)
       (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb)
     (continuous_chartToBIProd p F ϖ a b hb hπ1 hπ2 hr1 hr2) z
 
+omit [CharP F p] in
 /-- **Division by a pseudo-uniformizer power in `O_F`**: an element of value at
 most `|ϖ|^e` factors as `c'·ϖ^e`. -/
 theorem exists_factor_toOF (e : ℕ) (c : OF F)
@@ -1344,6 +1350,7 @@ theorem high_arg_split (b k t j : ℕ) (c c' : OF F)
           * (WittVector.teichmuller p c * (p : Ainf p F) ^ (k + j)) := by
         ring
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The `A_inf`-side final power collection for the high terms. -/
 theorem high_arg_final (a k t j : ℕ) (c : OF F) :
     (p : Ainf p F) ^ (a * t) * (WittVector.teichmuller p c * (p : Ainf p F) ^ (k + j))
@@ -1366,6 +1373,7 @@ theorem chart_term_high_eq (a b k t j : ℕ) (c c' : OF F)
     ← mul_assoc, chartFracP_pow_mul_teichPi_pow, ← map_mul,
     high_arg_final p F a k t j c]
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The `A_inf`-side regrouping for the tail. -/
 theorem tail_arg_split (b k : ℕ) (hb : 0 < b) (z : Ainf p F) :
     teichPi p F ϖ ^ (b * k - k) * z * ((p : Ainf p F) * teichPi p F ϖ) ^ k
@@ -1377,6 +1385,7 @@ theorem tail_arg_split (b k : ℕ) (hb : 0 < b) (z : Ainf p F) :
     omega]
   ring
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] [CharP F p] in
 /-- The `A_inf`-side final power collection for the tail. -/
 theorem tail_arg_final (a k : ℕ) (z : Ainf p F) :
     (p : Ainf p F) ^ (a * k) * ((p : Ainf p F) ^ k * z)
@@ -1440,6 +1449,7 @@ private theorem key_arith {a b i k : ℕ} (ha : 0 < a) :
           (Nat.mul_le_mul_left b (le_of_lt hlt)) _) _
     _ = a * b + a * k + b * (i / a) * a := by ring
 
+omit [CharP F p] in
 include hρ₂1 in
 /-- If `ρ₂ ^ a = |ϖ| ^ b` with `0 < a` and `ρ₂ < 1`, then `|ϖ| < 1`. -/
 private theorem perfectoidValuation_lt_one_of_exact {a b : ℕ} (ha : 0 < a)

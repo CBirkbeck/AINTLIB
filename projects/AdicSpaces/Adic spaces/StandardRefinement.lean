@@ -45,6 +45,7 @@ variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 
 /-! ### The maximum argument (Kedlaya 1.6.2) -/
 
+omit [TopologicalSpace A] [IsTopologicalRing A] in
 /-- A valuation cannot vanish on a family generating the unit ideal: else the span
 combination `1 = ∑ cₐ·a` and subadditivity force `v(1) = 0`. -/
 theorem exists_not_vle_zero_of_span_eq_top {v : Spv A} {F : Finset A}
@@ -101,6 +102,7 @@ theorem mem_genCoverPieces (D₀ : RationalLocData A) (hD₀ : D₀.IsRational)
   unfold genCoverPieces
   simp only [Finset.mem_image, Finset.mem_attach, true_and]
 
+omit [DecidableEq (RationalLocData A)] in
 /-- The tray-condition of a generated piece specializes to a product comparison. -/
 theorem genCover_tray_cond {D₀ : RationalLocData A} {hD₀ : D₀.IsRational}
     {F : Finset A} {hF : Ideal.span (F : Set A) = ⊤} {f : A} (_hfF : f ∈ F)

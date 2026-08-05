@@ -187,6 +187,7 @@ noncomputable abbrev RationalCoveringData.plusDatum (C : RationalCoveringData A)
     (f : A) : RationalLocData A :=
   laurentPlusDatum C.base f
 
+omit [HasLocLiftPowerBounded A] in
 /-- Each plus-piece `C.plusDatum f` is contained in `C.base`'s rational
 open — by `laurentPlus_subset`. -/
 theorem RationalCoveringData.plusDatum_subset_base (C : RationalCoveringData A) (f : A) :
@@ -244,6 +245,7 @@ instance-agnostic at the Prop level. Both `(C.plusDatum f).T` and
 same membership characterization, so the two `rationalOpen`s are equal
 as sets of valuations. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Extensional bridge**: the rational-open set computed from
 `(C.plusDatum f).T` (which uses `Classical.decEq` inside the
 `noncomputable` `laurentPlusDatum` definition) equals the rational-open
@@ -344,6 +346,7 @@ The rational-open swap combined with
 bijection that can be used to transport `fV`-type data between the two
 iteration orders in the outer induction's fV transport step. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Iterated Laurent-plus rational-open swap**. The rational open of
 `laurentPlusDatum (laurentPlusDatum D f) g` equals that of
 `laurentPlusDatum (laurentPlusDatum D g) f`.
@@ -378,6 +381,7 @@ The block below was originally located later in the file and has been
 moved up to resolve forward references from Lane-C theorems. Content
 unchanged — relocated only. -/
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- **Rational-open equality under `v.vle f s`**. Adding an element `f` to
 the generating family `T` does not change the rational open `R(T/s)`
 precisely when every valuation in `R(T/s)` already satisfies `v.vle f s`. -/
@@ -462,6 +466,7 @@ noncomputable def RationalCoveringData.plusLaurentCovering
       obtain ⟨E, hE, hvE⟩ := hCov v hv
       exact ⟨laurentPlusDatum E f₀, Finset.mem_image.mpr ⟨E, hE, rfl⟩, hvE⟩ }
 
+omit [HasLocLiftPowerBounded A] in
 /-- **`hContain` automatic discharge for standard-cover V-covers**. When
 `C.covers = C.standardCoverVCovers S`, each cover piece `E` is
 `C.plusDatum f` with `E.s = C.base.s`, so the Laurent-plus-at-`f₀`
@@ -492,6 +497,7 @@ theorem RationalCoveringData.plusLaurentCovering_hContain_of_standardCoverVCover
   · exact Or.inl rfl
   · exact Or.inr (Or.inr ht')
 
+omit [HasLocLiftPowerBounded A] in
 /-- **`hCov` automatic discharge for standard-cover V-covers**. Under
 `refines_cover C S` (every valuation in the base's rational open lands in
 some plus-piece `insert f C.base.T / C.base.s`), combined with being in
@@ -858,6 +864,7 @@ presheaf values on one match the restrictions on the other. This is
 the final bridge enabling outer-V-piece restriction properties from
 inner-IH restriction properties. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Outer plus-piece at `g` equals inner iterated plus when outer ⊆ plus half**.
 Given `hD_plus : rationalOpen (C.plusDatum g) ⊆ rationalOpen plus-half`,
 the rational open of `C.plusDatum g` equals that of
@@ -1390,6 +1397,7 @@ whose only hypotheses are (i) `f ∈ A⁺` (power-boundedness) and (ii)
 `1 ∈ C.base.T` (Laurent normalization) — no opaque surjectivity, no
 raw `hvle`. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Valuation discharge** for the plus-piece base-case hypothesis. For a
 rational datum `D` with `1 ∈ D.T`, every `f ∈ A⁺` (power-bounded) satisfies
 `v.vle f D.s` for every `v ∈ rationalOpen D.T D.s`.
@@ -2026,6 +2034,7 @@ For the outer induction's **cardinality-decrease** step (`|S \ {f₀}| <
 strictly decreases cardinality. This is the stopping condition for
 `Finset.strongInductionOn` over `|S|`. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Minus-half containment** (structural analog). For `v` in the
 Laurent-minus-`f₀` base of `C`, `v` lies in the Laurent-minus of some
 cover piece iff the original cover covers it. The exact statement mirrors
@@ -2105,6 +2114,7 @@ theorem Finset.erase_nonempty_of_card_ge_two
   rw [← Finset.card_pos, Finset.card_erase_of_mem hf₀]
   omega
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Plus-half IH preconditions bundle**. Discharges all three of
 `S'.Nonempty`, `∀ f ∈ S', f ∈ A⁺`, and `1 ∈ (plusLaurentBase).T` for the
 recursive invocation of `standardCover_hV_glue_induction` on the plus
@@ -2153,6 +2163,7 @@ side). Both options remain future work in this lane.
 We DO expose the nonemptyness and `A⁺`-closure clauses as reusable
 fragments; the `h1T`-on-minus-side clause is left as a hypothesis. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Minus-half IH preconditions — partial bundle**. Discharges
 nonemptyness and `A⁺`-closure for the `S.erase f₀` recursion on the
 minus half. The third precondition `1 ∈ (laurentMinusDatum C.base f₀).T`
@@ -2181,6 +2192,7 @@ minus half. This decomposition powers the minus-half `hCov` discharge in
 the standard-cover V-cover setting, completing the Laurent-half
 infrastructure for the outer induction. -/
 
+omit [HasLocLiftPowerBounded A] in
 open scoped Pointwise in
 /-- **Laurent-minus rational open decomposition**. The rational open of
 `laurentMinusDatum D₀ f` is the intersection of the base rational open
@@ -2295,6 +2307,7 @@ witnesses in the caller's outer induction.
 termination witness already exposed via `Finset.card_erase_of_mem_decreases`
 above. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Sub-cover containment** on the plus half: given `f₀ ∈ S` and any
 `g ∈ S.erase f₀`, the plus-piece `(plusLaurentCovering ...).plusDatum g`
 (i.e. `laurentPlusDatum (laurentPlusDatum C.base f₀) g`) is contained in
@@ -2328,6 +2341,7 @@ This transfer does not require any additional hypotheses beyond
 `refines_cover C S` (the latter used only to construct the covering
 itself). It is the "cleanest" of the three sub-cover transfers. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Plus-half containment transfer (primitive form)**. For every
 `g ∈ S`, the plus-piece at `g` on the Laurent-plus-`f₀` base equals (as
 rational open) the Laurent-plus of the `g`-plus-piece of the original
@@ -2675,6 +2689,7 @@ hypothesis until the localised version is formalised. The clean
 helpers below discharge HALF of the obligation (the "S itself, not
 `S.erase f₀`" side). -/
 
+omit [IsHuberRing A] in
 /-- **Plus-half no-common-zero from `refines_span_top`** (Prop 7.14
 via `spanTop_iff_noCommonZero_spa`). If the full cover `S` spans the
 unit ideal in `A`, then on the plus half at `f₀`, some `f ∈ S` has
@@ -2698,6 +2713,7 @@ theorem RationalCoveringData.noCommonZero_plusHalf_of_refines_span_top
     rationalOpen_subset_spa (laurentPlus_subset C.base f₀ hv_plusDatum)
   exact ((spanTop_iff_noCommonZero_spa P S).mp hspan) v hv_spa
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- **Minus-half no-common-zero from `refines_span_top`**. Mirror of
 the plus-half version via `laurentMinus_subset`. -/
 theorem RationalCoveringData.noCommonZero_minusHalf_of_refines_span_top
@@ -2715,6 +2731,7 @@ theorem RationalCoveringData.noCommonZero_minusHalf_of_refines_span_top
     rationalOpen_subset_spa (laurentMinus_subset C.base f₀ hv)
   exact ((spanTop_iff_noCommonZero_spa P S).mp hspan) v hv_spa
 
+omit [HasLocLiftPowerBounded A] in
 /-- **`f₀` has non-zero valuation on the minus half**. On the Laurent-
 minus half at `f₀`, the valuation of `f₀` dominates `C.base.s` (which
 is always non-zero on the rational open), so `f₀` itself is never in
@@ -2740,6 +2757,7 @@ theorem RationalCoveringData.f₀_notZero_on_minusHalf
   change ¬ v.vle (C.base.s * f₀) 0 at hvs
   exact not_vle_zero_right_of_mul hvs
 
+omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- **No-common-zero of `S.erase f₀` on the `f₀`-zero locus** — the
 CLEAN half of the span-top erase transfer, derivable directly from
 Prop 7.14 applied to `S`. Given `refines_span_top S` and `f₀ ∈ S`,
@@ -2761,6 +2779,7 @@ theorem RationalCoveringData.noCommonZero_erase_of_f₀_zero
   intro h_eq
   exact hvf (h_eq ▸ hv_f₀)
 
+omit [IsHuberRing A] in
 /-- **`refines_span_top` for `S.erase f₀` from a `v(f₀) ≠ 0` covering
 hypothesis** — the cleanest concrete reduction available from the
 existing (non-localised) Prop 7.14.
@@ -2801,6 +2820,7 @@ theorem RationalCoveringData.refines_span_top_erase_of_noCommonZero_nonzero_f₀
       f₀ S hspan h_f₀_mem v hv_spa h_f₀_zero
   · exact h_cover_nonzero_f₀ v hv_spa h_f₀_zero
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Legacy shape** kept for callers of the earlier localised-
 Nullstellensatz API. Given a localised-Nullstellensatz hypothesis
 (directly provides `Ideal.span (S.erase f₀) = ⊤` from a plus-half
@@ -2849,6 +2869,7 @@ These refined pieces are used together with
 gluing from the refined V-cover to the outer rational covering `C`,
 bypassing the per-V-piece dichotomy obstacle. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Plus-refined piece lies in the plus half**. The iterated Laurent
 plus `laurentPlusDatum (C.plusDatum f) f₀` has more `T` constraints
 than the plus half `laurentPlusDatum C.base f₀` (adds `f`), so its
@@ -2870,6 +2891,7 @@ theorem RationalCoveringData.refinedPlusPiece_in_plusHalf
   · exact Or.inl rfl
   · exact Or.inr (Or.inr ht')
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Minus-refined piece lies in the minus half**. The iterated Laurent
 minus `laurentMinusDatum (C.plusDatum f) f₀` has more `T` constraints
 than the minus half `laurentMinusDatum C.base f₀` (first factor of the
@@ -2896,6 +2918,7 @@ theorem RationalCoveringData.refinedMinusPiece_in_minusHalf
   · exact Or.inl rfl
   · exact Or.inr (Or.inr ht₁')
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Plus-refined and minus-refined pieces cover the V-piece**. The
 union of the two refined pieces at `f` equals the outer V-piece at `f`
 (as sets of valuations), by Laurent-cover coverage applied at `f₀` on
@@ -2920,6 +2943,7 @@ noncomputable def RationalCoveringData.refinedVCovers
   S.image (fun f => laurentPlusDatum (C.plusDatum f) f₀) ∪
     S.image (fun f => laurentMinusDatum (C.plusDatum f) f₀)
 
+omit [HasLocLiftPowerBounded A] in
 /-- Membership in the refined V-cover: each refined piece is either the
 plus-refined or minus-refined iterate at some `f ∈ S`. -/
 theorem RationalCoveringData.mem_refinedVCovers
@@ -3313,6 +3337,7 @@ theorem RationalCoveringData.standardCover_hV_glue_induction_via_vle
     exact C.hV_glue_step_from_laurent_halves f₀ S
       plus_section minus_section hrefine hLaurentGlue hOvlp fV compat
 
+omit [HasLocLiftPowerBounded A] in
 /-- **Plus-half `hBase_vle` transfer**. Given outer `hBase_vle` on
 `rationalOpen C.base.T C.base.s`, restricted to `S.erase f₀`, the
 corresponding hypothesis on the plus-half
@@ -5678,6 +5703,7 @@ No τ compatibility is required because each step closes via
 `hC_compat` or `restrictionMap_comp`, both Prop-irrelevant on their
 subset-proof arguments. -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- For each refined V-cover piece, `refines_contain` picks a member of the original
 covering that contains it: the composite of the plus-piece containment with the chosen
 target. Step 1 of `tateAcyclicity_Part2_direct_per_E`. -/
@@ -5726,6 +5752,7 @@ private theorem exists_target_cover_of_refines [HasLocLiftPowerBounded A] [Decid
     fun D => (D_sub_plusPiece_insert D).trans (D_E_sub D)
   exact ⟨D_E, D_E_mem, D_sub_DE⟩
 
+omit [HasLocLiftPowerBounded A] in
 /-- **`tateAcyclicity` Part 2 via direct per-E covering** — the Lane B
 closure consuming the canonical `refines_cover_per_E` predicate from
 `StandardCover.lean` (via `refines_by_standard_cover_per_E`) without any

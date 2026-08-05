@@ -60,6 +60,7 @@ theorem vpiQ_frobRoot_invP (n : ℕ) :
   ring
 
 
+omit [CharP F p] in
 /-- `rhoRight` is a rational-exponent radius. -/
 theorem rhoRight_eq_vpiQ (ϖ'' : PseudoUniformizer F) (a b : ℕ) :
     rhoRight p F ϖ'' a b = vpiQ p F ϖ'' ((b : ℚ) / (a : ℚ)) := by

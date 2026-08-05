@@ -25,6 +25,7 @@ variable {Γ₀ : Type u_2} [LinearOrderedCommGroupWithZero Γ₀]
   [TopologicalSpace Γ₀] [OrderClosedTopology Γ₀] [T2Space Γ₀]
   [ContinuousMul Γ₀]
 
+omit [OrderClosedTopology Γ₀] [ContinuousMul Γ₀] in
 theorem ne_zero_of_unit_completion
     (v : Valuation R Γ₀) (hv_cont : ContinuousAt v 1)
     {α : R} (hα_unit : IsUnit

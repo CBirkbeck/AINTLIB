@@ -2077,6 +2077,7 @@ private theorem tate_coord_relation {l : ℕ} {f : Fin l → A}
         (fun i ↦ (f i • x i : ↥(TateAlgebra A)).val) ▸ h'
   exact fun i ↦ TateAlgebra.smul_val_eq (f i) (x i) s
 
+omit [NonarchimedeanRing A] [IsNoetherianRing A] [IsTateRing A] in
 /-- A point of `A` lying in the image of `P.I ^ m` for *every* `m` is zero: the images of the
 powers of the ideal of definition form a neighbourhood basis of `0`, and `A` is Hausdorff. -/
 theorem eq_zero_of_mem_all_idealOfDefinition_pow_image
@@ -2088,6 +2089,7 @@ theorem eq_zero_of_mem_all_idealOfDefinition_pow_image
   obtain ⟨p, _, hp⟩ := P.hasBasis_nhds_zero.mem_iff.mp (hU_open.mem_nhds h0U)
   exact Set.disjoint_left.mp hUV (hp (hy p)) hxV
 
+omit [T2Space A] [IsNoetherianRing A] [IsTateRing A] in
 /-- Restrictedness of the coefficient family produced by the Artin–Rees decomposition: if
 `c' n j` lies in the image of `P.I ^ m` whenever every `(x i).val n` lies in the image of
 `P.I ^ (m + k₀)`, then each `fun n ↦ c' n j` is a restricted power series. -/
@@ -2120,6 +2122,7 @@ theorem mem_tateAlgebra_of_filtration_control
   by_contra h_all; push Not at h_all
   exact hn (hc'_filt n m h_all j)
 
+omit [IsTopologicalRing A] [T2Space A] [IsNoetherianRing A] [IsTateRing A] in
 /-- Unconditional decomposition by denominator-clearing, the `q = 0` half of the diagonal
 Artin–Rees argument (compare `exists_controlled_decomposition_of_forall_fail`, which does the
 same for a single element against ideal generators).
@@ -2186,6 +2189,7 @@ private theorem exists_syzygy_decomp_of_clear_denominators
     exact Finset.sum_congr rfl (fun j _ ↦ by
       simp only [c₀, Subring.coe_subtype]; ring)
 
+omit [IsTopologicalRing A] [T2Space A] [IsNoetherianRing A] [IsTateRing A] in
 /-- Artin–Rees filtration control for the syzygy decomposition: if every component of the
 coefficient vector at multi-index `n` lies `k₀` levels deep in the `P.I`-adic filtration, the
 vector decomposes over the generating family `s₀` with coefficients that are themselves at
@@ -2239,6 +2243,7 @@ private theorem exists_ideal_pow_decomp_of_forall_mem
     rw [← hlift₀_eq i]; exact h
   exact exists_ideal_pow_coeffs_of_forall_mem P.I m hAR s₀ hs₀ _ hlift₀_mem h_ker
 
+omit [IsTopologicalRing A] [T2Space A] [IsNoetherianRing A] [IsTateRing A] in
 /-- Assembling a coefficientwise decomposition into a trivial relation in `TateAlgebra A`:
 if every coefficient of every `x i` decomposes over a fixed family `a` with coefficients
 `c'' n j`, and each column `n ↦ c'' n j` is itself restricted, then the relation `f` on `x` is
@@ -2278,6 +2283,7 @@ private theorem isTrivialRelation_of_coeff_decomp
     exact Finset.sum_congr rfl (fun j _ ↦ by ring)
   · exact fun j ↦ hsyz j
 
+omit [NonarchimedeanRing A] [IsTopologicalRing A] [T2Space A] [IsNoetherianRing A] [IsTateRing A] in
 /-- An `A₀`-syzygy of the scaled family `g` is an `A`-syzygy of `f`: the scaling factor
 `w ^ N` is a unit, so it cancels. -/
 private theorem syzygy_relation_of_ker
@@ -2644,6 +2650,7 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A] [NonarchimedeanRing A]
 
 namespace TateAlgebra
 
+omit [IsNoetherianRing A] in
 /-- All coefficients of elements in the extended ideal `I · A⟨X⟩` lie in `I`.
 This uses `span_induction` with the predicate strengthened to all coefficients
 simultaneously, and the convolution formula for the scalar multiplication case. -/
@@ -2694,6 +2701,7 @@ theorem forall_coeff_mem_of_mem_ideal_map (I : Ideal A) (g : ↥(TateAlgebra A))
 
 variable [IsTopologicalRing A] [T2Space A] [IsTateRing A]
 
+omit [IsNoetherianRing A] [IsTopologicalRing A] [T2Space A] [IsTateRing A] in
 /-- The degenerate branch: when `h.val n` sits at no filtration level at all, scale it into `A₀`
 by a power of the pseudo-uniformizer, decompose there over `g₀`, and scale back. The control
 clause is vacuous because its hypothesis never holds. -/
@@ -2732,6 +2740,7 @@ private theorem exists_controlled_decomposition_of_forall_fail (I : Ideal A) (P 
   rw [hinv, hcf_A, Finset.mul_sum]
   congr 1; ext q; ring
 
+omit [IsNoetherianRing A] [IsTopologicalRing A] [T2Space A] [IsTateRing A] in
 /-- The main branch: `m` is the last level at which `h.val n` still lies in the filtration.
 Artin–Rees at `m + k₁` moves the witness into `P.I ^ m • I₀`; decomposing there over `g₀` gives
 coefficients at level `m`, which covers every `l ≤ m`, the rest being vacuous. -/
@@ -2847,6 +2856,7 @@ private theorem exists_controlled_decomposition (I : Ideal A) (P : PairOfDefinit
         k₁ hAR n (qn - 1) (hqn_valid (qn - 1) (by omega))
         (fun l hl ↦ hqn_fail_above l (by omega))
 
+omit [IsNoetherianRing A] [IsTopologicalRing A] [T2Space A] [IsTateRing A] in
 /-- Assembling the coefficientwise decomposition into an identity in `TateAlgebra A`:
 if every coefficient of `h` decomposes over the generators `g₀` with coefficients `c' n q`, and
 each `q`-column `n ↦ c' n q` is restricted, then `h` is that combination in the Tate algebra. -/
