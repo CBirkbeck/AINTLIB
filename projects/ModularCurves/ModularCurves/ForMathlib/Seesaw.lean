@@ -193,15 +193,27 @@ theorem orderedBaseCech_kernel_finrank_of_fibre_trivial
   exact (LinearMap.finrank_ker_baseChange_eq (↥(S.residueField s)) K (C.d 0 1).hom).trans
     (orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial hπ hM U hU hUaff s hfib)
 
-/-- **(KM-SEESAW-2′)** Constant residue rank `1` of `ker d⁰`, over a **reduced** base, makes
-`π_* M` invertible and the counit an isomorphism: `M ≅ π^* N`.
+/-- **(KM-SEESAW-2″)** Constant residue rank `1` of `ker d⁰` **together with fibrewise triviality**,
+over a **reduced** base, makes `π_* M` invertible and the counit an isomorphism: `M ≅ π^* N`.
 
-Constant fibre rank over a reduced base is what forces `ker d⁰` — which is `Γ(M)` as a module over the
-base ring — to be locally free of rank `1`; that is the only place `IsReduced` is used, and over a
-non-reduced base the conclusion is false (`k[ε]/(ε²)`, see the module docstring). The counit
-`π^* π_* M → M` is then a map of invertible sheaves that is nonzero on every fibre, hence an
-isomorphism, which is where the local-to-global glue (`nonempty_unitObj_iso_of_normalized_glue`) enters. -/
-theorem exists_pullback_iso_of_kernel_finrank
+The two hypotheses do different jobs and **neither can be dropped**:
+
+* `hrank` — constant residue rank — is what forces `ker d⁰`, i.e. `Γ(M)` as a module over the base ring,
+  to be locally free of rank `1`. This is the only place `IsReduced` is used; over a non-reduced base the
+  conclusion is false (`k[ε]/(ε²)`, see the module docstring).
+* `hfib` — fibrewise triviality — is what makes the counit `π^* π_* M → M` *surjective*: the generator of
+  `Γ(X_s, M_s) ≅ Γ(X_s, 𝒪)` is nowhere vanishing precisely because `M_s ≅ 𝒪_{X_s}`. Without it the counit
+  is only injective.
+
+**An earlier version of this leaf had `hrank` alone and was FALSE** — logged in
+`.mathlib-quality/b2_log.jsonl`. Counterexample: `S = Spec k`, `X = E` an elliptic curve, `M = 𝒪_E(P)`
+for a rational `P ≠ 0`. Riemann–Roch on genus `1` with `deg = 1 > 2g-2 = 0` gives `h¹ = 0` and
+`h⁰ = deg + 1 - g = 1`, stably under field extension, so `hrank` holds; but `𝒪_E(P) ≇ 𝒪_E` (degrees `1`
+and `0`), and indeed the counit is the inclusion `𝒪_E → 𝒪_E(P)`, injective and not surjective — the
+generator of `Γ(𝒪_E(P))` is the image of `1`, whose zero divisor is `P`. Substituting the *cohomological
+dimension* `h⁰ = 1` for the *geometric* hypothesis `M_s ≅ 𝒪` loses exactly the nowhere-vanishing
+information, and 0EX7's own hypothesis (1) is the geometric one. -/
+theorem exists_pullback_iso_of_kernel_finrank_of_fibre_trivial
     {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian X] [X.IsSeparated]
     {π : X ⟶ S}
     [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
@@ -211,7 +223,10 @@ theorem exists_pullback_iso_of_kernel_finrank
     (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
     (hrank : ∀ (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K],
       let C := orderedBaseCechComplex π M U
-      Module.finrank K (LinearMap.ker ((C.d 0 1).hom.baseChange K)) = 1) :
+      Module.finrank K (LinearMap.ker ((C.d 0 1).hom.baseChange K)) = 1)
+    (hfib : ∀ {k : Type u} [Field k] (x : Spec (.of k) ⟶ S),
+      Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
+          (Limits.pullback.fst π x)).obj M ≅ unitObj (Limits.pullback π x))) :
     ∃ N : S.Modules, IsInvertible N ∧
       Nonempty (M ≅ (AlgebraicGeometry.Scheme.Modules.pullback π).obj N) := by
   sorry
@@ -220,9 +235,10 @@ theorem exists_pullback_iso_of_kernel_finrank
 family of finite presentation over a **reduced** affine base, trivial on every fibre, is pulled back
 from the base.
 
-The composition of `orderedBaseCech_residueField_exact_of_fibre_trivial` (KM-SEESAW-1) with
-`exists_pullback_iso_of_residueField_exact` (KM-SEESAW-2), over the finite affine trivialising cover
-produced by `IsInvertible.exists_finiteAffineBaseCech_flat`. -/
+The composition of `orderedBaseCech_kernel_finrank_of_fibre_trivial` (KM-SEESAW-1′) with
+`exists_pullback_iso_of_kernel_finrank_of_fibre_trivial` (KM-SEESAW-2″), over the finite affine
+trivialising cover produced by `IsInvertible.exists_finiteAffineBaseCech_flat`. Note that `hfib` is fed
+to **both** — the descent step needs it in its own right, not merely through the rank. -/
 theorem exists_pullback_iso_of_fibrewise_trivial_of_isReduced
     {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian X] [X.IsSeparated]
     {π : X ⟶ S}
@@ -237,7 +253,7 @@ theorem exists_pullback_iso_of_fibrewise_trivial_of_isReduced
   obtain ⟨ι, hι, U, hU, hUaff, htriv, hflat⟩ := hM.exists_finiteAffineBaseCech_flat π
   letI : Fintype ι := Fintype.ofFinite ι
   letI : LinearOrder ι := LinearOrder.lift' (Fintype.equivFin ι) (Equiv.injective _)
-  exact exists_pullback_iso_of_kernel_finrank hπ hM U hU hUaff
-    fun K _ _ => orderedBaseCech_kernel_finrank_of_fibre_trivial hπ hM U hU hUaff K hfib
+  exact exists_pullback_iso_of_kernel_finrank_of_fibre_trivial hπ hM U hU hUaff
+    (fun K _ _ => orderedBaseCech_kernel_finrank_of_fibre_trivial hπ hM U hU hUaff K hfib) hfib
 
 end ModularCurves

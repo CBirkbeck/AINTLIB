@@ -335,3 +335,110 @@ and costed a "cheap route" without ever grepping `Picard/` for the conclusion `[
 needs extending: **before choosing a route, grep the tree for the route's characteristic conclusion,
 not just for the target theorem's statement.** A 505-line file named after the route's key property
 will not surface from greps for `weilPairing`.
+
+---
+
+# `/develop --decompose` — adversarial rounds, 2026-08-05
+
+Run at the user's instruction after a run of avoidable errors. Disposition: **red team**. Target: the
+`[KM-SEESAW]` sub-tree (`ForMathlib/Seesaw.lean`) and the parent leaf it serves,
+`exists_invertible_tensor_idealModule_add` (`Picard/SelfAdjointN.lean:267`).
+
+## Round 1 — the Seesaw sub-tree
+
+### Attack 5 (discharge) — PASSED, all ten citations real
+
+Every name the file's route cites, re-verified with **full** grep output (the earlier `head -1` that
+produced a false "stale citations" report is the reason this is spelled out):
+
+| cited | location | ✓ |
+|---|---|---|
+| `HomologicalComplex.baseChangeKernelZeroLinearEquiv` | `ForMathlib/LowDegreeFiniteProjectiveReplacement.lean:164` | ✓ |
+| `orderedBaseCechComplexBaseChangeIso` | `ForMathlib/AffineModuleCechBaseChange.lean:1037` | ✓ |
+| `kernelZeroLinearEquivOfHom` | `ForMathlib/CochainComplexKernel.lean:41` | ✓ |
+| `baseSectionsIsoKernelOrderedBaseCechDifferential` | `ForMathlib/SchemeModuleOrderedBaseCechZero.lean:256` | ✓ |
+| `baseCechKernelOrderedBaseChangeLinearEquiv` | `ForMathlib/SchemeModuleOrderedBaseCechZero.lean:161` | ✓ |
+| `orderedBaseCechObject_flat_of_isInvertible` | `ForMathlib/SchemeModuleOrderedBaseCech.lean:357` | ✓ |
+| `IsInvertible.exists_finiteAffineBaseCech_flat` | `Picard/InvertibleSheafBaseCechFlat.lean:23` | ✓ |
+| `nonempty_unitObj_iso_of_normalized_glue` | `Picard/RigidDescent.lean:65` | ✓ |
+| `LinearMap.finrank_ker_baseChange_eq` | `ForMathlib/BaseChangeKerCoker.lean:586` | ✓ |
+| `affineFieldFactor_residue_isScalarTower` | `ForMathlib/AffineFieldPointTower.lean:94` | ✓ (relocated today) |
+
+### Attack 2 (edge-case instantiation) on the descent leaf — **SUCCEEDED. Leaf was FALSE.**
+
+`exists_pullback_iso_of_kernel_finrank` assumed only `hrank`: `finrank K (ker (d⁰ ⊗ K)) = 1` at every
+field-valued point, i.e. `h⁰(X_s, M_s) = 1`. Instantiate at `S = Spec k`, `X = E` an elliptic curve,
+`M = 𝒪_E(P)` with `P ≠ 0` rational. Riemann–Roch at genus `1`, `deg = 1 > 2g-2 = 0`: `h¹ = 0`,
+`h⁰ = deg + 1 - g = 1`, stable under field extension — so `hrank` holds. The conclusion would give
+`M ≅ π^* N` with `N` invertible on `Spec k`, hence `𝒪_E(P) ≅ 𝒪_E`, false (degrees `1` vs `0`). The counit
+`π^*π_*𝒪_E(P) → 𝒪_E(P)` is the inclusion `𝒪_E → 𝒪_E(P)`: injective, **not** surjective.
+
+**Diagnosis.** Stacks 0EX7 assumes `ℰ|_{X_s} ≅ 𝒪^{⊕ r_s}` — *geometric* triviality. I replaced it by its
+*numerical* consequence `h⁰ = 1`, which loses the fact that the generator of `Γ(X_s, M_s)` is nowhere
+vanishing — exactly what makes the counit surjective. **Fixed**: the descent leaf is now
+`exists_pullback_iso_of_kernel_finrank_of_fibre_trivial`, carrying `hrank` *and* `hfib`, with the two
+roles spelled out in its docstring (`hrank` ⟹ local freeness of `π_*M`, needing `IsReduced`; `hfib` ⟹
+surjectivity of the counit). Logged in `b2_log.jsonl`. Build green; the parent still assembles, now
+feeding `hfib` to both children.
+
+### Attack 3 (hypothesis strength) on the rank leaf — flaw found, non-fatal
+
+`orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial` carries `[Flat π]`, `[IsProper π]`,
+`[LocallyOfFinitePresentation π]`, `[IsNoetherian X]`. None appears to be used: `Γ(X_s, 𝒪) = κ(s)` comes
+from `hπ` alone (instantiate `UniversallyOConnected` at `T = Spec κ(s)`, `U = ⊤` — that *is* the
+statement), and the base-change iso needs only `M.IsQuasicoherent`, from `hM`. **Over-specified.** Kept
+as-is for source-faithfulness to 0EX7's hypothesis set; recorded so a later `/generalise` can strip them.
+
+### Attack 4 (source drift) on both leaves — **the structural finding of this round**
+
+0EX7's own proof goes through Stacks 0BDP and derived-category machinery. My two leaves go through Čech
+kernel ranks. **They are therefore invented, not transcribed** — precisely what the source-faithfulness
+rule warns against — and *both* invented leaves have now turned out false (`KM-SEESAW-1` on exactness,
+`KM-SEESAW-2′` on the rank). Rule 4 of that section says two false leaves means the source proves it a
+different, easier way, or that the result is not the one needed. That is now an open question referred to
+the second opinion (below), not a settled plan.
+
+## Round 2 — the parent leaf, and whether the seesaw is on the critical path
+
+### Attack 1 (counterexample search) / grep-the-conclusion — no cube material exists
+
+`theorem.*cube` returns 74 raw hits and **zero** relevant declarations: all are `sCubeCoord₀/₁/₂`,
+`root_cube_eq`, `exists_unit_sq_cube` (Weierstrass coordinate algebra) and `atlasCubeCover` (an
+unrelated index set). No `theoremOfCube`, no `cubeBundle`, no `Poincare`/`poincareBundle`, no
+`theoremOfSquare`. The field-level square exists only as `tos_divisor`, `tos_toClass`,
+`tos_pullback_principal_of_{dual_additive_at,sigma_eq_zero}` (`HasseWeil/Pic0/`). **So the cube route is
+a from-scratch build**, and the earlier "the KM route is 95% done" framing covers `(★)`/`(★′)` only —
+*not* the leaf beneath them.
+
+### Consistency check that did pass
+
+The leaf's `π^* N'` correction term is consistent with the field-level `tos_divisor` having none: over a
+field `Pic(k) = 0`, so no correction term is expressible there. The relative statement needs one exactly
+because `Pic(T) ≠ 0`. Shapes agree.
+
+### Referred to the second opinion (not settled by me)
+
+`SelfAdjointN.lean:236` asserts an **exact** tensor iso is false, by "restricting along the constant zero
+section would force a degree-`2` bundle to agree with a degree-`4` one" for the family `E × E ⟶ E` with
+`Q = Q' = ` the diagonal. I could not verify this argument to my own satisfaction, and the leaf's *shape*
+(with or without `π^* N'`) depends on it. Asked as Q2 of the second opinion, together with: whether the
+cube instantiation at `X = Y = Z = E_T` genuinely satisfies 0BF4's hypotheses (2)/(3)/(4) and yields the
+`π^* N'` form (Q1); whether the cube needs the seesaw at all, given 0BF4's proof cites 37.33.1/4/7 and
+**not** 37.33.2 (Q3); whether a route avoids both (Q4); whether 0BF4 is valid over **non-reduced** bases,
+since the leaf must apply over arbitrary `T` while 0EX7 demands reducedness (Q5); and whether any
+standard reference states the relative square in the `π^* N'` form for transcription (Q6).
+
+## Step 4.6 — prior-B2 log consultation (16 entries)
+
+No name- or shape-match for the current leaves other than my own two entries from this session. But the
+log has a **dominant failure shape** across the project, and it is the one that bit me twice today:
+
+> 7 of the 14 substantive entries (`T-A4`, `T-E5`, `T-H4`, `T-H6`×2, `T-E5f`, `T-G3a-SUB3`) are
+> **hypothesis loss in transcription** — a statement that drops or weakens a hypothesis the source
+> maintains (`IsUnit (2 : R)`; "relatively representable"; global vs. local orbits; bare presheaf vs.
+> sheaf). `KM-SEESAW-1` and `KM-SEESAW-2′` are the same shape at one remove: substituting a
+> *cohomological/numerical* consequence for a *geometric* hypothesis.
+
+**Actionable rule for this project**: when a leaf replaces a source hypothesis with something derived
+from it, that substitution is the first thing to attack. In both of today's cases one edge-case
+instantiation (genus-1 `H¹ ≠ 0`; `𝒪(P)` of degree 1) killed the leaf immediately.
