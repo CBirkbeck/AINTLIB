@@ -17048,3 +17048,72 @@ Queued, with the cost that stopped each:
 * `wca_restrictionMap_bijective_of_rationalOpen_eq` — needs an import edge, not an unprivate.
 * `isBounded_OD` / `isBounded_unitBall` — a generalisation (one lemma about a normed ring's
   unit ball), not a dedup.
+
+### Deleting a declaration must take its modifiers with it
+
+Removing `productRestrictionSub_continuous''` from `StandardDescent` left its two-line
+`omit [T2Space A] [NonarchimedeanRing A] … in` behind, where it silently re-bound the *next*
+declaration:
+
+```
+error: StandardDescent.lean:234:0: cannot omit referenced section variable `inst✝⁶`
+```
+
+The delete helper walked up over a docstring and over `--` banner comments but not over
+`omit … in`. Same modifier list as the insert side (`set_option … in`, `@[attr]`, `open … in`,
+`omit … in`, `include … in`) — a deletion needs the identical walk-back, and it is the *next*
+declaration that reports the error, not the deleted one.
+
+### The most-repeated block in the tree is the `letI` instance triple
+
+An 8-line cross-file block scan returns **1,109** hits, and the top of the list is not proof
+logic — it is instance plumbing:
+
+```lean
+letI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+letI : IsNoetherianRing (presheafValue D₀) := hNoeth_B
+…
+```
+
+repeated 38× in `EmbeddingTopo` alone and 27–31× across `HubnerSeparation` /
+`LaneAReverseRoundTrip` / `LaurentOverlap`. This is the same thing that makes the four
+remaining over-50 proofs undecomposable, seen from the other end: the `letI` triple for a
+`RationalLocData` cannot be registered as a real instance because `Localization.Away D.s` does
+not determine `D`, so every consumer re-states it. **It is the single largest mechanical
+redundancy in the project**, and it needs a design decision (a bundled structure carrying the
+three instances, or a `local macro`), not a cleanup pass.
+
+By contrast the *name*-family scan is clean: the only 3+ member suffix families are
+`problem1…39` (Scottish Book numbering), `chartEquivStep1/2/3` and `unitCover_overlapEval{,_gen1,_gen2}`,
+all legitimate.
+
+### Not every copy is caused by `private` — check the *hypotheses* before repointing
+
+`StandardDescent.productRestrictionSub_continuous''` looked like the same case: a private copy
+of a lemma the file can already see publicly in `EmbeddingTopo`, statement byte-identical
+(`(C : RationalCoveringData A) : Continuous (productRestrictionSub A C)`). Repointing it failed:
+
+```
+error: StandardDescent.lean:306:5: failed to synthesize instance IsNoetherianRing A
+```
+
+`EmbeddingTopo`'s section auto-includes `[IsNoetherianRing A]`, which the `StandardDescent`
+call site does not have. So the *public* version is the **stronger** lemma and the private copy
+is the general one — the same inversion as `spa_topology_eq_generateFrom` / `…_huber`. Reverted;
+the real fix is an `omit` on the `EmbeddingTopo` declaration (its identical proof compiles
+without those instances, so the omit is sound), at 73 dependants.
+
+> Two identical *statements* are not the same lemma until the auto-included section variables
+> match. Compare the `variable` blocks — the visible binder list is not the whole signature.
+
+`RelativeDescentHuber.productRestrictionSub_continuous_local` failed the same way at its own
+call site, so the **entire four-member family** — `EmbeddingTopo` (public),
+`SheafyPair.…'` (public, and with *no in-repo call sites at all*),
+`StandardDescent.…''` (private), `RelativeDescentHuber.…_local` (public) — exists because the
+public one is over-hypothesised, not because anything is `private`. All four are one `omit`
+away from being one lemma. That correction matters for the earlier claim: `private` is the
+cause for `tsum_mem_of_isOpen_addSubgroup` and `presheafValue_eq_id_of_coeRingHom`, but
+**auto-included section variables are the cause for the larger family**.
+
+Applied in this batch: `presheafValue_eq_id_of_coeRingHom` un-privated in
+`RingEquivPresheafTransport`, the Huber copy deleted, its 2 call sites repointed.

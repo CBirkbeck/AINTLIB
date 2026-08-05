@@ -138,16 +138,6 @@ theorem RationalLocData.mapHuber_isRational (e : A ≃+* B) (he : Continuous e)
   rw [hset]
   exact (IsOpenMap.of_inverse he' e.apply_symm_apply e.symm_apply_apply) _ hD
 
--- Local copy of the (private) dense-extension identity engine.
-private theorem presheafValue_eq_id_of_coeRingHom' {R : Type*} [CommRing R]
-    [TopologicalSpace R] [IsTopologicalRing R] (E : RationalLocData R)
-    {G : presheafValue E → presheafValue E} (hG : Continuous G)
-    (h : ∀ l, G (E.coeRingHom l) = E.coeRingHom l) (x : presheafValue E) :
-    G x = x := by
-  have hdense : DenseRange (⇑(E.coeRingHom)) :=
-    @UniformSpace.Completion.denseRange_coe _ E.uniformSpace
-  exact congr_fun (hdense.equalizer hG continuous_id (funext h)) x
-
 section Value
 
 variable (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
@@ -223,7 +213,7 @@ noncomputable def presheafValueRingEquivHuber :
   toFun := pvFwdHuber e he he' D
   invFun := pvBwdHuber e he he' D
   left_inv x := by
-    refine presheafValue_eq_id_of_coeRingHom' D
+    refine presheafValue_eq_id_of_coeRingHom D
       ((presheafValueMapOfHom_continuous _ he' _ _ _ _).comp
         (presheafValueMapOfHom_continuous _ he _ _ _ _)) (fun l => ?_) x
     show pvBwdHuber e he he' D (pvFwdHuber e he he' D (D.coeRingHom l))
@@ -240,7 +230,7 @@ noncomputable def presheafValueRingEquivHuber :
         presheafValueMapOfHom_coe _ he' _ _ _ _ _,
       locMapHuber_roundtrip]
   right_inv y := by
-    refine presheafValue_eq_id_of_coeRingHom' (D.mapHuber e he he')
+    refine presheafValue_eq_id_of_coeRingHom (D.mapHuber e he he')
       ((presheafValueMapOfHom_continuous _ he _ _ _ _).comp
         (presheafValueMapOfHom_continuous _ he' _ _ _ _)) (fun l => ?_) y
     show pvFwdHuber e he he' D (pvBwdHuber e he he' D

@@ -464,7 +464,7 @@ private theorem locMap_roundtrip_symm
 -- A continuous self-map of a completed localization agreeing with the identity
 -- on the dense localization image is the identity (the shared dense-extension
 -- uniqueness engine for the two inverse-law fields below).
-private theorem presheafValue_eq_id_of_coeRingHom {R : Type*} [CommRing R]
+theorem presheafValue_eq_id_of_coeRingHom {R : Type*} [CommRing R]
     [TopologicalSpace R] [IsTopologicalRing R] (E : RationalLocData R)
     {F : presheafValue E → presheafValue E} (hF : Continuous F)
     (h : ∀ l, F (E.coeRingHom l) = E.coeRingHom l) (x : presheafValue E) : F x = x := by
