@@ -16344,3 +16344,43 @@ lost original's 14, and I noted it then without drawing the consequence:
 Concretely: `…_pair_package_exists` sits at 49–51 depending on convention, so it drifts in and
 out of the list. The substantive result here is `wedhorn_lemma_834` **132 → 123**, which both
 conventions agree on.
+
+### MEASUREMENT CORRECTION: the over-50 board is 22, not 72
+
+Chasing an impossible 71 → 72 reading exposed a real off-by-one in my rebuilt `scope.py`.
+
+`body_split` returned the offset just past the first depth-0 `:=`, and the body was then counted
+from **mid-line** — so the ` by` tail of the `… := by` line was counted as a body line. Every
+declaration was over-counted by exactly 1.
+
+The tell was in the data all along: **50 declarations measured exactly 51.** A spike that size
+sitting one unit above the threshold is an artifact, not a distribution.
+
+Fix: start counting at the line *after* the `:=` line.
+
+```python
+nl = chunk.find("\n", cut)
+c = code_lines(chunk[nl + 1:])
+```
+
+Verified by hand on `Module.Flat.quotient_of_flat_of_saturated`: it counts 50, not 51. (My
+*hand* check first said 51 too — because its ad-hoc extent regex treated `/--` as a terminator
+but not `/-!`, so it swallowed the following section header. `scope.py`'s STOP regex has both.
+Two different scripts, two different off-by-ones, agreeing only once both were fixed.)
+
+**Consequences:**
+
+| | old | corrected |
+|---|---|---|
+| bodies over 50 | 72 | **22** |
+| `wedhorn_lemma_834` | 123 | 122 |
+| `presheafValue_mvRestricted_surjection` | 189 | 188 |
+
+Large targets shift by 1; the *count* collapses because the 51-spike was entirely spurious.
+
+> Every number I reported as an over-50 count this session was inflated. The per-target
+> before/after figures are unaffected (both ends carried the same +1), and those remain the
+> honest measure — but "the count went from N to M" was measuring my own bug.
+
+The real remaining board is 22 declarations, top: two at 188 (`presheafValue_mvRestricted_surjection`,
+`idealOfDef_pow_isClosed_aux`), 136, 124, 122.
