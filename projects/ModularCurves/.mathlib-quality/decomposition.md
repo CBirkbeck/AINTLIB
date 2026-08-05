@@ -845,3 +845,94 @@ without a scoping decision, and that decision is not a decomposition question:
 prevent drifting into it. Note the gate says "do-not-formalize-**from-memory**"; rounds 4–9 worked from the
 primary sources (KM pp. 11, 63–67; Mumford pp. 51–53), with the pages quoted verbatim above, which is what
 the gate asks for.
+
+---
+
+# Round 11 — the CURRENT plan checked with gpt-5.6-sol (the round-3 check was of the old, discarded plan)
+
+## Independent agreement on the three scoping questions
+
+I recorded my own verdicts from the KM pages *before* the review landed, so the two are independent:
+
+| question | my verdict (from KM pp. 63–67) | reviewer | agree? |
+|---|---|---|---|
+| box 2 `relative-duality-genus-one` needed for 2.1.2? | **No** — (2.2.1.1) appears *after* 2.1.2's Q.E.D. on p. 67, inside §2.2, and defines `ω`; step (d) needs only `R¹f_*L = 0` for `deg L = 1` | **No** — "KM begins the duality discussion only after finishing 2.1.2, in §2.2.1"; knowing `R¹π_*𝒪_E` gives neither `H¹(E_s,L_s)=0` nor base change for `R¹f_*L` | ✓ |
+| box 3 `relative-Picard` (representability) needed? | **No** — KM p. 64 defines `Pic⁽¹⁾` as a *set* of iso classes mod `f^*`; (b)–(f) build maps of sets | **No** — "Nothing in (a)–(f) requires a representing scheme" | ✓ |
+| box 4 `Poincare` needed for the leaf? | **No** — absent from pp. 63–67 | **No** | ✓ |
+
+So three of the six fenced boxes are **off the critical path for the leaf**. The fence is defensible only
+if box 5 silently contains KM steps (c)–(f); as a decomposition it is "simultaneously over-scoped and
+incomplete".
+
+## Three cited discharges — all verified
+
+| citation | verified |
+|---|---|
+| `ModularCurves.grpObj_mul_unique` (`EllipticCurve/RecordGroupUnique.lean:414`) and `isMonHom_of_pointedIso_records` (`:439`) | ✓ **and the file is sorry-free (0 sorries)** |
+| `CategoryTheory.CommGrpObj.ofRepresentableBy` (mathlib `CategoryTheory/Monoidal/Cartesian/CommGrp_.lean:34`) | ✓ |
+| `AlgebraicGeometry.Scheme.Hom.isIso_iff_finrank_eq` (mathlib `AlgebraicGeometry/Morphisms/FlatRank.lean:273`) — "a finite flat locally finitely presented morphism is an iso iff `finrank = 1`" | ✓ |
+
+Two of these collapse leaves I had listed as gaps:
+* **L7** (KM Lemma 1.2.7's converse: a degree-one effective Cartier divisor is a section) is mathlib's
+  `isIso_iff_finrank_eq` — precisely KM's own one-sentence reason, already formalised.
+* **The comparison with the carried group law is already proved in this project, sorry-free.**
+  `grpObj_mul_unique`: two group-object structures on the same pointed genus-one curve with unit `0` have
+  the same multiplication. That is the ingredient round 10 said was missing.
+
+## A correction to my round 8, and it matters
+
+I claimed the Čech layer "expresses L3 and L4 without any derived functor" and so discharges KM step (d).
+**That is wrong.** Those results are typed to `sectionPoleSheafPower π z hz n`; KM's `L` is an *arbitrary*
+fibrewise-degree-one invertible sheaf, and setting `n = 1` does not make an arbitrary such `L` equal to
+`𝒪([0])`. Identifying them *via* relative Abel would be **circular** — Abel is what we are proving. The
+Čech layer supplies the homological machinery and the model case only. The valid bridge is: prove
+`H¹(L_s) = 0` and `h⁰(L_s) = 1` for arbitrary degree-one `L_s` at field level by Riemann–Roch/Serre
+duality, take a finite affine trivialising cover for arbitrary `L` (`IsInvertible.exists_finiteAffineBase
+Cech_flat` applies), transport the fibre computation into *that* complex, then conclude base-change
+compatibility and rank-one projectivity of its degree-zero kernel from flatness + boundedness + finite
+homology. That is genuine remaining work.
+
+## The circularity trap, and the non-circular API
+
+The tempting argument — "KM constructs *the unique* Abel group law, therefore it equals my carried law" —
+is **circular**: KM's uniqueness is uniqueness among laws satisfying the Abel criterion, and that the
+carried law satisfies it is the leaf. The clean order is group-law-free first, carried-law corollary
+second:
+
+1. define `abelSum P Q` **without mentioning `E.grp`** — the unique section representing
+   `I(P)⁻¹ ⊗ I(Q)⁻¹ ⊗ I(0)` in `Pic⁽¹⁾`;
+2. prove the ideal-sheaf relation for `abelSum`;
+3. package `abelSum` as a commutative group object via `CommGrpObj.ofRepresentableBy`;
+4. apply the **already-proved** `grpObj_mul_unique` to get `abelSum P Q = P +_carried Q`;
+5. rewrite the relation from step 2 — that is the LEAF, with `N' = L₀^∨`.
+
+**Type-level warning, independently consistent with the tree.** `picRel = ker(0^*)` is *larger* than
+`Pic⁰` — over a field it contains classes of every degree — so it must not be the target of an Abel
+isomorphism. `SelfAdjointN.lean`'s own docstring already says exactly this ("with `picRel = Ker(0^*)` as
+codomain, 'sectionToPicRel is an isomorphism' is **false**"). Two independent sources, same warning.
+
+## Revised minimal plan for the LEAF
+
+```
+box 1  coherent-base-change                        ✓ ALREADY PROVED (UniversallyOConnected)
+  ↓
+[A] degree-one cohomology/base-change for ARBITRARY L   ← the one real gap
+      · field level: H¹(L_s)=0, h⁰(L_s)=1 for deg 1     (Riemann–Roch / Serre duality)
+      · transport to the Čech complex of an arbitrary L (cover: exists_finiteAffineBaseCech_flat)
+      · ⟹ f_*L invertible, base-change compatible       (Mumford AV p.53 Cor.3 — reduced-free)
+  ↓
+[B] natural set-valued Abel equivalence E(T) ≃ Pic⁽¹⁾(E_T/T)
+      · step (e) 𝒪 --ℓ--> L universally injective
+      · step (f) ✓ mathlib isIso_iff_finrank_eq
+      · step (c) noetherian approximation ✓ present in Picard/
+  ↓
+[C] CommGrpObj.ofRepresentableBy                   ✓ mathlib
+  ↓
+[D] comparison with E.grp                          ✓ ALREADY PROVED, sorry-free (grpObj_mul_unique)
+  ↓
+LEAF
+```
+
+Boxes 2, 3, 4 postponed off the critical path; box 5 replaced by the narrower natural equivalence [B];
+box 6 split, with its comparison half already in hand. **The one genuinely new package is [A]**, and it is
+substantially cheaper than the six-box fence — three of whose boxes turn out not to be needed at all.
