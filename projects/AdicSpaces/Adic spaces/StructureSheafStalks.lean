@@ -420,6 +420,7 @@ theorem restrictionMapHom_comp_limitEvalHom {V : Opens ↥(Spa A A⁺)}
     (restrictionMapHom i.D k.D h).comp (limitEvalHom i) = limitEvalHom k :=
   RingHom.ext fun x => x.2 i k h
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- **Choice independence**: any rational index containing the point computes
 `openValue`. -/
 theorem comap_limitEvalHom_pointValue {V : Opens ↥(Spa A A⁺)}
@@ -484,6 +485,7 @@ theorem openValue_vle_restrict {V W : Opens ↥(Spa A A⁺)} (h : W ≤ V)
       ↔ (openValue W hvW).vle (limitRestrict h f) (limitRestrict h g) := by
   rw [← comap_limitRestrict_openValue h hvW, comap_vle]
 
+omit [IsRingOfIntegralElements A⁺] in
 /-- The `vle`-relation of the point transports along an equality of opens.
 
 `rw` cannot do this substitution at the use site: the membership and containment
@@ -541,6 +543,7 @@ def stalkVle (v : ↥(Spa A A⁺))
     ∧ (spaRingPresheaf A).germ U v hvU g = b
     ∧ (openValue U hvU).vle f g
 
+omit [IsTopologicalRing A] [IsRingOfIntegralElements A⁺] in
 /-- Any two stalk elements admit common representatives. -/
 theorem exists_common_rep (v : ↥(Spa A A⁺))
     (a b : ToType ((spaRingPresheaf A).stalk v)) :
@@ -584,6 +587,7 @@ theorem stalkVle_elim {v : ↥(Spa A A⁺)}
   rw [← hres₁, ← hres₂] at hfinal
   exact hfinal
 
+omit [IsRingOfIntegralElements A⁺] in
 theorem stalkVle_intro {v : ↥(Spa A A⁺)} {U : Opens ↥(Spa A A⁺)}
     {hvU : v ∈ U} {f g : ↥(limitSections U)}
     (h : (openValue U hvU).vle f g) :

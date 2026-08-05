@@ -1138,6 +1138,7 @@ variable [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺ : Subring A)
 variable (D₀ : RationalLocData A) [DecidableEq (presheafValue D₀)]
 
 omit [HasLocLiftPowerBounded A] in
+omit [HasLocLiftPowerBounded A] in
 /-- Casting along a datum equality is continuous (subst-form). -/
 theorem continuous_cast_presheafValue {E₁ E₂ : RationalLocData (presheafValue D₀)}
     (heq : E₁ = E₂) :

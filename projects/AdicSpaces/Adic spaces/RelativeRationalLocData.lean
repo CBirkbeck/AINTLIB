@@ -563,6 +563,7 @@ noncomputable def relativeLaurentNormalized_forwardInnerLocHom
   IsLocalization.Away.lift (S := Localization.Away D.s) (R := A) D.s
     (relativeLaurentNormalized_Ds_isUnit_in_Loc E D hsub)
 
+omit [HasLocLiftPowerBounded A] in
 /-- forwardInnerLocHom on algebraMap A image equals algebraMap (presheafValue E)
 of E.canonicalMap. -/
 theorem relativeLaurentNormalized_forwardInnerLocHom_algebraMap
@@ -625,6 +626,7 @@ theorem relativeLaurentNormalized_forwardLocHom_factor
   -- by definition of canonicalMap.
   rfl
 
+omit [HasLocLiftPowerBounded A] in
 /-- `relativeLaurentNormalized_forwardInnerLocHom` sends `divByS t D.s` to
 `divByS (E.canonicalMap t) (E.canonicalMap D.s)`. Used in continuity. -/
 theorem relativeLaurentNormalized_forwardInnerLocHom_divByS

@@ -51,6 +51,7 @@ theorem RationalLocData.interValid_isRational (D E : RationalLocData A)
   RationalLocData.isRational_of_pow_le _
     (D.interDatumOpen_pow_le E _ _ _ _)
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] [HasLocLiftPowerBounded A] in
 theorem RationalLocData.interValid_subset_left (D E : RationalLocData A)
     (hD : D.IsRational) (hE : E.IsRational) :
     rationalOpen (D.interValid E hD hE).T (D.interValid E hD hE).s ⊆
@@ -58,6 +59,7 @@ theorem RationalLocData.interValid_subset_left (D E : RationalLocData A)
   rw [D.interValid_rationalOpen E hD hE]
   exact Set.inter_subset_left
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] [HasLocLiftPowerBounded A] in
 theorem RationalLocData.interValid_subset_right (D E : RationalLocData A)
     (hD : D.IsRational) (hE : E.IsRational) :
     rationalOpen (D.interValid E hD hE).T (D.interValid E hD hE).s ⊆
@@ -76,6 +78,7 @@ theorem IsSheafyOn.separationSub [T2Space A] [NonarchimedeanRing A]
     Function.Injective (productRestrictionSub A C) :=
   (hOn.embedding C hC hbase).injective
 
+omit [DecidableEq A] in
 omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] [HasLocLiftPowerBounded A] in
 /-- A rational datum whose trace lies in a trace-subset of `S` has its
 rational open inside `S`. -/
@@ -86,6 +89,7 @@ theorem RationalLocData.rationalOpen_subset_of_trace {S : Set (Spv A)}
   fun v hv => hWS (hDW (show (⟨v, rationalOpen_subset_spa hv⟩
     : ↥(Spa A A⁺)) ∈ spaOpen D from hv))
 
+omit [DecidableEq (RationalLocData A)] [IsRingOfIntegralElements A⁺] [HasLocLiftPowerBounded A] in
 /-- **Finite rational refinement over a general Huber ring** (the Tate-free
 `exists_finite_rational_refinement`): compactness supplied as a hypothesis,
 the basis from `exists_isRational_spaOpen_subset_huber`. -/

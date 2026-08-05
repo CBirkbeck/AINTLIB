@@ -17385,3 +17385,28 @@ state, and dropped ~120 MB of this session's own build logs.
 > but **"is the file it was writing still whole?"** Compare the line count against `git show
 > HEAD:` before doing anything else — a truncated `.lean` still parses as far as it goes and
 > can build green while silently missing declarations.
+
+### Where the campaign converges: 768 omits, and a hard core that resists
+
+Finishing round 2's bisection on the eight files the ENOSPC interrupted gives **13 of 67** —
+a far lower yield than round 1's 110/182, and the split is informative:
+
+```
+ 3/32  RelativeDescentHuber      0/14  Wedhorn828        0/3  SheafyPair
+ 4/ 6  StructureSheafStalks      0/ 3  RelativePieceKeystone   0/1  StandardDescent
+ 4/ 5  RestrictedLimitSheaf      2/ 3  RelativeRationalLocData
+```
+
+Four files now yield **nothing at all**, twice over. These are the declarations whose
+"unused" section variables are unused only *until you remove them* — the instance is reached
+through unification rather than syntactically, so dropping it changes which instance path
+elaboration takes. The linter cannot see that, and no amount of bisection recovers it: the
+suggestion is simply wrong for those declarations.
+
+Campaign total: **768 omits**, `unusedSectionVars` 714 → ~305, total AdicSpaces warnings
+4,398 → ~3,835.
+
+> The value of the per-omit gate is not only what it keeps but what it *certifies*: after
+> bisection, a rejected omit has been individually tried and individually refused. That is a
+> much stronger statement than "the file did not build", and it is what makes the residue
+> honest rather than merely unfinished.
