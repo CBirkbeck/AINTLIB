@@ -16821,3 +16821,118 @@ This also explains the earlier "0 blocks" readings and the two blank target name
 `instance` declarations have no name to extract and no `have`-chain to survey.
 
 **Actionable board: 14 proofs**; excluding the two sorry-bearing ones leaves **12** that are mine.
+
+### `include … in` is a fourth modifier kind — and inserting below it *steals* it
+
+`surjective_evalBIHom₂` carries `include hφb in` above its docstring, and
+`RobbaPresentation.lean` uses that form **34 times**. `decl_top` recognised `set_option` /
+`@[…]` / `open … in` / `omit … in` but **not** `include … in`, so it would have inserted the new
+lemma *between* the include and the target — transferring `hφb` to my lemma and stripping it
+from the theorem that needs it.
+
+Worse than the earlier modifier failures: those produced errors, this one produces a *different
+program* that might still compile. Fixed by adding it to `MODIFIER`, plus a post-condition
+asserting the include is still directly above the target's docstring after the edit.
+
+> Modifier kinds seen: `set_option … in`, `@[attr]`, `open … in`, `omit … in`, `include … in`.
+> Enumerate them from the *file* before trusting a walk-back — a missing one relocates meaning
+> rather than breaking it.
+
+## Session: board 17 → 7, and three of the removals were measurement bugs
+
+Committed this session: `d893fbbc0` (Robba / Wedhorn828 / Groebner), `a422375c8`
+(TopologyComparison ×8).
+
+| decl | before | after | how |
+|---|---|---|---|
+| `locToQuotientOneSubfX_gen_continuous_canonical` | 136 | 44 | 5 lifts + dead-code removal |
+| `locToQuotient_mul_small_constant_mem` | 96 | 44 | 3 lifts |
+| `ker_le_of_ext` | 51 | 32 | completion-extension lift |
+| `approx_generation` | 53 | 41 | gaussNorm-zero branch |
+| `surjective_evalBIHom₂` | 51 | 27 | `BIProd_inv_pow_mul_pImage_pow` |
+| `CompleteSpace (RestrictedLaurent R)` | 61 | 42 | Step-5 lift |
+
+### `decl_top` returned `i-1` when the target had no docstring
+
+The walk-back helper started at `j = i - 1` and only ever decremented, so with no docstring
+and no modifier it returned *the line above the declaration* — which is the **last line of the
+previous proof**. The Groebner lemma was inserted between the final two lines of
+`approx_generation_key`, splitting an anonymous constructor:
+
+```
+error: unexpected token '/--'; expected '⟩'
+```
+
+It survived a dozen earlier lifts because every one of those targets had a docstring, and in
+that case the `-/` branch walks back correctly. Fixed to start at `j = i` and only move up for
+a docstring or a modifier.
+
+> A helper that is *usually* right because your inputs are usually uniform is a latent bug, not
+> a working helper. The guard that caught it was the printed line count, not the build.
+
+### Three board entries were `scope.py` artifacts, not long proofs
+
+`body_split` cut at the first depth-0 `:=`. Two other constructs put a `:=` there:
+
+* **`letI … := …` inside a *statement*.** `isSheafy_presheafChart` opens with four of them, so
+  everything from the first `letI`'s value onward was counted as body: measured **80**, real
+  body **48**. Anchoring on the binder's own *line* is not enough either — the `:=` routinely
+  lands several continuation lines below the keyword. Fixed by counting pending depth-0 binder
+  keywords and letting each one claim the next depth-0 `:=`.
+* **`where`-instances.** Every field of a structure instance has its own depth-0 `:=`, so
+  `instance : CommRing (RestrictedLaurent R) where` measured 67 — the *sum* of 20 independent
+  field obligations, longest of which is 30. A `where`-block has no single proof body; it is
+  now excluded outright (354 declarations).
+
+> Before decomposing a target, confirm the number is measuring a proof. Three of seventeen
+> entries dissolved on inspection, and one of them (`isSheafy_presheafChart`) was already
+> compliant.
+
+### Two elaboration constraints that only a build finds
+
+* **`OpenAddSubgroup` with a non-ambient topology has no `SetLike` coercion.** A binder
+  `@OpenAddSubgroup G _ (quotientOneSubfXIdealTopology s)` type-checks, but `(W : Set _)` then
+  fails with `expected Set ?m` — instance search for `SetLike` uses whatever `TopologicalSpace G`
+  it infers, not the one written. The fix is to *not carry the topology*: take a plain
+  `AddSubgroup` where only `add_mem` and the underlying set are used, or a bare `Set` plus the
+  `∈ nhds 0` fact where only `isOpen`/`zero_mem` were used. Both lemmas got shorter.
+* **A lifted lemma must repeat the consumer's `omit`.** The caller carries
+  `omit [PlusSubring A] [IsHuberRing A] in`; a lemma without it auto-includes `[PlusSubring A]`,
+  and the call site cannot synthesize what the caller omitted —
+  `failed to synthesize instance PlusSubring A`, reported at the *call*, not the lemma.
+* **`Insert A (Finset A)` in a statement is not covered by the body's `classical`.** Moving an
+  `insert` out of a `have` and into a lemma's *statement* needs `open Classical in` on the
+  lemma (the file's own `genPiece_relOverlap_p_decomp` does exactly this).
+* **`set X := e with h` blocks bottom-up elaboration of a membership proof.** Hoisting
+  `(unitCoUnit_inter_one_mem _ _)` to `have hone := unitCoUnit_inter_one_mem D₀.P f` broke: the
+  expected type is `1 ∈ OD.T` with `OD` `set`-bound, and the underscore form was being solved
+  *against* that expectation. Reverted — it was worth two lines.
+
+### Section variables lead the argument list — but only the explicit ones
+
+`BIProd_inv_pow_mul_pImage_pow k z` put `k` where the auto-included `p` goes, so Lean asked for
+`Fact (Nat.Prime k)`. In `RobbaPresentation` the section variables `(p) (F) (ϖ)` are explicit
+and must be passed; `ρ₁`, `hρ₁0`, … are implicit and must not. In `Wedhorn828` and
+`TopologyComparison`, `{A}` is implicit and nothing is passed. **Read the `variable` block
+before writing the call** — the binder mode, not the presence of the variable, decides.
+
+### Remaining board: 7, of which 2 are the producer's
+
+* `ofValuation_restrictIdeal_isInSpvAI` (68) and `berkeley_6_2_8` (66) are **sorry-bearing** —
+  the owning producer's WIP, never fleet work.
+* `presheafValue_mvRestricted_surjection` (188), `idealOfDef_pow_isClosed_aux` (188),
+  `genPiece_relative_overlap_square₂` (95) and
+  `presheafValue_mvRestricted_fU_uniformContinuous` (68) are **front-loaded `letI` walls**:
+  the whole prologue is instance plumbing and *every* instance is consumed downstream, so
+  nothing detaches. `genPiece_relative_overlap_square₂` is the clearest case — 46 of its 95
+  lines are twelve `letI`s for four `RationalLocData`, three lines each, none of which can be
+  registered as a real instance (`Localization.Away D.s` does not determine `D`).
+* `wedhorn_lemma_834` (122) is the one genuinely actionable target left.
+
+### Disk
+
+Second whole-fleet ENOSPC of the project (see `disk-full-elan-toolchain-pileup`). At 100% the
+**Bash tool itself** stops working — it cannot write a command's output file — and so do
+`Write`/`Edit`, which stage through a temp file. Only reads work. Recovered ~350 MB by deleting
+this session's own gate logs and the backups of already-committed files; that is enough for one
+module at a time, not for a full-workspace gate.

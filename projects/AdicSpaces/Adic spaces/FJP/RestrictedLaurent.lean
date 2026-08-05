@@ -486,6 +486,33 @@ theorem norm_W_mul [CompleteSpace R] [NormOneClass R] (f : RestrictedLaurent R) 
     rw [coeff_Wu_mul] at h
     simpa using h
 
+/-- If the coefficients of `u i` approximate a family `a` uniformly in the index, then `a` is
+itself restricted: `‖a n‖ → 0` along `cofinite`. A three-ε argument against a single `u N₁`,
+using nothing about `u` beyond that one member being restricted. -/
+private theorem tendsto_norm_cofinite_of_uniform_approx {u : ℕ → RestrictedLaurent R}
+    {a : ℤ → R}
+    (unif_conv : ∀ ε > (0 : ℝ), ∃ N, ∀ i ≥ N, ∀ n, ‖(u i).coeff n - a n‖ ≤ ε) :
+    Tendsto (fun n => ‖a n‖) cofinite (𝓝 0) := by
+  rw [Metric.tendsto_nhds]
+  intro ε hε
+  obtain ⟨N₁, hN₁⟩ := unif_conv (ε / 3) (by linarith)
+  have h_uN1 := (u N₁).tendsto_coeff
+  rw [Metric.tendsto_nhds] at h_uN1
+  have h_uN1' := h_uN1 (ε / 3) (by linarith)
+  rw [Filter.eventually_cofinite] at h_uN1' ⊢
+  refine h_uN1'.subset fun n hn => ?_
+  simp only [Set.mem_setOf_eq, dist_zero_right, Real.norm_eq_abs, not_lt,
+    abs_of_nonneg (norm_nonneg _)] at hn ⊢
+  have h1 : ‖(u N₁).coeff n - a n‖ ≤ ε / 3 := hN₁ N₁ le_rfl n
+  have h2 : ‖a n‖ ≤ ‖(u N₁).coeff n - a n‖ + ‖(u N₁).coeff n‖ := by
+    calc ‖a n‖ = ‖a n - (u N₁).coeff n + (u N₁).coeff n‖ := by rw [sub_add_cancel]
+      _ ≤ ‖a n - (u N₁).coeff n‖ + ‖(u N₁).coeff n‖ := norm_add_le _ _
+      _ = ‖(u N₁).coeff n - a n‖ + ‖(u N₁).coeff n‖ := by rw [norm_sub_rev]
+  by_contra hcon
+  push Not at hcon
+  have : ‖(u N₁).coeff n‖ < ε / 3 := hcon.trans_le (by linarith)
+  linarith [hn, this]
+
 /-- Completeness of the restricted Laurent ring over a complete base ([FJP] §1: Banach
 direct sums / restricted series are complete). -/
 instance [CompleteSpace R] [NormOneClass R] : CompleteSpace (RestrictedLaurent R) := by
@@ -522,26 +549,7 @@ instance [CompleteSpace R] [NormOneClass R] : CompleteSpace (RestrictedLaurent R
     rw [dist_eq_norm] at h_dist
     exact ((coeff_le (u i) (u j) n).trans_lt h_dist).le
   -- Step 5: the pointwise limit is restricted.
-  have hf : Tendsto (fun n => ‖a n‖) cofinite (𝓝 0) := by
-    rw [Metric.tendsto_nhds]
-    intro ε hε
-    obtain ⟨N₁, hN₁⟩ := unif_conv (ε / 3) (by linarith)
-    have h_uN1 := (u N₁).tendsto_coeff
-    rw [Metric.tendsto_nhds] at h_uN1
-    have h_uN1' := h_uN1 (ε / 3) (by linarith)
-    rw [Filter.eventually_cofinite] at h_uN1' ⊢
-    refine h_uN1'.subset fun n hn => ?_
-    simp only [Set.mem_setOf_eq, dist_zero_right, Real.norm_eq_abs, not_lt,
-      abs_of_nonneg (norm_nonneg _)] at hn ⊢
-    have h1 : ‖(u N₁).coeff n - a n‖ ≤ ε / 3 := hN₁ N₁ le_rfl n
-    have h2 : ‖a n‖ ≤ ‖(u N₁).coeff n - a n‖ + ‖(u N₁).coeff n‖ := by
-      calc ‖a n‖ = ‖a n - (u N₁).coeff n + (u N₁).coeff n‖ := by rw [sub_add_cancel]
-        _ ≤ ‖a n - (u N₁).coeff n‖ + ‖(u N₁).coeff n‖ := norm_add_le _ _
-        _ = ‖(u N₁).coeff n - a n‖ + ‖(u N₁).coeff n‖ := by rw [norm_sub_rev]
-    by_contra hcon
-    push Not at hcon
-    have : ‖(u N₁).coeff n‖ < ε / 3 := hcon.trans_le (by linarith)
-    linarith [hn, this]
+  have hf := tendsto_norm_cofinite_of_uniform_approx unif_conv
   set F : RestrictedLaurent R := ⟨a, hf⟩ with hF
   -- Step 6: `u → F` in the Gauss norm.
   refine ⟨F, Metric.tendsto_atTop.mpr fun ε hε => ?_⟩

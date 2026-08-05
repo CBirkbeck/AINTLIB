@@ -4808,6 +4808,21 @@ private theorem unitCover_overlapDatum_B_s_eq
   rw [show ((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) =
     (1 : presheafValue D₀) * D₀.canonicalMap f from rfl, one_mul]
 
+open Classical in
+/-- Every element of the doubly-intersected datum's `T` is a product of one element from each
+side: that `T` is by construction the image of the product Finset under multiplication. -/
+private theorem unitCover_exists_factor_pair (D₀ : RationalLocData A) (f t : A)
+    (ht : t ∈ ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f)).T) :
+    ∃ p ∈ insert (D₀.s * 1) (D₀.interSamePair (unitDatum D₀.P f) rfl).T,
+      ∃ q ∈ insert (D₀.s * f) (D₀.interSamePair (coUnitDatum D₀.P f) rfl).T, t = p * q := by
+  have ht' : t ∈ ((insert (D₀.s * 1) (D₀.interSamePair (unitDatum D₀.P f) rfl).T).product
+      (insert (D₀.s * f) (D₀.interSamePair (coUnitDatum D₀.P f) rfl).T)).image
+      (fun r : A × A => r.1 * r.2) := ht
+  rw [Finset.mem_image] at ht'
+  obtain ⟨⟨p, q⟩, hpq, rfl⟩ := ht'
+  exact ⟨p, (Finset.mem_product.mp hpq).1, q, (Finset.mem_product.mp hpq).2, rfl⟩
+
 set_option linter.unusedSectionVars false in
 /-- **Relative-overlap per-generator witnesses (O4)**: every `t ∈ T_inter` (a product
 `p·q` over the two factor-data) has a `locSubring`-witness over the B-side annulus datum.
@@ -4856,17 +4871,12 @@ private theorem unitCover_relOverlap_forward_witness
     ((unitCover_relOverlap_aMb_isUnit D₀ f).map OD.coeRingHom)
 
   -- decompose `t = p · q`
-  have ht' : t ∈ ((insert (D₀.s * 1) (D₀.interSamePair (unitDatum D₀.P f) rfl).T).product
-      (insert (D₀.s * f) (D₀.interSamePair (coUnitDatum D₀.P f) rfl).T)).image
-      (fun r : A × A => r.1 * r.2) := ht
-  rw [Finset.mem_image] at ht'
-  obtain ⟨⟨p, q⟩, hpq, rfl⟩ := ht'
-  rw [show (((p, q).1 : A) * (p, q).2 : A) = p * q from rfl]
+  obtain ⟨p, hp, q, hq, rfl⟩ := unitCover_exists_factor_pair D₀ f t ht
   -- classification of each factor
   obtain ⟨c_p, hc_p, hcase_p⟩ :=
-    unitCover_class_left D₀ f rfl hA₀ hsplit p (Finset.mem_product.mp hpq).1
+    unitCover_class_left D₀ f rfl hA₀ hsplit p hp
   obtain ⟨c_q, hc_q, hcase_q⟩ :=
-    unitCover_class_right D₀ f rfl hA₀ hsplit q (Finset.mem_product.mp hpq).2
+    unitCover_class_right D₀ f rfl hA₀ hsplit q hq
   have hs_eq : (DII.s : A) = (D₀.s * 1) * (D₀.s * f) := rfl
   -- common expansion of both sides of the `hF_div` equation
   have hLHS := unitCover_F_mul_expand D₀ f DII OD F hF_alg p q
