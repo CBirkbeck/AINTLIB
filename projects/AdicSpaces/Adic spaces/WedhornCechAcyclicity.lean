@@ -12028,6 +12028,155 @@ private theorem interSamePair_genPiece_trace_subset
     genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s]
   exact fun v hv => ⟨hv.1.2, hv.2⟩
 
+/-- The trace covers `V|U`, one per piece `U` of `C`, packaged with everything Prop A.3(1)
+asks about them: their base, that each of their pieces sits inside a piece of `V`, that they
+are acyclic, and that they cover `U`. -/
+private theorem exists_traceCover_package [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)]
+    (C V : RationalCoveringData A) (fs : List A)
+    (hV_laurent : V.IsLaurentProdCover fs) (hV_base : V.base = C.base)
+    (hCP : ∀ U ∈ C.covers, U.P = C.base.P)
+    (hVP_leaves : ∀ Q ∈ V.covers, Q.P = V.base.P)
+    (hpiece_rat : ∀ U ∈ C.covers, U.IsRational) :
+    ∃ V_restr_at : ↥C.covers → RationalCoveringData A,
+      (∀ U : ↥C.covers, (V_restr_at U).base = U.1) ∧
+      (∀ U : ↥C.covers, ∀ V' ∈ (V_restr_at U).covers,
+        ∃ V'' ∈ V.covers, rationalOpen V'.T V'.s ⊆ rationalOpen V''.T V''.s) ∧
+      (∀ U : ↥C.covers, (V_restr_at U).IsOXAcyclic) ∧
+      (∀ U : ↥C.covers, ∀ v ∈ rationalOpen U.1.T U.1.s,
+        ∃ V' ∈ (V_restr_at U).covers, v ∈ rationalOpen V'.T V'.s ∧
+          rationalOpen V'.T V'.s ⊆ rationalOpen U.1.T U.1.s) := by
+  let V_restr_at : ↥C.covers → RationalCoveringData A := fun U =>
+    V.restrictTo U.1 (by rw [hV_base]; exact C.hsubset U.1 U.2)
+      ((hCP U.1 U.2).trans (congrArg RationalLocData.P hV_base).symm)
+      hVP_leaves
+  have hV_restr_base : ∀ U : ↥C.covers, (V_restr_at U).base = U.1 := fun _ => rfl
+  have hV_restr_pieces : ∀ U : ↥C.covers, ∀ V' ∈ (V_restr_at U).covers,
+      ∃ V'' ∈ V.covers, rationalOpen V'.T V'.s ⊆ rationalOpen V''.T V''.s := by
+    intro U V' hV'
+    simp only [V_restr_at] at hV'
+    rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hV'
+    obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hV'
+    exact ⟨Q, hQ, RationalLocData.interSamePair_subset_right _ _ _⟩
+  have hV_restr_acyclic : ∀ U : ↥C.covers, (V_restr_at U).IsOXAcyclic :=
+    fun U => laurentTrace_isOXAcyclic V fs hV_laurent U.1 (hpiece_rat U.1 U.2)
+      (by rw [hV_base]; exact C.hsubset U.1 U.2)
+      ((hCP U.1 U.2).trans (congrArg RationalLocData.P hV_base).symm)
+      hVP_leaves
+  have hV_restr_covers : ∀ U : ↥C.covers, ∀ v ∈ rationalOpen U.1.T U.1.s,
+      ∃ V' ∈ (V_restr_at U).covers, v ∈ rationalOpen V'.T V'.s ∧
+        rationalOpen V'.T V'.s ⊆ rationalOpen U.1.T U.1.s := by
+    intro U v hv
+    obtain ⟨Q, hQ, hvQ⟩ := V.hcover v
+      (by rw [hV_base] at *; exact C.hsubset U.1 U.2 hv)
+    refine ⟨U.1.interSamePair Q ((hVP_leaves Q hQ).trans
+      ((hCP U.1 U.2).trans (congrArg RationalLocData.P hV_base).symm).symm),
+      ?_, ?_, RationalLocData.interSamePair_subset_left _ _ _⟩
+    · simp only [V_restr_at]
+      rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
+      exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, rfl⟩
+    · rw [RationalLocData.interSamePair_rationalOpen]
+      exact ⟨hv, hvQ⟩
+  exact ⟨V_restr_at, hV_restr_base, hV_restr_pieces, hV_restr_acyclic, hV_restr_covers⟩
+
+/-- The mixed `(U, Vj)` package: on each trace `U ∩ Vj` put the `genRestrictedCover` over the
+full spanning set `T`. Its base opens as the intersection, its pieces sit inside the matching
+pieces of `C|Vj`, and it is acyclic by the σ₊-dichotomy engine run with `Vj`'s unit/empty data
+transported along the trace. -/
+private theorem exists_mixedCover_package [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)]
+    (C V : RationalCoveringData A) (T : Finset A)
+    (hspanT : Ideal.span (T : Set A) = ⊤) (hV_base : V.base = C.base)
+    (hCP : ∀ U ∈ C.covers, U.P = C.base.P)
+    (hVP_leaves : ∀ Q ∈ V.covers, Q.P = V.base.P)
+    (hV_unit_restrictions : ∀ Vj ∈ V.covers, ∃ Tpos : Finset A, Tpos ⊆ T ∧
+      (∀ t ∈ Tpos, IsUnit (Vj.canonicalMap t)) ∧
+      (∀ t ∈ T, t ∉ Tpos →
+        rationalOpen (Vj.interSamePair (genPieceDatum Vj.P T t hspanT) rfl).T
+          (Vj.interSamePair (genPieceDatum Vj.P T t hspanT) rfl).s = ∅)) :
+    ∃ M_at : ↥C.covers → ↥V.covers → RationalCoveringData A,
+      (∀ (U : ↥C.covers) (Vj : ↥V.covers),
+        rationalOpen (M_at U Vj).base.T (M_at U Vj).base.s =
+          rationalOpen U.1.T U.1.s ∩ rationalOpen Vj.1.T Vj.1.s) ∧
+      (∀ (U : ↥C.covers) (Vj : ↥V.covers), ∀ E ∈ (M_at U Vj).covers,
+        ∃ D'' ∈ (genRestrictedCover Vj.1 T hspanT).covers,
+          rationalOpen E.T E.s ⊆ rationalOpen D''.T D''.s) ∧
+      (∀ (U : ↥C.covers) (Vj : ↥V.covers), (M_at U Vj).IsOXAcyclic) := by
+  choose Tpos_at hTpos_sub hTpos_units hTpos_empty using
+    fun Vj (hVj : Vj ∈ V.covers) => hV_unit_restrictions Vj hVj
+  have hP_UV : ∀ (U : ↥C.covers) (Vj : ↥V.covers), Vj.1.P = U.1.P :=
+    fun U Vj => (hVP_leaves Vj.1 Vj.2).trans
+      ((congrArg RationalLocData.P hV_base).trans (hCP U.1 U.2).symm)
+  let M_at : ↥C.covers → ↥V.covers → RationalCoveringData A := fun U Vj =>
+    genRestrictedCover (U.1.interSamePair Vj.1 (hP_UV U Vj)) T hspanT
+  have hM_base_open : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
+      rationalOpen (M_at U Vj).base.T (M_at U Vj).base.s =
+        rationalOpen U.1.T U.1.s ∩ rationalOpen Vj.1.T Vj.1.s :=
+    fun U Vj => RationalLocData.interSamePair_rationalOpen U.1 Vj.1 (hP_UV U Vj)
+  have hM_trace_sub : ∀ (U : ↥C.covers) (Vj : ↥V.covers), ∀ t ∈ T,
+      rationalOpen ((U.1.interSamePair Vj.1 (hP_UV U Vj)).interSamePair
+        (genPieceDatum (U.1.interSamePair Vj.1 (hP_UV U Vj)).P T t
+          hspanT) rfl).T
+        ((U.1.interSamePair Vj.1 (hP_UV U Vj)).interSamePair
+          (genPieceDatum (U.1.interSamePair Vj.1 (hP_UV U Vj)).P T t
+            hspanT) rfl).s ⊆
+      rationalOpen (Vj.1.interSamePair
+          (genPieceDatum Vj.1.P T t hspanT) rfl).T
+        (Vj.1.interSamePair (genPieceDatum Vj.1.P T t hspanT) rfl).s :=
+    fun U Vj t _ ↦ interSamePair_genPiece_trace_subset U.1 Vj.1 (hP_UV U Vj) T hspanT t
+  have hM_pieces : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
+      ∀ E ∈ (M_at U Vj).covers, ∃ D'' ∈ (genRestrictedCover Vj.1 T hspanT).covers,
+        rationalOpen E.T E.s ⊆ rationalOpen D''.T D''.s := by
+    intro U Vj E hE
+    simp only [M_at] at hE
+    obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hE
+    exact ⟨Vj.1.interSamePair (genPieceDatum Vj.1.P T t hspanT) rfl,
+      Finset.mem_image_of_mem _ ht, hM_trace_sub U Vj t ht⟩
+  have hM_acyclic : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
+      (M_at U Vj).IsOXAcyclic := by
+    intro U Vj
+    refine genRestrictedCover_isOXAcyclic_of_units_or_empty _ T hspanT
+      (Tpos_at Vj.1 Vj.2) (hTpos_sub Vj.1 Vj.2) ?_ ?_
+    · intro t ht
+      exact isUnit_canonicalMap_of_subset Vj.1 _
+        (RationalLocData.interSamePair_subset_right _ _ _) t
+        (hTpos_units Vj.1 Vj.2 t ht)
+    · intro t ht htn
+      exact Set.eq_empty_of_subset_empty
+        ((hM_trace_sub U Vj t ht).trans
+          (le_of_eq (hTpos_empty Vj.1 Vj.2 t ht htn)))
+  exact ⟨M_at, hM_base_open, hM_pieces, hM_acyclic⟩
+
+/-- Every piece of `genRestrictedCover Vj T` sits inside a piece of `C`. The piece is
+`Vj ∩ R(T/t)`, and because `C` is generated by `T`, the datum `R(T/t)` IS a piece of `C` —
+which is exactly what the generation bijection `φC` names. -/
+private theorem genRestrictedCover_pieces_subset_covers [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)]
+    (C : RationalCoveringData A) (T : Finset A) (hC_gen : C.IsGeneratedBy T)
+    (V : RationalCoveringData A) :
+    ∀ Vj : ↥V.covers, ∀ D' ∈ (genRestrictedCover Vj.1 T hC_gen.1).covers,
+      ∃ D ∈ C.covers, rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s := by
+  obtain ⟨-, φC, hφC_bij, hφC_eq⟩ := id hC_gen
+  intro Vj D' hD'
+  obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hD'
+  refine ⟨(φC ⟨t, ht⟩).1, (φC ⟨t, ht⟩).2, ?_⟩
+  rw [(hφC_eq ⟨t, ht⟩).1, (hφC_eq ⟨t, ht⟩).2]
+  have h := RationalLocData.interSamePair_subset_right Vj.1
+    (genPieceDatum Vj.1.P T t hC_gen.1) rfl
+  rwa [genPieceDatum_T, genPieceDatum_s] at h
+
 /-- **Wedhorn Lemma 8.34** (p. 84). *Let `A` be a complete strongly
 noetherian Tate ring and `𝒰` be a rational cover generated by some
 finite subset `T ⊆ A` with `T · A = A`. Then `𝒰` is `𝒪_X`-acyclic.*
@@ -12080,37 +12229,9 @@ theorem wedhorn_lemma_834 [DecidableEq A]
   -- filter-form + its σ-walk cover-each are gone — traces always cover).
   have hVP_leaves : ∀ Q ∈ V.covers, Q.P = V.base.P := fun Q hQ =>
     laurentProdLeaves_pair fs V.base ((Finset.ext_iff.mp hV_laurent Q).mp hQ)
-  let V_restr_at : ↥C.covers → RationalCoveringData A := fun U =>
-    V.restrictTo U.1 (by rw [hV_base]; exact C.hsubset U.1 U.2)
-      ((hCP U.1 U.2).trans (congrArg RationalLocData.P hV_base).symm)
-      hVP_leaves
-  have hV_restr_base : ∀ U : ↥C.covers, (V_restr_at U).base = U.1 := fun _ => rfl
-  have hV_restr_pieces : ∀ U : ↥C.covers, ∀ V' ∈ (V_restr_at U).covers,
-      ∃ V'' ∈ V.covers, rationalOpen V'.T V'.s ⊆ rationalOpen V''.T V''.s := by
-    intro U V' hV'
-    simp only [V_restr_at] at hV'
-    rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hV'
-    obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hV'
-    exact ⟨Q, hQ, RationalLocData.interSamePair_subset_right _ _ _⟩
-  have hV_restr_acyclic : ∀ U : ↥C.covers, (V_restr_at U).IsOXAcyclic :=
-    fun U => laurentTrace_isOXAcyclic V fs hV_laurent U.1 (hpiece_rat U.1 U.2)
-      (by rw [hV_base]; exact C.hsubset U.1 U.2)
-      ((hCP U.1 U.2).trans (congrArg RationalLocData.P hV_base).symm)
-      hVP_leaves
-  have hV_restr_covers : ∀ U : ↥C.covers, ∀ v ∈ rationalOpen U.1.T U.1.s,
-      ∃ V' ∈ (V_restr_at U).covers, v ∈ rationalOpen V'.T V'.s ∧
-        rationalOpen V'.T V'.s ⊆ rationalOpen U.1.T U.1.s := by
-    intro U v hv
-    obtain ⟨Q, hQ, hvQ⟩ := V.hcover v
-      (by rw [hV_base] at *; exact C.hsubset U.1 U.2 hv)
-    refine ⟨U.1.interSamePair Q ((hVP_leaves Q hQ).trans
-      ((hCP U.1 U.2).trans (congrArg RationalLocData.P hV_base).symm).symm),
-      ?_, ?_, RationalLocData.interSamePair_subset_left _ _ _⟩
-    · simp only [V_restr_at]
-      rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
-      exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, rfl⟩
-    · rw [RationalLocData.interSamePair_rationalOpen]
-      exact ⟨hv, hvQ⟩
+  obtain ⟨V_restr_at, hV_restr_base, hV_restr_pieces, hV_restr_acyclic,
+    hV_restr_covers⟩ := exists_traceCover_package C V fs hV_laurent hV_base hCP
+    hVP_leaves hpiece_rat
   -- The restricted covers: genRestrictedCover over the full set T.
   let C_restr_at : ↥V.covers → RationalCoveringData A := fun Vj =>
     genRestrictedCover Vj.1 T _hC_gen.1
@@ -12118,16 +12239,9 @@ theorem wedhorn_lemma_834 [DecidableEq A]
     fun _ => rfl
   -- pieces-in-C: each piece Vj ∩ R(T/t) sits inside the C-piece R(T/t)
   -- (C is generated by T, so R(T/t) IS a C-piece).
-  obtain ⟨-, φC, hφC_bij, hφC_eq⟩ := id _hC_gen
   have hC_restr_pieces' : ∀ Vj : ↥V.covers, ∀ D' ∈ (C_restr_at Vj).covers,
-      ∃ D ∈ C.covers, rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s := by
-    intro Vj D' hD'
-    obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hD'
-    refine ⟨(φC ⟨t, ht⟩).1, (φC ⟨t, ht⟩).2, ?_⟩
-    rw [(hφC_eq ⟨t, ht⟩).1, (hφC_eq ⟨t, ht⟩).2]
-    have h := RationalLocData.interSamePair_subset_right Vj.1
-      (genPieceDatum Vj.1.P T t _hC_gen.1) rfl
-    rwa [genPieceDatum_T, genPieceDatum_s] at h
+      ∃ D ∈ C.covers, rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s :=
+    genRestrictedCover_pieces_subset_covers C T _hC_gen V
   -- Pair-level package: q=1 instances of the A.3(1) standing hypothesis,
   -- discharged by the part-(ii) construction on intersections.
   have h_pair := fun (Vj₁ Vj₂ : ↥V.covers) =>
@@ -12138,47 +12252,9 @@ theorem wedhorn_lemma_834 [DecidableEq A]
   choose I_at W_at hI_open hW_base hW_acyclic hW_pieces₁ hW_pieces₂ using h_pair
   -- MIXED (U,Vj)-package: the trace U∩Vj carries the genRestrictedCover over
   -- T, acyclic by the σ₊-dichotomy engine with the per-Vj data restricted.
-  have hP_UV : ∀ (U : ↥C.covers) (Vj : ↥V.covers), Vj.1.P = U.1.P :=
-    fun U Vj => (hVP_leaves Vj.1 Vj.2).trans
-      ((congrArg RationalLocData.P hV_base).trans (hCP U.1 U.2).symm)
-  let M_at : ↥C.covers → ↥V.covers → RationalCoveringData A := fun U Vj =>
-    genRestrictedCover (U.1.interSamePair Vj.1 (hP_UV U Vj)) T _hC_gen.1
-  have hM_base_open : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
-      rationalOpen (M_at U Vj).base.T (M_at U Vj).base.s =
-        rationalOpen U.1.T U.1.s ∩ rationalOpen Vj.1.T Vj.1.s :=
-    fun U Vj => RationalLocData.interSamePair_rationalOpen U.1 Vj.1 (hP_UV U Vj)
-  have hM_trace_sub : ∀ (U : ↥C.covers) (Vj : ↥V.covers), ∀ t ∈ T,
-      rationalOpen ((U.1.interSamePair Vj.1 (hP_UV U Vj)).interSamePair
-        (genPieceDatum (U.1.interSamePair Vj.1 (hP_UV U Vj)).P T t
-          _hC_gen.1) rfl).T
-        ((U.1.interSamePair Vj.1 (hP_UV U Vj)).interSamePair
-          (genPieceDatum (U.1.interSamePair Vj.1 (hP_UV U Vj)).P T t
-            _hC_gen.1) rfl).s ⊆
-      rationalOpen (Vj.1.interSamePair
-          (genPieceDatum Vj.1.P T t _hC_gen.1) rfl).T
-        (Vj.1.interSamePair (genPieceDatum Vj.1.P T t _hC_gen.1) rfl).s :=
-    fun U Vj t _ ↦ interSamePair_genPiece_trace_subset U.1 Vj.1 (hP_UV U Vj) T _hC_gen.1 t
-  have hM_pieces : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
-      ∀ E ∈ (M_at U Vj).covers, ∃ D'' ∈ (C_restr_at Vj).covers,
-        rationalOpen E.T E.s ⊆ rationalOpen D''.T D''.s := by
-    intro U Vj E hE
-    simp only [M_at] at hE
-    obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hE
-    exact ⟨Vj.1.interSamePair (genPieceDatum Vj.1.P T t _hC_gen.1) rfl,
-      Finset.mem_image_of_mem _ ht, hM_trace_sub U Vj t ht⟩
-  have hM_acyclic : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
-      (M_at U Vj).IsOXAcyclic := by
-    intro U Vj
-    refine genRestrictedCover_isOXAcyclic_of_units_or_empty _ T _hC_gen.1
-      (Tpos_at Vj.1 Vj.2) (hTpos_sub Vj.1 Vj.2) ?_ ?_
-    · intro t ht
-      exact isUnit_canonicalMap_of_subset Vj.1 _
-        (RationalLocData.interSamePair_subset_right _ _ _) t
-        (hTpos_units Vj.1 Vj.2 t ht)
-    · intro t ht htn
-      exact Set.eq_empty_of_subset_empty
-        ((hM_trace_sub U Vj t ht).trans
-          (le_of_eq (hTpos_empty Vj.1 Vj.2 t ht htn)))
+  obtain ⟨M_at, hM_base_open, hM_pieces, hM_acyclic⟩ :=
+    exists_mixedCover_package C V T _hC_gen.1 hV_base hCP hVP_leaves
+      hV_unit_restrictions
   -- Now apply propA3_part1_bridge.
   refine wedhorn_lemma_834_propA3_part1_bridge C V hV_base _hV_acyclic
     V_restr_at hV_restr_base hV_restr_pieces hV_restr_acyclic
