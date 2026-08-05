@@ -1142,15 +1142,6 @@ theorem continuous_cast_presheafValue {E₁ E₂ : RationalLocData (presheafValu
   subst heq
   exact continuous_id
 
-/-- The product restriction is continuous (local copy of the private
-`StandardDescent` fact). -/
-theorem productRestrictionSub_continuous_local (C : RationalCoveringData A) :
-    Continuous (productRestrictionSub A C) := by
-  refine continuous_pi fun E => ?_
-  show Continuous fun x : presheafValue C.base =>
-    restrictionMap C.base E.1 (C.hsubset E.1 E.2) x
-  exact restrictionMapHom_continuous C.base E.1 (C.hsubset E.1 E.2)
-
 variable [DecidableEq (RationalLocData (presheafValue D₀))]
 
 /-- **The comparison square on products.** Restricting on `A` and then applying the
@@ -1261,7 +1252,7 @@ theorem isEmbedding_productRestrictionSub_of_imgCovering
   rw [← hcomp] at hcompEmb
   constructor
   · exact Topology.IsInducing.of_comp
-      (productRestrictionSub_continuous_local C) hgcont
+      (productRestrictionSub_continuous C) hgcont
       hcompEmb.isInducing
   · exact Function.Injective.of_comp (f := g) hcompEmb.injective
 

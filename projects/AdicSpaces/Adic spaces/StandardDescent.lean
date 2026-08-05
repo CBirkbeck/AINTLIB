@@ -228,15 +228,6 @@ theorem mem_ofSpanTop_covers {D₀ : RationalLocData A} {hD₀ : D₀.IsRational
   obtain ⟨f, hfeq⟩ := (mem_genCoverPieces D₀ hD₀ S hS).mp hP
   exact ⟨f.1, f.2, hfeq⟩
 
-omit [T2Space A] [NonarchimedeanRing A]
-  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] [DecidableEq (RationalLocData A)] in
-private theorem productRestrictionSub_continuous'' [HasLocLiftPowerBounded A]
-    (C : RationalCoveringData A) : Continuous (productRestrictionSub A C) := by
-  refine continuous_pi fun E => ?_
-  show Continuous fun x : presheafValue C.base =>
-    restrictionMap C.base E.1 (C.hsubset E.1 E.2) x
-  exact restrictionMapHom_continuous C.base E.1 (C.hsubset E.1 E.2)
-
 omit [DecidableEq A] in
 /-- **Empty-cover branch** (Wedhorn's implicit degenerate case): a rational covering
 with no members forces the base rational open to be empty (via `C.hcover`), so the
@@ -312,7 +303,7 @@ private theorem isEmbedding_productRestrictionSub_of_standard
       (continuous_apply (⟨r P, hrC P⟩ : ↥C.covers))
   refine IsEmbedding.of_comp_isEmbedding (g := fun y P =>
     restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) ?_
-    (productRestrictionSub_continuous'' C) hΦcont
+    (productRestrictionSub_continuous C) hΦcont
   rw [← hfac]
   exact hkey.1
 

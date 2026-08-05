@@ -17110,10 +17110,19 @@ without those instances, so the omit is sound), at 73 dependants.
 call site, so the **entire four-member family** — `EmbeddingTopo` (public),
 `SheafyPair.…'` (public, and with *no in-repo call sites at all*),
 `StandardDescent.…''` (private), `RelativeDescentHuber.…_local` (public) — exists because the
-public one is over-hypothesised, not because anything is `private`. All four are one `omit`
+public one is over-hypothesised, not because anything is `private`. All four were one `omit`
 away from being one lemma. That correction matters for the earlier claim: `private` is the
 cause for `tsum_mem_of_isOpen_addSubgroup` and `presheafValue_eq_id_of_coeRingHom`, but
 **auto-included section variables are the cause for the larger family**.
+
+**Since fixed.** `EmbeddingTopo.productRestrictionSub_continuous` now carries
+`omit [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+[NonarchimedeanRing A] [IsDomain A] in`, and both copies are deleted with their call sites
+repointed. Finding the right omit list is cheap to iterate even at 73 dependants, because a
+wrong entry fails **inside the declaration's own file** — `cannot omit referenced section
+variable inst✝⁷` — long before any dependant is rebuilt. Count the `inst✝ⁿ` from the *end* of
+the `variable` block to name it: here `inst✝⁷` was `[IsHuberRing A]`, which `RationalLocData`
+genuinely needs, and the other six went.
 
 Applied in this batch: `presheafValue_eq_id_of_coeRingHom` un-privated in
 `RingEquivPresheafTransport`, the Huber copy deleted, its 2 call sites repointed.

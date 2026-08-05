@@ -276,6 +276,8 @@ theorem _root_.Topology.IsInducing.of_continuous_comp
     rw [hgf, ← induced_compose]
     exact induced_mono hg.le_induced
 
+omit [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+  [NonarchimedeanRing A] [IsDomain A] in
 /-- **T283**: `productRestrictionSub A C` is always continuous.
 
 Each component is `restrictionMap C.base D _`, which is continuous via
