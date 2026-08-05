@@ -155,7 +155,7 @@ instance sectionsDiscreteUniformity (U : Opens (SpaTop A)) :
 noncomputable instance sectionsIsTopologicalRing (U : Opens (SpaTop A)) :
     @IsTopologicalRing ↥(sectionsSubring U)
       (sectionsUniformSpace A U).toTopologicalSpace _ := by
-  haveI : DiscreteTopology ↥(sectionsSubring U) :=
+  have : DiscreteTopology ↥(sectionsSubring U) :=
     DiscreteUniformity.instDiscreteTopology ↥(sectionsSubring U)
   exact { toContinuousMul := ⟨continuous_of_discreteTopology⟩
           toContinuousAdd := ⟨continuous_of_discreteTopology⟩
@@ -193,7 +193,7 @@ noncomputable def presheafSectionsRes {U V : Opens (SpaTop A)} (h : V ≤ U) :
 noncomputable def presheafSectionsMor {U V : Opens (SpaTop A)} (h : V ≤ U) :
     presheafSectionsObj A U ⟶ presheafSectionsObj A V := by
   refine ⟨presheafSectionsRes A h, ?_⟩
-  haveI : DiscreteTopology (presheafSectionsObj A U).α := by
+  have : DiscreteTopology (presheafSectionsObj A U).α := by
     change DiscreteTopology ↥(sectionsSubring U)
     exact DiscreteUniformity.instDiscreteTopology ↥(sectionsSubring U)
   exact continuous_of_discreteTopology
@@ -310,11 +310,11 @@ theorem presheafValue_uniformity_isCountablyGenerated (D : RationalLocData A) :
   letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  haveI : (nhds (0 : Localization.Away D.s)).IsCountablyGenerated :=
+  have : (nhds (0 : Localization.Away D.s)).IsCountablyGenerated :=
     (locBasis D.P D.T D.s D.hopen).hasBasis_nhds_zero.isCountablyGenerated
-  haveI : Filter.IsCountablyGenerated (uniformity (Localization.Away D.s)) :=
+  have : Filter.IsCountablyGenerated (uniformity (Localization.Away D.s)) :=
     IsUniformAddGroup.uniformity_countably_generated
-  haveI : (nhds (0 : presheafValue D)).IsCountablyGenerated := by
+  have : (nhds (0 : presheafValue D)).IsCountablyGenerated := by
     letI : PseudoMetricSpace (Localization.Away D.s) := UniformSpace.pseudoMetricSpace _
     letI : MetricSpace (presheafValue D) := UniformSpace.Completion.instMetricSpace
     infer_instance
@@ -325,7 +325,7 @@ subspace uniformity (the comap of `Subtype.val`) of the finite product `∏_D �
 uniformity is countably generated (finite product of countably-generated completions). -/
 theorem sectionEqualizer_isCountablyGenerated (C : RationalCoveringData A) :
     Filter.IsCountablyGenerated (uniformity ↥(sectionEqualizer A C)) := by
-  haveI : ∀ D : ↥C.covers, Filter.IsCountablyGenerated (uniformity (presheafValue D.1)) :=
+  have : ∀ D : ↥C.covers, Filter.IsCountablyGenerated (uniformity (presheafValue D.1)) :=
     fun D => presheafValue_uniformity_isCountablyGenerated A D.1
   exact Filter.comap.isCountablyGenerated _ _
 
@@ -543,8 +543,8 @@ instance : CategoryTheory.Category VPreObj.{u} where
     toHom := f.toHom ≫ g.toHom
     isLocalHom_stalkMap := fun x ↦ by
       rw [ringStalkMap_comp]
-      haveI := f.isLocalHom_stalkMap x
-      haveI := g.isLocalHom_stalkMap (ConcreteCategory.hom f.toHom.base x)
+      have := f.isLocalHom_stalkMap x
+      have := g.isLocalHom_stalkMap (ConcreteCategory.hom f.toHom.base x)
       change IsLocalHom ((ringStalkMap f.toHom x).hom'.comp
         (ringStalkMap g.toHom (ConcreteCategory.hom f.toHom.base x)).hom')
       infer_instance
@@ -589,8 +589,8 @@ instance : CategoryTheory.Category VObj.{u} where
     toHom := f.toHom ≫ g.toHom
     isLocalHom_stalkMap := fun x ↦ by
       rw [ringStalkMap_comp]
-      haveI := f.isLocalHom_stalkMap x
-      haveI := g.isLocalHom_stalkMap (ConcreteCategory.hom f.toHom.base x)
+      have := f.isLocalHom_stalkMap x
+      have := g.isLocalHom_stalkMap (ConcreteCategory.hom f.toHom.base x)
       change IsLocalHom ((ringStalkMap f.toHom x).hom'.comp
         (ringStalkMap g.toHom (ConcreteCategory.hom f.toHom.base x)).hom')
       infer_instance
@@ -722,7 +722,7 @@ theorem exists_spa_point_in_rationalOpen_of_isOpen_prime
     (hs_notin : s ∉ p) :
     ∃ v ∈ rationalOpen T s, p ≤ v.supp := by
   classical
-  haveI : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
+  have : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
   let φ : A →+* FractionRing (A ⧸ p) :=
     (algebraMap (A ⧸ p) (FractionRing (A ⧸ p))).comp (Ideal.Quotient.mk p)
   let w : Valuation A (WithZero (Multiplicative ℤ)) :=
@@ -785,7 +785,7 @@ theorem base_s_in_annihilator_radical_of_covering
   classical
   rw [Ideal.radical_eq_sInf, Ideal.mem_sInf]
   intro p ⟨hp_ann, hp_prime⟩
-  haveI := hp_prime
+  have := hp_prime
   by_contra hs_notin
   obtain ⟨v, hv_rat, hv_supp_ge⟩ := hSpa_points p hp_prime hs_notin
   obtain ⟨D, hD, hv_D⟩ := C.hcover v hv_rat
@@ -973,7 +973,7 @@ theorem presheafValue_flat_of_tateQuotient
       (locToQuotientOneSubfX_gen D.s)) :
     @Module.Flat A (presheafValue D) _ _
       (RingHom.toModule (RationalLocData.canonicalMap D)) := by
-  haveI hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     TateAlgebra.flat_quotient_oneSubfX_general P D.s
   let e := presheafValueTateQuotientEquiv D hb hcs ht0 hcont hdense
   change @Module.Flat A (presheafValue D) _ _
@@ -1023,7 +1023,7 @@ theorem presheafValue_flat_of_canonical
       (tateQuotientToPresheafHom D hb)) :
     @Module.Flat A (presheafValue D) _ _
       (RingHom.toModule (RationalLocData.canonicalMap D)) := by
-  haveI hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     TateAlgebra.flat_quotient_oneSubfX_general P D.s
   let e := presheafValueCanonicalQuotientEquiv D hb hA_complete hnoeth hT_pb hcont_eval
   change @Module.Flat A (presheafValue D) _ _
@@ -1068,10 +1068,10 @@ theorem presheafValue_isNoetherian_via_canonical
       (tateQuotientToPresheafHom D hb)) :
     IsNoetherianRing (presheafValue D) := by
   -- TateAlgebra A is noetherian (definitionally `restrictedMvPowerSeriesSubring 1 A`).
-  haveI : IsNoetherianRing ↥(TateAlgebra A) :=
+  have : IsNoetherianRing ↥(TateAlgebra A) :=
     IsStronglyNoetherian.isNoetherianRing_restricted 1
   -- Quotient of noetherian is noetherian (mathlib instance via `Ideal.Quotient.commRing`).
-  haveI : IsNoetherianRing (↥(TateAlgebra A) ⧸ TateAlgebra.oneSubfXIdeal D.s) :=
+  have : IsNoetherianRing (↥(TateAlgebra A) ⧸ TateAlgebra.oneSubfXIdeal D.s) :=
     isNoetherianRing_of_surjective _ _ (Ideal.Quotient.mk _)
       (Ideal.Quotient.mk_surjective)
   -- Transfer along the equiv.
@@ -1173,7 +1173,7 @@ theorem _aux_nonOpen_hSpa_principalPair_A₀_completeSpace
   have hclosed : IsClosed (P.A₀ : Set A) :=
     AddSubgroup.isClosed_of_isOpen P.A₀.toAddSubgroup P.isOpen
   -- The subspace uniformity coincides with the comap uniformity for the inclusion.
-  haveI : IsClosed ((P.A₀ : Set A) : Set A) := hclosed
+  have : IsClosed ((P.A₀ : Set A) : Set A) := hclosed
   exact IsClosed.completeSpace_coe (s := (P.A₀ : Set A))
 
 /-- **Sub-lemma (a.1) — `IsAdicComplete` instance for the principal pair of a
@@ -1211,7 +1211,7 @@ theorem _aux_nonOpen_hSpa_principalPair_isAdicComplete
   haveI : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup
   letI : UniformSpace ↥(IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
     UniformSpace.comap Subtype.val ‹UniformSpace A›
-  haveI : IsUniformAddGroup
+  have : IsUniformAddGroup
       ↥(IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
     AddSubgroup.isUniformAddGroup
       (IsTateRing.principalPair A).toPairOfDefinition.A₀.toAddSubgroup
@@ -1269,10 +1269,10 @@ theorem _aux_nonOpen_hSpa_spaPoint_exists
     ∀ (p : Ideal A), p.IsPrime → ¬IsOpen (p : Set A) →
       ∃ v ∈ Spa A A⁺, p ≤ v.supp := by
   intro p hp hopen
-  haveI : IsAdicComplete (IsTateRing.principalPair A).toPairOfDefinition.I
+  have : IsAdicComplete (IsTateRing.principalPair A).toPairOfDefinition.I
       (IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
     _aux_nonOpen_hSpa_principalPair_isAdicComplete A
-  haveI : p.IsPrime := hp
+  have : p.IsPrime := hp
   obtain ⟨v, hv, hpv, _⟩ :=
     PairOfDefinition.exists_mem_spa_supp_ge_of_nonOpen_prime
       (IsTateRing.principalPair A).toPairOfDefinition hopen
@@ -1304,8 +1304,8 @@ theorem _aux_nonOpen_hSpa_rationalOpen_lift
   -- existence hypothesis is structurally consumed inside the underlying
   -- Wedhorn-7.45 chain, so we don't need it explicitly here.
   intro T s p hp hs _h
-  haveI : p.IsPrime := hp
-  haveI : IsAdicComplete (IsTateRing.principalPair A).toPairOfDefinition.I
+  have : p.IsPrime := hp
+  have : IsAdicComplete (IsTateRing.principalPair A).toPairOfDefinition.I
       (IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
     _aux_nonOpen_hSpa_principalPair_isAdicComplete A
   exact exists_mem_rationalOpen_supp_ge_of_prime_noHArch
@@ -1356,7 +1356,7 @@ theorem exists_hSpa_points_global_of_stronglyNoetherianTate
       ∃ v ∈ rationalOpen T s, p ≤ v.supp := by
   intro T s p hp hs
   by_cases hopen : IsOpen ((p : Ideal A) : Set A)
-  · haveI : (p : Ideal A).IsPrime := hp
+  · have : (p : Ideal A).IsPrime := hp
     exact exists_spa_point_in_rationalOpen_of_isOpen_prime (A := A) T s p hopen hs
   · exact _aux_nonOpen_hSpa_points_of_stronglyNoetherianTate
       (A := A) T s p hp hs hopen
@@ -1458,7 +1458,7 @@ theorem isSheafy_ofStronglyNoetherianTate_flat
     -- zero ring), so any function from it is automatically an embedding via
     -- `Topology.IsEmbedding.of_subsingleton`.
     by_cases hs : C.base.s = 0
-    · haveI := presheafValue_subsingleton_of_s_eq_zero C.base hs
+    · have := presheafValue_subsingleton_of_s_eq_zero C.base hs
       exact Topology.IsEmbedding.of_subsingleton _
     · -- Remaining sorry: the topological-inducing residual identified by
       -- T-EMBED-TOPO.
@@ -1581,7 +1581,7 @@ theorem isSheafy_ofStronglyNoetherianTate_flat_of_topo_inducing
     IsSheafy A where
   embedding C _hC := by
     by_cases hs : C.base.s = 0
-    · haveI := presheafValue_subsingleton_of_s_eq_zero C.base hs
+    · have := presheafValue_subsingleton_of_s_eq_zero C.base hs
       exact Topology.IsEmbedding.of_subsingleton _
     · refine ⟨topo_inducing C, ?_⟩
       -- Algebraic injectivity from `rationalCovering_hasSeparation`.
@@ -1716,7 +1716,7 @@ theorem faithfullyFlat_cocycle_kernel_eq_algebraMap_range
   -- the Stacks 023N descent argument: for faithfully flat `R → S`, the sequence
   -- `R → S ⇉ S ⊗[R] S` is exact via `s ⊗ 1 - 1 ⊗ s`. Our `cocycleMap` is the
   -- sign-flip `1 ⊗ s - s ⊗ 1`, so its kernel coincides.
-  haveI hEff : Algebra.IsEffective R S := Algebra.IsEffective.of_faithfullyFlat R S
+  have hEff : Algebra.IsEffective R S := Algebra.IsEffective.of_faithfullyFlat R S
   have h_eq : faithfullyFlat_cocycleMap R S s =
       - Algebra.TensorProduct.includeLeftSubRight R S s := by
     simp only [faithfullyFlat_cocycleMap, LinearMap.sub_apply, TensorProduct.mk_apply,
@@ -1791,7 +1791,7 @@ theorem tateAcyclicity_gluing_via_descent
       restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂)) :
     ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
       restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D :=
-  haveI : IsNoetherianRing (IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
+  have : IsNoetherianRing (IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
     -- P0/T#57: was `_aux_noeth_principalPair_A0_of_stronglyNoetherianTate` — a FALSE lemma
     -- (strong-noeth ⇒ noeth-A₀, ℂ_p-counterexample). Deleted; the noeth-A₀ obligation is now an
     -- honest open `sorry`, to be discharged faithfully via `IsStronglyNoetherian ⇒ A⟨X⟩-noetherian`
@@ -1860,13 +1860,13 @@ theorem prop_8_30_flat_clean
       ((restrictionMapHom D D' h).toModule) := by
   letI : Algebra (presheafValue D) (presheafValue D') :=
     (restrictionMapHom D D' h).toAlgebra
-  haveI : IsNoetherianRing (IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
+  have : IsNoetherianRing (IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
     -- P0/T#57: was `_aux_noeth_principalPair_A0_of_stronglyNoetherianTate` — a FALSE lemma
     -- (strong-noeth ⇒ noeth-A₀, ℂ_p-counterexample). Deleted; the noeth-A₀ obligation is now an
     -- honest open `sorry`, to be discharged faithfully via `IsStronglyNoetherian ⇒ A⟨X⟩-noetherian`
     -- (Example 6.38) in P1/T#58, NOT via a noetherian ring of definition (case (a)).
     sorry
-  haveI : @IsLocalization.Away (presheafValue D) _
+  have : @IsLocalization.Away (presheafValue D) _
       (D.canonicalMap D'.s) (presheafValue D') _
       (restrictionMapHom D D' h).toAlgebra :=
     restrictionMap_isLocalization (IsTateRing.principalPair A).toPairOfDefinition D D' h
@@ -1923,7 +1923,7 @@ theorem cor_8_32_clean_sub
       (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
     Module.FaithfullyFlat (presheafValue C.base)
       (∀ D : { D // D ∈ C.covers }, presheafValue D.1) :=
-  haveI : IsNoetherianRing (IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
+  have : IsNoetherianRing (IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
     -- P0/T#57: was `_aux_noeth_principalPair_A0_of_stronglyNoetherianTate` — a FALSE lemma
     -- (strong-noeth ⇒ noeth-A₀, ℂ_p-counterexample). Deleted; the noeth-A₀ obligation is now an
     -- honest open `sorry`, to be discharged faithfully via `IsStronglyNoetherian ⇒ A⟨X⟩-noetherian`
@@ -1965,10 +1965,10 @@ theorem tateAcyclicity_separation_via_cor832
   letI algInst : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base)
       (presheafValue D.1) := fun D ↦
     (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
-  haveI hFF : Module.FaithfullyFlat (presheafValue C.base)
+  have hFF : Module.FaithfullyFlat (presheafValue C.base)
       (∀ D : { D // D ∈ C.covers }, presheafValue D.1) :=
     cor_8_32_clean (A := A) C
-  haveI hFS : FaithfulSMul (presheafValue C.base)
+  have hFS : FaithfulSMul (presheafValue C.base)
       (∀ D : { D // D ∈ C.covers }, presheafValue D.1) :=
     Module.FaithfullyFlat.faithfulSMul
   have hinj : Function.Injective
@@ -2004,7 +2004,7 @@ omit [PlusSubring A] [IsHuberRing A] in
 hence its completion `presheafValue D` is subsingleton. -/
 theorem presheafValue_subsingleton_of_nilpotent_s (D : RationalLocData A)
     (hs : IsNilpotent D.s) : Subsingleton (presheafValue D) := by
-  haveI : Subsingleton (Localization.Away D.s) := by
+  have : Subsingleton (Localization.Away D.s) := by
     apply IsLocalization.subsingleton (M := Submonoid.powers D.s)
     obtain ⟨n, hn⟩ := hs
     exact ⟨n, hn⟩
@@ -2032,7 +2032,7 @@ theorem isSheafy_separation_empty_cover_of_stronglyNoetherianTate
   -- on whether `C.base.s` is nilpotent.
   by_cases hnil : IsNilpotent C.base.s
   · -- If `s` is nilpotent, `presheafValue C.base` is subsingleton.
-    haveI := presheafValue_subsingleton_of_nilpotent_s C.base hnil
+    have := presheafValue_subsingleton_of_nilpotent_s C.base hnil
     exact Subsingleton.elim x y
   · -- If `s` is not nilpotent, then by `nilpotent_iff_mem_prime` there
     -- exists a prime `p` with `s ∉ p`. Apply `exists_spa_point_in_rationalOpen_of_prime`
@@ -2077,7 +2077,7 @@ theorem isSheafy_ofStronglyNoetherianTate
     IsSheafy A :=
   { embedding := fun C _hC ↦ by
       by_cases hs : C.base.s = 0
-      · haveI := presheafValue_subsingleton_of_s_eq_zero C.base hs
+      · have := presheafValue_subsingleton_of_s_eq_zero C.base hs
         exact Topology.IsEmbedding.of_subsingleton _
       · refine ⟨productRestrictionSub_isInducing_tate (A := A) C, ?_⟩
         intro x y hxy

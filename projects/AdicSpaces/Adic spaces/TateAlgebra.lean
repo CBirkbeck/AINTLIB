@@ -1870,7 +1870,7 @@ private theorem muMap_middle_exact
   -- Subspace typeclass setup on `↥(range u)` (needed to form `↥(range u)⟨X⟩` and to apply
   -- the surjection-lifting lemma; only `T2`/`IsTopologicalAddGroup`/`ContinuousConstSMul`
   -- are required of the target, all inherited from the subspace structure).
-  haveI : ContinuousSMul A ↥(LinearMap.range u) := by
+  have : ContinuousSMul A ↥(LinearMap.range u) := by
     refine ⟨?_⟩
     rw [show (fun pr : A × ↥(LinearMap.range u) ↦ pr.1 • pr.2) =
         fun pr ↦ (⟨pr.1 • (pr.2 : Fin m → A), Submodule.smul_mem _ pr.1 pr.2.2⟩ :
@@ -1887,10 +1887,10 @@ private theorem muMap_middle_exact
   -- `fg_topologicalClosure_isClosed` since it is fg over the noetherian Tate ring).
   have hu'_open : IsOpenMap (u.rangeRestrict) := by
     letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
-    haveI : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup
-    haveI : (nhds (0 : A)).IsCountablyGenerated :=
+    have : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup
+    have : (nhds (0 : A)).IsCountablyGenerated :=
       FirstCountableTopology.nhds_generated_countable 0
-    haveI : (uniformity A).IsCountablyGenerated :=
+    have : (uniformity A).IsCountablyGenerated :=
       IsUniformAddGroup.uniformity_countably_generated
     exact ValuationSpectrum.wedhorn_6_18_open_onto_image u
   have hu'_surj : Function.Surjective u.rangeRestrict := LinearMap.surjective_rangeRestrict u
@@ -1967,7 +1967,7 @@ theorem muMap_injective
   obtain ⟨m, p, hp_surj⟩ := Module.Finite.exists_fin' A M
   have hp_cont : Continuous p := IsModuleTopology.continuous_linearMap_of_finite p
   -- `ker p` is finitely generated (`A` noetherian, `Aᵐ` finite).
-  haveI : Module.Finite A ↥(LinearMap.ker p) := by
+  have : Module.Finite A ↥(LinearMap.ker p) := by
     have : IsNoetherian A (Fin m → A) := inferInstance
     exact Module.Finite.iff_fg.mpr (this.noetherian _)
   obtain ⟨n, v, hv_surj⟩ := Module.Finite.exists_fin' A ↥(LinearMap.ker p)
@@ -2585,7 +2585,7 @@ theorem noeth_mem_ideal_of_mul_shift {R : Type u} [CommRing R] [IsNoetherianRing
   -- Reduce to noeth_zero_of_mul_shift in A/I.
   -- In A/I: ā * x̄₀ = 0 and x̄ₖ = ā * x̄ₖ₊₁, so x̄₀ = 0 by the ascending chain argument.
   rw [← Ideal.Quotient.eq_zero_iff_mem]
-  haveI : IsNoetherianRing (R ⧸ I) := Ideal.Quotient.isNoetherianRing I
+  have : IsNoetherianRing (R ⧸ I) := Ideal.Quotient.isNoetherianRing I
   set mk := Ideal.Quotient.mk I
   -- Set up notation for the quotient
   set a' := mk a with ha'_def
@@ -3045,7 +3045,7 @@ theorem flat_quotient_fSubX_general
     (f : A) :
     Module.Flat A (↥(TateAlgebra A) ⧸
       Ideal.span {algebraMap A ↥(TateAlgebra A) f - X}) := by
-  haveI := tateAlgebra_flat P
+  have := tateAlgebra_flat P
   exact Module.Flat.quotient_of_flat_of_saturated
     (mul_fSubX_regular f) (fun I s hmem ↦ fSubX_saturated P f I s hmem)
 
@@ -3055,7 +3055,7 @@ theorem flat_quotient_oneSubfX_general
     (f : A) :
     Module.Flat A (↥(TateAlgebra A) ⧸
       Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * X}) := by
-  haveI := tateAlgebra_flat P
+  have := tateAlgebra_flat P
   exact Module.Flat.quotient_of_flat_of_saturated
     (mul_oneSubfX_regular f) (fun I s hmem ↦ oneSubfX_saturated P f I s hmem)
 
@@ -3070,7 +3070,7 @@ combined with surjectivity of `PrimeSpectrum.comap (algebraMap A A⟨X⟩)`
 `Module.FaithfullyFlat.of_comap_surjective`. -/
 theorem faithfullyFlat_general (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
     Module.FaithfullyFlat A ↥(TateAlgebra A) := by
-  haveI := tateAlgebra_flat P
+  have := tateAlgebra_flat P
   exact Module.FaithfullyFlat.of_comap_surjective
     PrimeSpectrum_comap_algebraMap_surjective
 

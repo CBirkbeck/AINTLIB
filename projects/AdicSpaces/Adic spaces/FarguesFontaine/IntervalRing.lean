@@ -788,7 +788,7 @@ theorem tendsto_resI {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ�
     Filter.Tendsto (fun x => BlocToHatK p F ϖ hmid0 hmid1 x)
       (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
       (nhds (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z)) := by
-  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have hne := neBot_comap_of_mem_BISub p F ϖ hz
   set L := Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z) with hL
   set g : Bloc p F ϖ → hatK p F hmid0 hmid1 :=
     fun x => BlocToHatK p F ϖ hmid0 hmid1 x with hg
@@ -844,7 +844,7 @@ theorem resI_BIProd {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ�
       = BlocToHatK p F ϖ hmid0 hmid1 x := by
   have hmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
       ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 := BIProd_mem_BISub p F ϖ x
-  haveI hne := neBot_comap_of_mem_BISub p F ϖ hmem
+  have hne := neBot_comap_of_mem_BISub p F ϖ hmem
   have hlim := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hmem
   have hlim2 : Filter.Tendsto (fun y => BlocToHatK p F ϖ hmid0 hmid1 y)
       (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
@@ -934,8 +934,8 @@ theorem resI_add {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ <
     resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 (z + z')
       = resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z
         + resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z' := by
-  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
-  haveI hne' := neBot_comap_of_mem_BISub p F ϖ hz'
+  have hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have hne' := neBot_comap_of_mem_BISub p F ϖ hz'
   have h1 := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hz
   have h2 := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hz'
   have hsum := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 (add_mem hz hz')
@@ -960,8 +960,8 @@ theorem resI_mul {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ <
     resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 (z * z')
       = resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z
         * resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z' := by
-  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
-  haveI hne' := neBot_comap_of_mem_BISub p F ϖ hz'
+  have hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have hne' := neBot_comap_of_mem_BISub p F ϖ hz'
   have h1 := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hz
   have h2 := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hz'
   have hprod := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 (mul_mem hz hz')
@@ -989,7 +989,7 @@ theorem resI_pair_mem {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ
     (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1 z,
         resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₂0 hσ₂1 z)
       ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 := by
-  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have hne := neBot_comap_of_mem_BISub p F ϖ hz
   have h1 := tendsto_resI p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 hz
   have h2 := tendsto_resI p F ϖ hη0 hη1 hσ₂0 hσ₂1 hz
   have hpair : Filter.Tendsto (fun x => (BlocToHatK p F ϖ hσ₁0 hσ₁1 x,
@@ -1243,7 +1243,7 @@ theorem valued_resI_le_wI {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 
     (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
     Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z)
       ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z := by
-  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have hne := neBot_comap_of_mem_BISub p F ϖ hz
   have hlim := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hz
   -- for every ε, the approximant images sit in the (wI z ⊔ ε)-ball
   have hstep : ∀ ε : NNReal, 0 < ε →

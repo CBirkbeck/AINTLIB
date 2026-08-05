@@ -51,7 +51,7 @@ private theorem presheafValueMapB_eq_zero_of_pieces (C : RationalCoveringData (J
     (hC : C.IsRational) (z : presheafValue C.base)
     (hres : ∀ D : ↥C.covers, restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) z = 0) :
     presheafValueMapB C.base hC.base z = 0 := by
-  haveI : IsSheafy (JetB F) := isSheafy_JetB F
+  have : IsSheafy (JetB F) := isSheafy_JetB F
   refine IsSheafy.separationSub (A := JetB F) (pushCoveringB C hC)
     (pushCoveringB_isRational hC) ?_
   funext D'
@@ -77,7 +77,7 @@ private theorem presheafValueMapC_eq_zero_of_pieces (C : RationalCoveringData (J
     (hC : C.IsRational) (z : presheafValue C.base)
     (hres : ∀ D : ↥C.covers, restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) z = 0) :
     presheafValueMapC C.base hC.base z = 0 := by
-  haveI : IsSheafy (JetC F) := isSheafy_JetC F
+  have : IsSheafy (JetC F) := isSheafy_JetC F
   refine IsSheafy.separationSub (A := JetC F) (pushCoveringC C hC)
     (pushCoveringC_isRational hC) ?_
   funext D'
@@ -103,8 +103,8 @@ embedding …"; algebraic part). -/
 theorem productRestrictionSub_injective_JetA (C : RationalCoveringData (JetA F))
     (hC : C.IsRational) :
     Function.Injective (productRestrictionSub (JetA F) C) := by
-  haveI : IsSheafy (JetB F) := isSheafy_JetB F
-  haveI : IsSheafy (JetC F) := isSheafy_JetC F
+  have : IsSheafy (JetB F) := isSheafy_JetB F
+  have : IsSheafy (JetC F) := isSheafy_JetC F
   intro x y hxy
   set z := x - y with hz
   set e := datumEnum C.base with he
@@ -237,7 +237,7 @@ theorem pushedCompatB (d₁ d₂ : ↥C.covers) (D₃ : RationalLocData (JetB F)
       (presheafValueMapB d₁.1 (hC.piece d₁.2) (f d₁)) =
     restrictionMap (pushDatumB d₂.1 (hC.piece d₂.2)) D₃ h₃₂
       (presheafValueMapB d₂.1 (hC.piece d₂.2) (f d₂)) := by
-  haveI : IsSheafy (JetB F) := isSheafy_JetB F
+  have : IsSheafy (JetB F) := isSheafy_JetB F
   set hIrat := interDatum_isRational (hC.piece d₁.2) (hC.piece d₂.2) with hIratdef
   have hsub₁ : rationalOpen (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).T (interDatum
     d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).s ⊆ rationalOpen d₁.1.T d₁.1.s := by
@@ -292,7 +292,7 @@ theorem pushedCompatC (d₁ d₂ : ↥C.covers) (D₃ : RationalLocData (JetC F)
       (presheafValueMapC d₁.1 (hC.piece d₁.2) (f d₁)) =
     restrictionMap (pushDatumC d₂.1 (hC.piece d₂.2)) D₃ h₃₂
       (presheafValueMapC d₂.1 (hC.piece d₂.2) (f d₂)) := by
-  haveI : IsSheafy (JetC F) := isSheafy_JetC F
+  have : IsSheafy (JetC F) := isSheafy_JetC F
   set hIrat := interDatum_isRational (hC.piece d₁.2) (hC.piece d₂.2) with hIratdef
   have hsub₁ : rationalOpen (interDatum d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).T (interDatum
     d₁.1 d₂.1 (hC.piece d₁.2) (hC.piece d₂.2)).s ⊆ rationalOpen d₁.1.T d₁.1.s := by
@@ -421,7 +421,7 @@ private theorem mapBD_eq_mapCD_of_pushed_gluing
       presheafValueMapC d.1 (hC.piece d.2) (f d)) :
     mapBD C.base hC.base bB = mapCD C.base hC.base bC := by
   classical
-  haveI : IsSheafy (JetD F) := isSheafy_JetD F
+  have : IsSheafy (JetD F) := isSheafy_JetD F
   refine IsSheafy.separationSub (A := JetD F) (pushCoveringD C hC)
     (pushCoveringD_isRational hC) ?_
   funext D'
@@ -587,7 +587,7 @@ private theorem exists_gluing_pushedFamilyB :
       ∀ D' : ↥(pushCoveringB C hC).covers,
         restrictionMap (pushCoveringB C hC).base D'.1
           ((pushCoveringB C hC).hsubset D'.1 D'.2) bB = pushedFamilyB C hC f D' := by
-  haveI : IsSheafy (JetB F) := isSheafy_JetB F
+  have : IsSheafy (JetB F) := isSheafy_JetB F
   exact IsSheafy.gluing (A := JetB F) (pushCoveringB C hC)
     (pushCoveringB_isRational hC) (pushedFamilyB C hC f) (by
       intro D₁' D₂' D₃ h₃₁ h₃₂
@@ -602,7 +602,7 @@ private theorem exists_gluing_pushedFamilyC :
       ∀ D' : ↥(pushCoveringC C hC).covers,
         restrictionMap (pushCoveringC C hC).base D'.1
           ((pushCoveringC C hC).hsubset D'.1 D'.2) bC = pushedFamilyC C hC f D' := by
-  haveI : IsSheafy (JetC F) := isSheafy_JetC F
+  have : IsSheafy (JetC F) := isSheafy_JetC F
   exact IsSheafy.gluing (A := JetC F) (pushCoveringC C hC)
     (pushCoveringC_isRational hC) (pushedFamilyC C hC f) (by
       intro D₁' D₂' D₃ h₃₁ h₃₂
@@ -668,9 +668,9 @@ theorem gluing_JetA :
     ∃ x : presheafValue C.base, ∀ D : ↥C.covers,
       restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D := by
   classical
-  haveI : IsSheafy (JetB F) := isSheafy_JetB F
-  haveI : IsSheafy (JetC F) := isSheafy_JetC F
-  haveI : IsSheafy (JetD F) := isSheafy_JetD F
+  have : IsSheafy (JetB F) := isSheafy_JetB F
+  have : IsSheafy (JetC F) := isSheafy_JetC F
+  have : IsSheafy (JetD F) := isSheafy_JetD F
   set e := datumEnum C.base with he
   -- the pushed families, their vertex gluings and the closing identification are all
   -- standalone now, so each carries its own elaboration budget
@@ -760,17 +760,17 @@ theorem productRestrictionSub_isEmbedding_JetA (C : RationalCoveringData (JetA F
   have hclosed : IsClosed
       (LinearMap.range rho : Set (∀ D : ↥C.covers, presheafValue D.1)) := by
     rw [hrange]; exact sectionEqualizer_isClosed (JetA F) C
-  haveI : (uniformity (presheafValue C.base)).IsCountablyGenerated :=
+  have : (uniformity (presheafValue C.base)).IsCountablyGenerated :=
     presheafValue_uniformity_isCountablyGenerated (A := JetA F) C.base
-  haveI : ∀ D : ↥C.covers, (uniformity (presheafValue D.1)).IsCountablyGenerated :=
+  have : ∀ D : ↥C.covers, (uniformity (presheafValue D.1)).IsCountablyGenerated :=
     fun D => presheafValue_uniformity_isCountablyGenerated (A := JetA F) D.1
-  haveI : ContinuousSMul (JetA F) (presheafValue C.base) :=
+  have : ContinuousSMul (JetA F) (presheafValue C.base) :=
     ⟨continuous_mul.comp (((canonicalMap_continuous C.base).comp continuous_fst).prodMk
       continuous_snd)⟩
-  haveI : ∀ D : ↥C.covers, ContinuousSMul (JetA F) (presheafValue D.1) :=
+  have : ∀ D : ↥C.covers, ContinuousSMul (JetA F) (presheafValue D.1) :=
     fun D => ⟨continuous_mul.comp
       (((canonicalMap_continuous D.1).comp continuous_fst).prodMk continuous_snd)⟩
-  haveI : ContinuousSMul (JetA F) (∀ D : ↥C.covers, presheafValue D.1) := inferInstance
+  have : ContinuousSMul (JetA F) (∀ D : ↥C.covers, presheafValue D.1) := inferInstance
   have hrho_cont : Continuous rho :=
     continuous_pi fun D => restrictionMapHom_continuous C.base D.1 (C.hsubset D.1 D.2)
   have hinj : Function.Injective (rho : presheafValue C.base → _) := fun x y h =>

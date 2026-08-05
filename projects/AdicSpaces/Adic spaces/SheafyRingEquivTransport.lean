@@ -61,16 +61,16 @@ theorem isSheafyFor_mapRingEquiv (e : A ≃+* B) (he : Continuous e)
   classical
   -- 1–2: install the source pair and the mapped target pair
   letI := Aplus.toPlusSubring
-  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
+  have : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
   letI := (Aplus.map e he he').toPlusSubring
-  haveI : IsRingOfIntegralElements (B⁺ : Subring B) := (Aplus.map e he he').2
+  have : IsRingOfIntegralElements (B⁺ : Subring B) := (Aplus.map e he he').2
   -- 3: both faithful restriction-map packages, locally
-  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
-  haveI : HasLocLiftPowerBounded B := hasLocLiftPowerBounded_faithful
+  have : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+  have : HasLocLiftPowerBounded B := hasLocLiftPowerBounded_faithful
   -- 4: convert `IsLimitSheaf` to the internal criterion
-  haveI : IsSheafy A := isSheafy_of_isLimitSheaf h
+  have : IsSheafy A := isSheafy_of_isLimitSheaf h
   -- 5: the T6 transport (the mapped plus ring is definitionally the image)
-  haveI : IsSheafy B := isSheafy_mapRingEquiv e he he' rfl
+  have : IsSheafy B := isSheafy_mapRingEquiv e he he' rfl
   -- 6: convert back
   exact isLimitSheaf_of_isSheafy
 

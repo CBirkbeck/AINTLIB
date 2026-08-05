@@ -406,7 +406,7 @@ private theorem exists_rationalLocData_mem_subset (n : ℤ)
       ∀ v : Spv (windowChartRing p F ϖ n), v ∈ rationalOpen D'.T D'.s → v ∈ Q := by
   classical
   set Bn := windowChartRing p F ϖ n with hBn
-  haveI : IsTateRing Bn := isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
+  have : IsTateRing Bn := isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
   obtain ⟨fam, FG, hmem, hfamQ⟩ := exists_finset_basicOpen_mem_subset hQ hw₀Q
   obtain ⟨uB, huB⟩ := IsTateRing.exists_topologicallyNilpotent_unit (A := Bn)
   obtain ⟨f, g, hspan, hwmem, hsub⟩ :=
@@ -533,8 +533,8 @@ private theorem exists_windowNbhd_spec (hp : 1 < p) (n : ℤ) (y : ↥(yTop p F 
         ≃ₜ ↥((V : Set ↥(yTop p F ϖ)))) := by
   classical
   set Bn := windowChartRing p F ϖ n with hBn
-  haveI : IsTateRing Bn := isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+  have : IsTateRing Bn := isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
+  have : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
     isAffinoidRing_Ainf p F
   set h_n := spaChartHomeoWindow p F ϖ hp n with hhn
   set m₀ : ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
@@ -562,9 +562,9 @@ private theorem exists_windowNbhd_spec (hp : 1 < p) (n : ℤ) (y : ↥(yTop p F 
   · -- V ≤ O
     exact windowNbhd_le p F ϖ hp n hG₂ (by rw [hG₂eq, hIM, hRT]) O hOmem hQmem hRsub
   · -- the homeomorphism
-    haveI : IsHuberRing Bn :=
+    have : IsHuberRing Bn :=
       (isTateRing_bigWindowChart p F (windowUnif p F ϖ n)).toIsHuberRing
-    haveI : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
+    have : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
     set e₁ := spaPresheafValueHomeomorphRationalOpen' D'
       (IsTateRing.exists_topologicallyNilpotent_unit
         (A := presheafValue D')).choose
@@ -607,8 +607,8 @@ theorem exists_window_subdatum_nbhd (hp : 1 < p) (y : ↥(yTop p F ϖ))
   obtain ⟨n, hbw⟩ := Set.mem_iUnion.mp hyY
   refine ⟨n, ?_⟩
   set Bn := windowChartRing p F ϖ n with hBn
-  haveI : IsTateRing Bn := isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+  have : IsTateRing Bn := isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
+  have : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
     isAffinoidRing_Ainf p F
   set h_n := spaChartHomeoWindow p F ϖ hp n with hhn
   -- the M_n-point and the chart-side point

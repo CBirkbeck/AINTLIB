@@ -137,8 +137,8 @@ theorem IsSheafOfTopologicalRings.ringPresheaf_isSheaf
   refine (TopCat.Presheaf.isSheaf_iff_isSheafUniqueGluing_types _).mpr ?_
   intro ι U sf hsf
   letI : TopologicalSpace E.carrier := ⊥
-  haveI : DiscreteTopology E.carrier := ⟨rfl⟩
-  haveI : IsTopologicalRing E.carrier :=
+  have : DiscreteTopology E.carrier := ⟨rfl⟩
+  have : IsTopologicalRing E.carrier :=
     { continuous_add := continuous_of_discreteTopology
       continuous_mul := continuous_of_discreteTopology
       continuous_neg := continuous_of_discreteTopology }

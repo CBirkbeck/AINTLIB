@@ -210,7 +210,7 @@ theorem restrictionMap_flat_via_iteratedMinus
   -- Step 1: B-level flatness for the iteratedMinusDatum_B side.
   -- NO `letI : HasLocLiftPowerBounded` needed — `iteratedMinus_B_flat_of_canonical`
   -- does not require it (proved via `presheafValue_flat_of_canonical`).
-  haveI hflat_B :
+  have hflat_B :
       @Module.Flat (presheafValue D₀) (presheafValue (iteratedMinusDatum_B P D₀ f))
         _ _ (RingHom.toModule
           (RationalLocData.canonicalMap (iteratedMinusDatum_B P D₀ f))) :=
@@ -408,7 +408,7 @@ theorem restrictionMap_flat_via_iteratedPlus
   letI : IsNoetherianRing
       (locSubring (iteratedPlusDatum_B P D₀ f).P (iteratedPlusDatum_B P D₀ f).T
         (iteratedPlusDatum_B P D₀ f).s) := hlocSubring_Noeth_B
-  haveI hflat_B :
+  have hflat_B :
       @Module.Flat (presheafValue D₀) (presheafValue (iteratedPlusDatum_B P D₀ f))
         _ _ (RingHom.toModule
           (RationalLocData.canonicalMap (iteratedPlusDatum_B P D₀ f))) :=
@@ -501,7 +501,7 @@ theorem restrictionMap_flat_via_fSubX_quotient
   letI : IsNoetherianRing ↥P_B.A₀ := hA₀Noeth_B
   -- Step 1: B = presheafValue D₀-flatness of B⟨X⟩/(f - X) via Wedhorn 8.30 / Lemma 8.31.
   -- `flat_quotient_fSubX_general` gives this for ANY f in B (no PB hypothesis).
-  haveI hflat_quot :
+  have hflat_quot :
       Module.Flat (presheafValue D₀)
         (LaurentCover.B₁_gen (D₀.canonicalMap f)) :=
     TateAlgebra.flat_quotient_fSubX_general P_B (D₀.canonicalMap f)
@@ -594,7 +594,7 @@ theorem restrictionMap_flat_via_oneSubfX_quotient
     presheafValue_pairOfDefinition_concrete P D₀
   letI : IsNoetherianRing ↥P_B.A₀ := hP_A₀Noeth_B
   -- B-level flatness of B⟨X⟩/(1 - fX) via Wedhorn 8.30 / Lemma 8.31.
-  haveI hflat_quot :
+  have hflat_quot :
       Module.Flat (presheafValue D₀)
         (LaurentCover.B₂_gen (D₀.canonicalMap f)) :=
     TateAlgebra.flat_quotient_oneSubfX_general P_B (D₀.canonicalMap f)
@@ -712,7 +712,7 @@ theorem restrictionMap_flat_of_rational_subset_via_relative
   -- Note: `presheafValue_flat_of_canonical` does NOT require
   -- `HasLocLiftPowerBounded (presheafValue E)` — flatness is established directly
   -- from the Tate-quotient identification at the B-level, no Nullstellensatz needed.
-  haveI hflat_E :
+  have hflat_E :
       @Module.Flat (presheafValue E) (presheafValue D_at_E)
         _ _ (RingHom.toModule D_at_E.canonicalMap) :=
     presheafValue_flat_of_canonical (presheafValue E) P_B D_at_E
@@ -837,14 +837,14 @@ theorem restrictionMap_flat_trans
   letI mod_E_D₁ : Module (presheafValue E) (presheafValue D₁) := Algebra.toModule
   letI mod_D₁_D : Module (presheafValue D₁) (presheafValue D) := Algebra.toModule
   letI mod_E_D : Module (presheafValue E) (presheafValue D) := Algebra.toModule
-  haveI : IsScalarTower (presheafValue E) (presheafValue D₁) (presheafValue D) := by
+  have : IsScalarTower (presheafValue E) (presheafValue D₁) (presheafValue D) := by
     refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
     change restrictionMapHom E D (h_D₁_D.trans h_E_D₁) x =
       restrictionMapHom D₁ D h_D₁_D (restrictionMapHom E D₁ h_E_D₁ x)
     have hcomp := restrictionMap_restrictionMap E D₁ D h_E_D₁ h_D₁_D x
     exact hcomp.symm
-  haveI : Module.Flat (presheafValue E) (presheafValue D₁) := flat_E_D₁
-  haveI : Module.Flat (presheafValue D₁) (presheafValue D) := flat_D₁_D
+  have : Module.Flat (presheafValue E) (presheafValue D₁) := flat_E_D₁
+  have : Module.Flat (presheafValue D₁) (presheafValue D) := flat_D₁_D
   exact Module.Flat.trans (presheafValue E) (presheafValue D₁) (presheafValue D)
 
 /-- The self-restriction `𝒪_X(E) → 𝒪_X(E)` is flat (it is the identity ring hom,

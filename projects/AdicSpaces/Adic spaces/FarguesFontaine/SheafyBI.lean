@@ -219,7 +219,7 @@ theorem completeSpace_right_BISub :
     @CompleteSpace ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
       (IsTopologicalAddGroup.rightUniformSpace
         ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
-  haveI := isUniformAddGroup_BISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+  have := isUniformAddGroup_BISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
     (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
   rw [IsUniformAddGroup.rightUniformSpace_eq]
   exact (isComplete_BISub p F ϖ).completeSpace_coe

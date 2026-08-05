@@ -673,7 +673,7 @@ theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
     [IsAdicComplete P.I P.A₀] [PlusSubring A] {𝔭 : Ideal A} [𝔭.IsPrime]
     (h𝔭 : ¬IsOpen (𝔭 : Set A)) (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀) :
     ∃ v ∈ Spa A A⁺, 𝔭 ≤ v.supp ∧ ¬P.idealOfDefinition ≤ v.supp := by
-  haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
+  have : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
   obtain ⟨V₀, hrange₀, hnonunits₀⟩ := P.exists_valuationSubring_of_prime (𝔭 := 𝔭)
   obtain ⟨a₀, ha₀_I, ha₀_notp⟩ := P.exists_mem_I_not_mem_of_not_isOpen h𝔭
   set s := (P.A₀.subtype a₀ : A)
@@ -755,7 +755,7 @@ theorem exists_spa_point_supp_ge_maxIdeal_of_complete
   by_cases h𝔪_open : IsOpen (𝔪 : Set A)
   · obtain ⟨v, hv, hsupp⟩ := exists_mem_spa_supp_eq 𝔪 h𝔪_open
     exact ⟨v, hv, le_of_eq hsupp.symm⟩
-  · haveI : 𝔪.IsPrime := inferInstance
+  · have : 𝔪.IsPrime := inferInstance
     obtain ⟨v, hv, hsupp, _⟩ :=
       P.exists_mem_spa_supp_ge_of_nonOpen_prime h𝔪_open hAplus_le_A₀
     exact ⟨v, hv, hsupp⟩
@@ -777,7 +777,7 @@ theorem isUnit_iff_forall_not_vle_zero_of_complete
   by_contra hf
   obtain ⟨𝔪, h𝔪, hf𝔪⟩ :=
     Ideal.exists_le_maximal (Ideal.span {f}) (Ideal.span_singleton_ne_top hf)
-  haveI := h𝔪
+  have := h𝔪
   obtain ⟨v, hv, hsupp⟩ := P.exists_spa_point_supp_ge_maxIdeal_of_complete 𝔪 hAplus_le_A₀
   exact h v hv ((v.mem_supp_iff f).mp (hsupp (hf𝔪 (Ideal.mem_span_singleton_self f))))
 
@@ -871,7 +871,7 @@ theorem mulArchimedean_valueGroupWithZero_ofValuation {Γ₀' : Type*}
     (letI : ValuativeRel A := ValuativeRel.ofValuation w
      MulArchimedean (ValuativeRel.ValueGroupWithZero A)) := by
   letI : ValuativeRel A := ValuativeRel.ofValuation w
-  haveI := Valuation.Compatible.ofValuation w
+  have := Valuation.Compatible.ofValuation w
   have h1 := ValuativeRel.ValueGroupWithZero.embed_strictMono w
   have h2 := MonoidWithZeroHom.ValueGroup₀.embedding_strictMono
     (f := MonoidWithZeroHom.ofClass w)
@@ -1020,10 +1020,10 @@ theorem exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime'
   set w := v'.coarsen (ConvexSubgroup.maxAvoid hg₀_lt.ne) with hw_def
   have hw_supp : w.supp = x₀.supp := by
     rw [hw_def, Valuation.coarsen_supp, hv'_supp, hsupp_eq]
-  haveI : MulArchimedean
+  have : MulArchimedean
       (WithZero ((ValuativeRel.ValueGroupWithZero A)ˣ ⧸
         (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup)) := by
-    haveI := hw_arch
+    have := hw_arch
     infer_instance
   refine ⟨ofValuation w, isContinuous_ofValuation_of w hw_cont, ?_, ?_, ?_⟩
   · rw [supp_ofValuation, hw_supp]

@@ -1011,7 +1011,7 @@ theorem imagePieceDatum_mem_rationalOpen_iff
         (imagePieceDatumOpen D₀ E.T E.s ME hleE).s ↔
       w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺ ∧
         comap D₀.canonicalMap w ∈ rationalOpen E.T E.s) := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   have hT : (imagePieceDatumOpen D₀ E.T E.s ME hleE).T = E.T.image D₀.canonicalMap := rfl
   have hs : (imagePieceDatumOpen D₀ E.T E.s ME hleE).s = D₀.canonicalMap E.s := rfl
@@ -1057,7 +1057,7 @@ theorem imagePieceDatum_rationalOpen_mono
         (imagePieceDatumOpen D₀ E'.T E'.s ME' hleE').s ⊆
       rationalOpen (imagePieceDatumOpen D₀ E.T E.s ME hleE).T
         (imagePieceDatumOpen D₀ E.T E.s ME hleE).s := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   intro w hw
   rw [imagePieceDatum_mem_rationalOpen_iff] at hw ⊢
   exact ⟨hw.1, h hw.2⟩
@@ -1090,7 +1090,7 @@ theorem imagePieceDatum_rationalOpen_inter
           (imagePieceDatumOpen D₀ E₁.T E₁.s ME₁ hleE₁).s ∩
         rationalOpen (imagePieceDatumOpen D₀ E₂.T E₂.s ME₂ hleE₂).T
           (imagePieceDatumOpen D₀ E₂.T E₂.s ME₂ hleE₂).s := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   ext w
   rw [Set.mem_inter_iff, imagePieceDatum_mem_rationalOpen_iff,
     imagePieceDatum_mem_rationalOpen_iff, imagePieceDatum_mem_rationalOpen_iff, h₃]
@@ -1135,12 +1135,12 @@ private theorem relativePiece_restrict_square_locLevel
       (((relativePiece_equiv D₀ E hE_sub ME hleE) :
         presheafValue E →+* presheafValue (imagePieceDatumOpen D₀ E.T E.s ME hleE)).comp
         E.coeRingHom)) := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
-  haveI : @CompleteSpace (presheafValue D₀)
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   -- both composites, postcomposed with `E.coeRingHom`, agree as ring homs out of
   -- the localization (determined on the `algebraMap`-range by the trackings)
   refine IsLocalization.ringHom_ext (Submonoid.powers E.s) ?_
@@ -1212,10 +1212,10 @@ theorem relativePiece_equiv_restrict_square
         (imagePieceDatumOpen D₀ E'.T E'.s ME' hleE')
         (imagePieceDatum_rationalOpen_mono D₀ E E' ME hleE ME' hleE' hE'_sub)
         (relativePiece_equiv D₀ E hE_sub ME hleE y) := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
-  haveI := presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have := presheafValue_completeSpace_rightUniformSpace D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   -- both composites, postcomposed with `E.coeRingHom`, agree as ring homs out of
   -- the localization (determined on the `algebraMap`-range by the trackings)
   have hloc := relativePiece_restrict_square_locLevel D₀ E E' hE_sub hE'_sub ME hleE ME' hleE'

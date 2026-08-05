@@ -188,13 +188,13 @@ private theorem varIncl_continuous_aux (j : Fin 2)
       instTopologicalSpaceTateAlgebra₂ φ := by
   letI τ₁ : TopologicalSpace ↥(TateAlgebra A) := tateAlgebraTopology'
   letI τ₂ : TopologicalSpace ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'
-  haveI hr1 : IsTopologicalRing ↥(TateAlgebra A) :=
+  have hr1 : IsTopologicalRing ↥(TateAlgebra A) :=
     tateAlgebraTopology'_isTopologicalRing
-  haveI hr2 : IsTopologicalRing ↥(TateAlgebra₂ A) :=
+  have hr2 : IsTopologicalRing ↥(TateAlgebra₂ A) :=
     tateAlgebra₂Topology'_isTopologicalRing
-  haveI hag1 : IsTopologicalAddGroup ↥(TateAlgebra A) :=
+  have hag1 : IsTopologicalAddGroup ↥(TateAlgebra A) :=
     hr1.to_topologicalAddGroup
-  haveI hag2 : IsTopologicalAddGroup ↥(TateAlgebra₂ A) :=
+  have hag2 : IsTopologicalAddGroup ↥(TateAlgebra₂ A) :=
     hr2.to_topologicalAddGroup
   let pp := IsTateRing.principalPair A
   let P := pp.toPairOfDefinition
@@ -296,7 +296,7 @@ theorem posLift_continuous :
   letI hringA : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
   letI tB1 : TopologicalSpace (B₁_gen f) := B₁_gen_topology f
   letI tB12 : TopologicalSpace (B₁₂_gen f) := B₁₂_gen_topology f
-  haveI hringB1 : IsTopologicalRing (B₁_gen f) := B₁_gen_isTopologicalRing f
+  have hringB1 : IsTopologicalRing (B₁_gen f) := B₁_gen_isTopologicalRing f
   have hQM : IsQuotientMap (Ideal.Quotient.mk
       (Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X})) :=
     (QuotientRing.isOpenQuotientMap_mk _).isQuotientMap
@@ -311,7 +311,7 @@ theorem negLift_continuous :
   letI hringA : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
   letI tB2 : TopologicalSpace (B₂_gen f) := B₂_gen_topology f
   letI tB12 : TopologicalSpace (B₁₂_gen f) := B₁₂_gen_topology f
-  haveI hringB2 : IsTopologicalRing (B₂_gen f) := B₂_gen_isTopologicalRing f
+  have hringB2 : IsTopologicalRing (B₂_gen f) := B₂_gen_isTopologicalRing f
   have hQM : IsQuotientMap (Ideal.Quotient.mk
       (Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X})) :=
     (QuotientRing.isOpenQuotientMap_mk _).isQuotientMap
@@ -328,8 +328,8 @@ theorem deltaMap_gen_continuous :
   letI tB1 : TopologicalSpace (B₁_gen f) := B₁_gen_topology f
   letI tB2 : TopologicalSpace (B₂_gen f) := B₂_gen_topology f
   letI tB12 : TopologicalSpace (B₁₂_gen f) := B₁₂_gen_topology f
-  haveI hringB12 : IsTopologicalRing (B₁₂_gen f) := B₁₂_gen_isTopologicalRing f
-  haveI hagB12 : IsTopologicalAddGroup (B₁₂_gen f) := B₁₂_gen_isTopologicalAddGroup f
+  have hringB12 : IsTopologicalRing (B₁₂_gen f) := B₁₂_gen_isTopologicalRing f
+  have hagB12 : IsTopologicalAddGroup (B₁₂_gen f) := B₁₂_gen_isTopologicalAddGroup f
   have h1 : Continuous (fun p : B₁_gen f × B₂_gen f ↦ posLift f p.1) :=
     (posLift_continuous f).comp continuous_fst
   have h2 : Continuous (fun p : B₁_gen f × B₂_gen f ↦ negLift f p.2) :=
@@ -459,8 +459,8 @@ theorem epsilonHom_gen_inducing
   have he_surj : Function.Surjective e := fun ⟨p, hp⟩ ↦ by
     obtain ⟨a, ha⟩ := h_ker_eps p hp
     exact ⟨a, Subtype.ext ha⟩
-  haveI := hT2_prod
-  haveI : BaireSpace ↥K := hBaire_ker
+  have := hT2_prod
+  have : BaireSpace ↥K := hBaire_ker
   have he_open : IsOpenMap e :=
     AddMonoidHom.isOpenMap_of_complete_countable e he_surj he_continuous
   have he_ind : Topology.IsInducing e :=
@@ -506,7 +506,7 @@ theorem plusFSubXIdeal_local_isClosed
     IsClosed
       ((Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X} :
           Ideal ↥(TateAlgebra A)) : Set ↥(TateAlgebra A)) := by
-  haveI : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := A)).A₀ := hnoeth
+  have : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := A)).A₀ := hnoeth
   exact tateAlgebra_isClosed_ideal hA_complete _
 
 omit [IsNoetherianRing A] [IsDomain A] in
@@ -517,7 +517,7 @@ theorem B₁_gen_t2Space
     (hnoeth : IsNoetherianRing
       ↥(pairSubring (IsTateRing.principalPair A).toPairOfDefinition)) :
     @T2Space (B₁_gen f) (B₁_gen_topology f) := by
-  haveI : IsClosed
+  have : IsClosed
       ((Ideal.span {algebraMap A ↥(TateAlgebra A) f -
           TateAlgebra.X}).toAddSubgroup :
         Set ↥(TateAlgebra A)) :=
@@ -532,10 +532,10 @@ theorem B₂_gen_t2Space
     (hnoeth : IsNoetherianRing
       ↥(pairSubring (IsTateRing.principalPair A).toPairOfDefinition)) :
     @T2Space (B₂_gen f) (B₂_gen_topology f) := by
-  haveI hclosed : IsClosed
+  have hclosed : IsClosed
       ((Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f *
           TateAlgebra.X}).toAddSubgroup : Set ↥(TateAlgebra A)) := by
-    haveI : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := A)).A₀ := hnoeth
+    have : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := A)).A₀ := hnoeth
     exact tateAlgebra_isClosed_ideal hA_complete _
   infer_instance
 
@@ -548,7 +548,7 @@ theorem laurentIdeal_local_isClosed
       ↥(pairSubring₂ (IsTateRing.principalPair A).toPairOfDefinition)) :
     IsClosed ((laurentIdeal A : Ideal ↥(TateAlgebra₂ A)) :
       Set ↥(TateAlgebra₂ A)) := by
-  haveI : IsNoetherianRing ↥(tateAlgebra₂_pairOfDefinition (A := A)).A₀ := hnoeth
+  have : IsNoetherianRing ↥(tateAlgebra₂_pairOfDefinition (A := A)).A₀ := hnoeth
   exact tateAlgebra₂_isClosed_ideal hA_complete _
 
 omit [IsNoetherianRing A] [IsDomain A] in
@@ -559,7 +559,7 @@ theorem laurentTateAlgebra_t2Space
     (hnoeth : IsNoetherianRing
       ↥(pairSubring₂ (IsTateRing.principalPair A).toPairOfDefinition)) :
     @T2Space (LaurentTateAlgebra A) laurentTateAlgebra_topology := by
-  haveI : IsClosed ((laurentIdeal A).toAddSubgroup : Set ↥(TateAlgebra₂ A)) :=
+  have : IsClosed ((laurentIdeal A).toAddSubgroup : Set ↥(TateAlgebra₂ A)) :=
     laurentIdeal_local_isClosed hA_complete hnoeth
   change T2Space (↥(TateAlgebra₂ A) ⧸ laurentIdeal A)
   infer_instance
@@ -575,13 +575,13 @@ theorem laurentFSubZetaIdeal_isClosed
       ((laurentFSubZetaIdeal f : Ideal (LaurentTateAlgebra A)) :
         Set (LaurentTateAlgebra A)) := by
   letI : TopologicalSpace ↥(TateAlgebra₂ A) := instTopologicalSpaceTateAlgebra₂
-  haveI : IsTopologicalRing ↥(TateAlgebra₂ A) := instIsTopologicalRingTateAlgebra₂
+  have : IsTopologicalRing ↥(TateAlgebra₂ A) := instIsTopologicalRingTateAlgebra₂
   letI : TopologicalSpace (LaurentTateAlgebra A) := laurentTateAlgebra_topology
-  haveI : IsTopologicalRing (LaurentTateAlgebra A) := laurentTateAlgebra_isTopologicalRing
+  have : IsTopologicalRing (LaurentTateAlgebra A) := laurentTateAlgebra_isTopologicalRing
   have hcomap_closed : IsClosed
       (((laurentFSubZetaIdeal f).comap LaurentTateAlgebra.mkHom : Ideal _) :
         Set ↥(TateAlgebra₂ A)) := by
-    haveI : IsNoetherianRing ↥(tateAlgebra₂_pairOfDefinition (A := A)).A₀ := hnoeth
+    have : IsNoetherianRing ↥(tateAlgebra₂_pairOfDefinition (A := A)).A₀ := hnoeth
     exact tateAlgebra₂_isClosed_ideal hA_complete _
   have hQM : Topology.IsQuotientMap
       (LaurentTateAlgebra.mkHom : ↥(TateAlgebra₂ A) → LaurentTateAlgebra A) :=
@@ -599,10 +599,10 @@ theorem B₁₂_gen_t2Space
       ↥(pairSubring₂ (IsTateRing.principalPair A).toPairOfDefinition)) :
     @T2Space (B₁₂_gen f) (B₁₂_gen_topology f) := by
   letI : TopologicalSpace (LaurentTateAlgebra A) := laurentTateAlgebra_topology
-  haveI : IsTopologicalRing (LaurentTateAlgebra A) := laurentTateAlgebra_isTopologicalRing
-  haveI hT2_laurent : T2Space (LaurentTateAlgebra A) :=
+  have : IsTopologicalRing (LaurentTateAlgebra A) := laurentTateAlgebra_isTopologicalRing
+  have hT2_laurent : T2Space (LaurentTateAlgebra A) :=
     laurentTateAlgebra_t2Space hA_complete hnoeth
-  haveI hclosed : IsClosed ((laurentFSubZetaIdeal f).toAddSubgroup :
+  have hclosed : IsClosed ((laurentFSubZetaIdeal f).toAddSubgroup :
       Set (LaurentTateAlgebra A)) :=
     laurentFSubZetaIdeal_isClosed f hA_complete hnoeth
   infer_instance
@@ -615,8 +615,8 @@ theorem B₁_gen_x_B₂_gen_t2Space
     (hnoeth : IsNoetherianRing
       ↥(pairSubring (IsTateRing.principalPair A).toPairOfDefinition)) :
     T2Space (B₁_gen f × B₂_gen f) := by
-  haveI : T2Space (B₁_gen f) := B₁_gen_t2Space f hA_complete hnoeth
-  haveI : T2Space (B₂_gen f) := B₂_gen_t2Space f hA_complete hnoeth
+  have : T2Space (B₁_gen f) := B₁_gen_t2Space f hA_complete hnoeth
+  have : T2Space (B₂_gen f) := B₂_gen_t2Space f hA_complete hnoeth
   exact Prod.t2Space
 
 /-! ### `BaireSpace` of `ker(deltaMap_gen f)` (next-step blocker)
@@ -696,9 +696,9 @@ omit [IsNoetherianRing A] [IsDomain A] [T2Space A] in
 /-- The neighborhood filter at `0 : B₁_gen f` is countably-generated. -/
 theorem B₁_gen_nhds_zero_isCountablyGenerated :
     Filter.IsCountablyGenerated (𝓝 (0 : B₁_gen f)) := by
-  haveI : FirstCountableTopology ↥(TateAlgebra A) :=
+  have : FirstCountableTopology ↥(TateAlgebra A) :=
     instFirstCountableTopologyTateAlgebra
-  haveI : (𝓝 (0 : ↥(TateAlgebra A))).IsCountablyGenerated := inferInstance
+  have : (𝓝 (0 : ↥(TateAlgebra A))).IsCountablyGenerated := inferInstance
   have hmk_OQM := QuotientRing.isOpenQuotientMap_mk
     (Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X})
   have hmk0 : Ideal.Quotient.mk
@@ -713,9 +713,9 @@ omit [IsNoetherianRing A] [IsDomain A] [T2Space A] in
 /-- The neighborhood filter at `0 : B₂_gen f` is countably-generated. -/
 theorem B₂_gen_nhds_zero_isCountablyGenerated :
     Filter.IsCountablyGenerated (𝓝 (0 : B₂_gen f)) := by
-  haveI : FirstCountableTopology ↥(TateAlgebra A) :=
+  have : FirstCountableTopology ↥(TateAlgebra A) :=
     instFirstCountableTopologyTateAlgebra
-  haveI : (𝓝 (0 : ↥(TateAlgebra A))).IsCountablyGenerated := inferInstance
+  have : (𝓝 (0 : ↥(TateAlgebra A))).IsCountablyGenerated := inferInstance
   have hmk_OQM := QuotientRing.isOpenQuotientMap_mk
     (Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X})
   have hmk0 : Ideal.Quotient.mk
@@ -730,7 +730,7 @@ omit [IsNoetherianRing A] [IsDomain A] [T2Space A] in
 /-- The canonical uniformity on `B₁_gen f` is countably-generated. -/
 theorem B₁_gen_uniformity_isCountablyGenerated :
     Filter.IsCountablyGenerated (𝓤 (B₁_gen f)) := by
-  haveI hcg : (𝓝 (0 : B₁_gen f)).IsCountablyGenerated :=
+  have hcg : (𝓝 (0 : B₁_gen f)).IsCountablyGenerated :=
     B₁_gen_nhds_zero_isCountablyGenerated f
   exact @IsUniformAddGroup.uniformity_countably_generated
     (B₁_gen f) (B₁_gen_uniformSpace f) _ (B₁_gen_isUniformAddGroup f) hcg
@@ -739,7 +739,7 @@ omit [IsNoetherianRing A] [IsDomain A] [T2Space A] in
 /-- The canonical uniformity on `B₂_gen f` is countably-generated. -/
 theorem B₂_gen_uniformity_isCountablyGenerated :
     Filter.IsCountablyGenerated (𝓤 (B₂_gen f)) := by
-  haveI hcg : (𝓝 (0 : B₂_gen f)).IsCountablyGenerated :=
+  have hcg : (𝓝 (0 : B₂_gen f)).IsCountablyGenerated :=
     B₂_gen_nhds_zero_isCountablyGenerated f
   exact @IsUniformAddGroup.uniformity_countably_generated
     (B₂_gen f) (B₂_gen_uniformSpace f) _ (B₂_gen_isUniformAddGroup f) hcg

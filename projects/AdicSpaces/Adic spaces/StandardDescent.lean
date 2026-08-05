@@ -121,10 +121,10 @@ theorem standardSheafCondition_of_isSheafyFor (Aplus : RingOfIntegralElements A)
   intro S B hB
   -- ——— assertions at the GIVEN pair (derived before the target instance enters) ———
   have key : Topology.IsEmbedding (letI := Aplus.toPlusSubring;
-        haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
+        have : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
         productRestrictionSub A (StandardCoverData.toCovering S)) ∧
       (letI := Aplus.toPlusSubring
-       haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
+       have : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
        ∀ (f : ∀ D : ↥(StandardCoverData.toCovering S).covers, presheafValue D.1),
         (StandardCoverData.toCovering S).ExactIntersectionCompatible
           (StandardCoverData.toCovering_isRational S) f →
@@ -133,15 +133,15 @@ theorem standardSheafCondition_of_isSheafyFor (Aplus : RingOfIntegralElements A)
             restrictionMap (StandardCoverData.toCovering S).base D.1
               ((StandardCoverData.toCovering S).hsubset D.1 D.2) x = f D) := by
     letI := Aplus.toPlusSubring
-    haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
-    haveI hSheafy₁ : IsSheafy A := isSheafy_of_isLimitSheaf h
+    have : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
+    have hSheafy₁ : IsSheafy A := isSheafy_of_isLimitSheaf h
     refine ⟨IsSheafy.embedding _ (StandardCoverData.toCovering_isRational S),
       fun f hf => IsSheafy.gluing _ (StandardCoverData.toCovering_isRational S) f ?_⟩
     exact (RationalCoveringData.allDataCompatible_iff_exactIntersectionCompatible
       (StandardCoverData.toCovering_isRational S) f).mpr hf
   -- ——— the assertions at the TARGET pair ———
   letI : PlusSubring A := ⟨B⟩
-  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := hB
+  have : IsRingOfIntegralElements (A⁺ : Subring A) := hB
   refine ⟨?_, ?_⟩
   · -- embedding: the product restriction of the standard datum is the **same
     -- function** at both pairs (the instance and containment arguments are
@@ -251,7 +251,7 @@ theorem isSheafy_rationalCovering_of_covers_empty
     intro v hv
     obtain ⟨D, hD, _⟩ := C.hcover v hv
     exact Finset.eq_empty_iff_forall_notMem.mp he D hD
-  haveI : Subsingleton (presheafValue C.base) :=
+  have : Subsingleton (presheafValue C.base) :=
     presheafValue_subsingleton_of_rationalOpen_empty C.base hbase_empty
   exact ⟨Topology.IsEmbedding.of_subsingleton _,
     fun f _ => ⟨0, fun D => absurd D.2 (Finset.eq_empty_iff_forall_notMem.mp he D.1)⟩⟩
@@ -470,10 +470,10 @@ theorem isSheafyFor_of_standardSheafCondition (hstd : StandardSheafCondition A)
     IsSheafyFor A Bplus := by
   classical
   letI := Bplus.toPlusSubring
-  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Bplus.2
+  have : IsRingOfIntegralElements (A⁺ : Subring A) := Bplus.2
   letI iA : DecidableEq A := Classical.decEq A
   letI iR : DecidableEq (RationalLocData A) := Classical.decEq _
-  haveI : IsSheafy A := isSheafy_of_standardSheafCondition_at hstd (href iA iR)
+  have : IsSheafy A := isSheafy_of_standardSheafCondition_at hstd (href iA iR)
   show IsLimitSheaf A
   exact isLimitSheaf_of_isSheafy
 

@@ -37,9 +37,9 @@ variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 theorem presheafValue_subsingleton_of_rationalOpen_empty_huber
     (E : RationalLocData A) (hempty : rationalOpen E.T E.s = ∅) :
     Subsingleton (presheafValue E) := by
-  haveI : IsHuberRing (presheafValue E) := presheafValue_isHuberRing_huber E
+  have : IsHuberRing (presheafValue E) := presheafValue_isHuberRing_huber E
   letI P_B : PairOfDefinition (presheafValue E) := presheafValue_concretePair E
-  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete E
+  have : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete E
   have h0 : IsUnit (0 : presheafValue E) := by
     rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
     intro w hw
@@ -66,7 +66,7 @@ theorem limitSections_subsingleton_of_empty {V : Opens ↥(Spa A A⁺)}
     (hV : (V : Set ↥(Spa A A⁺)) = ∅) :
     Subsingleton ↥(limitSections V) := by
   refine ⟨fun x y => Subtype.ext (funext fun i => ?_)⟩
-  haveI := presheafValue_subsingleton_of_rationalOpen_empty_huber i.D
+  have := presheafValue_subsingleton_of_rationalOpen_empty_huber i.D
     (rationalOpen_eq_empty_of_index hV i)
   exact Subsingleton.elim _ _
 
@@ -1578,7 +1578,7 @@ noncomputable def xStalkEquiv (x : Curve p F ϖ) :
 comparison). -/
 theorem isLocalRing_xStalk (x : Curve p F ϖ) :
     IsLocalRing (ToType ((curveSpace p F ϖ).ringStalk x)) := by
-  haveI : IsLocalRing (ToType ((yPresheafedSpace p F ϖ).ringStalk
+  have : IsLocalRing (ToType ((yPresheafedSpace p F ϖ).ringStalk
       (fiberPoint p F ϖ x))) :=
     isLocalRing_yStalk p F ϖ (fiberPoint p F ϖ x)
   exact (xStalkEquiv p F ϖ x).symm.isLocalRing
@@ -1594,7 +1594,7 @@ noncomputable def yStalkValue (y : ↥(yTop p F ϖ)) :
 theorem yStalkValue_supp (y : ↥(yTop p F ϖ)) :
     (yStalkValue p F ϖ y).supp
       = @IsLocalRing.maximalIdeal _ _ (isLocalRing_yStalk p F ϖ y) := by
-  haveI hSloc : IsLocalRing (ToType ((spaRingPresheaf (Ainf p F)).stalk
+  have hSloc : IsLocalRing (ToType ((spaRingPresheaf (Ainf p F)).stalk
       (ySpaPoint p F ϖ y))) :=
     isLocalRing_stalk_Y p F ϖ (ySpaPoint p F ϖ y) (ySpaPoint_mem_Y p F ϖ y)
   rw [show yStalkValue p F ϖ y
@@ -1619,7 +1619,7 @@ noncomputable def xVPreObj : VPreObj where
   val := fun x => comap ((xStalkEquiv p F ϖ x : _ →+* _))
     (yStalkValue p F ϖ (fiberPoint p F ϖ x))
   val_supp := fun x => by
-    haveI hSloc : IsLocalRing (ToType ((yPresheafedSpace p F ϖ).ringStalk
+    have hSloc : IsLocalRing (ToType ((yPresheafedSpace p F ϖ).ringStalk
         (fiberPoint p F ϖ x))) :=
       isLocalRing_yStalk p F ϖ (fiberPoint p F ϖ x)
     rw [supp_comap]

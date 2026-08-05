@@ -63,15 +63,15 @@ noncomputable def chartVObj (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a
     VObj :=
   letI := chartPlus p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
     (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2
-  haveI hT := isTateRing_presheafChart p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+  have hT := isTateRing_presheafChart p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
     (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2
-  haveI : IsHuberRing (presheafValue (chartData p F ϖ 1 b a b)) :=
+  have : IsHuberRing (presheafValue (chartData p F ϖ 1 b a b)) :=
     hT.toIsHuberRing
   letI : @CompleteSpace (presheafValue (chartData p F ϖ 1 b a b))
       (IsTopologicalAddGroup.rightUniformSpace
         (presheafValue (chartData p F ϖ 1 b a b))) :=
     completeSpace_right_presheafValue (chartData p F ϖ 1 b a b)
-  haveI : IsRingOfIntegralElements
+  have : IsRingOfIntegralElements
       (ValuationSpectrum.ringPlus (presheafValue (chartData p F ϖ 1 b a b))
         : Subring (presheafValue (chartData p F ϖ 1 b a b))) :=
     (isRingOfIntegralElements_BIPlusIn p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
@@ -84,7 +84,7 @@ noncomputable def chartVObj (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a
       (presheafChartRingEquivBISub_continuous p F ϖ (hρ₁0 := hρ₁0)
         (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
         hexact1 hexact2)
-  haveI : ValuationSpectrum.IsSheafy
+  have : ValuationSpectrum.IsSheafy
       (presheafValue (chartData p F ϖ 1 b a b)) :=
     isSheafy_presheafChart p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
       (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2
@@ -132,7 +132,7 @@ theorem completedPlusSubring_le_chartPlus (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
             (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
             hexact1 hexact2).symm.toRingHom) := by
   intro x hx
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+  have : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
     isAffinoidRing_Ainf p F
   have hIRIE := RationalLocData.presheafValuePlus_isRingOfIntegralElements
     (A := Ainf p F) (chartData p F ϖ 1 b a b)
@@ -242,7 +242,7 @@ closed. -/
 private theorem isClosed_chartData_completedPlusSubring (a b : ℕ) :
     IsClosed ((chartData p F ϖ 1 b a b).completedPlusSubring
       : Set (presheafValue (chartData p F ϖ 1 b a b))) := by
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+  have : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
     isAffinoidRing_Ainf p F
   exact AddSubgroup.isClosed_of_isOpen
     (chartData p F ϖ 1 b a b).completedPlusSubring.toAddSubgroup
@@ -266,7 +266,7 @@ theorem chartPlus_le_completedPlusSubring_of_dense (a b : ℕ) (ha : 0 < a)
           hexact1 hexact2).symm.toRingHom)
       ≤ (chartData p F ϖ 1 b a b).completedPlusSubring := by
   rintro _ ⟨z, hz, rfl⟩
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) := isAffinoidRing_Ainf p F
+  have : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) := isAffinoidRing_Ainf p F
   have hclosed := isClosed_chartData_completedPlusSubring p F ϖ a b
   choose hseq hball hw1 hw2 using exists_ball_approx p F ϖ
     (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) z hz
@@ -1192,7 +1192,7 @@ subgroup, and open subgroups are closed. -/
 private theorem isClosed_completedPlusSubring (a : ℕ) :
     IsClosed ((chartData p F ϖ 1 1 a 1).completedPlusSubring
       : Set (presheafValue (chartData p F ϖ 1 1 a 1))) := by
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+  have : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
     isAffinoidRing_Ainf p F
   have hopen : IsOpen
       ((chartData p F ϖ 1 1 a 1).completedPlusSubring

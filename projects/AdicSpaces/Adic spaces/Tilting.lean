@@ -172,7 +172,7 @@ theorem p_not_isUnit_in_powerBounded [Nontrivial A] :
       exact_mod_cast h
     rw [← this]; exact hq_pb.isTopologicallyNilpotent_mul hp_nil
   -- 1 topologically nilpotent means constant seq 1 → 0
-  haveI := IsPerfectoidRing.t0 (p := p) (A := A)
+  have := IsPerfectoidRing.t0 (p := p) (A := A)
   have h01 : Inseparable (0 : A) 1 :=
     tendsto_nhds_unique_inseparable
       (show Filter.Tendsto (fun _ : ℕ ↦ (1 : A)) Filter.atTop (nhds 0) by

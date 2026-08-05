@@ -220,8 +220,8 @@ private theorem isHausdorff_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
   -- Using: (x : A) = (c * ϖ^p)^n * y_n, A° is bounded, ϖ top. nilp.
   have hx_zero : (x : A) = 0 := by
     -- Show 0 ∈ closure {(x : A)}, hence x = 0 by T₁ (from T₀ + UniformSpace)
-    haveI := IsPerfectoidRing.t0 (p := p) (A := A)
-    haveI := IsPerfectoidRing.uniform (p := p) (A := A)
+    have := IsPerfectoidRing.t0 (p := p) (A := A)
+    have := IsPerfectoidRing.uniform (p := p) (A := A)
     suffices h_mem_nhds : ∀ U ∈ nhds (0 : A), (x : A) ∈ U by
       have h0 : (0 : A) ∈ closure ({(x : A)} : Set A) :=
         mem_closure_iff_nhds.mpr fun U hU ↦ ⟨(x : A), h_mem_nhds U hU, Set.mem_singleton _⟩
@@ -465,9 +465,9 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] [Nontrivial A] :
     IsPrecomplete (pIdeal p A) (PBSubring A) := by
-  haveI := IsPerfectoidRing.complete (p := p) (A := A)
-  haveI := IsPerfectoidRing.t0 (p := p) (A := A)
-  haveI := IsPerfectoidRing.uniform (p := p) (A := A)
+  have := IsPerfectoidRing.complete (p := p) (A := A)
+  have := IsPerfectoidRing.t0 (p := p) (A := A)
+  have := IsPerfectoidRing.uniform (p := p) (A := A)
   -- Extract perfectoid data
   obtain ⟨ϖ, hϖ_pb, ⟨c, hc_pb, hpc⟩⟩ :=
     IsPerfectoidRing.exists_pseudoUniformizer (p := p) (A := A)
@@ -499,7 +499,7 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     obtain ⟨y, hy⟩ := hf_divA m n hmn
     rw [← hy]; exact hN (y : A) y.property m hNm
   -- Step 3: Show CauchySeq and get limit.
-  haveI : IsUniformAddGroup A := IsPerfectoidRing.uniformAddGroup (p := p) (A := A)
+  have : IsUniformAddGroup A := IsPerfectoidRing.uniformAddGroup (p := p) (A := A)
   have htop := IsPerfectoidRing.topologyEq (p := p) (A := A)
   -- Symmetrize `hf_small` (`sub_mem_nhds_symm`), get Cauchy, then the limit.
   obtain ⟨L, hL⟩ := cauchySeq_tendsto_of_complete

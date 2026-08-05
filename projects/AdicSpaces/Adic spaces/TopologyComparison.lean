@@ -135,9 +135,9 @@ noncomputable instance quotientTTopology_nonarchimedean (f : A) :
     @NonarchimedeanRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal f)
       _ (quotientTTopology f) := by
   letI : TopologicalSpace ↥(TateAlgebra A) := TateAlgebraWedhorn.tateTopologyT f
-  haveI : IsTopologicalRing ↥(TateAlgebra A) :=
+  have : IsTopologicalRing ↥(TateAlgebra A) :=
     TateAlgebraWedhorn.tateTopologyT_isTopologicalRing f
-  haveI : NonarchimedeanRing ↥(TateAlgebra A) :=
+  have : NonarchimedeanRing ↥(TateAlgebra A) :=
     TateAlgebraWedhorn.tateTopologyT_nonarchimedean f
   constructor
   intro U hU
@@ -456,9 +456,9 @@ private theorem exists_indexData_of_mem_nhds_quotient [T2Space A] (P : PairOfDef
   classical
   letI τT : TopologicalSpace ↥(TateAlgebra A) := TateAlgebraWedhorn.tateTopologyT s
   letI τQ : TopologicalSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) := quotientTTopology s
-  haveI hTR_T : IsTopologicalRing ↥(TateAlgebra A) :=
+  have hTR_T : IsTopologicalRing ↥(TateAlgebra A) :=
     TateAlgebraWedhorn.tateTopologyT_isTopologicalRing s
-  haveI hTR_Q : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) :=
+  have hTR_Q : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) :=
     quotientTTopology_isTopologicalRing s
   let mk := Ideal.Quotient.mk (oneSubfXIdeal s)
   have hmk_cont : @Continuous _ _ τT τQ mk := continuous_quotient_mk'
@@ -507,9 +507,9 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
     TateAlgebraWedhorn.tateTopologyT D.s
   letI τQ : TopologicalSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientTTopology D.s
-  haveI hTR_T : IsTopologicalRing ↥(TateAlgebra A) :=
+  have hTR_T : IsTopologicalRing ↥(TateAlgebra A) :=
     TateAlgebraWedhorn.tateTopologyT_isTopologicalRing D.s
-  haveI hTR_Q : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have hTR_Q : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientTTopology_isTopologicalRing D.s
   -- Abbreviations.
   let mk := Ideal.Quotient.mk (oneSubfXIdeal D.s)
@@ -625,7 +625,7 @@ theorem locToQuotientOneSubfX_gen_continuous (D : RationalLocData A)
   letI τQ : TopologicalSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) := quotientTTopology D.s
   letI : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientTTopology_isTopologicalRing D.s
-  haveI : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     @IsTopologicalRing.to_topologicalAddGroup _ _
       (quotientTTopology D.s) (quotientTTopology_isTopologicalRing D.s)
   -- Step 1: Reduce to continuity at 0 using additive group structure.
@@ -636,7 +636,7 @@ theorem locToQuotientOneSubfX_gen_continuous (D : RationalLocData A)
   let hb := hbasis.toRingFilterBasis.toAddGroupFilterBasis
   -- Step 3: The target neighborhood S contains an open additive subgroup.
   -- Use the nonarchimedean property of the quotient.
-  haveI : NonarchimedeanRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have : NonarchimedeanRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientTTopology_nonarchimedean D.s
   obtain ⟨W, hWS⟩ := NonarchimedeanRing.is_nonarchimedean S hS
   -- Step 4: It suffices to show locToQuotientOneSubfX_gen maps some
@@ -867,8 +867,8 @@ theorem presheafToQuotient_comp_tateQuotientToPresheaf (D : RationalLocData A)
   letI : IsUniformAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientTTopology_isUniformAddGroup D.s
   -- T₀ uniform space is T₂ (uniform → regular → R1, and R1 + T₀ → T₂).
-  haveI hT2 : @T2Space _ τQ := by
-    haveI : @RegularSpace _ τQ :=
+  have hT2 : @T2Space _ τQ := by
+    have : @RegularSpace _ τQ :=
       @UniformSpace.to_regularSpace _ (quotientTUniformSpace D.s)
     exact inferInstance
   -- The composites agree on the dense image of locToQuotientOneSubfX_gen.
@@ -1266,7 +1266,7 @@ theorem isClosed_ideal_of_noetherian_adic_separated
     IsClosed (J : Set R) := by
   -- Step 1: Introduce uniform space from the topological additive group.
   letI : UniformSpace R := IsTopologicalAddGroup.rightUniformSpace R
-  haveI : IsUniformAddGroup R := isUniformAddGroup_of_addCommGroup
+  have : IsUniformAddGroup R := isUniformAddGroup_of_addCommGroup
   -- Step 2: IsAdicComplete I R from IsAdic + CompleteSpace + T2.
   have hac : IsAdicComplete I R := hadic.isAdicComplete_iff.mpr ⟨hcs, ‹_›⟩
   -- Step 3: I ≤ jacobson ⊥ from IsAdicComplete.
@@ -1368,14 +1368,14 @@ theorem quotientTTopology_completeSpace (s : A)
     @CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal s)
       (quotientTUniformSpace s) := by
   letI τT : TopologicalSpace ↥(TateAlgebra A) := TateAlgebraWedhorn.tateTopologyT s
-  haveI : IsTopologicalRing ↥(TateAlgebra A) :=
+  have : IsTopologicalRing ↥(TateAlgebra A) :=
     TateAlgebraWedhorn.tateTopologyT_isTopologicalRing s
-  haveI : IsTopologicalAddGroup ↥(TateAlgebra A) :=
+  have : IsTopologicalAddGroup ↥(TateAlgebra A) :=
     IsTopologicalRing.to_topologicalAddGroup
-  haveI : FirstCountableTopology A := IsHuberRing.firstCountableTopology
-  haveI hfc_pi : @FirstCountableTopology ((Fin 1 →₀ ℕ) → A) Pi.topologicalSpace :=
+  have : FirstCountableTopology A := IsHuberRing.firstCountableTopology
+  have hfc_pi : @FirstCountableTopology ((Fin 1 →₀ ℕ) → A) Pi.topologicalSpace :=
     inferInstance
-  haveI : @FirstCountableTopology ↥(TateAlgebra A) τT :=
+  have : @FirstCountableTopology ↥(TateAlgebra A) τT :=
     @TopologicalSpace.firstCountableTopology_induced _ _
       Pi.topologicalSpace hfc_pi (TateAlgebraWedhorn.scaleIncl s)
   exact @QuotientAddGroup.completeSpace_right' ↥(TateAlgebra A) _ τT ‹_› ‹_›
@@ -1398,11 +1398,11 @@ theorem quotientTTopology_t0Space (s : A)
     @T0Space (↥(TateAlgebra A) ⧸ oneSubfXIdeal s)
       (quotientTTopology s) := by
   letI τT : TopologicalSpace ↥(TateAlgebra A) := TateAlgebraWedhorn.tateTopologyT s
-  haveI : IsTopologicalRing ↥(TateAlgebra A) :=
+  have : IsTopologicalRing ↥(TateAlgebra A) :=
     TateAlgebraWedhorn.tateTopologyT_isTopologicalRing s
-  haveI : IsTopologicalAddGroup ↥(TateAlgebra A) :=
+  have : IsTopologicalAddGroup ↥(TateAlgebra A) :=
     IsTopologicalRing.to_topologicalAddGroup
-  haveI : @IsClosed ↥(TateAlgebra A) τT
+  have : @IsClosed ↥(TateAlgebra A) τT
       (oneSubfXIdeal s : Set ↥(TateAlgebra A)) :=
     oneSubfXIdeal_isClosed_tTopology s hcs_tate ht2_tate J hadic
   exact (Submodule.t3_quotient_of_isClosed (S := oneSubfXIdeal s)).toT0Space
@@ -1475,9 +1475,9 @@ theorem tateQuotientToPresheafHom_continuous (D : RationalLocData A)
       (inferInstance : TopologicalSpace (presheafValue D))
       (tateQuotientToPresheafHom D hb) := by
   letI τT : TopologicalSpace ↥(TateAlgebra A) := TateAlgebraWedhorn.tateTopologyT D.s
-  haveI hTR : IsTopologicalRing ↥(TateAlgebra A) :=
+  have hTR : IsTopologicalRing ↥(TateAlgebra A) :=
     TateAlgebraWedhorn.tateTopologyT_isTopologicalRing D.s
-  haveI : IsTopologicalAddGroup ↥(TateAlgebra A) :=
+  have : IsTopologicalAddGroup ↥(TateAlgebra A) :=
     IsTopologicalRing.to_topologicalAddGroup
   letI τQ : TopologicalSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientTTopology D.s
@@ -1803,10 +1803,10 @@ private theorem quotientOneSubfXIdealTopology_nonarchimedean [IsTateRing A] (s :
     quotientOneSubfXIdealTopology s
   letI : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) :=
     quotientOneSubfXIdealTopology_isTopologicalRing s
-  haveI : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) :=
+  have : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) :=
     @IsTopologicalRing.to_topologicalAddGroup _ _
       (quotientOneSubfXIdealTopology s) (quotientOneSubfXIdealTopology_isTopologicalRing s)
-  haveI hNA_tate : @NonarchimedeanRing ↥(TateAlgebra A) _ instTopologicalSpaceTateAlgebra :=
+  have hNA_tate : @NonarchimedeanRing ↥(TateAlgebra A) _ instTopologicalSpaceTateAlgebra :=
     tateAlgBasis'.nonarchimedean
   constructor; intro U hU
   have hcont : @Continuous _ _ instTopologicalSpaceTateAlgebra
@@ -1952,7 +1952,7 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
     quotientOneSubfXIdealTopology D.s
   letI : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientOneSubfXIdealTopology_isTopologicalRing D.s
-  haveI : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     @IsTopologicalRing.to_topologicalAddGroup _ _
       (quotientOneSubfXIdealTopology D.s) (quotientOneSubfXIdealTopology_isTopologicalRing D.s)
   -- Reduce to continuity at 0.
@@ -1961,7 +1961,7 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
   intro S hS
   have hbasis := locBasis D.P D.T D.s D.hopen
   let hb := hbasis.toRingFilterBasis.toAddGroupFilterBasis
-  haveI : @NonarchimedeanRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s)
+  have : @NonarchimedeanRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s)
       _ (quotientOneSubfXIdealTopology D.s) :=
     quotientOneSubfXIdealTopology_nonarchimedean D.s
   obtain ⟨W, hWS⟩ := NonarchimedeanRing.is_nonarchimedean S hS
@@ -2067,11 +2067,11 @@ noncomputable def presheafValueToCanonicalQuotient (D : RationalLocData A)
     quotientOneSubfXIdealUniformSpace D.s
   letI : IsUniformAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientOneSubfXIdeal_isUniformAddGroup D.s
-  haveI : CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have : CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotient_oneSubfXIdeal_completeSpace hA_complete hnoeth D.s
-  haveI hT2Q : @T2Space _ (quotientOneSubfXIdealTopology D.s) :=
+  have hT2Q : @T2Space _ (quotientOneSubfXIdealTopology D.s) :=
     quotient_oneSubfXIdeal_t2Space hA_complete hnoeth D.s
-  haveI hT0Q : @T0Space _ (quotientOneSubfXIdealTopology D.s) :=
+  have hT0Q : @T0Space _ (quotientOneSubfXIdealTopology D.s) :=
     @T1Space.t0Space _ (quotientOneSubfXIdealTopology D.s) (T2Space.t1Space)
   exact @UniformSpace.Completion.extensionHom _ _ _ _ _ _
     (quotientOneSubfXIdealUniformSpace D.s) _
@@ -2106,9 +2106,9 @@ theorem presheafValueToCanonicalQuotient_continuous (D : RationalLocData A)
     quotientOneSubfXIdealTopology D.s
   letI us_tgt : UniformSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientOneSubfXIdealUniformSpace D.s
-  haveI cs_tgt : @CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) us_tgt :=
+  have cs_tgt : @CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) us_tgt :=
     quotient_oneSubfXIdeal_completeSpace hA_complete hnoeth D.s
-  haveI hT0Q : @T0Space _ (quotientOneSubfXIdealTopology D.s) :=
+  have hT0Q : @T0Space _ (quotientOneSubfXIdealTopology D.s) :=
     @T1Space.t0Space _ (quotientOneSubfXIdealTopology D.s)
       (@T2Space.t1Space _ (quotientOneSubfXIdealTopology D.s)
         (quotient_oneSubfXIdeal_t2Space hA_complete hnoeth D.s))
@@ -2146,11 +2146,11 @@ theorem presheafValueToCanonicalQuotient_coe (D : RationalLocData A)
     quotientOneSubfXIdealUniformSpace D.s
   letI : IsUniformAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientOneSubfXIdeal_isUniformAddGroup D.s
-  haveI : CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have : CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotient_oneSubfXIdeal_completeSpace hA_complete hnoeth D.s
-  haveI hT2Q : @T2Space _ (quotientOneSubfXIdealTopology D.s) :=
+  have hT2Q : @T2Space _ (quotientOneSubfXIdealTopology D.s) :=
     quotient_oneSubfXIdeal_t2Space hA_complete hnoeth D.s
-  haveI hT0Q : @T0Space _ (quotientOneSubfXIdealTopology D.s) :=
+  have hT0Q : @T0Space _ (quotientOneSubfXIdealTopology D.s) :=
     @T1Space.t0Space _ (quotientOneSubfXIdealTopology D.s) (T2Space.t1Space)
   exact @UniformSpace.Completion.extensionHom_coe _ _ _ _ _ _
     (quotientOneSubfXIdealUniformSpace D.s) _
@@ -2255,9 +2255,9 @@ theorem presheafToCanonicalQuotient_comp_tateQuotientToPresheaf (D : RationalLoc
   letI : IsUniformAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientOneSubfXIdeal_isUniformAddGroup D.s
   -- T2 for canonical quotient.
-  haveI hT2 : @T2Space _ τC :=
+  have hT2 : @T2Space _ τC :=
     quotient_oneSubfXIdeal_t2Space hA_complete hnoeth D.s
-  haveI : @CompleteSpace _ (quotientOneSubfXIdealUniformSpace D.s) :=
+  have : @CompleteSpace _ (quotientOneSubfXIdealUniformSpace D.s) :=
     quotient_oneSubfXIdeal_completeSpace hA_complete hnoeth D.s
   -- Dense range for canonical topology.
   have hdense := locToQuotientOneSubfX_gen_denseRange_canonical D.s
@@ -2420,7 +2420,7 @@ noncomputable instance quotientOneSubfXIdeal_firstCountableTopology [IsTateRing 
     (f : A) :
     @FirstCountableTopology (↥(TateAlgebra A) ⧸ oneSubfXIdeal f)
       (quotientOneSubfXIdealTopology f) := by
-  haveI := instFirstCountableTopologyTateAlgebra (A := A)
+  have := instFirstCountableTopologyTateAlgebra (A := A)
   constructor; intro q
   obtain ⟨g, rfl⟩ := Ideal.Quotient.mk_surjective q
   -- The quotient map mk is open and continuous.
@@ -2474,9 +2474,9 @@ theorem tateQuotientToPresheafHom_isHomeomorph (D : RationalLocData A)
     quotientOneSubfXIdealUniformSpace D.s
   letI : IsUniformAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientOneSubfXIdeal_isUniformAddGroup D.s
-  haveI : CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have : CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotient_oneSubfXIdeal_completeSpace hA_complete hnoeth D.s
-  haveI : T2Space (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have : T2Space (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotient_oneSubfXIdeal_t2Space hA_complete hnoeth D.s
   -- The canonical isomorphism provides bijectivity.
   let e := presheafValueCanonicalQuotientEquiv D hb hA_complete hnoeth hT_pb hcont_eval
@@ -2714,7 +2714,7 @@ theorem tateQuotientToPresheafHom_continuous_canonical
   letI τ : TopologicalSpace ↥(TateAlgebra A) := instTopologicalSpaceTateAlgebra
   letI τQ : TopologicalSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientOneSubfXIdealTopology D.s
-  haveI hTR : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
+  have hTR : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
   have hmk_qm : Topology.IsQuotientMap
       (Ideal.Quotient.mk (oneSubfXIdeal D.s) :
         ↥(TateAlgebra A) → ↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=

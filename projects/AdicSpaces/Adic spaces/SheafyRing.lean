@@ -104,7 +104,7 @@ exist (Wedhorn Prop 8.2 via 7.52(2)); their existence-and-continuity package is
 so no `HasLocLiftPowerBounded` appears in this definition or anywhere downstream. -/
 def IsSheafyFor (Aplus : RingOfIntegralElements A) : Prop :=
   letI := Aplus.toPlusSubring
-  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
+  have : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
   IsLimitSheaf A
 
 /-- **The complete-ring specialization of Wedhorn Definition 8.26**: `A` is sheafy
@@ -130,9 +130,9 @@ theorem isSheafyFor_of_stronglyNoetherianTate [IsStronglyNoetherian A]
     (Aplus : RingOfIntegralElements A) : IsSheafyFor A Aplus := by
   classical
   letI := Aplus.toPlusSubring
-  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
+  have : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
   letI : IsNoetherianRing A := IsStronglyNoetherian.isNoetherianRing A
-  haveI : IsSheafy A := isSheafy_of_stronglyNoetherian_828b
+  have : IsSheafy A := isSheafy_of_stronglyNoetherian_828b
   show IsLimitSheaf A
   exact isLimitSheaf_of_isSheafy
 
@@ -271,7 +271,7 @@ theorem isSheafyTateRing_of_stronglyNoetherian_completion
     (h : ∀ P : PairOfDefinition A, IsStronglyNoetherian (CompletionModel A P)) :
     IsSheafyTateRing A := by
   intro P Bplus
-  haveI := h P
+  have := h P
   exact isSheafyFor_of_stronglyNoetherianTate Bplus
 
 end NoncompleteWrapper
@@ -373,7 +373,7 @@ def StandardSheafCondition [IsTateRing A] [T2Space A]
       CompleteSpace A] : Prop :=
   ∀ (S : StandardCoverData A) (B : Subring A) (hB : IsRingOfIntegralElements B),
     letI : PlusSubring A := ⟨B⟩
-    haveI : IsRingOfIntegralElements (A⁺ : Subring A) := hB
+    have : IsRingOfIntegralElements (A⁺ : Subring A) := hB
     Topology.IsEmbedding (productRestrictionSub A S.toCovering) ∧
     ∀ (f : ∀ D : ↥S.toCovering.covers, presheafValue D.1),
       S.toCovering.AllDataCompatible f →
@@ -401,9 +401,9 @@ theorem standardSheafCondition_of_isSheafyComplete [IsTateRing A]
   classical
   intro S B hB
   letI : PlusSubring A := ⟨B⟩
-  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := hB
+  have : IsRingOfIntegralElements (A⁺ : Subring A) := hB
   have hlimit : IsLimitSheaf A := h ⟨B, hB⟩
-  haveI hSheafy : IsSheafy A := isSheafy_of_isLimitSheaf hlimit
+  have hSheafy : IsSheafy A := isSheafy_of_isLimitSheaf hlimit
   refine ⟨?_, ?_⟩
   · exact IsSheafy.embedding (A := A) S.toCovering (S.toCovering_isRational)
   · intro f hf

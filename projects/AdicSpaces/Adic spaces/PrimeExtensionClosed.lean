@@ -120,10 +120,10 @@ theorem prime_extension_closed_from_Huber_Tate_of_jacobson_pointwise
     D'.P D'.T D'.s D'.hopen hπ_nil hπ_A₀ hπ_unit _ ?_
   -- Contraction closedness via pointwise Jacobson in the adic topology on locSubring.
   letI : TopologicalSpace (Localization.Away D'.s) := D'.topology
-  haveI : IsTopologicalRing (Localization.Away D'.s) := D'.isTopologicalRing
+  have : IsTopologicalRing (Localization.Away D'.s) := D'.isTopologicalRing
   letI : TopologicalSpace (locSubring D'.P D'.T D'.s) :=
     D'.topology.induced (locSubring D'.P D'.T D'.s).subtype
-  haveI : IsTopologicalRing (locSubring D'.P D'.T D'.s) :=
+  have : IsTopologicalRing (locSubring D'.P D'.T D'.s) :=
     Subring.instIsTopologicalRing (locSubring D'.P D'.T D'.s)
   exact Ideal.isClosed_of_le_jacobson_pointwise
     (locSubring_isAdic D'.P D'.T D'.s D'.hopen)

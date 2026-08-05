@@ -544,7 +544,7 @@ theorem canonicalMap_Qa_sq :
     rw [hkey n, mul_comm]
     exact hVU (Set.mul_mem_mul ⟨n, rfl⟩ hnn)
   -- T1 separation forces the constant to be `0`
-  haveI : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
+  have : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
   have h0mem : (0 : presheafValue (chartDatum F)) ∈ closure {ρ (Qa F * Qa F)} := by
     rw [mem_closure_iff_nhds]
     intro U hU
@@ -695,7 +695,7 @@ theorem canonicalMap_eq_zero_of_qSq (y : JetA F)
     have hnn := hn n (le_refl n)
     rw [hkey n, mul_comm]
     exact hVU (Set.mul_mem_mul ⟨n, rfl⟩ hnn)
-  haveI : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
+  have : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
   have h0mem : (0 : presheafValue (chartDatum F)) ∈ closure {ρ y} := by
     rw [mem_closure_iff_nhds]
     intro U hU
@@ -1127,7 +1127,7 @@ series recovers the canonical image of the constant lift ([FJP] Prop 3.1's
 theorem evalRescale_eq (f : PowerSeries.Restricted K (1 : ℝ)) :
     chartEval F (rescaleRestricted (ϖ F) (norm_t_lt_one F).le f) =
     (chartDatum F).canonicalMap (constKW F f) := by
-  haveI : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
+  have : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
   have hrescont : Continuous
       (rescaleRestricted (ϖ F) (norm_t_lt_one F).le) :=
     AddMonoidHomClass.continuous_of_bound _ 1 fun g => by
@@ -1348,7 +1348,7 @@ theorem chartFwd_canonicalMap (a : JetA F) :
 `chartRev_theta`, then density). -/
 theorem chartRev_chartFwd (x : presheafValue (chartDatum F)) :
     chartRev F (chartFwd F x) = x := by
-  haveI : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
+  have : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
   have hloc : (chartRev F).comp (chartLocHom F) = (chartDatum F).coeRingHom := by
     refine IsLocalization.ringHom_ext (Submonoid.powers (chartDatum F).s)
       (RingHom.ext fun a => ?_)

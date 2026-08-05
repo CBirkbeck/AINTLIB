@@ -275,17 +275,17 @@ theorem extRhoB_rB (i : Fin m) : extRhoB F m (rB F m g f i) = rD F m g f i :=
 /-- The vertex Tate extensions are noetherian (transfer of strong noetherianity to the
 Gauss form). -/
 theorem isNoetherianRing_PB : IsNoetherianRing (PB F m) := by
-  haveI hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetB F) m
+  have hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetB F) m
   exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m (JetB F)) _
     (UnitDiscExample.restrictedGaussEquiv (JetB F) m).symm.toRingHom (RingEquiv.surjective _)
 
 theorem isNoetherianRing_PC : IsNoetherianRing (PC F m) := by
-  haveI hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetC F) m
+  have hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetC F) m
   exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m (JetC F)) _
     (UnitDiscExample.restrictedGaussEquiv (JetC F) m).symm.toRingHom (RingEquiv.surjective _)
 
 theorem isNoetherianRing_PD : IsNoetherianRing (PD F m) := by
-  haveI hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetD F) m
+  have hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetD F) m
   exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m (JetD F)) _
     (UnitDiscExample.restrictedGaussEquiv (JetD F) m).symm.toRingHom (RingEquiv.surjective _)
 
@@ -316,8 +316,8 @@ theorem ideal_row_surjective (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     ∃ Cs : ℝ, 1 ≤ Cs ∧ ∀ y ∈ ID F m g f,
       ∃ xc ∈ IC F m g f, extRhoC F m xc = y ∧ ‖xc‖ ≤ Cs * ‖y‖ := by
   classical
-  haveI hPD : IsNoetherianRing (PD F m) := by
-    haveI hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetD F) m
+  have hPD : IsNoetherianRing (PD F m) := by
+    have hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetD F) m
     exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m (JetD F)) _
       (UnitDiscExample.restrictedGaussEquiv (JetD F) m).symm.toRingHom
       (RingEquiv.surjective _)
@@ -542,9 +542,9 @@ private theorem ideal_pullback_controlled_witness
     ∃ xa ∈ IA F m g f, extJB F m xa = xb ∧ extIotaC F m xa = xc ∧
       ‖xa‖ ≤ (1 + Bs * CrA) * max ‖xb‖ ‖xc‖ := by
   classical
-  haveI hPB := isNoetherianRing_PB F m
-  haveI hPC := isNoetherianRing_PC F m
-  haveI hPD := isNoetherianRing_PD F m
+  have hPB := isNoetherianRing_PB F m
+  have hPC := isNoetherianRing_PC F m
+  have hPD := isNoetherianRing_PD F m
   set M : ℝ := max ‖xb‖ ‖xc‖ with hM
   have hM0 : (0 : ℝ) ≤ M := le_max_of_le_left (norm_nonneg xb)
   obtain ⟨u, hu, hun⟩ := hliftB xb hxb
@@ -602,9 +602,9 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
         ∃ xa ∈ IA F m g f,
           extJB F m xa = xb ∧ extIotaC F m xa = xc ∧ ‖xa‖ ≤ Cs * max ‖xb‖ ‖xc‖ := by
   classical
-  haveI hPB := isNoetherianRing_PB F m
-  haveI hPC := isNoetherianRing_PC F m
-  haveI hPD := isNoetherianRing_PD F m
+  have hPB := isNoetherianRing_PB F m
+  have hPC := isNoetherianRing_PC F m
+  have hPD := isNoetherianRing_PD F m
   obtain ⟨hB, hB1, hliftB⟩ := exists_d1_lift (E := JetB F) (tB F) (isUnit_tB F)
     (by rw [norm_tB]; exact norm_t_lt_one F) (by rw [norm_tB]; exact norm_t_pos F)
     (norm_tB_mul F) (isNoetherianRing_unitBall_PB F m) (rB F m g f)
@@ -646,8 +646,8 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
 theorem isClosed_IA (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     IsClosed ((IA F m g f : Set (PA F m))) := by
   classical
-  haveI hPB := isNoetherianRing_PB F m
-  haveI hPC := isNoetherianRing_PC F m
+  have hPB := isNoetherianRing_PB F m
+  have hPC := isNoetherianRing_PC F m
   have hIBclosed : IsClosed ((IB F m g f : Set (PB F m))) :=
     isClosed_graphIdeal (tB F) (isUnit_tB F)
       (by rw [norm_tB]; exact norm_t_lt_one F) (by rw [norm_tB]; exact norm_t_pos F)
@@ -985,8 +985,8 @@ theorem loc_pair_isEmbedding (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     Topology.IsEmbedding
       (fun x : locA F m g f => (locJB F m g f x, locIotaC F m g f x)) := by
   classical
-  haveI hclA : IsClosed ((IA F m g f : Set (PA F m))) := isClosed_IA F m g f hspan
-  haveI : NormedAddCommGroup (PA F m ⧸ IA F m g f) :=
+  have hclA : IsClosed ((IA F m g f : Set (PA F m))) := isClosed_IA F m g f hspan
+  have : NormedAddCommGroup (PA F m ⧸ IA F m g f) :=
     Submodule.Quotient.normedAddCommGroup _
   set C₁ := Classical.choose (ideal_row_surjective F m g f hspan) with hC₁def
   have hC₁1 := (Classical.choose_spec (ideal_row_surjective F m g f hspan)).1
@@ -1072,8 +1072,8 @@ set_option backward.isDefEq.respectTransparency false in
 /-- `𝓐_α` is Hausdorff (quotient by a closed ideal; [FJP] (4.21)). -/
 theorem locA_t2 (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     T2Space (locA F m g f) := by
-  haveI hclA : IsClosed ((IA F m g f : Set (PA F m))) := isClosed_IA F m g f hspan
-  haveI : NormedAddCommGroup (PA F m ⧸ IA F m g f) :=
+  have hclA : IsClosed ((IA F m g f : Set (PA F m))) := isClosed_IA F m g f hspan
+  have : NormedAddCommGroup (PA F m ⧸ IA F m g f) :=
     Submodule.Quotient.normedAddCommGroup _
   infer_instance
 
@@ -1083,10 +1083,10 @@ already the Banach quotient"). -/
 theorem locA_completeSpace (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     @CompleteSpace (locA F m g f)
       (IsTopologicalAddGroup.rightUniformSpace (locA F m g f)) := by
-  haveI hclA : IsClosed ((IA F m g f : Set (PA F m))) := isClosed_IA F m g f hspan
-  haveI : NormedAddCommGroup (PA F m ⧸ IA F m g f) :=
+  have hclA : IsClosed ((IA F m g f : Set (PA F m))) := isClosed_IA F m g f hspan
+  have : NormedAddCommGroup (PA F m ⧸ IA F m g f) :=
     Submodule.Quotient.normedAddCommGroup _
-  haveI : IsUniformAddGroup (locA F m g f) := SeminormedAddCommGroup.to_isUniformAddGroup
+  have : IsUniformAddGroup (locA F m g f) := SeminormedAddCommGroup.to_isUniformAddGroup
   rw [IsUniformAddGroup.rightUniformSpace_eq]
   infer_instance
 

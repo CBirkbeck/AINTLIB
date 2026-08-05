@@ -80,7 +80,7 @@ theorem Ideal.isClosed_in_ringOfDef_subspace_of_isAdicComplete
       (presheafValue_ringOfDef D₀)]
     (J : Ideal (presheafValue_ringOfDef D₀)) :
     IsClosed (J : Set (presheafValue_ringOfDef D₀)) := by
-  haveI : IsTopologicalRing (presheafValue_ringOfDef D₀) :=
+  have : IsTopologicalRing (presheafValue_ringOfDef D₀) :=
     Subring.instIsTopologicalRing _
   exact Ideal.isClosed_of_isAdicComplete (presheafValue_idealOfDef D₀)
     (presheafValue_isAdic D₀) J
@@ -141,8 +141,8 @@ theorem IsClosed.preimage_coeRingHom
     @IsClosed _ D₀.topology
       ((D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) ⁻¹' C) := by
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
-  haveI : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
-  haveI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
+  have : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
+  have : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
   exact hC.preimage UniformSpace.Completion.continuous_coeRingHom
 
 /-! ### T-COMP-FF scaffold: identify `presheafValue_ringOfDef D` with
@@ -302,8 +302,8 @@ theorem locSubringToRingOfDef_val_eq_symm_comp_of (D : RationalLocData A)
         (AdicCompletion.of (locIdeal D.P D.T D.s) (locSubring D.P D.T D.s) r) :
           presheafValue D) := by
   letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-  haveI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
-  haveI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  have : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  have : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
   letI : UniformSpace (locSubring D.P D.T D.s) :=
     CompletionLocalization.locSubringUniformSpace D
   have hadic : IsAdic (locIdeal D.P D.T D.s) :=
@@ -320,12 +320,12 @@ theorem locSubringToRingOfDef_val_eq_symm_comp_of (D : RationalLocData A)
     have hcont : Continuous D.locSubringToCompleted :=
       Continuous.subtype_mk
         (CompletionLocalization.locSubringToPresheafValue_continuous D) _
-    haveI : IsClosed (D.completedLocSubring : Set (presheafValue D)) :=
+    have : IsClosed (D.completedLocSubring : Set (presheafValue D)) :=
       Subring.isClosed_topologicalClosure _
-    haveI : CompleteSpace D.completedLocSubring :=
+    have : CompleteSpace D.completedLocSubring :=
       (Subring.isClosed_topologicalClosure _).completeSpace_coe
-    haveI : IsTopologicalRing D.completedLocSubring := Subring.instIsTopologicalRing _
-    haveI : IsUniformAddGroup D.completedLocSubring :=
+    have : IsTopologicalRing D.completedLocSubring := Subring.instIsTopologicalRing _
+    have : IsUniformAddGroup D.completedLocSubring :=
       IsUniformAddGroup.comap D.completedLocSubring.subtype.toAddMonoidHom
     have hui : IsUniformInducing D.locSubringToCompleted := by
       refine isUniformEmbedding_subtype_val.isUniformInducing.of_comp_iff.mp ?_

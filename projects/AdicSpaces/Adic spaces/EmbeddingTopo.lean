@@ -1032,10 +1032,10 @@ theorem productRestrictionSub_laurentCovering_isInducing_via_tau_identity
       (productRestrictionSub A (laurentCovering D₀ f)) := by
   -- (laurentCovering D₀ f).base = D₀ by definition; the typeclass instance
   -- on D₀ transfers to (laurentCovering D₀ f).base via show.
-  haveI : IsNoetherianRing (locSubring (laurentCovering D₀ f).base.P
+  have : IsNoetherianRing (locSubring (laurentCovering D₀ f).base.P
       (laurentCovering D₀ f).base.T (laurentCovering D₀ f).base.s) :=
     inferInstanceAs (IsNoetherianRing (locSubring D₀.P D₀.T D₀.s))
-  haveI : LaurentNormalized (laurentCovering D₀ f).base :=
+  have : LaurentNormalized (laurentCovering D₀ f).base :=
     inferInstanceAs (LaurentNormalized D₀)
   exact productRestrictionSub_isInducing_via_laurent_refinement_tau
     P (laurentCovering D₀ f) f hf_nonunit hs
@@ -1334,10 +1334,10 @@ theorem productRestrictionSub_laurentCovering_isInducing_via_T291
     Topology.IsInducing
       (productRestrictionSub A (laurentCovering D₀ f)) := by
   classical
-  haveI : IsNoetherianRing (locSubring (laurentCovering D₀ f).base.P
+  have : IsNoetherianRing (locSubring (laurentCovering D₀ f).base.P
       (laurentCovering D₀ f).base.T (laurentCovering D₀ f).base.s) :=
     inferInstanceAs (IsNoetherianRing (locSubring D₀.P D₀.T D₀.s))
-  haveI : LaurentNormalized (laurentCovering D₀ f).base :=
+  have : LaurentNormalized (laurentCovering D₀ f).base :=
     inferInstanceAs (LaurentNormalized D₀)
   exact productRestrictionSub_isInducing_of_C_covers_contains_laurent_pair
     P (laurentCovering D₀ f) f hf_nonunit hs hNoeth_B hDom_B hSigCp_B
@@ -1712,7 +1712,7 @@ theorem productRestrictionSub_leafTree_isInducing
   have hcovers : C.covers = ({D₀} : Finset _) := by
     change (LaurentTree.leaf.leaves D₀).toFinset = _
     simp [LaurentTree.leaves_leaf, List.toFinset_cons, List.toFinset_nil]
-  haveI hUniq : Unique ↑C.covers := hcovers ▸ Finset.instUniqueSubtypeMemSingleton D₀
+  have hUniq : Unique ↑C.covers := hcovers ▸ Finset.instUniqueSubtypeMemSingleton D₀
   have h := inducing_iInf_to_pi
     (fun (D : ↑C.covers) (x : presheafValue C.base) =>
       restrictionMap C.base D.1 (C.hsubset _ D.2) x)

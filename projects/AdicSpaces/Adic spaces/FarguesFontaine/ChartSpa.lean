@@ -99,9 +99,9 @@ noncomputable def spaChartHomeoBigWindow (n : ℕ) (hp : 1 < p) :
       (ringPlus (presheafValue (chartData p F
         (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1))))
       ≃ₜ ↥(bigWindow p F ϖ (n : ℤ) ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+  have : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
     isAffinoidRing_Ainf p F
-  haveI : IsTateRing (presheafValue (chartData p F
+  have : IsTateRing (presheafValue (chartData p F
       (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1)) :=
     isTateRing_bigWindowChart p F (PseudoUniformizer.frobRoot p F ϖ n)
   (spaPresheafValueHomeomorphRationalOpen'
@@ -123,9 +123,9 @@ noncomputable def spaChartHomeoBigWindowNeg (m : ℕ) (hp : 1 < p) :
         (PseudoUniformizer.pPow F ϖ (p ^ m)
           (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) 1 1 p 1))))
       ≃ₜ ↥(bigWindow p F ϖ (-(m : ℤ)) ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+  have : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
     isAffinoidRing_Ainf p F
-  haveI : IsTateRing (presheafValue (chartData p F
+  have : IsTateRing (presheafValue (chartData p F
       (PseudoUniformizer.pPow F ϖ (p ^ m)
         (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) 1 1 p 1)) :=
     isTateRing_bigWindowChart p F _

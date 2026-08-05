@@ -919,7 +919,7 @@ noncomputable def bivariateLocToQuotient_atOverlap
     (P : PairOfDefinition B) (b : B) :
     Localization.Away (overlapDatum B P b).s →+*
       ↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b := by
-  haveI : IsLocalization.Away b (Localization.Away (overlapDatum B P b).s) := by
+  have : IsLocalization.Away b (Localization.Away (overlapDatum B P b).s) := by
     rw [overlapDatum_s B P b]; infer_instance
   exact IsLocalization.Away.lift (x := b) (isUnit_b_in_bivariate_quotient B b)
 
@@ -929,7 +929,7 @@ theorem bivariateLocToQuotient_atOverlap_algebraMap
     bivariateLocToQuotient_atOverlap B P b
         (algebraMap B (Localization.Away (overlapDatum B P b).s) a) =
       (Ideal.Quotient.mk _) (algebraMap B ↥(TateAlgebra₂ B) a) := by
-  haveI : IsLocalization.Away b (Localization.Away (overlapDatum B P b).s) := by
+  have : IsLocalization.Away b (Localization.Away (overlapDatum B P b).s) := by
     rw [overlapDatum_s B P b]; infer_instance
   change IsLocalization.Away.lift (x := b) (isUnit_b_in_bivariate_quotient B b)
       (algebraMap B (Localization.Away (overlapDatum B P b).s) a) = _
@@ -1073,9 +1073,9 @@ theorem bivariateLocToQuotient_continuous
     TateAlgebra.quotientBivariateOverlapIdealTopology b
   letI : IsTopologicalRing (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalRing b
-  haveI : NonarchimedeanRing (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
+  have : NonarchimedeanRing (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealTopology_nonarchimedean b
-  haveI : IsLocalization.Away b (Localization.Away (overlapDatum B P b).s) := by
+  have : IsLocalization.Away b (Localization.Away (overlapDatum B P b).s) := by
     rw [overlapDatum_s B P b]; infer_instance
   obtain ⟨h_loc_bb, h_loc_bsq, h_inv_algmap⟩ := overlap_divByS_values B P b
   have h_biv_inv :
@@ -1139,12 +1139,12 @@ noncomputable def example638Bivariate_backwardHom
     @isUniformAddGroup_of_addCommGroup _ _
       (TateAlgebra.quotientBivariateOverlapIdealTopology b)
       (TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalAddGroup b)
-  haveI hQ_complete : CompleteSpace
+  have hQ_complete : CompleteSpace
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_completeSpace hA_complete hnoeth b
-  haveI hT2Q : @T2Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
+  have hT2Q : @T2Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_t2Space hA_complete hnoeth b
-  haveI hT0Q : @T0Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
+  have hT0Q : @T0Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
     @T1Space.t0Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b)
       T2Space.t1Space
   exact @UniformSpace.Completion.extensionHom _ _ _ _ _ _
@@ -1187,12 +1187,12 @@ theorem example638Bivariate_backwardHom_coe
     @isUniformAddGroup_of_addCommGroup _ _
       (TateAlgebra.quotientBivariateOverlapIdealTopology b)
       (TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalAddGroup b)
-  haveI hQ_complete : CompleteSpace
+  have hQ_complete : CompleteSpace
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_completeSpace hA_complete hnoeth b
-  haveI hT2Q : @T2Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
+  have hT2Q : @T2Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_t2Space hA_complete hnoeth b
-  haveI hT0Q : @T0Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
+  have hT0Q : @T0Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
     @T1Space.t0Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b)
       T2Space.t1Space
   exact @UniformSpace.Completion.extensionHom_coe _ _ _ _ _ _
@@ -1269,7 +1269,7 @@ theorem example638Bivariate_forward_backward_eq_id
       (TateAlgebra.quotientBivariateOverlapIdealUniformSpace b) _ :=
     @isUniformAddGroup_of_addCommGroup _ _ (TateAlgebra.quotientBivariateOverlapIdealTopology b)
       (TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalAddGroup b)
-  haveI : CompleteSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
+  have : CompleteSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_completeSpace hA_complete hnoeth b
   apply RingHom.ext
   intro y
@@ -1382,7 +1382,7 @@ theorem example638Bivariate_backwardHom_continuous
   letI : TopologicalSpace ↥(TateAlgebra₂ B) := TateAlgebra.instTopologicalSpaceTateAlgebra₂
   letI : TopologicalSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealTopology b
-  haveI hT2Q : @T2Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
+  have hT2Q : @T2Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_t2Space hA_complete hnoeth b
   letI : UniformSpace (Localization.Away (overlapDatum B P b).s) :=
     (overlapDatum B P b).uniformSpace
@@ -1397,7 +1397,7 @@ theorem example638Bivariate_backwardHom_continuous
     TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalAddGroup b
   letI : IsTopologicalRing (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalRing b
-  haveI : CompleteSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
+  have : CompleteSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_completeSpace hA_complete hnoeth b
   exact UniformSpace.Completion.continuous_extension
 
@@ -1495,7 +1495,7 @@ theorem example638Bivariate_backward_forward_eq_id
   letI : TopologicalSpace ↥(TateAlgebra₂ B) := TateAlgebra.instTopologicalSpaceTateAlgebra₂
   letI : TopologicalSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealTopology b
-  haveI hT2Q : @T2Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
+  have hT2Q : @T2Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_t2Space hA_complete hnoeth b
   apply Ideal.Quotient.ringHom_ext
   apply RingHom.ext
@@ -1603,8 +1603,8 @@ noncomputable def iteratedOverlapDatum_B
         presheafValue_isTateRing P D₀
       HasLocLiftPowerBounded (presheafValue D₀)) :
     RationalLocData (presheafValue D₀) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
   -- Transport `overlapDatum` via the `overlapDatum_s` equality so the resulting
   -- `.s` field is literally `D₀.canonicalMap f`.
   exact overlapDatum (presheafValue D₀) (presheafValue_pairOfDefinition_concrete P D₀)
@@ -1626,8 +1626,8 @@ theorem iteratedOverlapDatum_B_s_eq
         presheafValue_isTateRing P D₀
       HasLocLiftPowerBounded (presheafValue D₀)) :
     (iteratedOverlapDatum_B P D₀ f hLocLift_B).s = D₀.canonicalMap f := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
   unfold iteratedOverlapDatum_B
   exact overlapDatum_s (presheafValue D₀)
     (presheafValue_pairOfDefinition_concrete P D₀) (D₀.canonicalMap f)
@@ -1756,9 +1756,9 @@ noncomputable def iteratedOverlap_backwardToCompletion
       rationalOpen D₀.T D₀.s) :
     Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s) →+*
       presheafValue (laurentOverlapDatum D₀ f) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI : IsLocalization.Away (D₀.canonicalMap f)
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsLocalization.Away (D₀.canonicalMap f)
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) := by
     rw [iteratedOverlapDatum_B_s_eq P D₀ f hLocLift_B]; infer_instance
   exact IsLocalization.Away.lift (x := D₀.canonicalMap f)
@@ -1781,9 +1781,9 @@ theorem iteratedOverlap_backwardToCompletion_algebraMap
       (algebraMap (presheafValue D₀)
         (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) b) =
       restrictionMapHom D₀ (laurentOverlapDatum D₀ f) hsub b := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI : IsLocalization.Away (D₀.canonicalMap f)
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsLocalization.Away (D₀.canonicalMap f)
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) := by
     rw [iteratedOverlapDatum_B_s_eq P D₀ f hLocLift_B]; infer_instance
   change IsLocalization.Away.lift (x := D₀.canonicalMap f)
@@ -2102,12 +2102,12 @@ theorem presheafValue_trivialPlus_fSubX_equiv_continuous
       (quotientPlusFSubXIdealTopology (presheafValue D₀) (D₀.canonicalMap f))
       (presheafValue_trivialPlus_fSubX_equiv P D₀ f
         hNoeth_B hLocLift_B hA₀Noeth_B hA_complete_B hnoeth_B hcont_forward_B) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI : IsNoetherianRing (presheafValue D₀) := hNoeth_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsNoetherianRing (presheafValue D₀) := hNoeth_B
   letI P_B : PairOfDefinition (presheafValue D₀) :=
     presheafValue_pairOfDefinition_concrete P D₀
-  haveI : IsNoetherianRing ↥P_B.A₀ := hA₀Noeth_B
+  have : IsNoetherianRing ↥P_B.A₀ := hA₀Noeth_B
   -- presheafValue_trivialPlus_fSubX_equiv = (example638Plus_equiv _ _ _ ... _).symm.
   -- Its toFun = example638Plus_backwardHom.
   exact example638Plus_backwardHom_continuous (presheafValue D₀) P_B
@@ -2201,7 +2201,7 @@ theorem laurentPlusBridge_continuous
       (quotientPlusFSubXIdealTopology (presheafValue D₀) (D₀.canonicalMap f))
       (laurentPlusBridge P D₀ f hNoeth_B hLocLift_B hA₀Noeth_B
         hA_complete_B hnoeth_B hcont_forward_B) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
   -- laurentPlusBridge = iteratedPlus_equiv.trans trivialPlus_fSubX_equiv.
   -- Continuous ∘ Continuous = Continuous.
   exact (presheafValue_trivialPlus_fSubX_equiv_continuous P D₀ f
@@ -2249,7 +2249,7 @@ theorem laurentPlusBridge_symm_continuous
       (inferInstance : TopologicalSpace (presheafValue (laurentPlusDatum D₀ f)))
       (laurentPlusBridge P D₀ f hNoeth_B hLocLift_B hA₀Noeth_B
         hA_complete_B hnoeth_B hcont_forward_B).symm := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
   -- laurentPlusBridge.symm = trivialPlus_fSubX_equiv.symm.trans iteratedPlus_equiv.symm.
   exact (presheafValue_iteratedPlus_equiv_symm_continuous P D₀ f).comp
     (presheafValue_trivialPlus_fSubX_equiv_symm_continuous P D₀ f
@@ -2346,19 +2346,19 @@ noncomputable def TA_B_to_bivariateOverlap_evalHom
   letI usQ : UniformSpace
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealUniformSpace b
-  haveI : IsUniformAddGroup
+  have : IsUniformAddGroup
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     @isUniformAddGroup_of_addCommGroup _ _ topQ addQ
-  haveI : NonarchimedeanRing
+  have : NonarchimedeanRing
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealTopology_nonarchimedean b
-  haveI : CompleteSpace
+  have : CompleteSpace
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_completeSpace hA_complete hnoeth b
-  haveI hT2Q : T2Space
+  have hT2Q : T2Space
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_t2Space hA_complete hnoeth b
-  haveI : T0Space
+  have : T0Space
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     T2Space.t1Space.t0Space
   -- Base map: `mk ∘ algebraMap B (TA₂ B) : B → TA₂ B ⧸ bivariateOverlapIdeal b`.
@@ -2545,7 +2545,7 @@ theorem B₁_gen_nonarchimedeanRing (b : B) :
     quotientPlusFSubXIdealTopology B b
   letI hring : IsTopologicalRing (LaurentCover.B₁_gen b) :=
     quotientPlusFSubXIdealTopology_isTopologicalRing B b
-  haveI hNA_tate : @NonarchimedeanRing ↥(TateAlgebra B) _
+  have hNA_tate : @NonarchimedeanRing ↥(TateAlgebra B) _
       TateAlgebra.instTopologicalSpaceTateAlgebra :=
     TateAlgebra.tateAlgBasis'.nonarchimedean
   constructor; intro U hU
@@ -2595,9 +2595,9 @@ noncomputable def TA_B₁_gen_to_bivariateOverlap_outer_evalHom
       ↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b := by
   letI topB₁ : TopologicalSpace (LaurentCover.B₁_gen b) :=
     quotientPlusFSubXIdealTopology B b
-  haveI ringB₁ : IsTopologicalRing (LaurentCover.B₁_gen b) :=
+  have ringB₁ : IsTopologicalRing (LaurentCover.B₁_gen b) :=
     quotientPlusFSubXIdealTopology_isTopologicalRing B b
-  haveI naB₁ : NonarchimedeanRing (LaurentCover.B₁_gen b) := B₁_gen_nonarchimedeanRing b
+  have naB₁ : NonarchimedeanRing (LaurentCover.B₁_gen b) := B₁_gen_nonarchimedeanRing b
   letI topQ : TopologicalSpace
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealTopology b
@@ -2610,19 +2610,19 @@ noncomputable def TA_B₁_gen_to_bivariateOverlap_outer_evalHom
   letI usQ : UniformSpace
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealUniformSpace b
-  haveI : IsUniformAddGroup
+  have : IsUniformAddGroup
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     @isUniformAddGroup_of_addCommGroup _ _ topQ addQ
-  haveI : NonarchimedeanRing
+  have : NonarchimedeanRing
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealTopology_nonarchimedean b
-  haveI : CompleteSpace
+  have : CompleteSpace
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_completeSpace hA_complete hnoeth b
-  haveI hT2Q : T2Space
+  have hT2Q : T2Space
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_t2Space hA_complete hnoeth b
-  haveI : T0Space
+  have : T0Space
       (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     T2Space.t1Space.t0Space
   -- Target element: `mk TateAlgebra₂.Y`, power-bounded.
@@ -2980,18 +2980,18 @@ noncomputable def TA_B_bivariate_to_outerQuotient_evalHom₂
     ↥(TateAlgebra₂ B) →+*
       ↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b := by
   letI := h.topOuter
-  haveI := h.ringOuter
-  haveI := h.addOuter
+  have := h.ringOuter
+  have := h.addOuter
   letI : UniformSpace (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
     @IsTopologicalAddGroup.rightUniformSpace _ _ h.topOuter
       h.addOuter
-  haveI : @IsUniformAddGroup _
+  have : @IsUniformAddGroup _
       (@IsTopologicalAddGroup.rightUniformSpace _ _ h.topOuter h.addOuter) _ :=
     @isUniformAddGroup_of_addCommGroup _ _ h.topOuter h.addOuter
-  haveI := h.cOuter
-  haveI := h.tOuter
-  haveI := h.naOuter
-  haveI : T0Space (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
+  have := h.cOuter
+  have := h.tOuter
+  have := h.naOuter
+  have : T0Space (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
     T2Space.t1Space.t0Space
   exact TateAlgebraWedhorn.evalHomBounded₂
     (outerQuotient_baseHom b) h.hcont_base
@@ -3004,18 +3004,18 @@ theorem TA_B_bivariate_to_outerQuotient_evalHom₂_algebraMap
     TA_B_bivariate_to_outerQuotient_evalHom₂ b h (algebraMap B _ a) =
       outerQuotient_baseHom b a := by
   letI := h.topOuter
-  haveI := h.ringOuter
-  haveI := h.addOuter
+  have := h.ringOuter
+  have := h.addOuter
   letI : UniformSpace (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
     @IsTopologicalAddGroup.rightUniformSpace _ _ h.topOuter
       h.addOuter
-  haveI : @IsUniformAddGroup _
+  have : @IsUniformAddGroup _
       (@IsTopologicalAddGroup.rightUniformSpace _ _ h.topOuter h.addOuter) _ :=
     @isUniformAddGroup_of_addCommGroup _ _ h.topOuter h.addOuter
-  haveI := h.cOuter
-  haveI := h.tOuter
-  haveI := h.naOuter
-  haveI : T0Space (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
+  have := h.cOuter
+  have := h.tOuter
+  have := h.naOuter
+  have : T0Space (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
     T2Space.t1Space.t0Space
   unfold TA_B_bivariate_to_outerQuotient_evalHom₂
   exact TateAlgebraWedhorn.evalHomBounded₂_algebraMap _ _ _ _ _ _ _
@@ -3026,18 +3026,18 @@ theorem TA_B_bivariate_to_outerQuotient_evalHom₂_X
     TA_B_bivariate_to_outerQuotient_evalHom₂ b h TateAlgebra₂.X =
       outerQuotient_YbarTgt b := by
   letI := h.topOuter
-  haveI := h.ringOuter
-  haveI := h.addOuter
+  have := h.ringOuter
+  have := h.addOuter
   letI : UniformSpace (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
     @IsTopologicalAddGroup.rightUniformSpace _ _ h.topOuter
       h.addOuter
-  haveI : @IsUniformAddGroup _
+  have : @IsUniformAddGroup _
       (@IsTopologicalAddGroup.rightUniformSpace _ _ h.topOuter h.addOuter) _ :=
     @isUniformAddGroup_of_addCommGroup _ _ h.topOuter h.addOuter
-  haveI := h.cOuter
-  haveI := h.tOuter
-  haveI := h.naOuter
-  haveI : T0Space (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
+  have := h.cOuter
+  have := h.tOuter
+  have := h.naOuter
+  have : T0Space (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
     T2Space.t1Space.t0Space
   unfold TA_B_bivariate_to_outerQuotient_evalHom₂
   exact TateAlgebraWedhorn.evalHomBounded₂_X _ _ _ _ _ _
@@ -3048,18 +3048,18 @@ theorem TA_B_bivariate_to_outerQuotient_evalHom₂_Y
     TA_B_bivariate_to_outerQuotient_evalHom₂ b h TateAlgebra₂.Y =
       outerQuotient_XoutTgt b := by
   letI := h.topOuter
-  haveI := h.ringOuter
-  haveI := h.addOuter
+  have := h.ringOuter
+  have := h.addOuter
   letI : UniformSpace (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
     @IsTopologicalAddGroup.rightUniformSpace _ _ h.topOuter
       h.addOuter
-  haveI : @IsUniformAddGroup _
+  have : @IsUniformAddGroup _
       (@IsTopologicalAddGroup.rightUniformSpace _ _ h.topOuter h.addOuter) _ :=
     @isUniformAddGroup_of_addCommGroup _ _ h.topOuter h.addOuter
-  haveI := h.cOuter
-  haveI := h.tOuter
-  haveI := h.naOuter
-  haveI : T0Space (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
+  have := h.cOuter
+  have := h.tOuter
+  have := h.naOuter
+  have : T0Space (↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b) :=
     T2Space.t1Space.t0Space
   unfold TA_B_bivariate_to_outerQuotient_evalHom₂
   exact TateAlgebraWedhorn.evalHomBounded₂_Y _ _ _ _ _ _

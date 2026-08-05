@@ -158,16 +158,16 @@ theorem CompleteSpace.of_isModuleTopology_finite
       [IsModuleTopology A M] [Module.Finite A M] :
     CompleteSpace M := by
   obtain ⟨n, ν, hν⟩ := Module.Finite.exists_fin' A M
-  haveI : CompleteSpace (Fin n → A) := inferInstance
-  haveI : FirstCountableTopology A := UniformSpace.firstCountableTopology A
-  haveI : FirstCountableTopology (Fin n → A) := inferInstance
+  have : CompleteSpace (Fin n → A) := inferInstance
+  have : FirstCountableTopology A := UniformSpace.firstCountableTopology A
+  have : FirstCountableTopology (Fin n → A) := inferInstance
   have hν_cont : Continuous ⇑ν := IsModuleTopology.continuous_linearMap_of_finite ν
   have hν_open : IsOpenMap ⇑ν := IsModuleTopology.isOpenMap_of_surjective_of_finite ν hν
   -- Right uniformity on the quotient (mirrors `wedhorn_6_18_exists_canonical_topology`).
   letI τQ : UniformSpace ((Fin n → A) ⧸ ν.toAddMonoidHom.ker) :=
     IsTopologicalAddGroup.rightUniformSpace _
-  haveI : @IsUniformAddGroup _ τQ _ := isUniformAddGroup_of_addCommGroup
-  haveI : @CompleteSpace _ τQ :=
+  have : @IsUniformAddGroup _ τQ _ := isUniformAddGroup_of_addCommGroup
+  have : @CompleteSpace _ τQ :=
     QuotientAddGroup.completeSpace_right (Fin n → A) ν.toAddMonoidHom.ker
   -- The canonical add-equiv from the quotient to `M`.
   let e : ((Fin n → A) ⧸ ν.toAddMonoidHom.ker) ≃+ M :=
@@ -393,7 +393,7 @@ private theorem isClosed_ideal_of_adicComplete_noetherian
     [IsTopologicalRing R] [T2Space R] [CompleteSpace R] [IsNoetherianRing R]
     {I : Ideal R} (hadic : IsAdic I) (J : Ideal R) :
     IsClosed (J : Set R) := by
-  haveI : IsAdicComplete I R := hadic.isAdicComplete_iff.mpr ⟨‹_›, ‹_›⟩
+  have : IsAdicComplete I R := hadic.isAdicComplete_iff.mpr ⟨‹_›, ‹_›⟩
   have hjac : I ≤ (⊥ : Ideal R).jacobson := IsAdicComplete.le_jacobson_bot I
   have hkrull : (⨅ i : ℕ, I ^ i • (⊤ : Submodule R (R ⧸ J))) = ⊥ :=
     Ideal.iInf_pow_smul_eq_bot_of_le_jacobson I hjac
@@ -504,8 +504,8 @@ theorem Wedhorn.isClosed_ideal_of_noetherian
   have hA₀_closed : IsClosed (P.A₀ : Set A) :=
     AddSubgroup.isClosed_of_isOpen P.A₀.toAddSubgroup P.isOpen
   -- Step 2: Install uniform + complete instances on ↥P.A₀.
-  haveI : IsUniformAddGroup ↥P.A₀ := P.A₀.toAddSubgroup.isUniformAddGroup
-  haveI : CompleteSpace ↥P.A₀ := hA₀_closed.completeSpace_coe
+  have : IsUniformAddGroup ↥P.A₀ := P.A₀.toAddSubgroup.isUniformAddGroup
+  have : CompleteSpace ↥P.A₀ := hA₀_closed.completeSpace_coe
   -- Step 3: Apply the abstract helper to show J₀ := J.comap A₀.subtype is closed.
   set J₀ : Ideal ↥P.A₀ := J.comap P.A₀.subtype with hJ₀_def
   have hJ₀_closed : IsClosed (J₀ : Set ↥P.A₀) :=

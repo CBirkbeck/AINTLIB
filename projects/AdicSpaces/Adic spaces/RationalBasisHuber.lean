@@ -78,7 +78,7 @@ theorem genPiece_hopen_of_pow_le (P : PairOfDefinition A) (T : Finset A)
       exact Finset.sum_congr rfl fun t' _ => (smul_eq_mul _ _)⟩
   have hGamb := generators_mem_span P T M hle G hG
   choose c hc using fun g : ↥(G : Set P.A₀) => hgen _ (hGamb g)
-  haveI : Fintype ↥(G : Set P.A₀) := G.finite_toSet.fintype
+  have : Fintype ↥(G : Set P.A₀) := G.finite_toSet.fintype
   obtain ⟨N, hN⟩ := pod_absorb_finset_mul_pow P
     (Finset.univ.biUnion fun g : ↥(G : Set P.A₀) => T.image (c g))
   refine ⟨N + M, fun b hb => ?_⟩

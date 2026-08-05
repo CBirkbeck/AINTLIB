@@ -494,7 +494,7 @@ instance : IsRingOfIntegralElements
   subset_powerBounded := OD_subset_powerBounded F
 
 instance : @CompleteSpace (D F) (IsTopologicalAddGroup.rightUniformSpace (D F)) := by
-  haveI : IsUniformAddGroup (D F) := SeminormedAddCommGroup.to_isUniformAddGroup
+  have : IsUniformAddGroup (D F) := SeminormedAddCommGroup.to_isUniformAddGroup
   rw [IsUniformAddGroup.rightUniformSpace_eq]
   infer_instance
 

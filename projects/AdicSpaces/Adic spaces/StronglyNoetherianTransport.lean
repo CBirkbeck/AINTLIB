@@ -102,7 +102,7 @@ theorem isStronglyNoetherian_congr
   constructor
   · intro hB
     refine ⟨fun k => ?_⟩
-    haveI : IsNoetherianRing (restrictedMvPowerSeriesSubring k B) :=
+    have : IsNoetherianRing (restrictedMvPowerSeriesSubring k B) :=
       hB.isNoetherianRing_restricted k
     exact isNoetherianRing_of_surjective
       (restrictedMvPowerSeriesSubring k B) (restrictedMvPowerSeriesSubring k B')
@@ -110,7 +110,7 @@ theorem isStronglyNoetherian_congr
       (restrictedMvPowerSeriesEquiv e he he' k).surjective
   · intro hB'
     refine ⟨fun k => ?_⟩
-    haveI : IsNoetherianRing (restrictedMvPowerSeriesSubring k B') :=
+    have : IsNoetherianRing (restrictedMvPowerSeriesSubring k B') :=
       hB'.isNoetherianRing_restricted k
     exact isNoetherianRing_of_surjective
       (restrictedMvPowerSeriesSubring k B') (restrictedMvPowerSeriesSubring k B)

@@ -118,7 +118,7 @@ lemma exists_mem_basicOpen_pow_of_tn
     {t : A} (htne : ¬ v.vle t 0) :
     ∃ n : ℕ, v ∈ basicOpen (π ^ n) t := by
   letI : ValuativeRel A := v.toValuativeRel
-  haveI : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch
+  have : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch
   have hcompat : (ValuativeRel.valuation A).Compatible := inferInstance
   set w := ValuativeRel.valuation A
   have hπ_lt : w π < 1 := by
@@ -156,7 +156,7 @@ lemma exists_dominatedBy_cover
     refine Set.mem_iUnion.mpr ⟨n, ?_⟩
     simp only [hS_def, Set.mem_preimage, dominatedBy, Set.mem_iUnion]
     exact ⟨t, htT, hn⟩
-  haveI := hSpa_compact
+  have := hSpa_compact
   obtain ⟨F, hF⟩ := isCompact_univ.elim_finite_subcover S hS_open hS_cover
   -- `N := F.sup id` bounds every element of `F`.
   set N : ℕ := F.sup id with hN_def
@@ -194,7 +194,7 @@ theorem exists_dominating_unit
     ∃ s : Aˣ, ∀ v ∈ Spa A A⁺, ∃ t ∈ T,
       v.vle (s : A) t ∧ ¬ v.vle t (s : A) := by
   -- Compactness via SpaCompact.
-  haveI hSpa_compact : CompactSpace ↥(Spa A A⁺) :=
+  have hSpa_compact : CompactSpace ↥(Spa A A⁺) :=
     instCompactSpace_spa_of_tate_pseudouniformizer P hA₀_le π hI hπ_tn hπ_unit hArch
   -- Finite `N` dominator.
   set πA : A := P.A₀.subtype π with hπA_def
@@ -219,7 +219,7 @@ theorem exists_dominating_unit
     exact le_trans (mul_le_of_le_one_right zero_le hπ_le_one) h_t
   · -- `¬ v.vle t (πA^(N+1))` via strict `w πA < 1`.
     letI : ValuativeRel A := v.toValuativeRel
-    haveI : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch v
+    have : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch v
     have hcompat : (ValuativeRel.valuation A).Compatible := inferInstance
     set w := ValuativeRel.valuation A
     have h_t : w (πA ^ N) ≤ w t :=

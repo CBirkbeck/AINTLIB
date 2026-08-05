@@ -164,7 +164,7 @@ theorem nontrivial_JetB : Nontrivial (JetB F) := by
 /-- The chart `𝒪_X(U) = 𝓐⟨W/ϖ⟩ ≅ 𝓑` is a **nonzero** ring ([FJP] Prop 3.1), so the
 vanishing above is not the degenerate "empty rational subset" phenomenon. -/
 theorem nontrivial_chart : Nontrivial (presheafValue (chartDatum F)) :=
-  haveI := nontrivial_JetB F
+  have := nontrivial_JetB F
   (chartEquiv F).toEquiv.nontrivial
 
 /-! ### The rational subset `U = R(W/ϖ)` is nonempty
@@ -330,7 +330,7 @@ theorem finiteJet_not_flat_canonicalMap :
     ¬ @Module.Flat (JetA F) (presheafValue (chartDatum F)) _ _
       (RingHom.toModule (chartDatum F).canonicalMap) := by
   intro hflat
-  haveI := nontrivial_chart F
+  have := nontrivial_chart F
   -- flatness makes the nonzerodivisor `Q²` act injectively on the chart …
   have hreg := @Module.Flat.isSMulRegular_of_nonZeroDivisors (JetA F)
     (presheafValue (chartDatum F)) _ _ (RingHom.toModule (chartDatum F).canonicalMap)

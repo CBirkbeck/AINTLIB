@@ -270,15 +270,15 @@ noncomputable def adicCompletionRingEquiv (hadic : IsAdic I) :
     UniformSpace.Completion R ≃+* AdicCompletion I R := by
   let e := adicCompletionEquiv I hadic
   let e_inv := adicCompletionEquivInv I hadic
-  haveI : T2Space (AdicCompletion I R) := inferInstance
-  haveI : CompleteSpace (AdicCompletion I R) := adicCompletionComplete I
-  haveI : ContinuousMul (AdicCompletion I R) := ⟨by
+  have : T2Space (AdicCompletion I R) := inferInstance
+  have : CompleteSpace (AdicCompletion I R) := adicCompletionComplete I
+  have : ContinuousMul (AdicCompletion I R) := ⟨by
     apply Continuous.subtype_mk; apply continuous_pi; intro n
     change Continuous fun p : AdicCompletion I R × AdicCompletion I R =>
       p.1.val n * p.2.val n
     exact ((continuous_apply n).comp (continuous_subtype_val.comp continuous_fst)).mul
       ((continuous_apply n).comp (continuous_subtype_val.comp continuous_snd))⟩
-  haveI : ContinuousAdd (AdicCompletion I R) := ⟨by
+  have : ContinuousAdd (AdicCompletion I R) := ⟨by
     apply Continuous.subtype_mk; apply continuous_pi; intro n
     change Continuous fun p : AdicCompletion I R × AdicCompletion I R =>
       p.1.val n + p.2.val n
@@ -333,8 +333,8 @@ noncomputable def completionRingEquiv
   let pkg : AbstractCompletion R :=
     ⟨S, g, inferInstance, inferInstance, inferInstance, hg_ui, hg_dense⟩
   letI := (@UniformSpace.Completion.cPkg R _).uniformStruct
-  haveI := (@UniformSpace.Completion.cPkg R _).complete
-  haveI := (@UniformSpace.Completion.cPkg R _).separation
+  have := (@UniformSpace.Completion.cPkg R _).complete
+  have := (@UniformSpace.Completion.cPkg R _).separation
   let f_inv : S → UniformSpace.Completion R :=
     pkg.compare UniformSpace.Completion.cPkg
   have hf_inv_coe : ∀ a : R, f_inv (g a) = (↑a : UniformSpace.Completion R) :=

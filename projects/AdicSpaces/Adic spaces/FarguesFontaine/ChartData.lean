@@ -1128,9 +1128,9 @@ theorem continuous_chartToBIProd (a b : ℕ) (hb : 0 < b)
         (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb) := by
   letI : TopologicalSpace (Localization.Away (chartS p F ϖ 1 b)) :=
     chartTopology p F ϖ a b
-  haveI : IsTopologicalRing (Localization.Away (chartS p F ϖ 1 b)) :=
+  have : IsTopologicalRing (Localization.Away (chartS p F ϖ 1 b)) :=
     chartTopologicalRing p F ϖ a b
-  haveI : IsTopologicalAddGroup (Localization.Away (chartS p F ϖ 1 b)) :=
+  have : IsTopologicalAddGroup (Localization.Away (chartS p F ϖ 1 b)) :=
     (chartTopologicalRing p F ϖ a b).to_topologicalAddGroup
   refine continuous_of_tendsto_nhds_zero
     (chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)

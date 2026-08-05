@@ -55,7 +55,7 @@ theorem principalPair_A₀_completeSpace_of_stronglyNoetherianTate
   set P := (IsTateRing.principalPair A).toPairOfDefinition
   have hclosed : IsClosed (P.A₀ : Set A) :=
     AddSubgroup.isClosed_of_isOpen P.A₀.toAddSubgroup P.isOpen
-  haveI : IsClosed ((P.A₀ : Set A) : Set A) := hclosed
+  have : IsClosed ((P.A₀ : Set A) : Set A) := hclosed
   exact IsClosed.completeSpace_coe (s := (P.A₀ : Set A))
 
 /-- **Adic-completeness of the canonical principal pair.** The principal pair of
@@ -84,7 +84,7 @@ theorem principalPair_isAdicComplete_of_stronglyNoetherianTate
   letI : UniformSpace ↥(IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
     UniformSpace.comap Subtype.val ‹UniformSpace A›
   -- Inherit `IsUniformAddGroup` via the canonical subring/addsubgroup inclusion.
-  haveI : IsUniformAddGroup
+  have : IsUniformAddGroup
       ↥(IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
     AddSubgroup.isUniformAddGroup
       (IsTateRing.principalPair A).toPairOfDefinition.A₀.toAddSubgroup

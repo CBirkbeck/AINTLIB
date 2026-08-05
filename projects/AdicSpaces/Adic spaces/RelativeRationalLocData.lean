@@ -692,9 +692,9 @@ theorem relativeLaurentNormalized_forwardInnerLocHom_continuous
   letI : IsTopologicalAddGroup (Localization.Away (E.canonicalMap D.s)) :=
     D_at_E_data.isTopologicalAddGroup
   -- Target is nonarchimedean ring (needed by locTopology_continuous_lift).
-  haveI naTgt : @NonarchimedeanRing (Localization.Away D_at_E_data.s) _ tgtTop :=
+  have naTgt : @NonarchimedeanRing (Localization.Away D_at_E_data.s) _ tgtTop :=
     (locBasis D_at_E_data.P D_at_E_data.T D_at_E_data.s D_at_E_data.hopen).nonarchimedean
-  haveI : @NonarchimedeanRing (Localization.Away (E.canonicalMap D.s)) _
+  have : @NonarchimedeanRing (Localization.Away (E.canonicalMap D.s)) _
       D_at_E_data.topology := naTgt
   -- hf_alg: continuity of forwardInner ∘ algebraMap A from A to target.
   have hf_alg : @Continuous A _ _ D_at_E_data.topology
@@ -878,7 +878,7 @@ theorem relativeLaurentNormalized_backwardLocHom_continuous
   letI : IsTopologicalRing (Localization.Away (E.canonicalMap D.s)) :=
     D_at_E_data.isTopologicalRing
   -- Target is nonarchimedean ring (needed by locTopology_continuous_lift).
-  haveI : NonarchimedeanRing (presheafValue D) := presheafValueNonarchimedeanRing D
+  have : NonarchimedeanRing (presheafValue D) := presheafValueNonarchimedeanRing D
   -- hf_alg: continuity of backwardLocHom ∘ algebraMap (presheafValue E).
   -- The composite equals `restrictionMapHom E D hsub` by backwardLocHom_algebraMap.
   -- restrictionMapHom is continuous by restrictionMapHom_continuous.
@@ -1121,7 +1121,7 @@ theorem relativeLaurentNormalized_forwardHom_restrictionMapHom
   letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
-  haveI : T2Space (presheafValue D_at_E_data) := presheafValueT2Space _
+  have : T2Space (presheafValue D_at_E_data) := presheafValueT2Space _
   set f : presheafValue E → presheafValue D_at_E_data := fun b =>
     relativeLaurentNormalized_forwardHom E D hsub (restrictionMapHom E D hsub b)
   set g : presheafValue E → presheafValue D_at_E_data := fun b => D_at_E_data.canonicalMap b

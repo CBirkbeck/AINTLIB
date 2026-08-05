@@ -268,7 +268,7 @@ theorem plusFSubXIdeal_isClosed
     (b : B) :
     IsClosed ((plusFSubXIdeal B b : Ideal ↥(TateAlgebra B)) :
       Set ↥(TateAlgebra B)) := by
-  haveI : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := B)).A₀ := hnoeth
+  have : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := B)).A₀ := hnoeth
   exact tateAlgebra_isClosed_ideal hA_complete (plusFSubXIdeal B b)
 
 /-- The quotient `TateAlgebra B ⧸ plusFSubXIdeal b` is T2. -/
@@ -278,7 +278,7 @@ theorem quotient_plusFSubXIdeal_t2Space
       ↥(TateAlgebra.pairSubring (IsTateRing.principalPair B).toPairOfDefinition))
     (b : B) :
     T2Space (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) := by
-  haveI : IsClosed ((plusFSubXIdeal B b).toAddSubgroup : Set ↥(TateAlgebra B)) :=
+  have : IsClosed ((plusFSubXIdeal B b).toAddSubgroup : Set ↥(TateAlgebra B)) :=
     plusFSubXIdeal_isClosed B hA_complete hnoeth b
   infer_instance
 
@@ -292,14 +292,14 @@ theorem quotient_plusFSubXIdeal_completeSpace
     @CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b)
       (quotientPlusFSubXIdealUniformSpace B b) := by
   letI τ : TopologicalSpace ↥(TateAlgebra B) := instTopologicalSpaceTateAlgebra
-  haveI _hring : IsTopologicalRing ↥(TateAlgebra B) := instIsTopologicalRingTateAlgebra
-  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra B) :=
+  have _hring : IsTopologicalRing ↥(TateAlgebra B) := instIsTopologicalRingTateAlgebra
+  have haddgrp : IsTopologicalAddGroup ↥(TateAlgebra B) :=
     IsTopologicalRing.to_topologicalAddGroup
-  haveI : FirstCountableTopology ↥(TateAlgebra B) := instFirstCountableTopologyTateAlgebra
-  haveI hCS : @CompleteSpace ↥(TateAlgebra B)
+  have : FirstCountableTopology ↥(TateAlgebra B) := instFirstCountableTopologyTateAlgebra
+  have hCS : @CompleteSpace ↥(TateAlgebra B)
       (IsTopologicalAddGroup.rightUniformSpace ↥(TateAlgebra B)) :=
     tateAlgebraTopology'_completeSpace hA_complete
-  haveI : IsClosed ((plusFSubXIdeal B b).toAddSubgroup : Set ↥(TateAlgebra B)) :=
+  have : IsClosed ((plusFSubXIdeal B b).toAddSubgroup : Set ↥(TateAlgebra B)) :=
     plusFSubXIdeal_isClosed B hA_complete hnoeth b
   exact @QuotientAddGroup.completeSpace_right' ↥(TateAlgebra B) _ τ haddgrp ‹_›
     (plusFSubXIdeal B b).toAddSubgroup inferInstance hCS
@@ -388,7 +388,7 @@ theorem TateAlgebra_X_isPowerBounded :
     @TopologicalRing.IsPowerBounded _ _ instTopologicalSpaceTateAlgebra
       (TateAlgebra.X (A := B)) := by
   letI : TopologicalSpace ↥(TateAlgebra B) := instTopologicalSpaceTateAlgebra
-  haveI : IsTopologicalRing ↥(TateAlgebra B) := instIsTopologicalRingTateAlgebra
+  have : IsTopologicalRing ↥(TateAlgebra B) := instIsTopologicalRingTateAlgebra
   have hX_in : TateAlgebra.X (A := B) ∈
       TateAlgebra.pairSubring (IsTateRing.principalPair B).toPairOfDefinition :=
     TateAlgebra_X_mem_pairSubring B
@@ -485,9 +485,9 @@ theorem plusLocToQuotient_continuous (P : PairOfDefinition B) (b : B) :
     quotientPlusFSubXIdealTopology_isTopologicalRing B b
   letI hadd : IsTopologicalAddGroup (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotientPlusFSubXIdealTopology_isTopologicalAddGroup B b
-  haveI hNA_tate : @NonarchimedeanRing ↥(TateAlgebra B) _ instTopologicalSpaceTateAlgebra :=
+  have hNA_tate : @NonarchimedeanRing ↥(TateAlgebra B) _ instTopologicalSpaceTateAlgebra :=
     tateAlgBasis'.nonarchimedean
-  haveI : @NonarchimedeanRing (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b)
+  have : @NonarchimedeanRing (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b)
       _ (quotientPlusFSubXIdealTopology B b) := by
     constructor; intro U hU
     have hcont : @Continuous _ _ instTopologicalSpaceTateAlgebra
@@ -563,11 +563,11 @@ noncomputable def example638Plus_backwardHom
     quotientPlusFSubXIdealUniformSpace B b
   letI : IsUniformAddGroup (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotientPlusFSubXIdeal_isUniformAddGroup B b
-  haveI : CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
+  have : CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotient_plusFSubXIdeal_completeSpace B hA_complete hnoeth b
-  haveI hT2Q : @T2Space _ (quotientPlusFSubXIdealTopology B b) :=
+  have hT2Q : @T2Space _ (quotientPlusFSubXIdealTopology B b) :=
     quotient_plusFSubXIdeal_t2Space B hA_complete hnoeth b
-  haveI hT0Q : @T0Space _ (quotientPlusFSubXIdealTopology B b) :=
+  have hT0Q : @T0Space _ (quotientPlusFSubXIdealTopology B b) :=
     @T1Space.t0Space _ (quotientPlusFSubXIdealTopology B b) (T2Space.t1Space)
   exact @UniformSpace.Completion.extensionHom _ _ _ _ _ _
     (quotientPlusFSubXIdealUniformSpace B b) _
@@ -605,11 +605,11 @@ theorem example638Plus_backwardHom_coe
     quotientPlusFSubXIdealUniformSpace B b
   letI : IsUniformAddGroup (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotientPlusFSubXIdeal_isUniformAddGroup B b
-  haveI : CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
+  have : CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotient_plusFSubXIdeal_completeSpace B hA_complete hnoeth b
-  haveI hT2Q : @T2Space _ (quotientPlusFSubXIdealTopology B b) :=
+  have hT2Q : @T2Space _ (quotientPlusFSubXIdealTopology B b) :=
     quotient_plusFSubXIdeal_t2Space B hA_complete hnoeth b
-  haveI hT0Q : @T0Space _ (quotientPlusFSubXIdealTopology B b) :=
+  have hT0Q : @T0Space _ (quotientPlusFSubXIdealTopology B b) :=
     @T1Space.t0Space _ (quotientPlusFSubXIdealTopology B b) (T2Space.t1Space)
   exact @UniformSpace.Completion.extensionHom_coe _ _ _ _ _ _
     (quotientPlusFSubXIdealUniformSpace B b) _
@@ -660,7 +660,7 @@ theorem example638Plus_backwardHom_continuous
   letI : TopologicalSpace ↥(TateAlgebra B) := instTopologicalSpaceTateAlgebra
   letI : TopologicalSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotientPlusFSubXIdealTopology B b
-  haveI hT2Q : @T2Space _ (quotientPlusFSubXIdealTopology B b) :=
+  have hT2Q : @T2Space _ (quotientPlusFSubXIdealTopology B b) :=
     quotient_plusFSubXIdeal_t2Space B hA_complete hnoeth b
   letI : UniformSpace (Localization.Away (1 : B)) :=
     (trivialPlusDatum B P b).uniformSpace
@@ -680,7 +680,7 @@ theorem example638Plus_backwardHom_continuous
     quotientPlusFSubXIdeal_isUniformAddGroup B b
   letI : IsTopologicalRing (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotientPlusFSubXIdealTopology_isTopologicalRing B b
-  haveI : CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
+  have : CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotient_plusFSubXIdeal_completeSpace B hA_complete hnoeth b
   exact UniformSpace.Completion.continuous_extension
 
@@ -771,7 +771,7 @@ theorem example638Plus_backward_forward_eq_id
   letI : TopologicalSpace ↥(TateAlgebra B) := instTopologicalSpaceTateAlgebra
   letI : TopologicalSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotientPlusFSubXIdealTopology B b
-  haveI hT2Q : @T2Space _ (quotientPlusFSubXIdealTopology B b) :=
+  have hT2Q : @T2Space _ (quotientPlusFSubXIdealTopology B b) :=
     quotient_plusFSubXIdeal_t2Space B hA_complete hnoeth b
   apply Ideal.Quotient.ringHom_ext
   apply RingHom.ext
@@ -834,7 +834,7 @@ theorem example638Plus_forward_backward_eq_id
     quotientPlusFSubXIdealUniformSpace B b
   letI : IsUniformAddGroup (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotientPlusFSubXIdeal_isUniformAddGroup B b
-  haveI : CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
+  have : CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotient_plusFSubXIdeal_completeSpace B hA_complete hnoeth b
   apply RingHom.ext
   intro y
@@ -1007,11 +1007,11 @@ theorem example638Plus_isHomeomorph
     quotientPlusFSubXIdealTopology_isTopologicalAddGroup B b
   letI uC : UniformSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotientPlusFSubXIdealUniformSpace B b
-  haveI : @IsUniformAddGroup _ uC _ :=
+  have : @IsUniformAddGroup _ uC _ :=
     quotientPlusFSubXIdeal_isUniformAddGroup B b
-  haveI : @CompleteSpace _ uC :=
+  have : @CompleteSpace _ uC :=
     quotient_plusFSubXIdeal_completeSpace B hA_complete hnoeth b
-  haveI : T2Space (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
+  have : T2Space (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotient_plusFSubXIdeal_t2Space B hA_complete hnoeth b
   let e := example638Plus_equiv B P b hA_complete hnoeth hcont_forward
   have hbij : Function.Bijective (example638Plus_forwardHom B P b) :=

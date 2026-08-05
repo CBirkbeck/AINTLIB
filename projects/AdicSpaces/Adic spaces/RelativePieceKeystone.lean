@@ -1124,7 +1124,7 @@ private theorem relativePiece_restrict_square_locLevel
       (((relativePiece_equiv D₀ E hE_sub hspanE) :
         presheafValue E →+* presheafValue (imagePieceDatum D₀ E.T E.s hspanE)).comp
         E.coeRingHom)) := by
-  haveI : @CompleteSpace (presheafValue D₀)
+  have : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
   refine IsLocalization.ringHom_ext (Submonoid.powers E.s) ?_
@@ -1189,7 +1189,7 @@ theorem relativePiece_equiv_restrict_square
         (imagePieceDatum D₀ E'.T E'.s hspanE')
         (imagePieceDatum_rationalOpen_mono D₀ E E' hspanE hspanE' hE'_sub)
         (relativePiece_equiv D₀ E hE_sub hspanE y) := by
-  haveI := presheafValue_completeSpace_rightUniformSpace D₀
+  have := presheafValue_completeSpace_rightUniformSpace D₀
   -- both composites, postcomposed with `E.coeRingHom`, agree as ring homs out of
   -- the localization (determined on the `algebraMap`-range by the trackings)
   have hloc := relativePiece_restrict_square_locLevel D₀ E E' hE_sub hE'_sub hspanE hspanE'
@@ -1358,7 +1358,7 @@ theorem prop_8_30_basic_laurent_step_flat
     presheafValue_completeSpace_rightUniformSpace E
   -- Step 1 (FAITHFUL Example 6.38 + Lemma 8.31 over `B`): `presheafValue Xbar` is flat over `B` along
   -- `Xbar.canonicalMap`.  NO `hb`-via-whole-space, NO noeth-`A₀`, NO `[IsDomain]`.
-  haveI hflat_Xbar :
+  have hflat_Xbar :
       @Module.Flat (presheafValue E) (presheafValue Xbar) _ _
         (RingHom.toModule Xbar.canonicalMap) :=
     presheafValue_flat_of_canonical_faithful Xbar hb hA_complete hT_pb
@@ -1401,7 +1401,7 @@ instance hypotheses (incl. completeness) come from the `Wedhorn828Tail` section 
 theorem presheafValue_flat_of_unitDatum_faithful (P : PairOfDefinition A) (f : A) :
     @Module.Flat A (presheafValue (unitDatum P f)) _ _
       (RingHom.toModule (unitDatum P f).canonicalMap) := by
-  haveI hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ unitDatumSpanIdeal (A := A) f) :=
+  have hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ unitDatumSpanIdeal (A := A) f) :=
     lemma_8_31_fSubX_flat (A := A) f
   let e := unitDatum_quotEquiv P f
   change @Module.Flat A (presheafValue (unitDatum P f)) _ _
@@ -1432,7 +1432,7 @@ dominating-unit base step `X₀ = {1 ≤ x(s/u)} = coUnitDatum(s·u⁻¹)` of th
 theorem presheafValue_flat_of_coUnitDatum_faithful (P : PairOfDefinition A) (f : A) :
     @Module.Flat A (presheafValue (coUnitDatum P f)) _ _
       (RingHom.toModule (coUnitDatum P f).canonicalMap) := by
-  haveI hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ coUnitDatumSpanIdeal (A := A) f) :=
+  have hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ coUnitDatumSpanIdeal (A := A) f) :=
     lemma_8_31_oneSubfX_flat (A := A) f
   let e := coUnitDatum_quotEquiv P f
   change @Module.Flat A (presheafValue (coUnitDatum P f)) _ _
@@ -1598,7 +1598,7 @@ theorem flat_imagePieceDatum_denomGen [DecidableEq A] (D₀ : RationalLocData A)
       (RingHom.toModule (imagePieceDatum D₀ {f, s} s hspan).canonicalMap) := by
   classical
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
-  haveI hCompleteB : @CompleteSpace (presheafValue D₀)
+  have hCompleteB : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
   -- FAITHFUL re-wiring: shadow the generic `hasLocLiftPowerBounded_of_stronglyNoetherianTate`
@@ -1618,7 +1618,7 @@ theorem flat_imagePieceDatum_denomGen [DecidableEq A] (D₀ : RationalLocData A)
       rationalOpen ({g} : Finset (presheafValue D₀)) 1
     rw [hg]; exact imagePieceDatum_denomGen_rationalOpen_eq D₀ f s hspan hs_unit
   -- `𝒪(U) = 𝒪(unitDatum g)` is flat over `B` by the arbitrary-`f` engine.
-  haveI hflat_U : @Module.Flat (presheafValue D₀) (presheafValue U) _ _
+  have hflat_U : @Module.Flat (presheafValue D₀) (presheafValue U) _ _
       (RingHom.toModule U.canonicalMap) := by
     rw [hU]; exact presheafValue_flat_of_unitDatum_faithful (presheafValue_concretePair D₀) g
   -- Transport flatness across the restriction iso `e : 𝒪(W) ≃+* 𝒪(U)` (equal `rationalOpen`),
@@ -1656,7 +1656,7 @@ theorem flat_chainStep [DecidableEq A] (D₀ : RationalLocData A) (g s : A)
         (RationalLocData.interSamePair_subset_left _ _ _)).toModule := by
   set D' := D₀.interSamePair (genPieceDatum D₀.P {g, s} s hspan) rfl with hD'
   set Wimg := imagePieceDatum D₀ {g, s} s hspan with hWimg
-  haveI hflat_img : @Module.Flat (presheafValue D₀) (presheafValue Wimg) _ _
+  have hflat_img : @Module.Flat (presheafValue D₀) (presheafValue Wimg) _ _
       (RingHom.toModule Wimg.canonicalMap) :=
     flat_imagePieceDatum_denomGen D₀ g s hspan hs_unit
   let e := genPiece_relative_equiv D₀ {g, s} s hspan
@@ -1692,7 +1692,7 @@ theorem flat_imagePieceDatum_domUnit [DecidableEq A] (D₀ : RationalLocData A) 
       (RingHom.toModule (imagePieceDatum D₀ {g, u} s hspan).canonicalMap) := by
   classical
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
-  haveI hCompleteB : @CompleteSpace (presheafValue D₀)
+  have hCompleteB : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
   -- FAITHFUL re-wiring (see `flat_imagePieceDatum_denomGen`): route the internal
@@ -1707,7 +1707,7 @@ theorem flat_imagePieceDatum_domUnit [DecidableEq A] (D₀ : RationalLocData A) 
         (imagePieceDatum D₀ {g, u} s hspan).s =
       rationalOpen ({gg} : Finset (presheafValue D₀)) 1
     rw [hgg]; exact imagePieceDatum_domUnit_rationalOpen_eq D₀ g s u hspan hs_unit h_pb
-  haveI hflat_U : @Module.Flat (presheafValue D₀) (presheafValue U) _ _
+  have hflat_U : @Module.Flat (presheafValue D₀) (presheafValue U) _ _
       (RingHom.toModule U.canonicalMap) := by
     rw [hU]; exact presheafValue_flat_of_unitDatum_faithful (presheafValue_concretePair D₀) gg
   let e : presheafValue W ≃+* presheafValue U :=
@@ -1745,7 +1745,7 @@ theorem flat_chainStep_domUnit [DecidableEq A] (D₀ : RationalLocData A) (g s u
         (RationalLocData.interSamePair_subset_left _ _ _)).toModule := by
   set D' := D₀.interSamePair (genPieceDatum D₀.P {g, u} s hspan) rfl with hD'
   set Wimg := imagePieceDatum D₀ {g, u} s hspan with hWimg
-  haveI hflat_img : @Module.Flat (presheafValue D₀) (presheafValue Wimg) _ _
+  have hflat_img : @Module.Flat (presheafValue D₀) (presheafValue Wimg) _ _
       (RingHom.toModule Wimg.canonicalMap) :=
     flat_imagePieceDatum_domUnit D₀ g s u hspan hs_unit h_pb
   let e := genPiece_relative_equiv D₀ {g, u} s hspan
@@ -1776,7 +1776,7 @@ theorem flat_presheafValue_coUnitDatum_at_base (D : RationalLocData A) (f : pres
     @Module.Flat (presheafValue D)
       (presheafValue (coUnitDatum (presheafValue_concretePair D) f)) _ _
       (RingHom.toModule (coUnitDatum (presheafValue_concretePair D) f).canonicalMap) := by
-  haveI hCompleteB : @CompleteSpace (presheafValue D)
+  have hCompleteB : @CompleteSpace (presheafValue D)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D)) :=
     presheafValue_completeSpace_rightUniformSpace D
   exact presheafValue_flat_of_coUnitDatum_faithful (presheafValue_concretePair D) f
@@ -2023,10 +2023,10 @@ theorem flat_trans_via_canonicalMap
   letI : Module A (presheafValue X₀) := Algebra.toModule
   letI : Module (presheafValue X₀) (presheafValue D') := Algebra.toModule
   letI : Module A (presheafValue D') := Algebra.toModule
-  haveI : IsScalarTower A (presheafValue X₀) (presheafValue D') :=
+  have : IsScalarTower A (presheafValue X₀) (presheafValue D') :=
     IsScalarTower.of_algebraMap_eq fun x => (restrictionMapHom_canonicalMap X₀ D' h x).symm
-  haveI : Module.Flat A (presheafValue X₀) := hX0
-  haveI : Module.Flat (presheafValue X₀) (presheafValue D') := hfold
+  have : Module.Flat A (presheafValue X₀) := hX0
+  have : Module.Flat (presheafValue X₀) (presheafValue D') := hfold
   exact Module.Flat.trans A (presheafValue X₀) (presheafValue D')
 
 /-- One `chainStep`'s `rationalOpen` is the intersection `R(D') ∩ R({g,↑u}/sB)`
@@ -2103,7 +2103,7 @@ theorem prop_8_30_imagePiece_assembled
     @Module.Flat (presheafValue D) (presheafValue (imagePieceDatum D E.T E.s hspanE)) _ _
       ((imagePieceDatum D E.T E.s hspanE).canonicalMap).toModule := by
   classical
-  haveI hCompleteB : @CompleteSpace (presheafValue D)
+  have hCompleteB : @CompleteSpace (presheafValue D)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D)) :=
     presheafValue_completeSpace_rightUniformSpace D
   -- Remark 7.55 dominating unit `u` (`|u| ≤ |sB|` on `rationalOpen (im E)`).
@@ -2257,10 +2257,10 @@ theorem prop_8_30_flat_of_faithful_base
   -- `NonarchimedeanRing`/`T2Space` are derivable from the plain `presheafValue` (completion)
   -- instances; `IsStronglyNoetherian` from `presheafValue_isStronglyNoetherian_faithful` (Ex. 6.38).
   -- None of this uses any `PairOfDefinition` / noeth-`A₀`.
-  haveI := hTate
-  haveI := hNoeth
-  haveI : NonarchimedeanRing (presheafValue D) := inferInstance
-  haveI : T2Space (presheafValue D) := inferInstance
+  have := hTate
+  have := hNoeth
+  have : NonarchimedeanRing (presheafValue D) := inferInstance
+  have : T2Space (presheafValue D) := inferInstance
   -- Steps 2–4 (Remark 7.55 + relative Example 6.38 over `B` + Lemma 8.31): the single genuine
   -- residual, isolated faithfully (NO noeth-`A₀`). See `prop_8_30_relative_laurent_flat`.
   exact prop_8_30_relative_laurent_flat D D' h hD hD'
@@ -2343,7 +2343,7 @@ theorem cor_8_32_maximal_liftedIdeal_ne_top (C : RationalCoveringData A) :
       ∃ (D : { D // D ∈ C.covers }),
         Ideal.map (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)) m ≠ ⊤ := by
   intro m hm
-  haveI : m.IsPrime := hm.isPrime
+  have : m.IsPrime := hm.isPrime
   -- `presheafValue C.base` is a Tate ring (noeth-A₀-free faithful pair).
   -- A maximal (hence proper) ideal of a Tate ring is non-open.
   have hm_notOpen : ¬IsOpen (m : Set (presheafValue C.base)) :=
@@ -2412,7 +2412,7 @@ theorem cor_8_32_productRestrictionSub_injective (C : RationalCoveringData A)
     Function.Injective (productRestrictionSub A C) := by
   letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base) (presheafValue D.1) :=
     fun D => (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
-  haveI := cor_8_32_productRestriction_faithfullyFlat C hC
+  have := cor_8_32_productRestriction_faithfullyFlat C hC
   -- The product's `algebraMap` is injective (faithfully flat ⇒ `FaithfulSMul`), and it
   -- agrees componentwise with `productRestrictionSub` (each factor's algebraMap is the
   -- restriction ring hom).

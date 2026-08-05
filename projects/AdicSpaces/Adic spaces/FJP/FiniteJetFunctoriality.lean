@@ -428,11 +428,11 @@ variable [IsFJPNoetherianBase F]
 the target is complete Hausdorff since `I_𝓐` is closed, [FJP] (4.21)). -/
 noncomputable def bridgeFwd (hD : D.IsRational) :
     presheafValue D →+* locA F e.m D.s e.f := by
-  haveI hcl : IsClosed ((IA F e.m D.s e.f : Set (PA F e.m))) :=
+  have hcl : IsClosed ((IA F e.m D.s e.f : Set (PA F e.m))) :=
     isClosed_IA F e.m D.s e.f (e.span_eq_top D hD)
-  haveI : NormedAddCommGroup (locA F e.m D.s e.f) :=
+  have : NormedAddCommGroup (locA F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
-  haveI : T2Space (locA F e.m D.s e.f) := locA_t2 F e.m D.s e.f (e.span_eq_top D hD)
+  have : T2Space (locA F e.m D.s e.f) := locA_t2 F e.m D.s e.f (e.span_eq_top D hD)
   letI := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
@@ -441,11 +441,11 @@ noncomputable def bridgeFwd (hD : D.IsRational) :
 
 theorem bridgeFwd_coe (hD : D.IsRational) (a : Localization.Away D.s) :
     bridgeFwd D e hD (D.coeRingHom a) = bridgeLocHom D e hD a := by
-  haveI hcl : IsClosed ((IA F e.m D.s e.f : Set (PA F e.m))) :=
+  have hcl : IsClosed ((IA F e.m D.s e.f : Set (PA F e.m))) :=
     isClosed_IA F e.m D.s e.f (e.span_eq_top D hD)
-  haveI : NormedAddCommGroup (locA F e.m D.s e.f) :=
+  have : NormedAddCommGroup (locA F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
-  haveI : T2Space (locA F e.m D.s e.f) := locA_t2 F e.m D.s e.f (e.span_eq_top D hD)
+  have : T2Space (locA F e.m D.s e.f) := locA_t2 F e.m D.s e.f (e.span_eq_top D hD)
   letI := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
@@ -665,7 +665,7 @@ theorem bridgeRev_bridgeFwd (hD : D.IsRational) (x : presheafValue D) :
   letI := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  haveI : RegularSpace (presheafValue D) := UniformSpace.to_regularSpace
+  have : RegularSpace (presheafValue D) := UniformSpace.to_regularSpace
   have hcomp : (bridgeRev D e).comp (bridgeLocHom D e hD) = D.coeRingHom := by
     refine IsLocalization.ringHom_ext (Submonoid.powers D.s) ?_
     ext a
@@ -696,11 +696,11 @@ theorem mkIA_continuous :
 polynomial image; extend by density to the Banach quotient). -/
 theorem bridgeFwd_bridgeRev (hD : D.IsRational) (y : locA F e.m D.s e.f) :
     bridgeFwd D e hD (bridgeRev D e y) = y := by
-  haveI hcl : IsClosed ((IA F e.m D.s e.f : Set (PA F e.m))) :=
+  have hcl : IsClosed ((IA F e.m D.s e.f : Set (PA F e.m))) :=
     isClosed_IA F e.m D.s e.f (e.span_eq_top D hD)
-  haveI : NormedAddCommGroup (locA F e.m D.s e.f) :=
+  have : NormedAddCommGroup (locA F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
-  haveI : T2Space (locA F e.m D.s e.f) := locA_t2 F e.m D.s e.f (e.span_eq_top D hD)
+  have : T2Space (locA F e.m D.s e.f) := locA_t2 F e.m D.s e.f (e.span_eq_top D hD)
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective y
   have hmkcont : Continuous (Ideal.Quotient.mk (IA F e.m D.s e.f)) :=
     mkIA_continuous D e
@@ -852,7 +852,7 @@ theorem bridgeLocHomC_continuous (hD : D.IsRational) :
 
 /-- `I_𝓒` is closed (noetherian-ball route, as in `isClosed_IA`'s vertex inputs). -/
 theorem isClosed_IC' : IsClosed ((IC F e.m D.s e.f : Set (PC F e.m))) := by
-  haveI := isNoetherianRing_PC F e.m
+  have := isNoetherianRing_PC F e.m
   exact isClosed_graphIdeal (tC F) (isUnit_tC F)
     (by rw [norm_tC]; exact norm_t_lt_one F) (by rw [norm_tC]; exact norm_t_pos F)
     (norm_tC_mul F) (isNoetherianRing_unitBall_PC F e.m) (rC F e.m D.s e.f)
@@ -860,8 +860,8 @@ theorem isClosed_IC' : IsClosed ((IC F e.m D.s e.f : Set (PC F e.m))) := by
 /-- The 𝓒-side forward bridge `𝒪_𝓒(D_C) → 𝓒_α`. -/
 noncomputable def bridgeFwdC (hD : D.IsRational) :
     presheafValue (pushDatumC D hD) →+* locC F e.m D.s e.f := by
-  haveI hcl : IsClosed ((IC F e.m D.s e.f : Set (PC F e.m))) := isClosed_IC' D e
-  haveI : NormedAddCommGroup (locC F e.m D.s e.f) :=
+  have hcl : IsClosed ((IC F e.m D.s e.f : Set (PC F e.m))) := isClosed_IC' D e
+  have : NormedAddCommGroup (locC F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
   letI := (pushDatumC D hD).uniformSpace
   letI : IsTopologicalRing (Localization.Away (pushDatumC D hD).s) :=
@@ -873,8 +873,8 @@ noncomputable def bridgeFwdC (hD : D.IsRational) :
 
 theorem bridgeFwdC_coe (hD : D.IsRational) (a : Localization.Away (pushDatumC D hD).s) :
     bridgeFwdC D e hD ((pushDatumC D hD).coeRingHom a) = bridgeLocHomC D e hD a := by
-  haveI hcl : IsClosed ((IC F e.m D.s e.f : Set (PC F e.m))) := isClosed_IC' D e
-  haveI : NormedAddCommGroup (locC F e.m D.s e.f) :=
+  have hcl : IsClosed ((IC F e.m D.s e.f : Set (PC F e.m))) := isClosed_IC' D e
+  have : NormedAddCommGroup (locC F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
   letI := (pushDatumC D hD).uniformSpace
   letI : IsTopologicalRing (Localization.Away (pushDatumC D hD).s) :=
@@ -1016,7 +1016,7 @@ theorem bridgeLocHomB_continuous (hD : D.IsRational) :
 
 /-- `I_𝓑` is closed (noetherian-ball route). -/
 theorem isClosed_IB' : IsClosed ((IB F e.m D.s e.f : Set (PB F e.m))) := by
-  haveI := isNoetherianRing_PB F e.m
+  have := isNoetherianRing_PB F e.m
   exact isClosed_graphIdeal (tB F) (isUnit_tB F)
     (by rw [norm_tB]; exact norm_t_lt_one F) (by rw [norm_tB]; exact norm_t_pos F)
     (norm_tB_mul F) (isNoetherianRing_unitBall_PB F e.m) (rB F e.m D.s e.f)
@@ -1024,13 +1024,13 @@ theorem isClosed_IB' : IsClosed ((IB F e.m D.s e.f : Set (PB F e.m))) := by
 /-- The 𝓑-side forward bridge `𝒪_𝓑(D_B) → 𝓑_α`. -/
 noncomputable def bridgeFwdB (hD : D.IsRational) :
     presheafValue (pushDatumB D hD) →+* locB F e.m D.s e.f := by
-  haveI hcl : IsClosed ((IB F e.m D.s e.f : Set (PB F e.m))) := isClosed_IB' D e
-  haveI : NormedAddCommGroup (locB F e.m D.s e.f) :=
+  have hcl : IsClosed ((IB F e.m D.s e.f : Set (PB F e.m))) := isClosed_IB' D e
+  have : NormedAddCommGroup (locB F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
   letI := (pushDatumB D hD).uniformSpace
-  haveI : @IsTopologicalRing (Localization.Away (pushDatumB D hD).s)
+  have : @IsTopologicalRing (Localization.Away (pushDatumB D hD).s)
       ((pushDatumB D hD).topology) _ := (pushDatumB D hD).isTopologicalRing
-  haveI : @IsUniformAddGroup (Localization.Away (pushDatumB D hD).s)
+  have : @IsUniformAddGroup (Localization.Away (pushDatumB D hD).s)
       ((pushDatumB D hD).uniformSpace) _ := (pushDatumB D hD).isUniformAddGroup
   exact @UniformSpace.Completion.extensionHom
     (Localization.Away (pushDatumB D hD).s) _
@@ -1041,13 +1041,13 @@ noncomputable def bridgeFwdB (hD : D.IsRational) :
 
 theorem bridgeFwdB_coe (hD : D.IsRational) (a : Localization.Away (pushDatumB D hD).s) :
     bridgeFwdB D e hD ((pushDatumB D hD).coeRingHom a) = bridgeLocHomB D e hD a := by
-  haveI hcl : IsClosed ((IB F e.m D.s e.f : Set (PB F e.m))) := isClosed_IB' D e
-  haveI : NormedAddCommGroup (locB F e.m D.s e.f) :=
+  have hcl : IsClosed ((IB F e.m D.s e.f : Set (PB F e.m))) := isClosed_IB' D e
+  have : NormedAddCommGroup (locB F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
   letI := (pushDatumB D hD).uniformSpace
-  haveI : @IsTopologicalRing (Localization.Away (pushDatumB D hD).s)
+  have : @IsTopologicalRing (Localization.Away (pushDatumB D hD).s)
       ((pushDatumB D hD).topology) _ := (pushDatumB D hD).isTopologicalRing
-  haveI : @IsUniformAddGroup (Localization.Away (pushDatumB D hD).s)
+  have : @IsUniformAddGroup (Localization.Away (pushDatumB D hD).s)
       ((pushDatumB D hD).uniformSpace) _ := (pushDatumB D hD).isUniformAddGroup
   exact @UniformSpace.Completion.extensionHom_coe
     (Localization.Away (pushDatumB D hD).s) _
@@ -1193,7 +1193,7 @@ theorem bridgeLocHomD_continuous (hD : D.IsRational) :
 
 /-- `I_𝓓` is closed (noetherian-ball route). -/
 theorem isClosed_ID' : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := by
-  haveI := isNoetherianRing_PD F e.m
+  have := isNoetherianRing_PD F e.m
   exact isClosed_graphIdeal (tD F) (isUnit_tD F)
     (by rw [norm_tD]; exact norm_t_lt_one F) (by rw [norm_tD]; exact norm_t_pos F)
     (norm_tD_mul F) (isNoetherianRing_unitBall_PD F e.m) (rD F e.m D.s e.f)
@@ -1201,13 +1201,13 @@ theorem isClosed_ID' : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := by
 /-- The 𝓓-side forward bridge `𝒪_𝓓(D_D) → 𝓓_α`. -/
 noncomputable def bridgeFwdD (hD : D.IsRational) :
     presheafValue (pushDatumD D hD) →+* locD F e.m D.s e.f := by
-  haveI hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
-  haveI : NormedAddCommGroup (locD F e.m D.s e.f) :=
+  have hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
+  have : NormedAddCommGroup (locD F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
   letI := (pushDatumD D hD).uniformSpace
-  haveI : @IsTopologicalRing (Localization.Away (pushDatumD D hD).s)
+  have : @IsTopologicalRing (Localization.Away (pushDatumD D hD).s)
       ((pushDatumD D hD).topology) _ := (pushDatumD D hD).isTopologicalRing
-  haveI : @IsUniformAddGroup (Localization.Away (pushDatumD D hD).s)
+  have : @IsUniformAddGroup (Localization.Away (pushDatumD D hD).s)
       ((pushDatumD D hD).uniformSpace) _ := (pushDatumD D hD).isUniformAddGroup
   exact @UniformSpace.Completion.extensionHom
     (Localization.Away (pushDatumD D hD).s) _
@@ -1218,13 +1218,13 @@ noncomputable def bridgeFwdD (hD : D.IsRational) :
 
 theorem bridgeFwdD_coe (hD : D.IsRational) (a : Localization.Away (pushDatumD D hD).s) :
     bridgeFwdD D e hD ((pushDatumD D hD).coeRingHom a) = bridgeLocHomD D e hD a := by
-  haveI hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
-  haveI : NormedAddCommGroup (locD F e.m D.s e.f) :=
+  have hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
+  have : NormedAddCommGroup (locD F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
   letI := (pushDatumD D hD).uniformSpace
-  haveI : @IsTopologicalRing (Localization.Away (pushDatumD D hD).s)
+  have : @IsTopologicalRing (Localization.Away (pushDatumD D hD).s)
       ((pushDatumD D hD).topology) _ := (pushDatumD D hD).isTopologicalRing
-  haveI : @IsUniformAddGroup (Localization.Away (pushDatumD D hD).s)
+  have : @IsUniformAddGroup (Localization.Away (pushDatumD D hD).s)
       ((pushDatumD D hD).uniformSpace) _ := (pushDatumD D hD).isUniformAddGroup
   exact @UniformSpace.Completion.extensionHom_coe
     (Localization.Away (pushDatumD D hD).s) _
@@ -1416,7 +1416,7 @@ theorem bridgeRevB_bridgeFwdB (hD : D.IsRational)
     (pushDatumB D hD).isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away (pushDatumB D hD).s) :=
     (pushDatumB D hD).isUniformAddGroup
-  haveI : RegularSpace (presheafValue (pushDatumB D hD)) := UniformSpace.to_regularSpace
+  have : RegularSpace (presheafValue (pushDatumB D hD)) := UniformSpace.to_regularSpace
   have hcomp : (bridgeRevB D e hD).comp (bridgeLocHomB D e hD) =
       (pushDatumB D hD).coeRingHom := by
     refine IsLocalization.ringHom_ext (Submonoid.powers (pushDatumB D hD).s) ?_
@@ -1619,7 +1619,7 @@ theorem bridgeRevC_bridgeFwdC (hD : D.IsRational)
     (pushDatumC D hD).isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away (pushDatumC D hD).s) :=
     (pushDatumC D hD).isUniformAddGroup
-  haveI : RegularSpace (presheafValue (pushDatumC D hD)) := UniformSpace.to_regularSpace
+  have : RegularSpace (presheafValue (pushDatumC D hD)) := UniformSpace.to_regularSpace
   have hcomp : (bridgeRevC D e hD).comp (bridgeLocHomC D e hD) =
       (pushDatumC D hD).coeRingHom := by
     refine IsLocalization.ringHom_ext (Submonoid.powers (pushDatumC D hD).s) ?_
@@ -1688,7 +1688,7 @@ theorem mapBD_mapB_eq_mapCD_mapC (hD : D.IsRational) :
   letI := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  haveI : RegularSpace (presheafValue (pushDatumD D hD)) := UniformSpace.to_regularSpace
+  have : RegularSpace (presheafValue (pushDatumD D hD)) := UniformSpace.to_regularSpace
   have hcomp : ((mapBD D hD).comp (presheafValueMapB D hD)).comp D.coeRingHom =
       ((mapCD D hD).comp (presheafValueMapC D hD)).comp D.coeRingHom := by
     refine IsLocalization.ringHom_ext (Submonoid.powers D.s) ?_
@@ -1795,8 +1795,8 @@ theorem locRhoB_bridgeFwdB (hD : D.IsRational) :
     (pushDatumB D hD).isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away (pushDatumB D hD).s) :=
     (pushDatumB D hD).isUniformAddGroup
-  haveI hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
-  haveI : NormedAddCommGroup (locD F e.m D.s e.f) :=
+  have hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
+  have : NormedAddCommGroup (locD F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
   have hdense : DenseRange ((pushDatumB D hD).coeRingHom :
       Localization.Away (pushDatumB D hD).s → presheafValue (pushDatumB D hD)) :=
@@ -1858,8 +1858,8 @@ theorem locRhoC_bridgeFwdC (hD : D.IsRational) :
     (pushDatumC D hD).isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away (pushDatumC D hD).s) :=
     (pushDatumC D hD).isUniformAddGroup
-  haveI hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
-  haveI : NormedAddCommGroup (locD F e.m D.s e.f) :=
+  have hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
+  have : NormedAddCommGroup (locD F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
   have hdense : DenseRange ((pushDatumC D hD).coeRingHom :
       Localization.Away (pushDatumC D hD).s → presheafValue (pushDatumC D hD)) :=
@@ -1910,8 +1910,8 @@ theorem graphBridge_natural_B (D : RationalLocData (JetA F)) (hD : D.IsRational)
   letI := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  haveI hcl : IsClosed ((IB F e.m D.s e.f : Set (PB F e.m))) := isClosed_IB' D e
-  haveI : NormedAddCommGroup (locB F e.m D.s e.f) :=
+  have hcl : IsClosed ((IB F e.m D.s e.f : Set (PB F e.m))) := isClosed_IB' D e
+  have : NormedAddCommGroup (locB F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
   have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
     UniformSpace.Completion.denseRange_coe
@@ -1964,8 +1964,8 @@ theorem graphBridge_natural_C (D : RationalLocData (JetA F)) (hD : D.IsRational)
   letI := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  haveI hcl : IsClosed ((IC F e.m D.s e.f : Set (PC F e.m))) := isClosed_IC' D e
-  haveI : NormedAddCommGroup (locC F e.m D.s e.f) :=
+  have hcl : IsClosed ((IC F e.m D.s e.f : Set (PC F e.m))) := isClosed_IC' D e
+  have : NormedAddCommGroup (locC F e.m D.s e.f) :=
     Submodule.Quotient.normedAddCommGroup _
   have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
     UniformSpace.Completion.denseRange_coe
@@ -2043,7 +2043,7 @@ theorem presheafValueMapC_restriction (D D' : RationalLocData (JetA F))
   letI := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  haveI : RegularSpace (presheafValue (pushDatumC D' hD')) :=
+  have : RegularSpace (presheafValue (pushDatumC D' hD')) :=
     UniformSpace.to_regularSpace
   have hcomp : ((presheafValueMapC D' hD').comp (restrictionMapHom D D' h)).comp
       D.coeRingHom =
@@ -2079,7 +2079,7 @@ theorem presheafValueMapB_restriction (D D' : RationalLocData (JetA F))
   letI := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  haveI : RegularSpace (presheafValue (pushDatumB D' hD')) :=
+  have : RegularSpace (presheafValue (pushDatumB D' hD')) :=
     UniformSpace.to_regularSpace
   have hcomp : ((presheafValueMapB D' hD').comp (restrictionMapHom D D' h)).comp
       D.coeRingHom =

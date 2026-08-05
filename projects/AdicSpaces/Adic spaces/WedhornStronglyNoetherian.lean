@@ -183,7 +183,7 @@ theorem _sub_lemma_L5_4_1_open_prime_spa_point
     -- project lemma at StructureSheaf.lean:602 (which is already PROVED).
     ∀ (T : Finset A) (s : A) (p : Ideal A), p.IsPrime → IsOpen (p : Set A) → s ∉ p →
       ∃ v ∈ rationalOpen T s, p ≤ v.supp := fun T s p hp hp_open hs_notin =>
-  haveI := hp
+  have := hp
   ValuationSpectrum.exists_spa_point_in_rationalOpen_of_isOpen_prime
     (A := A) T s p hp_open hs_notin
 
@@ -209,7 +209,7 @@ theorem _sub_lemma_L5_4_2_nonOpen_prime_spa_point
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀) :
     ∀ (T : Finset A) (s : A) (p : Ideal A), p.IsPrime → ¬ IsOpen (p : Set A) → s ∉ p →
       ∃ v ∈ rationalOpen T s, p ≤ v.supp := fun T s p hp _hp_notopen hs_notin =>
-  haveI : p.IsPrime := hp
+  have : p.IsPrime := hp
   ValuationSpectrum.exists_mem_rationalOpen_supp_ge_of_prime_noHArch
     P hAplus_le_A₀ T s hs_notin
 

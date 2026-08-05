@@ -911,7 +911,7 @@ theorem mem_nonunits_iff_vle_zero {v : ↥(Spa A A⁺)} (hs : StalkShrink v)
 ring. -/
 theorem isLocalRing_stalk_of_shrink {v : ↥(Spa A A⁺)} (hs : StalkShrink v) :
     IsLocalRing (ToType ((spaRingPresheaf A).stalk v)) := by
-  haveI := stalk_nontrivial v
+  have := stalk_nontrivial v
   refine IsLocalRing.of_nonunits_add ?_
   intro a b ha hb
   rw [mem_nonunits_iff_vle_zero hs] at ha hb ⊢
@@ -1057,7 +1057,7 @@ Spa-point of the smaller value pulls back (plus functoriality) to a captured
 point, so `b` is nonvanishing there. -/
 theorem rationalShrink_holds : RationalShrink A := by
   intro D hD v' hv b hnz
-  haveI hTate : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
+  have hTate : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
   have hwspa := pointValue_mem_spa D hv
   have hwcont := pointValue_isContinuous D hv
   obtain ⟨u, hu⟩ := presheafValue_topNilUnit D
@@ -1088,10 +1088,10 @@ theorem rationalShrink_holds : RationalShrink A := by
   have hsub : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s :=
     spaOpen_subset_iff.mp (hD'sub.trans Set.inter_subset_right)
   refine ⟨D', hD', hsub, mem_spaOpen.mp hvD', ?_⟩
-  haveI hTate' : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
-  haveI : IsHuberRing (presheafValue D') := presheafValue_isHuberRing_huber D'
+  have hTate' : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
+  have : IsHuberRing (presheafValue D') := presheafValue_isHuberRing_huber D'
   letI P_B : PairOfDefinition (presheafValue D') := presheafValue_concretePair D'
-  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
+  have : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
   rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
   exact fun w'' hw'' => not_vle_zero_of_shrink D D' hsub hD'sub hcdef
     (fun w' hw' hW => (hcapture w' hw' hW () (Finset.mem_singleton_self ())).2) w'' hw''

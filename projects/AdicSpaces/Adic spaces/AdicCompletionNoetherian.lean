@@ -316,7 +316,7 @@ theorem _root_.MvPowerSeries.instIsNoetherianRing_fin (R : Type u) [CommRing R]
     rfl
   | succ n IH =>
     obtain ⟨e⟩ := MvPowerSeries.finSuccEquivPowerSeries R n
-    haveI : IsNoetherianRing (MvPowerSeries (Fin n) R) := IH
+    have : IsNoetherianRing (MvPowerSeries (Fin n) R) := IH
     exact isNoetherianRing_of_ringEquiv _ e.symm
 
 /-! ## L3 — Evaluation map `MvPowerSeries (Fin n) R → AdicCompletion I R`
@@ -1727,7 +1727,7 @@ theorem isNoetherianRing [IsNoetherianRing R] (I : Ideal R) :
       refine Ideal.subset_span ⟨e.symm ⟨x, hx⟩, ?_⟩
       simp [f]
   -- L2: MvPowerSeries (Fin n) R is Noetherian.
-  haveI hnoeth : IsNoetherianRing (MvPowerSeries (Fin n) R) :=
+  have hnoeth : IsNoetherianRing (MvPowerSeries (Fin n) R) :=
     MvPowerSeries.instIsNoetherianRing_fin R n
   -- L3 + L4: eval map is a surjective ring hom.
   exact isNoetherianRing_of_surjective _ _ (mvPowerSeriesEval I hn f hf_in_I)

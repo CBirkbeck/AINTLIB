@@ -130,7 +130,7 @@ private theorem prod_lt_of_nonempty {A : Type*} [CommRing A] [TopologicalSpace A
     (hS_ne : S.Nonempty) (f : Fin n₀ → ↥S) :
     (∏ i : Fin n₀, v (P.A₀.subtype (↑(f i) : P.A₀))) < γ := by
   classical
-  haveI : Nonempty ↥S := hS_ne.coe_sort
+  have : Nonempty ↥S := hS_ne.coe_sort
   have h_card_le : Fintype.card ↥S * N_max ≤ Fintype.card (Fin n₀) := by
     simp only [Fintype.card_fin, Fintype.card_coe]
     rw [hn₀]
@@ -544,7 +544,7 @@ private theorem pow_gen_prod_lt {R Γ₀ : Type*} [CommRing R]
     set N_max : ℕ := (S.attach.image (fun x => N_c x.1 x.2)).sup id + 1 with hN_max_def
     refine ⟨(S.card + 1) * N_max, fun f => ?_⟩
     rw [map_prod]
-    haveI : Nonempty ↥S := hS.coe_sort
+    have : Nonempty ↥S := hS.coe_sort
     have h_card_le : Fintype.card ↥S * N_max ≤ Fintype.card (Fin ((S.card + 1) * N_max)) := by
       simp only [Fintype.card_fin, Fintype.card_coe]
       calc S.card * N_max ≤ S.card * N_max + N_max := Nat.le_add_right _ _

@@ -535,7 +535,7 @@ theorem presheafValueRingEquivHuber_comp_apply
   set D₁ := D.mapHuber e₁ he₁ he₁'
   set D₁₂ := D₁.mapHuber e₂ he₂ he₂'
   set Dt := D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')
-  haveI : T2Space (presheafValue D₁₂) := inferInstance
+  have : T2Space (presheafValue D₁₂) := inferInstance
   refine presheafValue_eq_of_coeRingHom'
     ((presheafValueRingEquivHuber_continuous e₂ he₂ he₂' _).comp
       (presheafValueRingEquivHuber_continuous e₁ he₁ he₁' D))

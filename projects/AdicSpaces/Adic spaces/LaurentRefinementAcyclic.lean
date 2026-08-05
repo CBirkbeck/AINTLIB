@@ -383,7 +383,7 @@ omit [PlusSubring A] in
 hence its completion `presheafValue D` is also subsingleton. -/
 theorem presheafValue_subsingleton_of_s_eq_zero (D : RationalLocData A)
     (hs : D.s = 0) : Subsingleton (presheafValue D) := by
-  haveI : Subsingleton (Localization.Away D.s) :=
+  have : Subsingleton (Localization.Away D.s) :=
     IsLocalization.subsingleton (M := Submonoid.powers D.s) ⟨1, by simp [hs]⟩
   -- 0 = 1 in `Localization.Away D.s` (subsingleton), so 0 = 1 in `presheafValue D`.
   refine subsingleton_of_zero_eq_one (M₀ := presheafValue D) ?_
@@ -420,13 +420,13 @@ theorem rationalCovering_hasSeparation
   · -- Empty covering edge case: split on whether `C.base.s = 0`.
     by_cases hs : C.base.s = 0
     · -- `C.base.s = 0`: `presheafValue C.base` is subsingleton, so `x = y` trivially.
-      haveI := presheafValue_subsingleton_of_s_eq_zero C.base hs
+      have := presheafValue_subsingleton_of_s_eq_zero C.base hs
       exact Subsingleton.elim x y
     · -- `C.base.s ≠ 0`: use `hSpa` applied to the zero ideal.
       -- Since `A` is a domain, `(0)` is prime and `C.base.s ∉ (0)`.
       -- `hSpa` then produces `v ∈ rationalOpen C.base.T C.base.s`, and
       -- `C.hcover v` gives `D ∈ C.covers = ∅`, a contradiction.
-      haveI hprime : (⊥ : Ideal A).IsPrime := Ideal.isPrime_bot
+      have hprime : (⊥ : Ideal A).IsPrime := Ideal.isPrime_bot
       have hs_notin : C.base.s ∉ (⊥ : Ideal A) := fun h => hs (Ideal.mem_bot.mp h)
       obtain ⟨v, hv_rat, _⟩ := hSpa ⊥ hprime hs_notin
       obtain ⟨D, hD, _⟩ := C.hcover v hv_rat

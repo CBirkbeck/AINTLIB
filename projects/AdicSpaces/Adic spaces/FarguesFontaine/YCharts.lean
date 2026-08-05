@@ -185,9 +185,9 @@ theorem isTateRing_presheafValue_of_rationalOpen_subset_Y
     (D : RationalLocData (Ainf p F))
     (hsub : rationalOpen D.T D.s ⊆ Y p F ϖ) :
     IsTateRing (presheafValue D) := by
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+  have : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
     isAffinoidRing_Ainf p F
-  haveI : T2Space (Ainf p F) := t2Space_Ainf p F ϖ
+  have : T2Space (Ainf p F) := t2Space_Ainf p F ϖ
   have hx_nil : IsTopologicallyNilpotent
       (D.canonicalMap ((p : Ainf p F) * teichPi p F ϖ)) :=
     (isTopologicallyNilpotent_p_teichPi p F ϖ).map
@@ -196,7 +196,7 @@ theorem isTateRing_presheafValue_of_rationalOpen_subset_Y
       (D.canonicalMap ((p : Ainf p F) * teichPi p F ϖ)) := by
     letI : IsHuberRing (presheafValue D) :=
       presheafValue_isHuberRing_huber D
-    haveI : IsAdicComplete (presheafValue_concretePair D).I
+    have : IsAdicComplete (presheafValue_concretePair D).I
         (presheafValue_concretePair D).A₀ :=
       presheafValue_isAdicComplete D
     refine (isUnit_iff_forall_not_vle_zero_of_completePair
@@ -220,7 +220,7 @@ theorem completeSpace_right_Ainf :
       (IsTopologicalAddGroup.rightUniformSpace (Ainf p F)) := by
   letI : UniformSpace (Ainf p F) :=
     IsTopologicalAddGroup.rightUniformSpace (Ainf p F)
-  haveI : IsUniformAddGroup (Ainf p F) := isUniformAddGroup_of_addCommGroup
+  have : IsUniformAddGroup (Ainf p F) := isUniformAddGroup_of_addCommGroup
   exact ((isAdic_Iinf p F ϖ).isAdicComplete_iff.mp
     (isAdicComplete_Iinf p F ϖ)).1
 
@@ -229,10 +229,10 @@ include ϖ in
 package at the ambient `A_inf`. -/
 theorem hasLocLiftPowerBounded_Ainf :
     HasLocLiftPowerBounded (Ainf p F) := by
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+  have : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
     isAffinoidRing_Ainf p F
-  haveI : T2Space (Ainf p F) := t2Space_Ainf p F ϖ
-  haveI := completeSpace_right_Ainf p F ϖ
+  have : T2Space (Ainf p F) := t2Space_Ainf p F ϖ
+  have := completeSpace_right_Ainf p F ϖ
   exact hasLocLiftPowerBounded_huber
 
 end FarguesFontaine

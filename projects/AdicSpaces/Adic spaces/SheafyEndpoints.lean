@@ -48,7 +48,7 @@ theorem isSheafyFor_structurePresheaf_isSheafOfTopologicalRings
     haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
     TopCat.Presheaf.IsSheafOfTopologicalRings (structurePresheaf A) := by
   letI := Aplus.toPlusSubring
-  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
+  have : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
   exact (structurePresheaf_isSheafOfTopologicalRings_iff A).mpr h
 
 /-- **Pair-level sheafiness makes the public structure presheaf a categorical
@@ -59,7 +59,7 @@ theorem isSheafyFor_structurePresheaf_isSheaf
     haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
     (structurePresheaf A).IsSheaf := by
   letI := Aplus.toPlusSubring
-  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
+  have : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
   exact structurePresheaf_isSheaf A h
 
 end PairLevel

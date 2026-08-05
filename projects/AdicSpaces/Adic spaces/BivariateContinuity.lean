@@ -150,7 +150,7 @@ theorem example638Bivariate_forwardHom_continuous_canonical
   letI τ : TopologicalSpace ↥(TateAlgebra₂ B) := instTopologicalSpaceTateAlgebra₂
   letI τQ : TopologicalSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealTopology b
-  haveI hTR : IsTopologicalRing ↥(TateAlgebra₂ B) := instIsTopologicalRingTateAlgebra₂
+  have hTR : IsTopologicalRing ↥(TateAlgebra₂ B) := instIsTopologicalRingTateAlgebra₂
   have hmk_qm : Topology.IsQuotientMap
       (Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b) :
         ↥(TateAlgebra₂ B) → ↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=

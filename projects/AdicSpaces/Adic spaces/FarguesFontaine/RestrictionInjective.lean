@@ -93,7 +93,7 @@ private theorem valued_resI_le_max_pow {θ' θ'' c : ℝ} (hc0 : 0 < c) (hc1 : c
       Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmc0 hmc1 z)
         ≤ (max (Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z)) ε) ^ c
           * (max (Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z)) ε) ^ (1 - c) := by
-  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have hne := neBot_comap_of_mem_BISub p F ϖ hz
   set v' := Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z) with hv'def
   set v'' := Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z) with hv''def
   intro ε hε
@@ -160,7 +160,7 @@ theorem valued_resI_rpow_interpolate {θ' θ'' c : ℝ}
     Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmc0 hmc1 z)
       ≤ Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z) ^ c
         * Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z) ^ (1 - c) := by
-  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have hne := neBot_comap_of_mem_BISub p F ϖ hz
   have hθc0 : (0 : ℝ) ≤ c * θ' + (1 - c) * θ'' := by nlinarith
   have hθc1 : c * θ' + (1 - c) * θ'' ≤ 1 := by nlinarith
   have hlim' := tendsto_resI p F ϖ hθ'0 hθ'1 hm'0 hm'1 hz

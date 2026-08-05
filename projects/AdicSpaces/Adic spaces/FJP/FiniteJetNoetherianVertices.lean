@@ -203,7 +203,7 @@ theorem isNoetherianRing_restricted_L (m : ℕ) :
   obtain ⟨e3, -⟩ := UnitDiscExample.exists_flatten' K
     (MvPowerSeries.Restricted K (fun _ : Fin 1 => (1 : ℝ))) (RingEquiv.refl _)
     (fun _ => rfl) (m + 1)
-  haveI hK : IsNoetherianRing (restrictedMvPowerSeriesSubring (m + 2) K) :=
+  have hK : IsNoetherianRing (restrictedMvPowerSeriesSubring (m + 2) K) :=
     IsStronglyNoetherian.isNoetherianRing_restricted (m + 2)
   refine isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring (m + 2) K) _
     (((UnitDiscExample.restrictedGaussEquiv (L F) m).toRingHom).comp
@@ -229,7 +229,7 @@ theorem isNoetherianRing_restricted_univariate (R : Type*) [NormedCommRing R]
     IsNoetherianRing (restrictedMvPowerSeriesSubring m (PowerSeries.Restricted R (1 : ℝ))) := by
   obtain ⟨e₂, -⟩ := UnitDiscExample.exists_flatten' R (PowerSeries.Restricted R (1 : ℝ))
     (innerToSeries (R := R)).symm (innerToSeries_symm_norm (R := R)) m
-  haveI h : IsNoetherianRing (restrictedMvPowerSeriesSubring (m + 1) R) :=
+  have h : IsNoetherianRing (restrictedMvPowerSeriesSubring (m + 1) R) :=
     IsStronglyNoetherian.isNoetherianRing_restricted (m + 1)
   exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring (m + 1) R) _
     (((UnitDiscExample.restrictedGaussEquiv R (m + 1)).symm.trans e₂.symm).trans
@@ -303,8 +303,8 @@ theorem isNoetherianRing_restricted_dualNumber
     (hS : ∀ m : ℕ, IsNoetherianRing (restrictedMvPowerSeriesSubring m S)) (m : ℕ) :
     IsNoetherianRing (restrictedMvPowerSeriesSubring m (DualNumber S)) := by
   classical
-  haveI hA : IsNoetherianRing (MvPowerSeries.Restricted S (fun _ : Fin m => (1 : ℝ))) := by
-    haveI := hS m
+  have hA : IsNoetherianRing (MvPowerSeries.Restricted S (fun _ : Fin m => (1 : ℝ))) := by
+    have := hS m
     exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m S) _
       (UnitDiscExample.restrictedGaussEquiv S m).symm.toRingHom (RingEquiv.surjective _)
   refine isNoetherianRing_of_surjective
@@ -363,7 +363,7 @@ norm-nonincreasing set-theoretic sections. -/
 theorem isNoetherianRing_unitBall_of_section (f : A →+* B) (hf : ∀ x, ‖f x‖ ≤ ‖x‖)
     (hsec : ∀ y : B, ∃ x : A, f x = y ∧ ‖x‖ ≤ ‖y‖)
     (h : IsNoetherianRing (unitBall A)) : IsNoetherianRing (unitBall B) := by
-  haveI := h
+  have := h
   refine isNoetherianRing_of_surjective (unitBall A) _
     (RingHom.codRestrict (f.comp (unitBall A).subtype) (unitBall B)
       (fun x => (hf x.1).trans x.2)) ?_
@@ -409,7 +409,7 @@ is: it is the `ε`-polynomial image of the ball (`(f+Qg)` decomposition on balls
 theorem isNoetherianRing_unitBall_dualNumber
     (h : IsNoetherianRing (unitBall S)) : IsNoetherianRing (unitBall (DualNumber S)) := by
   classical
-  haveI := h
+  have := h
   have hEmem : (DualNumber.eps : DualNumber S) ∈ unitBall (DualNumber S) := by
     show ‖(DualNumber.eps : DualNumber S)‖ ≤ 1
     rw [JetNorm.norm_def]
@@ -579,7 +579,7 @@ theorem isNoetherianRing_unitBall_restricted_dualNumber
     IsNoetherianRing (unitBall
       (MvPowerSeries.Restricted (DualNumber S) (fun _ : Fin m => (1 : ℝ)))) := by
   classical
-  haveI := h
+  have := h
   have hcoeffle := fun y s => norm_coeff_le_norm_restricted S m y s
   have hEball := norm_epsRestricted_le_one S m
   refine isNoetherianRing_of_surjective

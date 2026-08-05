@@ -193,8 +193,8 @@ theorem exists_downstairs_rationalDatum (D : RationalLocData A) (_hD : D.IsRatio
   -- the denominator on the *compact* upstairs subset — so that the downstairs family
   -- spans `⊤` (the unit is in it) while the upstairs subset is unchanged (the added
   -- condition holds throughout).
-  haveI hTateB : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
-  haveI : IsHuberRing (presheafValue D) := hTateB.toIsHuberRing
+  have hTateB : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
+  have : IsHuberRing (presheafValue D) := hTateB.toIsHuberRing
   -- Step 1: the topologically nilpotent unit upstairs
   obtain ⟨u, hu⟩ := presheafValue_topNilUnit D
   -- Step 2: the uniform perturbation bound for `E`'s parameters

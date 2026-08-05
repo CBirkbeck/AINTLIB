@@ -57,7 +57,7 @@ theorem isNoetherianRing_restrictedMvPowerSeries_BISub (h12 : ρ₁ ≤ ρ₂) (
       ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) = ρ₁) (k : ℕ) :
     IsNoetherianRing ↥(restrictedMvPowerSeriesSubring k
       ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
-  haveI : IsNoetherianRing ↥(restrictedMvPowerSeriesSubring (k + 1)
+  have : IsNoetherianRing ↥(restrictedMvPowerSeriesSubring (k + 1)
       ↥(ArSub p F ϖ hρ₂0 hρ₂1)) :=
     isNoetherianRing_restrictedMvPowerSeries p F ϖ
   exact isNoetherianRing_of_surjective

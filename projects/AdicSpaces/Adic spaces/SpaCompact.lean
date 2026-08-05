@@ -367,7 +367,7 @@ lemma not_vle_one_of_mem_spa_of_topologicallyNilpotent
     push Not at h
     exact not_lt_of_ge (one_le_pow_of_one_le' h n) hn
   -- Translate to `vle` via `Compatible.vle_iff_le`.
-  haveI : (ValuativeRel.valuation A).Compatible := inferInstance
+  have : (ValuativeRel.valuation A).Compatible := inferInstance
   intro h_vle
   have h_le := (Valuation.Compatible.vle_iff_le
     (v := ValuativeRel.valuation A) 1 π).mp h_vle
@@ -465,7 +465,7 @@ lemma image_spa_ιSpv_bool_of_tate
     refine ⟨?_, fun a ha ↦ ?_⟩
     · -- Continuity from reverse direction.
       letI : ValuativeRel A := v.toValuativeRel
-      haveI : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch v
+      have : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch v
       have hv_le : ∀ a ∈ (A⁺ : Set A), v.vle a 1 := by
         intro a ha
         have := hA a ha

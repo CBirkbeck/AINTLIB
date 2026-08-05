@@ -293,9 +293,9 @@ theorem uniformContinuous_blocToBI_interpolate {θ₁ θ₂ : ℝ}
       (blocToBI p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) := by
   letI : UniformSpace (Bloc p F ϖ) :=
     blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-  haveI : IsUniformAddGroup (Bloc p F ϖ) :=
+  have : IsUniformAddGroup (Bloc p F ϖ) :=
     isUniformAddGroup_blocWI p F ϖ
-  haveI : IsUniformAddGroup ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
+  have : IsUniformAddGroup ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
     isUniformAddGroup_BISub p F ϖ
   refine uniformContinuous_of_tendsto_zero ?_
   rw [tendsto_subtype_rng]
@@ -343,7 +343,7 @@ noncomputable def biRes {θ₁ θ₂ : ℝ}
       →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
   letI : UniformSpace (Bloc p F ϖ) :=
     blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-  haveI : CompleteSpace ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
+  have : CompleteSpace ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
     (isComplete_BISub p F ϖ).completeSpace_coe
   IsDenseInducing.extendRingHom
     (isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
@@ -366,7 +366,7 @@ theorem biRes_blocToBI {θ₁ θ₂ : ℝ}
       = blocToBI p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 z := by
   letI : UniformSpace (Bloc p F ϖ) :=
     blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-  haveI : CompleteSpace ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
+  have : CompleteSpace ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
     (isComplete_BISub p F ϖ).completeSpace_coe
   exact IsDenseInducing.extend_eq
     ((isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
@@ -457,7 +457,7 @@ theorem biRes_continuous {θ₁ θ₂ : ℝ}
       (hρ₂1 := hρ₂1) hθ₁0 hθ₁1 hθ₂0 hθ₂1 hσ₁0 hσ₁1 hσ₂0 hσ₂1) := by
   letI : UniformSpace (Bloc p F ϖ) :=
     blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-  haveI : CompleteSpace ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
+  have : CompleteSpace ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
     (isComplete_BISub p F ϖ).completeSpace_coe
   exact (uniformContinuous_uniformly_extend
     (isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)

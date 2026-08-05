@@ -431,7 +431,7 @@ theorem banach_two_of_three
     ((CompleteSpace H ∧ IsOpenMap f) → Function.Surjective f) ∧
     ((Function.Surjective f ∧ IsOpenMap f) → CompleteSpace H) :=
   ⟨fun ⟨hcomp, hsurj⟩ =>
-    haveI := hcomp
+    have := hcomp
     isOpenMap_of_completeSpace_of_countablyGenerated f hf hsurj,
    -- (a) ∧ (c) ⇒ (b): **B2 FALSE (2026-05-18)** — see `b2_log.jsonl` entry 4.
    -- Counterexample: G = 2ℤ ↪ H = ℤ (both discrete, addition; G complete,
@@ -442,12 +442,12 @@ theorem banach_two_of_three
    -- eq : (G ⧸ f.ker) ≃+ H induced by surjectivity, plus completeness of
    -- the quotient (`QuotientAddGroup.completeSpace_right'`).
    fun ⟨hsurj, hopen⟩ => by
-     haveI hk_normal : f.ker.Normal := AddSubgroup.normal_of_isAddCommutative _
-     haveI : FirstCountableTopology G := UniformSpace.firstCountableTopology G
+     have hk_normal : f.ker.Normal := AddSubgroup.normal_of_isAddCommutative _
+     have : FirstCountableTopology G := UniformSpace.firstCountableTopology G
      letI τQ : UniformSpace (G ⧸ f.ker) :=
        IsTopologicalAddGroup.rightUniformSpace (G ⧸ f.ker)
-     haveI hτQ_uag : @IsUniformAddGroup _ τQ _ := isUniformAddGroup_of_addCommGroup
-     haveI hτQ_complete : @CompleteSpace _ τQ :=
+     have hτQ_uag : @IsUniformAddGroup _ τQ _ := isUniformAddGroup_of_addCommGroup
+     have hτQ_complete : @CompleteSpace _ τQ :=
        QuotientAddGroup.completeSpace_right G f.ker
      -- f is a topological quotient map: open + continuous + surjective.
      have hf_quot : Topology.IsQuotientMap f := hopen.isQuotientMap hf hsurj

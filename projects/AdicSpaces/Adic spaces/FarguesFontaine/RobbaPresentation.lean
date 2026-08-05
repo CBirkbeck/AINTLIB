@@ -2823,7 +2823,7 @@ theorem wIRPS_le_GeltElt_mul (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ�
 theorem resI_eq_snd {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
     (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
     resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hρ₂0 hρ₂1 z = z.2 := by
-  haveI := neBot_comap_of_mem_BISub p F ϖ hz
+  have := neBot_comap_of_mem_BISub p F ϖ hz
   refine Filter.Tendsto.limUnder_eq ?_
   have h1 : Filter.Tendsto (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
       (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
@@ -2839,7 +2839,7 @@ theorem resI_eq_snd {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1
 theorem resI_eq_fst {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
     (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
     resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hρ₁0 hρ₁1 z = z.1 := by
-  haveI := neBot_comap_of_mem_BISub p F ϖ hz
+  have := neBot_comap_of_mem_BISub p F ϖ hz
   refine Filter.Tendsto.limUnder_eq ?_
   have h1 : Filter.Tendsto (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
       (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
@@ -3972,7 +3972,7 @@ theorem resI_top_pair_mem {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
     (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
     (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1 z, z.2)
       ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 := by
-  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have hne := neBot_comap_of_mem_BISub p F ϖ hz
   have h1 := tendsto_resI p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 hz
   have h2 : Filter.Tendsto (fun x => BlocToHatK p F ϖ hρ₂0 hρ₂1 x)
       (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
@@ -5668,7 +5668,7 @@ theorem resI_bot_pair_mem {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
     (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
     (z.1, resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1 z)
       ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1 := by
-  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have hne := neBot_comap_of_mem_BISub p F ϖ hz
   have h2 := tendsto_resI p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 hz
   have h1 : Filter.Tendsto (fun x => BlocToHatK p F ϖ hρ₁0 hρ₁1 x)
       (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))

@@ -17165,3 +17165,77 @@ and essentially none of them is a defect here:
 The one genuine smell is the `_sub_lemma_L5_x_y_…` family (10 uses across 4 files), which does
 encode an internal plan numbering — but it is a **cross-file rename**, which is coordinator
 work under a freeze, not a producer-side cleanup. Left, and recorded.
+
+### `haveI` → `have`: 1,257 sites, validated before the sweep
+
+`haveI` is a Lean 3 holdover — the `I` stood for "inline", not "instance". Lean 4's plain
+`have : T := e` is picked up by typeclass resolution just as well, so every `haveI` is a
+style defect. The tree had **1,288**.
+
+The sweep was not run blind. `IteratedOverlapEquiv` has 40 `haveI`s and exactly **one**
+dependant, so converting that file alone and building it costs almost nothing and answers the
+only real question — whether local instances still resolve. It did, so the same substitution
+went tree-wide.
+
+**But the witness was not sufficient, and the full gate said so.** Two declarations in
+`RelativePieceKeystone` broke:
+
+```
+error: Invalid rewrite argument: Expected an equality or iff proof …
+  is a proof of  have hTateB := ⋯; … ↔ …
+```
+
+`haveI` inside a **statement** — the `haveI hTateB : IsTateRing … := …` that precedes the
+conclusion so the conclusion can even be stated — is not the same as `have` there. In a type
+position `have` builds an opaque `letFun` wrapper, so `rw` can no longer see the `↔` behind it.
+The tactic-position substitution is sound; the *statement*-position one is not, and one witness
+file that happened to have no statement-level `haveI` could not distinguish them.
+
+Redone with a signature/body split (the same depth-0 `:=` walk `scope.py` uses, so multi-line
+`letI` binders in the signature are handled): **1,239 conversions**, **63 left** — those in a
+statement position or in prose. A comment that talks *about* `haveI` should keep saying `haveI`.
+
+The full gate then found **one more**, and this one was in *tactic* position:
+
+```lean
+letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
+haveI : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup   -- have: breaks
+exact UniformSpace.Completion.extensionHom_coe _ _ l
+   -- don't know how to synthesize placeholder for argument `hf`
+```
+
+So the blanket rule "`haveI` is always a defect" is **not true here**. When the instance being
+introduced depends on a carrier whose own instance was just `letI`-bound *with a value*, the
+substitution loses what the later elaboration needs. Ten sites in the tree have that exact
+shape (a `have : IsUniformAddGroup A` within three lines of a `letI : UniformSpace A`); all ten
+were restored to `haveI` pre-emptively rather than one build round at a time.
+
+Final: **1,229 converted, 73 left** — 63 in a statement position or in prose, 10 riding on a
+value-carrying `letI`. Full `lake build '«Adic spaces»'` green.
+
+> A mechanical sweep needs a witness for each *syntactic position* it touches, not one witness
+> for the token — and when a gate does fail, fix the whole **class** of site the failure
+> identifies, not the one line it names. Reverting only `SheafyCompletionModel:103` would have
+> bought one more full-library build to find the next of the ten.
+
+> Pick the validation target by **fan-out, not by size**. The most-affected file
+> (`Wedhorn828`, 130 sites) has 91 dependants; the file that answers the same question has 40
+> sites and 1. A mechanical transformation only needs one honest witness before it scales.
+
+`letI` (2,394 sites) is **not** included. `haveI`/`have` both forget the value, so the
+substitution is semantics-preserving for any class; `letI`/`let` differ in whether the value
+stays available for defeq, and this tree leans on exactly that — the `letI` instance walls that
+make four proofs undecomposable are load-bearing precisely because the value must unfold.
+Converting them is a different change with a different risk, and it is not a style fix.
+
+### The remaining Task-3 items, and why each is where it is
+
+| item | count | status |
+|---|---|---|
+| non-terminal bare `simp` | 1 | trivially small; `simp` with args non-terminal: 4 |
+| `rw [a]; rw [b]` mergeable | 0 | already clean |
+| terminal bare `simp` | 51 | acceptable mathlib style, not a defect |
+| long lines (>100 chars) | 294 | linter not enabled; 103 of 158 code lines need judgement |
+| `letI` → `let` | 2394 | semantics, not style — see above |
+| `_sub_lemma_L5_x_y_…` rename | 10 uses / 4 files | cross-file rename = coordinator work under a freeze |
+| the `letI` instance triple | ~1109 repeated blocks | needs a bundled structure or a `local macro` — a design decision |

@@ -259,7 +259,7 @@ private theorem extendToLocalization_smul_mem_pow_lt
           ((r : Localization.Away s)
             * ((d' : locSubring P T s) : Localization.Away s)) < γ := by
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  haveI : IsTopologicalRing (Localization.Away s) :=
+  have : IsTopologicalRing (Localization.Away s) :=
     (locBasis P T s hopen).toRingFilterBasis.isTopologicalRing
   set ν_loc := ν.extendToLocalization hS (Localization.Away s) with hν_loc
   rw [locIdeal, ← Ideal.map_pow, ← Ideal.span_eq (P.I^m), Ideal.map_span] at hd'_mem
@@ -341,7 +341,7 @@ theorem extendToLocalization_isContinuous_locTopology_of_bounded
     letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
     (ν.extendToLocalization hS (Localization.Away s)).IsContinuous := by
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  haveI : IsTopologicalRing (Localization.Away s) :=
+  have : IsTopologicalRing (Localization.Away s) :=
     (locBasis P T s hopen).toRingFilterBasis.isTopologicalRing
   set ν_loc := ν.extendToLocalization hS (Localization.Away s) with hν_loc
   -- For continuity, it suffices (by IsTopologicalAddGroup) to verify continuity at 0.

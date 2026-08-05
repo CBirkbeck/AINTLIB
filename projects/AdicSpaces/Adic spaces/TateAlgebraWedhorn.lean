@@ -152,15 +152,15 @@ theorem tateTopologyT_isTopologicalRing :
     @IsTopologicalRing ↥(TateAlgebra A) (tateTopologyT f) _ := by
   letI τ_prod : TopologicalSpace (MvPowerSeries (Fin 1) A) :=
     WithPiTopology.instTopologicalSpace A
-  haveI : IsTopologicalRing (MvPowerSeries (Fin 1) A) :=
+  have : IsTopologicalRing (MvPowerSeries (Fin 1) A) :=
     WithPiTopology.instIsTopologicalRing (Fin 1) A
   letI : TopologicalSpace ↥(TateAlgebra A) := tateTopologyT f
-  haveI hind : Topology.IsInducing (scaleIncl f) := ⟨rfl⟩
-  haveI : ContinuousMul ↥(TateAlgebra A) :=
+  have hind : Topology.IsInducing (scaleIncl f) := ⟨rfl⟩
+  have : ContinuousMul ↥(TateAlgebra A) :=
     continuousMul_induced (scaleIncl f)
-  haveI : ContinuousAdd ↥(TateAlgebra A) :=
+  have : ContinuousAdd ↥(TateAlgebra A) :=
     continuousAdd_induced (scaleIncl f)
-  haveI : ContinuousNeg ↥(TateAlgebra A) := by
+  have : ContinuousNeg ↥(TateAlgebra A) := by
     constructor; rw [hind.continuous_iff]
     change Continuous ((scaleIncl f) ∘ (- ·))
     rw [scaleIncl_neg_comm]
@@ -182,10 +182,10 @@ This follows because the T-topology is induced from the product topology on
 theorem tateTopologyT_nonarchimedean (f : A) :
     @NonarchimedeanRing ↥(TateAlgebra A) _ (tateTopologyT f) := by
   letI : TopologicalSpace (MvPowerSeries (Fin 1) A) := WithPiTopology.instTopologicalSpace A
-  haveI : IsTopologicalRing (MvPowerSeries (Fin 1) A) :=
+  have : IsTopologicalRing (MvPowerSeries (Fin 1) A) :=
     WithPiTopology.instIsTopologicalRing (Fin 1) A
   letI : TopologicalSpace ↥(TateAlgebra A) := tateTopologyT f
-  haveI := tateTopologyT_isTopologicalRing f
+  have := tateTopologyT_isTopologicalRing f
   constructor
   intro U hU
   -- Unfold the induced topology nhds of 0.

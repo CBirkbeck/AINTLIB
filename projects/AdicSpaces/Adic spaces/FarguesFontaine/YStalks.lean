@@ -95,10 +95,10 @@ theorem rationalShrink_Y
       ∧ v' ∈ rationalOpen D'.T D'.s
       ∧ IsUnit (restrictionMapHom D D' h b) := by
   classical
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) := isAffinoidRing_Ainf p F
-  haveI : T2Space (Ainf p F) := t2Space_Ainf p F ϖ
-  haveI := completeSpace_right_Ainf p F ϖ
-  haveI hTate : IsTateRing (presheafValue D) :=
+  have : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) := isAffinoidRing_Ainf p F
+  have : T2Space (Ainf p F) := t2Space_Ainf p F ϖ
+  have := completeSpace_right_Ainf p F ϖ
+  have hTate : IsTateRing (presheafValue D) :=
     isTateRing_presheafValue_of_rationalOpen_subset_Y p F ϖ D hDY
   have hwspa := pointValue_mem_spa D hv
   have hwcont := pointValue_isContinuous D hv
@@ -119,11 +119,11 @@ theorem rationalShrink_Y
   have hsub : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s :=
     spaOpen_subset_iff.mp (hD'sub.trans Set.inter_subset_right)
   refine ⟨D', hD', hsub, hsub.trans hDY, mem_spaOpen.mp hvD', ?_⟩
-  haveI hTate' : IsTateRing (presheafValue D') :=
+  have hTate' : IsTateRing (presheafValue D') :=
     isTateRing_presheafValue_of_rationalOpen_subset_Y p F ϖ D' (hsub.trans hDY)
-  haveI : IsHuberRing (presheafValue D') := presheafValue_isHuberRing_huber D'
+  have : IsHuberRing (presheafValue D') := presheafValue_isHuberRing_huber D'
   letI P_B : PairOfDefinition (presheafValue D') := presheafValue_concretePair D'
-  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
+  have : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
   rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
   intro w'' hw'' hcon
   have hwPD := comap_restrictionMapHom_mem_spa D D' hsub hw''
@@ -298,7 +298,7 @@ noncomputable def yRingStalkEquiv (x : yTop p F ϖ) :
 `Y`-point Wedhorn 8.14 package along the restriction stalk iso). -/
 theorem isLocalRing_yStalk (x : yTop p F ϖ) :
     IsLocalRing (ToType ((yPresheafedSpace p F ϖ).ringStalk x)) := by
-  haveI : IsLocalRing (ToType ((spaRingPresheaf (Ainf p F)).stalk
+  have : IsLocalRing (ToType ((spaRingPresheaf (Ainf p F)).stalk
       (ySpaPoint p F ϖ x))) :=
     isLocalRing_stalk_Y p F ϖ (ySpaPoint p F ϖ x) (ySpaPoint_mem_Y p F ϖ x)
   exact (yRingStalkEquiv p F ϖ x).symm.isLocalRing
@@ -312,7 +312,7 @@ noncomputable def yVPreObj : VPreObj where
   val := fun x => comap ((yRingStalkEquiv p F ϖ x : _ →+* _))
     (stalkValue (ySpaPoint p F ϖ x))
   val_supp := fun x => by
-    haveI hSloc : IsLocalRing (ToType ((spaRingPresheaf (Ainf p F)).stalk
+    have hSloc : IsLocalRing (ToType ((spaRingPresheaf (Ainf p F)).stalk
         (ySpaPoint p F ϖ x))) :=
       isLocalRing_stalk_Y p F ϖ (ySpaPoint p F ϖ x) (ySpaPoint_mem_Y p F ϖ x)
     rw [supp_comap]
@@ -346,15 +346,15 @@ Spa-point criterion like `YB1`). -/
 theorem isUnit_canonicalMap_p_teichPi_window (n : ℤ) :
     IsUnit ((chartData p F (windowUnif p F ϖ n) 1 1 p 1).canonicalMap
       ((p : Ainf p F) * teichPi p F ϖ)) := by
-  haveI : IsRingOfIntegralElements
+  have : IsRingOfIntegralElements
       ((Ainf p F)⁺ : Subring (Ainf p F)) := isAffinoidRing_Ainf p F
-  haveI : IsHuberRing (presheafValue
+  have : IsHuberRing (presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
     presheafValue_isHuberRing_huber _
   letI P_B : PairOfDefinition (presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
     presheafValue_concretePair _
-  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete _
+  have : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete _
   rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
   intro w hw hcon
   have hmem := comap_canonicalMap_mem_rationalOpen
@@ -552,10 +552,10 @@ theorem isSheafyOn_window (n : ℤ) :
       (rationalOpen (chartData p F (windowUnif p F ϖ n) 1 1 p 1).T
         (chartData p F (windowUnif p F ϖ n) 1 1 p 1).s) := by
   classical
-  haveI : IsTateRing (presheafValue
+  have : IsTateRing (presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
     isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
-  haveI : IsHuberRing (presheafValue
+  have : IsHuberRing (presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
     IsTateRing.toIsHuberRing
   letI : @CompleteSpace (presheafValue
@@ -564,7 +564,7 @@ theorem isSheafyOn_window (n : ℤ) :
         (chartData p F (windowUnif p F ϖ n) 1 1 p 1))) :=
     completeSpace_right_presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 p 1)
-  haveI : ValuationSpectrum.IsSheafy (presheafValue
+  have : ValuationSpectrum.IsSheafy (presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
     isSheafy_canonical_window p F ϖ n
   refine ⟨?_, ?_⟩
@@ -740,15 +740,15 @@ theorem bigWindow_subset_runWindow (n : ℤ) (k : ℕ) {j : ℤ}
 theorem isUnit_canonicalMap_p_teichPi_runChart (n : ℤ) (k : ℕ) :
     IsUnit ((chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).canonicalMap
       ((p : Ainf p F) * teichPi p F ϖ)) := by
-  haveI : IsRingOfIntegralElements
+  have : IsRingOfIntegralElements
       ((Ainf p F)⁺ : Subring (Ainf p F)) := isAffinoidRing_Ainf p F
-  haveI : IsHuberRing (presheafValue
+  have : IsHuberRing (presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) :=
     presheafValue_isHuberRing_huber _
   letI P_B : PairOfDefinition (presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) :=
     presheafValue_concretePair _
-  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete _
+  have : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete _
   rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
   intro w hw hcon
   have hmem := comap_canonicalMap_mem_rationalOpen
@@ -863,10 +863,10 @@ theorem isSheafyOn_runChart (n : ℤ) (k : ℕ) :
       (rationalOpen (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).T
         (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).s) := by
   classical
-  haveI : IsTateRing (presheafValue
+  have : IsTateRing (presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) :=
     isTateRing_runChart p F ϖ n k
-  haveI : IsHuberRing (presheafValue
+  have : IsHuberRing (presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) :=
     IsTateRing.toIsHuberRing
   letI : @CompleteSpace (presheafValue
@@ -875,7 +875,7 @@ theorem isSheafyOn_runChart (n : ℤ) (k : ℕ) :
         (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1))) :=
     completeSpace_right_presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)
-  haveI : ValuationSpectrum.IsSheafy (presheafValue
+  have : ValuationSpectrum.IsSheafy (presheafValue
       (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) :=
     isSheafy_canonical_runChart p F ϖ n k
   refine ⟨?_, ?_⟩

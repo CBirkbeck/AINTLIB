@@ -294,11 +294,11 @@ theorem locSubring_topology_eq_adic (P : PairOfDefinition A) (T : Finset A)
       (TopologicalSpace.induced (locSubring P T s).subtype (locTopology P T s hopen))
       (locIdeal P T s) := by
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  haveI : IsTopologicalRing (Localization.Away s) :=
+  have : IsTopologicalRing (Localization.Away s) :=
     (locBasis P T s hopen).toRingFilterBasis.isTopologicalRing
   letI : TopologicalSpace (locSubring P T s) :=
     TopologicalSpace.induced (locSubring P T s).subtype (locTopology P T s hopen)
-  haveI : IsTopologicalRing (locSubring P T s) := Subring.instIsTopologicalRing _
+  have : IsTopologicalRing (locSubring P T s) := Subring.instIsTopologicalRing _
   change TopologicalSpace.induced _ _ = _
   suffices h : @IsAdic (locSubring P T s) _
       (TopologicalSpace.induced (locSubring P T s).subtype (locTopology P T s hopen))
@@ -310,7 +310,7 @@ theorem locSubring_topology_eq_adic (P : PairOfDefinition A) (T : Finset A)
     · have hmem : (locNhd P T s n : Set (Localization.Away s)) ∈
           @nhds _ (locTopology P T s hopen) 0 :=
         (locBasis P T s hopen).hasBasis_nhds_zero.mem_of_mem (i := n) trivial
-      haveI : @IsTopologicalAddGroup _ (locTopology P T s hopen) _ :=
+      have : @IsTopologicalAddGroup _ (locTopology P T s hopen) _ :=
         @IsTopologicalRing.to_topologicalAddGroup _ _
           (locTopology P T s hopen)
           (locBasis P T s hopen).toRingFilterBasis.isTopologicalRing
@@ -480,7 +480,7 @@ theorem locTopology_continuous_lift {B : Type*} [CommRing B] [TopologicalSpace B
     locSubring_mul_mem_of_forall_powerBounded P s f
       (fun G => locSubring_base_mul_mem P s f hf_alg G) T hpow
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  haveI : IsTopologicalRing (Localization.Away s) :=
+  have : IsTopologicalRing (Localization.Away s) :=
     (locBasis P T s hopen).toRingFilterBasis.isTopologicalRing
   apply continuous_of_continuousAt_zero f.toAddMonoidHom
   rw [ContinuousAt, map_zero, Filter.tendsto_def]
@@ -561,7 +561,7 @@ theorem locNhd_singleton_one_eq (P : PairOfDefinition A) (n : ℕ) :
   ext x; constructor
   · rintro ⟨d, hd, rfl⟩
     rw [locIdeal, ← Ideal.map_pow] at hd
-    haveI : RingHomSurjective (algebraMapD P {1} (1 : A)) := ⟨algebraMapD_surjective_one P⟩
+    have : RingHomSurjective (algebraMapD P {1} (1 : A)) := ⟨algebraMapD_surjective_one P⟩
     rw [Ideal.map_eq_submodule_map] at hd
     obtain ⟨b, hb, rfl⟩ := Submodule.mem_map.mp hd
     exact ⟨↑b, ⟨b, hb, rfl⟩, rfl⟩
@@ -641,8 +641,8 @@ theorem locSubring_isNoetherianRing (P : PairOfDefinition A) [IsNoetherianRing P
       refine ⟨p₁ * p₂, ?_⟩
       change (aeval_g (p₁ * p₂)).1 = y₁ * y₂
       rw [map_mul]; exact congr_arg₂ (· * ·) hp₁ hp₂
-  haveI : Fintype T := inferInstance
-  haveI : IsNoetherianRing (MvPolynomial T P.A₀) := MvPolynomial.isNoetherianRing
+  have : Fintype T := inferInstance
+  have : IsNoetherianRing (MvPolynomial T P.A₀) := MvPolynomial.isNoetherianRing
   exact isNoetherianRing_of_surjective _ _ aeval_g.toRingHom h_surj
 
 /-- Instance version of `locSubring_isNoetherianRing`, so `IsNoetherianRing

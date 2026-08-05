@@ -901,7 +901,7 @@ theorem pairSubring_isOpen [IsTateRing A] (P : PairOfDefinition A)
     @IsOpen ↥(TateAlgebra A) (tateAlgebraTopology P π hπ_gen hπ_unit)
       ((pairSubring P : Subring ↥(TateAlgebra A)) : Set ↥(TateAlgebra A)) := by
   letI : TopologicalSpace ↥(TateAlgebra A) := tateAlgebraTopology P π hπ_gen hπ_unit
-  haveI := tateAlgebraTopology_isTopologicalRing P π hπ_gen hπ_unit
+  have := tateAlgebraTopology_isTopologicalRing P π hπ_gen hπ_unit
   refine (pairSubring P).toAddSubgroup.isOpen_of_mem_nhds (g := 0) ?_
   refine Filter.mem_of_superset
     ((tateAlgBasis P π hπ_gen hπ_unit).hasBasis_nhds_zero.mem_of_mem (i := 1) trivial) ?_
@@ -1009,8 +1009,8 @@ noncomputable def instT2SpaceTateAlgebra [IsTateRing A] [T2Space A] :
   change @T2Space _ tateAlgebraTopology'
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI : TopologicalSpace ↥(TateAlgebra A) := tateAlgebraTopology'
-  haveI : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
-  haveI : IsTopologicalAddGroup ↥(TateAlgebra A) := IsTopologicalRing.to_topologicalAddGroup
+  have : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
+  have : IsTopologicalAddGroup ↥(TateAlgebra A) := IsTopologicalRing.to_topologicalAddGroup
   apply IsTopologicalAddGroup.t2Space_of_zero_sep
   intro y hy_ne
   -- Since y ≠ 0, some coefficient is nonzero.
@@ -1186,7 +1186,7 @@ private theorem coeff_cauchySeq_of_basis (P : PairOfDefinition A)
     @CauchySeq A ℕ (IsTopologicalAddGroup.rightUniformSpace A) _
       (fun n => MvPowerSeries.coeff l (u n).val) := by
   letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
-  haveI : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
+  have : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
   rw [cauchySeq_iff]
   intro V hV
   -- The uniformity on A (= uA = rightUniformSpace) is comap (· - ·) (nhds 0).
@@ -1226,8 +1226,8 @@ private theorem tateAlgNhd_of_cauchySeq [IsTateRing A] [T2Space A]
       u m - u k ∈ tateAlgNhd (IsTateRing.principalPair A).toPairOfDefinition n := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(TateAlgebra A) := tateAlgebraTopology'
-  haveI hring : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
-  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
+  have hring : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
+  have haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
     IsTopologicalRing.to_topologicalAddGroup
   letI uT : UniformSpace ↥(TateAlgebra A) := IsTopologicalAddGroup.rightUniformSpace _
   intro n
@@ -1262,17 +1262,17 @@ theorem tateAlgebraTopology'_completeSpace [IsTateRing A] [T2Space A]
           tateAlgebraTopology' (tateAlgebraTopology'_isTopologicalRing))) := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(TateAlgebra A) := tateAlgebraTopology'
-  haveI hring : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
-  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
+  have hring : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
+  have haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
     IsTopologicalRing.to_topologicalAddGroup
   letI uT : UniformSpace ↥(TateAlgebra A) := IsTopologicalAddGroup.rightUniformSpace _
-  haveI : @IsUniformAddGroup _ uT _ := @isUniformAddGroup_of_addCommGroup _ _ _ haddgrp
+  have : @IsUniformAddGroup _ uT _ := @isUniformAddGroup_of_addCommGroup _ _ _ haddgrp
   -- Step 1: The uniformity is countably generated (basis indexed by ℕ).
   -- Since uT = rightUniformSpace, its topology equals tateAlgebraTopology' definitionally.
   -- The nhds basis {tateAlgNhd P n}_n is ℕ-indexed, hence countably generated.
-  haveI : (@nhds _ τ (0 : ↥(TateAlgebra A))).IsCountablyGenerated :=
+  have : (@nhds _ τ (0 : ↥(TateAlgebra A))).IsCountablyGenerated :=
     tateAlgBasis'.hasBasis_nhds_zero.isCountablyGenerated
-  haveI hcg : (@uniformity _ uT).IsCountablyGenerated :=
+  have hcg : (@uniformity _ uT).IsCountablyGenerated :=
     @IsUniformAddGroup.uniformity_countably_generated _ uT _ _ (by
       convert ‹(@nhds _ τ (0 : ↥(TateAlgebra A))).IsCountablyGenerated›)
   -- Step 2: Use the sequential completeness criterion.
@@ -1280,7 +1280,7 @@ theorem tateAlgebraTopology'_completeSpace [IsTateRing A] [T2Space A]
   intro u hu
   -- Set up the uniform space on A: use the rightUniformSpace from the topology.
   letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
-  haveI : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
+  have : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
   -- The uniformity of (TateAlgebra A, uT) has a basis from tateAlgBasis'.
   -- The uniformity of (A, uA) has a basis from P.hasBasis_nhds_zero.
   -- hu_basis: the Cauchy condition in terms of tateAlgNhd.
@@ -1371,10 +1371,10 @@ theorem pairIdeal_isAdic_subspace [IsTateRing A] :
       (pairIdeal (IsTateRing.principalPair A).toPairOfDefinition) := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(TateAlgebra A) := tateAlgebraTopology'
-  haveI hring : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
+  have hring : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
   letI τ_sub : TopologicalSpace ↥(pairSubring P) :=
     instTopologicalSpaceSubtype
-  haveI hring_sub : @IsTopologicalRing ↥(pairSubring P) τ_sub _ :=
+  have hring_sub : @IsTopologicalRing ↥(pairSubring P) τ_sub _ :=
     Subring.instIsTopologicalRing (pairSubring P)
   rw [@isAdic_iff _ _ _ hring_sub]
   refine ⟨fun n => ?_, fun s hs => ?_⟩
@@ -1417,7 +1417,7 @@ theorem tateAlgebra_algebraMap_continuous [IsTateRing A] :
       (algebraMap A ↥(TateAlgebra A)) := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(TateAlgebra A) := tateAlgebraTopology'
-  haveI hring : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
+  have hring : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
   -- It suffices to show continuity at 0 (for an additive group hom).
   rw [continuous_def]
   intro U hU
@@ -1466,7 +1466,7 @@ topologically nilpotent in `A`, so `algebraMap π` is topologically nilpotent in
 theorem tateAlgebra_isTateRing [IsTateRing A] :
     @IsTateRing ↥(TateAlgebra A) _ tateAlgebraTopology' := by
   letI τ : TopologicalSpace ↥(TateAlgebra A) := tateAlgebraTopology'
-  haveI hring : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
+  have hring : IsTopologicalRing ↥(TateAlgebra A) := tateAlgebraTopology'_isTopologicalRing
   exact @IsTateRing.mk _ _ τ
     ⟨⟨tateAlgebra_pairOfDefinition⟩⟩
     (by
@@ -1509,9 +1509,9 @@ theorem tateAlgebra_isClosed_ideal [IsTateRing A] [T2Space A]
   -- Prop 6.17 needs [UniformSpace] [IsUniformAddGroup] [IsTopologicalRing] [T2Space]
   -- [CompleteSpace] [IsTateRing] — all with the Tate topology.
   -- Use instUniformSpaceTateAlgebra, reconcile via IsUniformAddGroup.toUniformSpace_eq.
-  haveI hCS : @CompleteSpace _ instUniformSpaceTateAlgebra :=
+  have hCS : @CompleteSpace _ instUniformSpaceTateAlgebra :=
     tateAlgebraTopology'_completeSpace hA_complete
-  haveI hTR : @IsTateRing ↥(TateAlgebra A) _ instTopologicalSpaceTateAlgebra :=
+  have hTR : @IsTateRing ↥(TateAlgebra A) _ instTopologicalSpaceTateAlgebra :=
     tateAlgebra_isTateRing
   -- Prop 6.17 returns IsClosed with respect to instUniformSpaceTateAlgebra.toTopologicalSpace.
   -- This equals instTopologicalSpaceTateAlgebra because instUniformSpaceTateAlgebra was
@@ -1590,7 +1590,7 @@ theorem oneSubfXIdeal_isClosed [IsTateRing A] [T2Space A]
       ↥(pairSubring (IsTateRing.principalPair A).toPairOfDefinition))
     (s : A) :
     IsClosed ((oneSubfXIdeal s : Ideal ↥(TateAlgebra A)) : Set ↥(TateAlgebra A)) := by
-  haveI : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := A)).A₀ := hnoeth
+  have : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := A)).A₀ := hnoeth
   exact tateAlgebra_isClosed_ideal hA_complete (oneSubfXIdeal s)
 
 /-- The quotient `A⟨X⟩/(1-sX)` is T2. -/
@@ -1600,7 +1600,7 @@ theorem quotient_oneSubfXIdeal_t2Space [IsTateRing A] [T2Space A]
       ↥(pairSubring (IsTateRing.principalPair A).toPairOfDefinition))
     (s : A) :
     T2Space (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) := by
-  haveI : IsClosed ((oneSubfXIdeal s).toAddSubgroup : Set ↥(TateAlgebra A)) :=
+  have : IsClosed ((oneSubfXIdeal s).toAddSubgroup : Set ↥(TateAlgebra A)) :=
     oneSubfXIdeal_isClosed hA_complete hnoeth s
   infer_instance
 
@@ -1620,17 +1620,17 @@ theorem quotient_oneSubfXIdeal_completeSpace [IsTateRing A] [T2Space A]
       (quotientOneSubfXIdealUniformSpace s) := by
   -- Set up the canonical topology instances on TateAlgebra A.
   letI τ : TopologicalSpace ↥(TateAlgebra A) := instTopologicalSpaceTateAlgebra
-  haveI _hring : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
-  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
+  have _hring : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
+  have haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
     IsTopologicalRing.to_topologicalAddGroup
   -- TateAlgebra A is first-countable (basis indexed by ℕ).
-  haveI : FirstCountableTopology ↥(TateAlgebra A) := instFirstCountableTopologyTateAlgebra
+  have : FirstCountableTopology ↥(TateAlgebra A) := instFirstCountableTopologyTateAlgebra
   -- TateAlgebra A is complete.
-  haveI hCS : @CompleteSpace ↥(TateAlgebra A)
+  have hCS : @CompleteSpace ↥(TateAlgebra A)
       (IsTopologicalAddGroup.rightUniformSpace ↥(TateAlgebra A)) :=
     tateAlgebraTopology'_completeSpace hA_complete
   -- (1-sX) is closed (uses hnoeth via oneSubfXIdeal_isClosed).
-  haveI : IsClosed ((oneSubfXIdeal s).toAddSubgroup : Set ↥(TateAlgebra A)) :=
+  have : IsClosed ((oneSubfXIdeal s).toAddSubgroup : Set ↥(TateAlgebra A)) :=
     oneSubfXIdeal_isClosed hA_complete hnoeth s
   -- Apply QuotientAddGroup.completeSpace_right' (Bourbaki IX.3.1 Prop 4).
   -- The result gives CompleteSpace for rightUniformSpace on the quotient.
@@ -1701,7 +1701,7 @@ theorem plusFSubXIdeal_isClosed [IsTateRing A] [T2Space A]
     (f : A) :
     IsClosed ((plusFSubXIdeal f : Ideal ↥(TateAlgebra A)) :
       Set ↥(TateAlgebra A)) := by
-  haveI : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := A)).A₀ := hnoeth
+  have : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := A)).A₀ := hnoeth
   exact tateAlgebra_isClosed_ideal hA_complete (plusFSubXIdeal f)
 
 /-- The quotient `A⟨X⟩/(algebraMap f − X)` is T2. -/
@@ -1711,7 +1711,7 @@ theorem quotient_plusFSubXIdeal_t2Space [IsTateRing A] [T2Space A]
       ↥(pairSubring (IsTateRing.principalPair A).toPairOfDefinition))
     (f : A) :
     T2Space (↥(TateAlgebra A) ⧸ plusFSubXIdeal f) := by
-  haveI : IsClosed ((plusFSubXIdeal f).toAddSubgroup : Set ↥(TateAlgebra A)) :=
+  have : IsClosed ((plusFSubXIdeal f).toAddSubgroup : Set ↥(TateAlgebra A)) :=
     plusFSubXIdeal_isClosed hA_complete hnoeth f
   infer_instance
 
@@ -1725,14 +1725,14 @@ theorem quotient_plusFSubXIdeal_completeSpace [IsTateRing A] [T2Space A]
     @CompleteSpace (↥(TateAlgebra A) ⧸ plusFSubXIdeal f)
       (quotientPlusFSubXIdealUniformSpace f) := by
   letI τ : TopologicalSpace ↥(TateAlgebra A) := instTopologicalSpaceTateAlgebra
-  haveI _hring : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
-  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
+  have _hring : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
+  have haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
     IsTopologicalRing.to_topologicalAddGroup
-  haveI : FirstCountableTopology ↥(TateAlgebra A) := instFirstCountableTopologyTateAlgebra
-  haveI hCS : @CompleteSpace ↥(TateAlgebra A)
+  have : FirstCountableTopology ↥(TateAlgebra A) := instFirstCountableTopologyTateAlgebra
+  have hCS : @CompleteSpace ↥(TateAlgebra A)
       (IsTopologicalAddGroup.rightUniformSpace ↥(TateAlgebra A)) :=
     tateAlgebraTopology'_completeSpace hA_complete
-  haveI : IsClosed ((plusFSubXIdeal f).toAddSubgroup : Set ↥(TateAlgebra A)) :=
+  have : IsClosed ((plusFSubXIdeal f).toAddSubgroup : Set ↥(TateAlgebra A)) :=
     plusFSubXIdeal_isClosed hA_complete hnoeth f
   exact @QuotientAddGroup.completeSpace_right' ↥(TateAlgebra A) _ τ haddgrp ‹_›
     (plusFSubXIdeal f).toAddSubgroup inferInstance hCS
@@ -2321,7 +2321,7 @@ theorem pairSubring₂_isOpen [IsTateRing A] (P : PairOfDefinition A)
     @IsOpen ↥(TateAlgebra₂ A) (tateAlgebra₂Topology P π hπ_gen hπ_unit)
       ((pairSubring₂ P : Subring ↥(TateAlgebra₂ A)) : Set ↥(TateAlgebra₂ A)) := by
   letI : TopologicalSpace ↥(TateAlgebra₂ A) := tateAlgebra₂Topology P π hπ_gen hπ_unit
-  haveI := tateAlgebra₂Topology_isTopologicalRing P π hπ_gen hπ_unit
+  have := tateAlgebra₂Topology_isTopologicalRing P π hπ_gen hπ_unit
   refine (pairSubring₂ P).toAddSubgroup.isOpen_of_mem_nhds (g := 0) ?_
   refine Filter.mem_of_superset
     ((tateAlgBasis₂ P π hπ_gen hπ_unit).hasBasis_nhds_zero.mem_of_mem (i := 1) trivial) ?_
@@ -2409,8 +2409,8 @@ noncomputable def instT2SpaceTateAlgebra₂ [IsTateRing A] [T2Space A] :
   change @T2Space _ tateAlgebra₂Topology'
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI : TopologicalSpace ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'
-  haveI : IsTopologicalRing ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'_isTopologicalRing
-  haveI : IsTopologicalAddGroup ↥(TateAlgebra₂ A) := IsTopologicalRing.to_topologicalAddGroup
+  have : IsTopologicalRing ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'_isTopologicalRing
+  have : IsTopologicalAddGroup ↥(TateAlgebra₂ A) := IsTopologicalRing.to_topologicalAddGroup
   apply IsTopologicalAddGroup.t2Space_of_zero_sep
   intro y hy_ne
   obtain ⟨l, hl⟩ : ∃ l, MvPowerSeries.coeff l y.val ≠ 0 := by
@@ -2518,7 +2518,7 @@ private theorem coeff₂_cauchySeq_of_basis (P : PairOfDefinition A)
     @CauchySeq A ℕ (IsTopologicalAddGroup.rightUniformSpace A) _
       (fun n => MvPowerSeries.coeff l (u n).val) := by
   letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
-  haveI : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
+  have : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
   rw [cauchySeq_iff]
   intro V hV
   rw [uniformity_eq_comap_nhds_zero'] at hV
@@ -2550,9 +2550,9 @@ private theorem tateAlgNhd₂_of_cauchySeq [IsTateRing A] [T2Space A]
       u m - u k ∈ tateAlgNhd₂ (IsTateRing.principalPair A).toPairOfDefinition n := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'
-  haveI hring : IsTopologicalRing ↥(TateAlgebra₂ A) :=
+  have hring : IsTopologicalRing ↥(TateAlgebra₂ A) :=
     tateAlgebra₂Topology'_isTopologicalRing
-  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra₂ A) :=
+  have haddgrp : IsTopologicalAddGroup ↥(TateAlgebra₂ A) :=
     IsTopologicalRing.to_topologicalAddGroup
   letI uT : UniformSpace ↥(TateAlgebra₂ A) := IsTopologicalAddGroup.rightUniformSpace _
   intro n
@@ -2589,20 +2589,20 @@ theorem tateAlgebra₂Topology'_completeSpace [IsTateRing A] [T2Space A]
           tateAlgebra₂Topology' (tateAlgebra₂Topology'_isTopologicalRing))) := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'
-  haveI hring : IsTopologicalRing ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'_isTopologicalRing
-  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra₂ A) :=
+  have hring : IsTopologicalRing ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'_isTopologicalRing
+  have haddgrp : IsTopologicalAddGroup ↥(TateAlgebra₂ A) :=
     IsTopologicalRing.to_topologicalAddGroup
   letI uT : UniformSpace ↥(TateAlgebra₂ A) := IsTopologicalAddGroup.rightUniformSpace _
-  haveI : @IsUniformAddGroup _ uT _ := @isUniformAddGroup_of_addCommGroup _ _ _ haddgrp
-  haveI : (@nhds _ τ (0 : ↥(TateAlgebra₂ A))).IsCountablyGenerated :=
+  have : @IsUniformAddGroup _ uT _ := @isUniformAddGroup_of_addCommGroup _ _ _ haddgrp
+  have : (@nhds _ τ (0 : ↥(TateAlgebra₂ A))).IsCountablyGenerated :=
     tateAlgBasis'₂.hasBasis_nhds_zero.isCountablyGenerated
-  haveI hcg : (@uniformity _ uT).IsCountablyGenerated :=
+  have hcg : (@uniformity _ uT).IsCountablyGenerated :=
     @IsUniformAddGroup.uniformity_countably_generated _ uT _ _ (by
       convert ‹(@nhds _ τ (0 : ↥(TateAlgebra₂ A))).IsCountablyGenerated›)
   apply @UniformSpace.complete_of_cauchySeq_tendsto _ uT hcg
   intro u hu
   letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
-  haveI : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
+  have : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
   have hu_basis := tateAlgNhd₂_of_cauchySeq u hu
   have hcoeff_cauchy := coeff₂_cauchySeq_of_basis P u hu_basis
   have hcoeff_conv : ∀ l : Fin 2 →₀ ℕ, ∃ a : A,
@@ -2641,10 +2641,10 @@ theorem pairIdeal₂_isAdic_subspace [IsTateRing A] :
       (pairIdeal₂ (IsTateRing.principalPair A).toPairOfDefinition) := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'
-  haveI hring : IsTopologicalRing ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'_isTopologicalRing
+  have hring : IsTopologicalRing ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'_isTopologicalRing
   letI τ_sub : TopologicalSpace ↥(pairSubring₂ P) :=
     instTopologicalSpaceSubtype
-  haveI hring_sub : @IsTopologicalRing ↥(pairSubring₂ P) τ_sub _ :=
+  have hring_sub : @IsTopologicalRing ↥(pairSubring₂ P) τ_sub _ :=
     Subring.instIsTopologicalRing (pairSubring₂ P)
   rw [@isAdic_iff _ _ _ hring_sub]
   refine ⟨fun n => ?_, fun s hs => ?_⟩
@@ -2679,7 +2679,7 @@ theorem tateAlgebra₂_algebraMap_continuous [IsTateRing A] :
       (algebraMap A ↥(TateAlgebra₂ A)) := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'
-  haveI hring : IsTopologicalRing ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'_isTopologicalRing
+  have hring : IsTopologicalRing ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'_isTopologicalRing
   rw [continuous_def]
   intro U hU
   rw [isOpen_iff_mem_nhds]
@@ -2709,7 +2709,7 @@ of `tateAlgebra_isTateRing`. -/
 theorem tateAlgebra₂_isTateRing [IsTateRing A] :
     @IsTateRing ↥(TateAlgebra₂ A) _ tateAlgebra₂Topology' := by
   letI τ : TopologicalSpace ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'
-  haveI hring : IsTopologicalRing ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'_isTopologicalRing
+  have hring : IsTopologicalRing ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'_isTopologicalRing
   exact @IsTateRing.mk _ _ τ
     ⟨⟨tateAlgebra₂_pairOfDefinition⟩⟩
     (by
@@ -2746,9 +2746,9 @@ theorem tateAlgebra₂_isClosed_ideal [IsTateRing A] [T2Space A]
     [IsNoetherianRing ↥(tateAlgebra₂_pairOfDefinition (A := A)).A₀]
     (J : Ideal ↥(TateAlgebra₂ A)) :
     IsClosed (J : Set ↥(TateAlgebra₂ A)) := by
-  haveI hCS : @CompleteSpace _ instUniformSpaceTateAlgebra₂ :=
+  have hCS : @CompleteSpace _ instUniformSpaceTateAlgebra₂ :=
     tateAlgebra₂Topology'_completeSpace hA_complete
-  haveI hTR : @IsTateRing ↥(TateAlgebra₂ A) _ instTopologicalSpaceTateAlgebra₂ :=
+  have hTR : @IsTateRing ↥(TateAlgebra₂ A) _ instTopologicalSpaceTateAlgebra₂ :=
     tateAlgebra₂_isTateRing
   suffices h : @IsClosed _ instUniformSpaceTateAlgebra₂.toTopologicalSpace (J : Set _) by
     convert h using 1
@@ -2829,7 +2829,7 @@ theorem bivariateOverlapIdeal_isClosed [IsTateRing A] [T2Space A]
     (b : A) :
     IsClosed ((bivariateOverlapIdeal b : Ideal ↥(TateAlgebra₂ A)) :
       Set ↥(TateAlgebra₂ A)) := by
-  haveI : IsNoetherianRing ↥(tateAlgebra₂_pairOfDefinition (A := A)).A₀ := hnoeth
+  have : IsNoetherianRing ↥(tateAlgebra₂_pairOfDefinition (A := A)).A₀ := hnoeth
   exact tateAlgebra₂_isClosed_ideal hA_complete (bivariateOverlapIdeal b)
 
 /-- The bivariate overlap quotient is T2. -/
@@ -2839,7 +2839,7 @@ theorem quotient_bivariateOverlapIdeal_t2Space [IsTateRing A] [T2Space A]
       ↥(pairSubring₂ (IsTateRing.principalPair A).toPairOfDefinition))
     (b : A) :
     T2Space (↥(TateAlgebra₂ A) ⧸ bivariateOverlapIdeal b) := by
-  haveI : IsClosed ((bivariateOverlapIdeal b).toAddSubgroup : Set ↥(TateAlgebra₂ A)) :=
+  have : IsClosed ((bivariateOverlapIdeal b).toAddSubgroup : Set ↥(TateAlgebra₂ A)) :=
     bivariateOverlapIdeal_isClosed hA_complete hnoeth b
   infer_instance
 
@@ -2856,14 +2856,14 @@ theorem quotient_bivariateOverlapIdeal_completeSpace [IsTateRing A] [T2Space A]
     @CompleteSpace (↥(TateAlgebra₂ A) ⧸ bivariateOverlapIdeal b)
       (quotientBivariateOverlapIdealUniformSpace b) := by
   letI τ : TopologicalSpace ↥(TateAlgebra₂ A) := instTopologicalSpaceTateAlgebra₂
-  haveI _hring : IsTopologicalRing ↥(TateAlgebra₂ A) := instIsTopologicalRingTateAlgebra₂
-  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra₂ A) :=
+  have _hring : IsTopologicalRing ↥(TateAlgebra₂ A) := instIsTopologicalRingTateAlgebra₂
+  have haddgrp : IsTopologicalAddGroup ↥(TateAlgebra₂ A) :=
     IsTopologicalRing.to_topologicalAddGroup
-  haveI : FirstCountableTopology ↥(TateAlgebra₂ A) := instFirstCountableTopologyTateAlgebra₂
-  haveI hCS : @CompleteSpace ↥(TateAlgebra₂ A)
+  have : FirstCountableTopology ↥(TateAlgebra₂ A) := instFirstCountableTopologyTateAlgebra₂
+  have hCS : @CompleteSpace ↥(TateAlgebra₂ A)
       (IsTopologicalAddGroup.rightUniformSpace ↥(TateAlgebra₂ A)) :=
     tateAlgebra₂Topology'_completeSpace hA_complete
-  haveI : IsClosed ((bivariateOverlapIdeal b).toAddSubgroup : Set ↥(TateAlgebra₂ A)) :=
+  have : IsClosed ((bivariateOverlapIdeal b).toAddSubgroup : Set ↥(TateAlgebra₂ A)) :=
     bivariateOverlapIdeal_isClosed hA_complete hnoeth b
   exact @QuotientAddGroup.completeSpace_right' ↥(TateAlgebra₂ A) _ τ haddgrp ‹_›
     (bivariateOverlapIdeal b).toAddSubgroup inferInstance hCS
@@ -2908,7 +2908,7 @@ theorem TateAlgebra₂_X_isPowerBounded [IsTateRing A] :
     @TopologicalRing.IsPowerBounded _ _ instTopologicalSpaceTateAlgebra₂
       (TateAlgebra₂.X (A := A)) := by
   letI : TopologicalSpace ↥(TateAlgebra₂ A) := instTopologicalSpaceTateAlgebra₂
-  haveI : IsTopologicalRing ↥(TateAlgebra₂ A) := instIsTopologicalRingTateAlgebra₂
+  have : IsTopologicalRing ↥(TateAlgebra₂ A) := instIsTopologicalRingTateAlgebra₂
   have hX_in : TateAlgebra₂.X (A := A) ∈
       pairSubring₂ (IsTateRing.principalPair A).toPairOfDefinition :=
     TateAlgebra₂_X_mem_pairSubring₂ (IsTateRing.principalPair A).toPairOfDefinition
@@ -2927,7 +2927,7 @@ theorem TateAlgebra₂_Y_isPowerBounded [IsTateRing A] :
     @TopologicalRing.IsPowerBounded _ _ instTopologicalSpaceTateAlgebra₂
       (TateAlgebra₂.Y (A := A)) := by
   letI : TopologicalSpace ↥(TateAlgebra₂ A) := instTopologicalSpaceTateAlgebra₂
-  haveI : IsTopologicalRing ↥(TateAlgebra₂ A) := instIsTopologicalRingTateAlgebra₂
+  have : IsTopologicalRing ↥(TateAlgebra₂ A) := instIsTopologicalRingTateAlgebra₂
   have hY_in : TateAlgebra₂.Y (A := A) ∈
       pairSubring₂ (IsTateRing.principalPair A).toPairOfDefinition :=
     TateAlgebra₂_Y_mem_pairSubring₂ (IsTateRing.principalPair A).toPairOfDefinition
@@ -3052,7 +3052,7 @@ nonarchimedean topological ring by an additive subgroup). -/
 theorem quotientBivariateOverlapIdealTopology_nonarchimedean [IsTateRing A] (b : A) :
     @NonarchimedeanRing (↥(TateAlgebra₂ A) ⧸ bivariateOverlapIdeal b) _
       (quotientBivariateOverlapIdealTopology b) := by
-  haveI hNA_tate : @NonarchimedeanRing ↥(TateAlgebra₂ A) _
+  have hNA_tate : @NonarchimedeanRing ↥(TateAlgebra₂ A) _
       instTopologicalSpaceTateAlgebra₂ :=
     tateAlgBasis'₂.nonarchimedean
   constructor; intro U hU

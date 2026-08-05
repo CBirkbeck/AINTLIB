@@ -169,7 +169,7 @@ Source: [Bhatt, Cor. 3.2.3] pattern (t-adic topology on `K°` is separated and c
 theorem isHausdorff_span_toOF [UniformSpace F] [IsPerfectoidField p F]
     (ϖ : PseudoUniformizer F) :
     IsHausdorff (Ideal.span {PseudoUniformizer.toOF F ϖ}) (OF F) := by
-  haveI := IsPerfectoidRing.t0 (p := p) (A := F)
+  have := IsPerfectoidRing.t0 (p := p) (A := F)
   constructor
   intro x hx
   have hmem : ∀ U ∈ nhds (0 : OF F), x ∈ U := by
@@ -192,10 +192,10 @@ private theorem exists_forall_sub_mem_of_adicPrecision [UniformSpace F]
     (I : Ideal (OF F)) (hI : I = Ideal.span {PseudoUniformizer.toOF F ϖ})
     (f : ℕ → OF F) (hf' : ∀ {m n : ℕ}, m ≤ n → f m - f n ∈ I ^ m) :
     ∀ W ∈ nhds (0 : F), ∃ N, ∀ m n, N ≤ m → N ≤ n → (f m : F) - (f n : F) ∈ W := by
-  haveI := IsPerfectoidRing.complete (p := p) (A := F)
-  haveI := IsPerfectoidRing.uniformAddGroup (p := p) (A := F)
-  haveI := IsPerfectoidRing.t0 (p := p) (A := F)
-  haveI := IsPerfectoidRing.uniform (p := p) (A := F)
+  have := IsPerfectoidRing.complete (p := p) (A := F)
+  have := IsPerfectoidRing.uniformAddGroup (p := p) (A := F)
+  have := IsPerfectoidRing.t0 (p := p) (A := F)
+  have := IsPerfectoidRing.uniform (p := p) (A := F)
   intro W hW
   obtain ⟨G, hGW⟩ := NonarchimedeanAddGroup.is_nonarchimedean W hW
   obtain ⟨V, hV, hFV⟩ := IsUniform.isBounded_powerBounded (A := F) (G : Set F)
@@ -231,10 +231,10 @@ directly. -/
 theorem isAdicComplete_span_toOF [UniformSpace F] [IsPerfectoidField p F]
     (ϖ : PseudoUniformizer F) :
     IsAdicComplete (Ideal.span {PseudoUniformizer.toOF F ϖ}) (OF F) := by
-  haveI := IsPerfectoidRing.complete (p := p) (A := F)
-  haveI := IsPerfectoidRing.uniformAddGroup (p := p) (A := F)
-  haveI := IsPerfectoidRing.t0 (p := p) (A := F)
-  haveI := IsPerfectoidRing.uniform (p := p) (A := F)
+  have := IsPerfectoidRing.complete (p := p) (A := F)
+  have := IsPerfectoidRing.uniformAddGroup (p := p) (A := F)
+  have := IsPerfectoidRing.t0 (p := p) (A := F)
+  have := IsPerfectoidRing.uniform (p := p) (A := F)
   have htop := IsPerfectoidRing.topologyEq (p := p) (A := F)
   set I : Ideal (OF F) := Ideal.span {PseudoUniformizer.toOF F ϖ} with hI
   have hprec : IsPrecomplete I (OF F) := by

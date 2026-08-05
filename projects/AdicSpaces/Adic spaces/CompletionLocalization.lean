@@ -161,7 +161,7 @@ theorem away_lift_torsion_bounded [IsNoetherianRing A] {s₁ t : A}
     ∃ N₀ : ℕ, ∀ x : Localization.Away s₁,
       IsLocalization.Away.lift s₁ hu x = 0 →
         algebraMap A (Localization.Away s₁) (t ^ N₀) * x = 0 := by
-  haveI : IsNoetherianRing (Localization.Away s₁) :=
+  have : IsNoetherianRing (Localization.Away s₁) :=
     IsLocalization.isNoetherianRing (Submonoid.powers s₁) (Localization.Away s₁) ‹_›
   obtain ⟨N₀, hN₀⟩ := torsion_bounded (algebraMap A (Localization.Away s₁) t)
   refine ⟨N₀, fun x hx => ?_⟩
@@ -339,12 +339,12 @@ attribute [local instance] locSubringUniformSpace
 
 private noncomputable instance : IsTopologicalRing (locSubring D₀.P D₀.T D₀.s) := by
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
-  haveI : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
+  have : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
   exact Subring.instIsTopologicalRing _
 
 private noncomputable instance : IsUniformAddGroup (locSubring D₀.P D₀.T D₀.s) := by
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
-  haveI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
+  have : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
   exact IsUniformAddGroup.comap _
 
 /-- The completed bridge map: extends `coeRingHom ∘ subtype` from `locSubring` to
@@ -429,7 +429,7 @@ theorem locSubringCompletionToPresheafValue_range :
     Set.range (locSubringCompletionToPresheafValue D₀) =
       (D₀.completedLocSubring : Set (presheafValue D₀)) := by
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
-  haveI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
+  have : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
   apply le_antisymm
   · rintro y ⟨x, rfl⟩
     refine UniformSpace.Completion.induction_on x ?_ (fun a => ?_)
@@ -452,14 +452,14 @@ noncomputable def completionLocSubringEquiv :
     UniformSpace.Completion (locSubring D₀.P D₀.T D₀.s) ≃+*
       D₀.completedLocSubring := by
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
-  haveI : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
-  haveI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
-  haveI : IsClosed (D₀.completedLocSubring : Set (presheafValue D₀)) :=
+  have : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
+  have : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
+  have : IsClosed (D₀.completedLocSubring : Set (presheafValue D₀)) :=
     Subring.isClosed_topologicalClosure _
-  haveI : CompleteSpace D₀.completedLocSubring :=
+  have : CompleteSpace D₀.completedLocSubring :=
     (Subring.isClosed_topologicalClosure _).completeSpace_coe
-  haveI : IsTopologicalRing D₀.completedLocSubring := Subring.instIsTopologicalRing _
-  haveI : IsUniformAddGroup D₀.completedLocSubring :=
+  have : IsTopologicalRing D₀.completedLocSubring := Subring.instIsTopologicalRing _
+  have : IsUniformAddGroup D₀.completedLocSubring :=
     IsUniformAddGroup.comap D₀.completedLocSubring.subtype.toAddMonoidHom
   have hcont : Continuous D₀.locSubringToCompleted :=
     (locSubringToPresheafValue_continuous D₀).subtype_mk _

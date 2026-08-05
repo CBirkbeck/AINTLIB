@@ -73,24 +73,24 @@ private theorem t2Space_of_moduleTopology_finite (M : Type u) [AddCommGroup M] [
     [TopologicalSpace M] [IsModuleTopology A M] [Module.Finite A M] :
     T2Space M := by
   letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
-  haveI : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup
-  haveI : (uniformity A).IsCountablyGenerated := IsUniformAddGroup.uniformity_countably_generated
-  haveI : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
-  haveI : ContinuousSMul A M := inferInstance
+  have : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup
+  have : (uniformity A).IsCountablyGenerated := IsUniformAddGroup.uniformity_countably_generated
+  have : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
+  have : ContinuousSMul A M := inferInstance
   -- Present `M` as an open quotient of `Aⁿ`.
   obtain ⟨n, ν, hν⟩ := Module.Finite.exists_fin' A M
   have hν_cont : Continuous ⇑ν := IsModuleTopology.continuous_linearMap_of_finite ν
   have hν_open : IsOpenMap ⇑ν := IsModuleTopology.isOpenMap_of_surjective_of_finite ν hν
   -- `ker ν` is finitely generated (`Aⁿ` noetherian), so its closure is finitely generated.
-  haveI hnoeth : IsNoetherian A (Fin n → A) := inferInstance
+  have hnoeth : IsNoetherian A (Fin n → A) := inferInstance
   have hker_clos_fg : Module.Finite A ((LinearMap.ker ν).topologicalClosure) :=
     Module.Finite.of_fg (hnoeth.noetherian _)
   -- Hence `ker ν` is closed (BGR §3.7.2/1).
   have hker_closed : IsClosed ((LinearMap.ker ν) : Set (Fin n → A)) :=
     fg_topologicalClosure_isClosed (LinearMap.ker ν) hker_clos_fg
-  haveI hkc : IsClosed ((ν.toAddMonoidHom.ker : AddSubgroup (Fin n → A)) :
+  have hkc : IsClosed ((ν.toAddMonoidHom.ker : AddSubgroup (Fin n → A)) :
       Set (Fin n → A)) := hker_closed
-  haveI : T2Space ((Fin n → A) ⧸ ν.toAddMonoidHom.ker) := inferInstance
+  have : T2Space ((Fin n → A) ⧸ ν.toAddMonoidHom.ker) := inferInstance
   -- The canonical add-equiv `Aⁿ ⧸ ker ν ≃+ M` is a homeomorphism.
   let e : ((Fin n → A) ⧸ ν.toAddMonoidHom.ker) ≃+ M :=
     QuotientAddGroup.quotientKerEquivOfSurjective ν.toAddMonoidHom hν
@@ -126,11 +126,11 @@ private theorem muMap_bijective_of_finite (M : Type u) [AddCommGroup M] [Module 
     haveI : ContinuousSMul A M := inferInstance
     Function.Bijective (muMap (A := A) (M := M)) := by
   letI : TopologicalSpace M := moduleTopology A M
-  haveI : IsModuleTopology A M := ⟨rfl⟩
-  haveI : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
-  haveI : ContinuousSMul A M := inferInstance
-  haveI : ContinuousConstSMul A M := inferInstance
-  haveI : T2Space M := t2Space_of_moduleTopology_finite (A := A) M
+  have : IsModuleTopology A M := ⟨rfl⟩
+  have : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
+  have : ContinuousSMul A M := inferInstance
+  have : ContinuousConstSMul A M := inferInstance
+  have : T2Space M := t2Space_of_moduleTopology_finite (A := A) M
   exact ⟨muMap_injective, muMap_surjective⟩
 
 omit [PlusSubring A] [HasLocLiftPowerBounded A] [IsStronglyNoetherian A]
@@ -150,15 +150,15 @@ private theorem tensorTate_map_injective
     (i : N →ₗ[A] M) (hi : Function.Injective i) :
     Function.Injective (TensorProduct.map i (LinearMap.id (R := A) (M := ↥(TateAlgebra A)))) := by
   letI : TopologicalSpace N := moduleTopology A N
-  haveI : IsModuleTopology A N := ⟨rfl⟩
-  haveI : IsTopologicalAddGroup N := IsModuleTopology.topologicalAddGroup A N
-  haveI : ContinuousSMul A N := inferInstance
-  haveI : ContinuousConstSMul A N := inferInstance
+  have : IsModuleTopology A N := ⟨rfl⟩
+  have : IsTopologicalAddGroup N := IsModuleTopology.topologicalAddGroup A N
+  have : ContinuousSMul A N := inferInstance
+  have : ContinuousConstSMul A N := inferInstance
   letI : TopologicalSpace M := moduleTopology A M
-  haveI : IsModuleTopology A M := ⟨rfl⟩
-  haveI : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
-  haveI : ContinuousSMul A M := inferInstance
-  haveI : ContinuousConstSMul A M := inferInstance
+  have : IsModuleTopology A M := ⟨rfl⟩
+  have : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
+  have : ContinuousSMul A M := inferInstance
+  have : ContinuousConstSMul A M := inferInstance
   -- `i` is continuous (linear out of the module topology).
   have hi_cont : Continuous i := IsModuleTopology.continuous_linearMap_of_finite i
   -- `μ_N` is injective; `i⟨X⟩` is injective.
@@ -193,7 +193,7 @@ to the injective inclusion `Submodule.subtype I`. -/
 private theorem tateAlgebra_flat_faithful : Module.Flat A ↥(TateAlgebra A) := by
   rw [Module.Flat.iff_rTensor_injective]
   intro I hI
-  haveI : Module.Finite A ↥I := Module.Finite.of_fg hI
+  have : Module.Finite A ↥I := Module.Finite.of_fg hI
   rw [LinearMap.rTensor_def]
   exact tensorTate_map_injective (Submodule.subtype I) (Submodule.injective_subtype I)
 
@@ -236,7 +236,7 @@ private theorem mem_idealMap_of_forall_coeff_mem (I : Ideal A) (h : ↥(TateAlge
   classical
   -- `A ⧸ I` carries its quotient topology, which is the module topology (`A ⧸ I` is f.g.).
   set q : A →ₗ[A] (A ⧸ I) := (Submodule.mkQ I) with hq_def
-  haveI : T2Space (A ⧸ I) := t2Space_of_moduleTopology_finite (A := A) (A ⧸ I)
+  have : T2Space (A ⧸ I) := t2Space_of_moduleTopology_finite (A := A) (A ⧸ I)
   have hq_cont : Continuous q := IsModuleTopology.continuous_linearMap_of_finite q
   -- `μ_A`, `μ_{A/I}` are bijective.
   have hμA_bij : Function.Bijective (muMap (A := A) (M := A)) :=
@@ -403,23 +403,23 @@ private theorem tateAlgebra_isClosed_ideal_faithful [IsStronglyNoetherian A]
     (J : Ideal ↥(TateAlgebra A)) :
     IsClosed (J : Set ↥(TateAlgebra A)) := by
   letI uT : UniformSpace ↥(TateAlgebra A) := instUniformSpaceTateAlgebra
-  haveI hua : @IsUniformAddGroup _ uT _ := instIsUniformAddGroupTateAlgebra
-  haveI hCS : @CompleteSpace _ uT := tateAlgebraTopology'_completeSpace (A := A) hA_complete
-  haveI hcg : (@uniformity _ uT).IsCountablyGenerated := by
-    haveI hcgn : (@nhds _ instTopologicalSpaceTateAlgebra
+  have hua : @IsUniformAddGroup _ uT _ := instIsUniformAddGroupTateAlgebra
+  have hCS : @CompleteSpace _ uT := tateAlgebraTopology'_completeSpace (A := A) hA_complete
+  have hcg : (@uniformity _ uT).IsCountablyGenerated := by
+    have hcgn : (@nhds _ instTopologicalSpaceTateAlgebra
         (0 : ↥(TateAlgebra A))).IsCountablyGenerated :=
       tateAlgBasis'.hasBasis_nhds_zero.isCountablyGenerated
     exact @IsUniformAddGroup.uniformity_countably_generated _ uT _ _ (by convert hcgn)
-  haveI hT2 : @T2Space _ uT.toTopologicalSpace := instT2SpaceTateAlgebra
-  haveI hTR : @IsTopologicalRing _ uT.toTopologicalSpace _ := instIsTopologicalRingTateAlgebra
-  haveI hTate : @IsTateRing _ _ uT.toTopologicalSpace := tateAlgebra_isTateRing
+  have hT2 : @T2Space _ uT.toTopologicalSpace := instT2SpaceTateAlgebra
+  have hTR : @IsTopologicalRing _ uT.toTopologicalSpace _ := instIsTopologicalRingTateAlgebra
+  have hTate : @IsTateRing _ _ uT.toTopologicalSpace := tateAlgebra_isTateRing
   -- A⟨X⟩ is noetherian (A strongly noetherian), so Prop 6.17 closes every ideal. Route through the
   -- FAITHFUL, sorry-free §3.7.2/1 engine `fg_topologicalClosure_isClosed` directly (NOT the iff
   -- `wedhorn_6_17_ideal`, whose REVERSE direction carries a `sorryAx` we never use) — mirroring the
   -- multivariate `MvTateAlgebra.mvTate_isClosed_ideal`.
-  haveI : @ContinuousSMul ↥(TateAlgebra A) ↥(TateAlgebra A) _ _ uT.toTopologicalSpace :=
+  have : @ContinuousSMul ↥(TateAlgebra A) ↥(TateAlgebra A) _ _ uT.toTopologicalSpace :=
     ⟨continuous_mul⟩
-  haveI hnoeth : IsNoetherianRing ↥(TateAlgebra A) := inferInstance
+  have hnoeth : IsNoetherianRing ↥(TateAlgebra A) := inferInstance
   have hfin : Module.Finite ↥(TateAlgebra A) (Submodule.topologicalClosure J) :=
     Module.Finite.iff_fg.mpr (isNoetherian_def.mp hnoeth _)
   exact ValuationSpectrum.fg_topologicalClosure_isClosed J hfin
@@ -442,7 +442,7 @@ omit [PlusSubring A] [HasLocLiftPowerBounded A] [IsNoetherianRing A] [IsStrongly
 private theorem quotient_oneSubfXIdeal_t2Space_faithful [IsStronglyNoetherian A]
     (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A)) (s : A) :
     T2Space (↥(TateAlgebra A) ⧸ oneSubfXIdeal s) := by
-  haveI : IsClosed ((oneSubfXIdeal s).toAddSubgroup : Set ↥(TateAlgebra A)) :=
+  have : IsClosed ((oneSubfXIdeal s).toAddSubgroup : Set ↥(TateAlgebra A)) :=
     oneSubfXIdeal_isClosed_faithful hA_complete s
   infer_instance
 
@@ -458,14 +458,14 @@ private theorem quotient_oneSubfXIdeal_completeSpace_faithful [IsStronglyNoether
     @CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal s)
       (quotientOneSubfXIdealUniformSpace s) := by
   letI τ : TopologicalSpace ↥(TateAlgebra A) := instTopologicalSpaceTateAlgebra
-  haveI _hring : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
-  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
+  have _hring : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
+  have haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
     IsTopologicalRing.to_topologicalAddGroup
-  haveI : FirstCountableTopology ↥(TateAlgebra A) := instFirstCountableTopologyTateAlgebra
-  haveI hCS : @CompleteSpace ↥(TateAlgebra A)
+  have : FirstCountableTopology ↥(TateAlgebra A) := instFirstCountableTopologyTateAlgebra
+  have hCS : @CompleteSpace ↥(TateAlgebra A)
       (IsTopologicalAddGroup.rightUniformSpace ↥(TateAlgebra A)) :=
     tateAlgebraTopology'_completeSpace hA_complete
-  haveI : IsClosed ((oneSubfXIdeal s).toAddSubgroup : Set ↥(TateAlgebra A)) :=
+  have : IsClosed ((oneSubfXIdeal s).toAddSubgroup : Set ↥(TateAlgebra A)) :=
     oneSubfXIdeal_isClosed_faithful hA_complete s
   exact @QuotientAddGroup.completeSpace_right' ↥(TateAlgebra A) _ τ haddgrp ‹_›
     (oneSubfXIdeal s).toAddSubgroup inferInstance hCS
@@ -496,11 +496,11 @@ private noncomputable def presheafValueToCanonicalQuotient_faithful [IsStronglyN
     quotientOneSubfXIdealUniformSpace D.s
   letI : IsUniformAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientOneSubfXIdeal_isUniformAddGroup D.s
-  haveI : CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have : CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotient_oneSubfXIdeal_completeSpace_faithful hA_complete D.s
-  haveI hT2Q : @T2Space _ (quotientOneSubfXIdealTopology D.s) :=
+  have hT2Q : @T2Space _ (quotientOneSubfXIdealTopology D.s) :=
     quotient_oneSubfXIdeal_t2Space_faithful hA_complete D.s
-  haveI hT0Q : @T0Space _ (quotientOneSubfXIdealTopology D.s) :=
+  have hT0Q : @T0Space _ (quotientOneSubfXIdealTopology D.s) :=
     @T1Space.t0Space _ (quotientOneSubfXIdealTopology D.s) (T2Space.t1Space)
   exact @UniformSpace.Completion.extensionHom _ _ _ _ _ _
     (quotientOneSubfXIdealUniformSpace D.s) _
@@ -534,11 +534,11 @@ private theorem presheafValueToCanonicalQuotient_faithful_coe [IsStronglyNoether
     quotientOneSubfXIdealUniformSpace D.s
   letI : IsUniformAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientOneSubfXIdeal_isUniformAddGroup D.s
-  haveI : CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have : CompleteSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotient_oneSubfXIdeal_completeSpace_faithful hA_complete D.s
-  haveI hT2Q : @T2Space _ (quotientOneSubfXIdealTopology D.s) :=
+  have hT2Q : @T2Space _ (quotientOneSubfXIdealTopology D.s) :=
     quotient_oneSubfXIdeal_t2Space_faithful hA_complete D.s
-  haveI hT0Q : @T0Space _ (quotientOneSubfXIdealTopology D.s) :=
+  have hT0Q : @T0Space _ (quotientOneSubfXIdealTopology D.s) :=
     @T1Space.t0Space _ (quotientOneSubfXIdealTopology D.s) (T2Space.t1Space)
   exact @UniformSpace.Completion.extensionHom_coe _ _ _ _ _ _
     (quotientOneSubfXIdealUniformSpace D.s) _
@@ -618,8 +618,8 @@ private theorem presheafToCanonicalQuotient_comp_faithful [IsStronglyNoetherian 
     quotientOneSubfXIdealTopology_isTopologicalAddGroup D.s
   letI : IsUniformAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientOneSubfXIdeal_isUniformAddGroup D.s
-  haveI hT2 : @T2Space _ τC := quotient_oneSubfXIdeal_t2Space_faithful hA_complete D.s
-  haveI : @CompleteSpace _ (quotientOneSubfXIdealUniformSpace D.s) :=
+  have hT2 : @T2Space _ τC := quotient_oneSubfXIdeal_t2Space_faithful hA_complete D.s
+  have : @CompleteSpace _ (quotientOneSubfXIdealUniformSpace D.s) :=
     quotient_oneSubfXIdeal_completeSpace_faithful hA_complete D.s
   have hdense := locToQuotientOneSubfX_gen_denseRange_canonical D.s
   have hagree : ∀ (a : Localization.Away D.s),
@@ -723,7 +723,7 @@ argument (Artin–Rees over a ring of definition) and **must not** be used to di
 case-(b) target. See `.mathlib-quality/decomposition.md` §LEAF A2 (2026-06-02). -/
 theorem lemma_8_31_tateAlgebra_faithfullyFlat :
     Module.FaithfullyFlat A ↥(TateAlgebra A) := by
-  haveI : Module.Flat A ↥(TateAlgebra A) := tateAlgebra_flat_faithful
+  have : Module.Flat A ↥(TateAlgebra A) := tateAlgebra_flat_faithful
   exact Module.FaithfullyFlat.of_comap_surjective
     TateAlgebra.PrimeSpectrum_comap_algebraMap_surjective
 
@@ -736,7 +736,7 @@ so by the claim at `:4116` `A⟨X⟩/(1 − fX)` is flat. **Faithful: `[IsNoethe
 theorem lemma_8_31_oneSubfX_flat (f : A) :
     Module.Flat A (↥(TateAlgebra A) ⧸
       Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X}) := by
-  haveI : Module.Flat A ↥(TateAlgebra A) := tateAlgebra_flat_faithful
+  have : Module.Flat A ↥(TateAlgebra A) := tateAlgebra_flat_faithful
   exact Module.Flat.quotient_of_flat_of_saturated
     (TateAlgebra.mul_oneSubfX_regular f)
     (fun I s hmem ↦ oneSubfX_saturated_faithful f I s hmem)
@@ -783,7 +783,7 @@ theorem presheafValue_flat_of_canonical_faithful [IsStronglyNoetherian A]
     (hT_pb : ∀ t ∈ D.T, TopologicalRing.IsPowerBounded t) :
     @Module.Flat A (presheafValue D) _ _ (RingHom.toModule D.canonicalMap) := by
   -- The faithful Lemma 8.31(2): `A⟨X⟩/(1 − sX)` is flat over `A` (`[IsNoetherianRing A]` only).
-  haveI hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
+  have hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     lemma_8_31_oneSubfX_flat (A := A) D.s
   let e := presheafValueCanonicalQuotientEquiv_faithful D hb hA_complete hT_pb
   change @Module.Flat A (presheafValue D) _ _ (RingHom.toModule D.canonicalMap)
@@ -814,7 +814,7 @@ only** (the noeth use is "`M` noetherian"; the noeth-`A₀` route
 theorem lemma_8_31_fSubX_flat (f : A) :
     Module.Flat A (↥(TateAlgebra A) ⧸
       Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X}) := by
-  haveI : Module.Flat A ↥(TateAlgebra A) := tateAlgebra_flat_faithful
+  have : Module.Flat A ↥(TateAlgebra A) := tateAlgebra_flat_faithful
   exact Module.Flat.quotient_of_flat_of_saturated
     (TateAlgebra.mul_fSubX_regular f)
     (fun I s hmem ↦ fSubX_saturated_faithful f I s hmem)
@@ -1106,10 +1106,10 @@ theorem mvEvalHomBounded_continuous [IsTateRing R] {n : ℕ}
   classical
   letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n R) :=
     MvTateAlgebra.mvTateAlgebraTopology' n
-  haveI hringC : @IsTopologicalRing _ τC _ :=
+  have hringC : @IsTopologicalRing _ τC _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.to_topologicalAddGroup
-  haveI hNA : NonarchimedeanRing S := inferInstance
+  have haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.to_topologicalAddGroup
+  have hNA : NonarchimedeanRing S := inferInstance
   refine continuous_of_continuousAt_zero (mvEvalHomBounded g hg b hb) ?_
   rw [ContinuousAt, map_zero, Filter.tendsto_def]
   intro Sset hS
@@ -1323,11 +1323,11 @@ theorem example638_evalHom_continuous (D : RationalLocData A) :
   set n := D.T.card with hn
   letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) :=
     MvTateAlgebra.mvTateAlgebraTopology' n
-  haveI hringC : @IsTopologicalRing _ τC _ :=
+  have hringC : @IsTopologicalRing _ τC _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.to_topologicalAddGroup
+  have haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.to_topologicalAddGroup
   -- `presheafValue D` is a nonarchimedean topological ring.
-  haveI hNA : NonarchimedeanRing (presheafValue D) := inferInstance
+  have hNA : NonarchimedeanRing (presheafValue D) := inferInstance
   -- Reduce to continuity at 0 (additive-group hom).
   refine continuous_of_continuousAt_zero (example638_evalHom D) ?_
   rw [ContinuousAt, map_zero, Filter.tendsto_def]
@@ -1418,16 +1418,16 @@ theorem mvQuot_completeSpace (n : ℕ)
     @CompleteSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) (mvQuotUniformSpace n a) := by
   letI τ : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) :=
     MvTateAlgebra.mvTateAlgebraTopology' n
-  haveI _hring : @IsTopologicalRing _ τ _ :=
+  have _hring : @IsTopologicalRing _ τ _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.to_topologicalAddGroup
+  have haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.to_topologicalAddGroup
   letI uC : UniformSpace ↥(restrictedMvPowerSeriesSubring n A) :=
     MvTateAlgebra.mvTateUniformSpace n
-  haveI : @IsUniformAddGroup _ uC _ := MvTateAlgebra.mvTate_isUniformAddGroup n
-  haveI : (@uniformity _ uC).IsCountablyGenerated :=
+  have : @IsUniformAddGroup _ uC _ := MvTateAlgebra.mvTate_isUniformAddGroup n
+  have : (@uniformity _ uC).IsCountablyGenerated :=
     MvTateAlgebra.mvTate_uniformity_isCountablyGenerated n
-  haveI : @FirstCountableTopology _ τ := UniformSpace.firstCountableTopology _
-  haveI hCS : @CompleteSpace _ uC := MvTateAlgebra.mvTate_completeSpace n hA_complete
+  have : @FirstCountableTopology _ τ := UniformSpace.firstCountableTopology _
+  have hCS : @CompleteSpace _ uC := MvTateAlgebra.mvTate_completeSpace n hA_complete
   exact @QuotientAddGroup.completeSpace_right' ↥(restrictedMvPowerSeriesSubring n A) _ τ haddgrp
     ‹_› a.toAddSubgroup inferInstance hCS
 
@@ -1442,13 +1442,13 @@ theorem mvQuot_t2Space (n : ℕ)
     @T2Space (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) (mvQuotTopology n a) := by
   letI τ : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) :=
     MvTateAlgebra.mvTateAlgebraTopology' n
-  haveI _hring : @IsTopologicalRing _ τ _ :=
+  have _hring : @IsTopologicalRing _ τ _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.to_topologicalAddGroup
-  haveI hac : @IsClosed _ τ (a.toAddSubgroup : Set ↥(restrictedMvPowerSeriesSubring n A)) := ha
+  have haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.to_topologicalAddGroup
+  have hac : @IsClosed _ τ (a.toAddSubgroup : Set ↥(restrictedMvPowerSeriesSubring n A)) := ha
   letI : TopologicalSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) := mvQuotTopology n a
-  haveI : @IsTopologicalAddGroup _ (mvQuotTopology n a) _ := mvQuot_isTopologicalAddGroup n a
-  haveI _h3 : @T3Space _ (mvQuotTopology n a) :=
+  have : @IsTopologicalAddGroup _ (mvQuotTopology n a) _ := mvQuot_isTopologicalAddGroup n a
+  have _h3 : @T3Space _ (mvQuotTopology n a) :=
     @QuotientAddGroup.instT3Space _ τ _ haddgrp a.toAddSubgroup inferInstance hac
   infer_instance
 
@@ -1494,7 +1494,7 @@ private theorem example638_kerLift_continuous (D : RationalLocData A) :
   set a := RingHom.ker (example638_evalHom D) with ha
   letI τ : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) :=
     MvTateAlgebra.mvTateAlgebraTopology' n
-  haveI _hring : @IsTopologicalRing _ τ _ :=
+  have _hring : @IsTopologicalRing _ τ _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
   letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) := mvQuotTopology n a
   -- The quotient map `mk` is a quotient map; `ē ∘ mk = example638_evalHom` is continuous.
@@ -1607,11 +1607,11 @@ theorem mvQuot_nonarchimedean (n : ℕ)
     @NonarchimedeanRing (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) _ (mvQuotTopology n a) := by
   letI τ : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) :=
     MvTateAlgebra.mvTateAlgebraTopology' n
-  haveI _hring : @IsTopologicalRing _ τ _ :=
+  have _hring : @IsTopologicalRing _ τ _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI hNA : @NonarchimedeanRing _ _ τ := MvTateAlgebra.mvTate_nonarchimedean n
+  have hNA : @NonarchimedeanRing _ _ τ := MvTateAlgebra.mvTate_nonarchimedean n
   letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) := mvQuotTopology n a
-  haveI : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing n a
+  have : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing n a
   constructor
   intro U hU
   have hcont : @Continuous _ _ τ τQ (Ideal.Quotient.mk a) := continuous_quotient_mk'
@@ -1659,11 +1659,11 @@ private theorem example638_locToQuot_continuous (D : RationalLocData A) :
   -- Install the quotient Tate topology + ring/nonarch instances on `B := C ⧸ a`.
   letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) :=
     MvTateAlgebra.mvTateAlgebraTopology' n
-  haveI _hringC : @IsTopologicalRing _ τC _ :=
+  have _hringC : @IsTopologicalRing _ τC _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
   letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) := mvQuotTopology n a
-  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing n a
-  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean n a
+  have hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing n a
+  have hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean n a
   -- `D.topology = locTopology D.P D.T D.s D.hopen` (reducible). Apply the lift criterion.
   change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ (example638_locToQuot D)
   refine locTopology_continuous_lift D.P D.T D.s D.hopen (example638_locToQuot D) ?_ ?_
@@ -1722,11 +1722,11 @@ private noncomputable def example638_quotBackward (D : RationalLocData A)
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
   letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) := mvQuotTopology n a
   letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) := mvQuotUniformSpace n a
-  haveI : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing n a
-  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup n a
-  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace n a hA_complete
-  haveI hT2 : @T2Space _ τQ := mvQuot_t2Space n a hker
-  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2)
+  have : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing n a
+  have : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup n a
+  have : @CompleteSpace _ uQ := mvQuot_completeSpace n a hA_complete
+  have hT2 : @T2Space _ τQ := mvQuot_t2Space n a hker
+  have : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2)
   exact @UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
     (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) uQ _ (mvQuot_isUniformAddGroup n a)
     (mvQuot_isTopologicalRing n a) (example638_locToQuot D)
@@ -1751,11 +1751,11 @@ private theorem example638_quotBackward_coe (D : RationalLocData A)
   letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ ak) :=
     mvQuotTopology n ak
   letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ ak) := mvQuotUniformSpace n ak
-  haveI : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing n ak
-  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup n ak
-  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace n ak hA_complete
-  haveI hT2 : @T2Space _ τQ := mvQuot_t2Space n ak hker
-  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2)
+  have : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing n ak
+  have : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup n ak
+  have : @CompleteSpace _ uQ := mvQuot_completeSpace n ak hA_complete
+  have hT2 : @T2Space _ τQ := mvQuot_t2Space n ak hker
+  have : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2)
   exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace _ _
     (↥(restrictedMvPowerSeriesSubring n A) ⧸ ak) uQ _ (mvQuot_isUniformAddGroup n ak)
     (mvQuot_isTopologicalRing n ak) (example638_locToQuot D)
@@ -1776,7 +1776,7 @@ private theorem example638_quotBackward_continuous (D : RationalLocData A)
   set n := D.T.card
   set ak := RingHom.ker (example638_evalHom D)
   letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ ak) := mvQuotUniformSpace n ak
-  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace n ak hA_complete
+  have : @CompleteSpace _ uQ := mvQuot_completeSpace n ak hA_complete
   exact @UniformSpace.Completion.continuous_extension (Localization.Away D.s) D.uniformSpace _ uQ
     (↑(example638_locToQuot D)) ‹_›
 
@@ -1830,7 +1830,7 @@ inverse of the injective factorisation `ē : C ⧸ ker ↪ presheafValue D`
 theorem example638_evalHom_surjective [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]
     (D : RationalLocData A) : Function.Surjective (example638_evalHom D) := by
   letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
-  haveI hAc : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A) := ‹_›
+  have hAc : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A) := ‹_›
   -- Prop 6.17: `ker(example638_evalHom D)` is closed in `C = A⟨X₁..Xₙ⟩`.
   have hker : @IsClosed _ (MvTateAlgebra.mvTateAlgebraTopology' D.T.card)
       ((RingHom.ker (example638_evalHom D) :
@@ -1907,7 +1907,7 @@ private theorem presheafValue_isNoetherianRing_residual
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] (D : RationalLocData A) :
     IsNoetherianRing (presheafValue D) := by
   -- The source `C = A⟨X₁..Xₙ⟩` is noetherian (case-(b): strongly noetherian `A`).
-  haveI hC : IsNoetherianRing (restrictedMvPowerSeriesSubring D.T.card A) :=
+  have hC : IsNoetherianRing (restrictedMvPowerSeriesSubring D.T.card A) :=
     IsStronglyNoetherian.isNoetherianRing_restricted (A := A) D.T.card
   -- Example 6.38 (multivariate): `C ↠ presheafValue D` with `Xᵢ ↦ tᵢ/s` (now sorry-free via the
   -- completion-comparison iso). Noetherianness transfers along this surjection from `C`.
@@ -2066,7 +2066,7 @@ private lemma presheafValue_mvRestricted_iU_denseRange
       (MvTateAlgebra.mvTateAlgebraTopology' m) _ iU := by
   letI τT : TopologicalSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
     MvTateAlgebra.mvTateAlgebraTopology' m
-  haveI hringT : IsTopologicalRing (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  have hringT : IsTopologicalRing (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing m
   classical
   -- `R := closure(range iU)`, a closed subring of `T`. We show `R = ⊤` by exhibiting that it
@@ -2212,19 +2212,19 @@ private lemma exists_mvRestricted_inclusion
   -- `mvEvalHomBounded` can build the variable-inclusion `ι`.
   letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m)
-  haveI hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+  have hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing (D.T.card + m)
   letI uS : UniformSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateUniformSpace (D.T.card + m)
-  haveI : IsUniformAddGroup (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+  have : IsUniformAddGroup (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTate_isUniformAddGroup (D.T.card + m)
-  haveI : CompleteSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+  have : CompleteSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTate_completeSpace (D.T.card + m) hA_complete
-  haveI : NonarchimedeanRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+  have : NonarchimedeanRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTate_nonarchimedean (D.T.card + m)
-  haveI : T2Space (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+  have : T2Space (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTate_t2Space (D.T.card + m)
-  haveI : T0Space (restrictedMvPowerSeriesSubring (D.T.card + m) A) := inferInstance
+  have : T0Space (restrictedMvPowerSeriesSubring (D.T.card + m) A) := inferInstance
   -- `ι : A⟨X₁..Xₙ⟩ → A⟨X₁..Xₙ₊ₘ⟩`, `Xᵢ ↦ X (castAdd m i)`, `algebraMap a ↦ algebraMap a`.
   let bι : Fin D.T.card → restrictedMvPowerSeriesSubring (D.T.card + m) A :=
     fun i ↦ ⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestrictedAdic _⟩
@@ -2407,14 +2407,14 @@ private lemma presheafValue_mvRestricted_psiGamma_continuous
     @Continuous _ _ D.topology (mvQuotTopology (D.T.card + m) (RingHom.ker Ψ)) ψγ := by
   letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m)
-  haveI hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+  have hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing (D.T.card + m)
   letI τQ : TopologicalSpace
       (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) :=
     mvQuotTopology (D.T.card + m) (RingHom.ker Ψ)
-  haveI hringQ : @IsTopologicalRing _ τQ _ :=
+  have hringQ : @IsTopologicalRing _ τQ _ :=
     mvQuot_isTopologicalRing (D.T.card + m) (RingHom.ker Ψ)
-  haveI hNAQ : @NonarchimedeanRing _ _ τQ :=
+  have hNAQ : @NonarchimedeanRing _ _ τQ :=
     mvQuot_nonarchimedean (D.T.card + m) (RingHom.ker Ψ)
   change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψγ
   refine locTopology_continuous_lift D.P D.T D.s D.hopen ψγ ?_ ?_
@@ -2469,12 +2469,12 @@ private lemma presheafValue_mvRestricted_fU_X_isPowerBounded
       (fU (MvPolynomial.X j)) := by
   letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m)
-  haveI hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+  have hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing (D.T.card + m)
   letI τQ : TopologicalSpace
       (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) :=
     mvQuotTopology (D.T.card + m) (RingHom.ker Ψ)
-  haveI hringQ : @IsTopologicalRing _ τQ _ :=
+  have hringQ : @IsTopologicalRing _ τQ _ :=
     mvQuot_isTopologicalRing (D.T.card + m) (RingHom.ker Ψ)
   rw [hfU_X j]
   have hZ_mem : (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestrictedAdic _⟩ :
@@ -2579,26 +2579,26 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
     MvTateAlgebra.mvTateAlgebraTopology' m
   letI uT : UniformSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
     MvTateAlgebra.mvTateUniformSpace m
-  haveI : IsUniformAddGroup (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  have : IsUniformAddGroup (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
     MvTateAlgebra.mvTate_isUniformAddGroup m
   letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m)
-  haveI hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+  have hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing (D.T.card + m)
   letI τQ : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) :=
     mvQuotTopology (D.T.card + m) (RingHom.ker Ψ)
   letI uQ : UniformSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) :=
     mvQuotUniformSpace (D.T.card + m) (RingHom.ker Ψ)
-  haveI hringQ : @IsTopologicalRing _ τQ _ :=
+  have hringQ : @IsTopologicalRing _ τQ _ :=
     mvQuot_isTopologicalRing (D.T.card + m) (RingHom.ker Ψ)
   letI uU : UniformSpace (MvPolynomial (Fin m) (Localization.Away D.s)) :=
     UniformSpace.comap iU uT
   have hi_ind : IsUniformInducing iU := ⟨rfl⟩
   -- `uU = comap iU uT` is a uniform add group (pullback of the uniform add group `uT`).
-  haveI huug : @IsUniformAddGroup (MvPolynomial (Fin m) (Localization.Away D.s)) uU _ :=
+  have huug : @IsUniformAddGroup (MvPolynomial (Fin m) (Localization.Away D.s)) uU _ :=
     IsUniformAddGroup.comap iU
-  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean (D.T.card + m) (RingHom.ker Ψ)
-  haveI hUQ : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup (D.T.card + m) (RingHom.ker Ψ)
+  have hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean (D.T.card + m) (RingHom.ker Ψ)
+  have hUQ : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup (D.T.card + m) (RingHom.ker Ψ)
   -- `P_T = principal pair of `presheafValue D``, `P_S = principal pair of `A``.
   set P_T := (IsTateRing.principalPair (presheafValue D)).toPairOfDefinition with hP_T
   -- (i) `ψγ : Loc → γ` is continuous (relative analogue of `example638_locToQuot_continuous`).
@@ -2694,26 +2694,26 @@ private theorem presheafValue_mvRestricted_surjection
             (restrictedMvPowerSeriesSubring m (presheafValue D)),
       Function.Surjective φ := by
   classical
-  haveI hTate : IsTateRing (presheafValue D) := presheafValue_isTateRing_faithful D
-  haveI hT2 : T2Space (presheafValue D) := inferInstance
+  have hTate : IsTateRing (presheafValue D) := presheafValue_isTateRing_faithful D
+  have hT2 : T2Space (presheafValue D) := inferInstance
   have hComplete : @CompleteSpace (presheafValue D)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D)) :=
     presheafValue_completeSpace_rightUniformSpace D
   letI τT : TopologicalSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
     MvTateAlgebra.mvTateAlgebraTopology' m
-  haveI hringT : IsTopologicalRing (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  have hringT : IsTopologicalRing (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing m
   letI uT : UniformSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
     MvTateAlgebra.mvTateUniformSpace m
-  haveI : IsUniformAddGroup (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  have : IsUniformAddGroup (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
     MvTateAlgebra.mvTate_isUniformAddGroup m
-  haveI : CompleteSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  have : CompleteSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
     MvTateAlgebra.mvTate_completeSpace m hComplete
-  haveI : NonarchimedeanRing (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  have : NonarchimedeanRing (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
     MvTateAlgebra.mvTate_nonarchimedean m
-  haveI : T2Space (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  have : T2Space (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
     MvTateAlgebra.mvTate_t2Space m
-  haveI : T0Space (restrictedMvPowerSeriesSubring m (presheafValue D)) := inferInstance
+  have : T0Space (restrictedMvPowerSeriesSubring m (presheafValue D)) := inferInstance
   -- base map `g = algebraMap ∘ canonicalMap : A → (presheafValue D)⟨Y⟩`, continuous
   let g : A →+* restrictedMvPowerSeriesSubring m (presheafValue D) :=
     (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
@@ -2765,7 +2765,7 @@ private theorem presheafValue_mvRestricted_surjection
   -- so `source ⧸ ker` is a complete topological ring — the codomain for the extension.
   letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m)
-  haveI hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+  have hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing (D.T.card + m)
   have hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A) := ‹_›
   have hker_closed : IsClosed
@@ -2778,14 +2778,14 @@ private theorem presheafValue_mvRestricted_surjection
     mvQuotTopology (D.T.card + m) (RingHom.ker Ψ)
   letI uQ : UniformSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) :=
     mvQuotUniformSpace (D.T.card + m) (RingHom.ker Ψ)
-  haveI hringQ : @IsTopologicalRing _ τQ _ :=
+  have hringQ : @IsTopologicalRing _ τQ _ :=
     mvQuot_isTopologicalRing (D.T.card + m) (RingHom.ker Ψ)
-  haveI : @IsUniformAddGroup _ uQ _ :=
+  have : @IsUniformAddGroup _ uQ _ :=
     mvQuot_isUniformAddGroup (D.T.card + m) (RingHom.ker Ψ)
-  haveI : @CompleteSpace _ uQ :=
+  have : @CompleteSpace _ uQ :=
     mvQuot_completeSpace (D.T.card + m) (RingHom.ker Ψ) hA_complete
-  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space (D.T.card + m) (RingHom.ker Ψ) hker_closed
-  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
+  have hT2Q : @T2Space _ τQ := mvQuot_t2Space (D.T.card + m) (RingHom.ker Ψ) hker_closed
+  have : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
   -- `ē := kerLift Ψ : γ → T` is the injective factorisation; we right-invert it.
   set ē : (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) →+*
       restrictedMvPowerSeriesSubring m (presheafValue D) := RingHom.kerLift Ψ with hē
@@ -2924,7 +2924,7 @@ theorem presheafValue_isStronglyNoetherian_faithful
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] (D : RationalLocData A) :
     IsStronglyNoetherian (presheafValue D) := by
   refine ⟨fun m ↦ ?_⟩
-  haveI : IsNoetherianRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+  have : IsNoetherianRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     IsStronglyNoetherian.isNoetherianRing_restricted (A := A) (D.T.card + m)
   obtain ⟨φ, hφ⟩ := presheafValue_mvRestricted_surjection D m
   exact isNoetherianRing_of_surjective _ _ φ hφ
@@ -3193,12 +3193,12 @@ private theorem psi_continuous_of_gen
     @Continuous _ _ D.topology (mvQuotTopology 1 aI) ψ := by
   letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring 1 A) :=
     MvTateAlgebra.mvTateAlgebraTopology' 1
-  haveI hringC : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring 1 A) :=
+  have hringC : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring 1 A) :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing 1
   letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
     mvQuotTopology 1 aI
-  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing 1 aI
-  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean 1 aI
+  have hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing 1 aI
+  have hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean 1 aI
   change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) (mvQuotTopology 1 aI) ψ
   refine locTopology_continuous_lift D.P D.T D.s D.hopen ψ ?_ ?_
   · have heq : ψ.comp (algebraMap A (Localization.Away D.s)) =
@@ -3237,10 +3237,10 @@ private theorem exists_completionExtension_of_quotient
     mvQuotTopology 1 aI
   letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
     mvQuotUniformSpace 1 aI
-  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup 1 aI
-  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace 1 aI hA_complete
-  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space 1 aI haI_closed
-  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
+  have : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup 1 aI
+  have : @CompleteSpace _ uQ := mvQuot_completeSpace 1 aI hA_complete
+  have hT2Q : @T2Space _ τQ := mvQuot_t2Space 1 aI haI_closed
+  have : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
   letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
@@ -3287,7 +3287,7 @@ private theorem ker_le_of_ext
     MvTateAlgebra.mvTateAlgebraTopology' 1
   letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
     mvQuotTopology 1 aI
-  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space 1 aI haI_closed
+  have hT2Q : @T2Space _ τQ := mvQuot_t2Space 1 aI haI_closed
   obtain ⟨β, hβ_coe, hβ_cont⟩ :=
     exists_completionExtension_of_quotient D aI haI_closed hA_complete ψ hψ_cont
   have hext : (⇑β ∘ ⇑Φ :

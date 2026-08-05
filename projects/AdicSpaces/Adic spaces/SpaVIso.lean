@@ -253,7 +253,7 @@ theorem phiComp_compat {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
     (i j : RationalIndex V)
     (h : rationalOpen j.D.T j.D.s ⊆ rationalOpen i.D.T i.D.s) :
     restrictionMap i.D j.D h (phiComp D₀ hV hVW x i) = phiComp D₀ hV hVW x j := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   -- the B-side compatibility of `x` at the two image indices
   have hB : restrictionMap (imgDatum D₀ i.isRational) (imgDatum D₀ j.isRational)
       (OpenKeystone.imagePieceDatum_rationalOpen_mono D₀ i.D j.D
@@ -323,7 +323,7 @@ theorem exists_imgDatum_subset [DecidableEq A]
       rationalOpen (imgDatum D₀ hE).T (imgDatum D₀ hE).s
         ⊆ rationalOpen F.T F.s := by
   classical
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   obtain ⟨u, hu⟩ := (inferInstance : IsTateRing (presheafValue D₀)
     ).exists_topologicallyNilpotent_unit
   -- the `B`-side conditions defining `F` at `w`
@@ -393,9 +393,9 @@ theorem imgOpens_cover [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
 /-- The projective-limit sheaf condition for the value ring. -/
 theorem isLimitSheaf_value : IsLimitSheaf (presheafValue D₀) := by
   classical
-  haveI : IsNoetherianRing (presheafValue D₀) :=
+  have : IsNoetherianRing (presheafValue D₀) :=
     IsStronglyNoetherian.isNoetherianRing (presheafValue D₀)
-  haveI : IsSheafy (presheafValue D₀) := isSheafy_of_stronglyNoetherian_828b
+  have : IsSheafy (presheafValue D₀) := isSheafy_of_stronglyNoetherian_828b
   exact isLimitSheaf_of_isSheafy
 
 /-- **The comparison map kills nothing** (P5-K4): a `B`-side family whose
@@ -407,7 +407,7 @@ theorem phiHom_injective [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
     (hVW : Paired D₀ V W) :
     Function.Injective (phiHom D₀ hV hVW) := by
   classical
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   refine (injective_iff_map_eq_zero _).mpr fun x hx => ?_
   -- the components at image indices vanish
   have hzero : ∀ i : RationalIndex V, limitEvalHom (idxOf D₀ hVW i) x = 0 := by
@@ -589,7 +589,7 @@ theorem phiHom_surjective {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
     (hVW : Paired D₀ V W) :
     Function.Surjective (phiHom D₀ hV hVW) := by
   classical
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   intro y
   obtain ⟨x, hx⟩ := (isLimitSheaf_value D₀).glue
     (U := imgOpens D₀ (A := A) (V := V)) (imgOpens_le D₀ hVW)
@@ -620,7 +620,7 @@ theorem genPiece_rel_forward_continuous
     (hle : (Ideal.span (D₀.P.A₀.subtype '' (D₀.P.I : Set D₀.P.A₀))) ^ M
       ≤ Ideal.span ((T : Finset A) : Set A)) :
     Continuous (OpenKeystone.genPiece_rel_forward D₀ T t M hle) := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   letI : UniformSpace (Localization.Away
     (D₀.interSamePair (OpenKeystone.genPieceDatumOpen D₀.P T t M hle) rfl).s) :=
     (D₀.interSamePair (OpenKeystone.genPieceDatumOpen D₀.P T t M hle) rfl).uniformSpace
@@ -632,7 +632,7 @@ theorem genPiece_rel_backward_continuous
     (hle : (Ideal.span (D₀.P.A₀.subtype '' (D₀.P.I : Set D₀.P.A₀))) ^ M
       ≤ Ideal.span ((T : Finset A) : Set A)) :
     Continuous (OpenKeystone.genPiece_rel_backward D₀ T t M hle) := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   letI : UniformSpace (Localization.Away
     (OpenKeystone.imagePieceDatumOpen D₀ T t M hle).s) :=
     (OpenKeystone.imagePieceDatumOpen D₀ T t M hle).uniformSpace
@@ -642,7 +642,7 @@ theorem genPiece_rel_backward_continuous
 theorem pieceEquiv_continuous {E : RationalLocData A} (hE : E.IsRational)
     (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) :
     Continuous (pieceEquiv D₀ hE hE_sub) := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   exact (genPiece_rel_forward_continuous D₀ E.T E.s (certExp D₀ hE)
     (certExp_spec D₀ hE)).comp (restrictionMapHom_continuous _ _ _)
 
@@ -667,7 +667,7 @@ theorem pieceEquiv_open_eq {E : RationalLocData A} (hE : E.IsRational)
 theorem pieceEquiv_symm_continuous {E : RationalLocData A} (hE : E.IsRational)
     (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) :
     Continuous (pieceEquiv D₀ hE hE_sub).symm := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   have hEeq := pieceEquiv_open_eq D₀ hE hE_sub
   have hbij := restrictionMap_bijective_of_rationalOpen_eq E
     (D₀.interSamePair (OpenKeystone.genPieceDatumOpen D₀.P E.T E.s
@@ -743,7 +743,7 @@ theorem phiEquiv_symm_continuous [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
     (hV : V ≤ spaOpens D₀)
     {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
     (hVW : Paired D₀ V W) : Continuous (phiEquiv D₀ hV hVW).symm := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   refine ((isLimitSheaf_value D₀).isEmbedding (imgOpens_le D₀ hVW)
     (imgOpens_cover D₀ hV hVW)).continuous_iff.mpr ?_
   refine continuous_pi fun i => ?_
@@ -819,7 +819,7 @@ theorem pieceEquiv_canonicalMap {E : RationalLocData A} (hE : E.IsRational)
     (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) (a : A) :
     pieceEquiv D₀ hE hE_sub (E.canonicalMap a)
       = (imgDatum D₀ hE).canonicalMap (D₀.canonicalMap a) := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   rw [← restrictionMapHom_canonicalMap_generic D₀ E hE_sub a]
   exact OpenKeystone.relativePiece_equiv_restrictionMap D₀ E hE_sub
     (certExp D₀ hE) (certExp_spec D₀ hE) (D₀.canonicalMap a)
@@ -840,7 +840,7 @@ theorem comap_pieceEquiv_pointValue [DecidableEq A]
     comap ((pieceEquiv D₀ hE hE_sub).toRingHom)
         (pointValue (imgDatum D₀ hE) hwB)
       = pointValue E hwA := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   refine eq_pointValue_of_comap_eq E hwA ?_ ?_
   · exact comap_isContinuous (pieceEquiv_continuous D₀ hE hE_sub)
       (pointValue_isContinuous (imgDatum D₀ hE) hwB)
@@ -896,7 +896,7 @@ theorem comap_phiHom_openValue [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
     comap (phiHom D₀ hV hVW) (openValue V (paired_shadow D₀ hVW w hw))
       = openValue W hw := by
   classical
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   -- an `A`-index of `V` around the shadow, and its image index
   obtain ⟨E, hE, hEmem, hEsub⟩ := exists_isRational_spaOpen_subset_huber
     (V := (V : Set ↥(Spa A A⁺))) V.2 (paired_shadow D₀ hVW w hw)
@@ -1260,9 +1260,9 @@ noncomputable def spaCompVPreHom [DecidableEq A]
       (spaVPreObjOf (A := A) hloc hsupp) where
   toHom := spaCompHom D₀ u hu
   isLocalHom_stalkMap := fun w => by
-    haveI hA : IsLocalRing (ToType ((spaRingPresheaf A).stalk (shadow D₀ w))) :=
+    have hA : IsLocalRing (ToType ((spaRingPresheaf A).stalk (shadow D₀ w))) :=
       hloc _
-    haveI hB : IsLocalRing (ToType ((spaRingPresheaf (presheafValue D₀)).stalk w)) :=
+    have hB : IsLocalRing (ToType ((spaRingPresheaf (presheafValue D₀)).stalk w)) :=
       isLocalRing_stalk_of_shrink (stalkShrink_tate w)
     exact isLocalHom_of_val_comap hA hB _ _ _
       (comap_ringStalkMap_spaCompHom_stalkValue D₀ u hu w)

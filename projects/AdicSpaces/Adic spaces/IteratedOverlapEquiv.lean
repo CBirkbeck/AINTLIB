@@ -74,8 +74,8 @@ private theorem iteratedOverlap_isLocalization_target
       HasLocLiftPowerBounded (presheafValue D₀)) :
     IsLocalization.Away (D₀.canonicalMap f)
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
   rw [iteratedOverlapDatum_B_s_eq P D₀ f hLocLift_B]; infer_instance
 
 /-! ### Phase 1: forward uncompleted hom landing in target localization -/
@@ -90,9 +90,9 @@ private theorem iteratedOverlap_baseHom_DsTimes_f_isUnit
     IsUnit ((algebraMap (presheafValue D₀)
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s))).comp
       D₀.canonicalMap (D₀.s * f)) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI := iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have := iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
   rw [RingHom.comp_apply, map_mul, map_mul]
   exact ((isUnit_s_in_presheafValue D₀).map _).mul
     (IsLocalization.Away.algebraMap_isUnit (D₀.canonicalMap f))
@@ -107,7 +107,7 @@ noncomputable def iteratedOverlap_forwardLocHom_to_B
       HasLocLiftPowerBounded (presheafValue D₀)) :
     Localization.Away ((laurentOverlapDatum D₀ f).s) →+*
       Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s) := by
-  haveI : IsLocalization.Away (D₀.s * f)
+  have : IsLocalization.Away (D₀.s * f)
       (Localization.Away ((laurentOverlapDatum D₀ f).s)) := by
     change IsLocalization.Away (D₀.s * f) (Localization.Away (D₀.s * f))
     infer_instance
@@ -128,7 +128,7 @@ theorem iteratedOverlap_forwardLocHom_to_B_algebraMap
       algebraMap (presheafValue D₀)
         (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s))
         (D₀.canonicalMap a) := by
-  haveI : IsLocalization.Away (D₀.s * f)
+  have : IsLocalization.Away (D₀.s * f)
       (Localization.Away ((laurentOverlapDatum D₀ f).s)) := by
     change IsLocalization.Away (D₀.s * f) (Localization.Away (D₀.s * f))
     infer_instance
@@ -484,13 +484,13 @@ private theorem iteratedOverlap_forwardLocHom_to_B_generators_powerBounded
         (iteratedOverlapDatum_B P D₀ f hLocLift_B).topology
         (iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B
           (divByS t (laurentOverlapDatum D₀ f).s)) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI hloc_src : IsLocalization.Away (D₀.s * f)
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have hloc_src : IsLocalization.Away (D₀.s * f)
       (Localization.Away ((laurentOverlapDatum D₀ f).s)) := by
     change IsLocalization.Away (D₀.s * f) (Localization.Away (D₀.s * f))
     infer_instance
-  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
+  have hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
     iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
   intro t ht
@@ -562,8 +562,8 @@ private theorem iteratedOverlap_forwardLocHom_to_B_comp_algebraMap_continuous
     @Continuous _ _ _ (iteratedOverlapDatum_B P D₀ f hLocLift_B).topology
       ((iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B).comp
         (algebraMap A (Localization.Away ((laurentOverlapDatum D₀ f).s)))) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
   letI : TopologicalSpace (Localization.Away ((laurentOverlapDatum D₀ f).s)) :=
     (laurentOverlapDatum D₀ f).topology
   letI topB : TopologicalSpace
@@ -599,8 +599,8 @@ theorem iteratedOverlap_forwardToCompletion_continuous
       HasLocLiftPowerBounded (presheafValue D₀)) :
     @Continuous _ _ (laurentOverlapDatum D₀ f).topology _
       (iteratedOverlap_forwardToCompletion P D₀ f hLocLift_B) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
   letI : TopologicalSpace (Localization.Away ((laurentOverlapDatum D₀ f).s)) :=
     (laurentOverlapDatum D₀ f).topology
   letI : IsTopologicalRing (Localization.Away ((laurentOverlapDatum D₀ f).s)) :=
@@ -621,7 +621,7 @@ theorem iteratedOverlap_forwardToCompletion_continuous
   letI : IsUniformAddGroup
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
     (iteratedOverlapDatum_B P D₀ f hLocLift_B).isUniformAddGroup
-  haveI : @NonarchimedeanRing
+  have : @NonarchimedeanRing
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) _
       (iteratedOverlapDatum_B P D₀ f hLocLift_B).topology :=
     (locBasis (iteratedOverlapDatum_B P D₀ f hLocLift_B).P
@@ -809,9 +809,9 @@ private theorem iteratedOverlap_backward_divByS_one_isPowerBounded
       (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
         (divByS (1 : presheafValue D₀)
           (iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
     iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
   set B := presheafValue D₀
@@ -868,9 +868,9 @@ private theorem iteratedOverlap_backward_divByS_canonicalMap_mul_isPowerBounded
       (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
         (divByS (D₀.canonicalMap f * y)
           (iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
     iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
   set B := presheafValue D₀
@@ -932,9 +932,9 @@ private theorem iteratedOverlap_backwardToCompletion_generators_powerBounded
       TopologicalRing.IsPowerBounded
         (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
           (divByS t (iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
     iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
   intro t ht
@@ -1001,9 +1001,9 @@ theorem iteratedOverlap_backwardToCompletion_continuous
       rationalOpen D₀.T D₀.s) :
     @Continuous _ _ (iteratedOverlapDatum_B P D₀ f hLocLift_B).topology _
       (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
     iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
   letI : TopologicalSpace
@@ -1012,7 +1012,7 @@ theorem iteratedOverlap_backwardToCompletion_continuous
   letI : IsTopologicalRing
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
     (iteratedOverlapDatum_B P D₀ f hLocLift_B).isTopologicalRing
-  haveI : NonarchimedeanRing (presheafValue (laurentOverlapDatum D₀ f)) :=
+  have : NonarchimedeanRing (presheafValue (laurentOverlapDatum D₀ f)) :=
     presheafValueNonarchimedeanRing (laurentOverlapDatum D₀ f)
   -- Continuity of `backwardToCompletion ∘ algebraMap B`: equals `restrictionMapHom`.
   have hf_alg : @Continuous _ _ _ _
@@ -1055,13 +1055,13 @@ private theorem iteratedOverlap_backwardToCompletion_comp_forwardLocHom_to_B
     (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub).comp
       (iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B) =
       (laurentOverlapDatum D₀ f).coeRingHom := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI hloc_src : IsLocalization.Away (D₀.s * f)
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have hloc_src : IsLocalization.Away (D₀.s * f)
       (Localization.Away ((laurentOverlapDatum D₀ f).s)) := by
     change IsLocalization.Away (D₀.s * f) (Localization.Away (D₀.s * f))
     infer_instance
-  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
+  have hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
       (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
     iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
   apply IsLocalization.ringHom_ext (Submonoid.powers (D₀.s * f))
@@ -1237,11 +1237,11 @@ theorem iteratedOverlap_forwardHom_comp_restrictionMapHom
       (iteratedOverlapDatum_B P D₀ f hLocLift_B).canonicalMap := by
   set W := laurentOverlapDatum D₀ f with hW
   set Q := iteratedOverlapDatum_B P D₀ f hLocLift_B with hQ
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI hloc_src : IsLocalization.Away (D₀.s * f) (Localization.Away ((W).s)) := by
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have hloc_src : IsLocalization.Away (D₀.s * f) (Localization.Away ((W).s)) := by
     change IsLocalization.Away (D₀.s * f) (Localization.Away (D₀.s * f)); infer_instance
-  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f) (Localization.Away ((Q).s)) :=
+  have hloc_tgt : IsLocalization.Away (D₀.canonicalMap f) (Localization.Away ((Q).s)) :=
     iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
   letI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
@@ -1301,9 +1301,9 @@ theorem iteratedOverlap_forwardHom_comp_backwardHom
         (iteratedOverlap_backwardHom P D₀ f hLocLift_B hsub) =
       RingHom.id _ := by
   set J := iteratedOverlapDatum_B P D₀ f hLocLift_B with hJ
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f) (Localization.Away (J.s)) :=
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have hloc_tgt : IsLocalization.Away (D₀.canonicalMap f) (Localization.Away (J.s)) :=
     iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
   letI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup

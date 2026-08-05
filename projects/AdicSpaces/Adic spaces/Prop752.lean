@@ -57,11 +57,11 @@ theorem locSubring_isAdic (P : PairOfDefinition A) (T : Finset A) (s : A)
       ((locTopology P T s hopen).induced (locSubring P T s).subtype)
       (locIdeal P T s) := by
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  haveI : IsTopologicalRing (Localization.Away s) :=
+  have : IsTopologicalRing (Localization.Away s) :=
     (locBasis P T s hopen).toRingFilterBasis.isTopologicalRing
   letI : TopologicalSpace (locSubring P T s) :=
     (locTopology P T s hopen).induced (locSubring P T s).subtype
-  haveI : IsTopologicalRing (locSubring P T s) :=
+  have : IsTopologicalRing (locSubring P T s) :=
     Subring.instIsTopologicalRing (locSubring P T s)
   rw [isAdic_iff]
   constructor
@@ -138,7 +138,7 @@ omit [IsTopologicalRing A] in
 /-- `locSubring` is a domain when `A` is and `s ≠ 0` (subring of a domain). -/
 theorem locSubring_isDomain [IsDomain A] (P : PairOfDefinition A) (T : Finset A)
     {s : A} (hs : s ≠ 0) : IsDomain (locSubring P T s) :=
-  haveI := locAway_isDomain hs; Subring.instIsDomainSubtypeMem _
+  have := locAway_isDomain hs; Subring.instIsDomainSubtypeMem _
 
 omit [IsTopologicalRing A] in
 /-- `locSubring` is noetherian when `A₀` is, because `locSubring` is a finitely
@@ -165,7 +165,7 @@ theorem locSubring_isNoetherian (P : PairOfDefinition A) [IsNoetherianRing P.A�
         Algebra.subset_adjoin ?_, rfl⟩
       exact Finset.mem_coe.mpr (Finset.mem_image.mpr
         ⟨⟨t, ht⟩, Finset.mem_attach _ _, rfl⟩)
-  haveI : Algebra.FiniteType P.A₀ (locSubring P T s) := ⟨⟨S, hadj⟩⟩
+  have : Algebra.FiniteType P.A₀ (locSubring P T s) := ⟨⟨S, hadj⟩⟩
   exact Algebra.FiniteType.isNoetherianRing P.A₀ _
 
 omit [IsTopologicalRing A] in
@@ -192,8 +192,8 @@ theorem isHausdorff_locSubring [IsDomain A] (P : PairOfDefinition A)
     (hdisjoint : Disjoint (Submonoid.powers s : Set A)
       ((Ideal.map P.A₀.subtype P.I : Ideal A) : Set A)) :
     IsHausdorff (locIdeal P T s) (locSubring P T s) := by
-  haveI := locSubring_isDomain P T hs
-  haveI := locSubring_isNoetherian P T s
+  have := locSubring_isDomain P T hs
+  have := locSubring_isNoetherian P T s
   apply IsHausdorff.mk
   intro x hx
   have hmem : ∀ n, (x : locSubring P T s) ∈ locIdeal P T s ^ n := by

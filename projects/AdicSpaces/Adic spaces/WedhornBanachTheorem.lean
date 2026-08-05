@@ -109,8 +109,8 @@ private theorem image_smul_image_preimage_eq {A : Type u} [CommRing A]
     {ϖ : A} (hϖu : IsUnit ϖ) (n₀ : ℕ) (V : Set M) (f : M →ₗ[A] N) :
     (((hϖu.pow n₀).isHomeomorph_smul).homeomorph : N ≃ₜ N) ''
         (f '' {m : M | ϖ ^ n₀ • m ∈ V}) = f '' V := by
-  haveI : ContinuousConstSMul A M := inferInstance
-  haveI : ContinuousConstSMul A N := inferInstance
+  have : ContinuousConstSMul A M := inferInstance
+  have : ContinuousConstSMul A N := inferInstance
   set S : ℕ → Set M := fun n => {m : M | ϖ ^ n • m ∈ V} with hS_def
   let e : N ≃ₜ N := ((hϖu.pow n₀).isHomeomorph_smul).homeomorph
   show e '' (f '' S n₀) = f '' V
@@ -150,7 +150,7 @@ theorem _omt_almost_open
   obtain ⟨V, hV_nhds, _hV_closed, hV_symm, hV_add⟩ :=
     AddMonoidHom._sub_sub_lemma_A_1_split_symmetric U hU
   -- `ContinuousConstSMul` instances follow from `ContinuousSMul`.
-  haveI : ContinuousConstSMul A M := inferInstance; haveI : ContinuousConstSMul A N := inferInstance
+  have : ContinuousConstSMul A M := inferInstance; have : ContinuousConstSMul A N := inferInstance
   -- Step 1: closure (f '' V) has nonempty interior.
   -- The dilation cover sets in M.
   set S : ℕ → Set M := fun n => {m : M | ϖ ^ n • m ∈ V} with hS_def
@@ -487,7 +487,7 @@ theorem wedhorn_6_16_of_topNilpUnit
     (f : M →ₗ[A] N) (hf : Continuous f) (hsurj : Function.Surjective f) :
     IsOpenMap f := by
   -- `N` is a Baire space: complete + countably-generated uniformity ⇒ metrizable ⇒ Baire.
-  haveI : BaireSpace N := inferInstance
+  have : BaireSpace N := inferInstance
   -- Almost-open half (the dilation-cover Baire step replaces σ-compactness).
   have h_almost : ∀ U ∈ nhds (0 : M), closure (f '' U) ∈ nhds (0 : N) :=
     fun U hU => _omt_almost_open hϖ hϖu f hsurj hU
@@ -518,13 +518,13 @@ theorem isInducing_of_closedRange_of_topNilpUnit
     (hcl : IsClosed (LinearMap.range f : Set N)) :
     Topology.IsInducing (⇑f) := by
   -- The (closed) range, as a complete + countably-based topological `A`-module.
-  haveI : IsUniformAddGroup ↥(LinearMap.range f) :=
+  have : IsUniformAddGroup ↥(LinearMap.range f) :=
     show IsUniformAddGroup ↥(LinearMap.range f).toAddSubgroup from inferInstance
-  haveI : T2Space ↥(LinearMap.range f) := inferInstance
-  haveI : CompleteSpace ↥(LinearMap.range f) := hcl.completeSpace_coe
-  haveI : (uniformity ↥(LinearMap.range f)).IsCountablyGenerated :=
+  have : T2Space ↥(LinearMap.range f) := inferInstance
+  have : CompleteSpace ↥(LinearMap.range f) := hcl.completeSpace_coe
+  have : (uniformity ↥(LinearMap.range f)).IsCountablyGenerated :=
     Filter.comap.isCountablyGenerated _ _
-  haveI : ContinuousSMul A ↥(LinearMap.range f) := by
+  have : ContinuousSMul A ↥(LinearMap.range f) := by
     refine ⟨?_⟩
     rw [show (fun p : A × ↥(LinearMap.range f) => p.1 • p.2)
         = fun p => ⟨p.1 • (p.2 : N), Submodule.smul_mem _ p.1 p.2.2⟩ from rfl]
@@ -733,16 +733,16 @@ theorem fg_topologicalClosure_isClosed
   set Nbar : Submodule A M := N.topologicalClosure
   -- `↥N̄` is a complete cg T2 `A`-module (closed subspace of complete `M`), finite by `hfin`.
   have hNbar_closed : IsClosed (Nbar : Set M) := N.isClosed_topologicalClosure
-  haveI : IsUniformAddGroup ↥Nbar :=
+  have : IsUniformAddGroup ↥Nbar :=
     show IsUniformAddGroup ↥Nbar.toAddSubgroup from inferInstance
-  haveI : (uniformity ↥Nbar).IsCountablyGenerated := Filter.comap.isCountablyGenerated _ _
-  haveI : CompleteSpace ↥Nbar := hNbar_closed.completeSpace_coe
-  haveI : T2Space ↥Nbar := inferInstance
-  haveI : ContinuousSMul A ↥Nbar := ⟨by
+  have : (uniformity ↥Nbar).IsCountablyGenerated := Filter.comap.isCountablyGenerated _ _
+  have : CompleteSpace ↥Nbar := hNbar_closed.completeSpace_coe
+  have : T2Space ↥Nbar := inferInstance
+  have : ContinuousSMul A ↥Nbar := ⟨by
     refine Topology.IsInducing.subtypeVal.continuous_iff.mpr ?_
     exact continuous_smul.comp
       ((continuous_fst).prodMk (continuous_subtype_val.comp continuous_snd))⟩
-  haveI : Module.Finite A ↥Nbar := hfin
+  have : Module.Finite A ↥Nbar := hfin
   -- `N` as a submodule of `↥N̄`, where it is **dense**.
   set N' : Submodule A ↥Nbar := N.comap Nbar.subtype with hN'_def
   have hN_le_Nbar : N ≤ Nbar := N.le_topologicalClosure
@@ -784,12 +784,12 @@ theorem _sub_lemma_L3_1b_fg_submodule_closed
     (N : Submodule A M) (hN_fg : N.FG) :
     IsClosed (N : Set M) := by
   -- ↥N inherits subspace uniform structure from M.
-  haveI : IsUniformAddGroup ↥N :=
+  have : IsUniformAddGroup ↥N :=
     show IsUniformAddGroup ↥N.toAddSubgroup from inferInstance
-  haveI : (uniformity ↥N).IsCountablyGenerated := Filter.comap.isCountablyGenerated _ _
-  haveI : Module.Finite A ↥N := (Module.Finite.iff_fg (N := N)).mpr hN_fg
+  have : (uniformity ↥N).IsCountablyGenerated := Filter.comap.isCountablyGenerated _ _
+  have : Module.Finite A ↥N := (Module.Finite.iff_fg (N := N)).mpr hN_fg
   -- L3.1a gives CompleteSpace ↥N for the fg subspace.
-  haveI : CompleteSpace ↥N := _sub_lemma_L3_1a_completion_fg_complete (A := A) (M := ↥N)
+  have : CompleteSpace ↥N := _sub_lemma_L3_1a_completion_fg_complete (A := A) (M := ↥N)
     inferInstance
   -- Complete subset of T2 ambient ⇒ closed.
   exact (completeSpace_coe_iff_isComplete.mp ‹CompleteSpace ↥N›).isClosed
@@ -874,11 +874,11 @@ theorem _sub_lemma_L3_2_baire_chain_submodule
   -- M_inf is closed (by hypothesis).
   have hM_inf_closed : IsClosed (M_inf : Set M) := h_all_closed M_inf
   -- ↥M_inf inherits subspace structure.
-  haveI : IsUniformAddGroup ↥M_inf :=
+  have : IsUniformAddGroup ↥M_inf :=
     show IsUniformAddGroup ↥M_inf.toAddSubgroup from inferInstance
-  haveI : (uniformity ↥M_inf).IsCountablyGenerated := Filter.comap.isCountablyGenerated _ _
-  haveI : CompleteSpace ↥M_inf := hM_inf_closed.completeSpace_coe
-  haveI : T2Space ↥M_inf := inferInstance
+  have : (uniformity ↥M_inf).IsCountablyGenerated := Filter.comap.isCountablyGenerated _ _
+  have : CompleteSpace ↥M_inf := hM_inf_closed.completeSpace_coe
+  have : T2Space ↥M_inf := inferInstance
   -- Each chain k is closed in M (hypothesis), hence closed in ↥M_inf via preimage.
   have hk_closed_in_inf : ∀ k, IsClosed
       ((Subtype.val : ↥M_inf → M) ⁻¹' (chain k : Set M)) := fun k =>
@@ -895,7 +895,7 @@ theorem _sub_lemma_L3_2_baire_chain_submodule
     rw [h_inf_union, Set.mem_iUnion] at this
     exact this
   -- Nonempty witness for C.2.
-  haveI : Nonempty ↥M_inf := ⟨⟨0, M_inf.zero_mem⟩⟩
+  have : Nonempty ↥M_inf := ⟨⟨0, M_inf.zero_mem⟩⟩
   -- Apply C.2 (Baire): some chain k₀ has nonempty interior in ↥M_inf.
   obtain ⟨k₀, hk₀_int⟩ := AddMonoidHom._sub_sub_lemma_C_2_baire_nonempty_interior
     (fun k => (Subtype.val : ↥M_inf → M) ⁻¹' (chain k : Set M))
@@ -917,7 +917,7 @@ theorem _sub_lemma_L3_2_baire_chain_submodule
     push_cast
     exact (chain k₀).sub_mem hwk hyk
   -- Establish ContinuousSMul A ↥M_inf via the subspace IsInducing.
-  haveI : ContinuousSMul A ↥M_inf := ⟨by
+  have : ContinuousSMul A ↥M_inf := ⟨by
     refine Topology.IsInducing.subtypeVal.continuous_iff.mpr ?_
     exact continuous_smul.comp
       ((continuous_fst).prodMk (continuous_subtype_val.comp continuous_snd))⟩
@@ -964,7 +964,7 @@ theorem wedhorn_6_17_ideal
   -- direction, but here it appears as iff LHS. Split into two directions.
   constructor
   · intro hA
-    haveI : IsNoetherianRing A := hA
+    have : IsNoetherianRing A := hA
     exact (wedhorn_6_17 (A := A) (M := A)).mp hA
   · intro h_all
     -- Reverse: derive IsNoetherian A A from chain stationarity via L3.2 Submodule.
@@ -1020,9 +1020,9 @@ theorem _sub_lemma_L4_1_quotient_complete
       @CompleteSpace _ τ ∧
       (@uniformity _ τ).IsCountablyGenerated := by
   -- M is first-countable from countably-generated uniformity (mathlib instance)
-  haveI : FirstCountableTopology M := UniformSpace.firstCountableTopology M
+  have : FirstCountableTopology M := UniformSpace.firstCountableTopology M
   -- Quotient is first-countable (mathlib instance, needs explicit subgroup arg)
-  haveI : FirstCountableTopology (M ⧸ K) :=
+  have : FirstCountableTopology (M ⧸ K) :=
     QuotientAddGroup.instFirstCountableTopology K.toAddSubgroup
   -- Take τ := canonical right uniform space from the topological additive group structure.
   letI τ : UniformSpace (M ⧸ K) := IsTopologicalAddGroup.rightUniformSpace (M ⧸ K)
@@ -1034,7 +1034,7 @@ theorem _sub_lemma_L4_1_quotient_complete
     exact QuotientAddGroup.completeSpace_right M K.toAddSubgroup
   · -- IsCountablyGenerated via IsUniformAddGroup.uniformity_countably_generated;
     -- needs IsUniformAddGroup w.r.t. our chosen τ + IsCountablyGenerated (𝓝 0).
-    haveI : @IsUniformAddGroup (M ⧸ K) τ _ := isUniformAddGroup_of_addCommGroup
+    have : @IsUniformAddGroup (M ⧸ K) τ _ := isUniformAddGroup_of_addCommGroup
     exact IsUniformAddGroup.uniformity_countably_generated
 
 /-- **Sub-lemma L4.2 — A-linear map between fg modules is continuous**.
@@ -1204,19 +1204,19 @@ theorem _sub_lemma_L4_3_strict_via_closed_image
   have hrange_closed : IsClosed (LinearMap.range f : Set N) :=
     fg_topologicalClosure_isClosed (LinearMap.range f) hclos_fin
   -- Step 3: subspace typeclass setup on ↥f.range.
-  haveI : IsUniformAddGroup ↥(LinearMap.range f) :=
+  have : IsUniformAddGroup ↥(LinearMap.range f) :=
     show IsUniformAddGroup ↥(LinearMap.range f).toAddSubgroup from inferInstance
-  haveI : (uniformity ↥(LinearMap.range f)).IsCountablyGenerated :=
+  have : (uniformity ↥(LinearMap.range f)).IsCountablyGenerated :=
     Filter.comap.isCountablyGenerated _ _
-  haveI : CompleteSpace ↥(LinearMap.range f) :=
+  have : CompleteSpace ↥(LinearMap.range f) :=
     hrange_closed.completeSpace_coe
-  haveI : T2Space ↥(LinearMap.range f) :=
+  have : T2Space ↥(LinearMap.range f) :=
     inferInstance  -- Subtype T2 from T2 N
-  haveI : Module.Finite A ↥(LinearMap.range f) :=
+  have : Module.Finite A ↥(LinearMap.range f) :=
     (Module.Finite.iff_fg (N := LinearMap.range f)).mpr hrange_fg
   -- ContinuousSMul on subspace: A × ↥range → ↥range factors through
   -- A × N → N via Subtype.val on the codomain.
-  haveI : ContinuousSMul A ↥(LinearMap.range f) := by
+  have : ContinuousSMul A ↥(LinearMap.range f) := by
     refine ⟨?_⟩
     -- Continuous fun p : A × ↥(LinearMap.range f) => p.1 • p.2 : ↥(LinearMap.range f)
     -- Equivalently, Continuous of (a, x) ↦ ⟨a • x.1, ...⟩.
@@ -1357,15 +1357,15 @@ theorem wedhorn_6_18_exists_canonical_topology
     exact ⟨a, ha⟩
   let eq : ((Fin n → A) ⧸ ν.ker) ≃+ M :=
     QuotientAddGroup.quotientKerEquivOfSurjective ν hν_surj
-  haveI : FirstCountableTopology (Fin n → A) := UniformSpace.firstCountableTopology _
-  haveI : FirstCountableTopology ((Fin n → A) ⧸ ν.ker) :=
+  have : FirstCountableTopology (Fin n → A) := UniformSpace.firstCountableTopology _
+  have : FirstCountableTopology ((Fin n → A) ⧸ ν.ker) :=
     QuotientAddGroup.instFirstCountableTopology ν.ker
   letI τQ : UniformSpace ((Fin n → A) ⧸ ν.ker) :=
     IsTopologicalAddGroup.rightUniformSpace ((Fin n → A) ⧸ ν.ker)
-  haveI : @IsUniformAddGroup _ τQ _ := isUniformAddGroup_of_addCommGroup
-  haveI : @CompleteSpace _ τQ :=
+  have : @IsUniformAddGroup _ τQ _ := isUniformAddGroup_of_addCommGroup
+  have : @CompleteSpace _ τQ :=
     QuotientAddGroup.completeSpace_right (Fin n → A) ν.ker
-  haveI : (@uniformity _ τQ).IsCountablyGenerated :=
+  have : (@uniformity _ τQ).IsCountablyGenerated :=
     IsUniformAddGroup.uniformity_countably_generated
   letI τM : UniformSpace M := UniformSpace.comap eq.symm τQ
   refine ⟨τM, ?_, ?_, ?_⟩

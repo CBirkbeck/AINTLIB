@@ -498,9 +498,9 @@ theorem RationalLocData.locPlusSubring_le_powerBounded (D : RationalLocData A)
     (D.locPlusSubring : Set (Localization.Away D.s)) ⊆
       @TopologicalRing.powerBoundedSubring (Localization.Away D.s) _ D.topology := by
   letI := D.topology
-  haveI hloc_ring : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  have hloc_ring : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   have hbasis := locBasis D.P D.T D.s D.hopen
-  haveI hag_loc : NonarchimedeanAddGroup (Localization.Away D.s) :=
+  have hag_loc : NonarchimedeanAddGroup (Localization.Away D.s) :=
     @NonarchimedeanAddGroup.mk _ _ D.topology D.isTopologicalAddGroup (by
       intro U hU
       obtain ⟨V, ⟨n, rfl⟩, hVU⟩ :=
@@ -525,9 +525,9 @@ theorem RationalLocData.integralClosure_locPlusSubring_le_powerBounded
         Set (Localization.Away D.s)) ⊆
       @TopologicalRing.powerBoundedSubring (Localization.Away D.s) _ D.topology := by
   letI := D.topology
-  haveI hloc_ring : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  have hloc_ring : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   have hbasis := locBasis D.P D.T D.s D.hopen
-  haveI hag_loc : NonarchimedeanAddGroup (Localization.Away D.s) :=
+  have hag_loc : NonarchimedeanAddGroup (Localization.Away D.s) :=
     @NonarchimedeanAddGroup.mk _ _ D.topology D.isTopologicalAddGroup (by
       intro U hU
       obtain ⟨V, ⟨n, rfl⟩, hVU⟩ :=
@@ -602,7 +602,7 @@ open-subgroups basis; completions preserve nonarchimedean additive groups via
 theorem RationalLocData.nonarchimedeanAddGroup_presheafValue (D : RationalLocData A) :
     NonarchimedeanAddGroup (presheafValue D) := by
   have hbasis := locBasis D.P D.T D.s D.hopen
-  haveI hag_loc : @NonarchimedeanAddGroup (Localization.Away D.s) _ D.topology :=
+  have hag_loc : @NonarchimedeanAddGroup (Localization.Away D.s) _ D.topology :=
     @NonarchimedeanAddGroup.mk _ _ D.topology D.isTopologicalAddGroup (by
       intro U hU
       obtain ⟨V, ⟨n, rfl⟩, hVU⟩ :=
@@ -614,7 +614,7 @@ theorem RationalLocData.nonarchimedeanAddGroup_presheafValue (D : RationalLocDat
 (21 lines of a 51-line body). -/
 private theorem isClosed_powerBoundedSubring_isOpen_key (D : RationalLocData A) :
     IsOpen (D.completedLocSubring : Set (presheafValue D)) := by
-  haveI hag : NonarchimedeanAddGroup (presheafValue D) := D.nonarchimedeanAddGroup_presheafValue
+  have hag : NonarchimedeanAddGroup (presheafValue D) := D.nonarchimedeanAddGroup_presheafValue
   letI := D.uniformSpace
   letI := D.isUniformAddGroup
   letI := D.isTopologicalRing
@@ -641,7 +641,7 @@ open subring — Wedhorn 6.1.2 at the completion), hence is an open, and therefo
 additive subgroup. -/
 theorem RationalLocData.isClosed_powerBoundedSubring (D : RationalLocData A) :
     IsClosed (TopologicalRing.powerBoundedSubring (presheafValue D)) := by
-  haveI hag : NonarchimedeanAddGroup (presheafValue D) := D.nonarchimedeanAddGroup_presheafValue
+  have hag : NonarchimedeanAddGroup (presheafValue D) := D.nonarchimedeanAddGroup_presheafValue
   -- (i) `completedLocSubring` is open: it contains `closure (coe '' locNhd 1)`, a
   -- `0`-neighbourhood of the completion.
   have hopen : IsOpen (D.completedLocSubring : Set (presheafValue D)) :=
@@ -930,7 +930,7 @@ instance RationalLocData.presheafValuePlus_isRingOfIntegralElements
       have hx' : x ∈ D.completedPlusSubring := hx
       rwa [RationalLocData.completedPlusSubring, Subalgebra.mem_toSubring,
         mem_integralClosure_iff] at hx'
-    haveI := D.nonarchimedeanAddGroup_presheafValue
+    have := D.nonarchimedeanAddGroup_presheafValue
     exact TopologicalRing.isPowerBounded_of_isIntegral_of_subset_powerBounded
       D.completedPlusSubringBase_le_powerBounded hx_int
 
@@ -1065,7 +1065,7 @@ noncomputable def RationalLocData.completedAbstractCompletion (D : RationalLocDa
     @AbstractCompletion (locSubring D.P D.T D.s)
       (@instUniformSpaceSubtype _ (· ∈ locSubring D.P D.T D.s) D.uniformSpace) := by
   letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-  haveI hclosed : IsClosed (D.completedLocSubring : Set (presheafValue D)) :=
+  have hclosed : IsClosed (D.completedLocSubring : Set (presheafValue D)) :=
     Subring.isClosed_topologicalClosure _
   exact {
     space := D.completedLocSubring
@@ -1193,8 +1193,8 @@ private theorem mem_prime_of_rational_subset_open {A : Type*} [CommRing A]
     (hDs : D.s ∈ p) : D'.s ∈ p := by
   classical
   by_contra hD's
-  haveI := hp
-  haveI : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
+  have := hp
+  have : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
   let φ : A →+* FractionRing (A ⧸ p) :=
     (algebraMap (A ⧸ p) (FractionRing (A ⧸ p))).comp (Ideal.Quotient.mk p)
   let w : Valuation A (WithZero (Multiplicative ℤ)) :=
@@ -1276,7 +1276,7 @@ private theorem mem_prime_of_rational_subset_nonOpen {A : Type*} [CommRing A]
     (hDs : D.s ∈ p)
     (hnonempty : D'.s ∉ p → ∃ v ∈ rationalOpen D'.T D'.s, p ≤ v.supp) :
     D'.s ∈ p := by
-  haveI := hp
+  have := hp
   by_contra hD's
   obtain ⟨v, hv_rat, hv_supp⟩ := hnonempty hD's
   exact (h hv_rat).2.2 ((v.mem_supp_iff D.s).mp (hv_supp hDs))
@@ -1521,7 +1521,7 @@ theorem restrictionMapAlg_continuous_of_huber {A : Type*} [CommRing A]
       D'.coeRingHom :=
     @UniformSpace.Completion.continuous_coe _ D'.uniformSpace
   suffices hlift : @Continuous _ _ D.topology D'.topology locLift from hcoe.comp hlift
-  haveI : @NonarchimedeanRing _ _ D'.topology :=
+  have : @NonarchimedeanRing _ _ D'.topology :=
     (locBasis D'.P D'.T D'.s D'.hopen).nonarchimedean
   have hf_alg : @Continuous _ _ _ D'.topology
       (locLift.comp (algebraMap A (Localization.Away D.s))) := by
@@ -1717,21 +1717,21 @@ theorem restrictionMapAlg_continuous_of_huber_completion
   -- with NO derivation of the localization-level unit `isUnit_algebraMap_s_of_huber` (= the
   -- T001 `spa_point_nonOpen` route). Mirrors `restrictionMapAlg_continuous_of_huber` (above)
   -- but with target `presheafValue D'` (the completion) instead of `Localization.Away D'.s`.
-  haveI : IsTopologicalRing A := IsHuberRing.toIsTopologicalRing
+  have : IsTopologicalRing A := IsHuberRing.toIsTopologicalRing
   letI : UniformSpace (Localization.Away D'.s) := D'.uniformSpace
   letI : IsUniformAddGroup (Localization.Away D'.s) := D'.isUniformAddGroup
   -- NonarchimedeanRing on the completion `presheafValue D'` (inline; the downstream
   -- `presheafValueNonarchimedeanRing` is not importable here).
-  haveI hag_loc : @NonarchimedeanAddGroup (Localization.Away D'.s) _ D'.topology := by
+  have hag_loc : @NonarchimedeanAddGroup (Localization.Away D'.s) _ D'.topology := by
     have hbasis := locBasis D'.P D'.T D'.s D'.hopen
     exact @NonarchimedeanAddGroup.mk _ _ D'.topology D'.isTopologicalAddGroup (by
       intro U hU
       obtain ⟨V, ⟨n, rfl⟩, hVU⟩ :=
         hbasis.toRingFilterBasis.toAddGroupFilterBasis.nhds_zero_hasBasis.mem_iff.mp hU
       exact ⟨hbasis.openAddSubgroup n, hVU⟩)
-  haveI hag : NonarchimedeanAddGroup (presheafValue D') :=
+  have hag : NonarchimedeanAddGroup (presheafValue D') :=
     @instNonarchimedeanAddGroupCompletion _ _ D'.uniformSpace D'.isUniformAddGroup hag_loc
-  haveI : NonarchimedeanRing (presheafValue D') := ⟨hag.is_nonarchimedean⟩
+  have : NonarchimedeanRing (presheafValue D') := ⟨hag.is_nonarchimedean⟩
   -- `lift hu_can ∘ algebraMap = canonicalMap = coeRingHom ∘ algebraMap`, continuous via
   -- `coeRingHom` (completion map) ∘ `algebraMap` (continuous into `D'.topology`).
   have hf_alg : Continuous ((IsLocalization.Away.lift D.s hu_can).comp
@@ -2184,7 +2184,7 @@ theorem exists_valuationSubring_of_notMem_integralClosure
     exact Ideal.map_le_iff_le_comap.mpr (fun a ha ↦ hgen a ha)
   -- Find maximal ideal 𝔪 ⊇ S_x (proper since 1 ∉ S_x).
   obtain ⟨𝔪, h𝔪_max, h𝔪_le⟩ := S_x.exists_le_maximal hS_x_proper
-  haveI : 𝔪.IsPrime := h𝔪_max.isPrime
+  have : 𝔪.IsPrime := h𝔪_max.isPrime
   -- Since 𝔪 is prime and I_img^n ⊆ S_x ⊆ 𝔪, we get I_img ⊆ 𝔪.
   have hI_le_m : I_img ≤ 𝔪 :=
     have ⟨n, hn⟩ := hI_pow_le_Sx
@@ -2194,7 +2194,7 @@ theorem exists_valuationSubring_of_notMem_integralClosure
   -- ι x ∉ L.toSubring: if ι x = a/s with a ∈ R₀, s ∉ 𝔪, then
   -- s · ι x = a ∈ R₀, so s ∈ S_x ⊆ 𝔪, contradiction.
   have hx_notL : ι x ∉ L.toSubring := notMem_ofPrime_of_conductor_le R₀ 𝔪 h𝔪_le
-  haveI : IsIntegrallyClosedIn L.toSubring K := isIntegrallyClosedIn_ofPrime R₀ 𝔪
+  have : IsIntegrallyClosedIn L.toSubring K := isIntegrallyClosedIn_ofPrime R₀ 𝔪
   -- Apply Stacks 090P part 2.
   obtain ⟨V, hV_dom, hx_notV⟩ :=
     LocalSubring.exists_le_valuationSubring_of_isIntegrallyClosedIn hx_notL
@@ -2213,7 +2213,7 @@ theorem exists_valuationSubring_of_notMem_integralClosure
     rw [← ValuationSubring.valuation_lt_one_iff V ⟨_, ha_in_V⟩]
     have ha_maxL : ⟨(ι_R₀ a : K), ha_in_L⟩ ∈ IsLocalRing.maximalIdeal L.toSubring :=
       (IsLocalization.AtPrime.to_map_mem_maximal_iff L.toSubring 𝔪 (ι_R₀ a)).mpr ha_m
-    haveI : IsLocalHom (Subring.inclusion hV_dom.1) := hV_dom.2
+    have : IsLocalHom (Subring.inclusion hV_dom.1) := hV_dom.2
     exact map_nonunit (Subring.inclusion hV_dom.1) _ ha_maxL
 
 /-- The degenerate branch of `exists_continuous_valuation_of_valuationSubring_of_span_eq`:
@@ -2703,8 +2703,8 @@ private theorem mem_prime_of_rational_subset_discrete {A : Type*} [CommRing A]
     (hDs : D.s ∈ p) : D'.s ∈ p := by
   classical
   by_contra hD's
-  haveI := hp
-  haveI : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
+  have := hp
+  have : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
   let φ : A →+* FractionRing (A ⧸ p) :=
     (algebraMap (A ⧸ p) (FractionRing (A ⧸ p))).comp (Ideal.Quotient.mk p)
   let w : Valuation A (WithZero (Multiplicative ℤ)) :=
@@ -2788,7 +2788,7 @@ private theorem uniformSpace_eq_bot_of_discrete
   have hpure : @nhds (Localization.Away D'.s) D'.topology 0 = pure 0 := by
     rw [htop]
     letI : TopologicalSpace (Localization.Away D'.s) := ⊥
-    haveI : DiscreteTopology (Localization.Away D'.s) := ⟨rfl⟩
+    have : DiscreteTopology (Localization.Away D'.s) := ⟨rfl⟩
     exact congr_fun (nhds_discrete _) 0
   rw [hpure, Filter.comap_pure]
   ext s
@@ -2817,7 +2817,7 @@ theorem isPowerBounded_of_discrete_presheafValue
   -- TateAcyclicity.lean which is downstream, so we cannot import it here).
   have hbot : D'.uniformSpace = ⊥ := uniformSpace_eq_bot_of_discrete D'
   letI : UniformSpace (Localization.Away D'.s) := D'.uniformSpace
-  haveI : DiscreteUniformity (Localization.Away D'.s) := ⟨hbot⟩
+  have : DiscreteUniformity (Localization.Away D'.s) := ⟨hbot⟩
   -- DiscreteUniformity → DiscreteTopology automatically (mathlib instance).
   have hue := UniformSpace.Completion.isUniformEmbedding_coe (Localization.Away D'.s)
   have hemb : Topology.IsEmbedding D'.coeRingHom := hue.isEmbedding
@@ -2834,7 +2834,7 @@ theorem isPowerBounded_of_discrete_presheafValue
       rw [hclosed.closure_eq.symm]; exact hdense.closure_eq ▸ Set.mem_univ x
     exact hmem
   -- Transfer DiscreteTopology via the homeomorphism induced by hemb + hsurj.
-  haveI : DiscreteTopology (presheafValue D') :=
+  have : DiscreteTopology (presheafValue D') :=
     (hemb.toHomeomorphOfSurjective hsurj).discreteTopology
   -- IsBounded under discrete topology: V = {0} works.
   intro U hU
@@ -2886,7 +2886,7 @@ theorem coeRingHom_bijective_of_discrete {A : Type*} [CommRing A]
     have hpure : @nhds (Localization.Away D.s) D.topology 0 = pure 0 := by
       rw [htop]
       letI : TopologicalSpace (Localization.Away D.s) := ⊥
-      haveI : DiscreteTopology (Localization.Away D.s) := ⟨rfl⟩
+      have : DiscreteTopology (Localization.Away D.s) := ⟨rfl⟩
       exact congr_fun (nhds_discrete _) 0
     rw [hpure, Filter.comap_pure]
     ext s
@@ -2895,7 +2895,7 @@ theorem coeRingHom_bijective_of_discrete {A : Type*} [CommRing A]
     · intro h ⟨a, b⟩ (hab : a = b); exact h (show b - a = 0 by rw [hab, sub_self])
     · intro h ⟨a, b⟩ (hab : b - a = 0); exact h (sub_eq_zero.mp hab).symm
   letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-  haveI : DiscreteUniformity (Localization.Away D.s) := ⟨hbot⟩
+  have : DiscreteUniformity (Localization.Away D.s) := ⟨hbot⟩
   constructor
   · exact UniformSpace.Completion.coe_injective _
   · have hclosed := (UniformSpace.Completion.isUniformEmbedding_coe
@@ -2969,9 +2969,9 @@ private theorem base_s_mem_annihilator_radical {A : Type*} [CommRing A]
   classical
   rw [Ideal.radical_eq_sInf, Ideal.mem_sInf]
   intro p ⟨hp_ann, hp_prime⟩
-  haveI := hp_prime
+  have := hp_prime
   by_contra hs_notin
-  haveI : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
+  have : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
   let φ : A →+* FractionRing (A ⧸ p) :=
     (algebraMap (A ⧸ p) (FractionRing (A ⧸ p))).comp (Ideal.Quotient.mk p)
   let w : Valuation A (WithZero (Multiplicative ℤ)) :=
@@ -3107,11 +3107,11 @@ theorem Localization.Away_isTate_of_rational
     (D : RationalLocData A) :
     @IsTateRing (Localization.Away D.s) _ D.topology := by
   letI : TopologicalSpace (Localization.Away D.s) := D.topology
-  haveI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  have : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   -- Pair of definition: lift D.P via locPairOfDefinition (Wedhorn §8.1).
   have hPair : Nonempty (PairOfDefinition (Localization.Away D.s)) :=
     ⟨locPairOfDefinition D.P D.T D.s D.hopen⟩
-  haveI : IsHuberRing (Localization.Away D.s) :=
+  have : IsHuberRing (Localization.Away D.s) :=
     { exists_pairOfDefinition := hPair }
   -- Topologically nilpotent unit: transport one from A via algebraMap.
   obtain ⟨u, hu⟩ := IsTateRing.exists_topologicallyNilpotent_unit (A := A)
@@ -3632,7 +3632,7 @@ theorem isUnit_iff_forall_not_vle_zero_of_complete_pairFree
   by_contra hf
   obtain ⟨𝔪, h𝔪, hf𝔪⟩ :=
     Ideal.exists_le_maximal (Ideal.span {f}) (Ideal.span_singleton_ne_top hf)
-  haveI := h𝔪
+  have := h𝔪
   obtain ⟨v, hv, hsupp⟩ := exists_spa_point_supp_eq_maxIdeal_of_complete 𝔪
   exact h v hv ((v.mem_supp_iff f).mp (hsupp.ge (hf𝔪 (Ideal.mem_span_singleton_self f))))
 
@@ -3694,7 +3694,7 @@ theorem isUnit_iff_ne_zero_on_spa_of_complete
   by_contra hf
   obtain ⟨𝔪, h𝔪, hf𝔪⟩ :=
     Ideal.exists_le_maximal (Ideal.span {f}) (Ideal.span_singleton_ne_top hf)
-  haveI := h𝔪
+  have := h𝔪
   obtain ⟨v, hv, hvsupp⟩ := exists_spa_point_supp_eq_maxIdeal_of_complete 𝔪
   exact h v hv ((v.mem_supp_iff f).mp
     (hvsupp ▸ hf𝔪 (Ideal.mem_span_singleton_self f)))
@@ -3943,7 +3943,7 @@ private theorem rankOne_embedding_of_topNilp_witness
       WithZero (Multiplicative ℝ),
       Function.Injective φ ∧ StrictMono φ := by
   letI : ValuativeRel A := x.toValuativeRel
-  haveI : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch
+  have : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch
   -- Step 2: v(b) < 1 via continuity + topological nilpotence.
   have hvb_lt_one : ValuativeRel.valuation A b < 1 :=
     topNilp_vle_one_of_continuous x hx_cont b hb_topNilp hb_ne
@@ -4029,7 +4029,7 @@ theorem heightOne_le_one_on_powerBounded
     (a : A) (ha : TopologicalRing.IsPowerBounded a) :
     x.vle a 1 := by
   letI : ValuativeRel A := x.toValuativeRel
-  haveI : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch
+  have : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch
   rw [Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) a 1, map_one]
   by_contra h_not
   rw [not_le] at h_not
@@ -4152,7 +4152,7 @@ theorem wedhorn_7_52_2_isUnit_iff_forall_not_vle_zero
     by_contra hf
     obtain ⟨𝔪, h𝔪, hf𝔪⟩ :=
       Ideal.exists_le_maximal (Ideal.span {f}) (Ideal.span_singleton_ne_top hf)
-    haveI := h𝔪
+    have := h𝔪
     obtain ⟨v, hv, hvsupp⟩ := exists_spa_point_supp_eq_maxIdeal_of_complete 𝔪
     exact h v hv ((v.mem_supp_iff f).mp
       (hvsupp ▸ hf𝔪 (Ideal.mem_span_singleton_self f)))
@@ -4176,7 +4176,7 @@ theorem exists_spa_point_supp_eq_nonOpen_maxIdeal_of_complete'
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (𝔪 : Ideal A) [𝔪.IsMaximal] (h𝔪 : ¬ IsOpen (𝔪 : Set A)) :
     ∃ v ∈ Spa A A⁺, v.supp = 𝔪 := by
-  haveI : 𝔪.IsPrime := ‹𝔪.IsMaximal›.isPrime
+  have : 𝔪.IsPrime := ‹𝔪.IsMaximal›.isPrime
   obtain ⟨v, hv_cont, hv_supp, hv_bd⟩ :=
     exists_cont_supp_ge_powerBounded_of_nonOpen_prime (A := A) P h𝔪
   refine ⟨v, ⟨hv_cont, fun f hf => hv_bd f
@@ -4208,7 +4208,7 @@ theorem isUnit_iff_forall_not_vle_zero_of_completePair
   by_contra hf
   obtain ⟨𝔪, h𝔪, hf𝔪⟩ :=
     Ideal.exists_le_maximal (Ideal.span {f}) (Ideal.span_singleton_ne_top hf)
-  haveI := h𝔪
+  have := h𝔪
   obtain ⟨v, hv, hsupp⟩ := exists_spa_point_supp_eq_maxIdeal_of_complete' P 𝔪
   exact h v hv ((v.mem_supp_iff f).mp (hsupp.ge (hf𝔪 (Ideal.mem_span_singleton_self f))))
 

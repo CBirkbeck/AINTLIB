@@ -126,7 +126,7 @@ theorem tendsto_resAr {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ
     Filter.Tendsto (fun u => AlocToHatK p F ϖ hρ₁0 hρ₁1 u)
       (Filter.comap (AlocToHatK p F ϖ hρ₂0 hρ₂1) (nhds z))
       (nhds (resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z)) := by
-  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hz
+  have hne := neBot_comap_of_mem_ArSub p F ϖ hz
   set L := Filter.comap (AlocToHatK p F ϖ hρ₂0 hρ₂1) (nhds z) with hL
   set g : Aloc p F ϖ → hatK p F hρ₁0 hρ₁1 :=
     fun u => AlocToHatK p F ϖ hρ₁0 hρ₁1 u with hg
@@ -256,7 +256,7 @@ theorem resAr_AlocToHatK {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 :
     resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (AlocToHatK p F ϖ hρ₂0 hρ₂1 u)
       = AlocToHatK p F ϖ hρ₁0 hρ₁1 u := by
   have hmem := AlocToHatK_mem_ArSub p F ϖ (hρ0 := hρ₂0) (hρ1 := hρ₂1) u
-  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hmem
+  have hne := neBot_comap_of_mem_ArSub p F ϖ hmem
   have hlim := tendsto_resAr p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 hmem
   have hlim2 : Filter.Tendsto (fun y => AlocToHatK p F ϖ hρ₁0 hρ₁1 y)
       (Filter.comap (AlocToHatK p F ϖ hρ₂0 hρ₂1)
@@ -284,8 +284,8 @@ theorem resAr_add {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ 
     (hz : z ∈ ArSub p F ϖ hρ₂0 hρ₂1) (hz' : z' ∈ ArSub p F ϖ hρ₂0 hρ₂1) :
     resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z + z')
       = resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z + resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z' := by
-  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hz
-  haveI hne' := neBot_comap_of_mem_ArSub p F ϖ hz'
+  have hne := neBot_comap_of_mem_ArSub p F ϖ hz
+  have hne' := neBot_comap_of_mem_ArSub p F ϖ hz'
   have h1 := tendsto_resAr p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 hz
   have h2 := tendsto_resAr p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 hz'
   have hsum := tendsto_resAr p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 (add_mem hz hz')
@@ -306,8 +306,8 @@ theorem resAr_mul {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ 
     (hz : z ∈ ArSub p F ϖ hρ₂0 hρ₂1) (hz' : z' ∈ ArSub p F ϖ hρ₂0 hρ₂1) :
     resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z * z')
       = resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z * resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z' := by
-  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hz
-  haveI hne' := neBot_comap_of_mem_ArSub p F ϖ hz'
+  have hne := neBot_comap_of_mem_ArSub p F ϖ hz
+  have hne' := neBot_comap_of_mem_ArSub p F ϖ hz'
   have h1 := tendsto_resAr p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 hz
   have h2 := tendsto_resAr p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 hz'
   have hprod := tendsto_resAr p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 (mul_mem hz hz')
@@ -328,7 +328,7 @@ theorem resAr_pair_mem {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : �
     {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (h12 : ρ₁ ≤ ρ₂) {z : hatK p F hρ₂0 hρ₂1}
     (hz : z ∈ ArSub p F ϖ hρ₂0 hρ₂1) :
     (resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z, z) ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 := by
-  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hz
+  have hne := neBot_comap_of_mem_ArSub p F ϖ hz
   have h1 := tendsto_resAr p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 hz
   have h2 : Filter.Tendsto (fun u => AlocToHatK p F ϖ hρ₂0 hρ₂1 u)
       (Filter.comap (AlocToHatK p F ϖ hρ₂0 hρ₂1) (nhds z)) (nhds z) :=
@@ -398,7 +398,7 @@ theorem valued_resAr_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : 
     {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (h12 : ρ₁ ≤ ρ₂) {z : hatK p F hρ₂0 hρ₂1}
     (hz : z ∈ ArSub p F ϖ hρ₂0 hρ₂1) :
     Valued.v (resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ≤ Valued.v z := by
-  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hz
+  have hne := neBot_comap_of_mem_ArSub p F ϖ hz
   have hkey : ∀ ε : NNReal, 0 < ε →
       Valued.v (resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ≤ max (Valued.v z) ε := by
     intro ε hε

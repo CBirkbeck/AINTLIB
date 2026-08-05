@@ -1262,7 +1262,7 @@ private theorem exists_radius_and_delta_of_isClosed_range {t : A} (ht0 : 0 < ‖
   classical
   -- the closed range as a complete (hence Baire) subgroup
   have hrangeset : (f.range : Set (κ → A)) = Set.range f := AddMonoidHom.coe_range f
-  haveI hYcomplete : CompleteSpace ↥(f.range) :=
+  have hYcomplete : CompleteSpace ↥(f.range) :=
     (show IsClosed (f.range : Set (κ → A)) by
       rw [hrangeset]; exact hclosed).completeSpace_coe
   -- the closures of the ball images cover the range
@@ -2032,8 +2032,8 @@ private theorem flat_unitBall_over_polyBall
     (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
     (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) :
     Module.Flat (MvPolynomial (Fin m) ↥(unitBall E)) ↥(unitBall (P E m)) := by
-  haveI : IsNoetherianRing ↥(unitBall E) := hE₀
-  haveI : IsNoetherianRing (MvPolynomial (Fin m) ↥(unitBall E)) := inferInstance
+  have : IsNoetherianRing ↥(unitBall E) := hE₀
+  have : IsNoetherianRing (MvPolynomial (Fin m) ↥(unitBall E)) := inferInstance
   have hcompat : ∀ q : MvPolynomial (Fin m) ↥(unitBall E),
       ballAdicEquiv t htu ht1 ht0 hscale (polyBallCod q) =
         algebraMap (MvPolynomial (Fin m) ↥(unitBall E))
@@ -2074,21 +2074,21 @@ theorem flat_polyToP (hE₀ : IsNoetherianRing (unitBall E))
     Module.Flat (MvPolynomial (Fin m) E) (P E m) := by
   classical
   letI : Algebra (MvPolynomial (Fin m) E) (P E m) := (polyToP (E := E) (m := m)).toAlgebra
-  haveI hE₀' : IsNoetherianRing ↥(unitBall E) := hE₀
-  haveI hR₀ : IsNoetherianRing (MvPolynomial (Fin m) ↥(unitBall E)) := inferInstance
+  have hE₀' : IsNoetherianRing ↥(unitBall E) := hE₀
+  have hR₀ : IsNoetherianRing (MvPolynomial (Fin m) ↥(unitBall E)) := inferInstance
   -- Step B: the ball is flat over `R₀` (adic completion of a noetherian ring)
-  haveI hflatB : Module.Flat (MvPolynomial (Fin m) ↥(unitBall E))
+  have hflatB : Module.Flat (MvPolynomial (Fin m) ↥(unitBall E))
       ↥(unitBall (P E m)) :=
     flat_unitBall_over_polyBall hE₀ t htu ht1 ht0 hscale
   -- Step C: localization instances
   set S₀ : Submonoid (MvPolynomial (Fin m) ↥(unitBall E)) :=
     ballDenoms t ht1.le with hS₀
-  haveI hloc1 := ballDenoms_isLocalization (m := m) t htu ht1 hscale
+  have hloc1 := ballDenoms_isLocalization (m := m) t htu ht1 hscale
   -- Step D: `P_E` is the localized module of the ball along `S₀`
-  haveI hloc2 := algebraMapSubmonoid_ballDenoms_isLocalization
+  have hloc2 := algebraMapSubmonoid_ballDenoms_isLocalization
     (m := m) t htu ht1 ht0 hscale
   -- Step E: base change along the localization and transport of flatness
-  haveI hlocmod : IsLocalizedModule S₀
+  have hlocmod : IsLocalizedModule S₀
       ((IsScalarTower.toAlgHom (MvPolynomial (Fin m) ↥(unitBall E)) ↥(unitBall (P E m))
         (P E m)).toLinearMap) :=
     isLocalizedModule_iff_isLocalization.mpr hloc2
@@ -2116,7 +2116,7 @@ theorem syzygy_graph_restricted (hE₀ : IsNoetherianRing (unitBall E))
     ∃ v, d2 r v = u := by
   classical
   letI : Algebra (MvPolynomial (Fin m) E) (P E m) := (polyToP (E := E) (m := m)).toAlgebra
-  haveI hflat : Module.Flat (MvPolynomial (Fin m) E) (P E m) :=
+  have hflat : Module.Flat (MvPolynomial (Fin m) E) (P E m) :=
     flat_polyToP hE₀ t htu ht1 ht0 hscale
   set ρ : Fin m → MvPolynomial (Fin m) E :=
     fun i => MvPolynomial.C g * MvPolynomial.X i - MvPolynomial.C (f i) with hρ
@@ -2160,7 +2160,7 @@ theorem isClosed_graphIdeal [IsNoetherianRing (P E m)]
     (hE₀P : IsNoetherianRing (unitBall (P E m)))
     (r : Fin m → P E m) :
     IsClosed ((Ideal.span (Set.range r) : Set (P E m))) := by
-  haveI : IsTateRing (P E m) := isTateRing_of_scale (polyToP (MvPolynomial.C t))
+  have : IsTateRing (P E m) := isTateRing_of_scale (polyToP (MvPolynomial.C t))
     (isUnit_tP t htu)
     (by rw [norm_tP t hscale]; exact ht1)
     (by rw [norm_tP t hscale]; exact ht0)
@@ -2168,8 +2168,8 @@ theorem isClosed_graphIdeal [IsNoetherianRing (P E m)]
   set pod := unitBallPod (E := P E m) (polyToP (MvPolynomial.C t)) (isUnit_tP t htu)
     (by rw [norm_tP t hscale]; exact ht1) (by rw [norm_tP t hscale]; exact ht0)
     (fun G => by rw [norm_tP t hscale]; exact norm_tP_mul t hscale G) with hpod
-  haveI : IsNoetherianRing ↥pod.A₀ := hE₀P
-  haveI : IsUniformAddGroup (P E m) := SeminormedAddCommGroup.to_isUniformAddGroup
+  have : IsNoetherianRing ↥pod.A₀ := hE₀P
+  have : IsUniformAddGroup (P E m) := SeminormedAddCommGroup.to_isUniformAddGroup
   exact Wedhorn.isClosed_ideal_of_noetherian pod _
 
 /-- The Koszul differential `d1 r` packaged as an additive map into `Fin 1 → P E m`, which is

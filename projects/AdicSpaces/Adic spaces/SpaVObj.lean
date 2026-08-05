@@ -42,7 +42,7 @@ nilpotent-unit rescale and the `A`-level open presentation apply verbatim. -/
 theorem rationalShrink_tate : RationalShrink A := by
   intro D hD v' hv b hnz
   classical
-  haveI hTate : IsTateRing (presheafValue D) :=
+  have hTate : IsTateRing (presheafValue D) :=
     presheafValue_isTateRing_concrete D
   have hwspa := pointValue_mem_spa D hv
   have hwcont := pointValue_isContinuous D hv
@@ -80,11 +80,11 @@ theorem rationalShrink_tate : RationalShrink A := by
   have hsub : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s :=
     spaOpen_subset_iff.mp (hD'sub.trans Set.inter_subset_right)
   refine ⟨D', hD', hsub, mem_spaOpen.mp hvD', ?_⟩
-  haveI hTate' : IsTateRing (presheafValue D') :=
+  have hTate' : IsTateRing (presheafValue D') :=
     presheafValue_isTateRing_concrete D'
-  haveI : IsHuberRing (presheafValue D') := presheafValue_isHuberRing_huber D'
+  have : IsHuberRing (presheafValue D') := presheafValue_isHuberRing_huber D'
   letI P_B : PairOfDefinition (presheafValue D') := presheafValue_concretePair D'
-  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
+  have : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
   rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
   exact fun w'' hw'' => not_vle_zero_of_shrink D D' hsub hD'sub hcdef
     (fun w' hw' hW => (hcapture w' hw' hW () (Finset.mem_singleton_self ())).2) w'' hw''
@@ -109,9 +109,9 @@ noncomputable def spaVObjTate [IsStronglyNoetherian A] : VObj where
   val_supp := fun v => (maximalIdeal_stalk_eq_supp (stalkShrink_tate v)).symm
   isSheafTopRings := by
     classical
-    haveI : IsNoetherianRing A := IsStronglyNoetherian.isNoetherianRing A
-    haveI := hasLocLiftPowerBounded_faithful (A := A)
-    haveI : IsSheafy A := isSheafy_of_stronglyNoetherian_828b
+    have : IsNoetherianRing A := IsStronglyNoetherian.isNoetherianRing A
+    have := hasLocLiftPowerBounded_faithful (A := A)
+    have : IsSheafy A := isSheafy_of_stronglyNoetherian_828b
     exact (structurePresheaf_isSheafOfTopologicalRings_iff A).mpr
       isLimitSheaf_of_isSheafy
 

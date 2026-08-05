@@ -169,7 +169,7 @@ theorem RingOfIntegralElements.hasStandardRefinements
     (Bplus : RingOfIntegralElements A) : Bplus.HasStandardRefinements A := by
   intro _ _
   letI := Bplus.toPlusSubring
-  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Bplus.2
+  have : IsRingOfIntegralElements (A⁺ : Subring A) := Bplus.2
   intro C hC hne
   exact exists_spanTop_standard_refinement_of_rationalCovering_nonempty C hC hne
 

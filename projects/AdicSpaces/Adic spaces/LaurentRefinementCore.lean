@@ -1198,11 +1198,11 @@ theorem iteratedPlus_forwardToCompletion_continuous
     (iteratedPlusDatum_B P D₀ f).isUniformAddGroup
   letI : IsUniformAddGroup (Localization.Away (iteratedPlusDatum_B P D₀ f).s) :=
     (iteratedPlusDatum_B P D₀ f).isUniformAddGroup
-  haveI naB : @NonarchimedeanRing (Localization.Away (1 : presheafValue D₀)) _
+  have naB : @NonarchimedeanRing (Localization.Away (1 : presheafValue D₀)) _
       (iteratedPlusDatum_B P D₀ f).topology :=
     (locBasis (iteratedPlusDatum_B P D₀ f).P (iteratedPlusDatum_B P D₀ f).T
       (iteratedPlusDatum_B P D₀ f).s (iteratedPlusDatum_B P D₀ f).hopen).nonarchimedean
-  haveI : @NonarchimedeanRing (Localization.Away (iteratedPlusDatum_B P D₀ f).s) _
+  have : @NonarchimedeanRing (Localization.Away (iteratedPlusDatum_B P D₀ f).s) _
       (iteratedPlusDatum_B P D₀ f).topology := naB
   change @Continuous _ _ (laurentPlusDatum D₀ f).topology _
       ((iteratedPlusDatum_B P D₀ f).coeRingHom.comp (iteratedPlus_forwardLocHom D₀))
@@ -1293,7 +1293,7 @@ theorem iteratedPlus_backwardLocHom_continuous
     (iteratedPlusDatum_B P D₀ f).isTopologicalRing
   letI : IsTopologicalRing (Localization.Away (iteratedPlusDatum_B P D₀ f).s) :=
     (iteratedPlusDatum_B P D₀ f).isTopologicalRing
-  haveI : NonarchimedeanRing (presheafValue (laurentPlusDatum D₀ f)) :=
+  have : NonarchimedeanRing (presheafValue (laurentPlusDatum D₀ f)) :=
     presheafValueNonarchimedeanRing (laurentPlusDatum D₀ f)
   have hf_alg : @Continuous _ _ _ _
       ((iteratedPlus_backwardLocHom D₀ f hsub).comp
@@ -1944,10 +1944,10 @@ theorem iteratedMinus_forwardToCompletion_continuous
   letI : IsUniformAddGroup (Localization.Away (D₀.canonicalMap f)) := (Q).isUniformAddGroup
   letI : IsUniformAddGroup (Localization.Away (Q).s) := (Q).isUniformAddGroup
   -- Target is nonarchimedean ring (for `locTopology_continuous_lift`).
-  haveI naB : @NonarchimedeanRing (Localization.Away (D₀.canonicalMap f)) _ (Q).topology :=
+  have naB : @NonarchimedeanRing (Localization.Away (D₀.canonicalMap f)) _ (Q).topology :=
     (locBasis (Q).P (Q).T (Q).s
       (Q).hopen).nonarchimedean
-  haveI : @NonarchimedeanRing (Localization.Away (Q).s) _ (Q).topology := naB
+  have : @NonarchimedeanRing (Localization.Away (Q).s) _ (Q).topology := naB
   -- Factor `iteratedMinus_forwardToCompletion` as `coeRingHom ∘ forwardLocHom`.
   change @Continuous _ _ (W).topology _
       ((Q).coeRingHom.comp (iteratedMinus_forwardLocHom D₀ f))
@@ -2140,7 +2140,7 @@ theorem iteratedMinus_backwardLocHom_continuous
   letI : IsTopologicalRing (Localization.Away (iteratedMinusDatum_B P D₀ f).s) :=
     (iteratedMinusDatum_B P D₀ f).isTopologicalRing
   -- Target is nonarchimedean ring (for `locTopology_continuous_lift`).
-  haveI : NonarchimedeanRing (presheafValue (laurentMinusDatum D₀ f)) :=
+  have : NonarchimedeanRing (presheafValue (laurentMinusDatum D₀ f)) :=
     presheafValueNonarchimedeanRing (laurentMinusDatum D₀ f)
   -- Continuity of `backwardLocHom ∘ algebraMap B`: the composite equals
   -- `restrictionMapHom D₀ (laurentMinusDatum D₀ f) hsub` (by
@@ -2661,10 +2661,10 @@ theorem presheafValue_baireSpace
   letI : IsTopologicalAddGroup (Localization.Away D.s) := D.isTopologicalAddGroup
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
   -- The localization topology has countable basis at `0` (locBasis indexed by ℕ).
-  haveI : (nhds (0 : Localization.Away D.s)).IsCountablyGenerated :=
+  have : (nhds (0 : Localization.Away D.s)).IsCountablyGenerated :=
     (locBasis D.P D.T D.s D.hopen).hasBasis_nhds_zero.isCountablyGenerated
   -- Hence the uniformity is countably generated.
-  haveI : Filter.IsCountablyGenerated (uniformity (Localization.Away D.s)) :=
+  have : Filter.IsCountablyGenerated (uniformity (Localization.Away D.s)) :=
     IsUniformAddGroup.uniformity_countably_generated
   -- Pseudo-metrize the localization (compatible with its existing UniformSpace).
   letI : PseudoMetricSpace (Localization.Away D.s) :=
@@ -2683,13 +2683,13 @@ theorem presheafValue_baireSpace
   -- can fire.
   letI hM : MetricSpace (presheafValue D) := UniformSpace.Completion.instMetricSpace
   letI : UniformSpace (presheafValue D) := hM.toUniformSpace
-  haveI : @CompleteSpace (presheafValue D) hM.toUniformSpace := by
+  have : @CompleteSpace (presheafValue D) hM.toUniformSpace := by
     -- `hM.toUniformSpace = Completion.uniformSpace D.uniformSpace`
     -- = `instUniformSpacePresheafValue D` by construction; the auto
     -- `CompleteSpace` from Presheaf.lean transports.
     change CompleteSpace (presheafValue D)
     infer_instance
-  haveI : Filter.IsCountablyGenerated (uniformity (presheafValue D)) :=
+  have : Filter.IsCountablyGenerated (uniformity (presheafValue D)) :=
     (Metric.uniformity_basis_dist_inv_nat_succ
       (α := presheafValue D)).isCountablyGenerated
   -- `IsCompletelyPseudoMetrizableSpace.of_completeSpace_pseudometrizable` and
@@ -2819,12 +2819,12 @@ noncomputable def presheafValue_trivialPlus_fSubX_equiv
         (example638Plus_forwardHom (presheafValue D₀) P_B (D₀.canonicalMap f))) :
     presheafValue (iteratedPlusDatum_B P D₀ f) ≃+*
       LaurentCover.B₁_gen (D₀.canonicalMap f) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI : IsNoetherianRing (presheafValue D₀) := hNoeth_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsNoetherianRing (presheafValue D₀) := hNoeth_B
   letI P_B : PairOfDefinition (presheafValue D₀) :=
     presheafValue_pairOfDefinition_concrete P D₀
-  haveI : IsNoetherianRing ↥P_B.A₀ := hA₀Noeth_B
+  have : IsNoetherianRing ↥P_B.A₀ := hA₀Noeth_B
   -- `iteratedPlusDatum_B P D₀ f = trivialPlusDatum (presheafValue D₀) P_B (canonicalMap f)`
   -- definitionally (same P, T = {canonicalMap f}, s = 1, hopen = hopen_away_one _ _).
   -- `B₁_gen (canonicalMap f) = TateAlgebra (presheafValue D₀) ⧸ plusFSubXIdeal _ _`
@@ -2935,7 +2935,7 @@ noncomputable def laurentMinusBridge
           (tateQuotientToPresheafHom D hb)) :
     presheafValue (laurentMinusDatum D₀ f) ≃+*
       LaurentCover.B₂_gen (D₀.canonicalMap f) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
   -- Step 1: iterated rational identification (Wedhorn Lemma 2.13).
   refine (presheafValue_iteratedMinus_equiv P D₀ f).trans ?_
   -- Step 2: Phase 2 canonical-topology iso at B := presheafValue D₀ applied to
@@ -3141,12 +3141,12 @@ theorem laurentPlusBridge_restrictionMap
         (restrictionMap D₀ (laurentPlusDatum D₀ f) hplus x) =
         (LaurentCover.epsilonHom_gen (D₀.canonicalMap f) x).1 := by
   intro x
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI : IsNoetherianRing (presheafValue D₀) := hNoeth_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsNoetherianRing (presheafValue D₀) := hNoeth_B
   letI P_B : PairOfDefinition (presheafValue D₀) :=
     presheafValue_pairOfDefinition_concrete P D₀
-  haveI : IsNoetherianRing ↥P_B.A₀ := hA₀Noeth_B
+  have : IsNoetherianRing ↥P_B.A₀ := hA₀Noeth_B
   -- Step 1: Reduce via the `trans` structure of `laurentPlusBridge`.
   -- `laurentPlusBridge = (presheafValue_iteratedPlus_equiv).trans
   --   (presheafValue_trivialPlus_fSubX_equiv ...)`, so applying it amounts to
@@ -3245,7 +3245,7 @@ theorem laurentMinusBridge_restrictionMap
         (restrictionMap D₀ (laurentMinusDatum D₀ f) hminus x) =
         (LaurentCover.epsilonHom_gen (D₀.canonicalMap f) x).2 := by
   intro x
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
   -- Step 1: Reduce via the `trans` structure of `laurentMinusBridge`.
   -- `laurentMinusBridge = (presheafValue_iteratedMinus_equiv).trans
   --   (presheafValueCanonicalQuotientEquiv ...)`, so applying it amounts to
@@ -3361,13 +3361,13 @@ theorem laurentPlusBridge_isInducing
           hnoeth_B hcont_forward_B) :
         presheafValue (laurentPlusDatum D₀ f) →
           LaurentCover.B₁_gen (D₀.canonicalMap f)) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI : IsNoetherianRing (presheafValue D₀) := hNoeth_B
-  haveI : IsDomain (presheafValue D₀) := hDom_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsNoetherianRing (presheafValue D₀) := hNoeth_B
+  have : IsDomain (presheafValue D₀) := hDom_B
   letI P_B : PairOfDefinition (presheafValue D₀) :=
     presheafValue_pairOfDefinition_concrete P D₀
-  haveI : IsNoetherianRing ↥P_B.A₀ := hA₀Noeth_B
+  have : IsNoetherianRing ↥P_B.A₀ := hA₀Noeth_B
   -- T146 plus equiv inducing.
   have h₁ : Topology.IsInducing
       ((presheafValue_iteratedPlus_equiv P D₀ f) :
@@ -3445,9 +3445,9 @@ theorem laurentMinusBridge_isInducing
       ((laurentMinusBridge P D₀ f hnoeth_B hcont_eval_B) :
         presheafValue (laurentMinusDatum D₀ f) →
           LaurentCover.B₂_gen (D₀.canonicalMap f)) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : IsNoetherianRing (presheafValue D₀) := hNoeth_B
-  haveI : IsDomain (presheafValue D₀) := hDom_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : IsNoetherianRing (presheafValue D₀) := hNoeth_B
+  have : IsDomain (presheafValue D₀) := hDom_B
   -- Recompute the internal `hb`, `hT_pb`, `hA_complete` from the
   -- `laurentMinusBridge` body, mirroring `laurentMinusBridge_restrictionMap`.
   have hb : TopologicalRing.IsPowerBounded
@@ -4675,7 +4675,7 @@ theorem laurentCover_isEmbedding_presheaf_via_bridges
       (fun x : presheafValue D₀ =>
         (restrictionMap D₀ (laurentPlusDatum D₀ f) hplus x,
          restrictionMap D₀ (laurentMinusDatum D₀ f) hminus x)) := by
-  haveI hTate_B : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have hTate_B : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
   -- Build the bridges and discharge T141's six τ-side hypotheses.
   exact laurentCover_isEmbedding_presheaf_of_complete D₀ f hf_nonunit
     hNoeth_B hDom_B hTate_B hSigCp_B hA_complete_B hnoeth_B hnoeth₂_B
@@ -4774,9 +4774,9 @@ theorem laurentCover_isEmbedding_presheaf_via_bridges_baire_auto
       (fun x : presheafValue D₀ =>
         (restrictionMap D₀ (laurentPlusDatum D₀ f) hplus x,
          restrictionMap D₀ (laurentMinusDatum D₀ f) hminus x)) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : IsNoetherianRing (presheafValue D₀) := hNoeth_B
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : IsNoetherianRing (presheafValue D₀) := hNoeth_B
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
   letI P_B : PairOfDefinition (presheafValue D₀) :=
     presheafValue_pairOfDefinition_concrete P D₀
   -- Discharge the two Baire hypotheses via the T149 generic supplier.
@@ -4874,9 +4874,9 @@ theorem laurentCover_isEmbedding_presheaf_via_bridges_baire_quotientSigma_auto
       (fun x : presheafValue D₀ =>
         (restrictionMap D₀ (laurentPlusDatum D₀ f) hplus x,
          restrictionMap D₀ (laurentMinusDatum D₀ f) hminus x)) := by
-  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
-  haveI : IsNoetherianRing (presheafValue D₀) := hNoeth_B
-  haveI : IsDomain (presheafValue D₀) := hDom_B
+  have : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  have : IsNoetherianRing (presheafValue D₀) := hNoeth_B
+  have : IsDomain (presheafValue D₀) := hDom_B
   -- Discharge the two quotient SigmaCompactSpace hypotheses via the T152
   -- transport suppliers (continuous-surjective image of σ-compact is σ-compact).
   have hSigma_plus_B :

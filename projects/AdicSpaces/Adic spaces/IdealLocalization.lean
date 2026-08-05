@@ -163,7 +163,7 @@ theorem Ideal.isClosed_in_locTopology_of_contraction_isClosed_in_locSubring
         Set (locSubring P T s))) :
     @IsClosed _ (locTopology P T s hopen) (q : Set (Localization.Away s)) := by
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  haveI : IsTopologicalRing (Localization.Away s) :=
+  have : IsTopologicalRing (Localization.Away s) :=
     (locBasis P T s hopen).toRingFilterBasis.isTopologicalRing
   rw [← isOpen_compl_iff, isOpen_iff_mem_nhds]
   intro x hx_not_mem
@@ -306,9 +306,9 @@ theorem locIdeal_forall_isTopologicallyNilpotent
   letI : TopologicalSpace (locSubring P T s) :=
     (locTopology P T s hopen).induced (locSubring P T s).subtype
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  haveI : IsTopologicalRing (Localization.Away s) :=
+  have : IsTopologicalRing (Localization.Away s) :=
     (locBasis P T s hopen).toRingFilterBasis.isTopologicalRing
-  haveI : IsTopologicalRing (locSubring P T s) :=
+  have : IsTopologicalRing (locSubring P T s) :=
     Subring.instIsTopologicalRing (locSubring P T s)
   exact isTopologicallyNilpotent_of_mem_of_isAdic (locSubring_isAdic P T s hopen) hx
 
@@ -336,11 +336,11 @@ theorem Ideal.isClosed_in_locSubring_subspace_of_isAdicComplete
       ((locTopology P T s hopen).induced (locSubring P T s).subtype)
       (q : Set (locSubring P T s)) := by
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  haveI : IsTopologicalRing (Localization.Away s) :=
+  have : IsTopologicalRing (Localization.Away s) :=
     (locBasis P T s hopen).toRingFilterBasis.isTopologicalRing
   letI : TopologicalSpace (locSubring P T s) :=
     (locTopology P T s hopen).induced (locSubring P T s).subtype
-  haveI : IsTopologicalRing (locSubring P T s) :=
+  have : IsTopologicalRing (locSubring P T s) :=
     Subring.instIsTopologicalRing (locSubring P T s)
   exact Ideal.isClosed_of_le_jacobson
     (locSubring_isAdic P T s hopen)

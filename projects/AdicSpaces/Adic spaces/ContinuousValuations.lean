@@ -143,7 +143,7 @@ private lemma embed_comp_valuation_eq {Γ₀ : Type*}
       ((ValuativeRel.ValueGroupWithZero.embed v)
         ((ValuativeRel.valuation A) a)) = v a := by
   letI := ValuativeRel.ofValuation v
-  haveI := Valuation.Compatible.ofValuation v
+  have := Valuation.Compatible.ofValuation v
   change MonoidWithZeroHom.ValueGroup₀.embedding
     (ValuativeRel.ValueGroupWithZero.embed v
       (ValuativeRel.ValueGroupWithZero.mk a
@@ -155,7 +155,7 @@ lemma isContinuous_ofValuation_of {Γ₀ : Type*}
     [LinearOrderedCommGroupWithZero Γ₀] (v : Valuation A Γ₀)
     (hv : v.IsContinuous) : (ofValuation v).IsContinuous := by
   letI : ValuativeRel A := ValuativeRel.ofValuation v
-  haveI := Valuation.Compatible.ofValuation v
+  have := Valuation.Compatible.ofValuation v
   have h_sm := MonoidWithZeroHom.ValueGroup₀.embedding_strictMono
     (f := MonoidWithZeroHom.ofClass v)
   intro δ

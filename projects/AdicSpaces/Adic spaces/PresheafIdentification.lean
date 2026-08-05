@@ -825,13 +825,13 @@ noncomputable instance presheafValueNonarchimedeanAddGroup
 completion) and regular (from the uniform space), hence T3 hence T2. -/
 instance presheafValueT2Space (D : RationalLocData A) :
     T2Space (presheafValue D) :=
-  haveI : RegularSpace (presheafValue D) := UniformSpace.to_regularSpace
+  have : RegularSpace (presheafValue D) := UniformSpace.to_regularSpace
   inferInstance
 
 /-- `presheafValue D` is T3: it is T0 and regular. -/
 instance presheafValueT3Space (D : RationalLocData A) :
     T3Space (presheafValue D) :=
-  haveI : RegularSpace (presheafValue D) := UniformSpace.to_regularSpace
+  have : RegularSpace (presheafValue D) := UniformSpace.to_regularSpace
   inferInstance
 
 /-! #### Continuity of algebraMap and canonicalMap -/

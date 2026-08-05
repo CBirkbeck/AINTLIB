@@ -62,7 +62,7 @@ noncomputable def imagePieceDatum
     [IsStronglyNoetherian (presheafValue D₀)] (T : Finset A) (t : A)
     (hspan : Ideal.span (T : Set A) = ⊤) :
     RationalLocData (presheafValue D₀) :=
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   { P := presheafValue_concretePair D₀
@@ -884,7 +884,7 @@ theorem imagePieceDatum_mem_rationalOpen_iff
         (imagePieceDatum D₀ E.T E.s hspanE).s ↔
       w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺ ∧
         comap D₀.canonicalMap w ∈ rationalOpen E.T E.s) := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   have hT : (imagePieceDatum D₀ E.T E.s hspanE).T = E.T.image D₀.canonicalMap := rfl
   have hs : (imagePieceDatum D₀ E.T E.s hspanE).s = D₀.canonicalMap E.s := rfl
@@ -926,7 +926,7 @@ theorem imagePieceDatum_rationalOpen_mono
         (imagePieceDatum D₀ E'.T E'.s hspanE').s ⊆
       rationalOpen (imagePieceDatum D₀ E.T E.s hspanE).T
         (imagePieceDatum D₀ E.T E.s hspanE).s := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   intro w hw
   rw [imagePieceDatum_mem_rationalOpen_iff] at hw ⊢
   exact ⟨hw.1, h hw.2⟩
@@ -953,7 +953,7 @@ theorem imagePieceDatum_rationalOpen_inter
           (imagePieceDatum D₀ E₁.T E₁.s hspanE₁).s ∩
         rationalOpen (imagePieceDatum D₀ E₂.T E₂.s hspanE₂).T
           (imagePieceDatum D₀ E₂.T E₂.s hspanE₂).s := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   ext w
   rw [Set.mem_inter_iff, imagePieceDatum_mem_rationalOpen_iff,
     imagePieceDatum_mem_rationalOpen_iff, imagePieceDatum_mem_rationalOpen_iff, h₃]
@@ -994,12 +994,12 @@ private theorem relativePiece_restrict_square_locLevel
       (((relativePiece_equiv D₀ E hE_sub hspanE) :
         presheafValue E →+* presheafValue (imagePieceDatum D₀ E.T E.s hspanE)).comp
         E.coeRingHom)) := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
-  haveI : @CompleteSpace (presheafValue D₀)
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   -- both composites, postcomposed with `E.coeRingHom`, agree as ring homs out of
   -- the localization (determined on the `algebraMap`-range by the trackings)
   refine IsLocalization.ringHom_ext (Submonoid.powers E.s) ?_
@@ -1067,10 +1067,10 @@ theorem relativePiece_equiv_restrict_square
         (imagePieceDatum D₀ E'.T E'.s hspanE')
         (imagePieceDatum_rationalOpen_mono D₀ E E' hspanE hspanE' hE'_sub)
         (relativePiece_equiv D₀ E hE_sub hspanE y) := by
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
-  haveI := presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
-  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have := presheafValue_completeSpace_rightUniformSpace D₀
+  have : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
+  have : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   -- both composites, postcomposed with `E.coeRingHom`, agree as ring homs out of
   -- the localization (determined on the `algebraMap`-range by the trackings)
   have hloc := relativePiece_restrict_square_locLevel D₀ E E' hE_sub hE'_sub hspanE hspanE'

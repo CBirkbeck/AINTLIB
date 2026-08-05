@@ -55,7 +55,7 @@ theorem canonicalMap_flat_discrete [DiscreteTopology A] (D : RationalLocData A) 
   let e : Localization.Away D.s ≃+* presheafValue D :=
     RingEquiv.ofBijective D.coeRingHom hbij
   -- Localization is flat over A
-  haveI : Module.Flat A (Localization.Away D.s) := Localization.flat ..
+  have : Module.Flat A (Localization.Away D.s) := Localization.flat ..
   -- Give presheafValue D the A-module structure via canonicalMap
   letI instMod : Module A (presheafValue D) :=
     RingHom.toModule (RationalLocData.canonicalMap D)

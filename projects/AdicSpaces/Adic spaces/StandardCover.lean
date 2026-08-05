@@ -869,7 +869,7 @@ theorem spanTop_iff_noCommonZero_spa
     -- Then `T ⊆ p ⊆ supp(v)`, so `v.vle t 0` for all `t ∈ T`, contradicting `h_spa`.
     by_contra h_ne
     obtain ⟨q, hq_max, hq_le⟩ := Ideal.exists_le_maximal _ h_ne
-    haveI : q.IsPrime := hq_max.isPrime
+    have : q.IsPrime := hq_max.isPrime
     obtain ⟨v, hv_spa, hv_supp⟩ := exists_spa_point_with_supp_ge_of_prime (A := A) P
       (p := q)
     obtain ⟨t, htT, htne⟩ := h_spa v hv_spa
@@ -1429,7 +1429,7 @@ theorem RationalCoveringData.refines_by_standard_cover
       intro f hf
       simp at hf
   · -- Nontrivial `A`. Apply the Nullstellensatz refinement helper directly.
-    haveI hNT : Nontrivial A := not_subsingleton_iff_nontrivial.mp hA
+    have hNT : Nontrivial A := not_subsingleton_iff_nontrivial.mp hA
     obtain ⟨S, hS_cover, hS_contain, hS_span⟩ :=
       exists_nullstellensatz_refinement C hne hZavyalov
     exact ⟨⟨S, hS_span⟩, hS_cover, hS_contain⟩
@@ -1561,7 +1561,7 @@ theorem RationalCoveringData.refines_by_standard_cover_per_E
     · intro f hf
       simp at hf
   · -- Nontrivial `A`: dispatch via the strengthened refinement helper chain.
-    haveI hNT : Nontrivial A := not_subsingleton_iff_nontrivial.mp hA
+    have hNT : Nontrivial A := not_subsingleton_iff_nontrivial.mp hA
     obtain ⟨S, hS_per_E, hS_contain, hS_span⟩ :=
       exists_nullstellensatz_refinement_per_E C hne hZavyalov_per_E
     exact ⟨⟨S, hS_span⟩, hS_per_E, hS_contain⟩

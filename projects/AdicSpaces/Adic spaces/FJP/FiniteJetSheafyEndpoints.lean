@@ -61,10 +61,10 @@ topological rings. Corollary of `finiteJet_isSheafy` through the C5 equivalence.
 theorem finiteJet_isSheafyFor : IsSheafyFor (JetA F) (finiteJetPlus F) := by
   classical
   letI := (finiteJetPlus F).toPlusSubring
-  haveI : IsRingOfIntegralElements ((JetA F)⁺ : Subring (JetA F)) :=
+  have : IsRingOfIntegralElements ((JetA F)⁺ : Subring (JetA F)) :=
     (finiteJetPlus F).2
-  haveI : HasLocLiftPowerBounded (JetA F) := hasLocLiftPowerBounded_faithful
-  haveI : IsSheafy (JetA F) := finiteJet_isSheafy F
+  have : HasLocLiftPowerBounded (JetA F) := hasLocLiftPowerBounded_faithful
+  have : IsSheafy (JetA F) := finiteJet_isSheafy F
   show IsLimitSheaf (JetA F)
   exact isLimitSheaf_of_isSheafy
 
@@ -75,7 +75,7 @@ theorem finiteJet_isSheafOfTopologicalRings :
     IsSheafOfTopologicalRings (JetA F) := by
   classical
   refine (isSheafOfTopologicalRings_iff_isLimitSheaf).mpr ?_
-  haveI : IsSheafy (JetA F) := finiteJet_isSheafy F
+  have : IsSheafy (JetA F) := finiteJet_isSheafy F
   exact isLimitSheaf_of_isSheafy
 
 /-- **The public structure presheaf of the pinching algebra is a sheaf of
@@ -87,7 +87,7 @@ theorem finiteJet_structurePresheaf_isSheafOfTopologicalRings :
       (ValuationSpectrum.structurePresheaf (JetA F)) := by
   classical
   refine (structurePresheaf_isSheafOfTopologicalRings_iff (JetA F)).mpr ?_
-  haveI : IsSheafy (JetA F) := finiteJet_isSheafy F
+  have : IsSheafy (JetA F) := finiteJet_isSheafy F
   exact isLimitSheaf_of_isSheafy
 
 /-- **The bundled public structure presheaf of the pinching algebra satisfies the
@@ -96,7 +96,7 @@ theorem finiteJet_structurePresheaf_isSheaf :
     (ValuationSpectrum.structurePresheaf (JetA F)).IsSheaf := by
   classical
   refine structurePresheaf_isSheaf (JetA F) ?_
-  haveI : IsSheafy (JetA F) := finiteJet_isSheafy F
+  have : IsSheafy (JetA F) := finiteJet_isSheafy F
   exact isLimitSheaf_of_isSheafy
 
 /-- The structure sheaf of the pinching algebra, as a sheaf object valued in the

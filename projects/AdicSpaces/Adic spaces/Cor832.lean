@@ -119,7 +119,7 @@ theorem faithfullyFlat_pi_of_prime_surjection
     Module.FaithfullyFlat R (∀ i, B i) := by
   classical
   -- The product is flat.
-  haveI : Module.Flat R (∀ i, B i) := Module.Flat.pi_of_algebra B
+  have : Module.Flat R (∀ i, B i) := Module.Flat.pi_of_algebra B
   -- Lying over at the level of the product: given prime `p`, lift to a prime
   -- of some component `B i`, then push to a prime of `∏ B i`.
   apply Module.FaithfullyFlat.of_comap_surjective
@@ -159,7 +159,7 @@ theorem faithfullyFlat_pi_of_maximal_ne_top
     (hmax : ∀ (m : Ideal R), m.IsMaximal →
       ∃ (i : ι), Ideal.map (algebraMap R (B i)) m ≠ ⊤) :
     Module.FaithfullyFlat R (∀ i, B i) := by
-  haveI : Module.Flat R (∀ i, B i) := Module.Flat.pi_of_algebra B
+  have : Module.Flat R (∀ i, B i) := Module.Flat.pi_of_algebra B
   refine Module.FaithfullyFlat.mk (fun {m} hm => ?_)
   obtain ⟨i, hi⟩ := hmax m hm
   -- Suppose `m • ⊤ = ⊤` in `∏ B j`; project to `B i`.
@@ -189,7 +189,7 @@ theorem algebraMap_pi_injective_of_prime_surjection
     (hsurj : ∀ (p : Ideal R), p.IsPrime →
       ∃ (i : ι) (q : Ideal (B i)), q.IsPrime ∧ q.comap (algebraMap R (B i)) = p) :
     Function.Injective (algebraMap R (∀ i, B i)) := by
-  haveI := faithfullyFlat_pi_of_prime_surjection B hsurj
+  have := faithfullyFlat_pi_of_prime_surjection B hsurj
   exact FaithfulSMul.algebraMap_injective R (∀ i, B i)
 
 /-! ### Injectivity of the product restriction from Spa-points lying-over
@@ -261,7 +261,7 @@ theorem productRestriction_faithfullyFlat_abstract
     (presheafValue D.1) := fun D =>
     (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
   -- Direct application to concrete identifiers (no lambdas in `B`).
-  haveI flatInst : ∀ D : { D // D ∈ C.covers },
+  have flatInst : ∀ D : { D // D ∈ C.covers },
       @Module.Flat (presheafValue C.base) (presheafValue D.1) _ _
         (Algebra.toModule (R := presheafValue C.base) (A := presheafValue D.1)) :=
     flat_over_base
@@ -299,7 +299,7 @@ theorem productRestriction_injective_of_flat_and_lifting
   letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base)
     (presheafValue D.1) := fun D =>
     (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
-  haveI := productRestriction_faithfullyFlat_abstract C flat_over_base hSpa_surj
+  have := productRestriction_faithfullyFlat_abstract C flat_over_base hSpa_surj
   -- Under this algebra structure, the product's algebraMap is precisely the
   -- product restriction, so its injectivity transports directly.
   have hinj : Function.Injective
@@ -561,7 +561,7 @@ theorem hSpa_surj_from_spanTop
   obtain ⟨D, hD_notin⟩ := hspan_top p hp
   letI : Algebra (presheafValue C.base) (presheafValue D.1) :=
     (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
-  haveI : @IsLocalization.Away (presheafValue C.base) _
+  have : @IsLocalization.Away (presheafValue C.base) _
       (C.base.canonicalMap D.1.s) (presheafValue D.1) _
       (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra :=
     restrictionMap_isLocalization P C.base D.1 (C.hsubset D.1 D.2)
@@ -601,7 +601,7 @@ theorem flat_over_base_tate
   intro D
   letI : Algebra (presheafValue C.base) (presheafValue D.1) :=
     (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
-  haveI : @IsLocalization.Away (presheafValue C.base) _
+  have : @IsLocalization.Away (presheafValue C.base) _
       (C.base.canonicalMap D.1.s) (presheafValue D.1) _
       (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra :=
     restrictionMap_isLocalization P C.base D.1 (C.hsubset D.1 D.2)
@@ -984,7 +984,7 @@ theorem spanTop_localization_of_hSpa_points
         algebraMap A (Localization.Away C.base.s) D.s) '' (C.covers : Set _)) = ⊤ := by
   by_contra hne
   obtain ⟨q, hq_max, hq_le⟩ := Ideal.exists_le_maximal _ hne
-  haveI : q.IsPrime := Ideal.IsMaximal.isPrime hq_max
+  have : q.IsPrime := Ideal.IsMaximal.isPrime hq_max
   -- Pull back to a prime p of A with C.base.s ∉ p and D.s ∈ p for all D ∈ C.covers.
   set p := q.comap (algebraMap A (Localization.Away C.base.s)) with hp_def
   have hp_prime : p.IsPrime := Ideal.IsPrime.comap _
@@ -1411,7 +1411,7 @@ theorem productRestriction_faithfullyFlat_laurentCovering_at_E
   letI : IsNoetherianRing (locSubring (laurentCovering E f).base.P
       (laurentCovering E f).base.T (laurentCovering E f).base.s) := hE_loc
   letI : LaurentNormalized (laurentCovering E f).base := hE_LN
-  haveI : Finite { D : RationalLocData A // D ∈ (laurentCovering E f).covers } :=
+  have : Finite { D : RationalLocData A // D ∈ (laurentCovering E f).covers } :=
     Finite.of_fintype _
   -- The cover pieces of `laurentCovering E f` are exactly
   -- `laurentPlusDatum E f` and `laurentMinusDatum E f`.
@@ -1567,12 +1567,12 @@ theorem exists_spa_point_supp_ge_in_presheafValue
   -- (Wedhorn 7.45 + 7.41, `exists_cont_supp_ge_powerBounded_of_nonOpen_prime`); since `B⁺ ⊆ B°`
   -- (`B⁺` a ring of integral elements, `presheafValuePlus_isRingOfIntegralElements`) the point
   -- lies in `Spa(B, B⁺)`. NO `A⁺ ⊆ A₀` / pair-of-definition detour, NO noeth-`A₀`.
-  haveI hTate : IsTateRing (presheafValue C.base) := presheafValue_isTateRing_concrete C.base
-  haveI : IsHuberRing (presheafValue C.base) := hTate.toIsHuberRing
-  haveI : T2Space (presheafValue C.base) := inferInstance
-  haveI : NonarchimedeanRing (presheafValue C.base) := inferInstance
+  have hTate : IsTateRing (presheafValue C.base) := presheafValue_isTateRing_concrete C.base
+  have : IsHuberRing (presheafValue C.base) := hTate.toIsHuberRing
+  have : T2Space (presheafValue C.base) := inferInstance
+  have : NonarchimedeanRing (presheafValue C.base) := inferInstance
   letI P_B : PairOfDefinition (presheafValue C.base) := presheafValue_concretePair C.base
-  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete C.base
+  have : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete C.base
   obtain ⟨v, hcont, hsupp, hbd⟩ :=
     exists_cont_supp_ge_powerBounded_of_nonOpen_prime
       (A := presheafValue C.base) P_B h𝔭_notOpen
@@ -1694,10 +1694,10 @@ theorem hSpa_points_nonOpen_via_lifted_ideal_proper
   -- Step 1: Lift `liftedIdeal p` to a maximal ideal `𝔭` of `presheafValue C.base`.
   obtain ⟨𝔭, h𝔭_max, h𝔭_le⟩ :=
     Ideal.exists_le_maximal (Ideal.map C.base.canonicalMap p) h_lifted_ne_top
-  haveI : 𝔭.IsPrime := h𝔭_max.isPrime
+  have : 𝔭.IsPrime := h𝔭_max.isPrime
   -- Step 2: 𝔭 is non-open since `presheafValue C.base` is a Tate ring and 𝔭 is proper.
   -- The Tate structure on presheafValue C.base via `presheafValue_isTateRing`.
-  haveI : IsTateRing (presheafValue C.base) := presheafValue_isTateRing P C.base
+  have : IsTateRing (presheafValue C.base) := presheafValue_isTateRing P C.base
   have h𝔭_notOpen : ¬IsOpen (𝔭 : Set (presheafValue C.base)) :=
     tate_proper_ideal_not_open h𝔭_max.ne_top
   -- Step 3: Apply Lemma 7.45 (via the completion route) to get a Spa point of
@@ -2171,7 +2171,7 @@ theorem isClosed_image_of_isClosed_subspace_in_locSubring
       (((locSubring D.P D.T D.s).subtype) ⁻¹' C : Set (locSubring D.P D.T D.s))) :
     @IsClosed _ D.topology C := by
   letI : TopologicalSpace (Localization.Away D.s) := D.topology
-  haveI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  have : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   exact IsClosed.of_isClosed_subspace_of_isOpen_subring
     (locSubring_isOpen D.P D.T D.s D.hopen) hC_sub hC_closed_sub
 
@@ -2454,9 +2454,9 @@ theorem locIdeal_le_jacobson_bot_of_ringOfDef_faithfullyFlat
       Ideal.jacobson (⊥ : Ideal (locSubring D.P D.T D.s)) := by
   letI : Algebra (locSubring D.P D.T D.s) (presheafValue_ringOfDef D) :=
     (locSubringToRingOfDef D).toAlgebra
-  haveI : Module.FaithfullyFlat (locSubring D.P D.T D.s)
+  have : Module.FaithfullyFlat (locSubring D.P D.T D.s)
       (presheafValue_ringOfDef D) := hff
-  haveI : IsAdicComplete (presheafValue_idealOfDef D)
+  have : IsAdicComplete (presheafValue_idealOfDef D)
       (presheafValue_ringOfDef D) := presheafValue_isAdicComplete D
   have h_jac : presheafValue_idealOfDef D ≤
       Ideal.jacobson (⊥ : Ideal (presheafValue_ringOfDef D)) :=
@@ -2479,11 +2479,11 @@ theorem Ideal.isClosed_in_locSubring_subspace_of_ringOfDef_faithfullyFlat
       ((locTopology D.P D.T D.s D.hopen).induced (locSubring D.P D.T D.s).subtype)
       (q : Set (locSubring D.P D.T D.s)) := by
   letI : TopologicalSpace (Localization.Away D.s) := locTopology D.P D.T D.s D.hopen
-  haveI : IsTopologicalRing (Localization.Away D.s) :=
+  have : IsTopologicalRing (Localization.Away D.s) :=
     (locBasis D.P D.T D.s D.hopen).toRingFilterBasis.isTopologicalRing
   letI : TopologicalSpace (locSubring D.P D.T D.s) :=
     (locTopology D.P D.T D.s D.hopen).induced (locSubring D.P D.T D.s).subtype
-  haveI : IsTopologicalRing (locSubring D.P D.T D.s) :=
+  have : IsTopologicalRing (locSubring D.P D.T D.s) :=
     Subring.instIsTopologicalRing (locSubring D.P D.T D.s)
   exact Ideal.isClosed_of_le_jacobson
     (locSubring_isAdic D.P D.T D.s D.hopen)

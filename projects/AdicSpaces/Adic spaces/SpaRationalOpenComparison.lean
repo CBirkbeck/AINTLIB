@@ -115,7 +115,7 @@ theorem vle_one_comap_ofValuation {B C : Type*} [CommRing B] [CommRing C]
     {f : C} (h : V (φ f) ≤ 1) : (comap φ (ofValuation V)).vle f 1 := by
   rw [comap_vle, map_one]
   letI : ValuativeRel B := ValuativeRel.ofValuation V
-  haveI : V.Compatible := Valuation.Compatible.ofValuation V
+  have : V.Compatible := Valuation.Compatible.ofValuation V
   exact (Valuation.vle_iff_le V).mpr (by simpa using h)
 
 /-- `Spv`-boundedness via the canonical valuation: `w.vle d 1 ⟹ canonicalValuation w d ≤ 1`.
@@ -364,7 +364,7 @@ theorem spa_completion_of_spa_localization
   set w' : Spv (presheafValue D) := comap φhat (ofValuation Valued.v) with hw'_def
   letI : TopologicalSpace (ValuationSpectrum.valueGroup (Localization.Away D.s) w) :=
     WithZeroTopology.topologicalSpace
-  haveI : OrderClosedTopology (ValuationSpectrum.valueGroup (Localization.Away D.s) w) :=
+  have : OrderClosedTopology (ValuationSpectrum.valueGroup (Localization.Away D.s) w) :=
     WithZeroTopology.orderClosedTopology
   have hVcont : Continuous
       (Valued.v : val.Completion → ValuationSpectrum.valueGroup (Localization.Away D.s) w) :=

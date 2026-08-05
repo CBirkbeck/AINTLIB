@@ -176,8 +176,8 @@ theorem exists_valuation_extension_of_prime_over
     ∃ (Γ' : Type uS) (_ : LinearOrderedCommGroupWithZero Γ') (t : Valuation S Γ'),
       s.IsEquiv (Valuation.comap (algebraMap R S) t) := by
   -- Step 1: `s` descends to a valuation on the domain `R ⧸ supp s` (Chevalley, ring case).
-  haveI : (s.supp).IsPrime := inferInstance
-  haveI : IsDomain (R ⧸ s.supp) := Ideal.Quotient.isDomain s.supp
+  have : (s.supp).IsPrime := inferInstance
+  have : IsDomain (R ⧸ s.supp) := Ideal.Quotient.isDomain s.supp
   let sQuot : Valuation (R ⧸ s.supp) Γ := s.onQuot le_rfl
   -- Step 2: `sQuot` (support `0`) extends to the fraction field `F = Frac(R⧸supp s)`.
   have hsupp : sQuot.supp = ⊥ := s.supp_quot_supp
@@ -189,7 +189,7 @@ theorem exists_valuation_extension_of_prime_over
     exact mem_nonZeroDivisors_iff_ne_zero.mp hx (Ideal.mem_bot.mp hxsupp)
   let sF : Valuation F Γ := sQuot.extendToLocalization hS F
   -- Step 3: embed `F ↪ L = Frac(S⧸q')` via the injective `R⧸supp ↪ S⧸q'` (from `hq'`).
-  haveI : IsDomain (S ⧸ q') := Ideal.Quotient.isDomain q'
+  have : IsDomain (S ⧸ q') := Ideal.Quotient.isDomain q'
   let φRS : (R ⧸ s.supp) →+* (S ⧸ q') := Ideal.quotientMap q' (algebraMap R S) (le_of_eq hq'.symm)
   have hφRS_inj : Function.Injective φRS := Ideal.quotientMap_injective' (le_of_eq hq')
   have hgRL_inj : Function.Injective ((algebraMap (S ⧸ q') L).comp φRS) :=
@@ -240,9 +240,9 @@ theorem exists_dominating_valuation_of_minimalPrime_le {R : Type uR} [CommRing R
     {p : Ideal R} [hp : p.IsPrime] {q : Ideal R} (hq : q ∈ minimalPrimes R) (hqp : q ≤ p) :
     ∃ (Γ : Type uR) (_ : LinearOrderedCommGroupWithZero Γ) (s : Valuation R Γ),
       s.supp = q ∧ (∀ r, s r ≤ 1) ∧ (∀ y ∈ p, s y < 1) := by
-  haveI : q.IsPrime := hq.1.1
-  haveI : IsDomain (R ⧸ q) := Ideal.Quotient.isDomain q
-  haveI hp'prime : (p.map (Ideal.Quotient.mk q)).IsPrime :=
+  have : q.IsPrime := hq.1.1
+  have : IsDomain (R ⧸ q) := Ideal.Quotient.isDomain q
+  have hp'prime : (p.map (Ideal.Quotient.mk q)).IsPrime :=
     Ideal.map_isPrime_of_surjective Ideal.Quotient.mk_surjective (by rw [Ideal.mk_ker]; exact hqp)
   -- Localize the domain `R/q` at the prime `p/q` (a local ring); dominate it by a valuation
   -- subring `V` of its fraction field `K`.
@@ -304,14 +304,14 @@ theorem presheafValue_isAdicComplete
   letI : UniformSpace (presheafValue_ringOfDef D₀) :=
     UniformSpace.comap Subtype.val inferInstance
   -- Inherit `IsUniformAddGroup` from the ambient `presheafValue D₀`.
-  haveI : IsUniformAddGroup (presheafValue_ringOfDef D₀) :=
+  have : IsUniformAddGroup (presheafValue_ringOfDef D₀) :=
     AddSubgroup.isUniformAddGroup (presheafValue_ringOfDef D₀).toAddSubgroup
   -- The ring of definition is closed, hence complete (subspace of complete space).
-  haveI : CompleteSpace (presheafValue_ringOfDef D₀) :=
+  have : CompleteSpace (presheafValue_ringOfDef D₀) :=
     (Subring.isClosed_topologicalClosure
       (D₀.coeRingHom.comp (locSubring D₀.P D₀.T D₀.s).subtype).range).completeSpace_coe
   -- T2 inherited from ambient T2.
-  haveI : T2Space (presheafValue_ringOfDef D₀) := inferInstance
+  have : T2Space (presheafValue_ringOfDef D₀) := inferInstance
   -- Apply the iff: IsAdic ⇒ (IsAdicComplete ↔ CompleteSpace ∧ T2Space).
   exact hadic.isAdicComplete_iff.mpr ⟨inferInstance, inferInstance⟩
 
@@ -451,7 +451,7 @@ private theorem huber_ofValuation_mem_spa
           (presheafValue_concretePair D').I) :=
       ofValuation_restrictIdealSingle_one_isInSpvAI (t.comap algB) hW1 _
     letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
-    haveI hrsC : rs.Compatible := Valuation.Compatible.ofValuation rs
+    have hrsC : rs.Compatible := Valuation.Compatible.ofValuation rs
     have hequiv : (ValuativeRel.valuation (presheafValue D')).IsEquiv rs := fun a b =>
       (Valuation.Compatible.vle_iff_le
           (v := ValuativeRel.valuation (presheafValue D')) a b).symm.trans
@@ -522,7 +522,7 @@ private theorem ofValuation_vle_iff {D' : RationalLocData A} {Γ' : Type*}
     ∀ a b : presheafValue D', (ValuationSpectrum.ofValuation rs).vle a b ↔ rs a ≤ rs b := by
   intro a b
   letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
-  haveI : rs.Compatible := Valuation.Compatible.ofValuation rs
+  have : rs.Compatible := Valuation.Compatible.ofValuation rs
   exact Valuation.Compatible.vle_iff_le (v := rs) a b
 
 set_option linter.unusedSectionVars false in
@@ -556,7 +556,7 @@ theorem exists_spa_point_not_vle_one_huber
   -- HU-c (huber2.txt:644-646): a minimal prime `q ⊆ 𝔪`; the dominating valuation `s` of
   -- `R := B⁺[x⁻¹]` with `supp s = q`, `s ≤ 1` on `R` (so on `B⁺` and at `x⁻¹`), `s < 1` on `𝔪`
   -- (so `s(x⁻¹) < 1`, since `x⁻¹ ∈ 𝔪`).
-  haveI : 𝔪.IsPrime := h𝔪max.isPrime
+  have : 𝔪.IsPrime := h𝔪max.isPrime
   obtain ⟨q, hq_min, hq_le⟩ := Ideal.exists_minimalPrimes_le (J := 𝔪) bot_le
   obtain ⟨Γs, _, s, hs_supp, hs_le, hs_lt⟩ :=
     exists_dominating_valuation_of_minimalPrime_le hq_min hq_le
@@ -570,7 +570,7 @@ theorem exists_spa_point_not_vle_one_huber
   have hinj : Function.Injective (algebraMap ↑Radj (Localization.Away x)) := Subtype.val_injective
   obtain ⟨q', hq'prime, hq'eq⟩ :=
     Ideal.exists_comap_eq_of_mem_minimalPrimes_of_injective hinj q hq_min
-  haveI := hq'prime
+  have := hq'prime
   obtain ⟨Γt, _, t, ht_equiv⟩ := exists_valuation_extension_of_prime_over s q'
     (hq'eq.trans hs_supp.symm) (FractionRing (↑Radj ⧸ s.supp)) (FractionRing (Localization.Away x ⧸
       q'))
@@ -651,11 +651,11 @@ theorem isUnit_canonicalMap_s_huber
     (D D' : RationalLocData A)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) :
     IsUnit (D'.canonicalMap D.s) := by
-  haveI : IsHuberRing (presheafValue D') := presheafValue_isHuberRing_huber D'
-  haveI : T2Space (presheafValue D') := inferInstance
-  haveI : NonarchimedeanRing (presheafValue D') := inferInstance
+  have : IsHuberRing (presheafValue D') := presheafValue_isHuberRing_huber D'
+  have : T2Space (presheafValue D') := inferInstance
+  have : NonarchimedeanRing (presheafValue D') := inferInstance
   letI P_B : PairOfDefinition (presheafValue D') := presheafValue_concretePair D'
-  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
+  have : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
   rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B (D'.canonicalMap D.s)]
   intro w hw hvle
   have hmem := comap_canonicalMap_mem_rationalOpen D' (canonicalMap_continuous D') hw

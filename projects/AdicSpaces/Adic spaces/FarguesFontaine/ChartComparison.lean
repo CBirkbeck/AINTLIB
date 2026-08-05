@@ -238,9 +238,9 @@ theorem isUniformInducing_chartToBI (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
         (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb) := by
   letI : UniformSpace (Localization.Away (chartS p F ϖ 1 b)) :=
     chartUniformity p F ϖ a b
-  haveI : IsUniformAddGroup (Localization.Away (chartS p F ϖ 1 b)) :=
+  have : IsUniformAddGroup (Localization.Away (chartS p F ϖ 1 b)) :=
     chartIsUniformAddGroup p F ϖ a b
-  haveI : IsUniformAddGroup ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  have : IsUniformAddGroup ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
     isUniformAddGroup_BISub p F ϖ
   exact AddMonoidHom.isUniformInducing_of_isInducing
     (isInducing_chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
@@ -573,9 +573,9 @@ theorem isSheafy_presheafChart (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b �
     refine wI_teichPowOverP_le_one p F ϖ h12 ?_
     rw [perfectoidValuation_pow_toOF p F ϖ]
     exact le_of_eq hexact'
-  haveI : ValuationSpectrum.IsSheafy ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  have : ValuationSpectrum.IsSheafy ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
     isSheafy_BISub p F ϖ h12 1 1 (BIProd_mem_BISub p F ϖ _) hbb hexact'
-  haveI : IsTateRing (presheafValue (chartData p F ϖ 1 b a b)) :=
+  have : IsTateRing (presheafValue (chartData p F ϖ 1 b a b)) :=
     isTateRing_congr e he he'
   letI : ValuationSpectrum.PlusSubring (presheafValue (chartData p F ϖ 1 b a b)) :=
     ⟨(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).map e.toRingHom⟩

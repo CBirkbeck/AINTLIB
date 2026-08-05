@@ -153,7 +153,7 @@ lemma exists_mem_spa_supp_eq (𝔪 : Ideal A) [𝔪.IsMaximal]
     (h𝔪 : IsOpen (𝔪 : Set A)) :
     ∃ v ∈ Spa A A⁺, v.supp = 𝔪 := by
   classical
-  haveI := Ideal.Quotient.field 𝔪
+  have := Ideal.Quotient.field 𝔪
   let w : Valuation A (ℤᵐ⁰) := (1 : Valuation (A ⧸ 𝔪) _).comap (Ideal.Quotient.mk 𝔪)
   refine ⟨ofValuation w, ⟨?_, ?_⟩, ?_⟩
   · apply isContinuous_ofValuation_of
@@ -195,7 +195,7 @@ lemma isUnit_of_forall_not_vle_zero
   by_contra hf
   obtain ⟨𝔪, h𝔪, hf𝔪⟩ :=
     Ideal.exists_le_maximal (Ideal.span {f}) (Ideal.span_singleton_ne_top hf)
-  haveI := h𝔪
+  have := h𝔪
   obtain ⟨v, hv, hsv⟩ := exists_mem_spa_supp_eq 𝔪 (hmax 𝔪 h𝔪)
   exact h v hv ((v.mem_supp_iff f).mp (hsv ▸ hf𝔪 (Ideal.mem_span_singleton_self f)))
 
@@ -204,7 +204,7 @@ lemma exists_mem_spa_supp_eq_of_prime [DiscreteTopology A]
     (p : Ideal A) [p.IsPrime] :
     ∃ v ∈ Spa A A⁺, v.supp = p := by
   classical
-  haveI : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
+  have : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
   let φ : A →+* FractionRing (A ⧸ p) :=
     (algebraMap (A ⧸ p) (FractionRing (A ⧸ p))).comp (Ideal.Quotient.mk p)
   let w : Valuation A ℤᵐ⁰ := (1 : Valuation (FractionRing (A ⧸ p)) _).comap φ

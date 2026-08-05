@@ -63,12 +63,12 @@ theorem isUnit_canonicalMap_s_faithful
     (D D' : RationalLocData A)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) :
     IsUnit (D'.canonicalMap D.s) := by
-  haveI hTate : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
-  haveI : IsHuberRing (presheafValue D') := hTate.toIsHuberRing
-  haveI : T2Space (presheafValue D') := inferInstance
-  haveI : NonarchimedeanRing (presheafValue D') := inferInstance
+  have hTate : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
+  have : IsHuberRing (presheafValue D') := hTate.toIsHuberRing
+  have : T2Space (presheafValue D') := inferInstance
+  have : NonarchimedeanRing (presheafValue D') := inferInstance
   letI P_B : PairOfDefinition (presheafValue D') := presheafValue_concretePair D'
-  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
+  have : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
   rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B (D'.canonicalMap D.s)]
   intro w hw hvle
   have hmem := comap_canonicalMap_mem_rationalOpen D' (canonicalMap_continuous D') hw

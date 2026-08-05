@@ -63,10 +63,10 @@ theorem prop_8_30_remark755_chain_assembled
     (_hD : D.IsRational) (hD' : D'.IsRational) :
     @Module.Flat (presheafValue D) (presheafValue D') _ _
       (restrictionMapHom D D' h).toModule := by
-  haveI hTateB : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
-  haveI : IsNoetherianRing (presheafValue D) := presheafValue_isNoetherianRing_faithful D
-  haveI : IsHuberRing (presheafValue D) := hTateB.toIsHuberRing
-  haveI : IsStronglyNoetherian (presheafValue D) := presheafValue_isStronglyNoetherian_faithful D
+  have hTateB : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
+  have : IsNoetherianRing (presheafValue D) := presheafValue_isNoetherianRing_faithful D
+  have : IsHuberRing (presheafValue D) := hTateB.toIsHuberRing
+  have : IsStronglyNoetherian (presheafValue D) := presheafValue_isStronglyNoetherian_faithful D
   set W := imagePieceDatum D D'.T D'.s hD'.span_eq_top with hW
   set e := relativePiece_equiv D D' h hD'.span_eq_top with he
   have hflatW : @Module.Flat (presheafValue D) (presheafValue W) _ _

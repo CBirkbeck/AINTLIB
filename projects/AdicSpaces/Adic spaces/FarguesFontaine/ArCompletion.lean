@@ -408,7 +408,7 @@ subring is bounded; scale by `ϖ^N`). -/
 theorem exists_ball_subset_nhds {V : Set F} (hV : V ∈ nhds (0 : F)) :
     ∃ m : ℕ, {z : F | perfectoidValuation p F z ≤ (perfectoidValuation p F
       ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ m} ⊆ V := by
-  haveI := IsPerfectoidRing.uniform (p := p) (A := F)
+  have := IsPerfectoidRing.uniform (p := p) (A := F)
   obtain ⟨G, hGV⟩ := NonarchimedeanAddGroup.is_nonarchimedean V hV
   obtain ⟨W, hW, hFW⟩ := IsUniform.isBounded_powerBounded (A := F) (G : Set F)
     (G.isOpen.mem_nhds G.zero_mem')
@@ -529,7 +529,7 @@ theorem exists_eventually_wAloc_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) :
     ∃ B : NNReal, ∀ᶠ u in Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x),
       wAloc p F ϖ hρ0 hρ1 u ≤ B := by
-  haveI := neBot_comap_of_mem_ArSub p F ϖ hx
+  have := neBot_comap_of_mem_ArSub p F ϖ hx
   have hpair := eventually_pair_wAloc_le p F ϖ (hρ0 := hρ0) (hρ1 := hρ1) x
     (ε := 1) one_pos
   rw [Filter.eventually_prod_iff] at hpair
@@ -630,10 +630,10 @@ theorem tendsto_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     Filter.Tendsto (fun u => teichCoeffF p F (alocToWittF p F ϖ u) n)
       (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x))
       (nhds (teichCoeffAr p F ϖ hρ0 hρ1 x n)) := by
-  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hx
-  haveI hcompl : CompleteSpace F := IsPerfectoidRing.complete (p := p) (A := F)
-  haveI ht0 : T0Space F := IsPerfectoidRing.t0 (p := p) (A := F)
-  haveI huag : IsUniformAddGroup F := IsPerfectoidRing.uniformAddGroup (p := p) (A := F)
+  have hne := neBot_comap_of_mem_ArSub p F ϖ hx
+  have hcompl : CompleteSpace F := IsPerfectoidRing.complete (p := p) (A := F)
+  have ht0 : T0Space F := IsPerfectoidRing.t0 (p := p) (A := F)
+  have huag : IsUniformAddGroup F := IsPerfectoidRing.uniformAddGroup (p := p) (A := F)
   set L := Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x) with hL
   set coords : Aloc p F ϖ → F := fun u => teichCoeffF p F (alocToWittF p F ϖ u) n
     with hcoords
@@ -733,7 +733,7 @@ theorem gaussTerm_teichCoeffAr_le_of_ne_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1
     {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : Valued.v x ≠ 0)
     (n : ℕ) :
     ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n) ≤ Valued.v x := by
-  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hx
+  have hne := neBot_comap_of_mem_ArSub p F ϖ hx
   set r : NNReal := Valued.v x * (ρ ^ n)⁻¹ with hr
   have hρn : (0 : NNReal) < ρ ^ n := pow_pos hρ0 n
   have hr0 : 0 < r := mul_pos (pos_iff_ne_zero.mpr hx0) (inv_pos.mpr hρn)
@@ -1490,7 +1490,7 @@ theorem tendsto_gaussTerm_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ 
     {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) :
     Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F
       (teichCoeffAr p F ϖ hρ0 hρ1 x n)) Filter.atTop (nhds 0) := by
-  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hx
+  have hne := neBot_comap_of_mem_ArSub p F ϖ hx
   rw [tendsto_order]
   constructor
   · intro a ha
@@ -1769,7 +1769,7 @@ private theorem valued_PhiHatK_teichCoeffAr_sub_le {ρ : NNReal} {hρ0 : 0 < ρ}
     {hρ1 : ρ < 1} {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
     (ε : NNReal) (hεpos : 0 < ε) :
     Valued.v (PhiHatK p F ϖ hρ0 hρ1 (teichCoeffAr p F ϖ hρ0 hρ1 x) - x) ≤ ε := by
-  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hx
+  have hne := neBot_comap_of_mem_ArSub p F ϖ hx
   set b : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 x with hb
   have hbdec := tendsto_gaussTerm_teichCoeffAr p F ϖ hx
   rw [← hb] at hbdec
@@ -1863,9 +1863,9 @@ theorem teichCoeffAr_PhiHatK {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : 
     (hb : Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F (b n))
       Filter.atTop (nhds 0)) (n : ℕ) :
     teichCoeffAr p F ϖ hρ0 hρ1 (PhiHatK p F ϖ hρ0 hρ1 b) n = b n := by
-  haveI hcompl : CompleteSpace F := IsPerfectoidRing.complete (p := p) (A := F)
-  haveI ht0 : T0Space F := IsPerfectoidRing.t0 (p := p) (A := F)
-  haveI huag : IsUniformAddGroup F := IsPerfectoidRing.uniformAddGroup (p := p) (A := F)
+  have hcompl : CompleteSpace F := IsPerfectoidRing.complete (p := p) (A := F)
+  have ht0 : T0Space F := IsPerfectoidRing.t0 (p := p) (A := F)
+  have huag : IsUniformAddGroup F := IsPerfectoidRing.uniformAddGroup (p := p) (A := F)
   have hΦ := tendsto_PhiHatK p F ϖ hρ0 hρ1 hb
   have htend : Filter.Tendsto (fun N => prefixAloc p F ϖ b N) Filter.atTop
       (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1)

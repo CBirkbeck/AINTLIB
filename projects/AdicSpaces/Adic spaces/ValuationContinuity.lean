@@ -133,7 +133,7 @@ theorem image_I_ne_top (P : PairOfDefinition A)
     [IsAdicComplete P.I P.A₀]
     {𝔭 : Ideal A} [𝔭.IsPrime] :
     Ideal.map (P.toFractionQuotient 𝔭).rangeRestrict P.I ≠ ⊤ := by
-  haveI : (Ideal.comap P.A₀.subtype 𝔭).IsPrime := Ideal.IsPrime.comap P.A₀.subtype
+  have : (Ideal.comap P.A₀.subtype 𝔭).IsPrime := Ideal.IsPrime.comap P.A₀.subtype
   intro htop
   apply P.I_sup_prime_ne_top (𝔭₀ := Ideal.comap P.A₀.subtype 𝔭)
   have hker : RingHom.ker (P.toFractionQuotient 𝔭).rangeRestrict =
@@ -195,7 +195,7 @@ theorem supp_comap_quotient_fractionRing {𝔭 : Ideal A} [𝔭.IsPrime]
       (Ideal.Quotient.mk 𝔭))).supp = 𝔭 := by
   ext a
   simp only [Valuation.mem_supp_iff, Valuation.comap_apply, RingHom.comp_apply]
-  haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
+  have : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
   constructor
   · intro h
     by_contra ha
@@ -224,7 +224,7 @@ noncomputable def pulledBackValuation (_P : PairOfDefinition A)
     {𝔭 : Ideal A} [𝔭.IsPrime]
     (V : ValuationSubring (FractionRing (A ⧸ 𝔭))) :
     Valuation A V.ValueGroup :=
-  haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
+  have : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
   V.valuation.comap
     ((algebraMap (A ⧸ 𝔭) (FractionRing (A ⧸ 𝔭))).comp (Ideal.Quotient.mk 𝔭))
 
@@ -328,7 +328,7 @@ theorem pulledBackValuation_isContinuous
       (Ideal.map (P.toFractionQuotient 𝔭).rangeRestrict P.I : Set _) ⊆ V.nonunits)
     [MulArchimedean V.ValueGroup] :
     (P.pulledBackValuation V).IsContinuous := by
-  haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
+  have : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
   set v := P.pulledBackValuation V with hv_def
   obtain ⟨S, hS⟩ := P.fg
   obtain ⟨a₀, ha₀_I, ha₀_notp⟩ := P.exists_mem_I_not_mem_of_not_isOpen h𝔭
@@ -367,7 +367,7 @@ theorem exists_mem_spa_supp_eq_of_nonOpen_prime_mulArchimedean
     [MulArchimedean V.ValueGroup]
     (hAplus : ∀ f ∈ (A⁺ : Set A), P.pulledBackValuation V f ≤ 1) :
     ∃ v ∈ Spa A A⁺, v.supp = 𝔭 := by
-  haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
+  have : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
   set w := P.pulledBackValuation V
   refine ⟨ofValuation w, ⟨?_, ?_⟩, ?_⟩
   · exact isContinuous_ofValuation_of w
@@ -931,7 +931,7 @@ theorem pulledBackValuation_le_one_of_le (P : PairOfDefinition A)
     {V W : ValuationSubring (FractionRing (A ⧸ 𝔭))} (hVW : V ≤ W)
     {f : A} (hf : P.pulledBackValuation V f ≤ 1) :
     P.pulledBackValuation W f ≤ 1 := by
-  haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
+  have : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
   have hmono := V.monotone_mapOfLE W hVW hf
   rw [map_one] at hmono
   change W.valuation _ ≤ 1
@@ -1000,7 +1000,7 @@ theorem exists_mem_rationalOpen_supp_ge_of_nonOpen_prime_mulArchimedean
     (hrat_compat : ∀ t ∈ T,
       P.pulledBackValuation V t ≤ P.pulledBackValuation V s) :
     ∃ v ∈ rationalOpen T s, 𝔭 ≤ v.supp := by
-  haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
+  have : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
   set w := P.pulledBackValuation V with hw_def
   refine ⟨ofValuation w, ⟨⟨?_, ?_⟩, ?_, ?_⟩, ?_⟩
   · -- ofValuation w is continuous.
@@ -1063,7 +1063,7 @@ theorem exists_mem_spa_supp_eq_of_nonOpen_prime_via_heightOne_ofPrime
     (hAplus : ∀ f ∈ (A⁺ : Set A), P.pulledBackValuation V₀ f ≤ 1) :
     ∃ v ∈ Spa A A⁺, v.supp = 𝔭 := by
   -- Set up the coarsened valuation subring.
-  haveI : MulArchimedean (V₀.ofPrime Q).ValueGroup :=
+  have : MulArchimedean (V₀.ofPrime Q).ValueGroup :=
     ValuationSubring.mulArchimedean_ofPrime_of_height_one V₀ Q hQ hht1
   have hle : V₀ ≤ V₀.ofPrime Q := V₀.le_ofPrime Q
   -- Transfer of `hrange` through `V₀ ≤ V₀.ofPrime Q`.
@@ -1123,7 +1123,7 @@ theorem hrat_compat_of_mem_enlarged_domination (P : PairOfDefinition A)
         (Ideal.Quotient.mk 𝔭)) s)⁻¹ ∈ V.toSubring) :
     ∀ t ∈ T, P.pulledBackValuation V t ≤ P.pulledBackValuation V s := by
   intro t ht
-  haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
+  have : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
   set φ : A →+* FractionRing (A ⧸ 𝔭) :=
     (algebraMap (A ⧸ 𝔭) (FractionRing (A ⧸ 𝔭))).comp (Ideal.Quotient.mk 𝔭) with hφ_def
   -- `φ s ≠ 0` from `s ∉ 𝔭` via injectivity of `algebraMap` on the domain quotient.
@@ -1183,7 +1183,7 @@ theorem exists_mem_rationalOpen_supp_ge_of_enlarged_domination
           (Ideal.Quotient.mk 𝔭)) s)⁻¹ ∈ V.toSubring)) :
     ∃ v ∈ rationalOpen T s, 𝔭 ≤ v.supp := by
   obtain ⟨V, hrange, hnonunits, ⟨hmarch⟩, hAplus, hdom⟩ := hsupplier
-  haveI := hmarch
+  have := hmarch
   exact P.exists_mem_rationalOpen_supp_ge_of_nonOpen_prime_mulArchimedean
     h𝔭 T s hs hrange hnonunits hAplus
     (P.hrat_compat_of_mem_enlarged_domination T s hs hdom)
@@ -1341,7 +1341,7 @@ theorem exists_packaged_enlarged_domination_of_subResiduals
           (Ideal.Quotient.mk 𝔭)) t *
         (((algebraMap (A ⧸ 𝔭) (FractionRing (A ⧸ 𝔭))).comp
           (Ideal.Quotient.mk 𝔭)) s)⁻¹ ∈ V.toSubring) := by
-  haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
+  have : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
   -- Apply enlarged domination to get V₀.
   obtain ⟨V₀, hR'_le_V₀, hnonunits_V₀⟩ := P.exists_valuationSubring_of_prime_enlarged
       (R' := P.rationalEnlargedSubring 𝔭 T s)
@@ -1349,10 +1349,10 @@ theorem exists_packaged_enlarged_domination_of_subResiduals
   -- Extract height-1 Q from sub-residual (b).
   obtain ⟨Q, hQ_prime, hQ_ne_bot, hQ_ht1, hQ_contains_I⟩ :=
     hQ_heightOne_I V₀ hR'_le_V₀ hnonunits_V₀
-  haveI := hQ_prime
+  have := hQ_prime
   -- Set V := V₀.ofPrime Q.
   have hle : V₀ ≤ V₀.ofPrime Q := V₀.le_ofPrime Q
-  haveI : MulArchimedean (V₀.ofPrime Q).ValueGroup :=
+  have : MulArchimedean (V₀.ofPrime Q).ValueGroup :=
     ValuationSubring.mulArchimedean_ofPrime_of_height_one V₀ Q hQ_ne_bot hQ_ht1
   refine ⟨V₀.ofPrime Q, ?_, ?_, ⟨inferInstance⟩, ?_, ?_⟩
   · -- range ≤ V.toSubring

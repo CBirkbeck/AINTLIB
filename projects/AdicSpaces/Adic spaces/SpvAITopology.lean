@@ -431,7 +431,7 @@ theorem ofValuation_restrictIdeal_isInSpvAI
     (w : Valuation A Γ₀) (I : Ideal A) :
     Spv.IsInSpvAI (ofValuation (w.restrictIdeal I)) I := by
   letI : ValuativeRel A := (ofValuation (w.restrictIdeal I)).toValuativeRel
-  haveI hcw : (w.restrictIdeal I).Compatible := Valuation.Compatible.ofValuation _
+  have hcw : (w.restrictIdeal I).Compatible := Valuation.Compatible.ofValuation _
   -- `canon := ValuativeRel.valuation A` is `IsEquiv` to `w.restrictIdeal I` (both `Compatible`).
   have hequiv : (ValuativeRel.valuation A).IsEquiv (w.restrictIdeal I) := fun a b =>
     (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) a b).symm.trans
@@ -559,7 +559,7 @@ theorem cofinalValue_canon_of_restricted {Γ' : Type*} [LinearOrderedCommGroupWi
     letI : ValuativeRel A := (ofValuation rs).toValuativeRel
     Valuation.CofinalValue (ValuativeRel.valuation A) a := by
   letI : ValuativeRel A := (ofValuation rs).toValuativeRel
-  haveI hcw : rs.Compatible := Valuation.Compatible.ofValuation _
+  have hcw : rs.Compatible := Valuation.Compatible.ofValuation _
   have hequiv : (ValuativeRel.valuation A).IsEquiv rs := fun p q =>
     (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) p q).symm.trans
       (Valuation.Compatible.vle_iff_le (v := rs) p q)
@@ -589,7 +589,7 @@ theorem isMicrobial_canon_of_restricted {Γ' : Type*} [LinearOrderedCommGroupWit
     letI : ValuativeRel A := (ofValuation rs).toValuativeRel
     Valuation.IsMicrobial (ValuativeRel.valuation A) := by
   letI : ValuativeRel A := (ofValuation rs).toValuativeRel
-  haveI hcw : rs.Compatible := Valuation.Compatible.ofValuation _
+  have hcw : rs.Compatible := Valuation.Compatible.ofValuation _
   have hequiv : (ValuativeRel.valuation A).IsEquiv rs := fun p q =>
     (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) p q).symm.trans
       (Valuation.Compatible.vle_iff_le (v := rs) p q)
@@ -1337,7 +1337,7 @@ theorem lemma_3_29_qcKolmogorov_oc_basis_consequences
     intro ι UU hU_open hcover
     have hU'_open : ∀ i, @IsOpen X₀ T' (UU i) := fun i => hT'_le_T (UU i) (hU_open i)
     have hs_closed_T' : @IsClosed X₀ T' s := (hU_oc s hs).2
-    haveI : @CompactSpace X₀ T' := hT'_qc
+    have : @CompactSpace X₀ T' := hT'_qc
     exact (@IsClosed.isCompact X₀ T' s _ hs_closed_T').elim_finite_subcover
       UU hU'_open hcover
 
@@ -1632,7 +1632,7 @@ and the ambient product Sierpinski cube is QuasiSober (`prop_pi_quasiSober`);
 closed embeddings reflect QuasiSober via `Topology.IsClosedEmbedding.quasiSober`. -/
 theorem Spv.isSpectralSpace : CompactSpace (Spv A) ∧ T0Space (Spv A) ∧ QuasiSober (Spv A) :=
   ⟨inferInstance, inferInstance,
-    haveI : QuasiSober (A × A → Prop) := prop_pi_quasiSober
+    have : QuasiSober (A × A → Prop) := prop_pi_quasiSober
     ιSpv_isClosedEmbedding.quasiSober⟩
 
 /-- **(T-Spv.2.γ, SpvAI Kolmogorov as subspace of Spv)** -/
@@ -1717,7 +1717,7 @@ theorem SpvAI.quasiSober_topology [TopologicalSpace A] (I : Ideal A)
     (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) :
     @QuasiSober (SpvAI A I) (SpvAI.topology I) := by
   letI : TopologicalSpace (SpvAI A I) := SpvAI.topology I
-  haveI hQS : QuasiSober (Spv A) := Spv.isSpectralSpace.2.2
+  have hQS : QuasiSober (Spv A) := Spv.isSpectralSpace.2.2
   -- Inclusion `Subtype.val : SpvAI A I → Spv A` is continuous: `SpvAI.topology I` is
   -- finer than the induced topology, so continuity transfers from the induced case.
   have h_iota_cont : Continuous (Subtype.val : SpvAI A I → Spv A) :=
@@ -2016,7 +2016,7 @@ theorem Spv.isContinuous_of_lt_one_general
     letI : ValuativeRel A := v.toValuativeRel
     (ValuativeRel.valuation A).IsContinuous := by
   letI : ValuativeRel A := v.toValuativeRel
-  haveI : IsTopologicalRing A := isTopologicalRing_of_pairOfDefinition P
+  have : IsTopologicalRing A := isTopologicalRing_of_pairOfDefinition P
   -- `I = Ideal.map P.A₀.subtype P.I` by definitional unfolding of `Ideal.map`.
   have hImap : I = Ideal.map P.A₀.subtype P.I := hIeq
   -- Transport `h_in` and `h_lt_one` to the `Ideal.map`-form.
@@ -2229,8 +2229,8 @@ theorem cont_isSpectralSpace [DecidableEq A]
         (ValuativeRel.valuation A).IsContinuous }
       (TopologicalSpace.induced (·.val) (SpvAI.topology I)) := by
   letI : TopologicalSpace (SpvAI A I) := SpvAI.topology I
-  haveI hCpct : CompactSpace (SpvAI A I) := (SpvAI.isSpectralSpace I P hIeq).1
-  haveI hT0 : T0Space (SpvAI A I) := (SpvAI.isSpectralSpace I P hIeq).2.1
+  have hCpct : CompactSpace (SpvAI A I) := (SpvAI.isSpectralSpace I P hIeq).1
+  have hT0 : T0Space (SpvAI A I) := (SpvAI.isSpectralSpace I P hIeq).2.1
   have hClosed : IsClosed { v : SpvAI A I |
       letI : ValuativeRel A := v.1.toValuativeRel
       (ValuativeRel.valuation A).IsContinuous } :=

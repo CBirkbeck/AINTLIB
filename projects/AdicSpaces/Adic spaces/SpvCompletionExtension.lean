@@ -37,7 +37,7 @@ theorem ne_zero_of_unit_completion
       UniformSpace.Completion R) * xinv = 1 := by
     rw [hxinv_def, ← hu]; exact_mod_cast u.mul_inv
   set F : Filter R := Filter.comap (UniformSpace.Completion.coe' : R → _) (nhds xinv) with hF_def
-  haveI hF_neBot : F.NeBot := UniformSpace.Completion.isDenseInducing_coe.comap_nhds_neBot xinv
+  have hF_neBot : F.NeBot := UniformSpace.Completion.isDenseInducing_coe.comap_nhds_neBot xinv
   have hcoeF : Filter.Tendsto
       (UniformSpace.Completion.coe' : R → _) F (nhds xinv) := Filter.tendsto_comap
   have h1 : Filter.Tendsto

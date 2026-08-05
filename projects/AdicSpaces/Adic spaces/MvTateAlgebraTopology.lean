@@ -500,7 +500,7 @@ theorem mvPairSubring_isOpen [IsTateRing A] (n : ℕ) (P : PairOfDefinition A)
         Set ↥(restrictedMvPowerSeriesSubring n A)) := by
   letI : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology n P π hπ_gen hπ_unit
-  haveI := mvTateAlgebraTopology_isTopologicalRing n P π hπ_gen hπ_unit
+  have := mvTateAlgebraTopology_isTopologicalRing n P π hπ_gen hπ_unit
   refine (mvPairSubring n P).toAddSubgroup.isOpen_of_mem_nhds (g := 0) ?_
   refine Filter.mem_of_superset
     ((mvTateAlgBasis n P π hπ_gen hπ_unit).hasBasis_nhds_zero.mem_of_mem (i := 1) trivial) ?_
@@ -590,9 +590,9 @@ theorem mvTate_t2Space [IsTateRing A] [T2Space A] (n : ℕ) :
     @T2Space ↥(restrictedMvPowerSeriesSubring n A) (mvTateAlgebraTopology' n) := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateAlgebraTopology' n
-  haveI : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
+  have : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology'_isTopologicalRing n
-  haveI : IsTopologicalAddGroup ↥(restrictedMvPowerSeriesSubring n A) :=
+  have : IsTopologicalAddGroup ↥(restrictedMvPowerSeriesSubring n A) :=
     IsTopologicalRing.to_topologicalAddGroup
   apply IsTopologicalAddGroup.t2Space_of_zero_sep
   intro y hy_ne
@@ -638,13 +638,13 @@ theorem mvTate_uniformity_isCountablyGenerated [IsTateRing A] (n : ℕ) :
     @Filter.IsCountablyGenerated _
       (@uniformity ↥(restrictedMvPowerSeriesSubring n A) (mvTateUniformSpace n)) := by
   letI τ : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateAlgebraTopology' n
-  haveI hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
+  have hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddgrp : IsTopologicalAddGroup ↥(restrictedMvPowerSeriesSubring n A) :=
+  have haddgrp : IsTopologicalAddGroup ↥(restrictedMvPowerSeriesSubring n A) :=
     IsTopologicalRing.to_topologicalAddGroup
   letI uT : UniformSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateUniformSpace n
-  haveI : @IsUniformAddGroup _ uT _ := mvTate_isUniformAddGroup n
-  haveI : (@nhds _ τ (0 : ↥(restrictedMvPowerSeriesSubring n A))).IsCountablyGenerated :=
+  have : @IsUniformAddGroup _ uT _ := mvTate_isUniformAddGroup n
+  have : (@nhds _ τ (0 : ↥(restrictedMvPowerSeriesSubring n A))).IsCountablyGenerated :=
     (mvTateAlgBasis' n).hasBasis_nhds_zero.isCountablyGenerated
   exact @IsUniformAddGroup.uniformity_countably_generated _ uT _ _ (by
     convert ‹(@nhds _ τ (0 : ↥(restrictedMvPowerSeriesSubring n A))).IsCountablyGenerated›)
@@ -736,7 +736,7 @@ private theorem coeffMv_cauchySeq_of_basis (n : ℕ) (P : PairOfDefinition A)
     @CauchySeq A ℕ (IsTopologicalAddGroup.rightUniformSpace A) _
       (fun m => MvPowerSeries.coeff l (u m).val) := by
   letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
-  haveI : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
+  have : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
   rw [cauchySeq_iff]
   intro V hV
   rw [uniformity_eq_comap_nhds_zero'] at hV
@@ -767,9 +767,9 @@ private theorem mvTateAlgNhd_of_cauchySeq [IsTateRing A] [T2Space A] (n : ℕ)
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology' n
-  haveI hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
+  have hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddgrp : IsTopologicalAddGroup ↥(restrictedMvPowerSeriesSubring n A) :=
+  have haddgrp : IsTopologicalAddGroup ↥(restrictedMvPowerSeriesSubring n A) :=
     IsTopologicalRing.to_topologicalAddGroup
   letI uT : UniformSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateUniformSpace n
   intro k
@@ -801,20 +801,20 @@ theorem mvTate_completeSpace [IsTateRing A] [T2Space A] (n : ℕ)
     @CompleteSpace ↥(restrictedMvPowerSeriesSubring n A) (mvTateUniformSpace n) := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateAlgebraTopology' n
-  haveI hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
+  have hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddgrp : IsTopologicalAddGroup ↥(restrictedMvPowerSeriesSubring n A) :=
+  have haddgrp : IsTopologicalAddGroup ↥(restrictedMvPowerSeriesSubring n A) :=
     IsTopologicalRing.to_topologicalAddGroup
   letI uT : UniformSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateUniformSpace n
-  haveI : @IsUniformAddGroup _ uT _ := mvTate_isUniformAddGroup n
+  have : @IsUniformAddGroup _ uT _ := mvTate_isUniformAddGroup n
   -- Step 1: The uniformity is countably generated (basis indexed by ℕ).
-  haveI hcg : (@uniformity _ uT).IsCountablyGenerated :=
+  have hcg : (@uniformity _ uT).IsCountablyGenerated :=
     mvTate_uniformity_isCountablyGenerated n
   -- Step 2: Use the sequential completeness criterion.
   apply @UniformSpace.complete_of_cauchySeq_tendsto _ uT hcg
   intro u hu
   letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
-  haveI : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
+  have : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
   -- hu_basis: the Cauchy condition in terms of mvTateAlgNhd.
   have hu_basis := mvTateAlgNhd_of_cauchySeq n u hu
   -- Step 3: For each l, the coefficient sequence is Cauchy in (A, uA).
@@ -876,11 +876,11 @@ theorem mvPairIdeal_isAdic_subspace [IsTateRing A] (n : ℕ) :
       (mvPairIdeal n (IsTateRing.principalPair A).toPairOfDefinition) := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateAlgebraTopology' n
-  haveI hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
+  have hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology'_isTopologicalRing n
   letI τ_sub : TopologicalSpace ↥(mvPairSubring n P) :=
     instTopologicalSpaceSubtype
-  haveI hring_sub : @IsTopologicalRing ↥(mvPairSubring n P) τ_sub _ :=
+  have hring_sub : @IsTopologicalRing ↥(mvPairSubring n P) τ_sub _ :=
     Subring.instIsTopologicalRing (mvPairSubring n P)
   rw [@isAdic_iff _ _ _ hring_sub]
   refine ⟨fun k => ?_, fun s hs => ?_⟩
@@ -921,7 +921,7 @@ theorem mvTateAlgebra_algebraMap_continuous [IsTateRing A] (n : ℕ) :
       (algebraMap A ↥(restrictedMvPowerSeriesSubring n A)) := by
   let P := (IsTateRing.principalPair A).toPairOfDefinition
   letI τ : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateAlgebraTopology' n
-  haveI hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
+  have hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology'_isTopologicalRing n
   rw [continuous_def]
   intro U hU
@@ -954,7 +954,7 @@ principal pair of `A`. -/
 theorem mvTate_isTateRing [IsTateRing A] (n : ℕ) :
     @IsTateRing ↥(restrictedMvPowerSeriesSubring n A) _ (mvTateAlgebraTopology' n) := by
   letI τ : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateAlgebraTopology' n
-  haveI hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
+  have hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology'_isTopologicalRing n
   exact @IsTateRing.mk _ _ τ
     ⟨⟨mvTateAlgebra_pairOfDefinition n⟩⟩
@@ -999,18 +999,18 @@ theorem mvTate_isClosed_ideal [IsTateRing A] [T2Space A] [IsStronglyNoetherian A
     @IsClosed ↥(restrictedMvPowerSeriesSubring n A) (mvTateAlgebraTopology' n)
       (J : Set ↥(restrictedMvPowerSeriesSubring n A)) := by
   letI τ : TopologicalSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateAlgebraTopology' n
-  haveI hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
+  have hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology'_isTopologicalRing n
   letI uC : UniformSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateUniformSpace n
-  haveI : IsUniformAddGroup ↥(restrictedMvPowerSeriesSubring n A) := mvTate_isUniformAddGroup n
-  haveI : CompleteSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTate_completeSpace n hA_complete
-  haveI : (@uniformity ↥(restrictedMvPowerSeriesSubring n A) uC).IsCountablyGenerated :=
+  have : IsUniformAddGroup ↥(restrictedMvPowerSeriesSubring n A) := mvTate_isUniformAddGroup n
+  have : CompleteSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTate_completeSpace n hA_complete
+  have : (@uniformity ↥(restrictedMvPowerSeriesSubring n A) uC).IsCountablyGenerated :=
     mvTate_uniformity_isCountablyGenerated n
-  haveI : T2Space ↥(restrictedMvPowerSeriesSubring n A) := mvTate_t2Space n
-  haveI : IsTateRing ↥(restrictedMvPowerSeriesSubring n A) := mvTate_isTateRing n
-  haveI : ContinuousSMul ↥(restrictedMvPowerSeriesSubring n A)
+  have : T2Space ↥(restrictedMvPowerSeriesSubring n A) := mvTate_t2Space n
+  have : IsTateRing ↥(restrictedMvPowerSeriesSubring n A) := mvTate_isTateRing n
+  have : ContinuousSMul ↥(restrictedMvPowerSeriesSubring n A)
       ↥(restrictedMvPowerSeriesSubring n A) := ⟨continuous_mul⟩
-  haveI hnoeth : IsNoetherianRing ↥(restrictedMvPowerSeriesSubring n A) :=
+  have hnoeth : IsNoetherianRing ↥(restrictedMvPowerSeriesSubring n A) :=
     IsStronglyNoetherian.isNoetherianRing_restricted n
   exact ValuationSpectrum.fg_topologicalClosure_isClosed J
     (Module.Finite.iff_fg.mpr (isNoetherian_def.mp hnoeth _))
@@ -1145,7 +1145,7 @@ theorem mvPowerSeries_X_isBounded [IsTateRing A] {m : ℕ} (j : Fin m) :
         ℕ → ↥(restrictedMvPowerSeriesSubring m A))) := by
   classical
   letI : TopologicalSpace ↥(restrictedMvPowerSeriesSubring m A) := mvTateAlgebraTopology' m
-  haveI : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring m A) :=
+  have : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring m A) :=
     mvTateAlgebraTopology'_isTopologicalRing m
   set P := (IsTateRing.principalPair A).toPairOfDefinition with hP
   set Xj : ↥(restrictedMvPowerSeriesSubring m A) :=
@@ -1175,7 +1175,7 @@ theorem mvTateAlgebra_algebraMap_isBounded [IsTateRing A] {m : ℕ} {S : Set A}
       ((algebraMap A ↥(restrictedMvPowerSeriesSubring m A)) '' S) := by
   classical
   letI : TopologicalSpace ↥(restrictedMvPowerSeriesSubring m A) := mvTateAlgebraTopology' m
-  haveI : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring m A) :=
+  have : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring m A) :=
     mvTateAlgebraTopology'_isTopologicalRing m
   set P := (IsTateRing.principalPair A).toPairOfDefinition with hP
   intro U hU

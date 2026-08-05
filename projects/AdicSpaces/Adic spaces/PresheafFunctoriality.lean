@@ -128,8 +128,8 @@ theorem locMapOfHom_continuous (φ : R →+* S) (hφ : Continuous φ)
     (hT : ∀ t ∈ D.T, φ t ∈ D'.T) :
     @Continuous _ _ D.topology D'.topology (locMapOfHom φ D D' hs) := by
   letI := D'.topology
-  haveI : IsTopologicalRing (Localization.Away D'.s) := D'.isTopologicalRing
-  haveI : @NonarchimedeanRing _ _ D'.topology :=
+  have : IsTopologicalRing (Localization.Away D'.s) := D'.isTopologicalRing
+  have : @NonarchimedeanRing _ _ D'.topology :=
     (locBasis D'.P D'.T D'.s D'.hopen).nonarchimedean
   have hf_alg : @Continuous _ _ _ D'.topology
       ((locMapOfHom φ D D' hs).comp (algebraMap R (Localization.Away D.s))) := by
@@ -257,7 +257,7 @@ theorem presheafValueMapOfHom_restriction
   letI := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  haveI : RegularSpace (presheafValue E') := UniformSpace.to_regularSpace
+  have : RegularSpace (presheafValue E') := UniformSpace.to_regularSpace
   have hcomp : ((presheafValueMapOfHom φ hφ D' E' hs' hT').comp
       (restrictionMapHom D D' h)).comp D.coeRingHom =
       ((restrictionMapHom E E' hpush).comp
