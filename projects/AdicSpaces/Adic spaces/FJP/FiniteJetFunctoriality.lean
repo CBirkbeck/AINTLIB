@@ -566,17 +566,6 @@ theorem bridgeRev_bridgeX (i : Fin e.m) :
     bridgeRev D e (bridgeX D e i) = bridgeGen D e i :=
   bridgeEval_X D e i
 
-/-- Sums of open-subgroup members stay in the subgroup (local copy of the private
-Wedhorn828 helper). -/
-private theorem tsum_mem_of_isOpen_addSubgroup' {ι G₀ : Type*} [AddCommGroup G₀]
-    [TopologicalSpace G₀] [IsTopologicalAddGroup G₀] {f : ι → G₀}
-    (hf : Summable f) {G : AddSubgroup G₀} (hG : IsOpen (G : Set G₀))
-    (hmem : ∀ i, f i ∈ G) : ∑' i, f i ∈ G := by
-  have hclosed : IsClosed (G : Set G₀) := AddSubgroup.isClosed_of_isOpen G hG
-  refine hclosed.mem_of_tendsto hf.hasSum (Filter.Eventually.of_forall ?_)
-  intro s
-  exact G.sum_mem fun i _ => hmem i
-
 /-- The range of the generator product powers is bounded (local copy of the private
 Wedhorn828 helper, at our tuple). -/
 private theorem bridgeRangeProd_isBounded :
@@ -616,7 +605,7 @@ theorem bridgeEval_continuous : Continuous (bridgeEval D e) := by
   apply hWU
   change (∑' v, mvEvalTerm D.canonicalMap (bridgeGen D e)
     (bridgeToRestricted e.m p) v) ∈ (W : Set (presheafValue D))
-  refine tsum_mem_of_isOpen_addSubgroup'
+  refine ValuationSpectrum.tsum_mem_of_isOpen_addSubgroup
     (mvEvalTerm_summable D.canonicalMap (canonicalMap_continuous D)
       (bridgeGen D e) (bridgeGen_isBounded D e) (bridgeToRestricted e.m p))
     W.isOpen fun v => ?_
@@ -1395,7 +1384,7 @@ theorem bridgeEvalB_continuous (hD : D.IsRational) :
   apply hWU
   change (∑' v, mvEvalTerm (pushDatumB D hD).canonicalMap (bridgeGenB D e hD)
     (bridgeToRestrictedB e.m p) v) ∈ (W : Set (presheafValue (pushDatumB D hD)))
-  refine tsum_mem_of_isOpen_addSubgroup'
+  refine ValuationSpectrum.tsum_mem_of_isOpen_addSubgroup
     (mvEvalTerm_summable (pushDatumB D hD).canonicalMap
       (canonicalMap_continuous (pushDatumB D hD))
       (bridgeGenB D e hD) (bridgeGenB_isBounded D e hD) (bridgeToRestrictedB e.m p))
@@ -1598,7 +1587,7 @@ theorem bridgeEvalC_continuous (hD : D.IsRational) :
   apply hWU
   change (∑' v, mvEvalTerm (pushDatumC D hD).canonicalMap (bridgeGenC D e hD)
     (bridgeToRestrictedC e.m p) v) ∈ (W : Set (presheafValue (pushDatumC D hD)))
-  refine tsum_mem_of_isOpen_addSubgroup'
+  refine ValuationSpectrum.tsum_mem_of_isOpen_addSubgroup
     (mvEvalTerm_summable (pushDatumC D hD).canonicalMap
       (canonicalMap_continuous (pushDatumC D hD))
       (bridgeGenC D e hD) (bridgeGenC_isBounded D e hD) (bridgeToRestrictedC e.m p))

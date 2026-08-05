@@ -16936,3 +16936,115 @@ Second whole-fleet ENOSPC of the project (see `disk-full-elan-toolchain-pileup`)
 `Write`/`Edit`, which stage through a temp file. Only reads work. Recovered ~350 MB by deleting
 this session's own gate logs and the backups of already-committed files; that is enough for one
 module at a time, not for a full-workspace gate.
+
+## Task 1 is complete; Task 2's actionable board is empty
+
+**Task 1.** Outside `Vendored/` the tree now contains **zero** heartbeat or synth-heartbeat
+raises. What a naive grep still finds is only:
+
+* two *comments* recording raises that decomposition removed
+  (`WedhornCechAcyclicity.lean:11198`, `FJP/FiniteJetSheafTransfer.lean:478`);
+* three `set_option maxSynthPendingDepth 1 in` in `FarguesFontaine/RobbaCorrespondence.lean`,
+  which the goal explicitly keeps — it is a *reduction*, not a raise.
+
+> Grep trap worth repeating: `projects/AdicSpaces/_blueprint/.lake/packages/mathlib/` is inside
+> the project tree, and it contributes **83 of the 86** raw matches. Filter `/.lake/` as well as
+> `/Vendored/`, or the count is mathlib's, not ours.
+
+**Task 2.** `wedhorn_lemma_834` 122 → 48 closed the last actionable target. The remaining six
+are all outside fleet scope:
+
+| c | decl | why not fleet work |
+|---|---|---|
+| 188 | `presheafValue_mvRestricted_surjection` | letI instance wall |
+| 188 | `idealOfDef_pow_isClosed_aux` | letI instance wall |
+| 95 | `genPiece_relative_overlap_square₂` | letI wall — 46 of 95 lines are 12 `letI`s |
+| 68 | `presheafValue_mvRestricted_fU_uniformContinuous` | letI instance wall |
+| 68 | `ofValuation_restrictIdeal_isInSpvAI` | **sorry-bearing** — the producer's WIP |
+| 66 | `berkeley_6_2_8` | **sorry-bearing** — the producer's WIP |
+
+The wall shape is always the same: a prologue of `letI`/`haveI` that every later step consumes,
+so no suffix of the proof detaches and no prefix is a statement. `genPiece_relative_overlap_square₂`
+is the purest instance: twelve `letI`s, three each for four `RationalLocData`, and they cannot be
+made real instances because `Localization.Away D.s` does not determine `D`.
+
+## Task 3 — file-level audit is clean; the remaining surface is per-declaration
+
+Across the 272 project files (excluding `Vendored/` and `.lake/`):
+
+| item | finding |
+|---|---|
+| A.1 copyright | **16 files fixed** (14 ScottishBook + 2 FarguesFontaine). The four import-aggregator roots are left alone, as mathlib leaves `Mathlib.lean` |
+| A.2 module docstring | only the aggregator roots lack one — n/a |
+| A.3 imports | **not reordered**, per this project's own recorded rule |
+| A.6 file-level `set_option` | Task 1, done |
+| A.7 `λ` / `$` / `push_neg` | `$` and `push_neg`: zero. All 28 `λ` are **prose** — `λ` is the *name* of the Čech difference map in docstrings, not a lambda. n/a |
+| long lines (>100 **characters**) | 294 in 25 files, 202 of them in the three `RelativePieceKeystone*` |
+
+> `awk 'length($0)>100'` counts **bytes**. On this tree — dense with `↥ ⧸ ₀ ⟨⟩` — it reported
+> 1000+ where the character count is 294. Measure Lean line width in Python, not awk.
+
+The long-line item is deliberately **not** taken: `style.longLine` is not enabled in this
+project (zero linter hits in a full build log), only 55 of the 158 long *code* lines split
+safely at `:=`, and the three files that hold two-thirds of them are 4,800 lines that cost a
+full rebuild to verify. Cosmetic gain, real risk.
+
+### Duplication scan: 6 identical-body groups in 6,396 declarations
+
+Exact-body hash (comments and blank lines stripped, whitespace collapsed, bodies under three
+lines ignored):
+
+| lines | declarations | verdict |
+|---|---|---|
+| 35 | `spa_topology_eq_generateFrom` / `…_huber` | **not a duplicate — a typeclass variant.** `RationalBasis`'s section adds `[DecidableEq A] [IsTateRing A]`, which auto-include, so the *upstream* copy is the **weaker** lemma. Fixing it means `omit [DecidableEq A] [IsTateRing A] in` upstream, then delegating — a statement change, and 54 dependants |
+| 14 | `principalPair_A₀_completeSpace_of_stronglyNoetherianTate` / `_aux_nonOpen_hSpa_…` | **no possible home** — neither `StructureSheaf` nor `PrincipalPairAdicComplete` reaches the other. Also a naming defect (`_aux_nonOpen_` prefix) |
+| 13 | `isBounded_OD` / `isBounded_unitBall` | statements *differ*; same proof. A **generalisation** (one lemma about a normed ring's unit ball), not a dedup |
+| 7 | `tsum_mem_of_isOpen_addSubgroup''` / `'` | **fixed** — `FiniteJetChart` transitively imports `FiniteJetFunctoriality`, so the upstream copy loses its `private` and the downstream one is deleted |
+| 5 | `constHomC` / `constHomPS` | different types; genuine |
+| 4 | `locSubring_empty` ×2 | identical statement *and* body, and the consumer imports the producer — but **both are `private`**, which is exactly what forced the copy. 190 dependants |
+
+> The scan's real output is not "six duplicates" but *why* each survived: `private` blocking
+> cross-file reuse (×1), no common ancestor (×1), a typeclass variant that inverts which copy is
+> the better lemma (×1). Only the case where an import already existed was cheap to fix.
+
+### The better duplication detector here is the *docstring*, not the body hash
+
+The `tsum_mem_of_isOpen_addSubgroup` case turned out to be a **three**-way duplicate, not a
+pair. The body hash found only two of the three: the `Wedhorn828` original differs from the two
+copies by `fun i _ ↦` vs `fun i _ =>` and by where `{ι : Type*}` sits in the binder list. What
+actually found it was the copy's own docstring —
+
+> *"Sums of open-subgroup members stay in the subgroup (local copy of the private Wedhorn828
+> helper)."*
+
+Grepping for that habit finds six more self-declared copies, and the reason is nearly always
+the same one word:
+
+| copy | cited reason |
+|---|---|
+| `presheafValue_eq_id_of_coeRingHom'` (RingEquivPresheafTransportHuber:142) | "copy of the **(private)** dense-extension identity engine" |
+| `productRestrictionSub_continuous_local` (RelativeDescentHuber:1147) | "local copy of the **private** `StandardDescent` fact" |
+| `bridgeRangeProd_isBounded` (FiniteJetFunctoriality:571) | "local copy of the **private** Wedhorn828 helper, **at our tuple**" — a specialisation, not a verbatim copy |
+| `wca_restrictionMap_bijective_of_rationalOpen_eq` (WedhornCechAcyclicity:10432) | "**GeometricReduction is not imported here**" — a missing edge, not `private` |
+| `nonarchOfUltra` (RestrictedLaurent:978) | "to keep this file's **imports light**" — a deliberate trade, and a duplicate *instance*; the author's call |
+| `productRestrictionSub_isInducing…` variant (EmbeddingTopo:292) | "Same as … **but**" — a variant, not a copy |
+
+> **`private` is the single largest cause of duplication in this tree.** It is module-scoped, so
+> a downstream file that already imports the producer still cannot see the lemma and copies it
+> instead. Each such case is a one-token fix upstream plus a deletion downstream — the only cost
+> is the upstream file's rebuild fan-out.
+
+Applied here: `tsum_mem_of_isOpen_addSubgroup` un-privated in `Wedhorn828` and the two FJP
+copies deleted, their four call sites repointed at `ValuationSpectrum.tsum_mem_of_isOpen_addSubgroup`.
+
+Queued, with the cost that stopped each:
+
+* `presheafValue_eq_id_of_coeRingHom'`, `productRestrictionSub_continuous_local` — same
+  `private` fix; not yet taken.
+* `locSubring_empty` — same `private` fix, but `LocalizationTopology` has **190** dependants.
+* `spa_topology_eq_generateFrom` — needs `omit [DecidableEq A] [IsTateRing A] in` upstream
+  first (the identical body compiles without them in `RationalBasisHuber`, so the omit is
+  guaranteed sound); 54 dependants.
+* `wca_restrictionMap_bijective_of_rationalOpen_eq` — needs an import edge, not an unprivate.
+* `isBounded_OD` / `isBounded_unitBall` — a generalisation (one lemma about a normed ring's
+  unit ball), not a dedup.

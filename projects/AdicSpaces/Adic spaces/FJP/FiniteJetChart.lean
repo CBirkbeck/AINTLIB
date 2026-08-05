@@ -954,17 +954,6 @@ theorem chartEval_jBWa_fst :
     rw [TateAlgebraWedhorn.evalTerm, coeff_kwToTate, coeff_jB_Wa_fst,
       if_neg hn, map_zero, zero_mul]
 
-/-- Sums of open-subgroup members stay in the subgroup (local copy of the private
-helper from the functoriality file). -/
-private theorem tsum_mem_of_isOpen_addSubgroup'' {ι G₀ : Type*} [AddCommGroup G₀]
-    [TopologicalSpace G₀] [IsTopologicalAddGroup G₀] {f : ι → G₀}
-    (hf : Summable f) {G : AddSubgroup G₀} (hG : IsOpen (G : Set G₀))
-    (hmem : ∀ i, f i ∈ G) : ∑' i, f i ∈ G := by
-  have hclosed : IsClosed (G : Set G₀) := AddSubgroup.isClosed_of_isOpen G hG
-  refine hclosed.mem_of_tendsto hf.hasSum (Filter.Eventually.of_forall ?_)
-  intro s
-  exact G.sum_mem fun i _ => hmem i
-
 /-- Continuity of the chart evaluation from the norm topology on `K⟨X⟩`
 (Gauss-ball mirror of the functoriality-file evaluation continuity; the T-topology
 obstruction recorded in `TateAlgebraWedhorn` does not apply to the norm source). -/
@@ -986,7 +975,7 @@ theorem chartEval_continuous : Continuous (chartEval F) := by
   apply hWU
   change (∑' n, TateAlgebraWedhorn.evalTerm (chartConst F) (gChart F)
     (kwToTate F f) n) ∈ (W : Set (presheafValue (chartDatum F)))
-  refine tsum_mem_of_isOpen_addSubgroup''
+  refine ValuationSpectrum.tsum_mem_of_isOpen_addSubgroup
     (TateAlgebraWedhorn.evalTerm_summable (chartConst F) (chartConst_continuous F)
       (gChart F) (gChart_isBounded F) (kwToTate F f)) W.isOpen fun n => ?_
   have hcoeff : ‖PowerSeries.coeff n f.1‖ < δ := by

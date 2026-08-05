@@ -1080,7 +1080,10 @@ theorem mvEvalHomBounded_X {n : ℕ} (g : R →+* S) (hg : Continuous g) (b : Fi
 -- clopen (`AddSubgroup.isClosed_of_isOpen`); `HasSum` is the limit of the finite partial sums,
 -- each in `G` by `AddSubgroup.sum_mem`, so the sum lies in the closed `G` by
 -- `IsClosed.mem_of_tendsto`.
-private theorem tsum_mem_of_isOpen_addSubgroup {G₀ : Type*} [AddCommGroup G₀]
+/-- A `tsum` of elements of an open — hence closed — additive subgroup stays in the
+subgroup. Generic; `FJP.FiniteJetFunctoriality` and `FJP.FiniteJetChart` each carried a
+copy of it only because this one was `private`. -/
+theorem tsum_mem_of_isOpen_addSubgroup {G₀ : Type*} [AddCommGroup G₀]
     [TopologicalSpace G₀] [IsTopologicalAddGroup G₀] {ι : Type*} {f : ι → G₀}
     (hf : Summable f) {G : AddSubgroup G₀} (hG : IsOpen (G : Set G₀))
     (hmem : ∀ i, f i ∈ G) : ∑' i, f i ∈ G := by
