@@ -159,3 +159,32 @@ as siblings; they are not.** Corrected below. Note also that the argument is gen
 
 **Readiness after acquisition**: AP-A1, AP-D1 and **AP-D3** can start now. One ticket (AP-E5) still needs
 its own sub-development; no ticket is now blocked on an *unobtainable* reference.
+
+---
+
+## Consolidated architecture (2026-08-06, rounds 15–18 — supersedes groups A/B above)
+
+Sources merged: Hida GME 2.2.1–2.2.2 (fibre computation; three source defects corrected, see
+`decomposition-gme2.md` CORRECTIONS) + KM 2.1.2 pp. 64–67 (functoriality and the three repairs). (2.15)
+`R¹f_*𝒪_E` is **off the critical path** — only the degree-one package matters, and both sources state it
+identically.
+
+1. **[A′] degree-one package, arbitrary invertible `L`** (KM p. 66 = Hida pp. 107–108): fibrewise
+   `H¹ = 0` (Serre duality, `deg L⁻¹⊗Ω = −1 < 0`) and `h⁰ = 1` (RR) ⟹ `R¹f_*L = 0` and `f_*L` invertible,
+   base-change compatible — via noetherian approximation + Mumford §5 L1/L2 (transcribed in
+   `LowDegreeFiniteProjectiveReplacement.lean`) / GME 1.10.4. Fibre facts through the tree's Čech layer
+   with **finite homology** (`orderedBaseCechHomologyFinite_of_isProper` + `BoundedFlatBaseChange`
+   section), never the finite-terms section.
+2. **[B′] relative Picard locality via zero-rigidification** — needs `UniversallyOConnected` +
+   `eq_one_of_pullback_eq_one` (both proved). Hida's locality claim is repaired here, per KM p. 65.
+3. **[B″] the evaluation-divisor inverse `D(L)`**, natural in `T` — replaces Hida's fibrewise-injectivity
+   inference; endpoint is mathlib `isIso_iff_finrank_eq`. Gives injectivity + surjectivity at once, on all
+   nilpotent thickenings.
+4. **[C′] group law transported** by `CommGrpObj.ofRepresentableBy`; the Abel criterion is the tensor
+   identity; comparison with the carried law by `grpObj_mul_unique` (proved) — Hida's uniqueness
+   (Cor 2.2.5) is NOT formalised.
+5. **[D/E] unchanged** from the board (KM 2.8.1 at `π = [N]` with **typed slots** via `λ_E`; sign pin KM
+   = opposite of Katz [K-5]; `_self` re-decomposed: direct skew-symmetry from the two-slot construction →
+   new `NM`-torsion composability (the registered `_mul` is a different statement) → fppf `[2]`-descent →
+   diagonal; D5→E1 naturality-before-Yoneda obligation; `_nondegenerate` = Cartier–Nishi sub-development
+   [Oda, in refs/]).

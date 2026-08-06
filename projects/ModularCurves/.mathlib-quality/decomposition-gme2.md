@@ -199,3 +199,39 @@ glue over ℤ[1/pqq′]. → worker plan for T-H8 with every step sourced.
 Y.7 Katz-components note for stream IRR: GME 2.9.3 (irreducibility of p-ordinary
 moduli) + 2.5.3 (étale coverings of Tate curves) = the algebraic connectedness route's
 in-hand source; read at T-IRR0 cut.
+
+---
+
+# CORRECTIONS (2026-08-06, adversarial pass rounds 17–18 — read before cutting any ticket from chain A6)
+
+Hida pp. 106–110 re-read verbatim (pdf = book + 10). **Three of the four defects found by review are in
+the SOURCE itself; the July transcription was faithful.** The header's "GME is proof-sufficient on its
+own" is refuted — GME needs KM's repairs at three points.
+
+1. **(2.15) is false as Hida states it.** Hida p. 107, verbatim: *"R¹f_*𝒪_E ≅ 𝒪_S for an elliptic curve
+   E/S"*, proved from *"the exact sequence `0 → 𝒪_E → L → 𝒪_S → 0`"* — but the third term is
+   `e_*e^*L = e_*N_{0/E} ≅ e_*ω^∨`, not `𝒪_S`, and Hida's (E3) is genuinely fibrewise
+   (*"`f_*Ω_{E_s/s} ≅ k(s)` for all geometric points"*), so ω need not be trivial. Counterexample: the
+   quadratic-twist family (μ₂-torsor via `[-1]`, nontrivial `M ∈ Pic⁰(C)[2]`) has `R¹f_*𝒪_E ≅ M^∨`.
+   Correct statement: `R¹f_*𝒪_E ≅ ω^∨`, invertible, base-change compatible; trivial **Zariski-locally**.
+   Hida's own downstream uses (p. 109 after "by further shrinking S"; p. 110 "ω is invertible") need only
+   the local/invertible form, so the chain survives. The in-tree witness is `Picard/SelfAdjointN.lean:236`.
+2. **A6.α's "corollary" is a method-repetition, and Hida says so**: p. 108 verbatim — *"The above argument
+   can be applied to any invertible sheaf ℒ which is fiber by fiber of degree 1 and show that
+   `f_*ℒ ≅ 𝒪_S` **locally** and `R¹f_*ℒ = 0`."* Faithfully recorded in July. Globally false without
+   "locally" (`S = ℙ¹`, `L = 𝒪([0]) ⊗ f^*𝒪(1)` has `f_*L ≅ 𝒪(1)`).
+3. **A6.β's locality is elided in the source.** Hida p. 109: *"Since the formation of invertible sheaf is
+   local, Pic_{E/S} is local"* — a non-sequitur (iso classes are not a Zariski sheaf: `𝒪_{ℙ¹}(1)` vs `𝒪`).
+   The missing input is **universal `f_*𝒪 = 𝒪`** making zero-rigidified bundles automorphism-free, so
+   rigidified descent is effective — exactly KM p. 65, and exactly the tree's `UniversallyOConnected` +
+   `eq_one_of_pullback_eq_one`.
+4. **A6.γ's injectivity inference is invalid in the source.** Hida p. 109: *"Thus ι is fiber by fiber
+   injective and hence is injective."* False inference over a non-reduced base (`Spec k[ε]/(ε²)`: the
+   ε-tangent section agrees with 0 on the only geometric fibre). The *statement* is true; the proof must be
+   KM's mutually-inverse maps — the evaluation-divisor inverse `D(L)` (`V = f_*L`, `f^*V → L` universally
+   injective, flat cokernel, `D(L)` a degree-one relative ECD, `D(L ⊗ f^*M) = D(L)`, `D(I(P)⁻¹) = P`).
+
+**Simplification found in the same pass: (2.15) is OFF the critical path.** Neither KM pp. 64–67 nor the
+`D(L)`-inverse route uses `R¹f_*𝒪_E` at all. The load-bearing statement is only the **degree-one package**
+(item 2), which both sources state identically (KM p. 66 = Hida pp. 107–108) — double-attested, and the
+correct target of group A.
