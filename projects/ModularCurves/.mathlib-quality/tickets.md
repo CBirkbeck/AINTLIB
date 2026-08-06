@@ -38918,3 +38918,97 @@ AINTLIB's producer/cleaner split.
 **Ready to start now, in parallel**: AP-A1 and AP-D1 (no dependencies).
 **Not ready**: AP-D3 (bibliography entry [K5] unresolved), AP-E5 `_nondegenerate` (needs Cartier duality,
 absent from mathlib), AP-E4 `_self` (needs KM's "Notes Added in Proof").
+
+---
+
+# `/develop --continue` — 2026-08-06, board re-cut to the STABLE plan (round 19)
+
+Plan `plan-ds4-abel-pairing.md` is **STABLE** ("no further mathematical flaws found", round 19, with 8
+binding precision pins in `decomposition.md`). Groups A/B below re-cut to the consolidated [A′]–[D′];
+**AP-A1, AP-A2, AP-A3, AP-B1, AP-B2, AP-B3, AP-B4 are SUPERSEDED** by AP2-* (their KM-only framing and
+the finite-terms-package discharge were both corrected in rounds 12–15). Groups D/E stand with the
+recorded corrections (AP-D3 **ready**; AP-E4 re-blocked on the new `NM`-composability; AP-E5 a
+Cartier–Nishi sub-development). No CLEANUP tickets — producer role per CLAUDE.md.
+
+**R1 discrepancy**: `EllipticCurve/AbelSkeleton.lean:69,:87` still carry the round-13 statements whose
+`hdeg` is vacuous — **false as stated** (round 14, counterexamples in `decomposition.md`). AP2-A0 exists
+to fix exactly this; nothing may build on them meanwhile.
+
+### [AP2-A0] Restate the Abel skeleton per [A′] — delete the vacuous-`hdeg` pair
+- **Status**: open · **File**: `EllipticCurve/AbelSkeleton.lean` · **Depends on**: none · **Type**: def + spec lemmas
+- **Statement**: delete both round-13 theorems; define `HasDegreeOneFibreCohomology π M : Prop` := for
+  every field-valued `x : Spec k ⟶ S`, `H¹(X_x, M_x) = 0` and `dim_k H⁰(X_x, M_x) = 1` (Čech form:
+  fibre complex exact at 1 and `finrank ker d⁰ = 1`), + two projection spec lemmas. Named for what it
+  says, per round 14 — **not** `FibrewiseDegreeOne`.
+- **Sketch**: definition + `rfl`-level projections; the content lives in AP2-A1/A2.
+- **Sources**: KM p. 66 and Hida pp. 107–108 both derive exactly these two facts from degree one and use
+  only them. **Generality**: arbitrary invertible `M`, never `𝒪(n[0])` (circularity trap, b2_log).
+
+### [AP2-A1] Degree one ⟹ the two fibre facts (genus-one Riemann–Roch, field level)
+- **Status**: open · **File**: `EllipticCurve/DegreeOneFibreCohomology.lean` (new) · **Depends on**: AP2-A0
+- **Statement**: over a field `k`, `C/k` proper smooth geometrically connected genus one, `L` invertible
+  of degree 1: `h⁰ = 1` and `h¹ = 0`.
+- **Sketch**: Hida p. 107 verbatim: `H¹(E_s, L(s))` dual to `H⁰(L(s)⁻¹ ⊗ Ω)` (Serre duality),
+  `deg(L⁻¹⊗Ω) = −1 < 0` ⟹ no sections; RR (`GME 2.1.6` shape) gives `h⁰ = 1`. **This is the ONE place a
+  degree notion for an invertible sheaf is needed** — decide the interface here (candidates: HasseWeil
+  divisor degree; `χ(L_s) = 1` per Mumford Cor (b)). Verify mathlib RR state at pickup.
+- **Sources**: Hida p. 107 (quoted in `decomposition.md` round 18); KM p. 66; Mumford AV p. 50 Cor (b).
+
+### [AP2-A2] The degree-one package: `f_*L` invertible, base-change compatible
+- **Status**: blocked (AP2-A0) · **File**: `EllipticCurve/DegreeOneFibreCohomology.lean`
+- **Statement**: `[HasDegreeOneFibreCohomology π M]` ⟹ the degree-zero Čech kernel (`= baseSections`) is
+  **`Module.Invertible`** over `Γ(S,⊤)` and its formation commutes with arbitrary base change.
+- **Sketch**: the **finite-homology route only** (round 14): `orderedBaseCechHomologyFinite_of_isProper`
+  → `BoundedFlatBaseChange` section of `BaseChangeKerCoker.lean` (`:1026`, flat terms suffice) →
+  `LowDegreeFiniteProjectiveReplacement` (= Mumford §5 L1) → finite + projective + rank 1 ⟹ invertible
+  (separate obligation). Model: `sectionPoleSheafPower_projectiveClosed_orderedBaseCech_kernel_data`.
+  Noetherian removed by approximation (KM p. 66; `InvertibleSheafNoetherianSmoothStage`).
+- **TRAPS**: never the finite-terms section (`:1084`); never bare `Module.Projective` (round 12); never
+  constant-fibre-dimension in place of `H¹`-vanishing (Mumford L1 p. 51 needs reduced).
+- **Sources**: KM p. 66; Mumford AV pp. 47–53 (L1, L2, Cor 3 — quotes in rounds 6, 15).
+
+### [AP2-B1] Relative Picard locality via zero-rigidification
+- **Status**: open (independent) · **File**: `WeilPairing/RelPicLocal.lean` (new)
+- **Statement**: `Pic_{E/S}(T) ≅ ker(0_T^*)` naturally (the splitting `0^*f^* = id`); the functor is a
+  Zariski sheaf on `S`-schemes.
+- **Sketch**: rigidified bundles have no automorphisms — `eq_one_of_pullback_eq_one` (proved) under
+  `UniversallyOConnected` (proved) — so rigidified descent is effective; then fibre degree is stable
+  under `⊗f^*M` and base change. **Hida's "formation of invertible sheaf is local" is NOT a proof**
+  (round 17); this is KM p. 65's argument.
+- **Sources**: KM p. 65 (quoted round 4); Hida p. 109 + CORRECTIONS block in `decomposition-gme2.md`.
+
+### [AP2-B2] The counit `f^*(f_*L) → L` is universally injective with flat cokernel
+- **Status**: blocked (AP2-A2) · **File**: `EllipticCurve/AbelEquivalence.lean` (new)
+- **Sketch**: geometric fibres are integral (smooth + connected); a basis of the 1-dim `H⁰` is a nonzero
+  section, hence injective on each fibre; fibrewise criterion for flatness ⟹ injective with `S`-flat
+  cokernel ⟹ stable under all base change (round 19 Q2 — **no thickened-fibre `h⁰` needed**). KM pp.
+  66–67 verbatim ("reduced to the case `S = Spec(k)` … the assertion is obvious").
+- **Sources**: KM pp. 66–67.
+
+### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
+- **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
+- **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
+  finrank 1 ⟹ iso by **mathlib `Scheme.Hom.isIso_iff_finrank_eq`** (verified). Second lemma:
+  `D(L ⊗ f^*M) = D(L)` (pushforward and counit both just tensor by `M`). **PIN 1**:
+  `ℐ_{D(L)} ≅ f^*(f_*L) ⊗ L⁻¹`, so `I(D(L))⁻¹ ≅ L ⊗ f^*((f_*L)^∨)` — the twist is `(f_*L)^∨`, never
+  `(0^*L)^∨`.
+- **Sources**: KM p. 67 + Lemma 1.2.7 p. 11 (quoted round 7); round 19 pin 1.
+
+### [AP2-B4] The natural Abel equivalence `E(T) ≅ Pic¹(E_T/T)`
+- **Status**: blocked (AP2-B1, AP2-B3) · **File**: `EllipticCurve/AbelEquivalence.lean`
+- **Sketch**: mutually inverse maps `P ↦ [I(P)⁻¹]` and `[L] ↦ D(L)`: `D(I(P)⁻¹) = P` and
+  `I(D(L))⁻¹ ≅ L ⊗ f^*(unit)` (pin 1); natural in `T`. **Injectivity via `D`, NEVER via geometric fibres**
+  (Hida's p. 109 inference is invalid over `k[ε]/(ε²)` — round 17).
+- **Sources**: KM pp. 64–67; `decomposition-gme2.md` CORRECTIONS item 4.
+
+### [AP2-C1] Group law + the leaf (unchanged goal, corrected sketch)
+- **Status**: blocked (AP2-B4) · **File**: `Picard/SelfAdjointN.lean:267` (the existing sorry)
+- **Sketch**: `Pic¹ ≅ Pic⁰` via `⊗I(0)`; `CommGrpObj.ofRepresentableBy` (verified) transports the group
+  law; `grpObj_mul_unique` (proved) identifies it with the carried law — **this order avoids the
+  circularity** (round 11); then KM 2.1.2's criterion at `R = P+Q`, invert, `N' = L₀^∨`.
+- **Sources**: KM Thm 2.1.2 p. 63 (verbatim, round 3); Hida Thm 2.2.1 p. 108.
+
+**Groups D/E**: as boarded 2026-08-05 with the reference-acquisition corrections, PLUS pins 2–8 of
+`decomposition.md` round 19 (typed `λ_E` square; Zariski-site `K^×` LES; two-slot skew-symmetry;
+`⟨P,Q⟩_{π₂π₁} = ⟨P,π₂^tQ⟩_{π₁}` typing; `deg[N] = N²`; naturality-before-Yoneda; Oda-inverse
+perfectness). **Ready now, in parallel: AP2-A0, AP2-B1, AP-D1, AP-D3.**
