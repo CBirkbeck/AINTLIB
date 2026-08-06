@@ -1029,3 +1029,94 @@ base-change comparison), `AP-B1` re-planned around local bases and `baseSections
 shape — a hypothesis the source maintains, dropped in transcription (`hn : 1 ≤ n`; fibrewise triviality;
 coherence/Nakayama; global-vs-local basis; `N`-torsion in `_mul`). That is now the first thing to check on
 any new statement.
+
+---
+
+# Round 14 — draft 2 reviewed. The indexing was right; the hypotheses and the package choice were not.
+
+## What survived
+
+My own questions 1–3 (the Čech indexing) resolved correctly, and the review agrees:
+`Function.Exact (d n) (d (n+1))` is exactness at `C^{n+1}`, so `hfield : ∀ n < N` constrains `H^1 … H^m`
+and **leaves `H⁰ = ker d⁰` untouched** — no contradiction with `h⁰ = 1`. The range is redundant by one
+terminal case (`C^m = 0` already, by `orderedBaseCechObject_subsingleton_of_card_le`), not wrong. Čech does
+compute cohomology here: finite affine cover, separated `X`, quasicoherent `M`.
+
+## Defect 1 — A1a and A1b are FALSE, and by my own hand
+
+I shipped `hdeg : ∀ {k} [Field k], (Spec (.of k) ⟶ S) → Prop` as a "placeholder". It is an arbitrary
+predicate, unrelated to `M`, satisfiable by `fun _ => True`. So the statements carry **no** degree
+hypothesis and **no** genus-one hypothesis, and are false:
+
+* `L = 𝒪_E` on an elliptic curve: `H¹(E, 𝒪_E) ≅ k ≠ 0`, so A1a fails at `n = 0`.
+* genus two, `L = 𝒪(P)`: RR gives `h⁰ = h¹ = 1`, so A1a fails even with a genuine degree-one condition.
+* `L = 𝒪_E(2[0])`: kernel has dimension `2`, so A1b fails.
+* `X = ℙ¹`, `L = 𝒪(1)`: `h⁰ = 2`, so A1b fails without genus one.
+
+**This is the second time in two drafts I have shipped a vacuous hypothesis** — draft 1's
+`(hbasis : ∀ K …, True)`, which I caught and removed, and now `hdeg`, which I did not. A placeholder that
+type-checks is not a placeholder; it is a false statement. The rule going forward: a hypothesis that does
+not mention the object it is supposed to constrain (`M`) is a defect on sight.
+
+**The fix is not to invent a degree notion.** State the cohomological property directly and name it for
+what it is — `HasFibrewiseDegreeOneCohomology`, *not* `FibrewiseDegreeOne` — as: for every field-valued
+base change, `H¹(X_K, L_K) = 0` and `dim_K H⁰(X_K, L_K) = 1`. Prove the equivalence with degree one later,
+by RR on smooth proper geometrically connected genus-one curves. The intrinsic definition, when wanted, is
+`deg(L_s) = χ(L_s) − χ(𝒪_{X_s})`, which on genus-one fibres reduces to `χ(L_s) = 1`.
+Assuming `L ≅ 𝒪(D)` for a degree-one relative effective Cartier divisor is **not** an acceptable
+shortcut — producing that divisor from `L` *is* the Abel step.
+
+## Defect 2 — the package I chose cannot be applied to the Čech complex at all
+
+Verified in the file: `section BoundedFiniteProjectiveComplex` (`ForMathlib/BaseChangeKerCoker.lean:1084`)
+opens with
+
+```lean
+variable (M : ℕ → Type v) [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
+  (d : ∀ n, M n →ₗ[R] M (n + 1)) [∀ n, Module.Finite R (M n)]
+  [∀ n, Module.Projective R (M n)]
+```
+
+so `Module.Projective.ker_of_bounded_forall_field_baseChange_exact` and
+`Module.rankAtStalk_ker_eq_of_bounded_forall_field_baseChange_exact` require the **terms** to be finite and
+projective. The ordered affine Čech terms are **flat but not finite**: for the standard two-affine cover of
+`ℙ¹_R`, `C⁰ ≅ R[t] × R[s]` and `C¹ ≅ R[t,t⁻¹]`, none finitely generated over `R`. Properness of `X` does
+not make sections over its affine opens finite over the base. Round 13's "these are just applications of
+the package" is therefore **wrong**.
+
+**The correct route is the flat-terms / finite-homology one, and every step of it exists** (all six
+verified present):
+
+| step | declaration |
+|---|---|
+| finite Čech homology, after the affine-noetherian reduction | `orderedBaseCechHomologyFinite_of_isProper` |
+| base exactness from field-fibre exactness | `HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology` |
+| finiteness of the degree-zero kernel | `HomologicalComplex.finite_kernel_zero_of_finite_homology` |
+| projectivity | `Module.Projective.ker_of_bounded_exact_of_finite` |
+| base-change compatibility | `kerBaseChangeComparison_bijective_of_bounded_exact` |
+| the model that already does all of this | `FibrewiseElliptic.sectionPoleSheafPower_projectiveClosed_orderedBaseCech_kernel_data` |
+
+Note the shape: `section BoundedFlatBaseChange` (`:1026`) has **no** finiteness on the terms — flatness
+only — which is exactly why it is the right section. I applied the wrong one of two adjacent sections.
+
+And "finite projective + constant local rank one ⟹ `Module.Invertible`" remains a **separate obligation**,
+not a conclusion of any cited theorem.
+
+## Standing prediction, unchanged
+
+The **D5 → E1 passage from cocycles to a scheme morphism** is still the predicted next geometric failure:
+uniqueness of normalized `h_i` on one fixed cover does not give Yoneda naturality; compatibility with every
+base change *and every refinement of the cover* must be proved before representability is invoked.
+
+## Gate after round 14
+
+Not passed. Required repairs, in order: replace `hdeg` with `HasFibrewiseDegreeOneCohomology` stated on
+`M`; re-route A2/A3 through `BoundedFlatBaseChange` + finite homology, copying
+`sectionPoleSheafPower_projectiveClosed_orderedBaseCech_kernel_data`; add the finite-projective-plus-rank-one
+⟹ invertible step as its own leaf; then re-state B1 against `baseSections` with a *local* generator.
+
+**Error-family tally across fourteen rounds: seven defects, six of them the same shape** — a hypothesis the
+source maintains, dropped or vacuous in transcription (`hn : 1 ≤ n`; fibrewise triviality;
+coherence/Nakayama; global-vs-local basis; `N`-torsion in `_mul`; and now `hdeg` twice over). The seventh
+is this round's wrong-section error, which is a sibling: I took a theorem whose *name* matched and whose
+*hypotheses* did not.
