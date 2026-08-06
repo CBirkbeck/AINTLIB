@@ -1207,3 +1207,69 @@ Lemma 2 + Cor 3 applied through the tree's existing transcription of Lemma 1, wi
 **Tally: eight defects in fifteen rounds.** Six were dropped/vacuous hypotheses; one was a wrong-section
 application; and this one — the largest — is that I was authoring leaves at all instead of transcribing
 them. The first seven are symptoms of the eighth.
+
+---
+
+# Round 16 — the literature WAS consulted, a year's worth of it, in an artifact I never opened
+
+Following round 15's method correction, I audited which of Mumford §5 the tree had transcribed. That
+audit turned up a reference the tree cites constantly and I had never identified: **GME**.
+
+**GME = Haruzo Hida, *Geometric Modular Forms and Elliptic Curves* (World Scientific, 2001)** — and it has
+been sitting in `refs/ModularCurves/` for the whole session. The tree cites it at
+`BaseChangeKerCoker.lean:20,27,152,165,166`, `SectionRigidity.lean:19`, `WeierstrassModel.lean:42,141,2984`,
+`InvariantDifferential.lean:24,1398`, `EndomorphismDegree.lean:488,494`, `LegendreNormalForm.lean:18`.
+
+And there is an existing decomposition artifact for exactly my target:
+**`.mathlib-quality/decomposition-gme2.md`, "Worker decomposition — GME Chapter 2 chains (proofs read
+2026-07-05)"**, whose header records *"Sections read WITH PROOFS: 2.2.1–2.2.6 (pp. 107–119), 2.3.1 start,
+2.6.1(end)–2.6.4 (pp. 143–154)"*.
+
+## What that artifact already contains
+
+**"Chain A6 — Abel & the group law (GME 2.2.1–2.2.2, Cor 2.2.5; discharges the `abelEnrichment`
+canonicity project)"** — the exact target of rounds 4–15:
+
+* **A6.α = (2.15), proof p. 107, transcribed** — `R¹f_*𝒪_E ≅ 𝒪_S`, with every step written out, and the
+  closing remark: *"**Also yields: any fibre-degree-1 invertible L has `f_*L ≅ 𝒪_S` locally and
+  `R¹f_*L = 0`** (p. 108 remark — used by A6.γ)."* **That is my AP-A2 + AP-A3, verbatim, with a page.**
+* **A6.β = (2.17), p. 109** — `Pic_{E/S}(T) := Pic(E_T)/f_T^*Pic(T)`, `Pic^ν` by fibre degree, and locality
+  of `Pic¹` from the `Pic(E) = Ker(0^*) ⊕ Im(f^*)` splitting. **That is the `Pic⁽¹⁾` definition I declared
+  "absent from the tree" in round 8**, together with the fibre-degree notion I claimed did not exist.
+* **A6.γ, proof p. 109, transcribed** — `ι : E(S) ≅ Pic¹(S)`, `P ↦ I(P)⁻¹`, with surjectivity (via the
+  A6.α remark → `f_*L` locally free rank 1 → shrink → generator `ℓ` → `(L,ℓ)` a relative ECD of degree 1 =
+  a section, citing KM 1.2.7) and injectivity (reduce to `k̄`; `I(P) ≅ I(Q)` would give `φ` with
+  `div φ = P − Q`, hence `E ≅ ℙ¹`). **That is my L0 / AP-B3.**
+
+It also fixes the source policy I spent rounds re-deriving:
+
+* **the RR box** — `BB-RR := GME 2.1.2` (Grothendieck–Serre duality for relative curves), `2.1.3` (RR),
+  `2.1.6` (relative RR: `rank f_*L − rank f_*(L⁻¹⊗Ω) = 1 − g + deg L`), with *"Nothing else may be silently
+  absorbed into the box"*;
+* **COH-1 = GME Lemma 1.10.4**, the cohomology-and-base-change criterion — what I was reconstructing from
+  Mumford §5;
+* **COH-2 = GME Cor 1.9.12**, `Γ(E, 𝒪_E) = Γ(S, 𝒪_S)`;
+* **COH-3** — `R^i f_*` is coming to mathlib in PRs #36345/#36218, *"coordinate, do not build"*.
+
+## The honest assessment
+
+The criticism was right twice over. I was authoring leaves instead of transcribing (round 15) — and the
+literature I should have transcribed had **already been read with proofs, page by page, and written up**,
+by this project, in an artifact next to the one I was appending to. Hida's book was in `refs/` throughout.
+
+Rounds 4–15 produced a worse version of chain A6 from KM + Mumford: worse because it invented Čech
+statements Hida does not need, because it declared `Pic⁽¹⁾` and fibre degree missing when A6.β defines
+both, and because it re-derived the RR and COH boxes that the artifact had already pinned and scoped.
+
+**Eighth "the tree already had it", and the only one that was avoidable by reading a filename.** The
+correct first action in this whole line of work was `ls .mathlib-quality/` and `ls refs/`.
+
+## What replaces the plan
+
+`plan-ds4-abel-pairing.md`'s groups A and B are **superseded by `decomposition-gme2.md` chain A6**. The
+board's AP-A1/A2/A3/B1/B2/B3 should be re-cut from A6.α/β/γ against Hida pp. 107–109, not from KM
+pp. 64–67 — KM remains the right source for §2.8's pairing (group D) and for 1.2.7, which A6.γ itself
+cites. `AbelSkeleton.lean`'s two authored statements should be deleted outright.
+
+**Standing rule added:** before any decomposition, read `.mathlib-quality/decomposition-*.md` and `ls refs/`.
+This session opened `decomposition.md` sixteen times and never listed its siblings.
