@@ -188,3 +188,11 @@ identically.
    new `NM`-torsion composability (the registered `_mul` is a different statement) → fppf `[2]`-descent →
    diagonal; D5→E1 naturality-before-Yoneda obligation; `_nondegenerate` = Cartier–Nishi sub-development
    [Oda, in refs/]).
+
+## STATUS: STABLE (2026-08-06, round 19)
+
+Reviewer verdict on the consolidated chain: **"NO FURTHER MATHEMATICAL FLAWS FOUND."** Eight precision
+pins recorded in `decomposition.md` round 19 — binding at implementation time; pin 1 corrects [C′]'s
+normalisation: `I(D(L))⁻¹ ≅ L ⊗ f^*((f_*L)^∨)`, never `(0^*L)^∨`. Residual risk is engineering.
+Next: `/develop --continue` to re-cut board groups A/B to [A′]–[D′] (groups D/E stand, with pins 2–8),
+then `/beastmode` starting at [A′].

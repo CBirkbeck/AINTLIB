@@ -1348,3 +1348,53 @@ Not passed. But for the first time the open items are defects in a *source trans
 statements I authored, and each has a named repair. **`decomposition-gme2.md` chain A6 must be corrected
 before anything is cut from it** — in particular A6.α's `𝒪_S` must become `ω^∨`, and `SelfAdjointN.lean`'s
 docstring is the in-tree witness that it should.
+
+---
+
+# Round 19 — STABILISATION MET
+
+The consolidated [A′]–[E′] chain (plan-ds4-abel-pairing.md, 2026-08-06 block) was put to the reviewer with
+the explicit instruction not to grant stabilisation unless true. Verdict, verbatim:
+
+> **"NO FURTHER MATHEMATICAL FLAWS FOUND. Subject to the project's existing `[NeZero N]` convention, the
+> repaired chain is mathematically sound."**
+
+With per-step confirmations: [A′] correct (the finite-projective replacement route, avoiding KM/Hida's
+overly broad base-change assertion); [B′] correct (zero-rigidification, unique overlap isos, automatic
+cocycle); [C′] correct (endpoint `isIso_iff_finrank_eq`); [D′] non-circular in the stated order;
+[E′] correct including the new `NM`-composability and the fppf `[2]`-descent. Dependency answers:
+[B′] needs nothing from [A′]; [C′] needs **no** thickened-fibre `h⁰` — universal injectivity of the counit
+comes from integral geometric fibres + the fibrewise local criterion for flatness, and thickened-fibre
+statements are consequences.
+
+## Precision pins extracted from the verdict (statement-hygiene, not flaws — carried into the plan)
+
+1. **`I(D(L))⁻¹ ≅ L ⊗ f^*(V^∨)` with `V = f_*L`.** The "unit" is `(f_*L)^∨`, **not** `(0^*L)^∨` — the
+   ideal is `ℐ_{D(L)} ≅ f^*V ⊗ L⁻¹`. (Corrects a loose phrase in my [C′].)
+2. Self-duality of `[N]` = the natural identity `[N]^* ∘ λ_E = λ_E ∘ [N]` with biduality identifications
+   — never a definitional equality.
+3. The `K^×` sequence on the **Zariski site**, `0` a closed immersion so `0_*` exact and
+   `H¹(E, 0_*𝔾_m) = Pic(S)`; the LES then gives exactly `ker(0^*)`.
+4. Skew-symmetry in two-slot form `⟨P,Q⟩_π ⟨Q,P⟩_{π^t} = 1` via `(π^t)^t = π`, before specialising.
+5. KM 2.8.4.1 typed as `⟨P,Q⟩_{π₂π₁} = ⟨P, π₂^t Q⟩_{π₁}`; at `π₁ = [N]`, `π₂ = [M]`:
+   `e_{NM}(MP,Q) = e_N(MP,MQ)`, and bilinearity gives `e_{NM}(P,Q)^M = e_{NM}(MP,Q)` — matching the
+   KM p. 505 note verbatim.
+6. `deg [N] = N²` ≠ the scalar `N`; landing in `μ_N` uses that `E[N]` is `N`-torsion.
+7. Independence of representative/rigidification/frame/cover/refinement proved **before** Yoneda.
+8. Oda's perfectness applies to the `𝔾_m`-valued pairing; KM = Oda's inverse; inversion preserves
+   perfectness.
+
+## Residual risk — engineering, per the verdict
+
+Scheme-level flat-cokernel criterion; Picard-quotient and rigidification coherences; the typed
+self-adjointness square; cover/refinement independence; Cartier-dual internal-Hom infrastructure without
+reverting to pointwise nondegeneracy in bad characteristic.
+
+## Session tally at stabilisation
+
+19 rounds. Defects found and repaired: 2 false skeleton statements (mine), 1 false descent leaf (mine),
+2 vacuous hypotheses (mine), 1 inapplicable package (mine), 1 authored-not-transcribed method error
+(mine), 3 source errors in Hida GME (verified against pp. 106–110), 4 unreconciled/duplicated in-tree
+items, 1 dependency cycle in the register, 1 sign-convention trap, 1 wrong-slot-typing trap. Eight
+"the-tree-already-had-it" discoveries. The plan the session started with (route β) shares nothing with the
+plan that stabilised.
