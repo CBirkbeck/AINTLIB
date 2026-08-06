@@ -1273,3 +1273,78 @@ cites. `AbelSkeleton.lean`'s two authored statements should be deleted outright.
 
 **Standing rule added:** before any decomposition, read `.mathlib-quality/decomposition-*.md` and `ls refs/`.
 This session opened `decomposition.md` sixteen times and never listed its siblings.
+
+---
+
+# Round 17 — the review attacked chain A6 itself, and found four defects in the project's transcription
+
+First round whose findings are about **the project's year-old artifact**, not my inventions.
+
+## A6.α is FALSE as transcribed — and the tree already contains its own refutation
+
+`decomposition-gme2.md` A6.α records the divisor sequence's third term as `𝒪_S`:
+> "SES `0 → 𝒪_E → L → 𝒪_S (≅ L/𝒪) → 0` … `L/𝒪 ≅ 𝒪_S` via degree-1 properness … ⟹ `f_*L ≅ f_*𝒪_E ≅ 𝒪_S`"
+
+But `L/𝒪 = e_*e^*𝒪_E(D) = e_*N_{0/E}`, and **`Picard/SelfAdjointN.lean:236-240` says, in this same tree**:
+> "`0^* 𝒪(D_0)` is the **normal** bundle `N_{0/E} ≅ ω_{E/T}⁻¹` (the *conormal* `I_0/I_0²` is `0^*` of
+> `𝒪(−D_0)`), which is a **generally nontrivial** line bundle on the base."
+
+So the correct conclusion is `R¹f_*𝒪_E ≅ ω^∨` (equivalently `(R¹f_*𝒪_E)^∨ ≅ f_*Ω¹_{E/S}`), and what is
+canonically trivial is `R¹f_*Ω¹_{E/S} ≅ 𝒪_S`, not `R¹f_*𝒪_E`. Counterexample: twist a constant elliptic
+curve by a `μ₂`-torsor via `[-1]`, using a nontrivial `M ∈ Pic⁰(C)[2]`; the Hodge bundle is `M`, so
+`R¹f_*𝒪_E ≅ M^∨ ≇ 𝒪_S`.
+
+**Two sessions of this project wrote contradictory things about the same bundle and never reconciled.**
+The artifact's own convention pin (line 11) even records Hida's (E3) in the correct `f_*Ω_{E/S} ≅ 𝒪_S`
+form. A6.α can be read charitably as "`R¹f_*𝒪_E` is *invertible*"; as a global isomorphism it is wrong.
+
+## The other three
+
+* **The p. 108 "corollary" is true but is not a corollary.** For fibre-degree-one `L`,
+  `H¹(E_s, L_s) ≅ H⁰(E_s, L_s⁻¹ ⊗ Ω)^∨ = 0` since the dual has degree `−1`, and RR gives `h⁰ = 1`. That is
+  a *repetition of the method*, using no canonical section — not a consequence of A6.α. And
+  "`f_*L ≅ 𝒪_S` locally" means only "invertible"; globally false, e.g. `S = ℙ¹`, `L = 𝒪([0]) ⊗ f^*𝒪(1)`
+  gives `f_*L ≅ 𝒪_{ℙ¹}(1)`.
+* **A6.β's splitting is right; its locality conclusion is a non-sequitur.** `Pic(E_T) ≅ ker(0_T^*) ⊕
+  f_T^*Pic(T)` holds with no hypothesis (from `0_T^* f_T^* = id`). But "subfunctor of `Pic(E)` ⟹
+  Zariski-local" is false — line-bundle iso classes are not a Zariski sheaf (`𝒪_{ℙ¹}(1)` and `𝒪` become
+  isomorphic on the standard cover). The missing input is **universal `f_*𝒪 = 𝒪`**, i.e. the tree's
+  `UniversallyOConnected`, exactly as KM p. 65 uses it. Degree-one-ness then needs its own (easy) locality
+  check.
+* **A6.γ's injectivity argument is invalid.** "Reduce to `k̄`" fails over a non-reduced base: on
+  `S = Spec k[ε]/(ε²)` with `E = E₀ × S`, a section `Q` representing a nonzero tangent vector at `0`
+  satisfies `Q ≠ 0` yet agrees with `0` on the unique geometric fibre. The correct proof builds the
+  **inverse**: `V = f_*L` invertible, `f^*V → L` universally injective with `S`-flat cokernel, zero scheme
+  `D(L)` a relative ECD of degree one, hence a section; `D(L ⊗ f^*M) = D(L)` makes it depend only on the
+  relative class, and `D(I(P)⁻¹) = P` gives injectivity and surjectivity at once. The recorded
+  *surjectivity* also assumes evaluation is injective, which a dimension count cannot give over a
+  non-reduced base — KM pp. 66–67 proves it by reduction after arbitrary base change.
+
+## And the KM route is not redundant after all
+
+I concluded in round 16 that chain A6 supersedes my KM groups A/B. That was too fast. A bijection
+`E(S) ≅ Pic¹(S)` at a single base does **not** give a group-scheme morphism; one needs the equivalence for
+every `T → S`, natural in `T`, before `CommGrpObj.ofRepresentableBy` applies. KM 2.1.2 is stated
+functorially and is exactly that. So the two are complementary: **A6 supplies the fibre computation, KM
+supplies the functoriality**, and once A6's four defects are repaired they become one proof rather than
+two routes.
+
+Hida's Theorem 2.2.1 intends KM's result, but the transcription omits arbitrary-base approximation, the
+nontrivial Hodge line, locality of the relative equivalence, universal injectivity/flatness of evaluation,
+infinitesimal injectivity, and naturality in `T`. All six are exactly what KM's pp. 64–67 supply.
+
+## Consolidated architecture (both sources, one proof)
+
+1. arbitrary-degree-one cohomology and base change (Hida's computation, KM's approximation);
+2. relative Picard locality via rigidification along `0` — needs `UniversallyOConnected`;
+3. the **evaluation-divisor inverse** `D(L)`, natural under base change — replaces A6.γ's fibre reduction;
+4. transport of the `Pic⁰` group law by `CommGrpObj.ofRepresentableBy`;
+5. comparison with the carried law by `grpObj_mul_unique` — already proved, so **Hida's separate uniqueness
+   argument need not be formalised at all**.
+
+## Gate after round 17
+
+Not passed. But for the first time the open items are defects in a *source transcription* rather than in
+statements I authored, and each has a named repair. **`decomposition-gme2.md` chain A6 must be corrected
+before anything is cut from it** — in particular A6.α's `𝒪_S` must become `ω^∨`, and `SelfAdjointN.lean`'s
+docstring is the in-tree witness that it should.
