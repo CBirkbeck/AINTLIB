@@ -3,35 +3,47 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
 import ModularCurves.Picard.InvertibleSheafBaseCechFlat
 import ModularCurves.Picard.RigidDescent
-import ModularCurves.ForMathlib.BaseChangeKerCoker
 
 /-!
-# Skeleton for the Abel route to the relative Weil pairing (`/develop --decompose` Step 2.5)
+# Skeleton for the Abel route to the relative Weil pairing (`/develop --decompose`, round 13)
 
-Every declaration here is a `:= by sorry` STATEMENT, transcribed from Katz–Mazur's own proof of
-**Theorem 2.1.2 (Abel)**, book pp. 63–67. Plan: `.mathlib-quality/plan-ds4-abel-pairing.md`; decomposition
-and attack record: `.mathlib-quality/decomposition.md` (rounds 1–11); board group A/B.
+Statements transcribed from Katz-Mazur's proof of **Theorem 2.1.2 (Abel)**, book pp. 63-67.
+Plan: `.mathlib-quality/plan-ds4-abel-pairing.md`. Attack record: `.mathlib-quality/decomposition.md`,
+rounds 1-13.
 
-## Why the hypotheses are cohomological rather than "degree one"
+## Round 12 killed the first draft of this file; read this before re-stating anything
 
-KM's steps (d)–(f) consume exactly two facts about the fibres of an invertible `L`: that `H¹` vanishes and
-that `h⁰ = 1`. "Fibrewise degree one" is how KM *supplies* those, via Riemann–Roch. The tree has no notion
-of the degree of an invertible sheaf (only `RelEffCartierDiv.degree`, `LevelStructure/CartierDivisor.lean:108`),
-so this skeleton takes the two cohomological facts as explicit hypotheses and leaves
-"degree one ⟹ those two facts" to `AP-A1`, which is where a degree notion is actually needed. That keeps
-the skeleton compiling today and confines the missing definition to one leaf.
+Draft 1 contained two statements, both **false**:
 
-## Čech form, and the trap it avoids
+* *"field-fibre exact implies exact over the base ring"* -- false: over `Z`, the complex `Z -> Q -> 0` has
+  homology `Q/Z` nonzero yet every field fibre is exact. Fields do not detect non-finitely-generated
+  homology. The missing hypothesis is finiteness of the homology, i.e. exactly KM p. 66's *"coherent sheaf
+  ... with all fibers zero ... by Nakayama's lemma"*.
+* *"exact + fibre rank 1 implies kernel projective"* -- false: `R = k[e]/(e^2)` with `R -e-> R -e-> R` is
+  exact at the middle, has `dim_K ker = 1` over every field, and `ker(e)` is not projective. What fails is
+  the comparison `K (x) ker d0 -> ker(d0_K)`.
 
-The fibre facts are phrased against `orderedBaseCechComplex` — the tree's derived-functor-free surrogate,
-since mathlib has no cohomology-and-base-change and no `R¹f_*`. **The sheaf is an arbitrary invertible `L`,
-never `𝒪(n[0])`**: specialising to the pole sheaves and identifying a general `L` with `𝒪([0])` via relative
-Abel is circular, because Abel is what this file proves. `PoleSheafBaseCechHigher.lean`'s results are the
-model case only. See `.mathlib-quality/b2_log.jsonl`, entries `KM-SEESAW-1` and `KM-SEESAW-2prime`, for the
-two false leaves that this note exists to prevent recurring.
+**And the correct package was already in the project all along** -- `ForMathlib/BaseChangeKerCoker.lean`
+supplies `Module.Finite.ker_of_bounded_forall_field_baseChange_exact`,
+`Module.Projective.ker_of_bounded_forall_field_baseChange_exact` (`:1179`),
+`kerBaseChangeComparison_bijective_of_bounded_forall_field_baseChange_exact` (`:1192`) and
+`Module.rankAtStalk_ker_eq_of_bounded_forall_field_baseChange_exact` (`:1204`), each carrying the
+hypotheses draft 1 dropped: a **bounded** complex (`Subsingleton (M (N+1))`), `hcomp : d . d = 0`, and
+field-fibre exactness **at every `n < N`**, not at one spot.
+
+So the leaves below are *applications* of that package, not restatements of it. The only genuinely new
+mathematical content on this branch is the pair of **fibre** facts for an arbitrary fibrewise-degree-one
+`L`, which is `AP-A1` and is pure genus-one Riemann-Roch.
+
+## The sheaf is an arbitrary invertible `L`
+
+Never `O(n[0])`. `PoleSheafBaseCechHigher.lean` proves the fibre facts for the pole sheaves only;
+identifying a general `L` with `O([0])` via relative Abel is circular, since Abel is what this branch
+proves. See `b2_log.jsonl`, entries `KM-SEESAW-1` and `KM-SEESAW-2prime`.
 -/
 
 open CategoryTheory AlgebraicGeometry Limits TopologicalSpace
@@ -41,66 +53,78 @@ universe u
 
 namespace ModularCurves
 
-variable {X S : Scheme.{u}} [IsAffine S] [IsNoetherian X] [X.IsSeparated] {π : X ⟶ S}
+variable {X S : Scheme.{u}} [IsAffine S] [IsNoetherian X] [X.IsSeparated] {pi : X ⟶ S}
 
-/-- **(AP-A2, Čech form)** For an invertible `L` whose every residue fibre has vanishing `H¹`, the
-base-Čech complex is exact at position `1` over the base ring itself.
+/-- **(AP-A1a)** The first fibre fact: for an invertible `L` fibrewise of degree one, the ordered
+base-Cech complex is exact in **every** positive degree after base change to every field over the base.
 
-KM p. 66: *"`R¹f_*ℒ = 0` because it is of formation compatible with arbitrary change of base (being an
-`R¹f_*` for `f` proper and flat) and because over an algebraically closed field, `H¹(E, ℒ) = 0` for
-`degree(ℒ) > 2g−2 = 0`. As `R¹f_*ℒ` is a coherent sheaf on `S` with all fibers zero, it vanishes by
-Nakayama's lemma."* -/
-theorem orderedBaseCech_exactAt_one_of_residueField_exactAt_one
-    [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
+This is the genuinely new content of group A, and it is pure genus-one Riemann-Roch: `H^q(E_s, L_s) = 0`
+for `q >= 1` because `deg L_s = 1 > 2g - 2 = 0`.
+
+KM p. 66: *"over an algebraically closed field, `H^1(E, L) = 0` for `degree(L) > 2g-2 = 0`."*
+
+`hdeg` is a placeholder for "fibrewise of degree one": the tree has no notion of the degree of an
+invertible sheaf, only `RelEffCartierDiv.degree`. Supplying it is where that definition is needed, and
+this is the one place it is needed. -/
+theorem orderedBaseCech_field_exactAt_succ_of_fibrewise_degree_one
+    [LocallyOfFinitePresentation pi] [IsProper pi] [Flat pi]
     {M : X.Modules} (hM : IsInvertible M)
-    {ι : Type u} [Fintype ι] [LinearOrder ι]
-    (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
-    (hfib : ∀ (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K],
-      let C := orderedBaseCechComplex π M U
-      Function.Exact ((C.d 0 1).hom.baseChange K) ((C.d 1 2).hom.baseChange K)) :
-    let C := orderedBaseCechComplex π M U
-    Function.Exact ((C.d 0 1).hom) ((C.d 1 2).hom) := by
+    {iota : Type u} [Fintype iota] [LinearOrder iota]
+    (U : iota → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hdeg : ∀ {k : Type u} [Field k], (Spec (.of k) ⟶ S) → Prop)
+    (n : ℕ) (hn : n < Fintype.card iota)
+    (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K] :
+    let C := orderedBaseCechComplex pi M U
+    Function.Exact ((C.d n (n + 1)).hom.baseChange K)
+      ((C.d (n + 1) (n + 2)).hom.baseChange K) := by
   sorry
 
-/-- **(AP-A3)** …and then the degree-zero kernel — which is `Γ(M)` over the base ring — is an invertible
-module.
+/-- **(AP-A1b)** The second fibre fact: the degree-zero kernel has dimension `1` over every residue field.
 
-Mumford, *Abelian Varieties*, p. 53 **Corollary 3**, whose statement carries the parenthetical *"(unlike
-Corollary 2, `Y` need not be reduced)"*; local freeness comes from the `K^•`-splitting argument on p. 52.
-
-**TRAP.** State this from the `H¹`-vanishing hypothesis, **never** from a constant-fibre-dimension
-hypothesis. Constant fibre dimension gives local freeness only over a *reduced* base (Mumford Lemma 1,
-p. 51), and that route is `b2_log.jsonl`'s `KM-SEESAW-2prime`, refuted by `𝒪_E(P)` of degree one. -/
-theorem invertible_kernel_of_orderedBaseCech_exactAt_one
-    [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
-    (hπ : UniversallyOConnected π)
+Riemann-Roch again: `h0 - h1 = deg + 1 - g = 1` and `h1 = 0` by AP-A1a. Stated over
+`PrimeSpectrum` residue fields, which is the shape
+`Module.rankAtStalk_ker_eq_of_bounded_forall_field_baseChange_exact` consumes. -/
+theorem orderedBaseCech_residueField_kernel_finrank_of_fibrewise_degree_one
+    [LocallyOfFinitePresentation pi] [IsProper pi] [Flat pi]
     {M : X.Modules} (hM : IsInvertible M)
-    {ι : Type u} [Fintype ι] [LinearOrder ι]
-    (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
-    (hex : let C := orderedBaseCechComplex π M U
-      Function.Exact ((C.d 0 1).hom) ((C.d 1 2).hom))
-    (hrk : ∀ (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K],
-      let C := orderedBaseCechComplex π M U
-      Module.finrank K (LinearMap.ker ((C.d 0 1).hom.baseChange K)) = 1) :
-    let C := orderedBaseCechComplex π M U
-    Module.Projective Γ(S, (⊤ : S.Opens)) (LinearMap.ker ((C.d 0 1).hom)) := by
+    {iota : Type u} [Fintype iota] [LinearOrder iota]
+    (U : iota → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hdeg : ∀ {k : Type u} [Field k], (Spec (.of k) ⟶ S) → Prop)
+    (p : PrimeSpectrum Γ(S, (⊤ : S.Opens))) :
+    let C := orderedBaseCechComplex pi M U
+    Module.finrank p.asIdeal.ResidueField
+      (LinearMap.ker ((C.d 0 1).hom.baseChange p.asIdeal.ResidueField)) = 1 := by
   sorry
 
-/- **(AP-B1) — NOT YET STATABLE, and this is a finding, not an omission.**
+/- **(AP-A2, AP-A3) -- deliberately NOT stated here.**
 
-KM pp. 66–67's step (e) is: *"the map of invertible sheaves `𝒪 --ℓ--> ℒ` on `E` is injective, and remains
-so after any base change `T → S`. For this we are reduced to the case `S = Spec(k)` with `k` a field, and
-`ℓ ∈ H⁰(E, ℒ)` a `k`-basis, so non-zero, in which case the assertion is obvious."*
+Given AP-A1a and AP-A1b, the passage to "`f_*L` is invertible over the base ring, compatibly with base
+change" is **not new mathematics**: it is
+`Module.rankAtStalk_ker_eq_of_bounded_forall_field_baseChange_exact` together with
+`Module.Projective.ker_of_bounded_forall_field_baseChange_exact` and
+`kerBaseChangeComparison_bijective_of_bounded_forall_field_baseChange_exact`
+(`ForMathlib/BaseChangeKerCoker.lean:1204, :1179, :1192`), applied to `orderedBaseCechComplex pi M U`.
 
-Stating it needs "`ℓ` is a basis of `f_*M`", and `f_*M` is `AP-A3`'s output — `LinearMap.ker ((C.d 0 1).hom)`
-as a `Γ(S, ⊤)`-module. Writing `r • ℓ` for `r : Γ(S, ⊤)` and `ℓ : Γ(M, ⊤)` fails to elaborate: `Γ(M, ⊤)` is a
-`Γ(X, ⊤)`-module and the `Γ(S, ⊤)`-action factors through `π`, so the statement needs a scalar tower that
-is not currently set up.
+Its remaining obligations are the package's own hypotheses, all of which the tree can already supply for
+this complex: `hcomp` (`d . d = 0`, from the complex), boundedness via
+`orderedBaseCechObject_subsingleton_of_card_le`, and flatness of the terms via
+`orderedBaseCechObject_flat_of_isInvertible`. `Picard/InvertibleSheafProperCechResidueSpread.lean:23`
+assembles exactly this set for its own purposes and is the model to copy.
 
-**So AP-B1 is blocked on an API-design decision in AP-A3**, namely which module `f_*M` is presented as and
-with which scalar-tower instances. That decision belongs in AP-A3's ticket, and AP-B1 should be stated only
-after it. A first attempt here used `(hbasis : ∀ K …, True)` — a vacuous hypothesis that makes the
-statement false as written — and was removed rather than shipped.
--/
+Writing these as fresh `theorem`s here is what produced draft 1's two false statements. They belong in the
+ticket as "apply the package", not as new statements. -/
+
+/- **(AP-B1) -- still not statable, and the reason is now geometric, not an API wrinkle.**
+
+Round 12: an invertible `f_*L` **need not have a global basis**. KM chooses it Zariski-locally on `S`
+(p. 66: *"Because `f_*L` is invertible on `S`, Zariski locally on `S` we may pick an `O_S`-basis `l` of
+`f_*L`"*). Draft 1 quantified over a global `l`, a genuine geometric error that the elaboration failure
+happened to hide.
+
+The correct shape restricts to an open where `baseSections pi M` is free of rank one, takes a local
+generator, and forms `O_E -> L` there. It must be phrased against `Scheme.Modules.baseSections pi M`,
+which carries the `Gamma(S,O_S)`-structure intrinsically, and use
+`baseSectionsIsoKernelOrderedBaseCechDifferential` only to transport algebraic results in. Blocked on
+AP-A3's chosen presentation, and that choice belongs to AP-A3's ticket. -/
 
 end ModularCurves
