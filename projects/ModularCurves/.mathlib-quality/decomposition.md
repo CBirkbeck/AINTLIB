@@ -1120,3 +1120,90 @@ source maintains, dropped or vacuous in transcription (`hn : 1 ≤ n`; fibrewise
 coherence/Nakayama; global-vs-local basis; `N`-torsion in `_mul`; and now `hdeg` twice over). The seventh
 is this round's wrong-section error, which is a sibling: I took a theorem whose *name* matched and whose
 *hypotheses* did not.
+
+---
+
+# Round 15 — method correction: I was authoring statements instead of transcribing
+
+The criticism is correct and it names the skill's own binding rule. `/develop`'s source-faithfulness
+section says *"Transcribe, don't invent … your leaves are **its** sub-results … not a fresh route you
+happen to find convenient"*, with the quote-or-delete acceptance test. Rounds 13's statements —
+`orderedBaseCech_field_exactAt_succ_of_fibrewise_degree_one` and its sibling — **appear nowhere in
+Katz–Mazur**. They are Lean-convenience translations chosen because they connect to the tree's Čech layer,
+and `hdeg` existed only because the signature needed something in that slot. Quote-or-delete kills both on
+sight. That is the case study in the skill, reproduced exactly.
+
+So: back to the page. Mumford, *Abelian Varieties*, §5, pp. 47–50 — the section KM's p. 66 cites.
+
+## What Mumford actually does (verbatim)
+
+**p. 47**, the Čech set-up:
+> "for all `A`-algebras `B`, `{U_i ×_Y Spec B}` is an affine covering of `X ×_Y Spec(B)`, and
+> `C^p(𝔄, ℱ) ⊗_A B` is the module of Čech `p`-cochains of `ℱ ⊗_A B` for this covering. Therefore
+> `H^p(X ×_Y Spec B, ℱ ⊗_A B) ≅ H^p(C^• ⊗_A B)` for all `B`, and, in fact, **functorially in `B`**."
+
+**Lemma 1, p. 47** — the finite-projective replacement:
+> "Let `C^•` be a complex of `A`-modules (`A` any noetherian ring) such that the `H^i(C^•)` are **finitely
+> generated** `A`-modules and such that `C^p ≠ (0)` only if `0 ≤ p ≤ n`. Then there exists a complex `K^•`
+> of finitely generated `A`-modules such that `K^p ≠ (0)` only if `0 ≤ p ≤ n` and `K^p` is **free** if
+> `1 ≤ p ≤ n` and a homomorphism of complexes `φ : K^• → C^•` such that `φ` induces isomorphisms
+> `H^i(K^•) ≅ H^i(C^•)`, all `i`. Moreover if the `C^p` are `A`-flat, then `K^0` will be `A`-flat too."
+
+**p. 49**: *"Note that `K^0` is `A`-projective, since it is `A`-flat and finitely generated over a
+noetherian `A`."*
+
+**Lemma 2, p. 49** — base change:
+> "Let `C^•`, `K^•` be any finite complexes of flat `A`-modules, and let `C^• → K^•` be a homomorphism of
+> complexes inducing isomorphisms `H^p(C^•) ≅ H^p(K^•)` for all `p`. Then for every `A`-algebra `B`, the
+> maps `H^p(C^• ⊗_A B) ≅ H^p(K^• ⊗_A B)` are isomorphisms."
+
+**Corollary, p. 50**:
+> "(a) For each `p ≥ 0`, the function `y ↦ dim_{k(y)} H^p(X_y, ℱ_y)` is **upper semicontinuous** on `Y`.
+> (b) The function `y ↦ χ(ℱ_y) = Σ (−1)^p dim_{k(y)} H^p(X_y, ℱ_y)` is **locally constant** on `Y`."
+
+## Three corrections this forces
+
+**1. The mechanism is the finite-projective replacement, not direct Čech exactness.** Mumford never proves
+things about the Čech terms — he *replaces* `C^•` by a quasi-isomorphic `K^•` with finitely generated
+terms, free in degrees `≥ 1`, `K^0` flat hence projective. That is exactly why my round-14 defect (Čech
+terms are flat but not finite) arises and exactly how Mumford avoids it. **The right leaves are Mumford's
+Lemma 1 and Lemma 2**, and the input Lemma 1 needs is *finitely generated cohomology* — which for a proper
+morphism is `orderedBaseCechHomologyFinite_of_isProper`.
+
+**2. The tree already transcribed Lemma 1.** `ForMathlib/LowDegreeFiniteProjectiveReplacement.lean`'s own
+docstring: *"the amplitude `[0, 1]` module-theoretic form of Mumford, Abelian Varieties, Section 5,
+Lemma 1"*, with the Noetherian hypothesis isolated and the note that *"Geometric applications over an
+arbitrary base must remove it by approximation before exposing their final statements"* — i.e. KM's step
+(c). **Seventh time the tree already had it**, and this time it had the *source's own lemma*, correctly
+attributed, while I was inventing a substitute for it.
+
+**3. "Fibrewise degree one" has a source-sanctioned formulation, and it is Euler characteristic.**
+Corollary (b) gives that `χ(ℱ_y)` is locally constant with no hypotheses. On genus-one fibres `χ(𝒪) = 0`,
+so `deg = 1` is `χ(L_s) = 1`. That is a statement about `L`, mentions the object it constrains, and needs
+no degree theory — unlike `hdeg`, which mentioned nothing and constrained nothing.
+
+## The leaf chain, now transcribed rather than authored
+
+```
+Mumford p.47   Cech cochains base-change functorially in B          → project: SchemeModuleOrderedBaseCech
+Mumford L1     finite-generated cohomology ⟹ finite-projective K^•  → project: LowDegreeFiniteProjective
+                 input: H^i(C^•) finitely generated                    Replacement  (ALREADY TRANSCRIBED)
+                                                                       from orderedBaseCechHomologyFinite_of_isProper
+Mumford L2     quasi-iso of finite flat complexes ⟹ base change      → project: BaseChangeKerCoker
+Mumford Cor3   H^p(X_y,ℱ_y)=0 ∀y ⟹ R^{p-1}f_* ⊗ k(y) ≅ H^{p-1}       (p.53, reduced-free)
+Mumford Cor(b) χ(ℱ_y) locally constant                                ← how to say "degree one"
+KM p.66        the above at p=1 for deg-one L ⟹ f_*L invertible
+```
+
+Every line now has a page and a verbatim quote. **Nothing on it is a statement I invented.**
+
+## Gate after round 15
+
+Not passed, but the failure mode is finally identified rather than iterated. The repair is not to re-draft
+my Čech statements a third time; it is to **delete them** and re-state group A as Mumford's Lemma 1 +
+Lemma 2 + Cor 3 applied through the tree's existing transcription of Lemma 1, with `χ(L_s) = 1` in place of
+`hdeg`.
+
+**Tally: eight defects in fifteen rounds.** Six were dropped/vacuous hypotheses; one was a wrong-section
+application; and this one — the largest — is that I was authoring leaves at all instead of transcribing
+them. The first seven are symptoms of the eighth.
