@@ -128,11 +128,11 @@ theorem glueSectionA_compat {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}} (g
     (ej : (AlgebraicGeometry.Scheme.Modules.pullback Vj.ι).obj N ≅ unitObj Vj.toScheme) :
     ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
         ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).presheaf.map
-        (Opens.infLELeft Vi Vj).op (glueSectionA g N Vi ei) =
+        (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi)).op (glueSectionA g N Vi ei) =
       (glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)) •
         ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
           ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).presheaf.map
-          (Opens.infLERight Vi Vj).op (glueSectionA g N Vj ej) := by
+          (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)).op (glueSectionA g N Vj ej) := by
   sorry
 
 /-- **(AP2-B1a, comparison B — the dual slot picks up the INVERSE transition unit.)** -/
@@ -140,10 +140,10 @@ theorem glueSectionB_compat {T : Scheme.{u}} (N : T.Modules) {Vi Vj : T.Opens}
     (ei : (AlgebraicGeometry.Scheme.Modules.pullback Vi.ι).obj N ≅ unitObj Vi.toScheme)
     (ej : (AlgebraicGeometry.Scheme.Modules.pullback Vj.ι).obj N ≅ unitObj Vj.toScheme) :
     (AlgebraicGeometry.Scheme.Modules.dualObj N).presheaf.map
-        (Opens.infLELeft Vi Vj).op (glueSectionB N Vi ei) =
+        (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi)).op (glueSectionB N Vi ei) =
       (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) •
         (AlgebraicGeometry.Scheme.Modules.dualObj N).presheaf.map
-          (Opens.infLERight Vi Vj).op (glueSectionB N Vj ej) := by
+          (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)).op (glueSectionB N Vj ej) := by
   sorry
 
 /-- **(AP2-B1a′, ⊗-self — discharged)** Invertibility pairing `N ⊗ N^∨ ≅ 𝒪`: exactly the tree's
@@ -170,9 +170,15 @@ theorem nonempty_tensorObj_pushforwardPullback_dualObj_unitObj {X S : Scheme.{u}
   -- (m i): the generating section over V i.
   · exact tensorSection _ _ (V i)
       (glueSectionA g N (V i) (htriv i).some) (glueSectionB N (V i) (htriv i).some)
-  -- (hcompat): cocycle cancellation ON THE NOSE — `f^*N` inherits `N`'s transition units,
-  -- and the dual factor cancels them; both sides are the same section of the tensor.
-  · sorry
+  -- (hcompat): the two slots pick up the transition unit inversely, and the tensor cancels it.
+  · intro i j
+    rw [show (Opens.infLELeft (V i) (V j)) = homOfLE inf_le_left from rfl,
+      show (Opens.infLERight (V i) (V j)) = homOfLE inf_le_right from rfl,
+      tensorSection_restrict, tensorSection_restrict,
+      glueSectionA_compat g N ((htriv i).some) ((htriv j).some),
+      glueSectionB_compat N ((htriv i).some) ((htriv j).some),
+      tensorSection_smul_left, tensorSection_smul_right, smul_smul,
+      Units.mul_inv, one_smul]
   -- (hbij): componentwise — `hp g W` on the pushforward factor, `e_i` on both.
   · sorry
 
