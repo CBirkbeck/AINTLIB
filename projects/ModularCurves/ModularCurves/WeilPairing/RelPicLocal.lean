@@ -57,6 +57,47 @@ theorem exists_pullback_twist_of_locally {X S : Scheme.{u}} {p : X ⟶ S} {T : S
         ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N₀)) := by
   sorry
 
+
+/-- The pushforward-slot generating section of the glue: over a trivialising open `V` of `N`, the
+canonical section of `f_*f^*N` obtained from a trivialisation `e` through the pullback dictionaries
+(`sheafOfModulesEquivOverUnit`, `pullbackUnitIso`, `localPullbackModuleIso`), read via `unitHomEquiv`
+at the top of the over-site. -/
+noncomputable def glueSectionA {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}} (g : T ⟶ S)
+    (N : T.Modules) (V : T.Opens)
+    (e : (AlgebraicGeometry.Scheme.Modules.pullback V.ι).obj N ≅ unitObj V.toScheme) :
+    ↑Γ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N), V) :=
+  ((((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N).over
+      (pullback.snd p g ⁻¹ᵁ V)).unitHomEquiv
+    ((AlgebraicGeometry.Scheme.Modules.overEquiv
+        (pullback.snd p g ⁻¹ᵁ V)).functor.preimage
+      (((pullback.snd p g ⁻¹ᵁ V).sheafOfModulesEquivOverUnit
+          (pullback p g).ringCatSheaf).hom ≫
+        (AlgebraicGeometry.Scheme.Modules.pullbackUnitIso
+          (pullback.snd p g ∣_ V)).inv ≫
+        (AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g ∣_ V)).map e.inv ≫
+        (AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g ∣_ V)).map
+          (((AlgebraicGeometry.Scheme.Modules.overFunctorEquiv V).app N ≪≫
+            (AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback V.ι).app N).inv) ≫
+        (AlgebraicGeometry.Scheme.Modules.localPullbackModuleIso
+          (pullback.snd p g) N V).hom))).val
+    (Opposite.op (CategoryTheory.Over.mk (𝟙 (pullback.snd p g ⁻¹ᵁ V))))
+
+/-- The dual-slot generating section of the glue: the functional on `N` over `V` induced by a
+trivialisation `e`, as a section of `dualObj N` (whose sections over `V` are definitionally the
+Hom-type `N.over V ⟶ unit`). -/
+noncomputable def glueSectionB {T : Scheme.{u}} (N : T.Modules) (V : T.Opens)
+    (e : (AlgebraicGeometry.Scheme.Modules.pullback V.ι).obj N ≅ unitObj V.toScheme) :
+    ↑Γ(AlgebraicGeometry.Scheme.Modules.dualObj N, V) :=
+  (fun (φ : N.over V ⟶ _root_.SheafOfModules.unit (T.ringCatSheaf.over V)) => φ)
+    ((AlgebraicGeometry.Scheme.Modules.overEquiv V).functor.preimage
+      (((AlgebraicGeometry.Scheme.Modules.overFunctorEquiv V).app N).hom ≫
+        ((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback V.ι).app N).hom ≫
+        e.hom ≫
+        (V.sheafOfModulesEquivOverUnit T.ringCatSheaf).inv))
+
 /-- **(AP2-B1a′, ⊗-self — discharged)** Invertibility pairing `N ⊗ N^∨ ≅ 𝒪`: exactly the tree's
 `nonempty_eval_iso` (`Picard/PicComparison.lean`), proved. Kept as a named wrapper for the assembly. -/
 theorem nonempty_tensorObj_dualObj_unitObj {T : Scheme.{u}} {N : T.Modules}
@@ -78,43 +119,9 @@ theorem nonempty_tensorObj_pushforwardPullback_dualObj_unitObj {X S : Scheme.{u}
       (dualObj N) ≅ unitObj T) := by
   obtain ⟨κ, V, hV, htriv⟩ := hN
   refine Nonempty.map Iso.symm (nonempty_unitObj_iso_of_glue _ V hV (fun i => ?_) ?_ ?_)
-  -- (m i): the generating section over V i — `tensorSection sA sB` per the board plan.
-  · have sA : ↑Γ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
-        ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N), V i) := by
-      -- rfl-equal to Γ(f^*N, f⁻¹(V i)): the unit-hom from `htriv i` through the pullback
-      -- dictionaries, read as a section at the top of the over-site.
-      have ψ : _root_.SheafOfModules.unit
-            ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ V i)) ⟶
-          ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N).over
-            (pullback.snd p g ⁻¹ᵁ V i) :=
-        (AlgebraicGeometry.Scheme.Modules.overEquiv
-            (pullback.snd p g ⁻¹ᵁ V i)).functor.preimage
-          (((pullback.snd p g ⁻¹ᵁ V i).sheafOfModulesEquivOverUnit
-              (pullback p g).ringCatSheaf).hom ≫
-            (AlgebraicGeometry.Scheme.Modules.pullbackUnitIso
-              (pullback.snd p g ∣_ V i)).inv ≫
-            (AlgebraicGeometry.Scheme.Modules.pullback
-              (pullback.snd p g ∣_ V i)).map ((htriv i).some.inv) ≫
-            (AlgebraicGeometry.Scheme.Modules.pullback
-              (pullback.snd p g ∣_ V i)).map
-              (((AlgebraicGeometry.Scheme.Modules.overFunctorEquiv (V i)).app N ≪≫
-                (AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
-                  (V i).ι).app N).inv) ≫
-            (AlgebraicGeometry.Scheme.Modules.localPullbackModuleIso
-              (pullback.snd p g) N (V i)).hom)
-      exact ((((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N).over
-        (pullback.snd p g ⁻¹ᵁ V i)).unitHomEquiv ψ).val
-        (Opposite.op (CategoryTheory.Over.mk (𝟙 (pullback.snd p g ⁻¹ᵁ V i))))
-    have sB : ↑Γ(AlgebraicGeometry.Scheme.Modules.dualObj N, V i) := by
-      -- `Γ(dualObj N, V i)` is definitionally the Hom-type `N.over (V i) ⟶ unit`; the functional is
-      -- `htriv i` read through the over/pullback dictionaries.
-      exact (fun (φ : N.over (V i) ⟶ _root_.SheafOfModules.unit (T.ringCatSheaf.over (V i))) => φ)
-        ((AlgebraicGeometry.Scheme.Modules.overEquiv (V i)).functor.preimage
-          (((AlgebraicGeometry.Scheme.Modules.overFunctorEquiv (V i)).app N).hom ≫
-            ((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback (V i).ι).app N).hom ≫
-            (htriv i).some.hom ≫
-            ((V i).sheafOfModulesEquivOverUnit T.ringCatSheaf).inv))
-    exact tensorSection _ _ (V i) sA sB
+  -- (m i): the generating section over V i.
+  · exact tensorSection _ _ (V i)
+      (glueSectionA g N (V i) (htriv i).some) (glueSectionB N (V i) (htriv i).some)
   -- (hcompat): cocycle cancellation ON THE NOSE — `f^*N` inherits `N`'s transition units,
   -- and the dual factor cancels them; both sides are the same section of the tensor.
   · sorry

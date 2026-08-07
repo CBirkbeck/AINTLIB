@@ -39248,3 +39248,16 @@ _ _ (V i) sA sB` with:
 Then `hcompat` = `tensorSection_restrict` (PROVED) + both `sA` and `sB` restrictions agreeing via the
 SAME `htriv` on overlaps — the cancellation is that the `i`/`j` discrepancy units enter `sA` and `sB`
 inversely. `hbij` = the `bijective_evPre_app_of_triv` pattern + `hp g W`.
+
+**AP2-B1a Progress** (2026-08-07, MAJOR): hole 1 of the glue obligation is CLOSED and refactored —
+`glueSectionA`/`glueSectionB` are now top-level sorry-free defs (the full dictionary chains landed:
+sA = unitHomEquiv of overEquiv.preimage [sheafOfModulesEquivOverUnit ≫ pullbackUnitIso⁻¹ ≫ map e⁻¹ ≫
+map (overFunctorEquiv≪≫restrictFunctorIsoPullback)⁻¹ ≫ localPullbackModuleIso] at the over-site top;
+sB = overEquiv.preimage [overFunctorEquiv ≫ restrictFunctorIsoPullback ≫ e ≫
+sheafOfModulesEquivOverUnit⁻¹], with Γ(dualObj N, V) definitionally the Hom-type), and
+`m i := tensorSection (glueSectionA …) (glueSectionB …)`. Two holes left: hcompat — via
+`tensorSection_restrict` (proved) + the two transition-comparison lemmas (`res (glueSectionA i) =
+u_ij • res (glueSectionA j)` and inversely for B, with `u_ij := trivializationTransitionUnit`
+(`InvertibleSheafCocycle.lean:44` — the tree HAS the transition-unit machinery with `_restrict`,
+`_trans`, `_symm`)) + a `tensorSection_smul` cancellation pair; hbij — `bijective_evPre_app_of_triv`
+pattern + `hp g W`. Green 3318 jobs, everything pushed.
