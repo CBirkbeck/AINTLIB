@@ -39012,3 +39012,10 @@ to fix exactly this; nothing may build on them meanwhile.
 `decomposition.md` round 19 (typed `λ_E` square; Zariski-site `K^×` LES; two-slot skew-symmetry;
 `⟨P,Q⟩_{π₂π₁} = ⟨P,π₂^tQ⟩_{π₁}` typing; `deg[N] = N²`; naturality-before-Yoneda; Oda-inverse
 perfectness). **Ready now, in parallel: AP2-A0, AP2-B1, AP-D1, AP-D3.**
+
+### [AP2-A0] — Status: done (2026-08-07)
+**Progress**: false vacuous-`hdeg` pair DELETED; `HasDegreeOneFibreCohomology` (def-bundle over shared
+`K`, per statement-splitting) + `.exact` + `.kernel_finrank` projections PROVED (no sorry). Exactness
+clause over all `n < card ι` per round 14; `H⁰` untouched. `lake build` green 3316 jobs; axioms on both
+projections: propext/Classical.choice/Quot.sound only. Phase 6.5 /cleanup: n/a — producer role per
+CLAUDE.md (fleet work on main). G6 re-scan: next open with met deps = AP-D1, AP2-B1, AP2-A1, AP-D3.
