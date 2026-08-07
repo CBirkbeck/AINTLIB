@@ -97,18 +97,23 @@ noncomputable def overTrivialization {T : Scheme.{u}} (N : T.Modules) (V : T.Ope
       (AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback V.ι).app N ≪≫
       e ≪≫ (V.sheafOfModulesEquivOverUnit T.ringCatSheaf).symm)
 
-/-- The transition unit of two pullback trivialisations on the overlap: restrict both with
-`restrictTrivialization` (`Picard/InvertibleSheaf.lean:229`), pass to over-form, and take
-`trivializationTransitionUnit`. -/
+/-- The transition unit of two pullback trivialisations on the overlap: pass each to over-form
+(`overTrivialization`), restrict **at the over level** with `restrictOverTrivialization`
+(`Picard/Dual.lean:792`), and take `trivializationTransitionUnit`. Restricting at the over level —
+rather than with the pullback-level `restrictTrivialization` — makes the comparison lemmas below
+consume the transition-unit API (`overUnitScalarEnd_transitionUnit`,
+`restrictOverTrivialization_hom_eq_comp_scalar`) directly, with no route-coherence lemma. -/
 noncomputable def glueTransitionUnit {T : Scheme.{u}} (N : T.Modules) {Vi Vj : T.Opens}
     (ei : (AlgebraicGeometry.Scheme.Modules.pullback Vi.ι).obj N ≅ unitObj Vi.toScheme)
     (ej : (AlgebraicGeometry.Scheme.Modules.pullback Vj.ι).obj N ≅ unitObj Vj.toScheme) :
     ↑Γ(T, Vi ⊓ Vj)ˣ :=
   AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit (Vi ⊓ Vj)
-    (overTrivialization N (Vi ⊓ Vj)
-      (AlgebraicGeometry.Scheme.Modules.restrictTrivialization inf_le_right ej))
-    (overTrivialization N (Vi ⊓ Vj)
-      (AlgebraicGeometry.Scheme.Modules.restrictTrivialization inf_le_left ei))
+    (ModularCurves.SheafOfModules.restrictOverTrivialization T.ringCatSheaf N Vj
+      (overTrivialization N Vj ej)
+      (CategoryTheory.Over.mk (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj))))
+    (ModularCurves.SheafOfModules.restrictOverTrivialization T.ringCatSheaf N Vi
+      (overTrivialization N Vi ei)
+      (CategoryTheory.Over.mk (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi))))
 
 /-- The dual-slot generating section of the glue: the functional on `N` over `V` induced by a
 trivialisation `e`, as a section of `dualObj N` (whose sections over `V` are definitionally the
