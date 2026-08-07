@@ -139,6 +139,13 @@ theorem glueSectionA_compat {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}} (g
         ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
           ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).presheaf.map
           (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)).op (glueSectionA g N Vj ej) := by
+  -- Isolated core (ψ-level): the two unit-homs into `f^*N` over the overlap differ by the
+  -- `E(u⁻¹)`-precomposition, transported through the chain by the four intertwiners
+  -- (`overEquiv_unitScalarEnd`/`_inv` DualPullback:204/:292, `pullbackUnitIso_scalar` :282,
+  -- `openTopSection_morphismRestrict` :232), from the restricted-htriv `E(u)`-relation
+  -- (`overUnitScalarEnd_transitionUnit`, as in `glueSectionB_compat`).
+  -- Conclusion then follows from `unitHomEquiv_apply_coe` (rfl, mathlib Sheaf.lean:183) +
+  -- the pushforward-per-open rfl + the section smul-definition.
   sorry
 
 /-- **(AP2-B1a, comparison B — the dual slot picks up the transition unit: `u • φ = φ ≫ E(u)` and
