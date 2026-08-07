@@ -39181,3 +39181,10 @@ from `htriv i` (which gives `f^*N ≅ f^*𝒪 = 𝒪`-transport over `f⁻¹(V i
 of SHEAVES, sidestepping per-open opacity) tensored with `e_i^∨`. hcompat = cocycle cancellation;
 hbij componentwise. AP2-B1a-ii is thereby RETIRED as unnecessary; the glue proof consumes only
 sheaf-level isos, all of which exist.
+
+**AP2-B1a Progress** (2026-08-07): glue obligation split IN-FILE into its three engine sub-goals —
+`nonempty_unitObj_iso_of_glue` applied (direction flipped by `Nonempty.map Iso.symm`), leaving
+(m i) / (hcompat) / (hbij) as three commented sorries inside one proof. Green 3314 jobs. Next window:
+fill (m i) from `htriv i` + `localPullbackModuleIso` + `pullbackUnitIso` + `dualUnitSectionsEquiv`
+(`Dual.lean:501`); (hcompat) by cocycle cancellation; (hbij) via the `bijective_evPre_app_of_triv`
+pattern with `hp g W`.

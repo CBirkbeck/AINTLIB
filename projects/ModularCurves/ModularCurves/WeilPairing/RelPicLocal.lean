@@ -74,7 +74,17 @@ theorem nonempty_tensorObj_pushforwardPullback_dualObj_unitObj {X S : Scheme.{u}
       ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
         ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N))
       (dualObj N) ≅ unitObj T) := by
-  sorry
+  obtain ⟨κ, V, hV, htriv⟩ := hN
+  refine Nonempty.map Iso.symm (nonempty_unitObj_iso_of_glue _ V hV (fun i => ?_) ?_ ?_)
+  -- (m i): the generating section over V i, from `htriv i` transported by the sheaf-level
+  -- pullback isos (localPullbackModuleIso, pullbackUnitIso — pushforward per open is rfl)
+  -- tensored with the dual generator e_i^∨.
+  · sorry
+  -- (hcompat): cocycle cancellation ON THE NOSE — `f^*N` inherits `N`'s transition units,
+  -- and the dual factor cancels them; both sides are the same section of the tensor.
+  · sorry
+  -- (hbij): componentwise — `hp g W` on the pushforward factor, `e_i` on both.
+  · sorry
 
 /-- **(AP2-B1a, KM p. 65: "`f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`")** Over a universally `O`-connected family,
 `f_*f^*N ≅ N` for invertible `N` — assembled by cancelling the dual twist
