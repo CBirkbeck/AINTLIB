@@ -39233,3 +39233,18 @@ collapsed to `ConcreteCategory.congr_hom` of the sheafification unit's naturalit
 tensor's own instance; the restrictScalars-conjugated composites then unify by `exact`). File
 sorry-free (0), green 2577 jobs. Remaining in the ticket: `tensorSection_smul_left` (needed only if the
 hbij hole wants it — check at fill time). Next: fill B1a holes :82/:85/:87 per the THEN clause.
+
+**AP2-B1a holes — construction plan for (m i)** (2026-08-07, from the LSP goal): `m i := tensorSection
+_ _ (V i) sA sB` with:
+- `sA : Γ(f_*f^*N, V i)` — **rfl-equal** to `Γ(f^*N, f⁻¹(V i))`; built as the image of `1` under the
+  composite sheaf iso `(pullback (f⁻¹V i).ι).obj (f^*N) ≅ (pullback (f∣_V i)).obj ((pullback (V i).ι).obj N)`
+  [= `localPullbackModuleIso f N (V i)`, `DualPullback:259` — exactly this shape] `≅ (pullback (f∣_Vi)).obj
+  (unitObj)` [mapIso `(htriv i).some`] `≅ unitObj (f⁻¹V i)` [`pullbackUnitIso (f∣_Vi)`]; then top-section →
+  `Γ(f^*N, f⁻¹Vi)` via the over/restrict dictionaries (`overSectionEquiv`, `Evaluation:37` +
+  `restrictFunctorIsoPullback`/`overFunctorEquiv` as in `localPullbackModuleIso`'s own ingredients).
+- `sB : Γ(dualObj N, V i)` — via the dual dictionaries (`dualSections`/`dualToSubfunctorEquiv`,
+  `Dual.lean:123/:397`): the hom `N.over (V i) ⟶ unit` corresponding to `(htriv i).some.hom` through
+  `overEquiv`.
+Then `hcompat` = `tensorSection_restrict` (PROVED) + both `sA` and `sB` restrictions agreeing via the
+SAME `htriv` on overlaps — the cancellation is that the `i`/`j` discrepancy units enter `sA` and `sB`
+inversely. `hbij` = the `bijective_evPre_app_of_triv` pattern + `hp g W`.
