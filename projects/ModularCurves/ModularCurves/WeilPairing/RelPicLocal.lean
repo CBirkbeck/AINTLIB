@@ -55,22 +55,40 @@ theorem exists_pullback_twist_of_locally {X S : Scheme.{u}} {p : X ⟶ S} {T : S
         ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N₀)) := by
   sorry
 
-/-- **(AP2-B1a, KM p. 65: "`f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`")** Over a universally `O`-connected family,
-the pullback–pushforward adjunction unit is an isomorphism on invertible modules: `N ≅ f_*f^*N`
-canonically. Mathlib supplies the adjunction (`Modules.pullbackPushforwardAdjunction`,
-`AlgebraicGeometry/Modules/Sheaf.lean:189`); `hp` is what makes its unit invertible — locally `N ≅ 𝒪`
-and on the structure sheaf the unit is exactly `hp g U : IsIso ((pullback.snd p g).app U)`. -/
-theorem isIso_pullbackPushforwardAdjunction_unit_app {X S : Scheme.{u}} {p : X ⟶ S}
+/-- **(AP2-B1a′, obligation ⊗-self)** Invertibility pairing: `N ⊗ N^∨ ≅ 𝒪` — the evaluation `ev N`
+(`Picard/Evaluation.lean:201`) is an isomorphism for invertible `N` (Zariski-locally it is
+`isIso_ev_unitObj`, `PicComparison.lean:282`, transported along a trivialisation). -/
+theorem nonempty_tensorObj_dualObj_unitObj {T : Scheme.{u}} {N : T.Modules}
+    (hN : IsInvertible N) :
+    Nonempty (tensorObj N (dualObj N) ≅ unitObj T) := by
+  sorry
+
+/-- **(AP2-B1a′, obligation glue)** The pushforward of the pullback, twisted by the dual, is trivial:
+per trivialising open the generating section is (pushforward-`rfl` of `f^*e_i` via `pullbackUnitIso`)
+`⊗ e_i^∨`; overlap agreement holds **on the nose** by cocycle cancellation (`f^*N` inherits `N`'s own
+transition units, and the tensor with `N^∨` cancels them); bijectivity componentwise from
+`hp g W` and `e_i`. Engine: `nonempty_unitObj_iso_of_glue` (`GlueTrivialization.lean:98`). -/
+theorem nonempty_tensorObj_pushforwardPullback_dualObj_unitObj {X S : Scheme.{u}} {p : X ⟶ S}
     {T : Scheme.{u}} (g : T ⟶ S) (hp : UniversallyOConnected p)
     {N : T.Modules} (hN : IsInvertible N) :
-    IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
-      (pullback.snd p g)).unit.app N) := by
-  obtain ⟨κ, V, hV, htriv⟩ := hN
-  refine isIso_of_bijective_app_on_cover _ V hV fun i W hW => ?_
-  -- Per-open bijectivity inside a trivialising open: transport the unit across `htriv i`
-  -- (unit naturality + `localPullbackModuleIso`/`localPullbackUnitIso`, DualPullback:259/:272),
-  -- reducing to the structure sheaf, where the unit per open is `(pullback.snd p g).app W`
-  -- (`unitToPushforwardObjUnit_val_app_apply`, PullbackFree.lean) — an iso by `hp g W`.
+    Nonempty (tensorObj
+      ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N))
+      (dualObj N) ≅ unitObj T) := by
   sorry
+
+/-- **(AP2-B1a, KM p. 65: "`f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`")** Over a universally `O`-connected family,
+`f_*f^*N ≅ N` for invertible `N` — assembled by cancelling the dual twist
+(`nonempty_iso_of_tensorObj_unitObj`, `PicComparison.lean:909`) between the two obligations above.
+Replaces the earlier opaque-adjunction-unit form (see the AP2-B1a REPLAN note on the board): KM's
+proof consumes only this identification, not the unit. -/
+theorem nonempty_pushforwardPullback_iso {X S : Scheme.{u}} {p : X ⟶ S}
+    {T : Scheme.{u}} (g : T ⟶ S) (hp : UniversallyOConnected p)
+    {N : T.Modules} (hN : IsInvertible N) :
+    Nonempty ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+      ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N) ≅ N) :=
+  nonempty_iso_of_tensorObj_unitObj
+    (nonempty_tensorObj_pushforwardPullback_dualObj_unitObj g hp hN)
+    (nonempty_tensorObj_dualObj_unitObj hN)
 
 end ModularCurves

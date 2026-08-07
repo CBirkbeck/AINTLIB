@@ -39143,3 +39143,11 @@ by `PresheafOfModules.isoMk` — per open the composite
  (hbij) componentwise: `r ↦ r • m i` is bijective since each factor is a local trivialisation
    (`hp g W` on the pushforward factor, `e_i` on both).
 Three mechanical lemmas; every engine cited is proved. This IS KM p. 65's `f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`.
+
+**AP2-B1a Progress** (2026-08-07, restated skeleton LANDED): opaque-unit form deleted;
+`nonempty_pushforwardPullback_iso` (the KM p. 65 identification) is **assembled — proof term complete**
+from two narrow obligations: `nonempty_tensorObj_dualObj_unitObj` (⊗-self; note
+`PicComparison.lean:424` already derives `IsIso (ev M)` for invertible `M` inside another proof — likely
+extractable) and `nonempty_tensorObj_pushforwardPullback_dualObj_unitObj` (glue; full recipe in
+docstring: pushforward-rfl sections, cocycle cancellation on the nose, hp+e_i bijectivity). Green,
+3314 jobs, 3 sorries in file (parent AP2-B1 at :43 + the two obligations).
