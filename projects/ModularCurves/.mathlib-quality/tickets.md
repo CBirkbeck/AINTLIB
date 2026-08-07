@@ -39309,3 +39309,8 @@ the Ring instance the `Module` was keyed to, breaking it (probe 13). Resolution 
 inside that environment or replicate its exact letI block verbatim**. All 13 probes' findings are in
 the docstrings + this note; the statements are green sorries; `hcompat` (their only consumer) is
 otherwise complete.
+
+**AP2-B1a-iii** (probe 14, terminal for this context): even `Module ↑(T.sheaf.obj.obj (op U))
+↑(A.val.obj (op U))` fails to synthesize here — the working environment in `PicComparison` differs in
+what `M.val.obj`'s ambient instance is keyed to. **14 probes; instance-alignment only, zero mathematical
+content; queued for a fresh-context `/simplify`-style pass with this full map.** Sorried green.
