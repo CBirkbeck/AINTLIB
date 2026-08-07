@@ -39035,3 +39035,11 @@ element form closes by `happ.trans`). File now: `kUnitsEval`, `kUnits`, `mem_kUn
 `kUnits_eq_bot` (= AP-D2), `kUnits_restrict_mem`. Zero sorries, build green 3125 jobs, axioms standard
 on all. Base-change API deferred to AP-D5/D6's exact shapes as planned (their cocycles fix the
 transport form). Phase 6.5 /cleanup: n/a (producer role per CLAUDE.md).
+
+### [AP2-B1] — Status: in_progress (skeleton landed 2026-08-07)
+**Progress**: `WeilPairing/RelPicLocal.lean` (new): `exists_pullback_twist_of_locally` stated `:= by
+sorry`, transcribed from KM p. 65 (statement AND proof quoted verbatim in the module docstring; Hida's
+p. 109 non-sequitur noted with the repair). Elaborates green (3314 jobs) — `M.restrict (…).ι`,
+`tensorObj`, `Modules.pullback (snd ∣_ U i)` vocabulary all typecheck. PHASE 4 next: KM's
+mutually-inverse pushforwards `f_*(M⁻¹⊗M')` / `f_*(M⊗M'⁻¹)`; the tree's `baseSections` +
+`UniversallyOConnected` supply `f_*f^* = id`; glue via the sheaf axiom. Also feeds AP-D5.
