@@ -39117,3 +39117,15 @@ expose; not on the KM path). AP2-B1a-i's compatibility statement now also target
 where it is provable by construction rather than against an opaque unit. In-file skeleton to be
 re-stated accordingly next; `RelPicLocal.lean:63`'s current IsIso form stays until the replacement
 elaborates, then is deleted (it is my own sorry'd scaffold, not a source-transcribed statement).
+
+**AP2-B1a Progress** (2026-08-07, final ingredient): mathlib `pushforward_obj_obj` is **`rfl`** —
+`Γ((pushforward f).obj M, U) = Γ(M, f⁻¹ᵁ U)` (`AlgebraicGeometry/Modules/Sheaf.lean:170`), and
+`pushforward_obj_presheaf_map`/`pushforward_map_app` are `rfl` too. So the pushforward side of the
+explicit iso is definitional; ALL content is on the pullback side, where `pullbackUnitIso f`
+(tree, cited `InvertibleSheaf.lean:82`) gives `f^*𝒪 ≅ 𝒪` and `htriv`/`hp` finish per trivialising open.
+Construction plan (next window): build `(pushforward f).obj ((pullback f).obj N) ≅ N` on the cover `V`
+by `PresheafOfModules.isoMk` — per open the composite
+`Γ(f^*N, f⁻¹W) ≅ Γ(f^*𝒪, f⁻¹W) = Γ(𝒪_{X_T}, f⁻¹W) ≅ Γ(𝒪_T, W) ≅ Γ(N, W)`
+(htriv-transport ∘ pullbackUnitIso ∘ hp⁻¹ ∘ htriv⁻¹), glued via the effectivity machinery
+(`InvertibleSheafGlueEffectivity` patterns) since the local isos are zero-normalisable — uniqueness by
+`kUnits_eq_bot` (AP-D2) makes the cocycle condition automatic, exactly KM p. 65's mechanism.
