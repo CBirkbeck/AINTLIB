@@ -39156,3 +39156,17 @@ docstring: pushforward-rfl sections, cocycle cancellation on the nose, hp+e_i bi
 `nonempty_eval_iso` (`PicComparison.lean:414`), proved (tenth tree-already-had-it; found by reading the
 inline `IsIso (ev M)` derivation, which turned out to BE the public theorem). B1a is now: assembly
 PROVED + one remaining glue obligation (`RelPicLocal.lean:70`). Green.
+
+### [AP2-B1a-ii] the pushforward-twisted evaluation presheaf map (sub-ticket)
+- **Status**: open · **File**: `WeilPairing/RelPicLocal.lean` · **Parent**: AP2-B1a · **Type**: def + lemmas
+- **Statement** (shape): `pushPullEvPre N : ((pushforward f).obj ((pullback f).obj N)).val ⊗ (dualObj N).val ⟶ 𝟙_ _`
+  — the `evPre` analogue with the first slot conjugated through `f.app` (per-open pushforward is `rfl`,
+  `Modules/Sheaf.lean:170`), for `f := pullback.snd p g`.
+- **Sketch**: mimic `evPre` (`Picard/Evaluation.lean:170-198`) verbatim: `TensorProduct.lift` of a
+  `LinearMap.mk₂` whose value is `evalSection`-after-`f.app`-transport; bilinearity lemmas are the five
+  `evalSection_*` (`Evaluation.lean:78-105`) composed with `f.app`'s ring-hom laws; naturality from
+  `evalSection_naturality` + `pushforward_obj_presheaf_map` (`rfl`).
+- **Then** (parent's engine): `sheafificationW_of_bijective_on_cover` over `hN`'s cover, per-open
+  bijectivity by `bijective_evPre_app_of_triv`-pattern (`PicComparison:349`) with `restrictTrivialization`
+  + `hp g W`; `sheafificationW_iff`; `asIso ≪≫ sheafifyValIso`. Sources: KM p. 65; model cited by line.
+- **Generality**: match the use site (`pullback.snd p g`), per sub-ticket rule.
