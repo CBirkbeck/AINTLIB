@@ -39293,3 +39293,8 @@ intertwiners for pushing `E(u)` through ψ's chain all exist: `pullbackUnitIso_s
 (`DualPullback:282`), `overEquiv_unitScalarEnd`/`_inv` (`:204`/`:292`). compA = the restricted-htriv
 `E(u)`-relation (as in compB) transported through the chain by those three intertwiners + `(pullback _).map`
 functoriality, then the `rfl` and the smul-def. All steps named; no new machinery.
+
+**AP2-B1a Progress** (2026-08-07): fourth compA intertwiner read in full —
+`openTopSection_morphismRestrict` (`DualPullback:232`): `openTopSection (f⁻¹U) ((f.app U) r) =
+(f ∣_ U).appTop (openTopSection U r)` — the exact `f.app`-crossing for `E(u)` from `T` to `X_T` inside
+ψ's chain. compA is now a pure assembly over four fully-read lemmas.
