@@ -39170,3 +39170,14 @@ PROVED + one remaining glue obligation (`RelPicLocal.lean:70`). Green.
   bijectivity by `bijective_evPre_app_of_triv`-pattern (`PicComparison:349`) with `restrictTrivialization`
   + `hp g W`; `sheafificationW_iff`; `asIso ≪≫ sheafifyValIso`. Sources: KM p. 65; model cited by line.
 - **Generality**: match the use site (`pullback.snd p g`), per sub-ticket rule.
+
+**AP2-B1a-ii ATTACK NOTE** (2026-08-07, before implementing): mathlib's `Modules.pullback` is a
+sheafification — `((pullback f).obj N).val` has **no** per-open `rfl` description (only pushforward
+does). So `pushPullEvPre`'s first slot cannot be written by `evalSection`-transport as sketched; the
+`mk₂` would need sections of `f^*N` over `f⁻¹W`, which are opaque. **Route decision**: skip the global
+presheaf pairing entirely — prove the glue obligation directly with `nonempty_unitObj_iso_of_glue`
+(cover-local generating sections of `tensorObj (f_*f^*N) (dualObj N)`), where the sections are built
+from `htriv i` (which gives `f^*N ≅ f^*𝒪 = 𝒪`-transport over `f⁻¹(V i)` via `pullbackUnitIso` — an iso
+of SHEAVES, sidestepping per-open opacity) tensored with `e_i^∨`. hcompat = cocycle cancellation;
+hbij componentwise. AP2-B1a-ii is thereby RETIRED as unnecessary; the glue proof consumes only
+sheaf-level isos, all of which exist.
