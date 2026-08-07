@@ -39073,3 +39073,11 @@ plumbing exists, no `f_*f^*≅id` or invertibility-of-pushforward). Parent pause
 (`PicComparison.lean:838`) over the trivialising cover, transporting the unit across the trivialisation
 with `localPullbackModuleIso`/`localPullbackUnitIso` (`DualPullback.lean:259/:272`) + unit naturality.
 Route in sentinel; assembly is the remaining work.
+
+**AP2-B1a Progress** (2026-08-07, reduction landed): B1a's sorry is now the single per-open
+bijectivity sub-goal — `obtain ⟨κ, V, hV, htriv⟩ := hN` (raw `IsInvertible` destructure; the
+CompactSpace-needing cover lemma is NOT required) + `isIso_of_bijective_app_on_cover _ V hV`. Remaining
+goal at `RelPicLocal.lean:70`: `Bijective ((unit.app N).app W)` for `W ≤ V i`, with
+`htriv i : Nonempty ((Modules.pullback (V i).ι).obj N ≅ unitObj (V i))`. Note
+`InvertibleSheaf.lean:82` says mathlib's `pullbackObjUnitToUnit` iso is already available in-tree.
+Green, 3314 jobs.

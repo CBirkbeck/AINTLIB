@@ -65,6 +65,12 @@ theorem isIso_pullbackPushforwardAdjunction_unit_app {X S : Scheme.{u}} {p : X �
     {N : T.Modules} (hN : IsInvertible N) :
     IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
       (pullback.snd p g)).unit.app N) := by
+  obtain ⟨κ, V, hV, htriv⟩ := hN
+  refine isIso_of_bijective_app_on_cover _ V hV fun i W hW => ?_
+  -- Per-open bijectivity inside a trivialising open: transport the unit across `htriv i`
+  -- (unit naturality + `localPullbackModuleIso`/`localPullbackUnitIso`, DualPullback:259/:272),
+  -- reducing to the structure sheaf, where the unit per open is `(pullback.snd p g).app W`
+  -- (`unitToPushforwardObjUnit_val_app_apply`, PullbackFree.lean) — an iso by `hp g W`.
   sorry
 
 end ModularCurves
