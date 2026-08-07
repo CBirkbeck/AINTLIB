@@ -45,6 +45,11 @@ theorem tensorSection_restrict {T : Scheme.{u}} (A B : T.Modules) {U' U : T.Open
     (AlgebraicGeometry.Scheme.Modules.tensorObj A B).presheaf.map (homOfLE h).op
         (tensorSection A B U a b) =
       tensorSection A B U' (A.presheaf.map (homOfLE h).op a) (B.presheaf.map (homOfLE h).op b) := by
-  sorry
+  have h1 := ConcreteCategory.congr_hom
+    (((PresheafOfModules.sheafificationAdjunction
+      (𝟙 T.ringCatSheaf.obj)).unit.app (A.val ⊗ B.val)).naturality (homOfLE h).op)
+    (show ↑((A.val ⊗ B.val).obj (op U)) from a ⊗ₜ b)
+  simp only [tensorSection]
+  exact h1.symm
 
 end ModularCurves

@@ -39226,3 +39226,10 @@ missing brick is the `tensorObj` sections API. Spawning:
 (Notation gotcha recorded: `open TensorProduct` un-scoped hijacks `⊗`; use `open MonoidalCategory` +
 `open scoped TensorProduct`.) Remaining: `tensorSection_restrict` (naturality in `U`, from the unit's
 presheaf-hom naturality — should be one `congrArg`+`map_tmul` chain) and `tensorSection_smul_left`.
+
+**AP2-B1a-iii Progress** (2026-08-07): `tensorSection_restrict` **PROVED** — the whole naturality
+collapsed to `ConcreteCategory.congr_hom` of the sheafification unit's naturality at a type-ascribed
+`⊗ₜ` (the ascription `show ↑((A.val ⊗ B.val).obj (op U))` is what routes the `⊗ₜ` to the presheaf
+tensor's own instance; the restrictScalars-conjugated composites then unify by `exact`). File
+sorry-free (0), green 2577 jobs. Remaining in the ticket: `tensorSection_smul_left` (needed only if the
+hbij hole wants it — check at fill time). Next: fill B1a holes :82/:85/:87 per the THEN clause.
