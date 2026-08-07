@@ -39027,3 +39027,11 @@ CLAUDE.md (fleet work on main). G6 re-scan: next open with met deps = AP-D1, AP2
 so AP-D2 is DONE, sorry-free, axioms standard (propext/Classical.choice/Quot.sound). Build green 3125
 jobs. AP-D1 remaining API: restriction along `U' ≤ U` and base-change along `T' ⟶ T` — needed by AP-D5/D6
 (cocycle refinement), add when those tickets fix their exact shapes. Phase 6.5 /cleanup: n/a (producer).
+
+### [AP-D1] — Status: done (2026-08-07)
+**Progress**: restriction API landed — `kUnits_restrict_mem` PROVED (via `Scheme.Hom.map_appLE` +
+`Scheme.Hom.appLE_map`; the two composites agree by proof-irrelevance of the `≤`-arguments, then the
+element form closes by `happ.trans`). File now: `kUnitsEval`, `kUnits`, `mem_kUnits_iff`,
+`kUnits_eq_bot` (= AP-D2), `kUnits_restrict_mem`. Zero sorries, build green 3125 jobs, axioms standard
+on all. Base-change API deferred to AP-D5/D6's exact shapes as planned (their cocycles fix the
+transport form). Phase 6.5 /cleanup: n/a (producer role per CLAUDE.md).

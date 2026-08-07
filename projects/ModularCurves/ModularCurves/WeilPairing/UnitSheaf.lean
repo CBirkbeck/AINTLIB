@@ -29,7 +29,7 @@ site via the five-term sequence, with no hypothesis on `Pic(S)`.
 
 universe u
 
-open CategoryTheory AlgebraicGeometry Limits
+open CategoryTheory AlgebraicGeometry Limits TopologicalSpace
 
 namespace ModularCurves
 
@@ -72,5 +72,27 @@ theorem kUnits_eq_bot (hp : UniversallyOConnected p) {z : T ⟶ pullback p g}
     exact Units.ext (eq_one_of_pullback_eq_one g hp hz U (le_preimage_preimage g hz U) h)
   · rintro rfl
     simp
+
+/-- **(AP-D1, restriction API)** Zero-section normalization is stable under restriction to a smaller
+base open: the units-restriction along `f⁻¹U' ≤ f⁻¹U` carries `kUnits U` into `kUnits U'`. This is the
+subsheaf half of KM p. 88's "subsheaf of invertible functions"; with it KM's `h_i ∘ P` patching (p. 89,
+`AP-D6`) can restrict normalized units to overlaps. -/
+theorem kUnits_restrict_mem {z : T ⟶ pullback p g} (hz : z ≫ pullback.snd p g = 𝟙 T)
+    {U' U : T.Opens} (h : U' ≤ U) {u : Γ(pullback p g, pullback.snd p g ⁻¹ᵁ U)ˣ}
+    (hu : u ∈ kUnits g hz U) :
+    Units.map ((pullback p g).presheaf.map
+        (homOfLE ((Opens.map (pullback.snd p g).base).monotone h)).op).hom.toMonoidHom u ∈
+      kUnits g hz U' := by
+  rw [mem_kUnits_iff] at hu ⊢
+  have h12 : (pullback p g).presheaf.map
+        (homOfLE ((Opens.map (pullback.snd p g).base).monotone h)).op ≫
+        z.appLE (pullback.snd p g ⁻¹ᵁ U') U' (le_preimage_preimage g hz U') =
+      z.appLE (pullback.snd p g ⁻¹ᵁ U) U (le_preimage_preimage g hz U) ≫
+        T.presheaf.map (homOfLE h).op := by
+    rw [Scheme.Hom.map_appLE, Scheme.Hom.appLE_map]
+  have happ := congrArg (fun φ => (CommRingCat.Hom.hom φ) (u : _)) h12
+  simp only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply] at happ
+  simp only [Units.coe_map]
+  exact happ.trans (by rw [hu, map_one])
 
 end ModularCurves
