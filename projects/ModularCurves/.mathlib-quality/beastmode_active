@@ -1,7 +1,1 @@
-FOCUS: [AP2-B1a] NEXT WINDOW ENTRY POINT (all state pushed through 0ee64f95f, tree green 3329 jobs):
-1. tensorSection_smul pair (TensorSection.lean 2 sorries): INSTANCE-ALIGNMENT ONLY — 14-probe map in docstrings + board; replicate the ambient environment where the instances DO live (try proving the pair as private lemmas INSIDE Picard/PicComparison.lean after :374, then re-export) — zero math content.
-2. glueSectionA_compat (RelPicLocal:~149): pure assembly over four READ intertwiners (in-file comment at the sorry cites all four by line).
-3. hbij (RelPicLocal last bullet): PicComparison:349 pattern + hp g W.
-4. Parent AP2-B1 (:59): KM p.65 mutual-inverse pushforwards via B1a (nonempty_pushforwardPullback_iso PROVED mod holes) + B1b (board ticket).
-5. Then: AP2-A1 (RR field leaf), AP-D3 (five-term LES), rest of board.
-PROVED THIS MARATHON (16): AP2-A0 pkg, AP-D1 (kUnits+API), AP-D2, B1a assembly, obligation-1(nonempty_eval_iso reuse), tensorSection, tensorSection_restrict, glueSectionA, glueSectionB, m-i closure, overTrivialization, glueTransitionUnit, hcompat 9-rewrite, glueSectionB_compat, + 2 corrections (compat signs). Board+FOCUS synchronized.
+FOCUS: AP2-A1a — chart-section dictionary: recon projModel chart API (Γ(U₀)≅CoordinateRing?), then FibreDivisorDictionary.lean skeleton

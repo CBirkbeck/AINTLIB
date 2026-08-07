@@ -38944,15 +38944,73 @@ to fix exactly this; nothing may build on them meanwhile.
 - **Sources**: KM p. 66 and Hida pp. 107–108 both derive exactly these two facts from degree one and use
   only them. **Generality**: arbitrary invertible `M`, never `𝒪(n[0])` (circularity trap, b2_log).
 
-### [AP2-A1] Degree one ⟹ the two fibre facts (genus-one Riemann–Roch, field level)
-- **Status**: open · **File**: `EllipticCurve/DegreeOneFibreCohomology.lean` (new) · **Depends on**: AP2-A0
-- **Statement**: over a field `k`, `C/k` proper smooth geometrically connected genus one, `L` invertible
-  of degree 1: `h⁰ = 1` and `h¹ = 0`.
-- **Sketch**: Hida p. 107 verbatim: `H¹(E_s, L(s))` dual to `H⁰(L(s)⁻¹ ⊗ Ω)` (Serre duality),
-  `deg(L⁻¹⊗Ω) = −1 < 0` ⟹ no sections; RR (`GME 2.1.6` shape) gives `h⁰ = 1`. **This is the ONE place a
-  degree notion for an invertible sheaf is needed** — decide the interface here (candidates: HasseWeil
-  divisor degree; `χ(L_s) = 1` per Mumford Cor (b)). Verify mathlib RR state at pickup.
-- **Sources**: Hida p. 107 (quoted in `decomposition.md` round 18); KM p. 66; Mumford AV p. 50 Cor (b).
+### [AP2-A1] Degree one ⟹ the two fibre facts — SUB-CUT 2026-08-08 against the vendored RR
+- **Status**: open (= the assembly A1d) · **Depends on**: AP2-A0, VENDOR-RR (done, `8cff6eea5`)
+- **INTERFACE DECISION** (the ticket's mandated choice): the degree notion is **divisorial via the
+  vendored function-field theory**. On a fibre `projModel W`/`F` (`W : WeierstrassCurve F` elliptic,
+  `K_W := FractionRing W.toAffine.CoordinateRing`), a *degree-one presentation* of an invertible `M` is
+  a meromorphic trivialization identifying `Γ(chart, M)` with fractional `CoordinateRing`-ideals whose
+  associated `DivisorA F K_W` has vendored `deg = 1`. Family level: `∀ s : S`, a presentation of
+  `M|_{fibre s}` of degree one. Consumers (AP2-B2/B3) supply this from `I(P)⁻¹`-type constructions
+  (section ideals are literally degree-one divisors; KM 1.2.7). `χ`-based and HasseWeil-ideal degrees
+  REJECTED: former needs the package first (circular), latter has no ∞-chart calculus.
+- **Cover decoupling** (pin): fibre-native facts are stated **cover-independently** as
+  `Subsingleton (Sheaf.H M q)` (`q ≥ 1`) + `finrank F Γ(projModel W, M) = 1`; the family engine's
+  3-chart ordered Čech facts follow through the existing generic comparison layers
+  (`baseCechComplex_exactAt_one_iff_subsingleton_H`, `AcyclicAffineCechComparison`,
+  ordered↔alternating retract, residue-field→field transport in `PoleSheafBaseCechHigher` — all
+  M-generic, verified by reading `PoleSheafProjectiveCech.lean:29–119`). The vendored 2-chart
+  (finite/infinite) split is used only *inside* the fibre-native proofs.
+
+#### [AP2-A1a] Chart-section ⇆ fractional-ideal dictionary on `projModel W` over a field
+- **File**: `EllipticCurve/FibreDivisorDictionary.lean` (new)
+- **Statement**: for `W` elliptic over `F`, the affine Weierstrass chart `U₀` of `projModel W` has
+  `Γ(U₀, 𝒪) ≅ W.CoordinateRing` (should exist in the projModel layer — verify) and, for the ∞-chart
+  `U₁`, a Dedekind identification of `Γ(U₁, 𝒪)`-data with the vendored infinite side
+  (`infiniteIntegers F K_W = integralClosure (inftyValuationSubring F) K_W`, one place over ∞ with
+  `e = 2`, `deg = 1` — vendored `EllipticCurve/Infinity.lean`). Then: a presentation of `M` ⇝
+  `D : DivisorA F K_W` with `Γ(projModel W, M) ≃ₗ[F] RRspace F K_W D`.
+- **Sketch**: H⁰ glues from the two charts: a global section is a pair of fractional elements agreeing
+  in `K_W`, i.e. an `f ∈ K_W` with `v(f) ≥ -D(v)` at finite places (chart-0 ideal) and at infinite
+  places (chart-1 ideal) — literally the vendored `RRspace` membership (`RRspace/Basic.lean:128`).
+  Vendored glue: `PlaceDictionary.coordinateRingEquiv : W.CoordinateRing ≃ₐ[k[X]] ringOfIntegers F K_W`
+  (`PlaceDictionary.lean:46`), `instIsDedekindDomainCoordinateRing` (`Dedekind.lean:359`), the
+  `Instances.lean` farm (`algebraPolynomial`/`algebraRatFunc`/`functionField`/`finrank_ratFunc_eq_two`).
+- **Sources**: vendored formal API (supersedes PDF quotes); Stichtenoth §1.4 for the RRspace form.
+
+#### [AP2-A1b] `H¹ = 0` for a degree-one presentation (pole-peeling, the real math)
+- **File**: `EllipticCurve/FibreDegreeOneHOne.lean` (new) · **Depends on**: A1a
+- **Statement**: `Subsingleton (Sheaf.H M 1)` (and `q ≥ 1` via dimension/cover bound) for `M` with a
+  degree-one presentation on `projModel W`/`F`.
+- **Sketch**: 2-affine-cover Čech: `H¹ = Γ(U₀∩U₁,M)/(Γ(U₀,M) − Γ(U₁,M))`. Pole-peeling induction:
+  `g ∈ Γ(U₀∩U₁)` has poles off the presentation bound only along the two removed finite loci; for any
+  `D' ≥ D` with `deg D' ≥ 1`, genus one + `zero_isCanonical_of_genus_eq_one` give `i(D') = ℓ(-D'') = 0`,
+  so vendored RR yields the FULL jump `ℓ(D' + v) = ℓ(D') + deg v` — peel the top pole at each removed
+  place by subtracting a matching element of the jump, terminating in `Γ(U₀) + Γ(U₁)`. Every divisor of
+  degree `≥ 1 = 2g − 1` is nonspecial: the induction never stalls. Čech-H¹ of an affine 2-cover
+  computes `Sheaf.H 1` on the separated `projModel` by the tree's comparison layer.
+- **Sources**: Stichtenoth Thm 1.5.17 proof shape (strong approximation = the same peel); vendored
+  `riemann_roch`, `genus_eq_one`, `zero_isCanonical_of_genus_eq_one` (all axiom-verified 2026-08-08).
+
+#### [AP2-A1c] `h⁰ = 1` for a degree-one presentation
+- **File**: with A1a · **Depends on**: A1a
+- **Sketch**: transport along A1a's `≃ₗ[F]`: `finrank = ell F K_W D`; vendored RR:
+  `ℓ(D) = 1 + 1 − 1 + ℓ(W₀−D)` with `W₀ = 0` canonical; `deg(−D) = −1 < 0 ⟹ ℓ(−D) = 0` (vendored
+  `ell_eq_zero` variant — verify exact name at pickup; it feeds their own `riemann_ineq`/`clifford`).
+- **Sources**: vendored `RiemannRochTheorem/Basic.lean:31`, `GenusOne.lean:43`, `GenusCounting.lean:583`.
+
+#### [AP2-A1d] Family assembly: degree-one presentations ⟹ `HasDegreeOneFibreCohomology`
+- **File**: `EllipticCurve/DegreeOneFibreCohomology.lean` (new) · **Depends on**: A1a–c
+- **Sketch**: define the family-level presentation predicate (interface above); per point `s`, apply
+  A1a–c on the fibre via the `FibrewiseElliptic` iso `e : π.fiber s ≅ projModel W`; lift through the
+  M-generic transport stack exactly as `sectionPoleSheafPower_residueField_orderedBaseCech_*` →
+  `_field_*` do for `𝒪(n[0])` (`PoleSheafBaseCechHigher.lean:228–342` — proofs are M-generic modulo
+  the fibre-native inputs, verified by reading). Output: `HasDegreeOneFibreCohomology π M U`.
+- **TRAP**: presentations must base-change along `residueField s → K` (field extensions of the fibre);
+  vendored side needs `IsFullConstantField`/separability stability — check `CoordinateFree/` layer for
+  the base-change-of-constants story at pickup; if absent, state fibre facts after the extension
+  directly (the presentation extends: fractional ideals base-change).
+- **Sources**: KM p. 66; Hida pp. 107–108 (package shape); tree transport layer (formal).
 
 ### [AP2-A2] The degree-one package: `f_*L` invertible, base-change compatible
 - **Status**: blocked (AP2-A0) · **File**: `EllipticCurve/DegreeOneFibreCohomology.lean`
