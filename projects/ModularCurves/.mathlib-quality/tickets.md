@@ -39220,3 +39220,9 @@ missing brick is the `tensorObj` sections API. Spawning:
   with the factors from `overSectionEquiv` (`Evaluation.lean:37`) + `dualUnitSectionsEquiv`
   (`Dual.lean:501`); `hcompat` via `tensorSection_restrict` + cocycle cancellation; `hbij` via the
   `bijective_evPre_app_of_triv` pattern (`PicComparison:349`) + `hp g W`.
+
+**AP2-B1a-iii Progress** (2026-08-07): `tensorSection` DEF LANDED, sorry-free, green (2577 jobs) —
+`WeilPairing/TensorSection.lean`; the image of `a ⊗ₜ b` under the sheafification unit's component.
+(Notation gotcha recorded: `open TensorProduct` un-scoped hijacks `⊗`; use `open MonoidalCategory` +
+`open scoped TensorProduct`.) Remaining: `tensorSection_restrict` (naturality in `U`, from the unit's
+presheaf-hom naturality — should be one `congrArg`+`map_tmul` chain) and `tensorSection_smul_left`.
