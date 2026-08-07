@@ -55,13 +55,12 @@ theorem exists_pullback_twist_of_locally {X S : Scheme.{u}} {p : X ⟶ S} {T : S
         ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N₀)) := by
   sorry
 
-/-- **(AP2-B1a′, obligation ⊗-self)** Invertibility pairing: `N ⊗ N^∨ ≅ 𝒪` — the evaluation `ev N`
-(`Picard/Evaluation.lean:201`) is an isomorphism for invertible `N` (Zariski-locally it is
-`isIso_ev_unitObj`, `PicComparison.lean:282`, transported along a trivialisation). -/
+/-- **(AP2-B1a′, ⊗-self — discharged)** Invertibility pairing `N ⊗ N^∨ ≅ 𝒪`: exactly the tree's
+`nonempty_eval_iso` (`Picard/PicComparison.lean`), proved. Kept as a named wrapper for the assembly. -/
 theorem nonempty_tensorObj_dualObj_unitObj {T : Scheme.{u}} {N : T.Modules}
     (hN : IsInvertible N) :
-    Nonempty (tensorObj N (dualObj N) ≅ unitObj T) := by
-  sorry
+    Nonempty (tensorObj N (dualObj N) ≅ unitObj T) :=
+  nonempty_eval_iso hN
 
 /-- **(AP2-B1a′, obligation glue)** The pushforward of the pullback, twisted by the dual, is trivial:
 per trivialising open the generating section is (pushforward-`rfl` of `f^*e_i` via `pullbackUnitIso`)

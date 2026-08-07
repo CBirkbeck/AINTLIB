@@ -39151,3 +39151,8 @@ from two narrow obligations: `nonempty_tensorObj_dualObj_unitObj` (⊗-self; not
 extractable) and `nonempty_tensorObj_pushforwardPullback_dualObj_unitObj` (glue; full recipe in
 docstring: pushforward-rfl sections, cocycle cancellation on the nose, hp+e_i bijectivity). Green,
 3314 jobs, 3 sorries in file (parent AP2-B1 at :43 + the two obligations).
+
+**AP2-B1a Progress** (2026-08-07): obligation ⊗-self **DISCHARGED** — it was the tree's
+`nonempty_eval_iso` (`PicComparison.lean:414`), proved (tenth tree-already-had-it; found by reading the
+inline `IsIso (ev M)` derivation, which turned out to BE the public theorem). B1a is now: assembly
+PROVED + one remaining glue obligation (`RelPicLocal.lean:70`). Green.
