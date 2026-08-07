@@ -39298,3 +39298,14 @@ functoriality, then the `rfl` and the smul-def. All steps named; no new machiner
 `openTopSection_morphismRestrict` (`DualPullback:232`): `openTopSection (f⁻¹U) ((f.app U) r) =
 (f ∣_ U).appTop (openTopSection U r)` — the exact `f.app`-crossing for `E(u)` from `T` to `X_T` inside
 ψ's chain. compA is now a pure assembly over four fully-read lemmas.
+
+**AP2-B1a-iii Progress** (2026-08-07, probe 13 — definitive for this stretch): the smul pair's full
+instance map is now charted: Γ(A,U)'s `Module` is keyed on `T.ringCatSheaf.obj.obj (op U)` (RingCat
+spelling; neither Γ(T,U) nor the forget₂ composite), whose `CommSemiring` must come from
+`inferInstanceAs (CommSemiring ↑(T.sheaf.obj.obj (op U)))` — but adding that `letI` NAKED **shadows**
+the Ring instance the `Module` was keyed to, breaking it (probe 13). Resolution requires staging the
+`letI`s exactly as `PicComparison`'s section does (its `bijective_evPre_app_of_triv` block at
+`:365-374` stages `CommSemiring` + two `Module` bridges in an order that works) — i.e. **prove the pair
+inside that environment or replicate its exact letI block verbatim**. All 13 probes' findings are in
+the docstrings + this note; the statements are green sorries; `hcompat` (their only consumer) is
+otherwise complete.
