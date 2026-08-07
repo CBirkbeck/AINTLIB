@@ -39129,3 +39129,17 @@ by `PresheafOfModules.isoMk` — per open the composite
 (htriv-transport ∘ pullbackUnitIso ∘ hp⁻¹ ∘ htriv⁻¹), glued via the effectivity machinery
 (`InvertibleSheafGlueEffectivity` patterns) since the local isos are zero-normalisable — uniqueness by
 `kUnits_eq_bot` (AP-D2) makes the cocycle condition automatic, exactly KM p. 65's mechanism.
+
+**AP2-B1a Progress** (2026-08-07, construction finalised — implement next): the iso is built as
+`nonempty_iso_of_tensorObj_unitObj` (`PicComparison:909`) applied with `K := N^{-1}` (from `hN`):
+`N ⊗ N^{-1} ≅ 𝒪` is invertibility; `f_*f^*N ⊗ N^{-1} ≅ 𝒪` via `nonempty_unitObj_iso_of_glue`
+(`GlueTrivialization:98`) — its three obligations, per trivialising open `V i` with trivialisation
+`e_i`:
+ (m i) generating section of `f_*f^*N ⊗ N^{-1}` over `V i` := (pushforward of `f^*e_i` via
+   `pullbackUnitIso`, per-open **rfl** on the pushforward side) ⊗ (dual of `e_i`);
+ (hcompat) **the two cocycles cancel on the nose** — `f^*N` inherits exactly `N`'s transition units
+   `u_ij`, so the tensor has transition `u_ij · u_ij^{-1} = 1`: sections agree exactly, no
+   normalisation needed (this replaces the earlier kUnits idea, which does not apply on `T`);
+ (hbij) componentwise: `r ↦ r • m i` is bijective since each factor is a local trivialisation
+   (`hp g W` on the pushforward factor, `e_i` on both).
+Three mechanical lemmas; every engine cited is proved. This IS KM p. 65's `f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`.
