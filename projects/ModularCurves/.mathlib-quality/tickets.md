@@ -39269,3 +39269,13 @@ trivialisation, sorry-free def via `preimageIso`), `glueTransitionUnit` (the ove
 `glueSectionA_compat` / `glueSectionB_compat` are STATED (sorried) — A picks up the unit, B its inverse;
 these are hcompat's exact remaining content, and with them + `tensorSection_restrict` (proved) +
 `tensorSection_smul_*` (recipe'd) the cancellation closes. Green 3329 jobs.
+
+**AP2-B1a Progress** (2026-08-07, compB scoped): `glueSectionB_compat` decomposes into (i) dual-restriction
+of an over-trivialisation's hom = the restricted trivialisation's hom (near-rfl; `dualRestrict` IS
+hom-restriction, `Dual.lean:135`/`:433`); (ii) **`overTrivialization_restrictTrivialization` coherence** —
+the pullback-level and over-level restriction routes agree (the one real lemma; prove by unfolding both
+to `preimageIso` + dictionary naturality); (iii) assembly from `overUnitScalarEnd_transitionUnit` +
+`dualSectionsModule = Module.compHom` postcomposition, pinning the inverse-sign. Model:
+`trivializationTransitionUnit_restrict`'s own proof (`InvertibleSheafCocycle:158-200`), which walks the
+same three steps for the unit itself; `restrictOverTrivialization_hom_eq_comp_scalar` (cited there at
+`:187`) is the workhorse.
