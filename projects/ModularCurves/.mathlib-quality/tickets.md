@@ -39103,3 +39103,17 @@ Green, 3314 jobs.
 **AP2-B1a Progress** (2026-08-07): per-open sub-goal typed precisely (`Bijective ((unit.app N).app W)`,
 `W ≤ V i`); spawned AP2-B1a-i for the unit-vs-restriction compatibility after verifying
 `restrictPushforwardPresheafIsoOfIsPullback` exists proved. Parent paused at `RelPicLocal.lean:74`.
+
+**AP2-B1a REPLAN** (2026-08-07, strategy — statement unchanged in truth-value, form changed): mathlib's
+`pullbackPushforwardAdjunction` is `Adjunction.ofIsRightAdjoint` (`PullbackContinuous.lean:60`) — **the
+unit is opaque**, no per-open description exists to compute against. KM p. 65 does not need *the unit*
+to be the iso, only *some* base-change-compatible identification `f_*f^*N ≅ N` (its use in B1b is purely
+computational). So AP2-B1a is restated as constructing an explicit
+`pushforwardPullbackUnitObjIso : (pushforward f).obj ((pullback f).obj N) ≅ N` from the tree's own
+machinery — per open `W`: `Γ(f⁻¹W, f^*N) ≅ Γ(W, N)` via `htriv` + `hp g W`, glued by
+`PresheafOfModules.isoMk` exactly as `restrictPushforwardPresheafIsoOfIsPullback` does — with the
+IsIso-of-unit form retired to a remark (deriving it would need a unit characterisation mathlib does not
+expose; not on the KM path). AP2-B1a-i's compatibility statement now also targets the explicit iso,
+where it is provable by construction rather than against an opaque unit. In-file skeleton to be
+re-stated accordingly next; `RelPicLocal.lean:63`'s current IsIso form stays until the replacement
+elaborates, then is deleted (it is my own sorry'd scaffold, not a source-transcribed statement).
