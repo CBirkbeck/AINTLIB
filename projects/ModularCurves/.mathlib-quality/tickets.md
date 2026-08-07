@@ -39043,3 +39043,24 @@ p. 109 non-sequitur noted with the repair). Elaborates green (3314 jobs) — `M.
 `tensorObj`, `Modules.pullback (snd ∣_ U i)` vocabulary all typecheck. PHASE 4 next: KM's
 mutually-inverse pushforwards `f_*(M⁻¹⊗M')` / `f_*(M⊗M'⁻¹)`; the tree's `baseSections` +
 `UniversallyOConnected` supply `f_*f^* = id`; glue via the sheaf axiom. Also feeds AP-D5.
+
+### [AP2-B1a] `f_*f^*N ≅ N` for an invertible N under `UniversallyOConnected` (sub-ticket)
+- **Status**: open · **File**: `WeilPairing/RelPicLocal.lean` · **Parent**: AP2-B1 · **Type**: theorem
+- **Statement**: for `hp : UniversallyOConnected p`, `N : T.Modules` invertible, the pushforward along
+  `pullback.snd p g` of `(Modules.pullback (pullback.snd p g)).obj N` is isomorphic to `N` (state at the
+  sections level per open first — `Γ(U, f_*f^*N) ≃ Γ(U, N)` via the trivialising cover of `N` and
+  `hp g U : IsIso ((snd).app U)` — then package).
+- **Sketch**: KM p. 65: "`f_*(𝒪_E) = 𝒪_S`, whence `f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`". Locally `N ≅ 𝒪`, so
+  reduce to `f_*𝒪_{X_T} = 𝒪_T` = `hp` itself; glue with the module sheaf axiom (`GlueTrivialization`
+  pattern). Mathlib: `SheafOfModules.pushforward`. Sources: KM p. 65.
+- **Generality**: match use site (`pullback.snd p g`), per sub-ticket rule.
+
+### [AP2-B1b] mutual-inverse pushforwards give the global twist (sub-ticket)
+- **Status**: blocked (AP2-B1a) · **File**: `WeilPairing/RelPicLocal.lean` · **Parent**: AP2-B1
+- **Sketch**: from `hglue i` and AP2-B1a, `f_*(M^⊗-1 ⊗ M')` restricted to `U i` is `≅ N i` — invertible;
+  invertibility is Zariski-local, so `N₀ := f_*(M ⊗ M'^⊗-1)`-inverse per KM; the counit + unit section
+  `1` give `M ≅ M' ⊗ f^*N₀` via `nonempty_iso_of_tensorObj_unitObj` (`PicComparison:909`) and
+  `kUnits_eq_bot` for normalization uniqueness. Sources: KM p. 65 (proof quoted in file docstring).
+**AP2-B1 Progress**: 2026-08-07: PHASE 4 opened; spawned AP2-B1a/AP2-B1b (Tier A2 — the pushforward
+bridge KM's proof consumes is not yet in the Modules layer; survey: only raw `SheafOfModules.pushforward`
+plumbing exists, no `f_*f^*≅id` or invertibility-of-pushforward). Parent paused at docstring recipe.
