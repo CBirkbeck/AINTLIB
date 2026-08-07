@@ -77,10 +77,23 @@ theorem nonempty_tensorObj_pushforwardPullback_dualObj_unitObj {X S : Scheme.{u}
       (dualObj N) ≅ unitObj T) := by
   obtain ⟨κ, V, hV, htriv⟩ := hN
   refine Nonempty.map Iso.symm (nonempty_unitObj_iso_of_glue _ V hV (fun i => ?_) ?_ ?_)
-  -- (m i): the generating section over V i, from `htriv i` transported by the sheaf-level
-  -- pullback isos (localPullbackModuleIso, pullbackUnitIso — pushforward per open is rfl)
-  -- tensored with the dual generator e_i^∨.
-  · sorry
+  -- (m i): the generating section over V i — `tensorSection sA sB` per the board plan.
+  · have sA : ↑Γ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N), V i) := by
+      -- rfl-equal to Γ(f^*N, f⁻¹(V i)); image of 1 under
+      -- localPullbackModuleIso ≪≫ mapIso (htriv i).some ≪≫ pullbackUnitIso, through the
+      -- over/restrict section dictionaries.
+      sorry
+    have sB : ↑Γ(AlgebraicGeometry.Scheme.Modules.dualObj N, V i) := by
+      -- `Γ(dualObj N, V i)` is definitionally the Hom-type `N.over (V i) ⟶ unit`; the functional is
+      -- `htriv i` read through the over/pullback dictionaries.
+      exact (fun (φ : N.over (V i) ⟶ _root_.SheafOfModules.unit (T.ringCatSheaf.over (V i))) => φ)
+        ((AlgebraicGeometry.Scheme.Modules.overEquiv (V i)).functor.preimage
+          (((AlgebraicGeometry.Scheme.Modules.overFunctorEquiv (V i)).app N).hom ≫
+            ((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback (V i).ι).app N).hom ≫
+            (htriv i).some.hom ≫
+            ((V i).sheafOfModulesEquivOverUnit T.ringCatSheaf).inv))
+    exact tensorSection _ _ (V i) sA sB
   -- (hcompat): cocycle cancellation ON THE NOSE — `f^*N` inherits `N`'s transition units,
   -- and the dual factor cancels them; both sides are the same section of the tensor.
   · sorry
