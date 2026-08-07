@@ -39081,3 +39081,25 @@ goal at `RelPicLocal.lean:70`: `Bijective ((unit.app N).app W)` for `W ≤ V i`,
 `htriv i : Nonempty ((Modules.pullback (V i).ι).obj N ≅ unitObj (V i))`. Note
 `InvertibleSheaf.lean:82` says mathlib's `pullbackObjUnitToUnit` iso is already available in-tree.
 Green, 3314 jobs.
+
+### [AP2-B1a-i] the adjunction unit commutes with restriction to a base open (sub-ticket)
+- **Status**: open · **File**: `WeilPairing/RelPicLocal.lean` · **Parent**: AP2-B1a · **Type**: theorem
+- **Statement** (shape): for `f := pullback.snd p g`, `V : T.Opens`, and the cartesian square
+  `IsPullback (f ∣_ V) iU iV f` of `morphismRestrict` (mathlib `isPullback_morphismRestrict`, verticals
+  open immersions), the restriction to `V` of `(pullbackPushforwardAdjunction f).unit.app N` equals —
+  through `restrictPushforwardPresheafIsoOfIsPullback` (`ForMathlib/SchemeModuleRestrictPushforward.lean:20`,
+  **exists, proved**) and `localPullbackModuleIso` (`Picard/DualPullback.lean:259`) — the unit of
+  `pullbackPushforwardAdjunction (f ∣_ V)` at `N.restrict V.ι`-appropriately-transported.
+- **Sketch**: both sides per open `W ≤ V` are induced by `f.app`/`(f ∣_ V).app`, which agree through
+  the `appIso`s of the open immersions (the `hring` square already proved inside
+  `restrictPushforwardPresheafIsoOfIsPullback`); assemble by `PresheafOfModules.isoMk` naturality.
+- **Why on-target**: with it, B1a's remaining sub-goal reduces over `W ≤ V i` to the unit of the
+  restricted morphism at a module trivialised by `htriv i`, then to `unitObj` (unit per open =
+  `(f ∣_ V i).app W` = iso since `UniversallyOConnected` restricts along base opens — `hp` applied to
+  the composite `g` with `V i`'s inclusion), closing (b). **Ninth tree-already-had-it**: the
+  restriction-pushforward compatibility this needs was already in `ForMathlib/`.
+- **Sources**: KM p. 65 (parent's docstring); the square is mathlib `isPullback_morphismRestrict`.
+
+**AP2-B1a Progress** (2026-08-07): per-open sub-goal typed precisely (`Bijective ((unit.app N).app W)`,
+`W ≤ V i`); spawned AP2-B1a-i for the unit-vs-restriction compatibility after verifying
+`restrictPushforwardPresheafIsoOfIsPullback` exists proved. Parent paused at `RelPicLocal.lean:74`.
