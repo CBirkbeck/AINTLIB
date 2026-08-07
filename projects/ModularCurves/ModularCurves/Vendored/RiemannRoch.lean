@@ -1,0 +1,37 @@
+module  -- shake: keep-all --deprecated_module: ignore
+
+public import ModularCurves.Vendored.RiemannRoch.AdeleSpace.Basic
+public import ModularCurves.Vendored.RiemannRoch.AdeleSpace.FilterChain
+public import ModularCurves.Vendored.RiemannRoch.Basic
+public import ModularCurves.Vendored.RiemannRoch.CoordinateFree.AdeleSpace
+public import ModularCurves.Vendored.RiemannRoch.CoordinateFree.Divisor
+public import ModularCurves.Vendored.RiemannRoch.CoordinateFree.EllipticCurve
+public import ModularCurves.Vendored.RiemannRoch.CoordinateFree.RiemannRoch
+public import ModularCurves.Vendored.RiemannRoch.CoordinateFree.WeilDifferential
+public import ModularCurves.Vendored.RiemannRoch.Divisor
+public import ModularCurves.Vendored.RiemannRoch.EllipticCurve.ConcreteRegression
+public import ModularCurves.Vendored.RiemannRoch.EllipticCurve.Dedekind
+public import ModularCurves.Vendored.RiemannRoch.EllipticCurve.DegreeOneDictionary
+public import ModularCurves.Vendored.RiemannRoch.EllipticCurve.GenusCounting
+public import ModularCurves.Vendored.RiemannRoch.EllipticCurve.GenusOne
+public import ModularCurves.Vendored.RiemannRoch.EllipticCurve.Infinity
+public import ModularCurves.Vendored.RiemannRoch.EllipticCurve.Instances
+public import ModularCurves.Vendored.RiemannRoch.EllipticCurve.PicTorsorCore
+public import ModularCurves.Vendored.RiemannRoch.EllipticCurve.PlaceDictionary
+public import ModularCurves.Vendored.RiemannRoch.FunctionField.Divisor
+public import ModularCurves.Vendored.RiemannRoch.Genus
+public import ModularCurves.Vendored.RiemannRoch.Genus.AdeleQuotient
+public import ModularCurves.Vendored.RiemannRoch.Genus.Basic
+public import ModularCurves.Vendored.RiemannRoch.Genus.Polar
+public import ModularCurves.Vendored.RiemannRoch.Genus.Ramification
+public import ModularCurves.Vendored.RiemannRoch.LinearKneser
+public import ModularCurves.Vendored.RiemannRoch.LocalResidue
+public import ModularCurves.Vendored.RiemannRoch.Place
+public import ModularCurves.Vendored.RiemannRoch.PlaceEquiv
+public import ModularCurves.Vendored.RiemannRoch.RRspace.Basic
+public import ModularCurves.Vendored.RiemannRoch.RiemannRochTheorem.Basic
+public import ModularCurves.Vendored.RiemannRoch.RiemannRochTheorem.Corollaries
+public import ModularCurves.Vendored.RiemannRoch.RiemannRochTheorem.Regression
+public import ModularCurves.Vendored.RiemannRoch.SeparableRelNorm
+public import ModularCurves.Vendored.RiemannRoch.WeilDifferential
+public import ModularCurves.Vendored.RiemannRoch.WeilDifferential.Basic
