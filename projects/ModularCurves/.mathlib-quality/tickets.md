@@ -39261,3 +39261,11 @@ u_ij • res (glueSectionA j)` and inversely for B, with `u_ij := trivialization
 (`InvertibleSheafCocycle.lean:44` — the tree HAS the transition-unit machinery with `_restrict`,
 `_trans`, `_symm`)) + a `tensorSection_smul` cancellation pair; hbij — `bijective_evPre_app_of_triv`
 pattern + `hp g W`. Green 3318 jobs, everything pushed.
+
+**AP2-B1a Progress** (2026-08-07, cocycle layer landed): `overTrivialization` (pullback-form → over-form
+trivialisation, sorry-free def via `preimageIso`), `glueTransitionUnit` (the overlap unit through
+`restrictTrivialization` + `trivializationTransitionUnit` — the tree's own cocycle machinery), and
+`glueSectionB` refactored to `(overTrivialization …).hom` (definitional). The two comparison lemmas
+`glueSectionA_compat` / `glueSectionB_compat` are STATED (sorried) — A picks up the unit, B its inverse;
+these are hcompat's exact remaining content, and with them + `tensorSection_restrict` (proved) +
+`tensorSection_smul_*` (recipe'd) the cancellation closes. Green 3329 jobs.

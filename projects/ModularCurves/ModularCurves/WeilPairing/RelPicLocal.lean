@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Picard.DualPullback
+import ModularCurves.Picard.InvertibleSheafCocycle
 import ModularCurves.WeilPairing.TensorSection
 import ModularCurves.WeilPairing.UnitSheaf
 import ModularCurves.Picard.InvertibleSheafBaseCechFlat
@@ -85,6 +86,30 @@ noncomputable def glueSectionA {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}}
           (pullback.snd p g) N V).hom))).val
     (Opposite.op (CategoryTheory.Over.mk (𝟙 (pullback.snd p g ⁻¹ᵁ V))))
 
+/-- The over-site form of a pullback trivialisation: `N.over V ≅ unit`, through the
+`overEquiv`/`restrictFunctorIsoPullback`/`sheafOfModulesEquivOverUnit` dictionaries. This is the form
+`trivializationTransitionUnit` (`Picard/InvertibleSheafCocycle.lean:44`) consumes. -/
+noncomputable def overTrivialization {T : Scheme.{u}} (N : T.Modules) (V : T.Opens)
+    (e : (AlgebraicGeometry.Scheme.Modules.pullback V.ι).obj N ≅ unitObj V.toScheme) :
+    N.over V ≅ _root_.SheafOfModules.unit (T.ringCatSheaf.over V) :=
+  (AlgebraicGeometry.Scheme.Modules.overEquiv V).functor.preimageIso
+    ((AlgebraicGeometry.Scheme.Modules.overFunctorEquiv V).app N ≪≫
+      (AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback V.ι).app N ≪≫
+      e ≪≫ (V.sheafOfModulesEquivOverUnit T.ringCatSheaf).symm)
+
+/-- The transition unit of two pullback trivialisations on the overlap: restrict both with
+`restrictTrivialization` (`Picard/InvertibleSheaf.lean:229`), pass to over-form, and take
+`trivializationTransitionUnit`. -/
+noncomputable def glueTransitionUnit {T : Scheme.{u}} (N : T.Modules) {Vi Vj : T.Opens}
+    (ei : (AlgebraicGeometry.Scheme.Modules.pullback Vi.ι).obj N ≅ unitObj Vi.toScheme)
+    (ej : (AlgebraicGeometry.Scheme.Modules.pullback Vj.ι).obj N ≅ unitObj Vj.toScheme) :
+    ↑Γ(T, Vi ⊓ Vj)ˣ :=
+  AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit (Vi ⊓ Vj)
+    (overTrivialization N (Vi ⊓ Vj)
+      (AlgebraicGeometry.Scheme.Modules.restrictTrivialization inf_le_right ej))
+    (overTrivialization N (Vi ⊓ Vj)
+      (AlgebraicGeometry.Scheme.Modules.restrictTrivialization inf_le_left ei))
+
 /-- The dual-slot generating section of the glue: the functional on `N` over `V` induced by a
 trivialisation `e`, as a section of `dualObj N` (whose sections over `V` are definitionally the
 Hom-type `N.over V ⟶ unit`). -/
@@ -92,11 +117,34 @@ noncomputable def glueSectionB {T : Scheme.{u}} (N : T.Modules) (V : T.Opens)
     (e : (AlgebraicGeometry.Scheme.Modules.pullback V.ι).obj N ≅ unitObj V.toScheme) :
     ↑Γ(AlgebraicGeometry.Scheme.Modules.dualObj N, V) :=
   (fun (φ : N.over V ⟶ _root_.SheafOfModules.unit (T.ringCatSheaf.over V)) => φ)
-    ((AlgebraicGeometry.Scheme.Modules.overEquiv V).functor.preimage
-      (((AlgebraicGeometry.Scheme.Modules.overFunctorEquiv V).app N).hom ≫
-        ((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback V.ι).app N).hom ≫
-        e.hom ≫
-        (V.sheafOfModulesEquivOverUnit T.ringCatSheaf).inv))
+    (overTrivialization N V e).hom
+
+
+/-- **(AP2-B1a, comparison A — the pushforward slot picks up the transition unit.)** On the overlap the
+two `glueSectionA`s differ by `glueTransitionUnit`. Cocycle content of KM p. 65's glue. -/
+theorem glueSectionA_compat {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}} (g : T ⟶ S)
+    (N : T.Modules) {Vi Vj : T.Opens}
+    (ei : (AlgebraicGeometry.Scheme.Modules.pullback Vi.ι).obj N ≅ unitObj Vi.toScheme)
+    (ej : (AlgebraicGeometry.Scheme.Modules.pullback Vj.ι).obj N ≅ unitObj Vj.toScheme) :
+    ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).presheaf.map
+        (Opens.infLELeft Vi Vj).op (glueSectionA g N Vi ei) =
+      (glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)) •
+        ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+          ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).presheaf.map
+          (Opens.infLERight Vi Vj).op (glueSectionA g N Vj ej) := by
+  sorry
+
+/-- **(AP2-B1a, comparison B — the dual slot picks up the INVERSE transition unit.)** -/
+theorem glueSectionB_compat {T : Scheme.{u}} (N : T.Modules) {Vi Vj : T.Opens}
+    (ei : (AlgebraicGeometry.Scheme.Modules.pullback Vi.ι).obj N ≅ unitObj Vi.toScheme)
+    (ej : (AlgebraicGeometry.Scheme.Modules.pullback Vj.ι).obj N ≅ unitObj Vj.toScheme) :
+    (AlgebraicGeometry.Scheme.Modules.dualObj N).presheaf.map
+        (Opens.infLELeft Vi Vj).op (glueSectionB N Vi ei) =
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) •
+        (AlgebraicGeometry.Scheme.Modules.dualObj N).presheaf.map
+          (Opens.infLERight Vi Vj).op (glueSectionB N Vj ej) := by
+  sorry
 
 /-- **(AP2-B1a′, ⊗-self — discharged)** Invertibility pairing `N ⊗ N^∨ ≅ 𝒪`: exactly the tree's
 `nonempty_eval_iso` (`Picard/PicComparison.lean`), proved. Kept as a named wrapper for the assembly. -/
