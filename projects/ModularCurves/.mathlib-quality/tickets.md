@@ -39198,3 +39198,25 @@ invertible module by transition units — and the tensor `f_*f^*N ⊗ N^∨` has
 :5002`) — if "module with chart trivialisations and transition units `u`" ⟹ "≅ glued(`u`)" exists, the
 three holes collapse to: exhibit chart trivialisations of the tensor with transition `1`, then
 glued(triv) ≅ 𝒪. Candidate eleventh tree-already-had-it.
+
+**AP2-B1a Progress** (2026-08-07, GlueEffectivity route COSTED AND REJECTED): the layer's entry points
+(`affineIntersectionOriginalGluedModuleIso`, read at `:5002`) require finite-affine-intersection covers
+(`hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen …`) and route through `GlueData` — hypotheses B1a's
+arbitrary-`T`, arbitrary-cover statement does not have. Rejected for this use (right grain for the
+Noetherian-stage path only). The `nonempty_unitObj_iso_of_glue` application stays; the one genuinely
+missing brick is the `tensorObj` sections API. Spawning:
+
+### [AP2-B1a-iii] `tmul`-sections of the sheafified tensor, with restriction compatibility (sub-ticket)
+- **Status**: open · **File**: `Picard/InvertibleSheafTensorQuasicoherent.lean` (or sibling) ·
+  **Parent**: AP2-B1a · **Type**: def + 2 lemmas
+- **Statement** (shape): `tensorSection : Γ(A, U) → Γ(B, U) → Γ(tensorObj A B, U)` — the image of
+  `a ⊗ₜ b` under the sheafification map on the presheaf tensor (whose per-open value IS
+  `Γ(A,U) ⊗ Γ(B,U)`, as used by `evPre`, `Evaluation.lean:170`); plus (i) naturality in `U`
+  (`tensorSection_restrict`) and (ii) `r • tensorSection a b = tensorSection (r • a) b`.
+- **Sketch**: `PresheafOfModules.toSheafify`-component at `U` applied to `a ⊗ₜ[Γ(T,U)] b`; both lemmas
+  from `toSheafify`'s naturality and bilinearity of `⊗ₜ`. Purely mechanical; the same constructor
+  `evPre` uses, exposed as sections API.
+- **Then the three holes**: `(m i) := tensorSection (pushforward-of-htriv-section) (e_i^∨-section)`
+  with the factors from `overSectionEquiv` (`Evaluation.lean:37`) + `dualUnitSectionsEquiv`
+  (`Dual.lean:501`); `hcompat` via `tensorSection_restrict` + cocycle cancellation; `hbij` via the
+  `bijective_evPre_app_of_triv` pattern (`PicComparison:349`) + `hp g W`.
