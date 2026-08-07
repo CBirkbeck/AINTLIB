@@ -39019,3 +39019,11 @@ perfectness). **Ready now, in parallel: AP2-A0, AP2-B1, AP-D1, AP-D3.**
 clause over all `n < card ι` per round 14; `H⁰` untouched. `lake build` green 3316 jobs; axioms on both
 projections: propext/Classical.choice/Quot.sound only. Phase 6.5 /cleanup: n/a — producer role per
 CLAUDE.md (fleet work on main). G6 re-scan: next open with met deps = AP-D1, AP2-B1, AP2-A1, AP-D3.
+
+### [AP-D1] — Status: in_progress (core landed 2026-08-07) · [AP-D2] — Status: done (2026-08-07)
+**Progress**: `WeilPairing/UnitSheaf.lean` (new): `kUnitsEval` (zero-section evaluation on units, a
+`MonoidHom`), `kUnits g hz U := (kUnitsEval …).ker` (KM p. 88 verbatim in docstring), `mem_kUnits_iff`
+(the `hnorm` shape), and **`kUnits_eq_bot` = KM (2.8.1.6), PROVED** from `eq_one_of_pullback_eq_one` —
+so AP-D2 is DONE, sorry-free, axioms standard (propext/Classical.choice/Quot.sound). Build green 3125
+jobs. AP-D1 remaining API: restriction along `U' ≤ U` and base-change along `T' ⟶ T` — needed by AP-D5/D6
+(cocycle refinement), add when those tickets fix their exact shapes. Phase 6.5 /cleanup: n/a (producer).
