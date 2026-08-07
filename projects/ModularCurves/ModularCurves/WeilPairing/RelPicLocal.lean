@@ -55,4 +55,16 @@ theorem exists_pullback_twist_of_locally {X S : Scheme.{u}} {p : X ⟶ S} {T : S
         ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N₀)) := by
   sorry
 
+/-- **(AP2-B1a, KM p. 65: "`f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`")** Over a universally `O`-connected family,
+the pullback–pushforward adjunction unit is an isomorphism on invertible modules: `N ≅ f_*f^*N`
+canonically. Mathlib supplies the adjunction (`Modules.pullbackPushforwardAdjunction`,
+`AlgebraicGeometry/Modules/Sheaf.lean:189`); `hp` is what makes its unit invertible — locally `N ≅ 𝒪`
+and on the structure sheaf the unit is exactly `hp g U : IsIso ((pullback.snd p g).app U)`. -/
+theorem isIso_pullbackPushforwardAdjunction_unit_app {X S : Scheme.{u}} {p : X ⟶ S}
+    {T : Scheme.{u}} (g : T ⟶ S) (hp : UniversallyOConnected p)
+    {N : T.Modules} (hN : IsInvertible N) :
+    IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+      (pullback.snd p g)).unit.app N) := by
+  sorry
+
 end ModularCurves
