@@ -39188,3 +39188,13 @@ sheaf-level isos, all of which exist.
 fill (m i) from `htriv i` + `localPullbackModuleIso` + `pullbackUnitIso` + `dualUnitSectionsEquiv`
 (`Dual.lean:501`); (hcompat) by cocycle cancellation; (hbij) via the `bijective_evPre_app_of_triv`
 pattern with `hp g W`.
+
+**AP2-B1a Progress** (2026-08-07, route sharpening for the 3 holes): no `tensorObj`-`restrict`
+compatibility exists in-tree, so hand-building the tensor's sections is the wrong grain. Better: the
+5000-line `AffineIntersectionUnitCocycle`/`GlueEffectivity` layer exists precisely to present an
+invertible module by transition units — and the tensor `f_*f^*N ⊗ N^∨` has the **cancelling** cocycle
+`u_ij · u_ij⁻¹ = 1`. Next move: read `affineIntersectionOriginalChartTrivialization`(+`_isCompatible`,
+`_transition`) and `affineIntersectionOriginalGluedModuleIso` (`GlueEffectivity.lean:4392/:4942/:4969/
+:5002`) — if "module with chart trivialisations and transition units `u`" ⟹ "≅ glued(`u`)" exists, the
+three holes collapse to: exhibit chart trivialisations of the tensor with transition `1`, then
+glued(triv) ≅ 𝒪. Candidate eleventh tree-already-had-it.
