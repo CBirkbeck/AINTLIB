@@ -63,7 +63,14 @@ show a * (b * c) = b * (a * c); rw [← mul_assoc, mul_comm' a b, mul_assoc]⟩`
 `dsimp only [CategoryTheory.Functor.id_obj]` after `unfold` (the `𝟭`-wrapper blocks the carrier's
 SMul instance), and `letI : Module forget₂carrier ↑Γ(A,U) := inferInstanceAs (Module ↑Γ(T,U) _)` (+ the
 `B` twin): `Γ(A,U)`'s module instance is keyed on the CommRingCat carrier, `smul_tmul'` wants the
-forget₂ one; the rings are defeq so `inferInstanceAs` bridges. -/
+forget₂ one; the rings are defeq so `inferInstanceAs` bridges. Cycle-8 finding: after those, TWO blockers remain —
+(i) `smul_tmul'` asks a MIXED `SMulCommClass forget₂ring ↑Γ(T,U) ↑Γ(A,U)` because the statement's
+`r • a` is Γ(T,U)-keyed: first rewrite `(r • a) = ((show forget₂ from r) • a)` by `rfl`, THEN
+`smul_tmul'`; (ii) the tensor carrier's `SMul forget₂ring carrier` is keyed on
+`T.ringCatSheaf.obj.obj (op U)`, not on the `(T.sheaf.obj ⋙ forget₂ …)` spelling — bridge with one more
+`inferInstanceAs`, or restate the lemmas with `r : ↑(T.ringCatSheaf.obj.obj (op U))` and add Γ-form
+`rfl`-wrappers. Consider also proving a single `tensorSection_units_cancel`
+(`tensorSection (u•x) (u⁻¹•y) = tensorSection x y`) instead — it is all `hcompat` consumes. -/
 theorem tensorSection_smul_left {T : Scheme.{u}} (A B : T.Modules) (U : T.Opens)
     (r : ↑Γ(T, U)) (a : Γ(A, U)) (b : Γ(B, U)) :
     tensorSection A B U (r • a) b = r • tensorSection A B U a b := by
