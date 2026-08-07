@@ -39320,3 +39320,8 @@ content; queued for a fresh-context `/simplify`-style pass with this full map.**
 bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,
 `PicComparison:105`, proved)). So the fresh-context instance-alignment pass on the pair unlocks BOTH
 remaining glue holes at once; compA is independent of it.
+
+**AP2-B1a-iii** (probe 16, closing the census): `rw [← smul_tmul']` also fails — rw must elaborate the
+rewrite lemma's instances before matching, hitting the same wall. The pair needs either (a) a mathlib-side
+`PresheafOfModules`-tensor smul-section lemma, or (b) an expert instance-alignment pass. 16 probes
+charted; statements green; both consumers (`hcompat` proved-conditional, `hbij` route) wired.
