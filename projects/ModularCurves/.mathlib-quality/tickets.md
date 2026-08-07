@@ -39325,3 +39325,14 @@ remaining glue holes at once; compA is independent of it.
 rewrite lemma's instances before matching, hitting the same wall. The pair needs either (a) a mathlib-side
 `PresheafOfModules`-tensor smul-section lemma, or (b) an expert instance-alignment pass. 16 probes
 charted; statements green; both consumers (`hcompat` proved-conditional, `hbij` route) wired.
+
+**AP2-A1 survey** (2026-08-07): the tree's genus-1 Riemann–Roch lives in **Weierstrass-ideal form** in
+HasseWeil (`ClassReducesToCodimLEOne` + `exists_mem_norm_natDegree_le`, `Pic0/ToClassSurjective.lean:676/:783`
+— ℓ(D) ≥ deg D for g = 1 by explicit dimension count); there is **no sheaf-level RR**, and the Čech fibre
+facts for `𝒪(n[0])` came from the pole-FILTRATION engine, not RR. **Route for A1 that avoids building
+sheaf RR**: over a *field* the Abel bijection is already proved (HasseWeil `Pic0`/`toClass` API — no
+circularity, this is the classical field case), so an arbitrary degree-one `L` on a fibre is `𝒪(P)` for a
+point `P`; then transport the pole-filtration engine from `[0]` to `P` (translation by the group law, or
+re-run the filtration at `P`). This reduces AP2-A1 to (i) the field-level `L ≅ 𝒪(P)` bridge out of
+HasseWeil's class-group vocabulary into `Modules`, and (ii) the `P`-translated pole-sheaf fibre facts —
+both concrete, neither RR-from-scratch.
