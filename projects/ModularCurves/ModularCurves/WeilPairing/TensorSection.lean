@@ -52,4 +52,24 @@ theorem tensorSection_restrict {T : Scheme.{u}} (A B : T.Modules) {U' U : T.Open
   simp only [tensorSection]
   exact h1.symm
 
+/-- Scalars move out of the first slot of `tensorSection`.
+
+Fill recipe (4 cycles spent, capped): the blocker is `TensorProduct.smul_tmul'` needing
+`SMulCommClass` over the `forget₂`-ring — supply it locally exactly as `evPre` does
+(`Picard/Evaluation.lean:178-184`, the three-line `letI : SMulCommClass … := ⟨fun a b c => by
+show a * (b * c) = b * (a * c); rw [← mul_assoc, mul_comm' a b, mul_assoc]⟩`), retype `r` by
+`show ↑((T.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (op U)) from r`, then
+`rw [key]; exact map_smul _ _ _`. -/
+theorem tensorSection_smul_left {T : Scheme.{u}} (A B : T.Modules) (U : T.Opens)
+    (r : ↑Γ(T, U)) (a : Γ(A, U)) (b : Γ(B, U)) :
+    tensorSection A B U (r • a) b = r • tensorSection A B U a b := by
+  sorry
+
+/-- Scalars move out of the second slot of `tensorSection`. Same fill recipe as
+`tensorSection_smul_left`, with `TensorProduct.smul_tmul` bridging the slots. -/
+theorem tensorSection_smul_right {T : Scheme.{u}} (A B : T.Modules) (U : T.Opens)
+    (r : ↑Γ(T, U)) (a : Γ(A, U)) (b : Γ(B, U)) :
+    tensorSection A B U a (r • b) = r • tensorSection A B U a b := by
+  sorry
+
 end ModularCurves
