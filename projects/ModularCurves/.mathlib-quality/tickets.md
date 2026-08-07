@@ -39314,3 +39314,9 @@ otherwise complete.
 ↑(A.val.obj (op U))` fails to synthesize here — the working environment in `PicComparison` differs in
 what `M.val.obj`'s ambient instance is keyed to. **14 probes; instance-alignment only, zero mathematical
 content; queued for a fresh-context `/simplify`-style pass with this full map.** Sorried green.
+
+**AP2-B1a dependency chart** (2026-08-07 final): the capped smul pair is DOUBLY load-bearing — `hcompat`
+(proved, cites it) AND `hbij` (route: `r • tensorSection a b = tensorSection (r•a) b` splits the
+bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,
+`PicComparison:105`, proved)). So the fresh-context instance-alignment pass on the pair unlocks BOTH
+remaining glue holes at once; compA is independent of it.
