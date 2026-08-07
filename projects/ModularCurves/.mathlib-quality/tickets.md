@@ -39064,3 +39064,12 @@ mutually-inverse pushforwards `f_*(M⁻¹⊗M')` / `f_*(M⊗M'⁻¹)`; the tree'
 **AP2-B1 Progress**: 2026-08-07: PHASE 4 opened; spawned AP2-B1a/AP2-B1b (Tier A2 — the pushforward
 bridge KM's proof consumes is not yet in the Modules layer; survey: only raw `SheafOfModules.pushforward`
 plumbing exists, no `f_*f^*≅id` or invertibility-of-pushforward). Parent paused at docstring recipe.
+
+**AP2-B1a Progress** (2026-08-07, route assembly): all ingredients located and verified —
+(a) structure-sheaf case: mathlib `unitToPushforwardObjUnit_val_app_apply` is `rfl` for
+"`unit per open = φ.hom.app`", tied to the adjunction unit by `PullbackFree.lean:88–111`;
+`pullbackObjUnitToUnit` inverse via the tree's `pullbackUnitIso`; per open the map is
+`(pullback.snd p g).app W`, an iso by `hp g W`. (b) invertible case: `isIso_of_bijective_app_on_cover`
+(`PicComparison.lean:838`) over the trivialising cover, transporting the unit across the trivialisation
+with `localPullbackModuleIso`/`localPullbackUnitIso` (`DualPullback.lean:259/:272`) + unit naturality.
+Route in sentinel; assembly is the remaining work.
