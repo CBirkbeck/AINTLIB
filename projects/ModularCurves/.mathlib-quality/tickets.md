@@ -39286,3 +39286,10 @@ restrictions are `rfl`-equal to `restrictOverTrivialization` homs; step (ii) `ov
 dual smul is postcomposition by `E(u)`; A picks up `u⁻¹` since its chain uses `e.inv`); `hcompat`'s
 cancellation adjusted to `Units.inv_mul`. Live sorries on the path now **4**: `glueSectionA_compat`,
 `hbij`, parent `AP2-B1`, + the smul pair in TensorSection (capped, recipe'd). Green 3329.
+
+**AP2-B1a Progress** (2026-08-07, compA anchored): `unitHomEquiv_apply_coe` is `rfl` (mathlib
+`Sheaf.lean:183`) — `glueSectionA` is `ψ.val.app (top) 1` definitionally; and the scalar-end
+intertwiners for pushing `E(u)` through ψ's chain all exist: `pullbackUnitIso_scalar`
+(`DualPullback:282`), `overEquiv_unitScalarEnd`/`_inv` (`:204`/`:292`). compA = the restricted-htriv
+`E(u)`-relation (as in compB) transported through the chain by those three intertwiners + `(pullback _).map`
+functoriality, then the `rfl` and the smul-def. All steps named; no new machinery.
