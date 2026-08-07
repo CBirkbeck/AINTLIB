@@ -39336,3 +39336,25 @@ point `P`; then transport the pole-filtration engine from `[0]` to `P` (translat
 re-run the filtration at `P`). This reduces AP2-A1 to (i) the field-level `L ≅ 𝒪(P)` bridge out of
 HasseWeil's class-group vocabulary into `Modules`, and (ii) the `P`-translated pole-sheaf fibre facts —
 both concrete, neither RR-from-scratch.
+
+## External RR assessment (2026-08-07, user-supplied): github.com/vaca22/riemann-roch-function-fields — YES, adopt for AP2-A1
+
+Surveyed (cloned to scratchpad): **full Riemann–Roch for function fields of one variable**, Lean 4,
+**sorry-free** (CI-enforced, axiom audit = standard three), **Apache-2.0** (author Guanghao Li, 2026),
+mathlib **v4.31.0**, own machinery (places, `RRspace`, adeles, Weil differentials, genus,
+`riemann_roch` / `duality` / `riemann_ineq` / `clifford`). Decisive for us — the **elliptic application
+is already there**: `EllipticCurve/GenusOne.lean: genus_eq_one` (for `WeierstrassCurve.Affine` +
+`CoordinateRing` — the SAME mathlib vocabulary as our fibres), `GenusCounting.lean:583
+zero_isCanonical_of_genus_eq_one`, and `DegreeOneDictionary.lean` (degree-one places ↔ rational
+Weierstrass points). **AP2-A1's two facts fall straight out**: `deg D = 1`, `g = 1`, `W = 0` canonical ⟹
+`ℓ(D) = 1 + ℓ(−D) = 1` (h⁰) and `i(D) = ℓ(−D) = 0` (h¹ via `duality`).
+
+**Integration constraint**: one-mathlib workspace (v4.33.0-rc1) vs their v4.31.0 ⟹ cannot Lake-dep;
+**vendor + bump** the needed subtree (`RiemannRoch/{FunctionField,RRspace,Genus,AdeleSpace,
+RiemannRochTheorem,EllipticCurve}` or the `CoordinateFree` layer) under e.g.
+`projects/ModularCurves/ModularCurves/Vendored/RiemannRoch/` **preserving Apache-2.0 attribution
+headers**. Uses the new `module`/`public import` syntax (recent-mathlib compatible). Vendoring
+third-party code into the monorepo is **structural — coordinator consult before executing**; meanwhile
+AP2-A1 proceeds by stating its interface against the two facts so the vendored RR plugs in.
+**This replaces the HasseWeil-ideal-RR bridge route** (ae5b6df24) as A1's primary plan — the
+function-field vocabulary is strictly closer to our fibres.
