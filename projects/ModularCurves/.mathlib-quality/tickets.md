@@ -39279,3 +39279,10 @@ to `preimageIso` + dictionary naturality); (iii) assembly from `overUnitScalarEn
 `trivializationTransitionUnit_restrict`'s own proof (`InvertibleSheafCocycle:158-200`), which walks the
 same three steps for the unit itself; `restrictOverTrivialization_hom_eq_comp_scalar` (cited there at
 `:187`) is the workhorse.
+
+**AP2-B1a Progress** (2026-08-07, compB PROVED): `glueSectionB_compat` closed — step (i) both
+restrictions are `rfl`-equal to `restrictOverTrivialization` homs; step (ii) `overUnitScalarEnd_transitionUnit`
++ `Iso.hom_inv_id_assoc`. **The sign algebra flipped both compat statements** (B picks up `u` since the
+dual smul is postcomposition by `E(u)`; A picks up `u⁻¹` since its chain uses `e.inv`); `hcompat`'s
+cancellation adjusted to `Units.inv_mul`. Live sorries on the path now **4**: `glueSectionA_compat`,
+`hbij`, parent `AP2-B1`, + the smul pair in TensorSection (capped, recipe'd). Green 3329.
