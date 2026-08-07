@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import ModularCurves.Picard.DualPullback
 import ModularCurves.WeilPairing.TensorSection
 import ModularCurves.WeilPairing.UnitSheaf
 import ModularCurves.Picard.InvertibleSheafBaseCechFlat
@@ -80,10 +81,30 @@ theorem nonempty_tensorObj_pushforwardPullback_dualObj_unitObj {X S : Scheme.{u}
   -- (m i): the generating section over V i — `tensorSection sA sB` per the board plan.
   · have sA : ↑Γ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
         ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N), V i) := by
-      -- rfl-equal to Γ(f^*N, f⁻¹(V i)); image of 1 under
-      -- localPullbackModuleIso ≪≫ mapIso (htriv i).some ≪≫ pullbackUnitIso, through the
-      -- over/restrict section dictionaries.
-      sorry
+      -- rfl-equal to Γ(f^*N, f⁻¹(V i)): the unit-hom from `htriv i` through the pullback
+      -- dictionaries, read as a section at the top of the over-site.
+      have ψ : _root_.SheafOfModules.unit
+            ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ V i)) ⟶
+          ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N).over
+            (pullback.snd p g ⁻¹ᵁ V i) :=
+        (AlgebraicGeometry.Scheme.Modules.overEquiv
+            (pullback.snd p g ⁻¹ᵁ V i)).functor.preimage
+          (((pullback.snd p g ⁻¹ᵁ V i).sheafOfModulesEquivOverUnit
+              (pullback p g).ringCatSheaf).hom ≫
+            (AlgebraicGeometry.Scheme.Modules.pullbackUnitIso
+              (pullback.snd p g ∣_ V i)).inv ≫
+            (AlgebraicGeometry.Scheme.Modules.pullback
+              (pullback.snd p g ∣_ V i)).map ((htriv i).some.inv) ≫
+            (AlgebraicGeometry.Scheme.Modules.pullback
+              (pullback.snd p g ∣_ V i)).map
+              (((AlgebraicGeometry.Scheme.Modules.overFunctorEquiv (V i)).app N ≪≫
+                (AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
+                  (V i).ι).app N).inv) ≫
+            (AlgebraicGeometry.Scheme.Modules.localPullbackModuleIso
+              (pullback.snd p g) N (V i)).hom)
+      exact ((((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N).over
+        (pullback.snd p g ⁻¹ᵁ V i)).unitHomEquiv ψ).val
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 (pullback.snd p g ⁻¹ᵁ V i))))
     have sB : ↑Γ(AlgebraicGeometry.Scheme.Modules.dualObj N, V i) := by
       -- `Γ(dualObj N, V i)` is definitionally the Hom-type `N.over (V i) ⟶ unit`; the functional is
       -- `htriv i` read through the over/pullback dictionaries.
