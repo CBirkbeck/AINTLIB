@@ -39233,6 +39233,24 @@ by the glueSectionA/adjUnit pattern), with `IsOfficialCartier`-fields discharged
 B3's real content). NEXT SEGMENT: read CartierDivisor.lean:76-115 + :812-1000 in full, then state
 B2 in `EllipticCurve/AbelEquivalence.lean`.
 
+**AP2-B2 Progress** (2026-08-08 late): `EllipticCurve/AbelEquivalence.lean` now carries the
+evaluation-divisor construction with only THREE sorries, all named and scoped:
+(1) **`exists_dualRestrict_eq_pow_smul`** — "dual sections localize" (the sv2 gap; mathlib has no
+sections-over-basic-opens localization for quasi-coherent modules — its qcoh is presentation-based;
+route in the docstring: refine trivialising cover by basic opens on the quasi-compact affine, use
+`span_range_eval_eq_of_trivialization` per piece, glue by the sheaf condition after clearing
+denominators — Hartshorne II.5.1(b) shape). Everything else in `sectionVanishingIdeal` is PROVED:
+`map_ideal_basicOpen` ⊆ (Ideal.map_span + dualRestrict dictionary + naturality) and ⊇ (sv2 +
+`eval_dualRestrict` + `eval_smul` + unit-inverse clearing); plus **sv1**
+`span_range_eval_eq_of_trivialization` (evaluation ideal is principal on trivialising opens, via
+`dualTrivializationLinearEquiv`).
+(2) `exists_relEffCartierDiv_of_degreeOne` — the B2 head (finite/flat/lfp fields + PIN-1 iso).
+(3) `relEffCartierDiv_degree_one_of_degreeOne` — the B3 degree.
+Instance lessons added: scalars on dual sections must be spelled in the **ringCatSheaf carrier**
+(`↑(E.ringCatSheaf.obj.obj (op V))`), not `↑Γ(E,V)`, or `HSMul`/`HMul` synthesis fails; `rfl`-anchor
+`have` beats `rw [overUnitScalarEnd_app_apply]` at the transparency wall; `Ideal.mul_mem_left`
+avoids the `IsTwoSided` instance search that `mul_mem_right` triggers.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
