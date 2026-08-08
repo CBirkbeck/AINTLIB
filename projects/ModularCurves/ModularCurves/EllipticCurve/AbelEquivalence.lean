@@ -201,7 +201,40 @@ theorem exists_pow_smul_eq_restrict_of_trivial {E : Scheme.{u}} (N : E.Modules)
     ∃ (n : ℕ) (s : ↑Γ(N, V.1)),
       N.presheaf.map (homOfLE (E.basicOpen_le f)).op s =
         (E.presheaf.map (homOfLE (E.basicOpen_le f)).op f) ^ n • s' := by
-  sorry
+  obtain ⟨e0⟩ := e
+  set ψV : N.over V.1 ≅ _root_.SheafOfModules.unit (E.ringCatSheaf.over V.1) :=
+    overTrivializationOfRestrictIso N V.1 (restrictIsoOfPullbackIso N V.1 e0) with hψV
+  set ψf : N.over (E.basicOpen f) ≅
+      _root_.SheafOfModules.unit (E.ringCatSheaf.over (E.basicOpen f)) :=
+    ModularCurves.SheafOfModules.restrictOverTrivialization E.ringCatSheaf N V.1 ψV
+      (CategoryTheory.Over.mk (homOfLE (E.basicOpen_le f))) with hψf
+  set τV := sectionsLinearEquivOfTrivialization N V.1 ψV with hτV
+  set τf := sectionsLinearEquivOfTrivialization N (E.basicOpen f) ψf with hτf
+  haveI := V.2.isLocalization_basicOpen f
+  obtain ⟨n, a, hna⟩ := IsLocalization.Away.surj (S := ↑Γ(E, E.basicOpen f)) f (τf s')
+  refine ⟨n, τV.symm a, ?_⟩
+  apply τf.injective
+  have hL : τf (N.presheaf.map (homOfLE (E.basicOpen_le f)).op (τV.symm a)) =
+      E.presheaf.map (homOfLE (E.basicOpen_le f)).op a := by
+    have h1 : τf (N.presheaf.map (homOfLE (E.basicOpen_le f)).op (τV.symm a)) =
+        ModularCurves.SheafOfModules.evalSection E.ringCatSheaf N (E.basicOpen f)
+          (ModularCurves.SheafOfModules.restrictOverTrivialization E.ringCatSheaf N V.1 ψV
+            (CategoryTheory.Over.mk (homOfLE (E.basicOpen_le f)))).hom
+          (N.presheaf.map (homOfLE (E.basicOpen_le f)).op (τV.symm a)) := rfl
+    rw [h1, evalSection_restrictOverTrivialization N V.1 ψV (E.basicOpen_le f) (τV.symm a)]
+    exact congrArg (fun z ↦ E.presheaf.map (homOfLE (E.basicOpen_le f)).op z)
+      (τV.apply_symm_apply a)
+  have hR : τf ((E.presheaf.map (homOfLE (E.basicOpen_le f)).op f) ^ n • s') =
+      (show ↑(E.ringCatSheaf.obj.obj (Opposite.op (E.basicOpen f))) from
+        (E.presheaf.map (homOfLE (E.basicOpen_le f)).op f) ^ n) * τf s' :=
+    ModularCurves.SheafOfModules.evalSection_smul_right E.ringCatSheaf N
+      (E.basicOpen f) ψf.hom _ s'
+  rw [hL, hR]
+  have halg : ∀ x : ↑Γ(E, V.1),
+      (algebraMap ↑Γ(E, V.1) ↑Γ(E, E.basicOpen f)) x =
+        E.presheaf.map (homOfLE (E.basicOpen_le f)).op x := fun x ↦ rfl
+  rw [halg, halg] at hna
+  exact hna.symm.trans (mul_comm _ _)
 
 /-- **(sv2-core, the remaining gap — sections of an invertible module localize)** On an
 affine open, a section over a basic open becomes, after multiplication by a power of the
