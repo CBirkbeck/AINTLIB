@@ -38881,6 +38881,12 @@ in the plan's "Known traps".
 - **Proof sketch**: KM (2.8.1.7) specialised to the self-dual `π = [N]`. The `⊆` direction **is** the
   tree's `(★′)` `picMap_mulByHom_kappa_eq_one` (`SelfAdjointN.lean:497`); the `⊇` direction is Abel
   (AP-B3) applied to a class killed by `[N]^*`.
+- **⚠ AXIOM AUDIT (2026-08-08)**: `picMap_mulByHom_kappa_eq_one` **depends on `sorryAx`** — it is not
+  actually proved, it inherits a `sorry` from its dependency chain. So AP-D4's `⊆` direction is *not*
+  available as claimed; before working AP-D4, bisect that chain with `#print axioms` (candidates: the
+  known file-level sorries in `WeierstrassModel.lean:2986`, `GroupLaw.lean:80/85`,
+  `CartierDivisor.lean:2050/2858`) and either discharge the leaf or restate the ticket. This is the
+  "sorry greps lie; `#print axioms` doesn't" pattern — `SelfAdjointN.lean` itself may show no `sorry`.
 - **Sources**: KM (2.8.1.7), p. 88; self-duality of `[N]` is KM 2.6.2.1.
 
 ### [AP-D5] the unique factorisation `f_{i,j} ∘ [N] = h_i / h_j`
