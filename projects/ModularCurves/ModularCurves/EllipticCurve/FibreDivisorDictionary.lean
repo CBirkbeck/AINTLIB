@@ -187,6 +187,62 @@ theorem exists_sub_of_memRRspaceOn_inter {D : DivisorA k K}
 
 end Split
 
+section ChartPlaces
+
+/-- The finite places — the points of the affine (`Z`-)chart of the projective Weierstrass
+model, as coordinate places. -/
+def finitePlaces : Set (PlaceA k K) := Set.range Sum.inl
+
+/-- **(`AP2-A1a-i`)** The trivial-divisor `finitePlaces` bound carves out exactly the ring of
+integers: `⋂_{v finite} O_v = ringOfIntegers` inside `K`. Forward is
+`mem_integers_of_valuation_le_one` (Dedekind), backward is integrality of the image. -/
+theorem memRRspaceOn_finitePlaces_zero_iff (f : K) :
+    memRRspaceOn k K (finitePlaces k K) 0 f ↔
+      f ∈ (algebraMap (ringOfIntegers k K) K).range := by
+  constructor
+  · intro hf
+    apply IsDedekindDomain.HeightOneSpectrum.mem_integers_of_valuation_le_one
+    intro v
+    have h := hf (Sum.inl v) ⟨v, rfl⟩
+    simpa [placeValuation] using h
+  · rintro ⟨g, rfl⟩ v hv
+    obtain ⟨v, rfl⟩ := hv
+    simpa [placeValuation] using
+      IsDedekindDomain.HeightOneSpectrum.valuation_le_one (K := K) v g
+
+variable {k K}
+variable (W : WeierstrassCurve.Affine k) [W.IsElliptic]
+variable [Algebra W.CoordinateRing K] [IsFractionRing W.CoordinateRing K]
+  [IsScalarTower k[X] W.CoordinateRing K]
+
+/-- The vendored integral-closure identification commutes with the maps to `K`:
+`algebraMap (ringOfIntegers) K (coordinateRingEquivIntegers r) = algebraMap CoordinateRing K r`. -/
+theorem algebraMap_coordinateRingEquivIntegers (r : W.CoordinateRing) :
+    algebraMap (ringOfIntegers k K) K
+        (WeierstrassCurve.Affine.Chart.coordinateRingEquivIntegers W K r) =
+      algebraMap W.CoordinateRing K r := by
+  have hemb := IsIntegralClosure.algebraMap_equiv k[X] W.CoordinateRing K
+    (ringOfIntegers k K) r
+  exact hemb
+
+/-- **(`AP2-A1a-i`, coordinate-ring form)** The finite-place bound carves out the coordinate
+ring of the affine Weierstrass chart, through the vendored integral-closure identification. -/
+theorem memRRspaceOn_finitePlaces_zero_iff_coordinateRing (f : K) :
+    memRRspaceOn k K (finitePlaces k K) 0 f ↔
+      f ∈ (algebraMap W.CoordinateRing K).range := by
+  rw [memRRspaceOn_finitePlaces_zero_iff]
+  constructor
+  · rintro ⟨g, rfl⟩
+    refine ⟨(WeierstrassCurve.Affine.Chart.coordinateRingEquivIntegers W K).symm g, ?_⟩
+    rw [← algebraMap_coordinateRingEquivIntegers W
+      ((WeierstrassCurve.Affine.Chart.coordinateRingEquivIntegers W K).symm g),
+      AlgEquiv.apply_symm_apply]
+  · rintro ⟨g, rfl⟩
+    exact ⟨WeierstrassCurve.Affine.Chart.coordinateRingEquivIntegers W K g,
+      algebraMap_coordinateRingEquivIntegers W g⟩
+
+end ChartPlaces
+
 end FibreRR
 
 end ModularCurves

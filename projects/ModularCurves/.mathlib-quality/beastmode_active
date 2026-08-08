@@ -1,1 +1,1 @@
-FOCUS: AP2-A1 — A1b-core+A1c PROVED (FibreDivisorDictionary green, axiom-verified). NEXT: A1a chart-section dictionary (Γ(chartZ/Y, M) ↔ memRRspaceOn) — recon chartYSectionsEquiv/chartZSectionsEquiv + place-set defs
+FOCUS: AP2-A1a — Z-chart zero-divisor dictionary PROVED (memRRspaceOn_finitePlaces_zero_iff + _coordinateRing). NEXT: D-twisted finite-chart dictionary (FractionalIdeal.divisor route, vendored PicTorsorCore) + Y-side places
