@@ -974,7 +974,71 @@ theorem nonempty_discrepancy_iso_pullback_pushforward {X S : Scheme.{u}} {p : X 
           rw [hsolve]
           infer_instance
         -- (m1)-(m3): transport through the composed adjunctions
-        sorry
+        have h590 := Adjunction.comp_counit_app
+          (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (pullback.snd p g))
+          (AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+            (pullback.snd p g ⁻¹ᵁ U i).ι)
+          ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))
+        have hLU := Adjunction.leftAdjointUniq_hom_app_counit
+          ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (pullback.snd p g)).comp
+            (AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+              (pullback.snd p g ⁻¹ᵁ U i).ι))
+          (((AlgebraicGeometry.Scheme.Modules.restrictAdjunction (U i).ι).comp
+            (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+              (pullback.snd p g ∣_ U i))).ofNatIsoRight
+            (AlgebraicGeometry.Scheme.Modules.openPushforwardSquareIsoT
+              (pullback.snd p g) (U i)))
+          ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))
+        have hof : ((((AlgebraicGeometry.Scheme.Modules.restrictAdjunction (U i).ι).comp
+            (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+              (pullback.snd p g ∣_ U i))).ofNatIsoRight
+            (AlgebraicGeometry.Scheme.Modules.openPushforwardSquareIsoT
+              (pullback.snd p g) (U i))).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+              (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))) =
+            ((AlgebraicGeometry.Scheme.Modules.restrictFunctor (U i).ι ⋙
+              AlgebraicGeometry.Scheme.Modules.pullback
+                (pullback.snd p g ∣_ U i)).map
+              ((AlgebraicGeometry.Scheme.Modules.openPushforwardSquareIsoT
+                (pullback.snd p g) (U i)).inv.app
+                ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+                  (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M'))))) ≫
+            (((AlgebraicGeometry.Scheme.Modules.restrictAdjunction (U i).ι).comp
+              (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+                (pullback.snd p g ∣_ U i))).counit.app
+              ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+                (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))) := rfl
+        have hcompL := Adjunction.comp_counit_app
+          (AlgebraicGeometry.Scheme.Modules.restrictAdjunction (U i).ι)
+          (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (pullback.snd p g ∣_ U i))
+          ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))
+        haveI hlocal' : IsIso ((((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+            (U i).ι).comp
+            (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+              (pullback.snd p g ∣_ U i))).ofNatIsoRight
+            (AlgebraicGeometry.Scheme.Modules.openPushforwardSquareIsoT
+              (pullback.snd p g) (U i))).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+              (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))) := by
+          rw [hof, hcompL]
+          infer_instance
+        haveI hglobal : IsIso (((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (pullback.snd p g)).comp
+            (AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+              (pullback.snd p g ⁻¹ᵁ U i).ι)).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+              (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))) := by
+          rw [← hLU]
+          infer_instance
+        have hsolve2 := (IsIso.eq_comp_inv _).mpr h590.symm
+        rw [hsolve2]
+        infer_instance
       -- the composed functor's map of the unit is an isomorphism after restriction
       have hGFu : IsIso ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
           (pullback.snd p g ⁻¹ᵁ U i).ι).map

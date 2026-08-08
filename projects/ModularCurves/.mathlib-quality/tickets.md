@@ -39658,6 +39658,19 @@ Then components: `Hom.isIso_iff_isIso_app`.mp on the restricted map + the rfl-di
 `restrictFunctor_map_app_apply` + ι''ι⁻¹W = W (W ≤ piece) + `ConcreteCategory.isIso_iff_bijective`.
 CAUTION: hploc/hglue-conjugation of a counit needs counit-NATURALITY squares only (no mates).
 
+## **AP2-B1 COMPLETE** (2026-08-08) — `exists_pullback_twist_of_locally` PROVED, zero sorries on the line
+
+KM p. 65's Zariski-locality of the relative Picard equivalence, end to end, axiom-verified
+standard-three: `nonempty_pushforwardPullback_iso` (KM core `f_*f^*N ≅ N`, via the adjunction unit +
+`isIso_of_bijective_app_on_cover`), `isInvertible_pushforward_discrepancy` (P-invertible, via the new
+`IsInvertible.of_restrict_cover` + Skeleton-algebra P-local `nonempty_pullback_discrepancy_iso`),
+`nonempty_discrepancy_iso_pullback_pushforward` (P-counit: hres = hfac counit-naturality factorisation
++ hu triangle + hGFu double square-conjugation + hmid piece-counit m1-m4 through
+`Adjunction.comp_counit_app` / `leftAdjointUniq_hom_app_counit` / `ofNatIsoRight`-rfl + s5 components),
+and the parent by Picard-group algebra. Supporting new API: q-generalized glueSection line,
+`isIso_pullbackPushforwardAdjunction_unit_app`, `IsInvertible.of_restrict_cover`. The hres proof is a
+reusable TEMPLATE for open-base-change-of-adjunction arguments.
+
 **AP2-B1a dependency chart** (2026-08-07 final): the capped smul pair is DOUBLY load-bearing — `hcompat`
 (proved, cites it) AND `hbij` (route: `r • tensorSection a b = tensorSection (r•a) b` splits the
 bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,
