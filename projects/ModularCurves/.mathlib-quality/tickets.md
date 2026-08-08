@@ -39470,6 +39470,18 @@ lemma). Technique notes: the tree's `_symm` states a product `= 1` (not an inver
 (practical criterion). Pre-existing and used: `kUnitsEval`, `kUnits`, `mem_kUnits_iff`,
 `kUnits_eq_bot` (= AP-D2's `H⁰ = 1`), `kUnits_restrict_mem`.
 
+**AP-D3 CONSUMABLE FORM COMPLETE** (2026-08-08): nine lemmas, all standard-three, in
+`WeilPairing/UnitSheaf.lean`. The last, `forall_transitionUnit_mem_kUnits_of_eval_const`, is the
+family-level statement AP-D6's patching consumes: a family of trivialisations whose zero-section
+evaluations against a fixed reference agree has *all* transition units in `K_E^×`. With
+`kUnits_eq_bot` (AP-D2) and the coboundary formula this is the entire interface KM pp. 88–89 uses,
+so **AP-D3 can be treated as satisfied for downstream purposes**; the abstract `Pic ≅ H¹(K^×)`
+statement is deliberately not formalised (KM cites [K5] for it and never uses more than the above).
+Recommended: mark AP-D3 done-for-consumers and open AP-D5 (`f_{i,j} ∘ [N] = h_i/h_j` uniqueness,
+which needs AP-D2 + this interface) as the next `AP-D` ticket. Technique for this file: pin the
+base-change morphism `(g := g)` and prefer tactic mode — term-mode applications hit `isDefEq`
+timeouts here.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
