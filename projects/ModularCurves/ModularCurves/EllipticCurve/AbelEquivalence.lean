@@ -44,6 +44,94 @@ local instance (X : Scheme.{u}) :
     change IsMulCommutative (X.presheaf.obj U)
     exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
 
+/-- Evaluation against a fixed section is natural: evaluating the restricted functional is
+restricting the evaluation. -/
+theorem eval_dualRestrict {E : Scheme.{u}} (M : E.Modules) (σ : ↑Γ(M, ⊤))
+    {U V : E.Opens} (h : V ≤ U)
+    (φ : M.over U ⟶ _root_.SheafOfModules.unit (E.ringCatSheaf.over U)) :
+    (ModularCurves.SheafOfModules.dualRestrict E.ringCatSheaf M
+        (show Opposite.op U ⟶ Opposite.op V from (homOfLE h).op) φ).val.app
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 V)))
+        (show (M.over V).val.obj (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) from
+          M.presheaf.map (homOfLE le_top).op σ) =
+      E.presheaf.map (homOfLE h).op
+        (show ↑Γ(E, U) from φ.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 U)))
+          (show (M.over U).val.obj (Opposite.op (CategoryTheory.Over.mk (𝟙 U))) from
+            M.presheaf.map (homOfLE le_top).op σ)) := by
+  have hσ : (M.presheaf.map (homOfLE h).op)
+      ((M.presheaf.map (homOfLE (le_top : U ≤ ⊤)).op) σ) =
+      (M.presheaf.map (homOfLE (le_top : V ≤ ⊤)).op) σ := by
+    rw [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+    exact congrArg (fun q ↦ (ConcreteCategory.hom (M.presheaf.map
+      (Quiver.Hom.op q))) σ) (Subsingleton.elim _ _)
+  have hnat := PresheafOfModules.naturality_apply φ.val
+    (CategoryTheory.Over.mkIdTerminal.from (CategoryTheory.Over.mk (homOfLE h))).op
+    (show (M.over U).val.obj (Opposite.op (CategoryTheory.Over.mk (𝟙 U))) from
+      M.presheaf.map (homOfLE (le_top : U ≤ ⊤)).op σ)
+  simp only [ModularCurves.SheafOfModules.dualRestrict_app_apply]
+  exact (congrArg (fun z ↦ φ.val.app (Opposite.op ((CategoryTheory.Over.map
+    (homOfLE h)).obj (CategoryTheory.Over.mk (𝟙 V)))) z) hσ.symm).trans hnat
+
+/-- Evaluation is semilinear for the dual's scalar action: the scalar comes out as a ring
+multiple (the scalar endomorphism acts by multiplication at the terminal object). -/
+theorem eval_smul {E : Scheme.{u}} (M : E.Modules) (V : E.Opens)
+    (r : ↑(E.ringCatSheaf.obj.obj (Opposite.op V)))
+    (ψ : M.over V ⟶ _root_.SheafOfModules.unit (E.ringCatSheaf.over V))
+    (x : (M.over V).val.obj (Opposite.op (CategoryTheory.Over.mk (𝟙 V)))) :
+    letI := ModularCurves.SheafOfModules.dualSectionsModule E.ringCatSheaf M V
+    ((r • ψ).val.app
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x) =
+      (show ↑(E.ringCatSheaf.obj.obj (Opposite.op V)) from ψ.val.app
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x) * r := by
+  letI := ModularCurves.SheafOfModules.dualSectionsModule E.ringCatSheaf M V
+  have hcomp : (r • ψ) = ψ ≫ ModularCurves.SheafOfModules.overUnitScalarEnd
+    E.ringCatSheaf V r := rfl
+  rw [hcomp]
+  have hsplit : (ψ ≫ ModularCurves.SheafOfModules.overUnitScalarEnd
+      E.ringCatSheaf V r).val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x =
+      (ModularCurves.SheafOfModules.overUnitScalarEnd E.ringCatSheaf V r).val.app
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 V)))
+        (ψ.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x) := rfl
+  rw [hsplit]
+  have h0 : (ModularCurves.SheafOfModules.overUnitScalarEnd E.ringCatSheaf V r).val.app
+      (Opposite.op (CategoryTheory.Over.mk (𝟙 V)))
+      (ψ.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x) =
+      (show ↑(E.ringCatSheaf.obj.obj (Opposite.op V)) from ψ.val.app
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x) *
+      (show ↑(E.ringCatSheaf.obj.obj (Opposite.op V)) from
+        E.ringCatSheaf.obj.map (𝟙 V).op r) := rfl
+  rw [h0]
+  refine congrArg (fun z ↦ (show ↑(E.ringCatSheaf.obj.obj (Opposite.op V)) from ψ.val.app
+    (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x) * z) ?_
+  show E.ringCatSheaf.obj.map (𝟙 V).op r = r
+  rw [CategoryTheory.op_id, CategoryTheory.Functor.map_id]
+  rfl
+
+/-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
+over a basic open is, up to a power of the defining section, the restriction of a functional
+on the ambient affine open. This is quasi-coherence of `dualObj M` in its concrete
+away-localization form; mathlib's quasi-coherence is presentation-based and has no
+sections-over-basic-opens localization lemma (board note 2026-08-08), so this is the one
+genuine gap left in the `AP2-B2` construction. Route: refine the trivialising cover of `U`
+by basic opens (affine `U` is quasi-compact), apply `span_range_eval_eq_of_trivialization`
+on each piece, and glue the resulting local preimages by the sheaf condition after clearing
+denominators (Hartshorne II.5.1(b)-style; the standard argument for f.p. quasi-coherent
+Hom-sheaves). -/
+theorem exists_dualRestrict_eq_pow_smul {E : Scheme.{u}} (M : E.Modules)
+    (hM : IsInvertible M) (U : E.affineOpens) (f : ↑Γ(E, U.1))
+    (φ' : M.over (E.basicOpen f) ⟶
+      _root_.SheafOfModules.unit (E.ringCatSheaf.over (E.basicOpen f))) :
+    ∃ (n : ℕ) (φ : M.over U.1 ⟶
+        _root_.SheafOfModules.unit (E.ringCatSheaf.over U.1)),
+      letI := ModularCurves.SheafOfModules.dualSectionsModule E.ringCatSheaf M
+        (E.basicOpen f)
+      ModularCurves.SheafOfModules.dualRestrict E.ringCatSheaf M
+        (show Opposite.op U.1 ⟶ Opposite.op (E.basicOpen f) from
+          (homOfLE (E.basicOpen_le f)).op) φ =
+      ((show ↑(E.ringCatSheaf.obj.obj (Opposite.op (E.basicOpen f))) from
+        E.presheaf.map (homOfLE (E.basicOpen_le f)).op f) ^ n) • φ' := by
+  sorry
+
 /-- **(sv1)** On a trivialising open the evaluation ideal of `σ` is principal, generated by
 the trivialisation's own evaluation: every functional is `t.hom ≫ E(r)`
 (`dualTrivializationLinearEquiv`), and evaluation turns the scalar action into ring
@@ -82,7 +170,8 @@ trivialising open this is the principal ideal of the trivialised value of `σ`; 
 basic-open compatibility is checked at maximal ideals through trivialising basic opens
 (`Ideal.mem_of_localization_maximal` — board note 2026-08-08, no quasi-coherent
 localization needed). -/
-noncomputable def sectionVanishingIdeal {E : Scheme.{u}} (M : E.Modules) (σ : ↑Γ(M, ⊤)) :
+noncomputable def sectionVanishingIdeal {E : Scheme.{u}} (M : E.Modules)
+    (hM : IsInvertible M) (σ : ↑Γ(M, ⊤)) :
     E.IdealSheafData where
   ideal U := Ideal.span (Set.range fun φ : M.over U.1 ⟶
       _root_.SheafOfModules.unit (E.ringCatSheaf.over U.1) =>
