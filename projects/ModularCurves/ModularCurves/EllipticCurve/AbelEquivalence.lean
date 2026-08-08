@@ -440,6 +440,14 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
     ⟨Finset.univ.sup fun p : {g // g ∈ t} × {g // g ∈ t} ↦ k p.1 p.2,
       fun g g' ↦ Finset.le_sup (f := fun p : {g // g ∈ t} × {g // g ∈ t} ↦ k p.1 p.2)
         (Finset.mem_univ (g, g'))⟩
+  -- the twice-rescaled pieces
+  set w : ∀ g : {g // g ∈ t}, ↑Γ(N, E.basicOpen g.1) := fun g ↦
+    (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f) ^ K • v g with hw
+  -- they agree on overlaps, on the nose
+  have hcompat : ∀ g g' : {g // g ∈ t},
+      N.presheaf.map (Opens.infLELeft (E.basicOpen g.1) (E.basicOpen g'.1)).op (w g) =
+      N.presheaf.map (Opens.infLERight (E.basicOpen g.1) (E.basicOpen g'.1)).op (w g') := by
+    sorry
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
