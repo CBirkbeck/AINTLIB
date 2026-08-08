@@ -115,7 +115,7 @@ Proof: lift a `k`-basis `w` of `k ⊗ N` to a family `v` in `N` (minimal generat
 linearly independent over `R`.  As `v` generates `N` (`IsLocalRing.span_eq_top_of_tmul_eq_basis`),
 `Finsupp.linearCombination R v` is surjective, while `Finsupp.linearCombination R (u ∘ v) =
 u ∘ₗ Finsupp.linearCombination R v` is injective; together these force `u` injective. -/
-private theorem injective_of_lTensor_residueField_injective (u : N →ₗ[R] M)
+theorem injective_of_lTensor_residueField_injective (u : N →ₗ[R] M)
     (hbar : Function.Injective (LinearMap.lTensor (IsLocalRing.ResidueField R) u)) :
     Function.Injective u := by
   classical

@@ -770,6 +770,19 @@ theorem mem_nonZeroDivisors_iff_injective_mulRight {A : Type u} [CommRing A] (f 
   · intro hinj
     exact mem_nonZeroDivisors_of_mul_injective hinj
 
+/-- **(B2-head, step 3d)** The local form of KM's reduction, fully assembled: over a
+Noetherian *local* ring whose residue-field fibre sees the element as a nonzerodivisor, the
+element is a nonzerodivisor. This is `injective_of_lTensor_residueField_injective`'s
+R-substrate core (verified axiom-clean; the `_sModule` variant in that file is sorried and
+must not be used) packaged through the multiplication-map characterisation. -/
+theorem mem_nonZeroDivisors_of_residueField_fibre_injective {A : Type u} [CommRing A]
+    [IsLocalRing A] [IsNoetherianRing A] (f : A)
+    (hbar : Function.Injective (LinearMap.lTensor
+      (A ⧸ IsLocalRing.maximalIdeal A) (mulRightLinearMap f))) :
+    f ∈ nonZeroDivisors A := by
+  refine (mem_nonZeroDivisors_iff_injective_mulRight f).mpr ?_
+  exact Module.Flat.injective_of_lTensor_residueField_injective (mulRightLinearMap f) hbar
+
 /-- **(B2-head, step 3 = the fibre input, KM p. 66)** A local generator of the vanishing
 ideal of the distinguished section is a nonzerodivisor: *"we are reduced to the case
 `S = Spec(k)` with `k` a field, and `ℓ ∈ H⁰(E,L)` a `k`-basis, so non-zero, in which case
