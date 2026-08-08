@@ -38857,7 +38857,11 @@ in the plan's "Known traps".
 - **Sources**: KM (2.8.1.6), p. 88.
 
 ### [AP-D3] `Pic(E/S) ≅ H¹(E, K_E^×)`
-- **Status**: open (AP-D1 done; bibliography resolved 2026-08-08 — see Sources: [K5] is not needed) · **File**: `WeilPairing/UnitSheaf.lean` · **Type**: theorem
+- **Status**: **in_progress — consumable form largely DONE (2026-08-08)**: eight lemmas proved
+  standard-three in `WeilPairing/UnitSheaf.lean`, culminating in `kUnitsEval_transitionUnit_eq_div'`
+  (KM's coboundary formula `f_{i,j} ∘ π = h_i / h_j`, p. 88). [K5] not needed — bibliography resolved
+  from `refs/`. Remaining: the existence/rescaling statement (choose a normalized representative of a
+  family), which AP-D6's patching consumes. · **File**: `WeilPairing/UnitSheaf.lean` · **Type**: theorem
 - **Sources**: KM (2.8.1.5), p. 88, citing **[K5 §5, esp. 5.2, pp. 186–187]**. **Bibliography resolved
   (2026-08-08, read from refs/): the citation is decorative — KM p. 88 states `Pic(E/S) ≅ H¹(E, K_E^×)`
   and `H⁰(E, K_E^×) = {1}` and then uses ONLY the cocycle consequence** (a normalized cocycle
@@ -39457,6 +39461,14 @@ existence statement — rescale a family of trivialisations so that all its tran
 normalized (divide `e i` by its own zero-section value; the ratios cancel by the multiplicativity
 lemma). Technique notes: the tree's `_symm` states a product `= 1` (not an inverse), so use forward
 `congrArg` reasoning; pin the base-change morphism implicitly (`(g := g)`) to avoid elaboration blowup.
+
+**AP-D3 lemma inventory** (2026-08-08, all standard-three, `WeilPairing/UnitSheaf.lean`):
+`kUnitsEval_transitionUnit_eq_div` (multiplicativity), `kUnitsEval_transitionUnit_eq_div'`
+(**the coboundary formula**), `transitionUnit_mem_kUnits_iff` (membership test),
+`transitionUnit_self/symm/trans_mem_kUnits` (normalization is an equivalence relation),
+`transitionUnit_trans_eq_mul` (cocycle product), `transitionUnit_mem_kUnits_of_eval_eq`
+(practical criterion). Pre-existing and used: `kUnitsEval`, `kUnits`, `mem_kUnits_iff`,
+`kUnits_eq_bot` (= AP-D2's `H⁰ = 1`), `kUnits_restrict_mem`.
 
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
