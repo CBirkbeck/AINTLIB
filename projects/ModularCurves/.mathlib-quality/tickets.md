@@ -39267,6 +39267,21 @@ section) and `exists_dualRestrict_eq_pow_smul` are now fully proved and standard
 AP2-B2/B3: the two head theorems only — `exists_relEffCartierDiv_of_degreeOne` (divisor fields +
 PIN-1 ideal-module iso) and `relEffCartierDiv_degree_one_of_degreeOne`.
 
+**AP2-B2 head progress** (2026-08-08, after the gap closed): two head components PROVED —
+`exists_generating_globalSection` (A2 invertibility of `baseSections`, i.e. KM's basis `ℓ` exists) and
+`sectionVanishingIdeal_locally_span` (the evaluation ideal is affine-locally principal: affine-opens
+basis in nbhd form + `restrictTrivialization` + sv1). REMAINING for `exists_relEffCartierDiv_of_degreeOne`:
+(h-a) the NONZERODIVISOR property of the local generator — this is the b2-ii fibre input (over a fibre
+field the trivialised section is a nonzero element of a domain, so multiplication by it is injective;
+`IsIntegral` instances at `GroupLawAxioms.lean:102-129`, mathlib `map_injective_of_isIntegral`), lifted
+off the fibres by the Stacks-00ME criterion in `ForMathlib/LocalFlatnessCriterion.lean`;
+(h-b) the `RelEffCartierDiv` fields `finite`/`flat`/`lfp` for the subscheme of that ideal — model:
+`CartierDivisor.lean`'s `sectionDivisor` (:172) transports them from `IsIso z.toImage`; here they must
+come from properness of `π` + finiteness of the fibres (degree one), i.e. from the same fibre package;
+(h-c) the PIN-1 iso `idealModule D.ideal ≅ f^*(f_*M) ⊗ M^∨` — from sv1-principality (the ideal is the
+image of the evaluation `M^∨ → 𝒪`) plus `IsInvertible.dual`; note `Picard/IdealModule.lean`'s
+`idealGenHom`/`bijective_idealGenHom_app` (:240/:309) is exactly the local comparison needed.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
