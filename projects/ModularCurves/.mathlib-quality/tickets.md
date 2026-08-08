@@ -39188,6 +39188,26 @@ consumers need non-noetherian bases.
   66–67 verbatim ("reduced to the case `S = Spec(k)` … the assertion is obvious").
 - **Sources**: KM pp. 66–67.
 
+**AP2-B2 KM-transcription** (2026-08-08, read from refs/ModularCurves/katz-mazur pp. 66-67 verbatim):
+"Because f_*L is invertible on S, Zariski locally on S we may pick an O_S-basis ℓ of f_*L. We claim
+that, locally over S, the pair (L, ℓ) on E defines an effective Cartier divisor in E. We must show
+that we have an exact sequence 0 → O --ℓ--> L → L/O → 0 with L/O flat over S. This amounts to the
+statement that the map of invertible sheaves O --ℓ--> L on E is injective, and remains so after any
+base change T → S on S. For this we are reduced to the case S = Spec(k) with k a field, and
+ℓ ∈ H⁰(E,L) a k-basis, so non-zero, in which case the assertion is obvious." [Also secured p. 66:
+f_*L invertible + R¹f_*L = 0 via Mum-4-p.53 + Nakayama; p. 67: degree-one ECD = section via 1.2.7.]
+SUB-CUT sketch (next segment, G5 statement-design first): (b2-i) the ℓ-section map in the tree's
+vocabulary — REUSE the glueSection/adjUnit machinery (glueSectionA_eq_adjUnit pattern) or the
+counit-form f^*f_*L ⟶ L directly (B3's PIN consumes the counit-form: I_D(L) ≅ f^*(f_*L) ⊗ L⁻¹);
+(b2-ii) fibrewise-injectivity input: over a field, a nonzero section of an invertible sheaf on an
+INTEGRAL scheme is injective as O → L — needs fibre-integrality (smooth + geometrically connected —
+where is this in the tree? EllipticCurveGeom fields / WeierstrassModel smoothness); (b2-iii) the
+fibrewise criterion: injective-on-fibres ⟹ universally injective with S-flat cokernel for E→S flat
+lfp — module-level: the AP2-A2 base-change machinery (kerBaseChangeComparison line) is the natural
+home; check mathlib for a fibrewise-flatness criterion (Algebra/Module/FinitePresentation +
+LocalRing fibrewise flat: `Module.flat_iff_of_...`?, or the scheme-level
+`AlgebraicGeometry.Flat`-fiberwise API) BEFORE building one.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
