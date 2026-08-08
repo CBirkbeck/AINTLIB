@@ -38884,7 +38884,9 @@ in the plan's "Known traps".
 - **Sources**: KM (2.8.1.7), p. 88; self-duality of `[N]` is KM 2.6.2.1.
 
 ### [AP-D5] the unique factorisation `f_{i,j} ∘ [N] = h_i / h_j`
-- **Status**: blocked (AP-D2, AP-D3, AP-D4) · **File**: `WeilPairing/KMPairing.lean` · **Type**: theorem
+- **Status**: **uniqueness half DONE (2026-08-08)** — `eq_one_of_mem_kUnits` and
+  `eq_of_div_mem_kUnits` (`WeilPairing/UnitSheaf.lean`, standard-three) give KM p. 88's
+  "uniquely in the form …" from AP-D2 alone. Existence half still blocked (AP-D4) · **File**: `WeilPairing/KMPairing.lean` · **Type**: theorem
 - **Proof sketch**: KM p. 88 — triviality of `[N]^*ℒ` in `Pic(E/S)` means the normalized cocycle
   `f_{i,j} ∘ [N]` is a coboundary; **uniqueness** of the `h_i` is AP-D2 (`H⁰(K^×) = {1}`).
 - **Sources**: KM p. 88.
@@ -39481,6 +39483,13 @@ Recommended: mark AP-D3 done-for-consumers and open AP-D5 (`f_{i,j} ∘ [N] = h_
 which needs AP-D2 + this interface) as the next `AP-D` ticket. Technique for this file: pin the
 base-change morphism `(g := g)` and prefer tactic mode — term-mode applications hit `isDefEq`
 timeouts here.
+
+**AP-D5 uniqueness landed** (2026-08-08): the half of AP-D5 that depends only on AP-D2 is proved —
+`eq_one_of_mem_kUnits` (a zero-section-normalized unit is `1`, i.e. `H⁰(K^×) = {1}` pointwise) and
+`eq_of_div_mem_kUnits` (two solutions differing by a normalized unit coincide). This is KM p. 88's
+uniqueness mechanism, and it was available despite the ticket's formal block on AP-D4 because that
+block only affects the *existence* half. Lesson worth repeating: when a ticket is blocked on several
+dependencies, check whether one conclusion needs only the satisfied ones.
 
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
