@@ -38978,6 +38978,34 @@ to fix exactly this; nothing may build on them meanwhile.
   `Instances.lean` farm (`algebraPolynomial`/`algebraRatFunc`/`functionField`/`finrank_ratFunc_eq_two`).
 - **Sources**: vendored formal API (supersedes PDF quotes); Stichtenoth §1.4 for the RRspace form.
 
+#### AP2-A1 progress (2026-08-08)
+- **VENDOR-RR done** (`8cff6eea5`): 36-file tree bumped v4.31→v4.33, green, endpoints axiom-verified;
+  zero heartbeat options (FilterChain 4M → scoped `[local irreducible] valuationSubringAtPrime` +
+  targeted Finsupp rewrites for the 4M-heartbeat simpa; playbook transparency triple insufficient there).
+- **A1c PROVED** (`e6fac5ed7`): `FibreRR.ell_eq_one_of_deg_eq_one` + `indexOfSpecialty_eq_zero_of_one_le_deg`
+  + `defect_eq_genus_of_deg_eq_one` (FibreDivisorDictionary.lean, axiom-verified).
+- **A1b core PROVED** (same commit): `exists_sub_of_memRRspaceOn_inter` — two-chart splitting via vendored
+  strong approximation `adeleSubmodule_top_eq_adeleFilt_add_diagonal` at `defect = genus` (deg-1 divisors
+  hit it on the nose); **no pole-peeling induction** — α-adele split, ~40 lines.
+- **A1a-i PROVED** (`4846332c0`): `memRRspaceOn_finitePlaces_zero_iff(_coordinateRing)` — ⋂ finite O_v =
+  ringOfIntegers (mathlib `mem_integers_of_valuation_le_one`) transported along vendored
+  `coordinateRingEquivIntegers`. Gotcha: `valuation_le_one` needs `(K := K)` pinned (stuck metavar).
+- **A1a place-set layer PROVED**: `TwoChartPlaces` structure + `memRRspace_iff_memRRspaceOn_and` (H⁰
+  matching) + `exists_sub_of_overlap` (H¹ split, deg-1 elliptic) — FibreCechPresentation.lean green.
+- **Design pins**: NO fractional-ideal detour in A1's interface (presentation carries section-module
+  equivs directly; `ofDivisor`-membership is B-side supply, deferred). H⁰ side will reuse M-generic
+  `baseSectionsIsoKernelOrderedBaseCechDifferential`. Key vendored bridges found:
+  `FractionalIdeal.valuation_eq_exp_neg_count` (Place.lean:49),
+  `placeValuation_eq_exp_neg_principalDivisor`, `finrank_adele_quotient` (= indexOfSpecialty),
+  `isAlgebraic_of_placeValuation_le_one` (RRspace/Basic:798 — the [A1e] hook).
+- **NEW SUB-TICKET [AP2-A1e]** (gap): `IsFullConstantField F K_W` for elliptic W over an ARBITRARY field
+  (vendored has only RatFunc + alg-closed base; genus_eq_one/riemann_roch/ell_zero all carry it).
+  Sketch: α algebraic /F, [F(α):F] = m ⟹ m ∣ [K : F(X)]... m ∈ {1,2}; m = 2 forces K = F(α)(X) rational,
+  contradicting the vendored ∞-ramification e = 2 (`infinity_ramificationIdx_eq_two`) since constant
+  extensions are unramified at ∞ (1/X stays a uniformizer). Alternative route: geometric integrality of
+  CoordinateRing ⊗_F F̄ (mathlib instIsDomain + AdjoinRoot base change) ⟹ F(α)⊗F̄ a domain ⟹ m = 1.
+  Needed for A1d's ∀-fields quantifier; A1a–c proceed with the instance as hypothesis.
+
 #### [AP2-A1b] `H¹ = 0` for a degree-one presentation (pole-peeling, the real math)
 - **File**: `EllipticCurve/FibreDegreeOneHOne.lean` (new) · **Depends on**: A1a
 - **Statement**: `Subsingleton (Sheaf.H M 1)` (and `q ≥ 1` via dimension/cover bound) for `M` with a

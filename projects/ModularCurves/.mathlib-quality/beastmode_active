@@ -1,1 +1,1 @@
-FOCUS: AP2-A1a — Z-chart zero-divisor dictionary PROVED (memRRspaceOn_finitePlaces_zero_iff + _coordinateRing). NEXT: D-twisted finite-chart dictionary (FractionalIdeal.divisor route, vendored PicTorsorCore) + Y-side places
+FOCUS: AP2-A1a — TwoChartPlaces + H0-matching + H1-split PROVED at place-set level (FibreCechPresentation green). NEXT: instantiate (Y,Z)-cover place sets (Y-chart places = ∞ + finite v with v(y)=0; needs yCoord place support finiteness) + section-module equivs to orderedBaseCech
