@@ -236,6 +236,50 @@ theorem exists_pow_smul_eq_restrict_of_trivial {E : Scheme.{u}} (N : E.Modules)
   rw [halg, halg] at hna
   exact hna.symm.trans (mul_comm _ _)
 
+/-- **(sv2-e)** Two sections of a trivialised module on an affine open that agree after
+restriction to a basic open agree after multiplication by a power of the defining function
+(the `f`-torsion is killed): through the trivialisation this is
+`IsLocalization.Away.exists_of_eq`. -/
+theorem exists_pow_smul_eq_of_restrict_eq {E : Scheme.{u}} (N : E.Modules)
+    (V : E.affineOpens) (f : ↑Γ(E, V.1))
+    (e : Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback V.1.ι).obj N ≅
+      unitObj V.1.toScheme))
+    (s t : ↑Γ(N, V.1))
+    (h : N.presheaf.map (homOfLE (E.basicOpen_le f)).op s =
+      N.presheaf.map (homOfLE (E.basicOpen_le f)).op t) :
+    ∃ n : ℕ, (f ^ n) • s = (f ^ n) • t := by
+  obtain ⟨e0⟩ := e
+  set ψV : N.over V.1 ≅ _root_.SheafOfModules.unit (E.ringCatSheaf.over V.1) :=
+    overTrivializationOfRestrictIso N V.1 (restrictIsoOfPullbackIso N V.1 e0) with hψV
+  set ψf : N.over (E.basicOpen f) ≅
+      _root_.SheafOfModules.unit (E.ringCatSheaf.over (E.basicOpen f)) :=
+    ModularCurves.SheafOfModules.restrictOverTrivialization E.ringCatSheaf N V.1 ψV
+      (CategoryTheory.Over.mk (homOfLE (E.basicOpen_le f))) with hψf
+  set τV := sectionsLinearEquivOfTrivialization N V.1 ψV with hτV
+  haveI := V.2.isLocalization_basicOpen f
+  -- the coordinates of `s` and `t` agree after restriction
+  have hcoord : (algebraMap ↑Γ(E, V.1) ↑Γ(E, E.basicOpen f)) (τV s) =
+      (algebraMap ↑Γ(E, V.1) ↑Γ(E, E.basicOpen f)) (τV t) := by
+    have hs : (algebraMap ↑Γ(E, V.1) ↑Γ(E, E.basicOpen f)) (τV s) =
+        ModularCurves.SheafOfModules.evalSection E.ringCatSheaf N (E.basicOpen f) ψf.hom
+          (N.presheaf.map (homOfLE (E.basicOpen_le f)).op s) :=
+      (evalSection_restrictOverTrivialization N V.1 ψV (E.basicOpen_le f) s).symm
+    have ht : (algebraMap ↑Γ(E, V.1) ↑Γ(E, E.basicOpen f)) (τV t) =
+        ModularCurves.SheafOfModules.evalSection E.ringCatSheaf N (E.basicOpen f) ψf.hom
+          (N.presheaf.map (homOfLE (E.basicOpen_le f)).op t) :=
+      (evalSection_restrictOverTrivialization N V.1 ψV (E.basicOpen_le f) t).symm
+    rw [hs, ht, h]
+  obtain ⟨n, hn⟩ := IsLocalization.Away.exists_of_eq (S := ↑Γ(E, E.basicOpen f)) f hcoord
+  refine ⟨n, τV.injective ?_⟩
+  have hs : τV ((f ^ n) • s) =
+      (show ↑(E.ringCatSheaf.obj.obj (Opposite.op V.1)) from f ^ n) * τV s :=
+    ModularCurves.SheafOfModules.evalSection_smul_right E.ringCatSheaf N V.1 ψV.hom _ s
+  have ht : τV ((f ^ n) • t) =
+      (show ↑(E.ringCatSheaf.obj.obj (Opposite.op V.1)) from f ^ n) * τV t :=
+    ModularCurves.SheafOfModules.evalSection_smul_right E.ringCatSheaf N V.1 ψV.hom _ t
+  rw [hs, ht]
+  exact hn
+
 /-- **(sv2-core, the remaining gap — sections of an invertible module localize)** On an
 affine open, a section over a basic open becomes, after multiplication by a power of the
 defining function, the restriction of a global-on-`U` section. This is the concrete
