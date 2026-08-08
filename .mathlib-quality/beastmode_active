@@ -193,7 +193,26 @@ mathematics:
       Model to imitate throughout: `kernel_data_of_hasDegreeOneFibreCohomology`
       (`EllipticCurve/DegreeOneFibreCohomology.lean:126`) — same shape, `hexact` replaced by
       `hhigh` + reducedness. Remember to ADD `hhigh` to KM-SEESAW-2″'s signature.
-  * **T6 — IN PROGRESS, ONE SORRY LEFT, AND IT IS API NOT MATHEMATICS.**
+  * **T6 — DONE (2026-08-08). BLOCKER 2's HALF B.2 IS CLOSED.**
+    `exists_baseCover_restrict_unitObj_iso_of_invertible_baseSections` PROVED, axiom-verified
+    standard-three, zero sorries. **BOTH halves of Blocker 2's descent input (B.1 `π_*M` invertible,
+    B.2 `M` base-locally trivial) are now complete.**
+    The boarded T6-eval ticket was largely UNNECESSARY — route simplification killed it: `hfib`
+    gives a GLOBAL trivialisation `θ : g^*M ≅ 𝒪_{X_T}` on the whole fibre product, so the cofactor
+    is only divided out (`isUnit_of_mul_isUnit_left`), never identified; and
+    `Scheme.preimage_basicOpen` + the tautological `σ := pullback.lift (X.fromSpecResidueField y) 𝟙`
+    reduces the germ comparison to the set-level `g (σ pt) = y`, with no `IsLocalHom` reasoning.
+    LOAD-BEARING DEFEQ (`rfl`): the `Γ(X,W)`-action on `Γ((pushforward g).obj N, W)` IS
+    `(g.app W).hom r • x`; with `Scheme.Modules.Hom.app_smul` that gives
+    `u_W (a • e) = g^#(a) • u_W e` for free.
+    ALREADY EXISTED, do not rebuild: `Scheme.Modules.localPullbackTrivializationT`
+    (`Picard/DualPullback/LocalTrivialization.lean:264`) pulls a trivialisation back along an
+    ARBITRARY morphism, with `localPullbackTrivialization_hom_unit_ofSection`/`_inv_one_ofSection`.
+    CAVEAT: `ForMathlib/SeesawBaseLocallyTrivial.lean` is an ORPHAN MODULE — nothing imports it, so
+    `lake build ModularCurves` skips it and leaves its olean stale. Build it EXPLICITLY before any
+    cross-file `#print axioms`.
+
+  * (historical, superseded by the line above)
     `ForMathlib/SeesawBaseLocallyTrivial.lean`. Target
     `exists_baseCover_restrict_unitObj_iso_of_invertible_baseSections` is stated as planned (not
     weakened) and now carries Half B.1's binders (`[IsReduced S] [IsNoetherian S]`, the cover,
