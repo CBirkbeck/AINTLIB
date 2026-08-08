@@ -39536,6 +39536,18 @@ standard-three. **Remaining in RelPicLocal: `hbij` (:484) + parent AP2-B1 (:53).
 HSMul fails on `.val.obj`-spelled carriers (use Γ-notation spelling / `Hom.app`); `have h0 := rfl`-anchor
 beats rw through the transparency wall; core `Functor.map_id` shadows `CategoryTheory.Functor.map_id`.
 
+**AP2-B1a-iii** (probes 17-19, 2026-08-08): three more routes charted on the smul pair, all capped —
+(17) composed-linear-map `map_smul` of `(hom unit-component).comp ((TensorProduct.mk _ _ _).flip b)`:
+`comp` cannot unify the `𝟭`-wrapped component source with the TensorProduct-typed `mk` target;
+(18) `inferInstanceAs`-letI bridges at the `(T.sheaf.obj ⋙ forget₂)`-spelling (mathlib registers
+`CommRing` there, `Presheaf/Monoidal.lean:34`) get Module across all three carrier spellings, BUT
+`TensorProduct.smul_tmul'` then wants `SMulCommClass` keyed on the monoidal structure's INTERNAL
+instance terms — letI-fvar instances never match (search is by key, not defeq); (19) `noncomputable
+section` fixes the aux-def compile complaints. **Decisive next tool: `dsimp +instances`** — mathlib's
+own `tensorObjMap` proofs (`Presheaf/Monoidal.lean:44-57`) normalise exactly these diamonds with it
+(+ `set_option backward.isDefEq.respectTransparency false` + `erw [TensorProduct.tmul_smul]`); mirror
+their proof style inside a goal reshaped by `have`-anchors. Full notes in the docstring.
+
 **AP2-B1a dependency chart** (2026-08-07 final): the capped smul pair is DOUBLY load-bearing — `hcompat`
 (proved, cites it) AND `hbij` (route: `r • tensorSection a b = tensorSection (r•a) b` splits the
 bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,
