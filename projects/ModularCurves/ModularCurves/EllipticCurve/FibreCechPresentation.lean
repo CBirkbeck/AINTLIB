@@ -219,4 +219,40 @@ end SurjectivityTransport
 
 end FibreRR
 
+/-! ## Ordered Čech indices of a two-element cover -/
+
+namespace TwoCoverIndex
+
+open AlgebraicGeometry.Scheme.Modules
+
+/-- Degree-zero ordered Čech indices of a two-element cover are the two singletons. -/
+def zeroEquiv : Scheme.Modules.OrderedCechIndex (Fin 2) 0 ≃ Fin 2 where
+  toFun i := i.1 0
+  invFun j := ⟨fun _ => j, fun a b hab => absurd hab (by omega)⟩
+  left_inv i := by
+    apply Subtype.ext
+    funext a
+    have : a = 0 := by omega
+    rw [this]
+  right_inv j := rfl
+
+/-- The unique degree-one ordered Čech index of a two-element cover: the full tuple `(0, 1)`. -/
+instance : Unique (Scheme.Modules.OrderedCechIndex (Fin 2) 1) where
+  default := ⟨fun a => a, fun _ _ h => h⟩
+  uniq i := by
+    apply Subtype.ext
+    funext a
+    show i.1 a = a
+    have b0 : (i.1 0 : ℕ) < 2 := (i.1 0).isLt
+    have b1 : (i.1 1 : ℕ) < 2 := (i.1 1).isLt
+    have h01 : (i.1 0 : ℕ) < (i.1 1 : ℕ) := i.2 (by norm_num : (0 : Fin 2) < 1)
+    refine Fin.cases ?_ ?_ a
+    · exact Fin.ext (by omega : ((i.1 0 : ℕ)) = ((0 : Fin 2) : ℕ))
+    · intro a1
+      have ha1 : a1 = 0 := Subsingleton.elim _ _
+      subst ha1
+      exact Fin.ext (by omega : ((i.1 1 : ℕ)) = ((1 : Fin 2) : ℕ))
+
+end TwoCoverIndex
+
 end ModularCurves
