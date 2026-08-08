@@ -203,8 +203,49 @@ noncomputable def sectionVanishingIdeal {E : Scheme.{u}} (M : E.Modules)
       exact (congrArg (fun z ↦ φ.val.app (Opposite.op ((CategoryTheory.Over.map
         (homOfLE (E.basicOpen_le f))).obj
         (CategoryTheory.Over.mk (𝟙 (E.affineBasicOpen f).1)))) z) hσ.symm).trans hnat
-    · -- ⊇ : the maximal-local argument through trivialising basic opens
-      sorry
+    · refine Ideal.span_le.mpr ?_
+      rintro x ⟨φ', rfl⟩
+      obtain ⟨n, φ, hnφ⟩ := exists_dualRestrict_eq_pow_smul M hM U f φ'
+      letI := ModularCurves.SheafOfModules.dualSectionsModule E.ringCatSheaf M
+        (E.basicOpen f)
+      -- evaluate the identity `dualRestrict φ = f^n • φ'`
+      have hev := congrArg (fun ψ : M.over (E.basicOpen f) ⟶
+          _root_.SheafOfModules.unit (E.ringCatSheaf.over (E.basicOpen f)) ↦
+        ψ.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 (E.basicOpen f))))
+          (show (M.over (E.basicOpen f)).val.obj
+            (Opposite.op (CategoryTheory.Over.mk (𝟙 (E.basicOpen f)))) from
+            M.presheaf.map (homOfLE le_top).op σ)) hnφ
+      rw [eval_dualRestrict M σ (E.basicOpen_le f) φ,
+        eval_smul M (E.basicOpen f) _ φ' _] at hev
+      -- the restriction of `f` is a unit on its basic open, so the power divides out
+      obtain ⟨w, hw⟩ := (IsUnit.pow n
+        (E.toRingedSpace.isUnit_res_basicOpen f)).exists_right_inv
+      have hrange : (show ↑Γ(E, U.1) from φ.val.app
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 U.1)))
+          (show (M.over U.1).val.obj
+            (Opposite.op (CategoryTheory.Over.mk (𝟙 U.1))) from
+            M.presheaf.map (homOfLE le_top).op σ)) ∈
+          Set.range (fun ψ : M.over U.1 ⟶
+              _root_.SheafOfModules.unit (E.ringCatSheaf.over U.1) ↦
+            (show ↑Γ(E, U.1) from ψ.val.app
+              (Opposite.op (CategoryTheory.Over.mk (𝟙 U.1)))
+              (show (M.over U.1).val.obj
+                (Opposite.op (CategoryTheory.Over.mk (𝟙 U.1))) from
+                M.presheaf.map (homOfLE le_top).op σ))) := ⟨φ, rfl⟩
+      have hmem := Ideal.subset_span (Set.mem_image_of_mem
+        (⇑(CommRingCat.Hom.hom (E.presheaf.map
+          (homOfLE (E.basicOpen_le f)).op))) hrange)
+      have heq := (congrArg (fun z ↦ z * w) hev).trans
+        ((mul_assoc _ _ _).trans
+          ((congrArg (fun z ↦ (show ↑Γ(E, E.basicOpen f) from φ'.val.app
+            (Opposite.op (CategoryTheory.Over.mk (𝟙 (E.basicOpen f))))
+            (show (M.over (E.basicOpen f)).val.obj
+              (Opposite.op (CategoryTheory.Over.mk (𝟙 (E.basicOpen f)))) from
+              M.presheaf.map (homOfLE le_top).op σ)) * z) hw).trans (mul_one _)))
+      have hfinal := Ideal.mul_mem_left _ w hmem
+      have heq2 := (mul_comm w _).trans heq
+      rw [heq2] at hfinal
+      exact hfinal
 
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
