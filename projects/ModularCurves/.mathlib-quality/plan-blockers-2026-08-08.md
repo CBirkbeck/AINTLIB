@@ -434,6 +434,48 @@ isomorphism and `H¹ = 0`; but at `p = (x,y)`, `d⁰ ⊗ κ(p) = 0` so `ker(d⁰
 **Recommendation: pursue (b) first**, fall back to (a). They repair the same defect from
 different directions — (b) removes `i` from the picture, (a) tolerates it.
 
+#### A2′ — follow-up (checked 2026-08-08, after the review): BOTH repairs are needed, and (b) is not free
+
+Two corrections to the recommendation above.
+
+*(b) is not freely available.* `IsInvertible.exists_finiteAffineBaseCech_flat`
+(`Picard/InvertibleSheafBaseCechFlat.lean:23`) is a thin wrapper over
+`hM.exists_finite_affine_trivializingCover`, a generic quasi-compactness argument with **no
+control on `card ι`**. A two-element trivialising affine cover is false for a general proper
+scheme; for a relative curve it is plausible (complement of an ample relative divisor is affine)
+but proving it is its own development.
+
+*(a) does not remove the flatness requirement.* The minimal-prime sandwich repairs the
+**dimension identification** `dim ker(u_p) = 1`. It does **not** discharge
+`[Module.Flat R (ker d¹)]`, which is a *variable* of the `LowDegreeFiniteReplacement` namespace
+(`variable [Module.Flat R C0] [Module.Flat R Z1]`) and so is needed to construct the replacement
+at all. Nor can it be dodged by applying the replacement to `d⁰ : C⁰ → C¹` directly: that needs
+`Module.Finite R (C¹/im d⁰)`, and only `H¹ = Z¹/im d⁰` is finite — `C¹/Z¹` is not.
+
+**Conclusion — KM-SEESAW-2″ must carry one extra hypothesis: exactness of `C^•` at positions
+`≥ 2`.** In the shape the tree already uses,
+
+```lean
+(hhigh : ∀ q, 1 ≤ q → Function.Exact ((C.d q (q + 1)).hom) ((C.d (q + 1) (q + 2)).hom))
+```
+
+This is strictly weaker than AP2-A2's `hexact` (which also demands position 1, i.e. `H¹ = 0` —
+false here) and it is **automatic in the application**: the fibres are curves, so
+`H^{≥2}(X_s, M_s) = 0`, and the tree's spreading lemma
+`HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
+lifts per-field exactness to `R`, exactly as `kernel_data_of_hasDegreeOneFibreCohomology` does —
+just over `q ≥ 1` instead of all `q`. The tree already has the fibre input
+(`subsingleton_H_add_two_of_two_affine_open_cover`, via a two-affine-cover fibre model).
+
+From `hhigh`, `Flat R Z¹` follows by **descending induction** on the bounded complex: `Z^N = C^N`
+is flat; and for `1 ≤ i < N`, `im d^i = Z^{i+1}` by exactness at `i+1`, so
+`0 → Z^i → C^i → Z^{i+1} → 0` is exact with `C^i` and `Z^{i+1}` flat, hence `Z^i` is flat. The
+same short exact sequences give `ker(d¹ ⊗ A) = Z¹ ⊗ A`, i.e. the `hbij` argument.
+
+So the corrected ticket set is: **T4c(i)** `hhigh ⟹ Flat R Z¹ + hbij` (descending induction),
+and **T4c(ii)** the minimal-prime sandwich for `dim ker(u_p) = 1`. Both are required; neither
+alone suffices.
+
 With the repair inserted, the reviewer confirms the rest of B.1: the dimension count
 `dim coker(u_p) = rk K¹ − rk_p K⁰ + 1`, local constancy from `K⁰` finite projective, right
 exactness `(coker u) ⊗ κ(p) ≅ coker(u_p)`, and — explicitly — that **applying 0FWG only to

@@ -65,6 +65,28 @@ UNCONDITIONAL finite-projective replacement:
        flat, so `F_η = H_η` and `dim F_η = 1`; rank only drops under specialisation `η ⤳ p`, so
        `dim ker(u_p) ≥ dim ker(u_η) = 1`. Reducedness is used TWICE in Blocker 2 (here, and in 0FWG).
 
+  *** A2′ FOLLOW-UP (checked after the review — read this before starting T4c) ***
+  BOTH repairs are needed; (b) is NOT free.
+   * (b) is not available off the shelf: `exists_finiteAffineBaseCech_flat` is a thin wrapper over
+     `exists_finite_affine_trivializingCover`, a generic quasi-compactness argument with NO control
+     on `card ι`.
+   * (a) fixes only the DIMENSION identification. It does not discharge `[Module.Flat R (ker d¹)]`,
+     which is a *variable* of the `LowDegreeFiniteReplacement` namespace and so is needed to build
+     the replacement at all. And you cannot dodge it by replacing `d⁰ : C⁰ → C¹` directly: that
+     needs `Module.Finite R (C¹/im d⁰)`, and only `H¹ = Z¹/im d⁰` is finite.
+  ⇒ KM-SEESAW-2″ MUST CARRY ONE EXTRA HYPOTHESIS:
+       `(hhigh : ∀ q, 1 ≤ q → Function.Exact ((C.d q (q+1)).hom) ((C.d (q+1) (q+2)).hom))`
+     — exactness at positions ≥ 2 only. Strictly weaker than AP2-A2's `hexact` (which also demands
+     position 1, i.e. `H¹ = 0`, FALSE here), and automatic in the application: the fibres are
+     curves so `H^{≥2}(X_s,M_s) = 0`, and
+     `HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
+     lifts it to `R` exactly as `kernel_data_of_hasDegreeOneFibreCohomology` does, just over `q ≥ 1`.
+     Fibre input already in the tree: `subsingleton_H_add_two_of_two_affine_open_cover`.
+     From `hhigh`, `Flat R Z¹` by DESCENDING INDUCTION: `Z^N = C^N` flat; for `1 ≤ i < N`,
+     `im d^i = Z^{i+1}` by exactness at `i+1`, so `0 → Z^i → C^i → Z^{i+1} → 0` with `C^i`, `Z^{i+1}`
+     flat ⟹ `Z^i` flat. The same sequences give `ker(d¹ ⊗ A) = Z¹ ⊗ A`, i.e. `hbij`.
+  ⇒ T4c(i) = `hhigh ⟹ Flat R Z¹ + hbij`; T4c(ii) = the minimal-prime sandwich. BOTH required.
+
 HALF B.2 (counit iso) — write the comparison diagram EXPLICITLY, in this order (review A4):
   `P := ker u ≅ Γ(X,M)`, then `P ⊗ κ(p) ≅ ker(u_p) ≅ ker(f_p) ↪ H⁰(X_p,M_p)`, an ISO by dimension
   count; then a local basis `ℓ` restricts to a nonzero element of `H⁰(X_p,M_p) ≅ κ(p)`, so `ℓ_p`
