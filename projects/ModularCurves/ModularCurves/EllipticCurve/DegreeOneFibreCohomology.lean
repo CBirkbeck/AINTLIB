@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.AbelSkeleton
 import ModularCurves.ForMathlib.SchemeModuleBaseCechResidueTransport
+import ModularCurves.ForMathlib.SchemeModuleProperLowDegreeCechFinite
 
 /-!
 # Assembly of the degree-one fibre cohomology package (`AP2-A1d`)
@@ -114,5 +115,78 @@ theorem exists_hasDegreeOneFibreCohomology_of_fibre_data
   exact ⟨ι, inferInstance, inferInstance, U, hU, hUaff,
     hasDegreeOneFibreCohomology_of_fibre_data M U hU hUaff hqc hH
       (hker U hU hUaff)⟩
+
+/-- **(`AP2-A2`, kernel data)** For an invertible module with the degree-one fibre cohomology
+package on a proper family over a Noetherian affine base, the degree-zero Čech kernel — the
+pushforward's sections — is finite projective of constant rank one, and commutes with
+arbitrary algebra base change. Module-generic instance of the pole-sheaf model
+(`sectionPoleSheafPower_projectiveClosed_orderedBaseCech_kernel_data`). -/
+theorem kernel_data_of_hasDegreeOneFibreCohomology
+    {R : Type u} [CommRing R] [IsNoetherianRing R]
+    {E : Scheme.{u}} {π : E ⟶ Spec (.of R)} [IsProper π] [Flat π]
+    [IsNoetherian E] [LocallyOfFinitePresentation π]
+    (M : E.Modules) (hM : M.IsInvertible)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hpkg : HasDegreeOneFibreCohomology π M U) :
+    let C := Scheme.Modules.orderedBaseCechComplex π M U
+    let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+    Module.Finite B (LinearMap.ker (C.d 0 1).hom) ∧
+      Module.Projective B (LinearMap.ker (C.d 0 1).hom) ∧
+      (∀ (A : Type u) [CommRing A] [Algebra B A],
+        Function.Bijective (kerBaseChangeComparison A (C.d 0 1).hom)) ∧
+      Module.rankAtStalk (R := B) (LinearMap.ker (C.d 0 1).hom) = fun _ ↦ 1 := by
+  dsimp only
+  let C := Scheme.Modules.orderedBaseCechComplex π M U
+  let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+  letI : E.IsSeparated := ⟨by
+    rw [← terminal.comp_from π]
+    infer_instance⟩
+  letI : M.IsQuasicoherent := hM.isQuasicoherent
+  letI : M.IsFinitePresentation := hM.isFinitePresentation
+  letI : M.IsFiniteType :=
+    SheafOfModules.instIsFiniteTypeOfIsFinitePresentation M
+  letI (q : ℕ) : Module.Flat B (C.X q) :=
+    Scheme.Modules.orderedBaseCechObject_flat_of_isInvertible π M hM U hUaff q
+  have hfinite := Scheme.Modules.orderedBaseCechHomologyFinite_of_isProper
+    (xπ := π) U hU hUaff M
+  letI (q : ℕ) : Module.Finite B (C.homology q) := hfinite q
+  let N := Fintype.card ι
+  letI : Subsingleton (C.X (N + 1)) :=
+    Scheme.Modules.orderedBaseCechObject_subsingleton_of_card_le π M U (N + 1)
+      (Nat.le_succ N)
+  have hexact : ∀ q, q < N →
+      Function.Exact (C.d q (q + 1)).hom (C.d (q + 1) (q + 2)).hom := by
+    intro q hq
+    exact
+      HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology
+        C N (fun i hi K _ _ ↦ (hpkg K).1 i hi) q hq
+  have hkerFinite : Module.Finite B (LinearMap.ker (C.d 0 1).hom) :=
+    HomologicalComplex.finite_kernel_zero_of_finite_homology C
+  letI : Module.Finite B (LinearMap.ker (C.d 0 1).hom) := hkerFinite
+  letI : IsNoetherianRing B :=
+    isNoetherianRing_of_ringEquiv R
+      (Scheme.ΓSpecIso (.of R)).symm.commRingCatIsoToRingEquiv
+  have hkerProjective : Module.Projective B (LinearMap.ker (C.d 0 1).hom) :=
+    Module.Projective.ker_of_bounded_exact_of_finite
+      (fun q ↦ C.X q) (fun q ↦ (C.d q (q + 1)).hom) N hexact
+  letI : Module.Projective B (LinearMap.ker (C.d 0 1).hom) := hkerProjective
+  have hbase : ∀ (A : Type u) [CommRing A] [Algebra B A],
+      Function.Bijective (kerBaseChangeComparison A (C.d 0 1).hom) := by
+    intro A _ _
+    exact kerBaseChangeComparison_bijective_of_bounded_exact
+      A (fun q ↦ C.X q) (fun q ↦ (C.d q (q + 1)).hom) N hexact
+  have hrankAt :
+      Module.rankAtStalk (R := B) (LinearMap.ker (C.d 0 1).hom) = fun _ ↦ 1 := by
+    letI : Module.Flat B (LinearMap.ker (C.d 0 1).hom) := inferInstance
+    funext p
+    rw [Module.rankAtStalk_eq]
+    let e : p.asIdeal.Fiber (LinearMap.ker (C.d 0 1).hom) ≃ₗ[p.asIdeal.ResidueField]
+        LinearMap.ker ((C.d 0 1).hom.baseChange p.asIdeal.ResidueField) :=
+      LinearEquiv.ofBijective
+        (kerBaseChangeComparison p.asIdeal.ResidueField (C.d 0 1).hom)
+        (hbase p.asIdeal.ResidueField)
+    exact e.finrank_eq.trans (hpkg p.asIdeal.ResidueField).2
+  exact ⟨hkerFinite, hkerProjective, hbase, hrankAt⟩
 
 end ModularCurves

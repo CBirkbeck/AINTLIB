@@ -39119,6 +39119,21 @@ coface compatibilities), everything axiom-verified standard-three, zero sorries:
   directly (the presentation extends: fractional ideals base-change).
 - **Sources**: KM p. 66; Hida pp. 107–108 (package shape); tree transport layer (formal).
 
+#### AP2-A2 progress (2026-08-08): **kernel-data theorem PROVED**
+`kernel_data_of_hasDegreeOneFibreCohomology` (`EllipticCurve/DegreeOneFibreCohomology.lean`,
+axiom-verified standard-three): for invertible `M` with the package on a proper flat lfp family
+over a Noetherian affine base, `ker(d⁰¹)` (= `f_*M`'s sections via the M-generic
+`baseSectionsIsoKernelOrderedBaseCechDifferential`) is **finite ∧ projective ∧ base-change
+bijective ∧ rankAtStalk ≡ 1** — the module-generic instance of the pole model, composed from
+`orderedBaseCechObject_flat_of_isInvertible` + `orderedBaseCechHomologyFinite_of_isProper` +
+the bounded-flat engine + the package's two clauses. Extra hypotheses vs the ticket sketch:
+`[Flat π] [IsNoetherian E] [LocallyOfFinitePresentation π]` (all held by elliptic families).
+REMAINING for A2: (i) transport ker → `baseSections` (mirror
+`sectionPoleSheafPower_projectiveClosed_baseSections_data`, 15 lines); (ii) the
+`Module.Invertible`-packaging of finite+projective+rank-1 (ticket's "separate obligation");
+(iii) noetherian removal by approximation (InvertibleSheafNoetherianSmoothStage route) when the
+consumers need non-noetherian bases.
+
 ### [AP2-A2] The degree-one package: `f_*L` invertible, base-change compatible
 - **Status**: blocked (AP2-A0) · **File**: `EllipticCurve/DegreeOneFibreCohomology.lean`
 - **Statement**: `[HasDegreeOneFibreCohomology π M]` ⟹ the degree-zero Čech kernel (`= baseSections`) is
