@@ -39363,6 +39363,16 @@ remaining fields — no Artin–Rees needed. Sorries left in the file: `evalGene
 (now optional — supersedable by the section route), `exists_relEffCartierDiv_of_degreeOne`,
 `relEffCartierDiv_degree_one_of_degreeOne`.
 
+**AP2-B3 degree computation — tools verified** (2026-08-08): `RelEffCartierDiv.degree` is
+definitionally `Scheme.Hom.finrank` of the subscheme-over-base map (`CartierDivisor.lean:108`), and
+mathlib gives base-change invariance in the convenient form
+**`Scheme.Hom.finrank_of_isPullback`** (`FlatRank.lean:165`: for any pullback square,
+`finrank snd y = finrank f (g y)`) — no need to construct the literal `pullback` object. So the fibre
+degree is computed by exhibiting the fibre-divisor square as a pullback (the tree's
+`isPullback_sectionBaseChange` (:115) and `ker_sectionBaseChange` (:157) are the models) and then
+evaluating the rank over the residue field, where the divisor is the vanishing scheme of a nonzero
+section of a degree-one invertible sheaf on the integral genus-one fibre — AP2-A1's `h⁰ = 1`.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
