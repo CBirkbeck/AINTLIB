@@ -36,6 +36,10 @@ open FunctionField FunctionField.Chart Polynomial
 
 open scoped Polynomial Polynomial.Bivariate RatFunc WithZero
 
+-- v4.33 playbook: `OrderedCechIndex` is a plain def, so Čech-index applications are only
+-- type-correct after delta; without this, `rw`/`simp` matching bails on the two-cover goals.
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 namespace ModularCurves
@@ -342,6 +346,19 @@ theorem twoCover_d01_surjective
     if h : i = twoCoverIdx1.delete 1 then h ▸ p₀
     else (idx0_eq_delete_or i).resolve_left h ▸ p₁
   refine ⟨(Scheme.Modules.orderedBaseCechObjectIsoPi π M U 0).inv.hom x, ?_⟩
+  -- Verification plan (each ingredient proved in isolation earlier; assembly pending):
+  -- componentwise at the unique degree-one index through
+  -- `orderedBaseCechObjectIsoPi`.toLinearEquiv.injective + Subsingleton;
+  -- `ModuleCat.piIsoPi_hom_ker_subtype`/`piIsoPi_inv_kernel_ι` (via
+  -- `ConcreteCategory.congr_hom`) turn iso components into `Pi.π`-applications and give
+  -- `(Pi.π _ i).hom ((isoPi₀).inv.hom x) = x i`; `orderedBaseCechComplex_d` +
+  -- `orderedBaseCechDifferential_comp_π` give the two-coface sum, expanded by
+  -- `erw [ModuleCat.hom_sum, LinearMap.sum_apply, Fin.sum_univ_two]`; the packed
+  -- `Hom.hom (π ≫ res)` summands need the elementwise idiom of the Epi block in
+  -- `ForMathlib/SchemeModuleOrderedBaseCechExact.lean` (a plain `show` whnf-explodes,
+  -- and the erw/simp route trips a kernel-level cast under
+  -- `respectTransparency.types false`); close with `x`-components
+  -- (`dif_pos`/`dif_neg` + `zeroEquiv_delete_*`), `← sub_eq_add_neg`, and `hp`.
   sorry
 
 end TwoCoverCech
