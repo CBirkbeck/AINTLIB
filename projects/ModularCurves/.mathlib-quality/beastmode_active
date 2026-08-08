@@ -1,1 +1,1 @@
-FOCUS: AP2-A1a — chart-section dictionary: recon projModel chart API (Γ(U₀)≅CoordinateRing?), then FibreDivisorDictionary.lean skeleton
+FOCUS: AP2-A1 — A1b-core+A1c PROVED (FibreDivisorDictionary green, axiom-verified). NEXT: A1a chart-section dictionary (Γ(chartZ/Y, M) ↔ memRRspaceOn) — recon chartYSectionsEquiv/chartZSectionsEquiv + place-set defs
