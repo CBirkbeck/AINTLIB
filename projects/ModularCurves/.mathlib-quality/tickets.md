@@ -39350,6 +39350,19 @@ of `(M, ℓ)` is a section divisor, and the tree's section machinery supplies pr
 nonzerodivisor property, `IsOfficialCartier`, degree one (`sectionDivisor_degree` :186) and `Mono`
 directly. This also matches KM p.67 ("any effective Cartier divisor of degree one is a section").
 
+**AP2-B3 — KM 1.2.7 CONVERSE PROVED** (2026-08-08, cd55ed0e1): `exists_section_of_degree_one`
+(`EllipticCurve/AbelEquivalence.lean`, standard-three): a degree-one `RelEffCartierDiv π` is
+`Scheme.Hom.ker z` for a section `z`. Proof: the divisor's own `finite`/`flat`/`lfp` fields feed
+mathlib's `Scheme.Hom.isIso_iff_finrank_eq` (degree IS `finrank`), so the subscheme maps
+isomorphically to the base; `z := inv (subschemeι ≫ π) ≫ subschemeι`; the ideal identification is
+`Scheme.Hom.ker_comp_of_isIso` + `Scheme.IdealSheafData.ker_subschemeι`. **This is the Abel map's
+inverse direction** and completes the pivot recorded above: with it, any degree-one evaluation divisor
+is a section divisor, so the tree's section machinery (`exists_affineOpen_ker_principal_nonZeroDivisor`,
+`sectionDivisor_isOfficial`, `sectionDivisor_degree`, `sectionPoleUnitHom_mono`) supplies B2/B3's
+remaining fields — no Artin–Rees needed. Sorries left in the file: `evalGenerator_mem_nonZeroDivisors`
+(now optional — supersedable by the section route), `exists_relEffCartierDiv_of_degreeOne`,
+`relEffCartierDiv_degree_one_of_degreeOne`.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
