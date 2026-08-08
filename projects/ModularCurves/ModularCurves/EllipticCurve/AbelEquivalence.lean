@@ -303,7 +303,24 @@ theorem restrict_clearing_identity {E : Scheme.{u}} (N : E.Modules)
         (E.presheaf.map (homOfLE (hW'W.trans hWU)).op f))).op
         (E.presheaf.map (homOfLE (hW'W.trans hWU)).op f)) ^ n •
         N.presheaf.map (homOfLE (hfW'.trans hfW)).op s' := by
-  sorry
+  -- restrict the hypothesis along the `f`-locus inclusion
+  have hres := congrArg (fun z ↦ N.presheaf.map (homOfLE hfW').op z) hw
+  simp only [AlgebraicGeometry.Scheme.Modules.map_smul, map_pow] at hres
+  refine Eq.trans ?_ (hres.trans ?_)
+  · -- the two restriction composites agree
+    rw [← ConcreteCategory.comp_apply, ← Functor.map_comp,
+      ← ConcreteCategory.comp_apply, ← Functor.map_comp]
+    exact congrArg (fun q ↦ (ConcreteCategory.hom (N.presheaf.map (Quiver.Hom.op q))) w)
+      (Subsingleton.elim _ _)
+  · -- the scalar and the `s'`-restriction match on the nose
+    refine congrArg₂ (fun (r : ↑Γ(E, E.basicOpen (E.presheaf.map
+        (homOfLE (hW'W.trans hWU)).op f))) z ↦ r ^ n • z) ?_ ?_
+    · simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+      exact congrArg (fun q ↦ (ConcreteCategory.hom (E.presheaf.map (Quiver.Hom.op q))) f)
+        (Subsingleton.elim _ _)
+    · simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+      exact congrArg (fun q ↦ (ConcreteCategory.hom (N.presheaf.map (Quiver.Hom.op q))) s')
+        (Subsingleton.elim _ _)
 
 /-- **(sv2-core, the remaining gap — sections of an invertible module localize)** On an
 affine open, a section over a basic open becomes, after multiplication by a power of the
