@@ -862,7 +862,17 @@ both cut out the same closed subscheme. -/
 theorem exists_section_of_degree_one {C S : Scheme.{u}} (π : C ⟶ S) [IsSeparated π]
     (D : RelEffCartierDiv π) (hdeg : ∀ s : S, D.degree s = 1) :
     ∃ z : S ⟶ C, ∃ hz : z ≫ π = 𝟙 S, D.ideal = Scheme.Hom.ker z := by
-  sorry
+  haveI := D.finite
+  haveI := D.flat
+  haveI := D.lfp
+  -- degree one means the subscheme maps isomorphically to the base
+  haveI hiso : IsIso (D.ideal.subschemeι ≫ π) := by
+    rw [Scheme.Hom.isIso_iff_finrank_eq]
+    funext s
+    exact hdeg s
+  refine ⟨CategoryTheory.inv (D.ideal.subschemeι ≫ π) ≫ D.ideal.subschemeι, ?_, ?_⟩
+  · rw [Category.assoc, CategoryTheory.IsIso.inv_hom_id]
+  · sorry
 
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
