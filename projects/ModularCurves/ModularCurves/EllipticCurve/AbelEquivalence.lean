@@ -299,6 +299,24 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
     ∃ (n : ℕ) (s : ↑Γ(N, U.1)),
       N.presheaf.map (homOfLE (E.basicOpen_le f)).op s =
         (E.presheaf.map (homOfLE (E.basicOpen_le f)).op f) ^ n • s' := by
+  classical
+  -- (a) a finite trivialising cover of `U` by basic opens
+  obtain ⟨t, hcover, hpiece⟩ := exists_finite_basicOpen_trivialization N hN U
+  -- (b) per piece: the section clears a power of `f` there
+  have hloc : ∀ g : {g // g ∈ t}, ∃ (m : ℕ) (u : ↑Γ(N, E.basicOpen g.1)),
+      N.presheaf.map (homOfLE (E.basicOpen_le
+        (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f))).op u =
+      (E.presheaf.map (homOfLE (E.basicOpen_le
+        (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f))).op
+        (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f)) ^ m •
+        N.presheaf.map (homOfLE (by
+          rw [Scheme.basicOpen_res]
+          exact le_trans inf_le_right le_rfl)).op s' := by
+    intro g
+    exact exists_pow_smul_eq_restrict_of_trivial N
+      ⟨E.basicOpen g.1, U.2.basicOpen g.1⟩
+      (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f)
+      (hpiece g.1 g.2).2 _
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
