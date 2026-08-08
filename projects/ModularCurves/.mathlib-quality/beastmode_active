@@ -140,7 +140,30 @@ splittings in one step.
 **THE WHOLE GRAUERT SUBSTITUTE IS NOW IN PLACE.** What remains for Blocker 2 is wiring, not new
 mathematics:
 
-  * **T5-wire** — instantiate the above on the ordered Čech complex. Chain:
+  * **T5-wire — DONE** (2026-08-08). `ForMathlib/SeesawPushforwardInvertible.lean`:
+    `baseSections_invertible_of_orderedBaseCechHomologyFinite` PROVED, axiom-verified
+    standard-three. Given `hrank` (KM-SEESAW-1′), `hhigh`, and Čech homology finiteness,
+    `baseSections π M` is invertible over a REDUCED base with no `H¹ = 0` anywhere.
+    TWO PLAN CORRECTIONS FOUND IN EXECUTION: the right short complex is `C.sc' 0 1 2`, NOT
+    `C.sc' 0 0 1` (there `f` is `C.d 0 0 = 0`); and no `1 ≤ card ι` hypothesis is needed — take
+    `N := card ι + 1` and extend `hhigh` via `exact_of_subsingleton_middle`.
+  * **T5-bridge (NEW TICKET, the only sorry left in that file — a GENERALITY bridge, not a
+    mathematical gap)**: `Scheme.Modules.orderedBaseCechHomologyFinite_of_isProper`
+    (`ForMathlib/SchemeModuleProperLowDegreeCechFinite.lean`) is stated for a SYNTACTIC
+    `Spec (.of R)` base, as is its whole supporting chain (whose helpers are `private`), so it does
+    not unify with a general `[IsAffine S]`. Three routes tried and documented at the sorry:
+    direct application (no unify); composing with `S.isoSpec.hom` (the two complexes are `∏ᶜ` over
+    different rings — carriers NOT defeq); `orderedBaseCechComplexBaseChangeIso` along
+    `S.isoSpec.inv` (blocked — mathlib has neither
+    `((F.mapHomologicalComplex c).obj C).homology n ≅ F.obj (C.homology n)` nor
+    `PreservesFiniteLimits`/`Colimits` for `ModuleCat.restrictScalars`).
+    FIX: generalise that lemma and its `Spec (.of R)`-shaped helpers to
+    `[IsAffine S] [IsNoetherianRing Γ(S,⊤)]`. Also unblocks
+    `Picard/InvertibleSheafProperCechResidueSpread.lean`. WORKAROUND meanwhile: a caller with a
+    `Spec (.of R)` base uses `baseSections_invertible_of_orderedBaseCechHomologyFinite` directly,
+    SORRY-FREE, feeding it `orderedBaseCechHomologyFinite_of_isProper`.
+  * (superseded plan text for T5-wire, kept for the chain of reasoning) instantiate on the Čech
+    complex:
       `hhigh` ⟹ `Flat R Z¹` (`Module.Flat.ker_of_bounded_exact_from` at k=1) and `hbij`
       (`kerBaseChangeComparison_bijective_of_bounded_exact_from` at k=1)
       ⟹ `shortComplexBaseChangeKernelEquiv A hbij : ker(u ⊗ A) ≅ ker(d⁰ ⊗ A)` for all `A`
