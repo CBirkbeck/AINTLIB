@@ -146,4 +146,41 @@ theorem transitionUnit_self_mem_kUnits {z : T ⟶ pullback p g}
   rw [transitionUnit_mem_kUnits_iff,
     AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit_self, map_one]
 
+/-- **(AP-D3, symmetry)** Normalization is symmetric: if the transition unit from `e₁` to `e₂`
+is normalized then so is the one from `e₂` to `e₁`. -/
+theorem transitionUnit_symm_mem_kUnits {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens)
+    {M : (pullback p g).Modules}
+    (e₁ e₂ : M.over (pullback.snd p g ⁻¹ᵁ U) ≅
+      SheafOfModules.unit ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ U)))
+    (h : AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+      (pullback.snd p g ⁻¹ᵁ U) e₁ e₂ ∈ kUnits g hz U) :
+    AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+      (pullback.snd p g ⁻¹ᵁ U) e₂ e₁ ∈ kUnits g hz U := by
+  rw [transitionUnit_mem_kUnits_iff] at h ⊢
+  have hmul := congrArg (kUnitsEval g hz U)
+    (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit_symm
+      (pullback.snd p g ⁻¹ᵁ U) e₁ e₂)
+  rw [map_mul, map_one, h, one_mul] at hmul
+  exact hmul
+
+/-- **(AP-D3, transitivity)** Normalization is transitive: normalized transition units compose
+to normalized ones. With the self and symmetry cases this says "being normalized" is an
+equivalence relation on trivialisations — the cocycle condition KM's `h_i` patching needs. -/
+theorem transitionUnit_trans_mem_kUnits {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens)
+    {M : (pullback p g).Modules}
+    (e₁ e₂ e₃ : M.over (pullback.snd p g ⁻¹ᵁ U) ≅
+      SheafOfModules.unit ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ U)))
+    (h₁₂ : AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+      (pullback.snd p g ⁻¹ᵁ U) e₁ e₂ ∈ kUnits g hz U)
+    (h₂₃ : AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+      (pullback.snd p g ⁻¹ᵁ U) e₂ e₃ ∈ kUnits g hz U) :
+    AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+      (pullback.snd p g ⁻¹ᵁ U) e₁ e₃ ∈ kUnits g hz U := by
+  rw [transitionUnit_mem_kUnits_iff] at h₁₂ h₂₃ ⊢
+  have hmul := kUnitsEval_transitionUnit_eq_div (g := g) hz U e₁ e₂ e₃
+  rw [h₁₂, h₂₃, one_mul] at hmul
+  exact hmul.symm
+
 end ModularCurves
