@@ -426,7 +426,13 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
       (by rw [Scheme.basicOpen_res, Scheme.basicOpen_res]
           exact inf_le_inf_right _ inf_le_right)
       (hvres g')
-    sorry
+    refine hgL.trans (Eq.trans ?_ hgR.symm)
+    refine congrArg₂ (fun (r : ↑Γ(E, E.basicOpen (E.presheaf.map (homOfLE ((inf_le_left :
+        E.basicOpen g.1 ⊓ E.basicOpen g'.1 ≤ E.basicOpen g.1).trans
+        (hpiece g.1 g.2).1)).op f))) z ↦ r ^ n • z) ?_ ?_
+    · simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+    · exact congrArg (fun q ↦ (ConcreteCategory.hom (N.presheaf.map (Quiver.Hom.op q))) s')
+        (Subsingleton.elim _ _)
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
