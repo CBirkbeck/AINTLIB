@@ -39518,6 +39518,24 @@ otherwise complete.
 what `M.val.obj`'s ambient instance is keyed to. **14 probes; instance-alignment only, zero mathematical
 content; queued for a fresh-context `/simplify`-style pass with this full map.** Sorried green.
 
+**AP2-B1a Progress** (2026-08-08, compA PROVED): `glueSectionA_compat` closed — NOT by the four-intertwiner
+chain-transport, but by a cleaner factorisation discovered en route: (1) **`glueSectionA_eq_adjUnit`** —
+`glueSectionA g N V e = (pullbackPushforwardAdjunction snd).unit.app N |>.val.app V (glueSectionASeed N V e)`
+where the seed is `(overTrivialization N V e).inv` at the over-site top on `1`; proved via the new
+module-generic clone file `Picard/DualPullback/LocalTrivializationSection.lean` (the dual-line
+`LocalTrivialization`/`Inv` chain genericised: `localPullbackTrivialization_inv_one_ofSection` — any module
+`A`, over-trivialisation `t`, section `x` with `t.hom x = 1`), plus an iso-algebra identification of
+glueSectionA's chain with `localPullbackTrivializationT`'s inverse (needs
+`set_option backward.isDefEq.respectTransparency false` for the simp-normalisation — TopCat.Sheaf vs
+grothendieck-spelling congruence wall). (2) **`glueSectionASeed_compat`** — base-side seed comparison:
+`restrictOverTrivialization_inv_app_apply` is rfl, `overUnitScalarEnd_transitionUnit` + ring-hom
+multiplicativity gives `rOTi.inv = E(u⁻¹) ≫ rOTj.inv`, evaluate at top on 1. (3) assembly by naturality of
+the adjunction unit + `Hom.app_smul` (mathlib Modules/Sheaf.lean Γ-smul API; the `Γ(M,U)`-instance IS the
+val-instance, so spell smuls через `Hom.app` with φ ascribed to the non-⋙ target). Axiom-verified
+standard-three. **Remaining in RelPicLocal: `hbij` (:484) + parent AP2-B1 (:53).** Instance-lessons:
+HSMul fails on `.val.obj`-spelled carriers (use Γ-notation spelling / `Hom.app`); `have h0 := rfl`-anchor
+beats rw through the transparency wall; core `Functor.map_id` shadows `CategoryTheory.Functor.map_id`.
+
 **AP2-B1a dependency chart** (2026-08-07 final): the capped smul pair is DOUBLY load-bearing — `hcompat`
 (proved, cites it) AND `hbij` (route: `r • tensorSection a b = tensorSection (r•a) b` splits the
 bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,

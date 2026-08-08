@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Picard.DualPullback
+import ModularCurves.Picard.DualPullback.LocalTrivializationSection
 import ModularCurves.Picard.InvertibleSheafCocycle
 import ModularCurves.WeilPairing.TensorSection
 import ModularCurves.WeilPairing.UnitSheaf
@@ -36,6 +37,12 @@ open CategoryTheory AlgebraicGeometry Limits TopologicalSpace
 open AlgebraicGeometry.Scheme.Modules
 
 namespace ModularCurves
+
+local instance (X : Scheme.{u}) :
+    ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
+  fun U ↦ by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
 
 /-- **(AP2-B1, KM p. 65)** The `f^*`-twist equivalence on invertible sheaves is Zariski-local on the
 base: isomorphisms `M ≅ M' ⊗ f^*(N i)` over the preimages of an open cover of `T` glue to a global
@@ -97,6 +104,91 @@ noncomputable def overTrivialization {T : Scheme.{u}} (N : T.Modules) (V : T.Ope
       (AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback V.ι).app N ≪≫
       e ≪≫ (V.sheafOfModulesEquivOverUnit T.ringCatSheaf).symm)
 
+/-- The base-side generating element of `glueSectionA`: the value of the inverse over-site
+trivialisation on `1`, a section of `N` over `V`. `glueSectionA` is the image of this seed
+under the pullback–pushforward adjunction unit (`glueSectionA_eq_adjUnit`), which makes its
+overlap behaviour a base-side computation. -/
+noncomputable def glueSectionASeed {T : Scheme.{u}} (N : T.Modules) (V : T.Opens)
+    (e : (AlgebraicGeometry.Scheme.Modules.pullback V.ι).obj N ≅ unitObj V.toScheme) :
+    N.val.obj (Opposite.op V) :=
+  (overTrivialization N V e).inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 V)))
+    (show (T.ringCatSheaf.over V).obj.obj
+      (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) from 1)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **`glueSectionA` in adjunction-unit form.** The pushforward-slot section is the image of
+the base-side seed under the pullback–pushforward adjunction unit: `glueSectionA`'s chain is
+the inverse of the canonical pulled trivialisation of
+`ModularCurves.Picard.DualPullback.LocalTrivializationSection`, evaluated on `1`. -/
+theorem glueSectionA_eq_adjUnit {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}} (g : T ⟶ S)
+    (N : T.Modules) (V : T.Opens)
+    (e : (AlgebraicGeometry.Scheme.Modules.pullback V.ι).obj N ≅ unitObj V.toScheme) :
+    glueSectionA (p := p) g N V e =
+      ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+          (pullback.snd p g)).unit.app N).val.app (Opposite.op V)
+        (glueSectionASeed N V e) := by
+  have hx : (overTrivialization N V e).hom.val.app
+      (Opposite.op (CategoryTheory.Over.mk (𝟙 V)))
+      (glueSectionASeed N V e) =
+      (show (T.ringCatSheaf.over V).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) from 1) := by
+    have hcomp := congrArg
+      (fun q ↦ q.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 V))))
+      (overTrivialization N V e).inv_hom_id
+    have h := CategoryTheory.ConcreteCategory.congr_hom hcomp
+      (show (T.ringCatSheaf.over V).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) from 1)
+    erw [AlgebraicGeometry.Scheme.Modules.sheafOfModules_comp_app_apply] at h
+    exact h
+  have hp : (AlgebraicGeometry.Scheme.Modules.overEquiv
+      (pullback.snd p g ⁻¹ᵁ V)).functor.map
+      (AlgebraicGeometry.Scheme.Modules.localPullbackTrivializationT
+        (pullback.snd p g) N V (overTrivialization N V e)).hom =
+      (AlgebraicGeometry.Scheme.Modules.localPullbackModuleIso (pullback.snd p g) N V).inv ≫
+        (AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g ∣_ V)).map
+          ((AlgebraicGeometry.Scheme.Modules.overEquiv V).functor.map
+            (overTrivialization N V e).hom) ≫
+        (AlgebraicGeometry.Scheme.Modules.localPullbackUnitIso (pullback.snd p g) V).hom := by
+    dsimp only [AlgebraicGeometry.Scheme.Modules.localPullbackTrivializationT]
+    simp only [Functor.FullyFaithful.preimageIso_hom,
+      Functor.FullyFaithful.map_preimage, Iso.trans_hom, Functor.mapIso_hom]
+    rfl
+  have hone := AlgebraicGeometry.Scheme.Modules.localPullbackTrivialization_inv_one_ofSection
+    (pullback.snd p g) N V (overTrivialization N V e) (glueSectionASeed N V e)
+    (AlgebraicGeometry.Scheme.Modules.localPullbackTrivializationT
+      (pullback.snd p g) N V (overTrivialization N V e)) hx hp
+  have hψ : (AlgebraicGeometry.Scheme.Modules.overEquiv
+      (pullback.snd p g ⁻¹ᵁ V)).functor.preimage
+      ((((pullback.snd p g ⁻¹ᵁ V).sheafOfModulesEquivOverUnit
+          (pullback p g).ringCatSheaf).hom ≫
+        (AlgebraicGeometry.Scheme.Modules.pullbackUnitIso
+          (pullback.snd p g ∣_ V)).inv ≫
+        (AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g ∣_ V)).map e.inv ≫
+        (AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g ∣_ V)).map
+          (((AlgebraicGeometry.Scheme.Modules.overFunctorEquiv V).app N ≪≫
+            (AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback V.ι).app N).inv) ≫
+        (AlgebraicGeometry.Scheme.Modules.localPullbackModuleIso
+          (pullback.snd p g) N V).hom)) =
+      (AlgebraicGeometry.Scheme.Modules.localPullbackTrivializationT
+        (pullback.snd p g) N V (overTrivialization N V e)).inv := by
+    apply (AlgebraicGeometry.Scheme.Modules.overEquiv
+      (pullback.snd p g ⁻¹ᵁ V)).functor.map_injective
+    rw [Functor.map_preimage]
+    dsimp only [AlgebraicGeometry.Scheme.Modules.localPullbackTrivializationT]
+    simp only [Functor.FullyFaithful.preimageIso_inv, Functor.FullyFaithful.map_preimage,
+      Iso.trans_inv, Iso.symm_inv, Functor.mapIso_inv, Functor.mapIso_hom,
+      AlgebraicGeometry.Scheme.Modules.localPullbackUnitIso, overTrivialization,
+      Functor.preimageIso_inv, Functor.map_preimage, Functor.map_comp, Category.assoc]
+    conv_rhs => rw [← Functor.map_comp_assoc]
+    rw [Iso.inv_hom_id, CategoryTheory.Functor.map_id, Category.id_comp]
+  exact (congrArg (fun q ↦ q.val.app
+      (Opposite.op (CategoryTheory.Over.mk (𝟙 (pullback.snd p g ⁻¹ᵁ V))))
+      (show ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ V)).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 (pullback.snd p g ⁻¹ᵁ V)))) from 1)) hψ).trans
+    hone
+
 /-- The transition unit of two pullback trivialisations on the overlap: pass each to over-form
 (`overTrivialization`), restrict **at the over level** with `restrictOverTrivialization`
 (`Picard/Dual.lean:792`), and take `trivializationTransitionUnit`. Restricting at the over level —
@@ -125,6 +217,176 @@ noncomputable def glueSectionB {T : Scheme.{u}} (N : T.Modules) (V : T.Opens)
     (overTrivialization N V e).hom
 
 
+/-- **(AP2-B1a, seed comparison)** On the overlap the two base-side seeds differ by the
+inverse transition unit: the restricted inverse over-trivialisations satisfy
+`rOTᵢ.inv = E(u⁻¹) ≫ rOTⱼ.inv` by `overUnitScalarEnd_transitionUnit` and multiplicativity of
+the scalar-endomorphism ring hom, and evaluating at `1` on the top of the overlap's over-site
+turns the scalar endomorphism into the module smul. -/
+theorem glueSectionASeed_compat {T : Scheme.{u}} (N : T.Modules) {Vi Vj : T.Opens}
+    (ei : (AlgebraicGeometry.Scheme.Modules.pullback Vi.ι).obj N ≅ unitObj Vi.toScheme)
+    (ej : (AlgebraicGeometry.Scheme.Modules.pullback Vj.ι).obj N ≅ unitObj Vj.toScheme) :
+    N.presheaf.map (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi)).op (glueSectionASeed N Vi ei) =
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) •
+        N.presheaf.map (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)).op
+          (glueSectionASeed N Vj ej) := by
+  let rOTi : N.over (Vi ⊓ Vj) ≅
+      _root_.SheafOfModules.unit (T.ringCatSheaf.over (Vi ⊓ Vj)) :=
+    ModularCurves.SheafOfModules.restrictOverTrivialization T.ringCatSheaf N Vi
+      (overTrivialization N Vi ei)
+      (CategoryTheory.Over.mk (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi)))
+  let rOTj : N.over (Vi ⊓ Vj) ≅
+      _root_.SheafOfModules.unit (T.ringCatSheaf.over (Vi ⊓ Vj)) :=
+    ModularCurves.SheafOfModules.restrictOverTrivialization T.ringCatSheaf N Vj
+      (overTrivialization N Vj ej)
+      (CategoryTheory.Over.mk (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)))
+  have hseedL : N.presheaf.map (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi)).op
+      (glueSectionASeed N Vi ei) =
+      rOTi.inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
+        (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1) := by
+    have hnat := PresheafOfModules.naturality_apply (overTrivialization N Vi ei).inv.val
+      (CategoryTheory.Over.mkIdTerminal.from
+        (CategoryTheory.Over.mk (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi)))).op
+      (show (T.ringCatSheaf.over Vi).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 Vi))) from 1)
+    have h1 : (_root_.SheafOfModules.unit (T.ringCatSheaf.over Vi)).val.map
+        (CategoryTheory.Over.mkIdTerminal.from
+          (CategoryTheory.Over.mk (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi)))).op
+        (show (T.ringCatSheaf.over Vi).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 Vi))) from 1) =
+        (show (T.ringCatSheaf.over Vi).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk
+            (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi)))) from 1) :=
+      PresheafOfModules.unit_map_one (T.ringCatSheaf.over Vi).obj
+        (CategoryTheory.Over.mkIdTerminal.from
+          (CategoryTheory.Over.mk (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi)))).op
+    rw [h1] at hnat
+    exact hnat.symm
+  have hseedR : N.presheaf.map (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)).op
+      (glueSectionASeed N Vj ej) =
+      rOTj.inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
+        (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1) := by
+    have hnat := PresheafOfModules.naturality_apply (overTrivialization N Vj ej).inv.val
+      (CategoryTheory.Over.mkIdTerminal.from
+        (CategoryTheory.Over.mk (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)))).op
+      (show (T.ringCatSheaf.over Vj).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 Vj))) from 1)
+    have h1 : (_root_.SheafOfModules.unit (T.ringCatSheaf.over Vj)).val.map
+        (CategoryTheory.Over.mkIdTerminal.from
+          (CategoryTheory.Over.mk (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)))).op
+        (show (T.ringCatSheaf.over Vj).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 Vj))) from 1) =
+        (show (T.ringCatSheaf.over Vj).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk
+            (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)))) from 1) :=
+      PresheafOfModules.unit_map_one (T.ringCatSheaf.over Vj).obj
+        (CategoryTheory.Over.mkIdTerminal.from
+          (CategoryTheory.Over.mk (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)))).op
+    rw [h1] at hnat
+    exact hnat.symm
+  rw [hseedL, hseedR]
+  have hE : ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+      ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) =
+      rOTj.inv ≫ rOTi.hom :=
+    AlgebraicGeometry.Scheme.Modules.overUnitScalarEnd_transitionUnit (Vi ⊓ Vj) rOTj rOTi
+  have hcancel : ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+      ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+        ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) =
+      𝟙 (_root_.SheafOfModules.unit (T.ringCatSheaf.over (Vi ⊓ Vj))) := by
+    have h1 : (ModularCurves.SheafOfModules.overUnitScalarEndRingHom
+        T.ringCatSheaf (Vi ⊓ Vj))
+        (((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) *
+          (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))) =
+        𝟙 (_root_.SheafOfModules.unit (T.ringCatSheaf.over (Vi ⊓ Vj))) := by
+      rw [Units.mul_inv]
+      exact map_one _
+    have h2 := map_mul (ModularCurves.SheafOfModules.overUnitScalarEndRingHom
+        T.ringCatSheaf (Vi ⊓ Vj))
+      ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))
+    exact (h2.symm.trans h1 : _)
+  have hinv : rOTi.inv =
+      ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+        (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+        rOTj.inv := by
+    calc rOTi.inv
+        = 𝟙 (_root_.SheafOfModules.unit (T.ringCatSheaf.over (Vi ⊓ Vj))) ≫ rOTi.inv :=
+          (Category.id_comp _).symm
+      _ = (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+          ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))) ≫
+          rOTi.inv := by rw [hcancel]
+      _ = ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+          ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+          rOTi.inv := by rw [Category.assoc]
+      _ = ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+          (rOTj.inv ≫ rOTi.hom) ≫ rOTi.inv := by rw [hE]
+      _ = ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+          rOTj.inv := by rw [Category.assoc, Iso.hom_inv_id, Category.comp_id]
+  have happ := CategoryTheory.ConcreteCategory.congr_hom
+    (congrArg (fun q : _root_.SheafOfModules.unit (T.ringCatSheaf.over (Vi ⊓ Vj)) ⟶
+        N.over (Vi ⊓ Vj) ↦
+      q.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))) hinv)
+    (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+      (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1)
+  have hsplit : (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+        rOTj.inv).val.app
+      (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
+      (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1) =
+      rOTj.inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
+        ((ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+          (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).val.app
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
+          (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+            (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1)) := rfl
+  refine (happ.trans hsplit).trans ?_
+  have hEapp : (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).val.app
+      (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
+      (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1) =
+      (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from
+        (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))) := by
+    have h0 : (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+        (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).val.app
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
+        (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1) =
+        (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1) *
+        (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from
+          T.ringCatSheaf.obj.map (𝟙 (Vi ⊓ Vj)).op
+            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))) := rfl
+    rw [h0, one_mul]
+    show T.ringCatSheaf.obj.map (𝟙 (Vi ⊓ Vj)).op
+        (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) = _
+    rw [CategoryTheory.op_id, CategoryTheory.Functor.map_id]
+    rfl
+  rw [hEapp]
+  have hsm : (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+      (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))) =
+      (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from
+        (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))) •
+      (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1) := by
+    rw [smul_eq_mul, mul_one]
+  rw [hsm]
+  exact map_smul (CategoryTheory.ConcreteCategory.hom
+    (rOTj.inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))))) _ _
+
 /-- **(AP2-B1a, comparison A — the pushforward slot picks up the INVERSE transition unit,
 since `glueSectionA`'s chain uses `e.inv`.)** On the overlap the
 two `glueSectionA`s differ by `glueTransitionUnit`. Cocycle content of KM p. 65's glue. -/
@@ -139,14 +401,29 @@ theorem glueSectionA_compat {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}} (g
         ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
           ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).presheaf.map
           (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)).op (glueSectionA g N Vj ej) := by
-  -- Isolated core (ψ-level): the two unit-homs into `f^*N` over the overlap differ by the
-  -- `E(u⁻¹)`-precomposition, transported through the chain by the four intertwiners
-  -- (`overEquiv_unitScalarEnd`/`_inv` DualPullback:204/:292, `pullbackUnitIso_scalar` :282,
-  -- `openTopSection_morphismRestrict` :232), from the restricted-htriv `E(u)`-relation
-  -- (`overUnitScalarEnd_transitionUnit`, as in `glueSectionB_compat`).
-  -- Conclusion then follows from `unitHomEquiv_apply_coe` (rfl, mathlib Sheaf.lean:183) +
-  -- the pushforward-per-open rfl + the section smul-definition.
-  sorry
+  rw [glueSectionA_eq_adjUnit g N Vi ei, glueSectionA_eq_adjUnit g N Vj ej]
+  set φ : N ⟶ (AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+      ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N) :=
+    (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+      (pullback.snd p g)).unit.app N with hφ
+  have hnatL := PresheafOfModules.naturality_apply φ.val
+    (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi)).op (glueSectionASeed N Vi ei)
+  have hnatR := PresheafOfModules.naturality_apply φ.val
+    (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)).op (glueSectionASeed N Vj ej)
+  have happL : AlgebraicGeometry.Scheme.Modules.Hom.app φ (Vi ⊓ Vj)
+      (N.presheaf.map (homOfLE (inf_le_left : Vi ⊓ Vj ≤ Vi)).op
+        (glueSectionASeed N Vi ei)) =
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) •
+      AlgebraicGeometry.Scheme.Modules.Hom.app φ (Vi ⊓ Vj)
+        (N.presheaf.map (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)).op
+          (glueSectionASeed N Vj ej)) := by
+    rw [glueSectionASeed_compat N ei ej]
+    exact AlgebraicGeometry.Scheme.Modules.Hom.app_smul φ _ _
+  exact hnatL.symm.trans (happL.trans (congrArg
+    (fun z : ↑Γ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N), Vi ⊓ Vj) ↦
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) • z)
+    hnatR))
 
 /-- **(AP2-B1a, comparison B — the dual slot picks up the transition unit: `u • φ = φ ≫ E(u)` and
 `E(u) = e_jV.inv ≫ e_iV.hom` by `overUnitScalarEnd_transitionUnit`.)** -/
