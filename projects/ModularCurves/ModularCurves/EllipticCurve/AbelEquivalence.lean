@@ -174,6 +174,21 @@ theorem sectionsLinearEquivOfTrivialization_apply {E : Scheme.{u}} (N : E.Module
       ModularCurves.SheafOfModules.evalSection E.ringCatSheaf N W ψ.hom m :=
   rfl
 
+/-- Evaluation against a restricted trivialisation is the restriction of the evaluation:
+`restrictOverTrivialization`'s `hom` is definitionally `dualRestrict` of the original, so
+this is `evalSection_naturality`. -/
+theorem evalSection_restrictOverTrivialization {E : Scheme.{u}} (N : E.Modules)
+    (V : E.Opens) (t : N.over V ≅ _root_.SheafOfModules.unit (E.ringCatSheaf.over V))
+    {W : E.Opens} (h : W ≤ V) (m : ↑(N.val.obj (Opposite.op V))) :
+    ModularCurves.SheafOfModules.evalSection E.ringCatSheaf N W
+        (ModularCurves.SheafOfModules.restrictOverTrivialization E.ringCatSheaf N V t
+          (CategoryTheory.Over.mk (homOfLE h))).hom
+        (N.presheaf.map (homOfLE h).op m) =
+      E.presheaf.map (homOfLE h).op
+        (ModularCurves.SheafOfModules.evalSection E.ringCatSheaf N V t.hom m) :=
+  ModularCurves.SheafOfModules.evalSection_naturality E.ringCatSheaf N
+    (show Opposite.op V ⟶ Opposite.op W from (homOfLE h).op) t.hom m
+
 /-- **(sv2-b)** Per-piece clearing on a *trivial* piece: if `N` is trivial on an affine open
 `V`, a section over `V ⊓ basicOpen f` becomes, after multiplying by a power of `f`, the
 restriction of a section over `V`. Through the trivialisation this is exactly the
