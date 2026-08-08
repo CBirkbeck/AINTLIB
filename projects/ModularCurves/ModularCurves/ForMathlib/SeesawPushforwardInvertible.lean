@@ -474,4 +474,121 @@ theorem baseSections_invertible_of_kernel_finrank_of_isReduced
     (Scheme.Modules.orderedBaseCechHomologyFinite_of_isProper_of_isAffine
       (xπ := π) U hU hUaff M) hhigh hrank
 
+/-! ### Fibre transport of the degree-zero Čech kernel, on elements
+
+The chain identifying `ker (d⁰ ⊗ Γ(T,⊤))` with `H⁰(X_T, M_T) = baseSections π_T M_T` is used in
+`orderedBaseCech_appTop_kernel_finrank_of_fibre_trivial` (`ForMathlib/Seesaw.lean`) only for a
+`finrank` count. The two declarations below package it as one equivalence and record what it does
+to the class of a *global* section: it is the pullback of that section along `pullback.fst π t`. -/
+
+open TensorProduct in
+open scoped ChangeOfRings in
+/-- **The generic degree-zero link of the chain, on elements.** Composing the algebraic-to-
+categorical base-change equivalence with a transport along a map of complexes sends the class of
+`1 ⊗ z`, for `z` a cycle of the original complex, to the image of the pure tensor `1 ⊗ z` under
+the degree-zero component of that map. Pure bookkeeping, isolated from any geometry. -/
+private theorem kernelZeroChainValue
+    {R : Type u} [CommRing R] (K : CochainComplex (ModuleCat.{u} R) ℕ)
+    (A : Type u) [CommRing A] [Algebra R A]
+    {L : CochainComplex (ModuleCat.{u} A) ℕ}
+    (f : ((ModuleCat.extendScalars (algebraMap R A)).mapHomologicalComplex
+        (ComplexShape.up ℕ)).obj K ⟶ L)
+    (g : L ⟶ ((ModuleCat.extendScalars (algebraMap R A)).mapHomologicalComplex
+        (ComplexShape.up ℕ)).obj K)
+    (hfg : f.f 0 ≫ g.f 0 = 𝟙 _) (hgf : g.f 0 ≫ f.f 0 = 𝟙 _)
+    (z : LinearMap.ker ((K.d 0 1).hom)) :
+    ((HomologicalComplex.kernelZeroLinearEquivOfHom f g hfg hgf
+        (ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv K A
+          (kerBaseChangeComparison A ((K.d 0 1).hom)
+            ((1 : A) ⊗ₜ[R] z)))).1 : L.X 0) =
+      (f.f 0).hom ((1 : A) ⊗ₜ[R, algebraMap R A] (z : K.X 0)) := by
+  rw [HomologicalComplex.kernelZeroLinearEquivOfHom_coe]
+  refine ConcreteCategory.congr_arg (f.f 0) ?_
+  rw [ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv_coe,
+    kerBaseChangeComparison_coe, LinearMap.baseChange_tmul,
+    moduleCatExtendScalarsObjLinearEquiv_tmul]
+  rfl
+
+/-- **Fibre transport of the degree-zero Čech kernel.** For an affine base change `t : T ⟶ S`,
+`ker (d⁰ ⊗ Γ(T,⊤))` is the base-linear module of global sections of `M` pulled back to
+`X ×_S T`.
+
+The five links are `HomologicalComplex.baseChangeKernelZeroLinearEquiv` (algebraic base change
+versus extension of scalars), `Scheme.Modules.orderedBaseCechComplexBaseChangeIso` (the
+base-changed complex *is* the fibre's own ordered base-Čech complex),
+`HomologicalComplex.kernelZeroLinearEquivOfHom` (transport the kernel along that isomorphism) and
+`Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential` on the fibre. -/
+noncomputable def orderedBaseCechKernelBaseChangeEquivBaseSections
+    {X S T : Scheme.{u}} [IsAffine S] [IsAffine T] [X.IsSeparated]
+    {π : X ⟶ S} {M : X.Modules} [M.IsQuasicoherent]
+    {ι : Type u} [Fintype ι] [LinearOrder ι]
+    (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i)) (t : T ⟶ S) :
+    letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) := t.appTop.hom.toAlgebra
+    LinearMap.ker
+        (((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom.baseChange
+          Γ(T, (⊤ : T.Opens))) ≃ₗ[Γ(T, (⊤ : T.Opens))]
+      (Scheme.Modules.baseSections (Limits.pullback.snd π t)
+        ((Scheme.Modules.pullback (Limits.pullback.fst π t)).obj M) : Type u) :=
+  letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) := t.appTop.hom.toAlgebra
+  (ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv
+      (Scheme.Modules.orderedBaseCechComplex π M U) Γ(T, (⊤ : T.Opens))).trans
+    ((HomologicalComplex.kernelZeroLinearEquivOfHom
+        (Scheme.Modules.orderedBaseCechComplexBaseChangeIso π t M U hUaff).hom
+        (Scheme.Modules.orderedBaseCechComplexBaseChangeIso π t M U hUaff).inv
+        (by rw [← HomologicalComplex.comp_f,
+          (Scheme.Modules.orderedBaseCechComplexBaseChangeIso π t M U hUaff).hom_inv_id,
+          HomologicalComplex.id_f])
+        (by rw [← HomologicalComplex.comp_f,
+          (Scheme.Modules.orderedBaseCechComplexBaseChangeIso π t M U hUaff).inv_hom_id,
+          HomologicalComplex.id_f])).trans
+      (Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential
+        (Limits.pullback.snd π t)
+        ((Scheme.Modules.pullback (Limits.pullback.fst π t)).obj M)
+        (fun i => Limits.pullback.fst π t ⁻¹ᵁ U i)
+        ((Limits.pullback.fst π t).iSup_preimage_eq_top hU)).toLinearEquiv.symm)
+
+open TensorProduct in
+/-- **The chain sends `1 ⊗ ℓ` to the pullback of `ℓ`.** The class in `ker (d⁰ ⊗ Γ(T,⊤))` of a
+global section `ℓ` of `M` is transported to `ℓ` pulled back along `pullback.fst π t`.
+
+This is the element-level statement that a fibrewise nowhere-vanishing argument consumes: combined
+with injectivity of `kerBaseChangeComparison`
+(`kerBaseChangeComparison_orderedBaseCech_zero_bijective`) and
+`tmul_one_ne_zero_of_isUnit_dual_apply`, it turns a nonvanishing dual value into a *nonzero*
+section of `M` on the fibre. -/
+theorem orderedBaseCechKernelBaseChangeEquivBaseSections_apply
+    {X S T : Scheme.{u}} [IsAffine S] [IsAffine T] [X.IsSeparated]
+    {π : X ⟶ S} {M : X.Modules} [M.IsQuasicoherent]
+    {ι : Type u} [Fintype ι] [LinearOrder ι]
+    (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i)) (t : T ⟶ S)
+    (x : Scheme.Modules.baseSections π M) :
+    letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) := t.appTop.hom.toAlgebra
+    orderedBaseCechKernelBaseChangeEquivBaseSections U hU hUaff t
+        (kerBaseChangeComparison Γ(T, (⊤ : T.Opens))
+          ((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom
+          ((1 : Γ(T, (⊤ : T.Opens))) ⊗ₜ[Γ(S, (⊤ : S.Opens))]
+            (Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential
+              π M U hU).hom x)) =
+      (((Scheme.Modules.pullbackPushforwardAdjunction
+        (Limits.pullback.fst π t)).unit.app M).val.app
+          (Opposite.op (⊤ : X.Opens))) x := by
+  letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) := t.appTop.hom.toAlgebra
+  refine (Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential
+      (Limits.pullback.snd π t)
+      ((Scheme.Modules.pullback (Limits.pullback.fst π t)).obj M)
+      (fun i => Limits.pullback.fst π t ⁻¹ᵁ U i)
+      ((Limits.pullback.fst π t).iSup_preimage_eq_top hU)).toLinearEquiv.symm_apply_eq.mpr ?_
+  refine Subtype.ext (Eq.trans (kernelZeroChainValue
+    (Scheme.Modules.orderedBaseCechComplex π M U) Γ(T, (⊤ : T.Opens))
+    (Scheme.Modules.orderedBaseCechComplexBaseChangeIso π t M U hUaff).hom
+    (Scheme.Modules.orderedBaseCechComplexBaseChangeIso π t M U hUaff).inv _ _
+    ((Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential π M U hU).hom x)) ?_)
+  refine Scheme.Modules.orderedBaseCechObject_ext _ _ _ 0 fun i => ?_
+  refine Eq.trans ?_ (Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential_hom_π
+    (Limits.pullback.snd π t) ((Scheme.Modules.pullback (Limits.pullback.fst π t)).obj M)
+    (fun j => Limits.pullback.fst π t ⁻¹ᵁ U j)
+    ((Limits.pullback.fst π t).iSup_preimage_eq_top hU) _ i).symm
+  exact Scheme.Modules.orderedBaseCechXBaseChangeIso_one_tmul_of_projection_eq π t M U hUaff 0 _ x i
+    (Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential_hom_π π M U hU x i)
+
 end ModularCurves

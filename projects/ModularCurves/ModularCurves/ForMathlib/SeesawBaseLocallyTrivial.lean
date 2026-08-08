@@ -58,18 +58,25 @@ Everything below the blocked step is proved here:
 ## What is left, and why (the one `sorry`)
 
 `le_basicOpen_evalSection_of_dual_baseSections` — *the section `ℓ_k` is nowhere vanishing over
-`D(f_k)`*. Its first two steps are now proved:
+`D(f_k)`*. Its first three steps are now proved:
 
 * step 1, `1 ⊗ ℓ_k ≠ 0` in `π_* M ⊗ κ(y)`, is `tmul_one_ne_zero_of_isUnit_dual_apply` here;
 * step 2, the cohomology-and-base-change injection `π_* M ⊗ κ(y) ↪ H⁰(X_{κ(y)}, M_{κ(y)})`, is
   `kerBaseChangeComparison_orderedBaseCech_zero_bijective`
   (`ForMathlib/SeesawPushforwardInvertible.lean`), added for this file. It is the reason `hhigh`,
   `hrank` and `[IsReduced S]` — Half B.1's own hypotheses — now appear here.
+* step 3, the *transport* of that nonzero class to a nonzero section of `M_T` on `X ×_S T`, is
+  `baseChange_unit_ne_zero_of_isUnit_dual_apply` here, on top of the fibre-transport chain
+  `orderedBaseCechKernelBaseChangeEquivBaseSections` and its `_apply` lemma
+  (`ForMathlib/SeesawPushforwardInvertible.lean`) — the chain sends `1 ⊗ ℓ` to the pullback of `ℓ`
+  along `pullback.fst π t`. Its element-level API is now in
+  `ForMathlib/AffineModuleCechBaseChange.lean` and
+  `ForMathlib/SchemeModuleOrderedBaseCechZero.lean`.
 
-What remains is steps 3–4, the *transport* of that nonzero class back to the point `y`: the
-five-link chain identifying `ker (d⁰ ⊗ κ(y))` with `Γ(X_{κ(y)}, M_{κ(y)})` exists in the tree but
-has no element-level (`_apply`) lemmas, because its only present consumer uses it for a `finrank`
-count. See the lemma's own docstring for the precise list.
+What remains is step 4 only: `hfib`/`hπ` make that nonzero section a **unit** on the fibre, and one
+must read that unit off at the point `y`. This needs `evalSection` compatibility with the pullback
+of modules along `pullback.fst π t` — a piece of `Picard/Evaluation.lean`-style API that does not
+exist yet. See the lemma's own docstring for the precise list.
 
 ## Consumer
 
@@ -118,6 +125,59 @@ theorem tmul_one_ne_zero_of_isUnit_dual_apply {R : Type u} [CommRing R] {P : Typ
   rw [hzero, map_zero] at h1
   rw [← h1] at h
   exact not_isUnit_zero h
+
+open TensorProduct in
+/-- **Steps 1–3 of the nowhere-vanishing argument, assembled.** Over an affine base change
+`t : T ⟶ S` on which the dual value `φ l` becomes invertible, the pullback of `l` along
+`pullback.fst π t` is a **nonzero** section of `M` on the fibre product.
+
+The three inputs are `tmul_one_ne_zero_of_isUnit_dual_apply` (step 1: `1 ⊗ l ≠ 0`),
+`kerBaseChangeComparison_orderedBaseCech_zero_bijective` (step 2: the injection
+`π_* M ⊗ Γ(T,⊤) ↪ ker (d⁰ ⊗ Γ(T,⊤))`) and
+`orderedBaseCechKernelBaseChangeEquivBaseSections_apply` (step 3: the fibre-transport chain sends
+`1 ⊗ l` to the pullback of `l`). Nothing here uses `hfib` or `hπ`: this is the "the section
+survives" half, and it holds for an arbitrary invertible `M`. -/
+private theorem baseChange_unit_ne_zero_of_isUnit_dual_apply
+    {X S T : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian S]
+    [IsNoetherian X] [X.IsSeparated] [IsAffine T] [Nontrivial Γ(T, (⊤ : T.Opens))]
+    {π : X ⟶ S} [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
+    {M : X.Modules} (hM : AlgebraicGeometry.Scheme.Modules.IsInvertible M)
+    {ι : Type u} [Fintype ι] [LinearOrder ι]
+    (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hhigh : ∀ q, 1 ≤ q → q < Fintype.card ι →
+      Function.Exact ((AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex π M U).d q (q+1)).hom
+        ((AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex π M U).d (q+1) (q+2)).hom)
+    (hrank : ∀ (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K],
+      Module.finrank K (LinearMap.ker
+        (((AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom.baseChange K))
+        = 1)
+    (t : T ⟶ S)
+    (φ : Module.Dual Γ(S, (⊤ : S.Opens))
+      (AlgebraicGeometry.Scheme.Modules.baseSections π M))
+    (l : AlgebraicGeometry.Scheme.Modules.baseSections π M)
+    (hunit : IsUnit (t.appTop.hom (φ l))) :
+    (((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+        (Limits.pullback.fst π t)).unit.app M).val.app (Opposite.op (⊤ : X.Opens))) l ≠ 0 := by
+  letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) := t.appTop.hom.toAlgebra
+  letI : M.IsQuasicoherent := hM.isQuasicoherent
+  let e0 := (AlgebraicGeometry.Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential
+    π M U hU).toLinearEquiv
+  have h1 : (1 : Γ(T, (⊤ : T.Opens))) ⊗ₜ[Γ(S, (⊤ : S.Opens))] l ≠ 0 :=
+    tmul_one_ne_zero_of_isUnit_dual_apply φ l Γ(T, (⊤ : T.Opens)) hunit
+  have h2 : (1 : Γ(T, (⊤ : T.Opens))) ⊗ₜ[Γ(S, (⊤ : S.Opens))] (e0 l) ≠ 0 := by
+    intro hz
+    refine h1 ((LinearEquiv.lTensor Γ(T, (⊤ : T.Opens)) e0).map_eq_zero_iff.mp ?_)
+    exact (LinearEquiv.lTensor_tmul Γ(T, (⊤ : T.Opens)) e0 1 l).trans hz
+  have h3 : kerBaseChangeComparison Γ(T, (⊤ : T.Opens))
+      ((AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom
+      ((1 : Γ(T, (⊤ : T.Opens))) ⊗ₜ[Γ(S, (⊤ : S.Opens))] (e0 l)) ≠ 0 := by
+    intro hz
+    exact h2 ((kerBaseChangeComparison_orderedBaseCech_zero_bijective hM U hU hUaff hhigh hrank
+      Γ(T, (⊤ : T.Opens))).injective (hz.trans (map_zero _).symm))
+  intro hzero
+  refine h3 ?_
+  refine (orderedBaseCechKernelBaseChangeEquivBaseSections U hU hUaff t).map_eq_zero_iff.mp ?_
+  exact (orderedBaseCechKernelBaseChangeEquivBaseSections_apply U hU hUaff t l).trans hzero
 
 /-- **Local-to-global.** A global section `l` of `M` whose multiplication map `r ↦ r • l` is
 bijective on every open inside a member of a family covering `U` trivializes `M` over `U`.
@@ -274,32 +334,42 @@ coordinate of `l`. Then, in order:
    (both composites are the base change of `kZeroToCZero ∘ subtype`). It is exactly why `hhigh`,
    `hrank` and `[IsReduced S]` were added to this file.
    With 1 this gives: the image of `l` in `ker (d⁰ ⊗ k)` is nonzero.
-3. **`H⁰(X_k, M_k) ≅ k`, so a nonzero section there is a unit.** `hfib` gives `M_k ≅ 𝒪_{X_k}` and
-   `hπ` gives `Γ(X_k, 𝒪) ≅ k`; a nonzero constant is nowhere vanishing on `X_k`.
-4. **Descend to `y`.** `Spec κ(y) → X` and `𝟙` give a section `σ : Spec k ⟶ X ×_S Spec k`, and the
-   value of `l` at `σ` is `a(y)` up to a unit; so `a(y) ≠ 0`, i.e. `y ∈ X.basicOpen a`
-   (`Scheme.evaluation_ne_zero_iff_mem_basicOpen` / `Scheme.mem_basicOpen`).
+3. **Transport the class to a nonzero section of `M_k` on `X_k`.** ✅ PROVED —
+   `baseChange_unit_ne_zero_of_isUnit_dual_apply` above, which packages 1 and 2 with
+   `orderedBaseCechKernelBaseChangeEquivBaseSections_apply`
+   (`ForMathlib/SeesawPushforwardInvertible.lean`): the five-link fibre-transport chain sends
+   `1 ⊗ l` to the *pullback of `l` along `pullback.fst π t`*, so that pullback is nonzero. The
+   element-level API for the chain that this needed is now in place — see
+   `orderedBaseCechXBaseChangeIso_one_tmul_of_projection_eq`
+   (`ForMathlib/AffineModuleCechBaseChange.lean`) and
+   `baseSectionsIsoKernelOrderedBaseCechDifferential_hom_π` /
+   `orderedBaseCechObject_ext` (`ForMathlib/SchemeModuleOrderedBaseCechZero.lean`).
+4. **`H⁰(X_k, M_k) ≅ k`, and descend to `y`.** ❌ REMAINING. `hfib` gives `M_k ≅ 𝒪_{X_k}` and `hπ`
+   gives `Γ(X_k, 𝒪) ≅ k`, so the nonzero section of 3 becomes a nonzero constant `c ∈ k`, hence a
+   **unit** of `Γ(X_k, 𝒪)`; and `X.fromSpecResidueField y` together with `𝟙` gives a section
+   `σ : Spec k ⟶ X ×_S Spec k` over `y`, at which the value of `l` is `a(y)` up to a unit. Then
+   `a(y) ≠ 0`, i.e. `y ∈ X.basicOpen a` (`Scheme.mem_basicOpen`).
 
-## What still blocks 3–4, precisely
+## What still blocks 4, precisely
 
-Steps 3 and 4 are *not* a mathematical gap — they are a **missing element-level API for the fibre
-transport**. The chain identifying `ker (d⁰ ⊗ Γ(T,⊤))` with `baseSections π_T M_T` exists and is
-used in `orderedBaseCech_appTop_kernel_finrank_of_fibre_trivial` (`ForMathlib/Seesaw.lean`):
+The transport is done; what is missing is **`evalSection` versus pullback of modules along a
+scheme morphism**. Concretely, three ingredients, none of which exists in the tree:
 
-`HomologicalComplex.baseChangeKernelZeroLinearEquiv` → `orderedBaseCechComplexBaseChangeIso` →
-`HomologicalComplex.kernelZeroLinearEquivOfHom` → `baseSectionsIsoKernelOrderedBaseCechDifferential`
-→ `baseSectionsMapIso π_T (hfib …).some`.
+* the **pulled-back trivialization**: from `ψ : M.over W ≅ 𝒪` produce a trivialization of
+  `(Scheme.Modules.pullback g).obj M` over `g ⁻¹ᵁ W`, for `g := pullback.fst π t` — the existing
+  `restrictTrivialization` / `restrictIsoOfPullbackIso` / `overTrivializationOfRestrictIso` family
+  (`Picard/`) only covers *open immersions*, not a general `g`;
+* the **naturality of `evalSection` along `g`**: the evaluation of `g^* l` against that
+  trivialization is `g^# a`. (`evalSection_naturality` in `Picard/Evaluation.lean` is naturality in
+  the *open*, not along a morphism of schemes; `evalSection_factor`
+  (`Picard/PicComparison.lean`) then supplies the unit relating it to `hfib`'s own trivialization,
+  on the same open, and is the piece that *does* exist.);
+* the **germ comparison**: a point `z` of `X ×_S Spec k` over `y` (take `σ` above), plus the fact
+  that the local homomorphism `𝒪_{X,y} → 𝒪_{X_k,z}` reflects units, so that unitness of `g^# a` at
+  `z` gives unitness of `a` at `y` (`RingedSpace.isUnit_of_isUnit_germ` is then the packaging, as
+  in `isUnit_evalSection_of_dual_baseSections` below).
 
-That chain is used there only for a `finrank` computation, so **none of its five links has an
-`_apply`/`_coe` lemma** (`orderedBaseCechComplexBaseChangeIso` has only `…_hom_f`, reducing to
-`orderedBaseCechXBaseChangeIso`, which again has no element description). To run step 3 one must
-know that the chain sends `1 ⊗ l` to the *pullback of `l` along `pullback.fst π t`*, and step 4
-additionally needs the compatibility of `evalSection` with that pullback and with the germ at `y`.
-Writing those five `_apply` lemmas — plus the section `σ` and the germ comparison — is a separate,
-sizeable piece of work in `ForMathlib/AffineModuleCechBaseChange.lean` and
-`ForMathlib/SchemeModuleOrderedBaseCechZero.lean`, and it is what remains.
-
-Nothing about the *statement* is in doubt: with steps 1 and 2 in hand the mathematics of 3–4 is the
+Nothing about the *statement* is in doubt: with steps 1–3 in hand the mathematics of 4 is the
 completely standard "`h⁰` of the fibre is `κ(s)`, so a nonzero section is a unit". -/
 private theorem le_basicOpen_evalSection_of_dual_baseSections
     {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian S]
