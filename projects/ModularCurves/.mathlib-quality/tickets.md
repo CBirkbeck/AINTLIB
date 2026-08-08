@@ -39442,6 +39442,22 @@ its zero-section value (an element of `Γ(T, U i)ˣ`, transported by
 `_trans`/`_symm` and check membership via `mem_kUnits_iff` — the rescaling ratios cancel along `z`
 because `kUnitsEval` is a group hom. No new theory needed; it is cocycle bookkeeping.
 
+**AP-D3 OPENED AND ADVANCING** (2026-08-08): the ticket that was blocked on the unavailable [K5]
+reference now has FIVE proved lemmas (all standard-three) in `WeilPairing/UnitSheaf.lean`, on the
+restated consumable form:
+* `kUnitsEval_transitionUnit_eq_div` — zero-section evaluation is multiplicative across transition
+  units (KM's `f_{i,j} ∘ π = h_i/h_j`, p. 88);
+* `transitionUnit_mem_kUnits_iff` — the normalization membership test;
+* `transitionUnit_self_mem_kUnits`, `transitionUnit_symm_mem_kUnits`,
+  `transitionUnit_trans_mem_kUnits` — being normalized is an *equivalence relation* on
+  trivialisations, which is the cocycle condition KM's `h_i` patching (p. 89, AP-D6) consumes.
+Together with `kUnits_eq_bot` (= `H⁰(E,K_E^×) = {1}`, AP-D2) this is the whole interface KM's pairing
+construction uses; the abstract `Pic ≅ H¹(K^×)` isomorphism is not needed. NEXT for AP-D3: the
+existence statement — rescale a family of trivialisations so that all its transition units are
+normalized (divide `e i` by its own zero-section value; the ratios cancel by the multiplicativity
+lemma). Technique notes: the tree's `_symm` states a product `= 1` (not an inverse), so use forward
+`congrArg` reasoning; pin the base-change morphism implicitly (`(g := g)`) to avoid elaboration blowup.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
