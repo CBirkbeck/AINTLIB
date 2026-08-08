@@ -38,6 +38,22 @@ open AlgebraicGeometry.Scheme.Modules
 
 namespace ModularCurves
 
+/-- The vanishing ideal of a global section `σ` of a module `M`: over each affine open,
+the ideal of values of local functionals against `σ` (the evaluation ideal). On a
+trivialising open this is the principal ideal of the trivialised value of `σ`; the
+basic-open compatibility is checked at maximal ideals through trivialising basic opens
+(`Ideal.mem_of_localization_maximal` — board note 2026-08-08, no quasi-coherent
+localization needed). -/
+noncomputable def sectionVanishingIdeal {E : Scheme.{u}} (M : E.Modules) (σ : ↑Γ(M, ⊤)) :
+    E.IdealSheafData where
+  ideal U := Ideal.span (Set.range fun φ : M.over U.1 ⟶
+      _root_.SheafOfModules.unit (E.ringCatSheaf.over U.1) =>
+    (show ↑Γ(E, U.1) from φ.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 U.1)))
+      (show (M.over U.1).val.obj (Opposite.op (CategoryTheory.Over.mk (𝟙 U.1))) from
+        M.presheaf.map (homOfLE le_top).op σ)))
+  map_ideal_basicOpen U f := by
+    sorry
+
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
 effective Cartier divisor whose ideal is the `M`-inverse twist of the pushforward pullback:
