@@ -1024,7 +1024,19 @@ theorem nonempty_discrepancy_iso_pullback_pushforward {X S : Scheme.{u}} {p : X 
       rw [hfac]
       infer_instance
     -- (s5) components: from the restricted iso to per-open bijectivity
-    sorry
+    obtain ⟨V', rfl⟩ : ∃ V' : ((pullback.snd p g ⁻¹ᵁ U i)).toScheme.Opens,
+        (pullback.snd p g ⁻¹ᵁ U i).ι ''ᵁ V' = W :=
+      ⟨(pullback.snd p g ⁻¹ᵁ U i).ι ⁻¹ᵁ W, by
+        apply TopologicalSpace.Opens.ext
+        change (pullback.snd p g ⁻¹ᵁ U i).ι.base '' ((pullback.snd p g ⁻¹ᵁ U i).ι.base ⁻¹' W) = _
+        rw [Set.image_preimage_eq_inter_range]
+        rw [Scheme.Opens.range_ι]
+        exact Set.inter_eq_left.mpr hW⟩
+    exact (CategoryTheory.ConcreteCategory.isIso_iff_bijective _).mp
+      (inferInstanceAs (IsIso (((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+        (pullback.snd p g ⁻¹ᵁ U i).ι).map
+        ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+          (pullback.snd p g)).counit.app (tensorObj M (dualObj M')))).app V')))
   haveI : IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
       (pullback.snd p g)).counit.app (tensorObj M (dualObj M'))) :=
     AlgebraicGeometry.Scheme.Modules.isIso_of_bijective_app_on_cover _
