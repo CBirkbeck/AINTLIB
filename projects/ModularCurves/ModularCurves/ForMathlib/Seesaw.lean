@@ -5,8 +5,10 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.ForMathlib.AffineFieldPointTower
 import ModularCurves.ForMathlib.BaseChangeKerCoker
+import ModularCurves.ForMathlib.SeesawBaseLocallyTrivial
 import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
 import ModularCurves.Picard.RigidDescent
+import ModularCurves.WeilPairing.RelPicLocal
 
 /-!
 # The seesaw theorem over a reduced base (`KM-SEESAW`, Stacks 0EX7 at rank 1)
@@ -318,15 +320,27 @@ for a rational `P ≠ 0`. Riemann–Roch on genus `1` with `deg = 1 > 2g-2 = 0` 
 and `0`), and indeed the counit is the inclusion `𝒪_E → 𝒪_E(P)`, injective and not surjective — the
 generator of `Γ(𝒪_E(P))` is the image of `1`, whose zero divisor is `P`. Substituting the *cohomological
 dimension* `h⁰ = 1` for the *geometric* hypothesis `M_s ≅ 𝒪` loses exactly the nowhere-vanishing
-information, and 0EX7's own hypothesis (1) is the geometric one. -/
+information, and 0EX7's own hypothesis (1) is the geometric one.
+
+`hhigh` — exactness of the base-Čech complex at the positions `≥ 2` — is the third hypothesis, and
+it is what makes the Grauert substitute run: it supplies `Module.Flat Γ(S,⊤) (ker d¹)` and the
+degree-one kernel base-change comparison (`Module.Flat.ker_of_bounded_exact_from` and
+`kerBaseChangeComparison_bijective_of_bounded_exact_from`, both at `k = 1`) that Half B.1,
+`baseSections_invertible_of_kernel_finrank_of_isReduced`, needs. It is strictly weaker than
+positive-tail exactness: position `1`, i.e. `H¹(X, M) = 0`, is **not** demanded — that is false on a
+genus-1 fibre — while `H^{≥2}` does vanish for a relative curve, so `hhigh` is expected to be
+automatic in the application. See the "rejected split" in the module docstring for the boundary. -/
 theorem exists_pullback_iso_of_kernel_finrank_of_fibre_trivial
-    {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian X] [X.IsSeparated]
+    {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian S] [IsNoetherian X] [X.IsSeparated]
     {π : X ⟶ S}
     [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
     (hπ : UniversallyOConnected π)
     {M : X.Modules} (hM : IsInvertible M)
     {ι : Type u} [Fintype ι] [LinearOrder ι]
     (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hhigh : ∀ q, 1 ≤ q → q < Fintype.card ι →
+      Function.Exact ((orderedBaseCechComplex π M U).d q (q + 1)).hom
+        ((orderedBaseCechComplex π M U).d (q + 1) (q + 2)).hom)
     (hrank : ∀ (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K],
       let C := orderedBaseCechComplex π M U
       Module.finrank K (LinearMap.ker ((C.d 0 1).hom.baseChange K)) = 1)
@@ -335,7 +349,39 @@ theorem exists_pullback_iso_of_kernel_finrank_of_fibre_trivial
           (Limits.pullback.fst π x)).obj M ≅ unitObj (Limits.pullback π x))) :
     ∃ N : S.Modules, IsInvertible N ∧
       Nonempty (M ≅ (AlgebraicGeometry.Scheme.Modules.pullback π).obj N) := by
-  sorry
+  -- Half B.1: the pushforward's global sections form an invertible `Γ(S, ⊤)`-module
+  have hinv := baseSections_invertible_of_kernel_finrank_of_isReduced hM U hU hUaff hhigh
+    (fun K _ _ ↦ hrank K)
+  -- Half B.2: `M` is trivial over a Zariski open cover *of the base*
+  obtain ⟨ι', V, hV, hVtriv⟩ := exists_baseCover_restrict_unitObj_iso_of_invertible_baseSections
+    hπ hM U hU hUaff hhigh (fun K _ _ ↦ hrank K) hinv hfib
+  -- Half A, at `M' = 𝒪_X` and `N i = 𝒪_{V i}`: the descent consumes the base-local trivialisations
+  -- in twisted form, and both twists are trivial.
+  have hglue : ∀ i, Nonempty (M.restrict (π ⁻¹ᵁ V i).ι ≅
+      tensorObj ((unitObj X).restrict (π ⁻¹ᵁ V i).ι)
+        ((AlgebraicGeometry.Scheme.Modules.pullback (π ∣_ V i)).obj (unitObj (V i).toScheme))) := by
+    intro i
+    letI := AlgebraicGeometry.Scheme.Modules.monoidalCategory (π ⁻¹ᵁ V i).toScheme
+    letI := AlgebraicGeometry.Scheme.Modules.symmetricCategory (π ⁻¹ᵁ V i).toScheme
+    refine toSkeleton_eq_toSkeleton_iff.mp ?_
+    have h1 : toSkeleton ((unitObj X).restrict (π ⁻¹ᵁ V i).ι) = 1 :=
+      (toSkeleton_eq_toSkeleton_iff.mpr
+        ⟨(restrictFunctorIsoPullback (π ⁻¹ᵁ V i).ι).app (unitObj X) ≪≫
+          pullbackUnitIso (π ⁻¹ᵁ V i).ι⟩).trans toSkeleton_unitObj
+    have h2 : toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback (π ∣_ V i)).obj
+        (unitObj (V i).toScheme)) = 1 :=
+      (toSkeleton_eq_toSkeleton_iff.mpr ⟨pullbackUnitIso (π ∣_ V i)⟩).trans toSkeleton_unitObj
+    rw [toSkeleton_tensorObj_eq, h1, h2, one_mul]
+    exact (toSkeleton_eq_toSkeleton_iff.mpr (hVtriv i)).trans toSkeleton_unitObj
+  obtain ⟨N₀, hN₀, e⟩ := exists_pullback_twist_of_locally' π hπ.isIso_app hM isInvertible_unit
+    V hV (fun i ↦ unitObj (V i).toScheme) (fun _ ↦ isInvertible_unit) hglue
+  -- `𝒪_X ⊗ π^*N₀ ≅ π^*N₀`, so the twisted conclusion is the seesaw's
+  refine ⟨N₀, hN₀, ?_⟩
+  letI := AlgebraicGeometry.Scheme.Modules.monoidalCategory X
+  letI := AlgebraicGeometry.Scheme.Modules.symmetricCategory X
+  refine toSkeleton_eq_toSkeleton_iff.mp ?_
+  have he := toSkeleton_eq_toSkeleton_iff.mpr e
+  rwa [toSkeleton_tensorObj_eq, toSkeleton_unitObj, one_mul] at he
 
 /-- **(KM-SEESAW, Stacks 0EX7 at rank 1)** The seesaw theorem: an invertible sheaf on a proper flat
 family of finite presentation over a **reduced** affine base, trivial on every fibre, is pulled back
@@ -344,13 +390,28 @@ from the base.
 The composition of `orderedBaseCech_kernel_finrank_of_fibre_trivial` (KM-SEESAW-1′) with
 `exists_pullback_iso_of_kernel_finrank_of_fibre_trivial` (KM-SEESAW-2″), over the finite affine
 trivialising cover produced by `IsInvertible.exists_finiteAffineBaseCech_flat`. Note that `hfib` is fed
-to **both** — the descent step needs it in its own right, not merely through the rank. -/
+to **both** — the descent step needs it in its own right, not merely through the rank.
+
+**On `hhigh`.** KM-SEESAW-2″ needs `H^{≥2}` of the base-Čech complex to vanish (see its docstring);
+here the cover is *produced inside the proof* by `exists_finiteAffineBaseCech_flat`, which gives no
+control on it, so the hypothesis has to be quantified over all finite affine open covers. It is not
+derived from the fibre side, and that is the one remaining obligation on the way to a
+hypothesis-free `0EX7`: for a relative curve `H^{≥2}(X_s, M_s) = 0` fibrewise
+(`subsingleton_H_add_two_of_two_affine_open_cover`), and
+`HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
+lifts fibrewise exactness to the base ring exactly as `kernel_data_of_hasDegreeOneFibreCohomology`
+does — over `q ≥ 1` instead of `q ≥ 0`. Discharging it needs a *curve* hypothesis on `π`, which this
+statement (a general proper flat family) does not carry, hence the binder. -/
 theorem exists_pullback_iso_of_fibrewise_trivial_of_isReduced
-    {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian X] [X.IsSeparated]
+    {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian S] [IsNoetherian X] [X.IsSeparated]
     {π : X ⟶ S}
     [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
     (hπ : UniversallyOConnected π)
     {M : X.Modules} (hM : IsInvertible M)
+    (hhigh : ∀ {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens), IsOpenCover U →
+      (∀ i, IsAffineOpen (U i)) → ∀ q, 1 ≤ q → q < Fintype.card ι →
+        Function.Exact ((orderedBaseCechComplex π M U).d q (q + 1)).hom
+          ((orderedBaseCechComplex π M U).d (q + 1) (q + 2)).hom)
     (hfib : ∀ {k : Type u} [Field k] (x : Spec (.of k) ⟶ S),
       Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
           (Limits.pullback.fst π x)).obj M ≅ unitObj (Limits.pullback π x))) :
@@ -360,6 +421,7 @@ theorem exists_pullback_iso_of_fibrewise_trivial_of_isReduced
   letI : Fintype ι := Fintype.ofFinite ι
   letI : LinearOrder ι := LinearOrder.lift' (Fintype.equivFin ι) (Equiv.injective _)
   exact exists_pullback_iso_of_kernel_finrank_of_fibre_trivial hπ hM U hU hUaff
+    (hhigh U hU hUaff)
     (fun K _ _ => orderedBaseCech_kernel_finrank_of_fibre_trivial hπ hM U hU hUaff K hfib) hfib
 
 end ModularCurves

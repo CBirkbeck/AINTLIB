@@ -7,7 +7,10 @@ import ModularCurves.Picard.DualPullback
 import ModularCurves.Picard.DualPullback.LocalTrivializationSection
 import ModularCurves.Picard.DualPullback.Iso
 import ModularCurves.Picard.InvertibleSheafCocycle
-import ModularCurves.WeilPairing.TensorSection
+-- `ModularCurves.WeilPairing.TensorSection` is deliberately NOT imported: nothing in this file uses
+-- it, and its four `tensorSection*` declarations collide by full name with the ones in
+-- `EllipticCurve/PoleSheaf.lean` and `EllipticCurve/PullbackTensorSection.lean`, which the seesaw
+-- consumer of this file (`ForMathlib/Seesaw.lean`) imports. Restoring the import breaks that build.
 import ModularCurves.WeilPairing.UnitSheaf
 import ModularCurves.Picard.InvertibleSheafBaseCechFlat
 
@@ -1180,4 +1183,433 @@ theorem exists_pullback_twist_of_locally {X S : Scheme.{u}} {p : X ⟶ S} {T : S
     exact toSkeleton_eq_toSkeleton_iff.mpr (nonempty_eval_iso hM')
   rw [toSkeleton_tensorObj_eq, ← h2, toSkeleton_tensorObj_eq, mul_left_comm, h3, mul_one]
 
+
+/-! ### The bare-morphism form of the descent (ticket T7)
+
+The four declarations above are stated for the projection `pullback.snd p g` out of a fibre
+product, which is the shape the relative-Picard consumers produce. The seesaw
+(`ForMathlib/Seesaw.lean`) instead has a bare family `π : X ⟶ S`, and `X` is *not* presented as
+a fibre product; transporting modules along `pullback π (𝟙 S) ≅ X` is strictly more work than
+observing that the pullback square is never used.
+
+Indeed `hp : UniversallyOConnected p` enters those proofs *only* through
+`hp g W : IsIso ((pullback.snd p g).app W)`. So the whole chain generalises verbatim to an
+arbitrary `f : Y ⟶ T` with `hf : ∀ W, IsIso (f.app W)`, which is what the primed versions below
+record. (A cleanup pass should re-derive the unprimed statements from these; they are kept
+untouched here so that no existing consumer moves.)
+-/
+
+/-- A universally `O`-connected morphism has isomorphism section-components: the case `g = 𝟙 S`
+of the definition, transported along the canonical `X ≅ X ×_S S`.
+
+This is the bridge between `UniversallyOConnected p` — which speaks about the *base changes* of
+`p` — and the hypothesis `∀ W, IsIso (f.app W)` that the descent chain below actually consumes
+for `f` itself. -/
+theorem UniversallyOConnected.isIso_app {X S : Scheme.{u}} {p : X ⟶ S}
+    (hp : UniversallyOConnected p) (U : S.Opens) : IsIso (p.app U) := by
+  have hpb : IsPullback (𝟙 X) p p (𝟙 S) := IsPullback.of_horiz_isIso ⟨by simp⟩
+  have hcomp : hpb.isoPullback.hom ≫ pullback.snd p (𝟙 S) = p := hpb.isoPullback_hom_snd
+  have h2 : IsIso ((hpb.isoPullback.hom ≫ pullback.snd p (𝟙 S)).app U) := by
+    rw [Scheme.Hom.comp_app]
+    exact IsIso.comp_isIso' (hp (𝟙 S) U)
+      (Scheme.Hom.instIsIsoCommRingCatApp hpb.isoPullback.hom _)
+  rwa [hcomp] at h2
+
+/-- **(P-local, bare-morphism form)** `nonempty_pullback_discrepancy_iso` for an arbitrary
+`f : Y ⟶ T` in place of `pullback.snd p g`: on a trivialising piece the discrepancy pulls back
+to `N i`. Nothing in the argument sees the pullback square. -/
+theorem nonempty_pullback_discrepancy_iso' {Y T : Scheme.{u}} (f : Y ⟶ T)
+    {M M' : Y.Modules} (hM : IsInvertible M) (hM' : IsInvertible M')
+    {ι : Type u} (U : ι → T.Opens)
+    (N : ∀ i, (U i).toScheme.Modules)
+    (hglue : ∀ i, Nonempty
+      (M.restrict (f ⁻¹ᵁ U i).ι ≅
+        tensorObj (M'.restrict (f ⁻¹ᵁ U i).ι)
+          ((AlgebraicGeometry.Scheme.Modules.pullback
+            (f ∣_ U i)).obj (N i))))
+    (i : ι) :
+    Nonempty
+      ((AlgebraicGeometry.Scheme.Modules.pullback
+        (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')) ≅
+      (AlgebraicGeometry.Scheme.Modules.pullback (f ∣_ U i)).obj (N i)) := by
+    letI := AlgebraicGeometry.Scheme.Modules.monoidalCategory
+      (f ⁻¹ᵁ U i).toScheme
+    letI := AlgebraicGeometry.Scheme.Modules.symmetricCategory
+      (f ⁻¹ᵁ U i).toScheme
+    refine toSkeleton_eq_toSkeleton_iff.mp ?_
+    obtain ⟨e1⟩ := AlgebraicGeometry.Scheme.Modules.nonempty_pullback_tensorObj
+      (f ⁻¹ᵁ U i).ι M (dualObj M')
+    obtain ⟨eglue⟩ := hglue i
+    have h1 : toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+        (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M'))) =
+        toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+          (f ⁻¹ᵁ U i).ι).obj M) *
+        toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+          (f ⁻¹ᵁ U i).ι).obj (dualObj M')) :=
+      (toSkeleton_eq_toSkeleton_iff.mpr ⟨e1⟩).trans (toSkeleton_tensorObj_eq _ _)
+    have h2 : toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+        (f ⁻¹ᵁ U i).ι).obj (dualObj M')) =
+        toSkeleton (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+          (f ⁻¹ᵁ U i).ι).obj M')) :=
+      toSkeleton_eq_toSkeleton_iff.mpr
+        ⟨AlgebraicGeometry.Scheme.Modules.dualPullbackIsoOfIsInvertibleT _ M' hM'⟩
+    have h3 : toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+        (f ⁻¹ᵁ U i).ι).obj M) =
+        toSkeleton (M'.restrict (f ⁻¹ᵁ U i).ι) *
+        toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+          (f ∣_ U i)).obj (N i)) := by
+      refine Eq.trans ?_ ((toSkeleton_eq_toSkeleton_iff.mpr ⟨eglue⟩).trans
+        (toSkeleton_tensorObj_eq _ _))
+      exact toSkeleton_eq_toSkeleton_iff.mpr
+        ⟨((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
+          (f ⁻¹ᵁ U i).ι).app M).symm⟩
+    have h5 : toSkeleton (M'.restrict (f ⁻¹ᵁ U i).ι) =
+        toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+          (f ⁻¹ᵁ U i).ι).obj M') :=
+      toSkeleton_eq_toSkeleton_iff.mpr
+        ⟨(AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
+          (f ⁻¹ᵁ U i).ι).app M'⟩
+    have h6 : toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+        (f ⁻¹ᵁ U i).ι).obj M') *
+        toSkeleton (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+          (f ⁻¹ᵁ U i).ι).obj M')) = 1 := by
+      rw [← toSkeleton_tensorObj_eq, ← toSkeleton_unitObj]
+      exact toSkeleton_eq_toSkeleton_iff.mpr
+        (nonempty_eval_iso (hM'.pullback (f ⁻¹ᵁ U i).ι))
+    rw [h1, h2, h3, h5, mul_right_comm, h6, one_mul]
+
+
+/-- **(P-invertible leaf, bare-morphism form)** `isInvertible_pushforward_discrepancy` for an
+arbitrary `f : Y ⟶ T`: the pushforward of the discrepancy `M ⊗ (M')^∨` is invertible.
+
+The original consumes `hp : UniversallyOConnected p` *only* through
+`hp g W : IsIso ((pullback.snd p g).app W)`, so `hf` is exactly the hypothesis the proof uses;
+`UniversallyOConnected.isIso_app` supplies it for a universally `O`-connected `f`, and
+`UniversallyOConnected.baseChange` for any base change of one. -/
+theorem isInvertible_pushforward_discrepancy' {Y T : Scheme.{u}} (f : Y ⟶ T)
+    (hf : ∀ W : T.Opens, IsIso (f.app W))
+    {M M' : Y.Modules} (hM : IsInvertible M) (hM' : IsInvertible M')
+    {ι : Type u} (U : ι → T.Opens) (hU : IsOpenCover U)
+    (N : ∀ i, (U i).toScheme.Modules) (hN : ∀ i, IsInvertible (N i))
+    (hglue : ∀ i, Nonempty
+      (M.restrict (f ⁻¹ᵁ U i).ι ≅
+        tensorObj (M'.restrict (f ⁻¹ᵁ U i).ι)
+          ((AlgebraicGeometry.Scheme.Modules.pullback
+            (f ∣_ U i)).obj (N i)))) :
+    IsInvertible ((AlgebraicGeometry.Scheme.Modules.pushforward f).obj
+      (tensorObj M (dualObj M'))) := by
+  refine IsInvertible.of_restrict_cover U hU (fun i => ⟨N i, hN i, ?_⟩)
+  -- section-isos for the restricted structure morphism
+  have hq' : ∀ (W' : (U i).toScheme.Opens), IsIso ((f ∣_ U i).app W') := by
+    intro W'
+    rw [morphismRestrict_app]
+    refine IsIso.comp_isIso' (hf ((U i).ι ''ᵁ W')) ?_
+    exact (Y.presheaf.mapIso
+      (eqToIso (image_morphismRestrict_preimage
+        f (U i) W')).op).isIso_hom
+  have hploc := nonempty_pullback_discrepancy_iso' f hM hM' U N hglue i
+  obtain ⟨eloc⟩ := hploc
+  obtain ⟨ekm⟩ := nonempty_pushforwardPullback_iso (f ∣_ U i) hq' (hN i)
+  exact ⟨((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
+      (U i).ι).app _).symm ≪≫
+    (AlgebraicGeometry.Scheme.Modules.restrictPushforwardIsoOfIsPullback
+      f (f ∣_ U i)
+      (f ⁻¹ᵁ U i).ι (U i).ι
+      (isPullback_morphismRestrict f (U i))).app
+      (tensorObj M (dualObj M')) ≪≫
+    (AlgebraicGeometry.Scheme.Modules.pushforward (f ∣_ U i)).mapIso
+      ((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
+        (f ⁻¹ᵁ U i).ι).app (tensorObj M (dualObj M')) ≪≫ eloc) ≪≫
+    ekm⟩
+
+/-- **(P-counit leaf, bare-morphism form)** `nonempty_discrepancy_iso_pullback_pushforward`
+for an arbitrary `f : Y ⟶ T`: the discrepancy is the pullback of its pushforward, by the
+`ε`-triangle route. -/
+theorem nonempty_discrepancy_iso_pullback_pushforward' {Y T : Scheme.{u}} (f : Y ⟶ T)
+    (hf : ∀ W : T.Opens, IsIso (f.app W))
+    {M M' : Y.Modules} (hM : IsInvertible M) (hM' : IsInvertible M')
+    {ι : Type u} (U : ι → T.Opens) (hU : IsOpenCover U)
+    (N : ∀ i, (U i).toScheme.Modules) (hN : ∀ i, IsInvertible (N i))
+    (hglue : ∀ i, Nonempty
+      (M.restrict (f ⁻¹ᵁ U i).ι ≅
+        tensorObj (M'.restrict (f ⁻¹ᵁ U i).ι)
+          ((AlgebraicGeometry.Scheme.Modules.pullback
+            (f ∣_ U i)).obj (N i)))) :
+    Nonempty (tensorObj M (dualObj M') ≅
+      (AlgebraicGeometry.Scheme.Modules.pullback f).obj
+        ((AlgebraicGeometry.Scheme.Modules.pushforward f).obj
+          (tensorObj M (dualObj M')))) := by
+  -- the counit's components are bijective on every open inside a piece of the cover
+  -- (deep leaf: counit-restriction square + triangle identity + IsIso η on the piece)
+  have hres : ∀ (i : ι) (W : Y.Opens), W ≤ f ⁻¹ᵁ U i →
+      Function.Bijective (AlgebraicGeometry.Scheme.Modules.Hom.app
+        ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+          f).counit.app (tensorObj M (dualObj M'))) W) := by
+    intro i W hW
+    -- (sA) the counit restricted to the piece is an isomorphism
+    have hrestr : IsIso ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+        (f ⁻¹ᵁ U i).ι).map
+        ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+          f).counit.app (tensorObj M (dualObj M')))) := by
+      -- (s1) the restricted unit of the open-immersion adjunction is an isomorphism
+      haveI hu : IsIso ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+          (f ⁻¹ᵁ U i).ι).map
+          ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+            (f ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))) := by
+        have htri := (AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+          (f ⁻¹ᵁ U i).ι).left_triangle_components
+          (tensorObj M (dualObj M'))
+        rw [← IsIso.eq_comp_inv] at htri
+        rw [htri]
+        infer_instance
+      -- (s3+s4) the counit at the pushed-forward restriction is an isomorphism after
+      -- restriction
+      have hmid : IsIso ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+          (f ⁻¹ᵁ U i).ι).map
+          ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            f).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.pushforward
+              (f ⁻¹ᵁ U i).ι).obj
+              ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+                (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))))) := by
+        -- (m4) the piece-level counit at the restricted discrepancy is an isomorphism
+        have hq' : ∀ (W' : (U i).toScheme.Opens),
+            IsIso ((f ∣_ U i).app W') := by
+          intro W'
+          rw [morphismRestrict_app]
+          refine IsIso.comp_isIso' (hf ((U i).ι ''ᵁ W')) ?_
+          exact (Y.presheaf.mapIso
+            (eqToIso (image_morphismRestrict_preimage
+              f (U i) W')).op).isIso_hom
+        haveI hη := isIso_pullbackPushforwardAdjunction_unit_app
+          (f ∣_ U i) hq' (hN i)
+        haveI hεpull : IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (f ∣_ U i)).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.pullback
+              (f ∣_ U i)).obj (N i))) := by
+          have htri := (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (f ∣_ U i)).left_triangle_components (N i)
+          have hsolve := (IsIso.eq_inv_comp _).mpr htri
+          rw [hsolve]
+          infer_instance
+        haveI hloc : IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (f ∣_ U i)).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+              (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))) := by
+          obtain ⟨e0⟩ := nonempty_pullback_discrepancy_iso' f hM hM' U N hglue i
+          have hnatε := (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (f ∣_ U i)).counit.naturality
+            (((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
+              (f ⁻¹ᵁ U i).ι).app (tensorObj M (dualObj M')) ≪≫ e0).hom)
+          have hsolve := (IsIso.eq_comp_inv _).mpr hnatε.symm
+          rw [hsolve]
+          infer_instance
+        -- (m1)-(m3): transport through the composed adjunctions
+        have h590 := Adjunction.comp_counit_app
+          (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            f)
+          (AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+            (f ⁻¹ᵁ U i).ι)
+          ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))
+        have hLU := Adjunction.leftAdjointUniq_hom_app_counit
+          ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            f).comp
+            (AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+              (f ⁻¹ᵁ U i).ι))
+          (((AlgebraicGeometry.Scheme.Modules.restrictAdjunction (U i).ι).comp
+            (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+              (f ∣_ U i))).ofNatIsoRight
+            (AlgebraicGeometry.Scheme.Modules.openPushforwardSquareIsoT
+              f (U i)))
+          ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))
+        have hof : ((((AlgebraicGeometry.Scheme.Modules.restrictAdjunction (U i).ι).comp
+            (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+              (f ∣_ U i))).ofNatIsoRight
+            (AlgebraicGeometry.Scheme.Modules.openPushforwardSquareIsoT
+              f (U i))).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+              (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))) =
+            ((AlgebraicGeometry.Scheme.Modules.restrictFunctor (U i).ι ⋙
+              AlgebraicGeometry.Scheme.Modules.pullback
+                (f ∣_ U i)).map
+              ((AlgebraicGeometry.Scheme.Modules.openPushforwardSquareIsoT
+                f (U i)).inv.app
+                ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+                  (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M'))))) ≫
+            (((AlgebraicGeometry.Scheme.Modules.restrictAdjunction (U i).ι).comp
+              (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+                (f ∣_ U i))).counit.app
+              ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+                (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))) := rfl
+        have hcompL := Adjunction.comp_counit_app
+          (AlgebraicGeometry.Scheme.Modules.restrictAdjunction (U i).ι)
+          (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (f ∣_ U i))
+          ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))
+        haveI hlocal' : IsIso ((((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+            (U i).ι).comp
+            (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+              (f ∣_ U i))).ofNatIsoRight
+            (AlgebraicGeometry.Scheme.Modules.openPushforwardSquareIsoT
+              f (U i))).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+              (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))) := by
+          rw [hof, hcompL]
+          infer_instance
+        haveI hglobal : IsIso (((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            f).comp
+            (AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+              (f ⁻¹ᵁ U i).ι)).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+              (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))) := by
+          rw [← hLU]
+          infer_instance
+        have hsolve2 := (IsIso.eq_comp_inv _).mpr h590.symm
+        rw [hsolve2]
+        infer_instance
+      -- the composed functor's map of the unit is an isomorphism after restriction
+      have hGFu : IsIso ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+          (f ⁻¹ᵁ U i).ι).map
+          ((AlgebraicGeometry.Scheme.Modules.pullback f).map
+            ((AlgebraicGeometry.Scheme.Modules.pushforward f).map
+              ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+                (f ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))))) := by
+        haveI h1 : IsIso (((AlgebraicGeometry.Scheme.Modules.pushforward f ⋙
+            AlgebraicGeometry.Scheme.Modules.restrictFunctor (U i).ι)).map
+            ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+              (f ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))) := by
+          rw [NatIso.isIso_map_iff
+            (AlgebraicGeometry.Scheme.Modules.restrictPushforwardIsoOfIsPullback f (f ∣_ U i)
+              (f ⁻¹ᵁ U i).ι (U i).ι (isPullback_morphismRestrict f (U i)))]
+          exact inferInstanceAs (IsIso
+            ((AlgebraicGeometry.Scheme.Modules.pushforward
+              (f ∣_ U i)).map
+              ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+                (f ⁻¹ᵁ U i).ι).map
+                ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+                  (f ⁻¹ᵁ U i).ι).unit.app
+                  (tensorObj M (dualObj M'))))))
+        haveI h2 : IsIso (((AlgebraicGeometry.Scheme.Modules.pushforward f ⋙
+            (AlgebraicGeometry.Scheme.Modules.restrictFunctor (U i).ι ⋙
+              AlgebraicGeometry.Scheme.Modules.pullback (f ∣_ U i)))).map
+            ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+              (f ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))) :=
+          inferInstanceAs (IsIso
+            ((AlgebraicGeometry.Scheme.Modules.pullback (f ∣_ U i)).map
+              (((AlgebraicGeometry.Scheme.Modules.pushforward f ⋙
+                AlgebraicGeometry.Scheme.Modules.restrictFunctor (U i).ι)).map
+                ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+                  (f ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M'))))))
+        rw [show (AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (f ⁻¹ᵁ U i).ι).map
+            ((AlgebraicGeometry.Scheme.Modules.pullback f).map
+              ((AlgebraicGeometry.Scheme.Modules.pushforward f).map
+                ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+                  (f ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M'))))) =
+            ((AlgebraicGeometry.Scheme.Modules.pushforward f ⋙
+              (AlgebraicGeometry.Scheme.Modules.pullback f ⋙
+                AlgebraicGeometry.Scheme.Modules.restrictFunctor
+                  (f ⁻¹ᵁ U i).ι))).map
+              ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+                (f ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))
+          from rfl]
+        rw [NatIso.isIso_map_iff (Functor.isoWhiskerLeft
+          (AlgebraicGeometry.Scheme.Modules.pushforward f)
+          (AlgebraicGeometry.Scheme.Modules.openPullbackSquareExplicitIsoT
+            f (U i)).symm)]
+        exact h2
+      -- (s2) counit naturality at the unit, restricted, gives the factorisation
+      have hnat := congrArg (fun z => (AlgebraicGeometry.Scheme.Modules.restrictFunctor
+          (f ⁻¹ᵁ U i).ι).map z)
+        (((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+          f).counit.naturality
+          ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+            (f ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))))
+      rw [Functor.map_comp, Functor.map_comp] at hnat
+      -- ε_K = (restr GF-u) ≫ (restr ε_{pushed}) ≫ (restr u)⁻¹
+      have hfac : (AlgebraicGeometry.Scheme.Modules.restrictFunctor
+          (f ⁻¹ᵁ U i).ι).map
+          ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            f).counit.app (tensorObj M (dualObj M'))) =
+          ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (f ⁻¹ᵁ U i).ι).map
+            ((AlgebraicGeometry.Scheme.Modules.pullback f).map
+              ((AlgebraicGeometry.Scheme.Modules.pushforward f).map
+                ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+                  (f ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))))) ≫
+          ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (f ⁻¹ᵁ U i).ι).map
+            ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+              f).counit.app
+              ((AlgebraicGeometry.Scheme.Modules.pushforward
+                (f ⁻¹ᵁ U i).ι).obj
+                ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+                  (f ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))))) ≫
+          CategoryTheory.inv ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (f ⁻¹ᵁ U i).ι).map
+            ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+              (f ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))) := by
+        simp only [Functor.id_obj, Functor.id_map, Functor.comp_obj,
+          Functor.comp_map] at hnat
+        rw [← Category.assoc, IsIso.eq_comp_inv]
+        exact hnat.symm
+      rw [hfac]
+      infer_instance
+    -- (s5) components: from the restricted iso to per-open bijectivity
+    obtain ⟨V', rfl⟩ : ∃ V' : ((f ⁻¹ᵁ U i)).toScheme.Opens,
+        (f ⁻¹ᵁ U i).ι ''ᵁ V' = W :=
+      ⟨(f ⁻¹ᵁ U i).ι ⁻¹ᵁ W, by
+        apply TopologicalSpace.Opens.ext
+        change (f ⁻¹ᵁ U i).ι.base '' ((f ⁻¹ᵁ U i).ι.base ⁻¹' W) = _
+        rw [Set.image_preimage_eq_inter_range]
+        rw [Scheme.Opens.range_ι]
+        exact Set.inter_eq_left.mpr hW⟩
+    exact (CategoryTheory.ConcreteCategory.isIso_iff_bijective _).mp
+      (inferInstanceAs (IsIso (((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+        (f ⁻¹ᵁ U i).ι).map
+        ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+          f).counit.app (tensorObj M (dualObj M')))).app V')))
+  haveI : IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+      f).counit.app (tensorObj M (dualObj M'))) :=
+    AlgebraicGeometry.Scheme.Modules.isIso_of_bijective_app_on_cover _
+      (fun i => f ⁻¹ᵁ U i)
+      (f.iSup_preimage_eq_top hU) hres
+  exact ⟨(asIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+    f).counit.app (tensorObj M (dualObj M')))).symm⟩
+
+/-- **(AP2-B1, KM p. 65 — bare-morphism form)** `exists_pullback_twist_of_locally` for an
+arbitrary `f : Y ⟶ T` in place of `pullback.snd p g`: the `f^*`-twist equivalence on invertible
+sheaves is Zariski-local on the base. With `N₀ := f_*(M ⊗ (M')^∨)`, the class of `M' ⊗ f^*N₀`
+is `[M'] · [M] · [(M')^∨] = [M] · ([M'] · [(M')^∨]) = [M]` in the skeleton monoid.
+
+This is the form the seesaw consumes (`ForMathlib/Seesaw.lean`), where the family `π : X ⟶ S`
+is *not* presented as a projection out of a fibre product. -/
+theorem exists_pullback_twist_of_locally' {Y T : Scheme.{u}} (f : Y ⟶ T)
+    (hf : ∀ W : T.Opens, IsIso (f.app W))
+    {M M' : Y.Modules} (hM : IsInvertible M) (hM' : IsInvertible M')
+    {ι : Type u} (U : ι → T.Opens) (hU : IsOpenCover U)
+    (N : ∀ i, (U i).toScheme.Modules) (hN : ∀ i, IsInvertible (N i))
+    (hglue : ∀ i, Nonempty
+      (M.restrict (f ⁻¹ᵁ U i).ι ≅
+        tensorObj (M'.restrict (f ⁻¹ᵁ U i).ι)
+          ((AlgebraicGeometry.Scheme.Modules.pullback
+            (f ∣_ U i)).obj (N i)))) :
+    ∃ N₀ : T.Modules, IsInvertible N₀ ∧
+      Nonempty (M ≅ tensorObj M'
+        ((AlgebraicGeometry.Scheme.Modules.pullback f).obj N₀)) := by
+  refine ⟨(AlgebraicGeometry.Scheme.Modules.pushforward f).obj
+      (tensorObj M (dualObj M')),
+    isInvertible_pushforward_discrepancy' f hf hM hM' U hU N hN hglue, ?_⟩
+  letI := AlgebraicGeometry.Scheme.Modules.monoidalCategory Y
+  letI := AlgebraicGeometry.Scheme.Modules.symmetricCategory Y
+  refine toSkeleton_eq_toSkeleton_iff.mp ?_
+  have h2 := toSkeleton_eq_toSkeleton_iff.mpr
+    (nonempty_discrepancy_iso_pullback_pushforward' f hf hM hM' U hU N hN hglue)
+  have h3 : toSkeleton M' * toSkeleton (dualObj M') = 1 := by
+    rw [← toSkeleton_tensorObj_eq, ← toSkeleton_unitObj]
+    exact toSkeleton_eq_toSkeleton_iff.mpr (nonempty_eval_iso hM')
+  rw [toSkeleton_tensorObj_eq, ← h2, toSkeleton_tensorObj_eq, mul_left_comm, h3, mul_one]
 end ModularCurves
