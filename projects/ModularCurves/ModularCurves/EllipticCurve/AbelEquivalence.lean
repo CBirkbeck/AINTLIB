@@ -357,6 +357,19 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
     have haff : IsAffineOpen (E.basicOpen g.1 ⊓ E.basicOpen g'.1) := by
       rw [← Scheme.basicOpen_mul]
       exact U.2.basicOpen _
+    -- the `g`-trivialisation restricts to the overlap
+    have htrivW : Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
+        (E.basicOpen g.1 ⊓ E.basicOpen g'.1).ι).obj N ≅
+        unitObj (E.basicOpen g.1 ⊓ E.basicOpen g'.1).toScheme) :=
+      ⟨restrictTrivialization (inf_le_left : E.basicOpen g.1 ⊓ E.basicOpen g'.1 ≤
+        E.basicOpen g.1) (hpiece g.1 g.2).2.some⟩
+    -- apply the `f`-torsion lemma on the overlap
+    refine (exists_pow_smul_eq_of_restrict_eq N ⟨_, haff⟩
+      (E.presheaf.map (homOfLE ((inf_le_left : E.basicOpen g.1 ⊓ E.basicOpen g'.1 ≤
+        E.basicOpen g.1).trans (hpiece g.1 g.2).1)).op f) htrivW
+      (N.presheaf.map (Opens.infLELeft (E.basicOpen g.1) (E.basicOpen g'.1)).op (v g))
+      (N.presheaf.map (Opens.infLERight (E.basicOpen g.1) (E.basicOpen g'.1)).op (v g'))
+      ?_).imp (fun k hk ↦ hk)
     sorry
   sorry
 
