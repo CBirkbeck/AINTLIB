@@ -114,11 +114,16 @@ transports; `residueFieldAlgEquivOfSurjectiveOnStalks` (via
 is much cleaner than `IsLocalization.orderIsoOfPrime` — reuse it if a similar transport is needed.
 Needed `import Mathlib.RingTheory.LocalProperties.Reduced` for `IsReduced (Localization.AtPrime I)`.
 
+T4c(i) — **ALREADY PROVED IN THE TREE; ZERO NEW WORK** (found 2026-08-08). Do NOT write the
+descending induction: `ForMathlib/BaseChangeKerCoker.lean` already has both halves, sorry-free,
+stated with exactly the "exact from degree `k` onward" hypothesis and no full exactness —
+  * `Module.Flat.ker_of_bounded_exact_from` (:292) → `Flat R (ker (d k))`
+  * `kerBaseChangeComparison_bijective_of_bounded_exact_from` (:625) → the `hbij` for `d k`
+  * (support) `Module.Flat.quotient_range_of_bounded_exact_from` (:270) → `Flat R (M (k+1) ⧸ range (d k))`
+Instantiate all three at `k = 1`; `hhigh` IS their `hexact`. (Lesson `grep-the-conclusion-not-the-inputs`
+again: the argument was re-derived from scratch before anyone grepped for the conclusion.)
+
 NEXT UP, in order:
-  * **T4c(i)** — the descending-induction flatness lemma (see A2′ above): in a bounded cochain
-    complex of flat modules exact at every position ≥ 2, the degree-one cycles `ker d¹` are flat,
-    and `ker(d¹ ⊗ A) = (ker d¹) ⊗ A` for every `A`. Self-contained homological algebra; belongs in
-    a new `ForMathlib/` file so it does not collide with `Seesaw.lean`.
   * **T4c(ii)** — the minimal-prime sandwich for `dim ker(u_p) = 1`.
   * **T5** — the replacement-complex assembly: `π_*M` invertible (B.1 steps 1–5 above).
   * **T6** — the counit iso (B.2), then **T7** + **T8** to close Blocker 2.

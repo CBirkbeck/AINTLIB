@@ -476,6 +476,36 @@ So the corrected ticket set is: **T4c(i)** `hhigh ⟹ Flat R Z¹ + hbij` (descen
 and **T4c(ii)** the minimal-prime sandwich for `dim ker(u_p) = 1`. Both are required; neither
 alone suffices.
 
+#### A2″ — **T4c(i) IS ALREADY PROVED IN THE TREE** (found 2026-08-08; zero new work)
+
+Grepping for the *conclusion* rather than the inputs turned up both halves, already sorry-free in
+`ForMathlib/BaseChangeKerCoker.lean`, each stated with exactly the "exact from degree `k` onward"
+hypothesis this section derived — no full exactness:
+
+```lean
+theorem Module.Flat.ker_of_bounded_exact_from [∀ n, Module.Flat R (M n)]
+    (N k : ℕ) (hk : k ≤ N) [Subsingleton (M (N + 1))]
+    (hexact : ∀ n, k ≤ n → n < N → Function.Exact (d n) (d (n + 1))) :
+    Module.Flat R (LinearMap.ker (d k))                                    -- :292
+
+theorem kerBaseChangeComparison_bijective_of_bounded_exact_from
+    (M) (d) (A) [CommRing A] [Algebra R A] [∀ n, Module.Flat R (M n)]
+    (N k : ℕ) (hk : k ≤ N) [Subsingleton (M (N + 1))]
+    (hexact : ∀ n, k ≤ n → n < N → Function.Exact (d n) (d (n + 1))) :
+    Function.Bijective (kerBaseChangeComparison A (d k))                   -- :625
+```
+
+Its own docstring says it: *"The cycle module in degree `k` is flat when a bounded complex of flat
+modules is exact from degree `k` onward. **No exactness in lower degrees is required.**"*
+Instantiate both at `k = 1`: `hhigh` is precisely their `hexact`, and they deliver `Flat R Z¹` and
+`hbij` directly. Supporting lemma `Module.Flat.quotient_range_of_bounded_exact_from` (:270) gives
+`Flat R (C² ⧸ range d¹)`, which is what feeds `kerBaseChangeComparison_bijective`.
+
+**T4c(i) is therefore closed with no new declarations.** What remains of T4c is only (ii), the
+minimal-prime sandwich. (Lesson, already in memory as `grep-the-conclusion-not-the-inputs`: the
+descending-induction argument was re-derived from scratch here before anyone grepped for
+`Module.Flat` + "bounded" + "from".)
+
 With the repair inserted, the reviewer confirms the rest of B.1: the dimension count
 `dim coker(u_p) = rk K¹ − rk_p K⁰ + 1`, local constancy from `K⁰` finite projective, right
 exactness `(coker u) ⊗ κ(p) ≅ coker(u_p)`, and — explicitly — that **applying 0FWG only to
