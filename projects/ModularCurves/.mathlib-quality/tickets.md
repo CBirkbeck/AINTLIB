@@ -39292,6 +39292,19 @@ The MAIN path is clean and axiom-verified standard-three: `Module.Flat.coker_of_
 therefore use the R-substrate form (N finite over R, M flat over R, R local) — which is exactly the
 shape available on affine charts of a flat proper family.
 
+**AP2-B2 head — KM p.66 reduction PROVED in local form** (2026-08-08): the algebraic spine of the
+fibre input is complete and axiom-clean in `EllipticCurve/AbelEquivalence.lean`:
+`mem_nonZeroDivisors_of_ne_zero_of_isDomain` (fibre case), `mulRightLinearMap` +
+`mem_nonZeroDivisors_iff_injective_mulRight` (nonzerodivisor ⇔ injective multiplication),
+`mem_nonZeroDivisors_of_mul_injective`, and **`mem_nonZeroDivisors_of_residueField_fibre_injective`**
+(over a Noetherian local ring, residue-fibre injectivity ⟹ nonzerodivisor) — the last via the
+now-public `Module.Flat.injective_of_lTensor_residueField_injective` (un-privatized this session;
+the `_sModule` variant remains sorried and is avoided). WHAT IS LEFT for `h-a`
+(`evalGenerator_mem_nonZeroDivisors`) is geometry only: on an affine chart, identify the residue-field
+fibre of `Γ(E,V)` with sections on the actual fibre (AP2-A1's residue/fibre transport line) and show
+the trivialised generator is nonzero there (rank-one `H⁰` from the A2 kernel data + `σ ≠ 0`), then
+apply the local theorem chart-by-chart.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
