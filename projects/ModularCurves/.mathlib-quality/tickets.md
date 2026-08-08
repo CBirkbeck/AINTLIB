@@ -39316,6 +39316,25 @@ algebraic half of the fibre input is done; `evalGenerator_mem_nonZeroDivisors` n
 geometry: fibrewise injectivity from integral fibres (`IsIntegral.component_integral`) plus
 non-vanishing of the trivialised section there (rank-one `H⁰` from the A2 kernel data + `σ ≠ 0`).
 
+**AP2-B2 CORRECTION — the reduction must localize over the BASE, and that needs the sorried
+`_sModule` criterion** (2026-08-08, important): `evaluation_ne_zero_iff_mem_basicOpen`
+(`AlgebraicGeometry/ResidueField.lean`) makes the point sharp — the generator `f` of the vanishing
+ideal VANISHES at the divisor's points, so "multiplication by `f` is injective on the residue field of
+each point of `E`" is FALSE. The proved
+`mem_nonZeroDivisors_of_forall_maximal_residueField_fibre_injective` is a true general lemma but its
+hypothesis is unusable here. KM's actual reduction is over the BASE: `R = 𝒪_{S,s}` (or the base's local
+ring), `A = 𝒪_{E,e}` an `R`-algebra, `u = ·f : A → A` an `R`-linear map, and the residue-field fibre is
+`A ⊗_R κ(s) = 𝒪_{E_s, e}` — a domain because the FIBRE is integral, where `f`'s image is nonzero because
+the section is nonzero in the rank-one `H⁰`. That is exactly the shape of
+`injective_of_lTensor_residueField_injective_sModule` (`ForMathlib/LocalFlatnessCriterion.lean:448`) —
+`N` finite over the UPPER local ring `S`, flat over `R` — **which is the sorried variant** (Artin–Rees /
+Krull descending filtration). CONSEQUENCE: AP2-B2's fibre input is blocked on finishing that lemma
+(mathlib has Artin–Rees as `Ideal.exists_pow_inf_le`-family and Krull intersection
+`Ideal.iInf_pow_eq_bot_of_isLocalRing`; the docstring at :430-447 sketches the intended argument).
+NEXT ACTION for B2: prove `injective_of_lTensor_residueField_injective_sModule`, or find a route that
+avoids it (e.g. work with the ideal sheaf directly and use `IsIntegral` of the total space when the
+base is a domain, or invoke the pole-sheaf line's existing injectivity results).
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
