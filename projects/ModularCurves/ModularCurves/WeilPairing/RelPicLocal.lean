@@ -476,6 +476,34 @@ theorem nonempty_tensorObj_dualObj_unitObj {T : Scheme.{u}} {N : T.Modules}
     Nonempty (tensorObj N (dualObj N) ≅ unitObj T) :=
   nonempty_eval_iso hN
 
+/-- **(AP2-B1a, hbij factor α)** The pushforward-slot section generates: multiplication into
+the restricted `glueSectionA` is bijective on every open inside the trivialising one. Via
+`glueSectionA_eq_adjUnit` the section is the adjunction-unit image of the seed, and
+`hp g W` identifies `Γ(T, W)` with the pulled structure sections; the pulled trivialisation
+`e` carries the generation statement. -/
+theorem bijective_smul_glueSectionA_res {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}}
+    (g : T ⟶ S) (hp : UniversallyOConnected p) (N : T.Modules) {V : T.Opens}
+    (e : (AlgebraicGeometry.Scheme.Modules.pullback V.ι).obj N ≅ unitObj V.toScheme)
+    {W : T.Opens} (hW : W ≤ V) :
+    Function.Bijective (fun r : ↑Γ(T, W) ↦ r •
+      ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).presheaf.map
+        (homOfLE hW).op (glueSectionA g N V e)) := by
+  sorry
+
+/-- **(AP2-B1a, hbij factor β)** Tensoring against the restricted dual-slot functional is
+bijective: `glueSectionB`'s restriction is the hom of the restricted over-trivialisation
+(`restrictOverTrivialization`, rfl-dictionary), so the slot map is the sections-component of
+tensoring with an isomorphism — the `k`-inverse pattern of `bijective_evPre_app_of_triv`
+(PicComparison:377-409) in the mixed-module form. -/
+theorem bijective_tensorSection_glueSectionB_res {T : Scheme.{u}}
+    (A' : T.Modules) (N : T.Modules) {V : T.Opens}
+    (e : (AlgebraicGeometry.Scheme.Modules.pullback V.ι).obj N ≅ unitObj V.toScheme)
+    {W : T.Opens} (hW : W ≤ V) :
+    Function.Bijective (fun a : ↑Γ(A', W) ↦ tensorSection A' (dualObj N) W a
+      ((dualObj N).presheaf.map (homOfLE hW).op (glueSectionB N V e))) := by
+  sorry
+
 /-- **(AP2-B1a′, obligation glue)** The pushforward of the pullback, twisted by the dual, is trivial:
 per trivialising open the generating section is (pushforward-`rfl` of `f^*e_i` via `pullbackUnitIso`)
 `⊗ e_i^∨`; overlap agreement holds **on the nose** by cocycle cancellation (`f^*N` inherits `N`'s own
@@ -514,7 +542,31 @@ theorem nonempty_tensorObj_pushforwardPullback_dualObj_unitObj {X S : Scheme.{u}
     -- (β) `a ↦ tensorSection W a (res (glueSectionB …))` — pairing against the restricted
     --     dual trivialization: `bijective_evPre_app_of_triv`-mate through the
     --     `TensorProduct.mk`-slot (the `k`-inverse construction at PicComparison:377-409).
-    sorry
+    have hfun : (fun r : ↑Γ(T, W) ↦ r •
+        (((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+          ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).tensorObj
+            N.dualObj).presheaf.map (homOfLE hW).op
+          (tensorSection ((AlgebraicGeometry.Scheme.Modules.pushforward
+            (pullback.snd p g)).obj ((AlgebraicGeometry.Scheme.Modules.pullback
+              (pullback.snd p g)).obj N)) N.dualObj (V i)
+            (glueSectionA g N (V i) (htriv i).some) (glueSectionB N (V i) (htriv i).some))) =
+        (fun a : ↑Γ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+            ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N), W) ↦
+          tensorSection _ N.dualObj W a
+            ((dualObj N).presheaf.map (homOfLE hW).op
+              (glueSectionB N (V i) (htriv i).some))) ∘
+        (fun r : ↑Γ(T, W) ↦ r •
+          ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+            ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).presheaf.map
+            (homOfLE hW).op (glueSectionA g N (V i) (htriv i).some)) := by
+      funext r
+      show r • _ = _
+      rw [tensorSection_restrict, ← tensorSection_smul_left]
+      rfl
+    rw [hfun]
+    exact Function.Bijective.comp
+      (bijective_tensorSection_glueSectionB_res _ N (htriv i).some hW)
+      (bijective_smul_glueSectionA_res g hp N (htriv i).some hW)
 
 /-- **(AP2-B1a, KM p. 65: "`f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`")** Over a universally `O`-connected family,
 `f_*f^*N ≅ N` for invertible `N` — assembled by cancelling the dual twist
