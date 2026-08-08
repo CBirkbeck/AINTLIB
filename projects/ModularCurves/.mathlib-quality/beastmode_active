@@ -104,14 +104,24 @@ one shot, and `TensorProduct.mk_surjective` gives the lift. The per-prime step i
 `algebraMap_eq_zero_of_mem_ker` stated over an ARBITRARY `R`-algebra field `κ` rather than `κ(p)`
 (`set` would not fold the occurrence inside `hmin p`).
 
-IN FLIGHT (T4b): the GLOBAL form —
+T4b — **DONE** (2026-08-08). The GLOBAL form,
 `projective_of_isReduced_of_isLocallyConstant_finrank_fiber` : `R` reduced Noetherian, `M` finite,
-fibre dimension locally constant ⟹ `Module.Projective R M`. That is the form B.1 step 3 consumes
-(applied to `coker u`). Route: `Module.projective_of_localization_maximal` reduces to freeness of
-`M_I` over `R_I` for each maximal `I`, which is exactly the local form; the two fibre transports
-are `TensorProduct.AlgebraTensorModule.cancelBaseChange` (imitate mathlib's own proof of
-`Module.rankAtStalk_eq`); local constancy is used ONCE, via the fact that every prime `p ≤ I` lies
-in every neighbourhood of `I` (`g ∉ I` and `p ≤ I` ⟹ `g ∉ p`).
+fibre dimension locally constant ⟹ `Module.Projective R M` — PROVED, axiom-verified
+standard-three. **STACKS 0FWG IS COMPLETE; the mathlib gap under the seesaw is closed.**
+This is the form B.1 step 3 consumes (applied to `coker u`). Four private helpers do the fibre
+transports; `residueFieldAlgEquivOfSurjectiveOnStalks` (via
+`RingHom.SurjectiveOnStalks.residueFieldMap_bijective` at `surjectiveOnStalks_of_isLocalization`)
+is much cleaner than `IsLocalization.orderIsoOfPrime` — reuse it if a similar transport is needed.
+Needed `import Mathlib.RingTheory.LocalProperties.Reduced` for `IsReduced (Localization.AtPrime I)`.
+
+NEXT UP, in order:
+  * **T4c(i)** — the descending-induction flatness lemma (see A2′ above): in a bounded cochain
+    complex of flat modules exact at every position ≥ 2, the degree-one cycles `ker d¹` are flat,
+    and `ker(d¹ ⊗ A) = (ker d¹) ⊗ A` for every `A`. Self-contained homological algebra; belongs in
+    a new `ForMathlib/` file so it does not collide with `Seesaw.lean`.
+  * **T4c(ii)** — the minimal-prime sandwich for `dim ker(u_p) = 1`.
+  * **T5** — the replacement-complex assembly: `π_*M` invertible (B.1 steps 1–5 above).
+  * **T6** — the counit iso (B.2), then **T7** + **T8** to close Blocker 2.
 
 AFTER BLOCKER 2: Blocker 3 = `exists_invertible_tensor_idealModule_add` (`Picard/SelfAdjointN.lean`),
 which unblocks AP-D4/D5-existence/D6/D7. Reviewer kept the seesaw route (R1) ahead of the chart
