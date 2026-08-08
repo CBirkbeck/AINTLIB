@@ -147,8 +147,25 @@ mathematics:
     TWO PLAN CORRECTIONS FOUND IN EXECUTION: the right short complex is `C.sc' 0 1 2`, NOT
     `C.sc' 0 0 1` (there `f` is `C.d 0 0 = 0`); and no `1 ≤ card ι` hypothesis is needed — take
     `N := card ι + 1` and extend `hhigh` via `exact_of_subsingleton_middle`.
-  * **T5-bridge (NEW TICKET, the only sorry left in that file — a GENERALITY bridge, not a
-    mathematical gap)**: `Scheme.Modules.orderedBaseCechHomologyFinite_of_isProper`
+  * **T5-bridge — DONE** (2026-08-08). `baseSections_invertible_of_kernel_finrank_of_isReduced` is
+    now SORRY-FREE and axiom-verified standard-three. **BLOCKER 2's HALF B.1 IS COMPLETE.**
+    Two lessons recorded in the commit: (i) the boarded "swap `Spec (.of R)` for affine `S`" fix is
+    IMPOSSIBLE — the comodel-existence input runs through `SupportAdaptedChowChart`, whose fields
+    are structurally `Spec (.of R)` across ~25 files, so the general statement must be DERIVED, not
+    reparameterised; (ii) both blocking claims in the old sorry's docstring were STALE —
+    `ModuleCat.restrictScalars` DOES have `PreservesFiniteLimits`/`Colimits`/`PreservesHomology`,
+    and `ShortComplex.mapHomologyIso` gives the homology comparison. The transport is short because
+    `baseModulePresheaf f M ⋙ ModuleCat.restrictScalars g.appTop.hom = baseModulePresheaf (f ≫ g) M`
+    is a genuine EQUALITY of functors. New reusable exports:
+    `OrderedBaseCechHomologyFinite.of_comp`, `orderedBaseCechHomologyFinite_of_isProper_of_isAffine`,
+    `orderedBaseCechLowDegreeFinite_of_isProper_of_isAffine`.
+    FOLLOW-UP TICKET: move the private `CompTransport` section out of
+    `SchemeModuleProperLowDegreeCechFinite.lean` into
+    `ForMathlib/SchemeModuleOrderedBaseCechPushforward.lean`, next to
+    `orderedBaseCechComplexPushforwardIso` — it is generic ordered-Čech infrastructure and only
+    landed there because of a two-file edit fence.
+
+  * (historical, now closed) `Scheme.Modules.orderedBaseCechHomologyFinite_of_isProper`
     (`ForMathlib/SchemeModuleProperLowDegreeCechFinite.lean`) is stated for a SYNTACTIC
     `Spec (.of R)` base, as is its whole supporting chain (whose helpers are `private`), so it does
     not unify with a general `[IsAffine S]`. Three routes tried and documented at the sorry:
