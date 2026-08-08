@@ -39219,6 +39219,20 @@ So AP2-B2 = statement-design + globalization glue + (b2-ii) fibre-input only; th
 DONE. Next segment: G5 design at the module-generic level mirroring the A2 kernel-package
 (affine-base + orderedBaseCech vocabulary), consumer-checked against B3's PIN 1.
 
+**AP2-B2/B3 INTERFACE LOCKED** (2026-08-08 survey 2): the tree has a full relative-ECD engine —
+`LevelStructure/CartierDivisor.lean`: `RelEffCartierDiv π` (:76, IdealSheafData-based),
+`IsOfficialCartier` (:94), `degree` (:108), `sectionDivisor` (:172, divisor OF a section, with
+`sectionDivisor_degree` :186 and `sectionDivisor_isOfficial` :992 under
+`SmoothOfRelativeDimension 1`!), `exists_affineOpen_ker_principal_nonZeroDivisor` (:836).
+So B2's statement should PRODUCE a `RelEffCartierDiv π` from (M, ℓ): the section-map
+`unitObj E ⟶ M` induced by a base-local basis ℓ of `baseSections π M` (A2-package; build the map
+by the glueSectionA/adjUnit pattern), with `IsOfficialCartier`-fields discharged via
+`LocalFlatnessCriterion` (mono + flat coker) — and B3's `D(L)` IS this divisor, its degree-1 via
+`degree` + the A2 rank-one, and the section via the engine's `sectionDivisor`-inverse direction
+(KM 1.2.7 = degree-one ECD is a section — check whether the engine has this already or it is
+B3's real content). NEXT SEGMENT: read CartierDivisor.lean:76-115 + :812-1000 in full, then state
+B2 in `EllipticCurve/AbelEquivalence.lean`.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
