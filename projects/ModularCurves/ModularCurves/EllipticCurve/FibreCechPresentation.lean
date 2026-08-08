@@ -393,6 +393,62 @@ theorem twoCover_d01_surjective
     show x (twoCoverIdx1.delete 1) = p₀ from by simp only [x, dif_pos]]
   exact hp
 
+/-- Membership in the kernel of the degree-zero two-cover differential is agreement of the two
+coface restrictions at the unique overlap index. -/
+theorem twoCover_mem_ker_iff
+    (w : (Scheme.Modules.orderedBaseCechObject π M U 0 : Type u)) :
+    ((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom w = 0 ↔
+      (twoCoverRes π M U 0).hom
+        ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+          baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 0)).hom w) =
+      (twoCoverRes π M U 1).hom
+        ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+          baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 1)).hom w) := by
+  have hbridge : ∀ z : (Scheme.Modules.orderedBaseCechObject π M U 1 : Type u),
+      (Scheme.Modules.orderedBaseCechObjectIsoPi π M U 1).toLinearEquiv z twoCoverIdx1 =
+        (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1 =>
+          baseCechFactor π M U 1 j.1) twoCoverIdx1).hom z := fun z =>
+    ConcreteCategory.congr_hom
+      (ModuleCat.piIsoPi_hom_ker_subtype
+        (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1 =>
+          baseCechFactor π M U 1 j.1) twoCoverIdx1) z
+  have hcomp : (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1 =>
+        baseCechFactor π M U 1 j.1) twoCoverIdx1).hom
+          (((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom w) =
+      (twoCoverRes π M U 0).hom
+        ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+          baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 0)).hom w) -
+      (twoCoverRes π M U 1).hom
+        ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+          baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 1)).hom w) := by
+    rw [Scheme.Modules.orderedBaseCechComplex_d]
+    refine Eq.trans (show _ = ((Scheme.Modules.orderedBaseCechDifferential π M U 0) ≫
+      Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1 =>
+        baseCechFactor π M U 1 j.1) twoCoverIdx1).hom w from rfl) ?_
+    exact ConcreteCategory.congr_hom
+      (Scheme.Modules.orderedBaseCechDifferential_zero_comp_π_sub π M U twoCoverIdx1) w
+  constructor
+  · intro h0
+    have hz : (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1 =>
+        baseCechFactor π M U 1 j.1) twoCoverIdx1).hom
+          (((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom w) = 0 := by
+      rw [h0]
+      exact map_zero _
+    exact sub_eq_zero.mp (hcomp.symm.trans hz)
+  · intro heq
+    have hcomp0 : (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1 =>
+        baseCechFactor π M U 1 j.1) twoCoverIdx1).hom
+          (((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom w) = 0 :=
+      hcomp.trans (sub_eq_zero.mpr heq)
+    apply (Scheme.Modules.orderedBaseCechObjectIsoPi π M U 1).toLinearEquiv.injective
+    funext j
+    have hj : j = twoCoverIdx1 := Subsingleton.elim _ _
+    subst hj
+    exact ((hbridge _).trans hcomp0).trans
+      (congrFun (map_zero
+        ((Scheme.Modules.orderedBaseCechObjectIsoPi π M U 1).toLinearEquiv))
+        twoCoverIdx1).symm
+
 end TwoCoverCech
 
 end FibreRR
