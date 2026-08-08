@@ -447,7 +447,22 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
   have hcompat : ∀ g g' : {g // g ∈ t},
       N.presheaf.map (Opens.infLELeft (E.basicOpen g.1) (E.basicOpen g'.1)).op (w g) =
       N.presheaf.map (Opens.infLERight (E.basicOpen g.1) (E.basicOpen g'.1)).op (w g') := by
-    sorry
+    intro g g'
+    have hkey := hk g g'
+    rw [hw]
+    simp only [AlgebraicGeometry.Scheme.Modules.map_smul, map_pow]
+    have hscal : ∀ (h : {g // g ∈ t}) (hle : E.basicOpen g.1 ⊓ E.basicOpen g'.1 ≤
+        E.basicOpen h.1) (i : (Opposite.op (E.basicOpen h.1) : (E.Opens)ᵒᵖ) ⟶
+          Opposite.op (E.basicOpen g.1 ⊓ E.basicOpen g'.1)),
+        E.presheaf.map i ((E.presheaf.map (homOfLE (hpiece h.1 h.2).1).op) f) =
+        E.presheaf.map (homOfLE (le_trans (inf_le_left : E.basicOpen g.1 ⊓
+          E.basicOpen g'.1 ≤ E.basicOpen g.1) (hpiece g.1 g.2).1)).op f := by
+      intro h hle i
+      simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+      exact congrArg (fun q ↦ (ConcreteCategory.hom (E.presheaf.map (Quiver.Hom.op q))) f)
+        (Subsingleton.elim _ _)
+    rw [hscal g inf_le_left _, hscal g' inf_le_right _,
+      ← Nat.sub_add_cancel (hK g g'), pow_add, ← smul_smul, ← smul_smul, hkey]
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
