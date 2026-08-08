@@ -748,6 +748,28 @@ theorem mem_nonZeroDivisors_of_mul_injective {A : Type u} [CommRing A] {f : A}
     ⟨fun x hx ↦ hinj (show x * f = 0 * f by rw [zero_mul, mul_comm]; exact hx),
       fun x hx ↦ hinj (show x * f = 0 * f by rw [zero_mul]; exact hx)⟩
 
+/-- **(B2-head, step 3c)** Multiplication by a ring element, as a linear map — the shape the
+fibrewise injectivity criterion (`ForMathlib/LocalFlatnessCriterion.lean`, R-substrate form)
+consumes. Its residue-field fibre is multiplication by the image of the element. -/
+noncomputable def mulRightLinearMap {A : Type u} [CommRing A] (f : A) : A →ₗ[A] A :=
+  LinearMap.mulRight A f
+
+@[simp]
+theorem mulRightLinearMap_apply {A : Type u} [CommRing A] (f x : A) :
+    mulRightLinearMap f x = x * f := rfl
+
+/-- With the bridge above, a nonzerodivisor is exactly an injective multiplication map. -/
+theorem mem_nonZeroDivisors_iff_injective_mulRight {A : Type u} [CommRing A] (f : A) :
+    f ∈ nonZeroDivisors A ↔ Function.Injective (mulRightLinearMap f) := by
+  constructor
+  · intro hf x y hxy
+    have h : (x - y) * f = 0 := by
+      have := sub_eq_zero.mpr hxy
+      simpa [sub_mul] using this
+    exact sub_eq_zero.mp ((mem_nonZeroDivisors_iff.mp hf).2 _ h)
+  · intro hinj
+    exact mem_nonZeroDivisors_of_mul_injective hinj
+
 /-- **(B2-head, step 3 = the fibre input, KM p. 66)** A local generator of the vanishing
 ideal of the distinguished section is a nonzerodivisor: *"we are reduced to the case
 `S = Spec(k)` with `k` a field, and `ℓ ∈ H⁰(E,L)` a `k`-basis, so non-zero, in which case
