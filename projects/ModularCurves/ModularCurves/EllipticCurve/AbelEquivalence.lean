@@ -872,7 +872,7 @@ theorem exists_section_of_degree_one {C S : Scheme.{u}} (π : C ⟶ S) [IsSepara
     exact hdeg s
   refine ⟨CategoryTheory.inv (D.ideal.subschemeι ≫ π) ≫ D.ideal.subschemeι, ?_, ?_⟩
   · rw [Category.assoc, CategoryTheory.IsIso.inv_hom_id]
-  · sorry
+  · rw [Scheme.Hom.ker_comp_of_isIso, Scheme.IdealSheafData.ker_subschemeι]
 
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
