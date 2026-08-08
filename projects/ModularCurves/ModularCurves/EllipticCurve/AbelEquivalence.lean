@@ -534,7 +534,21 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
       · simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
         exact congrArg (fun q ↦ (ConcreteCategory.hom (N.presheaf.map (Quiver.Hom.op q))) s')
           (Subsingleton.elim _ _)
-  sorry
+  -- (iv)+(v) expand the right-hand side and combine the exponents
+  refine hLHS.trans (hWg.trans ((congrArg
+    (fun z : ↑Γ(N, E.basicOpen f ⊓ E.basicOpen g.1) ↦
+      (E.presheaf.map (homOfLE (inf_le_right :
+        E.basicOpen f ⊓ E.basicOpen g.1 ≤ E.basicOpen g.1)).op
+        (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f)) ^ K • z) hvg).trans ?_))
+  rw [smul_smul, ← pow_add]
+  simp only [AlgebraicGeometry.Scheme.Modules.map_smul, map_pow]
+  rw [Nat.add_comm K n]
+  refine congrArg₂ (fun (r : ↑Γ(E, E.basicOpen f ⊓ E.basicOpen g.1))
+    (z : ↑Γ(N, E.basicOpen f ⊓ E.basicOpen g.1)) ↦ r ^ (n + K) • z) ?_ ?_
+  · simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+    exact congrArg (fun q ↦ (ConcreteCategory.hom (E.presheaf.map (Quiver.Hom.op q))) f)
+      (Subsingleton.elim _ _)
+  · rfl
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
 over a basic open is, up to a power of the defining section, the restriction of a functional
