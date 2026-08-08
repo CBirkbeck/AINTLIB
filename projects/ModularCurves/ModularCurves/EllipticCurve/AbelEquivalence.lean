@@ -413,7 +413,19 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
       (N.presheaf.map (Opens.infLERight (E.basicOpen g.1) (E.basicOpen g'.1)).op (v g'))
       ?_).imp (fun k hk ↦ hk)
     -- the two rescaled pieces agree on the overlap's `f`-locus: both restrict to
-    -- `f ^ n • s'` there (compose the restrictions and apply `hvres` on each piece)
+    -- `f ^ n • s'` there (two applications of `restrict_clearing_identity`)
+    have hgL := restrict_clearing_identity N (hpiece g.1 g.2).1
+      (inf_le_left : E.basicOpen g.1 ⊓ E.basicOpen g'.1 ≤ E.basicOpen g.1) f n s' (v g)
+      (by rw [Scheme.basicOpen_res]; exact inf_le_right)
+      (by rw [Scheme.basicOpen_res, Scheme.basicOpen_res]
+          exact inf_le_inf_right _ inf_le_left)
+      (hvres g)
+    have hgR := restrict_clearing_identity N (hpiece g'.1 g'.2).1
+      (inf_le_right : E.basicOpen g.1 ⊓ E.basicOpen g'.1 ≤ E.basicOpen g'.1) f n s' (v g')
+      (by rw [Scheme.basicOpen_res]; exact inf_le_right)
+      (by rw [Scheme.basicOpen_res, Scheme.basicOpen_res]
+          exact inf_le_inf_right _ inf_le_right)
+      (hvres g')
     sorry
   sorry
 
