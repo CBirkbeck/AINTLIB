@@ -39022,15 +39022,21 @@ to fix exactly this; nothing may build on them meanwhile.
   copy: Epi block of `SchemeModuleOrderedBaseCechExact.lean` (`map_orderedBaseCechComplexFunctor…`,
   funext + `_apply` lemmas, NO such option in that file). Same instance-alignment category as the
   `tensorSection_smul` pair — candidate for the same expert alignment pass.
-- **[A1e] route refined**: vendored `isAlgebraic_of_placeValuation_le_one`'s PROOF already shows the
-  `k⟮X⟯`-minpoly of an everywhere-integral element has CONSTANT coefficients. For full-constant-field:
-  `f ∉ k` algebraic gives `k' := k(f)` with `m = [k':k] ≥ 2`; linear disjointness (X transcendental —
-  mathlib `Subalgebra.LinearDisjoint` / IntermediateField) forces `m ≤ [K:k⟮X⟯] = 2`, so `m = 2` and
-  `K = k'(X)` rational; CONTRADICTION with vendored `infinity_ramificationIdx_eq_two` since constant
-  extensions have `e = 1` at ∞ (1/X stays a uniformizer, all characteristics). Two sub-leaves:
-  (i) constants linear disjointness `[k'(X):k(X)] = [k':k]` inside K; (ii) `K = k'(X) ⟹ e(∞) = 1`.
-  Alternative route (geometric integrality of `CoordinateRing ⊗_F F̄` via AdjoinRoot base change +
-  mathlib instIsDomain) still open as fallback.
+- **[A1e] PROVED 2026-08-08** (`FibreConstantField.lean`, `FibreRR.isFullConstantField`, axiom-verified
+  standard-three, zero sorries): the residue trick, exactly as planned below. Discharges the standing
+  `[IsFullConstantField k K]` hypothesis of ALL vendored RR endpoints for elliptic function fields over
+  ARBITRARY base fields — A1c/A1b/ellipticYZ and the vendored genus_eq_one/riemann_roch now fire on
+  every fibre field extension (A1d's ∀-K quantifier unblocked). Original plan record:
+  `f` algebraic over `k` ⟹ integral over every `placeValuationSubring` (valuation rings integrally
+  closed, `k ⊆ O_v` by `placeValuation_algebraMap_le_one`) ⟹ all valuations ≤ 1 and `f ∈ S∞`.
+  At the UNIQUE infinite place (`infinity_heightOne_unique`) the residue field is 1-dimensional over
+  `k` (`infinityPlace_deg_one`/`placeDegree`) ⟹ `k → S∞/v` surjective ⟹ ∃ c ∈ k, `f − c ∈ v.asIdeal`
+  ⟹ `v(f−c) ≤ exp(−1)`; elsewhere `≤ 1`. So `f − c ∈ RRspace(−single(infinityPlace))`, whose degree is
+  `−1 < 0` (`deg_single` + `infinityPlace_deg_one`), and `RRspace_neg_deg` (NO IsFullConstantField in
+  its hypothesis pack — verified) gives `f = algebraMap k K c`. ~100 lines, entirely in vendored
+  vocabulary. Needed pins: valuation-vs-ideal membership at a HeightOneSpectrum place
+  (`valuation_lt_one_iff`-form), `placeDegree` def unfold at `Sum.inr`, discreteness step
+  `< 1 ⟹ ≤ exp(−1)` (`WithZero.log`/`exp` on ℤᵐ⁰). File: `EllipticCurve/FibreConstantField.lean`.
 
 #### [AP2-A1b] `H¹ = 0` for a degree-one presentation (pole-peeling, the real math)
 - **File**: `EllipticCurve/FibreDegreeOneHOne.lean` (new) · **Depends on**: A1a
