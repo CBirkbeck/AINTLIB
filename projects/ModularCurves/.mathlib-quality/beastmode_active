@@ -50,11 +50,34 @@ characteristic, Silverman III.3.5) into the fibrewise-triviality input `hfib` th
 the rigidified discrepancy `Δ^rig_{P,Q} = Δ_{P,Q} ⊗ f_B^*(0^* Δ_{P,Q})⁻¹` on `C_B ⟶ B`,
 `B = C ×_U C`. Start there — everything downstream of it is boarded.
 
+*** SCOPING SURVEY DONE (2026-08-08) — read `plan-blockers-2026-08-08.md` §"BLOCKER 3 — scoping
+survey" BEFORE starting. It CORRECTS this focus in two places: ***
+  (i) the universal pair is `WeilPairing/TautologicalPair.lean` (293 lines, SORRY-FREE), NOT
+      `EllipticCurve/AdditionBaseChange.lean`. And `pairClassify` (:79) — "every pair of sections is
+      a base change of the universal pair" — is ALREADY PROVED, which is most of T9b.
+  (ii) the bridge is NOT a Picard-group comparison. It is one field-level module triviality
+      `nonempty_tensorObj_idealModule_add_field` (statement in the plan), whose ONLY new mathematics
+      is "div(f) = 0 ⟹ multiplication by f is an isomorphism of ideal modules" — via `idealGenHom`
+      (`Picard/IdealModule.lean:240`), `bijective_idealGenHom_app` (:307) and
+      `isIso_of_bijective_app_on_cover` (`Picard/PicComparison.lean:838`), on the two Weierstrass
+      charts already trivialised at `EllipticCurve/PoleSheafModel.lean:410-424`. mathlib does NOT
+      have "principal divisor ⟹ trivial line bundle" for `Scheme.Modules`.
+  Then `hfib` is PURE TRANSPORT: `nonempty_pullback_tensorObj`
+  (`Picard/PullbackTensorObj.lean:61`) + `nonempty_pullback_idealModule_ker_sectionBaseChange`
+  (`Picard/IdealModulePullback.lean:387` — stated along `Limits.pullback.fst π t`, SYNTACTICALLY the
+  morphism in `hfib`) + `isPullback_projModelBaseChange` + `projModelPointsAddEquiv`
+  (`EllipticCurve/MulByHomDegree.lean:65`, which identifies a scheme section with a mathlib
+  `W.Point` — indispensable and already proved).
+  PRICE FIRST: `kappaDivisor_add_linEquiv` is char-free but NOT instance-free — it routes through
+  `miller_hypothesis_holds_allChar`, needing `[IsIntegrallyClosed W_k.CoordinateRing]` per fibre.
+  AND `hhigh` remains open: even a finished T10-cmp does not by itself close `SelfAdjointN.lean:267`.
+
 Sequence for Blocker 3:
-  1. **T10-cmp** — the divisor-class/`picClass` comparison + base-change naturality (THE bottleneck).
-  2. build `Δ^rig` on the universal pair (`EllipticCurve/AdditionBaseChange.lean` has the universal
-     `C ⟶ U`, `B = C ×_U C` and the two universal sections; reducedness/integrality of both is in
-     `EllipticCurve/GroupLawAxioms.lean`).
+  1. **T10-cmp** — the field-level bridge above (THE bottleneck; genuinely new, but short).
+  2. build `Δ^rig` on the universal pair from `WeilPairing/TautologicalPair.lean`; reducedness /
+     integrality of `pairBase` is `EllipticCurve/GroupLawAxioms.lean:129/:132` (exact spelling
+     match). SPELLING TRAP: the fibre-cube instances at `:136/:147` and `:142/:152` are NOT literally
+     `pairCurve`'s spelling — they agree by `pullback.condition`, but instance search will not see it.
   3. feed `hfib` from step 1, apply `exists_pullback_iso_of_fibrewise_trivial_of_isReduced_of_affineCover`,
      then pull back along the zero section to kill `N`.
   4. **T9b** — base-change down to an arbitrary, possibly NON-REDUCED, base, stated and glued
