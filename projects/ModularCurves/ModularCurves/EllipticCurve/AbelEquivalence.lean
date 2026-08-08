@@ -7,6 +7,7 @@ import ModularCurves.EllipticCurve.DegreeOneFibreCohomology
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.Picard.IdealModule
 import ModularCurves.ForMathlib.LocalFlatnessCriterion
+import Mathlib.RingTheory.LocalProperties.Exactness
 
 /-!
 # The Abel equivalence, evaluation-divisor side (`AP2-B2`/`AP2-B3`, KM pp. 66–67)
@@ -782,6 +783,21 @@ theorem mem_nonZeroDivisors_of_residueField_fibre_injective {A : Type u} [CommRi
     f ∈ nonZeroDivisors A := by
   refine (mem_nonZeroDivisors_iff_injective_mulRight f).mpr ?_
   exact Module.Flat.injective_of_lTensor_residueField_injective (mulRightLinearMap f) hbar
+
+/-- **(B2-head, step 3e)** The global form of KM's reduction on an affine chart: if at every
+maximal ideal the localized multiplication map has injective residue-field fibre, the element
+is a nonzerodivisor. Combines `Module.injective_of_localized_maximal` with the local theorem
+above; the geometric input is now purely fibrewise. -/
+theorem mem_nonZeroDivisors_of_forall_maximal_residueField_fibre_injective
+    {A : Type u} [CommRing A] [IsNoetherianRing A] (f : A)
+    (h : ∀ (J : Ideal A) [J.IsMaximal],
+      Function.Injective (LinearMap.lTensor
+        (Localization.AtPrime J ⧸ IsLocalRing.maximalIdeal (Localization.AtPrime J))
+        (mulRightLinearMap (algebraMap A (Localization.AtPrime J) f)))) :
+    f ∈ nonZeroDivisors A := by
+  refine (mem_nonZeroDivisors_iff_injective_mulRight f).mpr ?_
+  refine _root_.injective_of_localized_maximal (mulRightLinearMap f) (fun J hJ ↦ ?_)
+  sorry
 
 /-- **(B2-head, step 3 = the fibre input, KM p. 66)** A local generator of the vanishing
 ideal of the distinguished section is a nonzerodivisor: *"we are reduced to the case
