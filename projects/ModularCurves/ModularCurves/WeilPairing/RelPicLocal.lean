@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.Picard.DualPullback
 import ModularCurves.Picard.DualPullback.LocalTrivializationSection
+import ModularCurves.Picard.DualPullback.Iso
 import ModularCurves.Picard.InvertibleSheafCocycle
 import ModularCurves.WeilPairing.TensorSection
 import ModularCurves.WeilPairing.UnitSheaf
@@ -74,80 +75,6 @@ theorem IsInvertible.of_restrict_cover {T : Scheme.{u}} {L : T.Modules}
       (((AlgebraicGeometry.Scheme.Modules.pullbackComp (V i j).ι (U i).ι).app L).symm ≪≫
         (AlgebraicGeometry.Scheme.Modules.pullback (V i j).ι).mapIso hi ≪≫ tj)⟩
 
-/-- **(AP2-B1, KM p. 65)** The `f^*`-twist equivalence on invertible sheaves is Zariski-local on the
-base: isomorphisms `M ≅ M' ⊗ f^*(N i)` over the preimages of an open cover of `T` glue to a global
-`M ≅ M' ⊗ f^*N₀` — the sheaf condition for `Pic(E_T)/f_T^*Pic(T)`.
-
-**(P-invertible leaf)** The pushforward of the discrepancy `M ⊗ (M')^∨` is invertible:
-locally on `U i` it is `(f_i)_* f_i^* (N i) ≅ N i` (P-restrict + P-local transports +
-`nonempty_pushforwardPullback_iso` on the restricted family — `UniversallyOConnected` is
-stable under any base change by definition), and `IsInvertible` is a cover-existence
-statement, so refine the `U i`-cover by the trivialising covers of the `N i`. -/
-theorem isInvertible_pushforward_discrepancy {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}}
-    (g : T ⟶ S) (hp : UniversallyOConnected p)
-    {M M' : (pullback p g).Modules} (hM : IsInvertible M) (hM' : IsInvertible M')
-    {ι : Type u} (U : ι → T.Opens) (hU : IsOpenCover U)
-    (N : ∀ i, (U i).toScheme.Modules) (hN : ∀ i, IsInvertible (N i))
-    (hglue : ∀ i, Nonempty
-      (M.restrict (pullback.snd p g ⁻¹ᵁ U i).ι ≅
-        tensorObj (M'.restrict (pullback.snd p g ⁻¹ᵁ U i).ι)
-          ((AlgebraicGeometry.Scheme.Modules.pullback
-            (pullback.snd p g ∣_ U i)).obj (N i)))) :
-    IsInvertible ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
-      (tensorObj M (dualObj M'))) := by
-  sorry
-
-/-- **(P-counit leaf)** The discrepancy is the pullback of its pushforward: `ε`-triangle
-route — locally `K|ᵢ ≅ f_i^*(N i)` (from `hglue` + the ⊗/dual cancellation), the counit on a
-genuine pullback is split by `f^*` of the unit isomorphism (triangle identity +
-`nonempty_pushforwardPullback_iso`'s `IsIso η`), and iso-ness of the counit is
-Zariski-local on the source (`isIso_of_bijective_app_on_cover` + pushforward/pullback
-restriction compatibility). -/
-theorem nonempty_discrepancy_iso_pullback_pushforward {X S : Scheme.{u}} {p : X ⟶ S}
-    {T : Scheme.{u}} (g : T ⟶ S) (hp : UniversallyOConnected p)
-    {M M' : (pullback p g).Modules} (hM : IsInvertible M) (hM' : IsInvertible M')
-    {ι : Type u} (U : ι → T.Opens) (hU : IsOpenCover U)
-    (N : ∀ i, (U i).toScheme.Modules) (hN : ∀ i, IsInvertible (N i))
-    (hglue : ∀ i, Nonempty
-      (M.restrict (pullback.snd p g ⁻¹ᵁ U i).ι ≅
-        tensorObj (M'.restrict (pullback.snd p g ⁻¹ᵁ U i).ι)
-          ((AlgebraicGeometry.Scheme.Modules.pullback
-            (pullback.snd p g ∣_ U i)).obj (N i)))) :
-    Nonempty (tensorObj M (dualObj M') ≅
-      (AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj
-        ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
-          (tensorObj M (dualObj M')))) := by
-  sorry
-
-/-- **(AP2-B1, KM p. 65)** The `f^*`-twist equivalence on invertible sheaves is Zariski-local
-on the base — assembled from the two leaves by Picard-group algebra: with
-`N₀ := f_*(M ⊗ (M')^∨)`, the class of `M' ⊗ f^*N₀` is
-`[M'] · [M] · [(M')^∨] = [M] · ([M'] · [(M')^∨]) = [M]` in the skeleton monoid. -/
-theorem exists_pullback_twist_of_locally {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}}
-    (g : T ⟶ S) (hp : UniversallyOConnected p)
-    {M M' : (pullback p g).Modules} (hM : IsInvertible M) (hM' : IsInvertible M')
-    {ι : Type u} (U : ι → T.Opens) (hU : IsOpenCover U)
-    (N : ∀ i, (U i).toScheme.Modules) (hN : ∀ i, IsInvertible (N i))
-    (hglue : ∀ i, Nonempty
-      (M.restrict (pullback.snd p g ⁻¹ᵁ U i).ι ≅
-        tensorObj (M'.restrict (pullback.snd p g ⁻¹ᵁ U i).ι)
-          ((AlgebraicGeometry.Scheme.Modules.pullback
-            (pullback.snd p g ∣_ U i)).obj (N i)))) :
-    ∃ N₀ : T.Modules, IsInvertible N₀ ∧
-      Nonempty (M ≅ tensorObj M'
-        ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N₀)) := by
-  refine ⟨(AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
-      (tensorObj M (dualObj M')),
-    isInvertible_pushforward_discrepancy g hp hM hM' U hU N hN hglue, ?_⟩
-  letI := AlgebraicGeometry.Scheme.Modules.monoidalCategory (pullback p g)
-  letI := AlgebraicGeometry.Scheme.Modules.symmetricCategory (pullback p g)
-  refine toSkeleton_eq_toSkeleton_iff.mp ?_
-  have h2 := toSkeleton_eq_toSkeleton_iff.mpr
-    (nonempty_discrepancy_iso_pullback_pushforward g hp hM hM' U hU N hN hglue)
-  have h3 : toSkeleton M' * toSkeleton (dualObj M') = 1 := by
-    rw [← toSkeleton_tensorObj_eq, ← toSkeleton_unitObj]
-    exact toSkeleton_eq_toSkeleton_iff.mpr (nonempty_eval_iso hM')
-  rw [toSkeleton_tensorObj_eq, ← h2, toSkeleton_tensorObj_eq, mul_left_comm, h3, mul_one]
 
 
 /-- The pushforward-slot generating section of the glue: over a trivialising open `V` of `N`, the
@@ -841,5 +768,151 @@ theorem nonempty_pushforwardPullback_iso {E T : Scheme.{u}}
     exact (Function.Bijective.of_comp_iff _ hseed).mp hα
   exact ⟨(asIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
     (q)).unit.app N)).symm⟩
+
+/-- **(AP2-B1, KM p. 65)** The `f^*`-twist equivalence on invertible sheaves is Zariski-local on the
+base: isomorphisms `M ≅ M' ⊗ f^*(N i)` over the preimages of an open cover of `T` glue to a global
+`M ≅ M' ⊗ f^*N₀` — the sheaf condition for `Pic(E_T)/f_T^*Pic(T)`.
+
+**(P-invertible leaf)** The pushforward of the discrepancy `M ⊗ (M')^∨` is invertible:
+locally on `U i` it is `(f_i)_* f_i^* (N i) ≅ N i` (P-restrict + P-local transports +
+`nonempty_pushforwardPullback_iso` on the restricted family — `UniversallyOConnected` is
+stable under any base change by definition), and `IsInvertible` is a cover-existence
+statement, so refine the `U i`-cover by the trivialising covers of the `N i`. -/
+theorem isInvertible_pushforward_discrepancy {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}}
+    (g : T ⟶ S) (hp : UniversallyOConnected p)
+    {M M' : (pullback p g).Modules} (hM : IsInvertible M) (hM' : IsInvertible M')
+    {ι : Type u} (U : ι → T.Opens) (hU : IsOpenCover U)
+    (N : ∀ i, (U i).toScheme.Modules) (hN : ∀ i, IsInvertible (N i))
+    (hglue : ∀ i, Nonempty
+      (M.restrict (pullback.snd p g ⁻¹ᵁ U i).ι ≅
+        tensorObj (M'.restrict (pullback.snd p g ⁻¹ᵁ U i).ι)
+          ((AlgebraicGeometry.Scheme.Modules.pullback
+            (pullback.snd p g ∣_ U i)).obj (N i)))) :
+    IsInvertible ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+      (tensorObj M (dualObj M'))) := by
+  refine IsInvertible.of_restrict_cover U hU (fun i => ⟨N i, hN i, ?_⟩)
+  -- section-isos for the restricted structure morphism
+  have hq' : ∀ (W' : (U i).toScheme.Opens), IsIso ((pullback.snd p g ∣_ U i).app W') := by
+    intro W'
+    rw [morphismRestrict_app]
+    refine IsIso.comp_isIso' (hp g ((U i).ι ''ᵁ W')) ?_
+    exact ((Limits.pullback p g).presheaf.mapIso
+      (eqToIso (image_morphismRestrict_preimage
+        (pullback.snd p g) (U i) W')).op).isIso_hom
+  -- P-local: the restricted discrepancy is the pulled `N i`, by Picard-group algebra
+  have hploc : Nonempty
+      ((AlgebraicGeometry.Scheme.Modules.pullback
+        (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')) ≅
+      (AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g ∣_ U i)).obj (N i)) := by
+    letI := AlgebraicGeometry.Scheme.Modules.monoidalCategory
+      (pullback.snd p g ⁻¹ᵁ U i).toScheme
+    letI := AlgebraicGeometry.Scheme.Modules.symmetricCategory
+      (pullback.snd p g ⁻¹ᵁ U i).toScheme
+    refine toSkeleton_eq_toSkeleton_iff.mp ?_
+    obtain ⟨e1⟩ := AlgebraicGeometry.Scheme.Modules.nonempty_pullback_tensorObj
+      (pullback.snd p g ⁻¹ᵁ U i).ι M (dualObj M')
+    obtain ⟨eglue⟩ := hglue i
+    have h1 : toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+        (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M'))) =
+        toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g ⁻¹ᵁ U i).ι).obj M) *
+        toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g ⁻¹ᵁ U i).ι).obj (dualObj M')) :=
+      (toSkeleton_eq_toSkeleton_iff.mpr ⟨e1⟩).trans (toSkeleton_tensorObj_eq _ _)
+    have h2 : toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+        (pullback.snd p g ⁻¹ᵁ U i).ι).obj (dualObj M')) =
+        toSkeleton (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g ⁻¹ᵁ U i).ι).obj M')) :=
+      toSkeleton_eq_toSkeleton_iff.mpr
+        ⟨AlgebraicGeometry.Scheme.Modules.dualPullbackIsoOfIsInvertibleT _ M' hM'⟩
+    have h3 : toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+        (pullback.snd p g ⁻¹ᵁ U i).ι).obj M) =
+        toSkeleton (M'.restrict (pullback.snd p g ⁻¹ᵁ U i).ι) *
+        toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g ∣_ U i)).obj (N i)) := by
+      refine Eq.trans ?_ ((toSkeleton_eq_toSkeleton_iff.mpr ⟨eglue⟩).trans
+        (toSkeleton_tensorObj_eq _ _))
+      exact toSkeleton_eq_toSkeleton_iff.mpr
+        ⟨((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
+          (pullback.snd p g ⁻¹ᵁ U i).ι).app M).symm⟩
+    have h5 : toSkeleton (M'.restrict (pullback.snd p g ⁻¹ᵁ U i).ι) =
+        toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g ⁻¹ᵁ U i).ι).obj M') :=
+      toSkeleton_eq_toSkeleton_iff.mpr
+        ⟨(AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
+          (pullback.snd p g ⁻¹ᵁ U i).ι).app M'⟩
+    have h6 : toSkeleton ((AlgebraicGeometry.Scheme.Modules.pullback
+        (pullback.snd p g ⁻¹ᵁ U i).ι).obj M') *
+        toSkeleton (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g ⁻¹ᵁ U i).ι).obj M')) = 1 := by
+      rw [← toSkeleton_tensorObj_eq, ← toSkeleton_unitObj]
+      exact toSkeleton_eq_toSkeleton_iff.mpr
+        (nonempty_eval_iso (hM'.pullback (pullback.snd p g ⁻¹ᵁ U i).ι))
+    rw [h1, h2, h3, h5, mul_right_comm, h6, one_mul]
+  obtain ⟨eloc⟩ := hploc
+  obtain ⟨ekm⟩ := nonempty_pushforwardPullback_iso (pullback.snd p g ∣_ U i) hq' (hN i)
+  exact ⟨((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
+      (U i).ι).app _).symm ≪≫
+    (AlgebraicGeometry.Scheme.Modules.restrictPushforwardIsoOfIsPullback
+      (pullback.snd p g) (pullback.snd p g ∣_ U i)
+      (pullback.snd p g ⁻¹ᵁ U i).ι (U i).ι
+      (isPullback_morphismRestrict (pullback.snd p g) (U i))).app
+      (tensorObj M (dualObj M')) ≪≫
+    (AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g ∣_ U i)).mapIso
+      ((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
+        (pullback.snd p g ⁻¹ᵁ U i).ι).app (tensorObj M (dualObj M')) ≪≫ eloc) ≪≫
+    ekm⟩
+
+/-- **(P-counit leaf)** The discrepancy is the pullback of its pushforward: `ε`-triangle
+route — locally `K|ᵢ ≅ f_i^*(N i)` (from `hglue` + the ⊗/dual cancellation), the counit on a
+genuine pullback is split by `f^*` of the unit isomorphism (triangle identity +
+`nonempty_pushforwardPullback_iso`'s `IsIso η`), and iso-ness of the counit is
+Zariski-local on the source (`isIso_of_bijective_app_on_cover` + pushforward/pullback
+restriction compatibility). -/
+theorem nonempty_discrepancy_iso_pullback_pushforward {X S : Scheme.{u}} {p : X ⟶ S}
+    {T : Scheme.{u}} (g : T ⟶ S) (hp : UniversallyOConnected p)
+    {M M' : (pullback p g).Modules} (hM : IsInvertible M) (hM' : IsInvertible M')
+    {ι : Type u} (U : ι → T.Opens) (hU : IsOpenCover U)
+    (N : ∀ i, (U i).toScheme.Modules) (hN : ∀ i, IsInvertible (N i))
+    (hglue : ∀ i, Nonempty
+      (M.restrict (pullback.snd p g ⁻¹ᵁ U i).ι ≅
+        tensorObj (M'.restrict (pullback.snd p g ⁻¹ᵁ U i).ι)
+          ((AlgebraicGeometry.Scheme.Modules.pullback
+            (pullback.snd p g ∣_ U i)).obj (N i)))) :
+    Nonempty (tensorObj M (dualObj M') ≅
+      (AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj
+        ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+          (tensorObj M (dualObj M')))) := by
+  sorry
+
+/-- **(AP2-B1, KM p. 65)** The `f^*`-twist equivalence on invertible sheaves is Zariski-local
+on the base — assembled from the two leaves by Picard-group algebra: with
+`N₀ := f_*(M ⊗ (M')^∨)`, the class of `M' ⊗ f^*N₀` is
+`[M'] · [M] · [(M')^∨] = [M] · ([M'] · [(M')^∨]) = [M]` in the skeleton monoid. -/
+theorem exists_pullback_twist_of_locally {X S : Scheme.{u}} {p : X ⟶ S} {T : Scheme.{u}}
+    (g : T ⟶ S) (hp : UniversallyOConnected p)
+    {M M' : (pullback p g).Modules} (hM : IsInvertible M) (hM' : IsInvertible M')
+    {ι : Type u} (U : ι → T.Opens) (hU : IsOpenCover U)
+    (N : ∀ i, (U i).toScheme.Modules) (hN : ∀ i, IsInvertible (N i))
+    (hglue : ∀ i, Nonempty
+      (M.restrict (pullback.snd p g ⁻¹ᵁ U i).ι ≅
+        tensorObj (M'.restrict (pullback.snd p g ⁻¹ᵁ U i).ι)
+          ((AlgebraicGeometry.Scheme.Modules.pullback
+            (pullback.snd p g ∣_ U i)).obj (N i)))) :
+    ∃ N₀ : T.Modules, IsInvertible N₀ ∧
+      Nonempty (M ≅ tensorObj M'
+        ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N₀)) := by
+  refine ⟨(AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+      (tensorObj M (dualObj M')),
+    isInvertible_pushforward_discrepancy g hp hM hM' U hU N hN hglue, ?_⟩
+  letI := AlgebraicGeometry.Scheme.Modules.monoidalCategory (pullback p g)
+  letI := AlgebraicGeometry.Scheme.Modules.symmetricCategory (pullback p g)
+  refine toSkeleton_eq_toSkeleton_iff.mp ?_
+  have h2 := toSkeleton_eq_toSkeleton_iff.mpr
+    (nonempty_discrepancy_iso_pullback_pushforward g hp hM hM' U hU N hN hglue)
+  have h3 : toSkeleton M' * toSkeleton (dualObj M') = 1 := by
+    rw [← toSkeleton_tensorObj_eq, ← toSkeleton_unitObj]
+    exact toSkeleton_eq_toSkeleton_iff.mpr (nonempty_eval_iso hM')
+  rw [toSkeleton_tensorObj_eq, ← h2, toSkeleton_tensorObj_eq, mul_left_comm, h3, mul_one]
 
 end ModularCurves
