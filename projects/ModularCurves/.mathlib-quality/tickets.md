@@ -39589,6 +39589,21 @@ trick (bind un-restatable smul-carriers as Γ-typed vars with an eq-hypothesis, 
 `exists_pullback_twist_of_locally` (:53) ONLY — KM p.65 assembly: L₀ := f_*(M ⊗ dual(M')-pullback…)
 per the module docstring quote, consuming nonempty_pushforwardPullback_iso + the cocycle machinery.
 
+**AP2-B1 parent sub-cut** (2026-08-08, for the next segment): `exists_pullback_twist_of_locally`
+decomposes into: **P-restrict** — `Nonempty ((f_*K)|_{Uᵢ}-restricted ≅ (f_i)_*(K|_{f⁻¹Uᵢ}))`
+(pushforward-restriction base-change; `restrictPushforwardUnitIsoOfIsPullback`
+GlueEffectivity:66 is the unit case — generalise or find the module form); **P-local** —
+`M ⊗ (M')^∨ |_{f⁻¹Uᵢ} ≅ f_i^*(Nᵢ)` from `hglue i` + the ⊗/dual cancellation
+(`nonempty_eval_iso` + monoidal juggling, all Nonempty-level so Nonempty-packaged isos FINE);
+**P-invertible** — `IsInvertible (f_*(M ⊗ (M')^∨))` from locally-≅-Nᵢ (IsInvertible is
+by-definition a cover-existence statement: refine the Uᵢ-cover by Nᵢ's trivialising covers,
+transport along P-restrict/P-local/`nonempty_pushforwardPullback_iso`-restricted — note
+`UniversallyOConnected p` is stable under any base change BY DEFINITION (∀ g quantified));
+**P-counit** — `M ≅ M' ⊗ f^*N₀`: KM's unit-section argument; candidate formal route:
+M' ⊗ f^*f_*(M⊗(M')^∨) —(counit)→ M' ⊗ M ⊗ (M')^∨ ≅ M, with the counit iso-on-this-object
+checked locally (deepest leaf — may split again; consider instead gluing the local isos
+`hglue i` twisted by the P-local identifications, via `RigidDescent`/`GlueEffectivity`).
+
 **AP2-B1a dependency chart** (2026-08-07 final): the capped smul pair is DOUBLY load-bearing — `hcompat`
 (proved, cites it) AND `hbij` (route: `r • tensorSection a b = tensorSection (r•a) b` splits the
 bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,

@@ -63,6 +63,10 @@ theorem exists_pullback_twist_of_locally {X S : Scheme.{u}} {p : X ⟶ S} {T : S
     ∃ N₀ : T.Modules, IsInvertible N₀ ∧
       Nonempty (M ≅ tensorObj M'
         ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N₀)) := by
+  -- KM p. 65 assembly, decomposed (2026-08-08; sub-leaves below this theorem):
+  -- N₀ := f_*(M ⊗ (M')^∨); locally N₀|Uᵢ ≅ f_*f^*(Nᵢ) ≅ Nᵢ (P-restrict + P-local +
+  -- nonempty_pushforwardPullback_iso on the restricted family), hence invertible;
+  -- the twist iso by the counit-cancellation (P-counit).
   sorry
 
 
