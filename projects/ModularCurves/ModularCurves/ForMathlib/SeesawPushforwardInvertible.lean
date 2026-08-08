@@ -51,17 +51,11 @@ after transport along `baseSectionsIsoKernelOrderedBaseCechDifferential`.
 
 `baseSections_invertible_of_orderedBaseCechHomologyFinite` carries all of the mathematics and is
 **sorry-free**: it takes finiteness of the ordered base-Čech homology as an explicit hypothesis.
-Over `S = Spec (.of R)` that hypothesis is discharged by
-`Scheme.Modules.orderedBaseCechHomologyFinite_of_isProper`.
-
-## Known gap
-
-`orderedBaseCechHomologyFinite_of_isProper` is stated in this tree only for a base that is
-*syntactically* `Spec (.of R)`, and the whole coherent-pushforward chain below it
-(`SchemeModuleCanonicalSupportChowLowDegreeAssembly`) inherits that shape. Transporting it to a
-general affine base `S` along `S.isoSpec` is a genuine (if routine) piece of work — the two Čech
-complexes live over the two different rings `Γ(S, ⊤)` and `Γ(Spec Γ(S, ⊤), ⊤)` — and is left as
-the single `sorry` of `orderedBaseCechHomologyFinite_of_isProper_of_isAffine` below.
+Over an arbitrary Noetherian affine base that hypothesis is discharged by
+`Scheme.Modules.orderedBaseCechHomologyFinite_of_isProper_of_isAffine`
+(`ForMathlib/SchemeModuleProperLowDegreeCechFinite.lean`), which transports the
+`Spec (.of R)`-shaped Chow-comodel chain along `S.isoSpec` through
+`Scheme.Modules.OrderedBaseCechHomologyFinite.of_comp`.
 -/
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
@@ -205,43 +199,6 @@ theorem baseSections_invertible_of_orderedBaseCechHomologyFinite
   exact Module.Invertible.of_finite_of_projective_of_rankAtStalk_eq_one
     ((Module.rankAtStalk_eq_of_equiv eSec).trans hrankAtU)
 
-/-- **Missing bridge.** Finiteness of the ordered base-Čech homology of a coherent module on a
-proper Noetherian family over an arbitrary Noetherian **affine** base.
-
-`Scheme.Modules.orderedBaseCechHomologyFinite_of_isProper`
-(`ForMathlib/SchemeModuleProperLowDegreeCechFinite.lean:149`) is exactly this statement, but only
-for a base of the syntactic shape `Spec (.of R)`; its whole supporting chain
-(`exists_nonzero_homologyFiniteComodel`,
-`CanonicalSupportThickening.exists_chowComodel_orderedBaseCechHomologyFinite`, and the relative
-projective factorisation below them) is stated the same way, and the helpers are `private`.
-
-Transporting it along `S.isoSpec : S ≅ Spec Γ(S, ⊤)` is routine but not short: the two ordered
-base-Čech complexes live in `ModuleCat Γ(S, ⊤)` and `ModuleCat Γ(Spec Γ(S, ⊤), ⊤)`, and the terms
-are *not* definitionally equal (the categorical products defining them use the two different
-`HasLimits` instances). The route that does work runs through
-`orderedBaseCechComplexBaseChangeIso π t M U hUaff` for `t := S.isoSpec.inv`, which identifies
-`ModuleCat.extendScalars t.appTop.hom` applied to the complex with the ordered base-Čech complex
-of `pullback.snd π t` over `Spec Γ(S, ⊤)`; `t.appTop.hom` is a ring isomorphism, hence flat, so
-`kerBaseChangeComparison_bijective_of_flat` and right exactness of `⊗` turn the transported
-statement back into finiteness over `Γ(S, ⊤)` by `Module.Finite.trans`. Its cost is the
-instance bookkeeping for `pullback π t` (`IsNoetherian`, `IsSeparated`, affineness of the
-preimage cover) plus a homology comparison; mathlib has no ready
-`(F.mapHomologicalComplex c).obj C).homology n ≅ F.obj (C.homology n)`, and
-`ModuleCat.restrictScalars` carries no `PreservesFiniteLimits`/`PreservesFiniteColimits`
-instance, so that comparison has to be built by hand.
-
-The cheaper fix is to generalise `orderedBaseCechHomologyFinite_of_isProper` from `Spec (.of R)`
-to an arbitrary affine Noetherian base in its own file, which also unblocks
-`InvertibleSheafProperCechResidueSpread` and the rest of the `Spec (.of R)`-shaped chain. -/
-private theorem orderedBaseCechHomologyFinite_of_isProper_of_isAffine
-    {X S : Scheme.{u}} [IsAffine S] [IsNoetherian S] [IsNoetherian X] [X.IsSeparated]
-    {π : X ⟶ S} [LocallyOfFinitePresentation π] [IsProper π]
-    {ι : Type u} [Fintype ι] [LinearOrder ι]
-    (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
-    (M : X.Modules) [M.IsFiniteType] [M.IsQuasicoherent] :
-    AlgebraicGeometry.Scheme.Modules.OrderedBaseCechHomologyFinite π U M := by
-  sorry
-
 /-- **(`KM-SEESAW-2`)** For an invertible module on a proper flat family of finite presentation
 over a reduced Noetherian affine base, positive-degree exactness of the ordered base-Čech complex
 together with constant residue rank one of its degree-zero kernel makes the pushforward's global
@@ -249,7 +206,7 @@ sections `baseSections π M` an invertible `Γ(S, ⊤)`-module.
 
 All the mathematics is in `baseSections_invertible_of_orderedBaseCechHomologyFinite`; the only
 extra ingredient here is Čech homology finiteness, supplied by
-`orderedBaseCechHomologyFinite_of_isProper_of_isAffine`. -/
+`Scheme.Modules.orderedBaseCechHomologyFinite_of_isProper_of_isAffine`. -/
 theorem baseSections_invertible_of_kernel_finrank_of_isReduced
     {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian S]
     [IsNoetherian X] [X.IsSeparated]
@@ -269,7 +226,10 @@ theorem baseSections_invertible_of_kernel_finrank_of_isReduced
   letI : M.IsQuasicoherent := hM.isQuasicoherent
   letI : M.IsFinitePresentation := hM.isFinitePresentation
   letI : M.IsFiniteType := SheafOfModules.instIsFiniteTypeOfIsFinitePresentation M
+  letI : IsNoetherianRing Γ(S, (⊤ : S.Opens)) :=
+    IsLocallyNoetherian.component_noetherian ⟨⊤, isAffineOpen_top S⟩
   exact baseSections_invertible_of_orderedBaseCechHomologyFinite hM U hU hUaff
-    (orderedBaseCechHomologyFinite_of_isProper_of_isAffine (π := π) U hU hUaff M) hhigh hrank
+    (Scheme.Modules.orderedBaseCechHomologyFinite_of_isProper_of_isAffine
+      (xπ := π) U hU hUaff M) hhigh hrank
 
 end ModularCurves
