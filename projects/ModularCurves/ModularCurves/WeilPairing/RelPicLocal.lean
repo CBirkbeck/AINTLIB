@@ -728,6 +728,41 @@ theorem bijective_smul_glueSectionASeed_res {T : Scheme.{u}} (N : T.Modules) {V 
       exact h
   · exact ⟨fun a b h ↦ h, fun y ↦ ⟨y, rfl⟩⟩
 
+/-- The adjunction unit at an invertible module is an isomorphism when the structure
+morphism has iso section-components — the content of the KM isomorphism, exposed at the
+unit level for counit/triangle consumers. -/
+theorem isIso_pullbackPushforwardAdjunction_unit_app {E T : Scheme.{u}}
+    (q : E ⟶ T) (hq : ∀ W : T.Opens, IsIso (q.app W))
+    {N : T.Modules} (hN : IsInvertible N) :
+    IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+      q).unit.app N) := by
+  obtain ⟨κ, V, hV, htriv⟩ := hN
+  refine AlgebraicGeometry.Scheme.Modules.isIso_of_bijective_app_on_cover _ V hV
+    (fun i W hW ↦ ?_)
+  have hα := bijective_smul_glueSectionA_res q hq N (htriv i).some hW
+  have hseed := bijective_smul_glueSectionASeed_res N (htriv i).some hW
+  have hfac : (fun r : ↑Γ(T, W) ↦ r •
+      ((AlgebraicGeometry.Scheme.Modules.pushforward q).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback q).obj N)).presheaf.map
+        (homOfLE hW).op (glueSectionA q N (V i) (htriv i).some)) =
+      (AlgebraicGeometry.Scheme.Modules.Hom.app
+        ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+          q).unit.app N) W) ∘
+      (fun r : ↑Γ(T, W) ↦ r •
+        N.presheaf.map (homOfLE hW).op (glueSectionASeed N (V i) (htriv i).some)) := by
+    funext r
+    show r • _ = AlgebraicGeometry.Scheme.Modules.Hom.app _ W
+      (r • N.presheaf.map (homOfLE hW).op (glueSectionASeed N (V i) (htriv i).some))
+    rw [AlgebraicGeometry.Scheme.Modules.Hom.app_smul]
+    refine congrArg (fun z ↦ r • z) ?_
+    rw [glueSectionA_eq_adjUnit q N (V i) (htriv i).some]
+    exact (PresheafOfModules.naturality_apply
+      ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+        q).unit.app N).val (homOfLE hW).op
+      (glueSectionASeed N (V i) (htriv i).some)).symm
+  rw [hfac] at hα
+  exact (Function.Bijective.of_comp_iff _ hseed).mp hα
+
 /-- **(AP2-B1a, KM p. 65: "`f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`")** Over a universally `O`-connected family,
 `f_*f^*N ≅ N` for invertible `N` — assembled by cancelling the dual twist
 (`nonempty_iso_of_tensorObj_unitObj`, `PicComparison.lean:909`) between the two obligations above.
@@ -738,36 +773,9 @@ theorem nonempty_pushforwardPullback_iso {E T : Scheme.{u}}
     {N : T.Modules} (hN : IsInvertible N) :
     Nonempty ((AlgebraicGeometry.Scheme.Modules.pushforward (q)).obj
       ((AlgebraicGeometry.Scheme.Modules.pullback (q)).obj N) ≅ N) := by
-  obtain ⟨κ, V, hV, htriv⟩ := hN
-  haveI : IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
-      (q)).unit.app N) := by
-    refine AlgebraicGeometry.Scheme.Modules.isIso_of_bijective_app_on_cover _ V hV
-      (fun i W hW ↦ ?_)
-    have hα := bijective_smul_glueSectionA_res q hq N (htriv i).some hW
-    have hseed := bijective_smul_glueSectionASeed_res N (htriv i).some hW
-    have hfac : (fun r : ↑Γ(T, W) ↦ r •
-        ((AlgebraicGeometry.Scheme.Modules.pushforward (q)).obj
-          ((AlgebraicGeometry.Scheme.Modules.pullback (q)).obj N)).presheaf.map
-          (homOfLE hW).op (glueSectionA q N (V i) (htriv i).some)) =
-        (AlgebraicGeometry.Scheme.Modules.Hom.app
-          ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
-            (q)).unit.app N) W) ∘
-        (fun r : ↑Γ(T, W) ↦ r •
-          N.presheaf.map (homOfLE hW).op (glueSectionASeed N (V i) (htriv i).some)) := by
-      funext r
-      show r • _ = AlgebraicGeometry.Scheme.Modules.Hom.app _ W
-        (r • N.presheaf.map (homOfLE hW).op (glueSectionASeed N (V i) (htriv i).some))
-      rw [AlgebraicGeometry.Scheme.Modules.Hom.app_smul]
-      refine congrArg (fun z ↦ r • z) ?_
-      rw [glueSectionA_eq_adjUnit q N (V i) (htriv i).some]
-      exact (PresheafOfModules.naturality_apply
-        ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
-          (q)).unit.app N).val (homOfLE hW).op
-        (glueSectionASeed N (V i) (htriv i).some)).symm
-    rw [hfac] at hα
-    exact (Function.Bijective.of_comp_iff _ hseed).mp hα
+  haveI := isIso_pullbackPushforwardAdjunction_unit_app q hq hN
   exact ⟨(asIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
-    (q)).unit.app N)).symm⟩
+    q).unit.app N)).symm⟩
 
 /-- **(P-local)** On a trivialising piece the discrepancy pulls back to `N i`:
 Picard-group algebra on the restricted scheme (pullback-tensor, dual-pullback, `hglue`,
@@ -933,6 +941,39 @@ theorem nonempty_discrepancy_iso_pullback_pushforward {X S : Scheme.{u}} {p : X 
               (pullback.snd p g ⁻¹ᵁ U i).ι).obj
               ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
                 (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))))) := by
+        -- (m4) the piece-level counit at the restricted discrepancy is an isomorphism
+        have hq' : ∀ (W' : (U i).toScheme.Opens),
+            IsIso ((pullback.snd p g ∣_ U i).app W') := by
+          intro W'
+          rw [morphismRestrict_app]
+          refine IsIso.comp_isIso' (hp g ((U i).ι ''ᵁ W')) ?_
+          exact ((Limits.pullback p g).presheaf.mapIso
+            (eqToIso (image_morphismRestrict_preimage
+              (pullback.snd p g) (U i) W')).op).isIso_hom
+        haveI hη := isIso_pullbackPushforwardAdjunction_unit_app
+          (pullback.snd p g ∣_ U i) hq' (hN i)
+        haveI hεpull : IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (pullback.snd p g ∣_ U i)).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.pullback
+              (pullback.snd p g ∣_ U i)).obj (N i))) := by
+          have htri := (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (pullback.snd p g ∣_ U i)).left_triangle_components (N i)
+          have hsolve := (IsIso.eq_inv_comp _).mpr htri
+          rw [hsolve]
+          infer_instance
+        haveI hloc : IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (pullback.snd p g ∣_ U i)).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+              (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))) := by
+          obtain ⟨e0⟩ := nonempty_pullback_discrepancy_iso g hM hM' U N hglue i
+          have hnatε := (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (pullback.snd p g ∣_ U i)).counit.naturality
+            (((AlgebraicGeometry.Scheme.Modules.restrictFunctorIsoPullback
+              (pullback.snd p g ⁻¹ᵁ U i).ι).app (tensorObj M (dualObj M')) ≪≫ e0).hom)
+          have hsolve := (IsIso.eq_comp_inv _).mpr hnatε.symm
+          rw [hsolve]
+          infer_instance
+        -- (m1)-(m3): transport through the composed adjunctions
         sorry
       -- the composed functor's map of the unit is an isomorphism after restriction
       have hGFu : IsIso ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
