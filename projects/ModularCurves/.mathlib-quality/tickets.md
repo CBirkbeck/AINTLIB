@@ -39067,6 +39067,24 @@ coface compatibilities), everything axiom-verified standard-three, zero sorries:
   `set` on Čech carriers triggers kernel-level cast failures, `show`-casts across simp-normalized
   goals whnf-explode — keep everything term-level `Eq.trans`/`congr_hom` with rfl-casts only.
 
+#### AP2-A1 progress-4 (2026-08-08, fourth stretch) — **A1d PROVED; the [A′] interface is reachable**
+- **Stage B PROVED** (`afe697107`): `SchemeModuleBaseCechResidueTransport` — M-generic residue
+  transport (unordered + ordered), extracted from the pole line; pullback-quasicoherence as
+  instance hypothesis; `(pullback π t)`-vs-`(π.fiber s)` IsSeparated spelling gotcha.
+- **Stage D exposed** (`89a166831`): `baseChange_exact_of_forall_schemeResidueField_baseChange_exact`
+  un-privatized; with `finrank_ker_baseChange_eq` + `cochainComplex_baseChange_functionExact_of_map_exactAt`.
+- **A1d COMPOSITION PROVED** (`EllipticCurve/DegreeOneFibreCohomology.lean`,
+  `hasDegreeOneFibreCohomology_of_fibre_data`, axiom-verified): per-point fibre-pullback
+  `H^{q+1}`-vanishing + residue-field kernel-rank-one ⟹ `HasDegreeOneFibreCohomology π M U` on any
+  affine-based proper family with a finite affine cover. Zero sorries.
+- **AP2-A1 status**: the degree-one package pipeline is COMPLETE as
+  `presentation trio (proved) → fibre Sheaf.H package (twoCover_subsingleton_H_one + generic
+  add-two) → hasDegreeOneFibreCohomology_of_fibre_data`. The two per-point inputs are discharged
+  at CONSUMER call sites (concrete sheaves with concrete fibre models): (i) transporting
+  `Sheaf.H`-vanishing along the fibre-model iso (functorH.mapIso + prop_of_iso — engine pattern
+  PoleSheafBaseCechHigher:107–155), (ii) the residue kernel-rank via the H⁰ reading + ell = 1 +
+  linearity thread (the `fiberSectionsEquivBaseCechKernel` ≃ₗ pattern). AP2-A1 as a *producer*
+  ticket is DONE; remaining glue lives in AP2-A2/B tickets where M is concrete.
 #### [AP2-A1b] `H¹ = 0` for a degree-one presentation (pole-peeling, the real math)
 - **File**: `EllipticCurve/FibreDegreeOneHOne.lean` (new) · **Depends on**: A1a
 - **Statement**: `Subsingleton (Sheaf.H M 1)` (and `q ≥ 1` via dimension/cover bound) for `M` with a
