@@ -219,16 +219,19 @@ end SurjectivityTransport
 
 end FibreRR
 
-/-! ## Ordered Čech indices of a two-element cover -/
+/-! ## Ordered Čech indices of a two-element cover
+
+The Čech machinery indexes covers by a `Type u`, so the two-element cover is indexed by
+`ULift.{u} (Fin 2)`. -/
 
 namespace TwoCoverIndex
 
 open AlgebraicGeometry.Scheme.Modules
 
 /-- Degree-zero ordered Čech indices of a two-element cover are the two singletons. -/
-def zeroEquiv : Scheme.Modules.OrderedCechIndex (Fin 2) 0 ≃ Fin 2 where
-  toFun i := i.1 0
-  invFun j := ⟨fun _ => j, fun a b hab => absurd hab (by omega)⟩
+def zeroEquiv : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 ≃ Fin 2 where
+  toFun i := (i.1 0).down
+  invFun j := ⟨fun _ => ⟨j⟩, fun a b hab => absurd hab (by omega)⟩
   left_inv i := by
     apply Subtype.ext
     funext a
@@ -237,22 +240,112 @@ def zeroEquiv : Scheme.Modules.OrderedCechIndex (Fin 2) 0 ≃ Fin 2 where
   right_inv j := rfl
 
 /-- The unique degree-one ordered Čech index of a two-element cover: the full tuple `(0, 1)`. -/
-instance : Unique (Scheme.Modules.OrderedCechIndex (Fin 2) 1) where
-  default := ⟨fun a => a, fun _ _ h => h⟩
+instance : Unique (Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1) where
+  default := ⟨fun a => ⟨a⟩, fun a b h => show (a : ℕ) < b from h⟩
   uniq i := by
     apply Subtype.ext
     funext a
-    show i.1 a = a
-    have b0 : (i.1 0 : ℕ) < 2 := (i.1 0).isLt
-    have b1 : (i.1 1 : ℕ) < 2 := (i.1 1).isLt
-    have h01 : (i.1 0 : ℕ) < (i.1 1 : ℕ) := i.2 (by norm_num : (0 : Fin 2) < 1)
+    show i.1 a = ⟨a⟩
+    have b0 : ((i.1 0).down : ℕ) < 2 := (i.1 0).down.isLt
+    have b1 : ((i.1 1).down : ℕ) < 2 := (i.1 1).down.isLt
+    have h01 : ((i.1 0).down : ℕ) < ((i.1 1).down : ℕ) :=
+      i.2 (by norm_num : (0 : Fin 2) < 1)
+    have hcomp : ∀ (b : Fin 2), (i.1 b).down = b → i.1 b = ⟨b⟩ := by
+      intro b hb
+      cases hi : i.1 b
+      rw [← hb, hi]
     refine Fin.cases ?_ ?_ a
-    · exact Fin.ext (by omega : ((i.1 0 : ℕ)) = ((0 : Fin 2) : ℕ))
+    · exact hcomp 0 (Fin.ext (by omega : (((i.1 0).down : ℕ)) = ((0 : Fin 2) : ℕ)))
     · intro a1
       have ha1 : a1 = 0 := Subsingleton.elim _ _
       subst ha1
-      exact Fin.ext (by omega : ((i.1 1 : ℕ)) = ((1 : Fin 2) : ℕ))
+      exact hcomp 1 (Fin.ext (by omega : (((i.1 1).down : ℕ)) = ((1 : Fin 2) : ℕ)))
 
 end TwoCoverIndex
+
+namespace FibreRR
+
+section TwoCoverCech
+
+open AlgebraicGeometry Scheme.Modules
+
+variable {k K : Type u} [Field k] [Field K]
+variable [Algebra k K] [Algebra k[X] K] [Algebra k⟮X⟯ K] [IsScalarTower k k[X] K]
+  [IsScalarTower k[X] k⟮X⟯ K] [_root_.FunctionField k K]
+  [Algebra.IsSeparable k⟮X⟯ K] [IsFullConstantField k K]
+
+variable {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+  (U : ULift.{u} (Fin 2) → X.Opens)
+
+/-- The unique degree-one ordered index of a two-element cover. -/
+noncomputable abbrev twoCoverIdx1 :
+    Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1 := default
+
+/-- The restriction from the `k`-th deleted chart factor to the overlap factor — the exact
+morphism appearing in the `k`-th coface of the ordered Čech differential. -/
+noncomputable def twoCoverRes (k : Fin 2) :
+    baseCechFactor π M U 0 ((twoCoverIdx1.delete k)).1 ⟶
+      baseCechFactor π M U 1 twoCoverIdx1.1 :=
+  (baseModulePresheaf π M).map
+    (((FormalCoproduct.mk _ U).mapPower
+      (SimplexCategory.δ k).toOrderHom.toFun).φ twoCoverIdx1.1).op
+
+theorem zeroEquiv_delete_one :
+    TwoCoverIndex.zeroEquiv (twoCoverIdx1.delete 1) = 0 := rfl
+
+theorem zeroEquiv_delete_zero :
+    TwoCoverIndex.zeroEquiv (twoCoverIdx1.delete 0) = 1 := rfl
+
+/-- Every degree-zero index of a two-element cover is one of the two deletions of the unique
+degree-one index. -/
+theorem idx0_eq_delete_or (i : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0) :
+    i = twoCoverIdx1.delete 1 ∨ i = twoCoverIdx1.delete 0 := by
+  rcases Fin.exists_fin_two.mp ⟨TwoCoverIndex.zeroEquiv i, rfl⟩ with h0 | h1
+  · left
+    apply TwoCoverIndex.zeroEquiv.injective
+    rw [h0, zeroEquiv_delete_one]
+  · right
+    apply TwoCoverIndex.zeroEquiv.injective
+    rw [h1, zeroEquiv_delete_zero]
+
+/-- **(`AP2-A1b`, scheme form)** The degree-zero ordered Čech differential of a two-element
+cover is surjective, given identifications of the two chart factors and the overlap factor
+with `rrspaceOn` spaces intertwining the coface restrictions, and the function-field
+splitting. -/
+theorem twoCover_d01_surjective
+    {S₀ S₁ : Set (PlaceA k K)} {D : DivisorA k K}
+    (e₀ : (baseCechFactor π M U 0 ((twoCoverIdx1.delete 1)).1 : Type u) ≃+
+      rrspaceOn k K S₀ D)
+    (e₁ : (baseCechFactor π M U 0 ((twoCoverIdx1.delete 0)).1 : Type u) ≃+
+      rrspaceOn k K S₁ D)
+    (eC : (baseCechFactor π M U 1 twoCoverIdx1.1 : Type u) ≃+
+      rrspaceOn k K (S₀ ∩ S₁) D)
+    (h₀ : ∀ x, (eC ((twoCoverRes π M U 1).hom x) : K) = (e₀ x : K))
+    (h₁ : ∀ x, (eC ((twoCoverRes π M U 0).hom x) : K) = (e₁ x : K))
+    (split : ∀ g : K, memRRspaceOn k K (S₀ ∩ S₁) D g →
+      ∃ a b : K, memRRspaceOn k K S₀ D a ∧ memRRspaceOn k K S₁ D b ∧ g = a - b) :
+    Function.Surjective
+      ((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom := by
+  classical
+  -- surjectivity of the pair-to-overlap difference map, from the abstract transport
+  have habstract := surjective_sub_of_addEquiv_rrspaceOn (k := k) (K := K)
+    ((twoCoverRes π M U 1).hom.toAddMonoidHom) ((twoCoverRes π M U 0).hom.toAddMonoidHom)
+    e₀ e₁ eC h₀ h₁ split
+  -- reduce the categorical statement to the concrete one through the product isos
+  intro y
+  -- the overlap component of the target
+  obtain ⟨⟨p₀, p₁⟩, hp⟩ := habstract
+    ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1 =>
+      baseCechFactor π M U 1 j.1) twoCoverIdx1).hom y)
+  -- assemble the degree-zero cochain from the two components
+  let x : Scheme.Modules.orderedBaseCechTerm π M U 0 := fun i =>
+    if h : i = twoCoverIdx1.delete 1 then h ▸ p₀
+    else (idx0_eq_delete_or i).resolve_left h ▸ p₁
+  refine ⟨(Scheme.Modules.orderedBaseCechObjectIsoPi π M U 0).inv.hom x, ?_⟩
+  sorry
+
+end TwoCoverCech
+
+end FibreRR
 
 end ModularCurves
