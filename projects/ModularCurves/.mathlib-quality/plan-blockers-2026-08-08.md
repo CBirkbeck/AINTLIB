@@ -379,6 +379,155 @@ Artin–Rees development** and should not be attempted inside this ticket.
 
 T1–T3, T4, T7, T10 are all startable immediately and independent.
 
+## External review (ChatGPT 5.6 Sol, effort max, 2026-08-08) — verdict and amendments
+
+Verdict: *"Blocker 1 is false for arbitrary affine `T`. Blocker 2 has a genuine missing
+comparison, but reducedness supplies a short minimal-prime argument that repairs it. After that
+repair, B.1 and B.2 work. R1 is still substantially cheaper than complete addition laws. For
+Blocker 4, candidate (i) is exactly the local flatness criterion; the real alternative is a
+smooth-transversality/Jacobian argument."*
+
+### A1 — Blocker 1: the Lean statement survives; the *prose* claim I sent did not
+
+The reviewer's counterexample: `π = id_S` with `S = Spec R`, `R` Dedekind with nontrivial class
+group, `M = N` a nonprincipal invertible ideal. `π` is proper, flat, fp and universally
+`O`-connected; every field-valued fibre of `N` is 1-dimensional hence trivial; but for `T = S`,
+`Γ(X_T, M_T) = N` is not free. So **"trivial on every field-valued fibre" does NOT give rank one
+over `Γ(T,⊤)` for a general affine `T`.**
+
+This does **not** hit `orderedBaseCech_appTop_kernel_finrank_of_fibre_trivial` as stated in
+Lean, because its hypothesis is `hfibt : M_T ≅ 𝒪_{X_T}` **for that specific `T`**, not fibrewise
+triviality — and in the counterexample `hfibt` fails. The reviewer explicitly allows this case
+(*"or when you independently know `M_T ≅ O_{X_T}`"*). **Amendment: none to the statement;
+docstring warning added** so nobody later "simplifies" `hfibt` to the fibrewise hypothesis. Both
+call sites (residue field `κ(s)`, and the direct `Spec K` route) are field-valued, so `hfibt` is
+supplied by `hfib` there.
+
+### A2 — Blocker 2: a REAL gap, independent of my B2.3 self-correction
+
+`dim_{κ(p)} ker(u ⊗ κ(p)) = 1` does **not** follow from (F4) plus
+`dim ker(d⁰ ⊗ κ(p)) = 1`. (F4) compares `ker(u_A)` with `ker(f_A)` where `f : C⁰ → Z¹` is the
+corestriction, while the fibre `H⁰` is `ker(d⁰_A)`; and `d⁰_A = i_A ∘ f_A` with
+`i : Z¹ ↪ C¹` **not** injective after non-flat base change.
+
+Reviewer's counterexample (Koszul on `R = k[x,y]`):
+`R --(r ↦ (−yr, xr))--> R² --((a,b) ↦ xa+yb)--> R`. Here `Z¹ = R·(−y,x) ≅ R`, `f` is an
+isomorphism and `H¹ = 0`; but at `p = (x,y)`, `d⁰ ⊗ κ(p) = 0` so `ker(d⁰ ⊗ κ(p)) = κ(p)`, while
+`ker(f ⊗ κ(p)) = 0`. So `F_p ⊊ H_p` really happens.
+
+**Two independent repairs; take whichever is cheaper in Lean.**
+
+*Repair (a) — reviewer's minimal-prime sandwich (general).* Write `F_p = ker(f ⊗ κ(p))`,
+`H_p = ker(d⁰ ⊗ κ(p))`.
+ 1. `d⁰_p = i_p ∘ f_p` gives `F_p ↪ H_p`, so `dim F_p ≤ 1`.
+ 2. Let `η ⊆ p` be a minimal prime. `R` reduced ⟹ `R_η = κ(η)` is a **field**, hence flat over
+    `R`, hence `i ⊗ κ(η)` stays injective and `F_η = H_η`, so `dim F_η = 1`.
+ 3. By (F4), `dim ker(u_η) = 1` and `dim ker(u_p) = dim F_p ≤ 1`.
+ 4. Trivialise `K⁰` on a basic open containing both `η` and `p`; matrix rank only drops under
+    specialisation `η ⤳ p`, so `dim ker(u_p) ≥ dim ker(u_η) = 1`.
+ Hence `dim ker(u_p) = 1`. **Reducedness is used twice in Blocker 2** — here, and again in 0FWG.
+
+*Repair (b) — the two-element cover (my B2.3, cheaper when available).* If `C^q = 0` for
+`q ≥ 2` then `Z¹ = C¹`, `i = id`, and the gap simply does not exist; simultaneously
+`Flat R Z¹` and `hbij` (the hypotheses of `shortComplexBaseChangeKernelEquiv`) hold trivially.
+
+**Recommendation: pursue (b) first**, fall back to (a). They repair the same defect from
+different directions — (b) removes `i` from the picture, (a) tolerates it.
+
+With the repair inserted, the reviewer confirms the rest of B.1: the dimension count
+`dim coker(u_p) = rk K¹ − rk_p K⁰ + 1`, local constancy from `K⁰` finite projective, right
+exactness `(coker u) ⊗ κ(p) ≅ coker(u_p)`, and — explicitly — that **applying 0FWG only to
+`coker u` is legitimate**, the two splittings then giving `ker(u_A) = (ker u) ⊗ A` for all `A`.
+
+Caveat recorded by the reviewer: this proves arbitrary base change for `ker u` and `ker f`, **not
+automatically for Čech `H⁰`**; for residue fields the 1-dimensional comparison forces it, for
+general `A` it may not.
+
+### A3 — Blocker 2 / B2.1 (Stacks 0FWG): proof CONFIRMED correct
+
+No Noetherian hypothesis is needed anywhere; `Module.Finite R M` suffices. Two wording fixes:
+choose `x₁ … xₙ ∈ M` **whose images form** a basis (rather than "lifting a preselected basis");
+and state the conclusion as "the composite `K_q → R_q^n → κ(q)^n` is zero, hence
+`K_q ⊆ q R_q^n`" — **not** as `K ⊗ κ(q) = 0`, which does not follow. `q R_q ∩ R_g = q` is the
+step that puts the coordinates in every prime, hence in the nilradical, hence at `0`.
+
+### A4 — Blocker 2 / B.2: not circular, but needs the comparison diagram written out
+
+The order must be: `P := ker u ≅ Γ(X,M)`, then
+`P ⊗ κ(p) ≅ ker(u_p) ≅ ker(f_p) ↪ H⁰(X_p, M_p)` — first iso from the splittings, second from
+(F4), last arrow induced by `Z¹_p → C¹_p` — and this injection is an **isomorphism by dimension
+count** (both sides are 1-dimensional, by A2). Only then: a local basis `ℓ` restricts to a
+nonzero element of `H⁰(X_p, M_p) ≅ κ(p)`, so `ℓ_p` is nowhere vanishing on `X_p`; finally at
+`y ∈ X` over `p`, evaluation is multiplication by `a ∈ 𝒪_{X,y}` whose class mod `p𝒪_{X,y}` is a
+unit, so `a` is a unit. Reviewer's warning: *"splitting alone gives the cohomological base-change
+isomorphism"* is **too strong** — it is splitting **plus** the 1-dimensional injection.
+
+### A5 — Blocker 3: R1 confirmed cheaper, with two new obligations
+
+Ranking returned: **(1) R1 with the repaired B.1; (2) a generic-vertical-divisor route, if a
+Weil/Cartier package already exists; (3) complete projective addition-law charts (R2).**
+
+Two obligations R1 acquires that my plan did not list:
+
+* **`B = C ×_U C` need not be affine.** The seesaw as stated carries `[IsAffine S]`. Apply it on
+  an affine open cover of `B` and glue with the descent lemma. **New ticket T8b.**
+* **The passage from an arbitrary elliptic curve to the universal Weierstrass parameter space is
+  only Zariski-local** — globally there is a moduli-stack issue. The base-change-down step (route
+  item 5) must be stated locally on `T` and glued, not globally. **New ticket T9b.**
+
+Why the cheap R2 shortcut fails, recorded so it is not re-derived: the diagonal, antidiagonal and
+zero-section loci in the universal pair are **codimension 1**, so an isomorphism of line bundles
+on their complement need not extend (reflexivity only extends across codimension ≥ 2).
+
+The third route, for the record: trivialise the ratio bundle on the generic fibre, view it as a
+rational trivialisation on `E_B`, observe its divisor is vertical, note every vertical prime
+divisor is a whole fibre over a codimension-one point of the regular `B`, hence Cartier, so
+`div(s) = f^*D` and `L ≅ f^*𝒪_B(D)`. Uses only the theorem of the square over the generic field —
+but needs rational sections, vertical-prime classification, codimension formulas and pullback
+multiplicities. Compare Stacks 0BF0 / 0EX8.
+
+### A6 — Blocker 4: my recorded reasoning was WRONG, and route (i) does not dodge Artin–Rees
+
+**Correction to the board note of 2026-08-07.** *"The local generator vanishes on `Z`, therefore
+it is not a nonzerodivisor"* is **false reasoning**: `t ∈ k[t]` vanishes on `V(t)` and is a
+nonzerodivisor. Vanishing geometrically and being a zerodivisor are unrelated; what fails is only
+that it is a *unit*. The board note must be amended.
+
+**Route (i) is exactly the local criterion.** Locally, after trivialising `M`, the map is
+multiplication by `h : B → B`; "`h̄` a nonzerodivisor in `B/𝔪_A B` ⟹ `h` a nonzerodivisor and
+`B/hB` flat over `A`" **is** Stacks 00MF, the principal-element specialisation of 00ME, whose
+standard proof runs through Krull intersection, i.e. Artin–Rees. So (i) does not avoid the gap.
+
+**Route (ii) — build the section from the fibre points — is not viable.** `S_red → S` has exactly
+the same residue-field fibres as `S → S` and is generally not an isomorphism; fibre points say
+nothing in nilpotent directions.
+
+**The genuine Artin–Rees-free alternative is transversality.** At `z ∈ Z_s`: trivialise `M` near
+`z`, write `σ` as `h`; since `Z_s = Spec κ(s)` scheme-theoretically and `E_s` is a smooth curve,
+`h̄` generates the maximal ideal of the DVR `𝒪_{E_s,z}`, so `dh̄ ≠ 0` in
+`Ω_{E_s/κ(s),z} ⊗ κ(z)`. Then `h : U → 𝔸¹_S` has both sides smooth of relative dimension 1 and an
+isomorphism on relative differentials at `z`, hence is **étale** near `z`; so
+`Z ∩ U = U ×_{𝔸¹_S} S` is étale over `S`; `Z` is closed in the proper `E` hence proper; proper +
+étale ⟹ finite étale; fibre degree 1 ⟹ isomorphism. (Stacks §37.38 / 055S. Prove the special
+case from a standard-smooth Jacobian presentation — the *general* Stacks slicing lemma internally
+routes through fibrewise flatness, which would reintroduce the gap.)
+
+**Hypothesis audit for Blocker 4** (reviewer): `h⁰ = 1` and `H¹ = 0` alone do **not** encode what
+is needed. The statement must also carry smooth, geometrically integral, genus-one fibres;
+`deg M_s = 1`; and the base-change isomorphism making the chosen generator satisfy `σ_s ≠ 0`.
+
+### Revised ticket deltas
+
+| New/changed | Ticket | Note |
+|---|---|---|
+| changed | T2 | statement stands; docstring records the `hfibt`-vs-fibrewise counterexample |
+| **new** | T4c | the A2 repair: two-element cover (preferred) or minimal-prime sandwich |
+| changed | T4 | 0FWG: drop `IsNoetherianRing`; fix the two wordings in A3 |
+| changed | T6 | write the A4 comparison diagram explicitly; do not claim base change from splitting alone |
+| **new** | T8b | affine-cover + glue, since `B = C ×_U C` is not affine |
+| **new** | T9b | universal-curve comparison is Zariski-local on `T`; state and glue locally |
+| changed | T10/T11 | abandon the nonzerodivisor/local-criterion route; **re-plan as the étale transversality argument**, and strengthen the hypotheses per the audit above |
+
 ## Open questions for external review
 
 1. Is B2.2 (replacement complex + `coker` has locally constant fibre rank + reduced ⟹ locally

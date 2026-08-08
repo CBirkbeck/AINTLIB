@@ -122,7 +122,15 @@ This is the form in which the five-step route of the residue-field corollary bel
 composes: `orderedBaseCechComplexBaseChangeIso` produces `ModuleCat.extendScalars t.appTop.hom`,
 whose scalars are `Γ(T, ⊤)`, so stating the result over `Γ(T, ⊤)` makes
 `algebraMap Γ(S,⊤) Γ(T,⊤) = t.appTop.hom` hold by `rfl` and the two engines match syntactically.
-Transport to `κ(s)` happens once, at the end, in the corollary. -/
+Transport to `κ(s)` happens once, at the end, in the corollary.
+
+**DO NOT weaken `hfibt` to fibrewise triviality** (external review, 2026-08-08). `hfibt` asserts
+`M_T ≅ 𝒪_{X_T}` for *this* `T`; the conclusion is FALSE under the weaker hypothesis "`M` is
+trivial on every field-valued fibre". Counterexample: `π = 𝟙_S` with `S = Spec R`, `R` a Dedekind
+domain of nontrivial class group, `M` a nonprincipal invertible ideal `N`. Then `π` is proper,
+flat, of finite presentation and universally `O`-connected, and `N ⊗ K` is one-dimensional hence
+trivial over every field `K`; but at `T = S` the kernel is `N` itself, which is not free. Both
+call sites below are *field-valued* points, where `hfib` does supply `hfibt`. -/
 theorem orderedBaseCech_appTop_kernel_finrank_of_fibre_trivial
     {X S T : Scheme.{u}} [IsAffine S] [IsAffine T] [IsNoetherian X] [X.IsSeparated]
     {π : X ⟶ S}
