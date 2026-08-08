@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Picard.RigidDescent
+import ModularCurves.Picard.InvertibleSheafCocycle
 
 /-!
 # The unit sheaf `K_E^×` normalized along the zero section (`AP-D1`)
@@ -94,5 +95,28 @@ theorem kUnits_restrict_mem {z : T ⟶ pullback p g} (hz : z ≫ pullback.snd p 
   simp only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply] at happ
   simp only [Units.coe_map]
   exact happ.trans (by rw [hu, map_one])
+
+/-- **(AP-D3, KM (2.8.1.5) p. 88 — the consumable content)** Transition units of a family of
+trivialisations, evaluated along the zero section, form a *coboundary*: the zero-section value
+of the transition unit between `e i` and `e j` is the ratio of their individual zero-section
+values. Consequently, rescaling each trivialisation by the inverse of its own zero-section
+value makes all transition units lie in `kUnits` — which is the normalized-cocycle statement
+KM's pairing construction uses (his `f_{i,j} ∘ π = h_i / h_j`, p. 88).
+
+Bibliography note (2026-08-08): KM cites [K5 §5] for `Pic(E/S) ≅ H¹(E, K_E^×)`, but pp. 88–89
+consume only this cocycle fact together with `H⁰(E, K_E^×) = {1}` (`kUnits_eq_bot`), so the
+unavailable reference is not needed. Ingredients, all sorry-free: the cocycle calculus of
+`Picard/InvertibleSheafCocycle.lean` (`trivializationTransitionUnit` with `_self`, `_symm`,
+`_trans`, `_restrict`) and `kUnitsEval`/`mem_kUnits_iff` above; `kUnitsEval` is a group
+homomorphism, which is what makes the ratios cancel. -/
+theorem kUnitsEval_transitionUnit_eq_div {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens)
+    {M : (pullback p g).Modules}
+    (e₁ e₂ e₃ : M.over (pullback.snd p g ⁻¹ᵁ U) ≅
+      SheafOfModules.unit ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ U))) :
+    kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit (pullback.snd p g ⁻¹ᵁ U) e₁ e₂) *
+        kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit (pullback.snd p g ⁻¹ᵁ U) e₂ e₃) =
+      kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit (pullback.snd p g ⁻¹ᵁ U) e₁ e₃) := by
+  rw [← map_mul, AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit_trans]
 
 end ModularCurves
