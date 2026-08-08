@@ -149,6 +149,31 @@ theorem exists_finite_basicOpen_trivialization {E : Scheme.{u}} (N : E.Modules)
     obtain ⟨x, -, rfl⟩ := Finset.mem_image.mp hh
     exact ⟨hgle x, htrivg x⟩
 
+/-- The sections of a module trivialised on `W`, as a rank-one free module over the
+sections of the structure sheaf: evaluation against the trivialisation is a linear
+equivalence (`bijective_evalSection_iso` + `evalSection_add_right`/`_smul_right`). -/
+noncomputable def sectionsLinearEquivOfTrivialization {E : Scheme.{u}} (N : E.Modules)
+    (W : E.Opens)
+    (ψ : N.over W ≅ _root_.SheafOfModules.unit (E.ringCatSheaf.over W)) :
+    ↑(N.val.obj (Opposite.op W)) ≃ₗ[↑(E.ringCatSheaf.obj.obj (Opposite.op W))]
+      ↑(E.ringCatSheaf.obj.obj (Opposite.op W)) :=
+  LinearEquiv.ofBijective
+    { toFun := fun m ↦ ModularCurves.SheafOfModules.evalSection E.ringCatSheaf N W ψ.hom m
+      map_add' := fun a b ↦
+        ModularCurves.SheafOfModules.evalSection_add_right E.ringCatSheaf N W ψ.hom a b
+      map_smul' := fun c a ↦
+        ModularCurves.SheafOfModules.evalSection_smul_right E.ringCatSheaf N W ψ.hom c a }
+    (ModularCurves.SheafOfModules.bijective_evalSection_iso E.ringCatSheaf N W ψ)
+
+@[simp]
+theorem sectionsLinearEquivOfTrivialization_apply {E : Scheme.{u}} (N : E.Modules)
+    (W : E.Opens)
+    (ψ : N.over W ≅ _root_.SheafOfModules.unit (E.ringCatSheaf.over W))
+    (m : ↑(N.val.obj (Opposite.op W))) :
+    sectionsLinearEquivOfTrivialization N W ψ m =
+      ModularCurves.SheafOfModules.evalSection E.ringCatSheaf N W ψ.hom m :=
+  rfl
+
 /-- **(sv2-b)** Per-piece clearing on a *trivial* piece: if `N` is trivial on an affine open
 `V`, a section over `V ⊓ basicOpen f` becomes, after multiplying by a power of `f`, the
 restriction of a section over `V`. Through the trivialisation this is exactly the
