@@ -123,10 +123,39 @@ stated with exactly the "exact from degree `k` onward" hypothesis and no full ex
 Instantiate all three at `k = 1`; `hhigh` IS their `hexact`. (Lesson `grep-the-conclusion-not-the-inputs`
 again: the argument was re-derived from scratch before anyone grepped for the conclusion.)
 
-NEXT UP, in order:
-  * **T4c(ii)** — the minimal-prime sandwich for `dim ker(u_p) = 1`.
-  * **T5** — the replacement-complex assembly: `π_*M` invertible (B.1 steps 1–5 above).
-  * **T6** — the counit iso (B.2), then **T7** + **T8** to close Blocker 2.
+T4c(ii) — **NOT NEEDED**. `shortComplexBaseChangeKernelEquiv`'s conclusion is about `S.f.hom` = d⁰
+(not the corestriction `f`), reached via `ker_baseChange_codRestrictToKer_eq … hbij`. So `hbij` IS
+the identification whose failure the reviewer's Koszul counterexample exhibits, and T4c(i) supplies
+it from `hhigh`. The minimal-prime sandwich is the right repair only if one refuses `hhigh`.
+
+T5 CORE — **DONE** (2026-08-08). `ForMathlib/ConstantKernelRankProjective.lean`, all axiom-verified
+standard-three: over a reduced Noetherian ring, `u : K₀ → K₁` between finite projectives with
+`dim ker(u ⊗ κ(p)) = n` at every prime has projective cokernel, projective kernel, finite kernel.
+Two notes worth keeping: `Module.rankAtStalk_eq` must be RESTATED with the fibre spelled
+`κ(p) ⊗[R] M` (`Ideal.Fiber` is a reducible abbrev but `omega` treats it as a distinct atom); and
+the ℕ-arithmetic goes through the additive identity + `omega`, never through ℕ-subtraction.
+`Module.Projective.ker_of_projective_coker` (already in `BaseChangeKerCoker.lean`) does both
+splittings in one step.
+
+**THE WHOLE GRAUERT SUBSTITUTE IS NOW IN PLACE.** What remains for Blocker 2 is wiring, not new
+mathematics:
+
+  * **T5-wire** — instantiate the above on the ordered Čech complex. Chain:
+      `hhigh` ⟹ `Flat R Z¹` (`Module.Flat.ker_of_bounded_exact_from` at k=1) and `hbij`
+      (`kerBaseChangeComparison_bijective_of_bounded_exact_from` at k=1)
+      ⟹ `shortComplexBaseChangeKernelEquiv A hbij : ker(u ⊗ A) ≅ ker(d⁰ ⊗ A)` for all `A`
+      ⟹ with KM-SEESAW-1′, `dim ker(u ⊗ κ(p)) = 1` at every prime
+      ⟹ `ConstantKernelRankProjective` gives `ker u` finite projective
+      ⟹ `rankAtStalk (ker d⁰) = 1`, then
+      `Module.Invertible.of_finite_of_projective_of_rankAtStalk_eq_one`
+      (`ForMathlib/InvertibleOfRankOne.lean`) and
+      `baseSectionsIsoKernelOrderedBaseCechDifferential` ⟹ `baseSections π M` invertible.
+      Model to imitate throughout: `kernel_data_of_hasDegreeOneFibreCohomology`
+      (`EllipticCurve/DegreeOneFibreCohomology.lean:126`) — same shape, `hexact` replaced by
+      `hhigh` + reducedness. Remember to ADD `hhigh` to KM-SEESAW-2″'s signature.
+  * **T6** — the counit iso (B.2 above; write the comparison diagram explicitly).
+  * **T7** — generalise the RelPicLocal chain to a bare `f : Y ⟶ T`.
+  * **T8** — assemble; then Blocker 2 closes and Blocker 3 opens.
 
 AFTER BLOCKER 2: Blocker 3 = `exists_invertible_tensor_idealModule_add` (`Picard/SelfAdjointN.lean`),
 which unblocks AP-D4/D5-existence/D6/D7. Reviewer kept the seesaw route (R1) ahead of the chart
