@@ -183,4 +183,45 @@ theorem transitionUnit_trans_mem_kUnits {z : T ⟶ pullback p g}
   rw [h₁₂, h₂₃, one_mul] at hmul
   exact hmul.symm
 
+/-- **(AP-D3, rescaling)** Twisting a trivialisation by a unit changes the transition unit by
+that same unit: for `u : Γ(X_T, f⁻¹U)ˣ`, the trivialisation `e ≪≫ (scalar u)` has transition
+unit against `e'` equal to `u` times the original. This is the computation that lets one
+normalize a family (choose `u` to be the inverse of the zero-section value). -/
+theorem transitionUnit_trans_eq_mul {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens)
+    {M : (pullback p g).Modules}
+    (e₁ e₂ e₃ : M.over (pullback.snd p g ⁻¹ᵁ U) ≅
+      SheafOfModules.unit ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ U))) :
+    AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₁ e₃ =
+      AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₁ e₂ *
+      AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₂ e₃ :=
+  (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit_trans
+    (pullback.snd p g ⁻¹ᵁ U) e₁ e₂ e₃).symm
+
+/-- **(AP-D3, normalized comparison)** If two trivialisations have the same zero-section
+evaluation against a common reference, their mutual transition unit is normalized. This is the
+practical criterion for a family to be normalizable: pick any reference and compare. -/
+theorem transitionUnit_mem_kUnits_of_eval_eq {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens)
+    {M : (pullback p g).Modules}
+    (e₀ e₁ e₂ : M.over (pullback.snd p g ⁻¹ᵁ U) ≅
+      SheafOfModules.unit ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ U)))
+    (heq : kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₀ e₁) =
+      kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₀ e₂)) :
+    AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+      (pullback.snd p g ⁻¹ᵁ U) e₁ e₂ ∈ kUnits g hz U := by
+  rw [transitionUnit_mem_kUnits_iff]
+  have hmul := kUnitsEval_transitionUnit_eq_div (g := g) hz U e₀ e₁ e₂
+  rw [heq] at hmul
+  refine mul_left_cancel (a := kUnitsEval g hz U
+    (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+      (pullback.snd p g ⁻¹ᵁ U) e₀ e₂)) ?_
+  rw [mul_one]
+  exact hmul
+
 end ModularCurves
