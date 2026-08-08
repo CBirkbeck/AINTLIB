@@ -38,8 +38,6 @@ quasi-coherence of `π_* M` on a non-affine `X` — is ever needed.
 
 ## Route
 
-Everything below the blocked step is proved here:
-
 * `exists_finset_dual_apply_sum_eq_one` — the dual partition of unity (pure algebra).
 * `bijective_smul_of_isUnit_evalSection` — if the evaluation of `ℓ` against a trivialization of
   `M` on `W` is a **unit** of `Γ(X, W)`, then `r ↦ r • ℓ` is bijective `Γ(X, W') → Γ(M, W')` for
@@ -55,28 +53,33 @@ Everything below the blocked step is proved here:
 * `isUnit_evalSection_of_dual_baseSections` — "nowhere vanishing ⟹ unit", by
   `RingedSpace.isUnit_of_isUnit_germ` (valid on an arbitrary open, no affineness needed).
 
-## What is left, and why (the one `sorry`)
+## The nowhere-vanishing step
 
 `le_basicOpen_evalSection_of_dual_baseSections` — *the section `ℓ_k` is nowhere vanishing over
-`D(f_k)`*. Its first three steps are now proved:
+`D(f_k)`* — runs in four steps:
 
 * step 1, `1 ⊗ ℓ_k ≠ 0` in `π_* M ⊗ κ(y)`, is `tmul_one_ne_zero_of_isUnit_dual_apply` here;
 * step 2, the cohomology-and-base-change injection `π_* M ⊗ κ(y) ↪ H⁰(X_{κ(y)}, M_{κ(y)})`, is
   `kerBaseChangeComparison_orderedBaseCech_zero_bijective`
   (`ForMathlib/SeesawPushforwardInvertible.lean`), added for this file. It is the reason `hhigh`,
-  `hrank` and `[IsReduced S]` — Half B.1's own hypotheses — now appear here.
+  `hrank` and `[IsReduced S]` — Half B.1's own hypotheses — appear here.
 * step 3, the *transport* of that nonzero class to a nonzero section of `M_T` on `X ×_S T`, is
   `baseChange_unit_ne_zero_of_isUnit_dual_apply` here, on top of the fibre-transport chain
   `orderedBaseCechKernelBaseChangeEquivBaseSections` and its `_apply` lemma
   (`ForMathlib/SeesawPushforwardInvertible.lean`) — the chain sends `1 ⊗ ℓ` to the pullback of `ℓ`
-  along `pullback.fst π t`. Its element-level API is now in
-  `ForMathlib/AffineModuleCechBaseChange.lean` and
+  along `pullback.fst π t`, i.e. to its image under the pullback–pushforward adjunction unit. Its
+  element-level API is in `ForMathlib/AffineModuleCechBaseChange.lean` and
   `ForMathlib/SchemeModuleOrderedBaseCechZero.lean`.
+* step 4: `hfib` trivializes `M_T` **globally** and `hπ` makes `Γ(X_T, ⊤)` the field `κ(y)`, so the
+  nonzero section of step 3 is a *unit* function on `X_T`; restricting it to `g⁻¹ W` and expanding
+  `ℓ|_W = a • e` in a `ψ`-normalised generator exhibits it as `g^#(a)` times a cofactor, so
+  `g^#(a)` is a unit; `Scheme.preimage_basicOpen` and the tautological section
+  `Spec κ(y) ⟶ X ×_S Spec κ(y)` then read that off at `y`. See the lemma's own docstring.
 
-What remains is step 4 only: `hfib`/`hπ` make that nonzero section a **unit** on the fibre, and one
-must read that unit off at the point `y`. This needs `evalSection` compatibility with the pullback
-of modules along `pullback.fst π t` — a piece of `Picard/Evaluation.lean`-style API that does not
-exist yet. See the lemma's own docstring for the precise list.
+No `evalSection`-along-a-morphism API is needed for this: the only transport used is
+`Scheme.Modules.Hom.app_smul` for the adjunction unit (semilinear over `g^#` by `rfl`) and for the
+global trivialization, because `hfib`'s trivialization is defined on all of `X_T` and the cofactor
+is divided out rather than computed.
 
 ## Consumer
 
@@ -311,66 +314,62 @@ theorem nonempty_restrict_unitObj_iso_of_isUnit_evalSection {X : Scheme.{u}} {M 
             (htriv j).some))) ?_ W' hW'j
     exact h (V j ⊓ U) inf_le_right _
 
-/-- **THE ONE REMAINING STEP — transporting a fibre section back to a point.** *The global
+/-- A nonzero element of a ring isomorphic to a field is a unit. Used twice below, for the two
+rings which `hπ` (resp. the `Γ`–`Spec` adjunction) identifies with the residue field `κ(y)`. -/
+private theorem isUnit_of_ne_zero_of_ringEquiv {R : Type u} [CommRing R] {k : Type u} [Field k]
+    (ε : R ≃+* k) {x : R} (hx : x ≠ 0) : IsUnit x := by
+  have h0 : ε x ≠ 0 := fun h ↦ hx (by simpa using congrArg ε.symm h)
+  simpa using (isUnit_iff_ne_zero.mpr h0).map (ε.symm : k →+* R)
+
+/-- **The nowhere-vanishing step — transporting a fibre section back to a point.** *The global
 section `l` of `M` is nowhere vanishing over the base-basic-open `D(φ l)`*: against any
 trivialization `ψ` of `M` on an open `W ⊆ π⁻¹ D(φ l)`, the evaluation of `l` is invertible at
 every point of `W`.
 
-## The proof, and exactly where it now stands
+## The proof
 
-Fix `y ∈ W`, let `k := κ(y)` be the residue field of `X` at `y` (a `Γ(S, ⊤)`-algebra through
-`π`), write `P := π_* M = baseSections π M` and let `a := evalSection … ψ.hom l|_W` be the local
+Fix `y ∈ W`, let `k := κ(y)` be the residue field of `X` at `y`, let `t : Spec k ⟶ S` be
+`X.fromSpecResidueField y ≫ π`, and let `g := pullback.fst π t : X ×_S Spec k ⟶ X`. Write
+`P := π_* M = baseSections π M`, `N := g^* M` and `a := evalSection … ψ.hom l|_W` for the local
 coordinate of `l`. Then, in order:
 
-1. **`1 ⊗ l ≠ 0` in `k ⊗ P`.** ✅ PROVED — `tmul_one_ne_zero_of_isUnit_dual_apply` above. The
-   functional `φ` sends `1 ⊗ l` to the image of `φ l` in `k`, which is invertible because
-   `y ∈ π⁻¹ D(φ l)` and `κ(π y) → κ(y)` is a field map. (This is why the cover is built from a
-   dual partition of unity.)
-2. **`k ⊗ P ↪ ker (d⁰ ⊗ k) = H⁰(X_k, M_k)`.** ✅ PROVED — this was the blocking gap and it is now
+1. **`1 ⊗ l ≠ 0` in `k ⊗ P`.** `tmul_one_ne_zero_of_isUnit_dual_apply` above. The functional `φ`
+   sends `1 ⊗ l` to the image of `φ l` in `k`, which is invertible because `y ∈ π⁻¹ D(φ l)` — this
+   is the `hunit` step below, read off from `Scheme.preimage_basicOpen_top` at the unique point of
+   `Spec k`. (This is why the cover is built from a dual partition of unity.)
+2. **`k ⊗ P ↪ ker (d⁰ ⊗ k) = H⁰(X_k, M_k)`** —
    `kerBaseChangeComparison_orderedBaseCech_zero_bijective`
    (`ForMathlib/SeesawPushforwardInvertible.lean`), which extends the replacement's
    `kerBaseChangeComparison_bijective u` to the original differential `d⁰` along the square
    `(A ⊗ ker u) → ker (u ⊗ A) ≅ ker (d⁰ ⊗ A)` versus `(A ⊗ ker u) → (A ⊗ ker d⁰) → ker (d⁰ ⊗ A)`
    (both composites are the base change of `kZeroToCZero ∘ subtype`). It is exactly why `hhigh`,
-   `hrank` and `[IsReduced S]` were added to this file.
-   With 1 this gives: the image of `l` in `ker (d⁰ ⊗ k)` is nonzero.
-3. **Transport the class to a nonzero section of `M_k` on `X_k`.** ✅ PROVED —
+   `hrank` and `[IsReduced S]` appear in this file. With 1 this gives: the image of `l` in
+   `ker (d⁰ ⊗ k)` is nonzero.
+3. **Transport the class to a nonzero section of `M_k` on `X_k`** —
    `baseChange_unit_ne_zero_of_isUnit_dual_apply` above, which packages 1 and 2 with
    `orderedBaseCechKernelBaseChangeEquivBaseSections_apply`
    (`ForMathlib/SeesawPushforwardInvertible.lean`): the five-link fibre-transport chain sends
-   `1 ⊗ l` to the *pullback of `l` along `pullback.fst π t`*, so that pullback is nonzero. The
-   element-level API for the chain that this needed is now in place — see
-   `orderedBaseCechXBaseChangeIso_one_tmul_of_projection_eq`
-   (`ForMathlib/AffineModuleCechBaseChange.lean`) and
-   `baseSectionsIsoKernelOrderedBaseCechDifferential_hom_π` /
-   `orderedBaseCechObject_ext` (`ForMathlib/SchemeModuleOrderedBaseCechZero.lean`).
-4. **`H⁰(X_k, M_k) ≅ k`, and descend to `y`.** ❌ REMAINING. `hfib` gives `M_k ≅ 𝒪_{X_k}` and `hπ`
-   gives `Γ(X_k, 𝒪) ≅ k`, so the nonzero section of 3 becomes a nonzero constant `c ∈ k`, hence a
-   **unit** of `Γ(X_k, 𝒪)`; and `X.fromSpecResidueField y` together with `𝟙` gives a section
-   `σ : Spec k ⟶ X ×_S Spec k` over `y`, at which the value of `l` is `a(y)` up to a unit. Then
-   `a(y) ≠ 0`, i.e. `y ∈ X.basicOpen a` (`Scheme.mem_basicOpen`).
+   `1 ⊗ l` to the *pullback of `l` along `g`*, i.e. to the image of `l` under the unit
+   `u : M ⟶ g_* g^* M` of the pullback–pushforward adjunction, so `u_⊤ l ≠ 0`.
+4. **`H⁰(X_k, 𝒪) = k`, and descend to `y`.** `hfib` gives a *global* trivialization
+   `θ : N ≅ 𝒪_{X_k}`, and `hπ` makes `(pullback.snd π t).appTop` an isomorphism, so
+   `Γ(X_k, ⊤) ≅ Γ(Spec k, ⊤) ≅ k` is a **field**. Hence `h := θ_⊤ (u_⊤ l)` is nonzero, therefore a
+   unit (`isUnit_of_ne_zero_of_ringEquiv`).
 
-## What still blocks 4, precisely
+   Now compare on `V := g⁻¹ W`. Writing `l|_W = a • e` for the `ψ`-normalised generator `e`
+   (`bijective_evalSection_iso` supplies `e` with `evalSection ψ.hom e = 1`), semilinearity of
+   `u_W` over `g^#` — which is `Scheme.Modules.Hom.app_smul` together with the fact that the
+   `Γ(X, W)`-action on `Γ(g_* N, W)` *is* the `Γ(X_k, V)`-action along `g.app W`, by `rfl` — plus
+   `Γ(X_k, V)`-linearity of `θ_V` give `h|_V = g^#(a) · θ_V (u_W e)`. A restriction of a unit is a
+   unit, so `IsUnit (g^# a)` by `isUnit_of_mul_isUnit_left`.
 
-The transport is done; what is missing is **`evalSection` versus pullback of modules along a
-scheme morphism**. Concretely, three ingredients, none of which exists in the tree:
+   Finally `Scheme.preimage_basicOpen` turns that into `g⁻¹ (D(a)) = V`, and the tautological
+   section `σ := pullback.lift (X.fromSpecResidueField y) (𝟙 _)` produces a point
+   `z := σ(pt) ∈ X_k` with `g z = y` (`Scheme.fromSpecResidueField_apply`), whence
+   `y = g z ∈ D(a)`.
 
-* the **pulled-back trivialization**: from `ψ : M.over W ≅ 𝒪` produce a trivialization of
-  `(Scheme.Modules.pullback g).obj M` over `g ⁻¹ᵁ W`, for `g := pullback.fst π t` — the existing
-  `restrictTrivialization` / `restrictIsoOfPullbackIso` / `overTrivializationOfRestrictIso` family
-  (`Picard/`) only covers *open immersions*, not a general `g`;
-* the **naturality of `evalSection` along `g`**: the evaluation of `g^* l` against that
-  trivialization is `g^# a`. (`evalSection_naturality` in `Picard/Evaluation.lean` is naturality in
-  the *open*, not along a morphism of schemes; `evalSection_factor`
-  (`Picard/PicComparison.lean`) then supplies the unit relating it to `hfib`'s own trivialization,
-  on the same open, and is the piece that *does* exist.);
-* the **germ comparison**: a point `z` of `X ×_S Spec k` over `y` (take `σ` above), plus the fact
-  that the local homomorphism `𝒪_{X,y} → 𝒪_{X_k,z}` reflects units, so that unitness of `g^# a` at
-  `z` gives unitness of `a` at `y` (`RingedSpace.isUnit_of_isUnit_germ` is then the packaging, as
-  in `isUnit_evalSection_of_dual_baseSections` below).
-
-Nothing about the *statement* is in doubt: with steps 1–3 in hand the mathematics of 4 is the
-completely standard "`h⁰` of the fibre is `κ(s)`, so a nonzero section is a unit". -/
+Note that no *pulled-back over-site trivialization* of `ψ` is needed: because `hfib`'s `θ` is
+global, the cofactor `θ_V (u_W e)` never has to be identified — only divided out. -/
 private theorem le_basicOpen_evalSection_of_dual_baseSections
     {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian S]
     [IsNoetherian X] [X.IsSeparated]
@@ -386,7 +385,7 @@ private theorem le_basicOpen_evalSection_of_dual_baseSections
       Module.finrank K (LinearMap.ker
         (((AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom.baseChange K))
         = 1)
-    (hinv : Module.Invertible Γ(S, (⊤ : S.Opens))
+    (_hinv : Module.Invertible Γ(S, (⊤ : S.Opens))
       (AlgebraicGeometry.Scheme.Modules.baseSections π M))
     (hfib : ∀ {k : Type u} [Field k] (x : Spec (.of k) ⟶ S),
       Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
@@ -399,7 +398,119 @@ private theorem le_basicOpen_evalSection_of_dual_baseSections
     (ψ : M.over W ≅ _root_.SheafOfModules.unit (X.ringCatSheaf.over W)) :
     W ≤ X.basicOpen (ModularCurves.SheafOfModules.evalSection X.ringCatSheaf M W ψ.hom
       (M.presheaf.map (homOfLE (le_top : W ≤ (⊤ : X.Opens))).op l)) := by
-  sorry
+  intro y hy
+  -- the residue field of `X` at `y`, and the base change of `π` along `Spec κ(y) ⟶ X ⟶ S`
+  let t : Spec (CommRingCat.of (X.residueField y)) ⟶ S := X.fromSpecResidueField y ≫ π
+  let g : Limits.pullback π t ⟶ X := Limits.pullback.fst π t
+  let N : (Limits.pullback π t).Modules := (AlgebraicGeometry.Scheme.Modules.pullback g).obj M
+  let u : M ⟶ (AlgebraicGeometry.Scheme.Modules.pushforward g).obj N :=
+    (AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction g).unit.app M
+  let lW : Γ(M, W) := M.presheaf.map (homOfLE (le_top : W ≤ (⊤ : X.Opens))).op l
+  let a : Γ(X, W) := ModularCurves.SheafOfModules.evalSection X.ringCatSheaf M W ψ.hom lW
+  -- the tautological section of `Spec κ(y)` into the fibre product, and the point `z` above `y`
+  let σ : Spec (CommRingCat.of (X.residueField y)) ⟶ Limits.pullback π t :=
+    Limits.pullback.lift (X.fromSpecResidueField y) (𝟙 _) (Category.id_comp t).symm
+  let z : ↥(Limits.pullback π t) := σ.base default
+  have hσg : σ ≫ g = X.fromSpecResidueField y := Limits.pullback.lift_fst _ _ _
+  have hzy : g.base z = y := by
+    have h1 : g.base (σ.base default) = (σ ≫ g).base default := rfl
+    rw [h1, hσg]
+    exact X.fromSpecResidueField_apply y default
+  -- `Γ(Spec κ(y), ⊤)` and `Γ(X ×_S Spec κ(y), ⊤)` are both the field `κ(y)`
+  let εT := (Scheme.ΓSpecIso (CommRingCat.of (X.residueField y))).commRingCatIsoToRingEquiv
+  haveI : IsIso ((Limits.pullback.snd π t).app
+    (⊤ : (Spec (CommRingCat.of (X.residueField y))).Opens)) := hπ t ⊤
+  let εX : Γ(Limits.pullback π t, (⊤ : (Limits.pullback π t).Opens)) ≃+* (X.residueField y) :=
+    ((asIso ((Limits.pullback.snd π t).app
+      (⊤ : (Spec (CommRingCat.of (X.residueField y))).Opens))).symm ≪≫
+      Scheme.ΓSpecIso (CommRingCat.of (X.residueField y))).commRingCatIsoToRingEquiv
+  -- step 0: the dual value `φ l` is invertible on `Spec κ(y)`, because `π y ∈ D(φ l)`
+  have hunit : IsUnit (t.appTop.hom (φ l)) := by
+    refine isUnit_of_ne_zero_of_ringEquiv εT ?_
+    intro h0
+    have hmem : default ∈ t ⁻¹ᵁ S.basicOpen (φ l) := by
+      show t.base default ∈ S.basicOpen (φ l)
+      have h2 : t.base default = π.base y :=
+        congrArg π.base (X.fromSpecResidueField_apply y default)
+      rw [h2]
+      exact hW hy
+    rw [Scheme.preimage_basicOpen_top t (φ l), h0, Scheme.basicOpen_zero] at hmem
+    exact hmem
+  -- steps 1–3: the pullback of `l` to the fibre product is a nonzero global section
+  have hnz : u.app (⊤ : X.Opens) l ≠ 0 :=
+    baseChange_unit_ne_zero_of_isUnit_dual_apply hM U hU hUaff hhigh hrank t φ l hunit
+  obtain ⟨θ⟩ := hfib (k := X.residueField y) t
+  -- a generator of `M` on `W` normalised by the trivialization `ψ`, and `l|_W = a • e`
+  obtain ⟨e, he⟩ := (ModularCurves.SheafOfModules.bijective_evalSection_iso
+    X.ringCatSheaf M W ψ).surjective (show X.ringCatSheaf.obj.obj (Opposite.op W) from 1)
+  have he' : ModularCurves.SheafOfModules.evalSection X.ringCatSheaf M W ψ.hom e =
+      (show X.ringCatSheaf.obj.obj (Opposite.op W) from 1) := he
+  have hsm : ModularCurves.SheafOfModules.evalSection X.ringCatSheaf M W ψ.hom (a • e) =
+      (show X.ringCatSheaf.obj.obj (Opposite.op W) from a) *
+        ModularCurves.SheafOfModules.evalSection X.ringCatSheaf M W ψ.hom e :=
+    ModularCurves.SheafOfModules.evalSection_smul_right X.ringCatSheaf M W ψ.hom a e
+  have hle : lW = a • e := by
+    refine (ModularCurves.SheafOfModules.bijective_evalSection_iso
+      X.ringCatSheaf M W ψ).injective ?_
+    show ModularCurves.SheafOfModules.evalSection X.ringCatSheaf M W ψ.hom lW =
+      ModularCurves.SheafOfModules.evalSection X.ringCatSheaf M W ψ.hom (a • e)
+    rw [hsm, he']
+    exact (mul_one _).symm
+  -- step 4a: `θ` turns the nonzero section into a nonzero, hence invertible, global function
+  have hglob : (θ.hom.app (⊤ : (Limits.pullback π t).Opens)) (u.app (⊤ : X.Opens) l) ≠ 0 := by
+    intro h0
+    refine hnz ?_
+    have hcancel : θ.inv.app (⊤ : (Limits.pullback π t).Opens)
+        ((θ.hom.app (⊤ : (Limits.pullback π t).Opens)) (u.app (⊤ : X.Opens) l)) =
+          u.app (⊤ : X.Opens) l := by
+      rw [← ConcreteCategory.comp_apply, ← AlgebraicGeometry.Scheme.Modules.Hom.comp_app,
+        θ.hom_inv_id, AlgebraicGeometry.Scheme.Modules.Hom.id_app]
+      rfl
+    rw [h0, map_zero] at hcancel
+    exact hcancel.symm
+  have hglobunit : IsUnit (show Γ(Limits.pullback π t, (⊤ : (Limits.pullback π t).Opens)) from
+      (θ.hom.app (⊤ : (Limits.pullback π t).Opens)) (u.app (⊤ : X.Opens) l)) :=
+    isUnit_of_ne_zero_of_ringEquiv εX hglob
+  -- step 4b: restricted to `g ⁻¹ᵁ W`, that global function is `g^# a` times something
+  have hnat_u : u.app W lW =
+      N.presheaf.map
+        (homOfLE (le_top : g ⁻¹ᵁ W ≤ (⊤ : (Limits.pullback π t).Opens))).op
+        (u.app (⊤ : X.Opens) l) := by
+    refine (ConcreteCategory.congr_hom
+      (u.mapPresheaf.naturality (homOfLE (le_top : W ≤ (⊤ : X.Opens))).op) l).trans ?_
+    exact congrArg (fun q ↦ (ConcreteCategory.hom (N.presheaf.map q)) (u.app (⊤ : X.Opens) l))
+      (Subsingleton.elim _ _)
+  have hnat_θ : θ.hom.app (g ⁻¹ᵁ W)
+        (N.presheaf.map
+          (homOfLE (le_top : g ⁻¹ᵁ W ≤ (⊤ : (Limits.pullback π t).Opens))).op
+          (u.app (⊤ : X.Opens) l)) =
+      (Limits.pullback π t).presheaf.map
+        (homOfLE (le_top : g ⁻¹ᵁ W ≤ (⊤ : (Limits.pullback π t).Opens))).op
+        (θ.hom.app (⊤ : (Limits.pullback π t).Opens) (u.app (⊤ : X.Opens) l)) :=
+    ConcreteCategory.congr_hom (θ.hom.mapPresheaf.naturality
+      (homOfLE (le_top : g ⁻¹ᵁ W ≤ (⊤ : (Limits.pullback π t).Opens))).op)
+      (u.app (⊤ : X.Opens) l)
+  have hsplit : (Limits.pullback π t).presheaf.map
+        (homOfLE (le_top : g ⁻¹ᵁ W ≤ (⊤ : (Limits.pullback π t).Opens))).op
+        (θ.hom.app (⊤ : (Limits.pullback π t).Opens) (u.app (⊤ : X.Opens) l)) =
+      (g.app W).hom a * (show Γ(Limits.pullback π t, g ⁻¹ᵁ W) from
+        θ.hom.app (g ⁻¹ᵁ W) (u.app W e)) := by
+    rw [← hnat_θ, ← hnat_u, hle, AlgebraicGeometry.Scheme.Modules.Hom.app_smul]
+    exact AlgebraicGeometry.Scheme.Modules.Hom.app_smul θ.hom ((g.app W).hom a) (u.app W e)
+  have hcoord : IsUnit ((g.app W).hom a) := by
+    have hru := hglobunit.map (ConcreteCategory.hom ((Limits.pullback π t).presheaf.map
+      (homOfLE (le_top : g ⁻¹ᵁ W ≤ (⊤ : (Limits.pullback π t).Opens))).op))
+    rw [hsplit] at hru
+    exact isUnit_of_mul_isUnit_left hru
+  -- read the unit off at `z`, which lies over `y`
+  have hmem : z ∈ g ⁻¹ᵁ X.basicOpen a := by
+    rw [Scheme.preimage_basicOpen g a, Scheme.basicOpen_of_isUnit _ hcoord]
+    show g.base z ∈ W
+    rw [hzy]
+    exact hy
+  have hfin : g.base z ∈ X.basicOpen a := hmem
+  rw [hzy] at hfin
+  exact hfin
 
 /-- Nowhere vanishing ⟹ unit. Only the packaging: `RingedSpace.isUnit_of_isUnit_germ` says a
 section which is a unit in every stalk is a unit, and `Scheme.mem_basicOpen` says membership in the
@@ -453,7 +564,7 @@ extension, so `π_* M` is invertible, but `𝒪_E → 𝒪_E(P)` is injective an
 generator of `Γ(𝒪_E(P))` vanishes at `P`. Fibrewise triviality is what makes a nonzero fibre
 section a *unit*; see step 3 of `le_basicOpen_evalSection_of_dual_baseSections`.
 
-Everything except that one nowhere-vanishing step is proved here. -/
+The whole of Half B.2 — cover, nowhere vanishing, and local-to-global — is proved here. -/
 theorem exists_baseCover_restrict_unitObj_iso_of_invertible_baseSections
     {X S : Scheme.{u}} [IsAffine S] [IsReduced S] [IsNoetherian S]
     [IsNoetherian X] [X.IsSeparated]
