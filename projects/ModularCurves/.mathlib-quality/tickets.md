@@ -39171,7 +39171,7 @@ consumers need non-noetherian bases.
 - **Sources**: KM p. 66; Mumford AV pp. 47–53 (L1, L2, Cor 3 — quotes in rounds 6, 15).
 
 ### [AP2-B1] Relative Picard locality via zero-rigidification
-- **Status**: open (independent) · **File**: `WeilPairing/RelPicLocal.lean` (new)
+- **Status**: **done (2026-08-08)** — `exists_pullback_twist_of_locally` + full leaf tree proved, standard-three (see AP2-B1 COMPLETE block) · **File**: `WeilPairing/RelPicLocal.lean`
 - **Statement**: `Pic_{E/S}(T) ≅ ker(0_T^*)` naturally (the splitting `0^*f^* = id`); the functor is a
   Zariski sheaf on `S`-schemes.
 - **Sketch**: rigidified bundles have no automorphisms — `eq_one_of_pullback_eq_one` (proved) under
@@ -39181,7 +39181,7 @@ consumers need non-noetherian bases.
 - **Sources**: KM p. 65 (quoted round 4); Hida p. 109 + CORRECTIONS block in `decomposition-gme2.md`.
 
 ### [AP2-B2] The counit `f^*(f_*L) → L` is universally injective with flat cokernel
-- **Status**: blocked (AP2-A2) · **File**: `EllipticCurve/AbelEquivalence.lean` (new)
+- **Status**: open (deps met 2026-08-08: AP2-A2 done) · **File**: `EllipticCurve/AbelEquivalence.lean` (new)
 - **Sketch**: geometric fibres are integral (smooth + connected); a basis of the 1-dim `H⁰` is a nonzero
   section, hence injective on each fibre; fibrewise criterion for flatness ⟹ injective with `S`-flat
   cokernel ⟹ stable under all base change (round 19 Q2 — **no thickened-fibre `h⁰` needed**). KM pp.
@@ -39239,7 +39239,7 @@ element form closes by `happ.trans`). File now: `kUnitsEval`, `kUnits`, `mem_kUn
 on all. Base-change API deferred to AP-D5/D6's exact shapes as planned (their cocycles fix the
 transport form). Phase 6.5 /cleanup: n/a (producer role per CLAUDE.md).
 
-### [AP2-B1] — Status: in_progress (skeleton landed 2026-08-07)
+### [AP2-B1] — Status: done (2026-08-08; superseded progress note)
 **Progress**: `WeilPairing/RelPicLocal.lean` (new): `exists_pullback_twist_of_locally` stated `:= by
 sorry`, transcribed from KM p. 65 (statement AND proof quoted verbatim in the module docstring; Hida's
 p. 109 non-sequitur noted with the repair). Elaborates green (3314 jobs) — `M.restrict (…).ι`,
@@ -39247,7 +39247,7 @@ p. 109 non-sequitur noted with the repair). Elaborates green (3314 jobs) — `M.
 mutually-inverse pushforwards `f_*(M⁻¹⊗M')` / `f_*(M⊗M'⁻¹)`; the tree's `baseSections` +
 `UniversallyOConnected` supply `f_*f^* = id`; glue via the sheaf axiom. Also feeds AP-D5.
 
-### [AP2-B1a] `f_*f^*N ≅ N` for an invertible N under `UniversallyOConnected` (sub-ticket)
+### [AP2-B1a] — Status: done (2026-08-08) — `f_*f^*N ≅ N` (sub-ticket)
 - **Status**: open · **File**: `WeilPairing/RelPicLocal.lean` · **Parent**: AP2-B1 · **Type**: theorem
 - **Statement**: for `hp : UniversallyOConnected p`, `N : T.Modules` invertible, the pushforward along
   `pullback.snd p g` of `(Modules.pullback (pullback.snd p g)).obj N` is isomorphic to `N` (state at the
@@ -39259,7 +39259,7 @@ mutually-inverse pushforwards `f_*(M⁻¹⊗M')` / `f_*(M⊗M'⁻¹)`; the tree'
 - **Generality**: match use site (`pullback.snd p g`), per sub-ticket rule.
 
 ### [AP2-B1b] mutual-inverse pushforwards give the global twist (sub-ticket)
-- **Status**: blocked (AP2-B1a) · **File**: `WeilPairing/RelPicLocal.lean` · **Parent**: AP2-B1
+- **Status**: done (2026-08-08) — subsumed by the parent's Skeleton-algebra proof (single pushforward `f_*(M ⊗ M'^∨)` sufficed; no mutual-inverse pair needed) · **File**: `WeilPairing/RelPicLocal.lean` · **Parent**: AP2-B1
 - **Sketch**: from `hglue i` and AP2-B1a, `f_*(M^⊗-1 ⊗ M')` restricted to `U i` is `≅ N i` — invertible;
   invertibility is Zariski-local, so `N₀ := f_*(M ⊗ M'^⊗-1)`-inverse per KM; the counit + unit section
   `1` give `M ≅ M' ⊗ f^*N₀` via `nonempty_iso_of_tensorObj_unitObj` (`PicComparison:909`) and
