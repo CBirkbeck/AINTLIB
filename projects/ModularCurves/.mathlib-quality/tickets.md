@@ -39373,6 +39373,20 @@ degree is computed by exhibiting the fibre-divisor square as a pullback (the tre
 evaluating the rank over the residue field, where the divisor is the vanishing scheme of a nonzero
 section of a degree-one invertible sheaf on the integral genus-one fibre — AP2-A1's `h⁰ = 1`.
 
+**AP2-B3 — KM 1.2.7 PROVED AS AN EQUIVALENCE** (2026-08-08, 98ca64b4f): in
+`EllipticCurve/AbelEquivalence.lean`, all axiom-verified standard-three:
+* `exists_section_of_degree_one` — degree one ⟹ the divisor is `ker z` for a section `z`
+  (`isIso_iff_finrank_eq` on the divisor's own finite/flat/lfp data, then `ker_comp_of_isIso` +
+  `ker_subschemeι`);
+* `degree_eq_one_of_ideal_eq_ker` — the converse, transported from `sectionDivisor_degree`;
+* **`degree_eq_one_iff_exists_section`** — the two packaged as an iff.
+This is the axis of the Abel map (`P ↦ [I(P)⁻¹]` / `[L] ↦ D(L)` is this equivalence read in the two
+directions) and it means AP2-B3's degree obligation and its section obligation are interchangeable.
+REMAINING in the file: `exists_relEffCartierDiv_of_degreeOne` (construct the divisor from `(M, ℓ)`),
+`relEffCartierDiv_degree_one_of_degreeOne` (now: supply *either* the degree *or* a section — the
+equivalence converts), and `evalGenerator_mem_nonZeroDivisors` (likely superseded; the section route
+gets the nonzerodivisor property from `exists_affineOpen_ker_principal_nonZeroDivisor`).
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
