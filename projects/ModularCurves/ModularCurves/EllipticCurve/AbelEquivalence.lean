@@ -317,6 +317,11 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
       ⟨E.basicOpen g.1, U.2.basicOpen g.1⟩
       (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f)
       (hpiece g.1 g.2).2 _
+  choose m u hu using hloc
+  -- (c) a common exponent for all (finitely many) pieces
+  obtain ⟨n, hn⟩ : ∃ n : ℕ, ∀ g : {g // g ∈ t}, m g ≤ n := by
+    haveI : Fintype {g // g ∈ t} := FinsetCoe.fintype t
+    exact ⟨Finset.univ.sup m, fun g ↦ Finset.le_sup (Finset.mem_univ g)⟩
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
