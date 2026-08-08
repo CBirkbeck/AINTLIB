@@ -489,6 +489,16 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
       exact le_iSup (fun h : {g // g ∈ t} ↦ E.basicOpen f ⊓ E.basicOpen h.1) ⟨g, hg⟩)
     _ _ ?_
   intro g
+  -- (i) route the glued section through the piece
+  have hLHS : N.presheaf.map (homOfLE (inf_le_left :
+        E.basicOpen f ⊓ E.basicOpen g.1 ≤ E.basicOpen f)).op
+        (N.presheaf.map (homOfLE (E.basicOpen_le f)).op s) =
+      N.presheaf.map (homOfLE (inf_le_right :
+        E.basicOpen f ⊓ E.basicOpen g.1 ≤ E.basicOpen g.1)).op (w g) := by
+    rw [← hs g]
+    simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+    exact congrArg (fun q ↦ (ConcreteCategory.hom (N.presheaf.map (Quiver.Hom.op q))) s)
+      (Subsingleton.elim _ _)
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
