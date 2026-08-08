@@ -39305,6 +39305,17 @@ fibre of `Γ(E,V)` with sections on the actual fibre (AP2-A1's residue/fibre tra
 the trivialised generator is nonzero there (rank-one `H⁰` from the A2 kernel data + `σ ≠ 0`), then
 apply the local theorem chart-by-chart.
 
+**AP2-B2 head — KM p.66 reduction COMPLETE at chart level** (2026-08-08, 14af48657):
+`mem_nonZeroDivisors_of_forall_maximal_residueField_fibre_injective` is PROVED (standard-three): from
+a purely fibrewise hypothesis (at each maximal, the residue-field fibre of multiplication is injective)
+it concludes `f ∈ nonZeroDivisors Γ(E,V)`. Proof: `injective_of_localized_maximal` → `LocalizedModule.map_mk`
+(the localized multiplication computes on generators) → `IsLocalizedModule.iso` intertwining (residual
+algebra closed by `← Algebra.smul_def` + linearity) → the un-privatized R-substrate core
+`Module.Flat.injective_of_lTensor_residueField_injective` over `Localization.AtPrime J`. So the ENTIRE
+algebraic half of the fibre input is done; `evalGenerator_mem_nonZeroDivisors` now needs only the
+geometry: fibrewise injectivity from integral fibres (`IsIntegral.component_integral`) plus
+non-vanishing of the trivialised section there (rank-one `H⁰` from the A2 kernel data + `σ ≠ 0`).
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
