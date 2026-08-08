@@ -39208,6 +39208,17 @@ home; check mathlib for a fibrewise-flatness criterion (Algebra/Module/FinitePre
 LocalRing fibrewise flat: `Module.flat_iff_of_...`?, or the scheme-level
 `AlgebraicGeometry.Flat`-fiberwise API) BEFORE building one.
 
+**AP2-B2 b2-iii RESOLVED-IN-TREE** (2026-08-08 survey): the fibrewise flatness criterion already
+exists — `ForMathlib/LocalFlatnessCriterion.lean`: `coker_of_flat_of_fibre_injective` (Stacks 00ME,
+R-substrate form: R Noetherian local, N finite, M flat, residue-fibre-injective u ⟹ coker flat),
+plus `coker_flat_of_fibre_injective_forall`, the `_free`/`_sModule` variants (relative form!), and
+`BuchsbaumEisenbud.lean:1443 coker_flat_of_specialFibreExact` (Stacks 00MI shape) +
+`BaseChangeKerCoker.lean:397 Module.Projective.ker_of_flat_coker` /
+`:741 LinearMap.baseChange_exact_of_exact_of_flat_coker` (the universal-injectivity output form!).
+So AP2-B2 = statement-design + globalization glue + (b2-ii) fibre-input only; the hard analysis is
+DONE. Next segment: G5 design at the module-generic level mirroring the A2 kernel-package
+(affine-base + orderedBaseCech vocabulary), consumer-checked against B3's PIN 1.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
