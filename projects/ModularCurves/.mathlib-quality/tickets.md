@@ -40182,3 +40182,44 @@ extends only across codimension ≥ 2). New obligations R1 acquires:
 * **Hypothesis audit.** `h⁰ = 1` and `H¹ = 0` alone do not encode what is needed: the statement
   must also carry smooth geometrically integral genus-one fibres, `deg M_s = 1`, and the
   base-change isomorphism making the chosen generator satisfy `σ_s ≠ 0`.
+
+### [KM-SEESAW-2] progress — the Grauert substitute is COMPLETE (2026-08-08)
+
+Four tickets closed in sequence; Blocker 2 now reduces to wiring.
+
+* **[T4] done** — `ForMathlib/ReducedConstantRankFree.lean`,
+  `free_of_isReduced_of_forall_le_finrank_fiber` (Stacks 0FWG, local form). Verified absent from
+  mathlib before writing. `IsLocalRing.span_eq_top_of_tmul_eq_basis` does the whole Nakayama step;
+  `TensorProduct.mk_surjective` gives the lift. The per-prime step is a private helper stated over
+  an ARBITRARY `R`-algebra field rather than `κ(p)` (`set` would not fold the occurrence inside the
+  hypothesis).
+* **[T4b] done** — same file, `projective_of_isReduced_of_isLocallyConstant_finrank_fiber` (global
+  form). `Module.projective_of_localization_maximal` + four private transport helpers.
+  `residueFieldAlgEquivOfSurjectiveOnStalks`, built from
+  `RingHom.SurjectiveOnStalks.residueFieldMap_bijective` at `surjectiveOnStalks_of_isLocalization`,
+  is much cleaner than `IsLocalization.orderIsoOfPrime` — **reuse it** for any similar
+  contraction-of-primes transport. Needed `import Mathlib.RingTheory.LocalProperties.Reduced`.
+* **[T4c] closed with ZERO new declarations** — see the A2′/A2″ entries in the plan.
+  `Module.Flat.ker_of_bounded_exact_from` and
+  `kerBaseChangeComparison_bijective_of_bounded_exact_from` (both in
+  `ForMathlib/BaseChangeKerCoker.lean`) already carry exactly the "exact from degree `k` onward"
+  hypothesis, and `hbij` is itself the identification `ker(f ⊗ A) = ker(d⁰ ⊗ A)` that the
+  reviewer's Koszul counterexample threatens — so neither the descending induction nor the
+  minimal-prime sandwich is needed.
+* **[T5 core] done** — `ForMathlib/ConstantKernelRankProjective.lean`: over a reduced Noetherian
+  ring, a map of finite projectives with constant fibre-kernel dimension has projective cokernel,
+  projective kernel and finite kernel. This is Mumford *Abelian Varieties* §5's replacement for
+  cohomology-and-base-change. Two notes: `Module.rankAtStalk_eq` must be RESTATED with the fibre
+  spelled `κ(p) ⊗[R] M` (`Ideal.Fiber` is a reducible abbrev but `omega` treats it as a distinct
+  atom); and all ℕ-arithmetic goes through the additive identity plus `omega`, never through
+  ℕ-subtraction, since no pointwise rank inequality is available.
+  `Module.Projective.ker_of_projective_coker` already does both splittings.
+
+All of the above axiom-verified standard-three, zero sorries.
+
+**Remaining for Blocker 2 (wiring only, no new mathematics):** T5-wire (instantiate the
+constant-rank lemma on the ordered Čech complex; the model is
+`kernel_data_of_hasDegreeOneFibreCohomology`, with `hexact` replaced by `hhigh` + reducedness),
+T6 (counit iso), T7 (generalise the RelPicLocal chain to a bare `f : Y ⟶ T`), T8 (assemble).
+**KM-SEESAW-2″'s signature must gain `hhigh`** — exactness of the ordered Čech complex at positions
+≥ 2, automatic in the application because the fibres are curves.
