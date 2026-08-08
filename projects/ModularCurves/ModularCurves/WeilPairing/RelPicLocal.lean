@@ -906,6 +906,75 @@ theorem nonempty_discrepancy_iso_pullback_pushforward {X S : Scheme.{u}} {p : X 
       Function.Bijective (AlgebraicGeometry.Scheme.Modules.Hom.app
         ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
           (pullback.snd p g)).counit.app (tensorObj M (dualObj M'))) W) := by
+    intro i W hW
+    -- (sA) the counit restricted to the piece is an isomorphism
+    have hrestr : IsIso ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+        (pullback.snd p g ⁻¹ᵁ U i).ι).map
+        ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+          (pullback.snd p g)).counit.app (tensorObj M (dualObj M')))) := by
+      -- (s1) the restricted unit of the open-immersion adjunction is an isomorphism
+      have hu : IsIso ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+          (pullback.snd p g ⁻¹ᵁ U i).ι).map
+          ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+            (pullback.snd p g ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))) := by
+        sorry
+      -- (s3+s4) the counit at the pushed-forward restriction is an isomorphism after
+      -- restriction
+      have hmid : IsIso ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+          (pullback.snd p g ⁻¹ᵁ U i).ι).map
+          ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (pullback.snd p g)).counit.app
+            ((AlgebraicGeometry.Scheme.Modules.pushforward
+              (pullback.snd p g ⁻¹ᵁ U i).ι).obj
+              ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+                (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))))) := by
+        sorry
+      -- the composed functor's map of the unit is an isomorphism after restriction
+      have hGFu : IsIso ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+          (pullback.snd p g ⁻¹ᵁ U i).ι).map
+          ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).map
+            ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).map
+              ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+                (pullback.snd p g ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))))) := by
+        sorry
+      -- (s2) counit naturality at the unit, restricted, gives the factorisation
+      have hnat := congrArg (fun z => (AlgebraicGeometry.Scheme.Modules.restrictFunctor
+          (pullback.snd p g ⁻¹ᵁ U i).ι).map z)
+        (((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+          (pullback.snd p g)).counit.naturality
+          ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+            (pullback.snd p g ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))))
+      rw [Functor.map_comp, Functor.map_comp] at hnat
+      -- ε_K = (restr GF-u) ≫ (restr ε_{pushed}) ≫ (restr u)⁻¹
+      have hfac : (AlgebraicGeometry.Scheme.Modules.restrictFunctor
+          (pullback.snd p g ⁻¹ᵁ U i).ι).map
+          ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (pullback.snd p g)).counit.app (tensorObj M (dualObj M'))) =
+          ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (pullback.snd p g ⁻¹ᵁ U i).ι).map
+            ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).map
+              ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).map
+                ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+                  (pullback.snd p g ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))))) ≫
+          ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (pullback.snd p g ⁻¹ᵁ U i).ι).map
+            ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+              (pullback.snd p g)).counit.app
+              ((AlgebraicGeometry.Scheme.Modules.pushforward
+                (pullback.snd p g ⁻¹ᵁ U i).ι).obj
+                ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+                  (pullback.snd p g ⁻¹ᵁ U i).ι).obj (tensorObj M (dualObj M')))))) ≫
+          CategoryTheory.inv ((AlgebraicGeometry.Scheme.Modules.restrictFunctor
+            (pullback.snd p g ⁻¹ᵁ U i).ι).map
+            ((AlgebraicGeometry.Scheme.Modules.restrictAdjunction
+              (pullback.snd p g ⁻¹ᵁ U i).ι).unit.app (tensorObj M (dualObj M')))) := by
+        simp only [Functor.id_obj, Functor.id_map, Functor.comp_obj,
+          Functor.comp_map] at hnat
+        rw [← Category.assoc, IsIso.eq_comp_inv]
+        exact hnat.symm
+      rw [hfac]
+      infer_instance
+    -- (s5) components: from the restricted iso to per-open bijectivity
     sorry
   haveI : IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
       (pullback.snd p g)).counit.app (tensorObj M (dualObj M'))) :=
