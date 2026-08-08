@@ -207,6 +207,7 @@ import ModularCurves.Picard.InvertibleSheafLocallyFree
 import ModularCurves.Picard.InvertibleSheafNoetherianStage
 import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
 import ModularCurves.Picard.PicComparison
+import ModularCurves.Picard.PrincipalIdealModuleIso
 import ModularCurves.Picard.PullbackTensorObj
 import ModularCurves.Picard.RigidDescent
 import ModularCurves.Picard.SectionAffineIntersection
