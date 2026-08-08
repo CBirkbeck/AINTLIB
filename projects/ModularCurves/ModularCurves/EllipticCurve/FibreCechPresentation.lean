@@ -519,6 +519,78 @@ theorem twoCover_cochain_ext
   · exact (hbridge0 _ w).trans (h1.trans (hbridge0 _ w').symm)
   · exact (hbridge0 _ w).trans (h0.trans (hbridge0 _ w').symm)
 
+/-- The `H⁰` reading is injective on kernel elements: two cocycles with the same function-field
+reading agree in both components. -/
+theorem twoCover_ker_reading_injective
+    {S₀ S₁ : Set (PlaceA k K)} {D : DivisorA k K}
+    (e₀ : (baseCechFactor π M U 0 ((twoCoverIdx1.delete 1)).1 : Type u) ≃+
+      rrspaceOn k K S₀ D)
+    (e₁ : (baseCechFactor π M U 0 ((twoCoverIdx1.delete 0)).1 : Type u) ≃+
+      rrspaceOn k K S₁ D)
+    (eC : (baseCechFactor π M U 1 twoCoverIdx1.1 : Type u) ≃+
+      rrspaceOn k K (S₀ ∩ S₁) D)
+    (h₀ : ∀ x, (eC ((twoCoverRes π M U 1).hom x) : K) = (e₀ x : K))
+    (h₁ : ∀ x, (eC ((twoCoverRes π M U 0).hom x) : K) = (e₁ x : K))
+    {w w' : (Scheme.Modules.orderedBaseCechObject π M U 0 : Type u)}
+    (hw : ((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom w = 0)
+    (hw' : ((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom w' = 0)
+    (heq : ((e₀ ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+      baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 1)).hom w) : K)) =
+      ((e₀ ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+        baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 1)).hom w') : K))) :
+    w = w' := by
+  have hagree : ∀ {z : (Scheme.Modules.orderedBaseCechObject π M U 0 : Type u)},
+      ((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom z = 0 →
+      ((e₁ ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+        baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 0)).hom z) : K)) =
+      ((e₀ ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+        baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 1)).hom z) : K)) := by
+    intro z hz
+    have hker := (twoCover_mem_ker_iff π M U z).mp hz
+    rw [← h₁, ← h₀, hker]
+  apply twoCover_cochain_ext π M U
+  · exact e₀.injective (Subtype.ext heq)
+  · refine e₁.injective (Subtype.ext ?_)
+    rw [hagree hw, hagree hw', heq]
+
+/-- The `H⁰` reading is surjective onto the Riemann–Roch space: every function satisfying both
+charts' bounds assembles into a kernel cocycle reading off to it. -/
+theorem twoCover_ker_reading_surjective
+    {S₀ S₁ : Set (PlaceA k K)} {D : DivisorA k K}
+    (e₀ : (baseCechFactor π M U 0 ((twoCoverIdx1.delete 1)).1 : Type u) ≃+
+      rrspaceOn k K S₀ D)
+    (e₁ : (baseCechFactor π M U 0 ((twoCoverIdx1.delete 0)).1 : Type u) ≃+
+      rrspaceOn k K S₁ D)
+    (eC : (baseCechFactor π M U 1 twoCoverIdx1.1 : Type u) ≃+
+      rrspaceOn k K (S₀ ∩ S₁) D)
+    (h₀ : ∀ x, (eC ((twoCoverRes π M U 1).hom x) : K) = (e₀ x : K))
+    (h₁ : ∀ x, (eC ((twoCoverRes π M U 0).hom x) : K) = (e₁ x : K))
+    (f : K) (hf : memRRspace k K D f) :
+    ∃ w : (Scheme.Modules.orderedBaseCechObject π M U 0 : Type u),
+      ((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom w = 0 ∧
+      ((e₀ ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+        baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 1)).hom w) : K)) = f := by
+  classical
+  have hne : (twoCoverIdx1 : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1).delete 0 ≠
+      twoCoverIdx1.delete 1 := by
+    intro h
+    have h' := congrArg (TwoCoverIndex.zeroEquiv.{u}) h
+    rw [zeroEquiv_delete_zero, zeroEquiv_delete_one] at h'
+    exact absurd h' (by decide)
+  let x : Scheme.Modules.orderedBaseCechTerm π M U 0 := fun i =>
+    if h : i = twoCoverIdx1.delete 1 then h ▸ (e₀.symm ⟨f, fun v _ => hf v⟩)
+    else (idx0_eq_delete_or i).resolve_left h ▸ (e₁.symm ⟨f, fun v _ => hf v⟩)
+  have hx1 : x (twoCoverIdx1.delete 1) = e₀.symm ⟨f, fun v _ => hf v⟩ := by
+    simp only [x, dif_pos]
+  have hx0 : x (twoCoverIdx1.delete 0) = e₁.symm ⟨f, fun v _ => hf v⟩ := by
+    simp only [x, dif_neg hne]
+  refine ⟨(Scheme.Modules.orderedBaseCechObjectIsoPi π M U 0).inv.hom x, ?_, ?_⟩
+  · rw [twoCover_mem_ker_iff, isoPiInv_component, isoPiInv_component, hx0, hx1]
+    apply eC.injective
+    apply Subtype.ext
+    rw [h₁, h₀, e₀.apply_symm_apply, e₁.apply_symm_apply]
+  · rw [isoPiInv_component, hx1, e₀.apply_symm_apply]
+
 end TwoCoverCech
 
 end FibreRR

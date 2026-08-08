@@ -39038,6 +39038,28 @@ to fix exactly this; nothing may build on them meanwhile.
   (`valuation_lt_one_iff`-form), `placeDegree` def unfold at `Sum.inr`, discreteness step
   `< 1 ⟹ ≤ exp(−1)` (`WithZero.log`/`exp` on ℤᵐ⁰). File: `EllipticCurve/FibreConstantField.lean`.
 
+#### AP2-A1 progress-3 (2026-08-08, third stretch) — the scheme-form fibre package is PROVED
+All on the actual 2-cover ordered Čech complex, from `rrspaceOn`-presentation equivs (e₀/e₁/eC +
+coface compatibilities), everything axiom-verified standard-three, zero sorries:
+- **H¹**: upstream `orderedBaseCechDifferential_zero_comp_π_sub` (two-term morphism-level; `Fin
+  (0+2)`-vs-`Fin 2` and zsmul-instance walls dodged via `Fin.sum_univ_succ` + abstract
+  `two_term_alternating`) + `twoCover_d01_surjective` (`649a0370b`).
+- **H⁰**: `twoCover_mem_ker_iff` (`7322150c8`), `mem_RRspace_of_mem_ker` (`28fbe5426`),
+  `isoPiInv_component` + `twoCover_cochain_ext` (`d5727cde7`), `twoCover_ker_reading_injective` +
+  `twoCover_ker_reading_surjective` — the kernel of d⁰¹ is in bijection with `RRspace D`, hence
+  1-dimensional for deg-1 D by `ell_eq_one_of_deg_eq_one` once k-linearity is threaded (A1d).
+- **[A1e] PROVED** (`2b7f2e830`): `isFullConstantField` — all vendored RR endpoints now fire over
+  every base field.
+- REMAINING for A1: (α) exactAt ≥ 2 (isEmpty card lemma — trivial); (β) the ellipticYZ
+  section-module equivs for a concretely presented M (`𝒪(D)`-style; chartZSectionsEquiv +
+  coordinateRingEquivIntegers + the B1a overEquiv layer) — the last genuinely new construction;
+  (γ) A1d family assembly (≃ₗ-threading + FibrewiseElliptic transport + base-change of
+  presentations; A1e supplies the instance at every fibre field).
+- Failure-mode log for the Čech plumbing (binding for (β)/(γ)): Hom.hom-vs-ConcreteCategory.hom
+  spelling (bridge via intermediate `have`), `twoCoverIdx1` needs `.{u}` in standalone have-types,
+  `set` on Čech carriers triggers kernel-level cast failures, `show`-casts across simp-normalized
+  goals whnf-explode — keep everything term-level `Eq.trans`/`congr_hom` with rfl-casts only.
+
 #### [AP2-A1b] `H¹ = 0` for a degree-one presentation (pole-peeling, the real math)
 - **File**: `EllipticCurve/FibreDegreeOneHOne.lean` (new) · **Depends on**: A1a
 - **Statement**: `Subsingleton (Sheaf.H M 1)` (and `q ≥ 1` via dimension/cover bound) for `M` with a
