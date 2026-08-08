@@ -370,6 +370,8 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
       (N.presheaf.map (Opens.infLELeft (E.basicOpen g.1) (E.basicOpen g'.1)).op (v g))
       (N.presheaf.map (Opens.infLERight (E.basicOpen g.1) (E.basicOpen g'.1)).op (v g'))
       ?_).imp (fun k hk ↦ hk)
+    -- the two rescaled pieces agree on the overlap's `f`-locus: both restrict to
+    -- `f ^ n • s'` there (compose the restrictions and apply `hvres` on each piece)
     sorry
   sorry
 
