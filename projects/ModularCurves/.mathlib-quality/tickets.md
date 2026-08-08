@@ -39636,6 +39636,28 @@ hploc-iso → `IsIso ε^{piece}_{K|ᵢ}`; (h4) the leftAdjointUniq-square transp
 (restrict ι').map ε_K up to the explicit isos; (h5) components + image-open dictionary
 (`restrictFunctor_map_app_apply` rfl + ι''ι⁻¹W = W for W ≤ piece) give the app-bijectivity.
 
+**AP2-B1 hres EXACT DERIVATION** (2026-08-08, final sharpening — replaces (h2)-(h5) vagueness):
+per piece i (ι' := (snd⁻¹Uᵢ).ι, f := snd, fᵢ := snd∣_Uᵢ), prove
+`IsIso ((restrictFunctor ι').map (ε^f_K))` by the 4-step chain:
+(s1) `restrictAdjunction ι'` has ISO counit (open-immersion: ι'_* fully faithful), and
+`(restrictFunctor ι').map (η^{restr}_K)` is iso (triangle identity with iso counit);
+(s2) ε^f-NATURALITY at u := η^{restr}_K : K ⟶ ι'_*(K|ι'):
+`(f^*f_*).map u ≫ ε_{ι'_*(K|ι')} = ε_K ≫ u` — restrict the square along ι', invert the
+restricted u (s1) ⟹ (restr ι').map ε_K ≅-related to (restr ι').map ε_{ι'_*(K|ι')};
+(s3) `Adjunction.leftAdjointUniq_hom_counit` (mathlib Unique.lean:60) applied to
+`openPullbackSquareAdjunctionIsoT` (globalAdj := (pbAdj f).comp (restrictAdjunction ι') vs
+localAdj.ofNatIsoRight (openPushforwardSquareIsoT)) at A := K|ι' — the comp-counit formula
+(`Adjunction.comp` counit = F'.map (ε₁ at G' d) ≫ ε₂ at d) turns this into exactly
+`(restr ι').map (ε^f at ι'_* A)` = σ-isos ∘ (localAdj-counit at A) with
+localAdj-counit at A = (pb fᵢ).map (ε^{restrUᵢ} at ...) ≫ ε^{fᵢ}_A;
+(s4) localAdj-counit iso at A := K|ι': first factor iso by (s1)-for-Uᵢ.ι; second
+`ε^{fᵢ}_A`: conjugate by `nonempty_pullback_discrepancy_iso` (h1, EXTRACTED a5117952e) to
+`ε^{fᵢ}_{fᵢ^*Nᵢ}`, iso by `Adjunction.left_triangle_components` + IsIso (fᵢ^* η^{fᵢ}_{Nᵢ})
+[Functor.map_isIso of the q-generalized IsIso-η block with hq' as in P-invertible].
+Then components: `Hom.isIso_iff_isIso_app`.mp on the restricted map + the rfl-dictionary
+`restrictFunctor_map_app_apply` + ι''ι⁻¹W = W (W ≤ piece) + `ConcreteCategory.isIso_iff_bijective`.
+CAUTION: hploc/hglue-conjugation of a counit needs counit-NATURALITY squares only (no mates).
+
 **AP2-B1a dependency chart** (2026-08-07 final): the capped smul pair is DOUBLY load-bearing — `hcompat`
 (proved, cites it) AND `hbij` (route: `r • tensorSection a b = tensorSection (r•a) b` splits the
 bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,
