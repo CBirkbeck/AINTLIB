@@ -40067,3 +40067,118 @@ third-party code into the monorepo is **structural — coordinator consult befor
 AP2-A1 proceeds by stating its interface against the two facts so the vendored RR plugs in.
 **This replaces the HasseWeil-ideal-RR bridge route** (ae5b6df24) as A1's primary plan — the
 function-field vocabulary is strictly closer to our fibres.
+
+---
+
+## [KM-SEESAW-1′] **CLOSED** + `/develop` re-plan of the whole DS4 blocker set (2026-08-08)
+
+`/develop` (resume mode) ran over the four live blockers; the plan is
+`.mathlib-quality/plan-blockers-2026-08-08.md`, reviewed by ChatGPT 5.6 Sol (effort max) with the
+verdict and amendments folded in as §"External review". Then Blocker 1 was executed and closed.
+
+### Status change
+
+| Blocker | Where | Before | After |
+|---|---|---|---|
+| 1 · KM-SEESAW-1′ residue kernel rank one | `ForMathlib/Seesaw.lean` | sorry | **PROVED, axiom-verified standard-three** |
+| 2 · KM-SEESAW-2″ reduced descent | `ForMathlib/Seesaw.lean` | sorry | sorry — full route boarded, one mathlib gap in flight |
+| 3 · relative theorem of the square | `Picard/SelfAdjointN.lean` | sorry | sorry — route re-priced, +2 obligations |
+| 4 · `IsIso (subschemeι ≫ π)` | `EllipticCurve/AbelEquivalence.lean` | sorry | sorry — **route replaced**, old one was dead |
+
+`ForMathlib/Seesaw.lean` went 3 sorries → 1.
+
+### [KM-SEESAW-1′] — Status: **done** (2026-08-08)
+
+The earlier skeleton failed on a *ring mismatch*, not on mathematics:
+`orderedBaseCechComplexBaseChangeIso` produces `ModuleCat.extendScalars t.appTop.hom` (scalars in
+`Γ(Spec κ(s),⊤)`) while the goal's `LinearMap.baseChange` is over `κ(s)`. Fix: state the result
+**scheme-side** over `Γ(T,⊤)` for an arbitrary affine `t : T ⟶ S`, where
+`algebraMap Γ(S,⊤) Γ(T,⊤) = t.appTop.hom` holds by `rfl` and the two engines match syntactically;
+transport to `κ(s)` exactly once, at the end. Landed:
+
+* `Module.finrank_eq_one_of_bijective_algebraMap`
+* `finrank_baseSections_unitObj_eq_one` — step 5, via the tree's own `baseSections_smul`
+* `orderedBaseCech_appTop_kernel_finrank_of_fibre_trivial` — the five documented steps as one
+  `LinearEquiv.trans` chain (compiled first try)
+* `orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial` — the old sorry; transported by
+  `LinearMap.finrank_ker_baseChange_eq` along `Γ(S,⊤) → Γ(Spec κ(s),⊤) → κ(s)`, the middle
+  `Field` instance from `MulEquiv.isField` + `IsField.toField` (reuses the ambient `CommRing`, so
+  no instance diamond)
+
+`#print axioms ModularCurves.orderedBaseCech_kernel_finrank_of_fibre_trivial` → propext,
+Classical.choice, Quot.sound.
+
+**b2_log-worthy (do not re-derive).** `hfibt` in the scheme-side lemma may NOT be weakened to
+"trivial on every field-valued fibre". Counterexample (external review): `π = 𝟙_S`, `S = Spec R`
+with `R` Dedekind of nontrivial class group, `M` a nonprincipal invertible ideal — proper, flat,
+fp, universally `O`-connected, every field fibre trivial, but the kernel at `T = S` is `M` itself,
+not free. Recorded in the lemma's docstring.
+
+### [KM-SEESAW-2] — Status: open, fully boarded
+
+Half A is **already proved**: `exists_pullback_twist_of_locally` (`WeilPairing/RelPicLocal.lean`,
+AP2-B1) with `M' = unitObj` reduces the whole blocker to "Zariski-locally on the base, `M` is
+trivial". Half B is the new work; AP2-A2's engine is unusable here because its `hexact` is false
+(`H¹(E_s,𝒪) = κ(s)` on a genus-1 fibre), so B.1 runs Mumford's argument on the tree's own
+**unconditional** finite-projective replacement and applies Stacks 0FWG to `coker u`.
+
+New sub-tickets:
+
+* **[T4] `ForMathlib/ReducedConstantRankFree.lean`** — Stacks 0FWG, local form. **Statement
+  landed and building; proof in flight.** VERIFIED ABSENT FROM MATHLIB (leansearch;
+  `local_search "rankAtStalk"`; `grep IsReduced` in `FreeLocus.lean`, `Flat/Rank.lean`,
+  `LocalProperties/Projective.lean` — all empty). Reviewer confirmed the four-step proof correct
+  and noted no Noetherian hypothesis is needed.
+* **[T4c] the A2 repair** — `dim ker(u ⊗ κ(p)) = 1` does NOT follow from
+  `dim ker(d⁰ ⊗ κ(p)) = 1`; the replacement is applied to the corestriction `f : C⁰ → ker d¹`, and
+  `ker d¹ ↪ C¹` need not stay injective after non-flat base change. Reviewer's counterexample:
+  `R = k[x,y]`, `R --(r ↦ (−yr,xr))--> R² --((a,b) ↦ xa+yb)--> R`; at `p = (x,y)` the two kernels
+  are `κ(p)` and `0`. In Lean this is exactly the hypothesis pair of
+  `shortComplexBaseChangeKernelEquiv` (`[Module.Flat R (ker S.g.hom)]` + `hbij`), both of which
+  AP2-A2 got from `hexact`. Repairs: **(b) two-element cover** — then `C^q = 0` for `q ≥ 2`, so
+  `ker d¹ = C¹` is flat and the comparison is the identity, discharging both with no exactness
+  (open: strengthen `IsInvertible.exists_finiteAffineBaseCech_flat` to `card ι = 2`, or carry it
+  as a hypothesis); or **(a) minimal-prime sandwich** — reduced ⟹ `R_η = κ(η)` is a flat field at
+  a minimal prime `η ⊆ p`, so the kernels agree there, and rank semicontinuity under
+  specialisation pins the value at `p`.
+* **[T6] B.2** — write the comparison diagram `P ⊗ κ(p) ≅ ker(u_p) ≅ ker(f_p) ↪ H⁰(X_p,M_p)`
+  explicitly and note it is an iso by dimension count. Reviewer's warning: "the splitting alone
+  gives cohomological base change" is **too strong**.
+* **[T7]** generalise the RelPicLocal chain from `pullback.snd p g` to a bare `f : Y ⟶ T` with
+  `UniversallyOConnected f` — also the shape Blocker 3 consumes.
+
+### [AP-C1 / Blocker 3] — route re-priced, two obligations added
+
+Reviewer keeps the seesaw route (R1) ahead of the chart route (R2), and ahead of a third
+generic-vertical-divisor route (viable but needs a Weil/Cartier package: rational sections,
+vertical-prime classification, codimension formulas, pullback multiplicities — cf. Stacks 0BF0 /
+0EX8). Recorded so the R2 shortcut is not re-derived: the diagonal, antidiagonal and zero-section
+loci are **codimension 1**, so an isomorphism on their complement need not extend (reflexivity
+extends only across codimension ≥ 2). New obligations R1 acquires:
+
+* **[T8b]** `B = C ×_U C` is NOT affine; the seesaw carries `[IsAffine S]`, so apply it on an
+  affine open cover of `B` and glue with the descent lemma.
+* **[T9b]** the passage from an arbitrary elliptic curve to the universal Weierstrass parameter
+  space is only **Zariski-local** (moduli-stack issue globally); state the base-change-down step
+  locally on `T` and glue.
+
+### [AP2-B2/B3 / Blocker 4] — **route replaced; a board note was wrong**
+
+* **CORRECTION to the 2026-08-07 note.** "The local generator vanishes on `Z`, therefore it is not
+  a nonzerodivisor" is **false reasoning** — `t ∈ k[t]` vanishes on `V(t)` and is a nonzerodivisor.
+  Vanishing geometrically and being a zerodivisor are unrelated; what fails is only unit-ness.
+* The fibrewise-nonzerodivisor route **is** Stacks 00MF, the principal case of the local criterion
+  00ME, whose proof needs Artin–Rees. It does **not** dodge the sorried
+  `injective_of_lTensor_residueField_injective_sModule`.
+* Producing the section from the fibre points is **not viable**: `S_red → S` has the same
+  residue-field fibres as `S → S` and is generally not an isomorphism.
+* **USE INSTEAD — étale transversality.** `h̄` generates the maximal ideal of the DVR `𝒪_{E_s,z}`,
+  so `dh̄ ≠ 0` in `Ω_{E_s/κ(s),z} ⊗ κ(z)`; then `h : U → 𝔸¹_S` has both sides smooth of relative
+  dimension 1 and an isomorphism on relative differentials at `z`, hence is étale near `z`; so
+  `Z ∩ U = U ×_{𝔸¹_S} S` is étale over `S`; `Z` is closed in the proper `E` hence proper; proper +
+  étale ⟹ finite étale; fibre degree 1 ⟹ isomorphism. (Stacks §37.38 / 055S — prove the special
+  case from a standard-smooth Jacobian presentation; the general slicing lemma internally routes
+  through fibrewise flatness and would reintroduce the gap.)
+* **Hypothesis audit.** `h⁰ = 1` and `H¹ = 0` alone do not encode what is needed: the statement
+  must also carry smooth geometrically integral genus-one fibres, `deg M_s = 1`, and the
+  base-change isomorphism making the chosen generator satisfy `σ_s ≠ 0`.
