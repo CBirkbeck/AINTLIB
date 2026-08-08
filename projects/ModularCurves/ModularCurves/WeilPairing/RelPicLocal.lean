@@ -44,6 +44,36 @@ local instance (X : Scheme.{u}) :
     change IsMulCommutative (X.presheaf.obj U)
     exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
 
+/-- **Invertibility is Zariski-local**: a module whose restriction to each member of an
+open cover is isomorphic to some invertible module is invertible — refine the cover by the
+local trivialising covers and transport along `pullbackCompositeTrivialization` and the
+image-open identification `isoImage`. -/
+theorem IsInvertible.of_restrict_cover {T : Scheme.{u}} {L : T.Modules}
+    {ι : Type u} (U : ι → T.Opens) (hU : IsOpenCover U)
+    (h : ∀ i, ∃ Ni : (U i).toScheme.Modules, IsInvertible Ni ∧
+      Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback (U i).ι).obj L ≅ Ni)) :
+    IsInvertible L := by
+  choose Ni hNi hLi using h
+  choose κ V hV htriv using hNi
+  refine ⟨(i : ι) × κ i, fun ij => (U ij.1).ι ''ᵁ (V ij.1 ij.2), ?_, ?_⟩
+  · rw [eq_top_iff]
+    rintro x -
+    have hx : x ∈ iSup U := by rw [show iSup U = ⊤ from hU]; trivial
+    obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp hx
+    have hy : (⟨x, hi⟩ : (U i).toScheme) ∈ iSup (V i) := by
+      rw [hV i]; trivial
+    obtain ⟨j, hj⟩ := TopologicalSpace.Opens.mem_iSup.mp hy
+    exact TopologicalSpace.Opens.mem_iSup.mpr
+      ⟨⟨i, j⟩, ⟨⟨x, hi⟩, hj, rfl⟩⟩
+  · rintro ⟨i, j⟩
+    obtain ⟨hi⟩ := hLi i
+    obtain ⟨tj⟩ := htriv i j
+    exact ⟨AlgebraicGeometry.Scheme.Modules.pullbackCompositeTrivialization
+      ((U i).ι.isoImage (V i j)).inv ((V i j).ι ≫ (U i).ι) ((U i).ι ''ᵁ (V i j)).ι
+      (Scheme.Hom.isoImage_inv_ι (U i).ι (V i j)) L
+      (((AlgebraicGeometry.Scheme.Modules.pullbackComp (V i j).ι (U i).ι).app L).symm ≪≫
+        (AlgebraicGeometry.Scheme.Modules.pullback (V i j).ι).mapIso hi ≪≫ tj)⟩
+
 /-- **(AP2-B1, KM p. 65)** The `f^*`-twist equivalence on invertible sheaves is Zariski-local on the
 base: isomorphisms `M ≅ M' ⊗ f^*(N i)` over the preimages of an open cover of `T` glue to a global
 `M ≅ M' ⊗ f^*N₀` — the sheaf condition for `Pic(E_T)/f_T^*Pic(T)`.
