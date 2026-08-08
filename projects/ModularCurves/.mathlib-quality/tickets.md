@@ -39401,6 +39401,18 @@ finite flat of rank one and invoke `exists_section_of_degree_one`). Everything d
 bridge — divisor, fields, degree, invertible ideal — is proved. `AP2-B4` consumes exactly these
 interfaces.
 
+**AP2-B2/B3 — REDUCED TO ONE OBLIGATION** (2026-08-08, b0d865e75): the bridge
+`relEffCartierDiv_of_degreeOne_package` now has a single `sorry`, namely
+`IsIso ((sectionVanishingIdeal M hM σ).subschemeι ≫ π)`. Everything else is proved and
+axiom-clean, including the new **`relEffCartierDiv_of_isIso_subschemeι`** (if the vanishing
+subscheme is `S`-isomorphic, the three `RelEffCartierDiv` fields follow *by instance inference* —
+no fibrewise flatness criterion, no Artin–Rees). So the whole KM pp. 66–67 + 1.2.7 development
+rests on that one geometric fact, whose natural source is the `AP2-A2` rank-one basis of
+`baseSections` (it should invert the structure map). Downstream and proved:
+`exists_section_of_degree_one`, `degree_eq_one_of_ideal_eq_ker`, `degree_eq_one_iff_exists_section`,
+`exists_relEffCartierDiv_of_section`, `isInvertible_idealModule_of_section`, plus
+`sectionVanishingIdeal` and the entire sections-localize chain.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
