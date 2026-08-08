@@ -38857,9 +38857,17 @@ in the plan's "Known traps".
 - **Sources**: KM (2.8.1.6), p. 88.
 
 ### [AP-D3] `Pic(E/S) ≅ H¹(E, K_E^×)`
-- **Status**: blocked (AP-D1) · **File**: `WeilPairing/UnitSheaf.lean` · **Type**: theorem
-- **Sources**: KM (2.8.1.5), p. 88, citing **[K5 §5, esp. 5.2, pp. 186–187]** — *resolve this bibliography
-  entry before starting*; if the cited source is unavailable the ticket needs its own decomposition.
+- **Status**: open (AP-D1 done; bibliography resolved 2026-08-08 — see Sources: [K5] is not needed) · **File**: `WeilPairing/UnitSheaf.lean` · **Type**: theorem
+- **Sources**: KM (2.8.1.5), p. 88, citing **[K5 §5, esp. 5.2, pp. 186–187]**. **Bibliography resolved
+  (2026-08-08, read from refs/): the citation is decorative — KM p. 88 states `Pic(E/S) ≅ H¹(E, K_E^×)`
+  and `H⁰(E, K_E^×) = {1}` and then uses ONLY the cocycle consequence** (a normalized cocycle
+  `f_{i,j} ∈ Γ(U_i ∩ U_j, K^×)` representing a class, and triviality of `π^*(ℒ)` meaning
+  `f_{i,j} ∘ π = h_i/h_j`). So AP-D3 does not need [K5]: the tree's own normalized-cocycle layer
+  (`Picard/InvertibleSheafCocycle.lean:44`, `GlueTrivialization.lean:98`, `RigidDescent.lean:65`)
+  already provides exactly that interface, and AP-D5 consumes the cocycle form directly. RECOMMENDED
+  RESTATEMENT: skip the abstract `Pic ≅ H¹(K^×)` isomorphism and state the two consumable facts —
+  (i) every class has a `K^×`-valued normalized cocycle representative, (ii) `H⁰(E,K_E^×) = {1}`
+  (AP-D2, already done) — which is all KM's pairing construction uses.
 - **Note**: the tree's normalized-cocycle layer (`Picard/InvertibleSheafCocycle.lean:44`,
   `GlueTrivialization.lean:98`, `RigidDescent.lean:65`) is the `K^×`-valued Čech machinery this needs;
   `RigidDescent`'s "overlap comparison units are `1` along the zero section" is literally a `K_E^×` cocycle.
