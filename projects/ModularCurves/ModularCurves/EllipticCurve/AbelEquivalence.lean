@@ -847,6 +847,23 @@ theorem evalGenerator_mem_nonZeroDivisors
     f ∈ nonZeroDivisors ↑Γ(E, V.1) := by
   sorry
 
+/-- **(KM 1.2.7, the direction the Abel map needs)** A relative effective Cartier divisor of
+degree one is the divisor of a section. Not yet in the tree: `CartierDivisor.lean` builds the
+section → divisor direction (`sectionDivisor`, `sectionDivisor_degree`,
+`sectionDivisor_isOfficial`, `exists_affineOpen_ker_principal_nonZeroDivisor`); this is the
+converse, and it is what turns KM p. 67's *"any effective Cartier divisor of degree one is a
+section"* into the Abel equivalence's inverse map.
+
+Route: `D ⟶ S` is finite locally free of rank one (that is `D.degree = 1` plus the
+`RelEffCartierDiv` fields), hence an isomorphism onto `S`
+(mathlib `Scheme.Hom.isIso_iff_finrank_eq`, cited in the AP2-B3 ticket); the section is then
+`inv (D.ideal.subschemeι ≫ π) ≫ D.ideal.subschemeι`, and `D.ideal = ker z` follows because
+both cut out the same closed subscheme. -/
+theorem exists_section_of_degree_one {C S : Scheme.{u}} (π : C ⟶ S) [IsSeparated π]
+    (D : RelEffCartierDiv π) (hdeg : ∀ s : S, D.degree s = 1) :
+    ∃ z : S ⟶ C, ∃ hz : z ≫ π = 𝟙 S, D.ideal = Scheme.Hom.ker z := by
+  sorry
+
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
 effective Cartier divisor whose ideal is the `M`-inverse twist of the pushforward pullback:
