@@ -463,6 +463,18 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
         (Subsingleton.elim _ _)
     rw [hscal g inf_le_left _, hscal g' inf_le_right _,
       ← Nat.sub_add_cancel (hK g g'), pow_add, ← smul_smul, ← smul_smul, hkey]
+  -- glue the compatible family over the affine `U`
+  obtain ⟨s, hs, -⟩ := TopCat.Sheaf.existsUnique_gluing'
+    (F := (⟨N.presheaf, N.isSheaf⟩ : TopCat.Sheaf AddCommGrpCat E))
+    (fun g : {g // g ∈ t} ↦ E.basicOpen g.1) U.1
+    (fun g ↦ homOfLE (hpiece g.1 g.2).1)
+    (by
+      refine le_trans hcover ?_
+      refine iSup_le fun g ↦ ?_
+      refine iSup_le fun hg ↦ ?_
+      exact le_iSup (fun h : {g // g ∈ t} ↦ E.basicOpen h.1) ⟨g, hg⟩)
+    w hcompat
+  refine ⟨n + K, s, ?_⟩
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
