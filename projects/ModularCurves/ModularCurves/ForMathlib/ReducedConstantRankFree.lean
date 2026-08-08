@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import Mathlib.RingTheory.LocalRing.Module
 import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
 import Mathlib.RingTheory.LocalProperties.Projective
+import Mathlib.RingTheory.LocalProperties.Reduced
 
 /-!
 # Constant fibre rank over a reduced ring (Stacks 0FWG)
@@ -147,5 +148,105 @@ theorem free_of_isReduced_of_forall_le_finrank_fiber
     simpa using hnil
   -- 6. So `g` is an isomorphism `Rⁿ ≃ₗ M`.
   exact Module.Free.of_equiv (LinearEquiv.ofBijective g ⟨LinearMap.ker_eq_bot.mp hker, hgsurj⟩)
+
+/-! ### From the local form to the global form
+
+Passing from `free_of_isReduced_of_forall_le_finrank_fiber` to Stacks 0FWG needs, besides
+`Module.projective_of_localization_maximal`, only the identification of the fibres of the localized
+module `M_I` with the fibres of `M`. That splits into a base-change cancellation (the module side)
+and the fact that a localization does not change residue fields (the field side). -/
+
+/-- **Base change for a localized module.** For any algebra `κ` over `S⁻¹R`, the fibre of `S⁻¹M`
+over `κ` is the fibre of `M`: this is `LocalizedModule.equivTensorProduct` followed by the
+cancellation `κ ⊗[S⁻¹R] (S⁻¹R ⊗[R] M) ≃ κ ⊗[R] M`. -/
+private noncomputable def tensorLocalizedModuleEquiv {R : Type u} [CommRing R] (S : Submonoid R)
+    (M : Type u) [AddCommGroup M] [Module R M] (κ : Type u) [CommRing κ]
+    [Algebra (Localization S) κ] [Algebra R κ] [IsScalarTower R (Localization S) κ] :
+    κ ⊗[Localization S] (LocalizedModule S M) ≃ₗ[κ] κ ⊗[R] M :=
+  (TensorProduct.AlgebraTensorModule.congr (LinearEquiv.refl κ κ)
+      (LocalizedModule.equivTensorProduct S M)) ≪≫ₗ
+    TensorProduct.AlgebraTensorModule.cancelBaseChange R (Localization S) κ κ M
+
+/-- The dimension of the fibre of `S⁻¹M` over an `S⁻¹R`-algebra `κ` is that of the fibre of `M`. -/
+private lemma finrank_tensor_localizedModule {R : Type u} [CommRing R] (S : Submonoid R)
+    (M : Type u) [AddCommGroup M] [Module R M] (κ : Type u) [CommRing κ]
+    [Algebra (Localization S) κ] [Algebra R κ] [IsScalarTower R (Localization S) κ] :
+    Module.finrank κ (κ ⊗[Localization S] (LocalizedModule S M)) =
+      Module.finrank κ (κ ⊗[R] M) :=
+  (tensorLocalizedModuleEquiv S M κ).finrank_eq
+
+/-- If `algebraMap R S` is surjective on stalks — the case of interest being a localization — then
+for every prime `q` of `S` the canonical map `κ(q ∩ R) → κ(q)` is an isomorphism of
+`R`-algebras. -/
+private noncomputable def residueFieldAlgEquivOfSurjectiveOnStalks {R S : Type u} [CommRing R]
+    [CommRing S] [Algebra R S] (H : (algebraMap R S).SurjectiveOnStalks) (q : Ideal S)
+    [q.IsPrime] : (q.comap (algebraMap R S)).ResidueField ≃ₐ[R] q.ResidueField :=
+  AlgEquiv.ofBijective
+    (Ideal.ResidueField.mapₐ (q.comap (algebraMap R S)) q (Algebra.ofId R S) rfl)
+    (H.residueFieldMap_bijective _ q rfl)
+
+/-- The fibre dimension of `M` at a field depends on that field only through its `R`-algebra
+isomorphism class: base change along `K ≃ₐ[R] L` is `Module.finrank_baseChange`. -/
+private lemma finrank_tensor_eq_of_algEquiv {R : Type u} [CommRing R] {M : Type u}
+    [AddCommGroup M] [Module R M] {K L : Type u} [Field K] [Field L] [Algebra R K] [Algebra R L]
+    (φ : K ≃ₐ[R] L) : Module.finrank L (L ⊗[R] M) = Module.finrank K (K ⊗[R] M) := by
+  letI : Algebra K L := φ.toRingHom.toAlgebra
+  haveI : IsScalarTower R K L := .of_algebraMap_eq fun r => (φ.commutes r).symm
+  let e : L ⊗[K] (K ⊗[R] M) ≃ₗ[L] L ⊗[R] M :=
+    TensorProduct.AlgebraTensorModule.cancelBaseChange R K L L M
+  rw [← e.finrank_eq, Module.finrank_baseChange]
+
+/-- The fibre of the localized module `M_I` at a prime `q` of `R_I` is the fibre of `M` at the
+contraction of `q` to `R`. -/
+private lemma finrank_fiber_localizedModule {R : Type u} [CommRing R] (I : Ideal R) [I.IsPrime]
+    (M : Type u) [AddCommGroup M] [Module R M] (q : PrimeSpectrum (Localization.AtPrime I)) :
+    Module.finrank q.asIdeal.ResidueField
+        (q.asIdeal.ResidueField ⊗[Localization.AtPrime I] LocalizedModule I.primeCompl M) =
+      Module.finrank (q.asIdeal.comap (algebraMap R (Localization.AtPrime I))).ResidueField
+        ((q.asIdeal.comap (algebraMap R (Localization.AtPrime I))).ResidueField ⊗[R] M) := by
+  rw [finrank_tensor_localizedModule]
+  exact finrank_tensor_eq_of_algEquiv (residueFieldAlgEquivOfSurjectiveOnStalks
+    (RingHom.surjectiveOnStalks_of_isLocalization I.primeCompl _) q.asIdeal)
+
+/-- **(Stacks 0FWG)** A finite module over a reduced Noetherian ring whose fibre dimension
+`p ↦ dim_{κ(p)} (M ⊗ κ(p))` is locally constant on `Spec R` is projective — equivalently, finite
+locally free.
+
+Projectivity is checked one maximal ideal `I` at a time
+(`Module.projective_of_localization_maximal`, which is the only place the Noetherian hypothesis is
+spent — it supplies `Module.FinitePresentation R M`). Over `R_I` the local form
+`free_of_isReduced_of_forall_le_finrank_fiber` applies: the primes of `R_I` are the primes `p ≤ I`
+of `R`, with the same residue fields and hence the same fibres, and every such `p` lies in *every*
+neighbourhood of `I`, so local constancy pins the fibre dimension to the single value
+`dim_{κ(I)} (M ⊗ κ(I))` on all of `Spec R_I`. -/
+theorem projective_of_isReduced_of_isLocallyConstant_finrank_fiber
+    {R : Type u} [CommRing R] [IsReduced R] [IsNoetherianRing R]
+    {M : Type u} [AddCommGroup M] [Module R M] [Module.Finite R M]
+    (h : IsLocallyConstant fun p : PrimeSpectrum R =>
+      Module.finrank p.asIdeal.ResidueField (p.asIdeal.ResidueField ⊗[R] M)) :
+    Module.Projective R M := by
+  haveI : Module.FinitePresentation R M := Module.finitePresentation_of_finite R M
+  refine Module.projective_of_localization_maximal fun I hI => ?_
+  haveI := hI
+  haveI : Module.Free (Localization.AtPrime I) (LocalizedModule I.primeCompl M) := by
+    refine free_of_isReduced_of_forall_le_finrank_fiber
+      (Module.finrank I.ResidueField (I.ResidueField ⊗[R] M)) ?_ ?_
+    · -- The closed fibre of `M_I` is the fibre of `M` at `I`.
+      exact finrank_tensor_localizedModule I.primeCompl M I.ResidueField
+    · -- Every prime of `R_I` contracts to a prime `p ≤ I`, and `p` lies in every neighbourhood
+      -- of `I`, so local constancy forces the two fibre dimensions to agree.
+      intro q
+      rw [finrank_fiber_localizedModule I M q]
+      set p : Ideal R := q.asIdeal.comap (algebraMap R (Localization.AtPrime I))
+      have hple : p ≤ I := by
+        intro x hx
+        by_contra hxI
+        exact q.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ hx
+          (IsLocalization.map_units (Localization.AtPrime I) (⟨x, hxI⟩ : I.primeCompl)))
+      have hspec : (⟨p, inferInstance⟩ : PrimeSpectrum R) ⤳ ⟨I, hI.isPrime⟩ :=
+        (PrimeSpectrum.le_iff_specializes _ _).mp ((PrimeSpectrum.asIdeal_le_asIdeal _ _).mp hple)
+      exact (hspec.mem_open (h.isOpen_fiber _)
+        (rfl : Module.finrank I.ResidueField (I.ResidueField ⊗[R] M) = _)).ge
+  infer_instance
 
 end ModularCurves

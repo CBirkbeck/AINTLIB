@@ -96,10 +96,22 @@ HALF B.2 (counit iso) — write the comparison diagram EXPLICITLY, in this order
   `hfib` is essential and cannot be replaced by `hrank`: `𝒪_E(P)` on a genus-1 curve has `h⁰ = 1`
   but its generator vanishes at `P` (already in the b2_log).
 
-IN FLIGHT: `ForMathlib/ReducedConstantRankFree.lean` — Stacks 0FWG, local form, statement landed
-and building, single `sorry` being filled by a subagent. VERIFIED ABSENT FROM MATHLIB. Proof plan
-is in that file's module docstring; the external reviewer confirmed it correct and noted no
-Noetherian hypothesis is needed.
+T4 — **DONE** (2026-08-08). `ForMathlib/ReducedConstantRankFree.lean`:
+`free_of_isReduced_of_forall_le_finrank_fiber` — Stacks 0FWG, LOCAL form — PROVED, axiom-verified
+standard-three, zero sorries, no new imports. VERIFIED ABSENT FROM MATHLIB before writing.
+Two useful discoveries: `IsLocalRing.span_eq_top_of_tmul_eq_basis` does the whole Nakayama step in
+one shot, and `TensorProduct.mk_surjective` gives the lift. The per-prime step is a private helper
+`algebraMap_eq_zero_of_mem_ker` stated over an ARBITRARY `R`-algebra field `κ` rather than `κ(p)`
+(`set` would not fold the occurrence inside `hmin p`).
+
+IN FLIGHT (T4b): the GLOBAL form —
+`projective_of_isReduced_of_isLocallyConstant_finrank_fiber` : `R` reduced Noetherian, `M` finite,
+fibre dimension locally constant ⟹ `Module.Projective R M`. That is the form B.1 step 3 consumes
+(applied to `coker u`). Route: `Module.projective_of_localization_maximal` reduces to freeness of
+`M_I` over `R_I` for each maximal `I`, which is exactly the local form; the two fibre transports
+are `TensorProduct.AlgebraTensorModule.cancelBaseChange` (imitate mathlib's own proof of
+`Module.rankAtStalk_eq`); local constancy is used ONCE, via the fact that every prime `p ≤ I` lies
+in every neighbourhood of `I` (`g ∉ I` and `p ≤ I` ⟹ `g ∉ p`).
 
 AFTER BLOCKER 2: Blocker 3 = `exists_invertible_tensor_idealModule_add` (`Picard/SelfAdjointN.lean`),
 which unblocks AP-D4/D5-existence/D6/D7. Reviewer kept the seesaw route (R1) ahead of the chart
