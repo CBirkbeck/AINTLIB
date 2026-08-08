@@ -40223,3 +40223,62 @@ constant-rank lemma on the ordered Čech complex; the model is
 T6 (counit iso), T7 (generalise the RelPicLocal chain to a bare `f : Y ⟶ T`), T8 (assemble).
 **KM-SEESAW-2″'s signature must gain `hhigh`** — exactness of the ordered Čech complex at positions
 ≥ 2, automatic in the application because the fibres are curves.
+
+---
+
+## [KM-SEESAW] **CLOSED — THE RANK-ONE SEESAW IS PROVED** (2026-08-08)
+
+`ForMathlib/Seesaw.lean` is sorry-free and axiom-verified standard-three.
+`exists_pullback_iso_of_fibrewise_trivial_of_isReduced` (Stacks 0EX7 at rank 1): an invertible sheaf
+on a proper flat family of finite presentation over a **reduced** affine base, trivial on every
+fibre, is pulled back from the base — proved **without cohomology-and-base-change**, which mathlib
+does not have.
+
+| ticket | outcome |
+|---|---|
+| KM-SEESAW-1′ | done — the failure was a ring mismatch, fixed by a scheme-side restatement over `Γ(T,⊤)` |
+| T4 / T4b | done — Stacks 0FWG, local and global. **Verified absent from mathlib.** |
+| T4c | closed with ZERO new declarations — `Module.Flat.ker_of_bounded_exact_from` and `kerBaseChangeComparison_bijective_of_bounded_exact_from` already carried the "exact from degree `k` onward" hypothesis |
+| T5 core | done — Mumford *Abelian Varieties* §5 constant-kernel-rank |
+| T5-wire / T5-bridge | done — Half B.1, `π_*M` invertible |
+| T6 / T6-api / T6-eval | done — Half B.2, `M` base-locally trivial |
+| T7 / T8 | done — Half A generalised to a bare morphism, then assembled |
+
+### What the external review contributed, concretely
+
+* **A real gap in B.1** (Koszul counterexample on `k[x,y]`): the fibre kernel dimension does not
+  transfer to the replacement complex, because the corestriction into the cycles need not stay
+  injective after non-flat base change. Repaired via `hhigh`.
+* **A wrong board note killed**: "the local generator vanishes on `Z`, so it is not a
+  nonzerodivisor" is false reasoning; and that route *is* Stacks 00MF, so it does not dodge
+  Artin–Rees. Blocker 4 re-planned as étale transversality.
+* **Two obligations added to Blocker 3**: `B = C ×_U C` is not affine; the universal-curve
+  comparison is only Zariski-local.
+* **A counterexample that keeps a hypothesis honest**: `hfibt` may not be weakened to fibrewise
+  triviality (Dedekind domain with nontrivial class group).
+
+### Lessons worth carrying (all cost real time this session)
+
+1. **Grep the conclusion, not the ingredients** — fired twice. T4c was re-derived from scratch, and
+   a subagent was launched to rewrite a lemma that already existed; and `localPullbackTrivializationT`
+   (pulling a trivialisation back along an ARBITRARY morphism) was boarded as missing when it was
+   already in `Picard/DualPullback/LocalTrivialization.lean:264`.
+2. **Docstrings recording "this is blocked because X is missing" go stale.** Two such claims were
+   false by the time they were acted on (`ModuleCat.restrictScalars` does preserve finite limits;
+   `ShortComplex.mapHomologyIso` exists). Re-check before believing a recorded blocker.
+3. **`whnf`/`isDefEq` stalls in this area are fixed structurally**, never with heartbeats: `let` not
+   `set`, explicit terms instead of `rw`, `have h : … := rfl` anchors,
+   `cast (congrArg Function.Bijective …)` instead of `rw` on a function equation.
+4. **`Ideal.Fiber` is a reducible abbrev that `omega` treats as a distinct atom** from
+   `κ(p) ⊗[R] M` — restate `Module.rankAtStalk_eq` with the fibre spelled out.
+5. **Orphan modules**: `lake build ModularCurves` silently skips modules nothing imports, leaving
+   stale oleans. Build them explicitly before any cross-file `#print axioms`.
+
+### Debt left behind, deliberately
+
+* `hhigh` on the top-level seesaw is quantified over all finite affine covers (the cover is produced
+  inside the proof). Killable in the elliptic application; not from the general statement.
+* Four primed theorems in `RelPicLocal.lean` duplicate ~370 lines of the unprimed ones, which are now
+  thin specialisations. Left byte-identical so no consumer moved.
+* `WeilPairing/TensorSection.lean` is now a dead module whose `tensorSection` family full-name-collides
+  with two other copies in the tree. Do not re-import it without deduplicating.
