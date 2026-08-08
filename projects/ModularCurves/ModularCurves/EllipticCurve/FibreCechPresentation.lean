@@ -481,6 +481,44 @@ theorem mem_RRspace_of_mem_ker
   · rw [← hagree]
     exact (e₁ _).2
 
+/-- Components of a cochain assembled through the product iso. -/
+theorem isoPiInv_component (n : ℕ) (x : Scheme.Modules.orderedBaseCechTerm π M U n)
+    (i : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) n) :
+    (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) n =>
+      baseCechFactor π M U n j.1) i).hom
+        ((Scheme.Modules.orderedBaseCechObjectIsoPi π M U n).inv.hom x) = x i :=
+  ConcreteCategory.congr_hom
+    (ModuleCat.piIsoPi_inv_kernel_ι
+      (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) n =>
+        baseCechFactor π M U n j.1) i) x
+
+/-- A degree-zero cochain of a two-element cover is determined by its two components. -/
+theorem twoCover_cochain_ext
+    {w w' : (Scheme.Modules.orderedBaseCechObject π M U 0 : Type u)}
+    (h1 : (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+      baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 1)).hom w =
+      (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+        baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 1)).hom w')
+    (h0 : (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+      baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 0)).hom w =
+      (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+        baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 0)).hom w') :
+    w = w' := by
+  have hbridge0 : ∀ (i : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0)
+      (z : (Scheme.Modules.orderedBaseCechObject π M U 0 : Type u)),
+      (Scheme.Modules.orderedBaseCechObjectIsoPi π M U 0).toLinearEquiv z i =
+        (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+          baseCechFactor π M U 0 j.1) i).hom z := fun i z =>
+    ConcreteCategory.congr_hom
+      (ModuleCat.piIsoPi_hom_ker_subtype
+        (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+          baseCechFactor π M U 0 j.1) i) z
+  apply (Scheme.Modules.orderedBaseCechObjectIsoPi π M U 0).toLinearEquiv.injective
+  funext i
+  rcases idx0_eq_delete_or i with rfl | rfl
+  · exact (hbridge0 _ w).trans (h1.trans (hbridge0 _ w').symm)
+  · exact (hbridge0 _ w).trans (h0.trans (hbridge0 _ w').symm)
+
 end TwoCoverCech
 
 end FibreRR
