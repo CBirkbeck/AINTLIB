@@ -107,6 +107,39 @@ that shape: `FibrewiseElliptic.sectionPoleSheafPower_field_orderedBaseCech_kerne
 Logged in `.mathlib-quality/b2_log.jsonl` under `KM-SEESAW-1`.
 -/
 
+/-- A ring extension whose structure map is bijective is free of rank one over the base. -/
+theorem _root_.Module.finrank_eq_one_of_bijective_algebraMap
+    (R A : Type*) [CommRing R] [CommRing A] [Algebra R A] [Nontrivial R]
+    (h : Function.Bijective (algebraMap R A)) :
+    Module.finrank R A = 1 := by
+  have e : R ≃ₗ[R] A := LinearEquiv.ofBijective (Algebra.linearMap R A) h
+  rw [← e.finrank_eq, Module.finrank_self]
+
+/-- **(KM-SEESAW-1′, scheme-side)** The base-changed degree-zero Čech kernel is free of rank one
+over `Γ(T, ⊤)` for *any* affine `T` over `S` on whose fibre `M` is trivial — no field hypothesis.
+
+This is the form in which the five-step route of the residue-field corollary below actually
+composes: `orderedBaseCechComplexBaseChangeIso` produces `ModuleCat.extendScalars t.appTop.hom`,
+whose scalars are `Γ(T, ⊤)`, so stating the result over `Γ(T, ⊤)` makes
+`algebraMap Γ(S,⊤) Γ(T,⊤) = t.appTop.hom` hold by `rfl` and the two engines match syntactically.
+Transport to `κ(s)` happens once, at the end, in the corollary. -/
+theorem orderedBaseCech_appTop_kernel_finrank_of_fibre_trivial
+    {X S T : Scheme.{u}} [IsAffine S] [IsAffine T] [IsNoetherian X] [X.IsSeparated]
+    {π : X ⟶ S}
+    [LocallyOfFinitePresentation π] [IsProper π] [Flat π]
+    (hπ : UniversallyOConnected π)
+    {M : X.Modules} (hM : IsInvertible M)
+    {ι : Type u} [Fintype ι] [LinearOrder ι]
+    (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (t : T ⟶ S) [Nontrivial Γ(T, (⊤ : T.Opens))]
+    (hfibt : Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
+        (Limits.pullback.fst π t)).obj M ≅ unitObj (Limits.pullback π t))) :
+    letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) := t.appTop.hom.toAlgebra
+    let C := orderedBaseCechComplex π M U
+    Module.finrank Γ(T, (⊤ : T.Opens))
+      (LinearMap.ker ((C.d 0 1).hom.baseChange Γ(T, (⊤ : T.Opens)))) = 1 := by
+  sorry
+
 /-- **(KM-SEESAW-1′-res)** The residue-field form: at a point `s` of the base, fibrewise triviality of
 `M` makes `ker (d⁰ ⊗ κ(s))` one-dimensional.
 
