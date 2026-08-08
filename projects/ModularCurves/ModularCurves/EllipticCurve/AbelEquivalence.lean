@@ -931,6 +931,30 @@ theorem isInvertible_idealModule_of_section {C S : Scheme.{u}} {π : C ⟶ S} [I
     RelEffCartierDiv.exists_affineOpen_ker_principal_nonZeroDivisor π hsm z hz c
   exact ⟨V, hcV, f, hspan, hnzd⟩
 
+/-- **(B2/B3 bridge — the one remaining gap on the line)** The degree-one package makes the
+vanishing subscheme of the distinguished section finite, flat and locally of finite
+presentation over the base, i.e. a relative effective Cartier divisor. Combined with
+`degree_eq_one_iff_exists_section` (proved) this produces the point `P ∈ E(S)` and, through
+`exists_relEffCartierDiv_of_section` and `isInvertible_idealModule_of_section` (both proved),
+completes KM pp. 66–67.
+
+Two routes (board, 2026-08-08): (a) fibrewise — each fibre meets the vanishing locus in one
+reduced point by `AP2-A1`'s `h⁰ = 1`, so the map is finite flat of rank one (needs the
+R-substrate fibrewise-flatness criterion; the `_sModule` variant of that criterion is sorried
+and must be avoided); (b) through the `AP2-A2` package — the rank-one `baseSections` makes the
+counit's image ideal locally principal (`sv1`), and its subscheme is `S`-isomorphic by
+construction. -/
+theorem relEffCartierDiv_of_degreeOne_package
+    {R : Type u} [CommRing R] [IsNoetherianRing R]
+    {E : Scheme.{u}} {π : E ⟶ Spec (.of R)} [IsProper π] [Flat π]
+    [IsNoetherian E] [LocallyOfFinitePresentation π]
+    (M : E.Modules) (hM : M.IsInvertible) (σ : ↑Γ(M, ⊤))
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hpkg : HasDegreeOneFibreCohomology π M U) (hσ : σ ≠ 0) :
+    ∃ D : RelEffCartierDiv π, D.ideal = sectionVanishingIdeal M hM σ := by
+  sorry
+
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
 effective Cartier divisor whose ideal is the `M`-inverse twist of the pushforward pullback:
