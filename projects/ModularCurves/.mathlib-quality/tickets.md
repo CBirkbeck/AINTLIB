@@ -39050,11 +39050,18 @@ coface compatibilities), everything axiom-verified standard-three, zero sorries:
   1-dimensional for deg-1 D by `ell_eq_one_of_deg_eq_one` once k-linearity is threaded (A1d).
 - **[A1e] PROVED** (`2b7f2e830`): `isFullConstantField` — all vendored RR endpoints now fire over
   every base field.
-- REMAINING for A1: (α) exactAt ≥ 2 (isEmpty card lemma — trivial); (β) the ellipticYZ
-  section-module equivs for a concretely presented M (`𝒪(D)`-style; chartZSectionsEquiv +
-  coordinateRingEquivIntegers + the B1a overEquiv layer) — the last genuinely new construction;
-  (γ) A1d family assembly (≃ₗ-threading + FibrewiseElliptic transport + base-change of
-  presentations; A1e supplies the instance at every fibre field).
+- (α) DONE (`5a5cc6334`): `twoCover_exact_of_one_lt`. Fibre-native trio COMPLETE.
+- **(β) REFRAMED as consumer supply** (2026-08-08): A1's deliverable is `presentation ⟹ package`
+  (the fibre trio) — constructing presentations for CONCRETE sheaves (`I(P)^{±1}`, `𝒪(D(L))`) is
+  the consumers' obligation at their call sites (AP2-A2/B3-side), where each sheaf arrives with
+  its own fractional data; the dictionary ingredients are ready (chartZ/YSectionsEquiv,
+  coordinateRingEquivIntegers, memRRspaceOn_finitePlaces dictionaries, overEquiv layer).
+- REMAINING for A1: **(γ) A1d family assembly only** — family-level presentation predicate
+  (∀ s + field extensions, presentations of M|fibre with deg D = 1) ⟹
+  `HasDegreeOneFibreCohomology π M U`, by composing the fibre trio with the M-generic transport
+  stack (baseCechComplexBaseChangeIso, ordered↔alternating retract, residue-field→field lifts —
+  the exact composition pattern of `PoleSheafBaseCechHigher.lean:228–342`, verified M-generic),
+  with ≃ₗ-threading for the finrank clause and [A1e] instances at every fibre field.
 - Failure-mode log for the Čech plumbing (binding for (β)/(γ)): Hom.hom-vs-ConcreteCategory.hom
   spelling (bridge via intermediate `have`), `twoCoverIdx1` needs `.{u}` in standalone have-types,
   `set` on Čech carriers triggers kernel-level cast failures, `show`-casts across simp-normalized
