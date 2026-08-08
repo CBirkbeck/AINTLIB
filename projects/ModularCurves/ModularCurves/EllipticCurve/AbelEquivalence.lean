@@ -905,6 +905,17 @@ theorem degree_eq_one_iff_exists_section {C S : Scheme.{u}} {π : C ⟶ S} [IsSe
   · rintro ⟨z, hz, hD⟩ s
     exact degree_eq_one_of_ideal_eq_ker D z hz hD s
 
+/-- **(B2/B3 assembly, section form)** Once the evaluation divisor is known to be the divisor
+of a section, everything KM pp. 66–67 asserts follows from the tree's section machinery: the
+relative effective Cartier divisor is `sectionDivisor`, it is official (`sectionDivisor_isOfficial`
+under smoothness of relative dimension one), and its degree is one at every point. This is the
+form `AP2-B4` consumes. -/
+theorem exists_relEffCartierDiv_of_section {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) :
+    ∃ D : RelEffCartierDiv π, D.ideal = Scheme.Hom.ker z ∧ ∀ s : S, D.degree s = 1 :=
+  ⟨RelEffCartierDiv.sectionDivisor π z hz, rfl,
+    RelEffCartierDiv.sectionDivisor_degree π z hz⟩
+
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
 effective Cartier divisor whose ideal is the `M`-inverse twist of the pushforward pullback:
