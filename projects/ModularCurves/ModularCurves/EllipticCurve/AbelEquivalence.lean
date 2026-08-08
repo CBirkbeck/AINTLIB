@@ -52,7 +52,32 @@ noncomputable def sectionVanishingIdeal {E : Scheme.{u}} (M : E.Modules) (σ : �
       (show (M.over U.1).val.obj (Opposite.op (CategoryTheory.Over.mk (𝟙 U.1))) from
         M.presheaf.map (homOfLE le_top).op σ)))
   map_ideal_basicOpen U f := by
-    sorry
+    rw [Ideal.map_span]
+    apply le_antisymm
+    · refine Ideal.span_le.mpr ?_
+      rintro x ⟨y, ⟨φ, rfl⟩, rfl⟩
+      have hσ : (M.presheaf.map (homOfLE (E.basicOpen_le f)).op)
+          ((M.presheaf.map (homOfLE (le_top : U.1 ≤ ⊤)).op) σ) =
+          (M.presheaf.map (homOfLE (le_top : (E.affineBasicOpen f).1 ≤ ⊤)).op) σ := by
+        rw [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+        exact congrArg (fun q ↦ (ConcreteCategory.hom (M.presheaf.map
+          (Quiver.Hom.op q))) σ) (Subsingleton.elim _ _)
+      have hnat := PresheafOfModules.naturality_apply φ.val
+        (CategoryTheory.Over.mkIdTerminal.from
+          (CategoryTheory.Over.mk (homOfLE (E.basicOpen_le f)))).op
+        (show (M.over U.1).val.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 U.1))) from
+          M.presheaf.map (homOfLE (le_top : U.1 ≤ ⊤)).op σ)
+      refine Ideal.subset_span ?_
+      refine ⟨ModularCurves.SheafOfModules.dualRestrict E.ringCatSheaf M
+        (show Opposite.op U.1 ⟶ Opposite.op (E.affineBasicOpen f).1 from
+          (homOfLE (E.basicOpen_le f)).op) φ, ?_⟩
+      simp only [ModularCurves.SheafOfModules.dualRestrict_app_apply]
+      exact (congrArg (fun z ↦ φ.val.app (Opposite.op ((CategoryTheory.Over.map
+        (homOfLE (E.basicOpen_le f))).obj
+        (CategoryTheory.Over.mk (𝟙 (E.affineBasicOpen f).1)))) z) hσ.symm).trans hnat
+    · -- ⊇ : the maximal-local argument through trivialising basic opens
+      sorry
 
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
