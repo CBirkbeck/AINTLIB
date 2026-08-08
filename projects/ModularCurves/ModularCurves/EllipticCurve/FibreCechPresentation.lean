@@ -180,6 +180,43 @@ theorem ellipticYZ_S₁ : (ellipticYZ (K := K) W).S₁ = yChartPlaces W := rfl
 
 end EllipticYZ
 
+section SurjectivityTransport
+
+/-- **(`AP2-A1b`, abstract transport)** Surjectivity of the two-chart Čech difference map,
+transported from the function-field splitting along additive identifications of the two chart
+section modules and the overlap section module with `rrspaceOn`-submodules. The `Prop`-level
+compatibilities say the identifications intertwine the restriction maps with the submodule
+inclusions into `K`. -/
+theorem surjective_sub_of_addEquiv_rrspaceOn
+    {A₀ A₁ C : Type*} [AddCommGroup A₀] [AddCommGroup A₁] [AddCommGroup C]
+    (r₀ : A₀ →+ C) (r₁ : A₁ →+ C)
+    {S₀ S₁ : Set (PlaceA k K)} {D : DivisorA k K}
+    (e₀ : A₀ ≃+ rrspaceOn k K S₀ D) (e₁ : A₁ ≃+ rrspaceOn k K S₁ D)
+    (eC : C ≃+ rrspaceOn k K (S₀ ∩ S₁) D)
+    (h₀ : ∀ a, (eC (r₀ a) : K) = (e₀ a : K))
+    (h₁ : ∀ a, (eC (r₁ a) : K) = (e₁ a : K))
+    (split : ∀ g : K, memRRspaceOn k K (S₀ ∩ S₁) D g →
+      ∃ a b : K, memRRspaceOn k K S₀ D a ∧ memRRspaceOn k K S₁ D b ∧ g = a - b) :
+    Function.Surjective (fun p : A₀ × A₁ => r₁ p.2 - r₀ p.1) := by
+  intro c
+  obtain ⟨a, b, ha, hb, hab⟩ := split (eC c : K) (eC c).2
+  refine ⟨⟨e₀.symm ⟨-a, neg_mem ha⟩, e₁.symm ⟨-b, neg_mem hb⟩⟩, ?_⟩
+  apply eC.injective
+  apply Subtype.ext
+  have hr₀ : (eC (r₀ (e₀.symm ⟨-a, neg_mem ha⟩)) : K) = -a := by
+    rw [h₀, e₀.apply_symm_apply]
+  have hr₁ : (eC (r₁ (e₁.symm ⟨-b, neg_mem hb⟩)) : K) = -b := by
+    rw [h₁, e₁.apply_symm_apply]
+  calc (eC (r₁ (e₁.symm ⟨-b, neg_mem hb⟩) - r₀ (e₀.symm ⟨-a, neg_mem ha⟩)) : K)
+      = (eC (r₁ (e₁.symm ⟨-b, neg_mem hb⟩)) : K) -
+          (eC (r₀ (e₀.symm ⟨-a, neg_mem ha⟩)) : K) := by
+        rw [map_sub]
+        rfl
+    _ = -b - -a := by rw [hr₀, hr₁]
+    _ = (eC c : K) := by rw [hab]; ring
+
+end SurjectivityTransport
+
 end FibreRR
 
 end ModularCurves

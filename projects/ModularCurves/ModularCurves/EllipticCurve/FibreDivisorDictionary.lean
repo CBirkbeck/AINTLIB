@@ -57,6 +57,27 @@ theorem memRRspaceOn_mono {P Q : Set (PlaceA k K)} (hPQ : P ⊆ Q) {D : DivisorA
     (hf : memRRspaceOn k K Q D f) : memRRspaceOn k K P D f :=
   fun v hv => hf v (hPQ hv)
 
+/-- The chart-section space: functions obeying the `D`-bound at the places of `P`, as a
+`k`-submodule of `K`. For `P = Set.univ` this is the vendored `RRspace`. -/
+def rrspaceOn (P : Set (PlaceA k K)) (D : DivisorA k K) : Submodule k K where
+  carrier := {f | memRRspaceOn k K P D f}
+  zero_mem' := fun v _ => by
+    rw [map_zero]
+    exact zero_le'
+  add_mem' {f g} hf hg := fun v hv =>
+    le_trans (Valuation.map_add _ f g) (max_le (hf v hv) (hg v hv))
+  smul_mem' c f hf := fun v hv => by
+    rw [Algebra.smul_def, map_mul]
+    calc placeValuation k K v (algebraMap k K c) * placeValuation k K v f
+        ≤ 1 * WithZero.exp (D v) :=
+          mul_le_mul' (placeValuation_algebraMap_le_one k K v c) (hf v hv)
+      _ = WithZero.exp (D v) := one_mul _
+
+@[simp]
+theorem mem_rrspaceOn_iff (P : Set (PlaceA k K)) (D : DivisorA k K) (f : K) :
+    f ∈ rrspaceOn k K P D ↔ memRRspaceOn k K P D f :=
+  Iff.rfl
+
 section Elliptic
 
 variable {k K}
