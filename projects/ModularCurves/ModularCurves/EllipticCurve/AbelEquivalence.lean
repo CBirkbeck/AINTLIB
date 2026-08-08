@@ -889,6 +889,22 @@ theorem exists_section_of_degree_one {C S : Scheme.{u}} (π : C ⟶ S) [IsSepara
   · rw [Category.assoc, CategoryTheory.IsIso.inv_hom_id]
   · rw [Scheme.Hom.ker_comp_of_isIso, Scheme.IdealSheafData.ker_subschemeι]
 
+/-- **(KM 1.2.7, both directions)** For a relative effective Cartier divisor on a separated
+morphism, having degree one everywhere is *equivalent* to being the divisor of a section.
+This is the equivalence the Abel map is built on: the forward direction produces the point
+`P ∈ E(S)` from a degree-one divisor, the backward direction computes the degree of the
+divisor of a point. -/
+theorem degree_eq_one_iff_exists_section {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (D : RelEffCartierDiv π) :
+    (∀ s : S, D.degree s = 1) ↔
+      ∃ z : S ⟶ C, ∃ _ : z ≫ π = 𝟙 S, D.ideal = Scheme.Hom.ker z := by
+  constructor
+  · intro hdeg
+    obtain ⟨z, hz, hD⟩ := exists_section_of_degree_one π D hdeg
+    exact ⟨z, hz, hD⟩
+  · rintro ⟨z, hz, hD⟩ s
+    exact degree_eq_one_of_ideal_eq_ker D z hz hD s
+
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
 effective Cartier divisor whose ideal is the `M`-inverse twist of the pushforward pullback:
