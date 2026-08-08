@@ -816,7 +816,16 @@ theorem mem_nonZeroDivisors_of_forall_maximal_residueField_fibre_injective
       rw [hgen x t]
       simp [he, mulRightLinearMap, IsLocalizedModule.iso_apply_mk, mul_comm,
         ← Algebra.smul_def]
-  sorry
+  -- injectivity on the localization, from the residue-field fibre there
+  have hloc : Function.Injective
+      (mulRightLinearMap (algebraMap A (Localization.AtPrime J) f)) :=
+    Module.Flat.injective_of_lTensor_residueField_injective
+      (mulRightLinearMap (algebraMap A (Localization.AtPrime J) f)) (h J)
+  -- transport injectivity back along `e`
+  intro y z hyz
+  refine e.injective ?_
+  refine hloc ?_
+  rw [← hintertwine y, ← hintertwine z, hyz]
 
 /-- **(B2-head, step 3 = the fibre input, KM p. 66)** A local generator of the vanishing
 ideal of the distinguished section is a nonzerodivisor: *"we are reduced to the case
