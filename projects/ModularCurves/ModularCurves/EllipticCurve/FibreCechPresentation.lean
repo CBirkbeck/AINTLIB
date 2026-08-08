@@ -6,6 +6,8 @@ Authors: Chris Birkbeck
 import ModularCurves.EllipticCurve.FibreDivisorDictionary
 import ModularCurves.EllipticCurve.PoleFiltration
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
+import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
+import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
 
 /-!
 # Čech presentations of invertible sheaves on the projective Weierstrass model (`AP2-A1a/b`)
@@ -607,6 +609,31 @@ theorem twoCover_exact_of_one_lt (n : ℕ) (hn : 1 ≤ n) :
     exact ⟨0, Subsingleton.elim _ _⟩
   · intro _
     rw [Subsingleton.elim y 0, map_zero]
+
+/-- **(`AP2-A1b`, sheaf form)** Presented invertible modules on a separated scheme with a
+two-chart affine cover have vanishing first cohomology: the Čech `d⁰¹`-surjectivity converts
+through the ordered/unordered comparison and the affine-cover Čech-to-derived comparison. -/
+theorem twoCover_subsingleton_H_one
+    [X.IsSeparated] [M.IsQuasicoherent]
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    {S₀ S₁ : Set (PlaceA k K)} {D : DivisorA k K}
+    (e₀ : (baseCechFactor π M U 0 ((twoCoverIdx1.delete 1)).1 : Type u) ≃+
+      rrspaceOn k K S₀ D)
+    (e₁ : (baseCechFactor π M U 0 ((twoCoverIdx1.delete 0)).1 : Type u) ≃+
+      rrspaceOn k K S₁ D)
+    (eC : (baseCechFactor π M U 1 twoCoverIdx1.1 : Type u) ≃+
+      rrspaceOn k K (S₀ ∩ S₁) D)
+    (h₀ : ∀ x, (eC ((twoCoverRes π M U 1).hom x) : K) = (e₀ x : K))
+    (h₁ : ∀ x, (eC ((twoCoverRes π M U 0).hom x) : K) = (e₁ x : K))
+    (split : ∀ g : K, memRRspaceOn k K (S₀ ∩ S₁) D g →
+      ∃ a b : K, memRRspaceOn k K S₀ D a ∧ memRRspaceOn k K S₁ D b ∧ g = a - b) :
+    Subsingleton (CategoryTheory.Sheaf.H M.sheaf 1) := by
+  rw [← Scheme.Modules.baseCechComplex_exactAt_one_iff_subsingleton_H π M U hU hUaff]
+  apply Scheme.Modules.baseCechComplex_exactAt_one_of_orderedBaseCechComplex_exactAt_one
+  rw [HomologicalComplex.exactAt_iff' _ 0 1 2 (by simp) (by simp),
+    ShortComplex.moduleCat_exact_iff]
+  intro x _
+  exact twoCover_d01_surjective π M U e₀ e₁ eC h₀ h₁ split x
 
 end TwoCoverCech
 
