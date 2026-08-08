@@ -797,6 +797,8 @@ theorem mem_nonZeroDivisors_of_forall_maximal_residueField_fibre_injective
     f ∈ nonZeroDivisors A := by
   refine (mem_nonZeroDivisors_iff_injective_mulRight f).mpr ?_
   refine _root_.injective_of_localized_maximal (mulRightLinearMap f) (fun J hJ ↦ ?_)
+  -- transport `h J` along `LocalizedModule J.primeCompl A ≃ₗ Localization.AtPrime J`,
+  -- under which `LocalizedModule.map` of multiplication is multiplication by the image
   sorry
 
 /-- **(B2-head, step 3 = the fibre input, KM p. 66)** A local generator of the vanishing
