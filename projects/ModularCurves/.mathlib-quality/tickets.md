@@ -39432,6 +39432,16 @@ sorry-free in `WeilPairing/UnitSheaf.lean`: `kUnitsEval`, `kUnits`, `mem_kUnits_
 `glueTransitionUnit` / `trivializationTransitionUnit`. NOTE when writing it: `unitObj` is NOT in scope
 in that file — qualify it (`AlgebraicGeometry.Scheme.Modules.unitObj`) or add the `open`.
 
+**AP-D3 cocycle API confirmed** (2026-08-08): `Picard/InvertibleSheafCocycle.lean` already provides the
+full cocycle calculus the normalization needs — `trivializationTransitionUnit` (:44) with
+`_self` (:64), `_symm` (:86), **`_trans` (:118, the cocycle identity)** and `_restrict` (:158), plus
+`overUnitScalarEnd_transitionUnit` (:53) identifying multiplication by the unit with the change of
+trivialisation. So `exists_normalized_trivialization` is: rescale `e i` by the pulled-back inverse of
+its zero-section value (an element of `Γ(T, U i)ˣ`, transported by
+`AlgebraicGeometry.Scheme.Modules.overUnitScalarEnd`), then compute the new transition units with
+`_trans`/`_symm` and check membership via `mem_kUnits_iff` — the rescaling ratios cancel along `z`
+because `kUnitsEval` is a group hom. No new theory needed; it is cocycle bookkeeping.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
