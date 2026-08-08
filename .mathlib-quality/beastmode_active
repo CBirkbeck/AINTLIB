@@ -72,8 +72,37 @@ survey" BEFORE starting. It CORRECTS this focus in two places: ***
   `miller_hypothesis_holds_allChar`, needing `[IsIntegrallyClosed W_k.CoordinateRing]` per fibre.
   AND `hhigh` remains open: even a finished T10-cmp does not by itself close `SelfAdjointN.lean:267`.
 
+**T10-cmp-core — DONE (2026-08-09).** `Picard/PrincipalIdealModuleIso.lean` (546 lines):
+a PRINCIPAL DIVISOR TRIVIALISES ITS IDEAL MODULE, on an ARBITRARY scheme — no integrality,
+separatedness, Noetherian or curve hypothesis. Axiom-verified standard-three, zero sorries.
+`PrincipalDivisorData J₁ J₂` encodes `div f = D₁ − D₂` by local content (affine cover, nonzerodivisor
+generators `num i` / `den i`, and the cocycle `num i * den j = num j * den i` — the ratios being one
+rational function, cross-multiplied). Cross-multiplying is what removes every hypothesis and avoids
+building a total-quotient sheaf. Load-bearing:
+`restrict_gen_nonZeroDivisors_and_surjective` upgrades `bijective_idealGenHom_app` from BASIC OPENS
+to EVERY open; `f · s` is then CHARACTERISED by `t · den i = s · num i`, existence from
+`TopCat.Sheaf.existsUnique_gluing'` and everything else from uniqueness.
+Also newly exposed and reusable: `isIso_idealGenHom`.
+TWO TRAPS RECORDED: the tree has TWO parallel `idealModule`s (the `IdealSheafData` flavour, used
+here and by the consumer, and the morphism-kernel flavour that `PoleSheafModel.lean:410-431`
+trivialises); and `isIso_idealGenHom`'s proof block is copy-pasted in FOUR places
+(`IdealModule.lean` body, `WeilPairing/LineVertical.lean:732-747`,
+`EllipticCurve/PoleSheaf.lean:753`) — cleanup ticket.
+
+**T10-mult — THE NEW BLOCKER, next ticket:**
+    `idealModule (J_A · J_B) ≅ tensorObj (idealModule J_A) (idealModule J_B)`
+for ideal sheaves locally principal by nonzerodivisors on a common affine cover. Without it a
+divisor SUM cannot become a tensor product — and the chord-tangent function `ℓ / z` has divisor
+`(P)+(Q)−(P+Q)−(O)`, inherently about sums. It CANNOT be routed around via the skeleton: both
+`nonempty_iso_of_tensorObj_right_cancel` and `nonempty_iso_of_tensorObj_unitObj` need a witness that
+IS this comparison map. Two by-products of T10-cmp-core are positioned for it:
+`isInvertible_idealModule_fst/_snd` (the invertibility skeleton cancellation wants) and
+`restrict_gen_nonZeroDivisors_and_surjective` (the all-opens generation statement a multiplication
+comparison map is checked against).
+
 Sequence for Blocker 3:
-  1. **T10-cmp** — the field-level bridge above (THE bottleneck; genuinely new, but short).
+  1. **T10-mult** (above), then assemble `nonempty_tensorObj_idealModule_add_field` from it +
+     T10-cmp-core + `kappaDivisor_add_linEquiv`.
   2. build `Δ^rig` on the universal pair from `WeilPairing/TautologicalPair.lean`; reducedness /
      integrality of `pairBase` is `EllipticCurve/GroupLawAxioms.lean:129/:132` (exact spelling
      match). SPELLING TRAP: the fibre-cube instances at `:136/:147` and `:142/:152` are NOT literally
