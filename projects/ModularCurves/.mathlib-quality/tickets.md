@@ -39497,6 +39497,20 @@ uniqueness mechanism, and it was available despite the ticket's formal block on 
 block only affects the *existence* half. Lesson worth repeating: when a ticket is blocked on several
 dependencies, check whether one conclusion needs only the satisfied ones.
 
+**AXIOM-AUDIT BISECT COMPLETE — the AP-D line's sorry root** (2026-08-08): starting from
+`picMap_mulByHom_kappa_eq_one` (cited as AP-D4's `⊆` direction) the chain is
+`picMap_mulByHom_kappa_eq_one` → `kappa_nsmul`/`picMap_mulByHom_kappa_pow` → `kappa_add` →
+`exists_pic_map_snd_sectionCls_add` → **`exists_invertible_tensor_idealModule_add`**
+(`Picard/SelfAdjointN.lean:259`, an explicit `sorry`). Everything else in that chain is proved;
+`kappa_zero` is clean. So **one leaf gates the whole `AP-D` line** (D4 → D5-existence → D6 → D7).
+That leaf is the theorem-of-the-square discrepancy: `𝒪(D_{Q+Q'}) ⊗ 𝒪(D_0) ≅ 𝒪(D_Q) ⊗ 𝒪(D_{Q'}) ⊗ f^*N`
+for some invertible `N` on the base — i.e. `Δ_{Q,Q'} ≅ f^*(0^*Δ_{Q,Q'})`. Its docstring records the
+settled route (universal pair of points where the base is reduced ⟹ seesaw, with fibrewise triviality
+from HasseWeil's `kappaDivisor_add_linEquiv`, then base-change down) and, importantly, why the two
+obvious shortcuts fail — including an explicit counterexample (`T = E × E`) showing the exact-iso
+version is FALSE. This matches the memory note "DS4 route is SETTLED — one leaf left, the relative
+theorem of the square".
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
