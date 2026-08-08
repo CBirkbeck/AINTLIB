@@ -245,4 +245,26 @@ theorem kUnitsEval_transitionUnit_eq_div' {z : T ⟶ pullback p g}
   have hmul := kUnitsEval_transitionUnit_eq_div (g := g) hz U e₀ e₁ e₂
   rw [← hmul, ← mul_assoc, inv_mul_cancel, one_mul]
 
+/-- **(AP-D3 → AP-D5/AP-D6 interface)** A family of trivialisations is *normalizable* when all
+its transition units are normalized after correcting by the zero-section evaluations. By the
+coboundary formula this holds automatically once one fixes a reference member: the corrections
+`h_i` are the evaluations themselves. Stated for a family indexed over a base cover, in the
+form KM's p. 89 patching consumes. -/
+theorem forall_transitionUnit_mem_kUnits_of_eval_const {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens)
+    {M : (pullback p g).Modules} {ι : Type u}
+    (e : ι → (M.over (pullback.snd p g ⁻¹ᵁ U) ≅
+      SheafOfModules.unit ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ U))))
+    (e₀ : M.over (pullback.snd p g ⁻¹ᵁ U) ≅
+      SheafOfModules.unit ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ U)))
+    (hconst : ∀ i j : ι,
+      kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₀ (e i)) =
+      kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₀ (e j))) :
+    ∀ i j : ι, AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+      (pullback.snd p g ⁻¹ᵁ U) (e i) (e j) ∈ kUnits g hz U := by
+  intro i j
+  exact transitionUnit_mem_kUnits_of_eval_eq (g := g) hz U e₀ (e i) (e j) (hconst i j)
+
 end ModularCurves
