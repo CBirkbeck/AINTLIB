@@ -499,6 +499,16 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
     simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
     exact congrArg (fun q ↦ (ConcreteCategory.hom (N.presheaf.map (Quiver.Hom.op q))) s)
       (Subsingleton.elim _ _)
+  -- (ii) unfold `w` on the piece
+  have hWg : N.presheaf.map (homOfLE (inf_le_right :
+        E.basicOpen f ⊓ E.basicOpen g.1 ≤ E.basicOpen g.1)).op (w g) =
+      (E.presheaf.map (homOfLE (inf_le_right :
+        E.basicOpen f ⊓ E.basicOpen g.1 ≤ E.basicOpen g.1)).op
+        (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f)) ^ K •
+      N.presheaf.map (homOfLE (inf_le_right :
+        E.basicOpen f ⊓ E.basicOpen g.1 ≤ E.basicOpen g.1)).op (v g) := by
+    rw [hw]
+    simp only [AlgebraicGeometry.Scheme.Modules.map_smul, map_pow]
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
