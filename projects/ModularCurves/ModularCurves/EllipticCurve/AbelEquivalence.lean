@@ -966,6 +966,8 @@ theorem relEffCartierDiv_of_degreeOne_package
     (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
     (hpkg : HasDegreeOneFibreCohomology π M U) (hσ : σ ≠ 0) :
     ∃ D : RelEffCartierDiv π, D.ideal = sectionVanishingIdeal M hM σ := by
+  -- by the isomorphism-form bridge it suffices that the vanishing subscheme is `S`-isomorphic
+  refine relEffCartierDiv_of_isIso_subschemeι (sectionVanishingIdeal M hM σ) ?_
   sorry
 
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
