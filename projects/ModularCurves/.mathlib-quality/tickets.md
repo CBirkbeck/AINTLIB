@@ -39604,6 +39604,20 @@ M' ⊗ f^*f_*(M⊗(M')^∨) —(counit)→ M' ⊗ M ⊗ (M')^∨ ≅ M, with the
 checked locally (deepest leaf — may split again; consider instead gluing the local isos
 `hglue i` twisted by the P-local identifications, via `RigidDescent`/`GlueEffectivity`).
 
+**AP2-B1 status** (2026-08-08 late): P-invertible PROVED (`isInvertible_pushforward_discrepancy`,
+1240e752a) — of_restrict_cover + inline Skeleton-algebra P-local + restrictPushforwardIsoOfIsPullback
++ restricted-KM via q-generalization (8b2798689: glueSection line now over any q with section-isos;
+lambda-capture repair). **ONE sorry left on the whole AP2-B1 line: P-counit**
+(`nonempty_discrepancy_iso_pullback_pushforward`, RelPicLocal:872). REFINED ROUTE: prove
+`IsIso ((pullbackPushforwardAdjunction snd).counit.app K)` by component-locality on the
+pullback-scheme cover `snd⁻¹Uᵢ`; the ingredient is the COUNIT-RESTRICTION SQUARE (base-change of
+the adjunction along `isPullback_morphismRestrict`) — model: `restrictUnitIso_inv_unitToPushforward`
+(GlueEffectivity:87) is the unit-object case; need the module-generic mate relating restricted `ε_K`
+to `ε_{K|ᵢ}` through `restrictPushforwardIsoOfIsPullback` + the pullback-restriction square. Then
+per piece ε is iso by the triangle identity + IsIso η (reuse the haveI-block from
+nonempty_pushforwardPullback_iso with the restricted q and hq' as in P-invertible). Beware: local
+abstract isos do NOT glue (Hida-trap) — only the canonical ε carries the gluing.
+
 **AP2-B1a dependency chart** (2026-08-07 final): the capped smul pair is DOUBLY load-bearing — `hcompat`
 (proved, cites it) AND `hbij` (route: `r • tensorSection a b = tensorSection (r•a) b` splits the
 bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,
