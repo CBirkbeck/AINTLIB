@@ -39530,6 +39530,17 @@ be reused verbatim, though its ingredient list (`orderedBaseCechObject_flat_of_i
 `orderedBaseCechHomologyFinite_of_isProper`, `kerBaseChangeComparison_bijective_of_bounded_exact`,
 `Module.rankAtStalk_eq`) is the right toolbox for (1) and (2).
 
+**Seesaw step-4/5 mechanics — verified** (2026-08-08): `baseSectionsIsoKernelOrderedBaseCechDifferential`
+(`SchemeModuleOrderedBaseCechZero.lean:256`) returns a `ModuleCat.of Γ(S,⊤)`-isomorphism *for the base of
+whichever family it is applied to*. Applied on the fibre family `pullback.snd π t : pullback π t ⟶
+Spec (.of κ(s))`, its ring is therefore `Γ(Spec (.of κ(s)), ⊤)`, **not** `κ(s)` — this is the exact
+module-structure mismatch that stopped the first skeleton attempt. The bridge is
+`Scheme.ΓSpecIso (.of ↥(S.residueField s)) : Γ(Spec (.of κ(s)), ⊤) ≅ .of κ(s)` (a ring iso), which is
+precisely why the consumer's `letI` composes `appTop` with `(ΓSpecIso _).hom`. So the proof should either
+(a) carry the middle steps over `Γ(Spec κ(s), ⊤)` and transport the final `finrank` along that ring iso,
+or (b) rewrite with the iso early so everything is stated over `κ(s)`. With that, the docstring's five
+steps go through as written.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
