@@ -637,82 +637,85 @@ theorem bijective_smul_glueSectionA_res {X S : Scheme.{u}} {p : X ⟶ S} {T : Sc
       (CategoryTheory.ConcreteCategory.isIso_iff_bijective _).mp inferInstance
     exact hb
 
-/-- **(AP2-B1a, hbij factor β)** Tensoring against the restricted dual-slot functional is
-bijective: `glueSectionB`'s restriction is the hom of the restricted over-trivialisation
-(`restrictOverTrivialization`, rfl-dictionary), so the slot map is the sections-component of
-tensoring with an isomorphism — the `k`-inverse pattern of `bijective_evPre_app_of_triv`
-(PicComparison:377-409) in the mixed-module form. -/
-theorem bijective_tensorSection_glueSectionB_res {T : Scheme.{u}}
-    (A' : T.Modules) (N : T.Modules) {V : T.Opens}
+/-- **(AP2-B1a, base generation)** Multiplication into the restricted seed is bijective:
+the restricted seed is the restricted over-trivialisation's inverse image of `1`, so the
+map is the trivialisation's inverse component composed with the identity bridge into the
+over-site unit. No `O`-connectedness needed — the base-side twin of
+`bijective_smul_glueSectionA_res`. -/
+theorem bijective_smul_glueSectionASeed_res {T : Scheme.{u}} (N : T.Modules) {V : T.Opens}
     (e : (AlgebraicGeometry.Scheme.Modules.pullback V.ι).obj N ≅ unitObj V.toScheme)
     {W : T.Opens} (hW : W ≤ V) :
-    Function.Bijective (fun a : ↑Γ(A', W) ↦ tensorSection A' (dualObj N) W a
-      ((dualObj N).presheaf.map (homOfLE hW).op (glueSectionB N V e))) := by
-  sorry
-
-/-- **(AP2-B1a′, obligation glue)** The pushforward of the pullback, twisted by the dual, is trivial:
-per trivialising open the generating section is (pushforward-`rfl` of `f^*e_i` via `pullbackUnitIso`)
-`⊗ e_i^∨`; overlap agreement holds **on the nose** by cocycle cancellation (`f^*N` inherits `N`'s own
-transition units, and the tensor with `N^∨` cancels them); bijectivity componentwise from
-`hp g W` and `e_i`. Engine: `nonempty_unitObj_iso_of_glue` (`GlueTrivialization.lean:98`). -/
-theorem nonempty_tensorObj_pushforwardPullback_dualObj_unitObj {X S : Scheme.{u}} {p : X ⟶ S}
-    {T : Scheme.{u}} (g : T ⟶ S) (hp : UniversallyOConnected p)
-    {N : T.Modules} (hN : IsInvertible N) :
-    Nonempty (tensorObj
-      ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
-        ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N))
-      (dualObj N) ≅ unitObj T) := by
-  obtain ⟨κ, V, hV, htriv⟩ := hN
-  refine Nonempty.map Iso.symm (nonempty_unitObj_iso_of_glue _ V hV (fun i => ?_) ?_ ?_)
-  -- (m i): the generating section over V i.
-  · exact tensorSection _ _ (V i)
-      (glueSectionA g N (V i) (htriv i).some) (glueSectionB N (V i) (htriv i).some)
-  -- (hcompat): the two slots pick up the transition unit inversely, and the tensor cancels it.
-  · intro i j
-    rw [show (Opens.infLELeft (V i) (V j)) = homOfLE inf_le_left from rfl,
-      show (Opens.infLERight (V i) (V j)) = homOfLE inf_le_right from rfl,
-      tensorSection_restrict, tensorSection_restrict,
-      glueSectionA_compat g N ((htriv i).some) ((htriv j).some),
-      glueSectionB_compat N ((htriv i).some) ((htriv j).some),
-      tensorSection_smul_left, tensorSection_smul_right, smul_smul,
-      Units.inv_mul, one_smul]
-  -- (hbij): componentwise — `hp g W` on the pushforward factor, `e_i` on both.
-  · intro i W hW
-    -- Factorisation plan (2026-08-08, skeleton): through `tensorSection_restrict` +
-    -- `tensorSection_smul_left` (both PROVED) the map is
-    -- `r ↦ tensorSection W (r • res (glueSectionA _)) (res (glueSectionB _))`, the composite of
-    -- (α) `r ↦ r • res (glueSectionA …)` — Γ(T,W) ≃ Γ(f_*f^*N, W): via
-    --     `glueSectionA_eq_adjUnit` + adjunction-unit naturality the section is the unit image
-    --     of the restricted seed; bijectivity is `hp g W`'s O-connectedness transported by the
-    --     pulled trivialization (`localPullbackTrivialization` chain);
-    -- (β) `a ↦ tensorSection W a (res (glueSectionB …))` — pairing against the restricted
-    --     dual trivialization: `bijective_evPre_app_of_triv`-mate through the
-    --     `TensorProduct.mk`-slot (the `k`-inverse construction at PicComparison:377-409).
-    have hfun : (fun r : ↑Γ(T, W) ↦ r •
-        (((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
-          ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).tensorObj
-            N.dualObj).presheaf.map (homOfLE hW).op
-          (tensorSection ((AlgebraicGeometry.Scheme.Modules.pushforward
-            (pullback.snd p g)).obj ((AlgebraicGeometry.Scheme.Modules.pullback
-              (pullback.snd p g)).obj N)) N.dualObj (V i)
-            (glueSectionA g N (V i) (htriv i).some) (glueSectionB N (V i) (htriv i).some))) =
-        (fun a : ↑Γ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
-            ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N), W) ↦
-          tensorSection _ N.dualObj W a
-            ((dualObj N).presheaf.map (homOfLE hW).op
-              (glueSectionB N (V i) (htriv i).some))) ∘
-        (fun r : ↑Γ(T, W) ↦ r •
-          ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
-            ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).presheaf.map
-            (homOfLE hW).op (glueSectionA g N (V i) (htriv i).some)) := by
-      funext r
-      show r • _ = _
-      rw [tensorSection_restrict, ← tensorSection_smul_left]
-      rfl
-    rw [hfun]
-    exact Function.Bijective.comp
-      (bijective_tensorSection_glueSectionB_res _ N (htriv i).some hW)
-      (bijective_smul_glueSectionA_res g hp N (htriv i).some hW)
+    Function.Bijective (fun r : ↑Γ(T, W) ↦ r •
+      N.presheaf.map (homOfLE hW).op (glueSectionASeed N V e)) := by
+  set rOTW : N.over W ≅ _root_.SheafOfModules.unit (T.ringCatSheaf.over W) :=
+    ModularCurves.SheafOfModules.restrictOverTrivialization T.ringCatSheaf N V
+      (overTrivialization N V e) (CategoryTheory.Over.mk (homOfLE hW)) with hrOTW
+  have hseedW : N.presheaf.map (homOfLE hW).op (glueSectionASeed N V e) =
+      rOTW.inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 W)))
+        (show (T.ringCatSheaf.over W).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) from 1) := by
+    have hnat := PresheafOfModules.naturality_apply (overTrivialization N V e).inv.val
+      (CategoryTheory.Over.mkIdTerminal.from
+        (CategoryTheory.Over.mk (homOfLE hW))).op
+      (show (T.ringCatSheaf.over V).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) from 1)
+    have h1 : (_root_.SheafOfModules.unit (T.ringCatSheaf.over V)).val.map
+        (CategoryTheory.Over.mkIdTerminal.from
+          (CategoryTheory.Over.mk (homOfLE hW))).op
+        (show (T.ringCatSheaf.over V).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) from 1) =
+        (show (T.ringCatSheaf.over V).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (homOfLE hW))) from 1) :=
+      PresheafOfModules.unit_map_one (T.ringCatSheaf.over V).obj
+        (CategoryTheory.Over.mkIdTerminal.from
+          (CategoryTheory.Over.mk (homOfLE hW))).op
+    rw [h1] at hnat
+    exact hnat.symm
+  have hstep : ∀ (r : ↑Γ(T, W)) (X : ↑Γ(N, W)),
+      X = rOTW.inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 W)))
+        (show (T.ringCatSheaf.over W).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) from 1) →
+      r • X = rOTW.inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 W)))
+        (show (T.ringCatSheaf.over W).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) from r) := by
+    intro r X hX
+    have h1 : (show (T.ringCatSheaf.over W).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) from r) =
+        (show (T.ringCatSheaf.over W).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) from r) •
+        (show (T.ringCatSheaf.over W).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) from 1) := by
+      rw [smul_eq_mul, mul_one]
+    have h2 := map_smul (CategoryTheory.ConcreteCategory.hom
+      (rOTW.inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 W)))))
+      (show (T.ringCatSheaf.over W).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) from r)
+      (show (T.ringCatSheaf.over W).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) from 1)
+    rw [hX]
+    show (show (T.ringCatSheaf.over W).obj.obj
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) from r) •
+      (rOTW.inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 W)))
+        (show (T.ringCatSheaf.over W).obj.obj
+          (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) from 1)) = _
+    exact h2.symm.trans (congrArg (fun z ↦
+      rOTW.inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) z) h1.symm)
+  rw [funext (fun r : ↑Γ(T, W) ↦ hstep r _ hseedW)]
+  refine Function.Bijective.comp ?_ ?_
+  · refine Function.bijective_iff_has_inverse.mpr
+      ⟨fun y ↦ rOTW.hom.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 W))) y,
+        fun y ↦ ?_, fun y ↦ ?_⟩
+    · have hcomp := congrArg (fun q ↦ q.val.app
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 W)))) rOTW.inv_hom_id
+      have h := CategoryTheory.ConcreteCategory.congr_hom hcomp y
+      erw [AlgebraicGeometry.Scheme.Modules.sheafOfModules_comp_app_apply] at h
+      exact h
+    · have hcomp := congrArg (fun q ↦ q.val.app
+        (Opposite.op (CategoryTheory.Over.mk (𝟙 W)))) rOTW.hom_inv_id
+      have h := CategoryTheory.ConcreteCategory.congr_hom hcomp y
+      erw [AlgebraicGeometry.Scheme.Modules.sheafOfModules_comp_app_apply] at h
+      exact h
+  · exact ⟨fun a b h ↦ h, fun y ↦ ⟨y, rfl⟩⟩
 
 /-- **(AP2-B1a, KM p. 65: "`f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`")** Over a universally `O`-connected family,
 `f_*f^*N ≅ N` for invertible `N` — assembled by cancelling the dual twist
@@ -723,9 +726,36 @@ theorem nonempty_pushforwardPullback_iso {X S : Scheme.{u}} {p : X ⟶ S}
     {T : Scheme.{u}} (g : T ⟶ S) (hp : UniversallyOConnected p)
     {N : T.Modules} (hN : IsInvertible N) :
     Nonempty ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
-      ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N) ≅ N) :=
-  nonempty_iso_of_tensorObj_unitObj
-    (nonempty_tensorObj_pushforwardPullback_dualObj_unitObj g hp hN)
-    (nonempty_tensorObj_dualObj_unitObj hN)
+      ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N) ≅ N) := by
+  obtain ⟨κ, V, hV, htriv⟩ := hN
+  haveI : IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+      (pullback.snd p g)).unit.app N) := by
+    refine AlgebraicGeometry.Scheme.Modules.isIso_of_bijective_app_on_cover _ V hV
+      (fun i W hW ↦ ?_)
+    have hα := bijective_smul_glueSectionA_res g hp N (htriv i).some hW
+    have hseed := bijective_smul_glueSectionASeed_res N (htriv i).some hW
+    have hfac : (fun r : ↑Γ(T, W) ↦ r •
+        ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
+          ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)).presheaf.map
+          (homOfLE hW).op (glueSectionA g N (V i) (htriv i).some)) =
+        (AlgebraicGeometry.Scheme.Modules.Hom.app
+          ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+            (pullback.snd p g)).unit.app N) W) ∘
+        (fun r : ↑Γ(T, W) ↦ r •
+          N.presheaf.map (homOfLE hW).op (glueSectionASeed N (V i) (htriv i).some)) := by
+      funext r
+      show r • _ = AlgebraicGeometry.Scheme.Modules.Hom.app _ W
+        (r • N.presheaf.map (homOfLE hW).op (glueSectionASeed N (V i) (htriv i).some))
+      rw [AlgebraicGeometry.Scheme.Modules.Hom.app_smul]
+      refine congrArg (fun z ↦ r • z) ?_
+      rw [glueSectionA_eq_adjUnit g N (V i) (htriv i).some]
+      exact (PresheafOfModules.naturality_apply
+        ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+          (pullback.snd p g)).unit.app N).val (homOfLE hW).op
+        (glueSectionASeed N (V i) (htriv i).some)).symm
+    rw [hfac] at hα
+    exact (Function.Bijective.of_comp_iff _ hseed).mp hα
+  exact ⟨(asIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+    (pullback.snd p g)).unit.app N)).symm⟩
 
 end ModularCurves

@@ -39575,6 +39575,20 @@ rOTW.inv (no hp needed). PLAN: (1) prove `bijective_smul_glueSectionASeed_res` (
 REMOVE the two sorried decls (keep glueSectionB/compat/tensorSection lemmas: proved and reusable);
 (5) parent `exists_pullback_twist_of_locally` (KM p.65) then consumes the direct iso.
 
+**AP2-B1a COMPLETE** (2026-08-08): `nonempty_pushforwardPullback_iso` — KM p. 65's `f_*f^*N ≅ N`
+over a universally O-connected family — PROVED, standard-three. Final route (the REDIRECT executed):
+the ADJUNCTION UNIT `η_N` is the iso, via `isIso_of_bijective_app_on_cover` with per-open
+bijectivity `η.app W = (factor-α map) ∘ (seed-mult)⁻¹`: `bijective_smul_glueSectionA_res` (pushforward
+slot: pulled-trivialisation inverse-component ∘ hp-ring-iso; the pushforward smul is DEFINITIONALLY
+the structure-map route — the `show`-bridge was accepted) and `bijective_smul_glueSectionASeed_res`
+(base twin, no hp). The tensor-glue dead route (factor-β + the ⊗-obligation) REMOVED; kept proved:
+glueSectionA/B + compat pair + tensorSection smul/restrict API + adjUnit factorisation +
+LocalTrivializationSection generic chain. New instance-war techniques recorded: the X-eq-hypothesis
+trick (bind un-restatable smul-carriers as Γ-typed vars with an eq-hypothesis, subst via rw),
+`Function.Bijective.of_comp_iff` for factor-extraction. REMAINING in RelPicLocal: parent
+`exists_pullback_twist_of_locally` (:53) ONLY — KM p.65 assembly: L₀ := f_*(M ⊗ dual(M')-pullback…)
+per the module docstring quote, consuming nonempty_pushforwardPullback_iso + the cocycle machinery.
+
 **AP2-B1a dependency chart** (2026-08-07 final): the capped smul pair is DOUBLY load-bearing — `hcompat`
 (proved, cites it) AND `hbij` (route: `r • tensorSection a b = tensorSection (r•a) b` splits the
 bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,
