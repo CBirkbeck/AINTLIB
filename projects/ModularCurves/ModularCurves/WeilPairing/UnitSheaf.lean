@@ -119,4 +119,31 @@ theorem kUnitsEval_transitionUnit_eq_div {z : T ⟶ pullback p g}
       kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit (pullback.snd p g ⁻¹ᵁ U) e₁ e₃) := by
   rw [← map_mul, AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit_trans]
 
+/-- **(AP-D3, normalization criterion)** A transition unit lies in `kUnits` exactly when its
+zero-section evaluation is trivial — the membership test in the form the cocycle calculus
+produces. Combined with `kUnitsEval_transitionUnit_eq_div` this is what makes the rescaled
+family's transition units normalized. -/
+theorem transitionUnit_mem_kUnits_iff {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens)
+    {M : (pullback p g).Modules}
+    (e₁ e₂ : M.over (pullback.snd p g ⁻¹ᵁ U) ≅
+      SheafOfModules.unit ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ U))) :
+    AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₁ e₂ ∈ kUnits g hz U ↔
+      kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₁ e₂) = 1 :=
+  MonoidHom.mem_ker
+
+/-- **(AP-D3)** Self-transition units are normalized: the transition unit of a trivialisation
+with itself is `1`, hence lies in `kUnits`. -/
+theorem transitionUnit_self_mem_kUnits {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens)
+    {M : (pullback p g).Modules}
+    (e : M.over (pullback.snd p g ⁻¹ᵁ U) ≅
+      SheafOfModules.unit ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ U))) :
+    AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+      (pullback.snd p g ⁻¹ᵁ U) e e ∈ kUnits g hz U := by
+  rw [transitionUnit_mem_kUnits_iff,
+    AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit_self, map_one]
+
 end ModularCurves
