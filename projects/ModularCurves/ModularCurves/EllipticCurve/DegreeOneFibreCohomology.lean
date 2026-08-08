@@ -7,6 +7,7 @@ import ModularCurves.EllipticCurve.AbelSkeleton
 import ModularCurves.ForMathlib.SchemeModuleBaseCechResidueTransport
 import ModularCurves.ForMathlib.SchemeModuleProperLowDegreeCechFinite
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
+import ModularCurves.ForMathlib.InvertibleOfRankOne
 
 /-!
 # Assembly of the degree-one fibre cohomology package (`AP2-A1d`)
@@ -215,5 +216,25 @@ theorem baseSections_data_of_hasDegreeOneFibreCohomology
     π M U hU).toLinearEquiv
   exact ⟨Module.Finite.equiv e.symm, Module.Projective.of_equiv' e.symm,
     (Module.rankAtStalk_eq_of_equiv e).trans hrank⟩
+
+/-- **(`AP2-A2`, invertibility form)** Under the degree-one package, the pushforward's global
+sections `baseSections π M` form an invertible module over the base ring: the sections data
+(finite ∧ projective ∧ rank one) through the line-bundle criterion
+`Module.Invertible.of_finite_of_projective_of_rankAtStalk_eq_one`. -/
+theorem baseSections_invertible_of_hasDegreeOneFibreCohomology
+    {R : Type u} [CommRing R] [IsNoetherianRing R]
+    {E : Scheme.{u}} {π : E ⟶ Spec (.of R)} [IsProper π] [Flat π]
+    [IsNoetherian E] [LocallyOfFinitePresentation π]
+    (M : E.Modules) (hM : M.IsInvertible)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hpkg : HasDegreeOneFibreCohomology π M U) :
+    Module.Invertible Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+      (Scheme.Modules.baseSections π M) := by
+  obtain ⟨hfin, hproj, hrank⟩ :=
+    baseSections_data_of_hasDegreeOneFibreCohomology M hM U hU hUaff hpkg
+  letI := hfin
+  letI := hproj
+  exact Module.Invertible.of_finite_of_projective_of_rankAtStalk_eq_one hrank
 
 end ModularCurves

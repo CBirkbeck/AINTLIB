@@ -39134,6 +39134,29 @@ REMAINING for A2: (i) transport ker → `baseSections` (mirror
 (iii) noetherian removal by approximation (InvertibleSheafNoetherianSmoothStage route) when the
 consumers need non-noetherian bases.
 
+### [AP2-A2-inv] Line-bundle criterion: finite projective of rank one ⟹ Module.Invertible
+- **Status**: done (2026-08-08) — `Module.rankAtStalk_dual` + `Module.contractLeft_surjective_of_rankAtStalk_pos` + `Module.Invertible.of_finite_of_projective_of_rankAtStalk_eq_one` all proved in `ForMathlib/InvertibleOfRankOne.lean`; consumer corollary `baseSections_invertible_of_hasDegreeOneFibreCohomology` in `DegreeOneFibreCohomology.lean`. Axiom-verified standard-three. Mathlib-gap discharge (PicardGroup TODO / Stacks 00NX) — upstream candidate. · **File**: `ForMathlib/InvertibleOfRankOne.lean` (new) · **Parent**: AP2-A2
+- **Type**: theorem · **Depends on**: (mathlib only)
+- **Statement**: `theorem Module.Invertible.of_finite_of_projective_of_rankAtStalk_eq_one
+  {R M} [CommRing R] [AddCommGroup M] [Module R M] [Module.Finite R M] [Module.Projective R M]
+  (h : Module.rankAtStalk (R := R) M = fun _ ↦ 1) : Module.Invertible R M`
+- **Proof sketch** (mathlib TODO at PicardGroup.lean:52 names this as open; Stacks 00NX):
+  1. `Module.Invertible` def = `Bijective (contractLeft R M : Dual M ⊗ M → R)`.
+  2. Bijectivity via `Module.bijective_of_surjective_of_rankAtStalk_eq` (Flat/LocallyFree.lean:25;
+     needs [Finite]+[Flat] on both sides — Dual M is f.g. projective since M is; R trivially).
+  3. Rank equality: `rankAtStalk_tensorProduct` + `rankAtStalk_self` + a dual-rank lemma
+     (`rankAtStalk` of `Dual M` = of `M` — check FreeLocus; if absent, sub-lemma via
+     local freeness: dual of free-rank-n is free-rank-n).
+  4. Surjectivity of `contractLeft`: maximal-local (`Submodule.eq_top_of_localization…`-family);
+     at each maximal `m`, `M_m` free of rank 1 (`free_of_flat_of_isLocalRing` + h), and Hom/Dual
+     localizes for finitely presented `M` (mathlib `Module.FinitePresentation` localization of
+     Hom; f.g. projective ⟹ f.p.), so the localized eval is the free-rank-1 eval — surjective.
+- **Mathlib lemmas**: contractLeft, bijective_of_surjective_of_rankAtStalk_eq,
+  rankAtStalk_tensorProduct, rankAtStalk_self, free_of_flat_of_isLocalRing,
+  Module.FinitePresentation Hom-localization family, eq_top_of_localization-family.
+- **Sources**: Stacks 00NX; mathlib PicardGroup TODO block.
+- **Generality**: mathlib-ready generality (CommRing); upstream candidate.
+
 ### [AP2-A2] The degree-one package: `f_*L` invertible, base-change compatible
 - **Status**: blocked (AP2-A0) · **File**: `EllipticCurve/DegreeOneFibreCohomology.lean`
 - **Statement**: `[HasDegreeOneFibreCohomology π M]` ⟹ the degree-zero Čech kernel (`= baseSections`) is
