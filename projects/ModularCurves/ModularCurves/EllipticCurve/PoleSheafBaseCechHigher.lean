@@ -18,7 +18,7 @@ universe u
 
 namespace ModularCurves
 
-private theorem baseChange_exact_of_forall_schemeResidueField_baseChange_exact
+theorem baseChange_exact_of_forall_schemeResidueField_baseChange_exact
     {S : Scheme.{u}} [IsAffine S]
     {P Q T : Type u} [AddCommGroup P] [AddCommGroup Q] [AddCommGroup T]
     [Module Γ(S, (⊤ : S.Opens)) P] [Module Γ(S, (⊤ : S.Opens)) Q]
