@@ -24,9 +24,47 @@ prove the identity on the UNIVERSAL pair of points over the reduced — indeed i
 `HasseWeil.Pic0.RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv`; apply the seesaw; pull back
 along the zero section to kill `N`; base-change down to an arbitrary, possibly NON-REDUCED, base.
 
-TWO OBLIGATIONS THE REVIEW ADDED, not previously boarded:
-  * **T8b** — `B = C ×_U C` is NOT affine, and the seesaw carries `[IsAffine S]`. Apply it on an
-    affine open cover of `B` and glue with the descent lemma.
+**T8b — DONE (2026-08-08).** `ForMathlib/SeesawGlobalBase.lean`:
+`exists_pullback_iso_of_fibrewise_trivial_of_isReduced_of_affineCover` — the seesaw over an
+ARBITRARY base, axiom-verified standard-three, zero sorries. The `[IsAffine S]` restriction that
+blocked the consumer is gone. `UniversallyOConnected` restricts cleanly (via `IsPullback.paste_horiz`
+with `isPullback_morphismRestrict`), so the fallback was not needed. Also exported: the standalone
+gluing lemma `exists_pullback_iso_of_restrict_pullback_cover`, and `UniversallyOConnected.restrict`.
+INSTANCE BRIDGE worth remembering: `CompactSpace ↥U` exists on `↥(U : Set X)` but instance search
+does not reach it through the `U.toScheme` carrier wrapper — use `inferInstanceAs`.
+`hhigh` there is quantified over ALL opens `W ⊆ S`, because the cover of `S` is produced inside the
+proof from `S.affineOpens`.
+
+REMAINING OBLIGATION FROM THE REVIEW:
+
+=== NEXT CONCRETE TICKET FOR BLOCKER 3 ===
+The seesaw is now fully available (arbitrary base). Per `Picard/SelfAdjointN.lean`'s own module
+docstring, the EXPECTED BOTTLENECK is NOT the seesaw but:
+
+  **T10-cmp — the comparison between HasseWeil's PROJECTIVE-DIVISOR linear equivalence and the
+  scheme-theoretic `picClass`, together with its BASE-CHANGE NATURALITY.**
+
+That is what turns the field theorem
+`HasseWeil.Pic0.RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv` (proved unconditionally in any
+characteristic, Silverman III.3.5) into the fibrewise-triviality input `hfib` the seesaw wants for
+the rigidified discrepancy `Δ^rig_{P,Q} = Δ_{P,Q} ⊗ f_B^*(0^* Δ_{P,Q})⁻¹` on `C_B ⟶ B`,
+`B = C ×_U C`. Start there — everything downstream of it is boarded.
+
+Sequence for Blocker 3:
+  1. **T10-cmp** — the divisor-class/`picClass` comparison + base-change naturality (THE bottleneck).
+  2. build `Δ^rig` on the universal pair (`EllipticCurve/AdditionBaseChange.lean` has the universal
+     `C ⟶ U`, `B = C ×_U C` and the two universal sections; reducedness/integrality of both is in
+     `EllipticCurve/GroupLawAxioms.lean`).
+  3. feed `hfib` from step 1, apply `exists_pullback_iso_of_fibrewise_trivial_of_isReduced_of_affineCover`,
+     then pull back along the zero section to kill `N`.
+  4. **T9b** — base-change down to an arbitrary, possibly NON-REDUCED, base, stated and glued
+     ZARISKI-LOCALLY on `T` (moduli-stack issue globally).
+     `RelEffCartierDiv.sectionDivisor_baseChange` (`EllipticCurve/PoleSheaf.lean`) is part of that bridge.
+  5. discharge `hhigh` for the elliptic family (fibres are curves) with
+     `subsingleton_H_add_two_of_two_affine_open_cover` +
+     `HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
+     over `q ≥ 1`.
+
   * **T9b** — the passage from an arbitrary elliptic curve to the universal Weierstrass parameter
     space is only ZARISKI-LOCAL (globally there is a moduli-stack issue); state and glue the
     base-change-down step locally on `T`.
