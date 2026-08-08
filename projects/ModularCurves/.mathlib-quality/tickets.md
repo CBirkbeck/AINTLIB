@@ -39254,6 +39254,19 @@ Instance lessons added: scalars on dual sections must be spelled in the **ringCa
 `have` beats `rw [overUnitScalarEnd_app_apply]` at the transparency wall; `Ideal.mul_mem_left`
 avoids the `IsTwoSided` instance search that `mul_mem_right` triggers.
 
+**AP2-B2 GAP CLOSED** (2026-08-08): `exists_pow_smul_eq_restrict_of_isInvertible` — *sections of an
+invertible module localize on affine opens* — PROVED, axiom-verified standard-three. This was a real
+mathlib gap (its quasi-coherence is presentation-based; there is no sections-over-basic-opens
+localization lemma). Chain, all in `EllipticCurve/AbelEquivalence.lean`: `exists_finite_basicOpen_trivialization`
+(sv2-a) → `exists_pow_smul_eq_restrict_of_trivial` (sv2-b, via `sectionsLinearEquivOfTrivialization` +
+`evalSection_restrictOverTrivialization` + `IsLocalization.Away.surj`) → common exponent → rescaling →
+`exists_pow_smul_eq_of_restrict_eq` (sv2-e, via `Away.exists_of_eq`) + `restrict_clearing_identity`
+(sv2-d) for the overlaps → `TopCat.Sheaf.existsUnique_gluing'` over `U` → `eq_of_locally_eq'` for the
+final identity. CONSEQUENCE: `sectionVanishingIdeal` (the evaluation-ideal `IdealSheafData` of a global
+section) and `exists_dualRestrict_eq_pow_smul` are now fully proved and standard-three. REMAINING for
+AP2-B2/B3: the two head theorems only — `exists_relEffCartierDiv_of_degreeOne` (divisor fields +
+PIN-1 ideal-module iso) and `relEffCartierDiv_degree_one_of_degreeOne`.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
