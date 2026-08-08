@@ -503,7 +503,18 @@ theorem nonempty_tensorObj_pushforwardPullback_dualObj_unitObj {X S : Scheme.{u}
       tensorSection_smul_left, tensorSection_smul_right, smul_smul,
       Units.inv_mul, one_smul]
   -- (hbij): componentwise — `hp g W` on the pushforward factor, `e_i` on both.
-  · sorry
+  · intro i W hW
+    -- Factorisation plan (2026-08-08, skeleton): through `tensorSection_restrict` +
+    -- `tensorSection_smul_left` (both PROVED) the map is
+    -- `r ↦ tensorSection W (r • res (glueSectionA _)) (res (glueSectionB _))`, the composite of
+    -- (α) `r ↦ r • res (glueSectionA …)` — Γ(T,W) ≃ Γ(f_*f^*N, W): via
+    --     `glueSectionA_eq_adjUnit` + adjunction-unit naturality the section is the unit image
+    --     of the restricted seed; bijectivity is `hp g W`'s O-connectedness transported by the
+    --     pulled trivialization (`localPullbackTrivialization` chain);
+    -- (β) `a ↦ tensorSection W a (res (glueSectionB …))` — pairing against the restricted
+    --     dual trivialization: `bijective_evPre_app_of_triv`-mate through the
+    --     `TensorProduct.mk`-slot (the `k`-inverse construction at PicComparison:377-409).
+    sorry
 
 /-- **(AP2-B1a, KM p. 65: "`f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`")** Over a universally `O`-connected family,
 `f_*f^*N ≅ N` for invertible `N` — assembled by cancelling the dual twist
