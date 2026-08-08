@@ -39181,7 +39181,7 @@ consumers need non-noetherian bases.
 - **Sources**: KM p. 65 (quoted round 4); Hida p. 109 + CORRECTIONS block in `decomposition-gme2.md`.
 
 ### [AP2-B2] The counit `f^*(f_*L) → L` is universally injective with flat cokernel
-- **Status**: open (deps met 2026-08-08: AP2-A2 done) · **File**: `EllipticCurve/AbelEquivalence.lean` (new)
+- **Status**: in_progress (2026-08-08: statement designed + skeleton green — `EllipticCurve/AbelEquivalence.lean`: `exists_relEffCartierDiv_of_degreeOne` (B2+B3-head, existence-form, PIN-1 twist as the ideal-module iso) + `relEffCartierDiv_degree_one_of_degreeOne` (B3-degree), both sorried; all interfaces verified composing) · **File**: `EllipticCurve/AbelEquivalence.lean` (new)
 - **Sketch**: geometric fibres are integral (smooth + connected); a basis of the 1-dim `H⁰` is a nonzero
   section, hence injective on each fibre; fibrewise criterion for flatness ⟹ injective with `S`-flat
   cokernel ⟹ stable under all base change (round 19 Q2 — **no thickened-fibre `h⁰` needed**). KM pp.

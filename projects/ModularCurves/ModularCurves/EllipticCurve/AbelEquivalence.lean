@@ -1,0 +1,83 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import ModularCurves.EllipticCurve.DegreeOneFibreCohomology
+import ModularCurves.LevelStructure.CartierDivisor
+import ModularCurves.Picard.IdealModule
+import ModularCurves.ForMathlib.LocalFlatnessCriterion
+
+/-!
+# The Abel equivalence, evaluation-divisor side (`AP2-B2`/`AP2-B3`, KM pp. 66–67)
+
+KM p. 66, verbatim: *"Because `f_*L` is invertible on `S`, Zariski locally on `S` we may
+pick an `O_S`-basis `ℓ` of `f_*L`. We claim that, locally over `S`, the pair `(L, ℓ)` on
+`E` defines an effective Cartier divisor in `E`. We must show that we have an exact
+sequence `0 → O → L → L/O → 0` with `L/O` flat over `S`. This amounts to the statement
+that the map of invertible sheaves `O --ℓ--> L` on `E` is injective, and remains so after
+any base change `T → S` on `S`. For this we are reduced to the case `S = Spec(k)` with `k`
+a field, and `ℓ ∈ H⁰(E,L)` a `k`-basis, so non-zero, in which case the assertion is
+obvious."* Then p. 67: *"Therefore `(L, ℓ)` defines an effective Cartier divisor in `E/S`.
+Looking fiber-by-fiber, we see that it is of degree one. By (1.2.7), any effective Cartier
+divisor of degree one is a section `P ∈ E(S)`."*
+
+Design (board, 2026-08-08 surveys 1–2): the target vocabulary is the divisor engine —
+`RelEffCartierDiv π` / `IsOfficialCartier` (`LevelStructure/CartierDivisor.lean`) with the
+module seam `idealModule` / `isInvertible_idealModule` (`Picard/IdealModule.lean`); the
+fibrewise flatness criterion is in-tree (`ForMathlib/LocalFlatnessCriterion.lean`, Stacks
+00ME, with the relative `_sModule` variant and the `BaseChangeKerCoker` output forms). The
+statements below are EXISTENCE-form (Pic-level consumers only need the class), keeping all
+defs sorry-free.
+-/
+
+universe u
+
+open CategoryTheory AlgebraicGeometry Limits TopologicalSpace
+open AlgebraicGeometry.Scheme.Modules
+
+namespace ModularCurves
+
+/-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
+`(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
+effective Cartier divisor whose ideal is the `M`-inverse twist of the pushforward pullback:
+`ℐ_D ≅ f^*(f_*M) ⊗ M⁻¹` (round-19 PIN 1: the twist is `(f_*M)`, never `(0^*M)`).
+
+Existence-form packaging of KM's exact sequence `0 → O --ℓ--> M → M/O → 0` with `M/O`
+`S`-flat: the divisor's subscheme-over-base carries the flatness, the ideal-module
+isomorphism carries the exactness. -/
+theorem exists_relEffCartierDiv_of_degreeOne
+    {R : Type u} [CommRing R] [IsNoetherianRing R]
+    {E : Scheme.{u}} {π : E ⟶ Spec (.of R)} [IsProper π] [Flat π]
+    [IsNoetherian E] [LocallyOfFinitePresentation π]
+    (M : E.Modules) (hM : M.IsInvertible)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hpkg : HasDegreeOneFibreCohomology π M U) :
+    ∃ D : RelEffCartierDiv π,
+      Nonempty (AlgebraicGeometry.Scheme.Modules.idealModule D.ideal ≅
+        tensorObj ((AlgebraicGeometry.Scheme.Modules.pullback π).obj
+          ((AlgebraicGeometry.Scheme.Modules.pushforward π).obj M))
+          (dualObj M)) := by
+  sorry
+
+/-- **(`AP2-B3`, degree part, KM p. 67)** The evaluation divisor has fibre degree one:
+"Looking fiber-by-fiber, we see that it is of degree one" — the fibre `h⁰` of the
+degree-one package. -/
+theorem relEffCartierDiv_degree_one_of_degreeOne
+    {R : Type u} [CommRing R] [IsNoetherianRing R]
+    {E : Scheme.{u}} {π : E ⟶ Spec (.of R)} [IsProper π] [Flat π]
+    [IsNoetherian E] [LocallyOfFinitePresentation π]
+    (M : E.Modules) (hM : M.IsInvertible)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hpkg : HasDegreeOneFibreCohomology π M U)
+    (D : RelEffCartierDiv π)
+    (hD : Nonempty (AlgebraicGeometry.Scheme.Modules.idealModule D.ideal ≅
+      tensorObj ((AlgebraicGeometry.Scheme.Modules.pullback π).obj
+        ((AlgebraicGeometry.Scheme.Modules.pushforward π).obj M))
+        (dualObj M)))
+    (s : Spec (.of R)) : D.degree s = 1 := by
+  sorry
+
+end ModularCurves
