@@ -197,6 +197,7 @@ import ModularCurves.Picard.DualPullback.Iso
 import ModularCurves.Picard.DualPullback.TrivializationRestriction
 import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.GlueTrivialization
+import ModularCurves.Picard.IdealModuleMul
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.Picard.InvertibleSheafBaseCechFlat
 import ModularCurves.Picard.InvertibleSheafCocycle
