@@ -39558,6 +39558,23 @@ PLAYBOOK ADDITIONS: `dsimp +instances` for monoidal-instance diamonds; `congr 1`
 transparency-walled closed-term rewrites. **hcompat now genuinely sorry-free below hbij; RelPicLocal
 remaining: hbij (:484) + parent (:53) only.**
 
+**AP2-B1a REDIRECT** (2026-08-08, after factor-α proved): the (β)-factor
+(`bijective_tensorSection_glueSectionB_res`) hit a structural wall — the pullback-tensor
+compatibility (`nonempty_pullback_tensorObj`) is Nonempty-packaged (no element control), and the
+alternative needs a new sheafification-restriction-locality lemma. **But (β) is BYPASSABLE**: KM's
+statement `f_*f^*N ≅ N` is witnessed by the ADJUNCTION UNIT `η_N : N ⟶ f_*f^*N` directly —
+`isIso_of_bijective_app_on_cover` (PicComparison:838) needs only per-open bijectivity of `η.app W`,
+and `η.app W = (factor-α map) ∘ (r ↦ r • res-seed)⁻¹`: factor-α is PROVED
+(`bijective_smul_glueSectionA_res`, commit ce9adfb9d), and the base-side generation
+`Bijective (r ↦ r • N.presheaf.map _ (glueSectionASeed))` is the SAME iso-component pattern with
+rOTW.inv (no hp needed). PLAN: (1) prove `bijective_smul_glueSectionASeed_res` (base twin of α);
+(2) `η.app`-bijectivity by composition algebra (Hom.app_smul + hσ-chain identities already proved);
+(3) REWRITE `nonempty_pushforwardPullback_iso` to `⟨asIso η⟩` via isIso_of_bijective_app_on_cover
+(cover from hN: obtain ⟨κ, V, hV, htriv⟩); (4) the sorried tensor-glue obligation
+`nonempty_tensorObj_pushforwardPullback_dualObj_unitObj` + factor-β become an unconsumed dead route —
+REMOVE the two sorried decls (keep glueSectionB/compat/tensorSection lemmas: proved and reusable);
+(5) parent `exists_pullback_twist_of_locally` (KM p.65) then consumes the direct iso.
+
 **AP2-B1a dependency chart** (2026-08-07 final): the capped smul pair is DOUBLY load-bearing — `hcompat`
 (proved, cites it) AND `hbij` (route: `r • tensorSection a b = tensorSection (r•a) b` splits the
 bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,
