@@ -1,1 +1,107 @@
-FOCUS: HIGHEST-VALUE TARGET — orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial (ForMathlib/Seesaw.lean:157). Its docstring contains a COMPLETE 5-step route with every input located; execute it directly: (1) ker((C.d 0 1).hom.baseChange κ(s)) ≃ degree-0 kernel of the extendScalars-κ(s) image of C — ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv (ForMathlib/LowDegreeFiniteProjectiveReplacement.lean:164); MODEL for the whole pattern: baseCechKernelOrderedBaseChangeLinearEquiv (ForMathlib/SchemeModuleOrderedBaseCechZero.lean:161) uses it identically. (2) that complex IS the fibre's ordered base-Čech complex — orderedBaseCechComplexBaseChangeIso (ForMathlib/AffineModuleCechBaseChange.lean:1037), needs [IsAffine S] + [IsAffine (Spec κ(s))] + M.IsQuasicoherent (from hM.isQuasicoherent); no flatness/exactness needed. (3) transport the kernel along that complex-iso — HomologicalComplex.kernelZeroLinearEquivOfHom (same usage at SchemeModuleOrderedBaseCechZero.lean:161). (4) baseSectionsIsoKernelOrderedBaseCechDifferential (SchemeModuleOrderedBaseCechZero.lean:256) ON THE FIBRE identifies that kernel with baseSections π_s M_s. (5) hfib replaces M_s by unitObj and hπ (UniversallyOConnected) evaluates baseSections π_s 𝒪 = κ(s); close with Module.finrank_self. DO NOT use baseSectionsBaseChangeEquiv_of_orderedBaseCech_package (PoleSheafNeighborhoodHOne.lean:377) — its hexact hypothesis is FALSE here (H¹(E_s,𝒪) = κ(s) on a genus-1 fibre). After it: the second Seesaw sorry (:232), then the AP-D root leaf, unblocking AP-D4/D5/D6/D7. STATEMENT REPAIRED (59c1f0155): the bare [Algebra Γ(S,⊤) κ(s)] binder quantified over ARBITRARY algebra structures — unprovable; now baked in via letI as ((S.fromSpecResidueField s).appTop ≫ (ΓSpecIso _).hom).hom.toAlgebra, matching the consumer (which supplies exactly that). Consumer still compiles. NEW OBSTACLE FOUND when skeletonizing: the fibre's ordered base-Čech complex lives over Γ(Spec κ(s), ⊤), NOT over κ(s) — so `LinearMap.ker (fibre-complex.d 0 1).hom` does not directly carry a κ(s)-module structure and instance synthesis fails. FIX for the next attempt: thread the ΓSpecIso identification explicitly (the consumer's letI composes appTop with (ΓSpecIso _).hom for exactly this reason), or state the middle equivalence over Γ(Spec κ(s),⊤) and convert finranks along the ring iso at the end (Module.finrank of a ring-iso transport). Model to imitate: baseCechKernelOrderedBaseChangeLinearEquiv (SchemeModuleOrderedBaseCechZero.lean:161) keeps everything over the abstract algebra A and never mentions Γ of the fibre. STEP-4/5 MECHANICS VERIFIED: baseSectionsIsoKernelOrderedBaseCechDifferential returns a ModuleCat.of Γ(base,⊤)-iso, so on the fibre family its ring is Γ(Spec (.of κ(s)), ⊤); the bridge to κ(s) is Scheme.ΓSpecIso (.of ↥(S.residueField s)) — exactly why the consumer's letI composes appTop with (ΓSpecIso _).hom. Carry the middle steps over Γ(Spec κ(s),⊤) and transport finrank along that ring iso at the end (or rewrite early). With that the docstring's 5 steps go through.
+FOCUS (2026-08-08, after /develop + external review): **BLOCKER 1 IS CLOSED.**
+
+DONE THIS SESSION — `ForMathlib/Seesaw.lean` went from 3 sorries to 1, axiom-verified
+standard-three (`#print axioms ModularCurves.orderedBaseCech_kernel_finrank_of_fibre_trivial`):
+  * `Module.finrank_eq_one_of_bijective_algebraMap`
+  * `finrank_baseSections_unitObj_eq_one` — step 5, via the tree's `baseSections_smul`
+  * `orderedBaseCech_appTop_kernel_finrank_of_fibre_trivial` — THE FIX: state the result
+    scheme-side over `Γ(T,⊤)` for an arbitrary affine `t : T ⟶ S`. That makes
+    `algebraMap Γ(S,⊤) Γ(T,⊤) = t.appTop.hom` hold by `rfl`, so `baseChangeKernelZeroLinearEquiv`
+    and `orderedBaseCechComplexBaseChangeIso` match SYNTACTICALLY — the earlier skeleton died
+    only on this mismatch. The five documented steps then compose as one `LinearEquiv.trans`.
+  * `orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial` (the old sorry) — the
+    scheme-side form at `T = Spec κ(s)`, transported by `LinearMap.finrank_ker_baseChange_eq`
+    along `Γ(S,⊤) → Γ(Spec κ(s),⊤) → κ(s)`; the middle `Field` instance comes from
+    `MulEquiv.isField` + `IsField.toField` (reuses the ambient `CommRing`, so NO diamond).
+
+DO NOT weaken `hfibt` in the scheme-side lemma to fibrewise triviality — FALSE. Counterexample
+(external review): `π = 𝟙_S`, `S = Spec R` with `R` Dedekind of nontrivial class group, `M` a
+nonprincipal invertible ideal. Recorded in that lemma's docstring.
+
+=== CURRENT TARGET: BLOCKER 2 = `exists_pullback_iso_of_kernel_finrank_of_fibre_trivial`
+(`ForMathlib/Seesaw.lean`, the last sorry in the file). Full route in
+`.mathlib-quality/plan-blockers-2026-08-08.md` §BLOCKER 2 + §External review A2–A4. ===
+
+HALF A (descent) — ALREADY PROVED, just needs re-shaping. `exists_pullback_twist_of_locally`
+(`WeilPairing/RelPicLocal.lean:1157`, AP2-B1, zero sorries) with `M' = unitObj` says: base-locally
+a pullback ⟹ globally `M ≅ π^*N₀` with `N₀ = π_*M` invertible. So Blocker 2 reduces to
+"Zariski-locally on the base, M is trivial". Caveat: it is stated for `pullback.snd p g`; either
+instantiate at `g = 𝟙 S` and transport along `pullback π (𝟙 S) ≅ X`, or (RECOMMENDED, ticket T7)
+generalise the RelPicLocal chain to a bare `f : Y ⟶ T` with `UniversallyOConnected f`, which is
+also the shape `exists_invertible_tensor_idealModule_add` consumes.
+
+HALF B.1 (`π_*M` invertible) — the real work. `hpkg`/AP2-A2's engine is UNUSABLE (its `hexact`
+is false: `H¹(E_s,𝒪) = κ(s)` on a genus-1 fibre). Use Mumford's argument on the tree's own
+UNCONDITIONAL finite-projective replacement:
+  1. `LowDegreeFiniteReplacement` (`ForMathlib/LowDegreeFiniteProjectiveReplacement.lean`)
+     gives `u := kZeroToKOne f : K⁰ → K¹`, `K¹` finite free, `kZero_projective` (:522), and
+     `baseChangeKernelEquiv A : ker(u ⊗ A) ≃ₗ ker(f ⊗ A)` (:799) for EVERY `A`, with no exactness.
+  2. `coker u ⊗ κ(p) = coker(u ⊗ κ(p))` (right exactness), of dimension
+     `rk K¹ − rk_{κ(p)} K⁰ + 1`, locally constant by `Module.isLocallyConstant_rankAtStalk`
+     (mathlib, VERIFIED present) since `K⁰` is finite projective.
+  3. Apply 0FWG (see IN FLIGHT below) to `coker u` ⟹ finite locally free.
+  4. Both `0 → im u → K¹ → coker u → 0` and `0 → ker u → K⁰ → im u → 0` split ⟹ `ker u` is a
+     direct summand of `K⁰`, finite projective, and its formation commutes with all base change.
+  5. `Module.Invertible.of_finite_of_projective_of_rankAtStalk_eq_one`
+     (`ForMathlib/InvertibleOfRankOne.lean`) + `baseSectionsIsoKernelOrderedBaseCechDifferential`.
+
+  *** GAP FOUND IN STEP 1 (external review A2) — MUST BE REPAIRED ***
+  `dim ker(u ⊗ κ(p)) = 1` does NOT follow from `dim ker(d⁰ ⊗ κ(p)) = 1`: the replacement is
+  applied to the CORESTRICTION `f : C⁰ → Z¹ = ker d¹`, and `i : Z¹ ↪ C¹` need not stay injective
+  after non-flat base change. Reviewer's counterexample: `R = k[x,y]`,
+  `R --(r ↦ (−yr,xr))--> R² --((a,b) ↦ xa+yb)--> R`; at `p = (x,y)`, `ker(d⁰⊗κ(p)) = κ(p)` but
+  `ker(f⊗κ(p)) = 0`. Concretely in Lean this is the hypothesis pair of
+  `shortComplexBaseChangeKernelEquiv` (`LowDegree…:834`): `[Module.Flat R (ker S.g.hom)]` and
+  `hbij : Bijective (kerBaseChangeComparison A S.g.hom)`, BOTH of which AP2-A2 got from `hexact`.
+  TWO REPAIRS — try (b) first:
+   (b) TWO-ELEMENT COVER: if `card ι = 2` then `orderedBaseCechObject_subsingleton_of_card_le`
+       makes `C^q = 0` for `q ≥ 2`, so `d¹ = 0`, `Z¹ = C¹` is flat by (F3), `i = id`, and
+       `kerBaseChangeComparison A 0` is the identity. Everything discharges with no exactness.
+       Open question: can `IsInvertible.exists_finiteAffineBaseCech_flat`
+       (`Picard/InvertibleSheafBaseCechFlat.lean:23`) be strengthened to `card ι = 2` for a
+       relative curve, or should Blocker 2 carry `card ι = 2` as a hypothesis?
+   (a) MINIMAL-PRIME SANDWICH (general): `F_p := ker(f⊗κ(p)) ↪ H_p := ker(d⁰⊗κ(p))` so
+       `dim F_p ≤ 1`; for a minimal prime `η ⊆ p`, `R` reduced ⟹ `R_η = κ(η)` is a FIELD hence
+       flat, so `F_η = H_η` and `dim F_η = 1`; rank only drops under specialisation `η ⤳ p`, so
+       `dim ker(u_p) ≥ dim ker(u_η) = 1`. Reducedness is used TWICE in Blocker 2 (here, and in 0FWG).
+
+HALF B.2 (counit iso) — write the comparison diagram EXPLICITLY, in this order (review A4):
+  `P := ker u ≅ Γ(X,M)`, then `P ⊗ κ(p) ≅ ker(u_p) ≅ ker(f_p) ↪ H⁰(X_p,M_p)`, an ISO by dimension
+  count; then a local basis `ℓ` restricts to a nonzero element of `H⁰(X_p,M_p) ≅ κ(p)`, so `ℓ_p`
+  is nowhere vanishing; then at `y ∈ X` over `p`, evaluation is multiplication by `a` whose class
+  mod `p𝒪_{X,y}` is a unit, hence `a` is a unit. DO NOT claim base change "from the splitting
+  alone" — it is the splitting PLUS the one-dimensional injection.
+  `hfib` is essential and cannot be replaced by `hrank`: `𝒪_E(P)` on a genus-1 curve has `h⁰ = 1`
+  but its generator vanishes at `P` (already in the b2_log).
+
+IN FLIGHT: `ForMathlib/ReducedConstantRankFree.lean` — Stacks 0FWG, local form, statement landed
+and building, single `sorry` being filled by a subagent. VERIFIED ABSENT FROM MATHLIB. Proof plan
+is in that file's module docstring; the external reviewer confirmed it correct and noted no
+Noetherian hypothesis is needed.
+
+AFTER BLOCKER 2: Blocker 3 = `exists_invertible_tensor_idealModule_add` (`Picard/SelfAdjointN.lean`),
+which unblocks AP-D4/D5-existence/D6/D7. Reviewer kept the seesaw route (R1) ahead of the chart
+route (R2), but R1 acquires two obligations not previously boarded: `B = C ×_U C` is NOT affine
+(apply the affine seesaw on an affine open cover of `B`, then glue — ticket T8b), and the passage
+from an arbitrary elliptic curve to the universal Weierstrass parameter space is only
+Zariski-local (state and glue locally — ticket T9b).
+
+INDEPENDENT LINE (Blocker 4, does NOT gate AP-D): `IsIso ((sectionVanishingIdeal M hM σ).subschemeι ≫ π)`
+at `EllipticCurve/AbelEquivalence.lean`. **RE-PLANNED** — the old route is dead:
+  * The board note "the local generator vanishes on `Z`, so it is not a nonzerodivisor" is WRONG
+    reasoning (`t ∈ k[t]` vanishes on `V(t)` and is a nonzerodivisor).
+  * The fibrewise-nonzerodivisor route IS Stacks 00MF = the principal case of the local criterion
+    00ME, whose proof needs Artin–Rees. It does NOT dodge the sorried criterion.
+  * Producing the section from the fibre points is NOT viable (`S_red → S` has the same
+    residue-field fibres).
+  * USE INSTEAD — étale transversality: `h̄` generates the maximal ideal of the DVR `𝒪_{E_s,z}`,
+    so `dh̄ ≠ 0`, so `h : U → 𝔸¹_S` is étale near `z`, so `Z ∩ U = U ×_{𝔸¹_S} S` is étale over `S`;
+    `Z` closed in proper `E` ⟹ proper; proper + étale ⟹ finite étale; fibre degree 1 ⟹ iso.
+    (Stacks §37.38 / 055S — prove the special case from a standard-smooth Jacobian presentation;
+    the general slicing lemma routes through fibrewise flatness and would reintroduce the gap.)
+  * Hypothesis audit: `h⁰ = 1` and `H¹ = 0` alone are NOT enough; the statement also needs smooth
+    geometrically integral genus-one fibres, `deg M_s = 1`, and the base-change iso giving `σ_s ≠ 0`.
+
+RULES: no `set_option maxHeartbeats`/`synthInstance.maxHeartbeats`; never `2>/dev/null` beside a
+lake/lean command; push with `LEAN4_GUARDRAILS_BYPASS=1 git push origin dev/modular-curves`;
+`#print axioms` at every milestone (grep for sorry lies — bare `sorry` and inherited `sorryAx`).
