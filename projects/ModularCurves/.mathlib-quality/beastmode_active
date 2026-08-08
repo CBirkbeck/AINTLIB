@@ -1,26 +1,56 @@
-FOCUS (2026-08-08, after /develop + external review): **BLOCKER 1 IS CLOSED.**
+FOCUS (2026-08-08): **BLOCKERS 1 AND 2 ARE BOTH CLOSED. THE RANK-ONE SEESAW IS PROVED.**
 
-DONE THIS SESSION — `ForMathlib/Seesaw.lean` went from 3 sorries to 1, axiom-verified
-standard-three (`#print axioms ModularCurves.orderedBaseCech_kernel_finrank_of_fibre_trivial`):
-  * `Module.finrank_eq_one_of_bijective_algebraMap`
-  * `finrank_baseSections_unitObj_eq_one` — step 5, via the tree's `baseSections_smul`
-  * `orderedBaseCech_appTop_kernel_finrank_of_fibre_trivial` — THE FIX: state the result
-    scheme-side over `Γ(T,⊤)` for an arbitrary affine `t : T ⟶ S`. That makes
-    `algebraMap Γ(S,⊤) Γ(T,⊤) = t.appTop.hom` hold by `rfl`, so `baseChangeKernelZeroLinearEquiv`
-    and `orderedBaseCechComplexBaseChangeIso` match SYNTACTICALLY — the earlier skeleton died
-    only on this mismatch. The five documented steps then compose as one `LinearEquiv.trans`.
-  * `orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial` (the old sorry) — the
-    scheme-side form at `T = Spec κ(s)`, transported by `LinearMap.finrank_ker_baseChange_eq`
-    along `Γ(S,⊤) → Γ(Spec κ(s),⊤) → κ(s)`; the middle `Field` instance comes from
-    `MulEquiv.isField` + `IsField.toField` (reuses the ambient `CommRing`, so NO diamond).
+`ForMathlib/Seesaw.lean` is SORRY-FREE and axiom-verified standard-three:
+`exists_pullback_iso_of_fibrewise_trivial_of_isReduced` (Stacks 0EX7 at rank 1) — an invertible
+sheaf on a proper flat family of finite presentation over a REDUCED affine base, trivial on every
+fibre, is pulled back from the base. Proved WITHOUT cohomology-and-base-change, which mathlib lacks.
 
-DO NOT weaken `hfibt` in the scheme-side lemma to fibrewise triviality — FALSE. Counterexample
-(external review): `π = 𝟙_S`, `S = Spec R` with `R` Dedekind of nontrivial class group, `M` a
-nonprincipal invertible ideal. Recorded in that lemma's docstring.
+The chain, all axiom-clean:
+  KM-SEESAW-1′ (`ForMathlib/Seesaw.lean`) — fibrewise rank one
+  → Stacks 0FWG, local + global (`ForMathlib/ReducedConstantRankFree.lean`) — THE MATHLIB GAP, filled
+  → Mumford §5 constant-kernel-rank (`ForMathlib/ConstantKernelRankProjective.lean`)
+  → Half B.1 (`ForMathlib/SeesawPushforwardInvertible.lean`) — `π_*M` invertible
+  → Half B.2 (`ForMathlib/SeesawBaseLocallyTrivial.lean`) — `M` base-locally trivial
+  → Half A (`WeilPairing/RelPicLocal.lean`, primed generalisations) — descent
+  → KM-SEESAW-2″ and the top-level assembly.
 
-=== CURRENT TARGET: BLOCKER 2 = `exists_pullback_iso_of_kernel_finrank_of_fibre_trivial`
-(`ForMathlib/Seesaw.lean`, the last sorry in the file). Full route in
-`.mathlib-quality/plan-blockers-2026-08-08.md` §BLOCKER 2 + §External review A2–A4. ===
+=== CURRENT TARGET: BLOCKER 3 — `exists_invertible_tensor_idealModule_add`
+(`Picard/SelfAdjointN.lean:267`), the relative theorem of the square. It is what the seesaw exists
+to serve, and it unblocks AP-D4 / AP-D5-existence / AP-D6 / AP-D7. ===
+
+Route (external review kept it ahead of the chart route and of a generic-vertical-divisor route):
+prove the identity on the UNIVERSAL pair of points over the reduced — indeed integral — base
+`B = C ×_U C`, where every residue fibre is trivial by the field theorem
+`HasseWeil.Pic0.RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv`; apply the seesaw; pull back
+along the zero section to kill `N`; base-change down to an arbitrary, possibly NON-REDUCED, base.
+
+TWO OBLIGATIONS THE REVIEW ADDED, not previously boarded:
+  * **T8b** — `B = C ×_U C` is NOT affine, and the seesaw carries `[IsAffine S]`. Apply it on an
+    affine open cover of `B` and glue with the descent lemma.
+  * **T9b** — the passage from an arbitrary elliptic curve to the universal Weierstrass parameter
+    space is only ZARISKI-LOCAL (globally there is a moduli-stack issue); state and glue the
+    base-change-down step locally on `T`.
+
+TWO CARRY-OVERS FROM CLOSING BLOCKER 2:
+  * `hhigh` on the top-level seesaw is quantified over ALL finite affine covers, because the cover is
+    produced inside the proof by `exists_finiteAffineBaseCech_flat`. It cannot be discharged from the
+    fibre side there — it is `H^{≥2}(X,M) = 0`, needing a CURVE hypothesis the general statement does
+    not carry. In the elliptic application it IS available: kill it with
+    `subsingleton_H_add_two_of_two_affine_open_cover` +
+    `HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
+    over `q ≥ 1`.
+  * CLEANUP DEBT: the four primed theorems in `RelPicLocal.lean` duplicate ~370 lines of the unprimed
+    ones, which are now thin specialisations (`hp.baseChange g |>.isIso_app`). Left byte-identical so
+    no consumer moved.
+  * LANDMINE: `WeilPairing/TensorSection.lean` is now a DEAD module. Its `ModularCurves.tensorSection`
+    family FULL-NAME-COLLIDES with copies in `EllipticCurve/PoleSheaf.lean` and
+    `EllipticCurve/PullbackTensorSection.lean`. Do not re-import it into anything in `Seesaw.lean`'s
+    closure without deduplicating first.
+
+BLOCKER 4 (independent, does NOT gate AP-D) — `IsIso ((sectionVanishingIdeal M hM σ).subschemeι ≫ π)`
+at `EllipticCurve/AbelEquivalence.lean`. Route REPLACED after review; see below.
+
+--- retained detail from the previous focus ---
 
 HALF A (descent) — ALREADY PROVED, just needs re-shaping. `exists_pullback_twist_of_locally`
 (`WeilPairing/RelPicLocal.lean:1157`, AP2-B1, zero sorries) with `M' = unitObj` says: base-locally
