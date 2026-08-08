@@ -353,6 +353,10 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
             N.presheaf.map
               (Opens.infLERight (E.basicOpen g.1) (E.basicOpen g'.1)).op (v g') := by
     intro g g'
+    -- the overlap is a basic open of `U`, hence affine
+    have haff : IsAffineOpen (E.basicOpen g.1 ⊓ E.basicOpen g'.1) := by
+      rw [← Scheme.basicOpen_mul]
+      exact U.2.basicOpen _
     sorry
   sorry
 
