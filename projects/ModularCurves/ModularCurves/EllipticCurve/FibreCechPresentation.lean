@@ -36,10 +36,6 @@ open FunctionField FunctionField.Chart Polynomial
 
 open scoped Polynomial Polynomial.Bivariate RatFunc WithZero
 
--- v4.33 playbook: `OrderedCechIndex` is a plain def, so Čech-index applications are only
--- type-correct after delta; without this, `rw`/`simp` matching bails on the two-cover goals.
-set_option backward.isDefEq.respectTransparency.types false
-
 universe u
 
 namespace ModularCurves
