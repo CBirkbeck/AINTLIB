@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.EllipticCurve.AbelSkeleton
 import ModularCurves.ForMathlib.SchemeModuleBaseCechResidueTransport
 import ModularCurves.ForMathlib.SchemeModuleProperLowDegreeCechFinite
+import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
 
 /-!
 # Assembly of the degree-one fibre cohomology package (`AP2-A1d`)
@@ -188,5 +189,31 @@ theorem kernel_data_of_hasDegreeOneFibreCohomology
         (hbase p.asIdeal.ResidueField)
     exact e.finrank_eq.trans (hpkg p.asIdeal.ResidueField).2
   exact ⟨hkerFinite, hkerProjective, hbase, hrankAt⟩
+
+/-- **(`AP2-A2`, sections form)** Under the kernel-data hypotheses, the pushforward's global
+sections `baseSections π M` are finite projective of constant rank one over the base ring. -/
+theorem baseSections_data_of_hasDegreeOneFibreCohomology
+    {R : Type u} [CommRing R] [IsNoetherianRing R]
+    {E : Scheme.{u}} {π : E ⟶ Spec (.of R)} [IsProper π] [Flat π]
+    [IsNoetherian E] [LocallyOfFinitePresentation π]
+    (M : E.Modules) (hM : M.IsInvertible)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hpkg : HasDegreeOneFibreCohomology π M U) :
+    let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+    Module.Finite B (Scheme.Modules.baseSections π M) ∧
+      Module.Projective B (Scheme.Modules.baseSections π M) ∧
+      Module.rankAtStalk (R := B) (Scheme.Modules.baseSections π M) = fun _ ↦ 1 := by
+  dsimp only
+  let C := Scheme.Modules.orderedBaseCechComplex π M U
+  let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+  obtain ⟨hfinite, hprojective, -, hrank⟩ :=
+    kernel_data_of_hasDegreeOneFibreCohomology M hM U hU hUaff hpkg
+  letI : Module.Finite B (LinearMap.ker (C.d 0 1).hom) := hfinite
+  letI : Module.Projective B (LinearMap.ker (C.d 0 1).hom) := hprojective
+  let e := (Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential
+    π M U hU).toLinearEquiv
+  exact ⟨Module.Finite.equiv e.symm, Module.Projective.of_equiv' e.symm,
+    (Module.rankAtStalk_eq_of_equiv e).trans hrank⟩
 
 end ModularCurves
