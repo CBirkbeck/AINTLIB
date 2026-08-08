@@ -39511,6 +39511,25 @@ obvious shortcuts fail — including an explicit counterexample (`T = E × E`) s
 version is FALSE. This matches the memory note "DS4 route is SETTLED — one leaf left, the relative
 theorem of the square".
 
+**AP-D root leaf — the seesaw route's own state** (2026-08-08): `ForMathlib/Seesaw.lean` already
+implements the universal-pair route's engine, with the top-level statement
+`exists_pullback_iso_of_fibrewise_trivial_of_isReduced` (fibrewise-trivial invertible `M` on a proper
+flat family over a **reduced** affine base is a pullback) assembled from
+`exists_pullback_iso_of_kernel_finrank_of_fibre_trivial` +
+`orderedBaseCech_kernel_finrank_of_fibre_trivial`. **Exactly two sorries remain in that file**:
+(1) `orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial` (:157) — the residue-field rank of
+`ker d⁰` is `1` under fibrewise triviality; its docstring notes the pole-line's
+`PoleSheafNeighborhoodHOne.lean:377` is NOT usable (its `hexact` hypothesis is positive-tail exactness,
+false for a trivial sheaf on a genus-1 fibre since `H¹(E_s,𝒪) = κ(s)`), but that the inner tool
+`baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison` (kernel-comparison bijectivity, not
+exactness) *is* usable; and (2) `exists_pullback_iso_of_kernel_finrank_of_fibre_trivial` (:232).
+**NOTE the strong overlap with `AP2-A2`'s machinery proved this session**: `kernel_data_of_...`
+delivers precisely a rank-one kernel statement with base-change bijectivity, but under the degree-one
+package (which includes `H^{q+1}` vanishing) rather than fibrewise triviality — so the A2 proof cannot
+be reused verbatim, though its ingredient list (`orderedBaseCechObject_flat_of_isInvertible`,
+`orderedBaseCechHomologyFinite_of_isProper`, `kerBaseChangeComparison_bijective_of_bounded_exact`,
+`Module.rankAtStalk_eq`) is the right toolbox for (1) and (2).
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
