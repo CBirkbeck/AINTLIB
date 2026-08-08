@@ -322,6 +322,22 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
   obtain ⟨n, hn⟩ : ∃ n : ℕ, ∀ g : {g // g ∈ t}, m g ≤ n := by
     haveI : Fintype {g // g ∈ t} := FinsetCoe.fintype t
     exact ⟨Finset.univ.sup m, fun g ↦ Finset.le_sup (Finset.mem_univ g)⟩
+  -- (d) rescale each piece to the common exponent `n`
+  set v : ∀ g : {g // g ∈ t}, ↑Γ(N, E.basicOpen g.1) := fun g ↦
+    (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f) ^ (n - m g) • u g with hv
+  have hvres : ∀ g : {g // g ∈ t},
+      N.presheaf.map (homOfLE (E.basicOpen_le
+        (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f))).op (v g) =
+      (E.presheaf.map (homOfLE (E.basicOpen_le
+        (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f))).op
+        (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f)) ^ n •
+        N.presheaf.map (homOfLE (by
+          rw [Scheme.basicOpen_res]
+          exact le_trans inf_le_right le_rfl)).op s' := by
+    intro g
+    rw [hv]
+    rw [AlgebraicGeometry.Scheme.Modules.map_smul, hu g, smul_smul, map_pow,
+      ← pow_add, Nat.sub_add_cancel (hn g)]
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
