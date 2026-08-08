@@ -731,6 +731,13 @@ theorem sectionVanishingIdeal_locally_span {E : Scheme.{u}} (M : E.Modules)
     (overTrivializationOfRestrictIso M V
       (restrictIsoOfPullbackIso M V (restrictTrivialization hVW e)))⟩
 
+/-- **(B2-head, step 3a)** A *nonzerodivisor criterion in the trivialised picture*: if the
+sections ring is a domain and the local generator is nonzero, it is a nonzerodivisor. This
+is the fibre-level case of KM p. 66, isolated so the family case is pure transport. -/
+theorem mem_nonZeroDivisors_of_ne_zero_of_isDomain {A : Type u} [CommRing A] [IsDomain A]
+    {f : A} (hf : f ≠ 0) : f ∈ nonZeroDivisors A :=
+  mem_nonZeroDivisors_of_ne_zero hf
+
 /-- **(B2-head, step 3 = the fibre input, KM p. 66)** A local generator of the vanishing
 ideal of the distinguished section is a nonzerodivisor: *"we are reduced to the case
 `S = Spec(k)` with `k` a field, and `ℓ ∈ H⁰(E,L)` a `k`-basis, so non-zero, in which case
