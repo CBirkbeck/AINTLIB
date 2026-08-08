@@ -84,4 +84,35 @@ theorem hasDegreeOneFibreCohomology_of_fibre_data
     exact (LinearMap.finrank_ker_baseChange_eq k K
       ((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom).trans (hker s)
 
+/-- The exists-cover form of `hasDegreeOneFibreCohomology_of_fibre_data`: a proper family over
+an affine base always admits a finite affine cover, so per-point fibre data yields the package
+on some cover, provided the residue-field kernel rank is available on every such cover. -/
+theorem exists_hasDegreeOneFibreCohomology_of_fibre_data
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsProper π] [IsAffine S]
+    (M : E.Modules) [M.IsQuasicoherent]
+    (hqc : ∀ s : S, ((Scheme.Modules.pullback
+      (pullback.fst π (S.fromSpecResidueField s))).obj M).IsQuasicoherent)
+    (hH : ∀ (s : S) (q : ℕ), Subsingleton (CategoryTheory.Sheaf.H
+      ((Scheme.Modules.pullback
+        (pullback.fst π (S.fromSpecResidueField s))).obj M).sheaf (q + 1)))
+    (hker : ∀ {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens),
+      IsOpenCover U → (∀ i, IsAffineOpen (U i)) → ∀ s : S,
+      letI : Algebra Γ(S, (⊤ : S.Opens)) (S.residueField s) :=
+        ((S.fromSpecResidueField s).appTop ≫
+          (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
+      Module.finrank (S.residueField s)
+        (LinearMap.ker (((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom.baseChange
+          (S.residueField s))) = 1) :
+    ∃ (ι : Type u) (_ : Fintype ι) (_ : LinearOrder ι) (U : ι → E.Opens),
+      IsOpenCover U ∧ (∀ i, IsAffineOpen (U i)) ∧
+        HasDegreeOneFibreCohomology π M U := by
+  obtain ⟨ι, hι, U, hU, hUaff, -⟩ :=
+    π.exists_finite_affine_openCover_of_isProper
+  letI : Finite ι := hι
+  letI : Fintype ι := Fintype.ofFinite ι
+  letI : LinearOrder ι := IsWellOrder.linearOrder WellOrderingRel
+  exact ⟨ι, inferInstance, inferInstance, U, hU, hUaff,
+    hasDegreeOneFibreCohomology_of_fibre_data M U hU hUaff hqc hH
+      (hker U hU hUaff)⟩
+
 end ModularCurves
