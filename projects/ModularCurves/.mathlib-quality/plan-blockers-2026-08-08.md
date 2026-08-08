@@ -610,3 +610,38 @@ is needed. The statement must also carry smooth, geometrically integral, genus-o
 3. Blocker 3: seesaw route vs. the chart/line-function route (A) — which is genuinely cheaper
    now that the seesaw's gap is priced?
 4. Blocker 4: does the section-side reroute actually avoid the sorried Artin–Rees criterion?
+
+#### A2‴ — **T4c(ii) collapses too** (2026-08-08): `hbij` already bridges the two kernels
+
+With T4c(i) available, the reviewer's minimal-prime sandwich is **not needed either**. Read the
+conclusion of the tree's own bridge:
+
+```lean
+noncomputable def shortComplexBaseChangeKernelEquiv (A) (hbij) :
+    LinearMap.ker ((kZeroToKOne S.moduleCatToCycles).baseChange A) ≃ₗ[A]
+      LinearMap.ker (S.f.hom.baseChange A)          -- S.f.hom IS d⁰, not the corestriction f
+```
+
+Its proof rewrites `ker (moduleCatToCycles.baseChange A) = ker (S.f.hom.baseChange A)` via
+`LinearMap.ker_baseChange_codRestrictToKer_eq … hbij`. So `hbij` is *precisely* the identification
+`ker(f ⊗ A) = ker(d⁰ ⊗ A)` whose failure the reviewer's Koszul counterexample exhibits — and
+T4c(i) now supplies `hbij` from `hhigh`. Hence
+`ker(u ⊗ κ(p)) ≅ ker(d⁰ ⊗ κ(p))`, which KM-SEESAW-1′ already computes to be one-dimensional.
+
+The minimal-prime sandwich remains the correct repair *if one refuses `hhigh`*; with `hhigh` it is
+redundant. **T4c is closed entirely.**
+
+### Net effect on Blocker 2
+
+The only genuinely new input beyond existing machinery is `hhigh` (fibrewise `H^{≥2} = 0`,
+automatic for curves). The remaining work is **T5** — Mumford's argument, which is pure
+commutative algebra once phrased on the replacement complex:
+
+> Let `R` be reduced Noetherian and `u : K⁰ → K¹` a map of finite projective `R`-modules with
+> `dim_{κ(p)} ker(u ⊗ κ(p)) = n` for every prime `p`. Then `ker u` is finite projective with
+> `rankAtStalk (ker u) ≡ n`, and its formation commutes with arbitrary base change.
+
+Proof: `coker u ⊗ κ(p) ≅ coker(u ⊗ κ(p))` by right exactness, of dimension
+`rk K¹ − rk_p K⁰ + n`, locally constant since `K⁰`, `K¹` are finite projective
+(`Module.isLocallyConstant_rankAtStalk`); apply **0FWG (global form, now proved)** to `coker u`;
+the two resulting splittings make `ker u` a direct summand of `K⁰` and survive `⊗`.
