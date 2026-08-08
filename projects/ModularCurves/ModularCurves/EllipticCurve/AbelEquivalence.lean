@@ -433,6 +433,13 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
     · simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
     · exact congrArg (fun q ↦ (ConcreteCategory.hom (N.presheaf.map (Quiver.Hom.op q))) s')
         (Subsingleton.elim _ _)
+  -- (f) a uniform overlap exponent, so the rescaled pieces agree on the nose
+  choose k hk using hoverlap
+  haveI : Fintype {g // g ∈ t} := FinsetCoe.fintype t
+  obtain ⟨K, hK⟩ : ∃ K : ℕ, ∀ g g' : {g // g ∈ t}, k g g' ≤ K :=
+    ⟨Finset.univ.sup fun p : {g // g ∈ t} × {g // g ∈ t} ↦ k p.1 p.2,
+      fun g g' ↦ Finset.le_sup (f := fun p : {g // g ∈ t} × {g // g ∈ t} ↦ k p.1 p.2)
+        (Finset.mem_univ (g, g'))⟩
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
