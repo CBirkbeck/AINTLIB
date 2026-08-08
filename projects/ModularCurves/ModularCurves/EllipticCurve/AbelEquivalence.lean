@@ -509,6 +509,31 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
         E.basicOpen f ⊓ E.basicOpen g.1 ≤ E.basicOpen g.1)).op (v g) := by
     rw [hw]
     simp only [AlgebraicGeometry.Scheme.Modules.map_smul, map_pow]
+  -- (iii) transport `hvres` down to the same locus
+  have hle : E.basicOpen f ⊓ E.basicOpen g.1 ≤
+      E.basicOpen (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f) := by
+    rw [Scheme.basicOpen_res]
+    exact le_inf inf_le_right inf_le_left
+  have hvg : N.presheaf.map (homOfLE (inf_le_right :
+        E.basicOpen f ⊓ E.basicOpen g.1 ≤ E.basicOpen g.1)).op (v g) =
+      (E.presheaf.map (homOfLE (inf_le_right :
+        E.basicOpen f ⊓ E.basicOpen g.1 ≤ E.basicOpen g.1)).op
+        (E.presheaf.map (homOfLE (hpiece g.1 g.2).1).op f)) ^ n •
+      N.presheaf.map (homOfLE (inf_le_left :
+        E.basicOpen f ⊓ E.basicOpen g.1 ≤ E.basicOpen f)).op s' := by
+    have hres := congrArg (fun z ↦ N.presheaf.map (homOfLE hle).op z) (hvres g)
+    simp only [AlgebraicGeometry.Scheme.Modules.map_smul, map_pow] at hres
+    refine Eq.trans ?_ (hres.trans ?_)
+    · simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+      exact congrArg (fun q ↦ (ConcreteCategory.hom (N.presheaf.map (Quiver.Hom.op q))) (v g))
+        (Subsingleton.elim _ _)
+    · refine congrArg₂ (fun (r : ↑Γ(E, E.basicOpen f ⊓ E.basicOpen g.1)) z ↦ r ^ n • z) ?_ ?_
+      · simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+        exact congrArg (fun q ↦ (ConcreteCategory.hom (E.presheaf.map (Quiver.Hom.op q))) f)
+          (Subsingleton.elim _ _)
+      · simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+        exact congrArg (fun q ↦ (ConcreteCategory.hom (N.presheaf.map (Quiver.Hom.op q))) s')
+          (Subsingleton.elim _ _)
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
