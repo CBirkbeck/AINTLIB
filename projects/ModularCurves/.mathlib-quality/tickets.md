@@ -39235,11 +39235,14 @@ B2 in `EllipticCurve/AbelEquivalence.lean`.
 
 **AP2-B2 Progress** (2026-08-08 late): `EllipticCurve/AbelEquivalence.lean` now carries the
 evaluation-divisor construction with only THREE sorries, all named and scoped:
-(1) **`exists_dualRestrict_eq_pow_smul`** — "dual sections localize" (the sv2 gap; mathlib has no
-sections-over-basic-opens localization for quasi-coherent modules — its qcoh is presentation-based;
-route in the docstring: refine trivialising cover by basic opens on the quasi-compact affine, use
-`span_range_eval_eq_of_trivialization` per piece, glue by the sheaf condition after clearing
-denominators — Hartshorne II.5.1(b) shape). Everything else in `sectionVanishingIdeal` is PROVED:
+(1) **`exists_pow_smul_eq_restrict_of_isInvertible`** — "sections of an invertible module localize
+on affines" (mathlib gap; its quasi-coherence is presentation-based, no sections-over-basic-opens
+localization). `exists_dualRestrict_eq_pow_smul` is now DERIVED from it definitionally (via
+`IsInvertible.dual` — the Hom-type/`dualRestrict`/smul dictionaries all matched by `rfl`), so the
+gap is a single clean mathlib-worthy statement about invertible modules. Route in its docstring:
+finitely many trivialising basic opens on the quasi-compact affine, structure-sheaf away-localization
+per piece (`IsAffineOpen.isLocalization_basicOpen`), overlap-agreement after a further power, sheaf
+gluing — Hartshorne II.5.1(b) shape. Everything else in `sectionVanishingIdeal` is PROVED:
 `map_ideal_basicOpen` ⊆ (Ideal.map_span + dualRestrict dictionary + naturality) and ⊇ (sv2 +
 `eval_dualRestrict` + `eval_smul` + unit-inverse clearing); plus **sv1**
 `span_range_eval_eq_of_trivialization` (evaluation ideal is principal on trivialising opens, via
