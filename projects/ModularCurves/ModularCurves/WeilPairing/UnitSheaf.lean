@@ -267,4 +267,24 @@ theorem forall_transitionUnit_mem_kUnits_of_eval_const {z : T ⟶ pullback p g}
   intro i j
   exact transitionUnit_mem_kUnits_of_eval_eq (g := g) hz U e₀ (e i) (e j) (hconst i j)
 
+/-- **(AP-D5, uniqueness half — KM p. 88)** A normalized unit is trivial: this is
+`kUnits_eq_bot` in pointwise form, and it is exactly the uniqueness mechanism KM invokes for
+the `h_i` (*"uniquely in the form `f_{i,j} ∘ π = h_i/h_j`"*). Only `AP-D2` is needed. -/
+theorem eq_one_of_mem_kUnits (hp : UniversallyOConnected p) {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens)
+    {u : Γ(pullback p g, pullback.snd p g ⁻¹ᵁ U)ˣ} (hu : u ∈ kUnits g hz U) : u = 1 := by
+  rwa [kUnits_eq_bot g hp hz U, Subgroup.mem_bot] at hu
+
+/-- **(AP-D5, uniqueness for families)** Two families of units solving the same factorisation
+problem and differing by a normalized unit are equal. This is the form KM's `h_i` uniqueness
+takes once the cocycle is fixed. -/
+theorem eq_of_div_mem_kUnits (hp : UniversallyOConnected p) {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens)
+    {u v : Γ(pullback p g, pullback.snd p g ⁻¹ᵁ U)ˣ}
+    (huv : u * v⁻¹ ∈ kUnits g hz U) : u = v := by
+  have h1 := eq_one_of_mem_kUnits g hp hz U huv
+  calc u = u * v⁻¹ * v := by rw [inv_mul_cancel_right]
+    _ = 1 * v := by rw [h1]
+    _ = v := one_mul v
+
 end ModularCurves
