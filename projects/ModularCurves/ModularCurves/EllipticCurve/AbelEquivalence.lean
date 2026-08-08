@@ -280,6 +280,31 @@ theorem exists_pow_smul_eq_of_restrict_eq {E : Scheme.{u}} (N : E.Modules)
   rw [hs, ht]
   exact hn
 
+/-- **(sv2-d)** Transitivity of the clearing identity: if a section `w` on an open `W`
+restricts, on the `f`-locus of `W`, to `f ^ n` times a fixed section, then the same holds
+after further restriction to any smaller open. Stated with all opens explicit so the
+composite-restriction bridges stay first-order. -/
+theorem restrict_clearing_identity {E : Scheme.{u}} (N : E.Modules)
+    {U W W' : E.Opens} (hWU : W ≤ U) (hW'W : W' ≤ W) (f : ↑Γ(E, U)) (n : ℕ)
+    (s' : ↑Γ(N, E.basicOpen f)) (w : ↑Γ(N, W))
+    (hfW : E.basicOpen (E.presheaf.map (homOfLE hWU).op f) ≤ E.basicOpen f)
+    (hfW' : E.basicOpen (E.presheaf.map (homOfLE (hW'W.trans hWU)).op f) ≤
+      E.basicOpen (E.presheaf.map (homOfLE hWU).op f))
+    (hw : N.presheaf.map (homOfLE (E.basicOpen_le
+        (E.presheaf.map (homOfLE hWU).op f))).op w =
+      (E.presheaf.map (homOfLE (E.basicOpen_le
+        (E.presheaf.map (homOfLE hWU).op f))).op
+        (E.presheaf.map (homOfLE hWU).op f)) ^ n •
+        N.presheaf.map (homOfLE hfW).op s') :
+    N.presheaf.map (homOfLE (E.basicOpen_le
+        (E.presheaf.map (homOfLE (hW'W.trans hWU)).op f))).op
+        (N.presheaf.map (homOfLE hW'W).op w) =
+      (E.presheaf.map (homOfLE (E.basicOpen_le
+        (E.presheaf.map (homOfLE (hW'W.trans hWU)).op f))).op
+        (E.presheaf.map (homOfLE (hW'W.trans hWU)).op f)) ^ n •
+        N.presheaf.map (homOfLE (hfW'.trans hfW)).op s' := by
+  sorry
+
 /-- **(sv2-core, the remaining gap — sections of an invertible module localize)** On an
 affine open, a section over a basic open becomes, after multiplication by a power of the
 defining function, the restriction of a global-on-`U` section. This is the concrete
