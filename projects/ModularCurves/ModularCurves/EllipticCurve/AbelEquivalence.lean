@@ -149,6 +149,20 @@ theorem exists_finite_basicOpen_trivialization {E : Scheme.{u}} (N : E.Modules)
     obtain ⟨x, -, rfl⟩ := Finset.mem_image.mp hh
     exact ⟨hgle x, htrivg x⟩
 
+/-- **(sv2-b)** Per-piece clearing on a *trivial* piece: if `N` is trivial on an affine open
+`V`, a section over `V ⊓ basicOpen f` becomes, after multiplying by a power of `f`, the
+restriction of a section over `V`. Through the trivialisation this is exactly the
+structure-sheaf away-localization `IsAffineOpen.isLocalization_basicOpen`. -/
+theorem exists_pow_smul_eq_restrict_of_trivial {E : Scheme.{u}} (N : E.Modules)
+    (V : E.affineOpens) (f : ↑Γ(E, V.1))
+    (e : Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback V.1.ι).obj N ≅
+      unitObj V.1.toScheme))
+    (s' : ↑Γ(N, E.basicOpen f)) :
+    ∃ (n : ℕ) (s : ↑Γ(N, V.1)),
+      N.presheaf.map (homOfLE (E.basicOpen_le f)).op s =
+        (E.presheaf.map (homOfLE (E.basicOpen_le f)).op f) ^ n • s' := by
+  sorry
+
 /-- **(sv2-core, the remaining gap — sections of an invertible module localize)** On an
 affine open, a section over a basic open becomes, after multiplication by a power of the
 defining function, the restriction of a global-on-`U` section. This is the concrete
