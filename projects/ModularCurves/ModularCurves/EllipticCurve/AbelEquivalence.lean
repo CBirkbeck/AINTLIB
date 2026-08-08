@@ -692,6 +692,22 @@ noncomputable def sectionVanishingIdeal {E : Scheme.{u}} (M : E.Modules)
       rw [heq2] at hfinal
       exact hfinal
 
+/-- **(B2-head, step 1)** The `𝒪_S`-basis of the rank-one pushforward, transported to a
+global section of `M` on the total space: `Γ(f_*M, ⊤) = Γ(M, ⊤)` definitionally, so a
+generator of the invertible module of base sections *is* a global section of `M` — the `ℓ`
+of KM p. 66. -/
+theorem exists_generating_globalSection
+    {R : Type u} [CommRing R] [IsNoetherianRing R]
+    {E : Scheme.{u}} {π : E ⟶ Spec (.of R)} [IsProper π] [Flat π]
+    [IsNoetherian E] [LocallyOfFinitePresentation π]
+    (M : E.Modules) (hM : M.IsInvertible)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hpkg : HasDegreeOneFibreCohomology π M U) :
+    Module.Invertible Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+      (Scheme.Modules.baseSections π M) :=
+  baseSections_invertible_of_hasDegreeOneFibreCohomology M hM U hU hUaff hpkg
+
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
 effective Cartier divisor whose ideal is the `M`-inverse twist of the pushforward pullback:
