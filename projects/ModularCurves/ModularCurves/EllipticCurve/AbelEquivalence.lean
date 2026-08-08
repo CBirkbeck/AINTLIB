@@ -804,6 +804,18 @@ theorem mem_nonZeroDivisors_of_forall_maximal_residueField_fibre_injective
         (LocalizedModule.mk x t) = LocalizedModule.mk (x * f) t := by
     intro x t
     simp [LocalizedModule.map_mk]
+  -- the identification with the localization ring, and the transported map
+  set e := IsLocalizedModule.iso J.primeCompl
+    (Algebra.linearMap A (Localization.AtPrime J)) with he
+  have hintertwine : ∀ y : LocalizedModule J.primeCompl A,
+      e (LocalizedModule.map J.primeCompl (mulRightLinearMap f) y) =
+      mulRightLinearMap (algebraMap A (Localization.AtPrime J) f) (e y) := by
+    intro y
+    induction y using LocalizedModule.induction_on with
+    | _ x t =>
+      rw [hgen x t]
+      simp [he, mulRightLinearMap, IsLocalizedModule.iso_apply_mk, mul_comm,
+        ← Algebra.smul_def]
   sorry
 
 /-- **(B2-head, step 3 = the fibre input, KM p. 66)** A local generator of the vanishing
