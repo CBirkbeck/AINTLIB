@@ -449,6 +449,38 @@ theorem twoCover_mem_ker_iff
         ((Scheme.Modules.orderedBaseCechObjectIsoPi π M U 1).toLinearEquiv))
         twoCoverIdx1).symm
 
+/-- The `H⁰` reading of a kernel element: through the chart identifications, a Čech cocycle in
+degree zero is a single function satisfying both charts' bounds — a Riemann–Roch space element.
+Stated for the `U 0`-component; the kernel condition and the compatibilities force the
+`U 1`-component to read off the same function. -/
+theorem mem_RRspace_of_mem_ker
+    (P : TwoChartPlaces k K) {D : DivisorA k K}
+    (e₀ : (baseCechFactor π M U 0 ((twoCoverIdx1.delete 1)).1 : Type u) ≃+
+      rrspaceOn k K P.S₀ D)
+    (e₁ : (baseCechFactor π M U 0 ((twoCoverIdx1.delete 0)).1 : Type u) ≃+
+      rrspaceOn k K P.S₁ D)
+    (eC : (baseCechFactor π M U 1 twoCoverIdx1.1 : Type u) ≃+
+      rrspaceOn k K (P.S₀ ∩ P.S₁) D)
+    (h₀ : ∀ x, (eC ((twoCoverRes π M U 1).hom x) : K) = (e₀ x : K))
+    (h₁ : ∀ x, (eC ((twoCoverRes π M U 0).hom x) : K) = (e₁ x : K))
+    (w : (Scheme.Modules.orderedBaseCechObject π M U 0 : Type u))
+    (hw : ((Scheme.Modules.orderedBaseCechComplex π M U).d 0 1).hom w = 0) :
+    memRRspace k K D
+      ((e₀ ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+        baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 1)).hom w) : K)) := by
+  have hker := (twoCover_mem_ker_iff π M U w).mp hw
+  -- the two chart readings agree in `K`
+  have hagree : ((e₁ ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+      baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 0)).hom w) : K)) =
+      ((e₀ ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+        baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 1)).hom w) : K)) := by
+    rw [← h₁, ← h₀, hker]
+  rw [(P.memRRspace_iff_memRRspaceOn_and D _)]
+  constructor
+  · exact (e₀ _).2
+  · rw [← hagree]
+    exact (e₁ _).2
+
 end TwoCoverCech
 
 end FibreRR
