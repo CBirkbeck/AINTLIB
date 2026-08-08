@@ -475,6 +475,20 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
       exact le_iSup (fun h : {g // g ∈ t} ↦ E.basicOpen h.1) ⟨g, hg⟩)
     w hcompat
   refine ⟨n + K, s, ?_⟩
+  -- check the identity locally on the pieces' `f`-loci, which cover `basicOpen f`
+  refine TopCat.Sheaf.eq_of_locally_eq'
+    (F := (⟨N.presheaf, N.isSheaf⟩ : TopCat.Sheaf AddCommGrpCat E))
+    (fun g : {g // g ∈ t} ↦ E.basicOpen f ⊓ E.basicOpen g.1) (E.basicOpen f)
+    (fun g ↦ homOfLE inf_le_left)
+    (by
+      refine le_trans (le_inf le_rfl (le_trans (E.basicOpen_le f) hcover)) ?_
+      rw [inf_iSup_eq]
+      refine iSup_le fun g ↦ ?_
+      rw [inf_iSup_eq]
+      refine iSup_le fun hg ↦ ?_
+      exact le_iSup (fun h : {g // g ∈ t} ↦ E.basicOpen f ⊓ E.basicOpen h.1) ⟨g, hg⟩)
+    _ _ ?_
+  intro g
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
