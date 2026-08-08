@@ -39006,6 +39006,32 @@ to fix exactly this; nothing may build on them meanwhile.
   CoordinateRing ⊗_F F̄ (mathlib instIsDomain + AdjoinRoot base change) ⟹ F(α)⊗F̄ a domain ⟹ m = 1.
   Needed for A1d's ∀-fields quantifier; A1a–c proceed with the instance as hypothesis.
 
+#### AP2-A1 progress-2 (2026-08-08, second stretch)
+- **A1a place-set layer complete + scheme scaffolding**: `ellipticYZ` (Y,Z)-cover TwoChartPlaces PROVED
+  (`b838c1caa`); `rrspaceOn` submodule + abstract H¹ transport `surjective_sub_of_addEquiv_rrspaceOn`
+  PROVED (`5ac9dd5e3`); ULift(Fin 2) ordered-index enumeration (zeroEquiv, Unique deg-1, delete-cases)
+  PROVED (`6aa06d3fe`); `twoCover_d01_surjective` STATED with cochain assembly through
+  `orderedBaseCechObjectIsoPi` — ONE sorry: the componentwise verification tail (`161049880`).
+- **Verification-tail findings** (in-file plan + sentinel): every ingredient proved in isolation
+  (hbridge/hproj via `ModuleCat.piIsoPi_hom_ker_subtype`/`_inv_kernel_ι` + `ConcreteCategory.congr_hom`;
+  differential component via `orderedBaseCechDifferential_comp_π`; sum via
+  `erw [hom_sum, sum_apply, Fin.sum_univ_two]`); blockers: packed `Hom.hom (π ≫ res)` summands resist
+  `hom_comp` rewriting, plain `show` whnf-explodes, and the file-level
+  `respectTransparency.types false` route produced a KERNEL cast mismatch (option now removed —
+  elaboration-only acceptance, kernel rejection: new failure mode for the playbook option). Idiom to
+  copy: Epi block of `SchemeModuleOrderedBaseCechExact.lean` (`map_orderedBaseCechComplexFunctor…`,
+  funext + `_apply` lemmas, NO such option in that file). Same instance-alignment category as the
+  `tensorSection_smul` pair — candidate for the same expert alignment pass.
+- **[A1e] route refined**: vendored `isAlgebraic_of_placeValuation_le_one`'s PROOF already shows the
+  `k⟮X⟯`-minpoly of an everywhere-integral element has CONSTANT coefficients. For full-constant-field:
+  `f ∉ k` algebraic gives `k' := k(f)` with `m = [k':k] ≥ 2`; linear disjointness (X transcendental —
+  mathlib `Subalgebra.LinearDisjoint` / IntermediateField) forces `m ≤ [K:k⟮X⟯] = 2`, so `m = 2` and
+  `K = k'(X)` rational; CONTRADICTION with vendored `infinity_ramificationIdx_eq_two` since constant
+  extensions have `e = 1` at ∞ (1/X stays a uniformizer, all characteristics). Two sub-leaves:
+  (i) constants linear disjointness `[k'(X):k(X)] = [k':k]` inside K; (ii) `K = k'(X) ⟹ e(∞) = 1`.
+  Alternative route (geometric integrality of `CoordinateRing ⊗_F F̄` via AdjoinRoot base change +
+  mathlib instIsDomain) still open as fallback.
+
 #### [AP2-A1b] `H¹ = 0` for a degree-one presentation (pole-peeling, the real math)
 - **File**: `EllipticCurve/FibreDegreeOneHOne.lean` (new) · **Depends on**: A1a
 - **Statement**: `Subsingleton (Sheaf.H M 1)` (and `q ≥ 1` via dimension/cover bound) for `M` with a
