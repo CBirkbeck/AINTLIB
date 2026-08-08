@@ -39282,6 +39282,16 @@ come from properness of `π` + finiteness of the fibres (degree one), i.e. from 
 image of the evaluation `M^∨ → 𝒪`) plus `IsInvertible.dual`; note `Picard/IdealModule.lean`'s
 `idealGenHom`/`bijective_idealGenHom_app` (:240/:309) is exactly the local comparison needed.
 
+**TRAP RECORDED** (2026-08-08, for anyone routing through the flatness criterion): in
+`ForMathlib/LocalFlatnessCriterion.lean` the variant
+`injective_of_lTensor_residueField_injective_sModule` (:448) **contains a `sorry`** (the Artin–Rees /
+Krull descending-filtration argument) — do NOT route through it or through anything downstream of it.
+The MAIN path is clean and axiom-verified standard-three: `Module.Flat.coker_of_flat_of_fibre_injective`
+(:261) and `Module.Flat.fibre_injective_of_maximal` (:190), both resting on the proved R-substrate core
+`injective_of_lTensor_residueField_injective` (:118) and its `_free` variant (:346). AP2-B2's `h-a` must
+therefore use the R-substrate form (N finite over R, M flat over R, R local) — which is exactly the
+shape available on affine charts of a flat proper family.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
