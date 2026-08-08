@@ -115,6 +115,23 @@ theorem _root_.Module.finrank_eq_one_of_bijective_algebraMap
   have e : R ≃ₗ[R] A := LinearEquiv.ofBijective (Algebra.linearMap R A) h
   rw [← e.finrank_eq, Module.finrank_self]
 
+/-- Over a family whose structure map on global sections is bijective — the `⊤`-component of
+`UniversallyOConnected` — the base-linear global sections of the structure sheaf are free of rank
+one over the base ring. This is step 5 of the route below. -/
+theorem finrank_baseSections_unitObj_eq_one {X S : Scheme.{u}} (p : X ⟶ S)
+    [Nontrivial Γ(S, (⊤ : S.Opens))] (h : Function.Bijective p.appTop.hom) :
+    Module.finrank Γ(S, (⊤ : S.Opens))
+      (AlgebraicGeometry.Scheme.Modules.baseSections p (unitObj X)) = 1 := by
+  letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(X, (⊤ : X.Opens)) := p.appTop.hom.toAlgebra
+  have e : (AlgebraicGeometry.Scheme.Modules.baseSections p (unitObj X) : Type u) ≃ₗ[
+      Γ(S, (⊤ : S.Opens))] Γ(X, (⊤ : X.Opens)) :=
+    { __ := AddEquiv.refl (AlgebraicGeometry.Scheme.Modules.baseSections p (unitObj X) : Type u)
+      map_smul' := by
+        intro r x
+        exact AlgebraicGeometry.Scheme.Modules.baseSections_smul p (unitObj X) r x }
+  rw [e.finrank_eq]
+  exact Module.finrank_eq_one_of_bijective_algebraMap _ _ h
+
 /-- **(KM-SEESAW-1′, scheme-side)** The base-changed degree-zero Čech kernel is free of rank one
 over `Γ(T, ⊤)` for *any* affine `T` over `S` on whose fibre `M` is trivial — no field hypothesis.
 
@@ -146,7 +163,32 @@ theorem orderedBaseCech_appTop_kernel_finrank_of_fibre_trivial
     let C := orderedBaseCechComplex π M U
     Module.finrank Γ(T, (⊤ : T.Opens))
       (LinearMap.ker ((C.d 0 1).hom.baseChange Γ(T, (⊤ : T.Opens)))) = 1 := by
-  sorry
+  dsimp only
+  letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) := t.appTop.hom.toAlgebra
+  letI : M.IsQuasicoherent := hM.isQuasicoherent
+  set p : Limits.pullback π t ⟶ T := Limits.pullback.snd π t with hp
+  set Mt := (AlgebraicGeometry.Scheme.Modules.pullback (Limits.pullback.fst π t)).obj M with hMt
+  set Ut : ι → (Limits.pullback π t).Opens :=
+    fun i => Limits.pullback.fst π t ⁻¹ᵁ U i with hUtdef
+  have hUtcover : IsOpenCover Ut := (Limits.pullback.fst π t).iSup_preimage_eq_top hU
+  -- (1) algebraic base change of the kernel is the kernel after extension of scalars
+  let e1 := ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv
+    (orderedBaseCechComplex π M U) Γ(T, (⊤ : T.Opens))
+  -- (2)+(3) that complex is the fibre's own ordered base-Čech complex
+  let eC := orderedBaseCechComplexBaseChangeIso π t M U hUaff
+  let e2 := HomologicalComplex.kernelZeroLinearEquivOfHom eC.hom eC.inv
+    (by rw [← HomologicalComplex.comp_f, eC.hom_inv_id, HomologicalComplex.id_f])
+    (by rw [← HomologicalComplex.comp_f, eC.inv_hom_id, HomologicalComplex.id_f])
+  -- (4) that kernel is the fibre's base-linear global sections
+  let e3 := (AlgebraicGeometry.Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential
+    p Mt Ut hUtcover).toLinearEquiv
+  -- (5) fibrewise triviality, then `UniversallyOConnected`
+  let e4 := (AlgebraicGeometry.Scheme.Modules.baseSectionsMapIso p hfibt.some).toLinearEquiv
+  have hbij : Function.Bijective p.appTop.hom := by
+    haveI := hπ t (⊤ : T.Opens)
+    exact (ConcreteCategory.bijective_of_isIso (p.app (⊤ : T.Opens)))
+  rw [(e1.trans (e2.trans (e3.symm.trans e4))).finrank_eq]
+  exact finrank_baseSections_unitObj_eq_one p hbij
 
 /-- **(KM-SEESAW-1′-res)** The residue-field form: at a point `s` of the base, fibrewise triviality of
 `M` makes `ker (d⁰ ⊗ κ(s))` one-dimensional.
@@ -198,7 +240,27 @@ theorem orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial
     let C := orderedBaseCechComplex π M U
     Module.finrank ↥(S.residueField s)
       (LinearMap.ker ((C.d 0 1).hom.baseChange ↥(S.residueField s))) = 1 := by
-  sorry
+  dsimp only
+  letI : Algebra Γ(S, (⊤ : S.Opens))
+      Γ(Spec (S.residueField s), (⊤ : (Spec (S.residueField s)).Opens)) :=
+    (S.fromSpecResidueField s).appTop.hom.toAlgebra
+  letI : Algebra Γ(Spec (S.residueField s), (⊤ : (Spec (S.residueField s)).Opens))
+      ↥(S.residueField s) :=
+    (Scheme.ΓSpecIso (S.residueField s)).hom.hom.toAlgebra
+  letI : Algebra Γ(S, (⊤ : S.Opens)) ↥(S.residueField s) :=
+    ((S.fromSpecResidueField s).appTop ≫
+      (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
+  letI : IsScalarTower Γ(S, (⊤ : S.Opens))
+      Γ(Spec (S.residueField s), (⊤ : (Spec (S.residueField s)).Opens)) ↥(S.residueField s) :=
+    IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
+  letI : Field Γ(Spec (S.residueField s), (⊤ : (Spec (S.residueField s)).Opens)) :=
+    (MulEquiv.isField (Field.toIsField ↥(S.residueField s))
+      (Scheme.ΓSpecIso (S.residueField s)).commRingCatIsoToRingEquiv.toMulEquiv).toField
+  rw [LinearMap.finrank_ker_baseChange_eq
+    Γ(Spec (S.residueField s), (⊤ : (Spec (S.residueField s)).Opens)) ↥(S.residueField s)
+    ((orderedBaseCechComplex π M U).d 0 1).hom]
+  exact orderedBaseCech_appTop_kernel_finrank_of_fibre_trivial hπ hM U hU hUaff
+    (S.fromSpecResidueField s) (hfib (S.fromSpecResidueField s))
 
 /-- **(KM-SEESAW-1′)** Fibrewise triviality makes the residue rank of `ker d⁰` equal to `1` at every
 prime.
