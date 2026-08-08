@@ -39421,6 +39421,17 @@ rests on that one geometric fact, whose natural source is the `AP2-A2` rank-one 
 `exists_relEffCartierDiv_of_section`, `isInvertible_idealModule_of_section`, plus
 `sectionVanishingIdeal` and the entire sections-localize chain.
 
+**AP-D3 restatement — precise target for the next segment** (2026-08-08): the consumable content is
+`exists_normalized_trivialization`: given trivialisations of an invertible module over the preimages
+`f⁻¹(U i)` of a base cover, there are trivialisations whose overlap transition units lie in `kUnits`
+(value `1` along the zero section). Route: rescale each `e i` by the unit obtained from evaluating it
+along `z` (an element of `Γ(T, U i)ˣ` pulled back to `f⁻¹(U i)`); the rescaled family's transition
+units differ from the originals by that ratio, which cancels along `z`. Ingredients all present and
+sorry-free in `WeilPairing/UnitSheaf.lean`: `kUnitsEval`, `kUnits`, `mem_kUnits_iff`,
+`kUnits_eq_bot` (= `H⁰ = 1`), `kUnits_restrict_mem`; the transition units themselves are
+`glueTransitionUnit` / `trivializationTransitionUnit`. NOTE when writing it: `unitObj` is NOT in scope
+in that file — qualify it (`AlgebraicGeometry.Scheme.Modules.unitObj`) or add the `open`.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
