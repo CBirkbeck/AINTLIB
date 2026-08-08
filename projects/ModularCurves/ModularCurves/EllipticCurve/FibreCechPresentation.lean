@@ -342,20 +342,56 @@ theorem twoCover_d01_surjective
     if h : i = twoCoverIdx1.delete 1 then h ▸ p₀
     else (idx0_eq_delete_or i).resolve_left h ▸ p₁
   refine ⟨(Scheme.Modules.orderedBaseCechObjectIsoPi π M U 0).inv.hom x, ?_⟩
-  -- Verification plan (each ingredient proved in isolation earlier; assembly pending):
-  -- componentwise at the unique degree-one index through
-  -- `orderedBaseCechObjectIsoPi`.toLinearEquiv.injective + Subsingleton;
-  -- `ModuleCat.piIsoPi_hom_ker_subtype`/`piIsoPi_inv_kernel_ι` (via
-  -- `ConcreteCategory.congr_hom`) turn iso components into `Pi.π`-applications and give
-  -- `(Pi.π _ i).hom ((isoPi₀).inv.hom x) = x i`; `orderedBaseCechComplex_d` +
-  -- `orderedBaseCechDifferential_comp_π` give the two-coface sum, expanded by
-  -- `erw [ModuleCat.hom_sum, LinearMap.sum_apply, Fin.sum_univ_two]`; the packed
-  -- `Hom.hom (π ≫ res)` summands need the elementwise idiom of the Epi block in
-  -- `ForMathlib/SchemeModuleOrderedBaseCechExact.lean` (a plain `show` whnf-explodes,
-  -- and the erw/simp route trips a kernel-level cast under
-  -- `respectTransparency.types false`); close with `x`-components
-  -- (`dif_pos`/`dif_neg` + `zeroEquiv_delete_*`), `← sub_eq_add_neg`, and `hp`.
-  sorry
+  -- the two degree-zero indices are distinct, and the assembled components read off
+  have hne : (twoCoverIdx1 : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1).delete 0 ≠
+      twoCoverIdx1.delete 1 := by
+    intro h
+    have h' := congrArg (TwoCoverIndex.zeroEquiv.{u}) h
+    rw [zeroEquiv_delete_zero, zeroEquiv_delete_one] at h'
+    exact absurd h' (by decide)
+  -- iso components are the categorical projections; projections read off the cochain
+  have hbridge : ∀ z : (Scheme.Modules.orderedBaseCechObject π M U 1 : Type u),
+      (Scheme.Modules.orderedBaseCechObjectIsoPi π M U 1).toLinearEquiv z twoCoverIdx1 =
+        (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1 =>
+          baseCechFactor π M U 1 j.1) twoCoverIdx1).hom z := fun z =>
+    ConcreteCategory.congr_hom
+      (ModuleCat.piIsoPi_hom_ker_subtype
+        (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1 =>
+          baseCechFactor π M U 1 j.1) twoCoverIdx1) z
+  have hproj : ∀ i : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0,
+      (Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+        baseCechFactor π M U 0 j.1) i).hom
+          ((Scheme.Modules.orderedBaseCechObjectIsoPi π M U 0).inv.hom x) = x i := fun i =>
+    ConcreteCategory.congr_hom
+      (ModuleCat.piIsoPi_inv_kernel_ι
+        (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+          baseCechFactor π M U 0 j.1) i) x
+  -- compare componentwise through the pi iso at the unique degree-one index
+  apply (Scheme.Modules.orderedBaseCechObjectIsoPi π M U 1).toLinearEquiv.injective
+  funext j
+  have hj : j = twoCoverIdx1 := Subsingleton.elim _ _
+  subst hj
+  refine (hbridge _).trans (Eq.trans ?_ (hbridge y).symm)
+  rw [Scheme.Modules.orderedBaseCechComplex_d]
+  refine Eq.trans (show _ = ((Scheme.Modules.orderedBaseCechDifferential π M U 0) ≫
+    Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 1 =>
+      baseCechFactor π M U 1 j.1) twoCoverIdx1).hom
+        ((Scheme.Modules.orderedBaseCechObjectIsoPi π M U 0).inv.hom x) from rfl) ?_
+  refine Eq.trans (ConcreteCategory.congr_hom
+    (Scheme.Modules.orderedBaseCechDifferential_zero_comp_π_sub π M U twoCoverIdx1)
+    ((Scheme.Modules.orderedBaseCechObjectIsoPi π M U 0).inv.hom x)) ?_
+  refine Eq.trans (show _ = (twoCoverRes π M U 0).hom
+      ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+        baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 0)).hom
+          ((Scheme.Modules.orderedBaseCechObjectIsoPi π M U 0).inv.hom x)) -
+      (twoCoverRes π M U 1).hom
+        ((Pi.π (fun j : Scheme.Modules.OrderedCechIndex (ULift.{u} (Fin 2)) 0 =>
+          baseCechFactor π M U 0 j.1) (twoCoverIdx1.delete 1)).hom
+            ((Scheme.Modules.orderedBaseCechObjectIsoPi π M U 0).inv.hom x)) from rfl) ?_
+  rw [hproj, hproj,
+    show x (twoCoverIdx1.delete 0) = p₁ from by simp only [x, dif_neg hne],
+    show x (twoCoverIdx1.delete 1) = p₀ from by simp only [x, dif_pos]]
+  exact hp
 
 end TwoCoverCech
 
