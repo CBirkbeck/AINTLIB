@@ -39618,6 +39618,24 @@ per piece ε is iso by the triangle identity + IsIso η (reuse the haveI-block f
 nonempty_pushforwardPullback_iso with the restricted q and hq' as in P-invertible). Beware: local
 abstract isos do NOT glue (Hida-trap) — only the canonical ε carries the gluing.
 
+**AP2-B1 hres plan upgrade** (2026-08-08, OpenAdjunction discovery): the counit-restriction square
+should NOT be hand-proved — `DualPullback/OpenAdjunction.lean` already has
+`openPullbackSquareAdjunctionIsoT f U : pullback f ⋙ restrictFunctor (f⁻¹ᵁU).ι ≅
+restrictFunctor U.ι ⋙ pullback (f∣_U)` DEFINED VIA `Adjunction.leftAdjointUniq` of the composed
+adjunctions (`(pbAdj f).comp (restrictAdjunction (f⁻¹ᵁU).ι)` vs
+`(restrictAdjunction U.ι).comp (pbAdj (f∣_U))` twisted by `openPushforwardSquareIsoT`), plus
+`openPullbackSquareAdjunctionIso_eq_explicitT` (:151) identifying it with the explicit
+pullbackComp/Congr chain, and `conjugateEquiv_*` lemmas. So hres = mathlib adjunction-uniqueness
+calculus: `Adjunction.leftAdjointUniq_hom_counit` / `unit_leftAdjointUniq_hom` (Adjunction/Unique.lean)
++ `Adjunction.comp`-counit formula unfold, relating `(restrictFunctor ι').map ε_K`-components to the
+piece-adjunction counit whose iso-ness follows from triangle + IsIso η (q-generalized block).
+Sub-steps for next segment: (h1) extract `hploc` from isInvertible_pushforward_discrepancy as a
+standalone private lemma; (h2) `IsIso ε^{piece}_{fᵢ^*Nᵢ}` := triangle (`left_triangle_components`)
++ IsIso (fᵢ^* η) [Functor.map_isIso of the proved IsIso η]; (h3) counit-naturality conjugation by
+hploc-iso → `IsIso ε^{piece}_{K|ᵢ}`; (h4) the leftAdjointUniq-square transports ε^{piece} to
+(restrict ι').map ε_K up to the explicit isos; (h5) components + image-open dictionary
+(`restrictFunctor_map_app_apply` rfl + ι''ι⁻¹W = W for W ≤ piece) give the app-bijectivity.
+
 **AP2-B1a dependency chart** (2026-08-07 final): the capped smul pair is DOUBLY load-bearing — `hcompat`
 (proved, cites it) AND `hbij` (route: `r • tensorSection a b = tensorSection (r•a) b` splits the
 bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,
