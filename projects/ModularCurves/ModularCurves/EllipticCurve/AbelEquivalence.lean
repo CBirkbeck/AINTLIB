@@ -731,6 +731,26 @@ theorem sectionVanishingIdeal_locally_span {E : Scheme.{u}} (M : E.Modules)
     (overTrivializationOfRestrictIso M V
       (restrictIsoOfPullbackIso M V (restrictTrivialization hVW e)))⟩
 
+/-- **(B2-head, step 3 = the fibre input, KM p. 66)** A local generator of the vanishing
+ideal of the distinguished section is a nonzerodivisor: *"we are reduced to the case
+`S = Spec(k)` with `k` a field, and `ℓ ∈ H⁰(E,L)` a `k`-basis, so non-zero, in which case
+the assertion is obvious"* — over a fibre the trivialised section is a nonzero element of a
+domain (the fibre is integral), and the fibrewise criterion
+(`ForMathlib/LocalFlatnessCriterion.lean`, Stacks 00ME) lifts injectivity off the fibres. -/
+theorem evalGenerator_mem_nonZeroDivisors
+    {R : Type u} [CommRing R] [IsNoetherianRing R]
+    {E : Scheme.{u}} {π : E ⟶ Spec (.of R)} [IsProper π] [Flat π]
+    [IsNoetherian E] [LocallyOfFinitePresentation π]
+    (M : E.Modules) (hM : M.IsInvertible) (σ : ↑Γ(M, ⊤))
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hpkg : HasDegreeOneFibreCohomology π M U)
+    (hσ : σ ≠ 0)
+    (V : E.affineOpens) (f : ↑Γ(E, V.1))
+    (hspan : (sectionVanishingIdeal M hM σ).ideal V = Ideal.span {f}) :
+    f ∈ nonZeroDivisors ↑Γ(E, V.1) := by
+  sorry
+
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
 effective Cartier divisor whose ideal is the `M`-inverse twist of the pushforward pullback:
