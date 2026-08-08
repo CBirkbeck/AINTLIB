@@ -591,6 +591,23 @@ theorem twoCover_ker_reading_surjective
     rw [h₁, h₀, e₀.apply_symm_apply, e₁.apply_symm_apply]
   · rw [isoPiInv_component, hx1, e₀.apply_symm_apply]
 
+/-- Above degree one, the two-cover ordered Čech complex is exact for size reasons: there are
+no strictly increasing tuples of length `≥ 3` in a two-element order. -/
+theorem twoCover_exact_of_one_lt (n : ℕ) (hn : 1 ≤ n) :
+    Function.Exact
+      (((Scheme.Modules.orderedBaseCechComplex π M U).d n (n + 1)).hom)
+      (((Scheme.Modules.orderedBaseCechComplex π M U).d (n + 1) (n + 2)).hom) := by
+  haveI hsub : Subsingleton
+      ((Scheme.Modules.orderedBaseCechComplex π M U).X (n + 1) : Type u) :=
+    Scheme.Modules.orderedBaseCechObject_subsingleton_of_card_le π M U (n + 1)
+      (by simpa using hn)
+  intro y
+  constructor
+  · intro _
+    exact ⟨0, Subsingleton.elim _ _⟩
+  · intro _
+    rw [Subsingleton.elim y 0, map_zero]
+
 end TwoCoverCech
 
 end FibreRR
