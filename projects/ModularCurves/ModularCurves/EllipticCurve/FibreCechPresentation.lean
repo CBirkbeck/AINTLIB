@@ -34,7 +34,7 @@ splitting.
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 open FunctionField FunctionField.Chart Polynomial
 
-open scoped Polynomial RatFunc WithZero
+open scoped Polynomial Polynomial.Bivariate RatFunc WithZero
 
 universe u
 
@@ -95,6 +95,90 @@ theorem exists_sub_of_overlap (W : WeierstrassCurve.Affine k) [W.IsElliptic]
   exact exists_sub_of_memRRspaceOn_inter hfull P.diff_finite₀ hg
 
 end TwoChartPlaces
+
+section EllipticYZ
+
+variable (W : WeierstrassCurve.Affine k) [W.IsElliptic]
+variable [Algebra W.CoordinateRing K] [IsFractionRing W.CoordinateRing K]
+  [IsScalarTower k[X] W.CoordinateRing K]
+
+/-- The place set of the `Y`-chart of the projective Weierstrass model: the infinite place
+together with the finite places at which the coordinate `y` is a unit. -/
+def yChartPlaces : Set (PlaceA k K) :=
+  Set.range Sum.inr ∪
+    Sum.inl '' {v | placeValuation k K (Sum.inl v) (W.yCoord K) = 1}
+
+/-- The `y`-coordinate is nonzero in the function field. -/
+theorem yCoord_ne_zero : W.yCoord K ≠ 0 := fun h0 =>
+  WeierstrassCurve.Affine.yCoord_notMem_range W K
+    ⟨0, by rw [map_zero, h0]⟩
+
+/-- The `y`-coordinate is integral at every finite place. -/
+theorem placeValuation_yCoord_le_one
+    (v : IsDedekindDomain.HeightOneSpectrum (ringOfIntegers k K)) :
+    placeValuation k K (Sum.inl v) (W.yCoord K) ≤ 1 := by
+  have htrans := algebraMap_coordinateRingEquivIntegers (K := K) W
+    (WeierstrassCurve.Affine.CoordinateRing.mk W Y)
+  have h1 : W.yCoord K = algebraMap (ringOfIntegers k K) K
+      (WeierstrassCurve.Affine.Chart.coordinateRingEquivIntegers W K
+        (WeierstrassCurve.Affine.CoordinateRing.mk W Y)) := by
+    rw [htrans]
+    rfl
+  rw [h1]
+  simpa [placeValuation] using
+    IsDedekindDomain.HeightOneSpectrum.valuation_le_one (K := K) v _
+
+/-- **(`AP2-A1a-ii`)** The `(Y, Z)`-cover place combinatorics of the projective Weierstrass
+model of an elliptic curve: the `Z`-chart carries the finite places, the `Y`-chart the
+(unique) infinite place and the finite places off `y = 0`; each chart misses only finitely
+many places of the other. -/
+noncomputable def ellipticYZ : TwoChartPlaces k K where
+  S₀ := finitePlaces k K
+  S₁ := yChartPlaces W
+  union_eq := by
+    rw [Set.eq_univ_iff_forall]
+    rintro (v | v)
+    · exact Or.inl ⟨v, rfl⟩
+    · exact Or.inr (Or.inl ⟨v, rfl⟩)
+  diff_finite₀ := by
+    have hfin := (IsDedekindDomain.HeightOneSpectrum.Support.finite
+      (R := ringOfIntegers k K) ((W.yCoord K)⁻¹)).image
+      (Sum.inl : IsDedekindDomain.HeightOneSpectrum (ringOfIntegers k K) → PlaceA k K)
+    refine hfin.subset ?_
+    rintro w ⟨⟨v, rfl⟩, hw⟩
+    refine ⟨v, ?_, rfl⟩
+    have hne : placeValuation k K (Sum.inl v) (W.yCoord K) ≠ 1 := fun h1 =>
+      hw (Or.inr ⟨v, h1, rfl⟩)
+    have hlt : placeValuation k K (Sum.inl v) (W.yCoord K) < 1 :=
+      lt_of_le_of_ne (placeValuation_yCoord_le_one W v) hne
+    have h0 : placeValuation k K (Sum.inl v) (W.yCoord K) ≠ 0 :=
+      (Valuation.ne_zero_iff _).mpr (yCoord_ne_zero (K := K) W)
+    show 1 < v.valuation K ((W.yCoord K)⁻¹)
+    have hv : v.valuation K (W.yCoord K) < 1 := by
+      simpa [placeValuation] using hlt
+    have hv0 : v.valuation K (W.yCoord K) ≠ 0 := by
+      simpa [placeValuation] using h0
+    rw [map_inv₀]
+    exact one_lt_inv_iff₀.mpr ⟨zero_lt_iff.mpr hv0, hv⟩
+  diff_finite₁ := by
+    letI : Subsingleton
+        (IsDedekindDomain.HeightOneSpectrum (infiniteIntegers k K)) :=
+      ⟨fun v w =>
+        WeierstrassCurve.Affine.Chart.infinity_heightOne_unique W K v w⟩
+    refine (Set.finite_range (Sum.inr :
+      IsDedekindDomain.HeightOneSpectrum (infiniteIntegers k K) → PlaceA k K)).subset ?_
+    rintro w ⟨hw, hnot⟩
+    rcases hw with ⟨v, rfl⟩ | ⟨v, -, rfl⟩
+    · exact ⟨v, rfl⟩
+    · exact absurd ⟨v, rfl⟩ hnot
+
+@[simp]
+theorem ellipticYZ_S₀ : (ellipticYZ (K := K) W).S₀ = finitePlaces k K := rfl
+
+@[simp]
+theorem ellipticYZ_S₁ : (ellipticYZ (K := K) W).S₁ = yChartPlaces W := rfl
+
+end EllipticYZ
 
 end FibreRR
 
