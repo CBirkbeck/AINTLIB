@@ -738,6 +738,16 @@ theorem mem_nonZeroDivisors_of_ne_zero_of_isDomain {A : Type u} [CommRing A] [Is
     {f : A} (hf : f ≠ 0) : f ∈ nonZeroDivisors A :=
   mem_nonZeroDivisors_of_ne_zero hf
 
+/-- **(B2-head, step 3b)** The transport shape KM's reduction needs, isolated: on an affine
+open of the total space, if multiplication by `f` is injective then `f` is a nonzerodivisor.
+Stated so the geometric work reduces to producing that injectivity from the fibres via
+`ForMathlib/LocalFlatnessCriterion.lean`. -/
+theorem mem_nonZeroDivisors_of_mul_injective {A : Type u} [CommRing A] {f : A}
+    (hinj : Function.Injective fun x : A ↦ x * f) : f ∈ nonZeroDivisors A :=
+  mem_nonZeroDivisors_iff.mpr
+    ⟨fun x hx ↦ hinj (show x * f = 0 * f by rw [zero_mul, mul_comm]; exact hx),
+      fun x hx ↦ hinj (show x * f = 0 * f by rw [zero_mul]; exact hx)⟩
+
 /-- **(B2-head, step 3 = the fibre input, KM p. 66)** A local generator of the vanishing
 ideal of the distinguished section is a nonzerodivisor: *"we are reduced to the case
 `S = Spec(k)` with `k` a field, and `ℓ ∈ H⁰(E,L)` a `k`-basis, so non-zero, in which case
