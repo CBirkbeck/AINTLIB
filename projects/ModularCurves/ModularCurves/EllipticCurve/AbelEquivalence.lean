@@ -847,6 +847,21 @@ theorem evalGenerator_mem_nonZeroDivisors
     f ∈ nonZeroDivisors ↑Γ(E, V.1) := by
   sorry
 
+/-- **(B3-degree, section case)** The divisor of a section has degree one at every point —
+the tree's `sectionDivisor_degree`, restated in the form the Abel construction consumes: a
+`RelEffCartierDiv` whose ideal is a section's kernel has degree one. Consequence of
+`Scheme.IdealSheafData` extensionality plus `RelEffCartierDiv.sectionDivisor_degree`. -/
+theorem degree_eq_one_of_ideal_eq_ker {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (D : RelEffCartierDiv π) (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (hD : D.ideal = Scheme.Hom.ker z) (s : S) : D.degree s = 1 := by
+  have hdeg := RelEffCartierDiv.sectionDivisor_degree π z hz s
+  have hideal : (RelEffCartierDiv.sectionDivisor π z hz).ideal = D.ideal := by
+    rw [hD]
+    rfl
+  unfold RelEffCartierDiv.degree at hdeg ⊢
+  rw [← hideal]
+  convert! hdeg using 3
+
 /-- **(KM 1.2.7, the direction the Abel map needs)** A relative effective Cartier divisor of
 degree one is the divisor of a section. Not yet in the tree: `CartierDivisor.lean` builds the
 section → divisor direction (`sectionDivisor`, `sectionDivisor_degree`,
