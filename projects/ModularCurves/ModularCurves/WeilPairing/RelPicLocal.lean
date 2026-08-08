@@ -883,7 +883,20 @@ theorem nonempty_discrepancy_iso_pullback_pushforward {X S : Scheme.{u}} {p : X 
       (AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj
         ((AlgebraicGeometry.Scheme.Modules.pushforward (pullback.snd p g)).obj
           (tensorObj M (dualObj M')))) := by
-  sorry
+  -- the counit's components are bijective on every open inside a piece of the cover
+  -- (deep leaf: counit-restriction square + triangle identity + IsIso η on the piece)
+  have hres : ∀ (i : ι) (W : (pullback p g).Opens), W ≤ pullback.snd p g ⁻¹ᵁ U i →
+      Function.Bijective (AlgebraicGeometry.Scheme.Modules.Hom.app
+        ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+          (pullback.snd p g)).counit.app (tensorObj M (dualObj M'))) W) := by
+    sorry
+  haveI : IsIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+      (pullback.snd p g)).counit.app (tensorObj M (dualObj M'))) :=
+    AlgebraicGeometry.Scheme.Modules.isIso_of_bijective_app_on_cover _
+      (fun i => pullback.snd p g ⁻¹ᵁ U i)
+      ((pullback.snd p g).iSup_preimage_eq_top hU) hres
+  exact ⟨(asIso ((AlgebraicGeometry.Scheme.Modules.pullbackPushforwardAdjunction
+    (pullback.snd p g)).counit.app (tensorObj M (dualObj M')))).symm⟩
 
 /-- **(AP2-B1, KM p. 65)** The `f^*`-twist equivalence on invertible sheaves is Zariski-local
 on the base — assembled from the two leaves by Picard-group algebra: with
