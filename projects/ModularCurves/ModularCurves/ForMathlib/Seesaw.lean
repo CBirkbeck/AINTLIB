@@ -147,10 +147,13 @@ theorem orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial
     {M : X.Modules} (hM : IsInvertible M)
     {ι : Type u} [Fintype ι] [LinearOrder ι]
     (U : ι → X.Opens) (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
-    (s : S) [Algebra Γ(S, (⊤ : S.Opens)) ↥(S.residueField s)]
+    (s : S)
     (hfib : ∀ {k : Type u} [Field k] (x : Spec (.of k) ⟶ S),
       Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
           (Limits.pullback.fst π x)).obj M ≅ unitObj (Limits.pullback π x))) :
+    letI : Algebra Γ(S, (⊤ : S.Opens)) ↥(S.residueField s) :=
+      ((S.fromSpecResidueField s).appTop ≫
+        (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
     let C := orderedBaseCechComplex π M U
     Module.finrank ↥(S.residueField s)
       (LinearMap.ker ((C.d 0 1).hom.baseChange ↥(S.residueField s))) = 1 := by
