@@ -193,7 +193,42 @@ mathematics:
       Model to imitate throughout: `kernel_data_of_hasDegreeOneFibreCohomology`
       (`EllipticCurve/DegreeOneFibreCohomology.lean:126`) — same shape, `hexact` replaced by
       `hhigh` + reducedness. Remember to ADD `hhigh` to KM-SEESAW-2″'s signature.
-  * **T6** — the counit iso (B.2 above; write the comparison diagram explicitly).
+  * **T6 — IN PROGRESS, ONE SORRY LEFT, AND IT IS API NOT MATHEMATICS.**
+    `ForMathlib/SeesawBaseLocallyTrivial.lean`. Target
+    `exists_baseCover_restrict_unitObj_iso_of_invertible_baseSections` is stated as planned (not
+    weakened) and now carries Half B.1's binders (`[IsReduced S] [IsNoetherian S]`, the cover,
+    `hhigh`, `hrank`). `hrank` is a HYPOTHESIS, not derived from `hfib`, to avoid an import cycle —
+    `ForMathlib/Seesaw.lean` will import this file. `[IsReduced S]` is genuinely needed (sole input
+    to `projective_quotient_range_of_constant_finrank_ker_baseChange`).
+    PROVED sorry-free: `exists_finset_dual_apply_sum_eq_one`, `bijective_smul_of_isUnit_evalSection`,
+    `nonempty_restrict_unitObj_iso_of_bijective_smul`,
+    `nonempty_restrict_unitObj_iso_of_isUnit_evalSection`, `tmul_one_ne_zero_of_isUnit_dual_apply`,
+    and in `SeesawPushforwardInvertible.lean` the KEY comparison
+    `kerBaseChangeComparison_orderedBaseCech_zero_bijective` :
+    `A ⊗_{Γ(S,⊤)} Γ(X,M) ≅ ker(d⁰ ⊗ A) = H⁰(X_A, M_A)` — i.e. `π_*M ⊗ κ(s) ↪ H⁰(X_s,M_s)`, the input
+    that was reported missing. Steps 1 and 2 of the blocked lemma are therefore done.
+    DESIGN WIN worth keeping: the base cover comes from surjectivity of `contractLeft`
+    (`1 = ∑ φ_k(ℓ_k)`, take `V_k := S.basicOpen (φ_k ℓ_k)`), NOT from a free-locus trivialisation —
+    so the `ℓ_k` are honest GLOBAL sections and the proof never needs quasi-coherence of `π_*M` on a
+    non-affine `X`.
+    NON-RESCUES already checked (do not retry): invertibility of `π_*M` alone is insufficient (DVR:
+    `P = R·t ⊆ C⁰ = R`); and the dimension count alone is insufficient (a map between 1-dimensional
+    spaces can still be zero). The statement is NOT false — in the `k[ε]/(ε²)` example `π_*M` is not
+    invertible, so `hinv` excludes it.
+  * **T6-api (NEW TICKET — the only thing between here and Half B.2)**: element-level `_apply`/`_coe`
+    lemmas for the five-link chain
+    `baseChangeKernelZeroLinearEquiv → orderedBaseCechComplexBaseChangeIso →
+     kernelZeroLinearEquivOfHom → baseSectionsIsoKernelOrderedBaseCechDifferential →
+     baseSectionsMapIso`.
+    The chain exists but its only consumer uses it for a `finrank` count, so NONE of the five links
+    has an element description; `orderedBaseCechComplexBaseChangeIso` has only `…_hom_f`, reducing
+    to `orderedBaseCechXBaseChangeIso`, which has none either. Needed: the chain sends `1 ⊗ ℓ` to the
+    pullback of `ℓ` along `pullback.fst π t` (step 3), plus `evalSection`-vs-pullback and germ
+    compatibility (step 4). Lands in `ForMathlib/AffineModuleCechBaseChange.lean` and
+    `ForMathlib/SchemeModuleOrderedBaseCechZero.lean`.
+    TACTIC NOTE from this pass: `isDefEq`/`whnf` stalls here are fixed STRUCTURALLY — `let` not
+    `set`, explicit `LinearMap.baseChange_comp` terms instead of `rw`, and
+    `cast (congrArg Function.Bijective …)` instead of `rw` on a function equation.
   * **T7** — generalise the RelPicLocal chain to a bare `f : Y ⟶ T`.
   * **T8** — assemble; then Blocker 2 closes and Blocker 3 opens.
 
