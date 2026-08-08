@@ -645,3 +645,85 @@ Proof: `coker u ⊗ κ(p) ≅ coker(u ⊗ κ(p))` by right exactness, of dimensi
 `rk K¹ − rk_p K⁰ + n`, locally constant since `K⁰`, `K¹` are finite projective
 (`Module.isLocallyConstant_rankAtStalk`); apply **0FWG (global form, now proved)** to `coker u`;
 the two resulting splittings make `ker u` a direct summand of `K⁰` and survive `⊗`.
+
+---
+
+## BLOCKER 3 — scoping survey (2026-08-08, read-only). **Corrects this plan in two places.**
+
+### Correction 1 — the universal pair is NOT where this plan said
+
+`EllipticCurve/AdditionBaseChange.lean` does **not** contain `C ×_U C` or the universal sections.
+The universal pair is `projects/ModularCurves/ModularCurves/WeilPairing/TautologicalPair.lean`
+(293 lines, **sorry-free**), and it is further along than the board recorded:
+
+* `pairBase π := pullback π π` (:34), `pairCurve π := pullback π (pairBaseπ π)` (:40)
+* `tautPoint₁` (:50), `tautPoint₂` (:59) — the two universal sections
+* **`pairClassify (g : T ⟶ S) (P Q : {w // w ≫ π = g}) : T ⟶ pairBase π` (:79)** with
+  `pairClassify_fst/snd/π` (:84, :90, :98) — this **is** "every pair of sections is a base change of
+  the universal pair", already proved. **That is most of T9b.**
+* `section_ext_of_forall_specPoint` (:285) — sections over a reduced base agree iff they agree at
+  all field points.
+
+Reducedness/integrality citation was right: `EllipticCurve/GroupLawAxioms.lean` (sorry-free), and
+`:129`/`:132` give `IsIntegral`/`IsReduced (pullback (projModelπ 𝕌) (projModelπ 𝕌))`, i.e. exactly
+`pairBase`, matching spelling. **Spelling trap:** the fibre-cube instances at `:136/:147` and
+`:142/:152` use `pullback.snd … ≫ π` / `pullback.fst … ≫ π`; neither is literally `pairCurve`'s
+spelling. They agree by `pullback.condition`, but instance search will not see it.
+
+### Correction 2 — the bridge is smaller than "compare the two Picard groups"
+
+Do **not** build `Pic(projModel W_k) ≅ PicProj₀(⟨W⟩)`. Only one trivialisation is needed. State the
+bridge as a FIELD-LEVEL MODULE TRIVIALITY and let existing transport do the rest:
+
+```lean
+theorem nonempty_tensorObj_idealModule_add_field
+    {k : Type u} [Field k] [DecidableEq k] (W : WeierstrassCurve k) [W.IsElliptic]
+    (P Q : W.toAffine.Point) :
+    Nonempty (tensorObj (idealModule (Scheme.Hom.ker (sec P)))
+                        (idealModule (Scheme.Hom.ker (sec Q)))
+              ≅ tensorObj (idealModule (Scheme.Hom.ker (sec (P + Q))))
+                          (idealModule (Scheme.Hom.ker (projModelZero W))))
+```
+
+with `sec` the inverse of `projModelPointsAddEquiv` (`EllipticCurve/MulByHomDegree.lean:65`, proved
+— this is what identifies a scheme section with a mathlib `W.Point`, and it already exists).
+
+**The only new mathematics** is: extract `f ≠ 0` with `projectiveDivisorOf f = κ(P+Q) − κ(P) − κ(Q)`
+from `kappaDivisor_add_linEquiv`, then show **`div(f) = 0` ⟹ multiplication by `f` is an isomorphism
+of ideal modules**. Tooling: `Picard/IdealModule.lean:240` (`idealGenHom`) + `:307`
+(`bijective_idealGenHom_app`) + `Picard/PicComparison.lean:838` (`isIso_of_bijective_app_on_cover`),
+tested on the two Weierstrass charts already trivialised in `EllipticCurve/PoleSheafModel.lean:410–424`.
+Note mathlib does **not** have "principal divisor ⟹ trivial line bundle" for `Scheme.Modules`.
+
+### `hfib` is then pure transport — no new mathematics
+
+At `x : Spec k ⟶ pairBase π`: split with `Picard/PullbackTensorObj.lean:61`
+(`nonempty_pullback_tensorObj`); rewrite each factor with
+**`Picard/IdealModulePullback.lean:387` (`nonempty_pullback_idealModule_ker_sectionBaseChange`),
+which is stated along `Limits.pullback.fst π t` — SYNTACTICALLY the morphism in `hfib`**; identify
+the fibre via `isPullback_projModelBaseChange`; identify the four sections via
+`projModelPointsAddEquiv`; apply the bridge.
+
+### Class-level route: complete and sorry-free
+
+`toSkeleton_eq_toSkeleton_iff` (mathlib), `toSkeleton_tensorObj_eq` / `toSkeleton_unitObj` /
+`nonempty_iso_of_tensorObj_right_cancel` / `nonempty_iso_of_tensorObj_unitObj` / `nonempty_eval_iso`
+(`Picard/PicComparison.lean`), `picClass_eq_of_nonempty_iso` /
+`picClass_mul_eq_of_nonempty_tensor_iso` / `exists_pic_map_of_nonempty_tensor_pullback_iso`
+(`Picard/DivisorClass.lean`). **One small hole:** no converse
+`nonempty_iso_of_picClass_eq` — it is one `Units.ext` + `toSkeleton_eq_toSkeleton_iff.mp`.
+
+### Two things to price before committing
+
+1. `kappaDivisor_add_linEquiv` is char-free but **not instance-free**: it routes through
+   `Curves.miller_hypothesis_holds_allChar`, which needs
+   `[IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]` — so each residue-field fibre
+   must supply that instance.
+2. **`hhigh` remains open.** Even a finished T10-cmp does not by itself close
+   `SelfAdjointN.lean:267`; the seesaw's positive-degree Čech exactness binder must also be
+   discharged for the elliptic family.
+
+### Base-change naturality at `picClass` level: does not exist
+
+No `picClass_baseChange` / `sectionCls_baseChange` anywhere. The module-level transport listed above
+is strong enough that it may never be needed — prefer it.
