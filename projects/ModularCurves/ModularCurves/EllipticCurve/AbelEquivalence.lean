@@ -931,6 +931,19 @@ theorem isInvertible_idealModule_of_section {C S : Scheme.{u}} {π : C ⟶ S} [I
     RelEffCartierDiv.exists_affineOpen_ker_principal_nonZeroDivisor π hsm z hz c
   exact ⟨V, hcV, f, hspan, hnzd⟩
 
+/-- **(bridge, isomorphism form)** If the vanishing subscheme maps isomorphically to the base,
+it is a relative effective Cartier divisor — the three structural fields transport across the
+isomorphism exactly as in the tree's `sectionDivisor`. This is the shape the degree-one package
+should target: produce the inverse from the rank-one `baseSections` basis, and the divisor
+follows with no fibrewise flatness criterion. -/
+theorem relEffCartierDiv_of_isIso_subschemeι {C S : Scheme.{u}} {π : C ⟶ S}
+    (I : C.IdealSheafData) (hiso : IsIso (I.subschemeι ≫ π)) :
+    ∃ D : RelEffCartierDiv π, D.ideal = I := by
+  refine ⟨{ ideal := I
+            finite := ?_
+            flat := ?_
+            lfp := ?_ }, rfl⟩ <;> infer_instance
+
 /-- **(B2/B3 bridge — the one remaining gap on the line)** The degree-one package makes the
 vanishing subscheme of the distinguished section finite, flat and locally of finite
 presentation over the base, i.e. a relative effective Cartier divisor. Combined with
