@@ -39387,6 +39387,20 @@ REMAINING in the file: `exists_relEffCartierDiv_of_degreeOne` (construct the div
 equivalence converts), and `evalGenerator_mem_nonZeroDivisors` (likely superseded; the section route
 gets the nonzerodivisor property from `exists_affineOpen_ker_principal_nonZeroDivisor`).
 
+**AP2-B3 SECTION-SIDE COMPLETE** (2026-08-08): with KM 1.2.7 proved as an equivalence, the whole
+forward half of the Abel correspondence is now proved and axiom-clean in
+`EllipticCurve/AbelEquivalence.lean`:
+* `exists_relEffCartierDiv_of_section` — a section gives a relative ECD with degree one everywhere;
+* `isInvertible_idealModule_of_section` — its ideal sheaf `I(z)` is an invertible module (via
+  `isInvertible_idealModule` + `exists_affineOpen_ker_principal_nonZeroDivisor`), i.e. the object the
+  Abel map assigns to a point (round-19 PIN 1 interface);
+* `degree_eq_one_iff_exists_section` — the equivalence tying the two directions together.
+**The single remaining gap on the B2/B3 line** is the bridge from the degree-one package to a section:
+produce `z` with `sectionVanishingIdeal M hM σ = Scheme.Hom.ker z` (or show the vanishing subscheme is
+finite flat of rank one and invoke `exists_section_of_degree_one`). Everything downstream of that
+bridge — divisor, fields, degree, invertible ideal — is proved. `AP2-B4` consumes exactly these
+interfaces.
+
 ### [AP2-B3] The evaluation divisor `D(L)`: a section, invariant under `⊗ f^*M`
 - **Status**: blocked (AP2-B2) · **File**: `EllipticCurve/AbelEquivalence.lean` · split into two lemmas
 - **Sketch**: cokernel flat ⟹ `D(L)` a relative ECD; fibre degree 1 (`h⁰ = 1`); finite flat lfp of
