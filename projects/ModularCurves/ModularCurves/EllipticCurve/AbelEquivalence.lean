@@ -107,6 +107,48 @@ theorem eval_smul {E : Scheme.{u}} (M : E.Modules) (V : E.Opens)
   rw [CategoryTheory.op_id, CategoryTheory.Functor.map_id]
   rfl
 
+/-- **(sv2-a)** On an affine open, an invertible module admits a finite cover by basic opens
+on which it is trivial: refine the trivialising cover by `IsAffineOpen.exists_basicOpen_le`
+and take a finite subcover of the quasi-compact affine. -/
+theorem exists_finite_basicOpen_trivialization {E : Scheme.{u}} (N : E.Modules)
+    (hN : IsInvertible N) (U : E.affineOpens) :
+    ∃ (t : Finset ↑Γ(E, U.1)),
+      (U.1 ≤ ⨆ g ∈ t, E.basicOpen g) ∧
+      ∀ g ∈ t, E.basicOpen g ≤ U.1 ∧
+        Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
+          (E.basicOpen g).ι).obj N ≅ unitObj (E.basicOpen g).toScheme) := by
+  obtain ⟨ι, V, hV, htriv⟩ := hN
+  -- every point of `U` sits in a basic open of `U` inside some trivialising `V i`
+  have hpt : ∀ x : U.1, ∃ g : ↑Γ(E, U.1), E.basicOpen g ≤ U.1 ∧ ↑x ∈ E.basicOpen g ∧
+      Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
+        (E.basicOpen g).ι).obj N ≅ unitObj (E.basicOpen g).toScheme) := by
+    intro x
+    have hxV : (↑x : E) ∈ iSup V := by rw [hV]; trivial
+    obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp hxV
+    obtain ⟨g, hgle, hxg⟩ := U.2.exists_basicOpen_le
+      (V := U.1 ⊓ V i) ⟨↑x, ⟨x.2, hi⟩⟩ x.2
+    obtain ⟨e⟩ := htriv i
+    exact ⟨g, le_trans hgle inf_le_left, hxg,
+      ⟨restrictTrivialization (le_trans hgle inf_le_right) e⟩⟩
+  classical
+  choose g hgle hxg htrivg using hpt
+  have hcover : (U.1 : Set E) ⊆ ⋃ x : U.1, ((E.basicOpen (g x)) : Set E) := by
+    intro y hy
+    exact Set.mem_iUnion.mpr ⟨⟨y, hy⟩, hxg ⟨y, hy⟩⟩
+  obtain ⟨t, ht⟩ := U.2.isCompact.elim_finite_subcover
+    (fun x : U.1 ↦ ((E.basicOpen (g x)) : Set E))
+    (fun x ↦ (E.basicOpen (g x)).isOpen) hcover
+  refine ⟨t.image g, ?_, ?_⟩
+  · intro y hy
+    have hy' := ht hy
+    simp only [Set.mem_iUnion, exists_prop] at hy'
+    obtain ⟨x, hxt, hyx⟩ := hy'
+    simp only [TopologicalSpace.Opens.mem_iSup, Finset.mem_image]
+    exact ⟨g x, ⟨x, hxt, rfl⟩, hyx⟩
+  · intro h hh
+    obtain ⟨x, -, rfl⟩ := Finset.mem_image.mp hh
+    exact ⟨hgle x, htrivg x⟩
+
 /-- **(sv2-core, the remaining gap — sections of an invertible module localize)** On an
 affine open, a section over a basic open becomes, after multiplication by a power of the
 defining function, the restriction of a global-on-`U` section. This is the concrete
