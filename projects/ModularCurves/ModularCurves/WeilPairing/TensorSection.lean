@@ -52,36 +52,58 @@ theorem tensorSection_restrict {T : Scheme.{u}} (A B : T.Modules) {U' U : T.Open
   simp only [tensorSection]
   exact h1.symm
 
-/-- Scalars move out of the first slot of `tensorSection`.
-
-Fill status (19 probe-cycles, capped 2026-08-08): the underlying facts are two one-liners —
-`(r • a) ⊗ₜ b = r' • (a ⊗ₜ b)` in `(A.val ⊗ B.val).obj (op U)` and `map_smul` of the
-sheafification-unit component — but the instance alignment is expert-grade. New findings
-(cycles 17–19, this file's history has 1–16): (i) THREE carrier spellings circulate —
-`↑Γ(A,U)` (statement, mathlib `Module Γ(T,U) Γ(A,U)` from `Modules/Sheaf.lean:94`),
-`↑(A.val.obj (op U))` (isModule keyed at `T.ringCatSheaf.obj.obj`), and the tensor's internal
-`(T.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj` (mathlib registers `CommRing` there,
-`Presheaf/Monoidal.lean:34`); `inferInstanceAs`-letIs bridge Module across spellings BUT
-(ii) `TensorProduct.smul_tmul'` then demands `SMulCommClass` KEYED on the monoidal structure's
-internal instance terms, which letI-fvar instances never match — synthesis fails even with all
-bridges in place. (iii) The composed-linear-map route (`map_smul` of
-`(hom unit-component).comp ((TensorProduct.mk …).flip b)`) fails earlier: `comp` cannot unify
-the `𝟭`-wrapped unit-component source with the `TensorProduct`-typed mk target.
-NEXT TOOLS for a fresh pass: `dsimp +instances` (mathlib's own `tensorObjMap` proofs use it to
-normalise exactly these instance diamonds, `Presheaf/Monoidal.lean:44-57`), possibly under
-`set_option backward.isDefEq.respectTransparency false`; or prove a `tensor_ext`-mate through
-`ModuleCat.MonoidalCategory.tensorLift`. Consumers wired: `hcompat` (proved, cites the pair)
-and `hbij` (route recipe on the board). -/
+/-- Scalars move out of the first slot of `tensorSection`. Proved (probe 20, 2026-08-08) by the
+`dsimp +instances` normalisation mathlib's own `tensorObjMap` proofs use
+(`Presheaf/Monoidal.lean:44-57`): after normalising the instance diamonds, `erw` closes over the
+defeq scalar spellings. -/
 theorem tensorSection_smul_left {T : Scheme.{u}} (A B : T.Modules) (U : T.Opens)
     (r : ↑Γ(T, U)) (a : Γ(A, U)) (b : Γ(B, U)) :
     tensorSection A B U (r • a) b = r • tensorSection A B U a b := by
-  sorry
+  have h1 : ((r • a) ⊗ₜ b : ↑((A.val ⊗ B.val).obj (op U))) =
+      (show ↑((T.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (op U)) from r) •
+        ((a ⊗ₜ b : ↑((A.val ⊗ B.val).obj (op U)))) := by
+    dsimp +instances
+    erw [TensorProduct.smul_tmul']
+    rfl
+  have h2 : tensorSection A B U (r • a) b =
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 T.ringCatSheaf.obj)).unit.app (A.val ⊗ B.val)).app (op U)
+        ((show ↑((T.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (op U)) from r) •
+          ((a ⊗ₜ b : ↑((A.val ⊗ B.val).obj (op U))))) :=
+    congrArg (fun z : ↑((A.val ⊗ B.val).obj (op U)) =>
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 T.ringCatSheaf.obj)).unit.app (A.val ⊗ B.val)).app (op U) z) h1
+  refine h2.trans ?_
+  exact map_smul (CategoryTheory.ConcreteCategory.hom
+    (((PresheafOfModules.sheafificationAdjunction
+      (𝟙 T.ringCatSheaf.obj)).unit.app (A.val ⊗ B.val)).app (op U))) _ _
 
-/-- Scalars move out of the second slot of `tensorSection`. Same status and recipe as
-`tensorSection_smul_left`, with `TensorProduct.tmul_smul` bridging the slots. -/
+/-- Scalars move out of the second slot of `tensorSection`. The heterogeneous
+`TensorProduct.tmul_smul` route demands an unsynthesisable mixed `CompatibleSMul`; instead seed
+with `one_smul` and use the homogeneous `smul_tmul_smul`, closing the `1 * r` residue with
+`congr 1` (which reuses the goal's own instance where no tactic can rebuild it). -/
 theorem tensorSection_smul_right {T : Scheme.{u}} (A B : T.Modules) (U : T.Opens)
     (r : ↑Γ(T, U)) (a : Γ(A, U)) (b : Γ(B, U)) :
     tensorSection A B U a (r • b) = r • tensorSection A B U a b := by
-  sorry
+  have h1 : ((a ⊗ₜ (r • b)) : ↑((A.val ⊗ B.val).obj (op U))) =
+      (show ↑((T.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (op U)) from r) •
+        ((a ⊗ₜ b : ↑((A.val ⊗ B.val).obj (op U)))) := by
+    dsimp +instances
+    conv_lhs => rw [← one_smul ↑Γ(T, U) a]
+    erw [TensorProduct.smul_tmul_smul]
+    congr 1
+    exact one_mul r
+  have h2 : tensorSection A B U a (r • b) =
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 T.ringCatSheaf.obj)).unit.app (A.val ⊗ B.val)).app (op U)
+        ((show ↑((T.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (op U)) from r) •
+          ((a ⊗ₜ b : ↑((A.val ⊗ B.val).obj (op U))))) :=
+    congrArg (fun z : ↑((A.val ⊗ B.val).obj (op U)) =>
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 T.ringCatSheaf.obj)).unit.app (A.val ⊗ B.val)).app (op U) z) h1
+  refine h2.trans ?_
+  exact map_smul (CategoryTheory.ConcreteCategory.hom
+    (((PresheafOfModules.sheafificationAdjunction
+      (𝟙 T.ringCatSheaf.obj)).unit.app (A.val ⊗ B.val)).app (op U))) _ _
 
 end ModularCurves

@@ -39548,6 +39548,16 @@ own `tensorObjMap` proofs (`Presheaf/Monoidal.lean:44-57`) normalise exactly the
 (+ `set_option backward.isDefEq.respectTransparency false` + `erw [TensorProduct.tmul_smul]`); mirror
 their proof style inside a goal reshaped by `have`-anchors. Full notes in the docstring.
 
+**AP2-B1a-iii RESOLVED** (probe 20, 2026-08-08): `tensorSection_smul_left`/`_right` both PROVED —
+the 19-probe instance wall fell to `dsimp +instances` (mathlib's own tensorObjMap normalisation,
+`Presheaf/Monoidal.lean:44-57`): left = `dsimp +instances; erw [TensorProduct.smul_tmul']; rfl`;
+right = the heterogeneous `tmul_smul` demands an unsynthesisable mixed CompatibleSMul, so instead
+`conv_lhs => rw [← one_smul ↑Γ(T,U) a]; erw [TensorProduct.smul_tmul_smul]; congr 1; exact one_mul r`
+(`congr 1` reuses the goal's own instance where no tactic can rebuild the motive). Axiom-verified.
+PLAYBOOK ADDITIONS: `dsimp +instances` for monoidal-instance diamonds; `congr 1` + field-lemma for
+transparency-walled closed-term rewrites. **hcompat now genuinely sorry-free below hbij; RelPicLocal
+remaining: hbij (:484) + parent (:53) only.**
+
 **AP2-B1a dependency chart** (2026-08-07 final): the capped smul pair is DOUBLY load-bearing — `hcompat`
 (proved, cites it) AND `hbij` (route: `r • tensorSection a b = tensorSection (r•a) b` splits the
 bijectivity into the pushforward factor (`hp g W`) × the dual factor (`bijective_evalSection_iso`,
