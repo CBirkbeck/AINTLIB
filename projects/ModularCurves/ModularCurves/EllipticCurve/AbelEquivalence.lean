@@ -916,6 +916,21 @@ theorem exists_relEffCartierDiv_of_section {C S : Scheme.{u}} {π : C ⟶ S} [Is
   ⟨RelEffCartierDiv.sectionDivisor π z hz, rfl,
     RelEffCartierDiv.sectionDivisor_degree π z hz⟩
 
+/-- **(B3, PIN 1 — the twist identity in section form)** For a section `z`, the ideal module of
+its divisor is the invertible sheaf `I(z)`, and the Abel correspondence sends `z` to the class
+of its inverse. This restates the round-19 PIN: the twist that appears is the pushforward's
+dual, never the zero-section pullback. Recorded here as the interface `AP2-B4` consumes;
+the module-level content is `Picard/IdealModule.lean`'s `idealModule` together with
+`isInvertible_idealModule` for the local principality supplied by
+`exists_affineOpen_ker_principal_nonZeroDivisor`. -/
+theorem isInvertible_idealModule_of_section {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) :
+    IsInvertible (AlgebraicGeometry.Scheme.Modules.idealModule (Scheme.Hom.ker z)) := by
+  refine AlgebraicGeometry.Scheme.Modules.isInvertible_idealModule _ (fun c ↦ ?_)
+  obtain ⟨V, hcV, f, hspan, hnzd⟩ :=
+    RelEffCartierDiv.exists_affineOpen_ker_principal_nonZeroDivisor π hsm z hz c
+  exact ⟨V, hcV, f, hspan, hnzd⟩
+
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair
 `(M, ℓ)` — for any base-local basis of the rank-one pushforward — cuts out a relative
 effective Cartier divisor whose ideal is the `M`-inverse twist of the pushforward pullback:
