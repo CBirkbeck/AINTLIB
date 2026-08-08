@@ -224,4 +224,25 @@ theorem transitionUnit_mem_kUnits_of_eval_eq {z : T ⟶ pullback p g}
   rw [mul_one]
   exact hmul
 
+/-- **(AP-D3, the normalized-cocycle statement)** The transition units of a family of
+trivialisations, corrected by their zero-section evaluations, are normalized: for any three
+members, the product
+`(evaluation of t(e₀,e₁))⁻¹ · (evaluation of t(e₀,e₂))` measures exactly the failure of
+`t(e₁,e₂)` to be normalized. Consequently a family is normalizable iff all these correction
+units come from the base — which they do, since `kUnitsEval` lands in `Γ(T, U)ˣ`. This is
+KM's `f_{i,j} ∘ π = h_i / h_j` (p. 88) in the tree's vocabulary. -/
+theorem kUnitsEval_transitionUnit_eq_div' {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens)
+    {M : (pullback p g).Modules}
+    (e₀ e₁ e₂ : M.over (pullback.snd p g ⁻¹ᵁ U) ≅
+      SheafOfModules.unit ((pullback p g).ringCatSheaf.over (pullback.snd p g ⁻¹ᵁ U))) :
+    kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₁ e₂) =
+      (kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₀ e₁))⁻¹ *
+      kUnitsEval g hz U (AlgebraicGeometry.Scheme.Modules.trivializationTransitionUnit
+        (pullback.snd p g ⁻¹ᵁ U) e₀ e₂) := by
+  have hmul := kUnitsEval_transitionUnit_eq_div (g := g) hz U e₀ e₁ e₂
+  rw [← hmul, ← mul_assoc, inv_mul_cancel, one_mul]
+
 end ModularCurves
