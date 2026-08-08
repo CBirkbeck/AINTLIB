@@ -338,6 +338,22 @@ theorem exists_pow_smul_eq_restrict_of_isInvertible {E : Scheme.{u}} (N : E.Modu
     rw [hv]
     rw [AlgebraicGeometry.Scheme.Modules.map_smul, hu g, smul_smul, map_pow,
       ← pow_add, Nat.sub_add_cancel (hn g)]
+  -- (e) the rescaled pieces agree on overlaps after a further power of `f`
+  have hoverlap : ∀ g g' : {g // g ∈ t},
+      ∃ k : ℕ,
+        ((show ↑Γ(E, E.basicOpen g.1 ⊓ E.basicOpen g'.1) from
+            E.presheaf.map (homOfLE ((inf_le_left :
+              E.basicOpen g.1 ⊓ E.basicOpen g'.1 ≤ E.basicOpen g.1).trans
+              (hpiece g.1 g.2).1)).op f) ^ k) •
+            N.presheaf.map (Opens.infLELeft (E.basicOpen g.1) (E.basicOpen g'.1)).op (v g) =
+          ((show ↑Γ(E, E.basicOpen g.1 ⊓ E.basicOpen g'.1) from
+            E.presheaf.map (homOfLE ((inf_le_left :
+              E.basicOpen g.1 ⊓ E.basicOpen g'.1 ≤ E.basicOpen g.1).trans
+              (hpiece g.1 g.2).1)).op f) ^ k) •
+            N.presheaf.map
+              (Opens.infLERight (E.basicOpen g.1) (E.basicOpen g'.1)).op (v g') := by
+    intro g g'
+    sorry
   sorry
 
 /-- **(sv2, the remaining gap — dual sections localize)** A functional on an invertible `M`
