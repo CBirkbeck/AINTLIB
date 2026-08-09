@@ -433,6 +433,109 @@ theorem sectionCls_restrictBase (hsm : SmoothOfRelativeDimension 1 E.π)
   refine Eq.trans (map_inv (Scheme.Pic.map (baseChangeMap E.π g hg)) _) ?_
   exact congrArg (·⁻¹) hcore
 
+/-- `sectionCls` depends on the section only through its underlying morphism. -/
+theorem sectionCls_congr (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (t : T ⟶ S) {P P' : T ⟶ pullback E.π t}
+    (hP : P ≫ pullback.snd E.π t = 𝟙 T) (hP' : P' ≫ pullback.snd E.π t = 𝟙 T)
+    (h : P = P') : sectionCls E hsm t P hP = sectionCls E hsm t P' hP' := by
+  subst h; rfl
+
+/-- **(AP-E1-NAT1, step 4)** The zero class commutes with base change: restrict the
+zero *point* and identify it with the base-changed zero section. -/
+theorem zeroCls_restrictBase (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t') :
+    Scheme.Pic.map (baseChangeMap E.π g hg) (zeroCls E hsm t) = zeroCls E hsm t' := by
+  have hzval : ((0 : (E.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback E.π t) =
+      baseChangeZero E.π E.zero E.zero_π t :=
+    ((E.baseChange t).point_zero_val (𝟙 T)).trans (Category.id_comp _)
+  have hzval' : ((0 : (E.baseChange t').Point (𝟙 T')).1 : T' ⟶ pullback E.π t') =
+      baseChangeZero E.π E.zero E.zero_π t' :=
+    ((E.baseChange t').point_zero_val (𝟙 T')).trans (Category.id_comp _)
+  calc Scheme.Pic.map (baseChangeMap E.π g hg) (zeroCls E hsm t)
+      = Scheme.Pic.map (baseChangeMap E.π g hg)
+          (sectionCls E hsm t ((0 : (E.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback E.π t)
+            (0 : (E.baseChange t).Point (𝟙 T)).2) :=
+        congrArg _ (sectionCls_congr E hsm t _ _ hzval.symm)
+    _ = sectionCls E hsm t'
+          ((restrictBase E t g hg (0 : (E.baseChange t).Point (𝟙 T))).1 :
+            T' ⟶ pullback E.π t')
+          (restrictBase E t g hg (0 : (E.baseChange t).Point (𝟙 T))).2 :=
+        sectionCls_restrictBase E hsm t g hg 0
+    _ = sectionCls E hsm t' ((0 : (E.baseChange t').Point (𝟙 T')).1 : T' ⟶ pullback E.π t')
+          (0 : (E.baseChange t').Point (𝟙 T')).2 :=
+        congrArg (fun P : (E.baseChange t').Point (𝟙 T') =>
+          sectionCls E hsm t' (P.1 : T' ⟶ pullback E.π t') P.2)
+          (restrictBase_zero E t g hg)
+    _ = zeroCls E hsm t' := sectionCls_congr E hsm t' _ _ hzval'
+
+/-- **(AP-E1-NAT1, COMPLETE)** `κ` commutes with base change:
+`Pic(g_E)(κ_T(Q)) = κ_{T'}(Q|_{T'})`. Assembled from `sectionCls_restrictBase`,
+`zeroCls_restrictBase`, and the `MonoidHom` algebra of the kernel-projection
+`picRelProj`, using the two commuting squares of `baseChangeMap` with the structure and
+zero sections. -/
+theorem kappa_restrictBase (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t')
+    (Q : (E.baseChange t).Point (𝟙 T)) :
+    Scheme.Pic.map (baseChangeMap E.π g hg) (kappa E hsm t Q) =
+      kappa E hsm t' (restrictBase E t g hg Q) := by
+  have hval : ∀ (x : Scheme.Pic (pullback E.π t)),
+      ((picRelProj E.π E.zero E.zero_π t x : picRel E.π E.zero E.zero_π t) :
+        Scheme.Pic (pullback E.π t)) =
+      x * (Scheme.Pic.map (pullback.snd E.π t)
+        (Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t) x))⁻¹ := fun _ => rfl
+  have hval' : ∀ (x : Scheme.Pic (pullback E.π t')),
+      ((picRelProj E.π E.zero E.zero_π t' x : picRel E.π E.zero E.zero_π t') :
+        Scheme.Pic (pullback E.π t')) =
+      x * (Scheme.Pic.map (pullback.snd E.π t')
+        (Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t') x))⁻¹ := fun _ => rfl
+  set x := sectionCls E hsm t Q.1 Q.2 * (zeroCls E hsm t)⁻¹ with hx
+  set x' := sectionCls E hsm t'
+      ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t')
+      (restrictBase E t g hg Q).2 * (zeroCls E hsm t')⁻¹ with hx'
+  have hratio : Scheme.Pic.map (baseChangeMap E.π g hg) x = x' := by
+    rw [hx, hx', map_mul, map_inv, sectionCls_restrictBase E hsm t g hg Q,
+      zeroCls_restrictBase E hsm t g hg]
+  have hsq1 : ∀ y, Scheme.Pic.map (baseChangeMap E.π g hg)
+      (Scheme.Pic.map (pullback.snd E.π t) y) =
+      Scheme.Pic.map (pullback.snd E.π t') (Scheme.Pic.map g y) := by
+    intro y
+    calc Scheme.Pic.map (baseChangeMap E.π g hg) (Scheme.Pic.map (pullback.snd E.π t) y)
+        = Scheme.Pic.map (baseChangeMap E.π g hg ≫ pullback.snd E.π t) y := by
+          rw [Scheme.Pic.map_comp]; rfl
+      _ = Scheme.Pic.map (pullback.snd E.π t' ≫ g) y := by
+          rw [baseChangeMap_snd E t g hg]
+      _ = Scheme.Pic.map (pullback.snd E.π t') (Scheme.Pic.map g y) := by
+          rw [Scheme.Pic.map_comp]; rfl
+  have hsq2 : ∀ y, Scheme.Pic.map g
+      (Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t) y) =
+      Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t')
+        (Scheme.Pic.map (baseChangeMap E.π g hg) y) := by
+    intro y
+    calc Scheme.Pic.map g (Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t) y)
+        = Scheme.Pic.map (g ≫ baseChangeZero E.π E.zero E.zero_π t) y := by
+          rw [Scheme.Pic.map_comp]; rfl
+      _ = Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t' ≫
+            baseChangeMap E.π g hg) y := by
+          rw [baseChangeZero_baseChangeMap]
+      _ = Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t')
+            (Scheme.Pic.map (baseChangeMap E.π g hg) y) := by
+          rw [Scheme.Pic.map_comp]; rfl
+  calc Scheme.Pic.map (baseChangeMap E.π g hg) (kappa E hsm t Q)
+      = Scheme.Pic.map (baseChangeMap E.π g hg)
+          (x * (Scheme.Pic.map (pullback.snd E.π t)
+            (Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t) x))⁻¹) :=
+        congrArg _ ((kappa_eq_picRelProj E hsm t Q).trans (hval x))
+    _ = Scheme.Pic.map (baseChangeMap E.π g hg) x *
+          (Scheme.Pic.map (baseChangeMap E.π g hg)
+            (Scheme.Pic.map (pullback.snd E.π t)
+              (Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t) x)))⁻¹ := by
+        rw [map_mul, map_inv]
+    _ = x' * (Scheme.Pic.map (pullback.snd E.π t')
+          (Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t') x'))⁻¹ := by
+        simp only [hsq1, hsq2, hratio]
+    _ = kappa E hsm t' (restrictBase E t g hg Q) :=
+        ((kappa_eq_picRelProj E hsm t' (restrictBase E t g hg Q)).trans (hval' x')).symm
+
 end RestrictBase
 
 end ModularCurves
