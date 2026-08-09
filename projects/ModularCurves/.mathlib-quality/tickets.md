@@ -38952,6 +38952,18 @@ in the plan's "Known traps".
   - **Not affected by the AP2-B2 findings below** — `torsionSplittingEval` and everything it
     depends on is axiom-clean and does not route through `EllipticCurve/AbelEquivalence.lean`.
     This is currently the *only* substantial DS4 work that is not downstream of a false statement.
+  - 2026-08-09 (session 2): **sub-ticket plan spawned** — groups AP-E1-DS (dataset existence),
+    AP-E1-IND (independence of the dataset), AP-E1-NAT (κ-naturality + eval naturality),
+    AP-E1-YON (the Yoneda fill of `:49`/`:53`). See the "AP-E1 sub-cut" section below for the
+    full tickets. API audit done first: `fromSkeleton`/`toSkeleton_fromSkeleton_obj`,
+    `isInvertible_of_isUnit_toSkeleton`, `overTrivializationOfRestrictIso` +
+    `restrictIsoOfPullbackIso` (`Picard/InvertibleSheafLocallyFree.lean`),
+    `nonempty_pullback_idealModule` (general `f`! `Picard/IdealModulePullback.lean:361`),
+    `Pic.map_val`/`mapSkeleton_pullback_comp` (`ForMathlib/PullbackTensorGeneral.lean`),
+    `baseChangeMap` + functoriality (`Picard/RelativePic.lean`), `Point.baseChangeEquiv`
+    (`EllipticCurve/GroupLaw.lean:411`), `muNPointsEquiv` (both directions,
+    `GroupScheme/MuN.lean:653`), `torsionPointsEquiv` (`EllipticCurve/TorsionFibre.lean:290`)
+    — all present, so every leaf below cites a real lemma.
 
 ### [AP2-B2-evalgen / AP2-B2-blocker4] 🛑 TWO STATEMENTS ARE FALSE AS STATED (2026-08-09)
 - **Status**: **B2 — blocked on a user decision** (statement change; `theorem_statement_protected`)
@@ -38988,6 +39000,386 @@ in the plan's "Known traps".
 - `_nondegenerate` (`:270`) — KM 2.8.2, Cartier–Nishi duality [cf. Oda]. **This is the one register entry
   that genuinely needs Cartier duality**, and it is absent from mathlib — expect its own sub-development
 - `_mul` (`:328`) — KM 2.8.4.1, the composability formula
+
+## AP-E1 sub-cut (2026-08-09, session 2) — canonicalising `torsionSplittingEval`
+
+The KM output `torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP` depends on the
+choices `(M, hM, W, hW, e, hnorm)`. AP-E1 needs a **canonical** pairing; the cut is:
+**DS** (a normalised dataset exists for every torsion `Q`), **IND** (the value is independent
+of the dataset), **NAT** (the value is natural in `T`), **YON** (Yoneda over the universal base
+`E[N] ×_S E[N]` fills `weilPairing`/`weilPairing_over`, and the bridge theorem equates
+`weilPairingEval` with the KM value, unblocking AP-E2…E6).
+
+Design decisions: datasets stay **unbundled** (house style of the KM files — no structure, so
+no universe bookkeeping); new files `WeilPairing/KMDataset.lean`, `WeilPairing/KMIndependence.lean`,
+`WeilPairing/KMNaturality.lean`; `Basic.lean` is only touched to replace the two `sorry` bodies
+(`theorem_statement_protected`). The existence proof normalises the cocycle by the **two-family
+cover** trick: near the zero image use `Z i := W i ⊓ π⁻¹(0⁻¹ W i)` and rescale `e i` by
+`π^#(d i)⁻¹` (where `d i` compares `0^# e i` with a global rigidification `ρ` of `0^*M`, which
+exists by `kappa_mem_ker`); off the zero image (closed, since the base-changed `π` is separated)
+the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so `hnorm` holds.
+
+### [AP-E1-IND1] Eval depends only on the cocycle
+- **Status**: done (2026-08-09, `torsionSplittingEval_eq_of_transitionUnit_eq`, axiom-verified
+  standard-three) · **File**: `WeilPairing/KMIndependence.lean` · **Depends on**: none ·
+  **Parent**: AP-E1 · **Type**: theorem
+- **Statement**: `torsionSplittingEval_eq_of_transitionUnit_eq` — for two datasets
+  `(M, hM, e, hnorm)`, `(M', hM', e', hnorm')` for the *same* `Q hQ` over the *same* cover
+  `W hW`, if `∀ i j, transitionUnitOfCover M W e i j = transitionUnitOfCover M' W e' i j`
+  then the two `torsionSplittingEval`s at every `P hP` are equal.
+- **Proof sketch**: 1. `obtain ⟨h, hn, hsplit⟩ := exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints`
+  for the first dataset. 2. The cocycle equality transports `hsplit` to the second dataset's
+  cocycle. 3. `eq_torsionSplittingEval` (the pin) with `C := torsionSplittingEval` of the first,
+  whose `hC` is `resUnit_torsionSplittingEval` of the first. No geometry.
+- **Mathlib lemmas**: none beyond the project pin/spec pair.
+- **Sources**: KM p. 88–89 ("uniquely"). · **Generality**: exactly the use site.
+
+### [AP-E1-IND2] Refinement invariance
+- **Status**: done (2026-08-09, `torsionSplittingEval_restrict_cover` +
+  `transitionUnitOfCover_restrict` + `transitionUnitOfCover_restrict_mem_sectionUnits` +
+  private `restrictOverTrivialization_comp_eq`/`over_opens_ext`, all axiom-verified
+  standard-three; the two-stage-restriction path-independence needed an explicit-motive
+  `Eq.rec`/`HEq` transport — `congrArg` is unusable on the dependent
+  `restrictOverTrivialization`, and `rw` cannot see the `[N]⁻¹(W i ⊓ W j)` clothing) ·
+  **File**: `WeilPairing/KMIndependence.lean` · **Depends on**: none ·
+  **Parent**: AP-E1 · **Type**: theorem
+- **Statement**: `torsionSplittingEval_restrict_cover` — given the dataset over `W : ι → Opens`,
+  a map `r : ι' → ι` and a cover `V : ι' → Opens`, `hV : iSup V = ⊤`, `hle : ∀ a, V a ≤ W (r a)`,
+  the dataset restricts (`e' a := restrictOverTrivialization … (e (r a)) …` over `V a`;
+  restricted cocycle is `resUnit` of the original, hence still normalised), and the two evals
+  agree at every `P hP`.
+- **Proof sketch**: 1. Restriction of trivialisations: `SheafOfModules.restrictOverTrivialization`
+  (`Picard/Dual.lean:792`) + `restrictOverTrivialization_comp`
+  (`Picard/DualPullback/TrivializationRestriction.lean:102`) give
+  `transitionUnitOfCover M V e' a b = resUnit … (transitionUnitOfCover M W e (r a) (r b))`-shape
+  (state as its own lemma `transitionUnitOfCover_restrict`). 2. A normalised splitting `h` for
+  `W` restricts to one for `V`: `h' a := resUnit … (h (r a))`; normalisation and splitting
+  restrict (both are `resUnit`-images; `map_mul`, `resUnit_resUnit`). 3. The pin applied on the
+  `V`-side with `C :=` eval of the `W`-side; `hC` from `resUnit_torsionSplittingEval` on the
+  `W`-side plus `resUnit_resUnit`.
+- **Mathlib lemmas**: `homOfLE`, `map_mul`, `map_inv`. · **Sources**: standard Čech refinement.
+- **Generality**: refinement via an index map, not sieve-level — matches the two use sites
+  (common refinement `ι × ι'` with the two projections).
+
+### [AP-E1-IND3] Normalised-coboundary invariance
+- **Status**: open · **File**: `WeilPairing/KMIndependence.lean` · **Depends on**: none ·
+  **Parent**: AP-E1 · **Type**: theorem
+- **Statement**: `torsionSplittingEval_eq_of_mul_coboundary` — same `Q hQ`, same cover `W hW`,
+  two datasets whose cocycles satisfy
+  `F' i j = F i j * resUnit (c i) * (resUnit (c j))⁻¹` for units `c i ∈ Γ(pullback E.π t, W i)ˣ`
+  (both `F`, `F'` normalised along the zero section — no normalisation assumed of `c`):
+  the evals agree at every `P hP`.
+- **Proof sketch**: 1. `γ i := sectionEval 0 (W i) (c i) ∈ Γ(0⁻¹W i)ˣ`; normalisation of `F`,`F'`
+  forces `γ i = γ j` on overlaps (`0⁻¹(W i ⊓ W j)`), and the `0⁻¹W i` cover `T`
+  (`iSup_preimage_eq_top` from `hW` — the zero section is a *section*), so the `γ i` glue to
+  `γ ∈ Γ(T,⊤)ˣ` (`exists_globalUnit_restrict`). 2. Take a normalised splitting `h` of `F∘[N]`;
+  set `h' i := h i * unitPullback [N] … (c i) * (globalTwist snd … γ)⁻¹`. Then `h'` splits
+  `F'∘[N]` (the `γ` factors cancel in ratios) and is normalised: its zero-value is
+  `1 · (c i ∘ [N] ∘ 0) · γ⁻¹ = γ i · γ⁻¹| = 1` using `[N] ∘ 0 = 0`
+  (`zero_comp_mulByHom_baseChange`). 3. Evaluate at `P`: `(c i ∘ [N] ∘ P) = c i ∘ 0 = γ i`
+  (**`[N]P = 0`**, `comp_mulByN_eq_baseChangeZero` — this is where torsion of `P` enters) and
+  `globalTwist … γ ∘ P = γ` (`sectionEval_globalTwist`, `P.2`), so `h' i ∘ P = h i ∘ P · γ i · γ⁻¹`
+  restricted — wait, the same two factors cancel *again* on the trace `P⁻¹[N]⁻¹W i = 0⁻¹W i`
+  (preimages along equal morphisms `[N]∘P = 0`). 4. Pin.
+- **Mathlib lemmas**: `map_mul`, `map_inv`. Project: `unitPullback`, `sectionEval_unitPullback`,
+  `globalTwist`, `sectionEval_globalTwist`, `resUnit_sectionEval_congr`
+  (`WeilPairing/Translation.lean`), `exists_globalUnit_restrict`, `eq_of_forall_resUnit_eq`
+  (`WeilPairing/KMPatching.lean`).
+- **Sources**: KM p. 88–89. · **Generality**: coboundary un-normalised (the `γ`-glue handles it)
+  — that is what the master needs.
+
+### [AP-E1-IND4] Transport along a module isomorphism
+- **Status**: open · **File**: `WeilPairing/KMIndependence.lean` · **Depends on**: none ·
+  **Parent**: AP-E1 · **Type**: theorem
+- **Statement**: `transitionUnitOfCover_map_iso` — for `φ : M ≅ M'` and a trivialisation family
+  `e'` of `M'` over `W`, the family `fun i => (φ.over-restriction) ≪≫ e' i` trivialises `M`
+  with **the same** transition cocycle.
+- **Proof sketch**: `transitionUnitOfCover` unfolds to `trivializationTransitionUnit` of the two
+  restricted trivialisations; restriction of `φ ≪≫ e'` is `(restriction of φ) ≪≫ (restriction
+  of e')` (`restrictOverTrivialization` is functorial in the module — check
+  `Picard/DualPullback/TrivializationRestriction.lean` for the composition lemma, else prove the
+  small naturality directly); `trivializationTransitionUnit` of `(ψ ≪≫ a, ψ ≪≫ b)` equals that of
+  `(a, b)` because the `ψ` cancels in `a.inv ≫ ψ.inv ≫ ψ.hom ≫ b.hom`-form. Needs `M.over`
+  functoriality: `(φ.over W)`-style `mapIso` — `SheafOfModules.over` is a functor, so
+  `(overFunctor …).mapIso φ`.
+- **Mathlib lemmas**: `Iso.trans`, `Functor.mapIso`. · **Sources**: —.
+- **Generality**: statement about the cocycle only; the eval corollary is IND1.
+
+### [AP-E1-IND5] Master independence
+- **Status**: open · **File**: `WeilPairing/KMIndependence.lean` ·
+  **Depends on**: AP-E1-IND1, AP-E1-IND2, AP-E1-IND3, AP-E1-IND4 · **Parent**: AP-E1 ·
+  **Type**: theorem
+- **Statement**: `torsionSplittingEval_congr_dataset` — for the same `Q hQ` and `P hP`, any two
+  full datasets `(M, hM, W, hW, e, hnorm)` and `(M', hM', W', hW', e', hnorm')` give the same
+  value.
+- **Proof sketch**: 1. `toSkeleton M = (kappa …).val = toSkeleton M'` gives `φ : M ≅ M'`
+  (`toSkeleton_eq_toSkeleton_iff`). 2. Common refinement `ι'' := ι × ι'`,
+  `V (i,j) := W i ⊓ W' j`, covering (`iSup_inf_iSup`-style rewrite: `⨆ p, W p.1 ⊓ W' p.2 = ⊤`
+  from `hW`, `hW'` — small lattice lemma, `iSup_prod`+`inf_iSup_eq`). 3. IND2 twice: eval over
+  `W` = eval over `V` (restrict `e`), eval over `W'` = eval over `V` (restrict `e'`). 4. Over
+  `V`: the `e`-restriction trivialises `M`; the `(φ ≪≫ e')`-restriction also trivialises `M`
+  with the cocycle of `e'`-restricted (IND4). Two trivialisations of the *same* `M` over the
+  *same* cover differ by the coboundary of `c a := trivializationTransitionUnit (V a) (eV a)
+  ((φ≪≫e')V a)`-shape — state as a lemma `transitionUnitOfCover_mul_coboundary`: for two
+  families `a`, `b` of trivialisations of one `M` over one `W`,
+  `transitionUnitOfCover M W a i j = transitionUnitOfCover M W b i j * resUnit (c i) *
+  (resUnit (c j))⁻¹` with `c i` the comparison unit of `a i` vs `b i`. (Cocycle algebra on
+  `trivializationTransitionUnit`; same device as `InvertibleSheafCocycle.lean` uses.) 5. Both
+  refined cocycles are normalised (IND2 keeps normalisation), so IND3 applies. Chain the four
+  equalities.
+- **Mathlib lemmas**: `iSup_prod`, `iSup_inf_iSup`-shape (or prove inline). ·
+  **Sources**: KM p. 88–89 "uniquely". · **Generality**: exactly the use site.
+
+### [AP-E1-DS1] Representative module for `κ(Q)`
+- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
+  **Parent**: AP-E1 · **Type**: theorem
+- **Statement**: `exists_module_kappa` — `∃ M : (pullback E.π t).Modules,
+  ((kappa E hsm t Q).val = toSkeleton M) ∧ IsInvertible M` (shared witness — not split).
+- **Proof sketch**: `M := (fromSkeleton _).obj (kappa …).val`;
+  `toSkeleton_fromSkeleton_obj`; `IsUnit (toSkeleton M)` by rewriting along the equality —
+  `(kappa …)` is a unit of the skeleton monoid, so its `.val` is `IsUnit`
+  (`Units.isUnit` transported); `isInvertible_of_isUnit_toSkeleton`.
+- **Mathlib lemmas**: `CategoryTheory.fromSkeleton`, `toSkeleton_fromSkeleton_obj`,
+  `Units.isUnit`. · **Sources**: —. · **Generality**: any Pic element, but stated for `κ` at
+  the use site.
+
+### [AP-E1-DS2] `.over`-trivialisations from invertibility
+- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
+  **Parent**: AP-E1 · **Type**: theorem
+- **Statement**: `exists_over_trivialization_of_isInvertible` — `IsInvertible M →
+  ∃ (ι : Type u) (W : ι → X.Opens) (hW : iSup W = ⊤),
+  ∀ i, Nonempty (M.over (W i) ≅ SheafOfModules.unit (X.ringCatSheaf.over (W i)))`
+  (then choice-extract the family).
+- **Proof sketch**: unpack `IsInvertible` (cover + `(Modules.pullback (U i).ι).obj M ≅ unitObj`);
+  `restrictIsoOfPullbackIso` then `overTrivializationOfRestrictIso`
+  (`Picard/InvertibleSheafLocallyFree.lean` uses exactly this composite at
+  `localFreeTrivializationIso`) lands in `M.over (U i) ≅ unit`.
+- **Mathlib lemmas**: none new. · **Sources**: —. · **Generality**: any scheme `X`, any `M`.
+
+### [AP-E1-DS3] Rigidification along the zero section
+- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
+  **Parent**: AP-E1 · **Type**: theorem
+- **Statement**: `nonempty_pullback_zero_iso_unit_of_kappa` — for `hM : (kappa …).val =
+  toSkeleton M`: `Nonempty ((Modules.pullback (baseChangeZero E.π E.zero E.zero_π t)).obj M ≅
+  unitObj T)`.
+- **Proof sketch**: `kappa_mem_ker` gives `Pic.map (baseChangeZero …) (kappa …) = 1`; take
+  `.val`, rewrite with `Pic.map_val`, `hM`, `Functor.mapSkeleton_obj_toSkeleton`; conclude
+  `toSkeleton ((pullback 0).obj M) = (1 : Pic).val = toSkeleton (unitObj T)`
+  (`Skeleton.one_eq`/`toSkeleton_unitObj`); `toSkeleton_eq_toSkeleton_iff`.
+- **Mathlib lemmas**: `Functor.mapSkeleton_obj_toSkeleton`, `Units.val_one`. · **Sources**: —.
+- **Generality**: the `κ` use site.
+
+### [AP-E1-PULL] Pullback of an `.over`-trivialisation (dual-use: DS4 and NAT2)
+- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
+  **Parent**: AP-E1 · **Type**: def + spec lemmas
+- **Statement**: for `f : Y ⟶ X`, `U : X.Opens`, `e : M.over U ≅ unit`, a trivialisation
+  `pullbackOverTrivialization f U e : ((Modules.pullback f).obj M).over (f ⁻¹ᵁ U) ≅ unit`,
+  with the cocycle spec: `transitionUnitOfCover ((Modules.pullback f).obj M) (f ⁻¹ᵁ W ·)
+  (pullbackOverTrivialization …) i j = Units.map (f.app (W i ⊓ W j)) (transitionUnitOfCover
+  M W e i j)` (up to the `f⁻¹ᵁ(W i ⊓ W j) = f⁻¹ᵁ W i ⊓ f⁻¹ᵁ W j` comparison, which is
+  definitional here — same situation as `mulByN_preimage_preimage`).
+- **Proof sketch**: 1. The exchange iso `((Modules.pullback f).obj M).over (f ⁻¹ᵁ U) ≅
+  (Modules.pullback (f restricted-to-opens)).obj (M.over U)` — search
+  `Picard/DualPullback.lean` / `Picard/DualPullback/` for it first (three vocabularies:
+  `overPullback`, `pullbackOver`, `restrictPullback`); if genuinely absent, build it from the
+  same site-comparison mathlib uses for `Modules.pullback` (the opens-preimage functor
+  commutes with the two `over`-restrictions on the nose). 2. Then map `e` through
+  `(Modules.pullback f|).mapIso` and compose with `pullbackUnitIso`-over-form. 3. The cocycle
+  spec: `trivializationTransitionUnit` of pulled trivialisations = `f.app`-image — on
+  generating sections, as `TensorCocycle.lean` reads cocycles (`IsFrame`), or directly from the
+  scalar-comparison lemma `restrictOverTrivialization_hom_eq_comp_scalar`
+  (`Picard/InvertibleSheafCocycle.lean:184`).
+- **Mathlib lemmas**: `SheafOfModules.pullback` site plumbing. · **Sources**: —.
+- **Generality**: arbitrary `f`, `U`, `M` — both consumers need exactly this.
+- **Risk note**: this is the one genuinely new *gadget*; budget a session-quantum for the
+  exchange iso if `DualPullback` does not already have it.
+
+### [AP-E1-DS4] Comparison units and the rescale
+- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: AP-E1-DS3,
+  AP-E1-PULL · **Parent**: AP-E1 · **Type**: def + lemma
+- **Statement**: given the dataset-so-far (`W`, `e`) and the rigidification `ρ` (DS3), the
+  comparison units `d i ∈ Γ(T, 0⁻¹ᵁ W i)ˣ` of the two trivialisations of
+  `((Modules.pullback 0).obj M).over (0⁻¹ᵁ W i)` — `pullbackOverTrivialization 0 (W i) (e i)`
+  vs `ρ`-restricted — such that the pulled cocycle satisfies
+  `Units.map (0.app …) (transitionUnitOfCover M W e i j) = resUnit (d i) * (resUnit (d j))⁻¹`.
+- **Proof sketch**: `d i := trivializationTransitionUnit (0⁻¹ᵁ W i) (pulled-e-i) (ρ|)`; the
+  displayed identity is the cocycle identity for three trivialisations (`a/b · b/c = a/c`) —
+  the same algebra as `transitionUnitOfCover_mul_coboundary` from IND5's step 4, so state that
+  lemma here and share it.
+- **Mathlib lemmas**: none new. · **Sources**: —. · **Generality**: the use site.
+
+### [AP-E1-DS5] Unit-rescaling of a trivialisation
+- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
+  **Parent**: AP-E1 · **Type**: def + lemma
+- **Statement**: `scaleOverTrivialization` — for `c ∈ Γ(X, U)ˣ` and `e : M.over U ≅ unit`, the
+  rescaled trivialisation (compose with the unit-automorphism of multiplication by `c`), and
+  its cocycle effect: `transitionUnitOfCover M W (scale c e) i j =
+  transitionUnitOfCover M W e i j * resUnit (c i) * (resUnit (c j))⁻¹` (sign/inverse as
+  computed, fix orientation when proving).
+- **Proof sketch**: the automorphism is `unitEndomorphismOfTopSection`-style on the over-site
+  (`Picard/UnitPullback.lean:36` has the top-section form; the over-form is the same
+  construction on `X.ringCatSheaf.over U`, whose top open is `U`). The cocycle effect is a
+  scalar computation on `trivializationTransitionUnit` — again through
+  `restrictOverTrivialization_hom_eq_comp_scalar`.
+- **Mathlib lemmas**: none new. · **Sources**: —. · **Generality**: any `X`, `U`, `M`.
+
+### [AP-E1-DS6] The normalised dataset exists
+- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: AP-E1-DS1,
+  AP-E1-DS2, AP-E1-DS3, AP-E1-DS4, AP-E1-DS5 · **Parent**: AP-E1 · **Type**: theorem
+- **Statement**: `exists_normalized_dataset` — for every `Q ∈ torsionPoints E t N`:
+  `∃ (M) (hM) (ι : Type u) (W) (hW) (e), ∀ i j, transitionUnitOfCover M W e i j ∈
+  sectionUnits (baseChangeZero …) (W i ⊓ W j)` (one shared-witness `∃`-package;
+  Tier-A5 exception: every later consumer takes the whole package).
+- **Proof sketch**: 1. `M, hM, hInv` (DS1); `ι, W, hW, e` (DS2); `ρ` (DS3); `d i` (DS4).
+  2. New index `ι ⊕ ι`. Family `inl i`: `Z i := W i ⊓ π⁻¹(0⁻¹ᵁ W i)` (`π := pullback.snd`),
+  trivialisation `e i` restricted then rescaled by `π^#(d i)⁻¹` (DS5 + IND2's
+  `restrictOverTrivialization`); family `inr i`: `O i := W i ⊓ zeroComplement` where
+  `zeroComplement` is the open complement of the zero image — the zero section is a closed
+  immersion (a section of the separated `pullback.snd E.π t`; mathlib:
+  `IsClosedImmersion.of_isSection`-shape, search `sectionι`/`isClosedImmersion` — else derive:
+  section of separated is closed immersion, `AlgebraicGeometry.IsClosedImmersion` +
+  `isPullback_section`-idiom), trivialisation `e i` restricted. 3. Cover: a point on the zero
+  image lies in some `Z i` (its base point lies in `0⁻¹W i` for the `i` covering the zero
+  point); a point off it lies in some `O i`. 4. Normalisation: `inl/inl` overlaps — the
+  rescale by `π^#d` makes the zero-trace of the cocycle `d i⁻¹ · (0^#f_{ij}) · d j = 1` by
+  DS4's identity (`π^# u ∘ 0 = u`: `baseChangeZero_snd`); `inr/anything` overlaps — the
+  zero-trace of `O i` is empty (`0⁻¹ᵁ zeroComplement = ⊥`), and `sectionUnits _ ⊥`-membership
+  is vacuous (units of the terminal ring — check `sectionUnits` at `⊥`: `Γ(∅)` is trivial,
+  membership holds by `Subsingleton`).
+- **Mathlib lemmas**: closed-immersion-of-section (search: `IsImmersion`,
+  `isClosedImmersion_of_isSeparated`-shape, loogle `IsSeparated → IsClosedImmersion`),
+  `TopologicalSpace.Opens` complement of a closed set. · **Sources**: KM p. 88 (the
+  normalisation is taken for granted there); rigidified-bundle folklore.
+- **Generality**: the `κ` use site (rigidifiability is the input, via DS3).
+
+### [AP-E1-NAT0] Point restriction in the `pullback E.π t` presentation
+- **Status**: open · **File**: `WeilPairing/KMNaturality.lean` · **Depends on**: none ·
+  **Parent**: AP-E1 · **Type**: def + lemmas
+- **Statement**: for `g : T' ⟶ T`, `hg : g ≫ t = t'`: `Point.restrictBase g hg :
+  (E.baseChange t).Point (𝟙 T) →+ (E.baseChange t').Point (𝟙 T')`, with
+  (i) val-lemma `(restrictBase g hg Q).1 ≫ baseChangeMap E.π g hg = g ≫ Q.1`,
+  (ii) preservation of `torsionPoints` (from additivity + ℤ-linearity), and
+  (iii) compatibility with `Point.baseChangeEquiv`/`Point.restrict` (the transport route).
+- **Proof sketch**: define directly: `(restrictBase g hg Q).1 := pullback.lift
+  (g ≫ Q.1 ≫ pullback.fst E.π t) (𝟙 T') (by …)`; additivity via transporting through
+  `Point.baseChangeEquiv` (`GroupLaw.lean:411`, additive) and `Point.restrict` — or prove
+  `restrictBase = (baseChangeEquiv t').symm ∘ (hg ▸ Point.restrict g) ∘ baseChangeEquiv t`
+  and inherit `map_add` from the three additive pieces (`Point.restrict` is additive — check;
+  it is `k ≫ ·` on `Over`-homs, which is `MonoidHom` by `Over`-precomposition — search
+  `restrict_add` in `GroupLaw`; if absent, small lemma there-style here).
+- **Mathlib lemmas**: `AddEquiv.trans`. · **Sources**: GME p. 108. · **Generality**: any `g`.
+
+### [AP-E1-NAT1] `κ` commutes with base change
+- **Status**: open · **File**: `WeilPairing/KMNaturality.lean` · **Depends on**: AP-E1-NAT0 ·
+  **Parent**: AP-E1 · **Type**: theorem (+ 3 private steps)
+- **Statement**: `kappa_restrictBase` — `Pic.map (baseChangeMap E.π g hg) (kappa E hsm t Q) =
+  kappa E hsm t' (Point.restrictBase g hg Q)`.
+- **Proof sketch**: 1. **ker-comap** (`ker_comap_baseChangeMap`): `(Scheme.Hom.ker Q.1).comap
+  (baseChangeMap E.π g hg) = Scheme.Hom.ker (restrictBase g hg Q).1` — mirror of
+  `RelEffCartierDiv.ker_sectionBaseChange` (find it next to
+  `EllipticCurve/PoleSheaf.lean:93`'s consumer; the proof is the ideal-sheaf computation for a
+  section against a cartesian square — here the square `baseChangeMap`/`snd`/`snd`/`g` is
+  cartesian: `pullback E.π t' = (pullback E.π t) ×_T T'` by pasting,
+  `pullbackRightPullbackFstIso`/`pullbackAssoc`-family). 2. **module iso**:
+  `nonempty_pullback_idealModule (baseChangeMap …) (Scheme.Hom.ker Q.1) hJ hJ'`
+  (`Picard/IdealModulePullback.lean:361`; both local-principality sides from
+  `sectionDivisor_isOfficial` + step 1, exactly as `:387` does for `fst`). 3. **sectionCls**:
+  `Pic.map (baseChangeMap …) (sectionCls E hsm t Q.1 Q.2) = sectionCls E hsm t' …` — `picClass`
+  is `(isUnit_toSkeleton).unit⁻¹`; use `Pic.map_val`, `mapSkeleton_obj_toSkeleton`, step 2,
+  `toSkeleton_eq_toSkeleton_iff`, `Units.ext`. Same for `zeroCls` (`Q := 0`;
+  `baseChangeZero_baseChangeMap`). 4. **assembly**: `kappa_eq_picRelProj` + `picRelProj`
+  naturality (`Pic.map_comp`, the two commuting squares `baseChangeMap ≫ snd = snd ≫ g` and
+  `baseChangeZero_baseChangeMap`) — pure `MonoidHom` algebra.
+- **Mathlib lemmas**: `pullbackRightPullbackFstIso` / `pullbackAssoc` (mathlib pasting; find
+  exact names by loogle), `Units.ext`. · **Sources**: GME (2.16) functoriality; KM takes it
+  silently. · **Generality**: any `g` over `S`.
+- **Risk note**: step 1's cartesian-square bookkeeping is the fiddly part; the module/Pic part
+  is plumbing over existing engines.
+
+### [AP-E1-NAT2] Naturality of the eval
+- **Status**: open · **File**: `WeilPairing/KMNaturality.lean` · **Depends on**: AP-E1-PULL,
+  AP-E1-NAT0, AP-E1-NAT1 · **Parent**: AP-E1 · **Type**: theorem
+- **Statement**: `torsionSplittingEval_restrictBase` — for a dataset over `T` and `g : T' ⟶ T`:
+  the pulled-back dataset (module `(Modules.pullback (baseChangeMap …)).obj M`, `hM'` from
+  NAT1 + `Pic.map_val`, cover `baseChangeMap ⁻¹ᵁ W i`, trivialisations via AP-E1-PULL, `hnorm'`
+  from the PULL cocycle-spec + `baseChangeZero_baseChangeMap`) computes:
+  `torsionSplittingEval … (pulled dataset) (restrictBase g hg P) … =
+  Units.map (g.appTop) (torsionSplittingEval … (original) P hP)`-shape (orient the `Γ`-map as
+  in `weilPairingEval_restrict`, `WeilPairing/Basic.lean:282`).
+- **Proof sketch**: 1. `[N]` commutes with `baseChangeMap`
+  (`baseChangeMap_mulByN` : `baseChangeMap … ≫ mulByN E t N = mulByN E t' N ≫ baseChangeMap …`
+  — from `mulByHom` being defined over the base and `baseChange` functoriality; search
+  `mulByHom_baseChange`/`baseChange_mulByHom` first — the `(★)`-line needed similar). 2. Take a
+  normalised splitting `h` over `T`; its `unitPullback` along `baseChangeMap` is a normalised
+  splitting of the pulled cocycle over `T'` (normalisation via `baseChangeZero_baseChangeMap`,
+  splitting via functoriality of `Units.map`/`app`). 3. The pin on the `T'`-side with `C :=
+  Units.map g.appTop (eval over T)`; its `hC` restricts along traces:
+  `g`-pullback of `h i ∘ P` is `(pulled h i) ∘ (restrictBase P)` — `sectionEval` naturality
+  (`sectionEval_unitPullback` + NAT0's val-lemma + `resUnit_sectionEval_congr`).
+- **Mathlib lemmas**: none new. · **Sources**: KM p. 89 ("everything is compatible with base
+  change"). · **Generality**: any `g`.
+
+### [AP-E1-NAT3] The canonical value and its laws
+- **Status**: open · **File**: `WeilPairing/KMNaturality.lean` · **Depends on**: AP-E1-DS6,
+  AP-E1-IND5, AP-E1-NAT2 · **Parent**: AP-E1 · **Type**: def + theorems
+- **Statement**: `weilPairingKM E t N P hP Q hQ : Γ(T,⊤)ˣ` := `torsionSplittingEval` at
+  `exists_normalized_dataset`'s choice; specs: `weilPairingKM_eq_torsionSplittingEval` (= the
+  eval of *every* dataset — IND5), `weilPairingKM_restrictBase` (naturality — NAT2 + IND5),
+  `weilPairingKM_pow_eq_one`, `weilPairingKM_add_left` (from `torsionSplittingEval_add`),
+  and the `hsm`-irrelevance note (`hsm` is a `Prop`-valued structure field:
+  `SmoothOfRelativeDimension` is a Prop — so the choice is proof-irrelevant on the nose).
+- **Proof sketch**: definitions + one-line applications of the named theorems.
+- **Mathlib lemmas**: none. · **Sources**: KM 2.8. · **Generality**: the register's use site.
+
+### [AP-E1-YON1] Universal torsion points
+- **Status**: open · **File**: `WeilPairing/KMNaturality.lean` (or `Basic.lean` if short) ·
+  **Depends on**: none · **Parent**: AP-E1 · **Type**: def + lemmas
+- **Statement**: over `T₀ := pullback (E.torsionπ N) (E.torsionπ N)` with
+  `t₀ := pullback.fst … ≫ E.torsionπ N`: the two tautological points
+  `P₀ Q₀ : (E.baseChange t₀).Point (𝟙 T₀)`, both in `torsionPoints E t₀ N`; and the
+  reconstruction lemma: for any `x y : E.Point g` killed by `N` (as in
+  `weilPairingEval`'s inputs), the classifying map `k := pullback.lift (pointToTorsion x hx)
+  (pointToTorsion y hy) … : T ⟶ T₀` satisfies `restrictBase k … P₀ = ⟨x-transported⟩` and
+  similarly for `Q₀` (through `Point.baseChangeEquiv`; this is where
+  `torsionPointsEquiv`/`pointToTorsion_torsionι` do the work).
+- **Proof sketch**: `P₀ := (Point.baseChangeEquiv …).symm` of the point
+  `⟨pullback.fst … ≫ E.torsionι N, …⟩`-shape; torsion-hood via
+  `smul_eq_zero_iff_comp_mulByHom` + `pullback.condition` of the torsion scheme
+  (`E.torsionι N ≫ E.mulByHom N = E.torsionπ N ≫ E.zero`). Reconstruction: unfold both sides
+  to morphisms into `pullback E.π t` and `pullback.hom_ext`.
+- **Mathlib lemmas**: `pullback.lift_fst/snd/hom_ext`. · **Sources**: KM 2.8.5. ·
+  **Generality**: the two `weilPairing` fills.
+
+### [AP-E1-YON2] Fill `weilPairing` and `weilPairing_over`
+- **Status**: open · **File**: `WeilPairing/Basic.lean` (`:49`, `:53` — bodies only;
+  `theorem_statement_protected`) · **Depends on**: AP-E1-NAT3, AP-E1-YON1 · **Parent**: AP-E1 ·
+  **Type**: def-body + theorem-body
+- **Statement**: `weilPairing := ((muNPointsEquiv S N t₀).symm ⟨(weilPairingKM … P₀ … Q₀ …).val,
+  pow-lemma⟩).1` transported along `t₀ = pullback.fst ≫ torsionπ N`; `weilPairing_over` is the
+  `.2` of the same element.
+- **Proof sketch**: `muNPointsEquiv` is stated for a fixed structure map `g` — instantiate at
+  `g := pullback.fst … ≫ E.torsionπ N`; the subtype's `.2` **is** `weilPairing_over`'s
+  statement on the nose. `(weilPairingKM …)^N = 1` is `weilPairingKM_pow_eq_one`
+  (`Units`-level → `Γ`-level via `Units.val_pow_eq_pow_val`).
+- **Mathlib lemmas**: none new. · **Sources**: KM 2.8.5. · **Generality**: fixed by the
+  register.
+- **Note**: `E.smooth` is a structure field and `IsSeparated E.π` must synthesize from
+  `E.proper` — probe this first; if synthesis fails, route through
+  `E.toEllipticCurveGeom.proper.isSeparated`-style term.
+
+### [AP-E1-YON3] The bridge (unblocks AP-E2…E6)
+- **Status**: open · **File**: `WeilPairing/Basic.lean` or `WeilPairing/KMNaturality.lean` ·
+  **Depends on**: AP-E1-YON2, AP-E1-NAT3 · **Parent**: AP-E1 · **Type**: theorem
+- **Statement**: `weilPairingEval_eq_weilPairingKM` — for `x y : E.Point g` with the kill-by-`N`
+  hypotheses: `(E.weilPairingEval x y hx hy : Γ(T,⊤)) = (weilPairingKM E g N
+  (x-transported) … (y-transported) …).val` where the transports are through
+  `Point.baseChangeEquiv`.
+- **Proof sketch**: unfold `weilPairingEval` (= `muNPointsEquiv` at `lift ≫ weilPairing`);
+  `muNPointsEquiv_natural` along `k := pullback.lift …` reduces to the `T₀`-value;
+  `weilPairingKM_restrictBase` + YON1's reconstruction identifies the restriction with the
+  given points; IND5 removes the residual dataset choice.
+- **Mathlib lemmas**: none new. · **Sources**: KM 2.8.5. · **Generality**: the AP-E2…E6
+  consumers' exact shape.
 
 ## Cleanup cadence
 
