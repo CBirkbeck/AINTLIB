@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.KMUniqueness
+import ModularCurves.WeilPairing.TensorCocycle
 
 /-!
 # Bilinearity and `μ_N` for the Katz–Mazur pairing (ticket AP-D7)
@@ -39,17 +40,23 @@ then bottom out in the *same* module-level fact — see "The one open brick" bel
    (see `torsionSplittingEval_add`); the route taken here instead gets `h(P)^N = 1` from the
    `N`-th power cocycle directly, and so is independent of additivity in `P`.
 
-## The one open brick
+## The former open brick, now closed
 
 `exists_pow_transitionUnitOfCover_split` — the transition cocycle of `M^{⊗N}` is
-`f_{i,j}^N`, and `M^{⊗N}` is trivial because `κ(Q)^N = κ(N • Q) = 1`. Everything in that sentence
-except the first clause is proved (`kappa_nsmul`, `kappa_zero`,
-`exists_transitionUnit_eq_mul_inv`); the first clause is the missing API
-"`trivializationTransitionUnit` is monoidal", of which the tree has **no** instance — a grep for
-`tensorObj` against `trivializationTransitionUnit`/`over`/`restrictOverTrivialization` finds
-nothing. The identical brick, in its `M ⊗ M'` rather than `M^{⊗N}` form, is what upgrades
-`torsionSplittingEval_mul_of_transitionUnitOfCover_mul` to bilinearity in `Q` for `Q + Q'`
-through `kappa_add`.
+`f_{i,j}^N`, and `M^{⊗N}` is trivial because `κ(Q)^N = κ(N • Q) = 1`. The second clause was
+already proved (`kappa_nsmul`, `kappa_zero`); the first — the missing API
+"`trivializationTransitionUnit` is monoidal" — is now `WeilPairing/TensorCocycle.lean`.
+
+That file does **not** build a monoidal comparison `(M ⊗ M').over U ≅ M.over U ⊗ M'.over U`,
+which would leave a coherence obligation against `restrictOverTrivialization`. It reads the
+cocycle on the *generating sections* of the trivialisations instead (`IsFrame`), where
+restriction-naturality is free, and uses the pure-tensor sections of
+`EllipticCurve/PoleSheaf.lean` (`tensorSection`, natural and bilinear) together with
+`overTrivializationOfRestrictIso_tensorSection_coefficient`
+(`EllipticCurve/PullbackTensorSection.lean`), which already said that the coefficient of a pure
+tensor is the product of the coefficients. The same brick, in its `M ⊗ M'` rather than `M^{⊗N}`
+form, is what upgrades `torsionSplittingEval_mul_of_transitionUnitOfCover_mul` to bilinearity in
+`Q` for `Q + Q'` through `kappa_add`.
 
 ## Main results
 
@@ -62,9 +69,14 @@ through `kappa_add`.
   supplies it for `Q'' = Q + Q'` once the brick above is available.
 * `torsionSplittingEval_pow_eq_one_of_split` — **`h(P)^N = 1`, proved** from any splitting of the
   `N`-th power cocycle on the curve (normalisation of that splitting is derived, not assumed).
-* `torsionSplittingEval_pow_eq_one` — **the `μ_N` landing, KM p. 89**, unconditional.
-  **Inherits `sorryAx`** through the one brick, and only through it.
-* `torsionSplittingEval_add` — bilinearity in `P`. **`sorry`**; see its docstring.
+* `exists_pow_transitionUnitOfCover_split` — **proved**, from
+  `exists_pow_transitionUnitOfCover_split_of_toSkeleton_pow_eq_one`
+  (`WeilPairing/TensorCocycle.lean`) applied to `κ(Q)^N = 1`.
+* `torsionSplittingEval_pow_eq_one` — **the `μ_N` landing, KM p. 89**, unconditional and
+  axiom-clean.
+* `torsionSplittingEval_add` — bilinearity in `P`. **`sorry`**; see its docstring. It is the only
+  remaining gap in AP-D7, and it is disjoint from the tensor brick: it needs translations, not
+  the monoidal structure.
 
 ## What is *not* used
 
@@ -250,35 +262,36 @@ theorem torsionSplittingEval_pow_eq_one_of_split
       (sectionEval_eq_one_of_eq (comp_mulByN_eq_baseChangeZero E t N P hP) (W i) (g i) (hgn i)))
 
 include hsm hQ hM in
-/-- **(THE ONE OPEN BRICK OF AP-D7 — `sorry`)** The `N`-th power of the transition cocycle of an
+/-- **(AP-D7, the former open brick — PROVED)** The `N`-th power of the transition cocycle of an
 invertible sheaf representing `κ(Q)`, for `Q` an `N`-torsion section, is a coboundary on the
 curve.
 
-**Why it is true.** `κ(Q)^N = κ(N • Q) = κ(0) = 1` (`kappa_nsmul`, `kappa_zero`,
-`Picard/SelfAdjointN.lean` — both proved and axiom-clean), so the `N`-th tensor power `M^{⊗N}` is
-globally trivial. Its transition cocycle with respect to the induced trivialisations `e_i^{⊗N}` is
-`f_{i,j}^N`, so `exists_transitionUnit_eq_mul_inv` (`WeilPairing/KMSplitting.lean`) splits it.
-Neither `hW` nor `hnorm` is needed: the consumer
-`torsionSplittingEval_pow_eq_one_of_split` normalises the splitting itself.
+`κ(Q)^N = κ(N • Q) = κ(0) = 1` (`kappa_nsmul`, `kappa_zero`, `Picard/SelfAdjointN.lean`), so the
+class of `M` in the skeleton is killed by `N`; the module-level statement
+`exists_pow_transitionUnitOfCover_split_of_toSkeleton_pow_eq_one`
+(`WeilPairing/TensorCocycle.lean`) then splits `f_{i,j}^N`. Neither `hW` nor `hnorm` is needed:
+the consumer `torsionSplittingEval_pow_eq_one_of_split` normalises the splitting itself.
 
-**What is missing.** Exactly one clause: *the transition cocycle of `M^{⊗N}` is `f_{i,j}^N`*, i.e.
-that `trivializationTransitionUnit` is monoidal. The tree has no tensor API for it at all —
-`Picard/InvertibleSheafCocycle.lean` proves `trivializationTransitionUnit` is reflexive, symmetric,
-transitive (`_self`, `_symm`, `_trans`) and compatible with restriction and with pullback
-(`_restrict`, `..._localPullbackTrivialization`), but nothing about `tensorObj`. Supplying it means
-building `(M ⊗ M').over U ≅ M.over U ⊗ M'.over U`, `unit ⊗ unit ≅ unit` and the multiplicativity of
-`overUnitScalarEnd` in the monoidal structure on `X.Modules`, which is a self-contained ticket.
-
-**The same brick, in its `M ⊗ M'` rather than `M^{⊗N}` form, is what supplies the hypothesis
-`hmul` of `torsionSplittingEval_mul_of_transitionUnitOfCover_mul` for `Q'' = Q + Q'` via
-`kappa_add`.** So AP-D7's two conclusions have a single common obstruction, and it is a
-module-level one: nothing about `h(P)` itself is open. -/
+The missing clause was *the transition cocycle of `M^{⊗N}` is `f_{i,j}^N`* — that
+`trivializationTransitionUnit` is monoidal. `WeilPairing/TensorCocycle.lean` supplies it without
+building a monoidal comparison `(M ⊗ M').over U ≅ M.over U ⊗ M'.over U`, by reading the cocycle on
+the *generating sections* of the trivialisations instead: pure tensors of frames are frames
+(`IsFrame.tensor`), and `tensorSection` is natural and bilinear already. -/
 theorem exists_pow_transitionUnitOfCover_split :
     ∃ g : ∀ i, Γ(pullback E.π t, W i)ˣ,
       ∀ i j, transitionUnitOfCover M W e i j ^ N =
         Scheme.resUnit (inf_le_left : W i ⊓ W j ≤ W i) (g i) *
           (Scheme.resUnit (inf_le_right : W i ⊓ W j ≤ W j) (g j))⁻¹ := by
-  sorry
+  letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+  have hz : ((N : ℤ) • Q : (E.baseChange t).Point (𝟙 T)) = 0 := hQ
+  have hnat : (N • Q : (E.baseChange t).Point (𝟙 T)) = 0 := by rwa [natCast_zsmul] at hz
+  have hk : kappa E hsm t Q ^ N = 1 := by
+    rw [← kappa_nsmul E hsm t Q N, hnat]
+    exact kappa_zero E hsm t
+  have hval : toSkeleton M ^ N = 1 := by
+    rw [← hM]
+    exact (Units.val_pow_eq_pow_val (kappa E hsm t Q) N).symm.trans (congrArg Units.val hk)
+  exact exists_pow_transitionUnitOfCover_split_of_toSkeleton_pow_eq_one M W e N hval
 
 /-- **(AP-D7, the `μ_N` landing — KM p. 89)** The Katz–Mazur pairing takes values in `μ_N`:
 `h(P)^N = 1` in `Γ(T, 𝒪_T^×)`.
@@ -310,12 +323,28 @@ for `β`, and the device `mulByN_zero` (`WeilPairing/KMPairing.lean`) already us
   `τ_P^# h_i = π^#(h(P)) · h_i`;
 * evaluating at `P'` and using `P' ≫ τ_P = (P + P').1` gives the conclusion.
 
-Every step is available except the transport in the first bullet: `τ_P ⁻¹ᵁ ([N]⁻¹ W i)` and
-`[N]⁻¹(W i)` are equal only *propositionally*, via `congrArg (· ⁻¹ᵁ W i) (τ_P ≫ [N] = [N])`, and
-`Γ(Y, -)` of that equality is a dependent rewrite across the whole statement. That transport, plus
-the two `Point`-functoriality lemmas `π ≫ (N • P).1 = N • (π ≫ P.1)` and
-`P' ≫ (X + Y).1 = (P' ≫ X.1) + (P' ≫ Y.1)`, is the whole of the missing work; none of it is
-elliptic-curve geometry.
+**Precise inventory of what is missing** (re-scoped after the tensor brick landed; this sorry is
+*disjoint* from that brick — it needs translations, not the monoidal structure).
+
+1. `τ_P` itself, in the `pullback E.π t` presentation. `GroupScheme/TranslationBySection.lean`
+   builds `EllipticCurve.translateBy` / `translateByIso` as an automorphism of `E.asOver` in
+   `Over S` clothing, but that file is **not in this file's import closure**, and what is needed
+   is the base-changed translation transported to `pullback E.π t` — the same transport `mulByN`
+   performs for `[N]`. No such transport exists for `translateBy`.
+2. `τ_P ≫ [N] = [N]`. This is `f ≫ [N] = N • f` in the pointwise group `Hom_T(E_T, E_T)`,
+   specialised at `f = 𝟙 + const P`. The tree has the *points* version
+   (`EllipticCurve.smul_eq_zero_iff_comp_mulByHom`) but no endomorphism-group version, and there
+   is no lemma anywhere relating `translateBy` to `mulByHom` (checked both grep directions).
+3. The dependent transport `τ_P ⁻¹ᵁ ([N]⁻¹ W i) = [N]⁻¹(W i)`, which holds only
+   *propositionally* via `congrArg (· ⁻¹ᵁ W i)` of 2; `Γ(Y, -)` of that equality is a dependent
+   rewrite across the whole statement.
+4. Two `Point`-functoriality lemmas, `π ≫ (N • P).1 = N • (π ≫ P.1)` and
+   `P' ≫ (X + Y).1 = (P' ≫ X.1) + (P' ≫ Y.1)`. The second exists in `E.Point` clothing as
+   `pointMapOfHom_translateBy` (`LevelStructure/Factorization.lean`), again outside this closure.
+
+So the remaining work is a self-contained *translation* ticket — a base-change/presentation
+transport for `translateBy`, a `Hom`-group ↔ `mulByHom` dictionary, and the dependent open
+transport — not a leaf of the present file. None of it is new elliptic-curve geometry.
 
 **Degenerate checks done.** At `N = 0` the statement is not vacuous — `torsionPoints E t 0 = ⊤` —
 but it is true for a different reason: `[0]⁻¹(W i) = π⁻¹(0⁻¹ W i)` is the preimage of a base open,
