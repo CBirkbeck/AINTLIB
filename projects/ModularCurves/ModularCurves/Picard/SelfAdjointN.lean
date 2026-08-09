@@ -7,12 +7,19 @@ import ModularCurves.Picard.DivisorClass
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.TorsionFibre
 import ModularCurves.WeilPairing.ChartGroupSum
+-- ADDED (2026-08-09, DS4-poincare): supplies `EllipticCurve.picMap_mulByHom_eq_pow`, the
+-- input of `exists_pic_map_snd_picMap_mulByHom_kappa` below. No statement in this file is
+-- changed by it.
+import ModularCurves.WeilPairing.PoincareBiextension
 
 /-!
 # Restricted self-adjointness of `[N]` on the relative Picard group (DS4 Gap A, `(★)`/`(★′)`)
 
-**One sorry left** (`exists_invertible_tensor_idealModule_add`); the whole Picard layer
-around it is proved and axiom-clean. See "State (2026-07-29)" below.
+**Sorry-free** (2026-08-09). `exists_invertible_tensor_idealModule_add` is
+`isSquareIdentity_point_add` (`WeilPairing/ChartGroupSum.lean`), and the last leaf
+`exists_pic_map_snd_picMap_mulByHom_kappa` is `EllipticCurve.picMap_mulByHom_eq_pow`
+(`WeilPairing/PoincareBiextension.lean`). See "State (2026-07-29)" below for the route that
+got here.
 
 The decisive input for the Katz–Mazur / GME construction of the relative Weil pairing.
 Writing `κ_T(Q) = [𝒪(Q − 0)]` for `sectionToPicRel` and `m_N = [N]` on the base-changed
@@ -494,13 +501,41 @@ second variable; symmetry upgrades that to additivity in the first; hence
 `([N] × id)^* [𝒫] = [𝒫]^N`, and restricting along `(id, −Q)` gives the statement.
 
 Kept as a named statement because that derivation needs `𝒫` and its symmetry built first;
-it is bookkeeping, not new mathematics. -/
+it is bookkeeping, not new mathematics.
+
+PROVED (2026-08-09), by `EllipticCurve.picMap_mulByHom_eq_pow`
+(`WeilPairing/PoincareBiextension.lean`). That file takes a cheaper route than the sketch
+above: no sheaf `𝒫` is built. Working purely with Picard *classes*, the symmetric
+`β(h,k) = ξ(h+k)·ξ(h)⁻¹·ξ(k)⁻¹·ξ(0)` — where `ξ(h) = h^*[𝒪(D_0)]` for `h` in the group
+`𝔈.Point g` — is symmetric *by construction*, so `τ^*𝒫 ≅ 𝒫` needs no proof. `κ(Q) = β(1,−Q∘π)`,
+`[N]^*` acts as `N · 1` in the first slot by naturality of `β`, and the theorem of the square
+run one level up (over the base `E_T`, where the constants exhaust `Hom_T(E_T, E_T)`) gives
+biadditivity of `β`. The proof below is the identification of `κ` with `β(1, −Q∘π)`. -/
 theorem exists_pic_map_snd_picMap_mulByHom_kappa (N : ℕ)
     (Q : (E.baseChange t).Point (𝟙 T)) :
     ∃ M : Scheme.Pic T,
       (Scheme.Pic.map (mulByN E t N) (kappa E hsm t Q))
         * (kappa E hsm t Q ^ N)⁻¹ = Scheme.Pic.map (pullback.snd E.π t) M := by
-  sorry
+  haveI : IsSeparated (E.baseChange t).π :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π t ‹_›
+  have key : Scheme.Pic.map (mulByN E t N) (kappa E hsm t Q) = kappa E hsm t Q ^ N := by
+    refine (E.baseChange t).picMap_mulByHom_eq_pow N Q (kappa E hsm t Q)
+      (kappa_mem_ker E hsm t Q)
+      ((Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t)
+        (sectionCls E hsm t Q.1 Q.2 * (zeroCls E hsm t)⁻¹))⁻¹) ?_
+    -- `κ` is the zero-normalization of `[𝒪(D_Q)]·[𝒪(D_0)]⁻¹`, so the discrepancy is
+    -- literally the normalizing factor; `show` restates the goal in this file's
+    -- `pullback E.π t` presentation of `(E.baseChange t).E`.
+    show (sectionCls E hsm t Q.1 Q.2 * (zeroCls E hsm t)⁻¹) *
+          (Scheme.Pic.map (pullback.snd E.π t)
+            (Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t)
+              (sectionCls E hsm t Q.1 Q.2 * (zeroCls E hsm t)⁻¹)))⁻¹ *
+          (sectionCls E hsm t Q.1 Q.2 * (zeroCls E hsm t)⁻¹)⁻¹
+        = Scheme.Pic.map (pullback.snd E.π t)
+            ((Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t)
+              (sectionCls E hsm t Q.1 Q.2 * (zeroCls E hsm t)⁻¹))⁻¹)
+    rw [map_inv, mul_right_comm, mul_inv_cancel, one_mul]
+  exact ⟨1, by rw [key, map_one, mul_inv_cancel]⟩
 
 theorem picMap_mulByHom_kappa_pow (N : ℕ) (Q : (E.baseChange t).Point (𝟙 T)) :
     (Scheme.Pic.map (mulByN E t N) (kappa E hsm t Q)) = kappa E hsm t Q ^ N := by
