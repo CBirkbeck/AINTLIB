@@ -45,20 +45,40 @@ This is the shape in which a rational function with a prescribed divisor is actu
 local principality, and `nonempty_squareChartData_diagonal` builds the whole datum whenever the
 two sides carry the same pair of divisors (ratio `1`).
 
+## The generators may be chosen before the function
+
+`nonempty_squareChartData_of_span_ratio` and its pointwise form
+`nonempty_squareChartData_of_ideal_ratio` remove what looked like the main obstruction. Local
+generators of the four ideal sheaves are only well defined up to a unit per chart, but that unit
+is *pinned* by any ideal identity `⟨den⟩ · (D_P · D_Q) = ⟨num⟩ · (D_R · D_O)` one already has
+(`ModularCurves.exists_unit_mul_of_span_singleton_eq`: two generators of one principal ideal, one
+of them a nonzerodivisor, differ by a unit) and can be absorbed into a single generator. So the
+geometric input needed is an *ideal-sheaf identity chart by chart*, not a coherent system of
+generators.
+
 ## Status
 
 `exists_squareChartData_projModel` — the local reading of the theorem-of-the-square function on
-the Weierstrass charts — is the one remaining leaf; see its docstring for exactly what is
-missing and why the divisor input available today does not suffice. Proved here:
+the Weierstrass charts — is the one remaining leaf, and
+`nonempty_squareChartData_projModel_of_local` reduces it, with no gaps, to a purely local Cartier
+statement. See its docstring for exactly what remains and why the divisor input available today
+does not suffice. Proved here:
 
 * the whole composition, on an arbitrary scheme
   (`nonempty_tensorObj_idealModule_iso_of_squareChartData`);
 * the reduction of the cocycle to one equation in the function field
   (`cocycle_of_germToFunctionField_ratio`, `squareChartDataOfRatio`);
+* the passage from a chartwise **ideal identity** to a chart datum
+  (`nonempty_squareChartData_of_span_ratio`, `nonempty_squareChartData_of_ideal_ratio`);
 * the common-refinement step (`exists_affineOpen_span_nzd_four`) and the local principality of
   every section ideal sheaf of the model (`exists_affineOpen_ker_pointSection_span_nzd`);
 * the degenerate cases `P = 0` and `Q = 0` of the leaf itself
   (`nonempty_squareChartData_projModel_zero_left` / `_zero_right`);
+* the affine-chart ideal identity in exactly the shape the reduction consumes — the chord
+  (`chordIdealIdentity`, mathlib's `XYIdeal_mul_XYIdeal`) and the vertical
+  (`verticalIdealIdentity`, mathlib's `XYIdeal_neg_mul`);
+* the triviality of a section ideal sheaf away from its section
+  (`ker_ideal_eq_top_of_preimage_eq_bot`);
 * the transport of the HasseWeil divisor witness into `(projModel W).functionField`
   (`exists_functionField_projectiveDivisorOf_kappa`).
 
@@ -77,6 +97,32 @@ first.
 universe u
 
 open CategoryTheory AlgebraicGeometry Opposite HasseWeil.Curves
+
+namespace ModularCurves
+
+/-- **Two generators of one principal ideal differ by a unit**, as soon as one of them is a
+nonzerodivisor: `span {a} = span {b}` gives `b = c * a` and `a = d * b`, hence `(d * c - 1) * a = 0`
+and therefore `d * c = 1`.
+
+This is the algebraic reason why the "generators are only well defined up to a unit per chart"
+obstruction is harmless: the unit is *determined* by any ideal identity one already has, and can be
+absorbed into one of the generators. -/
+theorem exists_unit_mul_of_span_singleton_eq {A : Type*} [CommRing A] {a b : A}
+    (ha : a ∈ nonZeroDivisors A) (h : Ideal.span {a} = Ideal.span ({b} : Set A)) :
+    ∃ u : Aˣ, b = (u : A) * a := by
+  have hb : b ∈ Ideal.span ({a} : Set A) := by
+    rw [h]; exact Ideal.mem_span_singleton_self b
+  have ha' : a ∈ Ideal.span ({b} : Set A) := by
+    rw [← h]; exact Ideal.mem_span_singleton_self a
+  obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hb
+  obtain ⟨d, hd⟩ := Ideal.mem_span_singleton'.mp ha'
+  have hdc : d * c = 1 := by
+    refine sub_eq_zero.mp (mem_nonZeroDivisors_iff_right.mp ha _ ?_)
+    calc (d * c - 1) * a = d * (c * a) - a := by ring
+      _ = 0 := by rw [hc, hd, sub_self]
+  exact ⟨⟨c, d, by rw [mul_comm]; exact hdc, hdc⟩, hc.symm⟩
+
+end ModularCurves
 
 namespace AlgebraicGeometry.Scheme.Modules
 
@@ -280,6 +326,67 @@ def squareChartDataOfRatio [IsIntegral C] {JP JQ JR JO : C.IdealSheafData} {Idx 
   cocycle := cocycle_of_germToFunctionField_ratio chart hne
     (fun i => genP i * genQ i) (fun i => genR i * genO i) g hratio
 
+/-! ## The chart datum from a chartwise ideal identity -/
+
+/-- **The chart datum from a chartwise ideal identity (T10-asm-chart, reduction step).**
+
+The generators of the four ideal sheaves need *not* be produced together with the rational
+function. It is enough to have, on each chart of one cover:
+
+* *any* nonzerodivisor generators `genP, genQ, genR, genO` of the four ideal sheaves;
+* a local numerator/denominator pair `num, den` presenting one and the same global ratio
+  `g ∈ K(C)` (`hratio`);
+* the **ideal identity** `den · (D_P + D_Q) = num · (D_R + D_O)` on that chart (`hspan`).
+
+The unit ambiguity in the generators then cancels *automatically*: `hspan` says the two products
+`den · genP · genQ` and `num · genR · genO` generate the same principal ideal, and the first is a
+nonzerodivisor, so they differ by a unit `u` (`ModularCurves.exists_unit_mul_of_span_singleton_eq`);
+absorbing `u` into `genP` makes the ratios equal to `g` on the nose, and
+`squareChartDataOfRatio` does the rest. -/
+theorem nonempty_squareChartData_of_span_ratio [IsIntegral C] {JP JQ JR JO : C.IdealSheafData}
+    {Idx : Type u} (chart : Idx → C.affineOpens) (chart_cover : ⨆ i, (chart i).1 = ⊤)
+    (hne : ∀ i, Nonempty ↥(chart i).1.toScheme)
+    (genP genQ genR genO num den : ∀ i, Γ(C, (chart i).1))
+    (span_genP : ∀ i, JP.ideal (chart i) = Ideal.span {genP i})
+    (span_genQ : ∀ i, JQ.ideal (chart i) = Ideal.span {genQ i})
+    (span_genR : ∀ i, JR.ideal (chart i) = Ideal.span {genR i})
+    (span_genO : ∀ i, JO.ideal (chart i) = Ideal.span {genO i})
+    (genP_nzd : ∀ i, genP i ∈ nonZeroDivisors Γ(C, (chart i).1))
+    (genQ_nzd : ∀ i, genQ i ∈ nonZeroDivisors Γ(C, (chart i).1))
+    (genR_nzd : ∀ i, genR i ∈ nonZeroDivisors Γ(C, (chart i).1))
+    (genO_nzd : ∀ i, genO i ∈ nonZeroDivisors Γ(C, (chart i).1))
+    (den_nzd : ∀ i, den i ∈ nonZeroDivisors Γ(C, (chart i).1))
+    (g : C.functionField)
+    (hratio : ∀ i, C.germToFunctionField (chart i).1 (num i) =
+      g * C.germToFunctionField (chart i).1 (den i))
+    (hspan : ∀ i, Ideal.span {den i * (genP i * genQ i)} =
+      Ideal.span {num i * (genR i * genO i)}) :
+    Nonempty (SquareChartData JP JQ JR JO) := by
+  choose u hu using fun i => ModularCurves.exists_unit_mul_of_span_singleton_eq
+    (mul_mem (den_nzd i) (mul_mem (genP_nzd i) (genQ_nzd i))) (hspan i)
+  refine ⟨squareChartDataOfRatio chart chart_cover hne
+    (fun i => (u i : Γ(C, (chart i).1)) * genP i) genQ genR genO
+    (fun i => (span_genP i).trans
+      (Ideal.span_singleton_mul_left_unit (u i).isUnit (genP i)).symm)
+    span_genQ span_genR span_genO
+    (fun i => mul_mem (u i).isUnit.mem_nonZeroDivisors (genP_nzd i))
+    genQ_nzd genR_nzd genO_nzd g fun i => ?_⟩
+  haveI := hne i
+  have hden : C.germToFunctionField (chart i).1 (den i) ≠ 0 := fun h0 =>
+    nonZeroDivisors.ne_zero (den_nzd i)
+      (C.germToFunctionField_injective (chart i).1 (h0.trans (map_zero _).symm))
+  have h1 : C.germToFunctionField (chart i).1 (num i) *
+        (C.germToFunctionField (chart i).1 (genR i) * C.germToFunctionField (chart i).1 (genO i)) =
+      C.germToFunctionField (chart i).1 (u i : Γ(C, (chart i).1)) *
+        (C.germToFunctionField (chart i).1 (den i) *
+          (C.germToFunctionField (chart i).1 (genP i) *
+            C.germToFunctionField (chart i).1 (genQ i))) := by
+    simpa only [map_mul] using congrArg (C.germToFunctionField (chart i).1) (hu i)
+  rw [hratio i] at h1
+  refine mul_left_cancel₀ hden ?_
+  simp only [map_mul]
+  linear_combination -h1
+
 /-! ## Common refinement of four locally principal ideal sheaves -/
 
 /-- **Common refinement.** Four ideal sheaves that are locally principal on nonzerodivisors are
@@ -327,6 +434,102 @@ theorem exists_affineOpen_span_nzd_four {J₁ J₂ J₃ J₄ : C.IdealSheafData}
         (restrict_gen_nonZeroDivisors_and_surjective V₃ g₃ hs₃ hn₃ hW₃).1⟩,
       ⟨ideal_eq_span_restrict_of_affine V₄ g₄ hs₄ hn₄ ⟨W, hW⟩ hW₄,
         (restrict_gen_nonZeroDivisors_and_surjective V₄ g₄ hs₄ hn₄ hW₄).1⟩⟩⟩
+
+/-- **The chart datum from an ideal-sheaf identity (T10-asm-chart, pointwise form).**
+
+This is the shape in which the geometry actually supplies a theorem-of-the-square identity:
+
+* each of the four ideal sheaves is locally principal on a nonzerodivisor (`hP`–`hO`); for the
+  section ideal sheaves of a smooth proper relative curve this is exactly
+  `ModularCurves.exists_affineOpen_ker_pointSection_span_nzd`;
+* around every point there is *one* affine chart carrying a numerator/denominator presentation
+  `num / den = g` of one fixed rational function `g`, together with the **ideal identity**
+  `⟨den⟩ · (D_P · D_Q) = ⟨num⟩ · (D_R · D_O)` on that chart (`hloc`). No generators are asked for
+  here, and no compatibility between charts: the identity is between ideals.
+
+The two inputs live on unrelated charts. They are refined onto a common affine neighbourhood — the
+generators survive by `ideal_eq_span_restrict_of_affine`, the ideal identity by `Ideal.map_mul`
+together with `Scheme.IdealSheafData.map_ideal`, and `den` stays a nonzerodivisor because a
+nonempty open of an integral scheme has a domain of sections — and then
+`nonempty_squareChartData_of_span_ratio` absorbs the residual unit.
+
+So the only genuinely geometric input left is `hloc`: **a local Cartier presentation of the
+divisor `D_P + D_Q − D_R − D_O` as `div(g)`**, chart by chart. -/
+theorem nonempty_squareChartData_of_ideal_ratio [IsIntegral C] {JP JQ JR JO : C.IdealSheafData}
+    (hP : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      JP.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hQ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      JQ.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hR : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      JR.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hO : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      JO.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (g : C.functionField)
+    (hloc : ∀ c : ↥C, ∃ (V : C.affineOpens) (hc : c ∈ V.1) (num den : Γ(C, V.1)),
+      den ∈ nonZeroDivisors Γ(C, V.1) ∧
+      @Scheme.germToFunctionField C _ V.1 ⟨⟨c, hc⟩⟩ num =
+        g * @Scheme.germToFunctionField C _ V.1 ⟨⟨c, hc⟩⟩ den ∧
+      Ideal.span {den} * (JP.ideal V * JQ.ideal V) =
+        Ideal.span {num} * (JR.ideal V * JO.ideal V)) :
+    Nonempty (SquareChartData JP JQ JR JO) := by
+  choose V₀ hc₀ num den den_nzd hratio₀ hideal₀ using hloc
+  choose V hcV g₁ g₂ g₃ g₄ hg using fun c => exists_affineOpen_span_nzd_four hP hQ hR hO c
+  -- a common affine refinement of the two charts, around each point
+  have hbasis : ∀ c : ↥C, ∃ Wc : C.affineOpens, c ∈ Wc.1 ∧ Wc.1 ≤ (V c).1 ∧ Wc.1 ≤ (V₀ c).1 := by
+    intro c
+    obtain ⟨-, ⟨Wc, hWc, rfl⟩, hcWc, hsub⟩ :=
+      C.isBasis_affineOpens.exists_subset_of_mem_open
+        (show c ∈ (((V c).1 ⊓ (V₀ c).1 : C.Opens) : Set ↥C) from ⟨hcV c, hc₀ c⟩)
+        ((V c).1 ⊓ (V₀ c).1).2
+    exact ⟨⟨Wc, hWc⟩, hcWc, fun a ha => (hsub ha).1, fun a ha => (hsub ha).2⟩
+  choose W hcW hWV hWV₀ using hbasis
+  have hneW : ∀ c : ↥C, Nonempty ↥(W c).1.toScheme := fun c => ⟨⟨c, hcW c⟩⟩
+  refine nonempty_squareChartData_of_span_ratio W ?_ hneW
+    (fun c => g₁ c |_ₗ (W c).1 ⟪hWV c⟫) (fun c => g₂ c |_ₗ (W c).1 ⟪hWV c⟫)
+    (fun c => g₃ c |_ₗ (W c).1 ⟪hWV c⟫) (fun c => g₄ c |_ₗ (W c).1 ⟪hWV c⟫)
+    (fun c => num c |_ₗ (W c).1 ⟪hWV₀ c⟫) (fun c => den c |_ₗ (W c).1 ⟪hWV₀ c⟫)
+    (fun c => ideal_eq_span_restrict_of_affine (V c) (g₁ c) (hg c).1.1.1 (hg c).1.1.2 (W c) (hWV c))
+    (fun c => ideal_eq_span_restrict_of_affine (V c) (g₂ c) (hg c).1.2.1 (hg c).1.2.2 (W c) (hWV c))
+    (fun c => ideal_eq_span_restrict_of_affine (V c) (g₃ c) (hg c).2.1.1 (hg c).2.1.2 (W c) (hWV c))
+    (fun c => ideal_eq_span_restrict_of_affine (V c) (g₄ c) (hg c).2.2.1 (hg c).2.2.2 (W c) (hWV c))
+    (fun c => (restrict_gen_nonZeroDivisors_and_surjective (V c) (g₁ c) (hg c).1.1.1
+      (hg c).1.1.2 (hWV c)).1)
+    (fun c => (restrict_gen_nonZeroDivisors_and_surjective (V c) (g₂ c) (hg c).1.2.1
+      (hg c).1.2.2 (hWV c)).1)
+    (fun c => (restrict_gen_nonZeroDivisors_and_surjective (V c) (g₃ c) (hg c).2.1.1
+      (hg c).2.1.2 (hWV c)).1)
+    (fun c => (restrict_gen_nonZeroDivisors_and_surjective (V c) (g₄ c) (hg c).2.2.1
+      (hg c).2.2.2 (hWV c)).1)
+    (fun c => ?_) g (fun c => ?_) (fun c => ?_)
+  · exact eq_top_iff.mpr fun x _ => TopologicalSpace.Opens.mem_iSup.mpr ⟨x, hcW x⟩
+  · -- `den` stays a nonzerodivisor: its germ is unchanged, and `Γ(C, W c)` is a domain
+    haveI := hneW c
+    haveI : Nonempty ↥(V₀ c).1.toScheme := ⟨⟨c, hc₀ c⟩⟩
+    haveI : IsDomain Γ(C, (W c).1) := IsIntegral.component_integral (X := C) (W c).1
+    refine mem_nonZeroDivisors_of_ne_zero fun h0 => ?_
+    refine nonZeroDivisors.ne_zero (den_nzd c) (C.germToFunctionField_injective (V₀ c).1 ?_)
+    rw [← germToFunctionField_restrict (hWV₀ c) (den c), h0, map_zero, map_zero]
+  · haveI := hneW c
+    haveI : Nonempty ↥(V₀ c).1.toScheme := ⟨⟨c, hc₀ c⟩⟩
+    rw [germToFunctionField_restrict (hWV₀ c) (num c),
+      germToFunctionField_restrict (hWV₀ c) (den c)]
+    exact hratio₀ c
+  · -- the ideal identity restricts along `W c ≤ V₀ c`
+    set φ := (C.presheaf.map (homOfLE (hWV₀ c)).op).hom with hφ
+    have hPW : Ideal.map φ (JP.ideal (V₀ c)) = JP.ideal (W c) := JP.map_ideal (hWV₀ c)
+    have hQW : Ideal.map φ (JQ.ideal (V₀ c)) = JQ.ideal (W c) := JQ.map_ideal (hWV₀ c)
+    have hRW : Ideal.map φ (JR.ideal (V₀ c)) = JR.ideal (W c) := JR.map_ideal (hWV₀ c)
+    have hOW : Ideal.map φ (JO.ideal (V₀ c)) = JO.ideal (W c) := JO.map_ideal (hWV₀ c)
+    have hmap := congrArg (Ideal.map φ) (hideal₀ c)
+    rw [Ideal.map_mul, Ideal.map_mul, Ideal.map_mul, Ideal.map_mul, Ideal.map_span,
+      Ideal.map_span, Set.image_singleton, Set.image_singleton, hPW, hQW, hRW, hOW,
+      ideal_eq_span_restrict_of_affine (V c) (g₁ c) (hg c).1.1.1 (hg c).1.1.2 (W c) (hWV c),
+      ideal_eq_span_restrict_of_affine (V c) (g₂ c) (hg c).1.2.1 (hg c).1.2.2 (W c) (hWV c),
+      ideal_eq_span_restrict_of_affine (V c) (g₃ c) (hg c).2.1.1 (hg c).2.1.2 (W c) (hWV c),
+      ideal_eq_span_restrict_of_affine (V c) (g₄ c) (hg c).2.2.1 (hg c).2.2.2 (W c) (hWV c),
+      Ideal.span_singleton_mul_span_singleton, Ideal.span_singleton_mul_span_singleton,
+      Ideal.span_singleton_mul_span_singleton, Ideal.span_singleton_mul_span_singleton] at hmap
+    exact hmap
 
 /-- **The degenerate chart datum.** When the two sides of the identity carry the same pair of
 divisors, the constant ratio `1` works and the cocycle is commutativity of multiplication. The
@@ -480,6 +683,101 @@ theorem exists_functionField_projectiveDivisorOf_kappa (W : WeierstrassCurve k) 
       (h.trans (map_zero (EllipticCurve.projModelFunctionFieldEquiv W).symm).symm))
   · rwa [(EllipticCurve.projModelFunctionFieldEquiv W).apply_symm_apply]
 
+/-- **A section ideal sheaf is the unit ideal on any chart the section misses.** If `f ⁻¹ᵁ V` is
+empty then `Γ(X, f ⁻¹ᵁ V)` is trivial, so `f.app V` kills everything.
+
+This is the computation behind `projModelZero_ker_ideal_chartZ`, isolated for a general section:
+it is what makes three of the four ideal sheaves *trivial* on a chart, which is why the chart
+datum around a point only ever has to see the divisors passing through that point. -/
+theorem ker_ideal_eq_top_of_preimage_eq_bot {X Y : Scheme.{u}} (f : X ⟶ Y) [QuasiCompact f]
+    (V : Y.affineOpens) (h : f ⁻¹ᵁ V.1 = ⊥) :
+    (Scheme.Hom.ker f).ideal V = ⊤ := by
+  rw [Scheme.Hom.ker_apply]
+  haveI : Subsingleton Γ(X, f ⁻¹ᵁ V.1) := by rw [h]; infer_instance
+  exact (Ideal.eq_top_iff_one _).mpr (RingHom.mem_ker.mpr (Subsingleton.elim _ _))
+
+/-! ## The affine-chart ideal identity (the chord and the vertical, from mathlib)
+
+On the affine `Z`-chart the point at infinity is absent, so `I(O)` is the unit ideal and the
+identity `⟨den⟩ · (I(P) · I(Q)) = ⟨num⟩ · (I(P+Q) · I(O))` asked for by
+`nonempty_squareChartData_of_ideal_ratio` is *exactly* mathlib's ideal computation for the
+Weierstrass group law: `num` is the chord `ℓ`, `den` is the vertical `x − x₃`, and `g = ℓ/v`. -/
+
+open Polynomial WeierstrassCurve.Affine.CoordinateRing in
+/-- **The chord identity on the affine chart.** For `P = (x₁, y₁)` and `Q = (x₂, y₂)` with
+`Q ≠ -P`, writing `x₃ = addX`, `y₃ = addY` for the coordinates of `R = P + Q` and `ℓ` for the
+chord through `P` and `Q`,
+
+  `⟨x − x₃⟩ · (I(P) · I(Q)) = ⟨ℓ⟩ · (I(R) · ⊤)`
+
+in `W.CoordinateRing`. This is `WeierstrassCurve.Affine.CoordinateRing.XYIdeal_mul_XYIdeal`
+(`XIdeal = ⟨XClass⟩`, `YIdeal = ⟨YClass⟩`) with the unit ideal `⊤ = I(O)|_{affine}` inserted; it is
+the `hloc` input of `nonempty_squareChartData_of_ideal_ratio` on every chart contained in the
+affine `Z`-chart, with `den = XClass x₃` (the vertical) and `num = YClass ℓ` (the chord). -/
+theorem chordIdealIdentity {F : Type*} [Field F] [DecidableEq F] {W : WeierstrassCurve.Affine F}
+    {x₁ x₂ y₁ y₂ : F} (h₁ : W.Equation x₁ y₁) (h₂ : W.Equation x₂ y₂)
+    (hxy : ¬(x₁ = x₂ ∧ y₁ = W.negY x₂ y₂)) :
+    Ideal.span {XClass W (W.addX x₁ x₂ <| W.slope x₁ x₂ y₁ y₂)} *
+        (XYIdeal W x₁ (C y₁) * XYIdeal W x₂ (C y₂)) =
+      Ideal.span {YClass W (WeierstrassCurve.Affine.linePolynomial x₁ y₁ <|
+          W.slope x₁ x₂ y₁ y₂)} *
+        (XYIdeal W (W.addX x₁ x₂ <| W.slope x₁ x₂ y₁ y₂)
+          (C <| W.addY x₁ x₂ y₁ <| W.slope x₁ x₂ y₁ y₂) * (⊤ : Ideal W.CoordinateRing)) := by
+  rw [Ideal.mul_top]
+  exact XYIdeal_mul_XYIdeal h₁ h₂ hxy
+
+open Polynomial WeierstrassCurve.Affine.CoordinateRing in
+/-- **The vertical identity on the affine chart**, i.e. the degenerate case `Q = -P` of
+`chordIdealIdentity`. There `R = P + Q = 0`, so on the affine chart *both* right-hand ideals are
+the unit ideal and
+
+  `⟨1⟩ · (I(P) · I(-P)) = ⟨x − x₁⟩ · (⊤ · ⊤)`,
+
+i.e. `den = 1`, `num = XClass x₁` and `g = x − x₁`: the vertical line through `P`, whose divisor
+is `(P) + (-P) − 2(O)`. This is
+`WeierstrassCurve.Affine.CoordinateRing.XYIdeal_neg_mul`. -/
+theorem verticalIdealIdentity {F : Type*} [Field F] [DecidableEq F]
+    {W : WeierstrassCurve.Affine F} {x y : F} (h : W.Nonsingular x y) :
+    Ideal.span {(1 : W.CoordinateRing)} *
+        (XYIdeal W x (C y) * XYIdeal W x (C <| W.negY x y)) =
+      Ideal.span {XClass W x} * ((⊤ : Ideal W.CoordinateRing) * (⊤ : Ideal W.CoordinateRing)) := by
+  rw [Ideal.span_singleton_one, Ideal.top_mul, Ideal.mul_top, Ideal.mul_top, mul_comm]
+  exact XYIdeal_neg_mul h
+
+/-- **The leaf, reduced to a purely local Cartier statement (T10-asm-chart, entry point).**
+
+Every structural ingredient of `exists_squareChartData_projModel` is discharged here: the four
+section ideal sheaves are locally principal on nonzerodivisors
+(`exists_affineOpen_ker_pointSection_span_nzd` / `exists_affineOpen_ker_projModelZero_span_nzd`),
+and `nonempty_squareChartData_of_ideal_ratio` refines the charts, restricts the ideals, and
+absorbs the unit ambiguity in the generators.
+
+What is left is exactly `hloc`: around every point of `projModel W`, one affine chart carrying a
+numerator/denominator presentation of one fixed rational function `g` together with the ideal
+identity `⟨den⟩ · (I(P) · I(Q)) = ⟨num⟩ · (I(P+Q) · I(0))`. On charts inside the affine
+`Z`-chart that identity is `chordIdealIdentity` / `verticalIdealIdentity` (mathlib's
+`XYIdeal_mul_XYIdeal` / `XYIdeal_neg_mul`), transported along `chartZSectionsRingEquiv`; the only
+other point of `projModel W` is the point at infinity, where three of the four ideals are the unit
+ideal by `ker_ideal_eq_top_of_preimage_eq_bot` and the fourth is `⟨projModelSectionRoot W⟩`. -/
+theorem nonempty_squareChartData_projModel_of_local (W : WeierstrassCurve k) [W.IsElliptic]
+    (P Q : W.toAffine.Point) (g : (projModel W).functionField)
+    (hloc : ∀ c : ↥(projModel W), ∃ (V : (projModel W).affineOpens) (hc : c ∈ V.1)
+      (num den : Γ(projModel W, V.1)), den ∈ nonZeroDivisors Γ(projModel W, V.1) ∧
+      @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hc⟩⟩ num =
+        g * @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hc⟩⟩ den ∧
+      Ideal.span {den} * ((Scheme.Hom.ker (pointSection W P)).ideal V *
+          (Scheme.Hom.ker (pointSection W Q)).ideal V) =
+        Ideal.span {num} * ((Scheme.Hom.ker (pointSection W (P + Q))).ideal V *
+          (Scheme.Hom.ker (projModelZero W)).ideal V)) :
+    Nonempty (SquareChartData (Scheme.Hom.ker (pointSection W P))
+      (Scheme.Hom.ker (pointSection W Q)) (Scheme.Hom.ker (pointSection W (P + Q)))
+      (Scheme.Hom.ker (projModelZero W))) :=
+  nonempty_squareChartData_of_ideal_ratio
+    (exists_affineOpen_ker_pointSection_span_nzd W P)
+    (exists_affineOpen_ker_pointSection_span_nzd W Q)
+    (exists_affineOpen_ker_pointSection_span_nzd W (P + Q))
+    (exists_affineOpen_ker_projModelZero_span_nzd W) g hloc
+
 /-- **THE REMAINING LEAF (T10-asm-chart): read the local numerator and denominator of the
 theorem-of-the-square function off the Weierstrass charts.**
 
@@ -489,22 +787,55 @@ generators of the four section ideal sheaves on each chart whose ratios
 `squareChartDataOfRatio`, whose output this file's composition turns into the theorem of the
 square. This *is* the theorem of the square on the projective model, in local form.
 
-Two things are missing, and neither is repackaging:
+**Status (2026-08-09).** The *structural* half is now proved, and the leaf has one precise
+residue. Use `nonempty_squareChartData_projModel_of_local`: it reduces this statement, with no
+gaps, to producing
 
-1. **The ideal-sheaf dictionary.** Nothing in the tree computes an *explicit* generator of
-   `Scheme.Hom.ker (pointSection W P)` for a general point `P`. Only the zero section is done,
-   on its two charts, by `projModelZero_ker_ideal_chartZ` /
-   `projModelZero_ker_ideal_sectionNeighborhood` / `projModelSectionRoot_mem_nonZeroDivisors`
-   (`EllipticCurve/PoleSheafModel.lean`). The points dictionary `projModelPointsEquiv` is a
-   bijection of *points*, not of ideals, so it does not identify
-   `Scheme.Hom.ker (pointSection W P)` with mathlib's `XYIdeal x y` on the affine chart.
-   `exists_affineOpen_ker_pointSection_span_nzd` (above) does give a *pointwise* principal
-   chart for each of the four ideals, and `exists_affineOpen_span_nzd_four` refines the four
-   onto one common chart — but generators produced that way are only unique up to a unit on
-   each chart, and those units do not cancel in the cocycle. So the cover and the four
-   generators have to be produced *together with* the rational function, not before it. (When
-   the ratio is `1` no choice is needed, which is why `nonempty_squareChartData_diagonal`
-   already settles the degenerate cases `P = 0` and `Q = 0`.)
+  `g : (projModel W).functionField` and, around every point `c`, one affine chart `V ∋ c` with
+  `num den : Γ(projModel W, V)`, `den` a nonzerodivisor, `germ num = g · germ den`, and
+  `⟨den⟩ · (I(P) · I(Q)) = ⟨num⟩ · (I(P+Q) · I(0))` in `Γ(projModel W, V)`.
+
+In particular the *former* first blocker is gone: the generators of the four ideal sheaves need
+**not** be produced together with the rational function. They may be chosen arbitrarily
+(`exists_affineOpen_ker_pointSection_span_nzd`), because the chart unit is pinned by the ideal
+identity and absorbed by `exists_unit_mul_of_span_singleton_eq`; see
+`nonempty_squareChartData_of_span_ratio` and `nonempty_squareChartData_of_ideal_ratio`.
+
+What still has to be built, chart by chart:
+
+1a. **The ideal dictionary on the affine `Z`-chart.** The identity itself is *already available*
+   from mathlib and is recorded above as `chordIdealIdentity` (`XYIdeal_mul_XYIdeal`, the chord,
+   with `den = XClass x₃` and `num = YClass ℓ`) and `verticalIdealIdentity` (`XYIdeal_neg_mul`,
+   the case `Q = -P`, with `den = 1` and `num = XClass x₁`). What is missing is the translation
+   `(Scheme.Hom.ker (pointSection W P)).ideal (projModelZChart W) =
+   Ideal.comap (chartZSectionsRingEquiv W) (XYIdeal W.toAffine x (C y))` for `P = some x y`. The
+   route is `pointSection W (some x y h) = projModelAffineSection W x y h.left` (`pointSection` is
+   `(projModelPointsEquiv W k).symm`, and `projModelPointsEquiv_some` +
+   `eq_affineSection_of_zChart_factor` + `projModelAffineSection_injective` pin it), followed by
+   `RingHom.ker (affineChartHom W x y h) = ` the evaluation kernel, i.e. `XYIdeal` — note
+   `affineChartHom_mk` computes `affineChartHom` as `MvPolynomial.eval ![x, y, 1]`.
+   `(Scheme.Hom.ker (projModelZero W)).ideal (projModelZChart W) = ⊤` is
+   `projModelZero_ker_ideal_chartZ`.
+
+1b. **The one chart at infinity.** The complement of the `Z`-chart in `projModel W` is the single
+   point `[0:1:0]`, so exactly one more chart is needed: shrink
+   `projModelSectionNeighborhood W` so that it misses `P`, `Q` and `P+Q`. There `I(P)`, `I(Q)`,
+   `I(P+Q)` are `⊤` by `ker_ideal_eq_top_of_preimage_eq_bot` and
+   `I(0) = ⟨projModelSectionRoot W⟩` by `projModelZero_ker_ideal_sectionNeighborhood`, so the
+   required identity is `⟨den⟩ = ⟨num · s⟩` with `s = projModelSectionRoot W`. In the `Y`-chart
+   ring `AdjoinRoot (infChartCubic W)` (coordinates `s = X/Y = ` the root, `t = Z/Y =
+   infChartTElem`, with `t · sectionUnitElem = s²(s + a₂t)`, `basicOpen_sectionUnit_inf_t_eq_
+   basicOpen_sectionUnit_inf_root`) the chord and the vertical read
+   `ℓ = (1 − λs − μt)/t` and `v = (s − x₃t)/t`, so the right choice is
+   `num = 1 − λs − μt` and `den = s − x₃t`; `den = s · unit` near infinity gives the ideal
+   identity, and `num · XClass x₃ = YClass ℓ · den` on the chart overlap
+   (`overlapSectionsEquiv`, `PoleFiltration.lean`) gives the germ identity tying this chart to
+   the `Z`-chart value of `g`.
+
+1c. The case split is exactly mathlib's: `P = 0` and `Q = 0` are already proved
+   (`nonempty_squareChartData_projModel_zero_left` / `_zero_right`); for `P`, `Q` affine the
+   dichotomy `x₁ = x₂ ∧ y₁ = negY x₂ y₂` separates `verticalIdealIdentity` (then `P + Q = 0`)
+   from `chordIdealIdentity` (which covers `P = Q`, the tangent, as well).
 
 2. **The available divisor input is strictly weaker than what is needed.**
    `exists_functionField_projectiveDivisorOf_kappa` above delivers a nonzero `F` with
@@ -520,7 +851,8 @@ Two things are missing, and neither is repackaging:
    `(P+Q) + (0) − (P) − (Q)` at every closed point — the statement is true, it is the *input*
    that is too weak.) Closing this leaf therefore needs either the explicit chord-and-vertical
    function read on the two Weierstrass charts, or a strengthening of
-   `HasseWeil.Curves.MillerHypothesis` from rational points to all closed points.
+   `HasseWeil.Curves.MillerHypothesis` from rational points to all closed points. (1a/1b above
+   *are* the explicit chord-and-vertical route, which is why they do not use this input at all.)
 
 For that reason this leaf is deliberately stated *without* the divisor witness as a hypothesis:
 taking the weak witness as an input would make the statement false. -/
