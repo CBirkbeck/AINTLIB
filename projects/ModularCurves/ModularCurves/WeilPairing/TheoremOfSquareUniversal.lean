@@ -21,6 +21,9 @@ input through the seesaw and reads the output off along the zero section.
 
 * `HasHighCechExactness` / `HasHighCechExactnessOpens` — names for the seesaw's positive-degree
   ordered-base-Čech exactness binder, in its affine-base and arbitrary-base shapes.
+* **(step 4)** `hasHighCechExactness_of_two_affine_open_cover` — `hhigh` for any separated total
+  space covered by **two** affine opens, and `hasHighCechExactness_projModel`, its instance for
+  the projective Weierstrass model.
 * `isInvertible_discrepancy` — `Δ` is invertible, from
   `RelEffCartierDiv.sectionDivisor_isOfficial` and stability of `IsInvertible` under `⊗`.
 * **(step 2)** `exists_pullback_iso_discrepancy` — the seesaw over an **arbitrary** reduced
@@ -34,21 +37,40 @@ input through the seesaw and reads the output off along the zero section.
 * `exists_invertible_tensor_idealModule_add_of_hfib` — the **consumer shape**
   `I(D_P) ⊗ I(D_Q) ≅ (I(D_R) ⊗ I(D_Z)) ⊗ f^*N₀`, i.e. the relative theorem of the square as
   `Picard/SelfAdjointN.lean`'s `exists_invertible_tensor_idealModule_add` states it.
+* `isNoetherian_of_isProper` / `isSeparated_of_isSeparated_hom` and the universal-pair instances
+  `isNoetherian_pairBase`, `isNoetherian_pairCurve`, `isSeparated_pairCurve` — the three
+  hypotheses of the seesaw that instance search does **not** find for
+  `WeilPairing/TautologicalPair.lean`'s `pairBase`/`pairCurve` (everything else it does find).
 * `exists_pullback_iso_discrepancy_projModel`,
   `exists_invertible_tensor_idealModule_add_projModel` — the same two conclusions for the
   projective model `projModelπ W₀ : projModel W₀ ⟶ Spec A` of an elliptic Weierstrass curve over
-  a **reduced Noetherian** ring, with `hfib` discharged; only `hhigh` remains.
+  a **reduced Noetherian** ring, with `hfib` discharged; `hhigh` a hypothesis.
+* `exists_pullback_iso_discrepancy_projModel'`,
+  `exists_invertible_tensor_idealModule_add_projModel'` — the same two conclusions with **no**
+  `hhigh`, discharged by `hasHighCechExactness_projModel`. The hypothesised forms are kept for
+  consumers carrying their own exactness input.
+
+## How `hhigh` is discharged (step 4)
+
+`hhigh` is exactness of the ordered base-Čech complex at the positions `≥ 2`, i.e. `H^{≥2}` of
+the **total space** — not of the fibres. The projective Weierstrass model is a `Proj`, hence
+separated, and is covered by the *two* affine charts `projModelZChart` and
+`projModelSectionNeighborhood`; Mayer–Vietoris
+(`subsingleton_H_add_two_of_two_affine_open_cover`) then kills `H^{≥2}` for every quasicoherent
+module, and `orderedBaseCechComplex_exactAt_succ_iff_subsingleton_H_of_affine_openCover` converts
+that into ordered base-Čech exactness for *every* finite affine cover — the uniformity the seesaw
+needs, since it builds its cover internally. No fibre, no base change, and in particular no `H¹`
+claim: that is why `hhigh` is available where the seesaw's `hexact` (position `1` as well, false
+on a genus-one fibre) is not.
 
 ## What is *not* here
 
-`hhigh` (step 4) is left as a hypothesis throughout. It is exactness of the ordered base-Čech
-complex in positive degrees, which for a relative curve should come from
-`subsingleton_H_add_two_of_two_affine_open_cover` fed through
-`HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
-as in `kernel_data_of_hasDegreeOneFibreCohomology`. Note that the arbitrary-base seesaw quantifies
-its `hhigh` over **all opens of the base**, including non-affine ones, while that machinery needs
-an affine base — so the arbitrary-base form is not a direct instance of it. See the report on
-ticket B3-steps2to4.
+`HasHighCechExactnessOpens` — the arbitrary-base seesaw's `hhigh` — is still only a hypothesis.
+It quantifies over **all opens `W` of the base**, including non-affine ones, and the two charts of
+the model do not restrict to affine opens of `π ⁻¹ᵁ W`, so
+`hasHighCechExactness_of_two_affine_open_cover` does not apply to `π ∣_ W`. Only the affine-base
+predicate `HasHighCechExactness` is discharged, which is the one the projective model's theorems
+use. See the report on ticket B3-step4.
 -/
 
 universe u
@@ -74,6 +96,32 @@ of the family to every open of the base. The base's own affine cover is likewise
 the proof of `exists_pullback_iso_of_fibrewise_trivial_of_isReduced_of_affineCover`. -/
 abbrev HasHighCechExactnessOpens {C S : Scheme.{u}} (π : C ⟶ S) (M : C.Modules) : Prop :=
   ∀ W : S.Opens, HasHighCechExactness (π ∣_ W) (M.restrict (π ⁻¹ᵁ W).ι)
+
+/-- **[B3-step4, generic] Two affine charts on the total space discharge the seesaw's `hhigh`.**
+
+`hhigh` is exactness of the ordered base-Čech complex at the positions `≥ 2`, i.e. the vanishing
+of `H^{≥2}` of the **total space** — and a separated scheme covered by *two* affine opens has
+`H^{≥2} = 0` for every quasicoherent module, by Mayer–Vietoris
+(`subsingleton_H_add_two_of_two_affine_open_cover`). The ordered base-Čech complex of any finite
+affine open cover computes that cohomology
+(`orderedBaseCechComplex_exactAt_succ_iff_subsingleton_H_of_affine_openCover`), so the conclusion
+is uniform in the cover — which is what the seesaw needs, since it builds its cover internally.
+
+Nothing fibrewise, and no base change, is used: in particular no `H¹` of anything is claimed.
+That is exactly why `hhigh` is available where the seesaw's `hexact` (which also demands position
+`1`, false on a genus-one fibre) is not. -/
+theorem hasHighCechExactness_of_two_affine_open_cover {C S : Scheme.{u}} [C.IsSeparated]
+    (π : C ⟶ S) (M : C.Modules) [M.IsQuasicoherent] {U V : C.Opens}
+    (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hUV : U ⊔ V = ⊤) :
+    HasHighCechExactness π M := by
+  intro ι _ _ W hW hWaff q hq _
+  obtain ⟨p, rfl⟩ : ∃ p, q = p + 1 := ⟨q - 1, by omega⟩
+  have hH : Subsingleton (CategoryTheory.Sheaf.H M.sheaf (p + 1 + 1)) :=
+    subsingleton_H_add_two_of_two_affine_open_cover M U V hU hV hUV p
+  have hex := (orderedBaseCechComplex_exactAt_succ_iff_subsingleton_H_of_affine_openCover
+    π M W hW hWaff (p + 1)).mpr hH
+  rw [HomologicalComplex.exactAt_iff' _ (p + 1) (p + 2) (p + 3) (by simp) (by simp)] at hex
+  exact (ShortComplex.ShortExact.moduleCat_exact_iff_function_exact _).mp hex
 
 /-! ### `Ker(0^*) ∩ Im(f^*) = 1` -/
 
@@ -108,6 +156,13 @@ theorem isInvertible_discrepancy {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated 
       (RelEffCartierDiv.sectionDivisor_isOfficial hsm R hR).locallyPrincipal).tensorObj
     (AlgebraicGeometry.Scheme.Modules.isInvertible_idealModule _
       (RelEffCartierDiv.sectionDivisor_isOfficial hsm Z hZ).locallyPrincipal)).tensorObj hN
+
+/-- The discrepancy module is quasicoherent — it is invertible (`isInvertible_discrepancy`).
+This is the instance the Čech-cohomology reading of `hhigh` needs. -/
+theorem isQuasicoherent_discrepancy {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {R Z : S ⟶ C} (hR : R ≫ π = 𝟙 S) (hZ : Z ≫ π = 𝟙 S)
+    {N : C.Modules} (hN : IsInvertible N) : (discrepancy R Z N).IsQuasicoherent :=
+  (isInvertible_discrepancy hsm hR hZ hN).isQuasicoherent
 
 /-- A `⊗`-factor of the unit is invertible: this is how the seesaw's `IsInvertible` hypothesis on
 the twist `N` is obtained from the trivialisation `(I(D_P) ⊗ I(D_Q)) ⊗ N ≅ 𝒪` alone. -/
@@ -277,18 +332,64 @@ theorem exists_invertible_tensor_idealModule_add_of_hfib {C S : Scheme.{u}} [IsR
   refine ⟨dualObj N₀, hN₀.dual, nonempty_iso_tensorObj_of_tensorObj_unitObj hN e ?_⟩
   exact nonempty_pullback_tensorObj_iso_unitObj π (nonempty_eval_iso hN₀)
 
+/-! ### Noetherianness and separatedness bridges
+
+The seesaw asks for `IsNoetherian` and `Scheme.IsSeparated` of the *total space*, which for the
+families of interest — the projective Weierstrass model, and the universal pair `C ×_S C` with its
+base-changed curve — are never found by instance search, because those total spaces are `pullback`
+expressions whose structure morphisms are only proper *after* an unfolding step. Both follow from
+the corresponding property of the base along a proper (resp. separated) structure morphism. -/
+
+/-- A scheme proper over a Noetherian scheme is Noetherian: locally of finite type gives
+`IsLocallyNoetherian`, quasi-compactness over a compact base gives `CompactSpace`. -/
+theorem isNoetherian_of_isProper {X Y : Scheme.{u}} (f : X ⟶ Y) [IsProper f] [IsNoetherian Y] :
+    IsNoetherian X :=
+  haveI : IsLocallyNoetherian X := LocallyOfFiniteType.isLocallyNoetherian f
+  haveI : CompactSpace X := QuasiCompact.compactSpace_of_compactSpace f
+  ⟨⟩
+
+/-- A scheme separated over a separated scheme is separated: `terminal.from X = f ≫ terminal.from
+Y`, and separatedness of morphisms is stable under composition. -/
+theorem isSeparated_of_isSeparated_hom {X Y : Scheme.{u}} (f : X ⟶ Y) [IsSeparated f]
+    [Y.IsSeparated] : X.IsSeparated := by
+  constructor
+  rw [← terminal.comp_from f]
+  infer_instance
+
+/-! ### The universal pair of points
+
+`WeilPairing/TautologicalPair.lean`'s `pairBase π = C ×_S C` carries the two tautological
+sections, and `pairCurve π = C ×_S (C ×_S C)` is the family over it. These are the instances the
+seesaw needs there; `IsReduced`, `IsProper`, `Flat`, `LocallyOfFinitePresentation` and
+`UniversallyOConnected` are already found by instance search (resp. by
+`UniversallyOConnected.baseChange`) for the universal Weierstrass family, but the three below are
+not — the `pairCurve` spelling `pullback π (pullback.fst π π ≫ π)` is not literally any of the
+fibre-cube spellings recorded in `EllipticCurve/GroupLawAxioms.lean`. -/
+
+/-- The base of the universal pair is Noetherian when the base of the family is and the family is
+proper: `pairBaseπ π = pullback.fst π π ≫ π` is then proper. -/
+theorem isNoetherian_pairBase {C S : Scheme.{u}} (π : C ⟶ S) [IsProper π] [IsNoetherian S] :
+    IsNoetherian (pairBase π) :=
+  isNoetherian_of_isProper (pairBaseπ π)
+
+/-- The total space of the universal pair family is Noetherian. -/
+theorem isNoetherian_pairCurve {C S : Scheme.{u}} (π : C ⟶ S) [IsProper π] [IsNoetherian S] :
+    IsNoetherian (pairCurve π) :=
+  haveI := isNoetherian_pairBase π
+  isNoetherian_of_isProper (pairCurveπ π)
+
+/-- The total space of the universal pair family is a separated scheme. -/
+theorem isSeparated_pairCurve {C S : Scheme.{u}} (π : C ⟶ S) [IsProper π] [S.IsSeparated] :
+    (pairCurve π).IsSeparated :=
+  haveI : (pairBase π).IsSeparated := isSeparated_of_isSeparated_hom (pairBaseπ π)
+  isSeparated_of_isSeparated_hom (pairCurveπ π)
+
 /-! ### The projective model of a Weierstrass curve -/
 
-/-- The projective model of a Weierstrass curve over a Noetherian ring is a Noetherian scheme:
-it is locally of finite type over the base, hence locally Noetherian, and proper over a
-quasi-compact base, hence quasi-compact. -/
+/-- The projective model of a Weierstrass curve over a Noetherian ring is a Noetherian scheme. -/
 theorem isNoetherian_projModel {A : Type u} [CommRing A] [IsNoetherianRing A]
     (W₀ : WeierstrassCurve A) : IsNoetherian (projModel W₀) :=
-  haveI : IsLocallyNoetherian (projModel W₀) :=
-    LocallyOfFiniteType.isLocallyNoetherian (projModelπ W₀)
-  haveI : CompactSpace (projModel W₀) :=
-    QuasiCompact.compactSpace_of_compactSpace (projModelπ W₀)
-  ⟨⟩
+  isNoetherian_of_isProper (projModelπ W₀)
 
 /-- The projective model of an elliptic Weierstrass curve is flat over the base — it is smooth of
 relative dimension one. -/
@@ -297,6 +398,22 @@ theorem flat_projModelπ {A : Type u} [CommRing A] (W₀ : WeierstrassCurve A) [
   haveI : SmoothOfRelativeDimension 1 (projModelπ W₀) := projModel_smooth W₀
   haveI : Smooth (projModelπ W₀) := SmoothOfRelativeDimension.smooth 1 (projModelπ W₀)
   inferInstance
+
+/-- **[B3-step4] The seesaw's `hhigh` for the projective Weierstrass model.**
+
+The projective model is separated (`isSeparated_projModel`, it is a `Proj`) and is covered by the
+*two* affine charts `projModelZChart` and `projModelSectionNeighborhood`
+(`projModelZChart_sup_sectionNeighborhood_eq_top`), so
+`hasHighCechExactness_of_two_affine_open_cover` applies: every quasicoherent module on it has
+`H^{≥2} = 0`, hence positive-degree ordered base-Čech exactness for every finite affine cover.
+
+No ellipticity, no reducedness and no Noetherian hypothesis: the two-chart cover exists for every
+Weierstrass curve over every commutative ring. -/
+theorem hasHighCechExactness_projModel {A : Type u} [CommRing A] (W₀ : WeierstrassCurve A)
+    (M : (projModel W₀).Modules) [M.IsQuasicoherent] :
+    HasHighCechExactness (projModelπ W₀) M :=
+  hasHighCechExactness_of_two_affine_open_cover _ M (projModelZChart W₀).2
+    (projModelSectionNeighborhood W₀).2 (projModelZChart_sup_sectionNeighborhood_eq_top W₀)
 
 /-- **[B3-steps 2–3, tautological family] The discrepancy of the projective model is pulled back
 from the base.**
@@ -355,5 +472,58 @@ theorem exists_invertible_tensor_idealModule_add_projModel {A : Type u} [CommRin
   obtain ⟨N₀, hN₀, e⟩ := exists_pullback_iso_discrepancy_projModel hP hQ hR hRs N hN hhigh
   refine ⟨dualObj N₀, hN₀.dual, nonempty_iso_tensorObj_of_tensorObj_unitObj hN e ?_⟩
   exact nonempty_pullback_tensorObj_iso_unitObj (projModelπ W₀) (nonempty_eval_iso hN₀)
+
+/-! ### The projective model, unconditionally
+
+`hhigh` is now discharged by `hasHighCechExactness_projModel`, so the two conclusions above hold
+with no hypothesis beyond the sections and the `⊗`-inverse datum. The hypothesised forms are kept
+for consumers that carry their own exactness input. -/
+
+/-- **[B3-steps 2–4, tautological family] The discrepancy of the projective model is pulled back
+from the base — no hypotheses beyond the section data.**
+
+`exists_pullback_iso_discrepancy_projModel` with its `hhigh` supplied by
+`hasHighCechExactness_projModel`; the discrepancy is quasicoherent by
+`isQuasicoherent_discrepancy`. -/
+theorem exists_pullback_iso_discrepancy_projModel' {A : Type u} [CommRing A] [IsReduced A]
+    [IsNoetherianRing A] {W₀ : WeierstrassCurve A} [W₀.IsElliptic]
+    {P Q Rs : Spec (CommRingCat.of A) ⟶ projModel W₀} (hP : P ≫ projModelπ W₀ = 𝟙 _)
+    (hQ : Q ≫ projModelπ W₀ = 𝟙 _) (hR : Rs ≫ projModelπ W₀ = 𝟙 _)
+    (hRs : Rs = Limits.pullback.lift P Q (hP.trans hQ.symm) ≫ mulModelHom W₀)
+    (N : (projModel W₀).Modules)
+    (hN : Nonempty (tensorObj (tensorObj (Scheme.Modules.idealModule (Scheme.Hom.ker P))
+      (Scheme.Modules.idealModule (Scheme.Hom.ker Q))) N ≅ unitObj (projModel W₀))) :
+    ∃ N₀ : (Spec (CommRingCat.of A)).Modules, IsInvertible N₀ ∧
+      Nonempty (discrepancy Rs (projModelZero W₀) N ≅
+        (AlgebraicGeometry.Scheme.Modules.pullback (projModelπ W₀)).obj N₀) :=
+  haveI := isQuasicoherent_discrepancy (projModel_smooth W₀) hR (projModelZero_projModelπ W₀)
+    (isInvertible_of_tensorObj_iso_unitObj hN)
+  exists_pullback_iso_discrepancy_projModel hP hQ hR hRs N hN
+    (hasHighCechExactness_projModel W₀ _)
+
+/-- **[B3-steps 2–4, tautological family, consumer shape] The relative theorem of the square for
+the projective model, unconditionally**:
+`I(D_P) ⊗ I(D_Q) ≅ (I(D_{P+Q}) ⊗ I(D_0)) ⊗ f^*N₀` for an invertible `N₀` on `Spec A`, for an
+elliptic Weierstrass curve over a reduced Noetherian ring — the hypothesis-free form of
+`exists_invertible_tensor_idealModule_add_projModel`, i.e. `Picard/SelfAdjointN.lean`'s
+`exists_invertible_tensor_idealModule_add` for the Weierstrass-model family. -/
+theorem exists_invertible_tensor_idealModule_add_projModel' {A : Type u} [CommRing A]
+    [IsReduced A] [IsNoetherianRing A] {W₀ : WeierstrassCurve A} [W₀.IsElliptic]
+    {P Q Rs : Spec (CommRingCat.of A) ⟶ projModel W₀} (hP : P ≫ projModelπ W₀ = 𝟙 _)
+    (hQ : Q ≫ projModelπ W₀ = 𝟙 _) (hR : Rs ≫ projModelπ W₀ = 𝟙 _)
+    (hRs : Rs = Limits.pullback.lift P Q (hP.trans hQ.symm) ≫ mulModelHom W₀)
+    (N : (projModel W₀).Modules)
+    (hN : Nonempty (tensorObj (tensorObj (Scheme.Modules.idealModule (Scheme.Hom.ker P))
+      (Scheme.Modules.idealModule (Scheme.Hom.ker Q))) N ≅ unitObj (projModel W₀))) :
+    ∃ N₀ : (Spec (CommRingCat.of A)).Modules, IsInvertible N₀ ∧
+      Nonempty (tensorObj (Scheme.Modules.idealModule (Scheme.Hom.ker P))
+          (Scheme.Modules.idealModule (Scheme.Hom.ker Q)) ≅
+        tensorObj (tensorObj (Scheme.Modules.idealModule (Scheme.Hom.ker Rs))
+            (Scheme.Modules.idealModule (Scheme.Hom.ker (projModelZero W₀))))
+          ((AlgebraicGeometry.Scheme.Modules.pullback (projModelπ W₀)).obj N₀)) :=
+  haveI := isQuasicoherent_discrepancy (projModel_smooth W₀) hR (projModelZero_projModelπ W₀)
+    (isInvertible_of_tensorObj_iso_unitObj hN)
+  exists_invertible_tensor_idealModule_add_projModel hP hQ hR hRs N hN
+    (hasHighCechExactness_projModel W₀ _)
 
 end ModularCurves
