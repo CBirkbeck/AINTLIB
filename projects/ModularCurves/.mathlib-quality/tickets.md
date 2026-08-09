@@ -40282,3 +40282,62 @@ does not have.
   thin specialisations. Left byte-identical so no consumer moved.
 * `WeilPairing/TensorSection.lean` is now a dead module whose `tensorSection` family full-name-collides
   with two other copies in the tree. Do not re-import it without deduplicating.
+
+---
+
+## [BLOCKER 3] state at session end (2026-08-09) — one leaf, one clause
+
+`WeilPairing/TheoremOfSquareField.lean` has exactly one `sorry`: `hloc_off_chartZ` (:1301). It is one
+*clause* of one leaf — the local Cartier condition at points off the `Z`-chart. Everything else in
+the field-level theorem of the square is proved and axiom-clean.
+
+### The chain, all sorry-free
+
+| result | file |
+|---|---|
+| principal divisor ⟹ ideal modules isomorphic (arbitrary scheme) | `Picard/PrincipalIdealModuleIso.lean` |
+| ideal-module multiplicativity (divisor sum ⟹ tensor product) | `Picard/IdealModuleMul.lean` |
+| their composition, `SquareChartData` ⟹ the theorem-of-the-square iso | `WeilPairing/TheoremOfSquareField.lean` |
+| `P = 0` and `Q = 0` cases outright | same |
+| **1a** points→ideals dictionary on the `Z`-chart, all points | same |
+| **1c** all four cases as one existential (`affineIdeal`) | same |
+| the whole `Z`-chart half of `hloc` | same |
+
+### What is left: 1b only
+
+`hloc_off_chartZ` — the construction is written out in its docstring: chart
+`N ⊓ D(num∞) ⊓ D(w) ⊓ D(w − x₃s²)` with `w := sectionUnitElem − a₂s²` and `t·w = s³`; the `c ∈ V`
+argument mirroring `projModelZChart_sup_sectionNeighborhood_eq_top`; `⟨den∞⟩ = ⟨s⟩` from
+`den∞·w = s·(w − x₃s²)`; the germ tie-in via `overlapSectionsEquiv` + `overlapMap_coordX/_coordY`.
+Estimated 600–1000 lines. Its hypotheses are `num ≠ 0`, `den ≠ 0` plus the affine ideal identity, so
+a prover must either re-derive the chord/vertical shape (they agree up to a unit of
+`W.toAffine.CoordinateRing`, i.e. up to `k^×`) or split the call site into the four explicit cases of
+`exists_affine_ideal_identity`.
+
+### Dead ends, all logged — do not revisit
+
+* The `ProjIsPrincipal` / `kappaDivisor_add_linEquiv` route is **unsound over non-closed fields**
+  (`b2_log.jsonl`, T10-asm): `projectiveDivisorOf` is indexed by `k`-rational points plus `∞`, so the
+  witness is pinned only up to a factor supported at invisible closed points. Off the path entirely —
+  `exists_functionField_projectiveDivisorOf_kappa` is no longer needed.
+* `WeilPairing/LineVertical.lean` is **not** about the chord and the vertical despite its header.
+* "Cover, generators and ratio must be produced together" was a **wrong diagnosis**; the per-chart
+  unit is pinned by any ideal identity already in hand.
+* The `GroupLawConstruction.lean:675` whnf minefield is **avoidable**:
+  `projModelPointsEquiv_affineSectionSpecPoint` does the chart readout, so `pointSection_some` is 8
+  lines. ~150 lines had been budgeted for it.
+
+### Reusable by-products worth knowing about
+
+* `ker_ideal_of_fromSpec_factor` — if `f : Spec A ⟶ X` factors as `Spec.map φ ≫ hU.fromSpec` then
+  `(ker f).ideal U = RingHom.ker φ`. **Replaces the whole `appLE` apparatus** whose helpers are
+  `private` in `PoleFiltration.lean` — no copy, no de-privatisation.
+* mathlib's `XYIdeal_mul_XYIdeal` (`AlgebraicGeometry/EllipticCurve/Affine/Point.lean:336`) is the
+  affine-chart theorem of the square as an ideal identity — the affine half was always done.
+* `isIso_idealGenHom`, now named; the same block is copy-pasted in three other places.
+
+### Process note
+
+Commit `22ab1a4ec` swept two subagent scratch files into the repo via `git add -A` during a
+concurrent run; removed in `816a756a0`. **Never `git add -A` while a subagent is mid-run** — stage
+explicit paths.
