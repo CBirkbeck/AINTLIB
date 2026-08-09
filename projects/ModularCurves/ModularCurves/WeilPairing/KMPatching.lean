@@ -72,8 +72,12 @@ conclusion is the trivial unit group.
 
 `h(P)` is unique *given* the splitting units `h_i` (`eq_of_forall_resUnit_eq`). Its independence
 of the choice of the `h_i` is a separate statement: it needs uniqueness of the normalised `h_i` on
-**general** opens of the curve, which is still open and documented at `eq_of_mem_sectionUnits`
-(`WeilPairing/KMNormalisation.lean`). Nothing below assumes it.
+**general** opens of the curve. That is now proved, in `WeilPairing/KMUniqueness.lean`
+(`eq_of_normalized_splitting`, `eval_eq_of_normalized_splitting`), where `h(P)` is also
+repackaged as a function of `P` (`normalizedSplittingEval`, `torsionSplittingEval`). It costs the
+hypotheses `UniversallyOConnected` and `iSup V = ⊤`, both of which are absent below — so nothing
+in *this* file assumes it, and everything here stays valid for splitting units that are not
+normalised.
 -/
 
 universe u

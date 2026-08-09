@@ -277,8 +277,14 @@ units on the preimage of a base open that are both normalised along the zero sec
 Scope: this pins the normalised unit only on opens that are *preimages of base opens*. KM's
 `h_i` live on general opens `V i` of the curve, and their uniqueness needs one further gluing —
 of the ratios `h_i / h'_i`, which agree on overlaps and are normalised, hence glue by
-`exists_globalUnit_restrict` to a global normalised unit killed by this lemma at `U = ⊤`. That
-assembly is left to the uniqueness half of the ticket (`AP-D2`, already discharged). -/
+`exists_globalUnit_restrict` to a global normalised unit killed by this lemma at `U = ⊤` (`⊤`
+being `pullback.snd p g ⁻¹ᵁ ⊤` on the nose).
+
+That assembly is **done**, in `WeilPairing/KMUniqueness.lean`: `eq_of_normalized_splitting`. It
+needs one hypothesis `exists_normalized_splitting` does not carry — that the `V i` cover the
+*curve*, `iSup V = ⊤`, and not merely that their traces `z ⁻¹ᵁ V i` cover the base. The extra
+hypothesis is not removable (`𝔾_m ⊂ ℙ¹` with `z` at `t = 1`), and it is free where the tickets
+use it, the `V i` being preimages of a trivialising cover of the curve. -/
 theorem eq_of_mem_sectionUnits (hp : UniversallyOConnected p) (U : T.Opens)
     {u v : Γ(pullback p g, pullback.snd p g ⁻¹ᵁ U)ˣ}
     (hu : u ∈ sectionUnits z (pullback.snd p g ⁻¹ᵁ U))

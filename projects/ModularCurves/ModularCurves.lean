@@ -254,6 +254,7 @@ import ModularCurves.WeilPairing.KMNormalisation
 import ModularCurves.WeilPairing.KMPairing
 import ModularCurves.WeilPairing.KMPatching
 import ModularCurves.WeilPairing.KMSplitting
+import ModularCurves.WeilPairing.KMUniqueness
 import ModularCurves.WeilPairing.LineVerticalAssembly
 import ModularCurves.WeilPairing.LineVerticalConsumers
 import ModularCurves.EllipticCurve.IntegralOverField
