@@ -361,8 +361,14 @@ splitting itself is `exists_transitionUnit_eq_mul_inv_of_picMap_eq_one`
 (`WeilPairing/KMSplitting.lean`). Uniqueness of the `h_i` is `eq_of_div_mem_kUnits`
 (`WeilPairing/UnitSheaf.lean`), from AP-D2.
 
-Taking `W i = π⁻¹(U i)` for a base cover puts the `h_i` on KM's own opens, by
-`mulByN_preimage_preimage`. -/
+The `W i` must be a trivialising cover of the **curve**. Taking `W i = π⁻¹(U i)` for a cover of
+the base makes the hypothesis `e i` unsatisfiable except degenerately, since `κ(Q)` is fibrewise
+nontrivial and so is not trivial over the preimage of a base open
+(`WeilPairing/KMNormalisation.lean`, "Degenerate cases"). KM's opens over the base appear one step
+later, in the patching `AP-D6`: they are the traces `P⁻¹([N]⁻¹(W i))` of an `N`-torsion section
+`P`, and *those* do cover the base (`WeilPairing/KMPatching.lean`). `mulByN_preimage_preimage`
+records the one thing that is true about base opens — that `[N]` preserves them — but `AP-D6`
+does not need it. -/
 theorem exists_transitionUnit_eq_mul_inv_of_mem_torsionPoints (N : ℕ)
     (Q : (E.baseChange t).Point (𝟙 T)) (hQ : Q ∈ torsionPoints E t N)
     (M : (pullback E.π t).Modules)
