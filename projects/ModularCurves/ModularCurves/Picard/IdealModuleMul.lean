@@ -24,10 +24,24 @@ side.
   nonzerodivisor generators `genA i` of `JA`, `genB i` of `JB`, and the hypothesis that
   `genA i * genB i` generates `JC`.
 * `ProductDivisorData.mulPre` / `.mulHom` / `.mulIso`: multiplication of sections, as a morphism
-  of presheaves of modules, then of sheaves of modules, then as an isomorphism.
+  of presheaves of modules, then of sheaves of modules, then as an isomorphism (`mulIso_hom`
+  records that the isomorphism *is* the multiplication map, and `isIso_mulHom` its `IsIso` form).
+* `ProductDivisorData.isInvertible_idealModule_fst` / `_snd` / `_prod`: all three ideal modules
+  are invertible, which is what the skeleton cancellation of `Picard/PicComparison.lean`
+  (`nonempty_iso_of_tensorObj_right_cancel`) asks for alongside the comparison itself.
 * `nonempty_tensorObj_idealModule_iso_of_productDivisorData`: the `Nonempty (… ≅ …)` form.
 * `nonempty_tensorObj_idealModule_iso_mul`: the specialisation to `JC = JA * JB`, using
   `Scheme.IdealSheafData.ideal_mul` and `Ideal.span_singleton_mul_span_singleton`.
+* `nonempty_tensorObj_idealModule_iso_mul_of_locallyPrincipal`: **the consumer-facing form** —
+  `I(JA) ⊗ I(JB) ≅ I(JA · JB)` from the two ideal sheaves being locally principal by
+  nonzerodivisors on *separate* affine covers, which is how the Cartier condition is met
+  everywhere in the tree. The two covers are refined onto common basic opens here.
+
+One by-product of independent interest, about a single ideal sheaf:
+
+* `ideal_eq_span_restrict_of_affine`: a nonzerodivisor generator on an affine open restricts to a
+  generator on any smaller *affine* open — the affine-target companion of
+  `restrict_gen_nonZeroDivisors_and_surjective`.
 
 ## How the proof goes
 
@@ -41,8 +55,9 @@ On an open `W` inside `chart i` all three ideal sheaves are free of rank one:
 `restrict_gen_nonZeroDivisors_and_surjective` says that `genA i |_W` is a nonzerodivisor and that
 the sections of `I(JA)` over `W` are exactly its multiples, and likewise for `genB i` and for
 `genA i * genB i`. So every element of the presheaf tensor is of the shape
-`(genA i · z) ⊗ genB i` (`exists_eq_tmul_gen`), multiplication sends it to `(genA i genB i) · z`,
-and both injectivity and surjectivity fall out of the nonzerodivisor cancellation.
+`(genA i · z) ⊗ genB i` (`exists_secA_tmul_secB`), multiplication sends it to
+`(genA i · genB i) · z`, and both injectivity and surjectivity fall out of the nonzerodivisor
+cancellation.
 -/
 
 universe u
@@ -64,6 +79,23 @@ noncomputable def sectionsCommRing (C : Scheme.{u}) (W : (TopologicalSpace.Opens
   inferInstanceAs (CommRing ↑(C.presheaf.obj W))
 
 attribute [local instance] sectionsCommRing
+
+/-- **A nonzerodivisor generator restricts to a generator on any smaller affine open.** On affine
+opens the sections of the ideal sheaf *are* `J.ideal`, and `restrict_gen_nonZeroDivisors_and_
+surjective` says they are exactly the multiples of the restricted generator. (Restriction to a
+smaller affine is how two separately-given local trivialisations are refined onto one common
+cover — see `nonempty_tensorObj_idealModule_iso_mul_of_locallyPrincipal`.) -/
+theorem ideal_eq_span_restrict_of_affine {J : C.IdealSheafData} (U : C.affineOpens)
+    (r : Γ(C, U.1)) (hspan : J.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (W : C.affineOpens) (hW : W.1 ≤ U.1) :
+    J.ideal W = Ideal.span {r |_ₗ W.1 ⟪hW⟫} := by
+  obtain ⟨-, hsurj⟩ := restrict_gen_nonZeroDivisors_and_surjective U r hspan hnzd hW
+  rw [← show idealSections J (op W.1) = J.ideal W from J.ker_subschemeι_app W]
+  refine le_antisymm (fun s hs => ?_) ?_
+  · obtain ⟨x, hx⟩ := hsurj s hs
+    exact Ideal.mem_span_singleton'.mpr ⟨x, by rw [← hx]; ring⟩
+  · rw [Ideal.span_le, Set.singleton_subset_iff]
+    exact idealSections_map J (homOfLE hW).op (mem_idealSections_of_span hspan)
 
 /-- **The local data exhibiting `JC` as the product `JA · JB`.**
 
@@ -310,6 +342,15 @@ noncomputable def mulIso : tensorObj (idealModule JA) (idealModule JB) ≅ ideal
   (asIso ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).map D.mulPre)).trans
     (sheafifyValIso (idealModule JC))
 
+/-- The isomorphism `mulIso` *is* the multiplication-of-sections map. -/
+theorem mulIso_hom : D.mulIso.hom = D.mulHom := rfl
+
+include D in
+/-- Multiplication of sections is an isomorphism of `𝒪_C`-modules. -/
+theorem isIso_mulHom : IsIso D.mulHom := by
+  rw [← D.mulIso_hom]
+  infer_instance
+
 /-- **Commutativity of the product.** Exchanging the two factors is again product data. -/
 def symm : ProductDivisorData JB JA JC where
   Idx := D.Idx
@@ -396,5 +437,38 @@ theorem nonempty_tensorObj_idealModule_iso_mul {Idx : Type u} (chart : Idx → C
     Nonempty (tensorObj (idealModule JA) (idealModule JB) ≅ idealModule (JA * JB)) :=
   ⟨(productDivisorDataMul JA JB chart chart_cover genA genB span_genA span_genB genA_nzd
     genB_nzd).mulIso⟩
+
+/-- **The consumer-facing form of T10-mult.** The two ideal sheaves are locally principal by
+nonzerodivisors, each with its *own* affine cover — the shape in which the Cartier condition is
+met throughout the tree (`isInvertible_idealModule`, `nonempty_pullback_double_iso_unitObj`,
+`nonempty_pullback_triple_iso_unitObj`). Refining both covers onto common basic opens (affine,
+and where both generators survive by `ideal_eq_span_restrict_of_affine`) gives
+
+  `I(JA) ⊗_{𝒪_C} I(JB) ≅ I(JA · JB)`,
+
+i.e. the divisor sum on the ideal-sheaf side becomes a tensor product on the module side. -/
+theorem nonempty_tensorObj_idealModule_iso_mul_of_locallyPrincipal
+    (hA : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      JA.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hB : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      JB.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1)) :
+    Nonempty (tensorObj (idealModule JA) (idealModule JB) ≅ idealModule (JA * JB)) := by
+  choose VA hcA gA hspanA hnzdA using hA
+  choose VB hcB gB hspanB hnzdB using hB
+  have hcommon : ∀ c : ↥C, ∃ W : C.affineOpens, c ∈ W.1 ∧ W.1 ≤ (VA c).1 ∧ W.1 ≤ (VB c).1 := by
+    intro c
+    obtain ⟨b, hble, hcb⟩ := (VA c).2.exists_basicOpen_le (⟨c, hcB c⟩ : ↥(VB c).1) (hcA c)
+    exact ⟨⟨C.basicOpen b, (VA c).2.basicOpen b⟩, hcb, C.basicOpen_le b, hble⟩
+  choose W hcW hWA hWB using hcommon
+  refine nonempty_tensorObj_idealModule_iso_mul W ?_
+    (fun c => gA c |_ₗ (W c).1 ⟪hWA c⟫) (fun c => gB c |_ₗ (W c).1 ⟪hWB c⟫)
+    (fun c => ideal_eq_span_restrict_of_affine (VA c) (gA c) (hspanA c) (hnzdA c) (W c) (hWA c))
+    (fun c => ideal_eq_span_restrict_of_affine (VB c) (gB c) (hspanB c) (hnzdB c) (W c) (hWB c))
+    (fun c => (restrict_gen_nonZeroDivisors_and_surjective (VA c) (gA c) (hspanA c) (hnzdA c)
+      (hWA c)).1)
+    (fun c => (restrict_gen_nonZeroDivisors_and_surjective (VB c) (gB c) (hspanB c) (hnzdB c)
+      (hWB c)).1)
+  rw [eq_top_iff]
+  exact fun x _ => TopologicalSpace.Opens.mem_iSup.mpr ⟨x, hcW x⟩
 
 end AlgebraicGeometry.Scheme.Modules
