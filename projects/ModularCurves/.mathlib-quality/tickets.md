@@ -39232,7 +39232,11 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
 - **Mathlib lemmas**: none new. · **Sources**: —. · **Generality**: the use site.
 
 ### [AP-E1-DS5] Unit-rescaling of a trivialisation
-- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
+- **Status**: done (2026-08-09, `overUnitScalarIso` + `restrictOverTrivialization_trans_scalarIso`
+  + `trivializationTransitionUnit_trans_scalarIso` (`ttu(a·σc_a, b·σc_b) = ttu(a,b)·c_a⁻¹·c_b`),
+  `WeilPairing/KMDataset.lean`, all axiom-verified standard-three; built on
+  `overUnitScalarEndRingHom` whose `map_mul`/`map_one` were already proved — do NOT try
+  `overUnitScalarEnd_app_apply` via `simp`, its own file needs `erw` for it) · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
   **Parent**: AP-E1 · **Type**: def + lemma
 - **Statement**: `scaleOverTrivialization` — for `c ∈ Γ(X, U)ˣ` and `e : M.over U ≅ unit`, the
   rescaled trivialisation (compose with the unit-automorphism of multiplication by `c`), and
@@ -39247,7 +39251,15 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
 - **Mathlib lemmas**: none new. · **Sources**: —. · **Generality**: any `X`, `U`, `M`.
 
 ### [AP-E1-DS6] The normalised dataset exists
-- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: AP-E1-DS1,
+- **Status**: **done** (2026-08-09, `exists_normalized_dataset`, `WeilPairing/KMDataset.lean`,
+  axiom-verified standard-three — **the existence half of AP-E1's prerequisite is complete**,
+  and it needs no torsion hypothesis on `Q`. Construction as planned: two-family cover
+  `Z i ⊕ O i`; the comparison units come from the f-generic AP-D5 engine at the zero section;
+  the zero image is closed via `MorphismProperty.of_postcomp @IsClosedImmersion @IsSeparated`;
+  the off-zero traces are vacuous by mathlib's `Subsingleton Γ(X, ⊥)`. Lean gotchas hit:
+  `set`-folds block every `rw` — state the key computation against fully-unfolded terms and
+  bridge to the folded goal with one `exact`; `choose` does not destructure `Nonempty`) ·
+  **File**: `WeilPairing/KMDataset.lean` · **Depends on**: AP-E1-DS1,
   AP-E1-DS2, AP-E1-DS3, AP-E1-DS4, AP-E1-DS5 · **Parent**: AP-E1 · **Type**: theorem
 - **Statement**: `exists_normalized_dataset` — for every `Q ∈ torsionPoints E t N`:
   `∃ (M) (hM) (ι : Type u) (W) (hW) (e), ∀ i j, transitionUnitOfCover M W e i j ∈

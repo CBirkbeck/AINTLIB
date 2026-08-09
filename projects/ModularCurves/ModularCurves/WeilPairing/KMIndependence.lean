@@ -82,7 +82,7 @@ private theorem over_opens_ext {U : X.Opens} {A B : Over U} (h : A.left = B.left
 intermediate open: both composites collapse to a single restriction
 (`restrictOverTrivialization_comp`) along `Over`-objects that agree by thinness
 (`over_opens_ext`), and the `HEq`-transport keeps the dependent motive well-typed. -/
-private theorem restrictOverTrivialization_comp_eq {V₁ V₂ V₃ U : X.Opens} (M : X.Modules)
+theorem restrictOverTrivialization_comp_eq {V₁ V₂ V₃ U : X.Opens} (M : X.Modules)
     (e : M.over U ≅ _root_.SheafOfModules.unit (X.ringCatSheaf.over U))
     (h₁ : V₃ ≤ V₁) (h₂ : V₁ ≤ U) (h₃ : V₃ ≤ V₂) (h₄ : V₂ ≤ U) :
     SheafOfModules.restrictOverTrivialization X.ringCatSheaf M V₁
