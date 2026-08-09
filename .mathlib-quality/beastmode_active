@@ -1,31 +1,41 @@
-FOCUS (2026-08-09): **THE DS4 LEAF IS CLOSED.** `exists_invertible_tensor_idealModule_add`
-(`Picard/SelfAdjointN.lean:267`) is PROVED, axiom-verified standard-three — the relative theorem of
-the square, the single classical leaf under (★)/(★′) and hence under the Katz–Mazur construction of
-the relative Weil pairing. Downstream `kappa_add`, `exists_pic_map_snd_sectionCls_add`,
-`kappa_zsmul` have all lost their `sorryAx`.
+FOCUS (2026-08-09): **DS4 GAP A IS CLOSED. `Picard/` IS ENTIRELY SORRY-FREE.**
+`(★)` `picMap_mulByHom_kappa_pow` and `(★′)` `picMap_mulByHom_kappa_eq_one` are axiom-verified
+standard-three, as are `exists_invertible_tensor_idealModule_add` and `kappa_add`.
 
-Chain closed this session, every link axiom-clean:
-  Stacks 0FWG (`ForMathlib/ReducedConstantRankFree.lean`, a mathlib gap) → Mumford §5
-  (`ForMathlib/ConstantKernelRankProjective.lean`) → the rank-one seesaw (`ForMathlib/Seesaw.lean`,
-  `SeesawGlobalBase.lean`) → the field-level theorem of the square
-  (`Picard/PrincipalIdealModuleIso.lean`, `Picard/IdealModuleMul.lean`,
-  `WeilPairing/TheoremOfSquareField.lean`) → transport (`TheoremOfSquareFibrewise.lean`,
-  `FibreWeierstrassPresentation.lean`) → universal pair (`TheoremOfSquareUniversal.lean`) →
-  base change + gluing (`TheoremOfSquareBaseChange.lean`, `ChartFromUniversalPair.lean`,
-  `ChartGroupSum.lean`).
+=== CURRENT TARGET: AP-D4 — `E[N](S) = Ker([N]^* : Pic⁰(E/S) → Pic⁰(E/S))` ===
+File: new, `WeilPairing/KMPairing.lean`. Source: KM (2.8.1.7), p. 88; self-duality of `[N]` is
+KM 2.6.2.1.
+  * `⊆` **IS** `(★′)` `picMap_mulByHom_kappa_eq_one` (`Picard/SelfAdjointN.lean`) — now genuinely
+    available.
+  * `⊇` is Abel (AP-B3) applied to a class killed by `[N]^*`.
 
-=== NEXT TARGET: `exists_pic_map_snd_picMap_mulByHom_kappa` (`Picard/SelfAdjointN.lean:503`) ===
-The remaining sorry in that file, and the last one on the (★)/(★′) line. Its docstring (:465-482)
-says it is **NOT an independent leaf** — it is a formal consequence of the now-PROVED leaf, by
-symmetry of the normalized Poincaré bundle:
-  put `𝒜 = 𝒪(D_0) ⊗ f^*(0^*𝒪(D_0))⁻¹` and `𝒫 = m^*𝒜 ⊗ p₁^*𝒜⁻¹ ⊗ p₂^*𝒜⁻¹` on `E_T ×_T E_T`;
-  `𝒫` is trivial on both axes and SYMMETRIC (`τ^*𝒫 ≅ 𝒫`, because `m ∘ τ = m`);
-  `(id, −Q)^*𝒫 ≅ κ(Q)`; the leaf base-changed to `E_T ×_T E_T` with the two universal sections says
-  `𝒫` is additive in its second variable; symmetry upgrades that to the first; hence
-  `([N] × id)^*[𝒫] = [𝒫]^N`, and restricting along `(id, −Q)` gives the statement.
-The docstring calls this "bookkeeping, not new mathematics" — it needs `𝒫` and its symmetry built.
-`picMap_mulByHom_kappa_pow` (:490) and `picMap_mulByHom_kappa_eq_one` (:497) consume it and are
-otherwise proved, so closing it clears the whole file.
+*** THE TICKET BOARD'S AP-D4 WARNING IS STALE — IGNORE IT. *** `.mathlib-quality/tickets.md:38879`
+still says `picMap_mulByHom_kappa_eq_one` "depends on `sorryAx`" and tells you to bisect the chain.
+That was true when written; the inherited sorry was `exists_invertible_tensor_idealModule_add`,
+closed today. Re-verified directly: propext, Classical.choice, Quot.sound. **AP-D4, AP-D5-existence,
+AP-D6 and AP-D7 are all UNBLOCKED.**
+
+THEN, in order (all in `WeilPairing/KMPairing.lean`):
+  * **AP-D5 existence** — `f_{i,j} ∘ [N] = h_i / h_j`. KM p. 88: triviality of `[N]^*ℒ` in `Pic(E/S)`
+    means the normalized cocycle `f_{i,j} ∘ [N]` is a coboundary. **The UNIQUENESS half is already
+    DONE** — `eq_one_of_mem_kUnits` and `eq_of_div_mem_kUnits` (`WeilPairing/UnitSheaf.lean`,
+    standard-three) give KM's "uniquely in the form …" from AP-D2 alone.
+  * **AP-D6** — the patching: `h_i ∘ P` glue to `"h(P)" ∈ Γ(S, 𝒪_S^×)`. KM p. 89, over the cover of
+    `S` by `P^{-1}([N]^{-1}U_i)`, using `f_{i,j} ∈ K^×`, `h_i/h_j = f_{i,j} ∘ π`, `πP = 0`.
+  * **AP-D7** — bilinearity, and landing in `μ_N`. KM p. 89. **TWO tickets** (one conclusion each);
+    the source's "one verifies easily" is a flag that this may expand.
+Then Group E — the DS4 register (`AP-E1`, `AP-E2…E6`).
+
+ALSO STILL OPEN, independent of AP-D: **BLOCKER 4** —
+`IsIso ((sectionVanishingIdealSheaf M hM σ).subschemeι ≫ π)` at `EllipticCurve/AbelEquivalence.lean`
+(note the rename). Route REPLACED after external review: étale transversality — `dh̄ ≠ 0` on the
+smooth fibre ⟹ `h : U → 𝔸¹_S` étale ⟹ `Z` finite étale of degree one ⟹ iso (Stacks §37.38 / 055S;
+prove the special case from a standard-smooth Jacobian presentation, since the general slicing lemma
+routes through fibrewise flatness). The old nonzerodivisor route IS Stacks 00MF and does NOT dodge
+Artin–Rees; producing the section from fibre points is not viable (`S_red → S` has the same
+residue-field fibres). Hypothesis audit: `h⁰ = 1` and `H¹ = 0` alone are NOT enough — also needs
+smooth geometrically integral genus-one fibres, `deg M_s = 1`, and the base-change iso giving
+`σ_s ≠ 0`.
 
 === TWO COORDINATOR ITEMS (cross-cutting renames — NOT producer work, but they bite here) ===
 1. `ModularCurves.idealModule` (`EllipticCurve/PoleSheaf.lean:154`, ideal module of a MORPHISM)
