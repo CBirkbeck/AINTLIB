@@ -536,6 +536,53 @@ theorem kappa_restrictBase (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated
     _ = kappa E hsm t' (restrictBase E t g hg Q) :=
         ((kappa_eq_picRelProj E hsm t' (restrictBase E t g hg Q)).trans (hval' x')).symm
 
+/-- `[N]` commutes with `baseChangeMap`: multiplication is defined over the base. -/
+theorem baseChangeMap_mulByN (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t')
+    (N : ℕ) :
+    baseChangeMap E.π g hg ≫ mulByN E t N = mulByN E t' N ≫ baseChangeMap E.π g hg := by
+  apply pullback.hom_ext
+  · calc (baseChangeMap E.π g hg ≫ mulByN E t N) ≫ pullback.fst E.π t
+        = baseChangeMap E.π g hg ≫ (mulByN E t N ≫ pullback.fst E.π t) :=
+          Category.assoc _ _ _
+      _ = baseChangeMap E.π g hg ≫ (pullback.fst E.π t ≫ E.mulByHom (N : ℤ)) :=
+          congrArg _ (E.mulByHom_baseChange_fst t (N : ℤ))
+      _ = (baseChangeMap E.π g hg ≫ pullback.fst E.π t) ≫ E.mulByHom (N : ℤ) :=
+          (Category.assoc _ _ _).symm
+      _ = pullback.fst E.π t' ≫ E.mulByHom (N : ℤ) :=
+          congrArg (· ≫ E.mulByHom (N : ℤ)) (baseChangeMap_fst E t g hg)
+      _ = mulByN E t' N ≫ pullback.fst E.π t' :=
+          (E.mulByHom_baseChange_fst t' (N : ℤ)).symm
+      _ = mulByN E t' N ≫ (baseChangeMap E.π g hg ≫ pullback.fst E.π t) :=
+          congrArg _ (baseChangeMap_fst E t g hg).symm
+      _ = (mulByN E t' N ≫ baseChangeMap E.π g hg) ≫ pullback.fst E.π t :=
+          (Category.assoc _ _ _).symm
+  · calc (baseChangeMap E.π g hg ≫ mulByN E t N) ≫ pullback.snd E.π t
+        = baseChangeMap E.π g hg ≫ (mulByN E t N ≫ pullback.snd E.π t) :=
+          Category.assoc _ _ _
+      _ = baseChangeMap E.π g hg ≫ pullback.snd E.π t :=
+          congrArg _ (E.mulByHom_baseChange_snd t (N : ℤ))
+      _ = pullback.snd E.π t' ≫ g := baseChangeMap_snd E t g hg
+      _ = (mulByN E t' N ≫ pullback.snd E.π t') ≫ g :=
+          congrArg (· ≫ g) (E.mulByHom_baseChange_snd t' (N : ℤ)).symm
+      _ = mulByN E t' N ≫ (pullback.snd E.π t' ≫ g) := Category.assoc _ _ _
+      _ = mulByN E t' N ≫ (baseChangeMap E.π g hg ≫ pullback.snd E.π t) :=
+          congrArg _ (baseChangeMap_snd E t g hg).symm
+      _ = (mulByN E t' N ≫ baseChangeMap E.π g hg) ≫ pullback.snd E.π t :=
+          (Category.assoc _ _ _).symm
+
+/-- Evaluation along a composite is the pullback of the evaluation: the `appLE`-normalised
+form of `Scheme.Hom.comp_app`. -/
+theorem sectionEval_comp {Y : Scheme.{u}} (g : T' ⟶ T) (w : T ⟶ Y) (V : Y.Opens)
+    (u : Γ(Y, V)ˣ) :
+    sectionEval (g ≫ w) V u =
+      unitPullback g (w ⁻¹ᵁ V) ((g ≫ w) ⁻¹ᵁ V) (le_of_eq rfl) (sectionEval w V u) := by
+  refine Eq.trans ?_ (map_app_eq_unitPullback g (w ⁻¹ᵁ V) (sectionEval w V u))
+  apply Units.ext
+  show ((g ≫ w).app V).hom (u : Γ(Y, V)) =
+    (g.app (w ⁻¹ᵁ V)).hom ((w.app V).hom (u : Γ(Y, V)))
+  rw [Scheme.Hom.comp_app]
+  rfl
+
 end RestrictBase
 
 end ModularCurves
