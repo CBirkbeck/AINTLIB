@@ -39352,7 +39352,11 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
   is plumbing over existing engines.
 
 ### [AP-E1-NAT2] Naturality of the eval
-- **Status**: open — **design fixed 2026-08-10**: pulled dataset = `(Scheme.Modules.pullback
+- **Status**: **done** (2026-08-10, `torsionSplittingEval_restrictBase`, axiom-verified
+  standard-three, plus `baseChangeMap_mulByN` and `sectionEval_comp`. The whnf wall fell to
+  typed barrier-`have`s with every open explicit + the v4.33 opacity pair; `hM'`/`hnorm'`
+  are proof-irrelevant arguments of the statement, to be discharged at call sites) —
+  original design note: pulled dataset = `(Scheme.Modules.pullback
   (baseChangeMap E.π g hg)).obj M` with `hM'` from `kappa_restrictBase` + `Pic.map_val` +
   `mapSkeleton_obj_toSkeleton`; cover `baseChangeMap ⁻¹ᵁ W i`; trivialisations
   `localPullbackTrivializationT (baseChangeMap …) M (W i) (e i)` (KMSplitting's gadget) with
