@@ -36,8 +36,19 @@ standard-three. `lake build ModularCurves` is green at ~9770 jobs.
    four missing bricks that all now exist. That comment will actively mislead you or the next
    reader.
 
-2. **The real work: `evalGenerator_mem_nonZeroDivisors`** (`AbelEquivalence.lean:848`) and thence
-   "Blocker 4" (`AbelEquivalence.lean:971`).
+2. 🛑 **Before anything else: two statements on the critical path are FALSE AS STATED.**
+   `evalGenerator_mem_nonZeroDivisors` (`AbelEquivalence.lean:836`) and
+   `relEffCartierDiv_of_degreeOne_package` (`:960`) — the latter being "Blocker 4", the ticket the
+   whole board has been pointing at. `HasDegreeOneFibreCohomology` is purely cohomological and
+   permits disconnected, reducible fibres; one counterexample kills both
+   (`E = ℙ¹_k ⊔ Spec k`, `M = 𝒪(-1) ⊔ 𝒪`, `σ` the section supported on the point — it vanishes
+   identically on the `ℙ¹`). Full detail in §6.5 of the handover, in `b2_log.jsonl`
+   (`AP2-B2-evalgen`, `AP2-B2-blocker4`), and in both docstrings. The fix is to add smooth
+   geometrically integral fibres plus `deg M_s = 1`, but that changes statements, so **ask the
+   project owner before touching them**. Audit `:981` and `:999` for the same defect.
+
+3. **Then the real work: `evalGenerator_mem_nonZeroDivisors`** in its repaired form, and thence
+   Blocker 4.
 
    The deep commutative-algebra gate underneath these is **done**:
    `ForMathlib/LocalFlatnessCriterion.lean` is sorry-free as of 2026-08-09, with Stacks 00ME proved
@@ -52,7 +63,7 @@ standard-three. `lake build ModularCurves` is green at ~9770 jobs.
    the exact idiom. The board records a *different* route for Blocker 4 (étale transversality,
    Stacks §37.38/055S); I believe it is a detour, but that remains a hypothesis.
 
-3. Then `AbelEquivalence.lean:971 / :994 / :1013`, then the two Abel halves (rigidity + surjectivity)
+4. Then `AbelEquivalence.lean` :971 / :994 / :1013 (once repaired), then the two Abel halves (rigidity + surjectivity)
    for AP-D4 `⊇`, which additionally need a **fibrewise degree function on `Pic`** that the tree
    does not yet have.
 
@@ -87,9 +98,14 @@ standard-three. `lake build ModularCurves` is green at ~9770 jobs.
   target is absent — this tree has repeatedly had the same fact proved by a route sharing no lemma
   names with the one you have in mind. Before choosing a *route*, grep for that route's
   characteristic intermediate conclusion in the route's own vocabulary.
-- **Treat every recorded blocker as a dated observation.** Boarded routes in this project have been
-  wrong fifteen times — thirteen over-engineered, twice the statement was actually false, once the
-  "missing API" already existed. Trust the statement over the sketch, and say so when you deviate.
+- **Treat every recorded blocker as a dated observation, and every boarded statement as unverified.**
+  Boarded routes here have been wrong repeatedly and in every direction: most often over-engineered
+  (2026-08-09 alone: "Artin–Rees is needed" — it is not; "the base change needs `S ⧸ IS`" — it does
+  not; two of four enumerated blockers for AP-D7 were much smaller than boarded), once the "missing
+  API" already existed, and **four times the statement itself was false** — including the two found
+  on 2026-08-09 that sit on this very critical path. Trust the statement over the sketch, and say so
+  when you deviate. Before spending a session on a `sorry`, spend ten minutes trying to break its
+  statement; `b2_log.jsonl` is where that pays off.
 
 ## Known-dead — do not revisit
 

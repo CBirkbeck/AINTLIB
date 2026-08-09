@@ -832,7 +832,30 @@ ideal of the distinguished section is a nonzerodivisor: *"we are reduced to the 
 `S = Spec(k)` with `k` a field, and `ℓ ∈ H⁰(E,L)` a `k`-basis, so non-zero, in which case
 the assertion is obvious"* — over a fibre the trivialised section is a nonzero element of a
 domain (the fibre is integral), and the fibrewise criterion
-(`ForMathlib/LocalFlatnessCriterion.lean`, Stacks 00ME) lifts injectivity off the fibres. -/
+(`ForMathlib/LocalFlatnessCriterion.lean`, Stacks 00ME) lifts injectivity off the fibres.
+
+**⚠️ FALSE AS STATED (2026-08-09; `b2_log.jsonl`, `AP2-B2-evalgen`). Do not attempt this proof
+until the statement is fixed — the hypotheses do not entail the conclusion.**
+
+The argument quoted above uses *integrality of the fibre*, and nothing here supplies it.
+`HasDegreeOneFibreCohomology` (`EllipticCurve/AbelSkeleton.lean:53`) is purely cohomological —
+positive-degree Čech exactness plus `finrank (ker d⁰¹) = 1` over every field over the base ring —
+and says nothing about the geometry of `E`.  On a disconnected or reducible fibre a nonzero global
+section can vanish **identically on a component**, and `sectionVanishingIdealSheaf`'s ideal at an
+affine open `V` is `span {φ(σ|_V) : φ ∈ Hom(M|_V, 𝒪|_V)}`, so `σ|_V = 0` makes that ideal `0`,
+`hspan` holds with `f = 0`, and `0` is never a nonzerodivisor in a nontrivial ring.
+
+*Counterexample.*  `R = k` a field, `E = ℙ¹_k ⊔ Spec k` (proper, flat, lfp, Noetherian over `k`),
+`M = 𝒪(-1)` on the `ℙ¹` component and `𝒪` on the point.  Then `h⁰(M) = 0 + 1 = 1` and `H¹(M) = 0`,
+so the degree-one package holds.  Take `σ` the nonzero section supported on the point component, so
+`σ ≠ 0`.  For any nonempty affine open `V` inside the `ℙ¹` component, `σ|_V = 0`, hence the
+evaluation ideal at `V` is `span {0}` and `f = 0`.
+
+*Fix.*  Add smooth geometrically integral fibres — which is the board's own hypothesis audit
+(handover §6.4: "`h⁰ = 1` and `H¹ = 0` alone are NOT enough — also needs smooth geometrically
+integral genus-one fibres, `deg M_s = 1`, and the base-change iso giving `σ_s ≠ 0`") — or weaken
+the conclusion to trivialising opens on which `σ`'s image is already known to be a nonzerodivisor.
+The statement is left untouched pending that decision (`theorem_statement_protected`). -/
 theorem evalGenerator_mem_nonZeroDivisors
     {R : Type u} [CommRing R] [IsNoetherianRing R]
     {E : Scheme.{u}} {π : E ⟶ Spec (.of R)} [IsProper π] [Flat π]
@@ -953,10 +976,28 @@ completes KM pp. 66–67.
 
 Two routes (board, 2026-08-08): (a) fibrewise — each fibre meets the vanishing locus in one
 reduced point by `AP2-A1`'s `h⁰ = 1`, so the map is finite flat of rank one (needs the
-R-substrate fibrewise-flatness criterion; the `_sModule` variant of that criterion is sorried
-and must be avoided); (b) through the `AP2-A2` package — the rank-one `baseSections` makes the
-counit's image ideal locally principal (`sv1`), and its subscheme is `S`-isomorphic by
-construction. -/
+fibrewise-flatness criterion, `ForMathlib/LocalFlatnessCriterion.lean`, **which is now
+sorry-free and axiom-clean in every variant, including `_sModule`** — the prohibition recorded
+here on 2026-08-08 is lifted); (b) through the `AP2-A2` package — the rank-one `baseSections`
+makes the counit's image ideal locally principal (`sv1`), and its subscheme is `S`-isomorphic by
+construction.
+
+**⚠️ FALSE AS STATED (2026-08-09; `b2_log.jsonl`, `AP2-B2-blocker4`). This is "Blocker 4", and it
+fails for the same reason as `evalGenerator_mem_nonZeroDivisors` above: nothing in the hypotheses
+forces the fibres of `π` to be integral, or even connected.**
+
+*Counterexample.*  `R = k` a field, `E = ℙ¹_k ⊔ Spec k`, `M = 𝒪(-1)` on the `ℙ¹` component and `𝒪`
+on the point.  `h⁰(M) = 1` and `H¹(M) = 0`, so `hpkg` holds; take `σ` the nonzero section supported
+on the point component.  Its vanishing ideal sheaf is `0` on the `ℙ¹` component and `⊤` on the
+point, so the vanishing subscheme is the whole `ℙ¹` — not finite over `Spec k`, hence not a
+relative effective Cartier divisor.  `D.finite` already fails.  The equivalent form
+`IsIso ((sectionVanishingIdealSheaf M hM σ).subschemeι ≫ π)` is false for the same reason.
+
+*Fix.*  Add smooth geometrically integral fibres together with `deg M_s = 1` (handover §6.4) —
+that is exactly what makes `div(σ_s)` a single reduced rational point on each fibre.  The two
+declarations below (`exists_relEffCartierDiv_of_degreeOne`, `relEffCartierDiv_degree_one_of_degreeOne`)
+should be re-audited for the same defect before any proof work.  Statement left untouched pending
+the user's decision (`theorem_statement_protected`). -/
 theorem relEffCartierDiv_of_degreeOne_package
     {R : Type u} [CommRing R] [IsNoetherianRing R]
     {E : Scheme.{u}} {π : E ⟶ Spec (.of R)} [IsProper π] [Flat π]

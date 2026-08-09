@@ -335,6 +335,42 @@ is *why* it is still open. Closing `:456`/`:473` removes that prohibition.
 `h⁰ = 1` and `H¹ = 0` alone are **not** enough. Also needed: smooth geometrically integral
 genus-one fibres, `deg M_s = 1`, and the base-change iso giving `σ_s ≠ 0`.
 
+### 6.5 🛑 STOP — two of these four statements are FALSE AS STATED
+
+**Found 2026-08-09, logged in `b2_log.jsonl` as `AP2-B2-evalgen` and `AP2-B2-blocker4`, and warned
+in both docstrings. Do not attempt either proof until the user has decided the fix.**
+
+`HasDegreeOneFibreCohomology` (`EllipticCurve/AbelSkeleton.lean:53`) is **purely cohomological** —
+positive-degree Čech exactness plus `finrank (ker d⁰¹) = 1` over every field over the base ring. It
+says nothing whatever about the geometry of `E`. In particular the hypotheses of both theorems below
+allow **disconnected, reducible, non-integral fibres**, and §6.4's audit was right: `h⁰ = 1` and
+`H¹ = 0` are not enough.
+
+**One counterexample kills both.** `R = k` a field, `E = ℙ¹_k ⊔ Spec k` (proper, flat, lfp,
+Noetherian over `k`), `M = 𝒪(-1)` on the `ℙ¹` component and `𝒪` on the point. Then
+`h⁰(M) = 0 + 1 = 1` and `H¹(M) = 0`, so `hpkg` holds. Take `σ` the nonzero section supported on the
+point component — so `hσ : σ ≠ 0` holds — and note it vanishes **identically** on the whole `ℙ¹`.
+
+- **`evalGenerator_mem_nonZeroDivisors` (`:836`/sorry `:848`).**
+  `sectionVanishingIdealSheaf`'s ideal at an affine open `V` is `span {φ(σ|_V) : φ ∈ Hom(M|_V, 𝒪|_V)}`.
+  For any nonempty affine `V` inside the `ℙ¹` component, `σ|_V = 0`, so that ideal is `span {0}`,
+  `hspan` holds with `f = 0`, and `0` is never a nonzerodivisor in a nontrivial ring. The docstring's
+  own quoted argument ("the fibre is integral") uses a hypothesis that isn't there.
+- **`relEffCartierDiv_of_degreeOne_package` (`:960`/sorry `:971`) — i.e. Blocker 4 itself.**
+  The vanishing ideal sheaf is `0` on the `ℙ¹` and `⊤` on the point, so the vanishing subscheme is
+  the whole `ℙ¹`, which is not finite over `Spec k`. `D.finite` already fails, and the equivalent
+  `IsIso (… .subschemeι ≫ π)` is false for the same reason.
+
+**Fix (the user's call):** add smooth geometrically integral fibres together with `deg M_s = 1` —
+that is exactly what makes `div(σ_s)` a single reduced rational point on each fibre. Both statements
+were left byte-identical (`theorem_statement_protected`); the warnings live in their docstrings.
+`exists_relEffCartierDiv_of_degreeOne` (`:981`) and `relEffCartierDiv_degree_one_of_degreeOne`
+(`:999`) have **not** been audited and are suspect for the same reason.
+
+Note the ordering consequence: the commutative-algebra work of §6.3 was **not** wasted — Stacks 00ME
+is genuinely needed by the fibrewise route — but it cannot be wired up until the statements are
+repaired. That is why §11 puts the statement repair first.
+
 ---
 
 ## 7. Dead ends — logged, do not revisit
@@ -457,7 +493,15 @@ affine-chart theorem of the square.**
    particular `KMBilinear.lean`'s `torsionSplittingEval_add` docstring still contains the long
    "Precise inventory of what is missing" block listing four bricks that now all exist; rewrite it
    to describe the proof instead of the obstruction, or a future reader will rebuild them.
-2. **`evalGenerator_mem_nonZeroDivisors`** (`AbelEquivalence.lean:848`) — the first consumer of the
+2. 🛑 **Repair the two false statements first — §6.5.** `evalGenerator_mem_nonZeroDivisors` and
+   `relEffCartierDiv_of_degreeOne_package` (Blocker 4) are **false as stated**; one counterexample
+   (`E = ℙ¹_k ⊔ Spec k`) kills both. This needs the project owner's decision on the hypothesis set,
+   because it changes statements (`theorem_statement_protected`). Audit
+   `exists_relEffCartierDiv_of_degreeOne` and `relEffCartierDiv_degree_one_of_degreeOne` at the same
+   time. **Do not spend a session proving either until this is settled** — the project has lost time
+   to exactly this twice before.
+
+3. **Then `evalGenerator_mem_nonZeroDivisors`** (in its repaired form) — the first consumer of the
    now-complete Stacks 00ME. `ForMathlib/LocalFlatnessCriterion.lean` is sorry-free as of
    `a5af3b7da`, so the tool is available; nothing in the tree consumes it yet, so this is where the
    wiring starts. The neighbouring proved lemmas
