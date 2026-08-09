@@ -1,80 +1,61 @@
-FOCUS (2026-08-09): **THE FIELD-LEVEL THEOREM OF THE SQUARE IS PROVED, UNCONDITIONAL AND SORRY-FREE.**
+FOCUS (2026-08-09): **BLOCKER 3 STEPS 1-3 ARE PROVED. `hhigh` AND STEP 5 REMAIN.**
 
-`ModularCurves.nonempty_tensorObj_idealModule_add_field`
-(`WeilPairing/TheoremOfSquareField.lean`) : `I(P) ⊗ I(Q) ≅ I(P+Q) ⊗ I(O)` on the projective
-Weierstrass model over ANY field. Axiom-verified standard-three. Zero sorries in that file.
+`WeilPairing/TheoremOfSquareUniversal.lean` —
+`exists_invertible_tensor_idealModule_add_projModel` IS `SelfAdjointN.lean`'s
+`exists_invertible_tensor_idealModule_add` for the tautological family, with `Rs` pinned to
+`mulModelHom` so `P+Q` is the real group sum. `hfib` is FULLY DISCHARGED. Only `hhigh` is
+hypothesised. Axiom-clean, zero sorries. Also `exists_invertible_tensor_idealModule_add_of_hfib`
+(general form) and the universal-base instances `isNoetherian_pairBase`/`isNoetherian_pairCurve`/
+`isSeparated_pairCurve` (the boarded spelling trap, now bridged).
 
-Closed this session, all axiom-clean:
-  * BLOCKER 1 + BLOCKER 2 — the rank-one seesaw (`ForMathlib/Seesaw.lean`, `SeesawGlobalBase.lean`),
-    proved WITHOUT cohomology-and-base-change, on the back of Stacks 0FWG
-    (`ForMathlib/ReducedConstantRankFree.lean`) which mathlib lacks.
-  * The field-level bridge: `Picard/PrincipalIdealModuleIso.lean` (principal divisor ⟹ ideal modules
-    isomorphic, arbitrary scheme), `Picard/IdealModuleMul.lean` (divisor sum ⟹ tensor product), and
-    `WeilPairing/TheoremOfSquareField.lean` (composition + both charts).
+*** STRUCTURAL FIX LANDED (66b573f7f) — READ THIS ***
+`ModularCurves.sectionVanishingIdeal` was declared TWICE (an `IdealSheafData` in
+`EllipticCurve/AbelEquivalence.lean`, an `Ideal R` in `LevelStructure/Incidence.lean`). That clash
+is WHY THE WHOLE `ForMathlib/Seesaw*` LINE WAS AN ORPHAN — and its consumer `Picard/SelfAdjointN.lean`
+IS in the root, so it would have blocked the entire workstream from landing. Renamed the sheaf one to
+`sectionVanishingIdealSheaf`. `lake build ModularCurves` is now 9760 jobs (was 9745) and the Seesaw
+line is genuinely built. The old board note "some ForMathlib modules are orphans, build them
+explicitly" was a SYMPTOM of this, not a quirk.
+**Run a full `lake build ModularCurves` as a name-clash detector before adding any import** — a
+conclusion-grep has twice missed what the clash caught.
 
-=== CURRENT TARGET: BLOCKER 3 — `exists_invertible_tensor_idealModule_add`
-(`Picard/SelfAdjointN.lean:267`). What remains is TRANSPORT, not new mathematics. ===
+=== CURRENT TARGET: STEP 4 — discharge `hhigh` (in flight) ===
+`hhigh` = exactness of the ordered base-Čech complex at positions ≥ 2, i.e. `H^{≥2}(X_s,M_s) = 0`,
+automatic because the fibres are CURVES.
 
-**STEP 1 — DONE (2026-08-09), hfib IS NOW HYPOTHESIS-FREE.**
-  * `WeilPairing/TheoremOfSquareFibrewise.lean` — `nonempty_pullback_discrepancy_iso_unitObj_of_field`,
-    the discrepancy `Δ = (I(D_R) ⊗ I(D_Z)) ⊗ N` trivial on every field-valued fibre, in exactly the
-    seesaw's `hfib` shape. Discrepancy form chosen because it is what
-    `SelfAdjointN.exists_invertible_tensor_idealModule_add_of_discrepancy_trivial` consumes.
-  * `WeilPairing/FibreWeierstrassPresentation.lean` — `nonempty_pullback_discrepancy_iso_unitObj_projModel`
-    and `..._of_point`: the Weierstrass presentation of the fibre is DERIVED, so no presentation
-    hypothesis remains, for the tautological family `projModelπ W₀` at arbitrary `x : Spec k ⟶ Spec A`.
-  Both axiom-clean, zero sorries. **THE FIT IS VERIFIED BY ELABORATION** — three scratchpad probes
-  call `exists_pullback_iso_of_fibrewise_trivial_of_isReduced`, its `_of_affineCover` variant, and
-  the raw binder shape, and compile. KEEP THAT STANDARD for every remaining transport step.
-  No `[DecidableEq k]` leaks into the binder (`classical` is internal).
-
-  TWO ROUTE CORRECTIONS FOUND HERE, do not re-derive:
-   * Going through `projModelPointsAddEquiv` / `chartAffinePointEquiv` for the additive matching is a
-     TRAP — it forces comparing `projModelPointsEquiv` across TWO base rings (`A` and `k`), and that
-     base-change compatibility does not exist in the tree. Use `mulModelHom_map`
-     (`EllipticCurve/GroupLawConstruction.lean:853`) + `mulModelHom_specPoints`
-     (`EllipticCurve/AdditionSpecPoints.lean:1776`) instead — they match additively entirely OVER `k`
-     at the level of scheme morphisms, via the universal property of the base-change square. Zero leg:
-     `projModelZero_baseChange`.
-   * `WeierstrassAtlasBundle.lean:44`'s `e : … ≅ projModel (W i)` is a STRUCTURE FIELD (hypothesised
-     data), not a proof of the presentation.
-
-  STILL OPEN on this sub-line: transport to a family only ISOMORPHIC over the base to a `projModel`,
-  and a non-`Spec` affine `S` (the `Scheme.SpecToEquivOfField` / `S.isoSpec` step).
-
-DETECTION NOTE, earned twice: a conclusion-grep CAN miss a duplicate that spells its sections
-differently (`Limits.pullback.lift (t ≫ z₁) (𝟙 T') _` vs `sectionBaseChange`). The detector that
-worked was a full `lake build ModularCurves` — the environment NAME CLASH. Run it before writing.
-
-(historical) STEP 1 — `hfib` from the field theorem. At `x : Spec k ⟶ pairBase π`, split with
-`nonempty_pullback_tensorObj` (`Picard/PullbackTensorObj.lean:61`), rewrite each factor with
-`nonempty_pullback_idealModule_ker_sectionBaseChange` (`Picard/IdealModulePullback.lean:387` —
-stated along `Limits.pullback.fst π t`, SYNTACTICALLY the morphism in `hfib`), identify the fibre by
-`isPullback_projModelBaseChange`, identify the four sections by `projModelPointsAddEquiv`
-(`EllipticCurve/MulByHomDegree.lean:65`), then apply
-`nonempty_tensorObj_idealModule_add_field`. ALL of these are proved.
-
-STEP 2 — the universal pair. `WeilPairing/TautologicalPair.lean` (sorry-free) has `pairBase`,
-`pairCurve`, `tautPoint₁/₂`, and `pairClassify` (:79) = "every pair of sections is a base change of
-the universal pair", already proved. Reducedness/integrality of `pairBase` is
-`EllipticCurve/GroupLawAxioms.lean:129/:132` (exact spelling match).
-SPELLING TRAP: the fibre-cube instances at `:136/:147` and `:142/:152` are NOT literally
-`pairCurve`'s spelling — they agree by `pullback.condition`, but instance search will not see it.
-
-STEP 3 — apply the seesaw. Use `exists_pullback_iso_of_fibrewise_trivial_of_isReduced_of_affineCover`
-(`ForMathlib/SeesawGlobalBase.lean`) — it takes an ARBITRARY base, which is why T8b was done: `B` is
-integral but not affine. Then pull back along the zero section to kill `N`.
-
-STEP 4 — discharge the seesaw's `hhigh` for the elliptic family. It is `H^{≥2}(X_s, M_s) = 0`,
-automatic because the fibres are curves. Tools:
-`subsingleton_H_add_two_of_two_affine_open_cover` +
+*** THE BOARDED ROUTE DOES NOT WORK — CORRECTED, WITH THE FIX ALREADY VERIFIED ***
+Imitating `kernel_data_of_hasDegreeOneFibreCohomology` FAILS:
 `HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
-over `q ≥ 1` (the model is `kernel_data_of_hasDegreeOneFibreCohomology`, but only for `q ≥ 1`).
+(`ForMathlib/CochainComplexBoundedFlat.lean:275`) demands `hfield : ∀ n, n < N → …` — EVERY degree
+below `N`, INCLUDING `n = 0`, which for this discrepancy asserts `H¹(E_s,𝒪) = 0`, FALSE on a genus-1
+fibre. (That is exactly why `Seesaw.lean` leaves `hhigh` open and `HasDegreeOneFibreCohomology` is
+unavailable here.)
+THE FIX, verified verbatim in a scratchpad probe: `boundedFlatCokerAndExactOfFiniteHomology`
+(`ForMathlib/BaseChangeKerCoker.lean:900`) is a DECREASING induction consuming `hfield k`/`hfinite k`
+only for `n ≤ k < N`. Thread a LOWER BOUND `n₀ ≤ n` through it and it goes through unchanged.
+Generalise three lemmas to a lower-bounded `hfield` (ADD generalised versions, keep the existing ones
+as `n₀ = 0` specialisations so no consumer moves):
+  1. `boundedFlatCokerAndExactOfFiniteHomology` (`BaseChangeKerCoker.lean:900`)
+  2. `LinearMap.exact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
+  3. `HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
+At `n₀ = 1` the fibre input is then exactly `subsingleton_H_add_two_of_two_affine_open_cover`.
+SECOND OBSTACLE, route around it: `HasHighCechExactnessOpens` quantifies over ALL opens of the base
+including NON-AFFINE ones, but the Čech surrogate needs an affine base. **Target the affine-base
+`HasHighCechExactness` only** — that is what `exists_invertible_tensor_idealModule_add_projModel` uses.
 
-STEP 5 — base-change down to an arbitrary, possibly NON-REDUCED base, stated and glued
-ZARISKI-LOCALLY on `T` (moduli-stack issue globally; this is old ticket T9b, largely covered by
-`pairClassify`). `RelEffCartierDiv.sectionDivisor_baseChange` (`EllipticCurve/PoleSheaf.lean`) is
-part of the bridge.
+=== THEN: STEP 5 — base-change down ===
+To an arbitrary, possibly NON-REDUCED base, stated and glued ZARISKI-LOCALLY on `T` (moduli-stack
+issue globally). `pairClassify` (`WeilPairing/TautologicalPair.lean:79`) already proves "every pair of
+sections is a base change of the universal pair", which is most of it.
+`RelEffCartierDiv.sectionDivisor_baseChange` (`EllipticCurve/PoleSheaf.lean`) is part of the bridge.
+That closes `Picard/SelfAdjointN.lean:267` and unblocks AP-D4/D5-existence/D6/D7.
+
+=== STANDARDS THAT HAVE PAID OFF — KEEP THEM ===
+* **Verify fit by ELABORATION, not assertion**: every transport step so far shipped with a scratchpad
+  probe that actually applies the result to its consumer and compiles.
+* **Full `lake build ModularCurves` as the duplicate/clash detector** before writing.
+* Gotcha: passing `UniversallyOConnected` positionally makes Lean re-unify `π`, breaking `haveI`s —
+  bind it with an explicit type ascription first.
 
 DEAD ENDS — LOGGED, DO NOT REVISIT:
   * `ProjIsPrincipal` / `kappaDivisor_add_linEquiv` is UNSOUND over non-closed fields
