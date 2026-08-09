@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.Picard.DivisorClass
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.WeilPairing.ChartGroupSum
 
 /-!
 # Restricted self-adjointness of `[N]` on the relative Picard group (DS4 Gap A, `(★)`/`(★′)`)
@@ -157,6 +158,18 @@ open CategoryTheory AlgebraicGeometry Limits AlgebraicGeometry.Scheme.Modules
 
 namespace ModularCurves
 
+/- ADDED (2026-08-09, B3-step5b wiring) — **name-clash disambiguation, no statement changed.**
+`ModularCurves.idealModule` (`EllipticCurve/PoleSheaf.lean`, the ideal module of a *morphism*)
+and `AlgebraicGeometry.Scheme.Modules.idealModule` (`Picard/IdealModule.lean`, the ideal module
+of an *ideal sheaf*) are distinct declarations with the same short name. Inside
+`namespace ModularCurves` the former shadows the latter outright — Lean stops the namespace
+walk at the first match — so once `WeilPairing.ChartGroupSum` (which reaches `PoleSheaf`) is
+imported here, the bare `idealModule` of every statement below would resolve to the wrong
+constant. This `local notation` pins it back to the one every statement in this file has always
+meant; the elaborated statements are unchanged. The durable fix is a cross-cutting rename of
+`ModularCurves.idealModule`, which is coordinator work. -/
+local notation "idealModule" => AlgebraicGeometry.Scheme.Modules.idealModule
+
 variable {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
 
 /-! ## `κ`, on the group of sections
@@ -264,7 +277,9 @@ theorem exists_invertible_tensor_idealModule_add (Q Q' : (E.baseChange t).Point 
             (tensorObj (idealModule (Scheme.Hom.ker (Q + Q').1))
               (idealModule (Scheme.Hom.ker (baseChangeZero E.π E.zero E.zero_π t))))
             ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd E.π t)).obj N)) := by
-  sorry
+  haveI : IsSeparated (E.baseChange t).π :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π t ‹_›
+  exact isSquareIdentity_point_add (E.baseChange t) Q Q'
 
 /-- **The `N = 𝒪_T` case of the leaf.** An exact tensor isomorphism gives the leaf with
 `N = 𝒪_T`. True as stated, but note the hypothesis is *strictly stronger than the leaf* and
