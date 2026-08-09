@@ -583,6 +583,92 @@ theorem sectionEval_comp {Y : Scheme.{u}} (g : T' ⟶ T) (w : T ⟶ Y) (V : Y.Op
   rw [Scheme.Hom.comp_app]
   rfl
 
+/-- **(AP-E1-NAT2)** The Katz–Mazur value commutes with base change: the pulled-back
+dataset — module `(baseChangeMap)^* M`, cover `baseChangeMap ⁻¹ᵁ W`, trivialisations
+`localPullbackTrivializationT` — computes the `g`-pullback of the value.
+
+The normalised splitting over `T` pulls back to one over `T'`: normalisation transports
+through `0' ≫ baseChangeMap = g ≫ 0` and splitting through
+`baseChangeMap ≫ [N] = [N'] ≫ baseChangeMap`, both absorbed by `unitPullback_congr`; the
+value identification reads `P' ≫ baseChangeMap = g ≫ P`. The proof-irrelevant dataset
+hypotheses `hM'`, `hnorm'` are arguments (any derivation gives the same value). -/
+theorem torsionSplittingEval_restrictBase (hsm : SmoothOfRelativeDimension 1 E.π)
+    [IsSeparated E.π] (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t') (N : ℕ)
+    (Q : (E.baseChange t).Point (𝟙 T)) (hQ : Q ∈ torsionPoints E t N)
+    (M : (pullback E.π t).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+      (kappa E hsm t Q).val = toSkeleton M)
+    {ι : Type*} (W : ι → (pullback E.π t).Opens) (hW : iSup W = ⊤)
+    (e : ∀ i, M.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover M W e i j ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (W i ⊓ W j))
+    (P : (E.baseChange t).Point (𝟙 T)) (hP : P ∈ torsionPoints E t N)
+    (hM' : letI := Scheme.Modules.monoidalCategory (pullback E.π t')
+      (kappa E hsm t' (restrictBase E t g hg Q)).val =
+        toSkeleton ((Scheme.Modules.pullback (baseChangeMap E.π g hg)).obj M))
+    (hnorm' : ∀ i j, transitionUnitOfCover
+        ((Scheme.Modules.pullback (baseChangeMap E.π g hg)).obj M)
+        (fun i => baseChangeMap E.π g hg ⁻¹ᵁ W i)
+        (fun i => localPullbackTrivializationT (baseChangeMap E.π g hg) M (W i) (e i)) i j ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t')
+        (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j)) :
+    torsionSplittingEval E hsm t' N (restrictBase E t g hg Q)
+        (restrictBase_mem_torsionPoints E t g hg hQ)
+        ((Scheme.Modules.pullback (baseChangeMap E.π g hg)).obj M) hM'
+        (fun i => baseChangeMap E.π g hg ⁻¹ᵁ W i)
+        ((baseChangeMap E.π g hg).iSup_preimage_eq_top hW)
+        (fun i => localPullbackTrivializationT (baseChangeMap E.π g hg) M (W i) (e i))
+        hnorm'
+        (restrictBase E t g hg P) (restrictBase_mem_torsionPoints E t g hg hP) =
+      unitPullback g ⊤ ⊤ le_rfl
+        (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP) := by
+  obtain ⟨h, hn, hsplit⟩ :=
+    exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints E hsm t N Q hQ M hM W hW e
+      hnorm
+  -- the preimage path: `[N']⁻¹(bcm⁻¹ W i) = bcm⁻¹([N]⁻¹ W i)`
+  have hpatheq : ∀ i, mulByN E t' N ⁻¹ᵁ (baseChangeMap E.π g hg ⁻¹ᵁ W i) =
+      baseChangeMap E.π g hg ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) := by
+    intro i
+    have hcomm := baseChangeMap_mulByN E t g hg N
+    calc mulByN E t' N ⁻¹ᵁ (baseChangeMap E.π g hg ⁻¹ᵁ W i)
+        = (mulByN E t' N ≫ baseChangeMap E.π g hg) ⁻¹ᵁ W i := rfl
+      _ = (baseChangeMap E.π g hg ≫ mulByN E t N) ⁻¹ᵁ W i := by rw [hcomm]
+      _ = baseChangeMap E.π g hg ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) := rfl
+  have hpath : ∀ i, mulByN E t' N ⁻¹ᵁ (baseChangeMap E.π g hg ⁻¹ᵁ W i) ≤
+      baseChangeMap E.π g hg ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) := fun i => le_of_eq (hpatheq i)
+  -- the pulled splitting units
+  set h' : ∀ i, Γ(pullback E.π t',
+      mulByN E t' N ⁻¹ᵁ (baseChangeMap E.π g hg ⁻¹ᵁ W i))ˣ :=
+    fun i => unitPullback (baseChangeMap E.π g hg) (mulByN E t N ⁻¹ᵁ W i)
+      (mulByN E t' N ⁻¹ᵁ (baseChangeMap E.π g hg ⁻¹ᵁ W i)) (hpath i) (h i) with hh'
+  have hzcomp : baseChangeZero E.π E.zero E.zero_π t' ≫ baseChangeMap E.π g hg =
+      g ≫ baseChangeZero E.π E.zero E.zero_π t :=
+    baseChangeZero_baseChangeMap E.π E.zero E.zero_π g hg
+  refine (eq_torsionSplittingEval E hsm t' N (restrictBase E t g hg Q)
+    (restrictBase_mem_torsionPoints E t g hg hQ) _ hM' _
+    ((baseChangeMap E.π g hg).iSup_preimage_eq_top hW) _ hnorm'
+    (restrictBase E t g hg P) (restrictBase_mem_torsionPoints E t g hg hP) h'
+    (fun i => ?_) (fun i j => ?_) (fun i => ?_)).symm
+  · -- the pulled splitting is normalised along the zero section of `T'`
+    rw [mem_sectionUnits_iff, hh']
+    refine (sectionEval_unitPullback (baseChangeMap E.π g hg)
+      (baseChangeZero E.π E.zero E.zero_π t') (hpath i) (h i)).trans ?_
+    refine ((resUnit_sectionEval_congr hzcomp (mulByN E t N ⁻¹ᵁ W i) (h i)
+      ((baseChangeZero E.π E.zero E.zero_π t').preimage_mono (hpath i))
+      (by rw [← hzcomp]
+          exact (baseChangeZero E.π E.zero E.zero_π t').preimage_mono (hpath i))).trans
+      ?_)
+    refine (congrArg _ ((sectionEval_comp g (baseChangeZero E.π E.zero E.zero_π t)
+      (mulByN E t N ⁻¹ᵁ W i) (h i)).trans ?_)).trans (map_one _)
+    rw [show sectionEval (baseChangeZero E.π E.zero E.zero_π t)
+        (mulByN E t N ⁻¹ᵁ W i) (h i) = 1 from hn i]
+    exact map_one _
+  · -- the pulled splitting splits the pulled cocycle
+    sorry
+  · -- the value along the restricted point reads the `g`-pullback of the value
+    sorry
+
 end RestrictBase
 
 end ModularCurves
