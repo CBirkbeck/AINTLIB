@@ -373,6 +373,66 @@ theorem ker_restrictBase (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g �
   exact Scheme.IdealSheafData.ker_fst_of_isClosedImmersion (Q.1 : T ⟶ pullback E.π t)
     (baseChangeMap E.π g hg)
 
+/-- **(AP-E1-NAT1, step 3)** The class of a section divisor commutes with base change
+along `g : T' ⟶ T`: `Pic(g_E)([𝒪(Q)]) = [𝒪(Q|_{T'})]`. The ideal-module comparison is
+`nonempty_pullback_idealModule` at `f := baseChangeMap` with both local-principality sides
+from `sectionDivisor_isOfficial`, glued by `ker_restrictBase`. -/
+theorem sectionCls_restrictBase (hsm : SmoothOfRelativeDimension 1 E.π)
+    [IsSeparated E.π] (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t')
+    (Q : (E.baseChange t).Point (𝟙 T)) :
+    Scheme.Pic.map (baseChangeMap E.π g hg) (sectionCls E hsm t Q.1 Q.2) =
+      sectionCls E hsm t' ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t')
+        (restrictBase E t g hg Q).2 := by
+  letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+  letI := Scheme.Modules.monoidalCategory (pullback E.π t')
+  haveI hsepT : IsSeparated (pullback.snd E.π t) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π t ‹_›
+  haveI hsepT' : IsSeparated (pullback.snd E.π t') :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π t' ‹_›
+  have hsmT : SmoothOfRelativeDimension 1 (pullback.snd E.π t) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) E.π t hsm
+  have hsmT' : SmoothOfRelativeDimension 1 (pullback.snd E.π t') :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) E.π t' hsm
+  -- the ideal-module comparison along `baseChangeMap`
+  have hJ : ∀ c : ↥(pullback E.π t), ∃ V : (pullback E.π t).affineOpens, c ∈ V.1 ∧
+      ∃ f : Γ(pullback E.π t, V.1),
+        (Scheme.Hom.ker (Q.1 : T ⟶ pullback E.π t)).ideal V = Ideal.span {f} ∧
+          f ∈ nonZeroDivisors Γ(pullback E.π t, V.1) :=
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsmT
+      (Q.1 : T ⟶ pullback E.π t) Q.2).locallyPrincipal
+  have hJ' : ∀ c : ↥(pullback E.π t'), ∃ V : (pullback E.π t').affineOpens, c ∈ V.1 ∧
+      ∃ f : Γ(pullback E.π t', V.1),
+        ((Scheme.Hom.ker (Q.1 : T ⟶ pullback E.π t)).comap
+          (baseChangeMap E.π g hg)).ideal V = Ideal.span {f} ∧
+          f ∈ nonZeroDivisors Γ(pullback E.π t', V.1) := by
+    rw [← ker_restrictBase E t g hg Q]
+    exact (RelEffCartierDiv.sectionDivisor_isOfficial hsmT'
+      ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t')
+      (restrictBase E t g hg Q).2).locallyPrincipal
+  obtain ⟨eiso⟩ := nonempty_pullback_idealModule (baseChangeMap E.π g hg)
+    (Scheme.Hom.ker (Q.1 : T ⟶ pullback E.π t)) hJ hJ'
+  have hcore : Scheme.Pic.map (baseChangeMap E.π g hg)
+      (((RelEffCartierDiv.sectionDivisor (pullback.snd E.π t)
+          (Q.1 : T ⟶ pullback E.π t) Q.2).isInvertible_idealModule
+        (RelEffCartierDiv.sectionDivisor_isOfficial hsmT _ Q.2)).isUnit_toSkeleton.unit) =
+      ((RelEffCartierDiv.sectionDivisor (pullback.snd E.π t')
+          ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t')
+          (restrictBase E t g hg Q).2).isInvertible_idealModule
+        (RelEffCartierDiv.sectionDivisor_isOfficial hsmT' _
+          (restrictBase E t g hg Q).2)).isUnit_toSkeleton.unit := by
+    refine Units.ext ?_
+    refine (Scheme.Pic.map_val (baseChangeMap E.π g hg) _).trans ?_
+    refine (congrArg (Scheme.Modules.pullback (baseChangeMap E.π g hg)).mapSkeleton.obj
+      (IsUnit.unit_spec _)).trans ?_
+    refine (Functor.mapSkeleton_obj_toSkeleton _ _).trans ?_
+    refine (toSkeleton_eq_toSkeleton_iff.mpr
+      ⟨eiso ≪≫ eqToIso (congrArg Scheme.Modules.idealModule (ker_restrictBase E t g hg Q).symm)⟩).trans ?_
+    exact (IsUnit.unit_spec _).symm
+  refine Eq.trans (map_inv (Scheme.Pic.map (baseChangeMap E.π g hg)) _) ?_
+  exact congrArg (·⁻¹) hcore
+
 end RestrictBase
 
 end ModularCurves
