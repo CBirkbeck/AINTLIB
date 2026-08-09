@@ -36,25 +36,21 @@ standard-three. `lake build ModularCurves` is green at ~9770 jobs.
    four missing bricks that all now exist. That comment will actively mislead you or the next
    reader.
 
-2. **The real work: `injective_baseChange_of_residueField_fibre_sModule`** — the last sorry in
-   `ForMathlib/LocalFlatnessCriterion.lean`. Its docstring lists the four concrete steps, none of
-   which needs a new algebra or module instance; step 1 (`𝔪_{R⧸I} = 𝔪ᴿ.map q` for a surjective
-   local hom) is a genuine ~8-line mathlib gap.
+2. **The real work: `evalGenerator_mem_nonZeroDivisors`** (`AbelEquivalence.lean:848`) and thence
+   "Blocker 4" (`AbelEquivalence.lean:971`).
 
-   The theorem it feeds, `injective_of_lTensor_residueField_injective_sModule` (Stacks 00MK with
-   the source finite over the *upper* ring), was **proved on 2026-08-09** and is axiom-clean — and
-   note that the boarded route's "Artin–Rees" was a red herring: the inductive step is the ordinary
-   associated-graded step, and it needs no graded machinery because `N/𝔪N` is already a `k`-module.
-   A deliberately split form, `injective_of_lTensor_residueField_injective_of_separated`, takes the
-   filtration-separatedness as a bare hypothesis so the remaining plumbing never has to construct
-   `S ⧸ IS`.
+   The deep commutative-algebra gate underneath these is **done**:
+   `ForMathlib/LocalFlatnessCriterion.lean` is sorry-free as of 2026-08-09, with Stacks 00ME proved
+   in the form the geometry needs (source finite over the *upper* ring). Two of its by-products are
+   exported at root and generally useful — `IsLocalRing.maximalIdeal_eq_map_of_surjective` (a real
+   mathlib gap) and `Submodule.restrictScalars_map_smul_top`.
 
-   **Before you commit to this route, verify §6.3 of the handover**: that closing it really does
-   discharge `evalGenerator_mem_nonZeroDivisors` (`AbelEquivalence.lean:848`) and thence
-   "Blocker 4" (`AbelEquivalence.lean:971`). The board records a *different* route for Blocker 4
-   (étale transversality, Stacks §37.38/055S). I believe that route is a detour and the
-   commutative-algebra leaf is the real one, but **I did not verify the chain end to end** — and a
-   consumer grep shows nothing currently calls either, so wiring is owed on top of the tool.
+   **Nothing in the tree consumes it yet**, so what is owed is the wiring, and you should verify
+   §6.3 of the handover before budgeting: `relEffCartierDiv_of_degreeOne_package`'s body never calls
+   `evalGenerator_mem_nonZeroDivisors`, and mathlib's `Scheme.Hom.isIso_iff_finrank_eq` needs only
+   `[Flat f]`, `[IsFinite f]` and `finrank f = 1` (not LFP) — see `exists_section_of_degree_one` for
+   the exact idiom. The board records a *different* route for Blocker 4 (étale transversality,
+   Stacks §37.38/055S); I believe it is a detour, but that remains a hypothesis.
 
 3. Then `AbelEquivalence.lean:971 / :994 / :1013`, then the two Abel halves (rigidity + surjectivity)
    for AP-D4 `⊇`, which additionally need a **fibrewise degree function on `Pic`** that the tree

@@ -268,14 +268,18 @@ points at a much smaller leaf, and it is fully sketched:
 
 The variant whose hypotheses actually match the geometry — `N` finite over the **upper** ring
 `Γ(V)`, `M` flat over the **base** `R` — is `coker_of_flat_of_fibre_injective_sModule`. It had two
-sorries. **One of them was closed on 2026-08-09** (commit `12b5355a5`):
+sorries. **Both were closed on 2026-08-09** (commits `12b5355a5` and `a5af3b7da`):
+`ForMathlib/LocalFlatnessCriterion.lean` **is now entirely sorry-free, every declaration
+axiom-verified standard-three.** Stacks 00ME is done in the form the geometry needs.
 
-- ✅ `injective_of_lTensor_residueField_injective_sModule` — **PROVED, axiom-verified
-  standard-three.** This is Stacks 00MK / Matsumura 22.3 with the source finite over the *upper*
-  ring: `R` local, `R → S` a local hom to a Noetherian local `S`, `N` finite over `S`, `M` `R`-flat,
-  `u : N →ₗ[R] M` with injective residue-field fibre over `R` ⟹ `u` injective.
-- ❌ `injective_baseChange_of_residueField_fibre_sModule` (`private`) — the base-change-to-`R⧸I`
-  plumbing. **Still open, and now the only sorry in the file.**
+Two by-products are exported at root and are generally useful:
+
+- `IsLocalRing.maximalIdeal_eq_map_of_surjective` — for a surjective local hom of local rings, the
+  target's maximal ideal is the image of the source's. A genuine mathlib gap (loogle's only hit for
+  the shape was `AdicCompletion.maximalIdeal_eq_map`).
+- `Submodule.restrictScalars_map_smul_top` — `(J·S) • W = J • W` as sets, for **any** algebra map,
+  no surjectivity. This is the device that lets a filtration argument over `R` be read in the ring
+  over which the module is finite without transporting a single instance.
 
 **The boarded route said "Artin–Rees". It is not needed.** The inductive step
 `K ∩ 𝔪ⁿN ⊆ 𝔪ⁿ⁺¹N` is the usual associated-graded step, and it runs with *no graded machinery at
@@ -288,17 +292,14 @@ which replaces the `cancelBaseChange`/flatness-over-`k` argument by a three-line
 right-exactness of `⊗` puts `t` in the image of `I ⊗ 𝔪N`, whose `μ_N`-image is `(I·𝔪)•N`. Only the
 second step uses flatness.
 
-The core was deliberately **split** so the remaining consumer never has to build `S ⧸ IS`:
-`injective_of_lTensor_residueField_injective_of_separated` takes
-`hsep : ∀ x, (∀ n, x ∈ 𝔪ᴿⁿ • ⊤) → x = 0` in place of the whole `S`-package — that hypothesis is all
-the argument ever uses `S` for. The remaining obligation is written out in four concrete steps in
-`injective_baseChange_of_residueField_fibre_sModule`'s docstring; none of them needs a new algebra
-or module instance. Step 1 (`𝔪_{R⧸I} = 𝔪ᴿ.map q` for a surjective local hom) is a genuine ~8-line
-mathlib gap.
+The docstring's plan for the base-change step said it needed the instance transport `S ↦ S ⧸ IS`.
+**It did not.** Splitting the core into `injective_of_lTensor_residueField_injective_of_separated`
+— which takes `hsep : ∀ x, (∀ n, x ∈ 𝔪ᴿⁿ • ⊤) → x = 0` in place of the whole `S`-package, that
+being all the argument ever uses `S` for — reduces the base change to four steps that transport
+nothing. That is a pattern worth remembering: **when a proof needs an instance package only to
+supply one `Prop`, expose the `Prop`.**
 
-**Recommendation unchanged:** finish that plumbing and only fall back to étale transversality if
-the chain `sModule → evalGenerator_mem_nonZeroDivisors → flat Z → Blocker 4` genuinely fails to
-close.
+**So the tool now exists. What is owed next is the wiring** — see the ⚠️ below.
 
 **What I verified, precisely** (so you know where the risk is): I verified the four sorry
 locations, the statements and proofs of `exists_section_of_degree_one` and
@@ -456,11 +457,13 @@ affine-chart theorem of the square.**
    particular `KMBilinear.lean`'s `torsionSplittingEval_add` docstring still contains the long
    "Precise inventory of what is missing" block listing four bricks that now all exist; rewrite it
    to describe the proof instead of the obstruction, or a future reader will rebuild them.
-2. **Finish `injective_baseChange_of_residueField_fibre_sModule`** — the last sorry in
-   `ForMathlib/LocalFlatnessCriterion.lean`. Its docstring lists the four steps; the core it feeds
-   is already proved. **But first** verify the chain claimed in §6.3 — that closing it really does
-   discharge `evalGenerator_mem_nonZeroDivisors` and Blocker 4. (Note the ⚠️ correction in §6.3:
-   nothing currently *consumes* this chain, so wiring is owed on top of the tool.)
+2. **`evalGenerator_mem_nonZeroDivisors`** (`AbelEquivalence.lean:848`) — the first consumer of the
+   now-complete Stacks 00ME. `ForMathlib/LocalFlatnessCriterion.lean` is sorry-free as of
+   `a5af3b7da`, so the tool is available; nothing in the tree consumes it yet, so this is where the
+   wiring starts. The neighbouring proved lemmas
+   (`mem_nonZeroDivisors_iff_injective_mulRight`,
+   `mem_nonZeroDivisors_of_forall_maximal_residueField_fibre_injective`) are the intended plumbing
+   on the other side.
 3. Then `relEffCartierDiv_of_degreeOne_package` (`:971`), `exists_relEffCartierDiv_of_degreeOne`
    (`:994`), `relEffCartierDiv_degree_one_of_degreeOne` (`:1013`).
 4. Then the two Abel halves for AP-D4 `⊇` (§5.2), including the missing **fibrewise degree function
