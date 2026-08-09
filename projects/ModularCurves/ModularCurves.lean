@@ -251,6 +251,7 @@ import ModularCurves.WeilPairing.ChartFromUniversalPair
 import ModularCurves.WeilPairing.ChartGroupSum
 import ModularCurves.WeilPairing.IteratedTwist
 import ModularCurves.WeilPairing.KMPairing
+import ModularCurves.WeilPairing.KMSplitting
 import ModularCurves.WeilPairing.LineVerticalAssembly
 import ModularCurves.WeilPairing.LineVerticalConsumers
 import ModularCurves.EllipticCurve.IntegralOverField

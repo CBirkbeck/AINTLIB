@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Picard.SelfAdjointN
+import ModularCurves.WeilPairing.KMSplitting
 
 /-!
 # `E[N](S) = Ker([N]^*)` on the relative Picard group (KM (2.8.1.7), ticket AP-D4)
@@ -66,6 +67,10 @@ decoration; `kerMulByN_zero` makes the reason machine-checked.
 * `kerMulByN_zero`, `kerMulByN_one`, `kappa_image_torsionPoints_eq_kerMulByN_one` — the two
   degenerate values of `N`, pinning the shape of the statement: the headline equality is
   **false** at `N = 0` and holds unconditionally, `sorry`-free, at `N = 1`.
+* `exists_transitionUnit_eq_mul_inv_of_mem_torsionPoints` — **ticket AP-D5, the existence half**,
+  `f_{i,j} ∘ [N] = h_i / h_j` (KM p. 88), obtained by feeding the `⊆` direction into the generic
+  coboundary machinery of `WeilPairing/KMSplitting.lean`. Proved, and independent of the two
+  open declarations below. Supporting: `mulByN_comp_snd`, `mulByN_preimage_preimage`.
 
 ## Axiom status
 
@@ -320,5 +325,64 @@ theorem kappa_image_torsionPoints_eq_kerMulByN_one :
       (kerMulByN E t 1 : Set (Scheme.Pic (pullback E.π t))) := by
   rw [torsionPoints_one, kerMulByN_one, AddSubgroup.coe_bot, Subgroup.coe_bot,
     Set.image_singleton, kappa_zero]
+
+/-! ## AP-D5: `f_{i,j} ∘ [N] = h_i / h_j` for the curve
+
+The `⊆` direction proved above is exactly the input of the Katz–Mazur coboundary argument
+(KM p. 88): `[N]^* κ(Q) = 1` for an `N`-torsion section `Q` says the pullback of `κ(Q)` along
+`[N]` is trivial, so the pulled-back transition cocycle splits. The generic splitting machinery
+is `WeilPairing/KMSplitting.lean`; here it is instantiated at `f = [N]` and `L = κ(Q)`.
+
+Nothing in this section touches, or depends on, the two open `⊇`-direction declarations above. -/
+
+omit [IsSeparated E.π] in
+/-- `[N]` is a morphism over the base: it commutes with the structure map, so it maps each
+`π⁻¹(U)` into itself. This is why KM's `h_i` live on `π⁻¹(U_i)`, the same opens as the
+`f_{i,j}`. -/
+theorem mulByN_comp_snd (N : ℕ) :
+    mulByN E t N ≫ pullback.snd E.π t = pullback.snd E.π t :=
+  (E.baseChange t).mulByHom_π (N : ℤ)
+
+omit [IsSeparated E.π] in
+/-- The preimage under `[N]` of the preimage of a base open is that same open. -/
+theorem mulByN_preimage_preimage (N : ℕ) (V : T.Opens) :
+    mulByN E t N ⁻¹ᵁ (pullback.snd E.π t ⁻¹ᵁ V) = pullback.snd E.π t ⁻¹ᵁ V :=
+  congrArg (fun m : pullback E.π t ⟶ T => m ⁻¹ᵁ V) (mulByN_comp_snd E t N)
+
+/-- **(AP-D5 EXISTENCE, for the curve — KM p. 88)** Let `Q` be an `N`-torsion section and `M` an
+invertible sheaf representing `κ(Q)`, trivialized over opens `W i` with transition units
+`f_{i,j}`. Then there are units `h_i` on `[N]⁻¹(W i)` with
+
+  `f_{i,j} ∘ [N] = h_i · h_j⁻¹`   on `[N]⁻¹(W i ⊓ W j)`,
+
+which is Katz–Mazur's factorisation. The whole `N`-dependence enters through `(★′)`
+`picMap_mulByHom_kappa_eq_one`, i.e. through the `⊆` direction of AP-D4 proved above; the
+splitting itself is `exists_transitionUnit_eq_mul_inv_of_picMap_eq_one`
+(`WeilPairing/KMSplitting.lean`). Uniqueness of the `h_i` is `eq_of_div_mem_kUnits`
+(`WeilPairing/UnitSheaf.lean`), from AP-D2.
+
+Taking `W i = π⁻¹(U i)` for a base cover puts the `h_i` on KM's own opens, by
+`mulByN_preimage_preimage`. -/
+theorem exists_transitionUnit_eq_mul_inv_of_mem_torsionPoints (N : ℕ)
+    (Q : (E.baseChange t).Point (𝟙 T)) (hQ : Q ∈ torsionPoints E t N)
+    (M : (pullback E.π t).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+      (kappa E hsm t Q).val = toSkeleton M)
+    {ι : Type*} (W : ι → (pullback E.π t).Opens)
+    (e : ∀ i, M.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (W i))) :
+    ∃ h : ∀ i, Γ(pullback E.π t, mulByN E t N ⁻¹ᵁ W i)ˣ, ∀ i j,
+      Units.map ((mulByN E t N).app (W i ⊓ W j)).hom.toMonoidHom
+          (trivializationTransitionUnit (W i ⊓ W j)
+            (SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W i) (e i)
+              (Over.mk (homOfLE (inf_le_left : W i ⊓ W j ≤ W i))))
+            (SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W j) (e j)
+              (Over.mk (homOfLE (inf_le_right : W i ⊓ W j ≤ W j))))) =
+        Units.map ((pullback E.π t).presheaf.map (homOfLE ((mulByN E t N).preimage_mono
+              (inf_le_left : W i ⊓ W j ≤ W i))).op).hom.toMonoidHom (h i) *
+          (Units.map ((pullback E.π t).presheaf.map (homOfLE ((mulByN E t N).preimage_mono
+            (inf_le_right : W i ⊓ W j ≤ W j))).op).hom.toMonoidHom (h j))⁻¹ :=
+  exists_transitionUnit_eq_mul_inv_of_picMap_eq_one (mulByN E t N) (kappa E hsm t Q) M hM
+    (picMap_mulByHom_kappa_eq_one E hsm t N Q hQ) W e
 
 end ModularCurves
