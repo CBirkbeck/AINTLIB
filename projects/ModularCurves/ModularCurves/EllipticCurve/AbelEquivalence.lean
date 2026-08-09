@@ -616,7 +616,7 @@ trivialising open this is the principal ideal of the trivialised value of `σ`; 
 basic-open compatibility is checked at maximal ideals through trivialising basic opens
 (`Ideal.mem_of_localization_maximal` — board note 2026-08-08, no quasi-coherent
 localization needed). -/
-noncomputable def sectionVanishingIdeal {E : Scheme.{u}} (M : E.Modules)
+noncomputable def sectionVanishingIdealSheaf {E : Scheme.{u}} (M : E.Modules)
     (hM : IsInvertible M) (σ : ↑Γ(M, ⊤)) :
     E.IdealSheafData where
   ideal U := Ideal.span (Set.range fun φ : M.over U.1 ⟶
@@ -714,10 +714,10 @@ affine-locally principal: on a trivialising open the evaluation ideal is generat
 trivialised value of the section (`span_range_eval_eq_of_trivialization`), and the
 trivialising cover can be refined to affine opens. This is the second clause of
 `IsOfficialCartier`, modulo the nonzerodivisor property (which is the fibre input). -/
-theorem sectionVanishingIdeal_locally_span {E : Scheme.{u}} (M : E.Modules)
+theorem sectionVanishingIdealSheaf_locally_span {E : Scheme.{u}} (M : E.Modules)
     (hM : IsInvertible M) (σ : ↑Γ(M, ⊤)) (c : E) :
     ∃ V : E.affineOpens, c ∈ V.1 ∧ ∃ f : ↑Γ(E, V.1),
-      (sectionVanishingIdeal M hM σ).ideal V = Ideal.span {f} := by
+      (sectionVanishingIdealSheaf M hM σ).ideal V = Ideal.span {f} := by
   obtain ⟨ι, W, hW, htriv⟩ := hM
   -- a trivialising member containing `c`, refined to an affine open
   have hcW : c ∈ iSup W := by rw [hW]; trivial
@@ -843,7 +843,7 @@ theorem evalGenerator_mem_nonZeroDivisors
     (hpkg : HasDegreeOneFibreCohomology π M U)
     (hσ : σ ≠ 0)
     (V : E.affineOpens) (f : ↑Γ(E, V.1))
-    (hspan : (sectionVanishingIdeal M hM σ).ideal V = Ideal.span {f}) :
+    (hspan : (sectionVanishingIdealSheaf M hM σ).ideal V = Ideal.span {f}) :
     f ∈ nonZeroDivisors ↑Γ(E, V.1) := by
   sorry
 
@@ -965,9 +965,9 @@ theorem relEffCartierDiv_of_degreeOne_package
     {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
     (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
     (hpkg : HasDegreeOneFibreCohomology π M U) (hσ : σ ≠ 0) :
-    ∃ D : RelEffCartierDiv π, D.ideal = sectionVanishingIdeal M hM σ := by
+    ∃ D : RelEffCartierDiv π, D.ideal = sectionVanishingIdealSheaf M hM σ := by
   -- by the isomorphism-form bridge it suffices that the vanishing subscheme is `S`-isomorphic
-  refine relEffCartierDiv_of_isIso_subschemeι (sectionVanishingIdeal M hM σ) ?_
+  refine relEffCartierDiv_of_isIso_subschemeι (sectionVanishingIdealSheaf M hM σ) ?_
   sorry
 
 /-- **(`AP2-B2` + `AP2-B3` head, KM pp. 66–67)** Under the degree-one package, the pair

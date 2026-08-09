@@ -326,12 +326,4 @@ import ModularCurves.WeilPairing.GaloisEquivariance
 import ModularCurves.WeilPairing.FibreWeierstrassPresentation
 import ModularCurves.WeilPairing.TheoremOfSquareFibrewise
 import ModularCurves.WeilPairing.TheoremOfSquareField
--- `ModularCurves.WeilPairing.TheoremOfSquareUniversal` is intentionally NOT imported here yet:
--- it depends on `ForMathlib/SeesawGlobalBase`, whose transitive import
--- `EllipticCurve/AbelEquivalence` declares `ModularCurves.sectionVanishingIdeal`, clashing with
--- the `ModularCurves.sectionVanishingIdeal` of `LevelStructure/Incidence` (already imported at
--- line 167). Adding the import turns `lake build ModularCurves` red with
--- "environment already contains 'ModularCurves.sectionVanishingIdeal'". The whole
--- `ForMathlib/Seesaw*` line is an orphan for this reason; build the module explicitly with
--- `lake build ModularCurves.WeilPairing.TheoremOfSquareUniversal`. Resolving the clash is a
--- one-file rename in `EllipticCurve/AbelEquivalence.lean` (6 occurrences, no external users).
+import ModularCurves.WeilPairing.TheoremOfSquareUniversal
