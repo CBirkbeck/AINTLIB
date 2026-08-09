@@ -301,9 +301,9 @@ theorem exists_pow_transitionUnitOfCover_split :
 /-- **(AP-D7, the `μ_N` landing — KM p. 89)** The Katz–Mazur pairing takes values in `μ_N`:
 `h(P)^N = 1` in `Γ(T, 𝒪_T^×)`.
 
-**Depends on `sorryAx`**, through `exists_pow_transitionUnitOfCover_split` and only through it;
-`torsionSplittingEval_pow_eq_one_of_split`, which carries all the geometry, is proved and
-axiom-clean. -/
+Unconditional and axiom-clean. The splitting of the `N`-th power cocycle is supplied by
+`exists_pow_transitionUnitOfCover_split` (proved above, from `WeilPairing/TensorCocycle.lean`);
+`torsionSplittingEval_pow_eq_one_of_split` carries all the geometry. -/
 theorem torsionSplittingEval_pow_eq_one
     (P : (E.baseChange t).Point (𝟙 T)) (hP : P ∈ torsionPoints E t N) :
     torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP ^ N = 1 :=

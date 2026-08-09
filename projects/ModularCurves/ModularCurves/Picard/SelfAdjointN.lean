@@ -118,6 +118,11 @@ its base-change naturality.
 
 ### State (2026-07-29): the Picard layer is discharged; the leaf is now module-level
 
+> **Historical.** This subsection records the state on 2026-07-29 and is kept for the route it
+> documents. Every `sorry` it mentions — in particular `exists_invertible_tensor_idealModule_add`
+> below — was closed on 2026-08-09; this file is sorry-free. Read it as a route description, not
+> as a status report.
+
 Everything between the leaf and `kappa_add` / `(★′)` is proved and axiom-clean. The chain,
 top to bottom:
 
