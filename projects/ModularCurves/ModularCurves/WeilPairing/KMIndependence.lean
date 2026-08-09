@@ -60,6 +60,14 @@ section General
 
 variable {X : Scheme.{u}}
 
+/-- Sections of the structure sheaf commute (the same local instance
+`Picard/InvertibleSheafCocycle.lean` declares for the scalar-endomorphism ring equivalence). -/
+local instance (X : Scheme.{u}) :
+    ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
+  fun U ↦ by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
+
 /-- Two objects of `Over U` in the (thin) opens category agree once their underlying opens
 do: the structure morphism is a subsingleton. Restriction of trivialisations along
 `Over`-objects is therefore insensitive to how the `≤`-path was assembled. -/
@@ -143,6 +151,133 @@ theorem transitionUnitOfCover_restrict_mem_sectionUnits {T : Scheme.{u}} (M : X.
   rw [show sectionEval z (W (r a) ⊓ W (r b)) (transitionUnitOfCover M W e (r a) (r b)) = 1
     from hnorm (r a) (r b)]
   exact map_one _
+
+/-- The transition unit between two trivialisations is invariant under pre-composition with
+a common isomorphism: the `ψ`-factors cancel in `(ψ ≪≫ a).inv ≫ (ψ ≪≫ b).hom`. -/
+theorem trivializationTransitionUnit_iso_trans {M M' : X.Modules} (U : X.Opens)
+    (ψ : M.over U ≅ M'.over U)
+    (a b : M'.over U ≅ _root_.SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    trivializationTransitionUnit U (ψ ≪≫ a) (ψ ≪≫ b) =
+      trivializationTransitionUnit U a b := by
+  apply Units.ext
+  let E := ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv X.ringCatSheaf U
+  apply E.injective
+  have h1 : E (trivializationTransitionUnit U (ψ ≪≫ a) (ψ ≪≫ b) : Γ(X, U)) =
+      (ψ ≪≫ a).inv ≫ (ψ ≪≫ b).hom := by
+    dsimp only [E]
+    exact overUnitScalarEnd_transitionUnit U (ψ ≪≫ a) (ψ ≪≫ b)
+  have h2 : E (trivializationTransitionUnit U a b : Γ(X, U)) = a.inv ≫ b.hom := by
+    dsimp only [E]
+    exact overUnitScalarEnd_transitionUnit U a b
+  rw [h1, h2, Iso.trans_inv, Iso.trans_hom, Category.assoc, Iso.inv_hom_id_assoc]
+
+/-- **(AP-E1-IND4, restriction half)** `restrictOverTrivialization` is natural in the module:
+restricting the `φ`-transported trivialisation is transporting the restricted one. -/
+theorem restrictOverTrivialization_map_iso {M M' : X.Modules} (φ : M ≅ M') (U : X.Opens)
+    (e : M'.over U ≅ _root_.SheafOfModules.unit (X.ringCatSheaf.over U)) (V : Over U) :
+    SheafOfModules.restrictOverTrivialization X.ringCatSheaf M U
+        ((_root_.SheafOfModules.overFunctor X.ringCatSheaf U).mapIso φ ≪≫ e) V =
+      (_root_.SheafOfModules.overFunctor X.ringCatSheaf V.left).mapIso φ ≪≫
+        SheafOfModules.restrictOverTrivialization X.ringCatSheaf M' U e V := by
+  apply Iso.ext
+  have key : ((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app M).inv ≫
+      (_root_.SheafOfModules.overMap X.ringCatSheaf V.hom).map
+        ((_root_.SheafOfModules.overFunctor X.ringCatSheaf U).map φ.hom) =
+      (_root_.SheafOfModules.overFunctor X.ringCatSheaf V.left).map φ.hom ≫
+        ((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app M').inv :=
+    ((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).inv.naturality φ.hom).symm
+  show ((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app M).inv ≫
+      (_root_.SheafOfModules.overMap X.ringCatSheaf V.hom).map
+        ((_root_.SheafOfModules.overFunctor X.ringCatSheaf U).map φ.hom ≫ e.hom) ≫
+      (_root_.SheafOfModules.overMapUnitIso V.hom).hom =
+    (_root_.SheafOfModules.overFunctor X.ringCatSheaf V.left).map φ.hom ≫
+      ((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app M').inv ≫
+      (_root_.SheafOfModules.overMap X.ringCatSheaf V.hom).map e.hom ≫
+      (_root_.SheafOfModules.overMapUnitIso V.hom).hom
+  rw [Functor.map_comp]
+  calc ((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app M).inv ≫
+        ((_root_.SheafOfModules.overMap X.ringCatSheaf V.hom).map
+          ((_root_.SheafOfModules.overFunctor X.ringCatSheaf U).map φ.hom) ≫
+        (_root_.SheafOfModules.overMap X.ringCatSheaf V.hom).map e.hom) ≫
+        (_root_.SheafOfModules.overMapUnitIso V.hom).hom
+      = (((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app M).inv ≫
+          (_root_.SheafOfModules.overMap X.ringCatSheaf V.hom).map
+            ((_root_.SheafOfModules.overFunctor X.ringCatSheaf U).map φ.hom)) ≫
+          (_root_.SheafOfModules.overMap X.ringCatSheaf V.hom).map e.hom ≫
+          (_root_.SheafOfModules.overMapUnitIso V.hom).hom := by
+        simp only [Category.assoc]
+    _ = ((_root_.SheafOfModules.overFunctor X.ringCatSheaf V.left).map φ.hom ≫
+          ((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app M').inv) ≫
+          (_root_.SheafOfModules.overMap X.ringCatSheaf V.hom).map e.hom ≫
+          (_root_.SheafOfModules.overMapUnitIso V.hom).hom := by rw [key]
+    _ = _ := by simp only [Category.assoc]
+
+/-- **Two trivialisation families of one module differ by a coboundary**: the comparison
+units `c i := trivializationTransitionUnit (W i) (a i) (b i)` satisfy
+
+  `f^a_{i,j} = f^b_{i,j} · (c_i |_{W i ⊓ W j}) · (c_j |_{W i ⊓ W j})⁻¹`.
+
+This is the cocycle algebra `ttu(aᵢ,aⱼ) = ttu(aᵢ,bᵢ)·ttu(bᵢ,bⱼ)·ttu(bⱼ,aⱼ)` (two applications
+of `trivializationTransitionUnit_trans`), with the outer factors read as restrictions of the
+`c`'s (`trivializationTransitionUnit_restrict`, `_symm`). -/
+theorem transitionUnitOfCover_eq_mul_coboundary (M : X.Modules) {ι : Type*}
+    (W : ι → X.Opens)
+    (a b : ∀ i, M.over (W i) ≅ _root_.SheafOfModules.unit (X.ringCatSheaf.over (W i)))
+    (i j : ι) :
+    transitionUnitOfCover M W a i j = transitionUnitOfCover M W b i j *
+      (Scheme.resUnit (inf_le_left : W i ⊓ W j ≤ W i)
+          (trivializationTransitionUnit (W i) (a i) (b i)) *
+        (Scheme.resUnit (inf_le_right : W i ⊓ W j ≤ W j)
+          (trivializationTransitionUnit (W j) (a j) (b j)))⁻¹) := by
+  set rai := SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (W i) (a i)
+    (Over.mk (homOfLE (inf_le_left : W i ⊓ W j ≤ W i))) with hrai
+  set raj := SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (W j) (a j)
+    (Over.mk (homOfLE (inf_le_right : W i ⊓ W j ≤ W j))) with hraj
+  set rbi := SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (W i) (b i)
+    (Over.mk (homOfLE (inf_le_left : W i ⊓ W j ≤ W i))) with hrbi
+  set rbj := SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (W j) (b j)
+    (Over.mk (homOfLE (inf_le_right : W i ⊓ W j ≤ W j))) with hrbj
+  have h1 : trivializationTransitionUnit (W i ⊓ W j) rai rbi *
+      trivializationTransitionUnit (W i ⊓ W j) rbi raj =
+      trivializationTransitionUnit (W i ⊓ W j) rai raj :=
+    trivializationTransitionUnit_trans (W i ⊓ W j) rai rbi raj
+  have h2 : trivializationTransitionUnit (W i ⊓ W j) rbi rbj *
+      trivializationTransitionUnit (W i ⊓ W j) rbj raj =
+      trivializationTransitionUnit (W i ⊓ W j) rbi raj :=
+    trivializationTransitionUnit_trans (W i ⊓ W j) rbi rbj raj
+  have hsym : trivializationTransitionUnit (W i ⊓ W j) rbj raj =
+      (trivializationTransitionUnit (W i ⊓ W j) raj rbj)⁻¹ :=
+    eq_inv_of_mul_eq_one_right
+      (trivializationTransitionUnit_symm (W i ⊓ W j) raj rbj)
+  have hresi : trivializationTransitionUnit (W i ⊓ W j) rai rbi =
+      Scheme.resUnit (inf_le_left : W i ⊓ W j ≤ W i)
+        (trivializationTransitionUnit (W i) (a i) (b i)) :=
+    trivializationTransitionUnit_restrict (inf_le_left : W i ⊓ W j ≤ W i) (a i) (b i)
+  have hresj : trivializationTransitionUnit (W i ⊓ W j) raj rbj =
+      Scheme.resUnit (inf_le_right : W i ⊓ W j ≤ W j)
+        (trivializationTransitionUnit (W j) (a j) (b j)) :=
+    trivializationTransitionUnit_restrict (inf_le_right : W i ⊓ W j ≤ W j) (a j) (b j)
+  show trivializationTransitionUnit (W i ⊓ W j) rai raj =
+    trivializationTransitionUnit (W i ⊓ W j) rbi rbj * _
+  rw [← h1, ← h2, hsym, hresi, hresj]
+  ac_rfl
+
+/-- **(AP-E1-IND4)** Transporting the trivialisation family along a module isomorphism
+`φ : M ≅ M'` leaves the transition cocycle unchanged. -/
+theorem transitionUnitOfCover_map_iso {M M' : X.Modules} (φ : M ≅ M') {ι : Type*}
+    (W : ι → X.Opens)
+    (e' : ∀ i, M'.over (W i) ≅ _root_.SheafOfModules.unit (X.ringCatSheaf.over (W i)))
+    (i j : ι) :
+    transitionUnitOfCover M W
+        (fun i => (_root_.SheafOfModules.overFunctor X.ringCatSheaf (W i)).mapIso φ ≪≫
+          e' i) i j =
+      transitionUnitOfCover M' W e' i j := by
+  show trivializationTransitionUnit (W i ⊓ W j) _ _ = trivializationTransitionUnit _ _ _
+  rw [restrictOverTrivialization_map_iso φ (W i) (e' i)
+      (Over.mk (homOfLE (inf_le_left : W i ⊓ W j ≤ W i))),
+    restrictOverTrivialization_map_iso φ (W j) (e' j)
+      (Over.mk (homOfLE (inf_le_right : W i ⊓ W j ≤ W j)))]
+  exact trivializationTransitionUnit_iso_trans (W i ⊓ W j) _ _ _
 
 end General
 
@@ -388,6 +523,90 @@ theorem torsionSplittingEval_eq_of_mul_coboundary
     refine hspec.trans (Eq.trans ?_ hsplit3.symm)
     rw [hPcN, hPγ]
     exact (mul_inv_cancel_right _ _).symm
+
+/-- **(AP-E1-IND5, the master independence)** Any two full datasets — module representing
+`κ(Q)`, trivialising cover, trivialisations, normalisation — compute the same
+`torsionSplittingEval` at every `N`-torsion `P`. This is what makes KM's `h(P)` a function
+of `(P, Q)` alone, the prerequisite for the Yoneda step of AP-E1.
+
+Chain: refine both covers to `V (i,j) := W i ⊓ W' j` (IND2 twice); transport `e'` along the
+isomorphism `M ≅ M'` supplied by the common skeleton class (IND4 + IND1); the two remaining
+families trivialise the *same* module over the *same* cover, so they differ by the coboundary
+of their comparison units (`transitionUnitOfCover_eq_mul_coboundary`) and IND3 closes. -/
+theorem torsionSplittingEval_congr_dataset
+    (M M' : (pullback E.π t).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+      (kappa E hsm t Q).val = toSkeleton M)
+    (hM' : letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+      (kappa E hsm t Q).val = toSkeleton M')
+    {ι ι' : Type*} (W : ι → (pullback E.π t).Opens) (hW : iSup W = ⊤)
+    (W' : ι' → (pullback E.π t).Opens) (hW' : iSup W' = ⊤)
+    (e : ∀ i, M.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (W i)))
+    (e' : ∀ i, M'.over (W' i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (W' i)))
+    (hnorm : ∀ i j, transitionUnitOfCover M W e i j ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (W i ⊓ W j))
+    (hnorm' : ∀ i j, transitionUnitOfCover M' W' e' i j ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (W' i ⊓ W' j))
+    (P : (E.baseChange t).Point (𝟙 T)) (hP : P ∈ torsionPoints E t N) :
+    torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP =
+      torsionSplittingEval E hsm t N Q hQ M' hM' W' hW' e' hnorm' P hP := by
+  -- the isomorphism between the two representing modules
+  obtain ⟨φ⟩ := toSkeleton_eq_toSkeleton_iff.mp (hM.symm.trans hM')
+  -- the common refinement
+  set V : ι × ι' → (pullback E.π t).Opens := fun p => W p.1 ⊓ W' p.2 with hVdef
+  have hV : iSup V = ⊤ := by
+    rw [hVdef, iSup_prod]
+    have hstep : ∀ i, ⨆ j, (W i ⊓ W' j) = W i ⊓ ⨆ j, W' j := fun i =>
+      (inf_iSup_eq _ _).symm
+    calc ⨆ i, ⨆ j, (W i ⊓ W' j) = ⨆ i, (W i ⊓ ⨆ j, W' j) := iSup_congr hstep
+      _ = ⊤ := by rw [hW']; simp only [inf_top_eq]; exact hW
+  have hle₁ : ∀ p : ι × ι', V p ≤ W p.1 := fun p => inf_le_left
+  have hle₂ : ∀ p : ι × ι', V p ≤ W' p.2 := fun p => inf_le_right
+  -- the two restricted families over `V`
+  set eV : ∀ p : ι × ι', M.over (V p) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (V p)) :=
+    fun p => SheafOfModules.restrictOverTrivialization
+      (pullback E.π t).ringCatSheaf M (W p.1) (e p.1) (Over.mk (homOfLE (hle₁ p))) with heV
+  set e'V : ∀ p : ι × ι', M'.over (V p) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (V p)) :=
+    fun p => SheafOfModules.restrictOverTrivialization
+      (pullback E.π t).ringCatSheaf M' (W' p.2) (e' p.2) (Over.mk (homOfLE (hle₂ p))) with he'V
+  have hnormV : ∀ a b, transitionUnitOfCover M V eV a b ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (V a ⊓ V b) := fun a b =>
+    transitionUnitOfCover_restrict_mem_sectionUnits M W e hnorm Prod.fst V hle₁ a b
+  have hnorm'V : ∀ a b, transitionUnitOfCover M' V e'V a b ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (V a ⊓ V b) := fun a b =>
+    transitionUnitOfCover_restrict_mem_sectionUnits M' W' e' hnorm' Prod.snd V hle₂ a b
+  -- the `φ`-transported family trivialises `M` with `e'V`'s cocycle
+  set eφ : ∀ p : ι × ι', M.over (V p) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (V p)) :=
+    fun p => (_root_.SheafOfModules.overFunctor (pullback E.π t).ringCatSheaf
+      (V p)).mapIso φ ≪≫ e'V p with heφ
+  have hcoφ : ∀ a b, transitionUnitOfCover M V eφ a b =
+      transitionUnitOfCover M' V e'V a b := fun a b =>
+    transitionUnitOfCover_map_iso φ V e'V a b
+  have hnormφ : ∀ a b, transitionUnitOfCover M V eφ a b ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (V a ⊓ V b) := fun a b =>
+    (hcoφ a b).symm ▸ hnorm'V a b
+  -- chain the four equalities
+  calc torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP
+      = torsionSplittingEval E hsm t N Q hQ M hM V hV eV hnormV P hP :=
+        (torsionSplittingEval_restrict_cover E hsm t N Q hQ M hM W hW e hnorm Prod.fst V hV
+          hle₁ hnormV P hP).symm
+    _ = torsionSplittingEval E hsm t N Q hQ M hM V hV eφ hnormφ P hP :=
+        (torsionSplittingEval_eq_of_mul_coboundary E hsm t N Q hQ M M hM hM V hV eV eφ
+          hnormV hnormφ
+          (fun p => trivializationTransitionUnit (V p) (eφ p) (eV p))
+          (fun a b => (transitionUnitOfCover_eq_mul_coboundary M V eφ eV a b))
+          P hP).symm
+    _ = torsionSplittingEval E hsm t N Q hQ M' hM' V hV e'V hnorm'V P hP :=
+        torsionSplittingEval_eq_of_transitionUnit_eq E hsm t N Q hQ M M' hM hM' V hV eφ e'V
+          hnormφ hnorm'V hcoφ P hP
+    _ = torsionSplittingEval E hsm t N Q hQ M' hM' W' hW' e' hnorm' P hP :=
+        torsionSplittingEval_restrict_cover E hsm t N Q hQ M' hM' W' hW' e' hnorm' Prod.snd
+          V hV hle₂ hnorm'V P hP
 
 end Curve
 

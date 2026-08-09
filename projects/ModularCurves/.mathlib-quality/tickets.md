@@ -39062,7 +39062,11 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
   (common refinement `ι × ι'` with the two projections).
 
 ### [AP-E1-IND3] Normalised-coboundary invariance
-- **Status**: open · **File**: `WeilPairing/KMIndependence.lean` · **Depends on**: none ·
+- **Status**: done (2026-08-09, `torsionSplittingEval_eq_of_mul_coboundary`, axiom-verified
+  standard-three; private `mul_coboundary_regroup` (ac_rfl) and
+  `sectionEval_eq_resUnit_of_eq` (subst device); the coboundary is NOT assumed normalised —
+  the glued `γ` handles it, exactly as the master needs) ·
+  **File**: `WeilPairing/KMIndependence.lean` · **Depends on**: none ·
   **Parent**: AP-E1 · **Type**: theorem
 - **Statement**: `torsionSplittingEval_eq_of_mul_coboundary` — same `Q hQ`, same cover `W hW`,
   two datasets whose cocycles satisfy
@@ -39089,7 +39093,12 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
   — that is what the master needs.
 
 ### [AP-E1-IND4] Transport along a module isomorphism
-- **Status**: open · **File**: `WeilPairing/KMIndependence.lean` · **Depends on**: none ·
+- **Status**: done (2026-08-09, `transitionUnitOfCover_map_iso` +
+  `restrictOverTrivialization_map_iso` + `trivializationTransitionUnit_iso_trans` +
+  `transitionUnitOfCover_eq_mul_coboundary` (the two-families comparison, shared with DS4),
+  all axiom-verified standard-three; needed the `IsMulCommutative` local instance from
+  `InvertibleSheafCocycle.lean` — it is `local` there, copy it) ·
+  **File**: `WeilPairing/KMIndependence.lean` · **Depends on**: none ·
   **Parent**: AP-E1 · **Type**: theorem
 - **Statement**: `transitionUnitOfCover_map_iso` — for `φ : M ≅ M'` and a trivialisation family
   `e'` of `M'` over `W`, the family `fun i => (φ.over-restriction) ≪≫ e' i` trivialises `M`
@@ -39106,7 +39115,9 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
 - **Generality**: statement about the cocycle only; the eval corollary is IND1.
 
 ### [AP-E1-IND5] Master independence
-- **Status**: open · **File**: `WeilPairing/KMIndependence.lean` ·
+- **Status**: done (2026-08-09, `torsionSplittingEval_congr_dataset`, axiom-verified
+  standard-three — **the independence half of AP-E1's prerequisite is complete**) ·
+  **File**: `WeilPairing/KMIndependence.lean` ·
   **Depends on**: AP-E1-IND1, AP-E1-IND2, AP-E1-IND3, AP-E1-IND4 · **Parent**: AP-E1 ·
   **Type**: theorem
 - **Statement**: `torsionSplittingEval_congr_dataset` — for the same `Q hQ` and `P hP`, any two
