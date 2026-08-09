@@ -39142,7 +39142,8 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
   **Sources**: KM p. 88–89 "uniquely". · **Generality**: exactly the use site.
 
 ### [AP-E1-DS1] Representative module for `κ(Q)`
-- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
+- **Status**: done (2026-08-09, `exists_module_kappa`, `WeilPairing/KMDataset.lean`,
+  axiom-verified standard-three) · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
   **Parent**: AP-E1 · **Type**: theorem
 - **Statement**: `exists_module_kappa` — `∃ M : (pullback E.π t).Modules,
   ((kappa E hsm t Q).val = toSkeleton M) ∧ IsInvertible M` (shared witness — not split).
@@ -39155,7 +39156,8 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
   the use site.
 
 ### [AP-E1-DS2] `.over`-trivialisations from invertibility
-- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
+- **Status**: done (2026-08-09, `exists_over_trivialization_of_isInvertible`,
+  `WeilPairing/KMDataset.lean`, axiom-verified standard-three) · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
   **Parent**: AP-E1 · **Type**: theorem
 - **Statement**: `exists_over_trivialization_of_isInvertible` — `IsInvertible M →
   ∃ (ι : Type u) (W : ι → X.Opens) (hW : iSup W = ⊤),
@@ -39168,7 +39170,8 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
 - **Mathlib lemmas**: none new. · **Sources**: —. · **Generality**: any scheme `X`, any `M`.
 
 ### [AP-E1-DS3] Rigidification along the zero section
-- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
+- **Status**: done (2026-08-09, `nonempty_pullback_zero_iso_unit_of_kappa`,
+  `WeilPairing/KMDataset.lean`, axiom-verified standard-three) · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
   **Parent**: AP-E1 · **Type**: theorem
 - **Statement**: `nonempty_pullback_zero_iso_unit_of_kappa` — for `hM : (kappa …).val =
   toSkeleton M`: `Nonempty ((Modules.pullback (baseChangeZero E.π E.zero E.zero_π t)).obj M ≅
@@ -39181,7 +39184,11 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
 - **Generality**: the `κ` use site.
 
 ### [AP-E1-PULL] Pullback of an `.over`-trivialisation (dual-use: DS4 and NAT2)
-- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
+- **Status**: **done — ALREADY EXISTED** (2026-08-09 audit: `WeilPairing/KMSplitting.lean` has
+  the whole gadget for arbitrary `f : Y ⟶ X` — `localPullbackTrivializationT` (the pulled
+  trivialisation), `trivializationTransitionUnit_localPullbackTrivialization` (the cocycle
+  spec), `restrict_localPullbackTrivialization` (restriction compat). The board's risk note
+  was wrong in the good direction; "grep the conclusion" strikes again.) · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: none ·
   **Parent**: AP-E1 · **Type**: def + spec lemmas
 - **Statement**: for `f : Y ⟶ X`, `U : X.Opens`, `e : M.over U ≅ unit`, a trivialisation
   `pullbackOverTrivialization f U e : ((Modules.pullback f).obj M).over (f ⁻¹ᵁ U) ≅ unit`,
@@ -39206,7 +39213,12 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
   exchange iso if `DualPullback` does not already have it.
 
 ### [AP-E1-DS4] Comparison units and the rescale
-- **Status**: open · **File**: `WeilPairing/KMDataset.lean` · **Depends on**: AP-E1-DS3,
+- **Status**: **done — ALREADY EXISTED** (2026-08-09 audit:
+  `exists_transitionUnit_eq_mul_inv_of_picMap_eq_one` (`WeilPairing/KMSplitting.lean:362`) is
+  generic in `f`; at `f := baseChangeZero`, `L := κ(Q)`, `hL := kappa_mem_ker` it yields the
+  comparison units `d i` with `f_{ij} ∘ 0 = d_i · d_j⁻¹` directly — DS3's explicit `ρ` is not
+  even needed on this route. AP-D5's engine at the zero section.) ·
+  **File**: `WeilPairing/KMDataset.lean` · **Depends on**: AP-E1-DS3,
   AP-E1-PULL · **Parent**: AP-E1 · **Type**: def + lemma
 - **Statement**: given the dataset-so-far (`W`, `e`) and the rigidification `ρ` (DS3), the
   comparison units `d i ∈ Γ(T, 0⁻¹ᵁ W i)ˣ` of the two trivialisations of
