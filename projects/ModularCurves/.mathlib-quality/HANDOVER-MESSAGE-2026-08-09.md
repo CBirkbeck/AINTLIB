@@ -36,20 +36,25 @@ standard-three. `lake build ModularCurves` is green at ~9770 jobs.
    four missing bricks that all now exist. That comment will actively mislead you or the next
    reader.
 
-2. **The real work: `injective_of_lTensor_residueField_injective_sModule`**
-   (`ForMathlib/LocalFlatnessCriterion.lean:456`) and its private base-change plumbing at `:473`.
-   These two sorries are the deepest gate on the whole DS4 line. **Their docstrings already
-   contain the complete proof** — an Artin–Rees / Krull descending-filtration argument whose
-   mathlib API (`Ideal.exists_pow_inf_eq_pow_smul`, `Ideal.iInf_pow_smul_eq_bot_of_isLocalRing`)
-   is confirmed present. The `R`-substrate and `R`-free forms of the same theorem in that file are
-   already proved sorry-free; only the `S`-module variant is open.
+2. **The real work: `injective_baseChange_of_residueField_fibre_sModule`** — the last sorry in
+   `ForMathlib/LocalFlatnessCriterion.lean`. Its docstring lists the four concrete steps, none of
+   which needs a new algebra or module instance; step 1 (`𝔪_{R⧸I} = 𝔪ᴿ.map q` for a surjective
+   local hom) is a genuine ~8-line mathlib gap.
 
-   **Before you commit to this route, verify §6.3 of the handover**: that closing these two really
-   does discharge `evalGenerator_mem_nonZeroDivisors` (`AbelEquivalence.lean:848`) and thence
+   The theorem it feeds, `injective_of_lTensor_residueField_injective_sModule` (Stacks 00MK with
+   the source finite over the *upper* ring), was **proved on 2026-08-09** and is axiom-clean — and
+   note that the boarded route's "Artin–Rees" was a red herring: the inductive step is the ordinary
+   associated-graded step, and it needs no graded machinery because `N/𝔪N` is already a `k`-module.
+   A deliberately split form, `injective_of_lTensor_residueField_injective_of_separated`, takes the
+   filtration-separatedness as a bare hypothesis so the remaining plumbing never has to construct
+   `S ⧸ IS`.
+
+   **Before you commit to this route, verify §6.3 of the handover**: that closing it really does
+   discharge `evalGenerator_mem_nonZeroDivisors` (`AbelEquivalence.lean:848`) and thence
    "Blocker 4" (`AbelEquivalence.lean:971`). The board records a *different* route for Blocker 4
    (étale transversality, Stacks §37.38/055S). I believe that route is a detour and the
-   commutative-algebra leaf is the real one, but **I did not verify the chain end to end** — you
-   must, before spending a session on it.
+   commutative-algebra leaf is the real one, but **I did not verify the chain end to end** — and a
+   consumer grep shows nothing currently calls either, so wiring is owed on top of the tool.
 
 3. Then `AbelEquivalence.lean:971 / :994 / :1013`, then the two Abel halves (rigidity + surjectivity)
    for AP-D4 `⊇`, which additionally need a **fibrewise degree function on `Pic`** that the tree

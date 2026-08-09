@@ -1,42 +1,39 @@
-FOCUS (2026-08-09): **AP-D7 IS CLOSED. The Katz–Mazur construction of the relative Weil pairing
-is COMPLETE except for AP-D4 `⊇`.** Commit c6281f9d5, pushed. `lake build ModularCurves` green.
+FOCUS (2026-08-09, late): **AP-D7 CLOSED** (Katz–Mazur construction complete bar AP-D4 ⊇) and
+**Stacks 00MK S-module core PROVED** (`injective_of_lTensor_residueField_injective_sModule`,
+axiom-clean, commit 12b5355a5).
 
-READ FIRST: `.mathlib-quality/HANDOVER-2026-08-09-ds4-weil-pairing.md` — the full state of the
-line, written to be the only document needed. Kickoff message for a new worker:
-`.mathlib-quality/HANDOVER-MESSAGE-2026-08-09.md`.
+READ FIRST: `.mathlib-quality/HANDOVER-2026-08-09-ds4-weil-pairing.md`.
+Kickoff message for a new worker: `.mathlib-quality/HANDOVER-MESSAGE-2026-08-09.md`.
 
-=== THE ONE REMAINING TARGET ===
-`exists_torsionPoint_of_mem_kerMulByN` — `WeilPairing/KMPairing.lean:302` — AP-D4 `⊇`.
-It is Abel's theorem in two halves (rigidity `κ(Q)=1 → Q=0`, and surjectivity onto `kerMulByN`),
-and it additionally needs a **fibrewise degree function on `Pic`** that the tree does not have.
-Escape hatch already proved: `exists_torsionPoint_of_mem_kerMulByN_of_surjective` carries both
-halves as hypotheses and is axiom-clean.
+=== IMMEDIATE NEXT STEP ===
+`injective_baseChange_of_residueField_fibre_sModule` — the LAST sorry in
+`ForMathlib/LocalFlatnessCriterion.lean`. Its docstring now writes out the whole obligation in four
+steps, and the core was deliberately SPLIT
+(`injective_of_lTensor_residueField_injective_of_separated` takes
+`hsep : ∀ x, (∀ n, x ∈ 𝔪ᴿⁿ • ⊤) → x = 0` instead of the S-package) so this consumer NEVER has to
+build `S ⧸ IS`. Step 1 (`𝔪_{R⧸I} = 𝔪ᴿ.map q` for a surjective local hom) is a real ~8-line mathlib
+gap — loogle found only `AdicCompletion.maximalIdeal_eq_map`.
 
-=== NEXT ACTIONABLE STEP (handover §6.3 — the important one) ===
-1. Fix the stale docstrings (handover §8). Worst offender: `torsionSplittingEval_add`'s docstring
-   in `KMBilinear.lean` still says "OPEN, `sorry`" and lists four bricks that now all exist.
-2. Then: `injective_of_lTensor_residueField_injective_sModule`
-   (`ForMathlib/LocalFlatnessCriterion.lean:456`) + its private plumbing at `:473`. Their
-   docstrings already contain the COMPLETE proof (Artin–Rees induction `K ⊆ 𝔪ᴿⁿ•N`, then Krull);
-   the mathlib API is confirmed present. The `R`-substrate and `R`-free forms in that same file
-   are already proved sorry-free — only the `S`-module variant is open.
-   *** BUT VERIFY THE CHAIN FIRST. *** I established that `exists_section_of_degree_one` and
-   `relEffCartierDiv_of_isIso_subschemeι` are mutually inverse, so Blocker 4's genuine content is
-   flatness of the vanishing subscheme = Stacks 00ME. I did NOT verify end-to-end that closing
-   :456/:473 discharges `evalGenerator_mem_nonZeroDivisors` (`AbelEquivalence.lean:848`) and thence
-   Blocker 4 (`:971`). The board's étale-transversality route (Stacks §37.38/055S) is probably a
-   detour, but that is a hypothesis, not a verified fact.
-3. Then `AbelEquivalence.lean` :971 / :994 / :1013, then the two Abel halves, then Group E.
+=== THEN, AND VERIFY BEFORE COMMITTING TO IT ===
+A consumer grep shows **nothing in the tree consumes the sModule chain, and nothing consumes
+`evalGenerator_mem_nonZeroDivisors`**. `relEffCartierDiv_of_degreeOne_package`'s body is just
+`refine relEffCartierDiv_of_isIso_subschemeι _ ?_ ; sorry`. So closing the leaf supplies a TOOL;
+the wiring to `IsIso (Z ≫ π)` is still owed. Mathlib's `Scheme.Hom.isIso_iff_finrank_eq` needs
+`[Flat f] [IsFinite f]` and `Scheme.Hom.finrank f = 1` — LFP is NOT needed; see
+`exists_section_of_degree_one` (`AbelEquivalence.lean:877`) for the exact idiom.
 
-=== NEW AND REUSABLE (from the AP-D7 closure) ===
-`WeilPairing/Translation.lean` — `unitPullback` / `unitPullback_congr` phrase unit pullback through
-`Scheme.Hom.appLE`, putting the open-comparison in a `Prop` argument so `subst` + proof irrelevance
-replaces dependent rewrites. **Reach for this before writing any dependent open transport.** Also
-`translateByPoint` (+ `_comp_snd`, `comp_`, `_comp_mulByN`), `preimage_translateByPoint_mulByN`,
-`eq_mul_globalTwist_of_translate`.
+=== THE ONE REMAINING KM TARGET ===
+`exists_torsionPoint_of_mem_kerMulByN` — `WeilPairing/KMPairing.lean:302` — AP-D4 `⊇` = Abel
+(rigidity + surjectivity), plus a fibrewise degree function on `Pic` the tree does not have.
+Escape hatch proved: `exists_torsionPoint_of_mem_kerMulByN_of_surjective`.
+
+=== GOTCHA WORTH KEEPING ===
+Inside `namespace Module.Flat`, the bare name `lTensor_exact` resolves to `Module.Flat.lTensor_exact`
+with a DIFFERENT signature; `_root_.lTensor_exact` is load-bearing. Same shadowing family as the
+`idealModule` / `sectionVanishingIdeal` incidents. Full `lake build ModularCurves` is the detector.
 
 RULES: no `set_option maxHeartbeats`/`synthInstance.maxHeartbeats`; never `2>/dev/null` beside a
 lake/lean command; push with `LEAN4_GUARDRAILS_BYPASS=1 git push origin dev/modular-curves`;
-`#print axioms` at every milestone; NEVER `git add -A` while a subagent is mid-run; run a full
-`lake build ModularCurves` before adding any import (it is the clash detector). Some `ForMathlib/`
-modules are orphans that `lake build ModularCurves` skips — build them explicitly.
+`#print axioms` at every milestone; NEVER `git add -A` while a subagent is mid-run; full
+`lake build ModularCurves` before adding any import. Some `ForMathlib/` modules are orphans that
+`lake build ModularCurves` skips — build them explicitly.

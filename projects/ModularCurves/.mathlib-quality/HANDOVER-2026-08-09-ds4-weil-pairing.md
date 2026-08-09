@@ -210,15 +210,15 @@ result should use that. Nothing in `KMPairing.lean` depends on the sorried versi
 
 ## 6. The real bottom: the AbelEquivalence chain
 
-`EllipticCurve/AbelEquivalence.lean` has **four** sorries, at `:848`, `:971`, `:994`, `:1013`.
-(Note: an earlier board entry lists these as 836/960/994/1013 — that numbering is stale.)
+`EllipticCurve/AbelEquivalence.lean` has **four** sorries. Cite them carefully: the `theorem` line
+and the `sorry` line differ, and the tree's own cross-references use the **`sorry`** line.
 
-| Line | Declaration | Content |
-|---|---|---|
-| 848 | `evalGenerator_mem_nonZeroDivisors` | local generator of the vanishing ideal is a nonzerodivisor (KM p. 66) |
-| 971 | `relEffCartierDiv_of_degreeOne_package` | **"Blocker 4"** — `IsIso ((sectionVanishingIdealSheaf M hM σ).subschemeι ≫ π)` |
-| 994 | `exists_relEffCartierDiv_of_degreeOne` | `ℐ_D ≅ π^*(π_*M) ⊗ M⁻¹` (AP2-B2/B3 head) |
-| 1013 | `relEffCartierDiv_degree_one_of_degreeOne` | the divisor has fibre degree one |
+| decl @ | sorry @ | Declaration | Content |
+|---|---|---|---|
+| 836 | 848 | `evalGenerator_mem_nonZeroDivisors` | local generator of the vanishing ideal is a nonzerodivisor (KM p. 66) |
+| 960 | 971 | `relEffCartierDiv_of_degreeOne_package` | **"Blocker 4"** — `IsIso ((sectionVanishingIdealSheaf M hM σ).subschemeι ≫ π)` |
+| 981 | 994 | `exists_relEffCartierDiv_of_degreeOne` | `ℐ_D ≅ π^*(π_*M) ⊗ M⁻¹` (AP2-B2/B3 head) |
+| 999 | 1013 | `relEffCartierDiv_degree_one_of_degreeOne` | the divisor has fibre degree one |
 
 ### 6.1 What is already proved around them (do not rebuild)
 
@@ -267,38 +267,67 @@ points at a much smaller leaf, and it is fully sketched:
 `coker_of_flat_of_fibre_injective_free`.
 
 The variant whose hypotheses actually match the geometry — `N` finite over the **upper** ring
-`Γ(V)`, `M` flat over the **base** `R` — is `coker_of_flat_of_fibre_injective_sModule`, and it has
-exactly **two** sorries:
+`Γ(V)`, `M` flat over the **base** `R` — is `coker_of_flat_of_fibre_injective_sModule`. It had two
+sorries. **One of them was closed on 2026-08-09** (commit `12b5355a5`):
 
-- `injective_of_lTensor_residueField_injective_sModule` (`:456`) — the Artin–Rees / Krull core;
-- `injective_baseChange_of_residueField_fibre_sModule` (`:473`, `private`) — its base-change-to-`R⧸I`
-  instance plumbing (`S ↦ S ⧸ IS`).
+- ✅ `injective_of_lTensor_residueField_injective_sModule` — **PROVED, axiom-verified
+  standard-three.** This is Stacks 00MK / Matsumura 22.3 with the source finite over the *upper*
+  ring: `R` local, `R → S` a local hom to a Noetherian local `S`, `N` finite over `S`, `M` `R`-flat,
+  `u : N →ₗ[R] M` with injective residue-field fibre over `R` ⟹ `u` injective.
+- ❌ `injective_baseChange_of_residueField_fibre_sModule` (`private`) — the base-change-to-`R⧸I`
+  plumbing. **Still open, and now the only sorry in the file.**
 
-The docstring at `:422` **already writes out the complete proof** of the core:
+**The boarded route said "Artin–Rees". It is not needed.** The inductive step
+`K ∩ 𝔪ⁿN ⊆ 𝔪ⁿ⁺¹N` is the usual associated-graded step, and it runs with *no graded machinery at
+all*, because `N/𝔪N` is already a `k`-module and so `𝔪ⁿ ⊗[R] (N/𝔪N)` **is** the graded piece
+`(𝔪ⁿ/𝔪ⁿ⁺¹) ⊗[k] (N/𝔪N)` on the nose. Writing `μ_P : I ⊗[R] P → P` for multiplication: lift
+`x ∈ I•N` to `t`; `μ_M(lTensor I u  t) = u x = 0` and `μ_M` is injective *because `M` is flat*, so
+`lTensor I u  t = 0`; naturality of `p ↦ 1 ⊗ p` moves this into the fibre; `lTensor k u` is an
+injection of `k`-vector spaces hence **split**, and `lTensor I` of a split injection is injective —
+which replaces the `cancelBaseChange`/flatness-over-`k` argument by a three-line retraction; finally
+right-exactness of `⊗` puts `t` in the image of `I ⊗ 𝔪N`, whose `μ_N`-image is `(I·𝔪)•N`. Only the
+second step uses flatness.
 
-> Let `K = ker u`. Show `K ⊆ 𝔪ᴿⁿ • N` for every `n` by induction: `n = 1` is exactly injectivity of
-> `ū_𝔪ᴿ`; `n → n+1` uses `R`-flatness of `M` with Artin–Rees
-> (`Ideal.exists_pow_inf_eq_pow_smul`), giving `𝔪ᴿⁿ • N ∩ K ⊆ 𝔪ᴿⁿ⁺¹ • N`. Since `algebraMap R S`
-> is local, `𝔪ᴿⁿ • N ⊆ 𝔪ˢⁿ • N`, so `K ⊆ ⋂ₙ 𝔪ˢⁿ • N = ⊥` by Krull
-> (`Ideal.iInf_pow_smul_eq_bot_of_isLocalRing`) over the Noetherian local `S`.
+The core was deliberately **split** so the remaining consumer never has to build `S ⧸ IS`:
+`injective_of_lTensor_residueField_injective_of_separated` takes
+`hsep : ∀ x, (∀ n, x ∈ 𝔪ᴿⁿ • ⊤) → x = 0` in place of the whole `S`-package — that hypothesis is all
+the argument ever uses `S` for. The remaining obligation is written out in four concrete steps in
+`injective_baseChange_of_residueField_fibre_sModule`'s docstring; none of them needs a new algebra
+or module instance. Step 1 (`𝔪_{R⧸I} = 𝔪ᴿ.map q` for a surjective local hom) is a genuine ~8-line
+mathlib gap.
 
-The surrounding Krull/Artin–Rees API is confirmed present in mathlib. **This is an ordinary,
-self-contained commutative-algebra lemma with a written proof — not a scheme-theoretic
-development.** My recommendation is to attack it *first* and only fall back to étale transversality
-if the chain `sModule core → evalGenerator_mem_nonZeroDivisors → flat Z → Blocker 4` genuinely
-fails to close.
+**Recommendation unchanged:** finish that plumbing and only fall back to étale transversality if
+the chain `sModule → evalGenerator_mem_nonZeroDivisors → flat Z → Blocker 4` genuinely fails to
+close.
 
 **What I verified, precisely** (so you know where the risk is): I verified the four sorry
 locations, the statements and proofs of `exists_section_of_degree_one` and
 `relEffCartierDiv_of_isIso_subschemeι`, that the `R`-substrate/`_free` chains in
 `LocalFlatnessCriterion.lean` are sorry-free, and that the `_sModule` chain's only gaps are the two
-named above. I did **not** verify end-to-end that the `_sModule` variant discharges
-`evalGenerator_mem_nonZeroDivisors` and thence Blocker 4. **Check that before committing to the
-route** — this project's recorded routes have been wrong fifteen times (§10).
+named above. This project's recorded routes have been wrong fifteen times (§10), so treat the rest
+as a hypothesis.
+
+**⚠️ Correction, established after the first draft of this document — read it.** A consumer grep
+shows that **nothing in the tree consumes the `_sModule` chain at all**, and **nothing consumes
+`evalGenerator_mem_nonZeroDivisors` either**. `relEffCartierDiv_of_degreeOne_package`'s proof body
+is just
+
+```lean
+refine relEffCartierDiv_of_isIso_subschemeι (sectionVanishingIdealSheaf M hM σ) ?_
+sorry
+```
+
+— it never calls `evalGenerator_mem_nonZeroDivisors`. So closing `:456`/`:473` **does not
+automatically discharge anything**; it supplies a *tool* the fibrewise route needs, and the wiring
+from that tool to `IsIso (Z ≫ π)` still has to be written. Concretely the remaining obligations
+after the tool exists are: `IsFinite`, `Flat` and `LocallyOfFinitePresentation` instances for
+`(sectionVanishingIdealSheaf M hM σ).subschemeι ≫ π`, plus `finrank = 1` at every point, which is
+what `Scheme.Hom.isIso_iff_finrank_eq` consumes (see `exists_section_of_degree_one`'s proof for the
+exact idiom). Budget for that wiring, not just for the commutative-algebra leaf.
 
 Also note the warning already in the tree: the `_sModule` variant of the residue-field core "is
-sorried and must not be used" — that comment is in `evalGenerator_mem_nonZeroDivisors`'s neighbours
-and is *why* it is still open. Closing `:456`/`:473` removes that prohibition.
+sorried and must not be used" — that comment sits next to `evalGenerator_mem_nonZeroDivisors` and
+is *why* it is still open. Closing `:456`/`:473` removes that prohibition.
 
 ### 6.4 Hypothesis audit for Blocker 4 (do not weaken)
 
@@ -427,10 +456,11 @@ affine-chart theorem of the square.**
    particular `KMBilinear.lean`'s `torsionSplittingEval_add` docstring still contains the long
    "Precise inventory of what is missing" block listing four bricks that now all exist; rewrite it
    to describe the proof instead of the obstruction, or a future reader will rebuild them.
-2. **Attack `injective_of_lTensor_residueField_injective_sModule`**
-   (`ForMathlib/LocalFlatnessCriterion.lean:456`) and its plumbing at `:473`, using the proof
-   already written in its docstring. **But first** verify the chain claimed in §6.3 — that closing
-   these two really does discharge `evalGenerator_mem_nonZeroDivisors` and Blocker 4.
+2. **Finish `injective_baseChange_of_residueField_fibre_sModule`** — the last sorry in
+   `ForMathlib/LocalFlatnessCriterion.lean`. Its docstring lists the four steps; the core it feeds
+   is already proved. **But first** verify the chain claimed in §6.3 — that closing it really does
+   discharge `evalGenerator_mem_nonZeroDivisors` and Blocker 4. (Note the ⚠️ correction in §6.3:
+   nothing currently *consumes* this chain, so wiring is owed on top of the tool.)
 3. Then `relEffCartierDiv_of_degreeOne_package` (`:971`), `exists_relEffCartierDiv_of_degreeOne`
    (`:994`), `relEffCartierDiv_degree_one_of_degreeOne` (`:1013`).
 4. Then the two Abel halves for AP-D4 `⊇` (§5.2), including the missing **fibrewise degree function

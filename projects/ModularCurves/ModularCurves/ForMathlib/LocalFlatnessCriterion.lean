@@ -601,7 +601,30 @@ Only step 2 uses flatness, and only through `Module.Flat.rTensor_preserves_injec
 applied to `I.subtype`.  The `cancelBaseChange` idiom in step 4 is the same one
 `fibre_injective_of_maximal` already uses twice.
 
-Proved (2026-08-09) along exactly that route. -/
+Proved (2026-08-09) along exactly that route, in two pieces: the filtration descent is
+`injective_of_lTensor_residueField_injective_of_separated`, which takes the separatedness of the
+`𝔪ᴿ`-adic filtration as a bare hypothesis and mentions no `S` at all; this theorem supplies that
+hypothesis from Krull over `S`.  Consumers that cannot conveniently produce the `S`-package (an
+`Algebra`, an upper-ring module structure and an `S`-finiteness on the source) should use the
+separated form directly. -/
+theorem injective_of_lTensor_residueField_injective_of_separated
+    {R N M : Type*} [CommRing R] [IsLocalRing R]
+    [AddCommGroup N] [Module R N]
+    [AddCommGroup M] [Module R M] [Module.Flat R M] (u : N →ₗ[R] M)
+    (hbar : Function.Injective (LinearMap.lTensor (IsLocalRing.ResidueField R) u))
+    (hsep : ∀ x : N, (∀ n : ℕ, x ∈ (IsLocalRing.maximalIdeal R ^ n) • (⊤ : Submodule R N)) →
+      x = 0) :
+    Function.Injective u := by
+  rw [injective_iff_map_eq_zero]
+  intro x hux
+  refine hsep x fun n ↦ ?_
+  -- Descend `x` through the `𝔪ᴿ`-adic filtration, one power at a time.
+  induction n with
+  | zero => simpa using Submodule.mem_top
+  | succ n ih =>
+      rw [pow_succ]
+      exact mem_mul_smul_top_of_mem_smul_top u hbar _ ih hux
+
 theorem injective_of_lTensor_residueField_injective_sModule
     {R S N M : Type*} [CommRing R] [IsLocalRing R] [CommRing S] [IsLocalRing S]
     [Algebra R S] [IsLocalHom (algebraMap R S)] [IsNoetherianRing S]
@@ -609,16 +632,7 @@ theorem injective_of_lTensor_residueField_injective_sModule
     [AddCommGroup M] [Module R M] [Module.Flat R M] (u : N →ₗ[R] M)
     (hbar : Function.Injective (LinearMap.lTensor (IsLocalRing.ResidueField R) u)) :
     Function.Injective u := by
-  rw [injective_iff_map_eq_zero]
-  intro x hux
-  -- Descend `x` through the `𝔪ᴿ`-adic filtration, one power at a time.
-  have hfil : ∀ n : ℕ, x ∈ (IsLocalRing.maximalIdeal R ^ n) • (⊤ : Submodule R N) := by
-    intro n
-    induction n with
-    | zero => simpa using Submodule.mem_top
-    | succ n ih =>
-        rw [pow_succ]
-        exact mem_mul_smul_top_of_mem_smul_top u hbar _ ih hux
+  refine injective_of_lTensor_residueField_injective_of_separated u hbar fun x hfil ↦ ?_
   -- Transfer the filtration to `S`, where `N` is finite and Krull applies.
   have hSfil : ∀ n : ℕ, x ∈ (IsLocalRing.maximalIdeal S ^ n) • (⊤ : Submodule S N) :=
     fun n ↦ smul_top_pow_le_restrictScalars R S N n (hfil n)
@@ -636,26 +650,37 @@ core over `R ⧸ I` with upper ring `S ⧸ IS` — over which `(R ⧸ I) ⊗ N` 
 `(R ⧸ I) ⊗_R N ≅ (S ⧸ IS) ⊗_S N` — so the `S ↦ S ⧸ IS` instance transport (descending the algebra,
 module and finiteness structures) is the only bookkeeping beyond the core.
 
-**Status (2026-08-09): this is now the *only* `sorry` in the file, and it is pure instance
-plumbing — the mathematics is done.**  The core
-`injective_of_lTensor_residueField_injective_sModule` is proved and axiom-clean.  What remains is
-to produce, for a proper ideal `I`, the package
+**Status (2026-08-09): this is the *only* `sorry` in the file, and the mathematics is done.**  The
+core is proved and axiom-clean, and — deliberately — it was split so that this consumer never has
+to build `S ⧸ IS`:  use `injective_of_lTensor_residueField_injective_of_separated`, which takes
 
-* `S' := S ⧸ I.map (algebraMap R S)` — `IsLocalRing` (the ideal is proper because
-  `algebraMap R S` is local and `I ≤ 𝔪ᴿ`), `IsNoetherianRing` (quotient of Noetherian),
-  `Algebra (R ⧸ I) S'` and `IsLocalHom` for its structure map;
-* `N' := (R ⧸ I) ⊗[R] N` as an `S'`-module with `IsScalarTower (R ⧸ I) S' N'` and
-  `Module.Finite S' N'`, via `quotTensorEquivQuotSMul N I : (R ⧸ I) ⊗[R] N ≅ N ⧸ I • ⊤` (the
-  right-hand side is visibly a finite `S'`-module, since `I • ⊤` is an `S`-submodule);
+  `hsep : ∀ x, (∀ n, x ∈ 𝔪ᴿⁿ • (⊤ : Submodule R N)) → x = 0`
 
-and then to apply the core to `LinearMap.baseChange (R ⧸ I) u`, whose target
-`(R ⧸ I) ⊗[R] M` is `(R ⧸ I)`-flat by base change of flatness.
+in place of `[Algebra R S] [IsNoetherianRing S] [Module.Finite S N]`.  That hypothesis is *all* the
+argument ever uses `S` for.
 
-A route that avoids `S'` altogether: generalise the core to take
-`hsep : ∀ x, (∀ n, x ∈ 𝔪ᴿⁿ • ⊤) → x = 0` in place of `[IsNoetherianRing S] [Module.Finite S N]`
-(that hypothesis is *all* the proof uses `S` for, via `smul_top_pow_le_restrictScalars` and Krull),
-and discharge `hsep` for `N ⧸ I • ⊤` directly from Krull over `S` applied to the finite `S`-module
-`N ⧸ I • ⊤`.  That trades the algebra/module instance transport for one submodule computation. -/
+### The remaining obligation, in full
+
+Apply the separated core with `R' := R ⧸ I`, `N' := (R ⧸ I) ⊗[R] N`, `M' := (R ⧸ I) ⊗[R] M`
+(flat by base change of flatness) and `u' := LinearMap.baseChange (R ⧸ I) u`, with `hbar''` as the
+fibre hypothesis.  Only `hsep` for `N'` is owed, and it reduces in four steps, none of which needs
+a new algebra or module instance:
+
+1. **`𝔪_{R⧸I} = (𝔪ᴿ).map (Ideal.Quotient.mk I)`.**  Not in mathlib for a general surjective local
+   hom (`AdicCompletion.maximalIdeal_eq_map` is the only hit); prove it directly — `⊇` from
+   `IsLocalHom`'s contrapositive (`¬IsUnit a → ¬IsUnit (f a)`), `⊆` from surjectivity plus the
+   same.  About eight lines.
+2. **`((𝔪ᴿ ^ n).map q) • (⊤ : Submodule (R ⧸ I) W) = Submodule.restrictScalars R ((𝔪ᴿ ^ n) • ⊤)`**
+   for any `R ⧸ I`-module `W` — both inclusions by `Submodule.smul_le`, since the `R`-action on `W`
+   factors through `q`.  So `hsep` over `R ⧸ I` is `hsep` over `R` for the same carrier.
+3. **Transport along `quotTensorEquivQuotSMul N I : (R ⧸ I) ⊗[R] N ≃ₗ[R] N ⧸ I • ⊤`** (an `R`-linear
+   equiv, so submodule membership moves across directly).
+4. **Discharge `hsep` for `N ⧸ I • ⊤` from Krull over `S`.**  Lifting `y` to `z : N`, the
+   hypothesis reads `∀ n, z ∈ 𝔪ᴿⁿ • ⊤ + I • ⊤`; `smul_top_pow_le_restrictScalars` upgrades the
+   first summand to `𝔪ˢⁿ • ⊤`, and `I • (⊤ : Submodule R N) = (I.map (algebraMap R S)) • ⊤` as
+   *sets* (both are the additive span of `{a • n : a ∈ I}`), so `z` lies in every
+   `𝔪ˢⁿ • ⊤ + I' • ⊤`.  `Ideal.iInf_pow_smul_eq_bot_of_isLocalRing` applied to the finite
+   `S`-module `N ⧸ I' • ⊤` then gives `z ∈ I' • ⊤ = I • ⊤`, i.e. `y = 0`. -/
 private theorem injective_baseChange_of_residueField_fibre_sModule
     {R S N M : Type*} [CommRing R] [IsLocalRing R] [CommRing S] [IsLocalRing S]
     [Algebra R S] [IsLocalHom (algebraMap R S)] [IsNoetherianRing S]
