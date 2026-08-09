@@ -38881,12 +38881,19 @@ in the plan's "Known traps".
 - **Proof sketch**: KM (2.8.1.7) specialised to the self-dual `π = [N]`. The `⊆` direction **is** the
   tree's `(★′)` `picMap_mulByHom_kappa_eq_one` (`SelfAdjointN.lean:497`); the `⊇` direction is Abel
   (AP-B3) applied to a class killed by `[N]^*`.
-- **⚠ AXIOM AUDIT (2026-08-08)**: `picMap_mulByHom_kappa_eq_one` **depends on `sorryAx`** — it is not
-  actually proved, it inherits a `sorry` from its dependency chain. So AP-D4's `⊆` direction is *not*
-  available as claimed; before working AP-D4, bisect that chain with `#print axioms` (candidates: the
-  known file-level sorries in `WeierstrassModel.lean:2986`, `GroupLaw.lean:80/85`,
-  `CartierDivisor.lean:2050/2858`) and either discharge the leaf or restate the ticket. This is the
-  "sorry greps lie; `#print axioms` doesn't" pattern — `SelfAdjointN.lean` itself may show no `sorry`.
+- **✅ AXIOM AUDIT SUPERSEDED (2026-08-09)**: the 2026-08-08 warning said
+  `picMap_mulByHom_kappa_eq_one` depends on `sorryAx`. That inherited `sorry` was
+  `exists_invertible_tensor_idealModule_add`, now PROVED — `Picard/` is entirely sorry-free.
+  Re-verified: `#print axioms` → propext, Classical.choice, Quot.sound. The `⊆` direction IS
+  available. **Status: partially done (2026-08-09)** — see `WeilPairing/KMPairing.lean`.
+- **⚠ THE SKETCH ABOVE IS WRONG IN TWO WAYS** (found 2026-08-09): `⊇` is outright FALSE at
+  `N = 0` (`mulByN E t 0` factors through the zero section, so `[0]^*` kills all of `picRel`;
+  proved as `kerMulByN_zero`), hence the `N ≠ 0` hypothesis; and `⊇` needs MORE than Abel — it
+  also needs fibre-degree bookkeeping `deg([N]^*L) = N²·deg L`, and the tree has NO degree
+  function on `Pic`. `exists_torsionPoint_of_mem_kerMulByN_of_surjective` reduces `⊇` to plain
+  Abel and is proved; the remaining `sorry` is blocked on Abel's two halves — rigidity
+  (`D_Q ∼ D_0 ⟹ Q = 0`, nothing in the tree proves it) and surjectivity (gated on the
+  AP-B3 / AP2-B2 sorries at `AbelEquivalence.lean:848/971/994/1013`).
 - **Sources**: KM (2.8.1.7), p. 88; self-duality of `[N]` is KM 2.6.2.1.
 
 ### [AP-D5] the unique factorisation `f_{i,j} ∘ [N] = h_i / h_j`

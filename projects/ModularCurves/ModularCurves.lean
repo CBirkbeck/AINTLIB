@@ -250,6 +250,7 @@ import ModularCurves.WeilPairing.ChartCover
 import ModularCurves.WeilPairing.ChartFromUniversalPair
 import ModularCurves.WeilPairing.ChartGroupSum
 import ModularCurves.WeilPairing.IteratedTwist
+import ModularCurves.WeilPairing.KMPairing
 import ModularCurves.WeilPairing.LineVerticalAssembly
 import ModularCurves.WeilPairing.LineVerticalConsumers
 import ModularCurves.EllipticCurve.IntegralOverField
@@ -331,3 +332,4 @@ import ModularCurves.WeilPairing.TheoremOfSquareBaseChange
 import ModularCurves.WeilPairing.TheoremOfSquareFibrewise
 import ModularCurves.WeilPairing.TheoremOfSquareField
 import ModularCurves.WeilPairing.TheoremOfSquareUniversal
+import ModularCurves.WeilPairing.UnitSheaf
