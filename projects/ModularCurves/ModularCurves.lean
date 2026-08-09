@@ -246,6 +246,7 @@ import ModularCurves.WeilPairing.ChordIdentity
 import ModularCurves.WeilPairing.TautologicalPair
 import ModularCurves.WeilPairing.DescentFromCharts
 import ModularCurves.WeilPairing.ChartCover
+import ModularCurves.WeilPairing.ChartFromUniversalPair
 import ModularCurves.WeilPairing.IteratedTwist
 import ModularCurves.WeilPairing.LineVerticalAssembly
 import ModularCurves.WeilPairing.LineVerticalConsumers
