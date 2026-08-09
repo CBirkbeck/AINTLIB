@@ -101,7 +101,37 @@ locally; `eq_of_mul_prod_eq` is the uniqueness workhorse ("characterise, never c
   * principal divisor ⟹ ideal modules isomorphic — `Picard/PrincipalIdealModuleIso.lean`
   * divisor sum ⟹ tensor product — `Picard/IdealModuleMul.lean`
 
-**NEXT TICKET — T10-asm**: assemble `nonempty_tensorObj_idealModule_add_field` from those two plus
+**T10-asm — PARTIAL (2026-08-09). `WeilPairing/TheoremOfSquareField.lean`, one sorry at :527.**
+PROVED, axiom-clean: `SquareChartData` + `nonempty_tensorObj_idealModule_iso_of_squareChartData` —
+the composition `I(JP)⊗I(JQ) ≅ I(JP·JQ) ≅ I(JR·JO) ≅ I(JR)⊗I(JO)` on an ARBITRARY scheme, from
+`IdealModuleMul` + `PrincipalIdealModuleIso` (which had zero consumers before and compose as
+designed); `squareChartDataOfRatio` (on an integral scheme the cocycle collapses to ONE equation
+`genP·genQ = g·(genR·genO)` in `K(C)`); `pointSection` +
+`exists_affineOpen_ker_pointSection_span_nzd`; `exists_affineOpen_span_nzd_four`; and
+`nonempty_squareChartData_diagonal`, which **proves the degenerate cases `P = 0` and `Q = 0` of the
+leaf outright**.
+
+*** MY TICKET'S FIELD INPUT WAS MATHEMATICALLY TOO WEAK — b2_log-worthy, DO NOT RE-DERIVE ***
+"Extract `f` with `projectiveDivisorOf f = κ(P+Q) − κ(P) − κ(Q)` from `kappaDivisor_add_linEquiv`,
+then build the chart data from it" is **UNSOUND over a general field**. HasseWeil's
+`projectiveDivisorOf` is indexed by `SmoothPlaneCurve.SmoothPoint` — the `k`-RATIONAL affine points
+plus `∞`. Over non-algebraically-closed `k` it does not see closed points of degree > 1, so
+`ProjIsPrincipal` pins `f` only up to a factor supported there, and such factors EXIST (e.g.
+`(S)+(S̄)−(U)−(Ū)` for quadratic points of equal trace). The version I sketched is a FALSE statement.
+
+**NEXT TICKET — T10-chord.** Close `exists_squareChartData_projModel` (:527) by EITHER:
+  (a) the explicit CHORD-AND-VERTICAL function read off the two Weierstrass charts — note
+      `WeilPairing/LineVertical.lean` and `LineVerticalAssembly.lean` are about exactly this, but
+      `LineVerticalAssembly`'s theorem-of-the-square assembly takes the chart identities AS
+      HYPOTHESES (i.e. the unproven part) and its `I(0)` slot is the OTHER `idealModule`
+      (morphism-kernel flavour, `ModularCurves.sectionIdealModule`) — so it does not subsume this;
+  (b) strengthening `HasseWeil.Curves.MillerHypothesis` from rational points to ALL CLOSED POINTS.
+Second blocker recorded at the sorry: there is no explicit generator of
+`Scheme.Hom.ker (pointSection W P)` for general `P` — pointwise principality gives generators unique
+only up to a per-chart unit, and those units do NOT cancel in the cocycle. Cover, generators and the
+rational function must be produced TOGETHER. Route (a) does that; route (b) does not.
+
+(historical)  assemble `nonempty_tensorObj_idealModule_add_field` from those two plus
 `HasseWeil.Pic0.RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv`. Concretely: extract `f ≠ 0`
 with `projectiveDivisorOf f = κ(P+Q) − κ(P) − κ(Q)`, read off the local generators on the two
 Weierstrass charts (`EllipticCurve/PoleSheafModel.lean:410-431` — but note those trivialise the
