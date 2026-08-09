@@ -5,6 +5,9 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.Picard.IdealModuleMul
 import ModularCurves.EllipticCurve.MulByHomDegree
+import ModularCurves.EllipticCurve.SectionCoordinates
+import ModularCurves.EllipticCurve.AffineSectionSpecPoints
+import ModularCurves.EllipticCurve.PoleSheafModel
 import ModularCurves.LevelStructure.CartierDivisor
 import HasseWeil.Pic0.TheoremOfSquareDivisorForm
 
@@ -58,11 +61,9 @@ generators.
 
 ## Status
 
-`exists_squareChartData_projModel` — the local reading of the theorem-of-the-square function on
-the Weierstrass charts — is the one remaining leaf, and
-`nonempty_squareChartData_projModel_of_local` reduces it, with no gaps, to a purely local Cartier
-statement. See its docstring for exactly what remains and why the divisor input available today
-does not suffice. Proved here:
+`hloc_off_chartZ` — the local Cartier data at the *single* point of `projModel W` off the affine
+`Z`-chart, i.e. the chart at infinity — is the one remaining leaf. Everything else is proved, and
+`exists_squareChartData_projModel` is assembled from it. Proved here:
 
 * the whole composition, on an arbitrary scheme
   (`nonempty_tensorObj_idealModule_iso_of_squareChartData`);
@@ -76,7 +77,16 @@ does not suffice. Proved here:
   (`nonempty_squareChartData_projModel_zero_left` / `_zero_right`);
 * the affine-chart ideal identity in exactly the shape the reduction consumes — the chord
   (`chordIdealIdentity`, mathlib's `XYIdeal_mul_XYIdeal`) and the vertical
-  (`verticalIdealIdentity`, mathlib's `XYIdeal_neg_mul`);
+  (`verticalIdealIdentity`, mathlib's `XYIdeal_neg_mul`), assembled over *all* pairs of points
+  into the single existential `exists_affine_ideal_identity` (item 1c of the leaf);
+* **the points-to-ideals dictionary on the affine `Z`-chart** (item 1a of the leaf):
+  `ker_ideal_pointSection_chartZ` / `ker_ideal_pointSection_chartZ'` identify the section ideal
+  sheaf `I(P)` on the `Z`-chart with mathlib's `affineIdeal` (`XYIdeal` at an affine point, `⊤` at
+  `0`), transported along `chartZSectionsRingEquiv`; the route is mathlib's `quotientXYIdealEquiv`
+  (`ker_eq_XYIdeal`), the chart evaluation `affineChartHom` (`ker_affineChartHom`), the
+  general `fromSpec` computation `ker_ideal_of_fromSpec_factor`, and `pointSection_some`;
+* the resulting `hloc` clause at every point of the `Z`-chart (`hloc_chartZ`), for the explicit
+  chord-over-vertical rational function `chartZFunction`;
 * the triviality of a section ideal sheaf away from its section
   (`ker_ideal_eq_top_of_preimage_eq_bot`);
 * the transport of the HasseWeil divisor witness into `(projModel W).functionField`
@@ -744,6 +754,465 @@ theorem verticalIdealIdentity {F : Type*} [Field F] [DecidableEq F]
   rw [Ideal.span_singleton_one, Ideal.top_mul, Ideal.mul_top, Ideal.mul_top, mul_comm]
   exact XYIdeal_neg_mul h
 
+/-! ## The `Z`-chart ideal dictionary (T10-asm-chart, item 1a)
+
+The section ideal sheaf of an affine point of `W`, read on the affine `Z`-chart of `projModel W`,
+**is** mathlib's `XYIdeal`. This is what turns `chordIdealIdentity` / `verticalIdealIdentity` into
+the `hloc` input of `nonempty_squareChartData_projModel_of_local` on every chart contained in the
+`Z`-chart.
+
+The chain is: the evaluation `affineChartHom` of the `Z`-chart ring at `[p : q : 1]` has kernel
+`XYIdeal` (`ker_affineChartHom`, from mathlib's `quotientXYIdealEquiv`); the affine-point section
+factors as `Spec` of that evaluation followed by `fromSpec` of the chart
+(`projModelAffineSection_eq_fromSpec`), so the section's kernel ideal sheaf on the chart is that
+same kernel (`ker_ideal_of_fromSpec_factor`); and `pointSection W (some x y h)` *is* the
+affine-point section (`pointSection_some`). -/
+
+section ChartZDictionary
+
+open Polynomial WeierstrassCurve.Affine.CoordinateRing HomogeneousIdeal HomogeneousLocalization
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+/-- **The kernel of an evaluation of the affine coordinate ring is `XYIdeal`.** If a ring map
+`ε : R[W] → R` retracts the base ring and kills `X - p` and `Y - q`, then its kernel is exactly
+`XYIdeal W p (C q)`: the containment `⊇` is by definition, and `⊆` because
+`R[W] / XYIdeal ≃ₐ[R] R` (mathlib's `quotientXYIdealEquiv`), so any `a` in the kernel differs
+from the constant `ε a = 0` by an element of `XYIdeal`. -/
+theorem ker_eq_XYIdeal {A : Type*} [CommRing A] {W : WeierstrassCurve.Affine A} {p q : A}
+    (h : W.Equation p q) (ε : W.CoordinateRing →+* A)
+    (hC : ∀ r : A, ε (algebraMap A W.CoordinateRing r) = r)
+    (hx : ε (XClass W p) = 0) (hy : ε (YClass W (C q)) = 0) :
+    RingHom.ker ε = XYIdeal W p (C q) := by
+  have hle : XYIdeal W p (C q) ≤ RingHom.ker ε := by
+    rw [XYIdeal, Ideal.span_le]
+    rintro a (rfl | rfl)
+    · exact hx
+    · exact hy
+  refine le_antisymm (fun a ha => ?_) hle
+  set e := quotientXYIdealEquiv (W' := W) (x := p) (y := C q) h with he
+  set r : A := e (Ideal.Quotient.mk (XYIdeal W p (C q)) a) with hr
+  have hcomm : e (Ideal.Quotient.mk (XYIdeal W p (C q)) (algebraMap A W.CoordinateRing r)) = r :=
+    e.commutes r
+  have hzero : Ideal.Quotient.mk (XYIdeal W p (C q)) (a - algebraMap A W.CoordinateRing r) = 0 := by
+    refine e.injective ?_
+    rw [map_sub, map_sub, hcomm, ← hr, sub_self, map_zero]
+  have hmem : a - algebraMap A W.CoordinateRing r ∈ XYIdeal W p (C q) :=
+    Ideal.Quotient.eq_zero_iff_mem.mp hzero
+  have hr0 : r = 0 := by
+    have hker := hle hmem
+    rw [RingHom.mem_ker, map_sub, hC, RingHom.mem_ker.mp ha, zero_sub, neg_eq_zero] at hker
+    exact hker
+  rw [hr0, map_zero, sub_zero] at hmem
+  exact hmem
+
+variable {R : Type u} [CommRing R]
+
+/-- `X - p` is the coordinate `x` minus the constant `p`. -/
+theorem XClass_eq_coordX_sub (W : WeierstrassCurve R) (p : R) :
+    XClass W.toAffine p = coordX W - algebraMap R W.toAffine.CoordinateRing p := by
+  rw [XClass, coordX]
+  show AdjoinRoot.mk _ _ = AdjoinRoot.mk _ _ - AdjoinRoot.mk _ _
+  rw [← map_sub]
+  congr 1
+  rw [map_sub]
+  rfl
+
+/-- `Y - q` is the coordinate `y` minus the constant `q`. -/
+theorem YClass_eq_coordY_sub (W : WeierstrassCurve R) (q : R) :
+    YClass W.toAffine (C q) = coordY W - algebraMap R W.toAffine.CoordinateRing q := by
+  rw [YClass, coordY]
+  show AdjoinRoot.mk _ _ = AdjoinRoot.mk _ _ - AdjoinRoot.mk _ _
+  rw [← map_sub]
+  congr 1
+
+/-- The affine-point chart evaluation on a chart coordinate `Xⱼ/Z` is `Xⱼ` at `[p : q : 1]`. -/
+theorem affineChartHom_isLocalizationElem (W : WeierstrassCurve R) (p q : R)
+    (h : W.toAffine.Equation p q) (j : Fin 3) :
+    affineChartHom W p q h (Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W j)) =
+      MvPolynomial.eval ![p, q, 1] (MvPolynomial.X j) := by
+  rw [show Away.isLocalizationElem (mk_X_mem_quotientGrading_one W 2)
+      (mk_X_mem_quotientGrading_one W j) =
+    Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) 1
+      (((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)) ^ 1)
+      (by simpa using SetLike.pow_mem_graded 1 (mk_X_mem_quotientGrading_one W j)) from rfl]
+  rw [affineChartHom_mk, map_pow, pow_one]
+  rw [show (quotientGradingHom (projIdeal W)) (MvPolynomial.X j) =
+    Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X j) from rfl]
+  rw [projModelAffineEval_mk]
+
+/-- The affine-point chart evaluation retracts the base ring. -/
+theorem affineChartHom_fromZero (W : WeierstrassCurve R) (p q : R)
+    (h : W.toAffine.Equation p q) (r : R) :
+    affineChartHom W p q h ((fromZeroRingHom (quotientGrading (projIdeal W))
+      (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+        ((algebraMapGradeZero (projIdeal W)) r)) = r :=
+  RingHom.congr_fun (affineChartHom_comp_algebraMap W p q h) r
+
+/-- **The `Z`-chart ideal dictionary, ring form.** The kernel of the chart evaluation at the
+affine point `(p, q)` is mathlib's `XYIdeal W p (C q)`, pulled back along the identification of
+the `Z`-chart ring with the affine coordinate ring. -/
+theorem ker_affineChartHom (W : WeierstrassCurve R) (p q : R)
+    (h : W.toAffine.Equation p q) :
+    RingHom.ker (affineChartHom W p q h) =
+      Ideal.comap (chartZRingEquiv W : _ →+* W.toAffine.CoordinateRing)
+        (XYIdeal W.toAffine p (C q)) := by
+  set ε : W.toAffine.CoordinateRing →+* R :=
+    (affineChartHom W p q h).comp ((chartZRingEquiv W).symm : _ →+* _) with hε
+  have hC : ∀ r : R, ε (algebraMap R W.toAffine.CoordinateRing r) = r := by
+    intro r
+    have hsym : (chartZRingEquiv W).symm (algebraMap R W.toAffine.CoordinateRing r) =
+        (fromZeroRingHom (quotientGrading (projIdeal W))
+          (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+            ((algebraMapGradeZero (projIdeal W)) r) :=
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_fromZero W r).symm
+    show affineChartHom W p q h ((chartZRingEquiv W).symm _) = r
+    rw [hsym, affineChartHom_fromZero]
+  have hx : ε (XClass W.toAffine p) = 0 := by
+    have hsym : (chartZRingEquiv W).symm (coordX W) =
+        Away.isLocalizationElem (mk_X_mem_quotientGrading_one W 2)
+          (mk_X_mem_quotientGrading_one W 0) :=
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_x W).symm
+    rw [XClass_eq_coordX_sub, map_sub, hC]
+    show affineChartHom W p q h ((chartZRingEquiv W).symm (coordX W)) - p = 0
+    rw [hsym, affineChartHom_isLocalizationElem]
+    simp
+  have hy : ε (YClass W.toAffine (C q)) = 0 := by
+    have hsym : (chartZRingEquiv W).symm (coordY W) =
+        Away.isLocalizationElem (mk_X_mem_quotientGrading_one W 2)
+          (mk_X_mem_quotientGrading_one W 1) :=
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_y W).symm
+    rw [YClass_eq_coordY_sub, map_sub, hC]
+    show affineChartHom W p q h ((chartZRingEquiv W).symm (coordY W)) - q = 0
+    rw [hsym, affineChartHom_isLocalizationElem]
+    simp
+  have hker := ker_eq_XYIdeal h ε hC hx hy
+  have hcomp : ε.comp (chartZRingEquiv W : _ →+* W.toAffine.CoordinateRing) =
+      affineChartHom W p q h := by
+    refine RingHom.ext fun a => ?_
+    show affineChartHom W p q h ((chartZRingEquiv W).symm (chartZRingEquiv W a)) = _
+    rw [RingEquiv.symm_apply_apply]
+  rw [← hker, ← hcomp, ← RingHom.comap_ker]
+
+/-- The affine-point section in `fromSpec` chart coordinates: `Spec` of the chart evaluation,
+composed with the canonical `fromSpec` of the affine `Z`-chart. (The `Y`-chart analogue for the
+zero section is `projModelZero_eq_fromSpec`.) -/
+theorem projModelAffineSection_eq_fromSpec (W : WeierstrassCurve R) (p q : R)
+    (h : W.toAffine.Equation p q) :
+    projModelAffineSection W p q h =
+      Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv ≫
+        CommRingCat.ofHom (affineChartHom W p q h)) ≫
+      (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).fromSpec := by
+  rw [← spec_affineChartHom_awayι W p q h, Proj_fromSpec_awayToSection_awayι, Spec.map_comp,
+    Category.assoc, ← Spec.map_comp_assoc, ← Spec.map_comp_assoc,
+    show Proj.awayToSection (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ≫
+        (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv ≫
+        CommRingCat.ofHom (affineChartHom W p q h) =
+        CommRingCat.ofHom (affineChartHom W p q h) from by
+      rw [← Category.assoc, show Proj.awayToSection (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) =
+        (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).hom from rfl,
+        Iso.hom_inv_id, Category.id_comp]]
+
+/-- **A section that factors through `fromSpec` has the evident kernel ideal sheaf.** If
+`f : Spec A ⟶ X` factors as `Spec` of a ring map `φ : Γ(X, U) ⟶ A` followed by `fromSpec` of an
+affine open `U`, then `(ker f).ideal U = ker φ`. (The `appLE` at the top open is `φ` up to the
+`Γ`-`Spec` identification, by `IsAffineOpen.SpecMap_appLE_fromSpec` and faithfulness of `Spec`.) -/
+theorem ker_ideal_of_fromSpec_factor {X : Scheme.{u}} {U : X.Opens} (hU : IsAffineOpen U)
+    {A : CommRingCat.{u}} (φ : Γ(X, U) ⟶ A) (f : Spec A ⟶ X) [QuasiCompact f]
+    (hfac : f = Spec.map φ ≫ hU.fromSpec) :
+    (Scheme.Hom.ker f).ideal ⟨U, hU⟩ = RingHom.ker φ.hom := by
+  have hpre : f ⁻¹ᵁ U = ⊤ := by
+    rw [hfac]
+    show Spec.map φ ⁻¹ᵁ (hU.fromSpec ⁻¹ᵁ U) = ⊤
+    rw [hU.fromSpec_preimage_self]
+    rfl
+  have hi : (⊤ : (Spec A).Opens) ≤ f ⁻¹ᵁ U := le_of_eq hpre.symm
+  have hkerApp : RingHom.ker ((f.app U)).hom = RingHom.ker ((f.appLE U ⊤ hi)).hom := by
+    haveI : IsIso (homOfLE hi) :=
+      ⟨homOfLE (le_of_eq hpre), Subsingleton.elim _ _, Subsingleton.elim _ _⟩
+    have hinj : Function.Injective (((Spec A).presheaf.map (homOfLE hi).op)).hom :=
+      (ConcreteCategory.bijective_of_isIso ((Spec A).presheaf.map (homOfLE hi).op)).1
+    ext a
+    rw [RingHom.mem_ker, RingHom.mem_ker]
+    show ((f.app U)).hom a = 0 ↔
+      (((Spec A).presheaf.map (homOfLE hi).op)).hom (((f.app U)).hom a) = 0
+    exact ⟨fun ha => by rw [ha, map_zero], fun ha => hinj (by rw [ha, map_zero])⟩
+  have happ : f.appLE U ⊤ hi = φ ≫ (Scheme.ΓSpecIso A).inv := by
+    refine Spec.map_injective ?_
+    rw [Spec.map_comp]
+    have h1 := hU.SpecMap_appLE_fromSpec f (isAffineOpen_top (Spec A)) hi
+    have h2 : (isAffineOpen_top (Spec A)).fromSpec = Spec.map (Scheme.ΓSpecIso A).inv := by
+      rw [IsAffineOpen.fromSpec_top, Scheme.isoSpec_Spec_inv]
+    rw [h2] at h1
+    rw [← cancel_mono hU.fromSpec]
+    refine h1.trans ?_
+    rw [Category.assoc, ← hfac]
+  have hinj2 : Function.Injective (((Scheme.ΓSpecIso A).inv)).hom :=
+    (ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso A).inv).1
+  rw [Scheme.Hom.ker_apply, hkerApp, happ, CommRingCat.hom_comp, ← RingHom.comap_ker]
+  ext a
+  simp only [Ideal.mem_comap, RingHom.mem_ker]
+  exact ⟨fun hh => hinj2 (by rw [hh, map_zero]), fun hh => by rw [hh, map_zero]⟩
+
+/-- **(1a) The `Z`-chart ideal dictionary, sheaf form.** The section ideal sheaf of the
+affine-point section `[p : q : 1]`, read on the affine `Z`-chart, is mathlib's
+`XYIdeal W p (C q)` transported along `chartZSectionsRingEquiv`. -/
+theorem ker_ideal_projModelAffineSection_chartZ (W : WeierstrassCurve R) (p q : R)
+    (h : W.toAffine.Equation p q) :
+    (Scheme.Hom.ker (projModelAffineSection W p q h)).ideal (projModelZChart W) =
+      Ideal.comap (chartZSectionsRingEquiv W : _ →+* W.toAffine.CoordinateRing)
+        (XYIdeal W.toAffine p (C q)) := by
+  have hker := ker_ideal_of_fromSpec_factor
+    (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos)
+    ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv ≫
+      CommRingCat.ofHom (affineChartHom W p q h))
+    (projModelAffineSection W p q h) (projModelAffineSection_eq_fromSpec W p q h)
+  refine hker.trans ?_
+  rw [CommRingCat.hom_comp, ← RingHom.comap_ker, CommRingCat.hom_ofHom, ker_affineChartHom,
+    Ideal.comap_comap]
+  rfl
+
+omit [DecidableEq k] in
+/-- **(1a, the section identification)** The section of the projective model attached to the
+affine point `some x y` is the affine-point section `[x : y : 1]`: both are `Z`-chart points with
+the same dehomogenised coordinates, and `projModelPointsEquiv` is injective. -/
+theorem pointSection_some (W : WeierstrassCurve k) [W.IsElliptic] (x y : k)
+    (h : W.toAffine.Nonsingular x y) :
+    pointSection W (WeierstrassCurve.Affine.Point.some x y h) =
+      projModelAffineSection W x y h.left := by
+  have hid : Spec.map (CommRingCat.ofHom (algebraMap k k)) = 𝟙 (Spec (CommRingCat.of k)) := by
+    rw [show CommRingCat.ofHom (algebraMap k k) = 𝟙 (CommRingCat.of k) from rfl, Spec.map_id]
+  have hsec : (affineSectionSpecPoint W k x y h.left).1 = projModelAffineSection W x y h.left := by
+    show Spec.map (CommRingCat.ofHom (algebraMap k k)) ≫ projModelAffineSection W x y h.left = _
+    rw [hid, Category.id_comp]
+  have hkey := projModelPointsEquiv_affineSectionSpecPoint W (K := k) x y h.left h
+  have hsym : ((projModelPointsEquiv W k).symm) (WeierstrassCurve.Affine.Point.some x y h) =
+      affineSectionSpecPoint W k x y h.left :=
+    (projModelPointsEquiv W k).symm_apply_eq.mpr hkey.symm
+  exact (congrArg Subtype.val hsym).trans hsec
+
+omit [DecidableEq k] in
+/-- **(1a, PROVED) The points-to-ideals dictionary on the `Z`-chart.** For an affine point
+`P = some x y` of `W`, the ideal of the section ideal sheaf `I(P)` on the affine `Z`-chart is
+mathlib's `XYIdeal W x (C y)`, transported along the identification `chartZSectionsRingEquiv` of
+the `Z`-chart sections with the affine coordinate ring.
+
+Together with `projModelZero_ker_ideal_chartZ` (`I(0)|_{Z-chart} = ⊤`) this is exactly the
+translation that turns `chordIdealIdentity` / `verticalIdealIdentity` into the `hloc` input of
+`nonempty_squareChartData_projModel_of_local` on charts inside the `Z`-chart. -/
+theorem ker_ideal_pointSection_chartZ (W : WeierstrassCurve k) [W.IsElliptic] (x y : k)
+    (h : W.toAffine.Nonsingular x y) :
+    (Scheme.Hom.ker (pointSection W (WeierstrassCurve.Affine.Point.some x y h))).ideal
+        (projModelZChart W) =
+      Ideal.comap (chartZSectionsRingEquiv W : _ →+* W.toAffine.CoordinateRing)
+        (XYIdeal W.toAffine x (C y)) := by
+  rw [pointSection_some]
+  exact ker_ideal_projModelAffineSection_chartZ W x y h.left
+
+end ChartZDictionary
+
+/-! ## The affine ideal identity for an arbitrary pair of points, and its `Z`-chart transport
+(T10-asm-chart, items 1c and 1a assembled)
+
+`affineIdeal W P` packages the two cases of the section ideal on the affine part — `XYIdeal` at an
+affine point, the unit ideal at `0`. In these terms the *whole* case analysis of the theorem of the
+square on the affine chart is one existential, `exists_affine_ideal_identity`: the chord, the
+vertical, and the two `P = 0` / `Q = 0` cases with ratio `1`.
+
+`ideal_identity_chartZ` transports it to the `Z`-chart of the projective model along
+`chartZSectionsRingEquiv` (using the dictionary `ker_ideal_pointSection_chartZ'`), and
+`hloc_chartZ` packages the result as the `hloc` clause of
+`nonempty_squareChartData_projModel_of_local` at every point of the `Z`-chart, for the rational
+function `chartZFunction W num den = num / den`. -/
+
+section ChartZLocal
+
+open Polynomial WeierstrassCurve.Affine WeierstrassCurve.Affine.CoordinateRing
+
+/-- **The affine ideal of a point of a Weierstrass curve**: mathlib's `XYIdeal` at an affine
+point, and the unit ideal at the point at infinity (which is invisible on the affine chart). -/
+noncomputable def affineIdeal {A : Type*} [CommRing A] (W : WeierstrassCurve.Affine A) :
+    W.Point → Ideal W.CoordinateRing
+  | 0 => ⊤
+  | .some x y _ => XYIdeal W x (C y)
+
+@[simp] theorem affineIdeal_zero {A : Type*} [CommRing A] (W : WeierstrassCurve.Affine A) :
+    affineIdeal W 0 = ⊤ := rfl
+
+@[simp] theorem affineIdeal_some {A : Type*} [CommRing A] (W : WeierstrassCurve.Affine A)
+    {x y : A} (h : W.Nonsingular x y) : affineIdeal W (.some x y h) = XYIdeal W x (C y) := rfl
+
+/-- **(1c, PROVED) The affine ideal identity for an arbitrary pair of points.** For all `P`, `Q`
+there are nonzero `num`, `den` in the affine coordinate ring with
+
+  `⟨den⟩ · (I(P) · I(Q)) = ⟨num⟩ · (I(P+Q) · I(0))`,
+
+uniformly in the four cases: `P = 0` and `Q = 0` are the ratio `1`; `Q = -P` is the vertical
+(`den = 1`, `num = X - x₁`, `verticalIdealIdentity`); everything else — including `P = Q`, the
+tangent — is the chord (`den = X - x₃`, `num = ℓ`, `chordIdealIdentity`).
+
+This is the case split of the theorem of the square, done once, on the affine chart. -/
+theorem exists_affine_ideal_identity (W : WeierstrassCurve.Affine k) (P Q : W.Point) :
+    ∃ num den : W.CoordinateRing, num ≠ 0 ∧ den ≠ 0 ∧
+      Ideal.span {den} * (affineIdeal W P * affineIdeal W Q) =
+        Ideal.span {num} * (affineIdeal W (P + Q) * affineIdeal W 0) := by
+  match P, Q with
+  | 0, Q =>
+    refine ⟨1, 1, one_ne_zero, one_ne_zero, ?_⟩
+    rw [zero_add, affineIdeal_zero, Ideal.top_mul, Ideal.mul_top]
+  | .some x y h, 0 =>
+    refine ⟨1, 1, one_ne_zero, one_ne_zero, ?_⟩
+    rw [add_zero, affineIdeal_zero, Ideal.mul_top]
+  | .some x₁ y₁ h₁, .some x₂ y₂ h₂ =>
+    by_cases hxy : x₁ = x₂ ∧ y₁ = W.negY x₂ y₂
+    · refine ⟨XClass W x₁, 1, XClass_ne_zero x₁, one_ne_zero, ?_⟩
+      have hadd : (Point.some x₁ y₁ h₁ : W.Point) + Point.some x₂ y₂ h₂ = 0 :=
+        Point.add_of_Y_eq hxy.1 hxy.2
+      rw [hadd, affineIdeal_zero, affineIdeal_some, affineIdeal_some,
+        Ideal.span_singleton_one, Ideal.top_mul, Ideal.mul_top, Ideal.mul_top, hxy.1, hxy.2]
+      exact XYIdeal_neg_mul h₂
+    · have hadd : (Point.some x₁ y₁ h₁ : W.Point) + Point.some x₂ y₂ h₂ =
+          Point.some _ _ (nonsingular_add h₁ h₂ hxy) := Point.add_some hxy
+      refine ⟨YClass W (linePolynomial x₁ y₁ (W.slope x₁ x₂ y₁ y₂)),
+        XClass W (W.addX x₁ x₂ (W.slope x₁ x₂ y₁ y₂)),
+        YClass_ne_zero _, XClass_ne_zero _, ?_⟩
+      rw [hadd, affineIdeal_zero, affineIdeal_some, affineIdeal_some, affineIdeal_some]
+      exact chordIdealIdentity h₁.left h₂.left hxy
+
+/-- Pushing an ideal forward along the inverse of a ring equivalence is pulling it back. -/
+theorem ideal_map_symm_eq_comap {A B : Type*} [CommRing A] [CommRing B] (f : A ≃+* B)
+    (I : Ideal B) : Ideal.map (f.symm : B →+* A) I = Ideal.comap (f : A →+* B) I := by
+  refine le_antisymm (Ideal.map_le_iff_le_comap.mpr fun b hb => ?_) fun a ha => ?_
+  · show (f : A →+* B) ((f.symm : B →+* A) b) ∈ I
+    rw [show (f : A →+* B) ((f.symm : B →+* A) b) = b from f.apply_symm_apply b]
+    exact hb
+  · have hb : (f : A →+* B) a ∈ I := ha
+    have hmem := Ideal.mem_map_of_mem (f.symm : B →+* A) hb
+    rwa [show (f.symm : B →+* A) ((f : A →+* B) a) = a from f.symm_apply_apply a] at hmem
+
+omit [DecidableEq k] in
+/-- The affine `Z`-chart of the projective model is nonempty: its ring of sections is the affine
+coordinate ring, which is nontrivial. -/
+theorem nonempty_projModelZChart (W : WeierstrassCurve k) :
+    Nonempty ↥(projModelZChart W).1.toScheme := by
+  haveI : Nontrivial Γ(projModel W, (projModelZChart W).1) :=
+    (chartZSectionsRingEquiv W).toEquiv.nontrivial
+  obtain ⟨p⟩ := (inferInstance : Nonempty (PrimeSpectrum Γ(projModel W, (projModelZChart W).1)))
+  have hmem : ((projModelZChart W).2.fromSpec) p ∈
+      Set.range ⇑((projModelZChart W).2.fromSpec) := ⟨p, rfl⟩
+  rw [(projModelZChart W).2.range_fromSpec] at hmem
+  exact ⟨⟨_, hmem⟩⟩
+
+omit [DecidableEq k] in
+/-- **(1a, uniform form)** The section ideal sheaf of *any* point of `W` on the affine `Z`-chart is
+`affineIdeal`, transported along `chartZSectionsRingEquiv`. At `0` this is
+`projModelZero_ker_ideal_chartZ`; at an affine point it is `ker_ideal_pointSection_chartZ`. -/
+theorem ker_ideal_pointSection_chartZ' (W : WeierstrassCurve k) [W.IsElliptic]
+    (P : W.toAffine.Point) :
+    (Scheme.Hom.ker (pointSection W P)).ideal (projModelZChart W) =
+      Ideal.comap (chartZSectionsRingEquiv W : _ →+* W.toAffine.CoordinateRing)
+        (affineIdeal W.toAffine P) := by
+  match P with
+  | 0 =>
+    rw [pointSection_zero', projModelZero_ker_ideal_chartZ, affineIdeal_zero,
+      Ideal.comap_top, Ideal.span_singleton_one]
+  | .some x y h => exact ker_ideal_pointSection_chartZ W x y h
+
+/-- **The affine ideal identity, transported to the `Z`-chart of the projective model.** -/
+theorem ideal_identity_chartZ (W : WeierstrassCurve k) [W.IsElliptic] (P Q : W.toAffine.Point)
+    (num den : W.toAffine.CoordinateRing)
+    (hid : Ideal.span {den} * (affineIdeal W.toAffine P * affineIdeal W.toAffine Q) =
+      Ideal.span {num} * (affineIdeal W.toAffine (P + Q) * affineIdeal W.toAffine 0)) :
+    Ideal.span {(chartZSectionsRingEquiv W).symm den} *
+        ((Scheme.Hom.ker (pointSection W P)).ideal (projModelZChart W) *
+          (Scheme.Hom.ker (pointSection W Q)).ideal (projModelZChart W)) =
+      Ideal.span {(chartZSectionsRingEquiv W).symm num} *
+        ((Scheme.Hom.ker (pointSection W (P + Q))).ideal (projModelZChart W) *
+          (Scheme.Hom.ker (projModelZero W)).ideal (projModelZChart W)) := by
+  have hmapI : ∀ S : W.toAffine.Point,
+      Ideal.map ((chartZSectionsRingEquiv W).symm : _ →+* Γ(projModel W, (projModelZChart W).1))
+          (affineIdeal W.toAffine S) =
+        (Scheme.Hom.ker (pointSection W S)).ideal (projModelZChart W) := by
+    intro S
+    rw [ker_ideal_pointSection_chartZ' W S, ideal_map_symm_eq_comap]
+  have hspan : ∀ a : W.toAffine.CoordinateRing,
+      Ideal.map ((chartZSectionsRingEquiv W).symm : _ →+* Γ(projModel W, (projModelZChart W).1))
+          (Ideal.span {a}) = Ideal.span {(chartZSectionsRingEquiv W).symm a} := by
+    intro a
+    rw [Ideal.map_span, Set.image_singleton]
+    rfl
+  have hmap := congrArg (Ideal.map
+    ((chartZSectionsRingEquiv W).symm : _ →+* Γ(projModel W, (projModelZChart W).1))) hid
+  rw [Ideal.map_mul, Ideal.map_mul, Ideal.map_mul, Ideal.map_mul] at hmap
+  simp only [hmapI, hspan, pointSection_zero'] at hmap
+  exact hmap
+
+omit [DecidableEq k] in
+/-- A nonzero element of the affine coordinate ring gives a nonzero `Z`-chart section. -/
+theorem chartZSection_ne_zero (W : WeierstrassCurve k) {a : W.toAffine.CoordinateRing}
+    (ha : a ≠ 0) : (chartZSectionsRingEquiv W).symm a ≠ 0 := fun h => ha (by
+  have hh := congrArg (chartZSectionsRingEquiv W) h
+  rwa [RingEquiv.apply_symm_apply, map_zero] at hh)
+
+/-- **The rational function `num / den`, read on the affine `Z`-chart.** This is the `g` of
+`nonempty_squareChartData_projModel_of_local`: the chord over the vertical. -/
+noncomputable def chartZFunction (W : WeierstrassCurve k) [W.IsElliptic]
+    (num den : W.toAffine.CoordinateRing) : (projModel W).functionField :=
+  @Scheme.germToFunctionField (projModel W) _ (projModelZChart W).1
+      (nonempty_projModelZChart W) ((chartZSectionsRingEquiv W).symm num) *
+    (@Scheme.germToFunctionField (projModel W) _ (projModelZChart W).1
+      (nonempty_projModelZChart W) ((chartZSectionsRingEquiv W).symm den))⁻¹
+
+/-- **(PROVED) The `Z`-chart clause of `hloc`.** At every point of the affine `Z`-chart the local
+Cartier data of `nonempty_squareChartData_projModel_of_local` is supplied by the chart itself, with
+`num`, `den` the transported affine numerator and denominator and `g = chartZFunction W num den`.
+The nonzerodivisor condition is `den ≠ 0` in the domain `Γ(projModel W, Z-chart)`, the germ identity
+is the definition of `g`, and the ideal identity is `ideal_identity_chartZ`. -/
+theorem hloc_chartZ (W : WeierstrassCurve k) [W.IsElliptic] (P Q : W.toAffine.Point)
+    (num den : W.toAffine.CoordinateRing) (hden : den ≠ 0)
+    (hid : Ideal.span {den} * (affineIdeal W.toAffine P * affineIdeal W.toAffine Q) =
+      Ideal.span {num} * (affineIdeal W.toAffine (P + Q) * affineIdeal W.toAffine 0))
+    (c : ↥(projModel W)) (hc : c ∈ (projModelZChart W).1) :
+    ∃ (V : (projModel W).affineOpens) (hcv : c ∈ V.1) (num' den' : Γ(projModel W, V.1)),
+      den' ∈ nonZeroDivisors Γ(projModel W, V.1) ∧
+      @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ num' =
+        chartZFunction W num den *
+          @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ den' ∧
+      Ideal.span {den'} * ((Scheme.Hom.ker (pointSection W P)).ideal V *
+          (Scheme.Hom.ker (pointSection W Q)).ideal V) =
+        Ideal.span {num'} * ((Scheme.Hom.ker (pointSection W (P + Q))).ideal V *
+          (Scheme.Hom.ker (projModelZero W)).ideal V) := by
+  haveI := nonempty_projModelZChart W
+  haveI : IsDomain Γ(projModel W, (projModelZChart W).1) :=
+    IsIntegral.component_integral (X := projModel W) (projModelZChart W).1
+  have hden' : (chartZSectionsRingEquiv W).symm den ≠ 0 := chartZSection_ne_zero W hden
+  have hgerm : @Scheme.germToFunctionField (projModel W) _ (projModelZChart W).1
+      (nonempty_projModelZChart W) ((chartZSectionsRingEquiv W).symm den) ≠ 0 := fun h =>
+    hden' (@Scheme.germToFunctionField_injective (projModel W) _ (projModelZChart W).1
+      (nonempty_projModelZChart W) _ 0 (by rw [h, map_zero]))
+  refine ⟨projModelZChart W, hc, (chartZSectionsRingEquiv W).symm num,
+    (chartZSectionsRingEquiv W).symm den, mem_nonZeroDivisors_of_ne_zero hden', ?_,
+    ideal_identity_chartZ W P Q num den hid⟩
+  show _ = (_ * _) * _
+  rw [mul_assoc, inv_mul_cancel₀ hgerm, mul_one]
+
+end ChartZLocal
+
 /-- **The leaf, reduced to a purely local Cartier statement (T10-asm-chart, entry point).**
 
 Every structural ingredient of `exists_squareChartData_projModel` is discharged here: the four
@@ -778,7 +1247,74 @@ theorem nonempty_squareChartData_projModel_of_local (W : WeierstrassCurve k) [W.
     (exists_affineOpen_ker_pointSection_span_nzd W (P + Q))
     (exists_affineOpen_ker_projModelZero_span_nzd W) g hloc
 
-/-- **THE REMAINING LEAF (T10-asm-chart): read the local numerator and denominator of the
+/-- **(1b) THE REMAINING LEAF (T10-asm-chart): the single chart at infinity.**
+
+Everything else in the leaf is now proved. `nonempty_squareChartData_projModel_of_local` reduces
+`exists_squareChartData_projModel` to one `hloc` clause per point of `projModel W`; the affine
+case analysis is `exists_affine_ideal_identity` (1c), the `Z`-chart dictionary is
+`ker_ideal_pointSection_chartZ'` (1a) and the clause at every point of the `Z`-chart is
+`hloc_chartZ`. What remains is exactly the clause at the points *off* the `Z`-chart — and the
+complement of the affine `Z`-chart in `projModel W` is the single point `[0 : 1 : 0]`
+(`projModelZChart_sup_sectionNeighborhood_eq_top` shows the model is covered by *two* charts).
+
+**What has to be built.** `projModelZChart_sup_sectionNeighborhood_eq_top` puts `c` in
+`projModelSectionNeighborhood W = D(sectionUnitElem)` inside the `Y`-chart
+`AdjoinRoot (infChartCubic W)`, with coordinates `s = X/Y` (`AdjoinRoot.root`, the uniformiser at
+`O`) and `t = Z/Y` (`infChartTElem`), related by `t · v = s²(s + a₂ t)`
+(`tel_mul_sectionUnitElem`), i.e. `t · w = s³` with `w := v − a₂ s²`. Take
+
+  `V := projModelSectionNeighborhood W ⊓ D(num∞) ⊓ D(w) ⊓ D(w − x₃ s²)`,
+
+where, writing `ℓ = y − λx − μ` for the chord and `x − x₃` for the vertical,
+
+  `num∞ = 1 − λ s − μ t` (`= t · ℓ`)  and  `den∞ = s − x₃ t` (`= t · (x − x₃)`).
+
+Then:
+
+* `c ∈ V`: `c ∉ Z`-chart forces `t ∈ p_c` (`mem_projModelZChart_iff_not_mem_infChartTElem`),
+  hence `s ∈ p_c` (from `t · w = s³` and `v` a unit on the neighbourhood, cf.
+  `root_mem_of_tel_mem`); and `num∞ ≡ w ≡ w − x₃ s² ≡ 1 (mod (s, t))` because
+  `sectionUnitElem − 1 ∈ ⟨s, t⟩` (`sectionUnitElem_sub_one_mem`), so none of the three lies in
+  `p_c`. This is the same argument as in `projModelZChart_sup_sectionNeighborhood_eq_top`.
+* `I(P)|V = I(Q)|V = I(P+Q)|V = ⊤` by `ker_ideal_eq_top_of_preimage_eq_bot`, because `num∞`
+  vanishes at `P` and at `Q` (they lie on the chord) and `den∞` vanishes at `P + Q`, while
+  `den∞ · w = s · (w − x₃ s²)` makes `den∞ ∈ p` impossible on `V` unless `t ∈ p`; the affine
+  points are in the `Z`-chart, so `t ∉ p` there.
+* `I(0)|V = ⟨s⟩` by `projModelZero_ker_ideal_sectionNeighborhood` (restricted), and `s` is a
+  nonzerodivisor by `projModelSectionRoot_mem_nonZeroDivisors`.
+* the ideal identity `⟨den∞⟩ · (⊤ · ⊤) = ⟨num∞⟩ · (⊤ · ⟨s⟩)` then reads `⟨den∞⟩ = ⟨s⟩` on `V`,
+  which is `den∞ · w = s · (w − x₃ s²)` with `w` and `w − x₃ s²` units on `V`;
+* the germ identity ties this chart to `chartZFunction W num den` through the overlap: by
+  `overlapSectionsEquiv` / `overlapMap_coordX` / `overlapMap_coordY`
+  (`EllipticCurve/PoleFiltration.lean`), on `Y ⊓ Z` one has `overlapMap (YClass ℓ) = num∞ / t`
+  and `overlapMap (XClass x₃) = den∞ / t`, so `num · den∞ = num∞ · den` there, and
+  `Scheme.germToFunctionField_injective` upgrades that to the required germ equation.
+
+In the vertical case (`Q = -P`, so `P + Q = 0`, `num = XClass x₁`, `den = 1`) the same chart
+works with `num∞ = s − x₁ t` and `den∞ = t`, the identity becoming `⟨t⟩ = ⟨num∞ · s²⟩` — again
+`t · w = s³` up to units.
+
+**Two logged dead ends.** `WeilPairing/LineVertical.lean` is *not* about the chord and the
+vertical (no `linePolynomial`, no `slope`, no `addX`), and the
+`ProjIsPrincipal` / `kappaDivisor_add_linEquiv` route is unsound over non-closed fields — see the
+`exists_functionField_projectiveDivisorOf_kappa` note below. -/
+theorem hloc_off_chartZ (W : WeierstrassCurve k) [W.IsElliptic] (P Q : W.toAffine.Point)
+    (num den : W.toAffine.CoordinateRing) (hnum : num ≠ 0) (hden : den ≠ 0)
+    (hid : Ideal.span {den} * (affineIdeal W.toAffine P * affineIdeal W.toAffine Q) =
+      Ideal.span {num} * (affineIdeal W.toAffine (P + Q) * affineIdeal W.toAffine 0))
+    (c : ↥(projModel W)) (hc : c ∉ (projModelZChart W).1) :
+    ∃ (V : (projModel W).affineOpens) (hcv : c ∈ V.1) (num' den' : Γ(projModel W, V.1)),
+      den' ∈ nonZeroDivisors Γ(projModel W, V.1) ∧
+      @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ num' =
+        chartZFunction W num den *
+          @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ den' ∧
+      Ideal.span {den'} * ((Scheme.Hom.ker (pointSection W P)).ideal V *
+          (Scheme.Hom.ker (pointSection W Q)).ideal V) =
+        Ideal.span {num'} * ((Scheme.Hom.ker (pointSection W (P + Q))).ideal V *
+          (Scheme.Hom.ker (projModelZero W)).ideal V) := by
+  sorry
+
+/-- **THE LEAF (T10-asm-chart): read the local numerator and denominator of the
 theorem-of-the-square function off the Weierstrass charts.**
 
 Produce an affine cover of `projModel W` by nonempty charts, together with nonzerodivisor
@@ -787,81 +1323,44 @@ generators of the four section ideal sheaves on each chart whose ratios
 `squareChartDataOfRatio`, whose output this file's composition turns into the theorem of the
 square. This *is* the theorem of the square on the projective model, in local form.
 
-**Status (2026-08-09).** The *structural* half is now proved, and the leaf has one precise
-residue. Use `nonempty_squareChartData_projModel_of_local`: it reduces this statement, with no
-gaps, to producing
+**Status (2026-08-09).** Everything except the one chart at infinity is proved. The proof below
+is the complete assembly:
 
-  `g : (projModel W).functionField` and, around every point `c`, one affine chart `V ∋ c` with
-  `num den : Γ(projModel W, V)`, `den` a nonzerodivisor, `germ num = g · germ den`, and
-  `⟨den⟩ · (I(P) · I(Q)) = ⟨num⟩ · (I(P+Q) · I(0))` in `Γ(projModel W, V)`.
+* `exists_affine_ideal_identity` (1c) does the whole case analysis on `P`, `Q` on the affine
+  chart, producing a single nonzero pair `num`, `den` with
+  `⟨den⟩ · (I(P) · I(Q)) = ⟨num⟩ · (I(P+Q) · I(0))` in `W.toAffine.CoordinateRing`;
+* `chartZFunction W num den` is the resulting rational function `num / den` — the classical
+  chord-over-vertical;
+* `hloc_chartZ` (1a) supplies the local Cartier data at every point of the affine `Z`-chart,
+  through the dictionary `ker_ideal_pointSection_chartZ'` (mathlib's `XYIdeal`, transported along
+  `chartZSectionsRingEquiv`);
+* `hloc_off_chartZ` (1b) is the single remaining `sorry`: the chart at infinity. Its docstring
+  contains the full construction.
 
-In particular the *former* first blocker is gone: the generators of the four ideal sheaves need
-**not** be produced together with the rational function. They may be chosen arbitrarily
-(`exists_affineOpen_ker_pointSection_span_nzd`), because the chart unit is pinned by the ideal
-identity and absorbed by `exists_unit_mul_of_span_singleton_eq`; see
-`nonempty_squareChartData_of_span_ratio` and `nonempty_squareChartData_of_ideal_ratio`.
-
-What still has to be built, chart by chart:
-
-1a. **The ideal dictionary on the affine `Z`-chart.** The identity itself is *already available*
-   from mathlib and is recorded above as `chordIdealIdentity` (`XYIdeal_mul_XYIdeal`, the chord,
-   with `den = XClass x₃` and `num = YClass ℓ`) and `verticalIdealIdentity` (`XYIdeal_neg_mul`,
-   the case `Q = -P`, with `den = 1` and `num = XClass x₁`). What is missing is the translation
-   `(Scheme.Hom.ker (pointSection W P)).ideal (projModelZChart W) =
-   Ideal.comap (chartZSectionsRingEquiv W) (XYIdeal W.toAffine x (C y))` for `P = some x y`. The
-   route is `pointSection W (some x y h) = projModelAffineSection W x y h.left` (`pointSection` is
-   `(projModelPointsEquiv W k).symm`, and `projModelPointsEquiv_some` +
-   `eq_affineSection_of_zChart_factor` + `projModelAffineSection_injective` pin it), followed by
-   `RingHom.ker (affineChartHom W x y h) = ` the evaluation kernel, i.e. `XYIdeal` — note
-   `affineChartHom_mk` computes `affineChartHom` as `MvPolynomial.eval ![x, y, 1]`.
-   `(Scheme.Hom.ker (projModelZero W)).ideal (projModelZChart W) = ⊤` is
-   `projModelZero_ker_ideal_chartZ`.
-
-1b. **The one chart at infinity.** The complement of the `Z`-chart in `projModel W` is the single
-   point `[0:1:0]`, so exactly one more chart is needed: shrink
-   `projModelSectionNeighborhood W` so that it misses `P`, `Q` and `P+Q`. There `I(P)`, `I(Q)`,
-   `I(P+Q)` are `⊤` by `ker_ideal_eq_top_of_preimage_eq_bot` and
-   `I(0) = ⟨projModelSectionRoot W⟩` by `projModelZero_ker_ideal_sectionNeighborhood`, so the
-   required identity is `⟨den⟩ = ⟨num · s⟩` with `s = projModelSectionRoot W`. In the `Y`-chart
-   ring `AdjoinRoot (infChartCubic W)` (coordinates `s = X/Y = ` the root, `t = Z/Y =
-   infChartTElem`, with `t · sectionUnitElem = s²(s + a₂t)`, `basicOpen_sectionUnit_inf_t_eq_
-   basicOpen_sectionUnit_inf_root`) the chord and the vertical read
-   `ℓ = (1 − λs − μt)/t` and `v = (s − x₃t)/t`, so the right choice is
-   `num = 1 − λs − μt` and `den = s − x₃t`; `den = s · unit` near infinity gives the ideal
-   identity, and `num · XClass x₃ = YClass ℓ · den` on the chart overlap
-   (`overlapSectionsEquiv`, `PoleFiltration.lean`) gives the germ identity tying this chart to
-   the `Z`-chart value of `g`.
-
-1c. The case split is exactly mathlib's: `P = 0` and `Q = 0` are already proved
-   (`nonempty_squareChartData_projModel_zero_left` / `_zero_right`); for `P`, `Q` affine the
-   dichotomy `x₁ = x₂ ∧ y₁ = negY x₂ y₂` separates `verticalIdealIdentity` (then `P + Q = 0`)
-   from `chordIdealIdentity` (which covers `P = Q`, the tangent, as well).
-
-2. **The available divisor input is strictly weaker than what is needed.**
-   `exists_functionField_projectiveDivisorOf_kappa` above delivers a nonzero `F` with
-   `projectiveDivisorOf F = (P+Q) + (0) − (P) − (Q)`, but HasseWeil's `projectiveDivisorOf`
-   records orders only at `k`-**rational** affine points (`SmoothPlaneCurve.SmoothPoint` is a
-   pair of elements of `k`) together with the place at infinity. Over a non-algebraically-closed
-   `k` that pins `F` only up to a factor whose divisor is supported on closed points of degree
-   `> 1`, and such factors exist: if `S`, `U` are quadratic points of `E` with the same trace
-   `S + S̄ = U + Ū = T ≠ 0`, then `(S)+(S̄) − (U)−(Ū)` is principal and invisible to
-   `projectiveDivisorOf`. So `F` may have extra zeros and poles, which the ideal-sheaf identity
-   does not tolerate; feeding `F` straight into `squareChartDataOfRatio` is *not* sound.
-   (The classical witness `f = v / ℓ`, vertical over chord, does have divisor exactly
-   `(P+Q) + (0) − (P) − (Q)` at every closed point — the statement is true, it is the *input*
-   that is too weak.) Closing this leaf therefore needs either the explicit chord-and-vertical
-   function read on the two Weierstrass charts, or a strengthening of
-   `HasseWeil.Curves.MillerHypothesis` from rational points to all closed points. (1a/1b above
-   *are* the explicit chord-and-vertical route, which is why they do not use this input at all.)
-
-For that reason this leaf is deliberately stated *without* the divisor witness as a hypothesis:
-taking the weak witness as an input would make the statement false. -/
+**Why the available divisor input does not help.**
+`exists_functionField_projectiveDivisorOf_kappa` above delivers a nonzero `F` with
+`projectiveDivisorOf F = (P+Q) + (0) − (P) − (Q)`, but HasseWeil's `projectiveDivisorOf`
+records orders only at `k`-**rational** affine points (`SmoothPlaneCurve.SmoothPoint` is a
+pair of elements of `k`) together with the place at infinity. Over a non-algebraically-closed
+`k` that pins `F` only up to a factor whose divisor is supported on closed points of degree
+`> 1`, and such factors exist: if `S`, `U` are quadratic points of `E` with the same trace
+`S + S̄ = U + Ū = T ≠ 0`, then `(S)+(S̄) − (U)−(Ū)` is principal and invisible to
+`projectiveDivisorOf`. So `F` may have extra zeros and poles, which the ideal-sheaf identity
+does not tolerate; feeding `F` straight into `squareChartDataOfRatio` is *not* sound.
+(The classical witness `f = v / ℓ`, vertical over chord, does have divisor exactly
+`(P+Q) + (0) − (P) − (Q)` at every closed point — the statement is true, it is the *input*
+that is too weak.) That is why this leaf is stated *without* the divisor witness as a hypothesis,
+and why the route above is the explicit chord-and-vertical one. -/
 theorem exists_squareChartData_projModel (W : WeierstrassCurve k) [W.IsElliptic]
     (P Q : W.toAffine.Point) :
     Nonempty (SquareChartData (Scheme.Hom.ker (pointSection W P))
       (Scheme.Hom.ker (pointSection W Q)) (Scheme.Hom.ker (pointSection W (P + Q)))
       (Scheme.Hom.ker (projModelZero W))) := by
-  sorry
+  obtain ⟨num, den, hnum, hden, hid⟩ := exists_affine_ideal_identity W.toAffine P Q
+  refine nonempty_squareChartData_projModel_of_local W P Q (chartZFunction W num den) fun c => ?_
+  by_cases hc : c ∈ (projModelZChart W).1
+  · exact hloc_chartZ W P Q num den hden hid c hc
+  · exact hloc_off_chartZ W P Q num den hnum hden hid c hc
 
 /-- **(T10-asm) The theorem of the square as a module triviality over a field.**
 
@@ -877,10 +1376,10 @@ No hypothesis beyond `W.IsElliptic` is needed: the composition
 input `exists_functionField_projectiveDivisorOf_kappa`. -/
 theorem nonempty_tensorObj_idealModule_add_field (W : WeierstrassCurve k) [W.IsElliptic]
     (P Q : W.toAffine.Point) :
-    Nonempty (tensorObj (idealModule (Scheme.Hom.ker (pointSection W P)))
-          (idealModule (Scheme.Hom.ker (pointSection W Q))) ≅
-        tensorObj (idealModule (Scheme.Hom.ker (pointSection W (P + Q))))
-          (idealModule (Scheme.Hom.ker (projModelZero W)))) :=
+    Nonempty (tensorObj (Scheme.Modules.idealModule (Scheme.Hom.ker (pointSection W P)))
+          (Scheme.Modules.idealModule (Scheme.Hom.ker (pointSection W Q))) ≅
+        tensorObj (Scheme.Modules.idealModule (Scheme.Hom.ker (pointSection W (P + Q))))
+          (Scheme.Modules.idealModule (Scheme.Hom.ker (projModelZero W)))) :=
   nonempty_tensorObj_idealModule_iso_of_squareChartData
     (exists_squareChartData_projModel W P Q).some
 
