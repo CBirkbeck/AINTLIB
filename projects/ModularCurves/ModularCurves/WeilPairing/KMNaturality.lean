@@ -243,6 +243,136 @@ theorem restrictBase_mem_torsionPoints (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶
   rw [hP, map_zero] at h
   exact h.symm
 
+/-- The first leg of `baseChangeMap`. -/
+theorem baseChangeMap_fst (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t') :
+    baseChangeMap E.π g hg ≫ pullback.fst E.π t = pullback.fst E.π t' := by
+  simp only [baseChangeMap]
+  rw [pullback.lift_fst]
+  exact Category.comp_id _
+
+/-- The second leg of `baseChangeMap`. -/
+theorem baseChangeMap_snd (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t') :
+    baseChangeMap E.π g hg ≫ pullback.snd E.π t = pullback.snd E.π t' ≫ g := by
+  simp only [baseChangeMap]
+  exact pullback.lift_snd _ _ _
+
+/-- The first leg of the restricted point: restriction of the first leg. -/
+theorem restrictBase_coe_fst (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t')
+    (Q : (E.baseChange t).Point (𝟙 T)) :
+    ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫ pullback.fst E.π t' =
+      g ≫ ((Q.1 : T ⟶ pullback E.π t) ≫ pullback.fst E.π t) :=
+  (pullback.lift_fst _ _ _).trans (pointCongr_apply_coe E _ _)
+
+/-- The restricted point's leg through `baseChangeMap`: the naturality square commutes. -/
+theorem restrictBase_comp_baseChangeMap (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T)
+    (hg : g ≫ t = t') (Q : (E.baseChange t).Point (𝟙 T)) :
+    ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫ baseChangeMap E.π g hg =
+      g ≫ (Q.1 : T ⟶ pullback E.π t) := by
+  apply pullback.hom_ext
+  · calc (((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫
+          baseChangeMap E.π g hg) ≫ pullback.fst E.π t
+        = ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫
+            (baseChangeMap E.π g hg ≫ pullback.fst E.π t) := Category.assoc _ _ _
+      _ = ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫ pullback.fst E.π t' :=
+          congrArg _ (baseChangeMap_fst E t g hg)
+      _ = g ≫ ((Q.1 : T ⟶ pullback E.π t) ≫ pullback.fst E.π t) :=
+          restrictBase_coe_fst E t g hg Q
+      _ = (g ≫ (Q.1 : T ⟶ pullback E.π t)) ≫ pullback.fst E.π t :=
+          (Category.assoc _ _ _).symm
+  · calc (((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫
+          baseChangeMap E.π g hg) ≫ pullback.snd E.π t
+        = ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫
+            (baseChangeMap E.π g hg ≫ pullback.snd E.π t) := Category.assoc _ _ _
+      _ = ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫
+            (pullback.snd E.π t' ≫ g) := congrArg _ (baseChangeMap_snd E t g hg)
+      _ = (((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫
+            pullback.snd E.π t') ≫ g := (Category.assoc _ _ _).symm
+      _ = 𝟙 T' ≫ g := congrArg (· ≫ g) (restrictBase E t g hg Q).2
+      _ = g := Category.id_comp g
+      _ = g ≫ 𝟙 T := (Category.comp_id g).symm
+      _ = g ≫ ((Q.1 : T ⟶ pullback E.π t) ≫ pullback.snd E.π t) := congrArg _ Q.2.symm
+      _ = (g ≫ (Q.1 : T ⟶ pullback E.π t)) ≫ pullback.snd E.π t :=
+          (Category.assoc _ _ _).symm
+
+/-- **(AP-E1-NAT1, step 1)** The restriction square of a section along `g : T' ⟶ T` is
+cartesian. -/
+theorem isPullback_restrictBase (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t')
+    (Q : (E.baseChange t).Point (𝟙 T)) :
+    IsPullback ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') g
+      (baseChangeMap E.π g hg) (Q.1 : T ⟶ pullback E.π t) := by
+  have hb' : ∀ s : Limits.PullbackCone (baseChangeMap E.π g hg)
+      (Q.1 : T ⟶ pullback E.π t),
+      (s.fst ≫ pullback.snd E.π t') ≫ g = s.snd := by
+    intro s
+    calc (s.fst ≫ pullback.snd E.π t') ≫ g
+        = s.fst ≫ (pullback.snd E.π t' ≫ g) := Category.assoc _ _ _
+      _ = s.fst ≫ (baseChangeMap E.π g hg ≫ pullback.snd E.π t) :=
+          congrArg _ (baseChangeMap_snd E t g hg).symm
+      _ = (s.fst ≫ baseChangeMap E.π g hg) ≫ pullback.snd E.π t :=
+          (Category.assoc _ _ _).symm
+      _ = (s.snd ≫ (Q.1 : T ⟶ pullback E.π t)) ≫ pullback.snd E.π t :=
+          congrArg (· ≫ pullback.snd E.π t) s.condition
+      _ = s.snd ≫ ((Q.1 : T ⟶ pullback E.π t) ≫ pullback.snd E.π t) :=
+          Category.assoc _ _ _
+      _ = s.snd ≫ 𝟙 T := congrArg _ Q.2
+      _ = s.snd := Category.comp_id _
+  refine IsPullback.of_isLimit'
+    ⟨restrictBase_comp_baseChangeMap E t g hg Q⟩ ?_
+  refine Limits.PullbackCone.IsLimit.mk _ (fun s => s.fst ≫ pullback.snd E.π t')
+    (fun s => ?_) (fun s => hb' s) (fun s m hm₁ hm₂ => ?_)
+  · apply pullback.hom_ext
+    · calc ((s.fst ≫ pullback.snd E.π t') ≫
+            ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t')) ≫ pullback.fst E.π t'
+          = (s.fst ≫ pullback.snd E.π t') ≫
+              (((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫
+                pullback.fst E.π t') := Category.assoc _ _ _
+        _ = (s.fst ≫ pullback.snd E.π t') ≫
+              (g ≫ ((Q.1 : T ⟶ pullback E.π t) ≫ pullback.fst E.π t)) :=
+            congrArg _ (restrictBase_coe_fst E t g hg Q)
+        _ = ((s.fst ≫ pullback.snd E.π t') ≫ g) ≫
+              ((Q.1 : T ⟶ pullback E.π t) ≫ pullback.fst E.π t) :=
+            (Category.assoc _ _ _).symm
+        _ = s.snd ≫ ((Q.1 : T ⟶ pullback E.π t) ≫ pullback.fst E.π t) :=
+            congrArg (· ≫ _) (hb' s)
+        _ = (s.snd ≫ (Q.1 : T ⟶ pullback E.π t)) ≫ pullback.fst E.π t :=
+            (Category.assoc _ _ _).symm
+        _ = (s.fst ≫ baseChangeMap E.π g hg) ≫ pullback.fst E.π t :=
+            congrArg (· ≫ pullback.fst E.π t) s.condition.symm
+        _ = s.fst ≫ (baseChangeMap E.π g hg ≫ pullback.fst E.π t) :=
+            Category.assoc _ _ _
+        _ = s.fst ≫ pullback.fst E.π t' := congrArg _ (baseChangeMap_fst E t g hg)
+    · calc ((s.fst ≫ pullback.snd E.π t') ≫
+            ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t')) ≫ pullback.snd E.π t'
+          = (s.fst ≫ pullback.snd E.π t') ≫
+              (((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫
+                pullback.snd E.π t') := Category.assoc _ _ _
+        _ = (s.fst ≫ pullback.snd E.π t') ≫ 𝟙 T' :=
+            congrArg _ (restrictBase E t g hg Q).2
+        _ = s.fst ≫ pullback.snd E.π t' := Category.comp_id _
+  · calc m = m ≫ 𝟙 T' := (Category.comp_id m).symm
+      _ = m ≫ (((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t') ≫
+            pullback.snd E.π t') := congrArg _ (restrictBase E t g hg Q).2.symm
+      _ = (m ≫ ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t')) ≫
+            pullback.snd E.π t' := (Category.assoc _ _ _).symm
+      _ = s.fst ≫ pullback.snd E.π t' := congrArg (· ≫ pullback.snd E.π t') hm₁
+
+/-- **(AP-E1-NAT1, step 2)** The kernel of the restricted section is the comap of the
+kernel along `baseChangeMap` — the ideal-sheaf half of `κ`-naturality. Mirrors
+`RelEffCartierDiv.ker_sectionBaseChange`, with the cartesian square supplied by
+`isPullback_restrictBase`. -/
+theorem ker_restrictBase (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t')
+    (Q : (E.baseChange t).Point (𝟙 T)) [IsSeparated E.π] :
+    ((restrictBase E t g hg Q).1 : T' ⟶ pullback E.π t').ker =
+      (Scheme.Hom.ker (Q.1 : T ⟶ pullback E.π t)).comap (baseChangeMap E.π g hg) := by
+  haveI hsep : IsSeparated (pullback.snd E.π t) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π t ‹_›
+  haveI : IsClosedImmersion (Q.1 : T ⟶ pullback E.π t) :=
+    RelEffCartierDiv.SectionsIdeal.isClosedImmersion Q.2
+  rw [← (isPullback_restrictBase E t g hg Q).isoPullback_hom_fst,
+    Scheme.Hom.ker_comp_of_isIso]
+  exact Scheme.IdealSheafData.ker_fst_of_isClosedImmersion (Q.1 : T ⟶ pullback E.π t)
+    (baseChangeMap E.π g hg)
+
 end RestrictBase
 
 end ModularCurves
