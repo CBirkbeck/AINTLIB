@@ -583,6 +583,8 @@ theorem sectionEval_comp {Y : Scheme.{u}} (g : T' ⟶ T) (w : T ⟶ Y) (V : Y.Op
   rw [Scheme.Hom.comp_app]
   rfl
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **(AP-E1-NAT2)** The Katz–Mazur value commutes with base change: the pulled-back
 dataset — module `(baseChangeMap)^* M`, cover `baseChangeMap ⁻¹ᵁ W`, trivialisations
 `localPullbackTrivializationT` — computes the `g`-pullback of the value.
@@ -665,9 +667,128 @@ theorem torsionSplittingEval_restrictBase (hsm : SmoothOfRelativeDimension 1 E.�
         (mulByN E t N ⁻¹ᵁ W i) (h i) = 1 from hn i]
     exact map_one _
   · -- the pulled splitting splits the pulled cocycle
-    sorry
+    have hpullco : transitionUnitOfCover
+        ((Scheme.Modules.pullback (baseChangeMap E.π g hg)).obj M)
+        (fun i => baseChangeMap E.π g hg ⁻¹ᵁ W i)
+        (fun i => localPullbackTrivializationT (baseChangeMap E.π g hg) M (W i) (e i))
+        i j =
+        Units.map ((baseChangeMap E.π g hg).app (W i ⊓ W j)).hom.toMonoidHom
+          (transitionUnitOfCover M W e i j) :=
+      (congrArg₂ (trivializationTransitionUnit _)
+        (restrict_localPullbackTrivialization (baseChangeMap E.π g hg) M
+          (inf_le_left : W i ⊓ W j ≤ W i) (e i))
+        (restrict_localPullbackTrivialization (baseChangeMap E.π g hg) M
+          (inf_le_right : W i ⊓ W j ≤ W j) (e j))).trans
+      (trivializationTransitionUnit_localPullbackTrivialization
+        (baseChangeMap E.π g hg) M (W i ⊓ W j) _ _)
+    -- typed barrier steps: each equation elaborates in isolation
+    have hle : mulByN E t' N ⁻¹ᵁ
+        (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j) ≤
+        baseChangeMap E.π g hg ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ (W i ⊓ W j)) :=
+      inf_le_inf (hpath i) (hpath j)
+    have hb1 : Units.map ((mulByN E t' N).app
+        (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j)).hom.toMonoidHom
+        (Units.map ((baseChangeMap E.π g hg).app (W i ⊓ W j)).hom.toMonoidHom
+          (transitionUnitOfCover M W e i j)) =
+        unitPullback (mulByN E t' N ≫ baseChangeMap E.π g hg) (W i ⊓ W j)
+          (mulByN E t' N ⁻¹ᵁ
+            (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j))
+          (le_of_eq rfl) (transitionUnitOfCover M W e i j) :=
+      (congrArg (Units.map ((mulByN E t' N).app
+          (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j)).hom.toMonoidHom)
+        (map_app_eq_unitPullback (baseChangeMap E.π g hg) (W i ⊓ W j)
+          (transitionUnitOfCover M W e i j))).trans
+      ((map_app_eq_unitPullback (mulByN E t' N)
+          (baseChangeMap E.π g hg ⁻¹ᵁ (W i ⊓ W j))
+          (unitPullback (baseChangeMap E.π g hg) (W i ⊓ W j)
+            (baseChangeMap E.π g hg ⁻¹ᵁ (W i ⊓ W j)) le_rfl
+            (transitionUnitOfCover M W e i j))).trans
+        (unitPullback_unitPullback (mulByN E t' N) (baseChangeMap E.π g hg)
+          le_rfl le_rfl (transitionUnitOfCover M W e i j)))
+    have hb2 : unitPullback (mulByN E t' N ≫ baseChangeMap E.π g hg) (W i ⊓ W j)
+        (mulByN E t' N ⁻¹ᵁ
+          (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j))
+        (le_of_eq rfl) (transitionUnitOfCover M W e i j) =
+        unitPullback (baseChangeMap E.π g hg ≫ mulByN E t N) (W i ⊓ W j)
+          (mulByN E t' N ⁻¹ᵁ
+            (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j))
+          hle (transitionUnitOfCover M W e i j) :=
+      unitPullback_congr (baseChangeMap_mulByN E t g hg N).symm (W i ⊓ W j)
+        (mulByN E t' N ⁻¹ᵁ
+          (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j))
+        (le_of_eq rfl) hle (transitionUnitOfCover M W e i j)
+    have hb3 : unitPullback (baseChangeMap E.π g hg ≫ mulByN E t N) (W i ⊓ W j)
+        (mulByN E t' N ⁻¹ᵁ
+          (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j))
+        hle (transitionUnitOfCover M W e i j) =
+        unitPullback (baseChangeMap E.π g hg) (mulByN E t N ⁻¹ᵁ (W i ⊓ W j))
+          (mulByN E t' N ⁻¹ᵁ
+            (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j))
+          hle (Units.map ((mulByN E t N).app (W i ⊓ W j)).hom.toMonoidHom
+            (transitionUnitOfCover M W e i j)) :=
+      ((unitPullback_unitPullback (baseChangeMap E.π g hg) (mulByN E t N)
+          le_rfl hle (transitionUnitOfCover M W e i j)).symm).trans
+        (congrArg (unitPullback (baseChangeMap E.π g hg)
+            (mulByN E t N ⁻¹ᵁ (W i ⊓ W j))
+            (mulByN E t' N ⁻¹ᵁ
+              (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j)) hle)
+          (map_app_eq_unitPullback (mulByN E t N) (W i ⊓ W j)
+            (transitionUnitOfCover M W e i j)).symm)
+    have hb4 : unitPullback (baseChangeMap E.π g hg) (mulByN E t N ⁻¹ᵁ (W i ⊓ W j))
+        (mulByN E t' N ⁻¹ᵁ
+          (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j))
+        hle (Units.map ((mulByN E t N).app (W i ⊓ W j)).hom.toMonoidHom
+          (transitionUnitOfCover M W e i j)) =
+        Scheme.resUnit (inf_le_left : mulByN E t' N ⁻¹ᵁ (baseChangeMap E.π g hg ⁻¹ᵁ W i) ⊓
+            mulByN E t' N ⁻¹ᵁ (baseChangeMap E.π g hg ⁻¹ᵁ W j) ≤
+            mulByN E t' N ⁻¹ᵁ (baseChangeMap E.π g hg ⁻¹ᵁ W i)) (h' i) *
+          (Scheme.resUnit (inf_le_right : mulByN E t' N ⁻¹ᵁ
+              (baseChangeMap E.π g hg ⁻¹ᵁ W i) ⊓
+              mulByN E t' N ⁻¹ᵁ (baseChangeMap E.π g hg ⁻¹ᵁ W j) ≤
+              mulByN E t' N ⁻¹ᵁ (baseChangeMap E.π g hg ⁻¹ᵁ W j)) (h' j))⁻¹ := by
+      refine (congrArg (unitPullback (baseChangeMap E.π g hg)
+        (mulByN E t N ⁻¹ᵁ (W i ⊓ W j))
+        (mulByN E t' N ⁻¹ᵁ
+          (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j)) hle)
+        (hsplit i j)).trans ?_
+      refine ((map_mul _ _ _).trans ?_)
+      refine ((congrArg (_ * ·) (map_inv _ _)).trans ?_)
+      rw [hh']
+      exact congrArg₂ (fun x y => x * y⁻¹)
+        ((unitPullback_resUnit (baseChangeMap E.π g hg) _ _ (h i)).trans
+          (resUnit_unitPullback (baseChangeMap E.π g hg) (hpath i) _ (h i)).symm)
+        ((unitPullback_resUnit (baseChangeMap E.π g hg) _ _ (h j)).trans
+          (resUnit_unitPullback (baseChangeMap E.π g hg) (hpath j) _ (h j)).symm)
+    exact (congrArg (Units.map ((mulByN E t' N).app
+        (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j)).hom.toMonoidHom)
+      hpullco).trans (hb1.trans (hb2.trans (hb3.trans hb4)))
   · -- the value along the restricted point reads the `g`-pullback of the value
-    sorry
+    have hspec := resUnit_torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP h hn
+      hsplit i
+    have hPcomp : ((restrictBase E t g hg P).1 : T' ⟶ pullback E.π t') ≫
+        baseChangeMap E.π g hg = g ≫ (P.1 : T ⟶ pullback E.π t) :=
+      restrictBase_comp_baseChangeMap E t g hg P
+    have p2 : ((restrictBase E t g hg P).1 : T' ⟶ pullback E.π t') ⁻¹ᵁ
+        (mulByN E t' N ⁻¹ᵁ (baseChangeMap E.π g hg ⁻¹ᵁ W i)) ≤
+        (g ≫ (P.1 : T ⟶ pullback E.π t)) ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) := by
+      rw [← hPcomp]
+      exact ((restrictBase E t g hg P).1 : T' ⟶ pullback E.π t').preimage_mono (hpath i)
+    refine Eq.trans ?_ ((sectionEval_unitPullback (baseChangeMap E.π g hg)
+      ((restrictBase E t g hg P).1 : T' ⟶ pullback E.π t') (hpath i) (h i)).symm)
+    refine Eq.trans ?_ ((resUnit_sectionEval_congr hPcomp (mulByN E t N ⁻¹ᵁ W i) (h i)
+      (((restrictBase E t g hg P).1 : T' ⟶ pullback E.π t').preimage_mono (hpath i))
+      p2).symm)
+    refine Eq.trans ?_ ((congrArg (Scheme.resUnit p2)
+      (sectionEval_comp g (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i) (h i))).symm)
+    refine Eq.trans ?_ ((resUnit_unitPullback g (le_of_eq rfl) p2
+      (sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i) (h i))).symm)
+    refine Eq.trans ?_
+      ((congrArg (unitPullback g ((P.1 : T ⟶ pullback E.π t) ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i))
+        _ _) hspec))
+    refine Eq.trans ?_ ((unitPullback_resUnit g le_top _
+      (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP)).symm)
+    exact resUnit_unitPullback g le_rfl le_top
+      (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP)
 
 end RestrictBase
 
