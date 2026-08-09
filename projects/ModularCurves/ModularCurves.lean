@@ -250,6 +250,7 @@ import ModularCurves.WeilPairing.ChartCover
 import ModularCurves.WeilPairing.ChartFromUniversalPair
 import ModularCurves.WeilPairing.ChartGroupSum
 import ModularCurves.WeilPairing.IteratedTwist
+import ModularCurves.WeilPairing.KMBilinear
 import ModularCurves.WeilPairing.KMNormalisation
 import ModularCurves.WeilPairing.KMPairing
 import ModularCurves.WeilPairing.KMPatching
