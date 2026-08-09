@@ -1,61 +1,64 @@
-FOCUS (2026-08-09): **BLOCKER 3 STEPS 1-3 ARE PROVED. `hhigh` AND STEP 5 REMAIN.**
+FOCUS (2026-08-09): **THE DS4 LEAF IS CLOSED.** `exists_invertible_tensor_idealModule_add`
+(`Picard/SelfAdjointN.lean:267`) is PROVED, axiom-verified standard-three — the relative theorem of
+the square, the single classical leaf under (★)/(★′) and hence under the Katz–Mazur construction of
+the relative Weil pairing. Downstream `kappa_add`, `exists_pic_map_snd_sectionCls_add`,
+`kappa_zsmul` have all lost their `sorryAx`.
 
-`WeilPairing/TheoremOfSquareUniversal.lean` —
-`exists_invertible_tensor_idealModule_add_projModel` IS `SelfAdjointN.lean`'s
-`exists_invertible_tensor_idealModule_add` for the tautological family, with `Rs` pinned to
-`mulModelHom` so `P+Q` is the real group sum. `hfib` is FULLY DISCHARGED. Only `hhigh` is
-hypothesised. Axiom-clean, zero sorries. Also `exists_invertible_tensor_idealModule_add_of_hfib`
-(general form) and the universal-base instances `isNoetherian_pairBase`/`isNoetherian_pairCurve`/
-`isSeparated_pairCurve` (the boarded spelling trap, now bridged).
+Chain closed this session, every link axiom-clean:
+  Stacks 0FWG (`ForMathlib/ReducedConstantRankFree.lean`, a mathlib gap) → Mumford §5
+  (`ForMathlib/ConstantKernelRankProjective.lean`) → the rank-one seesaw (`ForMathlib/Seesaw.lean`,
+  `SeesawGlobalBase.lean`) → the field-level theorem of the square
+  (`Picard/PrincipalIdealModuleIso.lean`, `Picard/IdealModuleMul.lean`,
+  `WeilPairing/TheoremOfSquareField.lean`) → transport (`TheoremOfSquareFibrewise.lean`,
+  `FibreWeierstrassPresentation.lean`) → universal pair (`TheoremOfSquareUniversal.lean`) →
+  base change + gluing (`TheoremOfSquareBaseChange.lean`, `ChartFromUniversalPair.lean`,
+  `ChartGroupSum.lean`).
 
-*** STRUCTURAL FIX LANDED (66b573f7f) — READ THIS ***
-`ModularCurves.sectionVanishingIdeal` was declared TWICE (an `IdealSheafData` in
-`EllipticCurve/AbelEquivalence.lean`, an `Ideal R` in `LevelStructure/Incidence.lean`). That clash
-is WHY THE WHOLE `ForMathlib/Seesaw*` LINE WAS AN ORPHAN — and its consumer `Picard/SelfAdjointN.lean`
-IS in the root, so it would have blocked the entire workstream from landing. Renamed the sheaf one to
-`sectionVanishingIdealSheaf`. `lake build ModularCurves` is now 9760 jobs (was 9745) and the Seesaw
-line is genuinely built. The old board note "some ForMathlib modules are orphans, build them
-explicitly" was a SYMPTOM of this, not a quirk.
-**Run a full `lake build ModularCurves` as a name-clash detector before adding any import** — a
-conclusion-grep has twice missed what the clash caught.
+=== NEXT TARGET: `exists_pic_map_snd_picMap_mulByHom_kappa` (`Picard/SelfAdjointN.lean:503`) ===
+The remaining sorry in that file, and the last one on the (★)/(★′) line. Its docstring (:465-482)
+says it is **NOT an independent leaf** — it is a formal consequence of the now-PROVED leaf, by
+symmetry of the normalized Poincaré bundle:
+  put `𝒜 = 𝒪(D_0) ⊗ f^*(0^*𝒪(D_0))⁻¹` and `𝒫 = m^*𝒜 ⊗ p₁^*𝒜⁻¹ ⊗ p₂^*𝒜⁻¹` on `E_T ×_T E_T`;
+  `𝒫` is trivial on both axes and SYMMETRIC (`τ^*𝒫 ≅ 𝒫`, because `m ∘ τ = m`);
+  `(id, −Q)^*𝒫 ≅ κ(Q)`; the leaf base-changed to `E_T ×_T E_T` with the two universal sections says
+  `𝒫` is additive in its second variable; symmetry upgrades that to the first; hence
+  `([N] × id)^*[𝒫] = [𝒫]^N`, and restricting along `(id, −Q)` gives the statement.
+The docstring calls this "bookkeeping, not new mathematics" — it needs `𝒫` and its symmetry built.
+`picMap_mulByHom_kappa_pow` (:490) and `picMap_mulByHom_kappa_eq_one` (:497) consume it and are
+otherwise proved, so closing it clears the whole file.
 
-=== CURRENT TARGET: STEP 4 — discharge `hhigh` (in flight) ===
-`hhigh` = exactness of the ordered base-Čech complex at positions ≥ 2, i.e. `H^{≥2}(X_s,M_s) = 0`,
-automatic because the fibres are CURVES.
+=== TWO COORDINATOR ITEMS (cross-cutting renames — NOT producer work, but they bite here) ===
+1. `ModularCurves.idealModule` (`EllipticCurve/PoleSheaf.lean:154`, ideal module of a MORPHISM)
+   SHADOWS `AlgebraicGeometry.Scheme.Modules.idealModule` (`Picard/IdealModule.lean:156`, of an
+   IDEAL SHEAF) inside `namespace ModularCurves`. Importing `ChartGroupSum` made 518 modules newly
+   reachable and broke every bare `idealModule` in `SelfAdjointN.lean`. Worked around by ONE
+   semantics-preserving line after `namespace ModularCurves`:
+   `local notation "idealModule" => AlgebraicGeometry.Scheme.Modules.idealModule`.
+   Durable fix = rename `ModularCurves.idealModule`.
+2. `sectionVanishingIdeal` was the same failure mode and was silently orphaning the ENTIRE Seesaw
+   line; fixed this session (renamed to `sectionVanishingIdealSheaf`).
+**Run a full `lake build ModularCurves` before adding any import — it is the clash detector, and a
+conclusion-grep has twice missed what it caught.**
 
-*** THE BOARDED ROUTE DOES NOT WORK — CORRECTED, WITH THE FIX ALREADY VERIFIED ***
-Imitating `kernel_data_of_hasDegreeOneFibreCohomology` FAILS:
-`HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
-(`ForMathlib/CochainComplexBoundedFlat.lean:275`) demands `hfield : ∀ n, n < N → …` — EVERY degree
-below `N`, INCLUDING `n = 0`, which for this discrepancy asserts `H¹(E_s,𝒪) = 0`, FALSE on a genus-1
-fibre. (That is exactly why `Seesaw.lean` leaves `hhigh` open and `HasDegreeOneFibreCohomology` is
-unavailable here.)
-THE FIX, verified verbatim in a scratchpad probe: `boundedFlatCokerAndExactOfFiniteHomology`
-(`ForMathlib/BaseChangeKerCoker.lean:900`) is a DECREASING induction consuming `hfield k`/`hfinite k`
-only for `n ≤ k < N`. Thread a LOWER BOUND `n₀ ≤ n` through it and it goes through unchanged.
-Generalise three lemmas to a lower-bounded `hfield` (ADD generalised versions, keep the existing ones
-as `n₀ = 0` specialisations so no consumer moves):
-  1. `boundedFlatCokerAndExactOfFiniteHomology` (`BaseChangeKerCoker.lean:900`)
-  2. `LinearMap.exact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
-  3. `HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`
-At `n₀ = 1` the fibre input is then exactly `subsingleton_H_add_two_of_two_affine_open_cover`.
-SECOND OBSTACLE, route around it: `HasHighCechExactnessOpens` quantifies over ALL opens of the base
-including NON-AFFINE ones, but the Čech surrogate needs an affine base. **Target the affine-base
-`HasHighCechExactness` only** — that is what `exists_invertible_tensor_idealModule_add_projModel` uses.
+=== HOUSEKEEPING ===
+* STALE DOCSTRING: `SelfAdjointN.lean:14` still says "One sorry left
+  (`exists_invertible_tensor_idealModule_add`)". That leaf is closed; the remaining sorry is :503.
+* Cleanup debt: four primed theorems in `RelPicLocal.lean` duplicate ~370 lines of the unprimed
+  ones, which are now thin specialisations. `isIso_idealGenHom`'s proof block is copy-pasted in
+  three places. `WeilPairing/TensorSection.lean` is a DEAD module whose `tensorSection` family
+  full-name-collides with two other copies.
+* `HasHighCechExactnessOpens` (arbitrary-base seesaw) is untouched — it quantifies over non-affine
+  opens where the two-chart discharge does not reach. Reason recorded in its module docstring.
 
-=== THEN: STEP 5 — base-change down ===
-To an arbitrary, possibly NON-REDUCED base, stated and glued ZARISKI-LOCALLY on `T` (moduli-stack
-issue globally). `pairClassify` (`WeilPairing/TautologicalPair.lean:79`) already proves "every pair of
-sections is a base change of the universal pair", which is most of it.
-`RelEffCartierDiv.sectionDivisor_baseChange` (`EllipticCurve/PoleSheaf.lean`) is part of the bridge.
-That closes `Picard/SelfAdjointN.lean:267` and unblocks AP-D4/D5-existence/D6/D7.
-
-=== STANDARDS THAT HAVE PAID OFF — KEEP THEM ===
-* **Verify fit by ELABORATION, not assertion**: every transport step so far shipped with a scratchpad
-  probe that actually applies the result to its consumer and compiles.
+=== STANDARDS THAT PAID OFF — KEEP THEM ===
+* **Verify fit by ELABORATION, not assertion.** Seven consecutive passes shipped a scratchpad probe
+  applying the result as a black box from an independent file; it repeatedly caught real mismatches.
+  The last two added `fail_if_success` checks proving a gap was real, and tests over a CONCRETE
+  non-reduced base — that standard is now expected.
 * **Full `lake build ModularCurves` as the duplicate/clash detector** before writing.
-* Gotcha: passing `UniversallyOConnected` positionally makes Lean re-unify `π`, breaking `haveI`s —
-  bind it with an explicit type ascription first.
+* **My boarded routes were wrong SEVEN times** (six over-engineered, once under-engineered), usually
+  because I anchored on a nearby proved theorem's shape instead of reading what the statement needs.
+  Tell the worker to trust the statement over the sketch and to report when it does.
 
 DEAD ENDS — LOGGED, DO NOT REVISIT:
   * `ProjIsPrincipal` / `kappaDivisor_add_linEquiv` is UNSOUND over non-closed fields
