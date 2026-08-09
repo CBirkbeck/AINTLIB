@@ -1247,73 +1247,1059 @@ theorem nonempty_squareChartData_projModel_of_local (W : WeierstrassCurve k) [W.
     (exists_affineOpen_ker_pointSection_span_nzd W (P + Q))
     (exists_affineOpen_ker_projModelZero_span_nzd W) g hloc
 
-/-- **(1b) THE REMAINING LEAF (T10-asm-chart): the single chart at infinity.**
+/-! ## The chart at infinity (T10-asm-chart, item 1b)
 
-Everything else in the leaf is now proved. `nonempty_squareChartData_projModel_of_local` reduces
-`exists_squareChartData_projModel` to one `hloc` clause per point of `projModel W`; the affine
-case analysis is `exists_affine_ideal_identity` (1c), the `Z`-chart dictionary is
-`ker_ideal_pointSection_chartZ'` (1a) and the clause at every point of the `Z`-chart is
-`hloc_chartZ`. What remains is exactly the clause at the points *off* the `Z`-chart — and the
-complement of the affine `Z`-chart in `projModel W` is the single point `[0 : 1 : 0]`
-(`projModelZChart_sup_sectionNeighborhood_eq_top` shows the model is covered by *two* charts).
+`projModelZChart_sup_sectionNeighborhood_eq_top` covers `projModel W` by the affine `Z`-chart and
+the section neighbourhood `D(v)` inside the `Y`-chart `AdjoinRoot (infChartCubic W)`, whose
+coordinates are `s = X/Y` (`AdjoinRoot.root`, the uniformiser at `O`) and `t = Z/Y`
+(`infChartTElem`), related by `t · w = s³` with `w := v − a₂s²` (`tel_mul_infChartW`). The only
+point of the model off the `Z`-chart is `[0 : 1 : 0]`, and around it the clause of
+`nonempty_squareChartData_projModel_of_local` is supplied by the chart
 
-**What has to be built.** `projModelZChart_sup_sectionNeighborhood_eq_top` puts `c` in
-`projModelSectionNeighborhood W = D(sectionUnitElem)` inside the `Y`-chart
-`AdjoinRoot (infChartCubic W)`, with coordinates `s = X/Y` (`AdjoinRoot.root`, the uniformiser at
-`O`) and `t = Z/Y` (`infChartTElem`), related by `t · v = s²(s + a₂ t)`
-(`tel_mul_sectionUnitElem`), i.e. `t · w = s³` with `w := v − a₂ s²`. Take
+  `V := D(v · Nn · Dd) ⊆ D(v)`  (`infChartOpen`),
 
-  `V := projModelSectionNeighborhood W ⊓ D(num∞) ⊓ D(w) ⊓ D(w − x₃ s²)`,
+where `Nn`, `Dd` are a numerator and a denominator, both `≡ 1 (mod (s, t))`, of the rational
+function `g · sⁿ` — so that `g · sⁿ` is a *unit* on `V`. Since `V` also avoids `P`, `Q` and `P + Q`,
+the four ideals restrict to `I(P)|V = I(Q)|V = ⊤`, `I(P+Q)|V · I(0)|V = ⟨sⁿ⟩`, and the whole clause
+collapses to `num' = 1`, `den' = sⁿ · (g·sⁿ)⁻¹` (`hloc_off_chartZ_aux`).
 
-where, writing `ℓ = y − λx − μ` for the chord and `x − x₃` for the vertical,
+The dictionary that computes `g` at infinity is `OverlapRel`: `OverlapRel W b a j` says that the
+`Y`-chart element `b` *is* the `Z`-chart element `a` times `tʲ` in the overlap localization. It
+transports to the function field (`germY_eq_germZ_mul`, through
+`overlap_sections_equation_of_loc`), and it is also exactly what proves *avoidance*
+(`ker_ideal_pointSection_infChartOpen_eq_top`): if the cutter `v · Nn · Dd` factors through an `a`
+vanishing at an affine point, then that point misses `V`, so the section ideal there is `⊤`.
 
-  `num∞ = 1 − λ s − μ t` (`= t · ℓ`)  and  `den∞ = s − x₃ t` (`= t · (x − x₃)`).
+For the chord `g = ℓ/(x − x₃)` this is `n = 1`, `Nn = (1 − ℓs − μt)·w`, `Dd = w − x₃s²`; for the
+vertical `g = x − x₁` it is `n = 2`, `Nn = w − x₁s²`, `Dd = 1`. In both cases `Nn · Dd` restricts on
+the overlap to `x⁵·num·den` resp. `x⁴·num` times a power of `t`, which is the avoidance input.
 
-Then:
+**Two logged dead ends.** `WeilPairing/LineVertical.lean` is *not* about the chord and the vertical
+(no `linePolynomial`, no `slope`, no `addX`), and the `ProjIsPrincipal` /
+`kappaDivisor_add_linEquiv` route is unsound over non-closed fields — see the
+`exists_functionField_projectiveDivisorOf_kappa` note above. -/
 
-* `c ∈ V`: `c ∉ Z`-chart forces `t ∈ p_c` (`mem_projModelZChart_iff_not_mem_infChartTElem`),
-  hence `s ∈ p_c` (from `t · w = s³` and `v` a unit on the neighbourhood, cf.
-  `root_mem_of_tel_mem`); and `num∞ ≡ w ≡ w − x₃ s² ≡ 1 (mod (s, t))` because
-  `sectionUnitElem − 1 ∈ ⟨s, t⟩` (`sectionUnitElem_sub_one_mem`), so none of the three lies in
-  `p_c`. This is the same argument as in `projModelZChart_sup_sectionNeighborhood_eq_top`.
-* `I(P)|V = I(Q)|V = I(P+Q)|V = ⊤` by `ker_ideal_eq_top_of_preimage_eq_bot`, because `num∞`
-  vanishes at `P` and at `Q` (they lie on the chord) and `den∞` vanishes at `P + Q`, while
-  `den∞ · w = s · (w − x₃ s²)` makes `den∞ ∈ p` impossible on `V` unless `t ∈ p`; the affine
-  points are in the `Z`-chart, so `t ∉ p` there.
-* `I(0)|V = ⟨s⟩` by `projModelZero_ker_ideal_sectionNeighborhood` (restricted), and `s` is a
-  nonzerodivisor by `projModelSectionRoot_mem_nonZeroDivisors`.
-* the ideal identity `⟨den∞⟩ · (⊤ · ⊤) = ⟨num∞⟩ · (⊤ · ⟨s⟩)` then reads `⟨den∞⟩ = ⟨s⟩` on `V`,
-  which is `den∞ · w = s · (w − x₃ s²)` with `w` and `w − x₃ s²` units on `V`;
-* the germ identity ties this chart to `chartZFunction W num den` through the overlap: by
-  `overlapSectionsEquiv` / `overlapMap_coordX` / `overlapMap_coordY`
-  (`EllipticCurve/PoleFiltration.lean`), on `Y ⊓ Z` one has `overlapMap (YClass ℓ) = num∞ / t`
-  and `overlapMap (XClass x₃) = den∞ / t`, so `num · den∞ = num∞ · den` there, and
-  `Scheme.germToFunctionField_injective` upgrades that to the required germ equation.
+section InfinityChart
 
-In the vertical case (`Q = -P`, so `P + Q = 0`, `num = XClass x₁`, `den = 1`) the same chart
-works with `num∞ = s − x₁ t` and `den∞ = t`, the identity becoming `⟨t⟩ = ⟨num∞ · s²⟩` — again
-`t · w = s³` up to units.
+open WeierstrassCurve HomogeneousIdeal
 
-**Two logged dead ends.** `WeilPairing/LineVertical.lean` is *not* about the chord and the
-vertical (no `linePolynomial`, no `slope`, no `addX`), and the
-`ProjIsPrincipal` / `kappaDivisor_add_linEquiv` route is unsound over non-closed fields — see the
-`exists_functionField_projectiveDivisorOf_kappa` note below. -/
-theorem hloc_off_chartZ (W : WeierstrassCurve k) [W.IsElliptic] (P Q : W.toAffine.Point)
-    (num den : W.toAffine.CoordinateRing) (hnum : num ≠ 0) (hden : den ≠ 0)
-    (hid : Ideal.span {den} * (affineIdeal W.toAffine P * affineIdeal W.toAffine Q) =
-      Ideal.span {num} * (affineIdeal W.toAffine (P + Q) * affineIdeal W.toAffine 0))
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+variable {R : Type u} [CommRing R]
+
+/-- `w := v - a₂ s²`, the companion of the section unit with `t · w = s³`. -/
+noncomputable def infChartW (W : WeierstrassCurve R) : AdjoinRoot (infChartCubic W) :=
+  sectionUnitElem W -
+    algebraMap (Polynomial R) _ (Polynomial.C W.a₂) * AdjoinRoot.root (infChartCubic W) ^ 2
+
+theorem tel_mul_infChartW (W : WeierstrassCurve R) :
+    infChartTElem W * infChartW W = AdjoinRoot.root (infChartCubic W) ^ 3 := by
+  have h := tel_mul_sectionUnitElem W
+  unfold infChartW infChartTElem
+  have hterm : algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))
+      (Polynomial.C W.a₂ * Polynomial.X) =
+      algebraMap (Polynomial R) _ (Polynomial.C W.a₂) *
+        algebraMap (Polynomial R) _ Polynomial.X := by
+    rw [map_mul]
+  rw [hterm] at h
+  linear_combination h
+
+/-- A constant of the base ring, in the infinity chart. -/
+noncomputable abbrev infChartConst (W : WeierstrassCurve R) (a : R) :
+    AdjoinRoot (infChartCubic W) :=
+  algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) (Polynomial.C a)
+
+/-! ### The overlap dictionary `OverlapRel` -/
+
+section OverlapDict
+
+/-- `t` is invertible in the overlap localization. -/
+theorem isUnit_algebraMap_infChartTElem (W : WeierstrassCurve R) :
+    IsUnit (algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+      (infChartTElem W)) :=
+  IsLocalization.map_units (M := Submonoid.powers (infChartTElem W)) _
+    ⟨infChartTElem W, ⟨1, pow_one _⟩⟩
+
+/-- The overlap relation `b = a · tʲ`: the `Y`-chart element `b` is the `Z`-chart element `a`
+times `tʲ` in the overlap localization. -/
+def OverlapRel (W : WeierstrassCurve R) (b : AdjoinRoot (infChartCubic W))
+    (a : W.toAffine.CoordinateRing) (j : ℕ) : Prop :=
+  algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W)) b =
+    overlapMap W a *
+      algebraMap (AdjoinRoot (infChartCubic W)) (Localization.Away (infChartTElem W))
+        (infChartTElem W) ^ j
+
+theorem OverlapRel.mul {W : WeierstrassCurve R} {b₁ b₂ : AdjoinRoot (infChartCubic W)}
+    {a₁ a₂ : W.toAffine.CoordinateRing} {j₁ j₂ : ℕ}
+    (h₁ : OverlapRel W b₁ a₁ j₁) (h₂ : OverlapRel W b₂ a₂ j₂) :
+    OverlapRel W (b₁ * b₂) (a₁ * a₂) (j₁ + j₂) := by
+  unfold OverlapRel at h₁ h₂ ⊢
+  rw [map_mul, h₁, h₂, map_mul, pow_add]
+  ring
+
+theorem OverlapRel.sub {W : WeierstrassCurve R} {b₁ b₂ : AdjoinRoot (infChartCubic W)}
+    {a₁ a₂ : W.toAffine.CoordinateRing} {j : ℕ}
+    (h₁ : OverlapRel W b₁ a₁ j) (h₂ : OverlapRel W b₂ a₂ j) :
+    OverlapRel W (b₁ - b₂) (a₁ - a₂) j := by
+  unfold OverlapRel at h₁ h₂ ⊢
+  rw [map_sub, h₁, h₂, map_sub]
+  ring
+
+theorem OverlapRel.add {W : WeierstrassCurve R} {b₁ b₂ : AdjoinRoot (infChartCubic W)}
+    {a₁ a₂ : W.toAffine.CoordinateRing} {j : ℕ}
+    (h₁ : OverlapRel W b₁ a₁ j) (h₂ : OverlapRel W b₂ a₂ j) :
+    OverlapRel W (b₁ + b₂) (a₁ + a₂) j := by
+  unfold OverlapRel at h₁ h₂ ⊢
+  rw [map_add, h₁, h₂, map_add]
+  ring
+
+theorem OverlapRel.pow {W : WeierstrassCurve R} {b : AdjoinRoot (infChartCubic W)}
+    {a : W.toAffine.CoordinateRing} {j : ℕ} (h : OverlapRel W b a j) (n : ℕ) :
+    OverlapRel W (b ^ n) (a ^ n) (j * n) := by
+  unfold OverlapRel at h ⊢
+  rw [map_pow, h, map_pow]
+  ring
+
+theorem overlapRel_const (W : WeierstrassCurve R) (a : R) :
+    OverlapRel W (infChartConst W a) (algebraMap R W.toAffine.CoordinateRing a) 0 := by
+  unfold OverlapRel
+  rw [pow_zero, mul_one]
+  show _ = overlapMap W (AdjoinRoot.mk _ (Polynomial.C (Polynomial.C a)))
+  rw [show AdjoinRoot.mk W.toAffine.polynomial (Polynomial.C (Polynomial.C a)) =
+    AdjoinRoot.of W.toAffine.polynomial (Polynomial.C a) from rfl]
+  unfold overlapMap
+  rw [AdjoinRoot.lift_of, Polynomial.coe_eval₂RingHom, Polynomial.eval₂_C]
+  rfl
+
+theorem overlapRel_root (W : WeierstrassCurve R) :
+    OverlapRel W (AdjoinRoot.root (infChartCubic W)) (coordX W) 1 := by
+  unfold OverlapRel
+  rw [pow_one, overlapMap_coordX]
+  unfold overlapXElem
+  rw [← Localization.mk_one_eq_algebraMap, ← Localization.mk_one_eq_algebraMap,
+    Localization.mk_mul, Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  exact ⟨1, by simp [mul_comm]⟩
+
+theorem overlapRel_one (W : WeierstrassCurve R) :
+    OverlapRel W 1 (coordY W) 1 := by
+  unfold OverlapRel
+  rw [pow_one, overlapMap_coordY]
+  unfold overlapInvT
+  rw [← Localization.mk_one_eq_algebraMap, ← Localization.mk_one_eq_algebraMap,
+    Localization.mk_mul, Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  exact ⟨1, by simp [mul_comm]⟩
+
+theorem OverlapRel.cancel {W : WeierstrassCurve R} {b : AdjoinRoot (infChartCubic W)}
+    {a : W.toAffine.CoordinateRing} {j : ℕ}
+    (h : OverlapRel W (infChartTElem W * b) a (j + 1)) : OverlapRel W b a j := by
+  unfold OverlapRel at h ⊢
+  obtain ⟨u, hu⟩ := isUnit_algebraMap_infChartTElem W
+  rw [map_mul, ← hu] at h
+  refine (Units.mul_right_inj u).mp ?_
+  rw [h, ← hu]
+  ring
+
+theorem overlapRel_infChartW (W : WeierstrassCurve R) :
+    OverlapRel W (infChartW W) (coordX W ^ 3) 2 := by
+  refine OverlapRel.cancel ?_
+  rw [tel_mul_infChartW W]
+  simpa using (overlapRel_root W).pow 3
+
+theorem overlapRel_sectionUnitElem (W : WeierstrassCurve R) :
+    OverlapRel W (sectionUnitElem W)
+      (coordX W ^ 3 + algebraMap R W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) 2 := by
+  have hsplit : sectionUnitElem W =
+      infChartW W + infChartConst W W.a₂ * AdjoinRoot.root (infChartCubic W) ^ 2 := by
+    unfold infChartW
+    ring
+  rw [hsplit]
+  refine OverlapRel.add (overlapRel_infChartW W) ?_
+  simpa using (overlapRel_const W W.a₂).mul ((overlapRel_root W).pow 2)
+
+end OverlapDict
+
+section InfinityGerm
+
+
+omit [DecidableEq k] in
+/-- The `Y`-chart of the projective model is nonempty: the zero section lands in it. -/
+theorem nonempty_projModelYChart (W : WeierstrassCurve k) :
+    Nonempty ↥(projModelYChart W).1.toScheme := by
+  obtain ⟨p⟩ := (inferInstance : Nonempty (PrimeSpectrum k))
+  have hmem : p ∈ projModelZero W ⁻¹ᵁ ((projModelYChart W : (projModel W).Opens)) := by
+    rw [projModelZero_preimage_yChart W]
+    trivial
+  exact ⟨⟨_, hmem⟩⟩
+
+omit [DecidableEq k] in
+theorem nonempty_projModelOverlap (W : WeierstrassCurve k) :
+    Nonempty ↥(Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).toScheme := by
+  have h := AlgebraicGeometry.Scheme.Modules.nonempty_inf_of_nonempty
+    (C := projModel W) (U := (projModelYChart W).1) (V := (projModelZChart W).1)
+    (nonempty_projModelYChart W) (nonempty_projModelZChart W)
+  rw [show ((projModelYChart W).1 ⊓ (projModelZChart W).1 : (projModel W).Opens) =
+    Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) from
+    (Proj.basicOpen_mul _ _ _).symm] at h
+  exact h
+
+/-- The germ in the function field of a `Y`-chart element. -/
+noncomputable def germY (W : WeierstrassCurve k) :
+    AdjoinRoot (infChartCubic W) →+* (projModel W).functionField :=
+  (@Scheme.germToFunctionField (projModel W) _ (projModelYChart W).1
+      (nonempty_projModelYChart W)).hom.comp
+    (chartYSectionsRingEquiv W).symm.toRingHom
+
+/-- The germ in the function field of a `Z`-chart element. -/
+noncomputable def germZ (W : WeierstrassCurve k) :
+    W.toAffine.CoordinateRing →+* (projModel W).functionField :=
+  (@Scheme.germToFunctionField (projModel W) _ (projModelZChart W).1
+      (nonempty_projModelZChart W)).hom.comp
+    (chartZSectionsRingEquiv W).symm.toRingHom
+
+omit [DecidableEq k] in
+theorem germY_injective (W : WeierstrassCurve k) : Function.Injective (germY W) :=
+  (@Scheme.germToFunctionField_injective (projModel W) _ (projModelYChart W).1
+    (nonempty_projModelYChart W)).comp (chartYSectionsRingEquiv W).symm.injective
+
+omit [DecidableEq k] in
+theorem germZ_injective (W : WeierstrassCurve k) : Function.Injective (germZ W) :=
+  (@Scheme.germToFunctionField_injective (projModel W) _ (projModelZChart W).1
+    (nonempty_projModelZChart W)).comp (chartZSectionsRingEquiv W).symm.injective
+
+omit [DecidableEq k] in
+/-- **The overlap dictionary in the function field.** -/
+theorem germY_eq_germZ_mul (W : WeierstrassCurve k) {b : AdjoinRoot (infChartCubic W)}
+    {a : W.toAffine.CoordinateRing} {j : ℕ} (h : OverlapRel W b a j) :
+    germY W b = germZ W a * germY W (infChartTElem W) ^ j := by
+  haveI := nonempty_projModelOverlap W
+  haveI := nonempty_projModelYChart W
+  haveI := nonempty_projModelZChart W
+  have hsec := overlap_sections_equation_of_loc W a b (infChartTElem W) j h
+  have hle1 : Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ≤ (projModelYChart W).1 :=
+    Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩
+  have hle2 : Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ≤ (projModelZChart W).1 :=
+    Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      ⟨_, mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))⟩
+  have hgerm := congrArg (@Scheme.germToFunctionField (projModel W) _ _
+    (nonempty_projModelOverlap W)) hsec
+  rw [map_mul, map_pow] at hgerm
+  rw [show germY W b = @Scheme.germToFunctionField (projModel W) _ (projModelYChart W).1
+      (nonempty_projModelYChart W) ((chartYSectionsRingEquiv W).symm b) from rfl,
+    show germZ W a = @Scheme.germToFunctionField (projModel W) _ (projModelZChart W).1
+      (nonempty_projModelZChart W) ((chartZSectionsRingEquiv W).symm a) from rfl,
+    show germY W (infChartTElem W) = @Scheme.germToFunctionField (projModel W) _
+      (projModelYChart W).1 (nonempty_projModelYChart W)
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W)) from rfl,
+    ← AlgebraicGeometry.Scheme.Modules.germToFunctionField_restrict hle1
+      ((chartYSectionsRingEquiv W).symm b),
+    ← AlgebraicGeometry.Scheme.Modules.germToFunctionField_restrict hle2
+      ((chartZSectionsRingEquiv W).symm a),
+    ← AlgebraicGeometry.Scheme.Modules.germToFunctionField_restrict hle1
+      ((chartYSectionsRingEquiv W).symm (infChartTElem W))]
+  exact hgerm
+
+end InfinityGerm
+
+/-! ### The chart `D(v · F)`, its four ideals, and the generic clause -/
+
+section InfinityOpen
+
+/-- Membership in a basic open of an affine open, read on the chart prime. -/
+theorem mem_basicOpen_iff_notMem_primeIdealOf {X : Scheme.{u}} {U : X.Opens}
+    (hU : IsAffineOpen U) (x : ↥X) (hx : x ∈ U) (f : Γ(X, U)) :
+    x ∈ X.basicOpen f ↔ f ∉ (hU.primeIdealOf ⟨x, hx⟩).asIdeal := by
+  refine Iff.symm ?_
+  rw [← PrimeSpectrum.mem_basicOpen]
+  change hU.isoSpec.hom ⟨x, hx⟩ ∈ PrimeSpectrum.basicOpen f ↔ _
+  rw [← hU.fromSpec_preimage_basicOpen]
+  change hU.fromSpec.base (hU.primeIdealOf ⟨x, hx⟩) ∈ X.basicOpen f ↔ x ∈ X.basicOpen f
+  rw [hU.fromSpec_primeIdealOf ⟨x, hx⟩]
+
+/-- Restriction is transitive. -/
+theorem presheaf_map_map {X : Scheme.{u}} {U V T : X.Opens} (h₁ : V ≤ U) (h₂ : T ≤ V)
+    (a : Γ(X, U)) :
+    (X.presheaf.map (homOfLE h₂).op).hom ((X.presheaf.map (homOfLE h₁).op).hom a) =
+      (X.presheaf.map (homOfLE (h₂.trans h₁)).op).hom a := by
+  rw [← CommRingCat.comp_apply, ← Functor.map_comp, ← op_comp]
+  rfl
+
+/-- **The chart at infinity cut out by `F`**: the basic open `D(v · F)` of the `Y`-chart. -/
+noncomputable def infChartOpen (W : WeierstrassCurve R) (F : AdjoinRoot (infChartCubic W)) :
+    (projModel W).affineOpens :=
+  (projModel W).affineBasicOpen (U := projModelYChart W)
+    ((chartYSectionsRingEquiv W).symm (sectionUnitElem W * F))
+
+theorem infChartOpen_le_chartY (W : WeierstrassCurve R) (F : AdjoinRoot (infChartCubic W)) :
+    (infChartOpen W F).1 ≤ (projModelYChart W).1 :=
+  (projModel W).basicOpen_le _
+
+theorem infChartOpen_le_sectionNeighborhood (W : WeierstrassCurve R)
+    (F : AdjoinRoot (infChartCubic W)) :
+    (infChartOpen W F).1 ≤ (projModelSectionNeighborhood W).1 := by
+  show (projModel W).basicOpen ((chartYSectionsRingEquiv W).symm (sectionUnitElem W * F)) ≤
+    (projModel W).basicOpen (projModelSectionUnitSection W)
+  rw [map_mul, Scheme.basicOpen_mul]
+  exact inf_le_left
+
+/-- Restriction of a `Y`-chart element to the chart at infinity. -/
+noncomputable def infChartRes (W : WeierstrassCurve R) (F : AdjoinRoot (infChartCubic W)) :
+    AdjoinRoot (infChartCubic W) →+* Γ(projModel W, (infChartOpen W F).1) :=
+  ((projModel W).presheaf.map (homOfLE (infChartOpen_le_chartY W F)).op).hom.comp
+    (chartYSectionsRingEquiv W).symm.toRingHom
+
+omit [DecidableEq k] in
+/-- The point at infinity lies in every chart `D(v · F)` with `F ≡ 1 mod (s, t)`. -/
+theorem mem_infChartOpen (W : WeierstrassCurve k)
+    (F : AdjoinRoot (infChartCubic W))
+    (hF : F - 1 ∈ Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W})
+    (c : ↥(projModel W)) (hc : c ∉ (projModelZChart W).1) :
+    c ∈ (infChartOpen W F).1 := by
+  have hcY : c ∈ (projModelYChart W).1 := by
+    have hcover : (projModelYChart W : (projModel W).Opens) ⊔
+        (projModelZChart W : (projModel W).Opens) = ⊤ :=
+      basicOpen_X1_sup_basicOpen_X2_eq_top W
+    have hmem : c ∈ (projModelYChart W : (projModel W).Opens) ⊔
+        (projModelZChart W : (projModel W).Opens) := by rw [hcover]; trivial
+    rcases (TopologicalSpace.Opens.mem_sup).mp hmem with h | h
+    · exact h
+    · exact absurd h hc
+  let q := (projModelYChart W).2.primeIdealOf ⟨c, hcY⟩
+  let P : Ideal (AdjoinRoot (infChartCubic W)) := Ideal.map (chartYSectionsRingEquiv W) q.asIdeal
+  letI : P.IsPrime := Ideal.map_isPrime_of_equiv (chartYSectionsRingEquiv W)
+  have htq : (chartYSectionsRingEquiv W).symm (infChartTElem W) ∈ q.asIdeal := by
+    by_contra htq
+    exact hc ((mem_projModelZChart_iff_not_mem_infChartTElem W c hcY).mpr htq)
+  have htP : infChartTElem W ∈ P := by
+    have hmap := Ideal.mem_map_of_mem (chartYSectionsRingEquiv W) htq
+    simpa only [RingEquiv.apply_symm_apply] using hmap
+  have hsP : AdjoinRoot.root (infChartCubic W) ∈ P := root_mem_of_tel_mem W P htP
+  have hspan : Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W} ≤ P := by
+    refine Ideal.span_le.mpr ?_
+    rintro a (rfl | rfl)
+    · exact hsP
+    · exact htP
+  have hvP : sectionUnitElem W - 1 ∈ P := hspan (sectionUnitElem_sub_one_mem W)
+  have hFP : F - 1 ∈ P := hspan hF
+  have hprod : sectionUnitElem W * F - 1 ∈ P := by
+    have hrw : sectionUnitElem W * F - 1 = (sectionUnitElem W - 1) * F + (F - 1) := by ring
+    rw [hrw]
+    exact P.add_mem (P.mul_mem_right _ hvP) hFP
+  have hnot : sectionUnitElem W * F ∉ P := by
+    intro hmem
+    have h1 : (1 : AdjoinRoot (infChartCubic W)) ∈ P := by
+      simpa only [sub_sub_cancel] using P.sub_mem hmem hprod
+    exact (inferInstance : P.IsPrime).ne_top ((Ideal.eq_top_iff_one P).mpr h1)
+  have hq : (chartYSectionsRingEquiv W).symm (sectionUnitElem W * F) ∉ q.asIdeal := by
+    intro hmemq
+    refine hnot ?_
+    have hmap := Ideal.mem_map_of_mem (chartYSectionsRingEquiv W) hmemq
+    simpa only [RingEquiv.apply_symm_apply] using hmap
+  exact (mem_basicOpen_iff_notMem_primeIdealOf (projModelYChart W).2 c hcY _).mpr hq
+
+/-- On the chart at infinity the zero-section ideal is generated by `s`. -/
+theorem projModelZero_ker_ideal_infChartOpen (W : WeierstrassCurve R)
+    (F : AdjoinRoot (infChartCubic W)) :
+    (projModelZero W).ker.ideal (infChartOpen W F) =
+      Ideal.span {infChartRes W F (AdjoinRoot.root (infChartCubic W))} := by
+  have hle : infChartOpen W F ≤ projModelSectionNeighborhood W :=
+    infChartOpen_le_sectionNeighborhood W F
+  have hmap := (projModelZero W).ker.map_ideal hle
+  have hres : ((projModel W).presheaf.map (homOfLE hle).op).hom (projModelSectionRoot W) =
+      infChartRes W F (AdjoinRoot.root (infChartCubic W)) :=
+    presheaf_map_map _ _ _
+  rw [← hmap, projModelZero_ker_ideal_sectionNeighborhood W, Ideal.map_span,
+    Set.image_singleton]
+  exact congrArg (fun z => Ideal.span ({z} : Set Γ(projModel W, (infChartOpen W F).1))) hres
+
+omit [DecidableEq k] in
+/-- **Avoidance.** If, on the chart overlap, the cutter `v · F` of the chart at infinity is the
+`Z`-chart element `a` times a power of `t`, and `a` vanishes at the affine point `(x, y)`, then
+that point misses the chart, so its section ideal there is the unit ideal. -/
+theorem ker_ideal_pointSection_infChartOpen_eq_top (W : WeierstrassCurve k) [W.IsElliptic]
+    {x y : k} (h : W.toAffine.Nonsingular x y)
+    (F : AdjoinRoot (infChartCubic W)) {a : W.toAffine.CoordinateRing} {m : ℕ}
+    (hrel : OverlapRel W (sectionUnitElem W * F) a m)
+    (ha : a ∈ WeierstrassCurve.Affine.CoordinateRing.XYIdeal W.toAffine x (Polynomial.C y)) :
+    (Scheme.Hom.ker (pointSection W (WeierstrassCurve.Affine.Point.some x y h))).ideal
+      (infChartOpen W F) = ⊤ := by
+  set f := pointSection W (WeierstrassCurve.Affine.Point.some x y h) with hf
+  refine ker_ideal_eq_top_of_preimage_eq_bot f _ ?_
+  have hZ : f ⁻¹ᵁ (projModelZChart W).1 = ⊤ := by
+    rw [hf, pointSection_some W x y h, projModelAffineSection_eq_fromSpec W x y h.left]
+    show Spec.map _ ⁻¹ᵁ ((projModelZChart W).2.fromSpec ⁻¹ᵁ (projModelZChart W).1) = ⊤
+    rw [(projModelZChart W).2.fromSpec_preimage_self]
+    rfl
+  have hker : (f.app (projModelZChart W).1).hom ((chartZSectionsRingEquiv W).symm a) = 0 := by
+    have hid := ker_ideal_pointSection_chartZ W x y h
+    rw [Scheme.Hom.ker_apply] at hid
+    have hmem : (chartZSectionsRingEquiv W).symm a ∈
+        RingHom.ker (f.app (projModelZChart W).1).hom := by
+      rw [hf, hid, Ideal.mem_comap]
+      show (chartZSectionsRingEquiv W) ((chartZSectionsRingEquiv W).symm a) ∈ _
+      rw [RingEquiv.apply_symm_apply]
+      exact ha
+    exact hmem
+  have hle1 : Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ≤ (projModelYChart W).1 :=
+    Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩
+  have hle2 : Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ≤ (projModelZChart W).1 :=
+    Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      ⟨_, mul_comm ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))⟩
+  have hsec0 := overlap_sections_equation_of_loc W a (sectionUnitElem W * F) (infChartTElem W) m
+    hrel
+  have hsec : ((projModel W).presheaf.map (homOfLE hle1).op).hom
+        ((chartYSectionsRingEquiv W).symm (sectionUnitElem W * F)) =
+      ((projModel W).presheaf.map (homOfLE hle2).op).hom
+          ((chartZSectionsRingEquiv W).symm a) *
+        ((projModel W).presheaf.map (homOfLE hle1).op).hom
+          ((chartYSectionsRingEquiv W).symm (infChartTElem W)) ^ m := hsec0
+  have hBY : (projModel W).basicOpen (((projModel W).presheaf.map (homOfLE hle1).op).hom
+      ((chartYSectionsRingEquiv W).symm (sectionUnitElem W * F))) =
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⊓ (infChartOpen W F).1 :=
+    Scheme.basicOpen_res (projModel W)
+      ((chartYSectionsRingEquiv W).symm (sectionUnitElem W * F)) (homOfLE hle1).op
+  have hBZ : (projModel W).basicOpen (((projModel W).presheaf.map (homOfLE hle2).op).hom
+      ((chartZSectionsRingEquiv W).symm a)) =
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⊓
+        (projModel W).basicOpen ((chartZSectionsRingEquiv W).symm a) :=
+    Scheme.basicOpen_res (projModel W) ((chartZSectionsRingEquiv W).symm a) (homOfLE hle2).op
+  have hle : (infChartOpen W F).1 ⊓ (projModelZChart W).1 ≤
+      (projModel W).basicOpen ((chartZSectionsRingEquiv W).symm a) := by
+    have hOv : Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+          (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) =
+        (projModelYChart W).1 ⊓ (projModelZChart W).1 := Proj.basicOpen_mul _ _ _
+    calc (infChartOpen W F).1 ⊓ (projModelZChart W).1
+        ≤ Proj.basicOpen (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+              (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⊓ (infChartOpen W F).1 := by
+          rw [hOv]
+          exact le_inf (le_inf (inf_le_left.trans (infChartOpen_le_chartY W F)) inf_le_right)
+            inf_le_left
+      _ = (projModel W).basicOpen (((projModel W).presheaf.map (homOfLE hle1).op).hom
+            ((chartYSectionsRingEquiv W).symm (sectionUnitElem W * F))) := hBY.symm
+      _ ≤ (projModel W).basicOpen (((projModel W).presheaf.map (homOfLE hle2).op).hom
+            ((chartZSectionsRingEquiv W).symm a)) := by
+          rw [hsec, Scheme.basicOpen_mul]
+          exact inf_le_left
+      _ ≤ (projModel W).basicOpen ((chartZSectionsRingEquiv W).symm a) := by
+          rw [hBZ]; exact inf_le_right
+  rw [_root_.eq_bot_iff]
+  intro z hz
+  have hzZ : z ∈ f ⁻¹ᵁ (projModelZChart W).1 := by rw [hZ]; trivial
+  have hmem : z ∈ f ⁻¹ᵁ ((projModel W).basicOpen ((chartZSectionsRingEquiv W).symm a)) :=
+    hle ⟨hz, hzZ⟩
+  rw [Scheme.preimage_basicOpen] at hmem
+  have hzero : (f.app (projModelZChart W).1) ((chartZSectionsRingEquiv W).symm a) = 0 := hker
+  rw [hzero, Scheme.basicOpen_zero] at hmem
+  exact hmem
+
+/-- The cutter of the chart at infinity is a unit there. -/
+theorem isUnit_infChartRes_cutter (W : WeierstrassCurve R) (F : AdjoinRoot (infChartCubic W)) :
+    IsUnit (infChartRes W F (sectionUnitElem W * F)) :=
+  AlgebraicGeometry.RingedSpace.isUnit_res_basicOpen (projModel W).toRingedSpace _
+
+theorem isUnit_infChartRes_of_dvd (W : WeierstrassCurve R) (F b : AdjoinRoot (infChartCubic W))
+    (hdvd : b ∣ sectionUnitElem W * F) : IsUnit (infChartRes W F b) := by
+  obtain ⟨e, he⟩ := hdvd
+  have hu := isUnit_infChartRes_cutter W F
+  rw [he, map_mul] at hu
+  exact isUnit_of_mul_isUnit_left hu
+
+omit [DecidableEq k] in
+theorem germToFunctionField_infChartRes (W : WeierstrassCurve k)
+    (F : AdjoinRoot (infChartCubic W)) [hne : Nonempty ↥(infChartOpen W F).1]
+    (b : AdjoinRoot (infChartCubic W)) :
+    @Scheme.germToFunctionField (projModel W) _ (infChartOpen W F).1 hne (infChartRes W F b) =
+      germY W b := by
+  haveI := nonempty_projModelYChart W
+  haveI : Nonempty ↥(infChartOpen W F).1.toScheme := hne
+  exact AlgebraicGeometry.Scheme.Modules.germToFunctionField_restrict
+    (infChartOpen_le_chartY W F) ((chartYSectionsRingEquiv W).symm b)
+
+/-- **The generic clause at infinity.**  `Nn`, `Dd` are the numerator and denominator of
+`g · sⁿ` in the `Y`-chart; the chart is `D(v · Nn · Dd)`. -/
+theorem hloc_off_chartZ_aux (W : WeierstrassCurve k) [W.IsElliptic] (P Q : W.toAffine.Point)
+    (g : (projModel W).functionField) (n : ℕ) (Nn Dd : AdjoinRoot (infChartCubic W))
+    (hNn : Nn - 1 ∈ Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W})
+    (hDd : Dd - 1 ∈ Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W})
+    (hkey : g * germY W (AdjoinRoot.root (infChartCubic W)) ^ n * germY W Dd = germY W Nn)
+    (hIP : (Scheme.Hom.ker (pointSection W P)).ideal (infChartOpen W (Nn * Dd)) = ⊤)
+    (hIQ : (Scheme.Hom.ker (pointSection W Q)).ideal (infChartOpen W (Nn * Dd)) = ⊤)
+    (hIR : (Scheme.Hom.ker (pointSection W (P + Q))).ideal (infChartOpen W (Nn * Dd)) *
+        Ideal.span {infChartRes W (Nn * Dd) (AdjoinRoot.root (infChartCubic W))} =
+      Ideal.span {infChartRes W (Nn * Dd) (AdjoinRoot.root (infChartCubic W)) ^ n})
+    (c : ↥(projModel W)) (hc : c ∉ (projModelZChart W).1) :
+    ∃ (V : (projModel W).affineOpens) (hcv : c ∈ V.1) (num' den' : Γ(projModel W, V.1)),
+      den' ∈ nonZeroDivisors Γ(projModel W, V.1) ∧
+      @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ num' =
+        g * @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ den' ∧
+      Ideal.span {den'} * ((Scheme.Hom.ker (pointSection W P)).ideal V *
+          (Scheme.Hom.ker (pointSection W Q)).ideal V) =
+        Ideal.span {num'} * ((Scheme.Hom.ker (pointSection W (P + Q))).ideal V *
+          (Scheme.Hom.ker (projModelZero W)).ideal V) := by
+  have hprod : Nn * Dd - 1 ∈
+      Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W} := by
+    have hrw : Nn * Dd - 1 = (Nn - 1) * Dd + (Dd - 1) := by ring
+    rw [hrw]
+    exact Ideal.add_mem _ (Ideal.mul_mem_right _ _ hNn) hDd
+  have hcv : c ∈ (infChartOpen W (Nn * Dd)).1 := mem_infChartOpen W (Nn * Dd) hprod c hc
+  haveI hne : Nonempty ↥(infChartOpen W (Nn * Dd)).1 := ⟨⟨c, hcv⟩⟩
+  haveI hne' : Nonempty ↥(infChartOpen W (Nn * Dd)).1.toScheme := ⟨⟨c, hcv⟩⟩
+  haveI : IsDomain Γ(projModel W, (infChartOpen W (Nn * Dd)).1) :=
+    IsIntegral.component_integral (X := projModel W) (infChartOpen W (Nn * Dd)).1
+  set sV := infChartRes W (Nn * Dd) (AdjoinRoot.root (infChartCubic W)) with hsV
+  have hNnU : IsUnit (infChartRes W (Nn * Dd) Nn) :=
+    isUnit_infChartRes_of_dvd W (Nn * Dd) Nn ⟨sectionUnitElem W * Dd, by ring⟩
+  obtain ⟨X, hX⟩ := isUnit_iff_exists_inv.mp hNnU
+  refine ⟨infChartOpen W (Nn * Dd), hcv, 1, sV ^ n * (infChartRes W (Nn * Dd) Dd * X),
+    ?_, ?_, ?_⟩
+  · -- nonzerodivisor
+    refine mem_nonZeroDivisors_of_ne_zero fun h0 => ?_
+    have hg : g * @Scheme.germToFunctionField (projModel W) _ (infChartOpen W (Nn * Dd)).1 hne
+        (sV ^ n * (infChartRes W (Nn * Dd) Dd * X)) = 1 := by
+      rw [map_mul, map_pow, map_mul, hsV, germToFunctionField_infChartRes,
+        germToFunctionField_infChartRes]
+      calc g * (germY W (AdjoinRoot.root (infChartCubic W)) ^ n *
+            (germY W Dd * @Scheme.germToFunctionField (projModel W) _ _ hne X))
+          = (g * germY W (AdjoinRoot.root (infChartCubic W)) ^ n * germY W Dd) *
+            @Scheme.germToFunctionField (projModel W) _ _ hne X := by ring
+        _ = germY W Nn * @Scheme.germToFunctionField (projModel W) _ _ hne X := by rw [hkey]
+        _ = 1 := by
+            rw [← germToFunctionField_infChartRes W (Nn * Dd) Nn, ← map_mul, hX, map_one]
+    rw [h0, map_zero, mul_zero] at hg
+    exact zero_ne_one hg
+  · -- germ identity
+    rw [map_one, map_mul, map_pow, map_mul, hsV, germToFunctionField_infChartRes,
+      germToFunctionField_infChartRes]
+    calc (1 : (projModel W).functionField)
+        = germY W Nn * @Scheme.germToFunctionField (projModel W) _ _ ⟨⟨c, hcv⟩⟩ X := by
+          rw [← germToFunctionField_infChartRes W (Nn * Dd) Nn, ← map_mul, hX, map_one]
+      _ = (g * germY W (AdjoinRoot.root (infChartCubic W)) ^ n * germY W Dd) *
+            @Scheme.germToFunctionField (projModel W) _ _ ⟨⟨c, hcv⟩⟩ X := by rw [hkey]
+      _ = g * (germY W (AdjoinRoot.root (infChartCubic W)) ^ n *
+            (germY W Dd * @Scheme.germToFunctionField (projModel W) _ _ ⟨⟨c, hcv⟩⟩ X)) := by ring
+  · -- ideal identity
+    have hDdU : IsUnit (infChartRes W (Nn * Dd) Dd) :=
+      isUnit_infChartRes_of_dvd W (Nn * Dd) Dd ⟨sectionUnitElem W * Nn, by ring⟩
+    have hXU : IsUnit X := isUnit_iff_exists_inv'.mpr ⟨infChartRes W (Nn * Dd) Nn, hX⟩
+    rw [hIP, hIQ, projModelZero_ker_ideal_infChartOpen W (Nn * Dd), ← hsV,
+      Ideal.span_singleton_one]
+    simp only [Ideal.top_mul, Ideal.mul_top]
+    rw [hIR, Ideal.span_singleton_mul_right_unit (hDdU.mul hXU) (sV ^ n)]
+
+end InfinityOpen
+
+/-! ### The chord and the vertical -/
+
+section InfinityCases
+
+open Polynomial WeierstrassCurve.Affine WeierstrassCurve.Affine.CoordinateRing
+
+theorem overlapRel_tElem (W : WeierstrassCurve R) : OverlapRel W (infChartTElem W) 1 1 := by
+  unfold OverlapRel
+  rw [map_one, one_mul, pow_one]
+
+theorem mul_sub_one_mem {A : Type*} [CommRing A] {I : Ideal A} {a b : A}
+    (ha : a - 1 ∈ I) (hb : b - 1 ∈ I) : a * b - 1 ∈ I := by
+  have hrw : a * b - 1 = (a - 1) * b + (b - 1) := by ring
+  rw [hrw]
+  exact Ideal.add_mem _ (Ideal.mul_mem_right _ _ ha) hb
+
+theorem root_mem_infSpan (W : WeierstrassCurve R) :
+    AdjoinRoot.root (infChartCubic W) ∈
+      Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W} :=
+  Ideal.subset_span (Set.mem_insert _ _)
+
+theorem tElem_mem_infSpan (W : WeierstrassCurve R) :
+    infChartTElem W ∈ Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W} :=
+  Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
+
+theorem infChartW_sub_one_mem (W : WeierstrassCurve R) :
+    infChartW W - 1 ∈ Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W} := by
+  have hrw : infChartW W - 1 = (sectionUnitElem W - 1) -
+      (infChartConst W W.a₂ * AdjoinRoot.root (infChartCubic W)) *
+        AdjoinRoot.root (infChartCubic W) := by
+    unfold infChartW
+    ring
+  rw [hrw]
+  exact Ideal.sub_mem _ (sectionUnitElem_sub_one_mem W)
+    (Ideal.mul_mem_left _ _ (root_mem_infSpan W))
+
+theorem YClass_eq_coordY_sub_of (W : WeierstrassCurve R) (p : Polynomial R) :
+    YClass W.toAffine p = coordY W - AdjoinRoot.of W.toAffine.polynomial p := by
+  show AdjoinRoot.mk _ (Polynomial.X - Polynomial.C p) =
+    AdjoinRoot.mk _ Polynomial.X - AdjoinRoot.mk _ (Polynomial.C p)
+  rw [map_sub]
+
+theorem of_linePolynomial (W : WeierstrassCurve R) (x₁ y₁ l : R) :
+    AdjoinRoot.of W.toAffine.polynomial (linePolynomial x₁ y₁ l) =
+      algebraMap R W.toAffine.CoordinateRing l *
+        (coordX W - algebraMap R W.toAffine.CoordinateRing x₁) +
+      algebraMap R W.toAffine.CoordinateRing y₁ := by
+  rw [linePolynomial, map_add, map_mul, map_sub]
+  rfl
+
+
+omit [DecidableEq k] in
+theorem nontrivial_adjoinRoot_infChartCubic (W : WeierstrassCurve k) :
+    Nontrivial (AdjoinRoot (infChartCubic W)) := by
+  haveI := nonempty_projModelYChart W
+  haveI : IsDomain Γ(projModel W, (projModelYChart W).1) :=
+    IsIntegral.component_integral (X := projModel W) (projModelYChart W).1
+  exact (chartYSectionsRingEquiv W).symm.toEquiv.nontrivial
+
+omit [DecidableEq k] in
+theorem germY_root_ne_zero (W : WeierstrassCurve k) :
+    germY W (AdjoinRoot.root (infChartCubic W)) ≠ 0 := by
+  haveI := nontrivial_adjoinRoot_infChartCubic W
+  intro h
+  have hroot : AdjoinRoot.root (infChartCubic W) = 0 :=
+    germY_injective W (by rw [h, map_zero])
+  have h1 : (1 : AdjoinRoot (infChartCubic W)) = 0 :=
+    mem_nonZeroDivisors_iff_right.mp (infChart_root_mem_nonZeroDivisors W) 1
+      (by rw [hroot, mul_zero])
+  exact one_ne_zero h1
+
+omit [DecidableEq k] in
+theorem germZ_ne_zero (W : WeierstrassCurve k) {a : W.toAffine.CoordinateRing} (ha : a ≠ 0) :
+    germZ W a ≠ 0 := fun h => ha (germZ_injective W (by rw [h, map_zero]))
+
+omit [DecidableEq k] in
+theorem chartZFunction_eq_germZ (W : WeierstrassCurve k) [W.IsElliptic]
+    (num den : W.toAffine.CoordinateRing) :
+    chartZFunction W num den = germZ W num * (germZ W den)⁻¹ := rfl
+
+/-- The `Y`-chart identity `(s - x₀ t) · w = s · (w - x₀ s²)`, from `t · w = s³`. -/
+theorem denInf_mul_infChartW (W : WeierstrassCurve R) (x₀ : R) :
+    (AdjoinRoot.root (infChartCubic W) - infChartConst W x₀ * infChartTElem W) * infChartW W =
+      AdjoinRoot.root (infChartCubic W) *
+        (infChartW W - infChartConst W x₀ * AdjoinRoot.root (infChartCubic W) ^ 2) := by
+  have h := tel_mul_infChartW W
+  linear_combination (-(infChartConst W x₀)) * h
+
+/-- `1 − l·s − μ·t`, the chord numerator read in the `Y`-chart. -/
+noncomputable def chordNumInf (W : WeierstrassCurve R) (l mu : R) :
+    AdjoinRoot (infChartCubic W) :=
+  1 - infChartConst W l * AdjoinRoot.root (infChartCubic W) - infChartConst W mu * infChartTElem W
+
+/-- `s − x₀·t`, the vertical numerator read in the `Y`-chart. -/
+noncomputable def vertNumInf (W : WeierstrassCurve R) (x₀ : R) : AdjoinRoot (infChartCubic W) :=
+  AdjoinRoot.root (infChartCubic W) - infChartConst W x₀ * infChartTElem W
+
+/-- `(1 − l·s − μ·t)·w`. -/
+noncomputable def chordNn (W : WeierstrassCurve R) (l mu : R) : AdjoinRoot (infChartCubic W) :=
+  chordNumInf W l mu * infChartW W
+
+/-- `w − x₀·s²`. -/
+noncomputable def chordDd (W : WeierstrassCurve R) (x₀ : R) : AdjoinRoot (infChartCubic W) :=
+  infChartW W - infChartConst W x₀ * AdjoinRoot.root (infChartCubic W) ^ 2
+
+theorem overlapRel_one' (W : WeierstrassCurve R) : OverlapRel W 1 1 0 := by
+  unfold OverlapRel
+  rw [map_one, map_one, pow_zero, mul_one]
+
+theorem overlapRel_chordNumInf (W : WeierstrassCurve R) (l mu : R) :
+    OverlapRel W (chordNumInf W l mu)
+      (coordY W - (algebraMap R W.toAffine.CoordinateRing l * coordX W +
+        algebraMap R W.toAffine.CoordinateRing mu)) 1 := by
+  have hA : OverlapRel W (infChartConst W l * AdjoinRoot.root (infChartCubic W))
+      (algebraMap R W.toAffine.CoordinateRing l * coordX W) 1 :=
+    (overlapRel_const W l).mul (overlapRel_root W)
+  have hB : OverlapRel W (infChartConst W mu * infChartTElem W)
+      (algebraMap R W.toAffine.CoordinateRing mu * 1) 1 :=
+    (overlapRel_const W mu).mul (overlapRel_tElem W)
+  have h := ((overlapRel_one W).sub hA).sub hB
+  have heq : coordY W - algebraMap R W.toAffine.CoordinateRing l * coordX W -
+      algebraMap R W.toAffine.CoordinateRing mu * 1 =
+      coordY W - (algebraMap R W.toAffine.CoordinateRing l * coordX W +
+        algebraMap R W.toAffine.CoordinateRing mu) := by ring
+  exact heq ▸ h
+
+theorem overlapRel_vertNumInf (W : WeierstrassCurve R) (x₀ : R) :
+    OverlapRel W (vertNumInf W x₀)
+      (coordX W - algebraMap R W.toAffine.CoordinateRing x₀) 1 := by
+  have hB : OverlapRel W (infChartConst W x₀ * infChartTElem W)
+      (algebraMap R W.toAffine.CoordinateRing x₀ * 1) 1 :=
+    (overlapRel_const W x₀).mul (overlapRel_tElem W)
+  have h := (overlapRel_root W).sub hB
+  have heq : coordX W - algebraMap R W.toAffine.CoordinateRing x₀ * 1 =
+      coordX W - algebraMap R W.toAffine.CoordinateRing x₀ := by ring
+  exact heq ▸ h
+
+theorem overlapRel_chordDd (W : WeierstrassCurve R) (x₀ : R) :
+    OverlapRel W (chordDd W x₀)
+      (coordX W ^ 2 * (coordX W - algebraMap R W.toAffine.CoordinateRing x₀)) 2 := by
+  have hB : OverlapRel W
+      (infChartConst W x₀ * AdjoinRoot.root (infChartCubic W) ^ 2)
+      (algebraMap R W.toAffine.CoordinateRing x₀ * coordX W ^ 2) 2 :=
+    (overlapRel_const W x₀).mul ((overlapRel_root W).pow 2)
+  have h := (overlapRel_infChartW W).sub hB
+  have heq : coordX W ^ 3 - algebraMap R W.toAffine.CoordinateRing x₀ * coordX W ^ 2 =
+      coordX W ^ 2 * (coordX W - algebraMap R W.toAffine.CoordinateRing x₀) := by ring
+  exact heq ▸ h
+
+theorem overlapRel_chordNn (W : WeierstrassCurve R) (l mu : R) :
+    OverlapRel W (chordNn W l mu)
+      ((coordY W - (algebraMap R W.toAffine.CoordinateRing l * coordX W +
+        algebraMap R W.toAffine.CoordinateRing mu)) * coordX W ^ 3) 3 :=
+  (overlapRel_chordNumInf W l mu).mul (overlapRel_infChartW W)
+
+theorem chordNumInf_sub_one_mem (W : WeierstrassCurve R) (l mu : R) :
+    chordNumInf W l mu - 1 ∈
+      Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W} := by
+  have hrw : chordNumInf W l mu - 1 =
+      -(infChartConst W l * AdjoinRoot.root (infChartCubic W)) -
+        infChartConst W mu * infChartTElem W := by
+    unfold chordNumInf; ring
+  rw [hrw]
+  exact Ideal.sub_mem _ (neg_mem (Ideal.mul_mem_left _ _ (root_mem_infSpan W)))
+    (Ideal.mul_mem_left _ _ (tElem_mem_infSpan W))
+
+theorem chordNn_sub_one_mem (W : WeierstrassCurve R) (l mu : R) :
+    chordNn W l mu - 1 ∈ Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W} :=
+  mul_sub_one_mem (chordNumInf_sub_one_mem W l mu) (infChartW_sub_one_mem W)
+
+theorem chordDd_sub_one_mem (W : WeierstrassCurve R) (x₀ : R) :
+    chordDd W x₀ - 1 ∈ Ideal.span {AdjoinRoot.root (infChartCubic W), infChartTElem W} := by
+  have hrw : chordDd W x₀ - 1 = (infChartW W - 1) -
+      (infChartConst W x₀ * AdjoinRoot.root (infChartCubic W)) *
+        AdjoinRoot.root (infChartCubic W) := by
+    unfold chordDd; ring
+  rw [hrw]
+  exact Ideal.sub_mem _ (infChartW_sub_one_mem W)
+    (Ideal.mul_mem_left _ _ (root_mem_infSpan W))
+
+omit [DecidableEq k] in
+theorem germY_vertNumInf_mul (W : WeierstrassCurve k) (x₀ : k) :
+    germY W (vertNumInf W x₀) * germY W (infChartW W) =
+      germY W (AdjoinRoot.root (infChartCubic W)) * germY W (chordDd W x₀) := by
+  rw [← map_mul, ← map_mul]
+  exact congrArg (germY W) (denInf_mul_infChartW W x₀)
+
+omit [DecidableEq k] in
+theorem germY_tElem_mul_infChartW (W : WeierstrassCurve k) :
+    germY W (infChartTElem W) * germY W (infChartW W) =
+      germY W (AdjoinRoot.root (infChartCubic W)) ^ 3 := by
+  rw [← map_mul, tel_mul_infChartW, map_pow]
+
+/-- **The clause at infinity, chord shape.** -/
+theorem hloc_off_chartZ_chordShape (W : WeierstrassCurve k) [W.IsElliptic]
+    {x₁ y₁ x₂ y₂ x₃ y₃ l mu : k} (h₁ : W.toAffine.Nonsingular x₁ y₁)
+    (h₂ : W.toAffine.Nonsingular x₂ y₂) (h₃ : W.toAffine.Nonsingular x₃ y₃)
+    (hadd : (Point.some x₁ y₁ h₁ : W.toAffine.Point) + Point.some x₂ y₂ h₂ =
+      Point.some x₃ y₃ h₃)
+    (num den : W.toAffine.CoordinateRing)
+    (hnumdef : num = coordY W - (algebraMap k W.toAffine.CoordinateRing l * coordX W +
+      algebraMap k W.toAffine.CoordinateRing mu))
+    (hdendef : den = coordX W - algebraMap k W.toAffine.CoordinateRing x₃)
+    (hden0 : den ≠ 0)
+    (hnum1 : num ∈ XYIdeal W.toAffine x₁ (C y₁))
+    (hnum2 : num ∈ XYIdeal W.toAffine x₂ (C y₂))
+    (hden3 : den ∈ XYIdeal W.toAffine x₃ (C y₃))
     (c : ↥(projModel W)) (hc : c ∉ (projModelZChart W).1) :
     ∃ (V : (projModel W).affineOpens) (hcv : c ∈ V.1) (num' den' : Γ(projModel W, V.1)),
       den' ∈ nonZeroDivisors Γ(projModel W, V.1) ∧
       @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ num' =
         chartZFunction W num den *
           @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ den' ∧
-      Ideal.span {den'} * ((Scheme.Hom.ker (pointSection W P)).ideal V *
-          (Scheme.Hom.ker (pointSection W Q)).ideal V) =
-        Ideal.span {num'} * ((Scheme.Hom.ker (pointSection W (P + Q))).ideal V *
-          (Scheme.Hom.ker (projModelZero W)).ideal V) := by
-  sorry
+      Ideal.span {den'} *
+          ((Scheme.Hom.ker (pointSection W (Point.some x₁ y₁ h₁))).ideal V *
+            (Scheme.Hom.ker (pointSection W (Point.some x₂ y₂ h₂))).ideal V) =
+        Ideal.span {num'} *
+          ((Scheme.Hom.ker (pointSection W ((Point.some x₁ y₁ h₁ : W.toAffine.Point) +
+              Point.some x₂ y₂ h₂))).ideal V *
+            (Scheme.Hom.ker (projModelZero W)).ideal V) := by
+  -- the overlap factorisation of the cutter `v · Nn · Dd`
+  have hcut : OverlapRel W (sectionUnitElem W * (chordNn W l mu * chordDd W x₃))
+      ((coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+        ((num * coordX W ^ 3) * (coordX W ^ 2 * den))) 7 := by
+    have h := (overlapRel_sectionUnitElem W).mul
+      ((overlapRel_chordNn W l mu).mul (overlapRel_chordDd W x₃))
+    rw [hnumdef, hdendef]
+    exact h
+  have hIP : (Scheme.Hom.ker (pointSection W (Point.some x₁ y₁ h₁))).ideal
+      (infChartOpen W (chordNn W l mu * chordDd W x₃)) = ⊤ := by
+    refine ker_ideal_pointSection_infChartOpen_eq_top W h₁ _ hcut ?_
+    have hfac : (coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+        ((num * coordX W ^ 3) * (coordX W ^ 2 * den)) =
+        ((coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+          (coordX W ^ 3 * (coordX W ^ 2 * den))) * num := by ring
+    rw [hfac]
+    exact Ideal.mul_mem_left _ _ hnum1
+  have hIQ : (Scheme.Hom.ker (pointSection W (Point.some x₂ y₂ h₂))).ideal
+      (infChartOpen W (chordNn W l mu * chordDd W x₃)) = ⊤ := by
+    refine ker_ideal_pointSection_infChartOpen_eq_top W h₂ _ hcut ?_
+    have hfac : (coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+        ((num * coordX W ^ 3) * (coordX W ^ 2 * den)) =
+        ((coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+          (coordX W ^ 3 * (coordX W ^ 2 * den))) * num := by ring
+    rw [hfac]
+    exact Ideal.mul_mem_left _ _ hnum2
+  have hIR : (Scheme.Hom.ker (pointSection W ((Point.some x₁ y₁ h₁ : W.toAffine.Point) +
+      Point.some x₂ y₂ h₂))).ideal (infChartOpen W (chordNn W l mu * chordDd W x₃)) = ⊤ := by
+    rw [hadd]
+    refine ker_ideal_pointSection_infChartOpen_eq_top W h₃ _ hcut ?_
+    have hfac : (coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+        ((num * coordX W ^ 3) * (coordX W ^ 2 * den)) =
+        ((coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+          ((num * coordX W ^ 3) * coordX W ^ 2)) * den := by ring
+    rw [hfac]
+    exact Ideal.mul_mem_left _ _ hden3
+  -- the key identity in the function field
+  have hnumI : germY W (chordNumInf W l mu) = germZ W num * germY W (infChartTElem W) := by
+    have h := germY_eq_germZ_mul W (overlapRel_chordNumInf W l mu)
+    rw [pow_one] at h
+    rw [h, hnumdef]
+  have hdenI : germY W (vertNumInf W x₃) = germZ W den * germY W (infChartTElem W) := by
+    have h := germY_eq_germZ_mul W (overlapRel_vertNumInf W x₃)
+    rw [pow_one] at h
+    rw [h, hdendef]
+  have hden0' : germZ W den ≠ 0 := germZ_ne_zero W hden0
+  have hkey : chartZFunction W num den *
+      germY W (AdjoinRoot.root (infChartCubic W)) ^ 1 * germY W (chordDd W x₃) =
+      germY W (chordNn W l mu) := by
+    calc chartZFunction W num den *
+          germY W (AdjoinRoot.root (infChartCubic W)) ^ 1 * germY W (chordDd W x₃)
+        = germZ W num * (germZ W den)⁻¹ *
+            (germY W (AdjoinRoot.root (infChartCubic W)) * germY W (chordDd W x₃)) := by
+          rw [chartZFunction_eq_germZ, pow_one]; ring
+      _ = germZ W num * (germZ W den)⁻¹ *
+            (germY W (vertNumInf W x₃) * germY W (infChartW W)) := by
+          rw [germY_vertNumInf_mul W x₃]
+      _ = germZ W num * (germZ W den)⁻¹ *
+            (germZ W den * germY W (infChartTElem W) * germY W (infChartW W)) := by rw [hdenI]
+      _ = germZ W num * (germY W (infChartTElem W) * germY W (infChartW W)) := by
+          rw [show germZ W num * (germZ W den)⁻¹ *
+              (germZ W den * germY W (infChartTElem W) * germY W (infChartW W)) =
+            germZ W num * ((germZ W den)⁻¹ * germZ W den) *
+              (germY W (infChartTElem W) * germY W (infChartW W)) from by ring,
+            inv_mul_cancel₀ hden0', mul_one]
+      _ = germY W (chordNumInf W l mu) * germY W (infChartW W) := by rw [hnumI]; ring
+      _ = germY W (chordNn W l mu) := by rw [chordNn, map_mul]
+  refine hloc_off_chartZ_aux W (Point.some x₁ y₁ h₁) (Point.some x₂ y₂ h₂)
+    (chartZFunction W num den) 1 (chordNn W l mu) (chordDd W x₃)
+    (chordNn_sub_one_mem W l mu) (chordDd_sub_one_mem W x₃) hkey hIP hIQ ?_ c hc
+  rw [hIR, Ideal.top_mul, pow_one]
 
+/-- **The clause at infinity, vertical shape.** -/
+theorem hloc_off_chartZ_vertShape (W : WeierstrassCurve k) [W.IsElliptic]
+    {x₁ y₁ x₂ y₂ : k} (h₁ : W.toAffine.Nonsingular x₁ y₁)
+    (h₂ : W.toAffine.Nonsingular x₂ y₂)
+    (hadd : (Point.some x₁ y₁ h₁ : W.toAffine.Point) + Point.some x₂ y₂ h₂ = 0)
+    (num : W.toAffine.CoordinateRing)
+    (hnumdef : num = coordX W - algebraMap k W.toAffine.CoordinateRing x₁)
+    (hnum1 : num ∈ XYIdeal W.toAffine x₁ (C y₁))
+    (hnum2 : num ∈ XYIdeal W.toAffine x₂ (C y₂))
+    (c : ↥(projModel W)) (hc : c ∉ (projModelZChart W).1) :
+    ∃ (V : (projModel W).affineOpens) (hcv : c ∈ V.1) (num' den' : Γ(projModel W, V.1)),
+      den' ∈ nonZeroDivisors Γ(projModel W, V.1) ∧
+      @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ num' =
+        chartZFunction W num 1 *
+          @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ den' ∧
+      Ideal.span {den'} *
+          ((Scheme.Hom.ker (pointSection W (Point.some x₁ y₁ h₁))).ideal V *
+            (Scheme.Hom.ker (pointSection W (Point.some x₂ y₂ h₂))).ideal V) =
+        Ideal.span {num'} *
+          ((Scheme.Hom.ker (pointSection W ((Point.some x₁ y₁ h₁ : W.toAffine.Point) +
+              Point.some x₂ y₂ h₂))).ideal V *
+            (Scheme.Hom.ker (projModelZero W)).ideal V) := by
+  have hcut : OverlapRel W (sectionUnitElem W * (chordDd W x₁ * 1))
+      ((coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+        ((coordX W ^ 2 * num) * 1)) 4 := by
+    have h := (overlapRel_sectionUnitElem W).mul
+      ((overlapRel_chordDd W x₁).mul (overlapRel_one' W))
+    rw [hnumdef]
+    exact h
+  have hIP : (Scheme.Hom.ker (pointSection W (Point.some x₁ y₁ h₁))).ideal
+      (infChartOpen W (chordDd W x₁ * 1)) = ⊤ := by
+    refine ker_ideal_pointSection_infChartOpen_eq_top W h₁ _ hcut ?_
+    have hfac : (coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+        ((coordX W ^ 2 * num) * 1) =
+        ((coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+          coordX W ^ 2) * num := by ring
+    rw [hfac]
+    exact Ideal.mul_mem_left _ _ hnum1
+  have hIQ : (Scheme.Hom.ker (pointSection W (Point.some x₂ y₂ h₂))).ideal
+      (infChartOpen W (chordDd W x₁ * 1)) = ⊤ := by
+    refine ker_ideal_pointSection_infChartOpen_eq_top W h₂ _ hcut ?_
+    have hfac : (coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+        ((coordX W ^ 2 * num) * 1) =
+        ((coordX W ^ 3 + algebraMap k W.toAffine.CoordinateRing W.a₂ * coordX W ^ 2) *
+          coordX W ^ 2) * num := by ring
+    rw [hfac]
+    exact Ideal.mul_mem_left _ _ hnum2
+  have hnumI : germY W (vertNumInf W x₁) = germZ W num * germY W (infChartTElem W) := by
+    have h := germY_eq_germZ_mul W (overlapRel_vertNumInf W x₁)
+    rw [pow_one] at h
+    rw [h, hnumdef]
+  have hgz : chartZFunction W num 1 = germZ W num := by
+    rw [chartZFunction_eq_germZ, map_one, inv_one, mul_one]
+  have hkey : chartZFunction W num 1 *
+      germY W (AdjoinRoot.root (infChartCubic W)) ^ 2 * germY W 1 = germY W (chordDd W x₁) := by
+    refine mul_left_cancel₀ (germY_root_ne_zero W) ?_
+    calc germY W (AdjoinRoot.root (infChartCubic W)) *
+          (chartZFunction W num 1 * germY W (AdjoinRoot.root (infChartCubic W)) ^ 2 * germY W 1)
+        = germZ W num * (germY W (AdjoinRoot.root (infChartCubic W)) ^ 3) := by
+          rw [hgz, map_one]; ring
+      _ = germZ W num * (germY W (infChartTElem W) * germY W (infChartW W)) := by
+          rw [germY_tElem_mul_infChartW W]
+      _ = germY W (vertNumInf W x₁) * germY W (infChartW W) := by rw [hnumI]; ring
+      _ = germY W (AdjoinRoot.root (infChartCubic W)) * germY W (chordDd W x₁) :=
+          germY_vertNumInf_mul W x₁
+  refine hloc_off_chartZ_aux W (Point.some x₁ y₁ h₁) (Point.some x₂ y₂ h₂)
+    (chartZFunction W num 1) 2 (chordDd W x₁) 1
+    (chordDd_sub_one_mem W x₁) (by rw [sub_self]; exact Ideal.zero_mem _) hkey hIP hIQ ?_ c hc
+  rw [hadd, pointSection_zero', projModelZero_ker_ideal_infChartOpen W (chordDd W x₁ * 1),
+    Ideal.span_singleton_mul_span_singleton, ← pow_two]
+
+/-- The chord identity on the affine chart, in the `affineIdeal` packaging. -/
+theorem affine_ideal_identity_chord (W : WeierstrassCurve.Affine k) {x₁ y₁ x₂ y₂ : k}
+    (h₁ : W.Nonsingular x₁ y₁) (h₂ : W.Nonsingular x₂ y₂)
+    (hxy : ¬(x₁ = x₂ ∧ y₁ = W.negY x₂ y₂)) :
+    Ideal.span {XClass W (W.addX x₁ x₂ (W.slope x₁ x₂ y₁ y₂))} *
+        (affineIdeal W (Point.some x₁ y₁ h₁) * affineIdeal W (Point.some x₂ y₂ h₂)) =
+      Ideal.span {YClass W (linePolynomial x₁ y₁ (W.slope x₁ x₂ y₁ y₂))} *
+        (affineIdeal W ((Point.some x₁ y₁ h₁ : W.Point) + Point.some x₂ y₂ h₂) *
+          affineIdeal W 0) := by
+  have hadd : (Point.some x₁ y₁ h₁ : W.Point) + Point.some x₂ y₂ h₂ =
+      Point.some _ _ (nonsingular_add h₁ h₂ hxy) := Point.add_some hxy
+  rw [hadd, affineIdeal_zero, affineIdeal_some, affineIdeal_some, affineIdeal_some]
+  exact chordIdealIdentity h₁.left h₂.left hxy
+
+/-- The vertical identity on the affine chart, in the `affineIdeal` packaging. -/
+theorem affine_ideal_identity_vertical (W : WeierstrassCurve.Affine k) {x₁ y₁ x₂ y₂ : k}
+    (h₁ : W.Nonsingular x₁ y₁) (h₂ : W.Nonsingular x₂ y₂)
+    (hxy : x₁ = x₂ ∧ y₁ = W.negY x₂ y₂) :
+    Ideal.span {(1 : W.CoordinateRing)} *
+        (affineIdeal W (Point.some x₁ y₁ h₁) * affineIdeal W (Point.some x₂ y₂ h₂)) =
+      Ideal.span {XClass W x₁} *
+        (affineIdeal W ((Point.some x₁ y₁ h₁ : W.Point) + Point.some x₂ y₂ h₂) *
+          affineIdeal W 0) := by
+  have hadd : (Point.some x₁ y₁ h₁ : W.Point) + Point.some x₂ y₂ h₂ = 0 :=
+    Point.add_of_Y_eq hxy.1 hxy.2
+  rw [hadd, affineIdeal_zero, affineIdeal_some, affineIdeal_some,
+    Ideal.span_singleton_one, Ideal.top_mul, Ideal.mul_top, Ideal.mul_top, hxy.1, hxy.2]
+  exact XYIdeal_neg_mul h₂
+
+/-- **(1b, chord)** The clause at infinity for the chord. -/
+theorem hloc_off_chartZ_chord (W : WeierstrassCurve k) [W.IsElliptic] {x₁ y₁ x₂ y₂ : k}
+    (h₁ : W.toAffine.Nonsingular x₁ y₁) (h₂ : W.toAffine.Nonsingular x₂ y₂)
+    (hxy : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂))
+    (c : ↥(projModel W)) (hc : c ∉ (projModelZChart W).1) :
+    ∃ (V : (projModel W).affineOpens) (hcv : c ∈ V.1) (num' den' : Γ(projModel W, V.1)),
+      den' ∈ nonZeroDivisors Γ(projModel W, V.1) ∧
+      @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ num' =
+        chartZFunction W
+            (YClass W.toAffine (linePolynomial x₁ y₁ (W.toAffine.slope x₁ x₂ y₁ y₂)))
+            (XClass W.toAffine (W.toAffine.addX x₁ x₂ (W.toAffine.slope x₁ x₂ y₁ y₂))) *
+          @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ den' ∧
+      Ideal.span {den'} *
+          ((Scheme.Hom.ker (pointSection W (Point.some x₁ y₁ h₁))).ideal V *
+            (Scheme.Hom.ker (pointSection W (Point.some x₂ y₂ h₂))).ideal V) =
+        Ideal.span {num'} *
+          ((Scheme.Hom.ker (pointSection W ((Point.some x₁ y₁ h₁ : W.toAffine.Point) +
+              Point.some x₂ y₂ h₂))).ideal V *
+            (Scheme.Hom.ker (projModelZero W)).ideal V) := by
+  refine hloc_off_chartZ_chordShape W h₁ h₂ (nonsingular_add h₁ h₂ hxy) (Point.add_some hxy)
+    _ _ (l := W.toAffine.slope x₁ x₂ y₁ y₂)
+    (mu := y₁ - W.toAffine.slope x₁ x₂ y₁ y₂ * x₁) ?_ ?_ (XClass_ne_zero _) ?_ ?_ ?_ c hc
+  · rw [YClass_eq_coordY_sub_of, of_linePolynomial, map_sub, map_mul]
+    ring
+  · exact XClass_eq_coordX_sub W _
+  · rw [XYIdeal_eq₁ x₁ y₁ (W.toAffine.slope x₁ x₂ y₁ y₂)]
+    exact Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
+  · rw [XYIdeal_eq₂ h₁.left h₂.left hxy]
+    exact Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
+  · exact Ideal.subset_span (Set.mem_insert _ _)
+
+/-- **(1b, vertical)** The clause at infinity for the vertical. -/
+theorem hloc_off_chartZ_vertical (W : WeierstrassCurve k) [W.IsElliptic] {x₁ y₁ x₂ y₂ : k}
+    (h₁ : W.toAffine.Nonsingular x₁ y₁) (h₂ : W.toAffine.Nonsingular x₂ y₂)
+    (hxy : x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂)
+    (c : ↥(projModel W)) (hc : c ∉ (projModelZChart W).1) :
+    ∃ (V : (projModel W).affineOpens) (hcv : c ∈ V.1) (num' den' : Γ(projModel W, V.1)),
+      den' ∈ nonZeroDivisors Γ(projModel W, V.1) ∧
+      @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ num' =
+        chartZFunction W (XClass W.toAffine x₁) 1 *
+          @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ den' ∧
+      Ideal.span {den'} *
+          ((Scheme.Hom.ker (pointSection W (Point.some x₁ y₁ h₁))).ideal V *
+            (Scheme.Hom.ker (pointSection W (Point.some x₂ y₂ h₂))).ideal V) =
+        Ideal.span {num'} *
+          ((Scheme.Hom.ker (pointSection W ((Point.some x₁ y₁ h₁ : W.toAffine.Point) +
+              Point.some x₂ y₂ h₂))).ideal V *
+            (Scheme.Hom.ker (projModelZero W)).ideal V) := by
+  refine hloc_off_chartZ_vertShape W h₁ h₂ (Point.add_of_Y_eq hxy.1 hxy.2) _ ?_ ?_ ?_ c hc
+  · exact XClass_eq_coordX_sub W x₁
+  · exact Ideal.subset_span (Set.mem_insert _ _)
+  · rw [hxy.1]
+    exact Ideal.subset_span (Set.mem_insert _ _)
+
+/-- **(1b, PROVED) The clause at infinity.**
+`hloc_chartZ` handles every point of the affine `Z`-chart; this handles the one remaining point
+`[0 : 1 : 0]`, for a pair of affine points `P`, `Q`.
+
+Unlike `hloc_chartZ` this needs the *shape* of `num`, `den` and not merely the affine ideal
+identity they satisfy: the construction at infinity reads `num` and `den` off the chart overlap, so
+it has to know that they are the chord `ℓ` over the vertical `x − x₃`, or (when `Q = −P`) the
+vertical `x − x₁` over `1`. The hypothesis `hshape` records exactly the disjunction produced by the
+case split of `exists_affine_ideal_identity`, and `exists_squareChartData_projModel` supplies it by
+performing that same case split at the call site. -/
+theorem hloc_off_chartZ (W : WeierstrassCurve k) [W.IsElliptic] {x₁ y₁ x₂ y₂ : k}
+    (h₁ : W.toAffine.Nonsingular x₁ y₁) (h₂ : W.toAffine.Nonsingular x₂ y₂)
+    (num den : W.toAffine.CoordinateRing)
+    (hshape : (¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂) ∧
+        num = YClass W.toAffine (linePolynomial x₁ y₁ (W.toAffine.slope x₁ x₂ y₁ y₂)) ∧
+        den = XClass W.toAffine (W.toAffine.addX x₁ x₂ (W.toAffine.slope x₁ x₂ y₁ y₂))) ∨
+      ((x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂) ∧ num = XClass W.toAffine x₁ ∧ den = 1))
+    (c : ↥(projModel W)) (hc : c ∉ (projModelZChart W).1) :
+    ∃ (V : (projModel W).affineOpens) (hcv : c ∈ V.1) (num' den' : Γ(projModel W, V.1)),
+      den' ∈ nonZeroDivisors Γ(projModel W, V.1) ∧
+      @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ num' =
+        chartZFunction W num den *
+          @Scheme.germToFunctionField (projModel W) _ V.1 ⟨⟨c, hcv⟩⟩ den' ∧
+      Ideal.span {den'} *
+          ((Scheme.Hom.ker (pointSection W (Point.some x₁ y₁ h₁))).ideal V *
+            (Scheme.Hom.ker (pointSection W (Point.some x₂ y₂ h₂))).ideal V) =
+        Ideal.span {num'} *
+          ((Scheme.Hom.ker (pointSection W ((Point.some x₁ y₁ h₁ : W.toAffine.Point) +
+              Point.some x₂ y₂ h₂))).ideal V *
+            (Scheme.Hom.ker (projModelZero W)).ideal V) := by
+  rcases hshape with ⟨hxy, rfl, rfl⟩ | ⟨hxy, rfl, rfl⟩
+  · exact hloc_off_chartZ_chord W h₁ h₂ hxy c hc
+  · exact hloc_off_chartZ_vertical W h₁ h₂ hxy c hc
+
+end InfinityCases
+
+end InfinityChart
+
+open WeierstrassCurve.Affine WeierstrassCurve.Affine.CoordinateRing in
 /-- **THE LEAF (T10-asm-chart): read the local numerator and denominator of the
 theorem-of-the-square function off the Weierstrass charts.**
 
@@ -1323,19 +2309,21 @@ generators of the four section ideal sheaves on each chart whose ratios
 `squareChartDataOfRatio`, whose output this file's composition turns into the theorem of the
 square. This *is* the theorem of the square on the projective model, in local form.
 
-**Status (2026-08-09).** Everything except the one chart at infinity is proved. The proof below
-is the complete assembly:
+**Status: proved.** The proof below is the complete assembly. The case split of
+`exists_affine_ideal_identity` (1c) is performed here rather than inside it, because the chart at
+infinity needs the *shape* of `num`, `den` and not only the ideal identity:
 
-* `exists_affine_ideal_identity` (1c) does the whole case analysis on `P`, `Q` on the affine
-  chart, producing a single nonzero pair `num`, `den` with
-  `⟨den⟩ · (I(P) · I(Q)) = ⟨num⟩ · (I(P+Q) · I(0))` in `W.toAffine.CoordinateRing`;
-* `chartZFunction W num den` is the resulting rational function `num / den` — the classical
+* `P = 0` and `Q = 0` are the degenerate cases `nonempty_squareChartData_projModel_zero_left` /
+  `_zero_right` (both sides carry the same pair of divisors, ratio `1`);
+* for two affine points the identity on the affine chart is `affine_ideal_identity_vertical`
+  (`num = x − x₁`, `den = 1`) or `affine_ideal_identity_chord` (`num = ℓ`, `den = x − x₃`), and
+  `chartZFunction W num den` is the resulting rational function — the classical
   chord-over-vertical;
 * `hloc_chartZ` (1a) supplies the local Cartier data at every point of the affine `Z`-chart,
   through the dictionary `ker_ideal_pointSection_chartZ'` (mathlib's `XYIdeal`, transported along
   `chartZSectionsRingEquiv`);
-* `hloc_off_chartZ` (1b) is the single remaining `sorry`: the chart at infinity. Its docstring
-  contains the full construction.
+* `hloc_off_chartZ_vertical` / `hloc_off_chartZ_chord` (1b) supply it at the one point off the
+  `Z`-chart, `[0 : 1 : 0]`; see the section "The chart at infinity" above.
 
 **Why the available divisor input does not help.**
 `exists_functionField_projectiveDivisorOf_kappa` above delivers a nonzero `F` with
@@ -1356,11 +2344,26 @@ theorem exists_squareChartData_projModel (W : WeierstrassCurve k) [W.IsElliptic]
     Nonempty (SquareChartData (Scheme.Hom.ker (pointSection W P))
       (Scheme.Hom.ker (pointSection W Q)) (Scheme.Hom.ker (pointSection W (P + Q)))
       (Scheme.Hom.ker (projModelZero W))) := by
-  obtain ⟨num, den, hnum, hden, hid⟩ := exists_affine_ideal_identity W.toAffine P Q
-  refine nonempty_squareChartData_projModel_of_local W P Q (chartZFunction W num den) fun c => ?_
-  by_cases hc : c ∈ (projModelZChart W).1
-  · exact hloc_chartZ W P Q num den hden hid c hc
-  · exact hloc_off_chartZ W P Q num den hnum hden hid c hc
+  match P, Q with
+  | 0, Q => exact nonempty_squareChartData_projModel_zero_left W Q
+  | .some x y h, 0 => exact nonempty_squareChartData_projModel_zero_right W _
+  | .some x₁ y₁ h₁, .some x₂ y₂ h₂ =>
+    by_cases hxy : x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂
+    · refine nonempty_squareChartData_projModel_of_local W _ _
+        (chartZFunction W (XClass W.toAffine x₁) 1) fun c => ?_
+      by_cases hc : c ∈ (projModelZChart W).1
+      · exact hloc_chartZ W _ _ _ 1 one_ne_zero
+          (affine_ideal_identity_vertical W.toAffine h₁ h₂ hxy) c hc
+      · exact hloc_off_chartZ_vertical W h₁ h₂ hxy c hc
+    · refine nonempty_squareChartData_projModel_of_local W _ _
+        (chartZFunction W
+          (YClass W.toAffine (linePolynomial x₁ y₁ (W.toAffine.slope x₁ x₂ y₁ y₂)))
+          (XClass W.toAffine (W.toAffine.addX x₁ x₂ (W.toAffine.slope x₁ x₂ y₁ y₂))))
+        fun c => ?_
+      by_cases hc : c ∈ (projModelZChart W).1
+      · exact hloc_chartZ W _ _ _ _ (XClass_ne_zero _)
+          (affine_ideal_identity_chord W.toAffine h₁ h₂ hxy) c hc
+      · exact hloc_off_chartZ_chord W h₁ h₂ hxy c hc
 
 /-- **(T10-asm) The theorem of the square as a module triviality over a field.**
 
