@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.KMUniqueness
 import ModularCurves.WeilPairing.TensorCocycle
+import ModularCurves.WeilPairing.Translation
 
 /-!
 # Bilinearity and `μ_N` for the Katz–Mazur pairing (ticket AP-D7)
@@ -74,9 +75,13 @@ form, is what upgrades `torsionSplittingEval_mul_of_transitionUnitOfCover_mul` t
   (`WeilPairing/TensorCocycle.lean`) applied to `κ(Q)^N = 1`.
 * `torsionSplittingEval_pow_eq_one` — **the `μ_N` landing, KM p. 89**, unconditional and
   axiom-clean.
-* `torsionSplittingEval_add` — bilinearity in `P`. **`sorry`**; see its docstring. It is the only
-  remaining gap in AP-D7, and it is disjoint from the tensor brick: it needs translations, not
-  the monoidal structure.
+* `torsionSplittingEval_add` — **bilinearity in `P`, proved**, and with it AP-D7 and the whole
+  Katz–Mazur construction of the relative Weil pairing. It is disjoint from the tensor brick: it
+  needs translations, not the monoidal structure, and all of its infrastructure —
+  `translateByPoint` (the `mulByN`-style transport of `EllipticCurve.translateBy` to the
+  `pullback E.π t` presentation), `unitPullback` (unit pullback along `Scheme.Hom.appLE`, which
+  removes the dependent open transport) and `eq_mul_globalTwist_of_translate` (translation
+  invariance of a normalised splitting) — is `WeilPairing/Translation.lean`.
 
 ## What is *not* used
 
@@ -307,47 +312,42 @@ theorem torsionSplittingEval_pow_eq_one
 
 /-! ## Bilinearity in `P` -/
 
-/-- **(AP-D7, bilinearity in the first variable) — OPEN, `sorry`.** `h(P + P') = h(P) · h(P')`.
+/-- **(AP-D7, bilinearity in the first variable — KM p. 89, PROVED)**
+`h(P + P') = h(P) · h(P')`.
 
-**Why it is true, and what blocks it.** Unlike multiplicativity in `Q`, this is *not* a statement
-about the cocycle: the local values do not multiply pointwise, only their glued unit does. The
-argument is translation invariance. For an `N`-torsion `P` let `τ_P` be translation by `P`, i.e.
-the element `𝟙 + P ∘ π` of the group `(E.baseChange t).Point (E.baseChange t).π` of sections one
-level up — the same "constants over the curve" device `WeilPairing/PoincareBiextension.lean` uses
-for `β`, and the device `mulByN_zero` (`WeilPairing/KMPairing.lean`) already uses with `𝟙`. Then
+Unlike multiplicativity in `Q`, this is *not* a statement about the cocycle: the local values do
+not multiply pointwise, only their glued unit does. The argument is **translation invariance**,
+and the infrastructure is `WeilPairing/Translation.lean`.
 
-* `τ_P ≫ [N] = [N]`, because `[N] ∘ τ_P = N • τ_P = 𝟙 + (N • P) ∘ π` and `N • P = 0`; hence
-  `τ_P` preserves each open `[N]⁻¹(W i)`;
-* therefore `τ_P^# h_i` again splits `f_{i,j} ∘ [N]`, so `τ_P^# h_i · π^#(h(P))⁻¹` is a
-  *normalised* splitting of the same cocycle and `eq_of_normalized_splitting` gives
-  `τ_P^# h_i = π^#(h(P)) · h_i`;
-* evaluating at `P'` and using `P' ≫ τ_P = (P + P').1` gives the conclusion.
+Write `τ = τ_{P'}` for translation by `P'` in the `pullback E.π t` presentation
+(`translateByPoint`, the transport of `EllipticCurve.translateBy` that `mulByN` performs for
+`[N]`). Then, for `P'` an `N`-torsion section:
 
-**Precise inventory of what is missing** (re-scoped after the tensor brick landed; this sorry is
-*disjoint* from that brick — it needs translations, not the monoidal structure).
+* `τ ≫ [N] = [N]` (`translateByPoint_comp_mulByN`), because `[N] ∘ τ = 𝟙^N · const(P')^N` in the
+  hom-group `Hom_T(E_T, E_T)` and `N • P' = 0`; hence `τ` **fixes** every open `[N]⁻¹(W i)`
+  (`preimage_translateByPoint_mulByN`) and every transition unit `f_{i,j} ∘ [N]`;
+* so `τ^# h_i` is again a splitting of the same cocycle, and `τ^# h_i · (π^# h(P'))⁻¹` is a
+  *normalised* one — its zero-section value is `h_i ∘ (0 ≫ τ) = h_i ∘ P' = h(P')`. Hence
+  `eq_of_normalized_splitting` gives `τ^# h_i = h_i · π^# h(P')`
+  (`eq_mul_globalTwist_of_translate`);
+* evaluating at `P` and using `P ≫ τ = (P + P').1` (`comp_translateByPoint`) reads this as
+  `h(P + P')|_i = h(P)|_i · h(P')|_i` on the trace `P⁻¹([N]⁻¹ W i)`; those traces cover the base,
+  so `eq_of_forall_resUnit_eq` glues.
 
-1. `τ_P` itself, in the `pullback E.π t` presentation. `GroupScheme/TranslationBySection.lean`
-   builds `EllipticCurve.translateBy` / `translateByIso` as an automorphism of `E.asOver` in
-   `Over S` clothing, but that file is **not in this file's import closure**, and what is needed
-   is the base-changed translation transported to `pullback E.π t` — the same transport `mulByN`
-   performs for `[N]`. No such transport exists for `translateBy`.
-2. `τ_P ≫ [N] = [N]`. This is `f ≫ [N] = N • f` in the pointwise group `Hom_T(E_T, E_T)`,
-   specialised at `f = 𝟙 + const P`. The tree has the *points* version
-   (`EllipticCurve.smul_eq_zero_iff_comp_mulByHom`) but no endomorphism-group version, and there
-   is no lemma anywhere relating `translateBy` to `mulByHom` (checked both grep directions).
-3. The dependent transport `τ_P ⁻¹ᵁ ([N]⁻¹ W i) = [N]⁻¹(W i)`, which holds only
-   *propositionally* via `congrArg (· ⁻¹ᵁ W i)` of 2; `Γ(Y, -)` of that equality is a dependent
-   rewrite across the whole statement.
-4. Two `Point`-functoriality lemmas, `π ≫ (N • P).1 = N • (π ≫ P.1)` and
-   `P' ≫ (X + Y).1 = (P' ≫ X.1) + (P' ≫ Y.1)`. The second exists in `E.Point` clothing as
-   `pointMapOfHom_translateBy` (`LevelStructure/Factorization.lean`), again outside this closure.
+**What made this fiddly, and how it is handled.** The open transport `τ ⁻¹ᵁ ([N]⁻¹ W i) =
+[N]⁻¹(W i)` holds only *propositionally*, so `Γ(Y, -)` of it would be a dependent rewrite across
+the statement. `WeilPairing/Translation.lean` avoids it entirely by phrasing every pullback of a
+unit through `Scheme.Hom.appLE` (`unitPullback`), which absorbs the comparison of opens into a
+`Prop` argument: pullbacks along *equal* morphisms then agree by `subst` plus proof irrelevance
+(`unitPullback_congr`), and the same device on the section variable
+(`resUnit_sectionEval_congr`) handles `0 ≫ τ = P'` and `P ≫ τ = P + P'`.
 
-So the remaining work is a self-contained *translation* ticket — a base-change/presentation
-transport for `translateBy`, a `Hom`-group ↔ `mulByHom` dictionary, and the dependent open
-transport — not a leaf of the present file. None of it is new elliptic-curve geometry.
+The two `congr` steps are applied with **explicit** arguments: left as `_`, the elaborator
+unfolds `(E.baseChange t).E` against `pullback E.π t` — the semireducible-`def` wall documented at
+`EllipticCurve.Point.asSection_zsmul` — and `whnf` diverges.
 
-**Degenerate checks done.** At `N = 0` the statement is not vacuous — `torsionPoints E t 0 = ⊤` —
-but it is true for a different reason: `[0]⁻¹(W i) = π⁻¹(0⁻¹ W i)` is the preimage of a base open,
+**Degenerate checks.** At `N = 0` the statement is not vacuous — `torsionPoints E t 0 = ⊤` — but
+it is also true for a second reason: `[0]⁻¹(W i) = π⁻¹(0⁻¹ W i)` is the preimage of a base open,
 so `AP-D2` (`eq_of_mem_sectionUnits`) forces `h_i = 1` and `h ≡ 1`. At `N = 1`,
 `torsionPoints E t 1 = ⊥` and the statement is `torsionSplittingEval_zero`. -/
 theorem torsionSplittingEval_add (P P' : (E.baseChange t).Point (𝟙 T))
@@ -355,7 +355,138 @@ theorem torsionSplittingEval_add (P P' : (E.baseChange t).Point (𝟙 T))
     torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm (P + P') (add_mem hP hP') =
       torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP *
         torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P' hP' := by
-  sorry
+  obtain ⟨h, hn, hsplit⟩ :=
+    exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints E hsm t N Q hQ M hM W hW e
+      hnorm
+  -- `τ_{P'}` fixes each `[N]⁻¹(W i)` and each intersection of two of them
+  have hτle : ∀ i, mulByN E t N ⁻¹ᵁ W i ≤
+      translateByPoint E t P' ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) := fun i =>
+    le_of_eq (preimage_translateByPoint_mulByN E t P' N hP' (W i)).symm
+  have hτinf : ∀ i j, mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j ≤
+      translateByPoint E t P' ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j) := fun i j =>
+    le_of_eq (preimage_translateByPoint_mulByN E t P' N hP' (W i ⊓ W j)).symm
+  -- and therefore fixes the pulled-back transition cocycle
+  have hFeq : ∀ i j, Units.map ((mulByN E t N).app (W i ⊓ W j)).hom.toMonoidHom
+        (transitionUnitOfCover M W e i j) =
+      unitPullback (mulByN E t N) (W i ⊓ W j)
+        (mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j)
+        (Scheme.Hom.preimage_inf (mulByN E t N)).ge (transitionUnitOfCover M W e i j) :=
+    fun i j => map_app_eq_unitPullback _ _ _
+  have hτF : ∀ i j, unitPullback (translateByPoint E t P')
+      (mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j)
+      (mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j) (hτinf i j)
+      (Units.map ((mulByN E t N).app (W i ⊓ W j)).hom.toMonoidHom
+        (transitionUnitOfCover M W e i j)) =
+      Units.map ((mulByN E t N).app (W i ⊓ W j)).hom.toMonoidHom
+        (transitionUnitOfCover M W e i j) := by
+    intro i j
+    rw [hFeq i j, unitPullback_unitPullback]
+    exact unitPullback_congr (translateByPoint_comp_mulByN E t P' N hP') _ _ _ _ _
+  -- the zero section slides along `τ_{P'}` to `P'`, so `τ_{P'}^# h_i` reads `h(P')` there
+  have hzval : ((0 : (E.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback E.π t) =
+      baseChangeZero E.π E.zero E.zero_π t :=
+    ((E.baseChange t).point_zero_val (𝟙 T)).trans (Category.id_comp _)
+  have hzτ : baseChangeZero E.π E.zero E.zero_π t ≫ translateByPoint E t P' =
+      (P'.1 : T ⟶ pullback E.π t) := by
+    rw [← hzval]
+    exact (comp_translateByPoint E t P' 0).trans (congrArg Subtype.val (zero_add P'))
+  have hC : ∀ i, sectionEval (baseChangeZero E.π E.zero E.zero_π t) (mulByN E t N ⁻¹ᵁ W i)
+        (unitPullback (translateByPoint E t P') (mulByN E t N ⁻¹ᵁ W i)
+          (mulByN E t N ⁻¹ᵁ W i) (hτle i) (h i)) =
+      Scheme.resUnit (le_top : baseChangeZero E.π E.zero E.zero_π t ⁻¹ᵁ
+          (mulByN E t N ⁻¹ᵁ W i) ≤ ⊤)
+        (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P' hP') := by
+    intro i
+    have hP'le : baseChangeZero E.π E.zero E.zero_π t ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) ≤
+        (P'.1 : T ⟶ pullback E.π t) ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) := by
+      rw [← hzτ]
+      exact Scheme.Hom.preimage_mono _ (hτle i)
+    calc sectionEval (baseChangeZero E.π E.zero E.zero_π t) (mulByN E t N ⁻¹ᵁ W i)
+          (unitPullback (translateByPoint E t P') (mulByN E t N ⁻¹ᵁ W i)
+            (mulByN E t N ⁻¹ᵁ W i) (hτle i) (h i))
+        = Scheme.resUnit
+            (Scheme.Hom.preimage_mono (baseChangeZero E.π E.zero E.zero_π t) (hτle i))
+            (sectionEval (baseChangeZero E.π E.zero E.zero_π t ≫ translateByPoint E t P')
+              (mulByN E t N ⁻¹ᵁ W i) (h i)) := sectionEval_unitPullback _ _ _ _
+      _ = Scheme.resUnit hP'le
+            (sectionEval (P'.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i) (h i)) :=
+          resUnit_sectionEval_congr hzτ (mulByN E t N ⁻¹ᵁ W i) (h i)
+            (Scheme.Hom.preimage_mono (baseChangeZero E.π E.zero E.zero_π t) (hτle i)) hP'le
+      _ = Scheme.resUnit hP'le (Scheme.resUnit
+            (le_top : (P'.1 : T ⟶ pullback E.π t) ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) ≤ ⊤)
+            (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P' hP')) := by
+          rw [resUnit_torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P' hP' h hn hsplit i]
+      _ = _ := Scheme.resUnit_resUnit _ _ _
+  -- translation invariance: `τ_{P'}^# h_i = h_i · π^# h(P')`
+  have hkey := eq_mul_globalTwist_of_translate t
+    E.toEllipticCurveGeom.universallyOConnected
+    (baseChangeZero_snd E.π E.zero E.zero_π t)
+    (fun i => mulByN E t N ⁻¹ᵁ W i)
+    ((mulByN E t N).iSup_preimage_eq_top hW)
+    (F := fun i j => Units.map ((mulByN E t N).app (W i ⊓ W j)).hom.toMonoidHom
+      (transitionUnitOfCover M W e i j))
+    hn hsplit hτle hτinf hτF hC
+  have hPsnd : (P.1 : T ⟶ pullback E.π t) ≫ pullback.snd E.π t = 𝟙 T := P.2
+  have hglob : ∀ i, sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i)
+        (globalTwist (pullback.snd E.π t) (mulByN E t N ⁻¹ᵁ W i)
+          (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P' hP')) =
+      Scheme.resUnit (le_top : (P.1 : T ⟶ pullback E.π t) ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) ≤ ⊤)
+        (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P' hP') := fun i =>
+    sectionEval_globalTwist hPsnd _ _
+  have hPτ : (P.1 : T ⟶ pullback E.π t) ≫ translateByPoint E t P' =
+      ((P + P' : (E.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback E.π t) :=
+    comp_translateByPoint E t P' P
+  -- evaluate at `P` and glue over the traces
+  refine eq_of_forall_resUnit_eq
+    (fun i => (P.1 : T ⟶ pullback E.π t) ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i))
+    (iSup_preimage_preimage_eq_top (mulByN E t N) (P.1 : T ⟶ pullback E.π t) hW) fun i => ?_
+  have hPle : (P.1 : T ⟶ pullback E.π t) ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) ≤
+      ((P + P' : (E.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback E.π t) ⁻¹ᵁ
+        (mulByN E t N ⁻¹ᵁ W i) := by
+    rw [← hPτ]
+    exact Scheme.Hom.preimage_mono _ (hτle i)
+  have hstep : sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i)
+        (unitPullback (translateByPoint E t P') (mulByN E t N ⁻¹ᵁ W i)
+          (mulByN E t N ⁻¹ᵁ W i) (hτle i) (h i)) =
+      Scheme.resUnit hPle (sectionEval
+        ((P + P' : (E.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback E.π t)
+        (mulByN E t N ⁻¹ᵁ W i) (h i)) :=
+    (sectionEval_unitPullback (translateByPoint E t P') (P.1 : T ⟶ pullback E.π t)
+        (hτle i) (h i)).trans
+      (resUnit_sectionEval_congr hPτ (mulByN E t N ⁻¹ᵁ W i) (h i)
+        (Scheme.Hom.preimage_mono (P.1 : T ⟶ pullback E.π t) (hτle i)) hPle)
+  calc Scheme.resUnit (le_top : (P.1 : T ⟶ pullback E.π t) ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) ≤ ⊤)
+        (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm (P + P') (add_mem hP hP'))
+      = Scheme.resUnit hPle (Scheme.resUnit
+          (le_top : ((P + P' : (E.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback E.π t) ⁻¹ᵁ
+            (mulByN E t N ⁻¹ᵁ W i) ≤ ⊤)
+          (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm (P + P') (add_mem hP hP'))) :=
+        (Scheme.resUnit_resUnit _ _ _).symm
+    _ = Scheme.resUnit hPle (sectionEval
+          ((P + P' : (E.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback E.π t)
+          (mulByN E t N ⁻¹ᵁ W i) (h i)) := by
+        rw [resUnit_torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm (P + P')
+          (add_mem hP hP') h hn hsplit i]
+    _ = sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i)
+          (unitPullback (translateByPoint E t P') (mulByN E t N ⁻¹ᵁ W i)
+            (mulByN E t N ⁻¹ᵁ W i) (hτle i) (h i)) := hstep.symm
+    _ = sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i)
+          (h i * globalTwist (pullback.snd E.π t) (mulByN E t N ⁻¹ᵁ W i)
+            (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P' hP')) := by
+        rw [hkey i]
+    _ = sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i) (h i) *
+          sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i)
+            (globalTwist (pullback.snd E.π t) (mulByN E t N ⁻¹ᵁ W i)
+              (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P' hP')) := map_mul _ _ _
+    _ = Scheme.resUnit (le_top : (P.1 : T ⟶ pullback E.π t) ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) ≤ ⊤)
+          (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP) *
+        Scheme.resUnit (le_top : (P.1 : T ⟶ pullback E.π t) ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) ≤ ⊤)
+          (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P' hP') := by
+        rw [resUnit_torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP h hn hsplit i,
+          hglob i]
+    _ = Scheme.resUnit (le_top : (P.1 : T ⟶ pullback E.π t) ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) ≤ ⊤)
+          (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP *
+            torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P' hP') := (map_mul _ _ _).symm
 
 end Curve
 
