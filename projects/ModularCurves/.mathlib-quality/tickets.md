@@ -38952,6 +38952,17 @@ in the plan's "Known traps".
   - **Not affected by the AP2-B2 findings below** — `torsionSplittingEval` and everything it
     depends on is axiom-clean and does not route through `EllipticCurve/AbelEquivalence.lean`.
     This is currently the *only* substantial DS4 work that is not downstream of a false statement.
+  - 2026-08-09 (session 2, LANDED): **`weilPairing` (`:49`) and `weilPairing_over` (`:53`) are
+    FILLED and axiom-verified standard-three.** The whole prerequisite chain proved the same
+    session: dataset existence (`exists_normalized_dataset`, `WeilPairing/KMDataset.lean`),
+    master independence (`torsionSplittingEval_congr_dataset`,
+    `WeilPairing/KMIndependence.lean`), the canonical value (`weilPairingKM` + spec + `μ_N` +
+    `add_left` + `zero_left`, `WeilPairing/KMNaturality.lean`), the universal torsion pair
+    (`univTorsionFst/Snd` + `_mem`), and the Yoneda fill through `muNPointsEquiv.symm`.
+    `WeilPairing/Basic.lean` is down to the 5 AP-E2…E6 spec sorries. Still open in the
+    sub-cut: NAT0 val-lemmas (partly landed: `restrictBase`/`restrictBaseHom`/`_mem`),
+    NAT1 (κ-naturality), NAT2 (eval naturality), YON3 (the
+    `weilPairingEval = weilPairingKM` bridge) — those are what unblock AP-E2…E6.
   - 2026-08-09 (session 2): **sub-ticket plan spawned** — groups AP-E1-DS (dataset existence),
     AP-E1-IND (independence of the dataset), AP-E1-NAT (κ-naturality + eval naturality),
     AP-E1-YON (the Yoneda fill of `:49`/`:53`). See the "AP-E1 sub-cut" section below for the
@@ -39355,7 +39366,12 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
   change"). · **Generality**: any `g`.
 
 ### [AP-E1-NAT3] The canonical value and its laws
-- **Status**: open · **File**: `WeilPairing/KMNaturality.lean` · **Depends on**: AP-E1-DS6,
+- **Status**: **mostly done** (2026-08-09: `weilPairingKM` + spec
+  `weilPairingKM_eq_torsionSplittingEval` (IND5) + `weilPairingKM_pow_eq_one` +
+  `weilPairingKM_add_left` + `weilPairingKM_zero_left`, `WeilPairing/KMNaturality.lean`,
+  all axiom-verified standard-three. The def needed only DS6+IND5 — NOT naturality, which the
+  board had over-sequenced. Still open here: `weilPairingKM_restrictBase` (naturality), which
+  waits on NAT0–NAT2) · **File**: `WeilPairing/KMNaturality.lean` · **Depends on**: AP-E1-DS6,
   AP-E1-IND5, AP-E1-NAT2 · **Parent**: AP-E1 · **Type**: def + theorems
 - **Statement**: `weilPairingKM E t N P hP Q hQ : Γ(T,⊤)ˣ` := `torsionSplittingEval` at
   `exists_normalized_dataset`'s choice; specs: `weilPairingKM_eq_torsionSplittingEval` (= the
@@ -39367,7 +39383,12 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
 - **Mathlib lemmas**: none. · **Sources**: KM 2.8. · **Generality**: the register's use site.
 
 ### [AP-E1-YON1] Universal torsion points
-- **Status**: open · **File**: `WeilPairing/KMNaturality.lean` (or `Basic.lean` if short) ·
+- **Status**: done (2026-08-09: `univTorsionFst`/`univTorsionSnd` + `_mem` +
+  `mem_torsionPoints_of_comp_mulByHom` (the membership route through
+  `EllipticCurve.Point.baseChangeEquiv` + `map_zsmul`) + `torsionι_π`,
+  `WeilPairing/KMNaturality.lean`, axiom-verified standard-three. The reconstruction lemma
+  (restriction of the universal points along a classifying map) is deferred to YON3 where it
+  is consumed) · **File**: `WeilPairing/KMNaturality.lean` (or `Basic.lean` if short) ·
   **Depends on**: none · **Parent**: AP-E1 · **Type**: def + lemmas
 - **Statement**: over `T₀ := pullback (E.torsionπ N) (E.torsionπ N)` with
   `t₀ := pullback.fst … ≫ E.torsionπ N`: the two tautological points
@@ -39386,7 +39407,13 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
   **Generality**: the two `weilPairing` fills.
 
 ### [AP-E1-YON2] Fill `weilPairing` and `weilPairing_over`
-- **Status**: open · **File**: `WeilPairing/Basic.lean` (`:49`, `:53` — bodies only;
+- **Status**: **DONE — AP-E1's two target sorries are FILLED** (2026-08-09:
+  `WeilPairing/Basic.lean:49`/`:53` bodies replaced; `weilPairing` = `muNPointsEquiv.symm` of
+  `weilPairingKM` at the tautological pair, `weilPairing_over` = the subtype witness. Both
+  **axiom-verified standard-three** — the DS4 register entry is no longer a data-sorry.
+  `IsSeparated E.π` synthesises from `E.proper` via mathlib's `IsProper extends IsSeparated`;
+  `hsm := E.smooth`. `WeilPairing/Basic.lean` is down to 5 sorries, all of them AP-E2…E6
+  targets) · **File**: `WeilPairing/Basic.lean` (`:49`, `:53` — bodies only;
   `theorem_statement_protected`) · **Depends on**: AP-E1-NAT3, AP-E1-YON1 · **Parent**: AP-E1 ·
   **Type**: def-body + theorem-body
 - **Statement**: `weilPairing := ((muNPointsEquiv S N t₀).symm ⟨(weilPairingKM … P₀ … Q₀ …).val,

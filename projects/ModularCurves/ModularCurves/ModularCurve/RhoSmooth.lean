@@ -25,7 +25,11 @@ noncomputable section
 
 namespace ModularCurves
 
-open CategoryTheory CategoryTheory.Limits AlgebraicGeometry
+/- `open CategoryTheory` must be qualified here: this file's import closure now reaches
+`ForMathlib/FiniteHomologySequence.lean`, whose `namespace ModularCurves.CategoryTheory`
+would otherwise capture the `open` inside `namespace ModularCurves` and silently shadow
+`_root_.CategoryTheory` (the `idealModule` failure mode; durable fix = coordinator rename). -/
+open _root_.CategoryTheory _root_.CategoryTheory.Limits AlgebraicGeometry
 
 variable {N : ℕ} [NeZero N]
 

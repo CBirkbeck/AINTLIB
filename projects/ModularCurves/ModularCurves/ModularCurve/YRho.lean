@@ -2302,7 +2302,7 @@ structure RhoLevelStructure {N : ℕ} [NeZero N] (D : GaloisRepData N)
 
 section RhoProblem
 
-open CategoryTheory
+open _root_.CategoryTheory
 
 variable {N : ℕ} [NeZero N]
 

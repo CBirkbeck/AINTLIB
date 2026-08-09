@@ -7,6 +7,7 @@ import Mathlib.FieldTheory.IsAlgClosed.Basic
 import ModularCurves.EllipticCurve.TorsionFibre
 import ModularCurves.ForMathlib.RootOfUnityIntPow
 import ModularCurves.GroupScheme.MuN
+import ModularCurves.WeilPairing.KMNaturality
 
 /-!
 # The Weil pairing over a base scheme (KM 2.8)
@@ -43,14 +44,42 @@ namespace EllipticCurve
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
 /-- **(DS4, ticket chain T-C1)** The Weil pairing of `E[N]`, as an `S`-morphism
-`E[N] ×_S E[N] ⟶ μ_{N,S}`. DATA-SORRY (register entry DS4). Construction of record:
-KM 2.8 (the norm/divisor construction; equivalently Cartier autoduality of `E`). -/
+`E[N] ×_S E[N] ⟶ μ_{N,S}`. Construction of record: KM 2.8 (the norm/divisor construction) —
+**filled 2026-08-09 by the Katz–Mazur backend**: the canonical value `weilPairingKM`
+(existence of a normalised dataset: `WeilPairing/KMDataset.lean`; independence of the choice:
+`WeilPairing/KMIndependence.lean`) evaluated at the tautological pair of `N`-torsion points
+over the universal base `E[N] ×_S E[N]` (`WeilPairing/KMNaturality.lean`), turned into a
+morphism to `μ_N` by the points description `muNPointsEquiv` — it lands there by
+`weilPairingKM_pow_eq_one`, KM p. 89. -/
 noncomputable def weilPairing (N : ℕ) [NeZero N] :
-    pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N := sorry
+    pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N :=
+  ((muNPointsEquiv S N (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)).symm
+    ⟨((weilPairingKM E E.smooth (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+        N (univTorsionFst E N) (univTorsionFst_mem E N)
+        (univTorsionSnd E N) (univTorsionSnd_mem E N) :
+      Γ(pullback (E.torsionπ N) (E.torsionπ N), ⊤)ˣ) : Γ(pullback (E.torsionπ N)
+        (E.torsionπ N), ⊤)),
+      (Units.val_pow_eq_pow_val _ _).symm.trans
+        ((congrArg Units.val (weilPairingKM_pow_eq_one E E.smooth
+          (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) N
+          (univTorsionFst E N) (univTorsionFst_mem E N)
+          (univTorsionSnd E N) (univTorsionSnd_mem E N))).trans Units.val_one)⟩).val
 
-/-- **(T-C1a, specification of DS4)** The Weil pairing is a morphism over `S`. -/
+/-- **(T-C1a, specification of DS4)** The Weil pairing is a morphism over `S` — the
+subtype witness of the points description used to construct it. -/
 theorem weilPairing_over (N : ℕ) [NeZero N] :
-    E.weilPairing N ≫ muNπ S N = pullback.fst _ _ ≫ E.torsionπ N := by sorry
+    E.weilPairing N ≫ muNπ S N = pullback.fst _ _ ≫ E.torsionπ N :=
+  ((muNPointsEquiv S N (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)).symm
+    ⟨((weilPairingKM E E.smooth (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+        N (univTorsionFst E N) (univTorsionFst_mem E N)
+        (univTorsionSnd E N) (univTorsionSnd_mem E N) :
+      Γ(pullback (E.torsionπ N) (E.torsionπ N), ⊤)ˣ) : Γ(pullback (E.torsionπ N)
+        (E.torsionπ N), ⊤)),
+      (Units.val_pow_eq_pow_val _ _).symm.trans
+        ((congrArg Units.val (weilPairingKM_pow_eq_one E E.smooth
+          (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) N
+          (univTorsionFst E N) (univTorsionFst_mem E N)
+          (univTorsionSnd E N) (univTorsionSnd_mem E N))).trans Units.val_one)⟩).2
 
 /-- Pair two `T`-points of `E[N]` into a `T`-point of `E[N] ×_S E[N]`, and evaluate the
 Weil pairing, landing in the `N`-th roots of unity of `Γ(T, O_T)` via the points
