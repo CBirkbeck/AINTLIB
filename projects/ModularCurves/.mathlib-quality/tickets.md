@@ -39316,8 +39316,17 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
 - **Mathlib lemmas**: `AddEquiv.trans`. · **Sources**: GME p. 108. · **Generality**: any `g`.
 
 ### [AP-E1-NAT1] `κ` commutes with base change
-- **Status**: open · **File**: `WeilPairing/KMNaturality.lean` · **Depends on**: AP-E1-NAT0 ·
-  **Parent**: AP-E1 · **Type**: theorem (+ 3 private steps)
+- **Status**: **done** (2026-08-10, `kappa_restrictBase`, axiom-verified standard-three, with
+  the whole ladder: `restrictBase_coe_fst`/`restrictBase_comp_baseChangeMap`/
+  `isPullback_restrictBase`/`ker_restrictBase` (the cartesian-square + mathlib
+  `ker_fst_of_isClosedImmersion` route — NO pasting iso needed, contrary to the boarded
+  sketch), `sectionCls_restrictBase` (`nonempty_pullback_idealModule` at `f := baseChangeMap`),
+  `sectionCls_congr`, `zeroCls_restrictBase`, `baseChangeMap_fst/snd`. Lean lessons: rw is
+  unusable across the mixed `(E.baseChange t).E` / `pullback E.π t` clothing — calc/term
+  chains throughout; ambient `letI` monoidal instances fork the `Pic`-type clothing — scope
+  them tightly; bare `idealModule` is the documented shadowing, qualify as
+  `Scheme.Modules.idealModule`) · **File**: `WeilPairing/KMNaturality.lean` ·
+  **Depends on**: AP-E1-NAT0 · **Parent**: AP-E1 · **Type**: theorem (+ 3 private steps)
 - **Statement**: `kappa_restrictBase` — `Pic.map (baseChangeMap E.π g hg) (kappa E hsm t Q) =
   kappa E hsm t' (Point.restrictBase g hg Q)`.
 - **Proof sketch**: 1. **ker-comap** (`ker_comap_baseChangeMap`): `(Scheme.Hom.ker Q.1).comap
@@ -39343,7 +39352,18 @@ the normalisation condition is vacuous. Mixed overlaps have empty zero-trace, so
   is plumbing over existing engines.
 
 ### [AP-E1-NAT2] Naturality of the eval
-- **Status**: open · **File**: `WeilPairing/KMNaturality.lean` · **Depends on**: AP-E1-PULL,
+- **Status**: open — **design fixed 2026-08-10**: pulled dataset = `(Scheme.Modules.pullback
+  (baseChangeMap E.π g hg)).obj M` with `hM'` from `kappa_restrictBase` + `Pic.map_val` +
+  `mapSkeleton_obj_toSkeleton`; cover `baseChangeMap ⁻¹ᵁ W i`; trivialisations
+  `localPullbackTrivializationT (baseChangeMap …) M (W i) (e i)` (KMSplitting's gadget) with
+  cocycle spec `trivializationTransitionUnit_localPullbackTrivialization`; `hnorm'` via
+  `baseChangeZero_baseChangeMap` + the sectionEval-composite exchange
+  (`Scheme.Hom.comp_app` under `Units.map`); the value identification by the pin with the
+  pulled splitting `unitPullback (baseChangeMap …) … (h i)` — needs the small commutation
+  `baseChangeMap ≫ mulByN E t N = mulByN E t' N ≫ baseChangeMap` (pullback.hom_ext +
+  `mulByHom_baseChange_fst/snd`), then `unitPullback_congr` absorbs the preimage transport,
+  and `restrictBase_comp_baseChangeMap` + `resUnit_sectionEval_congr` handle `P' ≫ bcm = g ≫ P` ·
+  **File**: `WeilPairing/KMNaturality.lean` · **Depends on**: AP-E1-PULL,
   AP-E1-NAT0, AP-E1-NAT1 · **Parent**: AP-E1 · **Type**: theorem
 - **Statement**: `torsionSplittingEval_restrictBase` — for a dataset over `T` and `g : T' ⟶ T`:
   the pulled-back dataset (module `(Modules.pullback (baseChangeMap …)).obj M`, `hM'` from
