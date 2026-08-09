@@ -15,7 +15,38 @@ Closed this session, all axiom-clean:
 === CURRENT TARGET: BLOCKER 3 — `exists_invertible_tensor_idealModule_add`
 (`Picard/SelfAdjointN.lean:267`). What remains is TRANSPORT, not new mathematics. ===
 
-STEP 1 — `hfib` from the field theorem. At `x : Spec k ⟶ pairBase π`, split with
+**STEP 1 — DONE (2026-08-09), hfib IS NOW HYPOTHESIS-FREE.**
+  * `WeilPairing/TheoremOfSquareFibrewise.lean` — `nonempty_pullback_discrepancy_iso_unitObj_of_field`,
+    the discrepancy `Δ = (I(D_R) ⊗ I(D_Z)) ⊗ N` trivial on every field-valued fibre, in exactly the
+    seesaw's `hfib` shape. Discrepancy form chosen because it is what
+    `SelfAdjointN.exists_invertible_tensor_idealModule_add_of_discrepancy_trivial` consumes.
+  * `WeilPairing/FibreWeierstrassPresentation.lean` — `nonempty_pullback_discrepancy_iso_unitObj_projModel`
+    and `..._of_point`: the Weierstrass presentation of the fibre is DERIVED, so no presentation
+    hypothesis remains, for the tautological family `projModelπ W₀` at arbitrary `x : Spec k ⟶ Spec A`.
+  Both axiom-clean, zero sorries. **THE FIT IS VERIFIED BY ELABORATION** — three scratchpad probes
+  call `exists_pullback_iso_of_fibrewise_trivial_of_isReduced`, its `_of_affineCover` variant, and
+  the raw binder shape, and compile. KEEP THAT STANDARD for every remaining transport step.
+  No `[DecidableEq k]` leaks into the binder (`classical` is internal).
+
+  TWO ROUTE CORRECTIONS FOUND HERE, do not re-derive:
+   * Going through `projModelPointsAddEquiv` / `chartAffinePointEquiv` for the additive matching is a
+     TRAP — it forces comparing `projModelPointsEquiv` across TWO base rings (`A` and `k`), and that
+     base-change compatibility does not exist in the tree. Use `mulModelHom_map`
+     (`EllipticCurve/GroupLawConstruction.lean:853`) + `mulModelHom_specPoints`
+     (`EllipticCurve/AdditionSpecPoints.lean:1776`) instead — they match additively entirely OVER `k`
+     at the level of scheme morphisms, via the universal property of the base-change square. Zero leg:
+     `projModelZero_baseChange`.
+   * `WeierstrassAtlasBundle.lean:44`'s `e : … ≅ projModel (W i)` is a STRUCTURE FIELD (hypothesised
+     data), not a proof of the presentation.
+
+  STILL OPEN on this sub-line: transport to a family only ISOMORPHIC over the base to a `projModel`,
+  and a non-`Spec` affine `S` (the `Scheme.SpecToEquivOfField` / `S.isoSpec` step).
+
+DETECTION NOTE, earned twice: a conclusion-grep CAN miss a duplicate that spells its sections
+differently (`Limits.pullback.lift (t ≫ z₁) (𝟙 T') _` vs `sectionBaseChange`). The detector that
+worked was a full `lake build ModularCurves` — the environment NAME CLASH. Run it before writing.
+
+(historical) STEP 1 — `hfib` from the field theorem. At `x : Spec k ⟶ pairBase π`, split with
 `nonempty_pullback_tensorObj` (`Picard/PullbackTensorObj.lean:61`), rewrite each factor with
 `nonempty_pullback_idealModule_ker_sectionBaseChange` (`Picard/IdealModulePullback.lean:387` —
 stated along `Limits.pullback.fst π t`, SYNTACTICALLY the morphism in `hfib`), identify the fibre by
