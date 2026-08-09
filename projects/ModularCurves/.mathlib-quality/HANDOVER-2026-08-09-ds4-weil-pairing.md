@@ -1,11 +1,15 @@
 # HANDOVER — ModularCurves, DS4 relative Weil pairing (2026-08-09)
 
 Branch `dev/modular-curves` · worktree `/Users/mcu22seu/Documents/GitHub/aintlib-modular-curves`
-· HEAD at time of writing `b22304bc5` · `lake build ModularCurves` **green, 9771 jobs**.
+· HEAD `b036851cf` · `lake build ModularCurves` **green, 9772 jobs**.
 
 This document is written to be the *only* thing an incoming worker has to read. It is deliberately
 specific about what is **verified**, what is **claimed by a note in the tree** (and therefore
 suspect), and what is **known-dead**.
+
+> **If you read one section, read §6.5.** The ticket this whole board has been pointing at —
+> "Blocker 4" — is **false as stated**, along with its neighbour. That has to be settled with the
+> project owner before any proof work on the Abel chain.
 
 ---
 
@@ -28,8 +32,15 @@ bilinearity in `Q` **and bilinearity in `P`** — is **proved and axiom-verified
 `appLE`-based transport device is reusable and dissolves a class of dependent-open rewrites this
 line kept hitting.
 
-So the single remaining target is AP-D4 `⊇`, whose real bottom is §6 — and where the recorded route
-may be a detour (**§6.3 is the most important paragraph in this document**).
+**Stacks 00ME closed on 2026-08-09**: `ForMathlib/LocalFlatnessCriterion.lean` is entirely
+sorry-free, every declaration axiom-verified standard-three (§6.3). That was the deep
+commutative-algebra gate under the Abel chain.
+
+So the single remaining KM target is AP-D4 `⊇` — **but it is not currently workable**, because its
+surjectivity half consumes two statements in `EllipticCurve/AbelEquivalence.lean` that turn out to
+be **false as stated** (§6.5). The DS4 work that *is* dispatchable right now is **AP-E1**
+(`weilPairing` as a scheme morphism, `WeilPairing/Basic.lean:49`), which AP-D7 unblocked and which
+does not route through the Abel chain — see §11.
 
 ---
 
@@ -59,15 +70,15 @@ may be a detour (**§6.3 is the most important paragraph in this document**).
 
 ```bash
 cd /Users/mcu22seu/Documents/GitHub/aintlib-modular-curves
-lake build ModularCurves            # ~9771 jobs; green today
+lake build ModularCurves            # 9772 jobs; green at HEAD b036851cf
 ```
 
 - **`lake build ModularCurves` is also the duplicate/name-clash detector.** Run it *before* adding
   any new `import`. A conclusion-grep has twice missed a clash that this caught. Two shadowing
   incidents already cost real time (§9).
 - **Some `ForMathlib/` modules are orphans** that `lake build ModularCurves` does not reach —
-  build them explicitly by module name. `WeilPairing/Translation.lean` is currently one of these
-  (not yet imported into `ModularCurves.lean`).
+  build them explicitly by module name. (`WeilPairing/Translation.lean` was one while it was being
+  written; it is now imported at `ModularCurves.lean:260`.)
 - The v4.33 bump idiom, when elaboration stalls: a file-level option triple including
   `set_option backward.defeqAttrib.useBackward true` and
   `backward.synthInstance.canonInstances false` / `respectTransparency.types false`. See
@@ -125,7 +136,7 @@ no heartbeat bumps, no transparency overrides. Keep it that way.
 
 ---
 
-## 5. The two open statements
+## 5. The last two KM statements — one closed, one open
 
 ### 5.1 `torsionSplittingEval_add` — AP-D7, bilinearity in `P` — **CLOSED 2026-08-09**
 
@@ -238,8 +249,9 @@ and the `sorry` line differ, and the tree's own cross-references use the **`sorr
 
 Because `exists_section_of_degree_one` and `relEffCartierDiv_of_isIso_subschemeι` are inverse to
 each other, `IsIso` and `RelEffCartierDiv` are *equivalent* here — neither is free. **The genuine
-content of Blocker 4 is: the vanishing subscheme `Z = V(σ)` is finite, flat and lfp over `S` with
-fibre rank one.**
+content of Blocker 4 is: the vanishing subscheme `Z = V(σ)` is finite and flat over `S` with fibre
+rank one.** (`Scheme.Hom.isIso_iff_finrank_eq` takes `[Flat f]` and `[IsFinite f]` only — no
+`LocallyOfFinitePresentation`.)
 
 - *finiteness*: `Z` closed in `E`, `E → S` proper ⟹ `Z → S` proper; plus quasi-finite (each fibre
   `σ_s ≠ 0` on an integral curve) ⟹ finite. Needs `σ_s ≠ 0`, i.e. the package's base-change iso.
@@ -247,7 +259,7 @@ fibre rank one.**
   `div(σ_s)` is a single reduced rational point.
 - *flatness*: **this is the whole difficulty**, and it is Stacks **00ME**.
 
-### 6.3 ⚠️ The recorded route may be a detour — read this before planning
+### 6.3 The commutative-algebra bottom — CLOSED 2026-08-09
 
 The board and the FOCUS file record that the route was **replaced after external review** with
 *étale transversality* (`dh̄ ≠ 0` on the smooth fibre ⟹ `h : U → 𝔸¹_S` étale ⟹ `Z` finite étale of
@@ -301,34 +313,33 @@ supply one `Prop`, expose the `Prop`.**
 
 **So the tool now exists. What is owed next is the wiring** — see the ⚠️ below.
 
-**What I verified, precisely** (so you know where the risk is): I verified the four sorry
-locations, the statements and proofs of `exists_section_of_degree_one` and
-`relEffCartierDiv_of_isIso_subschemeι`, that the `R`-substrate/`_free` chains in
-`LocalFlatnessCriterion.lean` are sorry-free, and that the `_sModule` chain's only gaps are the two
-named above. This project's recorded routes have been wrong fifteen times (§10), so treat the rest
-as a hypothesis.
-
-**⚠️ Correction, established after the first draft of this document — read it.** A consumer grep
-shows that **nothing in the tree consumes the `_sModule` chain at all**, and **nothing consumes
-`evalGenerator_mem_nonZeroDivisors` either**. `relEffCartierDiv_of_degreeOne_package`'s proof body
-is just
+**⚠️ The tool exists; the wiring does not.** A consumer grep shows that **nothing in the tree
+consumes the flatness criterion at all**, and **nothing consumes `evalGenerator_mem_nonZeroDivisors`
+either**. `relEffCartierDiv_of_degreeOne_package`'s proof body is just
 
 ```lean
 refine relEffCartierDiv_of_isIso_subschemeι (sectionVanishingIdealSheaf M hM σ) ?_
 sorry
 ```
 
-— it never calls `evalGenerator_mem_nonZeroDivisors`. So closing `:456`/`:473` **does not
-automatically discharge anything**; it supplies a *tool* the fibrewise route needs, and the wiring
-from that tool to `IsIso (Z ≫ π)` still has to be written. Concretely the remaining obligations
-after the tool exists are: `IsFinite`, `Flat` and `LocallyOfFinitePresentation` instances for
-`(sectionVanishingIdealSheaf M hM σ).subschemeι ≫ π`, plus `finrank = 1` at every point, which is
-what `Scheme.Hom.isIso_iff_finrank_eq` consumes (see `exists_section_of_degree_one`'s proof for the
-exact idiom). Budget for that wiring, not just for the commutative-algebra leaf.
+— it never calls `evalGenerator_mem_nonZeroDivisors`. So having Stacks 00ME **does not
+automatically discharge anything**. The obligations that remain are: `IsFinite` and `Flat`
+instances for `(sectionVanishingIdealSheaf M hM σ).subschemeι ≫ π`, plus `Scheme.Hom.finrank = 1`
+at every point. That is exactly what `Scheme.Hom.isIso_iff_finrank_eq` consumes — and note it does
+**not** need `LocallyOfFinitePresentation`, contrary to what §6.2 above assumes; see
+`exists_section_of_degree_one`'s proof for the exact idiom. Budget for that wiring, not just for the
+commutative-algebra leaf.
 
-Also note the warning already in the tree: the `_sModule` variant of the residue-field core "is
-sorried and must not be used" — that comment sits next to `evalGenerator_mem_nonZeroDivisors` and
-is *why* it is still open. Closing `:456`/`:473` removes that prohibition.
+An older comment beside `evalGenerator_mem_nonZeroDivisors` said the `_sModule` variant of the
+residue-field core "is sorried and must not be used". **That prohibition is lifted** — the file is
+sorry-free in every variant. The comment has been updated in the tree.
+
+**What I verified, precisely** (so you know where the risk is): the four sorry locations; the
+statements and proofs of `exists_section_of_degree_one` and `relEffCartierDiv_of_isIso_subschemeι`;
+that `LocalFlatnessCriterion.lean` is sorry-free and every declaration in it axiom-clean; the
+signature of `Scheme.Hom.isIso_iff_finrank_eq`; and the consumer greps above. What I did **not**
+verify is that this route actually closes Blocker 4 once the statement is repaired — and §6.5 now
+makes that moot for the time being.
 
 ### 6.4 Hypothesis audit for Blocker 4 (do not weaken)
 
@@ -397,26 +408,32 @@ repaired. That is why §11 puts the statement repair first.
 
 ---
 
-## 8. Stale notes in the tree — verified stale today, do not trust
+## 8. Stale notes in the tree
 
-1. **`KMBilinear.lean:299–301`** says `torsionSplittingEval_pow_eq_one` "**Depends on `sorryAx`**,
-   through `exists_pow_transitionUnitOfCover_split`". **False.** `exists_pow_transitionUnitOfCover_split`
-   is proved at `KMBilinear.lean:281` and `#print axioms torsionSplittingEval_pow_eq_one` returns
-   the standard three. Fix the docstring.
-2. **`Picard/SelfAdjointN.lean:14`** says "One sorry left (`exists_invertible_tensor_idealModule_add`)".
-   That leaf is closed; `SelfAdjointN.lean` is sorry-free.
-3. **`tickets.md:38879`** warns that `picMap_mulByHom_kappa_eq_one` depends on `sorryAx` and tells
-   you to bisect the chain. Stale — re-verified standard-three today.
-4. **The AbelEquivalence sorry line numbers** in older board entries (836/960/994/1013) are stale;
-   the current ones are 848/971/994/1013.
-5. **`KMBilinear.lean`, `torsionSplittingEval_add`'s docstring** still opens
-   "**— OPEN, `sorry`**" and carries a long "Precise inventory of what is missing" block naming
-   four absent bricks. All four now exist in `WeilPairing/Translation.lean` and the theorem is
-   proved. This is the single most misleading comment in the tree right now — fix it first.
-6. General rule, learned the expensive way: **a docstring saying "blocked because mathlib lacks X"
-   is a dated observation, not a fact.** Three such notes were false when acted on. Spend one
-   search confirming X is still missing before planning around it. (Symmetrically: when a blocker
-   *is* discharged, go back and rewrite the note — items 1–5 above are all failures to do that.)
+Items 1, 2, 4 and 5 were **found and fixed on 2026-08-09**; they are listed so you can see the
+failure mode, not as outstanding work. Item 3 is still outstanding.
+
+1. ~~`KMBilinear.lean` said `torsionSplittingEval_pow_eq_one` "**Depends on `sorryAx`**".~~ **False,
+   and now fixed.** `exists_pow_transitionUnitOfCover_split` is proved, and `#print axioms` on the
+   consumer returns the standard three.
+2. ~~`Picard/SelfAdjointN.lean:14` said "One sorry left".~~ **Fixed** — the file is sorry-free, and
+   its "State (2026-07-29)" subsection is now explicitly marked historical.
+3. **`tickets.md:38879`** still warns that `picMap_mulByHom_kappa_eq_one` depends on `sorryAx` and
+   tells you to bisect the chain. **Stale** — re-verified standard-three. *(Not yet fixed: the board
+   is 40k lines and this entry is superseded by the newer Group-D block further down.)*
+4. ~~`KMBilinear.lean`'s `torsionSplittingEval_add` docstring said "— OPEN, `sorry`" and listed four
+   missing bricks.~~ **Fixed** — the theorem is proved and the docstring now describes the proof.
+5. ~~`relEffCartierDiv_of_degreeOne_package`'s docstring said the `_sModule` flatness criterion "is
+   sorried and must not be used".~~ **Fixed** — that file is sorry-free in every variant.
+6. **AbelEquivalence line numbers**: older board entries cite `836/960/994/1013`. The `theorem` lines
+   are 836/960/981/999 and the `sorry` lines are 848/971/994/1013; the tree's own cross-references
+   use the **`sorry`** line. See the table in §6.
+7. General rule, learned the expensive way: **a docstring saying "blocked because mathlib lacks X"
+   is a dated observation, not a fact.** Several such notes were false when acted on — on 2026-08-09
+   alone, "Artin–Rees is needed" and "the base change needs `S ⧸ IS`" were both wrong, and two of
+   four boarded blockers for AP-D7 were much smaller than recorded. Spend one search confirming X is
+   still missing before planning around it. **Symmetrically: when a blocker *is* discharged, go back
+   and rewrite the note** — every item above is a failure to do that.
 
 ### 8.1 `sorry` greps lie; `#print axioms` does not
 
@@ -471,10 +488,22 @@ needlessly general lemma.
   conclusion in the route's own vocabulary, and read the module docstrings of any directory that
   plausibly implements it — a route's home file is named after its machinery, never after the
   theorem it serves.
-- **Boarded routes in this project have been wrong fifteen times** (thirteen over-engineered, twice
-  the statement was actually **false**, once "missing API" already existed). The usual cause: the
-  planner anchored on a nearby proved theorem's *shape* instead of reading what the statement
-  needs. **Trust the statement over the sketch, and say so when you deviate.**
+- **Boarded routes in this project have been wrong repeatedly, and in every direction.** Most often
+  over-engineered — 2026-08-09 alone produced three: "Artin–Rees is needed" (it is not), "the base
+  change needs `S ⧸ IS`" (it does not), and two of the four boarded blockers for AP-D7 were much
+  smaller than recorded. Once the "missing API" already existed. And **four times the statement
+  itself was false**, including the two found on 2026-08-09 that sit on this very critical path
+  (§6.5). The usual cause: the planner anchored on a nearby proved theorem's *shape* instead of
+  reading what the statement needs. **Trust the statement over the sketch, and say so when you
+  deviate.**
+- **Spend ten minutes trying to break a statement before spending a session proving it.** Both
+  §6.5 findings came from asking "what do the hypotheses actually give me?" rather than from a
+  failed proof attempt. `b2_log.jsonl` is where that pays off, and it is what stops a decompose pass
+  re-ticketing a defective statement.
+- **When a proof needs an instance package only to supply one `Prop`, expose the `Prop`.**
+  `injective_of_lTensor_residueField_injective_of_separated` takes filtration-separatedness as a
+  bare hypothesis instead of `[Algebra R S] [IsNoetherianRing S] [Module.Finite S N]`, and that
+  alone turned a planned instance transport into four steps transporting nothing.
 
 ### Reusable by-products worth knowing about
 
@@ -489,51 +518,69 @@ affine-chart theorem of the square.**
 
 ## 11. Recommended order of work
 
-1. **Fix the stale docstrings** in §8 — cheap, and they have already misdirected work. In
-   particular `KMBilinear.lean`'s `torsionSplittingEval_add` docstring still contains the long
-   "Precise inventory of what is missing" block listing four bricks that now all exist; rewrite it
-   to describe the proof instead of the obstruction, or a future reader will rebuild them.
-2. 🛑 **Repair the two false statements first — §6.5.** `evalGenerator_mem_nonZeroDivisors` and
-   `relEffCartierDiv_of_degreeOne_package` (Blocker 4) are **false as stated**; one counterexample
-   (`E = ℙ¹_k ⊔ Spec k`) kills both. This needs the project owner's decision on the hypothesis set,
-   because it changes statements (`theorem_statement_protected`). Audit
-   `exists_relEffCartierDiv_of_degreeOne` and `relEffCartierDiv_degree_one_of_degreeOne` at the same
-   time. **Do not spend a session proving either until this is settled** — the project has lost time
-   to exactly this twice before.
+**A. Raise with the project owner, before touching the Abel chain.**
 
-3. **Then `evalGenerator_mem_nonZeroDivisors`** (in its repaired form) — the first consumer of the
-   now-complete Stacks 00ME. `ForMathlib/LocalFlatnessCriterion.lean` is sorry-free as of
-   `a5af3b7da`, so the tool is available; nothing in the tree consumes it yet, so this is where the
-   wiring starts. The neighbouring proved lemmas
-   (`mem_nonZeroDivisors_iff_injective_mulRight`,
-   `mem_nonZeroDivisors_of_forall_maximal_residueField_fibre_injective`) are the intended plumbing
-   on the other side.
-3. Then `relEffCartierDiv_of_degreeOne_package` (`:971`), `exists_relEffCartierDiv_of_degreeOne`
-   (`:994`), `relEffCartierDiv_degree_one_of_degreeOne` (`:1013`).
-4. Then the two Abel halves for AP-D4 `⊇` (§5.2), including the missing **fibrewise degree function
-   on `Pic`**.
-5. Then Group E — the DS4 register (`AP-E1`, `AP-E2…E6`) on the ticket board.
-6. Housekeeping worth doing at some point: `WeilPairing/Translation.lean` is imported at
-   `ModularCurves.lean:260`, out of the surrounding alphabetical order (between `KMUniqueness` and
-   `LineVerticalAssembly`). Harmless, but move it when you next touch that block.
+🛑 **The two false statements — §6.5.** `evalGenerator_mem_nonZeroDivisors` and
+`relEffCartierDiv_of_degreeOne_package` (Blocker 4) are **false as stated**; one counterexample
+(`E = ℙ¹_k ⊔ Spec k`) kills both. Repairing them changes statements
+(`theorem_statement_protected`), so it is the owner's decision. Audit
+`exists_relEffCartierDiv_of_degreeOne` (`:981`) and `relEffCartierDiv_degree_one_of_degreeOne`
+(`:999`) at the same time — they are unaudited and suspect for the same reason. **Do not spend a
+session proving any of them until this is settled.** Everything in group C below is downstream of
+this.
+
+**B. Work that is dispatchable right now (not downstream of §6.5).**
+
+1. **AP-E1** — `weilPairing` as a scheme morphism plus `weilPairing_over`
+   (`WeilPairing/Basic.lean:49`, `:53`). Unblocked by AP-D7 on 2026-08-09 and the only substantial
+   DS4 work not sitting behind a false statement.
+   **Scope warning, and it is not on the board:** the KM output is
+   `torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP` — it depends on a choice of the
+   auxiliary point `Q`, the invertible `M`, the cover `W`, the trivialisation `e` and the
+   normalisation `hnorm`. Yoneda needs a **canonical** pairing, so AP-E1 has a prerequisite:
+   *independence of all those choices*, then naturality in `T`. `WeilPairing/KMUniqueness.lean`
+   (`eq_of_normalized_splitting`) has part of it, not all. **Spawn the independence sub-tickets
+   before attempting the Yoneda step.**
+2. **AP-E2 … E6** — the register's five spec theorems, blocked on AP-E1. Two carry their own
+   research risk, already recorded on the board: `_self` needs KM's "Notes Added in Proof" (2.8.3
+   gives only alternation, which is weaker), and `_nondegenerate` needs Cartier–Nishi duality, which
+   is absent from mathlib and will want its own sub-development.
+3. Housekeeping: `WeilPairing/Translation.lean` is imported at `ModularCurves.lean:260`, out of the
+   surrounding alphabetical order. Harmless; move it when you next touch that block.
+
+**C. Once §6.5 is settled — the Abel chain, in this order.**
+
+1. `evalGenerator_mem_nonZeroDivisors` in its repaired form. This is the first consumer of the
+   now-complete Stacks 00ME (`ForMathlib/LocalFlatnessCriterion.lean`, sorry-free as of
+   `a5af3b7da`); nothing consumes it yet, so the wiring starts here. The neighbouring proved lemmas
+   `mem_nonZeroDivisors_iff_injective_mulRight` and
+   `mem_nonZeroDivisors_of_forall_maximal_residueField_fibre_injective` are the intended plumbing on
+   the other side.
+2. `relEffCartierDiv_of_degreeOne_package` (`:971`), then `exists_relEffCartierDiv_of_degreeOne`
+   (`:994`), then `relEffCartierDiv_degree_one_of_degreeOne` (`:1013`).
+3. The two Abel halves for AP-D4 `⊇` (§5.2), including the missing **fibrewise degree function on
+   `Pic`** — that has no ticket and no existing machinery.
 
 ---
 
 ## 12. Wider project state (context, not your task)
 
-80 sorry-bearing declarations are reachable from `ModularCurves.lean`. Concentration:
+**92** sorry-bearing declarations are reachable from `ModularCurves.lean` (compiler-reported, from a
+full replay — see the Lake caveat in §2; a partial replay under-reports, and an earlier count in
+this document said 80 for exactly that reason). By area:
 
 | Area | Count | Note |
 |---|---|---|
-| `GroupScheme/NIsogeny.lean` | 19 | pre-existing WIP |
-| `LevelStructure/*` | 16 | `ExactOrder`, `Factorization`, `CartierDivisor`, `Basic` |
-| `Moduli/*` | 15 | `GammaH`, `Coarse`, `EllCategory`, `SqrtCoverGlue`, `Stack`, … |
-| `EllipticCurve/EndomorphismDegree.lean` | 7 | |
-| `WeilPairing/Basic.lean` | 7 | superseded interface, see §9.6 |
-| `ForMathlib/*` | 8 | incl. the two in §6.3 |
-| rest | 8 | |
+| `GroupScheme/*` | 21 | 19 of them in `NIsogeny.lean`; pre-existing WIP |
+| `Moduli/*` | 18 | `GammaH` 5, `Coarse`, `EllCategory`, `SqrtCoverGlue`, `Stack`, … |
+| `EllipticCurve/*` | 15 | `EndomorphismDegree` 7, `AbelEquivalence` 4 (§6), … |
+| `LevelStructure/*` | 14 | `Factorization` 6, `ExactOrder` 4, `CartierDivisor`, `Basic` |
+| `ForMathlib/*` | 12 | `BuchsbaumEisenbud` 5; **`LocalFlatnessCriterion` is now 0** |
+| `WeilPairing/*` | 8 | 7 of them `Basic.lean`, the superseded interface (§9.6); 1 is AP-D4 `⊇` |
+| `ModularCurve/*` | 4 | |
 
-None of these except the `ForMathlib` pair and `AbelEquivalence.lean` are on the DS4 critical path.
+Only `AbelEquivalence.lean` (4) and `KMPairing.lean` (1) are on the DS4 critical path. The
+7 in `WeilPairing/Basic.lean` are the **targets** of AP-E1…E6, not obstacles to them.
 
 ---
 
@@ -545,8 +592,24 @@ None of these except the `ForMathlib` pair and `AbelEquivalence.lean` are on the
 - `.mathlib-quality/plan-blockers-2026-08-08.md` — the blockers plan **plus an external review
   (ChatGPT 5.6 Sol) folded in as §"External review" (A1–A6)**, with self-corrections A2′/A2″/A2‴.
   Read this before re-planning Blocker 4.
-- `.mathlib-quality/b2_log.jsonl` — statements found to be **mathematically wrong**. Check it
-  before boarding anything; it is what stops a defective statement being re-ticketed.
+- `.mathlib-quality/b2_log.jsonl` — statements found to be **mathematically wrong**, 19 entries.
+  **Check it before boarding anything**; it is what stops a defective statement being re-ticketed.
+  The two newest, `AP2-B2-evalgen` and `AP2-B2-blocker4`, are §6.5.
 - `.mathlib-quality/DEBT.md` — dead/unconsumed branches.
-- `.mathlib-quality/beastmode_active` — the live FOCUS breadcrumb (mirrored at repo root
-  `.mathlib-quality/beastmode_active`; **both copies must exist**).
+- `.mathlib-quality/beastmode_active` — the FOCUS breadcrumb for `/beastmode`. **Currently absent**:
+  it was removed at the B2 stop, which is the protocol. If you run `/beastmode`, it recreates the
+  file; it must exist at *both* the repo root and under `projects/ModularCurves/`.
+
+---
+
+## 14. What changed on 2026-08-09 (so you can date anything you find)
+
+| Commit | What |
+|---|---|
+| `c6281f9d5` | AP-D7 closed — `torsionSplittingEval_add`; new `WeilPairing/Translation.lean` |
+| `12b5355a5` | Stacks 00MK `S`-module core proved |
+| `c44f97f10` | core split into the hypothesis-light `…_of_separated` form |
+| `a5af3b7da` | `ForMathlib/LocalFlatnessCriterion.lean` **entirely sorry-free** |
+| `5e862b426` | 🛑 the two B2 findings — counterexample, docstring warnings, `b2_log` entries |
+| `d8f5960a9` | board: AP-D7 done, AP-E1 unblocked with its scope warning, B2 ticket added |
+| `b036851cf` | B2 stop; beastmode sentinel removed |
