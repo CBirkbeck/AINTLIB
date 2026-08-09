@@ -1,104 +1,42 @@
-FOCUS (2026-08-09): **DS4 GAP A IS CLOSED. `Picard/` IS ENTIRELY SORRY-FREE.**
-`(★)` `picMap_mulByHom_kappa_pow` and `(★′)` `picMap_mulByHom_kappa_eq_one` are axiom-verified
-standard-three, as are `exists_invertible_tensor_idealModule_add` and `kappa_add`.
+FOCUS (2026-08-09): **AP-D7 IS CLOSED. The Katz–Mazur construction of the relative Weil pairing
+is COMPLETE except for AP-D4 `⊇`.** Commit c6281f9d5, pushed. `lake build ModularCurves` green.
 
-=== CURRENT TARGET: AP-D4 — `E[N](S) = Ker([N]^* : Pic⁰(E/S) → Pic⁰(E/S))` ===
-File: new, `WeilPairing/KMPairing.lean`. Source: KM (2.8.1.7), p. 88; self-duality of `[N]` is
-KM 2.6.2.1.
-  * `⊆` **IS** `(★′)` `picMap_mulByHom_kappa_eq_one` (`Picard/SelfAdjointN.lean`) — now genuinely
-    available.
-  * `⊇` is Abel (AP-B3) applied to a class killed by `[N]^*`.
+READ FIRST: `.mathlib-quality/HANDOVER-2026-08-09-ds4-weil-pairing.md` — the full state of the
+line, written to be the only document needed. Kickoff message for a new worker:
+`.mathlib-quality/HANDOVER-MESSAGE-2026-08-09.md`.
 
-*** THE TICKET BOARD'S AP-D4 WARNING IS STALE — IGNORE IT. *** `.mathlib-quality/tickets.md:38879`
-still says `picMap_mulByHom_kappa_eq_one` "depends on `sorryAx`" and tells you to bisect the chain.
-That was true when written; the inherited sorry was `exists_invertible_tensor_idealModule_add`,
-closed today. Re-verified directly: propext, Classical.choice, Quot.sound. **AP-D4, AP-D5-existence,
-AP-D6 and AP-D7 are all UNBLOCKED.**
+=== THE ONE REMAINING TARGET ===
+`exists_torsionPoint_of_mem_kerMulByN` — `WeilPairing/KMPairing.lean:302` — AP-D4 `⊇`.
+It is Abel's theorem in two halves (rigidity `κ(Q)=1 → Q=0`, and surjectivity onto `kerMulByN`),
+and it additionally needs a **fibrewise degree function on `Pic`** that the tree does not have.
+Escape hatch already proved: `exists_torsionPoint_of_mem_kerMulByN_of_surjective` carries both
+halves as hypotheses and is axiom-clean.
 
-THEN, in order (all in `WeilPairing/KMPairing.lean`):
-  * **AP-D5 existence** — `f_{i,j} ∘ [N] = h_i / h_j`. KM p. 88: triviality of `[N]^*ℒ` in `Pic(E/S)`
-    means the normalized cocycle `f_{i,j} ∘ [N]` is a coboundary. **The UNIQUENESS half is already
-    DONE** — `eq_one_of_mem_kUnits` and `eq_of_div_mem_kUnits` (`WeilPairing/UnitSheaf.lean`,
-    standard-three) give KM's "uniquely in the form …" from AP-D2 alone.
-  * **AP-D6** — the patching: `h_i ∘ P` glue to `"h(P)" ∈ Γ(S, 𝒪_S^×)`. KM p. 89, over the cover of
-    `S` by `P^{-1}([N]^{-1}U_i)`, using `f_{i,j} ∈ K^×`, `h_i/h_j = f_{i,j} ∘ π`, `πP = 0`.
-  * **AP-D7** — bilinearity, and landing in `μ_N`. KM p. 89. **TWO tickets** (one conclusion each);
-    the source's "one verifies easily" is a flag that this may expand.
-Then Group E — the DS4 register (`AP-E1`, `AP-E2…E6`).
+=== NEXT ACTIONABLE STEP (handover §6.3 — the important one) ===
+1. Fix the stale docstrings (handover §8). Worst offender: `torsionSplittingEval_add`'s docstring
+   in `KMBilinear.lean` still says "OPEN, `sorry`" and lists four bricks that now all exist.
+2. Then: `injective_of_lTensor_residueField_injective_sModule`
+   (`ForMathlib/LocalFlatnessCriterion.lean:456`) + its private plumbing at `:473`. Their
+   docstrings already contain the COMPLETE proof (Artin–Rees induction `K ⊆ 𝔪ᴿⁿ•N`, then Krull);
+   the mathlib API is confirmed present. The `R`-substrate and `R`-free forms in that same file
+   are already proved sorry-free — only the `S`-module variant is open.
+   *** BUT VERIFY THE CHAIN FIRST. *** I established that `exists_section_of_degree_one` and
+   `relEffCartierDiv_of_isIso_subschemeι` are mutually inverse, so Blocker 4's genuine content is
+   flatness of the vanishing subscheme = Stacks 00ME. I did NOT verify end-to-end that closing
+   :456/:473 discharges `evalGenerator_mem_nonZeroDivisors` (`AbelEquivalence.lean:848`) and thence
+   Blocker 4 (`:971`). The board's étale-transversality route (Stacks §37.38/055S) is probably a
+   detour, but that is a hypothesis, not a verified fact.
+3. Then `AbelEquivalence.lean` :971 / :994 / :1013, then the two Abel halves, then Group E.
 
-ALSO STILL OPEN, independent of AP-D: **BLOCKER 4** —
-`IsIso ((sectionVanishingIdealSheaf M hM σ).subschemeι ≫ π)` at `EllipticCurve/AbelEquivalence.lean`
-(note the rename). Route REPLACED after external review: étale transversality — `dh̄ ≠ 0` on the
-smooth fibre ⟹ `h : U → 𝔸¹_S` étale ⟹ `Z` finite étale of degree one ⟹ iso (Stacks §37.38 / 055S;
-prove the special case from a standard-smooth Jacobian presentation, since the general slicing lemma
-routes through fibrewise flatness). The old nonzerodivisor route IS Stacks 00MF and does NOT dodge
-Artin–Rees; producing the section from fibre points is not viable (`S_red → S` has the same
-residue-field fibres). Hypothesis audit: `h⁰ = 1` and `H¹ = 0` alone are NOT enough — also needs
-smooth geometrically integral genus-one fibres, `deg M_s = 1`, and the base-change iso giving
-`σ_s ≠ 0`.
-
-=== TWO COORDINATOR ITEMS (cross-cutting renames — NOT producer work, but they bite here) ===
-1. `ModularCurves.idealModule` (`EllipticCurve/PoleSheaf.lean:154`, ideal module of a MORPHISM)
-   SHADOWS `AlgebraicGeometry.Scheme.Modules.idealModule` (`Picard/IdealModule.lean:156`, of an
-   IDEAL SHEAF) inside `namespace ModularCurves`. Importing `ChartGroupSum` made 518 modules newly
-   reachable and broke every bare `idealModule` in `SelfAdjointN.lean`. Worked around by ONE
-   semantics-preserving line after `namespace ModularCurves`:
-   `local notation "idealModule" => AlgebraicGeometry.Scheme.Modules.idealModule`.
-   Durable fix = rename `ModularCurves.idealModule`.
-2. `sectionVanishingIdeal` was the same failure mode and was silently orphaning the ENTIRE Seesaw
-   line; fixed this session (renamed to `sectionVanishingIdealSheaf`).
-**Run a full `lake build ModularCurves` before adding any import — it is the clash detector, and a
-conclusion-grep has twice missed what it caught.**
-
-=== HOUSEKEEPING ===
-* STALE DOCSTRING: `SelfAdjointN.lean:14` still says "One sorry left
-  (`exists_invertible_tensor_idealModule_add`)". That leaf is closed; the remaining sorry is :503.
-* Cleanup debt: four primed theorems in `RelPicLocal.lean` duplicate ~370 lines of the unprimed
-  ones, which are now thin specialisations. `isIso_idealGenHom`'s proof block is copy-pasted in
-  three places. `WeilPairing/TensorSection.lean` is a DEAD module whose `tensorSection` family
-  full-name-collides with two other copies.
-* `HasHighCechExactnessOpens` (arbitrary-base seesaw) is untouched — it quantifies over non-affine
-  opens where the two-chart discharge does not reach. Reason recorded in its module docstring.
-
-=== STANDARDS THAT PAID OFF — KEEP THEM ===
-* **Verify fit by ELABORATION, not assertion.** Seven consecutive passes shipped a scratchpad probe
-  applying the result as a black box from an independent file; it repeatedly caught real mismatches.
-  The last two added `fail_if_success` checks proving a gap was real, and tests over a CONCRETE
-  non-reduced base — that standard is now expected.
-* **Full `lake build ModularCurves` as the duplicate/clash detector** before writing.
-* **My boarded routes were wrong SEVEN times** (six over-engineered, once under-engineered), usually
-  because I anchored on a nearby proved theorem's shape instead of reading what the statement needs.
-  Tell the worker to trust the statement over the sketch and to report when it does.
-
-DEAD ENDS — LOGGED, DO NOT REVISIT:
-  * `ProjIsPrincipal` / `kappaDivisor_add_linEquiv` is UNSOUND over non-closed fields
-    (`b2_log.jsonl`, T10-asm) — `projectiveDivisorOf` sees only `k`-rational points. It is no longer
-    needed at all: the field theorem is now proved by the explicit chord-and-vertical route.
-  * `WeilPairing/LineVertical.lean` is NOT about the chord and the vertical despite its header.
-  * "cover, generators and ratio must be produced together" was a WRONG DIAGNOSIS.
-  * Recovering the chord/vertical shape from the ideal identity alone is BLOCKED — it needs the
-    coordinate ring to be Dedekind. Split the call site instead.
-
-REUSABLE BY-PRODUCTS FROM THIS SESSION:
-  * `OverlapRel W b a j` (`b = a·tʲ` on the `Y ⊓ Z` overlap) with `.mul/.sub/.add/.pow/.cancel` and
-    base cases — the overlap dictionary this line has wanted for a long time. Plus `germY`/`germZ`
-    with injectivity, `infChartOpen`, `projModelZero_ker_ideal_infChartOpen`.
-  * `ker_ideal_of_fromSpec_factor` — replaces the whole `appLE` apparatus whose helpers are
-    `private` in `PoleFiltration.lean`.
-  * mathlib's `XYIdeal_mul_XYIdeal` IS the affine-chart theorem of the square.
-  * `isIso_idealGenHom`, now named (copy-pasted in three other places — cleanup ticket).
-
-BLOCKER 4 (independent, does NOT gate AP-D): `IsIso ((sectionVanishingIdeal M hM σ).subschemeι ≫ π)`
-at `EllipticCurve/AbelEquivalence.lean`. Route REPLACED after review: étale transversality
-(`dh̄ ≠ 0` on the smooth fibre ⟹ `h : U → 𝔸¹_S` étale ⟹ `Z` finite étale of degree one ⟹ iso;
-Stacks §37.38 / 055S — prove the special case from a standard-smooth Jacobian presentation, since the
-general slicing lemma routes through fibrewise flatness). The old nonzerodivisor route IS Stacks
-00MF and does not dodge Artin-Rees; producing the section from fibre points is not viable.
-Hypothesis audit: `h⁰ = 1` and `H¹ = 0` alone are NOT enough — also needs smooth geometrically
-integral genus-one fibres, `deg M_s = 1`, and the base-change iso giving `σ_s ≠ 0`.
+=== NEW AND REUSABLE (from the AP-D7 closure) ===
+`WeilPairing/Translation.lean` — `unitPullback` / `unitPullback_congr` phrase unit pullback through
+`Scheme.Hom.appLE`, putting the open-comparison in a `Prop` argument so `subst` + proof irrelevance
+replaces dependent rewrites. **Reach for this before writing any dependent open transport.** Also
+`translateByPoint` (+ `_comp_snd`, `comp_`, `_comp_mulByN`), `preimage_translateByPoint_mulByN`,
+`eq_mul_globalTwist_of_translate`.
 
 RULES: no `set_option maxHeartbeats`/`synthInstance.maxHeartbeats`; never `2>/dev/null` beside a
 lake/lean command; push with `LEAN4_GUARDRAILS_BYPASS=1 git push origin dev/modular-curves`;
-`#print axioms` at every milestone. **NEVER `git add -A` while a subagent is mid-run** (it swept two
-scratch files in this session). Some `ForMathlib/` modules are ORPHANS that `lake build ModularCurves`
-skips — build them explicitly.
+`#print axioms` at every milestone; NEVER `git add -A` while a subagent is mid-run; run a full
+`lake build ModularCurves` before adding any import (it is the clash detector). Some `ForMathlib/`
+modules are orphans that `lake build ModularCurves` skips — build them explicitly.
