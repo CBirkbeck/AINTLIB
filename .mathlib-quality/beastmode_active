@@ -1,0 +1,76 @@
+FOCUS (2026-08-09, re-armed at the user's request): **ONE CLAUSE OF ONE LEAF LEFT ON THE DS4 LINE.**
+
+TARGET: `hloc_off_chartZ` — `WeilPairing/TheoremOfSquareField.lean:1301`. The ONLY `sorry` in the
+field-level theorem of the square. Its docstring (:1250-1300) is a COMPLETE construction with every
+input named — read it and execute it; do not replan.
+
+STATE — everything else is proved and axiom-verified standard-three:
+  * `Picard/PrincipalIdealModuleIso.lean` — principal divisor ⟹ ideal modules isomorphic, on an
+    ARBITRARY scheme.
+  * `Picard/IdealModuleMul.lean` — ideal-module multiplicativity (divisor sum ⟹ tensor product).
+  * `WeilPairing/TheoremOfSquareField.lean` — their composition (`SquareChartData` ⟹ the
+    theorem-of-the-square iso); the `P = 0` / `Q = 0` cases; **1a** the points→ideals dictionary on
+    the `Z`-chart (`ker_ideal_pointSection_chartZ'`); **1c** all four cases as one existential
+    (`affineIdeal`, `exists_affine_ideal_identity`); and the whole `Z`-chart half of `hloc`
+    (`hloc_chartZ`). `nonempty_squareChartData_projModel_of_local` reduces the leaf to one `hloc`
+    clause per point.
+  * ABOVE that, both closed this session: the rank-one seesaw (`ForMathlib/Seesaw.lean`,
+    `SeesawGlobalBase.lean`) and Stacks 0FWG (`ForMathlib/ReducedConstantRankFree.lean`).
+
+THE CONSTRUCTION (from the docstring — all names verified present):
+  `V := projModelSectionNeighborhood W ⊓ D(num∞) ⊓ D(w) ⊓ D(w − x₃ s²)`,
+  `w := sectionUnitElem − a₂ s²`, `t · w = s³` (from `tel_mul_sectionUnitElem`),
+  `num∞ = 1 − λ s − μ t` (`= t·ℓ`), `den∞ = s − x₃ t` (`= t·(x − x₃)`),
+  `s = AdjoinRoot.root (infChartCubic W)` (uniformiser at `O`), `t = infChartTElem`.
+  * `c ∈ V` — mirrors `projModelZChart_sup_sectionNeighborhood_eq_top`; uses
+    `mem_projModelZChart_iff_not_mem_infChartTElem`, `root_mem_of_tel_mem`,
+    `sectionUnitElem_sub_one_mem`.
+  * `I(P)|V = I(Q)|V = I(P+Q)|V = ⊤` by `ker_ideal_eq_top_of_preimage_eq_bot` (proved here).
+  * `I(0)|V = ⟨s⟩` by `projModelZero_ker_ideal_sectionNeighborhood`; `s` is a nonzerodivisor by
+    `projModelSectionRoot_mem_nonZeroDivisors`.
+  * the ideal identity reduces to `⟨den∞⟩ = ⟨s⟩`, i.e. `den∞ · w = s · (w − x₃ s²)` with `w` and
+    `w − x₃ s²` units on `V`.
+  * the germ identity ties the chart to `chartZFunction W num den` via `overlapSectionsEquiv` /
+    `overlapMap_coordX` / `overlapMap_coordY` (`EllipticCurve/PoleFiltration.lean`):
+    `num · den∞ = num∞ · den` on `Y ⊓ Z`, upgraded by `Scheme.germToFunctionField_injective`.
+  * VERTICAL CASE (`Q = −P`, `P+Q = 0`, `num = XClass x₁`, `den = 1`): same chart with
+    `num∞ = s − x₁ t`, `den∞ = t`; the identity becomes `⟨t⟩ = ⟨num∞ · s²⟩`, again `t·w = s³` up
+    to units.
+
+*** THE ONE THING THE DOCSTRING DOES NOT SETTLE ***
+`hloc_off_chartZ`'s hypotheses are only `num ≠ 0`, `den ≠ 0` and the affine ideal identity `hid` —
+NOT the chord/vertical shape the construction uses. So the prover must EITHER re-derive that shape
+from `hid` (chord and vertical agree with `num`/`den` up to a unit of `W.toAffine.CoordinateRing`,
+i.e. up to `k^×`), OR split the call site in `exists_squareChartData_projModel` into the four
+explicit cases of `exists_affine_ideal_identity`. Both are open without touching anything proved.
+Estimated 600–1000 lines.
+
+DEAD ENDS — LOGGED, DO NOT REVISIT:
+  * `ProjIsPrincipal` / `kappaDivisor_add_linEquiv` is UNSOUND over non-closed fields
+    (`b2_log.jsonl`, T10-asm): `projectiveDivisorOf` is indexed by `k`-RATIONAL points plus `∞`, so
+    the witness is pinned only up to a factor supported at invisible closed points.
+    `exists_functionField_projectiveDivisorOf_kappa` is off the path entirely.
+  * `WeilPairing/LineVertical.lean` is NOT about the chord and the vertical despite its header —
+    no `linePolynomial`, no `slope`, no `addX`. Two tickets were wasted on it.
+  * "cover, generators and ratio must be produced together" was a WRONG DIAGNOSIS — the per-chart
+    unit is pinned by any ideal identity already in hand.
+  * The `GroupLawConstruction.lean:675` whnf minefield is AVOIDABLE:
+    `projModelPointsEquiv_affineSectionSpecPoint` does the chart readout.
+
+REUSABLE BY-PRODUCTS FROM THIS SESSION:
+  * `ker_ideal_of_fromSpec_factor` — `f = Spec.map φ ≫ hU.fromSpec` ⟹ `(ker f).ideal U = ker φ`.
+    Replaces the whole `appLE` apparatus whose helpers are `private` in `PoleFiltration.lean`.
+  * mathlib's `XYIdeal_mul_XYIdeal` (`AlgebraicGeometry/EllipticCurve/Affine/Point.lean:336`) IS the
+    affine-chart theorem of the square.
+  * `isIso_idealGenHom`, now named (the block is copy-pasted in three other places — cleanup ticket).
+
+AFTER THIS LEAF: assemble `nonempty_tensorObj_idealModule_add_field`, then Blocker 3 proper
+(`Picard/SelfAdjointN.lean:267`) via the universal pair (`WeilPairing/TautologicalPair.lean`, whose
+`pairClassify` is already proved) + the seesaw, then discharge the seesaw's `hhigh` for the elliptic
+family. Blocker 4 is independent, re-planned as étale transversality.
+
+RULES: no `set_option maxHeartbeats`/`synthInstance.maxHeartbeats`; never `2>/dev/null` beside a
+lake/lean command; push with `LEAN4_GUARDRAILS_BYPASS=1 git push origin dev/modular-curves`;
+`#print axioms` at every milestone. **NEVER `git add -A` while a subagent is mid-run** — it swept two
+scratch files into the repo this session (`22ab1a4ec`, reverted in `816a756a0`). Stage explicit paths.
+Some `ForMathlib/` modules are ORPHANS that `lake build ModularCurves` skips — build them explicitly.
