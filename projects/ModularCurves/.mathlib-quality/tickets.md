@@ -40341,3 +40341,69 @@ a prover must either re-derive the chord/vertical shape (they agree up to a unit
 Commit `22ab1a4ec` swept two subagent scratch files into the repo via `git add -A` during a
 concurrent run; removed in `816a756a0`. **Never `git add -A` while a subagent is mid-run** — stage
 explicit paths.
+
+---
+
+## [AP-C1 / DS4 Gap A] **CLOSED — `Picard/` IS ENTIRELY SORRY-FREE** (2026-08-09)
+
+`Picard/SelfAdjointN.lean` has zero sorries. `(★)` `picMap_mulByHom_kappa_pow` and `(★′)`
+`picMap_mulByHom_kappa_eq_one` are axiom-verified standard-three, as are
+`exists_invertible_tensor_idealModule_add`, `kappa_add`, and
+`exists_pic_map_snd_picMap_mulByHom_kappa`.
+
+**⚠ THE AP-D4 AXIOM-AUDIT WARNING IS NOW STALE — DELETE IT WHEN EDITING THAT TICKET.** It said
+`picMap_mulByHom_kappa_eq_one` "depends on `sorryAx`". That was true when written; the inherited
+`sorry` was `exists_invertible_tensor_idealModule_add`, which is now proved. Re-verified directly:
+`#print axioms` → propext, Classical.choice, Quot.sound. **AP-D4's `⊆` direction is available as
+originally claimed**, so AP-D4 / AP-D5-existence / AP-D6 / AP-D7 are UNBLOCKED.
+
+Tree-wide sorries went 98 → 97; the remainder are pre-existing and outside this line
+(`WeilPairing/Basic.lean`, `LevelStructure/`, `EndomorphismDegree`, `abelEnrichment_*`).
+
+### The chain, every link axiom-clean
+
+Stacks 0FWG (`ForMathlib/ReducedConstantRankFree.lean` — a genuine mathlib gap)
+→ Mumford §5 (`ForMathlib/ConstantKernelRankProjective.lean`)
+→ the rank-one seesaw (`ForMathlib/Seesaw.lean`, `SeesawGlobalBase.lean`)
+→ the field-level theorem of the square (`Picard/PrincipalIdealModuleIso.lean`,
+  `Picard/IdealModuleMul.lean`, `WeilPairing/TheoremOfSquareField.lean`)
+→ transport (`TheoremOfSquareFibrewise.lean`, `FibreWeierstrassPresentation.lean`)
+→ the universal pair (`TheoremOfSquareUniversal.lean`)
+→ base change and gluing (`TheoremOfSquareBaseChange.lean`, `ChartFromUniversalPair.lean`,
+  `ChartGroupSum.lean`)
+→ the relative theorem of the square (`SelfAdjointN.lean`)
+→ `(★)`/`(★′)` via `WeilPairing/PoincareBiextension.lean`.
+
+### The last step avoided the boarded construction entirely
+
+`SelfAdjointN.lean`'s docstring prescribed building the Poincaré bundle
+`𝒫 = m^*𝒜 ⊗ p₁^*𝒜⁻¹ ⊗ p₂^*𝒜⁻¹` and proving `τ^*𝒫 ≅ 𝒫`. **No sheaf `𝒫` was built and that symmetry
+was never proved.** Everything happens in `Pic`: for `h` in `𝔈.Point g` put `ξ(h) = h^*[𝒪(D_0)]` and
+`β(h,k) = ξ(h+k)·ξ(h)⁻¹·ξ(k)⁻¹·ξ(0)`, which is **symmetric by construction** — the symmetry step
+costs zero. Then `κ(Q) = β(1, −Q∘π)`, `[N]^*` becomes `N·1` in the first slot by naturality, and the
+theorem of the square run one level up (over `E_T`, where constants exhaust `Hom_T(E_T,E_T)`) gives
+biadditivity. `IsSquareIdentity.baseChange` was not even needed — `isSquareIdentity_point_add` is
+already stated for an arbitrary working record.
+
+### Coordinator items (cross-cutting renames, NOT producer work)
+
+1. `ModularCurves.idealModule` (`EllipticCurve/PoleSheaf.lean:154`, of a MORPHISM) shadows
+   `AlgebraicGeometry.Scheme.Modules.idealModule` (`Picard/IdealModule.lean:156`, of an IDEAL SHEAF)
+   inside `namespace ModularCurves`. `SelfAdjointN.lean` now carries a semantics-preserving
+   `local notation` line to pin the intended one. Durable fix = rename.
+2. `sectionVanishingIdeal` was the same failure mode and was silently orphaning the ENTIRE Seesaw
+   line from the build; fixed this session (→ `sectionVanishingIdealSheaf`).
+3. A third clash was caught during the last pass: `EllipticCurve.constPt`
+   (`GroupScheme/TranslationBySection.lean`) — the new code renamed its own to `constPoint`.
+**Run a full `lake build ModularCurves` before adding any import.** It is the clash detector, and a
+conclusion-grep has repeatedly missed what it caught.
+
+### Standards that paid off — keep them
+
+* **Verify fit by ELABORATION, not assertion.** Every pass shipped a probe applying the result as a
+  black box from an independent file. The later ones added `fail_if_success` checks proving a gap
+  was real (including one that caught a *vacuous* check caused by a rename), and instantiation over
+  a CONCRETE non-reduced base — exactly where the seesaw fails.
+* **My boarded routes were wrong eight times** this session — seven over-engineered, once
+  under-engineered — usually because I anchored on a nearby proved theorem's shape instead of reading
+  what the statement needs. Workers should trust the statement over the sketch and say when they do.
