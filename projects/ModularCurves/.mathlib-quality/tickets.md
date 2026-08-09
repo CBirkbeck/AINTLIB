@@ -38911,7 +38911,23 @@ in the plan's "Known traps".
 - **Sources**: KM p. 89.
 
 ### [AP-D7] bilinearity, and landing in `μ_N`
-- **Status**: blocked (AP-D6) · **File**: `WeilPairing/KMPairing.lean` · **Type**: theorem (×2, split)
+- **Status**: **DONE (2026-08-09)** · **File**: `WeilPairing/KMBilinear.lean` (not `KMPairing.lean`)
+  · **Type**: theorem (×2, split)
+- **Progress**:
+  - 2026-08-09: `torsionSplittingEval_pow_eq_one` (the `μ_N` landing) — proved, unconditional,
+    axiom-clean. `torsionSplittingEval_mul_of_transitionUnitOfCover_mul` + `kappa_add` via the
+    tensor-cocycle brick (`WeilPairing/TensorCocycle.lean`) — bilinearity in `Q`, proved.
+  - 2026-08-09: `torsionSplittingEval_add` — bilinearity in `P`, **proved** (commit `c6281f9d5`),
+    axiom-verified standard-three. Route: translation invariance, KM p. 89. New sorry-free module
+    `WeilPairing/Translation.lean` (318 lines) supplies `unitPullback`/`unitPullback_congr`
+    (unit pullback through `Scheme.Hom.appLE` — this dissolves the dependent open transport),
+    `translateByPoint` + `translateByPoint_comp_mulByN`, `preimage_translateByPoint_mulByN` and
+    `eq_mul_globalTwist_of_translate`.
+  - Boarded blockers 2 and 3 were **over-engineered**: no `Hom`-group ↔ `mulByHom` dictionary was
+    needed (`GrpObj.comp_zpow` + `constPt_mul` + `MonObj.comp_one`, ~10 lines), and the dependent
+    transport is avoided outright by `appLE`. Blocker 4 needed only its `g = 𝟙 T` instance.
+  - **With this, the Katz–Mazur construction of the relative Weil pairing is complete except for
+    AP-D4 `⊇`.**
 - **Proof sketch**: KM p. 89 — *"One verifies easily that this construction defines a bilinear pairing"*;
   and *"Because `(Ker π)(S)` is killed by `N`, the pairing lands in `μ_N(S)`"*. **Two tickets** (one per
   conclusion) per the one-conclusion rule; the source's "easily" is a flag that this may expand.
@@ -38920,10 +38936,49 @@ in the plan's "Known traps".
 ## Group E — the DS4 register
 
 ### [AP-E1] `weilPairing` as a scheme morphism, and `weilPairing_over`
-- **Status**: blocked (AP-D7) · **File**: `WeilPairing/Basic.lean` (`:49`, `:53`) · **Type**: def + theorem
+- **Status**: **open — UNBLOCKED 2026-08-09** (AP-D7 is done) · **File**: `WeilPairing/Basic.lean`
+  (`:49`, `:53`) · **Type**: def + theorem
 - **Proof sketch**: AP-D7 gives a pairing on `T`-points natural in `T`; Yoneda turns it into
   `pullback (torsionπ N) (torsionπ N) ⟶ muN S N`. `weilPairing_over` is then the naturality square.
 - **Sources**: KM 2.8.5, p. 90.
+- **Progress**:
+  - 2026-08-09: unblocked by AP-D7. **Scope warning before anyone starts.** The KM output is
+    `torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP` — it depends on a choice of the
+    auxiliary point `Q`, the invertible `M`, the cover `W`, the trivialisation `e` and the
+    normalisation `hnorm`. Yoneda needs a **canonical** pairing, so AP-E1 has an unboarded
+    prerequisite: *independence of all of those choices*, then naturality in `T`. Part of that is
+    already in `WeilPairing/KMUniqueness.lean` (`eq_of_normalized_splitting`), but not all.
+    Spawn the independence sub-tickets before attempting the Yoneda step.
+  - **Not affected by the AP2-B2 findings below** — `torsionSplittingEval` and everything it
+    depends on is axiom-clean and does not route through `EllipticCurve/AbelEquivalence.lean`.
+    This is currently the *only* substantial DS4 work that is not downstream of a false statement.
+
+### [AP2-B2-evalgen / AP2-B2-blocker4] 🛑 TWO STATEMENTS ARE FALSE AS STATED (2026-08-09)
+- **Status**: **B2 — blocked on a user decision** (statement change; `theorem_statement_protected`)
+- **File**: `EllipticCurve/AbelEquivalence.lean` — `evalGenerator_mem_nonZeroDivisors` (`:836`,
+  sorry `:848`) and `relEffCartierDiv_of_degreeOne_package` (`:960`, sorry `:971`, **= Blocker 4**)
+- **Reason**: `HasDegreeOneFibreCohomology` (`EllipticCurve/AbelSkeleton.lean:53`) is purely
+  cohomological — positive-degree ordered-base-Čech exactness plus `finrank (ker d⁰¹) = 1` over
+  every field over the base ring — and constrains the geometry of `E` not at all. Both proofs need
+  integral fibres; `evalGenerator`'s own docstring quotes "the fibre is integral" as if it were a
+  hypothesis. It is not.
+- **Counterexample (one kills both)**: `R = k` a field, `E = ℙ¹_k ⊔ Spec k`, `M = 𝒪(-1)` on the `ℙ¹`
+  and `𝒪` on the point. `h⁰(M) = 1`, `H¹(M) = 0`, so `hpkg` holds; `σ` = the nonzero section
+  supported on the point vanishes identically on the `ℙ¹`. Then the evaluation ideal on any nonempty
+  affine `V ⊆ ℙ¹` is `span {0}`, so `hspan` holds with `f = 0` (not a nonzerodivisor); and the
+  vanishing subscheme is the whole `ℙ¹`, which is not finite over `Spec k`, so `D.finite` fails and
+  `IsIso (… .subschemeι ≫ π)` is false.
+- **Fix**: add smooth geometrically integral fibres + `deg M_s = 1` (the board's own hypothesis
+  audit already said `h⁰ = 1` and `H¹ = 0` are not enough). **Owner's call.**
+- **Not audited, suspect for the same defect**: `exists_relEffCartierDiv_of_degreeOne` (`:981`),
+  `relEffCartierDiv_degree_one_of_degreeOne` (`:999`).
+- **Downstream and therefore also blocked**: AP-D4 `⊇`
+  (`exists_torsionPoint_of_mem_kerMulByN`, `WeilPairing/KMPairing.lean:302`), since its surjectivity
+  half consumes exactly these declarations.
+- **Logged**: `.mathlib-quality/b2_log.jsonl`, entries `AP2-B2-evalgen` and `AP2-B2-blocker4`.
+- **Note**: the Stacks 00ME work is *not* wasted. `ForMathlib/LocalFlatnessCriterion.lean` became
+  entirely sorry-free on 2026-08-09 (commits `12b5355a5`, `a5af3b7da`), and the fibrewise route
+  genuinely needs it — it simply cannot be wired against a false statement.
 
 ### [AP-E2 … E6] the register's five spec theorems
 - **Status**: blocked (AP-E1) · **File**: `WeilPairing/Basic.lean` · one ticket each
