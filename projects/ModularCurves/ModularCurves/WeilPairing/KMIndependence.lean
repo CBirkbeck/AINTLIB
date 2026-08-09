@@ -38,6 +38,24 @@ open CategoryTheory AlgebraicGeometry Limits TopologicalSpace
 
 namespace ModularCurves
 
+/-- Regrouping a coboundary correction in a commutative group: the two `g`-factors cancel.
+Stated over abstract elements so the AC-normalisation runs on atoms, never on section terms. -/
+private theorem mul_coboundary_regroup {G : Type*} [CommGroup G] (a a' b b' g : G) :
+    a * a'⁻¹ * (b * b'⁻¹) = a * b * g⁻¹ * (a' * b' * g⁻¹)⁻¹ := by
+  have hg : a * b * g⁻¹ * (a' * b' * g⁻¹)⁻¹ = a * b * ((a' * b')⁻¹ * (g⁻¹ * g)) := by
+    rw [mul_inv (a' * b') g⁻¹, inv_inv]
+    ac_rfl
+  rw [hg, inv_mul_cancel, mul_one, mul_inv a' b']
+  ac_rfl
+
+/-- Evaluating along a morphism that *equals* a section whose value is pinned by a global
+unit: the dependent transport (`z ⁻¹ᵁ V` changes with `z`) is discharged by `subst`. -/
+private theorem sectionEval_eq_resUnit_of_eq {Y T : Scheme.{u}} {z z' : T ⟶ Y} (hzz : z = z')
+    (V : Y.Opens) (u : Γ(Y, V)ˣ) {C : Γ(T, ⊤)ˣ}
+    (hC : Scheme.resUnit (le_top : z' ⁻¹ᵁ V ≤ ⊤) C = sectionEval z' V u) :
+    sectionEval z V u = Scheme.resUnit (le_top : z ⁻¹ᵁ V ≤ ⊤) C := by
+  subst hzz; exact hC.symm
+
 section General
 
 variable {X : Scheme.{u}}
@@ -235,6 +253,141 @@ theorem torsionSplittingEval_restrict_cover
       ((P.1 : T ⟶ pullback E.π t).preimage_mono
         ((mulByN E t N).preimage_mono (hle a)))) hspec)
     exact (Scheme.resUnit_resUnit _ _ _).symm
+
+/-- **(AP-E1-IND3)** Normalised-coboundary invariance: two datasets for the same torsion
+section `Q`, over the same cover, whose cocycles differ by the coboundary of units
+`c i ∈ Γ(W i)ˣ`, give the same value at every `N`-torsion `P`.
+
+The zero-section values `γ i := c i ∘ 0` agree on overlaps — both cocycles are normalised, so
+the coboundary is too — and glue to a global unit `γ` of the base. If `h` is a normalised
+splitting for the first dataset, then `h_i · (c_i ∘ [N]) · (π^# γ)⁻¹` is one for the second:
+it splits because the `π^# γ` factors cancel in ratios (`resUnit_globalTwist`), and it is
+normalised because `c_i ∘ [N] ∘ 0 = c_i ∘ 0` reads off `γ` (`zero_comp_mulByHom_baseChange`).
+Evaluating at `P` kills the correction outright: `c_i ∘ [N] ∘ P = c_i ∘ 0` **because `P` is
+`N`-torsion** (`comp_mulByN_eq_baseChangeZero`), and `π^# γ ∘ P = γ` because `P` is a section
+— so the value along `P` is the first dataset's, and the pin closes. -/
+theorem torsionSplittingEval_eq_of_mul_coboundary
+    (M M' : (pullback E.π t).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+      (kappa E hsm t Q).val = toSkeleton M)
+    (hM' : letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+      (kappa E hsm t Q).val = toSkeleton M')
+    {ι : Type*} (W : ι → (pullback E.π t).Opens) (hW : iSup W = ⊤)
+    (e : ∀ i, M.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (W i)))
+    (e' : ∀ i, M'.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover M W e i j ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (W i ⊓ W j))
+    (hnorm' : ∀ i j, transitionUnitOfCover M' W e' i j ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (W i ⊓ W j))
+    (c : ∀ i, Γ(pullback E.π t, W i)ˣ)
+    (hco : ∀ i j, transitionUnitOfCover M' W e' i j =
+      transitionUnitOfCover M W e i j *
+        (Scheme.resUnit (inf_le_left : W i ⊓ W j ≤ W i) (c i) *
+          (Scheme.resUnit (inf_le_right : W i ⊓ W j ≤ W j) (c j))⁻¹))
+    (P : (E.baseChange t).Point (𝟙 T)) (hP : P ∈ torsionPoints E t N) :
+    torsionSplittingEval E hsm t N Q hQ M' hM' W hW e' hnorm' P hP =
+      torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP := by
+  -- the zero-section values of the `c i` agree on overlaps and glue to a global unit `γ`
+  have hzero : ∀ i j,
+      Scheme.resUnit ((baseChangeZero E.π E.zero E.zero_π t).preimage_mono
+          (inf_le_left : W i ⊓ W j ≤ W i))
+        (sectionEval (baseChangeZero E.π E.zero E.zero_π t) (W i) (c i)) =
+      Scheme.resUnit ((baseChangeZero E.π E.zero E.zero_π t).preimage_mono
+          (inf_le_right : W i ⊓ W j ≤ W j))
+        (sectionEval (baseChangeZero E.π E.zero E.zero_π t) (W j) (c j)) := by
+    intro i j
+    have h1 : sectionEval (baseChangeZero E.π E.zero E.zero_π t) (W i ⊓ W j)
+        (transitionUnitOfCover M' W e' i j) = 1 := hnorm' i j
+    rw [hco i j, map_mul, map_mul, map_inv,
+      show sectionEval (baseChangeZero E.π E.zero E.zero_π t) (W i ⊓ W j)
+        (transitionUnitOfCover M W e i j) = 1 from hnorm i j, one_mul,
+      sectionEval_resUnit, sectionEval_resUnit] at h1
+    exact (mul_inv_eq_one.mp h1)
+  obtain ⟨γ, hγ⟩ := exists_globalUnit_restrict
+    (fun i => baseChangeZero E.π E.zero E.zero_π t ⁻¹ᵁ W i)
+    ((baseChangeZero E.π E.zero E.zero_π t).iSup_preimage_eq_top hW)
+    (fun i => sectionEval (baseChangeZero E.π E.zero E.zero_π t) (W i) (c i))
+    hzero
+  obtain ⟨h, hn, hsplit⟩ :=
+    exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints E hsm t N Q hQ M hM W hW e
+      hnorm
+  -- the corrected splitting `h_i · (c_i ∘ [N]) · (π^# γ)⁻¹` for the second dataset
+  refine (eq_torsionSplittingEval E hsm t N Q hQ M' hM' W hW e' hnorm' P hP
+    (fun i => h i * Units.map ((mulByN E t N).app (W i)).hom.toMonoidHom (c i) *
+      (globalTwist (pullback.snd E.π t) (mulByN E t N ⁻¹ᵁ W i) γ)⁻¹)
+    (fun i => ?_) (fun i j => ?_) (fun i => ?_)).symm
+  · -- normalised: `h_i ∘ 0 = 1`, `c_i ∘ [N] ∘ 0 = γ`, `π^# γ ∘ 0 = γ`
+    have hEcN : sectionEval (baseChangeZero E.π E.zero E.zero_π t) (mulByN E t N ⁻¹ᵁ W i)
+        (Units.map ((mulByN E t N).app (W i)).hom.toMonoidHom (c i)) =
+        Scheme.resUnit (le_top : (baseChangeZero E.π E.zero E.zero_π t ≫ mulByN E t N) ⁻¹ᵁ
+          W i ≤ ⊤) γ :=
+      (sectionEval_pullback (mulByN E t N) (baseChangeZero E.π E.zero E.zero_π t) (W i)
+        (c i)).trans
+        (sectionEval_eq_resUnit_of_eq (zero_comp_mulByHom_baseChange E t (N : ℤ)) (W i) (c i)
+          (hγ i))
+    rw [mem_sectionUnits_iff, map_mul, map_mul, map_inv,
+      show sectionEval (baseChangeZero E.π E.zero E.zero_π t) (mulByN E t N ⁻¹ᵁ W i) (h i) = 1
+        from hn i, one_mul,
+      sectionEval_globalTwist (baseChangeZero_snd E.π E.zero E.zero_π t)]
+    exact mul_inv_eq_one.mpr hEcN
+  · -- splits the second cocycle: the `π^# γ` factors cancel in the ratio
+    have hmapco := congrArg
+      (Units.map ((mulByN E t N).app (W i ⊓ W j)).hom.toMonoidHom) (hco i j)
+    rw [map_mul, map_mul, map_inv] at hmapco
+    refine hmapco.trans ?_
+    have hci : Units.map ((mulByN E t N).app (W i ⊓ W j)).hom.toMonoidHom
+        (Scheme.resUnit (inf_le_left : W i ⊓ W j ≤ W i) (c i)) =
+        Scheme.resUnit ((mulByN E t N).preimage_mono (inf_le_left : W i ⊓ W j ≤ W i))
+          (Units.map ((mulByN E t N).app (W i)).hom.toMonoidHom (c i)) :=
+      (resUnit_map_app (mulByN E t N) (inf_le_left : W i ⊓ W j ≤ W i) (c i)).symm
+    have hcj : Units.map ((mulByN E t N).app (W i ⊓ W j)).hom.toMonoidHom
+        (Scheme.resUnit (inf_le_right : W i ⊓ W j ≤ W j) (c j)) =
+        Scheme.resUnit ((mulByN E t N).preimage_mono (inf_le_right : W i ⊓ W j ≤ W j))
+          (Units.map ((mulByN E t N).app (W j)).hom.toMonoidHom (c j)) :=
+      (resUnit_map_app (mulByN E t N) (inf_le_right : W i ⊓ W j ≤ W j) (c j)).symm
+    rw [hsplit i j, hci, hcj, map_mul, map_mul, map_mul, map_mul, map_inv, map_inv,
+      show Scheme.resUnit (inf_le_left : mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j ≤
+          mulByN E t N ⁻¹ᵁ W i)
+        (globalTwist (pullback.snd E.π t) (mulByN E t N ⁻¹ᵁ W i) γ) =
+        globalTwist (pullback.snd E.π t)
+          (mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j) γ from
+        resUnit_globalTwist (pullback.snd E.π t) _ γ,
+      show Scheme.resUnit (inf_le_right : mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j ≤
+          mulByN E t N ⁻¹ᵁ W j)
+        (globalTwist (pullback.snd E.π t) (mulByN E t N ⁻¹ᵁ W j) γ) =
+        globalTwist (pullback.snd E.π t)
+          (mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j) γ from
+        resUnit_globalTwist (pullback.snd E.π t) _ γ]
+    exact mul_coboundary_regroup _ _ _ _ _
+  · -- the value at `P` sees no correction: `[N]P = 0` and `π ∘ P = 𝟙`
+    have hspec := resUnit_torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP h hn
+      hsplit i
+    have hPcN : sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i)
+        (Units.map ((mulByN E t N).app (W i)).hom.toMonoidHom (c i)) =
+        Scheme.resUnit (le_top : ((P.1 : T ⟶ pullback E.π t) ≫ mulByN E t N) ⁻¹ᵁ W i ≤ ⊤)
+          γ :=
+      (sectionEval_pullback (mulByN E t N) (P.1 : T ⟶ pullback E.π t) (W i) (c i)).trans
+        (sectionEval_eq_resUnit_of_eq (comp_mulByN_eq_baseChangeZero E t N P hP) (W i) (c i)
+          (hγ i))
+    have hPγ : sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i)
+        (globalTwist (pullback.snd E.π t) (mulByN E t N ⁻¹ᵁ W i) γ) =
+        Scheme.resUnit (le_top : (P.1 : T ⟶ pullback E.π t) ⁻¹ᵁ
+          (mulByN E t N ⁻¹ᵁ W i) ≤ ⊤) γ :=
+      sectionEval_globalTwist P.2 (mulByN E t N ⁻¹ᵁ W i) γ
+    have hsplit3 : sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i)
+        (h i * Units.map ((mulByN E t N).app (W i)).hom.toMonoidHom (c i) *
+          (globalTwist (pullback.snd E.π t) (mulByN E t N ⁻¹ᵁ W i) γ)⁻¹) =
+        sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i) (h i) *
+          sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i)
+            (Units.map ((mulByN E t N).app (W i)).hom.toMonoidHom (c i)) *
+          (sectionEval (P.1 : T ⟶ pullback E.π t) (mulByN E t N ⁻¹ᵁ W i)
+            (globalTwist (pullback.snd E.π t) (mulByN E t N ⁻¹ᵁ W i) γ))⁻¹ :=
+      (map_mul _ _ _).trans (congrArg₂ (· * ·) (map_mul _ _ _) (map_inv _ _))
+    refine hspec.trans (Eq.trans ?_ hsplit3.symm)
+    rw [hPcN, hPγ]
+    exact (mul_inv_cancel_right _ _).symm
 
 end Curve
 
