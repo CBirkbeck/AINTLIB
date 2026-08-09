@@ -66,11 +66,15 @@ Nothing here is new mathematics; every ingredient is already proved elsewhere.
 * `nonempty_pullback_discrepancy_iso_unitObj_of_field` — the composite.
 
 The Weierstrass presentation of the fibre (the isomorphism `Limits.pullback π x ≅ projModel W`
-together with the four section identifications) is left as a hypothesis: producing it is the
-*points-dictionary* half of the bridge — `isPullback_projModelBaseChange`
-(`EllipticCurve/WeierstrassModel.lean`) for the fibre, and `projModelPointsAddEquiv`
-(`EllipticCurve/MulByHomDegree.lean`) / `chartAffinePointEquiv` (`WeilPairing/FibrePointDict.lean`)
-for the additive matching of `P + Q` — and is a separate ticket.
+together with the four section identifications) is left as a hypothesis here, so that the results
+of this file apply to any family that carries one.
+
+**It is produced, for the tautological family `projModelπ W₀`, in
+`WeilPairing/FibreWeierstrassPresentation.lean`** — `projModelFibreIso` from
+`isPullback_projModelBaseChange` (`EllipticCurve/WeierstrassModel.lean`), and the additive
+matching of `P + Q` at the level of *scheme morphisms* from `mulModelHom_map` +
+`mulModelHom_specPoints`, giving the hypothesis-free
+`nonempty_pullback_discrepancy_iso_unitObj_projModel`.
 -/
 
 universe u

@@ -323,5 +323,6 @@ import ModularCurves.Moduli.LegendreSmooth
 import ModularCurves.Moduli.LegendreTorsor
 import ModularCurves.Moduli.ProductProblem
 import ModularCurves.WeilPairing.GaloisEquivariance
+import ModularCurves.WeilPairing.FibreWeierstrassPresentation
 import ModularCurves.WeilPairing.TheoremOfSquareFibrewise
 import ModularCurves.WeilPairing.TheoremOfSquareField
