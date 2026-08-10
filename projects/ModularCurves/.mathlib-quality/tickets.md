@@ -41491,3 +41491,18 @@ dictionary glue (hxp: x.left = p.1; hP': dict p = P'; hP₀: P₀ = cast P' — 
 dict(pulled-x-as-KE-Point) to P₀ via the Dictionary.baseChange-brick (AdditionSpecPoints
 :1694-context) + the K→KE restriction + the W_KE-cast-collapse). Then: leaves via
 `chartSolutionHom_x/_y` vs HW `translateAlgHom_apply_x_gen`-family per case.
+
+
+### hx glue-brick spec (2026-08-10, session 3 latest+11)
+
+The x↔P₀ glue needs the FIELD-EXTENSION dictionary naturality (K → KE on the point-base,
+same curve): `projModelPointsEquiv W KE (point-precomposed-with Spec.map(KE→K-alg)) =
+Point.map (algebraMap-emb) (projModelPointsEquiv W K p)`. NOT in-tree; the template is
+`projModelPointsEquiv_specMapCompPoint` (PointsDictionaryGalois:183 — the σ-automorphism
+version, 2-case chart-solutions proof) with σ → the K→KE embedding; needs the
+`chartSolution_specMapCompPoint`-analogue for extension-precomposition (same guts).
+~30-line brick. With it: dict-KE(pulled-x-Point) = Point.map emb (dict-K p) = Point.map
+emb P' [hP'] — and HW's liftPointToKE/liftSomePoint = Point.map-emb-forms
+(`liftPointToKE_some` :3515 connects) ⟹ the chart-form + leaves close per the
+architecture. BUILD ORDER: (g1) the extension-naturality brick; (g2) the chart-form have;
+(g3) hτV; (g4) hx-leaf; (g5) hy-leaf.
