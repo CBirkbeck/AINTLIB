@@ -6937,6 +6937,37 @@ theorem unitCover_isOXAcyclic
       apply (unitCover_bridgeMinus D₀ f).injective
       exact (unitCover_bridgeMinus_restrictionMap D₀ f a).trans ha₂
 
+/-- **Wedhorn Lemma 8.33, the remaining degree (campaign C-L1)**: for the unit
+2-cover, the difference of the two overlap restrictions is **surjective** onto the
+overlap section ring — the full augmented alternating complex
+`0 → 𝒪(D₀) → 𝒪(U₁) × 𝒪(U₂) → 𝒪(U₁∩U₂) → 0` is exact also at its last term.
+[Wedhorn] l.4200: "The equations `A⟨ζ,ζ⁻¹⟩ = A⟨ζ⟩ + ζ⁻¹A⟨ζ⁻¹⟩`,
+`(f−ζ)A⟨ζ,ζ⁻¹⟩ = (f−ζ)A⟨ζ⟩ + (1−fζ⁻¹)A⟨ζ⁻¹⟩` show the surjectivity of λ and λ′."
+Formal content: `deltaMap_gen`-surjectivity (`row3_exact`, axiom-clean) transported
+across the three Example 6.38/6.39 bridges. Together with `unitCover_isOXAcyclic`
+this is the all-degree form of Lemma 8.33 for the 2-cover. -/
+theorem unitCover_delta_surjective
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A)
+    (z : presheafValue ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))) :
+    ∃ (g₁ : presheafValue (D₀.interSamePair (unitDatum D₀.P f) rfl))
+      (g₂ : presheafValue (D₀.interSamePair (coUnitDatum D₀.P f) rfl)),
+      restrictionMap _ _ (RationalLocData.interSamePair_subset_left _ _ _) g₁ -
+        restrictionMap _ _ (RationalLocData.interSamePair_subset_right _ _ _) g₂ = z := by
+  obtain ⟨⟨p₁, p₂⟩, hp⟩ := (LaurentCover.row3_exact (A := presheafValue D₀)
+      (D₀.canonicalMap f)
+      (rfl : (inferInstance : TopologicalSpace (presheafValue D₀)) =
+        UniformSpace.toTopologicalSpace)).2.2 (unitCover_bridgeOverlap D₀ f z)
+  refine ⟨(unitCover_bridgePlus D₀ f).symm p₁, (unitCover_bridgeMinus D₀ f).symm p₂, ?_⟩
+  apply (unitCover_bridgeOverlap D₀ f).injective
+  rw [map_sub, ← unitCover_posLift_bridgePlus, ← unitCover_negLift_bridgeMinus,
+    RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply]
+  exact hp
+
 /-- **Lemma 8.34(i) — the base-independent Laurent cover is `O_X`-acyclic** (the
 faithful Wedhorn A.3(3) induction). By induction on `fs`: the empty cover is the
 trivial cover `{D₀}`; the cons cover `R`-equals the product

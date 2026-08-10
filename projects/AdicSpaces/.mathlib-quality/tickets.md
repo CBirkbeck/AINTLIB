@@ -10,7 +10,7 @@ Cadence note: per-campaign milestones carry per-file cleanups; the single `CLEAN
 precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 
 ## Summary
-- Proof tickets: 9 (7 done — CAMPAIGN A + T611/T612/T613/T614/T617, all axiom-clean) · planning tickets: 2 · cleanup tickets: 5
+- Proof tickets: 9 (8 done — CAMPAIGN A + T611-T614/T617/T621, all axiom-clean). C-L1 landed: the 2-cover augmented complex is exact in ALL degrees. · planning tickets: 2 · cleanup tickets: 5
 - Parallel capacity: 3 (A-track, B-Fubini pair, C-L1)
 
 ---
@@ -111,8 +111,8 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 
 ---
 
-### [T621] C-L1: `wedhorn_lemma_833_deg1_surjective`
-- **Status**: in_progress (2026-08-10)
+### [T621] C-L1 (DONE as `unitCover_delta_surjective`)
+- **Status**: done (2026-08-10, axiom-clean; home = WedhornCechAcyclicity.lean beside unitCover_isOXAcyclic — the interDatum-based skeleton statement was retired as a planning correction, see Progress)
 - **Progress**:
   - 2026-08-10: reconnaissance — the value identifications are
     `laurentPlusBridge`/`laurentMinusBridge` (LaurentRefinementCore.lean:2863/2931)

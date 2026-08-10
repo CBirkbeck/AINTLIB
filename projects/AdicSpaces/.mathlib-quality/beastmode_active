@@ -1,1 +1,1 @@
-FOCUS: T617 leg 3 isRestricted_symm — symm coeff formula then reversed combinatorics
+FOCUS: T621 — awaiting WedhornCechAcyclicity build with unitCover_delta_surjective; then axiom-check + board update
