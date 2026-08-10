@@ -220,3 +220,39 @@ the A.3 product/refinement induction over Laurent covers. For the examples: [Rev
   sub-tree; B-H blocked by AG1. Skeleton compiles.
 - C: C-L1 READY; C-AG1 explicit API gap; headlines inside the gap. Skeleton compiles.
 - No REVIEW-PENDING leaves. No prior-B2 matches. All leaves single-conclusion.
+
+---
+
+## ChatGPT validation addendum (gpt-5.6-sol, max effort, 2026-08-10)
+
+Verdict: (A) sound, "essentially finished" — independently confirmed the definitional
+uniformity bridge and the exact discharge used. (B) sound conditionally. (C) sound in
+principle with two required layers my sketch missed. Corrections binding on T615/T621/T622:
+
+- **B (for T615's design brief)**: (i) the Fubini must be topological/isometric, not just
+  ring-level (as B-L1/2 already state); (ii) the Koszul code consumes EXPLICIT noetherian
+  interfaces — `unitBall E`, `P E m`, `unitBall (P E m)` noetherian
+  (FiniteJetGraphKoszul.lean:1255) — the extended corners must supply these from their
+  affinoid presentations, `IsStronglyNoetherian` alone is not the consumed interface;
+  (iii) abstract-first confirmed: build `StrictMilnorSquare → TateExtension` reusable
+  abstraction; (iv) the coefficientwise row extension is verbatim GIVEN the uniformly
+  bounded additive section (κ-bound; the project's `sectionD` is isometric, κ = 1) —
+  see FiniteJetRings.lean:176 + FiniteJetStrictLocalization.lean:88; (v) rows must be
+  natural under further rational restriction, not just per-datum exact.
+- **C (for T622's design brief)**: (i) the project's `CechCochain` is the UNNORMALIZED
+  complex (all `Fin (q+1) → ι` maps, repetitions included) while Wedhorn's 8.33/8.34 are
+  about the ALTERNATING complex — a normalization comparison quasi-isomorphism (or a
+  degeneracy contraction) is a required layer; (ii) my "connecting maps vanish iff
+  degrees split" framing was WRONG — the correct route is the short exact sequence of
+  **augmented algebraic cochain complexes** (Milnor row as degree −1) in `AddCommGrp`/
+  `ModuleCat k` + the long exact homology sequence (`ShortComplex.ShortExact.δ`,
+  `homology_exact₁/₂/₃`, Mathlib HomologySequence.lean:286) — strictness is needed only
+  earlier (for exactness after completed localization), NOT in the cohomological step;
+  (iii) WP c₀-primitives confirmed per fixed degree via
+  `ContinuousLinearMap.exists_preimage_norm_le` (Banach.lean:162) — per-degree constants
+  C_q, no linear splitting needed, one common head for all pieces and multi-intersections;
+  c₀-sums only, no inverse-limit claim.
+- **C-L1 (T621 addendum)**: the full 8.33 diagram also needs the relation-ideal
+  decomposition `(f−ζ)A⟨ζ,ζ⁻¹⟩ = (f−ζ)A⟨ζ⟩ + (1−fζ⁻¹)A⟨ζ⁻¹⟩` (Wedhorn's second
+  displayed equation), not only the ambient split — add it as a second step of the
+  proof sketch.
