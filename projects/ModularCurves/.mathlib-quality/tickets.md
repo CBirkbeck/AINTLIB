@@ -41338,3 +41338,17 @@ Remaining in the bridge: hinv step 2 (NOW UNBLOCKED: c₀ = restrict(π-pulled) 
 lemma; `τ ≫ π = π` via Over.w of translateByIso; `functionFieldMap_germToFunctionField`
 + naturality closes), hx, hy (slope-formula computations).
 Silent-python-replace lesson: ALWAYS assert the anchor (two no-op replaces this session).
+
+
+### U5c-2: hK anchor COMPLETE (2026-08-10, session 3 latest+1)
+
+**`hinv` fully proved** — the K-constants anchor (hK) of `functionFieldMap_translateBy`
+is CLOSED end-to-end. Chain: `coordRingToZSection_algebraMap` + `germ_res_apply`
+(ConcreteCategory-spelled h2) + `functionFieldMap_germToFunctionField` + the
+appTop-motive congrArg (KEY LESSON: `fun m => (m.app ⊤).hom c` is a DEPENDENT motive —
+`Γ(m⁻¹⊤)` depends on m — congrArg rejects it; `appTop` has a fixed target and works;
+`comp_appTop` is rfl so the composite collapses definitionally) + cross-defeq Eq.trans
+chain. The U5c-2 bridge theorem now rests on **hx and hy alone** — the x/y-generator
+slope-formula computations (τ-side via KE-valued specPoints vs HasseWeil's
+`translateAlgEquivOfPoint` case-split, TranslationOrd:3290; the [n]-exemplars
+`mulByInt_pullbackAlgHom_x_gen`/`_y_gen` at MulByHomDegree:324/:340).
