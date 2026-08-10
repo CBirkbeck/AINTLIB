@@ -248,6 +248,28 @@ theorem pushCoveringC_isRational (sq : MilnorSquareData φB φC φD hφB hφC h�
   obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
   exact sq.pushC_isRational W (hC₀.piece hW)
 
+/-- The pushed covering at the `D`-vertex. -/
+noncomputable def pushCoveringD (sq : MilnorSquareData φB φC φD hφB hφC hφD)
+    (C₀ : RationalCoveringData R) : RationalCoveringData D where
+  base := sq.pushD C₀.base
+  covers := C₀.covers.image sq.pushD
+  hsubset := by
+    intro E hE
+    obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
+    exact sq.pushD_mono C₀.base W (C₀.hsubset W hW)
+  hcover := by
+    intro w hw
+    obtain ⟨W, hW, hwW⟩ := sq.pushD_cover C₀.base C₀.covers C₀.hcover w hw
+    exact ⟨sq.pushD W, Finset.mem_image_of_mem _ hW, hwW⟩
+
+theorem pushCoveringD_isRational (sq : MilnorSquareData φB φC φD hφB hφC hφD)
+    {C₀ : RationalCoveringData R} (hC₀ : C₀.IsRational) :
+    (sq.pushCoveringD C₀).IsRational := by
+  refine ⟨sq.pushD_isRational C₀.base hC₀.1, ?_⟩
+  intro E hE
+  obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
+  exact sq.pushD_isRational W (hC₀.piece hW)
+
 /-- Transport along an equality of data is continuous (eliminated by `subst`). -/
 theorem cast_continuous {D₁ D₂ : RationalLocData B} (h : D₁ = D₂) :
     Continuous (fun v : presheafValue D₁ => h ▸ v : presheafValue D₁ → presheafValue D₂) := by
