@@ -41604,3 +41604,9 @@ build in flight) + the main μ_N-points argument (drafted). Transcription lesson
 NAT1/NAT2 templates mirror verbatim under (bcm ↦ pm, restrictBase ↦ pushSection, g ↦ 𝟙);
 `eq_torsionSplittingEval` absorbs the dataset choice; the `(E.baseChange t).E`-vs-pullback
 wall needs the v4.33 opacity options file-wide.
+
+### IRR-1 mathlib check (2026-08-10): NO complex-points topology / analytification in
+mathlib-current (only `AlgebraicGeometry/PointsPi`; `Geometry/` has Manifold/Euclidean but
+no scheme-points bridge). IRR-1 builds from scratch: affine case = subspace topology of
+`X(ℂ) ↪ ℂⁿ` via generators, glued along opens; ℂ-point existence from the Nullstellensatz
+side (`MvPolynomial`-zeros API exists). Scope unchanged from the endgame plan.
