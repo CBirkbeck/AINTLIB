@@ -268,4 +268,55 @@ theorem presheafValueMapOfHom_restriction
       (by funext a; exact DFunLike.congr_fun hcomp a)
   exact congrFun h_eq x
 
+/-- **Value-map composition along a commuting triangle of ring homs** ([FJP] (4.9),
+generically): if `ψ ∘ φ = χ` at the ring level, then the completed covariant value
+maps compose accordingly on any matching data. Both composites of a commuting
+square of Huber rings therefore agree on sections — the generic `row_comm` engine
+for Milnor-square instantiations. Dense-equalizer proof (the
+`mapBD_mapB_eq_mapCD_mapC` pattern, made generic). -/
+theorem presheafValueMapOfHom_comp
+    {R S T : Type*} [CommRing R] [TopologicalSpace R]
+    [PlusSubring R] [IsHuberRing R] [HasLocLiftPowerBounded R]
+    [CommRing S] [TopologicalSpace S]
+    [PlusSubring S] [IsHuberRing S] [HasLocLiftPowerBounded S]
+    [CommRing T] [TopologicalSpace T]
+    [PlusSubring T] [IsHuberRing T] [HasLocLiftPowerBounded T]
+    (φ : R →+* S) (hφ : Continuous φ) (ψ : S →+* T) (hψ : Continuous ψ)
+    (χ : R →+* T) (hχ : Continuous χ) (hcomm : ψ.comp φ = χ)
+    (D : RationalLocData R) (E : RationalLocData S) (G : RationalLocData T)
+    (hsE : E.s = φ D.s) (hTE : ∀ t ∈ D.T, φ t ∈ E.T)
+    (hsG : G.s = ψ E.s) (hTG : ∀ t ∈ E.T, ψ t ∈ G.T)
+    (hsG' : G.s = χ D.s) (hTG' : ∀ t ∈ D.T, χ t ∈ G.T)
+    (x : presheafValue D) :
+    presheafValueMapOfHom ψ hψ E G hsG hTG
+        (presheafValueMapOfHom φ hφ D E hsE hTE x) =
+      presheafValueMapOfHom χ hχ D G hsG' hTG' x := by
+  letI := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  haveI : RegularSpace (presheafValue G) := UniformSpace.to_regularSpace
+  have hcompeq : ((presheafValueMapOfHom ψ hψ E G hsG hTG).comp
+      (presheafValueMapOfHom φ hφ D E hsE hTE)).comp D.coeRingHom =
+      (presheafValueMapOfHom χ hχ D G hsG' hTG').comp D.coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D.s) ?_
+    ext a
+    simp only [RingHom.comp_apply]
+    rw [show D.coeRingHom (algebraMap R (Localization.Away D.s) a) =
+        D.canonicalMap a from rfl,
+      presheafValueMapOfHom_canonicalMap φ hφ D E hsE hTE a,
+      presheafValueMapOfHom_canonicalMap ψ hψ E G hsG hTG (φ a),
+      presheafValueMapOfHom_canonicalMap χ hχ D G hsG' hTG' a,
+      show ψ (φ a) = χ a from DFunLike.congr_fun hcomm a]
+  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
+    UniformSpace.Completion.denseRange_coe
+  have h_eq : (fun y => presheafValueMapOfHom ψ hψ E G hsG hTG
+      (presheafValueMapOfHom φ hφ D E hsE hTE y)) =
+      fun y => presheafValueMapOfHom χ hχ D G hsG' hTG' y :=
+    hdense.equalizer
+      ((presheafValueMapOfHom_continuous ψ hψ E G hsG hTG).comp
+        (presheafValueMapOfHom_continuous φ hφ D E hsE hTE))
+      (presheafValueMapOfHom_continuous χ hχ D G hsG' hTG')
+      (by funext a; exact DFunLike.congr_fun hcompeq a)
+  exact congrFun h_eq x
+
 end ValuationSpectrum
