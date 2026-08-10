@@ -7,7 +7,7 @@ VENDORED into AINTLIB (2026-07-04) from WilliamCoram/PhD (unmerged parts of
 PhD/ToPR/GaussNorm.lean + PhD/ToPR/Restricted.lean), building on the merged
 `Mathlib.RingTheory.PowerSeries.{Restricted, GaussNorm}`.
 -/
-import Mathlib.RingTheory.PowerSeries.Restricted
+import «Adic spaces».Vendored.CoramRestrictedCore
 import Mathlib.RingTheory.PowerSeries.GaussNorm
 import Mathlib.Analysis.Normed.Unbundled.RingSeminorm
 import «Adic spaces».Vendored.CoramMvRestrictedNorm
