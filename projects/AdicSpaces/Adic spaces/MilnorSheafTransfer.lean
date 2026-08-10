@@ -191,6 +191,40 @@ theorem pushCoveringC_isRational (sq : MilnorSquareData φB φC φD hφB hφC h�
   obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
   exact sq.pushC_isRational W (hC₀.piece hW)
 
+/-- Cast-compatibility of the `B`-leg push with restriction: the transported
+per-piece row equals the restriction of the base row (the ▸ is eliminated by
+substituting the free target datum). -/
+theorem cast_push_restriction_B (sq : MilnorSquareData φB φC φD hφB hφC hφD)
+    {U W : RationalLocData R}
+    (hWsub : rationalOpen W.T W.s ⊆ rationalOpen U.T U.s)
+    {E : RationalLocData B} (h : sq.pushB W = E)
+    (hEsub : rationalOpen E.T E.s ⊆
+      rationalOpen (sq.pushB U).T (sq.pushB U).s)
+    (x : presheafValue U) :
+    h ▸ (presheafValueMapOfHom φB hφB W (sq.pushB W) (sq.pushB_s W) (sq.pushB_T W)
+        (restrictionMap U W hWsub x)) =
+      restrictionMap (sq.pushB U) E hEsub
+        (presheafValueMapOfHom φB hφB U (sq.pushB U) (sq.pushB_s U)
+          (sq.pushB_T U) x) := by
+  subst h
+  exact sq.push_natural_B U W hWsub x
+
+/-- Cast-compatibility of the `C`-leg push with restriction. -/
+theorem cast_push_restriction_C (sq : MilnorSquareData φB φC φD hφB hφC hφD)
+    {U W : RationalLocData R}
+    (hWsub : rationalOpen W.T W.s ⊆ rationalOpen U.T U.s)
+    {E : RationalLocData C} (h : sq.pushC W = E)
+    (hEsub : rationalOpen E.T E.s ⊆
+      rationalOpen (sq.pushC U).T (sq.pushC U).s)
+    (x : presheafValue U) :
+    h ▸ (presheafValueMapOfHom φC hφC W (sq.pushC W) (sq.pushC_s W) (sq.pushC_T W)
+        (restrictionMap U W hWsub x)) =
+      restrictionMap (sq.pushC U) E hEsub
+        (presheafValueMapOfHom φC hφC U (sq.pushC U) (sq.pushC_s U)
+          (sq.pushC_T U) x) := by
+  subst h
+  exact sq.push_natural_C U W hWsub x
+
 end MilnorSquareData
 
 /-- **Abstract Milnor descent for sheafiness** ([WP-paper] lem:sheaf-transfer;
@@ -240,7 +274,14 @@ theorem isSheafy_of_milnorSquare
            productRestrictionSub C (sq.pushCoveringC C₀)
             (presheafValueMapOfHom φC hφC C₀.base (sq.pushC C₀.base)
               (sq.pushC_s C₀.base) (sq.pushC_T C₀.base) x)) := by
-      sorry
+      intro x
+      refine Prod.ext (funext fun E => ?_) (funext fun E => ?_)
+      · simp only [hg]
+        exact sq.cast_push_restriction_B (C₀.hsubset _ (selB E).2) (hselB_eq E)
+          ((sq.pushCoveringB C₀).hsubset E.1 E.2) x
+      · simp only [hg]
+        exact sq.cast_push_restriction_C (C₀.hsubset _ (selC E).2) (hselC_eq E)
+          ((sq.pushCoveringC C₀).hsubset E.1 E.2) x
     sorry
   · -- Gluing half ([WP-paper] l.613–627): push, glue at the vertices, compare in
     -- `D` by separation, descend by `row_glue`, recover per-piece by
