@@ -168,4 +168,70 @@ theorem ker_pushSection (Q : (A.curve.baseChange t).Point (𝟙 T)) :
   exact Scheme.IdealSheafData.ker_fst_of_isClosedImmersion
     ((pushSection g t Q).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom)) (pastingMap g t)
 
+/-- **(YR-1a-ii, step 3)** The class of a section divisor is natural along the pasting
+map: `Pic(pm)([𝒪(pushQ)]) = [𝒪(Q)]`. Transcription of `sectionCls_restrictBase`
+(AP-E1-NAT1 step 3) with the connecting morphism `baseChangeMap ↦ pastingMap`. -/
+theorem sectionCls_pastingMap (Q : (A.curve.baseChange t).Point (𝟙 T)) :
+    Scheme.Pic.map (pastingMap g t)
+        (sectionCls B.curve B.curve.smooth (t ≫ g.baseHom)
+          ((pushSection g t Q).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom))
+          (pushSection g t Q).2) =
+      sectionCls A.curve A.curve.smooth t (Q.1 : T ⟶ pullback A.curve.π t) Q.2 := by
+  letI := Scheme.Modules.monoidalCategory (pullback B.curve.π (t ≫ g.baseHom))
+  letI := Scheme.Modules.monoidalCategory (pullback A.curve.π t)
+  haveI hsepB : IsSeparated (pullback.snd B.curve.π (t ≫ g.baseHom)) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) B.curve.π (t ≫ g.baseHom)
+      inferInstance
+  haveI hsepA : IsSeparated (pullback.snd A.curve.π t) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) A.curve.π t inferInstance
+  have hsmB : SmoothOfRelativeDimension 1 (pullback.snd B.curve.π (t ≫ g.baseHom)) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) B.curve.π
+      (t ≫ g.baseHom) B.curve.smooth
+  have hsmA : SmoothOfRelativeDimension 1 (pullback.snd A.curve.π t) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) A.curve.π t
+      A.curve.smooth
+  have hJ : ∀ c : ↥(pullback B.curve.π (t ≫ g.baseHom)),
+      ∃ V : (pullback B.curve.π (t ≫ g.baseHom)).affineOpens, c ∈ V.1 ∧
+      ∃ f : Γ(pullback B.curve.π (t ≫ g.baseHom), V.1),
+        (Scheme.Hom.ker ((pushSection g t Q).1 :
+            T ⟶ pullback B.curve.π (t ≫ g.baseHom))).ideal V = Ideal.span {f} ∧
+          f ∈ nonZeroDivisors Γ(pullback B.curve.π (t ≫ g.baseHom), V.1) :=
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsmB
+      ((pushSection g t Q).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom))
+      (pushSection g t Q).2).locallyPrincipal
+  have hJ' : ∀ c : ↥(pullback A.curve.π t), ∃ V : (pullback A.curve.π t).affineOpens,
+      c ∈ V.1 ∧ ∃ f : Γ(pullback A.curve.π t, V.1),
+        ((Scheme.Hom.ker ((pushSection g t Q).1 :
+            T ⟶ pullback B.curve.π (t ≫ g.baseHom))).comap
+          (pastingMap g t)).ideal V = Ideal.span {f} ∧
+          f ∈ nonZeroDivisors Γ(pullback A.curve.π t, V.1) := by
+    rw [← ker_pushSection g t Q]
+    exact (RelEffCartierDiv.sectionDivisor_isOfficial hsmA
+      (Q.1 : T ⟶ pullback A.curve.π t) Q.2).locallyPrincipal
+  obtain ⟨eiso⟩ := nonempty_pullback_idealModule (pastingMap g t)
+    (Scheme.Hom.ker ((pushSection g t Q).1 :
+      T ⟶ pullback B.curve.π (t ≫ g.baseHom))) hJ hJ'
+  have hcore : Scheme.Pic.map (pastingMap g t)
+      (((RelEffCartierDiv.sectionDivisor (pullback.snd B.curve.π (t ≫ g.baseHom))
+          ((pushSection g t Q).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom))
+          (pushSection g t Q).2).isInvertible_idealModule
+        (RelEffCartierDiv.sectionDivisor_isOfficial hsmB _
+          (pushSection g t Q).2)).isUnit_toSkeleton.unit) =
+      ((RelEffCartierDiv.sectionDivisor (pullback.snd A.curve.π t)
+          (Q.1 : T ⟶ pullback A.curve.π t) Q.2).isInvertible_idealModule
+        (RelEffCartierDiv.sectionDivisor_isOfficial hsmA _ Q.2)).isUnit_toSkeleton.unit := by
+    refine Units.ext ?_
+    refine (Scheme.Pic.map_val (pastingMap g t) _).trans ?_
+    refine (congrArg (Scheme.Modules.pullback (pastingMap g t)).mapSkeleton.obj
+      (IsUnit.unit_spec _)).trans ?_
+    refine (Functor.mapSkeleton_obj_toSkeleton _ _).trans ?_
+    refine (toSkeleton_eq_toSkeleton_iff.mpr
+      ⟨eiso ≪≫ eqToIso (congrArg Scheme.Modules.idealModule
+        (ker_pushSection g t Q).symm)⟩).trans ?_
+    exact (IsUnit.unit_spec _).symm
+  refine Eq.trans (map_inv (Scheme.Pic.map (pastingMap g t)) _) ?_
+  exact congrArg (·⁻¹) hcore
+
 end ModularCurves
