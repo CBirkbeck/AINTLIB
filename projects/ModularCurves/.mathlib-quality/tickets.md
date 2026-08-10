@@ -39046,7 +39046,31 @@ in the plan's "Known traps".
   of `Γ(−, 𝒪ˣ)` (unit-descent; the stream-DESC fppf engine may supply it)
 - `_nondegenerate` (`:270`) — KM 2.8.2, Cartier–Nishi duality [cf. Oda]. **This is the one register entry
   that genuinely needs Cartier duality**, and it is absent from mathlib — expect its own sub-development
-- `_mul` (`:328`) — KM 2.8.4.1, the composability formula
+- `_mul` (`:328`) — KM 2.8.4.1, the composability formula.
+  **SOURCE READ 2026-08-10 (KM pp. 89–91 = pdf 100–102) — the E4/E5/E6 programme is the
+  general-isogeny pairing development**:
+  - KM 2.8.1.2/p. 89 defines `⟨P,P'⟩_π := "h(P)"` for an ARBITRARY isogeny `π`, a bilinear
+    pairing `(Ker π)(S) × (Ker πᵗ)(S) → G_m(S)`; our whole KM backend is this at `π = [N]`
+    (self-dual by 2.6.2.1). The `f`-generic splitting engine
+    (`exists_transitionUnit_eq_mul_inv_of_picMap_eq_one`) already supports arbitrary `π` —
+    the `[N]`-specific parts are `kappa`/`kerMulByN` and the normalisation bookkeeping.
+  - 2.8.3 (verbatim): "One also knows (cf. [Oda]) that this pairing is alternating, in the
+    sense that `⟨P,P'⟩_π ⟨P',P⟩_{πᵗ} = 1`." — an **[Oda] citation, not proved in KM**. At
+    `π = [N]` this is the antisymmetry `e_N(P,P')e_N(P',P) = 1` INDEPENDENT of `_self`
+    (E4a). Oda's proof is biextension/cube-theoretic.
+  - 2.8.4.1 (verbatim): for composable isogenies `π₁, π₂` and `P₀ ∈ Ker π₁`,
+    `P₂ ∈ Ker(π₁ᵗ∘π₂ᵗ)`: `⟨P₀,P₂⟩_{π₂∘π₁} = ⟨P₀, π₂ᵗP₂⟩_{π₁}` — "follows immediately from
+    the definition, via the interpretation of `P₂` as a suitable line bundle on `E₂`".
+    2.8.6.1: `e_N(P,Q) = ⟨P, πQ⟩_π` for an `N`-isogeny `π`.
+  - **Dependency structure**: E6 (`_mul`) needs 2.8.4.1 at `π₂∘π₁ = [NM] = [N]∘[M]`; E4
+    (`_self`) needs E4a (Oda-alternation) + E6 + E4c (fppf-locality: `[2]` finite flat
+    surjective + faithfully-flat `Γ(𝒪ˣ)`-injectivity + the value's base-change law, which we
+    have); E5 (`_nondegenerate`) needs 2.8.2.1 Cartier–Nishi (also [Oda]).
+  - **Next planning step**: a /develop pass for the `⟨,⟩_π`-generalisation of
+    `torsionSplittingEval` (replace `mulByN` by an arbitrary isogeny with a chosen
+    `πᵗ`-datum; the splitting/uniqueness/patching engines are already morphism-generic),
+    then 2.8.4.1 by the "line bundle on E₂" interpretation, then the register `_mul`. E4a
+    and E5 bottom out in biextension theory (Oda/Mumford) — genuinely the deepest strand.
 
 ## AP-E1 sub-cut (2026-08-09, session 2) — canonicalising `torsionSplittingEval`
 
