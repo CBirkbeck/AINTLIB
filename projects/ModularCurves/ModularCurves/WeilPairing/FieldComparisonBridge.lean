@@ -131,6 +131,12 @@ theorem genericSpecPoint_comp_translateBy
   congrArg Subtype.val (pointMapOfHom_translateBy (E := modelEllipticCurve W) x
     (genericModelPoint W))
 
+/- **(hx piece (ii) — INLINE AT USE)**: the dictionary-read of the sum is the two-rewrite
+composite `projModelPointsEquiv_add` (MulByHomDegree:54) then
+`projModelPointsEquiv_genericSpecPoint` (:780). A standalone statement fights the
+`W_KE`-vs-`baseChange` def-level typing; at the use site the expected types drive the
+defeq. -/
+
 /-- **(U5c-2 sub-brick — the chart-constants identification)** The chart identification
 `coordRingToZSection` carries the `K`-constant of the coordinate ring to the restriction
 of the structure-pulled global constant. The `chartZAffineEquiv`-leg is an `≃ₐ[K]`
