@@ -41307,3 +41307,19 @@ conclusion-grep has repeatedly missed what it caught.
 * **My boarded routes were wrong eight times** this session — seven over-engineered, once
   under-engineered — usually because I anchored on a nearby proved theorem's shape instead of reading
   what the statement needs. Workers should trust the statement over the sketch and say when they do.
+
+
+### U5c-2 chart-constants progress (2026-08-10, session 3 late)
+
+`coordRingToZSection_algebraMap` (FieldComparisonBridge.lean) proven MODULO the single
+pure-algebra leg `hlegB` (`chartCoordEquiv W 2` on constants = `fromZeroRingHom ∘
+algebraMapGradeZero`). Landed: leg A (`symm_trans` + `chartZAffineEquiv.symm.commutes`);
+leg C morphism identity (`awayι ≫ π = Spec.map fromZero ≫ Spec.map g₀` via
+`awayι_toSpecZero`); S2 double `ΓSpecIso_inv_naturality` — rw/simp hit whnf/isDefEq
+walls; broken by FULLY-TYPED haves + congrArg composition (opacity pair before the
+docstring); final assembly by `inv_hom_id_apply` term-chain. hinv step 1 also done
+(germ-form identification). Bricks: ForMathlib/ProjToSpecZero:43
+`Proj_awayι_appTop_ΓSpecIso`; mathlib `awayι_toSpecZero`, `ΓSpecIso_inv_naturality`.
+Remaining in the bridge file: `hlegB` (pure algebra — substrate
+`algebraMap_gradeZero_comp_eq` WeierstrassModel:373 + `chartCoordEquiv` def :551),
+`hinv` step 2 (consumes chart-constants + `functionFieldMap_comp`), `hx`, `hy`.
