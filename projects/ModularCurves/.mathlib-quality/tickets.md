@@ -41388,3 +41388,19 @@ mulOver with the constant section; specPoints-machinery + points dictionary);
 mathlib affine addition — matching HasseWeil's translateAlgEquiv case-split);
 (iii) function-field values = coordinate values at `genericSpecPoint` (the
 germ/section-to-point glue; `genericSpecPoint_comp_mulByHom` is the [n]-exemplar).
+
+
+### hx execution template located (2026-08-10, session 3 latest+4)
+
+`genericSpecPoint_comp_mulByHom`'s PROOF (MulByHomDegree:917–975ish) is the exact
+template for the hx R-side pieces (i)+(ii): view `genericSpecPoint` as a
+`(modelEllipticCurve W).Point g` over `g := Spec.map (algebraMap K KE)`, express the
+morphism-composition as the Point-group action (`point_smul_eq_comp_mulBy` there;
+for τ the analogue is composition-with-translateBy = +constant — `comp_translateByPoint`
+Translation.lean:186 / `pointMapOfHom_translateBy` Factorization:697), then read the
+result's coordinates through the dictionary (`projModelPointsEquiv_chartSpecPoint`).
+**hx-R-side statement to write**: `genericSpecPoint_comp_translateBy :
+(genericSpecPoint W).1 ≫ τ = (chartSpecPoint W xAdd yAdd hAdd).1` with xAdd/yAdd the
+affine-addition coordinates of `genericPoint + P₀'` — then piece (iii) via the germ
+machinery reads it into the function field, matching HasseWeil's slope case-split
+(`translateAlgEquivOfPoint_*_x_gen`). Mirror the :917-proof structure line by line.
