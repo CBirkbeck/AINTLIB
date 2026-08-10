@@ -342,7 +342,25 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
       have hπτ : τ ≫ projModelπ W = projModelπ W := by
         rw [hτ]
         exact Over.w ((modelEllipticCurve W).translateByIso x).hom
-      sorry
+      -- the restricted class is the global class
+      have h2 : ∀ s : Γ(projModel W, ⊤),
+          (algebraMap Γ(projModel W, zChart W) ((projModel W).functionField))
+            ((ConcreteCategory.hom ((projModel W).presheaf.map
+              (homOfLE (le_top : (zChart W : (projModel W).Opens) ≤ ⊤)).op)) s)
+          = (projModel W).germToFunctionField ⊤ s := by
+        intro s
+        exact TopCat.Presheaf.germ_res_apply (projModel W).presheaf
+          (homOfLE le_top) (genericPoint (projModel W)) _ s
+      have h3 : (τ.appTop).hom (((projModelπ W).appTop).hom
+          ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a))
+        = ((projModelπ W).appTop).hom ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a) :=
+        congrArg (fun (m : projModel W ⟶ Spec (CommRingCat.of K)) =>
+          (Scheme.Hom.appTop m).hom ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a)) hπτ
+      refine Eq.trans (congrArg (CommRingCat.Hom.hom (Scheme.Hom.functionFieldMap τ))
+        (h2 _)) (Eq.trans (functionFieldMap_germToFunctionField τ ⊤ _)
+          (Eq.trans (congrArg (ConcreteCategory.hom ((projModel W).presheaf.germ
+            (τ ⁻¹ᵁ ⊤) (genericPoint (projModel W))
+            (genericPoint_mem_preimage τ ⊤))) h3) (h2 _).symm))
     rw [hinv]
     exact (RingEquiv.apply_symm_apply _ _).symm
   have hx : L ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X))
