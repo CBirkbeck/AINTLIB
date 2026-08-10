@@ -125,6 +125,17 @@ theorem coordRingToZSection_algebraMap (a : K) :
     rw [RingEquiv.symm_trans_apply]
     exact congrArg (chartCoordEquiv W 2) ((chartZAffineEquiv W).symm.commutes a)
   rw [hA]
+  -- Leg C morphism algebra: the awayι-composite of the structure morphism is Spec of the
+  -- zero-degree composite
+  have hπ : Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos ≫ projModelπ W
+      = Spec.map (CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+          (quotientGrading (projIdeal W))
+          (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) ≫
+        Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))) := by
+    show _ ≫ (Proj.toSpecZero _ ≫ Spec.map _) = _
+    rw [← Category.assoc, Proj.awayι_toSpecZero]
   sorry
 
 /-- **(U5c-2 brick)** The self-base-change collapse on function fields:
