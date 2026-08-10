@@ -138,3 +138,58 @@ file:line, all checked this session), (b) elementary verified commutative algebr
 sub-development (U5, plus the U1 kappa_mapIso block and the U2 model-base-change
 generalisation as templated NAT2/E6-d-mirror work). Skeleton compiles (0 errors,
 7 sorries). REVIEW-PENDING: none.
+
+## U5 sub-decomposition (2026-08-10, validated ChatGPT 5.6-sol max — consultation #3)
+
+Scope: the comparison `e_KM = e_Sil` over a field and the alternation import, for the
+MODEL curve `E := modelEllipticCurve W` over `Spec k` (record-generality deferred to the
+U-assembly via U1/U2). Verdict highlights (ChatGPT had repo access and cited files):
+- **Orientation PINNED**: `transitionUnitOfCover` = `e.inv ≫ g.hom` (InvertibleSheafCocycle
+  :44, KMPatching:197) ⟹ F_ij = r_j/r_i ⟹ the comparison gives **equality** `e_KM = e_Sil`
+  (with the literal `e_i∘e_j⁻¹` convention it would be the inverse; for the diagonal either
+  suffices).
+- Q1 confirmed: `[N] ∘ τ_P = [N]` (`translateByPoint_comp_mulByN`), so `τ_P^#` fixes
+  `[N]^# K(E)` pointwise — formalised as `functionFieldMap_apply_functionFieldMap_of_comp_eq`
+  (PROVED, DominantFunctionField.lean).
+- Q2 clean form: with r_i := local equations of D = (Q)−(O) through φ : M ≅ O(D),
+  `G_i := h_i·[N]^#r_i` glue to one `G` with div G = [N]^*D = div g_Q, so `G = a·g_Q`,
+  `a ∈ k̄^×` scalar; hence `H := FF-class(h_{i₀}) = a·g_Q·[N]^#(r_{i₀}⁻¹)`. Alternative same
+  content: `ĥ_i := g_Q/[N]^#r_i` is another splitting of the SAME pulled cocycle; `h_i/ĥ_i`
+  glue to the scalar. Warnings: comparing arbitrary rational trivialisations gives only an
+  arbitrary FF-element — the [N]^#-form comes from the cocycle calculation; if cocycles are
+  merely cohomologous, absorb the coboundary into the r_i first.
+- Q3: Γ(X,O)^× = k^× via geometric integrality; in-tree formal route
+  `EllipticCurveGeom.universallyOConnected` + `UniversallyOConnected.isIso_app`. The scalar
+  `a` needs no descent.
+- Q5: do the WHOLE comparison over k̄, descend only the value (Γ-injectivity); IsAlgClosed +
+  (N:k)≠0 are needed only for the Silverman endpoint.
+- Q6 missing input (the genuine work): the divisor/line-bundle dictionary — κ(Q) ↔ O((Q)−(O))
+  concretised, HW `weilFunction_divisor` (valuation divisor) ↔ Cartier data on projModel,
+  [N]^#-FF vs HW pullback (the last IS brick6_intertwining, PROVED).
+
+### Leaves
+- **U5-L1** (the dictionary, hard): `∃ a v, H = a • (g_Q-image · [N]^#-FF v)` in
+  `W.toAffine.FunctionField` — where H := FF-class of h_{i₀} (chart ∋ generic), g_Q :=
+  `HasseWeil.weilFunction` (already lives in the same FunctionField). Split:
+  - L1a: r_i-family from the sectionDivisor/idealModule data of κ(Q) with
+    FF-transition-match (`transitionUnitOfCover`-image = r_j/r_i) and HW-divisor pinning
+    (div r_i = (Q)−(O) on W_i as valuation divisors) — the scheme↔valuation layer (T-C4 debt).
+  - L1b: div(G) = div(g_Q) ⟹ G/g_Q ∈ k̄^× (HW divisor-zero⟹constant over k̄ +
+    pullbackDiv-vs-[N]^#-FF via brick6).
+- **U5-L2** (τ-relation in FF): instantiate `eq_mul_globalTwist_of_translate` at
+  τ := translateByPoint (the KMBilinear:380–430 boilerplate is the template), push the i₀-chart
+  relation through germToFunctionField, conjugate by the PROVEN bridge
+  `functionFieldMap_translateBy` ⟹ `translateAlgEquivOfPoint W P₀ H = c·H`, c :=
+  algebraMap-image of `torsionSplittingEval … P'`. Needs the gluing
+  translateByPoint-vs-translateByIso.left (two spellings of translation — check/lemma).
+- **U5-L3** (scalar match): L1 + L2 + deck-invariance + `weilPairing_spec` + cancel g_Q ≠ 0 +
+  k̄ → K(E) injectivity ⟹ c = e_Sil(P₀, Q₀).
+- **U5-L4** (value plumbing): `weilPairingEval` at the model = C := torsionSplittingEval
+  (via `weilPairingEval_eq_weilPairingKM` + `eq_torsionSplittingEval`), c = algebraMap C.
+- **U5-L5** (diagonal): Q := P ⟹ e_KM(P,P) = e_Sil(P₀,P₀) = 1 (`weilPairing_self` /
+  `fieldWeilPairing_self`).
+- **U5-L6** (descent): base-change the k-data to k̄, `weilPairingEval_restrict` +
+  Γ(Spec k) → Γ(Spec k̄) injective; then the record→model transport at a field (U1-consumer).
+
+Execution order: L2 (all inputs proven, boilerplate) → L4 (plumbing) → L1a/L1b (the math) →
+L3 → L5 → L6.
