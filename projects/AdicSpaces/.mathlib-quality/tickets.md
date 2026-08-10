@@ -64,7 +64,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 ---
 
 ### [T611] B-L1 and [T612] B-L2: the RestrictedFubini Gauss-transport legs
-- **Status**: open ×2 · **File**: `Adic spaces/FJP/RestrictedFubini.lean` (the two
+- **Status**: done ×2 (2026-08-10 — already closed by a prior session; the file docstring's 'WIP frontier' line was stale, now fixed. Both legs + restrictedFubini axiom-clean.) · **File**: `Adic spaces/FJP/RestrictedFubini.lean` (the two
   `sorry` markers; grep `sorry` in the file for exact lines) · **Depends on**: none ·
   **Parallel**: yes (with each other and with the A-track) · **Type**: lemma ×2
 - **Proof sketch**: each leg transports Gauss decay across `sumAlgEquiv` (Xia) composed
@@ -81,7 +81,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 - **Generality**: as stated in the file (generic `K`, generic variable counts).
 
 ### [T613] B-L3: `mvTate_isStronglyNoetherian`
-- **Status**: blocked (T611, T612) · **File**: `Adic spaces/FJP/StrongSheafy.lean:40` · **Type**: theorem
+- **Status**: in_progress (2026-08-10) · **File**: `Adic spaces/FJP/StrongSheafy.lean:40` · **Type**: theorem
 - **Proof sketch**: unfold `IsStronglyNoetherian` for the extension: its `m`-variable
   Tate algebra flattens through Fubini (B-L1/2) to the `(n+m)`-variable Tate algebra of
   `A`, which is noetherian by `[IsStronglyNoetherian A]`; transport noetherianity along
@@ -141,3 +141,38 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 
 ### [CLEANUP-FINAL] /cleanup-all
 - **Status**: open · **Depends on**: everything.
+
+### [T617] Topological nested Fubini: `restrictedSumRingEquiv` (sub-ticket of T613)
+- **Status**: in_progress (2026-08-10) · **File**: `Adic spaces/FJP/StrongSheafy.lean` ·
+  **Depends on**: none · **Parent**: T613 · **Type**: def + 2 lemmas
+- **Statement**: over `[CommRing A] [TopologicalSpace A] [NonarchimedeanRing A]`
+  `[IsTopologicalRing A] [IsTateRing A]`, with the letI `mvTateAlgebraTopology' n` on
+  `B := ↥(restrictedMvPowerSeriesSubring n A)`:
+  `restrictedNestedEquiv (n k) : ↥(restrictedMvPowerSeriesSubring k B) ≃+* ↥(restrictedMvPowerSeriesSubring (n + k) A)`
+  (via `MvPowerSeries.sumAlgEquiv` + `finSumFinEquiv` reindex), plus the two
+  restrictedness-transport lemmas (joint ⟹ nested, nested ⟹ joint).
+- **Proof sketch**:
+  1. Ambient equivalence: `renameEquiv (finSumFinEquiv (m:=k)(n:=n)).symm` then
+     `sumAlgEquiv (Fin k) (Fin n) A` : `MvPowerSeries (Fin (n+k)) A ≃ MvPowerSeries (Fin k) (MvPowerSeries (Fin n) A)`
+     (coefficient formulas `coeff_sumAlgEquiv_symm_apply` etc., Vendored/XiaMvPowerSeriesEquiv).
+  2. (joint ⟹ nested), inner leg: for fixed outer ν, the inner slice of a cofinitely-null
+     joint family is cofinitely null (injection of index sets) — each outer coefficient
+     lands in `restrictedMvPowerSeriesSubring n A`.
+  3. (joint ⟹ nested), outer leg: a joint-cofinite family has finitely many exceptional
+     pairs; the set of outer ν occurring in an exceptional pair is finite, so cofinitely
+     many outer coefficients lie entirely in any `mvTateAlgNhd n P j` — outer family → 0
+     in `mvTateAlgebraTopology'` (basis: `mvTateAlgBasis'`).
+  4. (nested ⟹ joint): given U ⊇ a basis nhd, cofinitely many ν have g_ν entirely in U;
+     the finitely many remaining g_ν are each inner-restricted, contributing finitely many
+     exceptional μ each — total exceptional pairs finite.
+  5. Package: the restricted subrings map onto each other; `RingEquiv` via
+     `RingEquiv.ofBijective` on the corestricted map (mul/add from the ambient AlgEquiv).
+- **Mathlib lemmas**: `Filter.mem_cofinite`, `Set.Finite.subset`, `Filter.tendsto_nhds`,
+  `MvPowerSeries.coeff_*`; project: `sumAlgEquiv`, `coeff_sumAlgEquiv_symm_apply`,
+  `mvTateAlgBasis'`, `mvTateAlgNhd` membership lemmas, `MvPowerSeries.IsRestricted`
+  (RestrictedPowerSeries.lean:68).
+- **Sources**: the standard `A⟨X⟩⟨Y⟩ = A⟨X,Y⟩` (Wedhorn §5.3 vocabulary; the normed-field
+  instance is `restrictedFubini`, FJP/RestrictedFubini.lean:353; [WP-paper]
+  eq:strong-sheafy-decomposition is the WPA instance).
+- **Generality**: any Tate ring `A` — deliberately the maximal form (this is the
+  generic leaf both campaign B and future consumers use).

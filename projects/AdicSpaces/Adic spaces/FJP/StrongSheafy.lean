@@ -32,6 +32,79 @@ open ValuationSpectrum TopologicalRing MvTateAlgebra
 
 variable (F : Type*) [Field F]
 
+section NestedFubini
+
+variable {A : Type*} [CommRing A] [TopologicalSpace A] [NonarchimedeanRing A]
+    [IsTopologicalRing A] [IsTateRing A]
+
+/-- Index bookkeeping for the nested Fubini: `Fin (n+k) ≃ Fin k ⊕ Fin n`, outer
+variables first (matching `sumAlgEquiv`'s outer summand). -/
+def nestedIndexEquiv (n k : ℕ) : Fin (n + k) ≃ (Fin k ⊕ Fin n) :=
+  (finCongr (Nat.add_comm n k)).trans (finSumFinEquiv (m := k) (n := n)).symm
+
+/-- The ambient nested-Fubini ring equivalence
+`MvPowerSeries (Fin (n+k)) A ≃+* MvPowerSeries (Fin k) (MvPowerSeries (Fin n) A)`
+(reindex + `sumAlgEquiv`). -/
+noncomputable def nestedAmbientEquiv (n k : ℕ) :
+    MvPowerSeries (Fin (n + k)) A ≃+* MvPowerSeries (Fin k) (MvPowerSeries (Fin n) A) :=
+  ((MvPowerSeries.renameEquiv A (nestedIndexEquiv n k)).trans
+    (MvPowerSeries.sumAlgEquiv (Fin k) (Fin n) A)).toRingEquiv
+
+/-- **T617 leg 1 (joint ⟹ inner, per outer index)**: each outer coefficient of the
+nested image of a jointly-restricted series is itself restricted (the inner slice of
+a cofinitely-null family along a fixed outer index is cofinitely null). -/
+theorem isRestricted_coeff_nestedAmbientEquiv (n k : ℕ)
+    {g : MvPowerSeries (Fin (n + k)) A} (hg : MvPowerSeries.IsRestricted g)
+    (ν : Fin k →₀ ℕ) :
+    MvPowerSeries.IsRestricted (MvPowerSeries.coeff ν (nestedAmbientEquiv n k g)) := by
+  sorry
+
+/-- **T617 leg 2 (joint ⟹ outer null)**: the outer coefficient family of the nested
+image of a jointly-restricted series tends to zero in the canonical mv-Tate topology
+of `A⟨X₁,…,Xₙ⟩` (finite-exceptional-pair combinatorics against `mvTateAlgNhd`,
+entering the pair via `mvTateAlgNhd_of_coeff_mem_principal`). -/
+theorem tendsto_coeff_nestedAmbientEquiv (n k : ℕ)
+    {g : MvPowerSeries (Fin (n + k)) A} (hg : MvPowerSeries.IsRestricted g) :
+    letI := mvTateAlgebraTopology' (A := A) n
+    Filter.Tendsto
+      (fun ν : Fin k →₀ ℕ =>
+        (⟨MvPowerSeries.coeff ν (nestedAmbientEquiv n k g),
+          isRestricted_coeff_nestedAmbientEquiv n k hg ν⟩ :
+          ↥(restrictedMvPowerSeriesSubring n A)))
+      Filter.cofinite (nhds 0) := by
+  sorry
+
+/-- **T617 leg 3 (nested ⟹ joint)**: a series over `A⟨X₁,…,Xₙ⟩` whose outer family
+is restricted (w.r.t. the canonical topology) flattens to a jointly-restricted
+series over `A` (cofinitely many outer indices land entirely in any basic
+neighbourhood via `mvTateAlgNhd_coeff_mem`; the finitely many exceptional outer
+slices are each inner-restricted). -/
+theorem isRestricted_symm_nestedAmbientEquiv (n k : ℕ)
+    (f : MvPowerSeries (Fin k) ↥(restrictedMvPowerSeriesSubring n A))
+    (hf : letI := mvTateAlgebraTopology' (A := A) n
+      Filter.Tendsto (fun ν : Fin k →₀ ℕ => MvPowerSeries.coeff ν f)
+        Filter.cofinite (nhds 0)) :
+    MvPowerSeries.IsRestricted ((nestedAmbientEquiv n k).symm
+      (MvPowerSeries.map (restrictedMvPowerSeriesSubring n A).subtype f)) := by
+  sorry
+
+/-- **T617: the topological nested Fubini** — the `k`-variable restricted power
+series over the Tate extension `A⟨X₁,…,Xₙ⟩` (with its canonical topology) are the
+`(n+k)`-variable restricted power series over `A`. The standard
+`A⟨X⟩⟨Y⟩ = A⟨X,Y⟩` (Wedhorn §5.3 vocabulary; the normed-field instance is
+`restrictedFubini`), via `MvPowerSeries.sumAlgEquiv` + the `finSumFinEquiv`
+reindex, with the two restrictedness transports proved by the
+finite-exceptional-pair combinatorics. -/
+noncomputable def restrictedNestedEquiv (n k : ℕ) :
+    letI := mvTateAlgebraTopology' (A := A) n
+    haveI := mvTateAlgebraTopology'_isTopologicalRing (A := A) n
+    haveI := mvTate_nonarchimedean (A := A) n
+    ↥(restrictedMvPowerSeriesSubring k ↥(restrictedMvPowerSeriesSubring n A)) ≃+*
+      ↥(restrictedMvPowerSeriesSubring (n + k) A) := by
+  sorry
+
+end NestedFubini
+
 /-- **B-L3 (generic): the Tate extension of a strongly noetherian Tate ring is
 strongly noetherian.** Content: restricted Fubini
 `A⟨X₁,…,X_{n+m}⟩ ≅ (A⟨X₁,…,Xₙ⟩)⟨T₁,…,Tₘ⟩` flattens the extension's own Tate

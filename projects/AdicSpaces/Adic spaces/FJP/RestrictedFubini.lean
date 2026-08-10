@@ -18,7 +18,8 @@ sup-norm identity in both directions.  Composed with the `Fin`-sum rename,
 this identifies the `k`-th Tate extension of a Tate algebra with a Tate
 algebra, funneling the tower Nullstellensatz into `module_finite_residue`.
 
-WIP frontier: the two Gauss-transport legs carry `sorry` markers.
+Both Gauss-transport legs (`isRestrictedGauss_sumToRestrictedFun`,
+`isRestrictedGauss_iterToSum`) are proven; the file is sorry-free and axiom-clean.
 -/
 
 @[expose] public section
