@@ -41323,3 +41323,18 @@ docstring); final assembly by `inv_hom_id_apply` term-chain. hinv step 1 also do
 Remaining in the bridge file: `hlegB` (pure algebra — substrate
 `algebraMap_gradeZero_comp_eq` WeierstrassModel:373 + `chartCoordEquiv` def :551),
 `hinv` step 2 (consumes chart-constants + `functionFieldMap_comp`), `hx`, `hy`.
+
+
+### U5c-2: chart-constants COMPLETE (2026-08-10, session 3 latest)
+
+**`coordRingToZSection_algebraMap` FULLY PROVEN, axiom-clean** — the chart identification
+carries K-constants to restricted structure-pulled constants. Final pieces: hlegB via
+`algebraMap_gradeZero_comp_eq`-pointwise with BOTH residuals rfl
+(`HomogeneousLocalization.algebraMap_eq` is a mathlib rfl-lemma; `gradeZeroRingEquiv` is
+`RingEquiv.ofBijective` over `algebraMapGradeZero`); hchase closed by the mk-simp set
+(`Ideal.quotientEquiv_symm_mk`, `Ideal.quotEquivOfEq_mk`,
+`RingHom.quotientKerEquivOfSurjective_apply_mk`) + a final coe-rfl.
+Remaining in the bridge: hinv step 2 (NOW UNBLOCKED: c₀ = restrict(π-pulled) by the new
+lemma; `τ ≫ π = π` via Over.w of translateByIso; `functionFieldMap_germToFunctionField`
++ naturality closes), hx, hy (slope-formula computations).
+Silent-python-replace lesson: ALWAYS assert the anchor (two no-op replaces this session).
