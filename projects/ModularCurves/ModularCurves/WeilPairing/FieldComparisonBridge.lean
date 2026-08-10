@@ -171,6 +171,12 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
     (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) with hR
   have hK : ∀ a : K, L ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C (Polynomial.C a)))
       = R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C (Polynomial.C a))) := by
+    intro a
+    have ha : (AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C (Polynomial.C a))
+        = algebraMap K W.toAffine.CoordinateRing a := rfl
+    rw [ha]
+    simp only [hL, hR, RingHom.comp_apply]
+    rw [← IsScalarTower.algebraMap_apply K W.toAffine.CoordinateRing W.toAffine.FunctionField]
     sorry
   have hx : L ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X))
       = R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X)) := by
