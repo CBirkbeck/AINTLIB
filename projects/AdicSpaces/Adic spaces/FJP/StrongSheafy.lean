@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FJP.FiniteJetSheafyEndpoints
+import «Adic spaces».FJP.RestrictedFubini
 import «Adic spaces».SheafyRingEquivTransport
 import «Adic spaces».MvTateAlgebraTopology
 
@@ -50,14 +51,33 @@ noncomputable def nestedAmbientEquiv (n k : ℕ) :
   ((MvPowerSeries.renameEquiv A (nestedIndexEquiv n k)).trans
     (MvPowerSeries.sumAlgEquiv (Fin k) (Fin n) A)).toRingEquiv
 
-/-- **T617 leg 1 (joint ⟹ inner, per outer index)**: each outer coefficient of the
-nested image of a jointly-restricted series is itself restricted (the inner slice of
-a cofinitely-null family along a fixed outer index is cofinitely null). -/
+omit [TopologicalSpace A] [NonarchimedeanRing A] [IsTopologicalRing A] [IsTateRing A] in
+/-- Coefficient formula for the ambient nested equivalence: the `(ν, μ)` nested
+coefficient is the joint coefficient at the reindexed `sumElim`. -/
+theorem coeff_coeff_nestedAmbientEquiv (n k : ℕ) (g : MvPowerSeries (Fin (n + k)) A)
+    (ν : Fin k →₀ ℕ) (μ : Fin n →₀ ℕ) :
+    MvPowerSeries.coeff μ (MvPowerSeries.coeff ν (nestedAmbientEquiv n k g)) =
+      MvPowerSeries.coeff
+        (Finsupp.embDomain (nestedIndexEquiv n k).symm.toEmbedding (ν.sumElim μ)) g := by
+  show MvPowerSeries.coeff μ (MvPowerSeries.coeff ν
+    (MvPowerSeries.sumToIter _ _ _ (MvPowerSeries.rename (⇑(nestedIndexEquiv n k)) g))) = _
+  rw [MvPowerSeries.coeff_sumToIter]
+  conv_lhs => rw [← GraphKoszul.embDomain_symm_embDomain (nestedIndexEquiv n k) (ν.sumElim μ)]
+  exact MvPowerSeries.coeff_embDomain_rename (nestedIndexEquiv n k).toEmbedding g _
+
 theorem isRestricted_coeff_nestedAmbientEquiv (n k : ℕ)
     {g : MvPowerSeries (Fin (n + k)) A} (hg : MvPowerSeries.IsRestricted g)
     (ν : Fin k →₀ ℕ) :
     MvPowerSeries.IsRestricted (MvPowerSeries.coeff ν (nestedAmbientEquiv n k g)) := by
-  sorry
+  have hinj : Function.Injective (fun μ : Fin n →₀ ℕ =>
+      Finsupp.embDomain (nestedIndexEquiv n k).symm.toEmbedding (ν.sumElim μ)) := by
+    intro μ μ' h
+    have h2 := Finsupp.embDomain_injective _ h
+    ext j
+    have := congrArg (fun s : (Fin k ⊕ Fin n) →₀ ℕ => s (Sum.inr j)) h2
+    simpa using this
+  exact (hg.comp hinj.tendsto_cofinite).congr
+    (fun μ => (coeff_coeff_nestedAmbientEquiv n k g ν μ).symm)
 
 /-- **T617 leg 2 (joint ⟹ outer null)**: the outer coefficient family of the nested
 image of a jointly-restricted series tends to zero in the canonical mv-Tate topology
