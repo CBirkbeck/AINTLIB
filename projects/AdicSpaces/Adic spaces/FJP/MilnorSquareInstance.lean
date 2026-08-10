@@ -133,14 +133,57 @@ noncomputable def jetSquare :
   row_injective := by sorry
   row_glue := by sorry
   row_embedding := by sorry
-  pushB_mono := by sorry
-  pushC_mono := by sorry
+  pushB_mono := by
+    intro U U' hU hU' hsub v hv
+    rw [jetPushB_eq F hU'] at hv
+    rw [jetPushB_eq F hU]
+    have hvspa := rationalOpen_subset_spa hv
+    exact (mem_rationalOpen_pushDatumB_iff U hU v hvspa).mpr
+      (hsub ((mem_rationalOpen_pushDatumB_iff U' hU' v hvspa).mp hv))
+  pushC_mono := by
+    intro U U' hU hU' hsub v hv
+    rw [jetPushC_eq F hU'] at hv
+    rw [jetPushC_eq F hU]
+    have hvspa := rationalOpen_subset_spa hv
+    exact (mem_rationalOpen_pushDatumC_iff U hU v hvspa).mpr
+      (hsub ((mem_rationalOpen_pushDatumC_iff U' hU' v hvspa).mp hv))
   push_natural_B := by sorry
   push_natural_C := by sorry
-  pushB_cover := by sorry
-  pushC_cover := by sorry
-  pushD_cover := by sorry
-  pushD_mono := by sorry
+  pushB_cover := by
+    intro U S hU hS hcov w hw
+    rw [jetPushB_eq F hU] at hw
+    have hwspa := rationalOpen_subset_spa hw
+    obtain ⟨W, hWS, hWmem⟩ := hcov (ValuationSpectrum.comap (jB F) w)
+      ((mem_rationalOpen_pushDatumB_iff U hU w hwspa).mp hw)
+    refine ⟨W, hWS, ?_⟩
+    rw [jetPushB_eq F (hS W hWS)]
+    exact (mem_rationalOpen_pushDatumB_iff W (hS W hWS) w hwspa).mpr hWmem
+  pushC_cover := by
+    intro U S hU hS hcov w hw
+    rw [jetPushC_eq F hU] at hw
+    have hwspa := rationalOpen_subset_spa hw
+    obtain ⟨W, hWS, hWmem⟩ := hcov (ValuationSpectrum.comap (iotaC F) w)
+      ((mem_rationalOpen_pushDatumC_iff U hU w hwspa).mp hw)
+    refine ⟨W, hWS, ?_⟩
+    rw [jetPushC_eq F (hS W hWS)]
+    exact (mem_rationalOpen_pushDatumC_iff W (hS W hWS) w hwspa).mpr hWmem
+  pushD_cover := by
+    intro U S hU hS hcov w hw
+    rw [jetPushD_eq F hU] at hw
+    have hwspa := rationalOpen_subset_spa hw
+    obtain ⟨W, hWS, hWmem⟩ := hcov
+      (ValuationSpectrum.comap ((rhoC F).comp (iotaC F)) w)
+      ((mem_rationalOpen_pushDatumD_iff U hU w hwspa).mp hw)
+    refine ⟨W, hWS, ?_⟩
+    rw [jetPushD_eq F (hS W hWS)]
+    exact (mem_rationalOpen_pushDatumD_iff W (hS W hWS) w hwspa).mpr hWmem
+  pushD_mono := by
+    intro U U' hU hU' hsub v hv
+    rw [jetPushD_eq F hU'] at hv
+    rw [jetPushD_eq F hU]
+    have hvspa := rationalOpen_subset_spa hv
+    exact (mem_rationalOpen_pushDatumD_iff U hU v hvspa).mpr
+      (hsub ((mem_rationalOpen_pushDatumD_iff U' hU' v hvspa).mp hv))
   leg_natural_B := by sorry
   leg_natural_C := by sorry
   row_comm := by sorry
