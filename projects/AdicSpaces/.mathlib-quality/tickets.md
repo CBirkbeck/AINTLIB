@@ -10,7 +10,7 @@ Cadence note: per-campaign milestones carry per-file cleanups; the single `CLEAN
 precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 
 ## Summary
-- Proof tickets: 8 (3 done — CAMPAIGN A COMPLETE, axiom-clean) · planning tickets: 2 · cleanup tickets: 5
+- Proof tickets: 8 (4 done — CAMPAIGN A COMPLETE + B-L6, axiom-clean) · planning tickets: 2 · cleanup tickets: 5
 - Parallel capacity: 3 (A-track, B-Fubini pair, C-L1)
 
 ---
@@ -90,7 +90,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 - **Sources**: [Wedhorn] Ex 6.38/Rem 6.37(1); decomposition B-L3.
 
 ### [T614] B-L6: `finiteJet_tateExt_completeSpace`
-- **Status**: open · **File**: `Adic spaces/FJP/StrongSheafy.lean:50` · **Depends on**: none (mirror T601's proof) · **Parallel**: yes · **Type**: lemma
+- **Status**: done (2026-08-10, axiom-clean) · **File**: `Adic spaces/FJP/StrongSheafy.lean:50` · **Depends on**: none (mirror T601's proof) · **Parallel**: yes · **Type**: lemma
 - **Note for /generalise lane**: after T601+T614, merge the two into one generic lemma.
 
 ### [CLEANUP-611] /cleanup `Adic spaces/FJP/RestrictedFubini.lean`

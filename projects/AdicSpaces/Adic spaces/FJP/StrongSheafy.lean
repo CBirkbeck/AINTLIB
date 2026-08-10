@@ -38,7 +38,7 @@ strongly noetherian.** Content: restricted Fubini
 algebras back into those of `A` (Wedhorn Example 6.38 vocabulary; the FJP-side
 Fubini legs are `FJP/RestrictedFubini.lean`). -/
 theorem mvTate_isStronglyNoetherian {A : Type*} [CommRing A] [TopologicalSpace A]
-    [IsTopologicalRing A] [IsTateRing A] [IsStronglyNoetherian A] (n : ℕ) :
+    [IsTateRing A] [IsStronglyNoetherian A] (n : ℕ) :
     letI := mvTateAlgebraTopology' (A := A) n
     haveI := mvTateAlgebraTopology'_isTopologicalRing (A := A) n
     haveI := mvTate_nonarchimedean (A := A) n
@@ -52,7 +52,7 @@ theorem finiteJet_tateExt_completeSpace (n : ℕ) :
     haveI := mvTateAlgebraTopology'_isTopologicalRing (A := JetA F) n
     @CompleteSpace ↥(restrictedMvPowerSeriesSubring n (JetA F))
       (IsTopologicalAddGroup.rightUniformSpace _) := by
-  sorry
+  exact mvTate_completeSpace (A := JetA F) n inferInstance
 
 /-- **B headline: `𝓐` is strongly sheafy** — every finite Tate extension of the
 finite-jet pinching algebra is sheafy for every valid ring of integral elements
