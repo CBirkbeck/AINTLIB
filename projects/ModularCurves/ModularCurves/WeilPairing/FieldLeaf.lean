@@ -129,6 +129,36 @@ theorem unitPullback_translateByPoint_eq_of_splitting
     hn hsplit hτle hτinf hτF hC
   exact hkey i
 
+/-! ## The generic-point germ push (U5-L2c) -/
+
+section GermPush
+
+/-- **(U5-L2c)** Pushing a `unitPullback` multiplicativity relation into the function field:
+if `τ^#(u) = u · w` as sections over `V` (with `V ≤ τ⁻¹V`), then
+`τ^♭(germ u) = germ u · germ w` in `K(X)`. -/
+theorem functionFieldMap_germToFunctionField_of_unitPullback_eq
+    {X : Scheme.{u}} [IrreducibleSpace X] (τ : X ⟶ X) [IsDominant τ]
+    (V : X.Opens) [Nonempty V] (hle : V ≤ τ ⁻¹ᵁ V)
+    (u : Γ(X, V)ˣ) (w : Γ(X, V))
+    (hrel : ((unitPullback τ V V hle u : Γ(X, V)ˣ) : Γ(X, V)) = (u : Γ(X, V)) * w) :
+    τ.functionFieldMap.hom (X.germToFunctionField V (u : Γ(X, V)))
+      = X.germToFunctionField V (u : Γ(X, V)) * X.germToFunctionField V w := by
+  haveI : Nonempty (τ ⁻¹ᵁ V : X.Opens) :=
+    ⟨⟨genericPoint X, genericPoint_mem_preimage τ V⟩⟩
+  have h1 : τ.functionFieldMap.hom (X.germToFunctionField V (u : Γ(X, V)))
+      = X.presheaf.germ (τ ⁻¹ᵁ V) (genericPoint X) (genericPoint_mem_preimage τ V)
+          (Scheme.Hom.app τ V (u : Γ(X, V))) :=
+    functionFieldMap_germToFunctionField τ V (u : Γ(X, V))
+  have h2 : X.germToFunctionField V ((unitPullback τ V V hle u : Γ(X, V)ˣ) : Γ(X, V))
+      = X.presheaf.germ (τ ⁻¹ᵁ V) (genericPoint X) (genericPoint_mem_preimage τ V)
+          (Scheme.Hom.app τ V (u : Γ(X, V))) := by
+    show X.presheaf.germ V (genericPoint X) _
+        (X.presheaf.map (homOfLE hle).op (Scheme.Hom.app τ V (u : Γ(X, V)))) = _
+    exact TopCat.Presheaf.germ_res_apply X.presheaf (homOfLE hle) (genericPoint X) _ _
+  rw [h1, ← h2, hrel, map_mul]
+
+end GermPush
+
 /-! ## The identity-base-change crossing (U5-L2b)
 
 The KM apparatus lives on `pullback E.π t`; over a field the leaf statements live on the
