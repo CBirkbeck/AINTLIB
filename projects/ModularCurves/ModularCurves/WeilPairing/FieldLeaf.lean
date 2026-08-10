@@ -129,4 +129,88 @@ theorem unitPullback_translateByPoint_eq_of_splitting
     hn hsplit hτle hτinf hτF hC
   exact hkey i
 
+/-! ## The identity-base-change crossing (U5-L2b)
+
+The KM apparatus lives on `pullback E.π t`; over a field the leaf statements live on the
+curve itself. For `t = 𝟙 S` the first projection is an isomorphism, and it intertwines the
+translation endomorphisms: `τ_{P'} ≫ fst = fst ≫ τ_x` for `x` the crossed point. The
+monoid-hom input is the rigidity theorem `isMonHom_of_one_comp_eq'` (GIT Cor 6.4), which
+applies since a field base is locally noetherian. -/
+
+section IdentityBase
+
+open MonoidalCategory CartesianMonoidalCategory
+open scoped CategoryTheory.MonObj
+
+variable {S : Scheme.{u}} (E : EllipticCurve S)
+
+/-- The first projection of the identity base change, as a morphism of `Over S`. -/
+noncomputable def baseChangeIdFstOver : (E.baseChange (𝟙 S)).asOver ⟶ E.asOver :=
+  Over.homMk (pullback.fst E.π (𝟙 S)) (by
+    show pullback.fst E.π (𝟙 S) ≫ E.π = pullback.snd E.π (𝟙 S)
+    rw [pullback.condition, Category.comp_id])
+
+@[simp] theorem baseChangeIdFstOver_left :
+    (baseChangeIdFstOver E).left = pullback.fst E.π (𝟙 S) := rfl
+
+/-- The crossing is pointed: the base-changed zero section projects to the zero section. -/
+theorem baseChangeIdFstOver_one :
+    η[(E.baseChange (𝟙 S)).asOver] ≫ baseChangeIdFstOver E = η[E.asOver] := by
+  apply Over.OverMorphism.ext
+  show η[(E.baseChange (𝟙 S)).asOver].left ≫ pullback.fst E.π (𝟙 S) = η[E.asOver].left
+  rw [(E.baseChange (𝟙 S)).one_eq_zero, E.one_eq_zero]
+  show (𝟙_ (Over S)).hom ≫ (pullback.lift ((𝟙 S) ≫ E.zero) (𝟙 S) _ ≫ pullback.fst E.π (𝟙 S))
+    = (𝟙_ (Over S)).hom ≫ E.zero
+  rw [pullback.lift_fst, Category.id_comp]
+
+/-- **(U5-L2b-i)** The identity-base-change projection is a homomorphism of group objects —
+rigidity (`isMonHom_of_one_comp_eq'`, GIT Cor 6.4) applied to the pointed crossing. -/
+theorem isMonHom_baseChangeIdFstOver [IsLocallyNoetherian S] [IsSeparated E.π] :
+    IsMonHom (baseChangeIdFstOver E) := by
+  haveI : IsProper (E.baseChange (𝟙 S)).asOver.hom :=
+    inferInstanceAs (IsProper (E.baseChange (𝟙 S)).π)
+  haveI : Smooth (E.baseChange (𝟙 S)).π :=
+    SmoothOfRelativeDimension.smooth (n := 1) (f := (E.baseChange (𝟙 S)).π)
+  haveI : Flat (E.baseChange (𝟙 S)).asOver.hom :=
+    inferInstanceAs (Flat (E.baseChange (𝟙 S)).π)
+  haveI : IsSeparated E.asOver.hom := inferInstanceAs (IsSeparated E.π)
+  exact
+    { one_hom := baseChangeIdFstOver_one E
+      mul_hom := isMonHom_of_one_comp_eq'
+        (E.baseChange (𝟙 S)).toEllipticCurveGeom.universallyOConnected
+        (baseChangeIdFstOver E) (baseChangeIdFstOver_one E) }
+
+/-- **(U5-L2b-ii)** Translation intertwines with a pointed homomorphism of elliptic records:
+`τ_x ≫ φ = φ ≫ τ_{φ(x)}`. Pure hom-group algebra from `translateBy = 𝟙 * constPt x`. -/
+theorem translateBy_comp_of_isMonHom {E F : EllipticCurve S}
+    (φ : E.asOver ⟶ F.asOver) [IsMonHom φ] (x : 𝟙_ (Over S) ⟶ E.asOver) :
+    E.translateBy x ≫ φ = φ ≫ F.translateBy (x ≫ φ) := by
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  letI : CommGroup (E.asOver ⟶ F.asOver) := Hom.commGroup
+  letI : CommGroup (F.asOver ⟶ F.asOver) := Hom.commGroup
+  rw [E.translateBy_def x, F.translateBy_def (x ≫ φ)]
+  have hpost := map_mul (IsMonHom.monoidHom φ E.asOver)
+    (𝟙 E.asOver) (E.constPt x)
+  simp only [IsMonHom.monoidHom_apply] at hpost
+  rw [hpost, MonObj.comp_mul, Category.id_comp, Category.comp_id]
+  congr 1
+  show E.constPt x ≫ φ = φ ≫ F.constPt (x ≫ φ)
+  rw [EllipticCurve.constPt, EllipticCurve.constPt,
+    ← Category.assoc φ (toUnit F.asOver) (x ≫ φ),
+    CartesianMonoidalCategory.toUnit_unique (φ ≫ toUnit F.asOver) (toUnit E.asOver),
+    Category.assoc]
+
+/-- **(U5-L2b-iii)** The `.left`-level crossing consumed by the bridge: `translateByPoint`
+on the identity base change projects to `translateBy` at the crossed section. -/
+theorem translateByPoint_id_comp_fst [IsLocallyNoetherian S] [IsSeparated E.π]
+    (P' : (E.baseChange (𝟙 S)).Point (𝟙 S)) :
+    translateByPoint E (𝟙 S) P' ≫ pullback.fst E.π (𝟙 S)
+      = pullback.fst E.π (𝟙 S)
+        ≫ (E.translateBy (overPoint E (𝟙 S) P' ≫ baseChangeIdFstOver E)).left := by
+  haveI := isMonHom_baseChangeIdFstOver E
+  have h := translateBy_comp_of_isMonHom (baseChangeIdFstOver E) (overPoint E (𝟙 S) P')
+  exact congrArg CategoryTheory.CommaMorphism.left h
+
+end IdentityBase
+
 end ModularCurves
