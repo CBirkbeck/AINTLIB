@@ -248,7 +248,19 @@ with the Jet square as regression instance and the P-square as the payoff instan
 - **Sources**: [FJP] Lemma 5.1/5.2 datum layer; concrete patterns cited above.
 
 ### [T625] Corner-square strict localization + bridges (THE core)
-- **Status**: open · **File**: new `Adic spaces/CornerSquareLocalization.lean` (+ a second file if >2500 lines) · **Depends on**: T624 · **Type**: theorem stack
+- **Status**: in_progress (2026-08-11 — MAJOR PROGRESS, all committed+pushed:
+  `FJP/CornerSquareLocalization.lean` (1103 L, 0 warnings) = the `Pinch` package
+  structure + NoethPack + the ENTIRE §4 chain abstract: ext-layer (Lemma 4.1),
+  ideal_row_surjective + ideal_pullback_controlled + isClosed_IA (Lemma 4.3),
+  loc quotient layer with loc_pair_injective / loc_row_exact / loc_norm_le /
+  loc_pair_isEmbedding / locψC surjective+open / locA_t2 / locA_completeSpace
+  (Prop 4.5). Relations in polyToP-form so vertex instantiation is definitional.
+  `FJP/CornerSquareBridge.lean` (in flight): generic CornerEnum + single-corner
+  graphBridge (fwd = completion extension, rev = bounded evaluation, round
+  trips) — instantiates at all four corners since Pinch.IB/IC/ID are the
+  IA-ideals of the pushed data. REMAINING: (i) compile bridge file, (ii)
+  square-level naturality squares N1-N4 (dense-equalizer pattern), (iii) the
+  T627 value-row consumables valueRow_injective/glue/embedding.) · **File**: new `Adic spaces/CornerSquareLocalization.lean` (+ a second file if >2500 lines) · **Depends on**: T624 · **Type**: theorem stack
 - **Statement**: parametrize FiniteJetStrictLocalization's rational-datum layer +
   FiniteJetFunctoriality's bridge layer over the corner-square package: for a rational
   datum enum `e` on the base corner `A` (span ({g} ∪ range f) = ⊤), the graph quotients
