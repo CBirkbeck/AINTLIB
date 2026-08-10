@@ -338,7 +338,10 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
           RingEquiv.symm_apply_apply]
         exact (IsScalarTower.algebraMap_apply K W.toAffine.CoordinateRing
           W.toAffine.FunctionField a).symm
-      rw [h1]
+      rw [h1, coordRingToZSection_algebraMap W a]
+      have hπτ : τ ≫ projModelπ W = projModelπ W := by
+        rw [hτ]
+        exact Over.w ((modelEllipticCurve W).translateByIso x).hom
       sorry
     rw [hinv]
     exact (RingEquiv.apply_symm_apply _ _).symm
