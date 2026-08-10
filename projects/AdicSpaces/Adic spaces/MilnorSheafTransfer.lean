@@ -124,6 +124,21 @@ structure MilnorSquareData
         (restrictionMap U U' h x) =
       restrictionMap (pushC U) (pushC U') (pushC_mono U U' h)
         (presheafValueMapOfHom φC hφC U (pushC U) (pushC_s U) (pushC_T U) x)
+  /-- Covering transport: the pushes of the pieces of a rational cover of `U`
+  cover the pushed base (the paper's `U_E = p_E⁻¹(U)` gets this for free;
+  abstract pushes must carry it). -/
+  pushB_cover : ∀ (U : RationalLocData R) (S : Finset (RationalLocData R)),
+    (∀ v, v ∈ rationalOpen U.T U.s → ∃ W ∈ S, v ∈ rationalOpen W.T W.s) →
+    ∀ w, w ∈ rationalOpen (pushB U).T (pushB U).s →
+      ∃ W ∈ S, w ∈ rationalOpen (pushB W).T (pushB W).s
+  pushC_cover : ∀ (U : RationalLocData R) (S : Finset (RationalLocData R)),
+    (∀ v, v ∈ rationalOpen U.T U.s → ∃ W ∈ S, v ∈ rationalOpen W.T W.s) →
+    ∀ w, w ∈ rationalOpen (pushC U).T (pushC U).s →
+      ∃ W ∈ S, w ∈ rationalOpen (pushC W).T (pushC W).s
+  pushD_cover : ∀ (U : RationalLocData R) (S : Finset (RationalLocData R)),
+    (∀ v, v ∈ rationalOpen U.T U.s → ∃ W ∈ S, v ∈ rationalOpen W.T W.s) →
+    ∀ w, w ∈ rationalOpen (pushD U).T (pushD U).s →
+      ∃ W ∈ S, w ∈ rationalOpen (pushD W).T (pushD W).s
 
 /-- **Abstract Milnor descent for sheafiness** ([WP-paper] lem:sheaf-transfer;
 reviewer §4.1): if a strict Milnor square-with-rows exists over `R` and the three
