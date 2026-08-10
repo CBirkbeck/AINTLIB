@@ -127,6 +127,17 @@ built from mathlib `WeierstrassCurve.Affine.CoordinateRing.map (RingHom.id K)`-f
 (Point.lean:184) + `IsLocalization.ringEquivOfRingEquiv` (same pattern as
 `projModelFunctionFieldEquiv` above), and route the U5c-2 conjugation through it. -/
 
+/-- **(U5c-2 brick)** The self-base-change collapse on function fields:
+`W.baseChange K = W.map (algebraMap K K) = W.map (RingHom.id K) = W`, transported to the
+function fields. Sealed as a named equiv so the U5c-2 conjugation never exposes the
+cast. -/
+noncomputable def functionFieldSelfBaseChangeEquiv :
+    W.toAffine.FunctionField ≃+* (W.baseChange K).toAffine.FunctionField := by
+  have h : W.baseChange K = W := by
+    show W.map (algebraMap K K) = W
+    rw [Algebra.algebraMap_self, WeierstrassCurve.map_id]
+  rw [h]
+
 end Bridge
 
 end ModularCurves
