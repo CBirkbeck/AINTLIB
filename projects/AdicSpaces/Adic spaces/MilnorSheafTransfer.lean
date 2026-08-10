@@ -270,6 +270,26 @@ theorem pushCoveringD_isRational (sq : MilnorSquareData φB φC φD hφB hφC h�
   obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
   exact sq.pushD_isRational W (hC₀.piece hW)
 
+/-- Restriction of a transported value equals restriction of the value
+(eliminated by `subst`; the two subset proofs are proof-irrelevant). -/
+theorem cast_restrictionMap_B {X E : RationalLocData B} (heq : X = E)
+    {D₃ : RationalLocData B}
+    (h : rationalOpen D₃.T D₃.s ⊆ rationalOpen E.T E.s)
+    (h' : rationalOpen D₃.T D₃.s ⊆ rationalOpen X.T X.s)
+    (v : presheafValue X) :
+    restrictionMap E D₃ h (heq ▸ v) = restrictionMap X D₃ h' v := by
+  subst heq
+  rfl
+
+theorem cast_restrictionMap_C {X E : RationalLocData C} (heq : X = E)
+    {D₃ : RationalLocData C}
+    (h : rationalOpen D₃.T D₃.s ⊆ rationalOpen E.T E.s)
+    (h' : rationalOpen D₃.T D₃.s ⊆ rationalOpen X.T X.s)
+    (v : presheafValue X) :
+    restrictionMap E D₃ h (heq ▸ v) = restrictionMap X D₃ h' v := by
+  subst heq
+  rfl
+
 /-- Transport along an equality of data is continuous (eliminated by `subst`). -/
 theorem cast_continuous {D₁ D₂ : RationalLocData B} (h : D₁ = D₂) :
     Continuous (fun v : presheafValue D₁ => h ▸ v : presheafValue D₁ → presheafValue D₂) := by
