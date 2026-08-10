@@ -208,6 +208,39 @@ theorem isSheafy_of_milnorSquare
   · -- Embedding half ([WP-paper] l.600–612): factor the product restriction of `R`
     -- through the vertex product restrictions via the row, then `of_comp`.
     intro C₀ hC₀
+    -- component selection for the image-indexed pushed covers
+    have hselB : ∀ E : ↥(sq.pushCoveringB C₀).covers,
+        ∃ W : ↥C₀.covers, sq.pushB W.1 = E.1 := by
+      rintro ⟨E, hE⟩
+      obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
+      exact ⟨⟨W, hW⟩, rfl⟩
+    have hselC : ∀ E : ↥(sq.pushCoveringC C₀).covers,
+        ∃ W : ↥C₀.covers, sq.pushC W.1 = E.1 := by
+      rintro ⟨E, hE⟩
+      obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
+      exact ⟨⟨W, hW⟩, rfl⟩
+    choose selB hselB_eq using hselB
+    choose selC hselC_eq using hselC
+    -- the factoring map g: per-piece rows followed by component selection
+    set g : (∀ W : ↥C₀.covers, presheafValue W.1) →
+        (∀ E : ↥(sq.pushCoveringB C₀).covers, presheafValue E.1) ×
+        (∀ E : ↥(sq.pushCoveringC C₀).covers, presheafValue E.1) := fun s =>
+      (fun E => (hselB_eq E) ▸
+          presheafValueMapOfHom φB hφB (selB E).1 (sq.pushB (selB E).1)
+            (sq.pushB_s (selB E).1) (sq.pushB_T (selB E).1) (s (selB E)),
+       fun E => (hselC_eq E) ▸
+          presheafValueMapOfHom φC hφC (selC E).1 (sq.pushC (selC E).1)
+            (sq.pushC_s (selC E).1) (sq.pushC_T (selC E).1) (s (selC E))) with hg
+    -- g ∘ productRestrictionSub R C₀ = (vertex product restrictions) ∘ (base row)
+    have hfact : ∀ x : presheafValue C₀.base,
+        g (productRestrictionSub R C₀ x) =
+          (productRestrictionSub B (sq.pushCoveringB C₀)
+            (presheafValueMapOfHom φB hφB C₀.base (sq.pushB C₀.base)
+              (sq.pushB_s C₀.base) (sq.pushB_T C₀.base) x),
+           productRestrictionSub C (sq.pushCoveringC C₀)
+            (presheafValueMapOfHom φC hφC C₀.base (sq.pushC C₀.base)
+              (sq.pushC_s C₀.base) (sq.pushC_T C₀.base) x)) := by
+      sorry
     sorry
   · -- Gluing half ([WP-paper] l.613–627): push, glue at the vertices, compare in
     -- `D` by separation, descend by `row_glue`, recover per-piece by
