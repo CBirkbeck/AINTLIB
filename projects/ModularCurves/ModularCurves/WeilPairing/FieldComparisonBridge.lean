@@ -181,7 +181,17 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
         ((algebraMap K W.toAffine.FunctionField) a)
       = algebraMap K W.toAffine.FunctionField a from
         (HasseWeil.translateAlgEquivOfPoint W P₀).commutes a]
-    sorry
+    -- the τ-invariance of the K-constant's function-field class (isolated brick:
+    -- provable via functionFieldMap_comp at τ ≫ π = π once the chart-constants
+    -- identification lands; see the board's U5c-2 entry)
+    have hinv : (CommRingCat.Hom.hom (Scheme.Hom.functionFieldMap τ))
+        ((projModelFunctionFieldEquiv W).symm.toRingHom
+          ((algebraMap K W.toAffine.FunctionField) a)) =
+      (projModelFunctionFieldEquiv W).symm.toRingHom
+        ((algebraMap K W.toAffine.FunctionField) a) := by
+      sorry
+    rw [hinv]
+    exact (RingEquiv.apply_symm_apply _ _).symm
   have hx : L ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X))
       = R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X)) := by
     sorry
