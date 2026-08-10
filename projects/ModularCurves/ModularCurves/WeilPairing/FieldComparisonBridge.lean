@@ -130,12 +130,14 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
     (hxp : x.left = p.1)
     (P' : ((W.baseChange K).toAffine).Point)
     (hP' : projModelPointsEquiv W K p = P')
+    (P₀ : W.toAffine.Point)
+    (hP₀ : P₀ = (show W.baseChange K = W by
+      show W.map (algebraMap K K) = W
+      rw [Algebra.algebraMap_self, WeierstrassCurve.map_id]) ▸ P')
     (τ : projModel W ⟶ projModel W)
     (hτ : τ = (translateByIso (modelEllipticCurve W) x).hom.left)
     [IsDominant τ] :
-    (functionFieldSelfBaseChangeEquiv W).symm.toRingHom.comp
-      ((HasseWeil.translateAlgEquivOfPoint (W.baseChange K) P').toRingEquiv.toRingHom.comp
-        (functionFieldSelfBaseChangeEquiv W).toRingHom) =
+    (HasseWeil.translateAlgEquivOfPoint W P₀).toRingEquiv.toRingHom =
     (projModelFunctionFieldEquiv W).toRingHom.comp
       (τ.functionFieldMap.hom.comp
         (projModelFunctionFieldEquiv W).symm.toRingHom) := by
@@ -161,9 +163,7 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
   induction c using AdjoinRoot.induction_on with
   | _ f => ?_
   -- three anchors: the K-constants, the x-generator, the y-generator (the root)
-  set L := ((functionFieldSelfBaseChangeEquiv W).symm.toRingHom.comp
-    ((HasseWeil.translateAlgEquivOfPoint (W.baseChange K) P').toRingEquiv.toRingHom.comp
-      (functionFieldSelfBaseChangeEquiv W).toRingHom)).comp
+  set L := ((HasseWeil.translateAlgEquivOfPoint W P₀).toRingEquiv.toRingHom).comp
     (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) with hL
   set R := ((projModelFunctionFieldEquiv W).toRingHom.comp
     ((CommRingCat.Hom.hom (Scheme.Hom.functionFieldMap τ)).comp
@@ -177,6 +177,10 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
     rw [ha]
     simp only [hL, hR, RingHom.comp_apply]
     rw [← IsScalarTower.algebraMap_apply K W.toAffine.CoordinateRing W.toAffine.FunctionField]
+    rw [show ((HasseWeil.translateAlgEquivOfPoint W P₀).toRingEquiv.toRingHom)
+        ((algebraMap K W.toAffine.FunctionField) a)
+      = algebraMap K W.toAffine.FunctionField a from
+        (HasseWeil.translateAlgEquivOfPoint W P₀).commutes a]
     sorry
   have hx : L ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X))
       = R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X)) := by
