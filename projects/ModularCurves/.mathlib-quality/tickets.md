@@ -39089,6 +39089,58 @@ in the plan's "Known traps".
     and E4c fppf-descent). E4a and E5 still bottom out in [Oda] biextension theory — the
     genuinely-deep strand.
 
+### AP-E6 decomposition (2026-08-10, /develop pass — KM 2.8.4.1 at `π₁=[N], π₂=[M]`, all in the mulByN-only framework)
+
+**Verified against the sources and signatures before boarding**: `weilPairingKM`'s internal
+dataset (from `exists_normalized_dataset`) is **level-independent** — the dataset conditions
+`hM/hW/e/hnorm` never mention `N`; the level enters only through the `hQ/hP` slots of
+`torsionSplittingEval`. So one dataset serves both levels, and the whole compatibility is the
+shared-splittings argument: `[N]⁻¹∘[M₀]⁻¹ = [N·M₀]⁻¹` makes the `(N·M₀)`-side's normalised
+splitting family literally a splitting family for the `[M₀]`-pulled dataset at level `N`.
+New file: `WeilPairing/KMCompatibility.lean` (imports KMNaturality). Tickets:
+
+- **E6-a** `mulByN_comp` — `mulByN E t N ≫ mulByN E t M = mulByN E t (N * M)`.
+  Proof: `congrArg CommaMorphism.left` of `(E.baseChange t).mulBy_comp N M` (upstream
+  `EllipticCurve/EndomorphismDegree.lean:158`) + `Over.comp_left` + `Int.natCast_mul`.
+  (NB `Moduli/GammaH.lean:544` has the S-level twin `mulByHom_comp_mulByHom` — wrong import
+  direction for us; note for the cleanup fleet.)
+- **E6-b** `hM_mulByNPullback` — given `hA : κ(Q).val = toSkeleton A`, the `[M₀]`-pulled module
+  represents `κ(M₀ • Q)`: `κ(M₀ • Q).val = toSkeleton ((Modules.pullback (mulByN E t M₀)).obj A)`.
+  Proof: `kappa_nsmul` (`SelfAdjointN:438`, `κ(n•Q) = κ(Q)^n`) + `picMap_mulByHom_kappa_pow`
+  (`SelfAdjointN:545`, `Pic.map [n] κ(Q) = κ(Q)^n`) + the `mapSkeleton_obj_toSkeleton` calc-tail
+  copied from `hM_localPullback` (`KMNaturality:809`).
+- **E6-c** `hnorm_mulByNPullback` — normalisation transports along `[M₀]`: mirror
+  `hnorm_localPullback` (`KMNaturality:832`) with the zero-compat
+  `zero ≫ [M₀] = zero` (`zero_comp_mulByHom_baseChange`, `SelfAdjointN:467`) in place of the
+  base-change square. (`transitionUnitOfCover_localPullback` at `KMNaturality:795` is already
+  f-generic — free at `f := mulByN E t M₀`.)
+- **E6-d** (CORE) `torsionSplittingEval_mulByN_pullback` —
+  `torsionSplittingEval N (M₀•Q) (pulled dataset) P hP = torsionSplittingEval (N·M₀) Q (A,W,e) P hP'`.
+  Proof (pin-argument, sibling of `torsionSplittingEval_restrictBase`): obtain the
+  `(N·M₀)`-side normalised family `⟨h, hn, hsplit⟩` from
+  `exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints`; read the RHS off it by
+  `resUnit_torsionSplittingEval`; transport `h/hn/hsplit/`values along
+  `hcomp := E6-a` (morphism-level rewrite; opens `[N]⁻¹[M₀]⁻¹W i = [N·M₀]⁻¹W i` via
+  comp-preimage; `.app`-composition via `Scheme.comp_app` + `Units.map`-comp; the
+  preimage-inf clothing handled by NAT2's typed-barrier-`have` pattern); close with
+  `eq_torsionSplittingEval` at level `N` on the pulled dataset. Same space both sides — no
+  base-change legs, no `sectionEval_comp`.
+- **E6-e** `weilPairingKM_mul_smul_right` — `weilPairingKM (N·M₀) P hP' Q hQ =
+  weilPairingKM N P hP (M₀ • Q) hMQ`. Proof: spec (`weilPairingKM_eq_torsionSplittingEval`)
+  at level `N·M₀` with `weilPairingKM`'s own dataset `D(Q)`; spec at level `N` with the
+  `[M₀]`-pulled `D(Q)` (legitimate by E6-b/c); equate by E6-d. Torsion glue:
+  `hMQ` from `hQ` by `smul_smul`; `hP'` from `hP` by `mul_comm`+`smul_smul`.
+- **E6-f** register `weilPairingEval_mul` (`Basic.lean:491`) —
+  `e_{N·M}(x,y) = e_N(x,y)^M` for `x,y` N-torsion. Proof: bridge
+  `weilPairingEval_eq_weilPairingKM` at both levels + E6-e at `Q := asSection y`
+  (`asSection`-zsmul compat via the existing `asSection_add`-chain or stay Eval-level) +
+  the PROVED `weilPairingEval_zsmul_right` (`Basic.lean:350`) for
+  `e_N(x, M•y) = e_N(x,y)^M`.
+
+**Red-team notes (statement survived)**: composition order `[N] ≫ [M₀]` matches level `N*M₀`
+with the register's `N * M`; all torsion-glue is `smul_smul`/`mul_comm`; the dataset's
+level-independence is what makes E6-e two spec-applications and nothing more.
+
 ## AP-E1 sub-cut (2026-08-09, session 2) — canonicalising `torsionSplittingEval`
 
 The KM output `torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP` depends on the
