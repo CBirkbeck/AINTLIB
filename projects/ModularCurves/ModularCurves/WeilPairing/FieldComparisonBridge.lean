@@ -431,6 +431,25 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
     = projModelPointsEquiv W W.toAffine.FunctionField (genericSpecPoint W)
       + WeierstrassCurve.Affine.Point.map
           (IsScalarTower.toAlgHom K K W.toAffine.FunctionField) P' := by
+    -- (a) the composed SpecPoint IS the Point-sum, as subtypes
+    have ha : (⟨(genericSpecPoint W).1 ≫ τ, by
+          rw [Category.assoc, hπτ2]
+          exact (genericSpecPoint W).2⟩ :
+        SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField)
+      = (genericModelPoint W +
+          ((modelEllipticCurve W).pointEquivOverHom
+              (Spec.map (CommRingCat.ofHom
+                (algebraMap K W.toAffine.FunctionField)))).symm
+            (CategoryTheory.CartesianMonoidalCategory.toUnit
+              (CategoryTheory.Over.mk (Spec.map (CommRingCat.ofHom
+                (algebraMap K W.toAffine.FunctionField)))) ≫ x) :
+          (modelEllipticCurve W).Point _) := by
+      refine Subtype.ext ?_
+      exact (congrArg ((genericSpecPoint W).1 ≫ ·) hτ).trans
+        (genericSpecPoint_comp_translateBy W x)
+    rw [ha, projModelPointsEquiv_add]
+    congr 1
+    -- (c) the pulled section is the extension of `p`; g1 + hP' close
     sorry
   have hτV : (genericSpecPoint W).1.base
       (IsLocalRing.closedPoint (W.toAffine.FunctionField)) ∈ τ ⁻¹ᵁ (zChart W) := by
