@@ -420,6 +420,18 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
     (coordRingToZSection W).toEquiv.symm.nontrivial
   haveI : Nonempty (zChart W : (projModel W).Opens) :=
     ⟨hZaffM.isoSpec.inv.base (Classical.arbitrary _)⟩
+  -- (g2) the composed tautological point and its dictionary value
+  have hπτ2 : τ ≫ projModelπ W = projModelπ W := by
+    rw [hτ]
+    exact Over.w ((modelEllipticCurve W).translateByIso x).hom
+  have hg2 : projModelPointsEquiv W W.toAffine.FunctionField
+      ⟨(genericSpecPoint W).1 ≫ τ, by
+        rw [Category.assoc, hπτ2]
+        exact (genericSpecPoint W).2⟩
+    = projModelPointsEquiv W W.toAffine.FunctionField (genericSpecPoint W)
+      + WeierstrassCurve.Affine.Point.map
+          (IsScalarTower.toAlgHom K K W.toAffine.FunctionField) P' := by
+    sorry
   have hτV : (genericSpecPoint W).1.base
       (IsLocalRing.closedPoint (W.toAffine.FunctionField)) ∈ τ ⁻¹ᵁ (zChart W) := by
     sorry
