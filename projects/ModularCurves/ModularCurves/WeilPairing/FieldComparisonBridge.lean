@@ -608,7 +608,61 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
       rw [projModelFunctionFieldEquiv_symm_algebraMap]
       rfl
     rw [hR1, hMASTERτ]
-    sorry
+    -- (bundle) the dictionary some-form + the generator values of the translation
+    obtain ⟨xa, ya, hns, hsum, hLx, hLy⟩ := generic_add_cast_bundle W P' P₀ hP₀
+    have hsome : projModelPointsEquiv W W.toAffine.FunctionField
+        ⟨(genericSpecPoint W).1 ≫ τ, by
+          rw [Category.assoc, hπτ2]
+          exact (genericSpecPoint W).2⟩
+        = WeierstrassCurve.Affine.Point.some xa ya hns := hg2.trans hsum
+    -- readback: the translated tautological point is the chart-constructed point
+    have hb5 : (genericSpecPoint W).1 ≫ τ
+        = (chartSpecPoint W xa ya
+            (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)).1 :=
+      congrArg Subtype.val (eq_chartSpecPoint_of_projModelPointsEquiv_some W hsome)
+    simp only [hb5]
+    have hT3 := chartSpecPoint_appLE_eval W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)
+      (by
+        rw [← hb5]
+        exact le_trans (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge le_rfl)
+    refine Eq.trans ?_ (DFunLike.congr_fun (congrArg CommRingCat.Hom.hom hT3)
+      (coordRingToZSection W ((AdjoinRoot.mk W.toAffine.polynomial)
+        (Polynomial.C Polynomial.X)))).symm
+    have hread : (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv.hom
+        (coordRingToZSection W ((AdjoinRoot.mk W.toAffine.polynomial)
+          (Polynomial.C Polynomial.X)))
+        = (chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+            (Polynomial.C Polynomial.X)) := by
+      show (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv.hom
+        ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).hom.hom
+          ((chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+            (Polynomial.C Polynomial.X)))) = _
+      exact DFunLike.congr_fun (congrArg CommRingCat.Hom.hom
+        (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).hom_inv_id)
+        ((chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+          (Polynomial.C Polynomial.X)))
+    refine Eq.trans ?_ (congrArg (chartSolutionHom W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)) hread).symm
+    have hxelt : (chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+        (Polynomial.C Polynomial.X))
+        = HomogeneousLocalization.Away.isLocalizationElem
+            (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0) :=
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_x W).symm
+    refine Eq.trans ?_ (congrArg (chartSolutionHom W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)) hxelt).symm
+    refine Eq.trans (show L ((AdjoinRoot.mk W.toAffine.polynomial)
+        (Polynomial.C Polynomial.X)) = xa from hLx) ?_
+    exact (chartSolutionHom_x W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)).symm
   have hy : L ((AdjoinRoot.mk W.toAffine.polynomial) Polynomial.X)
       = R ((AdjoinRoot.mk W.toAffine.polynomial) Polynomial.X) := by
     sorry
