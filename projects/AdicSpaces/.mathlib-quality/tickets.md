@@ -145,7 +145,18 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
     cover's plus/minus pieces, every element of
     `presheafValue (plus.interSamePair minus h)` is a difference of the two
     restrictions. Proof mirrors unitCover_isOXAcyclic's own value identifications
-    (read that proof next; it contains the clean concrete models of the three values). · **File**: `Adic spaces/CechAcyclicityFull.lean:41` · **Depends on**: none · **Parallel**: yes · **Type**: theorem
+    (read that proof next; it contains the clean concrete models of the three values).
+  - 2026-08-10 (ROUTE FULLY MAPPED): `row3_exact` (LaurentCoverExact.lean:1797) already
+    provides `Function.Surjective (deltaMap_gen f)` AXIOM-CLEAN (consumed whole by the
+    certified isSheafy path). T621 = (1) build the clean overlap-value bridge
+    `presheafValue (U₁.interSamePair U₂) ≃/↪ B₁₂_gen (D₀.canonicalMap f)` with the
+    intertwining square `interBridge ∘ restriction-difference = deltaMap_gen ∘
+    (bridgePlus × bridgeMinus)` — read `unitCover_delta_eq_zero_of_compat`'s proof
+    internals first, they already construct pieces of this; (2) the 6-line chase:
+    given z, δ-surjectivity + bridgePlus/Minus surjectivity pulls back a pair, the
+    intertwining + interBridge injectivity closes. Statement stays in interSamePair
+    vocabulary (update the CechAcyclicityFull.lean skeleton statement accordingly —
+    planning correction, my statement predates this trace). · **File**: `Adic spaces/CechAcyclicityFull.lean:41` · **Depends on**: none · **Parallel**: yes · **Type**: theorem
 - **Proof sketch**:
   1. Identify the three `presheafValue`s via the existing 8.33 development's
      `Examples 6.38/6.39` comparisons (the identifications behind
