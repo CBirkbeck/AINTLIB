@@ -463,4 +463,14 @@ noncomputable def jetSquare :
     exact pushedCompatCAux F U₁ U₂ hU₁ hU₂ (jetPushC_eq F hU₁) (jetPushC_eq F hU₂)
       _ _ _ _ x₁ x₂ hmatch E₃ hE₁ hE₂
 
+/-- **Regression (T620)**: the finite-jet headline re-derived through the abstract
+strict-Milnor-descent criterion — `isSheafy_JetA` from `isSheafy_of_milnorSquare`
+at `jetSquare`, consuming only the three vertex sheafinesses. -/
+theorem isSheafy_JetA' : ValuationSpectrum.IsSheafy (JetA F) := by
+  classical
+  exact isSheafy_of_milnorSquare (jB F) (iotaC F) ((rhoC F).comp (iotaC F))
+    (continuous_jB) (continuous_iotaC)
+    (by rw [RingHom.coe_comp]; exact (continuous_rhoC).comp (continuous_iotaC))
+    (jetSquare F) (isSheafy_JetB F) (isSheafy_JetC F) (isSheafy_JetD F)
+
 end FiniteJet
