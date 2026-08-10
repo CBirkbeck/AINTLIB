@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.WeilPairing.DescentFaithful
+import ModularCurves.EllipticCurve.MulByHomSurjective
 
 /-!
 # Reduction of `e_N(x, x) = 1` to the level-`2N` diagonal square (AP-E4, KM Notes on Ch. 2)
@@ -115,6 +116,61 @@ theorem weilPairingEval_self_of_halving_of_flat {N : ℕ} [NeZero N] {T T' : Sch
   E.weilPairingEval_self_of_halving π'
     (by rw [Scheme.Γ_map_op]; exact injective_appTop_of_flat_of_surjective π')
     x hx P hP hhalf halt
+
+/-- **(AP-E4 assembly: `_self` reduced to the single diagonal-square box)** The halving
+cover EXISTS unconditionally: `[2] : E ⟶ E` is flat (`mulByHom_flat`, BB-FLAT) and
+surjective (`mulByHom_surjective_global`) over any base, so the `[2]`-fibre product over
+`x` is a flat surjective cover carrying a tautological half-point — automatically killed
+by `N·2`. Consequently `e_N(x,x) = 1` follows from the universal level-`N·2` diagonal
+square alone (AP-E4a, the KM 2.8.3 [Oda] instance) — no other input remains. -/
+theorem weilPairingEval_self_of_forall_diag_sq {N : ℕ} [NeZero N] {T : Scheme.{u}}
+    {g : T ⟶ S}
+    (hdiag : ∀ (T'' : Scheme.{u}) (g'' : T'' ⟶ S) (P : E.Point g'')
+      (hP : P.1 ≫ E.mulByHom (N * 2) = g'' ≫ E.zero),
+      haveI : NeZero (N * 2) := ⟨Nat.mul_ne_zero (NeZero.ne _) (NeZero.ne _)⟩
+      (E.weilPairingEval (N := N * 2) P P hP hP : Γ(T'', ⊤)) ^ 2 = 1)
+    (x : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by
+  haveI : Flat (pullback.snd (E.mulByHom (2 : ℤ)) x.1) :=
+    MorphismProperty.pullback_snd _ _ (E.mulByHom_flat 2)
+  haveI : AlgebraicGeometry.Surjective (pullback.snd (E.mulByHom (2 : ℤ)) x.1) :=
+    MorphismProperty.pullback_snd _ _ (E.mulByHom_surjective_global 2)
+  -- the tautological half-point over the `[2]`-fibre product
+  have hπP : pullback.fst (E.mulByHom (2 : ℤ)) x.1 ≫ E.π =
+      pullback.snd (E.mulByHom (2 : ℤ)) x.1 ≫ g :=
+    calc pullback.fst (E.mulByHom (2 : ℤ)) x.1 ≫ E.π
+        = pullback.fst (E.mulByHom (2 : ℤ)) x.1 ≫ (E.mulByHom (2 : ℤ) ≫ E.π) :=
+          congrArg (pullback.fst (E.mulByHom (2 : ℤ)) x.1 ≫ ·)
+            (E.mulByHom_π (2 : ℤ)).symm
+      _ = (pullback.fst (E.mulByHom (2 : ℤ)) x.1 ≫ E.mulByHom (2 : ℤ)) ≫ E.π :=
+          (Category.assoc _ _ _).symm
+      _ = (pullback.snd (E.mulByHom (2 : ℤ)) x.1 ≫ x.1) ≫ E.π :=
+          congrArg (· ≫ E.π) pullback.condition
+      _ = pullback.snd (E.mulByHom (2 : ℤ)) x.1 ≫ (x.1 ≫ E.π) := Category.assoc _ _ _
+      _ = pullback.snd (E.mulByHom (2 : ℤ)) x.1 ≫ g :=
+          congrArg (pullback.snd (E.mulByHom (2 : ℤ)) x.1 ≫ ·) x.2
+  have hcomp2N : E.mulByHom (2 : ℤ) ≫ E.mulByHom (N : ℤ) =
+      E.mulByHom ((N * 2 : ℕ) : ℤ) := by
+    have h := congrArg CommaMorphism.left (E.mulBy_comp 2 (N : ℤ))
+    simp only [Over.comp_left] at h
+    rwa [show ((2 : ℤ) * (N : ℤ)) = ((N * 2 : ℕ) : ℤ) by push_cast; ring] at h
+  have hP : (⟨pullback.fst (E.mulByHom (2 : ℤ)) x.1, hπP⟩ :
+      E.Point (pullback.snd (E.mulByHom (2 : ℤ)) x.1 ≫ g)).1 ≫ E.mulByHom (N * 2) =
+      (pullback.snd (E.mulByHom (2 : ℤ)) x.1 ≫ g) ≫ E.zero := by
+    show pullback.fst (E.mulByHom (2 : ℤ)) x.1 ≫ E.mulByHom ((N * 2 : ℕ) : ℤ) = _
+    rw [← hcomp2N, ← Category.assoc, pullback.condition, Category.assoc, hx,
+      ← Category.assoc]
+  have hhalf : (2 : ℤ) • (⟨pullback.fst (E.mulByHom (2 : ℤ)) x.1, hπP⟩ :
+      E.Point (pullback.snd (E.mulByHom (2 : ℤ)) x.1 ≫ g)) =
+      Point.restrict E (pullback.snd (E.mulByHom (2 : ℤ)) x.1) x := by
+    refine Subtype.ext ?_
+    rw [point_smul_eq_comp_mulBy]
+    exact pullback.condition
+  exact E.weilPairingEval_self_of_halving_of_flat
+    (pullback.snd (E.mulByHom (2 : ℤ)) x.1) x hx
+    ⟨pullback.fst (E.mulByHom (2 : ℤ)) x.1, hπP⟩ hP hhalf
+    (hdiag _ (pullback.snd (E.mulByHom (2 : ℤ)) x.1 ≫ g)
+      ⟨pullback.fst (E.mulByHom (2 : ℤ)) x.1, hπP⟩ hP)
 
 end EllipticCurve
 

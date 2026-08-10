@@ -39200,6 +39200,31 @@ faithfully-flat `Γ(𝒪ˣ)`-injectivity. E4c is bounded infrastructure (torsor 
   cannot reach it (it is symmetry information).
 - Assembly: `weilPairingEval_self := reduction + cover + E4a`.
 
+**E4-COVER DISCHARGED + FULL ASSEMBLY LANDED (2026-08-10, this session, second landing)**
+— tree green 9778, all axiom-clean (standard three):
+- NEW `EllipticCurve/MulByHomSurjective.lean`: `surjective_mulByHom_of_isMonHom_iso`
+  (conjugation transport, surjectivity sibling of the finite-fibres lemma),
+  `mulByHom_base_surjective` — **`[N] : E ⟶ E` is surjective over an arbitrary base in
+  every characteristic** (fibrewise BETA reduction to the any-field model surjectivity
+  `mulByHom_surjective`; instance pack at the model: lqf-of-field + IsProper-via-π +
+  `IsFinite.of_isProper_of_locallyQuasiFinite` + `mulByHom_flat` +
+  `LocallyOfFiniteType.isLocallyNoetherian` at π feeding mathlib's low-priority
+  lft⟹lfp instance), and `mulByHom_surjective_global` (the class form).
+- `WeilPairing/AlternationReduction.lean` gained
+  `weilPairingEval_self_of_forall_diag_sq`: **the halving cover EXISTS unconditionally**
+  — `[2]` is flat (BB-FLAT ✓ in-tree, axiom-clean) + surjective (new) ⟹ the `[2]`-fibre
+  product over `x` is a flat surjective cover; its tautological half-point is
+  automatically `N·2`-killed (pure composition algebra via `mulBy_comp`, no Point-smul).
+  **`weilPairingEval_self` is therefore reduced to the SINGLE box**: the universal
+  diagonal square `∀ T'' g'' P hP, e_{N·2}(P,P)² = 1` (AP-E4a, KM 2.8.3's [Oda]
+  instance). Nothing else remains on `_self`.
+- Lean lesson: `rw [← mulByHom_π]` in a goal mentioning a `Point` breaks the motive —
+  bare `E.π` occurs in the subtype's TYPE; calc with `congrArg (c ≫ ·)`-legs instead.
+
+**DS4-register state after this session**: `_mul` PROVED; `_self` = ONE research box
+(E4a diagonal square, biextension-theoretic); `_nondegenerate` = Cartier–Nishi (E5,
+research). Every infrastructure leg is now discharged.
+
 ## AP-E1 sub-cut (2026-08-09, session 2) — canonicalising `torsionSplittingEval`
 
 The KM output `torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP` depends on the

@@ -27,6 +27,7 @@ import ModularCurves.EllipticCurve.ModelVCEquivariance
 import ModularCurves.EllipticCurve.MulByHomEtale
 import ModularCurves.EllipticCurve.MulByHomFlatFibre
 import ModularCurves.EllipticCurve.MulByHomQuasiFinite
+import ModularCurves.EllipticCurve.MulByHomSurjective
 import ModularCurves.EllipticCurve.NegModelBaseChange
 import ModularCurves.EllipticCurve.PointVanishingClopen
 import ModularCurves.EllipticCurve.PointsDictionary
