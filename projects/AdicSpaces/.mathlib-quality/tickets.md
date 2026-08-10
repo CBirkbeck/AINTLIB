@@ -142,6 +142,15 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
   conclude equality by `D`-separation (`hD` separation), then `row_glue` at the base
   produces the section; per-piece recovery via `row_injective`.
 - **Sources**: [WP-paper] l.576–640 (verbatim quotes in decomposition.md campaign B).
+- **Progress**:
+  - 2026-08-10: pushCoveringB/C + IsRational lemmas landed. EMBEDDING-HALF PLAN
+    (refined): f := productRestrictionSub R C₀ (continuous:
+    EmbeddingTopo.lean:285); g := σ ∘ per-piece-rows where σ selects, for each
+    E ∈ image-cover, a chosen preimage piece (Classical.choice on Finset.mem_image);
+    g ∘ f = (vertex product restriction over pushCoveringB/C) ∘ (base row) by
+    push_natural_* per component — an embedding (row_embedding C₀.base composed with
+    hB.embedding (pushCoveringB, pushCoveringB_isRational) × hC.embedding);
+    conclude Topology.IsEmbedding.of_comp. GLUING-HALF per the original sketch.
 
 ### [T616] B-H (MILESTONE): `finiteJet_tateExt_isSheafyComplete`
 - **Status**: blocked (T615 outcome) · **File**: `Adic spaces/FJP/StrongSheafy.lean:60`.
