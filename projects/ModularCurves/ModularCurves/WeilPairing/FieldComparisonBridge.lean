@@ -296,6 +296,101 @@ noncomputable def functionFieldSelfBaseChangeEquiv :
     rw [Algebra.algebraMap_self, WeierstrassCurve.map_id]
   rw [h]
 
+/-- The self-base-change collapse `W.baseChange K = W` over the base field itself. -/
+theorem baseChange_self_eq : W.baseChange K = W := by
+  show W.map (algebraMap K K) = W
+  rw [Algebra.algebraMap_self, WeierstrassCurve.map_id]
+
+/-- Nonsingularity transfers through the self-base-change collapse. -/
+theorem nonsingular_of_baseChange_self {xk yk : K}
+    (h : ((W.baseChange K).toAffine).Nonsingular xk yk) :
+    W.toAffine.Nonsingular xk yk := by
+  rw [baseChange_self_eq W] at h
+  exact h
+
+/-- **(U5c-2 cast)** The cast-free repackaging of a `W.baseChange K`-point as a `W`-point,
+by structural recursion rather than `▸`-transport, so that its value lemmas are `rfl`. -/
+noncomputable def basePointCast : ((W.baseChange K).toAffine).Point → W.toAffine.Point
+  | .zero => .zero
+  | .some xk yk h => .some xk yk (nonsingular_of_baseChange_self W h)
+
+@[simp] theorem basePointCast_zero :
+    basePointCast W WeierstrassCurve.Affine.Point.zero
+      = WeierstrassCurve.Affine.Point.zero := rfl
+
+@[simp] theorem basePointCast_some {xk yk : K}
+    (h : ((W.baseChange K).toAffine).Nonsingular xk yk) :
+    basePointCast W (WeierstrassCurve.Affine.Point.some xk yk h)
+      = WeierstrassCurve.Affine.Point.some xk yk (nonsingular_of_baseChange_self W h) := rfl
+
+/-- **(U5c-2 g4/g5 bundle)** The translated dictionary value in `some`-form together with the
+`translateAlgEquivOfPoint` values on the two generators: one case split on `P'`, consumed by
+both generator anchors of the bridge theorem. -/
+private theorem generic_add_cast_bundle [AlgebraicGeometry.IsIntegral (projModel W)]
+    [(W.baseChange K).toAffine.IsElliptic]
+    (P' : ((W.baseChange K).toAffine).Point) (P₀ : W.toAffine.Point)
+    (hP₀ : P₀ = basePointCast W P') :
+    ∃ (xa ya : W.toAffine.FunctionField)
+      (hns : ((W.baseChange W.toAffine.FunctionField).toAffine).Nonsingular xa ya),
+      projModelPointsEquiv W W.toAffine.FunctionField (genericSpecPoint W)
+          + WeierstrassCurve.Affine.Point.map
+            (IsScalarTower.toAlgHom K K W.toAffine.FunctionField) P'
+        = WeierstrassCurve.Affine.Point.some xa ya hns
+      ∧ HasseWeil.translateAlgEquivOfPoint W P₀ (HasseWeil.x_gen W) = xa
+      ∧ HasseWeil.translateAlgEquivOfPoint W P₀ (HasseWeil.y_gen W) = ya := by
+  cases P' with
+  | zero =>
+      refine ⟨HasseWeil.x_gen W, HasseWeil.y_gen W, HasseWeil.generic_nonsingular W,
+        ?_, ?_, ?_⟩
+      · refine Eq.trans (congrArg (projModelPointsEquiv W W.toAffine.FunctionField
+            (genericSpecPoint W) + ·) (WeierstrassCurve.Affine.Point.map_zero
+              (f := IsScalarTower.toAlgHom K K W.toAffine.FunctionField))) ?_
+        refine Eq.trans (add_zero _) ?_
+        exact projModelPointsEquiv_genericSpecPoint W
+      · rw [hP₀]
+        rfl
+      · rw [hP₀]
+        rfl
+  | some xk yk h =>
+      have h₀ : W.toAffine.Nonsingular xk yk := nonsingular_of_baseChange_self W h
+      have hmap : WeierstrassCurve.Affine.Point.map
+          (IsScalarTower.toAlgHom K K W.toAffine.FunctionField)
+          (WeierstrassCurve.Affine.Point.some xk yk h)
+          = HasseWeil.liftSomePoint W xk yk h₀ := by
+        rw [WeierstrassCurve.Affine.Point.map_some]
+        rfl
+      have hadd := HasseWeil.genericPoint_add_liftSomePoint W xk yk h₀
+      have hchain : projModelPointsEquiv W W.toAffine.FunctionField (genericSpecPoint W)
+          + WeierstrassCurve.Affine.Point.map
+            (IsScalarTower.toAlgHom K K W.toAffine.FunctionField)
+            (WeierstrassCurve.Affine.Point.some xk yk h)
+          = _ :=
+        (congrArg (projModelPointsEquiv W W.toAffine.FunctionField
+            (genericSpecPoint W) + ·) hmap).trans
+          ((congrArg (· + HasseWeil.liftSomePoint W xk yk h₀)
+            (projModelPointsEquiv_genericSpecPoint W)).trans hadd)
+      refine ⟨_, _, _, hchain, ?_, ?_⟩
+      · rw [hP₀, basePointCast_some]
+        by_cases h2 : yk = W.toAffine.negY xk yk
+        · rw [HasseWeil.translateAlgEquivOfPoint_some_2tor W xk yk
+            (nonsingular_of_baseChange_self W h) h2]
+          exact HasseWeil.translateAlgHom_of_2tor_apply_x_gen W xk yk
+            (nonsingular_of_baseChange_self W h) h2
+        · rw [HasseWeil.translateAlgEquivOfPoint_some_nonTor W xk yk
+            (nonsingular_of_baseChange_self W h) h2]
+          exact HasseWeil.translateAlgHom_apply_x_gen W xk yk
+            (nonsingular_of_baseChange_self W h) h2
+      · rw [hP₀, basePointCast_some]
+        by_cases h2 : yk = W.toAffine.negY xk yk
+        · rw [HasseWeil.translateAlgEquivOfPoint_some_2tor W xk yk
+            (nonsingular_of_baseChange_self W h) h2]
+          exact HasseWeil.translateAlgHom_of_2tor_apply_y_gen W xk yk
+            (nonsingular_of_baseChange_self W h) h2
+        · rw [HasseWeil.translateAlgEquivOfPoint_some_nonTor W xk yk
+            (nonsingular_of_baseChange_self W h) h2]
+          exact HasseWeil.translateAlgHom_apply_y_gen W xk yk
+            (nonsingular_of_baseChange_self W h) h2
+
 /-- **(U5c-2)** The translation bridge: the function-field action of the scheme-level
 translation automorphism equals HasseWeil's `translateAlgEquivOfPoint` (at the
 self-base-changed curve, per the recorded design), conjugated through the two proven
@@ -310,9 +405,7 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
     (P' : ((W.baseChange K).toAffine).Point)
     (hP' : projModelPointsEquiv W K p = P')
     (P₀ : W.toAffine.Point)
-    (hP₀ : P₀ = (show W.baseChange K = W by
-      show W.map (algebraMap K K) = W
-      rw [Algebra.algebraMap_self, WeierstrassCurve.map_id]) ▸ P')
+    (hP₀ : P₀ = basePointCast W P')
     (τ : projModel W ⟶ projModel W)
     (hτ : τ = (translateByIso (modelEllipticCurve W) x).hom.left)
     [IsDominant τ] :
@@ -506,6 +599,15 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
     exact hfold
   have hx : L ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X))
       = R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X)) := by
+    have hR1 : R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X))
+        = projModelFunctionFieldEquiv W (τ.functionFieldMap.hom
+            ((projModel W).germToFunctionField (zChart W)
+              (coordRingToZSection W ((AdjoinRoot.mk W.toAffine.polynomial)
+                (Polynomial.C Polynomial.X))))) := by
+      simp only [hR, RingHom.comp_apply]
+      rw [projModelFunctionFieldEquiv_symm_algebraMap]
+      rfl
+    rw [hR1, hMASTERτ]
     sorry
   have hy : L ((AdjoinRoot.mk W.toAffine.polynomial) Polynomial.X)
       = R ((AdjoinRoot.mk W.toAffine.polynomial) Polynomial.X) := by
