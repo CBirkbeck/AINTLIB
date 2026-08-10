@@ -39321,10 +39321,18 @@ is built on (c); T-C4 = (a)↔(c). Verified substrate for (a)↔(c):
   (to verify exact shape at U5c-1).
 
 **U5 subcut (execution order)**:
-- [U5c-1] points + function-field dictionary: (i) model-record points over Spec K ↔
-  `W.toAffine.Point` (inventory PointsDictionary, add glue as needed); (ii)
-  `functionFieldEquivKE : (projModel W).functionField ≃+* KE` via the affine chart +
-  fraction-ring uniqueness. Status: open. NEXT.
+- [U5c-1] points + function-field dictionary: (i) `projModelPointsEquiv` ✓ EXISTS
+  (PointsDictionary, pointed + chart-valued); (ii) **DONE 2026-08-10**:
+  `projModelFunctionFieldEquiv` PROVED axiom-clean (`FieldComparisonBridge.lean`) — the
+  in-tree `coordRingToZSection` (ModelVariableChange:970, CoordinateRing ≃+* Γ(Z-chart))
+  was the missing link; then mathlib `functionField_isFractionRing_of_isAffineOpen` +
+  `IsLocalization.ringEquivOfRingEquiv` + `MulEquivClass.map_nonZeroDivisors`.
+  Gotchas: `MvPolynomial.gradedAlgebra` is a LOCAL instance in mathlib (must
+  `attribute [local instance]`); `isIntegral_projModel` is universe-monomorphic
+  ({K : Type}) — take `[IsIntegral (projModel W)]` as an argument, discharge via
+  `isIntegral_projModel_u`; HasseWeil imports on this branch are
+  `HasseWeil.HasseBound.*`/`HasseWeil.Foundation.*`. Status: (ii) done, (i) glue as
+  consumed. NEXT: U5c-2 (the translation bridge through this equiv).
 - [U5c-2] translation bridge: `functionFieldMap (model-translateByPoint P) =`
   `translateAlgEquivOfPoint (P-as-W-point)` transported along U5c-1(ii). Uses:
   translations are dominant (isos); mathlib FractionRing-lift uniqueness. Status: open.
