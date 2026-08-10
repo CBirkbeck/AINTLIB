@@ -41352,3 +41352,23 @@ chain. The U5c-2 bridge theorem now rests on **hx and hy alone** — the x/y-gen
 slope-formula computations (τ-side via KE-valued specPoints vs HasseWeil's
 `translateAlgEquivOfPoint` case-split, TranslationOrd:3290; the [n]-exemplars
 `mulByInt_pullbackAlgHom_x_gen`/`_y_gen` at MulByHomDegree:324/:340).
+
+
+### U5c-2 hx/hy interface findings (2026-08-10, session 3 latest+2)
+
+- `x_gen := algebraMap CoordinateRing KE (algebraMap (Polynomial F) _ X)`
+  (HasseWeil/Foundation/MulByIntPullback.lean:42) and `algebraMap (Polynomial K)
+  CoordinateRing X = mk (C X)` is rfl (MulByHomDegree:330-usage) ⟹ **the hx-anchor's
+  L-argument IS `x_gen W` definitionally** — HasseWeil's action lemmas apply directly:
+  `translateAlgEquivOfPoint_zero` (:3420 @[simp]), the `_add_*_x_gen` family
+  (:3742/:3905/:4036/:4150), `algEquiv_ext_x_y_gen` (:2368, the two-generator
+  extensionality). Similarly `y_gen` = the adjoined root (hy's argument = mk X = root).
+- The remaining content of hx/hy is the **R-side (τ-side) scheme computation**:
+  `projFF (ffMap-τ (projFF.symm (x_gen-class)))` = the translated chart coordinate —
+  via `projModelFunctionFieldEquiv_germ` backward at `coordRingToZSection (x-elt)` +
+  `functionFieldMap_germToFunctionField` + **τ.app on the chart x-coordinate section =
+  the slope-translated coordinate** — the addition-machinery at the generic point
+  (`mulModelHom_specPoints`/AdditionSpecPoints-genre at K := KE, or the Γ-level
+  translation action). This is the bridge's true content; needs its own decomposition
+  pass over the AdditionSpecPoints interface (grep: how translateByPoint's app acts on
+  chart coordinates — the `translateBy`-Γ-action lemmas if any).
