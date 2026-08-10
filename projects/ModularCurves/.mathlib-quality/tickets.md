@@ -41558,3 +41558,27 @@ standard three. File has 0 sorries.
 **U5 subcut remaining**: U5a (κ-bundle/divisor dictionary), U5b (glued rational function),
 U5d (scalar uniqueness vs `weilPairing_spec`), U5e (import `weilPairing_self` + K̄-descent).
 Next: U5d/U5a per the decomposition — the bridge now feeds the characterisation-matching.
+
+# ══════════════════════════════════════════════════════════════════════════
+# Y(ρ̄) ENDGAME BOARD (2026-08-10, owner-approved: D1=YES re-clothe over ℚ-algebras,
+# D2=minimal-analytic, D3=N=3 subsumed [optional YR-5 instance unfiled])
+# Plan: .mathlib-quality/decomposition-yrho-endgame.md
+# ══════════════════════════════════════════════════════════════════════════
+
+- [YR-1] `weilPairing_torsionMapOfEllHom` (YRho.lean:2489, KM 2.8.4.2 wiring via
+  weilPairingKM_restrictBase + EllHom cartesian transport). Status: in_progress.
+- [YR-2] E4a `weilPairingEval_self` per decomposition-e4a-self.md U5 (bridge + L2a/b/c
+  DONE; next: L2d/e assembly, L1 dictionary, L3–L6; U4 in ℚ-clothing). Status: open.
+- [YR-3] E5-ℚ `weilPairingEval_nondegenerate` re-clothed: 3a restricted internal Hom
+  (rank N², Stacks 58.5.2/58.5.4), 3b pairing map, 3c fibrewise-iso⟹iso
+  (isIso_iff_finrank_eq + natCard_sections_eq_finrank, template LevelThreeTorsor:607),
+  3d field import (fieldWeilPairing_eq_zero_of_forall + T-C4). Status: open (after YR-2).
+- [YR-4] assembly: yRho_representable axiom-clean. Status: blocked (YR-1..3).
+- [IRR-1] Euclidean topology on X(ℂ) + ℂ-point existence (mathlib-check first). Status: open.
+- [IRR-2] Euclidean-connected ⟹ Zariski-connected (finite type /ℂ). Status: open (IRR-1).
+- [IRR-3] CORE: continuous surjection ℍ → Y(N)^ζ(ℂ) — LeanModularForms bridge;
+  own /develop pass before execution. Status: open (sub-develop).
+- [IRR-4] ℂ→ℚ̄ descent (surjective + continuous image). Status: open (IRR-1).
+- [IRR-5] twist transfer Y(ρ̄)_ℚ̄ ≅ Y(N)^ζ_ℚ̄ (RhoDescent torsor-transport audit). Status: open.
+- [IRR-6] discharge hconn in the proven master reduction ⟹ yRho_geometricallyIrreducible.
+  Status: blocked (IRR-1..5).
