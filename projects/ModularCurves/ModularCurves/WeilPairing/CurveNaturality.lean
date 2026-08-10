@@ -234,4 +234,123 @@ theorem sectionCls_pastingMap (Q : (A.curve.baseChange t).Point (𝟙 T)) :
   refine Eq.trans (map_inv (Scheme.Pic.map (pastingMap g t)) _) ?_
   exact congrArg (·⁻¹) hcore
 
+/-- The zero point pushes to the zero point. -/
+theorem pushSection_zero :
+    pushSection g t (0 : (A.curve.baseChange t).Point (𝟙 T)) =
+      (0 : (B.curve.baseChange (t ≫ g.baseHom)).Point (𝟙 T)) := by
+  have hzvalA : ((0 : (A.curve.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback A.curve.π t) =
+      baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t :=
+    ((A.curve.baseChange t).point_zero_val (𝟙 T)).trans (Category.id_comp _)
+  have hzvalB : ((0 : (B.curve.baseChange (t ≫ g.baseHom)).Point (𝟙 T)).1 :
+      T ⟶ pullback B.curve.π (t ≫ g.baseHom)) =
+      baseChangeZero B.curve.π B.curve.zero B.curve.zero_π (t ≫ g.baseHom) :=
+    ((B.curve.baseChange (t ≫ g.baseHom)).point_zero_val (𝟙 T)).trans (Category.id_comp _)
+  refine Subtype.ext ?_
+  show ((0 : (A.curve.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback A.curve.π t) ≫
+      pastingMap g t =
+    ((0 : (B.curve.baseChange (t ≫ g.baseHom)).Point (𝟙 T)).1 :
+      T ⟶ pullback B.curve.π (t ≫ g.baseHom))
+  rw [hzvalA, hzvalB, baseChangeZero_pastingMap]
+
+/-- **(YR-1a-ii, step 4)** The zero class is natural along the pasting map. -/
+theorem zeroCls_pastingMap :
+    Scheme.Pic.map (pastingMap g t)
+        (zeroCls B.curve B.curve.smooth (t ≫ g.baseHom)) =
+      zeroCls A.curve A.curve.smooth t := by
+  have hzvalA : ((0 : (A.curve.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback A.curve.π t) =
+      baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t :=
+    ((A.curve.baseChange t).point_zero_val (𝟙 T)).trans (Category.id_comp _)
+  have hzvalB : ((0 : (B.curve.baseChange (t ≫ g.baseHom)).Point (𝟙 T)).1 :
+      T ⟶ pullback B.curve.π (t ≫ g.baseHom)) =
+      baseChangeZero B.curve.π B.curve.zero B.curve.zero_π (t ≫ g.baseHom) :=
+    ((B.curve.baseChange (t ≫ g.baseHom)).point_zero_val (𝟙 T)).trans (Category.id_comp _)
+  calc Scheme.Pic.map (pastingMap g t)
+        (zeroCls B.curve B.curve.smooth (t ≫ g.baseHom))
+      = Scheme.Pic.map (pastingMap g t)
+          (sectionCls B.curve B.curve.smooth (t ≫ g.baseHom)
+            ((pushSection g t (0 : (A.curve.baseChange t).Point (𝟙 T))).1 :
+              T ⟶ pullback B.curve.π (t ≫ g.baseHom))
+            (pushSection g t (0 : (A.curve.baseChange t).Point (𝟙 T))).2) :=
+        congrArg _ (sectionCls_congr B.curve B.curve.smooth (t ≫ g.baseHom) _ _
+          (hzvalB.symm.trans (congrArg (fun P :
+              (B.curve.baseChange (t ≫ g.baseHom)).Point (𝟙 T) =>
+            (P.1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom)))
+            (pushSection_zero g t).symm)))
+    _ = sectionCls A.curve A.curve.smooth t
+          ((0 : (A.curve.baseChange t).Point (𝟙 T)).1 : T ⟶ pullback A.curve.π t)
+          (0 : (A.curve.baseChange t).Point (𝟙 T)).2 :=
+        sectionCls_pastingMap g t 0
+    _ = zeroCls A.curve A.curve.smooth t :=
+        sectionCls_congr A.curve A.curve.smooth t _ _ hzvalA
+
+/-- **(YR-1a-ii, COMPLETE)** `κ` is natural along the pasting map:
+`Pic(pm)(κ_B(pushQ)) = κ_A(Q)`. Transcription of `kappa_restrictBase` (AP-E1-NAT1) with
+the two commuting squares supplied by `pastingMap_snd` and `baseChangeZero_pastingMap`. -/
+theorem kappa_pastingMap (Q : (A.curve.baseChange t).Point (𝟙 T)) :
+    Scheme.Pic.map (pastingMap g t)
+        (kappa B.curve B.curve.smooth (t ≫ g.baseHom) (pushSection g t Q)) =
+      kappa A.curve A.curve.smooth t Q := by
+  have hval : ∀ (x : Scheme.Pic (pullback B.curve.π (t ≫ g.baseHom))),
+      ((picRelProj B.curve.π B.curve.zero B.curve.zero_π (t ≫ g.baseHom) x :
+        picRel B.curve.π B.curve.zero B.curve.zero_π (t ≫ g.baseHom)) :
+        Scheme.Pic (pullback B.curve.π (t ≫ g.baseHom))) =
+      x * (Scheme.Pic.map (pullback.snd B.curve.π (t ≫ g.baseHom))
+        (Scheme.Pic.map (baseChangeZero B.curve.π B.curve.zero B.curve.zero_π
+          (t ≫ g.baseHom)) x))⁻¹ := fun _ => rfl
+  have hval' : ∀ (x : Scheme.Pic (pullback A.curve.π t)),
+      ((picRelProj A.curve.π A.curve.zero A.curve.zero_π t x :
+        picRel A.curve.π A.curve.zero A.curve.zero_π t) :
+        Scheme.Pic (pullback A.curve.π t)) =
+      x * (Scheme.Pic.map (pullback.snd A.curve.π t)
+        (Scheme.Pic.map (baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t) x))⁻¹ :=
+    fun _ => rfl
+  set x := sectionCls B.curve B.curve.smooth (t ≫ g.baseHom)
+      ((pushSection g t Q).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom))
+      (pushSection g t Q).2 *
+    (zeroCls B.curve B.curve.smooth (t ≫ g.baseHom))⁻¹ with hx
+  set x' := sectionCls A.curve A.curve.smooth t (Q.1 : T ⟶ pullback A.curve.π t) Q.2 *
+    (zeroCls A.curve A.curve.smooth t)⁻¹ with hx'
+  have hratio : Scheme.Pic.map (pastingMap g t) x = x' := by
+    rw [hx, hx', map_mul, map_inv, sectionCls_pastingMap g t Q, zeroCls_pastingMap g t]
+  have hsq1 : ∀ y, Scheme.Pic.map (pastingMap g t)
+      (Scheme.Pic.map (pullback.snd B.curve.π (t ≫ g.baseHom)) y) =
+      Scheme.Pic.map (pullback.snd A.curve.π t) y := by
+    intro y
+    calc Scheme.Pic.map (pastingMap g t)
+          (Scheme.Pic.map (pullback.snd B.curve.π (t ≫ g.baseHom)) y)
+        = Scheme.Pic.map (pastingMap g t ≫ pullback.snd B.curve.π (t ≫ g.baseHom)) y := by
+          rw [Scheme.Pic.map_comp]; rfl
+      _ = Scheme.Pic.map (pullback.snd A.curve.π t) y := by rw [pastingMap_snd]
+  have hsq2 : ∀ y, Scheme.Pic.map (baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t)
+      (Scheme.Pic.map (pastingMap g t) y) =
+      Scheme.Pic.map (baseChangeZero B.curve.π B.curve.zero B.curve.zero_π
+        (t ≫ g.baseHom)) y := by
+    intro y
+    calc Scheme.Pic.map (baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t)
+          (Scheme.Pic.map (pastingMap g t) y)
+        = Scheme.Pic.map (baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t ≫
+            pastingMap g t) y := by
+          rw [Scheme.Pic.map_comp]; rfl
+      _ = Scheme.Pic.map (baseChangeZero B.curve.π B.curve.zero B.curve.zero_π
+            (t ≫ g.baseHom)) y := by rw [baseChangeZero_pastingMap]
+  calc Scheme.Pic.map (pastingMap g t)
+        (kappa B.curve B.curve.smooth (t ≫ g.baseHom) (pushSection g t Q))
+      = Scheme.Pic.map (pastingMap g t)
+          (x * (Scheme.Pic.map (pullback.snd B.curve.π (t ≫ g.baseHom))
+            (Scheme.Pic.map (baseChangeZero B.curve.π B.curve.zero B.curve.zero_π
+              (t ≫ g.baseHom)) x))⁻¹) :=
+        congrArg _ ((kappa_eq_picRelProj B.curve B.curve.smooth (t ≫ g.baseHom)
+          (pushSection g t Q)).trans (hval x))
+    _ = Scheme.Pic.map (pastingMap g t) x *
+          (Scheme.Pic.map (pastingMap g t)
+            (Scheme.Pic.map (pullback.snd B.curve.π (t ≫ g.baseHom))
+              (Scheme.Pic.map (baseChangeZero B.curve.π B.curve.zero B.curve.zero_π
+                (t ≫ g.baseHom)) x)))⁻¹ := by
+        rw [map_mul, map_inv]
+    _ = x' * (Scheme.Pic.map (pullback.snd A.curve.π t)
+          (Scheme.Pic.map (baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t) x'))⁻¹ := by
+        rw [hsq1, ← hsq2, hratio]
+    _ = kappa A.curve A.curve.smooth t Q :=
+        ((kappa_eq_picRelProj A.curve A.curve.smooth t Q).trans (hval' x')).symm
+
 end ModularCurves
