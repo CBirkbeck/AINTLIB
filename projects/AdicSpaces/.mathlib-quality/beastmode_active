@@ -1,1 +1,1 @@
-FOCUS: T623 — generic presheafValueMapOfHom_square (dense-equalizer D-coherence) in PresheafFunctoriality.lean
+FOCUS: T624 — read mem_rationalOpen_pushDatumB_iff proof, design generic pushDatumOfHom
