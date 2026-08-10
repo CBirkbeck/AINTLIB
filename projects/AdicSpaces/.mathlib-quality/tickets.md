@@ -10,7 +10,7 @@ Cadence note: per-campaign milestones carry per-file cleanups; the single `CLEAN
 precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 
 ## Summary
-- Proof tickets: 10 (9 done — CAMPAIGN A + T611-T614/T617/T618/T621, all axiom-clean). Reviewer §4.1 abstract Milnor descent + all-degree 8.33 both landed. · planning tickets: 2 · cleanup tickets: 5
+- Proof tickets: 11 (10 done — CAMPAIGN A + T611-T614/T617/T618/T619/T621, all axiom-clean). The abstract criterion is instantiation-ready. · planning tickets: 2 · cleanup tickets: 5
 - Parallel capacity: 3 (A-track, B-Fubini pair, C-L1)
 
 ---
@@ -164,7 +164,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
     row_glue at base, recover per-piece via row_injective + push_natural.
 
 ### [T619] Rationality-gate the MilnorSquareData fields (sub-ticket of T615)
-- **Status**: open · **File**: `Adic spaces/MilnorSheafTransfer.lean` · **Parent**: T615 · **Type**: refactor
+- **Status**: done (2026-08-10 — hypothesis-gating (Plan B): laws quantify over rational data, pushes stay total; constructors take hC₀; the full chase rethreaded and still proven, axiom-clean) · **File**: `Adic spaces/MilnorSheafTransfer.lean` · **Parent**: T615 · **Type**: refactor
 - **Reason (instantiation-driven design correction)**: the concrete pushes are
   rationality-gated (`pushDatumB (D) (hD : D.IsRational)`, FiniteJetFunctoriality:93),
   and e.g. mono/cover for non-rational junk data is unprovable — so `pushB` must be
