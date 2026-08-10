@@ -41419,3 +41419,19 @@ x-coordinates). hx then closes by matching two computations of THE SAME mathlib
 `Point.add`. NEXT: grep the dictionary-additivity lemma name
 (projModelPointsEquiv_add / specPointsEquiv-group-compat in GroupLawConstruction /
 AdditionSpecPoints), then write the chain.
+
+
+### hx chain fully mapped (2026-08-10, session 3 latest+6)
+
+Dictionary-additivity EXISTS: `mulModelHom_specPoints_atlas` (AdditionSpecPoints:1431,
+universal level) + `_of_map`/`_of_eq` (:1679/:1758, transported to general W). Remaining
+glue for hx: the record's Point-add (as in `pointMapOfHom_translateBy`) vs the
+mulModelHom-composite — the record's group structure is `modelGrpObj` (ModelRecord),
+compat likely definitional or a named record-lemma. FULL hx-CHAIN: (1)
+`genericSpecPoint ≫ τ = (generic-Point + x|_KE).1` [pointMapOfHom_translateBy]; (2)
+dictionary of the sum = `genericPoint-affine + P'-restricted` [mulModelHom_specPoints_*
++ record-group-compat + projModelPointsEquiv_genericSpecPoint]; (3) affine addition's
+x-coordinate = HW slope formulas [mathlib Point.add match against
+translateAlgEquivOfPoint_add_*_x_gen]; (4) germ-reading into the function field
+[piece-(iii): the h1/h2-pattern proven in hinv + functionFieldMap_germToFunctionField].
+Write `genericSpecPoint_comp_translateBy` mirroring MulByHomDegree:917's proof, then hx.
