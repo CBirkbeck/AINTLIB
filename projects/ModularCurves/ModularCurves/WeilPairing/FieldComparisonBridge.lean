@@ -189,6 +189,25 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
           ((algebraMap K W.toAffine.FunctionField) a)) =
       (projModelFunctionFieldEquiv W).symm.toRingHom
         ((algebraMap K W.toAffine.FunctionField) a) := by
+      haveI hZaff : IsAffineOpen (zChart W) :=
+        Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+      haveI : Nontrivial Γ(projModel W, zChart W) :=
+        (coordRingToZSection W).toEquiv.symm.nontrivial
+      haveI : Nonempty (zChart W : (projModel W).Opens) :=
+        ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+      haveI : IsFractionRing Γ(projModel W, zChart W) (projModel W).functionField :=
+        functionField_isFractionRing_of_isAffineOpen (projModel W) _ hZaff
+      have h1 : (projModelFunctionFieldEquiv W).symm.toRingHom
+          ((algebraMap K W.toAffine.FunctionField) a)
+        = algebraMap Γ(projModel W, zChart W) ((projModel W).functionField)
+            (coordRingToZSection W (algebraMap K W.toAffine.CoordinateRing a)) := by
+        refine (RingEquiv.symm_apply_eq _).mpr ?_
+        rw [projModelFunctionFieldEquiv_germ W
+          (coordRingToZSection W (algebraMap K W.toAffine.CoordinateRing a)),
+          RingEquiv.symm_apply_apply]
+        exact (IsScalarTower.algebraMap_apply K W.toAffine.CoordinateRing
+          W.toAffine.FunctionField a).symm
+      rw [h1]
       sorry
     rw [hinv]
     exact (RingEquiv.apply_symm_apply _ _).symm
