@@ -192,7 +192,29 @@ theorem coordRingToZSection_algebraMap (a : K) :
           (quotientGrading (projIdeal W))
           (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))))) ⊤))
       hn1).trans hn2
-  sorry
+  -- Leg B: the chart equivalence carries the constant to the zero-degree constant
+  have hlegB : (chartCoordEquiv W 2) ((algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K ⧸
+        Ideal.span {(MvPolynomial.dehomogenizeAux K 2) W.toProjective.polynomial})) a)
+      = (HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
+          (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+        ((algebraMapGradeZero (projIdeal W)) a) := by
+    sorry
+  refine Eq.trans (congrArg (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv hlegB) ?_
+  refine Eq.trans ?_ (congrArg (fun z => (ConcreteCategory.hom
+      (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).hom)
+      ((ConcreteCategory.hom (Scheme.ΓSpecIso (CommRingCat.of
+        (HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).hom) z)) helt.symm)
+  exact congrArg (ConcreteCategory.hom (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).hom)
+    (CategoryTheory.inv_hom_id_apply (Scheme.ΓSpecIso (CommRingCat.of
+      (HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) _).symm
 
 /-- **(U5c-2 brick)** The self-base-change collapse on function fields:
 `W.baseChange K = W.map (algebraMap K K) = W.map (RingHom.id K) = W`, transported to the
