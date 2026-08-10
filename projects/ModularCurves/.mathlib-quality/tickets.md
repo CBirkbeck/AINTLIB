@@ -41517,3 +41517,15 @@ mirror (B1–B3). Cross-field lesson: the double projModelPointsEquiv-instantiat
 K') walls rw/whnf even where the single-field σ-twin sails — typed `hcoord`-have +
 `map_some`-rw-FIRST ordering breaks it. Commit 0218f4135. NEXT: g2 (chart-form of
 generic ≫ τ), g3 (hτV), g4/g5 (leaves).
+
+
+### g2(c) val-facts (2026-08-10, session 3 latest+13)
+
+`pointEquivOverHom.symm f = ⟨f.left, Over.w f⟩` (GroupLaw:113-116) — symm-val defeq
+`f.left`. So pulled-x-val = (toUnit ≫ x).left = toUnit.left ≫ x.left = toUnit.left ≫ p.1
+[hxp]. Remaining identification: `(CartesianMonoidalCategory.toUnit (Over.mk q)).left = q`
+(the Over-terminal's left IS the structure arrow — probe rfl / find the simp-lemma in
+mathlib's Over-cartesian instance). Then pulled-x-SpecPoint = extendSpecPoint p by
+Subtype.ext, g1-naturality applies, hP' rewrites, and the toAlgHom/ofId-coe aligns
+(both = algebraMap-underlying). g2 then closes; g3 (hτV via the chart-form/readback or
+directly from hg2 + inZChart-transfer) next.
