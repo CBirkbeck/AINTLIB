@@ -450,7 +450,22 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
     rw [ha, projModelPointsEquiv_add]
     congr 1
     -- (c) the pulled section is the extension of `p`; g1 + hP' close
-    sorry
+    have hpx : (((modelEllipticCurve W).pointEquivOverHom
+          (Spec.map (CommRingCat.ofHom
+            (algebraMap K W.toAffine.FunctionField)))).symm
+        (CategoryTheory.CartesianMonoidalCategory.toUnit
+          (CategoryTheory.Over.mk (Spec.map (CommRingCat.ofHom
+            (algebraMap K W.toAffine.FunctionField)))) ≫ x) :
+        SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField)
+      = extendSpecPoint W p := by
+      refine Subtype.ext ?_
+      show (CategoryTheory.CartesianMonoidalCategory.toUnit
+          (CategoryTheory.Over.mk (Spec.map (CommRingCat.ofHom
+            (algebraMap K W.toAffine.FunctionField)))) ≫ x).left
+        = Spec.map (CommRingCat.ofHom (algebraMap K W.toAffine.FunctionField)) ≫ p.1
+      rw [CategoryTheory.Over.comp_left, hxp]
+      rfl
+    rw [hpx, projModelPointsEquiv_extendSpecPoint W p, hP']
   have hτV : (genericSpecPoint W).1.base
       (IsLocalRing.closedPoint (W.toAffine.FunctionField)) ∈ τ ⁻¹ᵁ (zChart W) := by
     sorry
