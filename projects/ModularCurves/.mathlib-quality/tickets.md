@@ -41404,3 +41404,18 @@ result's coordinates through the dictionary (`projModelPointsEquiv_chartSpecPoin
 affine-addition coordinates of `genericPoint + P₀'` — then piece (iii) via the germ
 machinery reads it into the function field, matching HasseWeil's slope case-split
 (`translateAlgEquivOfPoint_*_x_gen`). Mirror the :917-proof structure line by line.
+
+
+### hx piece (i) SOLVED-in-tree (2026-08-10, session 3 latest+5)
+
+`pointMapOfHom_translateBy` (Factorization:697) IS the mixed-base translation action:
+`pointMapOfHom (translateBy x) Q = Q + (pulled x)` for Q at ANY base g — val-level:
+`Q.1 ≫ τ = (Q + x|_g).1`. So `genericSpecPoint ≫ τ` is the Point-sum
+`generic + restrict-g x`, and the hx-chain becomes: dictionary-additivity
+(`projModelPointsEquiv`-add — grep the group-law files; the model-group work proved the
+dictionary respects addition) ⟹ coordinates of the sum = mathlib affine addition =
+HasseWeil's slope formulas (their `_add_*_x_gen` lemmas compute exactly the addition
+x-coordinates). hx then closes by matching two computations of THE SAME mathlib
+`Point.add`. NEXT: grep the dictionary-additivity lemma name
+(projModelPointsEquiv_add / specPointsEquiv-group-compat in GroupLawConstruction /
+AdditionSpecPoints), then write the chain.
