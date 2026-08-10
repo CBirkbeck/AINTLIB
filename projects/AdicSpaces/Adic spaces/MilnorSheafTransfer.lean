@@ -175,6 +175,22 @@ noncomputable def pushCoveringC (sq : MilnorSquareData φB φC φD hφB hφC hφ
     obtain ⟨W, hW, hwW⟩ := sq.pushC_cover C₀.base C₀.covers C₀.hcover w hw
     exact ⟨sq.pushC W, Finset.mem_image_of_mem _ hW, hwW⟩
 
+theorem pushCoveringB_isRational (sq : MilnorSquareData φB φC φD hφB hφC hφD)
+    {C₀ : RationalCoveringData R} (hC₀ : C₀.IsRational) :
+    (sq.pushCoveringB C₀).IsRational := by
+  refine ⟨sq.pushB_isRational C₀.base hC₀.1, ?_⟩
+  intro E hE
+  obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
+  exact sq.pushB_isRational W (hC₀.piece hW)
+
+theorem pushCoveringC_isRational (sq : MilnorSquareData φB φC φD hφB hφC hφD)
+    {C₀ : RationalCoveringData R} (hC₀ : C₀.IsRational) :
+    (sq.pushCoveringC C₀).IsRational := by
+  refine ⟨sq.pushC_isRational C₀.base hC₀.1, ?_⟩
+  intro E hE
+  obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
+  exact sq.pushC_isRational W (hC₀.piece hW)
+
 end MilnorSquareData
 
 /-- **Abstract Milnor descent for sheafiness** ([WP-paper] lem:sheaf-transfer;
