@@ -39028,7 +39028,22 @@ in the plan's "Known traps".
   did.
 - `_add_left` (`:111`), `_add_right` (`:122`) — bilinearity, from AP-D7
 - `_self` (`:202`) — KM p. 90 footnote: *"In fact, `e_N(P,P) = 1`, cf. Notes Added in Proof"* — **read that
-  note before starting**; 2.8.3 gives only alternation `⟨P,P'⟩⟨P',P⟩ = 1`, which is weaker
+  note before starting**; 2.8.3 gives only alternation `⟨P,P'⟩⟨P',P⟩ = 1`, which is weaker.
+  **NOTE READ 2026-08-10 (KM print p. 505 = pdf 516, "Notes on Chapter 2"), verbatim
+  argument**: (i) for `P, Q ∈ E[NM](S)`:
+  `e_NM(P,Q)^M = e_NM(MP,Q) = e_N(MP,MQ)`, the last equality by (2.8.4.1) applied to
+  `E = E₀ = E₁ = E₂, π₁ = N, π₂ = M, P₀ = MP ∈ Ker π₁, P₂ = Q ∈ Ker(π₁ᵗ∘π₂ᵗ)`;
+  (ii) taking `M = 2, P = Q`: `1 = (e_2N(P,P))² = e_2N(2P,2P) = e_N(2P,2P)` for
+  `P ∈ E[2N](S)`, the first equality by 2.8.3 (alternation); (iii) `[2] : E → E` is f.p.p.f.
+  surjective, so any `R ∈ E[N](S)` is locally f.p.p.f. of the form `2P` with
+  `P ∈ E[2N](S)`, whence `e_N(R,R) = 1`. **Decomposition (E4a–c)**: E4a = independent
+  alternation 2.8.3 (must NOT route through `_self` — Basic.lean's current antisymm derives
+  FROM `_self`, so a fresh KM-2.8.3-route proof is needed); E4b = the `(NM, M)`-compatibility
+  — this is **AP-E6's (2.8.4.1)**, so **E6 is a prerequisite of E4**; E4c = fppf-locality:
+  `[2]` finite flat surjective (NIsogeny territory — 19 pre-existing sorries there, check
+  what is usable), the value's base-change compatibility (HAVE:
+  `weilPairingEval_restrict`/`weilPairingKM_restrictBase`), and faithfully-flat injectivity
+  of `Γ(−, 𝒪ˣ)` (unit-descent; the stream-DESC fppf engine may supply it)
 - `_nondegenerate` (`:270`) — KM 2.8.2, Cartier–Nishi duality [cf. Oda]. **This is the one register entry
   that genuinely needs Cartier duality**, and it is absent from mathlib — expect its own sub-development
 - `_mul` (`:328`) — KM 2.8.4.1, the composability formula
