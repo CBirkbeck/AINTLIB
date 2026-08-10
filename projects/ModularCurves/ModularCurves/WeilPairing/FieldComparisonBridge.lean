@@ -106,6 +106,17 @@ built from mathlib `WeierstrassCurve.Affine.CoordinateRing.map (RingHom.id K)`-f
 (Point.lean:184) + `IsLocalization.ringEquivOfRingEquiv` (same pattern as
 `projModelFunctionFieldEquiv` above), and route the U5c-2 conjugation through it. -/
 
+/-- **(U5c-2 sub-brick — the chart-constants identification)** The chart identification
+`coordRingToZSection` carries the `K`-constant of the coordinate ring to the restriction
+of the structure-pulled global constant. The `chartZAffineEquiv`-leg is an `≃ₐ[K]`
+(`.commutes` free); the remaining legs are `algebraMap_gradeZero_comp_eq`
+(WeierstrassModel:373) and the `awayι`/`toSpecZero` compatibility. -/
+theorem coordRingToZSection_algebraMap (a : K) :
+    coordRingToZSection W (algebraMap K W.toAffine.CoordinateRing a)
+      = ((projModel W).presheaf.map (homOfLE le_top).op)
+          ((projModelπ W).app ⊤ ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a)) := by
+  sorry
+
 /-- **(U5c-2 brick)** The self-base-change collapse on function fields:
 `W.baseChange K = W.map (algebraMap K K) = W.map (RingHom.id K) = W`, transported to the
 function fields. Sealed as a named equiv so the U5c-2 conjugation never exposes the
