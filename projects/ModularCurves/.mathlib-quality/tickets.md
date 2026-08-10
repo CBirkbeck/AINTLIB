@@ -41460,3 +41460,18 @@ assembly = transcribe brick6's generator-leaf proofs with: `genericSpecPoint_com
 germ-plumbing. Also landed this cycle: `projModelFunctionFieldEquiv_symm_algebraMap`
 (the R-side entry, general elements, commit 3672efc57).
 NEXT: read brick6's x-generator leaf in full (:1180–~1250) and transcribe for τ.
+
+
+### hx HW-side value lemmas pinned (2026-08-10, session 3 latest+9)
+
+`translateAlgHom_apply_x_gen` / `_apply_y_gen` (TranslationOrd ~:3757ff): the DIRECT
+single-translation actions `translateAlgHom (x_gen) = translateX_xy W xk yk` (the
+slope-formula values). With `translateAlgEquivOfPoint_zero` (@[simp]) and the 2tor-case
+apply-lemmas, hx's L-side is a 3-case split with ready values. The R-side τ-hMASTER
+transcription (from brick6's :1181–1250): needs the τ-analogue of hb5 in CHART form —
+`generic ≫ τ = (chartSpecPoint W xT yT hT).1` — from piece-(i)'s sum-form via the
+dictionary readback (`eq_chartSpecPoint_of_projModelPointsEquiv_some`, used at :939) +
+inline-(ii) + the sum's `some`-form (generic + K-rational ≠ 0 by transcendence of the
+generic coordinates; HW's `_add_*`-lemmas' h_sum-hypotheses show the case-data shape).
+Then `chartSpecPoint_appLE_eval` + `chartSolutionHom_x/_y` read the coordinates exactly
+as in brick6's FFM_X/FFM_Y.
