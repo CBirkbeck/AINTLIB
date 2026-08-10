@@ -39004,7 +39004,20 @@ in the plan's "Known traps".
   genuinely needs it — it simply cannot be wired against a false statement.
 
 ### [AP-E2 … E6] the register's five spec theorems
-- **Status**: blocked (AP-E1) · **File**: `WeilPairing/Basic.lean` · one ticket each
+- **Status**: **UNBLOCKED 2026-08-10** (AP-E1 complete: fills + the bridge
+  `weilPairingEval_eq_weilPairingKM`) · **File**: `WeilPairing/Basic.lean` · one ticket each
+- **`_add_left` DONE 2026-08-10** (bridge + `asSection_add` + `weilPairingKM_add_left` +
+  `Units.val_mul`; axiom-verified with the whole chain). 4 sorries left in the register.
+- **`_add_right` route (AP-E3)**: needs bilinearity-in-`Q` for `weilPairingKM`:
+  `torsionSplittingEval_mul_of_transitionUnitOfCover_mul` (proved) at a *tensor dataset* —
+  `M'' := M ⊗ M'` with `hM''` from `kappa_add` + `toSkeleton_tensorObj_eq` +
+  `Units.val_mul`, common refinement of the two covers (IND2 machinery), and **the one
+  missing brick**: `exists_over_trivialization_of_frames` — frames with ratio cocycle `r`
+  give an `.over`-trivialisation family with `transitionUnitOfCover = r` (the reverse of
+  `isFrame_overTrivializationSection`; the `M ⊗ M'`-frames with product ratio come from
+  `IsFrame.tensor` exactly as `exists_frame_pow`'s succ-step). Then `hnorm''` is
+  `mul_mem`-automatic and the register statement follows through the bridge as `_add_left`
+  did.
 - `_add_left` (`:111`), `_add_right` (`:122`) — bilinearity, from AP-D7
 - `_self` (`:202`) — KM p. 90 footnote: *"In fact, `e_N(P,P) = 1`, cf. Notes Added in Proof"* — **read that
   note before starting**; 2.8.3 gives only alternation `⟨P,P'⟩⟨P',P⟩ = 1`, which is weaker
