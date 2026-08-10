@@ -48,7 +48,7 @@ theorem wp_tateExt_completeSpace (s : ℕ) :
     haveI := mvTateAlgebraTopology'_isTopologicalRing (A := WPA K w) s
     @CompleteSpace ↥(restrictedMvPowerSeriesSubring s (WPA K w))
       (IsTopologicalAddGroup.rightUniformSpace _) := by
-  sorry
+  exact mvTate_completeSpace (A := WPA K w) s inferInstance
 
 /-- **Strong sheafiness, Tate-extension vocabulary** ([WP-paper]
 thm:parity-strongly-sheafy via eq:strong-sheafy-decomposition): the project's
@@ -64,7 +64,18 @@ theorem wp_tateExt_isSheafyComplete (ϖ : Uniformizer K)
     haveI : @CompleteSpace ↥(restrictedMvPowerSeriesSubring s (WPA K w))
       (IsTopologicalAddGroup.rightUniformSpace _) := wp_tateExt_completeSpace (w := w) s
     IsSheafyComplete ↥(restrictedMvPowerSeriesSubring s (WPA K w)) := by
-  sorry
+  letI := mvTateAlgebraTopology' (A := WPA K w) s
+  haveI := mvTate_isTateRing (A := WPA K w) s
+  haveI := mvTate_t2Space (A := WPA K w) s
+  haveI := mvTate_nonarchimedean (A := WPA K w) s
+  haveI := mvTateAlgebraTopology'_isTopologicalRing (A := WPA K w) s
+  haveI : @CompleteSpace ↥(restrictedMvPowerSeriesSubring s (WPA K w))
+      (IsTopologicalAddGroup.rightUniformSpace _) := wp_tateExt_completeSpace (w := w) s
+  exact (isSheafyComplete_congr
+    (A := ↥(restrictedMvPowerSeriesSubring s (WPA K w)))
+    (B := WPA K (shiftWeight w s)) (tateExtEquiv s)
+    (tateExtToWPA_continuous s) (tateExtEquiv_symm_continuous s)).mpr
+    (wp_stronglySheafy ϖ hK₀ s)
 
 /-- Layer 2: strong sheafiness of `𝒜⟨V₁,…,Vₛ⟩` over a base whose valuation ring is
 a DVR (the uniformizer is chosen, not carried). -/
@@ -77,6 +88,7 @@ theorem wp_tateExt_isSheafyComplete_of_dvr [IsDiscreteValuationRing 𝒪[K]] (s 
     haveI : @CompleteSpace ↥(restrictedMvPowerSeriesSubring s (WPA K w))
       (IsTopologicalAddGroup.rightUniformSpace _) := wp_tateExt_completeSpace (w := w) s
     IsSheafyComplete ↥(restrictedMvPowerSeriesSubring s (WPA K w)) := by
-  sorry
+  exact wp_tateExt_isSheafyComplete (Uniformizer.ofDVR K)
+    (FiniteJetOver.isNoetherianRing_unitBall K) s
 
 end WeightedParity

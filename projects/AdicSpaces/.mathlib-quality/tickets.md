@@ -10,13 +10,13 @@ Cadence note: per-campaign milestones carry per-file cleanups; the single `CLEAN
 precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 
 ## Summary
-- Proof tickets: 8 · planning tickets: 2 · cleanup tickets: 5
+- Proof tickets: 8 (3 done — CAMPAIGN A COMPLETE, axiom-clean) · planning tickets: 2 · cleanup tickets: 5
 - Parallel capacity: 3 (A-track, B-Fubini pair, C-L1)
 
 ---
 
 ### [T601] A-L1: `wp_tateExt_completeSpace`
-- **Status**: open · **File**: `Adic spaces/WP/StrongSheafy.lean:40` · **Depends on**: none · **Parallel**: yes · **Type**: lemma
+- **Status**: done (2026-08-10, axiom-clean) · **File**: `Adic spaces/WP/StrongSheafy.lean:40` · **Depends on**: none · **Parallel**: yes · **Type**: lemma
 - **Statement**: in skeleton (letI `mvTateAlgebraTopology'`; conclusion
   `@CompleteSpace ↥(restrictedMvPowerSeriesSubring s (WPA K w)) (rightUniformSpace _)`).
 - **Proof sketch**:
@@ -35,7 +35,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 - **Generality**: any weight `w`, any `s`; no DVR/noetherian hypotheses (pure topology).
 
 ### [T602] A-H (MILESTONE): `wp_tateExt_isSheafyComplete`
-- **Status**: open · **File**: `Adic spaces/WP/StrongSheafy.lean:57` · **Depends on**: T601 · **Parallel**: no · **Type**: theorem
+- **Status**: done (2026-08-10, axiom-clean) · **File**: `Adic spaces/WP/StrongSheafy.lean:57` · **Depends on**: T601 · **Parallel**: no · **Type**: theorem
 - **Statement**: in skeleton.
 - **Proof sketch**:
   1. `exact (isSheafyComplete_congr (tateExtEquiv s)
@@ -53,7 +53,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 - **Generality**: any `w`, any `s`.
 
 ### [T603] A-H-dvr: `wp_tateExt_isSheafyComplete_of_dvr`
-- **Status**: open · **File**: `Adic spaces/WP/StrongSheafy.lean:71` · **Depends on**: T602 · **Parallel**: no · **Type**: theorem
+- **Status**: done (2026-08-10, axiom-clean) · **File**: `Adic spaces/WP/StrongSheafy.lean:71` · **Depends on**: T602 · **Parallel**: no · **Type**: theorem
 - **Proof sketch**: `exact wp_tateExt_isSheafyComplete (Uniformizer.ofDVR K)
   (FiniteJetOver.isNoetherianRing_unitBall K) s` (pattern of `WP/Main.lean:137`).
 - **Sources**: decomposition A-H-dvr.
