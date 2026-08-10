@@ -119,9 +119,16 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
     170/2226) is Jet-concrete; the abstract AG1.d statement needs a generic
     datum/covering/value push along a continuous ring hom — check
     `PresheafFunctoriality.lean` (core) for the generic backbone before designing:
-    if present, AG1.d = bundle {square + strict row per datum, natural under
-    refinement + vertex sheafiness} → base sheafy, instantiated twice (original and
-    ⟨V⟩-extended squares).
+    CONFIRMED PRESENT: `locMapOfHom (φ : R →+* S) (D)` (generic datum push, :86),
+    `presheafValueMapOfHom (φ) (hφ : Continuous φ)` (generic value map, :171) with
+    continuity lemmas — the abstract AG1.d transfer is statable over these NOW.
+    NEXT SESSION ENTRY POINT: draft the abstract statement
+    `isSheafy_of_milnorRow (φB : R →+* B) (φC : R →+* C) (φD ...) (row : ∀ D hD,
+    strict-exact 0 → PV(D) → PV(pushB D) ⊕ PV(pushC D) → PV(pushD D) → 0, natural
+    under refinement) (hB hC hD : IsSheafy) : IsSheafy R` in a new
+    `MilnorSheafTransfer.lean`, mirroring lem:sheaf-transfer l.576–640 verbatim and
+    FiniteJetSheafTransfer's chase with the generic pushes; then re-derive
+    isSheafy_JetA through it (regression guard) and instantiate at the ⟨V⟩-square.
 
 ### [T616] B-H (MILESTONE): `finiteJet_tateExt_isSheafyComplete`
 - **Status**: blocked (T615 outcome) · **File**: `Adic spaces/FJP/StrongSheafy.lean:60`.
