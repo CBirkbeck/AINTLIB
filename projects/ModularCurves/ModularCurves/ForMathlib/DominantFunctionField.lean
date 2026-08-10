@@ -135,4 +135,23 @@ theorem functionFieldMap_comp {Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
     functionFieldMap_germToFunctionField g U s, hsec]
   exact (functionFieldMap_germToFunctionField f (g ⁻¹ᵁ U) (g.app U s)).symm
 
+/-- `functionFieldMap` is a congruence in the morphism (the `IsDominant` instances ride along by
+proof irrelevance). -/
+theorem functionFieldMap_congr {f g : X ⟶ Y} [IsDominant f] [IsDominant g]
+    [IrreducibleSpace X] [IrreducibleSpace Y] (h : f = g) :
+    f.functionFieldMap = g.functionFieldMap := by
+  subst h; rfl
+
+/-- **(invariance under a deck-style automorphism)** If `τ ≫ f = f` (e.g. `f = [N]` and `τ` a
+translation by an `N`-torsion section), the function-field pullback of `τ` fixes the image of
+`f.functionFieldMap` pointwise. One-line consequence of `functionFieldMap_comp`. -/
+theorem functionFieldMap_apply_functionFieldMap_of_comp_eq
+    (f : X ⟶ Y) (τ : X ⟶ X) [IsDominant f] [IsDominant τ]
+    [IrreducibleSpace X] [IrreducibleSpace Y] (h : τ ≫ f = f) (z : Y.functionField) :
+    τ.functionFieldMap.hom (f.functionFieldMap.hom z) = f.functionFieldMap.hom z := by
+  haveI : IsDominant (τ ≫ f) := by rw [h]; infer_instance
+  refine Eq.trans (congrArg (fun m => (CommRingCat.Hom.hom m) z)
+    (functionFieldMap_comp τ f)).symm ?_
+  exact congrArg (fun m => (CommRingCat.Hom.hom m) z) (functionFieldMap_congr h)
+
 end AlgebraicGeometry
