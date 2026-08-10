@@ -156,6 +156,8 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
   --    `mulByInt_pullbackAlgHom_x_gen` (MulByHomDegree:324) as the proven [n]-anchor
   --    exemplar.
   -- 5. Orientation/convention pinned at the first generator computation.
+  refine IsFractionRing.ringHom_ext (A := W.toAffine.CoordinateRing) ?_
+  intro c
   sorry
 
 end Bridge
