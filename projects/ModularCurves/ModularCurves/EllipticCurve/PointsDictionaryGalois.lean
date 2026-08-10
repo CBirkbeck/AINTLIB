@@ -202,4 +202,100 @@ theorem projModelPointsEquiv_specMapCompPoint [W.IsElliptic] {K : Type u} [Field
       projModelPointsEquiv_eq_zero_of_notInZChart W g hZ]
     exact (WeierstrassCurve.Affine.Point.map_zero (f := (σ : K →ₐ[R] K))).symm
 
+/-! ## B — extension of scalars on `SpecPoints` (the embedding analogue of the σ-action) -/
+
+section Extension
+
+variable {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+  {K' : Type u} [Field K'] [DecidableEq K'] [Algebra R K']
+  [Algebra K K'] [IsScalarTower R K K']
+
+/-- **(B1)** Extension of a `K`-valued SpecPoint along a field embedding `K → K'`
+(precomposition with `Spec.map`). The embedding analogue of `specMapCompPoint`. -/
+noncomputable def extendSpecPoint (g : SpecPoints (projModel W) (projModelπ W) K) :
+    SpecPoints (projModel W) (projModelπ W) K' :=
+  ⟨Spec.map (CommRingCat.ofHom (algebraMap K K')) ≫ g.1, by
+    rw [Category.assoc, g.2, ← Spec.map_comp]
+    congr 1
+    exact CommRingCat.hom_ext (RingHom.ext fun c =>
+      (IsScalarTower.algebraMap_apply R K K' c).symm)⟩
+
+/-- **(B2 forward)** The `Z`-chart condition ascends along the extension. -/
+theorem inZChart_extendSpecPoint (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hZ : InZChart W g) : InZChart W (extendSpecPoint W g : SpecPoints _ _ K') := by
+  obtain ⟨h, hfac⟩ := hZ
+  exact ⟨Spec.map (CommRingCat.ofHom (algebraMap K K')) ≫ h, by
+    rw [Category.assoc, hfac]; rfl⟩
+
+/-- **(B2 reverse, via the zero characterisation)** Off-chart points stay off-chart. -/
+theorem not_inZChart_extendSpecPoint (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hZ : ¬ InZChart W g) : ¬ InZChart W (extendSpecPoint W g : SpecPoints _ _ K') := by
+  have h0 := specPoint_eq_zero_of_not_inZ W K g hZ
+  intro hcon
+  refine projModelZero_not_inZ W K' ?_
+  obtain ⟨h, hfac⟩ := hcon
+  refine ⟨h, hfac.trans ?_⟩
+  show Spec.map (CommRingCat.ofHom (algebraMap K K')) ≫ g.1 = _
+  rw [h0, ← Category.assoc, ← Spec.map_comp]
+  congr 2
+  exact CommRingCat.hom_ext (RingHom.ext fun c =>
+    (IsScalarTower.algebraMap_apply R K K' c).symm)
+
+/-- **(B3)** The chart hom of the extension is the embedding composed with the chart
+hom (mirror of `chartHomEquiv_specMapCompPoint`). -/
+theorem chartHomEquiv_extendSpecPoint (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hZ : InZChart W g) :
+    (chartHomEquiv W 2 K' ⟨extendSpecPoint W g,
+        inZChart_extendSpecPoint W g hZ⟩).1 =
+      ((algebraMap K K')).comp (chartHomEquiv W 2 K ⟨g, hZ⟩).1 := by
+  refine congrArg Subtype.val (chartHomEquiv_eq_of_specMap W 2
+    ⟨extendSpecPoint W g, inZChart_extendSpecPoint W g hZ⟩
+    ⟨((algebraMap K K')).comp (chartHomEquiv W 2 K ⟨g, hZ⟩).1, ?_⟩ ?_)
+  · rw [RingHom.comp_assoc, (chartHomEquiv W 2 K ⟨g, hZ⟩).2]
+    exact RingHom.ext fun c => (IsScalarTower.algebraMap_apply R K K' c).symm
+  · rw [show CommRingCat.ofHom (((algebraMap K K')).comp
+        (chartHomEquiv W 2 K ⟨g, hZ⟩).1) =
+        CommRingCat.ofHom (chartHomEquiv W 2 K ⟨g, hZ⟩).1 ≫
+          CommRingCat.ofHom (algebraMap K K') from rfl,
+      Spec.map_comp, Category.assoc, chartHomEquiv_specMap_factors W 2 ⟨g, hZ⟩]
+    rfl
+
+/-- **(B4 — the field-extension dictionary naturality)** The dictionary of the extended
+point is `Point.map` along the embedding (mirror of
+`projModelPointsEquiv_specMapCompPoint`). -/
+theorem projModelPointsEquiv_extendSpecPoint [W.IsElliptic]
+    (g : SpecPoints (projModel W) (projModelπ W) K) :
+    projModelPointsEquiv W K' (extendSpecPoint W g)
+      = WeierstrassCurve.Affine.Point.map
+          (IsScalarTower.toAlgHom R K K')
+          (projModelPointsEquiv W K g) := by
+  classical
+  by_cases hZ : InZChart W g
+  · have hZ' := inZChart_extendSpecPoint (K' := K') W g hZ
+    have hcoord : ∀ j : {j : Fin 3 // j ≠ 2},
+        (chartSolutionsEquiv W 2 K' (chartHomEquiv W 2 K'
+            ⟨extendSpecPoint W g, hZ'⟩)).1 j
+          = algebraMap K K' ((chartSolutionsEquiv W 2 K
+              (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 j) := by
+      intro j
+      have h1 := chartSolutionsEquiv_apply_eq W ⟨extendSpecPoint W g, hZ'⟩ j
+      have h2 := chartSolutionsEquiv_apply_eq W ⟨g, hZ⟩ j
+      refine h1.trans (Eq.trans ?_ (congrArg (algebraMap K K') h2).symm)
+      exact congrArg (fun (φ : _ →+* K') => φ (chartCoordEquiv W 2
+        (Ideal.Quotient.mk _ (MvPolynomial.X j))))
+        (chartHomEquiv_extendSpecPoint W g hZ)
+    refine ((projModelPointsEquiv_eq_some_chartSolution W (extendSpecPoint W g)
+      hZ').trans ?_).trans (congrArg (WeierstrassCurve.Affine.Point.map
+        (IsScalarTower.toAlgHom R K K'))
+        (projModelPointsEquiv_eq_some_chartSolution W g hZ)).symm
+    rw [WeierstrassCurve.Affine.Point.map_some]
+    exact affinePoint_some_congr (hcoord ⟨0, by decide⟩) (hcoord ⟨1, by decide⟩) _ _
+  · have hZ' := not_inZChart_extendSpecPoint (K' := K') W g hZ
+    rw [projModelPointsEquiv_eq_zero_of_notInZChart W (extendSpecPoint W g) hZ',
+      projModelPointsEquiv_eq_zero_of_notInZChart W g hZ]
+    exact (WeierstrassCurve.Affine.Point.map_zero
+      (f := IsScalarTower.toAlgHom R K K')).symm
+
+end Extension
+
 end ModularCurves
