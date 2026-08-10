@@ -95,6 +95,119 @@ noncomputable def weilPairingEval {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T �
       rw [Category.assoc, E.weilPairing_over N, ← Category.assoc,
         pullback.lift_fst, E.pointToTorsion_torsionπ]⟩
 
+/-- **(AP-E1-YON3, the bridge)** `weilPairingEval` computes the canonical Katz–Mazur value
+`weilPairingKM` on every pair of `N`-torsion points. This is what AP-E2…E6 consume: it
+converts each register specification into a statement about `weilPairingKM`, where the KM
+machinery (`torsionSplittingEval_add`, `torsionSplittingEval_pow_eq_one`, …) applies.
+
+Proof: substitute `g = k ≫ t₀` for the classifying map `k` of the pair; naturality of the
+`μ_N`-points description reads the evaluation as the `k`-pullback of the universal value;
+the restriction law `weilPairingKM_restrictBase` computes the same pullback as the
+canonical value at the restricted tautological points, which the reconstruction lemmas
+identify with `x` and `y`. -/
+theorem weilPairingEval_eq_weilPairingKM {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    (x y : E.Point g)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x y hx hy : Γ(T, ⊤)) =
+      ((weilPairingKM E E.smooth g N
+        (EllipticCurve.Point.asSection E g x) (asSection_mem_torsionPoints E x hx)
+        (EllipticCurve.Point.asSection E g y) (asSection_mem_torsionPoints E y hy) :
+          Γ(T, ⊤)ˣ) : Γ(T, ⊤)) := by
+  -- generalize the classifying map so the base can be substituted (the raw lift mentions
+  -- `x`, so `subst` on it directly would fail the occurs-check)
+  obtain ⟨k, hgen⟩ : ∃ k, (pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy)
+      (by simp) : T ⟶ pullback (E.torsionπ N) (E.torsionπ N)) = k := ⟨_, rfl⟩
+  have hk : k ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) = g := by
+    rw [← hgen, ← Category.assoc, pullback.lift_fst, E.pointToTorsion_torsionπ]
+  subst hk
+  -- naturality of the points description along `k`, at the universal subtype element
+  have hnat := muNPointsEquiv_natural S N
+    (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) k
+    ((muNPointsEquiv S N
+      (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)).symm
+      ⟨((weilPairingKM E E.smooth
+          (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+          N (univTorsionFst E N) (univTorsionFst_mem E N)
+          (univTorsionSnd E N) (univTorsionSnd_mem E N) :
+        Γ(pullback (E.torsionπ N) (E.torsionπ N), ⊤)ˣ) : Γ(pullback (E.torsionπ N)
+          (E.torsionπ N), ⊤)),
+        (Units.val_pow_eq_pow_val _ _).symm.trans
+          ((congrArg Units.val (weilPairingKM_pow_eq_one E E.smooth
+            (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) N
+            (univTorsionFst E N) (univTorsionFst_mem E N)
+            (univTorsionSnd E N) (univTorsionSnd_mem E N))).trans Units.val_one)⟩)
+  -- the evaluation is the equiv-value at the pair whose value component is
+  -- `k ≫ weilPairing` (via `hgen`)
+  have hpair : (E.weilPairingEval x y hx hy : Γ(T, ⊤)) =
+      (muNPointsEquiv S N
+        (k ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N))
+        ⟨k ≫ ((muNPointsEquiv S N
+            (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)).symm
+            ⟨((weilPairingKM E E.smooth
+                (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+                N (univTorsionFst E N) (univTorsionFst_mem E N)
+                (univTorsionSnd E N) (univTorsionSnd_mem E N) :
+              Γ(pullback (E.torsionπ N) (E.torsionπ N), ⊤)ˣ) : Γ(pullback (E.torsionπ N)
+                (E.torsionπ N), ⊤)),
+              (Units.val_pow_eq_pow_val _ _).symm.trans
+                ((congrArg Units.val (weilPairingKM_pow_eq_one E E.smooth
+                  (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) N
+                  (univTorsionFst E N) (univTorsionFst_mem E N)
+                  (univTorsionSnd E N) (univTorsionSnd_mem E N))).trans
+                  Units.val_one)⟩).1, by
+          rw [Category.assoc]
+          exact congrArg _ ((muNPointsEquiv S N _).symm _).2⟩ : Γ(T, ⊤)) :=
+    congrArg (fun h => (muNPointsEquiv S N
+        (k ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)) h : Γ(T, ⊤)))
+      (Subtype.ext (congrArg (· ≫ E.weilPairing N) hgen))
+  refine hpair.trans (hnat.trans ?_)
+  -- the universal value reads back through `apply_symm_apply`
+  have happ := congrArg Subtype.val ((muNPointsEquiv S N
+    (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)).apply_symm_apply
+    ⟨((weilPairingKM E E.smooth
+        (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+        N (univTorsionFst E N) (univTorsionFst_mem E N)
+        (univTorsionSnd E N) (univTorsionSnd_mem E N) :
+      Γ(pullback (E.torsionπ N) (E.torsionπ N), ⊤)ˣ) : Γ(pullback (E.torsionπ N)
+        (E.torsionπ N), ⊤)),
+      (Units.val_pow_eq_pow_val _ _).symm.trans
+        ((congrArg Units.val (weilPairingKM_pow_eq_one E E.smooth
+          (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) N
+          (univTorsionFst E N) (univTorsionFst_mem E N)
+          (univTorsionSnd E N) (univTorsionSnd_mem E N))).trans Units.val_one)⟩)
+  refine (congrArg (Scheme.Γ.map k.op).hom happ).trans ?_
+  -- identify with the restricted canonical value: the restriction law at `k` plus the
+  -- reconstruction of the tautological points (transported along `hgen`)
+  have hrx := (restrictBase_congr_hom E
+    (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) hgen.symm rfl
+    (congrArg (· ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)) hgen)
+    (univTorsionFst E N)).trans
+    (restrictBase_univTorsionFst E x y hx hy
+      (congrArg (· ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)) hgen))
+  have hry := (restrictBase_congr_hom E
+    (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) hgen.symm rfl
+    (congrArg (· ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)) hgen)
+    (univTorsionSnd E N)).trans
+    (restrictBase_univTorsionSnd E x y hx hy
+      (congrArg (· ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)) hgen))
+  have hrestr := weilPairingKM_restrictBase E E.smooth
+    (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) k rfl N
+    (univTorsionFst E N) (univTorsionFst_mem E N)
+    (univTorsionSnd E N) (univTorsionSnd_mem E N)
+  have hcongrpts := weilPairingKM_congr E E.smooth
+    (k ≫ (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)) N
+    hrx hry
+    (restrictBase_mem_torsionPoints E _ _ rfl (univTorsionFst_mem E N))
+    (restrictBase_mem_torsionPoints E _ _ rfl (univTorsionSnd_mem E N))
+    (asSection_mem_torsionPoints E x hx) (asSection_mem_torsionPoints E y hy)
+  refine Eq.trans ?_ (congrArg Units.val (hcongrpts.symm.trans hrestr).symm)
+  -- the two `Γ`-map spellings agree
+  show (Scheme.Γ.map k.op).hom _ = (k.appLE ⊤ ⊤ le_rfl).hom _
+  rw [Scheme.Γ_map_op]
+  rw [show (k.appLE ⊤ ⊤ le_rfl : Γ(pullback (E.torsionπ N) (E.torsionπ N), ⊤) ⟶
+      Γ(T, ⊤)) = k.app ⊤ from Scheme.Hom.appLE_eq_app _]
+  rfl
+
 /-- **(T-A6d closure)** The raw kill-by-`N` condition is closed under addition of points.
 This is the lemma the bilinearity specifications' docstrings call `point_add_killedBy`;
 it was referenced but never stated. -/

@@ -1003,6 +1003,13 @@ theorem restrictBase_univTorsionSnd {T : Scheme.{u}} {g : T ⟶ S} {N : ℕ}
   · refine ((restrictBase E _ _ hk (univTorsionSnd E N)).2).trans ?_
     exact ((EllipticCurve.Point.asSection E g y).2).symm
 
+/-- `restrictBase` depends on the restriction morphism only through its value. -/
+theorem restrictBase_congr_hom {T T' : Scheme.{u}} (t : T ⟶ S) {t' : T' ⟶ S}
+    {g g' : T' ⟶ T} (hgg : g = g') (hg : g ≫ t = t') (hg' : g' ≫ t = t')
+    (Q : (E.baseChange t).Point (𝟙 T)) :
+    restrictBase E t g hg Q = restrictBase E t g' hg' Q := by
+  subst hgg; rfl
+
 /-- `weilPairingKM` depends only on the points, not on the membership witnesses or the
 way the points were assembled. -/
 theorem weilPairingKM_congr (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
