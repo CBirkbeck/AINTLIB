@@ -591,4 +591,28 @@ theorem torsionSplittingEval_pastingMap (N : ℕ)
     refine Eq.trans ?_ (congrArg (Scheme.resUnit p2) hspec)
     exact (Scheme.resUnit_resUnit _ _ _).symm
 
+/-- **(YR-1b)** The canonical pairing is natural in the curve slot: the `A`-value of two
+torsion sections equals the `B`-value of their pushes. Mirror of
+`weilPairingKM_restrictBase` (AP-E1-NAT3), reading both sides through a `B`-side chosen
+dataset and its `pm`-pullback via the engine. -/
+theorem weilPairingKM_pastingMap (N : ℕ)
+    (P : (A.curve.baseChange t).Point (𝟙 T)) (hP : P ∈ torsionPoints A.curve t N)
+    (Q : (A.curve.baseChange t).Point (𝟙 T)) (hQ : Q ∈ torsionPoints A.curve t N) :
+    weilPairingKM A.curve A.curve.smooth t N P hP Q hQ =
+      weilPairingKM B.curve B.curve.smooth (t ≫ g.baseHom) N
+        (pushSection g t P) (pushSection_mem_torsionPoints g t hP)
+        (pushSection g t Q) (pushSection_mem_torsionPoints g t hQ) := by
+  letI := Scheme.Modules.monoidalCategory (pullback B.curve.π (t ≫ g.baseHom))
+  obtain ⟨M, hM, ι, W, hW, e, hnorm⟩ := exists_normalized_dataset B.curve B.curve.smooth
+    (t ≫ g.baseHom) (pushSection g t Q)
+  rw [weilPairingKM_eq_torsionSplittingEval B.curve B.curve.smooth (t ≫ g.baseHom) N
+      (pushSection g t P) (pushSection_mem_torsionPoints g t hP)
+      (pushSection g t Q) (pushSection_mem_torsionPoints g t hQ) M hM W hW e hnorm,
+    weilPairingKM_eq_torsionSplittingEval A.curve A.curve.smooth t N P hP Q hQ
+      ((Scheme.Modules.pullback (pastingMap g t)).obj M) (hM_pastingMap g t Q M hM)
+      (fun i => pastingMap g t ⁻¹ᵁ W i) ((pastingMap g t).iSup_preimage_eq_top hW)
+      (fun i => localPullbackTrivializationT (pastingMap g t) M (W i) (e i))
+      (fun i j => hnorm_pastingMap g t M W e hnorm i j)]
+  exact torsionSplittingEval_pastingMap g t N Q hQ M hM W hW e hnorm P hP
+
 end ModularCurves
