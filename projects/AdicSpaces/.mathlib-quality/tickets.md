@@ -151,6 +151,17 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
     push_natural_* per component — an embedding (row_embedding C₀.base composed with
     hB.embedding (pushCoveringB, pushCoveringB_isRational) × hC.embedding);
     conclude Topology.IsEmbedding.of_comp. GLUING-HALF per the original sketch.
+  - 2026-08-10: EMBEDDING HALF CLOSED (committed 4b27836c5). GLUING half needs one
+    more structure amendment first: (i) leg-naturality fields — the legB/legC value
+    maps commute with restrictions between pushed-B/C data (legB_mono + legB_natural,
+    legC likewise), (ii) pushCoveringD constructor + IsRational (fields exist), so the
+    D-comparison can restrict both glued sections to every pushed piece and conclude
+    equality from hD separation (= injectivity from hD.embedding at pushCoveringD).
+    Then the body: push f via push_natural (matching persists on common refinements —
+    needs pushed-refinement transport: a common refinement of pushed pieces need NOT be
+    a push — use sectionEqualizer's common-refinement form pushed through the value
+    maps; CHECK IsSheafy.gluing's exact compat shape before writing), glue, compare,
+    row_glue at base, recover per-piece via row_injective + push_natural.
 
 ### [T616] B-H (MILESTONE): `finiteJet_tateExt_isSheafyComplete`
 - **Status**: blocked (T615 outcome) · **File**: `Adic spaces/FJP/StrongSheafy.lean:60`.
