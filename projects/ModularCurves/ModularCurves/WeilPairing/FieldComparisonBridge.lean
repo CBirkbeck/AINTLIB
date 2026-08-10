@@ -410,6 +410,48 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
             (genericPoint_mem_preimage τ ⊤))) h3) (h2 _).symm))
     rw [hinv]
     exact (RingEquiv.apply_symm_apply _ _).symm
+  -- τ-hMASTER (case-free): the R-side on any coordinate-ring element is the
+  -- appLE-evaluation of its chart section at the translated tautological point
+  -- (brick6_intertwining's h1+h2+hfold with [N] replaced by τ).
+  haveI hZaffM : IsAffineOpen (zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : Nontrivial Γ(projModel W, zChart W) :=
+    (coordRingToZSection W).toEquiv.symm.nontrivial
+  haveI : Nonempty (zChart W : (projModel W).Opens) :=
+    ⟨hZaffM.isoSpec.inv.base (Classical.arbitrary _)⟩
+  have hτV : (genericSpecPoint W).1.base
+      (IsLocalRing.closedPoint (W.toAffine.FunctionField)) ∈ τ ⁻¹ᵁ (zChart W) := by
+    sorry
+  have hMASTERτ : ∀ c : W.toAffine.CoordinateRing,
+      projModelFunctionFieldEquiv W (τ.functionFieldMap.hom
+          ((projModel W).germToFunctionField (zChart W) (coordRingToZSection W c)))
+        = (((genericSpecPoint W).1 ≫ τ).appLE (zChart W) ⊤
+            (le_trans (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge le_rfl)
+          ≫ (Scheme.ΓSpecIso (CommRingCat.of (W.toAffine.FunctionField))).hom).hom
+            (coordRingToZSection W c) := by
+    intro c
+    have h1 : τ.functionFieldMap.hom
+        ((projModel W).germToFunctionField (zChart W) (coordRingToZSection W c))
+        = (projModel W).presheaf.germ (τ ⁻¹ᵁ (zChart W)) (genericPoint _)
+            (genericPoint_mem_preimage τ (zChart W))
+            (τ.app (zChart W) (coordRingToZSection W c)) :=
+      functionFieldMap_germToFunctionField τ (zChart W) (coordRingToZSection W c)
+    have h2 := projModelFunctionFieldEquiv_germ_eval W (τ ⁻¹ᵁ (zChart W))
+      (genericPoint_mem_preimage τ (zChart W)) hτV
+      (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge
+      (τ.app (zChart W) (coordRingToZSection W c))
+    rw [h1, h2]
+    have hfold : (((genericSpecPoint W).1.appLE (τ ⁻¹ᵁ (zChart W)) ⊤
+          (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge)
+        ≫ (Scheme.ΓSpecIso (CommRingCat.of (W.toAffine.FunctionField))).hom).hom
+        ((τ.app (zChart W)).hom (coordRingToZSection W c))
+        = ((((genericSpecPoint W).1 ≫ τ).appLE (zChart W) ⊤
+            (le_trans (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge le_rfl))
+          ≫ (Scheme.ΓSpecIso (CommRingCat.of (W.toAffine.FunctionField))).hom).hom
+            (coordRingToZSection W c) := by
+      rw [Scheme.Hom.comp_appLE]
+      rfl
+    exact hfold
   have hx : L ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X))
       = R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X)) := by
     sorry
