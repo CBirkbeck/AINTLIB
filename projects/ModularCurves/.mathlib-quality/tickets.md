@@ -39225,6 +39225,85 @@ faithfully-flat `Γ(𝒪ˣ)`-injectivity. E4c is bounded infrastructure (torsor 
 (E4a diagonal square, biextension-theoretic); `_nondegenerate` = Cartier–Nishi (E5,
 research). Every infrastructure leg is now discharged.
 
+### AP-E4a ticket cut (2026-08-10, /develop session 2 — the universal-family route)
+
+**Strategy consulted with ChatGPT 5.6-sol (max effort) and validated**; full decomposition
+with source quotes and attack logs: `.mathlib-quality/decomposition-e4a-self.md`.
+Skeleton: `WeilPairing/SelfUniversal.lean` (compiles, 7 sorries). Key verdicts:
+the B ↪ B[1/N]-localisation formulation of the universal reduction (no density, no
+components — affine algebra only); the field leaf as a NARROW comparison through the
+translation characterisations (`eq_mul_globalTwist_of_translate` ↔ HasseWeil
+`weilPairing_spec`, both ✓ verified); Oda §1 is relative but biextension-scale — deferred
+to E5. The naive relative telescope PROVABLY degenerates to e^N = 1 (recorded), and the
+divisor-level telescope routes through the frozen RelEffCartierDiv zone — both rejected.
+
+- **[E4a-U1] `weilPairingEval_mapIso`** (+ `Point.mapIso_killedBy`) — pairing invariance
+  under pointed record-isos over the same base. The φ-sibling of E6-d: the localPullback
+  gadgets are f-generic; new work = `kappa_mapIso` (mirror `kappa_restrictBase`),
+  hnorm-transport (pointed zero-compat via `IsMonHom`), the eq_torsionSplittingEval pin.
+  Kill-transport: `mulByHom_comp_left_of_isMonHom`. Estimate: KMCompatibility-scale
+  (~400–600 lines incl. the κ-naturality block). Status: open.
+- **[E4a-U2] model/atlas classification plumbing** — (i) generalise the model
+  base-change pointed iso to arbitrary ring maps (`modelEllipticCurve (W.map c)` ≅
+  pullback of `modelEllipticCurve W`), reusing the Addition* base-change machinery;
+  (ii) the classifying chain `localModel` → W over Γ(S,U) → `classifyRingHomU W` →
+  `universalWeierstrassLocU_map_classifyRingHomU`. Pure plumbing, no new mathematics.
+  Status: open (after U1 for the transport target shape).
+- **[E4a-U3] gluing shell** — value equality is Zariski-local (O^×-sheaf) +
+  `weilPairingEval_restrict` (PROVED). Small. Status: open.
+- **[E4a-U4] `weilPairingEval_self_universal`** — the affine algebra over
+  `X_N = Spec B`: U4a affine (IsFinite of torsionπ over the atlas — general, via
+  IsProper + `mulByHom_locallyQuasiFinite_global`), U4b B ℤ-flat, U4c `B ↪ B[1/N]`,
+  U4d B[1/N] reduced (embed into the generic-fibre torsion algebra, finite étale over a
+  field — `torsionπ_etale`; mathlib étale-over-field-reduced discharge pinned at
+  execution), U4e pointwise vanishing via `weilPairingEval_restrict` + U5,
+  U4f nilradical. Status: open (consumes U5's statement only — can run before U5's
+  proof).
+- **[E4a-U5] `weilPairingEval_self_of_field`** — THE FIELD LEAF (API gap): alternation
+  over a field with `(N:K) ≠ 0`. Own `/develop` sub-pass before execution: K̄-descent +
+  the narrow characterisation-comparison with `HasseWeil.weilPairing` (spec/translate
+  verified at Pairing.lean:217–252) + import `weilPairing_self`
+  (PairingProps.lean:254, [IsAlgClosed]). Delivers T-C4's normalisation-pinning as a
+  by-product. Status: open — FIRST ACTION: the sub-/develop pass reading the route-A
+  FieldPairing* interface.
+- **[E4a-ASM] `weilPairingEval_self'`** — the assembly; fills Basic.lean:372 modulo the
+  recorded import-order note. Status: open (needs U1–U5).
+
+**VALIDATION PASS 2 (ChatGPT 5.6-sol, max) — corrections applied to the cut:**
+- **Execution order FLIPPED (risk-first)**: (1) spike U5's bridge far enough to fix the
+  comparison interface, (2) U4's algebra lemmas, (3) U1, (4) U2, (5) U3 + assembly. Do
+  NOT build U1's infrastructure before the U5 interface is de-risked.
+- **U5 split into five sub-tickets** (narrowed to projective Weierstrass models /
+  fibres of 𝕌 — U4 needs no more): (U5a) κ-bundle = O(D_T − D_0) divisor bundle;
+  (U5b) the glued rational function `g_i = h_i · [N]^# r_i` from the splitting + a
+  rational trivialisation r of O(D_T − D_0), divisor = [N]^*(D_T) − [N]^*(D_0) —
+  verify the transition-convention (h vs h⁻¹) on ONE overlap first; (U5c) **the
+  `translateByPoint ↔ HasseWeil.translateAlgEquivOfPoint` bridge — the largest missing
+  API, spike this FIRST**; (U5d) scalar uniqueness vs `weilPairing_spec` (equal
+  divisors ⟹ constant ratio on the projective integral curve; constants cancel in the
+  translation ratio — h(0)=1 vs g's pole at 0 is a non-issue); (U5e) import
+  `weilPairing_self` + K̄-descent.
+- **U4 corrections**: (d)-chain `B[1/N] ↪ B_ℚ` needs ALL nonzero integers regular
+  (ℤ-flatness), not just N; reducedness discharge =
+  `Algebra.FormallyUnramified.isReduced_of_field` (mathlib
+  RingTheory/Unramified/Field.lean:123 — VERIFIED REAL); everywhere-vanishing ⟹ 0 via
+  the in-tree `IsReduced.eq_zero_of_forall_ringHom_field`
+  (ForMathlib/ReducedSeparation.lean:40 — VERIFIED, empty-scheme-safe); prove the
+  RING-element equality then finish by `Units.ext`.
+- **Two missing assembly nodes added**: (ASM-i) the restricted torsion point factors
+  through X_N by the kernel-pullback universal property (`pointToTorsion` ✓ exists);
+  (ASM-ii) at p ∈ Spec B[1/N] relate the fibre point to the base-changed record — U5's
+  statement at an arbitrary record over Spec K (as skeletoned) + the U2 base-change iso
+  at field-valued c covers it.
+- **U2 de-risked**: `projModelBaseChange` + `_π` + `_comp` EXIST for arbitrary ring
+  maps (WeierstrassModel.lean:1927ff — VERIFIED); U2 is iso-packaging only.
+- U1 note: work with the base-changed φ_T; pointedness suffices for κ (inverse image
+  of a section's graph divisor along an iso is the transported graph divisor); expect
+  dataset-ISO + independence-pinning, not equality.
+- Edge cases recorded: NeZero N binding (N=0 fails fundamentally); N=1 fine (D(1) =
+  whole scheme); disconnected X_N harmless; empty-scheme safety via the ringHom-field
+  formulation.
+
 ## AP-E1 sub-cut (2026-08-09, session 2) — canonicalising `torsionSplittingEval`
 
 The KM output `torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP` depends on the
