@@ -114,6 +114,14 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
     design work: AG1.a (the ⟨V⟩-integral row, coefficientwise κ=1 section per the
     validation addendum), AG1.d (the abstract transfer statement), and the per-corner
     instance packaging above.
+  - 2026-08-10 (transfer-shape audit, step 2): the JetA transfer's push machinery
+    (`pushDatumB`/`presheafValueMapB`/`pushCoveringB`, FiniteJetFunctoriality.lean:93/
+    170/2226) is Jet-concrete; the abstract AG1.d statement needs a generic
+    datum/covering/value push along a continuous ring hom — check
+    `PresheafFunctoriality.lean` (core) for the generic backbone before designing:
+    if present, AG1.d = bundle {square + strict row per datum, natural under
+    refinement + vertex sheafiness} → base sheafy, instantiated twice (original and
+    ⟨V⟩-extended squares).
 
 ### [T616] B-H (MILESTONE): `finiteJet_tateExt_isSheafyComplete`
 - **Status**: blocked (T615 outcome) · **File**: `Adic spaces/FJP/StrongSheafy.lean:60`.
