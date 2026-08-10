@@ -264,6 +264,7 @@ noncomputable def IB : Ideal (P B m) := Ideal.span (Set.range (S.rB m g f))
 noncomputable def IC : Ideal (P C m) := Ideal.span (Set.range (S.rC m g f))
 noncomputable def ID : Ideal (P D m) := Ideal.span (Set.range (S.rD m g f))
 
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 /-- The pushed data generate the unit ideal at each vertex ([FJP] §4 after (4.6)). -/
 theorem span_pushed_B (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     Ideal.span ({S.φB g} ∪ Set.range (fun i => S.φB (f i))) = ⊤ := by
@@ -274,6 +275,7 @@ theorem span_pushed_B (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
   rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
   rfl
 
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 theorem span_pushed_C (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     Ideal.span ({S.φC g} ∪ Set.range (fun i => S.φC (f i))) = ⊤ := by
   have h := congrArg (Ideal.map S.φC) hspan
@@ -283,6 +285,7 @@ theorem span_pushed_C (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
   rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
   rfl
 
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 theorem span_pushed_D (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     Ideal.span ({S.ψC (S.φC g)} ∪
       Set.range (fun i => S.ψC (S.φC (f i)))) = ⊤ := by
@@ -293,6 +296,7 @@ theorem span_pushed_D (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
   rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
   rfl
 
+omit [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 theorem rB_eq (i : Fin m) : S.rB m g f i =
     polyToP (MvPolynomial.C (S.φB g) * MvPolynomial.X i -
       MvPolynomial.C (S.φB (f i))) := by
@@ -301,6 +305,7 @@ theorem rB_eq (i : Fin m) : S.rB m g f i =
   congr 1
   rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
 
+omit [NormOneClass B] [CompleteSpace B] [NormOneClass D] [CompleteSpace D] in
 theorem rC_eq (i : Fin m) : S.rC m g f i =
     polyToP (MvPolynomial.C (S.φC g) * MvPolynomial.X i -
       MvPolynomial.C (S.φC (f i))) := by
@@ -309,6 +314,7 @@ theorem rC_eq (i : Fin m) : S.rC m g f i =
   congr 1
   rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
 
+omit [NormOneClass B] [CompleteSpace B] in
 theorem rD_eq (i : Fin m) : S.rD m g f i =
     polyToP (MvPolynomial.C (S.ψC (S.φC g)) * MvPolynomial.X i -
       MvPolynomial.C (S.ψC (S.φC (f i)))) := by
@@ -317,20 +323,22 @@ theorem rD_eq (i : Fin m) : S.rD m g f i =
   congr 1
   rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
 
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 /-- The pushed generators are compatible across the square. -/
 theorem extDB_rB (i : Fin m) : S.extDB m (S.rB m g f i) = S.rD m g f i :=
   S.ext_square_commutes m (rA m g f i)
 
 /-! ### Lemma 4.3 — controlled graph-ideal pullback ([FJP] (4.11)–(4.16)) -/
 
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] in
 /-- Right strict surjectivity of the ideal row ([FJP] (4.11)). -/
 theorem ideal_row_surjective (hPD : IsNoetherianRing (P D m))
     (hPDball : IsNoetherianRing (unitBall (P D m)))
-    (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
+    (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     ∃ Cs : ℝ, 1 ≤ Cs ∧ ∀ y ∈ S.ID m g f,
       ∃ xc ∈ S.IC m g f, S.extDC m xc = y ∧ ‖xc‖ ≤ Cs * ‖y‖ := by
   classical
-  haveI := hPD
+  have := hPD
   obtain ⟨h, hh1, hlift⟩ := exists_d1_lift (E := D) S.tD S.tD_isUnit
     S.norm_tD_lt_one S.norm_tD_pos S.norm_tD_mul hPDball (S.rD m g f)
   set Cr : ℝ := 1 + ∑ i, ‖S.rC m g f i‖ with hCr
