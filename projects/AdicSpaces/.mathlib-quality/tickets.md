@@ -112,7 +112,16 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 ---
 
 ### [T621] C-L1: `wedhorn_lemma_833_deg1_surjective`
-- **Status**: open · **File**: `Adic spaces/CechAcyclicityFull.lean:41` · **Depends on**: none · **Parallel**: yes · **Type**: theorem
+- **Status**: in_progress (2026-08-10)
+- **Progress**:
+  - 2026-08-10: reconnaissance — the value identifications are
+    `laurentPlusBridge`/`laurentMinusBridge` (LaurentRefinementCore.lean:2863/2931)
+    with naturality `laurentPlusBridge_restrictionMap`/`laurentMinusBridge_restrictionMap`
+    (:3120/:3239), bicontinuity in LaurentOverlap.lean:2136/2184. Intersection-value
+    bridge lives in LaurentOverlap.lean (locating). Plan: transport the difference map
+    along the three bridges to the concrete quotients, split via
+    `A⟨ζ,ζ⁻¹⟩ = A⟨ζ⟩ + ζ⁻¹A⟨ζ⁻¹⟩` ([Wedhorn] l.4200; ALSO need the relation-ideal
+    decomposition per the ChatGPT addendum), push the two summands back. · **File**: `Adic spaces/CechAcyclicityFull.lean:41` · **Depends on**: none · **Parallel**: yes · **Type**: theorem
 - **Proof sketch**:
   1. Identify the three `presheafValue`s via the existing 8.33 development's
      `Examples 6.38/6.39` comparisons (the identifications behind
