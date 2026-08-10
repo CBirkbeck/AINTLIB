@@ -77,6 +77,14 @@ lake exe cache get          # mathlib oleans for v4.33.0
 lake build "«Adic spaces»"  # the library (root module imports both examples)
 ```
 
+Build the quoted `«Adic spaces»` target as shown — it is fully green, as are `Common` and
+`BernoulliRegular`. A bare `lake build` also builds the sibling projects sharing this
+workspace, where a handful of v4.33.0 bump repairs are still pending (off this
+announcement's path, owned by the central bump process):
+`HasseWeil/Foundation/Curves/Valuation/NormValuation.lean`,
+`HasseWeil/Pic0/ToClassSurjective.lean`, and
+`LeanModularForms/.../Residue/MultipointPV.lean`.
+
 ## Sorry policy on this branch
 
 **Every certified statement — all five [FJP] conclusions and seven of the eight [WP]
