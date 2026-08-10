@@ -127,6 +127,29 @@ theorem tendsto_coeff_nestedAmbientEquiv (n k : ℕ)
   · obtain ⟨b, hbI, hb⟩ := hcoeffU l
     exact ⟨b, hbI, hb⟩
 
+omit [TopologicalSpace A] [NonarchimedeanRing A] [IsTopologicalRing A] [IsTateRing A] in
+/-- Coefficient formula for the inverse ambient nested equivalence. -/
+theorem coeff_symm_nestedAmbientEquiv (n k : ℕ)
+    (q : MvPowerSeries (Fin k) (MvPowerSeries (Fin n) A)) (l : Fin (n + k) →₀ ℕ) :
+    MvPowerSeries.coeff l ((nestedAmbientEquiv n k).symm q) =
+      MvPowerSeries.coeff
+        (Finsupp.comapDomain Sum.inr
+          (Finsupp.embDomain (nestedIndexEquiv n k).toEmbedding l)
+          Sum.inr_injective.injOn)
+        (MvPowerSeries.coeff
+          (Finsupp.comapDomain Sum.inl
+            (Finsupp.embDomain (nestedIndexEquiv n k).toEmbedding l)
+            Sum.inl_injective.injOn) q) := by
+  show MvPowerSeries.coeff l
+    (MvPowerSeries.rename (⇑(nestedIndexEquiv n k).symm.toEmbedding)
+      ((MvPowerSeries.sumAlgEquiv (Fin k) (Fin n) A).symm q)) = _
+  conv_lhs =>
+    rw [show l = Finsupp.embDomain (nestedIndexEquiv n k).symm.toEmbedding
+        (Finsupp.embDomain (nestedIndexEquiv n k).toEmbedding l) from
+      (GraphKoszul.embDomain_symm_embDomain (nestedIndexEquiv n k).symm _).symm,
+      MvPowerSeries.coeff_embDomain_rename (nestedIndexEquiv n k).symm.toEmbedding]
+  exact MvPowerSeries.coeff_sumAlgEquiv_symm_apply q _
+
 /-- **T617 leg 3 (nested ⟹ joint)**: a series over `A⟨X₁,…,Xₙ⟩` whose outer family
 is restricted (w.r.t. the canonical topology) flattens to a jointly-restricted
 series over `A` (cofinitely many outer indices land entirely in any basic
@@ -139,7 +162,58 @@ theorem isRestricted_symm_nestedAmbientEquiv (n k : ℕ)
         Filter.cofinite (nhds 0)) :
     MvPowerSeries.IsRestricted ((nestedAmbientEquiv n k).symm
       (MvPowerSeries.map (restrictedMvPowerSeriesSubring n A).subtype f)) := by
-  sorry
+  letI := mvTateAlgebraTopology' (A := A) n
+  set P := (IsTateRing.principalPair A).toPairOfDefinition with hP
+  intro U hU
+  obtain ⟨j, -, hjU⟩ := (P.hasBasis_nhds_zero).mem_iff.mp hU
+  -- cofinitely many outer indices land in the j-th basic neighbourhood
+  have houter : {ν : Fin k →₀ ℕ |
+      MvPowerSeries.coeff ν f ∉ mvTateAlgNhd n P j}.Finite := by
+    have h1 := hf ((mvTateAlgBasis' (A := A) n).hasBasis_nhds_zero.mem_of_mem
+      (i := j) trivial)
+    rwa [Filter.mem_map, Filter.mem_cofinite] at h1
+  -- per exceptional outer index, cofinitely many inner indices land in U
+  have hinner : ∀ ν : Fin k →₀ ℕ, {μ : Fin n →₀ ℕ |
+      MvPowerSeries.coeff μ ((MvPowerSeries.coeff ν f : _) : MvPowerSeries (Fin n) A)
+        ∉ U}.Finite := by
+    intro ν
+    have h2 := (MvPowerSeries.coeff ν f).2 hU
+    rwa [Filter.mem_map, Filter.mem_cofinite] at h2
+  -- the bad joint set injects into the finite union of recombined pairs
+  refine Filter.mem_map.mpr (Filter.mem_cofinite.mpr (Set.Finite.subset
+    ((houter.biUnion (fun ν _ => (hinner ν).image (fun μ =>
+      Finsupp.embDomain (nestedIndexEquiv n k).symm.toEmbedding (ν.sumElim μ)))))
+    ?_))
+  intro l hl
+  simp only [Set.mem_compl_iff, Set.mem_preimage] at hl
+  set ν := Finsupp.comapDomain Sum.inl
+    (Finsupp.embDomain (nestedIndexEquiv n k).toEmbedding l) Sum.inl_injective.injOn
+  set μ := Finsupp.comapDomain Sum.inr
+    (Finsupp.embDomain (nestedIndexEquiv n k).toEmbedding l) Sum.inr_injective.injOn
+  have hval : MvPowerSeries.coeff l
+      ((nestedAmbientEquiv n k).symm
+        (MvPowerSeries.map (restrictedMvPowerSeriesSubring n A).subtype f)) =
+      MvPowerSeries.coeff μ ((MvPowerSeries.coeff ν f : _) : MvPowerSeries (Fin n) A) := by
+    rw [coeff_symm_nestedAmbientEquiv]
+    rfl
+  -- if the outer slice is in the basic nhd, all its coefficients are in U — contradiction
+  have hν_bad : MvPowerSeries.coeff ν f ∉ mvTateAlgNhd n P j := by
+    intro hgood
+    obtain ⟨b, hbI, hb⟩ := mvTateAlgNhd_coeff_mem n P j hgood μ
+    exact hl (hval ▸ hjU ⟨b, hbI, hb⟩)
+  -- l is the recombination of its own slices
+  have hμ_bad : MvPowerSeries.coeff μ
+      ((MvPowerSeries.coeff ν f : _) : MvPowerSeries (Fin n) A) ∉ U := fun hmem =>
+    hl (hval ▸ hmem)
+  refine Set.mem_biUnion hν_bad ⟨μ, hμ_bad, ?_⟩
+  show Finsupp.embDomain (nestedIndexEquiv n k).symm.toEmbedding (ν.sumElim μ) = l
+  have hsum : ν.sumElim μ = Finsupp.embDomain (nestedIndexEquiv n k).toEmbedding l := by
+    ext s
+    cases s with
+    | inl a => simp [ν, Finsupp.comapDomain_apply]
+    | inr b => simp [μ, Finsupp.comapDomain_apply]
+  rw [hsum]
+  simpa using GraphKoszul.embDomain_symm_embDomain (nestedIndexEquiv n k).symm l
 
 /-- **T617: the topological nested Fubini** — the `k`-variable restricted power
 series over the Tate extension `A⟨X₁,…,Xₙ⟩` (with its canonical topology) are the
@@ -154,7 +228,37 @@ noncomputable def restrictedNestedEquiv (n k : ℕ) :
     haveI := mvTate_nonarchimedean (A := A) n
     ↥(restrictedMvPowerSeriesSubring k ↥(restrictedMvPowerSeriesSubring n A)) ≃+*
       ↥(restrictedMvPowerSeriesSubring (n + k) A) := by
-  sorry
+  letI := mvTateAlgebraTopology' (A := A) n
+  haveI := mvTateAlgebraTopology'_isTopologicalRing (A := A) n
+  haveI := mvTate_nonarchimedean (A := A) n
+  refine RingEquiv.ofBijective
+    (RingHom.codRestrict
+      (((nestedAmbientEquiv n k).symm.toRingHom.comp
+          (MvPowerSeries.map (restrictedMvPowerSeriesSubring n A).subtype)).comp
+        (restrictedMvPowerSeriesSubring k
+          ↥(restrictedMvPowerSeriesSubring n A)).subtype)
+      (restrictedMvPowerSeriesSubring (n + k) A)
+      (fun x => isRestricted_symm_nestedAmbientEquiv n k x.1 x.2)) ⟨?_, ?_⟩
+  · -- injectivity: subtype ∘ map-subtype ∘ ring-equiv, all injective
+    intro x y hxy
+    have h1 := congrArg Subtype.val hxy
+    simp only [RingHom.codRestrict_apply, RingHom.comp_apply, RingEquiv.toRingHom_eq_coe,
+      RingEquiv.coe_toRingHom] at h1
+    have h2 := (nestedAmbientEquiv n k).symm.injective h1
+    exact Subtype.ext (MvPowerSeries.map_injective Subtype.val_injective h2)
+  · -- surjectivity: the coefficientwise lift is a preimage
+    intro g
+    refine ⟨⟨(fun ν : Fin k →₀ ℕ =>
+      (⟨MvPowerSeries.coeff ν (nestedAmbientEquiv n k g.1),
+        isRestricted_coeff_nestedAmbientEquiv n k g.2 ν⟩ :
+        ↥(restrictedMvPowerSeriesSubring n A))),
+      tendsto_coeff_nestedAmbientEquiv n k g.2⟩, ?_⟩
+    refine Subtype.ext ?_
+    show ((nestedAmbientEquiv n k).symm
+      (MvPowerSeries.map (restrictedMvPowerSeriesSubring n A).subtype _)) = g.1
+    rw [(nestedAmbientEquiv n k).symm_apply_eq]
+    ext ν μ
+    rfl
 
 end NestedFubini
 
@@ -169,7 +273,14 @@ theorem mvTate_isStronglyNoetherian {A : Type*} [CommRing A] [TopologicalSpace A
     haveI := mvTateAlgebraTopology'_isTopologicalRing (A := A) n
     haveI := mvTate_nonarchimedean (A := A) n
     IsStronglyNoetherian ↥(restrictedMvPowerSeriesSubring n A) := by
-  sorry
+  letI := mvTateAlgebraTopology' (A := A) n
+  haveI := mvTateAlgebraTopology'_isTopologicalRing (A := A) n
+  haveI := mvTate_nonarchimedean (A := A) n
+  refine ⟨fun k => ?_⟩
+  haveI : IsNoetherianRing ↥(restrictedMvPowerSeriesSubring (n + k) A) :=
+    IsStronglyNoetherian.isNoetherianRing_restricted (n + k)
+  exact isNoetherianRing_of_surjective _ _
+    (restrictedNestedEquiv n k).symm.toRingHom (restrictedNestedEquiv n k).symm.surjective
 
 /-- **B-L6 (uniformity bridge, JetA instance)**: the Tate extension of `𝓐` is
 complete for the right uniformity of its canonical topology. -/

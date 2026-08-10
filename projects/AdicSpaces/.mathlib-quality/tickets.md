@@ -10,7 +10,7 @@ Cadence note: per-campaign milestones carry per-file cleanups; the single `CLEAN
 precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 
 ## Summary
-- Proof tickets: 8 (4 done — CAMPAIGN A COMPLETE + B-L6, axiom-clean) · planning tickets: 2 · cleanup tickets: 5
+- Proof tickets: 9 (7 done — CAMPAIGN A + T611/T612/T613/T614/T617, all axiom-clean) · planning tickets: 2 · cleanup tickets: 5
 - Parallel capacity: 3 (A-track, B-Fubini pair, C-L1)
 
 ---
@@ -81,7 +81,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 - **Generality**: as stated in the file (generic `K`, generic variable counts).
 
 ### [T613] B-L3: `mvTate_isStronglyNoetherian`
-- **Status**: in_progress (2026-08-10) · **File**: `Adic spaces/FJP/StrongSheafy.lean:40` · **Type**: theorem
+- **Status**: done (2026-08-10, axiom-clean via T617) · **File**: `Adic spaces/FJP/StrongSheafy.lean:40` · **Type**: theorem
 - **Proof sketch**: unfold `IsStronglyNoetherian` for the extension: its `m`-variable
   Tate algebra flattens through Fubini (B-L1/2) to the `(n+m)`-variable Tate algebra of
   `A`, which is noetherian by `[IsStronglyNoetherian A]`; transport noetherianity along
@@ -143,7 +143,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 - **Status**: open · **Depends on**: everything.
 
 ### [T617] Topological nested Fubini: `restrictedSumRingEquiv` (sub-ticket of T613)
-- **Status**: in_progress (2026-08-10) · **File**: `Adic spaces/FJP/StrongSheafy.lean` ·
+- **Status**: done (2026-08-10, axiom-clean: restrictedNestedEquiv + 3 transport legs + 2 coeff formulas) · **File**: `Adic spaces/FJP/StrongSheafy.lean` ·
   **Depends on**: none · **Parent**: T613 · **Type**: def + 2 lemmas
 - **Statement**: over `[CommRing A] [TopologicalSpace A] [NonarchimedeanRing A]`
   `[IsTopologicalRing A] [IsTateRing A]`, with the letI `mvTateAlgebraTopology' n` on
