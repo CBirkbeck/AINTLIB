@@ -41475,3 +41475,19 @@ inline-(ii) + the sum's `some`-form (generic + K-rational ≠ 0 by transcendence
 generic coordinates; HW's `_add_*`-lemmas' h_sum-hypotheses show the case-data shape).
 Then `chartSpecPoint_appLE_eval` + `chartSolutionHom_x/_y` read the coordinates exactly
 as in brick6's FFM_X/FFM_Y.
+
+
+### hx endgame architecture FINAL (2026-08-10, session 3 latest+10)
+
+`genericPoint_add_liftSomePoint` (HW TranslationOrd:2018): `generic + liftSomePoint xk yk
+= some (translateX_xy) (translateY_xy) _` UNIFORMLY for all affine (xk,yk) (transcendence
+gives x ≠ xk — no 2-torsion split needed for the sum!). So the leaves need only a
+zero/some split on P₀. REORDER INSIGHT: hτV (the translated generic's Z-chart membership)
+FOLLOWS from the chart-form readback (`inZChart_chartSpecPoint`) — prove the chart form
+FIRST (dictionary-level: piece-i + projModelPointsEquiv_add + _genericSpecPoint +
+`genericPoint_add_liftSomePoint` + `eq_chartSpecPoint_of_projModelPointsEquiv_some`),
+then hτV from it, then hMASTERτ consumes hτV. REMAINING PLUMBING: the x-section ↔ P₀
+dictionary glue (hxp: x.left = p.1; hP': dict p = P'; hP₀: P₀ = cast P' — connect
+dict(pulled-x-as-KE-Point) to P₀ via the Dictionary.baseChange-brick (AdditionSpecPoints
+:1694-context) + the K→KE restriction + the W_KE-cast-collapse). Then: leaves via
+`chartSolutionHom_x/_y` vs HW `translateAlgHom_apply_x_gen`-family per case.
