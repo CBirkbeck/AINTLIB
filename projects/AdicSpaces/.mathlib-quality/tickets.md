@@ -97,7 +97,8 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 - **Status**: open · **Depends on**: T611, T612 (final per-file cleanup).
 
 ### [T615] B-AG1 design pass (PLANNING): the `⟨V⟩`-Milnor row + abstract transfer
-- **Status**: in_progress (2026-08-10 — AG1.d design LANDED: `MilnorSquareData` + `isSheafy_of_milnorSquare` skeleton elaborating in MilnorSheafTransfer.lean; remaining: AG1.a ⟨V⟩-row design + T618) · **Depends on**: T613 · **Type**: planning
+- **Status**: done (2026-08-10 — design COMPLETE; conclusion + execution tree recorded under "B-H execution tree" below: Route N normed-first, corner-square parametrization T623–T628, ring-level extended square discovered already-proven in StrictLoc at arity n)
+- **(was)**: in_progress (2026-08-10 — AG1.d design LANDED: `MilnorSquareData` + `isSheafy_of_milnorSquare` skeleton elaborating in MilnorSheafTransfer.lean; remaining: AG1.a ⟨V⟩-row design + T618) · **Depends on**: T613 · **Type**: planning
 - **Action**: run `/develop --decompose` scoped to B-AG1 (decomposition.md sub-tree
   AG1.a–d): design the abstract `lem:sheaf-transfer` statement (paper l.576–583 —
   [Reviewer] §4.1's criterion), audit the graph-Koszul stack's genericity over the
@@ -179,7 +180,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
   row_injective/row_glue/row_embedding, and `interOpen` facts).
 
 ### [T620] JetA-square MilnorSquareData instantiation (sub-ticket of T615, regression)
-- **Status**: open · **File**: new `Adic spaces/FJP/MilnorSquareInstance.lean` · **Parent**: T615 · **Type**: def + theorem
+- **Status**: done (2026-08-10, axiom-clean — `jetSquare` complete: pushes = classical-dite over `pushDatum*` with `jetPush*_eq` collapse lemmas; laws by groups: s/T/isRational via dif_pos, legs via `square_commutes`, opens via `mem_rationalOpen_pushDatum*_iff` comap chase, push/leg naturality via generic `presheafValueMapOfHom_restriction`, rows via subst-aux + graph bridges + `loc_row_exact` + `loc_pair_isEmbedding`, compat via pair-adapted `interDatum` factoring. Regression `isSheafy_JetA'` proven through `isSheafy_of_milnorSquare`. KEY REUSABLE PATTERN: free-datum subst-aux lemmas — state the law with the pushed datum as a free variable + an equation to `pushDatum*`, `subst`, then `show` the concrete `presheafValueMap*` form, which is defeq by proof irrelevance) · **File**: new `Adic spaces/FJP/MilnorSquareInstance.lean` · **Parent**: T615 · **Type**: def + theorem
 - **Plan**: assemble `jetSquare : MilnorSquareData (jB) (iotaC) (φD := legB ∘ jB) …` with
   pushes `fun D => if h : D.IsRational then pushDatumB D h else D-junk` (laws discharged
   with `dif_pos`); homs: `jB` (FiniteJetRings:326), `iotaC` (:320), `rhoC : JetC →+* JetD`
@@ -196,7 +197,110 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
   through it).
 
 ### [T616] B-H (MILESTONE): `finiteJet_tateExt_isSheafyComplete`
-- **Status**: blocked (T615 outcome) · **File**: `Adic spaces/FJP/StrongSheafy.lean:60`.
+- **Status**: blocked (T623–T628 below are its execution tree; discharged by T628) · **File**: `Adic spaces/FJP/StrongSheafy.lean:297`.
+
+---
+
+## B-H execution tree (T615 design conclusion, 2026-08-10)
+
+**Route N (normed-first)**: prove `IsSheafy (GraphKoszul.P (JetA F) n)` (the Gauss-normed
+radius-one restricted ring) via `isSheafy_of_milnorSquare` at the **normed extended square**
+`P(JetA)n → P(JetB)n, P(JetC)n → P(JetD)n` with homs `extJB/extIotaC/extRhoB/extRhoC F n`
+(StrictLoc :51–63), then transport to the headline's topological ring
+`↥(restrictedMvPowerSeriesSubring n (JetA F))` by a bicontinuous equiv + `isSheafyComplete`
+plumbing (campaign-A `tateExtEquiv` pattern).
+
+**Key discovery**: the ⟨V⟩-variables and the graph T-variables are the SAME construction —
+the ring-level extended square is ALREADY PROVEN in FiniteJetStrictLocalization at arity n:
+`ext_milnorRow_exact` (:120 — this IS AG1.a), `ext_square_commutes` (:73),
+`extRhoC_strict_surjective` (:88), `ext_pair_injective` (:179), `ext_max_norm_eq` (:166),
+`isNoetherianRing_unitBall_PB/PC/PD` (:293–303), 1-Lipschitz homs via
+`norm_mapRestricted_le`. What is missing is ONLY the rational-datum/bridge/loc layer for
+the extended square — i.e. prop:localized-milnor over abstract corners. Plan: parametrize
+that layer over a **corner-square package** (4 normed ultrametric complete corners + hom
+bundle + norm identities + milnor row + scale bundles + unitBall-noetherian at B/C/D),
+with the Jet square as regression instance and the P-square as the payoff instance.
+
+### [T623] Generic value-level square coherence + interDatum genericity
+- **Status**: open · **File**: `Adic spaces/PresheafFunctoriality.lean` (append) · **Type**: lemma
+- **Statement**: `presheafValueMapOfHom_square (φB : R →+* B) (φD : R →+* D)
+  (ψ : B →+* D) (hcomm : ψ.comp φB = φD) …
+  (hψ : Continuous ψ) … : presheafValueMapOfHom ψ hψ (pushB) (pushD) … ∘
+  presheafValueMapOfHom φB … = presheafValueMapOfHom φD …` — the dense-equalizer
+  D-coherence proven ONCE generically (pattern: `mapBD_mapB_eq_mapCD_mapC`,
+  FiniteJetFunctoriality:1695 — IsLocalization.ringHom_ext on powers + canonicalMap
+  computation + DenseRange.equalizer). Corollary: the two-leg form used by `row_comm`.
+  ALSO: audit `interDatum` (FiniteJetFunctoriality:2326) — if JetA-fixed, generalize to
+  any ring with the needed instances (proof is ring-generic) into PresheafFunctoriality,
+  with `rationalOpen_interDatum` + `interDatum_isRational`.
+- **Sources**: [FJP] (4.9); the concrete proof at FiniteJetFunctoriality:1695.
+
+### [T624] Corner-square datum layer (parametrized pushDatum + open iffs)
+- **Status**: open · **File**: new `Adic spaces/CornerSquareDatum.lean` · **Depends on**: T623 · **Type**: def + lemmas
+- **Statement**: over `(A B : Type*)` normed-ultrametric Huber with a 1-Lipschitz
+  continuous `φ : A →+* B` and openness transport, define `pushDatumOfHom D hD`
+  (s := φ D.s, T := D.T.image φ; rationality via `span_image_eq_top`), prove
+  `pushDatumOfHom_isRational` and `mem_rationalOpen_pushDatumOfHom_iff` (comap
+  characterization; pattern FiniteJetFunctoriality:2146 — uses `comap_mem_spa` +
+  `plus_le_comap_of_norm_le`), and `pushDatumOfHom_interOpen` (pattern
+  FiniteJetSheafTransfer:147). The Jet pushes become instances (regression check only,
+  no rewiring of the concrete files).
+- **Sources**: [FJP] Lemma 5.1/5.2 datum layer; concrete patterns cited above.
+
+### [T625] Corner-square strict localization + bridges (THE core)
+- **Status**: open · **File**: new `Adic spaces/CornerSquareLocalization.lean` (+ a second file if >2500 lines) · **Depends on**: T624 · **Type**: theorem stack
+- **Statement**: parametrize FiniteJetStrictLocalization's rational-datum layer +
+  FiniteJetFunctoriality's bridge layer over the corner-square package: for a rational
+  datum enum `e` on the base corner `A` (span ({g} ∪ range f) = ⊤), the graph quotients
+  `locA/locB/locC/locD`, `loc_square_commutes`, `loc_pair_injective`, `loc_row_exact`,
+  `loc_pair_isEmbedding`, `locRhoC_surjective/openMap`, `locA_t2/completeSpace`; then the
+  completion bridges `graphBridge` (`presheafValue D ≃+* locA`, continuous both ways),
+  `bridgeFwdB/C/D` + injectivity + continuity, naturality squares
+  (`graphBridge_natural_B/C`, `locRhoB_bridgeFwdB`, `locRhoC_bridgeFwdC`), and
+  `pairMapBC_injective`. Inputs consumed from the package: Koszul stack at the corners
+  (already generic: `syzygy_graph_restricted` over normed E + scale + unitBall-noeth),
+  the ring-level row, `ext`-style coefficientwise lemmas re-proven over the package
+  (they are `mapRestricted` transports — the StrictLoc arity-n forms are the P-instance
+  witnesses that the statements are right).
+- **Approach**: transcription-with-generalization of the two concrete files; keep decl
+  names with a `CornerSquare.` namespace; the concrete Jet versions stay untouched
+  (dedup ticket after the campaign retires them or rewires them as instances).
+- **Sources**: [FJP] §4 (Lemmas 4.1/4.3/4.4, Prop 4.5) + §5 bridges — the paper states
+  them over corners `E`; the concrete files are the transcription at Jet corners.
+
+### [T626] Extended-square corner package assembly
+- **Status**: open · **Depends on**: T625 (package shape frozen) · **Type**: instance bundle
+- **Statement**: instantiate the corner-square package at
+  `(P (JetA F) n, P (JetB F) n, P (JetC F) n, P (JetD F) n; extJB/extIotaC/extRhoB/extRhoC)`:
+  all fields from existing StrictLoc arity-n lemmas (list in the tree header above) +
+  scale bundles `t := const ϖ` (Gauss `hscale` from the vendored stack) + Tate/Huber/
+  PlusSubring/T2/Nonarch/Complete instance stack on the P-corners (mirror how JetB/C/D
+  got theirs — locate the generic normed→Huber path in FiniteJetRings/UniformDomain).
+- **Sources**: [Reviewer] §5.1; StrictLoc §ext.
+
+### [T627] Extended MilnorSquareData instance + `IsSheafy (P (JetA F) n)`
+- **Status**: open · **Depends on**: T623, T624, T625, T626 · **Type**: def + theorem
+- **Statement**: `extJetSquare n : MilnorSquareData (extJB F n) (extIotaC F n)
+  ((extRhoC F n).comp (extIotaC F n)) …` — T620's file is the template line-by-line
+  (dite pushes + collapse lemmas + subst-aux layer + generic naturality); rows from
+  T625's bridges; vertex sheafiness from `isSheafy_of_stronglyNoetherian_828b` at the
+  P-corners (strongly noetherian: unitBall-noeth + Fubini `restrictedFubini`, or
+  directly `mvTate_isStronglyNoetherian` transported along the normed↔topological
+  bridge — pick in-flight). Conclusion `isSheafy_extJetA n : IsSheafy (P (JetA F) n)`.
+- **Sources**: T620 (template); [WP-paper] lem:sheaf-transfer instantiation.
+
+### [T628] Normed↔topological bridge + B-H endgame (discharges T616)
+- **Status**: open · **Depends on**: T627 · **Type**: theorem
+- **Statement**: (i) `restrictedGaussTateEquiv n : P (JetA F) n ≃+*
+  ↥(restrictedMvPowerSeriesSubring n (JetA F))`, bicontinuous (underlying sets: both are
+  coefficients→0, JetA's topology is its norm topology; topologies: Gauss balls vs
+  `mvTateAlgNhd` via `mvTateAlgNhd_of_coeff_mem_principal`/`mvTateAlgNhd_coeff_mem` —
+  the T617-leg combinatorics); (ii) `IsSheafyComplete` endgame: from
+  `isSheafy_extJetA` get `IsSheafyFor` at the canonical pair
+  (`isLimitSheaf_of_isSheafy`), transport along (i) (`isSheafyComplete_congr` /
+  `isSheafyFor` congr as in T602), upgrade by `isSheafyFor_iff_isSheafyComplete`.
+  Fill `finiteJet_tateExt_isSheafyComplete` (StrongSheafy.lean:297). Then T616 → done.
+- **Sources**: campaign-A endgame (WP/StrongSheafy.lean) — the identical plumbing.
 
 ### [CLEANUP-612] /cleanup `Adic spaces/FJP/StrongSheafy.lean`
 - **Status**: open · **Depends on**: T616.
