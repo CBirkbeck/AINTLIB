@@ -1,5 +1,6 @@
 import ModularCurves.ForMathlib.FiniteEtaleFundamentalGroup
 import ModularCurves.WeilPairing.Basic
+import ModularCurves.WeilPairing.CurveNaturality
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Coarse
 import ModularCurves.Moduli.GammaHMaster
@@ -2467,6 +2468,131 @@ theorem pointToTorsion_mapPoint {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B
           (EllHom.mapPoint_torsion g x hx) ≫ B.curve.torsionπ N
     rw [Category.assoc, torsionMapOfEllHom_π g N, ← Category.assoc,
       A.curve.pointToTorsion_torsionπ, B.curve.pointToTorsion_torsionπ]
+
+/-- [YR-1c] The torsion-square comparison map composes with the `B`-side universal
+structure to the `A`-side universal structure pushed along the base. -/
+theorem torsionSquareMap_comp_univStructure {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (N : ℕ) [NeZero N] :
+    pullback.map (A.curve.torsionπ N) (A.curve.torsionπ N)
+        (B.curve.torsionπ N) (B.curve.torsionπ N)
+        (torsionMapOfEllHom g N) (torsionMapOfEllHom g N) g.baseHom
+        (torsionMapOfEllHom_π g N).symm (torsionMapOfEllHom_π g N).symm ≫
+      (pullback.fst (B.curve.torsionπ N) (B.curve.torsionπ N) ≫ B.curve.torsionπ N) =
+    (pullback.fst (A.curve.torsionπ N) (A.curve.torsionπ N) ≫ A.curve.torsionπ N) ≫
+      g.baseHom := by
+  rw [← Category.assoc, pullback.lift_fst, Category.assoc, torsionMapOfEllHom_π,
+    ← Category.assoc]
+
+/-- [YR-1c] `weilPairingKM` congruence in the two point slots (the torsion proofs are
+propositional). -/
+theorem weilPairingKM_congr_points {S : Scheme.{0}} (E : EllipticCurve S)
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π] {T : Scheme.{0}} (t : T ⟶ S)
+    (N : ℕ) {P P' Q Q' : (E.baseChange t).Point (𝟙 T)} (hPP : P = P') (hQQ : Q = Q')
+    (hP : P ∈ torsionPoints E t N) (hQ : Q ∈ torsionPoints E t N) :
+    weilPairingKM E hsm t N P hP Q hQ =
+      weilPairingKM E hsm t N P' (hPP ▸ hP) Q' (hQQ ▸ hQ) := by
+  subst hPP; subst hQQ; rfl
+
+/-- [YR-1c] The first leg of a restricted section: pure composition algebra from
+`restrictBase_comp_baseChangeMap` and `baseChangeMap_fst`. -/
+theorem restrictBase_val_fst {S : Scheme.{0}} (E : EllipticCurve S) {T T' : Scheme.{0}}
+    (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t')
+    (P : (E.baseChange t).Point (𝟙 T)) :
+    ((restrictBase E t g hg P).1 : T' ⟶ pullback E.π t') ≫ pullback.fst E.π t' =
+      g ≫ ((P.1 : T ⟶ pullback E.π t) ≫ pullback.fst E.π t) := by
+  rw [← baseChangeMap_fst E t g hg, ← Category.assoc,
+    restrictBase_comp_baseChangeMap E t g hg P, Category.assoc]
+
+/-- [YR-1c] The first leg of the first tautological point. -/
+theorem univTorsionFst_val_fst {S : Scheme.{0}} (E : EllipticCurve S) (N : ℕ) [NeZero N] :
+    ((univTorsionFst E N).1 : _ ⟶ pullback E.π _) ≫
+        pullback.fst E.π (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) =
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N :=
+  pullback.lift_fst _ _ _
+
+/-- [YR-1c] The first leg of the second tautological point. -/
+theorem univTorsionSnd_val_fst {S : Scheme.{0}} (E : EllipticCurve S) (N : ℕ) [NeZero N] :
+    ((univTorsionSnd E N).1 : _ ⟶ pullback E.π _) ≫
+        pullback.fst E.π (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) =
+      pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N :=
+  pullback.lift_fst _ _ _
+
+/-- [YR-1c] The `pmap`-restricted `B`-side tautological point is the pasting-pushed
+`A`-side tautological point (first slot). -/
+theorem restrictBase_univTorsionFst_eq_pushSection {A B : EllObj (CommRingCat.of ℚ)}
+    (g : A ⟶ B) (N : ℕ) [NeZero N] :
+    restrictBase B.curve
+        (pullback.fst (B.curve.torsionπ N) (B.curve.torsionπ N) ≫ B.curve.torsionπ N)
+        (pullback.map (A.curve.torsionπ N) (A.curve.torsionπ N)
+          (B.curve.torsionπ N) (B.curve.torsionπ N)
+          (torsionMapOfEllHom g N) (torsionMapOfEllHom g N) g.baseHom
+          (torsionMapOfEllHom_π g N).symm (torsionMapOfEllHom_π g N).symm)
+        (torsionSquareMap_comp_univStructure g N) (univTorsionFst B.curve N) =
+      pushSection g
+        (pullback.fst (A.curve.torsionπ N) (A.curve.torsionπ N) ≫ A.curve.torsionπ N)
+        (univTorsionFst A.curve N) := by
+  refine Subtype.ext ?_
+  refine pullback.hom_ext ?_ ?_
+  · refine (restrictBase_val_fst B.curve _ _ (torsionSquareMap_comp_univStructure g N)
+      (univTorsionFst B.curve N)).trans ?_
+    refine (congrArg (pullback.map (A.curve.torsionπ N) (A.curve.torsionπ N)
+        (B.curve.torsionπ N) (B.curve.torsionπ N)
+        (torsionMapOfEllHom g N) (torsionMapOfEllHom g N) g.baseHom
+        (torsionMapOfEllHom_π g N).symm (torsionMapOfEllHom_π g N).symm ≫ ·)
+      (univTorsionFst_val_fst B.curve N)).trans ?_
+    refine (Category.assoc _ _ _).symm.trans ?_
+    refine (congrArg (· ≫ B.curve.torsionι N) (pullback.lift_fst _ _ _)).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (_ ≫ ·) (torsionMapOfEllHom_ι g N)).trans ?_
+    refine Eq.trans ?_ (congrArg (· ≫ pullback.fst B.curve.π _)
+      (pushSection_coe g _ (univTorsionFst A.curve N)).symm)
+    refine Eq.trans ?_ (Category.assoc _ _ _).symm
+    refine Eq.trans ?_ (congrArg ((univTorsionFst A.curve N).1 ≫ ·)
+      (pastingMap_fst g _).symm)
+    refine Eq.trans ?_ (Category.assoc _ _ _)
+    refine Eq.trans ?_ (congrArg (· ≫ g.top) (univTorsionFst_val_fst A.curve N).symm)
+    exact (Category.assoc _ _ _).symm
+  · exact ((restrictBase B.curve _ _ (torsionSquareMap_comp_univStructure g N)
+      (univTorsionFst B.curve N)).2).trans
+      (((pushSection g _ (univTorsionFst A.curve N)).2).symm)
+
+/-- [YR-1c] Second slot. -/
+theorem restrictBase_univTorsionSnd_eq_pushSection {A B : EllObj (CommRingCat.of ℚ)}
+    (g : A ⟶ B) (N : ℕ) [NeZero N] :
+    restrictBase B.curve
+        (pullback.fst (B.curve.torsionπ N) (B.curve.torsionπ N) ≫ B.curve.torsionπ N)
+        (pullback.map (A.curve.torsionπ N) (A.curve.torsionπ N)
+          (B.curve.torsionπ N) (B.curve.torsionπ N)
+          (torsionMapOfEllHom g N) (torsionMapOfEllHom g N) g.baseHom
+          (torsionMapOfEllHom_π g N).symm (torsionMapOfEllHom_π g N).symm)
+        (torsionSquareMap_comp_univStructure g N) (univTorsionSnd B.curve N) =
+      pushSection g
+        (pullback.fst (A.curve.torsionπ N) (A.curve.torsionπ N) ≫ A.curve.torsionπ N)
+        (univTorsionSnd A.curve N) := by
+  refine Subtype.ext ?_
+  refine pullback.hom_ext ?_ ?_
+  · refine (restrictBase_val_fst B.curve _ _ (torsionSquareMap_comp_univStructure g N)
+      (univTorsionSnd B.curve N)).trans ?_
+    refine (congrArg (pullback.map (A.curve.torsionπ N) (A.curve.torsionπ N)
+        (B.curve.torsionπ N) (B.curve.torsionπ N)
+        (torsionMapOfEllHom g N) (torsionMapOfEllHom g N) g.baseHom
+        (torsionMapOfEllHom_π g N).symm (torsionMapOfEllHom_π g N).symm ≫ ·)
+      (univTorsionSnd_val_fst B.curve N)).trans ?_
+    refine (Category.assoc _ _ _).symm.trans ?_
+    refine (congrArg (· ≫ B.curve.torsionι N) (pullback.lift_snd _ _ _)).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (_ ≫ ·) (torsionMapOfEllHom_ι g N)).trans ?_
+    refine Eq.trans ?_ (congrArg (· ≫ pullback.fst B.curve.π _)
+      (pushSection_coe g _ (univTorsionSnd A.curve N)).symm)
+    refine Eq.trans ?_ (Category.assoc _ _ _).symm
+    refine Eq.trans ?_ (congrArg ((univTorsionSnd A.curve N).1 ≫ ·)
+      (pastingMap_fst g _).symm)
+    refine Eq.trans ?_ (Category.assoc _ _ _)
+    refine Eq.trans ?_ (congrArg (· ≫ g.top) (univTorsionSnd_val_fst A.curve N).symm)
+    exact (Category.assoc _ _ _).symm
+  · exact ((restrictBase B.curve _ _ (torsionSquareMap_comp_univStructure g N)
+      (univTorsionSnd B.curve N)).2).trans
+      (((pushSection g _ (univTorsionSnd A.curve N)).2).symm)
 
 /-- **(T-C1c, DS4 REGISTER SPEC: compatibility with base change of the CURVE)** The
 Weil pairing commutes with the cartesian torsion square of an `Ell/ℚ`-morphism: pushing a
