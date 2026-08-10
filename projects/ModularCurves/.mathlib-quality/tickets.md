@@ -41529,3 +41529,32 @@ mathlib's Over-cartesian instance). Then pulled-x-SpecPoint = extendSpecPoint p 
 Subtype.ext, g1-naturality applies, hP' rewrites, and the toAlgHom/ofId-coe aligns
 (both = algebraMap-underlying). g2 then closes; g3 (hτV via the chart-form/readback or
 directly from hg2 + inZChart-transfer) next.
+
+## 2026-08-10 (cont.) — U5c-2 COMPLETE, AXIOM-CLEAN
+
+**`functionFieldMap_translateBy` (FieldComparisonBridge.lean) PROVEN end-to-end** — the
+translation bridge, the largest missing API of the U5 field leaf. `#print axioms` =
+standard three. File has 0 sorries.
+
+- g4 (hx) + g5 (hy): via `generic_add_cast_bundle` (ONE case split on P′ consumed by both
+  generator anchors: dict some-form + `translateAlgEquivOfPoint` values), readback
+  `eq_chartSpecPoint_of_projModelPointsEquiv_some`, brick6-mirror tail
+  (`chartSpecPoint_appLE_eval` + `chartZRingEquiv_x/_y` + `chartSolutionHom_x/_y`), and the
+  defeq-collapses `algebraMap CR FF (coordX/coordY) = x_gen/y_gen`.
+- `basePointCast` (structural-recursion cast, rfl value lemmas) replaced the `▸`-interface —
+  kills all Eq.rec motive fights. `baseChange_self_eq`, `nonsingular_of_baseChange_self`
+  shipped alongside.
+- **POSTMORTEM (reusable, CRITICAL)**: a type-incorrect `show L f = R f` (raw polynomial fed
+  to a CoordinateRing hom) was SILENTLY recovered as `sorryAx` — zero error lines, zero
+  literal `sorry`, build green; `grep sorry` finds nothing. Tells: `#print axioms` shows
+  sorryAx with the decl itself as the only carrier; linter warnings "'induction …' tactic
+  does nothing / is never executed" + "Variable `hxp` is not explicitly referenced". Localise
+  by walking the proof term for `sorryAx` apps (run_cmd Expr-walk printing binder paths +
+  `sorryAx`'s first arg = the admitted Prop). ALWAYS check the unreachableTactic/unusedTactic
+  warnings after a "green" build of a big proof.
+- Also: bare `rw [map_mul]` grabbed `Polynomial.C`'s map_mul before the intended hom — pin
+  the head (`map_mul (AdjoinRoot.mk _)`, `map_mul L`).
+
+**U5 subcut remaining**: U5a (κ-bundle/divisor dictionary), U5b (glued rational function),
+U5d (scalar uniqueness vs `weilPairing_spec`), U5e (import `weilPairing_self` + K̄-descent).
+Next: U5d/U5a per the decomposition — the bridge now feeds the characterisation-matching.
