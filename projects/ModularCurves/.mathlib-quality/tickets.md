@@ -41446,3 +41446,17 @@ Remaining glue: record-Point-add ↔ mulModelHom-composite — the SMUL-version 
 wiring is inside `genericSpecPoint_comp_mulByHom`'s proof (MulByHomDegree:930–975,
 "the dictionary value of n • τ") — mirror it for add. piece (i) DONE
 (`genericSpecPoint_comp_translateBy` + `genericModelPoint`, commit 0ccfd88c9).
+
+
+### THE hx/hy TEMPLATE (2026-08-10, session 3 latest+8)
+
+**`brick6_intertwining` (MulByHomDegree:1146–~1349) IS the fully-proven [N]-version of
+U5c-2**: `projFF (ffMap-[N] z) = mulByInt_pullbackAlgHom (projFF z)` — with the
+"three generator leaves (FFM-X/Y/C)" structure = exactly my hK(✓)/hx/hy. The hx/hy
+assembly = transcribe brick6's generator-leaf proofs with: `genericSpecPoint_comp_mulByHom`
+→ `genericSpecPoint_comp_translateBy` (✓ proven, piece i), `mulByInt_pullbackAlgHom_x_gen`
+→ `translateAlgEquivOfPoint_*_x_gen` (HW, exist), the same
+`projModelFunctionFieldEquiv_germ_eval` (:1066) + `functionFieldMap_germToFunctionField`
+germ-plumbing. Also landed this cycle: `projModelFunctionFieldEquiv_symm_algebraMap`
+(the R-side entry, general elements, commit 3672efc57).
+NEXT: read brick6's x-generator leaf in full (:1180–~1250) and transcribe for τ.
