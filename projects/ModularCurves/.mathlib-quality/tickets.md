@@ -39333,9 +39333,17 @@ is built on (c); T-C4 = (a)↔(c). Verified substrate for (a)↔(c):
   `isIntegral_projModel_u`; HasseWeil imports on this branch are
   `HasseWeil.HasseBound.*`/`HasseWeil.Foundation.*`. Status: (ii) done, (i) glue as
   consumed. NEXT: U5c-2 (the translation bridge through this equiv).
-- [U5c-2] translation bridge: `functionFieldMap (model-translateByPoint P) =`
-  `translateAlgEquivOfPoint (P-as-W-point)` transported along U5c-1(ii). Uses:
-  translations are dominant (isos); mathlib FractionRing-lift uniqueness. Status: open.
+- [U5c-2] translation bridge. **STATED (2026-08-10, elaborates, 1 sorry)** in
+  `FieldComparisonBridge.lean` (`functionFieldMap_translateBy`, τ-quantified against the
+  asOver-clothing). CRITICAL REUSE FOUND: `projModelFunctionFieldEquiv` ALREADY EXISTED
+  (`MulByHomDegree.lean:85`, K4(B)) — my duplicate deleted (name-clash caught it); that
+  file's L4-iii machinery (`functionFieldMap [N] = mulByInt_pullbackAlgHom` mod the equiv,
+  `functionFieldMap_germToFunctionField` on chart coordinates,
+  `mulByInt_pullbackAlgHom_x_gen`) is THE PRECEDENT to mirror for the proof. Also proved:
+  `functionFieldSelfBaseChangeEquiv` (the self-baseChange collapse, rw+refl-sealed).
+  NEXT: prove U5c-2 by mirroring the L4-iii comparison's proof structure (read
+  MulByHomDegree's L4-iii proof first), computing both sides on the x,y-generators via
+  the KE-valued specPoints machinery + HasseWeil's slope formulas. Status: stated.
 - [U5a] κ-bundle ↔ O(D_T − D_0) + the rational-section dictionary over K̄. Status: open.
 - [U5b] the glued rational function `g_i = h_i · [N]^# r_i`, divisor `[N]^*(D_T − D_0)`;
   convention-check on ONE overlap FIRST. Status: open.
