@@ -41435,3 +41435,14 @@ x-coordinate = HW slope formulas [mathlib Point.add match against
 translateAlgEquivOfPoint_add_*_x_gen]; (4) germ-reading into the function field
 [piece-(iii): the h1/h2-pattern proven in hinv + functionFieldMap_germToFunctionField].
 Write `genericSpecPoint_comp_translateBy` mirroring MulByHomDegree:917's proof, then hx.
+
+
+### hx piece (ii) interface pinned (2026-08-10, session 3 latest+7)
+
+`mulModelHom_specPoints_of_map` (AdditionSpecPoints:1679): for `𝕌.map f`-curves,
+dictionary(mulModelHom-composite of P,Q) = dictionary(P) + dictionary(Q); `_of_eq`
+(:1758) is the given-W-with-eq form (use with `universalWeierstrassLocU_map_classifyRingHomU`).
+Remaining glue: record-Point-add ↔ mulModelHom-composite — the SMUL-version of this
+wiring is inside `genericSpecPoint_comp_mulByHom`'s proof (MulByHomDegree:930–975,
+"the dictionary value of n • τ") — mirror it for add. piece (i) DONE
+(`genericSpecPoint_comp_translateBy` + `genericModelPoint`, commit 0ccfd88c9).
