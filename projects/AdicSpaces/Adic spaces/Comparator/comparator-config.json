@@ -1,0 +1,17 @@
+{
+    "challenge_module": "«Adic spaces».Comparator.Challenge",
+    "solution_module": "«Adic spaces».Comparator.Solution",
+    "theorem_names": [
+        "fjp_1_3_isSheafy",
+        "fjp_1_3_isUniform",
+        "fjp_1_3_isDomain",
+        "fjp_1_3_not_isNoetherianRing",
+        "fjp_1_3_not_isStablyUniform"
+    ],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ],
+    "enable_nanoda": false
+}
