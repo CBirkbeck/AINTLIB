@@ -210,7 +210,15 @@ theorem coordRingToZSection_algebraMap (a : K) :
               HomogeneousLocalization.Away
                 (MvPolynomial.homogeneousSubmodule (Fin 3) K) (MvPolynomial.X 2))
             ((algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K)) a)) := by
-      sorry
+      have h0 : (algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K ⧸
+            Ideal.span {(MvPolynomial.dehomogenizeAux K 2) W.toProjective.polynomial})) a
+          = Ideal.Quotient.mk _ ((algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K)) a) :=
+        rfl
+      rw [h0]
+      simp only [chartCoordEquiv, chartQuotientEquiv, RingEquiv.trans_apply,
+        Ideal.quotientEquiv_symm_mk,
+        Ideal.quotEquivOfEq_mk, RingHom.quotientKerEquivOfSurjective_apply_mk]
+      rfl
     exact hchase.trans (hcomp.symm.trans (by rfl))
   refine Eq.trans (congrArg (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
