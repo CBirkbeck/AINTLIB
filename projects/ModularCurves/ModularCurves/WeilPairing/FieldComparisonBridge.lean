@@ -131,6 +131,26 @@ theorem genericSpecPoint_comp_translateBy
   congrArg Subtype.val (pointMapOfHom_translateBy (E := modelEllipticCurve W) x
     (genericModelPoint W))
 
+/-- **(g1 def)** Extension of a `K`-valued SpecPoint to a `K(E)`-valued one along the
+field embedding (precomposition with `Spec.map (algebraMap K K(E))`). -/
+noncomputable def extendSpecPoint (p : SpecPoints (projModel W) (projModelπ W) K) :
+    SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField :=
+  ⟨Spec.map (CommRingCat.ofHom (algebraMap K W.toAffine.FunctionField)) ≫ p.1, by
+    rw [Category.assoc, p.2, ← Spec.map_comp]
+    rfl⟩
+
+/-- **(g1 naturality — the field-extension dictionary compatibility)** The dictionary of
+the extended point is `Point.map` along the embedding of the dictionary of the original
+(mirror of `projModelPointsEquiv_specMapCompPoint` with the automorphism replaced by the
+embedding). -/
+theorem projModelPointsEquiv_extendSpecPoint
+    (p : SpecPoints (projModel W) (projModelπ W) K) :
+    projModelPointsEquiv W W.toAffine.FunctionField (extendSpecPoint W p)
+      = WeierstrassCurve.Affine.Point.map
+          (Algebra.ofId K W.toAffine.FunctionField)
+          (projModelPointsEquiv W K p) := by
+  sorry
+
 /- **(hx piece (ii) — INLINE AT USE)**: the dictionary-read of the sum is the two-rewrite
 composite `projModelPointsEquiv_add` (MulByHomDegree:54) then
 `projModelPointsEquiv_genericSpecPoint` (:780). A standalone statement fights the
