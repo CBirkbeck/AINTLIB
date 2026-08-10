@@ -163,6 +163,21 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
     maps; CHECK IsSheafy.gluing's exact compat shape before writing), glue, compare,
     row_glue at base, recover per-piece via row_injective + push_natural.
 
+### [T619] Rationality-gate the MilnorSquareData fields (sub-ticket of T615)
+- **Status**: open · **File**: `Adic spaces/MilnorSheafTransfer.lean` · **Parent**: T615 · **Type**: refactor
+- **Reason (instantiation-driven design correction)**: the concrete pushes are
+  rationality-gated (`pushDatumB (D) (hD : D.IsRational)`, FiniteJetFunctoriality:93),
+  and e.g. mono/cover for non-rational junk data is unprovable — so `pushB` must be
+  `(U : RationalLocData R) → U.IsRational → RationalLocData B` and every field gains
+  the `IsRational` arguments. Mechanical rethread: structure fields, pushCovering
+  constructors (take `hC₀`, image over `covers.attach` with `hC₀.piece`), cast helpers
+  unchanged, and the proven chase's ~40 use-sites (rationality always available from
+  `hC₀`). THEN the JetA instantiation proceeds field-by-field
+  (pushDatumB_isRational:120, mem_rationalOpen_pushDatumB_iff:2146 for mono/cover,
+  presheafValueMapB + _restriction for the value maps and naturality, pushedCompatB/C
+  for the compat transports, the localized-Milnor row lemmas for
+  row_injective/row_glue/row_embedding, and `interOpen` facts).
+
 ### [T616] B-H (MILESTONE): `finiteJet_tateExt_isSheafyComplete`
 - **Status**: blocked (T615 outcome) · **File**: `Adic spaces/FJP/StrongSheafy.lean:60`.
 
