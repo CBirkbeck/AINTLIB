@@ -8,6 +8,7 @@ import ModularCurves.EllipticCurve.ModelVariableChange
 import ModularCurves.EllipticCurve.MulByHomDegree
 import ModularCurves.ForMathlib.DominantFunctionField
 import ModularCurves.GroupScheme.TranslationBySection
+import ModularCurves.LevelStructure.Factorization
 import HasseWeil.HasseBound.WeilPairing.PairingProps
 
 /-!
@@ -108,6 +109,28 @@ built from mathlib `WeierstrassCurve.Affine.CoordinateRing.map (RingHom.id K)`-f
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- The tautological `K(E)`-point, in the record's `Point`-group over
+`Spec.map (algebraMap K K(E))` (definitional repackaging of `genericSpecPoint`). -/
+noncomputable def genericModelPoint : (modelEllipticCurve W).Point
+    (Spec.map (CommRingCat.ofHom (algebraMap K W.toAffine.FunctionField))) :=
+  genericSpecPoint W
+
+/-- **(hx piece (i))** Composing the tautological `K(E)`-point with translation-by-`x`
+is the Point-group sum with the pulled section — the val-level form of
+`pointMapOfHom_translateBy`. -/
+theorem genericSpecPoint_comp_translateBy
+    (x : 𝟙_ (Over (Spec (CommRingCat.of K))) ⟶ (modelEllipticCurve W).asOver) :
+    (genericSpecPoint W).1 ≫ ((modelEllipticCurve W).translateBy x).left
+      = (genericModelPoint W +
+          ((modelEllipticCurve W).pointEquivOverHom
+              (Spec.map (CommRingCat.ofHom
+                (algebraMap K W.toAffine.FunctionField)))).symm
+            (CategoryTheory.CartesianMonoidalCategory.toUnit
+              (CategoryTheory.Over.mk (Spec.map (CommRingCat.ofHom
+                (algebraMap K W.toAffine.FunctionField)))) ≫ x)).1 :=
+  congrArg Subtype.val (pointMapOfHom_translateBy (E := modelEllipticCurve W) x
+    (genericModelPoint W))
+
 /-- **(U5c-2 sub-brick — the chart-constants identification)** The chart identification
 `coordRingToZSection` carries the `K`-constant of the coordinate ring to the restriction
 of the structure-pulled global constant. The `chartZAffineEquiv`-leg is an `≃ₐ[K]`
