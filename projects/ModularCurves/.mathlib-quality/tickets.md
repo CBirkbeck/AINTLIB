@@ -41372,3 +41372,19 @@ slope-formula computations (τ-side via KE-valued specPoints vs HasseWeil's
   translation action). This is the bridge's true content; needs its own decomposition
   pass over the AdditionSpecPoints interface (grep: how translateByPoint's app acts on
   chart coordinates — the `translateBy`-Γ-action lemmas if any).
+
+
+### hx R-side architecture (2026-08-10, session 3 latest+3)
+
+Inventory: `pointMapOfHom_translateBy` (LevelStructure/Factorization:697 — translateBy's
+action on points via pointMapOfHom); `mulModelHom_specPoints_atlas/of_map/of_eq`
+(AdditionSpecPoints:1431/1679/1758 — the multiplication morphism's K-points action at a
+general field); `genericSpecPoint` + `genericSpecPoint_comp_mulByHom`
+(MulByHomDegree:917 — THE generic point as a KE-valued SpecPoint with composition
+machinery — piece (iii)'s substrate exists!).
+**hx R-side = three pieces**: (i) τ on KE-SpecPoints = translation by P₀ (translateBy =
+mulOver with the constant section; specPoints-machinery + points dictionary);
+(ii) the coordinates of (generic + P₀) = the slope formulas (projModelPointsEquiv_some +
+mathlib affine addition — matching HasseWeil's translateAlgEquiv case-split);
+(iii) function-field values = coordinate values at `genericSpecPoint` (the
+germ/section-to-point glue; `genericSpecPoint_comp_mulByHom` is the [n]-exemplar).
