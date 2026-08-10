@@ -160,7 +160,46 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
   intro c
   induction c using AdjoinRoot.induction_on with
   | _ f => ?_
-  sorry
+  -- three anchors: the K-constants, the x-generator, the y-generator (the root)
+  set L := ((functionFieldSelfBaseChangeEquiv W).symm.toRingHom.comp
+    ((HasseWeil.translateAlgEquivOfPoint (W.baseChange K) P').toRingEquiv.toRingHom.comp
+      (functionFieldSelfBaseChangeEquiv W).toRingHom)).comp
+    (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) with hL
+  set R := ((projModelFunctionFieldEquiv W).toRingHom.comp
+    ((CommRingCat.Hom.hom (Scheme.Hom.functionFieldMap τ)).comp
+      (projModelFunctionFieldEquiv W).symm.toRingHom)).comp
+    (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) with hR
+  have hK : ∀ a : K, L ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C (Polynomial.C a)))
+      = R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C (Polynomial.C a))) := by
+    sorry
+  have hx : L ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X))
+      = R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X)) := by
+    sorry
+  have hy : L ((AdjoinRoot.mk W.toAffine.polynomial) Polynomial.X)
+      = R ((AdjoinRoot.mk W.toAffine.polynomial) Polynomial.X) := by
+    sorry
+  show L f = R f
+  induction f using Polynomial.induction_on with
+  | C q =>
+      induction q using Polynomial.induction_on with
+      | C a => exact hK a
+      | add p₁ q₁ h₁ h₂ =>
+          simpa only [map_add] using congrArg₂ (· + ·) h₁ h₂
+      | monomial n a ih =>
+          have h1 : (Polynomial.C (Polynomial.C a * Polynomial.X ^ (n + 1)) :
+              Polynomial (Polynomial K)) =
+              Polynomial.C (Polynomial.C a * Polynomial.X ^ n) *
+                Polynomial.C Polynomial.X := by
+            rw [← Polynomial.C_mul, mul_assoc, pow_succ]
+          rw [h1, map_mul, map_mul, map_mul, ih, hx]
+  | add p q hp hq =>
+      simpa only [map_add] using congrArg₂ (· + ·) hp hq
+  | monomial n a ih =>
+      have h1 : (Polynomial.C a * Polynomial.X ^ (n + 1) :
+          Polynomial (Polynomial K)) =
+          Polynomial.C a * Polynomial.X ^ n * Polynomial.X := by
+        rw [mul_assoc, pow_succ]
+      rw [h1, map_mul, map_mul, map_mul, ih, hy]
 
 end Bridge
 
