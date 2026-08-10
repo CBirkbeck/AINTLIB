@@ -39066,11 +39066,28 @@ in the plan's "Known traps".
     (`_self`) needs E4a (Oda-alternation) + E6 + E4c (fppf-locality: `[2]` finite flat
     surjective + faithfully-flat `Γ(𝒪ˣ)`-injectivity + the value's base-change law, which we
     have); E5 (`_nondegenerate`) needs 2.8.2.1 Cartier–Nishi (also [Oda]).
-  - **Next planning step**: a /develop pass for the `⟨,⟩_π`-generalisation of
-    `torsionSplittingEval` (replace `mulByN` by an arbitrary isogeny with a chosen
-    `πᵗ`-datum; the splitting/uniqueness/patching engines are already morphism-generic),
-    then 2.8.4.1 by the "line bundle on E₂" interpretation, then the register `_mul`. E4a
-    and E5 bottom out in biextension theory (Oda/Mumford) — genuinely the deepest strand.
+  - **Next planning step — REFINED 2026-08-10 (the general-π note above over-scoped E6;
+    "boarded routes over-engineered" strikes again)**: the register `_mul` and the
+    Notes-argument need 2.8.4.1 ONLY at `π₁ = [N], π₂ = [M]` — every isogeny involved is a
+    self-dual `mulByN`, so **no `⟨,⟩_π`/dual-isogeny machinery is required**. Inventory:
+    the tree has NO `πᵗ` representation (NIsogeny.lean is divisor-generator machinery), and
+    none is needed for E6. Two-leaf cut: (E6-1, FREE) `e_{NM}(P,Q)^M = e_{NM}(M•P, Q)` is
+    the already-proved power law `weilPairingEval_zsmul_left` at level `NM`; (E6-CORE, the
+    one new theorem) `e_{NM}(M•P, Q) = e_N(M•P, M•Q)` for `P₀ := M•P ∈ E[N]`,
+    `Q ∈ E[NM]` — in KM-backend terms: a normalised `[NM]`-splitting of a `κ(Q)`-dataset,
+    evaluated at an `N`-torsion point, equals the `[N]`-splitting of a `κ(M•Q)`-dataset
+    evaluated there. In-tree ingredients: `kappa_nsmul` (`κ(M•Q) = κ(Q)^M`), the
+    tensor-power cocycle (`exists_frame_pow` — `f^M` is the cocycle of a `κ(Q)^M`-dataset),
+    `(★)` self-adjointness + `picMap_mulByHom_kappa_eq_one`, and the `localPullback` gadget
+    along `[M]` (`mulByN E t M`-instance of `localPullbackTrivializationT` +
+    `transitionUnitOfCover_localPullback`). The candidate mechanism: from an `[N]`-splitting
+    `h` of `f_{κ(Q)^M} ∘ [N]`, the family `h ∘ [M]` splits `f_{κ(Q)}^M ∘ [NM]`; compare with
+    the `M`-th power of an `[NM]`-splitting of `f_{κ(Q)}` via the uniqueness pin, and
+    evaluate at `M•P = P ≫ [M]`-composites (`comp_mulByN`-algebra). **A /develop-grade
+    decomposition of E6-CORE with the evaluated-splitting bookkeeping verified against KM
+    p. 89–91 is the next work item**; only after it, E4 (needing also E4a Oda-alternation
+    and E4c fppf-descent). E4a and E5 still bottom out in [Oda] biextension theory — the
+    genuinely-deep strand.
 
 ## AP-E1 sub-cut (2026-08-09, session 2) — canonicalising `torsionSplittingEval`
 
