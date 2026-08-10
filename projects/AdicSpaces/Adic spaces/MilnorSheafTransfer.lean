@@ -425,6 +425,125 @@ theorem isSheafy_of_milnorSquare
     -- `D` by separation, descend by `row_glue`, recover per-piece by
     -- `row_injective`.
     intro C₀ hC₀ f hcompat
+    classical
+    have hselB : ∀ E : ↥(sq.pushCoveringB C₀).covers,
+        ∃ W : ↥C₀.covers, sq.pushB W.1 = E.1 := by
+      rintro ⟨E, hE⟩
+      obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
+      exact ⟨⟨W, hW⟩, rfl⟩
+    have hselC : ∀ E : ↥(sq.pushCoveringC C₀).covers,
+        ∃ W : ↥C₀.covers, sq.pushC W.1 = E.1 := by
+      rintro ⟨E, hE⟩
+      obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
+      exact ⟨⟨W, hW⟩, rfl⟩
+    choose selB hselB_eq using hselB
+    choose selC hselC_eq using hselC
+    -- the pushed families
+    set fB : ∀ E : ↥(sq.pushCoveringB C₀).covers, presheafValue E.1 := fun E =>
+      (hselB_eq E) ▸ (presheafValueMapOfHom φB hφB (selB E).1 (sq.pushB (selB E).1)
+        (sq.pushB_s _) (sq.pushB_T _) (f (selB E))) with hfB
+    set fC : ∀ E : ↥(sq.pushCoveringC C₀).covers, presheafValue E.1 := fun E =>
+      (hselC_eq E) ▸ (presheafValueMapOfHom φC hφC (selC E).1 (sq.pushC (selC E).1)
+        (sq.pushC_s _) (sq.pushC_T _) (f (selC E))) with hfC
+    -- compatibility of the pushed families, from the compat transports
+    have hfBcompat : ∀ (E₁ E₂ : ↥(sq.pushCoveringB C₀).covers)
+        (D₃ : RationalLocData B)
+        (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
+        (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
+        restrictionMap E₁.1 D₃ h₃₁ (fB E₁) = restrictionMap E₂.1 D₃ h₃₂ (fB E₂) := by
+      intro E₁ E₂ D₃ h₃₁ h₃₂
+      simp only [hfB]
+      rw [MilnorSquareData.cast_restrictionMap_B (hselB_eq E₁) h₃₁
+          (by rw [hselB_eq E₁]; exact h₃₁),
+        MilnorSquareData.cast_restrictionMap_B (hselB_eq E₂) h₃₂
+          (by rw [hselB_eq E₂]; exact h₃₂)]
+      exact sq.pushedCompat_B (selB E₁).1 (selB E₂).1 (hC₀.piece (selB E₁).2)
+        (hC₀.piece (selB E₂).2) (f (selB E₁)) (f (selB E₂))
+        (fun D₃' h₁ h₂ => hcompat (selB E₁) (selB E₂) D₃' h₁ h₂) D₃ _ _
+    have hfCcompat : ∀ (E₁ E₂ : ↥(sq.pushCoveringC C₀).covers)
+        (D₃ : RationalLocData C)
+        (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
+        (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
+        restrictionMap E₁.1 D₃ h₃₁ (fC E₁) = restrictionMap E₂.1 D₃ h₃₂ (fC E₂) := by
+      intro E₁ E₂ D₃ h₃₁ h₃₂
+      simp only [hfC]
+      rw [MilnorSquareData.cast_restrictionMap_C (hselC_eq E₁) h₃₁
+          (by rw [hselC_eq E₁]; exact h₃₁),
+        MilnorSquareData.cast_restrictionMap_C (hselC_eq E₂) h₃₂
+          (by rw [hselC_eq E₂]; exact h₃₂)]
+      exact sq.pushedCompat_C (selC E₁).1 (selC E₂).1 (hC₀.piece (selC E₁).2)
+        (hC₀.piece (selC E₂).2) (f (selC E₁)) (f (selC E₂))
+        (fun D₃' h₁ h₂ => hcompat (selC E₁) (selC E₂) D₃' h₁ h₂) D₃ _ _
+    -- glue at the B and C vertices
+    obtain ⟨b, hb⟩ := hB.gluing _ (sq.pushCoveringB_isRational hC₀) fB hfBcompat
+    obtain ⟨c, hc⟩ := hC.gluing _ (sq.pushCoveringC_isRational hC₀) fC hfCcompat
+    -- normalize the glued sections' restrictions at genuine pushes
+    have hb_at : ∀ (W : ↥C₀.covers),
+        restrictionMap (sq.pushB C₀.base) (sq.pushB W.1)
+            (sq.pushB_mono C₀.base W.1 (C₀.hsubset W.1 W.2)) b =
+          presheafValueMapOfHom φB hφB W.1 (sq.pushB W.1) (sq.pushB_s _)
+            (sq.pushB_T _) (f W) := by
+      intro W
+      have hbW := hb ⟨sq.pushB W.1, Finset.mem_image_of_mem _ W.2⟩
+      rw [show restrictionMap (sq.pushB C₀.base) (sq.pushB W.1)
+            (sq.pushB_mono C₀.base W.1 (C₀.hsubset W.1 W.2)) b =
+          restrictionMap (sq.pushCoveringB C₀).base (sq.pushB W.1)
+            ((sq.pushCoveringB C₀).hsubset _ (Finset.mem_image_of_mem _ W.2)) b from rfl,
+        hbW]
+      set P : ↥(sq.pushCoveringB C₀).covers :=
+        ⟨sq.pushB W.1, Finset.mem_image_of_mem _ W.2⟩ with hP
+      have hcomp := sq.pushedCompat_B (selB P).1 W.1 (hC₀.piece (selB P).2)
+        (hC₀.piece W.2) (f (selB P)) (f W)
+        (fun D₃' h₁ h₂ => hcompat (selB P) W D₃' h₁ h₂) (sq.pushB W.1)
+        (by rw [hselB_eq P]) (le_refl _)
+      calc fB P
+          = restrictionMap P.1 (sq.pushB W.1) (le_refl _) (fB P) :=
+            (congrFun (restrictionMap_id (sq.pushB W.1)) _).symm
+        _ = restrictionMap (sq.pushB (selB P).1) (sq.pushB W.1)
+              (by rw [hselB_eq P])
+              (presheafValueMapOfHom φB hφB (selB P).1 (sq.pushB (selB P).1)
+                (sq.pushB_s _) (sq.pushB_T _) (f (selB P))) := by
+            simp only [hfB]
+            exact MilnorSquareData.cast_restrictionMap_B (hselB_eq P) _ _ _
+        _ = restrictionMap (sq.pushB W.1) (sq.pushB W.1) (le_refl _)
+              (presheafValueMapOfHom φB hφB W.1 (sq.pushB W.1) (sq.pushB_s _)
+                (sq.pushB_T _) (f W)) := hcomp
+        _ = presheafValueMapOfHom φB hφB W.1 (sq.pushB W.1) (sq.pushB_s _)
+              (sq.pushB_T _) (f W) :=
+            congrFun (restrictionMap_id (sq.pushB W.1)) _
+    have hc_at : ∀ (W : ↥C₀.covers),
+        restrictionMap (sq.pushC C₀.base) (sq.pushC W.1)
+            (sq.pushC_mono C₀.base W.1 (C₀.hsubset W.1 W.2)) c =
+          presheafValueMapOfHom φC hφC W.1 (sq.pushC W.1) (sq.pushC_s _)
+            (sq.pushC_T _) (f W) := by
+      intro W
+      have hcW := hc ⟨sq.pushC W.1, Finset.mem_image_of_mem _ W.2⟩
+      rw [show restrictionMap (sq.pushC C₀.base) (sq.pushC W.1)
+            (sq.pushC_mono C₀.base W.1 (C₀.hsubset W.1 W.2)) c =
+          restrictionMap (sq.pushCoveringC C₀).base (sq.pushC W.1)
+            ((sq.pushCoveringC C₀).hsubset _ (Finset.mem_image_of_mem _ W.2)) c from rfl,
+        hcW]
+      set P : ↥(sq.pushCoveringC C₀).covers :=
+        ⟨sq.pushC W.1, Finset.mem_image_of_mem _ W.2⟩ with hP
+      have hcomp := sq.pushedCompat_C (selC P).1 W.1 (hC₀.piece (selC P).2)
+        (hC₀.piece W.2) (f (selC P)) (f W)
+        (fun D₃' h₁ h₂ => hcompat (selC P) W D₃' h₁ h₂) (sq.pushC W.1)
+        (by rw [hselC_eq P]) (le_refl _)
+      calc fC P
+          = restrictionMap P.1 (sq.pushC W.1) (le_refl _) (fC P) :=
+            (congrFun (restrictionMap_id (sq.pushC W.1)) _).symm
+        _ = restrictionMap (sq.pushC (selC P).1) (sq.pushC W.1)
+              (by rw [hselC_eq P])
+              (presheafValueMapOfHom φC hφC (selC P).1 (sq.pushC (selC P).1)
+                (sq.pushC_s _) (sq.pushC_T _) (f (selC P))) := by
+            simp only [hfC]
+            exact MilnorSquareData.cast_restrictionMap_C (hselC_eq P) _ _ _
+        _ = restrictionMap (sq.pushC W.1) (sq.pushC W.1) (le_refl _)
+              (presheafValueMapOfHom φC hφC W.1 (sq.pushC W.1) (sq.pushC_s _)
+                (sq.pushC_T _) (f W)) := hcomp
+        _ = presheafValueMapOfHom φC hφC W.1 (sq.pushC W.1) (sq.pushC_s _)
+              (sq.pushC_T _) (f W) :=
+            congrFun (restrictionMap_id (sq.pushC W.1)) _
     sorry
 
 end ValuationSpectrum
