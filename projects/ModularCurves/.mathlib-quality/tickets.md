@@ -39341,9 +39341,16 @@ is built on (c); T-C4 = (a)↔(c). Verified substrate for (a)↔(c):
   `functionFieldMap_germToFunctionField` on chart coordinates,
   `mulByInt_pullbackAlgHom_x_gen`) is THE PRECEDENT to mirror for the proof. Also proved:
   `functionFieldSelfBaseChangeEquiv` (the self-baseChange collapse, rw+refl-sealed).
-  NEXT: prove U5c-2 by mirroring the L4-iii comparison's proof structure (read
-  MulByHomDegree's L4-iii proof first), computing both sides on the x,y-generators via
-  the KE-valued specPoints machinery + HasseWeil's slope formulas. Status: stated.
+  PROOF IN PROGRESS (2026-08-10): ringHom_ext + AdjoinRoot/Polynomial double induction
+  DONE (glue closed); three shaped anchors remain (hK constants / hx x-gen / hy y-gen);
+  hK advanced (tower-collapse `mk (C (C a)) = algebraMap K CoordinateRing a` is rfl;
+  composites unfolded via `simp only [hL, hR, RingHom.comp_apply]` + IsScalarTower).
+  **REFINEMENT DECIDED**: the `functionFieldSelfBaseChangeEquiv`-conjugation is
+  cast-bound (rw-refl-sealed, no algebraMap-API) — RESTATE the theorem transporting the
+  POINT instead (`h : W.baseChange K = W`, RHS := `translateAlgEquivOfPoint W (h ▸ P')`
+  acting directly on `W.toAffine.FunctionField`); then hK = `AlgEquiv.commutes` +
+  τ-side constant-plumbing (τ ≫ π = π via Over.w + functionFieldMap on π-pulled
+  constants). Status: proof in progress.
 - [U5a] κ-bundle ↔ O(D_T − D_0) + the rational-section dictionary over K̄. Status: open.
 - [U5b] the glued rational function `g_i = h_i · [N]^# r_i`, divisor `[N]^*(D_T − D_0)`;
   convention-check on ONE overlap FIRST. Status: open.
