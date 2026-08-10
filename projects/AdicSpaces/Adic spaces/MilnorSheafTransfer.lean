@@ -140,6 +140,43 @@ structure MilnorSquareData
     ∀ w, w ∈ rationalOpen (pushD U).T (pushD U).s →
       ∃ W ∈ S, w ∈ rationalOpen (pushD W).T (pushD W).s
 
+namespace MilnorSquareData
+
+variable {φB : R →+* B} {φC : R →+* C} {φD : R →+* D}
+  {hφB : Continuous φB} {hφC : Continuous φC} {hφD : Continuous φD}
+  [DecidableEq (RationalLocData B)] [DecidableEq (RationalLocData C)]
+  [DecidableEq (RationalLocData D)]
+
+/-- The pushed covering at the `B`-vertex. -/
+noncomputable def pushCoveringB (sq : MilnorSquareData φB φC φD hφB hφC hφD)
+    (C₀ : RationalCoveringData R) : RationalCoveringData B where
+  base := sq.pushB C₀.base
+  covers := C₀.covers.image sq.pushB
+  hsubset := by
+    intro E hE
+    obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
+    exact sq.pushB_mono C₀.base W (C₀.hsubset W hW)
+  hcover := by
+    intro w hw
+    obtain ⟨W, hW, hwW⟩ := sq.pushB_cover C₀.base C₀.covers C₀.hcover w hw
+    exact ⟨sq.pushB W, Finset.mem_image_of_mem _ hW, hwW⟩
+
+/-- The pushed covering at the `C`-vertex. -/
+noncomputable def pushCoveringC (sq : MilnorSquareData φB φC φD hφB hφC hφD)
+    (C₀ : RationalCoveringData R) : RationalCoveringData C where
+  base := sq.pushC C₀.base
+  covers := C₀.covers.image sq.pushC
+  hsubset := by
+    intro E hE
+    obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
+    exact sq.pushC_mono C₀.base W (C₀.hsubset W hW)
+  hcover := by
+    intro w hw
+    obtain ⟨W, hW, hwW⟩ := sq.pushC_cover C₀.base C₀.covers C₀.hcover w hw
+    exact ⟨sq.pushC W, Finset.mem_image_of_mem _ hW, hwW⟩
+
+end MilnorSquareData
+
 /-- **Abstract Milnor descent for sheafiness** ([WP-paper] lem:sheaf-transfer;
 reviewer §4.1): if a strict Milnor square-with-rows exists over `R` and the three
 vertices `B`, `C`, `D` are sheafy, then `R` is sheafy. -/
