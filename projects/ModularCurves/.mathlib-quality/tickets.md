@@ -39304,6 +39304,37 @@ divisor-level telescope routes through the frozen RelEffCartierDiv zone — both
   whole scheme); disconnected X_N harmless; empty-scheme safety via the ringHom-field
   formulation.
 
+**U5c SPIKE RESULT (2026-08-10, beastmode session 3)** — the bridge interface is fixed.
+Landscape: THREE pairings over fields — (a) our `weilPairingEval` (KM/DS4, records);
+(b) route-A's `fieldWeilPairingHom` (étale-algebra, records, pinned by k̄-point values via
+Galois-fibre faithfulness, `FieldPairingUnique.lean`); (c) HasseWeil's `weilPairing`
+(function-field, Weierstrass points, DEFINED by `weilPairing_spec`:
+`τ_S g_T = e·g_T`, alternation `weilPairing_self` PROVED [IsAlgClosed]). Route-A's (b)
+is built on (c); T-C4 = (a)↔(c). Verified substrate for (a)↔(c):
+- `Scheme.Hom.functionFieldMap` (ForMathlib/DominantFunctionField — dominant-morphism
+  function-field functoriality, OURS) + mathlib
+  `functionField_isFractionRing_of_isAffineOpen` (functionField = Frac(affine-chart Γ)).
+- `translateAlgEquivOfPoint : W.toAffine.Point → (KE ≃ₐ[F] KE)` (HasseWeil
+  EC/TranslationOrd.lean:3290, case-split 2-torsion/generic).
+- KM-side characterisation PROVED: `eq_mul_globalTwist_of_translate`.
+- `EllipticCurve/PointsDictionary.lean` for the model-record ↔ Weierstrass points link
+  (to verify exact shape at U5c-1).
+
+**U5 subcut (execution order)**:
+- [U5c-1] points + function-field dictionary: (i) model-record points over Spec K ↔
+  `W.toAffine.Point` (inventory PointsDictionary, add glue as needed); (ii)
+  `functionFieldEquivKE : (projModel W).functionField ≃+* KE` via the affine chart +
+  fraction-ring uniqueness. Status: open. NEXT.
+- [U5c-2] translation bridge: `functionFieldMap (model-translateByPoint P) =`
+  `translateAlgEquivOfPoint (P-as-W-point)` transported along U5c-1(ii). Uses:
+  translations are dominant (isos); mathlib FractionRing-lift uniqueness. Status: open.
+- [U5a] κ-bundle ↔ O(D_T − D_0) + the rational-section dictionary over K̄. Status: open.
+- [U5b] the glued rational function `g_i = h_i · [N]^# r_i`, divisor `[N]^*(D_T − D_0)`;
+  convention-check on ONE overlap FIRST. Status: open.
+- [U5d] scalar uniqueness vs `weilPairing_spec` (equal divisors ⟹ constant ratio;
+  constants cancel in the translation ratio). Status: open.
+- [U5e] import `weilPairing_self` + K̄-descent (Γ-injectivity of K → K̄). Status: open.
+
 ## AP-E1 sub-cut (2026-08-09, session 2) — canonicalising `torsionSplittingEval`
 
 The KM output `torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP` depends on the

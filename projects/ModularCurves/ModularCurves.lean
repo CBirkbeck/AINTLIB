@@ -231,6 +231,7 @@ import ModularCurves.WeilPairing.PoincareBiextension
 import ModularCurves.WeilPairing.TensorCocycle
 import ModularCurves.WeilPairing.TorsionBaseChange
 import ModularCurves.WeilPairing.TorsionSqBaseChange
+import ModularCurves.WeilPairing.FieldComparisonBridge
 import ModularCurves.WeilPairing.FieldPairingUnique
 import ModularCurves.WeilPairing.FieldPairingValue
 import ModularCurves.WeilPairing.FullLevelBaseChange
