@@ -39168,6 +39168,38 @@ information; RESEARCH-SCALE) — and **E4c** — the fppf `[2]`-descent: cover
 faithfully-flat `Γ(𝒪ˣ)`-injectivity. E4c is bounded infrastructure (torsor cover +
 `[2]`-flatness + Γ-descent) — NEXT concrete leaf; E4a is the deep strand.
 
+**E4-REDUCTION LANDED (2026-08-10, this session)** — new file
+`WeilPairing/AlternationReduction.lean`, axiom-clean (standard three), tree green 9777:
+- `weilPairingEval_self_of_halving` — GIVEN a cover `π' : T' ⟶ T` injective on `Γ(⊤)`,
+  a point `P` with `(2:ℤ)•P = x|_{T'}` killed by `N·2`, and the diagonal square
+  `e_{N·2}(P,P)² = 1` on the cover, THEN `e_N(x,x) = 1`. The KM Notes chain
+  `e_N(x,x)|_{T'} = e_N(2P,2P) = e_{N·2}(2P,P) = e_{N·2}(P,P)² = 1`, using ONLY proved
+  laws: `weilPairingEval_restrict`, the bridge + `weilPairingKM_mul_smul_right` (E6-e) for
+  the mixed level shift, and `weilPairingEval_add_left` at `2P = P + P` (`two_zsmul`).
+  **Deliberately avoids `weilPairingEval_zsmul_left`/`_antisymm` — those derive from
+  `_self` and would be circular.** Level spelled `N * 2` (not `2 * N`) to match the
+  `(N * M₀)`-shape of the E6 lemmas with no `mul_comm` transport.
+- `weilPairingEval_self_of_halving_of_flat` — the `hinj`-leg discharged by WP-C1
+  (`DescentFaithful.injective_appTop_of_flat_of_surjective`, which was ALREADY IN-TREE):
+  any `[Flat] [Surjective]` halving cover suffices.
+- Lean lesson: after `apply hinj` the goal carries implicit-transparency damage
+  (`rw [map_one]` refuses with "?f 1 not found" + not-type-correct note) — the whole
+  descent chain works as refine-`Eq.trans` terms; `pow_two` not `sq` is the `a^2 = a*a`
+  lemma name.
+
+**AP-E4 remaining decomposition (all of `_self` now factors through)**:
+- **E4-cover** — existence of a flat surjective halving cover: `T' :=` the `[2]`-splitting
+  torsor `T ×_{x, E[N]} E[2N]` (base-change of `[2] : E[2N] → E[N]`), finite locally free
+  surjective. GATED on the `mulByHom`-finiteness/flatness substrate
+  (`mulByHom_isFinite ⟹ torsionπ_isFinite` trail, `MulByHomFibresGlobal.lean` — pending
+  leaf "ALPHA's model finite fibre-count", `Torsion.lean:169`) + the fibrewise
+  `[2]`-surjectivity `E[2N] ↠ E[N]` (rank argument). Unconditional (no invertibility) —
+  the char-2 case is why it must be flat, not étale.
+- **E4a** — `e_{N·2}(P,P)² = 1` (diagonal alternation square, KM 2.8.3 diagonal instance,
+  [Oda]-cited): biextension/cube-theoretic, RESEARCH-SCALE. Bilinearity alone provably
+  cannot reach it (it is symmetry information).
+- Assembly: `weilPairingEval_self := reduction + cover + E4a`.
+
 ## AP-E1 sub-cut (2026-08-09, session 2) — canonicalising `torsionSplittingEval`
 
 The KM output `torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP` depends on the

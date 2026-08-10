@@ -214,6 +214,7 @@ import ModularCurves.Picard.RigidDescent
 import ModularCurves.Picard.SectionAffineIntersection
 import ModularCurves.Picard.SelfAdjointN
 import ModularCurves.Picard.UnitPullback
+import ModularCurves.WeilPairing.AlternationReduction
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.WeilPairing.CharZeroAssembly
 import ModularCurves.WeilPairing.DescentFaithful
