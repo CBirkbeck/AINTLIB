@@ -39351,6 +39351,20 @@ is built on (c); T-C4 = (a)↔(c). Verified substrate for (a)↔(c):
   acting directly on `W.toAffine.FunctionField`); then hK = `AlgEquiv.commutes` +
   τ-side constant-plumbing (τ ≫ π = π via Over.w + functionFieldMap on π-pulled
   constants). Status: proof in progress.
+  PROGRESS 2026-08-10 (session 3, continued): restatement DONE (point-cast form, L-side
+  of hK closed by `AlgEquiv.commutes`); **`functionFieldMap_comp` PROVED axiom-clean**
+  (`ForMathlib/DominantFunctionField.lean` — functoriality of the function-field
+  pullback; the clean proof: `stalk_hom_ext` BEFORE any unfold + three applications of
+  `functionFieldMap_germToFunctionField` + `comp_app`; upstream candidate); **hK
+  structurally CLOSED** modulo the isolated `hinv` brick (τ-invariance of K-constant
+  classes). Remaining bricks in `functionFieldMap_translateBy`: `hinv` (route:
+  `projModelFunctionFieldEquiv_germ` backward + chart-constants identification
+  [`chartZAffineEquiv` is ≃ₐ[R] — PoleFiltration:898 — so that leg is `.commutes`-free;
+  `zChartSectionCoordRingEquiv` MulByHomDegree:293 is more ready-made chart-API] +
+  `functionFieldMap_comp` at `τ ≫ π = π`), `hx`/`hy` (the chart-coordinate translation
+  computations vs HasseWeil's slope formulas — the genuine content). Lean lessons:
+  coe-spelling must match the goal exactly (`.symm.toRingHom`-applied vs equiv-applied)
+  for rw; `rw`'s refl-closer discharges `A ≃+* A`-goals via `@[refl] RingEquiv.refl`.
 - [U5a] κ-bundle ↔ O(D_T − D_0) + the rational-section dictionary over K̄. Status: open.
 - [U5b] the glued rational function `g_i = h_i · [N]^# r_i`, divisor `[N]^*(D_T − D_0)`;
   convention-check on ONE overlap FIRST. Status: open.
