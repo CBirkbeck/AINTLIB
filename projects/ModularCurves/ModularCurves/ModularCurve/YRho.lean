@@ -2612,7 +2612,98 @@ theorem weilPairing_torsionMapOfEllHom {A B : EllObj (CommRingCat.of ℚ)} (g : 
         (torsionMapOfEllHom g N) (torsionMapOfEllHom g N) g.baseHom
         (torsionMapOfEllHom_π g N).symm (torsionMapOfEllHom_π g N).symm ≫
       B.curve.weilPairing N =
-        A.curve.weilPairing N ≫ muNMapAlong g.baseHom N := by sorry
+        A.curve.weilPairing N ≫ muNMapAlong g.baseHom N := by
+  set t0A := pullback.fst (A.curve.torsionπ N) (A.curve.torsionπ N) ≫ A.curve.torsionπ N
+    with ht0A
+  set t0B := pullback.fst (B.curve.torsionπ N) (B.curve.torsionπ N) ≫ B.curve.torsionπ N
+    with ht0B
+  set pmap := pullback.map (A.curve.torsionπ N) (A.curve.torsionπ N)
+      (B.curve.torsionπ N) (B.curve.torsionπ N)
+      (torsionMapOfEllHom g N) (torsionMapOfEllHom g N) g.baseHom
+      (torsionMapOfEllHom_π g N).symm (torsionMapOfEllHom_π g N).symm with hpmap
+  have hover : pmap ≫ t0B = t0A ≫ g.baseHom := torsionSquareMap_comp_univStructure g N
+  have hoverL : (pmap ≫ B.curve.weilPairing N) ≫ muNπ B.base N = t0A ≫ g.baseHom := by
+    rw [Category.assoc, B.curve.weilPairing_over N]
+    exact hover
+  have hoverR : (A.curve.weilPairing N ≫ muNMapAlong g.baseHom N) ≫ muNπ B.base N =
+      t0A ≫ g.baseHom := by
+    rw [Category.assoc, muNMapAlong_π, ← Category.assoc, A.curve.weilPairing_over N]
+  have hidx : ∀ {g1 g2 : pullback (A.curve.torsionπ N) (A.curve.torsionπ N) ⟶ B.base}
+      (hgg : g1 = g2) (v : {h // h ≫ muNπ B.base N = g1}),
+      (muNPointsEquiv B.base N g1 v : Γ(pullback (A.curve.torsionπ N)
+        (A.curve.torsionπ N), ⊤)) =
+      (muNPointsEquiv B.base N g2 ⟨v.1, by rw [v.2, hgg]⟩ : Γ(pullback (A.curve.torsionπ N)
+        (A.curve.torsionπ N), ⊤)) := by
+    intro g1 g2 hgg v
+    subst hgg
+    rfl
+  have hBdef : (⟨B.curve.weilPairing N, B.curve.weilPairing_over N⟩ :
+      {h // h ≫ muNπ B.base N = t0B}) =
+    (muNPointsEquiv B.base N t0B).symm
+      ⟨((weilPairingKM B.curve B.curve.smooth t0B N
+          (univTorsionFst B.curve N) (univTorsionFst_mem B.curve N)
+          (univTorsionSnd B.curve N) (univTorsionSnd_mem B.curve N) :
+        Γ(pullback (B.curve.torsionπ N) (B.curve.torsionπ N), ⊤)ˣ) :
+          Γ(pullback (B.curve.torsionπ N) (B.curve.torsionπ N), ⊤)),
+        (Units.val_pow_eq_pow_val _ _).symm.trans
+          ((congrArg Units.val (weilPairingKM_pow_eq_one B.curve B.curve.smooth t0B N
+            (univTorsionFst B.curve N) (univTorsionFst_mem B.curve N)
+            (univTorsionSnd B.curve N) (univTorsionSnd_mem B.curve N))).trans
+            Units.val_one)⟩ := Subtype.ext rfl
+  have hAdef : (⟨A.curve.weilPairing N, A.curve.weilPairing_over N⟩ :
+      {h // h ≫ muNπ A.base N = t0A}) =
+    (muNPointsEquiv A.base N t0A).symm
+      ⟨((weilPairingKM A.curve A.curve.smooth t0A N
+          (univTorsionFst A.curve N) (univTorsionFst_mem A.curve N)
+          (univTorsionSnd A.curve N) (univTorsionSnd_mem A.curve N) :
+        Γ(pullback (A.curve.torsionπ N) (A.curve.torsionπ N), ⊤)ˣ) :
+          Γ(pullback (A.curve.torsionπ N) (A.curve.torsionπ N), ⊤)),
+        (Units.val_pow_eq_pow_val _ _).symm.trans
+          ((congrArg Units.val (weilPairingKM_pow_eq_one A.curve A.curve.smooth t0A N
+            (univTorsionFst A.curve N) (univTorsionFst_mem A.curve N)
+            (univTorsionSnd A.curve N) (univTorsionSnd_mem A.curve N))).trans
+            Units.val_one)⟩ := Subtype.ext rfl
+  have hres := weilPairingKM_restrictBase B.curve B.curve.smooth t0B pmap hover N
+    (univTorsionFst B.curve N) (univTorsionFst_mem B.curve N)
+    (univTorsionSnd B.curve N) (univTorsionSnd_mem B.curve N)
+  have hmapglue : Scheme.Γ.map pmap.op = Scheme.Hom.appLE pmap ⊤ ⊤ le_rfl := by
+    rw [Scheme.Γ_map_op]
+    exact Scheme.Hom.app_eq_appLE pmap
+  have hpast := weilPairingKM_pastingMap g t0A N
+    (univTorsionFst A.curve N) (univTorsionFst_mem A.curve N)
+    (univTorsionSnd A.curve N) (univTorsionSnd_mem A.curve N)
+  refine congrArg Subtype.val
+    ((muNPointsEquiv B.base N (t0A ≫ g.baseHom)).injective
+      (a₁ := ⟨pmap ≫ B.curve.weilPairing N, hoverL⟩)
+      (a₂ := ⟨A.curve.weilPairing N ≫ muNMapAlong g.baseHom N, hoverR⟩)
+      (Subtype.ext ?_))
+  refine ((hidx hover.symm ⟨pmap ≫ B.curve.weilPairing N, hoverL⟩).trans ?_).trans
+    (muNPointsEquiv_mapAlong g.baseHom N t0A
+      ⟨A.curve.weilPairing N, A.curve.weilPairing_over N⟩).symm
+  refine Eq.trans ?_ (congrArg Subtype.val
+    (congrArg (muNPointsEquiv A.base N t0A) hAdef)).symm
+  refine Eq.trans ?_ (congrArg Subtype.val
+    ((muNPointsEquiv A.base N t0A).apply_symm_apply _)).symm
+  -- LHS: naturality then B-def-fold then the KM chain
+  refine ((muNPointsEquiv_natural B.base N t0B pmap
+    ⟨B.curve.weilPairing N, B.curve.weilPairing_over N⟩).trans ?_)
+  refine (congrArg (Scheme.Γ.map pmap.op).hom (congrArg Subtype.val
+    (congrArg (muNPointsEquiv B.base N t0B) hBdef))).trans ?_
+  refine (congrArg (Scheme.Γ.map pmap.op).hom (congrArg Subtype.val
+    ((muNPointsEquiv B.base N t0B).apply_symm_apply _))).trans ?_
+  refine (congrArg (fun (m : Γ(pullback (B.curve.torsionπ N) (B.curve.torsionπ N), ⊤) ⟶
+      Γ(pullback (A.curve.torsionπ N) (A.curve.torsionπ N), ⊤)) =>
+    m.hom ((weilPairingKM B.curve B.curve.smooth t0B N
+      (univTorsionFst B.curve N) (univTorsionFst_mem B.curve N)
+      (univTorsionSnd B.curve N) (univTorsionSnd_mem B.curve N) :
+        Γ(pullback (B.curve.torsionπ N) (B.curve.torsionπ N), ⊤)ˣ) :
+        Γ(pullback (B.curve.torsionπ N) (B.curve.torsionπ N), ⊤)))
+    hmapglue).trans ?_
+  refine (congrArg Units.val hres.symm).trans ?_
+  refine (congrArg Units.val (weilPairingKM_congr_points B.curve B.curve.smooth
+    (t0A ≫ g.baseHom) N (restrictBase_univTorsionFst_eq_pushSection g N)
+    (restrictBase_univTorsionSnd_eq_pushSection g N) _ _)).trans ?_
+  exact (congrArg Units.val hpast).symm
 
 /-- **[T-YR-2e-W]** Naturality of the Weil-pairing evaluation along an `Ell/ℚ`-morphism:
 `e_N` of the pushed-forward points agrees with `e_N` upstairs. **PROVED** from the DS4
