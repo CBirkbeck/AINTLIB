@@ -39141,6 +39141,33 @@ New file: `WeilPairing/KMCompatibility.lean` (imports KMNaturality). Tickets:
 with the register's `N * M`; all torsion-glue is `smul_smul`/`mul_comm`; the dataset's
 level-independence is what makes E6-e two spec-applications and nothing more.
 
+**AP-E6 COMPLETE (2026-08-10, this session)** — all six tickets DONE, axiom-clean
+(standard three), full tree green at 9776 jobs. New file
+`WeilPairing/KMCompatibility.lean` (E6-a..e + `asSection_zsmul`); `Basic.lean:491`
+`weilPairingEval_mul` FILLED (bridge ×2 + `weilPairingKM_mul_smul_right` +
+`weilPairingKM_congr` at `asSection_zsmul`+`natCast_zsmul` + `weilPairingEval_nsmul_right`).
+The register is now down to `_self` (E4) and `_nondegenerate` (E5).
+Lean lessons: (1) a calc whose head TERM is a multiline application mis-parses (the
+application's second line becomes a relation step — "true : Bool" calc errors); use
+refine-`Eq.trans`-chains instead. (2) `congrArg (Scheme.resUnit _)` across defeq-equal
+opens makes goals "not type-correct under implicit transparency" — `rw [map_mul]` then
+refuses; close with TERM-applications (`(map_mul _ _ _).trans`, `congrArg₂ (· * ·)`,
+`(resUnit_resUnit …).trans (resUnit_resUnit …).symm` through the proof-irrelevant middle).
+(3) `mulBy_comp` lives in `EllipticCurve/EndomorphismDegree.lean` — NOT in the
+KMNaturality closure; the import addition forced the full-tree name-clash build ✓ clean.
+(4) `asSection` = two bundled additive layers, so `asSection_zsmul` is two `map_zsmul`s —
+no induction, no `asSection_zero` needed.
+
+**AP-E4 status after E6**: E4b (= E6) DISCHARGED. Remaining: **E4a** — the diagonal
+alternation instance `e_{2N}(P,P)² = 1` (KM 2.8.3 is an [Oda] citation; the ²=1-diagonal
+form is still biextension/cube-theoretic — bilinearity alone cannot produce symmetry
+information; RESEARCH-SCALE) — and **E4c** — the fppf `[2]`-descent: cover
+`T' := E[2N] ×_{[2],E[N],R} T` (finite locally free surjective), the chain
+`e_N(R,R)|_{T'} = e_N(2P,2P) = e_{2N}(P,P)² = 1` (first eq = base-change compat ✓ PROVED
+`weilPairingEval_restrict`; second = E6 ✓ + bilinearity ✓; third = E4a), then
+faithfully-flat `Γ(𝒪ˣ)`-injectivity. E4c is bounded infrastructure (torsor cover +
+`[2]`-flatness + Γ-descent) — NEXT concrete leaf; E4a is the deep strand.
+
 ## AP-E1 sub-cut (2026-08-09, session 2) — canonicalising `torsionSplittingEval`
 
 The KM output `torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP` depends on the

@@ -7,7 +7,7 @@ import Mathlib.FieldTheory.IsAlgClosed.Basic
 import ModularCurves.EllipticCurve.TorsionFibre
 import ModularCurves.ForMathlib.RootOfUnityIntPow
 import ModularCurves.GroupScheme.MuN
-import ModularCurves.WeilPairing.KMNaturality
+import ModularCurves.WeilPairing.KMCompatibility
 
 /-!
 # The Weil pairing over a base scheme (KM 2.8)
@@ -495,7 +495,25 @@ theorem weilPairingEval_mul {N M : ℕ} [NeZero N] [NeZero M] {T : Scheme.{u}}
     (hy' : y.1 ≫ E.mulByHom (N * M) = g ≫ E.zero) :
     (haveI : NeZero (N * M) := ⟨Nat.mul_ne_zero (NeZero.ne _) (NeZero.ne _)⟩;
       (E.weilPairingEval (N := N * M) x y hx' hy' : Γ(T, ⊤))) =
-      (E.weilPairingEval (N := N) x y hx hy : Γ(T, ⊤)) ^ M := by sorry
+      (E.weilPairingEval (N := N) x y hx hy : Γ(T, ⊤)) ^ M := by
+  haveI : NeZero (N * M) := ⟨Nat.mul_ne_zero (NeZero.ne _) (NeZero.ne _)⟩
+  rw [E.weilPairingEval_eq_weilPairingKM (N := N * M) x y hx' hy',
+    ← E.weilPairingEval_nsmul_right x y hx hy M,
+    E.weilPairingEval_eq_weilPairingKM x ((M : ℤ) • y) hx
+      (E.point_zsmul_killedBy (M : ℤ) hy)]
+  refine congrArg Units.val ?_
+  refine (weilPairingKM_mul_smul_right E E.smooth g N M
+    (EllipticCurve.Point.asSection E g x) (asSection_mem_torsionPoints E x hx)
+    (asSection_mem_torsionPoints E x hx')
+    (EllipticCurve.Point.asSection E g y) (asSection_mem_torsionPoints E y hy')
+    (smul_mem_torsionPoints_of_mul E g
+      (asSection_mem_torsionPoints E y hy'))).trans ?_
+  exact weilPairingKM_congr E E.smooth g N rfl
+    (((asSection_zsmul E g (M : ℤ) y).trans (natCast_zsmul _ _)).symm)
+    (asSection_mem_torsionPoints E x hx)
+    (smul_mem_torsionPoints_of_mul E g (asSection_mem_torsionPoints E y hy'))
+    (asSection_mem_torsionPoints E x hx)
+    (asSection_mem_torsionPoints E ((M : ℤ) • y) (E.point_zsmul_killedBy (M : ℤ) hy))
 
 /-- **(T-C2c, the symplectic-formula pin — expert review Q6, Silverman convention)**
 On a pair of torsion points, `e_N(aP + bQ, cP + dQ) = e_N(P,Q)^{ad − bc}` (exponent
