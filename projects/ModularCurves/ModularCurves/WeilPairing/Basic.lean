@@ -275,7 +275,21 @@ theorem weilPairingEval_add_right {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T �
     (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero) (hy' : y'.1 ≫ E.mulByHom N = g ≫ E.zero)
     (hyy' : (y + y').1 ≫ E.mulByHom N = g ≫ E.zero) :
     (E.weilPairingEval x (y + y') hx hyy' : Γ(T, ⊤)) =
-      E.weilPairingEval x y hx hy * E.weilPairingEval x y' hx hy' := by sorry
+      E.weilPairingEval x y hx hy * E.weilPairingEval x y' hx hy' := by
+  rw [E.weilPairingEval_eq_weilPairingKM x (y + y') hx hyy',
+    E.weilPairingEval_eq_weilPairingKM x y hx hy,
+    E.weilPairingEval_eq_weilPairingKM x y' hx hy',
+    weilPairingKM_congr E E.smooth g N rfl (asSection_add E g y y')
+      (asSection_mem_torsionPoints E x hx)
+      (asSection_mem_torsionPoints E (y + y') hyy')
+      (asSection_mem_torsionPoints E x hx)
+      (add_mem (asSection_mem_torsionPoints E y hy)
+        (asSection_mem_torsionPoints E y' hy')),
+    weilPairingKM_add_right E E.smooth g N
+      (EllipticCurve.Point.asSection E g x) (asSection_mem_torsionPoints E x hx)
+      (EllipticCurve.Point.asSection E g y) (EllipticCurve.Point.asSection E g y')
+      (asSection_mem_torsionPoints E y hy) (asSection_mem_torsionPoints E y' hy')]
+  exact Units.val_mul _ _
 
 /-- Pairing with the zero point is trivial — from bilinearity in the second slot alone
 (`e(x,0) = e(x,0)²` and `e(x,0)` is a unit). -/

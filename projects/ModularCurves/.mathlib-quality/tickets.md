@@ -39008,7 +39008,15 @@ in the plan's "Known traps".
   `weilPairingEval_eq_weilPairingKM`) · **File**: `WeilPairing/Basic.lean` · one ticket each
 - **`_add_left` DONE 2026-08-10** (bridge + `asSection_add` + `weilPairingKM_add_left` +
   `Units.val_mul`; axiom-verified with the whole chain). 4 sorries left in the register.
-- **`_add_right` route (AP-E3)**: needs bilinearity-in-`Q` for `weilPairingKM`:
+- **`_add_right` DONE 2026-08-10 (AP-E3 complete)**: `exists_frame_mul` +
+  `exists_over_trivialization_of_frames` (both in `WeilPairing/TensorCocycle.lean`, first-try
+  green) + `weilPairingKM_add_right` (obtain-destructured datasets, common refinement,
+  tensor dataset via `kappa_add`/`Skeleton.toSkeleton_tensorObj`, the proved
+  `torsionSplittingEval_mul_of_transitionUnitOfCover_mul`) + the register fill through the
+  bridge. All axiom-verified standard-three. **Basic.lean is down to 3 sorries — `_self`,
+  `_nondegenerate`, `_mul` — exactly the three with recorded research risk.**
+  `weilPairingEval_symplectic` (11 Rho-line call sites) now inherits `sorryAx` only through
+  `_self`. Original route note:
   `torsionSplittingEval_mul_of_transitionUnitOfCover_mul` (proved) at a *tensor dataset* —
   `M'' := M ⊗ M'` with `hM''` from `kappa_add` + `toSkeleton_tensorObj_eq` +
   `Units.val_mul`, common refinement of the two covers (IND2 machinery), and **the one

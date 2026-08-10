@@ -231,6 +231,105 @@ theorem exists_frame_pow (M : X.Modules) {ι : Type*} (W : ι → X.Opens)
       rw [tensorSection_restrict A M hL, tensorSection_restrict A M hR, hrel i j, hμ,
         tensorSection_smul_left, tensorSection_smul_right, smul_smul, ← pow_succ]
 
+/-- **The tensor of two trivialised covers carries frames with the product cocycle** — the
+`M ⊗ M'` form of `exists_frame_pow`'s inductive step, needed for bilinearity of the pairing
+in the second variable (AP-E3). -/
+theorem exists_frame_mul (M M' : X.Modules) {ι : Type*} (W : ι → X.Opens)
+    (e : ∀ i, M.over (W i) ≅ SheafOfModules.unit (X.ringCatSheaf.over (W i)))
+    (e' : ∀ i, M'.over (W i) ≅ SheafOfModules.unit (X.ringCatSheaf.over (W i))) :
+    ∃ σ : ∀ i, Γ(M ⊗ M', W i),
+      (∀ i, IsFrame (M ⊗ M') (W i) (σ i)) ∧
+        ∀ i j, (M ⊗ M').val.map (homOfLE (inf_le_left : W i ⊓ W j ≤ W i)).op (σ i) =
+          ((transitionUnitOfCover M W e i j : Γ(X, W i ⊓ W j)) *
+              (transitionUnitOfCover M' W e' i j : Γ(X, W i ⊓ W j))) •
+            (M ⊗ M').val.map (homOfLE (inf_le_right : W i ⊓ W j ≤ W j)).op (σ j) := by
+  refine ⟨fun i => tensorSection M M' (W i) (overTrivializationSection M (W i) (e i) 1)
+    (overTrivializationSection M' (W i) (e' i) 1),
+    fun i => (isFrame_overTrivializationSection M (W i) (e i)).tensor
+      (isFrame_overTrivializationSection M' (W i) (e' i)), fun i j => ?_⟩
+  have hL : W i ⊓ W j ≤ W i := inf_le_left
+  have hR : W i ⊓ W j ≤ W j := inf_le_right
+  have hμ : M.val.map (homOfLE hL).op (overTrivializationSection M (W i) (e i) 1) =
+      (transitionUnitOfCover M W e i j : Γ(X, W i ⊓ W j)) •
+        M.val.map (homOfLE hR).op (overTrivializationSection M (W j) (e j) 1) :=
+    frame_eq_transitionUnit_smul _ _
+      ((frameCoeff_restrict M hL (e i) _).trans
+        ((congrArg (X.presheaf.map (homOfLE hL).op).hom
+          (overTrivializationSection_coefficient M (W i) (e i) 1)).trans (map_one _)))
+      ((frameCoeff_restrict M hR (e j) _).trans
+        ((congrArg (X.presheaf.map (homOfLE hR).op).hom
+          (overTrivializationSection_coefficient M (W j) (e j) 1)).trans (map_one _)))
+  have hμ' : M'.val.map (homOfLE hL).op (overTrivializationSection M' (W i) (e' i) 1) =
+      (transitionUnitOfCover M' W e' i j : Γ(X, W i ⊓ W j)) •
+        M'.val.map (homOfLE hR).op (overTrivializationSection M' (W j) (e' j) 1) :=
+    frame_eq_transitionUnit_smul _ _
+      ((frameCoeff_restrict M' hL (e' i) _).trans
+        ((congrArg (X.presheaf.map (homOfLE hL).op).hom
+          (overTrivializationSection_coefficient M' (W i) (e' i) 1)).trans (map_one _)))
+      ((frameCoeff_restrict M' hR (e' j) _).trans
+        ((congrArg (X.presheaf.map (homOfLE hR).op).hom
+          (overTrivializationSection_coefficient M' (W j) (e' j) 1)).trans (map_one _)))
+  rw [tensorSection_restrict M M' hL, tensorSection_restrict M M' hR, hμ, hμ',
+    tensorSection_smul_left, tensorSection_smul_right, smul_smul]
+
+/-- **Frames with a prescribed ratio cocycle give a trivialising family with that
+cocycle** — the converse of `isFrame_overTrivializationSection`, and the glue that turns
+`exists_frame_mul` into the tensor *dataset* AP-E3 needs. The cancellation on the frame is
+by reading coefficients in the chosen trivialisation. -/
+theorem exists_over_trivialization_of_frames (A : X.Modules) {ι : Type*}
+    (W : ι → X.Opens) (σ : ∀ i, Γ(A, W i)) (hfr : ∀ i, IsFrame A (W i) (σ i))
+    (r : ∀ i j, Γ(X, W i ⊓ W j)ˣ)
+    (hrel : ∀ i j, A.val.map (homOfLE (inf_le_left : W i ⊓ W j ≤ W i)).op (σ i) =
+      (r i j : Γ(X, W i ⊓ W j)) •
+        A.val.map (homOfLE (inf_le_right : W i ⊓ W j ≤ W j)).op (σ j)) :
+    ∃ e'' : ∀ i, A.over (W i) ≅ SheafOfModules.unit (X.ringCatSheaf.over (W i)),
+      ∀ i j, transitionUnitOfCover A W e'' i j = r i j := by
+  refine ⟨fun i => (hfr i).choose, fun i j => ?_⟩
+  have hL : W i ⊓ W j ≤ W i := inf_le_left
+  have hR : W i ⊓ W j ≤ W j := inf_le_right
+  have hσi : frameCoeff A (W i ⊓ W j)
+      (restrictOverTrivialization X.ringCatSheaf A (W i) (hfr i).choose
+        (Over.mk (homOfLE hL))) (A.val.map (homOfLE hL).op (σ i)) = 1 :=
+    (frameCoeff_restrict A hL (hfr i).choose _).trans
+      ((congrArg (X.presheaf.map (homOfLE hL).op).hom (hfr i).choose_spec).trans
+        (map_one _))
+  have hσj : frameCoeff A (W i ⊓ W j)
+      (restrictOverTrivialization X.ringCatSheaf A (W j) (hfr j).choose
+        (Over.mk (homOfLE hR))) (A.val.map (homOfLE hR).op (σ j)) = 1 :=
+    (frameCoeff_restrict A hR (hfr j).choose _).trans
+      ((congrArg (X.presheaf.map (homOfLE hR).op).hom (hfr j).choose_spec).trans
+        (map_one _))
+  have hdict : A.val.map (homOfLE hL).op (σ i) =
+      (transitionUnitOfCover A W (fun i => (hfr i).choose) i j : Γ(X, W i ⊓ W j)) •
+        A.val.map (homOfLE hR).op (σ j) :=
+    frame_eq_transitionUnit_smul _ _ hσi hσj
+  -- cancel on the frame by reading coefficients in the `j`-restricted trivialisation
+  refine Units.ext ?_
+  have hread : ∀ (a : Γ(X, W i ⊓ W j)),
+      frameCoeff A (W i ⊓ W j)
+        (restrictOverTrivialization X.ringCatSheaf A (W j) (hfr j).choose
+          (Over.mk (homOfLE hR)))
+        (a • A.val.map (homOfLE hR).op (σ j)) = a := by
+    intro a
+    rw [frameCoeff_eq_evalSection, evalSection_smul_right, ← frameCoeff_eq_evalSection,
+      hσj, smul_eq_mul, mul_one]
+  calc (transitionUnitOfCover A W (fun i => (hfr i).choose) i j : Γ(X, W i ⊓ W j))
+      = frameCoeff A (W i ⊓ W j)
+          (restrictOverTrivialization X.ringCatSheaf A (W j) (hfr j).choose
+            (Over.mk (homOfLE hR)))
+          ((transitionUnitOfCover A W (fun i => (hfr i).choose) i j :
+            Γ(X, W i ⊓ W j)) • A.val.map (homOfLE hR).op (σ j)) := (hread _).symm
+    _ = frameCoeff A (W i ⊓ W j)
+          (restrictOverTrivialization X.ringCatSheaf A (W j) (hfr j).choose
+            (Over.mk (homOfLE hR))) (A.val.map (homOfLE hL).op (σ i)) :=
+        congrArg _ hdict.symm
+    _ = frameCoeff A (W i ⊓ W j)
+          (restrictOverTrivialization X.ringCatSheaf A (W j) (hfr j).choose
+            (Over.mk (homOfLE hR)))
+          ((r i j : Γ(X, W i ⊓ W j)) • A.val.map (homOfLE hR).op (σ j)) :=
+        congrArg _ (hrel i j)
+    _ = (r i j : Γ(X, W i ⊓ W j)) := hread _
+
 /-! ## The brick: a cocycle whose class is killed by `N` has `f^N` a coboundary -/
 
 /-- The coefficient of a section in a *global* trivialization of `A`. -/

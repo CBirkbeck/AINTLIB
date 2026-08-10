@@ -26,7 +26,7 @@ genuine function of the pair of torsion sections:
 universe u
 
 open CategoryTheory AlgebraicGeometry Limits TopologicalSpace
-  AlgebraicGeometry.Scheme.Modules
+  AlgebraicGeometry.Scheme.Modules CategoryTheory.MonoidalCategory
 
 namespace ModularCurves
 
@@ -1039,6 +1039,81 @@ theorem weilPairingKM_congr (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparate
     (hP' : P' ∈ torsionPoints E t N) (hQ' : Q' ∈ torsionPoints E t N) :
     weilPairingKM E hsm t N P hP Q hQ = weilPairingKM E hsm t N P' hP' Q' hQ' := by
   subst hPP; subst hQQ; rfl
+
+/-- **(AP-E3, bilinearity in the second variable)** The canonical pairing is additive in
+`Q`: refine the two chosen datasets to a common cover, tensor them — the frames of
+`exists_frame_mul` and the trivialising family of `exists_over_trivialization_of_frames`
+give a dataset for `Q + Q'` (via `kappa_add`) whose cocycle is the product — and
+`torsionSplittingEval_mul_of_transitionUnitOfCover_mul` multiplies the values. -/
+theorem weilPairingKM_add_right {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π] (t : T ⟶ S) (N : ℕ)
+    (P : (E.baseChange t).Point (𝟙 T)) (hP : P ∈ torsionPoints E t N)
+    (Q Q' : (E.baseChange t).Point (𝟙 T))
+    (hQ : Q ∈ torsionPoints E t N) (hQ' : Q' ∈ torsionPoints E t N) :
+    weilPairingKM E hsm t N P hP (Q + Q') (add_mem hQ hQ') =
+      weilPairingKM E hsm t N P hP Q hQ * weilPairingKM E hsm t N P hP Q' hQ' := by
+  letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+  obtain ⟨M, hM, ι, W, hW, e, hnorm⟩ := exists_normalized_dataset E hsm t Q
+  obtain ⟨M', hM', ι', W', hW', e', hnorm'⟩ := exists_normalized_dataset E hsm t Q'
+  -- the common refinement
+  set V : ι × ι' → (pullback E.π t).Opens := fun p => W p.1 ⊓ W' p.2 with hVdef
+  have hV : iSup V = ⊤ := by
+    rw [hVdef, iSup_prod]
+    have hstep : ∀ i, ⨆ j, (W i ⊓ W' j) = W i ⊓ ⨆ j, W' j := fun i =>
+      (inf_iSup_eq _ _).symm
+    calc ⨆ i, ⨆ j, (W i ⊓ W' j) = ⨆ i, (W i ⊓ ⨆ j, W' j) := iSup_congr hstep
+      _ = ⊤ := by rw [hW']; simp only [inf_top_eq]; exact hW
+  set eV : ∀ p : ι × ι', M.over (V p) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (V p)) :=
+    fun p => SheafOfModules.restrictOverTrivialization
+      (pullback E.π t).ringCatSheaf M (W p.1) (e p.1)
+      (Over.mk (homOfLE (inf_le_left : V p ≤ W p.1))) with heV
+  set e'V : ∀ p : ι × ι', M'.over (V p) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (V p)) :=
+    fun p => SheafOfModules.restrictOverTrivialization
+      (pullback E.π t).ringCatSheaf M' (W' p.2) (e' p.2)
+      (Over.mk (homOfLE (inf_le_right : V p ≤ W' p.2))) with he'V
+  have hnormV : ∀ p q, transitionUnitOfCover M V eV p q ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (V p ⊓ V q) := fun p q =>
+    transitionUnitOfCover_restrict_mem_sectionUnits M W e hnorm Prod.fst V
+      (fun p => inf_le_left) p q
+  have hnorm'V : ∀ p q, transitionUnitOfCover M' V e'V p q ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (V p ⊓ V q) := fun p q =>
+    transitionUnitOfCover_restrict_mem_sectionUnits M' W' e' hnorm' Prod.snd V
+      (fun p => inf_le_right) p q
+  -- the tensor dataset for `Q + Q'`
+  obtain ⟨σ, hfr, hrel⟩ := exists_frame_mul M M' V eV e'V
+  obtain ⟨e'', hmulco⟩ := exists_over_trivialization_of_frames (M ⊗ M') V σ hfr
+    (fun p q => transitionUnitOfCover M V eV p q * transitionUnitOfCover M' V e'V p q)
+    (fun p q => by rw [Units.val_mul]; exact hrel p q)
+  have hM'' : (kappa E hsm t (Q + Q')).val = toSkeleton (M ⊗ M') := by
+    have hMv : (kappa E hsm t Q).val = toSkeleton M := hM
+    have hM'v : (kappa E hsm t Q').val = toSkeleton M' := hM'
+    calc (kappa E hsm t (Q + Q')).val
+        = (kappa E hsm t Q * kappa E hsm t Q').val :=
+          congrArg Units.val (kappa_add E hsm t Q Q')
+      _ = (kappa E hsm t Q).val * (kappa E hsm t Q').val := Units.val_mul _ _
+      _ = toSkeleton M * toSkeleton M' := by rw [hMv, hM'v]
+      _ = toSkeleton (M ⊗ M') := (Skeleton.toSkeleton_tensorObj _ _).symm
+  have hnorm'' : ∀ p q, transitionUnitOfCover (M ⊗ M') V e'' p q ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (V p ⊓ V q) := fun p q => by
+    rw [hmulco p q]
+    exact mul_mem (hnormV p q) (hnorm'V p q)
+  calc weilPairingKM E hsm t N P hP (Q + Q') (add_mem hQ hQ')
+      = torsionSplittingEval E hsm t N (Q + Q') (add_mem hQ hQ') (M ⊗ M') hM'' V hV e''
+          hnorm'' P hP :=
+        weilPairingKM_eq_torsionSplittingEval E hsm t N P hP (Q + Q') (add_mem hQ hQ')
+          (M ⊗ M') hM'' V hV e'' hnorm''
+    _ = torsionSplittingEval E hsm t N Q hQ M hM V hV eV hnormV P hP *
+          torsionSplittingEval E hsm t N Q' hQ' M' hM' V hV e'V hnorm'V P hP :=
+        torsionSplittingEval_mul_of_transitionUnitOfCover_mul E hsm t N Q hQ M hM V hV eV
+          hnormV Q' (Q + Q') hQ' (add_mem hQ hQ') M' (M ⊗ M') hM' hM'' e'V e'' hnorm'V
+          hnorm'' hmulco P hP
+    _ = weilPairingKM E hsm t N P hP Q hQ * weilPairingKM E hsm t N P hP Q' hQ' := by
+        rw [← weilPairingKM_eq_torsionSplittingEval E hsm t N P hP Q hQ M hM V hV eV
+            hnormV,
+          ← weilPairingKM_eq_torsionSplittingEval E hsm t N P hP Q' hQ' M' hM' V hV e'V
+            hnorm'V]
 
 end Bridge
 
