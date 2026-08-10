@@ -353,4 +353,72 @@ theorem kappa_pastingMap (Q : (A.curve.baseChange t).Point (𝟙 T)) :
     _ = kappa A.curve A.curve.smooth t Q :=
         ((kappa_eq_picRelProj A.curve A.curve.smooth t Q).trans (hval' x')).symm
 
+/-- **(YR-1a-iii, hM)** The `pm`-pulled dataset's module represents the `A`-side
+`κ`-class: mirror of `hM_localPullback` with `kappa_pastingMap`. -/
+theorem hM_pastingMap (Q : (A.curve.baseChange t).Point (𝟙 T))
+    (M : (pullback B.curve.π (t ≫ g.baseHom)).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (pullback B.curve.π (t ≫ g.baseHom))
+      (kappa B.curve B.curve.smooth (t ≫ g.baseHom) (pushSection g t Q)).val =
+        toSkeleton M) :
+    letI := Scheme.Modules.monoidalCategory (pullback A.curve.π t)
+    (kappa A.curve A.curve.smooth t Q).val =
+      toSkeleton ((Scheme.Modules.pullback (pastingMap g t)).obj M) := by
+  letI := Scheme.Modules.monoidalCategory (pullback B.curve.π (t ≫ g.baseHom))
+  letI := Scheme.Modules.monoidalCategory (pullback A.curve.π t)
+  have hM'' : (kappa B.curve B.curve.smooth (t ≫ g.baseHom) (pushSection g t Q)).val =
+      toSkeleton M := hM
+  calc (kappa A.curve A.curve.smooth t Q).val
+      = (Scheme.Pic.map (pastingMap g t)
+          (kappa B.curve B.curve.smooth (t ≫ g.baseHom) (pushSection g t Q))).val :=
+        congrArg Units.val (kappa_pastingMap g t Q).symm
+    _ = (Scheme.Modules.pullback (pastingMap g t)).mapSkeleton.obj
+          (kappa B.curve B.curve.smooth (t ≫ g.baseHom) (pushSection g t Q)).val :=
+        Scheme.Pic.map_val _ _
+    _ = (Scheme.Modules.pullback (pastingMap g t)).mapSkeleton.obj (toSkeleton M) :=
+        congrArg _ hM''
+    _ = toSkeleton ((Scheme.Modules.pullback (pastingMap g t)).obj M) :=
+        Functor.mapSkeleton_obj_toSkeleton _ M
+
+/-- **(YR-1a-iii, hnorm)** The `pm`-pulled dataset's cocycle is normalised along the
+`A`-side zero section: mirror of `hnorm_localPullback` with the zero square
+`baseChangeZero_pastingMap`. -/
+theorem hnorm_pastingMap (M : (pullback B.curve.π (t ≫ g.baseHom)).Modules)
+    {ι : Type*} (W : ι → (pullback B.curve.π (t ≫ g.baseHom)).Opens)
+    (e : ∀ i, M.over (W i) ≅
+      _root_.SheafOfModules.unit
+        ((pullback B.curve.π (t ≫ g.baseHom)).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover M W e i j ∈
+      sectionUnits (baseChangeZero B.curve.π B.curve.zero B.curve.zero_π
+        (t ≫ g.baseHom)) (W i ⊓ W j)) (i j : ι) :
+    transitionUnitOfCover ((Scheme.Modules.pullback (pastingMap g t)).obj M)
+        (fun i => pastingMap g t ⁻¹ᵁ W i)
+        (fun i => localPullbackTrivializationT (pastingMap g t) M (W i) (e i)) i j ∈
+      sectionUnits (baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t)
+        (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j) := by
+  have hzcomp : baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t ≫ pastingMap g t =
+      𝟙 T ≫ baseChangeZero B.curve.π B.curve.zero B.curve.zero_π (t ≫ g.baseHom) :=
+    (baseChangeZero_pastingMap g t).trans (Category.id_comp _).symm
+  rw [mem_sectionUnits_iff,
+    transitionUnitOfCover_localPullback (pastingMap g t) M W e i j]
+  refine ((congrArg (sectionEval (baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t)
+      (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j))
+      (map_app_eq_unitPullback (pastingMap g t) (W i ⊓ W j)
+        (transitionUnitOfCover M W e i j))).trans ?_)
+  refine ((sectionEval_unitPullback (pastingMap g t)
+    (baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t) (le_of_eq rfl)
+    (transitionUnitOfCover M W e i j)).trans ?_)
+  refine ((resUnit_sectionEval_congr hzcomp (W i ⊓ W j)
+    (transitionUnitOfCover M W e i j)
+    ((baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t).preimage_mono
+      (le_of_eq rfl))
+    (by rw [← hzcomp]
+        exact (baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t).preimage_mono
+          (le_of_eq rfl))).trans ?_)
+  refine ((congrArg _ ((sectionEval_comp (𝟙 T)
+    (baseChangeZero B.curve.π B.curve.zero B.curve.zero_π (t ≫ g.baseHom))
+    (W i ⊓ W j) (transitionUnitOfCover M W e i j)).trans ?_)).trans (map_one _))
+  rw [show sectionEval (baseChangeZero B.curve.π B.curve.zero B.curve.zero_π
+      (t ≫ g.baseHom)) (W i ⊓ W j) (transitionUnitOfCover M W e i j) = 1 from hnorm i j]
+  exact map_one _
+
 end ModularCurves
