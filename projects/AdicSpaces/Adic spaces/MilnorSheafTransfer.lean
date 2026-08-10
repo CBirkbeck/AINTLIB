@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».PresheafFunctoriality
 import «Adic spaces».StructureSheaf
+import «Adic spaces».EmbeddingTopo
 
 /-!
 # Abstract Milnor descent for sheafiness (campaign B, AG1.d skeleton)
@@ -191,6 +192,18 @@ theorem pushCoveringC_isRational (sq : MilnorSquareData φB φC φD hφB hφC h�
   obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
   exact sq.pushC_isRational W (hC₀.piece hW)
 
+/-- Transport along an equality of data is continuous (eliminated by `subst`). -/
+theorem cast_continuous {D₁ D₂ : RationalLocData B} (h : D₁ = D₂) :
+    Continuous (fun v : presheafValue D₁ => h ▸ v : presheafValue D₁ → presheafValue D₂) := by
+  subst h
+  exact continuous_id
+
+/-- Transport along an equality of `C`-data is continuous. -/
+theorem cast_continuous_C {D₁ D₂ : RationalLocData C} (h : D₁ = D₂) :
+    Continuous (fun v : presheafValue D₁ => h ▸ v : presheafValue D₁ → presheafValue D₂) := by
+  subst h
+  exact continuous_id
+
 /-- Cast-compatibility of the `B`-leg push with restriction: the transported
 per-piece row equals the restriction of the base row (the ▸ is eliminated by
 substituting the free target datum). -/
@@ -282,7 +295,34 @@ theorem isSheafy_of_milnorSquare
       · simp only [hg]
         exact sq.cast_push_restriction_C (C₀.hsubset _ (selC E).2) (hselC_eq E)
           ((sq.pushCoveringC C₀).hsubset E.1 E.2) x
-    sorry
+    have hg_cont : Continuous g := by
+      rw [hg]
+      refine Continuous.prodMk (continuous_pi fun E => ?_) (continuous_pi fun E => ?_)
+      · exact (MilnorSquareData.cast_continuous (hselB_eq E)).comp
+          ((presheafValueMapOfHom_continuous φB hφB _ _ _ _).comp (continuous_apply _))
+      · exact (MilnorSquareData.cast_continuous_C (hselC_eq E)).comp
+          ((presheafValueMapOfHom_continuous φC hφC _ _ _ _).comp (continuous_apply _))
+    have hgf : Topology.IsEmbedding (g ∘ productRestrictionSub R C₀) := by
+      have heq : (g ∘ productRestrictionSub R C₀) =
+          (fun q : (presheafValue (sq.pushB C₀.base)) ×
+              (presheafValue (sq.pushC C₀.base)) =>
+            (productRestrictionSub B (sq.pushCoveringB C₀) q.1,
+             productRestrictionSub C (sq.pushCoveringC C₀) q.2)) ∘
+          (fun x : presheafValue C₀.base =>
+            (presheafValueMapOfHom φB hφB C₀.base (sq.pushB C₀.base)
+              (sq.pushB_s C₀.base) (sq.pushB_T C₀.base) x,
+             presheafValueMapOfHom φC hφC C₀.base (sq.pushC C₀.base)
+              (sq.pushC_s C₀.base) (sq.pushC_T C₀.base) x)) := by
+        funext x
+        exact hfact x
+      rw [heq]
+      exact ((hB.embedding _ (sq.pushCoveringB_isRational hC₀)).prodMap
+        (hC.embedding _ (sq.pushCoveringC_isRational hC₀))).comp
+        (sq.row_embedding C₀.base hC₀.1)
+    exact Topology.IsEmbedding.of_comp
+      (continuous_pi fun W => restrictionMapHom_continuous C₀.base W.1
+        (C₀.hsubset W.1 W.2))
+      hg_cont hgf
   · -- Gluing half ([WP-paper] l.613–627): push, glue at the vertices, compare in
     -- `D` by separation, descend by `row_glue`, recover per-piece by
     -- `row_injective`.
