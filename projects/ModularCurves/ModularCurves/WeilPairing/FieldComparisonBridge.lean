@@ -118,7 +118,14 @@ quantify `P' : (W.baseChange K).toAffine.Point` and state the RHS at the curve
 `W.baseChange K` (its `[IsElliptic]`-instances transport along `map`); a consuming
 corollary collapses to `W` later via mathlib `WeierstrassCurve.map_id`. This keeps the
 bridge statement dictionary-native. Then prove via the KE-valued specPoints strategy in
-the docstring above. -/
+the docstring above.
+FURTHER BRICK (found while elaborating): the wrinkle also hits the FunctionField slot —
+`translateAlgEquivOfPoint (W.baseChange K) P'` acts on `(W.baseChange K).toAffine.FunctionField`,
+not `W.toAffine.FunctionField`. Add the one-time brick
+`functionFieldSelfBaseChangeEquiv : W.toAffine.FunctionField ≃+* (W.baseChange K).toAffine.FunctionField`
+built from mathlib `WeierstrassCurve.Affine.CoordinateRing.map (RingHom.id K)`-functoriality
+(Point.lean:184) + `IsLocalization.ringEquivOfRingEquiv` (same pattern as
+`projModelFunctionFieldEquiv` above), and route the U5c-2 conjugation through it. -/
 
 end Bridge
 
