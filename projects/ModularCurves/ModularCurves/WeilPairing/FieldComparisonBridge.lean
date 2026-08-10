@@ -36,6 +36,7 @@ closes the field leaf (U5d/U5e).
 universe u
 
 open AlgebraicGeometry CategoryTheory Limits HomogeneousIdeal
+  CategoryTheory.MonoidalCategory
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
@@ -79,13 +80,42 @@ noncomputable def projModelFunctionFieldEquiv [IsIntegral (projModel W)] :
     (coordRingToZSection W)
     (MulEquivClass.map_nonZeroDivisors (coordRingToZSection W))).symm
 
-/- **(U5c-2, the translation bridge — the largest missing API of the U5 leaf; statement
-deferred until `projModelFunctionFieldEquiv` is proven, since it conjugates through it —
-a bare-∃ form would be vacuous.)** Board-level spec (tickets.md §U5c-2): for a `K`-point
-`P` of the model with dictionary image `P' : W.toAffine.Point`, the function-field map
-induced by the scheme translation `translateByPoint` (through the `𝟙`-base-change
-collapse iso and `Scheme.Hom.functionFieldMap`) equals `translateAlgEquivOfPoint W P'`
-conjugated by `projModelFunctionFieldEquiv`. -/
+/- **(U5c-2, the translation bridge — the core comparison API)** The function-field
+action of the scheme-level translation automorphism (`translateByIso` on the model
+record, no base-change clothing) is HasseWeil's `translateAlgEquivOfPoint`, conjugated
+through `projModelFunctionFieldEquiv`. The section `x` and the affine point `P'`
+correspond under the points dictionary (`projModelPointsEquiv`), expressed through the
+underlying morphism of `x`.
+
+Convention check (recorded per the validation): whether the right-hand side is
+`translateAlgEquivOfPoint W P'` or its inverse is pinned during the proof by computing
+one coordinate on the `Z`-chart; the statement records the natural orientation.
+
+Proof strategy (validated): both sides are ring maps out of `W.toAffine.FunctionField`
+determined by their values on the coordinate generators; compute the left side's values
+via the `KE`-valued `specPoints` machinery (`mulModelHom_specPoints` at `K := KE`
+applied to the translated generic point) and match HasseWeil's slope formulas. -/
+/- U5c-2 STATEMENT DRAFT (elaboration in progress — resume here):
+theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
+    (x : 𝟙_ (Over (Spec (CommRingCat.of K))) ⟶ (modelEllipticCurve W).asOver)
+    (p : SpecPoints (projModel W) (projModelπ W) K)
+    (hxp : x.left = p.1)
+    (P' : W.toAffine.Point) (hP' : projModelPointsEquiv W K p = P'.baseChange K)
+    [IsDominant ((GrpObj.translateByIso (E := (modelEllipticCurve W).asOver) x).hom.left)] :
+    (projModelFunctionFieldEquiv W).toRingHom.comp
+      (((GrpObj.translateByIso (E := (modelEllipticCurve W).asOver) x).hom.left).functionFieldMap.hom.comp
+        (projModelFunctionFieldEquiv W).symm.toRingHom) =
+      (translateAlgEquivOfPoint W P').toRingEquiv.toRingHom := by
+  sorry
+
+
+Elaboration fixes found so far: `translateByIso` is `ModularCurves.EllipticCurve.translateByIso`
+(namespace EllipticCurve, E implicit from x's type — NOT GrpObj); `SpecPoints` needs
+`[Algebra K K]` (present); the points-dictionary target is `(W.baseChange K).toAffine.Point`
+while `translateAlgEquivOfPoint` wants `W.toAffine.Point` — the self-baseChange wrinkle:
+either state the RHS at `W.baseChange K` (transport the [IsElliptic]-instances) or use
+mathlib `WeierstrassCurve.map_id` + `Point.map` to collapse; check how AdditionSpecPoints
+handles the same wrinkle before choosing. -/
 
 end Bridge
 
