@@ -197,11 +197,22 @@ end MilnorSquareData
 reviewer §4.1): if a strict Milnor square-with-rows exists over `R` and the three
 vertices `B`, `C`, `D` are sheafy, then `R` is sheafy. -/
 theorem isSheafy_of_milnorSquare
+    [DecidableEq (RationalLocData B)] [DecidableEq (RationalLocData C)]
+    [DecidableEq (RationalLocData D)]
     (φB : R →+* B) (φC : R →+* C) (φD : R →+* D)
     (hφB : Continuous φB) (hφC : Continuous φC) (hφD : Continuous φD)
     (sq : MilnorSquareData φB φC φD hφB hφC hφD)
     (hB : IsSheafy B) (hC : IsSheafy C) (hD : IsSheafy D) :
     IsSheafy R := by
-  sorry
+  constructor
+  · -- Embedding half ([WP-paper] l.600–612): factor the product restriction of `R`
+    -- through the vertex product restrictions via the row, then `of_comp`.
+    intro C₀ hC₀
+    sorry
+  · -- Gluing half ([WP-paper] l.613–627): push, glue at the vertices, compare in
+    -- `D` by separation, descend by `row_glue`, recover per-piece by
+    -- `row_injective`.
+    intro C₀ hC₀ f hcompat
+    sorry
 
 end ValuationSpectrum
