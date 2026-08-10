@@ -1,0 +1,198 @@
+# formalization.yaml — self-report for the AdicSpaces project, in the schema of
+# https://github.com/mathlib-initiative/formalization.yaml (v0.3).
+#
+# NOTE ON THE TWO FILES. This is NOT the same artifact as the sibling
+# `formalisation.yaml` (British spelling, `schema: 1`). That one is a GENERATED
+# inventory — cited results, modules, statement digests — consumed by
+# `scripts/check_formalisation.py` to detect drift. It is an internal manifest and does not
+# follow any external schema. This file is the small, hand-written, standards-conformant
+# self-report intended for outside readers and tooling.
+#
+# FIELDS LEFT BLANK ARE NOT YET KNOWN — the remaining ones (the source licence, spend,
+# wall time, hardware, prompting notes, acknowledgements) are human-supplied and are
+# deliberately empty rather than guessed.
+#
+# `sources[].license` is the licence of the SOURCE MATERIAL being formalized — the paper or
+# notes whose statements were transcribed — not the licence of this Lean code, which is
+# `project.license` above.
+
+version: "v0.3"
+
+project:
+  name: "AINTLIB / AdicSpaces"
+  authors: ["Christopher Birkbeck"]  # [required] from repo ownership + git history; ADD
+                                   # CO-AUTHORS if others contributed to this formalization
+                                   # (distinct from the source paper's author list).
+  license: "Apache-2.0"            # [required] matches the repository (LICENSE on `main`,
+                                   # commit 1c1c74664) and the Lean file headers. This
+                                   # branch forked before that commit and so does not
+                                   # itself carry the LICENSE file — housekeeping only.
+
+sources:
+  - title: "Adic Spaces (lecture notes)"
+    authors: ["Torsten Wedhorn"]
+    id: "wedhorn-adic-spaces"
+    type: "lecture-notes"
+    license: "arXiv nonexclusive-distrib/1.0"   # arXiv:1910.05934
+    author_contacted: "no"
+    prior_work: "None known in Lean at this scope."
+
+  - title: "Uniform sheafy Tate domains that are not stably uniform"
+    authors: ["Christopher Birkbeck", "Alex Torzewski"]
+    id: "fjp"
+    type: "preprint"
+    license: "none stated"         # no licence appears on the paper page; the authors may
+                                   # wish to state one
+    author_contacted: "n/a — a source author is an author of this formalization"
+    prior_work: >-
+      None known. The paper's two headline theorems are the results formalized here: the
+      finite-jet pinching algebra (cited [FJP] in the Lean docstrings; `thm:main`, Theorem
+      1.3 in the revision the docstrings cite) and the §6 weighted-parity rationally stably
+      reduced example (cited [WP]; `thm:rationally-reduced-example`, Theorem 6.2).
+    # https://cbirkbeck.github.io/uniform-sheafy-tate-domains/
+    # No arXiv identifier or DOI as of 2026-08-10.
+
+  - title: "The Nonarchimedean Scottish Book"
+    authors: ["Kiran S. Kedlaya (editor)"]
+    id: "nonarchimedean-scottish-book"
+    type: "problem-list"
+    license: "none stated"         # the wiki carries no explicit copyright/licence notice
+    author_contacted: "no"
+    prior_work: "None known in Lean."
+    # https://scripts.mit.edu/~kedlaya/wiki/index.php?title=The_Nonarchimedean_Scottish_Book
+    # On this branch the problem list is STATED (Lean statements, `sorry` bodies as open
+    # problems); the two problems answered by the finite-jet algebra are certified on the
+    # `dev/adic-spaces` branch.
+
+status:
+  scope: >-
+    Huber/Tate rings, adic spectra, rational localizations and the structure presheaf
+    (Wedhorn); the [FJP] finite-jet pinching algebra and its chart, over the restricted
+    Laurent-series base of the paper's earlier revision (any coefficient field) with a
+    generic-CDVF layer (`FiniteJetOver`); the [WP] §6 weighted-parity algebra — uniform,
+    strongly sheafy, rationally stably reduced, not stably uniform — over an abstract
+    complete ultrametric nonarchimedean field whose valuation ring is a DVR; and formal
+    statements of the Nonarchimedean Scottish Book problem list.
+  sorry_count: 0                   # scope: the CERTIFIED endpoints reported here — all five
+                                   # [FJP] Theorem 1.3 conclusions and seven of the eight
+                                   # [WP] Theorem 6.2 endpoints. Their axiom sets are exactly
+                                   # [propext, Classical.choice, Quot.sound] (no sorryAx),
+                                   # checked per-result by comparator. The one exception is
+                                   # [WP] (3) rationally-stably-reduced, which is complete in
+                                   # every example-specific input but still consumes the core
+                                   # campaign's open Wedhorn Prop 8.30 flatness — see its
+                                   # main_results entry. The wider repository tree carries
+                                   # WIP `sorry`s outside this report's scope (Scottish Book
+                                   # problem STATEMENTS, general 8.28(b) campaign frontiers);
+                                   # see the generated `formalisation.yaml` per-group counts.
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+
+  main_results:
+    - declaration: "FiniteJet.finiteJet_isSheafy"
+      file: "Adic spaces/FJP/FiniteJetMain.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "Adic spaces/Comparator/comparator-config.json"
+      literature_dependencies: []
+
+    - declaration: "FiniteJet.finiteJet_not_stablyUniform"
+      file: "Adic spaces/FJP/FiniteJetMain.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "Adic spaces/Comparator/comparator-config.json"
+      literature_dependencies: []
+
+    - declaration: "WeightedParity.weightedParity_isSheafyComplete_of_dvr"
+      file: "Adic spaces/WP/Main.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "Adic spaces/Comparator/wp-config.json"
+      literature_dependencies: []
+
+    - declaration: "WeightedParity.weightedParity_chainReduced_unconditional_of_dvr"
+      file: "Adic spaces/WP/Main.lean"
+      sorry_count: 0               # no sorry in any WP-side (example-specific) input: all
+                                   # head-reducedness leaves are discharged at maximal ideals
+      axioms: ["propext", "Classical.choice", "Quot.sound", "sorryAx"]
+      # sorryAx enters ONLY through the core development's Wedhorn Prop 8.30 restriction
+      # flatness (`prop_8_30_flat_clean`), an open frontier of the general 8.28(b)
+      # campaign. The statement is pinned in `Comparator/WPChallenge.lean` but not yet in
+      # `theorem_names`; once 8.30 lands, adding the name back completes the certificate.
+      comparator_config: "Adic spaces/Comparator/wp-config.json"
+      literature_dependencies:
+        - "Wedhorn, *Adic Spaces*, Prop 8.30 (rational-restriction flatness) — the one
+           open input"
+
+    - declaration: "WeightedParity.weightedParity_not_stablyUniform_of_dvr"
+      file: "Adic spaces/WP/Main.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "Adic spaces/Comparator/wp-config.json"
+      literature_dependencies: []
+
+automation:
+  methods:
+    - method: "result discovery — the underlying mathematics"
+      models: ["ChatGPT 5.6 Sol"]
+      framework: ""
+      tool_setup: ""
+      cost:
+        wall_time: ""
+        spend_usd: "1 month of a ChatGPT Pro subscription (flat-rate, not metered)"
+        hardware: ""
+      prompting_notes: >-
+        Per the source paper's abstract, its two main results are due to ChatGPT 5.6 Sol.
+        This is provenance of the MATHEMATICS, not of the Lean code.
+    - method: "Lean formalization"
+      models: ["Claude Fable 5"]
+      framework: "Claude Code"
+      tool_setup: >-
+        Lean 4 with mathlib; per-project dev branches in one Lake workspace; automated
+        cleanup lanes on `main`. See CLAUDE.md.
+      cost:
+        wall_time: ""
+        spend_usd: "4 months of a Claude Code Max 20x subscription (flat-rate, not metered)"
+        hardware: ""
+      prompting_notes: >-
+        The source paper records that the Lean formalisation was carried out by Claude Code.
+  spend_usd: "4 months Claude Code Max 20x + 1 month ChatGPT Pro"
+  notes: >-
+    COST CAVEAT: both figures are flat-rate subscriptions, not per-token metering, and each
+    subscription covered all of the holder's work over that period rather than this project
+    alone. So the subscription cost is an UPPER BOUND on what is attributable here, not a
+    measurement of it, and no USD figure is quoted for that reason.
+    Statement-level certification is available via leanprover/comparator; see
+    `scripts/certify.sh` and the two configs referenced above. This branch pins Lean
+    v4.33.0 (stable) + mathlib v4.33.0 — the first stable release line carrying the fix
+    for kernel soundness bug leanprover/lean4#14576.
+
+fidelity:
+  divergences: >-
+    (1) SCOPE OF THE FJP BASE. The paper states its main theorem over a complete discretely
+    valued nonarchimedean field k. The certified statements (`FiniteJetMain.lean`)
+    instantiate k at the restricted Laurent-series field over an arbitrary coefficient
+    field F — the base of the revision the Lean docstrings cite; the `FiniteJetOver` layer
+    additionally states the uniform / domain / nonnoetherian / not-stably-uniform endpoints
+    over an abstract such k (any complete ultrametric nontrivially-normed field, with the
+    uniformizer explicit or chosen from a DVR hypothesis).
+    (2) THE WP BASE. [WP] Theorem 6.2 is certified over an abstract complete ultrametric
+    nontrivially-normed field K with `IsDiscreteValuationRing 𝒪[K]` — the paper's "complete
+    discretely valued nonarchimedean field", with "discretely valued" rendered as the DVR
+    property of the valuation ring.
+    (3) RATIONALLY STABLY REDUCED. The paper's "every finite iterated rational localization
+    is reduced" is rendered as the cumulative chain recursion `ChainReduced 𝒜 n` for all n
+    (depth-≤-n iterated rational localizations are reduced); the certificate quantifies
+    over n.
+    (4) STRONGLY SHEAFY. The paper's "(strongly) sheafy" (every 𝒜⟨V₁,…,Vₛ⟩ is sheafy) is
+    rendered by the shifted-weight algebras (`shiftWeight`, [WP] §6.5): the certificate
+    pins sheafiness of `WPA K (shiftWeight id s)` for every s, and sheafiness itself is
+    "every valid ring of integral elements gives a sheaf" (`IsSheafyComplete`, the
+    complete-ring form of Wedhorn Definition 8.26).
+  statement_provenance: >-
+    Challenge files (`Adic spaces/Comparator/Challenge.lean`, `WPChallenge.lean`) restate
+    the headline conclusions from the definition layer only; their import closures contain
+    none of the proving modules (verified mechanically; see `Comparator/README.md`).
+  checked_by: ""                   # human sign-off pending
+
+acknowledgements: ""
