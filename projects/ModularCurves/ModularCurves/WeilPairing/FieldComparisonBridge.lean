@@ -198,7 +198,20 @@ theorem coordRingToZSection_algebraMap (a : K) :
       = (HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
           (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
         ((algebraMapGradeZero (projIdeal W)) a) := by
-    sorry
+    have hcomp := congrArg (fun (m : K →+* HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) => m a)
+      (algebraMap_gradeZero_comp_eq W 2)
+    have hchase : (chartCoordEquiv W 2) ((algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K ⧸
+          Ideal.span {(MvPolynomial.dehomogenizeAux K 2) W.toProjective.polynomial})) a)
+        = (HomogeneousLocalization.Away.map (quotientGradingHom (projIdeal W))
+            (MvPolynomial.X 2))
+          (((MvPolynomial.chartRingEquiv K (2 : Fin 3)).symm :
+            MvPolynomial {j : Fin 3 // j ≠ 2} K →+*
+              HomogeneousLocalization.Away
+                (MvPolynomial.homogeneousSubmodule (Fin 3) K) (MvPolynomial.X 2))
+            ((algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K)) a)) := by
+      sorry
+    exact hchase.trans (hcomp.symm.trans (by rfl))
   refine Eq.trans (congrArg (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
       (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv hlegB) ?_
