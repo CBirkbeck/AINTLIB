@@ -106,6 +106,8 @@ built from mathlib `WeierstrassCurve.Affine.CoordinateRing.map (RingHom.id K)`-f
 (Point.lean:184) + `IsLocalization.ringEquivOfRingEquiv` (same pattern as
 `projModelFunctionFieldEquiv` above), and route the U5c-2 conjugation through it. -/
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **(U5c-2 sub-brick — the chart-constants identification)** The chart identification
 `coordRingToZSection` carries the `K`-constant of the coordinate ring to the restriction
 of the structure-pulled global constant. The `chartZAffineEquiv`-leg is an `≃ₐ[K]`
@@ -136,6 +138,60 @@ theorem coordRingToZSection_algebraMap (a : K) :
         Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))) := by
     show _ ≫ (Proj.toSpecZero _ ≫ Spec.map _) = _
     rw [← Category.assoc, Proj.awayι_toSpecZero]
+  -- S1: re-express the restriction through the awayι presentation
+  have hres := (Iso.comp_inv_eq _).mp (Proj_awayι_appTop_ΓSpecIso
+    (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+    (mk_X_mem_quotientGrading_one W 2) one_pos).symm
+  rw [hres]
+  -- S2: the constant's transport through the two Spec.map legs
+  have helt : (Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).appTop.hom
+      ((projModelπ W).appTop.hom ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a))
+    = (Scheme.ΓSpecIso _).inv ((CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+        (quotientGrading (projIdeal W))
+        (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).hom
+          ((CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))).hom a)) := by
+    have h0 := congrArg
+      (fun m : Spec (CommRingCat.of (HomogeneousLocalization.Away
+          (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) ⟶
+        Spec (CommRingCat.of K) =>
+        m.appTop.hom ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a)) hπ
+    refine h0.trans ?_
+    have hn1 : (CommRingCat.Hom.hom (Scheme.Hom.app (Spec.map
+          (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W)))) ⊤))
+          ((ConcreteCategory.hom (Scheme.ΓSpecIso (CommRingCat.of K)).inv) a)
+        = (ConcreteCategory.hom (Scheme.ΓSpecIso
+              (CommRingCat.of ↥((projIdeal W).quotientGrading 0))).inv)
+            ((CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))).hom a) :=
+      (congrArg (fun m => CommRingCat.Hom.hom m a)
+        (Scheme.ΓSpecIso_inv_naturality
+          (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))))).symm
+    have hn2 : (CommRingCat.Hom.hom (Scheme.Hom.app (Spec.map
+          (CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+            (quotientGrading (projIdeal W))
+            (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))))) ⊤))
+          ((ConcreteCategory.hom (Scheme.ΓSpecIso
+              (CommRingCat.of ↥((projIdeal W).quotientGrading 0))).inv)
+            ((CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))).hom a))
+        = (ConcreteCategory.hom (Scheme.ΓSpecIso _).inv)
+            ((CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+              (quotientGrading (projIdeal W))
+              (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).hom
+              ((CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))).hom a)) :=
+      (congrArg (fun m => CommRingCat.Hom.hom m
+          ((CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))).hom a))
+        (Scheme.ΓSpecIso_inv_naturality
+          (CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+            (quotientGrading (projIdeal W))
+            (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))))).symm
+    exact (congrArg (CommRingCat.Hom.hom (Scheme.Hom.app (Spec.map
+        (CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+          (quotientGrading (projIdeal W))
+          (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))))) ⊤))
+      hn1).trans hn2
   sorry
 
 /-- **(U5c-2 brick)** The self-base-change collapse on function fields:
