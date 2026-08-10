@@ -5,7 +5,9 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.ModelVariableChange
+import ModularCurves.EllipticCurve.MulByHomDegree
 import ModularCurves.ForMathlib.DominantFunctionField
+import ModularCurves.GroupScheme.TranslationBySection
 import HasseWeil.HasseBound.WeilPairing.PairingProps
 
 /-!
@@ -42,43 +44,20 @@ attribute [local instance] MvPolynomial.gradedAlgebra
 
 namespace ModularCurves
 
+namespace EllipticCurve
+
 section Bridge
 
 variable {K : Type u} [Field K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.IsElliptic] [W.toAffine.IsElliptic]
 
-/-- **(U5c-1(ii))** The function field of the projective model is the function field of
-the affine Weierstrass curve: the `Z`-chart is an affine open with sections the affine
-coordinate ring, and both sides are its fraction field. The integrality instance is an
-argument (discharged at use sites by `isIntegral_projModel_u`, universe-polymorphic). -/
-noncomputable def projModelFunctionFieldEquiv [IsIntegral (projModel W)] :
-    (projModel W).functionField ≃+* W.toAffine.FunctionField := by
-  have hf := mk_X_mem_quotientGrading_one W 2
-  have hU : IsAffineOpen (Proj.basicOpen (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) := by
-    rw [← Proj.opensRange_awayι (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) hf one_pos]
-    exact isAffineOpen_opensRange _
-  haveI hnt : Nontrivial Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) :=
-    (coordRingToZSection W).symm.toEquiv.nontrivial
-  haveI hne : Nonempty (Proj.basicOpen (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) := by
-    by_contra h
-    have hbot : (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) = ⊥ := by
-      rw [← TopologicalSpace.Opens.not_nonempty_iff_eq_bot]
-      exact fun hcon => h hcon.to_subtype
-    refine (not_subsingleton_iff_nontrivial.mpr hnt) ?_
-    rw [hbot]
-    infer_instance
-  haveI := functionField_isFractionRing_of_isAffineOpen (X := projModel W) _ hU
-  exact (IsLocalization.ringEquivOfRingEquiv
-    (M := nonZeroDivisors W.toAffine.CoordinateRing)
-    (S := W.toAffine.FunctionField)
-    (Q := (projModel W).functionField)
-    (coordRingToZSection W)
-    (MulEquivClass.map_nonZeroDivisors (coordRingToZSection W))).symm
+/- **(U5c-1(ii)) — DISCHARGED BY REUSE.** `projModelFunctionFieldEquiv` already exists:
+`EllipticCurve/MulByHomDegree.lean:85` (K4 (B)), the identical `coordRingToZSection` +
+`functionField_isFractionRing_of_isAffineOpen` construction. The name clash that caught the
+duplication is the workspace working as intended. That file also carries the `[N]`-precedent
+for U5c-2: the L4-iii comparison `functionFieldMap [N] = mulByInt_pullbackAlgHom` mod
+`projModelFunctionFieldEquiv`, with `functionFieldMap_germToFunctionField` computing the
+chart-coordinate side — the translation bridge below mirrors that shape. -/
 
 /- **(U5c-2, the translation bridge — the core comparison API)** The function-field
 action of the scheme-level translation automorphism (`translateByIso` on the model
@@ -138,6 +117,32 @@ noncomputable def functionFieldSelfBaseChangeEquiv :
     rw [Algebra.algebraMap_self, WeierstrassCurve.map_id]
   rw [h]
 
+/-- **(U5c-2)** The translation bridge: the function-field action of the scheme-level
+translation automorphism equals HasseWeil's `translateAlgEquivOfPoint` (at the
+self-base-changed curve, per the recorded design), conjugated through the two proven
+dictionaries. Orientation to be convention-checked on one `Z`-chart coordinate during
+the proof; proof strategy: both sides are determined on the coordinate generators —
+compute the left side via the `KE`-valued specPoints machinery. -/
+theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
+    [(W.baseChange K).toAffine.IsElliptic]
+    (x : 𝟙_ (Over (Spec (CommRingCat.of K))) ⟶ (modelEllipticCurve W).asOver)
+    (p : SpecPoints (projModel W) (projModelπ W) K)
+    (hxp : x.left = p.1)
+    (P' : ((W.baseChange K).toAffine).Point)
+    (hP' : projModelPointsEquiv W K p = P')
+    (τ : projModel W ⟶ projModel W)
+    (hτ : τ = (translateByIso (modelEllipticCurve W) x).hom.left)
+    [IsDominant τ] :
+    (functionFieldSelfBaseChangeEquiv W).symm.toRingHom.comp
+      ((HasseWeil.translateAlgEquivOfPoint (W.baseChange K) P').toRingEquiv.toRingHom.comp
+        (functionFieldSelfBaseChangeEquiv W).toRingHom) =
+    (projModelFunctionFieldEquiv W).toRingHom.comp
+      (τ.functionFieldMap.hom.comp
+        (projModelFunctionFieldEquiv W).symm.toRingHom) := by
+  sorry
+
 end Bridge
+
+end EllipticCurve
 
 end ModularCurves
