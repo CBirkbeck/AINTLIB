@@ -115,4 +115,25 @@ theorem functionFieldMap_comp_germToFunctionField (f : X ⟶ Y) [IsDominant f]
   show f.functionFieldMap (Y.germToFunctionField U s) = X.germToFunctionField (f ⁻¹ᵁ U) (f.app U s)
   rw [functionFieldMap_germToFunctionField f U s]
 
+/-- **(functoriality)** The function-field pullback of a composite of dominant morphisms of
+irreducible schemes is the composite of the pullbacks. The eqToHom bookkeeping rides on
+`genericPoint_eq_of_isDominant`. -/
+theorem functionFieldMap_comp {Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
+    [IsDominant f] [IsDominant g] [IrreducibleSpace X] [IrreducibleSpace Y]
+    [IrreducibleSpace Z] [IsDominant (f ≫ g)] :
+    (f ≫ g).functionFieldMap = g.functionFieldMap ≫ f.functionFieldMap := by
+  unfold Scheme.Hom.functionFieldMap
+  rw [Scheme.Hom.stalkMap_comp]
+  refine TopCat.Presheaf.stalk_hom_ext _ fun U hxU => ?_
+  ext s
+  simp only [CommRingCat.comp_apply]
+  -- MANUAL CHAIN (both sides → germ_X of the composite-pulled section):
+  -- LHS: eqToHom(germ_Z-genZ) = germ_Z-at-(f≫g)(genX) [germ_eqToHom_stalk_apply];
+  --      g.stalkMap (f genX) germ = germ_Y-at-(f genX) (g.app s) [germ_stalkMap_apply g];
+  --      f.stalkMap germ = germ_X ((g≫f-apps) s) [germ_stalkMap_apply f].
+  -- RHS: inner eqToHom(germ_Z-genZ) = germ_Z-at-g(genY); g.stalkMap genY → germ_Y-genY (g.app s);
+  --      outer eqToHom: germ_Y-genY = germ_Y-at-(f genX) [point-eq (genericPoint_eq_of_isDominant f).symm];
+  --      f.stalkMap → germ_X (f.app (g.app s)). Sides agree (comp_app).
+  sorry
+
 end AlgebraicGeometry
