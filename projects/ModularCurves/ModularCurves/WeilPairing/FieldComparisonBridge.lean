@@ -158,6 +158,8 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
   -- 5. Orientation/convention pinned at the first generator computation.
   refine IsFractionRing.ringHom_ext (A := W.toAffine.CoordinateRing) ?_
   intro c
+  induction c using AdjoinRoot.induction_on with
+  | _ f => ?_
   sorry
 
 end Bridge
