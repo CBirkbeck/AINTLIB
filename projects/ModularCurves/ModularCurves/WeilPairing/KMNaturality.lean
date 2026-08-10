@@ -790,6 +790,229 @@ theorem torsionSplittingEval_restrictBase (hsm : SmoothOfRelativeDimension 1 E.�
     exact resUnit_unitPullback g le_rfl le_top
       (torsionSplittingEval E hsm t N Q hQ M hM W hW e hnorm P hP)
 
+/-- The transition cocycle of the pulled-back dataset is the image of the original
+cocycle (the exported form of NAT2's first barrier step). -/
+theorem transitionUnitOfCover_localPullback {X Y : Scheme.{u}} (f : Y ⟶ X)
+    (M : X.Modules) {ι : Type*} (W : ι → X.Opens)
+    (e : ∀ i, M.over (W i) ≅ _root_.SheafOfModules.unit (X.ringCatSheaf.over (W i)))
+    (i j : ι) :
+    transitionUnitOfCover ((Scheme.Modules.pullback f).obj M) (fun i => f ⁻¹ᵁ W i)
+        (fun i => localPullbackTrivializationT f M (W i) (e i)) i j =
+      Units.map (f.app (W i ⊓ W j)).hom.toMonoidHom (transitionUnitOfCover M W e i j) :=
+  (congrArg₂ (trivializationTransitionUnit _)
+    (restrict_localPullbackTrivialization f M (inf_le_left : W i ⊓ W j ≤ W i) (e i))
+    (restrict_localPullbackTrivialization f M (inf_le_right : W i ⊓ W j ≤ W j) (e j))).trans
+  (trivializationTransitionUnit_localPullbackTrivialization f M (W i ⊓ W j) _ _)
+
+/-- The pulled-back dataset's module represents the restricted `κ`-class: the `hM`-side of
+the pulled dataset, from `kappa_restrictBase`. -/
+theorem hM_localPullback (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t')
+    (Q : (E.baseChange t).Point (𝟙 T)) (M : (pullback E.π t).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+      (kappa E hsm t Q).val = toSkeleton M) :
+    letI := Scheme.Modules.monoidalCategory (pullback E.π t')
+    (kappa E hsm t' (restrictBase E t g hg Q)).val =
+      toSkeleton ((Scheme.Modules.pullback (baseChangeMap E.π g hg)).obj M) := by
+  letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+  letI := Scheme.Modules.monoidalCategory (pullback E.π t')
+  have hM'' : (kappa E hsm t Q).val = toSkeleton M := hM
+  calc (kappa E hsm t' (restrictBase E t g hg Q)).val
+      = (Scheme.Pic.map (baseChangeMap E.π g hg) (kappa E hsm t Q)).val :=
+        congrArg Units.val (kappa_restrictBase E hsm t g hg Q).symm
+    _ = (Scheme.Modules.pullback (baseChangeMap E.π g hg)).mapSkeleton.obj
+          (kappa E hsm t Q).val := Scheme.Pic.map_val _ _
+    _ = (Scheme.Modules.pullback (baseChangeMap E.π g hg)).mapSkeleton.obj
+          (toSkeleton M) := congrArg _ hM''
+    _ = toSkeleton ((Scheme.Modules.pullback (baseChangeMap E.π g hg)).obj M) :=
+        Functor.mapSkeleton_obj_toSkeleton _ M
+
+/-- The pulled-back dataset's cocycle is normalised along the zero section of `T'`: the
+`hnorm`-side of the pulled dataset. -/
+theorem hnorm_localPullback (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t')
+    (M : (pullback E.π t).Modules)
+    {ι : Type*} (W : ι → (pullback E.π t).Opens)
+    (e : ∀ i, M.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover M W e i j ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t) (W i ⊓ W j)) (i j : ι) :
+    transitionUnitOfCover ((Scheme.Modules.pullback (baseChangeMap E.π g hg)).obj M)
+        (fun i => baseChangeMap E.π g hg ⁻¹ᵁ W i)
+        (fun i => localPullbackTrivializationT (baseChangeMap E.π g hg) M (W i) (e i))
+        i j ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π t')
+        (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j) := by
+  have hzcomp : baseChangeZero E.π E.zero E.zero_π t' ≫ baseChangeMap E.π g hg =
+      g ≫ baseChangeZero E.π E.zero E.zero_π t :=
+    baseChangeZero_baseChangeMap E.π E.zero E.zero_π g hg
+  rw [mem_sectionUnits_iff,
+    transitionUnitOfCover_localPullback (baseChangeMap E.π g hg) M W e i j]
+  refine ((congrArg (sectionEval (baseChangeZero E.π E.zero E.zero_π t')
+      (baseChangeMap E.π g hg ⁻¹ᵁ W i ⊓ baseChangeMap E.π g hg ⁻¹ᵁ W j))
+      (map_app_eq_unitPullback (baseChangeMap E.π g hg) (W i ⊓ W j)
+        (transitionUnitOfCover M W e i j))).trans ?_)
+  refine ((sectionEval_unitPullback (baseChangeMap E.π g hg)
+    (baseChangeZero E.π E.zero E.zero_π t') (le_of_eq rfl)
+    (transitionUnitOfCover M W e i j)).trans ?_)
+  refine ((resUnit_sectionEval_congr hzcomp (W i ⊓ W j)
+    (transitionUnitOfCover M W e i j)
+    ((baseChangeZero E.π E.zero E.zero_π t').preimage_mono (le_of_eq rfl))
+    (by rw [← hzcomp]
+        exact (baseChangeZero E.π E.zero E.zero_π t').preimage_mono
+          (le_of_eq rfl))).trans ?_)
+  refine ((congrArg _ ((sectionEval_comp g (baseChangeZero E.π E.zero E.zero_π t)
+    (W i ⊓ W j) (transitionUnitOfCover M W e i j)).trans ?_)).trans (map_one _))
+  rw [show sectionEval (baseChangeZero E.π E.zero E.zero_π t) (W i ⊓ W j)
+      (transitionUnitOfCover M W e i j) = 1 from hnorm i j]
+  exact map_one _
+
+/-- **(AP-E1-NAT3, the restriction law)** The canonical pairing commutes with base change:
+`e_N(P|_{T'}, Q|_{T'}) = g^#(e_N(P, Q))`. Reads the `T`-value through its chosen dataset,
+pulls the dataset back (NAT2), and lets the master independence absorb the difference from
+the `T'`-chosen dataset. -/
+theorem weilPairingKM_restrictBase (hsm : SmoothOfRelativeDimension 1 E.π)
+    [IsSeparated E.π] (t : T ⟶ S) {t' : T' ⟶ S} (g : T' ⟶ T) (hg : g ≫ t = t') (N : ℕ)
+    (P : (E.baseChange t).Point (𝟙 T)) (hP : P ∈ torsionPoints E t N)
+    (Q : (E.baseChange t).Point (𝟙 T)) (hQ : Q ∈ torsionPoints E t N) :
+    weilPairingKM E hsm t' N (restrictBase E t g hg P)
+        (restrictBase_mem_torsionPoints E t g hg hP)
+        (restrictBase E t g hg Q) (restrictBase_mem_torsionPoints E t g hg hQ) =
+      unitPullback g ⊤ ⊤ le_rfl (weilPairingKM E hsm t N P hP Q hQ) :=
+  (weilPairingKM_eq_torsionSplittingEval E hsm t' N (restrictBase E t g hg P)
+    (restrictBase_mem_torsionPoints E t g hg hP)
+    (restrictBase E t g hg Q) (restrictBase_mem_torsionPoints E t g hg hQ)
+    ((Scheme.Modules.pullback (baseChangeMap E.π g hg)).obj
+      (exists_normalized_dataset E hsm t Q).choose)
+    (hM_localPullback E hsm t g hg Q (exists_normalized_dataset E hsm t Q).choose
+      (exists_normalized_dataset E hsm t Q).choose_spec.choose)
+    (fun i => baseChangeMap E.π g hg ⁻¹ᵁ
+      (exists_normalized_dataset E hsm t Q).choose_spec.choose_spec.choose_spec.choose i)
+    ((baseChangeMap E.π g hg).iSup_preimage_eq_top
+      (exists_normalized_dataset E hsm t Q).choose_spec.choose_spec.choose_spec.choose_spec.choose)
+    (fun i => localPullbackTrivializationT (baseChangeMap E.π g hg)
+      (exists_normalized_dataset E hsm t Q).choose
+      ((exists_normalized_dataset E hsm t Q).choose_spec.choose_spec.choose_spec.choose i)
+      ((exists_normalized_dataset E hsm t
+        Q).choose_spec.choose_spec.choose_spec.choose_spec.choose_spec.choose i))
+    (hnorm_localPullback E t g hg (exists_normalized_dataset E hsm t Q).choose
+      (exists_normalized_dataset E hsm t Q).choose_spec.choose_spec.choose_spec.choose
+      (exists_normalized_dataset E hsm t
+        Q).choose_spec.choose_spec.choose_spec.choose_spec.choose_spec.choose
+      (exists_normalized_dataset E hsm t
+        Q).choose_spec.choose_spec.choose_spec.choose_spec.choose_spec.choose_spec)).trans
+  (torsionSplittingEval_restrictBase E hsm t g hg N Q hQ
+    (exists_normalized_dataset E hsm t Q).choose
+    (exists_normalized_dataset E hsm t Q).choose_spec.choose
+    (exists_normalized_dataset E hsm t Q).choose_spec.choose_spec.choose_spec.choose
+    (exists_normalized_dataset E hsm t Q).choose_spec.choose_spec.choose_spec.choose_spec.choose
+    (exists_normalized_dataset E hsm t
+      Q).choose_spec.choose_spec.choose_spec.choose_spec.choose_spec.choose
+    (exists_normalized_dataset E hsm t
+      Q).choose_spec.choose_spec.choose_spec.choose_spec.choose_spec.choose_spec
+    P hP
+    (hM_localPullback E hsm t g hg Q (exists_normalized_dataset E hsm t Q).choose
+      (exists_normalized_dataset E hsm t Q).choose_spec.choose)
+    (hnorm_localPullback E t g hg (exists_normalized_dataset E hsm t Q).choose
+      (exists_normalized_dataset E hsm t Q).choose_spec.choose_spec.choose_spec.choose
+      (exists_normalized_dataset E hsm t
+        Q).choose_spec.choose_spec.choose_spec.choose_spec.choose_spec.choose
+      (exists_normalized_dataset E hsm t
+        Q).choose_spec.choose_spec.choose_spec.choose_spec.choose_spec.choose_spec))
+
 end RestrictBase
+
+section Bridge
+
+variable {S : Scheme.{u}} (E : EllipticCurve S)
+
+/-- A point killed by `[N]` gives an `N`-torsion section of the base-changed curve. -/
+theorem asSection_mem_torsionPoints {T : Scheme.{u}} {g : T ⟶ S} {N : ℕ} (x : E.Point g)
+    (hx : (x : T ⟶ E.E) ≫ E.mulByHom N = g ≫ E.zero) :
+    EllipticCurve.Point.asSection E g x ∈ torsionPoints E g N := by
+  refine mem_torsionPoints_of_comp_mulByHom E N _ ?_
+  calc ((EllipticCurve.Point.asSection E g x).1 : T ⟶ pullback E.π g) ≫
+        pullback.fst E.π g ≫ E.mulByHom (N : ℤ)
+      = (((EllipticCurve.Point.asSection E g x).1 : T ⟶ pullback E.π g) ≫
+          pullback.fst E.π g) ≫ E.mulByHom (N : ℤ) := (Category.assoc _ _ _).symm
+    _ = (x : T ⟶ E.E) ≫ E.mulByHom (N : ℤ) :=
+        congrArg (· ≫ E.mulByHom (N : ℤ)) (EllipticCurve.Point.asSection_val_fst E g x)
+    _ = g ≫ E.zero := hx
+    _ = (𝟙 T ≫ g) ≫ E.zero := congrArg (· ≫ E.zero) (Category.id_comp g).symm
+
+/-- **(AP-E1-YON1, reconstruction)** Restricting the first tautological point along the
+classifying map of a pair `(x, y)` recovers `x` (as a section of the base-changed curve). -/
+theorem restrictBase_univTorsionFst {T : Scheme.{u}} {g : T ⟶ S} {N : ℕ}
+    (x y : E.Point g)
+    (hx : (x : T ⟶ E.E) ≫ E.mulByHom N = g ≫ E.zero)
+    (hy : (y : T ⟶ E.E) ≫ E.mulByHom N = g ≫ E.zero)
+    (hk : (pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy)
+        (by simp) : T ⟶ pullback (E.torsionπ N) (E.torsionπ N)) ≫
+      (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) = g) :
+    restrictBase E (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+        (pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) (by simp)) hk
+        (univTorsionFst E N) =
+      EllipticCurve.Point.asSection E g x := by
+  refine Subtype.ext ?_
+  apply pullback.hom_ext
+  · refine (restrictBase_coe_fst E _ _ hk (univTorsionFst E N)).trans
+      (Eq.trans ?_ (EllipticCurve.Point.asSection_val_fst E g x).symm)
+    calc pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) (by simp) ≫
+          ((univTorsionFst E N).1 ≫
+            pullback.fst E.π (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N))
+        = pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) (by simp) ≫
+            (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) :=
+          congrArg _ (pullback.lift_fst _ _ _)
+      _ = (pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) (by simp) ≫
+            pullback.fst (E.torsionπ N) (E.torsionπ N)) ≫ E.torsionι N :=
+          (Category.assoc _ _ _).symm
+      _ = E.pointToTorsion x hx ≫ E.torsionι N :=
+          congrArg (· ≫ E.torsionι N) (pullback.lift_fst _ _ _)
+      _ = (x : T ⟶ E.E) := E.pointToTorsion_torsionι x hx
+  · refine ((restrictBase E _ _ hk (univTorsionFst E N)).2).trans ?_
+    exact ((EllipticCurve.Point.asSection E g x).2).symm
+
+/-- **(AP-E1-YON1, reconstruction — second slot)** Restricting the second tautological
+point recovers `y`. -/
+theorem restrictBase_univTorsionSnd {T : Scheme.{u}} {g : T ⟶ S} {N : ℕ}
+    (x y : E.Point g)
+    (hx : (x : T ⟶ E.E) ≫ E.mulByHom N = g ≫ E.zero)
+    (hy : (y : T ⟶ E.E) ≫ E.mulByHom N = g ≫ E.zero)
+    (hk : (pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy)
+        (by simp) : T ⟶ pullback (E.torsionπ N) (E.torsionπ N)) ≫
+      (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) = g) :
+    restrictBase E (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)
+        (pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) (by simp)) hk
+        (univTorsionSnd E N) =
+      EllipticCurve.Point.asSection E g y := by
+  refine Subtype.ext ?_
+  apply pullback.hom_ext
+  · refine (restrictBase_coe_fst E _ _ hk (univTorsionSnd E N)).trans
+      (Eq.trans ?_ (EllipticCurve.Point.asSection_val_fst E g y).symm)
+    calc pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) (by simp) ≫
+          ((univTorsionSnd E N).1 ≫
+            pullback.fst E.π (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N))
+        = pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) (by simp) ≫
+            (pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) :=
+          congrArg _ (pullback.lift_fst _ _ _)
+      _ = (pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) (by simp) ≫
+            pullback.snd (E.torsionπ N) (E.torsionπ N)) ≫ E.torsionι N :=
+          (Category.assoc _ _ _).symm
+      _ = E.pointToTorsion y hy ≫ E.torsionι N :=
+          congrArg (· ≫ E.torsionι N) (pullback.lift_snd _ _ _)
+      _ = (y : T ⟶ E.E) := E.pointToTorsion_torsionι y hy
+  · refine ((restrictBase E _ _ hk (univTorsionSnd E N)).2).trans ?_
+    exact ((EllipticCurve.Point.asSection E g y).2).symm
+
+/-- `weilPairingKM` depends only on the points, not on the membership witnesses or the
+way the points were assembled. -/
+theorem weilPairingKM_congr (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    {T : Scheme.{u}} (t : T ⟶ S) (N : ℕ)
+    {P P' Q Q' : (E.baseChange t).Point (𝟙 T)} (hPP : P = P') (hQQ : Q = Q')
+    (hP : P ∈ torsionPoints E t N) (hQ : Q ∈ torsionPoints E t N)
+    (hP' : P' ∈ torsionPoints E t N) (hQ' : Q' ∈ torsionPoints E t N) :
+    weilPairingKM E hsm t N P hP Q hQ = weilPairingKM E hsm t N P' hP' Q' hQ' := by
+  subst hPP; subst hQQ; rfl
+
+end Bridge
 
 end ModularCurves
