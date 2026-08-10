@@ -64,15 +64,45 @@ noncomputable def jetSquare :
   pushB := jetPushB F
   pushC := jetPushC F
   pushD := jetPushD F
-  pushB_s := by sorry
-  pushC_s := by sorry
-  pushD_s := by sorry
-  pushB_T := by sorry
-  pushC_T := by sorry
-  pushD_T := by sorry
-  pushB_isRational := by sorry
-  pushC_isRational := by sorry
-  pushD_isRational := by sorry
+  pushB_s := by
+    intro U hU
+    rw [jetPushB_eq F hU]
+    rfl
+  pushC_s := by
+    intro U hU
+    rw [jetPushC_eq F hU]
+    rfl
+  pushD_s := by
+    intro U hU
+    rw [jetPushD_eq F hU]
+    rfl
+  pushB_T := by
+    classical
+    intro U hU t ht
+    rw [jetPushB_eq F hU]
+    exact Finset.mem_image_of_mem _ ht
+  pushC_T := by
+    classical
+    intro U hU t ht
+    rw [jetPushC_eq F hU]
+    exact Finset.mem_image_of_mem _ ht
+  pushD_T := by
+    classical
+    intro U hU t ht
+    rw [jetPushD_eq F hU]
+    exact Finset.mem_image_of_mem _ ht
+  pushB_isRational := by
+    intro U hU
+    rw [jetPushB_eq F hU]
+    exact pushDatumB_isRational hU
+  pushC_isRational := by
+    intro U hU
+    rw [jetPushC_eq F hU]
+    exact pushDatumC_isRational hU
+  pushD_isRational := by
+    intro U hU
+    rw [jetPushD_eq F hU]
+    exact pushDatumD_isRational hU
   legB := rhoB F
   legC := rhoC F
   hlegB := continuous_rhoB
