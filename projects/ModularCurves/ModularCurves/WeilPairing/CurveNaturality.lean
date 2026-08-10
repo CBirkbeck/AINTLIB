@@ -123,4 +123,49 @@ theorem pushSection_mem_torsionPoints {N : ℕ} {P : (A.curve.baseChange t).Poin
   rw [pushSection_coe, Category.assoc, pastingMap_mulByN, ← Category.assoc, h,
     baseChangeZero_pastingMap]
 
+/-- **(YR-1a-ii, step 0)** The pasted pullback square: `pullback A.π t` is also a pullback
+of `B.π` along `t ≫ g.baseHom` (paste the defining square with the cartesian square of
+`g`). -/
+theorem isPullback_pasting :
+    IsPullback (pullback.fst A.curve.π t ≫ g.top) (pullback.snd A.curve.π t)
+      B.curve.π (t ≫ g.baseHom) :=
+  (IsPullback.of_hasPullback A.curve.π t).paste_horiz g.isPullback
+
+/-- The pasting map is the comparison of two pullback presentations, hence an
+isomorphism. -/
+instance isIso_pastingMap : IsIso (pastingMap g t) := by
+  have h : pastingMap g t = (isPullback_pasting g t).isoPullback.hom := by
+    apply pullback.hom_ext
+    · rw [pastingMap_fst, IsPullback.isoPullback_hom_fst]
+    · rw [pastingMap_snd, IsPullback.isoPullback_hom_snd]
+  rw [h]
+  infer_instance
+
+/-- **(YR-1a-ii, step 1)** The section square along the pasting map is cartesian. -/
+theorem isPullback_pushSection (Q : (A.curve.baseChange t).Point (𝟙 T)) :
+    IsPullback (Q.1 : T ⟶ pullback A.curve.π t) (𝟙 T) (pastingMap g t)
+      ((pushSection g t Q).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom)) := by
+  have hsq : CommSq (Q.1 : T ⟶ pullback A.curve.π t) (𝟙 T) (pastingMap g t)
+      ((pushSection g t Q).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom)) :=
+    ⟨by rw [pushSection_coe, Category.id_comp]⟩
+  exact IsPullback.of_vert_isIso hsq
+
+/-- **(YR-1a-ii, step 2)** The kernel of a section is the comap of the pushed section's
+kernel along the pasting map — the ideal-sheaf half of the curve-direction `κ`-naturality.
+Mirrors `ker_restrictBase` (AP-E1-NAT1 step 2). -/
+theorem ker_pushSection (Q : (A.curve.baseChange t).Point (𝟙 T)) :
+    (Q.1 : T ⟶ pullback A.curve.π t).ker =
+      (Scheme.Hom.ker ((pushSection g t Q).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom))).comap
+        (pastingMap g t) := by
+  haveI hsepB : IsSeparated (pullback.snd B.curve.π (t ≫ g.baseHom)) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) B.curve.π (t ≫ g.baseHom)
+      inferInstance
+  haveI : IsClosedImmersion
+      ((pushSection g t Q).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom)) :=
+    RelEffCartierDiv.SectionsIdeal.isClosedImmersion (pushSection g t Q).2
+  rw [← (isPullback_pushSection g t Q).isoPullback_hom_fst,
+    Scheme.Hom.ker_comp_of_isIso]
+  exact Scheme.IdealSheafData.ker_fst_of_isClosedImmersion
+    ((pushSection g t Q).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom)) (pastingMap g t)
+
 end ModularCurves
