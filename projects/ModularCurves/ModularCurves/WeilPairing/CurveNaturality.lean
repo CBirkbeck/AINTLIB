@@ -421,4 +421,174 @@ theorem hnorm_pastingMap (M : (pullback B.curve.π (t ≫ g.baseHom)).Modules)
       (t ≫ g.baseHom)) (W i ⊓ W j) (transitionUnitOfCover M W e i j) = 1 from hnorm i j]
   exact map_one _
 
+/-- **(YR-1a, THE ENGINE)** The Katz–Mazur value is natural in the curve slot: computing
+over the `A`-presentation with the `pm`-pulled dataset equals the `B`-value at the pushed
+sections. Transcription of `torsionSplittingEval_restrictBase` (AP-E1-NAT2) along the
+pasting map; since both presentations share the base `T`, no `unitPullback` appears in
+the conclusion. -/
+theorem torsionSplittingEval_pastingMap (N : ℕ)
+    (Q : (A.curve.baseChange t).Point (𝟙 T)) (hQ : Q ∈ torsionPoints A.curve t N)
+    (M : (pullback B.curve.π (t ≫ g.baseHom)).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (pullback B.curve.π (t ≫ g.baseHom))
+      (kappa B.curve B.curve.smooth (t ≫ g.baseHom) (pushSection g t Q)).val =
+        toSkeleton M)
+    {ι : Type*} (W : ι → (pullback B.curve.π (t ≫ g.baseHom)).Opens) (hW : iSup W = ⊤)
+    (e : ∀ i, M.over (W i) ≅
+      _root_.SheafOfModules.unit
+        ((pullback B.curve.π (t ≫ g.baseHom)).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover M W e i j ∈
+      sectionUnits (baseChangeZero B.curve.π B.curve.zero B.curve.zero_π
+        (t ≫ g.baseHom)) (W i ⊓ W j))
+    (P : (A.curve.baseChange t).Point (𝟙 T)) (hP : P ∈ torsionPoints A.curve t N) :
+    torsionSplittingEval A.curve A.curve.smooth t N Q hQ
+        ((Scheme.Modules.pullback (pastingMap g t)).obj M) (hM_pastingMap g t Q M hM)
+        (fun i => pastingMap g t ⁻¹ᵁ W i) ((pastingMap g t).iSup_preimage_eq_top hW)
+        (fun i => localPullbackTrivializationT (pastingMap g t) M (W i) (e i))
+        (fun i j => hnorm_pastingMap g t M W e hnorm i j) P hP =
+      torsionSplittingEval B.curve B.curve.smooth (t ≫ g.baseHom) N (pushSection g t Q)
+        (pushSection_mem_torsionPoints g t hQ) M hM W hW e hnorm (pushSection g t P)
+        (pushSection_mem_torsionPoints g t hP) := by
+  obtain ⟨h, hn, hsplit⟩ :=
+    exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints B.curve
+      B.curve.smooth (t ≫ g.baseHom) N (pushSection g t Q)
+      (pushSection_mem_torsionPoints g t hQ) M hM W hW e hnorm
+  have hpatheq : ∀ i, mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i) =
+      pastingMap g t ⁻¹ᵁ (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ W i) := by
+    intro i
+    have hcomm := pastingMap_mulByN g t N
+    calc mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i)
+        = (mulByN A.curve t N ≫ pastingMap g t) ⁻¹ᵁ W i := rfl
+      _ = (pastingMap g t ≫ mulByN B.curve (t ≫ g.baseHom) N) ⁻¹ᵁ W i := by rw [hcomm]
+      _ = pastingMap g t ⁻¹ᵁ (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ W i) := rfl
+  have hpath : ∀ i, mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i) ≤
+      pastingMap g t ⁻¹ᵁ (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ W i) := fun i =>
+    le_of_eq (hpatheq i)
+  set h' : ∀ i, Γ(pullback A.curve.π t,
+      mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i))ˣ :=
+    fun i => unitPullback (pastingMap g t) (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ W i)
+      (mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i)) (hpath i) (h i) with hh'
+  have hzcomp : baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t ≫ pastingMap g t =
+      𝟙 T ≫ baseChangeZero B.curve.π B.curve.zero B.curve.zero_π (t ≫ g.baseHom) :=
+    (baseChangeZero_pastingMap g t).trans (Category.id_comp _).symm
+  refine (eq_torsionSplittingEval A.curve A.curve.smooth t N Q hQ _
+    (hM_pastingMap g t Q M hM) _ ((pastingMap g t).iSup_preimage_eq_top hW) _
+    (fun i j => hnorm_pastingMap g t M W e hnorm i j) P hP h'
+    (fun i => ?_) (fun i j => ?_) (fun i => ?_)).symm
+  · rw [mem_sectionUnits_iff, hh']
+    refine (sectionEval_unitPullback (pastingMap g t)
+      (baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t) (hpath i) (h i)).trans ?_
+    refine ((resUnit_sectionEval_congr hzcomp
+      (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ W i) (h i)
+      ((baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t).preimage_mono (hpath i))
+      (by rw [← hzcomp]
+          exact (baseChangeZero A.curve.π A.curve.zero A.curve.zero_π t).preimage_mono
+            (hpath i))).trans ?_)
+    refine (congrArg _ ((sectionEval_comp (𝟙 T)
+      (baseChangeZero B.curve.π B.curve.zero B.curve.zero_π (t ≫ g.baseHom))
+      (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ W i) (h i)).trans ?_)).trans (map_one _)
+    rw [show sectionEval (baseChangeZero B.curve.π B.curve.zero B.curve.zero_π
+        (t ≫ g.baseHom)) (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ W i) (h i) = 1 from hn i]
+    exact map_one _
+  · have hpullco : transitionUnitOfCover
+        ((Scheme.Modules.pullback (pastingMap g t)).obj M)
+        (fun i => pastingMap g t ⁻¹ᵁ W i)
+        (fun i => localPullbackTrivializationT (pastingMap g t) M (W i) (e i)) i j =
+        Units.map ((pastingMap g t).app (W i ⊓ W j)).hom.toMonoidHom
+          (transitionUnitOfCover M W e i j) :=
+      transitionUnitOfCover_localPullback (pastingMap g t) M W e i j
+    have hle : mulByN A.curve t N ⁻¹ᵁ
+        (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j) ≤
+        pastingMap g t ⁻¹ᵁ (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ (W i ⊓ W j)) :=
+      inf_le_inf (hpath i) (hpath j)
+    have hb1 : Units.map ((mulByN A.curve t N).app
+        (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j)).hom.toMonoidHom
+        (Units.map ((pastingMap g t).app (W i ⊓ W j)).hom.toMonoidHom
+          (transitionUnitOfCover M W e i j)) =
+        unitPullback (mulByN A.curve t N ≫ pastingMap g t) (W i ⊓ W j)
+          (mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j))
+          (le_of_eq rfl) (transitionUnitOfCover M W e i j) :=
+      (congrArg (Units.map ((mulByN A.curve t N).app
+          (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j)).hom.toMonoidHom)
+        (map_app_eq_unitPullback (pastingMap g t) (W i ⊓ W j)
+          (transitionUnitOfCover M W e i j))).trans
+      ((map_app_eq_unitPullback (mulByN A.curve t N)
+          (pastingMap g t ⁻¹ᵁ (W i ⊓ W j))
+          (unitPullback (pastingMap g t) (W i ⊓ W j)
+            (pastingMap g t ⁻¹ᵁ (W i ⊓ W j)) le_rfl
+            (transitionUnitOfCover M W e i j))).trans
+        (unitPullback_unitPullback (mulByN A.curve t N) (pastingMap g t)
+          le_rfl le_rfl (transitionUnitOfCover M W e i j)))
+    have hb2 : unitPullback (mulByN A.curve t N ≫ pastingMap g t) (W i ⊓ W j)
+        (mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j))
+        (le_of_eq rfl) (transitionUnitOfCover M W e i j) =
+        unitPullback (pastingMap g t ≫ mulByN B.curve (t ≫ g.baseHom) N) (W i ⊓ W j)
+          (mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j))
+          hle (transitionUnitOfCover M W e i j) :=
+      unitPullback_congr (pastingMap_mulByN g t N).symm (W i ⊓ W j)
+        (mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j))
+        (le_of_eq rfl) hle (transitionUnitOfCover M W e i j)
+    have hb3 : unitPullback (pastingMap g t ≫ mulByN B.curve (t ≫ g.baseHom) N)
+        (W i ⊓ W j)
+        (mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j))
+        hle (transitionUnitOfCover M W e i j) =
+        unitPullback (pastingMap g t) (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ (W i ⊓ W j))
+          (mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j))
+          hle (Units.map ((mulByN B.curve (t ≫ g.baseHom) N).app
+            (W i ⊓ W j)).hom.toMonoidHom (transitionUnitOfCover M W e i j)) :=
+      ((unitPullback_unitPullback (pastingMap g t) (mulByN B.curve (t ≫ g.baseHom) N)
+          le_rfl hle (transitionUnitOfCover M W e i j)).symm).trans
+        (congrArg (unitPullback (pastingMap g t)
+            (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ (W i ⊓ W j))
+            (mulByN A.curve t N ⁻¹ᵁ
+              (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j)) hle)
+          (map_app_eq_unitPullback (mulByN B.curve (t ≫ g.baseHom) N) (W i ⊓ W j)
+            (transitionUnitOfCover M W e i j)).symm)
+    have hb4 : unitPullback (pastingMap g t)
+        (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ (W i ⊓ W j))
+        (mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j))
+        hle (Units.map ((mulByN B.curve (t ≫ g.baseHom) N).app
+          (W i ⊓ W j)).hom.toMonoidHom (transitionUnitOfCover M W e i j)) =
+        Scheme.resUnit (inf_le_left :
+            mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i) ⊓
+              mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W j) ≤
+            mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i)) (h' i) *
+          (Scheme.resUnit (inf_le_right :
+              mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i) ⊓
+                mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W j) ≤
+              mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W j)) (h' j))⁻¹ := by
+      refine (congrArg (unitPullback (pastingMap g t)
+        (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ (W i ⊓ W j))
+        (mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j)) hle)
+        (hsplit i j)).trans ?_
+      refine ((map_mul _ _ _).trans ?_)
+      refine ((congrArg (_ * ·) (map_inv _ _)).trans ?_)
+      rw [hh']
+      exact congrArg₂ (fun x y => x * y⁻¹)
+        ((unitPullback_resUnit (pastingMap g t) _ _ (h i)).trans
+          (resUnit_unitPullback (pastingMap g t) (hpath i) _ (h i)).symm)
+        ((unitPullback_resUnit (pastingMap g t) _ _ (h j)).trans
+          (resUnit_unitPullback (pastingMap g t) (hpath j) _ (h j)).symm)
+    exact (congrArg (Units.map ((mulByN A.curve t N).app
+        (pastingMap g t ⁻¹ᵁ W i ⊓ pastingMap g t ⁻¹ᵁ W j)).hom.toMonoidHom)
+      hpullco).trans (hb1.trans (hb2.trans (hb3.trans hb4)))
+  · have hspec := resUnit_torsionSplittingEval B.curve B.curve.smooth (t ≫ g.baseHom) N
+      (pushSection g t Q) (pushSection_mem_torsionPoints g t hQ) M hM W hW e hnorm
+      (pushSection g t P) (pushSection_mem_torsionPoints g t hP) h hn hsplit i
+    have hPcomp : (P.1 : T ⟶ pullback A.curve.π t) ≫ pastingMap g t =
+        ((pushSection g t P).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom)) :=
+      (pushSection_coe g t P).symm
+    have p2 : (P.1 : T ⟶ pullback A.curve.π t) ⁻¹ᵁ
+        (mulByN A.curve t N ⁻¹ᵁ (pastingMap g t ⁻¹ᵁ W i)) ≤
+        ((pushSection g t P).1 : T ⟶ pullback B.curve.π (t ≫ g.baseHom)) ⁻¹ᵁ
+          (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ W i) := by
+      rw [← hPcomp]
+      exact (P.1 : T ⟶ pullback A.curve.π t).preimage_mono (hpath i)
+    refine Eq.trans ?_ ((sectionEval_unitPullback (pastingMap g t)
+      (P.1 : T ⟶ pullback A.curve.π t) (hpath i) (h i)).symm)
+    refine Eq.trans ?_ ((resUnit_sectionEval_congr hPcomp
+      (mulByN B.curve (t ≫ g.baseHom) N ⁻¹ᵁ W i) (h i)
+      ((P.1 : T ⟶ pullback A.curve.π t).preimage_mono (hpath i)) p2).symm)
+    refine Eq.trans ?_ (congrArg (Scheme.resUnit p2) hspec)
+    exact (Scheme.resUnit_resUnit _ _ _).symm
+
 end ModularCurves
