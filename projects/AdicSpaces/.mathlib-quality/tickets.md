@@ -130,7 +130,15 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
     interDatum-based skeleton statement predates this reconnaissance), then transport the
     difference-map surjectivity through the ± bridges and bivariateOverlap equiv, closing
     with the Laurent split A⟨ζ,ζ⁻¹⟩ = A⟨ζ⟩ + ζ⁻¹A⟨ζ⁻¹⟩ + the relation-ideal
-    decomposition at the B₁₂_gen level. · **File**: `Adic spaces/CechAcyclicityFull.lean:41` · **Depends on**: none · **Parallel**: yes · **Type**: theorem
+    decomposition at the B₁₂_gen level.
+  - 2026-08-10 (axiom audit): `wedhorn_lemma_834_part_i_laurent_acyclic` is CLEAN but
+    `laurentOverlapBridge_exists_compatible` (LaurentRefinementCore.lean:3735) carries
+    sorryAx (parked residuals; 25 sorries in that file). T621 must ride the CLEAN 834
+    chain's own overlap identification, NOT the bridge-exists packaging. NEXT: trace
+    `laurentProdCoverOf_isOXAcyclic` → its 2-cover gluing base case → the overlap-value
+    identification it actually uses (grep the 833-gluing lemma in
+    WedhornCechAcyclicity.lean), then state the difference-map surjectivity in THAT
+    vocabulary. · **File**: `Adic spaces/CechAcyclicityFull.lean:41` · **Depends on**: none · **Parallel**: yes · **Type**: theorem
 - **Proof sketch**:
   1. Identify the three `presheafValue`s via the existing 8.33 development's
      `Examples 6.38/6.39` comparisons (the identifications behind
