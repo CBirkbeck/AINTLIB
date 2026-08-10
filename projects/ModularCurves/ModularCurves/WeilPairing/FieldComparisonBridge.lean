@@ -115,6 +115,16 @@ theorem coordRingToZSection_algebraMap (a : K) :
     coordRingToZSection W (algebraMap K W.toAffine.CoordinateRing a)
       = ((projModel W).presheaf.map (homOfLE le_top).op)
           ((projModelπ W).app ⊤ ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a)) := by
+  unfold coordRingToZSection
+  simp only [RingEquiv.coe_trans, Function.comp_apply]
+  have hA : (chartZRingEquiv W).symm ((algebraMap K W.toAffine.CoordinateRing) a)
+      = (chartCoordEquiv W 2) (algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux K 2 W.toProjective.polynomial}) a) := by
+    show ((chartCoordEquiv W 2).symm.trans
+      (chartZAffineEquiv W).toRingEquiv).symm _ = _
+    rw [RingEquiv.symm_trans_apply]
+    exact congrArg (chartCoordEquiv W 2) ((chartZAffineEquiv W).symm.commutes a)
+  rw [hA]
   sorry
 
 /-- **(U5c-2 brick)** The self-base-change collapse on function fields:
