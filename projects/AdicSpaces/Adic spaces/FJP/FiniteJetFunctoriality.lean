@@ -315,11 +315,9 @@ theorem isUnit_bridgeBase_s (hD : D.IsRational) : IsUnit (bridgeBase D e D.s) :=
       _ = 1 := happ
   exact IsUnit.of_mul_eq_one _ hmul
 
-/-- A seminormed ultrametric comm ring is a nonarchimedean topological ring
-(generalizes the normed version in `ExampleUnitDisc`). -/
-instance instNonarchimedeanRingOfSeminormedUltra {R : Type*} [SeminormedCommRing R]
-    [IsUltrametricDist R] : NonarchimedeanRing R :=
-  ⟨NonarchimedeanAddGroup.is_nonarchimedean⟩
+/- `instNonarchimedeanRingOfSeminormedUltra` moved to `FiniteJetRings.lean` (the
+definition layer), so the comparator challenge and the full library resolve
+`NonarchimedeanRing (JetA F)` identically. -/
 
 /-- Norm-≤-1 elements of a seminormed comm ring are power-bounded. -/
 theorem isPowerBounded_of_norm_le_one {R : Type*} [SeminormedCommRing R] {x : R}

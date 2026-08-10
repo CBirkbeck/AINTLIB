@@ -2,6 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
+import «Adic spaces».WP.ChainReducedDef
 import «Adic spaces».WP.CoeffLocalization
 import «Adic spaces».WP.UniformDomain
 import «Adic spaces».WP.FormalReduced
@@ -169,16 +170,8 @@ theorem isReduced_presheafValue_WPA (hred : HeadLocsReduced K w)
     exact rhoQ_regular ϖ hK₀ M.DH M.hDH
   exact isReduced_of_injective M.e.toRingHom M.e.injective
 
-/-- Finite chains of rational localizations, and reducedness all the way down
-([WP] def:rationally-stably-reduced: "every finite iterated rational localization is
-reduced").  `ChainReduced A n` says: `A` itself and every iterated rational
-localization of depth `≤ n` is reduced (cumulative successor form per the 2026-07-28
-ChatGPT-5.6 plan review, so each level records all shallower depths too). -/
-def ChainReduced : (A : Type _) → [inst : CommRing A] → [inst : TopologicalSpace A] →
-    [inst : IsTopologicalRing A] → ℕ → Prop
-  | A, _, _, _, 0 => IsReduced A
-  | A, _, _, _, (n + 1) => IsReduced A ∧ ∀ D : RationalLocData A, D.IsRational →
-      ChainReduced (presheafValue D) n
+/-! `ChainReduced` itself lives in `WP/ChainReducedDef.lean` (definition layer, so the
+comparator challenge can state [WP] thm 6.2 (3) without importing this file's proofs). -/
 
 universe uCRA uCRB
 

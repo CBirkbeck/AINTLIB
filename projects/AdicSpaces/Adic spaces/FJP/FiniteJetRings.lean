@@ -715,6 +715,20 @@ instance : NormOneClass (JetA F) :=
     show ‖((1 : JetA F) : JetC F)‖ = 1
     rw [show ((1 : JetA F) : JetC F) = 1 from rfl, norm_one]⟩
 
+/-- A seminormed ultrametric comm ring is a nonarchimedean topological ring
+(generalizes the normed version in `ExampleUnitDisc`). Lives HERE, in the
+definition layer, so that every environment containing `JetA` resolves
+`NonarchimedeanRing (JetA F)` to the same instance — the comparator challenge
+(`Comparator/Challenge.lean`) and the full library must elaborate the headline
+statements to structurally identical types. (Moved from
+`FiniteJetFunctoriality.lean`, which is outside the challenge's import closure;
+with the instance there, `IsSheafy (JetA F)` embedded a different
+`NonarchimedeanRing` witness on each side and comparator rightly refused the
+statement match.) -/
+instance instNonarchimedeanRingOfSeminormedUltra {R : Type*} [SeminormedCommRing R]
+    [IsUltrametricDist R] : NonarchimedeanRing R :=
+  ⟨NonarchimedeanAddGroup.is_nonarchimedean⟩
+
 theorem norm_tA : ‖tA F‖ = ‖LaurentSeriesExample.t F‖ := norm_constA F _
 
 /-- Scaling by `tA` in `𝓐` (restriction of the `𝒞`-statement). -/
