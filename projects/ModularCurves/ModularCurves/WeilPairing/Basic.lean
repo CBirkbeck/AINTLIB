@@ -250,7 +250,21 @@ theorem weilPairingEval_add_left {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T �
     (hx' : x'.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
     (hxx' : (x + x').1 ≫ E.mulByHom N = g ≫ E.zero) :
     (E.weilPairingEval (x + x') y hxx' hy : Γ(T, ⊤)) =
-      E.weilPairingEval x y hx hy * E.weilPairingEval x' y hx' hy := by sorry
+      E.weilPairingEval x y hx hy * E.weilPairingEval x' y hx' hy := by
+  rw [E.weilPairingEval_eq_weilPairingKM (x + x') y hxx' hy,
+    E.weilPairingEval_eq_weilPairingKM x y hx hy,
+    E.weilPairingEval_eq_weilPairingKM x' y hx' hy,
+    weilPairingKM_congr E E.smooth g N (asSection_add E g x x') rfl
+      (asSection_mem_torsionPoints E (x + x') hxx')
+      (asSection_mem_torsionPoints E y hy)
+      (add_mem (asSection_mem_torsionPoints E x hx)
+        (asSection_mem_torsionPoints E x' hx'))
+      (asSection_mem_torsionPoints E y hy),
+    weilPairingKM_add_left E E.smooth g N
+      (EllipticCurve.Point.asSection E g x) (EllipticCurve.Point.asSection E g x')
+      (asSection_mem_torsionPoints E x hx) (asSection_mem_torsionPoints E x' hx')
+      (EllipticCurve.Point.asSection E g y) (asSection_mem_torsionPoints E y hy)]
+  exact Units.val_mul _ _
 
 /-- **(T-C2-R = KM 2.8.2, bilinearity in the second slot)** The mirror of
 `weilPairingEval_add_left`: `e_N(x, y + y') = e_N(x, y) · e_N(x, y')` on

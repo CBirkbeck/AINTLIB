@@ -1003,6 +1003,26 @@ theorem restrictBase_univTorsionSnd {T : Scheme.{u}} {g : T ⟶ S} {N : ℕ}
   · refine ((restrictBase E _ _ hk (univTorsionSnd E N)).2).trans ?_
     exact ((EllipticCurve.Point.asSection E g y).2).symm
 
+/-- `Point.asSection` is the base-change equivalence composed with the transport along
+`𝟙 ≫ g = g` — in particular it is additive. -/
+theorem asSection_eq_baseChangeEquiv_symm {T : Scheme.{u}} (g : T ⟶ S) (P : E.Point g) :
+    EllipticCurve.Point.asSection E g P =
+      (EllipticCurve.Point.baseChangeEquiv E g (𝟙 T)).symm
+        (pointCongr E (Category.id_comp g).symm P) := by
+  refine Subtype.ext (pullback.hom_ext ?_ ?_)
+  · exact (EllipticCurve.Point.asSection_val_fst E g P).trans
+      ((pointCongr_apply_coe E (Category.id_comp g).symm P).symm.trans
+        (pullback.lift_fst _ _ _).symm)
+  · exact ((EllipticCurve.Point.asSection E g P).2).trans
+      (pullback.lift_snd _ _ _).symm
+
+/-- `Point.asSection` is additive. -/
+theorem asSection_add {T : Scheme.{u}} (g : T ⟶ S) (x y : E.Point g) :
+    EllipticCurve.Point.asSection E g (x + y) =
+      EllipticCurve.Point.asSection E g x + EllipticCurve.Point.asSection E g y := by
+  rw [asSection_eq_baseChangeEquiv_symm, asSection_eq_baseChangeEquiv_symm,
+    asSection_eq_baseChangeEquiv_symm, map_add, map_add]
+
 /-- `restrictBase` depends on the restriction morphism only through its value. -/
 theorem restrictBase_congr_hom {T T' : Scheme.{u}} (t : T ⟶ S) {t' : T' ⟶ S}
     {g g' : T' ⟶ T} (hgg : g = g') (hg : g ≫ t = t') (hg' : g' ≫ t = t')
