@@ -1,1 +1,1 @@
-FOCUS: T619 — rethread IsRational through MilnorSquareData fields + chase use-sites
+FOCUS: T620 group 1 — discharge push*_s/_T/_isRational via jetPush*_eq + rfl/mem_image

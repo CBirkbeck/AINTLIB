@@ -107,10 +107,29 @@ noncomputable def jetSquare :
   legC := rhoC F
   hlegB := continuous_rhoB
   hlegC := continuous_rhoC
-  legB_s := by sorry
-  legC_s := by sorry
-  legB_T := by sorry
-  legC_T := by sorry
+  legB_s := by
+    intro U hU
+    rw [jetPushB_eq F hU, jetPushD_eq F hU]
+    exact (square_commutes F U.s).symm
+  legC_s := by
+    intro U hU
+    rw [jetPushC_eq F hU, jetPushD_eq F hU]
+    rfl
+  legB_T := by
+    classical
+    intro U hU t ht
+    rw [jetPushB_eq F hU] at ht
+    rw [jetPushD_eq F hU]
+    obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp ht
+    rw [square_commutes F u]
+    exact Finset.mem_image_of_mem _ hu
+  legC_T := by
+    classical
+    intro U hU t ht
+    rw [jetPushC_eq F hU] at ht
+    rw [jetPushD_eq F hU]
+    obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp ht
+    exact Finset.mem_image_of_mem _ hu
   row_injective := by sorry
   row_glue := by sorry
   row_embedding := by sorry
