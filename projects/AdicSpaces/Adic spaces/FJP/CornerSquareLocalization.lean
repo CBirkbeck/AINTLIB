@@ -240,6 +240,146 @@ theorem ext_pair_injective :
 
 
 
+/-! ### The graph data ([FJP] (4.6)) -/
+
+section Graph
+
+variable [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B]
+  [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D]
+
+variable (g : A) (f : Fin m → A)
+
+/-- The graph relations `r_i = gT_i − f_i` in `P_A` ([FJP] (4.6)). -/
+noncomputable def rA : Fin m → P A m := fun i =>
+  polyToP (MvPolynomial.C g * MvPolynomial.X i - MvPolynomial.C (f i))
+
+/-- The pushed relations at the vertices. -/
+noncomputable def rB : Fin m → P B m := fun i => S.extB m (rA m g f i)
+noncomputable def rC : Fin m → P C m := fun i => S.extC m (rA m g f i)
+noncomputable def rD : Fin m → P D m := fun i => S.extDC m (S.rC m g f i)
+
+/-- Graph ideals `I_E = im(d₁) = (r₁, …, r_m)` ([FJP] (4.6)). -/
+noncomputable def IA : Ideal (P A m) := Ideal.span (Set.range (rA m g f))
+noncomputable def IB : Ideal (P B m) := Ideal.span (Set.range (S.rB m g f))
+noncomputable def IC : Ideal (P C m) := Ideal.span (Set.range (S.rC m g f))
+noncomputable def ID : Ideal (P D m) := Ideal.span (Set.range (S.rD m g f))
+
+/-- The pushed data generate the unit ideal at each vertex ([FJP] §4 after (4.6)). -/
+theorem span_pushed_B (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
+    Ideal.span ({S.φB g} ∪ Set.range (fun i => S.φB (f i))) = ⊤ := by
+  have h := congrArg (Ideal.map S.φB) hspan
+  rw [Ideal.map_span, Ideal.map_top] at h
+  rw [← h]
+  congr 1
+  rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
+  rfl
+
+theorem span_pushed_C (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
+    Ideal.span ({S.φC g} ∪ Set.range (fun i => S.φC (f i))) = ⊤ := by
+  have h := congrArg (Ideal.map S.φC) hspan
+  rw [Ideal.map_span, Ideal.map_top] at h
+  rw [← h]
+  congr 1
+  rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
+  rfl
+
+theorem span_pushed_D (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
+    Ideal.span ({S.ψC (S.φC g)} ∪
+      Set.range (fun i => S.ψC (S.φC (f i)))) = ⊤ := by
+  have h := congrArg (Ideal.map (S.ψC.comp S.φC)) hspan
+  rw [Ideal.map_span, Ideal.map_top] at h
+  rw [← h]
+  congr 1
+  rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
+  rfl
+
+theorem rB_eq (i : Fin m) : S.rB m g f i =
+    polyToP (MvPolynomial.C (S.φB g) * MvPolynomial.X i -
+      MvPolynomial.C (S.φB (f i))) := by
+  show mapRestricted S.φB S.norm_φB_le _ (polyToP _) = _
+  rw [StrictLoc.mapRestricted_polyToP]
+  congr 1
+  rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
+
+theorem rC_eq (i : Fin m) : S.rC m g f i =
+    polyToP (MvPolynomial.C (S.φC g) * MvPolynomial.X i -
+      MvPolynomial.C (S.φC (f i))) := by
+  show mapRestricted S.φC (fun a => le_of_eq (S.norm_φC a)) _ (polyToP _) = _
+  rw [StrictLoc.mapRestricted_polyToP]
+  congr 1
+  rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
+
+theorem rD_eq (i : Fin m) : S.rD m g f i =
+    polyToP (MvPolynomial.C (S.ψC (S.φC g)) * MvPolynomial.X i -
+      MvPolynomial.C (S.ψC (S.φC (f i)))) := by
+  show mapRestricted S.ψC S.norm_ψC_le _ (S.rC m g f i) = _
+  rw [S.rC_eq, StrictLoc.mapRestricted_polyToP]
+  congr 1
+  rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
+
+/-- The pushed generators are compatible across the square. -/
+theorem extDB_rB (i : Fin m) : S.extDB m (S.rB m g f i) = S.rD m g f i :=
+  S.ext_square_commutes m (rA m g f i)
+
+/-! ### Lemma 4.3 — controlled graph-ideal pullback ([FJP] (4.11)–(4.16)) -/
+
+/-- Right strict surjectivity of the ideal row ([FJP] (4.11)). -/
+theorem ideal_row_surjective (hPD : IsNoetherianRing (P D m))
+    (hPDball : IsNoetherianRing (unitBall (P D m)))
+    (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
+    ∃ Cs : ℝ, 1 ≤ Cs ∧ ∀ y ∈ S.ID m g f,
+      ∃ xc ∈ S.IC m g f, S.extDC m xc = y ∧ ‖xc‖ ≤ Cs * ‖y‖ := by
+  classical
+  haveI := hPD
+  obtain ⟨h, hh1, hlift⟩ := exists_d1_lift (E := D) S.tD S.tD_isUnit
+    S.norm_tD_lt_one S.norm_tD_pos S.norm_tD_mul hPDball (S.rD m g f)
+  set Cr : ℝ := 1 + ∑ i, ‖S.rC m g f i‖ with hCr
+  have hCr1 : 1 ≤ Cr := le_add_of_nonneg_right (Finset.sum_nonneg fun i _ => norm_nonneg _)
+  refine ⟨h * Cr, ?_, fun y hy => ?_⟩
+  · calc (1 : ℝ) ≤ h := hh1
+      _ = h * 1 := (mul_one h).symm
+      _ ≤ h * Cr := mul_le_mul_of_nonneg_left hCr1 (zero_le_one.trans hh1)
+  · obtain ⟨u, hu, hun⟩ := hlift y hy
+    have hsec : ∀ i, ∃ c : P C m, S.extDC m c = u i ∧ ‖c‖ = ‖u i‖ := fun i =>
+      S.extDC_strict_surjective m (u i)
+    choose cc hcc hccn using hsec
+    refine ⟨d1 (S.rC m g f) cc, ?_, ?_, ?_⟩
+    · show d1 (S.rC m g f) cc ∈ Ideal.span (Set.range (S.rC m g f))
+      unfold d1
+      exact Ideal.sum_mem _ fun i _ => Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨i, rfl⟩)
+    · rw [show S.extDC m (d1 (S.rC m g f) cc) =
+        d1 (fun i => S.extDC m (S.rC m g f i)) (fun i => S.extDC m (cc i)) from
+          d1_map (S.extDC m) _ cc,
+        show (fun i => S.extDC m (S.rC m g f i)) = S.rD m g f from rfl,
+        show (fun i => S.extDC m (cc i)) = u from funext hcc]
+      exact hu
+    · have hterm : ∀ i : Fin m, ‖cc i * S.rC m g f i‖ ≤ ‖u‖ * Cr := fun i => by
+        calc ‖cc i * S.rC m g f i‖ ≤ ‖cc i‖ * ‖S.rC m g f i‖ := norm_mul_le _ _
+          _ = ‖u i‖ * ‖S.rC m g f i‖ := by rw [hccn i]
+          _ ≤ ‖u‖ * Cr := by
+              refine mul_le_mul (norm_le_pi_norm u i) ?_ (norm_nonneg _) (norm_nonneg u)
+              rw [hCr]
+              refine le_add_of_nonneg_of_le zero_le_one ?_
+              exact Finset.single_le_sum (fun j _ => norm_nonneg _) (Finset.mem_univ i)
+      have hpartial : ∀ s : Finset (Fin m),
+          ‖∑ i ∈ s, cc i * S.rC m g f i‖ ≤ ‖u‖ * Cr := by
+        intro s
+        induction s using Finset.induction_on with
+        | empty =>
+          rw [Finset.sum_empty, norm_zero]
+          exact mul_nonneg (norm_nonneg u) (zero_le_one.trans hCr1)
+        | insert a s ha ih =>
+          rw [Finset.sum_insert ha]
+          exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hterm a) ih)
+      show ‖d1 (S.rC m g f) cc‖ ≤ h * Cr * ‖y‖
+      unfold d1
+      refine (hpartial Finset.univ).trans ?_
+      calc ‖u‖ * Cr ≤ h * ‖y‖ * Cr :=
+            mul_le_mul_of_nonneg_right hun (zero_le_one.trans hCr1)
+        _ = h * Cr * ‖y‖ := by ring
+
+end Graph
+
 end Pinch
 
 end FiniteJet
