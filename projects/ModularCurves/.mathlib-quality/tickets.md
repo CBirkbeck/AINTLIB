@@ -41506,3 +41506,14 @@ emb P' [hP'] — and HW's liftPointToKE/liftSomePoint = Point.map-emb-forms
 (`liftPointToKE_some` :3515 connects) ⟹ the chart-form + leaves close per the
 architecture. BUILD ORDER: (g1) the extension-naturality brick; (g2) the chart-form have;
 (g3) hτV; (g4) hx-leaf; (g5) hy-leaf.
+
+
+### g1 DONE (2026-08-10, session 3 latest+12)
+
+**`projModelPointsEquiv_extendSpecPoint` PROVED** (PointsDictionaryGalois, §B — the
+field-extension dictionary naturality, generalised to any [Algebra K K'] +
+[IsScalarTower R K K']), with `extendSpecPoint` + InZChart forward/reverse + the chart-hom
+mirror (B1–B3). Cross-field lesson: the double projModelPointsEquiv-instantiation (K and
+K') walls rw/whnf even where the single-field σ-twin sails — typed `hcoord`-have +
+`map_some`-rw-FIRST ordering breaks it. Commit 0218f4135. NEXT: g2 (chart-form of
+generic ≫ τ), g3 (hτV), g4/g5 (leaves).
