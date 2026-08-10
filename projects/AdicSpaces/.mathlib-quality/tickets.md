@@ -102,6 +102,18 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
   AG1.a–d): design the abstract `lem:sheaf-transfer` statement (paper l.576–583 —
   [Reviewer] §4.1's criterion), audit the graph-Koszul stack's genericity over the
   corner ring, write the AG1 skeleton, THEN add the B-H execution tickets.
+- **Progress**:
+  - 2026-08-10 (genericity audit, step 1 done): the graph-Koszul stack
+    (FiniteJetGraphKoszul.lean) is ALREADY generic over a normed corner `E` with the
+    scale bundle `(t, htu, ht1, ht0, hscale)` + `hE₀ : IsNoetherianRing (unitBall E)`
+    (e.g. `syzygy_graph_restricted` at :1255). NO Koszul-layer generalisation needed for
+    AG1.b — the extended corners `E⟨V⟩` just need (a) their Gauss-normed structure
+    (Coram stack through `restrictedFubini`), (b) `IsNoetherianRing (unitBall (E⟨V⟩))`
+    (the Fubini unit-ball identification — RestrictedFubini's original purpose), and
+    (c) the scale bundle at `t := image of the base pseudouniformizer`. Remaining AG1
+    design work: AG1.a (the ⟨V⟩-integral row, coefficientwise κ=1 section per the
+    validation addendum), AG1.d (the abstract transfer statement), and the per-corner
+    instance packaging above.
 
 ### [T616] B-H (MILESTONE): `finiteJet_tateExt_isSheafyComplete`
 - **Status**: blocked (T615 outcome) · **File**: `Adic spaces/FJP/StrongSheafy.lean:60`.
