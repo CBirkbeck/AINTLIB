@@ -82,6 +82,22 @@ structure Pinch (A B C D : Type*)
   norm_tD_pos : 0 < ‖tD‖
   norm_tD_mul : ∀ x, ‖tD * x‖ = ‖tD‖ * ‖x‖
 
+/-- The noetherianity inputs consumed by the graph-Koszul layer at arity `m`
+(discharged per instance: at the Jet corners from the concrete tower lemmas, at the
+`⟨V⟩`-extended corners through the restricted Fubini). -/
+structure NoethPack (B C D : Type*)
+    [NormedCommRing B] [IsUltrametricDist B] [NormOneClass B] [CompleteSpace B]
+    [NormedCommRing C] [IsUltrametricDist C] [NormOneClass C] [CompleteSpace C]
+    [NormedCommRing D] [IsUltrametricDist D] [NormOneClass D] [CompleteSpace D]
+    (m : ℕ) : Prop where
+  hPB : IsNoetherianRing (P B m)
+  hPC : IsNoetherianRing (P C m)
+  hPD : IsNoetherianRing (P D m)
+  hPBball : IsNoetherianRing (unitBall (P B m))
+  hPCball : IsNoetherianRing (unitBall (P C m))
+  hPDball : IsNoetherianRing (unitBall (P D m))
+  hDball : IsNoetherianRing (unitBall D)
+
 namespace Pinch
 
 variable (S : Pinch A B C D) (m : ℕ)
@@ -330,17 +346,16 @@ theorem extDB_rB (i : Fin m) : S.extDB m (S.rB m g f i) = S.rD m g f i :=
 
 /-! ### Lemma 4.3 — controlled graph-ideal pullback ([FJP] (4.11)–(4.16)) -/
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] in
+omit [NormOneClass A] [CompleteSpace A] in
 /-- Right strict surjectivity of the ideal row ([FJP] (4.11)). -/
-theorem ideal_row_surjective (hPD : IsNoetherianRing (P D m))
-    (hPDball : IsNoetherianRing (unitBall (P D m)))
+theorem ideal_row_surjective (hN : NoethPack B C D m)
     (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     ∃ Cs : ℝ, 1 ≤ Cs ∧ ∀ y ∈ S.ID m g f,
       ∃ xc ∈ S.IC m g f, S.extDC m xc = y ∧ ‖xc‖ ≤ Cs * ‖y‖ := by
   classical
-  have := hPD
+  have := hN.hPD
   obtain ⟨h, hh1, hlift⟩ := exists_d1_lift (E := D) S.tD S.tD_isUnit
-    S.norm_tD_lt_one S.norm_tD_pos S.norm_tD_mul hPDball (S.rD m g f)
+    S.norm_tD_lt_one S.norm_tD_pos S.norm_tD_mul hN.hPDball (S.rD m g f)
   set Cr : ℝ := 1 + ∑ i, ‖S.rC m g f i‖ with hCr
   have hCr1 : 1 ≤ Cr := le_add_of_nonneg_right (Finset.sum_nonneg fun i _ => norm_nonneg _)
   refine ⟨h * Cr, ?_, fun y hy => ?_⟩
@@ -390,12 +405,7 @@ theorem ideal_row_surjective (hPD : IsNoetherianRing (P D m))
 elements comes from an element of `I_A` with a uniformly bounded representative.
 This is where the `d₂`-syzygy correction (`exists_d2_lift` at the `D`-vertex)
 enters. -/
-theorem ideal_pullback_controlled
-    (hPB : IsNoetherianRing (P B m)) (hPC : IsNoetherianRing (P C m))
-    (hPD : IsNoetherianRing (P D m))
-    (hPBball : IsNoetherianRing (unitBall (P B m)))
-    (hPCball : IsNoetherianRing (unitBall (P C m)))
-    (hDball : IsNoetherianRing (unitBall D))
+theorem ideal_pullback_controlled (hN : NoethPack B C D m)
     (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     ∃ Cs : ℝ, 1 ≤ Cs ∧
       ∀ xb ∈ S.IB m g f, ∀ xc ∈ S.IC m g f,
@@ -403,15 +413,15 @@ theorem ideal_pullback_controlled
         ∃ xa ∈ IA m g f,
           S.extB m xa = xb ∧ S.extC m xa = xc ∧ ‖xa‖ ≤ Cs * max ‖xb‖ ‖xc‖ := by
   classical
-  have := hPB
-  have := hPC
-  have := hPD
+  have := hN.hPB
+  have := hN.hPC
+  have := hN.hPD
   obtain ⟨hB, hB1, hliftB⟩ := exists_d1_lift (E := B) S.tB S.tB_isUnit
-    S.norm_tB_lt_one S.norm_tB_pos S.norm_tB_mul hPBball (S.rB m g f)
+    S.norm_tB_lt_one S.norm_tB_pos S.norm_tB_mul hN.hPBball (S.rB m g f)
   obtain ⟨hC, hC1, hliftC⟩ := exists_d1_lift (E := C) S.tC S.tC_isUnit
-    S.norm_tC_lt_one S.norm_tC_pos S.norm_tC_mul hPCball (S.rC m g f)
+    S.norm_tC_lt_one S.norm_tC_pos S.norm_tC_mul hN.hPCball (S.rC m g f)
   obtain ⟨z, hz1, hliftD⟩ := exists_d2_lift (E := D)
-    hDball S.tD S.tD_isUnit
+    hN.hDball S.tD S.tD_isUnit
     S.norm_tD_lt_one S.norm_tD_pos
     S.norm_tD_mul (S.ψC (S.φC g)) (fun i => S.ψC (S.φC (f i)))
     (S.span_pushed_D m g f hspan) (S.rD m g f) (S.rD_eq m g f)
@@ -629,27 +639,21 @@ theorem ideal_pullback_controlled
 
 include S in
 /-- `I_A` is closed in `P_A` ([FJP] Lemma 4.3: "Consequently `I_R` is closed"). -/
-theorem isClosed_IA
-    (hPB : IsNoetherianRing (P B m)) (hPC : IsNoetherianRing (P C m))
-    (hPD : IsNoetherianRing (P D m))
-    (hPBball : IsNoetherianRing (unitBall (P B m)))
-    (hPCball : IsNoetherianRing (unitBall (P C m)))
-    (hDball : IsNoetherianRing (unitBall D))
+theorem isClosed_IA (hN : NoethPack B C D m)
     (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     IsClosed ((IA m g f : Set (P A m))) := by
   classical
-  have := hPB
-  have := hPC
+  have := hN.hPB
+  have := hN.hPC
   have hIBclosed : IsClosed ((S.IB m g f : Set (P B m))) :=
     isClosed_graphIdeal S.tB S.tB_isUnit
       S.norm_tB_lt_one S.norm_tB_pos
-      S.norm_tB_mul (hPBball) (S.rB m g f)
+      S.norm_tB_mul (hN.hPBball) (S.rB m g f)
   have hICclosed : IsClosed ((S.IC m g f : Set (P C m))) :=
     isClosed_graphIdeal S.tC S.tC_isUnit
       S.norm_tC_lt_one S.norm_tC_pos
-      S.norm_tC_mul (hPCball) (S.rC m g f)
-  obtain ⟨Cs, hCs1, hpull⟩ := S.ideal_pullback_controlled m g f hPB hPC hPD
-    hPBball hPCball hDball hspan
+      S.norm_tC_mul (hN.hPCball) (S.rC m g f)
+  obtain ⟨Cs, hCs1, hpull⟩ := S.ideal_pullback_controlled m g f hN hspan
   refine isClosed_of_closure_subset fun x hx => ?_
   have hcontB : Continuous (S.extB m) := by
     have hlip : LipschitzWith 1 (S.extB m) := LipschitzWith.of_dist_le_mul fun a b => by
