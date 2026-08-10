@@ -468,7 +468,12 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
     rw [hpx, projModelPointsEquiv_extendSpecPoint W p, hP']
   have hτV : (genericSpecPoint W).1.base
       (IsLocalRing.closedPoint (W.toAffine.FunctionField)) ∈ τ ⁻¹ᵁ (zChart W) := by
-    sorry
+    show τ.base ((genericSpecPoint W).1.base
+      (IsLocalRing.closedPoint (W.toAffine.FunctionField))) ∈ (zChart W)
+    rw [genericSpecPoint_base_closedPoint W]
+    show τ.base (genericPoint (projModel W)) ∈ (zChart W)
+    rw [genericPoint_eq_of_isDominant τ]
+    exact genericPoint_mem_zChart W
   have hMASTERτ : ∀ c : W.toAffine.CoordinateRing,
       projModelFunctionFieldEquiv W (τ.functionFieldMap.hom
           ((projModel W).germToFunctionField (zChart W) (coordRingToZSection W c)))
