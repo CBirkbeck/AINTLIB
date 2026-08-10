@@ -137,6 +137,24 @@ composite `projModelPointsEquiv_add` (MulByHomDegree:54) then
 `W_KE`-vs-`baseChange` def-level typing; at the use site the expected types drive the
 defeq. -/
 
+/-- **(R-side entry, reusable)** `projModelFunctionFieldEquiv.symm` reads the class of a
+coordinate-ring element as the class of its `Z`-chart section — the generalisation of
+hinv's `h1` from constants to arbitrary elements. -/
+theorem projModelFunctionFieldEquiv_symm_algebraMap [IsIntegral (projModel W)]
+    [Nonempty (zChart W : (projModel W).Opens)]
+    (c : W.toAffine.CoordinateRing) :
+    (projModelFunctionFieldEquiv W).symm.toRingHom
+      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField c)
+    = algebraMap Γ(projModel W, zChart W) ((projModel W).functionField)
+        (coordRingToZSection W c) := by
+  haveI hZaff : IsAffineOpen (zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : IsFractionRing Γ(projModel W, zChart W) (projModel W).functionField :=
+    functionField_isFractionRing_of_isAffineOpen (projModel W) _ hZaff
+  refine (RingEquiv.symm_apply_eq _).mpr ?_
+  rw [projModelFunctionFieldEquiv_germ W (coordRingToZSection W c),
+    RingEquiv.symm_apply_apply]
+
 /-- **(U5c-2 sub-brick — the chart-constants identification)** The chart identification
 `coordRingToZSection` carries the `K`-constant of the coordinate ring to the restriction
 of the structure-pulled global constant. The `chartZAffineEquiv`-leg is an `≃ₐ[K]`
