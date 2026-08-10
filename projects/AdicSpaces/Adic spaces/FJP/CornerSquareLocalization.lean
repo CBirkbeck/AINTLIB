@@ -269,10 +269,15 @@ variable (g : A) (f : Fin m → A)
 noncomputable def rA : Fin m → P A m := fun i =>
   polyToP (MvPolynomial.C g * MvPolynomial.X i - MvPolynomial.C (f i))
 
-/-- The pushed relations at the vertices. -/
-noncomputable def rB : Fin m → P B m := fun i => S.extB m (rA m g f i)
-noncomputable def rC : Fin m → P C m := fun i => S.extC m (rA m g f i)
-noncomputable def rD : Fin m → P D m := fun i => S.extDC m (S.rC m g f i)
+/-- The pushed relations at the vertices, in graph-polynomial form (so the
+single-corner bridge stack instantiates at each vertex definitionally). -/
+noncomputable def rB : Fin m → P B m := fun i =>
+  polyToP (MvPolynomial.C (S.φB g) * MvPolynomial.X i - MvPolynomial.C (S.φB (f i)))
+noncomputable def rC : Fin m → P C m := fun i =>
+  polyToP (MvPolynomial.C (S.φC g) * MvPolynomial.X i - MvPolynomial.C (S.φC (f i)))
+noncomputable def rD : Fin m → P D m := fun i =>
+  polyToP (MvPolynomial.C (S.ψC (S.φC g)) * MvPolynomial.X i -
+    MvPolynomial.C (S.ψC (S.φC (f i))))
 
 /-- Graph ideals `I_E = im(d₁) = (r₁, …, r_m)` ([FJP] (4.6)). -/
 noncomputable def IA : Ideal (P A m) := Ideal.span (Set.range (rA m g f))
@@ -313,36 +318,40 @@ theorem span_pushed_D (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
   rfl
 
 omit [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
-theorem rB_eq (i : Fin m) : S.rB m g f i =
-    polyToP (MvPolynomial.C (S.φB g) * MvPolynomial.X i -
-      MvPolynomial.C (S.φB (f i))) := by
+/-- The `B`-relations are the pushes of the base relations. -/
+theorem extB_rA (i : Fin m) : S.extB m (rA m g f i) = S.rB m g f i := by
   show mapRestricted S.φB S.norm_φB_le _ (polyToP _) = _
   rw [StrictLoc.mapRestricted_polyToP]
   congr 1
   rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
 
 omit [NormOneClass B] [CompleteSpace B] [NormOneClass D] [CompleteSpace D] in
-theorem rC_eq (i : Fin m) : S.rC m g f i =
-    polyToP (MvPolynomial.C (S.φC g) * MvPolynomial.X i -
-      MvPolynomial.C (S.φC (f i))) := by
+/-- The `C`-relations are the pushes of the base relations. -/
+theorem extC_rA (i : Fin m) : S.extC m (rA m g f i) = S.rC m g f i := by
   show mapRestricted S.φC (fun a => le_of_eq (S.norm_φC a)) _ (polyToP _) = _
   rw [StrictLoc.mapRestricted_polyToP]
   congr 1
   rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
 
-omit [NormOneClass B] [CompleteSpace B] in
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
+/-- The `D`-relations in graph-polynomial form (definitional; the
+`exists_d2_lift` interface). -/
 theorem rD_eq (i : Fin m) : S.rD m g f i =
     polyToP (MvPolynomial.C (S.ψC (S.φC g)) * MvPolynomial.X i -
-      MvPolynomial.C (S.ψC (S.φC (f i)))) := by
-  show mapRestricted S.ψC S.norm_ψC_le _ (S.rC m g f i) = _
-  rw [S.rC_eq, StrictLoc.mapRestricted_polyToP]
+      MvPolynomial.C (S.ψC (S.φC (f i)))) := rfl
+
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] in
+/-- The `D`-relations are the `ψC`-pushes of the `C`-relations. -/
+theorem extDC_rC (i : Fin m) : S.extDC m (S.rC m g f i) = S.rD m g f i := by
+  show mapRestricted S.ψC S.norm_ψC_le _ (polyToP _) = _
+  rw [StrictLoc.mapRestricted_polyToP]
   congr 1
   rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 /-- The pushed generators are compatible across the square. -/
-theorem extDB_rB (i : Fin m) : S.extDB m (S.rB m g f i) = S.rD m g f i :=
-  S.ext_square_commutes m (rA m g f i)
+theorem extDB_rB (i : Fin m) : S.extDB m (S.rB m g f i) = S.rD m g f i := by
+  rw [← S.extB_rA m g f i, ← S.extDC_rC m g f i, ← S.extC_rA m g f i]
+  exact S.ext_square_commutes m (rA m g f i)
 
 /-! ### Lemma 4.3 — controlled graph-ideal pullback ([FJP] (4.11)–(4.16)) -/
 
@@ -373,7 +382,8 @@ theorem ideal_row_surjective (hN : NoethPack B C D m)
     · rw [show S.extDC m (d1 (S.rC m g f) cc) =
         d1 (fun i => S.extDC m (S.rC m g f i)) (fun i => S.extDC m (cc i)) from
           d1_map (S.extDC m) _ cc,
-        show (fun i => S.extDC m (S.rC m g f i)) = S.rD m g f from rfl,
+        show (fun i => S.extDC m (S.rC m g f i)) = S.rD m g f from
+          funext fun i => S.extDC_rC m g f i,
         show (fun i => S.extDC m (cc i)) = u from funext hcc]
       exact hu
     · have hterm : ∀ i : Fin m, ‖cc i * S.rC m g f i‖ ≤ ‖u‖ * Cr := fun i => by
@@ -470,7 +480,8 @@ theorem ideal_pullback_controlled (hN : NoethPack B C D m)
       exact (funext fun i => (S.extDB_rB m g f i)).symm
     have h2 : d1 (S.rD m g f) (fun i => S.extDC m (v i)) = S.extDC m xc := by
       rw [← hv, d1_map (S.extDC m)]
-      rfl
+      congr 1
+      exact (funext fun i => S.extDC_rC m g f i).symm
     rw [hw, hd1sub, h1, h2, hcompat, sub_self]
   obtain ⟨sD, hsD, hsDn⟩ := hliftD w hwd1
   have hwn : ‖w‖ ≤ (hB + hC) * M := by
@@ -519,7 +530,8 @@ theorem ideal_pullback_controlled (hN : NoethPack B C D m)
     have heq : d2 (fun j => S.extDC m (S.rC m g f j)) (fun p => S.extDC m (sC p)) i =
         d2 (S.rD m g f) sD i := by
       congr 1
-      exact funext hsC
+      · exact funext fun j => S.extDC_rC m g f j
+      · exact funext hsC
     rw [heq, congrFun hsD i, hw]
     show S.extDB m (u i) =
       S.extDC m (v i) + (S.extDB m (u i) - S.extDC m (v i))
@@ -533,13 +545,15 @@ theorem ideal_pullback_controlled (hN : NoethPack B C D m)
   · rw [show S.extB m (d1 (rA m g f) a) =
       d1 (fun i => S.extB m (rA m g f i)) (fun i => S.extB m (a i)) from
         d1_map (S.extB m) _ a,
-      show (fun i => S.extB m (rA m g f i)) = S.rB m g f from rfl,
+      show (fun i => S.extB m (rA m g f i)) = S.rB m g f from
+        funext fun i => S.extB_rA m g f i,
       show (fun i => S.extB m (a i)) = u from funext fun i => (ha i).1]
     exact hu
   · rw [show S.extC m (d1 (rA m g f) a) =
       d1 (fun i => S.extC m (rA m g f i)) (fun i => S.extC m (a i)) from
         d1_map (S.extC m) _ a,
-      show (fun i => S.extC m (rA m g f i)) = S.rC m g f from rfl,
+      show (fun i => S.extC m (rA m g f i)) = S.rC m g f from
+        funext fun i => S.extC_rA m g f i,
       show (fun i => S.extC m (a i)) = v' from funext fun i => (ha i).2]
     exact hv'd1
   · have hsum : ∀ (C0 : ℝ), 0 ≤ C0 → ∀ (T : Finset (Fin m)) (G : Fin m → P C m),
@@ -671,7 +685,7 @@ theorem isClosed_IA (hN : NoethPack B C D m)
       rw [show IA m g f = Ideal.span (Set.range (rA m g f)) from rfl, Ideal.map_span]
       refine Ideal.span_le.mpr ?_
       rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
-      exact Ideal.subset_span ⟨i, rfl⟩
+      exact Ideal.subset_span ⟨i, (S.extB_rA m g f i).symm⟩
     exact hmap (Ideal.mem_map_of_mem _ hy)
   have hsubC : S.extC m '' (IA m g f : Set (P A m)) ⊆ (S.IC m g f : Set (P C m)) := by
     rintro _ ⟨y, hy, rfl⟩
@@ -679,7 +693,7 @@ theorem isClosed_IA (hN : NoethPack B C D m)
       rw [show IA m g f = Ideal.span (Set.range (rA m g f)) from rfl, Ideal.map_span]
       refine Ideal.span_le.mpr ?_
       rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
-      exact Ideal.subset_span ⟨i, rfl⟩
+      exact Ideal.subset_span ⟨i, (S.extC_rA m g f i).symm⟩
     exact hmap (Ideal.mem_map_of_mem _ hy)
   have hxB : S.extB m x ∈ (S.IB m g f : Set (P B m)) := by
     have h1 : S.extB m x ∈ closure (S.extB m '' (IA m g f : Set (P A m))) :=
@@ -708,27 +722,26 @@ abbrev locB : Type _ := P B m ⧸ S.IB m g f
 abbrev locC : Type _ := P C m ⧸ S.IC m g f
 abbrev locD : Type _ := P D m ⧸ S.ID m g f
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
+omit [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 /-- Graph ideals push forward along the square's maps. -/
 theorem extB_mem_IB {y : P A m} (hy : y ∈ IA m g f) : S.extB m y ∈ S.IB m g f := by
   have hmap : Ideal.map (S.extB m) (IA m g f) ≤ S.IB m g f := by
     rw [show IA m g f = Ideal.span (Set.range (rA m g f)) from rfl, Ideal.map_span]
     refine Ideal.span_le.mpr ?_
     rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
-    exact Ideal.subset_span ⟨i, rfl⟩
+    exact Ideal.subset_span ⟨i, (S.extB_rA m g f i).symm⟩
   exact hmap (Ideal.mem_map_of_mem _ hy)
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
+omit [NormOneClass B] [CompleteSpace B] [NormOneClass D] [CompleteSpace D] in
 theorem extC_mem_IC {y : P A m} (hy : y ∈ IA m g f) :
     S.extC m y ∈ S.IC m g f := by
   have hmap : Ideal.map (S.extC m) (IA m g f) ≤ S.IC m g f := by
     rw [show IA m g f = Ideal.span (Set.range (rA m g f)) from rfl, Ideal.map_span]
     refine Ideal.span_le.mpr ?_
     rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
-    exact Ideal.subset_span ⟨i, rfl⟩
+    exact Ideal.subset_span ⟨i, (S.extC_rA m g f i).symm⟩
   exact hmap (Ideal.mem_map_of_mem _ hy)
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 theorem extDB_mem_ID {y : P B m} (hy : y ∈ S.IB m g f) :
     S.extDB m y ∈ S.ID m g f := by
   have hmap : Ideal.map (S.extDB m) (S.IB m g f) ≤ S.ID m g f := by
@@ -738,14 +751,14 @@ theorem extDB_mem_ID {y : P B m} (hy : y ∈ S.IB m g f) :
     exact Ideal.subset_span ⟨i, (S.extDB_rB m g f i).symm⟩
   exact hmap (Ideal.mem_map_of_mem _ hy)
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] in
 theorem extDC_mem_ID {y : P C m} (hy : y ∈ S.IC m g f) :
     S.extDC m y ∈ S.ID m g f := by
   have hmap : Ideal.map (S.extDC m) (S.IC m g f) ≤ S.ID m g f := by
     rw [show S.IC m g f = Ideal.span (Set.range (S.rC m g f)) from rfl, Ideal.map_span]
     refine Ideal.span_le.mpr ?_
     rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
-    exact Ideal.subset_span ⟨i, rfl⟩
+    exact Ideal.subset_span ⟨i, (S.extDC_rC m g f i).symm⟩
   exact hmap (Ideal.mem_map_of_mem _ hy)
 
 /-- The induced maps of the localized square ([FJP] (4.19)). -/
@@ -773,27 +786,25 @@ noncomputable def locψC : S.locC m g f →+* S.locD m g f :=
       rw [RingHom.comp_apply, Ideal.Quotient.eq_zero_iff_mem]
       exact S.extDC_mem_ID m g f ha)
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
+omit [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 theorem locφB_mk (p : P A m) :
     S.locφB m g f (Ideal.Quotient.mk (IA m g f) p) =
       Ideal.Quotient.mk (S.IB m g f) (S.extB m p) := rfl
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
+omit [NormOneClass B] [CompleteSpace B] [NormOneClass D] [CompleteSpace D] in
 theorem locφC_mk (p : P A m) :
     S.locφC m g f (Ideal.Quotient.mk (IA m g f) p) =
       Ideal.Quotient.mk (S.IC m g f) (S.extC m p) := rfl
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 theorem locψB_mk (p : P B m) :
     S.locψB m g f (Ideal.Quotient.mk (S.IB m g f) p) =
       Ideal.Quotient.mk (S.ID m g f) (S.extDB m p) := rfl
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] in
 theorem locψC_mk (p : P C m) :
     S.locψC m g f (Ideal.Quotient.mk (S.IC m g f) p) =
       Ideal.Quotient.mk (S.ID m g f) (S.extDC m p) := rfl
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 theorem loc_square_commutes (x : locA m g f) :
     S.locψB m g f (S.locφB m g f x) = S.locψC m g f (S.locφC m g f x) := by
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
@@ -860,7 +871,7 @@ theorem loc_row_exact (hN : NoethPack B C D m)
         sub_add_cancel_left]
       exact (S.IC m g f).neg_mem hxc
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
+omit [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
 /-- The quotient maps are 1-Lipschitz for the quotient seminorms. -/
 theorem locφB_lipschitz : LipschitzWith 1 (S.locφB m g f) :=
   LipschitzWith.of_dist_le_mul fun a b => by
@@ -881,7 +892,7 @@ theorem locφB_lipschitz : LipschitzWith 1 (S.locφB m g f) :=
       _ ≤ ‖q‖ := norm_mapRestricted_le _ _ _ _
       _ ≤ ‖Ideal.Quotient.mk (IA m g f) p‖ + ε := hqn.le
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
+omit [NormOneClass B] [CompleteSpace B] [NormOneClass D] [CompleteSpace D] in
 theorem locφC_lipschitz : LipschitzWith 1 (S.locφC m g f) :=
   LipschitzWith.of_dist_le_mul fun a b => by
     rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm, ← map_sub]
@@ -1007,7 +1018,7 @@ theorem loc_pair_isEmbedding (hN : NoethPack B C D m)
     exact hest
   exact hanti.isEmbedding hcont
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] in
 /-- `C_α → D_α` is surjective ([FJP] Prop 4.5). -/
 theorem locψC_surjective :
     Function.Surjective (S.locψC m g f) := by
@@ -1032,7 +1043,7 @@ theorem extDC_isOpenMap : IsOpenMap (S.extDC m) := by
   · rw [map_add, hc]
     ring
 
-omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] in
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] in
 theorem locψC_isOpenMap :
     IsOpenMap (S.locψC m g f) := by
   intro U hU
