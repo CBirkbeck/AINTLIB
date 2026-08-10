@@ -139,6 +139,23 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
     (projModelFunctionFieldEquiv W).toRingHom.comp
       (τ.functionFieldMap.hom.comp
         (projModelFunctionFieldEquiv W).symm.toRingHom) := by
+  -- PROOF SCAFFOLD (recorded; the two computations are the real content):
+  -- 1. `IsFractionRing.ringHom_ext` (mathlib FractionRing.lean:355): two ring homs out of
+  --    the fraction field `W.toAffine.FunctionField` agree iff they agree on
+  --    `CoordinateRing`.
+  -- 2. `CoordinateRing = AdjoinRoot (W-poly over K[X])`: reduce to the `x`- and
+  --    `y`-generators (AdjoinRoot-ext + Polynomial-ext).
+  -- 3. τ-side value on a generator: through `projModelFunctionFieldEquiv` the generator is
+  --    the class of a `Z`-chart section; `functionFieldMap_germToFunctionField`
+  --    (DominantFunctionField:95) computes `τ.functionFieldMap` on it as the class of
+  --    `τ.app (chart-section)` — the translated chart coordinate, evaluated by the
+  --    addition/translation spec-points machinery (`mulModelHom_specPoints`-genre at the
+  --    generic point).
+  -- 4. HasseWeil side on the generators: the slope-formula cases of
+  --    `translateAlgEquivOfPoint` (TranslationOrd.lean:3290) — plus
+  --    `mulByInt_pullbackAlgHom_x_gen` (MulByHomDegree:324) as the proven [n]-anchor
+  --    exemplar.
+  -- 5. Orientation/convention pinned at the first generator computation.
   sorry
 
 end Bridge
