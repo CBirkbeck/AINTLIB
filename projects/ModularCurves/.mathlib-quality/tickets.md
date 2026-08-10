@@ -41582,3 +41582,25 @@ Next: U5d/U5a per the decomposition — the bridge now feeds the characterisatio
 - [IRR-5] twist transfer Y(ρ̄)_ℚ̄ ≅ Y(N)^ζ_ℚ̄ (RhoDescent torsor-transport audit). Status: open.
 - [IRR-6] discharge hconn in the proven master reduction ⟹ yRho_geometricallyIrreducible.
   Status: blocked (IRR-1..5).
+
+### YR-1 progress (2026-08-10, session 4)
+
+**The curve-direction KM-naturality stack is PROVEN AXIOM-CLEAN** in the new
+`WeilPairing/CurveNaturality.lean` (all standard-three verified):
+- `pastingMap` + fst/snd + zero-square + `[N]`-square + `pushSection` (+ torsion transport)
+- `isPullback_pasting` ⟹ `isIso_pastingMap` (pasted pullbacks); `isPullback_pushSection`;
+  `ker_pushSection` (ideal-sheaf half)
+- `sectionCls_pastingMap`, `pushSection_zero`, `zeroCls_pastingMap`,
+  **`kappa_pastingMap`** (NAT1-mirror)
+- `hM_pastingMap`, `hnorm_pastingMap` (dataset transport)
+- **`torsionSplittingEval_pastingMap`** (NAT2-mirror engine — no `unitPullback` in the
+  conclusion since both presentations share `T`)
+- **`weilPairingKM_pastingMap`** (NAT3-mirror: the canonical pairing is natural in the
+  curve slot)
+
+Remaining for YR-1: the YRho:2489 plumbing (helpers `torsionSquareMap_comp_univStructure`,
+`weilPairingKM_congr_points`, `restrictBase_univTorsion{Fst,Snd}_eq_pushSection` inserted,
+build in flight) + the main μ_N-points argument (drafted). Transcription lessons: the
+NAT1/NAT2 templates mirror verbatim under (bcm ↦ pm, restrictBase ↦ pushSection, g ↦ 𝟙);
+`eq_torsionSplittingEval` absorbs the dataset choice; the `(E.baseChange t).E`-vs-pullback
+wall needs the v4.33 opacity options file-wide.
