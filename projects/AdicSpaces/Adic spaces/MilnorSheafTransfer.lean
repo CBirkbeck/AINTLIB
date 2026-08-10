@@ -140,6 +140,62 @@ structure MilnorSquareData
     (∀ v, v ∈ rationalOpen U.T U.s → ∃ W ∈ S, v ∈ rationalOpen W.T W.s) →
     ∀ w, w ∈ rationalOpen (pushD U).T (pushD U).s →
       ∃ W ∈ S, w ∈ rationalOpen (pushD W).T (pushD W).s
+  /-- The pushed datum of a refinement refines at the `D`-vertex too. -/
+  pushD_mono : ∀ (U U' : RationalLocData R),
+    rationalOpen U'.T U'.s ⊆ rationalOpen U.T U.s →
+    rationalOpen (pushD U').T (pushD U').s ⊆ rationalOpen (pushD U).T (pushD U).s
+  /-- Leg naturality: the `B → D` leg's value map commutes with restrictions of
+  pushed data. -/
+  leg_natural_B : ∀ (U U' : RationalLocData R)
+    (h : rationalOpen U'.T U'.s ⊆ rationalOpen U.T U.s)
+    (b : presheafValue (pushB U)),
+    presheafValueMapOfHom legB hlegB (pushB U') (pushD U') (legB_s U') (legB_T U')
+        (restrictionMap (pushB U) (pushB U') (pushB_mono U U' h) b) =
+      restrictionMap (pushD U) (pushD U') (pushD_mono U U' h)
+        (presheafValueMapOfHom legB hlegB (pushB U) (pushD U) (legB_s U) (legB_T U) b)
+  leg_natural_C : ∀ (U U' : RationalLocData R)
+    (h : rationalOpen U'.T U'.s ⊆ rationalOpen U.T U.s)
+    (c : presheafValue (pushC U)),
+    presheafValueMapOfHom legC hlegC (pushC U') (pushD U') (legC_s U') (legC_T U')
+        (restrictionMap (pushC U) (pushC U') (pushC_mono U U' h) c) =
+      restrictionMap (pushD U) (pushD U') (pushD_mono U U' h)
+        (presheafValueMapOfHom legC hlegC (pushC U) (pushD U) (legC_s U) (legC_T U) c)
+  /-- The value-level commuting square: both composites `𝒪(U) → 𝒪(U_D)` agree. -/
+  row_comm : ∀ (U : RationalLocData R) (x : presheafValue U),
+    presheafValueMapOfHom legB hlegB (pushB U) (pushD U) (legB_s U) (legB_T U)
+        (presheafValueMapOfHom φB hφB U (pushB U) (pushB_s U) (pushB_T U) x) =
+      presheafValueMapOfHom legC hlegC (pushC U) (pushD U) (legC_s U) (legC_T U)
+        (presheafValueMapOfHom φC hφC U (pushC U) (pushC_s U) (pushC_T U) x)
+  /-- Compat transport at the `B`-vertex: `R`-level matching of two local sections
+  implies `B`-level matching of their pushes over arbitrary common `B`-refinements
+  (the instantiations discharge this via "push of intersection = intersection of
+  pushes", cf. `pushedCompatB` in `FiniteJetSheafTransfer.lean`). -/
+  pushedCompat_B : ∀ (U₁ U₂ : RationalLocData R), U₁.IsRational → U₂.IsRational →
+    ∀ (x₁ : presheafValue U₁) (x₂ : presheafValue U₂),
+    (∀ (D₃ : RationalLocData R)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen U₁.T U₁.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen U₂.T U₂.s),
+      restrictionMap U₁ D₃ h₃₁ x₁ = restrictionMap U₂ D₃ h₃₂ x₂) →
+    ∀ (E₃ : RationalLocData B)
+      (hE₁ : rationalOpen E₃.T E₃.s ⊆ rationalOpen (pushB U₁).T (pushB U₁).s)
+      (hE₂ : rationalOpen E₃.T E₃.s ⊆ rationalOpen (pushB U₂).T (pushB U₂).s),
+      restrictionMap (pushB U₁) E₃ hE₁
+          (presheafValueMapOfHom φB hφB U₁ (pushB U₁) (pushB_s U₁) (pushB_T U₁) x₁) =
+        restrictionMap (pushB U₂) E₃ hE₂
+          (presheafValueMapOfHom φB hφB U₂ (pushB U₂) (pushB_s U₂) (pushB_T U₂) x₂)
+  pushedCompat_C : ∀ (U₁ U₂ : RationalLocData R), U₁.IsRational → U₂.IsRational →
+    ∀ (x₁ : presheafValue U₁) (x₂ : presheafValue U₂),
+    (∀ (D₃ : RationalLocData R)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen U₁.T U₁.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen U₂.T U₂.s),
+      restrictionMap U₁ D₃ h₃₁ x₁ = restrictionMap U₂ D₃ h₃₂ x₂) →
+    ∀ (E₃ : RationalLocData C)
+      (hE₁ : rationalOpen E₃.T E₃.s ⊆ rationalOpen (pushC U₁).T (pushC U₁).s)
+      (hE₂ : rationalOpen E₃.T E₃.s ⊆ rationalOpen (pushC U₂).T (pushC U₂).s),
+      restrictionMap (pushC U₁) E₃ hE₁
+          (presheafValueMapOfHom φC hφC U₁ (pushC U₁) (pushC_s U₁) (pushC_T U₁) x₁) =
+        restrictionMap (pushC U₂) E₃ hE₂
+          (presheafValueMapOfHom φC hφC U₂ (pushC U₂) (pushC_s U₂) (pushC_T U₂) x₂)
 
 namespace MilnorSquareData
 
