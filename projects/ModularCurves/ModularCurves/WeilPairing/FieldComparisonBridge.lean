@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.PointsDictionary
+import ModularCurves.EllipticCurve.ModelVariableChange
 import ModularCurves.ForMathlib.DominantFunctionField
 import HasseWeil.HasseBound.WeilPairing.PairingProps
 
@@ -34,7 +35,9 @@ closes the field leaf (U5d/U5e).
 
 universe u
 
-open AlgebraicGeometry CategoryTheory Limits
+open AlgebraicGeometry CategoryTheory Limits HomogeneousIdeal
+
+attribute [local instance] MvPolynomial.gradedAlgebra
 
 namespace ModularCurves
 
@@ -48,7 +51,33 @@ the affine Weierstrass curve: the `Z`-chart is an affine open with sections the 
 coordinate ring, and both sides are its fraction field. The integrality instance is an
 argument (discharged at use sites by `isIntegral_projModel_u`, universe-polymorphic). -/
 noncomputable def projModelFunctionFieldEquiv [IsIntegral (projModel W)] :
-    (projModel W).functionField ≃+* W.toAffine.FunctionField := by sorry
+    (projModel W).functionField ≃+* W.toAffine.FunctionField := by
+  have hf := mk_X_mem_quotientGrading_one W 2
+  have hU : IsAffineOpen (Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) := by
+    rw [← Proj.opensRange_awayι (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) hf one_pos]
+    exact isAffineOpen_opensRange _
+  haveI hnt : Nontrivial Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) :=
+    (coordRingToZSection W).symm.toEquiv.nontrivial
+  haveI hne : Nonempty (Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) := by
+    by_contra h
+    have hbot : (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) = ⊥ := by
+      rw [← TopologicalSpace.Opens.not_nonempty_iff_eq_bot]
+      exact fun hcon => h hcon.to_subtype
+    refine (not_subsingleton_iff_nontrivial.mpr hnt) ?_
+    rw [hbot]
+    infer_instance
+  haveI := functionField_isFractionRing_of_isAffineOpen (X := projModel W) _ hU
+  exact (IsLocalization.ringEquivOfRingEquiv
+    (M := nonZeroDivisors W.toAffine.CoordinateRing)
+    (S := W.toAffine.FunctionField)
+    (Q := (projModel W).functionField)
+    (coordRingToZSection W)
+    (MulEquivClass.map_nonZeroDivisors (coordRingToZSection W))).symm
 
 /- **(U5c-2, the translation bridge — the largest missing API of the U5 leaf; statement
 deferred until `projModelFunctionFieldEquiv` is proven, since it conjugates through it —
