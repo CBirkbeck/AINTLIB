@@ -97,7 +97,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 - **Status**: open · **Depends on**: T611, T612 (final per-file cleanup).
 
 ### [T615] B-AG1 design pass (PLANNING): the `⟨V⟩`-Milnor row + abstract transfer
-- **Status**: open · **Depends on**: T613 · **Type**: planning
+- **Status**: in_progress (2026-08-10 — AG1.d design LANDED: `MilnorSquareData` + `isSheafy_of_milnorSquare` skeleton elaborating in MilnorSheafTransfer.lean; remaining: AG1.a ⟨V⟩-row design + T618) · **Depends on**: T613 · **Type**: planning
 - **Action**: run `/develop --decompose` scoped to B-AG1 (decomposition.md sub-tree
   AG1.a–d): design the abstract `lem:sheaf-transfer` statement (paper l.576–583 —
   [Reviewer] §4.1's criterion), audit the graph-Koszul stack's genericity over the
@@ -129,6 +129,19 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
     `MilnorSheafTransfer.lean`, mirroring lem:sheaf-transfer l.576–640 verbatim and
     FiniteJetSheafTransfer's chase with the generic pushes; then re-derive
     isSheafy_JetA through it (regression guard) and instantiate at the ⟨V⟩-square.
+
+### [T618] Prove `isSheafy_of_milnorSquare` (sub-ticket of T615)
+- **Status**: open · **File**: `Adic spaces/MilnorSheafTransfer.lean` · **Depends on**: none
+  (the statement is self-contained) · **Parent**: T615 · **Type**: theorem
+- **Proof sketch** (mirror [WP-paper] lem:sheaf-transfer l.585–640 + the concrete chase
+  of FiniteJetSheafTransfer.lean): (1) embedding: the product-restriction of `R` factors
+  through the vertex product-restrictions via `row_embedding` + `push_natural_*` and the
+  vertices' `IsSheafy.embedding` (paper's commutative square, l.600–612); (2) gluing:
+  push a matching family to the `B`/`C` vertices (`push_natural_*` preserves matching),
+  glue there (`hB`/`hC` gluing), compare the two `D`-images on every pushed piece and
+  conclude equality by `D`-separation (`hD` separation), then `row_glue` at the base
+  produces the section; per-piece recovery via `row_injective`.
+- **Sources**: [WP-paper] l.576–640 (verbatim quotes in decomposition.md campaign B).
 
 ### [T616] B-H (MILESTONE): `finiteJet_tateExt_isSheafyComplete`
 - **Status**: blocked (T615 outcome) · **File**: `Adic spaces/FJP/StrongSheafy.lean:60`.

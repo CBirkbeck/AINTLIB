@@ -1,1 +1,1 @@
-FOCUS: T621 — awaiting WedhornCechAcyclicity build with unitCover_delta_surjective; then axiom-check + board update
+FOCUS: T615 AG1.d — draft abstract isSheafy_of_milnorRow over locMapOfHom/presheafValueMapOfHom in new MilnorSheafTransfer.lean (entry point recorded in ticket)
