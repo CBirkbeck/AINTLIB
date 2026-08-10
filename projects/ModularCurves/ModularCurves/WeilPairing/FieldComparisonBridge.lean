@@ -112,10 +112,13 @@ theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
 Elaboration fixes found so far: `translateByIso` is `ModularCurves.EllipticCurve.translateByIso`
 (namespace EllipticCurve, E implicit from x's type — NOT GrpObj); `SpecPoints` needs
 `[Algebra K K]` (present); the points-dictionary target is `(W.baseChange K).toAffine.Point`
-while `translateAlgEquivOfPoint` wants `W.toAffine.Point` — the self-baseChange wrinkle:
-either state the RHS at `W.baseChange K` (transport the [IsElliptic]-instances) or use
-mathlib `WeierstrassCurve.map_id` + `Point.map` to collapse; check how AdditionSpecPoints
-handles the same wrinkle before choosing. -/
+while `translateAlgEquivOfPoint` wants `W.toAffine.Point` — the self-baseChange wrinkle.
+DESIGN DECISION (no in-tree precedent — no consumer of projModelPointsEquiv has hit it):
+quantify `P' : (W.baseChange K).toAffine.Point` and state the RHS at the curve
+`W.baseChange K` (its `[IsElliptic]`-instances transport along `map`); a consuming
+corollary collapses to `W` later via mathlib `WeierstrassCurve.map_id`. This keeps the
+bridge statement dictionary-native. Then prove via the KE-valued specPoints strategy in
+the docstring above. -/
 
 end Bridge
 
