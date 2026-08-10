@@ -1,1 +1,1 @@
-FOCUS: T620 group 1 — discharge push*_s/_T/_isRational via jetPush*_eq + rfl/mem_image
+FOCUS: T620 groups 4-6 — aux layer written, lean-checking MilnorSquareInstance
