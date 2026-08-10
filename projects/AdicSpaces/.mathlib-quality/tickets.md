@@ -121,7 +121,16 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
     bridge lives in LaurentOverlap.lean (locating). Plan: transport the difference map
     along the three bridges to the concrete quotients, split via
     `A⟨ζ,ζ⁻¹⟩ = A⟨ζ⟩ + ζ⁻¹A⟨ζ⁻¹⟩` ([Wedhorn] l.4200; ALSO need the relation-ideal
-    decomposition per the ChatGPT addendum), push the two summands back. · **File**: `Adic spaces/CechAcyclicityFull.lean:41` · **Depends on**: none · **Parallel**: yes · **Type**: theorem
+    decomposition per the ChatGPT addendum), push the two summands back.
+  - 2026-08-10 (design note): the existing 8.33 development presents the overlap via
+    `overlapDatum P b = laurentMinusDatum (trivialPlusDatum B P b) b` and identifies its
+    value through `bivariateOverlap_equiv_B₁₂gen b : TateAlgebra₂ B ⧸ (b−X, 1−bY) ≃+*
+    LaurentCover.B₁₂_gen b` (LaurentOverlap.lean:644). NEXT STEP: restate C-L1's
+    intersection over `overlapDatum` (planning correction via decomposition.md — my
+    interDatum-based skeleton statement predates this reconnaissance), then transport the
+    difference-map surjectivity through the ± bridges and bivariateOverlap equiv, closing
+    with the Laurent split A⟨ζ,ζ⁻¹⟩ = A⟨ζ⟩ + ζ⁻¹A⟨ζ⁻¹⟩ + the relation-ideal
+    decomposition at the B₁₂_gen level. · **File**: `Adic spaces/CechAcyclicityFull.lean:41` · **Depends on**: none · **Parallel**: yes · **Type**: theorem
 - **Proof sketch**:
   1. Identify the three `presheafValue`s via the existing 8.33 development's
      `Examples 6.38/6.39` comparisons (the identifications behind
