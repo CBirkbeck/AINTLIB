@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».FJP.FiniteJetMain
 
 /-!
-# Comparator solution: [FJP] Theorem 1.3
+# Comparator solution: [FJP] Theorem 1.1
 
 Forwards each statement of `Challenge.lean` to the library's proof. This is the module
 comparator rebuilds inside the sandbox, so it is deliberately tiny: the project itself is
@@ -20,17 +20,17 @@ universe u
 
 variable (F : Type u) [Field F]
 
-/-- **[FJP] Theorem 1.3 (sheafy)**. -/
-theorem fjp_1_3_isSheafy : IsSheafy (JetA F) := finiteJet_isSheafy F
+/-- **[FJP] Theorem 1.1 (sheafy)**. -/
+theorem fjp_1_1_isSheafy : IsSheafy (JetA F) := finiteJet_isSheafy F
 
-/-- **[FJP] Theorem 1.3 (uniform)**. -/
-theorem fjp_1_3_isUniform : IsUniform (JetA F) := finiteJet_isUniform F
+/-- **[FJP] Theorem 1.1 (uniform)**. -/
+theorem fjp_1_1_isUniform : IsUniform (JetA F) := finiteJet_isUniform F
 
-/-- **[FJP] Theorem 1.3 (domain)**. -/
-theorem fjp_1_3_isDomain : IsDomain (JetA F) := finiteJet_isDomain F
+/-- **[FJP] Theorem 1.1 (domain)**. -/
+theorem fjp_1_1_isDomain : IsDomain (JetA F) := finiteJet_isDomain F
 
-/-- **[FJP] Theorem 1.3 (nonnoetherian)**. -/
-theorem fjp_1_3_not_isNoetherianRing : ¬ IsNoetherianRing (JetA F) := finiteJet_not_noetherian F
+/-- **[FJP] Theorem 1.1 (nonnoetherian)**. -/
+theorem fjp_1_1_not_isNoetherianRing : ¬ IsNoetherianRing (JetA F) := finiteJet_not_noetherian F
 
-/-- **[FJP] Theorem 1.3 (not stably uniform)**. -/
-theorem fjp_1_3_not_isStablyUniform : ¬ IsStablyUniform (JetA F) := finiteJet_not_stablyUniform F
+/-- **[FJP] Theorem 1.1 (not stably uniform)**. -/
+theorem fjp_1_1_not_isStablyUniform : ¬ IsStablyUniform (JetA F) := finiteJet_not_stablyUniform F

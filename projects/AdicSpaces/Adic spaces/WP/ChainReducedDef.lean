@@ -8,10 +8,9 @@ import «Adic spaces».Presheaf
 # Rational stable reducedness — the definition ([WP] def:rationally-stably-reduced)
 
 The chain recursion `ChainReduced` formalizing "every finite iterated rational
-localization is reduced". Split out of `WP/Reduced.lean` so that the **definition**
-layer of the weighted-parity example is importable without any of its proofs: the
-comparator challenge (`Comparator/WPChallenge.lean`) must be able to *state*
-[WP] thm 6.2 (3) without pulling the proving modules into its import closure.
+localization is reduced". Split out of `WP/Reduced.lean` so the definition is
+importable without that file's proofs (definition layer / proving layer hygiene,
+as for the rest of the weighted-parity example).
 -/
 
 @[expose] public section

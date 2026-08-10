@@ -2,33 +2,38 @@
 
 Kernel-level certification, via
 [`leanprover/comparator`](https://github.com/leanprover/comparator), of the two headline
-theorems of *Uniform sheafy Tate domains that are not stably uniform* (Birkbeck–Torzewski):
+theorems of *Uniform sheafy Tate domains that are not stably uniform* (Birkbeck–Torzewski,
+<https://cbirkbeck.github.io/uniform-sheafy-tate-domains/>):
 
-* **[FJP] Theorem 1.3** (= `thm:main` of the current revision): the finite-jet pinching
-  algebra `𝓐 = JetA F` is a complete uniform Tate domain, nonnoetherian, sheafy, and **not
-  stably uniform** — the bad chart acquires a nilpotent.
-* **[WP] Theorem 6.2** (= `thm:rationally-reduced-example`, §6): the weighted-parity
-  algebra `𝒜 = WPA K w` at `w = id` is a complete uniform Tate domain, nonnoetherian,
-  `𝒜° = 𝒜₀`, **strongly sheafy**, **rationally stably reduced**, and **not stably
-  uniform** — so the failure of stable uniformity is *not* caused by a nilpotent: the bad
-  chart is reduced (a domain).
+* **[FJP] Theorem 1.1** (`thm:main`; the finite-jet pinching algebra): `𝓐 = JetA F` is a
+  complete uniform Tate domain, nonnoetherian, sheafy, and **not stably uniform** — the
+  bad chart acquires a nilpotent.
+* **[WP] Theorem 8.1** (the weighted-parity algebra): `𝒜 = WPA K id` is a complete uniform
+  Tate domain, nonnoetherian, `𝒜° = 𝒜₀`, **strongly sheafy**, and **not stably uniform** —
+  with the bad chart an integral domain, so the failure of stable uniformity is *not*
+  caused by a nilpotent.
+
+**Numbering crosswalk.** The library's docstrings were written against an earlier revision
+of the paper and cite these as `[FJP] Thm 1.3` and `[WP] thm 6.2`; in the current revision
+they are Theorem 1.1 and Theorem 8.1. The certificate names below follow the current
+numbering (`fjp_1_1_*`, `wp_8_1_*`).
 
 | file | role |
 |---|---|
-| `Challenge.lean` | [FJP] Thm 1.3: the five statements, each `:= sorry` |
+| `Challenge.lean` | [FJP] Thm 1.1: the five statements, each `:= sorry` |
 | `Solution.lean` | the same five, forwarded to the library's proofs |
 | `comparator-config.json` | `theorem_names` + `permitted_axioms` for the above |
-| `WPChallenge.lean` | [WP] Thm 6.2: the eight statements, each `:= sorry` |
-| `WPSolution.lean` | the same eight, forwarded to the library's proofs |
+| `WPChallenge.lean` | [WP] Thm 8.1: the seven statements, each `:= sorry` |
+| `WPSolution.lean` | the same seven, forwarded to the library's proofs |
 | `wp-config.json` | `theorem_names` + `permitted_axioms` for the above |
 | `../../scripts/certify.sh` | one-time setup instructions + the run |
 
 `certify.sh` reads the challenge and solution module names out of the config, so:
 
 ```sh
-bash projects/AdicSpaces/scripts/certify.sh                    # [FJP] Theorem 1.3
+bash projects/AdicSpaces/scripts/certify.sh                    # [FJP] Theorem 1.1
 CONFIG="projects/AdicSpaces/Adic spaces/Comparator/wp-config.json" \
-  bash projects/AdicSpaces/scripts/certify.sh                  # [WP] Theorem 6.2
+  bash projects/AdicSpaces/scripts/certify.sh                  # [WP] Theorem 8.1
 ```
 
 ## What comparator checks, and what it buys over `#print axioms`
@@ -59,13 +64,10 @@ contains none of the modules that prove the statements being judged:
   containing no `FJP.*` beyond `FiniteJetRings` and `RestrictedLaurent` — in particular
   none of `FiniteJetMain`, `FiniteJetSheafyEndpoints`, `FiniteJetSheafTransfer`,
   `FiniteJetChart`, `FiniteJetUniformDomain`, `FiniteJetNoetherianVertices`.
-* `WPChallenge.lean` imports `WP.Algebra` + `WP.ChainReducedDef` + `SheafyRing` + `Uniform`.
-  Closure: 118 project modules, containing no `WP.*` beyond `Algebra`, `Weight`,
-  `RestrictedComplete`, `ChainReducedDef` — in particular none of `WP.Main`, `WP.Sheafy`,
-  `WP.UniformDomain`, `WP.Nonnoetherian`, `WP.Chart`, `WP.Reduced`, or the
-  `HeadReduced*`/`Graph*` reducedness chain. (`ChainReduced` was split into
-  `WP/ChainReducedDef.lean` precisely so the challenge can *state* conclusion (3) without
-  importing its proof.)
+* `WPChallenge.lean` imports `WP.Algebra` + `SheafyRing` + `Uniform`. Closure: 118 project
+  modules, containing no `WP.*` beyond `Algebra`, `Weight`, `RestrictedComplete` — in
+  particular none of `WP.Main`, `WP.Sheafy`, `WP.UniformDomain`, `WP.Nonnoetherian`,
+  `WP.Chart`, or the reducedness chain.
 
 Do not "fix" a mismatch by importing more here. That trades away the only property these
 files exist to provide.
@@ -82,7 +84,7 @@ Two statement-spelling conventions keep proving-layer names out of the trusted s
 Comparator runs `safeLakeBuild solutionModule` — it rebuilds the solution **inside
 landrun**. Pointing `solution_module` at a library module would rebuild the entire project
 inside the sandbox and conflate "the untrusted submission" with "the project". The
-challenge declares neutral names (`fjp_1_3_*`, `wp_6_2_*`); the solution declares the same
+challenge declares neutral names (`fjp_1_1_*`, `wp_8_1_*`); the solution declares the same
 names and forwards each to the library's proof.
 
 ## Status (2026-08-10, Lean v4.33.0 + mathlib v4.33.0)
@@ -95,17 +97,10 @@ Lean default kernel accepts the solution
 Your solution is okay!        # exit 0
 ```
 
-**[FJP] Theorem 1.3 — all five statements certified** (statement pinned against
+**[FJP] Theorem 1.1 — all five statements certified** (statement pinned against
 `Challenge.lean`, kernel-accepted, axioms within `propext / Quot.sound /
-Classical.choice`):
-
-| | |
-|---|---|
-| `fjp_1_3_isSheafy` | [FJP] Thm 1.3 (sheafy) |
-| `fjp_1_3_isUniform` | [FJP] Thm 1.3 (uniform) |
-| `fjp_1_3_isDomain` | [FJP] Thm 1.3 (domain) |
-| `fjp_1_3_not_isNoetherianRing` | [FJP] Thm 1.3 (nonnoetherian) |
-| `fjp_1_3_not_isStablyUniform` | [FJP] Thm 1.3 (not stably uniform) |
+Classical.choice`): `fjp_1_1_isSheafy`, `fjp_1_1_isUniform`, `fjp_1_1_isDomain`,
+`fjp_1_1_not_isNoetherianRing`, `fjp_1_1_not_isStablyUniform`.
 
 This includes the two statements (`isSheafy`, `not_isStablyUniform`) that were **not**
 certifiable in the 2026-08-01 run on `dev/adic-spaces`: there, an anonymous
@@ -115,17 +110,10 @@ challenge's closure). The instance now lives in the definition layer
 (`FiniteJetRings.lean`), so every environment containing `JetA` elaborates the headline
 statements to structurally identical types.
 
-**[WP] Theorem 6.2 — seven of eight endpoints certified** (`wp-config.json`):
-`isUniform`, `isDomain`, `not_isNoetherianRing`, `powerBounded_eq_unitBall`,
-`isSheafyComplete`, `stronglySheafy`, `not_isStablyUniform`.
-
-**Pinned but not yet certifiable** — `wp_6_2_chainReduced` ([WP] 6.2 (3), rationally
-stably reduced). Its proof is complete in every example-specific input (all
-head-reducedness leaves discharged at maximal ideals) but still consumes the core
-development's Wedhorn Prop 8.30 restriction flatness (`prop_8_30_flat_clean`), an open
-frontier of the general 8.28(b) campaign, so its axiom set currently includes `sorryAx`.
-The statement stays pinned in `WPChallenge.lean`; when 8.30 lands, adding the name back
-to `theorem_names` completes the certificate.
+**[WP] Theorem 8.1 — all seven statements certified** (`wp-config.json`):
+`wp_8_1_isUniform`, `wp_8_1_isDomain`, `wp_8_1_not_isNoetherianRing`,
+`wp_8_1_powerBounded_eq_unitBall`, `wp_8_1_isSheafyComplete`, `wp_8_1_stronglySheafy`,
+`wp_8_1_not_isStablyUniform`.
 
 ## Running it
 

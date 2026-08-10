@@ -13055,7 +13055,7 @@ results:
     group: wp
     module: '«Adic spaces».WP.ChainReducedDef'
     file: 'projects/AdicSpaces/Adic spaces/WP/ChainReducedDef.lean'
-    line: 28
+    line: 27
     status: proved
     digest: b51b7a50b72b
     sources:

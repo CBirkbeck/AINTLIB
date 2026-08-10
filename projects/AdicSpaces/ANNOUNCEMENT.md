@@ -5,27 +5,23 @@
 
 This branch is a self-contained, inspectable snapshot of the Lean formalisation of the two
 headline theorems of *Uniform sheafy Tate domains that are not stably uniform*
-(Birkbeck–Torzewski):
+(Birkbeck–Torzewski, <https://cbirkbeck.github.io/uniform-sheafy-tate-domains/>):
 
-1. **The finite-jet pinching algebra** (`[FJP]`, the paper's `thm:main`; Theorem 1.3 in the
-   revision the Lean docstrings cite). `𝓐 = JetA F` is a complete uniform Tate domain,
-   nonnoetherian, **sheafy**, and **not stably uniform** — the bad rational localization
-   `𝓐⟨W/ϖ⟩` acquires a nilpotent.
+1. **Theorem 1.1 — the finite-jet pinching algebra** (cited `[FJP]` in the Lean
+   docstrings, as Thm 1.3 of the revision they were written against). `𝓐 = JetA F` is a
+   complete uniform Tate domain, nonnoetherian, **sheafy**, and **not stably uniform** —
+   the bad rational localization `𝓐⟨W/ϖ⟩` acquires a nilpotent.
    * Statements: `Adic spaces/FJP/FiniteJetMain.lean` (five endpoints).
    * A generic-base layer (`Adic spaces/FJP/Over/SheafyEndpoints.lean`) states the
      ring-level endpoints over an abstract complete discretely valued nonarchimedean field.
-
-2. **The weighted-parity algebra** (`[WP]`, §6, `thm:rationally-reduced-example` = Theorem
-   6.2). `𝒜 = WPA K id` is a complete uniform Tate domain, nonnoetherian, with `𝒜° = 𝒜₀`,
-   **strongly sheafy**, **rationally stably reduced**, and **not stably uniform** — so the
-   failure of stable uniformity is *not* caused by a nilpotent: every finite iterated
-   rational localization of `𝒜` is reduced, and the bad chart is in fact a domain.
+2. **Theorem 8.1 — the weighted-parity algebra** (cited `[WP] thm 6.2` in the Lean
+   docstrings). `𝒜 = WPA K id` is a complete uniform Tate domain, nonnoetherian, with
+   `𝒜° = 𝒜₀`, **strongly sheafy**, and **not stably uniform** — and here the bad chart is
+   an integral domain, so the failure of stable uniformity is *not* caused by a nilpotent.
    * Statements: `Adic spaces/WP/Main.lean` (headline endpoints, two base layers).
-   * Status: seven of the eight endpoints are kernel-certified. The eighth — (3),
-     rationally stably reduced — is proved modulo **one** core input: Wedhorn Prop 8.30
-     (rational-restriction flatness), an open frontier of the general 8.28(b) campaign;
-     every example-specific input, including all head-reducedness leaves at maximal
-     ideals, is discharged. Its statement is already pinned in the challenge file.
+
+All twelve certified statements (five for Theorem 1.1, seven for Theorem 8.1) are
+kernel-certified; see below.
 
 ## Why this toolchain
 
@@ -42,13 +38,13 @@ Both headline theorems are certified with
 [`leanprover/comparator`](https://github.com/leanprover/comparator): the statements are
 pinned in challenge files whose import closure provably contains none of the proving
 modules, the axiom budget is `[propext, Quot.sound, Classical.choice]`, and the proofs are
-replayed through the Lean kernel. See `Adic spaces/Comparator/README.md` for the trust
-boundary and current status, and run:
+replayed through the Lean kernel. Both runs end `Your solution is okay!`. See
+`Adic spaces/Comparator/README.md` for the trust boundary and the full status, and run:
 
 ```sh
-bash projects/AdicSpaces/scripts/certify.sh                    # [FJP] Theorem 1.3
+bash projects/AdicSpaces/scripts/certify.sh                    # Theorem 1.1 (five statements)
 CONFIG="projects/AdicSpaces/Adic spaces/Comparator/wp-config.json" \
-  bash projects/AdicSpaces/scripts/certify.sh                  # [WP] Theorem 6.2
+  bash projects/AdicSpaces/scripts/certify.sh                  # Theorem 8.1 (seven statements)
 ```
 
 ## Manifests
@@ -87,13 +83,10 @@ announcement's path, owned by the central bump process):
 
 ## Sorry policy on this branch
 
-**Every certified statement — all five [FJP] conclusions and seven of the eight [WP]
-endpoints — has a `sorry`-free proof closure**; the axiom set of each is exactly
-`[propext, Quot.sound, Classical.choice]`, verified by `#print axioms` and re-checked by
-comparator. The single exception is [WP] (3) (rationally stably reduced), whose proof is
-complete in every example-specific input but still consumes the core campaign's open
-Wedhorn Prop 8.30 flatness (`prop_8_30_flat_clean`) — so it is pinned but not yet listed in
-the certificate. The wider repository tree contains `sorry`s outside this announcement's
-scope: the Nonarchimedean Scottish Book *statements* (open problems), the superseded
-conditional legs in `WP/HeadReduced.lean`, and WIP frontiers of the general Wedhorn 8.28(b)
-campaign. `formalisation.yaml`'s per-group counts break this down.
+**Every certified statement — all twelve — has a `sorry`-free proof closure**; the axiom
+set of each is exactly `[propext, Quot.sound, Classical.choice]`, verified by
+`#print axioms` and re-checked by comparator. The wider repository tree contains `sorry`s
+outside this announcement's scope: the Nonarchimedean Scottish Book *statements* (open
+problems), a quarantined conditional reducedness route in `WP/HeadReduced.lean` (part of a
+development beyond the paper's current claims), and WIP frontiers of the general Wedhorn
+8.28(b) campaign. `formalisation.yaml`'s per-group counts break this down.

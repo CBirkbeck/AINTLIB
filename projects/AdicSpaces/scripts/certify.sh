@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Kernel-level certification of [FJP] Theorem 1.3 via leanprover/comparator:
+# Kernel-level certification of the paper's headline theorems via leanprover/comparator:
 # statement-identity against `Adic spaces/Comparator/Challenge.lean`, axiom budget
 # [propext, Quot.sound, Classical.choice], and kernel acceptance.
 #
@@ -20,9 +20,9 @@
 # Run from the REPO ROOT (the lake workspace), not from projects/AdicSpaces.
 #
 # CONFIG selects which certificate to run; the challenge/solution modules are read from it:
-#   default  — Adic spaces/Comparator/comparator-config.json   ([FJP] Theorem 1.3 = thm:main)
-#   also     — Adic spaces/Comparator/wp-config.json           ([WP] Theorem 6.2, the
-#              rationally stably reduced weighted-parity example)
+#   default  — Adic spaces/Comparator/comparator-config.json   ([FJP] Theorem 1.1 = thm:main)
+#   also     — Adic spaces/Comparator/wp-config.json           ([WP] Theorem 8.1, the
+#              weighted-parity example)
 
 set -euo pipefail
 

@@ -6,7 +6,7 @@ import «Adic spaces».FJP.FiniteJetRings
 import «Adic spaces».Uniform
 
 /-!
-# Comparator challenge: [FJP] Theorem 1.3
+# Comparator challenge: [FJP] Theorem 1.1
 
 The five conclusions of the paper's headline theorem (`thm:main` of *Uniform sheafy Tate
 domains that are not stably uniform*; Theorem 1.3 in the revision the library's docstrings
@@ -35,17 +35,17 @@ universe u
 
 variable (F : Type u) [Field F]
 
-/-- **[FJP] Theorem 1.3 (sheafy)**: `(𝓐, 𝓐°)` is sheafy. -/
-theorem fjp_1_3_isSheafy : IsSheafy (JetA F) := sorry
+/-- **[FJP] Theorem 1.1 (sheafy)**: `(𝓐, 𝓐°)` is sheafy. -/
+theorem fjp_1_1_isSheafy : IsSheafy (JetA F) := sorry
 
-/-- **[FJP] Theorem 1.3 (uniform)**: 𝓐 is uniform. -/
-theorem fjp_1_3_isUniform : IsUniform (JetA F) := sorry
+/-- **[FJP] Theorem 1.1 (uniform)**: 𝓐 is uniform. -/
+theorem fjp_1_1_isUniform : IsUniform (JetA F) := sorry
 
-/-- **[FJP] Theorem 1.3 (domain)**: 𝓐 is an integral domain. -/
-theorem fjp_1_3_isDomain : IsDomain (JetA F) := sorry
+/-- **[FJP] Theorem 1.1 (domain)**: 𝓐 is an integral domain. -/
+theorem fjp_1_1_isDomain : IsDomain (JetA F) := sorry
 
-/-- **[FJP] Theorem 1.3 (nonnoetherian)**: 𝓐 is not noetherian. -/
-theorem fjp_1_3_not_isNoetherianRing : ¬ IsNoetherianRing (JetA F) := sorry
+/-- **[FJP] Theorem 1.1 (nonnoetherian)**: 𝓐 is not noetherian. -/
+theorem fjp_1_1_not_isNoetherianRing : ¬ IsNoetherianRing (JetA F) := sorry
 
-/-- **[FJP] Theorem 1.3 (not stably uniform)**: 𝓐 is not stably uniform. -/
-theorem fjp_1_3_not_isStablyUniform : ¬ IsStablyUniform (JetA F) := sorry
+/-- **[FJP] Theorem 1.1 (not stably uniform)**: 𝓐 is not stably uniform. -/
+theorem fjp_1_1_not_isStablyUniform : ¬ IsStablyUniform (JetA F) := sorry
