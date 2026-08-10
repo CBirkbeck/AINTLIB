@@ -217,13 +217,17 @@ theorem Ideal.relNorm_maximalIdeal_eq_pow_inertiaDeg_of_isLocalRing
         (by rw [← IsLocalRing.primesOver_eq S hp0, ← Set.mem_toFinset]; exact hb)) hne
     · intro h
       exact absurd (by rw [Set.mem_toFinset, IsLocalRing.primesOver_eq S hp0]; rfl) h
-  -- `e · f = [Frac S : Frac R]` (the fundamental identity; *no* separability hypothesis).
+  -- `e · f = [Frac S : Frac R] = [S : R]` (the fundamental identity; *no* separability
+  -- hypothesis). Post-v4.33.0 mathlib states `relNorm_algebraMap` with exponent
+  -- `Module.finrank R S`, so convert via `IsFractionRing.finrank_eq`.
   letI : Algebra (FractionRing R) (FractionRing S) := FractionRing.liftAlgebra R _
   haveI : IsScalarTower R (FractionRing R) (FractionRing S) :=
     FractionRing.isScalarTower_liftAlgebra R _
   haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
-  have hef : e * f = Module.finrank (FractionRing R) (FractionRing S) :=
-    Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing S (FractionRing R) (FractionRing S) hp0
+  have hef : e * f = Module.finrank R S := by
+    rw [← IsFractionRing.finrank_eq R (FractionRing R) S (FractionRing S)]
+    exact Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing S (FractionRing R)
+      (FractionRing S) hp0
   -- `(relNorm 𝔪)^e = relNorm(𝔪^e) = relNorm(p · S) = p^{[Frac S:Frac R]} = p^{e·f}`.
   have h3 : (Ideal.relNorm R m) ^ e = p ^ (e * f) := by
     rw [← map_pow, ← hmap, Ideal.relNorm_algebraMap, hef]
@@ -913,20 +917,11 @@ theorem ClassGroup.map_mul (a b : ClassGroup R) :
 /-- The **ideal-level arithmetic core** of the dual relation: the relative norm of the extension of
 an integral ideal `I` of `R` is `I ^ n`, where `n = Module.finrank R S`.
 
-This is `Ideal.relNorm_algebraMap` (whose native exponent is
-`Module.finrank (FractionRing R) (FractionRing S)`), converted to `Module.finrank R S` via
-`Algebra.IsAlgebraic.finrank_of_isFractionRing`.  The non-instance `FractionRing.liftAlgebra`
-algebra on the fraction fields is supplied locally (the usual gotcha). -/
+Post-v4.33.0 mathlib states `Ideal.relNorm_algebraMap` with exponent `Module.finrank R S`
+directly, so this is now a bare delegation (kept because downstream call sites name it). -/
 theorem Ideal.relNorm_map_algebraMap (I : Ideal R) :
-    Ideal.relNorm R (Ideal.map (algebraMap R S) I) = I ^ Module.finrank R S := by
-  letI : Algebra (FractionRing R) (FractionRing S) :=
-    FractionRing.liftAlgebra R (FractionRing S)
-  haveI : IsScalarTower R (FractionRing R) (FractionRing S) :=
-    FractionRing.isScalarTower_liftAlgebra R (FractionRing S)
-  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
-  have hrank : Module.finrank (FractionRing R) (FractionRing S) = Module.finrank R S :=
-    Algebra.IsAlgebraic.finrank_of_isFractionRing R (FractionRing R) S (FractionRing S)
-  rw [Ideal.relNorm_algebraMap S I, hrank]
+    Ideal.relNorm R (Ideal.map (algebraMap R S) I) = I ^ Module.finrank R S :=
+  Ideal.relNorm_algebraMap S I
 
 /-- **The target: the dual relation at the class-group level.**
 
