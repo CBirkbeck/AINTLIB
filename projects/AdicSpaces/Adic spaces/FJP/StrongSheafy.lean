@@ -92,7 +92,40 @@ theorem tendsto_coeff_nestedAmbientEquiv (n k : ℕ)
           isRestricted_coeff_nestedAmbientEquiv n k hg ν⟩ :
           ↥(restrictedMvPowerSeriesSubring n A)))
       Filter.cofinite (nhds 0) := by
-  sorry
+  letI := mvTateAlgebraTopology' (A := A) n
+  set P := (IsTateRing.principalPair A).toPairOfDefinition with hP
+  refine (mvTateAlgBasis' (A := A) n).hasBasis_nhds_zero.tendsto_right_iff.mpr ?_
+  intro j _
+  have hU : (Subtype.val '' ((P.I ^ j : Ideal P.A₀) : Set P.A₀)) ∈ nhds (0 : A) :=
+    P.hasBasis_nhds_zero.mem_of_mem trivial
+  have hfin : ((fun l : Fin (n + k) →₀ ℕ => MvPowerSeries.coeff l g) ⁻¹'
+      (Subtype.val '' ((P.I ^ j : Ideal P.A₀) : Set P.A₀)))ᶜ.Finite := by
+    have h1 := hg hU
+    rwa [Filter.mem_map, Filter.mem_cofinite] at h1
+  refine Filter.eventually_cofinite.mpr ((hfin.image (fun l =>
+    Finsupp.comapDomain Sum.inl
+      (Finsupp.embDomain (nestedIndexEquiv n k).toEmbedding l)
+      Sum.inl_injective.injOn)).subset ?_)
+  intro ν hν
+  by_contra hν_im
+  apply hν
+  have hcoeffU : ∀ μ : Fin n →₀ ℕ,
+      MvPowerSeries.coeff μ (MvPowerSeries.coeff ν (nestedAmbientEquiv n k g)) ∈
+        Subtype.val '' ((P.I ^ j : Ideal P.A₀) : Set P.A₀) := by
+    intro μ
+    by_contra hbad
+    refine hν_im ⟨Finsupp.embDomain (nestedIndexEquiv n k).symm.toEmbedding (ν.sumElim μ),
+      ?_, ?_⟩
+    · simpa [coeff_coeff_nestedAmbientEquiv n k g ν μ] using hbad
+    · simp [GraphKoszul.embDomain_symm_embDomain,
+        Finsupp.comapDomain_inl_sumElim]
+  refine mvTateAlgNhd_of_coeff_mem_principal n P j (IsTateRing.principalPair A).π
+    (IsTateRing.principalPair A).I_eq_span (IsTateRing.principalPair A).π_isUnit
+    (fun s => ?_) (fun l => ?_)
+  · obtain ⟨b, -, hb⟩ := hcoeffU s
+    exact hb ▸ b.2
+  · obtain ⟨b, hbI, hb⟩ := hcoeffU l
+    exact ⟨b, hbI, hb⟩
 
 /-- **T617 leg 3 (nested ⟹ joint)**: a series over `A⟨X₁,…,Xₙ⟩` whose outer family
 is restricted (w.r.t. the canonical topology) flattens to a jointly-restricted
