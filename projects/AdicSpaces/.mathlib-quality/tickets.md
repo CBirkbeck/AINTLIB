@@ -178,6 +178,23 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
   for the compat transports, the localized-Milnor row lemmas for
   row_injective/row_glue/row_embedding, and `interOpen` facts).
 
+### [T620] JetA-square MilnorSquareData instantiation (sub-ticket of T615, regression)
+- **Status**: open · **File**: new `Adic spaces/FJP/MilnorSquareInstance.lean` · **Parent**: T615 · **Type**: def + theorem
+- **Plan**: assemble `jetSquare : MilnorSquareData (jB) (iotaC) (φD := legB ∘ jB) …` with
+  pushes `fun D => if h : D.IsRational then pushDatumB D h else D-junk` (laws discharged
+  with `dif_pos`); homs: `jB` (FiniteJetRings:326), `iotaC` (:320), `rhoC : JetC →+* JetD`
+  (:134), the B-leg `JetB →+* JetD` (locate; grep 'rhoB\|JetB F →+* JetD'); field
+  discharges from: pushDatumB_isRational (:120), mem_rationalOpen_pushDatumB_iff (:2146)
+  for mono/cover, presheafValueMapB + _restriction for value maps/naturality (CHECK
+  they equal presheafValueMapOfHom-form or add bridging lemmas), pushedCompatB/C
+  (SheafTransfer:212/258), localized-Milnor row lemmas for
+  row_injective/row_glue/row_embedding/row_comm, productRestrictionSub machinery.
+  Regression goal: `isSheafy_JetA' : IsSheafy (JetA F) := isSheafy_of_milnorSquare … jetSquare …`.
+- **Key risk**: presheafValueMapB is a bespoke construction — verify it agrees with
+  `presheafValueMapOfHom jB … (pushDatumB D hD)` (same universal-property extension;
+  if defs differ, prove the agreement lemma once and rewrite the field discharges
+  through it).
+
 ### [T616] B-H (MILESTONE): `finiteJet_tateExt_isSheafyComplete`
 - **Status**: blocked (T615 outcome) · **File**: `Adic spaces/FJP/StrongSheafy.lean:60`.
 
