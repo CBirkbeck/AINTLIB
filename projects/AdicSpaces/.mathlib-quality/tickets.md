@@ -138,7 +138,14 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
     `laurentProdCoverOf_isOXAcyclic` → its 2-cover gluing base case → the overlap-value
     identification it actually uses (grep the 833-gluing lemma in
     WedhornCechAcyclicity.lean), then state the difference-map surjectivity in THAT
-    vocabulary. · **File**: `Adic spaces/CechAcyclicityFull.lean:41` · **Depends on**: none · **Parallel**: yes · **Type**: theorem
+    vocabulary.
+  - 2026-08-10 (clean vocabulary located): the clean chain's 2-cover is `unitCover D₀ f`
+    with base case `unitCover_isOXAcyclic`, and intersections via
+    `RationalLocData.interSamePair` (same-pair form). RESTATE C-L1 as: for the unit
+    cover's plus/minus pieces, every element of
+    `presheafValue (plus.interSamePair minus h)` is a difference of the two
+    restrictions. Proof mirrors unitCover_isOXAcyclic's own value identifications
+    (read that proof next; it contains the clean concrete models of the three values). · **File**: `Adic spaces/CechAcyclicityFull.lean:41` · **Depends on**: none · **Parallel**: yes · **Type**: theorem
 - **Proof sketch**:
   1. Identify the three `presheafValue`s via the existing 8.33 development's
      `Examples 6.38/6.39` comparisons (the identifications behind
