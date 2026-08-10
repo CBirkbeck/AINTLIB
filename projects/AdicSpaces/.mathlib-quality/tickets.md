@@ -10,7 +10,7 @@ Cadence note: per-campaign milestones carry per-file cleanups; the single `CLEAN
 precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 
 ## Summary
-- Proof tickets: 9 (8 done — CAMPAIGN A + T611-T614/T617/T621, all axiom-clean). C-L1 landed: the 2-cover augmented complex is exact in ALL degrees. · planning tickets: 2 · cleanup tickets: 5
+- Proof tickets: 10 (9 done — CAMPAIGN A + T611-T614/T617/T618/T621, all axiom-clean). Reviewer §4.1 abstract Milnor descent + all-degree 8.33 both landed. · planning tickets: 2 · cleanup tickets: 5
 - Parallel capacity: 3 (A-track, B-Fubini pair, C-L1)
 
 ---
@@ -131,7 +131,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
     isSheafy_JetA through it (regression guard) and instantiate at the ⟨V⟩-square.
 
 ### [T618] Prove `isSheafy_of_milnorSquare` (sub-ticket of T615)
-- **Status**: open · **File**: `Adic spaces/MilnorSheafTransfer.lean` · **Depends on**: none
+- **Status**: done (2026-08-10, axiom-clean — the abstract strict-Milnor-descent criterion, reviewer §4.1, is a complete theorem: embedding half via of_comp factorization, gluing half via pushed families + compat transports + D-separation + row_glue + row_injective recovery) · **File**: `Adic spaces/MilnorSheafTransfer.lean` · **Depends on**: none
   (the statement is self-contained) · **Parent**: T615 · **Type**: theorem
 - **Proof sketch** (mirror [WP-paper] lem:sheaf-transfer l.585–640 + the concrete chase
   of FiniteJetSheafTransfer.lean): (1) embedding: the product-restriction of `R` factors

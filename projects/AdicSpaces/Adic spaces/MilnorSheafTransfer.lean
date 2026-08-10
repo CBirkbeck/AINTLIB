@@ -544,6 +544,33 @@ theorem isSheafy_of_milnorSquare
         _ = presheafValueMapOfHom φC hφC W.1 (sq.pushC W.1) (sq.pushC_s _)
               (sq.pushC_T _) (f W) :=
             congrFun (restrictionMap_id (sq.pushC W.1)) _
-    sorry
+    -- D-comparison: the two leg-images of the glued sections agree, by separation
+    have hd : presheafValueMapOfHom sq.legB sq.hlegB (sq.pushB C₀.base)
+        (sq.pushD C₀.base) (sq.legB_s C₀.base) (sq.legB_T C₀.base) b =
+      presheafValueMapOfHom sq.legC sq.hlegC (sq.pushC C₀.base)
+        (sq.pushD C₀.base) (sq.legC_s C₀.base) (sq.legC_T C₀.base) c := by
+      apply (hD.embedding _ (sq.pushCoveringD_isRational hC₀)).injective
+      funext E
+      obtain ⟨E, hE⟩ := E
+      obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hE
+      show restrictionMap (sq.pushD C₀.base) (sq.pushD W)
+          (sq.pushD_mono C₀.base W (C₀.hsubset W hW))
+          (presheafValueMapOfHom sq.legB sq.hlegB (sq.pushB C₀.base)
+            (sq.pushD C₀.base) (sq.legB_s C₀.base) (sq.legB_T C₀.base) b) =
+        restrictionMap (sq.pushD C₀.base) (sq.pushD W)
+          (sq.pushD_mono C₀.base W (C₀.hsubset W hW))
+          (presheafValueMapOfHom sq.legC sq.hlegC (sq.pushC C₀.base)
+            (sq.pushD C₀.base) (sq.legC_s C₀.base) (sq.legC_T C₀.base) c)
+      rw [← sq.leg_natural_B C₀.base W (C₀.hsubset W hW) b,
+        ← sq.leg_natural_C C₀.base W (C₀.hsubset W hW) c,
+        hb_at ⟨W, hW⟩, hc_at ⟨W, hW⟩]
+      exact sq.row_comm W (f ⟨W, hW⟩)
+    -- descend to the base by middle exactness, then recover per piece
+    obtain ⟨x, hxB, hxC⟩ := sq.row_glue C₀.base hC₀.1 b c hd
+    refine ⟨x, ?_⟩
+    intro W
+    apply sq.row_injective W.1 (hC₀.piece W.2)
+    · rw [sq.push_natural_B C₀.base W.1 (C₀.hsubset W.1 W.2) x, hxB, hb_at W]
+    · rw [sq.push_natural_C C₀.base W.1 (C₀.hsubset W.1 W.2) x, hxC, hc_at W]
 
 end ValuationSpectrum
