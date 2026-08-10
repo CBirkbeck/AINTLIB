@@ -122,18 +122,17 @@ theorem functionFieldMap_comp {Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
     [IsDominant f] [IsDominant g] [IrreducibleSpace X] [IrreducibleSpace Y]
     [IrreducibleSpace Z] [IsDominant (f ≫ g)] :
     (f ≫ g).functionFieldMap = g.functionFieldMap ≫ f.functionFieldMap := by
-  unfold Scheme.Hom.functionFieldMap
-  rw [Scheme.Hom.stalkMap_comp]
   refine TopCat.Presheaf.stalk_hom_ext _ fun U hxU => ?_
+  haveI hU : Nonempty U := ⟨⟨genericPoint Z, hxU⟩⟩
+  haveI : Nonempty (g ⁻¹ᵁ U) := ⟨⟨genericPoint Y, genericPoint_mem_preimage g U⟩⟩
   ext s
-  simp only [CommRingCat.comp_apply]
-  -- MANUAL CHAIN (both sides → germ_X of the composite-pulled section):
-  -- LHS: eqToHom(germ_Z-genZ) = germ_Z-at-(f≫g)(genX) [germ_eqToHom_stalk_apply];
-  --      g.stalkMap (f genX) germ = germ_Y-at-(f genX) (g.app s) [germ_stalkMap_apply g];
-  --      f.stalkMap germ = germ_X ((g≫f-apps) s) [germ_stalkMap_apply f].
-  -- RHS: inner eqToHom(germ_Z-genZ) = germ_Z-at-g(genY); g.stalkMap genY → germ_Y-genY (g.app s);
-  --      outer eqToHom: germ_Y-genY = germ_Y-at-(f genX) [point-eq (genericPoint_eq_of_isDominant f).symm];
-  --      f.stalkMap → germ_X (f.app (g.app s)). Sides agree (comp_app).
-  sorry
+  show (f ≫ g).functionFieldMap (Z.germToFunctionField U s) =
+    f.functionFieldMap (g.functionFieldMap (Z.germToFunctionField U s))
+  have hsec : (f ≫ g).app U s = f.app (g ⁻¹ᵁ U) (g.app U s) := by
+    rw [Scheme.Hom.comp_app]
+    rfl
+  rw [functionFieldMap_germToFunctionField (f ≫ g) U s,
+    functionFieldMap_germToFunctionField g U s, hsec]
+  exact (functionFieldMap_germToFunctionField f (g ⁻¹ᵁ U) (g.app U s)).symm
 
 end AlgebraicGeometry
