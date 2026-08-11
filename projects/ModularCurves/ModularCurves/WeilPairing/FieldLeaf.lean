@@ -538,6 +538,16 @@ theorem exists_affine_common_principal {X : Scheme.{u}}
     ∀ c : ↥X, ∃ V : X.affineOpens, c ∈ V.1 ∧ V.1 ≤ W c ∧
       (∃ f : Γ(X, V.1), J₁.ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(X, V.1)) ∧
       (∃ f : Γ(X, V.1), J₂.ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(X, V.1)) := by
+  intro c
+  obtain ⟨V₁, hc1, f₁, hspan1, hnzd1⟩ := h₁ c
+  obtain ⟨V₂, hc2, f₂, hspan2, hnzd2⟩ := h₂ c
+  -- refine inside V₂ ⊓ W c by a basic open of V₁
+  obtain ⟨b, hble, hcb⟩ := V₁.2.exists_basicOpen_le
+    (V := V₂.1 ⊓ W c) ⟨c, ⟨hc2, hW c⟩⟩ hc1
+  -- then a common further basic open giving principality on BOTH affines:
+  -- use the pattern of `exists_basicOpen_le_affine_inter` between V₁ and V₂
+  obtain ⟨g₁, g₂, hgg, hcg⟩ := AlgebraicGeometry.exists_basicOpen_le_affine_inter
+    V₁.2 V₂.2 c ⟨hc1, hc2⟩
   sorry
 
 end PicPoint
