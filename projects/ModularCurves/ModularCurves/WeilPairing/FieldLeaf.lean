@@ -426,6 +426,32 @@ theorem subsingleton_pic_of_subsingleton_space {X : Scheme.{u}}
   rw [← toSkeleton_fromSkeleton_obj u.val]
   exact h1
 
+/-- Over the spectrum of a field the base has trivial Picard group, so the relative
+normalisation in `κ` is invisible: `κ(Q) = [𝒪(Q)]·[𝒪(0)]⁻¹` on the nose. -/
+theorem kappa_eq_sectionCls_mul_inv_zeroCls_of_field {K : Type u} [Field K]
+    (E : EllipticCurve (Spec (CommRingCat.of K)))
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (Q : (E.baseChange (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K)))) :
+    kappa E hsm (𝟙 (Spec (CommRingCat.of K))) Q =
+      sectionCls E hsm (𝟙 (Spec (CommRingCat.of K))) Q.1 Q.2 *
+        (zeroCls E hsm (𝟙 (Spec (CommRingCat.of K))))⁻¹ := by
+  haveI hsub : Subsingleton ↥(Spec (CommRingCat.of K)) :=
+    inferInstanceAs (Subsingleton (PrimeSpectrum K))
+  haveI hne : Nonempty ↥(Spec (CommRingCat.of K)) :=
+    inferInstanceAs (Nonempty (PrimeSpectrum K))
+  haveI hpic : Subsingleton (AlgebraicGeometry.Scheme.Pic (Spec (CommRingCat.of K))) :=
+    subsingleton_pic_of_subsingleton_space
+  set x := sectionCls E hsm (𝟙 (Spec (CommRingCat.of K))) Q.1 Q.2 *
+    (zeroCls E hsm (𝟙 (Spec (CommRingCat.of K))))⁻¹ with hx
+  have hval : kappa E hsm (𝟙 (Spec (CommRingCat.of K))) Q =
+      x * (Scheme.Pic.map (pullback.snd E.π (𝟙 (Spec (CommRingCat.of K))))
+        (Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π
+          (𝟙 (Spec (CommRingCat.of K)))) x))⁻¹ :=
+    kappa_eq_picRelProj E hsm (𝟙 (Spec (CommRingCat.of K))) Q
+  rw [hval, show Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π
+      (𝟙 (Spec (CommRingCat.of K)))) x = 1 from Subsingleton.elim _ _,
+    map_one, inv_one, mul_one]
+
 end PicPoint
 
 end ModularCurves
