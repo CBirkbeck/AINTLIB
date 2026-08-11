@@ -241,4 +241,66 @@ theorem pushDatumOfHom_interOpen [DecidableEq A] {φ : A →+* B} (hφ : Continu
 
 end PushInter
 
+/-! ### Iterated intersections (the Čech multi-intersection data, T631) -/
+
+section InterList
+
+variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTateRing A]
+  [DecidableEq A]
+
+/-- Iterated intersection datum with its rationality, by folding
+`interDatumOfRational` ([Wedhorn] Appendix A's `U_{i₀…i_q}`). -/
+noncomputable def interListAux :
+    ∀ {q : ℕ} (D : Fin (q + 1) → RationalLocData A),
+      (∀ i, (D i).IsRational) → {E : RationalLocData A // E.IsRational}
+  | 0, D, h => ⟨D 0, h 0⟩
+  | (_ + 1), D, h =>
+    let rest := interListAux (fun i => D i.succ) (fun i => h i.succ)
+    ⟨interDatumOfRational (D 0) rest.1 (h 0) rest.2,
+      interDatumOfRational_isRational (h 0) rest.2⟩
+
+/-- The iterated intersection datum. -/
+noncomputable def interList {q : ℕ} (D : Fin (q + 1) → RationalLocData A)
+    (h : ∀ i, (D i).IsRational) : RationalLocData A :=
+  (interListAux D h).1
+
+theorem interList_isRational {q : ℕ} (D : Fin (q + 1) → RationalLocData A)
+    (h : ∀ i, (D i).IsRational) : (interList D h).IsRational :=
+  (interListAux D h).2
+
+theorem interList_zero (D : Fin 1 → RationalLocData A)
+    (h : ∀ i, (D i).IsRational) : interList D h = D 0 := rfl
+
+theorem interList_succ {q : ℕ} (D : Fin (q + 2) → RationalLocData A)
+    (h : ∀ i, (D i).IsRational) :
+    interList D h = interDatumOfRational (D 0)
+      (interList (fun i => D i.succ) (fun i => h i.succ)) (h 0)
+      (interList_isRational _ _) := rfl
+
+/-- The iterated intersection cuts out the intersection of the rational opens. -/
+theorem rationalOpen_interList [PlusSubring A] {q : ℕ}
+    (D : Fin (q + 1) → RationalLocData A) (h : ∀ i, (D i).IsRational) :
+    rationalOpen (interList D h).T (interList D h).s =
+      ⋂ i, rationalOpen (D i).T (D i).s := by
+  induction q with
+  | zero =>
+    rw [interList_zero]
+    ext v
+    simp only [Set.mem_iInter]
+    exact ⟨fun hv i => by rw [Fin.fin_one_eq_zero i]; exact hv, fun hv => hv 0⟩
+  | succ q ih =>
+    rw [interList_succ, rationalOpen_interDatumOfRational,
+      ih (fun i => D i.succ) (fun i => h i.succ)]
+    ext v
+    simp only [Set.mem_inter_iff, Set.mem_iInter]
+    constructor
+    · rintro ⟨h0, hs⟩ i
+      rcases Fin.eq_zero_or_eq_succ i with rfl | ⟨j, rfl⟩
+      · exact h0
+      · exact hs j
+    · intro hall
+      exact ⟨hall 0, fun j => hall j.succ⟩
+
+end InterList
+
 end ValuationSpectrum
