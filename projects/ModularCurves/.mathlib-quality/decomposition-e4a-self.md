@@ -281,3 +281,19 @@ nonZeroDivisors-transfer to the refined chart: either via localisation-injectivi
 basic opens, or dodge entirely — take PER-POINT choices from each isOfficial at the
 refined point (the r_i are per-chart data; no global choice needs restricting). The
 IsIso-machinery on basic opens is `bijective_idealGenHom_app` (IdealModule:309).
+
+### 3c cut (2026-08-11, all entry points named)
+Engine: `overTrivializationOfRestrictIso_hom_eq_comp_scalar` (PoleSheaf:3488) — two
+restrict-isos differing by `unitEndomorphismOfTopSection r` have .over-forms differing by
+the scalar-end of r ⟹ their `trivializationTransitionUnit` is r (spec
+`overUnitScalarEnd_transitionUnit`, InvertibleSheafCocycle:52). Cut:
+- 3c-i: two nzd generators of one principal ideal differ by a unit (comm-algebra:
+  span-eq + nzd ⟹ f_i = u·f_j, u ∈ Γˣ; mathlib-adjacent).
+- 3c-ii: `idealGenHom` at f_i = `idealGenHom` at f_j ∘ mult-by-u (from the mult-def).
+- 3c-iii: push through the 3b-ii chains (each leg a named iso) + the scalar-transfer ⟹
+  the M-transition on an overlap = (u₂/u₁)-ratio.
+- 3c-iv: FF-germ of the transition (units of sections ↦ FFˣ, ratios ↦ divisions) — the
+  L2e-consumer shape.
+Then L1b (divisor-zero ⟹ scalar over k̄: HW `pairing_const_of_transport`-machinery) and
+the L1-glue: run L2e at THE dataset built from these trivialisations (its h_i are then
+g-related by construction).
