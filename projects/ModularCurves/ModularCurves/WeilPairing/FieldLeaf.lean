@@ -962,6 +962,98 @@ theorem trivialization_inv_comp_hom_of_characterisation {X : Scheme.{u}}
     exact overUnitScalarEnd_mul V u r₂
   rw [key, Category.assoc, Iso.inv_hom_id, Category.comp_id]
 
+/-- **(U5-L1a 3c-iii C-rest-1)** The B1 characterisation restricted to a sub-open: the
+restriction of the chart trivialisation is characterised by the restricted generator.
+Direct instantiation of `restrictOverTrivialization_inv_comp_over` at B1; feeding two
+charts' restrictions to the overlap into the C(i)-b read-off computes the ideal-leg
+transition as the 3c-i unit. -/
+theorem overTriv_pullbackIdealTriv_restrict_inv_comp_toUnitHom {X : Scheme.{u}}
+    (J : X.IdealSheafData) (V : X.affineOpens) (f : Γ(X, V.1))
+    (hspan : J.ideal V = Ideal.span {f}) (hnzd : f ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem : f ∈ idealSections J (Opposite.op V.1))
+    {U : X.Opens} (hUV : U ≤ V.1) :
+    (SheafOfModules.restrictOverTrivialization X.ringCatSheaf (idealModule J) V.1
+        (Scheme.Modules.overTrivializationOfRestrictIso (idealModule J) V.1
+          (restrictIsoOfPullbackIso (idealModule J) V.1
+            (pullbackIdealTrivOfPrincipal J V f hspan hnzd hfmem)))
+        (Over.mk (homOfLE hUV))).inv ≫
+      (idealModuleToUnitHom J).over U =
+    SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
+      (X.presheaf.map (homOfLE hUV).op f) :=
+  restrictOverTrivialization_inv_comp_over (idealModuleToUnitHom J) V.1
+    (Scheme.Modules.overTrivializationOfRestrictIso (idealModule J) V.1
+      (restrictIsoOfPullbackIso (idealModule J) V.1
+        (pullbackIdealTrivOfPrincipal J V f hspan hnzd hfmem)))
+    f (overTriv_pullbackIdealTriv_inv_comp_toUnitHom J V f hspan hnzd hfmem) hUV
+
+/-- **(U5-L1a 3c-iii, THE IDEAL-LEG TRANSITION — hom level)** On the overlap of two
+principal charts whose generators are related by `res fᵢ = u · res fⱼ`, the restricted
+chart trivialisations differ by exactly `scalar u`. Pure assembly:
+C-rest-1 at both charts + the C(i)-b read-off. -/
+theorem idealTriv_restrict_inv_comp_hom {X : Scheme.{u}} (J : X.IdealSheafData)
+    (Vi Vj : X.affineOpens) (fi : Γ(X, Vi.1)) (fj : Γ(X, Vj.1))
+    (hspani : J.ideal Vi = Ideal.span {fi}) (hnzdi : fi ∈ nonZeroDivisors Γ(X, Vi.1))
+    (hfmemi : fi ∈ idealSections J (Opposite.op Vi.1))
+    (hspanj : J.ideal Vj = Ideal.span {fj}) (hnzdj : fj ∈ nonZeroDivisors Γ(X, Vj.1))
+    (hfmemj : fj ∈ idealSections J (Opposite.op Vj.1))
+    (u : Γ(X, Vi.1 ⊓ Vj.1))
+    (hu : X.presheaf.map (homOfLE (inf_le_left : Vi.1 ⊓ Vj.1 ≤ Vi.1)).op fi =
+      u * X.presheaf.map (homOfLE (inf_le_right : Vi.1 ⊓ Vj.1 ≤ Vj.1)).op fj) :
+    (SheafOfModules.restrictOverTrivialization X.ringCatSheaf (idealModule J) Vi.1
+        (Scheme.Modules.overTrivializationOfRestrictIso (idealModule J) Vi.1
+          (restrictIsoOfPullbackIso (idealModule J) Vi.1
+            (pullbackIdealTrivOfPrincipal J Vi fi hspani hnzdi hfmemi)))
+        (Over.mk (homOfLE inf_le_left))).inv ≫
+      (SheafOfModules.restrictOverTrivialization X.ringCatSheaf (idealModule J) Vj.1
+        (Scheme.Modules.overTrivializationOfRestrictIso (idealModule J) Vj.1
+          (restrictIsoOfPullbackIso (idealModule J) Vj.1
+            (pullbackIdealTrivOfPrincipal J Vj fj hspanj hnzdj hfmemj)))
+        (Over.mk (homOfLE inf_le_right))).hom =
+    SheafOfModules.overUnitScalarEnd X.ringCatSheaf (Vi.1 ⊓ Vj.1) u :=
+  trivialization_inv_comp_hom_of_characterisation J (Vi.1 ⊓ Vj.1) _ _
+    (X.presheaf.map (homOfLE (inf_le_left : Vi.1 ⊓ Vj.1 ≤ Vi.1)).op fi)
+    (X.presheaf.map (homOfLE (inf_le_right : Vi.1 ⊓ Vj.1 ≤ Vj.1)).op fj) u
+    (overTriv_pullbackIdealTriv_restrict_inv_comp_toUnitHom J Vi fi hspani hnzdi
+      hfmemi inf_le_left)
+    (overTriv_pullbackIdealTriv_restrict_inv_comp_toUnitHom J Vj fj hspanj hnzdj
+      hfmemj inf_le_right)
+    hu
+
+/-- **(U5-L1a 3c-iii, THE IDEAL-LEG TRANSITION — unit level)** The
+`trivializationTransitionUnit` of the two restricted chart trivialisations is the 3c-i
+generator unit. This is the `transitionUnitOfCover`-shaped output for the ideal legs. -/
+theorem trivializationTransitionUnit_idealTriv {X : Scheme.{u}} (J : X.IdealSheafData)
+    (Vi Vj : X.affineOpens) (fi : Γ(X, Vi.1)) (fj : Γ(X, Vj.1))
+    (hspani : J.ideal Vi = Ideal.span {fi}) (hnzdi : fi ∈ nonZeroDivisors Γ(X, Vi.1))
+    (hfmemi : fi ∈ idealSections J (Opposite.op Vi.1))
+    (hspanj : J.ideal Vj = Ideal.span {fj}) (hnzdj : fj ∈ nonZeroDivisors Γ(X, Vj.1))
+    (hfmemj : fj ∈ idealSections J (Opposite.op Vj.1))
+    (u : Γ(X, Vi.1 ⊓ Vj.1)ˣ)
+    (hu : X.presheaf.map (homOfLE (inf_le_left : Vi.1 ⊓ Vj.1 ≤ Vi.1)).op fi =
+      (u : Γ(X, Vi.1 ⊓ Vj.1)) *
+        X.presheaf.map (homOfLE (inf_le_right : Vi.1 ⊓ Vj.1 ≤ Vj.1)).op fj) :
+    trivializationTransitionUnit (Vi.1 ⊓ Vj.1)
+      (SheafOfModules.restrictOverTrivialization X.ringCatSheaf (idealModule J) Vi.1
+        (Scheme.Modules.overTrivializationOfRestrictIso (idealModule J) Vi.1
+          (restrictIsoOfPullbackIso (idealModule J) Vi.1
+            (pullbackIdealTrivOfPrincipal J Vi fi hspani hnzdi hfmemi)))
+        (Over.mk (homOfLE inf_le_left)))
+      (SheafOfModules.restrictOverTrivialization X.ringCatSheaf (idealModule J) Vj.1
+        (Scheme.Modules.overTrivializationOfRestrictIso (idealModule J) Vj.1
+          (restrictIsoOfPullbackIso (idealModule J) Vj.1
+            (pullbackIdealTrivOfPrincipal J Vj fj hspanj hnzdj hfmemj)))
+        (Over.mk (homOfLE inf_le_right))) = u := by
+  letI : ∀ (U : (TopologicalSpace.Opens ↥X)ᵒᵖ),
+      IsMulCommutative (X.ringCatSheaf.obj.obj U) := fun U => by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact ⟨⟨fun a b => mul_comm a b⟩⟩
+  apply Units.ext
+  apply (SheafOfModules.overUnitScalarEndRingEquiv
+    X.ringCatSheaf (Vi.1 ⊓ Vj.1)).injective
+  refine Eq.trans (overUnitScalarEnd_transitionUnit (Vi.1 ⊓ Vj.1) _ _) ?_
+  exact idealTriv_restrict_inv_comp_hom J Vi Vj fi fj hspani hnzdi hfmemi
+    hspanj hnzdj hfmemj u hu
+
 /-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects identities. Natural home
 after cleanup: `Picard/InvertibleSheaf.lean`. -/
 theorem tensorObjCongr_refl {X : Scheme.{u}} (M N : X.Modules) :

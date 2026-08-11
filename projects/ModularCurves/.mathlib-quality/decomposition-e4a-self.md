@@ -515,3 +515,16 @@ transitions via the five-chain shared-leg cancellation (tensorObjCongr_trans + t
 ⊗-slot scalar conjugation through monoidal/mapIso/triv₂ legs — the ONE remaining
 conjugation lemma) + transitionUnitOfCover read-off (overUnitScalarEndRingEquiv-inj).
 Then 3c-iv (FF-germ), L1b (translation layer), L1-glue, L3, L5, L6.
+
+★★ 3c-iii IDEAL-LEG LANE COMPLETE (2026-08-11, session 5 close): LANDED AXIOM-CLEAN —
+[C-rest-1] `overTriv_pullbackIdealTriv_restrict_inv_comp_toUnitHom` (B1 restricted via
+PoleSheaf:4049, term-mode one-shot); `idealTriv_restrict_inv_comp_hom` (hom-level
+overlap transition = scalar u, pure assembly); ★ `trivializationTransitionUnit_idealTriv`
+(THE TRANSITION THEOREM: trivializationTransitionUnit of two principal-chart
+trivialisations = the 3c-i generator unit u, via overUnitScalarEndRingEquiv-injectivity;
+needed the OpenUnit local-instance trick `letI : ∀ U, IsMulCommutative …` via `change` to
+presheaf-obj). The FULL ideal-leg pipeline: definite triv → B1 characterisation →
+4049-restriction → C(i)-b read-off → transition unit. REMAINING for 3c-iii: the M-CHAIN
+assembly ([C-rest-3]: five-chain shared-leg cancellation via tensorObjCongr_trans + the
+⊗-slot scalar conjugation through monoidal/mapIso/triv₂ legs) + transitionUnitOfCover
+packaging; then 3c-iv. Window total: 17 axiom-clean declarations.
