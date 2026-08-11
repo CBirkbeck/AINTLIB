@@ -556,17 +556,34 @@ theorem exists_affine_common_principal {X : Scheme.{u}}
     @AlgebraicGeometry.IsIntegral.component_integral X ‹_› (V₁.1 : X.Opens) hne1
   haveI : IsDomain Γ(X, V₂.1) :=
     @AlgebraicGeometry.IsIntegral.component_integral X ‹_› (V₂.1 : X.Opens) hne2
-  refine ⟨V, hcb, hVleW, ?_, ?_⟩
-  · refine ⟨X.presheaf.map (homOfLE (show V.1 ≤ V₁.1 from hVle1)).op f₁, ?_, ?_⟩
-    · -- span restriction: map_ideal + map_span (coe-spelling loop; next session w/ LSP)
-      sorry
-    · -- nzd transfer: map_injective_of_isIntegral (coe-spelling loop; next session w/ LSP)
-      sorry
-  · refine ⟨X.presheaf.map (homOfLE (show V.1 ≤ V₂.1 from hVle2)).op f₂, ?_, ?_⟩
-    · -- span restriction: map_ideal + map_span (coe-spelling loop; next session w/ LSP)
-      sorry
-    · -- nzd transfer: map_injective_of_isIntegral (coe-spelling loop; next session w/ LSP)
-      sorry
+  have hVle2' : V ≤ V₂ := hVle2
+  have hs1 : J₁.ideal V = Ideal.span
+      {X.presheaf.map (homOfLE (show V.1 ≤ V₁.1 from hVle1)).op f₁} := by
+    rw [← J₁.map_ideal (U := V) (V := V₁) hVle1, hspan1, Ideal.map_span,
+      Set.image_singleton]
+    rfl
+  have hs2 : J₂.ideal V = Ideal.span
+      {X.presheaf.map (homOfLE (show V.1 ≤ V₂.1 from hVle2)).op f₂} := by
+    rw [← J₂.map_ideal (U := V) (V := V₂) hVle2', hspan2, Ideal.map_span,
+      Set.image_singleton]
+    rfl
+  have hn1 : X.presheaf.map (homOfLE (show V.1 ≤ V₁.1 from hVle1)).op f₁ ∈
+      nonZeroDivisors Γ(X, V.1) := by
+    rw [mem_nonZeroDivisors_iff_ne_zero]
+    intro h0
+    refine (mem_nonZeroDivisors_iff_ne_zero.mp hnzd1) ?_
+    refine @AlgebraicGeometry.map_injective_of_isIntegral X ‹_› _ _
+      (homOfLE (show V.1 ≤ V₁.1 from hVle1)) hne f₁ 0 ?_
+    rw [h0, map_zero]
+  have hn2 : X.presheaf.map (homOfLE (show V.1 ≤ V₂.1 from hVle2)).op f₂ ∈
+      nonZeroDivisors Γ(X, V.1) := by
+    rw [mem_nonZeroDivisors_iff_ne_zero]
+    intro h0
+    refine (mem_nonZeroDivisors_iff_ne_zero.mp hnzd2) ?_
+    refine @AlgebraicGeometry.map_injective_of_isIntegral X ‹_› _ _
+      (homOfLE (show V.1 ≤ V₂.1 from hVle2)) hne f₂ 0 ?_
+    rw [h0, map_zero]
+  exact ⟨V, hcb, hVleW, ⟨_, hs1, hn1⟩, ⟨_, hs2, hn2⟩⟩
 
 end PicPoint
 
