@@ -243,4 +243,73 @@ theorem translateByPoint_id_comp_fst [IsLocallyNoetherian S] [IsSeparated E.π]
 
 end IdentityBase
 
+/-! ## The field instantiation (U5-L2e)
+
+Over `S := Spec K` with `t := 𝟙 S`, the KM apparatus lives on `pullback E.π (𝟙 S)`,
+which the first projection identifies with the total curve. The τ-relation (L2a)
+germ-pushes (L2c) into the function field of the pullback presentation. -/
+
+section FieldInstantiation
+
+variable {S : Scheme.{u}} (E : EllipticCurve S)
+variable (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+
+/-- The pullback presentation over the identity inherits integrality through the
+first-projection isomorphism. -/
+theorem isIntegral_pullback_id [AlgebraicGeometry.IsIntegral E.E] :
+    AlgebraicGeometry.IsIntegral (pullback E.π (𝟙 S)) :=
+  AlgebraicGeometry.IsIntegral.of_isIso (inv (pullback.fst E.π (𝟙 S)))
+
+/-- **(U5-L2e)** The τ-relation in the function field of the pullback presentation:
+for a normalised splitting `h` of the pulled cocycle and an `N`-torsion section `P'`,
+on any chart `V i` whose `[N]`-preimage is nonempty,
+
+  `τ_{P'}^♭ (germ h_i) = germ h_i · germ (π^# h(P'))` in `K(pullback E.π (𝟙 S))`.
+
+Assembly of L2a (`unitPullback_translateByPoint_eq_of_splitting`) and L2c
+(`functionFieldMap_germToFunctionField_of_unitPullback_eq`). -/
+theorem functionFieldMap_translateByPoint_germ [AlgebraicGeometry.IsIntegral E.E]
+    (N : ℕ) (Q : (E.baseChange (𝟙 S)).Point (𝟙 S))
+    (hQ : Q ∈ torsionPoints E (𝟙 S) N)
+    (M : (pullback E.π (𝟙 S)).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (pullback E.π (𝟙 S))
+      (kappa E hsm (𝟙 S) Q).val = toSkeleton M)
+    {ι : Type*} (W : ι → (pullback E.π (𝟙 S)).Opens) (hW : iSup W = ⊤)
+    (e : ∀ i, M.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π (𝟙 S)).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover M W e i j ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π (𝟙 S)) (W i ⊓ W j))
+    (h : ∀ i, Γ(pullback E.π (𝟙 S), mulByN E (𝟙 S) N ⁻¹ᵁ W i)ˣ)
+    (hn : ∀ i, h i ∈ sectionUnits (baseChangeZero E.π E.zero E.zero_π (𝟙 S))
+      (mulByN E (𝟙 S) N ⁻¹ᵁ W i))
+    (hsplit : ∀ i j, Units.map ((mulByN E (𝟙 S) N).app (W i ⊓ W j)).hom.toMonoidHom
+        (transitionUnitOfCover M W e i j) =
+      Scheme.resUnit (inf_le_left : mulByN E (𝟙 S) N ⁻¹ᵁ W i ⊓
+          mulByN E (𝟙 S) N ⁻¹ᵁ W j ≤ mulByN E (𝟙 S) N ⁻¹ᵁ W i) (h i) *
+        (Scheme.resUnit (inf_le_right : mulByN E (𝟙 S) N ⁻¹ᵁ W i ⊓
+          mulByN E (𝟙 S) N ⁻¹ᵁ W j ≤ mulByN E (𝟙 S) N ⁻¹ᵁ W j) (h j))⁻¹)
+    (P' : (E.baseChange (𝟙 S)).Point (𝟙 S)) (hP' : P' ∈ torsionPoints E (𝟙 S) N)
+    [IsDominant (translateByPoint E (𝟙 S) P')]
+    (i : ι) [Nonempty (mulByN E (𝟙 S) N ⁻¹ᵁ W i : (pullback E.π (𝟙 S)).Opens)] :
+    haveI : AlgebraicGeometry.IsIntegral (pullback E.π (𝟙 S)) := isIntegral_pullback_id E
+    (translateByPoint E (𝟙 S) P').functionFieldMap.hom
+        ((pullback E.π (𝟙 S)).germToFunctionField (mulByN E (𝟙 S) N ⁻¹ᵁ W i)
+          ((h i : Γ(pullback E.π (𝟙 S), mulByN E (𝟙 S) N ⁻¹ᵁ W i))))
+      = (pullback E.π (𝟙 S)).germToFunctionField (mulByN E (𝟙 S) N ⁻¹ᵁ W i)
+          ((h i : Γ(pullback E.π (𝟙 S), mulByN E (𝟙 S) N ⁻¹ᵁ W i)))
+        * (pullback E.π (𝟙 S)).germToFunctionField (mulByN E (𝟙 S) N ⁻¹ᵁ W i)
+          ((globalTwist (pullback.snd E.π (𝟙 S)) (mulByN E (𝟙 S) N ⁻¹ᵁ W i)
+            (torsionSplittingEval E hsm (𝟙 S) N Q hQ M hM W hW e hnorm P' hP') :
+              Γ(pullback E.π (𝟙 S), mulByN E (𝟙 S) N ⁻¹ᵁ W i))) := by
+  haveI : AlgebraicGeometry.IsIntegral (pullback E.π (𝟙 S)) := isIntegral_pullback_id E
+  refine functionFieldMap_germToFunctionField_of_unitPullback_eq
+    (translateByPoint E (𝟙 S) P') (mulByN E (𝟙 S) N ⁻¹ᵁ W i)
+    (le_of_eq (preimage_translateByPoint_mulByN E (𝟙 S) P' N hP' (W i)).symm)
+    (h i) _ ?_
+  have hrel := unitPullback_translateByPoint_eq_of_splitting E hsm (𝟙 S) N Q hQ M hM
+    W hW e hnorm h hn hsplit P' hP' i
+  exact congrArg Units.val hrel
+
+end FieldInstantiation
+
 end ModularCurves
