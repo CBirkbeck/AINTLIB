@@ -248,7 +248,7 @@ with the Jet square as regression instance and the P-square as the payoff instan
 - **Sources**: [FJP] Lemma 5.1/5.2 datum layer; concrete patterns cited above.
 
 ### [T625] Corner-square strict localization + bridges (THE core)
-- **Status**: in_progress (2026-08-11 — MAJOR PROGRESS, all committed+pushed:
+- **Status**: done (2026-08-11 — COMPLETE, all pushed: CornerSquareLocalization.lean (1189 L) = Pinch package + full abstract §4 chain (Lemmas 4.1/4.3, Prop 4.5 loc layer + ψ-lipschitz + exported quotient-structure helpers); CornerSquareBridge.lean (~1300 L) = CornerEnum + single-corner graphBridge (fwd/rev/roundtrips/continuity) + square naturality N1-N4 + **valueRow_injective/glue/embedding** (prop:localized-milnor at values over the abstract pinch — T627's row fields). KEY LESSONS: instance-diamond on P-rings fixed by set_option backward.isDefEq.respectTransparency false + exported instance-defs (locANormedAddCommGroup etc.); defeq-vs-syntactic friction between S.locB and pushed-corner presentations resolved by show-style hcomp proofs; IsTateRing extends IsHuberRing so bind only IsTateRing) (2026-08-11 — MAJOR PROGRESS, all committed+pushed:
   `FJP/CornerSquareLocalization.lean` (1103 L, 0 warnings) = the `Pinch` package
   structure + NoethPack + the ENTIRE §4 chain abstract: ext-layer (Lemma 4.1),
   ideal_row_surjective + ideal_pullback_controlled + isClosed_IA (Lemma 4.3),
