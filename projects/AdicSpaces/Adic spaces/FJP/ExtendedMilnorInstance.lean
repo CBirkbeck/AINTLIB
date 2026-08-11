@@ -448,4 +448,272 @@ private theorem extPushedCompatCAux (U₁ U₂ : RationalLocData (PA F n))
   simp only [Function.comp_apply] at hfac₁ hfac₂
   rw [← hfac₁, ← hfac₂, hpushed]
 
+/-! ### The extended square as a `MilnorSquareData` -/
+
+set_option maxHeartbeats 1600000 in
+/-- **The `⟨V⟩`-extended finite-jet square as a strict Milnor square-with-rows**
+(T627): the T620 template at the extended corners, with the generic datum layer
+and the abstract pinch's value-level row. -/
+noncomputable def extJetSquare :
+    MilnorSquareData (extJB F n) (extIotaC F n) ((extRhoC F n).comp (extIotaC F n))
+      ((extPinch F n).φB_continuous) ((extPinch F n).φC_continuous)
+      (by exact ((extPinch F n).ψC_continuous).comp ((extPinch F n).φC_continuous)) where
+  pushB := extPushB F n
+  pushC := extPushC F n
+  pushD := extPushD F n
+  pushB_s := by
+    intro U hU
+    rw [extPushB_eq F n hU]
+    rfl
+  pushC_s := by
+    intro U hU
+    rw [extPushC_eq F n hU]
+    rfl
+  pushD_s := by
+    intro U hU
+    rw [extPushD_eq F n hU]
+    rfl
+  pushB_T := by
+    classical
+    intro U hU t ht
+    rw [extPushB_eq F n hU]
+    exact Finset.mem_image_of_mem _ ht
+  pushC_T := by
+    classical
+    intro U hU t ht
+    rw [extPushC_eq F n hU]
+    exact Finset.mem_image_of_mem _ ht
+  pushD_T := by
+    classical
+    intro U hU t ht
+    rw [extPushD_eq F n hU]
+    exact Finset.mem_image_of_mem _ ht
+  pushB_isRational := by
+    intro U hU
+    rw [extPushB_eq F n hU]
+    exact pushDatumOfHom_isRational _ _ hU
+  pushC_isRational := by
+    intro U hU
+    rw [extPushC_eq F n hU]
+    exact pushDatumOfHom_isRational _ _ hU
+  pushD_isRational := by
+    intro U hU
+    rw [extPushD_eq F n hU]
+    exact pushDatumOfHom_isRational _ _ hU
+  legB := extRhoB F n
+  legC := extRhoC F n
+  hlegB := (extPinch F n).ψB_continuous
+  hlegC := (extPinch F n).ψC_continuous
+  legB_s := by
+    intro U hU
+    rw [extPushB_eq F n hU, extPushD_eq F n hU]
+    exact (ext_square_commutes F n U.s).symm
+  legC_s := by
+    intro U hU
+    rw [extPushC_eq F n hU, extPushD_eq F n hU]
+    rfl
+  legB_T := by
+    classical
+    intro U hU t ht
+    rw [extPushB_eq F n hU] at ht
+    rw [extPushD_eq F n hU]
+    obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp ht
+    rw [ext_square_commutes F n u]
+    exact Finset.mem_image_of_mem _ hu
+  legC_T := by
+    classical
+    intro U hU t ht
+    rw [extPushC_eq F n hU] at ht
+    rw [extPushD_eq F n hU]
+    obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp ht
+    exact Finset.mem_image_of_mem _ hu
+  row_injective := by
+    intro U hU x y hB hC
+    exact extRowInjectiveAux F n U hU (extPushB_eq F n hU) (extPushC_eq F n hU)
+      _ _ _ _ _ _ x y hB hC
+  row_glue := by
+    intro U hU b c h
+    exact extRowGlueAux F n U hU (extPushB_eq F n hU) (extPushC_eq F n hU)
+      (extPushD_eq F n hU) _ _ _ _ _ _ _ _ _ _ _ _ b c h
+  row_embedding := by
+    intro U hU
+    exact extRowEmbeddingAux F n U hU (extPushB_eq F n hU) (extPushC_eq F n hU)
+      _ _ _ _ _ _
+  pushB_mono := by
+    intro U U' hU hU' hsub v hv
+    rw [extPushB_eq F n hU'] at hv
+    rw [extPushB_eq F n hU]
+    have hvspa := rationalOpen_subset_spa hv
+    exact (mem_rationalOpen_pushDatumOfHom_iff ((extPinch F n).φB_continuous)
+      (plusLe_extJB F n) (podPB F n) U hU v hvspa).mpr
+      (hsub ((mem_rationalOpen_pushDatumOfHom_iff ((extPinch F n).φB_continuous)
+        (plusLe_extJB F n) (podPB F n) U' hU' v hvspa).mp hv))
+  pushC_mono := by
+    intro U U' hU hU' hsub v hv
+    rw [extPushC_eq F n hU'] at hv
+    rw [extPushC_eq F n hU]
+    have hvspa := rationalOpen_subset_spa hv
+    exact (mem_rationalOpen_pushDatumOfHom_iff ((extPinch F n).φC_continuous)
+      (plusLe_extIotaC F n) (podPC F n) U hU v hvspa).mpr
+      (hsub ((mem_rationalOpen_pushDatumOfHom_iff ((extPinch F n).φC_continuous)
+        (plusLe_extIotaC F n) (podPC F n) U' hU' v hvspa).mp hv))
+  push_natural_B := by
+    intro U U' hU hU' h x
+    exact presheafValueMapOfHom_restriction (extJB F n) ((extPinch F n).φB_continuous)
+      U U' (extPushB F n U) (extPushB F n U') _ _ _ _ h _ x
+  push_natural_C := by
+    intro U U' hU hU' h x
+    exact presheafValueMapOfHom_restriction (extIotaC F n) ((extPinch F n).φC_continuous)
+      U U' (extPushC F n U) (extPushC F n U') _ _ _ _ h _ x
+  pushB_cover := by
+    intro U S hU hS hcov w hw
+    rw [extPushB_eq F n hU] at hw
+    have hwspa := rationalOpen_subset_spa hw
+    obtain ⟨W, hWS, hWmem⟩ := hcov (ValuationSpectrum.comap (extJB F n) w)
+      ((mem_rationalOpen_pushDatumOfHom_iff ((extPinch F n).φB_continuous)
+        (plusLe_extJB F n) (podPB F n) U hU w hwspa).mp hw)
+    refine ⟨W, hWS, ?_⟩
+    rw [extPushB_eq F n (hS W hWS)]
+    exact (mem_rationalOpen_pushDatumOfHom_iff ((extPinch F n).φB_continuous)
+      (plusLe_extJB F n) (podPB F n) W (hS W hWS) w hwspa).mpr hWmem
+  pushC_cover := by
+    intro U S hU hS hcov w hw
+    rw [extPushC_eq F n hU] at hw
+    have hwspa := rationalOpen_subset_spa hw
+    obtain ⟨W, hWS, hWmem⟩ := hcov (ValuationSpectrum.comap (extIotaC F n) w)
+      ((mem_rationalOpen_pushDatumOfHom_iff ((extPinch F n).φC_continuous)
+        (plusLe_extIotaC F n) (podPC F n) U hU w hwspa).mp hw)
+    refine ⟨W, hWS, ?_⟩
+    rw [extPushC_eq F n (hS W hWS)]
+    exact (mem_rationalOpen_pushDatumOfHom_iff ((extPinch F n).φC_continuous)
+      (plusLe_extIotaC F n) (podPC F n) W (hS W hWS) w hwspa).mpr hWmem
+  pushD_cover := by
+    intro U S hU hS hcov w hw
+    rw [extPushD_eq F n hU] at hw
+    have hwspa := rationalOpen_subset_spa hw
+    obtain ⟨W, hWS, hWmem⟩ := hcov
+      (ValuationSpectrum.comap ((extRhoC F n).comp (extIotaC F n)) w)
+      ((mem_rationalOpen_pushDatumOfHom_iff
+        (by exact ((extPinch F n).ψC_continuous).comp ((extPinch F n).φC_continuous))
+        (plusLe_extD F n) (podPD F n) U hU w hwspa).mp hw)
+    refine ⟨W, hWS, ?_⟩
+    rw [extPushD_eq F n (hS W hWS)]
+    exact (mem_rationalOpen_pushDatumOfHom_iff
+      (by exact ((extPinch F n).ψC_continuous).comp ((extPinch F n).φC_continuous))
+      (plusLe_extD F n) (podPD F n) W (hS W hWS) w hwspa).mpr hWmem
+  pushD_mono := by
+    intro U U' hU hU' hsub v hv
+    rw [extPushD_eq F n hU'] at hv
+    rw [extPushD_eq F n hU]
+    have hvspa := rationalOpen_subset_spa hv
+    exact (mem_rationalOpen_pushDatumOfHom_iff
+      (by exact ((extPinch F n).ψC_continuous).comp ((extPinch F n).φC_continuous))
+      (plusLe_extD F n) (podPD F n) U hU v hvspa).mpr
+      (hsub ((mem_rationalOpen_pushDatumOfHom_iff
+        (by exact ((extPinch F n).ψC_continuous).comp ((extPinch F n).φC_continuous))
+        (plusLe_extD F n) (podPD F n) U' hU' v hvspa).mp hv))
+  leg_natural_B := by
+    intro U U' hU hU' h b
+    exact presheafValueMapOfHom_restriction (extRhoB F n) ((extPinch F n).ψB_continuous)
+      (extPushB F n U) (extPushB F n U') (extPushD F n U) (extPushD F n U')
+      _ _ _ _ _ _ b
+  leg_natural_C := by
+    intro U U' hU hU' h c
+    exact presheafValueMapOfHom_restriction (extRhoC F n) ((extPinch F n).ψC_continuous)
+      (extPushC F n U) (extPushC F n U') (extPushD F n U) (extPushD F n U')
+      _ _ _ _ _ _ c
+  row_comm := by
+    intro U hU x
+    have hsχ : (extPushD F n U).s = ((extRhoC F n).comp (extIotaC F n)) U.s := by
+      rw [extPushD_eq F n hU]; rfl
+    have hTχ : ∀ t ∈ U.T,
+        ((extRhoC F n).comp (extIotaC F n)) t ∈ (extPushD F n U).T := by
+      classical
+      intro t ht
+      rw [extPushD_eq F n hU]
+      exact Finset.mem_image_of_mem _ ht
+    refine (presheafValueMapOfHom_comp (extJB F n) ((extPinch F n).φB_continuous)
+      (extRhoB F n) ((extPinch F n).ψB_continuous)
+      ((extRhoC F n).comp (extIotaC F n))
+      (by exact ((extPinch F n).ψC_continuous).comp ((extPinch F n).φC_continuous))
+      (RingHom.ext fun a => ext_square_commutes F n a)
+      U (extPushB F n U) (extPushD F n U) _ _ _ _ hsχ hTχ x).trans
+      (presheafValueMapOfHom_comp (extIotaC F n) ((extPinch F n).φC_continuous)
+        (extRhoC F n) ((extPinch F n).ψC_continuous)
+        ((extRhoC F n).comp (extIotaC F n))
+        (by exact ((extPinch F n).ψC_continuous).comp ((extPinch F n).φC_continuous))
+        rfl U (extPushC F n U) (extPushD F n U) _ _ _ _ hsχ hTχ x).symm
+  pushedCompat_B := by
+    intro U₁ U₂ hU₁ hU₂ x₁ x₂ hmatch E₃ hE₁ hE₂
+    exact extPushedCompatBAux F n U₁ U₂ hU₁ hU₂ (extPushB_eq F n hU₁)
+      (extPushB_eq F n hU₂) _ _ _ _ _ x₁ x₂ hmatch E₃ hE₁ hE₂
+  pushedCompat_C := by
+    intro U₁ U₂ hU₁ hU₂ x₁ x₂ hmatch E₃ hE₁ hE₂
+    exact extPushedCompatCAux F n U₁ U₂ hU₁ hU₂ (extPushC_eq F n hU₁)
+      (extPushC_eq F n hU₂) _ _ _ _ _ x₁ x₂ hmatch E₃ hE₁ hE₂
+
+/-! ### Vertex sheafiness and the headline -/
+
+/-- Strong noetherianity of the extended `B`-corner (Fubini + the base facts). -/
+theorem isStronglyNoetherian_PB : IsStronglyNoetherian (PB F n) := by
+  refine ⟨fun k => ?_⟩
+  obtain ⟨e, -⟩ := exists_flattenPP (JetB F) n k
+  have h1 : IsNoetherianRing (P (PB F n) k) := by
+    have := isNoetherianRing_PB F (n + k)
+    exact isNoetherianRing_of_surjective (PB F (n + k)) _
+      e.symm.toRingHom e.symm.surjective
+  exact isNoetherianRing_of_surjective (P (PB F n) k) _
+    (UnitDiscExample.restrictedGaussEquiv (PB F n) k).toRingHom
+    (RingEquiv.surjective _)
+
+theorem isStronglyNoetherian_PC : IsStronglyNoetherian (PC F n) := by
+  refine ⟨fun k => ?_⟩
+  obtain ⟨e, -⟩ := exists_flattenPP (JetC F) n k
+  have h1 : IsNoetherianRing (P (PC F n) k) := by
+    have := isNoetherianRing_PC F (n + k)
+    exact isNoetherianRing_of_surjective (PC F (n + k)) _
+      e.symm.toRingHom e.symm.surjective
+  exact isNoetherianRing_of_surjective (P (PC F n) k) _
+    (UnitDiscExample.restrictedGaussEquiv (PC F n) k).toRingHom
+    (RingEquiv.surjective _)
+
+theorem isStronglyNoetherian_PD : IsStronglyNoetherian (PD F n) := by
+  refine ⟨fun k => ?_⟩
+  obtain ⟨e, -⟩ := exists_flattenPP (JetD F) n k
+  have h1 : IsNoetherianRing (P (PD F n) k) := by
+    have := isNoetherianRing_PD F (n + k)
+    exact isNoetherianRing_of_surjective (PD F (n + k)) _
+      e.symm.toRingHom e.symm.surjective
+  exact isNoetherianRing_of_surjective (P (PD F n) k) _
+    (UnitDiscExample.restrictedGaussEquiv (PD F n) k).toRingHom
+    (RingEquiv.surjective _)
+
+/-- Sheafiness of the extended `B`-corner (Wedhorn 8.28(b), clean form). -/
+theorem isSheafy_PB : IsSheafy (PB F n) := by
+  have := isStronglyNoetherian_PB F n
+  exact ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b
+
+theorem isSheafy_PC : IsSheafy (PC F n) := by
+  have := isStronglyNoetherian_PC F n
+  exact ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b
+
+theorem isSheafy_PD : IsSheafy (PD F n) := by
+  have := isStronglyNoetherian_PD F n
+  exact ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b
+
+/-- **Sheafiness of the `⟨V⟩`-extended pinching algebra** ([Reviewer] §5.1, the
+normed half of the B-headline): the Gauss-normed Tate extension `PA F n` is
+sheafy, by abstract strict Milnor descent at the extended square. -/
+theorem isSheafy_extJetA : IsSheafy (PA F n) := by
+  classical
+  let _iB : DecidableEq (RationalLocData (PB F n)) := Classical.decEq _
+  let _iC : DecidableEq (RationalLocData (PC F n)) := Classical.decEq _
+  let _iD : DecidableEq (RationalLocData (PD F n)) := Classical.decEq _
+  exact isSheafy_of_milnorSquare (extJB F n) (extIotaC F n)
+    ((extRhoC F n).comp (extIotaC F n))
+    ((extPinch F n).φB_continuous) ((extPinch F n).φC_continuous)
+    (by rw [RingHom.coe_comp]
+        exact ((extPinch F n).ψC_continuous).comp ((extPinch F n).φC_continuous))
+    (extJetSquare F n) (isSheafy_PB F n) (isSheafy_PC F n) (isSheafy_PD F n)
+
 end FiniteJet

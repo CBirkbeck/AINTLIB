@@ -1,1 +1,1 @@
-FOCUS: T626 compile pending (b3gydu6d4/b9jjeff4t); on green write T627 ExtendedMilnorInstance (design mapped: T620 template + T624/T625 generics + extPinch/extNoethPack + powerBounded_le_comap w/ scale + strongly-noeth vertices via flattenPP+restrictedGaussEquiv)
+FOCUS: T627 part 3 — extJetSquare structure assembly + vertex sheafiness + isSheafy_extJetA
