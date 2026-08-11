@@ -528,3 +528,16 @@ presheaf-obj). The FULL ideal-leg pipeline: definite triv → B1 characterisatio
 assembly ([C-rest-3]: five-chain shared-leg cancellation via tensorObjCongr_trans + the
 ⊗-slot scalar conjugation through monoidal/mapIso/triv₂ legs) + transitionUnitOfCover
 packaging; then 3c-iv. Window total: 17 axiom-clean declarations.
+
+[C-rest-3] TARGET PINNED (2026-08-11): the KM dataset (exists_normalized_dataset,
+KMDataset:220) consumes `e : ∀ i, M.over (W i) ≅ unit(over (W i))` — OVER-trivialisations
+directly. The L1-glue's family is e k := overTrivializationOfRestrictIso(
+restrictIsoOfPullbackIso(pullbackTrivOfTensorIdeal M J₁ J₂ e_dict V_k f₁ᵏ f₂ᵏ …)) —
+exactly the crown-theorems' form. [C-rest-3]'s statement: transitionUnitOfCover M W e i j
+= u₂ᵢⱼ · (u₁ᵢⱼ)⁻¹ (the two 3c-i units of the J₂- and J₁-generators), whose proof
+decomposes restrictOverTrivialization of the overTriv-of-five-chain leg-wise (shared
+legs A/C/D cancel via tensorObjCongr algebra; ideal legs via
+trivializationTransitionUnit_idealTriv). The ONE new lemma species needed: how
+restrictOverTrivialization/overTrivializationOfRestrictIso interact with the five-chain
+COMPOSITE (an Iso.trans-compatibility for overTrivializationOfRestrictIso + the ⊗-slot
+scalar conjugation through the C/D legs). Design next session; all inputs proven.
