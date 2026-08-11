@@ -344,4 +344,43 @@ theorem functionFieldMap_translateByPoint_conj [IsLocallyNoetherian S]
 
 end FieldInstantiation
 
+/-! ## The bridge hookup (U5-L2g) -/
+
+section BridgeHookup
+
+variable {K : Type u} [Field K] [DecidableEq K]
+variable (W : WeierstrassCurve K) [W.IsElliptic] [W.toAffine.IsElliptic]
+variable [AlgebraicGeometry.IsIntegral (projModel W)]
+variable [(W.baseChange K).toAffine.IsElliptic]
+
+/-- **(U5-L2g)** The bridge instantiated at a pullback-presentation section: the classical
+translation action of the dictionary point computes, through
+`EllipticCurve.projModelFunctionFieldEquiv`, the function-field pullback of the crossed translation. -/
+theorem translateAlgEquivOfPoint_functionFieldMap_of_section
+    (P'pb : ((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))))
+    (p : SpecPoints (projModel W) (projModelπ W) K)
+    (hxp : (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P'pb ≫
+      baseChangeIdFstOver (modelEllipticCurve W)).left = p.1)
+    (τp : projModel W ⟶ projModel W)
+    (hτp : τp = ((modelEllipticCurve W).translateBy
+      (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P'pb ≫
+        baseChangeIdFstOver (modelEllipticCurve W))).left)
+    [IsDominant τp] (z : (projModel W).functionField) :
+    HasseWeil.translateAlgEquivOfPoint W
+        (EllipticCurve.basePointCast W (projModelPointsEquiv W K p))
+        (EllipticCurve.projModelFunctionFieldEquiv W z)
+      = EllipticCurve.projModelFunctionFieldEquiv W (τp.functionFieldMap.hom z) := by
+  have hb := EllipticCurve.functionFieldMap_translateBy W
+    (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P'pb ≫
+      baseChangeIdFstOver (modelEllipticCurve W)) p hxp
+    (projModelPointsEquiv W K p) rfl
+    (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) rfl
+    τp (by rw [hτp]; rfl)
+  have happ := congrArg (fun (m : W.toAffine.FunctionField →+* W.toAffine.FunctionField)
+    => m (EllipticCurve.projModelFunctionFieldEquiv W z)) hb
+  simpa [RingHom.comp_apply, RingEquiv.symm_apply_apply] using happ
+
+end BridgeHookup
+
 end ModularCurves
