@@ -2,6 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
+import «Adic spaces».CornerSquareDatum
 import «Adic spaces».FJP.CornerSquareLocalization
 import «Adic spaces».FJP.FiniteJetFunctoriality
 
@@ -580,5 +581,178 @@ theorem graphBridge_symm_continuous (hD : D.IsRational)
 end Eval
 
 end CornerBridge
+
+/-! ### The square-level bridges: pushed enumerations and naturality (stage 4c)
+
+Instantiating the single-corner bridge at the four vertices of a pinch square:
+the pushed data (`pushDatumOfHom`) carry pushed enumerations of the SAME arity,
+and by the polyToP-form of the `Pinch` relations the pushed graph ideals are the
+`Pinch.IB/IC/ID` ideals definitionally, so the vertex bridges land in
+`Pinch.locB/locC/locD`. The naturality squares (N1)–(N4) identify the
+value-level square with the localized Milnor square. -/
+
+namespace Pinch
+
+section Square
+
+variable {A B C D : Type*}
+  [NormedCommRing A] [IsUltrametricDist A] [NormOneClass A] [CompleteSpace A]
+  [PlusSubring A] [IsTateRing A] [HasLocLiftPowerBounded A]
+  [NormedCommRing B] [IsUltrametricDist B] [NormOneClass B] [CompleteSpace B]
+  [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B]
+  [NormedCommRing C] [IsUltrametricDist C] [NormOneClass C] [CompleteSpace C]
+  [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C]
+  [NormedCommRing D] [IsUltrametricDist D] [NormOneClass D] [CompleteSpace D]
+  [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D]
+  [DecidableEq B] [DecidableEq C] [DecidableEq D]
+
+variable (S : Pinch A B C D)
+
+omit [NormOneClass B] [CompleteSpace B] in
+omit [NormOneClass A] [CompleteSpace A] [PlusSubring A] [IsTateRing A] [HasLocLiftPowerBounded A] [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B] [NormOneClass C] [CompleteSpace C] [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C] [NormOneClass D] [CompleteSpace D] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq B] [DecidableEq C] [DecidableEq D] in
+/-- Continuity of `φB` from its norm bound. -/
+theorem φB_continuous : Continuous S.φB :=
+  AddMonoidHomClass.continuous_of_bound S.φB 1 fun a => by
+    rw [one_mul]; exact S.norm_φB_le a
+
+omit [NormOneClass C] [CompleteSpace C] [NormOneClass A] [CompleteSpace A] [PlusSubring A] [IsTateRing A] [HasLocLiftPowerBounded A] [NormOneClass B] [CompleteSpace B] [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B] [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C] [NormOneClass D] [CompleteSpace D] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq B] [DecidableEq C] [DecidableEq D] in
+theorem φC_continuous : Continuous S.φC :=
+  AddMonoidHomClass.continuous_of_bound S.φC 1 fun a => by
+    rw [one_mul]; exact le_of_eq (S.norm_φC a)
+
+omit [NormOneClass B] [CompleteSpace B] [NormOneClass D] [CompleteSpace D] [NormOneClass A] [CompleteSpace A] [PlusSubring A] [IsTateRing A] [HasLocLiftPowerBounded A] [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B] [NormOneClass C] [CompleteSpace C] [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq B] [DecidableEq C] [DecidableEq D] in
+theorem ψB_continuous : Continuous S.ψB :=
+  AddMonoidHomClass.continuous_of_bound S.ψB 1 fun b => by
+    rw [one_mul]; exact le_of_eq (S.norm_ψB b)
+
+omit [NormOneClass C] [CompleteSpace C] [NormOneClass D] [CompleteSpace D] [NormOneClass A] [CompleteSpace A] [PlusSubring A] [IsTateRing A] [HasLocLiftPowerBounded A] [NormOneClass B] [CompleteSpace B] [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B] [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq B] [DecidableEq C] [DecidableEq D] in
+theorem ψC_continuous : Continuous S.ψC :=
+  AddMonoidHomClass.continuous_of_bound S.ψC 1 fun c => by
+    rw [one_mul]; exact S.norm_ψC_le c
+
+variable (PB : PairOfDefinition B) (PC : PairOfDefinition C) (PD : PairOfDefinition D)
+variable (D₀ : RationalLocData A) (e : CornerEnum D₀) (hD₀ : D₀.IsRational)
+
+/-- The pushed enumeration at the `B`-vertex. -/
+noncomputable def pushEnumB : CornerEnum (pushDatumOfHom S.φB PB D₀ hD₀) where
+  m := e.m
+  f := fun i => S.φB (e.f i)
+  hf := by
+    intro t ht
+    obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
+    obtain ⟨i, rfl⟩ := e.hf t₀ ht₀
+    exact ⟨i, rfl⟩
+  hf' := fun i => Finset.mem_image_of_mem _ (e.hf' i)
+
+/-- The pushed enumeration at the `C`-vertex. -/
+noncomputable def pushEnumC : CornerEnum (pushDatumOfHom S.φC PC D₀ hD₀) where
+  m := e.m
+  f := fun i => S.φC (e.f i)
+  hf := by
+    intro t ht
+    obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
+    obtain ⟨i, rfl⟩ := e.hf t₀ ht₀
+    exact ⟨i, rfl⟩
+  hf' := fun i => Finset.mem_image_of_mem _ (e.hf' i)
+
+/-- The pushed enumeration at the `D`-vertex (along the composite leg). -/
+noncomputable def pushEnumD :
+    CornerEnum (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) where
+  m := e.m
+  f := fun i => S.ψC (S.φC (e.f i))
+  hf := by
+    intro t ht
+    obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
+    obtain ⟨i, rfl⟩ := e.hf t₀ ht₀
+    exact ⟨i, rfl⟩
+  hf' := fun i => Finset.mem_image_of_mem _ (e.hf' i)
+
+omit [NormOneClass A] [CompleteSpace A] [PlusSubring A] [HasLocLiftPowerBounded A] [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B] [NormOneClass C] [CompleteSpace C] [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C] [NormOneClass D] [CompleteSpace D] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq B] [DecidableEq C] [DecidableEq D] in
+/-- Closedness of the pushed `B`-graph ideal (Koszul, corner-intrinsic). -/
+theorem isClosed_pushB (hPB : IsNoetherianRing (P B e.m))
+    (hPBball : IsNoetherianRing (unitBall (P B e.m))) :
+    IsClosed ((IA e.m (S.φB D₀.s) (fun i => S.φB (e.f i)) : Set (P B e.m))) := by
+  have := hPB
+  exact isClosed_graphIdeal S.tB S.tB_isUnit S.norm_tB_lt_one S.norm_tB_pos
+    S.norm_tB_mul hPBball _
+
+omit [NormOneClass A] [CompleteSpace A] [PlusSubring A] [HasLocLiftPowerBounded A] [NormOneClass B] [CompleteSpace B] [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B] [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C] [NormOneClass D] [CompleteSpace D] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq B] [DecidableEq C] [DecidableEq D] in
+/-- Closedness of the pushed `C`-graph ideal. -/
+theorem isClosed_pushC (hPC : IsNoetherianRing (P C e.m))
+    (hPCball : IsNoetherianRing (unitBall (P C e.m))) :
+    IsClosed ((IA e.m (S.φC D₀.s) (fun i => S.φC (e.f i)) : Set (P C e.m))) := by
+  have := hPC
+  exact isClosed_graphIdeal S.tC S.tC_isUnit S.norm_tC_lt_one S.norm_tC_pos
+    S.norm_tC_mul hPCball _
+
+omit [NormOneClass A] [CompleteSpace A] [PlusSubring A] [HasLocLiftPowerBounded A] [NormOneClass B] [CompleteSpace B] [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B] [NormOneClass C] [CompleteSpace C] [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq B] [DecidableEq C] [DecidableEq D] in
+/-- Closedness of the pushed `D`-graph ideal. -/
+theorem isClosed_pushD (hPD : IsNoetherianRing (P D e.m))
+    (hPDball : IsNoetherianRing (unitBall (P D e.m))) :
+    IsClosed ((IA e.m (S.ψC (S.φC D₀.s)) (fun i => S.ψC (S.φC (e.f i))) :
+      Set (P D e.m))) := by
+  have := hPD
+  exact isClosed_graphIdeal S.tD S.tD_isUnit S.norm_tD_lt_one S.norm_tD_pos
+    S.norm_tD_mul hPDball _
+
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [PlusSubring B] [HasLocLiftPowerBounded B] [NormOneClass C] [CompleteSpace C] [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C] [NormOneClass D] [CompleteSpace D] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq C] [DecidableEq D] in
+/-- `locφB` carries the `A`-bridge base to the `B`-bridge base. -/
+theorem locφB_bridgeBase (a : A) :
+    S.locφB e.m D₀.s e.f (CornerBridge.bridgeBase D₀ e a) =
+      CornerBridge.bridgeBase (pushDatumOfHom S.φB PB D₀ hD₀)
+        (S.pushEnumB PB D₀ e hD₀) (S.φB a) := by
+  show Ideal.Quotient.mk (S.IB e.m D₀.s e.f)
+      (S.extB e.m (polyToP (MvPolynomial.C a))) =
+    Ideal.Quotient.mk (S.IB e.m D₀.s e.f) (polyToP (MvPolynomial.C (S.φB a)))
+  congr 1
+  show mapRestricted S.φB S.norm_φB_le _ (polyToP _) = _
+  rw [StrictLoc.mapRestricted_polyToP, MvPolynomial.map_C]
+
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [NormOneClass B] [CompleteSpace B] [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B] [PlusSubring C] [HasLocLiftPowerBounded C] [NormOneClass D] [CompleteSpace D] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq B] [DecidableEq D] in
+/-- `locφC` carries the `A`-bridge base to the `C`-bridge base. -/
+theorem locφC_bridgeBase (a : A) :
+    S.locφC e.m D₀.s e.f (CornerBridge.bridgeBase D₀ e a) =
+      CornerBridge.bridgeBase (pushDatumOfHom S.φC PC D₀ hD₀)
+        (S.pushEnumC PC D₀ e hD₀) (S.φC a) := by
+  show Ideal.Quotient.mk (S.IC e.m D₀.s e.f)
+      (S.extC e.m (polyToP (MvPolynomial.C a))) =
+    Ideal.Quotient.mk (S.IC e.m D₀.s e.f) (polyToP (MvPolynomial.C (S.φC a)))
+  congr 1
+  show mapRestricted S.φC (fun x => le_of_eq (S.norm_φC x)) _ (polyToP _) = _
+  rw [StrictLoc.mapRestricted_polyToP, MvPolynomial.map_C]
+
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [PlusSubring B] [HasLocLiftPowerBounded B] [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C] [PlusSubring D] [HasLocLiftPowerBounded D] [DecidableEq C] in
+/-- `locψB` carries the `B`-bridge base to the `D`-bridge base. -/
+theorem locψB_bridgeBase (b : B) :
+    S.locψB e.m D₀.s e.f
+      (CornerBridge.bridgeBase (pushDatumOfHom S.φB PB D₀ hD₀)
+        (S.pushEnumB PB D₀ e hD₀) b) =
+      CornerBridge.bridgeBase (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀)
+        (S.pushEnumD PD D₀ e hD₀) (S.ψB b) := by
+  show Ideal.Quotient.mk (S.ID e.m D₀.s e.f)
+      (S.extDB e.m (polyToP (MvPolynomial.C b))) =
+    Ideal.Quotient.mk (S.ID e.m D₀.s e.f) (polyToP (MvPolynomial.C (S.ψB b)))
+  congr 1
+  show mapRestricted S.ψB (fun x => le_of_eq (S.norm_ψB x)) _ (polyToP _) = _
+  rw [StrictLoc.mapRestricted_polyToP, MvPolynomial.map_C]
+
+omit [NormOneClass A] [CompleteSpace A] [PlusSubring A] [HasLocLiftPowerBounded A] [NormOneClass B] [CompleteSpace B] [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B] [PlusSubring C] [HasLocLiftPowerBounded C] [PlusSubring D] [HasLocLiftPowerBounded D] [DecidableEq B] in
+/-- `locψC` carries the `C`-bridge base to the `D`-bridge base. -/
+theorem locψC_bridgeBase (c : C) :
+    S.locψC e.m D₀.s e.f
+      (CornerBridge.bridgeBase (pushDatumOfHom S.φC PC D₀ hD₀)
+        (S.pushEnumC PC D₀ e hD₀) c) =
+      CornerBridge.bridgeBase (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀)
+        (S.pushEnumD PD D₀ e hD₀) (S.ψC c) := by
+  show Ideal.Quotient.mk (S.ID e.m D₀.s e.f)
+      (S.extDC e.m (polyToP (MvPolynomial.C c))) =
+    Ideal.Quotient.mk (S.ID e.m D₀.s e.f) (polyToP (MvPolynomial.C (S.ψC c)))
+  congr 1
+  show mapRestricted S.ψC S.norm_ψC_le _ (polyToP _) = _
+  rw [StrictLoc.mapRestricted_polyToP, MvPolynomial.map_C]
+
+end Square
+
+end Pinch
 
 end FiniteJet
