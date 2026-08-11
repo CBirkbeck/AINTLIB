@@ -523,6 +523,23 @@ theorem nonempty_tensorObj_sectionIdeal_iso_zeroIdeal_of_field {K : Type u} [Fie
   refine (congrArg (toSkeleton M * ·) huQval.symm).trans ?_
   exact hval.trans hu0val
 
+/-- **(U5-L1a step 3a)** A common principal refinement: at every point there is an affine
+open contained in a prescribed open on which both section ideals are principal with
+nonzerodivisor generators. Per-point choices from the two `IsOfficialCartier` data,
+intersected and refined by an affine basic open, with `IdealSheafData.map_ideal` +
+`Ideal.map_span` restricting the spans. -/
+theorem exists_affine_common_principal {X : Scheme.{u}}
+    (J₁ J₂ : X.IdealSheafData)
+    (h₁ : ∀ c : ↥X, ∃ V : X.affineOpens, c ∈ V.1 ∧ ∃ f : Γ(X, V.1),
+      J₁.ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(X, V.1))
+    (h₂ : ∀ c : ↥X, ∃ V : X.affineOpens, c ∈ V.1 ∧ ∃ f : Γ(X, V.1),
+      J₂.ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(X, V.1))
+    (W : ↥X → X.Opens) (hW : ∀ c, c ∈ W c) :
+    ∀ c : ↥X, ∃ V : X.affineOpens, c ∈ V.1 ∧ V.1 ≤ W c ∧
+      (∃ f : Γ(X, V.1), J₁.ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(X, V.1)) ∧
+      (∃ f : Γ(X, V.1), J₂.ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(X, V.1)) := by
+  sorry
+
 end PicPoint
 
 end ModularCurves
