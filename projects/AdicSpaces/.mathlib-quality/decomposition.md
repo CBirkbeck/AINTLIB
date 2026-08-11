@@ -206,11 +206,58 @@ the A.3 product/refinement induction over Laurent covers. For the examples: [Rev
     quotienting) — these agree because the quotient maps are surjective (8.2.1
     identifications). SURVIVED.
 
-- **C-AG1** (API gap, own design pass): multi-intersection data + the Čech complex on
-  `RationalCoveringData` in all degrees + A.3 product/refinement calculus + per-example
-  headlines (FJP via the Milnor LES with degreewise strictness over prop:localized-milnor;
-  WP via coefficientwise primitives over eq:head-cech's bounded inverse, [WP-paper]
-  l.1199–1215). Blocks all C tickets beyond C-L1.
+- **C-AG1** (design pass DONE 2026-08-11, T622; leaves below). Source reading:
+  [Wedhorn] l.5245–5345 (Appendix A verbatim): `Č q (U, F) := ∏_{(i0..iq) ∈ I^{q+1}}
+  F(U_{i0..iq})` (UNNORMALIZED), alternating subcomplex `Ča`, "Recall that the
+  inclusion Ča• ↪ Č• is a quasi-isomorphism" (CITED, not proven — a required
+  layer), Definition A.1 (F-acyclic = augmented UNNORMALIZED complex exact),
+  Remark A.2 (mutual refinements; covers containing X are acyclic), Proposition
+  A.3 with (1) proven by "one knows more generally Ȟq(U) = Ȟq(V)" (CITED —
+  the Čech double-complex comparison is a required layer), A.4 (basis version ⟹
+  sheaf + Ȟq(X)=0). 8.34's proof structure (l.4222–4255): (i) Laurent covers and
+  their restrictions acyclic (8.33 + A.3(3) induction for products); (ii) a unit
+  `s` (Cor 7.32) making `U|_{V_j}` unit-generated; (iii) unit-generated covers
+  refined by Laurent covers ({f_i f_j⁻¹}); (iv) assemble by A.3(1)+(2).
+
+  **Design decisions (binding for the C-tickets):**
+  - Acyclicity notion `IsCechAcyclicFull` at the UNNORMALIZED augmented complex
+    (matches Definition A.1 verbatim); the alternating complex enters ONLY at the
+    8.33 base case, through the quasi-iso layer.
+  - Complexes live in `AddCommGrp` (`CochainComplex AddCommGrp ℕ`-shaped, or
+    project-native exactness predicates degreewise — decide at C-1 ticket time by
+    what `ShortComplex.ShortExact.δ` consumption needs; the mathlib LES API
+    (`HomologySequence`, homology_exact₁/₂/₃) is the FJP-headline engine).
+  - Multi-intersections via `interList` (iterated `interDatumOfRational`).
+  - The FJP headline does NOT go through 8.34-at-𝓐 (𝓐 is non-noetherian): it goes
+    through the SES of augmented complexes over the pinch square (campaign-B's
+    `valueRow_*` at every multi-intersection + `pushDatumOfHom_interOpen`) + LES +
+    the corners' 8.34 (they ARE strongly noetherian).
+
+  Sub-leaves (each becomes a ticket):
+  - C-1 `interList` + `rationalOpen_interList` (generic; from `interDatumOfRational`).
+  - C-2 the 𝒪-valued unnormalized Čech complex on a `RationalCoveringData` +
+    augmentation + `IsCechAcyclicFull` (Definition A.1 verbatim).
+  - C-3 the alternating subcomplex + the quasi-isomorphism `Ča• ↪ Č•` (Wedhorn's
+    "recall"; standard degeneracy argument — the one genuinely textbook-free layer;
+    for the 2-cover base case only the surjection `Ȟq(Ča) → Ȟq(Č)` in degrees
+    ≥ 2 with Ča ≡ 0 is needed, plus deg ≤ 1 agreement).
+  - C-4 the A.3 double-complex engine: two covers with bi-acyclic mutual
+    restrictions have isomorphic Ȟq; corollaries A.3(1)(2)(3) + Remark A.2.
+  - C-5 8.33-all-degree at a strongly noetherian corner: T621's
+    `unitCover_delta_surjective` + `row3_exact` + separation give the alternating
+    3-term exactness; conclude `IsCechAcyclicFull` via C-3.
+  - C-6 8.34-all-degree: transcribe (i)–(iv) on top of C-4/C-5 (the cover
+    combinatorics — `idealGenRationalCover`, Laurent products, unit scaling
+    Cor 7.32, Lemma 7.54 — already exists in the deg≤1 development; audit and
+    re-use).
+  - C-7 FJP headline: SES of augmented complexes over the extended pinch at a
+    rational cover of `Spa 𝓐` (rows from `valueRow_injective/glue` at every
+    `interList` of pushed pieces) + LES + C-6 at the corners ⟹ every rational
+    cover of the pinching algebra is `IsCechAcyclicFull`.
+  - C-8 WP headline: coefficientwise `c₀`-primitives per degree
+    (`ContinuousLinearMap.exists_preimage_norm_le`, per-degree constants).
+  Blocks: C-5 needs C-2/C-3; C-6 needs C-4/C-5; C-7 needs C-2/C-6 + campaign B;
+  C-8 needs C-2. C-3 and C-4 are the two heavy infrastructure layers.
 
 ---
 

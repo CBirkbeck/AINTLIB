@@ -58,6 +58,38 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
   (FiniteJetOver.isNoetherianRing_unitBall K) s` (pattern of `WP/Main.lean:137`).
 - **Sources**: decomposition A-H-dvr.
 
+### [T631] C-1: `interList` iterated intersection datum
+- **Status**: open · **File**: `Adic spaces/CornerSquareDatum.lean` (append) · **Type**: def + lemmas
+- **Statement**: `interList (D : Fin (q+1) → RationalLocData A) (h : ∀ i, (D i).IsRational) : RationalLocData A` (fold of `interDatumOfRational`), with `interList_isRational` and `rationalOpen_interList : rationalOpen (interList D h).T (interList D h).s = ⋂ i, rationalOpen (D i).T (D i).s`. Sources: [Wedhorn] A-appendix `U_{i0...iq}`; decomposition C-1.
+
+### [T632] C-2: the 𝒪-valued unnormalized Čech complex + `IsCechAcyclicFull`
+- **Status**: open · **Depends on**: T631 · **Type**: def-layer
+- **Statement**: for `C : RationalCoveringData A` (+ `hC : C.IsRational`), `cechO q := ∀ σ : Fin (q+1) → ↥C.covers, presheafValue (interList (fun i => (σ i).1) …)`; differential by the alternating sum of restrictions ([Wedhorn] l.5262 dq formula verbatim); augmentation from `presheafValue C.base`; `IsCechAcyclicFull` = Definition A.1 verbatim (exactness of the augmented complex at every degree). Design per decomposition C-2 (AddCommGrp-valued for the LES API).
+
+### [T633] C-3: alternating subcomplex + quasi-isomorphism
+- **Status**: open · **Depends on**: T632 · **Type**: theorem stack
+- **Statement**: `cechAlt q ⊆ cechO q` subcomplex ([Wedhorn] l.5257 alternating condition verbatim); the inclusion is a quasi-iso (Wedhorn l.5271 "Recall…"); minimal consumption form: for a 2-element cover, `IsCechAcyclicFull` follows from exactness of the 3-term alternating row. Standard degeneracy-filtration/ordered-contraction argument.
+
+### [T634] C-4: the A.3 double-complex engine
+- **Status**: open · **Depends on**: T632 · **Type**: theorem stack
+- **Statement**: [Wedhorn] Prop A.3 (l.5315) with the cited comparison: if `V|U_{i0..iq}` is acyclic for all tuples, then `Ȟq(U) ≅ Ȟq(V)`-side conclusions packaged as A.3(1)(2)(3) + Remark A.2 (l.5311: mutual refinements; covers containing the total space). The Čech double complex of two rational covers of one base.
+
+### [T635] C-5: 8.33-all-degree at a strongly noetherian corner
+- **Status**: open · **Depends on**: T633 (+ existing T621 artifacts) · **Type**: theorem
+- **Statement**: the Laurent 2-cover's augmented UNNORMALIZED complex is exact in all degrees (`IsCechAcyclicFull (laurentRationalCover …)`), from `LaurentCover.row3_exact` + `unitCover_delta_surjective` + separation (the alternating row) + T633. Source: [Wedhorn] 8.33 (l.4151–4207).
+
+### [T636] C-6: 8.34-all-degree
+- **Status**: open · **Depends on**: T634, T635 · **Type**: theorem
+- **Statement**: ideal-generated rational covers of a complete strongly noetherian Tate ring are `IsCechAcyclicFull`; transcribe (i)–(iv) of [Wedhorn] l.4222–4255 over the C-4 engine, reusing the deg≤1 development's cover combinatorics.
+
+### [T637] C-7 (FJP HEADLINE): all-degree acyclicity for the pinching algebra
+- **Status**: open · **Depends on**: T632, T636 + campaign B · **Type**: theorem
+- **Statement**: every rational cover of `Spa (JetA F)` (and of the extensions `PA F n`) is `IsCechAcyclicFull`: SES of augmented complexes over the (extended) pinch — degreewise from `valueRow_injective/glue` at `interList`s of pushed pieces (pushes of intersections = intersections of pushes, `pushDatumOfHom_interOpen`) — + mathlib LES (`ShortComplex.ShortExact.δ`, homology_exact₁/₂/₃) + T636 at the corners. Source: [Reviewer] §5.2; decomposition C-7.
+
+### [T638] C-8 (WP HEADLINE): all-degree acyclicity for the weighted-parity algebra
+- **Status**: open · **Depends on**: T632 · **Type**: theorem
+- **Statement**: rational covers of `Spa (WPA K w)` are `IsCechAcyclicFull` via coefficientwise `c₀`-primitives with per-degree OMT constants (`ContinuousLinearMap.exists_preimage_norm_le`); one common head for all pieces/multi-intersections; c₀-sums only. Source: [WP-paper] l.1199–1215; validation addendum C(iii).
+
 ### [CLEANUP-601] /cleanup `Adic spaces/WP/StrongSheafy.lean`
 - **Status**: open · **Depends on**: T603 (final per-file cleanup).
 
@@ -377,7 +409,7 @@ with the Jet square as regression instance and the P-square as the payoff instan
   existing 834-part-i signature).
 
 ### [T622] C-AG1 design pass (PLANNING): all-degree Čech on `RationalCoveringData`
-- **Status**: in_progress (2026-08-11 — AUDITS DONE: (1) `IsOXAcyclic` (WedhornCechAcyclicity:104) is DEGREE ≤ 1 only (separation+gluing) — the all-degree notion does NOT exist yet; (2) `CechCochain`/`cechDiff` (CechCohomology:201/220) are the UNNORMALIZED complex over abstract `AbPresheaf`/`FiniteCover`, not over `RationalCoveringData`/`presheafValue`; (3) campaign-B's abstract pinch machinery (valueRow_*, pushDatumOfHom, interDatumOfRational, pushDatumOfHom_interOpen) is EXACTLY the input for the reviewer's Milnor-LES route at FJP — the SES of augmented complexes needs the per-multi-intersection row, which follows from valueRow_glue/injective at iterated intersections + naturality. DESIGN LAYERS FIXED: [a] `interList` iterated intersection datum + `rationalOpen_interList = ⋂`; [b] the 𝒪-valued augmented UNNORMALIZED Čech complex on a RationalCoveringData in `AddCommGrp` (mathlib homology API); [c] all-degree `IsCechAcyclicFull` def; [d] corner input = ALL-DEGREE 8.34 for strongly-noetherian corners — REMAINING DESIGN QUESTION (needs wedhorn.txt A.3/8.34 re-read, source-faithfulness): 2-cover base case in unnormalized degrees ≥ 2 — candidate routes: (d1) contracting homotopy from the κ=1 splitting (cover-with-section contraction), (d2) alternating comparison quasi-iso; [e] FJP headline via ShortComplex.ShortExact.δ LES (homology_exact₁/₂/₃) over the SES from campaign-B rows; [f] WP headline via per-degree c₀-primitives + ContinuousLinearMap.exists_preimage_norm_le. NEXT ENTRY POINT: read wedhorn.txt l.4151–4400 (8.33/8.34/A.3 proofs) + refs/AdicSpaces PDF appendix; transcribe the A.3 induction's exact all-degree statements; write the [a]–[c] skeleton (statements compile with sorry); then ticket [d]–[f].) · **Depends on**: T621 · **Type**: planning
+- **Status**: done (2026-08-11 — design pass complete: Wedhorn Appendix A read (l.5245–5345) + 8.34 proof (l.4222–4255); decomposition.md C-subtree rewritten with verbatim quotes + binding design decisions; execution tickets T631–T638 filed. AUDITS: (1) `IsOXAcyclic` (WedhornCechAcyclicity:104) is DEGREE ≤ 1 only (separation+gluing) — the all-degree notion does NOT exist yet; (2) `CechCochain`/`cechDiff` (CechCohomology:201/220) are the UNNORMALIZED complex over abstract `AbPresheaf`/`FiniteCover`, not over `RationalCoveringData`/`presheafValue`; (3) campaign-B's abstract pinch machinery (valueRow_*, pushDatumOfHom, interDatumOfRational, pushDatumOfHom_interOpen) is EXACTLY the input for the reviewer's Milnor-LES route at FJP — the SES of augmented complexes needs the per-multi-intersection row, which follows from valueRow_glue/injective at iterated intersections + naturality. DESIGN LAYERS FIXED: [a] `interList` iterated intersection datum + `rationalOpen_interList = ⋂`; [b] the 𝒪-valued augmented UNNORMALIZED Čech complex on a RationalCoveringData in `AddCommGrp` (mathlib homology API); [c] all-degree `IsCechAcyclicFull` def; [d] corner input = ALL-DEGREE 8.34 for strongly-noetherian corners — REMAINING DESIGN QUESTION (needs wedhorn.txt A.3/8.34 re-read, source-faithfulness): 2-cover base case in unnormalized degrees ≥ 2 — candidate routes: (d1) contracting homotopy from the κ=1 splitting (cover-with-section contraction), (d2) alternating comparison quasi-iso; [e] FJP headline via ShortComplex.ShortExact.δ LES (homology_exact₁/₂/₃) over the SES from campaign-B rows; [f] WP headline via per-degree c₀-primitives + ContinuousLinearMap.exists_preimage_norm_le. NEXT ENTRY POINT: read wedhorn.txt l.4151–4400 (8.33/8.34/A.3 proofs) + refs/AdicSpaces PDF appendix; transcribe the A.3 induction's exact all-degree statements; write the [a]–[c] skeleton (statements compile with sorry); then ticket [d]–[f].) · **Depends on**: T621 · **Type**: planning
 - **Action**: `/develop --decompose` for C-AG1: multi-intersection data, the Čech complex
   on rational covers (reusing `CechCohomology.lean`'s `IsAcyclic` or an algebraic twin),
   A.3 in all degrees, then the two example headlines (FJP Milnor LES over
