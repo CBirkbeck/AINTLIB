@@ -197,7 +197,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
   through it).
 
 ### [T616] B-H (MILESTONE): `finiteJet_tateExt_isSheafyComplete`
-- **Status**: blocked (T623–T628 below are its execution tree; discharged by T628) · **File**: `Adic spaces/FJP/StrongSheafy.lean:297`.
+- **Status**: done (2026-08-11 — AXIOM-CLEAN [propext, Classical.choice, Quot.sound]. 𝓐 is STRONGLY SHEAFY: every finite Tate extension sheafy at every valid ring of integral elements. CAMPAIGN B COMPLETE — both papers' examples strongly sheafy.) · **File**: `Adic spaces/FJP/StrongSheafy.lean:297`.
 
 ---
 
@@ -222,7 +222,7 @@ bundle + norm identities + milnor row + scale bundles + unitBall-noetherian at B
 with the Jet square as regression instance and the P-square as the payoff instance.
 
 ### [T623] Generic value-level square coherence + interDatum genericity
-- **Status**: open · **File**: `Adic spaces/PresheafFunctoriality.lean` (append) · **Type**: lemma
+- **Status**: done (2026-08-11 — presheafValueMapOfHom_comp in PresheafFunctoriality; interDatum genericity delivered as interDatumOfRational in CornerSquareDatum (T624)) · **File**: `Adic spaces/PresheafFunctoriality.lean` (append) · **Type**: lemma
 - **Statement**: `presheafValueMapOfHom_square (φB : R →+* B) (φD : R →+* D)
   (ψ : B →+* D) (hcomm : ψ.comp φB = φD) …
   (hψ : Continuous ψ) … : presheafValueMapOfHom ψ hψ (pushB) (pushD) … ∘
@@ -236,7 +236,7 @@ with the Jet square as regression instance and the P-square as the payoff instan
 - **Sources**: [FJP] (4.9); the concrete proof at FiniteJetFunctoriality:1695.
 
 ### [T624] Corner-square datum layer (parametrized pushDatum + open iffs)
-- **Status**: open · **File**: new `Adic spaces/CornerSquareDatum.lean` · **Depends on**: T623 · **Type**: def + lemmas
+- **Status**: done (2026-08-11 — CornerSquareDatum.lean, 0 warnings) · **File**: new `Adic spaces/CornerSquareDatum.lean` · **Depends on**: T623 · **Type**: def + lemmas
 - **Statement**: over `(A B : Type*)` normed-ultrametric Huber with a 1-Lipschitz
   continuous `φ : A →+* B` and openness transport, define `pushDatumOfHom D hD`
   (s := φ D.s, T := D.T.image φ; rationality via `span_image_eq_top`), prove
@@ -302,7 +302,7 @@ with the Jet square as regression instance and the P-square as the payoff instan
 - **Sources**: T620 (template); [WP-paper] lem:sheaf-transfer instantiation.
 
 ### [T628] Normed↔topological bridge + B-H endgame (discharges T616)
-- **Status**: open · **Depends on**: T627 · **Type**: theorem
+- **Status**: done (2026-08-11 — ExtendedSheafyTransport.lean: gaussToTate/tateToGauss continuity + extJetPlus + ext_isSheafyFor/Complete; StrongSheafy.lean:306 sorry FILLED; headline axiom-clean) · **Depends on**: T627 · **Type**: theorem
 - **Statement**: (i) `restrictedGaussTateEquiv n : P (JetA F) n ≃+*
   ↥(restrictedMvPowerSeriesSubring n (JetA F))`, bicontinuous (underlying sets: both are
   coefficients→0, JetA's topology is its norm topology; topologies: Gauss balls vs
