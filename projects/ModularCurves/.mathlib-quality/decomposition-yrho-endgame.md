@@ -161,3 +161,9 @@ YR-3a entry CONFIRMED LIVE: `instance : PreGaloisCategory (CommAlgCat.FiniteEtal
 already PROVEN in-tree (FiniteEtaleGalois:694, AG-GG-1). The Hom-object construction
 starts directly on this instance + mathlib GaloisCategory.getFiberFunctor. All YR-3a
 prerequisites verified present; execution is unblocked.
+
+YR-3a FULLY ON RAILS: the `FiberFunctor` instance ALSO exists
+(FiniteEtaleFiberFunctor:662) — the complete (PreGaloisCategory + FiberFunctor) pair is
+live, so mathlib's full Galois apparatus (fundamental group, equivalence to finite
+G-sets) applies directly. YR-3a = define the Hom-G-set + transport; no foundational work
+remains in this lane.
