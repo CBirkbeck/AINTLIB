@@ -135,6 +135,17 @@ theorem functionFieldMap_comp {Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
     functionFieldMap_germToFunctionField g U s, hsec]
   exact (functionFieldMap_germToFunctionField f (g ⁻¹ᵁ U) (g.app U s)).symm
 
+/-- The function-field pullback of the identity is the identity. -/
+theorem functionFieldMap_id [IrreducibleSpace X] :
+    (𝟙 X : X ⟶ X).functionFieldMap = 𝟙 (CommRingCat.of X.functionField) := by
+  refine TopCat.Presheaf.stalk_hom_ext _ fun U hxU => ?_
+  haveI : Nonempty U := ⟨⟨genericPoint X, hxU⟩⟩
+  ext s
+  show (𝟙 X : X ⟶ X).functionFieldMap (X.germToFunctionField U s) =
+    X.germToFunctionField U s
+  rw [functionFieldMap_germToFunctionField (𝟙 X) U s]
+  rfl
+
 /-- `functionFieldMap` is a congruence in the morphism (the `IsDominant` instances ride along by
 proof irrelevance). -/
 theorem functionFieldMap_congr {f g : X ⟶ Y} [IsDominant f] [IsDominant g]
