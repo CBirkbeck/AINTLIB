@@ -138,3 +138,14 @@ ForMathlib/{FiniteEtaleGalois,FiniteEtaleFundamentalGroup,FiniteEtaleFiberFuncto
 WeilPairing Galois layer — YR-3a builds it fresh per the Stacks 58.5.2/58.5.4 route, as
 the endgame plan anticipated. Available substrate: the fiber-functor equivalence
 (FiniteEtaleFiberFunctor) for the geometric-fibre computations of YR-3c/d.
+
+YR-3a design insight (2026-08-11, final): the tree's finite-etale layer is ALGEBRA-side
+(CommAlgCat + mathlib CategoryTheory.Galois). Better than scheme-side Stacks 58.5: build
+the restricted dual as the Hom-object of finite G-SETS through the fiber-functor
+equivalence (FiniteEtaleFiberFunctor) — Hom-objects of finite G-sets are elementary
+(conjugation action on function-sets), and the equivalence transports representability +
+rank + the pairing map. The YR-3 statement should be clothed over the base field/its
+etale site accordingly (matching the D1 re-clothing). Cut on next execution: (i) G-set
+Hom-object + its rank; (ii) transport across the equivalence; (iii) the pairing-induced
+map and fibrewise-iso (existing isIso_iff_finrank_eq route); (iv) the field-nondegeneracy
+import.
