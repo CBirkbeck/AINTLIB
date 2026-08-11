@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.KMBilinear
 import ModularCurves.WeilPairing.FieldComparisonBridge
+import ModularCurves.ForMathlib.PullbackTensorMonoidal
 
 /-!
 # The field leaf: comparing the KM pairing with the Silverman pairing (U5)
@@ -671,6 +672,38 @@ theorem idealGenHom_mul_app {X : Scheme.{u}} (J : X.IdealSheafData) (V : X.Opens
   rw [← Functor.map_comp]
   exact congrArg (fun g => (CategoryTheory.ConcreteCategory.hom (X.presheaf.map g)) u)
     (Subsingleton.elim _ _)
+
+/-- **(U5-L1a step 3b-i, definite form)** The trivialisation of the pulled-back ideal
+module on a principal affine chart, as a *definite* iso (not merely `Nonempty`): the
+3c-iii transition computation must read ratios off a pinned choice. -/
+noncomputable def pullbackIdealTrivOfPrincipal {X : Scheme.{u}} (J : X.IdealSheafData)
+    (V : X.affineOpens) (f : Γ(X, V.1))
+    (hspan : J.ideal V = Ideal.span {f}) (hnzd : f ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem : f ∈ idealSections J (Opposite.op V.1)) :
+    (Scheme.Modules.pullback V.1.ι).obj (idealModule J) ≅ unitObj ↑(V.1) :=
+  haveI := isIso_idealGenHom_of_principal J V f hspan hnzd hfmem
+  (restrictFunctorIsoPullback V.1.ι).symm.app (idealModule J) ≪≫
+    (asIso (idealGenHom J V.1 f hfmem)).symm
+
+/-- **(U5-L1a step 3b-ii, definite form)** The chart trivialisation of a module `M` with
+`M ⊗ I₁ ≅ I₂`, as the definite five-step iso
+`pb M ≅ pb M ⊗ 𝒪 ≅ pb M ⊗ pb I₁ ≅ pb (M ⊗ I₁) ≅ pb I₂ ≅ 𝒪`
+(3c-iii reads the overlap transition ratios off this construction). -/
+noncomputable def pullbackTrivOfTensorIdeal {X : Scheme.{u}}
+    (M : X.Modules) (J₁ J₂ : X.IdealSheafData)
+    (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
+    (V : X.affineOpens) (f₁ f₂ : Γ(X, V.1))
+    (hspan₁ : J₁.ideal V = Ideal.span {f₁}) (hnzd₁ : f₁ ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem₁ : f₁ ∈ idealSections J₁ (Opposite.op V.1))
+    (hspan₂ : J₂.ideal V = Ideal.span {f₂}) (hnzd₂ : f₂ ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem₂ : f₂ ∈ idealSections J₂ (Opposite.op V.1)) :
+    (Scheme.Modules.pullback V.1.ι).obj M ≅ unitObj ↑(V.1) :=
+  (tensorObjUnitIso ((Scheme.Modules.pullback V.1.ι).obj M)).symm ≪≫
+    tensorObjCongr (Iso.refl _)
+      (pullbackIdealTrivOfPrincipal J₁ V f₁ hspan₁ hnzd₁ hfmem₁).symm ≪≫
+    (pullbackTensorObjIsoOfIsOpenImmersion V.1.ι M (idealModule J₁)).symm ≪≫
+    (Scheme.Modules.pullback V.1.ι).mapIso e ≪≫
+    pullbackIdealTrivOfPrincipal J₂ V f₂ hspan₂ hnzd₂ hfmem₂
 
 end PicPoint
 
