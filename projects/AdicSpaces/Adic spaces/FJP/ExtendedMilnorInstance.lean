@@ -183,4 +183,269 @@ theorem plusLe_extD :
     (fun p => le_trans ((extPinch F n).norm_ψC_le _)
       (le_of_eq ((extPinch F n).norm_φC p))) hx
 
+/-! ### The pushes (rationality-gated, T620 pattern) -/
+
+open Classical in
+/-- The total `B`-push of the extended square. -/
+noncomputable def extPushB : RationalLocData (PA F n) → RationalLocData (PB F n) :=
+  fun D => if h : D.IsRational then pushDatumOfHom (extJB F n) (podPB F n) D h
+    else trivialPlusDatum (PB F n) (podPB F n) 1
+
+open Classical in
+/-- The total `C`-push. -/
+noncomputable def extPushC : RationalLocData (PA F n) → RationalLocData (PC F n) :=
+  fun D => if h : D.IsRational then pushDatumOfHom (extIotaC F n) (podPC F n) D h
+    else trivialPlusDatum (PC F n) (podPC F n) 1
+
+open Classical in
+/-- The total `D`-push. -/
+noncomputable def extPushD : RationalLocData (PA F n) → RationalLocData (PD F n) :=
+  fun D => if h : D.IsRational then
+    pushDatumOfHom ((extRhoC F n).comp (extIotaC F n)) (podPD F n) D h
+    else trivialPlusDatum (PD F n) (podPD F n) 1
+
+theorem extPushB_eq {D : RationalLocData (PA F n)} (hD : D.IsRational) :
+    extPushB F n D = pushDatumOfHom (extJB F n) (podPB F n) D hD := by
+  simp [extPushB, dif_pos hD]
+
+theorem extPushC_eq {D : RationalLocData (PA F n)} (hD : D.IsRational) :
+    extPushC F n D = pushDatumOfHom (extIotaC F n) (podPC F n) D hD := by
+  simp [extPushC, dif_pos hD]
+
+theorem extPushD_eq {D : RationalLocData (PA F n)} (hD : D.IsRational) :
+    extPushD F n D =
+      pushDatumOfHom ((extRhoC F n).comp (extIotaC F n)) (podPD F n) D hD := by
+  simp [extPushD, dif_pos hD]
+
+/-! ### Subst-helpers for the row and compat fields -/
+
+private theorem extRowInjectiveAux (U : RationalLocData (PA F n)) (hU : U.IsRational)
+    {DB : RationalLocData (PB F n)} {DC : RationalLocData (PC F n)}
+    (hDB : DB = pushDatumOfHom (extJB F n) (podPB F n) U hU)
+    (hDC : DC = pushDatumOfHom (extIotaC F n) (podPC F n) U hU)
+    (hsB : DB.s = extJB F n U.s) (hTB : ∀ t ∈ U.T, extJB F n t ∈ DB.T)
+    (hsC : DC.s = extIotaC F n U.s) (hTC : ∀ t ∈ U.T, extIotaC F n t ∈ DC.T)
+    (hφB : Continuous (extJB F n)) (hφC : Continuous (extIotaC F n))
+    (x y : presheafValue U)
+    (hB : presheafValueMapOfHom (extJB F n) hφB U DB hsB hTB x =
+      presheafValueMapOfHom (extJB F n) hφB U DB hsB hTB y)
+    (hC : presheafValueMapOfHom (extIotaC F n) hφC U DC hsC hTC x =
+      presheafValueMapOfHom (extIotaC F n) hφC U DC hsC hTC y) :
+    x = y := by
+  subst hDB; subst hDC
+  exact (extPinch F n).valueRow_injective (podPB F n) (podPC F n) U (cornerEnum U) hU
+    (extNoethPack F n (cornerEnum U).m)
+    ((extPinch F n).isClosed_IA (cornerEnum U).m U.s (cornerEnum U).f
+      (extNoethPack F n (cornerEnum U).m) ((cornerEnum U).span_eq_top U hU))
+    ((extPinch F n).isClosed_pushB U (cornerEnum U)
+      (extNoethPack F n (cornerEnum U).m).hPB
+      (extNoethPack F n (cornerEnum U).m).hPBball)
+    ((extPinch F n).isClosed_pushC U (cornerEnum U)
+      (extNoethPack F n (cornerEnum U).m).hPC
+      (extNoethPack F n (cornerEnum U).m).hPCball)
+    hφB hφC hsB hTB hsC hTC x y hB hC
+
+private theorem extRowGlueAux (U : RationalLocData (PA F n)) (hU : U.IsRational)
+    {DB : RationalLocData (PB F n)} {DC : RationalLocData (PC F n)}
+    {DD : RationalLocData (PD F n)}
+    (hDB : DB = pushDatumOfHom (extJB F n) (podPB F n) U hU)
+    (hDC : DC = pushDatumOfHom (extIotaC F n) (podPC F n) U hU)
+    (hDD : DD = pushDatumOfHom ((extRhoC F n).comp (extIotaC F n)) (podPD F n) U hU)
+    (hsB : DB.s = extJB F n U.s) (hTB : ∀ t ∈ U.T, extJB F n t ∈ DB.T)
+    (hsC : DC.s = extIotaC F n U.s) (hTC : ∀ t ∈ U.T, extIotaC F n t ∈ DC.T)
+    (hsBD : DD.s = extRhoB F n DB.s) (hTBD : ∀ t ∈ DB.T, extRhoB F n t ∈ DD.T)
+    (hsCD : DD.s = extRhoC F n DC.s) (hTCD : ∀ t ∈ DC.T, extRhoC F n t ∈ DD.T)
+    (hφB : Continuous (extJB F n)) (hφC : Continuous (extIotaC F n))
+    (hψB : Continuous (extRhoB F n)) (hψC : Continuous (extRhoC F n))
+    (b : presheafValue DB) (c : presheafValue DC)
+    (h : presheafValueMapOfHom (extRhoB F n) hψB DB DD hsBD hTBD b =
+      presheafValueMapOfHom (extRhoC F n) hψC DC DD hsCD hTCD c) :
+    ∃ x : presheafValue U,
+      presheafValueMapOfHom (extJB F n) hφB U DB hsB hTB x = b ∧
+      presheafValueMapOfHom (extIotaC F n) hφC U DC hsC hTC x = c := by
+  subst hDB; subst hDC; subst hDD
+  exact (extPinch F n).valueRow_glue (podPB F n) (podPC F n) (podPD F n) U
+    (cornerEnum U) hU (extNoethPack F n (cornerEnum U).m)
+    ((extPinch F n).isClosed_IA (cornerEnum U).m U.s (cornerEnum U).f
+      (extNoethPack F n (cornerEnum U).m) ((cornerEnum U).span_eq_top U hU))
+    ((extPinch F n).isClosed_pushB U (cornerEnum U)
+      (extNoethPack F n (cornerEnum U).m).hPB
+      (extNoethPack F n (cornerEnum U).m).hPBball)
+    ((extPinch F n).isClosed_pushC U (cornerEnum U)
+      (extNoethPack F n (cornerEnum U).m).hPC
+      (extNoethPack F n (cornerEnum U).m).hPCball)
+    ((extPinch F n).isClosed_pushD U (cornerEnum U)
+      (extNoethPack F n (cornerEnum U).m).hPD
+      (extNoethPack F n (cornerEnum U).m).hPDball)
+    hφB hφC hψB hψC hsB hTB hsC hTC hsBD hTBD hsCD hTCD b c h
+
+private theorem extRowEmbeddingAux (U : RationalLocData (PA F n)) (hU : U.IsRational)
+    {DB : RationalLocData (PB F n)} {DC : RationalLocData (PC F n)}
+    (hDB : DB = pushDatumOfHom (extJB F n) (podPB F n) U hU)
+    (hDC : DC = pushDatumOfHom (extIotaC F n) (podPC F n) U hU)
+    (hsB : DB.s = extJB F n U.s) (hTB : ∀ t ∈ U.T, extJB F n t ∈ DB.T)
+    (hsC : DC.s = extIotaC F n U.s) (hTC : ∀ t ∈ U.T, extIotaC F n t ∈ DC.T)
+    (hφB : Continuous (extJB F n)) (hφC : Continuous (extIotaC F n)) :
+    Topology.IsEmbedding (fun x : presheafValue U =>
+      (presheafValueMapOfHom (extJB F n) hφB U DB hsB hTB x,
+       presheafValueMapOfHom (extIotaC F n) hφC U DC hsC hTC x)) := by
+  subst hDB; subst hDC
+  exact (extPinch F n).valueRow_embedding (podPB F n) (podPC F n) U (cornerEnum U) hU
+    (extNoethPack F n (cornerEnum U).m)
+    ((extPinch F n).isClosed_IA (cornerEnum U).m U.s (cornerEnum U).f
+      (extNoethPack F n (cornerEnum U).m) ((cornerEnum U).span_eq_top U hU))
+    ((extPinch F n).isClosed_pushB U (cornerEnum U)
+      (extNoethPack F n (cornerEnum U).m).hPB
+      (extNoethPack F n (cornerEnum U).m).hPBball)
+    ((extPinch F n).isClosed_pushC U (cornerEnum U)
+      (extNoethPack F n (cornerEnum U).m).hPC
+      (extNoethPack F n (cornerEnum U).m).hPCball)
+    hφB hφC hsB hTB hsC hTC
+
+private theorem extPushedCompatBAux (U₁ U₂ : RationalLocData (PA F n))
+    (hU₁ : U₁.IsRational) (hU₂ : U₂.IsRational)
+    {DB₁ DB₂ : RationalLocData (PB F n)}
+    (hDB₁ : DB₁ = pushDatumOfHom (extJB F n) (podPB F n) U₁ hU₁)
+    (hDB₂ : DB₂ = pushDatumOfHom (extJB F n) (podPB F n) U₂ hU₂)
+    (hφ : Continuous (extJB F n))
+    (hs₁ : DB₁.s = extJB F n U₁.s) (hT₁ : ∀ t ∈ U₁.T, extJB F n t ∈ DB₁.T)
+    (hs₂ : DB₂.s = extJB F n U₂.s) (hT₂ : ∀ t ∈ U₂.T, extJB F n t ∈ DB₂.T)
+    (x₁ : presheafValue U₁) (x₂ : presheafValue U₂)
+    (hmatch : ∀ (D₃ : RationalLocData (PA F n))
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen U₁.T U₁.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen U₂.T U₂.s),
+      restrictionMap U₁ D₃ h₃₁ x₁ = restrictionMap U₂ D₃ h₃₂ x₂)
+    (E₃ : RationalLocData (PB F n))
+    (hE₁ : rationalOpen E₃.T E₃.s ⊆ rationalOpen DB₁.T DB₁.s)
+    (hE₂ : rationalOpen E₃.T E₃.s ⊆ rationalOpen DB₂.T DB₂.s) :
+    restrictionMap DB₁ E₃ hE₁
+        (presheafValueMapOfHom (extJB F n) hφ U₁ DB₁ hs₁ hT₁ x₁) =
+      restrictionMap DB₂ E₃ hE₂
+        (presheafValueMapOfHom (extJB F n) hφ U₂ DB₂ hs₂ hT₂ x₂) := by
+  subst hDB₁; subst hDB₂
+  have hsub₁ : rationalOpen (interDatumOfRational U₁ U₂ hU₁ hU₂).T (interDatumOfRational U₁ U₂ hU₁ hU₂).s ⊆ rationalOpen U₁.T U₁.s := by
+    rw [rationalOpen_interDatumOfRational]
+    exact Set.inter_subset_left
+  have hsub₂ : rationalOpen (interDatumOfRational U₁ U₂ hU₁ hU₂).T (interDatumOfRational U₁ U₂ hU₁ hU₂).s ⊆ rationalOpen U₂.T U₂.s := by
+    rw [rationalOpen_interDatumOfRational]
+    exact Set.inter_subset_right
+  have hpush₁ : rationalOpen (pushDatumOfHom (extJB F n) (podPB F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).T
+      (pushDatumOfHom (extJB F n) (podPB F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).s ⊆
+      rationalOpen (pushDatumOfHom (extJB F n) (podPB F n) U₁ hU₁).T
+        (pushDatumOfHom (extJB F n) (podPB F n) U₁ hU₁).s := by
+    rw [pushDatumOfHom_interOpen hφ
+      (plusLe_extJB F n) (podPB F n) U₁ U₂ hU₁ hU₂]
+    exact Set.inter_subset_left
+  have hpush₂ : rationalOpen (pushDatumOfHom (extJB F n) (podPB F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).T
+      (pushDatumOfHom (extJB F n) (podPB F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).s ⊆
+      rationalOpen (pushDatumOfHom (extJB F n) (podPB F n) U₂ hU₂).T
+        (pushDatumOfHom (extJB F n) (podPB F n) U₂ hU₂).s := by
+    rw [pushDatumOfHom_interOpen hφ
+      (plusLe_extJB F n) (podPB F n) U₁ U₂ hU₁ hU₂]
+    exact Set.inter_subset_right
+  have h₃I : rationalOpen E₃.T E₃.s ⊆
+      rationalOpen (pushDatumOfHom (extJB F n) (podPB F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).T
+        (pushDatumOfHom (extJB F n) (podPB F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).s := by
+    rw [pushDatumOfHom_interOpen hφ
+      (plusLe_extJB F n) (podPB F n) U₁ U₂ hU₁ hU₂]
+    exact Set.subset_inter hE₁ hE₂
+  have hpushed := congrArg
+    (presheafValueMapOfHom (extJB F n) hφ (interDatumOfRational U₁ U₂ hU₁ hU₂)
+      (pushDatumOfHom (extJB F n) (podPB F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)) rfl
+      (fun t ht => Finset.mem_image_of_mem _ ht))
+    (hmatch (interDatumOfRational U₁ U₂ hU₁ hU₂) hsub₁ hsub₂)
+  rw [presheafValueMapOfHom_restriction (extJB F n) hφ U₁ (interDatumOfRational U₁ U₂ hU₁ hU₂)
+      (pushDatumOfHom (extJB F n) (podPB F n) U₁ hU₁)
+      (pushDatumOfHom (extJB F n) (podPB F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)) hs₁ hT₁ rfl
+      (fun t ht => Finset.mem_image_of_mem _ ht) hsub₁ hpush₁ x₁,
+    presheafValueMapOfHom_restriction (extJB F n) hφ U₂ (interDatumOfRational U₁ U₂ hU₁ hU₂)
+      (pushDatumOfHom (extJB F n) (podPB F n) U₂ hU₂)
+      (pushDatumOfHom (extJB F n) (podPB F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)) hs₂ hT₂ rfl
+      (fun t ht => Finset.mem_image_of_mem _ ht) hsub₂ hpush₂ x₂] at hpushed
+  have hfac₁ := congrFun (restrictionMap_comp
+    (pushDatumOfHom (extJB F n) (podPB F n) U₁ hU₁)
+    (pushDatumOfHom (extJB F n) (podPB F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)) E₃ hpush₁ h₃I)
+    (presheafValueMapOfHom (extJB F n) hφ U₁
+      (pushDatumOfHom (extJB F n) (podPB F n) U₁ hU₁) hs₁ hT₁ x₁)
+  have hfac₂ := congrFun (restrictionMap_comp
+    (pushDatumOfHom (extJB F n) (podPB F n) U₂ hU₂)
+    (pushDatumOfHom (extJB F n) (podPB F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)) E₃ hpush₂ h₃I)
+    (presheafValueMapOfHom (extJB F n) hφ U₂
+      (pushDatumOfHom (extJB F n) (podPB F n) U₂ hU₂) hs₂ hT₂ x₂)
+  simp only [Function.comp_apply] at hfac₁ hfac₂
+  rw [← hfac₁, ← hfac₂, hpushed]
+
+private theorem extPushedCompatCAux (U₁ U₂ : RationalLocData (PA F n))
+    (hU₁ : U₁.IsRational) (hU₂ : U₂.IsRational)
+    {DC₁ DC₂ : RationalLocData (PC F n)}
+    (hDC₁ : DC₁ = pushDatumOfHom (extIotaC F n) (podPC F n) U₁ hU₁)
+    (hDC₂ : DC₂ = pushDatumOfHom (extIotaC F n) (podPC F n) U₂ hU₂)
+    (hφ : Continuous (extIotaC F n))
+    (hs₁ : DC₁.s = extIotaC F n U₁.s) (hT₁ : ∀ t ∈ U₁.T, extIotaC F n t ∈ DC₁.T)
+    (hs₂ : DC₂.s = extIotaC F n U₂.s) (hT₂ : ∀ t ∈ U₂.T, extIotaC F n t ∈ DC₂.T)
+    (x₁ : presheafValue U₁) (x₂ : presheafValue U₂)
+    (hmatch : ∀ (D₃ : RationalLocData (PA F n))
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen U₁.T U₁.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen U₂.T U₂.s),
+      restrictionMap U₁ D₃ h₃₁ x₁ = restrictionMap U₂ D₃ h₃₂ x₂)
+    (E₃ : RationalLocData (PC F n))
+    (hE₁ : rationalOpen E₃.T E₃.s ⊆ rationalOpen DC₁.T DC₁.s)
+    (hE₂ : rationalOpen E₃.T E₃.s ⊆ rationalOpen DC₂.T DC₂.s) :
+    restrictionMap DC₁ E₃ hE₁
+        (presheafValueMapOfHom (extIotaC F n) hφ U₁ DC₁ hs₁ hT₁ x₁) =
+      restrictionMap DC₂ E₃ hE₂
+        (presheafValueMapOfHom (extIotaC F n) hφ U₂ DC₂ hs₂ hT₂ x₂) := by
+  subst hDC₁; subst hDC₂
+  have hsub₁ : rationalOpen (interDatumOfRational U₁ U₂ hU₁ hU₂).T (interDatumOfRational U₁ U₂ hU₁ hU₂).s ⊆ rationalOpen U₁.T U₁.s := by
+    rw [rationalOpen_interDatumOfRational]
+    exact Set.inter_subset_left
+  have hsub₂ : rationalOpen (interDatumOfRational U₁ U₂ hU₁ hU₂).T (interDatumOfRational U₁ U₂ hU₁ hU₂).s ⊆ rationalOpen U₂.T U₂.s := by
+    rw [rationalOpen_interDatumOfRational]
+    exact Set.inter_subset_right
+  have hpush₁ : rationalOpen (pushDatumOfHom (extIotaC F n) (podPC F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).T
+      (pushDatumOfHom (extIotaC F n) (podPC F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).s ⊆
+      rationalOpen (pushDatumOfHom (extIotaC F n) (podPC F n) U₁ hU₁).T
+        (pushDatumOfHom (extIotaC F n) (podPC F n) U₁ hU₁).s := by
+    rw [pushDatumOfHom_interOpen hφ
+      (plusLe_extIotaC F n) (podPC F n) U₁ U₂ hU₁ hU₂]
+    exact Set.inter_subset_left
+  have hpush₂ : rationalOpen (pushDatumOfHom (extIotaC F n) (podPC F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).T
+      (pushDatumOfHom (extIotaC F n) (podPC F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).s ⊆
+      rationalOpen (pushDatumOfHom (extIotaC F n) (podPC F n) U₂ hU₂).T
+        (pushDatumOfHom (extIotaC F n) (podPC F n) U₂ hU₂).s := by
+    rw [pushDatumOfHom_interOpen hφ
+      (plusLe_extIotaC F n) (podPC F n) U₁ U₂ hU₁ hU₂]
+    exact Set.inter_subset_right
+  have h₃I : rationalOpen E₃.T E₃.s ⊆
+      rationalOpen (pushDatumOfHom (extIotaC F n) (podPC F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).T
+        (pushDatumOfHom (extIotaC F n) (podPC F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)).s := by
+    rw [pushDatumOfHom_interOpen hφ
+      (plusLe_extIotaC F n) (podPC F n) U₁ U₂ hU₁ hU₂]
+    exact Set.subset_inter hE₁ hE₂
+  have hpushed := congrArg
+    (presheafValueMapOfHom (extIotaC F n) hφ (interDatumOfRational U₁ U₂ hU₁ hU₂)
+      (pushDatumOfHom (extIotaC F n) (podPC F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)) rfl
+      (fun t ht => Finset.mem_image_of_mem _ ht))
+    (hmatch (interDatumOfRational U₁ U₂ hU₁ hU₂) hsub₁ hsub₂)
+  rw [presheafValueMapOfHom_restriction (extIotaC F n) hφ U₁ (interDatumOfRational U₁ U₂ hU₁ hU₂)
+      (pushDatumOfHom (extIotaC F n) (podPC F n) U₁ hU₁)
+      (pushDatumOfHom (extIotaC F n) (podPC F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)) hs₁ hT₁ rfl
+      (fun t ht => Finset.mem_image_of_mem _ ht) hsub₁ hpush₁ x₁,
+    presheafValueMapOfHom_restriction (extIotaC F n) hφ U₂ (interDatumOfRational U₁ U₂ hU₁ hU₂)
+      (pushDatumOfHom (extIotaC F n) (podPC F n) U₂ hU₂)
+      (pushDatumOfHom (extIotaC F n) (podPC F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)) hs₂ hT₂ rfl
+      (fun t ht => Finset.mem_image_of_mem _ ht) hsub₂ hpush₂ x₂] at hpushed
+  have hfac₁ := congrFun (restrictionMap_comp
+    (pushDatumOfHom (extIotaC F n) (podPC F n) U₁ hU₁)
+    (pushDatumOfHom (extIotaC F n) (podPC F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)) E₃ hpush₁ h₃I)
+    (presheafValueMapOfHom (extIotaC F n) hφ U₁
+      (pushDatumOfHom (extIotaC F n) (podPC F n) U₁ hU₁) hs₁ hT₁ x₁)
+  have hfac₂ := congrFun (restrictionMap_comp
+    (pushDatumOfHom (extIotaC F n) (podPC F n) U₂ hU₂)
+    (pushDatumOfHom (extIotaC F n) (podPC F n) (interDatumOfRational U₁ U₂ hU₁ hU₂) (interDatumOfRational_isRational hU₁ hU₂)) E₃ hpush₂ h₃I)
+    (presheafValueMapOfHom (extIotaC F n) hφ U₂
+      (pushDatumOfHom (extIotaC F n) (podPC F n) U₂ hU₂) hs₂ hT₂ x₂)
+  simp only [Function.comp_apply] at hfac₁ hfac₂
+  rw [← hfac₁, ← hfac₂, hpushed]
+
 end FiniteJet
