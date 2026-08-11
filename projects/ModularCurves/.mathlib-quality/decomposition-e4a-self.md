@@ -343,3 +343,12 @@ i.e. `Scheme.Hom.appIso`-NATURALITY along W ≤ ⊤ (an appIso-naturality-square
 check mathlib `Scheme.Hom.appIso_hom_naturality`/`appIso_inv_naturality`). Also
 beta-reduce the RHS ModuleCat.ofHom-application (`ModuleCat.ofHom_apply`?) before the
 factor-match. Probe: scratchpad/probe3cii2.lean (kept at this state).
+
+3c-ii FINAL RECIPE (blind-mode complete, 2026-08-11): per-app statement + Subtype.ext +
+`show _ * _ = _` + `rw [unitEndo-app]` + `simp only [idealGenHom, openTopSection, map_mul,
+hom_ofHom, coe_mk]` + `simp [appIso_inv/hom_naturality, ← Functor.map_comp]` +
+`rw [mul_right_comm, mul_assoc]; congr 1; congr 1` isolates THE FACTOR-GOAL:
+`res u = 𝟙-hom (res (eqToHom-map u))` — a 3-line LSP-fix (fuse via the goal-spelled
+comp_apply variants + thin-cat Subsingleton.elim + map_comp; the blind comp_apply-rw
+pattern-misses on the CommRingCat-instance spelling). Probe frozen at this state
+(scratchpad/probe3cii2.lean, tail = sorry at the factor-goal).
