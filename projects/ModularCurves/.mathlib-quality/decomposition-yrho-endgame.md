@@ -156,3 +156,8 @@ injective_of_mono) — the transport toolkit for the G-set Hom-object; the equiv
 itself rides mathlib's PreGaloisCategory framework (Galois.Basic imports in
 FiniteEtaleGalois). Execution starts from mathlib's `CategoryTheory.Galois` fiber-functor
 essentially-surjective/full-faithful theorems.
+
+YR-3a entry CONFIRMED LIVE: `instance : PreGaloisCategory (CommAlgCat.FiniteEtale k)op`
+already PROVEN in-tree (FiniteEtaleGalois:694, AG-GG-1). The Hom-object construction
+starts directly on this instance + mathlib GaloisCategory.getFiberFunctor. All YR-3a
+prerequisites verified present; execution is unblocked.
