@@ -1232,6 +1232,65 @@ theorem restrictIsoOfPullbackIso_pullbackTrivOfTensorIdeal {X : Scheme.{u}}
   simp [restrictIsoOfPullbackIso, pullbackTrivOfTensorIdeal, tensorChainPrefix,
     pullbackIdealTrivOfPrincipal, Category.assoc]
 
+/-- **(U5-L1a 3c-iii RUNG-1a)** The over-site scaling endomorphism of an arbitrary
+module by a section over the base open (the general-`M` sibling of
+`overUnitScalarEnd`): componentwise `res r • ·` along the over-structure arrows. -/
+noncomputable def overSmulEndo {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (r : Γ(X, U)) : (M.over U) ⟶ (M.over U) :=
+  ⟨{ app := fun W => ModuleCat.ofHom
+      { toFun := fun m =>
+          (X.ringCatSheaf.obj.map (Opposite.unop W).hom.op r) • m
+        map_add' := fun _ _ => smul_add _ _ _
+        map_smul' := fun s m => by
+          dsimp only [RingHom.id_apply]
+          rw [← mul_smul, ← mul_smul]
+          congr 1
+          have hcomm : IsMulCommutative
+              (X.ringCatSheaf.obj.obj (Opposite.op (Opposite.unop W).left)) := by
+            change IsMulCommutative (X.presheaf.obj (Opposite.op (Opposite.unop W).left))
+            exact ⟨⟨fun a b => mul_comm a b⟩⟩
+          exact hcomm.is_comm.comm _ _ }
+     naturality := fun {W W'} i => by
+      refine ModuleCat.hom_ext (LinearMap.ext fun m => ?_)
+      show (X.ringCatSheaf.obj.map (Opposite.unop W').hom.op r) •
+          (CategoryTheory.ConcreteCategory.hom ((M.over U).val.map i)) m =
+        (CategoryTheory.ConcreteCategory.hom ((M.over U).val.map i))
+          ((X.ringCatSheaf.obj.map (Opposite.unop W).hom.op r) • m)
+      refine Eq.trans ?_ ((M.over U).val.map_smul i
+        (X.ringCatSheaf.obj.map (Opposite.unop W).hom.op r) m).symm
+      congr 1
+      change (CategoryTheory.ConcreteCategory.hom
+          (X.ringCatSheaf.obj.map (Opposite.unop W').hom.op)) r =
+        (CategoryTheory.ConcreteCategory.hom
+          (X.ringCatSheaf.obj.map i.unop.left.op))
+          ((CategoryTheory.ConcreteCategory.hom
+            (X.ringCatSheaf.obj.map (Opposite.unop W).hom.op)) r)
+      have h1 : (Opposite.unop W').hom.op =
+          (Opposite.unop W).hom.op ≫ i.unop.left.op := Subsingleton.elim _ _
+      rw [h1, Functor.map_comp]
+      rfl }⟩
+
+/-- The value of the over-site scaling endomorphism. -/
+theorem overSmulEndo_app_apply {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (r : Γ(X, U)) (W : (CategoryTheory.Over U)ᵒᵖ) (m : (M.over U).val.obj W) :
+    ((overSmulEndo M U r).val.app W).hom m =
+      (X.ringCatSheaf.obj.map (Opposite.unop W).hom.op r) • m := rfl
+
+/-- **(U5-L1a 3c-iii RUNG-1b)** Every over-site module homomorphism commutes with the
+over-site scaling endomorphisms. -/
+theorem overSmulEndo_naturality {X : Scheme.{u}} {M N : X.Modules} (U : X.Opens)
+    (g : M.over U ⟶ N.over U) (r : Γ(X, U)) :
+    overSmulEndo M U r ≫ g = g ≫ overSmulEndo N U r := by
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro W
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  erw [sheafOfModules_comp_app_apply, sheafOfModules_comp_app_apply]
+  erw [overSmulEndo_app_apply, overSmulEndo_app_apply]
+  exact map_smul ((g.val.app W).hom) _ x
+
 /-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects identities. Natural home
 after cleanup: `Picard/InvertibleSheaf.lean`. -/
 theorem tensorObjCongr_refl {X : Scheme.{u}} (M N : X.Modules) :
