@@ -132,3 +132,9 @@ of finite etale stay finite etale). Statement-draft belongs in a new
 WeilPairing/EtaleDual.lean; FIRST grep MorScheme/internalHom in ForMathlib
 FiniteEtaleFundamentalGroup + EtaleDescent + GaloisFibre for an existing internal-Mor
 constructor before building.
+
+YR-3a reuse-check NEGATIVE (2026-08-11): no internal-Mor/Hom-scheme constructor in
+ForMathlib/{FiniteEtaleGalois,FiniteEtaleFundamentalGroup,FiniteEtaleFiberFunctor} or the
+WeilPairing Galois layer — YR-3a builds it fresh per the Stacks 58.5.2/58.5.4 route, as
+the endgame plan anticipated. Available substrate: the fiber-functor equivalence
+(FiniteEtaleFiberFunctor) for the geometric-fibre computations of YR-3c/d.
