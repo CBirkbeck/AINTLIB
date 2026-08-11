@@ -41644,3 +41644,13 @@ All of `WeilPairing/FieldLeaf.lean` axiom-clean (standard three, verified):
 2. **L1 (the mathematical core)**: H = a·g_Q·[N]^#(r_{i₀}⁻¹) per decomposition-e4a-self.md
    U5-L1a/L1b.
 3. L3 scalar match → L4 value plumbing → L5 diagonal → L6 descent.
+
+### U5-L2g COMPLETE (2026-08-11): the τ-side chain L2a→L2g is DONE, axiom-clean.
+`translateAlgEquivOfPoint_functionFieldMap_of_section` (FieldLeaf) = the bridge at a
+pullback-presentation section. Composing L2e (germ-relation) + L2f (fst-conjugation) +
+L2g now yields: τ_{P₀}(projFF-image of germ h_{i₀}) = image · c in W.toAffine.FunctionField
+— the KM-side translation characterisation in HasseWeil language. Namespace gotcha:
+SpecPoints/projModelPointsEquiv are ModularCurves-level; projModelFunctionFieldEquiv +
+the bridge are EllipticCurve-level. NEXT: U5-L1 (divisor dictionary, design notes in
+decomposition-e4a-self.md; REUSE-FIRST: RelPicLocal/PoincareBiextension κ-dictionary),
+then L3–L6.
