@@ -411,3 +411,21 @@ REMAINING LADDER (each bounded):
   `overUnitScalarEnd_transitionUnit` + `overUnitScalarEndRingEquiv`-injectivity.
 Then 3c-iv (FF-germ reading of the transition — L2e-consumer shape) rides `sectionUnits`/
 germ-machinery on the C-output.
+
+3c-iii B-LAYER LANDED (2026-08-11, session 5 cont.): B1
+`overTriv_pullbackIdealTriv_inv_comp_toUnitHom` — full G.map_injective choreography
+PROVEN (A1-pre rewrite + preimageIso-expansion + overEquiv_unitScalarEnd conjugation +
+F.inv.naturality + cancel_epi + Iso.eq_comp_inv + calc-rfl); rests on exactly ONE
+micro-sorry `idealGenHom_comp_toUnitHom_comp_unitComparison` (the
+overFunctorEquiv/sheafOfModulesEquivOverUnit unit-collapse; toolkit located:
+localModuleSection app-lemmas in DualPullback/OpenUnit.lean,
+restrictUnitIso_inv_app_applyP in DualPullback/UnitComp.lean,
+SheafOfModules.pushforwardCongr_inv_app_val_app in mathlib PushforwardContinuous —
+NOTE it needs erw AND its instance context may fail; the app-splitting road
+(sheafOfModules_comp_app_apply) creates type-blurred goals where NO rewriting works —
+approach the micro-leaf HOM-LEVEL ONLY). B2
+`mono_overUnitScalarEnd_of_nonZeroDivisors` PROVEN AXIOM-CLEAN (componentwise
+cancellation; the key trick: transport the whole app-equation to the Γ-spelling via a
+show-from restatement `:= by exact happ` — instances only exist at ONE spelling; ALL
+mixed-spelling HMul/rw attempts fail). Remaining ladder: micro-leaf, B3 (five-chain
+characterisation square), C (transitionUnitOfCover assembly), 3c-iv.

@@ -748,11 +748,32 @@ theorem idealGenHom_comp_toUnitHom_app_apply {X : Scheme.{u}} (J : X.IdealSheafD
       X.presheaf.map (homOfLE (V.ι_image_le W.unop)).op f *
         (CategoryTheory.ConcreteCategory.hom (V.ι.appIso W.unop).inv) g := rfl
 
+/-- **(U5-L1a 3c-iii B1-leaf)** The unit-comparison micro-leaf of the B1
+characterisation: the mult-by-`f` map `idealGenHom ≫ incl` transported through the
+over-equivalence unit plumbing is the scalar endomorphism of the top-section of `f`.
+Everything else in B1 is proven functor algebra; this is the one residual app-level
+identity (the `overFunctorEquiv`/`sheafOfModulesEquivOverUnit` collapse — toolkit:
+`localModuleSection` app-lemmas in `DualPullback/OpenUnit.lean`,
+`restrictUnitIso_inv_app_applyP` in `DualPullback/UnitComp.lean`). -/
+theorem idealGenHom_comp_toUnitHom_comp_unitComparison {X : Scheme.{u}}
+    (J : X.IdealSheafData) (V : X.affineOpens) (f : Γ(X, V.1))
+    (hfmem : f ∈ idealSections J (Opposite.op V.1)) :
+    (idealGenHom J V.1 f hfmem ≫
+        (restrictFunctor V.1.ι).map (idealModuleToUnitHom J) ≫
+        (overFunctorEquiv V.1).inv.app (unitObj X)) ≫
+      (V.1.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom =
+    ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection V.1 f) := by
+  sorry
+
 /-- **(U5-L1a 3c-iii B1)** The over-site characterisation of the definite 3b-i
 trivialisation against the ideal inclusion: its inverse composed with the restricted
 inclusion is multiplication by the generator. This is the
 `restrictOverTrivialization_inv_comp_over`-shaped input that makes the transition of the
-trivialisation family computable after restriction to overlaps. -/
+trivialisation family computable after restriction to overlaps. Proof: the
+`G.map_injective` choreography of `overTrivializationOfRestrictIso_hom_eq_comp_scalar`
+(PoleSheaf) + the A1-pre cancellation + `overEquiv_unitScalarEnd` conjugation, closed by
+the `B1-leaf` micro-lemma. -/
 theorem overTriv_pullbackIdealTriv_inv_comp_toUnitHom {X : Scheme.{u}}
     (J : X.IdealSheafData) (V : X.affineOpens) (f : Γ(X, V.1))
     (hspan : J.ideal V = Ideal.span {f}) (hnzd : f ∈ nonZeroDivisors Γ(X, V.1))
@@ -762,7 +783,44 @@ theorem overTriv_pullbackIdealTriv_inv_comp_toUnitHom {X : Scheme.{u}}
           (pullbackIdealTrivOfPrincipal J V f hspan hnzd hfmem))).inv ≫
       (idealModuleToUnitHom J).over V.1 =
     SheafOfModules.overUnitScalarEnd X.ringCatSheaf V.1 f := by
-  sorry
+  rw [restrictIsoOfPullbackIso_pullbackIdealTrivOfPrincipal]
+  haveI := isIso_idealGenHom_of_principal J V f hspan hnzd hfmem
+  let G := (Scheme.Modules.overEquiv V.1).functor
+  let F := Scheme.Modules.overFunctorEquiv V.1
+  let C := V.1.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  apply G.map_injective
+  rw [Functor.map_comp]
+  simp only [Scheme.Modules.overTrivializationOfRestrictIso,
+    Functor.FullyFaithful.preimageIso_inv, Functor.FullyFaithful.map_preimage,
+    Iso.trans_inv, Iso.symm_inv]
+  have hs : G.map (ModularCurves.SheafOfModules.overUnitScalarEnd
+      X.ringCatSheaf V.1 f) =
+      C.hom ≫ ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection V.1 f) ≫ C.inv := by
+    rw [← Category.assoc, Iso.eq_comp_inv]
+    exact Scheme.Modules.overEquiv_unitScalarEnd V.1 f
+  rw [hs]
+  have hnat : (restrictFunctor V.1.ι).map (idealModuleToUnitHom J) ≫
+      F.inv.app (unitObj X) =
+      F.inv.app (idealModule J) ≫
+        G.map (SheafOfModules.Hom.over (idealModuleToUnitHom J) V.1) :=
+    F.inv.naturality _
+  have hFinv : ((overFunctorEquiv V.1).app (idealModule J)).inv =
+      F.inv.app (idealModule J) := by
+    simp [F]
+  rw [Category.assoc, Category.assoc, hFinv, ← hnat]
+  simp only [asIso_hom]
+  rw [cancel_epi C.hom, Iso.eq_comp_inv]
+  have h := idealGenHom_comp_toUnitHom_comp_unitComparison J V f hfmem
+  calc (idealGenHom J V.1 f hfmem ≫
+        (restrictFunctor V.1.ι).map (idealModuleToUnitHom J) ≫
+          F.inv.app (unitObj X)) ≫ C.hom
+      = (idealGenHom J V.1 f hfmem ≫
+          (restrictFunctor V.1.ι).map (idealModuleToUnitHom J) ≫
+          (overFunctorEquiv V.1).inv.app (unitObj X)) ≫
+          (V.1.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom := rfl
+    _ = ModularCurves.unitEndomorphismOfTopSection
+          (Scheme.Modules.openTopSection V.1 f) := h
 
 /-- **(U5-L1a 3c-iii B2)** Componentwise-nonzerodivisor scalars act monomorphically on
 the over-site unit module: the cancellation step of the transition computation. The
@@ -774,7 +832,34 @@ theorem mono_overUnitScalarEnd_of_nonZeroDivisors {X : Scheme.{u}} (V : X.Opens)
       X.presheaf.map (homOfLE h).op r ∈ nonZeroDivisors Γ(X, W)) :
     Mono ((SheafOfModules.overUnitScalarEnd X.ringCatSheaf V r :
       CategoryTheory.End (SheafOfModules.unit (X.ringCatSheaf.over V)))) := by
-  sorry
+  constructor
+  intro Z g₁ g₂ hgg
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro W
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  have happ := congrArg (fun q => (CategoryTheory.ConcreteCategory.hom
+    (q.val.app W)) x) hgg
+  simp only [sheafOfModules_comp_app_apply] at happ
+  erw [SheafOfModules.overUnitScalarEnd_app_apply,
+    SheafOfModules.overUnitScalarEnd_app_apply] at happ
+  dsimp only at happ
+  have happ' : ((show Γ(X, (Opposite.unop W).left) from
+        (CategoryTheory.ConcreteCategory.hom (g₁.val.app W)) x) *
+      (CategoryTheory.ConcreteCategory.hom
+        (X.presheaf.map (homOfLE (leOfHom (Opposite.unop W).hom)).op)) r) =
+      ((show Γ(X, (Opposite.unop W).left) from
+        (CategoryTheory.ConcreteCategory.hom (g₂.val.app W)) x) *
+      (CategoryTheory.ConcreteCategory.hom
+        (X.presheaf.map (homOfLE (leOfHom (Opposite.unop W).hom)).op)) r) := by
+    exact happ
+  have h0' := sub_eq_zero_of_eq happ'
+  rw [← sub_mul] at h0'
+  have hz := (mem_nonZeroDivisors_iff.mp
+    (hr (Opposite.unop W).left (leOfHom (Opposite.unop W).hom))).2 _ h0'
+  exact sub_eq_zero.mp hz
 
 end PicPoint
 

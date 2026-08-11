@@ -41589,6 +41589,28 @@ Next: U5d/U5a per the decomposition — the bridge now feeds the characterisatio
 - [IRR-6] discharge hconn in the proven master reduction ⟹ yRho_geometricallyIrreducible.
   Status: blocked (IRR-1..5).
 
+### YR-2 progress — 3c layer (2026-08-11, session 5)
+
+**3c-ii LANDED**: `idealGenHom_mul_app` (FieldLeaf) axiom-clean — the generator-change
+law per-app. The LSP-gate was broken blind via the reusable protocol: `done` as
+goal-printer + batched example-tails (one lake run tests N candidates) + `erw` through
+defeq-but-not-syntactic type mismatches + thin-cat `Subsingleton.elim` closer.
+**3c-iii architecture CLOSED + A-layer LANDED** (all axiom-clean): definite chart
+trivialisations `pullbackIdealTrivOfPrincipal` + `pullbackTrivOfTensorIdeal` (3b def
+forms — transitions need pinned choices); A0 `idealModuleToUnitHom` (ideal inclusion);
+A1-pre clothing-cancellation; A1 `idealGenHom_comp_toUnitHom_app_apply` = **rfl** (the
+characterisation reads the definitions on the nose). B1/B2 pinned sorry-skeleton
+(over-characterisation + scalar-mono); B1 probe in flight. Refined cut + full ladder in
+decomposition-e4a-self.md ("3c-iii REFINED CUT"). Key in-tree engines found:
+`restrictOverTrivialization_inv_comp_over` (PoleSheaf:4049 — characterisations restrict),
+`restrictOverTrivialization_hom_eq_comp_scalar` (TrivializationRestriction:911),
+`overEquiv_unitScalarEnd` (DualPullback:204 — the G/C-conjugation).
+
+**[YR-3 RE-CUT]** (same session): E5's register sorry = the fibrewise form = YR-3d ONLY;
+EtaleDual/internal-Hom lane DEFERRED off the critical path; E5 rides the SAME U5-L1..L4
+comparison as E4a + `fieldWeilPairing_eq_zero_of_forall` (proven). See the endgame plan's
+"YR-3 RE-CUT" section.
+
 ### YR-1 progress (2026-08-10, session 4)
 
 **The curve-direction KM-naturality stack is PROVEN AXIOM-CLEAN** in the new
