@@ -598,3 +598,17 @@ apply hX.hom_ext). smulEndo carrier next window: componentwise
 naturality via M.map_smul + hX.hom_ext. Also inspect whether the mathlib functor
 `forgetToPresheafModuleCat` itself already yields the endo (its morphism-level =
 Γ(⊤)-linear components — smulEndo may be `(functor-image linearity)` for free).
+
+smulEndo CARRIER LANDED (2026-08-11, true window close): `isInitialOpTop` +
+`smulEndo M r : M ⟶ M` (initial-object route — the eta-wall BEATEN: hX.to-arrows land at
+literal objects; the RingCat-comm wall solved by inline IsMulCommutative-change +
+Std.Commutative.comm; the map_smul' via ← mul_smul ×2 + congr) + the rfl value-lemma
+`smulEndo_app_apply` ALL COMPILE. `smulEndo_naturality` PARKED as a one-sorry leaf:
+its proof (hom_ext stack + erw-splitter + map_smul — the shape is right) CUMULATIVE
+whnf-timeouts at decl-elaboration (200k, position <decl>:0). Next-window structural
+fixes: (i) prove it at the PRESHEAF level first (PresheafOfModules-hom naturality of the
+val, then sheaf-hom-ext is one layer thinner); (ii) or per-app with explicit
+PresheafOfModules.Hom.ext × ModuleCat.hom_ext WITHOUT the SheafOfModules.hom_ext outer
+layer; (iii) or the v4.33 opacity options locally around the theorem (file has them
+file-wide already — check whether the theorem's elaboration hits a `.types`-hole).
+NO heartbeat bumps (user rule). Everything else in the window stands green.

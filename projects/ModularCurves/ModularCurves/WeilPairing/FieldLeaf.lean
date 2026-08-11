@@ -1080,6 +1080,61 @@ theorem overTrivializationOfRestrictIso_trans {X : Scheme.{u}} (M N : X.Modules)
     Functor.FullyFaithful.map_preimage]
   simp [Category.assoc]
 
+/-- The opposite of the top open is initial in `(Opens X)ᵒᵖ`: the arrow-supply of the
+central-scalar principle (its `to`-arrows land at literal objects, with `hom_ext`
+killing every spelling mismatch). -/
+noncomputable def isInitialOpTop (X : Scheme.{u}) :
+    Limits.IsInitial (Opposite.op (⊤ : X.Opens)) :=
+  Limits.initialOpOfTerminal
+    (Limits.IsTerminal.ofUniqueHom (fun _ => homOfLE le_top)
+      (fun _ _ => Subsingleton.elim _ _))
+
+/-- **(U5-L1a 3c-iii, the central-scalar principle — carrier)** Scaling by a global
+section `r ∈ Γ(X, ⊤)` as an endomorphism of an arbitrary sheaf of modules:
+componentwise `res r • ·`, with the restriction taken along the initial-object arrows
+of `(Opens X)ᵒᵖ` so that every component lives at its literal open. -/
+noncomputable def smulEndo {X : Scheme.{u}} (M : X.Modules) (r : Γ(X, ⊤)) :
+    M ⟶ M :=
+  ⟨{ app := fun U => ModuleCat.ofHom
+      { toFun := fun m => (X.ringCatSheaf.obj.map ((isInitialOpTop X).to U) r) • m
+        map_add' := fun _ _ => smul_add _ _ _
+        map_smul' := fun s m => by
+          dsimp only [RingHom.id_apply]
+          rw [← mul_smul, ← mul_smul]
+          congr 1
+          have hcomm : IsMulCommutative (X.ringCatSheaf.obj.obj U) := by
+            change IsMulCommutative (X.presheaf.obj U)
+            exact ⟨⟨fun a b => mul_comm a b⟩⟩
+          exact hcomm.is_comm.comm _ _ }
+     naturality := fun {U V} i => by
+      refine ModuleCat.hom_ext (LinearMap.ext fun m => ?_)
+      show (X.ringCatSheaf.obj.map ((isInitialOpTop X).to V) r) •
+          (CategoryTheory.ConcreteCategory.hom (M.val.map i)) m =
+        (CategoryTheory.ConcreteCategory.hom (M.val.map i))
+          ((X.ringCatSheaf.obj.map ((isInitialOpTop X).to U) r) • m)
+      refine Eq.trans ?_ (M.val.map_smul i
+        (X.ringCatSheaf.obj.map ((isInitialOpTop X).to U) r) m).symm
+      congr 1
+      rw [← CategoryTheory.ConcreteCategory.comp_apply, ← Functor.map_comp]
+      exact congrArg (fun g =>
+        (CategoryTheory.ConcreteCategory.hom (X.ringCatSheaf.obj.map g)) r)
+        ((isInitialOpTop X).hom_ext _ _) }⟩
+
+/-- The value of the scaling endomorphism (kept separate from the definition so
+consumers never unfold the `IsInitial`-packaging). -/
+theorem smulEndo_app_apply {X : Scheme.{u}} (M : X.Modules) (r : Γ(X, ⊤))
+    (U : (TopologicalSpace.Opens ↥X)ᵒᵖ) (m : M.val.obj U) :
+    ((smulEndo M r).val.app U).hom m =
+      (X.ringCatSheaf.obj.map ((isInitialOpTop X).to U) r) • m := rfl
+
+/-- **(U5-L1a 3c-iii, the central-scalar principle)** Every homomorphism of sheaf
+modules commutes with the global scaling endomorphisms: each conjugation step of the
+transition computation is one application of this. -/
+theorem smulEndo_naturality {X : Scheme.{u}} {M N : X.Modules} (g : M ⟶ N)
+    (r : Γ(X, ⊤)) :
+    smulEndo M r ≫ g = g ≫ smulEndo N r := by
+  sorry
+
 /-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects identities. Natural home
 after cleanup: `Picard/InvertibleSheaf.lean`. -/
 theorem tensorObjCongr_refl {X : Scheme.{u}} (M N : X.Modules) :
