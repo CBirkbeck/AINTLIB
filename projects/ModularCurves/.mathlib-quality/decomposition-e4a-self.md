@@ -297,3 +297,7 @@ the scalar-end of r ⟹ their `trivializationTransitionUnit` is r (spec
 Then L1b (divisor-zero ⟹ scalar over k̄: HW `pairing_const_of_transport`-machinery) and
 the L1-glue: run L2e at THE dataset built from these trivialisations (its h_i are then
 g-related by construction).
+
+3c-i DISCHARGED BY MATHLIB: `Ideal.span_singleton_eq_span_singleton` (span{x} = span{y} ↔
+Associated x y, over a domain — the refined charts are domains via component_integral) +
+`Associated`-destructuring gives the unit. No new lemma. 3c-ii..iv remain as cut.
