@@ -1107,6 +1107,37 @@ theorem locA_completeSpace (hN : NoethPack B C D m)
   rw [IsUniformAddGroup.rightUniformSpace_eq]
   infer_instance
 
+set_option backward.isDefEq.respectTransparency false in
+/-- The quotient norm structure on a single-corner graph quotient, packaged for
+importers (the two `P`-ring core paths are defeq only at default transparency —
+the established v4.33 pattern). -/
+@[instance_reducible]
+noncomputable def locANormedAddCommGroup (hIcl : IsClosed ((IA m g f : Set (P A m)))) :
+    NormedAddCommGroup (locA m g f) := by
+  have hclA : IsClosed ((IA m g f : Set (P A m))) := hIcl
+  exact Submodule.Quotient.normedAddCommGroup _
+
+set_option backward.isDefEq.respectTransparency false in
+omit [NormOneClass A] [CompleteSpace A] in
+/-- Single-corner Hausdorffness of the graph quotient from ideal closedness. -/
+theorem locA_t2_of_isClosed (hIcl : IsClosed ((IA m g f : Set (P A m)))) :
+    T2Space (locA m g f) := by
+  have hclA : IsClosed ((IA m g f : Set (P A m))) := hIcl
+  have : NormedAddCommGroup (P A m ⧸ IA m g f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  infer_instance
+
+set_option backward.isDefEq.respectTransparency false in
+omit [NormOneClass A] in
+/-- Single-corner completeness of the graph quotient (Banach quotient). -/
+theorem locA_completeSpace_of_isClosed
+    (hIcl : IsClosed ((IA m g f : Set (P A m)))) :
+    CompleteSpace (locA m g f) := by
+  have hclA : IsClosed ((IA m g f : Set (P A m))) := hIcl
+  have : NormedAddCommGroup (P A m ⧸ IA m g f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  infer_instance
+
 end Graph
 
 end Pinch
