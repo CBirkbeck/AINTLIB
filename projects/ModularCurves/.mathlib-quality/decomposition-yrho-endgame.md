@@ -122,3 +122,13 @@ YR-1 (unblocks nothing but is quick + de-risks the register wiring) → E4a comp
 (YR-2, in progress) → YR-3 (E5-ℚ; reuses E4a's T-C4 comparison) → YR-4. In parallel:
 IRR-1/2 (mathlib-adjacent, independent) and the IRR-3 sub-develop. D1/D2/D3 answers
 gate the board update.
+
+## YR-3a design recon (2026-08-11)
+Objects: `E.torsion N` (Torsion.lean:61, over S via torsionpi, group structure via the
+kernel square) and `muNGrpObj` (MuN.lean:289). Internal-Hom target: a finite etale
+S-scheme representing T -> Hom-gp-sch(E[N]_T, muN_T). Stacks route: 58.5.2 (Mor-scheme of
+finite etale is finite etale) + 58.5.4 + equalizers for the hom-condition (finite limits
+of finite etale stay finite etale). Statement-draft belongs in a new
+WeilPairing/EtaleDual.lean; FIRST grep MorScheme/internalHom in ForMathlib
+FiniteEtaleFundamentalGroup + EtaleDescent + GaloisFibre for an existing internal-Mor
+constructor before building.
