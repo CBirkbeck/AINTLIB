@@ -267,3 +267,10 @@ principal refinement to produce an M-trivialisation whose transition-cocycle FF-
 point: a common-refinement lemma for two locallyPrincipal families + the restrictFunctor
 vs .over-form conversion (restrictIsoOfPullbackIso / overTrivializationOfRestrictIso,
 InvertibleSheaf:241/255).
+
+Step-3 recon addendum: NO ready common-refinement lemma in the Picard layer — step-3a =
+build it (two locallyPrincipal choices + a dataset cover ⟹ one indexed family of affine
+opens, principal for both ideals and inside a dataset chart; elementary: intersect + the
+affine-basis refinement, `Opens.mem_iSup`-glue). `localPullbackTrivializationT`
+(LocalTrivialization:264) handles the .over-conversions. Steps: 3a refinement ⟹ 3b the
+M-trivialisation (tensor-iso ∘ idealGenHom⁻¹-pair) ⟹ 3c its cocycle FF-image = r-ratios.
