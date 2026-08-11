@@ -889,6 +889,22 @@ theorem mono_overUnitScalarEnd_of_nonZeroDivisors {X : Scheme.{u}} (V : X.Opens)
     (hr (Opposite.unop W).left (leOfHom (Opposite.unop W).hom))).2 _ h0'
   exact sub_eq_zero.mp hz
 
+/-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects identities. Natural home
+after cleanup: `Picard/InvertibleSheaf.lean`. -/
+theorem tensorObjCongr_refl {X : Scheme.{u}} (M N : X.Modules) :
+    tensorObjCongr (Iso.refl M) (Iso.refl N) = Iso.refl (tensorObj M N) := by
+  simp [tensorObjCongr, Iso.ext_iff]
+  rfl
+
+/-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects composition — the shared-leg
+cancellation input of the transition computation. -/
+theorem tensorObjCongr_trans {X : Scheme.{u}} {M M' M'' N N' N'' : X.Modules}
+    (e₁ : M ≅ M') (e₂ : M' ≅ M'') (f₁ : N ≅ N') (f₂ : N' ≅ N'') :
+    tensorObjCongr (e₁ ≪≫ e₂) (f₁ ≪≫ f₂) =
+      tensorObjCongr e₁ f₁ ≪≫ tensorObjCongr e₂ f₂ := by
+  simp [tensorObjCongr, Iso.ext_iff,
+    ← MonoidalCategory.tensorHom_comp_tensorHom]
+
 end PicPoint
 
 section ValuePlumbing
