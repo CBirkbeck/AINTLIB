@@ -429,3 +429,31 @@ cancellation; the key trick: transport the whole app-equation to the Γ-spelling
 show-from restatement `:= by exact happ` — instances only exist at ONE spelling; ALL
 mixed-spelling HMul/rw attempts fail). Remaining ladder: micro-leaf, B3 (five-chain
 characterisation square), C (transitionUnitOfCover assembly), 3c-iv.
+
+3c-iii (B3)/(C) DESIGN REFINEMENT (2026-08-11, end of session 5):
+- FINDING: the tree has NO hom-level tensor functoriality (only iso-level
+  `tensorObjCongr`, InvertibleSheaf:218) — the (id ⊗ incl₁)-strip characterisation of B3
+  cannot be stated without building ⊗-hom-functoriality. AVOID IT:
+- (C) route WITHOUT the strip: E_k := pullbackTrivOfTensorIdeal-chain = A ≪≫ B_k ≪≫ C
+  ≪≫ D ≪≫ F_k (A = tensorObjUnitIso.symm, B_k = tensorObjCongr(refl, triv₁ᵏ.symm),
+  C = monoidal.symm, D = mapIso e, F_k = triv₂ᵏ; A, C, D SHARED between charts).
+  Transition-hom E_i.inv ≫ E_j.hom = F_i.inv ≫ D.inv ≫ C.inv ≫ (B_i.inv ≫ B_j.hom) ≫
+  C.hom ≫ D.hom ≫ F_j.hom (shared A cancels). Then:
+  (i) B_i.inv ≫ B_j.hom = tensorObjCongr(refl, triv₁ⁱ.symm.symm ≪≫ triv₁ʲ.symm)-form;
+  the ⊗-slot iso-composite = the IDEAL transition = unitEndo(u₁)-form via the
+  B1-characterisations restricted to the inf (PoleSheaf:4049) + B2-cancel;
+  (ii) conjugating the ⊗-slot unitEndo through C, D, F: needs ONE new naturality
+  principle — scalar-endomorphisms commute through module homs (smul-naturality),
+  instantiated at tensorObjCongr/monoidal/mapIso legs. Check first:
+  `unitEndomorphismOfTopSection`-naturality lemmas + whether tensorObjCongr of an
+  endo-iso commutes with the monoidal leg (candidate existing lemmas in
+  PullbackTensorSection.lean — grep before building).
+  (iii) then transition = scalar(u₂·u₁⁻¹)-form; read off with
+  overUnitScalarEndRingEquiv-injectivity (+ its RingHom structure for products).
+- All of B1's restriction behaviour comes FREE from PoleSheaf:4049 once the micro-leaf
+  closes (characterisations restrict; no new restriction lemmas needed for the
+  ideal-legs).
+PRIORITY NOTE: 3c-iii's remaining rungs (micro-leaf, (i)-(iii)) are INDEPENDENT of the
+other U5 leaves — L4 (value plumbing, ranked easy, all inputs proven) and 3c-iv/L1b/L3
+can land in parallel sessions. Execution order rebalance: L4 next when blind, 3c-iii
+micro-leaf when LSP returns.
