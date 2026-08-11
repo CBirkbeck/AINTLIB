@@ -333,3 +333,13 @@ the endo-composite — next session (with LSP): either `SheafOfModules.Hom.ext` 
 per-app typed-haves, or prove the app-level identity per-open as its own lemma first and
 assemble hom-ext-free; comp-split via `SheafOfModules.comp_val` (Sheaf.lean:62) at the
 val-level. Probe file: scratchpad/probe3cii2.lean.
+
+3c-ii deepest probe state (2026-08-11, end of session 4): the per-app statement
+elaborates; after `Subtype.ext` + `show _ * _ = _` + `rw [unitEndo-app]` +
+`simp only [idealGenHom, openTopSection, map_mul, id_apply]` both sides display; the
+FINAL LEAF is the appIso-path identity: LHS-factor `res u` (homOfLE-path) vs RHS-factor
+`(appIso V.ι ⊤).hom ≫ (V-scheme).presheaf.map (le-⊤-res) then (appIso W).inv`-path —
+i.e. `Scheme.Hom.appIso`-NATURALITY along W ≤ ⊤ (an appIso-naturality-square lemma;
+check mathlib `Scheme.Hom.appIso_hom_naturality`/`appIso_inv_naturality`). Also
+beta-reduce the RHS ModuleCat.ofHom-application (`ModuleCat.ofHom_apply`?) before the
+factor-match. Probe: scratchpad/probe3cii2.lean (kept at this state).
