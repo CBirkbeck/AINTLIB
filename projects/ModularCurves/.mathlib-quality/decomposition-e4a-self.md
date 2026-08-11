@@ -499,3 +499,19 @@ sheafOfModulesEquivOverUnit_hom_app_apply]` + inline show-rfl (A1-value surface)
 exact h). B1 `overTriv_pullbackIdealTriv_inv_comp_toUnitHom` now rests on the standard
 three END-TO-END. FieldLeaf = ZERO sorries again. The 3c-iii A+B foundation is COMPLETE:
 remaining rungs are (C)(i)-(iii) per the strip-free route + 3c-iv.
+
+3c-iii C(i) ENGINE COMPLETE (2026-08-11, session 5 finale+): LANDED AXIOM-CLEAN in
+FieldLeaf — `mono_idealModuleToUnitHom_over` (inclusion mono, Subtype.ext),
+`overUnitScalarEnd_mul` (scalar multiplicativity; the all-Γ show-transport again),
+`trivialization_inv_comp_hom_of_characterisation` (THE READ-OFF: T₁.inv ≫ T₂.hom =
+scalar u from characterisations r₁ = u·r₂ via cancel_mono — NO B2-cancellation needed
+for the ideal legs), `tensorObjCongr_refl`/`_trans` (C-algebra;
+← MonoidalCategory.tensorHom_comp_tensorHom + Iso.ext_iff + trailing rfl).
+REMAINING for (C): [C-rest-1] restrict the B1-characterisation to the inf
+(PoleSheaf:4049 applied to B1 — one instantiation lemma); [C-rest-2] the inf's 3c-i unit
+(span-eq + Associated on the inf-chart — mathlib-discharged per 3c-i); [C-rest-3] the
+M-chain transition assembly: E_k-over-restricted transitions from the ideal-leg
+transitions via the five-chain shared-leg cancellation (tensorObjCongr_trans + the
+⊗-slot scalar conjugation through monoidal/mapIso/triv₂ legs — the ONE remaining
+conjugation lemma) + transitionUnitOfCover read-off (overUnitScalarEndRingEquiv-inj).
+Then 3c-iv (FF-germ), L1b (translation layer), L1-glue, L3, L5, L6.

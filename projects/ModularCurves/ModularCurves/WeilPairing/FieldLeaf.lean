@@ -889,6 +889,79 @@ theorem mono_overUnitScalarEnd_of_nonZeroDivisors {X : Scheme.{u}} (V : X.Opens)
     (hr (Opposite.unop W).left (leOfHom (Opposite.unop W).hom))).2 _ h0'
   exact sub_eq_zero.mp hz
 
+/-- **(U5-L1a 3c-iii C(i)-a)** The ideal inclusion is a monomorphism on every over-site
+(componentwise `Subtype.val` is injective). With this, two chart trivialisations
+characterised against the inclusion (B1-style) are equal up to exactly the scalar
+relating their characterisation values — the transition read-off needs no cancellation
+beyond this. -/
+theorem mono_idealModuleToUnitHom_over {X : Scheme.{u}} (J : X.IdealSheafData)
+    (V : X.Opens) :
+    Mono ((idealModuleToUnitHom J).over V) := by
+  constructor
+  intro Z g₁ g₂ hgg
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro W
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  have happ := congrArg (fun q => (CategoryTheory.ConcreteCategory.hom
+    (q.val.app W)) x) hgg
+  simp only [sheafOfModules_comp_app_apply] at happ
+  exact Subtype.ext happ
+
+/-- **(U5-L1a 3c-iii C(i))** The scalar endomorphisms are multiplicative:
+`scalar (a·b) = scalar a ≫ scalar b`. -/
+theorem overUnitScalarEnd_mul {X : Scheme.{u}} (V : X.Opens) (a b : Γ(X, V)) :
+    SheafOfModules.overUnitScalarEnd X.ringCatSheaf V (a * b) =
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V a ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V b :
+      CategoryTheory.End (SheafOfModules.unit (X.ringCatSheaf.over V))) := by
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro W
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  simp only [sheafOfModules_comp_app_apply]
+  erw [SheafOfModules.overUnitScalarEnd_app_apply,
+    SheafOfModules.overUnitScalarEnd_app_apply,
+    SheafOfModules.overUnitScalarEnd_app_apply]
+  dsimp only
+  show ((show Γ(X, (Opposite.unop W).left) from x) *
+      (CategoryTheory.ConcreteCategory.hom
+        (X.presheaf.map (homOfLE (leOfHom (Opposite.unop W).hom)).op)) (a * b)) =
+    (((show Γ(X, (Opposite.unop W).left) from x) *
+      (CategoryTheory.ConcreteCategory.hom
+        (X.presheaf.map (homOfLE (leOfHom (Opposite.unop W).hom)).op)) a) *
+      (CategoryTheory.ConcreteCategory.hom
+        (X.presheaf.map (homOfLE (leOfHom (Opposite.unop W).hom)).op)) b)
+  rw [map_mul]
+  exact (mul_assoc _ _ _).symm
+
+/-- **(U5-L1a 3c-iii C(i)-b, the transition read-off)** Two trivialisations of the
+ideal module characterised against the inclusion by scalars `r₁ = u·r₂` differ by
+exactly `scalar u`: `T₁.inv ≫ T₂.hom = scalar u`. Combined with the B1
+characterisation, `restrictOverTrivialization_inv_comp_over` (restriction), and 3c-i
+(the generator unit), this computes `trivializationTransitionUnit` for the ideal legs
+with no further cancellation. -/
+theorem trivialization_inv_comp_hom_of_characterisation {X : Scheme.{u}}
+    (J : X.IdealSheafData) (V : X.Opens)
+    (T₁ T₂ : (idealModule J).over V ≅
+      _root_.SheafOfModules.unit (X.ringCatSheaf.over V))
+    (r₁ r₂ u : Γ(X, V))
+    (h₁ : T₁.inv ≫ (idealModuleToUnitHom J).over V =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V r₁)
+    (h₂ : T₂.inv ≫ (idealModuleToUnitHom J).over V =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V r₂)
+    (hu : r₁ = u * r₂) :
+    T₁.inv ≫ T₂.hom = SheafOfModules.overUnitScalarEnd X.ringCatSheaf V u := by
+  haveI := mono_idealModuleToUnitHom_over J V
+  have key : T₁.inv = SheafOfModules.overUnitScalarEnd X.ringCatSheaf V u ≫ T₂.inv := by
+    rw [← cancel_mono ((idealModuleToUnitHom J).over V), h₁, Category.assoc, h₂, hu]
+    exact overUnitScalarEnd_mul V u r₂
+  rw [key, Category.assoc, Iso.inv_hom_id, Category.comp_id]
+
 /-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects identities. Natural home
 after cleanup: `Picard/InvertibleSheaf.lean`. -/
 theorem tensorObjCongr_refl {X : Scheme.{u}} (M N : X.Modules) :
