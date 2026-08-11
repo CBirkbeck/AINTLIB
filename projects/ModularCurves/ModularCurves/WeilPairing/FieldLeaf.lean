@@ -1054,6 +1054,32 @@ theorem trivializationTransitionUnit_idealTriv {X : Scheme.{u}} (J : X.IdealShea
   exact idealTriv_restrict_inv_comp_hom J Vi Vj fi fj hspani hnzdi hfmemi
     hspanj hnzdj hfmemj u hu
 
+/-- **(U5-L1a 3c-iii C-rest-3a)** The general over-iso induced by a restrict-site iso
+between two modules (the non-unit-target sibling of `overTrivializationOfRestrictIso`).
+Natural home after cleanup: `Picard/InvertibleSheaf.lean`. -/
+noncomputable def overIsoOfRestrictIso {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (φ : M.restrict U.ι ≅ N.restrict U.ι) :
+    M.over U ≅ N.over U :=
+  (Scheme.Modules.overEquiv U).fullyFaithfulFunctor.preimageIso
+    ((overFunctorEquiv U).app M ≪≫ φ ≪≫ ((overFunctorEquiv U).app N).symm)
+
+/-- **(U5-L1a 3c-iii C-rest-3b)** `overTrivializationOfRestrictIso` splits along a
+factorisation of the restrict-side trivialisation: the prefix becomes the general
+over-iso, the tail the over-trivialisation. This is the leg-wise decomposition of the
+five-chain's over-form. -/
+theorem overTrivializationOfRestrictIso_trans {X : Scheme.{u}} (M N : X.Modules)
+    (U : X.Opens) (φ : M.restrict U.ι ≅ N.restrict U.ι)
+    (e : N.restrict U.ι ≅ unitObj U.toScheme) :
+    Scheme.Modules.overTrivializationOfRestrictIso M U (φ ≪≫ e) =
+      overIsoOfRestrictIso M N U φ ≪≫
+        Scheme.Modules.overTrivializationOfRestrictIso N U e := by
+  refine Iso.ext ?_
+  apply (Scheme.Modules.overEquiv U).functor.map_injective
+  simp only [Scheme.Modules.overTrivializationOfRestrictIso, overIsoOfRestrictIso,
+    Iso.trans_hom, Functor.FullyFaithful.preimageIso_hom, Functor.map_comp,
+    Functor.FullyFaithful.map_preimage]
+  simp [Category.assoc]
+
 /-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects identities. Natural home
 after cleanup: `Picard/InvertibleSheaf.lean`. -/
 theorem tensorObjCongr_refl {X : Scheme.{u}} (M N : X.Modules) :

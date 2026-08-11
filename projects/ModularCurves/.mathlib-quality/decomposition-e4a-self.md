@@ -541,3 +541,31 @@ trivializationTransitionUnit_idealTriv). The ONE new lemma species needed: how
 restrictOverTrivialization/overTrivializationOfRestrictIso interact with the five-chain
 COMPOSITE (an Iso.trans-compatibility for overTrivializationOfRestrictIso + the ⊗-slot
 scalar conjugation through the C/D legs). Design next session; all inputs proven.
+
+[C-rest-3a/b] LANDED AXIOM-CLEAN (2026-08-11): `overIsoOfRestrictIso` (general non-unit
+converter, preimageIso-form) + `overTrivializationOfRestrictIso_trans` (the splitting
+law: overTriv(φ ≪≫ e) = overIso(φ) ≪≫ overTriv(e); Iso.ext + map_injective +
+preimageIso-simps, first shot). ANALYSIS OF THE REMAINING M-CHAIN CONTENT (next window):
+the transition (restrictOver E_i).inv ≫ (restrictOver E_j).hom with E_k = overIso(φ_k)
+≪≫ gen₂ᵏ-overTriv needs (α) restriction of GENERAL over-isos (a `restrictOverIso`
+mirroring Dual:792's restrictOverTrivialization, + functoriality on ≪≫ so composites
+restrict leg-wise), and (β) THE IRREDUCIBLE ⊗-SLOT CONJUGATION: φ_i⁻¹∘φ_j restricted =
+D⁻¹C⁻¹(B_i⁻¹B_j)CD with B_i⁻¹B_j = tensorObjCongr(refl, ideal-triv₁-transition) — needs
+the RESTRICT-side ideal-triv transition (the over-side crown's restrict-sibling — either
+re-derive by the same characterisation at restrict-level, or transport the over-crown
+back through overEquiv) and the conjugation of tensorObjCongr(refl, unitEndo-iso)
+through the monoidal leg D and mapIso e — i.e. scalar-naturality of the C/D legs. Route
+suggestion for (β): work at the OVER level throughout — express restrictOver(overIso φ_k)
+via overIsoOfRestrictIso of the RESTRICTED φ_k (needs (α)-compat), then the B-leg
+difference is the over-side ideal transition ALREADY PROVEN (crown), conjugated through
+overIso(C/D-legs) — the conjugation lemma: for any over-iso ψ : A.over ≅ B.over and the
+scalar-end action, ψ.inv ≫ (unit-side scalar) ≫ ψ = scalar (scalars central through
+sheaf-module isos — provable per-app since scalar-end app = mult and ψ-app is linear...
+CAREFUL: scalar-end lives on the UNIT only; the ⊗-slot's endo transported through
+tensorObjCongr lands as an endo of pb M ⊗ pb I₁ — the smul-endo of the tensor. The
+conjugation target: tensorObjCongr(refl, unitEndo u)-over-form conjugated to the
+smul-endo, then through C/D/gen₂-triv to scalar u on the unit. Define the SMUL-ENDO of
+an arbitrary module (smulEndo M r : End M, app = r-scaling) + its naturality through
+EVERY module hom (map_smul!) — THE clean central-scalar principle; then every
+conjugation step is one map_smul-naturality application. smulEndo + naturality =
+next window's first construction.)
