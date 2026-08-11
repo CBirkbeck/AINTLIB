@@ -39,8 +39,8 @@ theorem gaussToTate_continuous :
     @Continuous (PA F n) ↥(restrictedMvPowerSeriesSubring n (JetA F)) _
       (mvTateAlgebraTopology' (A := JetA F) n)
       ⇑(UnitDiscExample.restrictedGaussEquiv (JetA F) n) := by
-  letI := mvTateAlgebraTopology' (A := JetA F) n
-  haveI := mvTateAlgebraTopology'_isTopologicalRing (A := JetA F) n
+  let _i := mvTateAlgebraTopology' (A := JetA F) n
+  have := mvTateAlgebraTopology'_isTopologicalRing (A := JetA F) n
   set P := (IsTateRing.principalPair (JetA F)) with hPdef
   refine continuous_of_continuousAt_zero
     (UnitDiscExample.restrictedGaussEquiv (JetA F) n).toRingHom.toAddMonoidHom ?_
@@ -85,8 +85,8 @@ theorem tateToGauss_continuous :
     @Continuous ↥(restrictedMvPowerSeriesSubring n (JetA F)) (PA F n)
       (mvTateAlgebraTopology' (A := JetA F) n) _
       ⇑(UnitDiscExample.restrictedGaussEquiv (JetA F) n).symm := by
-  letI := mvTateAlgebraTopology' (A := JetA F) n
-  haveI := mvTateAlgebraTopology'_isTopologicalRing (A := JetA F) n
+  let _i := mvTateAlgebraTopology' (A := JetA F) n
+  have := mvTateAlgebraTopology'_isTopologicalRing (A := JetA F) n
   set P := (IsTateRing.principalPair (JetA F)) with hPdef
   refine continuous_of_continuousAt_zero
     (UnitDiscExample.restrictedGaussEquiv (JetA F) n).symm.toRingHom.toAddMonoidHom ?_
@@ -139,10 +139,10 @@ noncomputable def extJetPlus : RingOfIntegralElements (PA F n) :=
 theorem ext_isSheafyFor : IsSheafyFor (PA F n) (extJetPlus F n) := by
   classical
   let _i := (extJetPlus F n).toPlusSubring
-  haveI : IsRingOfIntegralElements ((PA F n)⁺ : Subring (PA F n)) :=
+  have : IsRingOfIntegralElements ((PA F n)⁺ : Subring (PA F n)) :=
     (extJetPlus F n).2
-  haveI : HasLocLiftPowerBounded (PA F n) := hasLocLiftPowerBounded_faithful
-  haveI : IsSheafy (PA F n) := isSheafy_extJetA F n
+  have : HasLocLiftPowerBounded (PA F n) := hasLocLiftPowerBounded_faithful
+  have : IsSheafy (PA F n) := isSheafy_extJetA F n
   show IsLimitSheaf (PA F n)
   exact isLimitSheaf_of_isSheafy
 
