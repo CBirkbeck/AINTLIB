@@ -523,13 +523,13 @@ theorem nonempty_tensorObj_sectionIdeal_iso_zeroIdeal_of_field {K : Type u} [Fie
   refine (congrArg (toSkeleton M * ·) huQval.symm).trans ?_
   exact hval.trans hu0val
 
-/-- **(U5-L1a step 3a)** A common principal refinement: at every point there is an affine
-open contained in a prescribed open on which both section ideals are principal with
-nonzerodivisor generators. Per-point choices from the two `IsOfficialCartier` data,
-intersected and refined by an affine basic open, with `IdealSheafData.map_ideal` +
-`Ideal.map_span` restricting the spans. -/
+/-- **(U5-L1a step 3a)** A common principal refinement on an integral scheme: at every
+point there is an affine open contained in a prescribed open on which both ideals are
+principal with nonzerodivisor generators. Per-point choices, one further basic-open
+refinement, `IdealSheafData.map_ideal` + `Ideal.map_span` for the spans, and integrality
+for the nonzerodivisor transfer (sections rings are domains, restrictions injective). -/
 theorem exists_affine_common_principal {X : Scheme.{u}}
-    (J₁ J₂ : X.IdealSheafData)
+    [AlgebraicGeometry.IsIntegral X] (J₁ J₂ : X.IdealSheafData)
     (h₁ : ∀ c : ↥X, ∃ V : X.affineOpens, c ∈ V.1 ∧ ∃ f : Γ(X, V.1),
       J₁.ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(X, V.1))
     (h₂ : ∀ c : ↥X, ∃ V : X.affineOpens, c ∈ V.1 ∧ ∃ f : Γ(X, V.1),
@@ -541,14 +541,32 @@ theorem exists_affine_common_principal {X : Scheme.{u}}
   intro c
   obtain ⟨V₁, hc1, f₁, hspan1, hnzd1⟩ := h₁ c
   obtain ⟨V₂, hc2, f₂, hspan2, hnzd2⟩ := h₂ c
-  -- refine inside V₂ ⊓ W c by a basic open of V₁
   obtain ⟨b, hble, hcb⟩ := V₁.2.exists_basicOpen_le
     (V := V₂.1 ⊓ W c) ⟨c, ⟨hc2, hW c⟩⟩ hc1
-  -- then a common further basic open giving principality on BOTH affines:
-  -- use the pattern of `exists_basicOpen_le_affine_inter` between V₁ and V₂
-  obtain ⟨g₁, g₂, hgg, hcg⟩ := AlgebraicGeometry.exists_basicOpen_le_affine_inter
-    V₁.2 V₂.2 c ⟨hc1, hc2⟩
-  sorry
+  set V : X.affineOpens := X.affineBasicOpen b with hV
+  have hVle1 : V ≤ V₁ := X.affineBasicOpen_le b
+  have hVle2 : V.1 ≤ V₂.1 := le_trans hble inf_le_left
+  have hVleW : V.1 ≤ W c := le_trans hble inf_le_right
+  haveI hne : Nonempty ↥(V.1 : X.Opens) := ⟨⟨c, hcb⟩⟩
+  haveI hne1 : Nonempty ↥(V₁.1 : X.Opens) := ⟨⟨c, hc1⟩⟩
+  haveI hne2 : Nonempty ↥(V₂.1 : X.Opens) := ⟨⟨c, hc2⟩⟩
+  haveI : IsDomain Γ(X, V.1) :=
+    @AlgebraicGeometry.IsIntegral.component_integral X ‹_› (V.1 : X.Opens) hne
+  haveI : IsDomain Γ(X, V₁.1) :=
+    @AlgebraicGeometry.IsIntegral.component_integral X ‹_› (V₁.1 : X.Opens) hne1
+  haveI : IsDomain Γ(X, V₂.1) :=
+    @AlgebraicGeometry.IsIntegral.component_integral X ‹_› (V₂.1 : X.Opens) hne2
+  refine ⟨V, hcb, hVleW, ?_, ?_⟩
+  · refine ⟨X.presheaf.map (homOfLE (show V.1 ≤ V₁.1 from hVle1)).op f₁, ?_, ?_⟩
+    · -- span restriction: map_ideal + map_span (coe-spelling loop; next session w/ LSP)
+      sorry
+    · -- nzd transfer: map_injective_of_isIntegral (coe-spelling loop; next session w/ LSP)
+      sorry
+  · refine ⟨X.presheaf.map (homOfLE (show V.1 ≤ V₂.1 from hVle2)).op f₂, ?_, ?_⟩
+    · -- span restriction: map_ideal + map_span (coe-spelling loop; next session w/ LSP)
+      sorry
+    · -- nzd transfer: map_injective_of_isIntegral (coe-spelling loop; next session w/ LSP)
+      sorry
 
 end PicPoint
 
