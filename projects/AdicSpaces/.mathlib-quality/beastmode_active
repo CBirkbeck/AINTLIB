@@ -1,1 +1,1 @@
-FOCUS: T632 — MIRROR cechDiff_comp_cechDiff (:382) + cechDiff_comp_cechAug (:656) from CechCohomology into CechRationalCover (same involution, restrictionMapHom carriers); then T634 at the abstract level
+FOCUS: T633/T634 next — alternating quasi-iso + A.3 all-degree engine at the abstract (AbPresheaf, FiniteCover) level; entry: grep WedhornCech AbPresheaf instantiation
