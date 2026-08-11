@@ -41694,3 +41694,14 @@ then port as typed `have`s — no LSP needed. The integral frame made the nzd-tr
 NEXT: 3b — the M-trivialisation over the refined charts from
 `nonempty_tensorObj_sectionIdeal_iso_zeroIdeal_of_field` + `idealGenHom`-inverses
 (IsIso on principal charts via `bijective_idealGenHom_app`); then 3c cocycle FF-image.
+
+### U5-L1a 3b COMPLETE (2026-08-11): `isIso_idealGenHom_of_principal` +
+`nonempty_pullback_idealModule_iso_unit_of_principal` (3b-i, the per-chart generator
+trivialisation) + `nonempty_pullback_iso_unit_of_tensor_ideal` (3b-ii, the five-step
+chain). With 3a (`exists_affine_common_principal`) + the module dictionary, any
+κ(Q)-module trivialises over the common principal refinement with generator-explicit
+trivialisations. NEXT 3c: the resulting transition cocycle in FF = generator-ratio germs —
+compose the 3b-ii-isos on overlaps and read `trivializationTransitionUnit`; the ratio
+r-shape comes from tracking the idealGenHom-legs (mult-by-f). This is the last
+construction brick; then L1b (divisor-zero ⟹ scalar over k̄) and the L1-glue against the
+τ-chain (L2e germs at the SAME refined dataset).
