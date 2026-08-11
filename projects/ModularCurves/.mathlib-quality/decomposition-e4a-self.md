@@ -569,3 +569,18 @@ an arbitrary module (smulEndo M r : End M, app = r-scaling) + its naturality thr
 EVERY module hom (map_smul!) — THE clean central-scalar principle; then every
 conjugation step is one map_smul-naturality application. smulEndo + naturality =
 next window's first construction.)
+
+smulEndo ATTEMPT PARKED (2026-08-11, window end): the componentwise def hits the
+OP-UNOP ETA WALL — at an ᵒᵖ-binder U, `(homOfLE le_top).op` lands in
+`obj (op (unop U))` which is NOT syntactically `obj U`, so the SMulCommClass/Module
+instances key-miss regardless of spelling (presheaf vs ringCatSheaf both tried; the
+ascription coerces the term but not the instance search). Next-window fixes (pick one):
+(a) eta-normalise the binder by matching `fun U => match U with | .op V => …` so all
+components are at literal `op V`; (b) build smulEndo NOT componentwise but as the image
+of r under a global-sections→End ring map (mirror `overUnitScalarEnd`'s
+unitHomEquiv-route: does mathlib's SheafOfModules have a Module-Γ(X,⊤)-structure on
+(M ⟶ M) or an endMulMap? re-grep `unitHomEquiv` consumers for the general-M pattern);
+(c) define it at the PRESHEAF level (PresheafOfModules-hom componentwise where the eta
+issue may not bite) and sheaf-package. The naturality THEOREM shape is right
+(hom_ext + splitter + map_smul); only the carrier def is blocked. FieldLeaf reverted to
+green (the two smulEndo decls removed; everything else stands).
