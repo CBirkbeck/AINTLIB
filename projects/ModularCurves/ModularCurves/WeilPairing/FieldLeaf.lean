@@ -310,6 +310,38 @@ theorem functionFieldMap_translateByPoint_germ [AlgebraicGeometry.IsIntegral E.E
     W hW e hnorm h hn hsplit P' hP' i
   exact congrArg Units.val hrel
 
+/-- **(U5-L2f)** The first-projection conjugation of function-field pullbacks: the
+`translateByPoint`-action on the pullback presentation corresponds to the
+`translateBy`-action on the curve through `fst`. Value form of the L2b crossing under
+`functionFieldMap_comp`. -/
+theorem functionFieldMap_translateByPoint_conj [IsLocallyNoetherian S]
+    [IrreducibleSpace ↥E.E] [IrreducibleSpace ↥(pullback E.π (𝟙 S))]
+    (P' : (E.baseChange (𝟙 S)).Point (𝟙 S))
+    [IsDominant (translateByPoint E (𝟙 S) P')]
+    (τp : E.E ⟶ E.E)
+    (hτp : τp = (E.translateBy (overPoint E (𝟙 S) P' ≫ baseChangeIdFstOver E)).left)
+    [IsDominant τp]
+    (z : E.E.functionField) :
+    (translateByPoint E (𝟙 S) P').functionFieldMap.hom
+        ((pullback.fst E.π (𝟙 S)).functionFieldMap.hom z)
+      = (pullback.fst E.π (𝟙 S)).functionFieldMap.hom
+          (τp.functionFieldMap.hom z) := by
+  haveI : IsDominant (pullback.fst E.π (𝟙 S)) := inferInstance
+  have hsq : translateByPoint E (𝟙 S) P' ≫ pullback.fst E.π (𝟙 S)
+      = pullback.fst E.π (𝟙 S) ≫ τp := by
+    rw [hτp]
+    exact translateByPoint_id_comp_fst E P'
+  haveI hd1 : IsDominant (translateByPoint E (𝟙 S) P' ≫ pullback.fst E.π (𝟙 S)) := by
+    rw [hsq]
+    infer_instance
+  have h1 := functionFieldMap_comp (translateByPoint E (𝟙 S) P')
+    (pullback.fst E.π (𝟙 S))
+  have h2 := functionFieldMap_comp (pullback.fst E.π (𝟙 S)) τp
+  have hcross := functionFieldMap_congr hsq
+  exact congrArg (fun (m : CommRingCat.of E.E.functionField ⟶
+      CommRingCat.of (pullback E.π (𝟙 S)).functionField) => m.hom z)
+    (h1.symm.trans (hcross.trans h2))
+
 end FieldInstantiation
 
 end ModularCurves
