@@ -281,7 +281,7 @@ with the Jet square as regression instance and the P-square as the payoff instan
   them over corners `E`; the concrete files are the transcription at Jet corners.
 
 ### [T626] Extended-square corner package assembly
-- **Status**: open · **Depends on**: T625 (package shape frozen) · **Type**: instance bundle
+- **Status**: done (2026-08-11 — ExtendedCornerPackage.lean: exists_flattenPP ring-Fubini + full Huber/Tate stack on P-corners + extPinch + extNoethPack; axiom-clean, 0 warnings) · **Depends on**: T625 (package shape frozen) · **Type**: instance bundle
 - **Statement**: instantiate the corner-square package at
   `(P (JetA F) n, P (JetB F) n, P (JetC F) n, P (JetD F) n; extJB/extIotaC/extRhoB/extRhoC)`:
   all fields from existing StrictLoc arity-n lemmas (list in the tree header above) +
@@ -291,7 +291,7 @@ with the Jet square as regression instance and the P-square as the payoff instan
 - **Sources**: [Reviewer] §5.1; StrictLoc §ext.
 
 ### [T627] Extended MilnorSquareData instance + `IsSheafy (P (JetA F) n)`
-- **Status**: open · **Depends on**: T623, T624, T625, T626 · **Type**: def + theorem
+- **Status**: done (2026-08-11 — ExtendedMilnorInstance.lean: powerBounded_le_comap transport, extJetSquare (all fields), isStronglyNoetherian_PB/PC/PD, isSheafy_PB/PC/PD via the CLEAN isSheafy_of_stronglyNoetherian_828b (NOT the _clean-named one, which carries sorry leaves!), isSheafy_extJetA n — ALL axiom-clean) · **Depends on**: T623, T624, T625, T626 · **Type**: def + theorem
 - **Statement**: `extJetSquare n : MilnorSquareData (extJB F n) (extIotaC F n)
   ((extRhoC F n).comp (extIotaC F n)) …` — T620's file is the template line-by-line
   (dite pushes + collapse lemmas + subst-aux layer + generic naturality); rows from
