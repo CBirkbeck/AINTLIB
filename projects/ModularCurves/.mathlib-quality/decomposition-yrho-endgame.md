@@ -149,3 +149,10 @@ etale site accordingly (matching the D1 re-clothing). Cut on next execution: (i)
 Hom-object + its rank; (ii) transport across the equivalence; (iii) the pairing-induced
 map and fibrewise-iso (existing isIso_iff_finrank_eq route); (iv) the field-nondegeneracy
 import.
+
+YR-3a substrate detail: FiniteEtaleFiberFunctor.lean carries the limit-preservation
+kit (isLimitMapConeProductFan, isColimitMapCoconeSpanPushout, isLimitMapConeFixedPoints,
+injective_of_mono) — the transport toolkit for the G-set Hom-object; the equivalence
+itself rides mathlib's PreGaloisCategory framework (Galois.Basic imports in
+FiniteEtaleGalois). Execution starts from mathlib's `CategoryTheory.Galois` fiber-functor
+essentially-surjective/full-faithful theorems.
