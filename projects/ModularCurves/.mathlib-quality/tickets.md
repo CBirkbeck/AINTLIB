@@ -41685,3 +41685,12 @@ OWN skeleton lemma `toSkeleton_tensorObj_eq` (PicComparison:857) — do not reac
 comparison — on the sectionDivisor_isOfficial.locallyPrincipal charts the iso reads
 e_i-trivialisations against the r_i-generators; then the glued rational comparison
 (ĥ := g/[N]^#r) and L1b (divisor-zero ⟹ scalar over k̄).
+
+### U5-L1a step 3a PROVED (2026-08-11): `exists_affine_common_principal` axiom-clean,
+FieldLeaf back to 0 sorries. Technique of record: when a proof fails only IN-CONTEXT
+(∃-metavars), verify each leaf in a standalone `example` via fast `lake env lean` probes,
+then port as typed `have`s — no LSP needed. The integral frame made the nzd-transfer
+3 lines (`component_integral` + `map_injective_of_isIntegral` with @-explicit a₁ a₂).
+NEXT: 3b — the M-trivialisation over the refined charts from
+`nonempty_tensorObj_sectionIdeal_iso_zeroIdeal_of_field` + `idealGenHom`-inverses
+(IsIso on principal charts via `bijective_idealGenHom_app`); then 3c cocycle FF-image.
