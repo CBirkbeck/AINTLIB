@@ -383,4 +383,49 @@ theorem translateAlgEquivOfPoint_functionFieldMap_of_section
 
 end BridgeHookup
 
+/-! ## The Picard group of a one-point scheme is trivial (U5-L1, Pic brick) -/
+
+section PicPoint
+
+open AlgebraicGeometry.Scheme.Modules
+
+/-- **(U5-L1 Pic brick)** A scheme whose space is a nonempty subsingleton (e.g. the
+spectrum of a field) has trivial Picard group: any invertible class trivialises over a
+cover, some member of which must be `⊤`, and pullback along the (iso) inclusion of `⊤`
+reflects the trivialisation. -/
+theorem subsingleton_pic_of_subsingleton_space {X : Scheme.{u}}
+    [Subsingleton ↥X] [Nonempty ↥X] :
+    Subsingleton (AlgebraicGeometry.Scheme.Pic X) := by
+  letI := Scheme.Modules.monoidalCategory X
+  refine ⟨fun a b => ?_⟩
+  suffices h : ∀ u : AlgebraicGeometry.Scheme.Pic X, u = 1 by rw [h a, h b]
+  intro u
+  have hinv : IsInvertible ((fromSkeleton X.Modules).obj u.val) :=
+    isInvertible_of_isUnit_toSkeleton (by
+      rw [toSkeleton_fromSkeleton_obj]
+      exact u.isUnit)
+  obtain ⟨ι, U, hU, htriv⟩ := hinv
+  obtain ⟨x⟩ := ‹Nonempty ↥X›
+  have hx : x ∈ iSup U := by rw [hU]; trivial
+  obtain ⟨i, hxi⟩ := TopologicalSpace.Opens.mem_iSup.mp hx
+  have hUi : (U i : TopologicalSpace.Opens ↥X) = ⊤ := by
+    refine le_antisymm le_top ?_
+    intro y _
+    rwa [Subsingleton.elim y x]
+  haveI : IsIso (Scheme.Opens.ι (⊤ : X.Opens)) :=
+    inferInstanceAs (IsIso (Scheme.topIso X).hom)
+  haveI : IsIso (U i).ι := hUi.symm ▸ ‹IsIso (Scheme.Opens.ι (⊤ : X.Opens))›
+  letI : (Scheme.Modules.pullback (U i).ι).IsEquivalence :=
+    pullback_isEquivalence_of_iso (asIso (U i).ι)
+  obtain ⟨e⟩ := htriv i
+  have eglob : (fromSkeleton X.Modules).obj u.val ≅ unitObj X :=
+    (Scheme.Modules.pullback (U i).ι).preimageIso (e ≪≫ (pullbackUnitIso (U i).ι).symm)
+  have h1 : toSkeleton ((fromSkeleton X.Modules).obj u.val) = 1 :=
+    toSkeleton_eq_one_of_iso_unitObj ⟨eglob⟩
+  refine Units.ext ?_
+  rw [← toSkeleton_fromSkeleton_obj u.val]
+  exact h1
+
+end PicPoint
+
 end ModularCurves
