@@ -623,6 +623,24 @@ theorem nonempty_pullback_idealModule_iso_unit_of_principal {X : Scheme.{u}}
   exact ⟨(restrictFunctorIsoPullback V.1.ι).symm.app (idealModule J) ≪≫
     (asIso (idealGenHom J V.1 f hfmem)).symm⟩
 
+/-- **(U5-L1a step 3b-ii)** On a chart where both ideals are principal, any module whose
+tensor with the first ideal is the second ideal trivialises:
+`pb M ≅ pb M ⊗ 𝒪 ≅ pb M ⊗ pb I₁ ≅ pb (M ⊗ I₁) ≅ pb I₂ ≅ 𝒪`. -/
+theorem nonempty_pullback_iso_unit_of_tensor_ideal {X : Scheme.{u}}
+    (M : X.Modules) (J₁ J₂ : X.IdealSheafData)
+    (hMdict : Nonempty (tensorObj M (idealModule J₁) ≅ idealModule J₂))
+    (V : X.affineOpens) (f₁ f₂ : Γ(X, V.1))
+    (hspan₁ : J₁.ideal V = Ideal.span {f₁}) (hnzd₁ : f₁ ∈ nonZeroDivisors Γ(X, V.1))
+    (hspan₂ : J₂.ideal V = Ideal.span {f₂}) (hnzd₂ : f₂ ∈ nonZeroDivisors Γ(X, V.1)) :
+    Nonempty ((Scheme.Modules.pullback V.1.ι).obj M ≅ unitObj ↑(V.1)) := by
+  obtain ⟨e⟩ := hMdict
+  obtain ⟨t⟩ := nonempty_pullback_tensorObj V.1.ι M (idealModule J₁)
+  obtain ⟨u₁⟩ := nonempty_pullback_idealModule_iso_unit_of_principal J₁ V f₁ hspan₁ hnzd₁
+  obtain ⟨u₂⟩ := nonempty_pullback_idealModule_iso_unit_of_principal J₂ V f₂ hspan₂ hnzd₂
+  exact ⟨(tensorObjUnitIso ((Scheme.Modules.pullback V.1.ι).obj M)).symm ≪≫
+    tensorObjCongr (Iso.refl _) u₁.symm ≪≫ t.symm ≪≫
+    (Scheme.Modules.pullback V.1.ι).mapIso e ≪≫ u₂⟩
+
 end PicPoint
 
 end ModularCurves
