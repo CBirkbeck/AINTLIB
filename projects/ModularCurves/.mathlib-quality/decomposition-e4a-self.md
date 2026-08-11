@@ -656,3 +656,14 @@ ASSEMBLY IS NOW EXACTLY TWO RUNGS:
   cancel (restrictOverIso_trans + overIsoOfRestrictIso_trans leg-wise); RUNG-1 gives the
   middle scalar; the gen₂-tails give the crown-scalar; compose via overUnitScalarEnd_mul;
   read off via overUnitScalarEndRingEquiv-injectivity (the crown-unit pattern).
+
+RUNG-1 REFINED (2026-08-11): the assembly's scalars live on the INF (Γ(X, U)), so the
+needed carrier is the OVER-SITE scalar `overSmulEndo M U (r : Γ(X,U)) : End (M.over U)`
+(general-M sibling of overUnitScalarEnd; the global smulEndo stays as the
+principle-template). Sub-rungs: (1a) def + rfl app-lemma (componentwise res-r • x along
+V.hom-arrows — no initial-object trick needed, the Over-site provides the arrows; thin-cat
+uniqueness for naturality); (1b) naturality through over-homs (bounded-erw shape);
+(1c) THE TENSOR-MEETS-SCALAR ATOM: tensorObjCongr(refl, unitEndo u)-over-form =
+overSmulEndo-u on the ⊗-object (per-app on the sheafified tensor); (1d) restrictOverIso
+transports overSmulEndo to the restricted scalar; (1e) at unit: overSmulEndo =
+overUnitScalarEnd (mul_comm-modulo). Then RUNG-2 wiring unchanged.
