@@ -231,3 +231,15 @@ sectionDivisor idealModule (r_i = its locallyPrincipal generators). Also availab
 L1-entry: state over Spec k̄; first brick = "Pic (Spec (CommRingCat.of K)) trivial"
 (mathlib: Pic of local ring / field — check `Pic`-triviality for Spec-of-field; likely
 via projective-modules-over-field free ⟹ small lemma if absent).
+
+### L1-Pic-brick analysis (2026-08-11)
+Needed: `Subsingleton (Scheme.Pic (Spec (CommRingCat.of K)))`, K a field.
+`Scheme.Pic X := (Skeleton X.Modules)ˣ` (Picard/Pic.lean:118). Cheapest route found:
+Spec K is a ONE-POINT space ⟹ any trivialising cover of an `IsInvertible` module contains
+⊤ ⟹ `M.over ⊤ ≅ unit` ⟹ `toSkeleton M = 1` directly (no affine-modules equivalence
+needed). Gap to check at execution: the unit-class ⟹ IsInvertible direction ([PIC-P2-CMP]
+registered comparison — invertible-to-unit is the constructed one; for our use the
+arriving elements are Pic.map-images of classes built from IsInvertible reps, so track
+representatives instead of quantifying over raw units if the comparison is missing).
+Fallback: Γ-side via ForMathlib/PicSubsingletonFree (`Subsingleton (Pic K)` fires from
+mathlib’s semilocal instance since a field has one maximal ideal).
