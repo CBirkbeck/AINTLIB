@@ -346,6 +346,25 @@ with the Jet square as regression instance and the P-square as the payoff instan
   Fill `finiteJet_tateExt_isSheafyComplete` (StrongSheafy.lean:297). Then T616 → done.
 - **Sources**: campaign-A endgame (WP/StrongSheafy.lean) — the identical plumbing.
 
+### [T629] General-base finite-jet strong sheafiness
+- **Status**: done (2026-08-11 — axiom-clean) · **Files**:
+  `Adic spaces/FJP/Over/ExtendedCornerPackage.lean`,
+  `Adic spaces/FJP/Over/ExtendedMilnorInstance.lean`,
+  `Adic spaces/FJP/Over/ExtendedSheafyTransport.lean`, and
+  `Adic spaces/FJP/Over/StrongSheafy.lean` · **Depends on**: T628 ·
+  **Type**: generalisation
+- **Statement**: for a complete nontrivially normed ultrametric field `K`, a
+  uniformizer `ϖ`, and a noetherian norm unit ball, every finite Tate extension
+  of `FiniteJetOver.JetA K` is sheafy for every valid ring of integral elements:
+  `finiteJet_tateExt_isSheafyComplete K ϖ hK₀ n`.  The corollary
+  `finiteJet_tateExt_isSheafyComplete_of_dvr K n` obtains the auxiliary data from
+  `[IsDiscreteValuationRing 𝒪[K]]`; in particular, the theorem applies to every
+  nonarchimedean local field.  The proof ports the extended pinch, rational-datum
+  descent, and Gauss-to-Tate topology transport from the Laurent-series model.
+- **Verification**: the module target builds green; the generic Gauss-model theorem,
+  the transported theorem, and the DVR corollary depend only on `propext`,
+  `Classical.choice`, and `Quot.sound`, with no `sorryAx`.
+
 ### [CLEANUP-612] /cleanup `Adic spaces/FJP/StrongSheafy.lean`
 - **Status**: open · **Depends on**: T616.
 
