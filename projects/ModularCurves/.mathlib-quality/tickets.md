@@ -41624,3 +41624,23 @@ restrictBase-univ = pushSection-univ identifications, and `weilPairingKM_pasting
 Lean lessons: `pullback.map` is an abbrev (use `lift_fst/snd`); Equiv.injective needs
 (a₁ :=)(a₂ :=) when the goal is the val-projection; `Γ(_, ⊤)`-holes ambiguous in
 congrArg-lambdas — spell the scheme; the record-π vs pullback.snd wall: term-level `.2`-trans.
+
+### YR-2 progress: the U5-L2 chain COMPLETE (2026-08-11, session 4)
+
+All of `WeilPairing/FieldLeaf.lean` axiom-clean (standard three, verified):
+- L2a `unitPullback_translateByPoint_eq_of_splitting` (τ-relation for a held splitting)
+- L2b `baseChangeIdFstOver` + `isMonHom_baseChangeIdFstOver` (rigidity) +
+  `translateBy_comp_of_isMonHom` + `translateByPoint_id_comp_fst`
+- L2c `functionFieldMap_germToFunctionField_of_unitPullback_eq` (germ-push)
+- L2e `functionFieldMap_translateByPoint_germ` (field instantiation; `isIntegral_pullback_id`)
+- L2f `functionFieldMap_translateByPoint_conj` (fst-conjugation; τ bound as a parameter —
+  dot-notation looks through type ascriptions, so bind a variable + hypothesis instead)
+
+**NEXT (YR-2 continuation), in order:**
+1. **L2g (wiring)**: hook L2e+L2f into the bridge `functionFieldMap_translateBy`
+   (FieldComparisonBridge): instantiate at E := modelEllipticCurve W over Spec K; relate
+   the L2f-τp to the bridge τ (translateByIso.hom = translateBy, rfl) with the bridge
+   inputs (p, hxp, P′dict, hP′, P₀, hP₀) produced from the pullback-presentation section.
+2. **L1 (the mathematical core)**: H = a·g_Q·[N]^#(r_{i₀}⁻¹) per decomposition-e4a-self.md
+   U5-L1a/L1b.
+3. L3 scalar match → L4 value plumbing → L5 diagonal → L6 descent.
