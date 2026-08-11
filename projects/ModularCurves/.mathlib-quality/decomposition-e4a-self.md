@@ -375,3 +375,39 @@ scalar`, hypothesis shape `e.hom = g.hom ≫ unitEndo(openTopSection U r)` on th
 open) needs it; then 3c-iii-b = overlap generator comparison (3c-i unit u_ij) + 3c-ii
 feeds the engine's h; transition-unit read-off via `overUnitScalarEnd_transitionUnit` +
 `overUnitScalarEndRingEquiv`-injectivity (InvertibleSheafCocycle:44-63).
+
+### 3c-iii REFINED CUT (2026-08-11, session 5 — the characterisation architecture)
+Recon findings that close the architecture:
+- `restrictOverTrivialization_inv_comp_over` (PoleSheaf:4049): a characterisation
+  `e.inv ≫ i.over U = overUnitScalarEnd U r` against a GLOBAL comparison hom i RESTRICTS
+  to sub-opens with the restricted scalar. This is the intended transition mechanism —
+  transitions are pinned by characterisations, never computed as ratios.
+- `restrictOverTrivialization_hom_eq_comp_scalar` (TrivializationRestriction:911) +
+  `overTrivializationOfRestrictIso_hom_eq_comp_scalar` (PoleSheaf:3488) already exist.
+- Bridges `restrictIsoOfPullbackIso`/`pullbackIsoOfRestrictIso` (InvertibleSheaf:242/249).
+- `overUnitScalarEnd` takes r : Γ(X, U) directly (no openTopSection at over-level).
+- The over-site hom_ext stack WORKS (no whnf-wall): Iso.ext + SheafOfModules.hom_ext +
+  PresheafOfModules.hom_ext + ModuleCat.hom_ext + LinearMap.ext (TrivializationRestriction
+  house style).
+
+LANDED this session: pullbackIdealTrivOfPrincipal + pullbackTrivOfTensorIdeal (definite
+3b forms, green); A0 `idealModuleToUnitHom` (inclusion, componentwise Subtype.val); A1-pre
+(clothing cancellation); A1 `idealGenHom_comp_toUnitHom_app_apply` (the characterisation
+per-app — rfl-attempt in build).
+
+REMAINING LADDER (each bounded):
+- (B1) over-characterisation of the ideal def-triv:
+  `(overTrivializationOfRestrictIso … (restrictIsoOfPullbackIso … (pullbackIdealTriv…))).inv
+    ≫ (idealModuleToUnitHom J).over V = overUnitScalarEnd V f` — from A1 + A1-pre via the
+  over-conversion (hom_ext + per-app).
+- (B2) scalar-mono: `overUnitScalarEnd V r` is mono for r ≠ 0 on an INTEGRAL chart
+  (components = sub-opens, sections domains, restrictions injective — the 3a
+  component_integral layer supplies both).
+- (B3) the M-triv characterisation square (five-chain equation, per-app, blind protocol):
+  incl₂-over ∘ pb(e)-over ∘ tensor-legs ∘ (id ⊗ f₁-gen) = f₂-mult ∘ (M-def-triv).
+- (C) assembly: restrict both charts' B1/B3-characterisations to the inf via PoleSheaf:4049,
+  apply 3c-i units (res f₁ⁱ = u₁·res f₁ʲ, res f₂ⁱ = u₂·res f₂ʲ), cancel via B2 ⟹
+  `transitionUnitOfCover M W E i j = (u₂·u₁⁻¹)`-form via
+  `overUnitScalarEnd_transitionUnit` + `overUnitScalarEndRingEquiv`-injectivity.
+Then 3c-iv (FF-germ reading of the transition — L2e-consumer shape) rides `sectionUnits`/
+germ-machinery on the C-output.

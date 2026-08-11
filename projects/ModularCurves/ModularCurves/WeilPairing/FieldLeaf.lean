@@ -705,6 +705,77 @@ noncomputable def pullbackTrivOfTensorIdeal {X : Scheme.{u}}
     (Scheme.Modules.pullback V.1.ι).mapIso e ≪≫
     pullbackIdealTrivOfPrincipal J₂ V f₂ hspan₂ hnzd₂ hfmem₂
 
+/-- **(U5-L1a 3c-iii A0)** The inclusion of the ideal module into the structure sheaf
+(componentwise `Subtype.val`) — the global comparison hom against which chart
+trivialisations are characterised (`restrictOverTrivialization_inv_comp_over`-style).
+Natural home after cleanup: `Picard/IdealModule.lean`. -/
+noncomputable def idealModuleToUnitHom {X : Scheme.{u}} (J : X.IdealSheafData) :
+    idealModule J ⟶ unitObj X :=
+  ⟨{ app := fun U => ModuleCat.ofHom
+      { toFun := fun m => m.1
+        map_add' := fun _ _ => rfl
+        map_smul' := fun _ _ => rfl }
+     naturality := fun _ => ModuleCat.hom_ext (LinearMap.ext fun _ => rfl) }⟩
+
+/-- **(U5-L1a 3c-iii A1-pre)** Feeding the definite 3b-i trivialisation through the
+pullback→restriction bridge recovers the bare `idealGenHom`-inverse: the
+`restrictFunctorIsoPullback` clothing cancels. -/
+theorem restrictIsoOfPullbackIso_pullbackIdealTrivOfPrincipal {X : Scheme.{u}}
+    (J : X.IdealSheafData) (V : X.affineOpens) (f : Γ(X, V.1))
+    (hspan : J.ideal V = Ideal.span {f}) (hnzd : f ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem : f ∈ idealSections J (Opposite.op V.1)) :
+    restrictIsoOfPullbackIso (idealModule J) V.1
+        (pullbackIdealTrivOfPrincipal J V f hspan hnzd hfmem) =
+      haveI := isIso_idealGenHom_of_principal J V f hspan hnzd hfmem
+      (asIso (idealGenHom J V.1 f hfmem)).symm := by
+  haveI := isIso_idealGenHom_of_principal J V f hspan hnzd hfmem
+  refine Iso.ext ?_
+  show ((restrictFunctorIsoPullback V.1.ι).app (idealModule J)).hom ≫
+      (((restrictFunctorIsoPullback V.1.ι).symm.app (idealModule J)) ≪≫
+        (asIso (idealGenHom J V.1 f hfmem)).symm).hom = _
+  rw [Iso.trans_hom, ← Category.assoc]
+  simp
+
+/-- **(U5-L1a 3c-iii A1)** The characterisation of the generator trivialisation against
+the ideal inclusion: `idealGenHom` composed with the restricted inclusion is
+multiplication by (the restriction of) `f` — the defining formula, per-app. -/
+theorem idealGenHom_comp_toUnitHom_app_apply {X : Scheme.{u}} (J : X.IdealSheafData)
+    (V : X.Opens) (f : Γ(X, V))
+    (hfmem : f ∈ idealSections J (Opposite.op V))
+    (W : (V.toScheme.Opens)ᵒᵖ) (g : Γ(V.toScheme, W.unop)) :
+    ((idealGenHom J V f hfmem ≫
+        (restrictFunctor V.ι).map (idealModuleToUnitHom J)).val.app W).hom g =
+      X.presheaf.map (homOfLE (V.ι_image_le W.unop)).op f *
+        (CategoryTheory.ConcreteCategory.hom (V.ι.appIso W.unop).inv) g := rfl
+
+/-- **(U5-L1a 3c-iii B1)** The over-site characterisation of the definite 3b-i
+trivialisation against the ideal inclusion: its inverse composed with the restricted
+inclusion is multiplication by the generator. This is the
+`restrictOverTrivialization_inv_comp_over`-shaped input that makes the transition of the
+trivialisation family computable after restriction to overlaps. -/
+theorem overTriv_pullbackIdealTriv_inv_comp_toUnitHom {X : Scheme.{u}}
+    (J : X.IdealSheafData) (V : X.affineOpens) (f : Γ(X, V.1))
+    (hspan : J.ideal V = Ideal.span {f}) (hnzd : f ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem : f ∈ idealSections J (Opposite.op V.1)) :
+    (Scheme.Modules.overTrivializationOfRestrictIso (idealModule J) V.1
+        (restrictIsoOfPullbackIso (idealModule J) V.1
+          (pullbackIdealTrivOfPrincipal J V f hspan hnzd hfmem))).inv ≫
+      (idealModuleToUnitHom J).over V.1 =
+    SheafOfModules.overUnitScalarEnd X.ringCatSheaf V.1 f := by
+  sorry
+
+/-- **(U5-L1a 3c-iii B2)** Componentwise-nonzerodivisor scalars act monomorphically on
+the over-site unit module: the cancellation step of the transition computation. The
+hypothesis is componentwise so that the consumer can discharge it from chart
+integrality (nonempty case) or vacuously (empty overlap). -/
+theorem mono_overUnitScalarEnd_of_nonZeroDivisors {X : Scheme.{u}} (V : X.Opens)
+    (r : Γ(X, V))
+    (hr : ∀ (W : X.Opens) (h : W ≤ V),
+      X.presheaf.map (homOfLE h).op r ∈ nonZeroDivisors Γ(X, W)) :
+    Mono ((SheafOfModules.overUnitScalarEnd X.ringCatSheaf V r :
+      CategoryTheory.End (SheafOfModules.unit (X.ringCatSheaf.over V)))) := by
+  sorry
+
 end PicPoint
 
 end ModularCurves
