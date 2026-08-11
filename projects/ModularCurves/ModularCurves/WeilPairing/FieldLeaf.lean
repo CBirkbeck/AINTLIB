@@ -1157,6 +1157,19 @@ noncomputable def restrictOverIso {X : Scheme.{u}} (M N : X.Modules) (U : X.Open
     (_root_.SheafOfModules.overMap X.ringCatSheaf V.hom).mapIso e ≪≫
     (_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app N
 
+/-- **(U5-L1a 3c-iii)** The general over-converter respects composition: the five-chain
+prefix converts leg-wise. -/
+theorem overIsoOfRestrictIso_trans {X : Scheme.{u}} (M N P : X.Modules) (U : X.Opens)
+    (φ₁ : M.restrict U.ι ≅ N.restrict U.ι) (φ₂ : N.restrict U.ι ≅ P.restrict U.ι) :
+    overIsoOfRestrictIso M P U (φ₁ ≪≫ φ₂) =
+      overIsoOfRestrictIso M N U φ₁ ≪≫ overIsoOfRestrictIso N P U φ₂ := by
+  refine Iso.ext ?_
+  apply (Scheme.Modules.overEquiv U).functor.map_injective
+  simp only [overIsoOfRestrictIso, Iso.trans_hom,
+    Functor.FullyFaithful.preimageIso_hom, Functor.map_comp,
+    Functor.FullyFaithful.map_preimage]
+  simp [Category.assoc]
+
 /-- **(U5-L1a 3c-iii)** Restriction respects composition of over-site isos with a
 trivialisation tail: the five-chain's over-form restricts leg-wise. -/
 theorem restrictOverTrivialization_comp_iso {X : Scheme.{u}} (M N : X.Modules)
