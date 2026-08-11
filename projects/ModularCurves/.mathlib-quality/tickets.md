@@ -41610,3 +41610,17 @@ mathlib-current (only `AlgebraicGeometry/PointsPi`; `Geometry/` has Manifold/Euc
 no scheme-points bridge). IRR-1 builds from scratch: affine case = subspace topology of
 `X(ℂ) ↪ ℂⁿ` via generators, glued along opens; ℂ-point existence from the Nullstellensatz
 side (`MvPolynomial`-zeros API exists). Scope unchanged from the endgame plan.
+
+### YR-1 COMPLETE (2026-08-11, session 4)
+
+**`weilPairing_torsionMapOfEllHom` (KM 2.8.4.2, YRho:2489) PROVED** — the third register
+sorry is gone. Carrier re-walk: `yRho_representable` now rests on EXACTLY TWO sorries:
+`weilPairingEval_self` (E4a → YR-2, in progress) and `weilPairingEval_nondegenerate`
+(E5 → YR-3). Proof: the μ_N-points argument at the universal pair — equiv-injectivity with
+explicit subtype inputs, both `weilPairing`-defs folded by `Subtype.ext rfl` +
+`apply_symm_apply`, `muNPointsEquiv_natural`/`_mapAlong`, `Scheme.Γ_map_op`+`app_eq_appLE`
+glue, `weilPairingKM_restrictBase` at the comparison map, the two
+restrictBase-univ = pushSection-univ identifications, and `weilPairingKM_pastingMap`.
+Lean lessons: `pullback.map` is an abbrev (use `lift_fst/snd`); Equiv.injective needs
+(a₁ :=)(a₂ :=) when the goal is the val-projection; `Γ(_, ⊤)`-holes ambiguous in
+congrArg-lambdas — spell the scheme; the record-π vs pullback.snd wall: term-level `.2`-trans.
