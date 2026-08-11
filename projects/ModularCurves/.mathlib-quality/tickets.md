@@ -41663,3 +41663,11 @@ preimageIso(e ≪≫ pullbackUnitIso.symm) + toSkeleton_eq_one_of_iso_unitObj. N
 over Spec k apply it to kill the π^*-twist in kappaCls_eq_normCls_mul ⟹ κ(Q) = normCls Q;
 then the trivialisation-vs-r_i comparison (sectionDivisor idealModule locallyPrincipal)
 and the ĥ = g_Q/[N]^#r alternative splitting; then L1b divisor-zero⟹scalar.
+
+### U5-L1a class collapse PROVED (2026-08-11): `kappa_eq_sectionCls_mul_inv_zeroCls_of_field`
+— over Spec K, κ(Q) = sectionCls·zeroCls⁻¹ exactly (kappa_eq_picRelProj + the Pic brick
+kills the base-twist). NEXT L1a-step2: from hM (toSkeleton M = κ-val) + the collapse,
+M ⊗ (sectionDiv-idealModule-dual-form) is skeleton-trivial ⟹ nonempty tensor-iso
+(toSkeleton_eq_toSkeleton_iff) ⟹ the trivialisation comparison against the r_i local
+equations of (sectionDivisor Q).ideal / (sectionDivisor 0).ideal; then ĥ := g/[N]^#r and
+L1b divisor-zero⟹scalar.
