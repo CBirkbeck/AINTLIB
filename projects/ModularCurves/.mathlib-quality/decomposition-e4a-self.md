@@ -301,3 +301,12 @@ g-related by construction).
 3c-i DISCHARGED BY MATHLIB: `Ideal.span_singleton_eq_span_singleton` (span{x} = span{y} ↔
 Associated x y, over a domain — the refined charts are domains via component_integral) +
 `Associated`-destructuring gives the unit. No new lemma. 3c-ii..iv remain as cut.
+
+3c-ii statement design (2026-08-11): `unitEndomorphismOfTopSection r`-app is mult-by-r
+(@[simp] rfl, UnitPullback:42). Candidate: for f₁ = f₂·u (u ∈ Γ(X,V)ˣ from 3c-i),
+`idealGenHom J V.1 f₁ hm₁ = (unit-endo of u transported to Γ(V-scheme,⊤) via the
+sections-topIso Restrict:146) ≫ idealGenHom J V.1 f₂ hm₂` — value-level: res f₁·(…) =
+res f₂·res u·(…), a ring shuffle; prove by SheafOfModules hom-ext + the :244-248 app-def.
+Then 3c-iii pushes u through asIso-symm/restrictFunctorIsoPullback (iso-algebra) to the
+3b-i-iso difference = mult-by-u⁻¹-form, and PoleSheaf:3488 converts to the transition
+unit; the M-transition on overlaps assembles as (u₂/u₁)-shape from the 3b-ii chain legs.
