@@ -912,6 +912,47 @@ theorem locφC_lipschitz : LipschitzWith 1 (S.locφC m g f) :=
       _ ≤ ‖q‖ := norm_mapRestricted_le _ _ _ _
       _ ≤ ‖Ideal.Quotient.mk (IA m g f) p‖ + ε := hqn.le
 
+theorem locψB_lipschitz : LipschitzWith 1 (S.locψB m g f) :=
+  LipschitzWith.of_dist_le_mul fun a b => by
+    rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm, ← map_sub]
+    obtain ⟨p, hp⟩ := Ideal.Quotient.mk_surjective (a - b)
+    rw [← hp, locψB_mk]
+    refine le_of_forall_pos_le_add fun ε hε => ?_
+    obtain ⟨q, hq, hqn⟩ := Ideal.Quotient.norm_mk_lt
+      (Ideal.Quotient.mk (S.IB m g f) p) hε
+    have hmkeq : Ideal.Quotient.mk (S.ID m g f) (S.extDB m p) =
+        Ideal.Quotient.mk (S.ID m g f) (S.extDB m q) := by
+      rw [Ideal.Quotient.mk_eq_mk_iff_sub_mem, ← map_sub]
+      exact S.extDB_mem_ID m g f (by
+        have h := hq.symm
+        rwa [Ideal.Quotient.mk_eq_mk_iff_sub_mem] at h)
+    rw [hmkeq]
+    calc ‖Ideal.Quotient.mk (S.ID m g f) (S.extDB m q)‖
+        ≤ ‖S.extDB m q‖ := Ideal.Quotient.norm_mk_le _ (S.extDB m q)
+      _ ≤ ‖q‖ := norm_mapRestricted_le _ _ _ _
+      _ ≤ ‖Ideal.Quotient.mk (S.IB m g f) p‖ + ε := hqn.le
+
+omit [NormOneClass A] [CompleteSpace A] [NormOneClass B] [CompleteSpace B] in
+theorem locψC_lipschitz : LipschitzWith 1 (S.locψC m g f) :=
+  LipschitzWith.of_dist_le_mul fun a b => by
+    rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm, ← map_sub]
+    obtain ⟨p, hp⟩ := Ideal.Quotient.mk_surjective (a - b)
+    rw [← hp, locψC_mk]
+    refine le_of_forall_pos_le_add fun ε hε => ?_
+    obtain ⟨q, hq, hqn⟩ := Ideal.Quotient.norm_mk_lt
+      (Ideal.Quotient.mk (S.IC m g f) p) hε
+    have hmkeq : Ideal.Quotient.mk (S.ID m g f) (S.extDC m p) =
+        Ideal.Quotient.mk (S.ID m g f) (S.extDC m q) := by
+      rw [Ideal.Quotient.mk_eq_mk_iff_sub_mem, ← map_sub]
+      exact S.extDC_mem_ID m g f (by
+        have h := hq.symm
+        rwa [Ideal.Quotient.mk_eq_mk_iff_sub_mem] at h)
+    rw [hmkeq]
+    calc ‖Ideal.Quotient.mk (S.ID m g f) (S.extDC m q)‖
+        ≤ ‖S.extDC m q‖ := Ideal.Quotient.norm_mk_le _ (S.extDC m q)
+      _ ≤ ‖q‖ := norm_mapRestricted_le _ _ _ _
+      _ ≤ ‖Ideal.Quotient.mk (S.IC m g f) p‖ + ε := hqn.le
+
 /-- The quantitative Lemma 4.4 estimate: the quotient pullback norm is controlled
 by the component norms. -/
 theorem loc_norm_le (hN : NoethPack B C D m)

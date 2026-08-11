@@ -751,6 +751,272 @@ theorem locψC_bridgeBase (c : C) :
   show mapRestricted S.ψC S.norm_ψC_le _ (polyToP _) = _
   rw [StrictLoc.mapRestricted_polyToP, MvPolynomial.map_C]
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(N1) Push naturality at `B`**: the `B`-vertex bridge intertwines the
+value-level push with the localized `locφB` ([FJP] Lemma 5.1's square, bridged). -/
+theorem bridgeFwd_natural_B
+    (hIclA : IsClosed ((IA e.m D₀.s e.f : Set (P A e.m))))
+    (hIclB : IsClosed ((IA e.m (S.φB D₀.s) (fun i => S.φB (e.f i)) : Set (P B e.m))))
+    (hφ : Continuous S.φB)
+    (hs : (pushDatumOfHom S.φB PB D₀ hD₀).s = S.φB D₀.s)
+    (hT : ∀ t ∈ D₀.T, S.φB t ∈ (pushDatumOfHom S.φB PB D₀ hD₀).T)
+    (x : presheafValue D₀) :
+    CornerBridge.bridgeFwd (pushDatumOfHom S.φB PB D₀ hD₀)
+        (S.pushEnumB PB D₀ e hD₀) (pushDatumOfHom_isRational S.φB PB hD₀) hIclB
+      (presheafValueMapOfHom S.φB hφ D₀ (pushDatumOfHom S.φB PB D₀ hD₀) hs hT x) =
+    S.locφB e.m D₀.s e.f (CornerBridge.bridgeFwd D₀ e hD₀ hIclA x) := by
+  let _i := D₀.uniformSpace
+  have : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
+  have : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
+  have hT2 := CornerBridge.locE_t2 (pushDatumOfHom S.φB PB D₀ hD₀)
+    (S.pushEnumB PB D₀ e hD₀) hIclB
+  have hcomp :
+      ((CornerBridge.bridgeFwd (pushDatumOfHom S.φB PB D₀ hD₀)
+          (S.pushEnumB PB D₀ e hD₀)
+          (pushDatumOfHom_isRational S.φB PB hD₀) hIclB).comp
+        (presheafValueMapOfHom S.φB hφ D₀ (pushDatumOfHom S.φB PB D₀ hD₀)
+          hs hT)).comp D₀.coeRingHom =
+      ((S.locφB e.m D₀.s e.f).comp
+        (CornerBridge.bridgeFwd D₀ e hD₀ hIclA)).comp D₀.coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D₀.s) ?_
+    refine RingHom.ext fun a => ?_
+    show CornerBridge.bridgeFwd (pushDatumOfHom S.φB PB D₀ hD₀)
+        (S.pushEnumB PB D₀ e hD₀) (pushDatumOfHom_isRational S.φB PB hD₀) hIclB
+        (presheafValueMapOfHom S.φB hφ D₀ (pushDatumOfHom S.φB PB D₀ hD₀) hs hT
+          (D₀.canonicalMap a)) =
+      S.locφB e.m D₀.s e.f (CornerBridge.bridgeFwd D₀ e hD₀ hIclA
+        (D₀.canonicalMap a))
+    rw [presheafValueMapOfHom_canonicalMap S.φB hφ D₀ _ hs hT a,
+      CornerBridge.bridgeFwd_canonicalMap,
+      CornerBridge.bridgeFwd_canonicalMap,
+      S.locφB_bridgeBase PB D₀ e hD₀ a]
+  have hdense : DenseRange (D₀.coeRingHom :
+      Localization.Away D₀.s → presheafValue D₀) :=
+    UniformSpace.Completion.denseRange_coe
+  have h_eq : (fun y => CornerBridge.bridgeFwd (pushDatumOfHom S.φB PB D₀ hD₀)
+      (S.pushEnumB PB D₀ e hD₀) (pushDatumOfHom_isRational S.φB PB hD₀) hIclB
+      (presheafValueMapOfHom S.φB hφ D₀ (pushDatumOfHom S.φB PB D₀ hD₀) hs hT y)) =
+      fun y => S.locφB e.m D₀.s e.f (CornerBridge.bridgeFwd D₀ e hD₀ hIclA y) :=
+    hdense.equalizer
+      ((CornerBridge.bridgeFwd_continuous _ _ _ hIclB).comp
+        (presheafValueMapOfHom_continuous S.φB hφ D₀ _ hs hT))
+      (((S.locφB_lipschitz e.m D₀.s e.f).continuous).comp
+        (CornerBridge.bridgeFwd_continuous _ _ _ hIclA))
+      (by funext a; exact DFunLike.congr_fun hcomp a)
+  exact congrFun h_eq x
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(N2) Push naturality at `C`**. -/
+theorem bridgeFwd_natural_C
+    (hIclA : IsClosed ((IA e.m D₀.s e.f : Set (P A e.m))))
+    (hIclC : IsClosed ((IA e.m (S.φC D₀.s) (fun i => S.φC (e.f i)) : Set (P C e.m))))
+    (hφ : Continuous S.φC)
+    (hs : (pushDatumOfHom S.φC PC D₀ hD₀).s = S.φC D₀.s)
+    (hT : ∀ t ∈ D₀.T, S.φC t ∈ (pushDatumOfHom S.φC PC D₀ hD₀).T)
+    (x : presheafValue D₀) :
+    CornerBridge.bridgeFwd (pushDatumOfHom S.φC PC D₀ hD₀)
+        (S.pushEnumC PC D₀ e hD₀) (pushDatumOfHom_isRational S.φC PC hD₀) hIclC
+      (presheafValueMapOfHom S.φC hφ D₀ (pushDatumOfHom S.φC PC D₀ hD₀) hs hT x) =
+    S.locφC e.m D₀.s e.f (CornerBridge.bridgeFwd D₀ e hD₀ hIclA x) := by
+  let _i := D₀.uniformSpace
+  have : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
+  have : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
+  have hT2 := CornerBridge.locE_t2 (pushDatumOfHom S.φC PC D₀ hD₀)
+    (S.pushEnumC PC D₀ e hD₀) hIclC
+  have hcomp :
+      ((CornerBridge.bridgeFwd (pushDatumOfHom S.φC PC D₀ hD₀)
+          (S.pushEnumC PC D₀ e hD₀)
+          (pushDatumOfHom_isRational S.φC PC hD₀) hIclC).comp
+        (presheafValueMapOfHom S.φC hφ D₀ (pushDatumOfHom S.φC PC D₀ hD₀)
+          hs hT)).comp D₀.coeRingHom =
+      ((S.locφC e.m D₀.s e.f).comp
+        (CornerBridge.bridgeFwd D₀ e hD₀ hIclA)).comp D₀.coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D₀.s) ?_
+    refine RingHom.ext fun a => ?_
+    show CornerBridge.bridgeFwd (pushDatumOfHom S.φC PC D₀ hD₀)
+        (S.pushEnumC PC D₀ e hD₀) (pushDatumOfHom_isRational S.φC PC hD₀) hIclC
+        (presheafValueMapOfHom S.φC hφ D₀ (pushDatumOfHom S.φC PC D₀ hD₀) hs hT
+          (D₀.canonicalMap a)) =
+      S.locφC e.m D₀.s e.f (CornerBridge.bridgeFwd D₀ e hD₀ hIclA
+        (D₀.canonicalMap a))
+    rw [presheafValueMapOfHom_canonicalMap S.φC hφ D₀ _ hs hT a,
+      CornerBridge.bridgeFwd_canonicalMap,
+      CornerBridge.bridgeFwd_canonicalMap,
+      S.locφC_bridgeBase PC D₀ e hD₀ a]
+  have hdense : DenseRange (D₀.coeRingHom :
+      Localization.Away D₀.s → presheafValue D₀) :=
+    UniformSpace.Completion.denseRange_coe
+  have h_eq : (fun y => CornerBridge.bridgeFwd (pushDatumOfHom S.φC PC D₀ hD₀)
+      (S.pushEnumC PC D₀ e hD₀) (pushDatumOfHom_isRational S.φC PC hD₀) hIclC
+      (presheafValueMapOfHom S.φC hφ D₀ (pushDatumOfHom S.φC PC D₀ hD₀) hs hT y)) =
+      fun y => S.locφC e.m D₀.s e.f (CornerBridge.bridgeFwd D₀ e hD₀ hIclA y) :=
+    hdense.equalizer
+      ((CornerBridge.bridgeFwd_continuous _ _ _ hIclC).comp
+        (presheafValueMapOfHom_continuous S.φC hφ D₀ _ hs hT))
+      (((S.locφC_lipschitz e.m D₀.s e.f).continuous).comp
+        (CornerBridge.bridgeFwd_continuous _ _ _ hIclA))
+      (by funext a; exact DFunLike.congr_fun hcomp a)
+  exact congrFun h_eq x
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(N3) Leg naturality at `B → D`**: `locψB` intertwines the vertex bridges
+with the value-level leg map. -/
+theorem bridgeFwd_natural_legB
+    (hIclB : IsClosed ((IA e.m (S.φB D₀.s) (fun i => S.φB (e.f i)) : Set (P B e.m))))
+    (hIclD : IsClosed ((IA e.m (S.ψC (S.φC D₀.s)) (fun i => S.ψC (S.φC (e.f i))) :
+      Set (P D e.m))))
+    (hψ : Continuous S.ψB)
+    (hs : (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀).s =
+      S.ψB (pushDatumOfHom S.φB PB D₀ hD₀).s)
+    (hT : ∀ t ∈ (pushDatumOfHom S.φB PB D₀ hD₀).T,
+      S.ψB t ∈ (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀).T)
+    (b : presheafValue (pushDatumOfHom S.φB PB D₀ hD₀)) :
+    CornerBridge.bridgeFwd (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀)
+        (S.pushEnumD PD D₀ e hD₀)
+        (pushDatumOfHom_isRational (S.ψC.comp S.φC) PD hD₀) hIclD
+      (presheafValueMapOfHom S.ψB hψ (pushDatumOfHom S.φB PB D₀ hD₀)
+        (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) hs hT b) =
+    S.locψB e.m D₀.s e.f
+      (CornerBridge.bridgeFwd (pushDatumOfHom S.φB PB D₀ hD₀)
+        (S.pushEnumB PB D₀ e hD₀)
+        (pushDatumOfHom_isRational S.φB PB hD₀) hIclB b) := by
+  let _i := (pushDatumOfHom S.φB PB D₀ hD₀).uniformSpace
+  have : IsTopologicalRing (Localization.Away (pushDatumOfHom S.φB PB D₀ hD₀).s) :=
+    (pushDatumOfHom S.φB PB D₀ hD₀).isTopologicalRing
+  have : IsUniformAddGroup (Localization.Away (pushDatumOfHom S.φB PB D₀ hD₀).s) :=
+    (pushDatumOfHom S.φB PB D₀ hD₀).isUniformAddGroup
+  have hT2 := CornerBridge.locE_t2 (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀)
+    (S.pushEnumD PD D₀ e hD₀) hIclD
+  have hcomp :
+      ((CornerBridge.bridgeFwd (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀)
+          (S.pushEnumD PD D₀ e hD₀)
+          (pushDatumOfHom_isRational (S.ψC.comp S.φC) PD hD₀) hIclD).comp
+        (presheafValueMapOfHom S.ψB hψ (pushDatumOfHom S.φB PB D₀ hD₀)
+          (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) hs hT)).comp
+        (pushDatumOfHom S.φB PB D₀ hD₀).coeRingHom =
+      ((S.locψB e.m D₀.s e.f).comp
+        (CornerBridge.bridgeFwd (pushDatumOfHom S.φB PB D₀ hD₀)
+          (S.pushEnumB PB D₀ e hD₀)
+          (pushDatumOfHom_isRational S.φB PB hD₀) hIclB)).comp
+        (pushDatumOfHom S.φB PB D₀ hD₀).coeRingHom := by
+    refine IsLocalization.ringHom_ext
+      (Submonoid.powers (pushDatumOfHom S.φB PB D₀ hD₀).s) ?_
+    refine RingHom.ext fun b₀ => ?_
+    show CornerBridge.bridgeFwd (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀)
+        (S.pushEnumD PD D₀ e hD₀)
+        (pushDatumOfHom_isRational (S.ψC.comp S.φC) PD hD₀) hIclD
+        (presheafValueMapOfHom S.ψB hψ (pushDatumOfHom S.φB PB D₀ hD₀)
+          (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) hs hT
+          ((pushDatumOfHom S.φB PB D₀ hD₀).canonicalMap b₀)) =
+      S.locψB e.m D₀.s e.f
+        (CornerBridge.bridgeFwd (pushDatumOfHom S.φB PB D₀ hD₀)
+          (S.pushEnumB PB D₀ e hD₀)
+          (pushDatumOfHom_isRational S.φB PB hD₀) hIclB
+          ((pushDatumOfHom S.φB PB D₀ hD₀).canonicalMap b₀))
+    rw [presheafValueMapOfHom_canonicalMap S.ψB hψ _ _ hs hT b₀,
+      CornerBridge.bridgeFwd_canonicalMap,
+      CornerBridge.bridgeFwd_canonicalMap,
+      S.locψB_bridgeBase PB PD D₀ e hD₀ b₀]
+  have hdense : DenseRange ((pushDatumOfHom S.φB PB D₀ hD₀).coeRingHom :
+      Localization.Away (pushDatumOfHom S.φB PB D₀ hD₀).s →
+        presheafValue (pushDatumOfHom S.φB PB D₀ hD₀)) :=
+    UniformSpace.Completion.denseRange_coe
+  have h_eq : (fun y => CornerBridge.bridgeFwd
+      (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) (S.pushEnumD PD D₀ e hD₀)
+      (pushDatumOfHom_isRational (S.ψC.comp S.φC) PD hD₀) hIclD
+      (presheafValueMapOfHom S.ψB hψ (pushDatumOfHom S.φB PB D₀ hD₀)
+        (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) hs hT y)) =
+      fun y => S.locψB e.m D₀.s e.f
+        (CornerBridge.bridgeFwd (pushDatumOfHom S.φB PB D₀ hD₀)
+          (S.pushEnumB PB D₀ e hD₀)
+          (pushDatumOfHom_isRational S.φB PB hD₀) hIclB y) :=
+    hdense.equalizer
+      ((CornerBridge.bridgeFwd_continuous _ _ _ hIclD).comp
+        (presheafValueMapOfHom_continuous S.ψB hψ _ _ hs hT))
+      (((S.locψB_lipschitz e.m D₀.s e.f).continuous).comp
+        (CornerBridge.bridgeFwd_continuous _ _ _ hIclB))
+      (by funext a; exact DFunLike.congr_fun hcomp a)
+  exact congrFun h_eq b
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(N4) Leg naturality at `C → D`**. -/
+theorem bridgeFwd_natural_legC
+    (hIclC : IsClosed ((IA e.m (S.φC D₀.s) (fun i => S.φC (e.f i)) : Set (P C e.m))))
+    (hIclD : IsClosed ((IA e.m (S.ψC (S.φC D₀.s)) (fun i => S.ψC (S.φC (e.f i))) :
+      Set (P D e.m))))
+    (hψ : Continuous S.ψC)
+    (hs : (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀).s =
+      S.ψC (pushDatumOfHom S.φC PC D₀ hD₀).s)
+    (hT : ∀ t ∈ (pushDatumOfHom S.φC PC D₀ hD₀).T,
+      S.ψC t ∈ (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀).T)
+    (c : presheafValue (pushDatumOfHom S.φC PC D₀ hD₀)) :
+    CornerBridge.bridgeFwd (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀)
+        (S.pushEnumD PD D₀ e hD₀)
+        (pushDatumOfHom_isRational (S.ψC.comp S.φC) PD hD₀) hIclD
+      (presheafValueMapOfHom S.ψC hψ (pushDatumOfHom S.φC PC D₀ hD₀)
+        (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) hs hT c) =
+    S.locψC e.m D₀.s e.f
+      (CornerBridge.bridgeFwd (pushDatumOfHom S.φC PC D₀ hD₀)
+        (S.pushEnumC PC D₀ e hD₀)
+        (pushDatumOfHom_isRational S.φC PC hD₀) hIclC c) := by
+  let _i := (pushDatumOfHom S.φC PC D₀ hD₀).uniformSpace
+  have : IsTopologicalRing (Localization.Away (pushDatumOfHom S.φC PC D₀ hD₀).s) :=
+    (pushDatumOfHom S.φC PC D₀ hD₀).isTopologicalRing
+  have : IsUniformAddGroup (Localization.Away (pushDatumOfHom S.φC PC D₀ hD₀).s) :=
+    (pushDatumOfHom S.φC PC D₀ hD₀).isUniformAddGroup
+  have hT2 := CornerBridge.locE_t2 (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀)
+    (S.pushEnumD PD D₀ e hD₀) hIclD
+  have hcomp :
+      ((CornerBridge.bridgeFwd (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀)
+          (S.pushEnumD PD D₀ e hD₀)
+          (pushDatumOfHom_isRational (S.ψC.comp S.φC) PD hD₀) hIclD).comp
+        (presheafValueMapOfHom S.ψC hψ (pushDatumOfHom S.φC PC D₀ hD₀)
+          (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) hs hT)).comp
+        (pushDatumOfHom S.φC PC D₀ hD₀).coeRingHom =
+      ((S.locψC e.m D₀.s e.f).comp
+        (CornerBridge.bridgeFwd (pushDatumOfHom S.φC PC D₀ hD₀)
+          (S.pushEnumC PC D₀ e hD₀)
+          (pushDatumOfHom_isRational S.φC PC hD₀) hIclC)).comp
+        (pushDatumOfHom S.φC PC D₀ hD₀).coeRingHom := by
+    refine IsLocalization.ringHom_ext
+      (Submonoid.powers (pushDatumOfHom S.φC PC D₀ hD₀).s) ?_
+    refine RingHom.ext fun c₀ => ?_
+    show CornerBridge.bridgeFwd (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀)
+        (S.pushEnumD PD D₀ e hD₀)
+        (pushDatumOfHom_isRational (S.ψC.comp S.φC) PD hD₀) hIclD
+        (presheafValueMapOfHom S.ψC hψ (pushDatumOfHom S.φC PC D₀ hD₀)
+          (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) hs hT
+          ((pushDatumOfHom S.φC PC D₀ hD₀).canonicalMap c₀)) =
+      S.locψC e.m D₀.s e.f
+        (CornerBridge.bridgeFwd (pushDatumOfHom S.φC PC D₀ hD₀)
+          (S.pushEnumC PC D₀ e hD₀)
+          (pushDatumOfHom_isRational S.φC PC hD₀) hIclC
+          ((pushDatumOfHom S.φC PC D₀ hD₀).canonicalMap c₀))
+    rw [presheafValueMapOfHom_canonicalMap S.ψC hψ _ _ hs hT c₀,
+      CornerBridge.bridgeFwd_canonicalMap,
+      CornerBridge.bridgeFwd_canonicalMap,
+      S.locψC_bridgeBase PC PD D₀ e hD₀ c₀]
+  have hdense : DenseRange ((pushDatumOfHom S.φC PC D₀ hD₀).coeRingHom :
+      Localization.Away (pushDatumOfHom S.φC PC D₀ hD₀).s →
+        presheafValue (pushDatumOfHom S.φC PC D₀ hD₀)) :=
+    UniformSpace.Completion.denseRange_coe
+  have h_eq : (fun y => CornerBridge.bridgeFwd
+      (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) (S.pushEnumD PD D₀ e hD₀)
+      (pushDatumOfHom_isRational (S.ψC.comp S.φC) PD hD₀) hIclD
+      (presheafValueMapOfHom S.ψC hψ (pushDatumOfHom S.φC PC D₀ hD₀)
+        (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) hs hT y)) =
+      fun y => S.locψC e.m D₀.s e.f
+        (CornerBridge.bridgeFwd (pushDatumOfHom S.φC PC D₀ hD₀)
+          (S.pushEnumC PC D₀ e hD₀)
+          (pushDatumOfHom_isRational S.φC PC hD₀) hIclC y) :=
+    hdense.equalizer
+      ((CornerBridge.bridgeFwd_continuous _ _ _ hIclD).comp
+        (presheafValueMapOfHom_continuous S.ψC hψ _ _ hs hT))
+      (((S.locψC_lipschitz e.m D₀.s e.f).continuous).comp
+        (CornerBridge.bridgeFwd_continuous _ _ _ hIclC))
+      (by funext a; exact DFunLike.congr_fun hcomp a)
+  exact congrFun h_eq c
+
 end Square
 
 end Pinch
