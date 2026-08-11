@@ -193,3 +193,28 @@ U-assembly via U1/U2). Verdict highlights (ChatGPT had repo access and cited fil
 
 Execution order: L2 (all inputs proven, boilerplate) → L4 (plumbing) → L1a/L1b (the math) →
 L3 → L5 → L6.
+
+## U5-L1 design notes (2026-08-11, pre-execution)
+
+Target (validated form): for the chosen B-side dataset over Spec k̄ and chart i₀ ∋ generic,
+∃ (a : k̄ˣ) (v : K(E)ˣ), germ(h_{i₀}) = a • (g_Q-image · [N]^#-FF v) in W.toAffine.FunctionField
+(after the L2g-conjugation, all objects live in W.toAffine.FunctionField).
+- The [N]^#-FF here is `functionFieldMap (mulByN …)` conjugated to `mulByInt_pullbackAlgHom`
+  via brick6_intertwining (PROVEN) — so v's image is `mulByInt_pullbackAlgHom`-applied,
+  i.e. HW-language directly.
+- g_Q-image := HasseWeil.weilFunction W ℓ hℓ T hT (already in W.toAffine.FunctionField).
+- L1a (r_i-family): the dataset's (M, e_i) against O(D_Q): realise via ChatGPT-#4's
+  ĥ_i := g_Q/[N]^#r_i alternative — BUILD the comparison splitting from g_Q and local
+  equations r_i of the section-divisor ideal (sectionDivisor Q).ideal = ker-ideal, whose
+  locallyPrincipal generators (sectionDivisor_isOfficial.locallyPrincipal) ARE the r_i on
+  an affine refinement. Transition-match: F_ij = r_j/r_i needs the e_i-vs-r_i comparison —
+  the toSkeleton-class-equality hM gives M ≅ idealModule(ker Q)⁻¹-form; the trivialisation
+  comparison is where the work is. Alternative dodge per #4 warning: absorb the coboundary.
+- L1b (div G = div g_Q ⟹ scalar): over k̄; HW-side `pairing_const_of_transport`-input
+  machinery (the divisor-zero⟹constant extraction already used by weilPairing's def);
+  needs div(germ h_i · [N]^#r_i-glued) computed = pullbackDiv-difference — via the
+  valuation-reading of scheme-germs (the T-C4 layer: ord at closed points of the model vs
+  HW valuations — check FibrePointDict/FieldPairingValue for existing readers).
+- REUSE-FIRST checklist before writing L1: grep RelPicLocal.lean + PoincareBiextension.lean
+  ("κ(Q) = β(1, −Q∘π)" dictionary + `eq_kappaCls` through the zero-section splitting +
+  `kappa_ratio_algebra`) — the κ-vs-O(D)-dictionary may partially exist there.
