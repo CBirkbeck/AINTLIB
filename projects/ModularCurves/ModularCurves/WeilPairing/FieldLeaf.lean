@@ -641,6 +641,37 @@ theorem nonempty_pullback_iso_unit_of_tensor_ideal {X : Scheme.{u}}
     tensorObjCongr (Iso.refl _) u₁.symm ≪≫ t.symm ≪≫
     (Scheme.Modules.pullback V.1.ι).mapIso e ≪≫ u₂⟩
 
+/-- **(U5-L1a step 3c-ii, the generator-change law, per-app form)** Changing the
+generator of an ideal module by a unit factor changes `idealGenHom` by the
+multiplication endomorphism of that factor: at every open `W` of the chart and every
+section `a`, the `f₂ * u`-trivialisation is the `f₂`-trivialisation precomposed with
+mult-by-`u`. Stated per-application (hom-level `ext` whnf-walls on the endo-composite);
+this is the shape 3c-iii consumes. -/
+theorem idealGenHom_mul_app {X : Scheme.{u}} (J : X.IdealSheafData) (V : X.Opens)
+    (f₂ u : Γ(X, V))
+    (hm₁ : f₂ * u ∈ idealSections J (Opposite.op V))
+    (hm₂ : f₂ ∈ idealSections J (Opposite.op V))
+    (W : (V.toScheme.Opens)ᵒᵖ) (a : Γ(V.toScheme, W.unop)) :
+    ((idealGenHom J V (f₂ * u) hm₁).val.app W).hom a =
+      ((idealGenHom J V f₂ hm₂).val.app W).hom
+        (((ModularCurves.unitEndomorphismOfTopSection
+          (Scheme.Modules.openTopSection V u)).val.app W).hom a) := by
+  refine Subtype.ext ?_
+  show _ * _ = _
+  rw [ModularCurves.unitEndomorphismOfTopSection_app_apply]
+  simp only [idealGenHom, Scheme.Modules.openTopSection, map_mul,
+    ModuleCat.hom_ofHom, LinearMap.coe_mk, AddHom.coe_mk]
+  simp [Scheme.Hom.appIso_inv_naturality, Scheme.Hom.appIso_hom_naturality,
+    ← Functor.map_comp]
+  rw [mul_right_comm, mul_assoc]
+  congr 1
+  congr 1
+  erw [CategoryTheory.ConcreteCategory.id_apply]
+  erw [← CategoryTheory.ConcreteCategory.comp_apply]
+  rw [← Functor.map_comp]
+  exact congrArg (fun g => (CategoryTheory.ConcreteCategory.hom (X.presheaf.map g)) u)
+    (Subsingleton.elim _ _)
+
 end PicPoint
 
 end ModularCurves

@@ -352,3 +352,26 @@ hom_ofHom, coe_mk]` + `simp [appIso_inv/hom_naturality, ← Functor.map_comp]` +
 comp_apply variants + thin-cat Subsingleton.elim + map_comp; the blind comp_apply-rw
 pattern-misses on the CommRingCat-instance spelling). Probe frozen at this state
 (scratchpad/probe3cii2.lean, tail = sorry at the factor-goal).
+
+3c-ii LANDED (2026-08-11, session 5): `idealGenHom_mul_app` (FieldLeaf.lean, per-app
+form) PROVEN AXIOM-CLEAN — build green, standard three. THE BLIND PROTOCOL THAT BROKE
+THE LSP-GATE (reusable): (1) `done` as goal-printer — replacing a probe tail with `done`
+makes the unsolved-goals error PRINT the full goal, no LSP needed; (2) batch N candidate
+tails as N copies of the same `example` in ONE probe file — one lake run tests all;
+(3) ROOT CAUSE of every simp/rw pattern-miss was a defeq-but-not-syntactic TYPE mismatch
+((↑V).presheaf.obj W vs Γ(X, V.ι ''ᵁ unop W)) at the application slots — `erw` unifies
+through it where simp/rw keyed-matching cannot; (4) the closer: erw [ConcreteCategory.
+id_apply], erw [← ConcreteCategory.comp_apply], rw [← Functor.map_comp], then thin-cat
+`congrArg (fun g => hom (X.presheaf.map g) u) (Subsingleton.elim _ _)` (also closable by
+bare `rfl` — proof-irrelevant preorder-op arrows). CAUTION for reading batch outputs: a
+FAILING tactic mid-sequence poisons the rest via sorryAx-recovery — only a run whose
+sole error is the `done` (or zero errors) is trustworthy.
+
+3c-iii NEXT (design refined): first sub-leaf 3c-iii-a = the idealGenHom-vs-restriction
+square (restricting the V-chart trivialisation to an overlap W ≤ V equals the W-chart
+trivialisation at the restricted generator, modulo the restriction functor) — every
+route through the engine (PoleSheaf:3488 `overTrivializationOfRestrictIso_hom_eq_comp_
+scalar`, hypothesis shape `e.hom = g.hom ≫ unitEndo(openTopSection U r)` on the COMMON
+open) needs it; then 3c-iii-b = overlap generator comparison (3c-i unit u_ij) + 3c-ii
+feeds the engine's h; transition-unit read-off via `overUnitScalarEnd_transitionUnit` +
+`overUnitScalarEndRingEquiv`-injectivity (InvertibleSheafCocycle:44-63).
