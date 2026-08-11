@@ -626,3 +626,17 @@ RingCat-clothed commutativity via inline IsMulCommutative-change + Std.Commutati
 restrictScalars-clothed — state component shows in the app_V(mapped) = mapped(app_U)
 orientation (idealGenHom-precedent). M-CHAIN NEXT: restrictOverIso + ≪≫-functoriality,
 then the B-leg conjugation via smulEndo_naturality ⟹ transitionUnitOfCover = u₂u₁⁻¹.
+
+★ M-CHAIN TOOLKIT COMPLETE (2026-08-11, window coda 2): `restrictOverIso` (general-iso
+restriction, three-leg mirror of Dual:792) + `restrictOverTrivialization_comp_iso`
+(leg-wise restriction: restrictOver(φ ≪≫ e) = restrictOverIso φ ≪≫ restrictOverTriv e)
+BOTH AXIOM-CLEAN FIRST SHOT (Iso.ext + simp on the def-shapes — the middle comparisons
+cancel). THE COMPLETE BRICK LIST for the final assembly (all proven): five-chain def →
+overIsoOfRestrictIso + splitting law → restrictOverIso + comp_iso → ideal-leg crown
+(trivializationTransitionUnit_idealTriv) → smulEndo + naturality → C(i)-b read-off +
+ringEquiv-inj → tensorObjCongr algebra. REMAINING: ONE assembly theorem
+(transitionUnitOfCover of the M-family = u₂·u₁⁻¹) wiring the bricks — the composite
+computation E_i-restricted.inv ≫ E_j-restricted.hom expanded by the splitting laws, the
+shared legs cancelled, the B-leg = ideal-crown conjugated by smulEndo-naturality, read
+off. Then 3c-iv (FF-germ), L1b translation, L1-glue, L3, L5, L6 — and U5 closes for
+BOTH E4a and E5.

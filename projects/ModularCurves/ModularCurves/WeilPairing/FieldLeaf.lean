@@ -1147,6 +1147,28 @@ theorem smulEndo_naturality {X : Scheme.{u}} {M N : X.Modules} (g : M ⟶ N)
   erw [smulEndo_app_apply, smulEndo_app_apply]
   exact map_smul ((g.val.app W).hom) _ x
 
+/-- **(U5-L1a 3c-iii)** Restriction of a general over-site iso from `U` to an object
+`V ⟶ U` (the non-unit-target sibling of `restrictOverTrivialization`, same three-leg
+shape with the target comparison in place of the unit comparison). -/
+noncomputable def restrictOverIso {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ N.over U) (V : CategoryTheory.Over U) :
+    M.over V.left ≅ N.over V.left :=
+  ((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app M).symm ≪≫
+    (_root_.SheafOfModules.overMap X.ringCatSheaf V.hom).mapIso e ≪≫
+    (_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app N
+
+/-- **(U5-L1a 3c-iii)** Restriction respects composition of over-site isos with a
+trivialisation tail: the five-chain's over-form restricts leg-wise. -/
+theorem restrictOverTrivialization_comp_iso {X : Scheme.{u}} (M N : X.Modules)
+    (U : X.Opens) (φ : M.over U ≅ N.over U)
+    (e : N.over U ≅ _root_.SheafOfModules.unit (X.ringCatSheaf.over U))
+    (V : CategoryTheory.Over U) :
+    SheafOfModules.restrictOverTrivialization X.ringCatSheaf M U (φ ≪≫ e) V =
+      restrictOverIso M N U φ V ≪≫
+        SheafOfModules.restrictOverTrivialization X.ringCatSheaf N U e V := by
+  refine Iso.ext ?_
+  simp [SheafOfModules.restrictOverTrivialization, restrictOverIso]
+
 /-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects identities. Natural home
 after cleanup: `Picard/InvertibleSheaf.lean`. -/
 theorem tensorObjCongr_refl {X : Scheme.{u}} (M N : X.Modules) :
