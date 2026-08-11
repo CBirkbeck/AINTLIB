@@ -1170,6 +1170,15 @@ theorem overIsoOfRestrictIso_trans {X : Scheme.{u}} (M N P : X.Modules) (U : X.O
     Functor.FullyFaithful.map_preimage]
   simp [Category.assoc]
 
+/-- **(U5-L1a 3c-iii)** General over-iso restriction respects composition. -/
+theorem restrictOverIso_trans {X : Scheme.{u}} (M N P : X.Modules) (U : X.Opens)
+    (φ₁ : M.over U ≅ N.over U) (φ₂ : N.over U ≅ P.over U)
+    (V : CategoryTheory.Over U) :
+    restrictOverIso M P U (φ₁ ≪≫ φ₂) V =
+      restrictOverIso M N U φ₁ V ≪≫ restrictOverIso N P U φ₂ V := by
+  refine Iso.ext ?_
+  simp [restrictOverIso]
+
 /-- **(U5-L1a 3c-iii)** Restriction respects composition of over-site isos with a
 trivialisation tail: the five-chain's over-form restricts leg-wise. -/
 theorem restrictOverTrivialization_comp_iso {X : Scheme.{u}} (M N : X.Modules)
@@ -1181,6 +1190,47 @@ theorem restrictOverTrivialization_comp_iso {X : Scheme.{u}} (M N : X.Modules)
         SheafOfModules.restrictOverTrivialization X.ringCatSheaf N U e V := by
   refine Iso.ext ?_
   simp [SheafOfModules.restrictOverTrivialization, restrictOverIso]
+
+/-- **(U5-L1a 3c-iii, the five-chain prefix)** Everything in the chart trivialisation
+before the final generator division, as a definite restrict-site iso
+`M|_V ≅ I₂|_V`. Chart-dependence enters only through the `J₁`-leg (its generator
+trivialisation); the `J₂`-generator lives in the factorisation's tail. -/
+noncomputable def tensorChainPrefix {X : Scheme.{u}}
+    (M : X.Modules) (J₁ J₂ : X.IdealSheafData)
+    (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
+    (V : X.affineOpens) (f₁ : Γ(X, V.1))
+    (hspan₁ : J₁.ideal V = Ideal.span {f₁}) (hnzd₁ : f₁ ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem₁ : f₁ ∈ idealSections J₁ (Opposite.op V.1)) :
+    M.restrict V.1.ι ≅ (idealModule J₂).restrict V.1.ι :=
+  (restrictFunctorIsoPullback V.1.ι).app M ≪≫
+    (tensorObjUnitIso ((Scheme.Modules.pullback V.1.ι).obj M)).symm ≪≫
+    tensorObjCongr (Iso.refl _)
+      (pullbackIdealTrivOfPrincipal J₁ V f₁ hspan₁ hnzd₁ hfmem₁).symm ≪≫
+    (pullbackTensorObjIsoOfIsOpenImmersion V.1.ι M (idealModule J₁)).symm ≪≫
+    (Scheme.Modules.pullback V.1.ι).mapIso e ≪≫
+    (restrictFunctorIsoPullback V.1.ι).symm.app (idealModule J₂)
+
+/-- **(U5-L1a 3c-iii, the five-chain factorisation)** The chart trivialisation's
+restrict-side form factors as the chain prefix followed by the generator division:
+the input shape for the leg-wise transition computation. -/
+theorem restrictIsoOfPullbackIso_pullbackTrivOfTensorIdeal {X : Scheme.{u}}
+    (M : X.Modules) (J₁ J₂ : X.IdealSheafData)
+    (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
+    (V : X.affineOpens) (f₁ f₂ : Γ(X, V.1))
+    (hspan₁ : J₁.ideal V = Ideal.span {f₁}) (hnzd₁ : f₁ ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem₁ : f₁ ∈ idealSections J₁ (Opposite.op V.1))
+    (hspan₂ : J₂.ideal V = Ideal.span {f₂}) (hnzd₂ : f₂ ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem₂ : f₂ ∈ idealSections J₂ (Opposite.op V.1)) :
+    restrictIsoOfPullbackIso M V.1
+        (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂ hspan₁ hnzd₁ hfmem₁
+          hspan₂ hnzd₂ hfmem₂) =
+      tensorChainPrefix M J₁ J₂ e V f₁ hspan₁ hnzd₁ hfmem₁ ≪≫
+        haveI := isIso_idealGenHom_of_principal J₂ V f₂ hspan₂ hnzd₂ hfmem₂
+        (asIso (idealGenHom J₂ V.1 f₂ hfmem₂)).symm := by
+  haveI := isIso_idealGenHom_of_principal J₂ V f₂ hspan₂ hnzd₂ hfmem₂
+  refine Iso.ext ?_
+  simp [restrictIsoOfPullbackIso, pullbackTrivOfTensorIdeal, tensorChainPrefix,
+    pullbackIdealTrivOfPrincipal, Category.assoc]
 
 /-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects identities. Natural home
 after cleanup: `Picard/InvertibleSheaf.lean`. -/

@@ -640,3 +640,19 @@ computation E_i-restricted.inv ≫ E_j-restricted.hom expanded by the splitting 
 shared legs cancelled, the B-leg = ideal-crown conjugated by smulEndo-naturality, read
 off. Then 3c-iv (FF-germ), L1b translation, L1-glue, L3, L5, L6 — and U5 closes for
 BOTH E4a and E5.
+
+★ FIVE-CHAIN FACTORISATION LANDED (2026-08-11, window coda 3): `restrictOverIso_trans` +
+`tensorChainPrefix` (the definite M|_V ≅ I₂|_V prefix — chart-dependence ONLY in the
+J₁-leg) + `restrictIsoOfPullbackIso_pullbackTrivOfTensorIdeal` (restrict-side form =
+prefix ≪≫ gen₂-division) — all green FIRST SHOT, axiom-clean. 28 landings. THE
+ASSEMBLY IS NOW EXACTLY TWO RUNGS:
+- [RUNG-1, the last new content] the ⊗-slot scalar transport: the B-leg difference
+  restricted to the inf — restrictOverIso of overIso-of-(tensorObjCongr(refl,
+  idealTriv₁-difference)) = a smulEndo-u₁-form (connect the restricted ideal-triv₁
+  difference (C-rest-1×2 + C(i)-b at J₁ ⟹ scalar u₁) through tensorObjCongr — the one
+  place tensor meets scalar; use smulEndo_naturality + tensorObjCongr_trans/refl).
+- [RUNG-2, pure wiring] transitionUnitOfCover(M-family) = u₂·u₁⁻¹: expand
+  restrictOver(E_k) via the factorisation + splitting + comp_iso laws; shared prefix-legs
+  cancel (restrictOverIso_trans + overIsoOfRestrictIso_trans leg-wise); RUNG-1 gives the
+  middle scalar; the gen₂-tails give the crown-scalar; compose via overUnitScalarEnd_mul;
+  read off via overUnitScalarEndRingEquiv-injectivity (the crown-unit pattern).
