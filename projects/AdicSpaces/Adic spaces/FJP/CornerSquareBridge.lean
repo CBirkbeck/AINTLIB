@@ -752,6 +752,7 @@ theorem locψC_bridgeBase (c : C) :
   rw [StrictLoc.mapRestricted_polyToP, MvPolynomial.map_C]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [PlusSubring B] [HasLocLiftPowerBounded B] [NormOneClass C] [CompleteSpace C] [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C] [NormOneClass D] [CompleteSpace D] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq C] [DecidableEq D] in
 /-- **(N1) Push naturality at `B`**: the `B`-vertex bridge intertwines the
 value-level push with the localized `locφB` ([FJP] Lemma 5.1's square, bridged). -/
 theorem bridgeFwd_natural_B
@@ -806,6 +807,7 @@ theorem bridgeFwd_natural_B
   exact congrFun h_eq x
 
 set_option backward.isDefEq.respectTransparency false in
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [NormOneClass B] [CompleteSpace B] [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B] [PlusSubring C] [HasLocLiftPowerBounded C] [NormOneClass D] [CompleteSpace D] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq B] [DecidableEq D] in
 /-- **(N2) Push naturality at `C`**. -/
 theorem bridgeFwd_natural_C
     (hIclA : IsClosed ((IA e.m D₀.s e.f : Set (P A e.m))))
@@ -859,6 +861,7 @@ theorem bridgeFwd_natural_C
   exact congrFun h_eq x
 
 set_option backward.isDefEq.respectTransparency false in
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [PlusSubring B] [HasLocLiftPowerBounded B] [PlusSubring C] [IsTateRing C] [HasLocLiftPowerBounded C] [PlusSubring D] [HasLocLiftPowerBounded D] [DecidableEq C] in
 /-- **(N3) Leg naturality at `B → D`**: `locψB` intertwines the vertex bridges
 with the value-level leg map. -/
 theorem bridgeFwd_natural_legB
@@ -939,6 +942,7 @@ theorem bridgeFwd_natural_legB
   exact congrFun h_eq b
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NormOneClass A] [CompleteSpace A] [PlusSubring A] [HasLocLiftPowerBounded A] [NormOneClass B] [CompleteSpace B] [PlusSubring B] [IsTateRing B] [HasLocLiftPowerBounded B] [PlusSubring C] [HasLocLiftPowerBounded C] [PlusSubring D] [HasLocLiftPowerBounded D] [DecidableEq B] in
 /-- **(N4) Leg naturality at `C → D`**. -/
 theorem bridgeFwd_natural_legC
     (hIclC : IsClosed ((IA e.m (S.φC D₀.s) (fun i => S.φC (e.f i)) : Set (P C e.m))))
@@ -1016,6 +1020,156 @@ theorem bridgeFwd_natural_legC
         (CornerBridge.bridgeFwd_continuous _ _ _ hIclC))
       (by funext a; exact DFunLike.congr_fun hcomp a)
   exact congrFun h_eq c
+
+
+/-! ### The value-level Milnor row (T625 output; T626/T627 consumables) -/
+
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [PlusSubring B] [HasLocLiftPowerBounded B] [PlusSubring C] [HasLocLiftPowerBounded C] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq D] in
+/-- **Value-row injectivity** (prop:localized-milnor left exactness at values):
+the pair of value-level pushes out of `𝒪_A(D₀)` is jointly injective. -/
+theorem valueRow_injective
+    (hN : NoethPack B C D e.m)
+    (hIclA : IsClosed ((IA e.m D₀.s e.f : Set (P A e.m))))
+    (hIclB : IsClosed ((IA e.m (S.φB D₀.s) (fun i => S.φB (e.f i)) : Set (P B e.m))))
+    (hIclC : IsClosed ((IA e.m (S.φC D₀.s) (fun i => S.φC (e.f i)) : Set (P C e.m))))
+    (hφB : Continuous S.φB) (hφC : Continuous S.φC)
+    (hsB : (pushDatumOfHom S.φB PB D₀ hD₀).s = S.φB D₀.s)
+    (hTB : ∀ t ∈ D₀.T, S.φB t ∈ (pushDatumOfHom S.φB PB D₀ hD₀).T)
+    (hsC : (pushDatumOfHom S.φC PC D₀ hD₀).s = S.φC D₀.s)
+    (hTC : ∀ t ∈ D₀.T, S.φC t ∈ (pushDatumOfHom S.φC PC D₀ hD₀).T)
+    (x y : presheafValue D₀)
+    (hB : presheafValueMapOfHom S.φB hφB D₀ (pushDatumOfHom S.φB PB D₀ hD₀) hsB hTB x =
+      presheafValueMapOfHom S.φB hφB D₀ (pushDatumOfHom S.φB PB D₀ hD₀) hsB hTB y)
+    (hC : presheafValueMapOfHom S.φC hφC D₀ (pushDatumOfHom S.φC PC D₀ hD₀) hsC hTC x =
+      presheafValueMapOfHom S.φC hφC D₀ (pushDatumOfHom S.φC PC D₀ hD₀) hsC hTC y) :
+    x = y := by
+  have hinj : Function.Injective (CornerBridge.bridgeFwd D₀ e hD₀ hIclA) :=
+    (CornerBridge.graphBridge D₀ e hD₀ hIclA).injective
+  refine hinj ?_
+  refine S.loc_pair_injective e.m D₀.s e.f hN (e.span_eq_top D₀ hD₀) ?_
+  refine Prod.ext ?_ ?_
+  · show S.locφB e.m D₀.s e.f (CornerBridge.bridgeFwd D₀ e hD₀ hIclA x) =
+      S.locφB e.m D₀.s e.f (CornerBridge.bridgeFwd D₀ e hD₀ hIclA y)
+    rw [← S.bridgeFwd_natural_B PB D₀ e hD₀ hIclA hIclB hφB hsB hTB x, hB,
+      S.bridgeFwd_natural_B PB D₀ e hD₀ hIclA hIclB hφB hsB hTB y]
+  · show S.locφC e.m D₀.s e.f (CornerBridge.bridgeFwd D₀ e hD₀ hIclA x) =
+      S.locφC e.m D₀.s e.f (CornerBridge.bridgeFwd D₀ e hD₀ hIclA y)
+    rw [← S.bridgeFwd_natural_C PC D₀ e hD₀ hIclA hIclC hφC hsC hTC x, hC,
+      S.bridgeFwd_natural_C PC D₀ e hD₀ hIclA hIclC hφC hsC hTC y]
+
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [PlusSubring B] [HasLocLiftPowerBounded B] [PlusSubring C] [HasLocLiftPowerBounded C] [PlusSubring D] [HasLocLiftPowerBounded D] in
+/-- **Value-row gluing** (prop:localized-milnor middle exactness at values):
+a `D`-matching pair of local sections at the pushed `B`/`C`-data descends to
+`𝒪_A(D₀)`. -/
+theorem valueRow_glue
+    (hN : NoethPack B C D e.m)
+    (hIclA : IsClosed ((IA e.m D₀.s e.f : Set (P A e.m))))
+    (hIclB : IsClosed ((IA e.m (S.φB D₀.s) (fun i => S.φB (e.f i)) : Set (P B e.m))))
+    (hIclC : IsClosed ((IA e.m (S.φC D₀.s) (fun i => S.φC (e.f i)) : Set (P C e.m))))
+    (hIclD : IsClosed ((IA e.m (S.ψC (S.φC D₀.s)) (fun i => S.ψC (S.φC (e.f i))) :
+      Set (P D e.m))))
+    (hφB : Continuous S.φB) (hφC : Continuous S.φC)
+    (hψB : Continuous S.ψB) (hψC : Continuous S.ψC)
+    (hsB : (pushDatumOfHom S.φB PB D₀ hD₀).s = S.φB D₀.s)
+    (hTB : ∀ t ∈ D₀.T, S.φB t ∈ (pushDatumOfHom S.φB PB D₀ hD₀).T)
+    (hsC : (pushDatumOfHom S.φC PC D₀ hD₀).s = S.φC D₀.s)
+    (hTC : ∀ t ∈ D₀.T, S.φC t ∈ (pushDatumOfHom S.φC PC D₀ hD₀).T)
+    (hsDB : (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀).s =
+      S.ψB (pushDatumOfHom S.φB PB D₀ hD₀).s)
+    (hTDB : ∀ t ∈ (pushDatumOfHom S.φB PB D₀ hD₀).T,
+      S.ψB t ∈ (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀).T)
+    (hsDC : (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀).s =
+      S.ψC (pushDatumOfHom S.φC PC D₀ hD₀).s)
+    (hTDC : ∀ t ∈ (pushDatumOfHom S.φC PC D₀ hD₀).T,
+      S.ψC t ∈ (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀).T)
+    (b : presheafValue (pushDatumOfHom S.φB PB D₀ hD₀))
+    (c : presheafValue (pushDatumOfHom S.φC PC D₀ hD₀))
+    (hbc : presheafValueMapOfHom S.ψB hψB (pushDatumOfHom S.φB PB D₀ hD₀)
+        (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) hsDB hTDB b =
+      presheafValueMapOfHom S.ψC hψC (pushDatumOfHom S.φC PC D₀ hD₀)
+        (pushDatumOfHom (S.ψC.comp S.φC) PD D₀ hD₀) hsDC hTDC c) :
+    ∃ x : presheafValue D₀,
+      presheafValueMapOfHom S.φB hφB D₀ (pushDatumOfHom S.φB PB D₀ hD₀) hsB hTB x = b ∧
+      presheafValueMapOfHom S.φC hφC D₀ (pushDatumOfHom S.φC PC D₀ hD₀) hsC hTC x = c := by
+  have hloc : S.locψB e.m D₀.s e.f
+      (CornerBridge.bridgeFwd (pushDatumOfHom S.φB PB D₀ hD₀)
+        (S.pushEnumB PB D₀ e hD₀) (pushDatumOfHom_isRational S.φB PB hD₀) hIclB b) =
+      S.locψC e.m D₀.s e.f
+      (CornerBridge.bridgeFwd (pushDatumOfHom S.φC PC D₀ hD₀)
+        (S.pushEnumC PC D₀ e hD₀) (pushDatumOfHom_isRational S.φC PC hD₀) hIclC c) := by
+    rw [← S.bridgeFwd_natural_legB PB PD D₀ e hD₀ hIclB hIclD hψB hsDB hTDB b,
+      ← S.bridgeFwd_natural_legC PC PD D₀ e hD₀ hIclC hIclD hψC hsDC hTDC c, hbc]
+  obtain ⟨w, ⟨hwB, hwC⟩, -⟩ := S.loc_row_exact e.m D₀.s e.f hN
+    (e.span_eq_top D₀ hD₀) _ _ hloc
+  refine ⟨(CornerBridge.graphBridge D₀ e hD₀ hIclA).symm w, ?_, ?_⟩
+  · have hinjB : Function.Injective
+        (CornerBridge.bridgeFwd (pushDatumOfHom S.φB PB D₀ hD₀)
+          (S.pushEnumB PB D₀ e hD₀) (pushDatumOfHom_isRational S.φB PB hD₀) hIclB) :=
+      (CornerBridge.graphBridge (pushDatumOfHom S.φB PB D₀ hD₀)
+        (S.pushEnumB PB D₀ e hD₀) (pushDatumOfHom_isRational S.φB PB hD₀)
+        hIclB).injective
+    refine hinjB ?_
+    rw [S.bridgeFwd_natural_B PB D₀ e hD₀ hIclA hIclB hφB hsB hTB,
+      show CornerBridge.bridgeFwd D₀ e hD₀ hIclA
+          ((CornerBridge.graphBridge D₀ e hD₀ hIclA).symm w) = w from
+        (CornerBridge.graphBridge D₀ e hD₀ hIclA).apply_symm_apply w]
+    exact hwB
+  · have hinjC : Function.Injective
+        (CornerBridge.bridgeFwd (pushDatumOfHom S.φC PC D₀ hD₀)
+          (S.pushEnumC PC D₀ e hD₀) (pushDatumOfHom_isRational S.φC PC hD₀) hIclC) :=
+      (CornerBridge.graphBridge (pushDatumOfHom S.φC PC D₀ hD₀)
+        (S.pushEnumC PC D₀ e hD₀) (pushDatumOfHom_isRational S.φC PC hD₀)
+        hIclC).injective
+    refine hinjC ?_
+    rw [S.bridgeFwd_natural_C PC D₀ e hD₀ hIclA hIclC hφC hsC hTC,
+      show CornerBridge.bridgeFwd D₀ e hD₀ hIclA
+          ((CornerBridge.graphBridge D₀ e hD₀ hIclA).symm w) = w from
+        (CornerBridge.graphBridge D₀ e hD₀ hIclA).apply_symm_apply w]
+    exact hwC
+
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [PlusSubring B] [HasLocLiftPowerBounded B] [PlusSubring C] [HasLocLiftPowerBounded C] [PlusSubring D] [IsTateRing D] [HasLocLiftPowerBounded D] [DecidableEq D] in
+/-- **Value-row embedding** (prop:localized-milnor topological strictness at
+values): the value-level pair map is a topological embedding. -/
+theorem valueRow_embedding
+    (hN : NoethPack B C D e.m)
+    (hIclA : IsClosed ((IA e.m D₀.s e.f : Set (P A e.m))))
+    (hIclB : IsClosed ((IA e.m (S.φB D₀.s) (fun i => S.φB (e.f i)) : Set (P B e.m))))
+    (hIclC : IsClosed ((IA e.m (S.φC D₀.s) (fun i => S.φC (e.f i)) : Set (P C e.m))))
+    (hφB : Continuous S.φB) (hφC : Continuous S.φC)
+    (hsB : (pushDatumOfHom S.φB PB D₀ hD₀).s = S.φB D₀.s)
+    (hTB : ∀ t ∈ D₀.T, S.φB t ∈ (pushDatumOfHom S.φB PB D₀ hD₀).T)
+    (hsC : (pushDatumOfHom S.φC PC D₀ hD₀).s = S.φC D₀.s)
+    (hTC : ∀ t ∈ D₀.T, S.φC t ∈ (pushDatumOfHom S.φC PC D₀ hD₀).T) :
+    Topology.IsEmbedding (fun x : presheafValue D₀ =>
+      (presheafValueMapOfHom S.φB hφB D₀ (pushDatumOfHom S.φB PB D₀ hD₀) hsB hTB x,
+       presheafValueMapOfHom S.φC hφC D₀ (pushDatumOfHom S.φC PC D₀ hD₀) hsC hTC x)) := by
+  have hpair := S.loc_pair_isEmbedding e.m D₀.s e.f hN (e.span_eq_top D₀ hD₀)
+  have hbr : Topology.IsEmbedding ⇑(CornerBridge.graphBridge D₀ e hD₀ hIclA) :=
+    (Homeomorph.mk (CornerBridge.graphBridge D₀ e hD₀ hIclA).toEquiv
+      (CornerBridge.graphBridge_continuous D₀ e hD₀ hIclA)
+      (CornerBridge.graphBridge_symm_continuous D₀ e hD₀ hIclA)).isEmbedding
+  have hcomp : (fun p : presheafValue (pushDatumOfHom S.φB PB D₀ hD₀) ×
+        presheafValue (pushDatumOfHom S.φC PC D₀ hD₀) =>
+        (CornerBridge.bridgeFwd (pushDatumOfHom S.φB PB D₀ hD₀)
+          (S.pushEnumB PB D₀ e hD₀) (pushDatumOfHom_isRational S.φB PB hD₀)
+          hIclB p.1,
+         CornerBridge.bridgeFwd (pushDatumOfHom S.φC PC D₀ hD₀)
+          (S.pushEnumC PC D₀ e hD₀) (pushDatumOfHom_isRational S.φC PC hD₀)
+          hIclC p.2)) ∘
+      (fun x : presheafValue D₀ =>
+        (presheafValueMapOfHom S.φB hφB D₀ (pushDatumOfHom S.φB PB D₀ hD₀) hsB hTB x,
+         presheafValueMapOfHom S.φC hφC D₀ (pushDatumOfHom S.φC PC D₀ hD₀) hsC hTC x)) =
+      (fun w : locA e.m D₀.s e.f =>
+        (S.locφB e.m D₀.s e.f w, S.locφC e.m D₀.s e.f w)) ∘
+        ⇑(CornerBridge.graphBridge D₀ e hD₀ hIclA) := by
+    funext x
+    exact Prod.ext (S.bridgeFwd_natural_B PB D₀ e hD₀ hIclA hIclB hφB hsB hTB x)
+      (S.bridgeFwd_natural_C PC D₀ e hD₀ hIclA hIclC hφC hsC hTC x)
+  refine Topology.IsEmbedding.of_comp ?_ ?_ (by rw [hcomp]; exact hpair.comp hbr)
+  · exact (presheafValueMapOfHom_continuous S.φB hφB D₀ _ hsB hTB).prodMk
+      (presheafValueMapOfHom_continuous S.φC hφC D₀ _ hsC hTC)
+  · exact ((CornerBridge.bridgeFwd_continuous _ _ _ hIclB).comp continuous_fst).prodMk
+      ((CornerBridge.bridgeFwd_continuous _ _ _ hIclC).comp continuous_snd)
 
 end Square
 
