@@ -243,3 +243,10 @@ arriving elements are Pic.map-images of classes built from IsInvertible reps, so
 representatives instead of quantifying over raw units if the comparison is missing).
 Fallback: Γ-side via ForMathlib/PicSubsingletonFree (`Subsingleton (Pic K)` fires from
 mathlib’s semilocal instance since a field has one maximal ideal).
+
+L1-Pic-brick UNBLOCKED (2026-08-11 final scoping): `isInvertible_of_isUnit_toSkeleton`
+EXISTS (KMDataset:154-region) — units give IsInvertible reps, so the one-point route runs:
+u ↦ fromSkeleton-rep ↦ IsInvertible ↦ trivialising cover ↦ some W i = ⊤ (PrimeSpectrum of a
+field is a subsingleton) ↦ M.over ⊤ ≅ unit ↦ toSkeleton = 1. Remaining sub-brick: the
+over-⊤-iso ⟹ global-iso step (an `.over ⊤`-conservativity/equivalence lemma — check
+RelPicLocal `overTrivialization`/`IsInvertible.of_restrict_cover` layer first).
