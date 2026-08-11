@@ -612,3 +612,17 @@ PresheafOfModules.Hom.ext × ModuleCat.hom_ext WITHOUT the SheafOfModules.hom_ex
 layer; (iii) or the v4.33 opacity options locally around the theorem (file has them
 file-wide already — check whether the theorem's elaboration hits a `.types`-hole).
 NO heartbeat bumps (user rule). Everything else in the window stands green.
+
+★ CENTRAL-SCALAR PRINCIPLE COMPLETE (2026-08-11, window coda): `isInitialOpTop` +
+`smulEndo M r : M ⟶ M` + `smulEndo_app_apply` (rfl) + `smulEndo_naturality` ALL
+AXIOM-CLEAN, zero sorries. THE STORM DIAGNOSIS (reusable): the cumulative-whnf timeout
+was `repeat' erw [sheafOfModules_comp_app_apply]` — repeat' retries UNBOUNDED at generic
+modules and each failed attempt whnf-storms under respectTransparency-false; the fix =
+BOUNDED erws (exactly as many as the goal's comp-apps). Also collected: (i) at an
+ᵒᵖ-binder use IsInitial.to-arrows (isInitialOpTop) — components land at literal opens,
+hom_ext kills arrow mismatches (the mathlib module_over_initial pattern); (ii)
+RingCat-clothed commutativity via inline IsMulCommutative-change + Std.Commutative.comm
+(mul_comm's implicit can't pin); (iii) PresheafOfModules.Hom naturality-fields are
+restrictScalars-clothed — state component shows in the app_V(mapped) = mapped(app_U)
+orientation (idealGenHom-precedent). M-CHAIN NEXT: restrictOverIso + ≪≫-functoriality,
+then the B-leg conjugation via smulEndo_naturality ⟹ transitionUnitOfCover = u₂u₁⁻¹.

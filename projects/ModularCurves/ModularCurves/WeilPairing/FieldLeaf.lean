@@ -1127,13 +1127,25 @@ theorem smulEndo_app_apply {X : Scheme.{u}} (M : X.Modules) (r : Γ(X, ⊤))
     ((smulEndo M r).val.app U).hom m =
       (X.ringCatSheaf.obj.map ((isInitialOpTop X).to U) r) • m := rfl
 
+attribute [irreducible] isInitialOpTop smulEndo
+
+set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency.types true in
 /-- **(U5-L1a 3c-iii, the central-scalar principle)** Every homomorphism of sheaf
 modules commutes with the global scaling endomorphisms: each conjugation step of the
 transition computation is one application of this. -/
 theorem smulEndo_naturality {X : Scheme.{u}} {M N : X.Modules} (g : M ⟶ N)
     (r : Γ(X, ⊤)) :
     smulEndo M r ≫ g = g ≫ smulEndo N r := by
-  sorry
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro W
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  erw [sheafOfModules_comp_app_apply, sheafOfModules_comp_app_apply]
+  erw [smulEndo_app_apply, smulEndo_app_apply]
+  exact map_smul ((g.val.app W).hom) _ x
 
 /-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects identities. Natural home
 after cleanup: `Picard/InvertibleSheaf.lean`. -/
