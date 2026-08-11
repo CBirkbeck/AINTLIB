@@ -1,1 +1,1 @@
-FOCUS: T632 remaining — simplicial identities dd=0 (Fin.succAbove swap double-sum) + d0 aug = 0 in CechRationalCover.lean
+FOCUS: T632 — MIRROR cechDiff_comp_cechDiff (:382) + cechDiff_comp_cechAug (:656) from CechCohomology into CechRationalCover (same involution, restrictionMapHom carriers); then T634 at the abstract level
