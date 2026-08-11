@@ -1291,6 +1291,25 @@ theorem overSmulEndo_naturality {X : Scheme.{u}} {M N : X.Modules} (U : X.Opens)
   erw [overSmulEndo_app_apply, overSmulEndo_app_apply]
   exact map_smul ((g.val.app W).hom) _ x
 
+/-- **(U5-L1a 3c-iii RUNG-1e)** On the unit module the over-site scaling coincides with
+`overUnitScalarEnd` (left- vs right-multiplication, commutativity). -/
+theorem overSmulEndo_unit {X : Scheme.{u}} (U : X.Opens) (r : Γ(X, U)) :
+    overSmulEndo (unitObj X) U r =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r := by
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro W
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  erw [overSmulEndo_app_apply, SheafOfModules.overUnitScalarEnd_app_apply]
+  dsimp only
+  have hcomm : IsMulCommutative
+      (X.ringCatSheaf.obj.obj (Opposite.op (Opposite.unop W).left)) := by
+    change IsMulCommutative (X.presheaf.obj (Opposite.op (Opposite.unop W).left))
+    exact ⟨⟨fun a b => mul_comm a b⟩⟩
+  exact hcomm.is_comm.comm _ _
+
 /-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects identities. Natural home
 after cleanup: `Picard/InvertibleSheaf.lean`. -/
 theorem tensorObjCongr_refl {X : Scheme.{u}} (M N : X.Modules) :
