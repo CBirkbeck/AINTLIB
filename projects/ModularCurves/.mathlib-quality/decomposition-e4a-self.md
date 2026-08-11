@@ -250,3 +250,9 @@ u ↦ fromSkeleton-rep ↦ IsInvertible ↦ trivialising cover ↦ some W i = �
 field is a subsingleton) ↦ M.over ⊤ ≅ unit ↦ toSkeleton = 1. Remaining sub-brick: the
 over-⊤-iso ⟹ global-iso step (an `.over ⊤`-conservativity/equivalence lemma — check
 RelPicLocal `overTrivialization`/`IsInvertible.of_restrict_cover` layer first).
+
+Pic-brick final chain (all named, one converter to build): u ↦ fromSkeleton-rep ↦
+`isInvertible_of_isUnit_toSkeleton` ↦ cover ∋ ⊤ (PrimeSpectrum-of-field subsingleton) ↦
+pullback-iso along ⊤.ι (an ISO of schemes — mathlib topIso) ↦ [BUILD: pullback-along-iso
+reflects/transports iso-to-unit ⟹ global `M ≅ unitObj`] ↦
+`toSkeleton_eq_one_of_iso_unitObj` (LineVerticalAssembly:39 ✓) ↦ u = 1.
