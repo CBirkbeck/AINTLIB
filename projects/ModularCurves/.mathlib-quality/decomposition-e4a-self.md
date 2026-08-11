@@ -465,3 +465,24 @@ by composing the two proven bridges (Basic:108 + KMNaturality:55; needed
 `import ModularCurves.WeilPairing.Basic` added to FieldLeaf). The L2-side c is the
 algebraMap image of this value at the 3b-dataset — L3's two inputs (L2g bridge + L4)
 are now both in place; L3 additionally consumes L1 (the dictionary) for the H-form.
+
+U5-L2 GLUING-CHECK RESOLVED (2026-08-11): the flagged "translateByPoint-vs-
+translateByIso.left two-spellings" check is a NON-ISSUE — `(translateByIso E x).hom`
+is DEFINITIONALLY `E.translateBy x` (Iso structure-literal projection,
+TranslationBySection:77: hom := E.translateBy x), so the bridge's
+τ = (translateByIso …).hom.left literally IS (translateBy …).left; and
+`translateByPoint E t P := ((E.baseChange t).translateBy (overPoint E t P)).left`
+(Translation:161) differs only by the overPoint/id-base-change clothing, which the
+PROVEN L2b layer (baseChangeIdFstOver + translateBy_comp_of_isMonHom +
+translateByPoint_id_comp_fst) transports. If the L1-glue ever hits a syntactic wall
+here, add the one-liner `translateByIso_hom … := rfl`; no lemma needed now.
+
+U5-L1b ANCHOR RECON (2026-08-11): the HasseWeil engine is COMPLETE AND PROVEN —
+`const_of_projectiveDivisorOf_eq_zero` + `const_unit_of_projectiveDivisorOf_eq_zero`
+(+ the τ-specialised `pairing_const_of_transport`) in
+HasseWeil/HasseBound/WeilPairing/Constancy.lean, over [IsAlgClosed F] [W.IsElliptic]
+[IsDedekindDomain CoordinateRing]: nonzero FF-element with projectiveDivisorOf = 0 is a
+nonzero base-field scalar. L1b's REMAINING content = the scheme↔valuation divisor
+translation at the quotient G/g_Q (div-scheme(G) = div-scheme(g_Q) from the 3b/3c
+dictionary + brick6 pullbackDiv-vs-[N]^#-FF ⟹ projectiveDivisorOf (G/g_Q) = 0) — the
+same T-C4-debt species as L1a's r-pinning — then one application of the anchor.
