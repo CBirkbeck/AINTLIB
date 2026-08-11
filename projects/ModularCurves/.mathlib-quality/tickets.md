@@ -41569,10 +41569,16 @@ Next: U5d/U5a per the decomposition — the bridge now feeds the characterisatio
   weilPairingKM_restrictBase + EllHom cartesian transport). Status: in_progress.
 - [YR-2] E4a `weilPairingEval_self` per decomposition-e4a-self.md U5 (bridge + L2a/b/c
   DONE; next: L2d/e assembly, L1 dictionary, L3–L6; U4 in ℚ-clothing). Status: open.
-- [YR-3] E5-ℚ `weilPairingEval_nondegenerate` re-clothed: 3a restricted internal Hom
-  (rank N², Stacks 58.5.2/58.5.4), 3b pairing map, 3c fibrewise-iso⟹iso
-  (isIso_iff_finrank_eq + natCard_sections_eq_finrank, template LevelThreeTorsor:607),
-  3d field import (fieldWeilPairing_eq_zero_of_forall + T-C4). Status: open (after YR-2).
+- [YR-3] E5 `weilPairingEval_nondegenerate` — **RE-CUT 2026-08-11 (see the endgame plan's
+  "YR-3 RE-CUT" section): = YR-3d ONLY.** The register statement IS the fibrewise form
+  (hypotheses carry [IsAlgClosed k] + hNk; no re-clothing needed) and it lives at k = k̄
+  so it has NO descent leaf. Assembly recipe: U5-L1..L4 general two-variable comparison
+  (SHARED with YR-2 — L5 is only E4a's diagonal specialisation) + U1/U2 record→model
+  transport at the field fibre + points-dictionary surjectivity/zero-reflection +
+  fieldWeilPairing_eq_zero_of_forall (PROVEN, FieldPairing.lean, hypothesis-exact).
+  DEFERRED off critical path: 3a EtaleDual internal Hom, 3b pairing map, 3c
+  fibrewise-iso⟹iso — a scheme-level-perfectness strengthening ticket, NOT consumed by
+  yRho_representable. Status: open (after YR-2's L1–L4; assembly-only).
 - [YR-4] assembly: yRho_representable axiom-clean. Status: blocked (YR-1..3).
 - [IRR-1] Euclidean topology on X(ℂ) + ℂ-point existence (mathlib-check first). Status: open.
 - [IRR-2] Euclidean-connected ⟹ Zariski-connected (finite type /ℂ). Status: open (IRR-1).
