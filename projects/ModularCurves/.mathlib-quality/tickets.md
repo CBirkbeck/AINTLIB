@@ -41654,3 +41654,12 @@ SpecPoints/projModelPointsEquiv are ModularCurves-level; projModelFunctionFieldE
 the bridge are EllipticCurve-level. NEXT: U5-L1 (divisor dictionary, design notes in
 decomposition-e4a-self.md; REUSE-FIRST: RelPicLocal/PoincareBiextension κ-dictionary),
 then L3–L6.
+
+### U5-L1 Pic brick PROVED (2026-08-11): `subsingleton_pic_of_subsingleton_space`
+(FieldLeaf) — trivial Pic for one-point schemes. Chain: fromSkeleton-rep +
+isInvertible_of_isUnit_toSkeleton + cover-member = ⊤ (subsingleton space) + IsIso ⊤.ι
+(Scheme.topIso, ▸-transported along U i = ⊤) + pullback_isEquivalence_of_iso +
+preimageIso(e ≪≫ pullbackUnitIso.symm) + toSkeleton_eq_one_of_iso_unitObj. NEXT: L1a —
+over Spec k apply it to kill the π^*-twist in kappaCls_eq_normCls_mul ⟹ κ(Q) = normCls Q;
+then the trivialisation-vs-r_i comparison (sectionDivisor idealModule locallyPrincipal)
+and the ĥ = g_Q/[N]^#r alternative splitting; then L1b divisor-zero⟹scalar.
