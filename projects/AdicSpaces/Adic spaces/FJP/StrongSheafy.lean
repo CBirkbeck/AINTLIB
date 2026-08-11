@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FJP.FiniteJetSheafyEndpoints
+import «Adic spaces».FJP.ExtendedSheafyTransport
 import «Adic spaces».FJP.RestrictedFubini
 import «Adic spaces».SheafyRingEquivTransport
 import «Adic spaces».MvTateAlgebraTopology
@@ -303,6 +304,15 @@ theorem finiteJet_tateExt_isSheafyComplete (n : ℕ) :
     haveI : @CompleteSpace ↥(restrictedMvPowerSeriesSubring n (JetA F))
       (IsTopologicalAddGroup.rightUniformSpace _) := finiteJet_tateExt_completeSpace F n
     IsSheafyComplete ↥(restrictedMvPowerSeriesSubring n (JetA F)) := by
-  sorry
+  let _i := mvTateAlgebraTopology' (A := JetA F) n
+  have := mvTate_isTateRing (A := JetA F) n
+  have := mvTate_t2Space (A := JetA F) n
+  have := mvTate_nonarchimedean (A := JetA F) n
+  have := mvTateAlgebraTopology'_isTopologicalRing (A := JetA F) n
+  have : @CompleteSpace ↥(restrictedMvPowerSeriesSubring n (JetA F))
+      (IsTopologicalAddGroup.rightUniformSpace _) := finiteJet_tateExt_completeSpace F n
+  exact (isSheafyComplete_congr (UnitDiscExample.restrictedGaussEquiv (JetA F) n)
+    (gaussToTate_continuous F n) (tateToGauss_continuous F n)).mp
+    (ext_isSheafyComplete F n)
 
 end FiniteJet
