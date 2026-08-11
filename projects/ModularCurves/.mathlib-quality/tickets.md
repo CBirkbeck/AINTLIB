@@ -41671,3 +41671,17 @@ M ⊗ (sectionDiv-idealModule-dual-form) is skeleton-trivial ⟹ nonempty tensor
 (toSkeleton_eq_toSkeleton_iff) ⟹ the trivialisation comparison against the r_i local
 equations of (sectionDivisor Q).ideal / (sectionDivisor 0).ideal; then ĥ := g/[N]^#r and
 L1b divisor-zero⟹scalar.
+
+### U5-L1a MODULE DICTIONARY PROVED (2026-08-11, session-4 close). All axiom-clean:
+- `subsingleton_pic_of_subsingleton_space` (Pic brick)
+- `kappa_eq_sectionCls_mul_inv_zeroCls_of_field` (class collapse)
+- `nonempty_tensorObj_sectionIdeal_iso_zeroIdeal_of_field` (M ⊗ I(Q) ≅ I(0))
+FieldLeaf now carries the v4.33 opacity options file-wide + the idealModule local-notation
+pin (PoleSheaf shadow). Lean lessons: letI-values must be single-line or the next
+parenthesised line is eaten as an argument; the custom `Scheme.Modules.tensorObj` has its
+OWN skeleton lemma `toSkeleton_tensorObj_eq` (PicComparison:857) — do not reach for
+`Skeleton.toSkeleton_tensorObj`; anchor `IsUnit.unit_spec` holes with typed haves.
+**NEXT (L1a step 3)**: from the M ⊗ I(Q) ≅ I(0)-iso extract the local trivialisation
+comparison — on the sectionDivisor_isOfficial.locallyPrincipal charts the iso reads
+e_i-trivialisations against the r_i-generators; then the glued rational comparison
+(ĥ := g/[N]^#r) and L1b (divisor-zero ⟹ scalar over k̄).
