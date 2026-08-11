@@ -584,3 +584,17 @@ unitHomEquiv-route: does mathlib's SheafOfModules have a Module-Γ(X,⊤)-struct
 issue may not bite) and sheaf-package. The naturality THEOREM shape is right
 (hom_ext + splitter + map_smul); only the carrier def is blocked. FieldLeaf reverted to
 green (the two smulEndo decls removed; everything else stands).
+
+smulEndo ROUTE (b) PAVED BY MATHLIB (2026-08-11, post-close recon): mathlib's
+`PresheafOfModules` "module_over_initial" section (Presheaf.lean:385-460:
+forgetToPresheafModuleCatObjObj/Map + the functor) gives each M.obj Y a
+Module Γ(X,⊤)-structure via restrictScalars along `R.map (hX.to Y)` where
+hX : IsInitial (op ⊤ : (Opens X)ᵒᵖ). THE ETA-FIX: `hX.to U : op ⊤ ⟶ U` lands at
+LITERAL U (no op-unop artifact), and `hX.hom_ext` kills every arrow-spelling mismatch
+(mathlib's own map_smul' proof there shows the pattern: rw [← R.map_comp]; congr;
+apply hX.hom_ext). smulEndo carrier next window: componentwise
+`fun m => (R.map (hX.to U) r) • m` with hX := initialOpOfTerminal
+(IsTerminal.ofUniqueHom (fun V => homOfLE le_top) (fun _ _ => Subsingleton.elim _ _));
+naturality via M.map_smul + hX.hom_ext. Also inspect whether the mathlib functor
+`forgetToPresheafModuleCat` itself already yields the endo (its morphism-level =
+Γ(⊤)-linear components — smulEndo may be `(functor-image linearity)` for free).
