@@ -585,6 +585,44 @@ theorem exists_affine_common_principal {X : Scheme.{u}}
     rw [h0, map_zero]
   exact ⟨V, hcb, hVleW, ⟨_, hs1, hn1⟩, ⟨_, hs2, hn2⟩⟩
 
+/-- **(U5-L1a step 3b-i)** On a principal affine chart the generator trivialises the ideal
+module: `idealGenHom` is an isomorphism. Extraction of the inner assembly of
+`isInvertible_idealModule` (Picard/IdealModule.lean) for a *given* chart. -/
+theorem isIso_idealGenHom_of_principal {X : Scheme.{u}} (J : X.IdealSheafData)
+    (V : X.affineOpens) (f : Γ(X, V.1))
+    (hspan : J.ideal V = Ideal.span {f}) (hnzd : f ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem : f ∈ idealSections J (Opposite.op V.1)) :
+    IsIso (idealGenHom J V.1 f hfmem) := by
+  refine isIso_of_bijective_app_on_basis _
+    {W | ∃ (b : Γ(X, V.1)) (_ : X.basicOpen b ≤ V.1),
+      W = V.1.ι ⁻¹ᵁ X.basicOpen b} ?_ ?_
+  · intro x U hxU
+    have hxV : V.1.ι.base x ∈ V.1 := x.2
+    obtain ⟨b, hble, hxb⟩ := V.2.exists_basicOpen_le
+      (V := V.1.ι ''ᵁ U) ⟨V.1.ι.base x, ⟨x, hxU, rfl⟩⟩ hxV
+    refine ⟨V.1.ι ⁻¹ᵁ X.basicOpen b,
+      ⟨b, hble.trans (V.1.ι_image_le U), rfl⟩, hxb, ?_⟩
+    calc V.1.ι ⁻¹ᵁ X.basicOpen b
+        ≤ V.1.ι ⁻¹ᵁ (V.1.ι ''ᵁ U) := fun y hy => hble hy
+      _ = U := Scheme.Hom.preimage_image_eq _ U
+  · rintro W ⟨b, hb, rfl⟩
+    exact bijective_idealGenHom_app J V f hspan hnzd hfmem b hb
+
+/-- **(U5-L1a step 3b-i, packaged)** The pullback of the ideal module to a principal
+affine chart is trivial. -/
+theorem nonempty_pullback_idealModule_iso_unit_of_principal {X : Scheme.{u}}
+    (J : X.IdealSheafData) (V : X.affineOpens) (f : Γ(X, V.1))
+    (hspan : J.ideal V = Ideal.span {f}) (hnzd : f ∈ nonZeroDivisors Γ(X, V.1)) :
+    Nonempty ((Scheme.Modules.pullback V.1.ι).obj (idealModule J) ≅
+      unitObj ↑(V.1)) := by
+  have hfmem : f ∈ idealSections J (Opposite.op V.1) := by
+    rw [show idealSections J (Opposite.op V.1) = J.ideal V from
+      J.ker_subschemeι_app V, hspan]
+    exact Ideal.mem_span_singleton_self f
+  haveI := isIso_idealGenHom_of_principal J V f hspan hnzd hfmem
+  exact ⟨(restrictFunctorIsoPullback V.1.ι).symm.app (idealModule J) ≪≫
+    (asIso (idealGenHom J V.1 f hfmem)).symm⟩
+
 end PicPoint
 
 end ModularCurves
