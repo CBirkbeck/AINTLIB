@@ -326,3 +326,10 @@ SheafOfModules comp-app lemma), then the @[simp] `unitEndomorphismOfTopSection_a
 fires, then `simp [mul_comm, mul_assoc, mul_left_comm]` + the isolated topIso-transport
 leaf. Probe file preserved at scratchpad/probe3cii2.lean (current state: ext+simp
 [idealGenHom]+Subtype.ext+show all fire; tail is the documented residue).
+
+3c-ii final probe state: statement should use `Scheme.Modules.openTopSection V u` (the
+PoleSheaf:3488-native form, NOT topIso.inv). The `ext W a`-tactic itself whnf-walls on
+the endo-composite — next session (with LSP): either `SheafOfModules.Hom.ext` explicit +
+per-app typed-haves, or prove the app-level identity per-open as its own lemma first and
+assemble hom-ext-free; comp-split via `SheafOfModules.comp_val` (Sheaf.lean:62) at the
+val-level. Probe file: scratchpad/probe3cii2.lean.
