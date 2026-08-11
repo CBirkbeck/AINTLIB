@@ -319,3 +319,10 @@ restricted through the unitEndo-app equals X-side `res u` through the `ι`-appIs
 displayed via failing rfl). Next session: close the transport leaf (likely
 `Opens.topIso_inv`-simp or `ι.appIso`-naturality), then mul_comm/assoc finishes; then
 3c-iii/iv per the cut.
+
+3c-ii probe addendum: do NOT unfold `unitEndomorphismOfTopSection`/`unitHomEquiv` in the
+simp set (whnf-wall, 200k). Correct sequence: split the composite app FIRST (find the
+SheafOfModules comp-app lemma), then the @[simp] `unitEndomorphismOfTopSection_app_apply`
+fires, then `simp [mul_comm, mul_assoc, mul_left_comm]` + the isolated topIso-transport
+leaf. Probe file preserved at scratchpad/probe3cii2.lean (current state: ext+simp
+[idealGenHom]+Subtype.ext+show all fire; tail is the documented residue).
