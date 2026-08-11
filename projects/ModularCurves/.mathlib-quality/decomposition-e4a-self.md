@@ -310,3 +310,12 @@ res f₂·res u·(…), a ring shuffle; prove by SheafOfModules hom-ext + the :2
 Then 3c-iii pushes u through asIso-symm/restrictFunctorIsoPullback (iso-algebra) to the
 3b-i-iso difference = mult-by-u⁻¹-form, and PoleSheaf:3488 converts to the transition
 unit; the M-transition on overlaps assembles as (u₂/u₁)-shape from the 3b-ii chain legs.
+
+3c-ii probe result (2026-08-11): `ext W a` + `simp [idealGenHom]` fires and the LHS
+distributes to `res f₂ * res u * (…) g`; the remaining eq vs the composite-RHS is a
+comm-ring shuffle PLUS one transport identity: the V-scheme section `topIso.inv u`
+restricted through the unitEndo-app equals X-side `res u` through the `ι`-appIso — the
+`Scheme.Opens.topIso`-naturality leaf. Probe file: scratchpad/probe3cii2.lean (goal-shape
+displayed via failing rfl). Next session: close the transport leaf (likely
+`Opens.topIso_inv`-simp or `ι.appIso`-naturality), then mul_comm/assoc finishes; then
+3c-iii/iv per the cut.
