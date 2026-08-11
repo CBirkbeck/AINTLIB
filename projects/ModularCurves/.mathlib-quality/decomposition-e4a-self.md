@@ -256,3 +256,14 @@ Pic-brick final chain (all named, one converter to build): u ↦ fromSkeleton-re
 pullback-iso along ⊤.ι (an ISO of schemes — mathlib topIso) ↦ [BUILD: pullback-along-iso
 reflects/transports iso-to-unit ⟹ global `M ≅ unitObj`] ↦
 `toSkeleton_eq_one_of_iso_unitObj` (LineVerticalAssembly:39 ✓) ↦ u = 1.
+
+### L1a step-3 API finding (2026-08-11): the generator trivialisation IS `idealGenHom`
+(Picard/IdealModule:240 — mult-by-f from unitObj to the restricted ideal module), shown
+IsIso on principal affine charts inside `isInvertible_idealModule` (:406). So the r_i-side
+trivialisations of I(Q)/I(0) come packaged with transitions r_j/r_i by construction; the
+step-3 comparison composes the M ⊗ I(Q) ≅ I(0)-iso with idealGenHom-inverses on a common
+principal refinement to produce an M-trivialisation whose transition-cocycle FF-image is
+(r0/rQ)-ratios — the shape the L2e-germ side consumes. Statement next session; entry
+point: a common-refinement lemma for two locallyPrincipal families + the restrictFunctor
+vs .over-form conversion (restrictIsoOfPullbackIso / overTrivializationOfRestrictIso,
+InvertibleSheaf:241/255).
