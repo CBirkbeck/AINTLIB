@@ -765,7 +765,34 @@ theorem idealGenHom_comp_toUnitHom_comp_unitComparison {X : Scheme.{u}}
       (V.1.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom =
     ModularCurves.unitEndomorphismOfTopSection
       (Scheme.Modules.openTopSection V.1 f) := by
-  sorry
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro W
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  repeat' erw [sheafOfModules_comp_app_apply]
+  erw [ModularCurves.unitEndomorphismOfTopSection_app_apply]
+  erw [sheafOfModulesEquivOverUnit_hom_app_apply]
+  erw [show (CategoryTheory.ConcreteCategory.hom
+        (((restrictFunctor (V.1).ι).map
+          (ModularCurves.idealModuleToUnitHom J)).val.app W))
+      ((CategoryTheory.ConcreteCategory.hom
+        ((idealGenHom J (V.1) f hfmem).val.app W)) x) =
+    X.presheaf.map (homOfLE ((V.1).ι_image_le W.unop)).op f *
+      (CategoryTheory.ConcreteCategory.hom ((V.1).ι.appIso W.unop).inv) x from rfl]
+  rw [mul_comm]
+  congr 1
+  · first
+      | rfl
+      | (rw [Scheme.Opens.ι_appIso]; simp;
+         erw [CategoryTheory.ConcreteCategory.id_apply])
+      | (rw [Scheme.Opens.ι_appIso]; simp)
+  · have h := openTopSection_restrict (V.1) W.unop f
+    rw [Scheme.Opens.ι_appIso] at h
+    first
+      | exact h
+      | exact h.symm
 
 /-- **(U5-L1a 3c-iii B1)** The over-site characterisation of the definite 3b-i
 trivialisation against the ideal inclusion: its inverse composed with the restricted

@@ -486,3 +486,16 @@ nonzero base-field scalar. L1b's REMAINING content = the scheme↔valuation divi
 translation at the quotient G/g_Q (div-scheme(G) = div-scheme(g_Q) from the 3b/3c
 dictionary + brick6 pullbackDiv-vs-[N]^#-FF ⟹ projectiveDivisorOf (G/g_Q) = 0) — the
 same T-C4-debt species as L1a's r-pinning — then one application of the anchor.
+
+★ 3c-iii MICRO-LEAF PROVEN + B1 FULLY AXIOM-CLEAN (2026-08-11, session 5 finale):
+`idealGenHom_comp_toUnitHom_comp_unitComparison` closed BLIND — the winning per-app
+sequence: hom_ext stack + `repeat' erw [sheafOfModules_comp_app_apply]` (this time the
+splitter consumed the WHOLE equiv-plumbing — the difference vs the failed B1-v3 attempt:
+no cancel_epi/Iso.eq_comp_inv rearrangement first, apply the splitter to the RAW
+composite-with-C.hom) + `erw [unitEndomorphismOfTopSection_app_apply,
+sheafOfModulesEquivOverUnit_hom_app_apply]` + inline show-rfl (A1-value surface) +
+`rw [mul_comm]; congr 1` + x-leaf (`rw [Scheme.Opens.ι_appIso]; simp; erw
+[ConcreteCategory.id_apply]`) + f-leaf (`openTopSection_restrict` + `ι_appIso`-rw,
+exact h). B1 `overTriv_pullbackIdealTriv_inv_comp_toUnitHom` now rests on the standard
+three END-TO-END. FieldLeaf = ZERO sorries again. The 3c-iii A+B foundation is COMPLETE:
+remaining rungs are (C)(i)-(iii) per the strip-free route + 3c-iv.
