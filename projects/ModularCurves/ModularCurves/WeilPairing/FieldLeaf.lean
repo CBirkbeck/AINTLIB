@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.KMBilinear
 import ModularCurves.WeilPairing.FieldComparisonBridge
+import ModularCurves.WeilPairing.Basic
 import ModularCurves.ForMathlib.PullbackTensorMonoidal
 
 /-!
@@ -862,5 +863,42 @@ theorem mono_overUnitScalarEnd_of_nonZeroDivisors {X : Scheme.{u}} (V : X.Opens)
   exact sub_eq_zero.mp hz
 
 end PicPoint
+
+section ValuePlumbing
+
+open EllipticCurve
+
+/-- **(U5-L4, value plumbing)** The register pairing evaluates as
+`torsionSplittingEval` of *any* normalised dataset for the second point: the composite
+of the two proven bridges `weilPairingEval_eq_weilPairingKM` (register → canonical) and
+`weilPairingKM_eq_torsionSplittingEval` (canonical → engine value at a dataset). This is
+the shape the U5 comparison chain consumes: the L2 τ-scalar `c` is the `algebraMap`
+image of the right-hand side at the dataset built from the 3b trivialisations. -/
+theorem weilPairingEval_eq_torsionSplittingEval {S : Scheme.{u}} (E : EllipticCurve S)
+    {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    (x y : E.Point g)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (M : (Limits.pullback E.π g).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (Limits.pullback E.π g)
+      (kappa E E.smooth g (EllipticCurve.Point.asSection E g y)).val = toSkeleton M)
+    {ι : Type*} (W : ι → (Limits.pullback E.π g).Opens) (hW : iSup W = ⊤)
+    (e : ∀ i, M.over (W i) ≅
+      _root_.SheafOfModules.unit ((Limits.pullback E.π g).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover M W e i j ∈
+      sectionUnits (baseChangeZero E.π E.zero E.zero_π g) (W i ⊓ W j)) :
+    (E.weilPairingEval x y hx hy : Γ(T, ⊤)) =
+      ((torsionSplittingEval E E.smooth g N
+        (EllipticCurve.Point.asSection E g y) (asSection_mem_torsionPoints E y hy)
+        M hM W hW e hnorm
+        (EllipticCurve.Point.asSection E g x) (asSection_mem_torsionPoints E x hx) :
+          Γ(T, ⊤)ˣ) : Γ(T, ⊤)) := by
+  rw [E.weilPairingEval_eq_weilPairingKM x y hx hy]
+  exact congrArg Units.val
+    (weilPairingKM_eq_torsionSplittingEval E E.smooth g N
+      (EllipticCurve.Point.asSection E g x) (asSection_mem_torsionPoints E x hx)
+      (EllipticCurve.Point.asSection E g y) (asSection_mem_torsionPoints E y hy)
+      M hM W hW e hnorm)
+
+end ValuePlumbing
 
 end ModularCurves

@@ -41606,6 +41606,10 @@ decomposition-e4a-self.md ("3c-iii REFINED CUT"). Key in-tree engines found:
 `restrictOverTrivialization_hom_eq_comp_scalar` (TrivializationRestriction:911),
 `overEquiv_unitScalarEnd` (DualPullback:204 — the G/C-conjugation).
 
+**U5-L4 LANDED** (same session): `weilPairingEval_eq_torsionSplittingEval` axiom-clean
+(FieldLeaf ValuePlumbing) — register pairing = engine value at any normalised dataset,
+full generality. L3's plumbing inputs complete.
+
 **[YR-3 RE-CUT]** (same session): E5's register sorry = the fibrewise form = YR-3d ONLY;
 EtaleDual/internal-Hom lane DEFERRED off the critical path; E5 rides the SAME U5-L1..L4
 comparison as E4a + `fieldWeilPairing_eq_zero_of_forall` (proven). See the endgame plan's

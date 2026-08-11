@@ -457,3 +457,11 @@ PRIORITY NOTE: 3c-iii's remaining rungs (micro-leaf, (i)-(iii)) are INDEPENDENT 
 other U5 leaves — L4 (value plumbing, ranked easy, all inputs proven) and 3c-iv/L1b/L3
 can land in parallel sessions. Execution order rebalance: L4 next when blind, 3c-iii
 micro-leaf when LSP returns.
+
+U5-L4 LANDED (2026-08-11, session 5): `weilPairingEval_eq_torsionSplittingEval`
+(FieldLeaf, ValuePlumbing section) PROVEN AXIOM-CLEAN — the register pairing =
+torsionSplittingEval at ANY normalised dataset, full generality (any base T, any pair),
+by composing the two proven bridges (Basic:108 + KMNaturality:55; needed
+`import ModularCurves.WeilPairing.Basic` added to FieldLeaf). The L2-side c is the
+algebraMap image of this value at the 3b-dataset — L3's two inputs (L2g bridge + L4)
+are now both in place; L3 additionally consumes L1 (the dictionary) for the H-form.
