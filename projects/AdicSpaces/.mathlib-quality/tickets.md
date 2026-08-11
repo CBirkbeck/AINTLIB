@@ -59,7 +59,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 - **Sources**: decomposition A-H-dvr.
 
 ### [T631] C-1: `interList` iterated intersection datum
-- **Status**: open · **File**: `Adic spaces/CornerSquareDatum.lean` (append) · **Type**: def + lemmas
+- **Status**: done (2026-08-11 — interListAux subtype-fold, interList/interList_isRational/interList_zero/interList_succ/rationalOpen_interList in CornerSquareDatum.lean, 0 warnings) · **File**: `Adic spaces/CornerSquareDatum.lean` (append) · **Type**: def + lemmas
 - **Statement**: `interList (D : Fin (q+1) → RationalLocData A) (h : ∀ i, (D i).IsRational) : RationalLocData A` (fold of `interDatumOfRational`), with `interList_isRational` and `rationalOpen_interList : rationalOpen (interList D h).T (interList D h).s = ⋂ i, rationalOpen (D i).T (D i).s`. Sources: [Wedhorn] A-appendix `U_{i0...iq}`; decomposition C-1.
 
 ### [T632] C-2: the 𝒪-valued unnormalized Čech complex + `IsCechAcyclicFull`

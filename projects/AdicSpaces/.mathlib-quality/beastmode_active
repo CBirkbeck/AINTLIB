@@ -1,1 +1,1 @@
-FOCUS: T631 — interList iterated intersection datum in CornerSquareDatum.lean
+FOCUS: T632 — the O-valued unnormalized Cech complex + IsCechAcyclicFull (new file CechRationalCover.lean)
