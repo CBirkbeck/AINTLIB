@@ -26,6 +26,11 @@ universe u
 open CategoryTheory AlgebraicGeometry Limits TopologicalSpace
   AlgebraicGeometry.Scheme.Modules
 
+-- the `(E.baseChange t).E`-vs-`pullback E.π t` semireducible wall (v4.33 idiom)
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 namespace ModularCurves
 
 variable {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
@@ -451,6 +456,72 @@ theorem kappa_eq_sectionCls_mul_inv_zeroCls_of_field {K : Type u} [Field K]
   rw [hval, show Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π
       (𝟙 (Spec (CommRingCat.of K)))) x = 1 from Subsingleton.elim _ _,
     map_one, inv_one, mul_one]
+
+-- `ModularCurves.idealModule` (PoleSheaf, of a morphism) shadows the ideal-sheaf version
+-- inside `namespace ModularCurves`; pin the one every statement below means
+-- (the `Picard/SelfAdjointN.lean` idiom).
+local notation "idealModule" => AlgebraicGeometry.Scheme.Modules.idealModule
+
+/-- **(U5-L1a, the module dictionary)** Over a field, any module representing `κ(Q)`
+tensored with the section ideal is isomorphic to the zero-section ideal:
+`M ⊗ I(Q) ≅ I(0)`. Unit algebra in the skeleton from the class collapse. -/
+theorem nonempty_tensorObj_sectionIdeal_iso_zeroIdeal_of_field {K : Type u} [Field K]
+    (E : EllipticCurve (Spec (CommRingCat.of K)))
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (Q : (E.baseChange (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))))
+    (M : (pullback E.π (𝟙 (Spec (CommRingCat.of K)))).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (pullback E.π (𝟙 (Spec (.of K))))
+      (kappa E hsm (𝟙 (Spec (CommRingCat.of K))) Q).val = toSkeleton M) :
+    letI := Scheme.Modules.monoidalCategory (pullback E.π (𝟙 (Spec (.of K))))
+    Nonempty (tensorObj M
+        (idealModule (Scheme.Hom.ker
+          (Q.1 : Spec (CommRingCat.of K) ⟶ pullback E.π (𝟙 (Spec (CommRingCat.of K)))))) ≅
+      idealModule (Scheme.Hom.ker
+        (baseChangeZero E.π E.zero E.zero_π (𝟙 (Spec (CommRingCat.of K)))))) := by
+  letI := Scheme.Modules.monoidalCategory (pullback E.π (𝟙 (Spec (CommRingCat.of K))))
+  haveI hsep : IsSeparated (pullback.snd E.π (𝟙 (Spec (CommRingCat.of K)))) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π (𝟙 (Spec (CommRingCat.of K)))
+      ‹_›
+  have hsm' : SmoothOfRelativeDimension 1
+      (pullback.snd E.π (𝟙 (Spec (CommRingCat.of K)))) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) E.π
+      (𝟙 (Spec (CommRingCat.of K))) hsm
+  set uQ := ((RelEffCartierDiv.sectionDivisor
+      (pullback.snd E.π (𝟙 (Spec (CommRingCat.of K))))
+      (Q.1 : Spec (CommRingCat.of K) ⟶ pullback E.π (𝟙 (Spec (CommRingCat.of K))))
+      Q.2).isInvertible_idealModule
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm' _ Q.2)).isUnit_toSkeleton.unit
+    with huQ
+  set u0 := ((RelEffCartierDiv.sectionDivisor
+      (pullback.snd E.π (𝟙 (Spec (CommRingCat.of K))))
+      (baseChangeZero E.π E.zero E.zero_π (𝟙 (Spec (CommRingCat.of K))))
+      (baseChangeZero_snd E.π E.zero E.zero_π
+        (𝟙 (Spec (CommRingCat.of K))))).isInvertible_idealModule
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm' _
+      (baseChangeZero_snd E.π E.zero E.zero_π
+        (𝟙 (Spec (CommRingCat.of K)))))).isUnit_toSkeleton.unit with hu0
+  have hcls : kappa E hsm (𝟙 (Spec (CommRingCat.of K))) Q = uQ⁻¹ * (u0⁻¹)⁻¹ :=
+    kappa_eq_sectionCls_mul_inv_zeroCls_of_field E hsm Q
+  letI := Scheme.Modules.symmetricCategory (pullback E.π (𝟙 (Spec (CommRingCat.of K))))
+  have hval : toSkeleton M * uQ.val = u0.val := by
+    have h1 := hM.symm.trans (congrArg Units.val hcls)
+    rw [inv_inv] at h1
+    calc toSkeleton M * uQ.val
+        = ((uQ⁻¹ * u0) * uQ).val := by rw [Units.val_mul (uQ⁻¹ * u0) uQ, ← h1]
+      _ = ((uQ⁻¹ * uQ) * u0).val := by
+          rw [mul_assoc, mul_comm u0 uQ, ← mul_assoc]
+      _ = u0.val := by rw [inv_mul_cancel, one_mul]
+  have huQval : uQ.val = toSkeleton (idealModule (Scheme.Hom.ker
+      (Q.1 : Spec (CommRingCat.of K) ⟶ pullback E.π (𝟙 (Spec (CommRingCat.of K)))))) :=
+    IsUnit.unit_spec _
+  have hu0val : u0.val = toSkeleton (idealModule (Scheme.Hom.ker
+      (baseChangeZero E.π E.zero E.zero_π (𝟙 (Spec (CommRingCat.of K)))))) :=
+    IsUnit.unit_spec _
+  refine toSkeleton_eq_toSkeleton_iff.mp ?_
+  refine (toSkeleton_tensorObj_eq M _).trans ?_
+  refine (congrArg (toSkeleton M * ·) huQval.symm).trans ?_
+  exact hval.trans hu0val
 
 end PicPoint
 
