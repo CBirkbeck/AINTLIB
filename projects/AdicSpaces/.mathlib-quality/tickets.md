@@ -63,7 +63,7 @@ precedes the final (C-headline) stage, `CLEANUP-FINAL` ends the board.
 - **Statement**: `interList (D : Fin (q+1) → RationalLocData A) (h : ∀ i, (D i).IsRational) : RationalLocData A` (fold of `interDatumOfRational`), with `interList_isRational` and `rationalOpen_interList : rationalOpen (interList D h).T (interList D h).s = ⋂ i, rationalOpen (D i).T (D i).s`. Sources: [Wedhorn] A-appendix `U_{i0...iq}`; decomposition C-1.
 
 ### [T632] C-2: the 𝒪-valued unnormalized Čech complex + `IsCechAcyclicFull`
-- **Status**: open · **Depends on**: T631 · **Type**: def-layer
+- **Status**: in_progress (2026-08-11 — def-layer LANDED in CechRationalCover.lean (tupleDatum/cechO/cechD/cechAug/IsCechAcyclicFull, 0 warnings); REMAINING: the simplicial identities cechD_comp_cechD = 0 (via restrictionMap_comp + Fin.succAbove_succAbove-swap double-sum cancellation) and cechD_comp_aug = 0 (two-face agreement via restrictionMap_comp)) · **Depends on**: T631 · **Type**: def-layer
 - **Statement**: for `C : RationalCoveringData A` (+ `hC : C.IsRational`), `cechO q := ∀ σ : Fin (q+1) → ↥C.covers, presheafValue (interList (fun i => (σ i).1) …)`; differential by the alternating sum of restrictions ([Wedhorn] l.5262 dq formula verbatim); augmentation from `presheafValue C.base`; `IsCechAcyclicFull` = Definition A.1 verbatim (exactness of the augmented complex at every degree). Design per decomposition C-2 (AddCommGrp-valued for the LES API).
 
 ### [T633] C-3: alternating subcomplex + quasi-isomorphism

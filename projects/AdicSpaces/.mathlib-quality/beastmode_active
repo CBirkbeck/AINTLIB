@@ -1,1 +1,1 @@
-FOCUS: T632 — the O-valued unnormalized Cech complex + IsCechAcyclicFull (new file CechRationalCover.lean)
+FOCUS: T632 remaining — simplicial identities dd=0 (Fin.succAbove swap double-sum) + d0 aug = 0 in CechRationalCover.lean
