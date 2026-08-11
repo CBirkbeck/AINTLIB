@@ -274,3 +274,10 @@ opens, principal for both ideals and inside a dataset chart; elementary: interse
 affine-basis refinement, `Opens.mem_iSup`-glue). `localPullbackTrivializationT`
 (LocalTrivialization:264) handles the .over-conversions. Steps: 3a refinement ⟹ 3b the
 M-trivialisation (tensor-iso ∘ idealGenHom⁻¹-pair) ⟹ 3c its cocycle FF-image = r-ratios.
+
+Step-3a inputs found: mathlib `IdealSheafData.map_ideal` (affine U ≤ V ⟹ ideal
+restricts by map) + `Ideal.map_span` give span-restriction in 2 lines. The
+nonZeroDivisors-transfer to the refined chart: either via localisation-injectivity on
+basic opens, or dodge entirely — take PER-POINT choices from each isOfficial at the
+refined point (the r_i are per-chart data; no global choice needs restricting). The
+IsIso-machinery on basic opens is `bijective_idealGenHom_app` (IdealModule:309).
