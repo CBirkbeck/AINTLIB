@@ -218,3 +218,16 @@ Target (validated form): for the chosen B-side dataset over Spec k̄ and chart i
 - REUSE-FIRST checklist before writing L1: grep RelPicLocal.lean + PoincareBiextension.lean
   ("κ(Q) = β(1, −Q∘π)" dictionary + `eq_kappaCls` through the zero-section splitting +
   `kappa_ratio_algebra`) — the κ-vs-O(D)-dictionary may partially exist there.
+
+### L1a reuse verdict (2026-08-11, inventory read)
+`PoincareBiextension.lean` has THE dictionary: `normCls Q = sectionPicCls · zeroPicCls⁻¹`
+([𝒪(D_Q)]·[𝒪(D_0)]⁻¹, the honest divisor classes), `kappaCls` (β-form),
+`kappaCls_eq_normCls_mul` (κ = normCls · π^*-twist), `eq_kappaCls` (any 0^*-killed class
+≡ normCls mod Im π^* IS κ). **Over Spec k the twist DIES (Pic of a field is trivial)** ⟹
+κ(Q) = normCls Q on the nose ⟹ the dataset module M with hM is Pic-equal to
+sectionPicCls·zeroPicCls⁻¹; the L1a trivialisation-comparison runs through the
+sectionDivisor idealModule (r_i = its locallyPrincipal generators). Also available:
+`exists_picMap_pi_sectionPicCls_add` (square, Pic-form) for the [N]^*-computation.
+L1-entry: state over Spec k̄; first brick = "Pic (Spec (CommRingCat.of K)) trivial"
+(mathlib: Pic of local ring / field — check `Pic`-triviality for Spec-of-field; likely
+via projective-modules-over-field free ⟹ small lemma if absent).
