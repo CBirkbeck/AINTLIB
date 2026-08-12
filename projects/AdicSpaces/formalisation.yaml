@@ -13,7 +13,7 @@ generated_by: scripts/gen_formalisation.py
 project:
   name: AdicSpaces
   library: '«Adic spaces»'
-  branch: announce/sheafy-not-stably-uniform
+  branch: wp/strengthenings
   toolchain: 'leanprover/lean4:v4.33.0'
   mathlib_rev: db584cd6d46c
 references:
@@ -28,25 +28,25 @@ references:
   stacks:
     title: 'The Stacks Project'
 summary:
-  modules: 375
-  declarations: 6956
-  public: 6394
-  documented: 5741
+  modules: 393
+  declarations: 7241
+  public: 6657
+  documented: 5935
   declarations_with_sorry: 155
-  results: 1084
-  source_results: 211
+  results: 1101
+  source_results: 212
 groups:
   - id: fjp
     description: 'The finite-jet pinching algebra ([FJP])'
-    modules: 41
-    declarations: 1426
-    results: 166
-    source_results: 24
+    modules: 53
+    declarations: 1655
+    results: 178
+    source_results: 27
     with_sorry: 0
   - id: wp
     description: 'The weighted-parity rationally-stably-reduced example ([WP] §6)'
-    modules: 28
-    declarations: 714
+    modules: 29
+    declarations: 717
     results: 122
     source_results: 46
     with_sorry: 3
@@ -66,10 +66,10 @@ groups:
     with_sorry: 0
   - id: adic-spaces
     description: 'Core adic-spaces development'
-    modules: 259
-    declarations: 4497
-    results: 756
-    source_results: 150
+    modules: 264
+    declarations: 4550
+    results: 761
+    source_results: 151
     with_sorry: 104
 scottish_book:
   description: 'The Nonarchimedean Scottish Book (Kedlaya''s problem list)'
@@ -1228,6 +1228,58 @@ results:
         at: '7.48'
         kind: Proposition
     statement: 'The point of Spv S is determined by a dense subring (the injectivity content of Wedhorn Proposition 7.48 = Huber [Hu2] Prop.'
+  - decl: ValuationSpectrum.pushDatumOfHom
+    kind: def
+    group: adic-spaces
+    module: '«Adic spaces».CornerSquareDatum'
+    file: 'projects/AdicSpaces/Adic spaces/CornerSquareDatum.lean'
+    line: 54
+    status: proved
+    digest: '47636a54ddb9'
+    sources:
+      - ref: fjp
+        at: '5.1'
+        kind: Lemma
+    statement: 'Push a rational datum along a ring hom (image datum, [FJP] Lemma 5.1 generically): s ↦ φ s, T ↦ φ '''' T, target pair of definition supplied.'
+  - decl: ValuationSpectrum.mem_rationalOpen_pushDatumOfHom_iff
+    kind: theorem
+    group: adic-spaces
+    module: '«Adic spaces».CornerSquareDatum'
+    file: 'projects/AdicSpaces/Adic spaces/CornerSquareDatum.lean'
+    line: 70
+    status: proved
+    digest: '33e1ce38b8f0'
+    sources:
+      - ref: fjp
+        at: '5.2'
+        kind: Lemma
+    statement: 'The comap characterization of the pushed rational open ([FJP] Lemma 5.2: "inverse images preserve the defining valuation inequalities").'
+  - decl: ValuationSpectrum.interDatumOfRational
+    kind: def
+    group: adic-spaces
+    module: '«Adic spaces».CornerSquareDatum'
+    file: 'projects/AdicSpaces/Adic spaces/CornerSquareDatum.lean'
+    line: 137
+    status: proved
+    digest: a752c6649882
+    sources:
+      - ref: fjp
+        at: '5.2'
+        kind: Lemma
+    statement: 'The product (intersection) datum of two rational data over one ring ([FJP] Lemma 5.2''s U_{ij} = U_i ∩ U_j, generically).'
+  - decl: ValuationSpectrum.pushDatumOfHom_interOpen
+    kind: theorem
+    group: adic-spaces
+    module: '«Adic spaces».CornerSquareDatum'
+    file: 'projects/AdicSpaces/Adic spaces/CornerSquareDatum.lean'
+    line: 214
+    status: proved
+    digest: '5db348cf65c6'
+    sources:
+      - ref: fjp
+        at: '5.2'
+        kind: Lemma
+    statement: '(U₁ ∩ U₂)_B = (U₁)_B ∩ (U₂)_B on rational opens ([FJP] Lemma 5.2, the pushed-intersection formula, generically; pattern of pushDatumB_interOpen).'
   - decl: ValuationSpectrum.productRestrictionSub_isEmbedding_of_lane_inputs
     kind: theorem
     group: adic-spaces
@@ -8042,12 +8094,25 @@ results:
         at: '8.33'
         kind: Lemma
     statement: 'Wedhorn Lemma 8.33 (base-independent / faithful form): the s=1 2-cover unitCover D₀ f = {R(f/1) ∩ D₀, R(1/f) ∩ D₀} is O_X-acyclic.'
+  - decl: ValuationSpectrum.unitCover_delta_surjective
+    kind: theorem
+    group: adic-spaces
+    module: '«Adic spaces».WedhornCechAcyclicity'
+    file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
+    line: 6949
+    status: proved
+    digest: e59f47d14304
+    sources:
+      - ref: wedhorn
+        at: '8.33'
+        kind: Lemma
+    statement: 'Wedhorn Lemma 8.33, the remaining degree (campaign C-L1): for the unit 2-cover, the difference of the two overlap restrictions is surjective onto the overlap section ring — the full augmented alternating complex 0 → 𝒪(D₀) → 𝒪(U₁) ×…'
   - decl: ValuationSpectrum.RationalCoveringData.IsGeneratedByUnits
     kind: def
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 7109
+    line: 7140
     status: proved
     digest: a71b56410715
     sources:
@@ -8059,7 +8124,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 7169
+    line: 7200
     status: proved
     digest: '208e5629a963'
     sources:
@@ -8071,7 +8136,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 7249
+    line: 7280
     status: proved
     digest: f86e8f8c4cde
     sources:
@@ -8083,7 +8148,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 7305
+    line: 7336
     status: proved
     digest: '80c849729dd2'
     sources:
@@ -8095,7 +8160,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8324
+    line: 8355
     status: proved
     digest: '072730d0b78f'
     sources:
@@ -8109,7 +8174,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8430
+    line: 8461
     status: proved
     digest: e36226f54f14
     sources:
@@ -8121,7 +8186,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8461
+    line: 8492
     status: proved
     digest: '09927a92e90e'
     sources:
@@ -8133,7 +8198,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8504
+    line: 8535
     status: proved
     digest: '98f6771be9c6'
     sources:
@@ -8145,7 +8210,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8550
+    line: 8581
     status: proved
     digest: c785c506abda
     sources:
@@ -8157,7 +8222,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8618
+    line: 8649
     status: proved
     digest: '8ffb4ce0e9c5'
     sources:
@@ -8169,7 +8234,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8661
+    line: 8692
     status: proved
     digest: '86dcf1fbf0a1'
     sources:
@@ -8182,7 +8247,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8882
+    line: 8913
     status: proved
     digest: d711d2badc67
     sources:
@@ -8195,7 +8260,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 10124
+    line: 10155
     status: proved
     digest: '810d3413afcb'
     sources:
@@ -8208,7 +8273,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 10936
+    line: 10967
     status: proved
     digest: '204f257060ad'
     sources:
@@ -8221,7 +8286,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 10995
+    line: 11026
     status: proved
     digest: '94c86d9c37ec'
     sources:
@@ -8233,7 +8298,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 11078
+    line: 11109
     status: proved
     digest: '44056b226f26'
     sources:
@@ -8245,7 +8310,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 11223
+    line: 11254
     status: proved
     digest: '264a564ae3bc'
     sources:
@@ -8257,7 +8322,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 11311
+    line: 11342
     status: proved
     digest: '6d96083dc87b'
     sources:
@@ -8270,7 +8335,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 11367
+    line: 11398
     status: proved
     digest: d37e434ecd62
     sources:
@@ -8282,7 +8347,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12000
+    line: 12031
     status: proved
     digest: '8c4f71ce9d59'
     sources:
@@ -8295,7 +8360,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12272
+    line: 12303
     status: proved
     digest: '37b75052f4ed'
     sources:
@@ -8307,7 +8372,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12321
+    line: 12352
     status: proved
     digest: c904664be9ff
     sources:
@@ -8320,7 +8385,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12445
+    line: 12476
     status: proved
     digest: edf26da9b30d
     sources:
@@ -8334,7 +8399,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12483
+    line: 12514
     status: proved
     digest: a6a16be28080
     sources:
@@ -8349,7 +8414,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12550
+    line: 12581
     status: proved
     digest: '1c8ea96c0ffd'
     sources:
@@ -8361,7 +8426,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12855
+    line: 12886
     status: sorry
     digest: '70bea334860b'
     sources:
@@ -8373,7 +8438,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12985
+    line: 13016
     status: proved
     digest: e5e0d6b50ea8
     sources:
@@ -8388,7 +8453,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 13111
+    line: 13142
     status: proved
     digest: '9b7d9b96a872'
     sources:
@@ -8401,7 +8466,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 13249
+    line: 13280
     status: proved
     digest: '232a30902dee'
     sources:
@@ -8414,7 +8479,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 13312
+    line: 13343
     status: proved
     digest: f183fbfba1d9
     sources:
@@ -8427,7 +8492,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 13363
+    line: 13394
     status: proved
     digest: '709a2ccdc60b'
     sources:
@@ -8439,7 +8504,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 13481
+    line: 13512
     status: proved
     digest: c77a0fdb8f24
     sources:
@@ -10867,6 +10932,96 @@ results:
         at: '5.1'
         kind: Section
     statement: 'A complete discretely valued nonarchimedean field is strongly noetherian ([FJP] §5.1).'
+  - decl: FiniteJet.Pinch.bridgeFwd_natural_B
+    kind: theorem
+    group: fjp
+    module: '«Adic spaces».FJP.CornerSquareBridge'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/CornerSquareBridge.lean'
+    line: 758
+    status: proved
+    digest: '5c898473dd7e'
+    sources:
+      - ref: fjp
+        at: '5.1'
+        kind: Lemma
+    statement: '(N1) Push naturality at B: the B-vertex bridge intertwines the value-level push with the localized locφB ([FJP] Lemma 5.1''s square, bridged).'
+  - decl: FiniteJet.Pinch.extDC_strict_surjective
+    kind: theorem
+    group: fjp
+    module: '«Adic spaces».FJP.CornerSquareLocalization'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/CornerSquareLocalization.lean'
+    line: 136
+    status: proved
+    digest: eb2bd4d26974
+    sources:
+      - ref: fjp
+        at: '4.1'
+        kind: Lemma
+    statement: 'Coefficientwise sectioning: the extended ψC is strictly surjective with constant 1 ([FJP] Lemma 4.1''s κ=1 section, abstractly).'
+  - decl: FiniteJet.Pinch.ext_milnorRow_exact
+    kind: theorem
+    group: fjp
+    module: '«Adic spaces».FJP.CornerSquareLocalization'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/CornerSquareLocalization.lean'
+    line: 169
+    status: proved
+    digest: '622e9fc941cf'
+    sources:
+      - ref: fjp
+        at: '4.1'
+        kind: Lemma
+    statement: 'The extended square is cartesian ([FJP] Lemma 4.1, abstractly): a compatible pair comes from a unique element of P_A, coefficientwise via the base row and the pullback max-norm identity.'
+  - decl: FiniteJet.Pinch.span_pushed_B
+    kind: theorem
+    group: fjp
+    module: '«Adic spaces».FJP.CornerSquareLocalization'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/CornerSquareLocalization.lean'
+    line: 290
+    status: proved
+    digest: e1ed50ced487
+    sources:
+      - ref: fjp
+        at: '4'
+        kind: Section
+    statement: 'The pushed data generate the unit ideal at each vertex ([FJP] §4 after (4.6)).'
+  - decl: FiniteJet.Pinch.isClosed_IA
+    kind: theorem
+    group: fjp
+    module: '«Adic spaces».FJP.CornerSquareLocalization'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/CornerSquareLocalization.lean'
+    line: 656
+    status: proved
+    digest: '505ca5bd0cf4'
+    sources:
+      - ref: fjp
+        at: '4.3'
+        kind: Lemma
+    statement: 'I_A is closed in P_A ([FJP] Lemma 4.3: "Consequently I_R is closed").'
+  - decl: 'FiniteJet.Pinch.locψC_surjective'
+    kind: theorem
+    group: fjp
+    module: '«Adic spaces».FJP.CornerSquareLocalization'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/CornerSquareLocalization.lean'
+    line: 1064
+    status: proved
+    digest: ef1a20aef92b
+    sources:
+      - ref: fjp
+        at: '4.5'
+        kind: Proposition
+    statement: 'C_α → D_α is surjective ([FJP] Prop 4.5).'
+  - decl: FiniteJet.isSheafy_PB
+    kind: theorem
+    group: fjp
+    module: '«Adic spaces».FJP.ExtendedMilnorInstance'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/ExtendedMilnorInstance.lean'
+    line: 692
+    status: proved
+    digest: c763eacaab12
+    sources:
+      - ref: wedhorn
+        at: '8.28(b)'
+    statement: 'Sheafiness of the extended B-corner (Wedhorn 8.28(b), clean form).'
   - decl: FiniteJet.Wa
     kind: def
     group: fjp
@@ -12052,12 +12207,24 @@ results:
       - ref: stacks
         at: '00VR'
     statement: 'The categorical sheaf condition for every completion model of 𝓐 over ℚ_[p] ([Stacks 00VR]) — the CDVF regression witness.'
+  - decl: FiniteJetOver.isSheafy_PB
+    kind: theorem
+    group: fjp
+    module: '«Adic spaces».FJP.Over.ExtendedMilnorInstance'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/Over/ExtendedMilnorInstance.lean'
+    line: 706
+    status: proved
+    digest: '4bf4c34a45c1'
+    sources:
+      - ref: wedhorn
+        at: '8.28(b)'
+    statement: 'Sheafiness of the extended B-corner (Wedhorn 8.28(b), clean form).'
   - decl: FiniteJetOver.pushDatumB
     kind: def
     group: fjp
     module: '«Adic spaces».FJP.Over.Functoriality'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/Functoriality.lean'
-    line: 238
+    line: 98
     status: proved
     digest: '617c204bf189'
     sources:
@@ -12070,7 +12237,7 @@ results:
     group: fjp
     module: '«Adic spaces».FJP.Over.Functoriality'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/Functoriality.lean'
-    line: 297
+    line: 157
     status: proved
     digest: cbb867526192
     sources:
@@ -12083,7 +12250,7 @@ results:
     group: fjp
     module: '«Adic spaces».FJP.Over.Functoriality'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/Functoriality.lean'
-    line: 1955
+    line: 1815
     status: proved
     digest: '838e1aaa5d71'
     sources:
@@ -12096,7 +12263,7 @@ results:
     group: fjp
     module: '«Adic spaces».FJP.Over.Functoriality'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/Functoriality.lean'
-    line: 2026
+    line: 1886
     status: proved
     digest: '765d6b0aaa0b'
     sources:
@@ -12109,7 +12276,7 @@ results:
     group: fjp
     module: '«Adic spaces».FJP.Over.Functoriality'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/Functoriality.lean'
-    line: 2262
+    line: 2122
     status: proved
     digest: bc06ec9f0e94
     sources:
@@ -12122,7 +12289,7 @@ results:
     group: fjp
     module: '«Adic spaces».FJP.Over.Functoriality'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/Functoriality.lean'
-    line: 2361
+    line: 2221
     status: proved
     digest: '6b989a2f1189'
     sources:
@@ -12505,12 +12672,25 @@ results:
         at: '1.3'
         kind: Theorem
     statement: '[FJP] Theorem 1.3 (uniform), layer 2: 𝓐 over a discretely-valued base is uniform.'
-  - decl: FiniteJetOver.finiteJet_not_stablyUniform_of_dvr
+  - decl: FiniteJetOver.finiteJet_powerBounded_eq_unitBall_of_dvr
     kind: theorem
     group: fjp
     module: '«Adic spaces».FJP.Over.SheafyEndpoints'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/SheafyEndpoints.lean'
     line: 269
+    status: proved
+    digest: c35a057d379b
+    sources:
+      - ref: fjp
+        at: '1.1'
+        kind: Theorem
+    statement: '[FJP] Theorem 1.1 (𝓐° = 𝓐₀), layer 2.'
+  - decl: FiniteJetOver.finiteJet_not_stablyUniform_of_dvr
+    kind: theorem
+    group: fjp
+    module: '«Adic spaces».FJP.Over.SheafyEndpoints'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/Over/SheafyEndpoints.lean'
+    line: 275
     status: proved
     digest: '84a502b811b2'
     sources:
@@ -12700,12 +12880,25 @@ results:
         at: '2.3'
         kind: Proposition
     statement: 'Power-boundedness in 𝓐 is having norm at most one ([FJP] Prop 2.3: "If v(a) < 0 … a is not power-bounded.'
+  - decl: FiniteJetOver.powerBoundedSubring_eq_unitBall
+    kind: theorem
+    group: fjp
+    module: '«Adic spaces».FJP.Over.UniformDomain'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/Over/UniformDomain.lean'
+    line: 166
+    status: proved
+    digest: '2a44789a79d5'
+    sources:
+      - ref: fjp
+        at: '1.1'
+        kind: Theorem
+    statement: 'The power-bounded subring of 𝓐 is its unit ball 𝓐₀ ([FJP] Theorem 1.1''s A° = A₀).'
   - decl: FiniteJetOver.isUniform_JetA
     kind: theorem
     group: fjp
     module: '«Adic spaces».FJP.Over.UniformDomain'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/UniformDomain.lean'
-    line: 168
+    line: 177
     status: proved
     digest: bdc6992080c6
     sources:
@@ -12718,7 +12911,7 @@ results:
     group: fjp
     module: '«Adic spaces».FJP.Over.UniformDomain'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/UniformDomain.lean'
-    line: 291
+    line: 300
     status: proved
     digest: a6dafc6c8e94
     sources:
@@ -12731,7 +12924,7 @@ results:
     group: fjp
     module: '«Adic spaces».FJP.Over.UniformDomain'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/UniformDomain.lean'
-    line: 326
+    line: 335
     status: proved
     digest: '2176248cf64b'
     sources:
@@ -12744,7 +12937,7 @@ results:
     group: fjp
     module: '«Adic spaces».FJP.Over.UniformDomain'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/UniformDomain.lean'
-    line: 350
+    line: 359
     status: proved
     digest: f2816540a4d4
     sources:
@@ -12757,7 +12950,7 @@ results:
     group: fjp
     module: '«Adic spaces».FJP.Over.UniformDomain'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/UniformDomain.lean'
-    line: 410
+    line: 419
     status: proved
     digest: '33a180334dfc'
     sources:
@@ -12770,7 +12963,7 @@ results:
     group: fjp
     module: '«Adic spaces».FJP.Over.UniformDomain'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/UniformDomain.lean'
-    line: 459
+    line: 468
     status: proved
     digest: '25b3681e3f19'
     sources:
@@ -12783,7 +12976,7 @@ results:
     group: fjp
     module: '«Adic spaces».FJP.Over.UniformDomain'
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/UniformDomain.lean'
-    line: 464
+    line: 473
     status: proved
     digest: '1ab723c4110a'
     sources:
@@ -12946,6 +13139,32 @@ results:
       - ref: wedhorn
         at: '6.17'
     statement: 'A restricted series with coefficients in 𝔭 lies in the extension ideal, provided the extension ideal is closed (Wedhorn 6.17 input).'
+  - decl: FiniteJet.restrictedNestedEquiv
+    kind: def
+    group: fjp
+    module: '«Adic spaces».FJP.StrongSheafy'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/StrongSheafy.lean'
+    line: 226
+    status: proved
+    digest: d266cb7d856f
+    sources:
+      - ref: wedhorn
+        at: '5.3'
+        kind: Section
+    statement: 'T617: the topological nested Fubini — the k-variable restricted power series over the Tate extension A⟨X₁,…,Xₙ⟩ (with its canonical topology) are the (n+k)-variable restricted power series over A.'
+  - decl: FiniteJet.mvTate_isStronglyNoetherian
+    kind: theorem
+    group: fjp
+    module: '«Adic spaces».FJP.StrongSheafy'
+    file: 'projects/AdicSpaces/Adic spaces/FJP/StrongSheafy.lean'
+    line: 271
+    status: proved
+    digest: '3d507adbd381'
+    sources:
+      - ref: wedhorn
+        at: '6.38'
+        kind: Example
+    statement: 'B-L3 (generic): the Tate extension of a strongly noetherian Tate ring is strongly noetherian.'
   - decl: WeightedParity.Amb
     kind: abbrev
     group: wp
@@ -14711,6 +14930,14 @@ modules:
       - 'wedhorn:5.30(2)'
       - 'wedhorn:5.30(4)'
       - 'wedhorn:5.6'
+  - name: '«Adic spaces».CechAcyclicityFull'
+    group: adic-spaces
+    file: 'projects/AdicSpaces/Adic spaces/CechAcyclicityFull.lean'
+    declarations: 0
+    public: 0
+    with_sorry: 0
+    results: 0
+    sources: []
   - name: '«Adic spaces».CechCohomology'
     group: adic-spaces
     file: 'projects/AdicSpaces/Adic spaces/CechCohomology.lean'
@@ -14720,6 +14947,22 @@ modules:
     results: 1
     sources:
       - 'wedhorn:8.34(i)'
+  - name: '«Adic spaces».CechRationalCover'
+    group: adic-spaces
+    file: 'projects/AdicSpaces/Adic spaces/CechRationalCover.lean'
+    declarations: 15
+    public: 11
+    with_sorry: 0
+    results: 0
+    sources: []
+  - name: '«Adic spaces».CechRefinementCalculus'
+    group: adic-spaces
+    file: 'projects/AdicSpaces/Adic spaces/CechRefinementCalculus.lean'
+    declarations: 5
+    public: 5
+    with_sorry: 0
+    results: 0
+    sources: []
   - name: '«Adic spaces».CharacteristicSubgroup'
     group: adic-spaces
     file: 'projects/AdicSpaces/Adic spaces/CharacteristicSubgroup.lean'
@@ -14804,6 +15047,16 @@ modules:
       - 'wedhorn:7.48'
       - 'wedhorn:7.7'
       - 'wedhorn:7.8(3)'
+  - name: '«Adic spaces».CornerSquareDatum'
+    group: adic-spaces
+    file: 'projects/AdicSpaces/Adic spaces/CornerSquareDatum.lean'
+    declarations: 17
+    public: 17
+    with_sorry: 0
+    results: 4
+    sources:
+      - 'fjp:5.1'
+      - 'fjp:5.2'
   - name: '«Adic spaces».EmbeddingTopo'
     group: adic-spaces
     file: 'projects/AdicSpaces/Adic spaces/EmbeddingTopo.lean'
@@ -15124,6 +15377,14 @@ modules:
       - 'wedhorn:5.51'
       - 'wedhorn:6.1'
       - 'wedhorn:7.20'
+  - name: '«Adic spaces».MilnorSheafTransfer'
+    group: adic-spaces
+    file: 'projects/AdicSpaces/Adic spaces/MilnorSheafTransfer.lean'
+    declarations: 14
+    public: 14
+    with_sorry: 0
+    results: 0
+    sources: []
   - name: '«Adic spaces».MvTateAlgebraTopology'
     group: adic-spaces
     file: 'projects/AdicSpaces/Adic spaces/MvTateAlgebraTopology.lean'
@@ -15253,8 +15514,8 @@ modules:
   - name: '«Adic spaces».PresheafFunctoriality'
     group: adic-spaces
     file: 'projects/AdicSpaces/Adic spaces/PresheafFunctoriality.lean'
-    declarations: 13
-    public: 13
+    declarations: 14
+    public: 14
     with_sorry: 0
     results: 4
     sources:
@@ -16144,10 +16405,10 @@ modules:
   - name: '«Adic spaces».WedhornCechAcyclicity'
     group: adic-spaces
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    declarations: 309
-    public: 142
+    declarations: 310
+    public: 143
     with_sorry: 2
-    results: 48
+    results: 49
     sources:
       - 'huber:Hu3 2.6'
       - 'wedhorn:2.13'
@@ -17133,6 +17394,52 @@ modules:
     results: 4
     sources:
       - 'fjp:5.1'
+  - name: '«Adic spaces».FJP.CornerSquareBridge'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/CornerSquareBridge.lean'
+    declarations: 62
+    public: 60
+    with_sorry: 0
+    results: 1
+    sources:
+      - 'fjp:5.1'
+  - name: '«Adic spaces».FJP.CornerSquareLocalization'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/CornerSquareLocalization.lean'
+    declarations: 63
+    public: 63
+    with_sorry: 0
+    results: 5
+    sources:
+      - 'fjp:4'
+      - 'fjp:4.1'
+      - 'fjp:4.3'
+      - 'fjp:4.5'
+  - name: '«Adic spaces».FJP.ExtendedCornerPackage'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/ExtendedCornerPackage.lean'
+    declarations: 4
+    public: 4
+    with_sorry: 0
+    results: 0
+    sources: []
+  - name: '«Adic spaces».FJP.ExtendedMilnorInstance'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/ExtendedMilnorInstance.lean'
+    declarations: 29
+    public: 24
+    with_sorry: 0
+    results: 1
+    sources:
+      - 'wedhorn:8.28(b)'
+  - name: '«Adic spaces».FJP.ExtendedSheafyTransport'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/ExtendedSheafyTransport.lean'
+    declarations: 5
+    public: 5
+    with_sorry: 0
+    results: 0
+    sources: []
   - name: '«Adic spaces».FJP.FiniteJetChart'
     group: fjp
     file: 'projects/AdicSpaces/Adic spaces/FJP/FiniteJetChart.lean'
@@ -17284,6 +17591,14 @@ modules:
     sources:
       - 'fjp:4'
       - 'fjp:4.5'
+  - name: '«Adic spaces».FJP.MilnorSquareInstance'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/MilnorSquareInstance.lean'
+    declarations: 14
+    public: 8
+    with_sorry: 0
+    results: 0
+    sources: []
   - name: '«Adic spaces».FJP.Over.Chart'
     group: fjp
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/Chart.lean'
@@ -17306,11 +17621,36 @@ modules:
       - 'fjp:1.3'
       - 'stacks:00VR'
       - 'wedhorn:8.20'
+  - name: '«Adic spaces».FJP.Over.ExtendedCornerPackage'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/Over/ExtendedCornerPackage.lean'
+    declarations: 2
+    public: 2
+    with_sorry: 0
+    results: 0
+    sources: []
+  - name: '«Adic spaces».FJP.Over.ExtendedMilnorInstance'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/Over/ExtendedMilnorInstance.lean'
+    declarations: 29
+    public: 24
+    with_sorry: 0
+    results: 1
+    sources:
+      - 'wedhorn:8.28(b)'
+  - name: '«Adic spaces».FJP.Over.ExtendedSheafyTransport'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/Over/ExtendedSheafyTransport.lean'
+    declarations: 5
+    public: 5
+    with_sorry: 0
+    results: 0
+    sources: []
   - name: '«Adic spaces».FJP.Over.Functoriality'
     group: fjp
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/Functoriality.lean'
-    declarations: 173
-    public: 169
+    declarations: 159
+    public: 155
     with_sorry: 0
     results: 6
     sources:
@@ -17350,11 +17690,12 @@ modules:
   - name: '«Adic spaces».FJP.Over.SheafyEndpoints'
     group: fjp
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/SheafyEndpoints.lean'
-    declarations: 35
-    public: 35
+    declarations: 36
+    public: 36
     with_sorry: 0
-    results: 11
+    results: 12
     sources:
+      - 'fjp:1.1'
       - 'fjp:1.3'
       - 'stacks:00VR'
       - 'wedhorn:8.20'
@@ -17373,14 +17714,31 @@ modules:
       - 'fjp:4.2'
       - 'fjp:4.3'
       - 'fjp:4.5'
+  - name: '«Adic spaces».FJP.Over.StrongSheafy'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/Over/StrongSheafy.lean'
+    declarations: 3
+    public: 3
+    with_sorry: 0
+    results: 0
+    sources: []
+  - name: '«Adic spaces».FJP.Over.TateInstances'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/Over/TateInstances.lean'
+    declarations: 14
+    public: 14
+    with_sorry: 0
+    results: 0
+    sources: []
   - name: '«Adic spaces».FJP.Over.UniformDomain'
     group: fjp
     file: 'projects/AdicSpaces/Adic spaces/FJP/Over/UniformDomain.lean'
-    declarations: 33
-    public: 33
+    declarations: 34
+    public: 34
     with_sorry: 0
-    results: 11
+    results: 12
     sources:
+      - 'fjp:1.1'
       - 'fjp:2.3'
       - 'fjp:2.4'
   - name: '«Adic spaces».FJP.QuotientPowFlat'
@@ -17439,6 +17797,16 @@ modules:
     with_sorry: 0
     results: 0
     sources: []
+  - name: '«Adic spaces».FJP.StrongSheafy'
+    group: fjp
+    file: 'projects/AdicSpaces/Adic spaces/FJP/StrongSheafy.lean'
+    declarations: 11
+    public: 11
+    with_sorry: 0
+    results: 2
+    sources:
+      - 'wedhorn:5.3'
+      - 'wedhorn:6.38'
   - name: '«Adic spaces».FJP.TateBallResidue'
     group: fjp
     file: 'projects/AdicSpaces/Adic spaces/FJP/TateBallResidue.lean'
@@ -18059,6 +18427,14 @@ modules:
       - 'wp:cover-coefficientwise'
       - 'wp:parity-strongly-sheafy'
       - 'wp:strong-sheafy-decomposition'
+  - name: '«Adic spaces».WP.StrongSheafy'
+    group: wp
+    file: 'projects/AdicSpaces/Adic spaces/WP/StrongSheafy.lean'
+    declarations: 3
+    public: 3
+    with_sorry: 0
+    results: 0
+    sources: []
   - name: '«Adic spaces».WP.Tail'
     group: wp
     file: 'projects/AdicSpaces/Adic spaces/WP/Tail.lean'

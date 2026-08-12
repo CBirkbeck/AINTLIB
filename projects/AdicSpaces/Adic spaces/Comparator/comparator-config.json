@@ -6,6 +6,8 @@
         "fjp_1_1_isUniform",
         "fjp_1_1_isDomain",
         "fjp_1_1_not_isNoetherianRing",
+        "fjp_1_1_powerBounded_eq_unitBall",
+        "fjp_1_1_stronglySheafy",
         "fjp_1_1_not_isStablyUniform"
     ],
     "permitted_axioms": [

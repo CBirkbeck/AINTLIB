@@ -20,9 +20,7 @@ version: "v0.3"
 
 project:
   name: "AINTLIB / AdicSpaces"
-  authors: ["Christopher Birkbeck"]  # [required] from repo ownership + git history; ADD
-                                   # CO-AUTHORS if others contributed to this formalization
-                                   # (distinct from the source paper's author list).
+  authors: ["Christopher Birkbeck", "Alex Torzewski"]   # [required]
   license: "Apache-2.0"            # [required] matches the repository (LICENSE on `main`,
                                    # commit 1c1c74664) and the Lean file headers. This
                                    # branch forked before that commit and so does not
@@ -37,7 +35,7 @@ sources:
     author_contacted: "no"
     prior_work: "None known in Lean at this scope."
 
-  - title: "Uniform sheafy Tate domains that are not stably uniform"
+  - title: "Uniform sheafy Tate rings that are not stably uniform"
     authors: ["Christopher Birkbeck", "Alex Torzewski"]
     id: "fjp"
     type: "preprint"
@@ -67,15 +65,17 @@ sources:
 status:
   scope: >-
     Huber/Tate rings, adic spectra, rational localizations and the structure presheaf
-    (Wedhorn); the finite-jet pinching algebra (Theorem 1.1) and its chart, over the
-    restricted Laurent-series base of the paper's earlier revision (any coefficient field)
-    with a generic-CDVF layer (`FiniteJetOver`); the weighted-parity algebra
-    (Theorem 8.1) — uniform, strongly sheafy, not stably uniform with a domain chart —
-    over an abstract complete ultrametric nonarchimedean field whose valuation ring is a
-    DVR; and formal statements of the Nonarchimedean Scottish Book problem list.
-  sorry_count: 0                   # scope: the formalization reported here — the twelve
-                                   # certified endpoints (five for Theorem 1.1, seven for
-                                   # Theorem 8.1) and their full proof closures. Their axiom
+    (Wedhorn); the finite-jet ring (Theorem 1.1) and its chart; the weighted-parity algebra
+    (Theorem 8.1) — both uniform, strongly sheafy, non-noetherian domains with `A° = A₀`
+    that are not stably uniform, the first with a non-reduced bad chart and the second with
+    a bad chart that is an integral domain; and formal statements of the Nonarchimedean
+    Scottish Book problem list. Both theorems are certified over an abstract complete
+    ultrametric nonarchimedean field whose valuation ring is a DVR, not over a fixed witness
+    field. A parallel finite-jet development over the concrete base `LaurentSeries F` is also
+    present (`FiniteJet`, as against the certified `FiniteJetOver`).
+  sorry_count: 0                   # scope: the formalization reported here — the fourteen
+                                   # certified endpoints (seven per theorem) and their full
+                                   # proof closures. Their axiom
                                    # sets are exactly [propext, Classical.choice, Quot.sound]
                                    # (no sorryAx), checked per-result by comparator. The
                                    # wider repository tree carries WIP `sorry`s outside this
@@ -86,15 +86,15 @@ status:
   axioms: ["propext", "Classical.choice", "Quot.sound"]
 
   main_results:
-    - declaration: "FiniteJet.finiteJet_isSheafy"
-      file: "Adic spaces/FJP/FiniteJetMain.lean"
+    - declaration: "FiniteJetOver.isSheafy_JetA_of_dvr"
+      file: "Adic spaces/FJP/Over/SheafTransfer.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
       comparator_config: "Adic spaces/Comparator/comparator-config.json"
       literature_dependencies: []
 
-    - declaration: "FiniteJet.finiteJet_not_stablyUniform"
-      file: "Adic spaces/FJP/FiniteJetMain.lean"
+    - declaration: "FiniteJetOver.finiteJet_not_stablyUniform_of_dvr"
+      file: "Adic spaces/FJP/Over/SheafyEndpoints.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
       comparator_config: "Adic spaces/Comparator/comparator-config.json"

@@ -265,6 +265,12 @@ theorem finiteJet_isUniform_of_dvr [IsDiscreteValuationRing 𝒪[K]] :
     TopologicalRing.IsUniform (JetA K) :=
   finiteJet_isUniform K (Uniformizer.ofDVR K)
 
+/-- **[FJP] Theorem 1.1 (`𝓐° = 𝓐₀`), layer 2**. -/
+theorem finiteJet_powerBounded_eq_unitBall_of_dvr [IsDiscreteValuationRing 𝒪[K]] :
+    TopologicalRing.powerBoundedSubring (JetA K) =
+      (FiniteJet.unitBall (JetA K) : Set (JetA K)) :=
+  powerBoundedSubring_eq_unitBall (Uniformizer.ofDVR K)
+
 /-- **[FJP] Theorem 1.3 (not stably uniform), layer 2**. -/
 theorem finiteJet_not_stablyUniform_of_dvr [IsDiscreteValuationRing 𝒪[K]] :
     ¬ TopologicalRing.IsStablyUniform (JetA K) :=

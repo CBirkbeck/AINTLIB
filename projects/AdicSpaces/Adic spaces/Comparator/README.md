@@ -2,7 +2,7 @@
 
 Kernel-level certification, via
 [`leanprover/comparator`](https://github.com/leanprover/comparator), of the two headline
-theorems of *Uniform sheafy Tate domains that are not stably uniform* (Birkbeck–Torzewski,
+theorems of *Uniform sheafy Tate rings that are not stably uniform* (Birkbeck–Torzewski,
 <https://cbirkbeck.github.io/uniform-sheafy-tate-domains/>):
 
 * **[FJP] Theorem 1.1** (`thm:main`; the finite-jet pinching algebra): `𝓐 = JetA F` is a
@@ -20,8 +20,8 @@ numbering (`fjp_1_1_*`, `wp_8_1_*`).
 
 | file | role |
 |---|---|
-| `Challenge.lean` | [FJP] Thm 1.1: the five statements, each `:= sorry` |
-| `Solution.lean` | the same five, forwarded to the library's proofs |
+| `Challenge.lean` | [FJP] Thm 1.1: the seven statements, each `:= sorry` |
+| `Solution.lean` | the same seven, forwarded to the library's proofs |
 | `comparator-config.json` | `theorem_names` + `permitted_axioms` for the above |
 | `WPChallenge.lean` | [WP] Thm 8.1: the seven statements, each `:= sorry` |
 | `WPSolution.lean` | the same seven, forwarded to the library's proofs |
@@ -60,10 +60,13 @@ development agree.
 Each challenge imports only the **definition layer**, and its import closure provably
 contains none of the modules that prove the statements being judged:
 
-* `Challenge.lean` imports `FJP.FiniteJetRings` + `Uniform`. Closure: 107 project modules,
-  containing no `FJP.*` beyond `FiniteJetRings` and `RestrictedLaurent` — in particular
-  none of `FiniteJetMain`, `FiniteJetSheafyEndpoints`, `FiniteJetSheafTransfer`,
-  `FiniteJetChart`, `FiniteJetUniformDomain`, `FiniteJetNoetherianVertices`.
+* `Challenge.lean` imports `FJP.Over.TateInstances` + `MvTateAlgebraTopology` +
+  `SheafyRing` + `Uniform`. Closure: 117 project modules, containing exactly five `FJP.*`
+  modules — `CDVFBase`, `FiniteJetRings`, `RestrictedLaurent`, `Over.JetRings`,
+  `Over.TateInstances`, all definition layer. In particular none of `Over.Chart`,
+  `Over.UniformDomain`, `Over.StrictLocalization`, `Over.SheafTransfer`,
+  `Over.SheafyEndpoints`, `Over.StrongSheafy`, `Over.ExtendedMilnorInstance`,
+  `Over.Functoriality`, or any of the Laurent proving chain.
 * `WPChallenge.lean` imports `WP.Algebra` + `SheafyRing` + `Uniform`. Closure: 118 project
   modules, containing no `WP.*` beyond `Algebra`, `Weight`, `RestrictedComplete` — in
   particular none of `WP.Main`, `WP.Sheafy`, `WP.UniformDomain`, `WP.Nonnoetherian`,
@@ -72,12 +75,19 @@ contains none of the modules that prove the statements being judged:
 Do not "fix" a mismatch by importing more here. That trades away the only property these
 files exist to provide.
 
-Two statement-spelling conventions keep proving-layer names out of the trusted side:
+Three statement-spelling conventions keep proving-layer names out of the trusted side:
 
 * the paper's weight `w = id` is spelled `fun k => k` in both WP files — the library
   abbreviation `idWeight` lives in the proving module `WP/Main.lean`;
-* the WP statements sit on the layer-2 base (`[IsDiscreteValuationRing 𝒪[K]]`), where the
-  uniformizer is chosen by the solution (`Uniformizer.ofDVR`) rather than carried as data.
+* both certificates' statements sit on the layer-2 base (`[IsDiscreteValuationRing 𝒪[K]]`),
+  where the uniformizer is chosen by the solution (`Uniformizer.ofDVR`) rather than carried
+  as data;
+* `fjp_1_1_stronglySheafy`'s instance telescope is spelled from the base-agnostic
+  `MvTateAlgebraTopology` stack — its completeness slot is
+  `mvTate_completeSpace … inferInstance`, not the library's one-line wrapper
+  `FiniteJetOver.finiteJet_tateExt_completeSpace`, which lives in the proving module
+  `Over/StrongSheafy.lean`. The two are definitionally equal, so the solution still closes
+  by forwarding.
 
 ## Why `Solution.lean` is a separate file and not the library module
 
@@ -97,10 +107,13 @@ Lean default kernel accepts the solution
 Your solution is okay!        # exit 0
 ```
 
-**[FJP] Theorem 1.1 — all five statements certified** (statement pinned against
+**[FJP] Theorem 1.1 — all seven statements certified** (statement pinned against
 `Challenge.lean`, kernel-accepted, axioms within `propext / Quot.sound /
 Classical.choice`): `fjp_1_1_isSheafy`, `fjp_1_1_isUniform`, `fjp_1_1_isDomain`,
-`fjp_1_1_not_isNoetherianRing`, `fjp_1_1_not_isStablyUniform`.
+`fjp_1_1_not_isNoetherianRing`, `fjp_1_1_powerBounded_eq_unitBall`,
+`fjp_1_1_stronglySheafy`, `fjp_1_1_not_isStablyUniform` — all over a *general* base (an
+arbitrary complete ultrametric nontrivially-normed field whose valuation ring is a DVR),
+not over the concrete witness `LaurentSeries F`.
 
 This includes the two statements (`isSheafy`, `not_isStablyUniform`) that were **not**
 certifiable in the 2026-08-01 run on `dev/adic-spaces`: there, an anonymous

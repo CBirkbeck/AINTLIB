@@ -4,24 +4,25 @@
 **mathlib:** release tag `v4.33.0` (`db584cd6d46c`)
 
 This branch is a self-contained, inspectable snapshot of the Lean formalisation of the two
-headline theorems of *Uniform sheafy Tate domains that are not stably uniform*
+headline theorems of *Uniform sheafy Tate rings that are not stably uniform*
 (Birkbeck–Torzewski, <https://cbirkbeck.github.io/uniform-sheafy-tate-domains/>):
 
 1. **Theorem 1.1 — the finite-jet pinching algebra** (cited `[FJP]` in the Lean
-   docstrings, as Thm 1.3 of the revision they were written against). `𝓐 = JetA F` is a
-   complete uniform Tate domain, nonnoetherian, **sheafy**, and **not stably uniform** —
-   the bad rational localization `𝓐⟨W/ϖ⟩` acquires a nilpotent.
-   * Statements: `Adic spaces/FJP/FiniteJetMain.lean` (five endpoints).
-   * A generic-base layer (`Adic spaces/FJP/Over/SheafyEndpoints.lean`) states the
-     ring-level endpoints over an abstract complete discretely valued nonarchimedean field.
+   docstrings, as Thm 1.3 of the revision they were written against). `𝓐 = JetA K` is a
+   complete uniform Tate domain, nonnoetherian, with `𝓐° = 𝓐₀`, **strongly sheafy**, and
+   **not stably uniform** — the bad rational localization `𝓐⟨W/ϖ⟩` acquires a nilpotent.
+   * Statements: `Adic spaces/FJP/Over/SheafyEndpoints.lean` and `Over/StrongSheafy.lean`
+     (seven endpoints), over an abstract complete ultrametric nonarchimedean field whose
+     valuation ring is a DVR — the declarations the paper's own `<lean>` references cite.
+   * A parallel development over the concrete witness base `LaurentSeries F` lives in
+     `Adic spaces/FJP/` (`FiniteJet.JetA F`, endpoints in `FJP/FiniteJetMain.lean`).
 2. **Theorem 8.1 — the weighted-parity algebra** (cited `[WP] thm 6.2` in the Lean
    docstrings). `𝒜 = WPA K id` is a complete uniform Tate domain, nonnoetherian, with
    `𝒜° = 𝒜₀`, **strongly sheafy**, and **not stably uniform** — and here the bad chart is
    an integral domain, so the failure of stable uniformity is *not* caused by a nilpotent.
    * Statements: `Adic spaces/WP/Main.lean` (headline endpoints, two base layers).
 
-All twelve certified statements (five for Theorem 1.1, seven for Theorem 8.1) are
-kernel-certified; see below.
+All fourteen certified statements (seven per theorem) are kernel-certified; see below.
 
 ## Why this toolchain
 
@@ -42,7 +43,7 @@ replayed through the Lean kernel. Both runs end `Your solution is okay!`. See
 `Adic spaces/Comparator/README.md` for the trust boundary and the full status, and run:
 
 ```sh
-bash projects/AdicSpaces/scripts/certify.sh                    # Theorem 1.1 (five statements)
+bash projects/AdicSpaces/scripts/certify.sh                    # Theorem 1.1 (seven statements)
 CONFIG="projects/AdicSpaces/Adic spaces/Comparator/wp-config.json" \
   bash projects/AdicSpaces/scripts/certify.sh                  # Theorem 8.1 (seven statements)
 ```
@@ -83,7 +84,7 @@ announcement's path, owned by the central bump process):
 
 ## Sorry policy on this branch
 
-**Every certified statement — all twelve — has a `sorry`-free proof closure**; the axiom
+**Every certified statement — all fourteen — has a `sorry`-free proof closure**; the axiom
 set of each is exactly `[propext, Quot.sound, Classical.choice]`, verified by
 `#print axioms` and re-checked by comparator. The wider repository tree contains `sorry`s
 outside this announcement's scope: the Nonarchimedean Scottish Book *statements* (open

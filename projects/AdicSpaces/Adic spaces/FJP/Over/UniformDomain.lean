@@ -161,6 +161,15 @@ theorem isPowerBounded_JetA_iff (ϖ : Uniformizer K) (a : JetA K) :
       _ = ‖y‖ := one_mul _
       _ < ε := hy
 
+/-- The power-bounded subring of 𝓐 is its unit ball 𝓐₀ ([FJP] Theorem 1.1's `A° = A₀`).
+The generic-base counterpart of `WeightedParity.powerBoundedSubring_eq_unitBall`. -/
+theorem powerBoundedSubring_eq_unitBall (ϖ : Uniformizer K) :
+    powerBoundedSubring (JetA K) = (FiniteJet.unitBall (JetA K) : Set (JetA K)) := by
+  ext a
+  rw [show a ∈ powerBoundedSubring (JetA K) ↔ IsPowerBounded a from Iff.rfl,
+    isPowerBounded_JetA_iff ϖ a]
+  exact (FiniteJet.mem_unitBall_iff _ a).symm
+
 set_option maxHeartbeats 1000000 in
 /-- The power-bounded subring of 𝓐 is bounded — **𝓐 is uniform**
 ([FJP] Prop 2.3: "The ring 𝒜 is a complete uniform Tate k-algebra"; any base-field
