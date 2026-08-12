@@ -170,6 +170,24 @@ theorem injective' (h : IsLimitSheaf A) (hle : ∀ i, U i ≤ V)
   rintro ⟨W, i, rfl⟩
   exact hxy i
 
+/-- **Well-definedness core for gluing**: on two cover members that refine each
+other, the section at one restricts to the section at the other. -/
+private theorem limitRestrict_eq_of_le
+    (s : ∀ i, ↥(limitSections (U i)))
+    (hs : ∀ i j, limitRestrict (inf_le_left (a := U i) (b := U j)) (s i) =
+                 limitRestrict (inf_le_right (a := U i) (b := U j)) (s j))
+    (i j : ι) (hUij : U i ≤ U j) :
+    limitRestrict hUij (s j) = s i := by
+  have h₁ : U i ≤ U i ⊓ U j := le_inf le_rfl hUij
+  calc limitRestrict hUij (s j)
+      = limitRestrict h₁ (limitRestrict (inf_le_right (a := U i) (b := U j)) (s j)) :=
+        (limitRestrict_limitRestrict h₁ inf_le_right (s j)).symm
+    _ = limitRestrict h₁ (limitRestrict (inf_le_left (a := U i) (b := U j)) (s i)) := by
+        rw [hs i j]
+    _ = limitRestrict (h₁.trans inf_le_left) (s i) :=
+        limitRestrict_limitRestrict h₁ inf_le_left (s i)
+    _ = s i := limitRestrict_self _ (s i)
+
 /-- Gluing for covers indexed in an arbitrary universe. -/
 theorem glue' (h : IsLimitSheaf A) (hle : ∀ i, U i ≤ V)
     (hcov : (V : Set ↥(Spa A A⁺)) ⊆ ⋃ i, (U i : Set ↥(Spa A A⁺)))
@@ -181,17 +199,8 @@ theorem glue' (h : IsLimitSheaf A) (hle : ∀ i, U i ≤ V)
   -- the well-definedness core: sections at equal cover members agree after
   -- restriction along the equality
   have hkey : ∀ (i j : ι) (hUij : U i ≤ U j), U j ≤ U i →
-      limitRestrict hUij (s j) = s i := by
-    intro i j hUij hUji
-    have h₁ : U i ≤ U i ⊓ U j := le_inf le_rfl hUij
-    calc limitRestrict hUij (s j)
-        = limitRestrict h₁ (limitRestrict (inf_le_right (a := U i) (b := U j)) (s j)) :=
-          (limitRestrict_limitRestrict h₁ inf_le_right (s j)).symm
-      _ = limitRestrict h₁ (limitRestrict (inf_le_left (a := U i) (b := U j)) (s i)) := by
-          rw [hs i j]
-      _ = limitRestrict (h₁.trans inf_le_left) (s i) :=
-          limitRestrict_limitRestrict h₁ inf_le_left (s i)
-      _ = s i := limitRestrict_self _ (s i)
+      limitRestrict hUij (s j) = s i :=
+    fun i j hUij _ => limitRestrict_eq_of_le s hs i j hUij
   have hle' : ∀ W : RangeIndex U, W.1 ≤ V := by
     rintro ⟨W, i, rfl⟩; exact hle i
   have hcov' : (V : Set ↥(Spa A A⁺)) ⊆
@@ -427,6 +436,74 @@ private def inducedLimitTopology {V : Opens ↥(Spa A A⁺)} {ι : Type u}
     TopologicalSpace ↥(limitSections V) :=
   TopologicalSpace.induced (limitRestrictProd hle) inferInstance
 
+/-- **Element-level separation from the bundled sheaf condition**: two sections that
+agree on a cover are equal, obtained by probing with the discrete polynomial test
+object and reading off the coefficient of `X`. -/
+private theorem isLimitSheaf_separation_of_sheaf (hsheaf : IsSheafOfTopologicalRings A)
+    {V : Opens ↥(Spa A A⁺)} {ι : Type u} {U : ι → Opens ↥(Spa A A⁺)}
+    (hle : ∀ i, U i ≤ V)
+    (hcov : (V : Set ↥(Spa A A⁺)) ⊆ ⋃ i, (U i : Set ↥(Spa A A⁺)))
+    {x y : ↥(limitSections V)}
+    (hxy : ∀ i, limitRestrict (hle i) x = limitRestrict (hle i) y) : x = y := by
+  -- both element probes glue the same compatible family
+  obtain ⟨g, -, hguniq⟩ := hsheaf PolyProbe hle hcov
+    (fun i => polyProbeEval (limitRestrict (hle i) x))
+    (fun i => continuous_of_discreteTopology)
+    (fun i j => by
+      rw [polyProbeEval_comp, polyProbeEval_comp, limitRestrict_limitRestrict,
+        limitRestrict_limitRestrict])
+  have hx := hguniq ⟨polyProbeEval x, continuous_of_discreteTopology⟩
+    (fun i => polyProbeEval_comp (limitRestrict (hle i)) x)
+  have hy := hguniq ⟨polyProbeEval y, continuous_of_discreteTopology⟩
+    (fun i => by rw [polyProbeEval_comp, hxy i])
+  have hkey : polyProbeEval (R := ↥(limitSections V)) x = polyProbeEval y := by
+    have := hx.trans hy.symm
+    exact congrArg Subtype.val this
+  calc x = polyProbeEval (R := ↥(limitSections V)) x (ULift.up Polynomial.X) :=
+        (polyProbeEval_X x).symm
+    _ = polyProbeEval (R := ↥(limitSections V)) y (ULift.up Polynomial.X) := by
+        rw [hkey]
+    _ = y := polyProbeEval_X y
+
+/-- The topology induced on `limitSections V` by the restriction maps to a cover is a
+ring topology: the inducing map is a ring homomorphism in each component, so `+`, `*`
+and `-` all factor through it. No sheaf hypothesis is involved. -/
+private theorem isTopologicalRing_inducedLimitTopology {V : Opens ↥(Spa A A⁺)}
+    {ι : Type u} {U : ι → Opens ↥(Spa A A⁺)} (hle : ∀ i, U i ≤ V) :
+    @IsTopologicalRing ↥(limitSections V) (inducedLimitTopology hle) _ := by
+  have hcontProd : Continuous[inducedLimitTopology hle, _] (limitRestrictProd hle) :=
+    continuous_induced_dom
+  letI := inducedLimitTopology hle
+  have hadd : (limitRestrictProd hle) ∘
+      (fun p : ↥(limitSections V) × ↥(limitSections V) => p.1 + p.2) =
+      fun p => limitRestrictProd hle p.1 + limitRestrictProd hle p.2 := by
+    funext p
+    funext i
+    exact map_add (limitRestrict (hle i)) p.1 p.2
+  have hmul : (limitRestrictProd hle) ∘
+      (fun p : ↥(limitSections V) × ↥(limitSections V) => p.1 * p.2) =
+      fun p => limitRestrictProd hle p.1 * limitRestrictProd hle p.2 := by
+    funext p
+    funext i
+    exact map_mul (limitRestrict (hle i)) p.1 p.2
+  have hneg : (limitRestrictProd hle) ∘
+      (fun z : ↥(limitSections V) => -z) =
+      fun z => -(limitRestrictProd hle z) := by
+    funext z
+    funext i
+    exact map_neg (limitRestrict (hle i)) z
+  refine { continuous_add := ?_, continuous_mul := ?_, continuous_neg := ?_ }
+  · refine continuous_induced_rng.mpr ?_
+    rw [hadd]
+    exact (hcontProd.comp continuous_fst).add (hcontProd.comp continuous_snd)
+  · refine continuous_induced_rng.mpr ?_
+    rw [hmul]
+    exact (hcontProd.comp continuous_fst).mul (hcontProd.comp continuous_snd)
+  · refine continuous_induced_rng.mpr ?_
+    rw [hneg]
+    exact hcontProd.neg
+
+
 /-- **Wedhorn Remark 8.20** for the all-open structure presheaf: the representable
 condition ("for every topological ring `T`, `Hom(T, 𝒪_X(−))` is a sheaf of sets") is
 equivalent to the concrete pair (ring-sheaf axioms) + (topological embedding into the
@@ -444,32 +521,7 @@ theorem isSheafOfTopologicalRings_iff_isLimitSheaf :
   constructor
   · intro hsheaf
     -- element-level separation, via the discrete polynomial probe
-    have hinj : ∀ {V : Opens ↥(Spa A A⁺)} {ι : Type u} {U : ι → Opens ↥(Spa A A⁺)}
-        (hle : ∀ i, U i ≤ V)
-        (_ : (V : Set ↥(Spa A A⁺)) ⊆ ⋃ i, (U i : Set ↥(Spa A A⁺)))
-        {x y : ↥(limitSections V)},
-        (∀ i, limitRestrict (hle i) x = limitRestrict (hle i) y) → x = y := by
-      intro V ι U hle hcov x y hxy
-      -- both element probes glue the same compatible family
-      obtain ⟨g, -, hguniq⟩ := hsheaf PolyProbe hle hcov
-        (fun i => polyProbeEval (limitRestrict (hle i) x))
-        (fun i => continuous_of_discreteTopology)
-        (fun i j => by
-          rw [polyProbeEval_comp, polyProbeEval_comp, limitRestrict_limitRestrict,
-            limitRestrict_limitRestrict])
-      have hx := hguniq ⟨polyProbeEval x, continuous_of_discreteTopology⟩
-        (fun i => polyProbeEval_comp (limitRestrict (hle i)) x)
-      have hy := hguniq ⟨polyProbeEval y, continuous_of_discreteTopology⟩
-        (fun i => by rw [polyProbeEval_comp, hxy i])
-      have hkey : polyProbeEval (R := ↥(limitSections V)) x = polyProbeEval y := by
-        have := hx.trans hy.symm
-        exact congrArg Subtype.val this
-      calc x = polyProbeEval (R := ↥(limitSections V)) x (ULift.up Polynomial.X) :=
-            (polyProbeEval_X x).symm
-        _ = polyProbeEval (R := ↥(limitSections V)) y (ULift.up Polynomial.X) := by
-            rw [hkey]
-        _ = y := polyProbeEval_X y
-    refine ⟨fun hle hcov => hinj hle hcov, ?_, ?_⟩
+    refine ⟨fun hle hcov => isLimitSheaf_separation_of_sheaf hsheaf hle hcov, ?_, ?_⟩
     · -- element-level gluing, via the discrete polynomial probe
       intro V ι U hle hcov s hs
       obtain ⟨g, hg, -⟩ := hsheaf PolyProbe hle hcov
@@ -487,36 +539,7 @@ theorem isSheafOfTopologicalRings_iff_isLimitSheaf :
         continuous_induced_dom
       -- the induced topology is a ring topology (the target is a topological ring
       -- and the inducing map is a ring homomorphism component-wise)
-      have σring : @IsTopologicalRing ↥(limitSections V) (inducedLimitTopology hle) _ := by
-        letI := inducedLimitTopology hle
-        have hadd : (limitRestrictProd hle) ∘
-            (fun p : ↥(limitSections V) × ↥(limitSections V) => p.1 + p.2) =
-            fun p => limitRestrictProd hle p.1 + limitRestrictProd hle p.2 := by
-          funext p
-          funext i
-          exact map_add (limitRestrict (hle i)) p.1 p.2
-        have hmul : (limitRestrictProd hle) ∘
-            (fun p : ↥(limitSections V) × ↥(limitSections V) => p.1 * p.2) =
-            fun p => limitRestrictProd hle p.1 * limitRestrictProd hle p.2 := by
-          funext p
-          funext i
-          exact map_mul (limitRestrict (hle i)) p.1 p.2
-        have hneg : (limitRestrictProd hle) ∘
-            (fun z : ↥(limitSections V) => -z) =
-            fun z => -(limitRestrictProd hle z) := by
-          funext z
-          funext i
-          exact map_neg (limitRestrict (hle i)) z
-        refine { continuous_add := ?_, continuous_mul := ?_, continuous_neg := ?_ }
-        · refine continuous_induced_rng.mpr ?_
-          rw [hadd]
-          exact (hcontProd.comp continuous_fst).add (hcontProd.comp continuous_snd)
-        · refine continuous_induced_rng.mpr ?_
-          rw [hmul]
-          exact (hcontProd.comp continuous_fst).mul (hcontProd.comp continuous_snd)
-        · refine continuous_induced_rng.mpr ?_
-          rw [hneg]
-          exact hcontProd.neg
+      have σring := isTopologicalRing_inducedLimitTopology hle
       -- restriction homomorphisms are continuous from the induced topology
       have hfc : ∀ i, Continuous[inducedLimitTopology hle, _] (limitRestrict (hle i)) :=
         fun i => @Continuous.comp ↥(limitSections V) (∀ j, ↥(limitSections (U j)))
@@ -529,7 +552,7 @@ theorem isSheafOfTopologicalRings_iff_isLimitSheaf :
       -- the glued homomorphism is the identity, by element-level separation
       have hgid : ∀ z, g.1 z = z := by
         intro z
-        refine hinj hle hcov fun i => ?_
+        refine isLimitSheaf_separation_of_sheaf hsheaf hle hcov fun i => ?_
         exact DFunLike.congr_fun (hg i) z
       -- hence the identity is continuous from the induced topology to the
       -- projective-limit topology, which forces the two to agree
@@ -543,7 +566,8 @@ theorem isSheafOfTopologicalRings_iff_isLimitSheaf :
         refine ⟨le_antisymm ?_ hστ⟩
         exact continuous_iff_le_induced.mp
           (continuous_pi fun i => limitRestrict_continuous (hle i))
-      exact ⟨hind, fun x y hxy => hinj hle hcov fun i => congr_fun hxy i⟩
+      exact ⟨hind, fun x y hxy =>
+        isLimitSheaf_separation_of_sheaf hsheaf hle hcov fun i => congr_fun hxy i⟩
   · intro hlimit T _ _ _ V ι U hle hcov f hfc hcompat
     exact hlimit.homGlue hle hcov f hfc hcompat
 
@@ -663,6 +687,41 @@ theorem structurePresheaf_isSheafOfTopologicalRings_iff :
       calc g' t = limitRestrict hVeq.le (limitRestrict hVeq.ge (g' t)) := rfl
         _ = limitRestrict hVeq.le (g₀ t) := hstep
   · exact structurePresheaf_isSheafOfTopologicalRings A
+
+variable (A) in
+/-- **The standard formulation, over `TopCommRingCat`**: the public structure
+presheaf, pushed along the forgetful functor into the category of plain topological
+commutative rings, satisfies mathlib's categorical sheaf condition **iff** the pair
+is sheafy. The categorical condition tests `Hom(E, −)`-gluing along the objects of
+the value category; over `TopCommRingCat` those are exactly Wedhorn's arbitrary
+topological test rings (Remark 8.20), so — unlike the `CompleteTopCommRingCat`-valued
+condition, where only the forward implication `structurePresheaf_isSheaf` is
+available — this is an equivalence. -/
+theorem structurePresheaf_forgetToTopCommRingCat_isSheaf_iff :
+    TopCat.Presheaf.IsSheaf
+        (structurePresheaf A ⋙ CompleteTopCommRingCat.forgetToTopCommRingCat) ↔
+      IsLimitSheaf A :=
+  (TopCat.Presheaf.isSheafOfTopologicalRings_iff_forgetToTopCommRingCat_isSheaf
+        (structurePresheaf A)).symm.trans
+    (structurePresheaf_isSheafOfTopologicalRings_iff A)
+
+variable (A) in
+/-- **The finite rational-cover criterion is exactly mathlib's sheaf condition over
+`TopCommRingCat`** — the full chain endpoint
+`IsSheafy ↔ IsLimitSheaf ↔ IsSheafOfTopologicalRings ↔ categorical IsSheaf`:
+the project's rational-basis criterion `IsSheafy A` holds iff the bundled public
+structure presheaf, viewed in `TopCommRingCat` through the forgetful functor,
+satisfies mathlib's `IsSheaf`. -/
+theorem isSheafy_iff_structurePresheaf_forgetToTopCommRingCat_isSheaf
+    [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] :
+    IsSheafy A ↔
+      TopCat.Presheaf.IsSheaf
+        (structurePresheaf A ⋙ CompleteTopCommRingCat.forgetToTopCommRingCat) :=
+  isSheafy_iff_isLimitSheaf.trans
+    (structurePresheaf_forgetToTopCommRingCat_isSheaf_iff A).symm
 
 /-! ### Affinoid and adic presentations (towards Definitions 8.21/8.22) -/
 

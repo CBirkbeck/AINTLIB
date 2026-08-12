@@ -19,6 +19,13 @@ Wedhorn Remark 8.20's condition, stated for an **arbitrary** presheaf
   mathlib's categorical sheaf condition for `F` ([Stacks 00VR]: the categorical
   condition *is* the `Hom(E, −)`-by-`E` condition tested along the objects of
   `CompleteTopCommRingCat`, which are among the test rings).
+* `TopCat.Presheaf.isSheafOfTopologicalRings_iff_forgetToTopCommRingCat_isSheaf` —
+  the condition is **equivalent** to mathlib's categorical sheaf condition for the
+  `TopCommRingCat`-valued presheaf `F ⋙ CompleteTopCommRingCat.forgetToTopCommRingCat`:
+  the objects of `TopCommRingCat` are *exactly* Wedhorn's arbitrary topological
+  commutative test rings, so Remark 8.20 is literally mathlib's `IsSheaf` there
+  (whereas over `CompleteTopCommRingCat` only the one-way implication above holds,
+  the test class being restricted to complete separated rings).
 
 `VObj` (`StructureSheaf.lean`) stores this condition — not merely the underlying
 ring-presheaf's categorical `IsSheaf` (which forgets the topological-embedding
@@ -81,6 +88,41 @@ theorem IsSheafOfTopologicalRings.isSheaf
   have := hguniq ⟨s'.1, s'.2⟩ (fun i => congrArg Subtype.val (hs' i))
   exact Subtype.ext (congrArg Subtype.val this)
 
+/-- **Wedhorn Remark 8.20 is exactly mathlib's sheaf condition over
+`TopCommRingCat`**: the Hom-sheaf condition holds iff the composition with the
+forgetful functor to plain topological commutative rings satisfies mathlib's
+categorical `IsSheaf`. Mathlib's condition tests `Hom(E, −)`-gluing along the
+objects `E` of the value category ([Stacks 00VR]); the objects of `TopCommRingCat`
+are **exactly** Wedhorn's arbitrary topological commutative test rings, so — unlike
+the `CompleteTopCommRingCat`-valued condition (`IsSheafOfTopologicalRings.isSheaf`,
+one-way, test class restricted to complete separated rings) — the two conditions
+coincide. -/
+theorem isSheafOfTopologicalRings_iff_forgetToTopCommRingCat_isSheaf :
+    F.IsSheafOfTopologicalRings ↔
+      TopCat.Presheaf.IsSheaf
+        (F ⋙ CompleteTopCommRingCat.forgetToTopCommRingCat) := by
+  constructor
+  · -- the categorical test objects are among Wedhorn's test rings
+    intro h E
+    rw [← CategoryTheory.isSheaf_iff_isSheaf_of_type]
+    refine (TopCat.Presheaf.isSheaf_iff_isSheafUniqueGluing_types _).mpr ?_
+    intro ι U sf hsf
+    obtain ⟨g, hg, hguniq⟩ := h E.α E.isCommRing E.isTopologicalSpace
+      E.isTopologicalRing U (fun i => ⟨(sf i).1, (sf i).2⟩)
+      (fun i j => congrArg Subtype.val (hsf i j))
+    refine ⟨⟨g.1, g.2⟩, fun i => Subtype.ext (hg i), fun s' hs' => ?_⟩
+    have := hguniq ⟨s'.1, s'.2⟩ (fun i => congrArg Subtype.val (hs' i))
+    exact Subtype.ext (congrArg Subtype.val this)
+  · -- every test ring is an object of `TopCommRingCat`
+    intro h T instC instT instR ι U f hcompat
+    have hUG := (TopCat.Presheaf.isSheaf_iff_isSheafUniqueGluing_types _).mp
+      ((CategoryTheory.isSheaf_iff_isSheaf_of_type _ _).mpr
+        (h (@TopCommRingCat.of T instC instT instR)))
+    obtain ⟨s, hs, hsuniq⟩ := hUG U (fun i => ⟨(f i).1, (f i).2⟩)
+      (fun i j => Subtype.ext (hcompat i j))
+    refine ⟨⟨s.1, s.2⟩, fun i => congrArg Subtype.val (hs i), fun g' hg' => ?_⟩
+    have := hsuniq ⟨g'.1, g'.2⟩ (fun i => Subtype.ext (hg' i))
+    exact Subtype.ext (congrArg Subtype.val this)
 
 /-- The Hom-sheaf condition implies the categorical sheaf condition of the
 **underlying ring presheaf** (values in `CommRingCat`, topology forgotten): the
@@ -95,8 +137,8 @@ theorem IsSheafOfTopologicalRings.ringPresheaf_isSheaf
   refine (TopCat.Presheaf.isSheaf_iff_isSheafUniqueGluing_types _).mpr ?_
   intro ι U sf hsf
   letI : TopologicalSpace E.carrier := ⊥
-  haveI : DiscreteTopology E.carrier := ⟨rfl⟩
-  haveI : IsTopologicalRing E.carrier :=
+  have : DiscreteTopology E.carrier := ⟨rfl⟩
+  have : IsTopologicalRing E.carrier :=
     { continuous_add := continuous_of_discreteTopology
       continuous_mul := continuous_of_discreteTopology
       continuous_neg := continuous_of_discreteTopology }

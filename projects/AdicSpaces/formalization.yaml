@@ -55,7 +55,7 @@ sources:
     id: "nonarchimedean-scottish-book"
     type: "problem-list"
     license: "none stated"         # the wiki carries no explicit copyright/licence notice
-    author_contacted: "no"
+    author_contacted: "yes"
     prior_work: "None known in Lean."
     # https://scripts.mit.edu/~kedlaya/wiki/index.php?title=The_Nonarchimedean_Scottish_Book
     # On this branch the problem list is STATED (Lean statements, `sorry` bodies as open
@@ -131,8 +131,11 @@ automation:
       models: ["Claude Fable 5"]
       framework: "Claude Code"
       tool_setup: >-
-        Lean 4 with mathlib; per-project dev branches in one Lake workspace; automated
-        cleanup lanes on `main`. See CLAUDE.md.
+        Lean 4 with mathlib, driven by the `mathlib-quality` Claude Code skill plugin
+        (https://github.com/CBirkbeck/mathlib-quality), which supplies the planning,
+        proving, cleanup, decomposition and review workflows the formalisation was carried
+        out under. Per-project dev branches in one Lake workspace; automated cleanup lanes
+        on `main`. See CLAUDE.md.
       cost:
         wall_time: ""
         spend_usd: "4 months of a Claude Code Max 20x subscription (flat-rate, not metered)"
