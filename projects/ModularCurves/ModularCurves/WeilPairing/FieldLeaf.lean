@@ -1521,7 +1521,23 @@ theorem pullbackTrivialization_inv_comp_hom_of_nu {X : Scheme.{u}}
       (Scheme.Modules.openTopSection W r₂))) :
     T₁.inv ≫ T₂.hom = ModularCurves.unitEndomorphismOfTopSection
       (Scheme.Modules.openTopSection W v) := by
-  sorry
+  haveI := hmono
+  refine (cancel_mono (ModularCurves.unitEndomorphismOfTopSection
+    (Scheme.Modules.openTopSection W r₂))).mp ?_
+  have htop : Scheme.Modules.openTopSection W r₁ =
+      Scheme.Modules.openTopSection W v * Scheme.Modules.openTopSection W r₂ := by
+    rw [hr]
+    simp [Scheme.Modules.openTopSection, map_mul]
+  have hsub := congrArg (fun t => T₁.inv ≫ T₂.hom ≫ t) h₂.symm
+  have halg : T₁.inv ≫ T₂.hom ≫ T₂.inv ≫ ν = T₁.inv ≫ ν :=
+    congrArg (fun t => T₁.inv ≫ t) (Iso.hom_inv_id_assoc T₂ ν)
+  have hval : T₁.inv ≫ ν = ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection W v) ≫
+        ModularCurves.unitEndomorphismOfTopSection
+          (Scheme.Modules.openTopSection W r₂) :=
+    h₁.trans ((congrArg ModularCurves.unitEndomorphismOfTopSection htop).trans
+      (ModularCurves.unitEndomorphismOfTopSection_comp _ _).symm)
+  exact (Category.assoc _ _ _).trans (hsub.trans (halg.trans hval))
 
 /-- **([C-rest-3] SK-W2')** The transition unit of two `overTrivializationOfRestrictIso`
 images is read off from the restrict-side composite: if `ψ₁.inv ≫ ψ₂.hom` is
@@ -1536,7 +1552,40 @@ theorem overTriv_inv_comp_hom_of_restrict_scalar {X : Scheme.{u}}
     (Scheme.Modules.overTrivializationOfRestrictIso M W ψ₁).inv ≫
       (Scheme.Modules.overTrivializationOfRestrictIso M W ψ₂).hom =
     SheafOfModules.overUnitScalarEnd X.ringCatSheaf W u := by
-  sorry
+  apply (Scheme.Modules.overEquiv W).functor.map_injective
+  simp only [Functor.map_comp, Scheme.Modules.overTrivializationOfRestrictIso,
+    Functor.FullyFaithful.preimageIso_inv, Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage, Iso.trans_hom, Iso.trans_inv,
+    Iso.symm_hom, Iso.symm_inv]
+  have hG := Scheme.Modules.overEquiv_unitScalarEnd (X := X) W u
+  have hGimg := (Iso.eq_comp_inv
+    (W.sheafOfModulesEquivOverUnit X.ringCatSheaf)).mpr hG
+  have hcol := congrArg
+    (fun t => (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom ≫ ψ₁.inv ≫ t)
+    (Iso.inv_hom_id_assoc ((overFunctorEquiv W).app M)
+      (ψ₂.hom ≫ (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).inv))
+  have hsub := congrArg
+    (fun t => (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom ≫ t ≫
+      (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).inv) h
+  have hregroup1 := congrArg
+    (fun t => (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom ≫ t)
+    ((Category.assoc ψ₁.inv ψ₂.hom
+      (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).inv).symm)
+  have hregroup2 := (Category.assoc
+    (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom
+    (ModularCurves.unitEndomorphismOfTopSection (Scheme.Modules.openTopSection W u))
+    (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).inv).symm
+  have full := hcol.trans (hregroup1.trans (hsub.trans (hregroup2.trans hGimg.symm)))
+  have bridge := (Category.assoc
+    ((W.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom ≫ ψ₁.inv)
+    ((overFunctorEquiv W).app M).inv
+    (((overFunctorEquiv W).app M).hom ≫ ψ₂.hom ≫
+      (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).inv)).trans
+    (Category.assoc
+      (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom ψ₁.inv
+      (((overFunctorEquiv W).app M).inv ≫ ((overFunctorEquiv W).app M).hom ≫
+        ψ₂.hom ≫ (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).inv))
+  exact bridge.trans full
 
 end PicPoint
 
