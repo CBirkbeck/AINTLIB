@@ -887,3 +887,23 @@ hnorm from the crown-transitions (u-units normalised along zero — the KM h-nor
 then L2e-instantiation ⟹ H = a·g_Q·[N]^#(r⁻¹)-form ⟹ L3 via the divisor-core +
 L1b-core + brick6. Session-lessons bank (this stretch): symm-first before
 single_eq_of_ne (Zero-metavar); untopD auto-reduces in display; plain-hQ direction.
+
+## THE L1-GLUE CUT (2026-08-16)
+Producer verified: `exists_affine_common_principal` (FieldLeaf:534) gives per-point
+common-principal charts refined into any cover. The glue's ladder:
+- [G1] the CONCRETE pre-normalised dataset: ι := ↥X-points; W c := the produced chart;
+  e-family := overTriv(restrictIso(pullbackTrivOfTensorIdeal at (V_c, f₁ᶜ, f₂ᶜ)));
+  hM := the 3a kappa-collapse (kappa_eq_sectionCls_mul_inv_zeroCls_of_field +
+  nonempty_tensorObj... + toSkeleton_tensorObj_eq — FieldLeaf-landed); transitions =
+  the (C)-assembly output (u₂u₁⁻¹-form — NEEDS the parked square + the M-chain
+  assembly, OR state G1's transition-content as the chart-wise (hspan, hoff)-data
+  consumed downstream without the hom-level transition theorem: REASSESS — the L2e
+  reading may only need the FF-images of the r's, obtainable from RP-4b + the
+  divisor-core WITHOUT transitionUnitOfCover; check L2e's exact hypothesis shape first
+  (functionFieldMap_translateByPoint_germ's dataset-inputs).
+- [G2] normalisation: replay exists_normalized_dataset's re-cover/rescale (KMDataset:220
+  proof) CONCRETELY with tracked rescalers d_i (zero-section data ⟹ the r-relation
+  survives: h_i-rescaled still a·g_Q·[N]^#(r⁻¹)-form with adjusted a).
+- [G3] the L2e-instantiation at the normalised concrete dataset ⟹ H-form ⟹ L3.
+FIRST ACTION next quantum: read L2e's (functionFieldMap_translateByPoint_germ) exact
+hypothesis-shape to determine whether G1 needs the hom-level transitions at all.
