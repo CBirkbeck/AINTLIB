@@ -1621,6 +1621,16 @@ theorem restrictTrivialization_pullbackTrivOfTensorIdeal_inv_comp_nu {X : Scheme
       (ModularCurves.moduleSectionsOfTop (unitObj W.toScheme)
         (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂))).1
       (Opposite.op (⊤ : W.toScheme.Opens)) := by
+    show (nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op f₁) hg hgi).val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        ((restrictTrivialization hWV (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂
+          hspan₁ hnzd₁ hfmem₁ hspan₂ hnzd₂ hfmem₂)).inv.val.app
+          (Opposite.op (⊤ : W.toScheme.Opens))
+          (show W.toScheme.presheaf.obj (Opposite.op (⊤ : W.toScheme.Opens))
+            from 1)) =
+      (unitObj W.toScheme).val.map
+        (homOfLE (le_top : (⊤ : W.toScheme.Opens) ≤ ⊤)).op
+        (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂))
     sorry
   refine Subtype.ext (funext fun Z => ?_)
   rw [← (_root_.SheafOfModules.sectionsMap

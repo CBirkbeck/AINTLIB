@@ -1084,3 +1084,22 @@ section-value machinery for the leg-chase lives in Picard/DualPullback/
 LocalTrivializationSection, LocalUnit}.lean — e.g. iso_hom_inv_app_applyT /
 iso_inv_hom_app_applyT (PullbackSection:25/33, T = top-component). MINE THESE FIRST
 before writing any new app-value lemma.
+
+[SK-per-chart] HTOP CUT (2026-08-16 continuation): htop is now the verified-show recast
+point-equation `nu.app top (T.inv.app top 1) = (unit).map (top<=top) (openTop res-f2)`.
+(The bare literal `1` in a show is TYPE-BAD and silently sorryAx-recovers — clothe as
+`show W.toScheme.presheaf.obj (op top) from 1`, engine idiom; VERIFY every show with a
+done-swap build, never trust a green sorry-tailed build.) Remaining cut:
+[H1] RHS map-along-top<=top = id (Subsingleton-arrow + map_id; engine pattern
+PullbackSection:81). [H2] T.inv.app top 1 = the transported V-section: statement via
+sheafIso_inv_app_eq_of_hom_app_eqT (LocalTrivializationInv:131 — the GENERAL inversion
+tool: hom-value determines inv-value); candidate x := (pbCongr.inv)(pbComp(eta_h(s_V)))
+with s_V := pbTriv-V.inv.app top_V 1; hom-value-chain via the eta-transport family
+(pullbackUnit_map_appT LocalSection:252, pullbackUnitIso_hom_unit_oneT :296,
+pullbackUnit_one_transport_topT :318 for the eqToHom top-corrections) + iso_inv_hom free
+at V. [H3] nu.app top on the transported section = openTop(res f2): nu-legs elementwise —
+slot-insert/e_dict/iota2 on eta-points (pullbackUnit_map_appT again for pb-W-maps... note
+nu's legs are pb(W-iota)-maps and tensor-legs: tensor-point-values via the toSheafify/
+adjunction idiom as in THE ATOM; the e/e-inv cancellation happens between H2's s_V-content
+and H3's e-leg — consider merging H2+H3 into one chain ending at the V-level
+f2-generator value (idealGenHom-app is concrete: f*appIso.inv-formula, IdealModule:240)).
