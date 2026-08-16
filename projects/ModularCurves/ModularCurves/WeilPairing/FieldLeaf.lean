@@ -1439,6 +1439,25 @@ theorem exists_const_mul_of_projectiveDivisorOf_eq {K : Type u} [Field K]
   rw [← hc]
   field_simp
 
+/-- **(RP-3 transport, step 1)** The zChart-side maximal ideal of a smooth point: the
+transport of `maximalIdealAt` (= mathlib's `XYIdeal`) along the fixed chart
+identification `coordRingToZSection`. The P-parametrised dodge: no point
+classification anywhere — the scheme point, its stalk, and the valuation all derive
+from this ideal. -/
+noncomputable def zChartMaximalIdeal {K : Type u} [Field K] [DecidableEq K]
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) :=
+  Ideal.map (coordRingToZSection W)
+    ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P)
+
+/-- **(RP-3 transport, step 1b)** Maximality transports along the ring equivalence. -/
+theorem zChartMaximalIdeal_isMaximal {K : Type u} [Field K] [DecidableEq K]
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) :
+    (zChartMaximalIdeal W P).IsMaximal := by
+  have h := (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt_isMaximal P
+  exact Ideal.map_isMaximal_of_equiv _ (hp := h)
+
 end DivisorConstancy
 
 section ValuePlumbing
