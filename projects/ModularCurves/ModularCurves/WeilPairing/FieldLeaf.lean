@@ -1416,14 +1416,24 @@ theorem tensorObjCongr_trans {X : Scheme.{u}} {M M' M'' N N' N'' : X.Modules}
   simp [tensorObjCongr, Iso.ext_iff,
     ← MonoidalCategory.tensorHom_comp_tensorHom]
 
-/-- **(U5-L1a 3c-iii, THE COMMUTATION SQUARE)** Restricting the over-form of a
-restrict-site iso is the over-form of its restriction: the square that lets every
-prefix-leg's overlap comparison be computed at the restrict level. -/
+/-- **(U5-L1a 3c-iii)** The restrict-native restriction of a restrict-site iso to a
+smaller open: conjugation by `restrictOpenCompIso` around the restriction functor's
+image (the tree's own restriction species — the Stage-machinery's home ground). -/
+noncomputable def restrictRestrictIsoNative {X : Scheme.{u}} (M N : X.Modules)
+    {U V : X.Opens} (i : V ⟶ U) (φ : M.restrict U.ι ≅ N.restrict U.ι) :
+    M.restrict V.ι ≅ N.restrict V.ι :=
+  (restrictOpenCompIso i).app M ≪≫
+    (restrictFunctor (X.homOfLE (leOfHom i))).mapIso φ ≪≫
+    ((restrictOpenCompIso i).app N).symm
+
+/-- **(U5-L1a 3c-iii, THE COMMUTATION SQUARE — redesigned)** Restricting the over-form
+of a restrict-site iso is the over-form of its native restriction. Assembly from the
+Stage-proven coherence `overRestrictModuleIso_comp_overFunctorEquiv` at `M` and `N`
+plus naturality. -/
 theorem restrictOverIso_overIsoOfRestrictIso {X : Scheme.{u}} (M N : X.Modules)
-    {U W : X.Opens} (hWU : W ≤ U) (φ : M.restrict U.ι ≅ N.restrict U.ι) :
-    restrictOverIso M N U (overIsoOfRestrictIso M N U φ)
-        (CategoryTheory.Over.mk (homOfLE hWU)) =
-      overIsoOfRestrictIso M N W (restrictRestrictIso M N hWU φ) := by
+    {U V : X.Opens} (i : V ⟶ U) (φ : M.restrict U.ι ≅ N.restrict U.ι) :
+    restrictOverIso M N U (overIsoOfRestrictIso M N U φ) (CategoryTheory.Over.mk i) =
+      overIsoOfRestrictIso M N V (restrictRestrictIsoNative M N i φ) := by
   sorry
 
 end PicPoint
