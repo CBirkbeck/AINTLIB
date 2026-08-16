@@ -1355,3 +1355,18 @@ FieldLeaf sorry-free. NEXT BOXES: 3c-iv stated DIV-LEVEL against the dressed for
 (div germ(transition) = div germ(u₂u₁⁻¹) — the a/b-units drop); then the L1-glue
 G1-G3 (dataset + normalisation-replay + L2e-instantiation), L3, L5, L6, U-assembly,
 E5-assembly.
+
+[3c-iv SCOPING NOTE] (2026-08-17): the div-level 3c-iv consumes: (i) the dressed
+package (landed); (ii) [DIV-UNIT] ord_P of the FF-germ of an overlap-UNIT is 0 for
+P in the overlap — the RP-chain's vocabulary: a unit of Γ(X,W) maps to a unit of the
+local ring at P ∈ W ⟹ not in the maximal ideal ⟹ the RP-5-atom species
+(ord_P_algebraMap_eq_zero_of_notMem, ValuationTransport — landed) applies through the
+germ-to-FF plumbing; (iii) the generator-quotient germ-reading (u₂u₁⁻¹ = (f₂ⁱ/f₂ʲ)·
+(f₁ⁱ/f₁ʲ)⁻¹-germs — from the span/Associated-data at the overlap, the 3c-i unit's
+DEFINITION). The 3c-iv STATEMENT belongs inside the G1-glue design (needs the curve-
+level dataset context: germToFunctionField, the W-cover from
+exists_affine_common_principal, the J₁/J₂ = pole-sheaf ideals with their generator
+divisors). NEXT SESSION = the G1 design+skeleton: write the dataset-statement
+(cover, e-family via pullbackTrivOfTensorIdeal at the affine charts, hnorm via the
+G2-replay with tracked rescalers — the a/b-dressing folds into the SAME rescaler
+bookkeeping), then 3c-iv div-statement, then G3 = L2e-instantiation.
