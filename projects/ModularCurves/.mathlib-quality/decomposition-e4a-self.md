@@ -695,3 +695,14 @@ overRestrictionComparisonLeft/Right + overRestrictionComparison_app_apply) — b
 exactly this over-vs-pullback restriction comparison; mine them next window (match the
 goal's leg-spellings against the Stage-composites, or go per-app with the bounded-erw
 protocol reading each leg's value off its Stage-app-lemma).
+
+SQUARE PER-APP PLAN (2026-08-16, for the dedicated probe session): bare per-app rfl
+fails (whnf-budget); the working combination = hom-level kitchen-sink simp FIRST (lands
+the 14-leg equation, probeSquare.lean) THEN hom_ext + per-app with the leg-value
+erw-chain: LHS legs via overRestrictionStage1_app_apply (=x) + the overMap-preimage
+middle (Functor.FullyFaithful.map_preimage + overFunctorEquiv_hom/inv_app_apply values)
++ overFunctorMap-hom-app; RHS legs via rfip-app values + pullbackCongr/Comp-app values
+(locate/derive their _app_apply lemmas — likely rfl-species like the Stages) + pb-map-φ
+app. Both sides reduce to φ.hom-app at transported sections; close by
+congrArg-Subsingleton on the arrow-spellings (the whole session's standard protocol).
+Bounded erws throughout (NO repeat'). Probe base: scratchpad/probeSquare.lean.
