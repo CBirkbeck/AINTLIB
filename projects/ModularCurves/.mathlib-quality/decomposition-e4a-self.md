@@ -920,3 +920,21 @@ r-relations giving hsplit BY the crown/assembly transitions). REVISED CRITICAL P
 YR-2: [square (LSP/3-shapes)] → [(C) M-chain transition assembly] → [G1 dataset + h-family]
 → [G2 normalisation] → [G3 = L2e] → [L3 scalar-match] → [L6] → [U-assembly]. The square
 is THE bottleneck; its dedicated session is the next major unit.
+
+★ SQUARE REDESIGN FOUND (2026-08-16): the tree ALREADY PROVES the needed coherence —
+`overRestrictModuleIso_comp_overFunctorEquiv` (OverRestriction.lean:280-ish, via the
+Stage-machinery): (overRestrictModuleIso M i).hom ≫ restrictFunctor(homOfLE).map(F.app M)
+= F.app M-at-V ≫ (restrictOpenCompIso i).hom.app M — the commutation of over-restriction
+with the F-comparison AT EACH MODULE. THE SQUARE'S NEW ROUTE: (1) restate the square
+with the RESTRICT-NATIVE restriction (restrictOpenCompIso-conjugated
+(restrictFunctor (X.homOfLE)).mapIso φ) instead of my pullback-clothed
+restrictRestrictIso; (2) the proof = the comparison-lemma at M and N + naturality of
+restrictFunctor(homOfLE).map on φ + G.map_injective-choreography — NO per-leg app-work
+remaining (the Stage-machinery already did it). (3) my pullback-clothed
+restrictRestrictIso then equals the native one by a separate bridge (needed only if a
+consumer wants the pullback-spelling — check consumers; the (C)-assembly can use the
+NATIVE spelling throughout). ALSO LANDED this stretch: restrictOverIso hom/inv
+app-twins (RFL — restriction is value-transparent), which already collapsed the
+square's per-app LHS to a single overIsoOfRestrictIso-app. Next quantum: define
+restrictRestrictIsoNative + restate/prove the square via the comparison-lemma;
+check overRestrictModuleIso's def-relation to restrictOverIso first.
