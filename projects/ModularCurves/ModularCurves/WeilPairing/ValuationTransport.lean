@@ -264,4 +264,40 @@ theorem uniformizer_of_span_maximalIdealAt (W : WeierstrassCurve K) [W.IsEllipti
   rw [hunz]
   rfl
 
+/-- **(RP-4b)** The chart-side uniformizer law: a generator of the transported maximal
+ideal `zChartMaximalIdeal` has `ord_P = 1` after passing through the fixed
+function-field identification. Reduction to RP-4a along the chart equivalence
+(span-roundtrip + the `ringEquivOfRingEquiv` computation rule). -/
+theorem uniformizer_of_span_zChartMaximalIdeal (W : WeierstrassCurve K)
+    [W.IsElliptic] (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (r' : Γ(projModel W, EllipticCurve.zChart W)) (hr' : r' ≠ 0)
+    (hspan' : zChartMaximalIdeal W P = Ideal.span {r'}) :
+    SmoothPlaneCurve.Uniformizer (⟨W⟩ : SmoothPlaneCurve K) P
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField)
+        ((coordRingToZSection W).symm r')) := by
+  haveI := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt_isMaximal P).isPrime
+  refine uniformizer_of_span_maximalIdealAt W P ((coordRingToZSection W).symm r')
+    (fun h0 => hr' (by simpa using congrArg (coordRingToZSection W) h0)) ?_
+  have hround : (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P =
+      Ideal.map ((coordRingToZSection W).symm)
+        (zChartMaximalIdeal W P) := by
+    unfold zChartMaximalIdeal
+    ext x
+    constructor
+    · intro hx
+      have := Ideal.mem_map_of_mem (coordRingToZSection W) hx
+      have h2 := Ideal.mem_map_of_mem ((coordRingToZSection W).symm) this
+      simpa using h2
+    · intro hx
+      have hle : Ideal.map ((coordRingToZSection W).symm)
+          (Ideal.map (coordRingToZSection W)
+            ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P)) ≤
+          (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P := by
+        refine Ideal.map_le_iff_le_comap.mpr ?_
+        refine Ideal.map_le_iff_le_comap.mpr fun a ha => ?_
+        simpa using ha
+      exact hle hx
+  rw [hround, hspan', Ideal.map_span, Set.image_singleton]
+
 end ModularCurves
