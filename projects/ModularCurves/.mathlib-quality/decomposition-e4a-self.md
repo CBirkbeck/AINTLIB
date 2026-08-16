@@ -1044,3 +1044,31 @@ whnf-storm at statement-elaboration while the identical in-FieldLeaf skeleton is
 — iterate heavy statements IN THE FILE; (ii) `reassoc_of%` on an already-tail-less
 equation adds a spurious ?h-tail that blocks rw — use the plain lemma + assoc-flatten;
 (iii) wrong-namespace `map_smul` (AG-shadow) silently mismatches — pin LinearMap.map_smul.
+
+[SK-per-chart] GRIND-PLAN (2026-08-16, for the next quantum — the LAST route-C leaf):
+Statement: (restrictTrivialization hWV (pullbackTrivOfTensorIdeal ... V f1 f2)).inv >>
+nuPullback(res f1) = unitEndomorphismOfTopSection (openTopSection W (res f2)).
+ROUTE-TRIAGE done: (a) leg-restriction coherences need a pullbackTensorObjIso-COMP
+lemma that does NOT exist (PullbackTensorMonoidal has only the single-immersion iso)
+=> heavy; (b) VALUE-ROUTE chosen: both sides are homs unitObj W -> unitObj W;
+`apply (unitObj W.toScheme).unitHomEquiv.injective` (mathlib equiv, no new species).
+RHS-value free: unitEndomorphismOfTopSection r := unitHomEquiv.symm (moduleSectionsOfTop r)
+(UnitPullback:36) => unitHomEquiv-image = moduleSectionsOfTop (openTopSection W (res f2))
+by Equiv.apply_symm_apply. LHS-value: unitHomEquiv (T.inv >> nu) — chase the section:
+(i) find/derive the unitHomEquiv-naturality (unitHomEquiv (f >> phi) = phi-section-image);
+(ii) T.inv's unit-section = the restricted five-chain trivialising section — compute
+through restrictTrivialization's four legs (pullbackCongr/pullbackComp/mapIso/
+pullbackUnitIso) at the TOP component via their app-lemmas (KMPatching's
+sectionEval/resUnit machinery is precedent); (iii) nu's value on it: slot-insert of
+res f1, e_dict, iota2 (Subtype.val), pullbackUnitIso — per-app; (iv) the composite
+value collapses by the e/e-inv and f1-divide/insert cancellations ELEMENT-WISE to
+(res f2)-multiplication (3c-ii idealGenHom_mul_app is the model). Expect bounded-erw
+protocol + the show-from re-typing trick at cross-clothed smuls. All work IN FieldLeaf
+(probe-restating IsIso(idealGenHom)-binders whnf-storms — battle-lesson).
+AFTER per-chart: state+prove the ASSEMBLY ([C-rest-3] proper): transitionUnitOfCover of
+the overTriv-of-five-chain family = u2 * u1^-1 — wiring: KMPatching:197-def +
+overTrivializationOfRestrictOpenTrivialization + [SK-normal] + per-chart at both charts
++ nuPullback_mul (u1-ratio, g_i = u1 * g_j needs mul-hyp massage) + [SK-read-off]
+(r1 = res f2_i, r2 = res f2_j, v = the u2u1-ratio via span-Associated at the inf) +
+[SK-W2'] + [SK-B2-restrict] (nzd-hyps from the curve's integrality at instantiation).
+Then 3c-iv, G1-G3, L3, L5, L6, U-assembly, E5-assembly.
