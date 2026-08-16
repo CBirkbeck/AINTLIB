@@ -706,3 +706,14 @@ middle (Functor.FullyFaithful.map_preimage + overFunctorEquiv_hom/inv_app_apply 
 app. Both sides reduce to φ.hom-app at transported sections; close by
 congrArg-Subsingleton on the arrow-spellings (the whole session's standard protocol).
 Bounded erws throughout (NO repeat'). Probe base: scratchpad/probeSquare.lean.
+
+SQUARE 12-ERW WALL (2026-08-16): the bounded 12-erw splitter chain itself
+whnf-timeouts (cumulative at the example head) — each erw-unification over the giant
+14-leg goal compounds. NEXT SHAPES for the dedicated session: (i) HALVE — prove each
+side separately equal to a common normal form (two lemmas, each a 6-erw chain); (ii)
+with the LSP restored, interactive goal-state management; (iii) opacity-scoped
+per-leg value lemmas FIRST (each leg's app = x as its own rfl-lemma at the FieldLeaf
+defs — restrictOverIso_app_apply etc.), then the chain is pure exact-rewriting. The
+square stays pinned (1 sorry); everything else in 3c-iii's finale consumes it, so the
+CURRENT unblocked work = U5-L1b (scheme↔valuation divisor translation, HW anchors
+verified proven, INDEPENDENT of the square) and the L1-glue prep.
