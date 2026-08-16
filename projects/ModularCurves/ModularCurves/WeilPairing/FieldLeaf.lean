@@ -2238,7 +2238,57 @@ theorem exists_transition_dressed_of_charts {X : Scheme.{u}}
       (Ideal.span_singleton_eq_span_singleton).mp (hsg₂'.symm.trans hsg₂)
     obtain ⟨u, hu⟩ := hassoc
     exact ⟨u, hu.symm⟩
-  sorry
+  haveI hii₁ := isIso_idealGenHom_of_principal J₁ ⟨(Wf i ⊓ Wf j), haff⟩ (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₁) hsg₁ hng₁ hmg₁
+  haveI hii₂ := isIso_idealGenHom_of_principal J₂ ⟨(Wf i ⊓ Wf j), haff⟩ (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₂) hsg₂ hng₂ hmg₂
+  haveI hii₁' := isIso_idealGenHom_of_principal J₁ ⟨(Wf i ⊓ Wf j), haff⟩ (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₁') hsg₁' hng₁' hmg₁'
+  haveI hii₂' := isIso_idealGenHom_of_principal J₂ ⟨(Wf i ⊓ Wf j), haff⟩ (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂') hsg₂' hng₂' hmg₂'
+  haveI hne'' : Nonempty ↥(((Wf i ⊓ Wf j) : X.Opens).toScheme) := hne
+  haveI hWint : AlgebraicGeometry.IsIntegral ((Wf i ⊓ Wf j) : X.Opens).toScheme :=
+    AlgebraicGeometry.isIntegral_of_isOpenImmersion ((Wf i ⊓ Wf j) : X.Opens).ι
+  have hg₂'ne : (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂') ≠ 0 := mem_nonZeroDivisors_iff_ne_zero.mp hng₂'
+  have hmono : Mono (ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection (Wf i ⊓ Wf j) (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂'))) := by
+    refine mono_unitEndomorphismOfTopSection_of_nonZeroDivisors _ _ ?_
+    intro Z
+    by_cases hZ : Nonempty ↥(Z : ((Wf i ⊓ Wf j) : X.Opens).toScheme.Opens)
+    · haveI := hZ
+      haveI : IsDomain Γ(((Wf i ⊓ Wf j) : X.Opens).toScheme, Z) :=
+        @AlgebraicGeometry.IsIntegral.component_integral _ hWint Z hZ
+      rw [mem_nonZeroDivisors_iff_ne_zero]
+      intro h0
+      have h1 : Scheme.Modules.openTopSection (Wf i ⊓ Wf j) (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂') = 0 := by
+        refine @AlgebraicGeometry.map_injective_of_isIntegral
+          (((Wf i ⊓ Wf j) : X.Opens).toScheme) hWint Z ⊤ (homOfLE le_top) hZ _ 0 ?_
+        rw [h0, map_zero]
+      have h2 : (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂') = 0 := by
+        have h3 := congrArg (CategoryTheory.ConcreteCategory.hom
+          (X.presheaf.map (eqToHom (((Wf i ⊓ Wf j) : X.Opens).ι_image_top).symm).op)) h1
+        rw [map_zero] at h3
+        have hcomp : X.presheaf.map (eqToHom (((Wf i ⊓ Wf j) : X.Opens).ι_image_top)).op ≫
+            X.presheaf.map (eqToHom (((Wf i ⊓ Wf j) : X.Opens).ι_image_top).symm).op =
+            𝟙 (Γ(X, (Wf i ⊓ Wf j))) := by
+          rw [← Functor.map_comp]
+          exact (congrArg X.presheaf.map (Subsingleton.elim _ (𝟙 _))).trans
+            (X.presheaf.map_id _)
+        have h4 : (CategoryTheory.ConcreteCategory.hom
+            (X.presheaf.map (eqToHom (((Wf i ⊓ Wf j) : X.Opens).ι_image_top).symm).op))
+            (Scheme.Modules.openTopSection (Wf i ⊓ Wf j) (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂')) = (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂') := by
+          simp only [Scheme.Modules.openTopSection, Scheme.Opens.ι_appIso,
+            Iso.refl_hom]
+          exact congrArg (fun (φ : Γ(X, (Wf i ⊓ Wf j)) ⟶ Γ(X, (Wf i ⊓ Wf j))) =>
+            (CategoryTheory.ConcreteCategory.hom φ) (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂')) hcomp
+        exact h4.symm.trans h3
+      exact hg₂'ne h2
+    · have hbot : Z = ⊥ := by
+        ext x
+        exact ⟨fun hx => (hZ ⟨⟨x, hx⟩⟩).elim, fun hx => hx.elim⟩
+      subst hbot
+      rw [mem_nonZeroDivisors_iff]
+      exact ⟨fun x _ => Subsingleton.elim x 0, fun x _ => Subsingleton.elim x 0⟩
+  obtain ⟨a, b, hab⟩ := transitionUnitOfCover_eq_dressed_native M J₁ J₂ e Wf efam
+    i j (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₁) (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₂) (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₁') (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂') u₁ u₂ hu₁ hu₂ hmg₁ hii₁ hmg₁' hii₁' hmg₂ hii₂
+    hmg₂' hii₂' hmono
+  exact ⟨a, b, u₁, u₂, hab, hu₁, hu₂⟩
 
 end PicPoint
 
