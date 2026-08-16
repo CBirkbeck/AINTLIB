@@ -2127,6 +2127,44 @@ theorem transitionUnitOfCover_eq_dressed_native {X : Scheme.{u}} (M : X.Modules)
           trivializationTransitionUnit (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁' g₂' hg₁' hgi₁' hg₂' hgi₂'))) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j) (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j))))) := by rw [hc2]
     _ = _ := by rw [hmid, hb, ← mul_assoc]
 
+
+/-- **([G1] the chart-transition)** Two common-principal charts' trivialisations have
+transition unit `a · (u₂ · u₁⁻¹) · b⁻¹` on their (affine) overlap, with `u₁, u₂` the
+generator-ratio units. The `3c-iv` germ-reading consumes the `u`-relations; the `a, b`
+dressing has zero divisor. -/
+theorem exists_transition_dressed_of_charts {X : Scheme.{u}}
+    [AlgebraicGeometry.IsIntegral X]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    (M : X.Modules) (J₁ J₂ : X.IdealSheafData)
+    (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
+    {ι : Type*} (Wf : ι → X.Opens)
+    (efam : ∀ i, M.over (Wf i) ≅
+      _root_.SheafOfModules.unit (X.ringCatSheaf.over (Wf i)))
+    (i j : ι) (Vi Vj : X.affineOpens) (hVi : Vi.1 = Wf i) (hVj : Vj.1 = Wf j)
+    (f₁ f₂ : Γ(X, Vi.1)) (f₁' f₂' : Γ(X, Vj.1))
+    (hspan₁ : J₁.ideal Vi = Ideal.span {f₁})
+    (hnzd₁ : f₁ ∈ nonZeroDivisors Γ(X, Vi.1))
+    (hfmem₁ : f₁ ∈ idealSections J₁ (Opposite.op Vi.1))
+    (hspan₂ : J₂.ideal Vi = Ideal.span {f₂})
+    (hnzd₂ : f₂ ∈ nonZeroDivisors Γ(X, Vi.1))
+    (hfmem₂ : f₂ ∈ idealSections J₂ (Opposite.op Vi.1))
+    (hspan₁' : J₁.ideal Vj = Ideal.span {f₁'})
+    (hnzd₁' : f₁' ∈ nonZeroDivisors Γ(X, Vj.1))
+    (hfmem₁' : f₁' ∈ idealSections J₁ (Opposite.op Vj.1))
+    (hspan₂' : J₂.ideal Vj = Ideal.span {f₂'})
+    (hnzd₂' : f₂' ∈ nonZeroDivisors Γ(X, Vj.1))
+    (hfmem₂' : f₂' ∈ idealSections J₂ (Opposite.op Vj.1))
+    (hne : Nonempty ↥(Wf i ⊓ Wf j)) :
+    ∃ (a b u₁ u₂ : Γ(X, Wf i ⊓ Wf j)ˣ),
+      transitionUnitOfCover M Wf efam i j = a * (u₂ * u₁⁻¹) * b⁻¹ ∧
+      X.presheaf.map (homOfLE (hVi ▸ inf_le_left : Wf i ⊓ Wf j ≤ Vi.1)).op f₁ =
+        X.presheaf.map (homOfLE (hVj ▸ inf_le_right : Wf i ⊓ Wf j ≤ Vj.1)).op f₁' *
+          (u₁ : Γ(X, Wf i ⊓ Wf j)) ∧
+      X.presheaf.map (homOfLE (hVi ▸ inf_le_left : Wf i ⊓ Wf j ≤ Vi.1)).op f₂ =
+        X.presheaf.map (homOfLE (hVj ▸ inf_le_right : Wf i ⊓ Wf j ≤ Vj.1)).op f₂' *
+          (u₂ : Γ(X, Wf i ⊓ Wf j)) := by
+  sorry
+
 end PicPoint
 
 section DivisorConstancy
