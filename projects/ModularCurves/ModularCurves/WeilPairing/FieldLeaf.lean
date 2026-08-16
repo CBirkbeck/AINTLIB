@@ -1947,6 +1947,16 @@ theorem nativeTensorIdealTriv_inv_comp_hom {X : Scheme.{u}} (M : X.Modules)
   ring
 
 
+/-- **([C-rest-3] PACKAGE-cancel)** The pullback-bridge conjugation drops out of
+inverse-hom composites: proven abstractly so the instantiation at large native terms
+is a term application, not a rewrite. -/
+theorem restrictIsoOfPullbackIso_inv_comp_hom {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens) (t₁ t₂ : (Scheme.Modules.pullback U.ι).obj M ≅ unitObj U.toScheme) :
+    (restrictIsoOfPullbackIso M U t₁).inv ≫ (restrictIsoOfPullbackIso M U t₂).hom =
+      t₁.inv ≫ t₂.hom := by
+  simp only [restrictIsoOfPullbackIso, Iso.trans_inv, Iso.trans_hom,
+    Category.assoc, Iso.inv_hom_id_assoc]
+
 /-- **([C-rest-3] N3)** The transition unit of a restricted trivialisation pair is the
 restriction of the transition unit: `trivializationTransitionUnit` commutes with
 `restrictOverTrivialization`. From the scalar-restriction law and the ring-equiv
@@ -2034,6 +2044,88 @@ theorem overTriv_inv_comp_hom_of_restrict_scalar {X : Scheme.{u}}
       (((overFunctorEquiv W).app M).inv ≫ ((overFunctorEquiv W).app M).hom ≫
         ψ₂.hom ≫ (W.sheafOfModulesEquivOverUnit X.ringCatSheaf).inv))
   exact bridge.trans full
+
+
+/-- **([C-rest-3] PACKAGE-mid)** The unit-level `W2'`-bridge: if two restrict-side
+trivialisations differ by multiplication by a unit's section, their over-forms'
+transition unit is that unit. Abstract, so instantiation at large terms is cheap. -/
+theorem trivializationTransitionUnit_overTriv_of_inv_comp_hom {X : Scheme.{u}}
+    (M : X.Modules) (W : X.Opens)
+    (ψ₁ ψ₂ : M.restrict W.ι ≅ unitObj W.toScheme) (u : Γ(X, W)ˣ)
+    (h : ψ₁.inv ≫ ψ₂.hom = ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection W (u : Γ(X, W)))) :
+    trivializationTransitionUnit W
+      (Scheme.Modules.overTrivializationOfRestrictIso M W ψ₁)
+      (Scheme.Modules.overTrivializationOfRestrictIso M W ψ₂) = u := by
+  letI : ∀ (U : (TopologicalSpace.Opens ↥X)ᵒᵖ),
+      IsMulCommutative (X.ringCatSheaf.obj.obj U) := fun U => by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact ⟨⟨fun a b => mul_comm a b⟩⟩
+  apply Units.ext
+  apply (ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv
+    X.ringCatSheaf W).injective
+  refine (overUnitScalarEnd_transitionUnit W _ _).trans ?_
+  refine Eq.trans (overTriv_inv_comp_hom_of_restrict_scalar M W ψ₁ ψ₂
+    ((u : Γ(X, W))) h) ?_
+  rfl
+
+/-- **([C-rest-3] PACKAGE)** The transition unit of any chart trivialisation family is,
+up to overlap-units, the generator ratio `u₂ · u₁⁻¹`: the native-middle cocycle
+insertion. The `div`-level `3c-iv` reading is insensitive to the dressing units
+`a`, `b` (units have zero divisor), so this existential form is the full `[C-rest-3]`
+output. -/
+theorem transitionUnitOfCover_eq_dressed_native {X : Scheme.{u}} (M : X.Modules)
+    (J₁ J₂ : X.IdealSheafData) (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
+    {ι : Type*} (Wf : ι → X.Opens)
+    (efam : ∀ i, M.over (Wf i) ≅
+      _root_.SheafOfModules.unit (X.ringCatSheaf.over (Wf i)))
+    (i j : ι) (g₁ g₂ g₁' g₂' : Γ(X, Wf i ⊓ Wf j)) (u₁ u₂ : Γ(X, Wf i ⊓ Wf j)ˣ)
+    (hu₁ : g₁ = g₁' * (u₁ : Γ(X, Wf i ⊓ Wf j)))
+    (hu₂ : g₂ = g₂' * (u₂ : Γ(X, Wf i ⊓ Wf j)))
+    (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op (Wf i ⊓ Wf j)))
+    (hgi₁ : IsIso (idealGenHom J₁ (Wf i ⊓ Wf j) g₁ hg₁))
+    (hg₁' : g₁' ∈ idealSections J₁ (Opposite.op (Wf i ⊓ Wf j)))
+    (hgi₁' : IsIso (idealGenHom J₁ (Wf i ⊓ Wf j) g₁' hg₁'))
+    (hg₂ : g₂ ∈ idealSections J₂ (Opposite.op (Wf i ⊓ Wf j)))
+    (hgi₂ : IsIso (idealGenHom J₂ (Wf i ⊓ Wf j) g₂ hg₂))
+    (hg₂' : g₂' ∈ idealSections J₂ (Opposite.op (Wf i ⊓ Wf j)))
+    (hgi₂' : IsIso (idealGenHom J₂ (Wf i ⊓ Wf j) g₂' hg₂'))
+    (hmono : Mono (ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection (Wf i ⊓ Wf j) g₂'))) :
+    ∃ a b : Γ(X, Wf i ⊓ Wf j)ˣ,
+      transitionUnitOfCover M Wf efam i j = a * (u₂ * u₁⁻¹) * b⁻¹ := by
+  letI : ∀ (U : (TopologicalSpace.Opens ↥X)ᵒᵖ),
+      IsMulCommutative (X.ringCatSheaf.obj.obj U) := fun U => by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact ⟨⟨fun a b => mul_comm a b⟩⟩
+  have hcancel := restrictIsoOfPullbackIso_inv_comp_hom M (Wf i ⊓ Wf j)
+    (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁ g₂ hg₁ hgi₁ hg₂ hgi₂)
+    (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁' g₂' hg₁' hgi₁' hg₂' hgi₂')
+  have hmid := trivializationTransitionUnit_overTriv_of_inv_comp_hom M
+    (Wf i ⊓ Wf j)
+    (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+      (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁ g₂ hg₁ hgi₁ hg₂ hgi₂))
+    (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+      (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁' g₂' hg₁' hgi₁' hg₂' hgi₂'))
+    (u₂ * u₁⁻¹)
+    (hcancel.trans (nativeTensorIdealTriv_inv_comp_hom M J₁ J₂ e (Wf i ⊓ Wf j)
+      g₁ g₂ g₁' g₂' u₁ u₂ hu₁ hu₂ hg₁ hgi₁ hg₁' hgi₁' hg₂ hgi₂ hg₂' hgi₂' hmono))
+  refine ⟨trivializationTransitionUnit (Wf i ⊓ Wf j) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i) (efam i) (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁ g₂ hg₁ hgi₁ hg₂ hgi₂))),
+    trivializationTransitionUnit (Wf i ⊓ Wf j) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j) (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁' g₂' hg₁' hgi₁' hg₂' hgi₂'))), ?_⟩
+  have hb : trivializationTransitionUnit (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁' g₂' hg₁' hgi₁' hg₂' hgi₂'))) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j) (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))) =
+      (trivializationTransitionUnit (Wf i ⊓ Wf j) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j) (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁' g₂' hg₁' hgi₁' hg₂' hgi₂'))))⁻¹ :=
+    eq_inv_of_mul_eq_one_left
+      (trivializationTransitionUnit_symm (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁' g₂' hg₁' hgi₁' hg₂' hgi₂'))) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j) (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))))
+  have hc1 := trivializationTransitionUnit_trans (Wf i ⊓ Wf j) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i) (efam i) (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁ g₂ hg₁ hgi₁ hg₂ hgi₂))) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j) (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j))))
+  have hc2 := trivializationTransitionUnit_trans (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁ g₂ hg₁ hgi₁ hg₂ hgi₂))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁' g₂' hg₁' hgi₁' hg₂' hgi₂'))) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j) (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j))))
+  calc transitionUnitOfCover M Wf efam i j
+      = trivializationTransitionUnit (Wf i ⊓ Wf j) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i) (efam i) (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)))) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j) (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))) := rfl
+    _ = trivializationTransitionUnit (Wf i ⊓ Wf j) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i) (efam i) (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁ g₂ hg₁ hgi₁ hg₂ hgi₂))) *
+        trivializationTransitionUnit (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁ g₂ hg₁ hgi₁ hg₂ hgi₂))) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j) (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))) := hc1.symm
+    _ = trivializationTransitionUnit (Wf i ⊓ Wf j) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i) (efam i) (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁ g₂ hg₁ hgi₁ hg₂ hgi₂))) *
+        (trivializationTransitionUnit (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁ g₂ hg₁ hgi₁ hg₂ hgi₂))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁' g₂' hg₁' hgi₁' hg₂' hgi₂'))) *
+          trivializationTransitionUnit (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j) (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j) (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j) g₁' g₂' hg₁' hgi₁' hg₂' hgi₂'))) (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j) (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j))))) := by rw [hc2]
+    _ = _ := by rw [hmid, hb, ← mul_assoc]
 
 end PicPoint
 
