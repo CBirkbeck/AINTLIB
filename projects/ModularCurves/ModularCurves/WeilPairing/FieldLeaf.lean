@@ -1434,6 +1434,12 @@ theorem restrictOverIso_overIsoOfRestrictIso {X : Scheme.{u}} (M N : X.Modules)
     {U V : X.Opens} (i : V ⟶ U) (φ : M.restrict U.ι ≅ N.restrict U.ι) :
     restrictOverIso M N U (overIsoOfRestrictIso M N U φ) (CategoryTheory.Over.mk i) =
       overIsoOfRestrictIso M N V (restrictRestrictIsoNative M N i φ) := by
+  refine Iso.ext ?_
+  apply (Scheme.Modules.overEquiv V).functor.map_injective
+  simp only [restrictOverIso, overIsoOfRestrictIso, restrictRestrictIsoNative,
+    Iso.trans_hom, Functor.mapIso_hom, Iso.symm_hom, Iso.app_hom, Iso.app_inv,
+    Functor.map_comp, Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage]
   sorry
 
 end PicPoint
