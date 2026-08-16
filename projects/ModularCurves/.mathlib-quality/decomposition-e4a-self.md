@@ -1310,3 +1310,18 @@ per-overlap — check whether L2e's hsplit + the tau-relation are per-overlap st
 chart-local form is required ⟹ resume the transport-block (H3-S layer-route). Under
 (a): [C-rest-3] completes with N-TRANSITION + N3 + cocycle + [SK-W2']-bridge + the
 rfip-cancel — ALL LANDED — only the packaging statement remains. STRONG DEFAULT: (a).
+
+[N4-PREREAD CONFIRMED] (2026-08-16, cont.11): L2e (functionFieldMap_translateByPoint_germ,
+read in full) consumes ONLY hnorm + (h, hn, hsplit) — NO transition-VALUE appears in its
+hypotheses or conclusion (the value-side is torsionSplittingEval, produced by the engine).
+⟹ the u2*u1^-1-value's ONLY consumer is the not-yet-stated 3c-iv/L1a germ-identification
+(tying h's germs to the g_Q-quotients for the U5 comparison). The N4-design therefore has
+ONE degree of freedom: state 3c-iv around the dressed transition. Design options (pick at
+the session): (i) state 3c-iv for the MIDDLE term only (germ of the native-vs-native
+transition = g-quotient germ — from N-TRANSITION directly) and thread the outer
+transitions as h-corrections through D4's h-family (h is EXISTENTIAL in L2e — replace
+h_i by h_i * [N]^#-lift of the outer-unit-data where the outer units' [N]-pullbacks
+split trivially since they are... CHECK); or (ii) state 3c-iv for the full dressed value
+with the A-ratio explicit. Either way NO new transport mathematics — only statement-
+placement. The parked transport-sorries (H3-T1, H3-S, [SK-per-chart]-as-stated) can be
+DELETED at the design session if (i)/(ii) confirm.
