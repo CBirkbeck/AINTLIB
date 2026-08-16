@@ -1283,3 +1283,30 @@ A_k := transitionUnit(chart-e_k, native-at-V_k) in Gamma(V_k)-units; then the
 transitionUnitOfCover-packaging (KMPatching:197-def + overTriv-of-native via
 [SK-W2']-style bridges) dressing as res(A_i) * u2u1^-1 * res(A_j)^-1; (N4) the
 G1/G2-glue-recut. Then 3c-iv, L3, L5, L6, U-assembly, E5.
+
+[N-PACKAGING ANALYSIS — THE DRESSING BOUNDARY] (2026-08-16, cont.10): N3 + the cocycle
+law (trivializationTransitionUnit_trans, InvertibleSheafCocycle:118 — LANDED) give the
+packaging frame, but the chart-LOCAL dressing hits a genuine fork:
+- cocycle-insertion with res-generator-natives t_W(k): middle = u2*u1^-1 [N-TRANSITION,
+  proven] but the outer terms transition(res-e_k, t_W(k)) are PAIR-local (W-dependent),
+  not chart-local — cannot fold into the h-family directly.
+- cocycle-insertion with restricted-FULL-natives res(tfull_k): outer terms = res(A_k)
+  by [N3] with A_k := transition(e_k, tfull_k) CHART-local — but the middle then needs
+  transition(res-tfull_i, res-tfull_j), whose reduction to u2*u1^-1 needs
+  res-tfull_k = t_W(k)-modulo-1 — WHICH IS the parked transport-coherence again
+  (restricted-native vs res-generator-native = the [SK-per-chart] species).
+⟹ the transport-content is irreducible FOR AN EXPLICIT chart-locally-dressed value.
+BUT the value may not be needed in that form: the h-family in hsplit is produced by
+AP-D4's machinery (exists_transitionUnit_eq_mul_inv_of_mem_torsionPoints) for ANY
+normalized kappa-dataset — NOT from an explicit u2u1^-1 formula. The explicit value
+enters ONLY at 3c-iv (the FF-germ reading tying the transition to the g_Q-quotient for
+L1b/L2e). Whether 3c-iv tolerates pair-local (or chart-local) dressing is a question
+about the L1-GLUE'S STATEMENTS (G1-G3 + 3c-iv cuts), not about more lemmas.
+NEXT SESSION = THE (N4) DESIGN SESSION: re-open the G1-G3/3c-iv design (/develop-style,
+source-faithful to the U5 cut + KMPairing's D4) and decide: (a) glue consumes the
+PAIR-local-dressed transition (germ-reading absorbs W-local units into the L1b-matching
+per-overlap — check whether L2e's hsplit + the tau-relation are per-overlap statements
+— they ARE (i j fixed)!  strong hint the pair-local dressing suffices); or (b) the
+chart-local form is required ⟹ resume the transport-block (H3-S layer-route). Under
+(a): [C-rest-3] completes with N-TRANSITION + N3 + cocycle + [SK-W2']-bridge + the
+rfip-cancel — ALL LANDED — only the packaging statement remains. STRONG DEFAULT: (a).
