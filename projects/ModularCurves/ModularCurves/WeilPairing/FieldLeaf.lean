@@ -1586,6 +1586,24 @@ theorem mono_unitEndomorphismOfTopSection_of_nonZeroDivisors {X : Scheme.{u}}
   dsimp only at happ
   exact (mul_cancel_right_mem_nonZeroDivisors (hr Y.unop)).mp happ
 
+/-- **([C-rest-3] H3-T1)** The tensor comparison commutes with pullback composition:
+the open-immersion monoidal comparison for the composite is the pullback of the inner
+comparison conjugated by the composition isos on both factors and on the tensor.
+(The one irreducible tensor-transport coherence of the per-chart chase; atom-technique.) -/
+theorem pullbackTensorObjIso_comp {X : Scheme.{u}} {Y Z : Scheme.{u}}
+    (f : Y ⟶ X) (g : Z ⟶ Y) [IsOpenImmersion f] [IsOpenImmersion g]
+    [IsOpenImmersion (g ≫ f)] (A B : X.Modules) :
+    pullbackTensorObjIsoOfIsOpenImmersion (g ≫ f) A B =
+      (Scheme.Modules.pullbackComp g f).symm.app (tensorObj A B) ≪≫
+        (Scheme.Modules.pullback g).mapIso
+          (pullbackTensorObjIsoOfIsOpenImmersion f A B) ≪≫
+        pullbackTensorObjIsoOfIsOpenImmersion g
+          ((Scheme.Modules.pullback f).obj A)
+          ((Scheme.Modules.pullback f).obj B) ≪≫
+        tensorObjCongr ((Scheme.Modules.pullbackComp g f).app A)
+          ((Scheme.Modules.pullbackComp g f).app B) := by
+  sorry
+
 /-- **([C-rest-3] H2)** The restricted trivialisation's inverse at the top section:
 the pullback-transported trivialising section of the chart, `eqToHom`-corrected. The
 inversion tool (`sheafIso_inv_app_eq_of_hom_app_eqT`) plus the η-transport family. -/
