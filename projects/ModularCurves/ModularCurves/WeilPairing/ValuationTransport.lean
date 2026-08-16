@@ -300,4 +300,64 @@ theorem uniformizer_of_span_zChartMaximalIdeal (W : WeierstrassCurve K)
       exact hle hx
   rw [hround, hspan', Ideal.map_span, Set.image_singleton]
 
+set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency.types true in
+/-- **(RP-5 atom)** Away from the point: a coordinate function not in the maximal
+ideal has `ord_P = 0`. Chain: its local-ring image lies in the prime complement
+(`under_maximalIdeal` membership), so its integral valuation is `1`
+(`intValuation_eq_one_iff_mem_primeCompl`), hence the point valuation is `1` and
+`ord_P = 0` by the HasseWeil characterisation. -/
+theorem ord_P_algebraMap_eq_zero_of_notMem (W : WeierstrassCurve K) [W.IsElliptic]
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (g : (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) (hg0 : g ≠ 0)
+    (hg : g ∉ (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P) :
+    (⟨W⟩ : SmoothPlaneCurve K).ord_P P
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) g) = 0 := by
+  haveI := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt_isMaximal P).isPrime
+  haveI hDVR : IsDiscreteValuationRing
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) :=
+    SmoothPlaneCurve.localRingAt.instIsDVR _ P
+  haveI hPID := hDVR.toIsPrincipalIdealRing
+  haveI hDed : IsDedekindDomain
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) := inferInstance
+  have hFFne : algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+      ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) g ≠ 0 := by
+    intro h0
+    exact hg0 (IsFractionRing.injective
+      ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+      ((⟨W⟩ : SmoothPlaneCurve K).FunctionField)
+      (h0.trans (map_zero _).symm))
+  have hcompl : algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) g ∈
+      (IsDiscreteValuationRing.maximalIdeal
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).asIdeal.primeCompl := by
+    intro hmem
+    refine hg ?_
+    have hunder : g ∈ (IsLocalRing.maximalIdeal
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).under
+        ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) :=
+      Ideal.mem_comap.mpr hmem
+    rwa [Localization.AtPrime.under_maximalIdeal] at hunder
+  have hval1 : (IsDiscreteValuationRing.maximalIdeal
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).intValuation
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) g) = 1 :=
+    (IsDedekindDomain.HeightOneSpectrum.intValuation_eq_one_iff_mem_primeCompl
+      (v := IsDiscreteValuationRing.maximalIdeal
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)) _).mpr hcompl
+  have hpv1 : (⟨W⟩ : SmoothPlaneCurve K).pointValuation P
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) g) = 1 := by
+    rw [IsScalarTower.algebraMap_apply
+      ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+      ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) g]
+    show (IsDiscreteValuationRing.maximalIdeal
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).valuation
+      ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) _ = 1
+    rw [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap, hval1]
+  exact (SmoothPlaneCurve.ord_P_eq_zero_iff_pointValuation_eq_one
+    (⟨W⟩ : SmoothPlaneCurve K) hFFne).mpr hpv1
+
 end ModularCurves
