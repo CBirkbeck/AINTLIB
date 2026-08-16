@@ -194,4 +194,22 @@ theorem isLocalization_stalk_zChartPoint (W : WeierstrassCurve K) [W.IsElliptic]
     ⟨zChartMaximalIdeal W P, (zChartMaximalIdeal_isMaximal W P).isPrime⟩
     (by rw [← SetLike.mem_coe, ← hZaff.range_fromSpec]; exact Set.mem_range_self _)
 
+/-- **(RP-4a)** A generator of the maximal ideal at a smooth point is a uniformizer:
+its function-field image has `ord_P = 1`. Chain: the local-ring image generates the
+DVR maximal ideal (`AtPrime` map-span), `intValuation_singleton` reads its integral
+valuation as `exp (-1)`, `valuation_of_algebraMap` transports to the function field,
+and the `ord_P` computation mirrors `exists_uniformizer`'s ending. -/
+theorem uniformizer_of_span_maximalIdealAt (W : WeierstrassCurve K) [W.IsElliptic]
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (r : (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) (hr : r ≠ 0)
+    (hspan : (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P = Ideal.span {r}) :
+    SmoothPlaneCurve.Uniformizer (⟨W⟩ : SmoothPlaneCurve K) P
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r) := by
+  -- Chain fully grounded (decomposition-e4a-self.md "RP-4a FULLY GROUNDED"):
+  -- AtPrime map-span → intValuation_singleton → valuation_of_algebraMap → ord_P
+  -- computation. An inner step whnf-walls blind (DVR/Dedekind instance search on the
+  -- localised ring); piece-wise iteration next quantum.
+  sorry
+
 end ModularCurves
