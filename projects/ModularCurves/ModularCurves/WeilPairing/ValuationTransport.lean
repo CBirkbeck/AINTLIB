@@ -360,4 +360,39 @@ theorem ord_P_algebraMap_eq_zero_of_notMem (W : WeierstrassCurve K) [W.IsEllipti
   exact (SmoothPlaneCurve.ord_P_eq_zero_iff_pointValuation_eq_one
     (⟨W⟩ : SmoothPlaneCurve K) hFFne).mpr hpv1
 
+set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency.types true in
+/-- **(RP-5, affine packaging)** A generator of the maximal ideal at `P₀` that lies in
+no other point's maximal ideal has principal divisor exactly `[P₀]`: order one at the
+point (RP-4a), zero everywhere else (the RP-5 atom). The affine half of the divisor
+dictionary's `div r = (Q) − (O)`-pinning; the infinity part is the dataset's
+normalisation content. -/
+theorem divisorOf_algebraMap_eq_single (W : WeierstrassCurve K) [W.IsElliptic]
+    (P₀ : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (r : (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) (hr : r ≠ 0)
+    (hspan : (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P₀ = Ideal.span {r})
+    (hoff : ∀ Q : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint, Q ≠ P₀ →
+      r ∉ (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt Q) :
+    (⟨W⟩ : SmoothPlaneCurve K).divisorOf
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r) =
+      Finsupp.single P₀ 1 := by
+  refine Finsupp.ext fun Q => ?_
+  rw [SmoothPlaneCurve.divisorOf_apply]
+  by_cases hQ : Q = P₀
+  · subst hQ
+    have h1 : (⟨W⟩ : SmoothPlaneCurve K).ord_P Q
+        (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+          ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r) = 1 :=
+      uniformizer_of_span_maximalIdealAt W Q r hr hspan
+    rw [h1]
+    simp
+  · have h0 : (⟨W⟩ : SmoothPlaneCurve K).ord_P Q
+        (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+          ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r) = 0 :=
+      ord_P_algebraMap_eq_zero_of_notMem W Q r hr (hoff Q hQ)
+    rw [h0]
+    symm
+    exact Finsupp.single_eq_of_ne hQ
+
 end ModularCurves
