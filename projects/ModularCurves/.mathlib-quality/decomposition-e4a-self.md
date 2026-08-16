@@ -1340,3 +1340,18 @@ are DELETED — FieldLeaf returns to zero sorries. KEPT (proven, useful): H2
 (restrictTrivialization_inv_app_top_one), tau + tau-nat, [SK-normal], the full N-cluster,
 N3, and the entire earlier battery. 3c-iv will be stated div-level against the
 existential packaging.
+
+★★★ [C-rest-3] CLOSED (2026-08-17): `transitionUnitOfCover_eq_dressed_native` PROVEN
+AXIOM-CLEAN — for ANY chart trivialisation family of M (with M ⊗ I₁ ≅ I₂ and
+unit-related generator data at the overlap), the transition unit is
+a * (u₂ · u₁⁻¹) * b⁻¹ with overlap-units a, b. Proof = the native-middle cocycle
+insertion: cocycle law ×2 + symm-inverse + the mid through PACKAGE-mid (the abstract
+unit-level W2'-bridge) + PACKAGE-cancel (abstract rIso-conjugation-drop) +
+N-TRANSITION. WHNF-LESSON (reusable): when instantiating at large composite terms,
+HOIST every rewrite-bearing step into an ABSTRACT micro-lemma (small binders) and
+instantiate by term-application — refine/simp at big terms whnf-storm even for
+trivial content. 3c-iii IS NOW FULLY COMPLETE (ideal-leg crown + M-chain package),
+FieldLeaf sorry-free. NEXT BOXES: 3c-iv stated DIV-LEVEL against the dressed form
+(div germ(transition) = div germ(u₂u₁⁻¹) — the a/b-units drop); then the L1-glue
+G1-G3 (dataset + normalisation-replay + L2e-instantiation), L3, L5, L6, U-assembly,
+E5-assembly.
