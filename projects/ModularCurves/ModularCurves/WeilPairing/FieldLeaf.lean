@@ -7,6 +7,7 @@ import ModularCurves.WeilPairing.KMBilinear
 import ModularCurves.WeilPairing.FieldComparisonBridge
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.ForMathlib.PullbackTensorMonoidal
+import HasseWeil.HasseBound.WeilPairing.Constancy
 
 /-!
 # The field leaf: comparing the KM pairing with the Silverman pairing (U5)
@@ -1405,6 +1406,40 @@ theorem restrictOverIso_overIsoOfRestrictIso {X : Scheme.{u}} (M N : X.Modules)
   sorry
 
 end PicPoint
+
+section DivisorConstancy
+
+open WeierstrassCurve HasseWeil.Curves HasseWeil.WeilPairing
+
+/-- **(U5-L1b core)** Two nonzero functions with equal projective divisors differ by a
+nonzero base-field constant: the quotient has trivial divisor
+(`projectiveDivisorOf_mul` + cancellation) and the HasseWeil constancy anchor applies.
+This is the "div G = div g_Q ⟹ G = a·g_Q, a ∈ k̄ˣ" step of the L1 dictionary. -/
+theorem exists_const_mul_of_projectiveDivisorOf_eq {K : Type u} [Field K]
+    [DecidableEq K] [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
+    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing]
+    (G gQ : (⟨W⟩ : SmoothPlaneCurve K).FunctionField) (hG : G ≠ 0) (hgQ : gQ ≠ 0)
+    (hdiv : (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf G =
+      (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf gQ) :
+    ∃ c : K, c ≠ 0 ∧
+      G = algebraMap K (⟨W⟩ : SmoothPlaneCurve K).FunctionField c * gQ := by
+  have hq : G / gQ ≠ 0 := div_ne_zero hG hgQ
+  have hdivq : (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf (G / gQ) = 0 := by
+    have hmul := (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf_mul
+      (f := G / gQ) (g := gQ) hq hgQ
+    rw [div_mul_cancel₀ G hgQ, hdiv] at hmul
+    have h0 : (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf (G / gQ) +
+        (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf gQ =
+        0 + (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf gQ := by
+      rw [zero_add]; exact hmul.symm
+    exact add_right_cancel h0
+  obtain ⟨c, hc0, hc⟩ := const_unit_of_projectiveDivisorOf_eq_zero
+    (G / gQ) hq hdivq
+  refine ⟨c, hc0, ?_⟩
+  rw [← hc]
+  field_simp
+
+end DivisorConstancy
 
 section ValuePlumbing
 
