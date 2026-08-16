@@ -1586,6 +1586,64 @@ theorem mono_unitEndomorphismOfTopSection_of_nonZeroDivisors {X : Scheme.{u}}
   dsimp only at happ
   exact (mul_cancel_right_mem_nonZeroDivisors (hr Y.unop)).mp happ
 
+/-- **([C-rest-3] H3-τ)** The two-step-to-one-step pullback transport at an object:
+the composition iso followed by the congruence to the direct inclusion pullback. The
+frame through which the per-chart chase's V-data reaches the overlap. -/
+noncomputable def pullbackRestrictTransport {X : Scheme.{u}} {V W : X.Opens}
+    (hWV : W ≤ V) (A : X.Modules) :
+    (Scheme.Modules.pullback (X.homOfLE hWV)).obj
+      ((Scheme.Modules.pullback V.ι).obj A) ⟶
+      (Scheme.Modules.pullback W.ι).obj A :=
+  (((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app A).hom) ≫
+    (((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).app A).inv)
+
+/-- **([C-rest-3] H3-τ-nat)** The transport is natural: a global map walks through it
+from the two-step to the one-step pullback. Handles every map-leg of the per-chart
+chase in one stroke. -/
+theorem pullbackRestrictTransport_naturality {X : Scheme.{u}} {V W : X.Opens}
+    (hWV : W ≤ V) {A B : X.Modules} (q : A ⟶ B) :
+    (Scheme.Modules.pullback (X.homOfLE hWV)).map
+        ((Scheme.Modules.pullback V.ι).map q) ≫
+      pullbackRestrictTransport hWV B =
+    pullbackRestrictTransport hWV A ≫ (Scheme.Modules.pullback W.ι).map q := by
+  have h1' : (Scheme.Modules.pullback (X.homOfLE hWV)).map
+      ((Scheme.Modules.pullback V.ι).map q) ≫
+      ((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app B).hom =
+      ((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app A).hom ≫
+      (Scheme.Modules.pullback (X.homOfLE hWV ≫ V.ι)).map q :=
+    ((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).hom).naturality q
+  have h2' : (Scheme.Modules.pullback (X.homOfLE hWV ≫ V.ι)).map q ≫
+      ((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).app B).inv =
+      ((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).app A).inv ≫
+      (Scheme.Modules.pullback W.ι).map q :=
+    ((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).inv).naturality q
+  simp only [pullbackRestrictTransport]
+  exact (congrArg (fun t => t ≫
+      ((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).app B).inv) h1').trans
+    ((Category.assoc _ _ _).trans
+      ((congrArg (fun t =>
+        ((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app A).hom ≫ t) h2').trans
+        (Category.assoc _ _ _).symm))
+
+/-- **([C-rest-3] H3-S)** The slot iso commutes with the pullback transport: the
+overlap's slot at the restricted generator, precomposed with the transport, is the
+pullback of the chart's slot followed by the transport at the tensor. The merged
+tensor-transport coherence of the per-chart chase (subsumes the tensor-unit, generator,
+and monoidal legs in one adjunction-transposable square). -/
+theorem pullbackRestrictTransport_tensorIdealSlotIso {X : Scheme.{u}}
+    (M : X.Modules) (J₁ : X.IdealSheafData) {V W : X.Opens} (hWV : W ≤ V)
+    (g : Γ(X, V)) (hgV : g ∈ idealSections J₁ (Opposite.op V))
+    (hgiV : IsIso (idealGenHom J₁ V g hgV))
+    (hgW : X.presheaf.map (homOfLE hWV).op g ∈ idealSections J₁ (Opposite.op W))
+    (hgiW : IsIso (idealGenHom J₁ W (X.presheaf.map (homOfLE hWV).op g) hgW)) :
+    pullbackRestrictTransport hWV M ≫
+        (tensorIdealSlotIso M J₁ W (X.presheaf.map (homOfLE hWV).op g)
+          hgW hgiW).hom =
+      (Scheme.Modules.pullback (X.homOfLE hWV)).map
+          (tensorIdealSlotIso M J₁ V g hgV hgiV).hom ≫
+        pullbackRestrictTransport hWV (tensorObj M (idealModule J₁)) := by
+  sorry
+
 /-- **([C-rest-3] H3-T1)** The tensor comparison commutes with pullback composition:
 the open-immersion monoidal comparison for the composite is the pullback of the inner
 comparison conjugated by the composition isos on both factors and on the tensor.
