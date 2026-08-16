@@ -1402,3 +1402,22 @@ data. REMAINING GLUE: [G2/hnorm] zero-section normalisation (curve-level: the ka
 dataset's exists_normalized_dataset replay — needs the CURVE context (E, mulByN,
 baseChangeZero) — lives beside KMDataset/KMPairing consumers); [3c-iv] div-level
 germ-reading; [G3] L2e-instantiation. Then L3, L5, L6, U-assembly, E5-assembly.
+
+[G2 DESIGN — REPLAY WITH THE CHART-FAMILY] (2026-08-17, cont.3): exists_normalized_
+dataset (KMDataset:220-read) takes an ARBITRARY family (Nonempty-choice via
+exists_over_trivialization_of_isInvertible) and normalises by: (a) the d-rescale from
+exists_transitionUnit_eq_mul_inv_of_picMap_eq_one (zero-section splitting), (b) the
+two-family SUM-cover refinement (W0 i ⊓ snd⁻¹(z⁻¹ W0 i)) ⊕ (W0 i ⊓ Zc). KEY
+STABILITY INSIGHT: the dressed-generator transition-form is CLOSED under both
+operations — refinement restricts the generator-data (map_ideal-transfer keeps the
+span/nzd/mem-relations on sub-overlaps) and unit-rescaling multiplies the a/b-dressing.
+[G2-package] therefore = an exists_normalized_dataset-VARIANT with e0 := the G1-chart-
+family as INPUT (replacing the choice), concluding hnorm ∧ dressed-generator-transitions
+on the refined overlaps. Execution = replay KMDataset's construction (~200 lines,
+curve-level context E/mulByN/baseChangeZero) tracking the transition-formula through
+(a)+(b) — its own session with KMDataset.lean open; the FieldLeaf-side stability
+micro-lemmas (restriction of the dressed form; rescale of the dressed form) can be
+proven X-generic FIRST: [G2-s1] dressed-transition of a RESCALED family (e'_k :=
+e_k ≪≫ scalar-unit-auto) = same-dressed (a/b absorb); [G2-s2] dressed-transition
+restricted to a sub-overlap = dressed with res-generators (map_ideal + N3-restriction).
+THEN 3c-iv (div-germ), G3 (L2e-instantiation at the G2-output).
