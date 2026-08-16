@@ -2163,6 +2163,81 @@ theorem exists_transition_dressed_of_charts {X : Scheme.{u}}
       X.presheaf.map (homOfLE (hVi ▸ inf_le_left : Wf i ⊓ Wf j ≤ Vi.1)).op f₂ =
         X.presheaf.map (homOfLE (hVj ▸ inf_le_right : Wf i ⊓ Wf j ≤ Vj.1)).op f₂' *
           (u₂ : Γ(X, Wf i ⊓ Wf j)) := by
+  have haff : IsAffineOpen (Wf i ⊓ Wf j) := by
+    rw [← hVi, ← hVj]; exact Vi.2.inf Vj.2
+  haveI hne' : Nonempty ↥((Wf i ⊓ Wf j) : X.Opens) := hne
+  haveI hnei : Nonempty ↥(Vi.1 : X.Opens) :=
+    ⟨⟨hne.some.1, (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left) hne.some.2⟩⟩
+  haveI hnej : Nonempty ↥(Vj.1 : X.Opens) :=
+    ⟨⟨hne.some.1, (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right) hne.some.2⟩⟩
+  haveI : IsDomain Γ(X, (Wf i ⊓ Wf j)) :=
+    @AlgebraicGeometry.IsIntegral.component_integral X ‹_› (Wf i ⊓ Wf j) hne'
+  haveI : IsDomain Γ(X, Vi.1) :=
+    @AlgebraicGeometry.IsIntegral.component_integral X ‹_› (Vi.1 : X.Opens) hnei
+  haveI : IsDomain Γ(X, Vj.1) :=
+    @AlgebraicGeometry.IsIntegral.component_integral X ‹_› (Vj.1 : X.Opens) hnej
+  have hsg₁ : J₁.ideal ⟨(Wf i ⊓ Wf j), haff⟩ = Ideal.span {(X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₁)} := by
+    rw [← J₁.map_ideal (U := ⟨(Wf i ⊓ Wf j), haff⟩) (V := Vi) (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left), hspan₁,
+      Ideal.map_span, Set.image_singleton]
+    rfl
+  have hsg₂ : J₂.ideal ⟨(Wf i ⊓ Wf j), haff⟩ = Ideal.span {(X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₂)} := by
+    rw [← J₂.map_ideal (U := ⟨(Wf i ⊓ Wf j), haff⟩) (V := Vi) (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left), hspan₂,
+      Ideal.map_span, Set.image_singleton]
+    rfl
+  have hsg₁' : J₁.ideal ⟨(Wf i ⊓ Wf j), haff⟩ = Ideal.span {(X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₁')} := by
+    rw [← J₁.map_ideal (U := ⟨(Wf i ⊓ Wf j), haff⟩) (V := Vj) (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right), hspan₁',
+      Ideal.map_span, Set.image_singleton]
+    rfl
+  have hsg₂' : J₂.ideal ⟨(Wf i ⊓ Wf j), haff⟩ = Ideal.span {(X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂')} := by
+    rw [← J₂.map_ideal (U := ⟨(Wf i ⊓ Wf j), haff⟩) (V := Vj) (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right), hspan₂',
+      Ideal.map_span, Set.image_singleton]
+    rfl
+  have hng₁ : (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₁) ∈ nonZeroDivisors Γ(X, (Wf i ⊓ Wf j)) := by
+    rw [mem_nonZeroDivisors_iff_ne_zero]
+    intro h0
+    refine (mem_nonZeroDivisors_iff_ne_zero.mp hnzd₁) ?_
+    refine @AlgebraicGeometry.map_injective_of_isIntegral X ‹_› _ _
+      (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)) hne' f₁ 0 ?_
+    rw [h0, map_zero]
+  have hng₂ : (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₂) ∈ nonZeroDivisors Γ(X, (Wf i ⊓ Wf j)) := by
+    rw [mem_nonZeroDivisors_iff_ne_zero]
+    intro h0
+    refine (mem_nonZeroDivisors_iff_ne_zero.mp hnzd₂) ?_
+    refine @AlgebraicGeometry.map_injective_of_isIntegral X ‹_› _ _
+      (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)) hne' f₂ 0 ?_
+    rw [h0, map_zero]
+  have hng₁' : (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₁') ∈ nonZeroDivisors Γ(X, (Wf i ⊓ Wf j)) := by
+    rw [mem_nonZeroDivisors_iff_ne_zero]
+    intro h0
+    refine (mem_nonZeroDivisors_iff_ne_zero.mp hnzd₁') ?_
+    refine @AlgebraicGeometry.map_injective_of_isIntegral X ‹_› _ _
+      (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)) hne' f₁' 0 ?_
+    rw [h0, map_zero]
+  have hng₂' : (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂') ∈ nonZeroDivisors Γ(X, (Wf i ⊓ Wf j)) := by
+    rw [mem_nonZeroDivisors_iff_ne_zero]
+    intro h0
+    refine (mem_nonZeroDivisors_iff_ne_zero.mp hnzd₂') ?_
+    refine @AlgebraicGeometry.map_injective_of_isIntegral X ‹_› _ _
+      (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)) hne' f₂' 0 ?_
+    rw [h0, map_zero]
+  have hmg₁ : (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₁) ∈ idealSections J₁ (Opposite.op (Wf i ⊓ Wf j)) :=
+    idealSections_map J₁ (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op hfmem₁
+  have hmg₂ : (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₂) ∈ idealSections J₂ (Opposite.op (Wf i ⊓ Wf j)) :=
+    idealSections_map J₂ (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op hfmem₂
+  have hmg₁' : (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₁') ∈ idealSections J₁ (Opposite.op (Wf i ⊓ Wf j)) :=
+    idealSections_map J₁ (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op hfmem₁'
+  have hmg₂' : (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂') ∈ idealSections J₂ (Opposite.op (Wf i ⊓ Wf j)) :=
+    idealSections_map J₂ (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op hfmem₂'
+  obtain ⟨u₁, hu₁⟩ : ∃ u : Γ(X, (Wf i ⊓ Wf j))ˣ, (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₁) = (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₁') * (u : Γ(X, (Wf i ⊓ Wf j))) := by
+    have hassoc : Associated (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₁') (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₁) :=
+      (Ideal.span_singleton_eq_span_singleton).mp (hsg₁'.symm.trans hsg₁)
+    obtain ⟨u, hu⟩ := hassoc
+    exact ⟨u, hu.symm⟩
+  obtain ⟨u₂, hu₂⟩ : ∃ u : Γ(X, (Wf i ⊓ Wf j))ˣ, (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₂) = (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂') * (u : Γ(X, (Wf i ⊓ Wf j))) := by
+    have hassoc : Associated (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vj.1 from hVj ▸ inf_le_right)).op f₂') (X.presheaf.map (homOfLE (show (Wf i ⊓ Wf j) ≤ Vi.1 from hVi ▸ inf_le_left)).op f₂) :=
+      (Ideal.span_singleton_eq_span_singleton).mp (hsg₂'.symm.trans hsg₂)
+    obtain ⟨u, hu⟩ := hassoc
+    exact ⟨u, hu.symm⟩
   sorry
 
 end PicPoint
