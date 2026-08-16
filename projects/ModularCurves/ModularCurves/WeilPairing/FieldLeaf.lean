@@ -1676,30 +1676,6 @@ theorem nativeTensorIdealTriv_inv_comp_nu {X : Scheme.{u}} (M : X.Modules)
     Category.id_comp]
   exact pullbackIdealTrivOfGen_inv_comp_toUnit J₂ W g₂ hg₂ hgi₂
 
-/-- **([C-rest-3] N-transition)** The native-vs-native transition: two overlap-native
-tensor-ideal trivialisations with unit-related generators differ by exactly
-`u₂ · u₁⁻¹`. Assembly of the `N2`-characterisations through `nuPullback_mul` and the
-pullback `C(i)-b` read-off. -/
-theorem nativeTensorIdealTriv_inv_comp_hom {X : Scheme.{u}} (M : X.Modules)
-    (J₁ J₂ : X.IdealSheafData) (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
-    (W : X.Opens) (g₁ g₂ g₁' g₂' : Γ(X, W)) (u₁ u₂ : Γ(X, W)ˣ)
-    (hu₁ : g₁ = g₁' * (u₁ : Γ(X, W))) (hu₂ : g₂ = g₂' * (u₂ : Γ(X, W)))
-    (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op W))
-    (hgi₁ : IsIso (idealGenHom J₁ W g₁ hg₁))
-    (hg₁' : g₁' ∈ idealSections J₁ (Opposite.op W))
-    (hgi₁' : IsIso (idealGenHom J₁ W g₁' hg₁'))
-    (hg₂ : g₂ ∈ idealSections J₂ (Opposite.op W))
-    (hgi₂ : IsIso (idealGenHom J₂ W g₂ hg₂))
-    (hg₂' : g₂' ∈ idealSections J₂ (Opposite.op W))
-    (hgi₂' : IsIso (idealGenHom J₂ W g₂' hg₂'))
-    (hmono : Mono (ModularCurves.unitEndomorphismOfTopSection
-      (Scheme.Modules.openTopSection W g₂'))) :
-    (nativeTensorIdealTriv M J₁ J₂ e W g₁ g₂ hg₁ hgi₁ hg₂ hgi₂).inv ≫
-        (nativeTensorIdealTriv M J₁ J₂ e W g₁' g₂' hg₁' hgi₁' hg₂' hgi₂').hom =
-      ModularCurves.unitEndomorphismOfTopSection
-        (Scheme.Modules.openTopSection W ((u₂ : Γ(X, W)) * (u₁⁻¹ : Γ(X, W)ˣ))) := by
-  sorry
-
 /-- **([C-rest-3] H3-τ)** The two-step-to-one-step pullback transport at an object:
 the composition iso followed by the congruence to the direct inclusion pullback. The
 frame through which the per-chart chase's V-data reaches the overlap. -/
@@ -2020,6 +1996,74 @@ theorem pullbackTrivialization_inv_comp_hom_of_nu {X : Scheme.{u}}
     h₁.trans ((congrArg ModularCurves.unitEndomorphismOfTopSection htop).trans
       (ModularCurves.unitEndomorphismOfTopSection_comp _ _).symm)
   exact (Category.assoc _ _ _).trans (hsub.trans (halg.trans hval))
+
+/-- **([C-rest-3] N-transition)** The native-vs-native transition: two overlap-native
+tensor-ideal trivialisations with unit-related generators differ by exactly
+`u₂ · u₁⁻¹`. Assembly of the `N2`-characterisations through `nuPullback_mul` and the
+pullback `C(i)-b` read-off. -/
+theorem nativeTensorIdealTriv_inv_comp_hom {X : Scheme.{u}} (M : X.Modules)
+    (J₁ J₂ : X.IdealSheafData) (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
+    (W : X.Opens) (g₁ g₂ g₁' g₂' : Γ(X, W)) (u₁ u₂ : Γ(X, W)ˣ)
+    (hu₁ : g₁ = g₁' * (u₁ : Γ(X, W))) (hu₂ : g₂ = g₂' * (u₂ : Γ(X, W)))
+    (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op W))
+    (hgi₁ : IsIso (idealGenHom J₁ W g₁ hg₁))
+    (hg₁' : g₁' ∈ idealSections J₁ (Opposite.op W))
+    (hgi₁' : IsIso (idealGenHom J₁ W g₁' hg₁'))
+    (hg₂ : g₂ ∈ idealSections J₂ (Opposite.op W))
+    (hgi₂ : IsIso (idealGenHom J₂ W g₂ hg₂))
+    (hg₂' : g₂' ∈ idealSections J₂ (Opposite.op W))
+    (hgi₂' : IsIso (idealGenHom J₂ W g₂' hg₂'))
+    (hmono : Mono (ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection W g₂'))) :
+    (nativeTensorIdealTriv M J₁ J₂ e W g₁ g₂ hg₁ hgi₁ hg₂ hgi₂).inv ≫
+        (nativeTensorIdealTriv M J₁ J₂ e W g₁' g₂' hg₁' hgi₁' hg₂' hgi₂').hom =
+      ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W ((u₂ : Γ(X, W)) * (u₁⁻¹ : Γ(X, W)ˣ))) := by
+  subst hu₁
+  subst hu₂
+  have hchar_i := nativeTensorIdealTriv_inv_comp_nu M J₁ J₂ e W
+    (g₁' * (u₁ : Γ(X, W))) (g₂' * (u₂ : Γ(X, W))) hg₁ hgi₁ hg₂ hgi₂
+  have hchar_j := nativeTensorIdealTriv_inv_comp_nu M J₁ J₂ e W
+    g₁' g₂' hg₁' hgi₁' hg₂' hgi₂'
+  have hratio := nuPullback_mul M J₁ J₂ e W g₁' (u₁ : Γ(X, W)) hg₁ hg₁' hgi₁ hgi₁'
+  have htop_mul : ∀ (x y : Γ(X, W)), Scheme.Modules.openTopSection W (x * y) =
+      Scheme.Modules.openTopSection W x * Scheme.Modules.openTopSection W y := by
+    intro x y
+    simp [Scheme.Modules.openTopSection, map_mul]
+  have hchar_i' : (nativeTensorIdealTriv M J₁ J₂ e W (g₁' * (u₁ : Γ(X, W)))
+        (g₂' * (u₂ : Γ(X, W))) hg₁ hgi₁ hg₂ hgi₂).inv ≫
+      nuPullback M J₁ J₂ e W g₁' hg₁' hgi₁' =
+      ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W
+          ((g₂' * (u₂ : Γ(X, W))) * ((u₁⁻¹ : Γ(X, W)ˣ) : Γ(X, W)))) := by
+    have step1 := hchar_i.symm.trans (congrArg (fun t =>
+      (nativeTensorIdealTriv M J₁ J₂ e W (g₁' * (u₁ : Γ(X, W)))
+        (g₂' * (u₂ : Γ(X, W))) hg₁ hgi₁ hg₂ hgi₂).inv ≫ t) hratio)
+    have step2 := congrArg (fun t => t ≫
+      ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W ((u₁⁻¹ : Γ(X, W)ˣ) : Γ(X, W)))) step1
+    simp only [Category.assoc, ModularCurves.unitEndomorphismOfTopSection_comp]
+      at step2
+    rw [← htop_mul, ← htop_mul] at step2
+    rw [mul_assoc, Units.mul_inv] at step2
+    have hone : Scheme.Modules.openTopSection W (1 : Γ(X, W)) = 1 := by
+      simp [Scheme.Modules.openTopSection, map_one]
+    rw [hone, ModularCurves.unitEndomorphismOfTopSection_one,
+      Category.comp_id] at step2
+    exact step2.symm.trans (congrArg (fun t =>
+      ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W t))
+      (mul_assoc g₂' (u₂ : Γ(X, W)) ((u₁⁻¹ : Γ(X, W)ˣ) : Γ(X, W))).symm)
+  refine pullbackTrivialization_inv_comp_hom_of_nu M
+    (nativeTensorIdealTriv M J₁ J₂ e W (g₁' * (u₁ : Γ(X, W)))
+      (g₂' * (u₂ : Γ(X, W))) hg₁ hgi₁ hg₂ hgi₂)
+    (nativeTensorIdealTriv M J₁ J₂ e W g₁' g₂' hg₁' hgi₁' hg₂' hgi₂')
+    (nuPullback M J₁ J₂ e W g₁' hg₁' hgi₁')
+    ((g₂' * (u₂ : Γ(X, W))) * ((u₁⁻¹ : Γ(X, W)ˣ) : Γ(X, W))) g₂'
+    ((u₂ : Γ(X, W)) * ((u₁⁻¹ : Γ(X, W)ˣ) : Γ(X, W)))
+    hchar_i' hchar_j ?_ hmono
+  ring
+
 
 /-- **([C-rest-3] SK-W2')** The transition unit of two `overTrivializationOfRestrictIso`
 images is read off from the restrict-side composite: if `ψ₁.inv ≫ ψ₂.hom` is
