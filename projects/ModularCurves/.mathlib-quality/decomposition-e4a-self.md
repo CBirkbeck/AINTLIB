@@ -794,3 +794,19 @@ projModelFunctionFieldEquiv on function fields (fraction-field functoriality of
 ringEquivOfRingEquiv — mathlib-species). RP-4 then reads valuations through the
 transported DVR structure; RP-5 assembles div_V(FF r) = [Q₀]. The whole RP-execution
 is now transport + one square + the RP-1/RP-2 scheme-side stalk-generation facts.
+
+RP-BRICK-3 RECIPE COMPLETE (2026-08-16): `projModelFunctionFieldEquiv` is ITSELF
+`IsLocalization.ringEquivOfRingEquiv` along `(coordRingToZSection W).symm` at the
+nonZeroDivisors (MulByHomDegree.lean:85 — same equiv, same mechanism as
+zChartLocalizationEquiv at the primeCompl). ⟹ THE FF-COMPATIBILITY SQUARE = extension
+UNIQUENESS: both composites Localization.AtPrime(chart-m) →+* W.FunctionField
+(via zChartLocalizationEquiv → algebraMap-localRingAt-FF, and via the
+primeCompl≤nonZeroDivisors tower-map → projModelFunctionFieldEquiv) restrict on
+Γ(zChart) to algebraMap ∘ (coordRingToZSection).symm (by the two
+ringEquivOfRingEquiv_eq computation rules) ⟹ equal by `IsLocalization.ringHom_ext
+(M := primeCompl)`. Ingredients (all named): the tower-map = IsLocalization.map along
+RingHom.id with primeCompl ≤ nonZeroDivisors (domain: Γ(zChart) is a domain via the
+CoordinateRing-equiv transport; mathlib's primeCompl-le-nonZeroDivisors species);
+HW-side algebraMap-instance localRingAt.instIsFractionRing. Statement + ringHom_ext
+proof = the next quantum; then RP-brick-4 (scheme-stalk ≅ chart-localisation at x_P,
+mathlib IsAffineOpen stalk machinery + hZaff), RP-1/2, RP-4-uniformizer, RP-5.
