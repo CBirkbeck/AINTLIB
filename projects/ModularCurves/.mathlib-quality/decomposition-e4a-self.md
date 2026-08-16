@@ -1391,3 +1391,14 @@ CONJUNCTION-shape). REMAINING GLUE: [G1-dataset] the cover+e-family existence-pa
 at charts; iSup = top); [G2/hnorm] the zero-section normalisation replay (curve-level);
 [3c-iv] div-level germ-reading (DIV-UNIT via RP-5 + the u-relations from G1-transition);
 then G3 = L2e-instantiation, L3, L5, L6, U-assembly, E5-assembly.
+
+★ [G1 COMPLETE] (2026-08-17, cont.2): exists_chart_family PROVEN (the chart-data
+existence: choose over exists_affine_common_principal at W := top; hfmem via
+ker_subschemeι_app + mem_span_singleton_self — the isInvertible_idealModule template).
+G1 = dataset + dressed-transition both axiom-clean. The e-family at consumers:
+efam c := overTrivializationOfRestrictIso M (V c).1 (restrictIsoOfPullbackIso
+(pullbackTrivOfTensorIdeal M J1 J2 e (V c) (f1 c) (f2 c) ...)) — definitional on the
+data. REMAINING GLUE: [G2/hnorm] zero-section normalisation (curve-level: the kappa-
+dataset's exists_normalized_dataset replay — needs the CURVE context (E, mulByN,
+baseChangeZero) — lives beside KMDataset/KMPairing consumers); [3c-iv] div-level
+germ-reading; [G3] L2e-instantiation. Then L3, L5, L6, U-assembly, E5-assembly.
