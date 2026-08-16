@@ -1251,3 +1251,18 @@ transport lemmas (H2 [proven — keep, may serve elsewhere], H3-S/H3-T1 skeleton
 [SK-per-chart] as stated) get PARKED (comment DEFERRED, or delete the sorried skeletons
 at the G1-recut if truly consumed nowhere). VERIFY at N4-time that hnorm's
 zero-section-normalisation interacts with the A-fold as with r-fold (same lemma).
+
+[N-ROUTE MILESTONE] (2026-08-16, cont.8): N1 + N2-cancel PROVEN — the native-middle
+route's characterisation chain is COMPLETE: nativeTensorIdealTriv (def) is characterised
+against nuPullback by pure iso-cancellation (one simp: slot+dictionary collapse) down to
+the W-level A1-sibling pullbackIdealTrivOfGen_inv_comp_toUnit, itself closed by the
+rfip-naturality walk + restrictFunctorIsoPullback_hom_comp_pullbackUnitIsoG + the
+concrete app-chase (KEY: Scheme.Opens.iota_appIso collapses appIso to Iso.refl — then
+the wrappers are RFL-transparent; simp refuses them but rfl-bridges + show-from
+clothing close; openTopSection_restrict massaged by the same iota_appIso rw). WITH the
+landed [SK-read-off] + nuPullback_mul + B2-restrict, the NATIVE-vs-NATIVE transition
+value u2*u1^-1 is now a pure assembly. REMAINING for [C-rest-3]-via-N-route:
+(N3) transition-restriction coherence + A_k-full (from :911) — then the assembly
+statement dressing transitions as res(A_i) * u2u1^-1 * res(A_j)^-1; (N4) G1/G2-recut
+carrying the dressing. The three transport-sorries (H3-T1, H3-S, [SK-per-chart]-as-
+stated) are now OFF the critical path — park/delete at the G1-recut.
