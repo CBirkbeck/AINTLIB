@@ -1586,6 +1586,51 @@ theorem mono_unitEndomorphismOfTopSection_of_nonZeroDivisors {X : Scheme.{u}}
   dsimp only at happ
   exact (mul_cancel_right_mem_nonZeroDivisors (hr Y.unop)).mp happ
 
+/-- **([C-rest-3] N-native)** The overlap-native tensor-ideal trivialisation: the slot
+iso followed by the dictionary and the `J₂`-generator division, all at `W` with the
+restricted generators. The transition middle-man of the native-middle route. -/
+noncomputable def nativeTensorIdealTriv {X : Scheme.{u}} (M : X.Modules)
+    (J₁ J₂ : X.IdealSheafData) (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
+    (W : X.Opens) (g₁ g₂ : Γ(X, W))
+    (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op W))
+    (hgi₁ : IsIso (idealGenHom J₁ W g₁ hg₁))
+    (hg₂ : g₂ ∈ idealSections J₂ (Opposite.op W))
+    (hgi₂ : IsIso (idealGenHom J₂ W g₂ hg₂)) :
+    (Scheme.Modules.pullback W.ι).obj M ≅ unitObj W.toScheme :=
+  tensorIdealSlotIso M J₁ W g₁ hg₁ hgi₁ ≪≫
+    (Scheme.Modules.pullback W.ι).mapIso e ≪≫
+    pullbackIdealTrivOfGen J₂ W g₂ hg₂ hgi₂
+
+/-- **([C-rest-3] N1)** The `W`-level `A1`-sibling: the generator trivialisation's
+inverse followed by the ideal inclusion and the unit collapse is multiplication by the
+generator. Concrete: `idealGenHom`'s app formula against `Subtype.val`. -/
+theorem pullbackIdealTrivOfGen_inv_comp_toUnit {X : Scheme.{u}}
+    (J : X.IdealSheafData) (W : X.Opens) (g : Γ(X, W))
+    (hg : g ∈ idealSections J (Opposite.op W))
+    (hgi : IsIso (idealGenHom J W g hg)) :
+    (pullbackIdealTrivOfGen J W g hg hgi).inv ≫
+        (Scheme.Modules.pullback W.ι).map (idealModuleToUnitHom J) ≫
+        (pullbackUnitIso W.ι).hom =
+      ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W g) := by
+  sorry
+
+/-- **([C-rest-3] N2-cancel)** The native trivialisation's characterisation against
+`ν`: the shared slot/dictionary prefix cancels and only the `N1`-tail remains. Pure
+iso-algebra plus `N1`. -/
+theorem nativeTensorIdealTriv_inv_comp_nu {X : Scheme.{u}} (M : X.Modules)
+    (J₁ J₂ : X.IdealSheafData) (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
+    (W : X.Opens) (g₁ g₂ : Γ(X, W))
+    (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op W))
+    (hgi₁ : IsIso (idealGenHom J₁ W g₁ hg₁))
+    (hg₂ : g₂ ∈ idealSections J₂ (Opposite.op W))
+    (hgi₂ : IsIso (idealGenHom J₂ W g₂ hg₂)) :
+    (nativeTensorIdealTriv M J₁ J₂ e W g₁ g₂ hg₁ hgi₁ hg₂ hgi₂).inv ≫
+        nuPullback M J₁ J₂ e W g₁ hg₁ hgi₁ =
+      ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W g₂) := by
+  sorry
+
 /-- **([C-rest-3] H3-τ)** The two-step-to-one-step pullback transport at an object:
 the composition iso followed by the congruence to the direct inclusion pullback. The
 frame through which the per-chart chase's V-data reaches the overlap. -/
