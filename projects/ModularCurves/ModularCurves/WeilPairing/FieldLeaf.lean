@@ -1413,7 +1413,16 @@ theorem restrictOpenTrivialization_restrictIsoOfPullbackIso {X : Scheme.{u}}
     (t : (Scheme.Modules.pullback V.ι).obj M ≅ unitObj V.toScheme) :
     Scheme.Modules.restrictOpenTrivialization hWV (restrictIsoOfPullbackIso M V t) =
       restrictIsoOfPullbackIso M W (restrictTrivialization hWV t) := by
-  sorry
+  rw [Scheme.Modules.restrictOpenTrivialization_eq_pullback]
+  simp only [Scheme.Modules.restrictOpenTrivializationPullback,
+    restrictIsoOfPullbackIso]
+  congr 1
+  have hpair : (restrictFunctorIsoPullback V.ι).symm.app M ≪≫
+      (restrictFunctorIsoPullback V.ι).app M =
+      Iso.refl ((Scheme.Modules.pullback V.ι).obj M) :=
+    Iso.ext (Iso.inv_hom_id_app (restrictFunctorIsoPullback V.ι) M)
+  exact (congrArg (fun q => restrictTrivialization hWV (q ≪≫ t)) hpair).trans
+    (congrArg (restrictTrivialization hWV) (Iso.refl_trans t))
 
 /-- **([C-rest-3] SK-triv)** The pullback-side ideal trivialisation from an
 iso-generator at an arbitrary open (the non-affine sibling of
