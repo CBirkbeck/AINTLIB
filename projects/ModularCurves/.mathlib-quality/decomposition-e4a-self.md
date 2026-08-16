@@ -1103,3 +1103,27 @@ nu's legs are pb(W-iota)-maps and tensor-legs: tensor-point-values via the toShe
 adjunction idiom as in THE ATOM; the e/e-inv cancellation happens between H2's s_V-content
 and H3's e-leg — consider merging H2+H3 into one chain ending at the V-level
 f2-generator value (idealGenHom-app is concrete: f*appIso.inv-formula, IdealModule:240)).
+
+[SK-per-chart] H2 LANDED + H3 FRONTIER (2026-08-16, cont.): H1 closed (Subsingleton-arrow
++ restrictScalarsId'App_inv_apply wrapper-erw). H2 = restrictTrivialization_inv_app_top_one
+PROVEN (standalone, reusable at both charts): the inversion tool
+sheafIso_inv_app_eq_of_hom_app_eqT reduces to a hom-value chain closed by g1..g7:
+congr/comp-cancels (iso_inv_hom/hom_inv_app_applyT at the pullbackCongr/Comp app-isos),
+pullbackUnit_map_transportT at t.hom, t-inversion, PresheafOfModules.naturality_apply at
+the eqToHom, pullbackUnitIso_hom_unit_oneT, and a PRESHEAF-CLOTHED map_one (the
+module-clothed carrier has no One instance — restate g7 at W'.presheaf and defeq-cast).
+LESSON: the erw-cascade version whnf-STORMS at the first pair-cancel (kabstract on the
+eqToHom-laden goal) — the congrArg TERM-chain with fully-spelled inner terms is the way
+(python-template the terms). H2 is PLUGGED into the per-chart frontier (htop' : top =
+preimage-top is rfl). REMAINING = H3: nu.app top (pbCongr.inv(pbComp.hom(eqMap(eta(s_V)))))
+= openTopSection W (res f2), s_V := pbTriv-V.inv.app topV 1. H3-cut: (a) V-LEVEL:
+s_V's five-chain value — by the SAME inversion-tool pattern at V: s_V is THE element with
+pbTriv.hom(s_V)=1; candidate x_V := tensor-transported e.inv-image of the f2-generator
+section (genHom-app formula IdealModule:240 is concrete: f * appIso.inv-arg); the
+five-chain hom-value on x_V via tensor-point lemmas (toSheafify/eta idiom as in THE ATOM).
+(b) W-LEVEL: nu's four legs on the transported point — slotIso (tensor), pb(e), pb(iota2),
+pbUnitIso — using pullbackUnit_map_appT on eta-points + the eqToHom-naturality plumbing
+(H2's g5-pattern). (c) the alignment: nu-legs vs the transported V-data — the e/e-inv
+cancellation manifests as: pb-W(e).map on the eta-image of e.inv-applied-x = eta-image of
+x (map_appT + e.inv-hom-cancel at V-level). Consider proving (a)+(c) MERGED: define the
+candidate x_V so that the H3-chain never needs s_V alone.
