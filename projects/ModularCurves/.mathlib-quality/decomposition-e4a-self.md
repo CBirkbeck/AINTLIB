@@ -999,3 +999,25 @@ composable-k segment lemmas; (4) splice collapses tail-first into right-assoc ch
 by congrArg under prefix-lambdas; (5) assoc-regroup to the goal's bracketing by
 Category.assoc term-application; (6) close with `exact` (defeq bridges Iso.app-vs-
 hom.app and Over.mk-hom spellings). Zero pattern-matching at blurred nodes.
+
+[C-rest-3] ROUTE LOCKED (2026-08-16): the CHART-DEPENDENT CHARACTERISATION route
+(generalised crown), chosen over leg-restriction-coherences (5 iso-species) and
+tensor-multiplicativity (needs over-monoidal comparison) after full triage. Mechanism:
+- nu_k : M.over(W) --> unit.over(W), the chart's comparison hom :=
+  (M ~ M(x)O --(1(x)f1_k-insert)--> M(x)I1 --e_dict--> I2 --iota2--> unit)-over-form,
+  restricted to the overlap (chart-dependence ONLY through the inserted f1_k).
+- PER-CHART characterisation: T_k.inv >> nu_k = overUnitScalarEnd(res f2_k): the
+  e/e.inv and (x)-slot triv1/insert-f1 pairs cancel WITHIN the chart (tensorObjCongr
+  algebra + A1-pre/3c-ii species, all landed), leaving the idealGenHom_mul 3c-ii value.
+- CROSS-CHART: nu_i = nu_j-times-u1 ((x)-linearity in the I1-slot: f1_i = u1*f1_j),
+  so T_i.inv >> T_j.hom reads off as scalar(res f2_i * (res f2_j)^-1 * u1^-1-form)
+  = u2 * u1^-1 via the generalised C(i)-b (characterisations against DIFFERENT
+  nu's related by a unit) + mono_overUnitScalarEnd_of_nonZeroDivisors (B2 — built
+  for exactly this cancellation).
+- Read-off: overUnitScalarEndRingEquiv-injectivity (crown pattern) ==>
+  transitionUnitOfCover M W e i j = u2 * u1^-1.
+Bridging lemmas already landed en route: overTrivializationOfRestrictOpenTrivialization
+(TrivializationRestriction:822 — over-restriction = overTriv of restrict-side rOT),
+restrictOpenTrivialization_eq_pullback (:814), overTrivializationOfRestrictIso_injective
+(:852), restrictOverTrivialization_hom_eq_comp_scalar (:911), transitionUnitOfCover def
+= trivializationTransitionUnit of the two restricted overTrivs (KMPatching:197).

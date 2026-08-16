@@ -1398,6 +1398,146 @@ theorem tensorObjCongr_trans {X : Scheme.{u}} {M M' M'' N N' N'' : X.Modules}
   simp [tensorObjCongr, Iso.ext_iff,
     ← MonoidalCategory.tensorHom_comp_tensorHom]
 
+/-! ### The M-chain transition ([C-rest-3], route C: chart-dependent characterisation)
+
+The transition unit of the tensor-ideal chart trivialisations is `u₂ · u₁⁻¹`, read off
+from characterisations against the chart-dependent comparison map `ν` (the
+`(· ⊗ f₁)`-insertion followed by the dictionary and the ideal inclusion). The skeleton
+below follows `.mathlib-quality/decomposition-e4a-self.md` ([C-rest-3] ROUTE LOCKED). -/
+
+/-- **([C-rest-3] SK-normal)** The restrict-side restriction of a pullback-bridge
+trivialisation is the pullback-bridge of the pullback-side restriction: `rOT` and
+`restrictTrivialization` correspond under `restrictIsoOfPullbackIso`. -/
+theorem restrictOpenTrivialization_restrictIsoOfPullbackIso {X : Scheme.{u}}
+    (M : X.Modules) {V W : X.Opens} (hWV : W ≤ V)
+    (t : (Scheme.Modules.pullback V.ι).obj M ≅ unitObj V.toScheme) :
+    Scheme.Modules.restrictOpenTrivialization hWV (restrictIsoOfPullbackIso M V t) =
+      restrictIsoOfPullbackIso M W (restrictTrivialization hWV t) := by
+  sorry
+
+/-- **([C-rest-3] SK-triv)** The pullback-side ideal trivialisation from an
+iso-generator at an arbitrary open (the non-affine sibling of
+`pullbackIdealTrivOfPrincipal`; at the overlap the generator hypothesis arrives as
+`IsIso` transported from the affine charts). -/
+noncomputable def pullbackIdealTrivOfGen {X : Scheme.{u}} (J : X.IdealSheafData)
+    (W : X.Opens) (g : Γ(X, W)) (hg : g ∈ idealSections J (Opposite.op W))
+    (hgi : IsIso (idealGenHom J W g hg)) :
+    (Scheme.Modules.pullback W.ι).obj (idealModule J) ≅ unitObj W.toScheme :=
+  letI := hgi
+  (restrictFunctorIsoPullback W.ι).symm.app (idealModule J) ≪≫
+    (asIso (idealGenHom J W g hg)).symm
+
+/-- **([C-rest-3] SK-slot)** The `⊗`-slot iso at the overlap: the tensor-unit collapse
+followed by the generator trivialisation in the ideal slot and the monoidal comparison —
+the chart-independent-shape prefix of the five-chain, at `W` with generator `g`. -/
+noncomputable def tensorIdealSlotIso {X : Scheme.{u}} (M : X.Modules)
+    (J₁ : X.IdealSheafData) (W : X.Opens) (g : Γ(X, W))
+    (hg : g ∈ idealSections J₁ (Opposite.op W))
+    (hgi : IsIso (idealGenHom J₁ W g hg)) :
+    (Scheme.Modules.pullback W.ι).obj M ≅
+      (Scheme.Modules.pullback W.ι).obj (tensorObj M (idealModule J₁)) :=
+  (tensorObjUnitIso ((Scheme.Modules.pullback W.ι).obj M)).symm ≪≫
+    tensorObjCongr (Iso.refl _) (pullbackIdealTrivOfGen J₁ W g hg hgi).symm ≪≫
+    (pullbackTensorObjIsoOfIsOpenImmersion W.ι M (idealModule J₁)).symm
+
+/-- **([C-rest-3] SK-ν)** The chart's comparison map at the overlap: insert the
+generator in the `⊗`-slot, apply the dictionary, include the ideal, collapse the unit.
+Chart-dependence enters only through `g`. -/
+noncomputable def nuPullback {X : Scheme.{u}} (M : X.Modules)
+    (J₁ J₂ : X.IdealSheafData) (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
+    (W : X.Opens) (g : Γ(X, W)) (hg : g ∈ idealSections J₁ (Opposite.op W))
+    (hgi : IsIso (idealGenHom J₁ W g hg)) :
+    (Scheme.Modules.pullback W.ι).obj M ⟶ unitObj W.toScheme :=
+  (tensorIdealSlotIso M J₁ W g hg hgi).hom ≫
+    (Scheme.Modules.pullback W.ι).map e.hom ≫
+    (Scheme.Modules.pullback W.ι).map (idealModuleToUnitHom J₂) ≫
+    (pullbackUnitIso W.ι).hom
+
+/-- **([C-rest-3] SK-B2-restrict)** The restrict-side sibling of
+`mono_overUnitScalarEnd_of_nonZeroDivisors`: multiplication by a non-zero-divisor
+section is a mono endomorphism of the structure sheaf. Supplies the `cancel_mono` of
+the transition read-off. -/
+theorem mono_unitEndomorphismOfTopSection_of_nonZeroDivisors {X : Scheme.{u}}
+    (W : X.Opens) (r : Γ(X, W))
+    (hr : ∀ (Z : W.toScheme.Opens),
+      W.toScheme.presheaf.map (homOfLE (le_top : Z ≤ ⊤)).op
+        (Scheme.Modules.openTopSection W r) ∈ nonZeroDivisors Γ(W.toScheme, Z)) :
+    Mono (ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection W r)) := by
+  sorry
+
+/-- **([C-rest-3] SK-per-chart)** The per-chart characterisation: the restricted
+five-chain trivialisation composed with the chart's `ν` is multiplication by the
+restricted `J₂`-generator. All cancellations are within one chart. -/
+theorem restrictTrivialization_pullbackTrivOfTensorIdeal_inv_comp_nu {X : Scheme.{u}}
+    (M : X.Modules) (J₁ J₂ : X.IdealSheafData)
+    (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
+    (V : X.affineOpens) (f₁ f₂ : Γ(X, V.1))
+    (hspan₁ : J₁.ideal V = Ideal.span {f₁}) (hnzd₁ : f₁ ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem₁ : f₁ ∈ idealSections J₁ (Opposite.op V.1))
+    (hspan₂ : J₂.ideal V = Ideal.span {f₂}) (hnzd₂ : f₂ ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem₂ : f₂ ∈ idealSections J₂ (Opposite.op V.1))
+    {W : X.Opens} (hWV : W ≤ V.1)
+    (hg : X.presheaf.map (homOfLE hWV).op f₁ ∈ idealSections J₁ (Opposite.op W))
+    (hgi : IsIso (idealGenHom J₁ W (X.presheaf.map (homOfLE hWV).op f₁) hg)) :
+    (restrictTrivialization hWV (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂
+        hspan₁ hnzd₁ hfmem₁ hspan₂ hnzd₂ hfmem₂)).inv ≫
+      nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op f₁) hg hgi =
+    ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂)) := by
+  sorry
+
+/-- **([C-rest-3] SK-ratio)** `ν` is linear in the inserted generator: multiplying the
+generator by a section multiplies `ν` by that section (the `3c-ii`
+`idealGenHom_mul_app` species lifted through the slot iso). -/
+theorem nuPullback_mul {X : Scheme.{u}} (M : X.Modules)
+    (J₁ J₂ : X.IdealSheafData) (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
+    (W : X.Opens) (g u : Γ(X, W))
+    (hgu : g * u ∈ idealSections J₁ (Opposite.op W))
+    (hg : g ∈ idealSections J₁ (Opposite.op W))
+    (hgui : IsIso (idealGenHom J₁ W (g * u) hgu))
+    (hgi : IsIso (idealGenHom J₁ W g hg)) :
+    nuPullback M J₁ J₂ e W (g * u) hgu hgui =
+      nuPullback M J₁ J₂ e W g hg hgi ≫
+        ModularCurves.unitEndomorphismOfTopSection
+          (Scheme.Modules.openTopSection W u) := by
+  sorry
+
+/-- **([C-rest-3] SK-read-off)** The pullback-side `C(i)-b`: two trivialisations
+characterised against the same comparison map, with a scalar ratio between the
+characterising sections and the smaller section's endo mono, differ by exactly the
+ratio. Pure `cancel_mono` — the comparison map itself need not be mono. -/
+theorem pullbackTrivialization_inv_comp_hom_of_nu {X : Scheme.{u}}
+    (M : X.Modules) {W : X.Opens}
+    (T₁ T₂ : (Scheme.Modules.pullback W.ι).obj M ≅ unitObj W.toScheme)
+    (ν : (Scheme.Modules.pullback W.ι).obj M ⟶ unitObj W.toScheme)
+    (r₁ r₂ v : Γ(X, W))
+    (h₁ : T₁.inv ≫ ν = ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection W r₁))
+    (h₂ : T₂.inv ≫ ν = ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection W r₂))
+    (hr : r₁ = v * r₂)
+    (hmono : Mono (ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection W r₂))) :
+    T₁.inv ≫ T₂.hom = ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection W v) := by
+  sorry
+
+/-- **([C-rest-3] SK-W2')** The transition unit of two `overTrivializationOfRestrictIso`
+images is read off from the restrict-side composite: if `ψ₁.inv ≫ ψ₂.hom` is
+multiplication by `u`, the over-side transition is `overUnitScalarEnd u`. Bridge:
+`overEquiv_unitScalarEnd`. -/
+theorem overTriv_inv_comp_hom_of_restrict_scalar {X : Scheme.{u}}
+    (M : X.Modules) (W : X.Opens)
+    (ψ₁ ψ₂ : M.restrict W.ι ≅ unitObj W.toScheme) (u : Γ(X, W))
+    (h : ψ₁.inv ≫ ψ₂.hom =
+      ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W u)) :
+    (Scheme.Modules.overTrivializationOfRestrictIso M W ψ₁).inv ≫
+      (Scheme.Modules.overTrivializationOfRestrictIso M W ψ₂).hom =
+    SheafOfModules.overUnitScalarEnd X.ringCatSheaf W u := by
+  sorry
+
 end PicPoint
 
 section DivisorConstancy
