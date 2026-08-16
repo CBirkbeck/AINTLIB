@@ -1007,6 +1007,7 @@ noncomputable def restrictRestrictIso {X : Scheme.{u}} (M N : X.Modules)
     restrictPullbackIso M N hWU (pullbackIsoOfRestrictIsoGen M N U φ) ≪≫
     ((restrictFunctorIsoPullback W.ι).app N).symm
 
+
 /-- **(U5-L1a 3c-iii, tail identification)** The over-form of the definite ideal
 trivialisation is the over-form of the bare generator division: `congrArg` of the
 A1-pre clothing cancellation. -/
@@ -1392,6 +1393,16 @@ theorem tensorObjCongr_trans {X : Scheme.{u}} {M M' M'' N N' N'' : X.Modules}
       tensorObjCongr e₁ f₁ ≪≫ tensorObjCongr e₂ f₂ := by
   simp [tensorObjCongr, Iso.ext_iff,
     ← MonoidalCategory.tensorHom_comp_tensorHom]
+
+/-- **(U5-L1a 3c-iii, THE COMMUTATION SQUARE)** Restricting the over-form of a
+restrict-site iso is the over-form of its restriction: the square that lets every
+prefix-leg's overlap comparison be computed at the restrict level. -/
+theorem restrictOverIso_overIsoOfRestrictIso {X : Scheme.{u}} (M N : X.Modules)
+    {U W : X.Opens} (hWU : W ≤ U) (φ : M.restrict U.ι ≅ N.restrict U.ι) :
+    restrictOverIso M N U (overIsoOfRestrictIso M N U φ)
+        (CategoryTheory.Over.mk (homOfLE hWU)) =
+      overIsoOfRestrictIso M N W (restrictRestrictIso M N hWU φ) := by
+  sorry
 
 end PicPoint
 
