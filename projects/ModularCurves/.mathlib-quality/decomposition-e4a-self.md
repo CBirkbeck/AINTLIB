@@ -1266,3 +1266,20 @@ value u2*u1^-1 is now a pure assembly. REMAINING for [C-rest-3]-via-N-route:
 statement dressing transitions as res(A_i) * u2u1^-1 * res(A_j)^-1; (N4) G1/G2-recut
 carrying the dressing. The three transport-sorries (H3-T1, H3-S, [SK-per-chart]-as-
 stated) are now OFF the critical path — park/delete at the G1-recut.
+
+★★ [N-ROUTE CORE COMPLETE — AXIOM-CLEAN] (2026-08-16, cont.9): #print axioms confirms
+nativeTensorIdealTriv_inv_comp_hom + pullbackIdealTrivOfGen_inv_comp_toUnit +
+nativeTensorIdealTriv_inv_comp_nu are ALL [propext, Classical.choice, Quot.sound] —
+NO sorryAx: the native-vs-native transition u2*u1^-1 is proven END-TO-END independent
+of the parked transport-sorries. The (C)-computation's mathematical heart is DONE.
+N-transition proof pattern (reusable): subst the unit-relations FIRST (g free vars ⟹
+subst works, aligning all dependent-hypothesis types), then the two N2-characterisations
++ nuPullback_mul + endo-composition algebra (unitEndomorphismOfTopSection_comp, _one,
+openTop-map_mul/map_one as local haves) + the C(i)-b read-off + `ring` for the
+unit-coe arithmetic. REMAINING for [C-rest-3]: (N3) the transition-RESTRICTION
+coherence (trivializationTransitionUnit of restricted trivialisation-pairs = res of
+the unit; from restrictOverTrivialization_hom_eq_comp_scalar :911 + [SK-W2']) +
+A_k := transitionUnit(chart-e_k, native-at-V_k) in Gamma(V_k)-units; then the
+transitionUnitOfCover-packaging (KMPatching:197-def + overTriv-of-native via
+[SK-W2']-style bridges) dressing as res(A_i) * u2u1^-1 * res(A_j)^-1; (N4) the
+G1/G2-glue-recut. Then 3c-iv, L3, L5, L6, U-assembly, E5.
