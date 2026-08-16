@@ -962,6 +962,21 @@ theorem trivialization_inv_comp_hom_of_characterisation {X : Scheme.{u}}
     exact overUnitScalarEnd_mul V u r₂
   rw [key, Category.assoc, Iso.inv_hom_id, Category.comp_id]
 
+/-- **(U5-L1a 3c-iii, the general pullback-side restriction)** A pullback-level iso of
+two modules restricts to any smaller open (the general-target sibling of
+`restrictTrivialization`, InvertibleSheaf:229 — same clothing with the `N`-side
+comparison in place of `pullbackUnitIso`). Every prefix-leg's inf-version is this
+applied to the leg. -/
+noncomputable def restrictPullbackIso {X : Scheme.{u}} (M N : X.Modules)
+    {U W : X.Opens} (hWU : W ≤ U)
+    (e : (Scheme.Modules.pullback U.ι).obj M ≅ (Scheme.Modules.pullback U.ι).obj N) :
+    (Scheme.Modules.pullback W.ι).obj M ≅ (Scheme.Modules.pullback W.ι).obj N :=
+  (Scheme.Modules.pullbackCongr (X.homOfLE_ι hWU).symm).app M ≪≫
+    ((Scheme.Modules.pullbackComp (X.homOfLE hWU) U.ι).app M).symm ≪≫
+    (Scheme.Modules.pullback (X.homOfLE hWU)).mapIso e ≪≫
+    (Scheme.Modules.pullbackComp (X.homOfLE hWU) U.ι).app N ≪≫
+    (Scheme.Modules.pullbackCongr (X.homOfLE_ι hWU)).app N
+
 /-- **(U5-L1a 3c-iii, tail identification)** The over-form of the definite ideal
 trivialisation is the over-form of the bare generator division: `congrArg` of the
 A1-pre clothing cancellation. -/
