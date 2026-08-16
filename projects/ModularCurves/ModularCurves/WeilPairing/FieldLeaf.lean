@@ -988,6 +988,25 @@ theorem restrictPullbackIso_trans {X : Scheme.{u}} (M N P : X.Modules)
   refine Iso.ext ?_
   simp [restrictPullbackIso]
 
+/-- **(U5-L1a 3c-iii)** The general two-sided pullback/restriction bridge (the
+arbitrary-target sibling of `pullbackIsoOfRestrictIso`). -/
+noncomputable def pullbackIsoOfRestrictIsoGen {X : Scheme.{u}} (M N : X.Modules)
+    (U : X.Opens) (φ : M.restrict U.ι ≅ N.restrict U.ι) :
+    (Scheme.Modules.pullback U.ι).obj M ≅ (Scheme.Modules.pullback U.ι).obj N :=
+  ((restrictFunctorIsoPullback U.ι).app M).symm ≪≫ φ ≪≫
+    (restrictFunctorIsoPullback U.ι).app N
+
+/-- **(U5-L1a 3c-iii)** The restrict-side restriction of a general restrict-site iso to
+a smaller open, through the pullback bridges: the `φ`-restriction every prefix-leg's
+overlap comparison consumes. -/
+noncomputable def restrictRestrictIso {X : Scheme.{u}} (M N : X.Modules)
+    {U W : X.Opens} (hWU : W ≤ U)
+    (φ : M.restrict U.ι ≅ N.restrict U.ι) :
+    M.restrict W.ι ≅ N.restrict W.ι :=
+  (restrictFunctorIsoPullback W.ι).app M ≪≫
+    restrictPullbackIso M N hWU (pullbackIsoOfRestrictIsoGen M N U φ) ≪≫
+    ((restrictFunctorIsoPullback W.ι).app N).symm
+
 /-- **(U5-L1a 3c-iii, tail identification)** The over-form of the definite ideal
 trivialisation is the over-form of the bare generator division: `congrArg` of the
 A1-pre clothing cancellation. -/
