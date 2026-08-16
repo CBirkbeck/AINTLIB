@@ -1612,7 +1612,60 @@ theorem nuPullback_mul {X : Scheme.{u}} (M : X.Modules)
       nuPullback M J₁ J₂ e W g hg hgi ≫
         ModularCurves.unitEndomorphismOfTopSection
           (Scheme.Modules.openTopSection W u) := by
-  sorry
+  letI := hgui
+  letI := hgi
+  have h2core : (((restrictFunctorIsoPullback W.ι).symm.app (idealModule J₁) ≪≫
+        (asIso (idealGenHom J₁ W (g * u) hgu)).symm)).inv =
+      ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W u) ≫
+        (((restrictFunctorIsoPullback W.ι).symm.app (idealModule J₁) ≪≫
+          (asIso (idealGenHom J₁ W g hg)).symm)).inv := by
+    simp only [Iso.trans_inv, Iso.symm_inv, asIso_hom]
+    rw [idealGenHom_mul J₁ W g u hgu hg, Category.assoc]
+  have h2 : (pullbackIdealTrivOfGen J₁ W (g * u) hgu hgui).inv =
+      ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W u) ≫
+        (pullbackIdealTrivOfGen J₁ W g hg hgi).inv := h2core
+  have hp1 : ∀ {N N' : W.toScheme.Modules} (β : N ≅ N'),
+      (tensorObjCongr (Iso.refl ((Scheme.Modules.pullback W.ι).obj M)) β).hom =
+        (PresheafOfModules.sheafification (𝟙 W.toScheme.ringCatSheaf.obj)).map
+          (MonoidalCategoryStruct.whiskerLeft
+            ((Scheme.Modules.pullback W.ι).obj M).val β.hom.val) := by
+    intro N N' β
+    simp only [tensorObjCongr, Functor.mapIso_hom,
+      MonoidalCategory.tensorIso_hom, Functor.mapIso_refl, Iso.refl_hom,
+      MonoidalCategory.id_tensorHom]
+    rfl
+  have h3 : (tensorObjCongr (Iso.refl ((Scheme.Modules.pullback W.ι).obj M))
+        (pullbackIdealTrivOfGen J₁ W (g * u) hgu hgui).symm).hom =
+      smulEndo (tensorObj ((Scheme.Modules.pullback W.ι).obj M)
+          (unitObj W.toScheme)) (Scheme.Modules.openTopSection W u) ≫
+        (tensorObjCongr (Iso.refl ((Scheme.Modules.pullback W.ι).obj M))
+          (pullbackIdealTrivOfGen J₁ W g hg hgi).symm).hom := by
+    rw [hp1, hp1]
+    rw [show ((pullbackIdealTrivOfGen J₁ W (g * u) hgu hgui).symm).hom =
+      (pullbackIdealTrivOfGen J₁ W (g * u) hgu hgui).inv from rfl]
+    rw [h2]
+    rw [show (ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W u) ≫
+        (pullbackIdealTrivOfGen J₁ W g hg hgi).inv).val =
+      (ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W u)).val ≫
+        (pullbackIdealTrivOfGen J₁ W g hg hgi).inv.val from rfl]
+    rw [MonoidalCategory.whiskerLeft_comp, Functor.map_comp]
+    rw [sheafificationMap_whiskerLeft_unitEndomorphism]
+    rfl
+  simp only [nuPullback, tensorIdealSlotIso, Iso.trans_hom, Category.assoc]
+  rw [h3]
+  simp only [Category.assoc]
+  rw [smulEndo_naturality
+    ((tensorObjCongr (Iso.refl ((Scheme.Modules.pullback W.ι).obj M))
+        (pullbackIdealTrivOfGen J₁ W g hg hgi).symm).hom ≫
+      (pullbackTensorObjIsoOfIsOpenImmersion W.ι M (idealModule J₁)).symm.hom ≫
+      (Scheme.Modules.pullback W.ι).map e.hom ≫
+      (Scheme.Modules.pullback W.ι).map (idealModuleToUnitHom J₂) ≫
+      (pullbackUnitIso W.ι).hom) (Scheme.Modules.openTopSection W u)]
+  simp only [Category.assoc, smulEndo_unitObj]
 
 /-- **([C-rest-3] SK-read-off)** The pullback-side `C(i)-b`: two trivialisations
 characterised against the same comparison map, with a scalar ratio between the
