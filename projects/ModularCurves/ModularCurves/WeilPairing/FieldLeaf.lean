@@ -1629,7 +1629,11 @@ theorem nativeTensorIdealTriv_inv_comp_nu {X : Scheme.{u}} (M : X.Modules)
         nuPullback M J₁ J₂ e W g₁ hg₁ hgi₁ =
       ModularCurves.unitEndomorphismOfTopSection
         (Scheme.Modules.openTopSection W g₂) := by
-  sorry
+  simp only [nativeTensorIdealTriv, nuPullback, Iso.trans_inv, Functor.mapIso_inv,
+    Category.assoc, Iso.inv_hom_id_assoc]
+  rw [← Functor.map_comp_assoc, Iso.inv_hom_id, CategoryTheory.Functor.map_id,
+    Category.id_comp]
+  exact pullbackIdealTrivOfGen_inv_comp_toUnit J₂ W g₂ hg₂ hgi₂
 
 /-- **([C-rest-3] H3-τ)** The two-step-to-one-step pullback transport at an object:
 the composition iso followed by the congruence to the direct inclusion pullback. The
