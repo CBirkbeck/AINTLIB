@@ -1610,7 +1610,39 @@ theorem restrictTrivialization_inv_app_top_one {X : Scheme.{u}} {P : X.Modules}
               (t.inv.val.app (Opposite.op (⊤ : U.toScheme.Opens))
                 (show U.toScheme.presheaf.obj
                   (Opposite.op (⊤ : U.toScheme.Opens)) from 1))))) := by
-  sorry
+  refine sheafIso_inv_app_eq_of_hom_app_eqT _ _ _ _ ?_
+  simp only [restrictTrivialization, Iso.trans_hom, Iso.symm_hom,
+    Functor.mapIso_hom]
+  erw [sheafOfModules_comp_app_apply, sheafOfModules_comp_app_apply,
+    sheafOfModules_comp_app_apply]
+  have g1 := congrArg (fun w => (CategoryTheory.ConcreteCategory.hom ((pullbackUnitIso (X.homOfLE hWU)).hom.val.app (Opposite.op (⊤ : W'.toScheme.Opens)))) ((CategoryTheory.ConcreteCategory.hom (((Scheme.Modules.pullback (X.homOfLE hWU)).map t.hom).val.app (Opposite.op (⊤ : W'.toScheme.Opens)))) ((CategoryTheory.ConcreteCategory.hom (((Scheme.Modules.pullbackComp (X.homOfLE hWU) U.ι).app P).inv.val.app (Opposite.op (⊤ : W'.toScheme.Opens)))) w)))
+    (iso_inv_hom_app_applyT ((Scheme.Modules.pullbackCongr
+      (X.homOfLE_ι hWU).symm).app P) (Opposite.op (⊤ : W'.toScheme.Opens)) ((((Scheme.Modules.pullbackComp (X.homOfLE hWU) U.ι).app P).hom.val.app (Opposite.op (⊤ : W'.toScheme.Opens))) ((((Scheme.Modules.pullback (X.homOfLE hWU)).obj ((Scheme.Modules.pullback U.ι).obj P)).presheaf.map (eqToHom htop).op) (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWU)).unit.app ((Scheme.Modules.pullback U.ι).obj P)).val.app (Opposite.op (⊤ : U.toScheme.Opens)) (t.inv.val.app (Opposite.op (⊤ : U.toScheme.Opens)) (show U.toScheme.presheaf.obj (Opposite.op (⊤ : U.toScheme.Opens)) from 1))))))
+  have g2 := congrArg (fun w => (CategoryTheory.ConcreteCategory.hom ((pullbackUnitIso (X.homOfLE hWU)).hom.val.app (Opposite.op (⊤ : W'.toScheme.Opens)))) ((CategoryTheory.ConcreteCategory.hom (((Scheme.Modules.pullback (X.homOfLE hWU)).map t.hom).val.app (Opposite.op (⊤ : W'.toScheme.Opens)))) w))
+    (iso_hom_inv_app_applyT ((Scheme.Modules.pullbackComp
+      (X.homOfLE hWU) U.ι).app P) (Opposite.op (⊤ : W'.toScheme.Opens)) ((((Scheme.Modules.pullback (X.homOfLE hWU)).obj ((Scheme.Modules.pullback U.ι).obj P)).presheaf.map (eqToHom htop).op) (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWU)).unit.app ((Scheme.Modules.pullback U.ι).obj P)).val.app (Opposite.op (⊤ : U.toScheme.Opens)) (t.inv.val.app (Opposite.op (⊤ : U.toScheme.Opens)) (show U.toScheme.presheaf.obj (Opposite.op (⊤ : U.toScheme.Opens)) from 1)))))
+  have g3 := congrArg (fun w => (CategoryTheory.ConcreteCategory.hom ((pullbackUnitIso (X.homOfLE hWU)).hom.val.app (Opposite.op (⊤ : W'.toScheme.Opens)))) w)
+    (pullbackUnit_map_transportT (X.homOfLE hWU) t.hom ⊤ ⊤ htop (t.inv.val.app (Opposite.op (⊤ : U.toScheme.Opens)) (show U.toScheme.presheaf.obj (Opposite.op (⊤ : U.toScheme.Opens)) from 1)))
+  have g4 := congrArg (fun w => (CategoryTheory.ConcreteCategory.hom ((pullbackUnitIso (X.homOfLE hWU)).hom.val.app (Opposite.op (⊤ : W'.toScheme.Opens)))) ((CategoryTheory.ConcreteCategory.hom ((((Scheme.Modules.pullback (X.homOfLE hWU)).obj (unitObj U.toScheme)).presheaf.map (eqToHom htop).op))) (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWU)).unit.app (unitObj U.toScheme)).val.app (Opposite.op (⊤ : U.toScheme.Opens)) w)))
+    (iso_inv_hom_app_applyT t (Opposite.op (⊤ : U.toScheme.Opens)) (show U.toScheme.presheaf.obj (Opposite.op (⊤ : U.toScheme.Opens)) from 1))
+  have g5 := PresheafOfModules.naturality_apply
+    (pullbackUnitIso (X.homOfLE hWU)).hom.val (eqToHom htop).op
+    (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWU)).unit.app
+      (unitObj U.toScheme)).val.app (Opposite.op (⊤ : U.toScheme.Opens))
+      (show U.toScheme.presheaf.obj (Opposite.op (⊤ : U.toScheme.Opens)) from 1))
+  have g6 := congrArg
+    (CategoryTheory.ConcreteCategory.hom
+      ((unitObj W'.toScheme).val.map (eqToHom htop).op))
+    (pullbackUnitIso_hom_unit_oneT (X.homOfLE hWU))
+  have g7 : (CategoryTheory.ConcreteCategory.hom
+      (W'.toScheme.presheaf.map (eqToHom htop).op))
+      (show W'.toScheme.presheaf.obj
+        (Opposite.op ((X.homOfLE hWU) ⁻¹ᵁ (⊤ : U.toScheme.Opens))) from 1) =
+      (show W'.toScheme.presheaf.obj
+        (Opposite.op (⊤ : W'.toScheme.Opens)) from 1) :=
+    map_one (CategoryTheory.ConcreteCategory.hom
+      (W'.toScheme.presheaf.map (eqToHom htop).op))
+  exact g1.trans (g2.trans (g3.trans (g4.trans (g5.trans (g6.trans g7)))))
 
 /-- **([C-rest-3] SK-per-chart)** The per-chart characterisation: the restricted
 five-chain trivialisation composed with the chart's `ν` is multiplication by the
