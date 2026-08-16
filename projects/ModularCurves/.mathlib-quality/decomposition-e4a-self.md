@@ -682,3 +682,16 @@ shared legs cancel pairwise, leaving the B-slot difference
 tensorObjCongr(refl, triv1^i << triv1^j.symm-restricted) = (1c)-atom = overSmulEndo-u1
 [via the J1-crown-scalars + tensorObjCongr_symm/trans]. Also needed cheap:
 tensorObjCongr_symm. All scalar-plumbing (overSmulEndo trio + unit-coincidence) LANDED.
+
+COMMUTATION-SQUARE RESIDUAL EXPOSED (2026-08-16): ONE goal — the coherence between the
+OVER-restriction legs (overFunctorMap.inv >> overMap-of-preimage >> overFunctorMap.hom,
+G_W-imaged) and the 11-leg PULLBACK-side chain (overFunctorEquiv >> rfip >>
+pullbackCongr >> pullbackComp.inv >> pb-maps of (rfip.inv, phi, rfip.hom) >>
+pullbackComp.hom >> pullbackCongr.inv >> rfip.inv >> overFunctorEquiv.inv). Full goal
+text in scratchpad/probeSquare.lean's output (task b7vzdh9vl). THE TOOLKIT:
+Picard/DualPullback/OverRestriction.lean's Stage-lemmas (overRestrictionStage1/2/3 +
+_app_apply, overMapCompOverEquivStage1_app_apply, overMapOpenIso,
+overRestrictionComparisonLeft/Right + overRestrictionComparison_app_apply) — built for
+exactly this over-vs-pullback restriction comparison; mine them next window (match the
+goal's leg-spellings against the Stage-composites, or go per-app with the bounded-erw
+protocol reading each leg's value off its Stage-app-lemma).
