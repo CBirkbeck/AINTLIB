@@ -810,3 +810,15 @@ CoordinateRing-equiv transport; mathlib's primeCompl-le-nonZeroDivisors species)
 HW-side algebraMap-instance localRingAt.instIsFractionRing. Statement + ringHom_ext
 proof = the next quantum; then RP-brick-4 (scheme-stalk ≅ chart-localisation at x_P,
 mathlib IsAffineOpen stalk machinery + hZaff), RP-1/2, RP-4-uniformizer, RP-5.
+
+RP-BRICK-3 DRAFT LESSONS (2026-08-16, attempt parked, tree green): (i) `zChart` is NOT
+in FieldLeaf's import closure (projModelFunctionFieldEquiv arrives transitively but the
+abbrev doesn't) — add `import ModularCurves.EllipticCurve.MulByHomDegree`; (ii) the
+`Γ(projModel W, zChart W)` notation CLASHES with the Modules-Γ overload in this file —
+spell the chart ring as `((projModel W).presheaf.obj (Opposite.op (zChart W)))` (with
+↑-carrier in Ideal/instance positions) or hoist the whole RP-block to a NEW FILE
+(ModularCurves/WeilPairing/ValuationTransport.lean) importing MulByHomDegree + Constancy
+directly, where the notation environment is clean — RECOMMENDED (also unclutters
+FieldLeaf, which has grown to ~1500 lines). The brick's mathematical recipe is complete
+(previous entry: ringHom_ext at primeCompl); execution = the new-file hoist + the
+skeleton at the clean environment.
