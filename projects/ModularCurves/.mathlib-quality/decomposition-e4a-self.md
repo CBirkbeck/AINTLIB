@@ -938,3 +938,16 @@ app-twins (RFL — restriction is value-transparent), which already collapsed th
 square's per-app LHS to a single overIsoOfRestrictIso-app. Next quantum: define
 restrictRestrictIsoNative + restate/prove the square via the comparison-lemma;
 check overRestrictModuleIso's def-relation to restrictOverIso first.
+
+SQUARE REDESIGN VERIFIED AGAINST DEFS (2026-08-16): `overRestrictModuleIso M i`
+(DualPullback:27) = G_V(mapIso (overFunctorMap.app M).symm) ≪≫ (overMapCompOverEquiv
+i).app (M.over U) — the G-IMAGED over-restriction, same overFunctorMap-leg as
+restrictOverIso. THE ASSEMBLY (execution-spec): G.map_injective; G(square-LHS) factors
+through overRestrictModuleIso(M/N) [by restrictOverIso's def + G-functoriality];
+G(square-RHS) factors through the F-apps at V [by overIsoOfRestrictIso's def]; the two
+factorisations meet by `overRestrictModuleIso_comp_overFunctorEquiv` at M and N +
+`(restrictFunctor (X.homOfLE)).map`-naturality on the φ-middle + restrictOpenCompIso-
+conjugation matching the restrict-native restriction. Statement change: use the
+restrict-native `restrictRestrictIsoNative φ := (restrictOpenCompIso i).app-conjugated
+(restrictFunctor (X.homOfLE (leOfHom i))).mapIso φ`. All three assembly-lemmas PROVEN
+in-tree; the square's execution = one statement + one choreography, zero new species.
