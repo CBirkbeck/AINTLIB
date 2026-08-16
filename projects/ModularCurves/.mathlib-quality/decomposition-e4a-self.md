@@ -1147,3 +1147,24 @@ sheafification-adjunction + eta/toSheafify idiom (THE ATOM's pattern) — preshe
 tensor is pointwise, the coherences are toSheafify-naturality chases. Alternatively
 consider stating [H3-T] directly as the SLOT-LEG's action on the transported point
 (one merged value-lemma instead of three iso-coherences) — fewer statements, same content.
+
+[H3-T1] PROOF LAYER-MAP (2026-08-16, cont.3): pullbackTensorObjIsoOfIsOpenImmersion's
+def (PullbackTensorMonoidal:331) = e1 (rfip.symm) >> e2 (sheafifyValIso.symm) >>
+e3 (asIso of the sheafificationW-inverted pushforward-unit-tensor comparison) >>
+e4 (sheafification.mapIso (pushforwardTensorIso (restrictRingHom f)).symm) >>
+e5a (refl) >> e5b (tensorObjCongr of rfip's). pushforwardTensorIso (:206) =
+restrictScalarsTensorObjIso >> restrictScalars-mapIso (Functor.Monoidal.muIso
+(pushforward0OfCommRingCat F R)) — mathlib's monoidal-functor mu at the reindexing +
+scalar-restriction along the componentwise-iso ring comparison. [H3-T1]'s proof
+therefore decomposes along: (L1) rfip-comp (restrictFunctorIsoPullback_comp — LANDED,
+RestrictComp:180) aligns the e1-legs; (L2) sheafifyValIso vs sheafification-functor
+composition (naturality of the counit — mathlib); (L3) the e3-legs: sheafificationW-
+inverted comparisons compose (W-members closed under the composition — the hmem-terms'
+asIso-functoriality); (L4) pushforwardTensorIso-COMP: mu-composition for
+pushforward0OfCommRingCat of a composite site-functor (mathlib Functor.Monoidal
+composition laws: muIso of F ⋙ G) + restrictScalarsTensorObjIso-comp (two-step scalar
+restriction along composed ring-comparisons); (L5) tensorObjCongr-algebra tail (landed).
+Estimated as its own decompose-first task — run /develop-style leaf-cuts on L2/L3/L4
+before tactics. ALTERNATIVE still open: state the SLOT-LEG's transported-point VALUE
+directly and prove by the adjunction/eta idiom end-to-end (one lemma, no iso-coherences;
+revisit after attempting L1-L5's first leaf).
