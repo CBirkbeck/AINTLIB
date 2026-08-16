@@ -1242,6 +1242,27 @@ theorem restrictOverIso_trans {X : Scheme.{u}} (M N P : X.Modules) (U : X.Opens)
   refine Iso.ext ?_
   simp [restrictOverIso]
 
+/-- **(square shape-iii, leg value)** The restricted over-iso's action is the original
+action at the transported object (mirror of `restrictOverTrivialization_inv_app_apply`). -/
+@[simp]
+theorem restrictOverIso_hom_app_apply {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ N.over U) (V : CategoryTheory.Over U)
+    (Z : (CategoryTheory.Over V.left)ᵒᵖ)
+    (x : ((M.over V.left)).val.obj Z) :
+    (restrictOverIso M N U e V).hom.val.app Z x =
+      e.hom.val.app (Opposite.op ((CategoryTheory.Over.map V.hom).obj Z.unop)) x :=
+  rfl
+
+/-- **(square shape-iii, leg value)** Inverse direction. -/
+@[simp]
+theorem restrictOverIso_inv_app_apply {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ N.over U) (V : CategoryTheory.Over U)
+    (Z : (CategoryTheory.Over V.left)ᵒᵖ)
+    (x : ((N.over V.left)).val.obj Z) :
+    (restrictOverIso M N U e V).inv.val.app Z x =
+      e.inv.val.app (Opposite.op ((CategoryTheory.Over.map V.hom).obj Z.unop)) x :=
+  rfl
+
 /-- **(U5-L1a 3c-iii)** Restriction respects composition of over-site isos with a
 trivialisation tail: the five-chain's over-form restricts leg-wise. -/
 theorem restrictOverTrivialization_comp_iso {X : Scheme.{u}} (M N : X.Modules)
