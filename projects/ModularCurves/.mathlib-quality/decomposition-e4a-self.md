@@ -907,3 +907,16 @@ common-principal charts refined into any cover. The glue's ladder:
 - [G3] the L2e-instantiation at the normalised concrete dataset ⟹ H-form ⟹ L3.
 FIRST ACTION next quantum: read L2e's (functionFieldMap_translateByPoint_germ) exact
 hypothesis-shape to determine whether G1 needs the hom-level transitions at all.
+
+L2E-SHAPE DECODED (2026-08-16, decisive for the glue-order): L2e
+(functionFieldMap_translateByPoint_germ, FieldLeaf:279) consumes the dataset
+(M,hM,W,e,hnorm) PLUS the SPLITTING FAMILY h (units on [N]⁻¹-preimages, hn-normalised)
+with hsplit: [N]^#(transitionUnitOfCover M W e i j) = h_i·h_j⁻¹. ⟹ (1) the hom-level
+transitions ARE consumed — the (C)-assembly (the parked square + the M-chain transition
+theorem) is ON the glue's critical path (no dodge); (2) the h-family is ANOTHER concrete
+dataset component: the [N]^*-splittings (KMSplitting-layer species — the [N]-pullback of
+κ(Q) trivialised by the h_i; concretely from the 3b-trivs pulled along [N] + the
+r-relations giving hsplit BY the crown/assembly transitions). REVISED CRITICAL PATH to
+YR-2: [square (LSP/3-shapes)] → [(C) M-chain transition assembly] → [G1 dataset + h-family]
+→ [G2 normalisation] → [G3 = L2e] → [L3 scalar-match] → [L6] → [U-assembly]. The square
+is THE bottleneck; its dedicated session is the next major unit.
