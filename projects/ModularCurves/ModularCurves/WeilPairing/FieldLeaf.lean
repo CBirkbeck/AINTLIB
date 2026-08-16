@@ -1631,6 +1631,15 @@ theorem restrictTrivialization_pullbackTrivOfTensorIdeal_inv_comp_nu {X : Scheme
       (unitObj W.toScheme).val.map
         (homOfLE (le_top : (⊤ : W.toScheme.Opens) ≤ ⊤)).op
         (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂))
+    have h1 : (unitObj W.toScheme).val.map
+        (homOfLE (le_top : (⊤ : W.toScheme.Opens) ≤ ⊤)).op
+        (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂)) =
+        Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂) := by
+      rw [show (homOfLE (le_top : (⊤ : W.toScheme.Opens) ≤ ⊤)).op =
+        𝟙 (Opposite.op (⊤ : W.toScheme.Opens)) from Subsingleton.elim _ _]
+      simp
+      erw [ModuleCat.restrictScalarsId'App_inv_apply]
+    refine Eq.trans ?_ h1.symm
     sorry
   refine Subtype.ext (funext fun Z => ?_)
   rw [← (_root_.SheafOfModules.sectionsMap
