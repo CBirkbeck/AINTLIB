@@ -1605,6 +1605,12 @@ theorem restrictTrivialization_pullbackTrivOfTensorIdeal_inv_comp_nu {X : Scheme
       nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op f₁) hg hgi =
     ModularCurves.unitEndomorphismOfTopSection
       (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂)) := by
+  -- Value-route (grind-plan in decomposition-e4a-self.md): both sides are unit-source
+  -- homs, determined by their `unitHomEquiv`-section; the RHS's section is free.
+  apply (_root_.SheafOfModules.unit
+    (W.toScheme.ringCatSheaf)).unitHomEquiv.injective
+  rw [_root_.SheafOfModules.unitHomEquiv_comp_apply]
+  refine Eq.trans ?_ (Equiv.apply_symm_apply _ _).symm
   sorry
 
 /-- **([C-rest-3] SK-ratio)** `ν` is linear in the inserted generator: multiplying the
