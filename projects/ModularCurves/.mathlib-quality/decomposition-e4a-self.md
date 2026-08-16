@@ -1232,3 +1232,22 @@ If YES: the ENTIRE transport-block (H3-S/H3-T1/L1-L5, and even H2!) leaves the c
 path — [SK-per-chart] as stated becomes UNNECESSARY (delete or park the three sorried
 transport lemmas). If NO: continue the L-layer route. DECIDE FIRST NEXT SESSION
 (decompose-adversarial on the A-cancellation through the glue's consumption chain).
+
+[GATE — DECISIVE OBSERVATION] (2026-08-16, cont.7): the A-dressing is THE SAME SPECIES
+as G2's normalisation-rescalers. The glue's own plan (G2: exists_normalized_dataset
+replay with TRACKED RESCALERS) already dresses every transition as
+res(r_i) * f_ij * res(r_j)^-1 with chart-local units r_k, and the downstream design
+(hsplit-absorption into the h-family, 3c-iv germ-reading, L1b constant-freedom) was cut
+to cope with exactly that — otherwise G2 itself would be unsound. Hence the prime
+alternative's A_k := transition(e_k, t_{V_k}-native) are absorbable exactly like the
+r_k: fold them INTO the G2-rescaling step (equivalently: normalize the NATIVE-family
+directly). DEFAULT FLIPPED: next session executes the NATIVE-MIDDLE ROUTE —
+(N1) W-level A1-sibling: pullbackIdealTrivOfGen.inv >> pb(iota2) >> pullbackUnitIso =
+endo-of-generator (hom-level, genHom-app concrete); (N2) native-vs-native transition =
+u2*u1^-1 via iso-cancellation + [SK-read-off]/nuPullback_mul/B2r (all landed);
+(N3) transition-restriction coherence (res of transitionUnit — :911-based) + A_k-full
+definition; (N4) re-cut the glue's G1/G2 to carry the A/r-dressing uniformly; then the
+transport lemmas (H2 [proven — keep, may serve elsewhere], H3-S/H3-T1 skeletons,
+[SK-per-chart] as stated) get PARKED (comment DEFERRED, or delete the sorried skeletons
+at the G1-recut if truly consumed nowhere). VERIFY at N4-time that hnorm's
+zero-section-normalisation interacts with the A-fold as with r-fold (same lemma).
