@@ -1471,6 +1471,85 @@ theorem idealGenHom_mul {X : Scheme.{u}} (J : X.IdealSheafData) (V : X.Opens)
   intro a
   exact idealGenHom_mul_app J V f u hm₁ hm₂ Y a
 
+/-- **([C-rest-3] RUNG-1e-restrict)** At the unit, the central scalar endomorphism is
+multiplication by the top section (`mul_comm` modulo the initial-object arrow). -/
+theorem smulEndo_unitObj {Y : Scheme.{u}} (r : Γ(Y, (⊤ : Y.Opens))) :
+    smulEndo (unitObj Y) r = ModularCurves.unitEndomorphismOfTopSection r := by
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro U
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  erw [smulEndo_app_apply]
+  erw [ModularCurves.unitEndomorphismOfTopSection_app_apply]
+  have harr := congrArg (fun (a : Opposite.op (⊤ : Y.Opens) ⟶ U) =>
+    (CategoryTheory.ConcreteCategory.hom (Y.ringCatSheaf.obj.map a)) r)
+    (Subsingleton.elim ((isInitialOpTop Y).to U)
+      (homOfLE (le_top : U.unop ≤ ⊤)).op)
+  refine (congrArg (fun t => t • x) harr).trans ?_
+  exact mul_comm (G := Γ(Y, U.unop)) _ _
+
+/-- **([C-rest-3] RUNG-1c, THE TENSOR-MEETS-SCALAR ATOM)** Whiskering the unit-slot
+scalar through the sheafified tensor is the central scalar endomorphism of the tensor:
+the one place the `⊗`-slot meets the scalar action. Proven by the sheafification
+adjunction, `TensorProduct.induction_on`, and a base-ring re-typing of the scalar. -/
+theorem sheafificationMap_whiskerLeft_unitEndomorphism {Y : Scheme.{u}}
+    (A : Y.Modules) (r : Γ(Y, (⊤ : Y.Opens))) :
+    (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map
+        (MonoidalCategoryStruct.whiskerLeft A.val
+          (ModularCurves.unitEndomorphismOfTopSection r).val) =
+      smulEndo (tensorObj A (unitObj Y)) r := by
+  apply ((PresheafOfModules.sheafificationAdjunction
+    (𝟙 Y.ringCatSheaf.obj)).homEquiv _ _).injective
+  rw [Adjunction.homEquiv_apply, Adjunction.homEquiv_apply]
+  have hnat := (PresheafOfModules.sheafificationAdjunction
+    (𝟙 Y.ringCatSheaf.obj)).unit.naturality
+    (MonoidalCategoryStruct.whiskerLeft A.val
+      (ModularCurves.unitEndomorphismOfTopSection r).val)
+  refine Eq.trans (Eq.trans ?_ hnat.symm) ?_
+  · rfl
+  apply PresheafOfModules.hom_ext
+  intro U
+  apply ModuleCat.hom_ext
+  refine LinearMap.ext ?_
+  intro t
+  induction t using TensorProduct.induction_on with
+  | zero => simp
+  | tmul x a =>
+      simp only [Functor.id_map, PresheafOfModules.comp_app, ModuleCat.hom_comp,
+        LinearMap.comp_apply]
+      erw [PresheafOfModules.whiskerLeft_app]
+      erw [ModuleCat.MonoidalCategory.whiskerLeft_apply]
+      erw [ModularCurves.unitEndomorphismOfTopSection_app_apply]
+      erw [smulEndo_app_apply]
+      have hswap := congrArg (fun (i : Opposite.op (⊤ : Y.Opens) ⟶ U) =>
+        (CategoryTheory.ConcreteCategory.hom (Y.ringCatSheaf.obj.map i)) r •
+          (ModuleCat.Hom.hom
+            (((PresheafOfModules.sheafificationAdjunction
+              (𝟙 Y.ringCatSheaf.obj)).unit.app
+                (MonoidalCategoryStruct.tensorObj A.val (unitObj Y).val)).app U))
+            (x ⊗ₜ a))
+        (Subsingleton.elim ((isInitialOpTop Y).to U)
+          (homOfLE (le_top : U.unop ≤ ⊤)).op)
+      refine Eq.trans ?_ hswap.symm
+      refine Eq.trans ?_ (LinearMap.map_smul
+        (ModuleCat.Hom.hom
+          (((PresheafOfModules.sheafificationAdjunction
+            (𝟙 Y.ringCatSheaf.obj)).unit.app
+              (MonoidalCategoryStruct.tensorObj A.val (unitObj Y).val)).app U)) _ _)
+      refine congrArg (ModuleCat.Hom.hom
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 Y.ringCatSheaf.obj)).unit.app
+            (MonoidalCategoryStruct.tensorObj A.val (unitObj Y).val)).app U)) ?_
+      refine Eq.trans (congrArg (fun t => x ⊗ₜ t) ?_) (TensorProduct.tmul_smul
+        (show ↑(((sheafToPresheaf (Opens.grothendieckTopology ↥Y) CommRingCat).obj
+            Y.sheaf ⋙ forget₂ CommRingCat RingCat).obj U) from
+          (CategoryTheory.ConcreteCategory.hom
+            (Y.ringCatSheaf.obj.map (homOfLE (le_top : U.unop ≤ ⊤)).op)) r) x a)
+      exact mul_comm (G := Γ(Y, U.unop)) _ _
+  | add s t hs ht => rw [map_add, map_add, hs, ht]
+
 /-- **([C-rest-3] SK-B2-restrict)** The restrict-side sibling of
 `mono_overUnitScalarEnd_of_nonZeroDivisors`: multiplication by a non-zero-divisor
 section is a mono endomorphism of the structure sheaf. Supplies the `cancel_mono` of

@@ -1,1 +1,1 @@
-FOCUS: [C-rest-3] skeleton battery — elaborating statements in FieldLeaf (SK-normal/SK-triv/SK-slot/SK-nu/SK-B2r/SK-per-chart/SK-ratio/SK-read-off/SK-W2), then grind proofs cheap-first
+FOCUS: [C-rest-3] — atom (1c) + r2 + B2r + read-off + W2-bridge + genHom_mul LANDED; next = SK-ratio assembly (nuPullback_mul via atom + smulEndo_naturality walk), then SK-normal, then SK-per-chart
