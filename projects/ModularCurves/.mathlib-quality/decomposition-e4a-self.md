@@ -1325,3 +1325,18 @@ split trivially since they are... CHECK); or (ii) state 3c-iv for the full dress
 with the A-ratio explicit. Either way NO new transport mathematics — only statement-
 placement. The parked transport-sorries (H3-T1, H3-S, [SK-per-chart]-as-stated) can be
 DELETED at the design session if (i)/(ii) confirm.
+
+★ [N4 ADJUDICATED — PAIR-LOCAL SUFFICES, DIV-INVARIANCE] (2026-08-16, cont.12): the
+3c-iv/L1a consumption is DIVISOR-level (the L1 dictionary runs on div-statements:
+div G = div g_Q => G = c g_Q), and UNITS HAVE ZERO DIVISOR on their domain — so ANY
+unit-dressing (pair-local included) drops out of the div-reading. The tau-ratio side is
+value-free (L2e preread). ⟹ the packaging theorem is the EXISTENTIAL form:
+  ∃ a b : Γ(W_i ⊓ W_j)ˣ, transitionUnitOfCover M W e i j = a * (u₂·u₁⁻¹-unit) * b⁻¹
+proven by the cocycle law ×2 with the native-middle insertion (a := transition(res-e_i,
+tW-over-i), b := transition(res-e_j, tW-over-j)) + the middle = N-TRANSITION through
+the overTriv-bridge ([SK-W2'] + the rfip-cancel, both landed). CONSEQUENCE: the three
+transport-sorries (H3-T1, H3-S, [SK-per-chart]-as-stated incl. its H2-plug scaffold)
+are DELETED — FieldLeaf returns to zero sorries. KEPT (proven, useful): H2
+(restrictTrivialization_inv_app_top_one), tau + tau-nat, [SK-normal], the full N-cluster,
+N3, and the entire earlier battery. 3c-iv will be stated div-level against the
+existential packaging.

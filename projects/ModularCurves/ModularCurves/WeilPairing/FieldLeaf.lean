@@ -1715,46 +1715,6 @@ theorem pullbackRestrictTransport_naturality {X : Scheme.{u}} {V W : X.Opens}
         ((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app A).hom ≫ t) h2').trans
         (Category.assoc _ _ _).symm))
 
-/-- **([C-rest-3] H3-S)** The slot iso commutes with the pullback transport: the
-overlap's slot at the restricted generator, precomposed with the transport, is the
-pullback of the chart's slot followed by the transport at the tensor. The merged
-tensor-transport coherence of the per-chart chase (subsumes the tensor-unit, generator,
-and monoidal legs in one adjunction-transposable square). -/
-theorem pullbackRestrictTransport_tensorIdealSlotIso {X : Scheme.{u}}
-    (M : X.Modules) (J₁ : X.IdealSheafData) {V W : X.Opens} (hWV : W ≤ V)
-    (g : Γ(X, V)) (hgV : g ∈ idealSections J₁ (Opposite.op V))
-    (hgiV : IsIso (idealGenHom J₁ V g hgV))
-    (hgW : X.presheaf.map (homOfLE hWV).op g ∈ idealSections J₁ (Opposite.op W))
-    (hgiW : IsIso (idealGenHom J₁ W (X.presheaf.map (homOfLE hWV).op g) hgW)) :
-    pullbackRestrictTransport hWV M ≫
-        (tensorIdealSlotIso M J₁ W (X.presheaf.map (homOfLE hWV).op g)
-          hgW hgiW).hom =
-      (Scheme.Modules.pullback (X.homOfLE hWV)).map
-          (tensorIdealSlotIso M J₁ V g hgV hgiV).hom ≫
-        pullbackRestrictTransport hWV (tensorObj M (idealModule J₁)) := by
-  apply ((Scheme.Modules.pullbackPushforwardAdjunction
-    (X.homOfLE hWV)).homEquiv _ _).injective
-  rw [Adjunction.homEquiv_apply, Adjunction.homEquiv_apply]
-  sorry
-
-/-- **([C-rest-3] H3-T1)** The tensor comparison commutes with pullback composition:
-the open-immersion monoidal comparison for the composite is the pullback of the inner
-comparison conjugated by the composition isos on both factors and on the tensor.
-(The one irreducible tensor-transport coherence of the per-chart chase; atom-technique.) -/
-theorem pullbackTensorObjIso_comp {X : Scheme.{u}} {Y Z : Scheme.{u}}
-    (f : Y ⟶ X) (g : Z ⟶ Y) [IsOpenImmersion f] [IsOpenImmersion g]
-    [IsOpenImmersion (g ≫ f)] (A B : X.Modules) :
-    pullbackTensorObjIsoOfIsOpenImmersion (g ≫ f) A B =
-      (Scheme.Modules.pullbackComp g f).symm.app (tensorObj A B) ≪≫
-        (Scheme.Modules.pullback g).mapIso
-          (pullbackTensorObjIsoOfIsOpenImmersion f A B) ≪≫
-        pullbackTensorObjIsoOfIsOpenImmersion g
-          ((Scheme.Modules.pullback f).obj A)
-          ((Scheme.Modules.pullback f).obj B) ≪≫
-        tensorObjCongr ((Scheme.Modules.pullbackComp g f).app A)
-          ((Scheme.Modules.pullbackComp g f).app B) := by
-  sorry
-
 /-- **([C-rest-3] H2)** The restricted trivialisation's inverse at the top section:
 the pullback-transported trivialising section of the chart, `eqToHom`-corrected. The
 inversion tool (`sheafIso_inv_app_eq_of_hom_app_eqT`) plus the η-transport family. -/
@@ -1813,84 +1773,6 @@ theorem restrictTrivialization_inv_app_top_one {X : Scheme.{u}} {P : X.Modules}
       (W'.toScheme.presheaf.map (eqToHom htop).op))
   exact g1.trans (g2.trans (g3.trans (g4.trans (g5.trans (g6.trans g7)))))
 
-/-- **([C-rest-3] SK-per-chart)** The per-chart characterisation: the restricted
-five-chain trivialisation composed with the chart's `ν` is multiplication by the
-restricted `J₂`-generator. All cancellations are within one chart. -/
-theorem restrictTrivialization_pullbackTrivOfTensorIdeal_inv_comp_nu {X : Scheme.{u}}
-    (M : X.Modules) (J₁ J₂ : X.IdealSheafData)
-    (e : tensorObj M (idealModule J₁) ≅ idealModule J₂)
-    (V : X.affineOpens) (f₁ f₂ : Γ(X, V.1))
-    (hspan₁ : J₁.ideal V = Ideal.span {f₁}) (hnzd₁ : f₁ ∈ nonZeroDivisors Γ(X, V.1))
-    (hfmem₁ : f₁ ∈ idealSections J₁ (Opposite.op V.1))
-    (hspan₂ : J₂.ideal V = Ideal.span {f₂}) (hnzd₂ : f₂ ∈ nonZeroDivisors Γ(X, V.1))
-    (hfmem₂ : f₂ ∈ idealSections J₂ (Opposite.op V.1))
-    {W : X.Opens} (hWV : W ≤ V.1)
-    (hg : X.presheaf.map (homOfLE hWV).op f₁ ∈ idealSections J₁ (Opposite.op W))
-    (hgi : IsIso (idealGenHom J₁ W (X.presheaf.map (homOfLE hWV).op f₁) hg)) :
-    (restrictTrivialization hWV (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂
-        hspan₁ hnzd₁ hfmem₁ hspan₂ hnzd₂ hfmem₂)).inv ≫
-      nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op f₁) hg hgi =
-    ModularCurves.unitEndomorphismOfTopSection
-      (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂)) := by
-  -- Value-route (grind-plan in decomposition-e4a-self.md): both sides are unit-source
-  -- homs, determined by their `unitHomEquiv`-section; the RHS's section is free.
-  apply (_root_.SheafOfModules.unit
-    (W.toScheme.ringCatSheaf)).unitHomEquiv.injective
-  rw [_root_.SheafOfModules.unitHomEquiv_comp_apply]
-  refine Eq.trans ?_ (Equiv.apply_symm_apply _ _).symm
-  have htop : (_root_.SheafOfModules.sectionsMap
-        (nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op f₁) hg hgi)
-        ((_root_.SheafOfModules.unitHomEquiv
-          ((Scheme.Modules.pullback W.ι).obj M))
-          (restrictTrivialization hWV (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂
-            hspan₁ hnzd₁ hfmem₁ hspan₂ hnzd₂ hfmem₂)).inv)).1
-      (Opposite.op (⊤ : W.toScheme.Opens)) =
-      (ModularCurves.moduleSectionsOfTop (unitObj W.toScheme)
-        (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂))).1
-      (Opposite.op (⊤ : W.toScheme.Opens)) := by
-    show (nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op f₁) hg hgi).val.app
-        (Opposite.op (⊤ : W.toScheme.Opens))
-        ((restrictTrivialization hWV (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂
-          hspan₁ hnzd₁ hfmem₁ hspan₂ hnzd₂ hfmem₂)).inv.val.app
-          (Opposite.op (⊤ : W.toScheme.Opens))
-          (show W.toScheme.presheaf.obj (Opposite.op (⊤ : W.toScheme.Opens))
-            from 1)) =
-      (unitObj W.toScheme).val.map
-        (homOfLE (le_top : (⊤ : W.toScheme.Opens) ≤ ⊤)).op
-        (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂))
-    have h1 : (unitObj W.toScheme).val.map
-        (homOfLE (le_top : (⊤ : W.toScheme.Opens) ≤ ⊤)).op
-        (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂)) =
-        Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂) := by
-      rw [show (homOfLE (le_top : (⊤ : W.toScheme.Opens) ≤ ⊤)).op =
-        𝟙 (Opposite.op (⊤ : W.toScheme.Opens)) from Subsingleton.elim _ _]
-      simp
-      erw [ModuleCat.restrictScalarsId'App_inv_apply]
-    refine Eq.trans ?_ h1.symm
-    have htop' : (⊤ : W.toScheme.Opens) =
-        (X.homOfLE hWV) ⁻¹ᵁ (⊤ : V.1.toScheme.Opens) := rfl
-    refine (congrArg (fun w =>
-      (CategoryTheory.ConcreteCategory.hom
-        ((nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op f₁)
-          hg hgi).val.app (Opposite.op (⊤ : W.toScheme.Opens)))) w)
-      (restrictTrivialization_inv_app_top_one hWV
-        (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂
-          hspan₁ hnzd₁ hfmem₁ hspan₂ hnzd₂ hfmem₂) htop')).trans ?_
-    erw [sheafOfModules_comp_app_apply, sheafOfModules_comp_app_apply,
-      sheafOfModules_comp_app_apply]
-    sorry
-  refine Subtype.ext (funext fun Z => ?_)
-  rw [← (_root_.SheafOfModules.sectionsMap
-      (nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op f₁) hg hgi)
-      ((_root_.SheafOfModules.unitHomEquiv
-        ((Scheme.Modules.pullback W.ι).obj M))
-        (restrictTrivialization hWV (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂
-          hspan₁ hnzd₁ hfmem₁ hspan₂ hnzd₂ hfmem₂)).inv)).2
-    ((homOfLE (le_top : Z.unop ≤ ⊤)).op)]
-  rw [← (ModularCurves.moduleSectionsOfTop (unitObj W.toScheme)
-      (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂))).2
-    ((homOfLE (le_top : Z.unop ≤ ⊤)).op)]
-  exact congrArg _ htop
 
 /-- **([C-rest-3] SK-ratio)** `ν` is linear in the inserted generator: multiplying the
 generator by a section multiplies `ν` by that section (the `3c-ii`
