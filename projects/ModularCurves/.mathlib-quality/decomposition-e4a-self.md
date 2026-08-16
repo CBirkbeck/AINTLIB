@@ -1021,3 +1021,26 @@ Bridging lemmas already landed en route: overTrivializationOfRestrictOpenTrivial
 restrictOpenTrivialization_eq_pullback (:814), overTrivializationOfRestrictIso_injective
 (:852), restrictOverTrivialization_hom_eq_comp_scalar (:911), transitionUnitOfCover def
 = trivializationTransitionUnit of the two restricted overTrivs (KMPatching:197).
+
+[C-rest-3] SESSION LANDINGS (2026-08-16, route-C execution): SEVEN of the nine skeleton
+leaves PROVEN in FieldLeaf — [SK-W2'] overTriv_inv_comp_hom_of_restrict_scalar (G.map_inj
++ preimageIso-expansion + overEquiv_unitScalarEnd + Category.assoc term-bridges);
+[SK-read-off] pullbackTrivialization_inv_comp_hom_of_nu (cancel_mono on the r2-endo, NO
+nu-mono needed); [SK-B2-restrict] mono_unitEndomorphismOfTopSection_of_nonZeroDivisors
+(mul_cancel_right_mem_nonZeroDivisors dodges the sub_mul instance-wall); idealGenHom_mul
+(hom-level of the 3c-ii app-lemma, one-exact); smulEndo_unitObj [RUNG-1e-restrict]
+(Subsingleton-arrow congrArg + mul_comm (G := Gamma)-defeq-cast); ***THE TENSOR-MEETS-
+SCALAR ATOM*** sheafificationMap_whiskerLeft_unitEndomorphism [RUNG-1c] (sheafification-
+adjunction homEquiv-injective + unit-naturality + TensorProduct.induction_on + the
+`show ... from`-RE-TYPING of the scalar to the tensor's own base-ring clothing — plain
+type-ASCRIPTION is a no-op on rigid terms and leaves the SMulCommClass wall);
+[SK-ratio] nuPullback_mul (h2core at the trans-form + defeq-cast — def-unfold simp
+whnf-storms; then hp1 (tOC-refl = sheafification-whisker, rfl) + whiskerLeft_comp +
+THE ATOM + ONE smulEndo_naturality at the whole 5-chain composite + smulEndo_unitObj).
+REMAINING: [SK-normal] (rOT vs restrictTrivialization under restrictIsoOfPullbackIso),
+[SK-per-chart] (the characterisation grind), the final assembly statement (glue-side).
+NEW BATTLE-LESSONS: (i) probe-files that RE-STATE IsIso(idealGenHom ...)-binders
+whnf-storm at statement-elaboration while the identical in-FieldLeaf skeleton is fine
+— iterate heavy statements IN THE FILE; (ii) `reassoc_of%` on an already-tail-less
+equation adds a spurious ?h-tail that blocks rw — use the plain lemma + assoc-flatten;
+(iii) wrong-namespace `map_smul` (AG-shadow) silently mismatches — pin LinearMap.map_smul.
