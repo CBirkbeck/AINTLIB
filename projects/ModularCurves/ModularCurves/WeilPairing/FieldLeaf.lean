@@ -1707,6 +1707,8 @@ theorem restrictTrivialization_pullbackTrivOfTensorIdeal_inv_comp_nu {X : Scheme
       (restrictTrivialization_inv_app_top_one hWV
         (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂
           hspan₁ hnzd₁ hfmem₁ hspan₂ hnzd₂ hfmem₂) htop')).trans ?_
+    erw [sheafOfModules_comp_app_apply, sheafOfModules_comp_app_apply,
+      sheafOfModules_comp_app_apply]
     sorry
   refine Subtype.ext (funext fun Z => ?_)
   rw [← (_root_.SheafOfModules.sectionsMap
