@@ -1072,3 +1072,15 @@ overTrivializationOfRestrictOpenTrivialization + [SK-normal] + per-chart at both
 (r1 = res f2_i, r2 = res f2_j, v = the u2u1-ratio via span-Associated at the inf) +
 [SK-W2'] + [SK-B2-restrict] (nzd-hyps from the curve's integrality at instantiation).
 Then 3c-iv, G1-G3, L3, L5, L6, U-assembly, E5-assembly.
+
+[SK-per-chart] VALUE-TOOLKIT POINTER (2026-08-16): the reduction's mathlib API is
+rfl-level and COMPLETE — SheafOfModules.unitHomEquiv (Sheaf.lean:178),
+unitHomEquiv_apply_coe (:183, .val X = f.val.app X 1, rfl), unitHomEquiv_comp_apply
+(:186, equiv-of-composite = sectionsMap, rfl), sectionsMap_comp (rfl),
+unitHomEquiv_symm_comp (:190). unitEndomorphismOfTopSection r :=
+unitHomEquiv.symm (moduleSectionsOfTop r) so its equiv-image is free. The engine's
+section-value machinery for the leg-chase lives in Picard/DualPullback/
+{PullbackSection, LocalSection, LocalTrivialization, LocalTrivializationInv,
+LocalTrivializationSection, LocalUnit}.lean — e.g. iso_hom_inv_app_applyT /
+iso_inv_hom_app_applyT (PullbackSection:25/33, T = top-component). MINE THESE FIRST
+before writing any new app-value lemma.
