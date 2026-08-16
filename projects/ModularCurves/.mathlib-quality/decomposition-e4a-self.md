@@ -858,3 +858,13 @@ to a zChartMaximalIdeal-generator at P := Q-dictionary-image — the sectionDivi
 transport connector (KM 1.2.2 stalk-property; needs the Q-point-to-P-dictionary at the
 zChart, which is the FieldComparisonBridge points-machinery evaluated at zChartPoint).
 RP-5 assembles div_V = [Q0] and feeds exists_const_mul_of_projectiveDivisorOf_eq.
+
+RP-4a FULLY GROUNDED (2026-08-16): mathlib's `intValuation_singleton` (AdicValuation:304
+— v.asIdeal = span{r} ⟹ intValuation r = exp(-1)) + `valuation_of_algebraMap` (:341 —
+FF-valuation of algebraMap = intValuation) are EXACTLY the chain's core. RP-4a =
+[r generates maximalIdealAt] → localRingAt-image generates DVR-max
+(IsLocalization.AtPrime map-span species) → intValuation_singleton at the DVR-max
+HeightOneSpectrum → valuation_of_algebraMap → pointValuation(FF-image) = exp(-1) →
+ord_P = 1 (mirror exists_uniformizer's ending, Valuation.lean:263-271: ord_P_of_ne +
+WithZero.unzero-computation). Every link is a named constant; the draft is mechanical.
+The RP-programme's remaining unknowns: ZERO — all five leaves grounded.
