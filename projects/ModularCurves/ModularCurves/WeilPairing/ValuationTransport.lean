@@ -164,4 +164,34 @@ theorem zChartLocalizationEquiv_compat (W : WeierstrassCurve K) [W.IsElliptic]
   -- refuse to pin blind (stuck metavars even goal-anchored); LSP-session one-liner.
   sorry
 
+/-- **(RP-3 transport, step 4a)** The scheme point of the Z-chart at a smooth point
+`P`: the `fromSpec`-image of the transported maximal ideal. -/
+noncomputable def zChartPoint (W : WeierstrassCurve K) [W.IsElliptic]
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) : projModel W :=
+  haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  hZaff.fromSpec.base
+    ⟨zChartMaximalIdeal W P, (zChartMaximalIdeal_isMaximal W P).isPrime⟩
+
+/-- **(RP-3 transport, step 4)** The scheme stalk at `zChartPoint` is the localisation
+of the chart sections at the transported maximal ideal — mathlib's
+`isLocalization_stalk'` instantiated at the Z-chart. Composed with
+`zChartLocalizationEquiv`, the stalk is HasseWeil's `localRingAt P`. -/
+theorem isLocalization_stalk_zChartPoint (W : WeierstrassCurve K) [W.IsElliptic]
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) :
+    haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+      Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+    haveI := (zChartMaximalIdeal_isMaximal W P).isPrime
+    @IsLocalization.AtPrime
+      (R := Γ(projModel W, EllipticCurve.zChart W))
+      (S := (projModel W).presheaf.stalk (zChartPoint W P)) _ _
+      ((TopCat.Presheaf.algebra_section_stalk (projModel W).presheaf _))
+      (zChartMaximalIdeal W P) _ := by
+  haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI := (zChartMaximalIdeal_isMaximal W P).isPrime
+  exact hZaff.isLocalization_stalk'
+    ⟨zChartMaximalIdeal W P, (zChartMaximalIdeal_isMaximal W P).isPrime⟩
+    (by rw [← SetLike.mem_coe, ← hZaff.range_fromSpec]; exact Set.mem_range_self _)
+
 end ModularCurves
