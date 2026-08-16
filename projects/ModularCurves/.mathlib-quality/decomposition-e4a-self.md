@@ -1201,3 +1201,34 @@ laws + restrictScalarsTensorObjIso-comp) and [L3] the sheafificationW-asIso
 functoriality, each as its own probe; then assemble H3-S by the e1-e5b-normal-forms of
 both slot-W and pb(slot-V) against tau's pbComp/pbCongr legs (rfip-comp LANDED covers
 the e1-alignment).
+
+[PER-CHART PRIME ALTERNATIVE — THE NATIVE-MIDDLE INSERTION] (2026-08-16, cont.6):
+potential TRANSPORT-FREE assembly discovered while triaging the L-layers. Insert the
+W-NATIVE chain t_W(k) := (tensorIdealSlotIso at W with res f1_k) >> pb-W(e_dict) >>
+pullbackIdealTrivOfGen-J2-W(res f2_k) — ALL general-W species (already landed as defs!)
+— as middle terms via the transition-cocycle law:
+  transition(e_i|, e_j|) = transition(e_i|, tW_i) * transition(tW_i, tW_j) * transition(tW_j, e_j|).
+- MIDDLE = native-vs-native = the crown-pattern with nuPullback: tW.inv >> nu_W collapses
+  by PURE ISO-CANCELLATION (slot.inv against slot, pb(e).inv against pb(e) — no values,
+  no sheafification!) to the J2-generator tail; with [SK-read-off]+nuPullback_mul+B2r
+  (all landed) gives u2*u1^-1 CHEAPLY. Needs one new W-level species: hom-level
+  `pullbackIdealTrivOfGen.inv >> pb(iota2) >> pullbackUnitIso = endo(res f2)`
+  (the A1/3c-ii sibling at general W — genHom-app is concrete, no opacity).
+- OUTER terms A_k := transition(e_k|, tW_k): chart-restricted-vs-native. DO NOT compute
+  them: define A_k-full := transition(e_k, t_{V_k}-native) in Gamma(V_k)-units at the
+  FULL chart, and use a TRANSITION-RESTRICTION coherence (trivializationTransitionUnit
+  of restricted pairs = res of the unit — provable from
+  restrictOverTrivialization_hom_eq_comp_scalar (:911, landed) + overUnitScalarEnd-
+  restriction) to get A_k-at-W = res(A_k-full). Then the e-family transition =
+  res(A_i) * (u2 u1^-1) * res(A_j)^-1 with A_k CHART-LOCAL — the h-family absorbs them
+  (h_k := [N]^#(A_k)-corrected), hsplit keeps its cocycle shape.
+⚠ ADVERSARIAL CHECK REQUIRED before adopting: does the U5-chain's downstream (L2e
+tau-relation, L1b divisor-matching, 3c-iv germ-reading, L3 scalar-match) tolerate the
+transition value u2*u1^-1 * res(A_i A_j^-1) with A chart-local units — i.e. do the
+A-factors cancel in the final pairing-value (they should: the pairing is an h-ratio and
+chart-local units drop out of the SAME-chart evaluations, mirroring KM's own
+normalisation freedom — this is exactly the exists_normalized_dataset rescaling-slack)?
+If YES: the ENTIRE transport-block (H3-S/H3-T1/L1-L5, and even H2!) leaves the critical
+path — [SK-per-chart] as stated becomes UNNECESSARY (delete or park the three sorried
+transport lemmas). If NO: continue the L-layer route. DECIDE FIRST NEXT SESSION
+(decompose-adversarial on the A-cancellation through the glue's consumption chain).
