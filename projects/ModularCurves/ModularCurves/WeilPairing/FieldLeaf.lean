@@ -1317,6 +1317,12 @@ theorem tensorObjCongr_refl {X : Scheme.{u}} (M N : X.Modules) :
   simp [tensorObjCongr, Iso.ext_iff]
   rfl
 
+/-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects inversion. -/
+theorem tensorObjCongr_symm {X : Scheme.{u}} {M M' N N' : X.Modules}
+    (eM : M ≅ M') (eN : N ≅ N') :
+    (tensorObjCongr eM eN).symm = tensorObjCongr eM.symm eN.symm := by
+  simp [tensorObjCongr, Iso.ext_iff]
+
 /-- **(U5-L1a 3c-iii C-algebra)** `tensorObjCongr` respects composition — the shared-leg
 cancellation input of the transition computation. -/
 theorem tensorObjCongr_trans {X : Scheme.{u}} {M M' M'' N N' N'' : X.Modules}

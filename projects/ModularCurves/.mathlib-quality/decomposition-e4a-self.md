@@ -667,3 +667,18 @@ uniqueness for naturality); (1b) naturality through over-homs (bounded-erw shape
 overSmulEndo-u on the ⊗-object (per-app on the sheafified tensor); (1d) restrictOverIso
 transports overSmulEndo to the restricted scalar; (1e) at unit: overSmulEndo =
 overUnitScalarEnd (mul_comm-modulo). Then RUNG-2 wiring unchanged.
+
+RUNG-2 DEFINITIVE WIRING MAP (2026-08-11): via the crown-pattern, RUNG-2 reduces to the
+hom-level `(restrictOver E_i|inf).inv >> (restrictOver E_j|inf).hom = overUnitScalarEnd
+(inf) (u2*u1^-1)`. Expansion: E_k = overIso(prefix_k) << overTriv(gen2^k) [splitting +
+factorisation, LANDED]; restriction leg-wise [comp_iso + trans-laws, LANDED]. TAILS:
+C-rest-1-style characterisation at gen2 (A1-pre identifies overTriv(restrictIso(pbTriv))
+with overTriv(asIso(gen).symm) via congrArg). MIDDLE: prefix_i/j live at DIFFERENT
+charts — decompose INSIDE the restriction: restrictOverIso(overIso(prefix_k))|inf
+leg-wise; the REMAINING BULK = per-leg restriction-computation lemmas (species:
+restrictOverIso(overIso(leg-at-V))|inf = overIso(leg-at-inf)) for the 5 shared
+leg-species (plumbing-app, tensor-unit-iso, monoidal, mapIso-e_dict, plumbing2) — then
+shared legs cancel pairwise, leaving the B-slot difference
+tensorObjCongr(refl, triv1^i << triv1^j.symm-restricted) = (1c)-atom = overSmulEndo-u1
+[via the J1-crown-scalars + tensorObjCongr_symm/trans]. Also needed cheap:
+tensorObjCongr_symm. All scalar-plumbing (overSmulEndo trio + unit-coincidence) LANDED.
