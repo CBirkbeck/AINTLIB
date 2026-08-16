@@ -822,3 +822,18 @@ directly, where the notation environment is clean — RECOMMENDED (also unclutte
 FieldLeaf, which has grown to ~1500 lines). The brick's mathematical recipe is complete
 (previous entry: ringHom_ext at primeCompl); execution = the new-file hoist + the
 skeleton at the clean environment.
+
+RP-STATE (2026-08-16, ValuationTransport.lean): bricks 1-2 AXIOM-CLEAN
+(zChartMaximalIdeal + maximality + abstract primeCompl-law + zChartLocalizationEquiv);
+brick-3 at 95%% — statement + ringHom_ext-reduction + simp-normalisation + h1
+(tower-collapse via IsScalarTower.algebraMap_apply, PROVEN in-body) all land; ONE line
+parked: `(IsLocalization.map_eq _ a).symm` (six loc-instance implicits stuck blind even
+goal-anchored — canonical LSP one-liner; alternatives: fully-named M/S/T/Q/g +
+hy-from-MulEquivClass.map_nonZeroDivisors-le). BRICK-4 RECIPE (mathlib entries
+confirmed): x_P := hZaff.fromSpec.base ⟨zChartMaximalIdeal W P, isPrime⟩;
+stalk(projModel W, x_P) ≅ Localization.AtPrime (zChartMaximalIdeal W P) via the
+fromSpec-stalk comparison + `Spec.stalkIso` (AffineScheme:1293), with
+`IsAffineOpen.primeIdealOf` (:775) + `fromSpec_primeIdealOf` (:780) giving the
+roundtrip. Then RP-1/2 (z.ker-stalk = max-ideal at the section point; generator
+generates stalks), RP-4 (DVR-uniformizer through zChartLocalizationEquiv), RP-5
+(assembly). The transport's algebra-half is DONE; the scheme-half is one brick.
