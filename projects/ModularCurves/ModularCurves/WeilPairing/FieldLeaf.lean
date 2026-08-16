@@ -1642,6 +1642,9 @@ theorem pullbackRestrictTransport_tensorIdealSlotIso {X : Scheme.{u}}
       (Scheme.Modules.pullback (X.homOfLE hWV)).map
           (tensorIdealSlotIso M J₁ V g hgV hgiV).hom ≫
         pullbackRestrictTransport hWV (tensorObj M (idealModule J₁)) := by
+  apply ((Scheme.Modules.pullbackPushforwardAdjunction
+    (X.homOfLE hWV)).homEquiv _ _).injective
+  rw [Adjunction.homEquiv_apply, Adjunction.homEquiv_apply]
   sorry
 
 /-- **([C-rest-3] H3-T1)** The tensor comparison commutes with pullback composition:
