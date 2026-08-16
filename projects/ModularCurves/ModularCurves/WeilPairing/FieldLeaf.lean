@@ -1440,6 +1440,19 @@ theorem restrictOverIso_overIsoOfRestrictIso {X : Scheme.{u}} (M N : X.Modules)
     Iso.trans_hom, Functor.mapIso_hom, Iso.symm_hom, Iso.app_hom, Iso.app_inv,
     Functor.map_comp, Functor.FullyFaithful.preimageIso_hom,
     Functor.FullyFaithful.map_preimage]
+  have hnat := (overMapCompOverEquiv (X := X) i).hom.naturality
+    ((Scheme.Modules.overEquiv U).fullyFaithfulFunctor.preimage
+      ((overFunctorEquiv U).hom.app M ≫ φ.hom ≫ (overFunctorEquiv U).inv.app N))
+  simp only [Functor.comp_map, Functor.FullyFaithful.map_preimage,
+    Functor.map_comp] at hnat
+  have hcompM := AlgebraicGeometry.Scheme.Modules.overRestrictModuleIso_comp_overFunctorEquiv
+    (X := X) M i
+  have hcompN := AlgebraicGeometry.Scheme.Modules.overRestrictModuleIso_comp_overFunctorEquiv
+    (X := X) N i
+  simp only [AlgebraicGeometry.Scheme.Modules.overRestrictModuleIso, Iso.trans_hom,
+    Functor.mapIso_hom, Iso.symm_hom, Iso.app_hom, Category.assoc] at hcompM hcompN
+  -- Endgame shuffle (term-mode; goal-rw blocked by the sheaf-type blur):
+  -- LHS = leg1 ≫ [hnat-rearranged mid] ≫ leg3, then hcompM-prefix + hcompN-inverse-tail.
   sorry
 
 end PicPoint
