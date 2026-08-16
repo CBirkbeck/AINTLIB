@@ -2290,6 +2290,42 @@ theorem exists_transition_dressed_of_charts {X : Scheme.{u}}
     hmg₂' hii₂' hmono
   exact ⟨a, b, u₁, u₂, hab, hu₁, hu₂⟩
 
+
+/-- **([G1] the chart data)** A common-principal chart family for the tensor-ideal
+dictionary: affine charts covering `X` on which both ideals are principal, with
+non-zero-divisor generators and their section memberships. The `e`-family and the
+dressed transitions are built on top of this data. -/
+theorem exists_chart_family {X : Scheme.{u}} [AlgebraicGeometry.IsIntegral X]
+    (J₁ J₂ : X.IdealSheafData)
+    (h₁ : ∀ c : ↥X, ∃ V : X.affineOpens, c ∈ V.1 ∧ ∃ f : Γ(X, V.1),
+      J₁.ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(X, V.1))
+    (h₂ : ∀ c : ↥X, ∃ V : X.affineOpens, c ∈ V.1 ∧ ∃ f : Γ(X, V.1),
+      J₂.ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(X, V.1)) :
+    ∃ (V : ↥X → X.affineOpens) (f₁ f₂ : ∀ c, Γ(X, (V c).1)),
+      (⨆ c, (V c).1) = ⊤ ∧
+      (∀ c, J₁.ideal (V c) = Ideal.span {f₁ c}) ∧
+      (∀ c, f₁ c ∈ nonZeroDivisors Γ(X, (V c).1)) ∧
+      (∀ c, f₁ c ∈ idealSections J₁ (Opposite.op (V c).1)) ∧
+      (∀ c, J₂.ideal (V c) = Ideal.span {f₂ c}) ∧
+      (∀ c, f₂ c ∈ nonZeroDivisors Γ(X, (V c).1)) ∧
+      (∀ c, f₂ c ∈ idealSections J₂ (Opposite.op (V c).1)) := by
+  have hcommon := exists_affine_common_principal J₁ J₂ h₁ h₂
+    (fun _ => ⊤) (fun _ => trivial)
+  choose V hcV _ hd₁ hd₂ using hcommon
+  choose f₁ hspan₁ hnzd₁ using hd₁
+  choose f₂ hspan₂ hnzd₂ using hd₂
+  refine ⟨V, f₁, f₂, ?_, hspan₁, hnzd₁, ?_, hspan₂, hnzd₂, ?_⟩
+  · rw [eq_top_iff]
+    exact fun x _ => TopologicalSpace.Opens.mem_iSup.mpr ⟨x, hcV x⟩
+  · intro c
+    rw [show idealSections J₁ (Opposite.op (V c).1) = J₁.ideal (V c) from
+      J₁.ker_subschemeι_app (V c), hspan₁ c]
+    exact Ideal.mem_span_singleton_self (f₁ c)
+  · intro c
+    rw [show idealSections J₂ (Opposite.op (V c).1) = J₂.ideal (V c) from
+      J₂.ker_subschemeι_app (V c), hspan₂ c]
+    exact Ideal.mem_span_singleton_self (f₂ c)
+
 end PicPoint
 
 section DivisorConstancy
