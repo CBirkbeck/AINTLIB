@@ -1619,7 +1619,28 @@ theorem pullbackIdealTrivOfGen_inv_comp_toUnit {X : Scheme.{u}}
       (restrictUnitIso W.ι).hom =
       ModularCurves.unitEndomorphismOfTopSection
         (Scheme.Modules.openTopSection W g) := by
-    sorry
+    apply _root_.SheafOfModules.hom_ext
+    apply PresheafOfModules.hom_ext
+    intro Z
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro a
+    erw [sheafOfModules_comp_app_apply, sheafOfModules_comp_app_apply]
+    erw [ModularCurves.unitEndomorphismOfTopSection_app_apply]
+    show (CategoryTheory.ConcreteCategory.hom ((W.ι.appIso Z.unop).hom))
+        ((CategoryTheory.ConcreteCategory.hom (X.presheaf.map
+          (homOfLE (W.ι_image_le Z.unop)).op)) g *
+          (CategoryTheory.ConcreteCategory.hom ((W.ι.appIso Z.unop).inv)) a) = _
+    rw [Scheme.Opens.ι_appIso]
+    have hres := Scheme.Modules.openTopSection_restrict W Z.unop g
+    rw [Scheme.Opens.ι_appIso] at hres
+    refine Eq.trans (b := (CategoryTheory.ConcreteCategory.hom (X.presheaf.map
+      (homOfLE (W.ι_image_le Z.unop)).op)) g *
+      (show ↑Γ(X, W.ι ''ᵁ Opposite.unop Z) from a)) rfl ?_
+    refine Eq.trans (congrArg (fun t => t *
+      (show ↑Γ(X, W.ι ''ᵁ Opposite.unop Z) from a)) ?_) (mul_comm _ _)
+    refine Eq.trans ?_ hres
+    rfl
   have hnat : (restrictFunctor W.ι).map (idealModuleToUnitHom J) ≫
       (restrictFunctorIsoPullback W.ι).hom.app (unitObj X) =
       (restrictFunctorIsoPullback W.ι).hom.app (idealModule J) ≫
