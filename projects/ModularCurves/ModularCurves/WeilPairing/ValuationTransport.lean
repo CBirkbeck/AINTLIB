@@ -150,8 +150,18 @@ theorem zChartLocalizationEquiv_compat (W : WeierstrassCurve K) [W.IsElliptic]
   ext a
   simp [zChartLocalizationEquiv, IsLocalization.ringEquivOfRingEquiv_eq,
     EllipticCurve.projModelFunctionFieldEquiv, IsLocalization.map_eq]
-  -- Residual: LHS tower-collapse (IsScalarTower.algebraMap_apply) ∘ map_eq.symm;
-  -- both lemmas named, the instantiation whnf-storms blind — LSP-session target.
+  have h1 : (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+      (⟨W⟩ : SmoothPlaneCurve K).FunctionField)
+        ((algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+          ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P))
+            ((coordRingToZSection W).symm a)) =
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        (⟨W⟩ : SmoothPlaneCurve K).FunctionField)
+          ((coordRingToZSection W).symm a) :=
+    (IsScalarTower.algebraMap_apply _ _ _ _).symm
+  refine h1.trans ?_
+  -- Residual: `(IsLocalization.map_eq _ a).symm` — the six loc-instance implicits
+  -- refuse to pin blind (stuck metavars even goal-anchored); LSP-session one-liner.
   sorry
 
 end ModularCurves
