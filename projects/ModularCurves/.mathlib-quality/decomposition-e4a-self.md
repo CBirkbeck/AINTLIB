@@ -728,3 +728,30 @@ ideal-data through the projModel charts to ord_P at the corresponding SmoothPoin
 likely rides residueField/pointValuation comparisons + the FieldComparisonBridge
 points-dictionary). Design next dedicated session; L1b-core (LANDED) consumes its
 output as hdiv.
+
+## L1a R-PINNING SUB-DEVELOP CUT (2026-08-16)
+Source: KM 1.2.2 (the section divisor [P]) + Silverman II.1 (uniformizers/ord).
+Scheme datum: `sectionDivisor π z hz` with `.ideal = z.ker` (CartierDivisor.lean:172);
+on a principal chart V of the model curve E := modelEllipticCurve W over k, a generator
+r ∈ Γ(projModel W, V) of z.ker's sections. HW target: the FF-image of r (germ →
+projModelFunctionFieldEquiv) has ord 1 at Q₀ (the W-point of the section Q via the
+points dictionary) and ord 0 at every other point of V's image. Leaf cut:
+- [RP-1] the stalk of z.ker at the section's image point = the maximal ideal of the
+  local ring (section-kernel stalk property; scheme-side, from IsClosedImmersion z +
+  the retraction hz — likely near SectionsIdeal machinery).
+- [RP-2] generator of a chart-restriction of z.ker generates each stalk over V
+  (localisation of the span; IdealSheafData stalk-generation — mathlib-adjacent).
+- [RP-3] the ord-dictionary: for x in the chart with SmoothPoint image P, ord_P of the
+  FF-image of a chart-section g = the local-ring valuation of the germ of g at x
+  (the scheme-stalk vs HW pointValuation comparison — the ONE genuinely new bridge;
+  entry points: HW pointValuation_eq_heightOneValuation (used in Constancy's proof),
+  residueFieldAtSmoothPoint, FieldComparisonBridge's projModelPointsEquiv/SpecPoints +
+  pointEquivClosedPoint species).
+- [RP-4] uniformizer read-off: generator of m_P has valuation 1; non-vanishing section
+  has valuation 0 (HW valuation layer: exists_uniformizer Valuation.lean:258 +
+  ord-characterisations).
+- [RP-5] assembly: div_V(FF r) = [Q₀] on V — the hdiv-feeder for L1b-core, and the
+  r_i-family transition-match (transitionUnitOfCover-image = r_j/r_i in FF) that L2e's
+  dataset consumes.
+[RP-3] is the sub-develop's core; do it first in the dedicated session (probe the stalk
+comparison at the zChart with the FieldComparisonBridge context loaded).
