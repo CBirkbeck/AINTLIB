@@ -254,3 +254,11 @@ with ζ-pinned pairing + SL₂(ℤ/N)-transitivity on pinned bases (group theory
 ℂ/Λ-torsion description), and (d) the continuity/topological packaging into IRR-1's
 Euclidean topology. The brick's unknown-unknowns are gone; it is now a plumbing
 programme against proven substrates.
+
+## OWNER BOUNDARY (2026-08-16): STOP BEFORE THE ANALYTIC LAYER
+The owner directive: complete the algebraic work (U5 chain / representability /
+transport layers) but STOP before starting the analytic layer — IRR-3 (the
+LeanModularForms bridge ℍ → Y(N)^ζ(ℂ)) and anything consuming the Euclidean-topology
+machinery beyond design. IRR-1/2 design notes stay as-is; NO analytic execution without
+a fresh owner go-ahead. The beastmode terminal for this arc = the algebraic
+representability chain (both register sorries) + the recorded designs.
