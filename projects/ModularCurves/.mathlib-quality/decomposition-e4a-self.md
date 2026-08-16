@@ -717,3 +717,14 @@ defs — restrictOverIso_app_apply etc.), then the chain is pure exact-rewriting
 square stays pinned (1 sorry); everything else in 3c-iii's finale consumes it, so the
 CURRENT unblocked work = U5-L1b (scheme↔valuation divisor translation, HW anchors
 verified proven, INDEPENDENT of the square) and the L1-glue prep.
+
+L1a R-PINNING RECON (2026-08-16): the HW valuation layer is present
+(exists_uniformizer Valuation.lean:258, ord_P, divisorOf, projectiveDivisorOf + _mul).
+The crossing statement — scheme-side sectionIdealSheaf-generator r_i on V_i ⟼ HW
+valuation-divisor of its FF-image = the (Q)-indicator restricted to V_i — is the
+deepest remaining T-C4-debt item and needs its OWN sub-develop pass (the
+sectionDivisor-vs-ord_P dictionary: relate `RelEffCartierDiv.sectionDivisor`'s
+ideal-data through the projModel charts to ord_P at the corresponding SmoothPoint;
+likely rides residueField/pointValuation comparisons + the FieldComparisonBridge
+points-dictionary). Design next dedicated session; L1b-core (LANDED) consumes its
+output as hdiv.
