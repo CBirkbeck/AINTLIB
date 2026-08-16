@@ -766,3 +766,17 @@ composition of EXISTING identifications, no new mathematics. The whole RP-1..5 c
 identified substrates; execution is a dedicated session with the chart-identification
 stack loaded (start: state RP-3 at the zChart, probe the stalk-iso composite against
 pointValuation via the maximalIdealAt-correspondence).
+
+RP RECON 100%% EXPLICIT (2026-08-16, final): `SmoothPoint C = {x, y // Nonsingular}`
+with `maximalIdealAt = WeierstrassCurve.Affine.CoordinateRing.XYIdeal` (MATHLIB's
+XYIdeal!) and `C.CoordinateRing = C.toAffine.CoordinateRing` — the SAME ring as the
+bridge's W.toAffine side, so the SmoothPoint↔W.toAffine.Point(.some) dictionary is
+coordinate-identity. THE RP-3 COMPOSITE, fully explicit:
+  stalk(projModel W, x) ≅ Γ(zChart)-localisation at prime(x)   [mathlib affine stalk-iso]
+    ≅ CoordinateRing-localisation                        [coordRingToZSection transport]
+    ≅ Localization.AtPrime (XYIdeal P.x P.y) = localRingAt P   [prime-correspondence]
+with ONE pinning lemma: the zChart-prime of the closed point x corresponds under
+coordRingToZSection to XYIdeal(x-coords) (the closed-point↔maximal-ideal dictionary at
+the chart — Spec-side comap computation). Every RP-leaf now has substrates named to the
+mathlib-constant level; the dedicated session opens by stating the composite + the
+pinning lemma at the zChart.
