@@ -107,4 +107,51 @@ noncomputable def zChartLocalizationEquiv (W : WeierstrassCurve K) [W.IsElliptic
     (coordRingToZSection W).symm
     (primeCompl_map_zChartMaximalIdeal W P)
 
+/-- **(RP-3 transport, step 3 — the FF-compatibility square)** The localisation
+transport agrees with the fixed function-field identification: composing
+`zChartLocalizationEquiv` with the HasseWeil fraction-field embedding equals the
+prime-to-nonZeroDivisors tower map followed by `projModelFunctionFieldEquiv`. Both are
+localisation extensions of `coordRingToZSection.symm`, so they agree by extension
+uniqueness (`IsLocalization.ringHom_ext` at the prime complement). -/
+theorem zChartLocalizationEquiv_compat (W : WeierstrassCurve K) [W.IsElliptic]
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) :
+    haveI := (zChartMaximalIdeal_isMaximal W P).isPrime
+    haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+      Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+    haveI : Nontrivial Γ(projModel W, EllipticCurve.zChart W) :=
+      (coordRingToZSection W).toEquiv.symm.nontrivial
+    haveI hNe : Nonempty (EllipticCurve.zChart W) :=
+      ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+    haveI : IsFractionRing Γ(projModel W, EllipticCurve.zChart W) (projModel W).functionField :=
+      functionField_isFractionRing_of_isAffineOpen (projModel W) (EllipticCurve.zChart W) hZaff
+    haveI : IsDomain Γ(projModel W, EllipticCurve.zChart W) :=
+      (coordRingToZSection W).symm.toMulEquiv.isDomain W.toAffine.CoordinateRing
+    ((algebraMap ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+        (⟨W⟩ : SmoothPlaneCurve K).FunctionField).comp
+      (zChartLocalizationEquiv W P).toRingHom) =
+    ((EllipticCurve.projModelFunctionFieldEquiv W : _ →+* _).comp
+      (IsLocalization.map (M := (zChartMaximalIdeal W P).primeCompl)
+        (T := nonZeroDivisors Γ(projModel W, EllipticCurve.zChart W))
+        ((projModel W).functionField) (RingHom.id _)
+        (fun x hx => Ideal.primeCompl_le_nonZeroDivisors _ hx))) := by
+  haveI := (zChartMaximalIdeal_isMaximal W P).isPrime
+  haveI := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt_isMaximal P).isPrime
+  haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : Nontrivial Γ(projModel W, EllipticCurve.zChart W) :=
+    (coordRingToZSection W).toEquiv.symm.nontrivial
+  haveI hNe : Nonempty (EllipticCurve.zChart W) :=
+    ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+  haveI : IsFractionRing Γ(projModel W, EllipticCurve.zChart W) (projModel W).functionField :=
+    functionField_isFractionRing_of_isAffineOpen (projModel W) (EllipticCurve.zChart W) hZaff
+  haveI : IsDomain Γ(projModel W, EllipticCurve.zChart W) :=
+    (coordRingToZSection W).symm.toMulEquiv.isDomain W.toAffine.CoordinateRing
+  apply IsLocalization.ringHom_ext (zChartMaximalIdeal W P).primeCompl
+  ext a
+  simp [zChartLocalizationEquiv, IsLocalization.ringEquivOfRingEquiv_eq,
+    EllipticCurve.projModelFunctionFieldEquiv, IsLocalization.map_eq]
+  -- Residual: LHS tower-collapse (IsScalarTower.algebraMap_apply) ∘ map_eq.symm;
+  -- both lemmas named, the instantiation whnf-storms blind — LSP-session target.
+  sorry
+
 end ModularCurves
