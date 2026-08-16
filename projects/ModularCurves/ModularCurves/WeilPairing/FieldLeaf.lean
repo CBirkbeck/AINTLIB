@@ -1611,7 +1611,29 @@ theorem restrictTrivialization_pullbackTrivOfTensorIdeal_inv_comp_nu {X : Scheme
     (W.toScheme.ringCatSheaf)).unitHomEquiv.injective
   rw [_root_.SheafOfModules.unitHomEquiv_comp_apply]
   refine Eq.trans ?_ (Equiv.apply_symm_apply _ _).symm
-  sorry
+  have htop : (_root_.SheafOfModules.sectionsMap
+        (nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op f₁) hg hgi)
+        ((_root_.SheafOfModules.unitHomEquiv
+          ((Scheme.Modules.pullback W.ι).obj M))
+          (restrictTrivialization hWV (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂
+            hspan₁ hnzd₁ hfmem₁ hspan₂ hnzd₂ hfmem₂)).inv)).1
+      (Opposite.op (⊤ : W.toScheme.Opens)) =
+      (ModularCurves.moduleSectionsOfTop (unitObj W.toScheme)
+        (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂))).1
+      (Opposite.op (⊤ : W.toScheme.Opens)) := by
+    sorry
+  refine Subtype.ext (funext fun Z => ?_)
+  rw [← (_root_.SheafOfModules.sectionsMap
+      (nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op f₁) hg hgi)
+      ((_root_.SheafOfModules.unitHomEquiv
+        ((Scheme.Modules.pullback W.ι).obj M))
+        (restrictTrivialization hWV (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂
+          hspan₁ hnzd₁ hfmem₁ hspan₂ hnzd₂ hfmem₂)).inv)).2
+    ((homOfLE (le_top : Z.unop ≤ ⊤)).op)]
+  rw [← (ModularCurves.moduleSectionsOfTop (unitObj W.toScheme)
+      (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op f₂))).2
+    ((homOfLE (le_top : Z.unop ≤ ⊤)).op)]
+  exact congrArg _ htop
 
 /-- **([C-rest-3] SK-ratio)** `ν` is linear in the inserted generator: multiplying the
 generator by a section multiplies `ν` by that section (the `3c-ii`
