@@ -979,3 +979,23 @@ lemma pair, the naturality, and the def-expansions all share ONE spelling-world 
 banked choreography (hnat + hcompM/N + hmid + htail-inversion + the assembly) should
 fire without blur. FieldLeaf re-imports the new file. The banked in-proof ingredients
 and the recorded assembly-plan carry over verbatim.
+
+SQUARE LANDED (2026-08-16): `restrictOverIso_overIsoOfRestrictIso` PROVEN AXIOM-CLEAN
+in the new `WeilPairing/OverRestrictionSquare.lean` (namespace
+AlgebraicGeometry.Scheme.Modules; FieldLeaf imports it; the cluster defs
+overIsoOfRestrictIso / restrictOverIso / restrictRestrictIsoNative moved there;
+FieldLeaf green + sorry-free). ROOT-CAUSE RESOLUTION: the blur is NOT FieldLeaf's
+opacity options — it is inherent to the `TopCat.Sheaf`-vs-`Sheaf (Opens.grothendieckTopology)`
+schism inside `X.ringCatSheaf`-typed terms: any rw/simp whose pattern must unify at an
+`overFunctorEquiv`/`overFunctorMap`-headed app node fails EVEN AT DEFAULT TRANSPARENCY
+and EVEN HYPOTHESIS-SIDE (their functor-implicits carry the blur-node
+`Sheaf.over X.ringCatSheaf`); omc-/restrictOpenCompIso-headed apps match fine; DEFEQ
+UNIFICATION (exact / typed-have casts / rfl) bridges everything. THE BLUR-PROOF
+PROTOCOL (reusable): (1) typed-have restatements cast library facts into one
+NatTrans-level spelling (`.hom.app`/`.inv.app`); (2) every pair-collapse is a
+TERM-APPLIED lemma (Iso.hom_inv_id_app / _assoc variants, Functor.map_comp/map_id via
+congrArg-on-Functor.map); (3) reassoc_of% for prefix-rewrites and to auto-type the
+composable-k segment lemmas; (4) splice collapses tail-first into right-assoc chains
+by congrArg under prefix-lambdas; (5) assoc-regroup to the goal's bracketing by
+Category.assoc term-application; (6) close with `exact` (defeq bridges Iso.app-vs-
+hom.app and Over.mk-hom spellings). Zero pattern-matching at blurred nodes.

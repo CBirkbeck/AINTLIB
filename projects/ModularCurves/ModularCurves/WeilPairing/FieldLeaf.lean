@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.WeilPairing.KMBilinear
 import ModularCurves.WeilPairing.FieldComparisonBridge
 import ModularCurves.WeilPairing.Basic
+import ModularCurves.WeilPairing.OverRestrictionSquare
 import ModularCurves.ForMathlib.PullbackTensorMonoidal
 import HasseWeil.HasseBound.WeilPairing.Constancy
 
@@ -1117,15 +1118,6 @@ theorem trivializationTransitionUnit_idealTriv {X : Scheme.{u}} (J : X.IdealShea
   exact idealTriv_restrict_inv_comp_hom J Vi Vj fi fj hspani hnzdi hfmemi
     hspanj hnzdj hfmemj u hu
 
-/-- **(U5-L1a 3c-iii C-rest-3a)** The general over-iso induced by a restrict-site iso
-between two modules (the non-unit-target sibling of `overTrivializationOfRestrictIso`).
-Natural home after cleanup: `Picard/InvertibleSheaf.lean`. -/
-noncomputable def overIsoOfRestrictIso {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
-    (φ : M.restrict U.ι ≅ N.restrict U.ι) :
-    M.over U ≅ N.over U :=
-  (Scheme.Modules.overEquiv U).fullyFaithfulFunctor.preimageIso
-    ((overFunctorEquiv U).app M ≪≫ φ ≪≫ ((overFunctorEquiv U).app N).symm)
-
 /-- **(U5-L1a 3c-iii C-rest-3b)** `overTrivializationOfRestrictIso` splits along a
 factorisation of the restrict-side trivialisation: the prefix becomes the general
 over-iso, the tail the over-trivialisation. This is the leg-wise decomposition of the
@@ -1209,16 +1201,6 @@ theorem smulEndo_naturality {X : Scheme.{u}} {M N : X.Modules} (g : M ⟶ N)
   erw [sheafOfModules_comp_app_apply, sheafOfModules_comp_app_apply]
   erw [smulEndo_app_apply, smulEndo_app_apply]
   exact map_smul ((g.val.app W).hom) _ x
-
-/-- **(U5-L1a 3c-iii)** Restriction of a general over-site iso from `U` to an object
-`V ⟶ U` (the non-unit-target sibling of `restrictOverTrivialization`, same three-leg
-shape with the target comparison in place of the unit comparison). -/
-noncomputable def restrictOverIso {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
-    (e : M.over U ≅ N.over U) (V : CategoryTheory.Over U) :
-    M.over V.left ≅ N.over V.left :=
-  ((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app M).symm ≪≫
-    (_root_.SheafOfModules.overMap X.ringCatSheaf V.hom).mapIso e ≪≫
-    (_root_.SheafOfModules.overFunctorMap X.ringCatSheaf V.hom).app N
 
 /-- **(U5-L1a 3c-iii)** The general over-converter respects composition: the five-chain
 prefix converts leg-wise. -/
@@ -1415,45 +1397,6 @@ theorem tensorObjCongr_trans {X : Scheme.{u}} {M M' M'' N N' N'' : X.Modules}
       tensorObjCongr e₁ f₁ ≪≫ tensorObjCongr e₂ f₂ := by
   simp [tensorObjCongr, Iso.ext_iff,
     ← MonoidalCategory.tensorHom_comp_tensorHom]
-
-/-- **(U5-L1a 3c-iii)** The restrict-native restriction of a restrict-site iso to a
-smaller open: conjugation by `restrictOpenCompIso` around the restriction functor's
-image (the tree's own restriction species — the Stage-machinery's home ground). -/
-noncomputable def restrictRestrictIsoNative {X : Scheme.{u}} (M N : X.Modules)
-    {U V : X.Opens} (i : V ⟶ U) (φ : M.restrict U.ι ≅ N.restrict U.ι) :
-    M.restrict V.ι ≅ N.restrict V.ι :=
-  (restrictOpenCompIso i).app M ≪≫
-    (restrictFunctor (X.homOfLE (leOfHom i))).mapIso φ ≪≫
-    ((restrictOpenCompIso i).app N).symm
-
-/-- **(U5-L1a 3c-iii, THE COMMUTATION SQUARE — redesigned)** Restricting the over-form
-of a restrict-site iso is the over-form of its native restriction. Assembly from the
-Stage-proven coherence `overRestrictModuleIso_comp_overFunctorEquiv` at `M` and `N`
-plus naturality. -/
-theorem restrictOverIso_overIsoOfRestrictIso {X : Scheme.{u}} (M N : X.Modules)
-    {U V : X.Opens} (i : V ⟶ U) (φ : M.restrict U.ι ≅ N.restrict U.ι) :
-    restrictOverIso M N U (overIsoOfRestrictIso M N U φ) (CategoryTheory.Over.mk i) =
-      overIsoOfRestrictIso M N V (restrictRestrictIsoNative M N i φ) := by
-  refine Iso.ext ?_
-  apply (Scheme.Modules.overEquiv V).functor.map_injective
-  simp only [restrictOverIso, overIsoOfRestrictIso, restrictRestrictIsoNative,
-    Iso.trans_hom, Functor.mapIso_hom, Iso.symm_hom, Iso.app_hom, Iso.app_inv,
-    Functor.map_comp, Functor.FullyFaithful.preimageIso_hom,
-    Functor.FullyFaithful.map_preimage]
-  have hnat := (overMapCompOverEquiv (X := X) i).hom.naturality
-    ((Scheme.Modules.overEquiv U).fullyFaithfulFunctor.preimage
-      ((overFunctorEquiv U).hom.app M ≫ φ.hom ≫ (overFunctorEquiv U).inv.app N))
-  simp only [Functor.comp_map, Functor.FullyFaithful.map_preimage,
-    Functor.map_comp] at hnat
-  have hcompM := AlgebraicGeometry.Scheme.Modules.overRestrictModuleIso_comp_overFunctorEquiv
-    (X := X) M i
-  have hcompN := AlgebraicGeometry.Scheme.Modules.overRestrictModuleIso_comp_overFunctorEquiv
-    (X := X) N i
-  simp only [AlgebraicGeometry.Scheme.Modules.overRestrictModuleIso, Iso.trans_hom,
-    Functor.mapIso_hom, Iso.symm_hom, Iso.app_hom, Category.assoc] at hcompM hcompN
-  -- Endgame shuffle (term-mode; goal-rw blocked by the sheaf-type blur):
-  -- LHS = leg1 ≫ [hnat-rearranged mid] ≫ leg3, then hcompM-prefix + hcompN-inverse-tail.
-  sorry
 
 end PicPoint
 
