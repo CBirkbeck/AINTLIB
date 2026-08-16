@@ -951,3 +951,17 @@ conjugation matching the restrict-native restriction. Statement change: use the
 restrict-native `restrictRestrictIsoNative φ := (restrictOpenCompIso i).app-conjugated
 (restrictFunctor (X.homOfLE (leOfHom i))).mapIso φ`. All three assembly-lemmas PROVEN
 in-tree; the square's execution = one statement + one choreography, zero new species.
+
+SQUARE ENDGAME DIAGNOSIS (2026-08-16): the def-expansion simp (projecting to .hom)
+CREATES the sheaf-type blur that then poisons ALL goal-rewriting (rw, simp-only,
+conv alike — 'target not type-correct under implicit transparency'). THE CLEAN ROUTE =
+ISO-LEVEL CHOREOGRAPHY (never project to .hom): G.mapIso(square-LHS) decomposes as
+G-mapIso(FM.symm) ≪≫ G-mapIso(overMap.mapIso(preimageIso K)) ≪≫ G-mapIso(FM); conjugate
+the middle by the NatIso overMapCompOverEquiv (its naturality in ISO form) to
+capp ≪≫ restrictFunctor.mapIso(G_U.mapIso(preimageIso K)) ≪≫ capp.symm; collapse
+G_U.mapIso(preimageIso K) = K-as-iso (FullyFaithful preimageIso-roundtrip); then the
+comparison-lemma pair (hcompM/N — RESTATE AS ISO-EQUATIONS via Iso.ext-inverse or use
+their hom-forms only at the final Iso.ext step) assembles the two sides. All banked
+in-proof ingredients stay valid. Iso-level lemma names to gather: NatIso-conjugation of
+mapIso (β.app-conjugation), Functor.FullyFaithful.preimageIso-roundtrip
+(map-preimageIso = the iso), Iso.trans-assoc-normal simp-set.
