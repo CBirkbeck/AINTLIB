@@ -975,7 +975,18 @@ noncomputable def restrictPullbackIso {X : Scheme.{u}} (M N : X.Modules)
     ((Scheme.Modules.pullbackComp (X.homOfLE hWU) U.ι).app M).symm ≪≫
     (Scheme.Modules.pullback (X.homOfLE hWU)).mapIso e ≪≫
     (Scheme.Modules.pullbackComp (X.homOfLE hWU) U.ι).app N ≪≫
-    (Scheme.Modules.pullbackCongr (X.homOfLE_ι hWU)).app N
+    ((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWU).symm).app N).symm
+
+/-- **(U5-L1a 3c-iii)** The general pullback-side restriction respects composition:
+prefix chains restrict leg-wise at the pullback level. -/
+theorem restrictPullbackIso_trans {X : Scheme.{u}} (M N P : X.Modules)
+    {U W : X.Opens} (hWU : W ≤ U)
+    (e₁ : (Scheme.Modules.pullback U.ι).obj M ≅ (Scheme.Modules.pullback U.ι).obj N)
+    (e₂ : (Scheme.Modules.pullback U.ι).obj N ≅ (Scheme.Modules.pullback U.ι).obj P) :
+    restrictPullbackIso M P hWU (e₁ ≪≫ e₂) =
+      restrictPullbackIso M N hWU e₁ ≪≫ restrictPullbackIso N P hWU e₂ := by
+  refine Iso.ext ?_
+  simp [restrictPullbackIso]
 
 /-- **(U5-L1a 3c-iii, tail identification)** The over-form of the definite ideal
 trivialisation is the over-form of the bare generator division: `congrArg` of the
