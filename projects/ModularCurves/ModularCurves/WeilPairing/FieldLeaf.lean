@@ -1586,6 +1586,32 @@ theorem mono_unitEndomorphismOfTopSection_of_nonZeroDivisors {X : Scheme.{u}}
   dsimp only at happ
   exact (mul_cancel_right_mem_nonZeroDivisors (hr Y.unop)).mp happ
 
+/-- **([C-rest-3] H2)** The restricted trivialisation's inverse at the top section:
+the pullback-transported trivialising section of the chart, `eqToHom`-corrected. The
+inversion tool (`sheafIso_inv_app_eq_of_hom_app_eqT`) plus the η-transport family. -/
+theorem restrictTrivialization_inv_app_top_one {X : Scheme.{u}} {P : X.Modules}
+    {U W' : X.Opens} (hWU : W' ≤ U)
+    (t : (Scheme.Modules.pullback U.ι).obj P ≅ unitObj U.toScheme)
+    (htop : (⊤ : W'.toScheme.Opens) = (X.homOfLE hWU) ⁻¹ᵁ (⊤ : U.toScheme.Opens)) :
+    (restrictTrivialization hWU t).inv.val.app
+        (Opposite.op (⊤ : W'.toScheme.Opens))
+        (show W'.toScheme.presheaf.obj (Opposite.op (⊤ : W'.toScheme.Opens))
+          from 1) =
+      ((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWU).symm).app P).inv.val.app
+        (Opposite.op (⊤ : W'.toScheme.Opens))
+        (((Scheme.Modules.pullbackComp (X.homOfLE hWU) U.ι).app P).hom.val.app
+          (Opposite.op (⊤ : W'.toScheme.Opens))
+          (((Scheme.Modules.pullback (X.homOfLE hWU)).obj
+              ((Scheme.Modules.pullback U.ι).obj P)).presheaf.map (eqToHom htop).op
+            (((Scheme.Modules.pullbackPushforwardAdjunction
+                (X.homOfLE hWU)).unit.app
+              ((Scheme.Modules.pullback U.ι).obj P)).val.app
+              (Opposite.op (⊤ : U.toScheme.Opens))
+              (t.inv.val.app (Opposite.op (⊤ : U.toScheme.Opens))
+                (show U.toScheme.presheaf.obj
+                  (Opposite.op (⊤ : U.toScheme.Opens)) from 1))))) := by
+  sorry
+
 /-- **([C-rest-3] SK-per-chart)** The per-chart characterisation: the restricted
 five-chain trivialisation composed with the chart's `ν` is multiplication by the
 restricted `J₂`-generator. All cancellations are within one chart. -/
