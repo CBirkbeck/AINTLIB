@@ -1698,6 +1698,15 @@ theorem restrictTrivialization_pullbackTrivOfTensorIdeal_inv_comp_nu {X : Scheme
       simp
       erw [ModuleCat.restrictScalarsId'App_inv_apply]
     refine Eq.trans ?_ h1.symm
+    have htop' : (⊤ : W.toScheme.Opens) =
+        (X.homOfLE hWV) ⁻¹ᵁ (⊤ : V.1.toScheme.Opens) := rfl
+    refine (congrArg (fun w =>
+      (CategoryTheory.ConcreteCategory.hom
+        ((nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op f₁)
+          hg hgi).val.app (Opposite.op (⊤ : W.toScheme.Opens)))) w)
+      (restrictTrivialization_inv_app_top_one hWV
+        (pullbackTrivOfTensorIdeal M J₁ J₂ e V f₁ f₂
+          hspan₁ hnzd₁ hfmem₁ hspan₂ hnzd₂ hfmem₂) htop')).trans ?_
     sorry
   refine Subtype.ext (funext fun Z => ?_)
   rw [← (_root_.SheafOfModules.sectionsMap
