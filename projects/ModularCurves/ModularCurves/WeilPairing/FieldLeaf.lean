@@ -1613,7 +1613,27 @@ theorem pullbackIdealTrivOfGen_inv_comp_toUnit {X : Scheme.{u}}
         (pullbackUnitIso W.ι).hom =
       ModularCurves.unitEndomorphismOfTopSection
         (Scheme.Modules.openTopSection W g) := by
-  sorry
+  letI := hgi
+  have hcore : idealGenHom J W g hg ≫
+      (restrictFunctor W.ι).map (idealModuleToUnitHom J) ≫
+      (restrictUnitIso W.ι).hom =
+      ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection W g) := by
+    sorry
+  have hnat : (restrictFunctor W.ι).map (idealModuleToUnitHom J) ≫
+      (restrictFunctorIsoPullback W.ι).hom.app (unitObj X) =
+      (restrictFunctorIsoPullback W.ι).hom.app (idealModule J) ≫
+      (Scheme.Modules.pullback W.ι).map (idealModuleToUnitHom J) :=
+    (restrictFunctorIsoPullback W.ι).hom.naturality (idealModuleToUnitHom J)
+  have hunit := restrictFunctorIsoPullback_hom_comp_pullbackUnitIsoG W.ι
+  refine Eq.trans (Category.assoc (idealGenHom J W g hg)
+    ((restrictFunctorIsoPullback W.ι).hom.app (idealModule J))
+    ((Scheme.Modules.pullback W.ι).map (idealModuleToUnitHom J) ≫
+      (pullbackUnitIso W.ι).hom)) ?_
+  refine Eq.trans (congrArg (fun t => idealGenHom J W g hg ≫ t) ?_) hcore
+  exact ((reassoc_of% hnat) ((pullbackUnitIso W.ι).hom)).symm.trans
+    (congrArg (fun t => (restrictFunctor W.ι).map (idealModuleToUnitHom J) ≫ t)
+      hunit)
 
 /-- **([C-rest-3] N2-cancel)** The native trivialisation's characterisation against
 `ν`: the shared slot/dictionary prefix cancels and only the `N1`-tail remains. Pure
