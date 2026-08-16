@@ -235,3 +235,22 @@ where `evalAt U a p : ℂ` := image of a under `p.1.appLE U ⊤ _` transported b
   (IRR-1b), both nonempty (IRR-1c via Jacobson density on each nonempty clopen) —
   contradicts Euclidean-connectedness. Euclidean-connected ⟹ Zariski-connected. ∎
 File: ModularCurves/Irreducibility/ComplexPoints.lean (new dir — leg-2 lives here).
+
+## IRR-3 RE-SIZED (2026-08-16, owner question "do we need this analytic brick?")
+ADJUDICATION: (1) Y(ρ̄) EXISTENCE (representability) does NOT need it — the brick feeds
+only the "geometrically irreducible" conclusion. (2) For irreducibility, SOME analytic
+input is unavoidable by every known route (the earlier T-IRR0 scoping stands: KM Ch.10's
+"algebraic" route bottoms out at ℍ/Γ̃; the étale-π₁/monodromy alternative hides Riemann
+existence — same content, larger). D2's minimal-analytic cut remains optimal. (3) BUT
+the brick just SHRANK dramatically — grounded findings:
+- `j_surjective` PROVEN SORRY-FREE (LeanModularForms/Modularforms/JFunction.lean:162,
+  via the weight-0-cusp-form-vanishes argument) — the uniformisation heart is DONE.
+- `exists_variableChange_of_j_eq` IS IN MATHLIB (IsomOfJ.lean:333) — same-j ⟹
+  isomorphic over the field; the twist-collapse over ℂ is done.
+- E₄/E₆/Δ exist as modular forms in LeanModularForms — the τ-family's Weierstrass
+  coefficients, hence continuity-in-τ ingredients, are present.
+REMAINING IRR-3 content = (c) the τ-curve construction + its N-torsion basis (τ/N, 1/N)
+with ζ-pinned pairing + SL₂(ℤ/N)-transitivity on pinned bases (group theory + the
+ℂ/Λ-torsion description), and (d) the continuity/topological packaging into IRR-1's
+Euclidean topology. The brick's unknown-unknowns are gone; it is now a plumbing
+programme against proven substrates.
