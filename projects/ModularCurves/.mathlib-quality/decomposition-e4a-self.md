@@ -755,3 +755,14 @@ points dictionary) and ord 0 at every other point of V's image. Leaf cut:
   dataset consumes.
 [RP-3] is the sub-develop's core; do it first in the dedicated session (probe the stalk
 comparison at the zChart with the FieldComparisonBridge context loaded).
+
+RP-3 SUBSTRATE CLOSED (2026-08-16): HW-side `localRingAt P = Localization.AtPrime
+(maximalIdealAt P)` of the COORDINATE RING, with DVR + IsFractionRing-to-FF instances
+(Valuation.lean:50-70); pointValuation = the maximal-ideal valuation; ord_P derived.
+⟹ RP-3 = scheme-stalk-at-x ≅ localRingAt P: affine-chart stalk-iso (mathlib
+IsAffineOpen stalk machinery) ∘ chart-to-coordinate-ring identification (the tree's
+`coordRingToZSection W` etc., as in brick6's proof) ∘ localisation-comparison — a
+composition of EXISTING identifications, no new mathematics. The whole RP-1..5 cut has
+identified substrates; execution is a dedicated session with the chart-identification
+stack loaded (start: state RP-3 at the zChart, probe the stalk-iso composite against
+pointValuation via the maximalIdealAt-correspondence).
