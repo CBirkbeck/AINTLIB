@@ -965,3 +965,17 @@ their hom-forms only at the final Iso.ext step) assembles the two sides. All ban
 in-proof ingredients stay valid. Iso-level lemma names to gather: NatIso-conjugation of
 mapIso (β.app-conjugation), Functor.FullyFaithful.preimageIso-roundtrip
 (map-preimageIso = the iso), Iso.trans-assoc-normal simp-set.
+
+SQUARE ENVIRONMENTAL RESOLUTION (2026-08-16): every route hits the SAME schism — the
+Scheme-world (TopCat.Sheaf RingCat) vs the Sites-world (Sheaf (Opens.grothendieckTopology))
+spelling divide between FieldLeaf's environment and OverRestriction.lean's. The Stage-
+machinery lives natively in the latter. RESOLUTION = HOIST (the ValuationTransport
+pattern): move restrictOverIso + overIsoOfRestrictIso + their trans-laws + app-twins +
+restrictRestrictIsoNative + THE SQUARE into a new
+`WeilPairing/OverRestrictionSquare.lean` that imports
+Picard/DualPullback/OverRestriction.lean and copies ITS opens/namespace conventions
+exactly (namespace AlgebraicGeometry.Scheme.Modules alignment) — there the comparison-
+lemma pair, the naturality, and the def-expansions all share ONE spelling-world and the
+banked choreography (hnat + hcompM/N + hmid + htail-inversion + the assembly) should
+fire without blur. FieldLeaf re-imports the new file. The banked in-proof ingredients
+and the recorded assembly-plan carry over verbatim.
