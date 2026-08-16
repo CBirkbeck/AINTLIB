@@ -868,3 +868,22 @@ HeightOneSpectrum → valuation_of_algebraMap → pointValuation(FF-image) = exp
 ord_P = 1 (mirror exists_uniformizer's ending, Valuation.lean:263-271: ord_P_of_ne +
 WithZero.unzero-computation). Every link is a named constant; the draft is mechanical.
 The RP-programme's remaining unknowns: ZERO — all five leaves grounded.
+
+## ★★ RP-PROGRAMME COMPLETE AT THE CORE (2026-08-16, ValuationTransport.lean)
+51 axiom-clean landings. The full scheme→valuation chain EXISTS IN LEAN:
+`zChartMaximalIdeal` (+maximality, primeCompl-law) → `zChartLocalizationEquiv`
+(chart-loc = localRingAt) → `zChartPoint` + `isLocalization_stalk_zChartPoint`
+(stalk = the localisation, instance-form) → `uniformizer_of_span_maximalIdealAt` (RP-4a:
+generator ⟹ ord_P = 1) → `uniformizer_of_span_zChartMaximalIdeal` (RP-4b: chart-level)
+→ `ord_P_algebraMap_eq_zero_of_notMem` (away-vanishing) → ★`divisorOf_algebraMap_eq_single`
+(div r = [P₀]) — feeding `exists_const_mul_of_projectiveDivisorOf_eq` (L1b-core, FieldLeaf).
+PARKED in the file: brick-3's one map_eq line (95%%-proven compat square).
+RP-1/2 REASSESSED: the section-connector's (hspan, hoff)-hypotheses arrive CHART-WISE
+from the L1-glue's own data (the 3b-charts have principal z.ker by construction) — no
+standalone lemma needed; fold into the glue.
+NEXT MAJOR UNIT: THE L1-GLUE (FieldLeaf-side): build the KM dataset (M := kappa-witness,
+W-cover := the 3b-charts, e := the definite over-trivs) — its hM from kappa_eq-collapse,
+hnorm from the crown-transitions (u-units normalised along zero — the KM h-norm content),
+then L2e-instantiation ⟹ H = a·g_Q·[N]^#(r⁻¹)-form ⟹ L3 via the divisor-core +
+L1b-core + brick6. Session-lessons bank (this stretch): symm-first before
+single_eq_of_ne (Zero-metavar); untopD auto-reduces in display; plain-hQ direction.
