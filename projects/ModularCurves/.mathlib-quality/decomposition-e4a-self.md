@@ -1421,3 +1421,20 @@ proven X-generic FIRST: [G2-s1] dressed-transition of a RESCALED family (e'_k :=
 e_k ≪≫ scalar-unit-auto) = same-dressed (a/b absorb); [G2-s2] dressed-transition
 restricted to a sub-overlap = dressed with res-generators (map_ideal + N3-restriction).
 THEN 3c-iv (div-germ), G3 (L2e-instantiation at the G2-output).
+
+[G2 TOOLKIT COMPLETE] (2026-08-17, cont.4): BOTH stability species already exist —
+[G2-s1] = trivializationTransitionUnit_trans_scalarIso (KMDataset:95, the engine's own:
+transition(rescaled) = transition * ca^-1 * cb) and restriction-side = my N3 +
+restrictOverTrivialization_trans_scalarIso (KMDataset:78, restriction-of-rescale =
+rescale-of-restriction). The G2-REPLAY (exists_normalized_dataset-variant with the
+G1-chart-family as input, concluding hnorm AND dressed-generator transitions on the
+refined sum-cover) is now pure assembly at the KMDataset-level (curve context) — its
+transition-computation on the inl-inl case is ALREADY in the construction (KMDataset:397
+uses s1!); the replay adds: the dressed-input-hypothesis threaded through, with
+map_ideal-restriction of the generator data to the refined overlaps (the G1-transition
+recipe applied at the SUM-cover overlaps, which sit inside chart-overlaps). NEXT
+QUANTUM: write exists_normalized_chart_dataset in KMDataset.lean (or a new
+KMChartDataset.lean importing FieldLeaf pieces — CAREFUL: import direction! FieldLeaf
+imports KMBilinear imports KMDataset ⟹ the replay-variant must live in FieldLeAF or
+later — put it in FieldLeaf's Curve-context section or a new GlueDataset.lean importing
+FieldLeaf) with the full conclusion; then 3c-iv, G3.

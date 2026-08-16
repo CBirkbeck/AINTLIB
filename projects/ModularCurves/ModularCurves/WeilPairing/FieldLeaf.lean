@@ -2326,6 +2326,7 @@ theorem exists_chart_family {X : Scheme.{u}} [AlgebraicGeometry.IsIntegral X]
       J₂.ker_subschemeι_app (V c), hspan₂ c]
     exact Ideal.mem_span_singleton_self (f₂ c)
 
+
 end PicPoint
 
 section DivisorConstancy
