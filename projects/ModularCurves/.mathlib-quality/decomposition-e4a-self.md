@@ -1370,3 +1370,24 @@ divisors). NEXT SESSION = the G1 design+skeleton: write the dataset-statement
 (cover, e-family via pullbackTrivOfTensorIdeal at the affine charts, hnorm via the
 G2-replay with tracked rescalers — the a/b-dressing folds into the SAME rescaler
 bookkeeping), then 3c-iv div-statement, then G3 = L2e-instantiation.
+
+★★ [G1-TRANSITION] PROVEN AXIOM-CLEAN (2026-08-17, cont.): exists_transition_dressed_
+of_charts — given two common-principal charts (span/nzd/mem data at affine Vi Vj matching
+the cover-opens) and a nonempty overlap, the e-family's transitionUnitOfCover is
+a * (u2*u1^-1) * b^-1 with hu-relations tying u1 u2 to the restricted generator ratios.
+Proof-recipe (reusable): affine overlap via Vi.2.inf Vj.2 (separatedness-surrogate
+[IsAffineHom (pullback.diagonal (terminal.from X))]); span-transfer via J.map_ideal +
+Ideal.map_span (the file's own hs-pattern); nzd-transfer via @map_injective_of_isIntegral
+(@-form with the Nonempty positional — mirror the file); mem-transfer via
+idealSections_map; units via Ideal.span_singleton_eq_span_singleton -> Associated;
+IsIso-genHoms RE-DERIVED at the affine overlap by isIso_idealGenHom_of_principal (NO
+restriction-coherence needed); hmono via B2r with the per-Z family (nonempty: open-
+subscheme integrality isIntegral_of_isOpenImmersion + component_integral + the
+eqToHom-roundtrip openTop-injectivity (hcomp := Subsingleton-arrow + map_id, then the
+ι_appIso-REWRITE FIRST since appIso=refl is a THEOREM not defeq, then congrArg-cast);
+empty: Z = bot by ext + Subsingleton Γ(-, bot) instance + the mem_nonZeroDivisors_iff
+CONJUNCTION-shape). REMAINING GLUE: [G1-dataset] the cover+e-family existence-packaging
+(choice over exists_affine_common_principal; e_k := overTriv(rIso(pbTrivOfTensorIdeal))
+at charts; iSup = top); [G2/hnorm] the zero-section normalisation replay (curve-level);
+[3c-iv] div-level germ-reading (DIV-UNIT via RP-5 + the u-relations from G1-transition);
+then G3 = L2e-instantiation, L3, L5, L6, U-assembly, E5-assembly.
