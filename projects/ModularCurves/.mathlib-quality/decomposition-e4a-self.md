@@ -1168,3 +1168,19 @@ Estimated as its own decompose-first task — run /develop-style leaf-cuts on L2
 before tactics. ALTERNATIVE still open: state the SLOT-LEG's transported-point VALUE
 directly and prove by the adjunction/eta idiom end-to-end (one lemma, no iso-coherences;
 revisit after attempting L1-L5's first leaf).
+
+[H3-S] PROOF ROUTE OPENED (2026-08-16, cont.4): the merged slot-transport square
+pullbackRestrictTransport_tensorIdealSlotIso is stated; tau := pbComp.hom >> pbCongr.inv
+(pullbackRestrictTransport) with its NATURALITY PROVEN (handles the e_dict/iota2 map-legs
+of the per-chart chase in one stroke — typed-have + congrArg-splice past the Iso.app
+blur, again). Proof-route for the square: DOUBLE-ADJUNCTION reduction — (1) geometric:
+(pullbackPushforwardAdjunction (homOfLE hWV)).homEquiv-injective + homEquiv_apply
+[OPENED, green]; transposed sides are eta-precomposed pushforward-images at V-level
+(pushforward along an open immersion is concrete: sections at preimages); (2) then the
+sheafification-adjunction (THE ATOM's pattern) to reach the presheaf-pointwise level;
+(3) TensorProduct.induction_on pure-tensors + eta-naturality chases; the genHom-
+restriction content (res-g vs g) lands as a presheaf-level component identity
+(idealGenHom's app formula IdealModule:240 is concrete). Fallback remains H3-T1's
+layer-route L1-L5. AFTER H3-S: per-chart closes = slot-walk (H3-S) + map-leg walk
+(tau-nat) + pbUnitIso-tail (oneT + g5-g7 pattern) + V-level cancellation
+(iso_hom_inv_app_applyT at pb-V(e) + genHom-value); then the cross-chart assembly.
