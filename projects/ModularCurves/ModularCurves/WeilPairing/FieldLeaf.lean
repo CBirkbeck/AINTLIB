@@ -2065,6 +2065,46 @@ theorem nativeTensorIdealTriv_inv_comp_hom {X : Scheme.{u}} (M : X.Modules)
   ring
 
 
+/-- **([C-rest-3] N3)** The transition unit of a restricted trivialisation pair is the
+restriction of the transition unit: `trivializationTransitionUnit` commutes with
+`restrictOverTrivialization`. From the scalar-restriction law and the ring-equiv
+read-off. -/
+theorem trivializationTransitionUnit_restrictOverTrivialization {X : Scheme.{u}}
+    {M : X.Modules} {V W : X.Opens} (hWV : W ≤ V)
+    (e g : M.over V ≅ _root_.SheafOfModules.unit (X.ringCatSheaf.over V)) :
+    trivializationTransitionUnit W
+      (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M V e
+        (Over.mk (homOfLE hWV)))
+      (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M V g
+        (Over.mk (homOfLE hWV))) =
+    Units.map (X.presheaf.map (homOfLE hWV).op).hom.toMonoidHom
+      (trivializationTransitionUnit V e g) := by
+  letI : ∀ (U : (TopologicalSpace.Opens ↥X)ᵒᵖ),
+      IsMulCommutative (X.ringCatSheaf.obj.obj U) := fun U => by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact ⟨⟨fun a b => mul_comm a b⟩⟩
+  apply Units.ext
+  apply (ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv
+    X.ringCatSheaf W).injective
+  have hL := overUnitScalarEnd_transitionUnit W
+    (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M V e
+      (Over.mk (homOfLE hWV)))
+    (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M V g
+      (Over.mk (homOfLE hWV)))
+  have hV := overUnitScalarEnd_transitionUnit V e g
+  have hgh : g.hom = e.hom ≫ ModularCurves.SheafOfModules.overUnitScalarEnd
+      X.ringCatSheaf V (trivializationTransitionUnit V e g : Γ(X, V)) := by
+    refine ((Iso.inv_comp_eq e).mp ?_).symm.symm
+    exact hV.symm
+  have h911 := ModularCurves.restrictOverTrivialization_hom_eq_comp_scalar
+    M hWV e g (trivializationTransitionUnit V e g : Γ(X, V)) hgh
+  refine hL.trans ?_
+  dsimp only at h911
+  refine Eq.trans (congrArg (fun t =>
+    (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M V e
+      (Over.mk (homOfLE hWV))).inv ≫ t) h911) ?_
+  refine Eq.trans (Iso.inv_hom_id_assoc _ _) ?_
+  rfl
 /-- **([C-rest-3] SK-W2')** The transition unit of two `overTrivializationOfRestrictIso`
 images is read off from the restrict-side composite: if `ψ₁.inv ≫ ψ₂.hom` is
 multiplication by `u`, the over-side transition is `overUnitScalarEnd u`. Bridge:
