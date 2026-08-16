@@ -230,6 +230,38 @@ theorem uniformizer_of_span_maximalIdealAt (W : WeierstrassCurve K) [W.IsEllipti
     rw [← Localization.AtPrime.map_eq_maximalIdeal]
     refine (congrArg (Ideal.map (algebraMap _ _)) hspan).trans ?_
     rw [Ideal.map_span, Set.image_singleton]
-  sorry
+  have hval := IsDedekindDomain.HeightOneSpectrum.intValuation_singleton
+    (v := IsDiscreteValuationRing.maximalIdeal
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)) hr' hgen
+  have htower : algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+      ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r =
+      algebraMap ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField)
+        (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+          ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r) :=
+    IsScalarTower.algebraMap_apply _ _ _ _
+  have hpv : (⟨W⟩ : SmoothPlaneCurve K).pointValuation P
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r) =
+      ((Multiplicative.ofAdd (-1 : ℤ) : Multiplicative ℤ) :
+        WithZero (Multiplicative ℤ)) := by
+    rw [htower]
+    show (IsDiscreteValuationRing.maximalIdeal
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).valuation
+      ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) _ = _
+    rw [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap, hval]
+    rfl
+  have hne : (⟨W⟩ : SmoothPlaneCurve K).pointValuation P
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r) ≠ 0 := by
+    rw [hpv]; exact WithZero.coe_ne_zero
+  show (⟨W⟩ : SmoothPlaneCurve K).ord_P P _ = 1
+  simp only [SmoothPlaneCurve.ord_P]
+  rw [dif_neg hne]
+  have hunz : WithZero.unzero hne = Multiplicative.ofAdd (-1 : ℤ) := by
+    rw [← WithZero.coe_inj, WithZero.coe_unzero]
+    exact hpv
+  rw [hunz]
+  rfl
 
 end ModularCurves
