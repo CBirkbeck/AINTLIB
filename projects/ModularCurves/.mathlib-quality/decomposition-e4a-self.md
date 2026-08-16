@@ -1184,3 +1184,20 @@ restriction content (res-g vs g) lands as a presheaf-level component identity
 layer-route L1-L5. AFTER H3-S: per-chart closes = slot-walk (H3-S) + map-leg walk
 (tau-nat) + pbUnitIso-tail (oneT + g5-g7 pattern) + V-level cancellation
 (iso_hom_inv_app_applyT at pb-V(e) + genHom-value); then the cross-chart assembly.
+
+[H3-S] TRANSPOSED FORM + HONEST ASSESSMENT (2026-08-16, cont.5): after the geometric
+transposition the square reads `unit >> pf(tau_M >> slot-W) = unit >> pf(pb(slot-V) >> 
+tau_tensor)`; pf-map_comp splits and the RHS's pb-factor walks out by unit-naturality,
+leaving `upsilon_M >> pf(slot-W.hom) = slot-V.hom >> upsilon_tensor` with
+upsilon_A := unit.app (pb-V A) >> pf(tau_A) (natural in A by unit-nat + tau-nat, both
+landed). The remaining content is the slot-legs' values, which stay sheafification-
+opaque under further transpositions (the source M is an abstract sheaf, so the atom's
+sheafification-source trick does not directly apply). VERDICT: H3-S's proof needs the
+slot unfolded to its sheafification normal-form — i.e. the LAYER ROUTE (L1-L5 of the
+H3-T1 map) is the honest cost either way; the square-form is still the better TARGET
+statement (single consumer-shaped equation). NEXT SESSION: decompose-first on the
+layers — start with [L4a] pushforwardTensorIso-COMP (mathlib Functor.Monoidal mu-comp
+laws + restrictScalarsTensorObjIso-comp) and [L3] the sheafificationW-asIso
+functoriality, each as its own probe; then assemble H3-S by the e1-e5b-normal-forms of
+both slot-W and pb(slot-V) against tau's pbComp/pbCongr legs (rfip-comp LANDED covers
+the e1-alignment).
