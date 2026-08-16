@@ -837,3 +837,24 @@ fromSpec-stalk comparison + `Spec.stalkIso` (AffineScheme:1293), with
 roundtrip. Then RP-1/2 (z.ker-stalk = max-ideal at the section point; generator
 generates stalks), RP-4 (DVR-uniformizer through zChartLocalizationEquiv), RP-5
 (assembly). The transport's algebra-half is DONE; the scheme-half is one brick.
+
+RP-4 CUT (2026-08-16): HW has `Uniformizer C P t := ord_P = 1` (Valuation.lean:250) but
+NO generator-lemma. RP-4 = two pieces:
+- [RP-4a, HW-side pure DVR] `uniformizer_of_span_maximalIdealAt`: r generating
+  maximalIdealAt P ⟹ Uniformizer P (algebraMap-FF r). Route: localRingAt-image of r
+  generates the DVR maximal ideal (localisation-of-span; mathlib
+  IsLocalization.AtPrime.map_eq_maximalIdeal-species) ⟹ the HeightOneSpectrum-valuation
+  (= pointValuation by def) of the FF-image = exp(-1) (mathlib DVR/HeightOneSpectrum
+  generator-valuation species — name-hunt: intValuation_uniformizer /
+  valuation_exists_uniformizer-converse / Ideal.span-generation valuation) ⟹ ord_P = 1
+  by the ord_P_of_ne computation (mirror exists_uniformizer's own ending,
+  Valuation.lean:258-271).
+- [RP-4b, transport application] chart-side r' generating zChartMaximalIdeal ⟹
+  (coordRingToZSection).symm r' generates maximalIdealAt (equiv-span-transport:
+  Ideal.map-span + the equiv) ⟹ RP-4a applies; the FF-image matches the chart-side
+  germ-image through brick-3's square (the parked line pins the identification).
+Then RP-1/2 (section-side): z.ker-restriction's generator on a chart V ∋ Q-image maps
+to a zChartMaximalIdeal-generator at P := Q-dictionary-image — the sectionDivisor-to-
+transport connector (KM 1.2.2 stalk-property; needs the Q-point-to-P-dictionary at the
+zChart, which is the FieldComparisonBridge points-machinery evaluated at zChartPoint).
+RP-5 assembles div_V = [Q0] and feeds exists_const_mul_of_projectiveDivisorOf_eq.
