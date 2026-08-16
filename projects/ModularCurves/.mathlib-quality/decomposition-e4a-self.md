@@ -1127,3 +1127,23 @@ pbUnitIso — using pullbackUnit_map_appT on eta-points + the eqToHom-naturality
 cancellation manifests as: pb-W(e).map on the eta-image of e.inv-applied-x = eta-image of
 x (map_appT + e.inv-hom-cancel at V-level). Consider proving (a)+(c) MERGED: define the
 candidate x_V so that the H3-chain never needs s_V alone.
+
+[H3] DESIGN RESOLVED (2026-08-16, cont.2): the four-leg chase on the transported point.
+KEY INSIGHT — the map-legs WALK by NATURALITY, not by value: pb(W.iota).map(e.hom) and
+pb(W.iota).map(iota2) commute LEFT through the pbCongr.inv/pbComp.hom transport by the
+NatIso-naturality of pullbackCongr/pullbackComp (hom-level, no values), turning them into
+pb(h).map(pb(V.iota).map(...)) which act on eta_h-points by pullbackUnit_map_appT; the
+V-level values then cancel against s_V's five-chain V-legs (e.inv against e.hom at V —
+iso_hom_inv_app_applyT; the triv2-tail yields the f2-generator value via idealGenHom-app's
+concrete formula). The pbUnitIso-tail closes by the oneT-family + eqToHom-naturality
+(H2's g5-g7 pattern). THE ONE IRREDUCIBLE NEW COHERENCE [H3-T]: the slot-leg
+(tensorIdealSlotIso, W-local tensor-structural) does NOT walk by naturality — needs the
+TENSOR-TRANSPORT coherence: pullbackTensorObjIsoOfIsOpenImmersion vs pullbackComp
+(pb(h)-image of the V-comparison = W-comparison modulo pbComp-legs on both tensor-factors)
+— PLUS the same for tensorObjUnitIso (unit-slot) and for the genHom-B-slot
+(genHom-restriction: pb(h)-transport of idealGenHom-V vs idealGenHom-W(res f1) — this one
+is ALSO the deferred glue-instantiation species!). Technique for all three: the
+sheafification-adjunction + eta/toSheafify idiom (THE ATOM's pattern) — presheaf-level
+tensor is pointwise, the coherences are toSheafify-naturality chases. Alternatively
+consider stating [H3-T] directly as the SLOT-LEG's action on the transported point
+(one merged value-lemma instead of three iso-coherences) — fewer statements, same content.
