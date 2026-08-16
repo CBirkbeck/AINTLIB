@@ -215,6 +215,21 @@ theorem uniformizer_of_span_maximalIdealAt (W : WeierstrassCurve K) [W.IsEllipti
   haveI hPID := hDVR.toIsPrincipalIdealRing
   haveI hDed : IsDedekindDomain
       ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) := inferInstance
+  have hr' : algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r ≠ 0 := by
+    intro h0
+    exact hr (IsLocalization.injective
+      (M := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P).primeCompl)
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+      (Ideal.primeCompl_le_nonZeroDivisors _) (h0.trans (map_zero _).symm))
+  have hgen : (IsDiscreteValuationRing.maximalIdeal
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).asIdeal =
+      Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r} := by
+    show IsLocalRing.maximalIdeal _ = _
+    rw [← Localization.AtPrime.map_eq_maximalIdeal]
+    refine (congrArg (Ideal.map (algebraMap _ _)) hspan).trans ?_
+    rw [Ideal.map_span, Set.image_singleton]
   sorry
 
 end ModularCurves
