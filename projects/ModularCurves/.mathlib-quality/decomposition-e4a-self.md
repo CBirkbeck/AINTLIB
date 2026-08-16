@@ -780,3 +780,17 @@ coordRingToZSection to XYIdeal(x-coords) (the closed-point↔maximal-ideal dicti
 the chart — Spec-side comap computation). Every RP-leaf now has substrates named to the
 mathlib-constant level; the dedicated session opens by stating the composite + the
 pinning lemma at the zChart.
+
+RP-3 DESIGN DISSOLUTION (2026-08-16, the P-parametrised dodge): NO point-classification
+needed. Parametrise everything by P : SmoothPoint — define m_P := Ideal.map
+(coordRingToZSection W) (maximalIdealAt P) (equiv-transport, maximality free); the
+zChart-scheme-point x_P := the PrimeSpectrum point of m_P through the chart's isoSpec;
+then stalk(x_P) ≅ Γ(zChart)-localisation-at-m_P [mathlib affine-stalk] ≅
+Localization.AtPrime (maximalIdealAt P) = localRingAt P [IsLocalization
+.ringEquivOfRingEquiv along coordRingToZSection — mathlib species]. The former
+"pinning lemma" becomes DEFINITIONAL; the ONE remaining proof obligation is the
+FF-COMPATIBILITY SQUARE: the localisation-equiv composite commutes with
+projModelFunctionFieldEquiv on function fields (fraction-field functoriality of
+ringEquivOfRingEquiv — mathlib-species). RP-4 then reads valuations through the
+transported DVR structure; RP-5 assembles div_V(FF r) = [Q₀]. The whole RP-execution
+is now transport + one square + the RP-1/RP-2 scheme-side stalk-generation facts.
