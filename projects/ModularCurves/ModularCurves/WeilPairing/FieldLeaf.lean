@@ -962,6 +962,22 @@ theorem trivialization_inv_comp_hom_of_characterisation {X : Scheme.{u}}
     exact overUnitScalarEnd_mul V u r₂
   rw [key, Category.assoc, Iso.inv_hom_id, Category.comp_id]
 
+/-- **(U5-L1a 3c-iii, tail identification)** The over-form of the definite ideal
+trivialisation is the over-form of the bare generator division: `congrArg` of the
+A1-pre clothing cancellation. -/
+theorem overTriv_pullbackIdealTriv_eq {X : Scheme.{u}} (J : X.IdealSheafData)
+    (V : X.affineOpens) (f : Γ(X, V.1))
+    (hspan : J.ideal V = Ideal.span {f}) (hnzd : f ∈ nonZeroDivisors Γ(X, V.1))
+    (hfmem : f ∈ idealSections J (Opposite.op V.1)) :
+    Scheme.Modules.overTrivializationOfRestrictIso (idealModule J) V.1
+        (restrictIsoOfPullbackIso (idealModule J) V.1
+          (pullbackIdealTrivOfPrincipal J V f hspan hnzd hfmem)) =
+      Scheme.Modules.overTrivializationOfRestrictIso (idealModule J) V.1
+        (haveI := isIso_idealGenHom_of_principal J V f hspan hnzd hfmem
+         (asIso (idealGenHom J V.1 f hfmem)).symm) :=
+  congrArg _ (restrictIsoOfPullbackIso_pullbackIdealTrivOfPrincipal J V f
+    hspan hnzd hfmem)
+
 /-- **(U5-L1a 3c-iii C-rest-1)** The B1 characterisation restricted to a sub-open: the
 restriction of the chart trivialisation is characterised by the restricted generator.
 Direct instantiation of `restrictOverTrivialization_inv_comp_over` at B1; feeding two
