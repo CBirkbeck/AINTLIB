@@ -1453,6 +1453,24 @@ noncomputable def nuPullback {X : Scheme.{u}} (M : X.Modules)
     (Scheme.Modules.pullback W.ι).map (idealModuleToUnitHom J₂) ≫
     (pullbackUnitIso W.ι).hom
 
+/-- **([C-rest-3] SK-ratio-1)** Hom-level packaging of `idealGenHom_mul_app`:
+multiplying the generator by a section factors as the scalar endomorphism followed by
+the original generator map. -/
+theorem idealGenHom_mul {X : Scheme.{u}} (J : X.IdealSheafData) (V : X.Opens)
+    (f u : Γ(X, V))
+    (hm₁ : f * u ∈ idealSections J (Opposite.op V))
+    (hm₂ : f ∈ idealSections J (Opposite.op V)) :
+    idealGenHom J V (f * u) hm₁ =
+      ModularCurves.unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection V u) ≫ idealGenHom J V f hm₂ := by
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro Y
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro a
+  exact idealGenHom_mul_app J V f u hm₁ hm₂ Y a
+
 /-- **([C-rest-3] SK-B2-restrict)** The restrict-side sibling of
 `mono_overUnitScalarEnd_of_nonZeroDivisors`: multiplication by a non-zero-divisor
 section is a mono endomorphism of the structure sheaf. Supplies the `cancel_mono` of
@@ -1464,7 +1482,21 @@ theorem mono_unitEndomorphismOfTopSection_of_nonZeroDivisors {X : Scheme.{u}}
         (Scheme.Modules.openTopSection W r) ∈ nonZeroDivisors Γ(W.toScheme, Z)) :
     Mono (ModularCurves.unitEndomorphismOfTopSection
       (Scheme.Modules.openTopSection W r)) := by
-  sorry
+  constructor
+  intro Z g₁ g₂ hgg
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro Y
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  have happ := congrArg (fun q => (CategoryTheory.ConcreteCategory.hom
+    (q.val.app Y)) x) hgg
+  erw [sheafOfModules_comp_app_apply, sheafOfModules_comp_app_apply] at happ
+  erw [ModularCurves.unitEndomorphismOfTopSection_app_apply,
+    ModularCurves.unitEndomorphismOfTopSection_app_apply] at happ
+  dsimp only at happ
+  exact (mul_cancel_right_mem_nonZeroDivisors (hr Y.unop)).mp happ
 
 /-- **([C-rest-3] SK-per-chart)** The per-chart characterisation: the restricted
 five-chain trivialisation composed with the chart's `ν` is multiplication by the
