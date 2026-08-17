@@ -2738,3 +2738,69 @@ the max ideal via K-EVAL/AtPrime + hspan + hrep-localized s-unit) and run RP-4a'
 second half (intValuation_singleton chain, :225-260 copyable). NEXT WINDOW: (1) the
 iff-chain as a micro [BO-CHAIN]; (2) OFF via secOrd_sPrime_ord_zero at f₀; (3) ON
 via the localized-span mirror; (4) close SEC-ORD.
+
+
+## cont.30al — ★ SEC-ORD COMPLETE, AXIOM-CLEAN (session 11)
+
+`ord_P_germ_sectionKer_generator` (OrdPipeline) proven end-to-end, `#print axioms` =
+[propext, Classical.choice, Quot.sound]. The S5 dichotomy landed as SEVEN micros:
+
+- **[BO-CHAIN]** `secOrd_f0_mem_basicOpen_iff` — mem bO f₀ ↔ point-off-section. Lessons:
+  `Scheme.basicOpen_pow` carries `0 < n` (n = 0 IS possible for Away.sec — case-split via
+  `Nat.eq_zero_or_pos`, zero-arm `pow_zero + basicOpen_one + basicOpen_le`); a
+  metavar-pattern rw on Γ-section goals can fail where the FULLY-INSTANTIATED
+  `have he := lemma (X := ..) (f := ..) (h := ..); rw [he]` succeeds (BO-CHAIN lesson,
+  now hit twice); `Scheme.Hom.support_ker` is a SET-level equation (coe inserted on the
+  LHS — grab it directly, no congrArg); `mem_zeroLocus_iff`'s conclusion is `∉ basicOpen`.
+- **[D-MEM-IFF]** iff-version of D-MEM (same fromSpec chain, both directions defeq-cast).
+- **[U-LOC]** `uniformizer_of_localized_span` (ValuationTransport, after RP-4a): RP-4a
+  with hgen AT THE DVR LEVEL as hypothesis (`IsLocalRing.maximalIdeal`-spelled — the
+  `IsDiscreteValuationRing.maximalIdeal`-spelling needs the DVR instance at statement
+  elaboration and FAILS there; convert inside via `show IsLocalRing.maximalIdeal _ = _`).
+  NO r ≠ 0 hypothesis — derived from hgen via `IsDiscreteValuationRing.not_a_field` +
+  `Ideal.span_singleton_eq_bot`. REGION-SAFETY REMINDER: the hr'-block existed verbatim
+  in BOTH RP-4a and U-LOC — a global text-replace hit both (caught at build).
+- **[K-MAX]** `secOrd_span_isMaximal` — THE K-EVAL: hz : z ≫ snd = 𝟙 splits z's appLE-to-⊤
+  (`appLE_comp_appLE` with middle V.1 + `appLE_top_top_of_eq_id` subst-micro), so
+  Γ(V) →+* Γ(SpecK,⊤) ≅ K is surjective; ker-chain: `RingHom.ker_comp_of_injective`
+  (ΓSpecIso inj; res-along-⊤=z⁻¹V inj via `Subsingleton.elim (homOfLE e₂) (eqToHom heq.symm)`
+  + bijective_of_isIso) + `Scheme.Hom.ker_apply` + hspan; `RingHom.ker_isMaximal_of_surjective`.
+- **[PT-KER]** section point ∉ bO f (support_ker + subset_closure — no IsClosedImmersion needed).
+- **[SPAN-P']** span{app f} = point's prime (K-MAX transported via
+  `(asIso ((inv fst).app V.1)).commRingCatIsoToRingEquiv` + `Ideal.map_isMaximal_of_equiv`
+  + map_span; membership via REUSED `mem_basicOpen_iff_notMem_primeIdealOf` — ALREADY IN
+  TheoremOfSquareField:1521 (dedup catch: the name clashed at build) + preimage_basicOpen
+  + hcase; close `IsMaximal.eq_of_le` + `isPrime.ne_top`).
+- **[SPAN-S]** `secOrd_maximalIdeal_stalk_eq_span_germ_f0` — maximalIdeal(stalk at q') =
+  span{germ_zChart f₀}. KEY INFRA LESSONS: (a) the preimage chart's AMBIENT elaborates as
+  `(modelEllipticCurve W).E` (defeq projModel but NOT reducibly) — spell the instance
+  layer in E-form + `show`-bridge, final `rfl` crosses back; (b) `algebra_section_stalk`
+  can NOT be found by instance synthesis at a BARE point (the subtype-coe ?x is not
+  invertible) — spell stalk-points as `↑⟨q', h⟩` AND provide the algebra as **letI**
+  (haveI-fvars are OPAQUE to unification — letI is the fix for DATA instances); the
+  AtPrime instance itself is Prop so haveI is fine; (c) `IsLocalization.AtPrime.map_eq_maximalIdeal`
+  (general-instance form, AtPrime/Basic:524) + `IsAffineOpen.isLocalization_stalk` +
+  `preimage_of_isIso`; (d) germ-collapse via `germ_res_apply` mirrors the hFFeq flow;
+  s-germ unit via `RingedSpace.mem_basicOpen` (NO second AtPrime needed);
+  `Ideal.span_singleton_mul_right_unit (hunit.pow n)` absorbs the denominator.
+- **[HGEN]** `secOrd_ord_f0_eq_one` — ONE-hop transport stalk → localRingAt via
+  `IsLocalization.ringEquivOfRingEquiv (coordRingToZSection W).symm
+  (primeCompl_map_zChartMaximalIdeal W P)` (stocked!) — do NOT two-hop through
+  Localization.AtPrime (algEquiv.commutes dies under simpa → True; spellings blow the
+  budget). Computation rule `IsLocalization.ringEquivOfRingEquiv_eq` gives hc pointwise;
+  `RingHom.ext fun a => hc a` lifts to comp-level; congrArg-map + map_map + map_span
+  chain h9; hround RP-4b-VERBATIM (equiv-form maps — coe-form breaks its simpa);
+  hgen via trans-chain NOT `rw [← Localization.AtPrime.map_eq_maximalIdeal]` (dependent
+  motive fails: the prime appears in the Localization TYPE); equiv-map vs coe-map
+  mismatches cross by `exact`-defeq.
+- **[S5-assembly]** in the main: hrep2 := `rw [← halg, ← halg]; exact hrep` (sec_spec has
+  the pow INSIDE algebraMap — no map_pow); by_cases hcase; ON := secOrd_ord_f0_eq_one;
+  OFF := BO-CHAIN.mpr + secOrd_sPrime_ord_zero AT f₀. The main gained
+  `[IsClosedImmersion z]` (BO-CHAIN needs isClosedEmbedding for the support read) —
+  consumers must supply it (sections of separated morphisms are closed immersions;
+  discharge at ORD-G time).
+
+NEXT: [G-REL] (cont.30w — the per-chart H-germ identity; u-germs = generator ratios;
+constructive r := c₀-generator-ratio) → [ORD-G] (Finsupp.ext; chart dichotomy feeds
+THIS SEC-ORD result; κ-orientation watch cont.30p) → [L1-assembly] (FieldLeaf:2340) →
+L3/L5 activate → E4a-diagonal → leaves A+B.
