@@ -2016,3 +2016,23 @@ Both are plumbing, not math. NEXT: [s3] (mu-BRIDGE.symm value on shUnit-tmuls of
 pbUnit-factors: mTOI.inv-def-rfl → tensorSection → pullback_μ_unit_tensorSection →
 pullbackMap_app_unit at mTOI.hom), then the W-side mirror walk, then the meet + the
 SLOT-SQ assembly.
+
+[SLOT-SQ WALK: s3 LANDED] (2026-08-17, cont.29c): [s3]
+pullbackTensorObjIsoOfIsOpenImmersion_symm_hom_app_unit PROVEN — the comparison's
+inverse on shUnit-tmuls of pbUnit-factors = the pbUnit-image of the X-side tensor.
+Recipe: hmu := congrArg-symm-hom-app of the mu-BRIDGE equality (single congrArg at the
+full argument, NOT congrFun-of-congrArg); hv1-rfl (mTOI.inv on shUnit-tmul =
+tensorSection, def-rfl); hv2 := the μ-direction derived from the PUBLIC
+pullback_δ_unit_tensorSection + Functor.Monoidal.δ_μ (the private μ-lemma is
+inaccessible — δ_μ-congrArg at the pbUnit-image then rw [hδ]); SPELLING: the
+δ/μ-interacting positions MUST use MonoidalCategoryStruct.tensorObj (the instance-⊗),
+NOT the ModularCurves tensorObj-def (namespace-resolution picks the wrong one and the
+congrArg-domain mismatches); hv3 := pullbackMap_app_unit at mTOI.hom; hcancel :=
+iso_inv_hom_app_applyT folding tensorSection; hcomp-rfl composite-split + rw-chain.
+STATE: NativeRestriction sorries = 4: s2's two plumbing residuals, SLOT-SQ, NR-1.
+NEXT: (a) close s2-residuals (LSP-ish def-transparency chases); (b) the SLOT-SQ
+walk-assembly: LHS-side = pRT-collapse → [need the Congr-stage-carried versions of
+s1/s2/s3 at the W-side (the pieces are stated at generic opens ✓ instantiate at the
+Congr-clothed positions)]; RHS-side = pullbackMap_app_unit(slotV.hom) → s1/s2/s3 at
+V-side → pRT-collapse-⊗; the MEET: both = Congr.inv-clothed pbUnit-images of
+(res-m ⊗ₜ res-g-section) — generator-res-compat.
