@@ -1922,3 +1922,25 @@ via mu (tensorObjUnitIso/tensorObjCongr/mu-BRIDGE) + pullbackComp_hom_isMonoidal
 Congr-subst + Functor.Monoidal coherences. NR-1 then per cont.20 (1a-instances + 1b +
 SLOT-SQ at elements via pullbackUnit_map_transportT + the [NR-unit-val] general-z
 pullbackUnitIso-collapse [statement drafted, re-add from cont.26 scratch]).
+
+[SLOT-SQ ENTRY + WALK-PLAN] (2026-08-17, cont.28): the double-transposition entry is
+LANDED in-file (homEquiv-injective at homOfLE- and V.ι-pullback-adjunctions + hom_ext
+chain to plain m : M.val.obj U — NO tensor in the source, no induction). The transposed
+goal (printed): both sides = double-homEquiv images of (pRT-M ≫ slotW.hom) resp
+(pbH.map(slotV.hom) ≫ pRT-⊗), .val.app U applied at m. NEXT-QUANTUM WALK: (1)
+homEquiv_apply-unfolds + an hcollapse-style rfl reducing both sides to
+composite.val.app-(op-preimage)-values at the double-unit image r₀(m); (2) LHS: pRT on
+the double-unit image (the pullbackUnit_map_transportT/H2-species), then slotW's three
+pieces at the W-unit image: tensorObjUnitIso.symm at elements (m ↦ m ⊗ₜ 1 — mathlib
+rightUnitor_inv_apply species at the presheaf level + the ATOM-adjunction pattern),
+tensorObjCongr(refl, genTrivW.symm) via tensorObjCongr_hom_app_unit_tmul (LANDED
+micro-lemma!) with the genTriv.symm-at-1-value (pullbackIdealTrivOfGen.symm-elements —
+the N1-hcore species: 1 ↦ the g-ideal-section), then pullbackTensorObjIsoOfIsOpen-
+Immersion.symm — INVERT the mu-BRIDGE (NOW PROVEN!) or walk its .inv on unit-images
+directly (its .symm-value on shUnit-tmuls follows from the mu-BRIDGE-equality +
+mu/δ-element-formulas); (3) RHS: transportT at q := slotV.hom + the V-side same-shape
+walk + pRT-⊗ on the resulting tensor-unit-image; (4) both sides meet at
+shUnitW-((m-res) ⊗ₜ (res-g₁-section-form)) — the res-compat of the generator-elements
+(map_tmul + idealSections-subtype-res). EXTRACT EVERY LANDED HAVE INTO A PRIVATE LEMMA
+FROM THE START (per-decl-budget rule). After SLOT-SQ: NR-1 (1a×2 + 1b + SLOT-SQ at
+elements + re-add [NR-unit-val] from cont.26), then G2', then ORD-G.
