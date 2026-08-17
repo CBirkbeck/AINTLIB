@@ -1222,6 +1222,31 @@ private theorem overPoint_toBaseChangePoint_comp_fst
     pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = pmod.1
   exact pullback.lift_fst _ _ _
 
+/-- Local copy of `baseChangeEquiv_asSection` (Moduli/GammaHRepresentability:3826 —
+kept private here to avoid importing the Moduli tree into the WeilPairing engine;
+flagged for the cleanup fleet). -/
+private theorem baseChangeEquiv_asSection'
+    {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) (R : E.Point g) :
+    EllipticCurve.Point.baseChangeEquiv E g (𝟙 T)
+      (EllipticCurve.Point.asSection E g R) =
+    EllipticCurve.Point.restrict E (𝟙 T) R := by
+  refine Subtype.ext ?_
+  rw [EllipticCurve.Point.baseChangeEquiv_apply_coe,
+    EllipticCurve.Point.asSection_val_fst]
+  show R.1 = 𝟙 T ≫ R.1
+  rw [Category.id_comp]
+
+/-- Local copy of `Point.asSection_add` (same provenance). -/
+private theorem asSection_add'
+    {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) (P Q : E.Point g) :
+    EllipticCurve.Point.asSection E g (P + Q) =
+      EllipticCurve.Point.asSection E g P + EllipticCurve.Point.asSection E g Q := by
+  apply (EllipticCurve.Point.baseChangeEquiv E g (𝟙 T)).injective
+  rw [map_add, baseChangeEquiv_asSection', baseChangeEquiv_asSection',
+    baseChangeEquiv_asSection', EllipticCurve.Point.restrict_add]
+
 /-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
 of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
 Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
