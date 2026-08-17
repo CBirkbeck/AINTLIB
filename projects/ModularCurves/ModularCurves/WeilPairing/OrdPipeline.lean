@@ -184,6 +184,22 @@ theorem mulByN_functionFieldMap_germ_transitionUnit
   rw [hinvj] at hg
   exact hg
 
+/-- **([G-REL-3])** A comparison unit relating two sections along restrictions is, in
+the function field, the ratio of their germs: from `a|ₒ = b|ₒ · u` on the overlap,
+`germ a = germ b · germ u`. Generic over any integral scheme. -/
+theorem germToFunctionField_eq_mul_of_res_rel {X : Scheme.{u}}
+    [AlgebraicGeometry.IsIntegral X]
+    {U₁ U₂ Uo : X.Opens} (h₁ : Uo ≤ U₁) (h₂ : Uo ≤ U₂)
+    [Nonempty U₁] [Nonempty U₂] [Nonempty Uo]
+    (a : Γ(X, U₁)) (b : Γ(X, U₂)) (w : Γ(X, Uo))
+    (hrel : X.presheaf.map (homOfLE h₁).op a =
+      X.presheaf.map (homOfLE h₂).op b * w) :
+    X.germToFunctionField U₁ a =
+      X.germToFunctionField U₂ b * X.germToFunctionField Uo w := by
+  have hg := congrArg (X.germToFunctionField Uo) hrel
+  simp only [map_mul, TopCat.Presheaf.germ_res_apply] at hg
+  exact hg
+
 /-- **([L1], statement)** The transported splitting germ factors through the classical
 Weil function: for the Katz–Mazur normalized per-chart dataset of `κ(Q)` and a
 normalized `[N]`-splitting family `h` with anchor chart `c₀`,
