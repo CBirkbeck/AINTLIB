@@ -355,6 +355,14 @@ theorem ord_P_germ_sectionKer_generator
     (projModel W).presheaf.germ_res_apply
       (homOfLE (hsle.trans inf_le_left)) _ _
       ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f)
+  -- [S3] the Away-fraction representation of the restricted section
+  haveI hAway : IsLocalization.Away s Γ(projModel W, (projModel W).basicOpen s) :=
+    hZaff.isLocalization_basicOpen s
+  set xD : Γ(projModel W, (projModel W).basicOpen s) :=
+    (projModel W).presheaf.map (homOfLE (hsle.trans inf_le_left)).op
+      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) with hxD
+  have hrep := IsLocalization.Away.sec_spec
+    (S := Γ(projModel W, (projModel W).basicOpen s)) s xD
   sorry
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
