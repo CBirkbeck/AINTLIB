@@ -203,7 +203,26 @@ theorem translateAlgEquivOfPoint_mulByInt_pullbackAlgHom
     HasseWeil.translateAlgEquivOfPoint W S
         (HasseWeil.mulByInt_pullbackAlgHom W.toAffine n hn0 r) =
       HasseWeil.mulByInt_pullbackAlgHom W.toAffine n hn0 r := by
-  sorry
+  have hpb : (HasseWeil.mulByInt W.toAffine n).pullback =
+      HasseWeil.mulByInt_pullbackAlgHom W.toAffine n hn0 := dif_neg hn0
+  have hk : S ∈ (HasseWeil.mulByInt W.toAffine n).kernel := by
+    rw [HasseWeil.Isogeny.mem_kernel_iff, HasseWeil.mulByInt_apply]
+    exact hS
+  have hxy := HasseWeil.WeilPairing.TorsionGeometric.hxy_mulByInt W n hn0 ⟨S, hk⟩
+  have hgx := HasseWeil.mulByInt_pullback_x W n hn0
+  have hgy := HasseWeil.mulByInt_pullback_y W n hn0
+  have hz := HasseWeil.WeilPairing.TorsionGeometric.hcov_of_xy W
+    (HasseWeil.mulByInt W.toAffine n) S
+    (by rw [show HasseWeil.x_gen W = algebraMap W.toAffine.CoordinateRing
+        W.toAffine.FunctionField (algebraMap (Polynomial K)
+          W.toAffine.CoordinateRing Polynomial.X) from rfl, hgx]
+        exact hxy.1)
+    (by rw [show HasseWeil.y_gen W = algebraMap W.toAffine.CoordinateRing
+        W.toAffine.FunctionField (AdjoinRoot.root W.toAffine.polynomial) from rfl, hgy]
+        exact hxy.2)
+    r
+  rw [← hpb]
+  exact hz
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
 `pullbackCurveFunctionFieldEquiv`-image of the germ of a `globalTwist` of a global unit
