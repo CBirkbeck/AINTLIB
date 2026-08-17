@@ -1194,6 +1194,34 @@ private theorem mulByHom_base_zChartPoint_of_smul
   exact mulByHom_base_zChartPoint W (N : ℤ) pmod hp hp' P
     ⟨x', y', hxy'⟩ rfl rfl rfl rfl
 
+/-- The identity base-change arrow collapse: `Spec.map` of the identity algebra map. -/
+private theorem specMap_algebraMap_self_eq_id :
+    Spec.map (CommRingCat.ofHom (algebraMap K K)) = 𝟙 (Spec (CommRingCat.of K)) := by
+  rw [show CommRingCat.ofHom (algebraMap K K) = 𝟙 (CommRingCat.of K) from rfl,
+    Spec.map_id]
+
+/-- **([OVERPT] carrier)** A model point over the identity-collapsed base arrow, as a
+section of the identity base change. -/
+private noncomputable def toBaseChangePoint
+    (pmod : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap K K)))) :
+    ((modelEllipticCurve W).baseChange (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))) :=
+  ⟨pullback.lift pmod.1 (𝟙 (Spec (CommRingCat.of K)))
+      (by rw [pmod.2, specMap_algebraMap_self_eq_id, Category.id_comp]),
+    pullback.lift_snd _ _ _⟩
+
+/-- **([OVERPT])** The overPoint composite of the section-viewed model point projects
+back to the model point (all pieces are `rfl`-transparent plus `lift_fst`). -/
+private theorem overPoint_toBaseChangePoint_comp_fst
+    (pmod : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap K K)))) :
+    (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+        (toBaseChangePoint W pmod) ≫
+      baseChangeIdFstOver (modelEllipticCurve W)).left = pmod.1 := by
+  show (toBaseChangePoint W pmod).1 ≫
+    pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = pmod.1
+  exact pullback.lift_fst _ _ _
+
 /-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
 of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
 Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
