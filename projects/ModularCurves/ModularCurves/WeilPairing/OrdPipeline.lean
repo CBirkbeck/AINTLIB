@@ -313,6 +313,24 @@ theorem ord_P_germ_sectionKer_generator
       (pullbackCurveFunctionFieldEquiv W
         ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField V.1 f)) =
     (if (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) = z.base default then 1 else 0) := by
+  haveI hIntE : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+    inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+  haveI hInt : AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    isIntegral_pullback_id (modelEllipticCurve W)
+  haveI hNeV' : Nonempty ↥((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ (V : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)) :=
+    ⟨⟨zChartPoint W P, hPV⟩⟩
+  -- [S1] the fst-hop: the pullback function-field image is the projModel
+  -- function-field image of the transported germ
+  have h1 : pullbackCurveFunctionFieldEquiv W
+      ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField V.1 f) =
+      EllipticCurve.projModelFunctionFieldEquiv W
+        ((@Scheme.germToFunctionField (projModel W) _
+          ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1)
+          hNeV')
+          ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f)) :=
+    congrArg (⇑(EllipticCurve.projModelFunctionFieldEquiv W))
+      (functionFieldMap_germToFunctionField
+        (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) V.1 f)
   sorry
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
