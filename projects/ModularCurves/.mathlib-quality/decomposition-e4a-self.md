@@ -3106,3 +3106,16 @@ finales copy the zero-arm VERBATIM — same hledZ shapes vt+vb+{1,0}+vc = 0+1+va
 v1 = vt via InftyOrdTransport untopD-eq). NEXT: the L1-consumers — L3/L5 (the E4a plan
 doc chain) → E4a-diagonal → leaves A (weilPairingEval_self) + B
 (weilPairingEval_nondegenerate). Leaf C (IsOfficialCartier.isFinite) separate.
+
+**[U1-CAMPAIGN WAVE 2] (cont.30bb-30bc, af0fffc87)**: after L1, the U1-transport campaign
+(weilPairingEval_mapIso, gating U5-AC) is 9/11 green: Point.mapIso+killedBy,
+zero_comp_left_of_isMonHom, PB-ISO (pullbackMapIso+legs+zero-compat), ASSEC-MAPISO,
+KER-MAPISO (ker_comap_iso), SECTIONCLS-MAPISO, ZEROCLS-MAPISO, KAPPA-MAPISO,
+HM/HNORM-MAPISO, MULBYN-PBISO, UMAP-SQ, RES-UMAP-RES, and the TSE-MAPISO skeleton
+(E6-d mirror; hn′/hC/assembly green). REMAINING: the 2 hsplit′-branch collapses
+(mixed inf-preimage spellings blow isDefEq — fix = rfl-show spelling normalization
+then RES-UMAP-RES application; pinned in sentinel) + the (g)-pin. KEY-LESSONS:
+per-decl 200k-budgets (split big arms as private theorems with hand-written
+signatures); the TWO-π-projection-path split (direct-field vs toEllipticCurveGeom)
+makes rw/simp miss across files — congrArg-term-chains cross by defeq; open MonObj
+steals ι; KMNaturality is rw-friendly, SelfUniversal is not.
