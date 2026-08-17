@@ -2372,3 +2372,15 @@ sectionToPicRel internals; recon sectionToPicRel's presentation next). Then the
 u-ratio germs (u₁ = f₁-ratio, u₂ = f₂-ratio via the G2' u-relations) carry orders
 (zero-sec vs Q-sec differences), the hsplit relation transfers along [N], and the
 per-place sum reproduces pullbackDivisor [N] (kappaDivisor T) at each w.
+
+[ORD-G κ-ORIENTATION WATCH] (2026-08-17, cont.30p): sectionToPicRel (DivisorClass:180)
+= picRelProj(picClass(sectionDivisor Q) · picClass(sectionDivisor zero)⁻¹) — GME 2.16
+"P ↦ I(P)⁻¹ ⊗ I(0)". With hM : κ(Q).val = toSkeleton M and e_dict : M ⊗ J₁ ≅ J₂
+(⟹ M ≅ J₂ ⊗ J₁⁻¹), the orientation candidate is J₂ ↔ I(0)-side (zero-section) and
+J₁ ↔ I(Q)-side (Q-section) — BUT the picClass-inverse conventions and the
+picRelProj-normalisation must be checked at execution before pinning the DIV-PIN
+signs (ord_P(f₁ i) counts the Q-section, ord_P(f₂ i) the zero-section, OR swapped).
+The divisors are RelEffCartierDiv.sectionDivisor (pullback.snd) Q / zero — their
+ideal-sheaves' maximalIdealAt-dictionary at closed points = the DIV-PIN input
+(sectionDivisor + IsOfficialCartier machinery, LevelStructure/CartierDivisor).
+Next cycle: state DIV-PIN from this dictionary, then G-REL, then ORD-G.
