@@ -1091,6 +1091,37 @@ theorem pullbackTensorObjIsoOfIsOpenImmersion_symm_hom_app_unit
   refine hcomp.trans ?_
   rw [hv1, hv2, hv3, hcancel]
 
+/-- **([NR-unit-eq-res])** The unit image at `U` is the `eqToHom`-transport of the unit
+image at a smaller open with equal preimage (small binders; the `hA2`-realignment of
+the slot walk). -/
+private theorem pullbackUnit_app_eq_res {X' Y' : Scheme.{u}} (f : Y' ⟶ X')
+    (P : X'.Modules) {U IM' : X'.Opens} (hle : IM' ≤ U)
+    (hpre : (f ⁻¹ᵁ IM') = f ⁻¹ᵁ U) (m : P.val.obj (Opposite.op U)) :
+    ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app P).val.app
+        (Opposite.op U) m =
+      ((Scheme.Modules.pullback f).obj P).val.map (eqToHom hpre.symm).op
+        (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app P).val.app
+          (Opposite.op IM') (P.val.map (homOfLE hle).op m)) := by
+  have h1 := pullbackUnit_app_res f P hle m
+  have h2 : ∀ (z : (((Scheme.Modules.pullback f).obj P).val.obj (Opposite.op (f ⁻¹ᵁ U)))),
+      ((Scheme.Modules.pullback f).obj P).val.map (eqToHom hpre.symm).op
+        (((Scheme.Modules.pullback f).obj P).val.map
+          (homOfLE (by exact fun x hx => hle hx : f ⁻¹ᵁ IM' ≤ f ⁻¹ᵁ U)).op z) = z := by
+    intro z
+    have hmapeq : (((Scheme.Modules.pullback f).obj P).presheaf.map
+        (homOfLE (by exact fun x hx => hle hx : f ⁻¹ᵁ IM' ≤ f ⁻¹ᵁ U)).op) ≫
+        (((Scheme.Modules.pullback f).obj P).presheaf.map (eqToHom hpre.symm).op) =
+        𝟙 _ := by
+      rw [← Functor.map_comp]
+      rw [show ((homOfLE (by exact fun x hx => hle hx :
+          f ⁻¹ᵁ IM' ≤ f ⁻¹ᵁ U)).op ≫ (eqToHom hpre.symm).op) =
+        (𝟙 (Opposite.op (f ⁻¹ᵁ U))) from Subsingleton.elim _ _]
+      exact CategoryTheory.Functor.map_id _ _
+    have happ := ConcreteCategory.congr_hom hmapeq z
+    exact happ
+  exact ((h2 _).symm).trans (congrArg
+    (((Scheme.Modules.pullback f).obj P).val.map (eqToHom hpre.symm).op) h1)
+
 /-- **([slot-walk], statement)** The slot construction on a pullback-adjunction-unit
 image: the value is the unit image of the sheafified pure tensor of the restricted
 section with the restricted generator (all data at the image open `U ⊓ Wo`, re-indexed
@@ -1120,6 +1151,28 @@ private theorem slot_walk (Wo : X.Opens) (g₁ : Γ(X, Wo))
               (⟨X.presheaf.map (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op g₁,
                 idealSections_map J₁
                   (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op hg₁⟩)))) := by
+  -- split the slot into its three pieces at the unit image
+  have hsplit : (tensorIdealSlotIso M J₁ Wo g₁ hg₁ hgi₁).hom.val.app
+      (Opposite.op (Wo.ι ⁻¹ᵁ U)) (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app M).val.app (Opposite.op U) m) =
+      (pullbackTensorObjIsoOfIsOpenImmersion Wo.ι M
+          (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).symm.hom.val.app
+        (Opposite.op (Wo.ι ⁻¹ᵁ U))
+        ((tensorObjCongr (Iso.refl ((Scheme.Modules.pullback Wo.ι).obj M))
+            (pullbackIdealTrivOfGen J₁ Wo g₁ hg₁ hgi₁).symm).hom.val.app
+          (Opposite.op (Wo.ι ⁻¹ᵁ U))
+          ((AlgebraicGeometry.Scheme.Modules.tensorObjUnitIso
+            ((Scheme.Modules.pullback Wo.ι).obj M)).symm.hom.val.app
+            (Opposite.op (Wo.ι ⁻¹ᵁ U)) (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app M).val.app (Opposite.op U) m))) := rfl
+  refine hsplit.trans ?_
+  -- [s1] the unit insertion
+  rw [tensorObjUnitIso_symm_hom_app]
+  -- [congr-tmul] the generator trivialisation in the second slot
+  rw [tensorObjCongr_hom_app_unit_tmul]
+  -- [s2] the generator value at 1 (the refl-factor is definitionally untouched)
+  rw [pullbackIdealTrivOfGen_symm_hom_app_one J₁ Wo g₁ hg₁ hgi₁
+    (Opposite.op (Wo.ι ⁻¹ᵁ U)) hpre]
+  -- [A2] via the generic unit-eq-res lemma
+  have hA2 := pullbackUnit_app_eq_res Wo.ι M hIMle hpre m
   sorry
 
 /-- **([SLOT-SQ], the map-level brick)** The tensor-slot construction commutes with the
