@@ -2335,3 +2335,26 @@ sorries (G2'). NEXT: [ORD-G/L1] exists_const_mul_weilFunction (OrdPipeline:~124,
 pointwise divisor route cont.18-19, now with the perChart dataset as input) — the LAST
 brick before the L3/L5-chain (already proven modulo L1) closes; then the E4a-diagonal
 reduction → leaf A (weilPairingEval_self) → leaf B (_nondegenerate transport).
+
+[ORD-G ENTRY-POINTS] (2026-08-17, cont.30n): verified the two HW-side transfer
+theorems as banked: projectiveDivisorOf_pullback_eq_pullbackDivisor
+(HasseWeil DivisorPullback:244, needs ProjOrdTransport φ + Finite ker) and
+weilFunction_divisor_eq_pullbackDivisor_kappaDivisor (HfactLemma:133) — so the L1
+target-side divisor is pullbackDivisor [N] (kappaDivisor T). The pointwise species
+G-REL / DIV-PIN / OrdAtInftyBridge are cont.18-19 DESIGN NAMES, not yet stated —
+ORD-G needs: (1) the r-choice (the c₀-chart generator-ratio correction; recon the
+kappaDivisor-vs-(J₁,J₂,f₁,f₂)-dictionary — how κ(Q)'s divisor reads the chart
+generators; entry: kappaDivisor def in HasseWeil Curves + the kappa-def in
+FieldLeaf); (2) the ORD-G statement in OrdPipeline: projectiveDivisorOf(H_HW ·
+mulByInt_pullbackAlgHom N r) = pullbackDivisor [N] (kappaDivisor T) with H_HW :=
+pullbackCurveFunctionFieldEquiv-image of germ(h c₀); (3) the pointwise proof at an
+affine place P: split by which chart W i contains the image point; the hsplit +
+G2'-perChart dressing express the H-germ as (chart-local units)·(u-ratio germs);
+unit-ord-0 species + the span-pinned generator-ords via ValuationTransport
+(uniformizer_of_span_maximalIdealAt :279, the span-dictionary :226) + the RP-germ
+transport (pullbackCurveFunctionFieldEquiv_germ_globalTwist, PROVEN in OrdPipeline);
+(4) the ∞-place: the zero-section is the model-∞; J₂-charts cover it
+(OrdAtInftyBridge species to state); (5) L1-assembly := ORD-G + HfactLemma-target +
+exists_const_mul_of_projectiveDivisorOf_eq (FieldLeaf:2340). All scheme-side
+transports PROVEN (OrdPipeline's five landed lemmas). NEXT CYCLE: recon
+kappaDivisor + kappa-def dictionaries, then state (2) with the r-construction.
