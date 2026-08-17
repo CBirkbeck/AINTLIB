@@ -2535,7 +2535,199 @@ theorem transitionUnitOfCover_eq_dressed_native_perChart
       (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)]
     exact (overTrivializationOfRestrictOpenTrivialization
       (inf_le_right : Wf i ⊓ Wf j ≤ Wf j) _).symm.symm
-  sorry
+  -- the dressed-native decomposition, replicated with explicit legs
+  letI : ∀ (U : (TopologicalSpace.Opens ↥X)ᵒᵖ),
+      IsMulCommutative (X.ringCatSheaf.obj.obj U) := fun U => by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact ⟨⟨fun a b => mul_comm a b⟩⟩
+  have hcancel := restrictIsoOfPullbackIso_inv_comp_hom M (Wf i ⊓ Wf j)
+    (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+      (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+      (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+      (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+      (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂)
+    (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+      (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+      (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+      (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+      (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂')
+  have hmid := trivializationTransitionUnit_overTriv_of_inv_comp_hom M
+    (Wf i ⊓ Wf j)
+    (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+      (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+        (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+        (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+        (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+        (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂))
+    (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+      (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+        (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+        (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+        (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+        (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂'))
+    (u₂ * u₁⁻¹)
+    (hcancel.trans (nativeTensorIdealTriv_inv_comp_hom M J₁ J₂ e (Wf i ⊓ Wf j)
+      (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+      (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+      (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+      (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+      u₁ u₂ hu₁ hu₂
+      (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+      (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+      (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂
+      (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂' hmono₂R))
+  have hb : trivializationTransitionUnit (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+          (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+          (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂'))) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+      (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))) =
+      (trivializationTransitionUnit (Wf i ⊓ Wf j) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+      (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+          (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+          (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂'))))⁻¹ :=
+    eq_inv_of_mul_eq_one_left
+      (trivializationTransitionUnit_symm (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+          (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+          (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂'))) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+      (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))))
+  have hc1 := trivializationTransitionUnit_trans (Wf i ⊓ Wf j)
+    (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i)
+      (efam i) (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+          (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+          (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂))) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+      (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j))))
+  have hc2 := trivializationTransitionUnit_trans (Wf i ⊓ Wf j)
+    (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+          (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+          (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+          (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+          (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂'))) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+      (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j))))
+  have hA : trivializationTransitionUnit (Wf i ⊓ Wf j) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i)
+      (efam i) (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i))))
+      (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i)
+        (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i)
+        (restrictIsoOfPullbackIso M (Wf i)
+          (nativeTensorIdealTriv M J₁ J₂ e (Wf i) F₁ F₂ hF₁ hFi₁ hF₂ hFi₂)))
+        (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)))) =
+      Scheme.resUnit (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)
+        (trivializationTransitionUnit (Wf i) (efam i) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i)
+        (restrictIsoOfPullbackIso M (Wf i)
+          (nativeTensorIdealTriv M J₁ J₂ e (Wf i) F₁ F₂ hF₁ hFi₁ hF₂ hFi₂)))) :=
+    trivializationTransitionUnit_restrict (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)
+      (efam i) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i)
+        (restrictIsoOfPullbackIso M (Wf i)
+          (nativeTensorIdealTriv M J₁ J₂ e (Wf i) F₁ F₂ hF₁ hFi₁ hF₂ hFi₂)))
+  have hB : trivializationTransitionUnit (Wf i ⊓ Wf j) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+      (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j))))
+      (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+        (Scheme.Modules.overTrivializationOfRestrictIso M (Wf j)
+        (restrictIsoOfPullbackIso M (Wf j)
+          (nativeTensorIdealTriv M J₁ J₂ e (Wf j) F₁' F₂' hF₁' hFi₁' hF₂' hFi₂')))
+        (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))) =
+      Scheme.resUnit (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)
+        (trivializationTransitionUnit (Wf j) (efam j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf j)
+        (restrictIsoOfPullbackIso M (Wf j)
+          (nativeTensorIdealTriv M J₁ J₂ e (Wf j) F₁' F₂' hF₁' hFi₁' hF₂' hFi₂')))) :=
+    trivializationTransitionUnit_restrict (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)
+      (efam j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf j)
+        (restrictIsoOfPullbackIso M (Wf j)
+          (nativeTensorIdealTriv M J₁ J₂ e (Wf j) F₁' F₂' hF₁' hFi₁' hF₂' hFi₂')))
+  calc transitionUnitOfCover M Wf efam i j
+      = trivializationTransitionUnit (Wf i ⊓ Wf j) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i)
+      (efam i) (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)))) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+      (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))) := rfl
+    _ = trivializationTransitionUnit (Wf i ⊓ Wf j) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i)
+      (efam i) (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+          (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+          (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂))) *
+        trivializationTransitionUnit (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+          (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+          (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂))) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+      (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))) := hc1.symm
+    _ = trivializationTransitionUnit (Wf i ⊓ Wf j) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i)
+      (efam i) (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+          (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+          (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂))) *
+        (trivializationTransitionUnit (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+          (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+          (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+          (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+          (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂'))) *
+          trivializationTransitionUnit (Wf i ⊓ Wf j) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+          (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+          (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂'))) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+      (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j))))) := by rw [hc2]
+    _ = trivializationTransitionUnit (Wf i ⊓ Wf j) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i)
+      (efam i) (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+          (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+          (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂))) *
+        ((u₂ * u₁⁻¹) *
+          (trivializationTransitionUnit (Wf i ⊓ Wf j) (ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+      (efam j) (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)))) (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+          (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+          (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂'))))⁻¹) := by
+        rw [hmid, hb]
+    _ = _ := by
+        rw [hlegA, hlegB] at *
+        rw [hlegA] at hA
+        rw [hlegB] at hB
+        rw [hA, hB, ← mul_assoc]
 
 end NativeRestriction
 
