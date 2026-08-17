@@ -1967,6 +1967,61 @@ private theorem divH_affine_arm
       (nonZeroDivisors.ne_zero (hnzd₂ (ch i)))
       ⟨x', y', hxy'⟩ hVchi
     have hAi := ord_P_germ_unit_section W (Wc i) (A i) ⟨x', y', hxy'⟩ hQmem
+    -- the transition ledger at the [N]P point
+    obtain ⟨u₁, u₂, htu, hu₁, hu₂⟩ := hu i c₀ hNeWiWc
+    have hf₁cne : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₁ (ch c₀)) ≠ 0 :=
+      fun h0 => nonZeroDivisors.ne_zero (hnzd₁ (ch c₀))
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField_injective ((V (ch c₀)).1)
+          (h0.trans (map_zero _).symm))
+    have hf₂cne : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₂ (ch c₀)) ≠ 0 :=
+      fun h0 => nonZeroDivisors.ne_zero (hnzd₂ (ch c₀))
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField_injective ((V (ch c₀)).1)
+          (h0.trans (map_zero _).symm))
+    have hf₁ine : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch i)).1) (f₁ (ch i)) ≠ 0 :=
+      fun h0 => nonZeroDivisors.ne_zero (hnzd₁ (ch i))
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField_injective ((V (ch i)).1)
+          (h0.trans (map_zero _).symm))
+    have hled := ord_transition_ledger W M Wc e V f₁ f₂ ch A i c₀
+      (hWch i) (hWch c₀) u₁ u₂ htu hu₁ hu₂ hf₁cne hf₂cne hf₁ine ⟨x', y', hxy'⟩
+    -- the zero-section indicator collapses at affine places
+    have hz0ind : ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W ⟨x', y', hxy'⟩) ≠
+        (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K)))).base default := by
+      intro hQeq
+      have h1 := congrArg ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base hQeq
+      have hidpt := congrArg (fun (m : (modelEllipticCurve W).E ⟶
+          (modelEllipticCurve W).E) => m.base (zChartPoint W ⟨x', y', hxy'⟩))
+        (IsIso.inv_hom_id (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+      simp only at hidpt
+      rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base
+          (zChartPoint W ⟨x', y', hxy'⟩)) =
+        ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W ⟨x', y', hxy'⟩) from rfl,
+        hidpt] at h1
+      rw [show ((𝟙 ((modelEllipticCurve W).E)) :
+          (modelEllipticCurve W).E ⟶ (modelEllipticCurve W).E).base
+          (zChartPoint W ⟨x', y', hxy'⟩) =
+        zChartPoint W ⟨x', y', hxy'⟩ from rfl] at h1
+      have h2 : (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K)))) ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) =
+          𝟙 (Spec (CommRingCat.of K)) ≫ (modelEllipticCurve W).zero :=
+        pullback.lift_fst _ _ _
+      rw [Category.id_comp] at h2
+      have h3 := congrArg (fun (m : Spec (CommRingCat.of K) ⟶
+          (modelEllipticCurve W).E) => m.base default) h2
+      simp only at h3
+      rw [show ((baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K)))) ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base default =
+        ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base ((baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K)))).base default) from rfl] at h3
+      rw [h3] at h1
+      letI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+        Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+      have hQz : zChartPoint W ⟨x', y', hxy'⟩ ∈ EllipticCurve.zChart W := by
+        rw [← SetLike.mem_coe, ← hZaff.range_fromSpec]
+        exact Set.mem_range_self _
+      rw [h1] at hQz
+      have hmem : (default : Spec (CommRingCat.of K)) ∈
+          (modelEllipticCurve W).zero ⁻¹ᵁ (EllipticCurve.zChart W) := hQz
+      rw [show (modelEllipticCurve W).zero = projModelZero W from rfl,
+        projModelZero_not_preimage_zChart] at hmem
+      simpa using hmem
+    rw [if_neg hz0ind] at hf2i
     sorry
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
