@@ -1908,6 +1908,93 @@ private theorem ord_transition_ledger
     SmoothPlaneCurve.ord_P_mul] at hord
   exact hord
 
+/-- **([ORD-LEDGER-∞])** The transition ledger read at the infinity place:
+`ordAtInfty` of the seven-factor identity, with the per-factor nonzeros that
+`ordAtInfty_mul` requires. -/
+private theorem ordAtInfty_transition_ledger
+    [AlgebraicGeometry.IsIntegral (projModel W)]
+    [AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))]
+    (M : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Modules)
+    {ι' : Type*}
+    (Wc : ι' → (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)
+    (e : ∀ i, M.over (Wc i) ≅
+      _root_.SheafOfModules.unit ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).ringCatSheaf.over (Wc i)))
+    (V : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) → (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f₁ f₂ : ∀ c, Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
+    (ch : ι' → ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+    (A : ∀ i, Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i)ˣ)
+    (i c₀ : ι')
+    (hWchi : Wc i ≤ (V (ch i)).1) (hWchc : Wc c₀ ≤ (V (ch c₀)).1)
+    (u₁ u₂ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)ˣ)
+    (htu : transitionUnitOfCover M Wc e i c₀ =
+      Scheme.resUnit (inf_le_left : Wc i ⊓ Wc c₀ ≤ Wc i) (A i) * (u₂ * u₁⁻¹) *
+        (Scheme.resUnit (inf_le_right : Wc i ⊓ Wc c₀ ≤ Wc c₀) (A c₀))⁻¹)
+    (hu₁ : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+        (homOfLE ((inf_le_left).trans hWchi : Wc i ⊓ Wc c₀ ≤ (V (ch i)).1)).op
+          (f₁ (ch i)) =
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+        (homOfLE ((inf_le_right).trans hWchc : Wc i ⊓ Wc c₀ ≤ (V (ch c₀)).1)).op
+          (f₁ (ch c₀)) * (u₁ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)))
+    (hu₂ : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+        (homOfLE ((inf_le_left).trans hWchi : Wc i ⊓ Wc c₀ ≤ (V (ch i)).1)).op
+          (f₂ (ch i)) =
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+        (homOfLE ((inf_le_right).trans hWchc : Wc i ⊓ Wc c₀ ≤ (V (ch c₀)).1)).op
+          (f₂ (ch c₀)) * (u₂ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)))
+    [Nonempty ((Wc i ⊓ Wc c₀) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)]
+    [Nonempty ((Wc i) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)]
+    [Nonempty ((Wc c₀) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)]
+    [Nonempty (((V (ch i)).1) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)]
+    [Nonempty (((V (ch c₀)).1) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)]
+    (hf₁c : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₁ (ch c₀)) ≠ 0)
+    (hf₂c : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₂ (ch c₀)) ≠ 0)
+    (hf₁i : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch i)).1) (f₁ (ch i)) ≠ 0)
+    (hf₂i : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch i)).1) (f₂ (ch i)) ≠ 0) :
+    (⟨W⟩ : SmoothPlaneCurve K).ordAtInfty (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField (Wc i ⊓ Wc c₀)
+          ((transitionUnitOfCover M Wc e i c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)))) +
+      (⟨W⟩ : SmoothPlaneCurve K).ordAtInfty (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₂ (ch c₀)))) +
+      (⟨W⟩ : SmoothPlaneCurve K).ordAtInfty (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch i)).1) (f₁ (ch i)))) +
+      (⟨W⟩ : SmoothPlaneCurve K).ordAtInfty (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField (Wc c₀)
+          ((A c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc c₀)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc c₀)))) =
+    (⟨W⟩ : SmoothPlaneCurve K).ordAtInfty (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField (Wc i)
+          ((A i : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i)))) +
+      (⟨W⟩ : SmoothPlaneCurve K).ordAtInfty (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch i)).1) (f₂ (ch i)))) +
+      (⟨W⟩ : SmoothPlaneCurve K).ordAtInfty (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₁ (ch c₀)))) := by
+  haveI hIntE : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+    inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+  haveI hInt : AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    isIntegral_pullback_id (modelEllipticCurve W)
+  have hmi := germ_transitionUnit_mul_ident W M Wc e V f₁ f₂ ch A i c₀
+    hWchi hWchc u₁ u₂ htu hu₁ hu₂ hf₁c hf₂c hf₁i
+  have hpe := congrArg (fun t => (pullbackCurveFunctionFieldEquiv W) t) hmi
+  simp only [map_mul] at hpe
+  have hpene : ∀ {U : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens} [Nonempty U] (g : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U)),
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField U g ≠ 0 →
+      pullbackCurveFunctionFieldEquiv W ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField U g) ≠ 0 :=
+    fun g hg => (map_ne_zero_iff _ (pullbackCurveFunctionFieldEquiv W).injective).mpr hg
+  have hT' := hpene _ (germToFunctionField_unit_val_ne_zero
+    (transitionUnitOfCover M Wc e i c₀))
+  have hf₂c' := hpene _ hf₂c
+  have hf₁i' := hpene _ hf₁i
+  have hAc' := hpene _ (germToFunctionField_unit_val_ne_zero (A c₀))
+  have hAi' := hpene _ (germToFunctionField_unit_val_ne_zero (A i))
+  have hf₂i' := hpene _ hf₂i
+  have hf₁c' := hpene _ hf₁c
+  have hord := congrArg ((⟨W⟩ : SmoothPlaneCurve K).ordAtInfty) hpe
+  rw [(⟨W⟩ : SmoothPlaneCurve K).ordAtInfty_mul (mul_ne_zero (mul_ne_zero hT' hf₂c') hf₁i') hAc',
+    (⟨W⟩ : SmoothPlaneCurve K).ordAtInfty_mul (mul_ne_zero hT' hf₂c') hf₁i',
+    (⟨W⟩ : SmoothPlaneCurve K).ordAtInfty_mul hT' hf₂c',
+    (⟨W⟩ : SmoothPlaneCurve K).ordAtInfty_mul (mul_ne_zero hAi' hf₂i') hf₁c',
+    (⟨W⟩ : SmoothPlaneCurve K).ordAtInfty_mul hAi' hf₂i'] at hord
+  exact hord
+
 open scoped Classical in
 /-- **([SEC-ORD], statement)** The pointwise order of a section-kernel chart
 generator: for a `Spec K`-section `z` of the base-changed curve and a chart `V` on
