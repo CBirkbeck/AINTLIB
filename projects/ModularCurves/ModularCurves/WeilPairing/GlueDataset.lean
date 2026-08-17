@@ -152,6 +152,57 @@ private theorem res_res {Y : Scheme.{u}} {A B C : Y.Opens}
     (CategoryTheory.ConcreteCategory.hom φ) x)
     (Y.presheaf.map_comp (homOfLE hBC).op (homOfLE hAB).op)).symm
 
+/-- **([G-REL] the overlap relation)** Pushing a split dressed transition into the
+function field along a dominant `τ`: the `h`-germs and the `τ`-pulled generator germs
+satisfy one division-free multiplicative relation per overlap. The pointwise divisor
+computation of `H·τ♭r` consumes exactly this. -/
+theorem germ_split_transition_rel {X : Scheme.{u}}
+    [AlgebraicGeometry.IsIntegral X] (τ : X ⟶ X) [IsDominant τ]
+    {Wij Vc Vd : X.Opens} (hc : Wij ≤ Vc) (hd : Wij ≤ Vd)
+    [Nonempty Wij] [Nonempty Vc] [Nonempty Vd]
+    [Nonempty (τ ⁻¹ᵁ Wij : X.Opens)]
+    (tval a b u₁ u₂ : Γ(X, Wij)ˣ)
+    (f₁c f₂c : Γ(X, Vc)) (f₁d f₂d : Γ(X, Vd))
+    (heq : tval = a * (u₂ * u₁⁻¹) * b⁻¹)
+    (hu₁ : X.presheaf.map (homOfLE hc).op f₁c =
+      X.presheaf.map (homOfLE hd).op f₁d * (u₁ : Γ(X, Wij)))
+    (hu₂ : X.presheaf.map (homOfLE hc).op f₂c =
+      X.presheaf.map (homOfLE hd).op f₂d * (u₂ : Γ(X, Wij)))
+    (hi hj : Γ(X, τ ⁻¹ᵁ Wij)ˣ)
+    (hsplit : Units.map (Scheme.Hom.app τ Wij).hom.toMonoidHom tval = hi * hj⁻¹) :
+    X.germToFunctionField (τ ⁻¹ᵁ Wij) ((hi : Γ(X, τ ⁻¹ᵁ Wij))) *
+      τ.functionFieldMap.hom (X.germToFunctionField Wij ((b : Γ(X, Wij))) *
+        X.germToFunctionField Vc f₁c * X.germToFunctionField Vd f₂d) =
+    X.germToFunctionField (τ ⁻¹ᵁ Wij) ((hj : Γ(X, τ ⁻¹ᵁ Wij))) *
+      τ.functionFieldMap.hom (X.germToFunctionField Wij ((a : Γ(X, Wij))) *
+        X.germToFunctionField Vc f₂c * X.germToFunctionField Vd f₁d) := by
+  have h3civ := germToFunctionField_transition_dressed hc hd tval a b u₁ u₂
+    f₁c f₂c f₁d f₂d heq hu₁ hu₂
+  have hτ := congrArg τ.functionFieldMap.hom h3civ
+  simp only [map_mul] at hτ
+  have hunits : Units.map (Scheme.Hom.app τ Wij).hom.toMonoidHom tval * hj = hi := by
+    rw [hsplit, inv_mul_cancel_right]
+  have hval := congrArg (fun (x : Γ(X, τ ⁻¹ᵁ Wij)ˣ) =>
+    X.germToFunctionField (τ ⁻¹ᵁ Wij) ((x : Γ(X, τ ⁻¹ᵁ Wij)))) hunits
+  simp only [Units.val_mul, map_mul, Units.coe_map, MonoidHom.coe_coe] at hval
+  have hnat : τ.functionFieldMap.hom
+      (X.germToFunctionField Wij ((tval : Γ(X, Wij)))) =
+      X.germToFunctionField (τ ⁻¹ᵁ Wij)
+        ((Scheme.Hom.app τ Wij).hom ((tval : Γ(X, Wij)))) :=
+    functionFieldMap_germToFunctionField τ Wij ((tval : Γ(X, Wij)))
+  have hval' : τ.functionFieldMap.hom
+      (X.germToFunctionField Wij ((tval : Γ(X, Wij)))) *
+      X.germToFunctionField (τ ⁻¹ᵁ Wij) ((hj : Γ(X, τ ⁻¹ᵁ Wij))) =
+      X.germToFunctionField (τ ⁻¹ᵁ Wij) ((hi : Γ(X, τ ⁻¹ᵁ Wij))) := by
+    rw [hnat]
+    exact hval
+  simp only [map_mul]
+  linear_combination (X.germToFunctionField (τ ⁻¹ᵁ Wij)
+      ((hj : Γ(X, τ ⁻¹ᵁ Wij)))) * hτ -
+    (τ.functionFieldMap.hom (X.germToFunctionField Wij ((b : Γ(X, Wij)))) *
+      τ.functionFieldMap.hom (X.germToFunctionField Vc f₁c) *
+      τ.functionFieldMap.hom (X.germToFunctionField Vd f₂d)) * hval'
+
 /-- **([G2] the normalized chart dataset)** From a `κ(Q)`-presentation `M` with a
 tensor-ideal dictionary and common-principal covers for both ideals, there is a
 zero-section–normalized trivialisation dataset for `M` whose transitions on every
