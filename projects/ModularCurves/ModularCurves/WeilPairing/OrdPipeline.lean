@@ -369,6 +369,36 @@ theorem ord_P_germ_sectionKer_generator
         Γ(projModel W, (projModel W).basicOpen s)) r =
       (projModel W).presheaf.map
         (homOfLE ((projModel W).basicOpen_le s)).op r := fun r => rfl
+  haveI hNeZ : Nonempty (EllipticCurve.zChart W) := ⟨⟨zChartPoint W P, hPz⟩⟩
+  -- [S3c] the function-field equation from the fraction representation
+  have hFFeq : EllipticCurve.projModelFunctionFieldEquiv W
+        ((projModel W).germToFunctionField ((projModel W).basicOpen s) xD) *
+      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+        ((coordRingToZSection W).symm s)) ^ (IsLocalization.Away.sec s xD).2 =
+      algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+        ((coordRingToZSection W).symm (IsLocalization.Away.sec s xD).1) := by
+    have h := congrArg (fun t =>
+      EllipticCurve.projModelFunctionFieldEquiv W
+        ((projModel W).germToFunctionField ((projModel W).basicOpen s) t)) hrep
+    simp only [map_mul, map_pow] at h
+    rw [halg, halg] at h
+    rw [show (projModel W).germToFunctionField ((projModel W).basicOpen s)
+        ((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op s) =
+      (projModel W).germToFunctionField (EllipticCurve.zChart W) s from
+      (projModel W).presheaf.germ_res_apply
+        (homOfLE ((projModel W).basicOpen_le s)) _ _ s] at h
+    rw [show (projModel W).germToFunctionField ((projModel W).basicOpen s)
+        ((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op
+          (IsLocalization.Away.sec s xD).1) =
+      (projModel W).germToFunctionField (EllipticCurve.zChart W)
+        (IsLocalization.Away.sec s xD).1 from
+      (projModel W).presheaf.germ_res_apply
+        (homOfLE ((projModel W).basicOpen_le s)) _ _
+        (IsLocalization.Away.sec s xD).1] at h
+    rw [projModelFunctionFieldEquiv_germToFunctionField_zChart W s,
+      projModelFunctionFieldEquiv_germToFunctionField_zChart W
+        (IsLocalization.Away.sec s xD).1] at h
+    exact h
   sorry
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
