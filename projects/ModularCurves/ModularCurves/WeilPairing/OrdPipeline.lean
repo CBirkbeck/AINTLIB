@@ -36,6 +36,8 @@ set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false
 set_option backward.isDefEq.respectTransparency.types false
 
+attribute [local instance] MvPolynomial.gradedAlgebra
+
 namespace ModularCurves
 
 open EllipticCurve WeierstrassCurve HasseWeil HasseWeil.Curves HasseWeil.WeilPairing
@@ -270,7 +272,18 @@ theorem coordRingToZSection_res_pi_app
             (⊤ : (Spec (CommRingCat.of K)).Opens)).hom Cv)) =
       algebraMap K W.toAffine.CoordinateRing
         ((Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom Cv) := by
-  sorry
+  have hcancel : ((Scheme.ΓSpecIso (CommRingCat.of K)).inv).hom
+      ((Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom Cv) = Cv := by
+    have h := ConcreteCategory.congr_hom
+      (Scheme.ΓSpecIso (CommRingCat.of K)).hom_inv_id Cv
+    simpa using h
+  have h4 := structure_section_square_apply W
+    ((projIdeal W).quotientGradingHom (MvPolynomial.X 2))
+    (mk_X_mem_quotientGrading_one W 2) one_pos
+    ((Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom Cv)
+  rw [hcancel] at h4
+  exact (congrArg (fun z => (chartZRingEquiv W) z) h4).trans
+    (chartZRingEquiv_fromZero W _)
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
 `pullbackCurveFunctionFieldEquiv`-image of the germ of a `globalTwist` of a global unit

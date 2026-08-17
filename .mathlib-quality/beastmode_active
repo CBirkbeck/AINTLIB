@@ -1,1 +1,1 @@
-FOCUS: [EQUIV-TAU proof] — compose L2f (functionFieldMap_translateByPoint_conj) with L2g (translateAlgEquivOfPoint_functionFieldMap_of_section) through the equiv-legs
+FOCUS: [CONST-SECTION recon] — chartZRingEquiv + basicOpenIsoAway K-algebra-compat; the pi-app-as-algebraMap identity; then prove coordRingToZSection_res_pi_app
