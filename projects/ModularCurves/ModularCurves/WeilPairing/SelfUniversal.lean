@@ -53,7 +53,53 @@ theorem weilPairingEval_mapIso {E F : EllipticCurve S} [IsLocallyNoetherian S]
     (hx' : (Point.mapIso φ x).1 ≫ F.mulByHom N = g ≫ F.zero)
     (hy' : (Point.mapIso φ y).1 ≫ F.mulByHom N = g ≫ F.zero) :
     (F.weilPairingEval (Point.mapIso φ x) (Point.mapIso φ y) hx' hy' : Γ(T, ⊤)) =
-      (E.weilPairingEval x y hx hy : Γ(T, ⊤)) := by sorry
+      (E.weilPairingEval x y hx hy : Γ(T, ⊤)) := by
+  have hsndx : ((EllipticCurve.Point.asSection E g x).1 ≫ (pullbackMapIso φ g).hom) ≫
+      pullback.snd F.π g = 𝟙 T := by
+    rw [asSection_mapIso φ x]
+    exact (EllipticCurve.Point.asSection F g (Point.mapIso φ x)).2
+  have hsndy : ((EllipticCurve.Point.asSection E g y).1 ≫ (pullbackMapIso φ g).hom) ≫
+      pullback.snd F.π g = 𝟙 T := by
+    rw [asSection_mapIso φ y]
+    exact (EllipticCurve.Point.asSection F g (Point.mapIso φ y)).2
+  have hpx : EllipticCurve.Point.asSection F g (Point.mapIso φ x) =
+      (⟨(EllipticCurve.Point.asSection E g x).1 ≫ (pullbackMapIso φ g).hom, hsndx⟩ :
+        (F.baseChange g).Point (𝟙 T)) := Subtype.ext (asSection_mapIso φ x).symm
+  have hpy : EllipticCurve.Point.asSection F g (Point.mapIso φ y) =
+      (⟨(EllipticCurve.Point.asSection E g y).1 ≫ (pullbackMapIso φ g).hom, hsndy⟩ :
+        (F.baseChange g).Point (𝟙 T)) := Subtype.ext (asSection_mapIso φ y).symm
+  have hmxF : (⟨(EllipticCurve.Point.asSection E g x).1 ≫ (pullbackMapIso φ g).hom, hsndx⟩ :
+      (F.baseChange g).Point (𝟙 T)) ∈ torsionPoints F g N :=
+    hpx ▸ asSection_mem_torsionPoints F (Point.mapIso φ x) hx'
+  have hmyF : (⟨(EllipticCurve.Point.asSection E g y).1 ≫ (pullbackMapIso φ g).hom, hsndy⟩ :
+      (F.baseChange g).Point (𝟙 T)) ∈ torsionPoints F g N :=
+    hpy ▸ asSection_mem_torsionPoints F (Point.mapIso φ y) hy'
+  rw [E.weilPairingEval_eq_weilPairingKM x y hx hy,
+    F.weilPairingEval_eq_weilPairingKM (Point.mapIso φ x) (Point.mapIso φ y) hx' hy']
+  refine congrArg Units.val ?_
+  rw [weilPairingKM_congr F F.smooth g N hpx hpy
+    (asSection_mem_torsionPoints F (Point.mapIso φ x) hx')
+    (asSection_mem_torsionPoints F (Point.mapIso φ y) hy')]
+  obtain ⟨A, hA0, ι0, W, hW, e, hnorm⟩ := exists_normalized_dataset F F.smooth g
+    (⟨(EllipticCurve.Point.asSection E g y).1 ≫ (pullbackMapIso φ g).hom, hsndy⟩ :
+      (F.baseChange g).Point (𝟙 T))
+  rw [weilPairingKM_eq_torsionSplittingEval F F.smooth g N _ hmxF _ hmyF A hA0 W hW e hnorm]
+  rw [weilPairingKM_eq_torsionSplittingEval E E.smooth g N
+    (EllipticCurve.Point.asSection E g x) (asSection_mem_torsionPoints E x hx)
+    (EllipticCurve.Point.asSection E g y) (asSection_mem_torsionPoints E y hy)
+    ((Scheme.Modules.pullback (pullbackMapIso φ g).hom).obj A)
+    (hM_mapIso E.smooth F.smooth φ g (EllipticCurve.Point.asSection E g y) hsndy A hA0)
+    (fun i => (pullbackMapIso φ g).hom ⁻¹ᵁ W i)
+    (((pullbackMapIso φ g).hom).iSup_preimage_eq_top hW)
+    (fun i => Scheme.Modules.localPullbackTrivializationT (pullbackMapIso φ g).hom A (W i) (e i))
+    (hnorm_mapIso φ g A W e hnorm)]
+  exact (torsionSplittingEval_mapIso E.smooth F.smooth φ g N
+    (EllipticCurve.Point.asSection E g y) (asSection_mem_torsionPoints E y hy)
+    hsndy hmyF A hA0 W hW e hnorm
+    (EllipticCurve.Point.asSection E g x) (asSection_mem_torsionPoints E x hx)
+    hsndx hmxF).symm
+  case hP' => exact hmxF
+  case hQ' => exact hmyF
 
 /-! ## U5 — the field leaf (API gap: own sub-development, see the decomposition doc) -/
 
