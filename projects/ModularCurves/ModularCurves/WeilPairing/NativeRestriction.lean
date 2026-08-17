@@ -784,6 +784,20 @@ theorem pullbackRestrictTransport_tensorIdealSlotIso {V W : X.Opens} (hWV : W �
           (tensorIdealSlotIso M J₁ V g₁ hg₁ hgi₁).hom ≫
         pullbackRestrictTransport hWV
           (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁)) := by
+  -- the mu-BRIDGE template: transpose along both pullback adjunctions, then compare
+  -- on presheaf elements of M (no tensor in the source, so no induction); the slot
+  -- pieces evaluate on double-unit images by the unitor/generator element formulas
+  -- (rightUnitor_inv_apply species + idealGenHom-elements + the landed micro-lemmas).
+  -- Extract each landed have into a private lemma per the per-decl-budget rule.
+  apply ((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).homEquiv
+    _ _).injective
+  apply ((Scheme.Modules.pullbackPushforwardAdjunction V.ι).homEquiv _ _).injective
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro U
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro m
   sorry
 
 /-- **([NR-1], the brick)** The `ν`-comparison map is natural under the open-restriction
