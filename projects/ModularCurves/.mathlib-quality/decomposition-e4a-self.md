@@ -2516,3 +2516,18 @@ the germ is a stalk-unit ⟹ ord 0 (:309-shape via non-membership). zChartMaxima
 direction for the roundtrips. G-REL then composes these per-chart ords per cont.30w.
 NEXT WINDOW: state [SEC-ORD] in OrdPipeline (after GERM-Z), prove the two cases,
 then [G-REL], then [ORD-G], then L1.
+
+[SEC-ORD ALGEBRAIC ROUTE] (2026-08-17, cont.30y): skip scheme-stalks entirely —
+RP-4a's own proof pattern (:203) is pure AtPrime-algebra from a maximalIdealAt-span;
+SEC-ORD mirrors it with the LOCALIZED span supplied from the section-kernel:
+z.ker.ideal at an affine = RingHom.ker of the section's app (the ker_subschemeι_app
+family, CartierDivisor); at the section's own point the localized kernel IS the
+maximal ideal of the localization (kernel of the local evaluation); the V-span
+transports by Ideal.map through J.map_ideal + the zChart roundtrip
+(coordRingToZSection + zChartMaximalIdeal :43 + primeCompl :80 +
+zChartLocalizationEquiv :95/:116). ON-P_z: localized-span ⟹ intValuation_singleton
+⟹ ord 1 (RP-4a's chain verbatim from the hgen-stage). OFF: f ∉ maximalIdealAt P
+(the kernel evaluates ≠ 0 at P ≠ P_z through the span) ⟹ :309. zChartPoint (:168)
++ isLocalization_stalk_zChartPoint (:179) available if the scheme-side point-
+identification is needed for the P_z-dictionary (fromSpec of zChartMaximalIdeal).
+NEXT WINDOW: write [SEC-ORD] + its span-supply have-chain in OrdPipeline.
