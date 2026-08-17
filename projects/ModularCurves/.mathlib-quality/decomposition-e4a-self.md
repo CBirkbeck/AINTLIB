@@ -2002,3 +2002,17 @@ Wo.ι ⁻¹ᵁ (Wo.ι ''ᵁ V)) or at the preimage-spelling throughout. THEN [s3
 + mTOI.inv-def-rfl + pullback_μ_unit_tensorSection + pullbackMap_app_unit at mTOI.hom),
 then the V-vs-W meet (res-g-compat via map_tmul + idealSections-subtype-res), then the
 SLOT-SQ assembly (per-decl-budget discipline: consume the walk-lemmas by term-app).
+
+[s2 STATE] (2026-08-17, cont.29b): pullbackIdealTrivOfGen_symm_hom_app_one — statement
+landed (H2-style hpre eqToHom-clothing; conclusion = pbUnit-image of the res-g
+idealSection under the re-index); hsplit-rfl + the hgen1-structure + the rFIP-hom
+naturality (hnat) landed. TWO marked sorry-residuals: (a) the hgen1 subtype-collapse
+(post mul_one: res-A-g = the ↑(restrict-map-eqToHom(restrictUnit-app(w')))-value — the
+idealPresheafAb-map .1-layers [IdealModule:59-62 structure-literal] + unit_app_app
+[.app-vs-.val.app spelling blocks the @[simp]] + eqToHom-res fusion — an LSP-session
+def-transparency rfl-chase); (b) the [511]-splice under the eqToHom-res (coe-spelling
+realignment of the restrictUnit-argument in the congrArg + final .val-vs-.presheaf rfl).
+Both are plumbing, not math. NEXT: [s3] (mu-BRIDGE.symm value on shUnit-tmuls of
+pbUnit-factors: mTOI.inv-def-rfl → tensorSection → pullback_μ_unit_tensorSection →
+pullbackMap_app_unit at mTOI.hom), then the W-side mirror walk, then the meet + the
+SLOT-SQ assembly.
