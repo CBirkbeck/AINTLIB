@@ -395,4 +395,34 @@ theorem divisorOf_algebraMap_eq_single (W : WeierstrassCurve K) [W.IsElliptic]
     symm
     exact Finsupp.single_eq_of_ne hQ
 
+
+/-- **(DIV-PIN separation)** Distinct smooth points have distinct maximal ideals:
+containment of maximal ideals forces equality, and equality forces equal coordinates
+through the quotient evaluations. -/
+theorem eq_of_maximalIdealAt_le (W : WeierstrassCurve K) [W.IsElliptic]
+    {P Q : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint}
+    (h : (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P ≤
+      (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt Q) : P = Q := by
+  have heq : (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P =
+      (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt Q :=
+    ((SmoothPlaneCurve.maximalIdealAt_isMaximal _ P).eq_of_le
+      (Ideal.IsMaximal.ne_top (SmoothPlaneCurve.maximalIdealAt_isMaximal _ Q)) h)
+  sorry
+
+/-- **(DIV-PIN, the affine pinning)** A generator of the maximal ideal at a point has
+principal divisor `[P₀]`: the away-nonmembership follows from the span by maximal-ideal
+separation. The chart-local form of `div r = (Q) − (O)`. -/
+theorem divisorOf_algebraMap_eq_single_of_span (W : WeierstrassCurve K) [W.IsElliptic]
+    (P₀ : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (r : (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) (hr : r ≠ 0)
+    (hspan : (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P₀ = Ideal.span {r}) :
+    (⟨W⟩ : SmoothPlaneCurve K).divisorOf
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r) =
+      Finsupp.single P₀ 1 := by
+  refine divisorOf_algebraMap_eq_single W P₀ r hr hspan (fun Q hQ hmem => ?_)
+  refine hQ (eq_of_maximalIdealAt_le W ?_).symm
+  rw [hspan]
+  exact Ideal.span_le.mpr (Set.singleton_subset_iff.mpr hmem)
+
 end ModularCurves
