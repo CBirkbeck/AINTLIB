@@ -375,6 +375,61 @@ theorem tensorObjUnitIso_symm_hom_app {Y' : Scheme.{u}} (Q : Y'.Modules)
       (MonoidalCategoryStruct.tensorObj Q.val (unitObj Y').val)).app V) ?_
   rfl
 
+/-- **([NR-s2])** The generator trivialisation's inverse at the unit section `1`: the
+pullback-adjunction-unit image of the restricted generator (up to the
+preimage-image re-index). -/
+theorem pullbackIdealTrivOfGen_symm_hom_app_one (J : X.IdealSheafData)
+    (Wo : X.Opens) (g : Γ(X, Wo)) (hg : g ∈ idealSections J (Opposite.op Wo))
+    (hgi : IsIso (idealGenHom J Wo g hg))
+    (V : (Opens ↥Wo.toScheme)ᵒᵖ)
+    (hpre : (Wo.ι ⁻¹ᵁ (Wo.ι ''ᵁ V.unop)) = V.unop) :
+    (pullbackIdealTrivOfGen J Wo g hg hgi).symm.hom.val.app V
+        (show Wo.toScheme.presheaf.obj V from 1) =
+      ((Scheme.Modules.pullback Wo.ι).obj
+          (AlgebraicGeometry.Scheme.Modules.idealModule J)).presheaf.map
+        (eqToHom hpre.symm).op
+        (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app
+          (AlgebraicGeometry.Scheme.Modules.idealModule J)).val.app
+          (Opposite.op (Wo.ι ''ᵁ V.unop))
+          (⟨X.presheaf.map (homOfLE (Wo.ι_image_le V.unop)).op g,
+            idealSections_map J (homOfLE (Wo.ι_image_le V.unop)).op hg⟩)) := by
+  have hsplit : (pullbackIdealTrivOfGen J Wo g hg hgi).symm.hom.val.app V
+      (show Wo.toScheme.presheaf.obj V from 1) =
+      ((restrictFunctorIsoPullback Wo.ι).app
+        (AlgebraicGeometry.Scheme.Modules.idealModule J)).hom.val.app V
+        ((idealGenHom J Wo g hg).val.app V
+          (show Wo.toScheme.presheaf.obj V from 1)) := rfl
+  refine hsplit.trans ?_
+  have hgen1 : (idealGenHom J Wo g hg).val.app V
+      (show Wo.toScheme.presheaf.obj V from 1) =
+      ((restrictFunctor Wo.ι).obj
+          (AlgebraicGeometry.Scheme.Modules.idealModule J)).val.map
+        (eqToHom hpre.symm).op
+        (((restrictAdjunction Wo.ι).unit.app
+          (AlgebraicGeometry.Scheme.Modules.idealModule J)).val.app
+          (Opposite.op (Wo.ι ''ᵁ V.unop)) (⟨X.presheaf.map (homOfLE (Wo.ι_image_le V.unop)).op g,
+            idealSections_map J (homOfLE (Wo.ι_image_le V.unop)).op hg⟩)) := by
+    refine Subtype.ext ?_
+    show X.presheaf.map (homOfLE (Wo.ι_image_le V.unop)).op g *
+        (Wo.ι.appIso V.unop).inv (show Wo.toScheme.presheaf.obj V from 1) = _
+    rw [map_one, mul_one]
+    -- residual: the subtype/restrict-layer value collapse (idealPresheaf-map .1 +
+    -- unit_app_app + eqToHom-res fusion) — a def-transparency plumbing rfl
+    sorry
+  refine (congrArg (((restrictFunctorIsoPullback Wo.ι).app
+    (AlgebraicGeometry.Scheme.Modules.idealModule J)).hom.val.app V) hgen1).trans ?_
+  have hnat := PresheafOfModules.naturality_apply
+    ((restrictFunctorIsoPullback Wo.ι).app
+      (AlgebraicGeometry.Scheme.Modules.idealModule J)).hom.val
+    (eqToHom hpre.symm).op
+    (((restrictAdjunction Wo.ι).unit.app
+      (AlgebraicGeometry.Scheme.Modules.idealModule J)).val.app
+      (Opposite.op (Wo.ι ''ᵁ V.unop)) (⟨X.presheaf.map (homOfLE (Wo.ι_image_le V.unop)).op g,
+            idealSections_map J (homOfLE (Wo.ι_image_le V.unop)).op hg⟩))
+  -- residual: splice the [511] instance under the eqToHom-res (coe-spelling
+  -- realignment of the restrictUnit-argument) and the final .val-vs-.presheaf rfl
+  sorry
+
 /-- **([NR-congr-unit-tmul])** `tensorObjCongr` on a sheafification-unit image of a
 pure tensor (small binders: the instantiation at the large pullback objects is by term
 application). -/
