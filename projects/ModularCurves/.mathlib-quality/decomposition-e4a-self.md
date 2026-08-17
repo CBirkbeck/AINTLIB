@@ -1966,3 +1966,17 @@ then (pullbackCongr homOfLE_ι.symm).inv-app = subst-rfl re-index; [MEET] both s
 shUnitW/unitW-images of (m-res ⊗ₜ res-g₁-section) — generator-res-compat via map_tmul +
 idealSections-subtype-res. Estimated 8-12 more private micro-lemmas + the assembly;
 EXTRACT-AS-YOU-GO per the per-decl-budget rule.
+
+[COMP-UNIT RECON] (2026-08-17, cont.28c): mathlib's SheafOfModules.pullbackComp :=
+Adjunction.leftAdjointCompIso (adj-φ) (adj-ψ) (adj-comp) (pushforwardComp φ ψ)
+[PullbackContinuous:167] with @[simp] conjugateEquiv_pullbackComp_inv relating its
+inv-conjugate to the adjunction-composition. The Scheme.Modules.pullbackComp is the
+scheme-clothed wrapper. [COMP-UNIT]'s route: the leftAdjointCompIso unit-triangle
+(hom-app on the two-step unit image = the composite-adjunction unit image, which by
+Adjunction.comp-def IS unitG ≫ pushfwdG(unitF)-whiskered — so the lemma may reduce to
+homEquiv/conjugate-algebra as in pullbackUnitIso_compLow's proof [UnitComp:321
+template: adjc.homEquiv-injective + unitToPushforward-composition]) + then
+(pullbackCongr (homOfLE_ι hWV).symm).inv on the composite-unit-image = the W.ι-unit
+image by subst-rfl (pullbackCongr_symm_app_inv species, LANDED). NEXT QUANTUM: build
+[COMP-UNIT] via the UnitComp:321-template, then execute the cont.28b walk
+(s1/s2/s3-pieces as private lemmas), then the SLOT-SQ assembly, then NR-1.
