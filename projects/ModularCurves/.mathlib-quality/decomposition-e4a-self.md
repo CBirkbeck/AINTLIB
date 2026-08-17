@@ -2384,3 +2384,17 @@ The divisors are RelEffCartierDiv.sectionDivisor (pullback.snd) Q / zero — the
 ideal-sheaves' maximalIdealAt-dictionary at closed points = the DIV-PIN input
 (sectionDivisor + IsOfficialCartier machinery, LevelStructure/CartierDivisor).
 Next cycle: state DIV-PIN from this dictionary, then G-REL, then ORD-G.
+
+[DIV-PIN INPUT COMPLETE] (2026-08-17, cont.30q): sectionDivisor π z hz :=
+{ ideal := z.ker, … } (CartierDivisor:172) — the section-divisor ideal IS the
+section's kernel ideal-sheaf. DIV-PIN therefore reads: for a chart generator f
+spanning (z.ker).ideal V (common-principal data), the germ of f at a closed point
+P is a UNIFORMIZER at P when P lies on the section image (smooth relative curve ⟹
+the section is a reduced divisor, multiplicity 1 — uniformizer_of_span_
+maximalIdealAt, ValuationTransport:279) and a UNIT germ when P ∉ the section
+(the span generates the unit ideal at P — the stalk of z.ker at off-section
+points is ⊤). Both cases via the span-transport (:226-shape) + maximalIdealAt.
+So ord_P(f-germ) ∈ {0, 1} with indicator = P ∈ section-image; the u-ratio germs
+carry ord = [P ∈ sec₁] − [P ∈ sec₂]; summed against the hsplit/[N]-transfer this
+reproduces pullbackDivisor [N] (kappaDivisor T) pointwise. ALL RECON DONE — next
+cycle is pure statement+proof work: DIV-PIN → G-REL → ORD-G → L1-assembly.
