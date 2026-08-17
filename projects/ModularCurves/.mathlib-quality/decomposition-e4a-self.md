@@ -2316,3 +2316,22 @@ in GlueDataset/FieldLeaf) and the G2'-statement's required shape
 t = res(A i)·(u₂u₁⁻¹)·res(A j)⁻¹ — the cZ-factors sit OUTSIDE the res-A's:
 res-piece(A-chart-i)·cZ-form-i commute (units in a commutative ring ✓) ⟹
 A-piece-i := cZ-factor-i · resUnit(A-chart-i) works with mul_comm-shuffles.
+
+[★★ G2' COMPLETE] (2026-08-17, cont.30m): exists_normalized_chart_dataset_perChart
+PROVEN AXIOM-CLEAN [propext, Classical.choice, Quot.sound]; GlueDataset.lean ZERO
+SORRIES. Final architecture: units_shuffle (abstract 8-atom CommGroup ac_rfl; the
+in-context AC-simp storms on giant atoms — ALWAYS shuffle abstractly) +
+perChart_piece_transition (the piece-step: transitionUnit_restrict_rescale + congrArg
+of the chart-dressing + simp-fusions + units_shuffle rfl rfl — in the ABSTRACT
+setting resUnit_resUnit fires and the fusion-hypotheses become proof-irrelevant rfl!)
++ hdressed (∀-hoisted G1''-call with Ach-ascribed types) + A-witness uniformity
+(inr-side gets ·(1)⁻¹ so all four branches share one helper) + 4 thin branches
+(hmask-congrArgs for inr-sides — rw fails under the tUOC-def, congrArg-λ works).
+GOTCHA LOGGED: python-replacement anchors MUST be region-sliced past the G2'-docstring
+(the base-G2 proof contains IDENTICAL branch-text; a global replace corrupted the base
+and cost a stash-recovery — b1/b2 rewritten from session history). CAMPAIGN STATE:
+NativeRestriction zero sorries (SLOT-SQ, s2, NR-1, G1', G1''), GlueDataset zero
+sorries (G2'). NEXT: [ORD-G/L1] exists_const_mul_weilFunction (OrdPipeline:~124, the
+pointwise divisor route cont.18-19, now with the perChart dataset as input) — the LAST
+brick before the L3/L5-chain (already proven modulo L1) closes; then the E4a-diagonal
+reduction → leaf A (weilPairingEval_self) → leaf B (_nondegenerate transport).
