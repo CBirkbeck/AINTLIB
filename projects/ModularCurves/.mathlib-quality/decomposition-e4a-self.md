@@ -2479,3 +2479,22 @@ hsplit — transported by VAL-TRANSPORT/EQUIV-TAU) → [ORD-G] (Finsupp.ext poin
 affine places by chart-dichotomy + DIV-PIN + pullbackDivisor_apply; ∞-place) →
 [L1-assembly]. Next: recon the G-REL germ-algebra (how the hsplit-relation reads at
 a single place through germToFunctionField).
+
+[G-REL MECHANISM] (2026-08-17, cont.30w): the divisor of H := germ(h c₀) materialises
+через the transitions: on [N]⁻¹(Wc i), hsplit gives H = germ(h i) · [N]♯(t_{i,c₀})⁻¹
+(germ-restriction hops); h i is a unit ON THE WHOLE [N]⁻¹(Wc i) (germ-ord 0 at every
+P over chart i); t_{i,c₀} = res(A i)·(u₂u₁⁻¹)·res(A c₀)⁻¹ [G2'] where A-parts are
+units on FULL charts (germ-ord 0 over chart i for A i; over-chart-c₀-only for A c₀ —
+at P over BOTH the A-germs die) and the u-germs, AS FF-ELEMENTS, are generator
+ratios: u₁-germ = f₁i-germ / f₁c₀-germ (from the u-relation, an equality of sections
+on the overlap ⟹ of FF-germs) — so ord_P(u₁-germ) = ord_P(f₁ i) − ord_P(f₁ c₀),
+nonzero beyond the overlap. Hence at P over chart i (and over c₀ for the tails):
+ord_P(H) = −ord_{[N]}(transported t) = [generator-ord differences] — the f-i-parts
+give the local [N]*-section-indicators (DIV-PIN + the [N]-transfer), the f-c₀-parts
+are a GLOBAL tail independent of i — cancelled by choosing r := the c₀-generator
+ratio (div r = [Q]−[O]-shaped via DIV-PIN at c₀'s span data!) so that
+div(H·[N]♯r) = pullbackDivisor [N] (kappaDivisor T) on the nose. The r-choice is
+CONSTRUCTIVE: r := (transported f₂c₀-germ)/(transported f₁c₀-germ)-as-FF-element
+(orientation per cont.30p watch). ORD-G-EXECUTION: state the per-chart germ identity
+[G-REL], then Finsupp.ext w with the chart-dichotomy; every ord-computation is
+DIV-PIN/:309/:483 + the ProjOrdTransport-[N]-transfer.
