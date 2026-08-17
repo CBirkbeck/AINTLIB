@@ -448,6 +448,21 @@ theorem pullbackCongr_app_inv_app_unit {X' Y' : Scheme.{u}} {f g : Y' ⟶ X'}
   subst h
   rfl
 
+/-- **([NR-unit-res])** The pullback-adjunction unit image restricts along preimages:
+the unit naturality at a restriction arrow, in value form (small binders). -/
+theorem pullbackUnit_app_res {X' Y' : Scheme.{u}} (f : Y' ⟶ X') (P : X'.Modules)
+    {U U' : X'.Opens} (hle : U' ≤ U) (m : P.val.obj (Opposite.op U)) :
+    ((Scheme.Modules.pullback f).obj P).val.map
+        (homOfLE (by exact fun x hx => hle hx : f ⁻¹ᵁ U' ≤ f ⁻¹ᵁ U)).op
+        (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app P).val.app
+          (Opposite.op U) m) =
+      ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app P).val.app
+        (Opposite.op U') (P.val.map (homOfLE hle).op m) := by
+  have hnat := PresheafOfModules.naturality_apply
+    ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app P).val
+    (homOfLE hle).op m
+  exact hnat.symm
+
 /-- **([NR-congr-unit-tmul])** `tensorObjCongr` on a sheafification-unit image of a
 pure tensor (small binders: the instantiation at the large pullback objects is by term
 application). -/
