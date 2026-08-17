@@ -1642,7 +1642,12 @@ private theorem divH_affine_arm
     (HasseWeil.Curves.ProjectiveSmoothPoint.affine P)
   rw [hpb, (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf_apply_affine] at htrY
   rw [(⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf_apply_affine, hHord]
-  sorry
+  rcases hNP : (HasseWeil.mulByInt W.toAffine (N : ℤ)).toAddMonoidHom
+      (HasseWeil.Curves.ProjectiveSmoothPoint.affine P).toAffinePoint with _ | ⟨x', y', hxy'⟩
+  · rw [hNP] at htrY
+    sorry
+  · rw [hNP] at htrY
+    sorry
 
 open scoped Classical in
 /-- **([SEC-ORD], statement)** The pointwise order of a section-kernel chart
