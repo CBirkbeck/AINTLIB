@@ -1212,6 +1212,19 @@ theorem asSection_mapIso {E F : EllipticCurve S} (φ : E.asOver ≅ F.asOver)
       (EllipticCurve.Point.asSection_val_snd F g (Point.mapIso φ x)).symm))
 
 
+/-- **([KER-MAPISO])** Kernel ideal-sheaf comap along an isomorphism: the comap of a
+closed-immersion kernel along `e.hom` is the kernel of the `e.inv`-conjugated morphism. -/
+theorem ker_comap_iso {X Y W : Scheme.{u}} (e : X ≅ Y) (z : W ⟶ Y)
+    [IsClosedImmersion z] :
+    (Scheme.Hom.ker z).comap e.hom = Scheme.Hom.ker (z ≫ e.inv) := by
+  rw [← Scheme.IdealSheafData.ker_fst_of_isClosedImmersion z e.hom]
+  have hfst : pullback.fst e.hom z = pullback.snd e.hom z ≫ z ≫ e.inv := by
+    conv_lhs => rw [← Category.comp_id (pullback.fst e.hom z), ← e.hom_inv_id,
+      ← Category.assoc, pullback.condition, Category.assoc]
+  rw [hfst]
+  haveI : IsIso (pullback.snd e.hom z) := inferInstance
+  exact Scheme.Hom.ker_comp_of_isIso _ _
+
 end EllipticCurve
 
 end MapIso
