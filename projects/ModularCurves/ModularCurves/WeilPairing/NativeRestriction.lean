@@ -327,6 +327,27 @@ theorem pullbackComp_hom_app_unit {X' Y' Z' : Scheme.{u}} (f : X' ⟶ Y') (g : Y
   rw [hc]
   rfl
 
+/-- **([NR-pRT-collapse])** The open-restriction transport on the two-step
+adjunction-unit image: `pullbackComp` collapses the units, leaving the
+`pullbackCongr` re-index of the composite-unit image (both sides of the slot square
+end here symmetrically, so the walk meets at this stage). -/
+theorem pullbackRestrictTransport_app_unit {V W : X.Opens} (hWV : W ≤ V)
+    (P : X.Modules) (U : X.Opens) (w : P.val.obj (Opposite.op U)) :
+    (pullbackRestrictTransport hWV P).val.app
+        (Opposite.op ((X.homOfLE hWV) ⁻¹ᵁ (V.ι ⁻¹ᵁ U)))
+        (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+          ((Scheme.Modules.pullback V.ι).obj P)).val.app (Opposite.op (V.ι ⁻¹ᵁ U))
+          (((Scheme.Modules.pullbackPushforwardAdjunction V.ι).unit.app P).val.app
+            (Opposite.op U) w)) =
+      ((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).app P).inv.val.app
+        (Opposite.op ((X.homOfLE hWV) ⁻¹ᵁ (V.ι ⁻¹ᵁ U)))
+        (((Scheme.Modules.pullbackPushforwardAdjunction
+          (X.homOfLE hWV ≫ V.ι)).unit.app P).val.app (Opposite.op U) w) := by
+  have hcomp := pullbackComp_hom_app_unit (X.homOfLE hWV) V.ι P U w
+  exact congrArg
+    (((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).app P).inv.val.app
+      (Opposite.op ((X.homOfLE hWV) ⁻¹ᵁ (V.ι ⁻¹ᵁ U)))) hcomp
+
 /-- **([NR-congr-unit-tmul])** `tensorObjCongr` on a sheafification-unit image of a
 pure tensor (small binders: the instantiation at the large pullback objects is by term
 application). -/
