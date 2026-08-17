@@ -242,7 +242,19 @@ theorem projModelFunctionFieldEquiv_germToFunctionField_zChart
         ((projModel W).germToFunctionField (EllipticCurve.zChart W) t) =
       algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
         ((coordRingToZSection W).symm t) := by
-  sorry
+  haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : Nontrivial W.toAffine.CoordinateRing := inferInstance
+  haveI : Nontrivial Γ(projModel W, EllipticCurve.zChart W) :=
+    (coordRingToZSection W).toEquiv.symm.nontrivial
+  haveI hNeZ : Nonempty (EllipticCurve.zChart W) :=
+    ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+  haveI : IsFractionRing Γ(projModel W, EllipticCurve.zChart W)
+      (projModel W).functionField :=
+    functionField_isFractionRing_of_isAffineOpen (projModel W)
+      (EllipticCurve.zChart W) hZaff
+  simp only [EllipticCurve.projModelFunctionFieldEquiv]
+  exact IsLocalization.ringEquivOfRingEquiv_eq _ t
 
 /-- **([CONST-SECTION], statement)** The `zChart`-restriction of a base constant pulled
 along the structure morphism transports to the `algebraMap`-image of the constant:

@@ -1781,3 +1781,27 @@ zChart-collapse → ringEquivOfRingEquiv_eq → coordRingToZSection-of-constant)
 EQUIV-TAU-proof (:256, L2f ∘ L2g composite — mostly mechanical given both landed).
 THEN: L5 (diagonal weilPairing_self import at P' := Q), L6-descent, U-assembly
 (weilPairingEval_self_of_field), E5-assembly.
+
+★ [EQUIV-TAU + VAL-TRANSPORT + GERM-Z PROVEN] (2026-08-17, cont.23): EQUIV-TAU proven
+(L2f∘L2g composite; hfg/hgf inverse-identities as functionFieldMap_congr-chains applied
+at elements). VAL-TRANSPORT's assembly proven: h12 (globalTwist-germ =
+germToFunctionField_restrict-collapse of the snd-app'd constant — globalTwist-val =
+appLE-application is DEFEQ), h3 (functionFieldMap_germToFunctionField at inv-fst), h45
+(collapse to the zChart + the π-vs-invfst≫snd app-identity: hπ from
+pullback.condition.trans (comp_id) + IsIso.inv_hom_id_assoc; the appLE-fusion via
+congrArg-(appLE-of-morphism)-of-hπ + Scheme.Hom.comp_appLE + rfl-tails), then the
+trans-chain endgame (NO rw's on germ-spellings — coe-atoms differ; congrArg with a
+CONCRETE hinner (h3.trans h45) instead of refine-holes). GERM-Z proven: simp only
+[projModelFunctionFieldEquiv-unfold] + exact IsLocalization.ringEquivOfRingEquiv_eq _ t
+(the germ-vs-algebraMap argument is DEFEQ via the toAlgebra-instance). REMAINING
+SORRIES (full repo-wide list for the U5 endgame): (1) [CONST-SECTION]
+coordRingToZSection_res_pi_app (OrdPipeline ~:262) — the K-scalar chase through the
+SEALED coordRingToZSection = chartZRingEquiv.symm ≪≫ basicOpenIsoAway (ModelVariableChange
+:970); route: find/derive the K-algebra-compat of chartZRingEquiv + basicOpenIsoAway +
+the π-app-⊤-as-algebraMap identity (Proj-Γ-plumbing; the pointedIsoCoord-battlefield —
+'rw on OPAQUE element never simp'); (2) [NR-1]/[SLOT-SQ] (NativeRestriction) — see
+cont.20 route; (3) [G2′-proof] (GlueDataset) — see cont.20 route; (4) [L1-proof]
+= ORD-G-pointwise (OrdPipeline :122) — see cont.18/19 route. EVERYTHING ELSE in the
+L3-chain is PROVEN. After these four: L5 = L3 at P' := Q + HW weilPairing_self;
+L6-descent; U-assembly (weilPairingEval_self_of_field needs the kappa-dict + G2′ +
+D4-instantiation packaging to PRODUCE the dataset-hypotheses); E5-assembly.
