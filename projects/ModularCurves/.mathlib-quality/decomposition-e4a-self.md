@@ -2988,3 +2988,13 @@ chartYRingEquiv_isLocalizationElem (PoleFiltration:1595: the X₁X₂-localizati
 infChartTElem); sectionUnitElem (:3684) may be the 1+…-unit already. The z∞-prime =
 ⟨s,t⟩-image = ker(evaluation-at-(0,0)) — K-MAX-style via the augmentation infChartAug
 (:3728 — the (0,0)-evaluation hom?!) — CHECK infChartAug's def first next window.
+
+**[INF-VAL STOCK-FIND] (cont.30as addendum 2)**: the ∞-uniformizer algebra is ALREADY
+BUILT in PoleFiltration (:3680-3750, the T-W7.0i pole-sheaf work): `sectionUnitElem`
+(U ≡ 1 mod (s,t)), `tel_mul_sectionUnitElem` (t·U = s²·(s + a₂t) — THE t~s³-relation),
+`sectionUnitElem_sub_one_mem`, `infChartAug` (the (0,0)-evaluation with root/poly-lemmas),
+`infChart_root_relation`. The [INF]-session ASSEMBLES rather than builds: the z∞-prime =
+ker(infChartAug ∘ chartYRingEquiv-forms) [K-MAX-shape]; the stalk-DVR-uniformizer = s
+(t = s³·unit via tel_mul + U-invertibility-near-the-section); w(x_gen/y_gen)-values via
+the yChart-fraction-reads; the anchor closes [INF-VAL]; then INF-SEC-ORD/INF-U-ORD0
+via the SPAN-S-at-z∞ mirror; then the two arms per the some-arm patterns.
