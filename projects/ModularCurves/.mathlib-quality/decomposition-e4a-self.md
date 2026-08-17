@@ -2554,3 +2554,20 @@ the zChart-hop: germ-at-V → germ-at-V⊓zChart (restrict) → GERM-Z localizat
 coordRingToZSection/zChartMaximalIdeal) → RP-4a-core (intValuation_singleton chain);
 (4) OFF-case: f ∉ maximalIdealAt (the kernel's evaluation ≠ 0 at P ≠ P_z) → :309.
 Split cases on the if; each case its own private lemma per the budget rule.
+
+[SEC-ORD PROOF REFINEMENT — SHRINK TO BASIC] (2026-08-17, cont.30ab): GERM-Z consumes
+germs at the FULL zChart (t : Γ(zChart)); a chart V is not inside zChart in general.
+The route: the ord at P only needs a neighbourhood — shrink to a BASIC open of the
+affine zChart around P's zChart-point inside (inv fst)⁻¹V ⊓ zChart
+(IsAffineOpen.exists_basicOpen_le, the same cofinality move as
+isIso_idealGenHom_of_principal's basis argument); on a basic open D(s),
+Γ(D(s)) = Localization.Away s of Γ(zChart) and the transported germ reads as a
+FRACTION f₀/sⁿ with f₀ ∈ Γ(zChart) — then ord_P(germ) = ord_P(algebraMap f₀') −
+n·ord_P(algebraMap s') with s' ∉ maximalIdealAt P (P ∈ D(s)!) ⟹ ord-s' = 0 (:309)
+⟹ ord = ord_P(algebraMap f₀'). The span-data transports to the basic-open
+localization (map_ideal + Away-localization) pinning f₀' up to units: ON-case
+f₀'-span-of-the-localized-maximal-ideal → RP-4a-core; OFF-case f₀' ∉ maximalIdealAt
+→ :309. The germ-to-fraction read: functionField_isFractionRing_of_isAffineOpen
+(used in GERM-Z's proof) + the section-restriction algebra — ALL standard localization
+API. This is the full SEC-ORD proof plan; execute in a fresh window (stage the
+fst-hop + shrink as have-chains, then the dichotomy as two private case-lemmas).
