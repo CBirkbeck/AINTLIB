@@ -1134,6 +1134,66 @@ private theorem zChartPoint_injective :
   refine (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt_injective ?_
   rw [hround P, hround Q, h2]
 
+/-- Nonsingularity transfers into the self-base-change (reverse direction). -/
+private theorem nonsingular_to_baseChange_self {xk yk : K}
+    (h : W.toAffine.Nonsingular xk yk) :
+    ((W.baseChange K).toAffine).Nonsingular xk yk := by
+  rw [EllipticCurve.baseChange_self_eq W]
+  exact h
+
+/-- **([CAST-INJ])** `basePointCast` is injective. -/
+private theorem basePointCast_injective :
+    Function.Injective (EllipticCurve.basePointCast W) := by
+  intro X Y hXY
+  cases X with
+  | zero => cases Y with
+    | zero => rfl
+    | some x2 y2 h2 => exact absurd hXY (by simp [EllipticCurve.basePointCast])
+  | some x1 y1 h1 => cases Y with
+    | zero => exact absurd hXY (by simp [EllipticCurve.basePointCast])
+    | some x2 y2 h2 =>
+      simp only [EllipticCurve.basePointCast,
+        WeierstrassCurve.Affine.Point.some.injEq] at hXY
+      obtain ⟨rfl, rfl⟩ := hXY
+      rfl
+
+/-- **([PT-2])** The scheme `[N]` sends the chart point of `P` to the chart point of
+`[N]•P`: the dictionary transport of the point arithmetic (PT-1 with the model point
+of `P`, the zsmul readout, and the `basePointCast` plumbing). -/
+private theorem mulByHom_base_zChartPoint_of_smul
+    (N : ℕ) (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) {x' y' : K}
+    {hxy' : W.toAffine.Nonsingular x' y'}
+    (hNP : (N : ℤ) • (WeierstrassCurve.Affine.Point.some P.x P.y P.nonsingular :
+      W.toAffine.Point) = WeierstrassCurve.Affine.Point.some x' y' hxy') :
+    ((modelEllipticCurve W).mulByHom (N : ℤ)).base (zChartPoint W P) =
+      zChartPoint W ⟨x', y', hxy'⟩ := by
+  have hbcns : ((W.baseChange K).toAffine).Nonsingular P.x P.y :=
+    nonsingular_to_baseChange_self W P.nonsingular
+  set pmod : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap K K))) :=
+    chartSpecPoint W P.x P.y
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hbcns) with hpmod
+  have hp : projModelPointsEquiv W K pmod =
+      WeierstrassCurve.Affine.Point.some P.x P.y hbcns :=
+    projModelPointsEquiv_chartSpecPoint W P.x P.y
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hbcns)
+  have hzs := projModelPointsEquiv_zsmul W (N : ℤ) pmod
+  have hc : EllipticCurve.basePointCast W ((N : ℤ) •
+      projModelPointsEquiv W K pmod) =
+      WeierstrassCurve.Affine.Point.some x' y' hxy' := by
+    rw [basePointCast_zsmul, hp, EllipticCurve.basePointCast_some]
+    exact hNP
+  have hbc' : (N : ℤ) • projModelPointsEquiv W K pmod =
+      WeierstrassCurve.Affine.Point.some x' y'
+        (nonsingular_to_baseChange_self W hxy') := by
+    apply basePointCast_injective W
+    rw [hc, EllipticCurve.basePointCast_some]
+  have hp' : projModelPointsEquiv W K ((N : ℤ) • pmod) =
+      WeierstrassCurve.Affine.Point.some x' y'
+        (nonsingular_to_baseChange_self W hxy') := hzs.trans hbc'
+  exact mulByHom_base_zChartPoint W (N : ℤ) pmod hp hp' P
+    ⟨x', y', hxy'⟩ rfl rfl rfl rfl
+
 /-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
 of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
 Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
