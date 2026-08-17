@@ -101,6 +101,137 @@ theorem openTopSection_homOfLE {X : Scheme.{u}} {V W : X.Opens} (hWV : W ≤ V)
       (ConcreteCategory.hom (X.presheaf.map q.op)) r)
     (Subsingleton.elim _ _)
 
+/-- **([NR-1a])** The `⊤`-section transport is natural in the module: a global map of
+modules walks through the four transport pieces (adjunction unit, `eqToHom` re-index,
+composition iso, congruence — each a natural transformation). -/
+theorem restrictTransportSection_naturality {V W : X.Opens} (hWV : W ≤ V)
+    {A B : X.Modules} (f : A ⟶ B)
+    (htop : (⊤ : W.toScheme.Opens) = (X.homOfLE hWV) ⁻¹ᵁ (⊤ : V.toScheme.Opens))
+    (x : ((Scheme.Modules.pullback V.ι).obj A).val.obj
+      (Opposite.op (⊤ : V.toScheme.Opens))) :
+    ((Scheme.Modules.pullback W.ι).map f).val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        (restrictTransportSection hWV A htop x) =
+      restrictTransportSection hWV B htop
+        (((Scheme.Modules.pullback V.ι).map f).val.app
+          (Opposite.op (⊤ : V.toScheme.Opens)) x) := by
+  have h4 := congrArg
+    (fun (q : (Scheme.Modules.pullback V.ι).obj A ⟶
+        (Scheme.Modules.pushforward (X.homOfLE hWV)).obj
+          ((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+            ((Scheme.Modules.pullback V.ι).obj B))) =>
+      q.val.app (Opposite.op (⊤ : V.toScheme.Opens)) x)
+    ((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.naturality
+      ((Scheme.Modules.pullback V.ι).map f))
+  have h3 := PresheafOfModules.naturality_apply
+    ((Scheme.Modules.pullback (X.homOfLE hWV)).map
+      ((Scheme.Modules.pullback V.ι).map f)).val (eqToHom htop).op
+    (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+      ((Scheme.Modules.pullback V.ι).obj A)).val.app
+      (Opposite.op (⊤ : V.toScheme.Opens)) x)
+  have h2 := congrArg
+    (fun (q : (Scheme.Modules.pullback (X.homOfLE hWV)).obj
+        ((Scheme.Modules.pullback V.ι).obj A) ⟶
+        (Scheme.Modules.pullback (X.homOfLE hWV ≫ V.ι)).obj B) =>
+      q.val.app (Opposite.op (⊤ : W.toScheme.Opens))
+        (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+            ((Scheme.Modules.pullback V.ι).obj A)).presheaf.map (eqToHom htop).op
+          (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+            ((Scheme.Modules.pullback V.ι).obj A)).val.app
+            (Opposite.op (⊤ : V.toScheme.Opens)) x)))
+    ((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).hom.naturality f)
+  have h1 := congrArg
+    (fun (q : (Scheme.Modules.pullback (X.homOfLE hWV ≫ V.ι)).obj A ⟶
+        (Scheme.Modules.pullback W.ι).obj B) =>
+      q.val.app (Opposite.op (⊤ : W.toScheme.Opens))
+        (((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app A).hom.val.app
+          (Opposite.op (⊤ : W.toScheme.Opens))
+          (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+              ((Scheme.Modules.pullback V.ι).obj A)).presheaf.map (eqToHom htop).op
+            (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+              ((Scheme.Modules.pullback V.ι).obj A)).val.app
+              (Opposite.op (⊤ : V.toScheme.Opens)) x))))
+    ((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).inv.naturality f)
+  simp only [restrictTransportSection]
+  have s1 : ((Scheme.Modules.pullback W.ι).map f).val.app
+      (Opposite.op (⊤ : W.toScheme.Opens))
+      (((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).app A).inv.val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        (((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app A).hom.val.app
+          (Opposite.op (⊤ : W.toScheme.Opens))
+          (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+              ((Scheme.Modules.pullback V.ι).obj A)).presheaf.map (eqToHom htop).op
+            (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+              ((Scheme.Modules.pullback V.ι).obj A)).val.app
+              (Opposite.op (⊤ : V.toScheme.Opens)) x)))) =
+      ((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).app B).inv.val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        (((Scheme.Modules.pullback (X.homOfLE hWV ≫ V.ι)).map f).val.app
+          (Opposite.op (⊤ : W.toScheme.Opens))
+          (((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app A).hom.val.app
+            (Opposite.op (⊤ : W.toScheme.Opens))
+            (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+                ((Scheme.Modules.pullback V.ι).obj A)).presheaf.map (eqToHom htop).op
+              (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+                ((Scheme.Modules.pullback V.ι).obj A)).val.app
+                (Opposite.op (⊤ : V.toScheme.Opens)) x)))) := h1.symm
+  refine s1.trans ?_
+  refine congrArg (((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).app B).inv.val.app
+    (Opposite.op (⊤ : W.toScheme.Opens))) ?_
+  have s2 : ((Scheme.Modules.pullback (X.homOfLE hWV ≫ V.ι)).map f).val.app
+      (Opposite.op (⊤ : W.toScheme.Opens))
+      (((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app A).hom.val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+            ((Scheme.Modules.pullback V.ι).obj A)).presheaf.map (eqToHom htop).op
+          (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+            ((Scheme.Modules.pullback V.ι).obj A)).val.app
+            (Opposite.op (⊤ : V.toScheme.Opens)) x))) =
+      ((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app B).hom.val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        (((Scheme.Modules.pullback (X.homOfLE hWV)).map
+            ((Scheme.Modules.pullback V.ι).map f)).val.app
+          (Opposite.op (⊤ : W.toScheme.Opens))
+          (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+              ((Scheme.Modules.pullback V.ι).obj A)).presheaf.map (eqToHom htop).op
+            (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+              ((Scheme.Modules.pullback V.ι).obj A)).val.app
+              (Opposite.op (⊤ : V.toScheme.Opens)) x))) := h2.symm
+  refine s2.trans ?_
+  refine congrArg (((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app B).hom.val.app
+    (Opposite.op (⊤ : W.toScheme.Opens))) ?_
+  have s3 : ((Scheme.Modules.pullback (X.homOfLE hWV)).map
+      ((Scheme.Modules.pullback V.ι).map f)).val.app
+      (Opposite.op (⊤ : W.toScheme.Opens))
+      (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+          ((Scheme.Modules.pullback V.ι).obj A)).presheaf.map (eqToHom htop).op
+        (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+          ((Scheme.Modules.pullback V.ι).obj A)).val.app
+          (Opposite.op (⊤ : V.toScheme.Opens)) x)) =
+      ((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+          ((Scheme.Modules.pullback V.ι).obj B)).presheaf.map (eqToHom htop).op
+        (((Scheme.Modules.pullback (X.homOfLE hWV)).map
+            ((Scheme.Modules.pullback V.ι).map f)).val.app
+          (Opposite.op ((X.homOfLE hWV) ⁻¹ᵁ (⊤ : V.toScheme.Opens)))
+          (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+            ((Scheme.Modules.pullback V.ι).obj A)).val.app
+            (Opposite.op (⊤ : V.toScheme.Opens)) x)) := h3
+  refine s3.trans ?_
+  refine congrArg (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+      ((Scheme.Modules.pullback V.ι).obj B)).presheaf.map (eqToHom htop).op) ?_
+  have s4 : ((Scheme.Modules.pullback (X.homOfLE hWV)).map
+      ((Scheme.Modules.pullback V.ι).map f)).val.app
+      (Opposite.op ((X.homOfLE hWV) ⁻¹ᵁ (⊤ : V.toScheme.Opens)))
+      (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+        ((Scheme.Modules.pullback V.ι).obj A)).val.app
+        (Opposite.op (⊤ : V.toScheme.Opens)) x) =
+      ((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+        ((Scheme.Modules.pullback V.ι).obj B)).val.app
+        (Opposite.op (⊤ : V.toScheme.Opens))
+        (((Scheme.Modules.pullback V.ι).map f).val.app
+          (Opposite.op (⊤ : V.toScheme.Opens)) x) := h4.symm
+  exact s4
+
 /-- **([NR-1], the brick)** The `ν`-comparison map is natural under the open-restriction
 transport at `⊤`-sections: evaluating the `W`-level `ν` on a transported `V`-section is
 the scheme-restriction of the `V`-level `ν`-value. -/
