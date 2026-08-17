@@ -1668,3 +1668,31 @@ compatibility across it (the zChart/RP-dictionary — ValuationTransport's purpo
 SESSION: write the transport-statements (H-HW := bridge(H-germ), r-HW := bridge(r)),
 state ORD-G, execute the pointwise proof; then L1-assembly, L3, L5, L6, U-assembly,
 E5-assembly. THE END IS ENUMERABLE: every remaining box has named proven tools.
+
+[ORD-G RE-CUT — THE DRESSING OBSTRUCTION + NATIVE FIX] (2026-08-17, cont.19): pricing
+the pointwise proof exposed a REAL obstruction: G2's a/b-dressing units live on
+OVERLAPS ONLY, but the ord-computation of G := H·[N]♭r at p over W i reads the germ
+of a/b at points OUTSIDE W i ⊓ W c₀ — unpinned (a germ of an overlap-unit has
+arbitrary ords beyond its domain). One-sided degree-0 tricks fail for the same
+reason. THE FIX (two moves): (1) rebuild G2's e₀-family as the PURE NATIVE trivs
+(e₀ᵢ := overTriv(restrictIso(nativeTensorIdealTriv at V i))) so THE PACKAGE-dressing
+at e₀-level becomes a₀ = t(nat-Vᵢ|ovl, nat-ovl(res gᵢ)) — which is 1 GIVEN
+[NAT-RESTRICT]; the only surviving dressing is the cZ-normalisation, which is
+PER-CHART by construction: t_ij = res(cZᵢ)·(u₂u₁⁻¹)·res(cZⱼ)⁻¹ — every factor
+chart-local ⟹ pointwise ords all computable (h_i unit ∋ p; cZ-res germ-ord 0 via
+chart-locality; u-parts via DIV-PIN; [N]-transfer via the GLOBAL divisor identity
+projectiveDivisorOf_pullback_eq_pullbackDivisor evaluated at p — no pointwise
+e_p-lemmas needed). (2) [NAT-RESTRICT] proven via the ν-CHARACTERISATION (no
+iso-chasing): [NR-1] ν-RES — the ν-composite is natural under open-restriction
+(map-level congrArg-chains; tensor-slot piece = the one blur-risk); [NR-2] the
+restricted native triv satisfies the W-level read-off (apply restrict-functor to the
+V-level read-off + NR-1); [NR-3] ν mono (insert-g₁ nzd + e_dict iso + ideal-inclusion
+mono) ⟹ trivialisations with equal read-off are equal ⟹ transition
+t(restrictTriv(nat-V), nat-W(res g)) = 1. Overlap-nonemptiness for the hsplit
+germ-read at (i, c₀): X integral ⟹ irreducible ⟹ nonempty opens meet ✓. ∞-place: the
+zero-section IS the model-∞; J₂-charts cover it; OrdAtInftyBridge species on the HW
+side (verify at execution). ORDER: [NR-0] recon ν/read-off/restrictTrivialization
+defs → [NR-1..3] → [G2′ native rework] → transport statements (H-HW/r-HW via
+projModelFunctionFieldEquiv ∘ fst-FF, germ-compat via zChartLocalizationEquiv_compat
+— brick-3 CLOSED cont.19, symm+apply IsLocalization.map_eq) → [ORD-G pointwise] →
+L1-assembly → L3/L5/L6/U/E5.
