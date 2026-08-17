@@ -56,6 +56,43 @@ private theorem sections_subsingleton_of_le_bot' {Y : Scheme.{u}} {V : Y.Opens}
   obtain rfl : V = ⊥ := le_bot_iff.mp hV
   infer_instance
 
+private theorem transitionUnit_restrict_rescale {Y : Scheme.{u}} {M : Y.Modules}
+    {Wi Wj Ui Uj : Y.Opens} (hUi : Ui ≤ Wi) (hUj : Uj ≤ Wj)
+    (ei : M.over Wi ≅ _root_.SheafOfModules.unit (Y.ringCatSheaf.over Wi))
+    (ej : M.over Wj ≅ _root_.SheafOfModules.unit (Y.ringCatSheaf.over Wj))
+    (ci : Γ(Y, Ui)ˣ) (cj : Γ(Y, Uj)ˣ) :
+    trivializationTransitionUnit (Ui ⊓ Uj)
+      (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Ui
+        (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Wi ei
+          (Over.mk (homOfLE hUi)) ≪≫ overUnitScalarIso Ui ci)
+        (Over.mk (homOfLE (inf_le_left : Ui ⊓ Uj ≤ Ui))))
+      (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Uj
+        (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Wj ej
+          (Over.mk (homOfLE hUj)) ≪≫ overUnitScalarIso Uj cj)
+        (Over.mk (homOfLE (inf_le_right : Ui ⊓ Uj ≤ Uj)))) =
+    Units.map (Y.presheaf.map (homOfLE
+        (inf_le_inf hUi hUj : Ui ⊓ Uj ≤ Wi ⊓ Wj)).op).hom.toMonoidHom
+      (trivializationTransitionUnit (Wi ⊓ Wj)
+        (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Wi ei
+          (Over.mk (homOfLE (inf_le_left : Wi ⊓ Wj ≤ Wi))))
+        (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Wj ej
+          (Over.mk (homOfLE (inf_le_right : Wi ⊓ Wj ≤ Wj))))) *
+      (Scheme.resUnit (inf_le_left : Ui ⊓ Uj ≤ Ui) ci)⁻¹ *
+      Scheme.resUnit (inf_le_right : Ui ⊓ Uj ≤ Uj) cj := by
+  refine (congrArg₂ (trivializationTransitionUnit _)
+    (restrictOverTrivialization_trans_scalarIso inf_le_left _ ci)
+    (restrictOverTrivialization_trans_scalarIso inf_le_right _ cj)).trans ?_
+  refine (trivializationTransitionUnit_trans_scalarIso _ _ _ _ _).trans ?_
+  refine congrArg (fun x => x *
+    (Scheme.resUnit (inf_le_left : Ui ⊓ Uj ≤ Ui) ci)⁻¹ *
+    Scheme.resUnit (inf_le_right : Ui ⊓ Uj ≤ Uj) cj) ?_
+  refine (congrArg₂ (trivializationTransitionUnit _)
+    (restrictOverTrivialization_comp_eq M ei inf_le_left hUi
+      (inf_le_inf hUi hUj) (inf_le_left : Wi ⊓ Wj ≤ Wi))
+    (restrictOverTrivialization_comp_eq M ej inf_le_right hUj
+      (inf_le_inf hUi hUj) (inf_le_right : Wi ⊓ Wj ≤ Wj))).trans ?_
+  exact trivializationTransitionUnit_restrict (inf_le_inf hUi hUj) _ _
+
 /-- **([G2] the normalized chart dataset)** From a `κ(Q)`-presentation `M` with a
 tensor-ideal dictionary and common-principal covers for both ideals, there is a
 zero-section–normalized trivialisation dataset for `M` whose transitions on every
