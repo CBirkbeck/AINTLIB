@@ -2283,3 +2283,36 @@ the perChart variant; witnesses: ch := Sum.elim id id; A := Sum.elim
 read-offs: Units.map-res of the chart-overlap identity + resUnit-fusion
 (Subsingleton-arrows) — the transitionUnit_restrict_rescale-dressing composes the
 cZ-factors exactly as the base's witnesses show.
+
+[G1'/G1'' LANDED] (2026-08-17, cont.30l): transitionUnitOfCover_eq_dressed_native_perChart
+[G1', axiom-clean] + mono_unitEndomorphismOfTopSection_openTopSection_of_ne_zero +
+exists_transition_dressed_of_charts_perChart [G1'', zero errors] all PROVEN in
+NativeRestriction (still zero sorries). G1'' takes chart data at the Wf-parametrization
+directly (haffi/haffj : IsAffineOpen (Wf i/j) + span/nzd/mem ×4) — NO hVi-casts — and
+outputs the per-chart form: transitionUnit = resUnit(A-i)·(u₂u₁⁻¹)·resUnit(A-j)⁻¹ with
+A-c := trivializationTransitionUnit(Wf c, efam c, overTriv(restrictIso(native-chart-c)))
+spelled explicitly (chart-IsIso via isIso_idealGenHom_of_principal-terms inline), plus
+the two u-relations. Gotchas fixed: [IsAffineHom diagonal]-instance hypothesis needed
+(the transitionUnit machinery), J.map_ideal wants the affineOpens-subtype-≤ (annotate
+(inf_le_left : (… : X.Opens) ≤ …)), chart-domain instances needed for
+mem_nonZeroDivisors_iff_ne_zero at the charts (component_integral + Nonempty-from-hne).
+REMAINING FOR G2' [STEP-2b]: the assembly in GlueDataset — add
+`import ModularCurves.WeilPairing.NativeRestriction`; copy the base-G2 proof
+(:317-720); replace the 4 branches' exists_transition_dressed_of_charts-calls with
+G1''-calls (charts: haffi := (V i).2 at W₀ i := (V i).1-defeq); witnesses: ch := Sum.elim
+id id, A := fun a => match a with | .inl i => Scheme.resUnit inf_le_left?? — NO: A-inl-i
+must combine the cZ-rescale with the chart-A: the e-(inl i) := restrictOver(e₀ i) ≪≫
+scalar-cZ-i — the G1''-A-term is computed against efam := e-THE-PIECE-FAMILY?? NO —
+G1'' is called at the PIECE-cover (Wf := W-pieces, efam := e)?? — the pieces are NOT
+affine ⟹ G1'' (needs haffi of Wf i) does NOT apply at pieces!!! ⟹ call G1'' at the
+CHART-cover (Wf := W₀, efam := e₀ — the base-G2's dressed-call was exactly there ✓)
+then RESTRICT to the pieces via transitionUnit_restrict_rescale (as the base does):
+t-piece-ab = resUnit(cZ-dressing) · res(t-chart-ij) — with t-chart-ij in G1''-form ⟹
+t-piece = [resUnit-cZ-j-form]⁻¹·[resUnit-cZ-i]·res(resUnit(A-i)·(u₂u₁⁻¹)·resUnit(A-j)⁻¹)
+— fold res-res via resUnit_resUnit → the perChart-statement's shape with
+A-piece-inl-i := resUnit(piece≤chart)(A-chart-i) · cZ-i-INVERSE?? — CHECK the
+rescale-orientation against transitionUnit_restrict_rescale's exact statement (grep
+in GlueDataset/FieldLeaf) and the G2'-statement's required shape
+t = res(A i)·(u₂u₁⁻¹)·res(A j)⁻¹ — the cZ-factors sit OUTSIDE the res-A's:
+res-piece(A-chart-i)·cZ-form-i commute (units in a commutative ring ✓) ⟹
+A-piece-i := cZ-factor-i · resUnit(A-chart-i) works with mul_comm-shuffles.
