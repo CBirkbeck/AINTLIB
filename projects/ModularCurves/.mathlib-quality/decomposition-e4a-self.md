@@ -1805,3 +1805,20 @@ cont.20 route; (3) [G2′-proof] (GlueDataset) — see cont.20 route; (4) [L1-pr
 L3-chain is PROVEN. After these four: L5 = L3 at P' := Q + HW weilPairing_self;
 L6-descent; U-assembly (weilPairingEval_self_of_field needs the kappa-dict + G2′ +
 D4-instantiation packaging to PRODUCE the dataset-hypotheses); E5-assembly.
+
+★ [L5 PROVEN] (2026-08-17, cont.24): torsionSplittingEval_self_eq_one — L3 at
+(P', pS, hxpS, hS) := (Q, p, hxp, hT) + HasseWeil.WeilPairing.weilPairing_self
+(PairingProps:255). The field-leaf VALUE statement is done: the KM diagonal value is 1
+under the dataset hypotheses. What weilPairingEval_self_of_field still needs on top:
+(i) the dataset-PRODUCTION package (kappa-witness M via exists_module_kappa-species +
+kappa-dict [FieldLeaf:472] + officiality-covers → G2′-instantiation → D4-pipeline
+exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints [KMUniqueness:264]
+producing (h, hn, hsplit) → a c₀ with nonempty preimage-chart [irreducibility]);
+(ii) the value-plumbing weilPairingEval_eq_torsionSplittingEval [FieldLeaf:2376 LANDED]
++ the ΓSpecIso-into-Γ(T,⊤)-units read (the register-value vs its ΓSpec-image — a
+units-coe massage); (iii) the point-dictionary production (p, hxp, hT from x — the
+L2g-vocabulary SpecPoints/projModelPointsEquiv/basePointCast + killedBy-transport);
+(iv) the descent from arbitrary field to the model-curve presentation (the E ≅
+modelEllipticCurve-of-its-Weierstrass-model transport — U1/U2-species — plus the
+alg-closure descent Γ-injectivity per the U5-plan). Remaining sorries repo-wide: STILL
+the 3 (SLOT-SQ, G2′, ORD-G).
