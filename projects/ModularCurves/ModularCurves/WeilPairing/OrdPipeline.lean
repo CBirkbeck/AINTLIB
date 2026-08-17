@@ -442,6 +442,15 @@ theorem ord_P_germ_sectionKer_generator
       projModelFunctionFieldEquiv_germToFunctionField_zChart W
         (IsLocalization.Away.sec s xD).1] at h
     exact h
+  -- [S4] take orders in the fraction equation
+  have hordeq := congrArg ((⟨W⟩ : SmoothPlaneCurve K).ord_P P) hFFeq
+  rw [SmoothPlaneCurve.ord_P_mul, SmoothPlaneCurve.ord_P_pow,
+    secOrd_sPrime_ord_zero W P s hPs, smul_zero, add_zero] at hordeq
+  refine Eq.trans (congrArg ((⟨W⟩ : SmoothPlaneCurve K).ord_P P)
+    (h1.trans (congrArg (⇑(EllipticCurve.projModelFunctionFieldEquiv W))
+      h2.symm))) ?_
+  refine hordeq.trans ?_
+  trace_state
   sorry
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
