@@ -1582,9 +1582,127 @@ private theorem slot_sq_rhs {V W : X.Opens} (hWV : W ≤ V) (g₁ : Γ(X, V))
               (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩))))).symm
   rfl
 
-/-- **([SLOT-SQ meet, pure-`W` inner])** The `W`-image reading of the sheafified
-tensor equals the re-indexed `V`-image reading: the genuine generator-res-compat, no
-propositional `W.ι` crossing in sight. -/
+/-- **([SLOT-SQ meet, `X`-level tensor step])** The sheafified pure tensor at the
+`W`-image open is the restriction of the one at the `V`-image open: sheafification
+naturality, the tensor of restrictions, and the two composite-restriction legs. -/
+private theorem slot_sq_meet_inner_x {V W : X.Opens} (hWV : W ≤ V) (g₁ : Γ(X, V))
+    (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op V))
+    (hg₁' : X.presheaf.map (homOfLE hWV).op g₁ ∈ idealSections J₁ (Opposite.op W))
+    (U : X.Opens)
+    (hle : (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)) ≤ (V.ι ''ᵁ (V.ι ⁻¹ᵁ U)))
+    (m : M.val.obj (Opposite.op U)) :
+    ((PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)).unit.app
+        (MonoidalCategoryStruct.tensorObj M.val
+          (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val)).app
+      (Opposite.op (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)))
+      ((M.val.map (homOfLE (Scheme.Hom.image_preimage_le W.ι U)).op m) ⊗ₜ
+        (⟨X.presheaf.map (homOfLE (W.ι_image_le (W.ι ⁻¹ᵁ U))).op
+            (X.presheaf.map (homOfLE hWV).op g₁),
+          idealSections_map J₁
+            (homOfLE (W.ι_image_le (W.ι ⁻¹ᵁ U))).op hg₁'⟩)) =
+    (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val.map
+      (homOfLE hle).op
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj M.val
+            (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val)).app
+        (Opposite.op (V.ι ''ᵁ (V.ι ⁻¹ᵁ U)))
+        ((M.val.map (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op m) ⊗ₜ
+          (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
+            idealSections_map J₁
+              (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩))) := by
+  -- [b3] the sheafification unit is natural at the restriction (typed have: the
+  -- adjunction-target functor spelling differs from the sheaf-`val` spelling)
+  have h3 : (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val.map
+      (homOfLE hle).op
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj M.val
+            (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val)).app
+        (Opposite.op (V.ι ''ᵁ (V.ι ⁻¹ᵁ U)))
+        ((M.val.map (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op m) ⊗ₜ
+          (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
+            idealSections_map J₁
+              (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩))) =
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj M.val
+            (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val)).app
+        (Opposite.op (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)))
+        ((MonoidalCategoryStruct.tensorObj M.val
+          (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val).map
+          (homOfLE hle).op
+          ((M.val.map (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op m) ⊗ₜ
+            (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
+              idealSections_map J₁
+                (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩))) :=
+    (PresheafOfModules.naturality_apply
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj M.val
+            (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val))
+      (homOfLE hle).op
+      ((M.val.map (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op m) ⊗ₜ
+        (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
+          idealSections_map J₁
+            (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩))).symm
+  refine Eq.trans ?_ h3.symm
+  refine congrArg (((PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)).unit.app
+      (MonoidalCategoryStruct.tensorObj M.val
+        (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val)).app
+    (Opposite.op (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)))) ?_
+  -- [b4] the tensor restriction on the pure tensor is the tensor of restrictions
+  have e4 : (MonoidalCategoryStruct.tensorObj M.val
+      (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val).map
+      (homOfLE hle).op
+      ((M.val.map (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op m) ⊗ₜ
+        (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
+          idealSections_map J₁
+            (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩)) =
+      (M.val.map (homOfLE hle).op
+        (M.val.map (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op m)) ⊗ₜ
+      ((AlgebraicGeometry.Scheme.Modules.idealModule J₁).val.map (homOfLE hle).op
+        (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
+          idealSections_map J₁
+            (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩)) := rfl
+  refine Eq.trans ?_ e4.symm
+  -- [b5] the two legs: composite restrictions fuse (poset arrows are equal)
+  sorry
+/-- **([ef-split micro])** The `ef`-restriction on any section splits through the
+`W`-image open: poset arrows are equal, then the functor law. Small binders. -/
+private theorem map_ef_split {V W : X.Opens} (hWV : W ≤ V) (U : X.Opens)
+    (ef : W.ι ⁻¹ᵁ U = W.ι ⁻¹ᵁ (V.ι ''ᵁ (V.ι ⁻¹ᵁ U)))
+    (hle : (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)) ≤ (V.ι ''ᵁ (V.ι ⁻¹ᵁ U)))
+    (y : ((Scheme.Modules.pullback W.ι).obj
+      (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.obj
+      (Opposite.op (W.ι ⁻¹ᵁ (V.ι ''ᵁ (V.ι ⁻¹ᵁ U))))) :
+    ((Scheme.Modules.pullback W.ι).obj
+        (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.map
+      (eqToHom ef).op y =
+    ((Scheme.Modules.pullback W.ι).obj
+        (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.map
+      (eqToHom (Scheme.Hom.preimage_image_eq W.ι (W.ι ⁻¹ᵁ U)).symm).op
+      (((Scheme.Modules.pullback W.ι).obj
+          (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.map
+        (homOfLE (by exact fun x hx => hle hx :
+          W.ι ⁻¹ᵁ (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)) ≤ W.ι ⁻¹ᵁ (V.ι ''ᵁ (V.ι ⁻¹ᵁ U)))).op y) := by
+  have hcomp : (eqToHom (Scheme.Hom.preimage_image_eq W.ι (W.ι ⁻¹ᵁ U)).symm ≫
+      homOfLE (by exact fun x hx => hle hx :
+        W.ι ⁻¹ᵁ (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)) ≤ W.ι ⁻¹ᵁ (V.ι ''ᵁ (V.ι ⁻¹ᵁ U)))) =
+      eqToHom ef := Subsingleton.elim _ _
+  refine Eq.trans (congrArg (fun (σ : (W.ι ⁻¹ᵁ U) ⟶
+      (W.ι ⁻¹ᵁ (V.ι ''ᵁ (V.ι ⁻¹ᵁ U)))) =>
+    ((Scheme.Modules.pullback W.ι).obj
+        (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.map σ.op
+      y) hcomp.symm) ?_
+  exact ConcreteCategory.congr_hom (((Scheme.Modules.pullback W.ι).obj
+    (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.map_comp
+      (homOfLE (by exact fun x hx => hle hx :
+        W.ι ⁻¹ᵁ (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)) ≤ W.ι ⁻¹ᵁ (V.ι ''ᵁ (V.ι ⁻¹ᵁ U)))).op
+      (eqToHom (Scheme.Hom.preimage_image_eq W.ι (W.ι ⁻¹ᵁ U)).symm).op) y
+
 private theorem slot_sq_meet_inner {V W : X.Opens} (hWV : W ≤ V) (g₁ : Γ(X, V))
     (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op V))
     (hg₁' : X.presheaf.map (homOfLE hWV).op g₁ ∈ idealSections J₁ (Opposite.op W))
@@ -1622,7 +1740,35 @@ private theorem slot_sq_meet_inner {V W : X.Opens} (hWV : W ≤ V) (g₁ : Γ(X,
             (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
               idealSections_map J₁
                 (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩)))) := by
-  sorry
+  have hle : (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)) ≤ (V.ι ''ᵁ (V.ι ⁻¹ᵁ U)) := by
+    rw [Scheme.Hom.image_preimage_eq_opensRange_inf,
+      Scheme.Hom.image_preimage_eq_opensRange_inf,
+      Scheme.Opens.opensRange_ι, Scheme.Opens.opensRange_ι]
+    exact inf_le_inf hWV le_rfl
+  -- [b1] split the ef-restriction through the W-image open (micro)
+  refine Eq.trans ?_ (map_ef_split M J₁ hWV U ef hle _).symm
+  -- peel the shared outer restriction
+  refine congrArg (fun z =>
+    ((Scheme.Modules.pullback W.ι).obj
+        (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.map
+      (eqToHom (Scheme.Hom.preimage_image_eq W.ι (W.ι ⁻¹ᵁ U)).symm).op z) ?_
+  -- [b2] the unit restricts to the W-image open
+  refine Eq.trans ?_ (pullbackUnit_app_res W.ι
+    (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁)) hle
+    (((PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)).unit.app
+        (MonoidalCategoryStruct.tensorObj M.val
+          (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val)).app
+      (Opposite.op (V.ι ''ᵁ (V.ι ⁻¹ᵁ U)))
+      ((M.val.map (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op m) ⊗ₜ
+        (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
+          idealSections_map J₁
+            (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩)))).symm
+  -- [b3–b5] the X-level tensor step, under the W-unit
+  refine congrArg (((Scheme.Modules.pullbackPushforwardAdjunction W.ι).unit.app
+    (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.app
+    (Opposite.op (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)))) ?_
+  exact slot_sq_meet_inner_x M J₁ hWV g₁ hg₁ hg₁' U hle m
 
 /-- **([SLOT-SQ meet, RHS peel])** The Congr-stage `V`-form peeled to the cast
 re-indexed `W`-unit reading at the `V`-image: the crossing, the arrow swap, and the
