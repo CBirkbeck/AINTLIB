@@ -2912,3 +2912,16 @@ ProjOrdTransport; only the post-transfer chart-memberships at [N]P need PT-DICT.
   RingHom-only (rfl-coe-step first); IsIso (awayToSection) via inferInstanceAs on
   basicOpenIsoAway.hom; letI for defs-with-inner-haveI in show-defeq; Point-coe targets
   (modelEllipticCurve W).E (E-ambient lesson extends to Point-coes).
+
+**[κ-ORIENTATION RESOLVED] (cont.30ap, session 11)**: the cont.30p watch is SETTLED by
+computing the DIV-H ledger (shorthand: f-ords at the [N]P-point, a := ord(A_c₀-germ)):
+D := T-DEC-ord(tUOC i c₀) = (f₂ords: (O_i − O_c)) − (f₁ords: (T_i − T_c)) − a under the
+FINAL assignment **hspan₁ : ker zQm-spans (f₁ = Q-side ⟹ f₁-ord = [pt = T]-indicator),
+hspan₂ : ker z0-spans (f₂ = zero-side ⟹ [pt = O]-indicator)**; ord H = −D (DIV-H-i);
+**rr := pE(germ f₁ chc₀) · pE(germ f₂ chc₀)⁻¹ · pE(germ A c₀-val)⁻¹** has
+ord@[N]P = T_c − O_c − a; then ord H + ord rr = T_i − O_i = κ@[N]P ✓ ON THE NOSE (the
+A-terms and both c₀-tails cancel). Flip applied to the three signatures + skeleton
+(25bf897f5 → this commit). REMAINING for hDIVW-fill: [DIV-H-AFF] the affine-arm micro
+(assemble DIV-H-i + N-CONJ + the ProjOrdTransport pointwise transfer + T-DEC + U-RATIO
++ SEC-ORD×4 (f₁/f₂ at chi/chc₀) + U-ORD0 (A_i) + PT-1 memberships + untopD-arithmetic),
+the [N]P = 0 / w = ∞ arms ([D]-rung), and the T-zero-case of the dictionary.
