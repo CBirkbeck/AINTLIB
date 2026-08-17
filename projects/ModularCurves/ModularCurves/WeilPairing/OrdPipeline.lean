@@ -224,6 +224,42 @@ theorem translateAlgEquivOfPoint_mulByInt_pullbackAlgHom
   rw [← hpb]
   exact hz
 
+/-- **([GERM-Z], statement)** The transport reads affine germs as `algebraMap`-images:
+the `projModelFunctionFieldEquiv`-image of a `zChart`-germ is the `algebraMap`-image of
+its `coordRingToZSection`-transport. Unfold of `IsLocalization.ringEquivOfRingEquiv_eq`
+at the fraction-field instances. -/
+theorem projModelFunctionFieldEquiv_germToFunctionField_zChart
+    [AlgebraicGeometry.IsIntegral (projModel W)]
+    (t : Γ(projModel W, EllipticCurve.zChart W)) :
+    haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+      Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+    haveI : Nontrivial W.toAffine.CoordinateRing := inferInstance
+    haveI : Nontrivial Γ(projModel W, EllipticCurve.zChart W) :=
+      (coordRingToZSection W).toEquiv.symm.nontrivial
+    haveI : Nonempty (EllipticCurve.zChart W) :=
+      ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+    EllipticCurve.projModelFunctionFieldEquiv W
+        ((projModel W).germToFunctionField (EllipticCurve.zChart W) t) =
+      algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+        ((coordRingToZSection W).symm t) := by
+  sorry
+
+/-- **([CONST-SECTION], statement)** The `zChart`-restriction of a base constant pulled
+along the structure morphism transports to the `algebraMap`-image of the constant:
+`coordRingToZSection` reads `π^#`-constants as scalars. -/
+theorem coordRingToZSection_res_pi_app
+    [AlgebraicGeometry.IsIntegral (projModel W)]
+    (Cv : Γ(Spec (CommRingCat.of K), ⊤))
+    (hle : EllipticCurve.zChart W ≤
+      (modelEllipticCurve W).π ⁻¹ᵁ (⊤ : (Spec (CommRingCat.of K)).Opens)) :
+    (coordRingToZSection W).symm
+        ((projModel W).presheaf.map (homOfLE hle).op
+          ((Scheme.Hom.app (modelEllipticCurve W).π
+            (⊤ : (Spec (CommRingCat.of K)).Opens)).hom Cv)) =
+      algebraMap K W.toAffine.CoordinateRing
+        ((Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom Cv) := by
+  sorry
+
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
 `pullbackCurveFunctionFieldEquiv`-image of the germ of a `globalTwist` of a global unit
 of the base is the `algebraMap`-image of that unit read through `ΓSpecIso`. -/
@@ -246,7 +282,127 @@ theorem pullbackCurveFunctionFieldEquiv_germ_globalTwist
       algebraMap K W.toAffine.FunctionField
         ((Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
           ((C : Γ(Spec (CommRingCat.of K), ⊤)))) := by
-  sorry
+  haveI hIntE : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+    inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+  haveI hInt : AlgebraicGeometry.IsIntegral
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    isIntegral_pullback_id (modelEllipticCurve W)
+  haveI hIrr : IrreducibleSpace
+      ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    inferInstance
+  haveI hIrrE : IrreducibleSpace ↥(modelEllipticCurve W).E := inferInstance
+  have hVle : V ≤ (pullback.snd (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K)))) ⁻¹ᵁ (⊤ : (Spec (CommRingCat.of K)).Opens) :=
+    le_top
+  haveI hNeV : Nonempty ↥V.toScheme := ‹Nonempty V›
+  haveI hNepre : Nonempty ↥((pullback.snd (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K)))) ⁻¹ᵁ
+      (⊤ : (Spec (CommRingCat.of K)).Opens)).toScheme := by
+    obtain ⟨v⟩ := ‹Nonempty V›
+    exact ⟨⟨v.1, hVle v.2⟩⟩
+  -- 1-2. the twist germ is the germ of the pulled constant on the full preimage
+  have h12 : (pullback (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField V
+        ((globalTwist (pullback.snd (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K)))) V C :
+            Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), V))) =
+      (pullback (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField
+        ((pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⁻¹ᵁ
+          (⊤ : (Spec (CommRingCat.of K)).Opens))
+        ((Scheme.Hom.app (pullback.snd (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K)))) (⊤ : (Spec (CommRingCat.of K)).Opens)).hom
+          ((C : Γ(Spec (CommRingCat.of K), ⊤)))) :=
+    germToFunctionField_restrict hVle _
+  -- 3. hop across the first-projection inverse
+  have h3 := functionFieldMap_germToFunctionField
+    (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+    ((pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⁻¹ᵁ
+      (⊤ : (Spec (CommRingCat.of K)).Opens))
+    ((Scheme.Hom.app (pullback.snd (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K)))) (⊤ : (Spec (CommRingCat.of K)).Opens)).hom
+      ((C : Γ(Spec (CommRingCat.of K), ⊤))))
+  -- 4-5. collapse to the zChart and read through the dictionary
+  have hle₂ : EllipticCurve.zChart W ≤
+      (inv (pullback.fst (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ
+        ((pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⁻¹ᵁ
+          (⊤ : (Spec (CommRingCat.of K)).Opens)) := le_top
+  have hle : EllipticCurve.zChart W ≤
+      (modelEllipticCurve W).π ⁻¹ᵁ (⊤ : (Spec (CommRingCat.of K)).Opens) := le_top
+  haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : Nontrivial W.toAffine.CoordinateRing := inferInstance
+  haveI : Nontrivial Γ(projModel W, EllipticCurve.zChart W) :=
+    (coordRingToZSection W).toEquiv.symm.nontrivial
+  haveI hNeZ : Nonempty (EllipticCurve.zChart W) :=
+    ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+  haveI hNeZ' : Nonempty ↥(EllipticCurve.zChart W).toScheme := hNeZ
+  haveI hNepre' : Nonempty ↥((inv (pullback.fst (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ
+      ((pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⁻¹ᵁ
+        (⊤ : (Spec (CommRingCat.of K)).Opens))).toScheme := by
+    obtain ⟨z⟩ := hNeZ
+    exact ⟨⟨z.1, hle₂ z.2⟩⟩
+  have h45 : (projModel W).germToFunctionField
+      ((inv (pullback.fst (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ
+        ((pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⁻¹ᵁ
+          (⊤ : (Spec (CommRingCat.of K)).Opens)))
+      ((Scheme.Hom.app (inv (pullback.fst (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K)))))
+        ((pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⁻¹ᵁ
+          (⊤ : (Spec (CommRingCat.of K)).Opens))).hom
+        ((Scheme.Hom.app (pullback.snd (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K)))) (⊤ : (Spec (CommRingCat.of K)).Opens)).hom
+          ((C : Γ(Spec (CommRingCat.of K), ⊤))))) =
+      (projModel W).germToFunctionField (EllipticCurve.zChart W)
+        ((projModel W).presheaf.map (homOfLE hle).op
+          ((Scheme.Hom.app (modelEllipticCurve W).π
+            (⊤ : (Spec (CommRingCat.of K)).Opens)).hom
+            ((C : Γ(Spec (CommRingCat.of K), ⊤))))) := by
+    have hπ : (modelEllipticCurve W).π =
+        inv (pullback.fst (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K)))) ≫
+          pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) := by
+      rw [show pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) =
+        pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) ≫
+          (modelEllipticCurve W).π from
+        (pullback.condition.trans (Category.comp_id _)).symm,
+        IsIso.inv_hom_id_assoc]
+    have hres := germToFunctionField_restrict (C := projModel W) hle₂
+      ((Scheme.Hom.app (inv (pullback.fst (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K)))))
+        ((pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⁻¹ᵁ
+          (⊤ : (Spec (CommRingCat.of K)).Opens))).hom
+        ((Scheme.Hom.app (pullback.snd (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K)))) (⊤ : (Spec (CommRingCat.of K)).Opens)).hom
+          ((C : Γ(Spec (CommRingCat.of K), ⊤)))))
+    refine hres.symm.trans ?_
+    refine congrArg ((projModel W).germToFunctionField (EllipticCurve.zChart W)) ?_
+    have happ := congrArg (fun (f : (modelEllipticCurve W).E ⟶
+        Spec (CommRingCat.of K)) =>
+      (Scheme.Hom.appLE f (⊤ : (Spec (CommRingCat.of K)).Opens)
+        (EllipticCurve.zChart W) le_top).hom
+        ((C : Γ(Spec (CommRingCat.of K), ⊤)))) hπ
+    refine Eq.trans ?_ (Eq.trans happ.symm ?_)
+    · rw [Scheme.Hom.comp_appLE]
+      rfl
+    · rfl
+  have hdef : ∀ y, pullbackCurveFunctionFieldEquiv W y =
+      EllipticCurve.projModelFunctionFieldEquiv W
+        ((inv (pullback.fst (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K))))).functionFieldMap.hom y) := fun _ => rfl
+  rw [h12]
+  have hinner := h3.trans h45
+  refine (hdef _).trans ?_
+  refine (congrArg (fun y => EllipticCurve.projModelFunctionFieldEquiv W y)
+    hinner).trans ?_
+  refine (projModelFunctionFieldEquiv_germToFunctionField_zChart W _).trans ?_
+  refine (congrArg (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
+    (coordRingToZSection_res_pi_app W _ hle)).trans ?_
+  exact (IsScalarTower.algebraMap_apply K W.toAffine.CoordinateRing
+    W.toAffine.FunctionField _).symm
 
 /-- **([EQUIV-TAU], statement)** The translation conjugation through the transport: the
 `pullbackCurveFunctionFieldEquiv`-image of a `translateByPoint`-pullback is the HasseWeil
