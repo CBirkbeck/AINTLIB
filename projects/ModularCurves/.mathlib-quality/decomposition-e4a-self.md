@@ -2718,3 +2718,23 @@ localized span (mirror RP-4a from the hgen-supply). The membership-chases need:
 and [K-EVAL] as its own micro (ker_apply + the Spec-K-eval-read + hspan ⟹ the
 f-vanishing-locus on the shrink region = {section point}, stated as: for a point
 pt ∈ D(s)-region, f₀-germ-vanishes-at-pt ⟺ pt = section-point).
+
+[S5 DECISIVE SIMPLIFICATION — support_ker + basicOpen ALGEBRA] (2026-08-17,
+cont.30ak): mathlib's Hom.support_ker (IdealSheaf/Basic:845): f.ker.support =
+closure (range f) — for the Spec-K-section z (closed immersion): z.ker.support =
+range z = {z default} (single point!). With mem_supportSet_iff_of_mem (:307):
+for q ∈ V: q ∈ zeroLocus(z.ker.ideal V) ⟺ q = z default. THE MEMBERSHIP-IFF-CHAIN
+(the whole OFF/ON-membership side is basic-open algebra): f₀ ∉ zChartMaximalIdeal
+W P ⟺ [D-MEM-iff] zChartPoint ∈ basicOpen f₀ ⟺ [hPs + hrep + basicOpen_mul +
+basicOpen_pow + basicOpen_res: bO(f₀)⊓D(s) = bO(xD)⊓D(s) = bO((inv fst).app f)⊓D(s)]
+zChartPoint ∈ bO((inv fst).app f) ⟺ [Scheme.preimage_basicOpen]
+(inv fst)(zChartPoint) ∈ basicOpen f ⟺ [hspan + zeroLocus-span + support_ker-chain]
+(inv fst)(zChartPoint) ≠ z default. ⟹ OFF-case: point-ne ⟹ f₀ ∉ zCMI ⟹ ord 0
+(the s-unit-micro's proof-shape at f₀ — REUSE secOrd_sPrime_ord_zero-generalized:
+restate it for ANY t with zChartPoint ∈ basicOpen t — it ALREADY IS that (its hPs-arg
+is exactly the membership)! ⟹ OFF = the iff-chain + secOrd_sPrime_ord_zero at f₀!!).
+ON-case: point-eq ⟹ supply the hgen-stage directly (z.ker-V-localized at the point =
+the max ideal via K-EVAL/AtPrime + hspan + hrep-localized s-unit) and run RP-4a's
+second half (intValuation_singleton chain, :225-260 copyable). NEXT WINDOW: (1) the
+iff-chain as a micro [BO-CHAIN]; (2) OFF via secOrd_sPrime_ord_zero at f₀; (3) ON
+via the localized-span mirror; (4) close SEC-ORD.
