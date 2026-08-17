@@ -363,6 +363,12 @@ theorem ord_P_germ_sectionKer_generator
       ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) with hxD
   have hrep := IsLocalization.Away.sec_spec
     (S := Γ(projModel W, (projModel W).basicOpen s)) s xD
+  -- [S3b] the Away algebra map is the restriction map
+  have halg : ∀ r : Γ(projModel W, EllipticCurve.zChart W),
+      (algebraMap Γ(projModel W, EllipticCurve.zChart W)
+        Γ(projModel W, (projModel W).basicOpen s)) r =
+      (projModel W).presheaf.map
+        (homOfLE ((projModel W).basicOpen_le s)).op r := fun r => rfl
   sorry
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
