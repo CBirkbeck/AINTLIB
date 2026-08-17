@@ -2998,3 +2998,14 @@ ker(infChartAug ∘ chartYRingEquiv-forms) [K-MAX-shape]; the stalk-DVR-uniformi
 (t = s³·unit via tel_mul + U-invertibility-near-the-section); w(x_gen/y_gen)-values via
 the yChart-fraction-reads; the anchor closes [INF-VAL]; then INF-SEC-ORD/INF-U-ORD0
 via the SPAN-S-at-z∞ mirror; then the two arms per the some-arm patterns.
+
+**[D-RUNG COLLAPSE] (cont.30at — MAJOR)**: `ord_P_negSmoothPoint_translateAlgEquivOfPoint_eq_ordAtInfty_some`
+(TranslateOrdInfty:440, PROVEN): ord_P(−T)(τ_T f) = ordAtInfty f for ANY affine T = (xk,yk)
+and f ≠ 0. ⟹ THE ∞-ARMS REDUCE TO THE AFFINE ENGINE: pick any affine T₀; then
+ordAtInfty(engine-term) = ord_{−T₀}(τ_{T₀}(term)); and τ_{T₀} ∘ pE = pE ∘ (scheme-translation-♭)
+(the U5c-2 bridge `functionFieldMap_translateBy` FieldComparisonBridge:372 — pE intertwines
+translateByIso with translateAlgEquivOfPoint) ⟹ τ-images of the germ-terms are germs of the
+TRANSLATED dataset ⟹ [INF-U-ORD0] = U-ORD0 at the translated unit; [INF-SEC-ORD] = SEC-ORD
+at the translation-conjugated section (z' := τ-scheme ∘ z with ker-conjugation). Remaining
+work = the τ-dataset plumbing (translateByPoint app-action on germs, section conjugation,
+membership transports — the L2e machinery family). NO new valuation theory needed.
