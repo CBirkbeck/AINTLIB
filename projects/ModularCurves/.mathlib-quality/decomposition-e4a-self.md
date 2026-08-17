@@ -2950,3 +2950,30 @@ PoleFiltration:1571 + projModelZero-point; a session-scale RP-∞-programme). PR
 degree-relation route for Y (one sum-computation) — the sum-over-places of the
 SEC-ORD-indicator-differences telescopes to fibre-counts; alternatively keep the
 zero-arm as the LAST sorry and reassess. Priority: D-2 (some-arm finale) first.
+
+
+## cont.30as — SESSION-11 FINALE: the affine engine COMPLETE, L1 at 2 sorries
+
+**FULL LIBRARY GREEN** (lake build ModularCurves, 0 errors). `exists_const_mul_weilFunction`
+is proven modulo exactly TWO sorries, both ∞-places: the divH_affine_arm ZERO-arm
+([N]P = 0 at an affine place) and the hDIVW INFINITY-arm (w = ∞).
+
+**THE [INF]-PROGRAMME (the remaining [D]-rung, next session):**
+1. [INF-VAL] the y-chart-stalk valuation IS ordAtInftyValuation: define w := the
+   DVR-intValuation of the stalk at z∞ := projModelZero.base default over the yChart
+   (projModelYChart PoleSheafModel:28; isLocalization_stalk; the smooth-point-DVR),
+   comapped to FF through the identification; compute w(x_gen) = exp 2, w(y_gen) = exp 3,
+   w(constants) = 1 (the infChart coordinate arithmetic — chartYRingEquiv
+   PoleFiltration:1571; projModelZero_eq_fromSpec :2267); close by the anchor
+   `eq_ordAtInftyValuation_of_x_y` (the inftyOrdTransport_mulByInt technique).
+2. [INF-SEC-ORD] ordAtInfty(pE(germ-V f)) = [z∞ = z.base default]-indicator for
+   section-kernel generators: SPAN-S at z∞ (the stalk-span machinery is section-generic)
+   feeds [INF-VAL] directly: maximalIdeal(stalk-at-z∞) = span{germ f₀} ⟹ w = exp(−1)
+   ⟹ ordAtInfty = 1; off-section: stalk-unit ⟹ 0.
+3. [INF-U-ORD0] units over z∞-containing opens: stalk-unit ⟹ w-value 1 ⟹ ord 0.
+4. The arms' assembly = the some-arm patterns at ∞ (ZERO-arm: z0-indicator TRUE at ∞,
+   zQm = [T=0], the ∞-ledger + omega; INFINITY-arm: G-REL-1 at a z∞-chart +
+   INF-U-ORD0 + N-CONJ + the PROVEN InftyOrdTransport + the ledger).
+
+Session-11 total: ~40 green commits; every landing pushed; the affine divisor engine
+(SEC-ORD + L1-skeleton + PT-dictionary + both dictionary-arms) complete.
