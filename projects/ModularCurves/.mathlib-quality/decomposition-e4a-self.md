@@ -2417,3 +2417,19 @@ intValuation-of-unit or Uniformizer-adjacent API — grep ord_P/pointValuation u
 lemmas next cycle). NEXT CYCLE ENTRY: state the (b)-micro (stalk-of-section-kernel
 = maximalIdealAt on the section) + the (c)-species, then DIV-PIN, then G-REL,
 then ORD-G, then L1. All in OrdPipeline (imports reach everything).
+
+[DIV-PIN DICHOTOMY FULLY STOCKED] (2026-08-17, cont.30s): the off-section species
+EXISTS: ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt (HasseWeil
+MulByIntUnramified, used at :188-203) — ord_P(algebraMap r) ≠ 0 ⟺ r ∈
+maximalIdealAt P. So DIV-PIN = ONE new micro [SEC-STALK]: for the L1-chart span
+data of z.ker (z = a section: the Q-section via overPoint Q or baseChangeZero),
+the transported generator's maximalIdealAt-P-membership ⟺ P lies over the
+section image (through the zChart/RP-dictionary: germ-Z [GERM-Z proven] +
+zChartLocalizationEquiv_compat + coordRingToZSection). ON-section: membership +
+span ⟹ uniformizer_of_span_maximalIdealAt ⟹ ord 1; OFF: non-membership ⟹ ord 0.
+Then G-REL (the hsplit germ identity at a place, transported via
+pullbackCurveFunctionFieldEquiv_germ_globalTwist [VAL-TRANSPORT proven] +
+[EQUIV-TAU proven]) → ORD-G pointwise (Finsupp.ext w; affine places by the chart
+dichotomy + pullbackDivisor_apply; ∞ via the zero-section chart) → L1-assembly.
+EVERY ingredient is now either proven or a single named micro. NEXT CYCLE: write
+[SEC-STALK] + [DIV-PIN] statements in OrdPipeline and prove them.
