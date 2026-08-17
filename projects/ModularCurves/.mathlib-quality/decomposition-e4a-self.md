@@ -2245,3 +2245,16 @@ dressed_of_charts got hmono). If (ii) lacks a compat-lemma, prove
 idealGenHom_restrictTrivialization: restrictTrivialization-of-idealGenHom-iso or the
 direct statement idealGenHom J W' (res g) = conjugated-restriction — one more
 NR-battery micro (the toolkit patterns apply).
+
+[G2' LAST PLUMBING PIECE] (2026-08-17, cont.30j): no idealGenHom-res-compat exists yet.
+Route for the piece-level IsIso (W-a ≤ chart V-c, non-affine): ONE micro
+`idealGenHom_restrict`: the restriction (over-category / restrictTrivialization-style)
+of idealGenHom J V f to W ≤ V equals idealGenHom J W (res f) — provable by
+unit_hom_ext (homs out of unitObj are pinned by the ⊤-value; both sides read the
+res'd generator — the NR-battery's own unit_hom_ext at NativeRestriction:~68) + the
+openTopSection_homOfLE res-compat; then IsIso transfers (functor-image of iso +
+conjugation). hmono at overlaps: as in dressed_of_charts (nzd + IsIntegral
+germ-injectivity — copy its derivation, grep hmono-construction there). THEN the G2'
+assembly per cont.30h/30i is fully unblocked: per-piece native trivialisations +
+A-def + the dressed-native-calc with restrict/NR-3 leg-rewrites. Estimated: 1 micro
+(idealGenHom_restrict) + 1 helper (res-A-identity) + the 4-branch assembly.
