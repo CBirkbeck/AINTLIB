@@ -1,1 +1,1 @@
-FOCUS: [G2-prime STATEMENT] append exists_normalized_chart_dataset_perChart (per-chart A-dressing + fixed chart-assignment ch) to GlueDataset with sorry; then ORD-G statement
+FOCUS: [OrdPipeline] build-iterate the FF-equiv + L1 statement
