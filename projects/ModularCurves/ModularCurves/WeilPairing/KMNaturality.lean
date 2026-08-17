@@ -1506,6 +1506,42 @@ theorem mulByN_comp_pullbackMapIso {E F : EllipticCurve S}
       _ = ((pullbackMapIso φ g).hom ≫ mulByN F g N) ≫ pullback.snd F.π g :=
           (Category.assoc _ _ _).symm
 
+/-- The preimage square of [MULBYN-PBISO]. -/
+theorem mulByN_preimage_pullbackMapIso {E F : EllipticCurve S}
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {T : Scheme.{u}} (g : T ⟶ S) (N : ℕ)
+    (V : (pullback F.π g).Opens) :
+    mulByN E g N ⁻¹ᵁ ((pullbackMapIso φ g).hom ⁻¹ᵁ V) = (pullbackMapIso φ g).hom ⁻¹ᵁ (mulByN F g N ⁻¹ᵁ V) :=
+  (Scheme.Hom.comp_preimage _ _ _).symm.trans
+    ((congrArg (· ⁻¹ᵁ V) (mulByN_comp_pullbackMapIso φ g N)).trans
+      (Scheme.Hom.comp_preimage _ _ _))
+
+/-- **([UMAP-SQ])** The `Units.map ∘ app` collapse along the [MULBYN-PBISO] square. -/
+private theorem unitsMap_app_mulByN_pullbackMapIso {E F : EllipticCurve S}
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {T : Scheme.{u}} (g : T ⟶ S) (N : ℕ)
+    (V : (pullback F.π g).Opens) (a : Γ(pullback F.π g, V)ˣ) :
+    Units.map ((mulByN E g N).app ((pullbackMapIso φ g).hom ⁻¹ᵁ V)).hom.toMonoidHom
+        (Units.map (((pullbackMapIso φ g).hom).app V).hom.toMonoidHom a) =
+      Scheme.resUnit (le_of_eq (mulByN_preimage_pullbackMapIso φ g N V))
+        (Units.map (((pullbackMapIso φ g).hom).app (mulByN F g N ⁻¹ᵁ V)).hom.toMonoidHom
+          (Units.map ((mulByN F g N).app V).hom.toMonoidHom a)) := by
+  refine ((congrArg (Units.map ((mulByN E g N).app ((pullbackMapIso φ g).hom ⁻¹ᵁ V)).hom.toMonoidHom)
+    (map_app_eq_unitPullback ((pullbackMapIso φ g).hom) V a)).trans ?_)
+  refine ((map_app_eq_unitPullback (mulByN E g N) ((pullbackMapIso φ g).hom ⁻¹ᵁ V)
+    (unitPullback ((pullbackMapIso φ g).hom) V ((pullbackMapIso φ g).hom ⁻¹ᵁ V) le_rfl a)).trans ?_)
+  refine ((unitPullback_unitPullback (mulByN E g N) ((pullbackMapIso φ g).hom) le_rfl le_rfl a).trans ?_)
+  refine ((unitPullback_congr (mulByN_comp_pullbackMapIso φ g N) V _ _
+    (le_of_eq (mulByN_preimage_pullbackMapIso φ g N V)) a).trans ?_)
+  refine Eq.trans ?_ (congrArg (Scheme.resUnit (le_of_eq
+      (mulByN_preimage_pullbackMapIso φ g N V)))
+    ((congrArg (Units.map (((pullbackMapIso φ g).hom).app (mulByN F g N ⁻¹ᵁ V)).hom.toMonoidHom)
+      (map_app_eq_unitPullback (mulByN F g N) V a)).trans
+     ((map_app_eq_unitPullback ((pullbackMapIso φ g).hom) (mulByN F g N ⁻¹ᵁ V)
+        (unitPullback (mulByN F g N) V (mulByN F g N ⁻¹ᵁ V) le_rfl a)).trans
+      (unitPullback_unitPullback ((pullbackMapIso φ g).hom) (mulByN F g N) le_rfl le_rfl a))).symm)
+  exact (resUnit_unitPullback (((pullbackMapIso φ g).hom) ≫ mulByN F g N)
+    (le_rfl.trans ((((pullbackMapIso φ g).hom)).preimage_mono le_rfl))
+    (le_of_eq (mulByN_preimage_pullbackMapIso φ g N V)) a).symm
+
 end EllipticCurve
 
 end MapIso
