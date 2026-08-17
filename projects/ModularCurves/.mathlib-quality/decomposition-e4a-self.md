@@ -2531,3 +2531,11 @@ zChartLocalizationEquiv :95/:116). ON-P_z: localized-span ⟹ intValuation_singl
 + isLocalization_stalk_zChartPoint (:179) available if the scheme-side point-
 identification is needed for the P_z-dictionary (fromSpec of zChartMaximalIdeal).
 NEXT WINDOW: write [SEC-ORD] + its span-supply have-chain in OrdPipeline.
+
+[SEC-ORD API PINS] (2026-08-17, cont.30z): Scheme.Hom.ker_apply (mathlib
+IdealSheaf/Basic:702): (f.ker).ideal U = RingHom.ker (f.app U)-shape for affine U
+[QuasiCompact f] — the section-kernel's chart-ideal IS the app-kernel ✓ the
+SEC-ORD span-supply reads through it. sectionDivisor.ideal = Scheme.Hom.ker z
+(CartierDivisor:194, rfl). SEC-ORD statement level: PULLBACK-side (match L1-data;
+the fst-hop done once inside via functionFieldMap_germToFunctionField + GERM-Z +
+zChartLocalizationEquiv_compat). All pins complete — next window writes it.
