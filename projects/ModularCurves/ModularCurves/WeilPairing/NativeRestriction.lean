@@ -2435,6 +2435,108 @@ theorem restrictTrivialization_nativeTensorIdealTriv
       _ = _ := by rw [hread, Category.comp_id]
   exact (Iso.ext hhom.symm)
 
+/-- **([G1′] the per-chart dressed transition)** `transitionUnitOfCover_eq_dressed_native`
+with the dressing exposed as restrictions of per-chart units: each chart trivialisation
+is compared with the chart-level native trivialisation once on the whole chart open,
+and the overlap dressing is the restriction of these two comparisons. The `NR-3`
+restriction of the native trivialisation and the two over-language crossings identify
+the overlap-native legs with the restricted chart-native legs. -/
+theorem transitionUnitOfCover_eq_dressed_native_perChart
+    {ι : Type*} (Wf : ι → X.Opens)
+    (efam : ∀ i, M.over (Wf i) ≅
+      _root_.SheafOfModules.unit (X.ringCatSheaf.over (Wf i)))
+    (i j : ι)
+    (F₁ F₂ : Γ(X, Wf i)) (F₁' F₂' : Γ(X, Wf j))
+    (hF₁ : F₁ ∈ idealSections J₁ (Opposite.op (Wf i)))
+    (hFi₁ : IsIso (idealGenHom J₁ (Wf i) F₁ hF₁))
+    (hF₂ : F₂ ∈ idealSections J₂ (Opposite.op (Wf i)))
+    (hFi₂ : IsIso (idealGenHom J₂ (Wf i) F₂ hF₂))
+    (hF₁' : F₁' ∈ idealSections J₁ (Opposite.op (Wf j)))
+    (hFi₁' : IsIso (idealGenHom J₁ (Wf j) F₁' hF₁'))
+    (hF₂' : F₂' ∈ idealSections J₂ (Opposite.op (Wf j)))
+    (hFi₂' : IsIso (idealGenHom J₂ (Wf j) F₂' hF₂'))
+    (u₁ u₂ : Γ(X, Wf i ⊓ Wf j)ˣ)
+    (hu₁ : X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁ =
+      X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁' *
+        (u₁ : Γ(X, Wf i ⊓ Wf j)))
+    (hu₂ : X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂ =
+      X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂' *
+        (u₂ : Γ(X, Wf i ⊓ Wf j)))
+    (hgi₁ : IsIso (idealGenHom J₁ (Wf i ⊓ Wf j)
+      (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+      (idealSections_map J₁ (homOfLE inf_le_left).op hF₁)))
+    (hgi₂ : IsIso (idealGenHom J₂ (Wf i ⊓ Wf j)
+      (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+      (idealSections_map J₂ (homOfLE inf_le_left).op hF₂)))
+    (hgi₁' : IsIso (idealGenHom J₁ (Wf i ⊓ Wf j)
+      (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+      (idealSections_map J₁ (homOfLE inf_le_right).op hF₁')))
+    (hgi₂' : IsIso (idealGenHom J₂ (Wf i ⊓ Wf j)
+      (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+      (idealSections_map J₂ (homOfLE inf_le_right).op hF₂')))
+    (hmono₂L : Mono (ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection (Wf i ⊓ Wf j)
+        (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂))))
+    (hmono₂R : Mono (ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection (Wf i ⊓ Wf j)
+        (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')))) :
+    transitionUnitOfCover M Wf efam i j =
+      Scheme.resUnit (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)
+        (trivializationTransitionUnit (Wf i) (efam i)
+          (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i)
+            (restrictIsoOfPullbackIso M (Wf i)
+              (nativeTensorIdealTriv M J₁ J₂ e (Wf i) F₁ F₂ hF₁ hFi₁ hF₂ hFi₂)))) *
+      (u₂ * u₁⁻¹) *
+      (Scheme.resUnit (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)
+        (trivializationTransitionUnit (Wf j) (efam j)
+          (Scheme.Modules.overTrivializationOfRestrictIso M (Wf j)
+            (restrictIsoOfPullbackIso M (Wf j)
+              (nativeTensorIdealTriv M J₁ J₂ e (Wf j)
+                F₁' F₂' hF₁' hFi₁' hF₂' hFi₂')))))⁻¹ := by
+  -- the overlap-native legs are the restricted chart-native legs
+  have hlegA : Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)
+          (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+          (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+          (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂)) =
+      ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf i)
+        (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i)
+          (restrictIsoOfPullbackIso M (Wf i)
+            (nativeTensorIdealTriv M J₁ J₂ e (Wf i) F₁ F₂ hF₁ hFi₁ hF₂ hFi₂)))
+        (Over.mk (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i))) := by
+    rw [← restrictTrivialization_nativeTensorIdealTriv M J₁ J₂ e
+      (inf_le_left : Wf i ⊓ Wf j ≤ Wf i) F₁ F₂ hF₁ hFi₁ hF₂ hFi₂
+      (idealSections_map J₁ (homOfLE inf_le_left).op hF₁) hgi₁
+      (idealSections_map J₂ (homOfLE inf_le_left).op hF₂) hgi₂ hmono₂L]
+    rw [← restrictOpenTrivialization_restrictIsoOfPullbackIso M
+      (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)]
+    exact (overTrivializationOfRestrictOpenTrivialization
+      (inf_le_left : Wf i ⊓ Wf j ≤ Wf i) _).symm.symm
+  have hlegB : Scheme.Modules.overTrivializationOfRestrictIso M (Wf i ⊓ Wf j)
+      (restrictIsoOfPullbackIso M (Wf i ⊓ Wf j)
+        (nativeTensorIdealTriv M J₁ J₂ e (Wf i ⊓ Wf j)
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+          (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+          (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+          (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂')) =
+      ModularCurves.SheafOfModules.restrictOverTrivialization X.ringCatSheaf M (Wf j)
+        (Scheme.Modules.overTrivializationOfRestrictIso M (Wf j)
+          (restrictIsoOfPullbackIso M (Wf j)
+            (nativeTensorIdealTriv M J₁ J₂ e (Wf j)
+              F₁' F₂' hF₁' hFi₁' hF₂' hFi₂')))
+        (Over.mk (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j))) := by
+    rw [← restrictTrivialization_nativeTensorIdealTriv M J₁ J₂ e
+      (inf_le_right : Wf i ⊓ Wf j ≤ Wf j) F₁' F₂' hF₁' hFi₁' hF₂' hFi₂'
+      (idealSections_map J₁ (homOfLE inf_le_right).op hF₁') hgi₁'
+      (idealSections_map J₂ (homOfLE inf_le_right).op hF₂') hgi₂' hmono₂R]
+    rw [← restrictOpenTrivialization_restrictIsoOfPullbackIso M
+      (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)]
+    exact (overTrivializationOfRestrictOpenTrivialization
+      (inf_le_right : Wf i ⊓ Wf j ≤ Wf j) _).symm.symm
+  sorry
+
 end NativeRestriction
 
 end ModularCurves
