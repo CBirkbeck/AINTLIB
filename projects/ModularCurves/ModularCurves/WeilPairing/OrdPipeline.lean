@@ -516,6 +516,48 @@ private theorem secOrd_span_isMaximal
   rw [hker] at hmax
   exact hmax
 
+/-- **([SEC-ORD SPAN-P'])** On the `projModel` side the transported kernel generator
+spans exactly the point's prime: the span is maximal (K-MAX through the chart ring
+iso) and is contained in the point's prime (PT-KER through the preimage read). -/
+private theorem secOrd_span_app_eq_primeIdealOf
+    (z : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+    [QuasiCompact z]
+    (hz : z ≫ pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = 𝟙 (Spec (CommRingCat.of K)))
+    (V : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), V.1))
+    (hspan : (Scheme.Hom.ker z).ideal V = Ideal.span {f})
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (hPV : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈ V.1)
+    (hcase : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) = z.base default) :
+    Ideal.span {(inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f} =
+      ((V.2.preimage_of_isIso (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).primeIdealOf
+        ⟨zChartPoint W P, hPV⟩).asIdeal := by
+  have hzd : z.base default ∈ V.1 := by rw [← hcase]; exact hPV
+  have hmaxV := secOrd_span_isMaximal W z hz V f hspan hzd
+  have hspan_max : (Ideal.span {(inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f}).IsMaximal := by
+    have h := Ideal.map_isMaximal_of_equiv
+      (e := (asIso ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1)).commRingCatIsoToRingEquiv) (hp := hmaxV)
+    rwa [Ideal.map_span, Set.image_singleton] at h
+  have hq'nb : zChartPoint W P ∉ (projModel W).basicOpen ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) := by
+    intro hmem
+    have hpre : (projModel W).basicOpen ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) =
+        (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).basicOpen f) :=
+      (Scheme.preimage_basicOpen (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) f).symm
+    rw [hpre] at hmem
+    have h3 : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈ (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).basicOpen f := hmem
+    rw [hcase] at h3
+    exact secOrd_sectionPoint_notMem_basicOpen W z V f hspan hzd h3
+  have hgP : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f ∈
+      ((V.2.preimage_of_isIso (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).primeIdealOf
+        ⟨zChartPoint W P, hPV⟩).asIdeal := by
+    by_contra hout
+    exact hq'nb ((mem_basicOpen_iff_notMem_primeIdealOf
+      (V.2.preimage_of_isIso (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))) (zChartPoint W P) hPV _).mpr hout)
+  exact hspan_max.eq_of_le
+    (((V.2.preimage_of_isIso (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).primeIdealOf
+      ⟨zChartPoint W P, hPV⟩).isPrime.ne_top)
+    (Ideal.span_le.mpr (Set.singleton_subset_iff.mpr hgP))
+
 open scoped Classical in
 /-- **([SEC-ORD], statement)** The pointwise order of a section-kernel chart
 generator: for a `Spec K`-section `z` of the base-changed curve and a chart `V` on
