@@ -1067,6 +1067,38 @@ private theorem mulByHom_base_zChartPoint
   rw [← hR, ← hL]
   exact hbase.symm
 
+/-- **([CAST-SMUL] family)** The transport of points along an equality of curves is
+additive (by `subst`), and `basePointCast` agrees with it (proof-irrelevant
+constructor arguments), so `basePointCast` commutes with `zsmul`. -/
+private theorem castPoint_zsmul {V₁ V₂ : WeierstrassCurve K} (h : V₁ = V₂)
+    (n : ℤ) (X : V₁.toAffine.Point) :
+    (h ▸ (n • X) : V₂.toAffine.Point) = n • (h ▸ X : V₂.toAffine.Point) := by
+  subst h; rfl
+
+private theorem basePointCast_eq_cast (X : ((W.baseChange K).toAffine).Point) :
+    EllipticCurve.basePointCast W X =
+      ((EllipticCurve.baseChange_self_eq W) ▸ X : W.toAffine.Point) := by
+  have hzero : ∀ {V₁ V₂ : WeierstrassCurve K} (h : V₁ = V₂),
+      (h ▸ (WeierstrassCurve.Affine.Point.zero : V₁.toAffine.Point) :
+        V₂.toAffine.Point) = WeierstrassCurve.Affine.Point.zero := by
+    intro V₁ V₂ h; subst h; rfl
+  have hsome : ∀ {V₁ V₂ : WeierstrassCurve K} (h : V₁ = V₂) (x y : K)
+      (ns : V₁.toAffine.Nonsingular x y),
+      (h ▸ (WeierstrassCurve.Affine.Point.some x y ns : V₁.toAffine.Point) :
+        V₂.toAffine.Point) =
+      WeierstrassCurve.Affine.Point.some x y (by rw [← h]; exact ns) := by
+    intro V₁ V₂ h x y ns; subst h; rfl
+  cases X with
+  | zero => exact (hzero (EllipticCurve.baseChange_self_eq W)).symm
+  | some xk yk hk =>
+    exact (hsome (EllipticCurve.baseChange_self_eq W) xk yk hk).symm
+
+private theorem basePointCast_zsmul (n : ℤ)
+    (X : ((W.baseChange K).toAffine).Point) :
+    EllipticCurve.basePointCast W (n • X) =
+      n • EllipticCurve.basePointCast W X := by
+  rw [basePointCast_eq_cast, basePointCast_eq_cast]
+
 /-- **([PT-INJ])** `zChartPoint` is injective: the chart point determines the prime,
 the prime determines the transported maximal ideal, and `maximalIdealAt` is
 injective on smooth points. -/
