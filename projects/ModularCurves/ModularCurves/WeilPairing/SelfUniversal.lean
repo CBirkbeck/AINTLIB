@@ -110,6 +110,25 @@ theorem baseChangeZero_comp_pullbackMapIso {E F : EllipticCurve S}
       show Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g ≫ pullback.snd F.π g =
       𝟙 T from pullback.lift_snd _ _ _]
 
+/-- **([ASSEC-MAPISO])** `asSection` intertwines the point transport and [PB-ISO]. -/
+theorem asSection_mapIso {E F : EllipticCurve S} (φ : E.asOver ≅ F.asOver)
+    {T : Scheme.{u}} {g : T ⟶ S} (x : E.Point g) :
+    (EllipticCurve.Point.asSection E g x).1 ≫ (pullbackMapIso φ g).hom =
+      (EllipticCurve.Point.asSection F g (Point.mapIso φ x)).1 := by
+  refine pullback.hom_ext ?_ ?_
+  · exact (Category.assoc _ _ _).trans
+      ((congrArg (fun m => (EllipticCurve.Point.asSection E g x).1 ≫ m)
+        (pullback.lift_fst _ _ _)).trans
+      ((Category.assoc _ _ _).symm.trans
+      ((congrArg (fun m => m ≫ φ.hom.left)
+        (EllipticCurve.Point.asSection_val_fst E g x)).trans
+      (EllipticCurve.Point.asSection_val_fst F g (Point.mapIso φ x)).symm)))
+  · exact (Category.assoc _ _ _).trans
+      ((congrArg (fun m => (EllipticCurve.Point.asSection E g x).1 ≫ m)
+        ((pullback.lift_snd _ _ _).trans (Category.comp_id _))).trans
+      ((EllipticCurve.Point.asSection_val_snd E g x).trans
+      (EllipticCurve.Point.asSection_val_snd F g (Point.mapIso φ x)).symm))
+
 /-- **(U1, the transport theorem — `φ`-sibling of the base-change naturality)** The
 pairing is invariant under pointed isomorphisms of elliptic records over the same
 base. -/
