@@ -2291,6 +2291,79 @@ theorem pullbackCurveFunctionFieldEquiv_translateByPoint
     ((inv (pullback.fst (modelEllipticCurve W).π
       (𝟙 (Spec (CommRingCat.of K))))).functionFieldMap.hom x)).symm
 
+/-- **([KER-CONJ])** Conjugating a section-kernel span along an automorphism: if the
+kernel ideal of `z` on the affine `V` is spanned by `f`, then the kernel ideal of
+`z ≫ inv φ` on `φ ⁻¹ᵁ V` is spanned by `φ.app V f`. -/
+private theorem ker_comp_inv_ideal_eq_span {X Y : AlgebraicGeometry.Scheme} (z : Y ⟶ X)
+    [QuasiCompact z] (φ : X ⟶ X) [IsIso φ] (V : X.affineOpens) (f : Γ(X, V.1))
+    (hspan : (Scheme.Hom.ker z).ideal V = Ideal.span {f}) :
+    (Scheme.Hom.ker (z ≫ inv φ)).ideal ⟨φ ⁻¹ᵁ V.1, V.2.preimage_of_isIso φ⟩ =
+      Ideal.span {φ.app V.1 f} := by
+  have hU' : (inv φ) ⁻¹ᵁ (φ ⁻¹ᵁ V.1) = V.1 := by
+    rw [show (inv φ) ⁻¹ᵁ (φ ⁻¹ᵁ V.1) = (inv φ ≫ φ) ⁻¹ᵁ V.1 from rfl, IsIso.inv_hom_id]
+    rfl
+  -- roundtrip 1: `φ.app V ≫ (inv φ).app (φ⁻¹V) ≫ res = 𝟙`
+  have hR1 : φ.app V.1 ≫ (inv φ).app (φ ⁻¹ᵁ V.1) ≫
+      X.presheaf.map (eqToHom hU'.symm).op = 𝟙 _ := by
+    rw [← Category.assoc, ← Scheme.Hom.comp_app, Scheme.Hom.congr_app (IsIso.inv_hom_id φ) V.1]
+    simp [← Functor.map_comp, ← op_comp, eqToHom_trans]
+    rfl
+  -- roundtrip 2 by iso-cancellation
+  haveI hIapp : IsIso (φ.app V.1) := inferInstance
+  have hR2 : ((inv φ).app (φ ⁻¹ᵁ V.1) ≫ X.presheaf.map (eqToHom hU'.symm).op) ≫
+      φ.app V.1 = 𝟙 _ := by
+    rw [show (inv φ).app (φ ⁻¹ᵁ V.1) ≫ X.presheaf.map (eqToHom hU'.symm).op =
+        inv (φ.app V.1) from IsIso.eq_inv_of_hom_inv_id (by rw [← Category.assoc] at hR1 ⊢; exact hR1),
+      IsIso.inv_hom_id]
+  -- elementwise roundtrips
+  have hR1' : ∀ b : Γ(X, V.1),
+      X.presheaf.map (eqToHom hU'.symm).op ((inv φ).app (φ ⁻¹ᵁ V.1) (φ.app V.1 b)) = b := by
+    intro b
+    rw [← CommRingCat.comp_apply, ← CommRingCat.comp_apply, ← Category.assoc, Category.assoc, hR1]
+    exact CommRingCat.id_apply _ _
+  have hR2' : ∀ a : Γ(X, φ ⁻¹ᵁ V.1),
+      φ.app V.1 (X.presheaf.map (eqToHom hU'.symm).op ((inv φ).app (φ ⁻¹ᵁ V.1) a)) = a := by
+    intro a
+    rw [← CommRingCat.comp_apply, ← CommRingCat.comp_apply, ← Category.assoc, hR2]
+    exact CommRingCat.id_apply _ _
+  -- the decomposition of `(z ≫ inv φ).app (φ⁻¹V)` through `z.app V`
+  have hYe : (z ≫ inv φ) ⁻¹ᵁ (φ ⁻¹ᵁ V.1) = z ⁻¹ᵁ V.1 := by
+    rw [show (z ≫ inv φ) ⁻¹ᵁ (φ ⁻¹ᵁ V.1) = z ⁻¹ᵁ ((inv φ) ⁻¹ᵁ (φ ⁻¹ᵁ V.1)) from rfl, hU']
+  have hDECcat : (z ≫ inv φ).app (φ ⁻¹ᵁ V.1) =
+      (inv φ).app (φ ⁻¹ᵁ V.1) ≫ X.presheaf.map (eqToHom hU'.symm).op ≫ z.app V.1 ≫
+        Y.presheaf.map (eqToHom hYe).op := by
+    rw [Scheme.Hom.comp_app, Scheme.Hom.app_eq z hU']
+  have hdec : ∀ a : Γ(X, φ ⁻¹ᵁ V.1), (z ≫ inv φ).app (φ ⁻¹ᵁ V.1) a =
+      Y.presheaf.map (eqToHom hYe).op (z.app V.1
+        (X.presheaf.map (eqToHom hU'.symm).op ((inv φ).app (φ ⁻¹ᵁ V.1) a))) := by
+    intro a
+    rw [hDECcat, CommRingCat.comp_apply, CommRingCat.comp_apply, CommRingCat.comp_apply]
+  -- res on `Y` along an opens-equality preserves being zero
+  have hres0 : ∀ {A B : Y.Opens} (h : A = B) (w : Γ(Y, B)),
+      Y.presheaf.map (eqToHom h).op w = 0 ↔ w = 0 := by
+    rintro A B rfl w
+    simp
+  rw [Scheme.Hom.ker_apply] at hspan
+  rw [Scheme.Hom.ker_apply]
+  ext a
+  simp only [RingHom.mem_ker, Ideal.mem_span_singleton]
+  constructor
+  · intro h0
+    rw [hdec a, hres0] at h0
+    have hmemk : X.presheaf.map (eqToHom hU'.symm).op ((inv φ).app (φ ⁻¹ᵁ V.1) a) ∈
+        RingHom.ker (z.app V.1).hom := h0
+    rw [hspan, Ideal.mem_span_singleton] at hmemk
+    obtain ⟨c, hc⟩ := hmemk
+    exact ⟨φ.app V.1 c, by rw [← hR2' a, hc, map_mul]⟩
+  · rintro ⟨c, rfl⟩
+    rw [hdec, map_mul, map_mul, hR1']
+    have hker : f * X.presheaf.map (eqToHom hU'.symm).op
+        ((inv φ).app (φ ⁻¹ᵁ V.1) c) ∈ RingHom.ker (z.app V.1).hom := by
+      rw [hspan]
+      exact Ideal.mul_mem_right _ _ (Ideal.mem_span_singleton_self f)
+    rw [RingHom.mem_ker] at hker
+    rw [hker, map_zero]
+
 /-- **([TAU-U-ORD0])** Unit sections over the infinity point have `ordAtInfty` zero:
 the translate-bridge carries the computation to the affine engine at `−T`. -/
 private theorem tau_ordAtInfty_germ_unit
