@@ -1175,6 +1175,142 @@ private theorem slot_walk_prefix (Wo : X.Opens) (g₁ : Γ(X, Wo))
   -- collapse the `Iso.refl`-clothing on the first tensor slot (defeq to the identity)
   rfl
 
+/-- **([A45 micro])** The comparison-after-sheafification-unit composite crosses an
+`eqToHom` re-index: both naturalities at once, `subst`-discharged on a general section
+(no tensor element in sight, so no carrier-defeq storm). -/
+private theorem comparison_shUnit_app_map_eqToHom (Wo : X.Opens)
+    {O₁ O₂ : Wo.toScheme.Opens} (h : O₂ = O₁)
+    (z : (MonoidalCategoryStruct.tensorObj
+        ((Scheme.Modules.pullback Wo.ι).obj M).val
+        ((Scheme.Modules.pullback Wo.ι).obj
+          (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val).obj
+      (Opposite.op O₁)) :
+    (pullbackTensorObjIsoOfIsOpenImmersion Wo.ι M
+        (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).symm.hom.val.app
+      (Opposite.op O₂)
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 Wo.toScheme.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj
+            ((Scheme.Modules.pullback Wo.ι).obj M).val
+            ((Scheme.Modules.pullback Wo.ι).obj
+              (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val)).app
+        (Opposite.op O₂)
+        ((MonoidalCategoryStruct.tensorObj
+            ((Scheme.Modules.pullback Wo.ι).obj M).val
+            ((Scheme.Modules.pullback Wo.ι).obj
+              (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val).map
+          (eqToHom h).op z)) =
+      ((Scheme.Modules.pullback Wo.ι).obj
+          (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.map
+        (eqToHom h).op
+        ((pullbackTensorObjIsoOfIsOpenImmersion Wo.ι M
+            (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).symm.hom.val.app
+          (Opposite.op O₁)
+          (((PresheafOfModules.sheafificationAdjunction
+            (𝟙 Wo.toScheme.ringCatSheaf.obj)).unit.app
+              (MonoidalCategoryStruct.tensorObj
+                ((Scheme.Modules.pullback Wo.ι).obj M).val
+                ((Scheme.Modules.pullback Wo.ι).obj
+                  (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val)).app
+            (Opposite.op O₁) z)) :=
+  PresheafOfModules.naturality_apply
+    (((PresheafOfModules.sheafificationAdjunction
+      (𝟙 Wo.toScheme.ringCatSheaf.obj)).unit.app
+        (MonoidalCategoryStruct.tensorObj
+          ((Scheme.Modules.pullback Wo.ι).obj M).val
+          ((Scheme.Modules.pullback Wo.ι).obj
+            (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val)) ≫
+      (pullbackTensorObjIsoOfIsOpenImmersion Wo.ι M
+        (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).symm.hom.val)
+    (eqToHom h).op z
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **([slot-walk tail])** From the both-factors-mapped form to the mapped unit image
+of the sheafified tensor at the image open: fuse, cross the two naturalities, apply
+the comparison formula. Fresh declaration per the per-decl-budget rule. The opacity
+flip is for `tensorObj_map_tmul`, whose `DFunLike`-annotated statement (mathlib states
+it under the same option) otherwise storms `isDefEq` against the goal spelling. -/
+private theorem slot_walk_tail (Wo : X.Opens) (g₁ : Γ(X, Wo))
+    (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op Wo))
+    (U : X.Opens) (m : M.val.obj (Opposite.op U))
+    (hpre : (Wo.ι ⁻¹ᵁ (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U))) = Wo.ι ⁻¹ᵁ U)
+    (hIMle : (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)) ≤ U) :
+    (pullbackTensorObjIsoOfIsOpenImmersion Wo.ι M
+        (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).symm.hom.val.app
+      (Opposite.op (Wo.ι ⁻¹ᵁ U))
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 Wo.toScheme.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj
+            ((Scheme.Modules.pullback Wo.ι).obj M).val
+            ((Scheme.Modules.pullback Wo.ι).obj
+              (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val)).app
+        (Opposite.op (Wo.ι ⁻¹ᵁ U))
+        ((((Scheme.Modules.pullback Wo.ι).obj M).val.map (eqToHom hpre.symm).op
+          (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app M).val.app
+            (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)))
+            (M.val.map (homOfLE hIMle).op m))) ⊗ₜ
+        (((Scheme.Modules.pullback Wo.ι).obj
+            (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val.map
+          (eqToHom hpre.symm).op
+          (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app
+            (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val.app
+            (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)))
+            (⟨X.presheaf.map (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op g₁,
+              idealSections_map J₁
+                (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op hg₁⟩))))) =
+      ((Scheme.Modules.pullback Wo.ι).obj
+          (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.map
+        (eqToHom hpre.symm).op
+        (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app
+          (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.app
+          (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)))
+          (((PresheafOfModules.sheafificationAdjunction
+            (𝟙 X.ringCatSheaf.obj)).unit.app
+              (MonoidalCategoryStruct.tensorObj M.val
+                (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val)).app
+            (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)))
+            ((M.val.map (homOfLE hIMle).op m) ⊗ₜ
+              (⟨X.presheaf.map (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op g₁,
+                idealSections_map J₁
+                  (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op hg₁⟩)))) := by
+  -- [A3] fuse the two mapped factors into the mapped tensor (typed have: the
+  -- DFunLike annotation on `tensorObj_map_tmul` blocks `rw`; `exact` crosses it)
+  have e3 : (((Scheme.Modules.pullback Wo.ι).obj M).val.map (eqToHom hpre.symm).op
+        (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app M).val.app
+          (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U))) (M.val.map (homOfLE hIMle).op m))) ⊗ₜ
+      (((Scheme.Modules.pullback Wo.ι).obj
+          (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val.map
+        (eqToHom hpre.symm).op
+        (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app
+          (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val.app
+          (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)))
+          (⟨X.presheaf.map (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op g₁,
+            idealSections_map J₁ (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op hg₁⟩))) =
+      (MonoidalCategoryStruct.tensorObj
+          ((Scheme.Modules.pullback Wo.ι).obj M).val
+          ((Scheme.Modules.pullback Wo.ι).obj
+            (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val).map
+        (eqToHom hpre.symm).op
+        ((((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app M).val.app
+            (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U))) (M.val.map (homOfLE hIMle).op m)) ⊗ₜ
+          (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app
+            (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val.app
+            (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)))
+            (⟨X.presheaf.map (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op g₁,
+              idealSections_map J₁ (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op hg₁⟩))) :=
+    rfl
+  rw [e3]
+  -- [A4+A5] cross the eqToHom re-index through the unit and the comparison at once
+  refine Eq.trans (comparison_shUnit_app_map_eqToHom M J₁ Wo hpre.symm _) ?_
+  -- [A6] the comparison value on the tmul of unit images at the image open
+  exact congrArg (fun z =>
+    ((Scheme.Modules.pullback Wo.ι).obj
+        (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.map
+      (eqToHom hpre.symm).op z)
+    (pullbackTensorObjIsoOfIsOpenImmersion_symm_hom_app_unit Wo.ι M
+      (AlgebraicGeometry.Scheme.Modules.idealModule J₁) (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U))
+      (M.val.map (homOfLE hIMle).op m) _)
+
 /-- **([slot-walk], statement)** The slot construction on a pullback-adjunction-unit
 image: the value is the unit image of the sheafified pure tensor of the restricted
 section with the restricted generator (all data at the image open `U ⊓ Wo`, re-indexed
@@ -1205,7 +1341,11 @@ private theorem slot_walk (Wo : X.Opens) (g₁ : Γ(X, Wo))
                 idealSections_map J₁
                   (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op hg₁⟩)))) := by
   refine (slot_walk_prefix M J₁ Wo g₁ hg₁ hgi₁ U m hpre).trans ?_
-  sorry
+  -- [A2] the first factor as an eqToHom-mapped image-restricted unit image
+  have hA2 := pullbackUnit_app_eq_res Wo.ι M hIMle hpre m
+  rw [hA2]
+  -- [A3–A6] the extracted tail (fresh per-decl budget)
+  exact slot_walk_tail M J₁ Wo g₁ hg₁ U m hpre hIMle
 
 /-- **([SLOT-SQ], the map-level brick)** The tensor-slot construction commutes with the
 open-restriction transport: the one genuinely monoidal square of the `ν`-naturality.
