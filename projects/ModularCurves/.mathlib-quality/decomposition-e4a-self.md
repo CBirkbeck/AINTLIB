@@ -2462,3 +2462,20 @@ morphism-level (the L1-hxp pattern: p.1 = the section composite) ⟺ point-equal
 (K alg closed, K-points ↔ closed points). DIV-PIN's indicator := [P = P_Q] for the
 J-Q-side and [P = P_O] for the J-zero-side (κ-orientation per cont.30p to fix).
 SpecPoints := {g : Spec K ⟶ X // g ≫ f = Spec.map (algebraMap)} (WeierstrassModel:65).
+
+[DIV-PIN ALREADY PROVEN] (2026-08-17, cont.30v): the RP-programme (session-8) landed
+it: divisorOf_algebraMap_eq_single_of_span (ValuationTransport:483) — div(r) = [P₀]
+for a maximalIdealAt-P₀-span-generator, away-nonmembership internal (via
+eq_of_maximalIdealAt_le + divisorOf_algebraMap_eq_single). Also stocked:
+ord_P_algebraMap_eq_zero_of_notMem (:309). SO the cont.30n "DIV-PIN"-item is DONE;
+the residual [SEC-STALK] is only the SPAN-SUPPLY: transport the L1-chart span
+(J.ideal V = span {f}, J = a section-kernel at T = Spec K) to the HW-side span
+(maximalIdealAt P_z = span {transported-r}) — via the zChart-hop (zChartMaximalIdeal
+:43 + zChartLocalizationEquiv_compat :116 + coordRingToZSection) + the
+section-kernel-stalk = point-ideal identification (Spec-K-section = closed point,
+cont.30u). REMAINING L1-LAYER: [SEC-STALK span-supply] → [G-REL] (the hsplit
+germ-read at a place: the H-germ at P over chart i vs h-c₀ via the G2'-transition +
+hsplit — transported by VAL-TRANSPORT/EQUIV-TAU) → [ORD-G] (Finsupp.ext pointwise:
+affine places by chart-dichotomy + DIV-PIN + pullbackDivisor_apply; ∞-place) →
+[L1-assembly]. Next: recon the G-REL germ-algebra (how the hsplit-relation reads at
+a single place through germToFunctionField).
