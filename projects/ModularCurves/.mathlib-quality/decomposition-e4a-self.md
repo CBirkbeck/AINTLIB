@@ -1488,3 +1488,27 @@ instantiate exists_normalized_chart_dataset at it. NEXT BOXES (order): [KAPPA-DI
 (PoleSheaf-mining, E4a-side); [3c-iv + L1a] joint design (the dressed-transition
 germ-divisor vs g_Q-quotients feeding exists_const_mul_of_projectiveDivisorOf_eq);
 [L3] scalar-match; [L5] diagonal; [L6] descent; [U-assembly]; [E5-assembly].
+
+[KAPPA-DICT RECON] (2026-08-17, cont.8): sectionToPicRel (DivisorClass:180) =
+picRelProj of (sectionDivisor P).picClass * ((sectionDivisor zero).picClass)^-1 —
+the class of I(D_P)-vs-I(D_0) with the kernel-model projection (picRelProj multiplies
+by a base-pullback correction). The DICT-target (M ⊗ idealModule J₁ ≅ idealModule J₂
+with hM : kappa-val = toSkeleton M) therefore needs: (i) the RelEffCartierDiv →
+IdealSheafData bridge (sectionDivisor's underlying ideal — RelEffCartierDiv's fields;
+its picClass presumably = toSkeleton of the idealModule — READ RelEffCartierDiv +
+picClass defs); (ii) the picRelProj-correction handled — KEY SIMPLIFICATION HYPOTHESIS:
+at the U5-instantiation the base is a FIELD (T = S = Spec k, t = 𝟙 S) where the
+correction class is trivial/absorbable — CHECK picRelProj's def and whether the
+kernel-model at t = 𝟙 collapses; (iii) skeleton-transfer: from the CLASS-equation
+kappa = [I_Q]*[I_0]^-1*[corr] produce the MODULE-level e_dict by toSkeleton-injectivity
+-on-classes (Skeleton-API: toSkeleton_eq_toSkeleton_iff — USED at DivisorClass:160!
+nonempty-iso from class-equality ✓ the mechanism exists) applied to M := the
+skeleton-representative (exists_module_kappa's M) tensored with I(D_Q): the class of
+M ⊗ I_Q = kappa*[I_Q] = [I_0]*[corr] ⟹ nonempty-iso M ⊗ I_Q ≅ I_0 ⊗ corr — with corr
+trivial: THE DICT ✓. (iv) the common-principal covers h₁ h₂: sectionDivisor is
+OFFICIAL-Cartier (sectionDivisor_isOfficial ✓ exists!) — IsOfficialCartier carries
+locallyPrincipal ⟹ h-shape directly (grep IsOfficialCartier's fields). NEXT STRETCH:
+read RelEffCartierDiv/picClass/picRelProj/IsOfficialCartier defs; adjudicate the
+field-case correction; state kappa_dict (∃ M hM J₁ J₂ e_dict h₁ h₂) and prove by the
+class-to-iso mechanism. Then G2-instantiate, D4-pipe, L2e — and the τ-side of U5 is
+fully fed.
