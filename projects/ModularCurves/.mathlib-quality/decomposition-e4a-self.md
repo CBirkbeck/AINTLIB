@@ -1944,3 +1944,25 @@ shUnitW-((m-res) ⊗ₜ (res-g₁-section-form)) — the res-compat of the gener
 (map_tmul + idealSections-subtype-res). EXTRACT EVERY LANDED HAVE INTO A PRIVATE LEMMA
 FROM THE START (per-decl-budget rule). After SLOT-SQ: NR-1 (1a×2 + 1b + SLOT-SQ at
 elements + re-add [NR-unit-val] from cont.26), then G2', then ORD-G.
+
+[SLOT-SQ WALK REFINEMENT] (2026-08-17, cont.28b): the 4x homEquiv_apply-unfold fires;
+both sides become (unitV ≫ pushfwdV(unitH ≫ pushfwdH(SIDE))).val.app U m — collapse via
+the hcollapse-∀-rfl pattern to SIDE.val.app-(op homOfLE⁻¹(V.ι⁻¹U'))-(r₀(m)) with r₀ :=
+unitH-app(unitV-app m). WALK-PIECES (all tooled): [W-RHS-inner] pbH.map(slotV.hom) on
+r₀ = pullbackMap_app_unit (LANDED cont.28b) giving unitH(slotV-app(unitV-m));
+[W-slotV-elements] s1 unitor: tensorObjUnitIso.symm.hom = sheafifyValIso.inv ≫
+sh.map(ρ⁻¹): sheafifyValIso_inv_app_apply + sheafificationMap_app_unit +
+rightUnitor_inv_apply (w ↦ w ⊗ₜ 1); s2 congr-genTriv: tensorObjCongr_hom_app_unit_tmul
+(LANDED) at (refl, genTrivV.symm) with genTriv.inv-at-1-value = idealGenHom-app(1) [the
+g₁-subtype-section] pushed through rFIP via restrictFunctorIsoPullback_hom_unit_app_
+apply-at-idealModule; s3 comparison: mu-BRIDGE.symm.hom = mTOI.inv ≫ μ ≫ pb.map(mTOI.
+hom): mTOI.inv-app(shUnit-tmul) = tensorSection [def-rfl], pullback_μ_unit_
+tensorSection, then pullbackMap_app_unit at mTOI.hom; [W-pRT-collapse] pRT-app(double-
+unit-image) = unit-W.ι-image(m): [COMP-UNIT-micro, TO BUILD]: (pullbackComp f g).app-P
+.hom.val.app on the two-step unit image = the (f ≫ g)-unit image — via the
+Adjunction.homEquiv_leftAdjointUniq_hom_app template (the restrictFunctorIsoPullback_
+hom_unit_app_apply :511-proof pattern; pullbackComp := leftAdjointUniq-species) —
+then (pullbackCongr homOfLE_ι.symm).inv-app = subst-rfl re-index; [MEET] both sides at
+shUnitW/unitW-images of (m-res ⊗ₜ res-g₁-section) — generator-res-compat via map_tmul +
+idealSections-subtype-res. Estimated 8-12 more private micro-lemmas + the assembly;
+EXTRACT-AS-YOU-GO per the per-decl-budget rule.
