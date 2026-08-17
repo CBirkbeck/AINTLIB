@@ -2433,3 +2433,18 @@ pullbackCurveFunctionFieldEquiv_germ_globalTwist [VAL-TRANSPORT proven] +
 dichotomy + pullbackDivisor_apply; ∞ via the zero-section chart) → L1-assembly.
 EVERY ingredient is now either proven or a single named micro. NEXT CYCLE: write
 [SEC-STALK] + [DIV-PIN] statements in OrdPipeline and prove them.
+
+[DIV-PIN STATEMENT SHAPE] (2026-08-17, cont.30t): LHS-form (matching VAL-TRANSPORT's
+:291 spelling): ord_P applied to `pullbackCurveFunctionFieldEquiv W
+(germToFunctionField V s)` for s : Γ(pullback-curve, V) — with the haveI-IsIntegral
+preamble as in :291-300. P ranges over (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint (the
+HW ord_P-side); the scheme-side section-image membership crosses via
+SpecPoints (projModel W) (projModelπ W) K + projModelPointsEquiv (the L1-statement's
+own p/hxp-pattern: p.1 is the scheme-point). SEC-STALK then states: [transported
+generator ∈ maximalIdealAt P] ⟺ [p.1 ∈ Set.range z-section.base ∧ p over V] —
+via the RP-dictionary (zChartMaximalIdeal + coordRingToZSection roundtrips,
+ValuationTransport :226/:270) + germ-restriction hops (germToFunctionField_restrict,
+as used in VAL-TRANSPORT's h12-h45 chain). NEXT WINDOW OPENING MOVES: (1) read
+ValuationTransport's RP-decl signatures (:1-120, the pointValuation/ord_P-transport
+family) + SpecPoints def; (2) state SEC-STALK + DIV-PIN in OrdPipeline after
+[GERM-Z]; (3) prove via the stocked dichotomy (cont.30s).
