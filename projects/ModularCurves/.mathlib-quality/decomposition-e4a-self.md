@@ -2925,3 +2925,11 @@ A-terms and both c₀-tails cancel). Flip applied to the three signatures + skel
 (assemble DIV-H-i + N-CONJ + the ProjOrdTransport pointwise transfer + T-DEC + U-RATIO
 + SEC-ORD×4 (f₁/f₂ at chi/chc₀) + U-ORD0 (A_i) + PT-1 memberships + untopD-arithmetic),
 the [N]P = 0 / w = ∞ arms ([D]-rung), and the T-zero-case of the dictionary.
+
+**[SOME-ARM FINAL PINS] (cont.30aq)**: `projModelZero_not_preimage_zChart` (WeierstrassModel:1205)
++ baseChangeZero-fst-leg (`pullback.lift_fst`: z0 ≫ fst = t ≫ zero; t = 𝟙 ⟹ = modelEllipticCurve.zero)
+⟹ the z0-side SEC-ORD indicator vanishes at every affine place (zero-image avoids the zChart) —
+matching κ's [affine ≠ ∞]. PT-2 chain complete (116373f9f): basePointCast_zsmul (subst-transport;
+rw-on-▸ is motive-fragile — use exact), CAST-INJ, ns-reverse, mulByHom_base_zChartPoint_of_smul
+(Point-typed pmod via set — SpecPoints has no SMul). 27 engine pieces; 3 sorries left
+(AFF-some, AFF-zero, hDIVW-∞).
