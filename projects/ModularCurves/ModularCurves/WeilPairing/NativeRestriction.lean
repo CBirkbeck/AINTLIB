@@ -1669,7 +1669,35 @@ private theorem slot_sq_meet_inner_x {V W : X.Opens} (hWV : W ≤ V) (g₁ : Γ(
             (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩)) := rfl
   refine Eq.trans ?_ e4.symm
   -- [b5] the two legs: composite restrictions fuse (poset arrows are equal)
-  sorry
+  have hm : M.val.map (homOfLE (Scheme.Hom.image_preimage_le W.ι U)).op m =
+      M.val.map (homOfLE hle).op
+        (M.val.map (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op m) := by
+    refine Eq.trans (congrArg (fun (σ : (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)) ⟶ U) =>
+      M.val.map σ.op m) (Subsingleton.elim _
+        (homOfLE hle ≫ homOfLE (Scheme.Hom.image_preimage_le V.ι U)))) ?_
+    exact ConcreteCategory.congr_hom (M.val.map_comp
+      (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op (homOfLE hle).op) m
+  have hg : (⟨X.presheaf.map (homOfLE (W.ι_image_le (W.ι ⁻¹ᵁ U))).op
+        (X.presheaf.map (homOfLE hWV).op g₁),
+      idealSections_map J₁ (homOfLE (W.ι_image_le (W.ι ⁻¹ᵁ U))).op hg₁'⟩ :
+        (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val.obj
+          (Opposite.op (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)))) =
+      (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val.map (homOfLE hle).op
+        (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
+          idealSections_map J₁ (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩) := by
+    apply Subtype.ext
+    show X.presheaf.map (homOfLE (W.ι_image_le (W.ι ⁻¹ᵁ U))).op
+        (X.presheaf.map (homOfLE hWV).op g₁) =
+      X.presheaf.map (homOfLE hle).op
+        (X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁)
+    refine Eq.trans (ConcreteCategory.congr_hom (X.presheaf.map_comp
+      (homOfLE hWV).op (homOfLE (W.ι_image_le (W.ι ⁻¹ᵁ U))).op) g₁).symm ?_
+    refine Eq.trans (congrArg (fun (σ : (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)) ⟶ V) =>
+      X.presheaf.map σ.op g₁) (Subsingleton.elim _
+        (homOfLE hle ≫ homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))))) ?_
+    exact ConcreteCategory.congr_hom (X.presheaf.map_comp
+      (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op (homOfLE hle).op) g₁
+  exact congr_arg₂ (fun a b => a ⊗ₜ b) hm hg
 /-- **([ef-split micro])** The `ef`-restriction on any section splits through the
 `W`-image open: poset arrows are equal, then the functor law. Small binders. -/
 private theorem map_ef_split {V W : X.Opens} (hWV : W ≤ V) (U : X.Opens)
