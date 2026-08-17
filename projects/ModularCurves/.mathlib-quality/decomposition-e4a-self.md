@@ -1649,3 +1649,22 @@ compute the combination by hand, the sign matters). SCHEME-SIDE L1a-TAIL COMPLET
 REMAINING: [ORD-G] — the HW-side pointwise div-computation (mine HasseWeil's
 weilFunction_divisor proof for the [N]-pullback-ord reading + the e_P-ramification;
 consume G-REL + DIV-PIN + DIV-UNIT); then [L1-ASSEMBLY]; then L3/L5/L6/U/E5.
+
+[ORD-G RECON COMPLETE — FULLY TOOLED] (2026-08-17, cont.18): the general FF-pullback-
+divisor transfer EXISTS: projectiveDivisorOf_pullback_eq_pullbackDivisor
+(DivisorPullback:244, under ProjOrdTransport φ — discharged for mulByInt in the
+weilFunction_divisor pipeline) + weilFunction_divisor_eq_pullbackDivisor_kappaDivisor
+(HfactLemma:133) gives the TARGET-side shape div g_Q = pullbackDivisor [N]
+(kappaDivisor Q). ORD-G's statement: projectiveDivisorOf(H-HW · (mulByInt N).pullback
+r-HW) = the same RHS — proof pointwise: affine places by the chart-hop (G-REL relates
+the H-germ to h_d-germs modulo generator-germs; unit-ords die; DIV-PIN pins the
+generator-ords; the [N]-transfer via ProjOrdTransport/pullbackDivisor_apply), the
+∞-place via OrdAtInftyBridge; then L1b closes L1 (G/g_Q constant). REMAINING
+STRUCTURAL LAYER (the last!): the SCHEME-FF ↔ HW-FF TRANSPORT of H and r — the
+T-W7.1b comparison-bridge applied: (i) the scheme-K(curve) ≅ HW-FunctionField
+identification (ComparisonCoefficients/Bridge/Injective — landed); (ii) germ-ord
+compatibility across it (the zChart/RP-dictionary — ValuationTransport's purpose);
+(iii) [N]♭-vs-mulByInt-pullback intertwining = brick6_intertwining (PROVEN). NEXT
+SESSION: write the transport-statements (H-HW := bridge(H-germ), r-HW := bridge(r)),
+state ORD-G, execute the pointwise proof; then L1-assembly, L3, L5, L6, U-assembly,
+E5-assembly. THE END IS ENUMERABLE: every remaining box has named proven tools.
