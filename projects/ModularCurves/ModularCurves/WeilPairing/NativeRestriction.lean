@@ -121,6 +121,26 @@ theorem nuPullback_app_restrictTransport {V W : X.Opens} (hWV : W ≤ V)
             (Opposite.op (⊤ : V.toScheme.Opens)) x)) := by
   sorry
 
+/-- **([NR-endo-1])** The scalar endomorphism of the unit evaluated at the `⊤`-section
+`1` returns its defining section. -/
+theorem unitEndomorphismOfTopSection_app_top_one {Y : Scheme.{u}}
+    (s : Γ(Y, (⊤ : Y.Opens))) :
+    (ModularCurves.unitEndomorphismOfTopSection s).val.app
+        (Opposite.op (⊤ : Y.Opens))
+        (show Y.presheaf.obj (Opposite.op (⊤ : Y.Opens)) from 1) = s := by
+  rw [show (ModularCurves.unitEndomorphismOfTopSection s).val.app
+      (Opposite.op (⊤ : Y.Opens))
+      (show Y.presheaf.obj (Opposite.op (⊤ : Y.Opens)) from 1) =
+    (show Y.presheaf.obj (Opposite.op (⊤ : Y.Opens)) from 1) *
+      Y.presheaf.map (homOfLE (le_top : (⊤ : Y.Opens) ≤ ⊤)).op s from
+    ModularCurves.unitEndomorphismOfTopSection_app_apply s ⊤ _]
+  rw [show (homOfLE (le_top : (⊤ : Y.Opens) ≤ ⊤)) = 𝟙 (⊤ : Y.Opens) from
+    Subsingleton.elim _ _]
+  rw [op_id, CategoryTheory.Functor.map_id]
+  rw [show (ConcreteCategory.hom (𝟙 (Y.presheaf.obj (Opposite.op (⊤ : Y.Opens))))) s
+    = s from rfl]
+  exact one_mul s
+
 /-- **([NR-2])** The restricted native trivialisation satisfies the `W`-level
 `ν`-characterisation with the restricted second generator. -/
 theorem restrictTrivialization_nativeTensorIdealTriv_inv_comp_nu
@@ -137,7 +157,75 @@ theorem restrictTrivialization_nativeTensorIdealTriv_inv_comp_nu
       nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op g₁) hg₁' hgi₁' =
       ModularCurves.unitEndomorphismOfTopSection
         (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op g₂)) := by
-  sorry
+  have htop : (⊤ : W.toScheme.Opens) =
+      (X.homOfLE hWV) ⁻¹ᵁ (⊤ : V.toScheme.Opens) := by simp
+  apply unit_hom_ext
+  have hsplit : ((restrictTrivialization hWV
+      (nativeTensorIdealTriv M J₁ J₂ e V g₁ g₂ hg₁ hgi₁ hg₂ hgi₂)).inv ≫
+      nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op g₁) hg₁' hgi₁').val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        (show W.toScheme.presheaf.obj (Opposite.op (⊤ : W.toScheme.Opens)) from 1) =
+      (nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op g₁)
+        hg₁' hgi₁').val.app (Opposite.op (⊤ : W.toScheme.Opens))
+        ((restrictTrivialization hWV
+          (nativeTensorIdealTriv M J₁ J₂ e V g₁ g₂ hg₁ hgi₁ hg₂ hgi₂)).inv.val.app
+          (Opposite.op (⊤ : W.toScheme.Opens))
+          (show W.toScheme.presheaf.obj
+            (Opposite.op (⊤ : W.toScheme.Opens)) from 1)) := rfl
+  refine hsplit.trans ?_
+  have h2 := restrictTrivialization_inv_app_top_one hWV
+    (nativeTensorIdealTriv M J₁ J₂ e V g₁ g₂ hg₁ hgi₁ hg₂ hgi₂) htop
+  rw [h2]
+  have hfold : ((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).app M).inv.val.app
+      (Opposite.op (⊤ : W.toScheme.Opens))
+      (((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app M).hom.val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+            ((Scheme.Modules.pullback V.ι).obj M)).presheaf.map (eqToHom htop).op
+          (((Scheme.Modules.pullbackPushforwardAdjunction
+              (X.homOfLE hWV)).unit.app
+            ((Scheme.Modules.pullback V.ι).obj M)).val.app
+            (Opposite.op (⊤ : V.toScheme.Opens))
+            ((nativeTensorIdealTriv M J₁ J₂ e V g₁ g₂
+              hg₁ hgi₁ hg₂ hgi₂).inv.val.app
+              (Opposite.op (⊤ : V.toScheme.Opens))
+              (show V.toScheme.presheaf.obj
+                (Opposite.op (⊤ : V.toScheme.Opens)) from 1))))) =
+      restrictTransportSection hWV M htop
+        ((nativeTensorIdealTriv M J₁ J₂ e V g₁ g₂ hg₁ hgi₁ hg₂ hgi₂).inv.val.app
+          (Opposite.op (⊤ : V.toScheme.Opens))
+          (show V.toScheme.presheaf.obj
+            (Opposite.op (⊤ : V.toScheme.Opens)) from 1)) := rfl
+  rw [hfold]
+  rw [nuPullback_app_restrictTransport M J₁ J₂ e hWV g₁ hg₁ hgi₁ hg₁' hgi₁' htop _]
+  have hV : (nuPullback M J₁ J₂ e V g₁ hg₁ hgi₁).val.app
+      (Opposite.op (⊤ : V.toScheme.Opens))
+      ((nativeTensorIdealTriv M J₁ J₂ e V g₁ g₂ hg₁ hgi₁ hg₂ hgi₂).inv.val.app
+        (Opposite.op (⊤ : V.toScheme.Opens))
+        (show V.toScheme.presheaf.obj
+          (Opposite.op (⊤ : V.toScheme.Opens)) from 1)) =
+      Scheme.Modules.openTopSection V g₂ := by
+    have hVcomp := congrArg
+      (fun (q : (Scheme.Modules.pullback V.ι).obj M ⟶ unitObj V.toScheme) =>
+        q.val.app (Opposite.op (⊤ : V.toScheme.Opens))
+        ((nativeTensorIdealTriv M J₁ J₂ e V g₁ g₂ hg₁ hgi₁ hg₂ hgi₂).inv.val.app
+          (Opposite.op (⊤ : V.toScheme.Opens))
+          (show V.toScheme.presheaf.obj
+            (Opposite.op (⊤ : V.toScheme.Opens)) from 1)))
+      (rfl : nuPullback M J₁ J₂ e V g₁ hg₁ hgi₁ = nuPullback M J₁ J₂ e V g₁ hg₁ hgi₁)
+    refine Eq.trans ?_ (unitEndomorphismOfTopSection_app_top_one
+      (Scheme.Modules.openTopSection V g₂))
+    have hVeq := congrArg
+      (fun (q : unitObj V.toScheme ⟶ unitObj V.toScheme) => q.val.app
+        (Opposite.op (⊤ : V.toScheme.Opens))
+        (show V.toScheme.presheaf.obj
+          (Opposite.op (⊤ : V.toScheme.Opens)) from 1))
+      (nativeTensorIdealTriv_inv_comp_nu M J₁ J₂ e V g₁ g₂ hg₁ hgi₁ hg₂ hgi₂)
+    exact hVeq
+  rw [hV]
+  rw [openTopSection_homOfLE hWV htop g₂]
+  exact (unitEndomorphismOfTopSection_app_top_one (Y := W.toScheme)
+    (Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op g₂))).symm
 
 /-- **([NR-3], NAT-RESTRICT)** The restriction of the native tensor-ideal trivialisation
 is the native trivialisation of the restricted generators. -/

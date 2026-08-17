@@ -1,1 +1,1 @@
-FOCUS: [NR] helpers build (unit_hom_ext + openTopSection_homOfLE), then NR-2 assembly, then NR-1 brick
+FOCUS: [NR-2] assembly build-iterate, then NR-1 brick (element chain per nu-piece)
