@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.WeilPairing.FieldLeaf
 import ModularCurves.WeilPairing.GlueDataset
 import ModularCurves.WeilPairing.ValuationTransport
+import HasseWeil.HasseBound.WeilPairing.HfactLemma
 
 /-!
 # The scheme-to-HasseWeil order pipeline ([FF-TRANSPORT] + [L1])
@@ -293,6 +294,9 @@ theorem exists_const_mul_weilFunction
     [AlgebraicGeometry.IsIntegral (projModel W)]
     [IsDedekindDomain (⟨W⟩ : HasseWeil.Curves.SmoothPlaneCurve K).CoordinateRing]
     (N : ℕ) [NeZero N] (hNZ : ((N : ℤ) : K) ≠ 0)
+    [Flat ((modelEllipticCurve W).mulByHom N)]
+    [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)]
     (Q : ((modelEllipticCurve W).baseChange
       (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))))
     (hQ : Q ∈ torsionPoints (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N)
@@ -383,7 +387,89 @@ theorem exists_const_mul_weilFunction
       algebraMap K W.toAffine.FunctionField c *
         HasseWeil.WeilPairing.weilFunction W (N : ℤ) hNZ
           (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hT := by
-  sorry
+  haveI hIntE : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+    inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+  haveI hInt : AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    isIntegral_pullback_id (modelEllipticCurve W)
+  have hn' : (N : ℤ) ≠ 0 := by exact_mod_cast NeZero.ne' N |>.symm
+  haveI hker : Finite (HasseWeil.mulByInt W.toAffine (N : ℤ)).toAddMonoidHom.ker :=
+    HasseWeil.WeilPairing.mulByInt_ker_finite W (N : ℤ) hNZ
+  obtain ⟨q0⟩ := ‹Nonempty ((mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc c₀) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)›
+  haveI hNeWc0 : Nonempty ((Wc c₀) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) := ⟨⟨(mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N).base q0.1, q0.2⟩⟩
+  haveI hNeVc0 : Nonempty (((V (ch c₀)).1) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) :=
+    ⟨⟨(mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N).base q0.1, hWch c₀ q0.2⟩⟩
+  set H : W.toAffine.FunctionField := pullbackCurveFunctionFieldEquiv W
+    ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc c₀)
+      ((h c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc c₀)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc c₀))) with hHdef
+  set rr : W.toAffine.FunctionField :=
+    pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₂ (ch c₀))) *
+      (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₁ (ch c₀))))⁻¹ *
+      (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((Wc c₀))
+          ((A c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc c₀)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc c₀))))⁻¹ with hrrdef
+  have hf₂ne : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₂ (ch c₀)) ≠ 0 := fun h0 =>
+    nonZeroDivisors.ne_zero (hnzd₂ (ch c₀))
+      ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField_injective ((V (ch c₀)).1)
+        (h0.trans (map_zero _).symm))
+  have hf₁ne : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₁ (ch c₀)) ≠ 0 := fun h0 =>
+    nonZeroDivisors.ne_zero (hnzd₁ (ch c₀))
+      ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField_injective ((V (ch c₀)).1)
+        (h0.trans (map_zero _).symm))
+  have hAne : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((Wc c₀))
+      ((A c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc c₀)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc c₀)) ≠ 0 :=
+    germToFunctionField_unit_val_ne_zero (A c₀)
+  have hrr0 : rr ≠ 0 := by
+    rw [hrrdef]
+    exact mul_ne_zero (mul_ne_zero
+      ((map_ne_zero_iff _ (pullbackCurveFunctionFieldEquiv W).injective).mpr hf₂ne)
+      (inv_ne_zero ((map_ne_zero_iff _
+        (pullbackCurveFunctionFieldEquiv W).injective).mpr hf₁ne)))
+      (inv_ne_zero ((map_ne_zero_iff _
+        (pullbackCurveFunctionFieldEquiv W).injective).mpr hAne))
+  have hH0 : H ≠ 0 := by
+    rw [hHdef]
+    exact (map_ne_zero_iff _ (pullbackCurveFunctionFieldEquiv W).injective).mpr
+      (germToFunctionField_unit_val_ne_zero (h c₀))
+  have hpbne : HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn' rr ≠ 0 :=
+    fun h0 => hrr0 ((HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ)
+      hn').toRingHom.injective (h0.trans (map_zero _).symm))
+  have hpb : (HasseWeil.mulByInt W.toAffine (N : ℤ)).pullback =
+      HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn' := dif_neg hn'
+  have htransfer : (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf
+      (HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn' rr) =
+      HasseWeil.WeilPairing.DivisorPullback.pullbackDivisor
+        (HasseWeil.mulByInt W.toAffine (N : ℤ)).toAddMonoidHom hker
+        ((⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf rr) := by
+    rw [← hpb]
+    exact HasseWeil.WeilPairing.DivisorPullback.projectiveDivisorOf_pullback_eq_pullbackDivisor
+      (HasseWeil.WeilPairing.DivisorPullback.projOrdTransport_mulByInt (N : ℤ) hNZ) rr
+  have hgQdiv := HasseWeil.WeilPairing.weilFunction_divisor_eq_pullbackDivisor_kappaDivisor
+    W (N : ℤ) hNZ (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hT
+  have hDIVW : ∀ w : HasseWeil.Curves.ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve K),
+      (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf H w + (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf rr
+        (((HasseWeil.mulByInt W.toAffine (N : ℤ)).toAddMonoidHom
+          w.toAffinePoint).toProjectiveSmoothPoint) =
+      HasseWeil.Curves.kappaDivisor W.toAffine
+        (EllipticCurve.basePointCast W (projModelPointsEquiv W K p))
+        (((HasseWeil.mulByInt W.toAffine (N : ℤ)).toAddMonoidHom
+          w.toAffinePoint).toProjectiveSmoothPoint) := by
+    sorry
+  have hdiv : (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf
+      (H * HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn' rr) =
+      (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf (HasseWeil.WeilPairing.weilFunction W (N : ℤ) hNZ
+        (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hT) := by
+    rw [(⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf_mul hH0 hpbne, htransfer, hgQdiv]
+    refine Finsupp.ext fun w => ?_
+    rw [Finsupp.add_apply,
+      HasseWeil.WeilPairing.DivisorPullback.pullbackDivisor_apply,
+      HasseWeil.WeilPairing.DivisorPullback.pullbackDivisor_apply]
+    exact hDIVW w
+  obtain ⟨c, hc0, hc⟩ := exists_const_mul_of_projectiveDivisorOf_eq W _ _
+    (mul_ne_zero hH0 hpbne)
+    (HasseWeil.WeilPairing.weilFunction_ne_zero W (N : ℤ) hNZ _ hT) hdiv
+  exact ⟨c, rr, hc0, hrr0, hc⟩
 
 end L1
 
@@ -1798,6 +1884,9 @@ theorem torsionSplittingEval_eq_weilPairing
     [AlgebraicGeometry.IsIntegral (projModel W)]
     [IsDedekindDomain (⟨W⟩ : HasseWeil.Curves.SmoothPlaneCurve K).CoordinateRing]
     (N : ℕ) [NeZero N] (hNZ : ((N : ℤ) : K) ≠ 0) (hN0 : (N : ℤ) ≠ 0)
+    [Flat ((modelEllipticCurve W).mulByHom N)]
+    [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)]
     (Q : ((modelEllipticCurve W).baseChange
       (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))))
     (hQ : Q ∈ torsionPoints (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N)
@@ -1986,6 +2075,9 @@ theorem torsionSplittingEval_self_eq_one
     [IsDedekindDomain (⟨W⟩ : HasseWeil.Curves.SmoothPlaneCurve K).CoordinateRing]
     [(W.baseChange K).toAffine.IsElliptic]
     (N : ℕ) [NeZero N] (hNZ : ((N : ℤ) : K) ≠ 0) (hN0 : (N : ℤ) ≠ 0)
+    [Flat ((modelEllipticCurve W).mulByHom N)]
+    [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)]
     (Q : ((modelEllipticCurve W).baseChange
       (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))))
     (hQ : Q ∈ torsionPoints (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N)
