@@ -1362,6 +1362,92 @@ private theorem translateByPoint_base_zChartPoint_of_add
   rw [hcomp2]
   exact hSpt
 
+/-- **([TAU-PT-ZERO])** The translation's point action, zero-sum case: when
+`A + T = 0` in the dictionary, `τ_T` sends the `A`-chart point to the zero image. -/
+private theorem translateByPoint_base_zChartPoint_of_add_zero
+    (pmodA pmodT : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap K K))))
+    {xa ya : K} {hxya : (W.baseChange K).toAffine.Nonsingular xa ya}
+    (hA : projModelPointsEquiv W K pmodA =
+      WeierstrassCurve.Affine.Point.some xa ya hxya)
+    (hS : projModelPointsEquiv W K (pmodA + pmodT) = 0)
+    (A : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) (hAx : A.x = xa) (hAy : A.y = ya) :
+    (translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+        (EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+          (specMap_algebraMap_self_eq_id (K := K) ▸ pmodT))).base
+      (((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W A)) =
+    ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base ((projModelZero W).base
+      ((Spec.map (CommRingCat.ofHom (algebraMap K K))).base
+        (default : (Spec (CommRingCat.of K))))) := by
+  set h := specMap_algebraMap_self_eq_id (K := K)
+  set QA := EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodA) with hQA
+  set PT' := EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodT) with hPT'
+  have hcomp := congrArg CategoryTheory.CommaMorphism.left
+    (overPoint_comp_translateBy (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT' QA)
+  have hcomp2 : QA.1 ≫ translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT' = (QA + PT').1 := hcomp
+  have hsum : QA + PT' = EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+      (h ▸ (pmodA + pmodT)) :=
+    ((asSection_add' (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodA) (h ▸ pmodT)).symm).trans
+      (congrArg (EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))))
+        (castPointG_add h pmodA pmodT).symm)
+  have hA2 := eq_chartSpecPoint_of_projModelPointsEquiv_some (W := W) hA
+  have hApt : QA.1.base (default : (Spec (CommRingCat.of K))) =
+      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W A) := by
+    refine eq_invFst_of_fst_eq W _ _ ?_
+    have hfst := congrArg (fun (m : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =>
+      m.base (default : (Spec (CommRingCat.of K))))
+      (EllipticCurve.Point.asSection_val_fst (modelEllipticCurve W)
+        (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodA))
+    simp only at hfst
+    rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (QA.1.base (default : (Spec (CommRingCat.of K)))) =
+      (QA.1 ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (default : (Spec (CommRingCat.of K))) from rfl]
+    rw [hQA, hfst]
+    rw [show ((h ▸ pmodA : (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K)))) :
+        (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =
+      (pmodA : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) from castPointG_coe h pmodA]
+    rw [hA2]
+    exact chartSpecPoint_base_default_eq_zChartPoint W xa ya _ A hAx hAy
+  -- the zero-sum side: the model sum is the zero point
+  have hpz : pmodA + pmodT = ⟨Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫
+      projModelZero W, by
+    rw [Category.assoc, show (modelEllipticCurve W).π = projModelπ W from rfl,
+      projModelZero_projModelπ, Category.comp_id]⟩ :=
+    (projModelPointsEquiv W K).injective
+      (by rw [hS, projModelPointsEquiv_zero])
+  have hSpt : (QA + PT').1.base (default : (Spec (CommRingCat.of K))) =
+      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base ((projModelZero W).base
+        ((Spec.map (CommRingCat.ofHom (algebraMap K K))).base
+          (default : (Spec (CommRingCat.of K))))) := by
+    have hc1 : (QA + PT').1.base (default : (Spec (CommRingCat.of K))) =
+        (EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+          (h ▸ (pmodA + pmodT))).1.base (default : (Spec (CommRingCat.of K))) := by
+      exact congrArg (fun X => (X.1).base (default : (Spec (CommRingCat.of K)))) hsum
+    rw [hc1]
+    refine eq_invFst_of_fst_eq W _ _ ?_
+    have hfst := congrArg (fun (m : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =>
+      m.base (default : (Spec (CommRingCat.of K))))
+      (EllipticCurve.Point.asSection_val_fst (modelEllipticCurve W)
+        (𝟙 (Spec (CommRingCat.of K))) (h ▸ (pmodA + pmodT)))
+    simp only at hfst
+    rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base ((EllipticCurve.Point.asSection (modelEllipticCurve W)
+        (𝟙 (Spec (CommRingCat.of K))) (h ▸ (pmodA + pmodT))).1.base (default : (Spec (CommRingCat.of K)))) =
+      ((EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+        (h ▸ (pmodA + pmodT))).1 ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (default : (Spec (CommRingCat.of K))) from rfl]
+    rw [hfst]
+    rw [show ((h ▸ (pmodA + pmodT) : (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K)))) :
+        (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =
+      ((pmodA + pmodT : (modelEllipticCurve W).Point _) :
+        (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) from castPointG_coe h _]
+    rw [hpz]
+    rfl
+  rw [← hApt]
+  rw [show (translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT').base
+      (QA.1.base (default : (Spec (CommRingCat.of K)))) =
+    (QA.1 ≫ translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT').base
+      (default : (Spec (CommRingCat.of K))) from rfl]
+  rw [hcomp2]
+  exact hSpt
+
 /-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
 of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
 Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
