@@ -2539,3 +2539,18 @@ SEC-ORD span-supply reads through it. sectionDivisor.ideal = Scheme.Hom.ker z
 (CartierDivisor:194, rfl). SEC-ORD statement level: PULLBACK-side (match L1-data;
 the fst-hop done once inside via functionFieldMap_germToFunctionField + GERM-Z +
 zChartLocalizationEquiv_compat). All pins complete — next window writes it.
+
+[SEC-ORD STATED] (2026-08-17, cont.30aa): ord_P_germ_sectionKer_generator lands in
+OrdPipeline (after CONST-SECTION, before VAL-TRANSPORT; sorried). Spelling notes:
+open scoped Classical ABOVE the docstring for the if-Decidable; the germ's Nonempty
+as an instance BINDER `[Nonempty V.1]` (the haveI-spellings ↥(V.1 : Opens)/↥↑↑V do
+NOT match the elaborator's instance-goal — binder-form resolves it; VAL-TRANSPORT's
+`[Nonempty V]`-pattern); the P-point dictionary: (inv fst).base (zChartPoint W P)
+with z.base default for the section point (Spec-K unique point). PROOF CAMPAIGN
+(cont.30y): (1) the fst-hop: pullbackCurveFunctionFieldEquiv-germ = projModel-FF of
+the transported germ (functionFieldMap_germToFunctionField + the equiv-def); (2)
+the zChart-hop: germ-at-V → germ-at-V⊓zChart (restrict) → GERM-Z localization-read;
+(3) ON-case: hspan → ker_apply → the AtPrime span (Ideal.map-chain через
+coordRingToZSection/zChartMaximalIdeal) → RP-4a-core (intValuation_singleton chain);
+(4) OFF-case: f ∉ maximalIdealAt (the kernel's evaluation ≠ 0 at P ≠ P_z) → :309.
+Split cases on the if; each case its own private lemma per the budget rule.
