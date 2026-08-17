@@ -1616,6 +1616,32 @@ private theorem divH_affine_arm
     ⟨⟨(Classical.arbitrary ((Wc c₀) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)).1,
       hWch c₀ (Classical.arbitrary ((Wc c₀) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)).2⟩⟩
   have hHord := ord_H_eq_neg_ord_transition W N M Wc e h hsplit i c₀ P hPi
+  have hn' : (N : ℤ) ≠ 0 := by exact_mod_cast NeZero.ne' N |>.symm
+  rw [pullbackCurveFunctionFieldEquiv_mulByN W N hn'] at hHord
+  have hpb : (HasseWeil.mulByInt W.toAffine (N : ℤ)).pullback =
+      HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn' := dif_neg hn'
+  have hYne : pullbackCurveFunctionFieldEquiv W
+      ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField (Wc i ⊓ Wc c₀)
+        ((transitionUnitOfCover M Wc e i c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)ˣ) :
+          Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀))) ≠ 0 :=
+    (map_ne_zero_iff _ (pullbackCurveFunctionFieldEquiv W).injective).mpr
+      (germToFunctionField_unit_val_ne_zero (transitionUnitOfCover M Wc e i c₀))
+  have hpbYne : HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn'
+      (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField (Wc i ⊓ Wc c₀)
+          ((transitionUnitOfCover M Wc e i c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)ˣ) :
+            Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)))) ≠ 0 := fun h0 => hYne
+    ((HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ)
+      hn').toRingHom.injective (h0.trans (map_zero _).symm))
+  have htrY := HasseWeil.WeilPairing.DivisorPullback.projOrdTransport_mulByInt
+    (F := K) (W := W.toAffine) (N : ℤ) hNZ
+    (pullbackCurveFunctionFieldEquiv W
+      ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField (Wc i ⊓ Wc c₀)
+        ((transitionUnitOfCover M Wc e i c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)ˣ) :
+          Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀))))
+    (HasseWeil.Curves.ProjectiveSmoothPoint.affine P)
+  rw [hpb, (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf_apply_affine] at htrY
+  rw [(⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf_apply_affine, hHord]
   sorry
 
 open scoped Classical in
