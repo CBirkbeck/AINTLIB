@@ -348,6 +348,33 @@ theorem pullbackRestrictTransport_app_unit {V W : X.Opens} (hWV : W ≤ V)
     (((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV).symm).app P).inv.val.app
       (Opposite.op ((X.homOfLE hWV) ⁻¹ᵁ (V.ι ⁻¹ᵁ U)))) hcomp
 
+/-- **([NR-s1])** The tensor-unit insertion on any section: `tensorObjUnitIso.symm`
+reads a section as the sheafification-unit image of its tensor with `1` (small
+binders). -/
+theorem tensorObjUnitIso_symm_hom_app {Y' : Scheme.{u}} (Q : Y'.Modules)
+    (V : (Opens ↥Y')ᵒᵖ) (q : Q.val.obj V) :
+    (AlgebraicGeometry.Scheme.Modules.tensorObjUnitIso Q).symm.hom.val.app V q =
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 Y'.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj Q.val (unitObj Y').val)).app V
+        (q ⊗ₜ (1 : Y'.presheaf.obj V)) := by
+  have hsplit : (AlgebraicGeometry.Scheme.Modules.tensorObjUnitIso Q).symm.hom.val.app
+      V q =
+      ((PresheafOfModules.sheafification (𝟙 Y'.ringCatSheaf.obj)).map
+        (MonoidalCategoryStruct.rightUnitor Q.val).inv).val.app V
+        ((sheafifyValIso Q).inv.val.app V q) := rfl
+  refine hsplit.trans ?_
+  refine (congrArg (fun z => ((PresheafOfModules.sheafification
+      (𝟙 Y'.ringCatSheaf.obj)).map
+      (MonoidalCategoryStruct.rightUnitor Q.val).inv).val.app V z)
+    (sheafifyValIso_inv_app_apply Q V.unop q)).trans ?_
+  refine (sheafificationMap_app_unit
+    (MonoidalCategoryStruct.rightUnitor Q.val).inv V q).trans ?_
+  refine congrArg (((PresheafOfModules.sheafificationAdjunction
+    (𝟙 Y'.ringCatSheaf.obj)).unit.app
+      (MonoidalCategoryStruct.tensorObj Q.val (unitObj Y').val)).app V) ?_
+  rfl
+
 /-- **([NR-congr-unit-tmul])** `tensorObjCongr` on a sheafification-unit image of a
 pure tensor (small binders: the instantiation at the large pullback objects is by term
 application). -/
