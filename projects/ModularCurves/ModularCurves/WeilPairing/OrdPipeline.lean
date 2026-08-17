@@ -286,7 +286,66 @@ theorem pullbackCurveFunctionFieldEquiv_translateByPoint
       HasseWeil.translateAlgEquivOfPoint W
         (EllipticCurve.basePointCast W (projModelPointsEquiv W K pS))
         (pullbackCurveFunctionFieldEquiv W x) := by
-  sorry
+  haveI hIntE : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+    inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+  haveI hIrrE : IrreducibleSpace ↥(modelEllipticCurve W).E := inferInstance
+  haveI hIrr : IrreducibleSpace
+      ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    inferInstance
+  have hdef : ∀ y, pullbackCurveFunctionFieldEquiv W y =
+      EllipticCurve.projModelFunctionFieldEquiv W
+        ((inv (pullback.fst (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K))))).functionFieldMap.hom y) := fun _ => rfl
+  have hfg : ∀ y : (pullback (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K)))).functionField,
+      (pullback.fst (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K)))).functionFieldMap.hom
+        ((inv (pullback.fst (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K))))).functionFieldMap.hom y) = y := by
+    intro y
+    have hc := (functionFieldMap_comp
+      (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+      (inv (pullback.fst (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K)))))).symm.trans
+      ((functionFieldMap_congr (IsIso.hom_inv_id
+        (pullback.fst (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K)))))).trans functionFieldMap_id)
+    exact congrArg (fun q => (CommRingCat.Hom.hom q) y) hc
+  -- the fst-crossing (U5-L2f) at z := invfst♯ x, rearranged
+  have hL2f := functionFieldMap_translateByPoint_conj (modelEllipticCurve W) P'
+    τp hτp ((inv (pullback.fst (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K))))).functionFieldMap.hom x)
+  rw [hfg x] at hL2f
+  -- hL2f : τpb♯ x = fst♯ (τp♯ (invfst♯ x))
+  have hmid : (inv (pullback.fst (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K))))).functionFieldMap.hom
+      ((translateByPoint (modelEllipticCurve W)
+        (𝟙 (Spec (CommRingCat.of K))) P').functionFieldMap.hom x) =
+      τp.functionFieldMap.hom
+        ((inv (pullback.fst (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K))))).functionFieldMap.hom x) := by
+    rw [hL2f]
+    have hgf : ∀ z : (projModel W).functionField,
+        (inv (pullback.fst (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K))))).functionFieldMap.hom
+          ((pullback.fst (modelEllipticCurve W).π
+            (𝟙 (Spec (CommRingCat.of K)))).functionFieldMap.hom z) = z := by
+      intro z
+      have hc := (functionFieldMap_comp
+        (inv (pullback.fst (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K)))))
+        (pullback.fst (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K))))).symm.trans
+        ((functionFieldMap_congr (IsIso.inv_hom_id
+          (pullback.fst (modelEllipticCurve W).π
+            (𝟙 (Spec (CommRingCat.of K)))))).trans functionFieldMap_id)
+      exact congrArg (fun q => (CommRingCat.Hom.hom q) z) hc
+    exact hgf _
+  -- assemble through the model bridge (U5-L2g)
+  rw [hdef, hdef, hmid]
+  exact (translateAlgEquivOfPoint_functionFieldMap_of_section W P' pS hxpS τp hτp
+    ((inv (pullback.fst (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K))))).functionFieldMap.hom x)).symm
 
 /-- **([L3], statement)** The Katz–Mazur torsion-splitting value is the Silverman–Weil
 pairing: for the normalized dataset, the anchor-chart τ-relation (`U5-L2e`) transported

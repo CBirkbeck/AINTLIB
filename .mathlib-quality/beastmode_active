@@ -1,1 +1,1 @@
-FOCUS: [L3-proof assembly] — the eigen-chain: L2e + EQUIV-TAU + VAL-TRANSPORT + L1 + TAU-INV + weilPairing_spec + cancellation
+FOCUS: [EQUIV-TAU proof] — compose L2f (functionFieldMap_translateByPoint_conj) with L2g (translateAlgEquivOfPoint_functionFieldMap_of_section) through the equiv-legs
