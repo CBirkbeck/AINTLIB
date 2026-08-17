@@ -1067,6 +1067,41 @@ private theorem mulByHom_base_zChartPoint
   rw [← hR, ← hL]
   exact hbase.symm
 
+/-- **([PT-INJ])** `zChartPoint` is injective: the chart point determines the prime,
+the prime determines the transported maximal ideal, and `maximalIdealAt` is
+injective on smooth points. -/
+private theorem zChartPoint_injective :
+    Function.Injective (zChartPoint W) := by
+  intro P Q hPQ
+  letI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  have h1 : (⟨zChartMaximalIdeal W P, (zChartMaximalIdeal_isMaximal W P).isPrime⟩ :
+      PrimeSpectrum Γ(projModel W, EllipticCurve.zChart W)) =
+      ⟨zChartMaximalIdeal W Q, (zChartMaximalIdeal_isMaximal W Q).isPrime⟩ :=
+    hZaff.fromSpec.isOpenEmbedding.injective hPQ
+  have h2 : zChartMaximalIdeal W P = zChartMaximalIdeal W Q :=
+    congrArg PrimeSpectrum.asIdeal h1
+  have hround : ∀ R : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint, (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt R =
+      Ideal.map ((coordRingToZSection W).symm) (zChartMaximalIdeal W R) := by
+    intro R
+    unfold zChartMaximalIdeal
+    ext x
+    constructor
+    · intro hx
+      have h3 := Ideal.mem_map_of_mem (coordRingToZSection W) hx
+      have h4 := Ideal.mem_map_of_mem ((coordRingToZSection W).symm) h3
+      simpa using h4
+    · intro hx
+      have hle : Ideal.map ((coordRingToZSection W).symm)
+          (Ideal.map (coordRingToZSection W) ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt R)) ≤
+          (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt R := by
+        refine Ideal.map_le_iff_le_comap.mpr ?_
+        refine Ideal.map_le_iff_le_comap.mpr fun a ha => ?_
+        simpa using ha
+      exact hle hx
+  refine (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt_injective ?_
+  rw [hround P, hround Q, h2]
+
 /-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
 of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
 Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
