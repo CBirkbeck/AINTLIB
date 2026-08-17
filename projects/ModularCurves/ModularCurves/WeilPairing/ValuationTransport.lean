@@ -229,9 +229,87 @@ theorem uniformizer_of_span_maximalIdealAt (W : WeierstrassCurve K) [W.IsEllipti
     rw [← Localization.AtPrime.map_eq_maximalIdeal]
     refine (congrArg (Ideal.map (algebraMap _ _)) hspan).trans ?_
     rw [Ideal.map_span, Set.image_singleton]
+  have hgen' : (IsDiscreteValuationRing.maximalIdeal
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).asIdeal =
+      Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r} := by
+    show IsLocalRing.maximalIdeal _ = _
+    exact hgen
   have hval := IsDedekindDomain.HeightOneSpectrum.intValuation_singleton
     (v := IsDiscreteValuationRing.maximalIdeal
-      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)) hr' hgen
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)) hr' hgen'
+  have htower : algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+      ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r =
+      algebraMap ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField)
+        (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+          ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r) :=
+    IsScalarTower.algebraMap_apply _ _ _ _
+  have hpv : (⟨W⟩ : SmoothPlaneCurve K).pointValuation P
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r) =
+      ((Multiplicative.ofAdd (-1 : ℤ) : Multiplicative ℤ) :
+        WithZero (Multiplicative ℤ)) := by
+    rw [htower]
+    show (IsDiscreteValuationRing.maximalIdeal
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).valuation
+      ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) _ = _
+    rw [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap, hval]
+    rfl
+  have hne : (⟨W⟩ : SmoothPlaneCurve K).pointValuation P
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r) ≠ 0 := by
+    rw [hpv]; exact WithZero.coe_ne_zero
+  show (⟨W⟩ : SmoothPlaneCurve K).ord_P P _ = 1
+  simp only [SmoothPlaneCurve.ord_P]
+  rw [dif_neg hne]
+  have hunz : WithZero.unzero hne = Multiplicative.ofAdd (-1 : ℤ) := by
+    rw [← WithZero.coe_inj, WithZero.coe_unzero]
+    exact hpv
+  rw [hunz]
+  rfl
+
+set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency.types true in
+/-- **(RP-4a-loc)** The localized uniformizer law: RP-4a with the span hypothesis
+already at the DVR level — a coordinate-ring element whose local-ring image generates
+the maximal ideal of the local ring at `P` is a uniformizer. This is the form the
+section-kernel computation supplies (the generator is only a local generator: the
+global section also vanishes along the shrinking denominator). Tail of RP-4a
+verbatim from `intValuation_singleton` on. -/
+theorem uniformizer_of_localized_span (W : WeierstrassCurve K) [W.IsElliptic]
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (r : (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) (hr : r ≠ 0)
+    (hgen : IsLocalRing.maximalIdeal
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) =
+      Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r}) :
+    SmoothPlaneCurve.Uniformizer (⟨W⟩ : SmoothPlaneCurve K) P
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r) := by
+  haveI := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt_isMaximal P).isPrime
+  haveI hDVR : IsDiscreteValuationRing
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) :=
+    SmoothPlaneCurve.localRingAt.instIsDVR _ P
+  haveI hPID := hDVR.toIsPrincipalIdealRing
+  haveI hDed : IsDedekindDomain
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) := inferInstance
+  have hr' : algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r ≠ 0 := by
+    intro h0
+    exact hr (IsLocalization.injective
+      (M := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P).primeCompl)
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+      (Ideal.primeCompl_le_nonZeroDivisors _) (h0.trans (map_zero _).symm))
+  have hgen' : (IsDiscreteValuationRing.maximalIdeal
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).asIdeal =
+      Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r} := by
+    show IsLocalRing.maximalIdeal _ = _
+    exact hgen
+  have hval := IsDedekindDomain.HeightOneSpectrum.intValuation_singleton
+    (v := IsDiscreteValuationRing.maximalIdeal
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)) hr' hgen'
   have htower : algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
       ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r =
       algebraMap ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)

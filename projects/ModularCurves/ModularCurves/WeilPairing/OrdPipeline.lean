@@ -301,6 +301,31 @@ private theorem secOrd_s_notMem_zChartMaximalIdeal
   rw [hZaff.fromSpec_preimage_basicOpen] at h2
   exact (PrimeSpectrum.mem_basicOpen _ _).mp h2
 
+/-- **([SEC-ORD D-MEM-IFF])** The iff-form of D-MEM: basic-open membership of the
+`zChart` point is exactly non-membership in the transported maximal ideal. -/
+private theorem secOrd_mem_basicOpen_iff_notMem
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (r : Γ(projModel W, EllipticCurve.zChart W)) :
+    zChartPoint W P ∈ (projModel W).basicOpen r ↔ r ∉ zChartMaximalIdeal W P := by
+  haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  constructor
+  · intro hPr
+    have h2 : (⟨zChartMaximalIdeal W P,
+        (zChartMaximalIdeal_isMaximal W P).isPrime⟩ :
+        PrimeSpectrum Γ(projModel W, EllipticCurve.zChart W)) ∈
+        hZaff.fromSpec ⁻¹ᵁ (projModel W).basicOpen r := hPr
+    rw [hZaff.fromSpec_preimage_basicOpen] at h2
+    exact (PrimeSpectrum.mem_basicOpen _ _).mp h2
+  · intro hnot
+    have h2 : (⟨zChartMaximalIdeal W P,
+        (zChartMaximalIdeal_isMaximal W P).isPrime⟩ :
+        PrimeSpectrum Γ(projModel W, EllipticCurve.zChart W)) ∈
+        hZaff.fromSpec ⁻¹ᵁ (projModel W).basicOpen r := by
+      rw [hZaff.fromSpec_preimage_basicOpen]
+      exact (PrimeSpectrum.mem_basicOpen _ _).mpr hnot
+    exact h2
+
 open scoped Classical in
 /-- **([SEC-ORD s-unit])** The shrink denominator has order zero at the point: the
 basic-open membership of the `zChart` point is exactly non-membership of `s` in the
