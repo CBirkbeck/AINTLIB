@@ -2022,7 +2022,135 @@ private theorem divH_affine_arm
         projModelZero_not_preimage_zChart] at hmem
       simpa using hmem
     rw [if_neg hz0ind] at hf2i
-    sorry
+    -- (a) split the rr order in the goal
+    have hbne := (map_ne_zero_iff _
+      (pullbackCurveFunctionFieldEquiv W).injective).mpr hf₂cne
+    have hcne' := (map_ne_zero_iff _
+      (pullbackCurveFunctionFieldEquiv W).injective).mpr
+      (germToFunctionField_unit_val_ne_zero (A c₀))
+    rw [SmoothPlaneCurve.ord_P_mul, SmoothPlaneCurve.ord_P_mul,
+      SmoothPlaneCurve.ord_P_inv _ hbne, SmoothPlaneCurve.ord_P_inv _ hcne']
+    rw [hf2i, hAi] at hled
+    -- the point-normalisation helper: zQm's image through the iso
+    have hzQpt : zQm.base (default : Spec (CommRingCat.of K)) =
+        ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (p.1.base (default : Spec (CommRingCat.of K))) := by
+      have h4 := congrArg (fun (m : Spec (CommRingCat.of K) ⟶
+          (modelEllipticCurve W).E) => m.base (default : Spec (CommRingCat.of K)))
+        hzQfst
+      simp only at h4
+      rw [show ((zQm ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (default : Spec (CommRingCat.of K)) =
+        ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zQm.base (default : Spec (CommRingCat.of K))) from rfl] at h4
+      have h5 := congrArg ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base h4
+      have hidpt2 := congrArg (fun (m : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⟶ (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) =>
+        m.base (zQm.base (default : Spec (CommRingCat.of K))))
+        (IsIso.hom_inv_id (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+      simp only at hidpt2
+      rw [show ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base
+          (zQm.base (default : Spec (CommRingCat.of K)))) =
+        (((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ≫ inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base
+          (zQm.base (default : Spec (CommRingCat.of K))) from rfl, hidpt2,
+        show ((𝟙 (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⟶ (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base
+          (zQm.base (default : Spec (CommRingCat.of K))) =
+          zQm.base (default : Spec (CommRingCat.of K)) from rfl] at h5
+      exact h5
+    -- the dictionary case split
+    rcases hpv : projModelPointsEquiv W K p with _ | ⟨x0, y0, h0⟩
+    · -- T = 0: both indicators are false
+      simp only [hpv] 
+      rw [EllipticCurve.basePointCast_zero,
+        show (WeierstrassCurve.Affine.Point.zero :
+            W.toAffine.Point).toProjectiveSmoothPoint =
+          (HasseWeil.Curves.ProjectiveSmoothPoint.infinity :
+            HasseWeil.Curves.ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve K)) from rfl,
+        if_neg (show ¬(HasseWeil.Curves.ProjectiveSmoothPoint.infinity :
+          HasseWeil.Curves.ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve K)) =
+          HasseWeil.Curves.ProjectiveSmoothPoint.affine ⟨x', y', hxy'⟩ from
+          fun h => by nomatch h)]
+      have hpz : p = ⟨Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫
+          projModelZero W, by
+        rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩ :=
+        (projModelPointsEquiv W K).injective
+          (by rw [hpv, projModelPointsEquiv_zero]; rfl)
+      have hf1iF : ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W ⟨x', y', hxy'⟩) ≠
+          zQm.base (default : Spec (CommRingCat.of K)) := by
+        intro hEq
+        rw [hzQpt, hpz] at hEq
+        have h6 := congrArg ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base hEq
+        have hidpt3 := congrArg (fun (m : (modelEllipticCurve W).E ⟶
+            (modelEllipticCurve W).E) =>
+            m.base (zChartPoint W ⟨x', y', hxy'⟩))
+          (IsIso.inv_hom_id (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+        simp only at hidpt3
+        rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base
+            (zChartPoint W ⟨x', y', hxy'⟩)) =
+          ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base
+            (zChartPoint W ⟨x', y', hxy'⟩) from rfl, hidpt3,
+          show ((𝟙 ((modelEllipticCurve W).E)) :
+            (modelEllipticCurve W).E ⟶ (modelEllipticCurve W).E).base
+            (zChartPoint W ⟨x', y', hxy'⟩) =
+            zChartPoint W ⟨x', y', hxy'⟩ from rfl] at h6
+        have hidpt4 := congrArg (fun (m : (modelEllipticCurve W).E ⟶
+            (modelEllipticCurve W).E) =>
+            m.base ((⟨Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫
+              projModelZero W, by
+                rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩ :
+              SpecPoints (projModel W) (projModelπ W) K).1.base
+              (default : Spec (CommRingCat.of K))))
+          (IsIso.inv_hom_id (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+        simp only at hidpt4
+        rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base
+            ((⟨Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫
+              projModelZero W, by
+                rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩ :
+              SpecPoints (projModel W) (projModelπ W) K).1.base
+              (default : Spec (CommRingCat.of K)))) =
+          ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base
+            ((⟨Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫
+              projModelZero W, by
+                rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]⟩ :
+              SpecPoints (projModel W) (projModelπ W) K).1.base
+              (default : Spec (CommRingCat.of K))) from rfl, hidpt4,
+          show ((𝟙 ((modelEllipticCurve W).E)) :
+            (modelEllipticCurve W).E ⟶ (modelEllipticCurve W).E).base _ = _ from
+            rfl] at h6
+        -- h6 : zChartPoint Q = the composite's point = projModelZero-image
+        letI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+          Proj.isAffineOpen_basicOpen _ _
+            (mk_X_mem_quotientGrading_one W 2) one_pos
+        have hQz2 : zChartPoint W ⟨x', y', hxy'⟩ ∈ EllipticCurve.zChart W := by
+          rw [← SetLike.mem_coe, ← hZaff.range_fromSpec]
+          exact Set.mem_range_self _
+        rw [h6] at hQz2
+        have hmem2 : (Spec.map (CommRingCat.ofHom (algebraMap K K))).base
+            (default : Spec (CommRingCat.of K)) ∈
+            projModelZero W ⁻¹ᵁ (EllipticCurve.zChart W) := hQz2
+        rw [projModelZero_not_preimage_zChart] at hmem2
+        simpa using hmem2
+      rw [if_neg hf1iF] at hf1i
+      -- ledger arithmetic: everything cancels
+      rw [hf1i] at hled
+      obtain ⟨va, hva⟩ := WithTop.ne_top_iff_exists.mp
+        (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr
+          ((map_ne_zero_iff _
+            (pullbackCurveFunctionFieldEquiv W).injective).mpr hf₁cne))
+      obtain ⟨vb, hvb⟩ := WithTop.ne_top_iff_exists.mp
+        (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hbne)
+      obtain ⟨vc, hvc⟩ := WithTop.ne_top_iff_exists.mp
+        (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hcne')
+      obtain ⟨vt, hvt⟩ := WithTop.ne_top_iff_exists.mp
+        (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hYne)
+      obtain ⟨v1, hv1⟩ := WithTop.ne_top_iff_exists.mp
+        (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hpbYne)
+      rw [← hva, ← hvb, ← hvc, ← hvt] at hled
+      rw [← hva, ← hvb, ← hvc, ← hv1]
+      rw [← hv1, ← hvt] at htrY
+      have hledZ : vt + vb + 0 + vc = 0 + 0 + va := by exact_mod_cast hled
+      have htrYZ : v1 = vt := by
+        simpa [WithTop.untopD_coe] using htrY
+      simp only [← WithTop.LinearOrderedAddCommGroup.coe_neg, ← WithTop.coe_add,
+        WithTop.untopD_coe]
+      omega
+    · sorry
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
 `pullbackCurveFunctionFieldEquiv`-image of the germ of a `globalTwist` of a global unit
