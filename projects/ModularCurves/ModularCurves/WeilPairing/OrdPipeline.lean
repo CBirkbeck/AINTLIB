@@ -187,4 +187,119 @@ theorem exists_const_mul_weilFunction
 
 end L1
 
+section L3
+
+variable {K : Type u} [Field K] [DecidableEq K] [IsAlgClosed K]
+variable (W : WeierstrassCurve K) [W.IsElliptic] [W.toAffine.IsElliptic]
+variable (hsm : SmoothOfRelativeDimension 1 (modelEllipticCurve W).π)
+variable [IsSeparated (modelEllipticCurve W).π]
+
+/-- **([TAU-INV], statement)** Translation by an `n`-torsion point fixes every
+`[n]`-pullback: `τ_S^# ∘ [n]^# = [n]^#` on the function field, since `[n] ∘ τ_S = [n]`
+at the point level for `n • S = 0`. -/
+theorem translateAlgEquivOfPoint_mulByInt_pullbackAlgHom
+    (S : W.toAffine.Point) (n : ℤ) (hn : (n : K) ≠ 0) (hn0 : n ≠ 0) (hS : n • S = 0)
+    (r : W.toAffine.FunctionField) :
+    HasseWeil.translateAlgEquivOfPoint W S
+        (HasseWeil.mulByInt_pullbackAlgHom W.toAffine n hn0 r) =
+      HasseWeil.mulByInt_pullbackAlgHom W.toAffine n hn0 r := by
+  sorry
+
+/-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
+`pullbackCurveFunctionFieldEquiv`-image of the germ of a `globalTwist` of a global unit
+of the base is the `algebraMap`-image of that unit read through `ΓSpecIso`. -/
+theorem pullbackCurveFunctionFieldEquiv_germ_globalTwist
+    [AlgebraicGeometry.IsIntegral (projModel W)]
+    (V : (pullback (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K)))).Opens) [Nonempty V]
+    (C : Γ(Spec (CommRingCat.of K), ⊤)ˣ) :
+    haveI : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+      inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+    haveI : AlgebraicGeometry.IsIntegral
+        (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+      isIntegral_pullback_id (modelEllipticCurve W)
+    pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π
+          (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField V
+          ((globalTwist (pullback.snd (modelEllipticCurve W).π
+            (𝟙 (Spec (CommRingCat.of K)))) V C :
+              Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), V)))) =
+      algebraMap K W.toAffine.FunctionField
+        ((Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
+          ((C : Γ(Spec (CommRingCat.of K), ⊤)))) := by
+  sorry
+
+/-- **([L3], statement)** The Katz–Mazur torsion-splitting value is the Silverman–Weil
+pairing: for the normalized dataset, the anchor-chart τ-relation (`U5-L2e`) transported
+through `pullbackCurveFunctionFieldEquiv` (`U5-L2f/L2g`) exhibits the transported
+splitting germ as a `τ_S`-eigenfunction with eigenvalue the KM value; the `[L1]`
+factorisation `H_HW · [N]^* r = c · g_T` and `weilPairing_spec` exhibit the same
+function with eigenvalue `e_N(S, T)`; eigenvalues of a fixed nonzero eigenfunction
+agree. -/
+theorem torsionSplittingEval_eq_weilPairing
+    [AlgebraicGeometry.IsIntegral (projModel W)]
+    [IsDedekindDomain (⟨W⟩ : HasseWeil.Curves.SmoothPlaneCurve K).CoordinateRing]
+    (N : ℕ) [NeZero N] (hNZ : ((N : ℤ) : K) ≠ 0) (hN0 : (N : ℤ) ≠ 0)
+    (Q : ((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))))
+    (hQ : Q ∈ torsionPoints (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N)
+    (M : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (pullback (modelEllipticCurve W).π (𝟙 (Spec (.of K))))
+      (kappa (modelEllipticCurve W) hsm (𝟙 (Spec (CommRingCat.of K))) Q).val =
+        toSkeleton M)
+    {ι' : Type*}
+    (Wc : ι' → (pullback (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K)))).Opens)
+    (hWc : iSup Wc = ⊤)
+    (e : ∀ i, M.over (Wc i) ≅
+      _root_.SheafOfModules.unit ((pullback (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K)))).ringCatSheaf.over (Wc i)))
+    (hnorm : ∀ i j, transitionUnitOfCover M Wc e i j ∈
+      sectionUnits (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero
+        (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K)))) (Wc i ⊓ Wc j))
+    (h : ∀ i, Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))),
+      mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc i)ˣ)
+    (hn : ∀ i, h i ∈ sectionUnits (baseChangeZero (modelEllipticCurve W).π
+        (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π
+        (𝟙 (Spec (CommRingCat.of K))))
+      (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc i))
+    (hsplit : ∀ i j, Units.map ((mulByN (modelEllipticCurve W)
+          (𝟙 (Spec (CommRingCat.of K))) N).app (Wc i ⊓ Wc j)).hom.toMonoidHom
+        (transitionUnitOfCover M Wc e i j) =
+      Scheme.resUnit (inf_le_left : mulByN (modelEllipticCurve W)
+          (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc i ⊓
+          mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc j ≤
+          mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc i)
+        (h i) *
+        (Scheme.resUnit (inf_le_right : mulByN (modelEllipticCurve W)
+            (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc i ⊓
+            mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc j ≤
+            mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc j)
+          (h j))⁻¹)
+    (c₀ : ι')
+    [Nonempty (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc c₀ :
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)]
+    (P' : ((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))))
+    (hP' : P' ∈ torsionPoints (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N)
+    [IsDominant (translateByPoint (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) P')]
+    (p pS : SpecPoints (projModel W) (projModelπ W) K)
+    (hxp : (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) Q ≫
+      baseChangeIdFstOver (modelEllipticCurve W)).left = p.1)
+    (hxpS : (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P' ≫
+      baseChangeIdFstOver (modelEllipticCurve W)).left = pS.1)
+    (hT : (N : ℤ) • EllipticCurve.basePointCast W (projModelPointsEquiv W K p) = 0)
+    (hS : (N : ℤ) • EllipticCurve.basePointCast W (projModelPointsEquiv W K pS) = 0) :
+    (Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
+        ((torsionSplittingEval (modelEllipticCurve W) hsm
+          (𝟙 (Spec (CommRingCat.of K))) N Q hQ M hM Wc hWc e hnorm P' hP' :
+            Γ(Spec (CommRingCat.of K), ⊤)ˣ) : Γ(Spec (CommRingCat.of K), ⊤)) =
+      HasseWeil.WeilPairing.weilPairing W (N : ℤ) hNZ
+        (EllipticCurve.basePointCast W (projModelPointsEquiv W K pS))
+        (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hS hT := by
+  sorry
+
+end L3
+
 end ModularCurves
