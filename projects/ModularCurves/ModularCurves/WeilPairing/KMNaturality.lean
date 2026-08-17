@@ -1542,6 +1542,32 @@ private theorem unitsMap_app_mulByN_pullbackMapIso {E F : EllipticCurve S}
     (le_rfl.trans ((((pullbackMapIso φ g).hom)).preimage_mono le_rfl))
     (le_of_eq (mulByN_preimage_pullbackMapIso φ g N V)) a).symm
 
+/-- **([RES-UMAP-RES])** The abstract four-restriction collapse: restricting a pulled
+unit of a restriction equals the doubly-restricted pull of the unit. Both sides are the
+`unitPullback` to the bottom open. -/
+private theorem resUnit_unitsMap_app_resUnit {X Y : Scheme.{u}} (f : X ⟶ Y)
+    {U₁ U₂ : Y.Opens} (hU : U₂ ≤ U₁) {V₁ V₂ : X.Opens}
+    (hV : V₂ ≤ f ⁻¹ᵁ U₂) (hV' : V₁ ≤ f ⁻¹ᵁ U₁) (hV₂₁ : V₂ ≤ V₁) (u : Γ(Y, U₁)ˣ) :
+    Scheme.resUnit hV (Units.map (f.app U₂).hom.toMonoidHom (Scheme.resUnit hU u)) =
+      Scheme.resUnit hV₂₁ (Scheme.resUnit hV' (Units.map (f.app U₁).hom.toMonoidHom u)) := by
+  have h1 : Units.map (f.app U₂).hom.toMonoidHom (Scheme.resUnit hU u) =
+      unitPullback f U₁ (f ⁻¹ᵁ U₂) (f.preimage_mono hU) u :=
+    (map_app_eq_unitPullback f U₂ (Scheme.resUnit hU u)).trans
+      (unitPullback_resUnit f hU le_rfl u)
+  have h2 : Scheme.resUnit hV (Units.map (f.app U₂).hom.toMonoidHom (Scheme.resUnit hU u)) =
+      unitPullback f U₁ V₂ (hV.trans (f.preimage_mono hU)) u :=
+    (congrArg (Scheme.resUnit hV) h1).trans
+      (resUnit_unitPullback f (f.preimage_mono hU) hV u)
+  have h3 : Scheme.resUnit hV' (Units.map (f.app U₁).hom.toMonoidHom u) =
+      unitPullback f U₁ V₁ hV' u :=
+    (congrArg (Scheme.resUnit hV') (map_app_eq_unitPullback f U₁ u)).trans
+      (resUnit_unitPullback f le_rfl hV' u)
+  have h4 : Scheme.resUnit hV₂₁ (Scheme.resUnit hV' (Units.map (f.app U₁).hom.toMonoidHom u)) =
+      unitPullback f U₁ V₂ (hV₂₁.trans hV') u :=
+    (congrArg (Scheme.resUnit hV₂₁) h3).trans
+      (resUnit_unitPullback f hV' hV₂₁ u)
+  exact h2.trans h4.symm
+
 /-- **([TSE-MAPISO], the E6-d mirror)** The torsion-splitting value is invariant under
 pointed record isos: the `E`-side evaluation on the [PB-ISO]-pulled dataset equals the
 `F`-side evaluation on the original dataset, both read at corresponding points. -/
