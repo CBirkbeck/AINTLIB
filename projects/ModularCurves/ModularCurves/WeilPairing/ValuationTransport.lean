@@ -160,9 +160,8 @@ theorem zChartLocalizationEquiv_compat (W : WeierstrassCurve K) [W.IsElliptic]
           ((coordRingToZSection W).symm a) :=
     (IsScalarTower.algebraMap_apply _ _ _ _).symm
   refine h1.trans ?_
-  -- Residual: `(IsLocalization.map_eq _ a).symm` — the six loc-instance implicits
-  -- refuse to pin blind (stuck metavars even goal-anchored); LSP-session one-liner.
-  sorry
+  symm
+  apply IsLocalization.map_eq
 
 /-- **(RP-3 transport, step 4a)** The scheme point of the Z-chart at a smooth point
 `P`: the `fromSpec`-image of the transported maximal ideal. -/
