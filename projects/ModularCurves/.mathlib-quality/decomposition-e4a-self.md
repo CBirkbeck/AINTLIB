@@ -1593,3 +1593,15 @@ restricted with the L1-orientation (r = f₂/f₁ = 0-over-Q equations — CHECK
 convention against weilFunction_divisor at assembly). NEXT BUILD: state div_pin at the
 zChart (ValuationTransport-context), prove from the chain; then r/G-glue statements;
 then the L1-assembly (H = a·g_Q·[N]^#(r⁻¹)) via L1b; then L3/L5/L6/U/E5.
+
+[DIV-PIN FORM RESOLVED — ORD-WISE LOCAL] (2026-08-17, cont.14): the infinity-question
+dissolves by stating DIV-PIN ORD-WISE AT CHART-POINTS (the doc's own "div r_i = (Q)−(O)
+on W_i" — LOCAL): for a point P IN the chart-open, ord_P(FF-image of the ker-span
+generator f) = (if P = section-point then 1 else 0) — no global divisorOf, no ∞ (∞ is
+not in the affine chart; the global div-G computation is pointwise via the cover).
+Statement lives in ValuationTransport-context (ord_P-vocabulary); proof = ker_eq_XYIdeal
++ RP-4 (at P = the point) + RP-5 (P ≠ the point: f ∉ maximalIdealAt-P since f spans
+ker-Q-ideal and P ∉ V(ker-Q) — the membership-argument via the span + P-in-chart-minus-Q)
+— all landed pieces. Then ord_P(r_c) = [P = 0pt] - [P = Qpt] per chart; div-G pointwise;
+L1b consumes. This is the next build-block, followed by r/G-glue, L1-assembly, L3, L5,
+L6, U-assembly, E5-assembly — the full remaining U5-path, every step with named tools.
