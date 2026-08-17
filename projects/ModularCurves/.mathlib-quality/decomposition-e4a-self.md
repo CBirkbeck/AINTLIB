@@ -1905,3 +1905,20 @@ then final := split-rfl.trans (congrArg-e5b-of-hstep₄).trans hfinal; (b) resta
 hL4b/pfTI-pieces at the (T ⋙ forget₂)-clothing throughout; (c) a clothing-crossing
 rfl-have at the PRESHEAF-map-level g-position. All the landed micro-lemmas are
 axiom-clean and reusable.
+
+★★ [mu-BRIDGE PROVEN AXIOM-CLEAN] (2026-08-17, cont.27): pullbackTensorObjIsoOfIsOpen
+Immersion_eq_mu COMPLETE. THE DECISIVE LESSON: the cont.26 "assembly storms" were NOT
+per-step costs — heartbeats are PER-DECL CUMULATIVE; the walk's landed haves had eaten
+the budget and every further step "stormed". FIX = extract the landed have-chains into
+private lemmas (mu_bridge_rhs, mu_bridge_lhs_e4 [statement-level IsIso haveI needed for
+its asIso-conclusion], mu_bridge_l4b, mu_bridge_l5) and re-run the IDENTICAL assembly
+steps in the slimmed main decl — hstep₄' (the previously-storming hL4b-congr), the
+hcross carrier-crossing rfl (previously storming!), hstep₅, and the final exact all
+landed VERBATIM. NEW BATTLE-RULE: on (deterministic) whnf/isDefEq timeout in a
+long proof, FIRST check the decl's cumulative weight — extract landed haves to private
+lemmas before redesigning the step. NativeRestriction now has TWO sorries: [SLOT-SQ]
+(:775) and [NR-1] (:792). SLOT-SQ's mu-route now has its key brick: slot re-expressed
+via mu (tensorObjUnitIso/tensorObjCongr/mu-BRIDGE) + pullbackComp_hom_isMonoidal +
+Congr-subst + Functor.Monoidal coherences. NR-1 then per cont.20 (1a-instances + 1b +
+SLOT-SQ at elements via pullbackUnit_map_transportT + the [NR-unit-val] general-z
+pullbackUnitIso-collapse [statement drafted, re-add from cont.26 scratch]).
