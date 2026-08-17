@@ -1036,6 +1036,93 @@ private theorem ker_chartSolutionHom_eq_map_maximalIdealAt
       exact chartSolutionHom_symm_YClass W x y h P hPy
   exact (hmapmax.eq_of_le hkermax.ne_top hle).symm
 
+/-- **([PT-0-i])** The chart point's scheme point through the `awayι` factorisation. -/
+private theorem chartSpecPoint_base_eq_awayι
+    (x y : K) (h : (W.baseChange K).toAffine.Equation x y) :
+    (chartSpecPoint W x y h).1.base (default : Spec (CommRingCat.of K)) =
+      (Proj.awayι ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2)) (mk_X_mem_quotientGrading_one W 2) one_pos).base
+        ((Spec.map (CommRingCat.ofHom (chartSolutionHom W x y h))).base
+          (default : Spec (CommRingCat.of K))) := by
+  have h0 : chartSpecPointZ W x y h =
+      ⟨chartSpecPoint W x y h, inZChart_chartSpecPoint W x y h⟩ :=
+    (Subtype.coe_eta _ _).symm
+  have hhom : (chartHomEquiv W 2 K (chartSpecPointZ W x y h)).1 =
+      chartSolutionHom W x y h := by
+    rw [h0, chartHomEquiv_chartSpecPoint W x y h (inZChart_chartSpecPoint W x y h)]
+    rfl
+  have hfac := chartHomEquiv_specMap_factors W 2 (chartSpecPointZ W x y h)
+  rw [hhom] at hfac
+  have hpt := congrArg (fun (m : Spec (CommRingCat.of K) ⟶ projModel W) =>
+    m.base (default : Spec (CommRingCat.of K))) hfac
+  simp only at hpt
+  show ((chartSpecPointZ W x y h).1).1.base (default : Spec (CommRingCat.of K)) = _
+  rw [← hpt]
+  rfl
+
+/-- **([PT-0-ii])** `zChartPoint` through the `awayι` factorisation (the
+`fromSpec`/`awayι` bridge). -/
+private theorem zChartPoint_eq_awayι
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) :
+    zChartPoint W P =
+      (Proj.awayι ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2)) (mk_X_mem_quotientGrading_one W 2) one_pos).base
+        ((Spec.map (Proj.awayToSection ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2)))).base
+          ⟨zChartMaximalIdeal W P, (zChartMaximalIdeal_isMaximal W P).isPrime⟩) := by
+  letI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  show hZaff.fromSpec.base
+    ⟨zChartMaximalIdeal W P, (zChartMaximalIdeal_isMaximal W P).isPrime⟩ = _
+  rw [show hZaff.fromSpec = Spec.map (Proj.awayToSection ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2))) ≫
+      (Proj.awayι ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2)) (mk_X_mem_quotientGrading_one W 2) one_pos) from
+    Proj_fromSpec_awayToSection_awayι ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos]
+  rfl
+
+/-- **([PT-0-iii])** The two `Spec`-side primes agree: the solution-hom kernel is the
+transported maximal ideal (PT-0a) and the section iso cancels. -/
+private theorem specMap_chartSolutionHom_default_eq
+    (x y : K) (h : (W.baseChange K).toAffine.Equation x y)
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) (hPx : P.x = x) (hPy : P.y = y) :
+    (Spec.map (CommRingCat.ofHom (chartSolutionHom W x y h))).base
+      (default : Spec (CommRingCat.of K)) =
+    (Spec.map (Proj.awayToSection ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2)))).base
+      ⟨zChartMaximalIdeal W P, (zChartMaximalIdeal_isMaximal W P).isPrime⟩ := by
+  rw [Spec.map_apply, Spec.map_apply]
+  apply PrimeSpectrum.ext
+  show Ideal.comap (chartSolutionHom W x y h)
+      ((default : Spec (CommRingCat.of K)) : PrimeSpectrum K).asIdeal =
+    Ideal.comap (Proj.awayToSection ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2))).hom (zChartMaximalIdeal W P)
+  have hbot : ((default : Spec (CommRingCat.of K)) : PrimeSpectrum K).asIdeal =
+      (⊥ : Ideal K) := rfl
+  rw [hbot]
+  rw [show Ideal.comap (chartSolutionHom W x y h) (⊥ : Ideal K) =
+    RingHom.ker (chartSolutionHom W x y h) from rfl]
+  rw [ker_chartSolutionHom_eq_map_maximalIdealAt W x y h P hPx hPy]
+  have hsplit : zChartMaximalIdeal W P =
+      Ideal.map (Proj.awayToSection ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2))).hom
+        (Ideal.map ((chartZRingEquiv W).symm) ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P)) := by
+    rw [show Ideal.map ((chartZRingEquiv W).symm) ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P) =
+      Ideal.map ((chartZRingEquiv W).symm.toRingHom) ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P) from
+      rfl, Ideal.map_map]
+    exact congrArg (fun (g : W.toAffine.CoordinateRing → Γ(projModel W, EllipticCurve.zChart W)) =>
+      Ideal.span (g '' ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P))) (funext fun a => rfl)
+  haveI hiso : IsIso (Proj.awayToSection ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2))) :=
+    inferInstanceAs (IsIso (Proj.basicOpenIsoAway ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).hom)
+  rw [hsplit, Ideal.comap_map_of_bijective _
+    (ConcreteCategory.bijective_of_isIso (Proj.awayToSection ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2))))]
+
+/-- **([PT-0])** The scheme point of a chart-constructed `K`-point is `zChartPoint`
+of the corresponding smooth point. -/
+private theorem chartSpecPoint_base_default_eq_zChartPoint
+    (x y : K) (h : (W.baseChange K).toAffine.Equation x y)
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) (hPx : P.x = x) (hPy : P.y = y) :
+    (chartSpecPoint W x y h).1.base (default : Spec (CommRingCat.of K)) =
+      zChartPoint W P :=
+  (chartSpecPoint_base_eq_awayι W x y h).trans
+    ((congrArg (Proj.awayι ((projIdeal W).quotientGrading) (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2)) (mk_X_mem_quotientGrading_one W 2) one_pos).base
+      (specMap_chartSolutionHom_default_eq W x y h P hPx hPy)).trans
+    (zChartPoint_eq_awayι W P).symm)
+
 /-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
 of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
 Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
