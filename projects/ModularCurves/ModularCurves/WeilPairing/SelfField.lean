@@ -91,6 +91,39 @@ theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq 
     (modelEllipticCurve W).smooth (𝟙 (Spec (CommRingCat.of K))) Q
   obtain ⟨edict⟩ := nonempty_tensorObj_sectionIdeal_iso_zeroIdeal_of_field
     (modelEllipticCurve W) (modelEllipticCurve W).smooth Q M hM
+  -- stage 3b: officiality covers + the G2′ dataset
+  have hsmPB : SmoothOfRelativeDimension 1
+      (pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) _ _
+      (modelEllipticCurve W).smooth
+  have h₁ := (RelEffCartierDiv.sectionDivisor_isOfficial hsmPB
+    (Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) Q.2).locallyPrincipal
+  have h₂ := (RelEffCartierDiv.sectionDivisor_isOfficial hsmPB
+    (Scheme.Modules.baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero
+      (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K))))
+    (Scheme.Modules.baseChangeZero_snd _ _ _ _)).locallyPrincipal
+  haveI hsepT : IsSeparated (terminal.from (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) := by
+    haveI h1 : IsSeparated (pullback.snd (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K)))) :=
+      MorphismProperty.pullback_snd (P := @IsSeparated) _ _ ‹_›
+    haveI h2 : IsSeparated (pullback.snd (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K))) ≫ terminal.from (Spec (CommRingCat.of K))) :=
+      inferInstance
+    rw [show terminal.from (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) =
+      pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) ≫
+        terminal.from (Spec (CommRingCat.of K)) from (terminal.comp_from _).symm]
+    exact h2
+  haveI hdiag : IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))) :=
+    inferInstance
+  obtain ⟨V, f₁, f₂, ι', Wc, hWc, e, ch, A, hspan₁, hnzd₁, hspan₂, hnzd₂, hnorm, hWch, hu⟩ :=
+    exists_normalized_chart_dataset_perChart (modelEllipticCurve W)
+      (modelEllipticCurve W).smooth (𝟙 (Spec (CommRingCat.of K))) Q M hM
+      (Scheme.Hom.ker (Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+      (Scheme.Hom.ker (Scheme.Modules.baseChangeZero (modelEllipticCurve W).π
+        (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π
+        (𝟙 (Spec (CommRingCat.of K)))))
+      edict h₁ h₂
   -- stages 4–5
   sorry
 
