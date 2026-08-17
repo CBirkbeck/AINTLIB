@@ -859,6 +859,163 @@ private theorem secOrd_ord_f0_eq_one
         ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P))) hround)).trans h9
   exact uniformizer_of_localized_span W P ((coordRingToZSection W).symm f₀) hgen
 
+/-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
+of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
+Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
+fraction numerators is a power of the shrink denominator, so neither lies in the
+maximal ideal, and `ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt` closes. -/
+theorem ord_P_germ_unit_section
+    [AlgebraicGeometry.IsIntegral (projModel W)]
+    (U : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) [Nonempty U]
+    (u : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U)ˣ)
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (hPU : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈ U) :
+    haveI : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+      inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+    haveI : AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+      isIntegral_pullback_id (modelEllipticCurve W)
+    (⟨W⟩ : SmoothPlaneCurve K).ord_P P
+      (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField U (u : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U)))) = 0 := by
+  haveI hIntE : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+    inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+  haveI hInt : AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    isIntegral_pullback_id (modelEllipticCurve W)
+  haveI hNeV' : Nonempty ↥((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ U) := ⟨⟨zChartPoint W P, hPU⟩⟩
+  have h1 : ∀ w : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U),
+      pullbackCurveFunctionFieldEquiv W ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField U w) =
+      EllipticCurve.projModelFunctionFieldEquiv W
+        ((@Scheme.germToFunctionField (projModel W) _ ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ U) hNeV')
+          ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app U w)) := fun w =>
+    congrArg (⇑(EllipticCurve.projModelFunctionFieldEquiv W))
+      (functionFieldMap_germToFunctionField (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) U w)
+  haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  have hPz : zChartPoint W P ∈ EllipticCurve.zChart W := by
+    rw [← SetLike.mem_coe, ← hZaff.range_fromSpec]
+    exact Set.mem_range_self _
+  obtain ⟨s, hsle, hPs⟩ := hZaff.exists_basicOpen_le
+    (V := (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ U ⊓ EllipticCurve.zChart W)
+    ⟨zChartPoint W P, ⟨hPU, hPz⟩⟩ hPz
+  haveI hNeD : Nonempty ↥((projModel W).basicOpen s).toScheme :=
+    ⟨⟨zChartPoint W P, hPs⟩⟩
+  haveI hAway : IsLocalization.Away s Γ(projModel W, (projModel W).basicOpen s) :=
+    hZaff.isLocalization_basicOpen s
+  haveI hNeZ : Nonempty (EllipticCurve.zChart W) := ⟨⟨zChartPoint W P, hPz⟩⟩
+  -- the two restricted sections and their fraction data
+  set xD : Γ(projModel W, (projModel W).basicOpen s) :=
+    (projModel W).presheaf.map (homOfLE (hsle.trans inf_le_left)).op
+      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app U (u : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U))) with hxD
+  set xE : Γ(projModel W, (projModel W).basicOpen s) :=
+    (projModel W).presheaf.map (homOfLE (hsle.trans inf_le_left)).op
+      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app U ((u⁻¹ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U))) with hxE
+  have hmm := map_mul (((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app U).hom)
+    (u : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U)) ((u⁻¹ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U))
+  have hprod : xD * xE = 1 := by
+    rw [hxD, hxE, ← map_mul, ← hmm, show ((u : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U)) *
+      ((u⁻¹ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U))) = 1 from by exact_mod_cast u.mul_inv,
+      map_one, map_one]
+  have hrepD := IsLocalization.Away.sec_spec
+    (S := Γ(projModel W, (projModel W).basicOpen s)) s xD
+  have hrepE := IsLocalization.Away.sec_spec
+    (S := Γ(projModel W, (projModel W).basicOpen s)) s xE
+  have halg : ∀ r : Γ(projModel W, EllipticCurve.zChart W),
+      (algebraMap Γ(projModel W, EllipticCurve.zChart W)
+        Γ(projModel W, (projModel W).basicOpen s)) r =
+      (projModel W).presheaf.map
+        (homOfLE ((projModel W).basicOpen_le s)).op r := fun r => rfl
+  -- the product identity in the chart ring
+  haveI hDomA : IsDomain Γ(projModel W, EllipticCurve.zChart W) :=
+    (coordRingToZSection W).symm.toMulEquiv.isDomain W.toAffine.CoordinateRing
+  have hsnotmem : s ∉ zChartMaximalIdeal W P :=
+    secOrd_s_notMem_zChartMaximalIdeal W P s hPs
+  have hs0 : s ≠ 0 := fun h0 => hsnotmem (by rw [h0]; exact Ideal.zero_mem _)
+  have hkey : (IsLocalization.Away.sec s xD).1 * (IsLocalization.Away.sec s xE).1 =
+      s ^ ((IsLocalization.Away.sec s xD).2 + (IsLocalization.Away.sec s xE).2) := by
+    have h2 := congrArg₂ (· * ·) hrepD hrepE
+    rw [show xD * (algebraMap Γ(projModel W, EllipticCurve.zChart W) Γ(projModel W, (projModel W).basicOpen s)) (s ^ (IsLocalization.Away.sec s xD).2) *
+        (xE * (algebraMap Γ(projModel W, EllipticCurve.zChart W) Γ(projModel W, (projModel W).basicOpen s)) (s ^ (IsLocalization.Away.sec s xE).2)) =
+      (xD * xE) * ((algebraMap Γ(projModel W, EllipticCurve.zChart W) Γ(projModel W, (projModel W).basicOpen s)) (s ^ (IsLocalization.Away.sec s xD).2) *
+        (algebraMap Γ(projModel W, EllipticCurve.zChart W) Γ(projModel W, (projModel W).basicOpen s)) (s ^ (IsLocalization.Away.sec s xE).2)) from by ring,
+      hprod, one_mul, ← map_mul, ← pow_add, ← map_mul] at h2
+    exact (IsLocalization.injective (M := Submonoid.powers s) Γ(projModel W, (projModel W).basicOpen s)
+      (powers_le_nonZeroDivisors_of_noZeroDivisors hs0) h2).symm
+  -- the numerator avoids the transported maximal ideal
+  haveI hmprime := (zChartMaximalIdeal_isMaximal W P).isPrime
+  have hf0A : (IsLocalization.Away.sec s xD).1 ∉ zChartMaximalIdeal W P := by
+    intro hmem
+    refine hsnotmem (hmprime.mem_of_pow_mem
+      ((IsLocalization.Away.sec s xD).2 + (IsLocalization.Away.sec s xE).2) ?_)
+    rw [← hkey]
+    exact Ideal.mul_mem_right _ _ hmem
+  have hf0ne : (IsLocalization.Away.sec s xD).1 ≠ 0 := by
+    intro h0
+    have hz : s ^ ((IsLocalization.Away.sec s xD).2 +
+        (IsLocalization.Away.sec s xE).2) = 0 := by
+      rw [← hkey, h0, zero_mul]
+    exact pow_ne_zero ((IsLocalization.Away.sec s xD).2 +
+      (IsLocalization.Away.sec s xE).2) hs0 hz
+  -- transport to the coordinate ring
+  have hs'notmem : (coordRingToZSection W).symm (IsLocalization.Away.sec s xD).1 ∉
+      (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P := fun hmem => by
+    have h3 := Ideal.mem_map_of_mem (coordRingToZSection W) hmem
+    rw [show (coordRingToZSection W) ((coordRingToZSection W).symm
+        (IsLocalization.Away.sec s xD).1) = (IsLocalization.Away.sec s xD).1 from
+      (coordRingToZSection W).apply_symm_apply _] at h3
+    exact hf0A h3
+  have hs'0 : (coordRingToZSection W).symm (IsLocalization.Away.sec s xD).1 ≠ 0 :=
+    fun h0 => by
+    have h4 := congrArg (coordRingToZSection W) h0
+    rw [(coordRingToZSection W).apply_symm_apply _, map_zero] at h4
+    exact hf0ne h4
+  -- the FF equation for the u-side and its order
+  have hFFeq : EllipticCurve.projModelFunctionFieldEquiv W
+        ((projModel W).germToFunctionField ((projModel W).basicOpen s) xD) *
+      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+        ((coordRingToZSection W).symm s)) ^ (IsLocalization.Away.sec s xD).2 =
+      algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+        ((coordRingToZSection W).symm (IsLocalization.Away.sec s xD).1) := by
+    have h := congrArg (fun t =>
+      EllipticCurve.projModelFunctionFieldEquiv W
+        ((projModel W).germToFunctionField ((projModel W).basicOpen s) t)) hrepD
+    simp only [map_mul, map_pow] at h
+    rw [halg, halg] at h
+    rw [show (projModel W).germToFunctionField ((projModel W).basicOpen s)
+        ((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op s) =
+      (projModel W).germToFunctionField (EllipticCurve.zChart W) s from
+      (projModel W).presheaf.germ_res_apply
+        (homOfLE ((projModel W).basicOpen_le s)) _ _ s] at h
+    rw [show (projModel W).germToFunctionField ((projModel W).basicOpen s)
+        ((projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op
+          (IsLocalization.Away.sec s xD).1) =
+      (projModel W).germToFunctionField (EllipticCurve.zChart W)
+        (IsLocalization.Away.sec s xD).1 from
+      (projModel W).presheaf.germ_res_apply
+        (homOfLE ((projModel W).basicOpen_le s)) _ _
+        (IsLocalization.Away.sec s xD).1] at h
+    rw [projModelFunctionFieldEquiv_germToFunctionField_zChart W s,
+      projModelFunctionFieldEquiv_germToFunctionField_zChart W
+        (IsLocalization.Away.sec s xD).1] at h
+    exact h
+  have hordeq := congrArg ((⟨W⟩ : SmoothPlaneCurve K).ord_P P) hFFeq
+  rw [SmoothPlaneCurve.ord_P_mul, SmoothPlaneCurve.ord_P_pow,
+    secOrd_sPrime_ord_zero W P s hPs, smul_zero, add_zero] at hordeq
+  -- align the goal and close via the maximal-ideal bridge
+  have h2g : (projModel W).germToFunctionField ((projModel W).basicOpen s) xD =
+      @Scheme.germToFunctionField (projModel W) _ ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ U) hNeV'
+        ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app U (u : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U))) :=
+    (projModel W).presheaf.germ_res_apply
+      (homOfLE (hsle.trans inf_le_left)) _ _
+      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app U (u : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U)))
+  refine Eq.trans (congrArg ((⟨W⟩ : SmoothPlaneCurve K).ord_P P)
+    ((h1 (u : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), U))).trans
+      (congrArg (⇑(EllipticCurve.projModelFunctionFieldEquiv W)) h2g.symm))) ?_
+  refine hordeq.trans ?_
+  by_contra hne
+  exact hs'notmem
+    (((⟨W⟩ : SmoothPlaneCurve K).ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt
+      hs'0 P).mp hne)
+
 open scoped Classical in
 /-- **([SEC-ORD], statement)** The pointwise order of a section-kernel chart
 generator: for a `Spec K`-section `z` of the base-changed curve and a chart `V` on
