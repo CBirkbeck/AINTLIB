@@ -1403,6 +1403,58 @@ theorem kappa_mapIso {E F : EllipticCurve S}
             (Scheme.Pic.map (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g) x'))⁻¹
           from rfl)).symm
 
+/-- **([HM-MAPISO])** The dataset skeleton-condition transports along [PB-ISO]:
+a `κ_F`-representative pulls back to a `κ_E`-representative. -/
+theorem hM_mapIso {E F : EllipticCurve S}
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsm' : SmoothOfRelativeDimension 1 F.π) [IsSeparated F.π]
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {T : Scheme.{u}} (g : T ⟶ S)
+    (Q : (E.baseChange g).Point (𝟙 T))
+    (hQF : (Q.1 ≫ (pullbackMapIso φ g).hom) ≫ pullback.snd F.π g = 𝟙 T)
+    (A : (pullback F.π g).Modules)
+    (hA : letI := Scheme.Modules.monoidalCategory (pullback F.π g)
+      (kappa F hsm' g (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ :
+        (F.baseChange g).Point (𝟙 T))).val = toSkeleton A) :
+    letI := Scheme.Modules.monoidalCategory (pullback E.π g)
+    (kappa E hsm g Q).val =
+      toSkeleton ((Scheme.Modules.pullback (pullbackMapIso φ g).hom).obj A) := by
+  letI := Scheme.Modules.monoidalCategory (pullback E.π g)
+  letI := Scheme.Modules.monoidalCategory (pullback F.π g)
+  have hA' : (kappa F hsm' g (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ :
+      (F.baseChange g).Point (𝟙 T))).val = toSkeleton A := hA
+  calc (kappa E hsm g Q).val
+      = (Scheme.Pic.map (pullbackMapIso φ g).hom
+          (kappa F hsm' g (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ :
+            (F.baseChange g).Point (𝟙 T)))).val :=
+        congrArg Units.val (kappa_mapIso hsm hsm' φ g Q hQF).symm
+    _ = (Scheme.Modules.pullback (pullbackMapIso φ g).hom).mapSkeleton.obj
+          (kappa F hsm' g (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ :
+            (F.baseChange g).Point (𝟙 T))).val := Scheme.Pic.map_val _ _
+    _ = (Scheme.Modules.pullback (pullbackMapIso φ g).hom).mapSkeleton.obj
+          (toSkeleton A) := congrArg _ hA'
+    _ = toSkeleton ((Scheme.Modules.pullback (pullbackMapIso φ g).hom).obj A) :=
+        Functor.mapSkeleton_obj_toSkeleton _ A
+
+/-- **([HNORM-MAPISO])** Normalisation of the pulled dataset along [PB-ISO]: the
+transported transitions are still zero-section normalised (pointedness). -/
+theorem hnorm_mapIso {E F : EllipticCurve S}
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {T : Scheme.{u}} (g : T ⟶ S)
+    (A : (pullback F.π g).Modules)
+    {J : Type*} (W : J → (pullback F.π g).Opens)
+    (e : ∀ i, A.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback F.π g).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover A W e i j ∈
+      sectionUnits (Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g) (W i ⊓ W j))
+    (i j : J) :
+    transitionUnitOfCover ((Scheme.Modules.pullback (pullbackMapIso φ g).hom).obj A)
+        (fun i => (pullbackMapIso φ g).hom ⁻¹ᵁ W i)
+        (fun i => localPullbackTrivializationT (pullbackMapIso φ g).hom A (W i) (e i)) i j ∈
+      sectionUnits (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g)
+        ((pullbackMapIso φ g).hom ⁻¹ᵁ W i ⊓ (pullbackMapIso φ g).hom ⁻¹ᵁ W j) := by
+  rw [transitionUnitOfCover_localPullback (pullbackMapIso φ g).hom A W e i j]
+  exact mem_sectionUnits_pullback (baseChangeZero_comp_pullbackMapIso φ g)
+    (W i ⊓ W j) (hnorm i j)
+
 end EllipticCurve
 
 end MapIso
