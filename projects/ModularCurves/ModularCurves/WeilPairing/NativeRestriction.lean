@@ -232,6 +232,24 @@ theorem restrictTransportSection_naturality {V W : X.Opens} (hWV : W ≤ V)
           (Opposite.op (⊤ : V.toScheme.Opens)) x) := h4.symm
   exact s4
 
+/-- **([μ-BRIDGE], statement)** The ad-hoc open-immersion tensor comparison is the
+monoidal `μ` conjugated by the definite `tensorObj`-vs-`⊗` bridges. With it, every
+transport square of the slot construction reduces to the `Functor.Monoidal` API and
+`pullbackComp_hom_isMonoidal`. Proof route (cont.25b): compare on
+adjunction-unit/`tensorSection` elements via the `PullbackTensorSection` formula
+library, then sheafification-adjunction hom-ext. -/
+theorem pullbackTensorObjIsoOfIsOpenImmersion_eq_mu {Y : Scheme.{u}} (f : Y ⟶ X)
+    [IsOpenImmersion f] (A B : X.Modules) :
+    letI := Scheme.Modules.monoidalCategory X
+    letI := Scheme.Modules.monoidalCategory Y
+    letI : (Scheme.Modules.pullback f).Monoidal := Scheme.Modules.pullbackMonoidal f
+    pullbackTensorObjIsoOfIsOpenImmersion f A B =
+      (Scheme.Modules.pullback f).mapIso (monoidalTensorObjIso A B).symm ≪≫
+        (Functor.Monoidal.μIso (Scheme.Modules.pullback f) A B).symm ≪≫
+        monoidalTensorObjIso ((Scheme.Modules.pullback f).obj A)
+          ((Scheme.Modules.pullback f).obj B) := by
+  sorry
+
 /-- **([SLOT-SQ], the map-level brick)** The tensor-slot construction commutes with the
 open-restriction transport: the one genuinely monoidal square of the `ν`-naturality.
 Proof route (cont.20): sources are sheafification-images (open-immersion presheaf
