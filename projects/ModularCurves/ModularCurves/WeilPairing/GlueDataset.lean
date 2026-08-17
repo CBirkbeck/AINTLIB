@@ -93,6 +93,19 @@ private theorem transitionUnit_restrict_rescale {Y : Scheme.{u}} {M : Y.Modules}
       (inf_le_inf hUi hUj) (inf_le_right : Wi ⊓ Wj ≤ Wj))).trans ?_
   exact trivializationTransitionUnit_restrict (inf_le_inf hUi hUj) _ _
 
+private theorem res_res {Y : Scheme.{u}} {A B C : Y.Opens}
+    (hAB : A ≤ B) (hBC : B ≤ C) (x : Γ(Y, C)) :
+    Y.presheaf.map (homOfLE hAB).op (Y.presheaf.map (homOfLE hBC).op x) =
+      Y.presheaf.map (homOfLE (hAB.trans hBC)).op x := by
+  have h := congrArg (fun (φ : _ ⟶ _) =>
+    (CategoryTheory.ConcreteCategory.hom (Y.presheaf.map φ)) x)
+    (Subsingleton.elim ((homOfLE hBC).op ≫ (homOfLE hAB).op)
+      (homOfLE (hAB.trans hBC)).op)
+  refine Eq.trans ?_ h
+  exact (congrArg (fun (φ : _ ⟶ _) =>
+    (CategoryTheory.ConcreteCategory.hom φ) x)
+    (Y.presheaf.map_comp (homOfLE hBC).op (homOfLE hAB).op)).symm
+
 /-- **([G2] the normalized chart dataset)** From a `κ(Q)`-presentation `M` with a
 tensor-ideal dictionary and common-principal covers for both ideals, there is a
 zero-section–normalized trivialisation dataset for `M` whose transitions on every
@@ -211,7 +224,19 @@ theorem exists_normalized_chart_dataset
     intro a b hne
     cases a with
     | inl i => cases b with
-      | inl j => sorry
+      | inl j =>
+          have hne₀ : Nonempty ↥((W₀ i ⊓ W₀ j : (pullback E.π t).Opens)) :=
+            ⟨⟨hne.some.1, ⟨hne.some.2.1.1, hne.some.2.2.1⟩⟩⟩
+          obtain ⟨a₀, b₀, u₁₀, u₂₀, heq₀, hu₁₀, hu₂₀⟩ :=
+            exists_transition_dressed_of_charts M J₁ J₂ e_dict W₀ e₀ i j
+              (V i) (V j) rfl rfl (f₁ i) (f₂ i) (f₁ j) (f₂ j)
+              (hspan₁ i) (hnzd₁ i) (hfmem₁ i) (hspan₂ i) (hnzd₂ i) (hfmem₂ i)
+              (hspan₁ j) (hnzd₁ j) (hfmem₁ j) (hspan₂ j) (hnzd₂ j) (hfmem₂ j) hne₀
+          have hform := transitionUnit_restrict_rescale
+            (inf_le_left : W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i) ≤ W₀ i)
+            (inf_le_left : W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j) ≤ W₀ j)
+            (e₀ i) (e₀ j) (cZ i) (cZ j)
+          sorry
       | inr j => sorry
     | inr i => cases b with
       | inl j => sorry
