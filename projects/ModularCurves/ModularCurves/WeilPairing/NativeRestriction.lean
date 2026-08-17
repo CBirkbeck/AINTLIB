@@ -430,6 +430,24 @@ theorem pullbackIdealTrivOfGen_symm_hom_app_one (J : X.IdealSheafData)
   -- realignment of the restrictUnit-argument) and the final .val-vs-.presheaf rfl
   sorry
 
+/-- **([NR-congr-unit])** `pullbackCongr` on an adjunction-unit image: for equal
+morphisms the congruence re-index carries the `g`-unit image to the `f`-unit image
+(proved by `subst`; the instantiation at `homOfLE_ι` supplies the propositional
+crossing of the slot-square walk). -/
+theorem pullbackCongr_app_inv_app_unit {X' Y' : Scheme.{u}} {f g : Y' ⟶ X'}
+    (h : f = g) (P : X'.Modules) (U : X'.Opens) (w : P.val.obj (Opposite.op U)) :
+    ((Scheme.Modules.pullbackCongr h).app P).inv.val.app
+        (Opposite.op (f ⁻¹ᵁ U))
+        ((show ((Scheme.Modules.pullback g).obj P).val.obj
+            (Opposite.op (f ⁻¹ᵁ U)) from by
+          rw [h]
+          exact ((Scheme.Modules.pullbackPushforwardAdjunction g).unit.app P).val.app
+            (Opposite.op U) w)) =
+      ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app P).val.app
+        (Opposite.op U) w := by
+  subst h
+  rfl
+
 /-- **([NR-congr-unit-tmul])** `tensorObjCongr` on a sheafification-unit image of a
 pure tensor (small binders: the instantiation at the large pullback objects is by term
 application). -/
