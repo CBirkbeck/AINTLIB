@@ -2221,3 +2221,27 @@ EXECUTE: (1) read NR-3's exact statement + find/prove transitionUnit-res-compat
 construction verbatim + per-branch: dressed-native as-is, then rewrite a := res(A i)
 · b := res(A j) via the helper, absorb the cZ-rescale into A-total (inl: cZ i · A i;
 inr: A i); the u-relations carry unchanged. All pieces proven — assembly only.
+
+[G2' ASSEMBLY DESIGN] (2026-08-17, cont.30i): confirmed NR-3 is ON-THE-NOSE
+(restrictTrivialization hWV (native-V) = native-W-of-res-gens, needs hmono of res-g₂)
+and trivializationTransitionUnit_restrict gives res-of-transition = transition-of-res.
+DEFINE A a := trivializationTransitionUnit (W a) (e a) (native-W-a-triv at res'd
+ch-a-chart generators) — against the FULL e-a (cZ-rescale absorbed ✓). PER-OVERLAP:
+t_ab = res(A a) · (u₂u₁⁻¹) · res(A b)⁻¹ via the dressed-native calc-shape
+(hc1/hc2/hb/hmid) with the a/b-legs rewritten: transitionUnit(res-e-a, res-native-a)
+= [transitionUnit_restrict] res(A a) after [NR-3] identifies res-native-a =
+native-overlap-res-gens; mid = u₂u₁⁻¹ via trivializationTransitionUnit_overTriv_of_
+inv_comp_hom + nativeTensorIdealTriv_inv_comp_hom (verbatim from dressed-native).
+OPEN PLUMBING QUESTION: per-PIECE generator instances — the pieces W-a (chart ⊓
+z-preimage / chart ⊓ Zc) are NOT affine; need (i) idealSections-membership of res-gens
+on W-a (idealSections_map ✓ trivial), (ii) IsIso (idealGenHom J (W a) res-g) — from
+the chart-level IsIso by restriction: grep idealGenHom-restriction-compat lemmas
+(candidates: idealGenHom_restrict / restrictTrivialization-machinery in
+NativeRestriction — the pullbackIdealTrivOfGen existence at chart-level shows the
+chart-iso; the restriction-functor maps isos to isos IF idealGenHom-res-compat
+exists); (iii) hmono at overlap-level res-g₂ (the base derived Mono from nzd via
+IsIntegral germ-injectivity — mono_unitEndomorphismOfTopSection_of_nzd-ish, grep how
+dressed_of_charts got hmono). If (ii) lacks a compat-lemma, prove
+idealGenHom_restrictTrivialization: restrictTrivialization-of-idealGenHom-iso or the
+direct statement idealGenHom J W' (res g) = conjugated-restriction — one more
+NR-battery micro (the toolkit patterns apply).
