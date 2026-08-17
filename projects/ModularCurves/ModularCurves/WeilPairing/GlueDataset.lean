@@ -726,6 +726,58 @@ theorem exists_normalized_chart_dataset
               (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)))) hco).trans hkey
 
 
+/-- Abstract commutative-group shuffle for the per-chart dressing rearrangement. -/
+private theorem units_shuffle {G : Type*} [CommGroup G] {A A' B B' c d u₁ u₂ : G}
+    (hA : A = A') (hB : B = B') :
+    A * (u₂ * (u₁⁻¹ * (B⁻¹ * (c⁻¹ * d)))) =
+      A' * (c⁻¹ * (u₂ * (u₁⁻¹ * (d * B'⁻¹)))) := by
+  subst hA
+  subst hB
+  ac_rfl
+
+/-- **([G2′ piece-step])** The transition of two rescaled restricted trivialisations,
+given the per-chart dressed form of the chart-level transition: restrict, insert the
+rescale dressing, fuse the restrictions, shuffle. One declaration per the
+per-declaration-budget rule. -/
+private theorem perChart_piece_transition {Y : Scheme.{u}} {M : Y.Modules}
+    {Wi Wj Ui Uj : Y.Opens} (hUi : Ui ≤ Wi) (hUj : Uj ≤ Wj)
+    (ei : M.over Wi ≅ _root_.SheafOfModules.unit (Y.ringCatSheaf.over Wi))
+    (ej : M.over Wj ≅ _root_.SheafOfModules.unit (Y.ringCatSheaf.over Wj))
+    (ci : Γ(Y, Ui)ˣ) (cj : Γ(Y, Uj)ˣ)
+    (Ai : Γ(Y, Wi)ˣ) (Aj : Γ(Y, Wj)ˣ) (u₁ u₂ : Γ(Y, Wi ⊓ Wj)ˣ)
+    (heq : trivializationTransitionUnit (Wi ⊓ Wj)
+        (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Wi ei
+          (Over.mk (homOfLE (inf_le_left : Wi ⊓ Wj ≤ Wi))))
+        (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Wj ej
+          (Over.mk (homOfLE (inf_le_right : Wi ⊓ Wj ≤ Wj)))) =
+      Scheme.resUnit (inf_le_left : Wi ⊓ Wj ≤ Wi) Ai * (u₂ * u₁⁻¹) *
+        (Scheme.resUnit (inf_le_right : Wi ⊓ Wj ≤ Wj) Aj)⁻¹) :
+    trivializationTransitionUnit (Ui ⊓ Uj)
+        (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Ui
+          (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Wi ei
+            (Over.mk (homOfLE hUi)) ≪≫ overUnitScalarIso Ui ci)
+          (Over.mk (homOfLE (inf_le_left : Ui ⊓ Uj ≤ Ui))))
+        (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Uj
+          (SheafOfModules.restrictOverTrivialization Y.ringCatSheaf M Wj ej
+            (Over.mk (homOfLE hUj)) ≪≫ overUnitScalarIso Uj cj)
+          (Over.mk (homOfLE (inf_le_right : Ui ⊓ Uj ≤ Uj)))) =
+      Scheme.resUnit (inf_le_left : Ui ⊓ Uj ≤ Ui)
+          (Scheme.resUnit hUi Ai * ci⁻¹) *
+        (Units.map (Y.presheaf.map (homOfLE
+            (inf_le_inf hUi hUj : Ui ⊓ Uj ≤ Wi ⊓ Wj)).op).hom.toMonoidHom u₂ *
+          (Units.map (Y.presheaf.map (homOfLE
+            (inf_le_inf hUi hUj : Ui ⊓ Uj ≤ Wi ⊓ Wj)).op).hom.toMonoidHom u₁)⁻¹) *
+        (Scheme.resUnit (inf_le_right : Ui ⊓ Uj ≤ Uj)
+          (Scheme.resUnit hUj Aj * cj⁻¹))⁻¹ := by
+  refine (transitionUnit_restrict_rescale hUi hUj ei ej ci cj).trans ?_
+  refine (congrArg (fun x => Units.map (Y.presheaf.map (homOfLE
+      (inf_le_inf hUi hUj : Ui ⊓ Uj ≤ Wi ⊓ Wj)).op).hom.toMonoidHom x *
+    (Scheme.resUnit (inf_le_left : Ui ⊓ Uj ≤ Ui) ci)⁻¹ *
+    Scheme.resUnit (inf_le_right : Ui ⊓ Uj ≤ Uj) cj) heq).trans ?_
+  simp only [map_mul, map_inv, mul_inv_rev, inv_inv, mul_assoc,
+    Scheme.resUnit_resUnit]
+  exact units_shuffle rfl rfl
+
 /-- **([G2′] the per-chart normalized dataset)** Strengthening of
 `exists_normalized_chart_dataset`: the overlap dressing of every transition decomposes
 into **per-chart** units `A i` around the fixed chart assignment `ch` — on every
@@ -864,12 +916,31 @@ theorem exists_normalized_chart_dataset_perChart
             (hfmem₂ c)
             (isIso_idealGenHom_of_principal J₂ ⟨W₀ c, (V c).2⟩ (f₂ c)
               (hspan₂ c) (hnzd₂ c) (hfmem₂ c))))) with hAch
+  have hdressed : ∀ (i j : ↥(pullback E.π t)),
+      Nonempty ↥((W₀ i ⊓ W₀ j : (pullback E.π t).Opens)) →
+      ∃ (u₁ u₂ : Γ(pullback E.π t, W₀ i ⊓ W₀ j)ˣ),
+        transitionUnitOfCover M W₀ e₀ i j =
+          Scheme.resUnit (inf_le_left : W₀ i ⊓ W₀ j ≤ W₀ i) (Ach i) *
+            (u₂ * u₁⁻¹) *
+            (Scheme.resUnit (inf_le_right : W₀ i ⊓ W₀ j ≤ W₀ j) (Ach j))⁻¹ ∧
+        (pullback E.π t).presheaf.map (homOfLE (inf_le_left : W₀ i ⊓ W₀ j ≤ W₀ i)).op (f₁ i) =
+          (pullback E.π t).presheaf.map (homOfLE (inf_le_right : W₀ i ⊓ W₀ j ≤ W₀ j)).op (f₁ j) *
+            (u₁ : Γ(pullback E.π t, W₀ i ⊓ W₀ j)) ∧
+        (pullback E.π t).presheaf.map (homOfLE (inf_le_left : W₀ i ⊓ W₀ j ≤ W₀ i)).op (f₂ i) =
+          (pullback E.π t).presheaf.map (homOfLE (inf_le_right : W₀ i ⊓ W₀ j ≤ W₀ j)).op (f₂ j) *
+            (u₂ : Γ(pullback E.π t, W₀ i ⊓ W₀ j)) :=
+    fun i j hne₀ =>
+      exists_transition_dressed_of_charts_perChart M J₁ J₂ e_dict W₀ e₀ i j
+        (V i).2 (V j).2 (f₁ i) (f₂ i) (f₁ j) (f₂ j)
+        (hspan₁ i) (hnzd₁ i) (hfmem₁ i) (hspan₂ i) (hnzd₂ i) (hfmem₂ i)
+        (hspan₁ j) (hnzd₁ j) (hfmem₁ j) (hspan₂ j) (hnzd₂ j) (hfmem₂ j) hne₀
   refine ⟨V, f₁, f₂, ↥(pullback E.π t) ⊕ ↥(pullback E.π t), W, hW, e,
     Sum.elim id id,
     (fun a => match a with
       | .inl i => Scheme.resUnit (inf_le_left :
           W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i) ≤ W₀ i) (Ach i) * (cZ i)⁻¹
-      | .inr i => Scheme.resUnit (inf_le_left : W₀ i ⊓ Zc ≤ W₀ i) (Ach i)),
+      | .inr i => Scheme.resUnit (inf_le_left : W₀ i ⊓ Zc ≤ W₀ i) (Ach i) *
+          ((1 : Γ(pullback E.π t, W₀ i ⊓ Zc)ˣ))⁻¹),
     hspan₁, hnzd₁, hspan₂, hnzd₂, ?_, ?_, ?_⟩
   · -- the transitions are unit sections of the zero-fibre restriction (stage 1)
     intro a b
@@ -1046,10 +1117,145 @@ theorem exists_normalized_chart_dataset_perChart
     intro a b hWch hne
     cases a with
     | inl i => cases b with
-      | inl j => sorry
-      | inr j => sorry
+      | inl j =>
+          obtain ⟨u₁₀, u₂₀, heq₀, hu₁₀, hu₂₀⟩ := hdressed i j
+            ⟨⟨hne.some.1, ⟨hne.some.2.1.1, hne.some.2.2.1⟩⟩⟩
+          refine ⟨Units.map ((pullback E.π t).presheaf.map (homOfLE
+              (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i)) ⊓ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)) ≤ W₀ i ⊓ W₀ j)).op).hom.toMonoidHom u₁₀,
+            Units.map ((pullback E.π t).presheaf.map (homOfLE
+              (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i)) ⊓ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)) ≤ W₀ i ⊓ W₀ j)).op).hom.toMonoidHom u₂₀, ?_, ?_, ?_⟩
+          · exact perChart_piece_transition inf_le_left inf_le_left
+              (e₀ i) (e₀ j) (cZ i) (cZ j) (Ach i) (Ach j) u₁₀ u₂₀ heq₀
+          · have h1 := congrArg (CategoryTheory.ConcreteCategory.hom
+              ((pullback E.π t).presheaf.map (homOfLE (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i)) ⊓ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)) ≤ W₀ i ⊓ W₀ j)).op)) hu₁₀
+            rw [map_mul] at h1
+            rw [res_res, res_res] at h1
+            exact h1
+          · have h2 := congrArg (CategoryTheory.ConcreteCategory.hom
+              ((pullback E.π t).presheaf.map (homOfLE (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i)) ⊓ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)) ≤ W₀ i ⊓ W₀ j)).op)) hu₂₀
+            rw [map_mul] at h2
+            rw [res_res, res_res] at h2
+            exact h2
+      | inr j =>
+          obtain ⟨u₁₀, u₂₀, heq₀, hu₁₀, hu₂₀⟩ := hdressed i j
+            ⟨⟨hne.some.1, ⟨hne.some.2.1.1, hne.some.2.2.1⟩⟩⟩
+          refine ⟨Units.map ((pullback E.π t).presheaf.map (homOfLE
+              (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i)) ⊓ (W₀ j ⊓ Zc) ≤ W₀ i ⊓ W₀ j)).op).hom.toMonoidHom u₁₀,
+            Units.map ((pullback E.π t).presheaf.map (homOfLE
+              (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i)) ⊓ (W₀ j ⊓ Zc) ≤ W₀ i ⊓ W₀ j)).op).hom.toMonoidHom u₂₀, ?_, ?_, ?_⟩
+          · have hmaskR : e (Sum.inr j) =
+              SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W₀ j)
+                (e₀ j) (Over.mk (homOfLE (inf_le_left : (W₀ j ⊓ Zc) ≤ W₀ j))) ≪≫
+                overUnitScalarIso (W₀ j ⊓ Zc) (1 : Γ((pullback E.π t), (W₀ j ⊓ Zc))ˣ) := by
+              rw [overUnitScalarIso_one]
+              exact (Iso.trans_refl _).symm
+            refine Eq.trans (congrArg (fun x₂ =>
+              trivializationTransitionUnit ((W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i)) ⊓ (W₀ j ⊓ Zc))
+                (SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i))
+                  (e (Sum.inl i))
+                  (Over.mk (homOfLE (inf_le_left : (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i)) ⊓ (W₀ j ⊓ Zc) ≤ (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i))))))
+                (SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W₀ j ⊓ Zc) x₂
+                  (Over.mk (homOfLE (inf_le_right : (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i)) ⊓ (W₀ j ⊓ Zc) ≤ (W₀ j ⊓ Zc))))))
+              hmaskR) ?_
+            exact perChart_piece_transition inf_le_left inf_le_left
+              (e₀ i) (e₀ j) (cZ i) (1 : Γ((pullback E.π t), (W₀ j ⊓ Zc))ˣ) (Ach i) (Ach j) u₁₀ u₂₀ heq₀
+          · have h1 := congrArg (CategoryTheory.ConcreteCategory.hom
+              ((pullback E.π t).presheaf.map (homOfLE (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i)) ⊓ (W₀ j ⊓ Zc) ≤ W₀ i ⊓ W₀ j)).op)) hu₁₀
+            rw [map_mul] at h1
+            rw [res_res, res_res] at h1
+            exact h1
+          · have h2 := congrArg (CategoryTheory.ConcreteCategory.hom
+              ((pullback E.π t).presheaf.map (homOfLE (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ i)) ⊓ (W₀ j ⊓ Zc) ≤ W₀ i ⊓ W₀ j)).op)) hu₂₀
+            rw [map_mul] at h2
+            rw [res_res, res_res] at h2
+            exact h2
     | inr i => cases b with
-      | inl j => sorry
-      | inr j => sorry
+      | inl j =>
+          obtain ⟨u₁₀, u₂₀, heq₀, hu₁₀, hu₂₀⟩ := hdressed i j
+            ⟨⟨hne.some.1, ⟨hne.some.2.1.1, hne.some.2.2.1⟩⟩⟩
+          refine ⟨Units.map ((pullback E.π t).presheaf.map (homOfLE
+              (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)) ≤ W₀ i ⊓ W₀ j)).op).hom.toMonoidHom u₁₀,
+            Units.map ((pullback E.π t).presheaf.map (homOfLE
+              (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)) ≤ W₀ i ⊓ W₀ j)).op).hom.toMonoidHom u₂₀, ?_, ?_, ?_⟩
+          · have hmaskL : e (Sum.inr i) =
+              SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W₀ i)
+                (e₀ i) (Over.mk (homOfLE (inf_le_left : (W₀ i ⊓ Zc) ≤ W₀ i))) ≪≫
+                overUnitScalarIso (W₀ i ⊓ Zc) (1 : Γ((pullback E.π t), (W₀ i ⊓ Zc))ˣ) := by
+              rw [overUnitScalarIso_one]
+              exact (Iso.trans_refl _).symm
+            refine Eq.trans (congrArg (fun x₁ =>
+              trivializationTransitionUnit ((W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)))
+                (SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W₀ i ⊓ Zc) x₁
+                  (Over.mk (homOfLE (inf_le_left : (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)) ≤ (W₀ i ⊓ Zc)))))
+                (SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j))
+                  (e (Sum.inl j))
+                  (Over.mk (homOfLE (inf_le_right : (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)) ≤ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)))))))
+              hmaskL) ?_
+            exact perChart_piece_transition inf_le_left inf_le_left
+              (e₀ i) (e₀ j) (1 : Γ((pullback E.π t), (W₀ i ⊓ Zc))ˣ) (cZ j) (Ach i) (Ach j) u₁₀ u₂₀ heq₀
+          · have h1 := congrArg (CategoryTheory.ConcreteCategory.hom
+              ((pullback E.π t).presheaf.map (homOfLE (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)) ≤ W₀ i ⊓ W₀ j)).op)) hu₁₀
+            rw [map_mul] at h1
+            rw [res_res, res_res] at h1
+            exact h1
+          · have h2 := congrArg (CategoryTheory.ConcreteCategory.hom
+              ((pullback E.π t).presheaf.map (homOfLE (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)) ≤ W₀ i ⊓ W₀ j)).op)) hu₂₀
+            rw [map_mul] at h2
+            rw [res_res, res_res] at h2
+            exact h2
+      | inr j =>
+          obtain ⟨u₁₀, u₂₀, heq₀, hu₁₀, hu₂₀⟩ := hdressed i j
+            ⟨⟨hne.some.1, ⟨hne.some.2.1.1, hne.some.2.2.1⟩⟩⟩
+          refine ⟨Units.map ((pullback E.π t).presheaf.map (homOfLE
+              (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ Zc) ≤ W₀ i ⊓ W₀ j)).op).hom.toMonoidHom u₁₀,
+            Units.map ((pullback E.π t).presheaf.map (homOfLE
+              (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ Zc) ≤ W₀ i ⊓ W₀ j)).op).hom.toMonoidHom u₂₀, ?_, ?_, ?_⟩
+          · have hmaskL : e (Sum.inr i) =
+              SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W₀ i)
+                (e₀ i) (Over.mk (homOfLE (inf_le_left : (W₀ i ⊓ Zc) ≤ W₀ i))) ≪≫
+                overUnitScalarIso (W₀ i ⊓ Zc) (1 : Γ((pullback E.π t), (W₀ i ⊓ Zc))ˣ) := by
+              rw [overUnitScalarIso_one]
+              exact (Iso.trans_refl _).symm
+            have hmaskR : e (Sum.inr j) =
+              SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W₀ j)
+                (e₀ j) (Over.mk (homOfLE (inf_le_left : (W₀ j ⊓ Zc) ≤ W₀ j))) ≪≫
+                overUnitScalarIso (W₀ j ⊓ Zc) (1 : Γ((pullback E.π t), (W₀ j ⊓ Zc))ˣ) := by
+              rw [overUnitScalarIso_one]
+              exact (Iso.trans_refl _).symm
+            refine Eq.trans (congrArg₂ (fun x₁ x₂ =>
+              trivializationTransitionUnit ((W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ Zc))
+                (SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W₀ i ⊓ Zc) x₁
+                  (Over.mk (homOfLE (inf_le_left : (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ Zc) ≤ (W₀ i ⊓ Zc)))))
+                (SheafOfModules.restrictOverTrivialization (pullback E.π t).ringCatSheaf M (W₀ j ⊓ Zc) x₂
+                  (Over.mk (homOfLE (inf_le_right : (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ Zc) ≤ (W₀ j ⊓ Zc))))))
+              hmaskL hmaskR) ?_
+            exact perChart_piece_transition inf_le_left inf_le_left
+              (e₀ i) (e₀ j) (1 : Γ((pullback E.π t), (W₀ i ⊓ Zc))ˣ) (1 : Γ((pullback E.π t), (W₀ j ⊓ Zc))ˣ) (Ach i) (Ach j) u₁₀ u₂₀ heq₀
+          · have h1 := congrArg (CategoryTheory.ConcreteCategory.hom
+              ((pullback E.π t).presheaf.map (homOfLE (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ Zc) ≤ W₀ i ⊓ W₀ j)).op)) hu₁₀
+            rw [map_mul] at h1
+            rw [res_res, res_res] at h1
+            exact h1
+          · have h2 := congrArg (CategoryTheory.ConcreteCategory.hom
+              ((pullback E.π t).presheaf.map (homOfLE (inf_le_inf inf_le_left inf_le_left :
+                (W₀ i ⊓ Zc) ⊓ (W₀ j ⊓ Zc) ≤ W₀ i ⊓ W₀ j)).op)) hu₂₀
+            rw [map_mul] at h2
+            rw [res_res, res_res] at h2
+            exact h2
 
 end ModularCurves
