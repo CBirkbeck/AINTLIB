@@ -451,6 +451,27 @@ private theorem appLE_top_top_of_eq_id {X : Scheme} {h : X ⟶ X} (he : h = 𝟙
   subst he
   simp [Scheme.Hom.appLE]
 
+/-- **([SEC-ORD PT-KER])** The section point avoids the kernel-generator's basic open:
+the point lies in the section's range, hence in the kernel support, hence in the
+zero locus of the generator. -/
+private theorem secOrd_sectionPoint_notMem_basicOpen
+    (z : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+    [QuasiCompact z]
+    (V : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), V.1))
+    (hspan : (Scheme.Hom.ker z).ideal V = Ideal.span {f})
+    (hzd : z.base default ∈ V.1) :
+    z.base default ∉ (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).basicOpen f := by
+  intro hbo
+  have h6 := Scheme.Hom.support_ker z
+  have hsup : z.base default ∈ (Scheme.Hom.ker z).supportSet := by
+    show z.base default ∈ ((Scheme.Hom.ker z).support : Set _)
+    rw [h6]
+    exact subset_closure ⟨default, rfl⟩
+  have hzl := (Scheme.IdealSheafData.mem_supportSet_iff_of_mem hzd).mp hsup
+  rw [hspan, Scheme.zeroLocus_span, Scheme.mem_zeroLocus_iff] at hzl
+  exact hzl f rfl hbo
+
 /-- **([SEC-ORD K-MAX])** The section-kernel span is a maximal ideal of the chart ring
 when the chart contains the section point: the section identity `z ≫ snd = 𝟙` splits
 `z`'s `appLE` to `⊤`, so the chart ring surjects onto `Γ(Spec K, ⊤) ≅ K` with kernel
