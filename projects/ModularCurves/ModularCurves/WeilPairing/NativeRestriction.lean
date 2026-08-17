@@ -252,6 +252,22 @@ theorem sheafificationMap_app_unit {Y' : Scheme.{u}}
     q.app V w) hn
   exact happ.symm
 
+/-- **([NR-sh-unit-nat-eq])** The composed form of `sheafificationMap_app_unit`: when
+the presheaf-level value is known, the sheafified map on the unit image is the unit
+image of that value (small binders — the congruence happens at the abstract codomain,
+so instantiating at large tensor objects is cheap). -/
+theorem sheafificationMap_app_unit_eq {Y' : Scheme.{u}}
+    {P Q : PresheafOfModules.{u} Y'.ringCatSheaf.obj} (g : P ⟶ Q)
+    (V : (Opens ↥Y')ᵒᵖ) (w : P.obj V) {w' : Q.obj V} (h : g.app V w = w') :
+    ((PresheafOfModules.sheafification (𝟙 Y'.ringCatSheaf.obj)).map g).val.app V
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 Y'.ringCatSheaf.obj)).unit.app P).app V w) =
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 Y'.ringCatSheaf.obj)).unit.app Q).app V w' :=
+  (sheafificationMap_app_unit g V w).trans
+    (congrArg (((PresheafOfModules.sheafificationAdjunction
+      (𝟙 Y'.ringCatSheaf.obj)).unit.app Q).app V) h)
+
 /-- **([NR-congr-unit-tmul])** `tensorObjCongr` on a sheafification-unit image of a
 pure tensor (small binders: the instantiation at the large pullback objects is by term
 application). -/
@@ -594,6 +610,23 @@ theorem pullbackTensorObjIsoOfIsOpenImmersion_eq_mu {Y : Scheme.{u}} (f : Y ⟶ 
           ((Scheme.Modules.pullback f).obj A).val
           ((Scheme.Modules.pullback f).obj B).val)).app (Opposite.op (f ⁻¹ᵁ U.unop))) ?_
         exact congrArg₂ (fun a b => a ⊗ₜ b) hfac₁ hfac₂
+      -- assembly: split the composite application and chain the six values
+      have hstep₂ := congrArg
+        (fun z => (sheafifyValIso
+          ((restrictFunctor f).obj (tensorObj A B))).inv.val.app (Opposite.op (f ⁻¹ᵁ U.unop)) z) hL1
+      have hstep₂' := hstep₂.trans hL2
+      have hstep₂'' := hstep₂'.trans (congrArg
+        (fun z => ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.sheafification
+          (𝟙 X.ringCatSheaf.obj) ⋙ SheafOfModules.forget X.ringCatSheaf ⋙
+          PresheafOfModules.restrictScalars (𝟙 X.ringCatSheaf.obj) ⋙
+          PresheafOfModules.pushforward (restrictRingHom f)).obj (MonoidalCategoryStruct.tensorObj A.val B.val))).app
+          (Opposite.op (f ⁻¹ᵁ U.unop)) z) hres)
+      have hstep₃ := (congrArg (fun z => (asIso ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map ((PresheafOfModules.pushforward (restrictRingHom f)).map ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val))))).inv.val.app (Opposite.op (f ⁻¹ᵁ U.unop)) z) hstep₂'').trans hL3
+      have hstep₄ := (congrArg (fun z => ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map (PresheafOfModules.pushforwardTensorIso (restrictRingHom f) A.val B.val).inv).val.app (Opposite.op (f ⁻¹ᵁ U.unop)) z) hstep₃).trans hL4
+      -- assembly residue: chain hL4b (via a cheap composed micro-lemma or an
+      -- @Eq-typed explicit have), the PF-vs-restrict crossing (hcross), and hL5 into
+      -- hstep₄. The hL4b-congr/instance elaborations whnf-storm on the
+      -- pushforward-tensor carrier crossings (see cont.26 notes); the values match.
       sorry
   | add s t hs ht =>
       simp only [map_add, hs, ht]
