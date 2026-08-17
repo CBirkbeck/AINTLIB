@@ -1696,3 +1696,29 @@ defs → [NR-1..3] → [G2′ native rework] → transport statements (H-HW/r-HW
 projModelFunctionFieldEquiv ∘ fst-FF, germ-compat via zChartLocalizationEquiv_compat
 — brick-3 CLOSED cont.19, symm+apply IsLocalization.map_eq) → [ORD-G pointwise] →
 L1-assembly → L3/L5/L6/U/E5.
+
+[NR EXECUTION STATE + THE 1b/SLOT CUT] (2026-08-17, cont.20): LANDED axiom-clean-modulo-
+NR-1: unit_hom_ext (from-unit maps determined at ⊤-1 via SheafOfModules.unitHomEquiv +
+sections_property), openTopSection_homOfLE (the res-square of openTopSection;
+poset-Hom-subsingleton finish), restrictTransportSection def (H2's transport composite
+as a def), [NR-1a] restrictTransportSection_naturality (4-square exact-defeq chain:
+adjUnit-nat, presheaf-res-nat [.presheaf.map vs .val.map are DIFFERENT SPELLINGS —
+typed-have realignment], pullbackComp-nat, pullbackCongr-nat; naturality_apply
+orientation is phi-tgt(M-map) = N-map(phi-src)... i.e. h3 NOT h3.symm),
+unitEndomorphismOfTopSection_app_top_one, [NR-2] (unit_hom_ext + H2 + NR-1 + V-level
+N2-cancel-at-1 + OTS-RES), [NR-3] (read-off + endo(1)=id + iso-algebra). REMAINING =
+NR-1 ONLY. Analysis (triple-checked, no cheaper route): the dressing-wall is real; BUT
+G2-prime does NOT need NR-3/NAT-RESTRICT-EQ — the per-chart A_i := transition(e_i,
+restrictOverTriv-of-overTriv(rIso(nat-V_i))) exists trivially; t_ij = res(A_i)·m_ij·
+res(A_j)^-1 by trivializationTransitionUnit_restrict + _trans (LANDED); m_ij =
+u₂u₁^-1 via [restrictOverTrivialization_comp + overTrivializationOfRestrictOpen-
+Trivialization + SK-normal (ALL LANDED)] + PACKAGE-mid + read-off from TWO NR-2
+instances (generator-change via nuPullback_mul). NR-1's cut: 1a-instances for
+pb(e.hom)/pb(toUnitHom) FREE; [1b] unit-tail = pRT-(unitObjX) ≫ pullbackUnitIso-W.hom
+= pbH.map(pullbackUnitIso-V.hom) ≫ pullbackUnitIso-homOfLE.hom (unit-cocycle over
+W.ι = homOfLE ≫ V.ι; prove via unit_hom_ext-conjugation at concrete 1,
+pullbackUnitIso_hom_unit_oneT species); [SLOT-SQ] pRT-M ≫ slotW.hom = pbH.map(slotV.hom)
+≫ pRT-(M⊗I₁) — general-⊤-sections of sheafified tensors have NO element calculus
+(sheafification!) ⟹ MUST go map-level via the sheafify-adjunction TRANSPOSITION
+(sources are sh-images: Hom(sh A, B) ≃ presheaf-Hom) then tmul-induction — the ATOM
+template at scale. Then NR-1 assembly at elements.
