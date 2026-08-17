@@ -357,7 +357,95 @@ theorem torsionSplittingEval_eq_weilPairing
       HasseWeil.WeilPairing.weilPairing W (N : ℤ) hNZ
         (EllipticCurve.basePointCast W (projModelPointsEquiv W K pS))
         (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hS hT := by
-  sorry
+  haveI hIntE : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+    inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+  haveI hInt : AlgebraicGeometry.IsIntegral
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    isIntegral_pullback_id (modelEllipticCurve W)
+  haveI hIrr : IrreducibleSpace
+      ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    inferInstance
+  -- the crossed translation on the model and its dominance
+  have hsq : translateByPoint (modelEllipticCurve W)
+        (𝟙 (Spec (CommRingCat.of K))) P' ≫
+        pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))
+      = pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) ≫
+        ((modelEllipticCurve W).translateBy
+          (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P' ≫
+            baseChangeIdFstOver (modelEllipticCurve W))).left :=
+    translateByPoint_id_comp_fst (modelEllipticCurve W) P'
+  have hτp_eq : ((modelEllipticCurve W).translateBy
+        (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P' ≫
+          baseChangeIdFstOver (modelEllipticCurve W))).left =
+      inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ≫
+        (translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P' ≫
+          pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) := by
+    rw [hsq, IsIso.inv_hom_id_assoc]
+  haveI hτdom : IsDominant (((modelEllipticCurve W).translateBy
+      (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P' ≫
+        baseChangeIdFstOver (modelEllipticCurve W))).left) := by
+    rw [hτp_eq]
+    infer_instance
+  -- 1. the scheme-side eigen-equation (U5-L2e at the anchor chart)
+  have hL2e := functionFieldMap_translateByPoint_germ (modelEllipticCurve W) hsm
+    N Q hQ M hM Wc hWc e hnorm h hn hsplit P' hP' c₀
+  -- 2. transport through the function-field equivalence
+  have h2 := congrArg (pullbackCurveFunctionFieldEquiv W) hL2e
+  rw [map_mul] at h2
+  rw [pullbackCurveFunctionFieldEquiv_translateByPoint W P' pS hxpS
+    (((modelEllipticCurve W).translateBy
+      (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P' ≫
+        baseChangeIdFstOver (modelEllipticCurve W))).left) rfl] at h2
+  rw [pullbackCurveFunctionFieldEquiv_germ_globalTwist W
+    (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc c₀)
+    (torsionSplittingEval (modelEllipticCurve W) hsm
+      (𝟙 (Spec (CommRingCat.of K))) N Q hQ M hM Wc hWc e hnorm P' hP')] at h2
+  -- 3. the divisor factorisation ([L1])
+  obtain ⟨c, r, hc, hr, hfact⟩ := exists_const_mul_weilFunction W hsm N hNZ Q hQ
+    M hM Wc hWc e hnorm h hn hsplit c₀ p hxp hT
+  -- 4. translate the factorisation and evaluate each factor
+  have h7 := congrArg (HasseWeil.translateAlgEquivOfPoint W
+    (EllipticCurve.basePointCast W (projModelPointsEquiv W K pS))) hfact
+  rw [map_mul, map_mul] at h7
+  rw [translateAlgEquivOfPoint_mulByInt_pullbackAlgHom W
+    (EllipticCurve.basePointCast W (projModelPointsEquiv W K pS))
+    (N : ℤ) hNZ (by exact_mod_cast NeZero.ne' N |>.symm) hS r] at h7
+  rw [AlgEquiv.commutes] at h7
+  rw [HasseWeil.WeilPairing.weilPairing_translate W (N : ℤ) hNZ
+    (EllipticCurve.basePointCast W (projModelPointsEquiv W K pS))
+    (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hS hT] at h7
+  -- 5. substitute the eigen-equation into the translated factorisation
+  rw [h2] at h7
+  -- h7 : (H_HW * algebraMap (ΓSpec val)) * [N]^*r
+  --    = algebraMap c * (algebraMap e * g_T)
+  -- 6. cancellation against the untranslated factorisation
+  have hgne : HasseWeil.WeilPairing.weilFunction W (N : ℤ) hNZ
+      (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hT ≠ 0 :=
+    HasseWeil.WeilPairing.weilFunction_ne_zero W (N : ℤ) hNZ _ hT
+  have hcne : algebraMap K W.toAffine.FunctionField c ≠ 0 := by
+    simpa using (map_ne_zero (algebraMap K W.toAffine.FunctionField)).mpr hc
+  have hkey : algebraMap K W.toAffine.FunctionField
+      ((Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
+        ((torsionSplittingEval (modelEllipticCurve W) hsm
+          (𝟙 (Spec (CommRingCat.of K))) N Q hQ M hM Wc hWc e hnorm P' hP' :
+            Γ(Spec (CommRingCat.of K), ⊤)ˣ) : Γ(Spec (CommRingCat.of K), ⊤))) *
+        (algebraMap K W.toAffine.FunctionField c *
+          HasseWeil.WeilPairing.weilFunction W (N : ℤ) hNZ
+            (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hT) =
+      algebraMap K W.toAffine.FunctionField
+        (HasseWeil.WeilPairing.weilPairing W (N : ℤ) hNZ
+          (EllipticCurve.basePointCast W (projModelPointsEquiv W K pS))
+          (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hS hT) *
+        (algebraMap K W.toAffine.FunctionField c *
+          HasseWeil.WeilPairing.weilFunction W (N : ℤ) hNZ
+            (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hT) := by
+    rw [← hfact]
+    linear_combination h7 - algebraMap K W.toAffine.FunctionField
+      (HasseWeil.WeilPairing.weilPairing W (N : ℤ) hNZ
+        (EllipticCurve.basePointCast W (projModelPointsEquiv W K pS))
+        (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hS hT) * hfact
+  have hcanc := mul_right_cancel₀ (mul_ne_zero hcne hgne) hkey
+  exact (algebraMap K W.toAffine.FunctionField).injective hcanc
 
 end L3
 
