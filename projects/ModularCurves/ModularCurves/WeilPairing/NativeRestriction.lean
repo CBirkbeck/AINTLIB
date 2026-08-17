@@ -1091,6 +1091,37 @@ theorem pullbackTensorObjIsoOfIsOpenImmersion_symm_hom_app_unit
   refine hcomp.trans ?_
   rw [hv1, hv2, hv3, hcancel]
 
+/-- **([slot-walk], statement)** The slot construction on a pullback-adjunction-unit
+image: the value is the unit image of the sheafified pure tensor of the restricted
+section with the restricted generator (all data at the image open `U ⊓ Wo`, re-indexed
+by `hpre`). The per-side walk of the slot square. -/
+private theorem slot_walk (Wo : X.Opens) (g₁ : Γ(X, Wo))
+    (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op Wo))
+    (hgi₁ : IsIso (idealGenHom J₁ Wo g₁ hg₁))
+    (U : X.Opens) (m : M.val.obj (Opposite.op U))
+    (hpre : (Wo.ι ⁻¹ᵁ (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U))) = Wo.ι ⁻¹ᵁ U)
+    (hIMle : (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)) ≤ U) :
+    (tensorIdealSlotIso M J₁ Wo g₁ hg₁ hgi₁).hom.val.app
+        (Opposite.op (Wo.ι ⁻¹ᵁ U))
+        (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app M).val.app
+          (Opposite.op U) m) =
+      ((Scheme.Modules.pullback Wo.ι).obj
+          (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.map
+        (eqToHom hpre.symm).op
+        (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app
+          (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.app
+          (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)))
+          (((PresheafOfModules.sheafificationAdjunction
+            (𝟙 X.ringCatSheaf.obj)).unit.app
+              (MonoidalCategoryStruct.tensorObj M.val
+                (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val)).app
+            (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)))
+            ((M.val.map (homOfLE hIMle).op m) ⊗ₜ
+              (⟨X.presheaf.map (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op g₁,
+                idealSections_map J₁
+                  (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op hg₁⟩)))) := by
+  sorry
+
 /-- **([SLOT-SQ], the map-level brick)** The tensor-slot construction commutes with the
 open-restriction transport: the one genuinely monoidal square of the `ν`-naturality.
 Proof route (cont.20): sources are sheafification-images (open-immersion presheaf
