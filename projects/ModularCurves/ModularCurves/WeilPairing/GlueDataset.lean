@@ -29,6 +29,19 @@ namespace ModularCurves
 variable {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
 variable (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π] (t : T ⟶ S)
 
+private theorem overUnitScalarIso_one {Y : Scheme.{u}} (U : Y.Opens) :
+    overUnitScalarIso U (1 : Γ(Y, U)ˣ) =
+      Iso.refl (_root_.SheafOfModules.unit (Y.ringCatSheaf.over U)) := by
+  letI : ∀ (Z : (TopologicalSpace.Opens ↥Y)ᵒᵖ),
+      IsMulCommutative (Y.ringCatSheaf.obj.obj Z) := fun Z => by
+    change IsMulCommutative (Y.presheaf.obj Z)
+    exact ⟨⟨fun a b => mul_comm a b⟩⟩
+  apply Iso.ext
+  show SheafOfModules.overUnitScalarEnd Y.ringCatSheaf U ((1 : Γ(Y, U)ˣ) : Γ(Y, U)) =
+    𝟙 _
+  exact ((SheafOfModules.overUnitScalarEndRingHom
+    Y.ringCatSheaf U).map_one).trans End.one_def
+
 private theorem mul_inv_mul_inv_cancel' {G : Type*} [CommGroup G] (a b : G) :
     a * b⁻¹ * a⁻¹ * b = 1 := by
   rw [show a * b⁻¹ * a⁻¹ * b = (a * a⁻¹) * (b⁻¹ * b) from by ac_rfl,
@@ -158,7 +171,14 @@ theorem exists_normalized_chart_dataset
     hspan₁, hnzd₁, hspan₂, hnzd₂, ?_, ?_⟩
   swap
   · -- the dressed transitions (stage 2)
-    sorry
+    intro a b hne
+    cases a with
+    | inl i => cases b with
+      | inl j => sorry
+      | inr j => sorry
+    | inr i => cases b with
+      | inl j => sorry
+      | inr j => sorry
   intro a b
   rw [mem_sectionUnits_iff]
   -- any overlap touching the off-zero family has empty zero-trace
