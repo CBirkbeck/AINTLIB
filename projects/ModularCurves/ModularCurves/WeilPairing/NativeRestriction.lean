@@ -2064,6 +2064,68 @@ theorem pullbackRestrictTransport_tensorIdealSlotIso {V W : X.Opens} (hWV : W �
       ((slot_sq_meet_peel M J₁ hWV (X.homOfLE_ι hWV).symm g₁ hg₁ U.unop hef m).trans
         (slot_sq_rhs M J₁ hWV g₁ hg₁ hgi₁ U.unop m)))
 
+/-- **([NR-slot-T])** The slot square at transported `⊤`-sections: the `W`-slot on a
+transported section is the transport of the `V`-slot value. `restrictTransportSection`
+is definitionally `pullbackRestrictTransport` applied to the re-indexed unit image, so
+this is SLOT-SQ evaluated there, with the pulled slot pushed through the two layers. -/
+private theorem slot_restrictTransportSection {V W : X.Opens} (hWV : W ≤ V)
+    (g₁ : Γ(X, V)) (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op V))
+    (hgi₁ : IsIso (idealGenHom J₁ V g₁ hg₁))
+    (hg₁' : X.presheaf.map (homOfLE hWV).op g₁ ∈ idealSections J₁ (Opposite.op W))
+    (hgi₁' : IsIso (idealGenHom J₁ W (X.presheaf.map (homOfLE hWV).op g₁) hg₁'))
+    (htop : (⊤ : W.toScheme.Opens) = (X.homOfLE hWV) ⁻¹ᵁ (⊤ : V.toScheme.Opens))
+    (x : ((Scheme.Modules.pullback V.ι).obj M).val.obj
+      (Opposite.op (⊤ : V.toScheme.Opens))) :
+    (tensorIdealSlotIso M J₁ W (X.presheaf.map (homOfLE hWV).op g₁)
+        hg₁' hgi₁').hom.val.app (Opposite.op (⊤ : W.toScheme.Opens))
+        (restrictTransportSection hWV M htop x) =
+      restrictTransportSection hWV
+        (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁)) htop
+        ((tensorIdealSlotIso M J₁ V g₁ hg₁ hgi₁).hom.val.app
+          (Opposite.op (⊤ : V.toScheme.Opens)) x) := by
+  -- SLOT-SQ evaluated at the re-indexed unit image
+  have hsq := congrArg (fun (q : (Scheme.Modules.pullback (X.homOfLE hWV)).obj
+      ((Scheme.Modules.pullback V.ι).obj M) ⟶
+      (Scheme.Modules.pullback W.ι).obj
+        (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))) =>
+    q.val.app (Opposite.op (⊤ : W.toScheme.Opens))
+      (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+          ((Scheme.Modules.pullback V.ι).obj M)).presheaf.map (eqToHom htop).op
+        (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+          ((Scheme.Modules.pullback V.ι).obj M)).val.app
+          (Opposite.op (⊤ : V.toScheme.Opens)) x)))
+    (pullbackRestrictTransport_tensorIdealSlotIso M J₁ hWV g₁ hg₁ hgi₁ hg₁' hgi₁')
+  refine Eq.trans (show _ = ((pullbackRestrictTransport hWV
+      (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        (((Scheme.Modules.pullback (X.homOfLE hWV)).map
+            (tensorIdealSlotIso M J₁ V g₁ hg₁ hgi₁).hom).val.app
+          (Opposite.op (⊤ : W.toScheme.Opens))
+          (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+              ((Scheme.Modules.pullback V.ι).obj M)).presheaf.map
+            (eqToHom htop).op
+            (((Scheme.Modules.pullbackPushforwardAdjunction
+              (X.homOfLE hWV)).unit.app
+              ((Scheme.Modules.pullback V.ι).obj M)).val.app
+              (Opposite.op (⊤ : V.toScheme.Opens)) x)))) from hsq) ?_
+  -- push the pulled slot through the re-index and the unit
+  refine congrArg ((pullbackRestrictTransport hWV
+    (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁))).val.app
+    (Opposite.op (⊤ : W.toScheme.Opens))) ?_
+  refine Eq.trans (PresheafOfModules.naturality_apply
+    ((Scheme.Modules.pullback (X.homOfLE hWV)).map
+      (tensorIdealSlotIso M J₁ V g₁ hg₁ hgi₁).hom).val
+    (eqToHom htop).op
+    (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+      ((Scheme.Modules.pullback V.ι).obj M)).val.app
+      (Opposite.op (⊤ : V.toScheme.Opens)) x)) ?_
+  exact congrArg (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+      ((Scheme.Modules.pullback V.ι).obj
+        (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁)))).presheaf.map
+    (eqToHom htop).op)
+    (pullbackMap_app_unit (X.homOfLE hWV)
+      (tensorIdealSlotIso M J₁ V g₁ hg₁ hgi₁).hom (⊤ : V.toScheme.Opens) x)
+
 /-- **([NR-1], the brick)** The `ν`-comparison map is natural under the open-restriction
 transport at `⊤`-sections: evaluating the `W`-level `ν` on a transported `V`-section is
 the scheme-restriction of the `V`-level `ν`-value. -/
