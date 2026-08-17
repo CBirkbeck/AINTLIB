@@ -232,6 +232,27 @@ theorem restrictTransportSection_naturality {V W : X.Opens} (hWV : W ≤ V)
           (Opposite.op (⊤ : V.toScheme.Opens)) x) := h4.symm
   exact s4
 
+/-- **([SLOT-SQ], the map-level brick)** The tensor-slot construction commutes with the
+open-restriction transport: the one genuinely monoidal square of the `ν`-naturality.
+Proof route (cont.20): sources are sheafification-images (open-immersion presheaf
+pullbacks are restrictions), so `Hom`s out of them are determined on presheaf elements
+by the sheafification adjunction; there tensor elements are `tmul`-generated and each
+slot piece has a concrete formula — the `sheafificationMap_whiskerLeft_unitEndomorphism`
+template at scale. -/
+theorem pullbackRestrictTransport_tensorIdealSlotIso {V W : X.Opens} (hWV : W ≤ V)
+    (g₁ : Γ(X, V)) (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op V))
+    (hgi₁ : IsIso (idealGenHom J₁ V g₁ hg₁))
+    (hg₁' : X.presheaf.map (homOfLE hWV).op g₁ ∈ idealSections J₁ (Opposite.op W))
+    (hgi₁' : IsIso (idealGenHom J₁ W (X.presheaf.map (homOfLE hWV).op g₁) hg₁')) :
+    pullbackRestrictTransport hWV M ≫
+        (tensorIdealSlotIso M J₁ W (X.presheaf.map (homOfLE hWV).op g₁)
+          hg₁' hgi₁').hom =
+      (Scheme.Modules.pullback (X.homOfLE hWV)).map
+          (tensorIdealSlotIso M J₁ V g₁ hg₁ hgi₁).hom ≫
+        pullbackRestrictTransport hWV
+          (tensorObj M (AlgebraicGeometry.Scheme.Modules.idealModule J₁)) := by
+  sorry
+
 /-- **([NR-1], the brick)** The `ν`-comparison map is natural under the open-restriction
 transport at `⊤`-sections: evaluating the `W`-level `ν` on a transported `V`-section is
 the scheme-restriction of the `V`-level `ν`-value. -/
