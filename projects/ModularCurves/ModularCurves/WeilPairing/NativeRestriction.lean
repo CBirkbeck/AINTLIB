@@ -529,6 +529,12 @@ theorem pullbackTensorObjIsoOfIsOpenImmersion_eq_mu {Y : Scheme.{u}} (f : Y ⟶ 
         exact sheafificationMap_app_unit
           ((PresheafOfModules.pushforwardTensorIso (restrictRingHom f)
             A.val B.val).inv) (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))
+      -- [L4b] the pushforward tensor comparison is the identity on pure tensors
+      have hL4b : (PresheafOfModules.pushforwardTensorIso (restrictRingHom f)
+          A.val B.val).inv.app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)) =
+          ((show ((PresheafOfModules.pushforward (restrictRingHom f)).obj A.val).obj (Opposite.op (f ⁻¹ᵁ U.unop)) from A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ
+            (show ((PresheafOfModules.pushforward (restrictRingHom f)).obj B.val).obj (Opposite.op (f ⁻¹ᵁ U.unop)) from B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)) := by
+        rfl
       sorry
   | add s t hs ht =>
       rw [map_add, map_add, hs, ht]
