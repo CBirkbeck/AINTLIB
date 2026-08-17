@@ -759,7 +759,7 @@ theorem ord_P_germ_sectionKer_generator
     (z : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
     (hz : z ≫ pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) =
       𝟙 (Spec (CommRingCat.of K)))
-    [QuasiCompact z]
+    [QuasiCompact z] [IsClosedImmersion z]
     (V : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
     (f : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), V.1))
     (hspan : (Scheme.Hom.ker z).ideal V = Ideal.span {f})
@@ -869,8 +869,23 @@ theorem ord_P_germ_sectionKer_generator
     (h1.trans (congrArg (⇑(EllipticCurve.projModelFunctionFieldEquiv W))
       h2.symm))) ?_
   refine hordeq.trans ?_
-  trace_state
-  sorry
+  have hrep2 : (projModel W).presheaf.map (homOfLE (hsle.trans inf_le_left)).op
+      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) *
+      (projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op
+        (s ^ (IsLocalization.Away.sec s xD).2) =
+      (projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op
+        (IsLocalization.Away.sec s xD).1 := by
+    rw [← halg, ← halg]
+    exact hrep
+  by_cases hcase : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) = z.base default
+  · rw [if_pos hcase]
+    exact secOrd_ord_f0_eq_one W z hz V f hspan P hPV hcase hPz s hsle hPs
+      (IsLocalization.Away.sec s xD).2 (IsLocalization.Away.sec s xD).1 hrep2
+  · rw [if_neg hcase]
+    have hiff := secOrd_f0_mem_basicOpen_iff W z V f hspan P hPV s hsle hPs
+      (IsLocalization.Away.sec s xD).2 (IsLocalization.Away.sec s xD).1 hrep2
+    exact secOrd_sPrime_ord_zero W P (IsLocalization.Away.sec s xD).1
+      (hiff.mpr hcase)
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
 `pullbackCurveFunctionFieldEquiv`-image of the germ of a `globalTwist` of a global unit
