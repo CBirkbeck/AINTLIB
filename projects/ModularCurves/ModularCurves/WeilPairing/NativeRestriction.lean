@@ -437,6 +437,196 @@ private theorem mu_bridge_rhs (U : (Opens ↥X)ᵒᵖ)
       rw [hsplit, hR1, hR2, hR3]
   exact hRHS
 
+private theorem mu_bridge_lhs_e4 (U : (Opens ↥X)ᵒᵖ)
+    (x : A.val.obj U) (y : B.val.obj U) :
+    letI := Scheme.Modules.monoidalCategory X
+    letI := Scheme.Modules.monoidalCategory Y
+    haveI : IsIso ((PresheafOfModules.sheafification
+        (𝟙 Y.ringCatSheaf.obj)).map
+        ((PresheafOfModules.pushforward (restrictRingHom f)).map
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 X.ringCatSheaf.obj)).unit.app
+              (MonoidalCategoryStruct.tensorObj A.val B.val)))) := by
+      have hmem := sheafificationW_pushforward_unit_tensor f A B
+      rw [PresheafOfModules.sheafificationW_iff] at hmem
+      exact hmem
+    ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map (PresheafOfModules.pushforwardTensorIso (restrictRingHom f) A.val B.val).inv).val.app (Opposite.op (f ⁻¹ᵁ U.unop))
+      ((asIso ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map ((PresheafOfModules.pushforward (restrictRingHom f)).map ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val))))).inv.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
+        ((sheafifyValIso ((restrictFunctor f).obj (tensorObj A B))).inv.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
+          (((restrictFunctorIsoPullback f).symm.app (tensorObj A B)).hom.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
+            (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+              (tensorObj A B)).val.app U (((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val)).app U (x ⊗ₜ y)))))) =
+      ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj
+        ((PresheafOfModules.pushforward (restrictRingHom f)).obj A.val) ((PresheafOfModules.pushforward (restrictRingHom f)).obj B.val))).app (Opposite.op (f ⁻¹ᵁ U.unop))
+        ((PresheafOfModules.pushforwardTensorIso (restrictRingHom f)
+          A.val B.val).inv.app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))) := by
+  letI := Scheme.Modules.monoidalCategory X
+  letI := Scheme.Modules.monoidalCategory Y
+  have hL1 := restrictFunctorIsoPullback_inv_unit_app_apply f (tensorObj A B)
+    U.unop
+    (((PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)).unit.app
+        (MonoidalCategoryStruct.tensorObj A.val B.val)).app U (x ⊗ₜ y))
+  -- [L2] un-sheafify on the Y-side
+  have hL2 := sheafifyValIso_inv_app_apply
+    ((restrictFunctor f).obj (tensorObj A B)) (f ⁻¹ᵁ U.unop)
+    (((restrictAdjunction f).unit.app (tensorObj A B)).val.app
+      (Opposite.op U.unop)
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj A.val B.val)).app U (x ⊗ₜ y)))
+  -- [Lres] the restrict-unit value is the sheafification-unit image of the
+  -- restricted pure tensor
+  have hres : ((restrictAdjunction f).unit.app (tensorObj A B)).val.app
+      (Opposite.op U.unop)
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj A.val B.val)).app U (x ⊗ₜ y)) =
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj A.val B.val)).app
+        (Opposite.op (f ''ᵁ (f ⁻¹ᵁ U.unop)))
+        ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ
+          (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)) := by
+    have hunit : ((restrictAdjunction f).unit.app (tensorObj A B)).val.app
+        (Opposite.op U.unop)
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 X.ringCatSheaf.obj)).unit.app
+            (MonoidalCategoryStruct.tensorObj A.val B.val)).app U (x ⊗ₜ y)) =
+        (tensorObj A B).val.map
+          (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op
+          (((PresheafOfModules.sheafificationAdjunction
+            (𝟙 X.ringCatSheaf.obj)).unit.app
+              (MonoidalCategoryStruct.tensorObj A.val B.val)).app U
+            (x ⊗ₜ y)) := rfl
+    have hnat' : (tensorObj A B).val.map
+        (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 X.ringCatSheaf.obj)).unit.app
+            (MonoidalCategoryStruct.tensorObj A.val B.val)).app U
+          (x ⊗ₜ y)) =
+        ((PresheafOfModules.sheafificationAdjunction
+          (𝟙 X.ringCatSheaf.obj)).unit.app
+            (MonoidalCategoryStruct.tensorObj A.val B.val)).app
+          (Opposite.op (f ''ᵁ (f ⁻¹ᵁ U.unop)))
+          ((MonoidalCategoryStruct.tensorObj A.val B.val).map
+            (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op
+            (x ⊗ₜ y)) :=
+      (PresheafOfModules.naturality_apply
+        ((PresheafOfModules.sheafificationAdjunction
+          (𝟙 X.ringCatSheaf.obj)).unit.app
+            (MonoidalCategoryStruct.tensorObj A.val B.val))
+        (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op (x ⊗ₜ y)).symm
+    have htm' : (MonoidalCategoryStruct.tensorObj A.val B.val).map
+        (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op (x ⊗ₜ y) =
+        (A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ
+          (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y) :=
+      PresheafOfModules.Monoidal.tensorObj_map_tmul _ x y
+    exact hunit.trans (hnat'.trans (congrArg
+      (fun z => ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj A.val B.val)).app
+        (Opposite.op (f ''ᵁ (f ⁻¹ᵁ U.unop))) z) htm'))
+  -- [L3-fwd] the collapsed sheafification map on the Y-unit image of the
+  -- restricted pure tensor (the R1 naturality pattern)
+  have hfwd : ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map
+      ((PresheafOfModules.pushforward (restrictRingHom f)).map ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val)))).val.app (Opposite.op (f ⁻¹ᵁ U.unop))
+      (((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.pushforward (restrictRingHom f)).obj (MonoidalCategoryStruct.tensorObj A.val B.val))).app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))) =
+      ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.pushforward (restrictRingHom f)).obj
+        ((PresheafOfModules.sheafification
+          (𝟙 X.ringCatSheaf.obj) ⋙ SheafOfModules.forget X.ringCatSheaf ⋙
+          PresheafOfModules.restrictScalars (𝟙 X.ringCatSheaf.obj)).obj
+            (MonoidalCategoryStruct.tensorObj A.val B.val)))).app (Opposite.op (f ⁻¹ᵁ U.unop))
+        (((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val)).app (Opposite.op (f ''ᵁ (f ⁻¹ᵁ U.unop))) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))) := by
+    exact sheafificationMap_app_unit
+      ((PresheafOfModules.pushforward (restrictRingHom f)).map ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val))) (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))
+  haveI hWiso : IsIso ((PresheafOfModules.sheafification
+      (𝟙 Y.ringCatSheaf.obj)).map
+      ((PresheafOfModules.pushforward (restrictRingHom f)).map
+        ((PresheafOfModules.sheafificationAdjunction
+          (𝟙 X.ringCatSheaf.obj)).unit.app
+            (MonoidalCategoryStruct.tensorObj A.val B.val)))) := by
+    have hmem := sheafificationW_pushforward_unit_tensor f A B
+    rw [PresheafOfModules.sheafificationW_iff] at hmem
+    exact hmem
+  -- [L3] the inverse of the collapsed sheafification map, evaluated
+  have hL3 : (asIso ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map
+      ((PresheafOfModules.pushforward (restrictRingHom f)).map ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val))))).inv.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
+      (((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.pushforward (restrictRingHom f)).obj
+        ((PresheafOfModules.sheafification
+          (𝟙 X.ringCatSheaf.obj) ⋙ SheafOfModules.forget X.ringCatSheaf ⋙
+          PresheafOfModules.restrictScalars (𝟙 X.ringCatSheaf.obj)).obj
+            (MonoidalCategoryStruct.tensorObj A.val B.val)))).app (Opposite.op (f ⁻¹ᵁ U.unop))
+        (((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val)).app (Opposite.op (f ''ᵁ (f ⁻¹ᵁ U.unop))) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)))) =
+      ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.pushforward (restrictRingHom f)).obj (MonoidalCategoryStruct.tensorObj A.val B.val))).app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)) := by
+    exact iso_inv_app_of_hom_app _ (Opposite.op (f ⁻¹ᵁ U.unop)) hfwd
+  -- [L4] the pushforward tensor comparison on the Y-unit image
+  have hL4 : ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map
+      (PresheafOfModules.pushforwardTensorIso (restrictRingHom f)
+        A.val B.val).inv).val.app (Opposite.op (f ⁻¹ᵁ U.unop))
+      (((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.pushforward (restrictRingHom f)).obj (MonoidalCategoryStruct.tensorObj A.val B.val))).app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))) =
+      ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj
+        ((PresheafOfModules.pushforward (restrictRingHom f)).obj A.val) ((PresheafOfModules.pushforward (restrictRingHom f)).obj B.val))).app (Opposite.op (f ⁻¹ᵁ U.unop))
+        ((PresheafOfModules.pushforwardTensorIso (restrictRingHom f)
+          A.val B.val).inv.app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))) := by
+    exact sheafificationMap_app_unit
+      ((PresheafOfModules.pushforwardTensorIso (restrictRingHom f)
+        A.val B.val).inv) (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))
+  -- [L4b] the pushforward tensor comparison is the identity on pure tensors
+  have hL4b : (PresheafOfModules.pushforwardTensorIso (restrictRingHom f)
+      A.val B.val).inv.app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)) =
+      ((show ((PresheafOfModules.pushforward (restrictRingHom f)).obj A.val).obj (Opposite.op (f ⁻¹ᵁ U.unop)) from A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ
+        (show ((PresheafOfModules.pushforward (restrictRingHom f)).obj B.val).obj (Opposite.op (f ⁻¹ᵁ U.unop)) from B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)) := by
+    rfl
+  -- [L5] the final congruence piece: restrict-to-pullback on each tensor factor
+  have hL5 : (tensorObjCongr ((restrictFunctorIsoPullback f).app A)
+      ((restrictFunctorIsoPullback f).app B)).hom.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
+      (((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj
+        ((restrictFunctor f).obj A).val ((restrictFunctor f).obj B).val)).app (Opposite.op (f ⁻¹ᵁ U.unop)) ((show ((restrictFunctor f).obj A).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ
+        (show ((restrictFunctor f).obj B).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))) =
+      ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj
+        ((Scheme.Modules.pullback f).obj A).val
+        ((Scheme.Modules.pullback f).obj B).val)).app (Opposite.op (f ⁻¹ᵁ U.unop))
+        ((((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
+          (Opposite.op U.unop) x) ⊗ₜ
+          (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
+            (Opposite.op U.unop) y)) := by
+    have hfac₁ : ((restrictFunctorIsoPullback f).app A).hom.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
+        (show ((restrictFunctor f).obj A).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from
+          A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) =
+        ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
+          (Opposite.op U.unop) x :=
+      restrictFunctorIsoPullback_hom_unit_app_apply f A U.unop x
+    have hfac₂ : ((restrictFunctorIsoPullback f).app B).hom.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
+        (show ((restrictFunctor f).obj B).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from
+          B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y) =
+        ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
+          (Opposite.op U.unop) y :=
+      restrictFunctorIsoPullback_hom_unit_app_apply f B U.unop y
+    refine (tensorObjCongr_hom_app_unit_tmul
+      ((restrictFunctorIsoPullback f).app A)
+      ((restrictFunctorIsoPullback f).app B) (Opposite.op (f ⁻¹ᵁ U.unop))
+      (show ((restrictFunctor f).obj A).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x)
+      (show ((restrictFunctor f).obj B).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)).trans ?_
+    refine congrArg (((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj
+      ((Scheme.Modules.pullback f).obj A).val
+      ((Scheme.Modules.pullback f).obj B).val)).app (Opposite.op (f ⁻¹ᵁ U.unop))) ?_
+    exact congrArg₂ (fun a b => a ⊗ₜ b) hfac₁ hfac₂
+  -- assembly: split the composite application and chain the six values
+  have hstep₂ := congrArg
+    (fun z => (sheafifyValIso
+      ((restrictFunctor f).obj (tensorObj A B))).inv.val.app (Opposite.op (f ⁻¹ᵁ U.unop)) z) hL1
+  have hstep₂' := hstep₂.trans hL2
+  have hstep₂'' := hstep₂'.trans (congrArg
+    (fun z => ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.sheafification
+      (𝟙 X.ringCatSheaf.obj) ⋙ SheafOfModules.forget X.ringCatSheaf ⋙
+      PresheafOfModules.restrictScalars (𝟙 X.ringCatSheaf.obj) ⋙
+      PresheafOfModules.pushforward (restrictRingHom f)).obj (MonoidalCategoryStruct.tensorObj A.val B.val))).app
+      (Opposite.op (f ⁻¹ᵁ U.unop)) z) hres)
+  have hstep₃ := (congrArg (fun z => (asIso ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map ((PresheafOfModules.pushforward (restrictRingHom f)).map ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val))))).inv.val.app (Opposite.op (f ⁻¹ᵁ U.unop)) z) hstep₂'').trans hL3
+  have hstep₄ := (congrArg (fun z => ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map (PresheafOfModules.pushforwardTensorIso (restrictRingHom f) A.val B.val).inv).val.app (Opposite.op (f ⁻¹ᵁ U.unop)) z) hstep₃).trans hL4
+  exact hstep₄
+
 end MuBridgePieces
 
 /-- **([μ-BRIDGE], statement)** The ad-hoc open-immersion tensor comparison is the
@@ -500,169 +690,7 @@ theorem pullbackTensorObjIsoOfIsOpenImmersion_eq_mu {Y : Scheme.{u}} (f : Y ⟶ 
       simp only [pullbackTensorObjIsoOfIsOpenImmersion, Iso.trans_hom, Iso.symm_hom,
         Functor.mapIso_inv, Iso.refl_hom]
       -- [L1] the restrict-side reading of the double-unit image
-      have hL1 := restrictFunctorIsoPullback_inv_unit_app_apply f (tensorObj A B)
-        U.unop
-        (((PresheafOfModules.sheafificationAdjunction
-          (𝟙 X.ringCatSheaf.obj)).unit.app
-            (MonoidalCategoryStruct.tensorObj A.val B.val)).app U (x ⊗ₜ y))
-      -- [L2] un-sheafify on the Y-side
-      have hL2 := sheafifyValIso_inv_app_apply
-        ((restrictFunctor f).obj (tensorObj A B)) (f ⁻¹ᵁ U.unop)
-        (((restrictAdjunction f).unit.app (tensorObj A B)).val.app
-          (Opposite.op U.unop)
-          (((PresheafOfModules.sheafificationAdjunction
-            (𝟙 X.ringCatSheaf.obj)).unit.app
-              (MonoidalCategoryStruct.tensorObj A.val B.val)).app U (x ⊗ₜ y)))
-      -- [Lres] the restrict-unit value is the sheafification-unit image of the
-      -- restricted pure tensor
-      have hres : ((restrictAdjunction f).unit.app (tensorObj A B)).val.app
-          (Opposite.op U.unop)
-          (((PresheafOfModules.sheafificationAdjunction
-            (𝟙 X.ringCatSheaf.obj)).unit.app
-              (MonoidalCategoryStruct.tensorObj A.val B.val)).app U (x ⊗ₜ y)) =
-          ((PresheafOfModules.sheafificationAdjunction
-            (𝟙 X.ringCatSheaf.obj)).unit.app
-              (MonoidalCategoryStruct.tensorObj A.val B.val)).app
-            (Opposite.op (f ''ᵁ (f ⁻¹ᵁ U.unop)))
-            ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ
-              (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)) := by
-        have hunit : ((restrictAdjunction f).unit.app (tensorObj A B)).val.app
-            (Opposite.op U.unop)
-            (((PresheafOfModules.sheafificationAdjunction
-              (𝟙 X.ringCatSheaf.obj)).unit.app
-                (MonoidalCategoryStruct.tensorObj A.val B.val)).app U (x ⊗ₜ y)) =
-            (tensorObj A B).val.map
-              (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op
-              (((PresheafOfModules.sheafificationAdjunction
-                (𝟙 X.ringCatSheaf.obj)).unit.app
-                  (MonoidalCategoryStruct.tensorObj A.val B.val)).app U
-                (x ⊗ₜ y)) := rfl
-        have hnat' : (tensorObj A B).val.map
-            (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op
-            (((PresheafOfModules.sheafificationAdjunction
-              (𝟙 X.ringCatSheaf.obj)).unit.app
-                (MonoidalCategoryStruct.tensorObj A.val B.val)).app U
-              (x ⊗ₜ y)) =
-            ((PresheafOfModules.sheafificationAdjunction
-              (𝟙 X.ringCatSheaf.obj)).unit.app
-                (MonoidalCategoryStruct.tensorObj A.val B.val)).app
-              (Opposite.op (f ''ᵁ (f ⁻¹ᵁ U.unop)))
-              ((MonoidalCategoryStruct.tensorObj A.val B.val).map
-                (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op
-                (x ⊗ₜ y)) :=
-          (PresheafOfModules.naturality_apply
-            ((PresheafOfModules.sheafificationAdjunction
-              (𝟙 X.ringCatSheaf.obj)).unit.app
-                (MonoidalCategoryStruct.tensorObj A.val B.val))
-            (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op (x ⊗ₜ y)).symm
-        have htm' : (MonoidalCategoryStruct.tensorObj A.val B.val).map
-            (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op (x ⊗ₜ y) =
-            (A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ
-              (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y) :=
-          PresheafOfModules.Monoidal.tensorObj_map_tmul _ x y
-        exact hunit.trans (hnat'.trans (congrArg
-          (fun z => ((PresheafOfModules.sheafificationAdjunction
-            (𝟙 X.ringCatSheaf.obj)).unit.app
-              (MonoidalCategoryStruct.tensorObj A.val B.val)).app
-            (Opposite.op (f ''ᵁ (f ⁻¹ᵁ U.unop))) z) htm'))
-      -- [L3-fwd] the collapsed sheafification map on the Y-unit image of the
-      -- restricted pure tensor (the R1 naturality pattern)
-      have hfwd : ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map
-          ((PresheafOfModules.pushforward (restrictRingHom f)).map ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val)))).val.app (Opposite.op (f ⁻¹ᵁ U.unop))
-          (((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.pushforward (restrictRingHom f)).obj (MonoidalCategoryStruct.tensorObj A.val B.val))).app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))) =
-          ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.pushforward (restrictRingHom f)).obj
-            ((PresheafOfModules.sheafification
-              (𝟙 X.ringCatSheaf.obj) ⋙ SheafOfModules.forget X.ringCatSheaf ⋙
-              PresheafOfModules.restrictScalars (𝟙 X.ringCatSheaf.obj)).obj
-                (MonoidalCategoryStruct.tensorObj A.val B.val)))).app (Opposite.op (f ⁻¹ᵁ U.unop))
-            (((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val)).app (Opposite.op (f ''ᵁ (f ⁻¹ᵁ U.unop))) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))) := by
-        exact sheafificationMap_app_unit
-          ((PresheafOfModules.pushforward (restrictRingHom f)).map ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val))) (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))
-      haveI hWiso : IsIso ((PresheafOfModules.sheafification
-          (𝟙 Y.ringCatSheaf.obj)).map
-          ((PresheafOfModules.pushforward (restrictRingHom f)).map
-            ((PresheafOfModules.sheafificationAdjunction
-              (𝟙 X.ringCatSheaf.obj)).unit.app
-                (MonoidalCategoryStruct.tensorObj A.val B.val)))) := by
-        have hmem := sheafificationW_pushforward_unit_tensor f A B
-        rw [PresheafOfModules.sheafificationW_iff] at hmem
-        exact hmem
-      -- [L3] the inverse of the collapsed sheafification map, evaluated
-      have hL3 : (asIso ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map
-          ((PresheafOfModules.pushforward (restrictRingHom f)).map ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val))))).inv.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
-          (((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.pushforward (restrictRingHom f)).obj
-            ((PresheafOfModules.sheafification
-              (𝟙 X.ringCatSheaf.obj) ⋙ SheafOfModules.forget X.ringCatSheaf ⋙
-              PresheafOfModules.restrictScalars (𝟙 X.ringCatSheaf.obj)).obj
-                (MonoidalCategoryStruct.tensorObj A.val B.val)))).app (Opposite.op (f ⁻¹ᵁ U.unop))
-            (((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val)).app (Opposite.op (f ''ᵁ (f ⁻¹ᵁ U.unop))) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)))) =
-          ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.pushforward (restrictRingHom f)).obj (MonoidalCategoryStruct.tensorObj A.val B.val))).app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)) := by
-        exact iso_inv_app_of_hom_app _ (Opposite.op (f ⁻¹ᵁ U.unop)) hfwd
-      -- [L4] the pushforward tensor comparison on the Y-unit image
-      have hL4 : ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map
-          (PresheafOfModules.pushforwardTensorIso (restrictRingHom f)
-            A.val B.val).inv).val.app (Opposite.op (f ⁻¹ᵁ U.unop))
-          (((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.pushforward (restrictRingHom f)).obj (MonoidalCategoryStruct.tensorObj A.val B.val))).app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))) =
-          ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj
-            ((PresheafOfModules.pushforward (restrictRingHom f)).obj A.val) ((PresheafOfModules.pushforward (restrictRingHom f)).obj B.val))).app (Opposite.op (f ⁻¹ᵁ U.unop))
-            ((PresheafOfModules.pushforwardTensorIso (restrictRingHom f)
-              A.val B.val).inv.app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))) := by
-        exact sheafificationMap_app_unit
-          ((PresheafOfModules.pushforwardTensorIso (restrictRingHom f)
-            A.val B.val).inv) (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))
-      -- [L4b] the pushforward tensor comparison is the identity on pure tensors
-      have hL4b : (PresheafOfModules.pushforwardTensorIso (restrictRingHom f)
-          A.val B.val).inv.app (Opposite.op (f ⁻¹ᵁ U.unop)) ((A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)) =
-          ((show ((PresheafOfModules.pushforward (restrictRingHom f)).obj A.val).obj (Opposite.op (f ⁻¹ᵁ U.unop)) from A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ
-            (show ((PresheafOfModules.pushforward (restrictRingHom f)).obj B.val).obj (Opposite.op (f ⁻¹ᵁ U.unop)) from B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)) := by
-        rfl
-      -- [L5] the final congruence piece: restrict-to-pullback on each tensor factor
-      have hL5 : (tensorObjCongr ((restrictFunctorIsoPullback f).app A)
-          ((restrictFunctorIsoPullback f).app B)).hom.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
-          (((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj
-            ((restrictFunctor f).obj A).val ((restrictFunctor f).obj B).val)).app (Opposite.op (f ⁻¹ᵁ U.unop)) ((show ((restrictFunctor f).obj A).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ
-            (show ((restrictFunctor f).obj B).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y))) =
-          ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj
-            ((Scheme.Modules.pullback f).obj A).val
-            ((Scheme.Modules.pullback f).obj B).val)).app (Opposite.op (f ⁻¹ᵁ U.unop))
-            ((((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
-              (Opposite.op U.unop) x) ⊗ₜ
-              (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
-                (Opposite.op U.unop) y)) := by
-        have hfac₁ : ((restrictFunctorIsoPullback f).app A).hom.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
-            (show ((restrictFunctor f).obj A).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from
-              A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) =
-            ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
-              (Opposite.op U.unop) x :=
-          restrictFunctorIsoPullback_hom_unit_app_apply f A U.unop x
-        have hfac₂ : ((restrictFunctorIsoPullback f).app B).hom.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
-            (show ((restrictFunctor f).obj B).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from
-              B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y) =
-            ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
-              (Opposite.op U.unop) y :=
-          restrictFunctorIsoPullback_hom_unit_app_apply f B U.unop y
-        refine (tensorObjCongr_hom_app_unit_tmul
-          ((restrictFunctorIsoPullback f).app A)
-          ((restrictFunctorIsoPullback f).app B) (Opposite.op (f ⁻¹ᵁ U.unop))
-          (show ((restrictFunctor f).obj A).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x)
-          (show ((restrictFunctor f).obj B).val.obj (Opposite.op (f ⁻¹ᵁ U.unop)) from B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y)).trans ?_
-        refine congrArg (((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj
-          ((Scheme.Modules.pullback f).obj A).val
-          ((Scheme.Modules.pullback f).obj B).val)).app (Opposite.op (f ⁻¹ᵁ U.unop))) ?_
-        exact congrArg₂ (fun a b => a ⊗ₜ b) hfac₁ hfac₂
-      -- assembly: split the composite application and chain the six values
-      have hstep₂ := congrArg
-        (fun z => (sheafifyValIso
-          ((restrictFunctor f).obj (tensorObj A B))).inv.val.app (Opposite.op (f ⁻¹ᵁ U.unop)) z) hL1
-      have hstep₂' := hstep₂.trans hL2
-      have hstep₂'' := hstep₂'.trans (congrArg
-        (fun z => ((PresheafOfModules.sheafificationAdjunction (𝟙 Y.ringCatSheaf.obj)).unit.app ((PresheafOfModules.sheafification
-          (𝟙 X.ringCatSheaf.obj) ⋙ SheafOfModules.forget X.ringCatSheaf ⋙
-          PresheafOfModules.restrictScalars (𝟙 X.ringCatSheaf.obj) ⋙
-          PresheafOfModules.pushforward (restrictRingHom f)).obj (MonoidalCategoryStruct.tensorObj A.val B.val))).app
-          (Opposite.op (f ⁻¹ᵁ U.unop)) z) hres)
-      have hstep₃ := (congrArg (fun z => (asIso ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map ((PresheafOfModules.pushforward (restrictRingHom f)).map ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app (MonoidalCategoryStruct.tensorObj A.val B.val))))).inv.val.app (Opposite.op (f ⁻¹ᵁ U.unop)) z) hstep₂'').trans hL3
-      have hstep₄ := (congrArg (fun z => ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).map (PresheafOfModules.pushforwardTensorIso (restrictRingHom f) A.val B.val).inv).val.app (Opposite.op (f ⁻¹ᵁ U.unop)) z) hstep₃).trans hL4
+      have hstep₄ := mu_bridge_lhs_e4 f A B U x y
       -- assembly residue: chain hL4b (via a cheap composed micro-lemma or an
       -- @Eq-typed explicit have), the PF-vs-restrict crossing (hcross), and hL5 into
       -- hstep₄. The hL4b-congr/instance elaborations whnf-storm on the
