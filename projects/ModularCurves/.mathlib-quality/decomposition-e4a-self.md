@@ -2152,3 +2152,18 @@ the [511] restrictFunctorIsoPullback_hom_unit_app_apply. NativeRestriction is no
 ONE sorry: NR-1 (nuPullback_app_restrictTransport). NEXT: NR-1 (consumes SLOT-SQ +
 NR-1a restrictTransportSection_naturality + 1b pullbackRestrictTransport_unitIso, all
 proven; + possibly the UNIT-VAL pullbackUnitIso_hom_app_unit re-add from cont.26).
+
+[NR-1 DESIGN] (2026-08-17, cont.30e): restrictTransportSection hWV P htop x =
+[Congr.inv ∘ Comp.hom]-app-⊤ (map-eqToHom-htop (unitH.app-V⊤ x)) — i.e. = pRT-P.app-⊤
+z₀ with z₀ := map-htop(unitH x) (pRT unfolds to Comp.hom ≫ Congr(symm).inv per 1b's
+calc). nuPullback = slotIso.hom ≫ pb-map-e.hom ≫ pb-map-idealModuleToUnitHom ≫
+pullbackUnitIso.hom (FieldLeaf:1455). NR-1-CHAIN at ⊤-elements: (1) [NR-slot-T]:
+slotW.app-⊤(T-M x) = T-⊗(slotV.app-⊤ x) — via SLOT-SQ-congr_hom at z₀ + push
+(pbH-map-slotV).app through map-htop (eqToHom-naturality) + pullbackMap_app_unit
+(pbH-map-on-unitH-image = unitH-of-slotV-value); (2)+(3) NR-1a
+restrictTransportSection_naturality DIRECT at f := e.hom and f := idealModuleToUnitHom
+J₂; (4) [1b-at-elements]: evaluate pullbackRestrictTransport_unitIso at z₀' +
+push-through + the [UNIT-VAL] micro (pullbackUnitIso_hom_app_unit, re-derive from
+cont.26 scratch): unitIsoH.app-⊤(map-htop(unitH s)) = res-htop(homOfLE-app-⊤ s) —
+matches the NR-1-RHS spelling (W.toScheme.presheaf.map (eqToHom htop).op ∘
+(Scheme.Hom.app (X.homOfLE hWV) ⊤).hom). Each stage its own lemma per the budget rule.
