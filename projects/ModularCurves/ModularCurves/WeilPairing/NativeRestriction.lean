@@ -2729,6 +2729,231 @@ theorem transitionUnitOfCover_eq_dressed_native_perChart
         rw [hlegB] at hB
         rw [hA, hB, ← mul_assoc]
 
+/-- **([G1′ mono helper])** On an integral ambient, a nonzero section's scalar
+endomorphism of the unit sheaf is mono: the nonzero-divisor criterion holds on every
+open by integrality of the subscheme. -/
+theorem mono_unitEndomorphismOfTopSection_openTopSection_of_ne_zero
+    [AlgebraicGeometry.IsIntegral X] (U : X.Opens) (hne : Nonempty ↥U)
+    (s : Γ(X, U)) (hs : s ≠ 0) :
+    Mono (ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection U s)) := by
+  haveI hne'' : Nonempty ↥((U : X.Opens).toScheme) := hne
+  haveI hWint : AlgebraicGeometry.IsIntegral (U : X.Opens).toScheme :=
+    AlgebraicGeometry.isIntegral_of_isOpenImmersion (U : X.Opens).ι
+  refine mono_unitEndomorphismOfTopSection_of_nonZeroDivisors _ _ ?_
+  intro Z
+  by_cases hZ : Nonempty ↥(Z : (U : X.Opens).toScheme.Opens)
+  · haveI := hZ
+    haveI : IsDomain Γ((U : X.Opens).toScheme, Z) :=
+      @AlgebraicGeometry.IsIntegral.component_integral _ hWint Z hZ
+    rw [mem_nonZeroDivisors_iff_ne_zero]
+    intro h0
+    have h1 : Scheme.Modules.openTopSection U s = 0 := by
+      refine @AlgebraicGeometry.map_injective_of_isIntegral
+        ((U : X.Opens).toScheme) hWint Z ⊤ (homOfLE le_top) hZ _ 0 ?_
+      rw [h0, map_zero]
+    have h2 : s = 0 := by
+      have h3 := congrArg (CategoryTheory.ConcreteCategory.hom
+        (X.presheaf.map (eqToHom ((U : X.Opens).ι_image_top).symm).op)) h1
+      rw [map_zero] at h3
+      have hcomp : X.presheaf.map (eqToHom ((U : X.Opens).ι_image_top)).op ≫
+          X.presheaf.map (eqToHom ((U : X.Opens).ι_image_top).symm).op =
+          𝟙 (Γ(X, U)) := by
+        rw [← Functor.map_comp]
+        exact (congrArg X.presheaf.map (Subsingleton.elim _ (𝟙 _))).trans
+          (X.presheaf.map_id _)
+      have h4 : (CategoryTheory.ConcreteCategory.hom
+          (X.presheaf.map (eqToHom ((U : X.Opens).ι_image_top).symm).op))
+          (Scheme.Modules.openTopSection U s) = s := by
+        simp only [Scheme.Modules.openTopSection, Scheme.Opens.ι_appIso,
+          Iso.refl_hom]
+        exact congrArg (fun (φ : Γ(X, U) ⟶ Γ(X, U)) =>
+          (CategoryTheory.ConcreteCategory.hom φ) s) hcomp
+      exact h4.symm.trans h3
+    exact hs h2
+  · have hbot : Z = ⊥ := by
+      ext x
+      exact ⟨fun hx => (hZ ⟨⟨x, hx⟩⟩).elim, fun hx => hx.elim⟩
+    subst hbot
+    rw [mem_nonZeroDivisors_iff]
+    exact ⟨fun x _ => Subsingleton.elim x 0, fun x _ => Subsingleton.elim x 0⟩
+
+/-- **([G1″] the per-chart dressed transition from chart data)** From common-principal
+affine chart data on `Wf i`, `Wf j`, the transition unit decomposes with **per-chart**
+dressing: the two comparison units are computed once per chart (each chart
+trivialisation against its chart-level native trivialisation) and only restricted to
+the overlap, with the generator-ratio units in the middle. -/
+theorem exists_transition_dressed_of_charts_perChart
+    [AlgebraicGeometry.IsIntegral X]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    {ι : Type*} (Wf : ι → X.Opens)
+    (efam : ∀ i, M.over (Wf i) ≅
+      _root_.SheafOfModules.unit (X.ringCatSheaf.over (Wf i)))
+    (i j : ι)
+    (haffi : IsAffineOpen (Wf i)) (haffj : IsAffineOpen (Wf j))
+    (F₁ F₂ : Γ(X, Wf i)) (F₁' F₂' : Γ(X, Wf j))
+    (hspan₁ : J₁.ideal ⟨Wf i, haffi⟩ = Ideal.span {F₁})
+    (hnzd₁ : F₁ ∈ nonZeroDivisors Γ(X, Wf i))
+    (hfmem₁ : F₁ ∈ idealSections J₁ (Opposite.op (Wf i)))
+    (hspan₂ : J₂.ideal ⟨Wf i, haffi⟩ = Ideal.span {F₂})
+    (hnzd₂ : F₂ ∈ nonZeroDivisors Γ(X, Wf i))
+    (hfmem₂ : F₂ ∈ idealSections J₂ (Opposite.op (Wf i)))
+    (hspan₁' : J₁.ideal ⟨Wf j, haffj⟩ = Ideal.span {F₁'})
+    (hnzd₁' : F₁' ∈ nonZeroDivisors Γ(X, Wf j))
+    (hfmem₁' : F₁' ∈ idealSections J₁ (Opposite.op (Wf j)))
+    (hspan₂' : J₂.ideal ⟨Wf j, haffj⟩ = Ideal.span {F₂'})
+    (hnzd₂' : F₂' ∈ nonZeroDivisors Γ(X, Wf j))
+    (hfmem₂' : F₂' ∈ idealSections J₂ (Opposite.op (Wf j)))
+    (hne : Nonempty ↥((Wf i ⊓ Wf j) : X.Opens)) :
+    ∃ (u₁ u₂ : Γ(X, Wf i ⊓ Wf j)ˣ),
+      transitionUnitOfCover M Wf efam i j =
+        Scheme.resUnit (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)
+          (trivializationTransitionUnit (Wf i) (efam i)
+            (Scheme.Modules.overTrivializationOfRestrictIso M (Wf i)
+              (restrictIsoOfPullbackIso M (Wf i)
+                (nativeTensorIdealTriv M J₁ J₂ e (Wf i) F₁ F₂ hfmem₁
+                  (isIso_idealGenHom_of_principal J₁ ⟨Wf i, haffi⟩ F₁
+                    hspan₁ hnzd₁ hfmem₁)
+                  hfmem₂
+                  (isIso_idealGenHom_of_principal J₂ ⟨Wf i, haffi⟩ F₂
+                    hspan₂ hnzd₂ hfmem₂))))) *
+        (u₂ * u₁⁻¹) *
+        (Scheme.resUnit (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)
+          (trivializationTransitionUnit (Wf j) (efam j)
+            (Scheme.Modules.overTrivializationOfRestrictIso M (Wf j)
+              (restrictIsoOfPullbackIso M (Wf j)
+                (nativeTensorIdealTriv M J₁ J₂ e (Wf j) F₁' F₂' hfmem₁'
+                  (isIso_idealGenHom_of_principal J₁ ⟨Wf j, haffj⟩ F₁'
+                    hspan₁' hnzd₁' hfmem₁')
+                  hfmem₂'
+                  (isIso_idealGenHom_of_principal J₂ ⟨Wf j, haffj⟩ F₂'
+                    hspan₂' hnzd₂' hfmem₂'))))))⁻¹ ∧
+      X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁ =
+        X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁' *
+          (u₁ : Γ(X, Wf i ⊓ Wf j)) ∧
+      X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂ =
+        X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂' *
+          (u₂ : Γ(X, Wf i ⊓ Wf j)) := by
+  have haff : IsAffineOpen (Wf i ⊓ Wf j) := haffi.inf haffj
+  haveI hne' : Nonempty ↥((Wf i ⊓ Wf j) : X.Opens) := hne
+  haveI : IsDomain Γ(X, (Wf i ⊓ Wf j)) :=
+    @AlgebraicGeometry.IsIntegral.component_integral X ‹_› (Wf i ⊓ Wf j) hne'
+  haveI hnei : Nonempty ↥(Wf i : X.Opens) :=
+    ⟨⟨hne.some.1, (inf_le_left : Wf i ⊓ Wf j ≤ Wf i) hne.some.2⟩⟩
+  haveI hnej : Nonempty ↥(Wf j : X.Opens) :=
+    ⟨⟨hne.some.1, (inf_le_right : Wf i ⊓ Wf j ≤ Wf j) hne.some.2⟩⟩
+  haveI : IsDomain Γ(X, Wf i) :=
+    @AlgebraicGeometry.IsIntegral.component_integral X ‹_› (Wf i) hnei
+  haveI : IsDomain Γ(X, Wf j) :=
+    @AlgebraicGeometry.IsIntegral.component_integral X ‹_› (Wf j) hnej
+  have hsg₁ : J₁.ideal ⟨(Wf i ⊓ Wf j), haff⟩ = Ideal.span
+      {(X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁)} := by
+    rw [← J₁.map_ideal (U := ⟨(Wf i ⊓ Wf j), haff⟩) (V := ⟨Wf i, haffi⟩)
+      (inf_le_left : (Wf i ⊓ Wf j : X.Opens) ≤ Wf i), hspan₁, Ideal.map_span,
+      Set.image_singleton]
+    rfl
+  have hsg₂ : J₂.ideal ⟨(Wf i ⊓ Wf j), haff⟩ = Ideal.span
+      {(X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)} := by
+    rw [← J₂.map_ideal (U := ⟨(Wf i ⊓ Wf j), haff⟩) (V := ⟨Wf i, haffi⟩)
+      (inf_le_left : (Wf i ⊓ Wf j : X.Opens) ≤ Wf i), hspan₂, Ideal.map_span,
+      Set.image_singleton]
+    rfl
+  have hsg₁' : J₁.ideal ⟨(Wf i ⊓ Wf j), haff⟩ = Ideal.span
+      {(X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')} := by
+    rw [← J₁.map_ideal (U := ⟨(Wf i ⊓ Wf j), haff⟩) (V := ⟨Wf j, haffj⟩)
+      (inf_le_right : (Wf i ⊓ Wf j : X.Opens) ≤ Wf j), hspan₁', Ideal.map_span,
+      Set.image_singleton]
+    rfl
+  have hsg₂' : J₂.ideal ⟨(Wf i ⊓ Wf j), haff⟩ = Ideal.span
+      {(X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')} := by
+    rw [← J₂.map_ideal (U := ⟨(Wf i ⊓ Wf j), haff⟩) (V := ⟨Wf j, haffj⟩)
+      (inf_le_right : (Wf i ⊓ Wf j : X.Opens) ≤ Wf j), hspan₂', Ideal.map_span,
+      Set.image_singleton]
+    rfl
+  have hng₁ : (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁) ∈
+      nonZeroDivisors Γ(X, (Wf i ⊓ Wf j)) := by
+    rw [mem_nonZeroDivisors_iff_ne_zero]
+    intro h0
+    refine (mem_nonZeroDivisors_iff_ne_zero.mp hnzd₁) ?_
+    refine @AlgebraicGeometry.map_injective_of_isIntegral X ‹_› _ _
+      (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)) hne' F₁ 0 ?_
+    rw [h0, map_zero]
+  have hng₂ : (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂) ∈
+      nonZeroDivisors Γ(X, (Wf i ⊓ Wf j)) := by
+    rw [mem_nonZeroDivisors_iff_ne_zero]
+    intro h0
+    refine (mem_nonZeroDivisors_iff_ne_zero.mp hnzd₂) ?_
+    refine @AlgebraicGeometry.map_injective_of_isIntegral X ‹_› _ _
+      (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)) hne' F₂ 0 ?_
+    rw [h0, map_zero]
+  have hng₁' : (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁') ∈
+      nonZeroDivisors Γ(X, (Wf i ⊓ Wf j)) := by
+    rw [mem_nonZeroDivisors_iff_ne_zero]
+    intro h0
+    refine (mem_nonZeroDivisors_iff_ne_zero.mp hnzd₁') ?_
+    refine @AlgebraicGeometry.map_injective_of_isIntegral X ‹_› _ _
+      (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)) hne' F₁' 0 ?_
+    rw [h0, map_zero]
+  have hng₂' : (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂') ∈
+      nonZeroDivisors Γ(X, (Wf i ⊓ Wf j)) := by
+    rw [mem_nonZeroDivisors_iff_ne_zero]
+    intro h0
+    refine (mem_nonZeroDivisors_iff_ne_zero.mp hnzd₂') ?_
+    refine @AlgebraicGeometry.map_injective_of_isIntegral X ‹_› _ _
+      (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)) hne' F₂' 0 ?_
+    rw [h0, map_zero]
+  obtain ⟨u₁, hu₁⟩ : ∃ u : Γ(X, (Wf i ⊓ Wf j))ˣ,
+      (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁) =
+        (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁') *
+          (u : Γ(X, (Wf i ⊓ Wf j))) := by
+    have hassoc : Associated
+        (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁')
+        (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁) :=
+      (Ideal.span_singleton_eq_span_singleton).mp (hsg₁'.symm.trans hsg₁)
+    obtain ⟨u, hu⟩ := hassoc
+    exact ⟨u, hu.symm⟩
+  obtain ⟨u₂, hu₂⟩ : ∃ u : Γ(X, (Wf i ⊓ Wf j))ˣ,
+      (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂) =
+        (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂') *
+          (u : Γ(X, (Wf i ⊓ Wf j))) := by
+    have hassoc : Associated
+        (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+        (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂) :=
+      (Ideal.span_singleton_eq_span_singleton).mp (hsg₂'.symm.trans hsg₂)
+    obtain ⟨u, hu⟩ := hassoc
+    exact ⟨u, hu.symm⟩
+  have hii₁ := isIso_idealGenHom_of_principal J₁ ⟨(Wf i ⊓ Wf j), haff⟩
+    (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₁) hsg₁ hng₁
+    (idealSections_map J₁ (homOfLE inf_le_left).op hfmem₁)
+  have hii₂ := isIso_idealGenHom_of_principal J₂ ⟨(Wf i ⊓ Wf j), haff⟩
+    (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂) hsg₂ hng₂
+    (idealSections_map J₂ (homOfLE inf_le_left).op hfmem₂)
+  have hii₁' := isIso_idealGenHom_of_principal J₁ ⟨(Wf i ⊓ Wf j), haff⟩
+    (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₁') hsg₁' hng₁'
+    (idealSections_map J₁ (homOfLE inf_le_right).op hfmem₁')
+  have hii₂' := isIso_idealGenHom_of_principal J₂ ⟨(Wf i ⊓ Wf j), haff⟩
+    (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂') hsg₂' hng₂'
+    (idealSections_map J₂ (homOfLE inf_le_right).op hfmem₂')
+  have hmonoL := mono_unitEndomorphismOfTopSection_openTopSection_of_ne_zero
+    (Wf i ⊓ Wf j) hne'
+    (X.presheaf.map (homOfLE (inf_le_left : Wf i ⊓ Wf j ≤ Wf i)).op F₂)
+    (mem_nonZeroDivisors_iff_ne_zero.mp hng₂)
+  have hmonoR := mono_unitEndomorphismOfTopSection_openTopSection_of_ne_zero
+    (Wf i ⊓ Wf j) hne'
+    (X.presheaf.map (homOfLE (inf_le_right : Wf i ⊓ Wf j ≤ Wf j)).op F₂')
+    (mem_nonZeroDivisors_iff_ne_zero.mp hng₂')
+  refine ⟨u₁, u₂, ?_, hu₁, hu₂⟩
+  exact transitionUnitOfCover_eq_dressed_native_perChart M J₁ J₂ e Wf efam i j
+    F₁ F₂ F₁' F₂' hfmem₁
+    (isIso_idealGenHom_of_principal J₁ ⟨Wf i, haffi⟩ F₁ hspan₁ hnzd₁ hfmem₁)
+    hfmem₂
+    (isIso_idealGenHom_of_principal J₂ ⟨Wf i, haffi⟩ F₂ hspan₂ hnzd₂ hfmem₂)
+    hfmem₁'
+    (isIso_idealGenHom_of_principal J₁ ⟨Wf j, haffj⟩ F₁' hspan₁' hnzd₁' hfmem₁')
+    hfmem₂'
+    (isIso_idealGenHom_of_principal J₂ ⟨Wf j, haffj⟩ F₂' hspan₂' hnzd₂' hfmem₂')
+    u₁ u₂ hu₁ hu₂ hii₁ hii₂ hii₁' hii₂' hmonoL hmonoR
+
 end NativeRestriction
 
 end ModularCurves
