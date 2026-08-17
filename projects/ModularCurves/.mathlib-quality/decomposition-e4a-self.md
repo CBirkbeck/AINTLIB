@@ -2206,3 +2206,18 @@ check whether the perChart-statement's A can absorb cZ: A-inl-i := cZ i · ν-un
 Watch: the cZ-rescale (overUnitScalarIso) multiplies the transition by
 res(cZ i)·res(cZ j)⁻¹ (transitionUnit_restrict_rescale) — composes with the ν-A's
 multiplicatively ⟹ A-total := cZ-factor · ν-factor per piece ✓ per-chart-shaped.
+
+[G2' ROUTE FINAL] (2026-08-17, cont.30h): transitionUnitOfCover_eq_dressed_native's
+a := trivializationTransitionUnit(overlap, res-efam-i, overTrivializationOfRestrictIso
+(restrictIsoOfPullbackIso (nativeTensorIdealTriv AT-THE-OVERLAP with res'd generators)))
+and b := (same for j)⁻¹-side. PER-CHART REFINEMENT: A i := trivializationTransitionUnit
+(W i, efam i, native-trivialisation-ON-W-i with the chart generators); then
+res-to-overlap(A i) equals the a-above via (i) transitionUnit-restriction-compat and
+(ii) [NR-3] restrictTrivialization_nativeTensorIdealTriv (PROVEN — the native
+trivialisation restricts on the nose, its NR-2/NR-1 machinery now fully clean).
+EXECUTE: (1) read NR-3's exact statement + find/prove transitionUnit-res-compat
+(grep trivializationTransitionUnit_restrict / _res in FieldLeaf+NativeRestriction);
+(2) state G2'-helper: res(A i) = a-term (per chart-side); (3) G2'-proof := base-G2
+construction verbatim + per-branch: dressed-native as-is, then rewrite a := res(A i)
+· b := res(A j) via the helper, absorb the cZ-rescale into A-total (inl: cZ i · A i;
+inr: A i); the u-relations carry unchanged. All pieces proven — assembly only.
