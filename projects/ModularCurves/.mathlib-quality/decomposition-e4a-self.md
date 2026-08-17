@@ -2584,3 +2584,18 @@ zChart-membership (hZaff.range_fromSpec pattern from isLocalization_stalk :193),
 then hZaff.exists_basicOpen_le (x := ⟨zChartPoint, mem-of-(inv-fst)⁻¹V⊓zChart⟩) →
 D(s) ≤ (inv fst)⁻¹V ⊓ zChart with the point inside; germ-restrict to D(s)
 (germToFunctionField_restrict, TheoremOfSquareField:275); then the fraction-read.
+
+[SEC-ORD S2 LANDED] (2026-08-17, cont.30ad): hPz (range_fromSpec) + the shrink
+obtain ⟨s, hsle, hPs⟩ (exists_basicOpen_le at (inv fst)⁻¹V ⊓ zChart) both green.
+NEXT [S2c]: germ-restriction h2 : germ-((inv fst)⁻¹V)(x) = germ-D(s)(res x) via
+germToFunctionField_restrict (TheoremOfSquareField:275) at hsle.trans inf_le_left.
+Then [S3] fraction-read: Γ(D(s)) is the Away-s localization of Γ(zChart)
+(IsAffineOpen.isLocalization_basicOpen); represent res-x = f₀/sⁿ
+(IsLocalization.Away.surj), push through germ-D(s): germ-D(s)(f₀/sⁿ-form) =
+algebraMap(f₀')·algebraMap(s')⁻ⁿ in the FF via GERM-Z (both f₀ s ∈ Γ(zChart);
+germ-D(s)∘res-zChart→D(s) = germ-zChart by the restrict-identity) + map_mul/inv.
+Then ord-additivity (ord_P is the valuation's exponent: multiplicative →
+ord(product) adds; the file's SmoothPlaneCurve.ord_P-API — check add-lemmas), the
+denominator ord-0 (s ∉ maximalIdealAt: hPs means the point is in D(s) ⟹ s
+invertible at P — the membership-bridge через the zChart-dictionary), and the
+f₀-dichotomy (ON: hspan-transport; OFF: :309).
