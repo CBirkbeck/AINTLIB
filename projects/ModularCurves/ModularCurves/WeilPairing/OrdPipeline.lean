@@ -2150,7 +2150,98 @@ private theorem divH_affine_arm
       simp only [← WithTop.LinearOrderedAddCommGroup.coe_neg, ← WithTop.coe_add,
         WithTop.untopD_coe]
       omega
-    · sorry
+    · -- T = some: the indicators are linked through the dictionary
+      have hinvinj : ∀ a b : (modelEllipticCurve W).E,
+          ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base a = ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base b → a = b := by
+        intro a b hab
+        have h7 := congrArg ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base hab
+        have hna := congrArg (fun (m : (modelEllipticCurve W).E ⟶
+            (modelEllipticCurve W).E) => m.base a) (IsIso.inv_hom_id (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+        have hnb := congrArg (fun (m : (modelEllipticCurve W).E ⟶
+            (modelEllipticCurve W).E) => m.base b) (IsIso.inv_hom_id (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+        simp only at hna hnb
+        rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base a) =
+            ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base a from rfl, hna,
+          show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base b) =
+            ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base b from rfl, hnb] at h7
+        exact h7
+      simp only [hpv]
+      rw [EllipticCurve.basePointCast_some,
+        WeierstrassCurve.Affine.Point.toProjectiveSmoothPoint_some]
+      have hpc := eq_chartSpecPoint_of_projModelPointsEquiv_some (W := W) hpv
+      have hp1 : p.1.base (default : Spec (CommRingCat.of K)) =
+          zChartPoint W ⟨x0, y0, nonsingular_of_baseChange_self W h0⟩ := by
+        rw [hpc]
+        exact chartSpecPoint_base_default_eq_zChartPoint W x0 y0 _
+          ⟨x0, y0, nonsingular_of_baseChange_self W h0⟩ rfl rfl
+      have hcond : (((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W ⟨x', y', hxy'⟩) =
+          zQm.base (default : Spec (CommRingCat.of K))) ↔
+          (⟨x0, y0, nonsingular_of_baseChange_self W h0⟩ : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) =
+            ⟨x', y', hxy'⟩ := by
+        rw [hzQpt, hp1]
+        constructor
+        · intro hEq
+          exact (zChartPoint_injective W (hinvinj _ _ hEq)).symm
+        · intro hEq
+          rw [hEq]
+      by_cases hQT : (⟨x0, y0, nonsingular_of_baseChange_self W h0⟩ :
+          (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) = ⟨x', y', hxy'⟩
+      · rw [if_pos (show (HasseWeil.Curves.ProjectiveSmoothPoint.affine
+            (⟨x0, y0, nonsingular_of_baseChange_self W h0⟩ : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) :
+            HasseWeil.Curves.ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve K)) =
+            HasseWeil.Curves.ProjectiveSmoothPoint.affine ⟨x', y', hxy'⟩ from
+          by rw [hQT])]
+        rw [if_pos (hcond.mpr hQT)] at hf1i
+        rw [hf1i] at hled
+        obtain ⟨va, hva⟩ := WithTop.ne_top_iff_exists.mp
+          (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr
+            ((map_ne_zero_iff _
+              (pullbackCurveFunctionFieldEquiv W).injective).mpr hf₁cne))
+        obtain ⟨vb, hvb⟩ := WithTop.ne_top_iff_exists.mp
+          (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hbne)
+        obtain ⟨vc, hvc⟩ := WithTop.ne_top_iff_exists.mp
+          (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hcne')
+        obtain ⟨vt, hvt⟩ := WithTop.ne_top_iff_exists.mp
+          (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hYne)
+        obtain ⟨v1, hv1⟩ := WithTop.ne_top_iff_exists.mp
+          (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hpbYne)
+        rw [← hva, ← hvb, ← hvc, ← hvt] at hled
+        rw [← hva, ← hvb, ← hvc, ← hv1]
+        rw [← hv1, ← hvt] at htrY
+        have hledZ : vt + vb + 1 + vc = 0 + 0 + va := by exact_mod_cast hled
+        have htrYZ : v1 = vt := by
+          simpa [WithTop.untopD_coe] using htrY
+        simp only [← WithTop.LinearOrderedAddCommGroup.coe_neg, ← WithTop.coe_add,
+          WithTop.untopD_coe]
+        omega
+      · rw [if_neg (show ¬(HasseWeil.Curves.ProjectiveSmoothPoint.affine
+            (⟨x0, y0, nonsingular_of_baseChange_self W h0⟩ : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) :
+            HasseWeil.Curves.ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve K)) =
+            HasseWeil.Curves.ProjectiveSmoothPoint.affine ⟨x', y', hxy'⟩ from
+          fun h => hQT (HasseWeil.Curves.ProjectiveSmoothPoint.affine_injective h))]
+        rw [if_neg (fun h => hQT (hcond.mp h))] at hf1i
+        rw [hf1i] at hled
+        obtain ⟨va, hva⟩ := WithTop.ne_top_iff_exists.mp
+          (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr
+            ((map_ne_zero_iff _
+              (pullbackCurveFunctionFieldEquiv W).injective).mpr hf₁cne))
+        obtain ⟨vb, hvb⟩ := WithTop.ne_top_iff_exists.mp
+          (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hbne)
+        obtain ⟨vc, hvc⟩ := WithTop.ne_top_iff_exists.mp
+          (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hcne')
+        obtain ⟨vt, hvt⟩ := WithTop.ne_top_iff_exists.mp
+          (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hYne)
+        obtain ⟨v1, hv1⟩ := WithTop.ne_top_iff_exists.mp
+          (((⟨W⟩ : SmoothPlaneCurve K).ord_P_eq_top_iff _).not.mpr hpbYne)
+        rw [← hva, ← hvb, ← hvc, ← hvt] at hled
+        rw [← hva, ← hvb, ← hvc, ← hv1]
+        rw [← hv1, ← hvt] at htrY
+        have hledZ : vt + vb + 0 + vc = 0 + 0 + va := by exact_mod_cast hled
+        have htrYZ : v1 = vt := by
+          simpa [WithTop.untopD_coe] using htrY
+        simp only [← WithTop.LinearOrderedAddCommGroup.coe_neg, ← WithTop.coe_add,
+          WithTop.untopD_coe]
+        omega
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
 `pullbackCurveFunctionFieldEquiv`-image of the germ of a `globalTwist` of a global unit
