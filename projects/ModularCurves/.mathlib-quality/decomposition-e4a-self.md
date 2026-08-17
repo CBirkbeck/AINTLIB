@@ -3024,3 +3024,17 @@ thread as ∃-obtained INSIDE the arms (no L1-SIG growth) or reuse the p-data wh
 CAUTION: τp for the arms is the translateBy at T₀-generic — the EQUIV-TAU's binders
 (P' pS hxpS τp hτp [IsDominant]) must be instantiated at the T₀-dataset — construct
 P'₀ := the (baseChange).Point of T₀ via the dictionary (basePointCast-preimage).
+
+**[TAU-INSTANTIATION ANALYSIS] (cont.30au)**: EQUIV-TAU's binders (P' pS hxpS τp hτp
+[IsDominant]) need for the arms' T₀: (i) when T := basePointCast(equiv p) is AFFINE —
+instantiate with the L1's OWN (p, hxp)-data (T₀ := T; the −T-point is affine; the
+zero-arm and ∞-arm ledgers run the affine engine at −T with the τ-conjugated dataset);
+(ii) when T = 0 — τ_T unavailable; pick T₀ := the place-P itself via pmod :=
+chartSpecPoint(P.x, P.y) (dictionary-value ✓ projModelPointsEquiv_chartSpecPoint);
+the GAP: hxpS₀ — the overPoint-composite-identity ((overPoint … P'₀ ≫
+baseChangeIdFstOver).left = pmod.1) for P'₀ := pmod-as-Point — likely provable
+(pointEquivOverHom-def + fst-projection unfold; grep pointEquivOverHom readouts /
+Point.asSection GroupLaw:244) but is its own micro [OVERPT]. NEXT WINDOW ORDER:
+[OVERPT] micro → the τ-conjugated U-ORD0/SEC-ORD wrappers → the two arms' ledgers
+(some-arm patterns). Also: IsDominant (translateByPoint) — derive from iso (grep
+IsIso-translateBy); the τp-app-germ-push is stocked (functionFieldMap_germToFunctionField).
