@@ -2126,26 +2126,6 @@ private theorem slot_restrictTransportSection {V W : X.Opens} (hWV : W ≤ V)
     (pullbackMap_app_unit (X.homOfLE hWV)
       (tensorIdealSlotIso M J₁ V g₁ hg₁ hgi₁).hom (⊤ : V.toScheme.Opens) x)
 
-/-- **([NR-1], the brick)** The `ν`-comparison map is natural under the open-restriction
-transport at `⊤`-sections: evaluating the `W`-level `ν` on a transported `V`-section is
-the scheme-restriction of the `V`-level `ν`-value. -/
-theorem nuPullback_app_restrictTransport {V W : X.Opens} (hWV : W ≤ V)
-    (g₁ : Γ(X, V)) (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op V))
-    (hgi₁ : IsIso (idealGenHom J₁ V g₁ hg₁))
-    (hg₁' : X.presheaf.map (homOfLE hWV).op g₁ ∈ idealSections J₁ (Opposite.op W))
-    (hgi₁' : IsIso (idealGenHom J₁ W (X.presheaf.map (homOfLE hWV).op g₁) hg₁'))
-    (htop : (⊤ : W.toScheme.Opens) = (X.homOfLE hWV) ⁻¹ᵁ (⊤ : V.toScheme.Opens))
-    (x : ((Scheme.Modules.pullback V.ι).obj M).val.obj
-      (Opposite.op (⊤ : V.toScheme.Opens))) :
-    (nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op g₁) hg₁' hgi₁').val.app
-        (Opposite.op (⊤ : W.toScheme.Opens))
-        (restrictTransportSection hWV M htop x) =
-      W.toScheme.presheaf.map (eqToHom htop).op
-        ((Scheme.Hom.app (X.homOfLE hWV) (⊤ : V.toScheme.Opens)).hom
-          ((nuPullback M J₁ J₂ e V g₁ hg₁ hgi₁).val.app
-            (Opposite.op (⊤ : V.toScheme.Opens)) x)) := by
-  sorry
-
 /-- **([NR-congr-symm])** The inverse component of `pullbackCongr` at a symmetrised
 equation is the hom component at the original equation. -/
 theorem pullbackCongr_symm_app_inv {Y Z : Scheme.{u}} {f g : Y ⟶ Z} (h : f = g)
@@ -2174,6 +2154,92 @@ theorem pullbackRestrictTransport_unitIso {V W : X.Opens} (hWV : W ≤ V) :
     _ = ((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app (unitObj X)).hom ≫
         (pullbackUnitIso (X.homOfLE hWV ≫ V.ι)).hom := by rw [hcongr]
     _ = _ := hcomp
+
+/-- **([NR-unit-T])** The unit comparison at transported `⊤`-sections: the `W`-level
+unit iso on a transported section is the scheme-restriction of the `V`-level value.
+The `1b` square at the re-indexed unit image, pushed through, with the unit-value
+core. -/
+private theorem pullbackUnitIso_app_restrictTransport {V W : X.Opens} (hWV : W ≤ V)
+    (htop : (⊤ : W.toScheme.Opens) = (X.homOfLE hWV) ⁻¹ᵁ (⊤ : V.toScheme.Opens))
+    (z : ((Scheme.Modules.pullback V.ι).obj (unitObj X)).val.obj
+      (Opposite.op (⊤ : V.toScheme.Opens))) :
+    (pullbackUnitIso W.ι).hom.val.app (Opposite.op (⊤ : W.toScheme.Opens))
+        (restrictTransportSection hWV (unitObj X) htop z) =
+      W.toScheme.presheaf.map (eqToHom htop).op
+        ((Scheme.Hom.app (X.homOfLE hWV) (⊤ : V.toScheme.Opens)).hom
+          ((pullbackUnitIso V.ι).hom.val.app
+            (Opposite.op (⊤ : V.toScheme.Opens)) z)) := by
+  -- the 1b square at the re-indexed unit image
+  have h1b := congrArg (fun (q : (Scheme.Modules.pullback (X.homOfLE hWV)).obj
+      ((Scheme.Modules.pullback V.ι).obj (unitObj X)) ⟶ unitObj W.toScheme) =>
+    q.val.app (Opposite.op (⊤ : W.toScheme.Opens))
+      (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+          ((Scheme.Modules.pullback V.ι).obj (unitObj X))).presheaf.map
+        (eqToHom htop).op
+        (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+          ((Scheme.Modules.pullback V.ι).obj (unitObj X))).val.app
+          (Opposite.op (⊤ : V.toScheme.Opens)) z)))
+    (pullbackRestrictTransport_unitIso hWV)
+  refine Eq.trans (show _ = ((pullbackUnitIso (X.homOfLE hWV)).hom.val.app
+      (Opposite.op (⊤ : W.toScheme.Opens))
+      (((Scheme.Modules.pullback (X.homOfLE hWV)).map
+          (pullbackUnitIso V.ι).hom).val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+            ((Scheme.Modules.pullback V.ι).obj (unitObj X))).presheaf.map
+          (eqToHom htop).op
+          (((Scheme.Modules.pullbackPushforwardAdjunction
+            (X.homOfLE hWV)).unit.app
+            ((Scheme.Modules.pullback V.ι).obj (unitObj X))).val.app
+            (Opposite.op (⊤ : V.toScheme.Opens)) z)))) from h1b) ?_
+  -- push the pulled unit iso through the re-index and the unit
+  refine Eq.trans (congrArg ((pullbackUnitIso (X.homOfLE hWV)).hom.val.app
+    (Opposite.op (⊤ : W.toScheme.Opens)))
+    (Eq.trans (PresheafOfModules.naturality_apply
+      ((Scheme.Modules.pullback (X.homOfLE hWV)).map
+        (pullbackUnitIso V.ι).hom).val
+      (eqToHom htop).op
+      (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+        ((Scheme.Modules.pullback V.ι).obj (unitObj X))).val.app
+        (Opposite.op (⊤ : V.toScheme.Opens)) z))
+    (congrArg (((Scheme.Modules.pullback (X.homOfLE hWV)).obj
+        (unitObj V.toScheme)).presheaf.map (eqToHom htop).op)
+      (pullbackMap_app_unit (X.homOfLE hWV) (pullbackUnitIso V.ι).hom
+        (⊤ : V.toScheme.Opens) z)))) ?_
+  -- the unit-value core: the homEquiv characterisation of the unit comparison
+  have hval := congrArg (fun q =>
+    q.val.app (Opposite.op (⊤ : V.toScheme.Opens))
+      ((pullbackUnitIso V.ι).hom.val.app (Opposite.op (⊤ : V.toScheme.Opens)) z))
+    (SheafOfModules.pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitToUnit
+      (X.homOfLE hWV).toRingCatSheafHom)
+  rw [Adjunction.homEquiv_unit] at hval
+  refine Eq.trans (PresheafOfModules.naturality_apply
+    (pullbackUnitIso (X.homOfLE hWV)).hom.val (eqToHom htop).op
+    (((Scheme.Modules.pullbackPushforwardAdjunction (X.homOfLE hWV)).unit.app
+      (unitObj V.toScheme)).val.app (Opposite.op (⊤ : V.toScheme.Opens))
+      ((pullbackUnitIso V.ι).hom.val.app
+        (Opposite.op (⊤ : V.toScheme.Opens)) z))) ?_
+  exact congrArg (fun t => W.toScheme.presheaf.map (eqToHom htop).op t) hval
+
+/-- **([NR-1], the brick)** The `ν`-comparison map is natural under the open-restriction
+transport at `⊤`-sections: evaluating the `W`-level `ν` on a transported `V`-section is
+the scheme-restriction of the `V`-level `ν`-value. -/
+theorem nuPullback_app_restrictTransport {V W : X.Opens} (hWV : W ≤ V)
+    (g₁ : Γ(X, V)) (hg₁ : g₁ ∈ idealSections J₁ (Opposite.op V))
+    (hgi₁ : IsIso (idealGenHom J₁ V g₁ hg₁))
+    (hg₁' : X.presheaf.map (homOfLE hWV).op g₁ ∈ idealSections J₁ (Opposite.op W))
+    (hgi₁' : IsIso (idealGenHom J₁ W (X.presheaf.map (homOfLE hWV).op g₁) hg₁'))
+    (htop : (⊤ : W.toScheme.Opens) = (X.homOfLE hWV) ⁻¹ᵁ (⊤ : V.toScheme.Opens))
+    (x : ((Scheme.Modules.pullback V.ι).obj M).val.obj
+      (Opposite.op (⊤ : V.toScheme.Opens))) :
+    (nuPullback M J₁ J₂ e W (X.presheaf.map (homOfLE hWV).op g₁) hg₁' hgi₁').val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        (restrictTransportSection hWV M htop x) =
+      W.toScheme.presheaf.map (eqToHom htop).op
+        ((Scheme.Hom.app (X.homOfLE hWV) (⊤ : V.toScheme.Opens)).hom
+          ((nuPullback M J₁ J₂ e V g₁ hg₁ hgi₁).val.app
+            (Opposite.op (⊤ : V.toScheme.Opens)) x)) := by
+  sorry
 
 /-- **([NR-endo-1])** The scalar endomorphism of the unit evaluated at the `⊤`-section
 `1` returns its defining section. -/
