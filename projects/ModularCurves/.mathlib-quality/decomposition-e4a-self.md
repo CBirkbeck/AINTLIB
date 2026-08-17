@@ -2977,3 +2977,14 @@ is proven modulo exactly TWO sorries, both ∞-places: the divH_affine_arm ZERO-
 
 Session-11 total: ~40 green commits; every landing pushed; the affine divisor engine
 (SEC-ORD + L1-skeleton + PT-dictionary + both dictionary-arms) complete.
+
+**[INF-VAL COORDINATE PINS] (cont.30as addendum)**: the y-chart (t,s)-coordinates
+(infChartCubic PoleFiltration:377: s³ + a₂ts² + (a₄t²−a₁t)s + (a₆t³−a₃t²−t), monic in s):
+z∞ = (t,s) = (0,0); the cubic-relation rearranges to t·(1 + a₃t + a₁s − a₆t² − a₄ts − a₂s²)-ish
+= s³-forms ⟹ in the z∞-stalk t = s³·unit ⟹ the stalk is a DVR with uniformizer s;
+w(s) = exp(−1), w(t) = exp(−3); x_gen = s/t (w = exp 2 ✓), y_gen = 1/t (w = exp 3 ✓) —
+matching the eq_ordAtInftyValuation_of_x_y anchor. The generator-read stock:
+chartYRingEquiv_isLocalizationElem (PoleFiltration:1595: the X₁X₂-localization elem ↦
+infChartTElem); sectionUnitElem (:3684) may be the 1+…-unit already. The z∞-prime =
+⟨s,t⟩-image = ker(evaluation-at-(0,0)) — K-MAX-style via the augmentation infChartAug
+(:3728 — the (0,0)-evaluation hom?!) — CHECK infChartAug's def first next window.
