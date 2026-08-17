@@ -3038,3 +3038,19 @@ Point.asSection GroupLaw:244) but is its own micro [OVERPT]. NEXT WINDOW ORDER:
 [OVERPT] micro → the τ-conjugated U-ORD0/SEC-ORD wrappers → the two arms' ledgers
 (some-arm patterns). Also: IsDominant (translateByPoint) — derive from iso (grep
 IsIso-translateBy); the τp-app-germ-push is stocked (functionFieldMap_germToFunctionField).
+
+**[TAU-PT ROUTE] (cont.30au addendum)**: [OVERPT] LANDED (toBaseChangePoint +
+overPoint_toBaseChangePoint_comp_fst + specMap_algebraMap_self_eq_id). The [TAU-PT]
+point-action route: work at the (baseChange)-Point-𝟙 level: Q₀ := toBaseChangePoint(pmodA),
+P'₀ := toBaseChangePoint(pmodT); `overPoint_comp_translateBy` (Translation:172) + rfl-lefts
+⟹ Q₀.1 ≫ translateByPoint P'₀ = (Q₀ + P'₀).1; base-at-default + PT-0 gives the τp-action
+on (inv fst)(zChartPoint A)-points. THE REMAINING LINK: (Q₀ + P'₀) vs toBaseChangePoint
+(pmodA + pmodT) — toBaseChangePoint-additivity OR the stocked `Point.baseChangeEquiv`
+(GroupLaw:411, an ≃+ between (E.baseChange σ).Point t and E.Point (t ≫ σ)) with the
+g-typing collapse (Spec.map-alg = 𝟙 propositionally — specMap_algebraMap_self_eq_id +
+a Point-transport). Alternatively prove toBaseChangePoint-add directly (the lift-of-sums:
+both sides are pullback.lifts of the same E-side data — pullback.hom_ext + lift_fst/snd +
+the E-side add-composite… the E-side sum's .1-realization needs the E-Point-add-def —
+routes through the same Hom-group — CHECK Point.asSection-additivity-lemmas first (the
+asSection-family may carry them: grep asSection.*add)). THEN [TAU-SEC-ORD]/[TAU-U-ORD0]
+wrappers + the two arms.
