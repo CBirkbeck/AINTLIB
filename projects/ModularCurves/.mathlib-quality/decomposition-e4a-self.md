@@ -2933,3 +2933,20 @@ matching κ's [affine ≠ ∞]. PT-2 chain complete (116373f9f): basePointCast_z
 rw-on-▸ is motive-fragile — use exact), CAST-INJ, ns-reverse, mulByHom_base_zChartPoint_of_smul
 (Point-typed pmod via set — SpecPoints has no SMul). 27 engine pieces; 3 sorries left
 (AFF-some, AFF-zero, hDIVW-∞).
+
+**[D-RUNG DESIGN LOCKED] (cont.30ar)**: `projectiveDivisorOf_degree_eq_zero`
+(NormValuation:2278, [IsAlgClosed][IsIntegrallyClosed CR][IsElliptic]) is CLOSED ⟹
+the ∞-ARM (w = ∞) is pure degree-arithmetic ONCE all affine arms hold: from
+div-H + pb-rr = pb-κ at every affine w (some+zero arms) + degree-0 of div H (principal),
+deg(pb D) = #ker·deg D with deg κ = 0 (kappaDivisor_degree) and deg div-rr = 0:
+div-H(∞) + pb-rr(∞) = −Σ-affine(LHS) = −Σ-affine(RHS) = pb-κ(∞). Needs a
+[DEG-SPLIT] micro (degree = ∞-coeff + affine-sum; projectiveDivisorOf_degree IS this
+split for div-forms; pullbackDivisor-side via pullbackDivisor_apply + degree-lemmas).
+The ZERO-ARM (w affine, [N]w = 0) needs ordAtInfty(Y := pE(germ tUOC)) — via ITS
+degree-relation: ordAtInfty-Y = −Σ-affine-ords-of-Y (projectiveDivisorOf_degree_eq_zero
+at Y + projectiveDivisorOf_degree) — the affine-sum of Y-ords: Finsupp-support-sum with
+the ledger values — OR the direct ∞-family (y-chart mirror: chartYRingEquiv
+PoleFiltration:1571 + projModelZero-point; a session-scale RP-∞-programme). PREFER the
+degree-relation route for Y (one sum-computation) — the sum-over-places of the
+SEC-ORD-indicator-differences telescopes to fibre-counts; alternatively keep the
+zero-arm as the LAST sorry and reassess. Priority: D-2 (some-arm finale) first.
