@@ -2167,3 +2167,18 @@ push-through + the [UNIT-VAL] micro (pullbackUnitIso_hom_app_unit, re-derive fro
 cont.26 scratch): unitIsoH.app-⊤(map-htop(unitH s)) = res-htop(homOfLE-app-⊤ s) —
 matches the NR-1-RHS spelling (W.toScheme.presheaf.map (eqToHom htop).op ∘
 (Scheme.Hom.app (X.homOfLE hWV) ⊤).hom). Each stage its own lemma per the budget rule.
+
+[★ NATIVERESTRICTION COMPLETE] (2026-08-17, cont.30f): the file has ZERO sorries;
+nuPullback_app_restrictTransport [NR-1] = [propext, Classical.choice, Quot.sound].
+Final NR-1 assembly: stage-unfold at the element was pure defeq (no show needed — the
+first congrArg-trans's unification crossed the ν-composite-app); slot-T + 1a at e.hom +
+1a at idealModuleToUnitHom J₂ + unit-T. [NR-unit-T]: 1b at the re-indexed unit image +
+push-through + core := congrArg-at-elements of
+pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitToUnit with homEquiv_unit rw'd —
+the wrapper/toRingCatSheafHom bridges all crossed at defeq (exact hval). Lesson: the
+mathlib homEquiv-characterisation lemmas evaluate at elements cleanly — congrArg with
+an UNANNOTATED λ (inferred domain), never hand-spell the SheafOfModules-hom-type
+(universe pins broke it). NEXT: [G2'] exists_normalized_chart_dataset_perChart
+(GlueDataset, NR-2×2 + read-off route cont.20) → [ORD-G/L1] exists_const_mul_weilFunction
+(OrdPipeline, pointwise divisor route cont.18-19) → L3/L5 already proven modulo L1 →
+E4a-diagonal reduction → leaves A (weilPairingEval_self) + B (_nondegenerate).
