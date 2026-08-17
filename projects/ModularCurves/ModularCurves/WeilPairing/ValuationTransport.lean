@@ -279,7 +279,7 @@ global section also vanishes along the shrinking denominator). Tail of RP-4a
 verbatim from `intValuation_singleton` on. -/
 theorem uniformizer_of_localized_span (W : WeierstrassCurve K) [W.IsElliptic]
     (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
-    (r : (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) (hr : r ≠ 0)
+    (r : (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
     (hgen : IsLocalRing.maximalIdeal
         ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) =
       Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
@@ -297,10 +297,10 @@ theorem uniformizer_of_localized_span (W : WeierstrassCurve K) [W.IsElliptic]
   have hr' : algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
       ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r ≠ 0 := by
     intro h0
-    exact hr (IsLocalization.injective
-      (M := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P).primeCompl)
-      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
-      (Ideal.primeCompl_le_nonZeroDivisors _) (h0.trans (map_zero _).symm))
+    refine IsDiscreteValuationRing.not_a_field
+      ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) ?_
+    rw [hgen, h0]
+    exact Ideal.span_singleton_eq_bot.mpr rfl
   have hgen' : (IsDiscreteValuationRing.maximalIdeal
       ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).asIdeal =
       Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
