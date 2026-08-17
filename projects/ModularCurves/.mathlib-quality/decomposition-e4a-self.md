@@ -2056,3 +2056,35 @@ RHS + the generator-res-compat (the s2-outputs' idealSections at res-paths — s
 res-fusion on the .1's + Subtype.ext). Assemble per the per-decl-budget rule (each side's
 chain as its own private lemma). Then NR-1 (1a×2 + 1b + SLOT-SQ-at-elements +
 UNIT-VAL-readd), then G2', then ORD-G.
+
+[AXIOM-CLEAN MANDATE + SLOT-WALK LANDED] (2026-08-17, cont.30): OWNER DIRECTIVE: "no
+tracked sorries, it needs to be axiom clean" — yRho_representable must reach the
+standard three axioms. THE DEFINITIVE WORKLIST (computed: collectAxioms over all 10289
+MC decls → 296 dirty; source-BFS from yRho_representable → 136 reachable-dirty; literal
+leaves among them = THREE):
+  (A) weilPairingEval_self (WeilPairing/Basic:370) — THE E4a grind (this campaign);
+  (B) weilPairingEval_nondegenerate (Basic:435) — field-leaf statement; HasseWeil has
+      weilPairing_nondegenerate (used in DetDeg omegaForm_nondegenerate:216) ⟹ B rides
+      the same L3-comparison transport as L5. Nearly free after the campaign.
+  (C) IsOfficialCartier.isFinite (CartierDivisor:2858, KM 1.2.3 ⇒) — proper+qf⟹finite;
+      mathlib's IsFinite.of_locallyQuasiFinite is ARTINIAN-base only (not applicable);
+      needs a route (ZMT-lite or affine+proper). Separate ticket.
+Everything else in the repo (abelEnrichment, EndomorphismDegree, GammaH, YFullRoute,
+ExactOrder, Factorization sorries...) is NOT under yRho_representable (source-BFS;
+final gate = #print axioms at the end). yRho_geometricallyIrreducible (frozen analytic)
+is a SEPARATE decl, not in RepresentsYRho — confirmed out of the mandate's cone.
+NOTE: the ":2204 T-F3 sorry" was a DOCSTRING false positive — PairingCompatAt is a real
+definition; T-F3 is discharged. Tracer gotcha: imported theorem VALUES are inaccessible
+(env.find?/kernel/private all strip them; 4.33 olean design precomputes per-decl axiom
+arrays — Lean.collectAxioms is the ONLY oracle; carrier-walks must be source-level).
+[SLOT-WALK PROVEN]: slot_walk = prefix (s1/congr-tmul/s2 + rfl-closes the refl-slot) +
+hA2 (unit-eq-res) + tail (fresh budget: e3-fusion **by rfl** — the tensorObj_map_tmul
+LEMMA-application storms even under respectTransparency-false, but the fact IS rfl and
+the kernel path is cheap; A45 composite-naturality micro (shUnit ≫ mTOI.symm.hom.val
+as ONE naturality_apply — no congrArg-lambda typing, no subst/map-id residue); s3-
+congrArg). NEW LESSONS: (1) when a lemma-application storms, try `rfl` if the lemma
+itself is rfl — kernel-defeq has no metavars and often sails; (2) naturality of a
+COMPOSITE hom in one naturality_apply beats congrArg-of-naturality (the congrArg-lambda
+retypes the middle carrier = storm); (3) subst-then-simp on eqToHom-micro-lemmas leaves
+restrictScalarsId'App residue — avoid, use naturality. NEXT: SLOT-SQ assembly (:1383,
+entry landed; cont.29d chains), then NR-1 (:1403), s2-residuals (:418/:431), G2', ORD-G.
