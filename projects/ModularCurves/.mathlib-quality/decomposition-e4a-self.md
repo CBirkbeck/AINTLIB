@@ -1605,3 +1605,16 @@ ker-Q-ideal and P ∉ V(ker-Q) — the membership-argument via the span + P-in-c
 — all landed pieces. Then ord_P(r_c) = [P = 0pt] - [P = Qpt] per chart; div-G pointwise;
 L1b consumes. This is the next build-block, followed by r/G-glue, L1-assembly, L3, L5,
 L6, U-assembly, E5-assembly — the full remaining U5-path, every step with named tools.
+
+★ [DIV-PIN PROVEN] (2026-08-17, cont.15): divisorOf_algebraMap_eq_single_of_span +
+eq_of_maximalIdealAt_le (ValuationTransport) — the span of the maximal ideal at P₀
+ALONE pins div(germ) = [P₀]: the away-nonmembership derived by maximal-containment
+(IsMaximal.eq_of_le) + point-separation (constants-are-units kills nonzero
+K-differences in a maximal ideal; XClass/YClass-difference identities via
+sub_sub_sub_cancel_left + C_sub term-chains — C_sub takes NO explicit args). With
+ker_eq_XYIdeal (= the chart-span-to-maximalIdealAt identification) the DIV-PIN chain
+is COMPLETE: chart-ker-span ⟹ div(germ f) = [section-point] on the chart. L1a-TAIL
+REMAINING: [r/G-GLUE] (r_c := germ f₂ᶜ/germ f₁ᶜ; G_c := germ(h_c)·[N]^#r_c;
+overlap-agreement from germed-hsplit + 3c-iv-a; div G = [N]^*((Q)-(0)) pointwise from
+DIV-PIN + brick6) and the [L1-ASSEMBLY] (H = a·g_Q·[N]^#(r⁻¹) via L1b + the model-FF
+bridge). Then L3, L5, L6, U-assembly, E5-assembly.
