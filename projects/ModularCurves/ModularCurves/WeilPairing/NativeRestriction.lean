@@ -252,6 +252,35 @@ theorem nuPullback_app_restrictTransport {V W : X.Opens} (hWV : W ≤ V)
             (Opposite.op (⊤ : V.toScheme.Opens)) x)) := by
   sorry
 
+/-- **([NR-congr-symm])** The inverse component of `pullbackCongr` at a symmetrised
+equation is the hom component at the original equation. -/
+theorem pullbackCongr_symm_app_inv {Y Z : Scheme.{u}} {f g : Y ⟶ Z} (h : f = g)
+    (P : Z.Modules) :
+    ((Scheme.Modules.pullbackCongr h.symm).app P).inv =
+      ((Scheme.Modules.pullbackCongr h).app P).hom := by
+  subst h
+  rfl
+
+/-- **([NR-1b], the unit-tail)** The unit-cocycle coherence over `W.ι = homOfLE ≫ V.ι`:
+the transport followed by the `W`-unit collapse is the pulled `V`-collapse followed by
+the `homOfLE`-collapse. Assembly of `pullbackUnitIso_congrLow` and
+`pullbackUnitIso_compLow`. -/
+theorem pullbackRestrictTransport_unitIso {V W : X.Opens} (hWV : W ≤ V) :
+    pullbackRestrictTransport hWV (unitObj X) ≫ (pullbackUnitIso W.ι).hom =
+      (Scheme.Modules.pullback (X.homOfLE hWV)).map (pullbackUnitIso V.ι).hom ≫
+        (pullbackUnitIso (X.homOfLE hWV)).hom := by
+  have hcongr := ModularCurves.pullbackUnitIso_congrLow (X.homOfLE_ι hWV)
+  have hcomp := ModularCurves.pullbackUnitIso_compLow (X.homOfLE hWV) V.ι
+  calc pullbackRestrictTransport hWV (unitObj X) ≫ (pullbackUnitIso W.ι).hom
+      = ((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app (unitObj X)).hom ≫
+        (((Scheme.Modules.pullbackCongr (X.homOfLE_ι hWV)).app (unitObj X)).hom ≫
+          (pullbackUnitIso W.ι).hom) := by
+        rw [pullbackRestrictTransport, pullbackCongr_symm_app_inv (X.homOfLE_ι hWV),
+          Category.assoc]
+    _ = ((Scheme.Modules.pullbackComp (X.homOfLE hWV) V.ι).app (unitObj X)).hom ≫
+        (pullbackUnitIso (X.homOfLE hWV ≫ V.ι)).hom := by rw [hcongr]
+    _ = _ := hcomp
+
 /-- **([NR-endo-1])** The scalar endomorphism of the unit evaluated at the `⊤`-section
 `1` returns its defining section. -/
 theorem unitEndomorphismOfTopSection_app_top_one {Y : Scheme.{u}}
