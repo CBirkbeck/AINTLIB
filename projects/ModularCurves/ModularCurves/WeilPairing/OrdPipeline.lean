@@ -285,6 +285,49 @@ theorem coordRingToZSection_res_pi_app
   exact (congrArg (fun z => (chartZRingEquiv W) z) h4).trans
     (chartZRingEquiv_fromZero W _)
 
+/-- **([SEC-ORD D-MEM])** Basic-open membership of the `zChart` point is
+non-membership of `s` in the transported maximal ideal. -/
+private theorem secOrd_s_notMem_zChartMaximalIdeal
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (s : Γ(projModel W, EllipticCurve.zChart W))
+    (hPs : zChartPoint W P ∈ (projModel W).basicOpen s) :
+    s ∉ zChartMaximalIdeal W P := by
+  haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  have h2 : (⟨zChartMaximalIdeal W P,
+      (zChartMaximalIdeal_isMaximal W P).isPrime⟩ :
+      PrimeSpectrum Γ(projModel W, EllipticCurve.zChart W)) ∈
+      hZaff.fromSpec ⁻¹ᵁ (projModel W).basicOpen s := hPs
+  rw [hZaff.fromSpec_preimage_basicOpen] at h2
+  exact (PrimeSpectrum.mem_basicOpen _ _).mp h2
+
+open scoped Classical in
+/-- **([SEC-ORD s-unit])** The shrink denominator has order zero at the point: the
+basic-open membership of the `zChart` point is exactly non-membership of `s` in the
+transported maximal ideal, and non-members have order zero. -/
+private theorem secOrd_sPrime_ord_zero
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (s : Γ(projModel W, EllipticCurve.zChart W))
+    (hPs : zChartPoint W P ∈ (projModel W).basicOpen s) :
+    (⟨W⟩ : SmoothPlaneCurve K).ord_P P
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).FunctionField)
+        ((coordRingToZSection W).symm s)) = 0 := by
+  have hsnotmem : s ∉ zChartMaximalIdeal W P :=
+    secOrd_s_notMem_zChartMaximalIdeal W P s hPs
+  have hs0 : s ≠ 0 := fun h0 => hsnotmem (by rw [h0]; exact Ideal.zero_mem _)
+  have hs'notmem : (coordRingToZSection W).symm s ∉
+      (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P := fun hmem => by
+    have h3 := Ideal.mem_map_of_mem (coordRingToZSection W) hmem
+    rw [show (coordRingToZSection W) ((coordRingToZSection W).symm s) = s from
+      (coordRingToZSection W).apply_symm_apply s] at h3
+    exact hsnotmem h3
+  have hs'0 : (coordRingToZSection W).symm s ≠ 0 := fun h0 => by
+    have h4 := congrArg (coordRingToZSection W) h0
+    rw [(coordRingToZSection W).apply_symm_apply s, map_zero] at h4
+    exact hs0 h4
+  exact ord_P_algebraMap_eq_zero_of_notMem W P _ hs'0 hs'notmem
+
 open scoped Classical in
 /-- **([SEC-ORD], statement)** The pointwise order of a section-kernel chart
 generator: for a `Spec K`-section `z` of the base-changed curve and a chart `V` on
