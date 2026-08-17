@@ -328,6 +328,96 @@ private theorem secOrd_sPrime_ord_zero
     exact hs0 h4
   exact ord_P_algebraMap_eq_zero_of_notMem W P _ hs'0 hs'notmem
 
+/-- **([SEC-ORD BO-CHAIN])** The numerator's basic-open membership at the point is
+exactly the point being off the section: transport the fraction relation through the
+basic-open algebra to the chart, then read the section-kernel support. -/
+private theorem secOrd_f0_mem_basicOpen_iff
+    (z : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+    [QuasiCompact z] [IsClosedImmersion z]
+    (V : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), V.1))
+    (hspan : (Scheme.Hom.ker z).ideal V = Ideal.span {f})
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (hPV : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈ V.1)
+    (s : Γ(projModel W, EllipticCurve.zChart W))
+    (hsle : (projModel W).basicOpen s ≤
+      (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1 ⊓ EllipticCurve.zChart W)
+    (hPs : zChartPoint W P ∈ (projModel W).basicOpen s)
+    (n : ℕ) (f₀ : Γ(projModel W, EllipticCurve.zChart W))
+    (hrep : (projModel W).presheaf.map (homOfLE (hsle.trans inf_le_left)).op
+        ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) *
+        (projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op
+          (s ^ n) =
+      (projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op f₀) :
+    zChartPoint W P ∈ (projModel W).basicOpen f₀ ↔
+      (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ≠ z.base default := by
+  -- the basic-open form of the fraction relation
+  have hbo := congrArg (projModel W).basicOpen hrep
+  rw [Scheme.basicOpen_mul, Scheme.basicOpen_res, Scheme.basicOpen_res,
+    Scheme.basicOpen_res] at hbo
+  -- the point lies in every power's basic open (n = 0 gives the whole chart)
+  have hpow : zChartPoint W P ∈ (projModel W).basicOpen (s ^ n) := by
+    rcases Nat.eq_zero_or_pos n with hn | hn
+    · rw [hn, pow_zero, Scheme.basicOpen_one]
+      exact (projModel W).basicOpen_le s hPs
+    · have he := Scheme.basicOpen_pow (X := projModel W) (f := s) (h := hn)
+      rw [he]
+      exact hPs
+  -- membership transfer at the point (which lies in D(s) and in basicOpen s)
+  have hmem : zChartPoint W P ∈ (projModel W).basicOpen f₀ ↔
+      zChartPoint W P ∈ (projModel W).basicOpen ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) := by
+    constructor
+    · intro h
+      have h2 : zChartPoint W P ∈ (projModel W).basicOpen s ⊓
+          (projModel W).basicOpen f₀ := ⟨hPs, h⟩
+      rw [← hbo] at h2
+      exact h2.1.2
+    · intro h
+      have h2 : zChartPoint W P ∈
+          ((projModel W).basicOpen s ⊓
+            (projModel W).basicOpen ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f)) ⊓
+          ((projModel W).basicOpen s ⊓ (projModel W).basicOpen (s ^ n)) :=
+        ⟨⟨hPs, h⟩, ⟨hPs, hpow⟩⟩
+      rw [hbo] at h2
+      exact h2.2
+  rw [hmem]
+  have hpre : (projModel W).basicOpen ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) =
+      (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).basicOpen f) :=
+    (Scheme.preimage_basicOpen (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) f).symm
+  rw [hpre]
+  -- the chart-level support read: supportSet = range of the section
+  have h6 := Scheme.Hom.support_ker z
+  have h5 : ∀ q, q ∈ (Scheme.Hom.ker z).supportSet ↔ q ∈ Set.range z.base := by
+    intro q
+    show q ∈ ((Scheme.Hom.ker z).support : Set _) ↔ q ∈ Set.range z.base
+    rw [h6, z.isClosedEmbedding.isClosed_range.closure_eq]
+  constructor
+  · intro hbo hqe
+    have hqr : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈ Set.range z.base :=
+      ⟨default, hqe.symm⟩
+    have hsup := (h5 _).mpr hqr
+    have hzl := (Scheme.IdealSheafData.mem_supportSet_iff_of_mem hPV).mp hsup
+    rw [hspan, Scheme.zeroLocus_span, Scheme.mem_zeroLocus_iff] at hzl
+    exact hzl f rfl hbo
+  · intro hne
+    by_contra hnbo
+    have hzl : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈
+        (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).zeroLocus (U := V.1) {f} := by
+      rw [Scheme.mem_zeroLocus_iff]
+      intro g hg
+      rw [Set.mem_singleton_iff] at hg
+      rw [hg]
+      exact hnbo
+    have hzl2 : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈
+        (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).zeroLocus (U := V.1) ((Scheme.Hom.ker z).ideal V : Set _) := by
+      rw [hspan, Scheme.zeroLocus_span]
+      exact hzl
+    have hsup := (Scheme.IdealSheafData.mem_supportSet_iff_of_mem hPV).mpr hzl2
+    obtain ⟨y, hy⟩ := (h5 _).mp hsup
+    exact hne (by
+      rw [← hy]
+      exact congrArg z.base (Subsingleton.elim y default))
+
 open scoped Classical in
 /-- **([SEC-ORD], statement)** The pointwise order of a section-kernel chart
 generator: for a `Spec K`-section `z` of the base-changed curve and a chart `V` on
