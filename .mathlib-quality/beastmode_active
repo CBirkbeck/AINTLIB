@@ -1,1 +1,1 @@
-FOCUS: [TAU-INV recon] read translateAlgEquivOfPoint_map_genericPoint + genericPointAct; then prove TAU-INV via IsLocalization.ringHom_ext or defer to SLOT-SQ per pricing
+FOCUS: [VAL-TRANSPORT proof] — germ-of-globalTwist through pullbackCurveFunctionFieldEquiv; recon globalTwist def + the equiv legs

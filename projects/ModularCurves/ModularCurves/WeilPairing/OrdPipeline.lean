@@ -248,6 +248,46 @@ theorem pullbackCurveFunctionFieldEquiv_germ_globalTwist
           ((C : Γ(Spec (CommRingCat.of K), ⊤)))) := by
   sorry
 
+/-- **([EQUIV-TAU], statement)** The translation conjugation through the transport: the
+`pullbackCurveFunctionFieldEquiv`-image of a `translateByPoint`-pullback is the HasseWeil
+translation of the image. Composite of `functionFieldMap_translateByPoint_conj` (U5-L2f,
+the `fst`-crossing) and `translateAlgEquivOfPoint_functionFieldMap_of_section` (U5-L2g,
+the model bridge). -/
+theorem pullbackCurveFunctionFieldEquiv_translateByPoint
+    [AlgebraicGeometry.IsIntegral (projModel W)]
+    [(W.baseChange K).toAffine.IsElliptic]
+    (P' : ((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))))
+    [IsDominant (translateByPoint (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) P')]
+    (pS : SpecPoints (projModel W) (projModelπ W) K)
+    (hxpS : (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P' ≫
+      baseChangeIdFstOver (modelEllipticCurve W)).left = pS.1)
+    (τp : projModel W ⟶ projModel W)
+    (hτp : τp = ((modelEllipticCurve W).translateBy
+      (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P' ≫
+        baseChangeIdFstOver (modelEllipticCurve W))).left)
+    [IsDominant τp]
+    [AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K))))]
+    (x : (pullback (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K)))).functionField) :
+    haveI : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+      inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+    haveI : AlgebraicGeometry.IsIntegral
+        (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+      isIntegral_pullback_id (modelEllipticCurve W)
+    haveI : IrreducibleSpace
+        ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+      inferInstance
+    pullbackCurveFunctionFieldEquiv W
+        ((translateByPoint (modelEllipticCurve W)
+          (𝟙 (Spec (CommRingCat.of K))) P').functionFieldMap.hom x) =
+      HasseWeil.translateAlgEquivOfPoint W
+        (EllipticCurve.basePointCast W (projModelPointsEquiv W K pS))
+        (pullbackCurveFunctionFieldEquiv W x) := by
+  sorry
+
 /-- **([L3], statement)** The Katz–Mazur torsion-splitting value is the Silverman–Weil
 pairing: for the normalized dataset, the anchor-chart τ-relation (`U5-L2e`) transported
 through `pullbackCurveFunctionFieldEquiv` (`U5-L2f/L2g`) exhibits the transported
