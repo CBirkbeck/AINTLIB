@@ -204,7 +204,37 @@ theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq 
     ]
     exact (congrArg (EllipticCurve.basePointCast W)
       (projModelPointsEquiv_zero W K)).trans (EllipticCurve.basePointCast_zero W)
-  -- stage 5
+  -- stage 5: the remaining instance slots and the L4-pin + L5-close
+  haveI hQC : QuasiCompact (Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) := inferInstance
+  haveI hsepPB : IsSeparated (pullback.snd (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K)))) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) _ _ ‹_›
+  haveI hICI : IsClosedImmersion (Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) := by
+    refine MorphismProperty.of_postcomp (W := @IsClosedImmersion)
+      (W' := @IsSeparated) _
+      (pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+      hsepPB ?_
+    rw [show (Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ≫
+      pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) =
+      𝟙 (Spec (CommRingCat.of K)) from Q.2]
+    infer_instance
+  haveI hIsoτ : IsIso (translateByPoint (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) Q) := by
+    show IsIso (((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).translateBy
+      (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) Q)).left
+    rw [show ((modelEllipticCurve W).baseChange
+        (𝟙 (Spec (CommRingCat.of K)))).translateBy
+        (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) Q) =
+      (((modelEllipticCurve W).baseChange
+        (𝟙 (Spec (CommRingCat.of K)))).translateByIso
+        (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) Q)).hom from rfl]
+    exact (Over.forget _).map_isIso
+      (((modelEllipticCurve W).baseChange
+        (𝟙 (Spec (CommRingCat.of K)))).translateByIso
+        (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) Q)).hom
+  haveI hDomτ : IsDominant (translateByPoint (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) Q) := inferInstance
   sorry
 
 end EllipticCurve
