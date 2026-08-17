@@ -3119,3 +3119,18 @@ per-decl 200k-budgets (split big arms as private theorems with hand-written
 signatures); the TWO-π-projection-path split (direct-field vs toEllipticCurveGeom)
 makes rw/simp miss across files — congrArg-term-chains cross by defeq; open MonObj
 steals ι; KMNaturality is rw-friendly, SelfUniversal is not.
+
+**★★ [U1 COMPLETE AXIOM-CLEAN] (cont.30bd, d526b32bc)**: `weilPairingEval_mapIso`,
+`torsionSplittingEval_mapIso`, `kappa_mapIso` all [propext, Classical.choice, Quot.sound].
+The full U1-transport campaign (11 pieces) is green: the pairing is invariant under
+pointed record isos over the same base. Final pieces this wave: TSE-MAPISO branch
+collapses (typed-le-haves + RES-UMAP-RES — explicit args eliminate the unifier search;
+the mixed inf-preimage spelling crossed by one by-exact le_of_eq) and the (g)-pin
+(weilPairingEval_eq_weilPairingKM ×2 + weilPairingKM_congr at Subtype.ext-crossings +
+KM-pins at the F-dataset and its PB-ISO pullback + TSE-MAPISO.symm + case-closers for
+the ▸-mem side-goals; localPullbackTrivializationT needs the Scheme.Modules-FQN in
+SelfUniversal). NEXT: U5-AC — weilPairingEval_self_of_field: at K alg-closed:
+exists_projModelIso_of_field → Φ pointed-iso → U1-transport to the model → the dataset
+(kappa-dict + G2′) → L4-plumbing (weilPairingEval_eq_torsionSplittingEval) → L5
+(torsionSplittingEval_self_eq_one); then the K→K̄ descent (Γ-injectivity). Then U4,
+assembly, leaf A.
