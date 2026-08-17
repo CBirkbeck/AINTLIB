@@ -284,6 +284,49 @@ theorem pullbackMap_app_unit {X' Y' : Scheme.{u}} (f : Y' ⟶ X')
     g.val.app (Opposite.op V) w) hn
   exact happ.symm
 
+/-- **([NR-comp-unit])** The pullback-composition comparison collapses the two-step
+adjunction-unit image to the direct one: the value form of the `leftAdjointCompIso`
+conjugation triangle. -/
+theorem pullbackComp_hom_app_unit {X' Y' Z' : Scheme.{u}} (f : X' ⟶ Y') (g : Y' ⟶ Z')
+    (P : Z'.Modules) (V : Z'.Opens) (w : P.val.obj (Opposite.op V)) :
+    ((Scheme.Modules.pullbackComp f g).app P).hom.val.app
+        (Opposite.op (f ⁻¹ᵁ (g ⁻¹ᵁ V)))
+        (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+          ((Scheme.Modules.pullback g).obj P)).val.app (Opposite.op (g ⁻¹ᵁ V))
+          (((Scheme.Modules.pullbackPushforwardAdjunction g).unit.app P).val.app
+            (Opposite.op V) w)) =
+      ((Scheme.Modules.pullbackPushforwardAdjunction (f ≫ g)).unit.app P).val.app
+        (Opposite.op V) w := by
+  have hu := CategoryTheory.unit_conjugateEquiv
+    (Scheme.Modules.pullbackPushforwardAdjunction (f ≫ g))
+    ((Scheme.Modules.pullbackPushforwardAdjunction g).comp
+      (Scheme.Modules.pullbackPushforwardAdjunction f))
+    ((Scheme.Modules.pullbackComp f g).hom) P
+  have happ := congrArg (fun (q : P ⟶
+      (Scheme.Modules.pushforward f ⋙ Scheme.Modules.pushforward g).obj
+        ((Scheme.Modules.pullback (f ≫ g)).obj P)) =>
+    q.val.app (Opposite.op V) w) hu
+  refine Eq.trans (show _ = (fun (q : P ⟶
+      (Scheme.Modules.pushforward f ⋙ Scheme.Modules.pushforward g).obj
+        ((Scheme.Modules.pullback (f ≫ g)).obj P)) =>
+    q.val.app (Opposite.op V) w)
+      ((Scheme.Modules.pullbackPushforwardAdjunction (f ≫ g)).unit.app P ≫
+        (CategoryTheory.conjugateEquiv
+          (Scheme.Modules.pullbackPushforwardAdjunction (f ≫ g))
+          ((Scheme.Modules.pullbackPushforwardAdjunction g).comp
+            (Scheme.Modules.pullbackPushforwardAdjunction f))
+          ((Scheme.Modules.pullbackComp f g).hom)).app
+          ((Scheme.Modules.pullback (f ≫ g)).obj P)) from happ.symm) ?_
+  have hc : (CategoryTheory.conjugateEquiv
+      (Scheme.Modules.pullbackPushforwardAdjunction (f ≫ g))
+      ((Scheme.Modules.pullbackPushforwardAdjunction g).comp
+        (Scheme.Modules.pullbackPushforwardAdjunction f)))
+      (Scheme.Modules.pullbackComp f g).hom =
+      (Scheme.Modules.pushforwardComp f g).inv :=
+    Equiv.apply_symm_apply _ _
+  rw [hc]
+  rfl
+
 /-- **([NR-congr-unit-tmul])** `tensorObjCongr` on a sheafification-unit image of a
 pure tensor (small binders: the instantiation at the large pullback objects is by term
 application). -/
