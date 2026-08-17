@@ -455,7 +455,17 @@ theorem exists_const_mul_weilFunction
         (EllipticCurve.basePointCast W (projModelPointsEquiv W K p))
         (((HasseWeil.mulByInt W.toAffine (N : ℤ)).toAddMonoidHom
           w.toAffinePoint).toProjectiveSmoothPoint) := by
-    sorry
+    intro w
+    rcases w with P | _
+    · obtain ⟨i, hPi⟩ : ∃ i, (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈
+          ((mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N) ⁻¹ᵁ Wc i : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) := by
+        have h1 : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈
+            ((⨆ i, (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N) ⁻¹ᵁ Wc i) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) := by
+          rw [(mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N).iSup_preimage_eq_top hWc]
+          trivial
+        rwa [TopologicalSpace.Opens.mem_iSup] at h1
+      sorry
+    · sorry
   have hdiv : (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf
       (H * HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn' rr) =
       (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf (HasseWeil.WeilPairing.weilFunction W (N : ℤ) hNZ
