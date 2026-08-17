@@ -1329,6 +1329,80 @@ theorem zeroCls_mapIso {E F : EllipticCurve S}
         sectionCls_mapIso hsm hsm' φ g _ _
     _ = zeroCls E hsm g := rfl
 
+/-- **([KAPPA-MAPISO])** `κ` transports along a pointed record iso over the same base:
+the `Pic`-pullback along [PB-ISO] of the `F`-side `κ` at the transported point is the
+`E`-side `κ`. Mirror of `kappa_restrictBase` with the fixed base `T`. -/
+theorem kappa_mapIso {E F : EllipticCurve S}
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsm' : SmoothOfRelativeDimension 1 F.π) [IsSeparated F.π]
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {T : Scheme.{u}} (g : T ⟶ S)
+    (Q : (E.baseChange g).Point (𝟙 T))
+    (hQF : (Q.1 ≫ (pullbackMapIso φ g).hom) ≫ pullback.snd F.π g = 𝟙 T) :
+    Scheme.Pic.map (pullbackMapIso φ g).hom
+      (kappa F hsm' g (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ :
+        (F.baseChange g).Point (𝟙 T))) =
+      kappa E hsm g Q := by
+  have hval : ∀ (x : Scheme.Pic (pullback F.π g)),
+      ((picRelProj F.π F.zero F.zero_π g x : picRel F.π F.zero F.zero_π g) :
+        Scheme.Pic (pullback F.π g)) =
+      x * (Scheme.Pic.map (pullback.snd F.π g)
+        (Scheme.Pic.map (Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g) x))⁻¹ :=
+    fun _ => rfl
+  set x := sectionCls F hsm' g (Q.1 ≫ (pullbackMapIso φ g).hom) hQF *
+    (zeroCls F hsm' g)⁻¹ with hx
+  set x' := sectionCls E hsm g Q.1 Q.2 * (zeroCls E hsm g)⁻¹ with hx'
+  have hratio : Scheme.Pic.map (pullbackMapIso φ g).hom x = x' := by
+    rw [hx, hx', map_mul, map_inv]
+    congr 1
+    · exact sectionCls_mapIso hsm hsm' φ g Q.1 Q.2
+    · exact congrArg (·⁻¹) (zeroCls_mapIso hsm hsm' φ g)
+  have hsq1 : ∀ y : Scheme.Pic T,
+      Scheme.Pic.map (pullbackMapIso φ g).hom
+        (Scheme.Pic.map (pullback.snd F.π g) y) =
+      Scheme.Pic.map (pullback.snd E.π g) y := by
+    intro y
+    calc Scheme.Pic.map (pullbackMapIso φ g).hom
+          (Scheme.Pic.map (pullback.snd F.π g) y)
+        = Scheme.Pic.map ((pullbackMapIso φ g).hom ≫ pullback.snd F.π g) y := by
+          rw [Scheme.Pic.map_comp]; rfl
+      _ = Scheme.Pic.map (pullback.snd E.π g) y := by
+          rw [show (pullbackMapIso φ g).hom ≫ pullback.snd F.π g =
+            pullback.snd E.π g from
+            (pullback.lift_snd _ _ _).trans (Category.comp_id _)]
+  have hsq2 : ∀ y : Scheme.Pic (pullback F.π g),
+      Scheme.Pic.map (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g)
+        (Scheme.Pic.map (pullbackMapIso φ g).hom y) =
+      Scheme.Pic.map (Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g) y := by
+    intro y
+    calc Scheme.Pic.map (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g)
+          (Scheme.Pic.map (pullbackMapIso φ g).hom y)
+        = Scheme.Pic.map (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g ≫
+            (pullbackMapIso φ g).hom) y := by
+          rw [Scheme.Pic.map_comp]; rfl
+      _ = Scheme.Pic.map (Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g) y := by
+          rw [baseChangeZero_comp_pullbackMapIso φ g]
+  calc Scheme.Pic.map (pullbackMapIso φ g).hom
+        (kappa F hsm' g (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ :
+          (F.baseChange g).Point (𝟙 T)))
+      = Scheme.Pic.map (pullbackMapIso φ g).hom
+          (x * (Scheme.Pic.map (pullback.snd F.π g)
+            (Scheme.Pic.map (Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g) x))⁻¹) :=
+        congrArg _ ((kappa_eq_picRelProj F hsm' g _).trans (hval x))
+    _ = Scheme.Pic.map (pullbackMapIso φ g).hom x *
+          (Scheme.Pic.map (pullbackMapIso φ g).hom
+            (Scheme.Pic.map (pullback.snd F.π g)
+              (Scheme.Pic.map (Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g) x)))⁻¹ := by
+        rw [map_mul, map_inv]
+    _ = x' * (Scheme.Pic.map (pullback.snd E.π g)
+          (Scheme.Pic.map (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g) x'))⁻¹ := by
+        rw [hratio, hsq1, ← hsq2, hratio]
+    _ = kappa E hsm g Q := ((kappa_eq_picRelProj E hsm g Q).trans
+        (show ((picRelProj E.π E.zero E.zero_π g x' : picRel E.π E.zero E.zero_π g) :
+            Scheme.Pic (pullback E.π g)) =
+          x' * (Scheme.Pic.map (pullback.snd E.π g)
+            (Scheme.Pic.map (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g) x'))⁻¹
+          from rfl)).symm
+
 end EllipticCurve
 
 end MapIso
