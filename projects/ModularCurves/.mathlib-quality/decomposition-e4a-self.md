@@ -1854,3 +1854,21 @@ ALTERNATIVE (possibly cheaper): redefine the ν-characterisation vehicle at the
 are landed at the tensorObj-spelling; bridge instead. START next quantum: grep
 SectionContractionLocal:32/201 (monoidalTensorObjIso_comp_tensorUnitStructureIso /
 _unitStructureTensorIso — likely EXACTLY the tensorObjUnitIso-bridge!).
+
+[SLOT-SQ BRIDGE CONFIRMATIONS] (2026-08-17, cont.25b): tensorObjUnitIso M :=
+sheafification.mapIso (ρ_ M.val) ≪≫ sheafifyValIso M (InvertibleSheaf:195) — EXACTLY
+the RHS of monoidalTensorObjIso_comp_tensorUnitStructureIso (SectionContractionLocal:32,
+private — REPROVE or de-private on consumption): so (tensorObjUnitIso M).hom =
+(monoidalTensorObjIso M unitObj).inv ≫ ((refl ⊗ᵢ monoidalUnitObjIso.symm) ≪≫ ρ_).hom.
+The unitor-piece of the slot bridges to ⊗-vocabulary essentially definitionally. The
+congr-piece: monoidalTensorObjIso_inv_natural (PoleSheaf:5218, private) is the
+naturality that conjugates tensorObjCongr into ⊗ᵢ. REMAINING GENUINE BRICK for the
+μ-route: [μ-BRIDGE] pullbackTensorObjIsoOfIsOpenImmersion f M N vs (Functor.Monoidal.μIso
+(pullback f) M N + monoidalTensorObjIso-legs) — both compare pb(M⊗-forms); prove via
+sheafification-adjunction-injectivity on adjUnit/tensorSection-elements
+(PullbackTensorSection's pullback_μ_unit_tensorSection + pullback_monoidalTensorObjIso_inv_unit
+give BOTH sides' element-formulas — compare on unit-images, then hom-ext). Then
+SLOT-SQ = unitor-bridge + congr-bridge + μ-BRIDGE + pullbackComp_hom_isMonoidal(μ-square)
++ pullbackCongr-subst + Functor.Monoidal coherences. NOTE: several needed lemmas are
+`private` in PoleSheaf/SectionContractionLocal — copy-or-deprivatise as producer-legal
+inline copies (the KMDataset-inlining precedent).
