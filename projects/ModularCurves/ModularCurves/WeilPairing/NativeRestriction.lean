@@ -248,6 +248,9 @@ theorem pullbackTensorObjIsoOfIsOpenImmersion_eq_mu {Y : Scheme.{u}} (f : Y ⟶ 
         (Functor.Monoidal.μIso (Scheme.Modules.pullback f) A B).symm ≪≫
         monoidalTensorObjIso ((Scheme.Modules.pullback f).obj A)
           ((Scheme.Modules.pullback f).obj B) := by
+  letI := Scheme.Modules.monoidalCategory X
+  letI := Scheme.Modules.monoidalCategory Y
+  letI : (Scheme.Modules.pullback f).Monoidal := Scheme.Modules.pullbackMonoidal f
   apply Iso.ext
   apply ((Scheme.Modules.pullbackPushforwardAdjunction f).homEquiv _ _).injective
   apply ((PresheafOfModules.sheafificationAdjunction
@@ -259,7 +262,131 @@ theorem pullbackTensorObjIsoOfIsOpenImmersion_eq_mu {Y : Scheme.{u}} (f : Y ⟶ 
   intro t
   induction t using TensorProduct.induction_on with
   | zero => rw [map_zero, map_zero]
-  | tmul x y => sorry
+  | tmul x y =>
+      rw [Adjunction.homEquiv_apply, Adjunction.homEquiv_apply,
+        Adjunction.homEquiv_apply, Adjunction.homEquiv_apply]
+      have hcollapse : ∀ (T : Y.Modules) (g : (Scheme.Modules.pullback f).obj
+          (tensorObj A B) ⟶ T),
+          (ModuleCat.Hom.hom
+            (((PresheafOfModules.sheafificationAdjunction
+                (𝟙 X.ringCatSheaf.obj)).unit.app
+                  (MonoidalCategoryStruct.tensorObj A.val B.val) ≫
+                (SheafOfModules.forget X.ringCatSheaf ⋙
+                  PresheafOfModules.restrictScalars (𝟙 X.ringCatSheaf.obj)).map
+                  ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+                    (tensorObj A B) ≫
+                    (Scheme.Modules.pushforward f).map g)).app U))
+            (x ⊗ₜ y) =
+          g.val.app (Opposite.op (f ⁻¹ᵁ U.unop))
+            (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+              (tensorObj A B)).val.app U
+              (((PresheafOfModules.sheafificationAdjunction
+                (𝟙 X.ringCatSheaf.obj)).unit.app
+                  (MonoidalCategoryStruct.tensorObj A.val B.val)).app U
+                (x ⊗ₜ y))) := fun T g => rfl
+      refine (hcollapse _ _).trans (Eq.trans ?_ (hcollapse _ _).symm)
+      -- [R1] the pulled tensorObj-bridge on the double-unit image (adjUnit naturality;
+      -- the `pullback_monoidalTensorObjIso_inv_unit` argument, inlined)
+      have hR1 : ((Scheme.Modules.pullback f).map
+          (monoidalTensorObjIso A B).inv).val.app
+          (Opposite.op (f ⁻¹ᵁ U.unop))
+          (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+            (tensorObj A B)).val.app U
+            (((PresheafOfModules.sheafificationAdjunction
+              (𝟙 X.ringCatSheaf.obj)).unit.app
+                (MonoidalCategoryStruct.tensorObj A.val B.val)).app U
+              (x ⊗ₜ y))) =
+          ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+            (MonoidalCategoryStruct.tensorObj A B)).val.app
+            (Opposite.op U.unop)
+            (tensorSection A B U.unop x y) := by
+        have hnat := (Scheme.Modules.pullbackPushforwardAdjunction f).unit.naturality
+          (monoidalTensorObjIso A B).inv
+        have happ := congrArg (fun (q : tensorObj A B ⟶
+            (Scheme.Modules.pushforward f).obj
+              ((Scheme.Modules.pullback f).obj
+                (MonoidalCategoryStruct.tensorObj A B))) =>
+          q.val.app U
+            (((PresheafOfModules.sheafificationAdjunction
+              (𝟙 X.ringCatSheaf.obj)).unit.app
+                (MonoidalCategoryStruct.tensorObj A.val B.val)).app U
+              (x ⊗ₜ y))) hnat
+        exact happ.symm
+      -- [R2] δ on the pulled pure tensor
+      have hR2 := ModularCurves.pullback_δ_unit_tensorSection f A B U.unop x y
+      -- [R3] the target-side bridge cancels on the pure tensor
+      have hR3 : (monoidalTensorObjIso ((Scheme.Modules.pullback f).obj A)
+          ((Scheme.Modules.pullback f).obj B)).hom.val.app
+          (Opposite.op (f ⁻¹ᵁ U.unop))
+          (tensorSection ((Scheme.Modules.pullback f).obj A)
+            ((Scheme.Modules.pullback f).obj B) (f ⁻¹ᵁ U.unop)
+            (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
+              (Opposite.op U.unop) x)
+            (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
+              (Opposite.op U.unop) y)) =
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 Y.ringCatSheaf.obj)).unit.app
+              (MonoidalCategoryStruct.tensorObj
+                ((Scheme.Modules.pullback f).obj A).val
+                ((Scheme.Modules.pullback f).obj B).val)).app
+            (Opposite.op (f ⁻¹ᵁ U.unop))
+            ((((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
+              (Opposite.op U.unop) x) ⊗ₜ
+              (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
+                (Opposite.op U.unop) y)) :=
+        iso_inv_hom_app_applyT (monoidalTensorObjIso _ _) _ _
+      -- assemble the μ-side value
+      have hRHS : (((Scheme.Modules.pullback f).mapIso
+            (monoidalTensorObjIso A B).symm ≪≫
+          (Functor.Monoidal.μIso (Scheme.Modules.pullback f) A B).symm ≪≫
+          monoidalTensorObjIso ((Scheme.Modules.pullback f).obj A)
+            ((Scheme.Modules.pullback f).obj B)).hom.val.app
+          (Opposite.op (f ⁻¹ᵁ U.unop))
+          (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+            (tensorObj A B)).val.app U
+            (((PresheafOfModules.sheafificationAdjunction
+              (𝟙 X.ringCatSheaf.obj)).unit.app
+                (MonoidalCategoryStruct.tensorObj A.val B.val)).app U
+              (x ⊗ₜ y)))) =
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 Y.ringCatSheaf.obj)).unit.app
+              (MonoidalCategoryStruct.tensorObj
+                ((Scheme.Modules.pullback f).obj A).val
+                ((Scheme.Modules.pullback f).obj B).val)).app
+            (Opposite.op (f ⁻¹ᵁ U.unop))
+            ((((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
+              (Opposite.op U.unop) x) ⊗ₜ
+              (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
+                (Opposite.op U.unop) y)) := by
+        have hsplit : (((Scheme.Modules.pullback f).mapIso
+              (monoidalTensorObjIso A B).symm ≪≫
+            (Functor.Monoidal.μIso (Scheme.Modules.pullback f) A B).symm ≪≫
+            monoidalTensorObjIso ((Scheme.Modules.pullback f).obj A)
+              ((Scheme.Modules.pullback f).obj B)).hom.val.app
+            (Opposite.op (f ⁻¹ᵁ U.unop))
+            (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+              (tensorObj A B)).val.app U
+              (((PresheafOfModules.sheafificationAdjunction
+                (𝟙 X.ringCatSheaf.obj)).unit.app
+                  (MonoidalCategoryStruct.tensorObj A.val B.val)).app U
+                (x ⊗ₜ y)))) =
+            (monoidalTensorObjIso ((Scheme.Modules.pullback f).obj A)
+              ((Scheme.Modules.pullback f).obj B)).hom.val.app
+              (Opposite.op (f ⁻¹ᵁ U.unop))
+              ((Functor.OplaxMonoidal.δ (Scheme.Modules.pullback f) A B).val.app
+                (Opposite.op (f ⁻¹ᵁ U.unop))
+                (((Scheme.Modules.pullback f).map
+                  (monoidalTensorObjIso A B).inv).val.app
+                  (Opposite.op (f ⁻¹ᵁ U.unop))
+                  (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+                    (tensorObj A B)).val.app U
+                    (((PresheafOfModules.sheafificationAdjunction
+                      (𝟙 X.ringCatSheaf.obj)).unit.app
+                        (MonoidalCategoryStruct.tensorObj A.val B.val)).app U
+                      (x ⊗ₜ y))))) := rfl
+        rw [hsplit, hR1, hR2, hR3]
+      refine Eq.trans ?_ hRHS.symm
+      sorry
   | add s t hs ht =>
       rw [map_add, map_add, hs, ht]
 
