@@ -2182,3 +2182,27 @@ an UNANNOTATED λ (inferred domain), never hand-spell the SheafOfModules-hom-typ
 (GlueDataset, NR-2×2 + read-off route cont.20) → [ORD-G/L1] exists_const_mul_weilFunction
 (OrdPipeline, pointwise divisor route cont.18-19) → L3/L5 already proven modulo L1 →
 E4a-diagonal reduction → leaves A (weilPairingEval_self) + B (_nondegenerate).
+
+[G2' RECON CORRECTION] (2026-08-17, cont.30g): G2' is NOT a re-witnessing of base-G2.
+The base's dressing units a₀ b₀ come from transitionUnitOfCover_eq_dressed_native
+(FieldLeaf:2077) and are genuinely per-OVERLAP (the efam-vs-native comparison ON the
+overlap). The per-chart route (as the G2' docstring says): A i := the chart-level
+ν-comparison unit — nuPullback M J₁ J₂ e (W i) g … evaluated at the ⊤-section 1 (the
+unit-value of the chart-trivialisation-vs-native comparison ON THE WHOLE PIECE W i);
+the overlap-identity t_ij = res(A i)·(u₂u₁⁻¹)·res(A j)⁻¹ then follows from:
+(a) TWO instances of restrictTrivialization_nativeTensorIdealTriv_inv_comp_nu [NR-2,
+proven], one per chart, RESTRICTED to the overlap via nuPullback_app_restrictTransport
+[NR-1, JUST PROVEN — this is exactly what it was built for]; (b) nuPullback_mul for
+the generator change u₁ (J₁-generators of the two charts differ by u₁ on the overlap);
+(c) the transitionUnit-decomposition through the native middle (the
+transitionUnitOfCover_eq_dressed_native PROOF-SHAPE, re-run keeping the ν-provenance).
+EXECUTION PLAN: (1) read transitionUnitOfCover_eq_dressed_native's proof body
+(FieldLeaf:2097+) to extract where a b := ν-values enter; (2) define A i := the
+ν-⊤-value-unit on W i (needs: the piece W i carries a J₁-generator res-g₁ and the
+IsIso-instances — supplied by the chart-data through W i ≤ V (ch i)); (3) prove the
+overlap-identity via NR-1 + nuPullback_mul; (4) assemble G2' with the base-G2 cover
+(charts ⊓ z-parts, cZ-rescale absorbed INTO A or kept as an extra explicit factor —
+check whether the perChart-statement's A can absorb cZ: A-inl-i := cZ i · ν-unit-i).
+Watch: the cZ-rescale (overUnitScalarIso) multiplies the transition by
+res(cZ i)·res(cZ j)⁻¹ (transitionUnit_restrict_rescale) — composes with the ν-A's
+multiplicatively ⟹ A-total := cZ-factor · ν-factor per piece ✓ per-chart-shaped.
