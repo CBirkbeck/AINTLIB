@@ -1438,3 +1438,18 @@ KMChartDataset.lean importing FieldLeaf pieces — CAREFUL: import direction! Fi
 imports KMBilinear imports KMDataset ⟹ the replay-variant must live in FieldLeAF or
 later — put it in FieldLeaf's Curve-context section or a new GlueDataset.lean importing
 FieldLeaf) with the full conclusion; then 3c-iv, G3.
+
+[G2-STATEMENT LANDED] (2026-08-17, cont.5): exists_normalized_chart_dataset elaborates
+(GlueDataset.lean, sorried). GOTCHAS for the file: BOTH scoped Gamma-notations (scheme
+Scheme.lean:103 + modules Modules/Sheaf.lean:92) live in the AlgebraicGeometry scope —
+at EXPRESSION-schemes (pullback E.π t) the overload stalls => spell sections explicitly
+as ↑((….pullback E.π t).presheaf.obj (Opposite.op U)); WITHOUT the Modules-open,
+qualify Scheme.Modules.idealModule / Scheme.Modules.baseChangeZero and use M.tensorObj
+dot-form; pullback needs CategoryTheory.Limits-qualification anyway. PROOF-PLAN (the
+replay): copy exists_normalized_dataset's body (KMDataset:220+) with (V,f-data) :=
+exists_chart_family-choice, e0 c := overTrivializationOfRestrictIso ∘
+restrictIsoOfPullbackIso ∘ pullbackTrivOfTensorIdeal at (V c); the sum-cover + cZ-
+rescale verbatim; hnorm-cases verbatim; the NEW dressed-conclusion per case from
+hAB-formula (transition-of-restricted = resUnit of chart-transition) + s1 (KMDataset:95)
++ exists_transition_dressed_of_charts + Units.map-multiplicativity + N3; indices c d :=
+the cover-points of the two summands, hWc/hWd := inf_le_left-chains.
