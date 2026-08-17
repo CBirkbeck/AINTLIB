@@ -1472,3 +1472,19 @@ the div-level germ-reading of the dressed transitions (DIV-UNIT species via RP-5
 the u-relations = generator-quotient germs) and [G3] the L2e-instantiation at the
 G2-dataset (hsplit via AP-D4's exists_transitionUnit_eq_mul_inv_of_mem_torsionPoints
 at the normalized family); then L3, L5, L6, U-assembly, E5-assembly.
+
+[G3 ADJUDICATED — ASSEMBLY-ONLY] (2026-08-17, cont.7): the FULL D4-pipeline exists:
+exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints (KMUniqueness:264)
+consumes EXACTLY the G2-dataset shape (N Q hQ M hM W hW e hnorm) and produces
+(h, hn, hsplit) — L2e's complete hypothesis-set. G3 = apply it at the G2-output and
+feed L2e; no new lemmas. REMAINING STRUCTURAL INPUT [KAPPA-DICT]: kappa(Q) =
+[O(Q-0)] via sectionToPicRel (SelfAdjointN:198); the G2-theorem needs a representative
+M with e_dict : M ⊗ idealModule J₁ ≅ idealModule J₂ (J's = the pole-ideals of [Q] and
+[0]-ish) + the common-principal covers h₁ h₂ (from the curve's smoothness/Cartier —
+the pole-divisors are official-Cartier: IsOfficialCartier/locallyPrincipal in
+IdealModule.lean's isInvertible route!). Route: mine sectionToPicRel/PoleSheaf for the
+concrete quotient-representative; the dict transfers along ≅ by tensorObjCongr. Then
+instantiate exists_normalized_chart_dataset at it. NEXT BOXES (order): [KAPPA-DICT]
+(PoleSheaf-mining, E4a-side); [3c-iv + L1a] joint design (the dressed-transition
+germ-divisor vs g_Q-quotients feeding exists_const_mul_of_projectiveDivisorOf_eq);
+[L3] scalar-match; [L5] diagonal; [L6] descent; [U-assembly]; [E5-assembly].
