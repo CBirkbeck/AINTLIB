@@ -2571,3 +2571,16 @@ f₀'-span-of-the-localized-maximal-ideal → RP-4a-core; OFF-case f₀' ∉ max
 (used in GERM-Z's proof) + the section-restriction algebra — ALL standard localization
 API. This is the full SEC-ORD proof plan; execute in a fresh window (stage the
 fst-hop + shrink as have-chains, then the dichotomy as two private case-lemmas).
+
+[SEC-ORD S1 LANDED] (2026-08-17, cont.30ac): the fst-hop h1 proven inside
+ord_P_germ_sectionKer_generator: pullbackCurveFunctionFieldEquiv-germ =
+projModelFFEquiv (germ-((inv fst)⁻¹V) ((inv fst).app f)) — a single congrArg of
+functionFieldMap_germToFunctionField across the RingEquiv.trans/ofRingHom def-layer
+(exact-defeq). SPELLING LESSON: the Opens-CoeSort instance-goals appear at the
+↥↑-unfolded form; haveI's recorded at ↥(folded) MISS the discrimination tree —
+for germToFunctionField at computed opens pass the instance @-EXPLICITLY
+(@Scheme.germToFunctionField X _ U hNe). NEXT [S2]: shrink-to-basic: the P-point's
+zChart-membership (hZaff.range_fromSpec pattern from isLocalization_stalk :193),
+then hZaff.exists_basicOpen_le (x := ⟨zChartPoint, mem-of-(inv-fst)⁻¹V⊓zChart⟩) →
+D(s) ≤ (inv fst)⁻¹V ⊓ zChart with the point inside; germ-restrict to D(s)
+(germToFunctionField_restrict, TheoremOfSquareField:275); then the fraction-read.
