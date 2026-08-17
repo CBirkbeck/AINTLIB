@@ -931,6 +931,111 @@ private theorem secOrd_ord_f0_eq_one
         ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P))) hround)).trans h9
   exact uniformizer_of_localized_span W P ((coordRingToZSection W).symm f₀) hgen
 
+/-- **([PT-0a-const])** The chart solution hom evaluates transported base constants
+to themselves (the algebra side-condition of the solution datum). -/
+private theorem chartSolutionHom_symm_algebraMap
+    (x y : K) (h : (W.baseChange K).toAffine.Equation x y) (r : K) :
+    chartSolutionHom W x y h
+      ((chartZRingEquiv W).symm (algebraMap K W.toAffine.CoordinateRing r)) = r := by
+  have helem : (chartZRingEquiv W).symm (algebraMap K W.toAffine.CoordinateRing r) =
+      (algebraMap (↥((projIdeal W).quotientGrading 0))
+        (HomogeneousLocalization.Away ((projIdeal W).quotientGrading)
+          (((projIdeal W).quotientGradingHom) (MvPolynomial.X 2))))
+        ((gradeZeroRingEquiv W) r) := by
+    rw [RingEquiv.symm_apply_eq]
+    exact (chartZRingEquiv_fromZero W r).symm
+  rw [helem]
+  have hc := RingHom.congr_fun
+    (((chartSolutionsEquiv W 2 K).symm (chartSolution W x y h)).2) r
+  exact hc
+
+/-- The coordinate-ring constants as `AdjoinRoot` classes (the scalar tower read). -/
+private theorem algebraMap_coordRing_mk (r : K) :
+    algebraMap K W.toAffine.CoordinateRing r = AdjoinRoot.mk W.toAffine.polynomial
+      (Polynomial.C (Polynomial.C r)) := by
+  rw [IsScalarTower.algebraMap_apply K (Polynomial K) W.toAffine.CoordinateRing,
+    AdjoinRoot.algebraMap_eq]
+  rfl
+
+/-- **([PT-0a-X])** The chart solution hom kills the transported `X`-generator. -/
+private theorem chartSolutionHom_symm_XClass
+    (x y : K) (h : (W.baseChange K).toAffine.Equation x y)
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) (hPx : P.x = x) :
+    chartSolutionHom W x y h ((chartZRingEquiv W).symm
+      (WeierstrassCurve.Affine.CoordinateRing.XClass W.toAffine P.x)) = 0 := by
+  have hXsplit : WeierstrassCurve.Affine.CoordinateRing.XClass W.toAffine P.x =
+      coordX W - algebraMap K W.toAffine.CoordinateRing P.x := by
+    rw [algebraMap_coordRing_mk W P.x,
+      WeierstrassCurve.Affine.CoordinateRing.XClass,
+      show Polynomial.C (Polynomial.X - Polynomial.C P.x) =
+        Polynomial.C Polynomial.X - Polynomial.C (Polynomial.C P.x) from
+        map_sub _ _ _,
+      map_sub]
+    rfl
+  rw [hXsplit, map_sub, map_sub,
+    show (chartZRingEquiv W).symm (coordX W) =
+      HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0) from
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_x W).symm,
+    chartSolutionHom_x W x y h, chartSolutionHom_symm_algebraMap W x y h P.x,
+    hPx, sub_self]
+
+/-- **([PT-0a-Y])** The chart solution hom kills the transported `Y`-generator. -/
+private theorem chartSolutionHom_symm_YClass
+    (x y : K) (h : (W.baseChange K).toAffine.Equation x y)
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) (hPy : P.y = y) :
+    chartSolutionHom W x y h ((chartZRingEquiv W).symm
+      (WeierstrassCurve.Affine.CoordinateRing.YClass W.toAffine
+        (Polynomial.C P.y))) = 0 := by
+  have hYsplit : WeierstrassCurve.Affine.CoordinateRing.YClass W.toAffine
+      (Polynomial.C P.y) = coordY W - algebraMap K W.toAffine.CoordinateRing P.y := by
+    rw [algebraMap_coordRing_mk W P.y,
+      WeierstrassCurve.Affine.CoordinateRing.YClass, map_sub]
+    rfl
+  rw [hYsplit, map_sub, map_sub,
+    show (chartZRingEquiv W).symm (coordY W) =
+      HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1) from
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_y W).symm,
+    chartSolutionHom_y W x y h, chartSolutionHom_symm_algebraMap W x y h P.y,
+    hPy, sub_self]
+
+/-- **([PT-0a])** The kernel of the chart solution hom is the transported maximal
+ideal: evaluation at `(x, y)` kills exactly the point's ideal, read on the `Z`-chart
+ring. K-MAX shape: the solution hom is surjective onto the field so its kernel is
+maximal; the transported ideal is maximal and its two generators evaluate to zero. -/
+private theorem ker_chartSolutionHom_eq_map_maximalIdealAt
+    (x y : K) (h : (W.baseChange K).toAffine.Equation x y)
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) (hPx : P.x = x) (hPy : P.y = y) :
+    RingHom.ker (chartSolutionHom W x y h) =
+      Ideal.map ((chartZRingEquiv W).symm)
+        ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P) := by
+  have hsurj : Function.Surjective (chartSolutionHom W x y h) := fun c =>
+    ⟨(chartZRingEquiv W).symm (algebraMap K W.toAffine.CoordinateRing c),
+      chartSolutionHom_symm_algebraMap W x y h c⟩
+  have hkermax := RingHom.ker_isMaximal_of_surjective
+    (chartSolutionHom W x y h) hsurj
+  have hmapmax : (Ideal.map ((chartZRingEquiv W).symm)
+      ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P)).IsMaximal :=
+    Ideal.map_isMaximal_of_equiv _ (hp := (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt_isMaximal P)
+  have hle : Ideal.map ((chartZRingEquiv W).symm)
+      ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P) ≤
+      RingHom.ker (chartSolutionHom W x y h) := by
+    rw [show (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P =
+      WeierstrassCurve.Affine.CoordinateRing.XYIdeal W.toAffine P.x
+        (Polynomial.C P.y) from rfl,
+      WeierstrassCurve.Affine.CoordinateRing.XYIdeal, Ideal.map_span]
+    refine Ideal.span_le.mpr ?_
+    rintro t ⟨g, hg, rfl⟩
+    rcases hg with rfl | hg
+    · rw [SetLike.mem_coe, RingHom.mem_ker]
+      exact chartSolutionHom_symm_XClass W x y h P hPx
+    · rw [Set.mem_singleton_iff] at hg
+      subst hg
+      rw [SetLike.mem_coe, RingHom.mem_ker]
+      exact chartSolutionHom_symm_YClass W x y h P hPy
+  exact (hmapmax.eq_of_le hkermax.ne_top hle).symm
+
 /-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
 of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
 Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
