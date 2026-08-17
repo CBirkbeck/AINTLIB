@@ -1259,6 +1259,21 @@ private theorem castPointG_add {S T : Scheme.{u}} {E : EllipticCurve S}
     (h ▸ (P + Q) : E.Point g') = (h ▸ P : E.Point g') + (h ▸ Q : E.Point g') := by
   subst h; rfl
 
+/-- **([FST-INV])** A pullback point with known `fst`-image is the `inv fst`-image:
+the iso-normalisation helper. -/
+private theorem eq_invFst_of_fst_eq
+    (q : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) (a : (modelEllipticCurve W).E)
+    (hq : ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base q = a) :
+    q = ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base a := by
+  have h5 := congrArg ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base hq
+  have hid := congrArg (fun (m : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⟶ (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) => m.base q)
+    (IsIso.hom_inv_id (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+  simp only at hid
+  rw [show ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base q) =
+      (((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ≫ inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base q from rfl, hid,
+    show ((𝟙 (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⟶ (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base q = q from rfl] at h5
+  exact h5
+
 /-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
 of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
 Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
