@@ -1980,3 +1980,25 @@ template: adjc.homEquiv-injective + unitToPushforward-composition]) + then
 image by subst-rfl (pullbackCongr_symm_app_inv species, LANDED). NEXT QUANTUM: build
 [COMP-UNIT] via the UnitComp:321-template, then execute the cont.28b walk
 (s1/s2/s3-pieces as private lemmas), then the SLOT-SQ assembly, then NR-1.
+
+[SLOT-SQ WALK PROGRESS] (2026-08-17, cont.29): LANDED AXIOM-CLEAN-modulo-nothing:
+[COMP-UNIT] pullbackComp_hom_app_unit (unit_conjugateEquiv at (adj-direct, comp-adj,
+Comp.hom) + the conjugate-identification hc := Equiv.apply_symm_apply — the def-layer
+crossing (Scheme-wrapper → SheafOfModules.pullbackComp → leftAdjointCompIso →
+leftAdjointCompNatTrans := (conjugateEquiv _).symm e.inv) is ACCEPTED at exact-defeq —
++ rfl glue-collapse of the pushforwardComp.inv-app on unit-images);
+[pRT-COLLAPSE] pullbackRestrictTransport_app_unit — output deliberately stops at the
+Congr-stage (Congr.inv-app of the composite-unit image): the W.ι-form needs the
+PROPOSITIONAL homOfLE_ι-crossing, but BOTH slot-square sides end with pRT so the walk
+meets at the Congr-stage symmetrically; [s1] tensorObjUnitIso_symm_hom_app (hsplit-rfl
++ sheafifyValIso_inv_app_apply-congrArg + sheafificationMap_app_unit + the presheaf-
+rho-inv-at-q value is RFL: q ⊗ₜ 1). NEXT [s2]: the genTriv-at-1 factor:
+idealGenHom-app-formula (IdealModule:240): g ↦ ⟨res-f · appIso-inv g, mem⟩; at 1 needs
+mul_one + Subtype.ext to reach ⟨res-f, mem⟩; then align with restrictUnit-image
+(unit_app_app-rfl res-map) — CAREFUL: the [511]-instantiation at U := image-V returns
+the value at .op (Wo.ι⁻¹(image V)) ≠ .op V SYNTACTICALLY (preimage_image_eq is
+propositional) ⟹ state [s2] with an H2-style eqToHom-clothing (hpre : V =
+Wo.ι ⁻¹ᵁ (Wo.ι ''ᵁ V)) or at the preimage-spelling throughout. THEN [s3] (mu-BRIDGE.symm
++ mTOI.inv-def-rfl + pullback_μ_unit_tensorSection + pullbackMap_app_unit at mTOI.hom),
+then the V-vs-W meet (res-g-compat via map_tmul + idealSections-subtype-res), then the
+SLOT-SQ assembly (per-decl-budget discipline: consume the walk-lemmas by term-app).
