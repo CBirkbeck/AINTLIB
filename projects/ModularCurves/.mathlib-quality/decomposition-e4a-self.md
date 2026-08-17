@@ -3084,3 +3084,25 @@ Then the ZERO-arm ledger (all values now computable at ∞: f₂/z0-SEC-ORD-valu
 TAU-SEC-ORD (the ∞-pt IS the z0-image ⟹ the indicator-TRUE-case of the conjugated
 SEC-ORD), f₁/zQm-value = [T=0], A/u-values via TAU-U-ORD0 + the ratio-machinery) and
 the INF-arm.
+
+**★★★ [L1 COMPLETE AXIOM-CLEAN] (cont.30ax, 49da67420)**: `exists_const_mul_weilFunction`,
+`torsionSplittingEval_eq_weilPairing`, `torsionSplittingEval_self_eq_one` ALL verified
+[propext, Classical.choice, Quot.sound]. OrdPipeline.lean is SORRY-FREE. The final wave
+(this session): [TAU-U-ORD0] (unit germs at ∞ = 0) → [KER-CONJ] (section-kernel span
+conjugation along an automorphism — generic {X Y : Scheme}; comp_app-rfl + app_eq +
+congr_app roundtrips + element chase; Scheme.Hom-namespace for comp_app/app_eq/congr_app/
+id_app) → [TAU-SEC-ORD] (kernel-generator germs at ∞ = section indicator; open scoped
+Classical for the ite; hoist the IsIso-τ haveI OUT of by-blocks) → [ORD-LEDGER-∞]
+(7-term ledger with per-factor nonzeros for ordAtInfty_mul) → [PT-2-ZERO] (N-torsion
+chart point ↦ zero-section image) → [AFF-ZERO-ARM] (divH_affine_arm_zero as a SPLIT
+DECL — the 200k heartbeat budget is per-decl and the parent was full; hand-write the
+helper signature, never extract_goal on a monster context) → [Z∞-FIX] (mulByN fixes the
+∞-point: N•zero-Point = zero + point_smul_eq_comp_mulBy + fst-conjugation) → [HORD-∞]
+(the ordAtInfty mirror of ord_H_eq_neg_ord_transition through tau_ordAtInfty_germ_unit)
+→ [DIV-H-INF] (divH_infinity_arm: pushed place ∞→∞ via toAffinePoint_infinity+map_zero;
+THE τ-POINT FOR THE ∞-ARM = ANY affine point, existing by smoothPoint_infinite since K
+is alg-closed — import HasseWeil.Foundation.Curves.Fiber.GenericFiber; the T-split +
+finales copy the zero-arm VERBATIM — same hledZ shapes vt+vb+{1,0}+vc = 0+1+va, htrYZ
+v1 = vt via InftyOrdTransport untopD-eq). NEXT: the L1-consumers — L3/L5 (the E4a plan
+doc chain) → E4a-diagonal → leaves A (weilPairingEval_self) + B
+(weilPairingEval_nondegenerate). Leaf C (IsOfficialCartier.isFinite) separate.
