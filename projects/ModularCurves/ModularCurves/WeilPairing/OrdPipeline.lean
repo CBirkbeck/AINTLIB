@@ -1797,6 +1797,15 @@ private theorem divH_affine_arm
             (zChartPoint W P)) from rfl] at h2
       rw [h2, hPT2] at h1
       exact h1
+    rw [HasseWeil.WeilPairing.DivisorPullback.projOrdAt_some] at htrY
+    rw [WeierstrassCurve.Affine.Point.toProjectiveSmoothPoint_some,
+      (⟨W⟩ : SmoothPlaneCurve K).projectiveDivisorOf_apply_affine]
+    rw [HasseWeil.Curves.kappaDivisor, Finsupp.sub_apply,
+      Finsupp.single_apply, Finsupp.single_apply]
+    rw [if_neg (show ¬(HasseWeil.Curves.ProjectiveSmoothPoint.infinity :
+        HasseWeil.Curves.ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve K)) =
+        HasseWeil.Curves.ProjectiveSmoothPoint.affine ⟨x', y', hxy'⟩ from
+      fun h => by nomatch h)]
     sorry
 
 open scoped Classical in
