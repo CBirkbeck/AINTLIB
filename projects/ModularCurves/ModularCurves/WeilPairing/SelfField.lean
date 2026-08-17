@@ -124,7 +124,26 @@ theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq 
         (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π
         (𝟙 (Spec (CommRingCat.of K)))))
       edict h₁ h₂
-  -- stages 4–5
+  -- stage 4: the H-side splittings, the SpecPoints dictionary, and the torsion transfer
+  obtain ⟨h, hn, hsplit⟩ := exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints
+    (modelEllipticCurve W) (modelEllipticCurve W).smooth (𝟙 (Spec (CommRingCat.of K)))
+    N Q hQ M hM Wc hWc e hnorm
+  have hspecid : Spec.map (CommRingCat.ofHom (algebraMap K K)) =
+      𝟙 (Spec (CommRingCat.of K)) := by
+    rw [show CommRingCat.ofHom (algebraMap K K) = 𝟙 (CommRingCat.of K) from rfl,
+      Spec.map_id]
+  set p : SpecPoints (projModel W) (projModelπ W) K :=
+    ⟨(Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ≫
+        pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))),
+      (Category.assoc _ _ _).trans
+        ((congrArg (fun m => (Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ≫ m)
+          (pullback.condition
+            (f := (modelEllipticCurve W).π) (g := 𝟙 (Spec (CommRingCat.of K))))).trans
+        ((Category.assoc _ _ _).symm.trans
+        ((congrArg (fun m => m ≫ 𝟙 (Spec (CommRingCat.of K))) Q.2).trans
+        ((Category.id_comp _).trans
+          hspecid.symm))))⟩ with hpdef
+  -- stage 5
   sorry
 
 end EllipticCurve
