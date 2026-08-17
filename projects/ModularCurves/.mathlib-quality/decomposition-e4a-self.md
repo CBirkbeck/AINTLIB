@@ -2398,3 +2398,22 @@ So ord_P(f-germ) ∈ {0, 1} with indicator = P ∈ section-image; the u-ratio ge
 carry ord = [P ∈ sec₁] − [P ∈ sec₂]; summed against the hsplit/[N]-transfer this
 reproduces pullbackDivisor [N] (kappaDivisor T) pointwise. ALL RECON DONE — next
 cycle is pure statement+proof work: DIV-PIN → G-REL → ORD-G → L1-assembly.
+
+[DIV-PIN TOOLING VERIFIED] (2026-08-17, cont.30r): RP-4b
+uniformizer_of_span_zChartMaximalIdeal (ValuationTransport:~270) is the ON-SECTION
+tool (ord_P = 1 for zChart-span-generators of the transported maximal ideal; the
+RP-dictionary roundtrip already inside). DIV-PIN decomposes into: (a) the chart-to-
+zChart germ hop for the L1-chart generators (germToFunctionField (Wc i) f →
+zChart-localization — via projModelFunctionFieldEquiv_germToFunctionField_zChart
+[GERM-Z, PROVEN in OrdPipeline] + zChartLocalizationEquiv_compat [brick-3, CLOSED]);
+(b) ON-section: the span-data of z.ker at the chart transports to a span of
+zChartMaximalIdeal (Ideal.map-span + the section-ideal ↔ maximalIdealAt dictionary
+— the one NEW ingredient: z.ker's stalk at an on-section closed point IS the
+maximal ideal, smoothness/reducedness of the section; state as its own micro) →
+RP-4b → ord 1; (c) OFF-section: z.ker-stalk = ⊤ at P ∉ image(z) ⟹ the generator
+germ is a UNIT in the local ring ⟹ ord_P = 0 (state the unit-ord-0 species:
+pointValuation of a local-unit's FF-image = 1; probably derivable from
+intValuation-of-unit or Uniformizer-adjacent API — grep ord_P/pointValuation unit
+lemmas next cycle). NEXT CYCLE ENTRY: state the (b)-micro (stalk-of-section-kernel
+= maximalIdealAt on the section) + the (c)-species, then DIV-PIN, then G-REL,
+then ORD-G, then L1. All in OrdPipeline (imports reach everything).
