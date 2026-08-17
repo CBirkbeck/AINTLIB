@@ -2674,3 +2674,22 @@ take ord_P of hFFeq (ord_P_mul + ord_P_pow + hs'ord ⟹ ord(germ)+0 = ord(alg f�
 handle the ⊤-cases (germ ≠ 0 from hf через the equiv-injectivity), then [S5] the
 f₀'-dichotomy (cont.30ae-(iv)) — likely as one more extracted private lemma
 (fresh budget; the main is near its ceiling).
+
+[SEC-ORD S4 LANDED — ONLY THE DICHOTOMY LEFT] (2026-08-17, cont.30ai): the main
+ord_P_germ_sectionKer_generator is proven modulo ONE goal (the in-place sorry):
+ord_P(alg((coordRingToZSection W).symm (Away.sec s xD).1)) = if (inv fst)(zChartPoint
+W P) = z(default) then 1 else 0 — with the full context in scope (hspan : z.ker-span
+at V, hrep : xD·alg(s^n) = alg(f₀) in Γ(D s), hsle, hPs, hPV, hf, h1, h2, hFFeq,
+hordeq). [S5] PLAN: (ON) point-eq case: the section-kernel's stalk at its own point
+is the maximal ideal; transport hspan через ker_apply + the localization at the
+point (the zChart-side: f₀ spans the AtPrime-localized maximal ideal — derive from
+hrep + the s-invertibility + the localized hspan) → mirror RP-4a's hgen-stage
+(intValuation_singleton) → ord 1; (OFF) point-ne: f₀ ∉ zChartMaximalIdeal (else,
+via hrep + s-unit, xD vanishes at the point ⟹ f vanishes ⟹ the point is in the
+kernel-locus = the section point, contra) → :309-species → 0. Both need the
+[SEC-STALK-CORE] bridge: the z.ker-vanishing-locus-membership at the zChart-point ⟺
+the point-equation (inv fst)(zChartPoint) = z(default) — via the Spec-K-section =
+single-closed-point dictionary (cont.30u). Extract [S5] as
+secOrd_f0_dichotomy (fresh budget) with the data (z hz V f hspan hf s hsle hPs P
+hPV + hrep-shape) — OR prove SEC-STALK-CORE as its own micro first and do the
+dichotomy in-place if the main's budget allows (it is near ceiling: prefer extract).
