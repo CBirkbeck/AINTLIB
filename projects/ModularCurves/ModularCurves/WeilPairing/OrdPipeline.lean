@@ -1247,6 +1247,18 @@ private theorem asSection_add'
   rw [map_add, baseChangeEquiv_asSection', baseChangeEquiv_asSection',
     baseChangeEquiv_asSection', EllipticCurve.Point.restrict_add]
 
+/-- **([CAST-G] family)** Transport of points along an equality of base arrows:
+generic subst-lemmas (the CAST-SMUL pattern at the arrow position). -/
+private theorem castPointG_coe {S T : Scheme.{u}} {E : EllipticCurve S}
+    {g g' : T ⟶ S} (h : g = g') (P : E.Point g) :
+    ((h ▸ P : E.Point g') : T ⟶ E.E) = (P : T ⟶ E.E) := by
+  subst h; rfl
+
+private theorem castPointG_add {S T : Scheme.{u}} {E : EllipticCurve S}
+    {g g' : T ⟶ S} (h : g = g') (P Q : E.Point g) :
+    (h ▸ (P + Q) : E.Point g') = (h ▸ P : E.Point g') + (h ▸ Q : E.Point g') := by
+  subst h; rfl
+
 /-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
 of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
 Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
