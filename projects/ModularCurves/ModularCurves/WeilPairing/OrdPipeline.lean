@@ -1123,6 +1123,50 @@ private theorem chartSpecPoint_base_default_eq_zChartPoint
       (specMap_chartSolutionHom_default_eq W x y h P hPx hPy)).trans
     (zChartPoint_eq_awayι W P).symm)
 
+/-- **([PT-1])** `zChartPoint` intertwines the scheme `[n]` with the point
+arithmetic: if the dictionary reads `p` as `(x, y)` and `n • p` as `(x', y')`, then
+`[n]` sends the first chart point to the second. PT-0 at both ends plus
+`point_smul_eq_comp_mulBy`. -/
+private theorem mulByHom_base_zChartPoint
+    (n : ℤ)
+    (p : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap K K))))
+    {x y : K} {hxy : (W.baseChange K).toAffine.Nonsingular x y}
+    (hp : projModelPointsEquiv W K p = WeierstrassCurve.Affine.Point.some x y hxy)
+    {x' y' : K} {hxy' : (W.baseChange K).toAffine.Nonsingular x' y'}
+    (hp' : projModelPointsEquiv W K (n • p) =
+      WeierstrassCurve.Affine.Point.some x' y' hxy')
+    (P P' : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (hPx : P.x = x) (hPy : P.y = y) (hPx' : P'.x = x') (hPy' : P'.y = y') :
+    ((modelEllipticCurve W).mulByHom n).base (zChartPoint W P) =
+      zChartPoint W P' := by
+  have hp2 := eq_chartSpecPoint_of_projModelPointsEquiv_some (W := W) hp
+  have hp2' := eq_chartSpecPoint_of_projModelPointsEquiv_some (W := W) hp'
+  have hsm := point_smul_eq_comp_mulBy (modelEllipticCurve W)
+    (Spec.map (CommRingCat.ofHom (algebraMap K K))) n p
+  have hbase := congrArg (fun (m : Spec (CommRingCat.of K) ⟶ (modelEllipticCurve W).E) =>
+    m.base (default : Spec (CommRingCat.of K))) hsm
+  simp only at hbase
+  -- hbase : (n • p).1.base default = mulByHom.base (p.1.base default)
+  have hL : ((n • p : (modelEllipticCurve W).Point _) :
+      Spec (CommRingCat.of K) ⟶ (modelEllipticCurve W).E).base
+        (default : Spec (CommRingCat.of K)) = zChartPoint W P' := by
+    rw [show ((n • p : (modelEllipticCurve W).Point _) :
+        Spec (CommRingCat.of K) ⟶ (modelEllipticCurve W).E) =
+      (chartSpecPoint W x' y'
+        (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hxy')).1 from
+      congrArg Subtype.val hp2']
+    exact chartSpecPoint_base_default_eq_zChartPoint W x' y' _ P' hPx' hPy'
+  have hR : ((p : Spec (CommRingCat.of K) ⟶ (modelEllipticCurve W).E)).base
+      (default : Spec (CommRingCat.of K)) = zChartPoint W P := by
+    rw [show ((p : Spec (CommRingCat.of K) ⟶ (modelEllipticCurve W).E)) =
+      (chartSpecPoint W x y
+        (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hxy)).1 from
+      congrArg Subtype.val hp2]
+    exact chartSpecPoint_base_default_eq_zChartPoint W x y _ P hPx hPy
+  rw [← hR, ← hL]
+  exact hbase.symm
+
 /-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
 of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
 Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
