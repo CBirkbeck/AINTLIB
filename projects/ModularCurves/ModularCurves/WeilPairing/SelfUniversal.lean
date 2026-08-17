@@ -73,6 +73,43 @@ theorem Point.mapIso_killedBy {E F : EllipticCurve S} [IsLocallyNoetherian S]
   rw [Category.assoc, ← mulByHom_comp_left_of_isMonHom E F φ.hom (N : ℤ),
     ← Category.assoc, hx, Category.assoc, zero_comp_left_of_isMonHom φ.hom]
 
+/-- **([PB-ISO])** The induced isomorphism on `π`-pullbacks from a record iso over the
+same base: `pullback.map` along `φ.hom.left`, `𝟙 T`, `𝟙 S`. -/
+noncomputable def pullbackMapIso {E F : EllipticCurve S} (φ : E.asOver ≅ F.asOver)
+    {T : Scheme.{u}} (g : T ⟶ S) : pullback E.π g ≅ pullback F.π g := by
+  haveI : IsIso φ.hom := inferInstance
+  haveI : IsIso φ.hom.left := (Over.forget S).map_isIso φ.hom
+  exact asIso (pullback.map E.π g F.π g φ.hom.left (𝟙 T) (𝟙 S)
+    (by rw [Category.comp_id]; exact (Over.w φ.hom).symm) (by simp))
+
+@[simp] theorem pullbackMapIso_hom_fst {E F : EllipticCurve S} (φ : E.asOver ≅ F.asOver)
+    {T : Scheme.{u}} (g : T ⟶ S) :
+    (pullbackMapIso φ g).hom ≫ pullback.fst F.π g = pullback.fst E.π g ≫ φ.hom.left :=
+  pullback.lift_fst _ _ _
+
+@[simp] theorem pullbackMapIso_hom_snd {E F : EllipticCurve S} (φ : E.asOver ≅ F.asOver)
+    {T : Scheme.{u}} (g : T ⟶ S) :
+    (pullbackMapIso φ g).hom ≫ pullback.snd F.π g = pullback.snd E.π g :=
+  (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+
+/-- The zero sections correspond under [PB-ISO] (pointedness). -/
+theorem baseChangeZero_comp_pullbackMapIso {E F : EllipticCurve S}
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {T : Scheme.{u}} (g : T ⟶ S) :
+    Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g ≫ (pullbackMapIso φ g).hom =
+      Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g := by
+  apply pullback.hom_ext
+  · rw [Category.assoc, pullbackMapIso_hom_fst, ← Category.assoc]
+    rw [show Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g ≫ pullback.fst E.π g =
+      g ≫ E.zero from pullback.lift_fst _ _ _,
+      show Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g ≫ pullback.fst F.π g =
+      g ≫ F.zero from pullback.lift_fst _ _ _]
+    rw [Category.assoc, zero_comp_left_of_isMonHom φ.hom]
+  · rw [Category.assoc, pullbackMapIso_hom_snd]
+    rw [show Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g ≫ pullback.snd E.π g =
+      𝟙 T from pullback.lift_snd _ _ _,
+      show Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g ≫ pullback.snd F.π g =
+      𝟙 T from pullback.lift_snd _ _ _]
+
 /-- **(U1, the transport theorem — `φ`-sibling of the base-change naturality)** The
 pairing is invariant under pointed isomorphisms of elliptic records over the same
 base. -/
