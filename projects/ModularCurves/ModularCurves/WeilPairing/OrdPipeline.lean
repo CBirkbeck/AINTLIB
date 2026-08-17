@@ -350,9 +350,9 @@ theorem exists_const_mul_weilFunction
       𝟙 (Spec (CommRingCat.of K)))
     [QuasiCompact zQm] [IsClosedImmersion zQm]
     (hzQfst : zQm ≫ pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = p.1)
-    (hspan₁ : ∀ c, (Scheme.Hom.ker (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K))))).ideal (V c) = Ideal.span {f₁ c})
+    (hspan₁ : ∀ c, (Scheme.Hom.ker zQm).ideal (V c) = Ideal.span {f₁ c})
     (hnzd₁ : ∀ c, f₁ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
-    (hspan₂ : ∀ c, (Scheme.Hom.ker zQm).ideal (V c) = Ideal.span {f₂ c})
+    (hspan₂ : ∀ c, (Scheme.Hom.ker (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K))))).ideal (V c) = Ideal.span {f₂ c})
     (hnzd₂ : ∀ c, f₂ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
     (hWch : ∀ i, Wc i ≤ (V (ch i)).1)
     (hu : ∀ i j, Nonempty ↥((Wc i ⊓ Wc j) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) →
@@ -403,9 +403,9 @@ theorem exists_const_mul_weilFunction
       ((h c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc c₀)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc c₀))) with hHdef
   set rr : W.toAffine.FunctionField :=
     pullbackCurveFunctionFieldEquiv W
-        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₂ (ch c₀))) *
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₁ (ch c₀))) *
       (pullbackCurveFunctionFieldEquiv W
-        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₁ (ch c₀))))⁻¹ *
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₂ (ch c₀))))⁻¹ *
       (pullbackCurveFunctionFieldEquiv W
         ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((Wc c₀))
           ((A c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc c₀)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc c₀))))⁻¹ with hrrdef
@@ -423,9 +423,9 @@ theorem exists_const_mul_weilFunction
   have hrr0 : rr ≠ 0 := by
     rw [hrrdef]
     exact mul_ne_zero (mul_ne_zero
-      ((map_ne_zero_iff _ (pullbackCurveFunctionFieldEquiv W).injective).mpr hf₂ne)
+      ((map_ne_zero_iff _ (pullbackCurveFunctionFieldEquiv W).injective).mpr hf₁ne)
       (inv_ne_zero ((map_ne_zero_iff _
-        (pullbackCurveFunctionFieldEquiv W).injective).mpr hf₁ne)))
+        (pullbackCurveFunctionFieldEquiv W).injective).mpr hf₂ne)))
       (inv_ne_zero ((map_ne_zero_iff _
         (pullbackCurveFunctionFieldEquiv W).injective).mpr hAne))
   have hH0 : H ≠ 0 := by
@@ -2019,9 +2019,9 @@ theorem torsionSplittingEval_eq_weilPairing
       𝟙 (Spec (CommRingCat.of K)))
     [QuasiCompact zQm] [IsClosedImmersion zQm]
     (hzQfst : zQm ≫ pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = p.1)
-    (hspan₁ : ∀ c, (Scheme.Hom.ker (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K))))).ideal (V c) = Ideal.span {f₁ c})
+    (hspan₁ : ∀ c, (Scheme.Hom.ker zQm).ideal (V c) = Ideal.span {f₁ c})
     (hnzd₁ : ∀ c, f₁ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
-    (hspan₂ : ∀ c, (Scheme.Hom.ker zQm).ideal (V c) = Ideal.span {f₂ c})
+    (hspan₂ : ∀ c, (Scheme.Hom.ker (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K))))).ideal (V c) = Ideal.span {f₂ c})
     (hnzd₂ : ∀ c, f₂ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
     (hWch : ∀ i, Wc i ≤ (V (ch i)).1)
     (hu : ∀ i j, Nonempty ↥((Wc i ⊓ Wc j) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) →
@@ -2204,9 +2204,9 @@ theorem torsionSplittingEval_self_eq_one
       𝟙 (Spec (CommRingCat.of K)))
     [QuasiCompact zQm] [IsClosedImmersion zQm]
     (hzQfst : zQm ≫ pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = p.1)
-    (hspan₁ : ∀ c, (Scheme.Hom.ker (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K))))).ideal (V c) = Ideal.span {f₁ c})
+    (hspan₁ : ∀ c, (Scheme.Hom.ker zQm).ideal (V c) = Ideal.span {f₁ c})
     (hnzd₁ : ∀ c, f₁ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
-    (hspan₂ : ∀ c, (Scheme.Hom.ker zQm).ideal (V c) = Ideal.span {f₂ c})
+    (hspan₂ : ∀ c, (Scheme.Hom.ker (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K))))).ideal (V c) = Ideal.span {f₂ c})
     (hnzd₂ : ∀ c, f₂ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
     (hWch : ∀ i, Wc i ≤ (V (ch i)).1)
     (hu : ∀ i j, Nonempty ↥((Wc i ⊓ Wc j) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) →
