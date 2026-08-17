@@ -1561,3 +1561,18 @@ G_i := h_i · [N]^#r_i gluing (div G = [N]^*D), [DIV-PIN] div r_i = ((Q)-(0))|_{
 — LANDED as the RP-chain!), then L1b ✓ (landed) closes L1. The remaining-work map for
 U5 is now: 3c-iv + r-family/G-glue/div-pin (L1a-tail) → L3 → L5 → L6 → U-assembly →
 E5-assembly, with the τ-side pipeline fully proven.
+
+★ [3c-iv-a PROVEN] (2026-08-17, cont.12): germToFunctionField_transition_dressed
+(GlueDataset) — the germ-equation in DIVISION-FREE mul-form
+t·b·f₁ᶜ·f₂ᵈ = a·f₂ᶜ·f₁ᵈ (at germs), proven by: units-massage t·b·u₁ = a·u₂
+(rw heq + `group`), congrArg-germ + map_mul, the germ-res collapse idiom
+(TopCat.Presheaf.germ_res_apply X.presheaf (homOfLE h) (genericPoint X) _ _ —
+FieldLeaf:166's own), and `linear_combination (f₁d-germ * f₂d-germ) * hC`.
+Instance-note: germToFunctionField needs [Nonempty U]-BARE spelling (the Opens-coe-sort).
+L1a-TAIL REMAINING: [DIV-PIN] div-germ of the chart generators = the section-divisor
+restricted (the RP/ValuationTransport reading at the curve's closed points — connect
+divisorOf_algebraMap_eq_single + the span-data to (Q)-(0)); [r/G-GLUE] r_c-family +
+G_c := germ(h_c)·[N]^#r_c overlap-agreement (hsplit + 3c-iv-a + the FF-cocycle
+cancellation); then L1-assembly (H = a·g_Q·[N]^#(r⁻¹)-form) via L1b (landed). These
+consume the HasseWeil-side dictionary (weilFunction_divisor, the T-C4 valuation-layer)
+— the next design+build block, at the CURVE over k-bar (Q5).
