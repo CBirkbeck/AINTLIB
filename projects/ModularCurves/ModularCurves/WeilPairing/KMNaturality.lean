@@ -1302,6 +1302,33 @@ theorem sectionCls_mapIso {E F : EllipticCurve S}
   refine Eq.trans (map_inv (Scheme.Pic.map (pullbackMapIso φ g).hom) _) ?_
   exact congrArg (·⁻¹) hcore
 
+/-- **([ZEROCLS-MAPISO])** The zero class transports along a pointed record iso:
+the transported zero section IS the `F`-side zero section (pointedness). -/
+theorem zeroCls_mapIso {E F : EllipticCurve S}
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsm' : SmoothOfRelativeDimension 1 F.π) [IsSeparated F.π]
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {T : Scheme.{u}} (g : T ⟶ S) :
+    Scheme.Pic.map (pullbackMapIso φ g).hom (zeroCls F hsm' g) =
+      zeroCls E hsm g := by
+  have hz : Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g ≫
+      (pullbackMapIso φ g).hom =
+      Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g :=
+    baseChangeZero_comp_pullbackMapIso φ g
+  have hzsnd : (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g ≫
+      (pullbackMapIso φ g).hom) ≫ pullback.snd F.π g = 𝟙 T := by
+    rw [hz]
+    exact Scheme.Modules.baseChangeZero_snd F.π F.zero F.zero_π g
+  calc Scheme.Pic.map (pullbackMapIso φ g).hom (zeroCls F hsm' g)
+      = Scheme.Pic.map (pullbackMapIso φ g).hom
+          (sectionCls F hsm' g
+            (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g ≫
+              (pullbackMapIso φ g).hom) hzsnd) :=
+        congrArg _ (sectionCls_congr F hsm' g _ _ hz.symm)
+    _ = sectionCls E hsm g (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g)
+          (Scheme.Modules.baseChangeZero_snd E.π E.zero E.zero_π g) :=
+        sectionCls_mapIso hsm hsm' φ g _ _
+    _ = zeroCls E hsm g := rfl
+
 end EllipticCurve
 
 end MapIso
