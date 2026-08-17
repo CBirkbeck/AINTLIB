@@ -1576,3 +1576,20 @@ G_c := germ(h_c)·[N]^#r_c overlap-agreement (hsplit + 3c-iv-a + the FF-cocycle
 cancellation); then L1-assembly (H = a·g_Q·[N]^#(r⁻¹)-form) via L1b (landed). These
 consume the HasseWeil-side dictionary (weilFunction_divisor, the T-C4 valuation-layer)
 — the next design+build block, at the CURVE over k-bar (Q5).
+
+[DIV-PIN RECON COMPLETE] (2026-08-17, cont.13): the ker-vs-point-ideal dictionary
+EXISTS — ker_eq_XYIdeal (TheoremOfSquareField:782, from the square-field work: the
+kernel of an affine-coordinate-ring evaluation IS XYIdeal) + ker_affineChartHom
+(quotientXYIdealEquiv-based). THE DIV-PIN CHAIN (all pieces landed): the section's
+ker-ideal span-generator f at a chart —[ker_eq_XYIdeal]— XYIdeal(point) =
+SmoothPlaneCurve.maximalIdealAt —[RP-4 uniformizer_of_span_maximalIdealAt +
+RP-5 ord_P_algebraMap_eq_zero_of_notMem + divisorOf_algebraMap_eq_single,
+ValuationTransport]— divisorOf(FF-image f) = Finsupp.single point 1. The germ-transport
+scheme-FF ↔ model-FF via the comparison bridge (T-W7.1b landed). DIV-PIN's statement:
+at the zChart with the section-point affine, divisorOf(model-FF-image of the ker-span
+generator) = single(section-point) 1; assemble from the named pieces; then div r_c =
+div(f₂-germ) - div(f₁-germ) = single(0-pt) - single(Q-pt) per chart ✓ = ((Q)-(0))-
+restricted with the L1-orientation (r = f₂/f₁ = 0-over-Q equations — CHECK the sign
+convention against weilFunction_divisor at assembly). NEXT BUILD: state div_pin at the
+zChart (ValuationTransport-context), prove from the chain; then r/G-glue statements;
+then the L1-assembly (H = a·g_Q·[N]^#(r⁻¹)) via L1b; then L3/L5/L6/U/E5.
