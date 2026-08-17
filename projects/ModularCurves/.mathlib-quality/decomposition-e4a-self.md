@@ -2448,3 +2448,17 @@ as used in VAL-TRANSPORT's h12-h45 chain). NEXT WINDOW OPENING MOVES: (1) read
 ValuationTransport's RP-decl signatures (:1-120, the pointValuation/ord_P-transport
 family) + SpecPoints def; (2) state SEC-STALK + DIV-PIN in OrdPipeline after
 [GERM-Z]; (3) prove via the stocked dichotomy (cont.30s).
+
+[SEC-STALK SIMPLIFICATION — Spec-K SECTIONS ARE POINTS] (2026-08-17, cont.30u): in
+the L1 context T = Spec K (pullback along 𝟙), so the Q-section and zero-section are
+K-POINTS: each section's image is ONE closed point, its kernel ideal-sheaf is the
+ideal of that single point, and the section-divisor is the single-point divisor.
+SEC-STALK therefore reduces to: the chart generator f of z.ker at V spans
+maximalIdealAt at THE section point (P = P_z) and is a non-member (unit) at every
+other P over V — the span-transport to the RP-dictionary at P_z is exactly the
+:226-shape span-statement; membership/non-membership at P ≠ P_z from the
+single-point ideal (stalk = ⊤ off the point). The on-section predicate is
+morphism-level (the L1-hxp pattern: p.1 = the section composite) ⟺ point-equality
+(K alg closed, K-points ↔ closed points). DIV-PIN's indicator := [P = P_Q] for the
+J-Q-side and [P = P_O] for the J-zero-side (κ-orientation per cont.30p to fix).
+SpecPoints := {g : Spec K ⟶ X // g ≫ f = Spec.map (algebraMap)} (WeierstrassModel:65).
