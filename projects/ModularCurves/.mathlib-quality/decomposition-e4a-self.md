@@ -2498,3 +2498,21 @@ CONSTRUCTIVE: r := (transported f₂c₀-germ)/(transported f₁c₀-germ)-as-FF
 (orientation per cont.30p watch). ORD-G-EXECUTION: state the per-chart germ identity
 [G-REL], then Finsupp.ext w with the chart-dichotomy; every ord-computation is
 DIV-PIN/:309/:483 + the ProjOrdTransport-[N]-transfer.
+
+[SEC-ORD FINAL FORM] (2026-08-17, cont.30x): WARNING logged: chart generators have NO
+global divisor claim (f lives only on V; div(:483) needs a GLOBAL maximalIdealAt
+span) — the pointwise ORD-G design never needs one. The executable statement is
+**[SEC-ORD]**: for a chart V of the L1-data with span J.ideal V = span {f}
+(J = z.ker, z a Spec-K-section with image point P_z) and a place P lying over V:
+ord_P (pullbackCurveFunctionFieldEquiv W (germToFunctionField V f-image-path)) =
+if P = P_z then 1 else 0. PROOF SHAPE: transport the V-span to the STALK at P
+(scheme-stalk ↔ localRingAt via isLocalization_stalk_zChartPoint
+[ValuationTransport:179] + zChartLocalizationEquiv_compat); on-point: the stalk
+span IS the DVR maximal ideal (section-kernel stalk at its own point) ⟹ the
+RP-4a hgen-shape ⟹ ord 1 (mirror uniformizer_of_span_maximalIdealAt's core :203+
+with the stalk-supply); off-point: the section-kernel stalk at P ≠ P_z is ⊤ ⟹
+the germ is a stalk-unit ⟹ ord 0 (:309-shape via non-membership). zChartMaximalIdeal
+:= Ideal.map (coordRingToZSection) (maximalIdealAt P) (:43) — the dictionary
+direction for the roundtrips. G-REL then composes these per-chart ords per cont.30w.
+NEXT WINDOW: state [SEC-ORD] in OrdPipeline (after GERM-Z), prove the two cases,
+then [G-REL], then [ORD-G], then L1.
