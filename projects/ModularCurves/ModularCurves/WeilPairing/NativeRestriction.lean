@@ -268,6 +268,22 @@ theorem sheafificationMap_app_unit_eq {Y' : Scheme.{u}}
     (congrArg (((PresheafOfModules.sheafificationAdjunction
       (𝟙 Y'.ringCatSheaf.obj)).unit.app Q).app V) h)
 
+/-- **([NR-pb-unit-nat])** The pullback of a module map, evaluated on a
+pullback-adjunction-unit image (the R1 naturality pattern at the scheme-pullback
+adjunction; small binders). -/
+theorem pullbackMap_app_unit {X' Y' : Scheme.{u}} (f : Y' ⟶ X')
+    {P Q : X'.Modules} (q : P ⟶ Q) (V : X'.Opens) (w : P.val.obj (Opposite.op V)) :
+    ((Scheme.Modules.pullback f).map q).val.app (Opposite.op (f ⁻¹ᵁ V))
+        (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app P).val.app
+          (Opposite.op V) w) =
+      ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app Q).val.app
+        (Opposite.op V) (q.val.app (Opposite.op V) w) := by
+  have hn := (Scheme.Modules.pullbackPushforwardAdjunction f).unit.naturality q
+  have happ := congrArg (fun (g : P ⟶
+      (Scheme.Modules.pushforward f).obj ((Scheme.Modules.pullback f).obj Q)) =>
+    g.val.app (Opposite.op V) w) hn
+  exact happ.symm
+
 /-- **([NR-congr-unit-tmul])** `tensorObjCongr` on a sheafification-unit image of a
 pure tensor (small binders: the instantiation at the large pullback objects is by term
 application). -/
