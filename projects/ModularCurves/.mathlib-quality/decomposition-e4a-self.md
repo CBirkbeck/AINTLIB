@@ -1453,3 +1453,22 @@ rescale verbatim; hnorm-cases verbatim; the NEW dressed-conclusion per case from
 hAB-formula (transition-of-restricted = resUnit of chart-transition) + s1 (KMDataset:95)
 + exists_transition_dressed_of_charts + Units.map-multiplicativity + N3; indices c d :=
 the cover-points of the two summands, hWc/hWd := inf_le_left-chains.
+
+★★★ [G2 COMPLETE — AXIOM-CLEAN] (2026-08-17, cont.6): exists_normalized_chart_dataset
+FULLY PROVEN (GlueDataset.lean, zero sorries): chart data (V, f1, f2, spans, nzds) +
+sum-cover normalized dataset + hnorm + DRESSED transitions with generator-tied units on
+every inhabited overlap. Proof = the KMDataset normalisation replayed with the G1
+chart family + the general transitionUnit_restrict_rescale formula (proven first-shot:
+trans_scalarIso ×2 + s1 + comp_eq ×2 + transitionUnit_restrict) + the four case-variants
+(unrescaled legs masked by e = e ≪≫ scalarIso-1 via overUnitScalarIso_one +
+Iso.trans_refl). BATTLE-LESSONS: (i) ac_rfl sorts atoms SYNTACTICALLY — defeq-but-
+differently-spelled proof-subterms break it; instead REORDER the existential WITNESSES
+so only associativity separates the sides and close with assoc-only simp; (ii) align
+witness spellings to the formula-side (spelled-out opens, not set-variables);
+(iii) KMDataset's open-list continues on a second line (Modules-open present);
+(iv) private upstream lemmas (sectionEval_id, mul_inv_mul_inv_cancel,
+sections_subsingleton_of_le_bot) inline-copied. GLUE STATUS: G1 ✓ G2 ✓. NEXT: [3c-iv]
+the div-level germ-reading of the dressed transitions (DIV-UNIT species via RP-5 +
+the u-relations = generator-quotient germs) and [G3] the L2e-instantiation at the
+G2-dataset (hsplit via AP-D4's exists_transitionUnit_eq_mul_inv_of_mem_torsionPoints
+at the normalized family); then L3, L5, L6, U-assembly, E5-assembly.
