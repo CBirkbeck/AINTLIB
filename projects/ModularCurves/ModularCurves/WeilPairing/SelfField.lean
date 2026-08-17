@@ -74,7 +74,24 @@ theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq 
     infer_instance
   haveI hDed : IsDedekindDomain
       (⟨W⟩ : HasseWeil.Curves.SmoothPlaneCurve K).CoordinateRing := inferInstance
-  -- stages 3–5 at the model
+  haveI hsepπ : IsSeparated (modelEllipticCurve W).π := inferInstance
+  haveI hIntE : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+    inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+  haveI hIntPB : AlgebraicGeometry.IsIntegral
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    isIntegral_pullback_id (modelEllipticCurve W)
+  -- stage 3: the dataset at the model
+  set Q : ((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))) :=
+    EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 _) (Point.mapIso Φ x)
+    with hQdef
+  have hQ : Q ∈ torsionPoints (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N :=
+    asSection_mem_torsionPoints (modelEllipticCurve W) (Point.mapIso Φ x) hx'
+  obtain ⟨M, hM, _hMinv⟩ := exists_module_kappa (modelEllipticCurve W)
+    (modelEllipticCurve W).smooth (𝟙 (Spec (CommRingCat.of K))) Q
+  obtain ⟨edict⟩ := nonempty_tensorObj_sectionIdeal_iso_zeroIdeal_of_field
+    (modelEllipticCurve W) (modelEllipticCurve W).smooth Q M hM
+  -- stages 4–5
   sorry
 
 end EllipticCurve
