@@ -2258,3 +2258,28 @@ germ-injectivity — copy its derivation, grep hmono-construction there). THEN t
 assembly per cont.30h/30i is fully unblocked: per-piece native trivialisations +
 A-def + the dressed-native-calc with restrict/NR-3 leg-rewrites. Estimated: 1 micro
 (idealGenHom_restrict) + 1 helper (res-A-identity) + the 4-branch assembly.
+
+[G2' EXECUTION STRUCTURE] (2026-08-17, cont.30k): NO new micros needed — inventory
+complete: restrictOverTrivialization_comp_eq (KMIndependence:85, double-restriction
+path-independence), trivializationTransitionUnit_restrict (InvertibleSheafCocycle:158),
+NR-3 + the over-language crossings (overTrivializationOfRestrictOpenTrivialization,
+restrictOpenTrivialization_restrictIsoOfPullbackIso — the G2'-docstring's own list),
+isIso_idealGenHom_of_principal (chart-level only — NO piece-level IsIso needed
+anywhere!). TWO-STEP PLAN:
+STEP-1 [new lemma, FieldLeaf after :2135]: exists_transition_dressed_of_charts_perChart
+— same hypotheses as dressed_of_charts (charts Vi=Wf i, Vj=Wf j affine, generators,
+spans, nzd) + CONCLUSION ∃ (Ai : Γ(Wf i)ˣ) (Bj : Γ(Wf j)ˣ) (u₁ u₂ : overlap-units),
+transitionUnitOfCover = resUnit(Ai)·(u₂u₁⁻¹)·resUnit(Bj)⁻¹ ∧ the two u-relations —
+where Ai := trivializationTransitionUnit(Wf i, efam i, overTriv(restrictIso(native-at-
+CHART-i with f-gens))) [chart-level IsIso ✓]. PROOF = the dressed-native calc-shape
+(hc1/hc2/hb/hmid verbatim from transitionUnitOfCover_eq_dressed_native) with the a/b
+legs rewritten: transitionUnit(res-efam-i, overTriv-native-OVERLAP-gens) =
+[over-crossing + NR-3] transitionUnit(res-efam-i, res-overTriv-native-CHART-i) =
+[trivializationTransitionUnit_restrict] resUnit(Ai); the span/nzd/hmono machinery at
+the affine chart-overlap copied from dressed_of_charts (:2158-2230).
+STEP-2 [G2' proof]: base-G2 proof copy (GlueDataset:317-720) with dressed_of_charts →
+the perChart variant; witnesses: ch := Sum.elim id id; A := Sum.elim
+(fun i => cZ i · resUnit(piece≤chart)(A-chart-i)) (fun i => resUnit(Ai)); per-branch
+read-offs: Units.map-res of the chart-overlap identity + resUnit-fusion
+(Subsingleton-arrows) — the transitionUnit_restrict_rescale-dressing composes the
+cZ-factors exactly as the base's witnesses show.
