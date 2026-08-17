@@ -2881,3 +2881,13 @@ C-dictionary's scheme-side [N]-to-E-side hop is this square; (iii) G-REL-1's
 (mulByN).functionFieldMap conjugates to (mulByHom).functionFieldMap via functionFieldMap_comp
 on the square, meeting brick6 on the E-side. Also `baseChangeZero_pastingMap` (zero-sections
 paste) at CurveNaturality:63. mulByHom takes the ℤ-arg (N : ℤ)-coercion.
+
+**[PT-0 PIN] (cont.30am addendum 2)**: `Proj_fromSpec_awayToSection_awayι` (PoleFiltration:2253)
+bridges `IsAffineOpen.fromSpec` and `Proj.awayι` chart machineries — the [PT-0] zChartPoint-vs-
+chartSpecPoint dictionary routes through it + `chartHomEquiv_eq_of_specMap` (WeierstrassModel:793)
++ `eq_chartSpecPoint_of_projModelPointsEquiv_some` (MulByHomDegree:762). Session-11 additional
+landings beyond SEC-ORD: [B-0] mulByN_id_isDominant, [G-REL-1] mulByN_functionFieldMap_germ_transitionUnit,
+[U-ORD0] ord_P_germ_unit_section, [G-REL-3] germToFunctionField_eq_mul_of_res_rel,
+[N-CONJ] pullbackCurveFunctionFieldEquiv_mulByN — all axiom-clean. DIV-H term-plan: unit-parts
+avoid PT-DICT (same-chart U-ORD0); tUOC goes whole through N-CONJ + the proven pointwise
+ProjOrdTransport; only the post-transfer chart-memberships at [N]P need PT-DICT.
