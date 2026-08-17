@@ -2641,3 +2641,20 @@ projectiveDivisorOf-additivity exists since divisors add — find the primitive)
 s'-ord-0 via the [D-MEM] bridge (hPs : zChartPoint ∈ D(s) ⟹ s ∉ zChartMaximalIdeal
 ⟹ s' ∉ maximalIdealAt via the Ideal.map-roundtrip :43) + :309; conclude
 ord(germ-x) = ord(alg f₀'). [S5] the dichotomy on f₀' (cont.30ae-(iv)).
+
+[SEC-ORD S3c LANDED] (2026-08-17, cont.30ag): hFFeq proven — the transported germ
+satisfies projEquiv(germ-D(s) xD)·alg(s')ⁿ = alg(f₀') in W.toAffine.FunctionField
+(s' := coordRingToZSection.symm s, f₀' := …symm (sec s xD).1). Spelling: BARE
+`Nonempty (zChart W)` (no ↥ — the ↥-form misses the tree; GERM-Z's own preamble
+form). Note h1+h2 tie the STATEMENT's germ to germ-D(s)-xD: statement-LHS-ord =
+ord(projEquiv(germ-((inv fst)⁻¹V)…)) = [h2] ord(projEquiv(germ-D(s) xD)).
+REMAINING: [S4] ord both sides of hFFeq: need ord_P-mul + ord_P-pow additivity
+(grep/derive: SmoothPlaneCurve.ord_P via pointValuation — Valuation.map_mul +
+the unzero-additivity; check HasseWeil for ord_P_mul — MulByIntUnramified /
+DivisorPullback used sums ⟹ exists-or-quick); s'-ord-0: [D-MEM] hPs ⟹ s ∉
+zChartMaximalIdeal (basicOpen-membership = not-in-the-prime under fromSpec:
+zChartPoint := fromSpec ⟨zChartMaximalIdeal⟩; mem-basicOpen-fromSpec-iff — the
+AffineScheme-API: IsAffineOpen.fromSpec_mem_basicOpen?? grep) ⟹ s' ∉ maximalIdealAt
+(Ideal.map-roundtrip of :43) ⟹ ord 0 (:309-shape = ord_P_algebraMap_eq_zero_of_
+notMem, ValuationTransport:309) ⟹ ord(germ) = ord(alg f₀'). [S5] dichotomy on f₀'
+per cont.30ae-(iv) (the hspan/ker_apply supply + the section-point cases).
