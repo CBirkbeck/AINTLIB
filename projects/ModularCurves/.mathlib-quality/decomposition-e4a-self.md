@@ -3066,3 +3066,21 @@ zc := z ≫ (translateByPoint)⁻¹ (section-property via translateByPoint_comp_
 iso-inv; the ker-transport along the iso-app — design the span-supply at write-time,
 the SPAN-P′-pattern). Then the ZERO-arm and INF-arm ledgers (some-arm patterns;
 z0-at-∞-indicator TRUE; κ(∞) = [T-proj = ∞] − 1).
+
+**[TAU-U-ORD0 LANDED] (cont.30aw)**: `tau_ordAtInfty_germ_unit` GREEN (55f44592c) — the
+first ∞-ord computation through the collapsed D-chain, validating the entire τ-machinery:
+the bridge (hbr RE-ASCRIBED at the ⟨W⟩-spelling — W_smooth-vs-⟨W⟩ defeq-not-syntactic!)
++ EQUIV-TAU at (toBaseChangePoint pmodT, OVERPT-hxpS, τE with rfl-hτp, iso-dominances)
++ the −T-membership via TAU-PT-ZERO (pmodneg := chartSpecPoint(xt, W-negY) Point-ASCRIBED
+(SpecPoints has no +!); the neg-dictionary-sum-zero: neg_some-rw then RFL closes the
+negY-spelling-gap (bc-coefficients are defeq to W's!); toBaseChangePoint_eq_asSection
+crossing) + the germ-push + U-ORD0. TEMPLATE FOR [TAU-SEC-ORD]: same chain with
+SEC-ORD at the τ-conjugated section — remaining design: the conjugated-section
+ker-span-supply (zc := z ≫ (τPB)⁻¹-inverse-forms; its ker-ideal at τ⁻¹V = the τ.app-image
+of ker-z's at V — the SPAN-P′-transport-pattern along the iso-app; OR observe SEC-ORD's
+INPUT is just (z, hz-section, hspan) — CONJUGATE THE WHOLE DATA: zc's span at τ⁻¹V-charts
+:= Ideal.map (τ.app V) (span f) = span (τ.app f) via the iso — the K-MAX-style transport).
+Then the ZERO-arm ledger (all values now computable at ∞: f₂/z0-SEC-ORD-value = 1 via
+TAU-SEC-ORD (the ∞-pt IS the z0-image ⟹ the indicator-TRUE-case of the conjugated
+SEC-ORD), f₁/zQm-value = [T=0], A/u-values via TAU-U-ORD0 + the ratio-machinery) and
+the INF-arm.
