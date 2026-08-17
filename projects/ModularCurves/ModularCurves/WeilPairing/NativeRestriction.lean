@@ -2239,7 +2239,37 @@ theorem nuPullback_app_restrictTransport {V W : X.Opens} (hWV : W ≤ V)
         ((Scheme.Hom.app (X.homOfLE hWV) (⊤ : V.toScheme.Opens)).hom
           ((nuPullback M J₁ J₂ e V g₁ hg₁ hgi₁).val.app
             (Opposite.op (⊤ : V.toScheme.Opens)) x)) := by
-  sorry
+  -- the ν-composite at the element, stage by stage
+  refine Eq.trans (congrArg (fun t =>
+    (pullbackUnitIso W.ι).hom.val.app (Opposite.op (⊤ : W.toScheme.Opens))
+      (((Scheme.Modules.pullback W.ι).map
+          (idealModuleToUnitHom J₂)).val.app
+        (Opposite.op (⊤ : W.toScheme.Opens))
+        (((Scheme.Modules.pullback W.ι).map e.hom).val.app
+          (Opposite.op (⊤ : W.toScheme.Opens)) t)))
+    (slot_restrictTransportSection M J₁ hWV g₁ hg₁ hgi₁ hg₁' hgi₁' htop x)) ?_
+  refine Eq.trans (congrArg (fun t =>
+    (pullbackUnitIso W.ι).hom.val.app (Opposite.op (⊤ : W.toScheme.Opens))
+      (((Scheme.Modules.pullback W.ι).map
+          (idealModuleToUnitHom J₂)).val.app
+        (Opposite.op (⊤ : W.toScheme.Opens)) t))
+    (restrictTransportSection_naturality hWV e.hom htop
+      ((tensorIdealSlotIso M J₁ V g₁ hg₁ hgi₁).hom.val.app
+        (Opposite.op (⊤ : V.toScheme.Opens)) x))) ?_
+  refine Eq.trans (congrArg (fun t =>
+    (pullbackUnitIso W.ι).hom.val.app (Opposite.op (⊤ : W.toScheme.Opens)) t)
+    (restrictTransportSection_naturality hWV (idealModuleToUnitHom J₂) htop
+      (((Scheme.Modules.pullback V.ι).map e.hom).val.app
+        (Opposite.op (⊤ : V.toScheme.Opens))
+        ((tensorIdealSlotIso M J₁ V g₁ hg₁ hgi₁).hom.val.app
+          (Opposite.op (⊤ : V.toScheme.Opens)) x)))) ?_
+  exact pullbackUnitIso_app_restrictTransport hWV htop
+    (((Scheme.Modules.pullback V.ι).map (idealModuleToUnitHom J₂)).val.app
+      (Opposite.op (⊤ : V.toScheme.Opens))
+      (((Scheme.Modules.pullback V.ι).map e.hom).val.app
+        (Opposite.op (⊤ : V.toScheme.Opens))
+        ((tensorIdealSlotIso M J₁ V g₁ hg₁ hgi₁).hom.val.app
+          (Opposite.op (⊤ : V.toScheme.Opens)) x)))
 
 /-- **([NR-endo-1])** The scalar endomorphism of the unit evaluated at the `⊤`-section
 `1` returns its defining section. -/
