@@ -558,6 +558,77 @@ private theorem secOrd_span_app_eq_primeIdealOf
       ⟨zChartPoint W P, hPV⟩).isPrime.ne_top)
     (Ideal.span_le.mpr (Set.singleton_subset_iff.mpr hgP))
 
+/-- **([SEC-ORD SPAN-S])** The stalk-level span: at the section point, the maximal
+ideal of the stalk is spanned by the `zChart` germ of the fraction numerator `f₀`.
+Chain: the stalk is the localisation of the preimage chart at the point's prime
+(mathlib `isLocalization_stalk`), the prime is the kernel-generator span (SPAN-P'),
+the germs collapse along restrictions, and the denominator germ is a unit. -/
+private theorem secOrd_maximalIdeal_stalk_eq_span_germ_f0
+    (z : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+    [QuasiCompact z]
+    (hz : z ≫ pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = 𝟙 (Spec (CommRingCat.of K)))
+    (V : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), V.1))
+    (hspan : (Scheme.Hom.ker z).ideal V = Ideal.span {f})
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (hPV : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈ V.1)
+    (hcase : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) = z.base default)
+    (hPz : zChartPoint W P ∈ EllipticCurve.zChart W)
+    (s : Γ(projModel W, EllipticCurve.zChart W))
+    (hsle : (projModel W).basicOpen s ≤
+      (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1 ⊓ EllipticCurve.zChart W)
+    (hPs : zChartPoint W P ∈ (projModel W).basicOpen s)
+    (n : ℕ) (f₀ : Γ(projModel W, EllipticCurve.zChart W))
+    (hrep : (projModel W).presheaf.map (homOfLE (hsle.trans inf_le_left)).op
+        ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) *
+        (projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op
+          (s ^ n) =
+      (projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op f₀) :
+    IsLocalRing.maximalIdeal ((projModel W).presheaf.stalk (zChartPoint W P)) =
+      Ideal.span {(projModel W).presheaf.germ (EllipticCurve.zChart W)
+        (zChartPoint W P) hPz f₀} := by
+  haveI hVaff' : IsAffineOpen ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1) :=
+    V.2.preimage_of_isIso (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+  letI halg : Algebra Γ((modelEllipticCurve W).E, (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1)
+      ((modelEllipticCurve W).E.presheaf.stalk
+        ((⟨zChartPoint W P, hPV⟩ : ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1)) : (modelEllipticCurve W).E)) :=
+    (modelEllipticCurve W).E.presheaf.algebra_section_stalk ⟨zChartPoint W P, hPV⟩
+  haveI i2 := hVaff'.isLocalization_stalk ⟨zChartPoint W P, hPV⟩
+  have h1 : IsLocalRing.maximalIdeal
+      ((modelEllipticCurve W).E.presheaf.stalk
+        ((⟨zChartPoint W P, hPV⟩ : ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1)) : (modelEllipticCurve W).E)) =
+      Ideal.map (algebraMap Γ((modelEllipticCurve W).E, (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1)
+          ((modelEllipticCurve W).E.presheaf.stalk
+            ((⟨zChartPoint W P, hPV⟩ : ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1)) : (modelEllipticCurve W).E)))
+        (hVaff'.primeIdealOf ⟨zChartPoint W P, hPV⟩).asIdeal :=
+    (IsLocalization.AtPrime.map_eq_maximalIdeal _ _).symm
+  show IsLocalRing.maximalIdeal
+      ((modelEllipticCurve W).E.presheaf.stalk
+        ((⟨zChartPoint W P, hPV⟩ : ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1)) : (modelEllipticCurve W).E)) = _
+  rw [h1, ← secOrd_span_app_eq_primeIdealOf W z hz V f hspan P hPV hcase,
+    Ideal.map_span, Set.image_singleton, TopCat.Presheaf.stalk_open_algebraMap]
+  -- germ collapse: the fraction relation at the stalk
+  have h2 : (projModel W).presheaf.germ ((projModel W).basicOpen s)
+      (zChartPoint W P) hPs
+      ((projModel W).presheaf.map (homOfLE (hsle.trans inf_le_left)).op
+        ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f)) =
+      (projModel W).presheaf.germ ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1) (zChartPoint W P)
+        ((homOfLE (hsle.trans inf_le_left)).le hPs) ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) :=
+    (projModel W).presheaf.germ_res_apply _ _ _ _
+  have h4 := congrArg ((projModel W).presheaf.germ ((projModel W).basicOpen s)
+    (zChartPoint W P) hPs) hrep
+  simp only [map_mul, map_pow] at h4
+  rw [(projModel W).presheaf.germ_res_apply
+      (homOfLE ((projModel W).basicOpen_le s)) (zChartPoint W P) hPs s,
+    (projModel W).presheaf.germ_res_apply
+      (homOfLE ((projModel W).basicOpen_le s)) (zChartPoint W P) hPs f₀,
+    h2] at h4
+  have hunit : IsUnit ((projModel W).presheaf.germ (EllipticCurve.zChart W)
+      (zChartPoint W P) hPz s) :=
+    (RingedSpace.mem_basicOpen _ s _ hPz).mp hPs
+  rw [← h4, Ideal.span_singleton_mul_right_unit (hunit.pow n)]
+  rfl
+
 open scoped Classical in
 /-- **([SEC-ORD], statement)** The pointwise order of a section-kernel chart
 generator: for a `Spec K`-section `z` of the base-changed curve and a chart `V` on
