@@ -1542,6 +1542,113 @@ private theorem unitsMap_app_mulByN_pullbackMapIso {E F : EllipticCurve S}
     (le_rfl.trans ((((pullbackMapIso φ g).hom)).preimage_mono le_rfl))
     (le_of_eq (mulByN_preimage_pullbackMapIso φ g N V)) a).symm
 
+/-- **([TSE-MAPISO], the E6-d mirror)** The torsion-splitting value is invariant under
+pointed record isos: the `E`-side evaluation on the [PB-ISO]-pulled dataset equals the
+`F`-side evaluation on the original dataset, both read at corresponding points. -/
+theorem torsionSplittingEval_mapIso {E F : EllipticCurve S}
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsm' : SmoothOfRelativeDimension 1 F.π) [IsSeparated F.π]
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {T : Scheme.{u}} (g : T ⟶ S) (N : ℕ)
+    (Q : (E.baseChange g).Point (𝟙 T)) (hQ : Q ∈ torsionPoints E g N)
+    (hQF : (Q.1 ≫ (pullbackMapIso φ g).hom) ≫ pullback.snd F.π g = 𝟙 T)
+    (hQFt : (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ : (F.baseChange g).Point (𝟙 T)) ∈ torsionPoints F g N)
+    (A : (pullback F.π g).Modules)
+    (hA : letI := Scheme.Modules.monoidalCategory (pullback F.π g)
+      (kappa F hsm' g (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ : (F.baseChange g).Point (𝟙 T))).val =
+        toSkeleton A)
+    {J : Type*} (W : J → (pullback F.π g).Opens) (hW : iSup W = ⊤)
+    (e : ∀ i, A.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback F.π g).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover A W e i j ∈
+      sectionUnits (Scheme.Modules.baseChangeZero F.π F.zero F.zero_π g) (W i ⊓ W j))
+    (Pt : (E.baseChange g).Point (𝟙 T)) (hPt : Pt ∈ torsionPoints E g N)
+    (hPF : (Pt.1 ≫ (pullbackMapIso φ g).hom) ≫ pullback.snd F.π g = 𝟙 T)
+    (hPFt : (⟨Pt.1 ≫ (pullbackMapIso φ g).hom, hPF⟩ : (F.baseChange g).Point (𝟙 T)) ∈ torsionPoints F g N) :
+    torsionSplittingEval E hsm g N Q hQ
+        ((Scheme.Modules.pullback (pullbackMapIso φ g).hom).obj A)
+        (hM_mapIso hsm hsm' φ g Q hQF A hA)
+        (fun i => (pullbackMapIso φ g).hom ⁻¹ᵁ W i)
+        (((pullbackMapIso φ g).hom).iSup_preimage_eq_top hW)
+        (fun i => localPullbackTrivializationT (pullbackMapIso φ g).hom A (W i) (e i))
+        (hnorm_mapIso φ g A W e hnorm)
+        Pt hPt =
+      torsionSplittingEval F hsm' g N
+        (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ : (F.baseChange g).Point (𝟙 T)) hQFt A hA W hW e hnorm
+        (⟨Pt.1 ≫ (pullbackMapIso φ g).hom, hPF⟩ : (F.baseChange g).Point (𝟙 T)) hPFt := by
+  obtain ⟨h, hn, hsplit⟩ := exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints
+    F hsm' g N (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ : (F.baseChange g).Point (𝟙 T)) hQFt A hA W hW e hnorm
+  have hres := resUnit_torsionSplittingEval
+    F hsm' g N (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ : (F.baseChange g).Point (𝟙 T)) hQFt A hA W hW e hnorm
+    (⟨Pt.1 ≫ (pullbackMapIso φ g).hom, hPF⟩ : (F.baseChange g).Point (𝟙 T)) hPFt h hn hsplit
+  have hle : ∀ i, mulByN E g N ⁻¹ᵁ ((pullbackMapIso φ g).hom ⁻¹ᵁ W i) ≤ (pullbackMapIso φ g).hom ⁻¹ᵁ (mulByN F g N ⁻¹ᵁ W i) :=
+    fun i => le_of_eq (mulByN_preimage_pullbackMapIso φ g N (W i))
+  -- the transported normalisation
+  have hn' : ∀ i, Scheme.resUnit (hle i)
+      (Units.map (((pullbackMapIso φ g).hom).app (mulByN F g N ⁻¹ᵁ W i)).hom.toMonoidHom (h i)) ∈
+      sectionUnits (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g)
+        (mulByN E g N ⁻¹ᵁ ((pullbackMapIso φ g).hom ⁻¹ᵁ W i)) := by
+    intro i
+    rw [mem_sectionUnits_iff, sectionEval_resUnit,
+      show sectionEval (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π g)
+        ((pullbackMapIso φ g).hom ⁻¹ᵁ (mulByN F g N ⁻¹ᵁ W i))
+        (Units.map (((pullbackMapIso φ g).hom).app (mulByN F g N ⁻¹ᵁ W i)).hom.toMonoidHom (h i)) = 1 from
+      mem_sectionUnits_pullback (baseChangeZero_comp_pullbackMapIso φ g)
+        (mulByN F g N ⁻¹ᵁ W i) (hn i), map_one]
+  -- the transported splitting property
+  have hsplit' : ∀ i j,
+      Units.map ((mulByN E g N).app
+          ((pullbackMapIso φ g).hom ⁻¹ᵁ W i ⊓ (pullbackMapIso φ g).hom ⁻¹ᵁ W j)).hom.toMonoidHom
+        (transitionUnitOfCover ((Scheme.Modules.pullback (pullbackMapIso φ g).hom).obj A)
+          (fun i => (pullbackMapIso φ g).hom ⁻¹ᵁ W i)
+          (fun i => localPullbackTrivializationT (pullbackMapIso φ g).hom A (W i) (e i)) i j) =
+      Scheme.resUnit inf_le_left (Scheme.resUnit (hle i)
+        (Units.map (((pullbackMapIso φ g).hom).app (mulByN F g N ⁻¹ᵁ W i)).hom.toMonoidHom (h i))) *
+        (Scheme.resUnit inf_le_right (Scheme.resUnit (hle j)
+          (Units.map (((pullbackMapIso φ g).hom).app (mulByN F g N ⁻¹ᵁ W j)).hom.toMonoidHom (h j))))⁻¹ := by
+    intro i j
+    refine ((congrArg (Units.map ((mulByN E g N).app
+        ((pullbackMapIso φ g).hom ⁻¹ᵁ W i ⊓ (pullbackMapIso φ g).hom ⁻¹ᵁ W j)).hom.toMonoidHom)
+        (transitionUnitOfCover_localPullback ((pullbackMapIso φ g).hom) A W e i j)).trans ?_)
+    refine ((unitsMap_app_mulByN_pullbackMapIso φ g N (W i ⊓ W j)
+        (transitionUnitOfCover A W e i j)).trans ?_)
+    refine ((congrArg (Scheme.resUnit _) (congrArg
+        (Units.map (((pullbackMapIso φ g).hom).app (mulByN F g N ⁻¹ᵁ (W i ⊓ W j))).hom.toMonoidHom)
+        (hsplit i j))).trans ?_)
+    refine ((congrArg (Scheme.resUnit _) (map_mul _ _ _)).trans ?_)
+    refine ((map_mul _ _ _).trans ?_)
+    refine congrArg₂ (· * ·) ?_ ?_
+    · sorry
+    · sorry
+  -- the value condition, read through the point crossing
+  have hC : ∀ i, Scheme.resUnit
+      (le_top : (Pt.1 : T ⟶ pullback E.π g) ⁻¹ᵁ
+        (mulByN E g N ⁻¹ᵁ ((pullbackMapIso φ g).hom ⁻¹ᵁ W i)) ≤ ⊤)
+      (torsionSplittingEval F hsm' g N
+        (⟨Q.1 ≫ (pullbackMapIso φ g).hom, hQF⟩ : (F.baseChange g).Point (𝟙 T)) hQFt A hA W hW e hnorm
+        (⟨Pt.1 ≫ (pullbackMapIso φ g).hom, hPF⟩ : (F.baseChange g).Point (𝟙 T)) hPFt) =
+      sectionEval (Pt.1 : T ⟶ pullback E.π g)
+        (mulByN E g N ⁻¹ᵁ ((pullbackMapIso φ g).hom ⁻¹ᵁ W i))
+        (Scheme.resUnit (hle i)
+          (Units.map (((pullbackMapIso φ g).hom).app (mulByN F g N ⁻¹ᵁ W i)).hom.toMonoidHom (h i))) := by
+    intro i
+    refine Eq.symm ?_
+    refine ((sectionEval_resUnit (Pt.1 : T ⟶ pullback E.π g) (hle i) _).trans ?_)
+    refine ((congrArg (Scheme.resUnit _)
+      (sectionEval_pullback ((pullbackMapIso φ g).hom) Pt.1 (mulByN F g N ⁻¹ᵁ W i) (h i))).trans ?_)
+    refine ((congrArg (Scheme.resUnit _) (hres i).symm).trans ?_)
+    exact Scheme.resUnit_resUnit _ _ _
+  exact (eq_torsionSplittingEval E hsm g N Q hQ
+    ((Scheme.Modules.pullback (pullbackMapIso φ g).hom).obj A)
+    (hM_mapIso hsm hsm' φ g Q hQF A hA)
+    (fun i => (pullbackMapIso φ g).hom ⁻¹ᵁ W i)
+    (((pullbackMapIso φ g).hom).iSup_preimage_eq_top hW)
+    (fun i => localPullbackTrivializationT (pullbackMapIso φ g).hom A (W i) (e i))
+    (hnorm_mapIso φ g A W e hnorm)
+    Pt hPt
+    (fun i => Scheme.resUnit (hle i)
+      (Units.map (((pullbackMapIso φ g).hom).app (mulByN F g N ⁻¹ᵁ W i)).hom.toMonoidHom (h i)))
+    hn' hsplit' hC).symm
+
 end EllipticCurve
 
 end MapIso
