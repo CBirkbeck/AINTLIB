@@ -341,6 +341,20 @@ theorem ord_P_germ_sectionKer_generator
     (V := (inv (pullback.fst (modelEllipticCurve W).π
       (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1 ⊓ EllipticCurve.zChart W)
     ⟨zChartPoint W P, ⟨hPV, hPz⟩⟩ hPz
+  haveI hNeD : Nonempty ↥((projModel W).basicOpen s).toScheme :=
+    ⟨⟨zChartPoint W P, hPs⟩⟩
+  haveI hNeV'sch : Nonempty ↥((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1).toScheme :=
+    ⟨⟨zChartPoint W P, hPV⟩⟩
+  -- [S2c] restrict the germ to the basic open
+  have h2 : (projModel W).germToFunctionField ((projModel W).basicOpen s)
+      ((projModel W).presheaf.map (homOfLE (hsle.trans inf_le_left)).op
+        ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f)) =
+      @Scheme.germToFunctionField (projModel W) _
+        ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1) hNeV'
+        ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) :=
+    (projModel W).presheaf.germ_res_apply
+      (homOfLE (hsle.trans inf_le_left)) _ _
+      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f)
   sorry
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
