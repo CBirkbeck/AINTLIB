@@ -2693,3 +2693,28 @@ single-closed-point dictionary (cont.30u). Extract [S5] as
 secOrd_f0_dichotomy (fresh budget) with the data (z hz V f hspan hf s hsle hPs P
 hPV + hrep-shape) — OR prove SEC-STALK-CORE as its own micro first and do the
 dichotomy in-place if the main's budget allows (it is near ceiling: prefer extract).
+
+[S5 MATHEMATICAL DERIVATION] (2026-08-17, cont.30aj): the dichotomy's two arguments,
+fully derived: KEY-FACT [K-EVAL]: for the Spec-K-section z, ker_apply gives z.ker's
+V-ideal = RingHom.ker (z.app V) where z.app V : Γ(V) → Γ(Spec K, z⁻¹V) ≅ K is the
+K-EVALUATION at the section point ⟹ the kernel ideal IS the vanishing/maximal ideal
+of the section point in Γ(V). (OFF, point ≠ section-point): suppose f₀ ∈
+zChartMaximalIdeal W P (vanishes at our point); the alg-f₀-germ vanishes ⟹ by hrep,
+xD·alg(sⁿ) vanishes at P; s ∉ the prime (D-MEM/hPs) ⟹ xD's germ ∈ the prime ⟹ f
+vanishes at our point ⟹ (by K-EVAL + hspan: f generates the vanishing ideal of
+EXACTLY the section point on V) our point = the section point — contradiction ⟹
+f₀ ∉ zCMI ⟹ ord 0 (the s-unit-micro's shape at f₀). (ON, point = section-point):
+f's germ generates the localized kernel = the localized maximal ideal at the point
+(K-EVAL localized: the vanishing ideal localizes to the DVR maximal ideal); by hrep
+and s-invertibility-at-the-point, f₀ = f-germ·sⁿ-unit-multiple also generates ⟹
+the RP-4a hgen-stage (AtPrime map-span + intValuation_singleton) gives ord 1.
+IMPLEMENTATION: extract secOrd_f0_dichotomy with binders (z hz V f hspan hf P +
+the shrink data s n f₀ + hrep at the Γ(D s)-level + hPs hPV + the point-eq-if) —
+inside: split_ifs; the OFF-case via the contrapositive membership-chase (all at
+the Γ(zChart)/prime level — the localization-free part!); the ON-case via the
+localized span (mirror RP-4a from the hgen-supply). The membership-chases need:
+[VAL-BRIDGE] the germ-vanishing ⟺ prime-membership at basic/chart opens (the
+:309-iff ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt-family + the D-MEM-iff)
+and [K-EVAL] as its own micro (ker_apply + the Spec-K-eval-read + hspan ⟹ the
+f-vanishing-locus on the shrink region = {section point}, stated as: for a point
+pt ∈ D(s)-region, f₀-germ-vanishes-at-pt ⟺ pt = section-point).
