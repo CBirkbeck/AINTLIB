@@ -2036,3 +2036,23 @@ s1/s2/s3 at the W-side (the pieces are stated at generic opens ✓ instantiate a
 Congr-clothed positions)]; RHS-side = pullbackMap_app_unit(slotV.hom) → s1/s2/s3 at
 V-side → pRT-collapse-⊗; the MEET: both = Congr.inv-clothed pbUnit-images of
 (res-m ⊗ₜ res-g-section) — generator-res-compat.
+
+[SLOT-SQ TOOLKIT COMPLETE] (2026-08-17, cont.29d): [CONGR-UNIT]
+pullbackCongr_app_inv_app_unit LANDED (subst h + rfl; the g-side argument enters via a
+show-by-rw cast in the statement — elaborates cleanly). THE WALK TOOLKIT IS NOW
+COMPLETE: pullbackMap_app_unit, pullbackComp_hom_app_unit [COMP-UNIT],
+pullbackRestrictTransport_app_unit [pRT-COLLAPSE, Congr-stage], pullbackCongr_app_inv
+_app_unit [CONGR-UNIT], tensorObjUnitIso_symm_hom_app [s1],
+pullbackIdealTrivOfGen_symm_hom_app_one [s2, 2 plumbing residuals],
+pullbackTensorObjIsoOfIsOpenImmersion_symm_hom_app_unit [s3], tensorObjCongr_hom_app_
+unit_tmul, sheafificationMap_app_unit(_eq), iso_inv_app_of_hom_app — ALL axiom-clean
+except s2's residuals. REMAINING FOR SLOT-SQ: THE ASSEMBLY — after the transposition-
+entry (landed in-file): both sides at r₀(m) := unitH(unitV-m); LHS: pRT-COLLAPSE →
+CONGR-UNIT (re-express the Congr-clothed comp-unit image as the W.ι-unit image cast) →
+the W-walk (s1 at the unit-image; tensorObjCongr_hom_app_unit_tmul with the s2-b-factor;
+s3 at f := W.ι) → cast-back; RHS: pullbackMap_app_unit(slotV.hom) → the V-walk (s1, s2,
+s3 at f := V.ι) → unitH-of-that → pRT-COLLAPSE-⊗ (Congr-stage); MEET: CONGR-UNIT on the
+RHS + the generator-res-compat (the s2-outputs' idealSections at res-paths — subsingleton
+res-fusion on the .1's + Subtype.ext). Assemble per the per-decl-budget rule (each side's
+chain as its own private lemma). Then NR-1 (1a×2 + 1b + SLOT-SQ-at-elements +
+UNIT-VAL-readd), then G2', then ORD-G.
