@@ -1760,3 +1760,24 @@ germ-of-globalTwist through the two equivs); (6) [L3-proof] (eigen-value match:
 L2e+L2f+L2g-transport + L1 + weilPairing_spec + TAU-INV + VAL-TRANSPORT + domain
 cancellation); (7) L5 (diagonal: weilPairing_self import) + L6 + U-assembly +
 E5-assembly. All consumers typed against these exact signatures.
+
+★★ [L3 PROVEN + TAU-INV PROVEN] (2026-08-17, cont.22): torsionSplittingEval_eq_weilPairing
+is PROVEN in OrdPipeline.lean (modulo the three consumed sorried statements L1/
+VAL-TRANSPORT/EQUIV-TAU): the eigen-chain = L2e-at-c₀ → congrArg-equiv + map_mul →
+EQUIV-TAU-rw → VAL-TRANSPORT-rw → obtain-L1 → translate-congrArg + map_mul + TAU-INV-rw
++ AlgEquiv.commutes + weilPairing_translate-rw → rw [h2] → the hkey-cancellation
+(rw [← hfact] then linear_combination h7 − e-image·hfact — the e·hfact-coefficient is
+REQUIRED; mul_right_cancel₀ + algebraMap-injective finish). TAU-INV proven via HW's
+SHIPPED machinery: hxy_mulByInt + hcov_of_xy (TorsionGeometric) + Isogeny.mem_kernel_iff
++ mulByInt_apply + mulByInt_pullback_x/y (OmegaPullbackCoeff) + dif_neg-pullback-unfold +
+x_gen/y_gen rfl-bridges to the algebraMap-spellings. IsDominant-τp discharged via
+hτp_eq : τp = inv fst ≫ (tBP ≫ fst) (from translateByPoint_id_comp_fst +
+IsIso.inv_hom_id_assoc) + infer_instance. GOTCHA: binder-position .functionField needs
+instance-BINDERS ([IsIntegral (pullback ...)]), conclusion-haveIs don't reach binders.
+REMAINING SORRIES (the complete list): NR-1/SLOT-SQ (NativeRestriction), G2′-proof
+(GlueDataset), L1-proof = ORD-G-pointwise (OrdPipeline :122), VAL-TRANSPORT-proof
+(:230, mechanical cast-chase: germ-of-globalTwist = appLE-germ → invfst♯∘snd♯ = π♯ →
+zChart-collapse → ringEquivOfRingEquiv_eq → coordRingToZSection-of-constant),
+EQUIV-TAU-proof (:256, L2f ∘ L2g composite — mostly mechanical given both landed).
+THEN: L5 (diagonal weilPairing_self import at P' := Q), L6-descent, U-assembly
+(weilPairingEval_self_of_field), E5-assembly.
