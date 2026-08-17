@@ -725,4 +725,66 @@ theorem exists_normalized_chart_dataset
               (W₀ j ⊓ (pullback.snd E.π t) ⁻¹ᵁ (z ⁻¹ᵁ W₀ j)))) hco).trans hkey
 
 
+/-- **([G2′] the per-chart normalized dataset)** Strengthening of
+`exists_normalized_chart_dataset`: the overlap dressing of every transition decomposes
+into **per-chart** units `A i` around the fixed chart assignment `ch` — on every
+inhabited overlap,
+
+  `t_ij = A i |_{ij} · (u₂ · u₁⁻¹) · (A j |_{ij})⁻¹`,
+
+with `u₁, u₂` the generator-comparison units of the charts `V (ch i)`, `V (ch j)`.
+This is the form the pointwise divisor computation (`ORD-G`) consumes: at a point `p`
+over `W i`, every factor is either a unit germ on a neighbourhood of `p` (`A i`, `h i`)
+or a generator-ratio germ with span-pinned order. Proof route (cont.20): the G2
+construction with the e-family compared to the restricted native trivialisations —
+`m_ij = u₂u₁⁻¹` via `restrictOverTrivialization_comp` +
+`overTrivializationOfRestrictOpenTrivialization` +
+`restrictOpenTrivialization_restrictIsoOfPullbackIso` + PACKAGE-mid + the read-off from
+two `restrictTrivialization_nativeTensorIdealTriv_inv_comp_nu` instances
+(`nuPullback_mul` for the generator change). -/
+theorem exists_normalized_chart_dataset_perChart
+    (Q : (E.baseChange t).Point (𝟙 T)) (M : (CategoryTheory.Limits.pullback E.π t).Modules)
+    (hM : letI := Scheme.Modules.monoidalCategory (CategoryTheory.Limits.pullback E.π t)
+      (kappa E hsm t Q).val = toSkeleton M)
+    [AlgebraicGeometry.IsIntegral (CategoryTheory.Limits.pullback E.π t)]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from (CategoryTheory.Limits.pullback E.π t)))]
+    (J₁ J₂ : (CategoryTheory.Limits.pullback E.π t).IdealSheafData)
+    (e_dict : M.tensorObj (Scheme.Modules.idealModule J₁) ≅ Scheme.Modules.idealModule J₂)
+    (h₁ : ∀ c : ↥(CategoryTheory.Limits.pullback E.π t), ∃ V : (CategoryTheory.Limits.pullback E.π t).affineOpens,
+      c ∈ V.1 ∧ ∃ f : ↑((CategoryTheory.Limits.pullback E.π t).presheaf.obj (Opposite.op (V.1))),
+      J₁.ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors ↑((CategoryTheory.Limits.pullback E.π t).presheaf.obj (Opposite.op (V.1))))
+    (h₂ : ∀ c : ↥(CategoryTheory.Limits.pullback E.π t), ∃ V : (CategoryTheory.Limits.pullback E.π t).affineOpens,
+      c ∈ V.1 ∧ ∃ f : ↑((CategoryTheory.Limits.pullback E.π t).presheaf.obj (Opposite.op (V.1))),
+      J₂.ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors ↑((CategoryTheory.Limits.pullback E.π t).presheaf.obj (Opposite.op (V.1)))) :
+    ∃ (V : ↥(CategoryTheory.Limits.pullback E.π t) → (CategoryTheory.Limits.pullback E.π t).affineOpens)
+      (f₁ f₂ : ∀ c, ↑((CategoryTheory.Limits.pullback E.π t).presheaf.obj (Opposite.op ((V c).1))))
+      (ι' : Type u) (W : ι' → (CategoryTheory.Limits.pullback E.π t).Opens) (_ : iSup W = ⊤)
+      (e : ∀ i, M.over (W i) ≅
+        _root_.SheafOfModules.unit ((CategoryTheory.Limits.pullback E.π t).ringCatSheaf.over (W i)))
+      (ch : ι' → ↥(CategoryTheory.Limits.pullback E.π t))
+      (A : ∀ i, ↑((CategoryTheory.Limits.pullback E.π t).presheaf.obj (Opposite.op (W i)))ˣ),
+      (∀ c, J₁.ideal (V c) = Ideal.span {f₁ c}) ∧
+      (∀ c, f₁ c ∈ nonZeroDivisors ↑((CategoryTheory.Limits.pullback E.π t).presheaf.obj (Opposite.op ((V c).1)))) ∧
+      (∀ c, J₂.ideal (V c) = Ideal.span {f₂ c}) ∧
+      (∀ c, f₂ c ∈ nonZeroDivisors ↑((CategoryTheory.Limits.pullback E.π t).presheaf.obj (Opposite.op ((V c).1)))) ∧
+      (∀ i j, transitionUnitOfCover M W e i j ∈
+        sectionUnits (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π t) (W i ⊓ W j)) ∧
+      (∀ i, W i ≤ (V (ch i)).1) ∧
+      (∀ i j (hWch : ∀ k, W k ≤ (V (ch k)).1), Nonempty ↥((W i ⊓ W j) : (CategoryTheory.Limits.pullback E.π t).Opens) →
+        ∃ (u₁ u₂ : ↑((CategoryTheory.Limits.pullback E.π t).presheaf.obj (Opposite.op (W i ⊓ W j)))ˣ),
+          transitionUnitOfCover M W e i j =
+            Scheme.resUnit (inf_le_left : W i ⊓ W j ≤ W i) (A i) * (u₂ * u₁⁻¹) *
+              (Scheme.resUnit (inf_le_right : W i ⊓ W j ≤ W j) (A j))⁻¹ ∧
+          (CategoryTheory.Limits.pullback E.π t).presheaf.map
+              (homOfLE ((inf_le_left).trans (hWch i) : W i ⊓ W j ≤ (V (ch i)).1)).op (f₁ (ch i)) =
+            (CategoryTheory.Limits.pullback E.π t).presheaf.map
+              (homOfLE ((inf_le_right).trans (hWch j) : W i ⊓ W j ≤ (V (ch j)).1)).op (f₁ (ch j)) *
+              (u₁ : ↑((CategoryTheory.Limits.pullback E.π t).presheaf.obj (Opposite.op (W i ⊓ W j)))) ∧
+          (CategoryTheory.Limits.pullback E.π t).presheaf.map
+              (homOfLE ((inf_le_left).trans (hWch i) : W i ⊓ W j ≤ (V (ch i)).1)).op (f₂ (ch i)) =
+            (CategoryTheory.Limits.pullback E.π t).presheaf.map
+              (homOfLE ((inf_le_right).trans (hWch j) : W i ⊓ W j ≤ (V (ch j)).1)).op (f₂ (ch j)) *
+              (u₂ : ↑((CategoryTheory.Limits.pullback E.π t).presheaf.obj (Opposite.op (W i ⊓ W j))))) := by
+  sorry
+
 end ModularCurves
