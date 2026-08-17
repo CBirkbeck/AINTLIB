@@ -2658,3 +2658,19 @@ AffineScheme-API: IsAffineOpen.fromSpec_mem_basicOpen?? grep) ⟹ s' ∉ maximal
 (Ideal.map-roundtrip of :43) ⟹ ord 0 (:309-shape = ord_P_algebraMap_eq_zero_of_
 notMem, ValuationTransport:309) ⟹ ord(germ) = ord(alg f₀'). [S5] dichotomy on f₀'
 per cont.30ae-(iv) (the hspan/ker_apply supply + the section-point cases).
+
+[SEC-ORD MICROS LANDED + TWO STORM LESSONS] (2026-08-17, cont.30ah):
+secOrd_s_notMem_zChartMaximalIdeal [D-MEM] + secOrd_sPrime_ord_zero [s-unit] both
+proven. LESSONS: (1) `h ▸ term` with the motive ranging over a HUGE definition
+(zChartMaximalIdeal) storms in kabstract — use `by rw [h]; exact …` (goal-side
+rewrite, single occurrence) instead of ▸; (2) PHANTOM LEMMA HAZARD:
+Ideal.mem_map_equiv does NOT exist in mathlib — the name resolved into a Sublattice
+lemma and stormed unifying; the working route is Ideal.mem_map_of_mem (equiv-as-
+FunLike) + apply_symm_apply-rw. Also ord_P arithmetic CONFIRMED STOCKED:
+ord_P_mul (Valuation.lean:126), ord_P_pow (:193), ord_P_inv (:170),
+ord_P_eq_top_iff (:94). MAIN-decl state: S1+S2+S2c+S3+S3b+S3c green + sorry.
+NEXT: in the main — consume s-unit (hs'ord := secOrd_sPrime_ord_zero W P s hPs),
+take ord_P of hFFeq (ord_P_mul + ord_P_pow + hs'ord ⟹ ord(germ)+0 = ord(alg f₀')),
+handle the ⊤-cases (germ ≠ 0 from hf через the equiv-injectivity), then [S5] the
+f₀'-dichotomy (cont.30ae-(iv)) — likely as one more extracted private lemma
+(fresh budget; the main is near its ceiling).
