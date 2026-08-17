@@ -3054,3 +3054,15 @@ the E-side add-composite… the E-side sum's .1-realization needs the E-Point-ad
 routes through the same Hom-group — CHECK Point.asSection-additivity-lemmas first (the
 asSection-family may carry them: grep asSection.*add)). THEN [TAU-SEC-ORD]/[TAU-U-ORD0]
 wrappers + the two arms.
+
+**[WRAPPER PINS COMPLETE] (cont.30av)**: the τ-toolkit is done (OVERPT, asSection_add′,
+CAST-G, FST-INV, TAU-PT, TAU-PT-ZERO, TAU-ISO — all green, HEAD 64a8954b9). The
+[TAU-U-ORD0]-recipe is fully pinned in the sentinel (the bridge at (xt,yt,ns) +
+EQUIV-TAU at toBaseChangePoint/OVERPT-data + the germ-push + U-ORD0 at negSmoothPoint
+with the TAU-PT-ZERO-membership via pmodneg := chartSpecPoint(xt, negY xt yt) and the
+neg-dictionary = map_neg). negSmoothPoint (TranslationOrd:48) and Point.neg_some
+(mathlib, rfl) stocked. [TAU-SEC-ORD]: same chain with the conjugated section
+zc := z ≫ (translateByPoint)⁻¹ (section-property via translateByPoint_comp_snd +
+iso-inv; the ker-transport along the iso-app — design the span-supply at write-time,
+the SPAN-P′-pattern). Then the ZERO-arm and INF-arm ledgers (some-arm patterns;
+z0-at-∞-indicator TRUE; κ(∞) = [T-proj = ∞] − 1).
