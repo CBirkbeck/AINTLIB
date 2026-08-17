@@ -2114,3 +2114,28 @@ res-g)))) — plan: arg-level crossing-lemma (Congr.inv∘unit-comp → CAST(uni
 φ-free version) + cast/eqToHom-normalization (eqToHom_map: map-eqToHom-applications
 ARE casts) + the PURE-W res-fusion (IMW ≤ IMV: pullbackUnit_app_res + shX-naturality
 + tensorObj_map_tmul-fuse + Subsingleton-arrows). Then NR-1 consumes SLOT-SQ.
+
+[SLOT-SQ COMPLETE] (2026-08-17, cont.30c): pullbackRestrictTransport_tensorIdealSlotIso
+PROVEN END-TO-END. Final architecture (9 private lemmas, all landed):
+slot_walk_prefix + slot_walk_tail + comparison_shUnit_app_map_eqToHom [A45] + slot_walk;
+app_pullbackCongr_inv_unit + pullbackCongr_inv_unit_arg + map_eqToHom_cast_crossing
+[the three abstract-{f g}(he : f = g) subst-crossing micros]; slot_sq_lhs (L1-collapse →
+crossing → cast-walk); slot_sq_rhs (R1-R5 peel, reversed, rfl-closed); map_ef_split +
+slot_sq_meet_inner (b1-b2) + slot_sq_meet_inner_x (b3-naturality typed-have + b4-rfl +
+b5-legs congr_arg₂) + slot_sq_meet_inner_cast + slot_sq_meet_peel (M1-M3 peel);
+SLOT-SQ := entry-transposition + show-reduced-form + hef-hoist + 4-fold trans chain
+lhs/(inner_cast)/(peel)/rhs. BUDGET-LESSONS (hit ~6 times): (1) a decl's STATEMENT-
+elaboration counts into its 200k budget — a giant-statement lemma has little proof-
+headroom; keep big-statement lemmas' proofs to ≤4 steps, extract the rest; (2) congrArg-
+λ-over-σ with a giant FIXED body = the λ-elaboration storms — hoist as ∀-section micro
+(map_ef_split pattern: small binders, general y); (3) NEVER compose two independently-
+elaborated show-casts across decls UNLESS both elaborate from the same he-BINDER +
+same-syntax (then instantiation makes them identical); decl-boundaries belong at CAST-
+FREE forms; (4) typed-have realignment for naturality_apply when the adjunction-target
+functor-spelling ((sheafification ⋙ forget ⋙ restrictScalars).obj) differs from the
+sheaf-val spelling — ascribe the sheaf-val form, prove by the raw naturality term.
+REMAINING in NativeRestriction: s2-residual (ONE sorry, in
+pullbackIdealTrivOfGen_symm_hom_app_one ~:381) + NR-1 (:2033). NEXT: s2-residual →
+NR-1 (1a×2 + 1b + SLOT-SQ-at-elements + UNIT-VAL re-add) → G2' → ORD-G/L1 →
+E4a-diagonal reduction → leaves A (weilPairingEval_self) + B (_nondegenerate via
+HasseWeil weilPairing_nondegenerate transport).
