@@ -3009,3 +3009,18 @@ TRANSLATED dataset ⟹ [INF-U-ORD0] = U-ORD0 at the translated unit; [INF-SEC-OR
 at the translation-conjugated section (z' := τ-scheme ∘ z with ker-conjugation). Remaining
 work = the τ-dataset plumbing (translateByPoint app-action on germs, section conjugation,
 membership transports — the L2e machinery family). NO new valuation theory needed.
+
+**[D-EXECUTION CHAIN] (cont.30at addendum — all pieces PROVEN & axiom-clean)**:
+ordAtInfty(pE(germ-U x)) = ord_{−T₀}(τ_{T₀}(pE(germ-U x)))   [TranslateOrdInfty:440 ✓]
+  = ord_{−T₀}(pE(translateByPoint-♭(germ-U x)))              [EQUIV-TAU = pullbackCurveFunctionFieldEquiv_translateByPoint, OrdPipeline:2395 ✓ proven in-file]
+  = ord_{−T₀}(pE(germ-τp⁻¹U (τp.app x)))                     [functionFieldMap_germToFunctionField ✓]
+then the AFFINE ENGINE at P := −T₀: U-ORD0 for units (τp.app-of-unit is a unit ✓);
+SEC-ORD for the τ-conjugated section-kernels (ker(τ-scheme ∘ z)-spans = τp.app-images
+of the spans — the ideal-pullback along the iso τp); memberships via the τp-point-action
+(−T₀-pt ∈ τp⁻¹U ⟺ τp(−T₀) = z∞ ∈ U — the PT-2-analogue for translateBy via
+projModelPointsEquiv_add MulByHomDegree:54 + the translateBy-point-action). T₀-supply:
+any affine point (alg-closed existence) + IsDominant-translateByPoint (an iso — derive);
+thread as ∃-obtained INSIDE the arms (no L1-SIG growth) or reuse the p-data when T≠0.
+CAUTION: τp for the arms is the translateBy at T₀-generic — the EQUIV-TAU's binders
+(P' pS hxpS τp hτp [IsDominant]) must be instantiated at the T₀-dataset — construct
+P'₀ := the (baseChange).Point of T₀ via the dictionary (basePointCast-preimage).
