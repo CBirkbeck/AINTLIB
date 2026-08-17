@@ -443,6 +443,58 @@ private theorem secOrd_f0_mem_basicOpen_iff
       rw [← hy]
       exact congrArg z.base (Subsingleton.elim y default))
 
+/-- The `appLE`-at-identity crossing: an endomorphism propositionally equal to the
+identity has identity `appLE` on `⊤` (subst then unfold). -/
+private theorem appLE_top_top_of_eq_id {X : Scheme} {h : X ⟶ X} (he : h = 𝟙 X)
+    (e : (⊤ : X.Opens) ≤ h ⁻¹ᵁ (⊤ : X.Opens)) :
+    Scheme.Hom.appLE h ⊤ ⊤ e = 𝟙 Γ(X, ⊤) := by
+  subst he
+  simp [Scheme.Hom.appLE]
+
+/-- **([SEC-ORD K-MAX])** The section-kernel span is a maximal ideal of the chart ring
+when the chart contains the section point: the section identity `z ≫ snd = 𝟙` splits
+`z`'s `appLE` to `⊤`, so the chart ring surjects onto `Γ(Spec K, ⊤) ≅ K` with kernel
+exactly the span — the K-valued evaluation at the section point. -/
+private theorem secOrd_span_isMaximal
+    (z : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+    [QuasiCompact z]
+    (hz : z ≫ pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = 𝟙 (Spec (CommRingCat.of K)))
+    (V : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), V.1))
+    (hspan : (Scheme.Hom.ker z).ideal V = Ideal.span {f})
+    (hzd : z.base default ∈ V.1) :
+    (Ideal.span {f}).IsMaximal := by
+  have e₂ : (⊤ : (Spec (CommRingCat.of K)).Opens) ≤ z ⁻¹ᵁ V.1 := by
+    intro x _
+    rw [Subsingleton.elim x default]
+    exact hzd
+  have e₁ : V.1 ≤ (pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⁻¹ᵁ (⊤ : (Spec (CommRingCat.of K)).Opens) := by simp
+  have hcomp : Scheme.Hom.appLE (pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⊤ V.1 e₁ ≫ Scheme.Hom.appLE z V.1 ⊤ e₂ =
+      𝟙 Γ(Spec (CommRingCat.of K), ⊤) :=
+    (Scheme.Hom.appLE_comp_appLE z (pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⊤ V.1 ⊤ e₁ e₂).trans
+      (appLE_top_top_of_eq_id hz _)
+  have hsurj : Function.Surjective (Scheme.Hom.appLE z V.1 ⊤ e₂).hom := fun y =>
+    ⟨(Scheme.Hom.appLE (pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⊤ V.1 e₁).hom y, by
+      simpa using ConcreteCategory.congr_hom hcomp y⟩
+  have hκbij := ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso (CommRingCat.of K)).hom
+  -- the kernel of the `⊤`-level evaluation is the kernel of the chart-level one
+  have heq : z ⁻¹ᵁ V.1 = (⊤ : (Spec (CommRingCat.of K)).Opens) := le_antisymm le_top e₂
+  have hresinj : Function.Injective
+      ((Spec (CommRingCat.of K)).presheaf.map (homOfLE e₂).op).hom := by
+    rw [Subsingleton.elim (homOfLE e₂) (eqToHom heq.symm)]
+    exact (ConcreteCategory.bijective_of_isIso _).1
+  have hker : RingHom.ker (((Scheme.ΓSpecIso (CommRingCat.of K)).hom).hom.comp
+      ((Scheme.Hom.appLE z V.1 ⊤ e₂).hom)) = Ideal.span {f} := by
+    rw [RingHom.ker_comp_of_injective _ hκbij.1]
+    have hsplit : (Scheme.Hom.appLE z V.1 ⊤ e₂).hom =
+        (((Spec (CommRingCat.of K)).presheaf.map (homOfLE e₂).op).hom).comp ((z.app V.1).hom) := rfl
+    rw [hsplit, RingHom.ker_comp_of_injective _ hresinj, ← Scheme.Hom.ker_apply, hspan]
+  have hmax := RingHom.ker_isMaximal_of_surjective
+    (((Scheme.ΓSpecIso (CommRingCat.of K)).hom).hom.comp ((Scheme.Hom.appLE z V.1 ⊤ e₂).hom))
+    (hκbij.2.comp hsurj)
+  rw [hker] at hmax
+  exact hmax
+
 open scoped Classical in
 /-- **([SEC-ORD], statement)** The pointwise order of a section-kernel chart
 generator: for a `Spec K`-section `z` of the base-changed curve and a chart `V` on
