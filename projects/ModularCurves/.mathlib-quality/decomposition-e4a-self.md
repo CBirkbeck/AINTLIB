@@ -1722,3 +1722,41 @@ pullbackUnitIso_hom_unit_oneT species); [SLOT-SQ] pRT-M ≫ slotW.hom = pbH.map(
 (sheafification!) ⟹ MUST go map-level via the sheafify-adjunction TRANSPOSITION
 (sources are sh-images: Hom(sh A, B) ≃ presheaf-Hom) then tmul-induction — the ATOM
 template at scale. Then NR-1 assembly at elements.
+
+★ [STATEMENT-LAYER COMPLETE] (2026-08-17, cont.21): the ENTIRE remaining U5-endgame is
+now TYPED as sorried statements with proven transport-infrastructure:
+- OrdPipeline.lean (NEW): pullbackCurveFunctionFieldEquiv PROVEN axiom-clean (fst-iso
+  FF-equiv via RingEquiv.ofRingHom + functionFieldMap_comp/congr/id, ≪≫
+  projModelFunctionFieldEquiv; gotchas: instance-VARIABLES not auto-included unless
+  syntactically mentioned → explicit [AlgebraicGeometry.IsIntegral (projModel W)]
+  binder; .E-vs-projModel instance-forms need haveI-inferInstanceAs BOTH in the
+  def-TYPE (haveI-in-type) and body; rw-motive fails on functionFieldMap-composites →
+  functionFieldMap_congr chain instead; letI-in-hypothesis swallows next paren-group
+  unless the app closes ON the letI-line → (Spec (.of K)) shortening).
+  [L1] exists_const_mul_weilFunction STATEMENT: H_HW·[N]^*r = c·g_T with r
+  EXISTENTIAL (tau-invariance holds for ANY [N]-pullback — kills the r-pinning);
+  [TAU-INV] translateAlgEquivOfPoint_mulByInt_pullbackAlgHom STATEMENT;
+  [VAL-TRANSPORT] pullbackCurveFunctionFieldEquiv_germ_globalTwist STATEMENT
+  (globalTwist-germ ↦ algebraMap∘ΓSpecIso);
+  [L3] torsionSplittingEval_eq_weilPairing STATEMENT (ΓSpecIso-image of the KM-value =
+  weilPairing at the basePointCast-points; general (P',Q) for E5-reuse).
+- GlueDataset: [G2'] exists_normalized_chart_dataset_perChart STATEMENT (per-chart A
+  dressing + fixed ch-assignment).
+- NativeRestriction: NR-battery landed (unit_hom_ext, OTS-RES, NR-1a, 1b
+  pullbackRestrictTransport_unitIso via pullbackUnitIso_compLow/congrLow [UnitComp.lean
+  GOLDMINE] + pullbackCongr_symm_app_inv [subst+rfl], NR-2, NR-3); ONLY NR-1 sorried.
+REMAINING PROOF-MAP (priority order): (1) [SLOT-SQ] → NR-1 (the one hard brick;
+sheafification-adjunction-injectivity + open-immersion-presheaf-shadow tmul-induction;
+element-formula library at PullbackTensorGeneral:1433-1496); (2) [G2'-proof] (G2-body
+rework: e-family vs restricted-natives via NR-2×2 + read-off + nuPullback_mul;
+PACKAGE-mid; trivializationTransitionUnit_restrict + _trans); (3) [ORD-G/L1-proof]
+(pointwise: G-REL germ-read at (i,c₀)-pairs [nonempty by irreducibility] + DIV-PIN +
+DIV-UNIT + projectiveDivisorOf_pullback_eq_pullbackDivisor + OrdAtInftyBridge + L1b);
+(4) [TAU-INV-proof] (IsLocalization.ringHom_ext to R-generators + tau-fixes-coordHom
+via x∘[n]∘tau_S = x∘[n]; translateAlgEquivOfPoint = case-dispatch formula AlgEquiv,
+TranslationOrd:3411; generic-point route via translateAlgEquivOfPoint_map_genericPoint
+SeparableKernelTorsor:209 + genericPointAct); (5) [VAL-TRANSPORT-proof] (cast-chase;
+germ-of-globalTwist through the two equivs); (6) [L3-proof] (eigen-value match:
+L2e+L2f+L2g-transport + L1 + weilPairing_spec + TAU-INV + VAL-TRANSPORT + domain
+cancellation); (7) L5 (diagonal: weilPairing_self import) + L6 + U-assembly +
+E5-assembly. All consumers typed against these exact signatures.
