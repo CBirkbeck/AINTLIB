@@ -1455,6 +1455,57 @@ theorem hnorm_mapIso {E F : EllipticCurve S}
   exact mem_sectionUnits_pullback (baseChangeZero_comp_pullbackMapIso φ g)
     (W i ⊓ W j) (hnorm i j)
 
+/-- **([MULBYN-PBISO])** [PB-ISO] intertwines the base-changed multiplication maps:
+the `[N]`-conjugation square for pointed record isos. -/
+theorem mulByN_comp_pullbackMapIso {E F : EllipticCurve S}
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {T : Scheme.{u}} (g : T ⟶ S) (N : ℕ) :
+    mulByN E g N ≫ (pullbackMapIso φ g).hom =
+      (pullbackMapIso φ g).hom ≫ mulByN F g N := by
+  have hmE : mulByN E g N = (E.baseChange g).mulByHom (N : ℤ) := rfl
+  have hmF : mulByN F g N = (F.baseChange g).mulByHom (N : ℤ) := rfl
+  have hfstIso : (pullbackMapIso φ g).hom ≫ pullback.fst F.π g =
+      pullback.fst E.π g ≫ φ.hom.left := pullback.lift_fst _ _ _
+  have hsndIso : (pullbackMapIso φ g).hom ≫ pullback.snd F.π g =
+      pullback.snd E.π g := (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+  refine pullback.hom_ext ?_ ?_
+  · calc (mulByN E g N ≫ (pullbackMapIso φ g).hom) ≫ pullback.fst F.π g
+        = mulByN E g N ≫ ((pullbackMapIso φ g).hom ≫ pullback.fst F.π g) :=
+          Category.assoc _ _ _
+      _ = mulByN E g N ≫ (pullback.fst E.π g ≫ φ.hom.left) := by rw [hfstIso]
+      _ = (mulByN E g N ≫ pullback.fst E.π g) ≫ φ.hom.left :=
+          (Category.assoc _ _ _).symm
+      _ = (pullback.fst E.π g ≫ E.mulByHom (N : ℤ)) ≫ φ.hom.left := by
+          rw [hmE]; exact congrArg (· ≫ φ.hom.left) (mulByHom_baseChange_fst E g (N : ℤ))
+      _ = pullback.fst E.π g ≫ (E.mulByHom (N : ℤ) ≫ φ.hom.left) :=
+          Category.assoc _ _ _
+      _ = pullback.fst E.π g ≫ (φ.hom.left ≫ F.mulByHom (N : ℤ)) := by
+          rw [mulByHom_comp_left_of_isMonHom E F φ.hom (N : ℤ)]
+      _ = (pullback.fst E.π g ≫ φ.hom.left) ≫ F.mulByHom (N : ℤ) :=
+          (Category.assoc _ _ _).symm
+      _ = ((pullbackMapIso φ g).hom ≫ pullback.fst F.π g) ≫ F.mulByHom (N : ℤ) := by
+          rw [hfstIso]
+      _ = (pullbackMapIso φ g).hom ≫ (pullback.fst F.π g ≫ F.mulByHom (N : ℤ)) :=
+          Category.assoc _ _ _
+      _ = (pullbackMapIso φ g).hom ≫ (mulByN F g N ≫ pullback.fst F.π g) := by
+          rw [hmF]
+          exact congrArg ((pullbackMapIso φ g).hom ≫ ·)
+            (mulByHom_baseChange_fst F g (N : ℤ)).symm
+      _ = ((pullbackMapIso φ g).hom ≫ mulByN F g N) ≫ pullback.fst F.π g :=
+          (Category.assoc _ _ _).symm
+  · calc (mulByN E g N ≫ (pullbackMapIso φ g).hom) ≫ pullback.snd F.π g
+        = mulByN E g N ≫ ((pullbackMapIso φ g).hom ≫ pullback.snd F.π g) :=
+          Category.assoc _ _ _
+      _ = mulByN E g N ≫ pullback.snd E.π g := by rw [hsndIso]
+      _ = pullback.snd E.π g := by
+          rw [hmE]; exact mulByHom_baseChange_snd E g (N : ℤ)
+      _ = (pullbackMapIso φ g).hom ≫ pullback.snd F.π g := hsndIso.symm
+      _ = (pullbackMapIso φ g).hom ≫ (mulByN F g N ≫ pullback.snd F.π g) := by
+          rw [hmF]
+          exact congrArg ((pullbackMapIso φ g).hom ≫ ·)
+            (mulByHom_baseChange_snd F g (N : ℤ)).symm
+      _ = ((pullbackMapIso φ g).hom ≫ mulByN F g N) ≫ pullback.snd F.π g :=
+          (Category.assoc _ _ _).symm
+
 end EllipticCurve
 
 end MapIso
