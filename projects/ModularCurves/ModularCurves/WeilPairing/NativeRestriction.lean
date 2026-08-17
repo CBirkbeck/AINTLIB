@@ -248,7 +248,20 @@ theorem pullbackTensorObjIsoOfIsOpenImmersion_eq_mu {Y : Scheme.{u}} (f : Y ⟶ 
         (Functor.Monoidal.μIso (Scheme.Modules.pullback f) A B).symm ≪≫
         monoidalTensorObjIso ((Scheme.Modules.pullback f).obj A)
           ((Scheme.Modules.pullback f).obj B) := by
-  sorry
+  apply Iso.ext
+  apply ((Scheme.Modules.pullbackPushforwardAdjunction f).homEquiv _ _).injective
+  apply ((PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)).homEquiv _ _).injective
+  apply PresheafOfModules.hom_ext
+  intro U
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro t
+  induction t using TensorProduct.induction_on with
+  | zero => rw [map_zero, map_zero]
+  | tmul x y => sorry
+  | add s t hs ht =>
+      rw [map_add, map_add, hs, ht]
 
 /-- **([SLOT-SQ], the map-level brick)** The tensor-slot construction commutes with the
 open-restriction transport: the one genuinely monoidal square of the `ν`-naturality.
