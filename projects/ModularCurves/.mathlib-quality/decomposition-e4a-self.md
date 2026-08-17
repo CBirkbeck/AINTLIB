@@ -2891,3 +2891,24 @@ landings beyond SEC-ORD: [B-0] mulByN_id_isDominant, [G-REL-1] mulByN_functionFi
 [N-CONJ] pullbackCurveFunctionFieldEquiv_mulByN — all axiom-clean. DIV-H term-plan: unit-parts
 avoid PT-DICT (same-chart U-ORD0); tUOC goes whole through N-CONJ + the proven pointwise
 ProjOrdTransport; only the post-transfer chart-memberships at [N]P need PT-DICT.
+
+**[DIV-H VOCABULARY PINS] (cont.30am addendum 3, session 11 end-of-window)**:
+- `projectiveDivisorOf f = (divisorOf f).toProjective + single ∞ (ordAtInfty f).untopD 0`
+  (ProjectiveDivisor:217); `projectiveDivisorOf_apply_affine : (projDiv f)(affine P) =
+  (ord_P P f).untopD 0` — SEC-ORD's ord_P is literally the affine coefficient.
+- `projOrdAt f (some x y h) = (ord_P ⟨x,y,h⟩ f).untopD 0` (DivisorPullback:75/77).
+- `pullbackDivisor_apply (f hf D w) : pullbackDivisor f hf D w =
+  D ((f w.toAffinePoint).toProjectiveSmoothPoint)` — UNIFORM all places (:200).
+- `kappaDivisor T = single T.toProjectiveSmoothPoint 1 − single infinity 1` (PicZero:232).
+- ProjOrdTransport (proven for mulByInt): `projectiveDivisorOf (φ.pullback h) w =
+  projOrdAt h (φ w.toAffinePoint)` — the pointwise [N]-transfer.
+- THE [DIV-H-w] OBLIGATION: div(H_HW)(w) + div r (([N]w).toProj) = kappaDivisor T (([N]w).toProj),
+  proven per-place: w affine over [N]⁻¹Wc-chart-i → G-REL-1(i,c₀) + U-ORD0 + N-CONJ +
+  the transfer + tUOC-decomposition (hu) + G-REL-3 + SEC-ORD at zQm/z0m with PT-0/PT-1
+  chart-memberships; w = ∞ or [N]w = O → the [D]-rung (y-chart/zero-section).
+- PT-DICT CORE LANDED: PT-0a (ker_chartSolutionHom = transported maximalIdealAt, 4 micros),
+  PT-0 (chartSpecPoint-base = zChartPoint, 4 micros), PT-1 (mulByHom_base_zChartPoint).
+  Lessons: coercion-ascriptions in Ideal.map storm (bare equiv!); Ideal.map_map is
+  RingHom-only (rfl-coe-step first); IsIso (awayToSection) via inferInstanceAs on
+  basicOpenIsoAway.hom; letI for defs-with-inner-haveI in show-defeq; Point-coe targets
+  (modelEllipticCurve W).E (E-ambient lesson extends to Point-coes).
