@@ -375,6 +375,7 @@ theorem tensorObjUnitIso_symm_hom_app {Y' : Scheme.{u}} (Q : Y'.Modules)
       (MonoidalCategoryStruct.tensorObj Q.val (unitObj Y').val)).app V) ?_
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([NR-s2])** The generator trivialisation's inverse at the unit section `1`: the
 pullback-adjunction-unit image of the restricted generator (up to the
 preimage-image re-index). -/
@@ -414,8 +415,38 @@ theorem pullbackIdealTrivOfGen_symm_hom_app_one (J : X.IdealSheafData)
         (Wo.ι.appIso V.unop).inv (show Wo.toScheme.presheaf.obj V from 1) = _
     rw [map_one, mul_one]
     -- residual: the subtype/restrict-layer value collapse (idealPresheaf-map .1 +
-    -- unit_app_app + eqToHom-res fusion) — a def-transparency plumbing rfl
-    sorry
+    -- unit_app_app + eqToHom-res fusion); outer rfl FAILS (one layer blocks);
+    -- restrictAdjunction_unit_app_app is rfl (mathlib :442); the .app-sugar is
+    -- forget₂-wrapped .val.app, bridged by the typed have
+    have hu : ((restrictAdjunction Wo.ι).unit.app
+        (AlgebraicGeometry.Scheme.Modules.idealModule J)).val.app
+        (Opposite.op (Wo.ι ''ᵁ V.unop))
+        (⟨X.presheaf.map (homOfLE (Wo.ι_image_le V.unop)).op g,
+          idealSections_map J (homOfLE (Wo.ι_image_le V.unop)).op hg⟩) =
+        (AlgebraicGeometry.Scheme.Modules.idealModule J).val.map
+          (homOfLE (Scheme.Hom.image_preimage_le Wo.ι (Wo.ι ''ᵁ V.unop))).op
+          (⟨X.presheaf.map (homOfLE (Wo.ι_image_le V.unop)).op g,
+            idealSections_map J (homOfLE (Wo.ι_image_le V.unop)).op hg⟩) :=
+      ConcreteCategory.congr_hom (restrictAdjunction_unit_app_app Wo.ι
+        (AlgebraicGeometry.Scheme.Modules.idealModule J) (Wo.ι ''ᵁ V.unop)) _
+    rw [hu]
+    -- swap the single arrow for the composite path, then split twice; the aligned
+    -- coe-unwinding then closes by rfl
+    refine Eq.trans (congrArg (fun (σ : (Wo.ι ''ᵁ V.unop) ⟶ Wo) =>
+      X.presheaf.map σ.op g) (Subsingleton.elim _
+        ((Wo.ι.opensFunctor.map (eqToHom hpre.symm)) ≫
+          (homOfLE (Scheme.Hom.image_preimage_le Wo.ι (Wo.ι ''ᵁ V.unop)) ≫
+            homOfLE (Wo.ι_image_le V.unop))))) ?_
+    refine Eq.trans (ConcreteCategory.congr_hom (X.presheaf.map_comp
+      ((homOfLE (Scheme.Hom.image_preimage_le Wo.ι (Wo.ι ''ᵁ V.unop)) ≫
+        homOfLE (Wo.ι_image_le V.unop))).op
+      ((Wo.ι.opensFunctor.map (eqToHom hpre.symm))).op) g) ?_
+    refine Eq.trans (congrArg (fun t => X.presheaf.map
+      ((Wo.ι.opensFunctor.map (eqToHom hpre.symm))).op t)
+      (ConcreteCategory.congr_hom
+        (X.presheaf.map_comp (homOfLE (Wo.ι_image_le V.unop)).op
+          (homOfLE (Scheme.Hom.image_preimage_le Wo.ι (Wo.ι ''ᵁ V.unop))).op) g)) ?_
+    rfl
   refine (congrArg (((restrictFunctorIsoPullback Wo.ι).app
     (AlgebraicGeometry.Scheme.Modules.idealModule J)).hom.val.app V) hgen1).trans ?_
   have hnat := PresheafOfModules.naturality_apply
