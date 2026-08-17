@@ -285,6 +285,36 @@ theorem coordRingToZSection_res_pi_app
   exact (congrArg (fun z => (chartZRingEquiv W) z) h4).trans
     (chartZRingEquiv_fromZero W _)
 
+open scoped Classical in
+/-- **([SEC-ORD], statement)** The pointwise order of a section-kernel chart
+generator: for a `Spec K`-section `z` of the base-changed curve and a chart `V` on
+which `z.ker` is principal with generator `f`, the `ord_P` of the transported
+function-field germ of `f` is `1` at the section's point and `0` at every other
+place lying over `V`. The chart-local half of `div f = [P_z]`; the `ORD-G`
+pointwise computation consumes exactly this dichotomy (cont.30x/30y). -/
+theorem ord_P_germ_sectionKer_generator
+    [AlgebraicGeometry.IsIntegral (projModel W)]
+    (z : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+    (hz : z ≫ pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) =
+      𝟙 (Spec (CommRingCat.of K)))
+    [QuasiCompact z]
+    (V : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), V.1))
+    (hspan : (Scheme.Hom.ker z).ideal V = Ideal.span {f})
+    (hf : f ≠ 0)
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (hPV : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈ V.1)
+    [Nonempty V.1] :
+    haveI : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+      inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+    haveI : AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+      isIntegral_pullback_id (modelEllipticCurve W)
+    (⟨W⟩ : SmoothPlaneCurve K).ord_P P
+      (pullbackCurveFunctionFieldEquiv W
+        ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField V.1 f)) =
+    (if (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) = z.base default then 1 else 0) := by
+  sorry
+
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
 `pullbackCurveFunctionFieldEquiv`-image of the germ of a `globalTwist` of a global unit
 of the base is the `algebraMap`-image of that unit read through `ΓSpecIso`. -/
