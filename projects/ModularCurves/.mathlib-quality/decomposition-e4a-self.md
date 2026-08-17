@@ -2088,3 +2088,29 @@ COMPOSITE hom in one naturality_apply beats congrArg-of-naturality (the congrArg
 retypes the middle carrier = storm); (3) subst-then-simp on eqToHom-micro-lemmas leaves
 restrictScalarsId'App residue — avoid, use naturality. NEXT: SLOT-SQ assembly (:1383,
 entry landed; cont.29d chains), then NR-1 (:1403), s2-residuals (:418/:431), G2', ORD-G.
+
+[SLOT-SQ ASSEMBLED] (2026-08-17, cont.30b): SLOT-SQ = slot_sq_lhs ∘ [MEET-sorry] ∘
+slot_sq_rhs.symm after the double-homEquiv transposition + a `show` at the reduced
+value-form (homEquiv_unit fires by simp; the comp/pushforward app-split is NOT
+simp-able — the X.Modules wrapper-category blocks SheafOfModules.comp_val — but IS
+exact-defeq: `show` the reduced form directly). CHAINS: slot_sq_rhs (peel-form,
+stated REVERSED so it closes by rfl) = R1 pullbackMap_app_unit → R2 slot_walk-V →
+R3 unitH-naturality-at-eqToHom → R4 pRT-naturality at (Opens.map h).map-eqToHom →
+R5 pRT-COLLAPSE at IMV; all g/h-spelled, NO W.ι-crossing, compiled first try.
+slot_sq_lhs = L1 pRT-COLLAPSE under slot → L2 app_pullbackCongr_inv_unit → L3
+congrArg-cast slot_walk-W. ★★ THE CROSSING PATTERN (the W.ι = homOfLE ≫ V.ι
+propositional wall): (1) the opens h⁻¹(Vι⁻¹U) vs W.ι⁻¹U are NOT defeq (probe!), but
+comp-preimage IS rfl; (2) NEVER congrArg-lambda across the wall (lambda-typing
+storms); (3) state the crossing as ONE subst-lemma over ABSTRACT {f g} (he : f = g)
+— morphism-vars subst-able, Congr-proof-args cross by PROOF-IRRELEVANCE (f = g is
+Prop!) — with the φ-application INSIDE (app_pullbackCongr_inv_unit: φ.app-op-g⁻¹U
+(Congr.inv (unit-g w)) = show-CAST (φ.app-op-f⁻¹U (unit-f w)); subst he; rfl); (4)
+thread `he` as a BINDER through the consumer-lemma so the statement-cast and the
+proof-cast elaborate from the SAME syntax (identical Eq.mpr-motives — never mix
+concrete (X.homOfLE_ι hWV).symm-casts with he-var-casts in one chain, except where
+proof-irrelevance covers it). REMAINING [MEET]: CAST(map-eqToHom-W(unit-W-IMW(shX
+((res m) ⊗ₜ (res-res g))))) = map-arrowV(Congr.inv(unit-comp-IMV(shX((res m) ⊗ₜ
+res-g)))) — plan: arg-level crossing-lemma (Congr.inv∘unit-comp → CAST(unit-W), the
+φ-free version) + cast/eqToHom-normalization (eqToHom_map: map-eqToHom-applications
+ARE casts) + the PURE-W res-fusion (IMW ≤ IMV: pullbackUnit_app_res + shX-naturality
++ tensorObj_map_tmul-fuse + Subsingleton-arrows). Then NR-1 consumes SLOT-SQ.
