@@ -1194,6 +1194,63 @@ private theorem mulByHom_base_zChartPoint_of_smul
   exact mulByHom_base_zChartPoint W (N : ℤ) pmod hp hp' P
     ⟨x', y', hxy'⟩ rfl rfl rfl rfl
 
+/-- **([PT-2-ZERO])** The mulBy image of an `N`-torsion chart point is the
+zero-section image point. -/
+private theorem mulByHom_base_zChartPoint_of_smul_zero
+    (N : ℕ) (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (hNP : (N : ℤ) • (WeierstrassCurve.Affine.Point.some P.x P.y P.nonsingular :
+      W.toAffine.Point) = 0) :
+    ((modelEllipticCurve W).mulByHom (N : ℤ)).base (zChartPoint W P) =
+      (projModelZero W).base ((Spec.map (CommRingCat.ofHom (algebraMap K K))).base
+        (default : Spec (CommRingCat.of K))) := by
+  have hbcns : ((W.baseChange K).toAffine).Nonsingular P.x P.y :=
+    nonsingular_to_baseChange_self W P.nonsingular
+  set pmod : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap K K))) :=
+    chartSpecPoint W P.x P.y
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hbcns) with hpmod
+  have hp : projModelPointsEquiv W K pmod =
+      WeierstrassCurve.Affine.Point.some P.x P.y hbcns :=
+    projModelPointsEquiv_chartSpecPoint W P.x P.y
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hbcns)
+  have hzs := projModelPointsEquiv_zsmul W (N : ℤ) pmod
+  have hc : EllipticCurve.basePointCast W ((N : ℤ) •
+      projModelPointsEquiv W K pmod) = 0 := by
+    rw [basePointCast_zsmul, hp, EllipticCurve.basePointCast_some]
+    exact hNP
+  have hbc' : (N : ℤ) • projModelPointsEquiv W K pmod = 0 := by
+    apply basePointCast_injective W
+    rw [hc]
+    exact (EllipticCurve.basePointCast_zero (W := W)).symm
+  have hp' : projModelPointsEquiv W K ((N : ℤ) • pmod) = 0 := hzs.trans hbc'
+  have hpz : ((N : ℤ) • pmod : (modelEllipticCurve W).Point _) =
+      ⟨Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫ projModelZero W, by
+        rw [Category.assoc, show (modelEllipticCurve W).π = projModelπ W from rfl,
+          projModelZero_projModelπ, Category.comp_id]⟩ :=
+    (projModelPointsEquiv W K).injective
+      (by rw [hp', projModelPointsEquiv_zero])
+  have hsm := point_smul_eq_comp_mulBy (modelEllipticCurve W)
+    (Spec.map (CommRingCat.ofHom (algebraMap K K))) (N : ℤ) pmod
+  have hbase := congrArg (fun (m : Spec (CommRingCat.of K) ⟶ (modelEllipticCurve W).E) =>
+    m.base (default : Spec (CommRingCat.of K))) hsm
+  simp only at hbase
+  have hR : ((pmod : (modelEllipticCurve W).Point _) :
+      Spec (CommRingCat.of K) ⟶ (modelEllipticCurve W).E).base
+        (default : Spec (CommRingCat.of K)) = zChartPoint W P :=
+    chartSpecPoint_base_default_eq_zChartPoint W P.x P.y _ P rfl rfl
+  have hL : (((N : ℤ) • pmod : (modelEllipticCurve W).Point _) :
+      Spec (CommRingCat.of K) ⟶ (modelEllipticCurve W).E).base
+        (default : Spec (CommRingCat.of K)) =
+      (projModelZero W).base ((Spec.map (CommRingCat.ofHom (algebraMap K K))).base
+        (default : Spec (CommRingCat.of K))) := by
+    rw [show (((N : ℤ) • pmod : (modelEllipticCurve W).Point _) :
+        Spec (CommRingCat.of K) ⟶ (modelEllipticCurve W).E) =
+      Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫ projModelZero W from
+      congrArg Subtype.val hpz]
+    rfl
+  rw [← hR, ← hL]
+  exact hbase.symm
+
 /-- The identity base-change arrow collapse: `Spec.map` of the identity algebra map. -/
 private theorem specMap_algebraMap_self_eq_id :
     Spec.map (CommRingCat.ofHom (algebraMap K K)) = 𝟙 (Spec (CommRingCat.of K)) := by
