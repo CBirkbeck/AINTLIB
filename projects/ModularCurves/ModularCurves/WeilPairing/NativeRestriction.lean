@@ -457,9 +457,15 @@ theorem pullbackIdealTrivOfGen_symm_hom_app_one (J : X.IdealSheafData)
       (AlgebraicGeometry.Scheme.Modules.idealModule J)).val.app
       (Opposite.op (Wo.ι ''ᵁ V.unop)) (⟨X.presheaf.map (homOfLE (Wo.ι_image_le V.unop)).op g,
             idealSections_map J (homOfLE (Wo.ι_image_le V.unop)).op hg⟩))
-  -- residual: splice the [511] instance under the eqToHom-res (coe-spelling
-  -- realignment of the restrictUnit-argument) and the final .val-vs-.presheaf rfl
-  sorry
+  refine hnat.trans ?_
+  exact congrArg (fun z =>
+    ((Scheme.Modules.pullback Wo.ι).obj
+        (AlgebraicGeometry.Scheme.Modules.idealModule J)).val.map
+      (eqToHom hpre.symm).op z)
+    (restrictFunctorIsoPullback_hom_unit_app_apply Wo.ι
+      (AlgebraicGeometry.Scheme.Modules.idealModule J) (Wo.ι ''ᵁ V.unop)
+      (⟨X.presheaf.map (homOfLE (Wo.ι_image_le V.unop)).op g,
+        idealSections_map J (homOfLE (Wo.ι_image_le V.unop)).op hg⟩))
 
 /-- **([NR-congr-unit])** `pullbackCongr` on an adjunction-unit image: for equal
 morphisms the congruence re-index carries the `g`-unit image to the `f`-unit image
