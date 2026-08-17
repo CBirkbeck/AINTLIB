@@ -26,6 +26,52 @@ set_option backward.isDefEq.respectTransparency.types false
 
 namespace ModularCurves
 
+/-- **([3c-iv-a] the germ equation)** The function-field germ of a dressed transition,
+in division-free multiplicative form: `t·b·f₁ᶜ·f₂ᵈ = a·f₂ᶜ·f₁ᵈ` at germs. Downstream
+the `a`, `b` germs die at divisor level (units), leaving the generator-quotient
+`r_d/r_c` reading. -/
+theorem germToFunctionField_transition_dressed {X : Scheme.{u}}
+    [AlgebraicGeometry.IsIntegral X]
+    {Wij Vc Vd : X.Opens} (hc : Wij ≤ Vc) (hd : Wij ≤ Vd) [Nonempty Wij] [Nonempty Vc] [Nonempty Vd]
+    (tval a b u₁ u₂ : Γ(X, Wij)ˣ)
+    (f₁c f₂c : Γ(X, Vc)) (f₁d f₂d : Γ(X, Vd))
+    (heq : tval = a * (u₂ * u₁⁻¹) * b⁻¹)
+    (hu₁ : X.presheaf.map (homOfLE hc).op f₁c =
+      X.presheaf.map (homOfLE hd).op f₁d * (u₁ : Γ(X, Wij)))
+    (hu₂ : X.presheaf.map (homOfLE hc).op f₂c =
+      X.presheaf.map (homOfLE hd).op f₂d * (u₂ : Γ(X, Wij))) :
+    X.germToFunctionField Wij ((tval : Γ(X, Wij))) *
+      X.germToFunctionField Wij ((b : Γ(X, Wij))) *
+      X.germToFunctionField Vc f₁c * X.germToFunctionField Vd f₂d =
+    X.germToFunctionField Wij ((a : Γ(X, Wij))) *
+      X.germToFunctionField Vc f₂c * X.germToFunctionField Vd f₁d := by
+  have hunits : tval * b * u₁ = a * u₂ := by rw [heq]; group
+  have hC := congrArg (fun (x : Γ(X, Wij)) => X.germToFunctionField Wij x)
+    (congrArg Units.val hunits)
+  simp only [Units.val_mul, map_mul] at hC
+  have hA := congrArg (fun (x : Γ(X, Wij)) => X.germToFunctionField Wij x) hu₁
+  have hB := congrArg (fun (x : Γ(X, Wij)) => X.germToFunctionField Wij x) hu₂
+  simp only [map_mul] at hA hB
+  have hr₁c : X.germToFunctionField Wij (X.presheaf.map (homOfLE hc).op f₁c) =
+      X.germToFunctionField Vc f₁c :=
+    TopCat.Presheaf.germ_res_apply X.presheaf (homOfLE hc) (genericPoint X) _ _
+  have hr₂c : X.germToFunctionField Wij (X.presheaf.map (homOfLE hc).op f₂c) =
+      X.germToFunctionField Vc f₂c :=
+    TopCat.Presheaf.germ_res_apply X.presheaf (homOfLE hc) (genericPoint X) _ _
+  have hr₁d : X.germToFunctionField Wij (X.presheaf.map (homOfLE hd).op f₁d) =
+      X.germToFunctionField Vd f₁d :=
+    TopCat.Presheaf.germ_res_apply X.presheaf (homOfLE hd) (genericPoint X) _ _
+  have hr₂d : X.germToFunctionField Wij (X.presheaf.map (homOfLE hd).op f₂d) =
+      X.germToFunctionField Vd f₂d :=
+    TopCat.Presheaf.germ_res_apply X.presheaf (homOfLE hd) (genericPoint X) _ _
+  rw [hr₁c, hr₁d] at hA
+  rw [hr₂c, hr₂d] at hB
+  rw [hA, hB]
+  linear_combination (X.germToFunctionField Vd f₁d *
+    X.germToFunctionField Vd f₂d) * hC
+
+
+
 variable {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
 variable (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π] (t : T ⟶ S)
 
