@@ -331,6 +331,16 @@ theorem ord_P_germ_sectionKer_generator
     congrArg (⇑(EllipticCurve.projModelFunctionFieldEquiv W))
       (functionFieldMap_germToFunctionField
         (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) V.1 f)
+  -- [S2] shrink to a basic open of the zChart around the point
+  haveI hZaff : IsAffineOpen (EllipticCurve.zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  have hPz : zChartPoint W P ∈ EllipticCurve.zChart W := by
+    rw [← SetLike.mem_coe, ← hZaff.range_fromSpec]
+    exact Set.mem_range_self _
+  obtain ⟨s, hsle, hPs⟩ := hZaff.exists_basicOpen_le
+    (V := (inv (pullback.fst (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1 ⊓ EllipticCurve.zChart W)
+    ⟨zChartPoint W P, ⟨hPV, hPz⟩⟩ hPz
   sorry
 
 /-- **([VAL-TRANSPORT], statement)** The transport of a base constant: the
