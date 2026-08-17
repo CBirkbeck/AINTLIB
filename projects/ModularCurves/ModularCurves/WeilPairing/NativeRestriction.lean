@@ -927,6 +927,137 @@ theorem pullbackTensorObjIsoOfIsOpenImmersion_eq_mu {Y : Scheme.{u}} (f : Y ⟶ 
   | add s t hs ht =>
       simp only [map_add, hs, ht]
 
+/-- **([NR-s3])** The open-immersion tensor comparison's inverse on the
+sheafification-unit image of a pure tensor of pullback-unit sections: it is the
+pullback-unit image of the `X`-side pure tensor. Consequence of the proven
+`pullbackTensorObjIsoOfIsOpenImmersion_eq_mu` and the `μ`/`tensorSection` calculus. -/
+theorem pullbackTensorObjIsoOfIsOpenImmersion_symm_hom_app_unit
+    {Y' : Scheme.{u}} (f : Y' ⟶ X) [IsOpenImmersion f] (A B : X.Modules)
+    (U : X.Opens) (x : A.val.obj (Opposite.op U)) (y : B.val.obj (Opposite.op U)) :
+    letI := Scheme.Modules.monoidalCategory X
+    letI := Scheme.Modules.monoidalCategory Y'
+    letI : (Scheme.Modules.pullback f).Monoidal := Scheme.Modules.pullbackMonoidal f
+    (pullbackTensorObjIsoOfIsOpenImmersion f A B).symm.hom.val.app
+        (Opposite.op (f ⁻¹ᵁ U))
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 Y'.ringCatSheaf.obj)).unit.app
+            (MonoidalCategoryStruct.tensorObj
+              ((Scheme.Modules.pullback f).obj A).val
+              ((Scheme.Modules.pullback f).obj B).val)).app
+          (Opposite.op (f ⁻¹ᵁ U))
+          ((((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
+            (Opposite.op U) x) ⊗ₜ
+            (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
+              (Opposite.op U) y))) =
+      ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+        (tensorObj A B)).val.app (Opposite.op U)
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 X.ringCatSheaf.obj)).unit.app
+            (MonoidalCategoryStruct.tensorObj A.val B.val)).app
+          (Opposite.op U) (x ⊗ₜ y)) := by
+  letI := Scheme.Modules.monoidalCategory X
+  letI := Scheme.Modules.monoidalCategory Y'
+  letI : (Scheme.Modules.pullback f).Monoidal := Scheme.Modules.pullbackMonoidal f
+  have hmu := congrArg (fun (e : (Scheme.Modules.pullback f).obj (tensorObj A B) ≅
+      tensorObj ((Scheme.Modules.pullback f).obj A)
+        ((Scheme.Modules.pullback f).obj B)) => e.symm.hom.val.app
+      (Opposite.op (f ⁻¹ᵁ U)))
+    (pullbackTensorObjIsoOfIsOpenImmersion_eq_mu f A B)
+  refine (congrArg (fun q => (ConcreteCategory.hom q)
+    (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 Y'.ringCatSheaf.obj)).unit.app
+            (MonoidalCategoryStruct.tensorObj
+              ((Scheme.Modules.pullback f).obj A).val
+              ((Scheme.Modules.pullback f).obj B).val)).app
+          (Opposite.op (f ⁻¹ᵁ U))
+          ((((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
+            (Opposite.op U) x) ⊗ₜ
+            (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
+              (Opposite.op U) y)))) hmu).trans ?_
+  -- the composite `.symm.hom` splits as mTOI.inv ≫ μ ≫ pb.map mTOI.hom
+  have hv1 : (monoidalTensorObjIso ((Scheme.Modules.pullback f).obj A)
+      ((Scheme.Modules.pullback f).obj B)).inv.val.app (Opposite.op (f ⁻¹ᵁ U))
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 Y'.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj
+            ((Scheme.Modules.pullback f).obj A).val
+            ((Scheme.Modules.pullback f).obj B).val)).app
+        (Opposite.op (f ⁻¹ᵁ U))
+        ((((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
+          (Opposite.op U) x) ⊗ₜ
+          (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
+            (Opposite.op U) y))) =
+      tensorSection ((Scheme.Modules.pullback f).obj A)
+        ((Scheme.Modules.pullback f).obj B) (f ⁻¹ᵁ U)
+        (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
+          (Opposite.op U) x)
+        (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
+          (Opposite.op U) y) := rfl
+  have hδ := ModularCurves.pullback_δ_unit_tensorSection f A B U x y
+  have hv2 : (Functor.LaxMonoidal.μ (Scheme.Modules.pullback f) A B).val.app
+      (Opposite.op (f ⁻¹ᵁ U)) (tensorSection ((Scheme.Modules.pullback f).obj A)
+        ((Scheme.Modules.pullback f).obj B) (f ⁻¹ᵁ U)
+        (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
+          (Opposite.op U) x)
+        (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
+          (Opposite.op U) y)) =
+      ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app (MonoidalCategoryStruct.tensorObj A B)).val.app (Opposite.op U) (tensorSection A B U x y) := by
+    have hdm := congrArg (fun (q : (Scheme.Modules.pullback f).obj
+        (MonoidalCategoryStruct.tensorObj A B) ⟶ (Scheme.Modules.pullback f).obj
+        (MonoidalCategoryStruct.tensorObj A B)) =>
+      q.val.app (Opposite.op (f ⁻¹ᵁ U)) (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app (MonoidalCategoryStruct.tensorObj A B)).val.app (Opposite.op U) (tensorSection A B U x y)))
+      (Functor.Monoidal.δ_μ (Scheme.Modules.pullback f) A B)
+    have hsplit : (Functor.LaxMonoidal.μ (Scheme.Modules.pullback f) A B).val.app
+        (Opposite.op (f ⁻¹ᵁ U))
+        ((Functor.OplaxMonoidal.δ (Scheme.Modules.pullback f) A B).val.app
+          (Opposite.op (f ⁻¹ᵁ U)) (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app (MonoidalCategoryStruct.tensorObj A B)).val.app (Opposite.op U) (tensorSection A B U x y))) =
+        ((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app (MonoidalCategoryStruct.tensorObj A B)).val.app (Opposite.op U) (tensorSection A B U x y) := hdm
+    rw [hδ] at hsplit
+    exact hsplit
+  -- v3: transport back through the pulled tensorObj-bridge
+  have hv3 := pullbackMap_app_unit f (monoidalTensorObjIso A B).hom U (tensorSection A B U x y)
+  have hcancel : (monoidalTensorObjIso A B).hom.val.app (Opposite.op U) (tensorSection A B U x y) =
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj A.val B.val)).app
+        (Opposite.op U) (x ⊗ₜ y) :=
+    iso_inv_hom_app_applyT (monoidalTensorObjIso A B) (Opposite.op U) _
+  -- assemble the three steps against the composite
+  have hcomp : (((Scheme.Modules.pullback f).mapIso (monoidalTensorObjIso A B).symm ≪≫
+      (Functor.Monoidal.μIso (Scheme.Modules.pullback f) A B).symm ≪≫
+      monoidalTensorObjIso ((Scheme.Modules.pullback f).obj A)
+        ((Scheme.Modules.pullback f).obj B)).symm.hom.val.app
+      (Opposite.op (f ⁻¹ᵁ U))
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 Y'.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj
+            ((Scheme.Modules.pullback f).obj A).val
+            ((Scheme.Modules.pullback f).obj B).val)).app
+        (Opposite.op (f ⁻¹ᵁ U))
+        ((((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app A).val.app
+          (Opposite.op U) x) ⊗ₜ
+          (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app B).val.app
+            (Opposite.op U) y)))) =
+      ((Scheme.Modules.pullback f).map (monoidalTensorObjIso A B).hom).val.app
+        (Opposite.op (f ⁻¹ᵁ U))
+        ((Functor.LaxMonoidal.μ (Scheme.Modules.pullback f) A B).val.app
+          (Opposite.op (f ⁻¹ᵁ U))
+          ((monoidalTensorObjIso ((Scheme.Modules.pullback f).obj A)
+            ((Scheme.Modules.pullback f).obj B)).inv.val.app
+            (Opposite.op (f ⁻¹ᵁ U))
+            (((PresheafOfModules.sheafificationAdjunction
+              (𝟙 Y'.ringCatSheaf.obj)).unit.app
+                (MonoidalCategoryStruct.tensorObj
+                  ((Scheme.Modules.pullback f).obj A).val
+                  ((Scheme.Modules.pullback f).obj B).val)).app
+              (Opposite.op (f ⁻¹ᵁ U))
+              ((((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+                A).val.app (Opposite.op U) x) ⊗ₜ
+                (((Scheme.Modules.pullbackPushforwardAdjunction f).unit.app
+                  B).val.app (Opposite.op U) y))))) := rfl
+  refine hcomp.trans ?_
+  rw [hv1, hv2, hv3, hcancel]
+
 /-- **([SLOT-SQ], the map-level brick)** The tensor-slot construction commutes with the
 open-restriction transport: the one genuinely monoidal square of the `ν`-naturality.
 Proof route (cont.20): sources are sheafification-images (open-immersion presheaf
