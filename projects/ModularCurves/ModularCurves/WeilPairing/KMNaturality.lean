@@ -1225,6 +1225,83 @@ theorem ker_comap_iso {X Y W : Scheme.{u}} (e : X ≅ Y) (z : W ⟶ Y)
   haveI : IsIso (pullback.snd e.hom z) := inferInstance
   exact Scheme.Hom.ker_comp_of_isIso _ _
 
+/-- **([SECTIONCLS-MAPISO])** The section class transports along a pointed record iso:
+`Pic.map (pullbackMapIso φ g).hom` carries the `F`-side class of the transported section
+to the `E`-side class. The comap of the transported kernel collapses on the nose to the
+original kernel via [KER-MAPISO]. -/
+theorem sectionCls_mapIso {E F : EllipticCurve S}
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsm' : SmoothOfRelativeDimension 1 F.π) [IsSeparated F.π]
+    (φ : E.asOver ≅ F.asOver) {T : Scheme.{u}} (g : T ⟶ S)
+    (P : T ⟶ pullback E.π g) (hP : P ≫ pullback.snd E.π g = 𝟙 T) :
+    Scheme.Pic.map (pullbackMapIso φ g).hom
+      (sectionCls F hsm' g (P ≫ (pullbackMapIso φ g).hom)
+        (by rw [Category.assoc, show (pullbackMapIso φ g).hom ≫ pullback.snd F.π g =
+          pullback.snd E.π g from (pullback.lift_snd _ _ _).trans (Category.comp_id _), hP])) =
+      sectionCls E hsm g P hP := by
+  letI := Scheme.Modules.monoidalCategory (pullback E.π g)
+  letI := Scheme.Modules.monoidalCategory (pullback F.π g)
+  haveI hsepE : IsSeparated (pullback.snd E.π g) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π g ‹_›
+  haveI hsepF : IsSeparated (pullback.snd F.π g) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) F.π g ‹_›
+  have hsmE : SmoothOfRelativeDimension 1 (pullback.snd E.π g) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) E.π g hsm
+  have hsmF : SmoothOfRelativeDimension 1 (pullback.snd F.π g) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) F.π g hsm'
+  have hPF : (P ≫ (pullbackMapIso φ g).hom) ≫ pullback.snd F.π g = 𝟙 T := by
+    rw [Category.assoc, show (pullbackMapIso φ g).hom ≫ pullback.snd F.π g =
+      pullback.snd E.π g from (pullback.lift_snd _ _ _).trans (Category.comp_id _), hP]
+  haveI hciP : IsClosedImmersion P := by
+    refine MorphismProperty.of_postcomp (W := @IsClosedImmersion)
+      (W' := @IsSeparated) _ (pullback.snd E.π g) hsepE ?_
+    rw [hP]
+    infer_instance
+  haveI hciPF : IsClosedImmersion (P ≫ (pullbackMapIso φ g).hom) := by
+    refine MorphismProperty.of_postcomp (W := @IsClosedImmersion)
+      (W' := @IsSeparated) _ (pullback.snd F.π g) hsepF ?_
+    rw [hPF]
+    infer_instance
+  -- the comap of the transported kernel is the original kernel on the nose
+  have hkercollapse : (Scheme.Hom.ker (P ≫ (pullbackMapIso φ g).hom)).comap
+      (pullbackMapIso φ g).hom = Scheme.Hom.ker P := by
+    rw [ker_comap_iso (pullbackMapIso φ g) (P ≫ (pullbackMapIso φ g).hom)]
+    exact congrArg Scheme.Hom.ker
+      (by rw [Category.assoc, Iso.hom_inv_id, Category.comp_id])
+  have hJ : ∀ c : ↥(pullback F.π g), ∃ V : (pullback F.π g).affineOpens, c ∈ V.1 ∧
+      ∃ f : Γ(pullback F.π g, V.1),
+        (Scheme.Hom.ker (P ≫ (pullbackMapIso φ g).hom)).ideal V = Ideal.span {f} ∧
+          f ∈ nonZeroDivisors Γ(pullback F.π g, V.1) :=
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsmF _ hPF).locallyPrincipal
+  have hJ' : ∀ c : ↥(pullback E.π g), ∃ V : (pullback E.π g).affineOpens, c ∈ V.1 ∧
+      ∃ f : Γ(pullback E.π g, V.1),
+        ((Scheme.Hom.ker (P ≫ (pullbackMapIso φ g).hom)).comap
+          (pullbackMapIso φ g).hom).ideal V = Ideal.span {f} ∧
+          f ∈ nonZeroDivisors Γ(pullback E.π g, V.1) := by
+    rw [hkercollapse]
+    exact (RelEffCartierDiv.sectionDivisor_isOfficial hsmE P hP).locallyPrincipal
+  obtain ⟨eiso⟩ := nonempty_pullback_idealModule (pullbackMapIso φ g).hom
+    (Scheme.Hom.ker (P ≫ (pullbackMapIso φ g).hom)) hJ hJ'
+  have hcore : Scheme.Pic.map (pullbackMapIso φ g).hom
+      (((RelEffCartierDiv.sectionDivisor (pullback.snd F.π g)
+          (P ≫ (pullbackMapIso φ g).hom) hPF).isInvertible_idealModule
+        (RelEffCartierDiv.sectionDivisor_isOfficial hsmF _ hPF)).isUnit_toSkeleton.unit) =
+      ((RelEffCartierDiv.sectionDivisor (pullback.snd E.π g)
+          P hP).isInvertible_idealModule
+        (RelEffCartierDiv.sectionDivisor_isOfficial hsmE P hP)).isUnit_toSkeleton.unit := by
+    refine Units.ext ?_
+    refine (Scheme.Pic.map_val (pullbackMapIso φ g).hom _).trans ?_
+    refine (congrArg (Scheme.Modules.pullback (pullbackMapIso φ g).hom).mapSkeleton.obj
+      (IsUnit.unit_spec _)).trans ?_
+    refine (Functor.mapSkeleton_obj_toSkeleton _ _).trans ?_
+    refine (toSkeleton_eq_toSkeleton_iff.mpr
+      ⟨eiso ≪≫ eqToIso (congrArg Scheme.Modules.idealModule hkercollapse)⟩).trans ?_
+    exact (IsUnit.unit_spec _).symm
+  refine Eq.trans (map_inv (Scheme.Pic.map (pullbackMapIso φ g).hom) _) ?_
+  exact congrArg (·⁻¹) hcore
+
 end EllipticCurve
 
 end MapIso
