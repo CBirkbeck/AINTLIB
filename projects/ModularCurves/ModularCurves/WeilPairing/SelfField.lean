@@ -132,7 +132,7 @@ theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq 
       𝟙 (Spec (CommRingCat.of K)) := by
     rw [show CommRingCat.ofHom (algebraMap K K) = 𝟙 (CommRingCat.of K) from rfl,
       Spec.map_id]
-  set p : SpecPoints (projModel W) (projModelπ W) K :=
+  set p : (modelEllipticCurve W).Point (Spec.map (CommRingCat.ofHom (algebraMap K K))) :=
     ⟨(Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ≫
         pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))),
       (Category.assoc _ _ _).trans
@@ -143,6 +143,67 @@ theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq 
         ((congrArg (fun m => m ≫ 𝟙 (Spec (CommRingCat.of K))) Q.2).trans
         ((Category.id_comp _).trans
           hspecid.symm))))⟩ with hpdef
+  -- stage 4b: the torsion transfer to the cast point (local copies of the
+  -- OrdPipeline-private cast micros; flagged for cleanup dedup)
+  have castPoint_zsmul' : ∀ {V₁ V₂ : WeierstrassCurve K} (h : V₁ = V₂)
+      (n : ℤ) (X : V₁.toAffine.Point),
+      (h ▸ (n • X) : V₂.toAffine.Point) = n • (h ▸ X : V₂.toAffine.Point) := by
+    intro V₁ V₂ h n X
+    subst h; rfl
+  have basePointCast_eq_cast' : ∀ (X : ((W.baseChange K).toAffine).Point),
+      EllipticCurve.basePointCast W X =
+        ((EllipticCurve.baseChange_self_eq W) ▸ X : W.toAffine.Point) := by
+    intro X
+    have hzero : ∀ {V₁ V₂ : WeierstrassCurve K} (h : V₁ = V₂),
+        (h ▸ (WeierstrassCurve.Affine.Point.zero : V₁.toAffine.Point) :
+          V₂.toAffine.Point) = WeierstrassCurve.Affine.Point.zero := by
+      intro V₁ V₂ h; subst h; rfl
+    have hsome : ∀ {V₁ V₂ : WeierstrassCurve K} (h : V₁ = V₂) (x0 y0 : K)
+        (ns : V₁.toAffine.Nonsingular x0 y0),
+        (h ▸ (WeierstrassCurve.Affine.Point.some x0 y0 ns : V₁.toAffine.Point) :
+          V₂.toAffine.Point) =
+        WeierstrassCurve.Affine.Point.some x0 y0 (by rw [← h]; exact ns) := by
+      intro V₁ V₂ h x0 y0 ns; subst h; rfl
+    cases X with
+    | zero => exact (hzero (EllipticCurve.baseChange_self_eq W)).symm
+    | some xk yk hk =>
+      exact (hsome (EllipticCurve.baseChange_self_eq W) xk yk hk).symm
+  have basePointCast_zsmul' : ∀ (n : ℤ) (X : ((W.baseChange K).toAffine).Point),
+      EllipticCurve.basePointCast W (n • X) =
+        n • EllipticCurve.basePointCast W X := by
+    intro n X
+    rw [basePointCast_eq_cast', basePointCast_eq_cast',
+      castPoint_zsmul' (EllipticCurve.baseChange_self_eq W) n X]
+  -- the point-group transfer ξ : baseChange-points ≃+ Spec.map-points, ξ Q = p
+  set ξ : ((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))) ≃+
+      (modelEllipticCurve W).Point (Spec.map (CommRingCat.ofHom (algebraMap K K))) :=
+    (EllipticCurve.Point.baseChangeEquiv (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) (𝟙 (Spec (CommRingCat.of K)))).trans
+      (pointCongr (modelEllipticCurve W)
+        ((Category.id_comp _).trans hspecid.symm)) with hξdef
+  have hxiQ : ξ Q = p := by
+    refine Subtype.ext ?_
+    show (pointCongr (modelEllipticCurve W) _
+      (EllipticCurve.Point.baseChangeEquiv _ _ _ Q)).1 = p.1
+    rw [pointCongr_apply_coe, EllipticCurve.Point.baseChangeEquiv_apply_coe]
+  have hNp : (N : ℤ) • p = 0 := by
+    have hQ0 : (N : ℤ) • Q = 0 := hQ
+    have h1 := congrArg ξ hQ0
+    rw [map_zsmul, hxiQ, map_zero] at h1
+    exact h1
+  have hT : (N : ℤ) • EllipticCurve.basePointCast W (projModelPointsEquiv W K p) = 0 := by
+    rw [← basePointCast_zsmul' (N : ℤ) (projModelPointsEquiv W K p),
+      ← projModelPointsEquiv_zsmul W (N : ℤ) p, hNp]
+    rw [show (0 : (modelEllipticCurve W).Point
+        (Spec.map (CommRingCat.ofHom (algebraMap K K)))) =
+      ⟨Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫ projModelZero W,
+        (Category.assoc _ _ _).trans
+          ((congrArg (fun m => Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫ m)
+            (projModelZero_projModelπ W)).trans (Category.comp_id _))⟩ from rfl,
+    ]
+    exact (congrArg (EllipticCurve.basePointCast W)
+      (projModelPointsEquiv_zero W K)).trans (EllipticCurve.basePointCast_zero W)
   -- stage 5
   sorry
 
