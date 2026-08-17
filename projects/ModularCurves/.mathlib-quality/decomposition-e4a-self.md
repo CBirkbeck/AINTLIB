@@ -1512,3 +1512,21 @@ read RelEffCartierDiv/picClass/picRelProj/IsOfficialCartier defs; adjudicate the
 field-case correction; state kappa_dict (∃ M hM J₁ J₂ e_dict h₁ h₂) and prove by the
 class-to-iso mechanism. Then G2-instantiate, D4-pipe, L2e — and the τ-side of U5 is
 fully fed.
+
+[KAPPA-DICT DESIGN COMPLETE] (2026-08-17, cont.9): picRelProj x = x * (snd^* z^* x)^-1
+(RelativePic:81) — the correction is the snd-pullback of the z-restriction class; over
+Pic-trivial T (Spec k!) it vanishes and kappa-val = [I(D_Q)]^-1 * [I(D_0)] on the nose.
+IsOfficialCartier.locallyPrincipal is LITERALLY the h₁/h₂ hypothesis-shape (the covers
+are free from sectionDivisor_isOfficial ×2). picClass D h := (isUnit_toSkeleton of the
+invertible ideal-module).unit^-1. THE KAPPA_DICT THEOREM (state at Pic-T-trivial or
+with the correction-triviality hypothesis, discharged at the field):
+  ∃ M hM, ∃ e_dict : M ⊗ idealModule (sectionDivisor Q').ideal ≅
+    idealModule (sectionDivisor zero).ideal — PROOF: M := exists_module_kappa's;
+  class-chase toSkeleton(M ⊗ I_Q) = kappa * [I_Q-class] [toSkeleton_tensorObj]
+  = proj([I_Q]^-1[I_0]) * [I_Q] = [I_0] [correction-trivial + group-algebra]
+  = toSkeleton(I_0-module) ⟹ toSkeleton_eq_toSkeleton_iff ⟹ Nonempty-iso ⟹ choice.
+  (Unit-vs-Pic-element plumbing: picClass lives via IsUnit.unit — mind the coe-layer;
+  DivisorClass:160's own hmain-block is the template for exactly this manipulation.)
+Then: exists_normalized_chart_dataset at (M, e_dict, officiality-covers) + the
+D4-pipeline + L2e = THE COMPLETE τ-SIDE. Remaining U5 after that: 3c-iv/L1a joint
+design (div-germ vs g_Q), L3, L5, L6, U-assembly, E5-assembly.
