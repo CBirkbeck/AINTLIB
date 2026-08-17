@@ -1530,3 +1530,17 @@ with the correction-triviality hypothesis, discharged at the field):
 Then: exists_normalized_chart_dataset at (M, e_dict, officiality-covers) + the
 D4-pipeline + L2e = THE COMPLETE τ-SIDE. Remaining U5 after that: 3c-iv/L1a joint
 design (div-germ vs g_Q), L3, L5, L6, U-assembly, E5-assembly.
+
+★★ [KAPPA-DICT PROVEN] (2026-08-17, cont.10): exists_kappa_dict axiom-clean
+(GlueDataset sorry-free): over hPicT : ∀ y : Scheme.Pic T, y = 1, any skeleton-
+representative M of kappa(Q) has Nonempty (M ⊗ I(D_Q) ≅ I(D_0)). Mechanics: the
+picRelProj-correction dies by hPicT + map_one; the units-equation kappa * uQ = u0
+(mul_comm + inv_mul_cancel), val-ed and unit_spec-ed; the tensorObj-vs-monoidal bridge
+by nonempty_tensorObj_iso_tensor + toSkeleton_eq_toSkeleton_iff; toSkeleton_tensorObj's
+direction is mul = tensor (use PLAIN not .symm for tensor-to-mul calc-steps). GOTCHA:
+Pic-vs-Skeletonˣ HMul stalls on dot-Pic spelling — wrap unit-terms with
+`show Scheme.Pic … from` in mixed equations. τ-SIDE PIPELINE NOW STRUCTURALLY
+COMPLETE: exists_kappa_dict → (officiality's locallyPrincipal = the h₁ h₂ covers,
+DIRECT) → exists_normalized_chart_dataset → KMUniqueness:264 D4-pipe → L2e. NEXT:
+the [3c-iv/L1a] joint design (div-germ of the dressed transitions vs the g_Q-quotient
+divisors — the OTHER side of U5's comparison), then L3, L5, L6, U-assembly, E5.
