@@ -167,7 +167,37 @@ theorem exists_const_mul_weilFunction
     (p : SpecPoints (projModel W) (projModelπ W) K)
     (hxp : (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) Q ≫
       baseChangeIdFstOver (modelEllipticCurve W)).left = p.1)
-    (hT : (N : ℤ) • EllipticCurve.basePointCast W (projModelPointsEquiv W K p) = 0) :
+    (hT : (N : ℤ) • EllipticCurve.basePointCast W (projModelPointsEquiv W K p) = 0)
+    -- the enriched dataset (G2′-extras): charts with section-kernel span data
+    (V : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) → (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f₁ f₂ : ∀ c, Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
+    (ch : ι' → ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+    (A : ∀ i, Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i)ˣ)
+    (zQm : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+    (hzQm : zQm ≫ pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) =
+      𝟙 (Spec (CommRingCat.of K)))
+    [QuasiCompact zQm] [IsClosedImmersion zQm]
+    (hzQfst : zQm ≫ pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = p.1)
+    (hspan₁ : ∀ c, (Scheme.Hom.ker (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K))))).ideal (V c) = Ideal.span {f₁ c})
+    (hnzd₁ : ∀ c, f₁ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
+    (hspan₂ : ∀ c, (Scheme.Hom.ker zQm).ideal (V c) = Ideal.span {f₂ c})
+    (hnzd₂ : ∀ c, f₂ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
+    (hWch : ∀ i, Wc i ≤ (V (ch i)).1)
+    (hu : ∀ i j, Nonempty ↥((Wc i ⊓ Wc j) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) →
+      ∃ (u₁ u₂ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc j)ˣ),
+        transitionUnitOfCover M Wc e i j =
+          Scheme.resUnit (inf_le_left : Wc i ⊓ Wc j ≤ Wc i) (A i) * (u₂ * u₁⁻¹) *
+            (Scheme.resUnit (inf_le_right : Wc i ⊓ Wc j ≤ Wc j) (A j))⁻¹ ∧
+        (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_left).trans (hWch i) : Wc i ⊓ Wc j ≤ (V (ch i)).1)).op (f₁ (ch i)) =
+          (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_right).trans (hWch j) : Wc i ⊓ Wc j ≤ (V (ch j)).1)).op (f₁ (ch j)) *
+            (u₁ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc j)) ∧
+        (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_left).trans (hWch i) : Wc i ⊓ Wc j ≤ (V (ch i)).1)).op (f₂ (ch i)) =
+          (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_right).trans (hWch j) : Wc i ⊓ Wc j ≤ (V (ch j)).1)).op (f₂ (ch j)) *
+            (u₂ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc j))) :
     haveI : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
       inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
     haveI : AlgebraicGeometry.IsIntegral
@@ -1191,7 +1221,37 @@ theorem torsionSplittingEval_eq_weilPairing
     (hxpS : (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P' ≫
       baseChangeIdFstOver (modelEllipticCurve W)).left = pS.1)
     (hT : (N : ℤ) • EllipticCurve.basePointCast W (projModelPointsEquiv W K p) = 0)
-    (hS : (N : ℤ) • EllipticCurve.basePointCast W (projModelPointsEquiv W K pS) = 0) :
+    (hS : (N : ℤ) • EllipticCurve.basePointCast W (projModelPointsEquiv W K pS) = 0)
+    -- the enriched dataset (G2′-extras): charts with section-kernel span data
+    (V : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) → (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f₁ f₂ : ∀ c, Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
+    (ch : ι' → ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+    (A : ∀ i, Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i)ˣ)
+    (zQm : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+    (hzQm : zQm ≫ pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) =
+      𝟙 (Spec (CommRingCat.of K)))
+    [QuasiCompact zQm] [IsClosedImmersion zQm]
+    (hzQfst : zQm ≫ pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = p.1)
+    (hspan₁ : ∀ c, (Scheme.Hom.ker (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K))))).ideal (V c) = Ideal.span {f₁ c})
+    (hnzd₁ : ∀ c, f₁ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
+    (hspan₂ : ∀ c, (Scheme.Hom.ker zQm).ideal (V c) = Ideal.span {f₂ c})
+    (hnzd₂ : ∀ c, f₂ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
+    (hWch : ∀ i, Wc i ≤ (V (ch i)).1)
+    (hu : ∀ i j, Nonempty ↥((Wc i ⊓ Wc j) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) →
+      ∃ (u₁ u₂ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc j)ˣ),
+        transitionUnitOfCover M Wc e i j =
+          Scheme.resUnit (inf_le_left : Wc i ⊓ Wc j ≤ Wc i) (A i) * (u₂ * u₁⁻¹) *
+            (Scheme.resUnit (inf_le_right : Wc i ⊓ Wc j ≤ Wc j) (A j))⁻¹ ∧
+        (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_left).trans (hWch i) : Wc i ⊓ Wc j ≤ (V (ch i)).1)).op (f₁ (ch i)) =
+          (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_right).trans (hWch j) : Wc i ⊓ Wc j ≤ (V (ch j)).1)).op (f₁ (ch j)) *
+            (u₁ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc j)) ∧
+        (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_left).trans (hWch i) : Wc i ⊓ Wc j ≤ (V (ch i)).1)).op (f₂ (ch i)) =
+          (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_right).trans (hWch j) : Wc i ⊓ Wc j ≤ (V (ch j)).1)).op (f₂ (ch j)) *
+            (u₂ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc j))) :
     (Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
         ((torsionSplittingEval (modelEllipticCurve W) hsm
           (𝟙 (Spec (CommRingCat.of K))) N Q hQ M hM Wc hWc e hnorm P' hP' :
@@ -1244,7 +1304,8 @@ theorem torsionSplittingEval_eq_weilPairing
       (𝟙 (Spec (CommRingCat.of K))) N Q hQ M hM Wc hWc e hnorm P' hP')] at h2
   -- 3. the divisor factorisation ([L1])
   obtain ⟨c, r, hc, hr, hfact⟩ := exists_const_mul_weilFunction W hsm N hNZ Q hQ
-    M hM Wc hWc e hnorm h hn hsplit c₀ p hxp hT
+    M hM Wc hWc e hnorm h hn hsplit c₀ p hxp hT V f₁ f₂ ch A zQm hzQm hzQfst
+    hspan₁ hnzd₁ hspan₂ hnzd₂ hWch hu
   -- 4. translate the factorisation and evaluate each factor
   have h7 := congrArg (HasseWeil.translateAlgEquivOfPoint W
     (EllipticCurve.basePointCast W (projModelPointsEquiv W K pS))) hfact
@@ -1342,13 +1403,44 @@ theorem torsionSplittingEval_self_eq_one
     (p : SpecPoints (projModel W) (projModelπ W) K)
     (hxp : (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) Q ≫
       baseChangeIdFstOver (modelEllipticCurve W)).left = p.1)
-    (hT : (N : ℤ) • EllipticCurve.basePointCast W (projModelPointsEquiv W K p) = 0) :
+    (hT : (N : ℤ) • EllipticCurve.basePointCast W (projModelPointsEquiv W K p) = 0)
+    -- the enriched dataset (G2′-extras): charts with section-kernel span data
+    (V : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) → (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f₁ f₂ : ∀ c, Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
+    (ch : ι' → ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+    (A : ∀ i, Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i)ˣ)
+    (zQm : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+    (hzQm : zQm ≫ pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) =
+      𝟙 (Spec (CommRingCat.of K)))
+    [QuasiCompact zQm] [IsClosedImmersion zQm]
+    (hzQfst : zQm ≫ pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = p.1)
+    (hspan₁ : ∀ c, (Scheme.Hom.ker (baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K))))).ideal (V c) = Ideal.span {f₁ c})
+    (hnzd₁ : ∀ c, f₁ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
+    (hspan₂ : ∀ c, (Scheme.Hom.ker zQm).ideal (V c) = Ideal.span {f₂ c})
+    (hnzd₂ : ∀ c, f₂ c ∈ nonZeroDivisors Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
+    (hWch : ∀ i, Wc i ≤ (V (ch i)).1)
+    (hu : ∀ i j, Nonempty ↥((Wc i ⊓ Wc j) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) →
+      ∃ (u₁ u₂ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc j)ˣ),
+        transitionUnitOfCover M Wc e i j =
+          Scheme.resUnit (inf_le_left : Wc i ⊓ Wc j ≤ Wc i) (A i) * (u₂ * u₁⁻¹) *
+            (Scheme.resUnit (inf_le_right : Wc i ⊓ Wc j ≤ Wc j) (A j))⁻¹ ∧
+        (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_left).trans (hWch i) : Wc i ⊓ Wc j ≤ (V (ch i)).1)).op (f₁ (ch i)) =
+          (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_right).trans (hWch j) : Wc i ⊓ Wc j ≤ (V (ch j)).1)).op (f₁ (ch j)) *
+            (u₁ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc j)) ∧
+        (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_left).trans (hWch i) : Wc i ⊓ Wc j ≤ (V (ch i)).1)).op (f₂ (ch i)) =
+          (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+            (homOfLE ((inf_le_right).trans (hWch j) : Wc i ⊓ Wc j ≤ (V (ch j)).1)).op (f₂ (ch j)) *
+            (u₂ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc j))) :
     (Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
         ((torsionSplittingEval (modelEllipticCurve W) hsm
           (𝟙 (Spec (CommRingCat.of K))) N Q hQ M hM Wc hWc e hnorm Q hQ :
             Γ(Spec (CommRingCat.of K), ⊤)ˣ) : Γ(Spec (CommRingCat.of K), ⊤)) = 1 := by
   rw [torsionSplittingEval_eq_weilPairing W hsm N hNZ hN0 Q hQ M hM Wc hWc e hnorm
-    h hn hsplit c₀ Q hQ p p hxp hxp hT hT]
+    h hn hsplit c₀ Q hQ p p hxp hxp hT hT V f₁ f₂ ch A zQm hzQm hzQfst
+    hspan₁ hnzd₁ hspan₂ hnzd₂ hWch hu]
   exact HasseWeil.WeilPairing.weilPairing_self W (N : ℤ) hNZ
     (EllipticCurve.basePointCast W (projModelPointsEquiv W K p)) hT
 
