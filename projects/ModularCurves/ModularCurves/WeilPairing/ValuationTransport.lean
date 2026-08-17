@@ -407,7 +407,76 @@ theorem eq_of_maximalIdealAt_le (W : WeierstrassCurve K) [W.IsElliptic]
       (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt Q :=
     ((SmoothPlaneCurve.maximalIdealAt_isMaximal _ P).eq_of_le
       (Ideal.IsMaximal.ne_top (SmoothPlaneCurve.maximalIdealAt_isMaximal _ Q)) h)
-  sorry
+  have hnetop := Ideal.IsMaximal.ne_top
+    (SmoothPlaneCurve.maximalIdealAt_isMaximal _ P)
+  have hconst : ∀ c : K, c ≠ 0 →
+      algebraMap K (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing c ∉
+        (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P := by
+    intro c hc hmem
+    exact hnetop (Ideal.eq_top_of_isUnit_mem _ hmem
+      ((IsUnit.mk0 c hc).map (algebraMap K _)))
+  have hmemQx : WeierstrassCurve.Affine.CoordinateRing.XClass
+      (⟨W⟩ : SmoothPlaneCurve K).toAffine Q.x ∈
+      (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P := by
+    rw [heq]
+    exact Ideal.subset_span (Set.mem_insert _ _)
+  have hmemPx : WeierstrassCurve.Affine.CoordinateRing.XClass
+      (⟨W⟩ : SmoothPlaneCurve K).toAffine P.x ∈
+      (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P :=
+    Ideal.subset_span (Set.mem_insert _ _)
+  have hxdiff : WeierstrassCurve.Affine.CoordinateRing.XClass
+      (⟨W⟩ : SmoothPlaneCurve K).toAffine Q.x -
+      WeierstrassCurve.Affine.CoordinateRing.XClass
+      (⟨W⟩ : SmoothPlaneCurve K).toAffine P.x =
+      algebraMap K (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing (P.x - Q.x) := by
+    have hpoly : Polynomial.C (Polynomial.X - Polynomial.C Q.x) -
+        Polynomial.C (Polynomial.X - Polynomial.C P.x) =
+        Polynomial.C (Polynomial.C (P.x - Q.x)) :=
+      (Polynomial.C_sub).symm.trans (congrArg Polynomial.C
+        ((sub_sub_sub_cancel_left _ _ _).trans (Polynomial.C_sub).symm))
+    rw [WeierstrassCurve.Affine.CoordinateRing.XClass,
+      WeierstrassCurve.Affine.CoordinateRing.XClass, ← map_sub, hpoly]
+    rfl
+  have hx : P.x = Q.x := by
+    by_contra hne
+    exact hconst (P.x - Q.x) (sub_ne_zero_of_ne hne)
+      (hxdiff ▸ Ideal.sub_mem _ hmemQx hmemPx)
+  have hmemQy : WeierstrassCurve.Affine.CoordinateRing.YClass
+      (⟨W⟩ : SmoothPlaneCurve K).toAffine (Polynomial.C Q.y) ∈
+      (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P := by
+    rw [heq]
+    exact Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
+  have hmemPy : WeierstrassCurve.Affine.CoordinateRing.YClass
+      (⟨W⟩ : SmoothPlaneCurve K).toAffine (Polynomial.C P.y) ∈
+      (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P :=
+    Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
+  have hydiff : WeierstrassCurve.Affine.CoordinateRing.YClass
+      (⟨W⟩ : SmoothPlaneCurve K).toAffine (Polynomial.C Q.y) -
+      WeierstrassCurve.Affine.CoordinateRing.YClass
+      (⟨W⟩ : SmoothPlaneCurve K).toAffine (Polynomial.C P.y) =
+      algebraMap K (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing (P.y - Q.y) := by
+    have hpoly : (Polynomial.X : Polynomial (Polynomial K)) -
+        Polynomial.C (Polynomial.C Q.y) -
+        ((Polynomial.X : Polynomial (Polynomial K)) -
+          Polynomial.C (Polynomial.C P.y)) =
+        Polynomial.C (Polynomial.C (P.y - Q.y)) :=
+      (sub_sub_sub_cancel_left _ _ _).trans
+        ((Polynomial.C_sub).symm.trans (congrArg Polynomial.C
+          (Polynomial.C_sub).symm))
+    rw [WeierstrassCurve.Affine.CoordinateRing.YClass,
+      WeierstrassCurve.Affine.CoordinateRing.YClass, ← map_sub, hpoly]
+    rfl
+  have hy : P.y = Q.y := by
+    by_contra hne
+    exact hconst (P.y - Q.y) (sub_ne_zero_of_ne hne)
+      (hydiff ▸ Ideal.sub_mem _ hmemQy hmemPy)
+  cases P with
+  | mk px py hp => cases Q with
+    | mk qx qy hq =>
+        simp only at hx hy
+        subst hx
+        subst hy
+        rfl
 
 /-- **(DIV-PIN, the affine pinning)** A generator of the maximal ideal at a point has
 principal divisor `[P₀]`: the away-nonmembership follows from the span by maximal-ideal
