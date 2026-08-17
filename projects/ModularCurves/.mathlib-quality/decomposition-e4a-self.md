@@ -1618,3 +1618,22 @@ REMAINING: [r/G-GLUE] (r_c := germ f₂ᶜ/germ f₁ᶜ; G_c := germ(h_c)·[N]^#
 overlap-agreement from germed-hsplit + 3c-iv-a; div G = [N]^*((Q)-(0)) pointwise from
 DIV-PIN + brick6) and the [L1-ASSEMBLY] (H = a·g_Q·[N]^#(r⁻¹) via L1b + the model-FF
 bridge). Then L3, L5, L6, U-assembly, E5-assembly.
+
+[r/G-GLUE DESIGN RESOLVED — NO GLUING NEEDED] (2026-08-17, cont.16): the L1-target H
+is the SINGLE germ at the generic chart (H := germ h_{c₀}) — G is never glued; the
+overlap-relations enter the POINTWISE div-computation where the unit-dressing dies at
+each ord. Cut: [G-REL] (scheme-side, buildable NOW): germ h_i · [N]♭(germ b) ·
+[N]♭(germ f₁ᶜ) · [N]♭(germ f₂ᵈ) = germ h_j · [N]♭(germ a) · [N]♭(germ f₂ᶜ) ·
+[N]♭(germ f₁ᵈ) — from hsplit germed through the L2c-reader (functionFieldMap_
+germToFunctionField + germ_res, the FieldLeaf:148-block's own sub-lemmas) + [N]♭ of
+3c-iv-a + field-algebra (division-free mul-form). [ORD-G] (the HW-side): for each
+closed point P, ord_P(H·[N]♭r_{c₀}) computed by moving to a P-covering chart-d via
+G-REL (dressing + h-units die: h_d is a UNIT-section on its open ∋ relevant points ⟹
+germ-ord 0 — the DIV-UNIT reading; a/b likewise), then ord([N]♭ r_d) = the pullback-
+ord = e_P · ord_{[N]P}(r_d) with DIV-PIN finishing. NEEDS RECON: the HW [N]-pullback-
+ord transfer (brick6_intertwining + MulByIntUnramified's ord-machinery — how HW reads
+ord of mulByInt_pullbackAlgHom-images; the e_P-ramification bookkeeping — HW's
+weilFunction_divisor consumed exactly this, mine its proof). THEN the L1-assembly:
+div(H·[N]♭r) = div(g_Q) [ORD-G vs weilFunction_divisor] ⟹ L1b ⟹ H = a·g_Q·[N]♭(r⁻¹).
+NEXT STRETCH: build [G-REL] (statements+proof, all pieces landed), recon the HW
+pullback-ord, state [ORD-G].
