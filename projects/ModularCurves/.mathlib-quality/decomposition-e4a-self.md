@@ -2358,3 +2358,17 @@ transport (pullbackCurveFunctionFieldEquiv_germ_globalTwist, PROVEN in OrdPipeli
 exists_const_mul_of_projectiveDivisorOf_eq (FieldLeaf:2340). All scheme-side
 transports PROVEN (OrdPipeline's five landed lemmas). NEXT CYCLE: recon
 kappaDivisor + kappa-def dictionaries, then state (2) with the r-construction.
+
+[ORD-G κ-DICTIONARY] (2026-08-17, cont.30o): kappa (SelfAdjointN:198) := κ_T(Q) =
+[𝒪(Q − 0)] via sectionToPicRel; kappaDivisor W P := single(P) − single(∞)
+(HasseWeil PicZero:232). So the (J₁,J₂)-pair presents 𝒪(Q−0) with J₁ ↔ the
+zero-section ideal and J₂ ↔ the Q-section ideal (through sectionToPicRel's
+construction + hM); the chart generators f₁ i / f₂ i vanish on the respective
+section loci with order pinned by the span data. The pointwise DIV-PIN species:
+at a place P over chart i, ord_P(f₂ i germ) = multiplicity of P in the Q-section
+divisor, ord_P(f₁ i) = in the zero-section divisor — state via the
+ideal-of-section ↔ maximalIdealAt dictionary (ValuationTransport :226/:279 +
+sectionToPicRel internals; recon sectionToPicRel's presentation next). Then the
+u-ratio germs (u₁ = f₁-ratio, u₂ = f₂-ratio via the G2' u-relations) carry orders
+(zero-sec vs Q-sec differences), the hsplit relation transfers along [N], and the
+per-place sum reproduces pullbackDivisor [N] (kappaDivisor T) at each w.
