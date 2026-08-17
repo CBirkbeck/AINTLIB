@@ -184,6 +184,62 @@ theorem mulByN_functionFieldMap_germ_transitionUnit
   rw [hinvj] at hg
   exact hg
 
+/-- **([N-CONJ])** The `[N]`-comparison through the pullback function-field
+identification: `pullbackCurveFunctionFieldEquiv` intertwines the scheme-level
+`[N]`-pullback on the presentation with HasseWeil's division-polynomial pullback.
+`brick6_intertwining` conjugated through the first-projection hop. -/
+theorem pullbackCurveFunctionFieldEquiv_mulByN
+    [AlgebraicGeometry.IsIntegral (projModel W)]
+    (N : ℕ) [NeZero N]
+    [Flat ((modelEllipticCurve W).mulByHom N)]
+    [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)]
+    (hn : (N : ℤ) ≠ 0)
+    (x : haveI : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+        inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+      haveI : AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+        isIntegral_pullback_id (modelEllipticCurve W)
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).functionField) :
+    haveI : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+      inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+    haveI : AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+      isIntegral_pullback_id (modelEllipticCurve W)
+    haveI : IsDominant (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N) := mulByN_id_isDominant W N
+    pullbackCurveFunctionFieldEquiv W ((mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N).functionFieldMap.hom x) =
+      HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn
+        (pullbackCurveFunctionFieldEquiv W x) := by
+  haveI hIntE : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+    inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+  haveI hInt : AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    isIntegral_pullback_id (modelEllipticCurve W)
+  haveI hDomN : IsDominant (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N) := mulByN_id_isDominant W N
+  haveI hDomH : IsDominant ((modelEllipticCurve W).mulByHom N) :=
+    mulByHom_isDominant W N
+  -- the conjugated square
+  have heq2 : inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ≫ (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N) =
+      (modelEllipticCurve W).mulByHom (N : ℤ) ≫ inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) := by
+    have hsq := EllipticCurve.mulByHom_baseChange_fst (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) (N : ℤ)
+    rw [← IsIso.inv_comp_eq, ← Category.assoc, ← IsIso.eq_comp_inv] at hsq
+    rw [← hsq]
+    rfl
+  have hcomp1 := functionFieldMap_comp (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N)
+  have hcomp2 := functionFieldMap_comp
+    ((modelEllipticCurve W).mulByHom (N : ℤ)) (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+  have hcongr := functionFieldMap_congr heq2
+  rw [hcomp1, hcomp2] at hcongr
+  have hel := congrArg CommRingCat.Hom.hom hcongr
+  have happ := congrArg (fun (φ : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).functionField →+*
+    (modelEllipticCurve W).E.functionField) => φ x) hel
+  simp only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply] at happ
+  -- happ : (inv fst)♭ ([N]♭ x) = mulByHom♭ ((inv fst)♭ x)
+  have hpe : ∀ y : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).functionField,
+      pullbackCurveFunctionFieldEquiv W y =
+      EllipticCurve.projModelFunctionFieldEquiv W
+        ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).functionFieldMap.hom y) := fun y => rfl
+  rw [hpe, hpe, happ]
+  exact brick6_intertwining W N hn ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).functionFieldMap.hom x)
+
 /-- **([G-REL-3])** A comparison unit relating two sections along restrictions is, in
 the function field, the ratio of their germs: from `a|ₒ = b|ₒ · u` on the overlap,
 `germ a = germ b · germ u`. Generic over any integral scheme. -/
