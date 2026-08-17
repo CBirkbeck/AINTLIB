@@ -2804,3 +2804,71 @@ NEXT: [G-REL] (cont.30w — the per-chart H-germ identity; u-germs = generator r
 constructive r := c₀-generator-ratio) → [ORD-G] (Finsupp.ext; chart dichotomy feeds
 THIS SEC-ORD result; κ-orientation watch cont.30p) → [L1-assembly] (FieldLeaf:2340) →
 L3/L5 activate → E4a-diagonal → leaves A+B.
+
+
+## cont.30am — ORD-G/L1 INVENTORY (session 11, post-SEC-ORD)
+
+**STOCKED AND AXIOM-CLEAN (all verified via #print axioms this session):**
+- `exists_const_mul_of_projectiveDivisorOf_eq` (FieldLeaf) ✓
+- `HasseWeil.WeilPairing.DivisorPullback.projectiveDivisorOf_pullback_eq_pullbackDivisor`
+  (needs hcore + [Finite ker]) ✓
+- `HasseWeil.WeilPairing.DivisorPullback.projOrdTransport_mulByInt` ✓ (hcore discharged!)
+- `HasseWeil.WeilPairing.weilFunction_divisor_eq_pullbackDivisor_kappaDivisor` ✓
+- `brick6_intertwining` (MulByHomDegree:1146) — THE L4-iii [N]-COMPARISON IS PROVEN:
+  projModelFFEquiv ∘ (mulByHom N).functionFieldMap = mulByInt_pullbackAlgHom ∘ projModelFFEquiv,
+  modulo instances [Flat] [IsFinite] [LocallyOfFinitePresentation] on mulByHom N (check their
+  discharge sites — the KM-engine receipts should provide them; grep brick6 consumers).
+- SEC-ORD `ord_P_germ_sectionKer_generator` ✓ (this session).
+- DIV-PIN `divisorOf_algebraMap_eq_single_of_span` (ValuationTransport:483) ✓ (session 8).
+- G2′ `exists_normalized_chart_dataset_perChart` (GlueDataset:798) — its ∃-output ALREADY
+  CARRIES THE SPAN-SUPPLY: (V, f₁, f₂ span-generators of J₁/J₂ per chart c) + (ch : chart
+  assignment) + (A i unit-dressings) + hnorm + hWch + per-overlap (u₁, u₂) with
+  t_ij = A_i·(u₂u₁⁻¹)·A_j⁻¹ AND res f₁(ch i) = res f₁(ch j)·u₁, res f₂(ch i) = res f₂(ch j)·u₂.
+- kappa-structure: kappa Q = (sectionToPicRel …).1 = picRelProj (picClass(sectionDivisor Q-sec)
+  · picClass(sectionDivisor zero-sec)⁻¹) (SelfAdjointN:198 + DivisorClass:180);
+  sectionDivisor.ideal = Scheme.Hom.ker z.
+
+**THE FOUR MISSING PIECES for the L1 sorry (OrdPipeline:188):**
+- **A [L1-SIG]**: extend exists_const_mul_weilFunction's hypotheses with the G2′-extras
+  (V, f₁, f₂, ch, A, span/nonzd-facts, hWch, u-facts) + the two section-morphism span-links
+  (zQm := Q-composite section, z0m := baseChangeZero, with (ker zQm).ideal (V c) = span {f₁-or-f₂}
+  — κ-ORIENTATION (cont.30p): which of J₁/J₂ is the Q-side at the E4a-instantiation, fix when
+  deriving e_dict from hM). Thread the SAME extras through the :1246-consumer
+  (torsionSplittingEval→weilPairing theorem — it takes the same abstract dataset and passes it
+  to L1 verbatim). The E4a-call-site later invokes G2′ to supply everything.
+- **B [G-REL]**: the germ-ord decomposition at a place P over chart i: from hsplit (j := c₀) +
+  germToFunctionField-hops: germFF(h c₀) = germFF(h i) · (mulByN).functionFieldMap-of-FF-germ
+  (tUOC i c₀)⁻¹ [needs functionFieldMap for mulByN: IsDominant ✓ mulByHom_isDominant exists
+  (MulByHomDegree, used at :1520)]; then tUOC-decomposition (G2′-u-facts) + ord-additivity +
+  sectionUnits-elements have ord 0 at… (hn/hnorm-facts: h i is a UNIT on [N]⁻¹(Wc i) ⟹ its
+  FF-germ has ord_P 0 for P over chart i — germ-of-unit is stalk-unit ⟹ RingedSpace.mem_basicOpen-
+  style ⟹ ord 0 via :309-shape; A i similarly on Wc i) + u-germs = f-generator ratios (the
+  G2′-u-relations at germ level) ⟹ ord_P(H_HW) = ord-difference formula in SEC-ORD-terms.
+- **C [PT-DICT]**: the point dictionary: SEC-ORD's indicator [(inv fst)(zChartPoint P) = z.base
+  default] ↔ the HW-arithmetic [N]•P-HW = T-shape. Ingredients: projModelPointsEquiv_zsmul
+  (MulByHomDegree:75), the p/hxp-pattern (overPoint-composite = p.1), fst-vs-mulByN compat
+  (mulByN := (E.baseChange t).mulByHom N; need fst ∘ mulByN-pullback = E-side mulByHom ∘ fst —
+  grep CurveNaturality/pastingMap_mulByN + KMPairing mulByN_comp_snd :342). Also
+  pullbackDivisor_apply's exact fibre-shape (DivisorPullback — read it) to match the
+  Finsupp.ext-pointwise target.
+- **D [∞-ORD]**: the ∞-place: zChartPoint/maximalIdealAt only cover AFFINE P (∞ ∉ zChart).
+  The HW-∞ corresponds to the ZERO-SECTION image; div-H's ∞-coefficient = the zero-section-chart
+  SEC-ORD read through the ∞-dictionary (kappaDivisor T = single T − single ∞?? — CHECK
+  kappaDivisor's def (HasseWeil PicZero:232) + how DivisorPullback handles ∞
+  (inftyOrdTransport_mulByInt)). Possibly needs an ∞-analogue of SEC-ORD on the y-chart
+  (projModelYChart machinery in TheoremOfSquareField — mem_basicOpen_iff_notMem_primeIdealOf
+  came from there, so the y-chart affine-dictionary exists).
+
+**[R-DEF]**: r := transported (f-ratio at c₀): r := projEquiv-image of germ-ratio — div r via
+DIV-PIN needs GLOBAL maximalIdealAt-spans — but f₁/f₂ c₀-spans are CHART-spans (V c₀) — the
+divisorOf-single :483 needs the global span?? NO — re-check :483's exact hypotheses; if global,
+r's div needs its own pointwise computation (same SEC-ORD machinery at the two sections,
+applied at the c₀-chart data — r = f₂c₀-germ/f₁c₀-germ with div = [P_Q]−[P_0] pointwise
+by SEC-ORD at zQm and z0m!) — NO new machinery: div r (w) = SEC-ORD-zQ-indicator −
+SEC-ORD-z0-indicator at w for w over V c₀; away from V c₀ use the u-relations to re-express —
+hmm, r is ONE global FF-element; its ord at P NOT over V c₀ still needs computing — the
+u-relations give f-c₀-germ = f-(ch i)-germ · u-germ⁻¹-ish beyond the overlap ⟹ ord-formula
+everywhere ✓ same G-REL mechanism. DESIGN [R-DIV] alongside B.
+
+**ORDER OF WORK**: A (mechanical threading; unblocks stating B/C/D against the enriched
+signature) → B+R-DIV (the germ-ord engine) → C → D → [L1-END assembly].
