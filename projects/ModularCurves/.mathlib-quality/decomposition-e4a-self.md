@@ -1822,3 +1822,35 @@ L2g-vocabulary SpecPoints/projModelPointsEquiv/basePointCast + killedBy-transpor
 modelEllipticCurve-of-its-Weierstrass-model transport — U1/U2-species — plus the
 alg-closure descent Γ-injectivity per the U5-plan). Remaining sorries repo-wide: STILL
 the 3 (SLOT-SQ, G2′, ORD-G).
+
+[SLOT-SQ RECON — THE μ-LIBRARY DISCOVERY] (2026-08-17, cont.25): the tree contains a
+COMPLETE μ-calculus layer the cont.20 plan did not account for:
+- PoleSheaf:1940-2100: monoidalUnitObjIso (𝟙_ ≅ unitObj, DEFINITE — sheafifyValIso),
+  monoidalTensorObjIso (M ⊗ N ≅ tensorObj M N, DEFINITE — the tensorObj-vs-⊗ bridge!!),
+  tensorSection (pure-tensor sections of M ⊗ N), unitObjTensorIso + MonObj-structure.
+- PoleSheaf:2606/2623: pullbackTensorTrivialization_eq_monoidal +
+  pullbackComp_tensorTrivialization — a monoidal comparison α between composite
+  pullbacks (with [α.hom.IsMonoidal] — SUPPLIED by pullbackComp_hom_isMonoidal,
+  PullbackCompMonoidal:1264) PRESERVES canonical tensor-frames. THE Comp-leg tensor
+  transport, landed.
+- PullbackTensorSection.lean: the ELEMENT-FORMULA LIBRARY — pullback_μ_formula,
+  pullback_μ_unit_tensorSection, composite_pullback_μ_tensorSection (μ of composite
+  pullbacks on tensorSections, via δ_μ-cancellation + sheafification_map_pullback_δ
+  species), restrictFunctorIsoPullback_hom/inv_unit_app_apply,
+  restrictMonoidalTensorIso_* (restrict-side monoidal-tensor transport!),
+  tensorSection_map_restrictIso, overTrivializationSection_tensor_one,
+  pullback_monoidalTensorObjIso_inv_unit.
+REVISED SLOT-SQ ROUTE: (1) bridge the slot's pieces to μ-vocabulary — the missing
+bridges are tensorObjUnitIso-vs-(monoidalTensorObjIso + ρ/λ + monoidalUnitObjIso),
+tensorObjCongr-vs-⊗ᵢ-conjugation (both plausibly one-line via monoidalTensorObjIso-
+naturality monoidalTensorObjIso_inv_natural [PoleSheaf:5218] + SectionContraction's
+monoidalTensorObjIso_comp_* lemmas), and pullbackTensorObjIsoOfIsOpenImmersion-vs-μIso
+(BOTH are pb(M⊗N)-vs-pbM⊗pbN comparisons — compare via the tensorSection/adjUnit-image
+elements + sheafification-adjunction-injectivity, the composite_pullback_μ_tensorSection
+proof-pattern); (2) then SLOT-SQ = the μ-square from pullbackComp_hom_isMonoidal
+(NatTrans.IsMonoidal) + pullbackCongr-subst + Functor.Monoidal unitor-coherences.
+ALTERNATIVE (possibly cheaper): redefine the ν-characterisation vehicle at the
+μ-vocabulary from the start and re-prove N2-cancel/read-off there — NO: N2/read-off
+are landed at the tensorObj-spelling; bridge instead. START next quantum: grep
+SectionContractionLocal:32/201 (monoidalTensorObjIso_comp_tensorUnitStructureIso /
+_unitStructureTensorIso — likely EXACTLY the tensorObjUnitIso-bridge!).
