@@ -61,7 +61,20 @@ theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq 
       𝟙 _ ≫ (modelEllipticCurve W).zero :=
     Point.mapIso_killedBy Φ hx
   rw [← weilPairingEval_mapIso Φ x x hx hx hx' hx']
-  -- stages 2–5 at the model
+  -- stage 2: the model-side instances
+  haveI hIntP : AlgebraicGeometry.IsIntegral (projModel W) := isIntegral_projModel_u W
+  haveI hFlat : Flat ((modelEllipticCurve W).mulByHom N) :=
+    (modelEllipticCurve W).mulByHom_flat N
+  haveI hFin : IsFinite ((modelEllipticCurve W).mulByHom N) :=
+    (modelEllipticCurve W).mulByHom_isFinite N
+  haveI hLofp : LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N) :=
+    (modelEllipticCurve W).mulByHom_locallyOfFinitePresentation N
+  haveI hbcEll : ((W.baseChange K).toAffine).IsElliptic := by
+    rw [EllipticCurve.baseChange_self_eq W]
+    infer_instance
+  haveI hDed : IsDedekindDomain
+      (⟨W⟩ : HasseWeil.Curves.SmoothPlaneCurve K).CoordinateRing := inferInstance
+  -- stages 3–5 at the model
   sorry
 
 end EllipticCurve
