@@ -2872,3 +2872,12 @@ everywhere ✓ same G-REL mechanism. DESIGN [R-DIV] alongside B.
 
 **ORDER OF WORK**: A (mechanical threading; unblocks stating B/C/D against the enriched
 signature) → B+R-DIV (the germ-ord engine) → C → D → [L1-END assembly].
+
+**[N]-COMPAT PIN (cont.30am addendum)**: `EllipticCurve.mulByHom_baseChange_fst E t (N : ℤ) :
+mulByN E t N ≫ pullback.fst E.π t = pullback.fst E.π t ≫ E.mulByHom (N : ℤ)` EXISTS (used in
+CurveNaturality.pastingMap_mulByN:77). Consequences: (i) PB-side dominance of mulByN derivable
+(mulByN = fst ≫ mulByHom ≫ inv fst from the square + fst iso; dominant-composite); (ii) the
+C-dictionary's scheme-side [N]-to-E-side hop is this square; (iii) G-REL-1's
+(mulByN).functionFieldMap conjugates to (mulByHom).functionFieldMap via functionFieldMap_comp
+on the square, meeting brick6 on the E-side. Also `baseChangeZero_pastingMap` (zero-sections
+paste) at CurveNaturality:63. mulByHom takes the ℤ-arg (N : ℤ)-coercion.
