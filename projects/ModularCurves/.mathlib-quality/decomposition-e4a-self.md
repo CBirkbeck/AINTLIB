@@ -1637,3 +1637,15 @@ weilFunction_divisor consumed exactly this, mine its proof). THEN the L1-assembl
 div(H·[N]♭r) = div(g_Q) [ORD-G vs weilFunction_divisor] ⟹ L1b ⟹ H = a·g_Q·[N]♭(r⁻¹).
 NEXT STRETCH: build [G-REL] (statements+proof, all pieces landed), recon the HW
 pullback-ord, state [ORD-G].
+
+★ [G-REL PROVEN] (2026-08-17, cont.17): germ_split_transition_rel (GlueDataset,
+axiom-clean) — germ(h_i)·τ♭(germ b·f₁ᶜ·f₂ᵈ) = germ(h_j)·τ♭(germ a·f₂ᶜ·f₁ᵈ) from
+hsplit + the dressed data. Proof-recipe: inverse-free units-massage (map-t·hj = hi via
+inv_mul_cancel_right), congrArg-germ + Units.coe_map/MonoidHom.coe_coe simp, the
+functionFieldMap_germToFunctionField naturality, typed-have realignment of the
+coe-spellings (ConcreteCategory-hom-application vs FunLike-↑ atoms differ for ring!),
+goal-side map_mul split, and the SIGNED linear_combination (hj·hτ − τblock·hval' —
+compute the combination by hand, the sign matters). SCHEME-SIDE L1a-TAIL COMPLETE.
+REMAINING: [ORD-G] — the HW-side pointwise div-computation (mine HasseWeil's
+weilFunction_divisor proof for the [N]-pullback-ord reading + the e_P-ramification;
+consume G-REL + DIV-PIN + DIV-UNIT); then [L1-ASSEMBLY]; then L3/L5/L6/U/E5.
