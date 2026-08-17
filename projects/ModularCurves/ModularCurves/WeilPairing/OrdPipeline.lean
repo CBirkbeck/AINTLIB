@@ -1774,6 +1774,29 @@ private theorem divH_affine_arm
   · rw [hNP] at htrY
     sorry
   · rw [hNP] at htrY
+    have hQmem : ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W ⟨x', y', hxy'⟩) ∈
+        (Wc i : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) := by
+      have hPT2 := mulByHom_base_zChartPoint_of_smul W N P (hxy' := hxy') hNP
+      have heq2 : inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ≫ (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N) =
+          (modelEllipticCurve W).mulByHom (N : ℤ) ≫ inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) := by
+        have hsq := EllipticCurve.mulByHom_baseChange_fst (modelEllipticCurve W)
+          (𝟙 (Spec (CommRingCat.of K))) (N : ℤ)
+        rw [← IsIso.inv_comp_eq, ← Category.assoc, ← IsIso.eq_comp_inv] at hsq
+        rw [← hsq]
+        rfl
+      have h1 : (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N).base (((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W P)) ∈ (Wc i) := hPi
+      have h2 := congrArg
+        (fun (m : (modelEllipticCurve W).E ⟶ (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) => m.base (zChartPoint W P))
+        heq2
+      simp only at h2
+      rw [show ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ≫ (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N)).base (zChartPoint W P) =
+          (mulByN (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N).base (((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W P)) from rfl,
+        show ((modelEllipticCurve W).mulByHom (N : ℤ) ≫ inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base
+            (zChartPoint W P) =
+          ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (((modelEllipticCurve W).mulByHom (N : ℤ)).base
+            (zChartPoint W P)) from rfl] at h2
+      rw [h2, hPT2] at h1
+      exact h1
     sorry
 
 open scoped Classical in
