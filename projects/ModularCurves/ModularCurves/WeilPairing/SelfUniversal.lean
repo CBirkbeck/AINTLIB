@@ -35,7 +35,7 @@ case, per the plan validated 2026-08-10 (ChatGPT 5.6 consultation; see
 
 universe u
 
-open AlgebraicGeometry CategoryTheory Limits
+open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 
 namespace ModularCurves
 
@@ -54,10 +54,24 @@ noncomputable def Point.mapIso {E F : EllipticCurve S} (φ : E.asOver ≅ F.asOv
 
 /-- Kill-by-`N` transports along a pointed (monoid) isomorphism:
 `mulByHom_comp_left_of_isMonHom` conjugates the `[N]`s. -/
+theorem zero_comp_left_of_isMonHom {E F : EllipticCurve S}
+    (φ : E.asOver ⟶ F.asOver) [IsMonHom φ] :
+    E.zero ≫ φ.left = F.zero := by
+  have h2' : ((𝟙_ (Over S)).hom ≫ E.zero) ≫ φ.left = (𝟙_ (Over S)).hom ≫ F.zero := by
+    have h1 : η[E.asOver] ≫ φ = η[F.asOver] := IsMonHom.one_hom φ
+    have h2 := congrArg CommaMorphism.left h1
+    simp only [Over.comp_left] at h2
+    rw [← E.one_eq_zero, ← F.one_eq_zero]
+    exact h2
+  simpa using h2'
+
 theorem Point.mapIso_killedBy {E F : EllipticCurve S} [IsLocallyNoetherian S]
     (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {T : Scheme.{u}} {g : T ⟶ S}
     {N : ℕ} {x : E.Point g} (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
-    (Point.mapIso φ x).1 ≫ F.mulByHom N = g ≫ F.zero := by sorry
+    (Point.mapIso φ x).1 ≫ F.mulByHom N = g ≫ F.zero := by
+  show (x.1 ≫ φ.hom.left) ≫ F.mulByHom N = g ≫ F.zero
+  rw [Category.assoc, ← mulByHom_comp_left_of_isMonHom E F φ.hom (N : ℤ),
+    ← Category.assoc, hx, Category.assoc, zero_comp_left_of_isMonHom φ.hom]
 
 /-- **(U1, the transport theorem — `φ`-sibling of the base-change naturality)** The
 pairing is invariant under pointed isomorphisms of elliptic records over the same
