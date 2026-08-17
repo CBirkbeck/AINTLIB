@@ -1448,6 +1448,19 @@ private theorem translateByPoint_base_zChartPoint_of_add_zero
   rw [hcomp2]
   exact hSpt
 
+/-- **([TAU-ISO])** `translateByPoint` is an isomorphism (hence dominant): it is the
+`.left` of the translation automorphism. -/
+private theorem isIso_translateByPoint
+    (P' : ((modelEllipticCurve W).baseChange (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K)))) :
+    IsIso (translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P') := by
+  show IsIso (((modelEllipticCurve W).baseChange (𝟙 (Spec (CommRingCat.of K)))).translateBy
+    (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P')).left
+  rw [show ((modelEllipticCurve W).baseChange (𝟙 (Spec (CommRingCat.of K)))).translateBy
+      (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P') =
+    (((modelEllipticCurve W).baseChange (𝟙 (Spec (CommRingCat.of K)))).translateByIso
+      (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P')).hom from rfl]
+  infer_instance
+
 /-- **([U-ORD0])** Unit sections have order zero: the transported function-field germ
 of a unit of `Γ(U)` has `ord_P = 0` at every place whose scheme point lies over `U`.
 Mirrors the SEC-ORD S1–S3 chain for the unit and its inverse; the product of the two
