@@ -2599,3 +2599,30 @@ ord(product) adds; the file's SmoothPlaneCurve.ord_P-API — check add-lemmas), 
 denominator ord-0 (s ∉ maximalIdealAt: hPs means the point is in D(s) ⟹ s
 invertible at P — the membership-bridge через the zChart-dictionary), and the
 f₀-dichotomy (ON: hspan-transport; OFF: :309).
+
+[SEC-ORD S1-S2c LANDED] (2026-08-17, cont.30ae): inside ord_P_germ_sectionKer_generator:
+h1 (fst-hop) + hPz + the ⟨s, hsle, hPs⟩-shrink + hNeD/hNeV'sch instances + h2
+(germ-restriction to D(s) via presheaf.germ_res_apply — the |_ₗ⟪⟫ notation is scoped
+in TheoremOfSquareField, use the primitive). REMAINING [S3+dichotomy]: (i) the
+Away-representation: haveI := hZaff.isLocalization_basicOpen s (Γ(D(s)) =
+Localization.Away (of Γ(zChart))); obtain ⟨⟨f₀, n⟩, hrep⟩ := IsLocalization.Away.surj
+s (res-to-D(s)-of-transported-f) — hrep : res-x · s^n-image = f₀-image; (ii) apply
+germToFunctionField-D(s) to hrep + map_mul + the zChart-germ-reads (germ-D(s) of a
+res-from-zChart = germ-zChart via germ_res_apply again; then GERM-Z → algebraMap
+CoordRing forms) ⟹ germ-x · algebraMap(s')^n = algebraMap(f₀') in the FF; (iii)
+ord_P both sides: ord-additive (the ord_P of the DVR-valuation — find/state the
+mul-add lemma: SmoothPlaneCurve.ord_P-API grep: ord_P_mul?? — HasseWeil has
+ord_P-arithmetic in the divisor files — projectiveDivisorOf is Finsupp-of-ord ⟹
+ord_P_mul exists-or-derive from Valuation.map_mul + the unzero-plumbing); s'-ord-0
+via :309-shape (s' ∉ maximalIdealAt P: P ∈ D(s) ⟹ s invertible in the stalk ⟹ the
+CoordRing-transport s' has nonzero eval — the zChartMaximalIdeal-membership-bridge:
+s ∉ zChartMaximalIdeal W P ⟺ point-in-D(s) — a small bridge-lemma [D-MEM] to state:
+zChartPoint W P ∈ basicOpen s ⟺ s ∉ zChartMaximalIdeal W P — via fromSpec/basicOpen
+membership = not-in-the-prime, standard AffineScheme API); ⟹ ord(germ-x) = ord(f₀');
+(iv) the f₀'-dichotomy: ON (point = section-point): the hspan-transport-chain
+pins f₀' up to a unit times the maximal-ideal generator ⟹ ord 1 — the span-supply:
+hspan + ker_apply + the Away-localization of the kernel + hrep — the algebra:
+localized-J at the point = span(f-image) = span(f₀'-image·s^-n) ⟹ f₀'-spans ⟹
+RP-4a-core; OFF: f₀'-eval ≠ 0 at P (else f-vanishes at P through hrep with s-unit ⟹
+P in the kernel-locus = the section point, contra) ⟹ :309. Each (iii)/(iv)-piece a
+private lemma per the budget rule.
