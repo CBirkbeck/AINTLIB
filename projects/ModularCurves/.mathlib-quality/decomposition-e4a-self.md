@@ -1872,3 +1872,36 @@ SLOT-SQ = unitor-bridge + congr-bridge + μ-BRIDGE + pullbackComp_hom_isMonoidal
 + pullbackCongr-subst + Functor.Monoidal coherences. NOTE: several needed lemmas are
 `private` in PoleSheaf/SectionContractionLocal — copy-or-deprivatise as producer-legal
 inline copies (the KMDataset-inlining precedent).
+
+[mu-BRIDGE EXECUTION STATE] (2026-08-17, cont.26): pullbackTensorObjIsoOfIsOpenImmersion
+_eq_mu is ~90% proven in NativeRestriction: the double-adjunction transposition entry
+(pbAdj.homEquiv-injective + shAdj.homEquiv-injective — the tensorObj-source is accepted
+as a sheafification-image DEFINITIONALLY), tmul-induction (zero: map_zero×2; add:
+simp only [map_add, hs, ht] — rw-form STORMS there), the hcollapse-rfl (the double-unit
+collapse is rfl; consume via refine (hcollapse _ _).trans (Eq.trans ?_ (hcollapse _ _
+).symm) — rw does NOT match its spelling), THE RHS-CHAIN PROVEN (hR1 := adjUnit-
+naturality congrArg at the sh-unit image [the private pullback_monoidalTensorObjIso_
+inv_unit argument inlined]; hR2 := pullback_δ_unit_tensorSection [PUBLIC,
+PullbackTensorSection:464]; hR3 := iso_inv_hom_app_applyT-fold of tensorSection-def;
+hRHS assembled via an rfl-hsplit + rw-chain), THE LHS-WALK PROVEN (hL1 :=
+restrictFunctorIsoPullback_inv_unit_app_apply [:531]; hL2 := sheafifyValIso_inv_app_
+apply [PullbackTensorGeneral:1433]; hres := unit_app_app-rfl + naturality_apply.symm
+[orientation: phi-tgt(M-map) = N-map(phi-src)] + tensorObj_map_tmul [typed-have
+realignment — rw storms on the (𝟭.obj)-clothing]; hfwd/hL3 via NEW small-binder
+micro-lemmas sheafificationMap_app_unit + iso_inv_app_of_hom_app + the IsIso-instance
+from sheafificationW_pushforward_unit_tensor + sheafificationW_iff; hL4 same pattern;
+hL4b := rfl at show-clothed PF-carriers [pushforwardTensorIso IS literal on tmuls];
+hL5 via NEW micro-lemma tensorObjCongr_hom_app_unit_tmul [uses the project
+tensorHom_app_tmul (T := Y.sheaf.obj)-named-args; the mathlib-erw-route storms] +
+hfac-retypes at the show-spelling). REMAINING: the ASSEMBLY (chain hstep₄ + hL4b +
+the PF-vs-restrict hcross + hL5 + a final composite-split-rfl into the goal): the
+hL4b-congr/composed-instance elaborations WHNF-STORM on the pushforward-tensor-carrier
+crossings (tried: pinned-domain congrArg, w := _ inference, a composed micro-lemma
+sheafificationMap_app_unit_eq — all storm at the pfTI-typed-over-(T⋙forget₂)-clothing
+vs Y.ringCatSheaf.obj-clothing unification). NEXT IDEAS: (a) hfinal-direct: prove
+e5b-app(hstep₄-RHS) = target with the INNER at PRESHEAF-level only (⊗ₘ-pair-app(
+pfTI.inv-app W3) = pbUnit-tmul via tensorHom_app_tmul + hfacs — no sheaf-crossings),
+then final := split-rfl.trans (congrArg-e5b-of-hstep₄).trans hfinal; (b) restate
+hL4b/pfTI-pieces at the (T ⋙ forget₂)-clothing throughout; (c) a clothing-crossing
+rfl-have at the PRESHEAF-map-level g-position. All the landed micro-lemmas are
+axiom-clean and reusable.
