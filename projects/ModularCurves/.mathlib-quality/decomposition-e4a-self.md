@@ -2626,3 +2626,18 @@ localized-J at the point = span(f-image) = span(f₀'-image·s^-n) ⟹ f₀'-spa
 RP-4a-core; OFF: f₀'-eval ≠ 0 at P (else f-vanishes at P through hrep with s-unit ⟹
 P in the kernel-locus = the section point, contra) ⟹ :309. Each (iii)/(iv)-piece a
 private lemma per the budget rule.
+
+[SEC-ORD S3 LANDED] (2026-08-17, cont.30af): hAway (isLocalization_basicOpen) + xD-set
++ hrep (Away.sec_spec: xD · alg(s^n) = alg(f₀), n := (sec s xD).2, f₀ := (sec s xD).1)
+all green. NEXT [S3b]: apply germToFunctionField-D(s) to hrep (map_mul) and identify
+germ-of-algebraMap-Γ(zChart)-elements: the Away-algebraMap IS the res-map from
+Γ(zChart) (RingHom.algebraMap_toAlgebra via basicOpenSectionsToAffine — check
+defeq or find the compat lemma), then germ-D(s)∘res-zChart = germ-zChart
+(germ_res_apply) → GERM-Z gives algebraMap-CoordRing forms:
+FF-eq: (germ xD) · alg(s')ⁿ = alg(f₀') with s' := coordRingToZSection.symm s,
+f₀' := …symm f₀. THEN [S4] ord_P both sides: need ord_P-mul/pow-additivity — grep
+SmoothPlaneCurve.ord_P arithmetic (ord_P_mul/ord_P_pow — HasseWeil divisor files;
+projectiveDivisorOf-additivity exists since divisors add — find the primitive);
+s'-ord-0 via the [D-MEM] bridge (hPs : zChartPoint ∈ D(s) ⟹ s ∉ zChartMaximalIdeal
+⟹ s' ∉ maximalIdealAt via the Ideal.map-roundtrip :43) + :309; conclude
+ord(germ-x) = ord(alg f₀'). [S5] the dichotomy on f₀' (cont.30ae-(iv)).
