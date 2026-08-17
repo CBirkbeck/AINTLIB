@@ -63,6 +63,44 @@ noncomputable def restrictTransportSection {V W : X.Opens} (hWV : W ≤ V) (P : 
           ((Scheme.Modules.pullback V.ι).obj P)).val.app
           (Opposite.op (⊤ : V.toScheme.Opens)) x)))
 
+/-- **([NR-ext])** A hom out of the unit sheaf of modules is determined by its value at
+the `⊤`-section `1`: the section it corresponds to under `unitHomEquiv` is res-compatible,
+so its `⊤`-value pins every value. -/
+theorem unit_hom_ext {Y : Scheme.{u}} {N : Y.Modules} (f g : unitObj Y ⟶ N)
+    (h : f.val.app (Opposite.op (⊤ : Y.Opens))
+        (show Y.presheaf.obj (Opposite.op (⊤ : Y.Opens)) from 1) =
+      g.val.app (Opposite.op (⊤ : Y.Opens))
+        (show Y.presheaf.obj (Opposite.op (⊤ : Y.Opens)) from 1)) : f = g := by
+  apply (SheafOfModules.unitHomEquiv N).injective
+  refine PresheafOfModules.sections_ext _ _ (fun U => ?_)
+  have hf := PresheafOfModules.sections_property ((SheafOfModules.unitHomEquiv N) f)
+    (X := Opposite.op (⊤ : Y.Opens)) (Y := U) (homOfLE le_top).op
+  have hg := PresheafOfModules.sections_property ((SheafOfModules.unitHomEquiv N) g)
+    (X := Opposite.op (⊤ : Y.Opens)) (Y := U) (homOfLE le_top).op
+  rw [← hf, ← hg]
+  exact congrArg _ h
+
+/-- **([NR-ots])** The open-restriction of an `openTopSection` along `W ≤ V` is the
+`openTopSection` of the restricted section: the two cast-paths from `Γ(X, V)` to
+`Γ(W, ⊤)` agree. -/
+theorem openTopSection_homOfLE {X : Scheme.{u}} {V W : X.Opens} (hWV : W ≤ V)
+    (htop : (⊤ : W.toScheme.Opens) = (X.homOfLE hWV) ⁻¹ᵁ (⊤ : V.toScheme.Opens))
+    (r : Γ(X, V)) :
+    W.toScheme.presheaf.map (eqToHom htop).op
+        ((Scheme.Hom.app (X.homOfLE hWV) (⊤ : V.toScheme.Opens)).hom
+          (Scheme.Modules.openTopSection V r)) =
+      Scheme.Modules.openTopSection W (X.presheaf.map (homOfLE hWV).op r) := by
+  simp only [Scheme.Modules.openTopSection, Scheme.Opens.ι_appIso, Iso.refl_hom,
+    Scheme.homOfLE_app]
+  rw [show W.toScheme.presheaf.map (eqToHom htop).op =
+    X.presheaf.map (W.ι.opensFunctor.map (eqToHom htop)).op from rfl]
+  simp only [← ConcreteCategory.comp_apply, ← Functor.map_comp, ← op_comp]
+  simp only [Category.comp_id, Category.id_comp, ← Functor.map_comp, ← op_comp]
+  exact congrArg
+    (fun (q : (W.ι ''ᵁ (⊤ : W.toScheme.Opens) : X.Opens) ⟶ V) =>
+      (ConcreteCategory.hom (X.presheaf.map q.op)) r)
+    (Subsingleton.elim _ _)
+
 /-- **([NR-1], the brick)** The `ν`-comparison map is natural under the open-restriction
 transport at `⊤`-sections: evaluating the `W`-level `ν` on a transported `V`-section is
 the scheme-restriction of the `V`-level `ν`-value. -/

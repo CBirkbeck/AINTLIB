@@ -1,1 +1,1 @@
-FOCUS: [NR-0] recon — read nu-def + read-off + injectivity + restrictTrivialization exact statements (FieldLeaf ~1452-1700, TrivializationRestriction 701/814), then state+prove NR-1 nu-RES
+FOCUS: [NR] helpers build (unit_hom_ext + openTopSection_homOfLE), then NR-2 assembly, then NR-1 brick
