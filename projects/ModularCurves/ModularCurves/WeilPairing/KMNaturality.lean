@@ -1642,9 +1642,21 @@ theorem torsionSplittingEval_mapIso {E F : EllipticCurve S}
         (hsplit i j))).trans ?_)
     refine ((congrArg (Scheme.resUnit _) (map_mul _ _ _)).trans ?_)
     refine ((map_mul _ _ _).trans ?_)
+    have hVi : mulByN E g N ⁻¹ᵁ ((pullbackMapIso φ g).hom ⁻¹ᵁ W i) ⊓ mulByN E g N ⁻¹ᵁ ((pullbackMapIso φ g).hom ⁻¹ᵁ W j) ≤
+        (pullbackMapIso φ g).hom ⁻¹ᵁ (mulByN F g N ⁻¹ᵁ W i ⊓ mulByN F g N ⁻¹ᵁ W j) :=
+      le_of_eq (by exact mulByN_preimage_pullbackMapIso φ g N (W i ⊓ W j))
     refine congrArg₂ (· * ·) ?_ ?_
-    · sorry
-    · sorry
+    · exact resUnit_unitsMap_app_resUnit ((pullbackMapIso φ g).hom)
+        (inf_le_left : mulByN F g N ⁻¹ᵁ W i ⊓ mulByN F g N ⁻¹ᵁ W j ≤ mulByN F g N ⁻¹ᵁ W i)
+        hVi (le_of_eq (mulByN_preimage_pullbackMapIso φ g N (W i)))
+        inf_le_left (h i)
+    · refine ((congrArg (Scheme.resUnit _) (map_inv _ _)).trans ?_)
+      refine ((map_inv _ _).trans ?_)
+      refine congrArg (·⁻¹) ?_
+      exact resUnit_unitsMap_app_resUnit ((pullbackMapIso φ g).hom)
+        (inf_le_right : mulByN F g N ⁻¹ᵁ W i ⊓ mulByN F g N ⁻¹ᵁ W j ≤ mulByN F g N ⁻¹ᵁ W j)
+        hVi (le_of_eq (mulByN_preimage_pullbackMapIso φ g N (W j)))
+        inf_le_right (h j)
   -- the value condition, read through the point crossing
   have hC : ∀ i, Scheme.resUnit
       (le_top : (Pt.1 : T ⟶ pullback E.π g) ⁻¹ᵁ
