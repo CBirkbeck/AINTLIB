@@ -2139,3 +2139,16 @@ pullbackIdealTrivOfGen_symm_hom_app_one ~:381) + NR-1 (:2033). NEXT: s2-residual
 NR-1 (1a×2 + 1b + SLOT-SQ-at-elements + UNIT-VAL re-add) → G2' → ORD-G/L1 →
 E4a-diagonal reduction → leaves A (weilPairingEval_self) + B (_nondegenerate via
 HasseWeil weilPairing_nondegenerate transport).
+
+[SLOT-SQ + s2 AXIOM-CLEAN] (2026-08-17, cont.30d): #print axioms
+pullbackRestrictTransport_tensorIdealSlotIso = [propext, Classical.choice, Quot.sound] ✓
+and pullbackIdealTrivOfGen_symm_hom_app_one ✓. s2-residual-a: hu typed-have crossing the
+.app-sugar (Hom.app := forget₂-wrapped .val.app; restrictAdjunction_unit_app_app is rfl
+but simp can't see through the spelling), then arrow-swap to the composite path
+(opensFunctor.map (eqToHom hpre.symm) ≫ pre ≫ imgle), double map_comp split, ALIGNED
+rfl (the standalone rfl fails only because the ARROWS differ — after aligning the
+arrows the coe-unwinding is rfl). s2-residual-b: hnat.trans + congrArg-map-eqToHom of
+the [511] restrictFunctorIsoPullback_hom_unit_app_apply. NativeRestriction is now
+ONE sorry: NR-1 (nuPullback_app_restrictTransport). NEXT: NR-1 (consumes SLOT-SQ +
+NR-1a restrictTransportSection_naturality + 1b pullbackRestrictTransport_unitIso, all
+proven; + possibly the UNIT-VAL pullbackUnitIso_hom_app_unit re-add from cont.26).
