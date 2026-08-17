@@ -1544,3 +1544,20 @@ COMPLETE: exists_kappa_dict → (officiality's locallyPrincipal = the h₁ h₂ 
 DIRECT) → exists_normalized_chart_dataset → KMUniqueness:264 D4-pipe → L2e. NEXT:
 the [3c-iv/L1a] joint design (div-germ of the dressed transitions vs the g_Q-quotient
 divisors — the OTHER side of U5's comparison), then L3, L5, L6, U-assembly, E5.
+
+[RECONCILIATION + CONVERGENCE] (2026-08-17, cont.11): my GlueDataset exists_kappa_dict
+was a DUPLICATE of the session-5 landing nonempty_tensorObj_sectionIdeal_iso_zeroIdeal_
+of_field (FieldLeaf:472; sectionDivisor.ideal = Hom.ker DEFINITIONALLY) — deleted; the
+field-Pic-brick (subsingleton_pic_of_subsingleton_space) and kappa_eq_sectionCls_mul_
+inv_zeroCls_of_field ALSO landed then. THE CONVERGENCE: the doc's own L1a-notes
+(2026-08-11) list "transition-match F_ij = r_j/r_i — where the work is" — THIS IS
+EXACTLY WHAT G2 DELIVERED (the dressed transition with u₂u₁⁻¹ = the f₂/f₁-generator-
+ratio, r_i := the D-difference equations f₂ⁱ/f₁ⁱ-quotients). CORRECTED L1a-STATUS:
+dictionary ✓, 3a ✓, 3b ✓, 3c-i/ii/iii ✓ (G2!), REMAINING: [3c-iv] the FF-germ reading
+(germToFunctionField of the dressed transition vs the generator-quotient germs; unit-
+dressing dies at div-level), [r-FAMILY] r_i := f₂ⁱ/f₁ⁱ as FF-elements + [G-GLUE]
+G_i := h_i · [N]^#r_i gluing (div G = [N]^*D), [DIV-PIN] div r_i = ((Q)-(0))|_{W_i}
+(the RP/ValuationTransport layer: divisorOf_algebraMap_eq_single + the ord-machinery
+— LANDED as the RP-chain!), then L1b ✓ (landed) closes L1. The remaining-work map for
+U5 is now: 3c-iv + r-family/G-glue/div-pin (L1a-tail) → L3 → L5 → L6 → U-assembly →
+E5-assembly, with the τ-side pipeline fully proven.
