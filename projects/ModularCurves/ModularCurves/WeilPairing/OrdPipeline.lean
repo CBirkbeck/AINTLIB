@@ -1561,6 +1561,66 @@ private theorem germ_transitionUnit_decomposition
   rw [hinv1, hinvA] at hg
   exact hg
 
+/-- **([MUL-IDENT])** The cleared-denominators transition identity in the function
+field: `t·f₂(c₀)·f₁(i)·A(c₀) = A(i)·f₂(i)·f₁(c₀)` — T-DEC with the two comparison
+units resolved into generator ratios (U-RATIO) and denominators cleared. -/
+private theorem germ_transitionUnit_mul_ident
+    [AlgebraicGeometry.IsIntegral (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))]
+    (M : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Modules)
+    {ι' : Type*}
+    (Wc : ι' → (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)
+    (e : ∀ i, M.over (Wc i) ≅
+      _root_.SheafOfModules.unit ((pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).ringCatSheaf.over (Wc i)))
+    (V : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) → (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f₁ f₂ : ∀ c, Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), (V c).1))
+    (ch : ι' → ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+    (A : ∀ i, Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i)ˣ)
+    (i c₀ : ι')
+    (hWchi : Wc i ≤ (V (ch i)).1) (hWchc : Wc c₀ ≤ (V (ch c₀)).1)
+    (u₁ u₂ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)ˣ)
+    (htu : transitionUnitOfCover M Wc e i c₀ =
+      Scheme.resUnit (inf_le_left : Wc i ⊓ Wc c₀ ≤ Wc i) (A i) * (u₂ * u₁⁻¹) *
+        (Scheme.resUnit (inf_le_right : Wc i ⊓ Wc c₀ ≤ Wc c₀) (A c₀))⁻¹)
+    (hu₁ : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+        (homOfLE ((inf_le_left).trans hWchi : Wc i ⊓ Wc c₀ ≤ (V (ch i)).1)).op
+          (f₁ (ch i)) =
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+        (homOfLE ((inf_le_right).trans hWchc : Wc i ⊓ Wc c₀ ≤ (V (ch c₀)).1)).op
+          (f₁ (ch c₀)) * (u₁ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)))
+    (hu₂ : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+        (homOfLE ((inf_le_left).trans hWchi : Wc i ⊓ Wc c₀ ≤ (V (ch i)).1)).op
+          (f₂ (ch i)) =
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).presheaf.map
+        (homOfLE ((inf_le_right).trans hWchc : Wc i ⊓ Wc c₀ ≤ (V (ch c₀)).1)).op
+          (f₂ (ch c₀)) * (u₂ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)))
+    [Nonempty ((Wc i ⊓ Wc c₀) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)]
+    [Nonempty ((Wc i) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)]
+    [Nonempty ((Wc c₀) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)]
+    [Nonempty (((V (ch i)).1) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)]
+    [Nonempty (((V (ch c₀)).1) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens)]
+    (hf₁c : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₁ (ch c₀)) ≠ 0)
+    (hf₂c : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₂ (ch c₀)) ≠ 0)
+    (hf₁i : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch i)).1) (f₁ (ch i)) ≠ 0) :
+    (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField (Wc i ⊓ Wc c₀)
+        ((transitionUnitOfCover M Wc e i c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)ˣ) :
+          Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀)) *
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₂ (ch c₀)) *
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch i)).1) (f₁ (ch i)) *
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField (Wc c₀) ((A c₀ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc c₀)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc c₀)) =
+    (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField (Wc i) ((A i : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i)ˣ) : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i)) *
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch i)).1) (f₂ (ch i)) *
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).germToFunctionField ((V (ch c₀)).1) (f₁ (ch c₀)) := by
+  have hdec := germ_transitionUnit_decomposition W M Wc e A i c₀ u₁ u₂ htu
+  have hr₁ := germ_comparisonUnit_eq_ratio
+    ((inf_le_left).trans hWchi) ((inf_le_right).trans hWchc)
+    (f₁ (ch i)) (f₁ (ch c₀)) ((u₁ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀))) hu₁ hf₁c
+  have hr₂ := germ_comparisonUnit_eq_ratio
+    ((inf_le_left).trans hWchi) ((inf_le_right).trans hWchc)
+    (f₂ (ch i)) (f₂ (ch c₀)) ((u₂ : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), Wc i ⊓ Wc c₀))) hu₂ hf₂c
+  have hAcne := germToFunctionField_unit_val_ne_zero (A c₀)
+  rw [hdec, hr₁, hr₂]
+  field_simp
+
 open scoped Classical in
 /-- **([SEC-ORD], statement)** The pointwise order of a section-kernel chart
 generator: for a `Spec K`-section `z` of the base-changed curve and a chart `V` on
