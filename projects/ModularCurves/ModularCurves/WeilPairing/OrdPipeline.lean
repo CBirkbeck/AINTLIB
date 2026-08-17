@@ -629,6 +629,124 @@ private theorem secOrd_maximalIdeal_stalk_eq_span_germ_f0
   rw [← h4, Ideal.span_singleton_mul_right_unit (hunit.pow n)]
   rfl
 
+/-- **([SEC-ORD HGEN])** The `ord = 1` law at the section point: the stalk span
+(SPAN-S) transports through the localisation equivalence
+`stalk ≃ localRingAt` (a `ringEquivOfRingEquiv` over the chart identification,
+with `primeCompl_map_zChartMaximalIdeal` matching the prime complements),
+supplying the localized-span hypothesis of RP-4a-loc. -/
+private theorem secOrd_ord_f0_eq_one
+    (z : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+    [QuasiCompact z]
+    (hz : z ≫ pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) = 𝟙 (Spec (CommRingCat.of K)))
+    (V : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).affineOpens)
+    (f : Γ(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))), V.1))
+    (hspan : (Scheme.Hom.ker z).ideal V = Ideal.span {f})
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint)
+    (hPV : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) ∈ V.1)
+    (hcase : (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (zChartPoint W P) = z.base default)
+    (hPz : zChartPoint W P ∈ EllipticCurve.zChart W)
+    (s : Γ(projModel W, EllipticCurve.zChart W))
+    (hsle : (projModel W).basicOpen s ≤
+      (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1 ⊓ EllipticCurve.zChart W)
+    (hPs : zChartPoint W P ∈ (projModel W).basicOpen s)
+    (n : ℕ) (f₀ : Γ(projModel W, EllipticCurve.zChart W))
+    (hrep : (projModel W).presheaf.map (homOfLE (hsle.trans inf_le_left)).op
+        ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).app V.1 f) *
+        (projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op
+          (s ^ n) =
+      (projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op f₀) :
+    (⟨W⟩ : SmoothPlaneCurve K).ord_P P
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) ((⟨W⟩ : SmoothPlaneCurve K).FunctionField)
+        ((coordRingToZSection W).symm f₀)) = 1 := by
+  have hSt := secOrd_maximalIdeal_stalk_eq_span_germ_f0 W z hz V f hspan P hPV
+    hcase hPz s hsle hPs n f₀ hrep
+  haveI := (zChartMaximalIdeal_isMaximal W P).isPrime
+  haveI := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt_isMaximal P).isPrime
+  letI α₁ : Algebra Γ(projModel W, EllipticCurve.zChart W) ((projModel W).presheaf.stalk (zChartPoint W P)) :=
+    TopCat.Presheaf.algebra_section_stalk (projModel W).presheaf
+      ⟨zChartPoint W P, hPz⟩
+  haveI i1 := isLocalization_stalk_zChartPoint W P
+  have h7 : ∀ a : Γ(projModel W, EllipticCurve.zChart W),
+      (algebraMap Γ(projModel W, EllipticCurve.zChart W) ((projModel W).presheaf.stalk (zChartPoint W P))) a =
+      (projModel W).presheaf.germ (EllipticCurve.zChart W) (zChartPoint W P) hPz a :=
+    fun a => rfl
+  have hstm : Ideal.map (algebraMap Γ(projModel W, EllipticCurve.zChart W) ((projModel W).presheaf.stalk (zChartPoint W P))) (zChartMaximalIdeal W P) =
+      Ideal.span {(projModel W).presheaf.germ (EllipticCurve.zChart W)
+        (zChartPoint W P) hPz f₀} :=
+    (IsLocalization.AtPrime.map_eq_maximalIdeal _ _).trans hSt
+  have hc : ∀ a : Γ(projModel W, EllipticCurve.zChart W),
+      (IsLocalization.ringEquivOfRingEquiv
+        (M := (zChartMaximalIdeal W P).primeCompl)
+        (T := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P).primeCompl)
+        (S := ((projModel W).presheaf.stalk (zChartPoint W P)))
+        (Q := (⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+        (coordRingToZSection W).symm
+        (primeCompl_map_zChartMaximalIdeal W P) :
+      ((projModel W).presheaf.stalk (zChartPoint W P)) →+* (⟨W⟩ : SmoothPlaneCurve K).localRingAt P) ((algebraMap Γ(projModel W, EllipticCurve.zChart W) ((projModel W).presheaf.stalk (zChartPoint W P))) a) =
+      algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+        ((coordRingToZSection W).symm a) :=
+    fun a => IsLocalization.ringEquivOfRingEquiv_eq _ a
+  have h9 := congrArg (Ideal.map (IsLocalization.ringEquivOfRingEquiv
+        (M := (zChartMaximalIdeal W P).primeCompl)
+        (T := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P).primeCompl)
+        (S := ((projModel W).presheaf.stalk (zChartPoint W P)))
+        (Q := (⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+        (coordRingToZSection W).symm
+        (primeCompl_map_zChartMaximalIdeal W P) :
+      ((projModel W).presheaf.stalk (zChartPoint W P)) →+* (⟨W⟩ : SmoothPlaneCurve K).localRingAt P)) hstm
+  rw [Ideal.map_map, Ideal.map_span, Set.image_singleton] at h9
+  have h10 : ((IsLocalization.ringEquivOfRingEquiv
+        (M := (zChartMaximalIdeal W P).primeCompl)
+        (T := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P).primeCompl)
+        (S := ((projModel W).presheaf.stalk (zChartPoint W P)))
+        (Q := (⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+        (coordRingToZSection W).symm
+        (primeCompl_map_zChartMaximalIdeal W P) :
+      ((projModel W).presheaf.stalk (zChartPoint W P)) →+* (⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).comp (algebraMap Γ(projModel W, EllipticCurve.zChart W) ((projModel W).presheaf.stalk (zChartPoint W P))) =
+      (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).comp
+        (((coordRingToZSection W).symm : Γ(projModel W, EllipticCurve.zChart W) ≃+* (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) :
+          Γ(projModel W, EllipticCurve.zChart W) →+* (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) :=
+    RingHom.ext fun a => hc a
+  rw [h10, ← Ideal.map_map] at h9
+  have hel : (IsLocalization.ringEquivOfRingEquiv
+        (M := (zChartMaximalIdeal W P).primeCompl)
+        (T := ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P).primeCompl)
+        (S := ((projModel W).presheaf.stalk (zChartPoint W P)))
+        (Q := (⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+        (coordRingToZSection W).symm
+        (primeCompl_map_zChartMaximalIdeal W P) :
+      ((projModel W).presheaf.stalk (zChartPoint W P)) →+* (⟨W⟩ : SmoothPlaneCurve K).localRingAt P) ((projModel W).presheaf.germ (EllipticCurve.zChart W)
+      (zChartPoint W P) hPz f₀) =
+      algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+        ((coordRingToZSection W).symm f₀) := by
+    rw [← h7 f₀]
+    exact hc f₀
+  rw [hel] at h9
+  have hround : (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P =
+      Ideal.map ((coordRingToZSection W).symm) (zChartMaximalIdeal W P) := by
+    unfold zChartMaximalIdeal
+    ext x
+    constructor
+    · intro hx
+      have h3 := Ideal.mem_map_of_mem (coordRingToZSection W) hx
+      have h4 := Ideal.mem_map_of_mem ((coordRingToZSection W).symm) h3
+      simpa using h4
+    · intro hx
+      have hle : Ideal.map ((coordRingToZSection W).symm)
+          (Ideal.map (coordRingToZSection W) ((⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P)) ≤
+          (⟨W⟩ : SmoothPlaneCurve K).maximalIdealAt P := by
+        refine Ideal.map_le_iff_le_comap.mpr ?_
+        refine Ideal.map_le_iff_le_comap.mpr fun a ha => ?_
+        simpa using ha
+      exact hle hx
+  have hgen : IsLocalRing.maximalIdeal ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) =
+      Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+        ((coordRingToZSection W).symm f₀)} :=
+    ((Localization.AtPrime.map_eq_maximalIdeal).symm.trans
+      (congrArg (Ideal.map (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P))) hround)).trans h9
+  exact uniformizer_of_localized_span W P ((coordRingToZSection W).symm f₀) hgen
+
 open scoped Classical in
 /-- **([SEC-ORD], statement)** The pointwise order of a section-kernel chart
 generator: for a `Spec K`-section `z` of the base-changed curve and a chart `V` on
