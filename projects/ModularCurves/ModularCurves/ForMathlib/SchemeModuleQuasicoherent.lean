@@ -69,6 +69,14 @@ namespace Modules
 
 noncomputable section
 
+/-- Evaluation of sheaves of modules is additive — it is `forget` followed by presheaf
+evaluation, both additive. mathlib no longer exposes this through the composite's `def`,
+so instance search needs it spelled out. -/
+private instance evaluation_additive (U : (Spec R).Opens) :
+    (SheafOfModules.evaluation (Spec R).ringCatSheaf (op U)).Additive := by
+  dsimp [SheafOfModules.evaluation]
+  infer_instance
+
 private noncomputable def kernelAppLinearEquiv
     {M N : (Spec R).Modules} (f : M ⟶ N) (U : (Spec R).Opens) :
     Γ(kernel f, U) ≃ₗ[R]
