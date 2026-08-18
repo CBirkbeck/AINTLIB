@@ -713,6 +713,32 @@ theorem weilPairingEval_self_of_locally {S : Scheme.{u}} (E : EllipticCurve S) {
   refine congrArg V.topIso.hom.hom ?_
   exact hres.symm.trans (map_one _).symm
 
+/-- **([ASM-4b-π])** The structure-map compatibility of the `localModel` record iso
+(own elaboration budget). -/
+private theorem localModel_recordIso_pi {S : Scheme.{u}} (E : EllipticCurve S)
+    (U : S.affineOpens) (W : WeierstrassCurve Γ(S, U.1)) [W.IsElliptic]
+    (e : pullback E.π U.1.ι ≅ projModel W)
+    (heπ : e.hom ≫ projModelπ W = pullback.snd E.π U.1.ι ≫ U.2.isoSpec.hom) :
+    ((bcSwapGenIso E U.1.ι U.2.isoSpec.inv).inv ≫
+        pullback.fst ((E.baseChange U.1.ι).π) U.2.isoSpec.inv ≫ e.hom) ≫ projModelπ W =
+      pullback.snd E.π (U.2.isoSpec.inv ≫ U.1.ι) := by
+  refine (Category.assoc _ _ _).trans ?_
+  refine (congrArg (fun m => (bcSwapGenIso E U.1.ι U.2.isoSpec.inv).inv ≫ m)
+    ((Category.assoc _ _ _).trans
+      (congrArg (fun m => pullback.fst ((E.baseChange U.1.ι).π) U.2.isoSpec.inv ≫ m)
+        heπ))).trans ?_
+  have hcond : pullback.fst ((E.baseChange U.1.ι).π) U.2.isoSpec.inv ≫
+      pullback.snd E.π U.1.ι =
+      pullback.snd ((E.baseChange U.1.ι).π) U.2.isoSpec.inv ≫ U.2.isoSpec.inv :=
+    pullback.condition
+  refine (congrArg (fun m => (bcSwapGenIso E U.1.ι U.2.isoSpec.inv).inv ≫ m)
+    ((Category.assoc _ _ _).symm.trans
+      ((congrArg (fun m => m ≫ U.2.isoSpec.hom) hcond).trans
+      ((Category.assoc _ _ _).trans
+      ((congrArg (fun m => pullback.snd ((E.baseChange U.1.ι).π) U.2.isoSpec.inv ≫ m)
+        U.2.isoSpec.inv_hom_id).trans (Category.comp_id _)))))).trans ?_
+  exact bcSwapGenIso_inv_snd E U.1.ι U.2.isoSpec.inv
+
 end EllipticCurve
 
 end ModularCurves
