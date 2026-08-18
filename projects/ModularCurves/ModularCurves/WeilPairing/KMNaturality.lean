@@ -2744,6 +2744,41 @@ theorem torsionSplittingEval_bcSwapGen
       (Units.map (((bcSwapGenIso E t g).hom).app (mulByN E (g ≫ t) N ⁻¹ᵁ W i)).hom.toMonoidHom (h i)))
     hn' hsplit' hC).symm
 
+/-- **([KM-BCSWAP-GEN])** The canonical pairing is invariant under the general collapse. -/
+theorem weilPairingKM_bcSwapGen
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)] (N : ℕ)
+    (Pt : (E.baseChange (g ≫ t)).Point (𝟙 T')) (hPt : Pt ∈ torsionPoints E (g ≫ t) N)
+    (Q : (E.baseChange (g ≫ t)).Point (𝟙 T')) (hQ : Q ∈ torsionPoints E (g ≫ t) N)
+    (hPsw : (Pt.1 ≫ (bcSwapGenIso E t g).inv) ≫
+      pullback.snd ((E.baseChange t).π) g = 𝟙 T')
+    (hPswt : (⟨Pt.1 ≫ (bcSwapGenIso E t g).inv, hPsw⟩ :
+      ((E.baseChange t).baseChange g).Point (𝟙 T')) ∈
+      torsionPoints (E.baseChange t) g N)
+    (hQsw : (Q.1 ≫ (bcSwapGenIso E t g).inv) ≫
+      pullback.snd ((E.baseChange t).π) g = 𝟙 T')
+    (hQswt : (⟨Q.1 ≫ (bcSwapGenIso E t g).inv, hQsw⟩ :
+      ((E.baseChange t).baseChange g).Point (𝟙 T')) ∈
+      torsionPoints (E.baseChange t) g N) :
+    weilPairingKM (E.baseChange t) hsmBC g N
+        (⟨Pt.1 ≫ (bcSwapGenIso E t g).inv, hPsw⟩ :
+          ((E.baseChange t).baseChange g).Point (𝟙 T')) hPswt
+        (⟨Q.1 ≫ (bcSwapGenIso E t g).inv, hQsw⟩ :
+          ((E.baseChange t).baseChange g).Point (𝟙 T')) hQswt =
+      weilPairingKM E hsm (g ≫ t) N Pt hPt Q hQ := by
+  obtain ⟨A, hA, J, W, hW, e, hnorm⟩ := exists_normalized_dataset E hsm (g ≫ t) Q
+  rw [weilPairingKM_eq_torsionSplittingEval E hsm (g ≫ t) N Pt hPt Q hQ A hA W hW e hnorm,
+    weilPairingKM_eq_torsionSplittingEval (E.baseChange t) hsmBC g N _ hPswt _ hQswt
+      ((Scheme.Modules.pullback (bcSwapGenIso E t g).hom).obj A)
+      (hM_bcSwapGen E t g hsm hsmBC Q hQsw A hA)
+      (fun i => (bcSwapGenIso E t g).hom ⁻¹ᵁ W i)
+      (((bcSwapGenIso E t g).hom).iSup_preimage_eq_top hW)
+      (fun i => Scheme.Modules.localPullbackTrivializationT (bcSwapGenIso E t g).hom A (W i) (e i))
+      (hnorm_bcSwapGen E t g A W e hnorm)]
+  exact torsionSplittingEval_bcSwapGen E t g hsm hsmBC N Q hQ hQsw hQswt A hA W hW e hnorm
+    Pt hPt hPsw hPswt
+
 end BcSwapGen
 
 end ModularCurves
