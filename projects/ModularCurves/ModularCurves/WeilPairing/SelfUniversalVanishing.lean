@@ -303,6 +303,56 @@ theorem injective_res_basicOpen_of_nonZeroDivisor {X : Scheme.{u}} [IsAffine X]
   exact IsLocalization.injective (M := Submonoid.powers s) _
     (Submonoid.powers_le.mpr hs)
 
+/-- **([U4-REGULAR])** Over an affine base whose `N`-inverted locus is reduced and on
+which `N` is a nonzerodivisor, the diagonal pairing value is `1`. -/
+theorem weilPairingEval_self_of_nonZeroDivisor {S : Scheme.{u}} (E : EllipticCurve S)
+    {T : Scheme.{u}} [IsAffine T] {g : T ⟶ S} {N : ℕ} [NeZero N]
+    (hreg : (N : Γ(T, ⊤)) ∈ nonZeroDivisors (Γ(T, ⊤) : CommRingCat.{u}))
+    [IsReduced (T.basicOpen (N : Γ(T, ⊤)) : Scheme.{u})]
+    (x : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by
+  set U : T.Opens := T.basicOpen (N : Γ(T, ⊤)) with hU
+  set i : (U : Scheme.{u}) ⟶ T := U.ι with hi
+  have hxr : (EllipticCurve.Point.restrict E i x).1 ≫ E.mulByHom N =
+      (i ≫ g) ≫ E.zero := by
+    show (i ≫ x.1) ≫ E.mulByHom N = (i ≫ g) ≫ E.zero
+    rw [Category.assoc, hx, ← Category.assoc]
+  haveI hNU : NIsInvertible (U : Scheme.{u}) N := by
+    show IsUnit ((N : ℕ) : Γ((U : Scheme.{u}), ⊤))
+    have h1 : IsUnit (T.presheaf.map (homOfLE (le_top : U ≤ ⊤)).op (N : Γ(T, ⊤))) :=
+      T.toRingedSpace.isUnit_res_basicOpen _
+    have hnat : (T.presheaf.map (homOfLE (le_top : U ≤ ⊤)).op).hom ((N : ℕ) : Γ(T, ⊤)) =
+        ((N : ℕ) : Γ(T, U)) := map_natCast _ N
+    rw [hnat] at h1
+    have h2 := h1.map U.topIso.inv.hom
+    rw [show (U.topIso.inv.hom ((N : ℕ) : Γ(T, U))) = ((N : ℕ) : Γ((U : Scheme.{u}), ⊤))
+      from map_natCast _ N] at h2
+    exact h2
+  have hone := weilPairingEval_self_of_reduced E hNU (EllipticCurve.Point.restrict E i x) hxr
+  have hres := E.weilPairingEval_restrict i x x hx hx hxr hxr
+  rw [hone] at hres
+  refine injective_res_basicOpen_of_nonZeroDivisor (N : Γ(T, ⊤)) hreg ?_
+  rw [map_one]
+  have hbridge : U.topIso.hom.hom ((Scheme.Γ.map i.op).hom
+        (E.weilPairingEval x x hx hx : Γ(T, ⊤))) =
+      (T.presheaf.map (homOfLE (le_top : U ≤ ⊤)).op).hom
+        (E.weilPairingEval x x hx hx : Γ(T, ⊤)) := by
+    rw [Scheme.Γ_map_op, Scheme.Opens.ι_appTop]
+    show (U.topIso.hom.hom
+      ((T.presheaf.map (homOfLE (x := U.ι ''ᵁ ⊤) le_top).op).hom _)) = _
+    have hcomp : U.topIso.hom.hom
+        ((T.presheaf.map (homOfLE (x := U.ι ''ᵁ ⊤) le_top).op).hom
+          (E.weilPairingEval x x hx hx : Γ(T, ⊤))) =
+        ((T.presheaf.map (homOfLE (x := U.ι ''ᵁ ⊤) le_top).op) ≫ U.topIso.hom).hom
+          (E.weilPairingEval x x hx hx : Γ(T, ⊤)) := rfl
+    rw [hcomp]
+    refine congrArg (fun m : Γ(T, ⊤) ⟶ Γ(T, U) => m.hom
+      (E.weilPairingEval x x hx hx : Γ(T, ⊤))) ?_
+    rw [Scheme.Opens.topIso_hom]
+    exact (T.presheaf.map_comp _ _).symm.trans
+      (congrArg T.presheaf.map (Subsingleton.elim _ _))
+  rw [← hbridge, ← hres, map_one]
+
 end EllipticCurve
 
 end ModularCurves
