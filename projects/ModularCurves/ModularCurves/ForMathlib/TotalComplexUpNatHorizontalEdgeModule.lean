@@ -40,7 +40,6 @@ private theorem moduleForgetHorizontal_comm
   dsimp only [moduleForgetBicomplex, moduleForgetComplex]
   rw [Functor.mapHomologicalComplex_obj_d]
   rw [← Functor.map_comp, he q q' h, Functor.map_comp]
-  rfl
 
 private theorem moduleForgetHorizontal_zero
     {A : CochainComplex (ModuleCat.{u} R) ℕ}

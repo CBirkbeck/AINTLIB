@@ -258,7 +258,7 @@ theorem eq_one_of_smul_eq (σ : SeparableClosure k ≃ₐ[k] SeparableClosure k)
 
 instance : GaloisCategory (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ where
   hasFiberFunctor :=
-    ⟨CommAlgCat.FiniteEtale.fiber k (SeparableClosure k), ⟨inferInstance⟩⟩
+    ⟨CommAlgCat.FiniteEtale.fiber k (SeparableClosure k), inferInstance⟩
 
 /-- The absolute Galois group of `k` is a fundamental group for the fiber functor of
 `(FiniteEtale k)ᵒᵖ` at the separable closure. -/
