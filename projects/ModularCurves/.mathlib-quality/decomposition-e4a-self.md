@@ -3284,3 +3284,21 @@ bridge), axiom-clean. What remains for leaf A is exactly **ASM-4b**: produce, fo
 point of `T`, an open `V` on which the record becomes a Weierstrass model (via
 `E.localModel` at the image point, pulled back along `g`), and chain
 U1 + BC-SWAP-GEN + ASM-3 there. All the transport tools for that chain are proven.
+
+**[ASM-4b DESIGN — the last brick] (cont.30bo, 6305ee126)**: the whole leaf-A chain is
+sorry-free and green. The remaining step is `exists_localModel_recordIso`:
+from `E.localModel s` — `(U : S.affineOpens)`, `W : WeierstrassCurve Γ(S,U)`,
+`e : pullback E.π U.ι ≅ projModel W`, `heπ : e.hom ≫ projModelπ W = pullback.snd ≫ isoSpec.hom`,
+`hez : (isoSpec.inv ≫ pullback.lift (U.ι ≫ E.zero) (𝟙 _) _) ≫ e.hom = projModelZero W` —
+build `(E.baseChange (U.2.isoSpec.inv ≫ U.ι)).asOver ≅ (modelEllipticCurve W).asOver`.
+The left-iso is
+`eL := (bcSwapGenIso E U.ι isoSpec.inv).symm ≪≫ asIso (pullback.fst ((E.baseChange U.ι).π) isoSpec.inv) ≪≫ e`.
+**The π-compatibility is already worked out** (and its key step is now the standalone
+`bcSwapGenIso_inv_snd`): rewrite with `heπ`, use the outer-square `pullback.condition`
+(`fst ≫ snd_{E.π,U.ι} = snd ≫ isoSpec.inv`), cancel `isoSpec.inv ≫ isoSpec.hom`, finish with
+`bcSwapGenIso_inv_snd`. The zero-compatibility (`(E.baseChange _).zero ≫ eL.hom = projModelZero W`)
+reduces by `Eq.trans _ hez` + `pullback.hom_ext` to the two leg-identities — **write it as its
+own private lemma** (the combined decl blew the 200k budget). Then: `Over.isoMk eL heπ'` +
+`isMonHom_of_pointedIso_records`, and the ASM-4 assembly = `weilPairingEval_self_of_locally`
++ `morphismRestrict` (to factor `V.ι ≫ g` through `U.ι`) + U1 + `weilPairingKM_bcSwapGen`
++ `weilPairingEval_self_model_map`.
