@@ -1950,4 +1950,55 @@ theorem kappa_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
       ((E.baseChange t).zero) ((E.baseChange t).zero_π) (𝟙 T)))
     hsq1 hsq2 hratio
 
+/-- **([HM-BCSWAP])** The dataset skeleton-condition transports along the collapse iso. -/
+theorem hM_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}} (t : T ⟶ S)
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)]
+    (Q : (E.baseChange t).Point (𝟙 T))
+    (hQsw : (Q.1 ≫ (bcSwapIso E t).inv) ≫
+      pullback.snd ((E.baseChange t).π) (𝟙 T) = 𝟙 T)
+    (A : (pullback E.π t).Modules)
+    (hA : letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+      (kappa E hsm t Q).val = toSkeleton A) :
+    letI := Scheme.Modules.monoidalCategory (pullback ((E.baseChange t).π) (𝟙 T))
+    (kappa (E.baseChange t) hsmBC (𝟙 T)
+      (⟨Q.1 ≫ (bcSwapIso E t).inv, hQsw⟩ :
+        ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T))).val =
+      toSkeleton ((Scheme.Modules.pullback (bcSwapIso E t).hom).obj A) := by
+  letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+  letI := Scheme.Modules.monoidalCategory (pullback ((E.baseChange t).π) (𝟙 T))
+  have hA' : (kappa E hsm t Q).val = toSkeleton A := hA
+  calc (kappa (E.baseChange t) hsmBC (𝟙 T)
+        (⟨Q.1 ≫ (bcSwapIso E t).inv, hQsw⟩ :
+          ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T))).val
+      = (Scheme.Pic.map (bcSwapIso E t).hom (kappa E hsm t Q)).val :=
+        congrArg Units.val (kappa_bcSwap E t hsm hsmBC Q hQsw).symm
+    _ = (Scheme.Modules.pullback (bcSwapIso E t).hom).mapSkeleton.obj
+          (kappa E hsm t Q).val := Scheme.Pic.map_val _ _
+    _ = (Scheme.Modules.pullback (bcSwapIso E t).hom).mapSkeleton.obj
+          (toSkeleton A) := congrArg _ hA'
+    _ = toSkeleton ((Scheme.Modules.pullback (bcSwapIso E t).hom).obj A) :=
+        Functor.mapSkeleton_obj_toSkeleton _ A
+
+/-- **([HNORM-BCSWAP])** Normalisation of the pulled dataset along the collapse iso. -/
+theorem hnorm_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}} (t : T ⟶ S)
+    (A : (pullback E.π t).Modules)
+    {J : Type*} (W : J → (pullback E.π t).Opens)
+    (e : ∀ i, A.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover A W e i j ∈
+      sectionUnits (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π t) (W i ⊓ W j))
+    (i j : J) :
+    transitionUnitOfCover ((Scheme.Modules.pullback (bcSwapIso E t).hom).obj A)
+        (fun i => (bcSwapIso E t).hom ⁻¹ᵁ W i)
+        (fun i => Scheme.Modules.localPullbackTrivializationT (bcSwapIso E t).hom A
+          (W i) (e i)) i j ∈
+      sectionUnits (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+          ((E.baseChange t).zero) ((E.baseChange t).zero_π) (𝟙 T))
+        ((bcSwapIso E t).hom ⁻¹ᵁ W i ⊓ (bcSwapIso E t).hom ⁻¹ᵁ W j) := by
+  rw [transitionUnitOfCover_localPullback (bcSwapIso E t).hom A W e i j]
+  exact mem_sectionUnits_pullback (baseChangeZero_comp_bcSwapIso E t)
+    (W i ⊓ W j) (hnorm i j)
+
 end ModularCurves
