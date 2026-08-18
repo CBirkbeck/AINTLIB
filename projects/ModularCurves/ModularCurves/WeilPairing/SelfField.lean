@@ -54,6 +54,21 @@ theorem injective_appTop_specMap {R S : CommRingCat.{u}} (f : R ⟶ S)
   have h4 := congrArg (fun m => (Scheme.ΓSpecIso R).inv.hom m) h3
   simpa using h4
 
+/-- **([ASSEC-BCSWAP])** The `asSection` of a base-changed point is the [BC-SWAP]
+image of that point. -/
+theorem asSection_eq_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) (y : (E.baseChange g).Point (𝟙 T)) :
+    (EllipticCurve.Point.asSection (E.baseChange g) (𝟙 T) y).1 =
+      y.1 ≫ (bcSwapIso E g).inv := by
+  refine pullback.hom_ext ?_ ?_
+  · refine (EllipticCurve.Point.asSection_val_fst (E.baseChange g) (𝟙 T) y).trans ?_
+    refine Eq.symm ((Category.assoc _ _ _).trans ?_)
+    exact (congrArg (fun m => y.1 ≫ m) (pullback.lift_fst _ _ _)).trans
+      (Category.comp_id _)
+  · refine (EllipticCurve.Point.asSection_val_snd (E.baseChange g) (𝟙 T) y).trans ?_
+    refine Eq.symm ((Category.assoc _ _ _).trans ?_)
+    exact (congrArg (fun m => y.1 ≫ m) (pullback.lift_snd _ _ _)).trans y.2
+
 /-- **(U5-AC, the algebraically closed field leaf)** `e_N(x, x) = 1` over an
 algebraically closed field in which `N` is invertible. -/
 theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq K]
