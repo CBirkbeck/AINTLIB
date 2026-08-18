@@ -1691,4 +1691,44 @@ end EllipticCurve
 
 end MapIso
 
+section BcSwapDefs
+
+variable {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}} (t : T ⟶ S)
+
+/-- **([BC-SWAP ι])** The tautological collapse of the identity pullback of a base
+change: `pullback ((E.baseChange t).π) (𝟙 T) ≅ pullback E.π t` via the first
+projection (`𝟙` on the right leg makes `fst` an isomorphism). -/
+noncomputable def bcSwapIso :
+    pullback ((E.baseChange t).π) (𝟙 T) ≅ pullback E.π t where
+  hom := pullback.fst ((E.baseChange t).π) (𝟙 T)
+  inv := pullback.lift (𝟙 _) (pullback.snd E.π t)
+    ((Category.id_comp _).trans
+      ((show (E.baseChange t).π = pullback.snd E.π t from rfl).trans
+        (Category.comp_id _).symm))
+  hom_inv_id := by
+    refine pullback.hom_ext ?_ ?_
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (fun m => pullback.fst ((E.baseChange t).π) (𝟙 T) ≫ m)
+          (pullback.lift_fst _ _ _)).trans
+        ((Category.comp_id _).trans (Category.id_comp _).symm))
+    · exact (Category.assoc _ _ _).trans
+        ((congrArg (fun m => pullback.fst ((E.baseChange t).π) (𝟙 T) ≫ m)
+          (pullback.lift_snd _ _ _)).trans
+        ((pullback.condition (f := (E.baseChange t).π) (g := 𝟙 T)).trans
+        ((Category.comp_id _).trans (Category.id_comp _).symm)))
+  inv_hom_id := pullback.lift_fst _ _ _
+
+@[simp] theorem bcSwapIso_hom :
+    (bcSwapIso E t).hom = pullback.fst ((E.baseChange t).π) (𝟙 T) := rfl
+
+/-- The zero sections correspond under [BC-SWAP ι]. -/
+theorem baseChangeZero_comp_bcSwapIso :
+    Scheme.Modules.baseChangeZero ((E.baseChange t).π) ((E.baseChange t).zero)
+        ((E.baseChange t).zero_π) (𝟙 T) ≫ (bcSwapIso E t).hom =
+      Scheme.Modules.baseChangeZero E.π E.zero E.zero_π t := by
+  rw [bcSwapIso_hom]
+  exact (pullback.lift_fst _ _ _).trans (Category.id_comp _)
+
+end BcSwapDefs
+
 end ModularCurves
