@@ -1039,6 +1039,45 @@ theorem weilPairingEval_zsmul_left_general {S : Scheme.{u}} (E : EllipticCurve S
   rw [pow_mul_pow_eq_one hef, ← h2]
   exact h1
 
+/-- **(The symplectic formula, axiom-clean)** `e_N(aP+bQ, cP+dQ) = e_N(P,Q)^(ad-bc)`. -/
+theorem weilPairingEval_symplectic_general {S : Scheme.{u}} (E : EllipticCurve S) {N : ℕ}
+    [NeZero N] {T : Scheme.{u}} {g : T ⟶ S} (P Q : E.Point g) (a b c d : ℤ)
+    (hP : P.1 ≫ E.mulByHom N = g ≫ E.zero) (hQ : Q.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (h₁ : (a • P + b • Q).1 ≫ E.mulByHom N = g ≫ E.zero)
+    (h₂ : (c • P + d • Q).1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval (a • P + b • Q) (c • P + d • Q) h₁ h₂ : Γ(T, ⊤)) =
+      (E.weilPairingEval P Q hP hQ : Γ(T, ⊤)) ^ (((a * d - b * c) % (N : ℤ)).toNat) := by
+  have haP := E.point_zsmul_killedBy a hP
+  have hbQ := E.point_zsmul_killedBy b hQ
+  have hcP := E.point_zsmul_killedBy c hP
+  have hdQ := E.point_zsmul_killedBy d hQ
+  rw [E.weilPairingEval_add_left (a • P) (b • Q) (c • P + d • Q) haP hbQ h₂ h₁,
+    E.weilPairingEval_add_right (a • P) (c • P) (d • Q) haP hcP hdQ h₂,
+    E.weilPairingEval_add_right (b • Q) (c • P) (d • Q) hbQ hcP hdQ h₂]
+  rw [weilPairingEval_zsmul_left_general E P (c • P) a hP hcP haP,
+    weilPairingEval_zsmul_left_general E P (d • Q) a hP hdQ haP,
+    weilPairingEval_zsmul_left_general E Q (c • P) b hQ hcP hbQ,
+    weilPairingEval_zsmul_left_general E Q (d • Q) b hQ hdQ hbQ,
+    E.weilPairingEval_zsmul_right P P c hP hP hcP,
+    E.weilPairingEval_zsmul_right P Q d hP hQ hdQ,
+    E.weilPairingEval_zsmul_right Q P c hQ hP hcP,
+    E.weilPairingEval_zsmul_right Q Q d hQ hQ hdQ]
+  rw [weilPairingEval_self_general E P hP, weilPairingEval_self_general E Q hQ]
+  rw [_root_.one_pow, _root_.one_pow, _root_.one_pow, _root_.one_pow, _root_.one_mul,
+    _root_.mul_one]
+  rw [pow_toNat_emod_mul (E.weilPairingEval P Q hP hQ).2,
+    pow_toNat_emod_mul (E.weilPairingEval Q P hQ hP).2]
+  have hanti : (E.weilPairingEval Q P hQ hP : Γ(T, ⊤)) *
+      E.weilPairingEval P Q hP hQ = 1 := by
+    rw [mul_comm]
+    exact weilPairingEval_antisymm_general E P Q hP hQ
+  have hunit : IsUnit ((E.weilPairingEval P Q hP hQ : Γ(T, ⊤)) ^
+      ((b * c % (N : ℤ)).toNat)) :=
+    (isUnit_of_pow_eq_one (E.weilPairingEval P Q hP hQ).2).pow _
+  refine (hunit.mul_left_inj).mp ?_
+  rw [pow_toNat_emod_add (E.weilPairingEval P Q hP hQ).2, sub_add_cancel,
+    _root_.mul_assoc, pow_mul_pow_eq_one hanti, _root_.mul_one]
+
 end EllipticCurve
 
 end ModularCurves
