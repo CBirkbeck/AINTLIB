@@ -41,6 +41,19 @@ instance isAffine_torsion_universal (N : ℕ) [NeZero N] :
   exact isAffine_of_isAffineHom
     ((modelEllipticCurve universalWeierstrassLocU.{u}).torsionπ N)
 
+/-- The section ring of the universal `N`-torsion base. -/
+noncomputable abbrev universalTorsionRing (N : ℕ) : CommRingCat.{u} :=
+  Γ((modelEllipticCurve universalWeierstrassLocU.{u}).torsion N, ⊤)
+
+/-- **([U4b], ring level)** The section ring is flat over the atlas ring: `torsionπ` is
+flat and both schemes are affine. -/
+theorem flat_universalTorsionRing (N : ℕ) [NeZero N] :
+    RingHom.Flat (((modelEllipticCurve universalWeierstrassLocU.{u}).torsionπ N).appTop).hom := by
+  haveI : Flat ((modelEllipticCurve universalWeierstrassLocU.{u}).torsionπ N) :=
+    (modelEllipticCurve universalWeierstrassLocU.{u}).torsionπ_flat N
+  exact (HasRingHomProperty.iff_of_isAffine (P := @Flat) (Q := RingHom.Flat)).mp
+    inferInstance
+
 end EllipticCurve
 
 end ModularCurves
