@@ -2493,6 +2493,90 @@ theorem kappa_bcSwapGen
       ((E.baseChange t).zero) ((E.baseChange t).zero_π) g))
     hsq1 hsq2 hratio
 
+/-- **([HM/HNORM-BCSWAP-GEN])** Dataset transport along the general collapse. -/
+theorem hM_bcSwapGen
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)]
+    (Q : (E.baseChange (g ≫ t)).Point (𝟙 T'))
+    (hQsw : (Q.1 ≫ (bcSwapGenIso E t g).inv) ≫
+      pullback.snd ((E.baseChange t).π) g = 𝟙 T')
+    (A : (pullback E.π (g ≫ t)).Modules)
+    (hA : letI := Scheme.Modules.monoidalCategory (pullback E.π (g ≫ t))
+      (kappa E hsm (g ≫ t) Q).val = toSkeleton A) :
+    letI := Scheme.Modules.monoidalCategory (pullback ((E.baseChange t).π) g)
+    (kappa (E.baseChange t) hsmBC g
+      (⟨Q.1 ≫ (bcSwapGenIso E t g).inv, hQsw⟩ :
+        ((E.baseChange t).baseChange g).Point (𝟙 T'))).val =
+      toSkeleton ((Scheme.Modules.pullback (bcSwapGenIso E t g).hom).obj A) := by
+  letI := Scheme.Modules.monoidalCategory (pullback E.π (g ≫ t))
+  letI := Scheme.Modules.monoidalCategory (pullback ((E.baseChange t).π) g)
+  have hA' : (kappa E hsm (g ≫ t) Q).val = toSkeleton A := hA
+  calc (kappa (E.baseChange t) hsmBC g
+        (⟨Q.1 ≫ (bcSwapGenIso E t g).inv, hQsw⟩ :
+          ((E.baseChange t).baseChange g).Point (𝟙 T'))).val
+      = (Scheme.Pic.map (bcSwapGenIso E t g).hom (kappa E hsm (g ≫ t) Q)).val :=
+        congrArg Units.val (kappa_bcSwapGen E t g hsm hsmBC Q hQsw).symm
+    _ = (Scheme.Modules.pullback (bcSwapGenIso E t g).hom).mapSkeleton.obj
+          (kappa E hsm (g ≫ t) Q).val := Scheme.Pic.map_val _ _
+    _ = (Scheme.Modules.pullback (bcSwapGenIso E t g).hom).mapSkeleton.obj (toSkeleton A) := congrArg _ hA'
+    _ = toSkeleton ((Scheme.Modules.pullback (bcSwapGenIso E t g).hom).obj A) :=
+        Functor.mapSkeleton_obj_toSkeleton _ A
+
+theorem hnorm_bcSwapGen
+    (A : (pullback E.π (g ≫ t)).Modules)
+    {J : Type*} (W : J → (pullback E.π (g ≫ t)).Opens)
+    (e : ∀ i, A.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π (g ≫ t)).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover A W e i j ∈
+      sectionUnits (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π (g ≫ t)) (W i ⊓ W j))
+    (i j : J) :
+    transitionUnitOfCover ((Scheme.Modules.pullback (bcSwapGenIso E t g).hom).obj A)
+        (fun i => (bcSwapGenIso E t g).hom ⁻¹ᵁ W i)
+        (fun i => Scheme.Modules.localPullbackTrivializationT (bcSwapGenIso E t g).hom A (W i) (e i)) i j ∈
+      sectionUnits (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+          ((E.baseChange t).zero) ((E.baseChange t).zero_π) g)
+        ((bcSwapGenIso E t g).hom ⁻¹ᵁ W i ⊓ (bcSwapGenIso E t g).hom ⁻¹ᵁ W j) := by
+  rw [transitionUnitOfCover_localPullback (bcSwapGenIso E t g).hom A W e i j]
+  exact mem_sectionUnits_pullback (baseChangeZero_comp_bcSwapGenIso E t g)
+    (W i ⊓ W j) (hnorm i j)
+
+/-- **([MULBYN-BCSWAP-GEN])** The `[N]`-square along the general collapse. -/
+theorem mulByN_comp_bcSwapGenIso (N : ℕ) :
+    mulByN (E.baseChange t) g N ≫ (bcSwapGenIso E t g).hom = (bcSwapGenIso E t g).hom ≫ mulByN E (g ≫ t) N := by
+  refine pullback.hom_ext ?_ ?_
+  · refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (fun m => mulByN (E.baseChange t) g N ≫ m)
+      (bcSwapGenIso_hom_fst E t g)).trans ?_
+    refine (Category.assoc _ _ _).symm.trans ?_
+    refine (congrArg (fun m => m ≫ pullback.fst E.π t)
+      (EllipticCurve.mulByHom_baseChange_fst (E.baseChange t) g (N : ℤ))).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (fun m => pullback.fst ((E.baseChange t).π) g ≫ m)
+      (EllipticCurve.mulByHom_baseChange_fst E t (N : ℤ))).trans ?_
+    refine (Category.assoc _ _ _).symm.trans ?_
+    refine (congrArg (fun m => m ≫ E.mulByHom (N : ℤ))
+      (bcSwapGenIso_hom_fst E t g).symm).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (fun m => (bcSwapGenIso E t g).hom ≫ m)
+      (EllipticCurve.mulByHom_baseChange_fst E (g ≫ t) (N : ℤ)).symm).trans ?_
+    exact (Category.assoc _ _ _).symm
+  · refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (fun m => mulByN (E.baseChange t) g N ≫ m)
+      (bcSwapGenIso_hom_snd E t g)).trans ?_
+    refine (EllipticCurve.mulByHom_baseChange_snd (E.baseChange t) g (N : ℤ)).trans ?_
+    refine (bcSwapGenIso_hom_snd E t g).symm.trans ?_
+    refine (congrArg (fun m => (bcSwapGenIso E t g).hom ≫ m)
+      (EllipticCurve.mulByHom_baseChange_snd E (g ≫ t) (N : ℤ)).symm).trans ?_
+    exact (Category.assoc _ _ _).symm
+
+/-- The preimage square of [MULBYN-BCSWAP-GEN]. -/
+theorem mulByN_preimage_bcSwapGenIso (N : ℕ) (V : (pullback E.π (g ≫ t)).Opens) :
+    mulByN (E.baseChange t) g N ⁻¹ᵁ ((bcSwapGenIso E t g).hom ⁻¹ᵁ V) = (bcSwapGenIso E t g).hom ⁻¹ᵁ (mulByN E (g ≫ t) N ⁻¹ᵁ V) :=
+  (Scheme.Hom.comp_preimage _ _ _).symm.trans
+    ((congrArg (· ⁻¹ᵁ V) (mulByN_comp_bcSwapGenIso E t g N)).trans
+      (Scheme.Hom.comp_preimage _ _ _))
+
 end BcSwapGen
 
 end ModularCurves
