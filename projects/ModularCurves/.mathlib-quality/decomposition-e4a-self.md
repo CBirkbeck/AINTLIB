@@ -3312,3 +3312,29 @@ the dependent-instance motive). Both axiom-clean; every file in the chain is sor
 THE LAST STEP: assemble — `weilPairingEval_self_of_locally` + `E.localModel (g.base p)` +
 `morphismRestrict` (factor `V.ι ≫ g` through `U.ι`) + `exists_localModel_recordIso` + U1
 (`weilPairingEval_mapIso`) + `weilPairingKM_bcSwapGen` + `weilPairingEval_self_model`.
+
+# ★★★ LEAF A IS PROVEN — AXIOM-CLEAN (cont.30bq, a0322c5fd)
+
+`ModularCurves.EllipticCurve.weilPairingEval_self_general` (SelfUniversalVanishing.lean):
+**e_N(x, x) = 1 over an ARBITRARY base**, for any elliptic-curve record and any
+`N`-torsion point, depending only on [propext, Classical.choice, Quot.sound].
+
+The completed chain, all axiom-clean:
+* **L1** (the E4a ord-engine; OrdPipeline sorry-free) → **U5-L3/L5**;
+* **U1** `weilPairingEval_mapIso` (pointed-record-iso invariance);
+* **BC-SWAP** at `𝟙` and **BC-SWAP-GEN** at any base map (`weilPairingKM_bcSwap(Gen)`);
+* **U5** `weilPairingEval_self_of_isAlgClosed` → `weilPairingEval_self_of_field'` →
+  `weilPairingEval_self_of_pointOverField`;
+* **U4** `isReduced_torsion` → `weilPairingEval_self_of_reduced` →
+  `weilPairingEval_self_of_nonZeroDivisor` → `weilPairingEval_self_universal_eq_one`;
+* **ASM** `weilPairingEval_self_universalModel` → `weilPairingEval_self_model_map` →
+  `weilPairingEval_self_model` → `exists_localModel_recordIso` →
+  `weilPairingEval_self_of_recordIso` → (with `weilPairingEval_self_of_locally`)
+  `weilPairingEval_self_general`.
+
+Derived and re-proven axiom-clean from it (the Basic.lean versions still ride that file's
+sorried register entry, which cannot be filled there because the proof chain imports it):
+`weilPairingEval_antisymm_general`, `weilPairingEval_zsmul_left_general`, and
+**`weilPairingEval_symplectic_general`** — the register's most-consumed law (11 call sites
+in RhoPairingBridge / RhoSections / YRho). **Follow-up:** re-point those consumers to the
+`_general` versions; then the Y(ρ̄) chain no longer inherits `sorryAx` from Basic:372.
