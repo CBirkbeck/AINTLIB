@@ -1803,4 +1803,38 @@ theorem sectionCls_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}
   refine Eq.trans (map_inv (Scheme.Pic.map (bcSwapIso E t).hom) _) ?_
   exact congrArg (·⁻¹) hcore
 
+/-- **([ZEROCLS-BCSWAP])** The zero class transports along the collapse iso. -/
+theorem zeroCls_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (t : T ⟶ S)
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)] :
+    Scheme.Pic.map (bcSwapIso E t).hom (zeroCls E hsm t) =
+      zeroCls (E.baseChange t) hsmBC (𝟙 T) := by
+  have hz : Scheme.Modules.baseChangeZero ((E.baseChange t).π) ((E.baseChange t).zero)
+      ((E.baseChange t).zero_π) (𝟙 T) ≫ (bcSwapIso E t).hom =
+      Scheme.Modules.baseChangeZero E.π E.zero E.zero_π t :=
+    baseChangeZero_comp_bcSwapIso E t
+  have hswap : Scheme.Modules.baseChangeZero E.π E.zero E.zero_π t ≫
+      (bcSwapIso E t).inv =
+      Scheme.Modules.baseChangeZero ((E.baseChange t).π) ((E.baseChange t).zero)
+        ((E.baseChange t).zero_π) (𝟙 T) :=
+    (congrArg (fun m => m ≫ (bcSwapIso E t).inv) hz.symm).trans
+      ((Category.assoc _ _ _).trans
+        ((congrArg (fun m => Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+            ((E.baseChange t).zero) ((E.baseChange t).zero_π) (𝟙 T) ≫ m)
+          (bcSwapIso E t).hom_inv_id).trans (Category.comp_id _)))
+  have hzsw : (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π t ≫
+      (bcSwapIso E t).inv) ≫ pullback.snd ((E.baseChange t).π) (𝟙 T) = 𝟙 T :=
+    (congrArg (fun m => m ≫ pullback.snd ((E.baseChange t).π) (𝟙 T)) hswap).trans
+      (Scheme.Modules.baseChangeZero_snd _ _ _ _)
+  calc Scheme.Pic.map (bcSwapIso E t).hom (zeroCls E hsm t)
+      = sectionCls (E.baseChange t) hsmBC (𝟙 T)
+          (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π t ≫ (bcSwapIso E t).inv)
+          hzsw :=
+        sectionCls_bcSwap E t hsm hsmBC _
+          (Scheme.Modules.baseChangeZero_snd E.π E.zero E.zero_π t) hzsw
+    _ = zeroCls (E.baseChange t) hsmBC (𝟙 T) :=
+        sectionCls_congr (E.baseChange t) hsmBC (𝟙 T) _ _ hswap
+
 end ModularCurves
