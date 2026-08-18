@@ -539,6 +539,44 @@ theorem weilPairingEval_self_universalModel {N : ℕ} [NeZero N] {T : Scheme.{u}
     (N := N) hpt hpt hrestrkill hrestrkill hx hx] at hres
   exact hres
 
+/-- **([ASM-3], map form)** For a model that is a base change of the universal model
+along a ring map, the diagonal pairing value at any `N`-torsion point is `1`. -/
+theorem weilPairingEval_self_model_map {R : Type u} [CommRing R]
+    [Algebra WeierstrassAtlasRingU.{u} R]
+    [(universalWeierstrassLocU.{u}.map (algebraMap WeierstrassAtlasRingU.{u} R)).IsElliptic]
+    {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ Spec (CommRingCat.of R)}
+    (x : (modelEllipticCurve (universalWeierstrassLocU.{u}.map
+      (algebraMap WeierstrassAtlasRingU.{u} R))).Point g)
+    (hx : x.1 ≫ (modelEllipticCurve (universalWeierstrassLocU.{u}.map
+        (algebraMap WeierstrassAtlasRingU.{u} R))).mulByHom N =
+      g ≫ (modelEllipticCurve (universalWeierstrassLocU.{u}.map
+        (algebraMap WeierstrassAtlasRingU.{u} R))).zero) :
+    ((modelEllipticCurve (universalWeierstrassLocU.{u}.map
+      (algebraMap WeierstrassAtlasRingU.{u} R))).weilPairingEval x x hx hx :
+      Γ(T, ⊤)) = 1 := by
+  classical
+  set σ : Spec (CommRingCat.of R) ⟶ Spec (CommRingCat.of WeierstrassAtlasRingU.{u}) :=
+    Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} R)) with hσ
+  obtain ⟨φ, hφ⟩ := modelBaseChangeIsoAsOver_ring universalWeierstrassLocU.{u} R
+  haveI := hφ
+  -- transport `x` back to the base-changed universal record
+  set y : ((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ).Point g :=
+    Point.mapIso φ.symm x with hy
+  have hykill : y.1 ≫ ((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ).mulByHom N
+      = g ≫ ((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ).zero := by
+    haveI : IsMonHom φ.symm.hom := isMonHom_symm φ
+    exact Point.mapIso_killedBy φ.symm hx
+  -- and further to a point of the universal record over `g ≫ σ`
+  set z : (modelEllipticCurve universalWeierstrassLocU.{u}).Point (g ≫ σ) :=
+    EllipticCurve.Point.baseChangeEquiv (modelEllipticCurve universalWeierstrassLocU.{u})
+      σ g y with hz
+  have hzkill : z.1 ≫ (modelEllipticCurve universalWeierstrassLocU.{u}).mulByHom N =
+      (g ≫ σ) ≫ (modelEllipticCurve universalWeierstrassLocU.{u}).zero := by
+    sorry
+  -- the universal statement at `z`
+  have huniv := weilPairingEval_self_universalModel z hzkill
+  sorry
+
 end EllipticCurve
 
 end ModularCurves

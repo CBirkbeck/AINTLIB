@@ -1147,7 +1147,18 @@ theorem zero_comp_left_of_isMonHom {E F : EllipticCurve S}
     exact h2
   simpa using h2'
 
-theorem Point.mapIso_killedBy {E F : EllipticCurve S} [IsLocallyNoetherian S]
+/-- The inverse of a pointed record iso is again a monoid-object hom. -/
+theorem isMonHom_symm {E F : EllipticCurve S} (φ : E.asOver ≅ F.asOver)
+    [IsMonHom φ.hom] : IsMonHom φ.symm.hom := by
+  have h1 : (η[E.asOver] : 𝟙_ (Over S) ⟶ E.asOver) ≫ φ.hom = η[F.asOver] :=
+    IsMonHom.one_hom φ.hom
+  have hη : (η[F.asOver] : 𝟙_ (Over S) ⟶ F.asOver) ≫ φ.symm.hom = η[E.asOver] := by
+    rw [← h1, Category.assoc]
+    show (η[E.asOver] : 𝟙_ (Over S) ⟶ E.asOver) ≫ (φ.hom ≫ φ.inv) = η[E.asOver]
+    rw [φ.hom_inv_id, Category.comp_id]
+  exact ⟨hη, isMonHom_of_pointedIso_records _ _ φ.symm hη⟩
+
+theorem Point.mapIso_killedBy {E F : EllipticCurve S}
     (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {T : Scheme.{u}} {g : T ⟶ S}
     {N : ℕ} {x : E.Point g} (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
     (Point.mapIso φ x).1 ≫ F.mulByHom N = g ≫ F.zero := by
