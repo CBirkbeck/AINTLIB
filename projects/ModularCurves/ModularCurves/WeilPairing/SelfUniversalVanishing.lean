@@ -185,6 +185,15 @@ theorem geometricallyReduced_torsionπ {S : Scheme.{u}} (E : EllipticCurve S) (N
     exact isReduced_of_isAffine_isReduced _
   exact isReduced_of_isOpenImmersion hiso.hom
 
+/-- **([U4d])** Over a reduced locally-noetherian base on which `N` is invertible, the
+`N`-torsion scheme is reduced. -/
+theorem isReduced_torsion {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ) [NeZero N]
+    (hN : NIsInvertible S N) [IsReduced S] [IsLocallyNoetherian S] :
+    IsReduced (E.torsion N) := by
+  haveI : GeometricallyReduced (E.torsionπ N) := geometricallyReduced_torsionπ E N hN
+  haveI : Flat (E.torsionπ N) := E.torsionπ_flat N
+  exact GeometricallyReduced.isReduced_of_flat_of_isLocallyNoetherian (E.torsionπ N)
+
 end EllipticCurve
 
 end ModularCurves
