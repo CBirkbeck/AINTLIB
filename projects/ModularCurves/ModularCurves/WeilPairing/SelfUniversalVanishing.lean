@@ -494,6 +494,47 @@ theorem modelBaseChangeIsoAsOver_ring {R : Type u} [CommRing R] [IsNoetherianRin
     (modelEllipticCurve (W.map (algebraMap R R'))).one_eq_zero]
   exact (Category.assoc _ _ _).trans (congrArg _ hz)
 
+/-- **([ASM-2], the universal pullback principle)** For the universal model record, the
+diagonal value at ANY torsion point (over any base map) is `1`: the point classifies a
+map to `X_N` along which the tautological value pulls back. -/
+theorem weilPairingEval_self_universalModel {N : ℕ} [NeZero N] {T : Scheme.{u}}
+    {g : T ⟶ Spec (CommRingCat.of WeierstrassAtlasRingU.{u})}
+    (x : (modelEllipticCurve universalWeierstrassLocU.{u}).Point g)
+    (hx : x.1 ≫ (modelEllipticCurve universalWeierstrassLocU.{u}).mulByHom N =
+      g ≫ (modelEllipticCurve universalWeierstrassLocU.{u}).zero) :
+    ((modelEllipticCurve universalWeierstrassLocU.{u}).weilPairingEval x x hx hx :
+      Γ(T, ⊤)) = 1 := by
+  obtain ⟨k, hkπ, hkι⟩ :
+      ∃ k : T ⟶ (modelEllipticCurve universalWeierstrassLocU.{u}).torsion N,
+        k ≫ (modelEllipticCurve universalWeierstrassLocU.{u}).torsionπ N = g ∧
+        k ≫ (modelEllipticCurve universalWeierstrassLocU.{u}).torsionι N = x.1 :=
+    ⟨(modelEllipticCurve universalWeierstrassLocU.{u}).pointToTorsion x hx,
+      (modelEllipticCurve universalWeierstrassLocU.{u}).pointToTorsion_torsionπ x hx,
+      (modelEllipticCurve universalWeierstrassLocU.{u}).pointToTorsion_torsionι x hx⟩
+  subst hkπ
+  -- the restricted tautological point is `x`
+  have hrestrkill : (EllipticCurve.Point.restrict
+        (modelEllipticCurve universalWeierstrassLocU.{u}) k (tautTorsionPoint _ N)).1 ≫
+      (modelEllipticCurve universalWeierstrassLocU.{u}).mulByHom N =
+      (k ≫ (modelEllipticCurve universalWeierstrassLocU.{u}).torsionπ N) ≫
+        (modelEllipticCurve universalWeierstrassLocU.{u}).zero := by
+    show (k ≫ (modelEllipticCurve universalWeierstrassLocU.{u}).torsionι N) ≫ _ = _
+    rw [Category.assoc, Category.assoc]
+    exact congrArg (fun m => k ≫ m)
+      (tautTorsionPoint_killedBy (modelEllipticCurve universalWeierstrassLocU.{u}) N)
+  have hpt : EllipticCurve.Point.restrict
+      (modelEllipticCurve universalWeierstrassLocU.{u}) k (tautTorsionPoint _ N) = x :=
+    Subtype.ext hkι
+  have hres := (modelEllipticCurve universalWeierstrassLocU.{u}).weilPairingEval_restrict k
+    (tautTorsionPoint _ N) (tautTorsionPoint _ N)
+    (tautTorsionPoint_killedBy _ N) (tautTorsionPoint_killedBy _ N) hrestrkill hrestrkill
+  rw [weilPairingEval_self_universal_eq_one N] at hres
+  rw [show ((Scheme.Γ.map k.op).hom (1 : Γ((modelEllipticCurve
+      universalWeierstrassLocU.{u}).torsion N, ⊤))) = 1 from map_one _] at hres
+  rw [(modelEllipticCurve universalWeierstrassLocU.{u}).weilPairingEval_congr
+    (N := N) hpt hpt hrestrkill hrestrkill hx hx] at hres
+  exact hres
+
 end EllipticCurve
 
 end ModularCurves
