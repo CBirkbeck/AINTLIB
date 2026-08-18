@@ -123,11 +123,12 @@ theorem weilPairingEval_self_of_field {K : Type u} [Field K]
 `pullback.condition` of the defining fibre square. -/
 noncomputable def tautTorsionPoint (E : EllipticCurve S) (N : ℕ) :
     E.Point (E.torsionπ N) :=
-  ⟨E.torsionι N, by sorry⟩
+  ⟨E.torsionι N, E.torsionι_π N⟩
 
 /-- The tautological point is killed by `N` — `pullback.condition` verbatim. -/
 theorem tautTorsionPoint_killedBy (E : EllipticCurve S) (N : ℕ) :
-    (tautTorsionPoint E N).1 ≫ E.mulByHom N = E.torsionπ N ≫ E.zero := by sorry
+    (tautTorsionPoint E N).1 ≫ E.mulByHom N = E.torsionπ N ≫ E.zero :=
+  pullback.condition
 
 /-- **(U4, universal vanishing — conditional on the field leaf U5)** Over
 `X_N := (modelEllipticCurve 𝕌).torsion N`, the diagonal pairing of the tautological
