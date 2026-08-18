@@ -3193,3 +3193,18 @@ notes is superseded. New route, all tools verified present:
    `eq_zero_of_basicOpen_eq_bot` (mathlib Properties.lean:179) ⟹ `u = 1` on `D(N)` ⟹
    `u = 1` on `X_N` by step 1.
 Then the assembly (U2 classification + U1 + U3 + U4) closes leaf A.
+
+**★★★ [U4 REDUCED-BASE FORM COMPLETE AXIOM-CLEAN] (cont.30bh, 900b8717e)**:
+`weilPairingEval_self_of_reduced` (SelfUniversalVanishing.lean) — over ANY reduced base on
+which `N` is invertible, e_N(x,x) = 1, for any record and any N-torsion point.
+[propext, Classical.choice, Quot.sound]. Pieces: U4a `isAffine_torsion_universal`;
+U4b `flat_universalTorsionRing`; U4c `flat_int_weierstrassAtlasRingU` +
+`flat_int_universalTorsionRing` + `natCast_mem_nonZeroDivisors_universalTorsionRing`;
+U4d `isReduced_torsion_sections_of_field` + `geometricallyReduced_torsionpi` +
+`isReduced_torsion`; U4e `evaluation_eq_fromSpecResidueField` +
+`weilPairingEval_self_evaluation_eq_one`; U4f `eq_zero_of_forall_evaluation_eq_zero` +
+`eq_one_of_forall_evaluation_eq_one`; plus the SelfField extraction
+`weilPairingEval_self_of_pointOverField` (the point-over-a-field leaf, the U4e engine).
+REMAINING for leaf A over an ARBITRARY base: the universal-family step — classify (E, x)
+by a map into X_N, pull the universal value back, and evaluate it by U4-reduced on the
+N-inverted locus plus the schematic-density injection.
