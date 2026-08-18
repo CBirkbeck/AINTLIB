@@ -2755,7 +2755,7 @@ theorem QuotPkg.projQ_geom_surjective (pkg : ∀ X : EllObj R, QuotPkg φ X)
     MorphismProperty.pullback_snd _ _ het
   -- a section of the base-changed projection exists
   have hne : Nonempty ↑(Spec (CommRingCat.of k)) := by
-    refine ⟨⟨⊥, Ideal.bot_prime⟩⟩
+    refine ⟨⟨⊥, Ideal.isPrime_bot⟩⟩
   obtain ⟨x₀⟩ := hne
   have hcard := natCard_sections_eq_finrank (k := k)
     (pullback.snd (pkg X).π s.1) x₀
