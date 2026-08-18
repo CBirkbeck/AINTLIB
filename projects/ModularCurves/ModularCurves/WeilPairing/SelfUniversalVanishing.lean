@@ -27,7 +27,7 @@ This file develops the pieces in order:
 
 universe u
 
-open AlgebraicGeometry CategoryTheory Limits
+open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 
 namespace ModularCurves
 
@@ -441,15 +441,14 @@ theorem weilPairingEval_self_universal_eq_one (N : ℕ) [NeZero N] :
 
 /-- **([ASM-1])** The record-level base-change iso for models over an arbitrary ring map
 (the general-ring sibling of `modelBaseChangeIsoAsOver`). -/
-theorem modelBaseChangeIsoAsOver_ring {R : Type u} [CommRing R] [IsNoetherianRing R]
+theorem modelBaseChangeIsoAsOver_ring {R : Type u} [CommRing R]
     (W : WeierstrassCurve R) [W.IsElliptic]
-    (R' : Type u) [CommRing R'] [IsNoetherianRing R'] [Algebra R R']
+    (R' : Type u) [CommRing R'] [Algebra R R']
     [(W.map (algebraMap R R')).IsElliptic] :
     ∃ φ : ((modelEllipticCurve W).baseChange
         (Spec.map (CommRingCat.ofHom (algebraMap R R')))).asOver ≅
       (modelEllipticCurve (W.map (algebraMap R R'))).asOver,
       IsMonHom φ.hom := by
-  haveI : IsLocallyNoetherian (Spec (CommRingCat.of R')) := by infer_instance
   have b := isPullback_projModelBaseChange (R' := R') W
   let e' : ((modelEllipticCurve W).baseChange
         (Spec.map (CommRingCat.ofHom (algebraMap R R')))).asOver.left ≅
@@ -459,7 +458,12 @@ theorem modelBaseChangeIsoAsOver_ring {R : Type u} [CommRing R] [IsNoetherianRin
         (Spec.map (CommRingCat.ofHom (algebraMap R R')))).asOver.hom := by
     show b.isoPullback.inv ≫ projModelπ (W.map (algebraMap R R')) = _
     exact (Iso.inv_comp_eq _).mpr b.isoPullback_hom_snd.symm
-  refine ⟨Over.isoMk e' heπ', isMonHom_of_pointed _ ?_⟩
+  refine ⟨Over.isoMk e' heπ', ?_⟩
+  suffices hη : (η[((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap R R')))).asOver]) ≫
+      (Over.isoMk e' heπ').hom =
+      η[(modelEllipticCurve (W.map (algebraMap R R'))).asOver] by
+    exact ⟨hη, isMonHom_of_pointedIso_records _ _ (Over.isoMk e' heπ') hη⟩
   have hz : ((modelEllipticCurve W).baseChange
         (Spec.map (CommRingCat.ofHom (algebraMap R R')))).zero ≫ e'.hom
       = (modelEllipticCurve (W.map (algebraMap R R'))).zero := by
