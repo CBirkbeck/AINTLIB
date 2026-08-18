@@ -353,6 +353,65 @@ theorem weilPairingEval_self_of_nonZeroDivisor {S : Scheme.{u}} (E : EllipticCur
       (congrArg T.presheaf.map (Subsingleton.elim _ _))
   rw [← hbridge, ← hres, map_one]
 
+/-- **([U4-NLOCUS])** The `N`-inverted locus of the torsion base is the torsion over the
+`N`-inverted locus of the base, hence reduced when the base is. -/
+theorem isReduced_basicOpen_natCast_torsion {S : Scheme.{u}} (E : EllipticCurve S)
+    (N : ℕ) [NeZero N] [IsReduced S] [IsLocallyNoetherian S] :
+    IsReduced ((E.torsion N).basicOpen ((N : ℕ) : Γ(E.torsion N, ⊤)) : Scheme.{u}) := by
+  -- the locus is the preimage of the base's `N`-locus
+  set V : S.Opens := S.basicOpen ((N : ℕ) : Γ(S, ⊤)) with hV
+  have hpre : (E.torsionπ N) ⁻¹ᵁ V =
+      (E.torsion N).basicOpen ((N : ℕ) : Γ(E.torsion N, ⊤)) := by
+    rw [hV, Scheme.preimage_basicOpen]
+    refine congrArg (E.torsion N).basicOpen ?_
+    exact map_natCast ((E.torsionπ N).appTop).hom N
+  -- the base's `N`-locus is reduced, locally noetherian, and `N` is invertible there
+  haveI : IsReduced (V : Scheme.{u}) := isReduced_of_isOpenImmersion V.ι
+  haveI : IsLocallyNoetherian (V : Scheme.{u}) :=
+    isLocallyNoetherian_of_isOpenImmersion V.ι
+  haveI hNV : NIsInvertible (V : Scheme.{u}) N := by
+    show IsUnit ((N : ℕ) : Γ((V : Scheme.{u}), ⊤))
+    have h1 : IsUnit (S.presheaf.map (homOfLE (le_top : V ≤ ⊤)).op ((N : ℕ) : Γ(S, ⊤))) :=
+      S.toRingedSpace.isUnit_res_basicOpen _
+    have hnat : (S.presheaf.map (homOfLE (le_top : V ≤ ⊤)).op).hom ((N : ℕ) : Γ(S, ⊤)) =
+        ((N : ℕ) : Γ(S, V)) := map_natCast _ N
+    rw [hnat] at h1
+    have h2 := h1.map V.topIso.inv.hom
+    rw [show (V.topIso.inv.hom ((N : ℕ) : Γ(S, V))) = ((N : ℕ) : Γ((V : Scheme.{u}), ⊤))
+      from map_natCast _ N] at h2
+    exact h2
+  -- the torsion over that locus is reduced, and it is the preimage
+  haveI hred : IsReduced ((E.baseChange V.ι).torsion N) :=
+    isReduced_torsion (E.baseChange V.ι) N hNV
+  have hsq := E.torsion_baseChange_isPullback N V.ι
+  haveI : IsOpenImmersion (E.torsionBaseChangeHom N V.ι) :=
+    MorphismProperty.of_isPullback hsq.flip inferInstance
+  -- the image of that open immersion is exactly the preimage locus
+  have hoRange : (E.torsionBaseChangeHom N V.ι).opensRange = (E.torsionπ N) ⁻¹ᵁ V := by
+    apply TopologicalSpace.Opens.ext
+    show Set.range (E.torsionBaseChangeHom N V.ι).base = _
+    have h1 : (E.torsionBaseChangeHom N V.ι) =
+        hsq.isoPullback.hom ≫ pullback.fst (E.torsionπ N) V.ι :=
+      (hsq.isoPullback_hom_fst).symm
+    rw [h1, Scheme.Hom.comp_base]
+    show Set.range ((pullback.fst (E.torsionπ N) V.ι).base ∘ hsq.isoPullback.hom.base) = _
+    rw [Set.range_comp]
+    have hsurj : Set.range (hsq.isoPullback.hom.base) = Set.univ := by
+      rw [Set.range_eq_univ]
+      intro z
+      exact ⟨hsq.isoPullback.inv.base z, by
+        show (hsq.isoPullback.inv ≫ hsq.isoPullback.hom).base z = z
+        rw [Iso.inv_hom_id]; rfl⟩
+    rw [hsurj, Set.image_univ]
+    rw [Scheme.Pullback.range_fst]
+    show (E.torsionπ N).base ⁻¹' (Set.range V.ι.base) = _
+    rw [show Set.range V.ι.base = (V : Set S) from V.range_ι]
+    rfl
+  -- transport reducedness along the induced isomorphism
+  have hiso := (E.torsionBaseChangeHom N V.ι).isoOpensRange
+  rw [hoRange, hpre] at hiso
+  exact isReduced_of_isOpenImmersion hiso.inv
+
 end EllipticCurve
 
 end ModularCurves
