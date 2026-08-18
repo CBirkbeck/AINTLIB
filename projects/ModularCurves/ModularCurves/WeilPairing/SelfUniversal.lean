@@ -101,20 +101,12 @@ theorem weilPairingEval_mapIso {E F : EllipticCurve S} [IsLocallyNoetherian S]
   case hP' => exact hmxF
   case hQ' => exact hmyF
 
-/-! ## U5 — the field leaf (API gap: own sub-development, see the decomposition doc) -/
+/-! ## U5 — the field leaf
 
-/-- **(U5, THE FIELD LEAF — the irreducible input, KM 2.8.3 over a field)** Alternation
-of the pairing over a field in which `N` is invertible. Route: descend to an algebraic
-closure (`Γ`-injectivity of a field extension), instantiate the KM dataset through the
-classical Weil function `g_Q`, match the translation characterisations
-(`eq_mul_globalTwist_of_translate` ↔ `HasseWeil.weilPairing_spec`), and import
-HasseWeil's `weilPairing_self`. Sub-decomposition in its own `/develop` pass. -/
-theorem weilPairingEval_self_of_field {K : Type u} [Field K]
-    (E : EllipticCurve (Spec (CommRingCat.of K))) {N : ℕ} [NeZero N]
-    (hNK : (N : K) ≠ 0)
-    (x : E.Point (𝟙 (Spec (CommRingCat.of K))))
-    (hx : x.1 ≫ E.mulByHom N = 𝟙 _ ≫ E.zero) :
-    (E.weilPairingEval x x hx hx : Γ(Spec (CommRingCat.of K), ⊤)) = 1 := by sorry
+**PROVED** in `WeilPairing/SelfField.lean` as
+`weilPairingEval_self_of_field'` (any field with `N` invertible), by descent from the
+algebraically closed leaf `weilPairingEval_self_of_isAlgClosed`. The `hfield`-hypothesis
+of `weilPairingEval_self_universal` below is discharged there. -/
 
 /-! ## U4 — vanishing over the universal torsion base -/
 
@@ -145,7 +137,7 @@ theorem weilPairingEval_self_universal {N : ℕ} [NeZero N]
       (E'.weilPairingEval (N := N) x x hx hx : Γ(Spec (CommRingCat.of K), ⊤)) = 1) :
     ((modelEllipticCurve universalWeierstrassLocU.{u}).weilPairingEval (N := N)
         (tautTorsionPoint _ N) (tautTorsionPoint _ N)
-        (by sorry) (by sorry) :
+        (tautTorsionPoint_killedBy _ N) (tautTorsionPoint_killedBy _ N) :
       Γ((modelEllipticCurve universalWeierstrassLocU.{u}).torsion N, ⊤)) = 1 := by sorry
 
 /-- **(FINAL ASSEMBLY — the statement of `Basic.lean:372`, proven downstream)**
