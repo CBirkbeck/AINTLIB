@@ -2779,6 +2779,16 @@ theorem weilPairingKM_bcSwapGen
   exact torsionSplittingEval_bcSwapGen E t g hsm hsmBC N Q hQ hQsw hQswt A hA W hW e hnorm
     Pt hPt hPsw hPswt
 
+@[reassoc] theorem bcSwapGenIso_inv_snd :
+    (bcSwapGenIso E t g).inv ≫ pullback.snd ((E.baseChange t).π) g =
+      pullback.snd E.π (g ≫ t) := by
+  refine (congrArg (fun m => (bcSwapGenIso E t g).inv ≫ m)
+    (bcSwapGenIso_hom_snd E t g).symm).trans ?_
+  refine (Category.assoc _ _ _).symm.trans ?_
+  refine (congrArg (fun m => m ≫ pullback.snd E.π (g ≫ t))
+    (bcSwapGenIso E t g).inv_hom_id).trans ?_
+  exact Category.id_comp _
+
 end BcSwapGen
 
 end ModularCurves
