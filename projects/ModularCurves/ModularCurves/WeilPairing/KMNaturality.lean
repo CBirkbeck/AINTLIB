@@ -2001,4 +2001,27 @@ theorem hnorm_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}} (t 
   exact mem_sectionUnits_pullback (baseChangeZero_comp_bcSwapIso E t)
     (W i ⊓ W j) (hnorm i j)
 
+/-- **([MULBYN-BCSWAP])** The collapse iso intertwines the multiplication maps. -/
+theorem mulByN_comp_bcSwapIso {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (t : T ⟶ S) (N : ℕ) :
+    mulByN (E.baseChange t) (𝟙 T) N ≫ (bcSwapIso E t).hom = (bcSwapIso E t).hom ≫ mulByN E t N := by
+  have hmE : mulByN E t N = (E.baseChange t).mulByHom (N : ℤ) := rfl
+  have hmB : mulByN (E.baseChange t) (𝟙 T) N =
+      ((E.baseChange t).baseChange (𝟙 T)).mulByHom (N : ℤ) := rfl
+  have hI : (bcSwapIso E t).hom = pullback.fst ((E.baseChange t).π) (𝟙 T) := rfl
+  rw [hmE, hmB, hI]
+  refine pullback.hom_ext ?_ ?_
+  · exact congrArg (· ≫ pullback.fst E.π t)
+      (EllipticCurve.mulByHom_baseChange_fst (E.baseChange t) (𝟙 T) (N : ℤ))
+  · exact congrArg (· ≫ pullback.snd E.π t)
+      (EllipticCurve.mulByHom_baseChange_fst (E.baseChange t) (𝟙 T) (N : ℤ))
+
+/-- The preimage square of [MULBYN-BCSWAP]. -/
+theorem mulByN_preimage_bcSwapIso {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (t : T ⟶ S) (N : ℕ) (V : (pullback E.π t).Opens) :
+    mulByN (E.baseChange t) (𝟙 T) N ⁻¹ᵁ ((bcSwapIso E t).hom ⁻¹ᵁ V) = (bcSwapIso E t).hom ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ V) :=
+  (Scheme.Hom.comp_preimage _ _ _).symm.trans
+    ((congrArg (· ⁻¹ᵁ V) (mulByN_comp_bcSwapIso E t N)).trans
+      (Scheme.Hom.comp_preimage _ _ _))
+
 end ModularCurves
