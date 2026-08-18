@@ -3236,3 +3236,14 @@ Ingredients present: `localModel` (U2), `classifyRingHomU` +
 `universalWeierstrassLocU_map_classifyRingHomU`, `pointToTorsion` (T ⟶ X_N),
 `weilPairingEval_restrict` (U3), `weilPairingEval_mapIso` (U1), and the model
 base-change iso `modelBaseChangeIsoAsOver`.
+
+**[ASM-1/ASM-2 LANDED] (cont.30bk, c2779946a)**: `modelBaseChangeIsoAsOver_ring` (the
+record-level model base-change iso over an arbitrary noetherian ring map) and
+`weilPairingEval_self_universalModel` (**for the universal model record, the diagonal
+value is 1 at ANY torsion point over ANY base** — via `pointToTorsion` + obtain/subst +
+`weilPairingEval_restrict` of the universal value). Both axiom-clean.
+LEAF A now needs only: (ASM-3) the MODEL case over an arbitrary noetherian ring `R`
+(transport along `modelBaseChangeIsoAsOver_ring` at the classifying map
+`classifyRingHomU W` + `Point.baseChangeEquiv` + the U1/BC-SWAP bridge — the same hbridge
+block as `weilPairingEval_self_of_pointOverField`), and (ASM-4) the general case
+(`localModel` + U1 + gluing over an affine cover of `T`).
