@@ -3302,3 +3302,13 @@ own private lemma** (the combined decl blew the 200k budget). Then: `Over.isoMk 
 `isMonHom_of_pointedIso_records`, and the ASM-4 assembly = `weilPairingEval_self_of_locally`
 + `morphismRestrict` (to factor `V.ι ≫ g` through `U.ι`) + U1 + `weilPairingKM_bcSwapGen`
 + `weilPairingEval_self_model_map`.
+
+**[ASM-4b/4c LANDED] (cont.30bp, af0d2eaa1)**: `exists_localModel_recordIso` (the
+`localModel` data as a pointed record iso over `Spec Γ(S,U)`; π- and zero-compatibility
+each in their own lemma for the budget, with the new legs `bcSwapGenIso_inv_snd` /
+`bcSwapGenIso_inv_fst_fst`) and `weilPairingEval_self_model` (**the model case for ANY
+elliptic Weierstrass curve over any ring** — `obtain`+`subst` on the classifying map dodges
+the dependent-instance motive). Both axiom-clean; every file in the chain is sorry-free.
+THE LAST STEP: assemble — `weilPairingEval_self_of_locally` + `E.localModel (g.base p)` +
+`morphismRestrict` (factor `V.ι ≫ g` through `U.ι`) + `exists_localModel_recordIso` + U1
+(`weilPairingEval_mapIso`) + `weilPairingKM_bcSwapGen` + `weilPairingEval_self_model`.
