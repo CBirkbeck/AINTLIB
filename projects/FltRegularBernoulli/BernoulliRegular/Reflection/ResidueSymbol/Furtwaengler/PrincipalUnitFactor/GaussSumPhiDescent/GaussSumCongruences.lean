@@ -103,7 +103,7 @@ theorem mem_span_singleton_pow_two_of_algebraMap_mem_span_singleton_pow_two
     rw [hy_alg]
     exact NumberField.RingOfIntegers.isIntegral_coe w
   have hy_int : IsIntegral ℤ y :=
-    (isIntegral_algebraMap_iff (FaithfulSMul.algebraMap_injective K R')).mp hy_int_R'
+    isIntegral_algebraMap_iff.mp hy_int_R'
   refine ⟨⟨y, hy_int⟩, ?_⟩
   apply RingOfIntegers.ext
   change (x : K) = ((ε : K) ^ 2) * y
