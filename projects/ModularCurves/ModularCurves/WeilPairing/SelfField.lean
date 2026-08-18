@@ -54,6 +54,30 @@ theorem injective_appTop_specMap {R S : CommRingCat.{u}} (f : R ⟶ S)
   have h4 := congrArg (fun m => (Scheme.ΓSpecIso R).inv.hom m) h3
   simpa using h4
 
+/-- **([ASSEC-BCSWAP-GEN])** The `asSection` of a point of the doubled base change is
+carried by the general collapse iso to the `asSection` of the corresponding point. -/
+theorem asSection_comp_bcSwapGenIso {S : Scheme.{u}} (E : EllipticCurve S)
+    {T T' : Scheme.{u}} (t : T ⟶ S) (g : T' ⟶ T)
+    (y : (E.baseChange t).Point g) :
+    (EllipticCurve.Point.asSection (E.baseChange t) g y).1 ≫ (bcSwapGenIso E t g).hom =
+      (EllipticCurve.Point.asSection E (g ≫ t)
+        (EllipticCurve.Point.baseChangeEquiv E t g y)).1 := by
+  refine pullback.hom_ext ?_ ?_
+  · refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (fun m => (EllipticCurve.Point.asSection (E.baseChange t) g y).1 ≫ m)
+      (bcSwapGenIso_hom_fst E t g)).trans ?_
+    refine (Category.assoc _ _ _).symm.trans ?_
+    refine (congrArg (fun m => m ≫ pullback.fst E.π t)
+      (EllipticCurve.Point.asSection_val_fst (E.baseChange t) g y)).trans ?_
+    exact (EllipticCurve.Point.asSection_val_fst E (g ≫ t)
+      (EllipticCurve.Point.baseChangeEquiv E t g y)).symm
+  · refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (fun m => (EllipticCurve.Point.asSection (E.baseChange t) g y).1 ≫ m)
+      (bcSwapGenIso_hom_snd E t g)).trans ?_
+    refine (EllipticCurve.Point.asSection_val_snd (E.baseChange t) g y).trans ?_
+    exact (EllipticCurve.Point.asSection_val_snd E (g ≫ t)
+      (EllipticCurve.Point.baseChangeEquiv E t g y)).symm
+
 /-- **([ASSEC-BCSWAP])** The `asSection` of a base-changed point is the [BC-SWAP]
 image of that point. -/
 theorem asSection_eq_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}

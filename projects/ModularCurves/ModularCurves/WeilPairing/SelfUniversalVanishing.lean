@@ -586,6 +586,21 @@ theorem weilPairingEval_self_model_map {R : Type u} [CommRing R]
       y y hykill hykill : Γ(T, ⊤)) =
       ((modelEllipticCurve universalWeierstrassLocU.{u}).weilPairingEval z z hzkill hzkill :
         Γ(T, ⊤)) := by
+    haveI hsepU : IsSeparated (modelEllipticCurve universalWeierstrassLocU.{u}).π :=
+      inferInstance
+    haveI hsepBC : IsSeparated
+        (((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ).π) :=
+      MorphismProperty.pullback_snd (P := @IsSeparated) _ _ hsepU
+    have hsmBC : SmoothOfRelativeDimension 1
+        (((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ).π) :=
+      haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+      MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) _ _
+        (modelEllipticCurve universalWeierstrassLocU.{u}).smooth
+    rw [((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ).weilPairingEval_eq_weilPairingKM
+      y y hykill hykill,
+      (modelEllipticCurve universalWeierstrassLocU.{u}).weilPairingEval_eq_weilPairingKM
+      z z hzkill hzkill]
+    refine congrArg Units.val ?_
     sorry
   -- transport back along `φ`
   have hmap := weilPairingEval_mapIso φ y y hykill hykill
