@@ -1510,7 +1510,7 @@ private theorem exists_card_residue_fibre_sub_mul_rpow_le_explicit {K : Type*} [
       ((intNorm (idealSetEquiv K J a).val : ZMod m) = (b : ZMod m))
   · obtain ⟨a₀, horth₀, hcos₀, hres₀⟩ := hQ
     obtain ⟨cellC, hcell⟩ := exists_card_cell_sub_mul_rpow_le_explicit T m hm
-      (Φ '' (normLeOne K)) (Φ.lipschitz.isBounded_image (isBounded_normLeOne K))
+      (Φ '' (normLeOne K)) (Φ.toContinuousLinearMap.lipschitzWith.isBounded_image (isBounded_normLeOne K))
       ((Φ.toHomeomorph.toMeasurableEquiv).measurableSet_image.mpr (measurableSet_normLeOne K))
       hcov (Sum.inl : {w : InfinitePlace K // IsReal w} → index K) s
     refine ⟨cellC, fun t ht ↦ ?_⟩
@@ -2221,7 +2221,7 @@ private theorem relIndex_mul_ideal_eq_absNorm {K : Type*} [Field K] [NumberField
       ≤ ((J : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K)).toAddSubgroup := by
     rw [Submodule.toAddSubgroup_le]
     push_cast
-    exact Ideal.mul_le_left
+    exact Ideal.mul_le_right
   have key := AddSubgroup.relIndex_mul_index hle
   rw [← Ideal.absNorm_eq_index, ← Ideal.absNorm_eq_index] at key
   have hNbJ : Ideal.absNorm ((𝔟 * J : (Ideal (𝓞 K))⁰) : Ideal (𝓞 K))
@@ -2245,7 +2245,7 @@ private theorem idealLattice_mul_le {K : Type*} [Field K] [NumberField K]
       ≤ (FractionalIdeal.mk0 K J : FractionalIdeal (𝓞 K)⁰ K) := by
     simp only [FractionalIdeal.coe_mk0]
     rw [FractionalIdeal.coeIdeal_le_coeIdeal]
-    exact Ideal.mul_le_left
+    exact Ideal.mul_le_right
   exact hsub hy
 
 open Ideal NumberField in
@@ -2473,7 +2473,7 @@ private theorem exists_mk0_eq_absNorm_coprime {K : Type*} [Field K] [NumberField
     have : 2 ≤ n ^ Module.finrank ℤ (𝓞 K) :=
       le_trans hn2 (Nat.le_self_pow Module.finrank_pos.ne' n)
     lia
-  have hle : 𝔫 * (J₀ : Ideal (𝓞 K)) ≤ (J₀ : Ideal (𝓞 K)) := Ideal.mul_le_left
+  have hle : 𝔫 * (J₀ : Ideal (𝓞 K)) ≤ (J₀ : Ideal (𝓞 K)) := Ideal.mul_le_right
   have hIne : 𝔫 * (J₀ : Ideal (𝓞 K)) ≠ 0 := mul_ne_zero h𝔫ne hJ₀ne
   obtain ⟨a, ha⟩ := IsDedekindDomain.exists_sup_span_eq hle hIne
   have hane : a ≠ 0 := by
@@ -2762,7 +2762,7 @@ private theorem exists_card_fibre_dvd_residue_sub_mul_rpow_le {K : Type*} [Field
   have hcard : Fintype.card (index K) = d := by
     rw [← Module.finrank_eq_card_basis (mixedEmbedding.stdBasis K), mixedEmbedding.finrank]
   obtain ⟨cellC', hcell'⟩ := exists_card_cell_sub_mul_rpow_le_explicit T' m hm
-    (Φ '' (normLeOne K)) (Φ.lipschitz.isBounded_image (isBounded_normLeOne K))
+    (Φ '' (normLeOne K)) (Φ.toContinuousLinearMap.lipschitzWith.isBounded_image (isBounded_normLeOne K))
     ((Φ.toHomeomorph.toMeasurableEquiv).measurableSet_image.mpr (measurableSet_normLeOne K))
     hcov (Sum.inl : {w : InfinitePlace K // IsReal w} → index K) s
   have hdetratio : MeasureTheory.volume.real (Φ '' (normLeOne K) ∩ Os)
