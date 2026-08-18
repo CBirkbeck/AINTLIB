@@ -601,7 +601,58 @@ theorem weilPairingEval_self_model_map {R : Type u} [CommRing R]
       (modelEllipticCurve universalWeierstrassLocU.{u}).weilPairingEval_eq_weilPairingKM
       z z hzkill hzkill]
     refine congrArg Units.val ?_
-    sorry
+    have hasec := asSection_comp_bcSwapGenIso
+      (modelEllipticCurve universalWeierstrassLocU.{u}) σ g y
+    have hzdef : z = EllipticCurve.Point.baseChangeEquiv
+        (modelEllipticCurve universalWeierstrassLocU.{u}) σ g y := rfl
+    -- the swapped point of `asSection z` is `asSection y`
+    have hcancel : (EllipticCurve.Point.asSection
+        ((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ) g y).1 =
+        (EllipticCurve.Point.asSection
+          (modelEllipticCurve universalWeierstrassLocU.{u}) (g ≫ σ) z).1 ≫
+        (bcSwapGenIso (modelEllipticCurve universalWeierstrassLocU.{u}) σ g).inv := by
+      rw [hzdef, ← hasec]
+      exact ((Category.assoc _ _ _).trans
+        ((congrArg (fun m => (EllipticCurve.Point.asSection
+          ((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ) g y).1 ≫ m)
+          (bcSwapGenIso (modelEllipticCurve universalWeierstrassLocU.{u}) σ g).hom_inv_id).trans
+        (Category.comp_id _))).symm
+    have hswcond : ((EllipticCurve.Point.asSection
+        (modelEllipticCurve universalWeierstrassLocU.{u}) (g ≫ σ) z).1 ≫
+        (bcSwapGenIso (modelEllipticCurve universalWeierstrassLocU.{u}) σ g).inv) ≫
+        pullback.snd (((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ).π) g =
+        𝟙 T := by
+      rw [← hcancel]
+      exact (EllipticCurve.Point.asSection
+        ((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ) g y).2
+    have hswpt : EllipticCurve.Point.asSection
+        ((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ) g y =
+        (⟨(EllipticCurve.Point.asSection
+            (modelEllipticCurve universalWeierstrassLocU.{u}) (g ≫ σ) z).1 ≫
+          (bcSwapGenIso (modelEllipticCurve universalWeierstrassLocU.{u}) σ g).inv,
+          hswcond⟩ :
+          (((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ).baseChange g).Point
+            (𝟙 T)) := by
+      exact Subtype.ext hcancel
+    have hswt : (⟨(EllipticCurve.Point.asSection
+          (modelEllipticCurve universalWeierstrassLocU.{u}) (g ≫ σ) z).1 ≫
+        (bcSwapGenIso (modelEllipticCurve universalWeierstrassLocU.{u}) σ g).inv,
+        hswcond⟩ :
+        (((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ).baseChange g).Point
+          (𝟙 T)) ∈
+        torsionPoints ((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ) g N :=
+      hswpt ▸ asSection_mem_torsionPoints
+        ((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ) y hykill
+    rw [weilPairingKM_congr
+      ((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ) hsmBC g N
+      hswpt hswpt (asSection_mem_torsionPoints _ y hykill)
+      (asSection_mem_torsionPoints _ y hykill)]
+    exact weilPairingKM_bcSwapGen (modelEllipticCurve universalWeierstrassLocU.{u}) σ g
+      (modelEllipticCurve universalWeierstrassLocU.{u}).smooth hsmBC N
+      (EllipticCurve.Point.asSection _ (g ≫ σ) z)
+      (asSection_mem_torsionPoints _ z hzkill)
+      (EllipticCurve.Point.asSection _ (g ≫ σ) z)
+      (asSection_mem_torsionPoints _ z hzkill) hswcond hswt hswcond hswt
   -- transport back along `φ`
   have hmap := weilPairingEval_mapIso φ y y hykill hykill
     (Point.mapIso_killedBy φ hykill) (Point.mapIso_killedBy φ hykill)
