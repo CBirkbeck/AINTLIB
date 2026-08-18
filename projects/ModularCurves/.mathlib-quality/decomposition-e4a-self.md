@@ -3222,3 +3222,17 @@ the torsion along the open immersion, `torsion_baseChange_isPullback`); (ii) the
 classification/gluing step: every `(E, x, hx)` over `T` is locally a pullback of the
 universal one, so its value is the pullback of 1 (via `weilPairingEval_restrict` + U1);
 (iii) wire `weilPairingEval_self'` and `Basic.lean:372`.
+
+**★★★ [U4 COMPLETE — THE UNIVERSAL VALUE IS 1] (cont.30bj, b1ede9c62)**:
+`weilPairingEval_self_universal_eq_one` — the diagonal pairing value of the tautological
+point over the universal N-torsion base is 1, [propext, Classical.choice, Quot.sound].
+The chain: `isReduced_basicOpen_natCast_torsion` (the N-locus of any torsion base is
+reduced: preimage_basicOpen + torsion_baseChange_isPullback range identification +
+isoOpensRange transport) + `natCast_mem_nonZeroDivisors_universalTorsionRing` +
+`weilPairingEval_self_of_nonZeroDivisor` (affine base, N regular, reduced N-locus).
+LEAF A now needs ONLY the classification/gluing step: every (E, x, hx) over T is locally
+the pullback of the universal pair, so its value is the pullback of the universal 1.
+Ingredients present: `localModel` (U2), `classifyRingHomU` +
+`universalWeierstrassLocU_map_classifyRingHomU`, `pointToTorsion` (T ⟶ X_N),
+`weilPairingEval_restrict` (U3), `weilPairingEval_mapIso` (U1), and the model
+base-change iso `modelBaseChangeIsoAsOver`.
