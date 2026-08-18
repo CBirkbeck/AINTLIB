@@ -3134,3 +3134,25 @@ exists_projModelIso_of_field → Φ pointed-iso → U1-transport to the model �
 (kappa-dict + G2′) → L4-plumbing (weilPairingEval_eq_torsionSplittingEval) → L5
 (torsionSplittingEval_self_eq_one); then the K→K̄ descent (Γ-injectivity). Then U4,
 assembly, leaf A.
+
+**★★★ [U5-AC COMPLETE AXIOM-CLEAN] (cont.30be, cc08f5789)**: `weilPairingEval_self_of_isAlgClosed`
+(SelfField.lean, sorry-free) — [propext, Classical.choice, Quot.sound]. e_N(x,x) = 1 over any
+algebraically closed field with (N:K) ≠ 0, for ANY elliptic-curve record E. The assembly:
+stage-1 model transport (exists_projModelIso_of_field + Over.isoMk + isMonHom_of_pointed +
+mapIso_killedBy + ← weilPairingEval_mapIso); stage-2 record-level instances; stage-3 the
+dataset (exists_module_kappa + nonempty_tensorObj_sectionIdeal_iso_zeroIdeal_of_field +
+sectionDivisor_isOfficial.locallyPrincipal ×2 + the terminal-separation/affine-diagonal
+chain + exists_normalized_chart_dataset_perChart); stage-4 the D4-pipe splittings + the
+SpecPoints p (term-mode component) + the ξ-torsion-transfer hT (baseChangeEquiv.trans
+pointCongr; local copies of the cast micros); stage-5 QC/ICI on the section +
+translateByIso-dominance + the chart choice + L4-pin + L5-close through ΓSpecIso-injectivity.
+DEBUG-LESSONS: the zQm-instance-keys need a set-FVAR-ATOM (haveI at any spelling of
+Subtype.val-terms misses — set zQm := … then haveI : P zQm); the hxiQ show was a SILENT
+sorryAx (memory-pattern tells: uses-sorry + tactic-does-nothing + never-executed) — fixed
+by the hξdef/AddEquiv.trans_apply/apply_coe rw-chain; ALWAYS #print axioms after assembly.
+SESSION-TOTAL: THREE campaigns landed axiom-clean — L1 (the E4a ord-engine), U1 (mapIso
+transport), U5-AC (the field leaf). REMAINING for leaf A: [U5-DESCENT] (K→K̄:
+weilPairingEval_restrict along Spec K̄ → Spec K + Γ-injectivity of the field extension +
+(N:K̄)≠0-transport — fills SelfUniversal weilPairingEval_self_of_field), [U4] (tautTorsionPoint
+rfl-sorries + the universal vanishing: affine/ℤ-flat/N-inverted-reduced route), [assembly]
+(weilPairingEval_self' via U2-localModel + U1 + U3-gluing + U4), then wire Basic:372.
