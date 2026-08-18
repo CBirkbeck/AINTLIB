@@ -3156,3 +3156,20 @@ weilPairingEval_restrict along Spec K̄ → Spec K + Γ-injectivity of the field
 (N:K̄)≠0-transport — fills SelfUniversal weilPairingEval_self_of_field), [U4] (tautTorsionPoint
 rfl-sorries + the universal vanishing: affine/ℤ-flat/N-inverted-reduced route), [assembly]
 (weilPairingEval_self' via U2-localModel + U1 + U3-gluing + U4), then wire Basic:372.
+
+**★★★ [U5 COMPLETE AXIOM-CLEAN] (cont.30bf, b0d8a54fd)**: `weilPairingEval_self_of_field'`
+(SelfField.lean) — e_N(x,x) = 1 over **any** field with N invertible, [propext,
+Classical.choice, Quot.sound]. Route: U5-AC (alg-closed) + the descent = [GAMMA-INJ]
+(`injective_appTop_specMap`, ΓSpecIso-naturality conjugation) + `weilPairingEval_restrict`
++ the **BC-SWAP campaign** (7 pieces in KMNaturality: `bcSwapIso` (the identity-pullback
+collapse), sectionCls/zeroCls/kappa/hM/hnorm-bcSwap, the mulByN + UMAP squares,
+`torsionSplittingEval_bcSwap`, `weilPairingKM_bcSwap`) + `asSection_eq_bcSwap`.
+New reusable micros: `sectionEval_congr_morphism`, `resUnit_unitsMap_app_resUnit`,
+`map_mul_inv_transport` (abstract CommGroup transport — the cheapest fix for calc
+blowups on giant scheme terms), `injective_appTop_specMap`.
+REMAINING for leaf A: **U4** (SelfUniversal: tautTorsionPoint rfl-sorries + the universal
+vanishing over X_N: affine / ℤ-flat / N-inverted-reduced route, fully specified in the
+U4a–U4f notes above) and the **assembly** (`weilPairingEval_self'` = U2-localModel + U1 +
+U3-gluing + U4 + U5), then wire `Basic.lean:372`; `AlternationReduction` then closes
+leaf A. NOTE: SelfUniversal's own `weilPairingEval_self_of_field` sorry is now redundant —
+the real theorem lives in SelfField (primed name); wire or delete at assembly time.
