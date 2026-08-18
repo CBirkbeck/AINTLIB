@@ -546,6 +546,9 @@ theorem logDeriv_eq_sum_add_of_factorization {U : Set ℂ} (hUo : IsOpen U)
   congr 1
   have h1 : logDeriv (fun z => ∏ u ∈ F, (fun w : ℂ => w - u) z ^ d u) ζ
       = ∑ u ∈ F, logDeriv (fun z => (fun w : ℂ => w - u) z ^ d u) ζ := by
+    rw [show (fun z => ∏ u ∈ F, (fun w : ℂ => w - u) z ^ d u)
+        = ∏ u ∈ F, (fun w : ℂ => (w - u) ^ d u) from
+          funext fun z => by simp [Finset.prod_apply]]
     refine logDeriv_prod (fun u hu => ?_) (fun u hu => ?_)
     · exact zpow_ne_zero _ (sub_ne_zero_of_ne (hζne u hu))
     · exact (differentiableAt_id.sub_const u).zpow (Or.inr (hd u))
