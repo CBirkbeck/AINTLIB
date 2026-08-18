@@ -45,6 +45,14 @@ classical Gauss derivation.
 
 namespace DedekindResidue
 
+/-- Pointwise-lambda form of `logDeriv_mul`. mathlib states it on the `Pi` product `f * g`,
+which `rw` will not match against a goal written `fun z => f z * g z`; the two are
+definitionally equal, so this restatement is the identity. -/
+private theorem logDeriv_mul_lambda {f g : ℂ → ℂ} (x : ℂ) (hf : f x ≠ 0) (hg : g x ≠ 0)
+    (hdf : DifferentiableAt ℂ f x) (hdg : DifferentiableAt ℂ g x) :
+    logDeriv (fun z => f z * g z) x = logDeriv f x + logDeriv g x :=
+  logDeriv_mul x hf hg hdf hdg
+
 open MeasureTheory Complex intervalIntegral Real Filter SchwartzMap
 open scoped FourierTransform ContDiff ComplexConjugate InnerProductSpace ENNReal
 
@@ -3216,7 +3224,7 @@ theorem logDeriv_Gammaℝ {s : ℂ} (hs : 0 < s.re) :
     exact ((h0.const_cpow (Or.inl hπ)).differentiableAt)
   have hd2 : DifferentiableAt ℂ (fun w : ℂ => Complex.Gamma (w / 2)) s :=
     (differentiableAt_Gamma_of_re_pos hs2).comp s (differentiableAt_id.div_const 2)
-  rw [logDeriv_mul s hpow_ne hΓ_ne hd1 hd2]
+  rw [logDeriv_mul_lambda s hpow_ne hΓ_ne hd1 hd2]
   have hlog1 : logDeriv (fun w : ℂ => (π:ℂ) ^ (-w / 2)) s = -(1/2) * Complex.log π := by
     rw [logDeriv_apply]
     have h0 : HasDerivAt (fun w : ℂ => -w / 2) (-(1/2)) s := by
@@ -3302,7 +3310,7 @@ theorem logDeriv_Gammaℂ {s : ℂ} (hs : 0 < s.re) :
     DifferentiableAt.const_mul
       (((hasDerivAt_id s).neg.const_cpow (Or.inl hbase)).differentiableAt) 2
   have hdΓ : DifferentiableAt ℂ Complex.Gamma s := differentiableAt_Gamma_of_re_pos hs
-  rw [logDeriv_mul (f := fun w : ℂ => 2 * (2 * (π:ℂ)) ^ (-w)) (g := Complex.Gamma) s
+  rw [logDeriv_mul_lambda (f := fun w : ℂ => 2 * (2 * (π:ℂ)) ^ (-w)) (g := Complex.Gamma) s
     (mul_ne_zero two_ne_zero hpow_ne) hΓ_ne hd1 hdΓ]
   have h1 : logDeriv (fun w : ℂ => 2 * (2 * (π:ℂ)) ^ (-w)) s = -Complex.log (2*π) := by
     rw [logDeriv_const_mul s 2 two_ne_zero]
@@ -3326,7 +3334,7 @@ theorem logDeriv_gammaFactor (K : Type*) [Field K] [NumberField K] {s : ℂ}
       (Complex.Gammaℝ s) ^ NumberField.InfinitePlace.nrRealPlaces K
         * (Complex.Gammaℂ s) ^ NumberField.InfinitePlace.nrComplexPlaces K := rfl
   rw [hfun]
-  rw [logDeriv_mul
+  rw [logDeriv_mul_lambda
     (f := fun s : ℂ => (Complex.Gammaℝ s) ^ NumberField.InfinitePlace.nrRealPlaces K)
     (g := fun s : ℂ => (Complex.Gammaℂ s) ^ NumberField.InfinitePlace.nrComplexPlaces K)
     s (pow_ne_zero _ (Complex.Gammaℝ_ne_zero_of_re_pos hs))
@@ -3352,7 +3360,7 @@ theorem logDeriv_cpow_half_mul {c : ℂ} (hc : c ≠ 0) {f : ℂ → ℂ} {s : �
     exact h1
   have hd1 : DifferentiableAt ℂ (fun w : ℂ => c ^ (w/2)) s :=
     (h0.const_cpow (Or.inl hc)).differentiableAt
-  rw [logDeriv_mul (f := fun w : ℂ => c ^ (w/2)) (g := f) s hpow_ne hf hd1 hd]
+  rw [logDeriv_mul_lambda (f := fun w : ℂ => c ^ (w/2)) (g := f) s hpow_ne hf hd1 hd]
   congr 1
   rw [logDeriv_apply, (h0.const_cpow (Or.inl hc)).deriv]
   field_simp
@@ -3561,7 +3569,7 @@ theorem digamma_quarter_add_three_quarter :
     exact hdiff _ (by rw [Complex.ofReal_re]; norm_num)
   have hLHS : logDeriv (fun s : ℂ => Complex.Gamma s * Complex.Gamma (s + 1/2)) s₀
       = Complex.digamma ((1/4 : ℝ) : ℂ) + Complex.digamma ((3/4 : ℝ) : ℂ) := by
-    rw [logDeriv_mul s₀ hΓq hΓ3q (hdiff s₀ (by rw [hre₀]; norm_num)) hd3q]
+    rw [logDeriv_mul_lambda s₀ hΓq hΓ3q (hdiff s₀ (by rw [hre₀]; norm_num)) hd3q]
     congr 1
     have h0 : (fun s : ℂ => Complex.Gamma (s + 1/2))
         = Complex.Gamma ∘ (fun s : ℂ => s + 1/2) := rfl
@@ -3602,10 +3610,10 @@ theorem digamma_quarter_add_three_quarter :
     have hsqrt_ne : ((Real.sqrt π : ℝ) : ℂ) ≠ 0 := by
       rw [Ne, Complex.ofReal_eq_zero]
       exact (Real.sqrt_pos.mpr Real.pi_pos).ne'
-    rw [logDeriv_mul (f := fun s : ℂ => Complex.Gamma (2*s) * (2:ℂ) ^ (1 - 2*s))
+    rw [logDeriv_mul_lambda (f := fun s : ℂ => Complex.Gamma (2*s) * (2:ℂ) ^ (1 - 2*s))
         (g := fun _ : ℂ => ((Real.sqrt π : ℝ) : ℂ)) s₀ hprod_ne hsqrt_ne
         (hdΓ2.mul hdpow.differentiableAt) (differentiableAt_const _),
-      logDeriv_mul (f := fun s : ℂ => Complex.Gamma (2*s))
+      logDeriv_mul_lambda (f := fun s : ℂ => Complex.Gamma (2*s))
         (g := fun s : ℂ => (2:ℂ) ^ (1 - 2*s)) s₀ hΓh hpow_ne hdΓ2
         hdpow.differentiableAt]
     have hconst : logDeriv (fun _ : ℂ => ((Real.sqrt π : ℝ) : ℂ)) s₀ = 0 :=

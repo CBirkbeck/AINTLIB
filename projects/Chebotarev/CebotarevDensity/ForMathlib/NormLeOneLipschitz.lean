@@ -674,7 +674,7 @@ theorem normLeOne_frontier_lipschitz_cover_index :
     rw [← Module.finrank_eq_card_basis (mixedEmbedding.stdBasis K), mixedEmbedding.finrank])
   refine ⟨m, ‖(Φ : mixedSpace K →L[ℝ] (index K → ℝ))‖₊ * (M * 1),
     fun j c ↦ Φ (φ j (fun a ↦ c (g.symm a))),
-    fun j ↦ Φ.lipschitz.comp ((hφ j).comp
+    fun j ↦ (Φ : mixedSpace K →L[ℝ] (index K → ℝ)).lipschitzWith.comp ((hφ j).comp
       (IsometryEquiv.piCongrLeft' (Y := fun _ ↦ ℝ) g).isometry.lipschitz), ?_⟩
   rw [← Φ.coe_toHomeomorph, ← Φ.toHomeomorph.image_frontier]
   refine (Set.image_mono hcov).trans ?_

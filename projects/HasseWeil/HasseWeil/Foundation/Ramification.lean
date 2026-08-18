@@ -1335,7 +1335,7 @@ instance coordinateRing_isIntegrallyClosed (E : Affine F) [E.IsElliptic] :
     Ring.DimensionLEOne.localization (Localization.AtPrime P) P.primeCompl_le_nonZeroDivisors
   haveI : IsPrincipalIdealRing (Localization.AtPrime P) :=
     ((tfae_of_isNoetherianRing_of_isLocalRing_of_isDomain
-      (Localization.AtPrime P)).out 4 0).mp
+      (Localization.AtPrime P)).out 5 1).mp
       (maximalIdeal_isPrincipal_of_nonsingular E P hP0 hPmax)
   exact UniqueFactorizationMonoid.instIsIntegrallyClosed
 

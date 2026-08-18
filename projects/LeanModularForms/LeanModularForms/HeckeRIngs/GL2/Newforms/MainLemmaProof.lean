@@ -66,7 +66,8 @@ private lemma qExpansion_one_coeff_finset_sum {ι : Type*} (s : Finset ι)
   have h := map_sum qExpansionOneCuspAddHom F s
   simp only [qExpansionOneCuspAddHom_apply] at h
   rw [show (∑ i ∈ s, ⇑(F i) : UpperHalfPlane → ℂ) = ⇑(∑ i ∈ s, F i) from
-    (map_sum (CuspForm.coeHom (Γ := (Gamma1 N).map (mapGL ℝ)) (k := k)) F s).symm, h, map_sum]
+    (map_sum (FunLike.coeAddMonoidHom (CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
+      UpperHalfPlane ℂ) F s).symm, h, map_sum]
 
 /-- **Oldforms vanish at coprime indices.**  If `g ∈ cuspFormsOld N k` and `(n, N) = 1`, then the
 `n`-th canonical (period-1) Fourier coefficient of `g` is `0`.

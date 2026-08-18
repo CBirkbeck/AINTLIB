@@ -359,7 +359,7 @@ lemma ideal_decomp_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7)
     refine top_le_iff.mp ?_
     calc ⊤ = P₁ ⊔ Q₁ := hP₁Q₁.symm
       _ = P₁ ⊔ (P₂ ^ b * Q₂) := by rw [hQ₁eq]
-      _ ≤ P₁ ⊔ Q₂ := sup_le_sup_left Ideal.mul_le_left _
+      _ ≤ P₁ ⊔ Q₂ := sup_le_sup_left Ideal.mul_le_right _
   have hQ₂_top : Q₂ = ⊤ := by
     by_contra hQ₂_ne_top
     have hQ₂_nf_ne : UniqueFactorizationMonoid.normalizedFactors Q₂ ≠ 0 := by
@@ -525,7 +525,7 @@ theorem idealNormMultiplicity_at_two_inert_odd (hp3 : p % 4 = 3) (hp3_8 : p % 8 
     have hQ_le_R : Q ≤ R := hRfac.2
     have hR_ne : R ≠ ⊥ := fun hR_bot ↦ hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
     have : NeZero R := ⟨hR_ne⟩
-    have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
+    have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_right
     have hR_dvd_I : Ideal.absNorm R ∣ 2 ^ k := by
       rw [← hI_norm]
       exact dvd_trans (Ideal.absNorm_dvd_absNorm_of_le hQ_le_R)
@@ -596,7 +596,7 @@ theorem idealNormMultiplicity_at_two_inert_even (hp3 : p % 4 = 3) (hp3_8 : p % 8
           have hR_ne : R ≠ ⊥ :=
             fun hR_bot ↦ hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
           have : NeZero R := ⟨hR_ne⟩
-          have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
+          have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_right
           have hR_dvd_I : Ideal.absNorm R ∣ 2 ^ (2 * m) := by
             rw [← hI_norm]
             exact dvd_trans (Ideal.absNorm_dvd_absNorm_of_le hQ_le_R)

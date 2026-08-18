@@ -43,7 +43,7 @@ variable {S : Scheme.{u}} {E : EllipticCurve S} (G : FiniteLocallyFreeSubgroup E
 
 /-- The (closed) support of the subgroup scheme inside `E`: the image of `ι`. -/
 theorem isClosed_range_ι : IsClosed (Set.range G.ι.base) :=
-  G.closedImmersion.base_closed.isClosed_range
+  G.closedImmersion.isClosedEmbedding.isClosed_range
 
 /-- The open complement `E ∖ G` of the subgroup scheme — the first chart of the `[HG-C3]`
 cover. -/

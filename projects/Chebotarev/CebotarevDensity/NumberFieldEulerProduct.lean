@@ -125,11 +125,11 @@ private lemma mul_sup_span_natCast_left {m n : ℕ} (hcop : Nat.Coprime m n)
           (span_natCast_sup_span_natCast L hcop).symm
       _ ≤ Ideal.span {(m : 𝓞 L)} ⊔ L' :=
           sup_le_sup_left (span_natCast_le_of_absNorm_eq L hL) _
-  refine le_antisymm (sup_le Ideal.mul_le_right (span_natCast_le_of_absNorm_eq L hJ)) ?_
+  refine le_antisymm (sup_le Ideal.mul_le_left (span_natCast_le_of_absNorm_eq L hJ)) ?_
   · calc J = J * ⊤ := (Ideal.mul_top J).symm
       _ = J * (Ideal.span {(m : 𝓞 L)} ⊔ L') := by rw [h_cop_mL_sup]
       _ = J * Ideal.span {(m : 𝓞 L)} ⊔ J * L' := Ideal.mul_sup _ _ _
-      _ ≤ Ideal.span {(m : 𝓞 L)} ⊔ J * L' := sup_le_sup_right Ideal.mul_le_left _
+      _ ≤ Ideal.span {(m : 𝓞 L)} ⊔ J * L' := sup_le_sup_right Ideal.mul_le_right _
       _ = J * L' ⊔ Ideal.span {(m : 𝓞 L)} := sup_comm _ _
 
 lemma idealNormMultiplicity_mul {m n : ℕ} (hcop : Nat.Coprime m n) :

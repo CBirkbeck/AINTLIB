@@ -6,6 +6,7 @@ Authors:
 import Mathlib.Analysis.Calculus.ContDiff.Defs
 import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
+import Mathlib.Topology.Defs.Filter
 import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.GammaAnalysis
 
 /-!
@@ -22,7 +23,7 @@ The key result `remainder_bounded_of_C2` shows that the remainder
 * `quadratic_approx_of_contDiffAt_two` — quadratic Taylor approximation
 -/
 
-open Complex MeasureTheory Set Filter Topology
+open Complex Set Filter Topology
 open scoped Real Interval
 
 noncomputable section

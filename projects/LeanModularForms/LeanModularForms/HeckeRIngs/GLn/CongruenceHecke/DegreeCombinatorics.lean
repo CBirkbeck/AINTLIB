@@ -397,7 +397,7 @@ private lemma finiteIndex_Gamma0_map_subgroupOf (N k : ℕ) [NeZero N] (hk : 0 <
       (Gamma0_pair N).H).FiniteIndex := by
   rw [← stab_diag_eq_Gamma0 N k hk]
   exact ⟨((Gamma0_pair N).h₁ (⟨diagMat 2 (![1, k] : Fin 2 → ℕ), diagMat_mem_Delta0_of_gcd N _
-    (fun i ↦ by fin_cases i <;> simp [hk]) (by simp)⟩ : (Gamma0_pair N).Δ).2).1⟩
+    (fun i ↦ by fin_cases i <;> simp [hk]) (by simp)⟩ : (Gamma0_pair N).Δ).2).1.relIndex_ne_zero⟩
 
 /-- **Gamma0 degree multiplicativity**: for coprime `m, n`,
 `deg(diag(1,m)) * deg(diag(1,n)) = deg(diag(1,mn))` at the `Γ₀(N)` level, i.e.

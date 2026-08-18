@@ -10,6 +10,7 @@ import Mathlib.Data.Fin.Tuple.Sort
 import Mathlib.GroupTheory.Perm.Sign
 import Mathlib.NumberTheory.EllipticDivisibilitySequence
 import Mathlib.Tactic.IntervalCases
+import Mathlib.Tactic.LinearCombination
 
 /-!
 # Additional lemmas for elliptic divisibility sequences

@@ -8,6 +8,7 @@ module
 public import BernoulliRegular.FLT37.Primary
 public import BernoulliRegular.UnitQuotient.DeltaAction
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerFurtwaengler.CyclotomicGaloisAction
+public import Mathlib.NumberTheory.RamificationInertia.Inertia
 
 
 /-!
@@ -484,7 +485,7 @@ theorem stickelbergerIdeal_le_factor
   rw [← Finset.prod_erase_mul (Finset.univ : Finset (CyclotomicUnitDelta p))
         (fun a => cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ q_K ^
             ((a : ZMod p).val)) (Finset.mem_univ a)]
-  exact Ideal.mul_le_left
+  exact Ideal.mul_le_right
 
 /-- Every cyclotomic conjugate of `q_K` divides `stickelbergerIdeal q_K`.
 The factor at `a = c⁻¹` contributes `(σ_c q_K)^k` with k ≥ 1. -/
@@ -526,7 +527,7 @@ theorem stickelbergerIdeal_le_self (q_K : Ideal (𝓞 K)) :
     simp [cyclotomicGaloisConjugate_one, ZMod.val_one_eq_one_mod,
       Nat.one_mod_eq_one.mpr (Fact.out : p.Prime).one_lt.ne']
   rw [hone]
-  exact Ideal.mul_le_left
+  exact Ideal.mul_le_right
 
 /-! ### Connection to Mathlib's `primesOver`
 

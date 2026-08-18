@@ -1,0 +1,7 @@
+qual	bucket	rationale
+sum_char_apply_eq_zero_of_ne_one	BORDERLINE-needs-human	mathlib has C/ZMod orthogonality not G->*Cx form; scope call
+sum_char_self_eq_zero_of_ne_one	NO-composable-from-mathlib	sum_hom_units_eq_zero generalises it; compose via Units.coeHom
+card_mul_eq_sum_of_sum_char_mul_eq_zero	NO-composable-from-mathlib	AddChar orthogonality+Fourier basis; routine inversion corollary
+eq_of_sum_char_mul_eq_zero	YES-but-generalise-first	restate over HasEnoughRootsOfUnity + AddChar idiom
+exists_card_coset_inter_smul_sub_volume_mul_rpow_le	YES-but-generalise-first	restate over ZLattice/covolume; mathlib lacks effective count
+ratioSum_frobeniusFibres_tendsto_one	NO-composable-from-mathlib	statement uses project-only primeIdealZetaSum/frobeniusClass; routine partition step over project density API

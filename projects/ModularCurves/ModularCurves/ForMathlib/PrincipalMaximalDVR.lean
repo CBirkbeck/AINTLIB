@@ -100,4 +100,4 @@ theorem IsDiscreteValuationRing.of_maximalIdeal_eq_span [IsDomain A] (π : A)
   have hfield : ¬IsField A := fun hf =>
     hπ (Ideal.span_singleton_eq_bot.mp (hm ▸ isField_iff_maximalIdeal_eq.mp hf))
   have hprin : (maximalIdeal A).IsPrincipal := ⟨⟨π, hm⟩⟩
-  exact ((IsDiscreteValuationRing.TFAE A hfield).out 0 4).mpr hprin
+  exact ((IsDiscreteValuationRing.TFAE A hfield).out 1 5).mpr hprin

@@ -850,7 +850,6 @@ private theorem pointSharp_add_of_kernel (hU : IsAffineOpen U)
     rw [h1, pairing_eq_pairBox P Q hp hq]
     refine (Category.assoc _ _ _).trans ?_
     rw [Category.assoc, Iso.hom_inv_id_assoc]
-    rfl
   -- units of the separating tensor under the three maps
   have hyLunit : IsUnit ((axisL ε).toRingHom y₀) := by
     show IsUnit (axisL ε y₀)

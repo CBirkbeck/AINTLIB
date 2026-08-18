@@ -108,7 +108,7 @@ theorem idealNormMultiplicity_at_q_inert_odd (hp3 : p % 4 = 3) (q : ℕ)
   obtain ⟨Q, hPQ, hIeq⟩ := Ideal.eq_prime_pow_mul_coprime hI_ne P
   let m : ℕ := Multiset.count P (UniqueFactorizationMonoid.normalizedFactors I)
   -- The coprime cofactor `Q` is forced to be trivial, so `I = P ^ m`.
-  have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
+  have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_right
   have hQ_norm : Ideal.absNorm Q ∣ q ^ k := by
     rw [← hI_norm]; exact Ideal.absNorm_dvd_absNorm_of_le hI_le_Q
   have hQ_ne : Q ≠ ⊥ := fun hQ_bot ↦ hI_ne (by rw [hIeq, hQ_bot, Ideal.mul_bot])
@@ -221,7 +221,7 @@ theorem idealNormMultiplicity_at_q_inert_even (hp3 : p % 4 = 3) (q : ℕ)
         rintro ⟨⟨I, hI_ne⟩, hI_norm⟩
         obtain ⟨Q, hPQ, hIeq⟩ := Ideal.eq_prime_pow_mul_coprime hI_ne P
         let mI : ℕ := Multiset.count P (UniqueFactorizationMonoid.normalizedFactors I)
-        have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
+        have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_right
         have hQ_norm : Ideal.absNorm Q ∣ q ^ (2 * m) := by
           rw [← hI_norm]; exact Ideal.absNorm_dvd_absNorm_of_le hI_le_Q
         have hQ_ne : Q ≠ ⊥ := fun hQ_bot ↦ hI_ne (by rw [hIeq, hQ_bot, Ideal.mul_bot])
@@ -607,7 +607,7 @@ theorem idealNormMultiplicity_at_p_eq_one (hp3 : p % 4 = 3) (k : ℕ) :
             hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
           have : NeZero R := ⟨hR_ne⟩
           have hI_le_Q : I ≤ Q := by
-            rw [hIeq]; exact Ideal.mul_le_left
+            rw [hIeq]; exact Ideal.mul_le_right
           have hR_dvd_I : Ideal.absNorm R ∣ p ^ k := by
             rw [← hI_norm]
             exact dvd_trans (Ideal.absNorm_dvd_absNorm_of_le hQ_le_R)
@@ -692,7 +692,7 @@ lemma ideal_decomp_at_q_split (hp3 : p % 4 = 3) (q : ℕ)
     refine top_le_iff.mp ?_
     calc ⊤ = P₁ ⊔ Q₁ := hP₁Q₁.symm
       _ = P₁ ⊔ (P₂ ^ b * Q₂) := by rw [hQ₁eq]
-      _ ≤ P₁ ⊔ Q₂ := sup_le_sup_left Ideal.mul_le_left _
+      _ ≤ P₁ ⊔ Q₂ := sup_le_sup_left Ideal.mul_le_right _
   -- Show Q₂ = ⊤.
   have hQ₂_top : Q₂ = ⊤ := by
     by_contra hQ₂_ne_top

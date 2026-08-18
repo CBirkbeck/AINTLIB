@@ -10,6 +10,7 @@ import Mathlib.RingTheory.MvPowerSeries.Basic
 import Mathlib.RingTheory.MvPowerSeries.Trunc
 import Mathlib.RingTheory.Polynomial.Basic
 import Mathlib.Algebra.MvPolynomial.Eval
+import Mathlib.Algebra.MvPolynomial.CommRing
 import «Adic spaces».AdicCompletionBridge
 
 /-!

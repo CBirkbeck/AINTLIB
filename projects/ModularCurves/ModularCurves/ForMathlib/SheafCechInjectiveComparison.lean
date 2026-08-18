@@ -104,7 +104,7 @@ private theorem cechGlobalSections_map_augmented_exact_and_mono
     change Mono (cechAugmentation F U)
     exact cechAugmentation_mono F U hU
   have hmap := (((Functor.preservesFiniteLimits_tfae
-    (globalSectionsFunctor X)).out 3 1 rfl rfl).mp
+    (globalSectionsFunctor X)).out 4 2 rfl rfl).mp
       (inferInstance : PreservesFiniteLimits (globalSectionsFunctor X)))
         S ⟨hS, hmono⟩
   refine ⟨?_, by simpa [S, cechAugmentedShortComplex] using hmap.2⟩

@@ -3071,6 +3071,9 @@ theorem exists_logDeriv_partial_fractions :
       = ∑ u ∈ F, (D₁ u : ℂ) / (s - u) := by
     have h1 : logDeriv (fun z => ∏ u ∈ F, (fun w : ℂ => w - u) z ^ D₁ u) s
         = ∑ u ∈ F, logDeriv (fun z => (fun w : ℂ => w - u) z ^ D₁ u) s := by
+      rw [show (fun z => ∏ u ∈ F, (fun w : ℂ => w - u) z ^ D₁ u)
+          = ∏ u ∈ F, (fun w : ℂ => (w - u) ^ D₁ u) from
+            funext fun z => by simp [Finset.prod_apply]]
       refine logDeriv_prod (fun u hu => hfactor_ne u hu) (fun u hu => ?_)
       exact (differentiableAt_id.sub_const u).zpow (Or.inr (hD₁nn u))
     refine Eq.trans h1 ?_

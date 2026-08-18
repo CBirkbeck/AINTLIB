@@ -9,6 +9,7 @@ public import Mathlib.FieldTheory.Galois.IsGaloisGroup
 public import Mathlib.RingTheory.DedekindDomain.Different
 public import Mathlib.RingTheory.DedekindDomain.Factorization
 public import Mathlib.RingTheory.Frobenius
+public import Mathlib.NumberTheory.RamificationInertia.Inertia
 
 public import CebotarevDensity.Density
 

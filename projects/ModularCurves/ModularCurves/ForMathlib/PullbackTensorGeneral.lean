@@ -4,7 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Generator
+import Mathlib.Algebra.Category.ModuleCat.Monoidal.Closed
+import Mathlib.CategoryTheory.Monoidal.Closed.Braided
 import Mathlib.CategoryTheory.Localization.Monoidal.Functor
+import Mathlib.CategoryTheory.Monoidal.Cartesian.FunctorCategory
 import Mathlib.LinearAlgebra.Finsupp.Pi
 import ModularCurves.Picard.Pic
 import ModularCurves.ForMathlib.PullbackTensorMonoidal

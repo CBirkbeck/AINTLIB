@@ -103,7 +103,7 @@ private lemma H_one_map_toRestrict_eq_zero_of_lift
   let presV' := pres.map
     (restrict AddCommGrpCat V.isOpenEmbedding ⋙ pushforward AddCommGrpCat V.inclusion')
   have presV'Ex : presV'.Exact :=
-    ((_ ⋙ pushforward _ _).preservesFiniteLimits_tfae.out 3 1 rfl rfl).mp inferInstance pres
+    ((_ ⋙ pushforward _ _).preservesFiniteLimits_tfae.out 4 2 rfl rfl).mp inferInstance pres
       ⟨presEx.1, presEx.2⟩ |>.1
   let φ : presV.X₃ ⟶ presV'.X₃ := cokernel.desc presV'.f presV'.g presV'.zero
   have hφMono : Mono φ := ShortComplex.Exact.mono_cokernelDesc presV'Ex

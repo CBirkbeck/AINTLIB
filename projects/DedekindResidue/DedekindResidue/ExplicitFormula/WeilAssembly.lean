@@ -28,6 +28,13 @@ prime side (Prop 2, `PrimeSide.lean`/`FourierJordan.lean`) and the Γ-side
 
 namespace DedekindResidue
 
+/-- Pointwise-lambda form of `logDeriv_mul` (mathlib states it on the `Pi` product, which
+`rw` cannot match against `fun z => f z * g z`; the two are definitionally equal). -/
+private theorem logDeriv_mul_lambda {f g : ℂ → ℂ} (x : ℂ) (hf : f x ≠ 0) (hg : g x ≠ 0)
+    (hdf : DifferentiableAt ℂ f x) (hdg : DifferentiableAt ℂ g x) :
+    logDeriv (fun z => f z * g z) x = logDeriv f x + logDeriv g x :=
+  logDeriv_mul x hf hg hdf hdg
+
 open MeasureTheory Complex intervalIntegral Real Filter NumberField
 open scoped ENNReal NNReal
 
@@ -141,14 +148,14 @@ theorem logDeriv_completedDedekindZetaEntire_split {s : ℂ} (hs : 1 < s.re) :
   have hid_d : DifferentiableAt ℂ (fun z : ℂ => z * (z - 1)) s :=
     differentiableAt_id.mul (differentiableAt_id.sub_const 1)
   -- peel the factors
-  rw [logDeriv_mul (f := fun z : ℂ => z * (z - 1))
+  rw [logDeriv_mul_lambda (f := fun z : ℂ => z * (z - 1))
       (g := fun z : ℂ => ((|NumberField.discr K| : ℝ) : ℂ) ^ (z/2)
         * (gammaFactor K z * NumberField.dedekindZeta K z)) s hid_ne hpre_ne hid_d hpre_d]
-  rw [logDeriv_mul (f := fun z : ℂ => z) (g := fun z : ℂ => z - 1) s hs0
+  rw [logDeriv_mul_lambda (f := fun z : ℂ => z) (g := fun z : ℂ => z - 1) s hs0
       (sub_ne_zero.mpr hs1) differentiableAt_id (differentiableAt_id.sub_const 1)]
   rw [logDeriv_cpow_half_mul (f := fun z : ℂ => gammaFactor K z
       * NumberField.dedekindZeta K z) hdiscrC hγζne hγζd]
-  rw [logDeriv_mul (f := gammaFactor K) (g := NumberField.dedekindZeta K) s hγne hζne
+  rw [logDeriv_mul_lambda (f := gammaFactor K) (g := NumberField.dedekindZeta K) s hγne hζne
       hγd hζd]
   have h1 : logDeriv (fun z : ℂ => z) s = 1/s := by
     rw [logDeriv_apply, deriv_id'']

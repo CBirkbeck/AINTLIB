@@ -1537,7 +1537,7 @@ theorem isIntegral_of_forall_valuation_le_one
   have hι_inj : Function.Injective ι := IsFractionRing.injective R (FractionRing R)
   -- Step 1: ι x is not integral over B in FractionRing R
   have hni_K : ¬ IsIntegral B (ι x) :=
-    mt (isIntegral_algebraMap_iff hι_inj).mp hni
+    mt isIntegral_algebraMap_iff.mp hni
   -- Step 2: ι x ∉ (integralClosure B (FractionRing R)).toSubring
   have hx_notin : ι x ∉ (integralClosure B (FractionRing R)).toSubring := by
     rwa [Subalgebra.mem_toSubring, mem_integralClosure_iff]
@@ -1610,7 +1610,7 @@ theorem isIntegral_of_forall_continuous_valuation_le_one
   have hι_inj : Function.Injective ι := IsFractionRing.injective R (FractionRing R)
   -- Step 1: ι x is not integral over B in Frac(R).
   have hni_K : ¬ IsIntegral B (ι x) :=
-    mt (isIntegral_algebraMap_iff hι_inj).mp hni
+    mt isIntegral_algebraMap_iff.mp hni
   have hx_notin : ι x ∉ (integralClosure B (FractionRing R)).toSubring := by
     rwa [Subalgebra.mem_toSubring, mem_integralClosure_iff]
   -- Step 2: Construct a continuous valuation witnessing v(x) > 1.

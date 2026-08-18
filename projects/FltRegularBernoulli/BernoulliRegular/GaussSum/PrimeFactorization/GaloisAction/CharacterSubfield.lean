@@ -1,6 +1,7 @@
 module
 
 public import BernoulliRegular.GaussSum.PrimeFactorization.GaloisAction.Basic
+public import Mathlib.NumberTheory.RamificationInertia.Inertia
 
 /-!
 # Character subfield primes in the Stickelberger field

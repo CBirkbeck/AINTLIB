@@ -4,6 +4,8 @@ import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
 import Mathlib.Algebra.Module.LocalizedModule.Submodule
 import Mathlib.AlgebraicGeometry.Modules.Tilde
 import Mathlib.AlgebraicGeometry.Noetherian
+import Mathlib.AlgebraicGeometry.Morphisms.Affine
+import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 import Mathlib.CategoryTheory.ObjectProperty.Kernels
 import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
 import Mathlib.LinearAlgebra.Dimension.Finite
@@ -30,6 +32,14 @@ namespace AlgebraicGeometry.Scheme
 open Modules
 
 variable {X Y : Scheme.{u}} {R : CommRingCat.{u}}
+
+/-- Evaluation of sheaves of modules is additive — it is `forget` followed by presheaf
+evaluation, both of which are additive. mathlib no longer exposes this through the
+composite's `def`, so instance search needs it spelled out. -/
+private instance evaluation_additive (S : Scheme.{u}) (U : S.Opens) :
+    (SheafOfModules.evaluation S.ringCatSheaf (op U)).Additive := by
+  dsimp [SheafOfModules.evaluation]
+  infer_instance
 
 variable (X) in
 /-- Quasicoherence as an object property on scheme modules. -/

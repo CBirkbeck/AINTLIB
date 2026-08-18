@@ -10,6 +10,7 @@ import Mathlib.Topology.Algebra.Group.Pointwise
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Algebra.BigOperators.Intervals
 import Mathlib.Topology.UniformSpace.Cauchy
+import Mathlib.GroupTheory.QuotientGroup.Basic
 import Mathlib.Topology.UniformSpace.UniformEmbedding
 
 /-!

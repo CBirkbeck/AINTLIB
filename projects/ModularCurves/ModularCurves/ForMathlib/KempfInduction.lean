@@ -49,7 +49,7 @@ private lemma map_restrictPushforward_shortExact
       pushforward AddCommGrpCat U.inclusion')).ShortExact := by
   have hleft := ((restrict AddCommGrpCat U.isOpenEmbedding ⋙
     pushforward AddCommGrpCat U.inclusion').preservesFiniteLimits_tfae.out
-      3 1 rfl rfl).mp inferInstance pres ⟨presEx.1, presEx.2⟩
+      4 2 rfl rfl).mp inferInstance pres ⟨presEx.1, presEx.2⟩
   refine ShortComplex.ShortExact.mk' hleft.1 hleft.2 ?_
   dsimp
   rw [← isLocallySurjective_iff_epi, Presheaf.isLocallySurjective_iff]

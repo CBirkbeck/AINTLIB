@@ -527,7 +527,7 @@ lemma ncard_primesOver_mul_inertiaDeg'_eq_two
     exact hram_rel
   have hinertia_in : PPlus.inertiaDegIn (𝓞 K) = PPlus.inertiaDeg' P := by
     rw [Ideal.inertiaDegIn_eq_inertiaDeg (p := PPlus) (P := P) (G := Gal(K/K⁺))]
-    rw [← Ideal.inertiaDeg'_eq_inertiaDeg (p := PPlus) (q := P)]
+    rw [← Ideal.inertiaDeg'_eq_inertiaDeg (p := PPlus) (P := P)]
   rw [hcard_gal, hram_in, hinertia_in, one_mul] at hfund
   exact hfund
 
