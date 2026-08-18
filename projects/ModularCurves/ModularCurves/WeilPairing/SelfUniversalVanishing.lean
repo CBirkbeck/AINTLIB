@@ -775,6 +775,45 @@ private theorem localModel_recordIso_zero {S : Scheme.{u}} (E : EllipticCurve S)
     refine (congrArg (fun m => U.2.isoSpec.inv ≫ m) (pullback.lift_snd _ _ _)).trans ?_
     exact Category.comp_id _
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **([ASM-4b])** The `localModel` data packaged as a pointed record iso over
+`Spec Γ(S, U)`. -/
+theorem exists_localModel_recordIso {S : Scheme.{u}} (E : EllipticCurve S)
+    (U : S.affineOpens) (W : WeierstrassCurve Γ(S, U.1)) [W.IsElliptic]
+    (e : pullback E.π U.1.ι ≅ projModel W)
+    (heπ : e.hom ≫ projModelπ W = pullback.snd E.π U.1.ι ≫ U.2.isoSpec.hom)
+    (hzc : (U.1.ι ≫ E.zero) ≫ E.π = 𝟙 (U.1 : Scheme.{u}) ≫ U.1.ι)
+    (hez : (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ E.zero) (𝟙 _) hzc) ≫ e.hom =
+      projModelZero W) :
+    ∃ φ : (E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).asOver ≅
+      (modelEllipticCurve W).asOver, IsMonHom φ.hom := by
+  set eL : (E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).asOver.left ≅
+      (modelEllipticCurve W).asOver.left :=
+    (bcSwapGenIso E U.1.ι U.2.isoSpec.inv).symm ≪≫
+      asIso (pullback.fst ((E.baseChange U.1.ι).π) U.2.isoSpec.inv) ≪≫ e with heL
+  have heπ' : eL.hom ≫ (modelEllipticCurve W).asOver.hom =
+      (E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).asOver.hom :=
+    localModel_recordIso_pi E U W e heπ
+  refine ⟨Over.isoMk eL heπ', ?_⟩
+  have hz : (E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).zero ≫ eL.hom =
+      (modelEllipticCurve W).zero := by
+    show (E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).zero ≫
+      ((bcSwapGenIso E U.1.ι U.2.isoSpec.inv).inv ≫
+        pullback.fst ((E.baseChange U.1.ι).π) U.2.isoSpec.inv ≫ e.hom) = projModelZero W
+    refine Eq.trans ?_ hez
+    refine (congrArg (fun m => (E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).zero ≫ m)
+      (Category.assoc _ _ _).symm).trans ?_
+    refine (Category.assoc _ _ _).symm.trans ?_
+    exact congrArg (fun m => m ≫ e.hom) (localModel_recordIso_zero E U hzc)
+  suffices hη : (η[(E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).asOver]) ≫
+      (Over.isoMk eL heπ').hom = η[(modelEllipticCurve W).asOver] by
+    exact ⟨hη, isMonHom_of_pointedIso_records _ _ (Over.isoMk eL heπ') hη⟩
+  ext1
+  rw [Over.comp_left, show (Over.isoMk eL heπ').hom.left = eL.hom from rfl,
+    (E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).one_eq_zero,
+    (modelEllipticCurve W).one_eq_zero]
+  exact (Category.assoc _ _ _).trans (congrArg _ hz)
+
 end EllipticCurve
 
 end ModularCurves
