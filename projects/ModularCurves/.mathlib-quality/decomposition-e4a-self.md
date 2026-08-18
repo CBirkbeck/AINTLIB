@@ -3351,3 +3351,59 @@ pairing with L4 (`weilPairingEval_eq_torsionSplittingEval`) + L3
 `HasseWeil.WeilPairing.weilPairing_nondegenerate` (PairingNondeg.lean:215 — nondegenerate in
 the SECOND slot, so swap with antisymmetry), and transport the conclusion back through the
 point dictionary (`projModelPointsEquiv`, `basePointCast_injective`).
+
+---
+
+## ★★★★ cont.30bs — LEAF B PROVEN, AND `yRho_representable` IS AXIOM-CLEAN
+
+**`#print axioms ModularCurves.yRho_representable` → `[propext, Classical.choice, Quot.sound]`**
+(same for `yRho_representable'`). The T-F4 capstone — "for `N ≥ 3` some `(Y, sY)` represents
+the ρ-level moduli problem", including `SmoothOfRelativeDimension 1 sY`, `IsAffineHom sY`
+and the functorial bijection — no longer depends on `sorryAx`. Leaves A and B were the last
+two sorry-dependencies on that path.
+
+### Leaf B (commit `fc540e192`), all `[propext, Classical.choice, Quot.sound]`
+
+New `WeilPairing/SelfField.lean` (the [VALUE-CROSSING] block):
+* `specMap_algebraMap_self`, `specPointOfModelPoint` (+ `_coe`), `basePointCast_eq_cast`,
+  `basePointCast_zsmul`, `basePointCast_specPointOfModelPoint_torsion`;
+* **`weilPairingEval_eq_weilPairing_model`** — at the projective model over an
+  algebraically closed field, the scheme value at `(x, y)` IS
+  `HasseWeil.WeilPairing.weilPairing W N (pt x) (pt y)`. Body = U5-AC's stages 2–5 with the
+  second point in the `P'` slot, closing with L3 instead of L5. **Compiled first try.**
+
+New file `WeilPairing/Nondegenerate.lean`:
+* `Point.mapIso_symm_mapIso`, `Point.mapIso_mapIso_symm`, `Point.mapIso_zeroPoint` — U1
+  transport is a pointed bijection on points;
+* `modelPointOfSpecPoint`, `basePointCast_injective'`, `basePointCast_surjective`,
+  `pointCongr_eq_specPointOfModelPoint`,
+  `kill_of_basePointCast_specPointOfModelPoint_torsion` — the model point dictionary is a
+  bijection, and it matches torsion on the nose (both directions);
+* **`weilPairingEval_nondegenerate_model`** — [VALUE-CROSSING] + `weilPairing_antisymm`
+  (to swap into HasseWeil's second slot) + `weilPairing_nondegenerate` (PairingNondeg:215);
+* **`weilPairingEval_nondegenerate_of_field`** — arbitrary record over `Spec K`, by U1
+  transport along `exists_projModelIso_of_field`;
+* `weilPairingEval_asSection_bridge` (the two-point BC-SWAP value bridge) + `asSectionEquiv`
+  (`asSection` as an `≃+`, from `asSection_eq_baseChangeEquiv_symm`);
+* **`weilPairingEval_nondegenerate_general`** — LEAF B: arbitrary base, geometric point.
+
+Both register consumers (`RhoSections.lean:1097`, `:4670`) re-pointed; green.
+
+Mechanics worth keeping: `(e : T)` type ascriptions do NOT force a `def`-unfolding
+(`SpecPoints` vs `Point`) — introduce the term at the wanted type with `set`/an explicit
+`⟨_, _⟩` instead; `subst` on the surjectivity equation is what lets proof-irrelevant
+pairing arguments line up; `_root_.one_mul` again (MonObj is open); `omit [DecidableEq K] in`
+goes ABOVE the docstring.
+
+### Remaining: leaf C — `IsOfficialCartier.isFinite` (CartierDivisor.lean:2858)
+
+NOT on the `yRho_representable` path: its only consumer is `toRelEffCartierDiv`, which has
+no consumers at all. Route now available in mathlib:
+`AlgebraicGeometry.IsFinite.of_isProper_of_locallyQuasiFinite` (ZariskisMainTheorem.lean:373)
+— so the task reduces to `LocallyQuasiFinite (J.subschemeι ≫ π)`. Math: from
+`0 → A →f A → A/f → 0` with `A/f` flat over `R`, tensoring with `κ(p)` stays exact, so `f̄`
+is a nonzerodivisor in the smooth 1-dimensional fibre `A ⊗ κ(p)`; hence `A/f ⊗ κ(p)` is
+0-dimensional of finite type over a field, i.e. finite. Package affine-locally through
+`HasRingHomProperty @LocallyQuasiFinite RingHom.QuasiFinite`.
+
+`yRho_geometricallyIrreducible` (BB-IRR) is the analytic layer — OWNER BOUNDARY, not touched.
