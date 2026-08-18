@@ -673,6 +673,46 @@ theorem weilPairingEval_self_model_map {R : Type u} [CommRing R]
     (Point.mapIso_killedBy φ hykill) (Point.mapIso_killedBy φ hykill) hx hx] at hmap
   exact hmap.trans (hbc.trans huniv)
 
+/-- **([ASM-4a], locality)** The diagonal value is `1` as soon as it is `1` after
+restriction to an open cover of the base. -/
+theorem weilPairingEval_self_of_locally {S : Scheme.{u}} (E : EllipticCurve S) {N : ℕ}
+    [NeZero N] {T : Scheme.{u}} {g : T ⟶ S} (x : E.Point g)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hloc : ∀ p : T, ∃ V : T.Opens, p ∈ V ∧
+      ∀ (hxr : (EllipticCurve.Point.restrict E V.ι x).1 ≫ E.mulByHom N =
+        (V.ι ≫ g) ≫ E.zero),
+        (E.weilPairingEval (EllipticCurve.Point.restrict E V.ι x)
+          (EllipticCurve.Point.restrict E V.ι x) hxr hxr : Γ((V : Scheme.{u}), ⊤)) = 1) :
+    (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by
+  refine TopCat.Presheaf.IsSheaf.section_ext
+    (F := T.presheaf) T.sheaf.cond (U := Opposite.op ⊤) ?_
+  intro p _
+  obtain ⟨V, hpV, hV⟩ := hloc p
+  refine ⟨V, le_top, hpV, ?_⟩
+  have hxr : (EllipticCurve.Point.restrict E V.ι x).1 ≫ E.mulByHom N =
+      (V.ι ≫ g) ≫ E.zero := by
+    show (V.ι ≫ x.1) ≫ E.mulByHom N = (V.ι ≫ g) ≫ E.zero
+    rw [Category.assoc, hx, ← Category.assoc]
+  have hres := E.weilPairingEval_restrict V.ι x x hx hx hxr hxr
+  rw [hV hxr] at hres
+  -- translate the `Γ.map`-restriction into the presheaf restriction
+  have hbridge : ∀ s : Γ(T, ⊤), V.topIso.hom.hom ((Scheme.Γ.map V.ι.op).hom s) =
+      (T.presheaf.map (homOfLE (le_top : V ≤ ⊤)).op).hom s := by
+    intro s
+    rw [Scheme.Γ_map_op, Scheme.Opens.ι_appTop]
+    refine Eq.trans (show V.topIso.hom.hom
+        ((T.presheaf.map (homOfLE (x := V.ι ''ᵁ ⊤) le_top).op).hom s) =
+        ((T.presheaf.map (homOfLE (x := V.ι ''ᵁ ⊤) le_top).op) ≫ V.topIso.hom).hom s
+      from rfl) ?_
+    refine congrArg (fun m : Γ(T, ⊤) ⟶ Γ(T, V) => m.hom s) ?_
+    rw [Scheme.Opens.topIso_hom]
+    exact (T.presheaf.map_comp _ _).symm.trans
+      (congrArg T.presheaf.map (Subsingleton.elim _ _))
+  refine ((hbridge (E.weilPairingEval x x hx hx : Γ(T, ⊤))).symm.trans ?_).trans
+    (hbridge 1)
+  refine congrArg V.topIso.hom.hom ?_
+  exact hres.symm.trans (map_one _).symm
+
 end EllipticCurve
 
 end ModularCurves
