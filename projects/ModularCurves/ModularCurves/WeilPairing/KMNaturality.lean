@@ -1731,4 +1731,76 @@ theorem baseChangeZero_comp_bcSwapIso :
 
 end BcSwapDefs
 
+/-- **([SECTIONCLS-BCSWAP])** The section class transports along the collapse iso:
+the `PB`-side class of `P` pulls back to the doubled-pullback-side class of
+`P ≫ (bcSwapIso E t).inv`. Mirror of `sectionCls_mapIso` at ι. -/
+theorem sectionCls_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (t : T ⟶ S)
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)]
+    (P : T ⟶ pullback E.π t) (hP : P ≫ pullback.snd E.π t = 𝟙 T)
+    (hPsw : (P ≫ (bcSwapIso E t).inv) ≫
+      pullback.snd ((E.baseChange t).π) (𝟙 T) = 𝟙 T) :
+    Scheme.Pic.map (bcSwapIso E t).hom
+      (sectionCls E hsm t P hP) =
+      sectionCls (E.baseChange t) hsmBC
+        (𝟙 T) (P ≫ (bcSwapIso E t).inv) hPsw := by
+  letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+  letI := Scheme.Modules.monoidalCategory (pullback ((E.baseChange t).π) (𝟙 T))
+  haveI hsepE : IsSeparated (pullback.snd E.π t) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π t ‹_›
+  haveI hsepB : IsSeparated (pullback.snd ((E.baseChange t).π) (𝟙 T)) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) _ _ ‹_›
+  have hsmE : SmoothOfRelativeDimension 1 (pullback.snd E.π t) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) E.π t hsm
+  have hsmB : SmoothOfRelativeDimension 1 (pullback.snd ((E.baseChange t).π) (𝟙 T)) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) _ _ hsmBC
+  haveI hciP : IsClosedImmersion P := by
+    refine MorphismProperty.of_postcomp (W := @IsClosedImmersion)
+      (W' := @IsSeparated) _ (pullback.snd E.π t) hsepE ?_
+    rw [hP]
+    infer_instance
+  haveI hciPsw : IsClosedImmersion (P ≫ (bcSwapIso E t).inv) := by
+    refine MorphismProperty.of_postcomp (W := @IsClosedImmersion)
+      (W' := @IsSeparated) _ (pullback.snd ((E.baseChange t).π) (𝟙 T)) hsepB ?_
+    rw [hPsw]
+    infer_instance
+  have hkercollapse : (Scheme.Hom.ker P).comap (bcSwapIso E t).hom =
+      Scheme.Hom.ker (P ≫ (bcSwapIso E t).inv) :=
+    EllipticCurve.ker_comap_iso (bcSwapIso E t) P
+  have hJ : ∀ c : ↥(pullback E.π t), ∃ V : (pullback E.π t).affineOpens, c ∈ V.1 ∧
+      ∃ f : Γ(pullback E.π t, V.1),
+        (Scheme.Hom.ker P).ideal V = Ideal.span {f} ∧
+          f ∈ nonZeroDivisors Γ(pullback E.π t, V.1) :=
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsmE P hP).locallyPrincipal
+  have hJ' : ∀ c : ↥(pullback ((E.baseChange t).π) (𝟙 T)),
+      ∃ V : (pullback ((E.baseChange t).π) (𝟙 T)).affineOpens, c ∈ V.1 ∧
+      ∃ f : Γ(pullback ((E.baseChange t).π) (𝟙 T), V.1),
+        ((Scheme.Hom.ker P).comap (bcSwapIso E t).hom).ideal V = Ideal.span {f} ∧
+          f ∈ nonZeroDivisors Γ(pullback ((E.baseChange t).π) (𝟙 T), V.1) := by
+    rw [hkercollapse]
+    exact (RelEffCartierDiv.sectionDivisor_isOfficial hsmB _ hPsw).locallyPrincipal
+  obtain ⟨eiso⟩ := nonempty_pullback_idealModule (bcSwapIso E t).hom
+    (Scheme.Hom.ker P) hJ hJ'
+  have hcore : Scheme.Pic.map (bcSwapIso E t).hom
+      (((RelEffCartierDiv.sectionDivisor (pullback.snd E.π t)
+          P hP).isInvertible_idealModule
+        (RelEffCartierDiv.sectionDivisor_isOfficial hsmE P hP)).isUnit_toSkeleton.unit) =
+      ((RelEffCartierDiv.sectionDivisor (pullback.snd ((E.baseChange t).π) (𝟙 T))
+          (P ≫ (bcSwapIso E t).inv) hPsw).isInvertible_idealModule
+        (RelEffCartierDiv.sectionDivisor_isOfficial hsmB _ hPsw)).isUnit_toSkeleton.unit := by
+    refine Units.ext ?_
+    refine (Scheme.Pic.map_val (bcSwapIso E t).hom _).trans ?_
+    refine (congrArg (Scheme.Modules.pullback (bcSwapIso E t).hom).mapSkeleton.obj
+      (IsUnit.unit_spec _)).trans ?_
+    refine (Functor.mapSkeleton_obj_toSkeleton _ _).trans ?_
+    refine (toSkeleton_eq_toSkeleton_iff.mpr
+      ⟨eiso ≪≫ eqToIso (congrArg Scheme.Modules.idealModule hkercollapse)⟩).trans ?_
+    exact (IsUnit.unit_spec _).symm
+  refine Eq.trans (map_inv (Scheme.Pic.map (bcSwapIso E t).hom) _) ?_
+  exact congrArg (·⁻¹) hcore
+
 end ModularCurves
