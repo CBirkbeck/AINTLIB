@@ -590,7 +590,22 @@ theorem weilPairingEval_self_model_map {R : Type u} [CommRing R]
   -- transport back along `φ`
   have hmap := weilPairingEval_mapIso φ y y hykill hykill
     (Point.mapIso_killedBy φ hykill) (Point.mapIso_killedBy φ hykill)
-  sorry
+  -- `Point.mapIso φ y = x` since `y` was defined as the `φ.symm`-transport
+  have hxy : Point.mapIso φ y = x := by
+    refine Subtype.ext ?_
+    show (y.1 ≫ φ.hom.left) = x.1
+    show ((x.1 ≫ φ.symm.hom.left) ≫ φ.hom.left) = x.1
+    rw [Category.assoc]
+    have : φ.symm.hom.left ≫ φ.hom.left = 𝟙 _ := by
+      show (φ.inv ≫ φ.hom).left = _
+      rw [φ.inv_hom_id]
+      rfl
+    rw [this]
+    exact Category.comp_id _
+  rw [weilPairingEval_congr (E := modelEllipticCurve (universalWeierstrassLocU.{u}.map
+    (algebraMap WeierstrassAtlasRingU.{u} R))) hxy hxy
+    (Point.mapIso_killedBy φ hykill) (Point.mapIso_killedBy φ hykill) hx hx] at hmap
+  exact hmap.trans (hbc.trans huniv)
 
 end EllipticCurve
 
