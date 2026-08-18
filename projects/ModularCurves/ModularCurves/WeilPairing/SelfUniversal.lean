@@ -46,7 +46,7 @@ variable {S : Scheme.{u}}
 /-- **(U1, the transport theorem — `φ`-sibling of the base-change naturality)** The
 pairing is invariant under pointed isomorphisms of elliptic records over the same
 base. -/
-theorem weilPairingEval_mapIso {E F : EllipticCurve S} [IsLocallyNoetherian S]
+theorem weilPairingEval_mapIso {E F : EllipticCurve S}
     (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] {N : ℕ} [NeZero N]
     {T : Scheme.{u}} {g : T ⟶ S} (x y : E.Point g)
     (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)

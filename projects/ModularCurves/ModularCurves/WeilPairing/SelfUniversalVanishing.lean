@@ -581,6 +581,15 @@ theorem weilPairingEval_self_model_map {R : Type u} [CommRing R]
     exact map_zero _
   -- the universal statement at `z`
   have huniv := weilPairingEval_self_universalModel z hzkill
+  -- the base-changed record's value equals the universal record's value at `z`
+  have hbc : (((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange σ).weilPairingEval
+      y y hykill hykill : Γ(T, ⊤)) =
+      ((modelEllipticCurve universalWeierstrassLocU.{u}).weilPairingEval z z hzkill hzkill :
+        Γ(T, ⊤)) := by
+    sorry
+  -- transport back along `φ`
+  have hmap := weilPairingEval_mapIso φ y y hykill hykill
+    (Point.mapIso_killedBy φ hykill) (Point.mapIso_killedBy φ hykill)
   sorry
 
 end EllipticCurve
