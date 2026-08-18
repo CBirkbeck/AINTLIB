@@ -996,6 +996,49 @@ theorem weilPairingEval_self_general {S : Scheme.{u}} (E : EllipticCurve S) {N :
     (EllipticCurve.Point.restrict E (g ⁻¹ᵁ U.1).ι x) hxr hxr'').symm.trans ?_
   exact weilPairingEval_self_of_recordIso E W (U.2.isoSpec.inv ≫ U.1.ι) φ _ hxr''
 
+/-! ## Consequences (axiom-clean versions of the register's derived laws)
+
+`WeilPairing/Basic.lean` derives antisymmetry, the first-slot power law and the
+symplectic formula from its (still sorried) register entry `weilPairingEval_self`. The
+versions below are the same statements re-derived from `weilPairingEval_self_general`,
+hence axiom-clean; downstream consumers should use these. -/
+
+/-- **Antisymmetry** `e_N(x,y) · e_N(y,x) = 1`, axiom-clean. -/
+theorem weilPairingEval_antisymm_general {S : Scheme.{u}} (E : EllipticCurve S) {N : ℕ}
+    [NeZero N] {T : Scheme.{u}} {g : T ⟶ S} (x y : E.Point g)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x y hx hy : Γ(T, ⊤)) * E.weilPairingEval y x hy hx = 1 := by
+  have hxy := E.point_add_killedBy hx hy
+  have h := weilPairingEval_self_general E (x + y) hxy
+  rw [E.weilPairingEval_add_left x y (x + y) hx hy hxy hxy,
+    E.weilPairingEval_add_right x x y hx hx hy hxy,
+    E.weilPairingEval_add_right y x y hy hx hy hxy,
+    weilPairingEval_self_general E x hx, weilPairingEval_self_general E y hy] at h
+  rw [_root_.one_mul, _root_.mul_one] at h
+  exact h
+
+/-- **The power law in the first slot**, axiom-clean. -/
+theorem weilPairingEval_zsmul_left_general {S : Scheme.{u}} (E : EllipticCurve S) {N : ℕ}
+    [NeZero N] {T : Scheme.{u}} {g : T ⟶ S} (x y : E.Point g) (a : ℤ)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hax : (a • x).1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval (a • x) y hax hy : Γ(T, ⊤)) =
+      (E.weilPairingEval x y hx hy : Γ(T, ⊤)) ^ ((a % (N : ℤ)).toNat) := by
+  have hef : (E.weilPairingEval x y hx hy : Γ(T, ⊤)) *
+      E.weilPairingEval y x hy hx = 1 :=
+    weilPairingEval_antisymm_general E x y hx hy
+  have h1 : (E.weilPairingEval (a • x) y hax hy : Γ(T, ⊤)) *
+      E.weilPairingEval y (a • x) hy hax = 1 :=
+    weilPairingEval_antisymm_general E (a • x) y hax hy
+  have h2 : (E.weilPairingEval y (a • x) hy hax : Γ(T, ⊤)) =
+      (E.weilPairingEval y x hy hx : Γ(T, ⊤)) ^ ((a % (N : ℤ)).toNat) :=
+    E.weilPairingEval_zsmul_right y x a hy hx hax
+  have hunit : IsUnit ((E.weilPairingEval y x hy hx : Γ(T, ⊤)) ^ ((a % (N : ℤ)).toNat)) :=
+    (isUnit_of_pow_eq_one (E.weilPairingEval y x hy hx).2).pow _
+  refine (hunit.mul_left_inj).mp ?_
+  rw [pow_mul_pow_eq_one hef, ← h2]
+  exact h1
+
 end EllipticCurve
 
 end ModularCurves
