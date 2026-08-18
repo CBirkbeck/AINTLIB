@@ -814,6 +814,20 @@ theorem exists_localModel_recordIso {S : Scheme.{u}} (E : EllipticCurve S)
     (modelEllipticCurve W).one_eq_zero]
   exact (Category.assoc _ _ _).trans (congrArg _ hz)
 
+/-- **([ASM-4c])** The model case restated for an arbitrary elliptic Weierstrass curve
+over a ring (via the classifying map). -/
+theorem weilPairingEval_self_model {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    [W.IsElliptic] {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ Spec (CommRingCat.of R)}
+    (x : (modelEllipticCurve W).Point g)
+    (hx : x.1 ≫ (modelEllipticCurve W).mulByHom N = g ≫ (modelEllipticCurve W).zero) :
+    ((modelEllipticCurve W).weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by
+  obtain ⟨c, hc⟩ : ∃ c : WeierstrassAtlasRingU.{u} →+* R,
+      universalWeierstrassLocU.{u}.map c = W :=
+    ⟨classifyRingHomU W, universalWeierstrassLocU_map_classifyRingHomU W⟩
+  subst hc
+  letI : Algebra WeierstrassAtlasRingU.{u} R := c.toAlgebra
+  exact weilPairingEval_self_model_map x hx
+
 end EllipticCurve
 
 end ModularCurves
