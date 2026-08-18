@@ -1,0 +1,18 @@
+#!/bin/sh
+# gc-hook-stamp: unknown unknown
+# Installed by gc — forwards bd events to Gas City event log.
+# Args: $1=issue_id  $2=event_type  stdin=issue JSON
+GC_BIN="${GC_BIN:-gc}"
+HOOK_LOG="${BEADS_DIR:-.beads}/hooks.log"
+CITY_PATH='/Users/mcu22seu/gascity-trial'
+DATA=$(cat)
+PAYLOAD=$(printf '{"bead":%s}' "$DATA")
+title=$(echo "$DATA" | grep -o '"title":"[^"]*"' | head -1 | cut -d'"' -f4)
+# Tag subprocess bd calls so the bd-trace can attribute them to the
+# hook cascade (best-effort; ignored when GC_BD_TRACE is unset).
+export GC_BD_TRACE_SCOPE="hook:bead.created"
+(
+  "$GC_BIN" --city "$CITY_PATH" event emit bead.created --subject "$1" --message "$title" --payload "$PAYLOAD" --bead-payload "$1" 2>>"$HOOK_LOG" \
+    || echo "[$(date -u +%FT%TZ)] on_create $1: gc event emit bead.created failed (gc=$GC_BIN)" >>"$HOOK_LOG" 2>/dev/null \
+    || true
+) </dev/null >/dev/null 2>&1 &

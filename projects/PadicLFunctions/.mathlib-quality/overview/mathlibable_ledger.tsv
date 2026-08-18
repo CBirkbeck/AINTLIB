@@ -1,0 +1,185 @@
+qual	bucket	rationale
+PadicLFunctions.Coleman.Fglobal	NO-composable-from-mathlib	alias, definitionally equal to the mathlib primitive ℚ⟮zetaSys p n⟯
+PadicLFunctions.Coleman.FglobalPlus	BORDERLINE-needs-human	Mode A, full 10-phase workflow, exhaustive literature sweep.
+PadicLFunctions.Coleman.FglobalPlus_le_Fglobal	NO-composable-from-mathlib	This is a Mode A run (single declaration, full 10-phase workflow, exhaustive
+PadicLFunctions.Coleman.Fglobal_le_K	NO-composable-from-mathlib	A thin, project-local base-change inclusion ℚ(ζ) ⊆ ℚ_p(ζ) (both inside ℂ_[p]). Mathlib
+PadicLFunctions.Coleman.cycloClosure	NO-composable-from-mathlib	𝒞_n of the cyclotomic units inside the local units — is a standard, named object
+PadicLFunctions.Coleman.cycloClosureOne	NO-composable-from-mathlib	project-specific subgroups; not a standalone mathlib object).
+PadicLFunctions.Coleman.cycloClosureOnePlus	NO-composable-from-mathlib	two project-specific subgroups; not a standalone mathlib object).
+PadicLFunctions.Coleman.cycloClosurePlus	NO-composable-from-mathlib	Subgroup intersection cycloClosure p n ⊓ localUnitsPlus p n (= 𝒞_n ∩ 𝒰_n⁺), a
+PadicLFunctions.Coleman.cycloGenSet	YES-but-generalise-first	- lake build:               build not re-run; reasoned from source (BUILD NOTE in task; Phase-0 fallback). The declaration and all dependenc
+PadicLFunctions.Coleman.cycloTower1	NO-composable-from-mathlib	(⨅ n, comap (elemsₙ) (cycloClosureOne n)) whose content is entirely project-specific
+PadicLFunctions.Coleman.cycloTower1Plus	NO-composable-from-mathlib	wrapper (⨅_n comap eval_n (cycloClosureOnePlus n)) over a project structure
+PadicLFunctions.Coleman.cycloTower1_le_unitsTower1	NO-composable-from-mathlib	- lake build:               build not re-run; reasoned from source (per task build note — a fresh
+PadicLFunctions.Coleman.cycloUnits	BORDERLINE-needs-human	cyclotomic units (only per-element associatedness facts in
+PadicLFunctions.Coleman.cycloUnitsPlus	BORDERLINE-needs-human	real cyclotomic units 𝒟_n ∩ F_n⁺ — a textbook-standard object (Wikipedia's "real
+PadicLFunctions.Coleman.cycloUnits_le_globalUnits	NO-composable-from-mathlib	cyclotomic units 𝒟_n = cycloUnits p n are contained in the global units
+PadicLFunctions.Coleman.globalUnits	NO-mathlib-has-it	the project's declaration is a project-specific re-presentation of it embedded in ℂ_[p]).
+PadicLFunctions.Coleman.globalUnitsPlus	NO-mathlib-has-it	NumberField.CMExtension.realUnits; the project's declaration is a project-specific
+PadicLFunctions.Coleman.globalUnits_le_localUnits	NO-composable-from-mathlib	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.Coleman.isIntegral_cycloUnit	YES-but-generalise-first	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.Coleman.norm_le_one_of_isIntegral_int	NO-mathlib-has-it	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.ExtLogDomain	NO-composable-from-mathlib	ExtLogDomain p x is a Prop-valued predicate that says x is a rational-valuation
+PadicLFunctions.ExtLogDomain.mul	NO-composable-from-mathlib	- Mode: A (single declaration, full 10-phase workflow, exhaustive 9-channel literature search).
+PadicLFunctions.ExtLogDomain.prod	NO-composable-from-mathlib	call over the project-local predicate ExtLogDomain p, using the already-existing binary
+PadicLFunctions.FtildeA	NO-composable-from-mathlib	antiderivative F̃_a, a 3-term assembly whose two power-series terms are exactly
+PadicLFunctions.InExpBall	NO-composable-from-mathlib	InExpBall p x is a thin Prop abbreviation for the single inequality
+PadicLFunctions.MeasureR.Ftilde	NO-composable-from-mathlib	antiderivative F̃_θ (the candidate for ∂⁻¹F_θ), introduced in-display inside the
+PadicLFunctions.MeasureR.LpFunction_one	YES-but-generalise-first	a sub-case of Leopoldt's theorem; the missing pure-p-power case D = 1 is part of the standard
+PadicLFunctions.MeasureR.boundary_norm_pow_sub_one_lt_one	YES-but-generalise-first	The content — the open unit norm-ball around 1 in an ultrametric field is closed
+PadicLFunctions.MeasureR.exists_antideriv_bounded	BORDERLINE-needs-human	A theorem that bundles three things into one existential: (existence of a formal
+PadicLFunctions.MeasureR.extLog_eq_padicLog_of_norm_lt_one	BORDERLINE-needs-human	glue between two project-specific p-adic-logarithm definitions, extLog and
+PadicLFunctions.MeasureR.logSeriesAt	NO-composable-from-mathlib	Mode A, full 10-phase workflow, exhaustive 9-channel literature sweep. Build was
+PadicLFunctions.MeasureR.norm_one_sub_pow_eq_one	NO-composable-from-mathlib	project lemma IsPrimitiveRoot.norm_pow_sub_one_eq_one; 2-call composition, zero
+PadicLFunctions.MeasureR.norm_pow_sub_one_eq_one_of_unit	BORDERLINE-needs-human	mathlib-worthy and should be generalised first; this specific declaration is a
+PadicLFunctions.MeasureR.norm_sub_one_eq_one_of_pow	BORDERLINE-needs-human	Mode A, full 10-phase workflow. The exhaustive 9-channel literature search ran; the ChatGPT MCP channel is unavailable in this environment a
+PadicLFunctions.MeasureR.one_add_mul_derivative_Ftilde	BORDERLINE-needs-human	for the mixed tame-and-wild case N = D·pⁿ (D > 1), the θ ≠ 1 analogue of the already-assessed
+PadicLFunctions.MeasureR.one_add_mul_derivative_logSeriesAt	BORDERLINE-needs-human	Mode A, full 10-phase workflow, exhaustive 9-channel literature sweep. Build was
+PadicLFunctions.MeasureR.one_add_mul_derivative_mahlerK_rhoTheta	BORDERLINE-needs-human	This is the Dirichlet-character-twisted sibling of
+PadicLFunctions.MeasureR.p_mul_constantCoeff_mahlerK_rhoTheta	BORDERLINE-needs-human	(RJW T615) — a ~170-line construction-internal identity that is STEP 1 in
+PadicLFunctions.MeasureR.padicLog_mul_of_norm_lt_one	YES-add-as-is	Mode A, full 10-phase workflow, exhaustive literature search.
+PadicLFunctions.MeasureR.padicLog_pow_of_norm_lt_one	BORDERLINE-needs-human	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.MeasureR.padicLog_pow_pPow_of_norm_lt_one	NO-composable-from-mathlib	- lake build:               build not re-run (stale/slow per task note); reasoned from source — the file elaborates as part of main, and the
+PadicLFunctions.MeasureR.padicLog_pow_p_of_norm_lt_one	BORDERLINE-needs-human	Mode A (single declaration), full 10-phase workflow with the exhaustive 9-channel
+PadicLFunctions.MeasureR.psi_rhoTheta	NO-composable-from-mathlib	project-local theorem mem_range_iota_iff; inline it at its single call site).
+PadicLFunctions.MeasureR.rhoTheta	NO-composable-from-mathlib	composition iota ( twist(χ, μ̃_η) ∘ extendByZero ∘ mulLeft(x⁻¹) ) of project-internal operations
+PadicLFunctions.MeasureR.seriesEval_formalLog	BORDERLINE-needs-human	Mode A, full 10-phase workflow, exhaustive 9-channel literature sweep. Build was
+PadicLFunctions.MeasureR.sum_seriesEval_Ftilde	BORDERLINE-needs-human	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.ValuesAtOneComplex.LFunction_one_eq	YES-add-as-is	Mode: A (single declaration, full 10-phase workflow, exhaustive 9-channel literature search)
+PadicLFunctions.ValuesAtOneComplex.LSeries_eq_gaussSum_inv_mul_sum	YES-but-generalise-first	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.ValuesAtOneComplex.gaussSum_mul_coprime	YES-but-generalise-first	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.ValuesAtOneComplex.tendsto_sum_pow_div_eq_neg_log	YES-add-as-is	z ∈ ∂𝔻 \ {1} analogue of mathlib's interior Complex.hasSum_taylorSeries_neg_log, and the
+PadicLFunctions._root_.IsPrimitiveRoot.norm_pow_sub_one_eq_one	YES-but-generalise-first	hypothesis cluster [NormedAlgebra ℚ_[p] L] is strictly narrower than the
+PadicLFunctions._root_.IsPrimitiveRoot.norm_sub_one_lt	YES-but-generalise-first	Mode A, full 10-phase workflow, exhaustive 9-channel literature search.
+PadicLFunctions._root_.IsPrimitiveRoot.tendsto_pow_sub_one	YES-but-generalise-first	Mode A, full 10-phase workflow, exhaustive 9-channel literature search.
+PadicLFunctions.branch_denom_ne_zero	BORDERLINE-needs-human	Mode A — single declaration, full 10-phase workflow, exhaustive 9-channel literature search.
+PadicLFunctions.charZero_of_qpAlgebra	NO-composable-from-mathlib	mathlib's charZero_of_injective_algebraMap. Mathlib already supplies the building block;
+PadicLFunctions.coe_norm_le_inv_of_mem_span	NO-composable-from-mathlib	coe_norm_le_inv_of_mem_span states that an element x ∈ ℤ_[p] lying in the
+PadicLFunctions.coeff_pow_eq_zero_of_lt	NO-composable-from-mathlib	statement is re-derived ≥4 times across AINTLIB and is a 1–3 call composition of existing mathlib
+PadicLFunctions.constantCoeff_FtildeA	NO-composable-from-mathlib	constant-coefficient computation about the project-specific power series
+PadicLFunctions.constantCoeff_mahlerK_rhoA	BORDERLINE-needs-human	One-line summary: a sorry-free, genuine piece of Kubota–Leopoldt p-adic
+PadicLFunctions.continuousAt_zetaPBranch	BORDERLINE-needs-human	Kubota–Leopoldt tower is being upstreamed to mathlib4 — it is currently absent, and this
+PadicLFunctions.continuous_zetaNum_branch_pairing	BORDERLINE-needs-human	The mathematical principle the theorem encodes — "the Mellin/Amice pairing of a
+PadicLFunctions.divisorMeasure	BORDERLINE-needs-human	The mathematical content is genuinely standard and named in the literature: A_n =
+PadicLFunctions.divisorMeasure_moment	BORDERLINE-needs-human	Mode A — full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.eisensteinFamily	BORDERLINE-needs-human	The mathematical object — the Λ-adic (Serre / Wiles / Katz) family of p-stabilised
+PadicLFunctions.eisensteinFamily_interpolation	BORDERLINE-needs-human	Mode A — full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.exists_pPow_pow_inExpBall	NO-composable-from-mathlib	(See Phase 7 for the full reasoning. Headline: mathlib has no p-adic exp/log
+PadicLFunctions.exists_pow_sub_one_norm_le	BORDERLINE-needs-human	Mode: A (single declaration, full 10-phase workflow with the exhaustive 9-channel literature search).
+PadicLFunctions.exp_subst_log	YES-but-generalise-first	ℚ_[p] form is a needless specialisation of a standard identity that holds, with
+PadicLFunctions.extLog	YES-but-generalise-first	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.extLogDomain_of_integral_norm_one	BORDERLINE-needs-human	The theorem is genuinely novel (mathlib has no p-adic logarithm at all), is not
+PadicLFunctions.extLog_eq_of_witness	YES-but-generalise-first	Mode A (single declaration), full 10-phase workflow with the exhaustive 9-channel
+PadicLFunctions.extLog_eq_padicLog	YES-but-generalise-first	Mode A — full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.extLog_eq_zero_of_pow_eq_one	YES-but-generalise-first	Mode A (single declaration), full 10-phase workflow with the exhaustive 9-channel
+PadicLFunctions.extLog_mul	YES-but-generalise-first	Mode A (single declaration), full 10-phase workflow with the exhaustive 9-channel
+PadicLFunctions.extLog_neg	YES-but-generalise-first	Mode A (single declaration), full 10-phase workflow with the exhaustive 9-channel
+PadicLFunctions.extLog_prod	BORDERLINE-needs-human	The full ten-phase Mode-A workflow with the nine-channel exhaustive literature
+PadicLFunctions.extLog_witness_smul_eq	YES-but-generalise-first	Mode A (single declaration), full 10-phase workflow with the exhaustive 9-channel
+PadicLFunctions.finite_adjoin_int_quotient	NO-composable-from-mathlib	Mode: A (single declaration, full 10-phase workflow with the exhaustive 9-channel literature search).
+PadicLFunctions.hasSum_pow_fin	YES-but-generalise-first	statement is the parent lemma HasSum.mul_of_nonarchimedean iterated, but pinned to a
+PadicLFunctions.hasSum_stabilisedEisenstein	BORDERLINE-needs-human	The mathematics is canonical and entirely absent from mathlib (no p-stabilisation
+PadicLFunctions.inExpBall_of_mem_span	NO-composable-from-mathlib	inExpBall_of_mem_span states the canonical p-adic-analysis fact that, for an odd
+PadicLFunctions.inExpBall_one_sub_one	NO-composable-from-mathlib	about the project-local predicate InExpBall; its content is a ≤3-call composition
+PadicLFunctions.integerRing.ballIdeal	NO-mathlib-has-it	Mode A, full 10-phase workflow, exhaustive literature search. ChatGPT MCP and the
+PadicLFunctions.integerRing.isUnit_of_norm_eq_one	NO-mathlib-has-it	Mathlib already has this fact, as the iff Valued.integer.isUnit_iff_norm_eq_one
+PadicLFunctions.integerRing.isometry_algebraMap	NO-composable-from-mathlib	The lemma is a single mathlib call (AddMonoidHomClass.isometry_of_norm) applied to
+PadicLFunctions.integerRing	BORDERLINE-needs-human	One-line summary: the carrier ({x : L | ‖x‖ ≤ 1} as a Subring) is essentially
+PadicLFunctions.integerRing.norm_algebraMap_eq	NO-composable-from-mathlib	- lake build:               build not re-run (stale/slow per task note); reasoned from source — the decl and all its dependencies read direc
+PadicLFunctions.integerRing.not_isUnit_of_norm_lt_one	NO-mathlib-has-it	- lake build:               build not re-run (stale/slow per task note); reasoned from source — the decl and all its dependencies were read 
+PadicLFunctions.isUnit_two_padicInt	YES-but-generalise-first	trivial 2-line specialisation of the standard fact "a natCast coprime to p
+PadicLFunctions.log_subst_exp_sub_one	YES-but-generalise-first	statement is the classical "log inverts exp" formal-power-series identity, but it is
+PadicLFunctions.map_nonZeroDivisors_unitsTwist	NO-mathlib-has-it	- lake build:                not re-run — build is stale/slow in this checkout (the task's BUILD NOTE applies). Reasoned from source directl
+PadicLFunctions.master_bridge	YES-but-generalise-first	- lake build:               build not re-run; reasoned from source (per task BUILD NOTE — build is stale/slow here). The declaration, its fi
+PadicLFunctions.mul_mem_expBall	NO-composable-from-mathlib	Mode A, full 10-phase workflow. The exhaustive 9-channel literature search ran;
+PadicLFunctions.natCast_p_ne_zero	NO-composable-from-mathlib	- lake build:               build not re-run (stale/slow per task instruction); reasoned from source
+PadicLFunctions.noMeasure_interpolates_pPow	BORDERLINE-needs-human	Mode A — full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.norm_coeff_exp_le	BORDERLINE-needs-human	- lake build:                build not re-run; reasoned from source (per task BUILD NOTE — lake build here is stale/slow). Declaration and i
+PadicLFunctions.norm_coeff_log_le	BORDERLINE-needs-human	- lake build:               build not re-run (stale/slow per task note); reasoned from source — decl + dependency chain read directly.
+PadicLFunctions.norm_coeff_pow_le	BORDERLINE-needs-human	- lake build:               build not re-run; reasoned from source (per task instruction — build is stale/slow here; read the decl + deps di
+PadicLFunctions.norm_coeff_prod_le	BORDERLINE-needs-human	The lemma is a genuine, correct fragment of standard p-adic analysis (a Legendre/Dwork-type
+PadicLFunctions.norm_eq_one_of_inExpBall_sub_one	NO-composable-from-mathlib	project-local InExpBall predicate and is a ≤3-call composition of mathlib's
+PadicLFunctions.norm_factorial_inv_pow_le	BORDERLINE-needs-human	- lake build:               build not re-run (stale/slow per task instructions); reasoned from source — Phase 0 fallback. All building block
+PadicLFunctions.norm_factorial_inv_smul_pow_le	BORDERLINE-needs-human	- lake build:               build not re-run; reasoned from source (per task BUILD NOTE — build is stale/slow here; Phase-0 source fallback 
+PadicLFunctions.norm_factorial_inv_smul_pow_sub_lt	BORDERLINE-needs-human	- lake build:               build not re-run (stale/slow per task BUILD NOTE); reasoned from source — Phase-0 fallback. All mathlib building
+PadicLFunctions.norm_factorial_le	NO-composable-from-mathlib	short composition of mathlib's Legendre inequality with the p-adic
+PadicLFunctions.norm_le_one_of_mem_adjoin_int	NO-composable-from-mathlib	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.norm_lt_one_of_inExpBall	NO-composable-from-mathlib	project-local InExpBall predicate and is a ≤3-call composition of mathlib's
+PadicLFunctions.norm_natCast_inv_pow_le	YES-but-generalise-first	Mode A — full 10-phase workflow, exhaustive 9-channel literature search.
+PadicLFunctions.norm_natCast_p	NO-composable-from-mathlib	(Padic.norm_p + norm_algebraMap', glued by map_natCast); the statement is a
+PadicLFunctions.norm_natCast_self_lt_one	NO-composable-from-mathlib	blocks (Padic.norm_p_lt_one + norm_algebraMap'); the statement is a 3-call
+PadicLFunctions.norm_onePAdicPow_sub_one	YES-but-generalise-first	missing, canonical fact of p-adic analysis (the p-adic logarithm/exponential
+PadicLFunctions.norm_padicExp_sub_one	BORDERLINE-needs-human	- lake build:               build not re-run (stale/slow per task note); reasoned from source — the file elaborates as part of main, and the
+PadicLFunctions.norm_padicExp_sub_one_sub_self_le	BORDERLINE-needs-human	- lake build:               build not re-run; reasoned from source (per task instruction — build is stale/slow here; Phase 0 fallback used)
+PadicLFunctions.norm_padicExp_sub_padicExp	YES-but-generalise-first	is standard and missing from mathlib, but the Lean form is keyed to ℚ_[p]-coefficient
+PadicLFunctions.norm_padicLog	YES-but-generalise-first	textbook-standard, named in the literature, and entirely missing from mathlib, but the Lean form
+PadicLFunctions.norm_pow_p_sub_one_le	BORDERLINE-needs-human	mathlib and not a cheap composition, but whether this single contraction-step
+PadicLFunctions.norm_succ_inv_smul_pow_le	BORDERLINE-needs-human	- lake build:               build not re-run; reasoned from source (per task instruction — build is stale/slow here; Phase 0 fallback used)
+PadicLFunctions.norm_succ_inv_smul_pow_lt	BORDERLINE-needs-human	- lake build:               build not re-run; reasoned from source (per task BUILD NOTE — lake build is stale/slow here; Phase-0 fallback us
+PadicLFunctions.oneAddX_mul_derivative_log	YES-add-as-is	- lake build:               build not re-run (stale/slow per task note); reasoned from source. The proof body is rw [deriv_log]; ext n; rw [
+PadicLFunctions.one_add_mul_derivative_FtildeA	BORDERLINE-needs-human	expository paper (Rodrigues Jacinto & Williams, An introduction to p-adic
+PadicLFunctions.one_add_mul_derivative_mahlerK_rhoA	BORDERLINE-needs-human	This is the formalised "T705 / Lemma 6.3 pattern" step of the project's
+PadicLFunctions.pScale	NO-composable-from-mathlib	positive-real scaling action on the upper half-plane
+PadicLFunctions.pZpExp	BORDERLINE-needs-human	the p-adic exponential restricted to pℤ_p (odd p), landing in 1 + pℤ_p — is
+PadicLFunctions.pZpExp_coe	BORDERLINE-needs-human	is a genuine, classical fact mathlib is missing — for odd p, the p-adic exponential is
+PadicLFunctions.pZpExp_sub_one_mem	BORDERLINE-needs-human	This is a true, textbook-standard (K. Conrad Infinite series in p-adic fields / MIT
+PadicLFunctions.pZpLog	BORDERLINE-needs-human	pZpLog is the integral p-adic logarithm 1 + pℤ_p → pℤ_p (odd p): the
+PadicLFunctions.pZpLog_coe	NO-mathlib-has-it	(One-line: the lemma is a definitional-branch characterisation of a project-local
+PadicLFunctions.pZpLog_mem	BORDERLINE-needs-human	This is the log-image half of the classical exp/log isomorphism of principal units —
+PadicLFunctions.p_mul_constantCoeff_mahlerK_rhoA	BORDERLINE-needs-human	~125-line construction-internal identity in RJW §7's residue computation,
+PadicLFunctions.padicExp	NO-mathlib-has-it	NormedSpace.exp specialised to the project's field L; the two are provably
+PadicLFunctions.padicExp_add	BORDERLINE-needs-human	The mathematics of padicExp_add (the exponential functional equation on the
+PadicLFunctions.padicExp_converges_on_pZp	BORDERLINE-needs-human	This is a true, standard (Washington §5.1 / Cassels §12 / RJW Lem 5.14), genuinely
+PadicLFunctions.padicExp_eq_tsum_coeff	NO-composable-from-mathlib	the project's own padicExp definition (∑' n, (n!)⁻¹ • zⁿ) into the formal-power-series
+PadicLFunctions.padicExp_padicLog	YES-add-as-is	Mode A, full 10-phase workflow, exhaustive literature sweep. ChatGPT-MCP and the
+PadicLFunctions.padicExp_smul_padicLog_eq_onePAdicPow	YES-but-generalise-first	Mode A, full 10-phase workflow, exhaustive 9-channel literature sweep.
+PadicLFunctions.padicExp_zero	BORDERLINE-needs-human	- lake build:               build not re-run (stale/slow per task note); reasoned from source — the file elaborates as part of main, the tar
+PadicLFunctions.padicLog	YES-but-generalise-first	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.padicLog_eq_tsum_coeff	BORDERLINE-needs-human	Mode A, full 10-phase workflow, exhaustive 9-channel literature search.
+PadicLFunctions.padicLog_mul	YES-but-generalise-first	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.padicLog_one	BORDERLINE-needs-human	load-bearing companion (log_p 1 = 0) of the project-local p-adic logarithm.
+PadicLFunctions.padicLog_padicExp	YES-but-generalise-first	Mode A — full 10-phase workflow, exhaustive 9-channel literature search.
+PadicLFunctions.padicLog_pow	BORDERLINE-needs-human	Mode A (single declaration), full 10-phase workflow with the exhaustive
+PadicLFunctions.padicLog_term_eq	NO-composable-from-mathlib	reindexing/glue lemma that bridges the hand-rolled padicLog tsum to the
+PadicLFunctions.pow_mem_expBall	YES-but-generalise-first	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.pow_norm_sum_le	NO-composable-from-mathlib	- lake build:               build not re-run; reasoned from source (mathlib pinned at rev = 005f0aa67b69, toolchain leanprover/lean4:v4.32.0
+PadicLFunctions.psi_rhoA	BORDERLINE-needs-human	- lake build:               build not re-run; reasoned from source (per task instruction — build stale/slow here; Phase 0 fallback used)
+PadicLFunctions.quotientTwist	NO-mathlib-has-it	IsFractionRing.ringEquivOfRingEquiv. quotientTwist p is definitionally equal to
+PadicLFunctions.quotientTwist_algebraMap	NO-mathlib-has-it	IsLocalization.ringEquivOfRingEquiv_eq (general localizations) and, in the
+PadicLFunctions.rhoA	NO-composable-from-mathlib	baseChange ∘ iota ∘ zetaNum of three project-internal operations on
+PadicLFunctions.rjwEisenstein	NO-composable-from-mathlib	Mode A — full 10-phase workflow, exhaustive 9-channel literature search.
+PadicLFunctions.sigmaP	BORDERLINE-needs-human	is the prime-to-p divisor power sum, a genuine def that mathlib does
+PadicLFunctions.sigmaP_add_pow_mul_sigma_div	BORDERLINE-needs-human	subtraction-free divisor-splitting identity σ^p_k(n) + p^k·σ_k(n/p) = σ_k(n)
+PadicLFunctions.sigmaP_eq_of_not_dvd	NO-composable-from-mathlib	that the prime-to-p divisor power sum σ^p_k(n) equals the full divisor power sum
+PadicLFunctions.stabilisedCoeff	YES-but-generalise-first	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.stabilisedEisenstein	YES-but-generalise-first	(reason: LITERATURE-WEAKENING + MODERN-IDIOM — the content is the standard Hida/Wiles
+PadicLFunctions.stabilisedEisenstein_apply	NO-composable-from-mathlib	Mode A — full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.stabilisedEisenstein_smul_apply	NO-composable-from-mathlib	Mode A — single declaration, full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.sub_one_mul_padicValNat_succ_le	YES-but-generalise-first	(p−1)·v_p(n+1) ≤ n is a genuine elementary gap in mathlib's padicValNat
+PadicLFunctions.sum_seriesEval_FtildeA	BORDERLINE-needs-human	Mode A, full 10-phase workflow, exhaustive literature sweep. Build was not
+PadicLFunctions.summable_coeff_pow_scalar	NO-mathlib-has-it	Mathlib already has this result, in strictly more general form, as
+PadicLFunctions.summable_eval_pow	YES-but-generalise-first	- lake build:               build not re-run (stale/slow per task instruction); reasoned from source. The decl + its two load-bearing depend
+PadicLFunctions.summable_iff_tendsto_cofinite_zero	NO-mathlib-has-it	general form, and the project theorem's proof body is a literal one-token delegation to it.
+PadicLFunctions.summable_padicExp_terms	BORDERLINE-needs-human	- lake build:               build not re-run; reasoned from source (per task instruction — build is stale/slow here; Phase 0 fallback used)
+PadicLFunctions.summable_padicLog_terms	BORDERLINE-needs-human	Mode A, full 10-phase workflow, exhaustive 9-channel literature search.
+PadicLFunctions.summable_prod_family	BORDERLINE-needs-human	- lake build:               build NOT re-run (stale/slow per task note); reasoned from source — declaration + all dependencies (InExpBall, c
+PadicLFunctions.teichmuller_isPrimitiveRoot	YES-but-generalise-first	content (the Teichmüller lift ω(u) of a unit whose reduction generates
+PadicLFunctions.tendsto_branch_denom_div	BORDERLINE-needs-human	- lake build:               build not re-run; reasoned from source (per task instruction — build is stale/slow here; Phase 0 fallback used)
+PadicLFunctions.tendsto_sub_one_mul_zetaPBranch	BORDERLINE-needs-human	Mode A (single declaration), full 10-phase workflow with the exhaustive 9-channel
+PadicLFunctions.tsum_coeff_exp_sub_one	NO-composable-from-mathlib	power-series evaluation algebra-homomorphism PowerSeries.aeval, so the identity is just
+PadicLFunctions.tsum_coeff_pow_eq_coeff_subst	NO-mathlib-has-it	Mathlib does not have this exact tsum-form coefficient-of-substitution identity as a named
+PadicLFunctions.tsum_eval_pow	NO-composable-from-mathlib	evaluation as an algebra homomorphism (PowerSeries.aeval), together with
+PadicLFunctions.twistedZetaHalf	BORDERLINE-needs-human	The mathematics (constant coefficient of the p-adic / Λ-adic Eisenstein family =
+PadicLFunctions.twistedZetaHalf_isTwistedPseudoMeasure	BORDERLINE-needs-human	Mode A — full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.twistedZetaHalf_moments	BORDERLINE-needs-human	Mode A — full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.uA	NO-composable-from-mathlib	PowerSeries.binomialSeries / the project's own PadicMeasure.geomSum; zero
+PadicLFunctions.unitOfNat	BORDERLINE-needs-human	The core unit construction is mathlib's IsUnit.unit (composable in one line at the
+PadicLFunctions.unitOfNat_coe	NO-composable-from-mathlib	- lake build:               build not re-run (stale/slow per task note); reasoned from source
+PadicLFunctions.unitsTwist	BORDERLINE-needs-human	The mathematics is canonical — the "twist" ring automorphism Tw_ρ : Λ(G) → Λ(G),
+PadicLFunctions.unitsTwist_dirac	YES-but-generalise-first	Mode A — full 10-phase workflow with the exhaustive 9-channel literature search.
+PadicLFunctions.unitsTwist_moment	NO-composable-from-mathlib	Single-declaration Mode-A assessment, full 10-phase workflow with the exhaustive
+PadicLFunctions.zetaNum_one	NO-composable-from-mathlib	Mode A (single declaration), full 10-phase workflow with the exhaustive 9-channel
+PadicMeasure.QuotientFieldPlus	NO-mathlib-has-it	Mode: A (single declaration, full 10-phase workflow with exhaustive 9-channel literature search)
+PadicMeasure.isPlusPseudoMeasure_padicZetaPlus	BORDERLINE-needs-human	RJW Cor. 11.4 (ζ_p descends to a pseudo-measure on ℤ_p^×/{±1}); mathlib lacks the whole pseudo-measure/Iwasawa foundation it sits atop, and its parent def IsPlusPseudoMeasure is itself YES-but-generalise-first — upstream-scope + generalisation-sequencing call.
+PadicLFunctions.Coleman.isIntegral_inv_cycloUnit	NO-composable-from-mathlib	Mode A, full 10-phase workflow with the exhaustive 9-channel literature search. Inverse of cyclotomic unit (xi^a-1)/(xi-1) is integral over Z via the explicit geometric-sum inverse; building blocks IsIntegral.sum/pow + IsPrimitiveRoot.isIntegral + coprime-multiplier geom_sum_mul are all in mathlib (RootsOfUnity/CyclotomicUnits.lean runs the same argument). IsIntegral.inv does NOT apply (it needs a field base; here R=Z). Short composition + project-local inv_cycloUnit_eq_geomSum rewrite; no upstream PR.
+PadicMeasure.zetaIdeal_eq_span	BORDERLINE-needs-human	Principality of I(𝒢)ζ_p: equals the principal ideal (([b]−1)·ζ_p) at a topological generator b (RJW §11.2 TeX 3052; engine = augmentationIdeal_eq_span). Substantive le_antisymm proof (NOT glue, unlike mem_zetaIdeal_iff), K=3 real call sites, not composable, no defeq risk. But it is a theorem ABOUT zetaIdeal — whose own verdict is BORDERLINE — and Phase 4 finds it strictly narrower than the general procyclic-Γ form (project already proves it twice: 𝒢 and 𝒢⁺). Upstreaming-scope + generality inherited from the parent; the whole Iwasawa-algebra tower is absent from mathlib.

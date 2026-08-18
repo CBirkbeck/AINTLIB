@@ -8,6 +8,7 @@ module
 public import BernoulliRegular.FLT37.Primary
 public import BernoulliRegular.UnitQuotient.DeltaAction
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerFurtwaengler.CyclotomicGaloisAction
+public import Mathlib.NumberTheory.RamificationInertia.Inertia
 
 
 /-!

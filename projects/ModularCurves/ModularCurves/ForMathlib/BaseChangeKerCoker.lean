@@ -403,7 +403,7 @@ theorem Module.Projective.ker_of_flat_coker (f : P →ₗ[R] Q) [IsNoetherianRin
   have : Module.Projective R (LinearMap.range f) := Module.Flat.projective_of_finitePresentation
   rw [← LinearMap.ker_rangeRestrict]
   obtain ⟨l, hl⟩ := (((LinearMap.exact_subtype_ker_map f.rangeRestrict).split_tfae
-    Subtype.val_injective f.surjective_rangeRestrict).out 0 1).mp
+    Subtype.val_injective f.surjective_rangeRestrict).out 1 2).mp
     (Module.projective_lifting_property _ _ f.surjective_rangeRestrict)
   exact .of_split _ _ hl
 

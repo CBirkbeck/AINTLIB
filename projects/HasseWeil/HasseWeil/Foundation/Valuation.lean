@@ -276,7 +276,7 @@ theorem localRing_isDVR {x₀ y₀ : F} (h : W.Nonsingular x₀ y₀) :
         (eq_bot_iff.mp hbot (subset_span (Set.mem_insert _ _)))
     haveI : IsPrincipalIdealRing (Localization.AtPrime P) :=
       ((tfae_of_isNoetherianRing_of_isLocalRing_of_isDomain
-        (Localization.AtPrime P)).out 4 0).mp hprincipal
+        (Localization.AtPrime P)).out 5 1).mp hprincipal
     exact ⟨hne⟩
   · -- Case: polynomialY ≠ 0
     have hmul_mem : f (Affine.CoordinateRing.YClass W (C y₀)) *
@@ -308,7 +308,7 @@ theorem localRing_isDVR {x₀ y₀ : F} (h : W.Nonsingular x₀ y₀) :
         (eq_bot_iff.mp hbot (subset_span (Set.mem_insert _ _)))
     haveI : IsPrincipalIdealRing (Localization.AtPrime P) :=
       ((tfae_of_isNoetherianRing_of_isLocalRing_of_isDomain
-        (Localization.AtPrime P)).out 4 0).mp hprincipal
+        (Localization.AtPrime P)).out 5 1).mp hprincipal
     exact ⟨hne⟩
 
 end HasseWeil

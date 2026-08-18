@@ -1,0 +1,249 @@
+qual	bucket	rationale
+C_Ψ₂Sq	NO-mathlib-has-it	existing mathlib lemma. This is a known, intentional duplication (the project
+C_Ψ₃_eq	NO-composable-from-mathlib	- Qualified name: WeierstrassCurve.C_Ψ₃_eq
+EvenRec	NO-mathlib-has-it	(human-judgment caveat below: the PR is long-stalled; a human may reclassify to YES if upstream is dead)
+HaveSameParity₄	NO-composable-from-mathlib	- lake build:               not re-run (env: local build stale); decl reasoned from source
+IsDivSequence	NO-mathlib-has-it	Qualified name: IsDivSequence (root namespace).
+IsEllDivSequence	NO-mathlib-has-it	fork of an existing mathlib definition (same file, same author David Kurniadi
+IsEllSequence.invar	YES-but-generalise-first	One-line: not in mathlib (this apparatus closes the standing normEDS satisfies IsEllDivSequence
+IsEllSequence	NO-mathlib-has-it	Qualified name: IsEllSequence (declared def _root_.IsEllSequence inside namespace EllSequence,
+OddRec	BORDERLINE-needs-human	One-line rationale: Not in mathlib; standard "elliptic ⇒ odd recurrence" but a one-call glue lemma over project-only OddRec/rel₃_iff_oddRec 
+Rel₃	NO-composable-from-mathlib	- Qualified name: EllSequence.Rel₃
+Rel₄OfValid	NO-composable-from-mathlib	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz theorem; elliptic
+StrictAnti₄	NO-composable-from-mathlib	bundle (0 ≤ d ∧ d < c ∧ c < b ∧ b < a); not a named concept, not in mathlib, and the
+addMulSub	YES-but-generalise-first	- Qualified name: EllSequence.addMulSub
+addMulSub_abs₀	NO-composable-from-mathlib	Step-9 mathlibable assessment, NagellLutz project. Single declaration.
+addMulSub_abs₁	NO-composable-from-mathlib	Step-9 (overview) mathlibable assessment, NagellLutz project (Nagell–Lutz theorem; elliptic
+addMulSub_even	NO-composable-from-mathlib	One-line rationale: an unfolding lemma for the project-local helper addMulSub
+addMulSub_mem_nonZeroDivisors	NO-composable-from-mathlib	- lake build:               (not re-run — local build stale per task note; reasoning from source)
+addMulSub_neg₀	YES-but-generalise-first	structural lemma about the project-local def EllSequence.addMulSub, which is itself not in
+addMulSub_neg₁	NO-composable-from-mathlib	EllSequence.addMulSub (which is itself absent from mathlib). It cannot be a standalone mathlib
+addMulSub_odd	YES-but-generalise-first	- Qualified name: EllSequence.addMulSub_odd (verified from source)
+addMulSub_same	BORDERLINE-needs-human	One-line rationale: trivial helper (addMulSub W m m = W m · W 0 = 0) about the
+addMulSub_sq_mul_rel₄_eq₉	NO-composable-from-mathlib	(ring) identity in the values of W, proved by simp_rw [rel₆, rel₄]; ring. It says
+addMulSub_swap	YES-but-generalise-first	lemma about the project-local def EllSequence.addMulSub, which is itself not in mathlib. The
+addMulSub_three_one	BORDERLINE-needs-human	- Project: NagellLutz (Nagell–Lutz; elliptic curves; division polynomials; elliptic divisibility sequences)
+addMulSub_transf	BORDERLINE-needs-human	_Step-9 single-declaration mathlibable assessment (AINTLIB /overview), NagellLutz project._
+addMulSub_two_zero	NO-composable-from-mathlib	- lake build:               not run (local build stale per task note); reasoning from source.
+addMulSub₄	NO-composable-from-mathlib	is a one-line, project-internal proof abbreviation: a hybrid two-factor product splicing one
+addMulSub₄_mul_addMulSub₄	NO-mathlib-has-it	- Qualified name: EllSequence.HaveSameParity₄.addMulSub₄_mul_addMulSub₄
+avg₄	NO-composable-from-mathlib	project-internal proof abbreviation over ℤ. It is mathlib's integer division; it has no
+avg₄_add_avg₄	NO-composable-from-mathlib	- Project: NagellLutz (Nagell–Lutz; elliptic curves; division polynomials; EDS)
+cMin	NO-composable-from-mathlib	is a one-line, project-internal ℤ → ℤ proof helper: the smallest valid third index of the same
+collapses	BORDERLINE-needs-human	- lake build:               not run (stale local build; irrelevant — see below)
+compl'	YES-but-generalise-first	(mathlib already has the special case of this definition; the value of compl' is precisely the
+compl	BORDERLINE-needs-human	File: projects/NagellLutz/LutzNagell/EllipticDivisibilitySequence.lean:1100
+complEDS'	NO-mathlib-has-it	Location: projects/NagellLutz/LutzNagell/EllipticDivisibilitySequence.lean:1528
+complEDS'_even	NO-mathlib-has-it	Qualified name: complEDS'_even (no namespace — declared inside section ComplEDS, not inside any namespace).
+complEDS'_odd	NO-mathlib-has-it	author, same statement, same proof structure). The project file is a verbatim
+complEDS'_one	NO-mathlib-has-it	Headline: mathlib already contains this lemma verbatim
+complEDS'_zero	NO-mathlib-has-it	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic curves;
+complEDS	NO-mathlib-has-it	Qualified name: complEDS (top-level; no enclosing namespace)
+complEDSRec'	NO-mathlib-has-it	Headline: This declaration is already in mathlib, byte-for-byte identical, under the
+complEDSRec	NO-mathlib-has-it	byte-identical copy of mathlib's complEDSRec
+complEDS_eq_aeval	BORDERLINE-needs-human	_Generated by /overview Step-9 mathlibable assessment (full single-decl workflow), 2026-06-18._
+complEDS_even	NO-mathlib-has-it	Qualified name: complEDS_even (no namespace — declared inside section ComplEDS, not inside any namespace).
+complEDS_neg	NO-mathlib-has-it	Qualified name: complEDS_neg (root namespace — defined in section ComplEDS, which has no
+complEDS_odd	NO-mathlib-has-it	Qualified name: complEDS_odd (top-level — no enclosing namespace; lives in section ComplEDS)
+complEDS_ofNat	NO-mathlib-has-it	NagellLutz / LutzNagell/EllipticDivisibilitySequence.lean:1566 (root namespace).
+complEDS_one	NO-mathlib-has-it	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic curves; division
+complEDS_zero	NO-mathlib-has-it	An identical declaration complEDS_zero already exists in the mathlib version pinned by this
+complEDS₂	NO-mathlib-has-it	is a literal fork of Mathlib/NumberTheory/EllipticDivisibilitySequence.lean
+complEDS₂_four	NO-mathlib-has-it	Headline: This declaration — together with the entire complEDS₂ block around it — is a
+complEDS₂_mul_b	NO-mathlib-has-it	exact pinned commit d90090f647ca, in Mathlib/NumberTheory/EllipticDivisibilitySequence.lean:329,
+complEDS₂_neg	NO-mathlib-has-it	- lake build:               not re-run (local build stale per task brief); decl read directly from source
+complEDS₂_one	NO-mathlib-has-it	Step-9 mathlibable assessment, NagellLutz project. One declaration.
+complEDS₂_three	NO-mathlib-has-it	This exact lemma — same qualified name, statement, @[simp] attribute, and proof — is already in
+complEDS₂_two	NO-mathlib-has-it	Qualified name: complEDS₂_two (root namespace — no enclosing namespace; section PreNormEDS does not change the namespace)
+complEDS₂_zero	NO-mathlib-has-it	The declaration is a byte-for-byte duplicate of a lemma already in mathlib.
+compl_neg	NO-mathlib-has-it	Project: NagellLutz (Nagell–Lutz; elliptic curves; division polynomials; elliptic divisibility sequences)
+compl_ofNat	NO-mathlib-has-it	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz theorem; elliptic
+compl₂EDS	NO-mathlib-has-it	already has this declaration verbatim as complEDS₂ in
+compl₂EDSAux	BORDERLINE-needs-human	mathlib (definitive grep over the pinned tree: zero hits anywhere), and it is a
+compl₂EDSAux_mul_b	BORDERLINE-needs-human	Project: NagellLutz (Nagell–Lutz theorem; elliptic curves; division polynomials; EDS).
+compl₂EDSAux_neg	BORDERLINE-needs-human	Project: NagellLutz (Nagell–Lutz; elliptic curves; division polynomials; EDS).
+compl₂EDSAux_neg_one	BORDERLINE-needs-human	Qualified name: compl₂EDSAux_neg_one (root namespace — no enclosing namespace)
+compl₂EDSAux_neg_two	NO-mathlib-has-it	- Qualified name: compl₂EDSAux_neg_two (root namespace — verified below)
+compl₂EDSAux_one	NO-composable-from-mathlib	_Project: NagellLutz (Nagell–Lutz theorem; elliptic curves; division polynomials; elliptic divisibility sequences)._
+compl₂EDSAux_two	BORDERLINE-needs-human	Step-9 single-declaration mathlibable assessment (NagellLutz / Nagell–Lutz, elliptic
+compl₂EDSAux_zero	NO-mathlib-has-it	One-line rationale: boundary @[simp] value of a fork-local helper compl₂EDSAux; mathlib already owns the canonical EDS-complement API (compl
+compl₂EDS_eq_aeval	NO-composable-from-mathlib	Step-9 mathlibable assessment, NagellLutz project. Run 2026-06-18.
+compl₂EDS_eq_redInvarNum_sub	NO-composable-from-mathlib	/ rationale: trivial ring inversion of the project-local definition redInvarNum; one step, no standalone API value.
+compl₂EDS_mul_b	NO-mathlib-has-it	Qualified name: compl₂EDS_mul_b (no enclosing namespace; the file is wrapped only in
+compl₂EDS_neg	NO-mathlib-has-it	One-line rationale: Verbatim renamed duplicate of mathlib's complEDS₂_neg — same statement, same definition, same proof.
+compl₂EDS_one	NO-mathlib-has-it	One-line rationale: Verbatim duplicate of mathlib's complEDS₂_one (same statement, same
+compl₂EDS_two	NO-mathlib-has-it	Step-9 single-declaration mathlibable assessment (NagellLutz / Nagell–Lutz, elliptic
+compl₂EDS_two_three_two	YES-but-generalise-first	Unlike the other complEDS₂_ base-case lemmas, this one is NOT in upstream mathlib, and
+compl₂EDS_zero	NO-mathlib-has-it	- lake build:               not re-run (local build stale per task brief); verdict is build-independent — it rests on a byte-level source co
+curveQ	NO-mathlib-has-it	curveQ W := W.map (algebraMap ℤ ℚ) is definitionally WeierstrassCurve.baseChange W ℚ
+curveQ_a₁	NO-mathlib-has-it	One-line: curveQ_a₁ is WeierstrassCurve.map_a₁ (a @[simps]-generated mathlib
+curveQ_a₂	NO-mathlib-has-it	One-line rationale: It is mathlib's WeierstrassCurve.map_a₂ (auto-@[simp] from @[simps] def map) specialised to f = algebraMap ℤ ℚ.
+curveQ_a₃	NO-mathlib-has-it	Step-9 (overview) mathlibable assessment, single declaration, NagellLutz project.
+curveQ_a₄	NO-mathlib-has-it	- lake build:               (not run — local build stale per task note; reasoning from source + mathlib source, which is authoritative for t
+curveQ_a₆	NO-mathlib-has-it	Mathlib already has the strictly more general WeierstrassCurve.map_a₆ (the @[simps]-generated
+curveQ_equation_iff	NO-composable-from-mathlib	- lake build:               (not run — local build stale per task; reasoned from source + mathlib source on pin)
+dMin	NO-composable-from-mathlib	one-line project-internal index helper, inline a % 2 at the (in-file) call sites.
+dMin_le	NO-composable-from-mathlib	project-local def dMin a = if Even a then 0 else 1. Its sole mathematical content is one
+dMin_lt_cMin	NO-composable-from-mathlib	A trivial private helper (dMin a < dMin a + 2) discharged by one core mathlib lemma; it belongs next to its defs, not in mathlib.
+dMin_nonneg	NO-composable-from-mathlib	- lake build:               (stale locally — reasoning from source per task note; decl is a trivial one-liner that elaborates against curren
+den_ne_prime_of_on_general_curve	YES-but-generalise-first	Step-9 (overview) full mathlibable assessment, single declaration.
+eq_normEDS	YES-add-as-is	This theorem closes one of the two open TODOs that mathlib's own
+eq_normEDS_of_dvd	YES-but-generalise-first	Project: NagellLutz (Nagell–Lutz theorem; elliptic curves; division polynomials; elliptic
+evalEval_eq_of_mk_eq	NO-composable-from-mathlib	One-line: a 2-call composition of AdjoinRoot.evalEval_mk (already in mathlib) + congrArg;
+evalEval_psi_odd	NO-composable-from-mathlib	evalEval_ψ_odd (lowercase ψ, EvalBridge.lean:68) = a 2-rw chain of two siblings BOTH ruled NO-composable (evalEval_ψ_eq_evalEval_Ψ = AdjoinRoot.evalEval_mk+mk_ψ; evalEval_Ψ_odd = simp[Ψ,if_neg,mul_one,evalEval_C]); supersedes earlier BORDERLINE (grain question belongs to parent evalEval_eq_of_mk_eq, not this specialisation). Report: evalEval_psi_odd.md
+evalEval_Ψ_odd	NO-composable-from-mathlib	One-line: trivial 3-step definitional simp over the project-local evalEval bridge API
+evalEval_Ψ_sq_eq_eval_ΨSq	NO-composable-from-mathlib	One-line: mathlib already exports every building block (Affine.CoordinateRing.mk_Ψ_sq,
+evalEval_φ_eq_eval_Φ	NO-composable-from-mathlib	One-line: mathlib already exports every building block (Affine.CoordinateRing.mk_φ,
+evalEval_ψ_eq_evalEval_Ψ	NO-composable-from-mathlib	- lake build:               not re-run (local build stale per task note); decl read from source
+evalEval_ψ_eq_zero_of_zsmul_eq_zero_general	YES-but-generalise-first	One-line: a genuine, mathlib-missing result (the forward direction of the classical
+even_sum	NO-composable-from-mathlib	One-line: the general fact ("same-parity integers sum to an even number") is a
+exists_some_of_ne_zero	NO-composable-from-mathlib	- lake build:               not re-run (env build stale, per task brief); reasoning from source
+hello	NO-composable-from-mathlib	Step-9 mathlibable assessment, NagellLutz project. Single declaration.
+integral_of_nsmul_integral_general	YES-but-generalise-first	- lake build:               not re-run (local build stale per task brief); reasoning from source + mathlib .lake/packages/mathlib
+integrality_of_order_four_general	BORDERLINE-needs-human	_Assessment date: 2026-06-18. Mathlib pin: d90090f (Lean v4.31.0-rc2), read directly from
+invar	BORDERLINE-needs-human	One-line: a one-line auxiliary def (6X² + b₂X + b₄, K=0 external call sites,
+invarDenom	NO-mathlib-has-it	One-line: EllSequence.invarDenom is a verbatim, Apache-licensed slice of David
+invarDenom_eq_redInvarDenom_mul	NO-mathlib-has-it	Step-9 mathlibable assessment (NagellLutz project — Nagell–Lutz theorem; elliptic
+invarDenom_normEDS_two	NO-mathlib-has-it	One-line: invarDenom_normEDS_two is the n = 2 base evaluation of the EDS "invariant
+invarNum	BORDERLINE-needs-human	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic curves;
+invarNum_eq_redInvarNum_mul	NO-composable-from-mathlib	Step-9 mathlibable assessment (AINTLIB /overview), NagellLutz project.
+invarNum_normEDS	NO-composable-from-mathlib	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz theorem; elliptic
+invarNum_normEDS_two	NO-composable-from-mathlib	Run as part of /overview Step-9 mathlibable assessment, NagellLutz project.
+invar_normEDS	BORDERLINE-needs-human	- Qualified name: invar_normEDS (root namespace — verified below; no enclosing namespace)
+invar_of_net	YES-but-generalise-first	- Qualified name: EllSequence.invar_of_net
+invar₂_normEDS	YES-but-generalise-first	- Project: NagellLutz (Nagell–Lutz theorem; elliptic curves; division polynomials; EDS)
+isDivSequence_id	NO-mathlib-has-it	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic curves;
+isDivSequence_of_dvd	BORDERLINE-needs-human	One-line rationale: Classical Ward result mathlib lists as a TODO, but its
+isEllDivSequence_id	NO-mathlib-has-it	- Qualified name: isEllDivSequence_id (top-level; no enclosing namespace)
+isEllDivSequence_of_dvd	BORDERLINE-needs-human	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic curves;
+isEllSequence_id	NO-mathlib-has-it	- lake build:               not re-run (local build stale per environment note); decl read directly from source
+isEllSequence_ψ	YES-but-generalise-first	- Qualified name: WeierstrassCurve.isEllSequence_ψ
+lutz_nagell_discriminant_general	YES-but-generalise-first	Step-9 (overview) full mathlibable assessment, single declaration.
+lutz_nagell_general	YES-add-as-is	_Assessment date: 2026-06-18. Mathlib pin: d90090f647ca (Lean v4.31.0-rc2), read directly from
+lutz_nagell_integrality_general	YES-add-as-is	_Assessment date: 2026-06-18. Mathlib pin: d90090f (Lean v4.31.0-rc2), read directly from
+lutz_nagell_integrality_short	YES-add-as-is	- lake build:               ~ not run (environment build is stale; reasoned from source per task note)
+map	YES-add-as-is	Step-9 mathlibable assessment for the NagellLutz project (Nagell–Lutz theorem;
+map_addMulSub	BORDERLINE-needs-human	Mode A, single declaration. Generated for the AINTLIB /overview Step-9 mathlibable
+map_compl	NO-mathlib-has-it	Qualified name: EllSequence.map_compl
+map_complEDS'	NO-mathlib-has-it	projects/NagellLutz/LutzNagell/EllipticDivisibilitySequence.lean is a fork/extension of
+map_complEDS	YES-but-generalise-first	One-declaration mathlibable assessment, run under /overview Step 9 on the
+map_complEDS_root	NO-mathlib-has-it	Qualified name: map_complEDS_root (root namespace — the section ComplEDS / section Map
+map_complEDS₂	NO-mathlib-has-it	Project: NagellLutz (Nagell–Lutz theorem; elliptic curves; division polynomials; elliptic divisibility sequences)
+map_compl₂EDS	NO-mathlib-has-it	Project: NagellLutz (Nagell–Lutz; elliptic curves; division polynomials; EDS)
+map_compl₂EDSAux	YES-add-as-is	Project: NagellLutz (Nagell–Lutz theorem; elliptic curves; division polynomials; EDS).
+map_invarDenom	NO-composable-from-mathlib	Trivial ring-hom naturality (map_mul ×2) over a bespoke 2-fold product invarDenom; no mathematical content, not independently addable.
+map_invarNum	BORDERLINE-needs-human	Mode A, single declaration. Generated for the AINTLIB /overview Step-9 mathlibable
+map_net	BORDERLINE-needs-human	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic curves;
+map_normEDS	NO-mathlib-has-it	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic curves;
+map_preNormEDS'	NO-mathlib-has-it	Project: NagellLutz (Nagell–Lutz theorem; elliptic curves; division polynomials;
+map_preNormEDS	NO-mathlib-has-it	One-line rationale: Already in mathlib verbatim (NumberTheory.EllipticDivisibilitySequence); this file is a literal fork of that mathlib mod
+map_redInvarDenom	NO-composable-from-mathlib	(secondary character: forked intra-repo duplicate — dedup, not upstream)
+map_redInvarNum	YES-add-as-is	- Project: NagellLutz (Nagell–Lutz theorem; elliptic curves; division polynomials; elliptic divisibility sequences)
+map_ω	YES-add-as-is	Step-9 (overview) mathlibable assessment, single declaration.
+mk_ψ₂_sq	NO-mathlib-has-it	| Parsed name | WeierstrassCurve.Affine.CoordinateRing.mk_ψ₂_sq |
+monic_Φ_sub_smul_ΨSq_general	YES-but-generalise-first	Mode A (single declaration), full workflow. Local Lean build is stale, so Phase 0
+mul_compl_eq_apply_mul_of_mem_nonZeroDivisors	YES-but-generalise-first	The content (the general multiplicative divisibility witness W(m) ∣ W(nm) for an EDS)
+neg	YES-add-as-is	An elliptic sequence is an odd function (W (-m) = -W m) given its first two terms are
+negOnePow_cMin	NO-composable-from-mathlib	- lake build:               not run (env: local build stale per task); reasoned from source.
+negOnePow_cMin_eq_dMin	NO-composable-from-mathlib	- Qualified name: EllSequence.negOnePow_cMin_eq_dMin
+negOnePow_dMin	NO-composable-from-mathlib	Qualified name: EllSequence.negOnePow_dMin
+net	NO-mathlib-has-it	- Qualified name: EllSequence.net
+net_add_sub_iff	NO-composable-from-mathlib	(more precisely: NOT-in-mathlib but blocked on its own project-local net definition, which is itself the missing upstream piece — see Phase 
+net_eq_rel₄	YES-add-as-is	Step-9 mathlibable assessment (NagellLutz project). Single declaration.
+net_normEDS	YES-but-generalise-first	net relation, on the direct path to mathlib's open isEllDivSequence_normEDS TODO), but it is a
+normEDS	NO-mathlib-has-it	Qualified name: normEDS (top-level; no enclosing namespace — defined inside section NormEDS)
+normEDSRec'	NO-mathlib-has-it	- lake build:               not re-run (local build stale per task brief); assessment reasons from source
+normEDSRec	NO-mathlib-has-it	Headline: normEDSRec is a verbatim fork of an existing mathlib declaration.
+normEDS_dvd_normEDS_two_mul	NO-mathlib-has-it	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic
+normEDS_dvd_two_mul	NO-mathlib-has-it	One-line rationale: Verbatim renamed fork of mathlib's normEDS_dvd_normEDS_two_mul; same statement, same proof, same generality.
+normEDS_eq_aeval	NO-composable-from-mathlib	Step-9 mathlibable assessment, NagellLutz project. Run 2026-06-18.
+normEDS_even	NO-mathlib-has-it	The declaration is already in mathlib verbatim — same name, same generality, same file
+normEDS_four	NO-mathlib-has-it	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz theorem; elliptic
+normEDS_mul_complEDS	YES-add-as-is	Project: NagellLutz (Nagell–Lutz; elliptic curves; division polynomials; EDS)
+normEDS_mul_complEDS_div	YES-but-generalise-first	(Upstream it together with its parent normEDS_mul_complEDS — the corollary is too thin to PR alone, but the product-identity API it caps is 
+normEDS_mul_complEDS₂	NO-mathlib-has-it	One-line rationale: This lemma is already in current mathlib — identical
+normEDS_mul_compl₂EDS	NO-mathlib-has-it	mathlib's normEDS_mul_complEDS₂ (in Mathlib/NumberTheory/EllipticDivisibilitySequence.lean,
+normEDS_neg	NO-mathlib-has-it	normEDS_neg is present verbatim in current mathlib; this project file is a literal fork of the same module.
+normEDS_odd	NO-mathlib-has-it	Mathlib/NumberTheory/EllipticDivisibilitySequence.lean (same Apache header, same author
+normEDS_ofNat	NO-mathlib-has-it	Qualified name: normEDS_ofNat (top-level; no enclosing namespace — defined inside
+normEDS_six_eq_mul	NO-composable-from-mathlib	- Project: NagellLutz (Nagell–Lutz; elliptic curves; division polynomials; elliptic divisibility sequences)
+normEDS_two_three_two	NO-mathlib-has-it	- Qualified name: normEDS_two_three_two (top-level — no enclosing namespace)
+nsmul_eq_zero_affine_to_jac	NO-composable-from-mathlib	- lake build:               (not run — local build stale per task; reasoning from source, proof reads as elaborating)
+of_oddRec_evenRec	YES-add-as-is	result (the "term-by-term recurrences ⇒ full two-variable elliptic relation"
+perm	NO-composable-from-mathlib	- lake build:               not run (local build stale per task brief; reasoning from source). Mathlib package present at .lake/packages/mat
+preNormEDS'	NO-mathlib-has-it	Single-declaration, full 10-phase assessment. Step-9 overview context (NagellLutz / Nagell–Lutz theorem; elliptic curves; division polynomia
+preNormEDS'_even	NO-mathlib-has-it	declaration preNormEDS'_even in
+preNormEDS'_four	NO-mathlib-has-it	- lake build:               not run (local build stale per task note; reasoning from source — the
+preNormEDS'_odd	NO-mathlib-has-it	Qualified name: preNormEDS'_odd (root namespace — see below)
+preNormEDS'_one	NO-mathlib-has-it	AINTLIB /overview Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz theorem;
+preNormEDS'_three	NO-mathlib-has-it	Mathlib already contains this declaration character-for-character identical —
+preNormEDS'_two	NO-mathlib-has-it	fork of an existing mathlib lemma. The NagellLutz project file
+preNormEDS'_zero	NO-mathlib-has-it	AINTLIB /overview Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz theorem;
+preNormEDS	NO-mathlib-has-it	Step-9 mathlibable assessment (AINTLIB /overview), single declaration.
+preNormEDS_even	NO-mathlib-has-it	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic curves;
+preNormEDS_four	NO-mathlib-has-it	mathlib lemma (Mathlib/NumberTheory/EllipticDivisibilitySequence.lean:202-204).
+preNormEDS_mul_complEDS₂	NO-mathlib-has-it	projects/NagellLutz/LutzNagell/EllipticDivisibilitySequence.lean is a verbatim
+preNormEDS_neg	NO-mathlib-has-it	vendored copy of preNormEDS_neg already in mathlib at
+preNormEDS_odd	NO-mathlib-has-it	identical (statement and proof), at
+preNormEDS_ofNat	NO-mathlib-has-it	lemma that already exists in mathlib at
+preNormEDS_one	NO-mathlib-has-it	One-line: This is a verbatim fork of an existing mathlib lemma. Mathlib already
+preNormEDS_three	NO-mathlib-has-it	Step-9 mathlibable assessment, NagellLutz project. Single declaration.
+preNormEDS_two	NO-mathlib-has-it	an existing mathlib lemma. Name, statement, proof, @[simp] attribute,
+preNormEDS_zero	NO-mathlib-has-it	Mathlib/NumberTheory/EllipticDivisibilitySequence.lean:186. This file is a
+preΨ'	NO-mathlib-has-it	Step-9 mathlibable assessment, single declaration. Project: NagellLutz (Nagell–Lutz theorem;
+preΨ'_zero	NO-mathlib-has-it	existing mathlib lemma. The project file's own module docstring states it is "a
+preΨ₄	NO-mathlib-has-it	- lake build:               not re-run (local build stale per task note); decl read directly from source
+preΨ₄_add_Ψ₂Sq_sq	NO-composable-from-mathlib	Step-9 (overview) mathlibable assessment, single declaration.
+preΨ₄_add_ψ₂_pow_four	BORDERLINE-needs-human	- lake build:               ⚠ not run (local build stale per task brief; reasoned from source +
+redInvarDenom	BORDERLINE-needs-human	_Project: NagellLutz · file: projects/NagellLutz/LutzNagell/EllipticDivisibilitySequence.lean:1372 · assessed 2026-06-18_
+redInvarDenom_one	NO-composable-from-mathlib	Project: NagellLutz (Nagell–Lutz theorem; elliptic curves; division polynomials; EDS)
+redInvarDenom_two	BORDERLINE-needs-human	_Project: NagellLutz (Nagell–Lutz theorem; elliptic curves; division polynomials; EDS)_
+redInvarDenom_zero	BORDERLINE-needs-human	(fate is bound to a human decision about upstreaming the parent definition redInvarDenom)
+redInvarNum	YES-but-generalise-first	Step-9 mathlibable assessment (NagellLutz project). Single declaration.
+redInvar_normEDS	YES-but-generalise-first	Step-9 mathlibable assessment (NagellLutz project). Single declaration, Mode A (full 10-phase workflow).
+relFin4	YES-add-as-is	Step-9 (overview) mathlibable assessment, NagellLutz project (Nagell–Lutz theorem; elliptic
+relFin4_perm'	NO-composable-from-mathlib	- lake build:               not run (local build stale per task brief; reasoning from source). Mathlib package present at .lake/packages/mat
+relFin4_perm	BORDERLINE-needs-human	project's relFin4 definition (which mathlib does not have), so it cannot go
+rel₃_iff_evenRec	YES-add-as-is	One-line: the even-term elliptic recurrence ⇔ 3-index elliptic relation at (m+1, m-1, 1).
+rel₃_iff_oddRec	BORDERLINE-needs-human	One-line rationale: Not in mathlib; trivial ring glue between two project-only defs (Rel₃/OddRec) — belongs in mathlib only with the whole n
+rel₃_iff₄	YES-add-as-is	- Qualified name: EllSequence.rel₃_iff₄
+rel₄	YES-add-as-is	EllSequence.rel₄ is the "elliptic relation" of Junyan Xu's 2026 paper On Elliptic
+rel₄_abs	YES-add-as-is	Step-9 (overview) mathlibable assessment, NagellLutz project (Nagell–Lutz theorem; elliptic
+rel₄_eq_net	YES-add-as-is	_Step-9 (overview) mathlibable assessment, single declaration. Local build stale; reasoned from source +
+rel₄_fix₁_of_fix₂	BORDERLINE-needs-human	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic curves;
+rel₄_iff_evenRec	BORDERLINE-needs-human	Project: NagellLutz (Nagell–Lutz; elliptic curves; division polynomials; elliptic
+rel₄_normEDS	BORDERLINE-needs-human	- Qualified name: rel₄_normEDS (root namespace — no enclosing namespace)
+rel₄_of_anti_oddRec_evenRec	YES-add-as-is	One-line rationale: load-bearing inductive engine that discharges a standing mathlib TODO (normEDS is elliptic); not in mathlib in any form;
+rel₄_of_fix₂	BORDERLINE-needs-human	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic curves;
+rel₄_of_min₂	BORDERLINE-needs-human	Project: NagellLutz (Nagell–Lutz; elliptic curves; division polynomials; elliptic divisibility sequences).
+rel₄_of_oddRec_evenRec	YES-add-as-is	upstreamed as part of its coherent EllSequence/rel₄ development, not in isolation).
+rel₄_same₀₁	NO-composable-from-mathlib	(One-line internal helper about a project-local rel₄; not a standalone mathlib
+rel₄_same₁₂	NO-composable-from-mathlib	Step-9 (overview) mathlibable assessment, single declaration.
+rel₄_same₂₃	NO-composable-from-mathlib	_Project: NagellLutz · file:_ projects/NagellLutz/LutzNagell/EllipticDivisibilitySequence.lean:561
+rel₄_swap₀₁	BORDERLINE-needs-human	Step-9 mathlibable assessment, NagellLutz project (Nagell–Lutz; elliptic curves;
+rel₄_swap₁₂	NO-composable-from-mathlib	_Project: NagellLutz (Nagell–Lutz / elliptic divisibility sequences). Assessment run as part of /overview Step 9._
+rel₄_swap₂₃	NO-composable-from-mathlib	_Project: NagellLutz (Nagell–Lutz / elliptic divisibility sequences). Assessment run as part of /overview Step 9._
+rel₄_transf	NO-mathlib-has-it	- Qualified name: EllSequence.HaveSameParity₄.rel₄_transf
+rel₆	NO-composable-from-mathlib	addMulSub W k l  rel₄ W a b c d, a ≤1-call product of two other project defs whose
+rel₆_eq	NO-composable-from-mathlib	One-line: a @[simp], := rfl definitional-unfolding glue lemma for the
+rel₆_eq₁₀	NO-mathlib-has-it	_Project: NagellLutz (Nagell–Lutz; elliptic curves; division polynomials; elliptic
+rel₆_eq₃'	BORDERLINE-needs-human	One-line: an internal ring-provable identity in a not-yet-upstreamed EDS-relations
+rel₆_eq₃	NO-mathlib-has-it	(author David Kurniadi Angdinata, forked ahead of master, traveling with the open
+same₀₃	NO-composable-from-mathlib	_Generated by /overview Step-9 mathlibable assessment (full 10-phase workflow), NagellLutz project._
+six_le_of_strictAnti₄	NO-composable-from-mathlib	- Parsed/verified qualified name: EllSequence.HaveSameParity₄.six_le_of_strictAnti₄
+smul	NO-mathlib-has-it	Target declaration: IsEllSequence.smul at
+strictAnti₄_transf	BORDERLINE-needs-human	One-line: a project-internal descent-bookkeeping lemma with no literature name and exactly one genuine call site — but it travels with the E
+sub_add_neg_sub_mul_eq_zero	BORDERLINE-needs-human	One-line rationale: Net-new abstract-EDS API (not in pinned mathlib), but this
+transf	NO-composable-from-mathlib	- lake build:               not run (local build stale per task brief; reasoning from source). Mathlib package present at .lake/packages/mat
+two_mul_ω	YES-add-as-is	- lake build:               not re-run (local build stale per task brief); reasoned from source — file is sorry-free, decl elaborates in the
+universalNormEDS	BORDERLINE-needs-human	Project: NagellLutz (Nagell–Lutz theorem; elliptic curves; division polynomials; EDS).
+universalNormEDS_mem_nonZeroDivisors	NO-composable-from-mathlib	_Step-9 mathlibable assessment (single declaration), NagellLutz project._
+universalNormEDS_ne_zero	NO-composable-from-mathlib	- lake build:               (not re-run — local build stale per task note; reasoning from source)
+x_coord_nsmul_eq_general	YES-but-generalise-first	formula x([n]P)·ΨSqₙ(x) = Φₙ(x) is a genuine mathlib gap (mathlib has the
+x_integral_of_nsmul_x_integral_general	BORDERLINE-needs-human	- lake build:               (not re-run; local build stale per task brief — reasoned from source)
+x_integral_of_odd_prime_torsion_general	BORDERLINE-needs-human	One-line: a genuine, non-trivially-composable proof step of the Nagell–Lutz theorem
+y_integral_of_x_integral_on_general_curve	NO-composable-from-mathlib	- lake build:               stale (per prompt; reasoned from source). Toolchain lean 4.31.0-rc2 resolves; decl elaborates by inspection.
+zero'	YES-add-as-is	IsEllSequence (the zeroth term of an elliptic sequence over a reduced ring vanishes) that mathlib
+zero	YES-add-as-is	Step-9 (overview) full mathlibable assessment. One declaration:
+two_nsmul_eq_zero_of_ψ₂_eq_zero	NO-composable-from-mathlib	Mathlib's add_self_of_Y_eq/add_of_Y_eq is the 2-torsion direction; ψ₂=polynomialY so the lemma is a <=3-call composition. K=1 call site; General/PID twins. Inline/demote, no PR. Qual: LutzNagell.PID.two_nsmul_eq_zero_of_ψ₂_eq_zero (=General twin).
+WeierstrassCurve.Universal.Affine.nonsingular_smulX_smulY	NO-composable-from-mathlib	One-line `.1` projection of parent zsmul_point_eq_smulX_smulY; zero call sites; Universal curve not in mathlib.
