@@ -33,6 +33,27 @@ namespace ModularCurves
 
 namespace EllipticCurve
 
+/-- **([GAMMA-INJ])** Sections inject along `Spec` of an injective ring map: the
+`ΓSpecIso` naturality square conjugates `appTop` into the ring map itself. -/
+theorem injective_appTop_specMap {R S : CommRingCat.{u}} (f : R ⟶ S)
+    (hf : Function.Injective f.hom) :
+    Function.Injective ((Spec.map f).appTop).hom := by
+  have hnat := Scheme.ΓSpecIso_naturality f
+  intro a b hab
+  -- push both sides through the naturality square
+  have hstep : ∀ z : Γ(Spec R, ⊤),
+      (Scheme.ΓSpecIso S).hom.hom (((Spec.map f).appTop).hom z) =
+        f.hom ((Scheme.ΓSpecIso R).hom.hom z) := by
+    intro z
+    have h := congrArg (fun m : Γ(Spec R, ⊤) ⟶ S => m.hom z) hnat
+    simp only [CommRingCat.comp_apply] at h
+    exact h
+  have h2 : f.hom ((Scheme.ΓSpecIso R).hom.hom a) = f.hom ((Scheme.ΓSpecIso R).hom.hom b) := by
+    rw [← hstep a, ← hstep b, hab]
+  have h3 := hf h2
+  have h4 := congrArg (fun m => (Scheme.ΓSpecIso R).inv.hom m) h3
+  simpa using h4
+
 /-- **(U5-AC, the algebraically closed field leaf)** `e_N(x, x) = 1` over an
 algebraically closed field in which `N` is invertible. -/
 theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq K]
