@@ -54,6 +54,19 @@ theorem flat_universalTorsionRing (N : ℕ) [NeZero N] :
   exact (HasRingHomProperty.iff_of_isAffine (P := @Flat) (Q := RingHom.Flat)).mp
     inferInstance
 
+/-- **([U4c-i])** The atlas ring is `ℤ`-flat: a localization of a polynomial ring over
+`ℤ` (free, hence flat), transported through `ULift`. -/
+instance flat_int_weierstrassAtlasRingU : Module.Flat ℤ WeierstrassAtlasRingU.{u} := by
+  haveI hfreeP : Module.Free ℤ (MvPolynomial (Fin 5) ℤ) := inferInstance
+  haveI hflatP : Module.Flat ℤ (MvPolynomial (Fin 5) ℤ) := Module.Flat.of_free
+  haveI hflatL : Module.Flat ℤ WeierstrassAtlasRing := by
+    haveI : Module.Flat (MvPolynomial (Fin 5) ℤ) WeierstrassAtlasRing :=
+      IsLocalization.flat _ (Submonoid.powers universalWeierstrass.Δ)
+    exact Module.Flat.trans ℤ (MvPolynomial (Fin 5) ℤ) WeierstrassAtlasRing
+  exact Module.Flat.of_linearEquiv
+    (e := ((ULift.ringEquiv (R := WeierstrassAtlasRing)) :
+      WeierstrassAtlasRingU.{u} ≃+* WeierstrassAtlasRing).toAddEquiv.toIntLinearEquiv)
+
 end EllipticCurve
 
 end ModularCurves
