@@ -309,6 +309,93 @@ theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq 
   exact ((Scheme.ΓSpecIso (CommRingCat.of K)).commRingCatIsoToRingEquiv).injective
     (h5.trans (map_one _).symm)
 
+
+/-- **(U5-DESCENT, the field leaf)** `e_N(x, x) = 1` over an arbitrary field in which
+`N` is invertible: descend to an algebraic closure (sections inject along the field
+extension), transport to the base-changed record via [BC-SWAP], and apply the
+algebraically-closed leaf. -/
+theorem weilPairingEval_self_of_field' {K : Type u} [Field K] [DecidableEq K]
+    (E : EllipticCurve (Spec (CommRingCat.of K))) {N : ℕ} [NeZero N]
+    (hNK : (N : K) ≠ 0)
+    (x : E.Point (𝟙 (Spec (CommRingCat.of K))))
+    (hx : x.1 ≫ E.mulByHom N = 𝟙 _ ≫ E.zero) :
+    (E.weilPairingEval x x hx hx : Γ(Spec (CommRingCat.of K), ⊤)) = 1 := by
+  classical
+  haveI : IsLocallyNoetherian (Spec (CommRingCat.of K)) := by
+    haveI : IsNoetherianRing K := inferInstance
+    infer_instance
+  set Kbar := AlgebraicClosure K with hKbar
+  set δ : Spec (CommRingCat.of Kbar) ⟶ Spec (CommRingCat.of K) :=
+    Spec.map (CommRingCat.ofHom (algebraMap K Kbar)) with hδ
+  -- Γ-injectivity along the field extension
+  have hinj : Function.Injective ((Scheme.Γ.map δ.op).hom :
+      Γ(Spec (CommRingCat.of K), ⊤) → Γ(Spec (CommRingCat.of Kbar), ⊤)) := by
+    rw [Scheme.Γ_map_op, hδ]
+    exact injective_appTop_specMap (CommRingCat.ofHom (algebraMap K Kbar))
+      (algebraMap K Kbar).injective
+  -- the restricted point and its kill condition
+  set g : Spec (CommRingCat.of Kbar) ⟶ Spec (CommRingCat.of K) :=
+    δ ≫ 𝟙 (Spec (CommRingCat.of K)) with hg
+  have hxr : (EllipticCurve.Point.restrict E δ x).1 ≫ E.mulByHom N = g ≫ E.zero := by
+    show (δ ≫ x.1) ≫ E.mulByHom N = g ≫ E.zero
+    rw [Category.assoc, hx, ← Category.assoc, hg]
+  -- the base-changed record over the closure and the section point
+  set E' : EllipticCurve (Spec (CommRingCat.of Kbar)) := E.baseChange g with hE'
+  set x' : E'.Point (𝟙 (Spec (CommRingCat.of Kbar))) :=
+    EllipticCurve.Point.asSection E g (EllipticCurve.Point.restrict E δ x) with hx'def
+  have hx'kill : x'.1 ≫ E'.mulByHom N = 𝟙 _ ≫ E'.zero := by
+    rw [← (E.baseChange g).smul_eq_zero_iff_comp_mulByHom (𝟙 _) N x']
+    exact asSection_mem_torsionPoints E (EllipticCurve.Point.restrict E δ x) hxr
+  have hNKbar : (N : Kbar) ≠ 0 := by
+    have h := (algebraMap K Kbar).injective.ne hNK
+    rwa [map_natCast, map_zero] at h
+  -- the algebraically closed leaf at the base-changed record
+  have hAC := weilPairingEval_self_of_isAlgClosed E' hNKbar x' hx'kill
+  -- transport back: both sides read the same `weilPairingKM` value
+  haveI hsepE : IsSeparated E.π := inferInstance
+  haveI hsepBC : IsSeparated ((E.baseChange g).π) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π g hsepE
+  have hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange g).π) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) _ _ E.smooth
+  have hswcond : (x'.1 ≫ (bcSwapIso E g).inv) ≫
+      pullback.snd ((E.baseChange g).π) (𝟙 (Spec (CommRingCat.of Kbar))) =
+      𝟙 (Spec (CommRingCat.of Kbar)) := by
+    rw [← asSection_eq_bcSwap E g x']
+    exact (EllipticCurve.Point.asSection (E.baseChange g)
+      (𝟙 (Spec (CommRingCat.of Kbar))) x').2
+  have hswpt : EllipticCurve.Point.asSection E' (𝟙 (Spec (CommRingCat.of Kbar))) x' =
+      (⟨x'.1 ≫ (bcSwapIso E g).inv, hswcond⟩ :
+        ((E.baseChange g).baseChange (𝟙 (Spec (CommRingCat.of Kbar)))).Point
+          (𝟙 (Spec (CommRingCat.of Kbar)))) :=
+    Subtype.ext (asSection_eq_bcSwap E g x')
+  have hswt : (⟨x'.1 ≫ (bcSwapIso E g).inv, hswcond⟩ :
+      ((E.baseChange g).baseChange (𝟙 (Spec (CommRingCat.of Kbar)))).Point
+        (𝟙 (Spec (CommRingCat.of Kbar)))) ∈
+      torsionPoints (E.baseChange g) (𝟙 (Spec (CommRingCat.of Kbar))) N :=
+    hswpt ▸ asSection_mem_torsionPoints E' x' hx'kill
+  have hbridge : (E'.weilPairingEval x' x' hx'kill hx'kill :
+      Γ(Spec (CommRingCat.of Kbar), ⊤)) =
+      (E.weilPairingEval (EllipticCurve.Point.restrict E δ x)
+        (EllipticCurve.Point.restrict E δ x) hxr hxr :
+        Γ(Spec (CommRingCat.of Kbar), ⊤)) := by
+    rw [E'.weilPairingEval_eq_weilPairingKM x' x' hx'kill hx'kill,
+      E.weilPairingEval_eq_weilPairingKM (EllipticCurve.Point.restrict E δ x)
+        (EllipticCurve.Point.restrict E δ x) hxr hxr]
+    refine congrArg Units.val ?_
+    rw [weilPairingKM_congr E' E'.smooth (𝟙 (Spec (CommRingCat.of Kbar))) N
+      hswpt hswpt (asSection_mem_torsionPoints E' x' hx'kill)
+      (asSection_mem_torsionPoints E' x' hx'kill)]
+    exact weilPairingKM_bcSwap E g E.smooth hsmBC N x'
+      (asSection_mem_torsionPoints E (EllipticCurve.Point.restrict E δ x) hxr) x'
+      (asSection_mem_torsionPoints E (EllipticCurve.Point.restrict E δ x) hxr)
+      hswcond hswt hswcond hswt
+  -- conclude by injectivity of the section map
+  refine hinj ?_
+  refine Eq.trans ?_ (map_one _).symm
+  rw [← E.weilPairingEval_restrict δ x x hx hx hxr hxr]
+  exact hbridge.symm.trans hAC
+
 end EllipticCurve
 
 end ModularCurves
