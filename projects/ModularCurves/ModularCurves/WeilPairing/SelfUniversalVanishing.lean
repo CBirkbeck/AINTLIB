@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.SelfField
+import ModularCurves.ForMathlib.RegularSectionDensity
 
 /-!
 # U4 — vanishing over the universal torsion base
@@ -66,6 +67,43 @@ instance flat_int_weierstrassAtlasRingU : Module.Flat ℤ WeierstrassAtlasRingU.
   exact Module.Flat.of_linearEquiv
     (e := ((ULift.ringEquiv (R := WeierstrassAtlasRing)) :
       WeierstrassAtlasRingU.{u} ≃+* WeierstrassAtlasRing).toAddEquiv.toIntLinearEquiv)
+
+/-- **([U4c-ii])** The universal torsion section ring is `ℤ`-flat: flat over the atlas
+ring (U4b), which is `ℤ`-flat (U4c-i). -/
+instance flat_int_universalTorsionRing (N : ℕ) [NeZero N] :
+    Module.Flat ℤ (universalTorsionRing.{u} N) := by
+  letI : Algebra (Γ(Spec (CommRingCat.of WeierstrassAtlasRingU.{u}), ⊤) :
+      CommRingCat.{u}) (universalTorsionRing.{u} N) :=
+    (((modelEllipticCurve universalWeierstrassLocU.{u}).torsionπ N).appTop).hom.toAlgebra
+  haveI hflatA : Module.Flat
+      (Γ(Spec (CommRingCat.of WeierstrassAtlasRingU.{u}), ⊤) : CommRingCat.{u})
+      (universalTorsionRing.{u} N) := flat_universalTorsionRing N
+  haveI hflatZA : Module.Flat ℤ
+      (Γ(Spec (CommRingCat.of WeierstrassAtlasRingU.{u}), ⊤) : CommRingCat.{u}) :=
+    Module.Flat.of_linearEquiv
+      (e := ((Scheme.ΓSpecIso (CommRingCat.of WeierstrassAtlasRingU.{u})).commRingCatIsoToRingEquiv :
+        (Γ(Spec (CommRingCat.of WeierstrassAtlasRingU.{u}), ⊤) : CommRingCat.{u}) ≃+*
+          WeierstrassAtlasRingU.{u}).toAddEquiv.toIntLinearEquiv)
+  haveI : IsScalarTower ℤ
+      (Γ(Spec (CommRingCat.of WeierstrassAtlasRingU.{u}), ⊤) : CommRingCat.{u})
+      (universalTorsionRing.{u} N) :=
+    IsScalarTower.of_algebraMap_eq (fun n => by
+      show (n : universalTorsionRing.{u} N) =
+        (((modelEllipticCurve universalWeierstrassLocU.{u}).torsionπ N).appTop).hom
+          ((algebraMap ℤ (Γ(Spec (CommRingCat.of WeierstrassAtlasRingU.{u}), ⊤) :
+            CommRingCat.{u})) n)
+      rw [show (algebraMap ℤ (Γ(Spec (CommRingCat.of WeierstrassAtlasRingU.{u}), ⊤) :
+          CommRingCat.{u})) n = (n : (Γ(Spec (CommRingCat.of WeierstrassAtlasRingU.{u}), ⊤) :
+            CommRingCat.{u})) from map_intCast _ n, map_intCast])
+  exact Module.Flat.trans ℤ
+    (Γ(Spec (CommRingCat.of WeierstrassAtlasRingU.{u}), ⊤) : CommRingCat.{u})
+    (universalTorsionRing.{u} N)
+
+/-- **([U4c])** `N` is a nonzerodivisor on the universal torsion section ring. -/
+theorem natCast_mem_nonZeroDivisors_universalTorsionRing (N : ℕ) [NeZero N] :
+    ((N : ℤ) : universalTorsionRing.{u} N) ∈
+      nonZeroDivisors (universalTorsionRing.{u} N) :=
+  isSMulRegular_natCast_of_flat _ (by exact_mod_cast NeZero.ne N)
 
 end EllipticCurve
 
