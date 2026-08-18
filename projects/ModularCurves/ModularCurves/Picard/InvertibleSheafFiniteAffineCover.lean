@@ -1,4 +1,5 @@
 import Mathlib.AlgebraicGeometry.Cover.Open
+import Mathlib.AlgebraicGeometry.AffineScheme
 import ModularCurves.Picard.InvertibleSheaf
 
 /-!

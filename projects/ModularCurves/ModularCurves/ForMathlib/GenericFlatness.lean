@@ -110,7 +110,7 @@ theorem exists_noetherNormalization_baseChange {R S : Type*} [CommRing R] [IsDom
 ## Transcendence-degree dimension theory (for the domain-case induction)
 
 The domain-case induction of Stacks 051R is run on the transcendence degree
-`Algebra.trdeg R (S ⧸ 𝔮)` (a well-defined natural number by `trdeg_lt_aleph0`). The mathematical
+`Algebra.trdeg R (S ⧸ 𝔮)` (a well-defined natural number by `trdeg_lt_aleph0_of_finiteType`). The mathematical
 crux — that a nonzero element cuts transcendence degree down — is `trdeg_quotient_prime_lt`: for a
 prime `𝔮'` of a polynomial ring `R[X₁,…,X_d]` (`d ≥ 1`) containing a nonzero `g`, the quotient
 domain has strictly smaller transcendence degree. This is the "a hypersurface in `𝔸ᵈ` has
@@ -196,7 +196,7 @@ private theorem trdeg_quotient_prime_lt {R : Type*} [CommRing R] [IsDomain R] {d
   haveI : IsDomain C := Ideal.Quotient.isDomain q'
   by_cases hinj : Function.Injective (algebraMap R C)
   · haveI : FaithfulSMul R C := (faithfulSMul_iff_algebraMap_injective R C).mpr hinj
-    have hfin : Algebra.trdeg R C < ℵ₀ := trdeg_lt_aleph0
+    have hfin : Algebra.trdeg R C < ℵ₀ := trdeg_lt_aleph0_of_finiteType
     by_contra hcon
     push Not at hcon
     obtain ⟨ι, x, hx⟩ := exists_isTranscendenceBasis' R C
@@ -750,7 +750,7 @@ private theorem gf_of_trdeg_le {R : Type u} [CommRing R] [IsDomain R] [IsNoether
     by_cases hinj : Function.Injective (algebraMap R B)
     · refine gf_of_injective_domain B hinj (fun C _ _ _ _ hCB => ?_)
       have hm : Algebra.trdeg R C = ((Algebra.trdeg R C).toNat : Cardinal) :=
-        (Cardinal.cast_toNat_of_lt_aleph0 trdeg_lt_aleph0).symm
+        (Cardinal.cast_toNat_of_lt_aleph0 trdeg_lt_aleph0_of_finiteType).symm
       have hmn : (Algebra.trdeg R C).toNat < n := by
         have h1 : Algebra.trdeg R C < (n : Cardinal) := lt_of_lt_of_le hCB hn
         rw [hm] at h1; exact_mod_cast h1
@@ -777,7 +777,7 @@ private theorem exists_generically_free_domain [IsNoetherianRing R] [Algebra.Fin
   haveI : IsDomain (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ) := Ideal.Quotient.isDomain _
   haveI : Algebra.FiniteType R (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ) := inferInstance
   have hfin : Algebra.trdeg R (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ) < Cardinal.aleph0 :=
-    trdeg_lt_aleph0
+    trdeg_lt_aleph0_of_finiteType
   have key : GF R (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ) :=
     gf_of_trdeg_le (Algebra.trdeg R (MvPolynomial (Fin m) R ⧸ RingHom.ker ψ)).toNat _
       (le_of_eq (Cardinal.cast_toNat_of_lt_aleph0 hfin).symm)

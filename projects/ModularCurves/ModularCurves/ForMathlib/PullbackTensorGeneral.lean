@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Generator
 import Mathlib.CategoryTheory.Localization.Monoidal.Functor
+import Mathlib.CategoryTheory.Monoidal.Cartesian.FunctorCategory
 import Mathlib.LinearAlgebra.Finsupp.Pi
 import ModularCurves.Picard.Pic
 import ModularCurves.ForMathlib.PullbackTensorMonoidal
