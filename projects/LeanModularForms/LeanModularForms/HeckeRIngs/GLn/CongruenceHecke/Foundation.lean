@@ -106,7 +106,7 @@ lemma Delta0_le_posDetInt (N : ℕ) :
 private lemma Gamma0_map_commensurable_SLnZ (N : ℕ) [NeZero N] :
     Subgroup.Commensurable ((CongruenceSubgroup.Gamma0 N).map (mapGL ℚ))
       (Subgroup.map (mapGL ℚ : SpecialLinearGroup (Fin 2) ℤ →* GL (Fin 2) ℚ) ⊤) := by
-  constructor
+  refine ⟨⟨?_⟩, ⟨?_⟩⟩
   · rw [Subgroup.relIndex_map_map_of_injective _ _ mapGL_injective,
         Subgroup.relIndex_top_right]
     exact Subgroup.FiniteIndex.index_ne_zero

@@ -386,7 +386,7 @@ theorem colon_coprime_of_principal_balance_left {I J : (Ideal (𝓞 K))⁰} {P :
     have hdx_right :
         d * x ∈ Ideal.span ({y} : Set (𝓞 K)) * (J : Ideal (𝓞 K)) := by
       simpa [hxy] using hdx_left
-    exact (Ideal.mul_le_right (I := Ideal.span ({y} : Set (𝓞 K)))
+    exact (Ideal.mul_le_left (I := Ideal.span ({y} : Set (𝓞 K)))
       (J := (J : Ideal (𝓞 K)))) hdx_right
   rw [Ideal.isCoprime_iff_sup_eq] at hI ⊢
   change D ⊔ P = ⊤

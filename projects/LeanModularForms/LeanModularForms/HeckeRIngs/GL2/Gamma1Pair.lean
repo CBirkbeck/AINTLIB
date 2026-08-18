@@ -82,7 +82,7 @@ private lemma Delta1_le_posDetInt (N : ℕ) : Delta1_submonoid N ≤ posDetInt_s
 private lemma Gamma1_map_commensurable_SLnZ (N : ℕ) [NeZero N] :
     Subgroup.Commensurable ((Gamma1 N).map (mapGL ℚ))
       (Subgroup.map (mapGL ℚ : SpecialLinearGroup (Fin 2) ℤ →* GL (Fin 2) ℚ) ⊤) := by
-  constructor
+  refine ⟨⟨?_⟩, ⟨?_⟩⟩
   · rw [Subgroup.relIndex_map_map_of_injective _ _ mapGL_injective, Subgroup.relIndex_top_right]
     exact Subgroup.FiniteIndex.index_ne_zero
   · rw [Subgroup.relIndex_map_map_of_injective _ _ mapGL_injective, Subgroup.relIndex_top_left]
