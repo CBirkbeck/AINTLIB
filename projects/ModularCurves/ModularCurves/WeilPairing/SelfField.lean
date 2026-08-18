@@ -90,6 +90,272 @@ theorem asSection_eq_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{
     refine Eq.symm ((Category.assoc _ _ _).trans ?_)
     exact (congrArg (fun m => y.1 ≫ m) (pullback.lift_snd _ _ _)).trans y.2
 
+section ModelCrossing
+
+variable {K : Type u} [Field K] [DecidableEq K]
+
+omit [DecidableEq K] in
+/-- `Spec` of `K`'s identity algebra map is the identity morphism of `Spec K`. -/
+theorem specMap_algebraMap_self :
+    Spec.map (CommRingCat.ofHom (algebraMap K K)) = 𝟙 (Spec (CommRingCat.of K)) := by
+  rw [show CommRingCat.ofHom (algebraMap K K) = 𝟙 (CommRingCat.of K) from rfl, Spec.map_id]
+
+/-- **([SPECPT])** The `K`-point of the projective model underlying a scheme point of
+`modelEllipticCurve W` over the identity base. -/
+def specPointOfModelPoint (W : WeierstrassCurve K) [W.IsElliptic]
+    (x : (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K)))) :
+    SpecPoints (projModel W) (projModelπ W) K :=
+  ⟨x.1, x.2.trans specMap_algebraMap_self.symm⟩
+
+omit [DecidableEq K] in
+@[simp] theorem specPointOfModelPoint_coe (W : WeierstrassCurve K) [W.IsElliptic]
+    (x : (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K)))) :
+    (specPointOfModelPoint W x).1 = x.1 := rfl
+
+/-- The `▸`-transport description of the cast-free `basePointCast`. -/
+theorem basePointCast_eq_cast (W : WeierstrassCurve K) [W.IsElliptic]
+    (X : ((W.baseChange K).toAffine).Point) :
+    EllipticCurve.basePointCast W X =
+      ((EllipticCurve.baseChange_self_eq W) ▸ X : W.toAffine.Point) := by
+  have hzero : ∀ {V₁ V₂ : WeierstrassCurve K} (h : V₁ = V₂),
+      (h ▸ (WeierstrassCurve.Affine.Point.zero : V₁.toAffine.Point) :
+        V₂.toAffine.Point) = WeierstrassCurve.Affine.Point.zero := by
+    intro V₁ V₂ h; subst h; rfl
+  have hsome : ∀ {V₁ V₂ : WeierstrassCurve K} (h : V₁ = V₂) (x0 y0 : K)
+      (ns : V₁.toAffine.Nonsingular x0 y0),
+      (h ▸ (WeierstrassCurve.Affine.Point.some x0 y0 ns : V₁.toAffine.Point) :
+        V₂.toAffine.Point) =
+      WeierstrassCurve.Affine.Point.some x0 y0 (by rw [← h]; exact ns) := by
+    intro V₁ V₂ h x0 y0 ns; subst h; rfl
+  cases X with
+  | zero => exact (hzero (EllipticCurve.baseChange_self_eq W)).symm
+  | some xk yk hk => exact (hsome (EllipticCurve.baseChange_self_eq W) xk yk hk).symm
+
+/-- `basePointCast` is `ℤ`-linear. -/
+theorem basePointCast_zsmul (W : WeierstrassCurve K) [W.IsElliptic] (n : ℤ)
+    (X : ((W.baseChange K).toAffine).Point) :
+    EllipticCurve.basePointCast W (n • X) = n • EllipticCurve.basePointCast W X := by
+  have castPoint_zsmul : ∀ {V₁ V₂ : WeierstrassCurve K} (h : V₁ = V₂)
+      (m : ℤ) (Y : V₁.toAffine.Point),
+      (h ▸ (m • Y) : V₂.toAffine.Point) = m • (h ▸ Y : V₂.toAffine.Point) := by
+    intro V₁ V₂ h m Y; subst h; rfl
+  rw [basePointCast_eq_cast, basePointCast_eq_cast,
+    castPoint_zsmul (EllipticCurve.baseChange_self_eq W) n X]
+
+/-- **([SPECPT-TORSION])** An `N`-torsion scheme point of the model has `N`-torsion image
+in the Weierstrass point group. -/
+theorem basePointCast_specPointOfModelPoint_torsion (W : WeierstrassCurve K) [W.IsElliptic]
+    {N : ℕ} [NeZero N] (x : (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K))))
+    (hx : x.1 ≫ (modelEllipticCurve W).mulByHom N = 𝟙 _ ≫ (modelEllipticCurve W).zero) :
+    (N : ℤ) • EllipticCurve.basePointCast W
+      (projModelPointsEquiv W K (specPointOfModelPoint W x)) = 0 := by
+  set Q : ((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))) :=
+    EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 _) x with hQdef
+  have hQ : Q ∈ torsionPoints (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N :=
+    asSection_mem_torsionPoints (modelEllipticCurve W) x hx
+  set ξ : ((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))) ≃+
+      (modelEllipticCurve W).Point (Spec.map (CommRingCat.ofHom (algebraMap K K))) :=
+    (EllipticCurve.Point.baseChangeEquiv (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) (𝟙 (Spec (CommRingCat.of K)))).trans
+      (pointCongr (modelEllipticCurve W)
+        ((Category.id_comp _).trans specMap_algebraMap_self.symm)) with hξdef
+  set p : (modelEllipticCurve W).Point (Spec.map (CommRingCat.ofHom (algebraMap K K))) :=
+    ⟨x.1, x.2.trans specMap_algebraMap_self.symm⟩ with hpdef
+  have hxiQ : ξ Q = p := by
+    refine Subtype.ext ?_
+    rw [hξdef, AddEquiv.trans_apply, pointCongr_apply_coe,
+      EllipticCurve.Point.baseChangeEquiv_apply_coe, hQdef,
+      EllipticCurve.Point.asSection_val_fst]
+  have hNp : (N : ℤ) • p = 0 := by
+    have h1 := congrArg ξ (show (N : ℤ) • Q = 0 from hQ)
+    rwa [map_zsmul, hxiQ, map_zero] at h1
+  show (N : ℤ) • EllipticCurve.basePointCast W (projModelPointsEquiv W K p) = 0
+  rw [← basePointCast_zsmul W (N : ℤ) (projModelPointsEquiv W K p),
+    ← projModelPointsEquiv_zsmul W (N : ℤ) p, hNp]
+  rw [show (0 : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap K K)))) =
+    ⟨Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫ projModelZero W,
+      (Category.assoc _ _ _).trans
+        ((congrArg (fun m => Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫ m)
+          (projModelZero_projModelπ W)).trans (Category.comp_id _))⟩ from rfl]
+  exact (congrArg (EllipticCurve.basePointCast W)
+    (projModelPointsEquiv_zero W K)).trans (EllipticCurve.basePointCast_zero W)
+
+/-- **([VALUE-CROSSING])** At the projective Weierstrass model over an algebraically closed
+field, the scheme-level Weil pairing value of two `N`-torsion points is the `HasseWeil`
+field pairing of the corresponding Weierstrass points: instantiate the Katz–Mazur dataset
+through the κ-dictionary + G2′ chart machinery, pin the value by
+`weilPairingEval_eq_torsionSplittingEval` (L4) and cross to the field pairing by
+`torsionSplittingEval_eq_weilPairing` (L3). -/
+theorem weilPairingEval_eq_weilPairing_model [IsAlgClosed K] (W : WeierstrassCurve K)
+    [W.IsElliptic] {N : ℕ} [NeZero N] (hNZ : ((N : ℤ) : K) ≠ 0)
+    (x y : (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K))))
+    (hx : x.1 ≫ (modelEllipticCurve W).mulByHom N = 𝟙 _ ≫ (modelEllipticCurve W).zero)
+    (hy : y.1 ≫ (modelEllipticCurve W).mulByHom N = 𝟙 _ ≫ (modelEllipticCurve W).zero) :
+    (Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
+        ((modelEllipticCurve W).weilPairingEval x y hx hy :
+          Γ(Spec (CommRingCat.of K), ⊤)) =
+      HasseWeil.WeilPairing.weilPairing W (N : ℤ) hNZ
+        (EllipticCurve.basePointCast W (projModelPointsEquiv W K (specPointOfModelPoint W x)))
+        (EllipticCurve.basePointCast W (projModelPointsEquiv W K (specPointOfModelPoint W y)))
+        (basePointCast_specPointOfModelPoint_torsion W x hx)
+        (basePointCast_specPointOfModelPoint_torsion W y hy) := by
+  haveI : IsLocallyNoetherian (Spec (CommRingCat.of K)) := by
+    haveI : IsNoetherianRing K := inferInstance
+    infer_instance
+  -- stage 2: the model-side instances
+  haveI hIntP : AlgebraicGeometry.IsIntegral (projModel W) := isIntegral_projModel_u W
+  haveI hFlat : Flat ((modelEllipticCurve W).mulByHom N) :=
+    (modelEllipticCurve W).mulByHom_flat N
+  haveI hFin : IsFinite ((modelEllipticCurve W).mulByHom N) :=
+    (modelEllipticCurve W).mulByHom_isFinite N
+  haveI hLofp : LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N) :=
+    (modelEllipticCurve W).mulByHom_locallyOfFinitePresentation N
+  haveI hbcEll : ((W.baseChange K).toAffine).IsElliptic := by
+    rw [EllipticCurve.baseChange_self_eq W]
+    infer_instance
+  haveI hDed : IsDedekindDomain
+      (⟨W⟩ : HasseWeil.Curves.SmoothPlaneCurve K).CoordinateRing := inferInstance
+  haveI hsepπ : IsSeparated (modelEllipticCurve W).π := inferInstance
+  haveI hIntE : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+    inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+  haveI hIntPB : AlgebraicGeometry.IsIntegral
+      (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    isIntegral_pullback_id (modelEllipticCurve W)
+  -- stage 3: the dataset at the second point `y`
+  set Q : ((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))) :=
+    EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 _) y with hQdef
+  have hQ : Q ∈ torsionPoints (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N :=
+    asSection_mem_torsionPoints (modelEllipticCurve W) y hy
+  set P' : ((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))) :=
+    EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 _) x with hP'def
+  have hP' : P' ∈ torsionPoints (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) N :=
+    asSection_mem_torsionPoints (modelEllipticCurve W) x hx
+  obtain ⟨M, hM, _hMinv⟩ := exists_module_kappa (modelEllipticCurve W)
+    (modelEllipticCurve W).smooth (𝟙 (Spec (CommRingCat.of K))) Q
+  obtain ⟨edict⟩ := nonempty_tensorObj_sectionIdeal_iso_zeroIdeal_of_field
+    (modelEllipticCurve W) (modelEllipticCurve W).smooth Q M hM
+  -- stage 3b: officiality covers + the G2′ dataset
+  have hsmPB : SmoothOfRelativeDimension 1
+      (pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) _ _
+      (modelEllipticCurve W).smooth
+  have h₁ := (RelEffCartierDiv.sectionDivisor_isOfficial hsmPB
+    (Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) Q.2).locallyPrincipal
+  have h₂ := (RelEffCartierDiv.sectionDivisor_isOfficial hsmPB
+    (Scheme.Modules.baseChangeZero (modelEllipticCurve W).π (modelEllipticCurve W).zero
+      (modelEllipticCurve W).zero_π (𝟙 (Spec (CommRingCat.of K))))
+    (Scheme.Modules.baseChangeZero_snd _ _ _ _)).locallyPrincipal
+  haveI hsepT : IsSeparated (terminal.from (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) := by
+    haveI h1 : IsSeparated (pullback.snd (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K)))) :=
+      MorphismProperty.pullback_snd (P := @IsSeparated) _ _ ‹_›
+    haveI h2 : IsSeparated (pullback.snd (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K))) ≫ terminal.from (Spec (CommRingCat.of K))) :=
+      inferInstance
+    rw [show terminal.from (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) =
+      pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) ≫
+        terminal.from (Spec (CommRingCat.of K)) from (terminal.comp_from _).symm]
+    exact h2
+  haveI hdiag : IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))) :=
+    inferInstance
+  obtain ⟨V, f₁, f₂, ι', Wc, hWc, e, ch, A, hspan₁, hnzd₁, hspan₂, hnzd₂, hnorm, hWch, hu⟩ :=
+    exists_normalized_chart_dataset_perChart (modelEllipticCurve W)
+      (modelEllipticCurve W).smooth (𝟙 (Spec (CommRingCat.of K))) Q M hM
+      (Scheme.Hom.ker (Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+      (Scheme.Hom.ker (Scheme.Modules.baseChangeZero (modelEllipticCurve W).π
+        (modelEllipticCurve W).zero (modelEllipticCurve W).zero_π
+        (𝟙 (Spec (CommRingCat.of K)))))
+      edict h₁ h₂
+  -- stage 4: the H-side splittings and the two point-dictionary crossings
+  obtain ⟨h, hn, hsplit⟩ := exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints
+    (modelEllipticCurve W) (modelEllipticCurve W).smooth (𝟙 (Spec (CommRingCat.of K)))
+    N Q hQ M hM Wc hWc e hnorm
+  -- stage 5: the remaining instance slots
+  haveI hQC : QuasiCompact (Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) := inferInstance
+  haveI hsepPB : IsSeparated (pullback.snd (modelEllipticCurve W).π
+      (𝟙 (Spec (CommRingCat.of K)))) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) _ _ ‹_›
+  haveI hICI : IsClosedImmersion (Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) := by
+    refine MorphismProperty.of_postcomp (W := @IsClosedImmersion)
+      (W' := @IsSeparated) _
+      (pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))
+      hsepPB ?_
+    rw [show (Q.1 : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ≫
+      pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) =
+      𝟙 (Spec (CommRingCat.of K)) from Q.2]
+    infer_instance
+  haveI hIsoτ : IsIso (translateByPoint (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) P') := by
+    show IsIso (((modelEllipticCurve W).baseChange
+      (𝟙 (Spec (CommRingCat.of K)))).translateBy
+      (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P')).left
+    rw [show ((modelEllipticCurve W).baseChange
+        (𝟙 (Spec (CommRingCat.of K)))).translateBy
+        (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P') =
+      (((modelEllipticCurve W).baseChange
+        (𝟙 (Spec (CommRingCat.of K)))).translateByIso
+        (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P')).hom from rfl]
+    exact (Over.forget _).map_isIso
+      (((modelEllipticCurve W).baseChange
+        (𝟙 (Spec (CommRingCat.of K)))).translateByIso
+        (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P')).hom
+  haveI hDomτ : IsDominant (translateByPoint (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) P') := inferInstance
+  -- stage 5b: the chart choice
+  haveI hIrr : IrreducibleSpace ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) := inferInstance
+  obtain ⟨c₀, hc₀⟩ : ∃ i, (Nonempty.some inferInstance : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ∈ Wc i := by
+    have h1 : (Nonempty.some inferInstance : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ∈
+        ((⨆ i, Wc i) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) := by
+      rw [hWc]; trivial
+    rwa [TopologicalSpace.Opens.mem_iSup] at h1
+  obtain ⟨ypre, hypre⟩ := (mulByHom_surjective_global
+    ((modelEllipticCurve W).baseChange (𝟙 (Spec (CommRingCat.of K)))) N).surj
+    (Nonempty.some inferInstance : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+  haveI hNec₀ : Nonempty ((mulByN (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc c₀) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) :=
+    ⟨⟨ypre, show (mulByN (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) N).base ypre ∈ Wc c₀ from hypre ▸ hc₀⟩⟩
+  have hxp : (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) Q ≫
+      baseChangeIdFstOver (modelEllipticCurve W)).left =
+      (specPointOfModelPoint W y).1 :=
+    EllipticCurve.Point.asSection_val_fst (modelEllipticCurve W) (𝟙 _) y
+  have hxpS : (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) P' ≫
+      baseChangeIdFstOver (modelEllipticCurve W)).left =
+      (specPointOfModelPoint W x).1 :=
+    EllipticCurve.Point.asSection_val_fst (modelEllipticCurve W) (𝟙 _) x
+  have hN0 : (N : ℤ) ≠ 0 := by exact_mod_cast NeZero.ne N
+  -- the L4-pin
+  rw [weilPairingEval_eq_torsionSplittingEval (modelEllipticCurve W)
+    x y hx hy M hM Wc hWc e hnorm]
+  -- the L3-crossing
+  set zQm : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) := Subtype.val Q with hzQmdef
+  haveI : QuasiCompact zQm := hQC
+  haveI : IsClosedImmersion zQm := hICI
+  exact torsionSplittingEval_eq_weilPairing (W := W)
+    (hsm := (modelEllipticCurve W).smooth) (N := N) (hNZ := hNZ) (hN0 := hN0)
+    (Q := Q) (hQ := hQ) (M := M) (hM := hM) (Wc := Wc) (hWc := hWc) (e := e)
+    (hnorm := hnorm) (h := h) (hn := hn) (hsplit := hsplit) (c₀ := c₀)
+    (P' := P') (hP' := hP')
+    (p := specPointOfModelPoint W y) (pS := specPointOfModelPoint W x)
+    (hxp := hxp) (hxpS := hxpS)
+    (hT := basePointCast_specPointOfModelPoint_torsion W y hy)
+    (hS := basePointCast_specPointOfModelPoint_torsion W x hx)
+    (V := V) (f₁ := f₁) (f₂ := f₂) (ch := ch) (A := A) (zQm := zQm)
+    (hzQm := show zQm ≫
+      pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) =
+      𝟙 (Spec (CommRingCat.of K)) from Q.2)
+    (hzQfst := EllipticCurve.Point.asSection_val_fst (modelEllipticCurve W) (𝟙 _) y)
+    (hspan₁ := hspan₁) (hnzd₁ := hnzd₁) (hspan₂ := hspan₂)
+    (hnzd₂ := hnzd₂) (hWch := hWch) (hu := fun i j hne => hu i j hWch hne)
+
+end ModelCrossing
+
 /-- **(U5-AC, the algebraically closed field leaf)** `e_N(x, x) = 1` over an
 algebraically closed field in which `N` is invertible. -/
 theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq K]

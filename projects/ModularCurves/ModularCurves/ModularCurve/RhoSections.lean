@@ -1,5 +1,6 @@
 import ModularCurves.ModularCurve.RhoDescent
 import ModularCurves.WeilPairing.SelfUniversalVanishing
+import ModularCurves.WeilPairing.Nondegenerate
 import ModularCurves.ModularCurve.RhoPairingBridge
 import Mathlib.AlgebraicGeometry.Sites.Fpqc
 
@@ -1093,7 +1094,7 @@ theorem weilPairing_pair_order (K : Type) [Field K] [IsAlgClosed K]
     rw [hto, pow_mul, hpow, one_pow]
   have hzero : (d : ℤ) • Q' = 0 := by
     have hzp : (d : ℤ) • Q' = E.zeroPoint t := by
-      refine E.weilPairingEval_nondegenerate K hNK t ((d : ℤ) • Q')
+      refine E.weilPairingEval_nondegenerate_general K hNK t ((d : ℤ) • Q')
         ((E.smul_eq_zero_iff_comp_mulByHom t N _).mp hkill_dQ) ?_
       intro y hy
       have hyz : (N : ℤ) • y = 0 :=
@@ -4666,7 +4667,7 @@ theorem strPt_pull_comb (D : GaloisRepData N) [Fact (1 < N)]
     refine Eq.trans (congrArg₂ (· * ·) hzc hzd) ?_
     rw [hb0, hb1, one_pow, one_pow, mul_one]
   -- nondegeneracy
-  have hzp := (X'.curve.baseChange (strPr D X')).weilPairingEval_nondegenerate
+  have hzp := (X'.curve.baseChange (strPr D X')).weilPairingEval_nondegenerate_general
     kk
     (by
       haveI : CharZero kk := charZero_of_injective_algebraMap
