@@ -184,9 +184,8 @@ theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq 
         ((Category.id_comp _).trans hspecid.symm)) with hξdef
   have hxiQ : ξ Q = p := by
     refine Subtype.ext ?_
-    show (pointCongr (modelEllipticCurve W) _
-      (EllipticCurve.Point.baseChangeEquiv _ _ _ Q)).1 = p.1
-    rw [pointCongr_apply_coe, EllipticCurve.Point.baseChangeEquiv_apply_coe]
+    rw [hξdef, AddEquiv.trans_apply, pointCongr_apply_coe,
+      EllipticCurve.Point.baseChangeEquiv_apply_coe]
   have hNp : (N : ℤ) • p = 0 := by
     have hQ0 : (N : ℤ) • Q = 0 := hQ
     have h1 := congrArg ξ hQ0
