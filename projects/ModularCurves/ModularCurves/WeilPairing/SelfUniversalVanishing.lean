@@ -161,6 +161,30 @@ theorem isReduced_torsion_sections_of_field {k : Type u} [Field k]
     Algebra.EssFiniteType.of_finiteType k _
   exact Algebra.FormallyUnramified.isReduced_of_field k _
 
+/-- **([U4d-ii])** If `N` is invertible on the base, the torsion structure morphism is
+geometrically reduced: every geometric fibre is the `N`-torsion of the fibre curve,
+which is reduced by [U4d-i]. -/
+theorem geometricallyReduced_torsionπ {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+    [NeZero N] (hN : NIsInvertible S N) :
+    GeometricallyReduced (E.torsionπ N) := by
+  constructor
+  intro K _ y Z fst snd hsq
+  -- the geometric fibre is the torsion of the base-changed curve
+  have hbc := E.torsion_baseChange_isPullback N y
+  have hiso : Z ≅ (E.baseChange y).torsion N := hsq.isoIsPullback _ _ hbc
+  haveI hNK : (N : K) ≠ 0 := by
+    have h1 : NIsInvertible (Spec (CommRingCat.of K)) N := NIsInvertible.of_hom y hN
+    exact (nIsInvertible_spec_iff K N).mp h1
+  haveI : IsReduced ((E.baseChange y).torsion N) := by
+    haveI hAff : IsAffine ((E.baseChange y).torsion N) := by
+      haveI : IsFinite ((E.baseChange y).torsionπ N) :=
+        (E.baseChange y).torsionπ_isFinite N
+      exact isAffine_of_isAffineHom ((E.baseChange y).torsionπ N)
+    haveI : _root_.IsReduced (Γ((E.baseChange y).torsion N, ⊤) : CommRingCat.{u}) :=
+      isReduced_torsion_sections_of_field (E.baseChange y) N hNK
+    exact isReduced_of_isAffine_isReduced _
+  exact isReduced_of_isOpenImmersion hiso.hom
+
 end EllipticCurve
 
 end ModularCurves
