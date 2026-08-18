@@ -951,6 +951,51 @@ theorem weilPairingEval_self_of_recordIso {S : Scheme.{u}} (E : EllipticCurve S)
     exact E.weilPairingEval_congr hxeq hxeq _ _ hx hx
   exact hbc.symm.trans (hmap.symm.trans hmodel)
 
+/-- The pairing value is invariant under transporting the point along an equality of
+base maps. -/
+theorem weilPairingEval_self_pointCongr {S : Scheme.{u}} (E : EllipticCurve S) {N : ℕ}
+    [NeZero N] {T : Scheme.{u}} {σ σ' : T ⟶ S} (h : σ = σ') (x : E.Point σ)
+    (hx : x.1 ≫ E.mulByHom N = σ ≫ E.zero)
+    (hx' : (pointCongr E h x).1 ≫ E.mulByHom N = σ' ≫ E.zero) :
+    (E.weilPairingEval (pointCongr E h x) (pointCongr E h x) hx' hx' : Γ(T, ⊤)) =
+      (E.weilPairingEval x x hx hx : Γ(T, ⊤)) := by
+  subst h
+  rfl
+
+/-- **(LEAF A — `e_N(x, x) = 1` over an arbitrary base)** The Weil pairing is alternating:
+the diagonal value of any `N`-torsion point is `1`. -/
+theorem weilPairingEval_self_general {S : Scheme.{u}} (E : EllipticCurve S) {N : ℕ}
+    [NeZero N] {T : Scheme.{u}} {g : T ⟶ S} (x : E.Point g)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by
+  classical
+  refine weilPairingEval_self_of_locally E x hx (fun p => ?_)
+  -- the local Weierstrass model at the image point
+  obtain ⟨U, hsU, W, hWell, e, heπ, hez⟩ := E.localModel (g.base p)
+  haveI := hWell
+  refine ⟨g ⁻¹ᵁ U.1, hsU, fun hxr => ?_⟩
+  -- the restricted base map factors through `Spec Γ(S, U)`
+  have hfac : (g ⁻¹ᵁ U.1).ι ≫ g =
+      ((g ∣_ U.1) ≫ U.2.isoSpec.hom) ≫ (U.2.isoSpec.inv ≫ U.1.ι) := by
+    rw [Category.assoc, ← Category.assoc U.2.isoSpec.hom, Iso.hom_inv_id,
+      Category.id_comp]
+    exact (morphismRestrict_ι g U.1).symm
+  obtain ⟨φ, hφ⟩ := exists_localModel_recordIso E U W e heπ
+    (by rw [Category.assoc, E.zero_π, Category.comp_id, Category.id_comp]) hez
+  haveI := hφ
+  -- transport the restricted point to the factored base map
+  have hxr' : (EllipticCurve.Point.restrict E (g ⁻¹ᵁ U.1).ι x).1 ≫ E.mulByHom N =
+      (((g ∣_ U.1) ≫ U.2.isoSpec.hom) ≫ (U.2.isoSpec.inv ≫ U.1.ι)) ≫ E.zero := by
+    rw [← hfac]; exact hxr
+  have hxr'' : (pointCongr E hfac (EllipticCurve.Point.restrict E (g ⁻¹ᵁ U.1).ι x)).1 ≫
+      E.mulByHom N =
+      (((g ∣_ U.1) ≫ U.2.isoSpec.hom) ≫ (U.2.isoSpec.inv ≫ U.1.ι)) ≫ E.zero := by
+    rw [pointCongr_apply_coe]
+    exact hxr'
+  refine (weilPairingEval_self_pointCongr E hfac
+    (EllipticCurve.Point.restrict E (g ⁻¹ᵁ U.1).ι x) hxr hxr'').symm.trans ?_
+  exact weilPairingEval_self_of_recordIso E W (U.2.isoSpec.inv ≫ U.1.ι) φ _ hxr''
+
 end EllipticCurve
 
 end ModularCurves
