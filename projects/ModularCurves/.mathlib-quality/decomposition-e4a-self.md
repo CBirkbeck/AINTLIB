@@ -3407,3 +3407,47 @@ is a nonzerodivisor in the smooth 1-dimensional fibre `A ⊗ κ(p)`; hence `A/f 
 `HasRingHomProperty @LocallyQuasiFinite RingHom.QuasiFinite`.
 
 `yRho_geometricallyIrreducible` (BB-IRR) is the analytic layer — OWNER BOUNDARY, not touched.
+
+---
+
+## cont.30bt — LEAF C scoping: blocked behind a mathlib dimension-theory gap (B3-scale)
+
+`IsOfficialCartier.isFinite` (CartierDivisor.lean:2858). The route is now short at the top and
+blocked at the bottom.
+
+**What mathlib gives (all verified to exist):**
+* `AlgebraicGeometry.IsFinite.of_isProper_of_locallyQuasiFinite` (ZariskisMainTheorem.lean:373)
+  — reduces leaf C to `LocallyQuasiFinite (J.subschemeι ≫ π)`;
+* `LocallyQuasiFinite.of_fiberToSpecResidueField`, and
+  `HasRingHomProperty @LocallyQuasiFinite RingHom.QuasiFinite`, so it suffices to prove, ring-locally:
+  *R → A smooth of relative dimension 1, `f ∈ A` a nonzerodivisor with `A/f` flat over `R`
+  ⟹ `Algebra.QuasiFinite R (A ⧸ f)`*, i.e. `Module.Finite κ(p) (A_κ/f̄)` for every prime `p`;
+* `LinearMap.lTensor_injective_of_exact_of_flat` (Flat/Equalizer.lean:192) — the Tor step: from
+  `0 → A →f A → A/f → 0` with `A/f` flat, `f̄` stays a **nonzerodivisor** in `A_κ`;
+* `Module.finite_iff_krullDimLE_zero` (Jacobson/Artinian.lean:50) — for a finite-type algebra
+  over an Artinian ring, `Module.Finite ↔ Ring.KrullDimLE 0`;
+* `ringKrullDim_quotient_succ_le_of_nonZeroDivisor` (KrullDimension/NonZeroDivisors.lean:37) —
+  `dim A_κ/f̄ + 1 ≤ dim A_κ`;
+* `MvPolynomial.ringKrullDim_of_isNoetherianRing` — `dim R[x_1..x_n] = dim R + n`.
+
+**The single missing input**: `ringKrullDim (A ⊗_R κ(p)) ≤ 1` — i.e. **smooth of relative
+dimension 1 over a field ⟹ Krull dimension ≤ 1**. mathlib has *no* `ringKrullDim` statement
+about smooth or standard-smooth algebras at all. Getting it needs either
+
+1. *the relations of a standard smooth presentation form a regular sequence* (so the `n-1`
+   equations each drop the dimension of `κ[x_1..x_n]` by one) — mathlib has the cotangent
+   theory of `SubmersivePresentation` (`free_cotangent`, `subsingleton_h1Cotangent`,
+   `free_kaehlerDifferential`) but **not** the H1-vanishing ⟹ quasi-regular ⟹ regular-sequence
+   bridge; or
+2. *dim = trdeg for finitely generated field algebras* plus a comparison of trdeg with the
+   presentation dimension — also absent (mathlib even carries a `proof_wanted` for the
+   Noetherian `MvPolynomial` dimension formula in KrullDimension/Basic.lean).
+
+Either is a mathlib-PR-scale commutative-algebra development in its own right, which is the
+**B3 bar** ("the sub-ticket itself would need its own multi-week development by mathlib
+standards"). It is also **not needed by the project's goal**: `yRho_representable` is
+axiom-clean without it, and leaf C's only consumer `toRelEffCartierDiv` has *no* consumers.
+Leaf C's statement is TRUE (KM 1.2.3) — this is a route/infrastructure block, not a B2.
+
+Recommended owner call: leave the `sorry` as the tracked marker for the KM 1.2.3 packaging, or
+open a separate infra ticket for the dimension bridge (and consider upstreaming it to mathlib).
