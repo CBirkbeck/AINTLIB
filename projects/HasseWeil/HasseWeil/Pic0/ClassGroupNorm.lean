@@ -629,8 +629,11 @@ theorem relNorm_map_eq_maximalIdeal_general
   have hQ0 : (P.map (algebraMap S Sp)) ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot hm0 _
   haveI hQmax : (P.map (algebraMap S Sp)).IsMaximal :=
     Ring.DimensionLEOne.maximalOfPrime hQ0 hQprime
+  rw [Ideal.inertiaDeg'_eq_inertiaDeg] at hf
   have hfQ : Ideal.inertiaDeg' (IsLocalRing.maximalIdeal Rp) (P.map (algebraMap S Sp)) = 1 := by
-    rw [IsLocalization.AtPrime.inertiaDeg_map_eq_inertiaDeg p Rp Sp P]; exact hf
+    rw [Ideal.inertiaDeg'_eq_inertiaDeg,
+      IsLocalization.AtPrime.inertiaDeg_map_eq_inertiaDeg p Rp Sp P]
+    exact hf
   exact relNorm_eq_maximalIdeal_of_inertiaDeg_one (P.map (algebraMap S Sp)) hQ0 hfQ
 
 -- The concrete semilocal `Sₚ` / DVR `Rₚ` localisation instance bundle is expensive to synthesise.

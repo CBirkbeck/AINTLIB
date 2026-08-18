@@ -111,7 +111,7 @@ lemma normalizedFactors_gaussSumIdeal_subset_primesAboveP
         symm
         simpa [Iχ, Iχinv, gaussSumIdeal] using
           (gaussSum_ideal_mul_inv_eq_span_p (p := p) (L := L) hχ)
-      _ ≤ Iχ := Ideal.mul_le_right
+      _ ≤ Iχ := Ideal.mul_le_left
       _ ≤ P := hIχ_le_P
   have hp_mem_P : (p : 𝓞 L) ∈ P :=
     hspan_p_le_P (Ideal.subset_span (by simp))

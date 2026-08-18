@@ -163,7 +163,7 @@ lemma idealNormMultiplicity_mul {m n : ℕ} (hcop : Nat.Coprime m n) :
         J * L' ⊔ Ideal.span {(m : 𝓞 L)} = J := fun J L' hJ hL => by
       have h_cop_mL_sup : Ideal.span {(m : 𝓞 L)} ⊔ L' = ⊤ :=
         Ideal.isCoprime_iff_sup_eq.mp (h_cop_m_L L' hL)
-      refine le_antisymm (sup_le Ideal.mul_le_right ?_) ?_
+      refine le_antisymm (sup_le Ideal.mul_le_left ?_) ?_
       · rw [Ideal.span_le, Set.singleton_subset_iff]
         have : ((m : ℕ) : 𝓞 L) ∈ J := by rw [← hJ]; exact Ideal.absNorm_mem J
         exact_mod_cast this
@@ -177,7 +177,7 @@ lemma idealNormMultiplicity_mul {m n : ℕ} (hcop : Nat.Coprime m n) :
         J * L' ⊔ Ideal.span {(n : 𝓞 L)} = L' := fun J L' hJ hL => by
       have h_cop_nJ_sup : Ideal.span {(n : 𝓞 L)} ⊔ J = ⊤ :=
         Ideal.isCoprime_iff_sup_eq.mp (h_cop_n_J J hJ)
-      refine le_antisymm (sup_le Ideal.mul_le_left ?_) ?_
+      refine le_antisymm (sup_le Ideal.mul_le_right ?_) ?_
       · rw [Ideal.span_le, Set.singleton_subset_iff]
         have : ((n : ℕ) : 𝓞 L) ∈ L' := by rw [← hL]; exact Ideal.absNorm_mem L'
         exact_mod_cast this
