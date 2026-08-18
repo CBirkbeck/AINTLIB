@@ -766,41 +766,14 @@ theorem smooth_of_etale_surjective {X Y Z : Scheme.{u}} (π : X ⟶ Y) (f : Y �
     [Etale π] (hπ : Function.Surjective π.base) (h : Smooth (π ≫ f)) : Smooth f :=
   Smooth.of_precomp_etale_of_surjective π f hπ h
 
-/-- **([YF-GEOM] = KM Cor 4.7.1's geometric computation)** SOME representing object of
-`[Γ(N)]` has smooth affine base over `Spec R`. KM 4.7.1 (verbatim, p. 116): *"Any
-relatively representable moduli problem 𝒫 which is affine and etale over (Ell), and
-rigid, is representable by a smooth affine curve over Z."* — its proof inspects the
-engine's construction: `𝕸(𝒫) ⊗ ℤ[1/2] = 𝕸(𝒫, Legendre)/(free G)` and
-`𝕸(𝒫) ⊗ ℤ[1/3] = 𝕸(𝒫, naive level 3)/(free G)`; each `𝕸(𝒫, δ)` is étale over the
-smooth affine `𝕸(δ)` (this file's [YF-ETALE] at the bootstrap object + T-E15a/T-E14
-explicit models), and smooth-affineness passes to the free finite quotient (T-Q3 affine
-quotient, PROVEN + [YF-QSM]). GATE: the engine's constructed object (CHARTER-FP4;
-same construction as `representable_iff`'s ⇐) + T-E15a + T-E14 + BB-DIFF. -/
-theorem exists_representing_smooth_affine (N : ℕ) [NeZero N] (hN : 3 ≤ N)
-    (hinv : IsUnit (N : R)) :
-    ∃ X₀ : EllObj R, Nonempty ((gammaFullNaiveProblem R N).RepresentableBy X₀) ∧
-      Smooth X₀.structMap ∧ IsAffineHom X₀.structMap := by
-  sorry
-
-/-! ### Assembly: the T-E9 statement -/
-
-/-- **(T-E9 ASSEMBLY = KM Cor 4.7.2; the bridge into
-`ModularCurves.gammaFullNaive_representable`)** For `N ≥ 3` invertible in `R`: `[Γ(N)]`
-is rigid and representable, and every representing object has smooth affine base over
-`Spec R`. Statement shape is VERBATIM that of the held
-`Moduli/Representability.lean:gammaFullNaive_representable`, so the T-E9 milestone
-discharges from this stream by `exact YFull.gammaFullNaive_representable_assembly …`
-(one line, to be wired by the holder of that file). Real wiring over this file's
-leaves. -/
-theorem gammaFullNaive_representable_assembly (N : ℕ) [NeZero N] (hN : 3 ≤ N)
-    (hinv : IsUnit (N : R)) :
-    ((gammaFullNaiveProblem R N).Rigid ∧ (gammaFullNaiveProblem R N).Representable) ∧
-      ∀ X : EllObj R, Nonempty ((gammaFullNaiveProblem R N).RepresentableBy X) →
-        (Smooth X.structMap ∧ IsAffineHom X.structMap) := by
-  refine ⟨⟨gammaFullNaive_rigid R N hN hinv,
-    gammaFullNaive_representable_of_engine R N hN hinv⟩, fun X hX => ?_⟩
-  obtain ⟨X₀, ⟨r₀⟩, hs, ha⟩ := exists_representing_smooth_affine R N hN hinv
-  exact smooth_affine_of_representableBy R r₀ hs ha X hX
+/- **RELOCATED (WP-D2c-7, 2026-08-03).** `exists_representing_smooth_affine` and the T-E9
+assembly `gammaFullNaive_representable_assembly` now live — with the same statements, and
+**proved** — in `ModularCurve/YFullSmoothAffine.lean`. They had to move downstream: their
+proofs consume `gammaOneNaive_representable` (`ModularCurve/YOneTatePoint.lean`) and the
+level-3 rigidifier, both of which import *this* file through
+`YFull.smooth_affine_of_representableBy` above, so proving them here would be a cycle. Same
+relocation pattern as `gammaOneNaive_representable`, which moved out of
+`Moduli/Representability.lean` for the same reason. Zero code consumers were affected. -/
 
 end YFull
 

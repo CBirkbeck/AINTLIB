@@ -1,0 +1,555 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import ModularCurves.GroupScheme.NaiveGammaOneLocus
+import ModularCurves.ModularCurve.YFullToYOne
+import ModularCurves.Moduli.QuotientProblem
+import ModularCurves.LevelStructure.NaiveGammaOneLevel
+
+/-!
+# The candidate `Y(N)` built over `Y₁(N)` (WP-D2c)
+
+`YFull.exists_representing_smooth_affine` asks for **some** object representing the naive
+full level-`N` problem whose structure morphism is smooth and affine. Since
+`YFull.smooth_affine_of_representableBy` is generic in the moduli problem, exhibiting one
+such object settles it for all of them.
+
+The object to exhibit is the universal curve over `Y₁(N)` pulled back to the full-level
+locus:
+
+  `X₀ := X₁.pullbackAlong (X₁.curve.fullLevelLocusπ N h)`,
+
+where `X₁` represents `gammaOneNaiveProblem` and is already known smooth and affine
+(`gammaOneNaive_representable`, axiom-verified).
+
+This file proves the **free half** (WP-D2c-2): `X₀.structMap` is smooth and affine, because
+it factors as a finite étale morphism followed by a smooth affine one. Nothing here needs
+new mathematics — `Etale ⟹ Smooth` is an instance, and `Smooth`, `IsAffineHom` and
+`IsFinite` all compose.
+
+What remains (WP-D2c-3) is that `X₀` *represents* the full-level problem; the functorial
+half of that is `yFullToYOneFibreEquiv` (WP-D2b) and the relative half is
+`fullLevelLocusPointsEquiv`.
+-/
+
+universe u
+
+open AlgebraicGeometry CategoryTheory Limits
+
+namespace ModularCurves
+
+variable {R : CommRingCat.{u}}
+
+/-- **(WP-D2c-1, corrected)** The candidate representing object for the naive full level-`N`
+problem: the universal curve over a `Γ₁(N)`-object, pulled back to the **completion locus**
+of the universal `Γ₁`-section.
+
+The earlier version used the whole full-level locus; that is wrong — by
+`ModuliProblem.simulRepresentableBy` it represents `Γ(N) × Γ₁(N)` with the two structures
+unrelated. Cutting down to the completions of the given section is exactly the missing
+compatibility. -/
+noncomputable def yFullCandidate (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N) : EllObj R :=
+  X₁.pullbackAlong (X₁.curve.completionLocusπ N h P)
+
+@[simp] theorem yFullCandidate_base (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N) :
+    (yFullCandidate N X₁ h P).base = X₁.curve.completionLocus N h P := rfl
+
+@[simp] theorem yFullCandidate_structMap (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N) :
+    (yFullCandidate N X₁ h P).structMap =
+      X₁.curve.completionLocusπ N h P ≫ X₁.structMap := rfl
+
+/-- **(WP-D2c-2)** The candidate's structure morphism is smooth: it is a finite étale
+morphism followed by a smooth one. -/
+theorem yFullCandidate_structMap_smooth (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hsm : Smooth X₁.structMap) :
+    Smooth (yFullCandidate N X₁ h P).structMap := by
+  haveI : Etale (X₁.curve.completionLocusπ N h P) := X₁.curve.completionLocusπ_etale N h P
+  haveI : Smooth (X₁.curve.completionLocusπ N h P) := inferInstance
+  haveI := hsm
+  rw [yFullCandidate_structMap]
+  exact MorphismProperty.comp_mem _ _ _ inferInstance hsm
+
+/-- **(WP-D2c-2)** The candidate's structure morphism is affine: it is a finite morphism
+followed by an affine one. -/
+theorem yFullCandidate_structMap_isAffineHom (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    [IsAffineHom X₁.structMap] :
+    IsAffineHom (yFullCandidate N X₁ h P).structMap := by
+  haveI : IsFinite (X₁.curve.completionLocusπ N h P) :=
+    X₁.curve.completionLocusπ_isFinite N h P
+  haveI hfa : IsAffineHom (X₁.curve.completionLocusπ N h P) := inferInstance
+  rw [yFullCandidate_structMap]
+  -- the composition instance does not fire through the `abbrev`, so inline its proof
+  refine ⟨fun U hU => ?_⟩
+  haveI := hfa
+  exact (hU.preimage X₁.structMap).preimage (X₁.curve.completionLocusπ N h P)
+
+/-- **(WP-D2c-2)** Both at once — the shape `smooth_affine_of_representableBy` consumes. -/
+theorem yFullCandidate_smooth_affine (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hsm : Smooth X₁.structMap) (ha : IsAffineHom X₁.structMap) :
+    Smooth (yFullCandidate N X₁ h P).structMap ∧
+      IsAffineHom (yFullCandidate N X₁ h P).structMap :=
+  haveI := ha
+  ⟨yFullCandidate_structMap_smooth N X₁ h P hsm,
+    yFullCandidate_structMap_isAffineHom N X₁ h P⟩
+
+/-! ### The per-`u` fibre (WP-D2c-3, step 2–3)
+
+For a fixed `u : Y ⟶ X₁`, the lifts of `u.baseHom` through `completionLocusπ` are the naive
+full level structures on `Y` whose first member is the pullback of `P`. This is
+`completionLocusClassifies` transported along `isoPullbackAlong u`. -/
+
+/-- Transport of the full-level problem along the canonical iso `Y ≅ X₁.pullbackAlong
+u.baseHom`. -/
+noncomputable def transportAlongIso (N : ℕ) [NeZero N] {X₁ Y : EllObj R} (u : Y ⟶ X₁) :
+    (gammaFullNaiveProblem R N).obj (Opposite.op (X₁.pullbackAlong u.baseHom)) ≃
+      (gammaFullNaiveProblem R N).obj (Opposite.op Y) :=
+  ((gammaFullNaiveProblem R N).mapIso (EllObj.isoPullbackAlong u).op).toEquiv
+
+/-- **(WP-D2c-3, per-`u` fibre)** The lifts of `u.baseHom` through `completionLocusπ`
+correspond to the naive full level structures on `Y` whose first member is the transported
+pullback of `P`. -/
+noncomputable def completionFibreEquiv (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hP : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base) {Y : EllObj R} (u : Y ⟶ X₁) :
+    { b : Y.base ⟶ X₁.curve.completionLocus N h P //
+        b ≫ X₁.curve.completionLocusπ N h P = u.baseHom } ≃
+      { PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y) //
+          ((transportAlongIso N u).symm PQ).1.1 =
+            X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+              (by rw [Category.assoc, hP, Category.comp_id]) } :=
+  (X₁.curve.completionLocusClassifies N h P hP u.baseHom).trans
+    ((transportAlongIso N u).subtypeEquiv (fun PQ => by
+      simp only [Equiv.symm_apply_apply]
+      exact Iff.rfl))
+
+/-- **(WP-D2c-3, glue)** The section attached to "a base map composed with a torsion
+section" is the pullback of that section along the tautological projection.
+
+Both sides are sections of `X₁.curve.baseChange g`, so by `baseChange_section_ext` it is
+enough to compare their composites with `pullback.fst`: the left is
+`(g ≫ pointToTorsion Q) ≫ torsionι = g ≫ Q` by `pointToTorsion_torsionι`, and the right is
+`g ≫ Q` by the defining property of `pullSection`. -/
+theorem torsionMapSection_comp_eq_pullSection (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    {T : Scheme.{u}} (g : T ⟶ X₁.base) (Q : X₁.curve.Section)
+    (hQ : (Q : X₁.base ⟶ X₁.curve.E) ≫ X₁.curve.mulByHom N = 𝟙 X₁.base ≫ X₁.curve.zero)
+    (hg : (g ≫ X₁.curve.pointToTorsion Q hQ) ≫ X₁.curve.torsionπ N = g) :
+    X₁.curve.torsionMapSection N g (g ≫ X₁.curve.pointToTorsion Q hQ) hg =
+      EllHom.pullSection R (X₁.pullbackAlongπ g) Q := by
+  refine X₁.curve.baseChange_section_ext ?_
+  have hL : ((X₁.curve.torsionMapSection N g (g ≫ X₁.curve.pointToTorsion Q hQ) hg).1 :
+        T ⟶ pullback X₁.curve.π g) ≫ pullback.fst X₁.curve.π g =
+      g ≫ (Q : X₁.base ⟶ X₁.curve.E) := by
+    rw [X₁.curve.torsionMapSection_fst N g _ hg, Category.assoc,
+      X₁.curve.pointToTorsion_torsionι Q hQ]
+  have hR : ((EllHom.pullSection R (X₁.pullbackAlongπ g) Q).1 :
+        T ⟶ pullback X₁.curve.π g) ≫ pullback.fst X₁.curve.π g =
+      g ≫ (Q : X₁.base ⟶ X₁.curve.E) :=
+    (X₁.pullbackAlongπ g).isPullback.lift_fst _ _ _
+  rw [hL]
+  exact hR.symm
+
+/-! ### The collapse (WP-D2c-3, step 4)
+
+The `Σ` over `u : Y ⟶ X₁` is redundant: the fibre condition pins `u`'s `Γ₁`-structure to be
+the `Γ₁`-part of the full level structure, and by WP-D1a that part is *determined* by the
+structure. Formally this is `Equiv.sigmaFiberEquiv` for the forgetful map. -/
+
+/-- The forgetful map on structures over a fixed `Y`, as a plain function — the fibre map
+whose `Σ` collapses. -/
+noncomputable def forgetAt (N : ℕ) [NeZero N] (hinv : IsUnit (N : R)) (Y : EllObj R) :
+    (gammaFullNaiveProblem R N).obj (Opposite.op Y) →
+      (gammaOneNaiveProblem R N).obj (Opposite.op Y) :=
+  fun PQ => (gammaFullToGammaOne N hinv).app (Opposite.op Y) PQ
+
+/-- `forgetAt` is natural — it is a component of the natural transformation
+`gammaFullToGammaOne`. Extracted as its own lemma so the unification happens at these simple
+types; used inside the big composite it times out `isDefEq`. -/
+theorem forgetAt_naturality (N : ℕ) [NeZero N] (hinvR : IsUnit (N : R))
+    {X X' : EllObj R} (f : X ⟶ X')
+    (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op X')) :
+    forgetAt N hinvR X ((gammaFullNaiveProblem R N).map f.op PQ) =
+      (gammaOneNaiveProblem R N).map f.op (forgetAt N hinvR X' PQ) :=
+  -- both sides have underlying section `pullSection f PQ.1.1`, by `gammaFullToGammaOne_app_val`
+  -- (which is `rfl`) and the definition of each problem's `map`
+  Subtype.ext rfl
+
+/-- **(WP-D2c-3, step 4)** The collapse: summing the fibres of the forgetful map over all
+`Γ₁`-structures recovers the full level structures. This is where WP-D1a is consumed — the
+`Γ₁`-part is not extra data. -/
+noncomputable def sigmaForgetEquiv (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
+    (Y : EllObj R) :
+    (Σ y : (gammaOneNaiveProblem R N).obj (Opposite.op Y),
+        { PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y) //
+          forgetAt N hinv Y PQ = y }) ≃
+      (gammaFullNaiveProblem R N).obj (Opposite.op Y) :=
+  Equiv.sigmaFiberEquiv (forgetAt N hinv Y)
+
+/-- **(WP-D2c-3, step 4)** Reindexed by `rOne`: the `Σ` over morphisms `Y ⟶ X₁` also
+collapses. -/
+noncomputable def sigmaHomForgetEquiv (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
+    {X₁ : EllObj R} (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁) (Y : EllObj R) :
+    (Σ u : Y ⟶ X₁, { PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y) //
+        forgetAt N hinv Y PQ = rOne.homEquiv u }) ≃
+      (gammaFullNaiveProblem R N).obj (Opposite.op Y) :=
+  (Equiv.sigmaCongrLeft' (rOne.homEquiv (X := Y))).trans
+    ((Equiv.sigmaCongrRight fun _ =>
+      Equiv.subtypeEquivRight fun _ => by rw [Equiv.apply_symm_apply]).trans
+      (sigmaForgetEquiv N hinv Y))
+
+/-- **(WP-D2c-3, the chain)** The representing equivalence at a fixed `Y`, assembled from
+the four steps. The `Σ`-reindexing is `Equiv.subtypeProdEquivSigmaSubtype`; the fibre
+conditions are matched by `torsionMapSection_comp_eq_pullSection` together with
+`homEquiv_eq_map_universalGammaOne`. -/
+noncomputable def yFullCandidateHomEquiv (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (hinv : IsUnit (N : R)) (h : NIsInvertible X₁.base N)
+    (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁)
+    (hmatch : ∀ (Y : EllObj R) (u : Y ⟶ X₁)
+      (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)),
+      (((transportAlongIso N u).symm PQ).1.1 =
+          X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+            (by rw [Category.assoc, hPsec, Category.comp_id])) ↔
+        forgetAt N hinv Y PQ = rOne.homEquiv u)
+    (Y : EllObj R) :
+    (Y ⟶ yFullCandidate N X₁ h P) ≃
+      (gammaFullNaiveProblem R N).obj (Opposite.op Y) :=
+  (EllObj.homPullbackAlongEquiv X₁ (X₁.curve.completionLocusπ N h P) Y).trans
+    ((Equiv.subtypeProdEquivSigmaSubtype
+        (fun (u : Y ⟶ X₁) (b : Y.base ⟶ X₁.curve.completionLocus N h P) =>
+          b ≫ X₁.curve.completionLocusπ N h P = u.baseHom)).trans
+      ((Equiv.sigmaCongrRight fun u =>
+          (completionFibreEquiv N X₁ h P hPsec u).trans
+            (Equiv.subtypeEquivRight (hmatch Y u))).trans
+        (sigmaHomForgetEquiv N hinv rOne Y)))
+
+/-- Pulling sections back along an isomorphism is injective. -/
+theorem pullSection_iso_injective {X Y : EllObj R} (e : X ≅ Y) :
+    Function.Injective (EllHom.pullSection R e.hom) := by
+  intro A B hab
+  have h := congrArg (EllHom.pullSection R e.inv) hab
+  rw [← EllHom.pullSection_comp, ← EllHom.pullSection_comp, e.inv_hom_id,
+    EllHom.pullSection_id, EllHom.pullSection_id] at h
+  exact h
+
+@[simp] theorem transportAlongIso_symm_fst (N : ℕ) [NeZero N] {X₁ Y : EllObj R}
+    (u : Y ⟶ X₁) (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)) :
+    ((transportAlongIso N u).symm PQ).1.1 =
+      EllHom.pullSection R (EllObj.isoPullbackAlong u).inv PQ.1.1 := rfl
+
+/-- **(WP-D2c-3-H1)** The first component of the `symm` composite: precomposing the inverse
+with the tautological projection recovers the `Γ₁`-classifying morphism.
+
+The outermost factor of the composite's `invFun` is `EllObj.homToPullbackAlong`, whose
+`_pullbackAlongπ` computation lemma gives the composite as the pair's first component; that
+component is `sigmaHomForgetEquiv`'s `invFun`, i.e. `rOne.homEquiv.symm` of the forgetful
+image (`Equiv.sigmaFiberEquiv_symm_apply_fst`). -/
+theorem yFullCandidateHomEquiv_symm_comp_pullbackAlongπ (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (hinvR : IsUnit (N : R)) (h : NIsInvertible X₁.base N)
+    (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁)
+    (hmatch : ∀ (Y : EllObj R) (u : Y ⟶ X₁)
+      (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)),
+      (((transportAlongIso N u).symm PQ).1.1 =
+          X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+            (by rw [Category.assoc, hPsec, Category.comp_id])) ↔
+        forgetAt N hinvR Y PQ = rOne.homEquiv u)
+    (Y : EllObj R) (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)) :
+    (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch Y).symm PQ ≫
+        X₁.pullbackAlongπ (X₁.curve.completionLocusπ N h P) =
+      rOne.homEquiv.symm (forgetAt N hinvR Y PQ) := by
+  set p := (((Equiv.subtypeProdEquivSigmaSubtype
+      (fun (u : Y ⟶ X₁) (b : Y.base ⟶ X₁.curve.completionLocus N h P) =>
+        b ≫ X₁.curve.completionLocusπ N h P = u.baseHom)).trans
+      ((Equiv.sigmaCongrRight fun u =>
+          (completionFibreEquiv N X₁ h P hPsec u).trans
+            (Equiv.subtypeEquivRight (hmatch Y u))).trans
+        (sigmaHomForgetEquiv N hinvR rOne Y))).symm PQ) with hp
+  exact EllObj.homToPullbackAlong_pullbackAlongπ p.1.1 p.1.2 p.2
+
+/-- **(WP-D2c-3-H5)** The base-change comparison square: comparing `Y'` into the chosen
+pullback over `u`'s base map, either directly along `f ≫ u` and then along the
+`pullbackAlongMap`, or through `f` first, gives the same morphism.
+
+Pure base-change bookkeeping — no level-structure content. Both sides have `baseHom`
+`f.baseHom`, and on `top` the two composites agree after `pullback.hom_ext` because
+`isoPullback.hom` computes against both projections. -/
+theorem isoPullbackAlong_hom_comp_pullbackAlongMap {X₁ Y Y' : EllObj R} (u : Y ⟶ X₁)
+    (f : Y' ⟶ Y) :
+    (EllObj.isoPullbackAlong (f ≫ u)).hom ≫ X₁.pullbackAlongMap u.baseHom f.baseHom =
+      f ≫ (EllObj.isoPullbackAlong u).hom := by
+  refine EllHom.ext ?_ ?_
+  · show 𝟙 Y'.base ≫ f.baseHom = f.baseHom ≫ 𝟙 Y.base
+    rw [Category.id_comp, Category.comp_id]
+  · show (f ≫ u).isPullback.isoPullback.hom ≫
+        pullback.map X₁.curve.π (f.baseHom ≫ u.baseHom) X₁.curve.π u.baseHom
+          (𝟙 _) f.baseHom (𝟙 _) (by simp) (by simp) =
+      f.top ≫ u.isPullback.isoPullback.hom
+  -- the four `isoPullback` computation rules, ascribed at the unfolded base maps so that
+  -- `rw` can see them (`(f ≫ u).baseHom` and `f.baseHom ≫ u.baseHom` are defeq, not syntactic)
+    have hfst' : (f ≫ u : Y' ⟶ X₁).isPullback.isoPullback.hom ≫
+        pullback.fst X₁.curve.π (f.baseHom ≫ u.baseHom) = (f ≫ u : Y' ⟶ X₁).top :=
+      (f ≫ u : Y' ⟶ X₁).isPullback.isoPullback_hom_fst
+    have hsnd' : (f ≫ u : Y' ⟶ X₁).isPullback.isoPullback.hom ≫
+        pullback.snd X₁.curve.π (f.baseHom ≫ u.baseHom) = Y'.curve.π :=
+      (f ≫ u : Y' ⟶ X₁).isPullback.isoPullback_hom_snd
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, pullback.lift_fst, Category.comp_id, hfst', Category.assoc,
+        u.isPullback.isoPullback_hom_fst]
+      rfl
+    · rw [Category.assoc, pullback.lift_snd, ← Category.assoc, hsnd', Category.assoc,
+        u.isPullback.isoPullback_hom_snd]
+      exact f.isPullback.w.symm
+
+/-- **(WP-D2c-3-H8)** Transporting a level structure along `isoPullbackAlong` is natural:
+the transport for `f ≫ u` of a pulled-back structure is the base change of the transport
+for `u`. Immediate from the comparison square `isoPullbackAlong_hom_comp_pullbackAlongMap`
+and functoriality of the moduli problem. -/
+theorem transportAlongIso_symm_natural (N : ℕ) [NeZero N] {X₁ Y Y' : EllObj R} (u : Y ⟶ X₁)
+    (f : Y' ⟶ Y) (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)) :
+    (transportAlongIso N (f ≫ u)).symm ((gammaFullNaiveProblem R N).map f.op PQ) =
+      (gammaFullNaiveProblem R N).map (X₁.pullbackAlongMap u.baseHom f.baseHom).op
+        ((transportAlongIso N u).symm PQ) := by
+  have hsq : (EllObj.isoPullbackAlong (f ≫ u)).inv ≫ f =
+      X₁.pullbackAlongMap u.baseHom f.baseHom ≫ (EllObj.isoPullbackAlong u).inv := by
+    rw [Iso.inv_comp_eq, ← Category.assoc, Iso.eq_comp_inv]
+    exact (isoPullbackAlong_hom_comp_pullbackAlongMap u f).symm
+  show (gammaFullNaiveProblem R N).map (EllObj.isoPullbackAlong (f ≫ u)).inv.op
+      ((gammaFullNaiveProblem R N).map f.op PQ) =
+    (gammaFullNaiveProblem R N).map (X₁.pullbackAlongMap u.baseHom f.baseHom).op
+      ((gammaFullNaiveProblem R N).map (EllObj.isoPullbackAlong u).inv.op PQ)
+  rw [← Functor.map_comp_apply, ← Functor.map_comp_apply, ← op_comp, ← op_comp, hsq]
+
+/-- **(WP-D2c-3-H7)** The per-`u` fibre dictionary is natural in the base, in the `symm`
+direction: the lift attached to a pulled-back level structure is the pullback of the lift.
+
+The `u₂ = f ≫ u` hypothesis is taken as an argument rather than substituted at the use
+site: the caller only knows the two classifying morphisms agree *propositionally*, and
+`subst` here does the transport once, in a context where nothing else depends on it. -/
+theorem completionFibreEquiv_symm_natural (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base)
+    {Y Y' : EllObj R} (u : Y ⟶ X₁) (f : Y' ⟶ Y) (u₂ : Y' ⟶ X₁) (hfu : f ≫ u = u₂)
+    (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y))
+    (hPQ : ((transportAlongIso N u).symm PQ).1.1 =
+      X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+        (by rw [Category.assoc, hPsec, Category.comp_id]))
+    (hPQ₂ : ((transportAlongIso N u₂).symm ((gammaFullNaiveProblem R N).map f.op PQ)).1.1 =
+      X₁.curve.torsionMapSection N u₂.baseHom (u₂.baseHom ≫ P)
+        (by rw [Category.assoc, hPsec, Category.comp_id])) :
+    f.baseHom ≫ ((completionFibreEquiv N X₁ h P hPsec u).symm ⟨PQ, hPQ⟩).1 =
+      ((completionFibreEquiv N X₁ h P hPsec u₂).symm
+        ⟨(gammaFullNaiveProblem R N).map f.op PQ, hPQ₂⟩).1 := by
+  subst hfu
+  -- both lifts are `pullback.lift`s, so the two projections compute
+  have e1 : ((completionFibreEquiv N X₁ h P hPsec u).symm ⟨PQ, hPQ⟩).1 ≫
+      pullback.fst (X₁.curve.fullLevelLocusFst N h) P =
+      ((X₁.curve.fullLevelLocusPointsEquiv N h u.baseHom).symm
+        ((transportAlongIso N u).symm PQ)).1 := pullback.lift_fst _ _ _
+  have e2 : ((completionFibreEquiv N X₁ h P hPsec (f ≫ u)).symm
+        ⟨(gammaFullNaiveProblem R N).map f.op PQ, hPQ₂⟩).1 ≫
+      pullback.fst (X₁.curve.fullLevelLocusFst N h) P =
+      ((X₁.curve.fullLevelLocusPointsEquiv N h (f ≫ u).baseHom).symm
+        ((transportAlongIso N (f ≫ u)).symm
+          ((gammaFullNaiveProblem R N).map f.op PQ))).1 := pullback.lift_fst _ _ _
+  refine pullback.hom_ext ?_ ?_
+  · -- the `fullLevelLocus` component: H3 after rewriting the transported structure by H8
+    rw [Category.assoc, e1, e2, transportAlongIso_symm_natural N u f PQ]
+    exact (fullLevelLocusPointsEquiv_symm_natural X₁ N h u.baseHom f.baseHom
+      ((transportAlongIso N u).symm PQ)).symm
+  · -- the base component: both sides lie over `f.baseHom ≫ u.baseHom` by construction
+    rw [Category.assoc,
+      ((completionFibreEquiv N X₁ h P hPsec u).symm ⟨PQ, hPQ⟩).2,
+      ((completionFibreEquiv N X₁ h P hPsec (f ≫ u)).symm
+        ⟨(gammaFullNaiveProblem R N).map f.op PQ, hPQ₂⟩).2]
+    rfl
+
+/-- **(WP-D2c-3, naturality — the `symm` form)** The inverse of the representing
+equivalence is natural: precomposing with `f` corresponds to pulling the level structure
+back along `f`.
+
+This is the tractable form of the naturality obligation. Comparing morphisms *into*
+`X₁.pullbackAlong (completionLocusπ …)` is easy — `EllObj.homPullbackAlongEquiv` is an
+`Equiv`, so two such morphisms agree as soon as their `(≫ pullbackAlongπ, baseHom)` pairs
+do, and both components are directly computable from `EllObj.homToPullbackAlong`'s
+computation lemmas together with `fullLevelLocusPointsEquiv`'s naturality
+(`Moduli/LevelLocusNatural.lean`). Comparing the level structures directly (the `toFun`
+form) instead forces `whnf` through all five composed equivalences and does not terminate —
+measured: `(deterministic) timeout at whnf` on the unfolded goal.
+
+Mirrors the `left_inv` argument of `ModuliProblem.simulRepresentableBy`
+(`Moduli/QuotientProblem.lean`), which is the same shape one level up. -/
+theorem yFullCandidateHomEquiv_symm_natural (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (hinvR : IsUnit (N : R)) (h : NIsInvertible X₁.base N)
+    (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁)
+    (hmatch : ∀ (Y : EllObj R) (u : Y ⟶ X₁)
+      (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)),
+      (((transportAlongIso N u).symm PQ).1.1 =
+          X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+            (by rw [Category.assoc, hPsec, Category.comp_id])) ↔
+        forgetAt N hinvR Y PQ = rOne.homEquiv u)
+    {X X' : EllObj R} (f : X ⟶ X')
+    (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op X')) :
+    f ≫ (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X').symm PQ =
+      (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X).symm
+        ((gammaFullNaiveProblem R N).map f.op PQ) := by
+  refine (EllObj.homPullbackAlongEquiv X₁ (X₁.curve.completionLocusπ N h P) X).injective ?_
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · -- first component: `≫ pullbackAlongπ`, discharged by H1 on both sides plus
+    -- `rOne.homEquiv_comp`
+    show f ≫ (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X').symm PQ ≫
+        X₁.pullbackAlongπ (X₁.curve.completionLocusπ N h P) =
+      (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X).symm
+          ((gammaFullNaiveProblem R N).map f.op PQ) ≫
+        X₁.pullbackAlongπ (X₁.curve.completionLocusπ N h P)
+    rw [yFullCandidateHomEquiv_symm_comp_pullbackAlongπ,
+      yFullCandidateHomEquiv_symm_comp_pullbackAlongπ]
+    rw [forgetAt_naturality N hinvR f PQ, rOne.comp_homEquiv_symm]
+  · -- second component: the `baseHom`s. `homPullbackAlongEquiv`'s `toFun` reads them off
+    -- directly, and the `symm` composite's base component is *definitionally*
+    -- `completionFibreEquiv.symm` at the classifying morphism, so this is exactly H7. The
+    -- two classifying morphisms are related only propositionally, which is why H7 takes
+    -- that relation as an argument and `subst`s it.
+    have hu' : f ≫ rOne.homEquiv.symm (forgetAt N hinvR X' PQ) =
+        rOne.homEquiv.symm
+          (forgetAt N hinvR X ((gammaFullNaiveProblem R N).map f.op PQ)) := by
+      rw [forgetAt_naturality N hinvR f PQ, rOne.comp_homEquiv_symm]
+    exact completionFibreEquiv_symm_natural N X₁ h P hPsec
+      (rOne.homEquiv.symm (forgetAt N hinvR X' PQ)) f
+      (rOne.homEquiv.symm (forgetAt N hinvR X ((gammaFullNaiveProblem R N).map f.op PQ)))
+      hu' PQ _ _
+
+/-- **(WP-D2c-3, `hmatch`)** The two fibre conditions agree: "the transported first member
+is the section attached to `u.baseHom ≫ P`" says exactly "the `Γ₁`-part of `PQ` is `u`'s
+structure".
+
+Both directions are the injectivity of `pullSection` along the iso: pulling back along
+`(isoPullbackAlong u).hom` cancels the `inv` on one side and, by
+`toPullbackAlong_pullbackAlongπ`, turns the tautological projection into `u` on the
+other. -/
+theorem fibre_condition_iff (N : ℕ) [NeZero N] (hinv : IsUnit (N : R)) (X₁ : EllObj R)
+    (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁)
+    (hP : P = X₁.curve.pointToTorsion (universalGammaOne R N rOne).1
+      ((X₁.curve.smul_eq_zero_iff_comp_mulByHom (𝟙 X₁.base) N _).mp
+        (universalGammaOne R N rOne).2.1))
+    (Y : EllObj R) (u : Y ⟶ X₁)
+    (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)) :
+    (((transportAlongIso N u).symm PQ).1.1 =
+        X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+          (by rw [Category.assoc, hPsec, Category.comp_id])) ↔
+      forgetAt N hinv Y PQ = rOne.homEquiv u := by
+  set e := EllObj.isoPullbackAlong u with he
+  -- the right-hand condition, unfolded
+  have hRHS : (forgetAt N hinv Y PQ = rOne.homEquiv u) ↔
+      PQ.1.1 = EllHom.pullSection R u (universalGammaOne R N rOne).1 := by
+    rw [homEquiv_eq_map_universalGammaOne R N rOne u]
+    exact ⟨fun hh => congrArg Subtype.val hh, fun hh => Subtype.ext hh⟩
+  -- the left-hand condition, with `hP` and the glue lemma
+  have hglue : X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+        (by rw [Category.assoc, hPsec, Category.comp_id]) =
+      EllHom.pullSection R (X₁.pullbackAlongπ u.baseHom)
+        (universalGammaOne R N rOne).1 := by
+    subst hP
+    exact torsionMapSection_comp_eq_pullSection N X₁ u.baseHom _ _ _
+  rw [transportAlongIso_symm_fst, hglue, hRHS]
+  constructor
+  · intro hh
+    have := congrArg (EllHom.pullSection R e.hom) hh
+    rwa [← EllHom.pullSection_comp, ← EllHom.pullSection_comp, e.hom_inv_id,
+      EllHom.pullSection_id, he, EllObj.isoPullbackAlong_hom,
+      EllObj.toPullbackAlong_pullbackAlongπ] at this
+  · intro hh
+    refine pullSection_iso_injective e ?_
+    rw [← EllHom.pullSection_comp, ← EllHom.pullSection_comp, e.hom_inv_id,
+      EllHom.pullSection_id, he, EllObj.isoPullbackAlong_hom,
+      EllObj.toPullbackAlong_pullbackAlongπ]
+    exact hh
+
+/-! ### `yFullCandidate` represents the full-level problem (WP-D2c-3)
+
+The single remaining step of the D-chain. Stated here so the interface is fixed and
+type-checked; the proof is the one piece still open.
+
+**Proof plan.** Write `B := X₁.curve.fullLevelLocus N h` and `π_B := fullLevelLocusπ`.
+
+*Forward.* Given `u : T ⟶ yFullCandidate N X₁ h`, its base map is `u.baseHom : T.base ⟶ B`,
+and `u ≫ X₁.pullbackAlongπ π_B : T ⟶ X₁` has base map `u.baseHom ≫ π_B`. Feeding
+`⟨u.baseHom, _⟩` to `fullLevelLocusPointsEquiv` yields a naive full level structure on
+`X₁.curve.baseChange (u.baseHom ≫ π_B) = (X₁.pullbackAlong (u.baseHom ≫ π_B)).curve`;
+transport it to `T.curve` along the isomorphism `toPullbackAlong` supplies
+(`Moduli/QuotientProblem.lean:73`, with `toPullbackAlong_pullbackAlongπ` as its defining
+property).
+
+*Backward.* Given a full level structure `(P, Q)` on `T`, its first member is a naive
+`Γ₁(N)`-structure by `isNaiveGammaOne_of_isNaiveFullLevel` (WP-D1a), so
+`v := rOne.homEquiv.symm ⟨P, _⟩ : T ⟶ X₁` classifies it. Transporting `(P, Q)` along
+`toPullbackAlong v` and applying `fullLevelLocusPointsEquiv.symm` gives a lift
+`T.base ⟶ B` over `v.baseHom`; combining with `toPullbackAlong v` produces
+`T ⟶ yFullCandidate N X₁ h`.
+
+**STATUS (2026-08-03).** The `homEquiv` field is now *fully constructed and
+axiom-verified* — it is `yFullCandidateHomEquiv`, the chain
+
+    homPullbackAlongEquiv → subtypeProdEquivSigmaSubtype → completionFibreEquiv
+      → subtypeEquivRight (fibre_condition_iff) → sigmaHomForgetEquiv
+
+with every factor proved. The **only** remaining obligation is `homEquiv_comp`, the
+naturality field: `homEquiv (f ≫ g) = F.map f.op (homEquiv g)`. Each of the five factors is
+natural — `homPullbackAlongEquiv` by construction, the three `Equiv.sigma*`/`subtypeEquiv*`
+steps trivially, and `completionFibreEquiv` from `naiveGammaOneLocusPointsEquiv_natural` /
+`fullLevelLocusPointsEquiv_natural_*` (`Moduli/LevelLocusNatural.lean`) — so this is a
+composition of known squares, with no mathematical content left.
+
+Note `rOne` is a hypothesis: the candidate is built from a `Γ₁(N)`-representing object, and
+the backward direction is exactly where that representability is consumed. -/
+theorem yFullCandidate_representableBy (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁)
+    (hP : P = X₁.curve.pointToTorsion (universalGammaOne R N rOne).1
+      ((X₁.curve.smul_eq_zero_iff_comp_mulByHom (𝟙 X₁.base) N _).mp
+        (universalGammaOne R N rOne).2.1))
+    (hinvR : IsUnit (N : R)) :
+    Nonempty ((gammaFullNaiveProblem R N).RepresentableBy (yFullCandidate N X₁ h P)) := by
+  have hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base := by
+    rw [hP]
+    exact X₁.curve.pointToTorsion_torsionπ _ _
+  refine ⟨{
+    homEquiv := fun {Y} =>
+      yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne
+        (fun Y u PQ => fibre_condition_iff N hinvR X₁ P hPsec rOne hP Y u PQ) Y
+    homEquiv_comp := fun {X X'} f g => by
+      have hsymm := yFullCandidateHomEquiv_symm_natural N X₁ hinvR h P hPsec rOne
+        (fun Y u PQ => fibre_condition_iff N hinvR X₁ P hPsec rOne hP Y u PQ) f
+        (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne
+          (fun Y u PQ => fibre_condition_iff N hinvR X₁ P hPsec rOne hP Y u PQ) X' g)
+      rw [Equiv.symm_apply_apply] at hsymm
+      rw [hsymm, Equiv.apply_symm_apply] }⟩
+
+/-- **(WP-D2c-4)** Given WP-D2c-3, every object representing the naive full level-`N`
+problem has smooth affine structure morphism — which is exactly
+`YFull.exists_representing_smooth_affine`. -/
+theorem exists_representing_smooth_affine_of_candidate (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hsm : Smooth X₁.structMap) (ha : IsAffineHom X₁.structMap)
+    (hrep : Nonempty ((gammaFullNaiveProblem R N).RepresentableBy
+      (yFullCandidate N X₁ h P))) :
+    ∃ X₀ : EllObj R, Nonempty ((gammaFullNaiveProblem R N).RepresentableBy X₀) ∧
+      Smooth X₀.structMap ∧ IsAffineHom X₀.structMap :=
+  haveI := ha
+  ⟨yFullCandidate N X₁ h P, hrep, yFullCandidate_structMap_smooth N X₁ h P hsm,
+    yFullCandidate_structMap_isAffineHom N X₁ h P⟩
+
+end ModularCurves

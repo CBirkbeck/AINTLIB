@@ -262,6 +262,66 @@ noncomputable def baseSectionsIsoKernelOrderedBaseCechDifferential
   baseSectionsIsoKernelBaseCechDifferential π M U hU ≪≫
     (baseCechKernelOrderedLinearEquiv π M U).toModuleIso
 
+private theorem compEqHom_apply {R : Type u} [CommRing R]
+    {A B C : ModuleCat.{u} R} {p : A ⟶ B} {q : B ⟶ C} {r : A ⟶ C}
+    (h : p ≫ q = r) (y : A) : q (p y) = r y := by
+  have hy := ConcreteCategory.congr_hom h y
+  rwa [ConcreteCategory.comp_apply] at hy
+
+/-- **Componentwise extensionality for ordered Cech cochains.** Two cochains agree as soon as all
+their components at strictly increasing indices agree. -/
+theorem orderedBaseCechObject_ext
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    {u v : (orderedBaseCechObject π M U n : Type u)}
+    (h : ∀ i : OrderedCechIndex ι n,
+      (Pi.π (fun j : OrderedCechIndex ι n => baseCechFactor π M U n j.1) i) u =
+        (Pi.π (fun j : OrderedCechIndex ι n => baseCechFactor π M U n j.1) i) v) :
+    u = v := by
+  refine (ConcreteCategory.bijective_of_isIso
+    (orderedBaseCechObjectIsoPi π M U n).hom).injective ?_
+  funext i
+  have hu := compEqHom_apply (orderedBaseCechObjectIsoPi_hom_comp_proj π M U n i) u
+  have hv := compEqHom_apply (orderedBaseCechObjectIsoPi_hom_comp_proj π M U n i) v
+  exact hu.trans ((h i).trans hv.symm)
+
+/-- **Element description of the global-sections/ordered-kernel identification.** A global
+section is sent to the ordered projection of its Cech augmentation, i.e. to the family of its
+restrictions to the members of the cover. -/
+theorem baseSectionsIsoKernelOrderedBaseCechDifferential_hom_coe
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (hU : IsOpenCover U)
+    (x : baseSections π M) :
+    ((baseSectionsIsoKernelOrderedBaseCechDifferential π M U hU).hom x).1 =
+      (baseCechToOrderedF π M U 0).hom
+        ((baseCechAugmentation π M U) x) := by
+  have hchain : (baseSectionsIsoKernelOrderedBaseCechDifferential π M U hU).hom x =
+      baseCechKernelOrderedLinearEquiv π M U
+        ((baseSectionsIsoKernelBaseCechDifferential π M U hU).hom x) := rfl
+  rw [hchain, baseCechKernelOrderedLinearEquiv_coe]
+  refine ConcreteCategory.congr_arg (baseCechToOrderedF π M U 0) ?_
+  exact ConcreteCategory.congr_hom
+    (baseSectionsIsoKernelBaseCechDifferential_hom_subtype π M U hU) x
+
+/-- **Componentwise form of the previous lemma.** The component of the ordered degree-zero
+cocycle attached to a global section at a strictly increasing index is the restriction of that
+section to the corresponding Cech intersection. -/
+theorem baseSectionsIsoKernelOrderedBaseCechDifferential_hom_π
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (hU : IsOpenCover U)
+    (x : baseSections π M) (i : OrderedCechIndex ι 0) :
+    (Pi.π (fun j : OrderedCechIndex ι 0 => baseCechFactor π M U 0 j.1) i)
+        ((baseSectionsIsoKernelOrderedBaseCechDifferential π M U hU).hom x).1 =
+      (baseModulePresheaf π M).map
+        (homOfLE (show (∏ᶜ fun k : Fin 1 => U (i.1 k)) ≤
+          (⊤ : X.Opens) from le_top)).op x := by
+  refine (ConcreteCategory.congr_arg
+    (Pi.π (fun j : OrderedCechIndex ι 0 => baseCechFactor π M U 0 j.1) i)
+    (baseSectionsIsoKernelOrderedBaseCechDifferential_hom_coe π M U hU x)).trans ?_
+  refine (compEqHom_apply (baseCechToOrderedF_comp_π π M U 0 i)
+    ((baseCechAugmentation π M U) x)).trans ?_
+  exact compEqHom_apply (baseCechAugmentation_comp_π π M U i.1) x
+
 end
 
 end AlgebraicGeometry.Scheme.Modules

@@ -328,10 +328,10 @@ inner `X`-side sheafification (its unit is locally bijective; restriction preser
 bijectivity by `isLocallyInjective/Surjective_whiskerLeft_opensFunctor`, so the `Y`-side
 sheafification inverts the restricted unit), and interchange restriction with the presheaf
 tensor (`pushforwardTensorIso`, sectionwise `x ⊗ₜ y ↦ x ⊗ₜ y`). -/
-theorem nonempty_pullback_tensorObj_of_isOpenImmersion (f : Y ⟶ X) [IsOpenImmersion f]
+noncomputable def pullbackTensorObjIsoOfIsOpenImmersion (f : Y ⟶ X) [IsOpenImmersion f]
     (M N : X.Modules) :
-    Nonempty ((Modules.pullback f).obj (tensorObj M N) ≅
-      tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N)) := by
+    (Modules.pullback f).obj (tensorObj M N) ≅
+      tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N) := by
   have hmem := sheafificationW_pushforward_unit_tensor f M N
   rw [PresheafOfModules.sheafificationW_iff] at hmem
   have e1 : (Modules.pullback f).obj (tensorObj M N) ≅
@@ -362,7 +362,17 @@ theorem nonempty_pullback_tensorObj_of_isOpenImmersion (f : Y ⟶ X) [IsOpenImme
       tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N) :=
     tensorObjCongr ((restrictFunctorIsoPullback f).app M)
       ((restrictFunctorIsoPullback f).app N)
-  exact ⟨e1 ≪≫ e2 ≪≫ e3 ≪≫ e4 ≪≫ e5a ≪≫ e5b⟩
+  exact e1 ≪≫ e2 ≪≫ e3 ≪≫ e4 ≪≫ e5a ≪≫ e5b
+
+/-- The `Nonempty` wrapper of `pullbackTensorObjIsoOfIsOpenImmersion`. The descent's
+cocycle computation needs the iso itself — the generator of a tensor trivialization must
+be *the tensor of the generators*, since an arbitrary choice would shift each chart's
+generator by a unit and destroy the normalization along the zero section. -/
+theorem nonempty_pullback_tensorObj_of_isOpenImmersion (f : Y ⟶ X) [IsOpenImmersion f]
+    (M N : X.Modules) :
+    Nonempty ((Modules.pullback f).obj (tensorObj M N) ≅
+      tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N)) :=
+  ⟨pullbackTensorObjIsoOfIsOpenImmersion f M N⟩
 
 
 

@@ -1064,4 +1064,94 @@ theorem orderedBaseCechComplexBaseChangeIso_hom_f
       (orderedBaseCechXBaseChangeIso f t M U hU n).hom :=
   rfl
 
+private theorem homCompEq_apply {R : Type u} [CommRing R]
+    {A B C D : ModuleCat.{u} R} {p : A ⟶ B} {q : B ⟶ D} {a : A ⟶ C} {b : C ⟶ D}
+    (h : p ≫ q = a ≫ b) (x : A) : q (p x) = b (a x) := by
+  have hx := ConcreteCategory.congr_hom h x
+  rwa [ConcreteCategory.comp_apply, ConcreteCategory.comp_apply] at hx
+
+/-- **Element description of the affine-patch comparison on a restricted global section.** The
+patchwise base-change comparison sends `1 ⊗ (s|_W)`, for `W` the `i`-th Cech intersection, to the
+restriction to `g⁻¹ W` of the pullback of the *global* section `s` along `g = pullback.fst f t`.
+
+This is the tail of `baseCechXBaseChangeIso_zero_one_tmul_of_projection_eq`, isolated so that the
+ordered complex can reuse it in `orderedBaseCechXBaseChangeIso_one_tmul_of_projection_eq`. -/
+private theorem baseCechFactorBaseChangeIso_hom_one_tmul_restrict
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) (hU : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (n : ℕ) (i : Fin (n + 1) → ι)
+    (s : (baseModulePresheaf f M).obj (op (⊤ : X.Opens))) :
+    (baseCechFactorBaseChangeIso f t M U hU n i).hom
+        ((1 : Γ(T, (⊤ : T.Opens))) ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom]
+          ((baseModulePresheaf f M).map
+            (homOfLE (show (∏ᶜ fun k : Fin (n + 1) => U (i k)) ≤
+              (⊤ : X.Opens) from le_top)).op s)) =
+      (baseModulePresheaf (pullback.snd f t)
+        ((pullback (pullback.fst f t)).obj M)).map
+          (homOfLE (show
+            (∏ᶜ fun k : Fin (n + 1) => pullback.fst f t ⁻¹ᵁ U (i k)) ≤
+              (⊤ : (Limits.pullback f t).Opens) from le_top)).op
+        ((((pullbackPushforwardAdjunction (pullback.fst f t)).unit.app M).val.app
+          (op (⊤ : X.Opens))) s) := by
+  refine (homEqComp_apply (baseCechFactorBaseChangeIso_hom f t M U hU n i)
+    ((1 : Γ(T, (⊤ : T.Opens))) ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom]
+      ((baseModulePresheaf f M).map
+        (homOfLE (show (∏ᶜ fun k : Fin (n + 1) => U (i k)) ≤
+          (⊤ : X.Opens) from le_top)).op s))).trans ?_
+  rw [affineModuleSectionsBaseChangeIso_hom_one_tmul f t M
+    (∏ᶜ fun k : Fin (n + 1) => U (i k)) (IsAffineOpen.cechIntersection U hU n i)]
+  exact pullbackUnit_restrict_transport f t M (∏ᶜ fun k : Fin (n + 1) => U (i k))
+    ((pullback.fst f t).preimage_cechIntersection U n i).symm s
+
+/-- **Element description of the ordered degreewise base-change comparison, degree zero.** If the
+`i`-th component of `m` is the restriction of a *global* section `s` of `M`, then the `i`-th
+component of the image of `1 ⊗ m` is the restriction of the pullback of `s` along
+`pullback.fst f t`.
+
+This is the ordered counterpart of
+`baseCechXBaseChangeIso_zero_one_tmul_of_projection_eq`, and it is the element-level content of
+`orderedBaseCechComplexBaseChangeIso` in the degree that carries global sections. -/
+theorem orderedBaseCechXBaseChangeIso_one_tmul_of_projection_eq
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (n : ℕ) (m : (orderedBaseCechObject f M U n : Type u))
+    (s : (baseModulePresheaf f M).obj (op (⊤ : X.Opens)))
+    (i : OrderedCechIndex ι n)
+    (hm : (Pi.π (fun j : OrderedCechIndex ι n =>
+      baseCechFactor f M U n j.1) i) m =
+      (baseModulePresheaf f M).map
+        (homOfLE (show (∏ᶜ fun k : Fin (n + 1) => U (i.1 k)) ≤
+          (⊤ : X.Opens) from le_top)).op s) :
+    (Pi.π (fun j : OrderedCechIndex ι n =>
+        baseCechFactor (pullback.snd f t)
+          ((pullback (pullback.fst f t)).obj M)
+            (fun a => pullback.fst f t ⁻¹ᵁ U a) n j.1) i)
+        ((orderedBaseCechXBaseChangeIso f t M U hU n).hom
+          ((1 : Γ(T, (⊤ : T.Opens)))
+            ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m)) =
+      (baseModulePresheaf (pullback.snd f t)
+        ((pullback (pullback.fst f t)).obj M)).map
+          (homOfLE (show
+            (∏ᶜ fun k : Fin (n + 1) => pullback.fst f t ⁻¹ᵁ U (i.1 k)) ≤
+              (⊤ : (Limits.pullback f t).Opens) from le_top)).op
+        ((((pullbackPushforwardAdjunction (pullback.fst f t)).unit.app M).val.app
+          (op (⊤ : X.Opens))) s) := by
+  refine (homCompEq_apply (orderedBaseCechXBaseChangeIso_hom_π f t M U hU n i)
+    ((1 : Γ(T, (⊤ : T.Opens))) ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m)).trans ?_
+  have hInput := ModuleCat.ExtendScalars.map_tmul (f := t.appTop.hom)
+    (Pi.π (fun j : OrderedCechIndex ι n => baseCechFactor f M U n j.1) i)
+    (1 : Γ(T, (⊤ : T.Opens))) m
+  have hEq := hInput.trans (congrArg (fun y => (1 : Γ(T, (⊤ : T.Opens)))
+    ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] y) hm)
+  have hFactor := ConcreteCategory.congr_arg
+    (baseCechFactorBaseChangeIso f t M U hU n i.1).hom hEq
+  have hRestrict :=
+    baseCechFactorBaseChangeIso_hom_one_tmul_restrict f t M U hU n i.1 s
+  -- The two pure tensors carry the Cech factor and the presheaf section as *different* (but
+  -- reducibly equal) implicit module arguments, so the final `Eq.trans` needs a deeper `whnf`.
+  set_option maxRecDepth 1024 in exact hFactor.trans hRestrict
+
 end AlgebraicGeometry.Scheme.Modules

@@ -58,10 +58,10 @@ composite ring hom so that `(Pr.W.map ΓSpecIso.hom).baseChange L` and
   ((algebraMap k L).comp (Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom).toAlgebra
 
 /-- **(F2)** With that structure, the chart's geometric point is the canonical one. -/
-theorem geomPt_eq_chart :
+theorem geomFieldPt_eq_chart :
     letI := gammaTopAlgebra k L
     Spec.map (CommRingCat.ofHom (algebraMap Γ(Spec (CommRingCat.of k), ⊤) L)) ≫
-        chartρ (topAffineOpen k) = geomPt k L := by
+        chartρ (topAffineOpen k) = geomFieldPt k L := by
   letI := gammaTopAlgebra k L
   rw [chartρ_topAffineOpen, ← Spec.map_comp]
   congr 1
@@ -93,12 +93,12 @@ noncomputable def globalGaloisFibreChart : GaloisFibreChart k E L :=
   letI := Pr.elliptic
   { W := Pr.W.map (Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom
     elliptic := inferInstanceAs ((Pr.W.baseChange L).toAffine.IsElliptic)
-    dict := (EllipticCurve.pointCongr E (geomPt_eq_chart k L).symm).trans
+    dict := (EllipticCurve.pointCongr E (geomFieldPt_eq_chart k L).symm).trans
       (chartAffinePointEquiv Pr L)
     equivariant := fun σ P Q hQ => by
       refine Eq.trans (chartAffinePointEquiv_of_coe_eq Pr L (gammaTopAlgEquiv k L σ)
-        (EllipticCurve.pointCongr E (geomPt_eq_chart k L).symm P)
-        (EllipticCurve.pointCongr E (geomPt_eq_chart k L).symm Q) hQ) ?_
+        (EllipticCurve.pointCongr E (geomFieldPt_eq_chart k L).symm P)
+        (EllipticCurve.pointCongr E (geomFieldPt_eq_chart k L).symm Q) hQ) ?_
       -- the two `Point.map`s differ only through the `AlgHom`'s base ring; their
       -- underlying functions are both `σ`, so a case split on the point closes it
       have key : ∀ Z : (Pr.W.baseChange L).toAffine.Point,

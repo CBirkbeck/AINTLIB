@@ -1,0 +1,671 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import ModularCurves.WeilPairing.DetCocycle
+import ModularCurves.WeilPairing.RootPowerPoints
+import ModularCurves.WeilPairing.TorsionSqBaseChange
+import ModularCurves.GroupScheme.ConstSchemeSquare
+import ModularCurves.GroupScheme.GLSchemeAction
+import ModularCurves.GroupScheme.LevelCoord
+
+/-!
+# The Weil pairing over a base with a full level structure (route β, step 1)
+
+`nonempty_weilPairing_of_root_of_trivialised` (`WeilPairing/DetCocycle.lean`) produces the pairing
+over any base on which `E[N] ×_S E[N]` is trivialised, from nothing but an `N`-th root of unity —
+the determinant law plays no part, because at `p = 𝟙 S` the kernel pair is degenerate.
+
+This file supplies that trivialisation from a **full level structure**: `fullLevelIso`
+(`GroupScheme/GLSchemeAction.lean`) trivialises `E[N]` for `N` invertible, and `constSchemeSqIso`
+(`GroupScheme/ConstSchemeSquare.lean`) identifies the fibre square of constant schemes. The result
+is the route-β entry point:
+
+> an elliptic curve over a base carrying a full level-`N` structure, with `N` invertible and an
+> `N`-th root of unity on the base, has a Weil pairing.
+
+The determinant law re-enters only one step later, when descending from such a base to a general
+one; there it is the `GL₂(ℤ/N)`-equivariance of this pairing, whose stabiliser case is
+`fieldWeilPairing_det_of_galois` (`WeilPairing/PairingTransport.lean`).
+-/
+
+open AlgebraicGeometry CategoryTheory Limits
+
+universe u
+
+namespace ModularCurves
+
+namespace EllipticCurve
+
+variable {S : Scheme.{u}} (E : EllipticCurve S) {N : ℕ} [NeZero N]
+
+/-- **(route β, step 1)** The torsion square, transported along the level trivialisation, is the
+fibre square of two copies of the constant scheme. Named separately from `fullLevelSqIso` so that
+`IsPullback.isoPullback_inv_fst`/`_snd` are available for the computation rules below. -/
+theorem isPullback_constSchemeπ_of_fullLevel (hinv : NIsInvertible S N) (L : E.FullLevelPt N) :
+    IsPullback (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ (E.fullLevelIso hinv L).inv)
+      (pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ (E.fullLevelIso hinv L).inv)
+      (constSchemeπ S (Fin 2 → ZMod N)) (constSchemeπ S (Fin 2 → ZMod N)) := by
+  have hinvπ : (E.fullLevelIso hinv L).inv ≫ constSchemeπ S (Fin 2 → ZMod N) =
+      E.torsionπ N := by
+    rw [Iso.inv_comp_eq]
+    exact (E.fullLevelHom_torsionπ L).symm
+  exact (IsPullback.of_hasPullback (E.torsionπ N) (E.torsionπ N)).of_iso (Iso.refl _)
+    (E.fullLevelIso hinv L).symm (E.fullLevelIso hinv L).symm (Iso.refl S)
+    (by simp) (by simp) (by simpa using hinvπ.symm) (by simpa using hinvπ.symm)
+
+/-- **(route β, step 1)** A full level structure trivialises the *square* `E[N] ×_S E[N]`: the
+two legs are trivialised by `fullLevelIso` and the resulting fibre square of constant schemes is
+`constSchemeSqIso`. -/
+noncomputable def fullLevelSqIso (hinv : NIsInvertible S N) (L : E.FullLevelPt N) :
+    pullback (E.torsionπ N) (E.torsionπ N) ≅
+      constScheme S ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) :=
+  (E.isPullback_constSchemeπ_of_fullLevel hinv L).isoPullback.trans
+    (constSchemeSqIso S (Fin 2 → ZMod N) (Fin 2 → ZMod N))
+
+/-- …and the trivialisation of the square is a morphism over `S`, in exactly the form
+`nonempty_weilPairing_of_root_of_trivialised` consumes. -/
+theorem fullLevelSqIso_hom_π (hinv : NIsInvertible S N) (L : E.FullLevelPt N) :
+    (E.fullLevelSqIso hinv L).hom ≫
+        constSchemeπ S ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) =
+      E.torsionSqπ N := by
+  rw [fullLevelSqIso, Iso.trans_hom, Category.assoc, constSchemeSqIso_hom_π,
+    IsPullback.isoPullback_hom_snd_assoc, Category.assoc,
+    (E.fullLevelIso hinv L).inv_comp_eq.mpr (E.fullLevelHom_torsionπ L).symm, torsionSqπ]
+  exact pullback.condition.symm
+
+/-- The computation rule for `fullLevelSqIso`: the `(v, w)`-th copy of `S` is the pair of torsion
+sections labelled `v` and `w` by the level structure. -/
+@[reassoc]
+theorem fullLevelSqIso_inv_ι (hinv : NIsInvertible S N) (L : E.FullLevelPt N)
+    (v w : Fin 2 → ZMod N) :
+    Sigma.ι (fun _ : (Fin 2 → ZMod N) × (Fin 2 → ZMod N) => S) (v, w) ≫
+        (E.fullLevelSqIso hinv L).inv =
+      pullback.lift
+        (Sigma.ι (fun _ : Fin 2 → ZMod N => S) v ≫ (E.fullLevelIso hinv L).hom)
+        (Sigma.ι (fun _ : Fin 2 → ZMod N => S) w ≫ (E.fullLevelIso hinv L).hom)
+        (by
+          have h : (E.fullLevelIso hinv L).hom ≫ E.torsionπ N =
+              constSchemeπ S (Fin 2 → ZMod N) := E.fullLevelHom_torsionπ L
+          rw [Category.assoc, Category.assoc, h]
+          simp [constSchemeπ]) := by
+  have hfst : (E.isPullback_constSchemeπ_of_fullLevel hinv L).isoPullback.inv ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) =
+        pullback.fst (constSchemeπ S (Fin 2 → ZMod N)) (constSchemeπ S (Fin 2 → ZMod N)) ≫
+          (E.fullLevelIso hinv L).hom := by
+    rw [← (E.isPullback_constSchemeπ_of_fullLevel hinv L).isoPullback_inv_fst]
+    simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id]
+  have hsnd : (E.isPullback_constSchemeπ_of_fullLevel hinv L).isoPullback.inv ≫
+      pullback.snd (E.torsionπ N) (E.torsionπ N) =
+        pullback.snd (constSchemeπ S (Fin 2 → ZMod N)) (constSchemeπ S (Fin 2 → ZMod N)) ≫
+          (E.fullLevelIso hinv L).hom := by
+    rw [← (E.isPullback_constSchemeπ_of_fullLevel hinv L).isoPullback_inv_snd]
+    simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id]
+  rw [fullLevelSqIso, Iso.trans_inv, ← Category.assoc, constSchemeSqIso_inv_ι]
+  refine pullback.hom_ext ?_ ?_
+  · rw [Category.assoc, hfst, pullback.lift_fst_assoc, pullback.lift_fst]
+  · rw [Category.assoc, hsnd, pullback.lift_snd_assoc, pullback.lift_snd]
+
+/-- **(route β, the square base-change)** `fullLevelSqIso` commutes with base change: the square
+trivialisation of the base-changed curve, followed by the torsion-square comparison, is
+`constSchemeMapAlong` followed by the original square trivialisation.
+
+The one-leg statement is the tree's `fullLevelHom_baseChange` (`GroupScheme/GLSchemeAction.lean`); the
+square version follows by checking on the coproduct inclusions with `fullLevelSqIso_inv_ι`, exactly as
+`fullLevelSqIso_glSmul_inv` below. -/
+theorem fullLevelSqIso_inv_baseChange {T' : Scheme.{u}} (σ : T' ⟶ S)
+    (hinv : NIsInvertible S N) (hinv' : NIsInvertible T' N) (L : E.FullLevelPt N) :
+    ((E.baseChange σ).fullLevelSqIso hinv' (L.pullAlong σ)).inv ≫
+        E.torsionSqBaseChangeHom N σ =
+      constSchemeMapAlong σ ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) ≫
+        (E.fullLevelSqIso hinv L).inv := by
+  refine Sigma.hom_ext _ _ fun vw => ?_
+  obtain ⟨v, w⟩ := vw
+  have hleg : ∀ u : Fin 2 → ZMod N,
+      (Sigma.ι (fun _ : Fin 2 → ZMod N => T') u ≫
+          ((E.baseChange σ).fullLevelIso hinv' (L.pullAlong σ)).hom) ≫
+        E.torsionBaseChangeHom N σ =
+      σ ≫ Sigma.ι (fun _ : Fin 2 → ZMod N => S) u ≫ (E.fullLevelIso hinv L).hom := by
+    intro u
+    have h := E.fullLevelHom_baseChange σ L
+    show (Sigma.ι (fun _ : Fin 2 → ZMod N => T') u ≫
+        (E.baseChange σ).fullLevelHom (L.pullAlong σ)) ≫ E.torsionBaseChangeHom N σ =
+      σ ≫ Sigma.ι (fun _ : Fin 2 → ZMod N => S) u ≫ E.fullLevelHom L
+    rw [Category.assoc, ← h, ← Category.assoc, ι_constSchemeMapAlong, Category.assoc]
+  rw [ι_constSchemeMapAlong_assoc,
+    (E.baseChange σ).fullLevelSqIso_inv_ι_assoc hinv' (L.pullAlong σ) v w,
+    E.fullLevelSqIso_inv_ι hinv L v w]
+  refine pullback.hom_ext ?_ ?_
+  · simp only [Category.assoc, E.torsionSqBaseChangeHom_fst N σ, pullback.lift_fst,
+      pullback.lift_fst_assoc]
+    exact hleg v
+  · simp only [Category.assoc, E.torsionSqBaseChangeHom_snd N σ, pullback.lift_snd,
+      pullback.lift_snd_assoc]
+    exact hleg w
+
+/-- **(route β, step 2, the equivariance)** Re-marking the level structure by `g ∈ GL₂(ℤ/N)`
+composes the trivialisation of the square with the diagonal action of `g`:
+
+`(fullLevelSqIso L).inv = constSchemeMap (gl2Both N g) ≫ (fullLevelSqIso (g • L)).inv`… read in
+the direction the pairing consumes, `(fullLevelSqIso L).hom = (fullLevelSqIso (g • L)).hom ≫
+constSchemeMap (gl2Both N g)`.
+
+`fullLevelIso_glSmul` is the one-leg statement; the square version follows by checking on the
+coproduct inclusions with `fullLevelSqIso_inv_ι`. -/
+theorem fullLevelSqIso_glSmul_inv (hinv : NIsInvertible S N)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (L : E.FullLevelPt N) :
+    (E.fullLevelSqIso hinv (E.glSmul g L)).inv =
+      constSchemeMap (S := S) (gl2Both N (g : Matrix (Fin 2) (Fin 2) (ZMod N))) ≫
+        (E.fullLevelSqIso hinv L).inv := by
+  refine Sigma.hom_ext _ _ fun vw => ?_
+  obtain ⟨v, w⟩ := vw
+  rw [← Category.assoc, constSchemeMap_ι]
+  have hgl : gl2Both N (g : Matrix (Fin 2) (Fin 2) (ZMod N)) (v, w) =
+      ((g : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec v,
+        (g : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec w) := rfl
+  rw [hgl, E.fullLevelSqIso_inv_ι hinv (E.glSmul g L) v w, E.fullLevelSqIso_inv_ι hinv L _ _]
+  refine pullback.hom_ext ?_ ?_ <;>
+    simp only [pullback.lift_fst, pullback.lift_snd, E.fullLevelIso_glSmul hinv g L,
+      Iso.trans_hom, constGL, Sigma.ι_desc_assoc, Sigma.ι_desc, Category.assoc] <;> rfl
+
+/-- …hence, at the level of the `hom`s, the direction the pairing consumes. -/
+theorem fullLevelSqIso_glSmul_hom (hinv : NIsInvertible S N)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (L : E.FullLevelPt N) :
+    (E.fullLevelSqIso hinv L).hom =
+      (E.fullLevelSqIso hinv (E.glSmul g L)).hom ≫
+        constSchemeMap (S := S) (gl2Both N (g : Matrix (Fin 2) (Fin 2) (ZMod N))) := by
+  have h := E.fullLevelSqIso_glSmul_inv hinv g L
+  calc (E.fullLevelSqIso hinv L).hom
+      = (E.fullLevelSqIso hinv (E.glSmul g L)).hom ≫
+          (E.fullLevelSqIso hinv (E.glSmul g L)).inv ≫ (E.fullLevelSqIso hinv L).hom := by
+        rw [← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+    _ = _ := by simp [h]
+
+/-! ### The pairing itself, named
+
+Per the architectural correction on the board, the register entry must be a *definition*, not a
+`choose` from an existence statement: only then are the computational specs reachable. Over a
+full-level base the definition is the determinant formula read through the level structure. -/
+
+/-- **(route β, step 1, the pairing)** The Weil pairing over a base with a full level structure:
+read the pair of torsion sections in the level basis, take the determinant, and raise `ζ` to it. -/
+noncomputable def fullLevelPairing (hinv : NIsInvertible S N) (L : E.FullLevelPt N)
+    (ζ : { a : Γ(S, (⊤ : S.Opens)) // a ^ N = 1 }) :
+    pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N :=
+  (E.fullLevelSqIso hinv L).hom ≫ detConstMor N ≫ rootSplitting N ζ
+
+/-- The pairing is a morphism over `S` — the DS4 `weilPairing_over` specification. -/
+theorem fullLevelPairing_over (hinv : NIsInvertible S N) (L : E.FullLevelPt N)
+    (ζ : { a : Γ(S, (⊤ : S.Opens)) // a ^ N = 1 }) :
+    E.fullLevelPairing hinv L ζ ≫ muNπ S N = E.torsionSqπ N := by
+  simp only [fullLevelPairing, Category.assoc]
+  rw [rootSplitting_π, detConstMor, constSchemeMap_π, E.fullLevelSqIso_hom_π hinv L]
+
+/-- **(route β, step 2, THE DETERMINANT LAW OF THE PAIRING)** The pairing is unchanged by
+re-marking the level structure by `g` *provided the root is simultaneously raised to `det g`*:
+
+`e_{g • L, ζ ^ det g} = e_{L, ζ}`.
+
+This is exactly the cocycle condition the descent from the frame bundle consumes, and it is a
+*theorem*, not an assumption: `fullLevelSqIso_glSmul_hom` moves the re-marking onto the constant
+scheme, where WP-A4 (`constSchemeMap_gl2Both_comp_detConstMor_rootSplitting`) converts the diagonal
+`GL₂`-action into the `det g`-th power of the root.
+
+Read contrapositively, this is the precise sense in which the root **must** transform by `det`: the
+`L`-pairing and the `g • L`-pairing agree for the *same* `ζ` only when `det g = 1`. -/
+theorem fullLevelPairing_glSmul (hinv : NIsInvertible S N)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (L : E.FullLevelPt N)
+    (ζ : { a : Γ(S, (⊤ : S.Opens)) // a ^ N = 1 }) :
+    E.fullLevelPairing hinv (E.glSmul g L)
+        ⟨(ζ : Γ(S, (⊤ : S.Opens))) ^ (g : Matrix (Fin 2) (Fin 2) (ZMod N)).det.val, by
+          rw [← pow_mul, mul_comm, pow_mul, ζ.2, one_pow]⟩ =
+      E.fullLevelPairing hinv L ζ := by
+  rw [fullLevelPairing, fullLevelPairing, E.fullLevelSqIso_glSmul_hom hinv g L, Category.assoc,
+    constSchemeMap_gl2Both_comp_detConstMor_rootSplitting]
+
+/-- **(route β, step 1, THE ENTRY POINT)** An elliptic curve over a base carrying a **full
+level-`N` structure**, with `N` invertible and an `N`-th root of unity on the base, admits a Weil
+pairing — the DS4 register's `weilPairing` together with its `weilPairing_over` specification.
+
+No determinant law, no descent, no cover: over such a base the pairing *is* the determinant
+formula `(v, w) ↦ ζ ^ det (v, w)` read through the level structure. -/
+theorem nonempty_weilPairing_of_fullLevel (hinv : NIsInvertible S N) (L : E.FullLevelPt N)
+    (ζ : { a : Γ(S, (⊤ : S.Opens)) // a ^ N = 1 }) :
+    ∃ e : pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N,
+      e ≫ muNπ S N = E.torsionSqπ N :=
+  nonempty_weilPairing_of_root_of_trivialised E N ζ (E.fullLevelSqIso hinv L)
+    (E.fullLevelSqIso_hom_π hinv L)
+
+/- ### `fullLevelHom_pullAlong` (route β, item (A) step 1) — IN PROGRESS, obstacle localised
+
+Statement: `constSchemeMapAlong σ (Fin 2 → ZMod N) ≫ E.fullLevelHom L =
+  (E.baseChange σ).fullLevelHom (L.pullAlong σ) ≫ E.torsionBaseChangeHom N σ`.
+
+`Sigma.hom_ext` then `← Category.assoc, ι_constSchemeMapAlong` puts the goal in the form
+
+  `σ ≫ Sigma.ι v ≫ E.fullLevelHom L
+     = Sigma.ι v ≫ (E.baseChange σ).fullLevelHom (L.pullAlong σ) ≫ E.torsionBaseChangeHom N σ`.
+
+**Do not rewrite the left side first.** Applying `pointToTorsion_torsionι` there unfolds
+`↑(v₀ • P + v₁ • Q)` into a `CartesianMonoidalCategory.lift …` normal form that nothing subsequently
+matches. Work the *right* side down to `E.pointToTorsion (Point.pull E σ (v₀ • P + v₁ • Q)) _`:
+
+1. `Sigma.ι_desc` — the right side is `(E.baseChange σ).pointToTorsion (comb of (L.pullAlong σ)) _ ≫
+   torsionBaseChangeHom`;
+2. `(L.pullAlong σ).1.i = Point.asSection E σ (Point.pull E σ L.1.i)` is `rfl`, so
+   `Point.asSection_zsmul` + `Point.asSection_add` + `Point.pull_zsmul` + `Point.pull_add` rewrite the
+   combination to `Point.asSection E σ (Point.pull E σ (v₀ • P + v₁ • Q))`;
+3. `pointToTorsion_asSection_torsionBaseChangeHom` (`WeilPairing/TorsionSqBaseChange.lean`, **proved**)
+   turns that into `E.pointToTorsion (Point.pull E σ (v₀ • P + v₁ • Q)) _`.
+
+The left side then needs `σ ≫ E.pointToTorsion x hx = E.pointToTorsion (Point.pull E σ x) _`, which is
+`comp_pointToTorsion` — **except that its conclusion is indexed by `σ ≫ 𝟙 S`, not `σ`**, exactly
+pattern (6) of the elaboration notes. So the last missing piece is a five-line `_of_eq` variant:
+
+  `comp_pointToTorsion_of_eq (w) (x) (hx) {q} (hq : w ≫ g = q) (hx' : … = q ≫ E.zero) :
+     w ≫ E.pointToTorsion x hx = E.pointToTorsion ⟨w ≫ ↑x, _⟩ hx'`   — by `subst hq`.
+
+With that in hand the two sides meet. -/
+
+/- ### `fullLevelHom_pullAlong` (route β, item (A) step 1) — assembly written, ONE import missing
+
+Every ingredient is proved and the assembly is written out below in comment form; the only thing
+blocking it is that **`Point.asSection_add` is not in this file's import closure**. It lives at
+`Moduli/GammaHRepresentability.lean:3839` and — note — in namespace `ModularCurves`, *not*
+`ModularCurves.EllipticCurve` (so it is `ModularCurves.Point.asSection_add`, while
+`Point.asSection_zsmul` is `ModularCurves.EllipticCurve.Point.asSection_zsmul`). Next session: either
+add `import ModularCurves.Moduli.GammaHRepresentability` here (check it does not create a cycle — that
+file is downstream of the moduli representability chain, so the safer move is probably to place
+`fullLevelHom_pullAlong` in a *new* file importing both), or relocate `Point.asSection_add` to
+`EllipticCurve/GroupLaw.lean` next to `Point.asSection_zsmul`.
+
+The assembly, verified against every lemma's actual statement:
+
+  refine Sigma.hom_ext _ _ fun v => ?_
+  rw [← Category.assoc, ι_constSchemeMapAlong]
+  have hcomb : Point.asSection E σ (Point.pull E σ (v₀ • L.1.1 + v₁ • L.1.2))
+      = v₀ • (L.pullAlong σ).1.1 + v₁ • (L.pullAlong σ).1.2 := by
+    rw [Point.pull_add, Point.pull_zsmul, Point.pull_zsmul, Point.asSection_add,
+      Point.asSection_zsmul, Point.asSection_zsmul]; rfl
+  have htor : ↑(v₀ • L.1.1 + v₁ • L.1.2) ≫ E.mulByHom N = 𝟙 S ≫ E.zero :=
+    (E.smul_eq_zero_iff_comp_mulByHom _ N _).mp (by
+      rw [smul_add, smul_comm .., smul_comm .., L.2.1.1, L.2.1.2, smul_zero, smul_zero, add_zero])
+  rw [fullLevelHom, Sigma.ι_desc, fullLevelHom, Sigma.ι_desc, ← hcomb]
+  refine Eq.trans (E.comp_pointToTorsion_of_eq σ _ htor (Category.comp_id σ)
+      (by rw [Category.assoc, htor, Category.id_comp])) ?_
+  exact (E.pointToTorsion_asSection_torsionBaseChangeHom σ _ _ _).symm
+
+(the `v₀`/`v₁` abbreviate `((v 0).val : ℤ)` / `((v 1).val : ℤ)`; `htor` is copied verbatim from
+`fullLevelHom`'s own definition, `GroupScheme/GLSchemeAction.lean:48`.) -/
+
+/-! ### Linearity of the trivialisation, for a **bare** matrix — invertibility is not needed
+
+`constGL g` and `glSmul g L` require `g ∈ GL₂(ℤ/N)`, which made the transition look as though it had
+to be proved invertible before the determinant law could be applied. It does not: the only thing the
+law needs is `fullLevelHom L' = constSchemeMap (mulVec g) ≫ fullLevelHom L`, which holds for an
+arbitrary matrix; WP-A4 (`constSchemeMap_gl2Both_comp_detConstMor_rootSplitting`) is likewise stated
+for a bare matrix; and the two `fullLevelSqIso`s that get inverted are isomorphisms regardless. -/
+
+/-- **(the linearity)** If the two basis points of `L'` are the `L`-basis combinations given by the
+columns of an **arbitrary** matrix `g`, the whole trivialisation factors: `fullLevelHom L'` is
+`mulVec g` followed by `fullLevelHom L`.
+
+This is `constGL_hom_fullLevelHom`'s section computation (`val_smul_add`, `val_smul_mul`, `module`)
+with the invertibility of `g` dropped. -/
+theorem fullLevelHom_eq_constSchemeMap_comp (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (h0 : L'.1.1 = ((g 0 0).val : ℤ) • L.1.1 + ((g 1 0).val : ℤ) • L.1.2)
+    (h1 : L'.1.2 = ((g 0 1).val : ℤ) • L.1.1 + ((g 1 1).val : ℤ) • L.1.2) :
+    E.fullLevelHom L' = constSchemeMap (S := S) (fun v => g.mulVec v) ≫ E.fullLevelHom L := by
+  refine Sigma.hom_ext _ _ fun v => ?_
+  rw [← Category.assoc, constSchemeMap_ι, fullLevelHom, fullLevelHom, Sigma.ι_desc, Sigma.ι_desc]
+  have hP : (N : ℤ) • L.1.1 = 0 := L.2.1.1
+  have hQ : (N : ℤ) • L.1.2 = 0 := L.2.1.2
+  have harith : ((v 0).val : ℤ) • L'.1.1 + ((v 1).val : ℤ) • L'.1.2 =
+      (((g.mulVec v) 0).val : ℤ) • L.1.1 + (((g.mulVec v) 1).val : ℤ) • L.1.2 := by
+    rw [h0, h1]
+    simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_two]
+    rw [val_smul_add E L.1.1 hP, val_smul_add E L.1.2 hQ,
+      val_smul_mul E L.1.1 hP, val_smul_mul E L.1.1 hP,
+      val_smul_mul E L.1.2 hQ, val_smul_mul E L.1.2 hQ]
+    module
+  simp only [harith]
+
+/-- **(route β, THE TRANSITION, invertibility-free form)** If the transition columns of `L'` against
+`L` are the constant columns of an arbitrary matrix `g`, the trivialisations factor through
+`mulVec g`. This is the form the pairing's determinant law consumes — no `GL₂` needed. -/
+theorem fullLevelHom_eq_of_levelCoord (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (hc : ∀ j : Fin 2,
+      E.levelCoord hinv L (E.levelBasisPt L' j) (E.levelBasisPt_torsionπ L' j) =
+        LocallyConstant.const S (fun i => g i j)) :
+    E.fullLevelHom L' = constSchemeMap (S := S) (fun v => g.mulVec v) ≫ E.fullLevelHom L := by
+  refine E.fullLevelHom_eq_constSchemeMap_comp L L' g ?_ ?_
+  · exact E.basis_fst_eq_of_levelBasisPt_eq_sigmaι L L' (fun i => g i 0)
+      (E.levelBasisPt_eq_sigmaι hinv L L' 0 (fun i => g i 0) (hc 0))
+  · exact E.basis_snd_eq_of_levelBasisPt_eq_sigmaι L L' (fun i => g i 1)
+      (E.levelBasisPt_eq_sigmaι hinv L L' 1 (fun i => g i 1) (hc 1))
+
+/-- **(the square version, bare matrix)** The factorisation of the trivialisation carries over to the
+square: `fullLevelSqIso L'` factors through the diagonal action `gl2Both N g`. -/
+theorem fullLevelSqIso_inv_eq_of_fullLevelHom (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (h : E.fullLevelHom L' = constSchemeMap (S := S) (fun v => g.mulVec v) ≫ E.fullLevelHom L) :
+    (E.fullLevelSqIso hinv L').inv =
+      constSchemeMap (S := S) (gl2Both N g) ≫ (E.fullLevelSqIso hinv L).inv := by
+  refine Sigma.hom_ext _ _ fun vw => ?_
+  obtain ⟨v, w⟩ := vw
+  rw [← Category.assoc, constSchemeMap_ι]
+  have hgl : gl2Both N g (v, w) = (g.mulVec v, g.mulVec w) := rfl
+  rw [hgl, E.fullLevelSqIso_inv_ι hinv L' v w,
+    E.fullLevelSqIso_inv_ι hinv L (g.mulVec v) (g.mulVec w)]
+  have key : ∀ u : Fin 2 → ZMod N,
+      Sigma.ι (fun _ : Fin 2 → ZMod N => S) u ≫ (E.fullLevelIso hinv L').hom =
+        Sigma.ι (fun _ : Fin 2 → ZMod N => S) (g.mulVec u) ≫ (E.fullLevelIso hinv L).hom := by
+    intro u
+    show Sigma.ι (fun _ : Fin 2 → ZMod N => S) u ≫ E.fullLevelHom L' =
+      Sigma.ι (fun _ : Fin 2 → ZMod N => S) (g.mulVec u) ≫ E.fullLevelHom L
+    rw [h, ← Category.assoc, constSchemeMap_ι]
+  refine pullback.hom_ext ?_ ?_ <;>
+    simp only [pullback.lift_fst, pullback.lift_snd, key]
+
+/-- …hence, at the level of the `hom`s, the direction the pairing consumes. -/
+theorem fullLevelSqIso_hom_eq_of_fullLevelHom (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (h : E.fullLevelHom L' = constSchemeMap (S := S) (fun v => g.mulVec v) ≫ E.fullLevelHom L) :
+    (E.fullLevelSqIso hinv L).hom =
+      (E.fullLevelSqIso hinv L').hom ≫ constSchemeMap (S := S) (gl2Both N g) := by
+  have hinvEq := E.fullLevelSqIso_inv_eq_of_fullLevelHom hinv L L' g h
+  calc (E.fullLevelSqIso hinv L).hom
+      = (E.fullLevelSqIso hinv L').hom ≫
+          (E.fullLevelSqIso hinv L').inv ≫ (E.fullLevelSqIso hinv L).hom := by
+        rw [← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+    _ = _ := by simp [hinvEq]
+
+/-- **(route β, THE DETERMINANT LAW, invertibility-free)** Two level structures whose transition is
+the *arbitrary* matrix `g` give the same pairing once the root is twisted by `det g`:
+
+`e_{L', ζ ^ det g} = e_{L, ζ}`.
+
+No `GL₂`, no `glSmul`: `fullLevelSqIso_hom_eq_of_fullLevelHom` moves the transition onto the constant
+scheme and WP-A4 converts it into the `det g`-th power of the root. -/
+theorem fullLevelPairing_eq_of_fullLevelHom (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (h : E.fullLevelHom L' = constSchemeMap (S := S) (fun v => g.mulVec v) ≫ E.fullLevelHom L)
+    (ζ : { a : Γ(S, (⊤ : S.Opens)) // a ^ N = 1 }) :
+    E.fullLevelPairing hinv L'
+        ⟨(ζ : Γ(S, (⊤ : S.Opens))) ^ g.det.val, by
+          rw [← pow_mul, mul_comm, pow_mul, ζ.2, one_pow]⟩ =
+      E.fullLevelPairing hinv L ζ := by
+  rw [fullLevelPairing, fullLevelPairing,
+    E.fullLevelSqIso_hom_eq_of_fullLevelHom hinv L L' g h, Category.assoc,
+    constSchemeMap_gl2Both_comp_detConstMor_rootSplitting]
+
+/-- **(route β)** The square trivialisations of two level structures whose **transition columns** are
+the constant columns of `g` differ by the diagonal action `gl2Both N g`. -/
+theorem fullLevelSqIso_inv_eq_of_levelCoord (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (hc : ∀ j : Fin 2,
+      E.levelCoord hinv L (E.levelBasisPt L' j) (E.levelBasisPt_torsionπ L' j) =
+        LocallyConstant.const S (fun i => g i j)) :
+    (E.fullLevelSqIso hinv L').inv =
+      constSchemeMap (S := S) (gl2Both N g) ≫ (E.fullLevelSqIso hinv L).inv :=
+  E.fullLevelSqIso_inv_eq_of_fullLevelHom hinv L L' g
+    (E.fullLevelHom_eq_of_levelCoord hinv L L' g hc)
+
+/-- **(route β, THE DETERMINANT LAW FROM THE TRANSITION COLUMNS)** …hence the pairings agree once the
+root is twisted by `det g`:
+
+`e_{L', ζ ^ det g} = e_{L, ζ}`  whenever the transition columns of `L'` against `L` are `g`'s.
+
+This is the form the piecewise argument consumes: on each clopen piece of `levelTransitionCols` the
+transition **is** a constant matrix, so this applies there verbatim, with no invertibility of `g`. -/
+theorem fullLevelPairing_eq_of_levelCoord (hinv : NIsInvertible S N) (L L' : E.FullLevelPt N)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (hc : ∀ j : Fin 2,
+      E.levelCoord hinv L (E.levelBasisPt L' j) (E.levelBasisPt_torsionπ L' j) =
+        LocallyConstant.const S (fun i => g i j))
+    (ζ : { a : Γ(S, (⊤ : S.Opens)) // a ^ N = 1 }) :
+    E.fullLevelPairing hinv L'
+        ⟨(ζ : Γ(S, (⊤ : S.Opens))) ^ g.det.val, by
+          rw [← pow_mul, mul_comm, pow_mul, ζ.2, one_pow]⟩ =
+      E.fullLevelPairing hinv L ζ :=
+  E.fullLevelPairing_eq_of_fullLevelHom hinv L L' g
+    (E.fullLevelHom_eq_of_levelCoord hinv L L' g hc) ζ
+
+/-! ### The pairing on a trivialising cover, and the descent
+
+`WeilPairingLocalData` wants a pairing out of `pullback (E.torsionSqπ N) p`; `fullLevelPairing`
+produces one out of the base-changed curve's torsion square. `torsionSqBaseChangeIso`
+(`WeilPairing/TorsionSqBaseChange.lean`) identifies the two, and `muNMapAlong` brings the values
+back over `S`. Everything then goes through except the cocycle, which is the one remaining
+arithmetic input. -/
+
+variable {S' : Scheme.{u}}
+
+/-- **(route β, step 3)** The pairing on the base change of the Weil-pairing source along a cover
+carrying a full level structure: `fullLevelPairing` of the base-changed curve, read through
+`torsionSqBaseChangeIso` and pushed back over `S` by `muNMapAlong`. -/
+noncomputable def coverPairing (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N) (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 }) :
+    pullback (E.torsionSqπ N) p ⟶ muN S N :=
+  (E.torsionSqBaseChangeIso N p).hom ≫
+    (E.baseChange p).fullLevelPairing hinv L ζ ≫ muNMapAlong p N
+
+/-- The cover pairing is a morphism over `S` — the `overBase` field of a
+`WeilPairingLocalData`. -/
+theorem coverPairing_over (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N) (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 }) :
+    E.coverPairing p hinv L ζ ≫ muNπ S N =
+      pullback.fst (E.torsionSqπ N) p ≫ E.torsionSqπ N := by
+  have hsnd : (E.torsionSqBaseChangeIso N p).hom ≫ (E.baseChange p).torsionSqπ N =
+      pullback.snd (E.torsionSqπ N) p := by
+    rw [torsionSqBaseChangeIso, Iso.symm_hom, Iso.inv_comp_eq]
+    exact (E.isPullback_torsionSq_baseChange N p).isoPullback_hom_snd.symm
+  simp only [coverPairing, Category.assoc]
+  rw [muNMapAlong_π, ← Category.assoc ((E.baseChange p).fullLevelPairing hinv L ζ),
+    (E.baseChange p).fullLevelPairing_over hinv L ζ, ← Category.assoc, hsnd]
+  exact pullback.condition.symm
+
+/-- The trivialisation of the base change of the Weil-pairing source that the cover pairing is
+built from: the base-change identification followed by the level trivialisation of the square. -/
+noncomputable def coverTriv (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N) :
+    pullback (E.torsionSqπ N) p ≅
+      constScheme S' ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) :=
+  (E.torsionSqBaseChangeIso N p).trans ((E.baseChange p).fullLevelSqIso hinv L)
+
+theorem coverTriv_htriv (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N) :
+    (E.coverTriv p hinv L).hom ≫
+        constSchemeπ S' ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) =
+      pullback.snd (E.torsionSqπ N) p := by
+  rw [coverTriv, Iso.trans_hom, Category.assoc,
+    (E.baseChange p).fullLevelSqIso_hom_π hinv L, torsionSqBaseChangeIso, Iso.symm_hom,
+    Iso.inv_comp_eq]
+  exact (E.isPullback_torsionSq_baseChange N p).isoPullback_hom_snd.symm
+
+/- **THE ONE REMAINING PLUMBING LEMMA (route β).** The square version of `fullLevelHom_pullAlong`:
+how `coverTriv.hom` behaves under precomposition with a map into the base-changed torsion square.
+
+Target shape — for `k : W ⟶ pullback (E.torsionSqπ N) p` and `κ := k ≫ pullback.snd _ p`:
+
+  `k ≫ (E.coverTriv p hinv L).hom
+     = (the `coverTriv` of the data pulled back to `W`) ≫ constSchemeMapAlong κ ((Fin 2 → ZMod N) × _)`,
+
+the pulled-back data being `L.pullAlong κ` on `E ×_S W`. Route: transport `fullLevelHom_pullAlong`
+(`WeilPairing/FullLevelBaseChange.lean`, proved) through `fullLevelSqIso`, checking on the coproduct
+inclusions with `fullLevelSqIso_inv_ι` — the same argument as `fullLevelSqIso_glSmul_inv` below, which
+has now worked three times.
+
+With it, applying `fullLevelHom_eq_of_levelCoord` to the two pulled-back level structures
+`α^*L`, `β^*L` (`α = a ≫ pullback.snd`, `β = b ≫ pullback.snd`, the kernel-pair projections) gives
+
+  `b ≫ coverTriv.hom = (a ≫ coverTriv.hom) ≫ constSchemeMap (gl2Both N g)`,
+
+and `constSchemePointsEquiv_comp_constSchemeMap` (`WeilPairing/ConstReading.lean`, proved) converts
+that into the reading identity `c ∘ b = gl2Both N g ∘ (c ∘ a)` that `hdet` consumes, via
+`detFun_gl2Both` (`CharZeroDescent.lean:73`), `comp_localDetPairing_restrict` and
+`comp_rootPower_muNMapAlong_eq`. -/
+
+/-- **(route β, item (A))** The *tautological reading* of the cover trivialisation: `coverTriv.hom`
+is itself a point of `constScheme S' (V × V)` over `pullback.snd` (that is exactly
+`coverTriv_htriv`), so it has a locally constant label, and **every** reading appearing in
+`jointReading` is a `comap` of this one. -/
+noncomputable def coverTrivReading (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N) :
+    LocallyConstant ((pullback (E.torsionSqπ N) p : Scheme.{u}) : Type u)
+      ((Fin 2 → ZMod N) × (Fin 2 → ZMod N)) :=
+  constSchemePointsEquiv S' ((Fin 2 → ZMod N) × (Fin 2 → ZMod N))
+    (pullback.snd (E.torsionSqπ N) p)
+    ⟨(E.coverTriv p hinv L).hom, E.coverTriv_htriv p hinv L⟩
+
+/- …and each reading appearing in `jointReading` is the `comap` of this one:
+
+  `constSchemePointsEquiv S' (V × V) (k ≫ pullback.snd _ p) ⟨k ≫ coverTriv.hom, _⟩
+     = (coverTrivReading p hinv L).comap k.base.hom`,
+
+which is literally `constSchemePointsEquiv_natural S' (V × V) (pullback.snd _ p) k _`
+(`GroupScheme/MuN.lean:439`). Stating it as a theorem here times out at `isDefEq` — the unification
+against `constSchemePointsEquiv_natural`'s statement is heavy at this instantiation. Next attempt:
+either apply it *at the use site* (where `k` is a concrete projection of the kernel pair, so the
+unifier has more to work with), or introduce the point `⟨coverTriv.hom, coverTriv_htriv⟩` as a named
+abbreviation first so that the `Subtype.mk` is not re-elaborated. -/
+
+/-- **(route β, the two lines converge)** The cover pairing *is* the local determinant pairing of
+`WeilPairing/RootSplitting.lean` for the trivialisation `coverTriv`.
+
+Consequently the whole clopen-decomposition machinery of `WeilPairing/DetCocycle.lean`
+(`comp_localDetPairing_restrict`, `comp_localDetPairing_eq_of_pieces`,
+`nonempty_weilPairing_of_root_of_det`) applies to it verbatim — and `fullLevelPairing_glSmul` is the
+tool that discharges the surviving `hdet`. -/
+theorem coverPairing_eq_localDetPairing (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (L : (E.baseChange p).FullLevelPt N)
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 }) :
+    E.coverPairing p hinv L ζ = localDetPairing E N p ζ (E.coverTriv p hinv L) := by
+  simp only [coverPairing, localDetPairing, coverTriv, fullLevelPairing, Iso.trans_hom,
+    Category.assoc]
+
+/-- **(route β)** The cover trivialisation changes by the diagonal action of `g` when the level
+structure is re-marked by `g` — the `coverTriv`-level form of `fullLevelSqIso_glSmul_hom`. -/
+theorem coverTriv_glSmul_hom (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (L : (E.baseChange p).FullLevelPt N) :
+    (E.coverTriv p hinv L).hom =
+      (E.coverTriv p hinv ((E.baseChange p).glSmul g L)).hom ≫
+        constSchemeMap (S := S') (gl2Both N (g : Matrix (Fin 2) (Fin 2) (ZMod N))) := by
+  rw [coverTriv, coverTriv, Iso.trans_hom, Iso.trans_hom, Category.assoc,
+    ← (E.baseChange p).fullLevelSqIso_glSmul_hom hinv g L]
+
+/-- **(route β, THE COVER-LEVEL DETERMINANT LAW)** Re-marking the level structure on the cover by `g`
+and simultaneously raising the root to `det g` leaves the cover pairing unchanged:
+
+`e_{g • L, ζ ^ det g} = e_{L, ζ}`  on  `pullback (E.torsionSqπ N) p`.
+
+Immediate from `fullLevelPairing_glSmul`, since `coverPairing` is `fullLevelPairing` read through
+`torsionSqBaseChangeIso` and pushed forward by `muNMapAlong`. This is the form the descent's cocycle
+consumes once the kernel pair's transition is identified. -/
+theorem coverPairing_glSmul (p : S' ⟶ S) (hinv : NIsInvertible S' N)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (L : (E.baseChange p).FullLevelPt N)
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 }) :
+    E.coverPairing p hinv ((E.baseChange p).glSmul g L)
+        ⟨(ζ : Γ(S', (⊤ : S'.Opens))) ^ (g : Matrix (Fin 2) (Fin 2) (ZMod N)).det.val, by
+          rw [← pow_mul, mul_comm, pow_mul, ζ.2, one_pow]⟩ =
+      E.coverPairing p hinv L ζ := by
+  rw [coverPairing, coverPairing, (E.baseChange p).fullLevelPairing_glSmul hinv g L ζ]
+
+/-- The `S'`-point of the cover that a map into the base change reads, restricted to a clopen piece.
+Introduced only to keep the value-form statement below readable. -/
+noncomputable abbrev pieceCoverPt (p : S' ⟶ S) {W : Scheme.{u}} (U : W.Opens)
+    (c : W ⟶ pullback (E.torsionSqπ N) p) : U.toScheme ⟶ S' :=
+  U.ι ≫ c ≫ pullback.snd (E.torsionSqπ N) p
+
+/-- **(route β, THE DESCENT IN VALUE FORM)** An elliptic curve admits a Weil pairing as soon as it
+admits a trivialising fppf cover carrying a **full level structure**, an `N`-th root of unity `ζ` on the
+cover, and — in place of the cocycle — the purely **ring-theoretic** value equations on the clopen
+pieces of the joint trivialisation reading.
+
+`comp_rootPower_muNMapAlong_eq` (`WeilPairing/RootPowerPoints.lean`) turns each value equation into the
+corresponding instance of `hdet`; the two points lie over the same point of the base because the kernel
+pair's projections agree after `→ E[N] ×_S E[N]`.
+
+This is DS4's first two register entries (for invertible `N`) reduced to a statement about `ζ` alone. -/
+theorem nonempty_weilPairing_of_cover_of_values (p : S' ⟶ S)
+    [Flat p] [LocallyOfFinitePresentation p] [Surjective p]
+    (hinv : NIsInvertible S' N) (L : (E.baseChange p).FullLevelPt N)
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 })
+    (hval : ∀ vw,
+      (Scheme.Γ.map (E.pieceCoverPt p
+          (locConstPiece (jointReading E N p (E.coverTriv p hinv L) (E.coverTriv_htriv p hinv L)
+            (pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p))
+            (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+              (pullback.fst (E.torsionSqπ N) p))) vw)
+          (pullback.fst (pullback.fst (E.torsionSqπ N) p)
+            (pullback.fst (E.torsionSqπ N) p))).op).hom
+        (ζ : Γ(S', (⊤ : S'.Opens))) ^ (detFun N vw.1).val =
+      (Scheme.Γ.map (E.pieceCoverPt p
+          (locConstPiece (jointReading E N p (E.coverTriv p hinv L) (E.coverTriv_htriv p hinv L)
+            (pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p))
+            (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+              (pullback.fst (E.torsionSqπ N) p))) vw)
+          (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+            (pullback.fst (E.torsionSqπ N) p))).op).hom
+        (ζ : Γ(S', (⊤ : S'.Opens))) ^ (detFun N vw.2).val) :
+    ∃ e : pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N,
+      e ≫ muNπ S N = E.torsionSqπ N := by
+  refine nonempty_weilPairing_of_root_of_det E N p ζ (E.coverTriv p hinv L)
+    (E.coverTriv_htriv p hinv L) fun vw => ?_
+  have hp : (E.pieceCoverPt p _ (pullback.fst (pullback.fst (E.torsionSqπ N) p)
+        (pullback.fst (E.torsionSqπ N) p))) ≫ p =
+      (E.pieceCoverPt p (locConstPiece (jointReading E N p (E.coverTriv p hinv L)
+          (E.coverTriv_htriv p hinv L)
+          (pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p))
+          (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+            (pullback.fst (E.torsionSqπ N) p))) vw)
+        (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+          (pullback.fst (E.torsionSqπ N) p))) ≫ p := by
+    have hker : (pullback.fst (pullback.fst (E.torsionSqπ N) p)
+          (pullback.fst (E.torsionSqπ N) p)) ≫ pullback.fst (E.torsionSqπ N) p =
+        (pullback.snd (pullback.fst (E.torsionSqπ N) p)
+          (pullback.fst (E.torsionSqπ N) p)) ≫ pullback.fst (E.torsionSqπ N) p :=
+      pullback.condition
+    have houter : pullback.fst (E.torsionSqπ N) p ≫ E.torsionSqπ N =
+        pullback.snd (E.torsionSqπ N) p ≫ p := pullback.condition
+    simp only [pieceCoverPt, Category.assoc, ← houter]
+    rw [reassoc_of% hker]
+  simpa only [pieceCoverPt, Category.assoc] using
+    comp_rootPower_muNMapAlong_eq N p ζ _ _ (detFun N vw.1) (detFun N vw.2) hp (hval vw)
+
+/-- **(route β, step 3, THE DESCENT)** An elliptic curve admits a Weil pairing as soon as it admits
+a trivialising fppf cover carrying a **full level structure** and an `N`-th root of unity, *and* the
+resulting cover pairing satisfies the cocycle condition on the kernel pair.
+
+Every field of `WeilPairingLocalData` except `cocycle` is discharged here. The cocycle is the one
+remaining arithmetic input, and `fullLevelPairing_glSmul` is what turns it into a statement about
+`ζ` alone: on the kernel pair the two level structures differ by the transition matrix `g`, so the
+two pairings agree exactly when `g^*ζ = ζ ^ det g`. -/
+theorem nonempty_weilPairing_of_cover_of_cocycle (p : S' ⟶ S)
+    [Flat p] [LocallyOfFinitePresentation p] [Surjective p]
+    (hinv : NIsInvertible S' N) (L : (E.baseChange p).FullLevelPt N)
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 })
+    (hcoc : pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫
+        E.coverPairing p hinv L ζ =
+      pullback.snd (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫
+        E.coverPairing p hinv L ζ) :
+    ∃ e : pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N,
+      e ≫ muNπ S N = E.torsionSqπ N :=
+  nonempty_weilPairing_of_localData
+    { cover := S'
+      p := p
+      flat := ‹Flat p›
+      lfp := ‹LocallyOfFinitePresentation p›
+      surj := ‹Surjective p›
+      pairing := E.coverPairing p hinv L ζ
+      cocycle := hcoc
+      overBase := E.coverPairing_over p hinv L ζ }
+
+end EllipticCurve
+
+end ModularCurves

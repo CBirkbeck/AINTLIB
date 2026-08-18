@@ -115,4 +115,54 @@ theorem functionFieldMap_comp_germToFunctionField (f : X ⟶ Y) [IsDominant f]
   show f.functionFieldMap (Y.germToFunctionField U s) = X.germToFunctionField (f ⁻¹ᵁ U) (f.app U s)
   rw [functionFieldMap_germToFunctionField f U s]
 
+/-- **(functoriality)** The function-field pullback of a composite of dominant morphisms of
+irreducible schemes is the composite of the pullbacks. The eqToHom bookkeeping rides on
+`genericPoint_eq_of_isDominant`. -/
+theorem functionFieldMap_comp {Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
+    [IsDominant f] [IsDominant g] [IrreducibleSpace X] [IrreducibleSpace Y]
+    [IrreducibleSpace Z] [IsDominant (f ≫ g)] :
+    (f ≫ g).functionFieldMap = g.functionFieldMap ≫ f.functionFieldMap := by
+  refine TopCat.Presheaf.stalk_hom_ext _ fun U hxU => ?_
+  haveI hU : Nonempty U := ⟨⟨genericPoint Z, hxU⟩⟩
+  haveI : Nonempty (g ⁻¹ᵁ U) := ⟨⟨genericPoint Y, genericPoint_mem_preimage g U⟩⟩
+  ext s
+  show (f ≫ g).functionFieldMap (Z.germToFunctionField U s) =
+    f.functionFieldMap (g.functionFieldMap (Z.germToFunctionField U s))
+  have hsec : (f ≫ g).app U s = f.app (g ⁻¹ᵁ U) (g.app U s) := by
+    rw [Scheme.Hom.comp_app]
+    rfl
+  rw [functionFieldMap_germToFunctionField (f ≫ g) U s,
+    functionFieldMap_germToFunctionField g U s, hsec]
+  exact (functionFieldMap_germToFunctionField f (g ⁻¹ᵁ U) (g.app U s)).symm
+
+/-- The function-field pullback of the identity is the identity. -/
+theorem functionFieldMap_id [IrreducibleSpace X] :
+    (𝟙 X : X ⟶ X).functionFieldMap = 𝟙 (CommRingCat.of X.functionField) := by
+  refine TopCat.Presheaf.stalk_hom_ext _ fun U hxU => ?_
+  haveI : Nonempty U := ⟨⟨genericPoint X, hxU⟩⟩
+  ext s
+  show (𝟙 X : X ⟶ X).functionFieldMap (X.germToFunctionField U s) =
+    X.germToFunctionField U s
+  rw [functionFieldMap_germToFunctionField (𝟙 X) U s]
+  rfl
+
+/-- `functionFieldMap` is a congruence in the morphism (the `IsDominant` instances ride along by
+proof irrelevance). -/
+theorem functionFieldMap_congr {f g : X ⟶ Y} [IsDominant f] [IsDominant g]
+    [IrreducibleSpace X] [IrreducibleSpace Y] (h : f = g) :
+    f.functionFieldMap = g.functionFieldMap := by
+  subst h; rfl
+
+/-- **(invariance under a deck-style automorphism)** If `τ ≫ f = f` (e.g. `f = [N]` and `τ` a
+translation by an `N`-torsion section), the function-field pullback of `τ` fixes the image of
+`f.functionFieldMap` pointwise. One-line consequence of `functionFieldMap_comp`. -/
+theorem functionFieldMap_apply_functionFieldMap_of_comp_eq
+    (f : X ⟶ Y) (τ : X ⟶ X) [IsDominant f] [IsDominant τ]
+    [IrreducibleSpace X] [IrreducibleSpace Y] (h : τ ≫ f = f) (z : Y.functionField) :
+    τ.functionFieldMap.hom (f.functionFieldMap.hom z) = f.functionFieldMap.hom z := by
+  haveI : IsDominant (τ ≫ f) := by rw [h]; infer_instance
+  refine Eq.trans (congrArg (fun m => (CommRingCat.Hom.hom m) z)
+    (functionFieldMap_comp τ f)).symm ?_
+  exact congrArg (fun m => (CommRingCat.Hom.hom m) z) (functionFieldMap_congr h)
+
 end AlgebraicGeometry

@@ -22,7 +22,9 @@ universe u
 
 namespace ModularCurves
 
-private theorem smoothOfRelativeDimension_pullback_snd_comp
+/-- Relative-dimension-one smoothness of a base-changed family persists under any further
+base change, expressed on the direct pullback. -/
+theorem smoothOfRelativeDimension_pullback_snd_comp
     {Y S T U : Scheme.{u}} (π : Y ⟶ S) (t : T ⟶ S) (u : U ⟶ T)
     (hsm : SmoothOfRelativeDimension 1 (pullback.snd π t)) :
     SmoothOfRelativeDimension 1 (pullback.snd π (u ≫ t)) := by
@@ -38,7 +40,9 @@ private theorem smoothOfRelativeDimension_pullback_snd_comp
   exact (smoothOfRelativeDimension_isStableUnderBaseChange 1).of_isPullback
     (IsPullback.of_hasPullback (pullback.snd π t) u) hsm
 
-private theorem fibrewiseElliptic_pullback_snd_comp
+/-- Fibrewise ellipticity of a base-changed family persists under any further base
+change, expressed on the direct pullback with the transported section. -/
+theorem fibrewiseElliptic_pullback_snd_comp
     {Y S T U : Scheme.{u}} (π : Y ⟶ S) (t : T ⟶ S)
     (zT : T ⟶ pullback π t)
     (hzT : zT ≫ pullback.snd π t = 𝟙 T)

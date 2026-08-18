@@ -88,6 +88,27 @@ theorem pointToTorsion_torsionι {N : ℕ} {T : Scheme.{u}} {g : T ⟶ S} (x : E
     E.pointToTorsion x hx ≫ E.torsionι N = x.1 :=
   pullback.lift_fst _ _ _
 
+/-- Composition with `pointToTorsion` is computed on the underlying `E`-points:
+`w ≫ pointToTorsion x hx` is `pointToTorsion` of the composite point. -/
+theorem comp_pointToTorsion {N : ℕ} {T T' : Scheme.{u}} {g : T ⟶ S} (w : T' ⟶ T)
+    (x : E.Point g) (hx : (x : T ⟶ E.E) ≫ E.mulByHom N = g ≫ E.zero) :
+    w ≫ E.pointToTorsion x hx = E.pointToTorsion
+      (⟨w ≫ (x : T ⟶ E.E), by rw [Category.assoc, x.2]⟩ : E.Point (w ≫ g))
+      (by rw [Category.assoc, hx, ← Category.assoc]) := by
+  apply pullback.hom_ext
+  · show w ≫ E.pointToTorsion x hx ≫ E.torsionι N = _ ≫ E.torsionι N
+    rw [E.pointToTorsion_torsionι, E.pointToTorsion_torsionι]
+  · show w ≫ E.pointToTorsion x hx ≫ E.torsionπ N = _ ≫ E.torsionπ N
+    rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ]
+
+/-- The `Point.restrict` spelling of `comp_pointToTorsion`, which is the form the Weil
+pairing's base-change specification consumes. -/
+theorem pointToTorsion_restrict {N : ℕ} {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T)
+    (x : E.Point g) (hx : (x : T ⟶ E.E) ≫ E.mulByHom N = g ≫ E.zero)
+    (hx' : (Point.restrict E k x : T' ⟶ E.E) ≫ E.mulByHom N = (k ≫ g) ≫ E.zero) :
+    E.pointToTorsion (Point.restrict E k x) hx' = k ≫ E.pointToTorsion x hx :=
+  (E.comp_pointToTorsion k x hx).symm
+
 /-- **(T-B3)** `E[N] ⟶ E` is a closed immersion (kernels of group-scheme morphisms against
 proper separated bases; the zero section of a separated morphism is a closed immersion). -/
 theorem torsionι_isClosedImmersion (N : ℕ) :

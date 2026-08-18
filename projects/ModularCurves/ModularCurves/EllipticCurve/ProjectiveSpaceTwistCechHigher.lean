@@ -29,7 +29,7 @@ variable {R : Type u} {σ : Type} [CommRing R]
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-local instance : DecidableEq σ := Classical.decEq σ
+local instance decEqSigmaCechHigher : DecidableEq σ := Classical.decEq σ
 
 /-- For fixed total degree and finitely many coordinates, there are only finitely many homogeneous
 Laurent exponents that are negative in every coordinate. -/

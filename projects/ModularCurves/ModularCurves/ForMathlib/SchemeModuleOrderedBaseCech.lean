@@ -227,6 +227,39 @@ theorem orderedBaseCechDifferential_comp_π
   rw [zsmul_comp, orderedBaseCechCoface_comp_π]
   rfl
 
+private theorem two_term_alternating {R : Type u} [Ring R] {A B : ModuleCat.{u} R}
+    (f g : A ⟶ B) :
+    ((-1 : ℤ) ^ (((0 : Fin (0 + 2))) : ℕ)) • f +
+      ((-1 : ℤ) ^ (((1 : Fin (0 + 2))) : ℕ)) • g = f - g := by
+  rw [show (((0 : Fin (0 + 2))) : ℕ) = 0 from rfl,
+    show (((1 : Fin (0 + 2))) : ℕ) = 1 from rfl,
+    pow_zero, pow_one, one_smul, neg_one_zsmul, ← sub_eq_add_neg]
+
+/-- For any cover, the degree-zero differential composed with the projection to a degree-one
+index is the difference of the two coface restrictions: the two-term instance of
+`orderedBaseCechDifferential_comp_π`, packaged morphism-level so that consumers can apply it
+elementwise without re-expanding the alternating sum. -/
+theorem orderedBaseCechDifferential_zero_comp_π_sub
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens)
+    (i : OrderedCechIndex ι 1) :
+    orderedBaseCechDifferential π M U 0 ≫
+        Pi.π (fun j : OrderedCechIndex ι 1 =>
+          baseCechFactor π M U 1 j.1) i =
+      (Pi.π (fun j : OrderedCechIndex ι 0 =>
+          baseCechFactor π M U 0 j.1) (i.delete 0) ≫
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower
+            (SimplexCategory.δ 0).toOrderHom.toFun).φ i.1).op) -
+      (Pi.π (fun j : OrderedCechIndex ι 0 =>
+          baseCechFactor π M U 0 j.1) (i.delete 1) ≫
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower
+            (SimplexCategory.δ 1).toOrderHom.toFun).φ i.1).op) := by
+  rw [orderedBaseCechDifferential_comp_π, Fin.sum_univ_succ, Fin.sum_univ_succ,
+    Fin.sum_univ_zero, add_zero, Fin.succ_zero_eq_one]
+  exact two_term_alternating _ _
+
 theorem orderedBaseCechDifferential_comp
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
     {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ) :

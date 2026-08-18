@@ -1,4 +1,6 @@
 import ModularCurves.ModularCurve.RhoDescent
+import ModularCurves.WeilPairing.SelfUniversalVanishing
+import ModularCurves.WeilPairing.Nondegenerate
 import ModularCurves.ModularCurve.RhoPairingBridge
 import Mathlib.AlgebraicGeometry.Sites.Fpqc
 
@@ -1047,7 +1049,7 @@ theorem weilPairing_pair_order (K : Type) [Field K] [IsAlgClosed K]
     obtain ⟨m, n, hmn⟩ := AddSubgroup.mem_closure_pair.mp (hfull z hz)
     have h0d : (0 : ℤ) • P' + (d : ℤ) • Q' = (d : ℤ) • Q' := by
       rw [zero_smul, zero_add]
-    have hsymp := E.weilPairingEval_symplectic P' Q' 0 (d : ℤ) m n
+    have hsymp := EllipticCurve.weilPairingEval_symplectic_general E P' Q' 0 (d : ℤ) m n
       ((E.smul_eq_zero_iff_comp_mulByHom t N P').mp hP')
       ((E.smul_eq_zero_iff_comp_mulByHom t N Q').mp hQ')
       (by
@@ -1092,7 +1094,7 @@ theorem weilPairing_pair_order (K : Type) [Field K] [IsAlgClosed K]
     rw [hto, pow_mul, hpow, one_pow]
   have hzero : (d : ℤ) • Q' = 0 := by
     have hzp : (d : ℤ) • Q' = E.zeroPoint t := by
-      refine E.weilPairingEval_nondegenerate K t ((d : ℤ) • Q')
+      refine E.weilPairingEval_nondegenerate_general K hNK t ((d : ℤ) • Q')
         ((E.smul_eq_zero_iff_comp_mulByHom t N _).mp hkill_dQ) ?_
       intro y hy
       have hyz : (N : ℤ) • y = 0 :=
@@ -2424,7 +2426,7 @@ theorem full_of_weilPairing_order (K : Type) [Field K] [IsAlgClosed K]
       (E.weilPairingEval ((0 : ℤ) • P' + (0 : ℤ) • Q') (c • P' + d • Q')
         (hcomb_raw 0 0) (hcomb_raw c d)).1 = 1 := by
     intro c d
-    have hs := E.weilPairingEval_symplectic P' Q' 0 0 c d
+    have hs := EllipticCurve.weilPairingEval_symplectic_general E P' Q' 0 0 c d
       ((E.smul_eq_zero_iff_comp_mulByHom t N P').mp hP')
       ((E.smul_eq_zero_iff_comp_mulByHom t N Q').mp hQ')
       (hcomb_raw 0 0) (hcomb_raw c d)
@@ -2440,7 +2442,7 @@ theorem full_of_weilPairing_order (K : Type) [Field K] [IsAlgClosed K]
             ((E.smul_eq_zero_iff_comp_mulByHom t N Q').mp hQ')).1 ^
           ((((a.val : ℤ) * d - (b.val : ℤ) * c) % (N : ℤ)).toNat) = 1 := by
       intro c d
-      have hs := E.weilPairingEval_symplectic P' Q' (a.val : ℤ) (b.val : ℤ) c d
+      have hs := EllipticCurve.weilPairingEval_symplectic_general E P' Q' (a.val : ℤ) (b.val : ℤ) c d
         ((E.smul_eq_zero_iff_comp_mulByHom t N P').mp hP')
         ((E.smul_eq_zero_iff_comp_mulByHom t N Q').mp hQ')
         (hcomb_raw _ _) (hcomb_raw c d)
@@ -4475,7 +4477,7 @@ theorem strPt_pull_comb (D : GaloisRepData N) [Fact (1 < N)]
       hb2 hnegraw hbj
       (hcombkillraw ((-(((v 0).val : ℤ))), (-(((v 1).val : ℤ)))))
       (hcombkillraw ((((w 0).val : ℤ)), (((w 1).val : ℤ))))
-    have hsymp := (X'.curve.baseChange (strPr D X')).weilPairingEval_symplectic
+    have hsymp := EllipticCurve.weilPairingEval_symplectic_general (X'.curve.baseChange (strPr D X'))
       (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
         (EllipticCurve.Point.asSection X'.curve (strPr D X')
           (strPt D str (Pi.single 0 1))))
@@ -4665,8 +4667,13 @@ theorem strPt_pull_comb (D : GaloisRepData N) [Fact (1 < N)]
     refine Eq.trans (congrArg₂ (· * ·) hzc hzd) ?_
     rw [hb0, hb1, one_pow, one_pow, mul_one]
   -- nondegeneracy
-  have hzp := (X'.curve.baseChange (strPr D X')).weilPairingEval_nondegenerate
-    kk t
+  have hzp := (X'.curve.baseChange (strPr D X')).weilPairingEval_nondegenerate_general
+    kk
+    (by
+      haveI : CharZero kk := charZero_of_injective_algebraMap
+        (algebraMap ℚ kk).injective
+      exact Nat.cast_ne_zero.mpr (NeZero.ne N))
+    t
     (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
       (EllipticCurve.Point.asSection X'.curve (strPr D X')
         (strPt D str v)) -

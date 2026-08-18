@@ -15,7 +15,7 @@ import ModularCurves.Moduli.Bootstrap
 
 `representable_iff_rigidNoeth` (`Moduli/EllCategory.lean`) cannot be proven in place — its
 proof needs the engine mouth (`representable_of_rigidNoeth_of_torsor`), the two `TorsorData`
-packages (`exists_levelThreeTorsorData_ulift`, `exists_legendreTorsorData_ulift`), and the
+packages (`exists_levelThreeTorsorData_ulift`, `exists_levelFourTorsorData_ulift`), and the
 recollement (`representable_of_baseChange_cover`), all of which live *downstream* of
 `EllCategory` — proving it there would be an import cycle. This file, downstream of all of
 them, proves the ⇐ direction as `representable_of_affineOverEll_of_rigidNoeth`; the receipt

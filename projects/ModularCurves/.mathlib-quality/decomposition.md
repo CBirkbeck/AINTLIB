@@ -1,551 +1,1400 @@
-# Decomposition for T-W7 — constructive group law + canonicity (adversarial pass)
+# Decomposition — the Weil pairing `e_N` over an arbitrary base (DS4)
 
-**Mode:** `/develop --decompose` (adversarial), 2026-07-07. **Scope:** T-W7 only. The prior
-whole-programme Phase-1 artifact (2026-07-05) is preserved verbatim as
-`decomposition-2026-07-05-phase1.md`. **Verbatim source quotes** live in
-`tw7-source-quotes.md` (locators into the regenerable text layers of the LOCAL-ONLY refs);
-this file quotes the load-bearing lines inline and points at the quotes file otherwise, to
-keep one canonical quote per passage.
+**Status: Phase 1e Step 1 (read the source's full proof) — DONE, and it invalidates the
+route the project has been pursuing.**
 
-## Skeleton location
+## The source
 
-Every leaf below exists as a `sorry`-bodied declaration in:
+Katz–Mazur, *Arithmetic Moduli of Elliptic Curves* (Annals of Math. Studies 108, PUP 1985),
+**§2.8 "Pairings", book pp. 87–91** (`refs/ModularCurves/katz-mazur-arithmetic-moduli-FULL.pdf`,
+PDF pp. 98–102). Cross-reference given by KM: Oda, pp. 66–67 (KM's pairing is *the opposite* of
+Oda's); the `Pic ≅ H¹(K^×)` input is cited to [K-5] §5, esp. 5.2, pp. 186–187.
 
-- `ModularCurves/EllipticCurve/PoleFiltration.lean` (lane P3 — 10 decls)
-- `ModularCurves/EllipticCurve/ModelVariableChange.lean` (lanes P3/P5 — 6 decls)
-- `ModularCurves/EllipticCurve/PointsDictionary.lean` (lane P2 — 8 decls)
-- `ModularCurves/EllipticCurve/GroupLawConstruction.lean` (lanes P0/P1 — 32 decls)
-- `ModularCurves/EllipticCurve/WeierstrassAtlasBundle.lean` (lane P5 — structure + 3 decls)
-- `ModularCurves/EllipticCurve/Rigidity.lean` (lane P4 — def + 6 decls)
-- `ModularCurves/EllipticCurve/GroupLawDescent.lean` (join — 9 decls; `toEllipticCurve` and
-  its geometry-spec `toEllipticCurve_geom` are REAL — the assembly node already compiles by
-  `rfl`)
+## What KM actually does (verbatim quotes)
 
-plus the two pre-existing root targets in `GroupLaw.lean` (`abelEnrichment_exists`,
-`abelEnrichment_unique`, both `sorry` since creation — unchanged).
+**(2.8.1)** — the setting is an *arbitrary* base, and the pairing is for an arbitrary isogeny:
 
-`lake build ModularCurves.EllipticCurve.GroupLawDescent` (the top of the import chain)
-**passes — "Build completed successfully (2969 jobs)"**, sorries only, no type errors,
-2026-07-07. One pre-existing unrelated sorry in scope: `Point.asSection_zsmul`
-(`GroupLaw.lean:268`, PARKED T-D6a-ii, other ticket).
+> "For any N-isogeny π (always understood to mean: finite locally free of rank N) between
+> elliptic curves over an **arbitrary base** S, with dual N-isogeny π^t, … there is a canonical
+> bilinear pairing of finite locally-free commutative S-group-schemes
+>   Ker π × Ker π^t → μ_N ⊂ 𝔾_m."
 
-## Result R-A (T-W7a): `abelEnrichment_exists`
+**(2.8.1.5–2.8.1.7, p. 88)** — the construction. Let `K_E^×  ⊂ O_E^×` be the subsheaf of
+invertible functions on `E` taking the value 1 along the zero-section. Then:
 
-### Plain-English proof (Step 1 prose; sources: reviewer round-1 reply §3, B–L, audit)
+> "we have a natural isomorphism  Pic(E/S) ≅ H¹(E, K_E^×),  while  H⁰(E, K_E^×) = {1}."
 
-Let `G = (E, π, 0)` be locally Weierstrass over arbitrary `S`. (1) For every ring `R` and
-elliptic `W/R`, the two Bosma–Lenstra addition laws — the bidegree-(2,2) polynomial triples
-attached (Thm 2) to the lines `Z=0` and `Y=0` — are each regular on the open complement of
-their exceptional divisor; the two exceptional divisors are disjoint over every field
-(`O ∉ {Y=0}`), so the two opens cover `E ×_R E`; the laws agree on the overlap (both compute
-the chord–tangent sum); gluing yields a morphism `m_W : E ×_R E → E` over `R`, and similarly
-the (denominator-free, total) negation. (2) On field points, `m_W` computes mathlib's
-`Point.add` through the (proven) dictionary. (3) Over the *universal* ring
-`R_u = ℤ[a₁..a₆][Δ⁻¹]` — a domain — the atlas products are *reduced*, so two morphisms into
-the (separated) model agreeing on all field-valued points are equal; each group axiom,
-checked at field points, is mathlib's group axiom on `Point K`; hence the axioms hold for
-the universal `m` as morphism identities. (4) For arbitrary `W/R`: `W` is the pushforward of
-the universal curve along its classifying map (`Xᵢ ↦ aᵢ`, legal since `Δ ↦` unit), and `m_W`
-is the base change of the universal `m` (the B–L coefficients enter polynomially —
-naturality), so each axiom identity transports by base change. (5) Over `S`: choose a
-bundled atlas; per chart the transported model law; on overlaps the two pointed chart
-presentations differ by a *variable change* (comparison theorem — via the pole filtration:
-a pointed iso preserves the affine part and the filtration; freeness of `F₂`/`F₃` forces
-`x' ↦ αx+β`, `y' ↦ γy+δx+ε`, `α,γ` units, `α³=γ²` ⟹ `u = γ/α`), and the model law is
-VC-equivariant (globally — proven over the universal VC-base domain by the same field-points
-method), so the per-chart laws agree and glue. Axioms hold chart-locally (base change of the
-universal identity — no flatness, no reducedness of `S`), hence globally (`Cover.hom_ext`).
-Package as `GrpObj` + commutativity + unit-normalisation: `abelEnrichment_exists`.
+> "By Abel's theorem (cf. 2.1), we may interpret a point P′ ∈ (Ker π^t)(S) as an element 𝓛 of
+> Pic⁰(E′/S) which lies in the kernel of π^* … In terms of a normalized cocycle … f_{i,j} ∈
+> Γ(U_i ∩ U_j, K_{E′}^×), the triviality of π^*(𝓛) in Pic(E/S) means that the normalized cocycle
+> representing π^*(𝓛) … f_{i,j} ∘ π … may be written **uniquely** in the form f_{i,j} ∘ π = h_i/h_j,
+> with functions h_i ∈ Γ(π^{-1}(U_i), K_E^×)."
 
-### Attack log for the internal composition (R-A)
+**(p. 89)** — and then the pairing is *evaluation of those functions at the point*:
 
-- [A] *Could the children hold and R-A fail?* The assembly consumes exactly: glued
-  `mulHom`/`negHom` + Over-level axiom equations + unit-normalisation — the
-  `GrpObj`/`IsCommMonObj` fields and `EllipticCurve`'s three extra fields, nothing else
-  (verified against `GroupLaw.lean:51-59`; and `toEllipticCurve_geom` compiles by `rfl`
-  already, so the record-shape composes). Composition gap checked: the Over-level axioms are
-  stated for the *model* while the descent needs them for the *glued* structure — bridged by
-  chart-locality of morphism equality (`Cover.hom_ext`, mathlib, verified round-1) + the
-  chart-specs of the glued maps; recorded as `EllipticCurveGeom.grpObj`'s proof obligation.
-  No missing child.
-- [B] *Edge case the source doesn't discuss:* `S = ∅` — empty atlas index; everything
-  degenerates consistently (`Cover.hom_ext` vacuous). No defect.
-- [C] *Does the existence path secretly use reducedness/noetherianness of `S`?* Hypothesis
-  sweep of the skeleton: reducedness appears ONLY as instances on the universal atlas
-  (`PointsDictionary`); noetherian/connected ONLY in `Rigidity.lean` (canonicity). No leak.
+> "Now view P ∈ (Ker π)(S) ⊂ E(S) as an S-morphism S → E. Over the open covering of S given by the
+> open sets P^{-1}(π^{-1}U_i), we have the invertible functions h_i ∘ P, which, in view of the
+> relations f_{i,j} ∈ K^×, h_i/h_j = f_{i,j} ∘ π, πP = 0, **patch together to define a global
+> section** “h(P)” ∈ Γ(S, O_S^×) = 𝔾_m(S). One then defines ⟨P, P′⟩_π = “h(P)”.
+> One verifies easily that this construction defines a bilinear pairing
+> (Ker π)(S) × (Ker π^t)(S) → 𝔾_m(S). **Because (Ker π)(S) is killed by N, the pairing lands in
+> μ_N(S).**"
 
-### Leaves (statement + source + provability + attacks per leaf)
+**(2.8.5, p. 90)** — `e_N` is the self-dual case:
 
-Skeleton pointers are file:line of the `sorry` declarations (lines as of this pass).
+> "If we apply the discussion 2.8.1.2 to the N²-isogeny “multiplication by N”, which is self-dual
+> (2.6.2.1), we obtain the “e_N-pairing”  E[N] × E[N] → μ_N,  (P,Q) ↦ ⟨P,Q⟩_N = e_N(P,Q), which
+> (by 2.8.3) is an alternating autoduality of E[N]."
 
-- **L-0a** (leaf, mathlib+small): `IsDomain WeierstrassAtlasRing` +
-  `universalWeierstrass_Δ_ne_zero`.
-  - Skeleton: `GroupLawConstruction.lean:49,42`.
-  - Source: design (audit); discharge `IsLocalization.isDomain_localization` (mathlib,
-    verified via `lean_local_search` → `Mathlib/RingTheory/Localization/Defs.lean`) +
-    `MvPolynomial` domain instance; `Δ ≠ 0` by evaluation at `y² = x³ − x` over `ℚ`
-    (`Δ = 64`).
-  - Attacks attempted:
-    - [1] Counterexample: could `Δ = 0` in `ℤ[a₁..a₆]` (trivialising the localization)?
-      The evaluation witness refutes; no contradicting lemma found.
-    - [2] Edge: characteristic-2 traps in the witness — avoided by evaluating over `ℚ`
-      (this attack CHANGED the plan: the earlier draft left the target ring unspecified).
-    - [3] Discharge: `isDomain_localization` needs `M ≤ nonZeroDivisors`; supplied by
-      domain + `Δ ≠ 0`. Type-checked shape ✓.
-    - Verdict: SURVIVED.
+**(2.8.2)** — Cartier duality appears only as a **consequence**:
 
-- **L-0b** (leaves ×5): `negModelHom` + `_π`, involution, `_zero`, `_specPoints`.
-  - Skeleton: `GroupLawConstruction.lean:55,60,65,70,76`.
-  - Source: Silverman III.2 (negation `(x,y) ↦ (x, −y−a₁x−a₃)`); projectivised
-    `[X : −Y−a₁X−a₃Z : Z]`, a single bidegree-1 total triple; B–L p. 231 (coefficients
-    polynomial ⟹ any ring; quotes file §B–L).
-  - Lean ↔ source: negation stated on `projModel W` over any `R`;
-    π-compat/involution/zero/points-spec one-conclusion-per-decl.
-  - Discharge: construction via the `baseChangeGradedHom` template (project, PROVEN,
-    `WeierstrassModel.lean:1657`); points-spec via the chart analysis of `projModel_points`
-    (project, PROVEN).
-  - Attacks attempted:
-    - [1] Totality: the triple never all-vanishes on the curve (at `Z=0`: `[0:−Y:0]`,
-      `Y ≠ 0` at `O`) — no hidden case split.
-    - [2] Edge: 2-torsion (`y = negY x y`) — involution unaffected.
-    - [3] Hypothesis-strength: `IsElliptic` NOT needed for the morphism — this attack
-      CHANGED the plan: four of five statements weakened to arbitrary `W` (skeleton
-      reflects it); kept only on `_specPoints` (dictionary).
-    - [4] Source-drift: mathlib `negY = −y − a₁x − a₃` re-verified against the
-      `AffinePointVariableChange` development.
-    - Verdict: SURVIVED.
+> "According to the fundamental Cartier–Nishi duality theory (cf. [Oda]), this pairing defines an
+> isomorphism of S-group-schemes  Ker(π^t) ≅ Hom_{S-gp}(Ker π, 𝔾_m)."
 
-- **L-0c1** (leaves ×4): `blOpenZ`, `blOpenY`, `addOnZ`, `addOnY`.
-  - Skeleton: `GroupLawConstruction.lean:90,97,104,110`.
-  - Source claim (verbatim, B–L Thm 2, p. 230; quotes file): "the pair P₁, P₂ is exceptional
-    for the addition law corresponding to (a:b:c) if and only if the difference P₁ − P₂ …
-    lies on the intersection of E(K) and the line ax + by + cz = 0"; and p. 230–231: "This
-    occurs for instance for the lines y = 0, z = 0".
-  - Lean ↔ source match: the opens are the complements of the two named laws' exceptional
-    divisors; the morphisms are the §5 triples restricted there.
-  - Discharge: opens = complement of common vanishing of the three §5 polynomials;
-    triple-on-open ⟹ morphism-to-Proj (repo chart machinery pattern). §5 formulas: local
-    PDF; transcribe + CAS-verify at implementation (P1 gate, satisfied — paper acquired).
-  - Attacks attempted:
-    - [1] False-leaf: is one law secretly total (second unnecessary)? B–L Thm 1: NO — every
-      law has nonempty exceptional divisor; two needed, two suffice.
-    - [2] Scheme-vs-points: the triple-defines-morphism step is scheme-theoretic
-      (basic-open cover); field points only *characterise* the locus — no reliance on
-      points to define the map.
-    - [3] Char 2/3: B–L's Thm 1/2 carry no characteristic hypothesis (long form, any
-      field) — checked in the OCR text; F2(b) double-checks with the reviewer.
-    - Verdict: SURVIVED.
+## Three corrections this forces
 
-- **L-0c2** (leaf): `blOpen_cover`.
-  - Skeleton: `GroupLawConstruction.lean:118`.
-  - Source (verbatim): B–L p. 230–231, "any two distinct lines in P²(k) that intersect
-    outside E(k) give rise to a complete system of two addition laws on E"; the pair
-    `{Y=0}, {Z=0}` meets at `(1:0:0)`, and `F(1,0,0) = −1` — never on the curve, any ring.
-  - Lean ↔ source: `⊔ = ⊤` ⟺ no point lies in both exceptional loci; fibrewise over fields
-    a common point needs `P₁−P₂ ∈ E ∩ {Z=0} ∩ {Y=0} = ∅` since `E ∩ {Z=0} = {O} ∌ {Y=0}`.
-  - Attacks attempted:
-    - [1] The fibrewise-to-global step: every point of the product lies in a fibre and is
-      hit by a residue-field point — sound; recorded as the first proof step.
-    - [2] Opens are point-determined — no scheme-density subtlety here (contrast i4).
-    - [3] Is `E ∩ {Z=0} = {O}` set-level over any fibre? `Z=0` forces `X³ = 0` ⟹ `X = 0`
-      topologically ✓ (nilpotents irrelevant at set level).
-    - Verdict: SURVIVED.
+**(1) Route β is invented, not transcribed.** KM never trivialises `E[N]` over a cover, never uses
+a level structure, never writes a determinant formula `ζ^{det(v|w)}`, and never descends along an
+fppf cover to build `e_N`. The determinant formula is a *computation of* `e_N` after the fact
+(and is how `e_N` interacts with `GL₂`), not a construction of it. Everything this session built
+downstream of `nonempty_weilPairing_of_localData` is scaffolding for a route with **no source**.
+This is precisely the failure mode `/develop`'s source-faithfulness rule exists to prevent, and it
+was not caught because Phase 1e Step 1 — *read the source's proof* — had never been run for DS4.
 
-- **L-0c3** (leaf): `addOn_agree`.
-  - Skeleton: `GroupLawConstruction.lean:127`.
-  - Source: B–L Thm 2 (both laws compute the sum where both are defined); scheme-level
-    content = bihomogeneous identities modulo the two curve relations.
-  - Attacks attempted:
-    - [1] Nilpotent failure needs division — none: exact cofactor identities over
-      `ℤ[a₁..a₆]`.
-    - [2] Proportionality: morphisms to Proj agree via the 2×2-minor identities
-      `ℓᵢℓ'ⱼ = ℓⱼℓ'ᵢ` mod relations, not literal triple equality — this attack CHANGED the
-      ticket sketch (minor-form recorded).
-    - [3] LOC estimate attack: sized by §5's actual display length (~1 page) — grounded.
-    - Verdict: SURVIVED (with the minor-identities correction).
+**(2) Cartier duality is NOT needed.** The board and
+`memory/ds4-weil-pairing-bottom.md` both assert the general-`N` case is gated on "Cartier duality
+for finite flat group schemes (API gap AG-CD)", a multi-week/month development. **False.** KM's
+construction *produces* the pairing and gets Cartier–Nishi duality as a corollary (2.8.2). The
+construction's inputs are: `Pic(E/S) ≅ H¹(E, K_E^×)` with `H⁰(E, K_E^×) = {1}`; Abel's theorem
+(KM 2.1) to see `Ker(π^t)(S)` inside `Pic⁰(E′/S)`; the unique factorisation `f_{i,j}∘π = h_i/h_j`;
+and patching `h_i ∘ P` into a global unit.
 
-- **L-0c4** (leaves ×3): `mulModelHom`, `blOpenZ_ι_mulModelHom`, `blOpenY_ι_mulModelHom`.
-  - Skeleton: `GroupLawConstruction.lean:136,141,146`.
-  - Source: two-open glue; `Scheme.Cover.glueMorphisms`/`hom_ext` (mathlib, verified
-    round-1) or direct opens-gluing.
-  - Attacks attempted: [1] glueMorphisms wants pullback-overlaps vs our `homOfLE` form —
-    bridge: intersections of opens are the pullbacks of the `ι`s; recorded. [2] glue pinned
-    by the two restriction specs (the leaves) — consumers never see the cover choice.
-    [3] Composition-check: `homOfLE ≫ ι` plumbing elaborates (skeleton compiles).
-    Verdict: SURVIVED.
+**(3) The register's arbitrary-`N`, arbitrary-`S` statement is correct and reachable.** My advice to
+the user — that the register is gratuitously general and should carry `NIsInvertible S N` — rested
+on the false premise in (2). **Withdraw it.** KM's construction is base-agnostic and needs no
+invertibility, which is exactly why KM can use it at bad primes.
 
-- **L-0d** (leaf): `mulModelHom_π`. Skeleton: `GroupLawConstruction.lean:154`.
-  - Source: per-piece structure maps (coefficients in `R`) + cover ext.
-  - Attacks: [1] per-piece + `hom_ext` ✓; [2] fst-vs-snd: either works; fst matches
-    `pullback.condition` downstream; [3] discharge shape ≤ 3 pieces. SURVIVED.
+## Where the tree already has KM's ingredients
 
-- **L-0c6** (leaf, THE spec): `mulModelHom_specPoints`.
-  - Skeleton: `GroupLawConstruction.lean:167`.
-  - Source (verbatim, B–L §2 defn of addition law, bl.txt:133–146 area): the triples
-    compute "the sum … in the abelian group E(K)"; mathlib side `Affine.Point.add`
-    (`slope`/`addX`/`addY`).
-  - Lean ↔ source: a pair of `Spec K`-points is lifted to the product, pushed through the
-    glued morphism, compared through the FIXED dictionary with mathlib's `+`.
-  - Attacks attempted:
-    - [1] The prior-B2 trap (bare-cardinality equiv): the spec pins the actual map through
-      the canonical `projModelPointsEquiv` — not an `∃`-equiv. Addressed by design.
-    - [2] Edge cases: `P = Q`, `Q = −P`, `P = O` — glued morphism total; `Point.add`
-      handles each; the legitimate case analysis happens HERE over a field (decidable),
-      never in the scheme construction. (Elaboration surfaced mathlib's `[DecidableEq K]`
-      gate on `Point.add` — added as an instance-argument, the pattern mathlib review
-      recommends; NOT a global classical instance.)
-    - [3] Hypothesis: `IsElliptic` genuinely needed (dictionary + nonsingularity).
-    - [4] Source-drift: "addition law" is *defined* by computing the sum on an open — the
-      spec IS the definition; no drift.
-    - Verdict: SURVIVED.
+`ModularCurves/Picard/` is a substantial development of invertible sheaves *by trivialising cover
+and normalized transition cocycle* — `InvertibleSheafCocycle.lean` has
+`trivializationTransitionUnit`, `_self`, `_symm`, `_trans`, `_restrict`,
+`trivializingCoverTransitionUnitOn`, `trivializingCoverTransitionUnit_cocycle`,
+and `InvertibleSheafGlueEffectivity.lean` / `InvertibleSheafFiniteAffineCover.lean`
+(`IsInvertible.exists_finite_affine_trivializingCover`). That is the `H¹(E, K^×)`-with-normalized-
+cocycles machinery KM's proof runs on. It was built for `Pic⁰` and the Hasse bound, and it is
+pointing at exactly the right target.
 
-- **L-0cnat** (leaf): `mulModelHom_map`.
-  - Skeleton: `GroupLawConstruction.lean:179`.
-  - Source (verbatim, B–L p. 231): "It will be seen that the coefficients of the
-    Weierstrass equation for E enter polynomially into all formulae in Section 5. This
-    implies that the same formulae can be used to perform the addition on elliptic curves
-    over com[m]utative rings."
-  - Discharge: per-piece `Proj.map`-functoriality — the repo's `projModelBaseChange`
-    machinery is this exact pattern (PROVEN, `WeierstrassModel.lean:1692`); glue-compat.
-  - Attacks attempted: [1] do the OPENS base-change? Exceptional loci cut by the same
-    polynomials ⟹ preimage-compat; inner lemma recorded. [2] square orientation — the
-    skeleton's original square was TRANSPOSED; caught by elaboration against
-    `projModelBaseChange_π`, fixed with `.symm` (the skeleton earning its keep). [3]
-    discharge `pullback.map` + piece-functoriality ≤ 3. SURVIVED.
+## Next (Phase 1e Steps 2–6) — NOT yet done
 
-- **L-0g** (leaves: 3 defs + 3 `_left` pins + 5 axiom equations):
-  `mulOver`/`oneOver`/`invOver` (+`_left` each), `mulOver_assoc`, `oneOver_mulOver`,
-  `mulOver_oneOver`, `mulOver_comm`, `invOver_mulOver`.
-  - Skeleton: `GroupLawConstruction.lean:200-253`.
-  - Source: reviewer round-1 §3 step 2; mathlib `Affine.Point.instAddCommGroup`
-    (`Affine/Point.lean:768`, verified — with its `add_assoc`/`add_comm`/units) over
-    `K`-fields; transport by L-0cnat along `classifyRingHom` (audit A6).
-  - Lean ↔ source: stated as the `MonObj`/`GrpObj` field shapes in `Over (Spec R)`
-    (assembly definitional); `_left` pins connect to the scheme construction.
-  - Attacks attempted:
-    - [1] Transport composition: base-changing an Over-equation needs naturality for BOTH
-      sides — μ has L-0cnat; unit/inv need small naturality lemmas — CAUGHT and recorded in
-      the 0g sketch (one-liners from `projModelZero_baseChange` ⓟ + neg-functoriality).
-    - [2] Braiding-form of commutativity checked against mathlib's `IsCommMonObj` field
-      shape.
-    - [3] Edge `R = 0`: `Spec 0 = ∅`, all equations trivial.
-    - [4] Hidden hypothesis: field-points ext consumes universal-ATLAS reducedness only;
-      general-`R` statements carry none (transport does the work).
-    - Verdict: SURVIVED.
+Transcribe KM 2.8.1's proof into an ordered lemma list mirroring *its* structure:
+`K_E^×`-sheaf → `Pic ≅ H¹(K^×)` + `H⁰ = 1` → Abel (KM 2.1) → unique `h_i/h_j` factorisation →
+patching `h_i ∘ P` → bilinearity → lands in `μ_N` → self-dual case gives `e_N` → alternating
+(2.8.3, via Oda) → isotropy (2.8.7). Then Steps 2.5 (Lean skeleton), 3 (verbatim quotes per leaf —
+several are already above), 4 (provability against `Picard/`), 4.5 (adversarial), 4.6 (b2 log),
+5 (gate), 6 (this file).
 
-- **L-0e** (leaves ×4): `isReduced_of_smoothOfRelativeDimension` + instances for
-  `weierstrassAtlas`, `universalCurve`, the double and triple products.
-  - Skeleton: `PointsDictionary.lean:63,67,72,76,81`.
-  - Source: reviewer round-1 §Q4 (reducedness half — audit A5's simplification of the
-    integrality requirement).
-  - Attacks attempted: [1] false without reduced base (`Spec k[ε]`) — instances stated for
-    the universal (domain) atlas only ✓. [2] engine generality: stated with
-    `SmoothOfRelativeDimension` (what the repo supplies) — over-generality attack
-    withdrawn. [3] instance discharge: products via base-change/composition stability
-    (mathlib `MorphismProperty`, used in `GroupLaw.baseChange` ⓟ). Verdict: SURVIVED;
-    engine's mathlib-availability = AG-2 (conditional gap, fallback named).
+## Second opinion (ChatGPT gpt-5.6-sol, max effort) — corroborates, and corrects one claim
 
-- **L-0f** (leaves ×2): `projModelPointsEquiv` + `_zero`.
-  - Skeleton: `PointsDictionary.lean:30,37`.
-  - Source: **project, PROVEN** — `projModel_points` (`WeierstrassModel.lean:1105`, T-A2e);
-    the leaves are its choice-extraction + pointedness pin.
-  - Attacks attempted:
-    - [1] Prior-B2 shape-match (Step 4.6): the `isWeierstrassModel_unique` B2 turned on a
-      bare `∃`-equiv. Choice-extraction gives NO naturality in `K` — consumer sweep: every
-      consumer uses the SAME fixed equiv on both sides of its equation;
-      choice-consistency suffices. NO inherited defect; future naturality-needing work must
-      re-audit (note left).
-    - [2] Discharge verification: `projModel_points` confirmed sorry-free (green build).
-    - [3] Edge: `K` a field forces `1 ≠ 0` compatible with `Δ` unit ✓.
-    - Verdict: SURVIVED.
+**Corroborated.** Route β is not the standard construction. KM §2.8 and **Oda §1 Thm 1.1 / Cor 1.3**
+both construct the pairing from rigidified line bundles and Čech cocycles, descending *line bundles
+along the isogeny* — not a determinant formula along a level cover. And
+**Deligne–Rapoport IV.3.20 runs the opposite way**: it calls `e_n` "well known" and then *uses* it to
+send a level structure to a primitive root of unity via the determinant. So the determinant formula is
+standard as a *calculation*, and as the way to extract the cyclotomic component of a level structure —
+never as the construction.
 
-- **L-ext** (leaf): `hom_ext_of_forall_specPoint`.
-  - Skeleton: `PointsDictionary.lean:51`.
-  - Source: audit A5 (field-points extensionality subsumes the generic-point route — the
-    generic point is one of the field points).
-  - Attacks attempted:
-    - [1] False without reducedness: `Spec k[ε]` ⇉ `𝔸¹` differing by `ε` — hypothesis
-      present; used ONLY over the universal atlas (docstring warns).
-    - [2] False without separatedness: line-with-doubled-origin — hypothesis present.
-    - [3] Scope-creep to general `S` — descent leaves do not cite it (checked).
-    - Verdict: SURVIVED. Discharge: equalizer-closed + surjective-closed-immersion-onto-
-      reduced-is-iso — names VERIFIED at the pin (coordinator §3 record, 2026-07-07):
-      `isClosedImmersion_equalizer_ι_left` (Morphisms/Separated.lean, in `Over S`) ·
-      `isIso_of_isClosedImmersion_of_surjective` (`[IsReduced]`) ·
-      `Scheme.fromSpecResidueField`. **Scope guard (coordinator §2/§3)**: L-ext proves
-      equality of EXISTING morphisms; it is NOT a discharge for T-W7.0c's c5 (on-curve =
-      ideal membership) — c5 goes through the Jacobson-density bridge c5α (board).
+**Correction to claim (2) above — I overstated it.** KM's *construction* needs no Cartier duality, which
+is right; but KM does invoke **Cartier–Nishi duality for perfectness** (2.8.2). So: not needed to build
+`e_N`, needed for nondegeneracy in general. In the `N`-invertible case it can be avoided: define only
+the finite-étale internal dual `G^♯ = Hom_{ℤ/N}(G, μ_N)` and check alternation/perfectness after
+geometric base change using the field theorem — "merely Cartier duality restricted to finite local
+systems". *The expensive part for Lean is instead the relative Picard/Poincaré infrastructure.*
 
-- **L-0h** (leaf ×1 + P3-file leaves ×4): `mulModelHom_vc`; `projModelVCIso` + `_π`,
-  `_zero`, `_mul`.
-  - Skeleton: `GroupLawConstruction.lean:265`; `ModelVariableChange.lean:34,39,45,52`.
-  - Source: reviewer round-1 §Q5 caveat 2 (global equivariance incl. infinity/diagonal/
-    anti-diagonal — verbatim in `reply.md`); affine cocycle ⓟ DONE; Silverman III.3.1(b).
-  - Attacks attempted: [1] equivariance stated against the same `pullback.map` plumbing the
-    descent uses — inline squares elaborate (build-verified). [2] `(C•W).IsElliptic` taken
-    as instance-argument (Δ scales by `u⁻¹²` — instance derivable later; no block).
-    [3] cocycle via `eqToHom (mul_smul …)` — elaborates; `▸`-transport rejected by design.
-    Verdict: SURVIVED.
+**Refinement of the circularity diagnosis.** Alternating bilinear `L × L → μ_N` for `L = E[N]`
+correspond to `Hom(∧²L, μ_N)`, and in a basis are determined by `ζ = e(b(e₁), b(e₂))` with
+`e(b(v),b(w)) = ζ^{det(v,w)}` — the transition rule being exactly (★). Hence:
+* solutions of (★) ↔ arbitrary alternating pairings;
+* **literal existence of a solution is NOT equivalent to the Weil pairing — `ζ = 1` always satisfies
+  (★) and gives the trivial pairing.** (This is precisely the "architectural correction" found
+  independently earlier in this session: `nonempty_weilPairing_of_cover_of_values` is satisfiable with
+  `ζ = 1`. Independent corroboration.)
+* with **primitivity in every geometric fibre**, (★) ⟺ an isomorphism `∧²E[N] ≅ μ_N`, i.e. a *perfect*
+  alternating pairing;
+* even that is not the *canonical* one — perfect pairings differ by a locally constant element of
+  `(ℤ/N)^×`, and a normalisation at one fibre pins it down. The relevant torsor is under
+  `(ℤ/N)^×` (it is `Isom(ℤ/N, μ_N)`), not under `μ_N`.
+* In monodromy language the missing statement is `det ρ_{E,N} = χ_N`, which is normally *deduced* from
+  the Weil pairing.
 
-- **L-1b** (leaves ×2, the comparison theorem): `pointedIso_exists_variableChange`,
-  `projModelVCIso_injective`.
-  - Skeleton: `ModelVariableChange.lean:66,79`.
-  - Source: audit A1 (the dependency both reviewer replies missed); KM §2.2/Deligne-
-    formulaire-style statement, proof re-derived uniformly: b1 pointed iso preserves
-    `E∖O` (= the `Z`-chart, complement of the section); b2 preserves `F_n` (intrinsic via
-    the section's ideal sheaf); b3 freeness forces the coordinate shape and `α³ = γ²`,
-    `u := γ/α`; b4 affine determines projective (L-i4); b5 faithfulness.
-  - Prior-B2: this IS fix-option (3) of the `isWeierstrassModel_unique` B2 — implemented
-    WITHOUT the BB-RR the log predicted (pole filtration instead). Addressed by
-    construction.
-  - Attacks attempted:
-    - [1] Circularity (the audit-A1 attack re-run): 1b depends only on P3 leaves — the
-      dependency graph is acyclic (checked).
-    - [2] Automorphism trap: "the `C` with `C•W' = W` is unique" is FALSE for special `W`
-      (extra automorphisms); uniqueness is pinned by the INDUCED ISO — the two-leaf split
-      (existence-with-pin + faithfulness) encodes exactly this; a naive `∃!C, C•W' = W`
-      leaf was rejected by this attack.
-    - [3] Transport form: `eqToHom (congrArg …)`-free statement via `∃ hW, e.hom = eqToHom
-      (by rw [← hW]) ≫ …` — elaborates (build-verified); shared-witness `∃∧` documented
-      (statement-splitting exception: the witness `C` is shared).
-    - Verdict: SURVIVED.
+Verdict quoted: "Do not spend 1100 lines proving the level-cover ζ-cocycle merely as a 'reduction';
+that cocycle is the missing symplectic orientation in disguise."
 
-- **L-P3** (leaves ×10, the filtration file): `coordX`/`coordY` (real defs),
-  `poleOrderFiltration` + `_one`, `_two`, `_three`, `_mul_le`,
-  `linearIndependent_one_coordX_coordY`, `projModel_globalSections_eq_baseRing`,
-  `infChart_s_nonZeroDivisor`, `projModel_hom_ext_of_affine`,
-  `locallyWeierstrass_pushforward_O_eq_O`.
-  - Skeleton: `PoleFiltration.lean` (whole file).
-  - Source: reviewer round-1 §Q2 (verbatim: prove `Γ(ProjModel(W), O) ≅ R` "directly, for
-    every ring R and every elliptic Weierstrass equation W/R", universality "by applying
-    the same theorem to `W.map (R → R')`, not by an abstract cohomology base-change
-    theorem"); audit A3 (2-chart equalizer; normal form one-basis-element-per-pole-order;
-    `x²y⁻¹` = the `H¹` witness in neither image; `A` free with `{xⁱ, xⁱy}` — mathlib
-    `Affine.CoordinateRing` freeness; `B = R[t][s]/(monic-in-s)` free `{sᵉtᵏ}`;
-    `s`-nonzerodivisor by McCoy).
-  - Attacks attempted:
-    - [1] Hypothesis-strength: `IsElliptic` NOWHERE needed in P3 — the chart rings are free
-      with universal bases for arbitrary Weierstrass data; this attack CHANGED the plan
-      (all P3 statements are Δ-free; simpler and stronger).
-    - [2] Base-change trap (the reviewer's own catch, re-verified): equalizers/kernels
-      don't commute with base change — the `Γ ≅ R` statement is per-ring; universality by
-      instantiation only. The i5 sheaf statement quantifies over families, not base
-      changes of a fixed proof.
-    - [3] False-leaf check on `F₁ = R`: over a FIELD this is `l(O) = 1` (genus 1) — but the
-      claim is Δ-free… for a SINGULAR cubic is there a pole-order-1 function? The normal
-      form is pure monomial bookkeeping (never uses Δ); the "genus" reading is a red
-      herring — the filtration is defined via the chart normal form, and `x²y⁻¹`'s
-      exclusion is basis arithmetic. Statement survives as stated FOR THE FILTRATION AS
-      DEFINED; the ticket notes the definitional pin (F via the section ideal on `D(u)`).
-    - [4] `hom_ext_of_affine` false via nilpotents? — precisely the McCoy leaf's job; over
-      any `R` the `s`-nonzerodivisor computation replaces density. (This is the i4 attack
-      that killed naive `IsDominant` routes in the round-1 audit; re-run, still sound.)
-    - [5] i5's `IsIso (π.app U)` for ALL opens vs affine-basis opens: sheaf-level iso is
-      checkable on a basis (principal opens inside chart opens); the statement quantifies
-      over all `U` — provable via basis + sheaf gluing; recorded.
-    - Verdict: SURVIVED (with the Δ-free strengthening applied).
+## THE CHEAP ROUTE (new, and recommended for the ℚ-case)
 
-- **L-1a′/1a** (leaves ×3 + structure): `WeierstrassAtlasData` (real structure — compiles),
-  `EllipticCurveGeom.atlas`, `classifyRingHom`, `universalWeierstrassLoc_map_classifyRingHom`.
-  - Skeleton: `WeierstrassAtlasBundle.lean`.
-  - Source: reviewer round-1 §Q5 caveat 3 (verbatim bundled-cover recommendation with the
-    Lean-shaped sketch, `reply.md`/`reply2.md`); `IsLocalization.Away.lift` for the
-    classifying map.
-  - Attacks attempted: [1] bundle-vs-predicate drift: fields copied verbatim from
-    `LocallyWeierstrass`'s ∃-body (side-by-side check against `Basic.lean:143-151` — the
-    structure ELABORATES, proving the compat equations are well-typed). [2] universe: index
-    by points of `S`, stays in `u`. [3] classify-spec: `map` acts on the five coefficients
-    (`Xᵢ ↦ aᵢ`) — five coefficient equations, no Δ-inverse interference. SURVIVED.
+For a **fixed irreducible, geometrically unibranch** base `S` (normal integral suffices) with generic
+point `η = Spec K`:
 
-- **L-desc** (leaves ×7 + 2 real): `negHom`(+π, zero), `mulHom`(+π), `grpObj`,
-  `grpObj_isCommMonObj`, `grpObj_one_eq_zero`; REAL: `toEllipticCurve`,
-  `toEllipticCurve_geom` (`rfl`, already compiled).
-  - Skeleton: `GroupLawDescent.lean`.
-  - Source: reviewer round-1 §3 step 3; glue over the atlas pullback cover; overlap = L-1b
-    + L-0h.
-  - Attacks attempted: [1] circularity re-check: acyclic (1b ← P3 only; 0h ← P1/P2 only).
-    [2] assembly is `rfl` BY CONSTRUCTION — gate-grade evidence the record shape composes.
-    [3] the pre-existing PARKED sorry (`Point.asSection_zsmul`) is downstream-only; nothing
-    here consumes it. SURVIVED.
+> **Stacks Project, Lemma 58.10.7 ([Tag 0BQI](https://stacks.math.columbia.edu/tag/0BQI))** — if `S` is
+> irreducible and geometrically unibranch then `FÉt(S) → FÉt(K)` is **fully faithful**; i.e. for finite
+> étale `X, Y` over `S`, `Hom_S(X,Y) ≅ Hom_K(X_η, Y_η)`.
 
-### R-A prior-B2 consultation (Step 4.6)
+No Noetherian or Nagata hypothesis. *Not* essentially surjective — but we do not need that: `E[N]²` and
+`μ_{N,S}` already exist over `S`; only a **morphism between their generic fibres** is being extended.
+Connectedness alone is insufficient (irreducible nodal curve: monodromy at the node's branches is
+invisible generically) — geometric unibranchness is the precise hypothesis.
 
-`b2_log.jsonl` (2 entries): entry 1 is pass-metadata (no lemma). Entry 2
-(`isWeierstrassModel_unique`, 2026-07-07): name-match NONE among R-A leaves; shape-match
-"points-equiv pins a model" → addressed at L-0f attack [1] and L-1b (which IS the b2's
-fix-option (3), delivered BB-RR-free). CLEAN.
+The route:
+1. over `K̄`: the pointwise pairing is a morphism (finite étale `K̄`-schemes are finite disjoint unions
+   of points) — **this is exactly what the tree already has**;
+2. Galois equivariance ⟹ a `G_K`-equivariant map of finite `G_K`-sets ⟹ a `K`-morphism
+   `e_{N,K} : E_K[N]² → μ_{N,K}` — **also already in the tree** (`fieldWeilPairingHom` and the
+   finite-étale descent engine);
+3. full faithfulness (0BQI) extends it **uniquely** to `e_{N,S} : E[N]² → μ_{N,S}`;
+4. bilinearity, alternation, antisymmetry and the isogeny identities are *equalities of morphisms* of
+   finite étale `S`-schemes; they hold generically, so **faithfulness** gives them over `S`;
+5. **nondegeneracy at every geometric point**, not just generically: `Φ : E[N] → Hom(E[N], μ_N)` has
+   both sides finite étale of rank `N²`; the generic inverse extends by 0BQI and the composites are
+   identities because they are generically, so `Φ` is an isomorphism over `S`. (Equivalently: the
+   isomorphism locus is open and closed, and contains `η`.)
 
-## Result R-B (T-W7b): canonicity, locally noetherian
+Two caveats, both recorded as they were given:
+* **isogeny functoriality** between two *different* curves still needs the field-level adjointness
+  theorem; the determinant law alone does not give it;
+* this constructs the pairing for a **fixed** normal integral `S`. Base change *from that `S`* is by
+  pullback; comparing with a separately-constructed pairing on a general `T` needs extra naturality.
+  **So this route does not, by itself, discharge the register as stated (arbitrary `S`).**
 
-### Plain-English proof (Step 1 prose; source: GIT pp. 115–117, read in full)
+**Mathlib status**: `CommAlgCat.FiniteEtale`, `FiniteEtale.baseChange`, `FiniteEtale.fiber`,
+`FiniteEtale.equivOfIsSepClosed` (`Mathlib/RingTheory/Etale/Finite.lean`) exist; **no packaged
+generic-fibre full-faithfulness theorem**. For an affine formalisation the proof is the standard
+integrally-closed argument, with `IsIntegrallyClosed.algebraMap_eq_of_integral` among the ingredients.
 
-GIT Prop 6.1 (verbatim statement + 3-case proof in the quotes file, git.txt:4885–4932): with
-`S` connected (chapter convention locally noetherian), `p : X → S` flat with
-`H⁰(X_s) = κ(s)` — replaced here by universal `O`-connectedness, which is what case 1
-actually consumes — and (case 2) a section plus `p` closed: if `f : X → Y` over `S`
-collapses one fibre set-theoretically to a point, then `f = η∘p` for the section
-`η = f∘e`. Case 1 (one-point base): `f = η∘p` topologically; the sheaf map
-`o_Y → f_*o_X ≅ η_*(p_*o_X) ≅ η_*o_S` is "precisely the extra structure required" to make
-`η` a scheme morphism. Case 2: `Z = (f, η∘p)⁻¹(Δ)` the largest closed subscheme of
-agreement; case 1 over every Artinian subscheme `T ⊂ S` concentrated at `t` gives
-`Z ⊇ p⁻¹(T)` scheme-theoretically; hence (Krull intersection in noetherian local rings +
-coherence of `I_Z` + `p` closed) `Z ⊇ p⁻¹(U₀)`, `U₀ ∋ t` open; `U₁ = {t : p⁻¹(t) ⊆ Z} =
-S ∖ p(X−Z)` is closed (`p` flat ⟹ open) and open, so connectedness gives `Z = X`. Case 3
-(no section): fppf descent — never needed here (the zero section exists). Corollaries
-(pp. 116–117): 6.2 (two morphisms into a group scheme agreeing on one fibre differ by
-`(η∘p)·`; apply 6.1 to `f·g⁻¹`); 6.3 (`f(x,y) = g(x)·h(y)`, `Y` connected; apply 6.2 over
-the base `Y`); 6.4 (pointed ⟹ homomorphism; apply 6.3 to `f∘μ`); 6.6 (**uniqueness of the
-group structure with a given identity**; apply 6.4 to `1_X` with the two laws).
+## Recommendation of record
 
-### Attack log (internal node R-B)
+* **arbitrary `S`** (what the register demands): follow **KM 2.8 / Oda §1** — rigidified line bundles
+  and Čech cocycles. Expensive in Lean because of the relative Picard/Poincaré infrastructure, but the
+  tree's `ModularCurves/Picard/` normalized-cocycle development is aimed at exactly this.
+* **normal integral `S` over ℚ**: the generic-fibre + 0BQI route, which reuses the field pairing and the
+  descent engine already proved. Cheapest by far.
+* **abandon** the level-cover ζ-cocycle as a reduction.
 
-- [A] The round-2 audit attack re-run against the source: the neighbourhood factorization
-  DOES globalize over nilpotents — by Artinian thickenings + Krull, NOT density (the gap in
-  both reviewer replies; closed by transcription; audit A4 CLOSED).
-- [B] Hypothesis honesty: locally-noetherian + connected genuinely used (Artinian
-  subschemes; Krull; coherence; clopen). Componentwise reduction (loc-noeth ⟹ components
-  clopen) recorded inside L-C3's sketch. The unrestricted `abelEnrichment_unique` remains
-  gated on AG-1 (T-W7.8) — NOT a leaf of this pass.
-- [C] Composition 6.4 → 6.6 for our record: the two structures share the zero section
-  through `h`; C3's unit-compat hypothesis is supplied by `one_eq_zero` ×2 + `h`; 6.4's
-  "any group scheme" instantiates at the second structure on the same object. Composes.
+## Step 2 — ordered lemma list for the CHEAP route (normal integral `S` over ℚ)
 
-### Leaves
+Transcribing the route's structure, with each leaf's status against the tree and mathlib.
 
-- **L-hyp** (def + leaf): `UniversallyOConnected` (real def) +
-  `EllipticCurveGeom.universallyOConnected`. Skeleton: `Rigidity.lean:42,48`.
-  - Source: GIT case 1 ("One checks that p_*(o_X) ≅ o_S", git.txt:4903); supplied by i5 +
-    `LocallyWeierstrass.baseChange` ⓟ (PROVEN).
-  - Attacks: [1] hypothesis-replacement drift: our hypothesis is STRONGER than GIT's
-    fibrewise `H⁰` and is what case 1 consumes; free for our families; recorded honestly in
-    the docstring. [2] quantifier shape covers the `Y`-side application (checked against
-    L-R1's use). [3] discharge = i5 + ⓟ. SURVIVED.
-- **L-R1** (leaf): `exists_unique_factor_of_isAffine`. Skeleton: `Rigidity.lean:58`.
-  - Source: GIT case 1 ringed-space argument (verbatim quote).
-  - Attacks: [1] false-leaf without hO (𝔸¹-counterexamples) — hypothesis load-bearing ✓.
-    [2] `∃!` = shared-witness + uniqueness — documented exception (uniqueness consumed by
-    glueing of local factors). [3] discharge: Γ-Spec adjunction + hO, ≤ 3 pieces. SURVIVED.
-- **L-R1′** (leaf): `rigidity_of_subsingleton_base`. Skeleton: `Rigidity.lean:69`.
-  - Source: GIT case 1 verbatim. Attacks: [1] one-point base via `∀ a b : S, a = b` — no
-    extra sobriety assumptions (case 1 needs none). [2] the section hypothesis is in GIT's
-    case-1 list ✓. [3] conclusion matches GIT's "there is a section η … such that f = η∘p"
-    exactly (shared-witness `∃∧` documented). SURVIVED.
-- **L-R2** (leaf): `rigidity` (GIT 6.1 case-2 form). Skeleton: `Rigidity.lean:85`.
-  - Source: verbatim statement + proof (quotes file). Hypotheses map 1:1; separatedness of
-    `q` is implicit in GIT (closed equalizer) — surfaced explicitly, honest strengthening
-    of record.
-  - Attacks: [1] the nilpotent-globalization attack: answered by the source's own
-    mechanism — transcribed, not invented. [2] empty-fibre edge: irrelevant (section ⟹
-    nonempty; proof needs nonemptiness nowhere else). [3] Krull-intersection mathlib name +
-    [4] flat-⟹-open-map mathlib name: verify-at-impl (both classical; if either is absent
-    it is a leaf-sized escalation, named in AG-2-style). SURVIVED with two named
-    verify-at-impl discharges.
-- **L-C3** (leaf): `isMonHom_of_one_comp_eq` (GIT 6.4; 6.2/6.3 internal).
-  Skeleton: `Rigidity.lean:101`.
-  - Source: Cor 6.2/6.3/6.4 verbatim. Internal chain recorded (6.2 via Hom-group `f·g⁻¹`;
-    6.3 over base `Y`, `Y` connected — componentwise; sub-leaf: `E` connected when `S` is).
-  - Attacks: [1] Over-language transcription type-checks (μ[A]/η[A]/GrpObj/IsSeparated —
-    build-verified). [2] one-conclusion split (mul-compat only; unit-compat is the
-    hypothesis; inv-compat formal) — documented. [3] connectedness placement settled by the
-    source (along `Y`). SURVIVED.
-- **L-C4** (leaf): `abelEnrichment_unique_of_isLocallyNoetherian`.
-  Skeleton: `Rigidity.lean:114`.
-  - Source (verbatim, GIT Cor 6.6 + proof): "X has only one structure of group scheme over
-    S with the given identity e … Apply Corollary 6.4 to 1_X, with 2 different group laws
-    considered on domain and image."
-  - Attacks: [1] record-equality reduces to `grp`-field equality (rest Prop-valued) ✓.
-    [2] the `h`-transport (cast along geometry-equality) is the only Lean-specific step —
-    recorded. [3] prior-B2: no match. SURVIVED.
+```
+R: e_N over a normal integral base S/ℚ, with bilinearity, alternation, nondegeneracy
+   Source: Stacks 0BQI for the extension step; Silverman AEC III.8 + KM 2.8.5 for the field pairing.
 
-### R-B prior-B2 consultation
+  L1  the pairing over K̄                        → LEAF, DONE  (fieldWeilPairing + its API)
+  L2  descent K̄ → K by Galois equivariance      → LEAF, DONE  (fieldWeilPairingHom, _spec, _unique)
+  L3  FÉt(S) → FÉt(K) is fully faithful          → **API GAP** (Stacks Lemma 58.10.7, Tag 0BQI)
+      L3.1 affine case: A integrally closed domain, Frac A = K, B C finite étale A-algebras
+             ⟹ Hom_A(B,C) ≅ Hom_K(B⊗K, C⊗K)
+           L3.1a faithfulness: B → B⊗K injective (B torsion-free over A)     → easy
+           L3.1b fullness: a K-map carries B into C because **C is integrally
+                 closed in C⊗K** — the "standard integrally-closed argument"  → see L3.2
+      L3.2 finite étale over an integrally closed domain is integrally closed → **the real gap**
+  L4  extend e_{N,K} to e_{N,S}                  → one line given L3
+  L5  bilinearity / alternation / antisymmetry   → one line each: equalities of morphisms of
+                                                    finite étale S-schemes, true generically,
+                                                    transported by faithfulness
+  L6  nondegeneracy at EVERY geometric point     → Φ : E[N] → Hom(E[N], μ_N) is generically iso;
+                                                    extend the inverse by L3; composites are
+                                                    identities because they are generically
+```
 
-No name-match; no shape-match (the B2'd lemma is model-uniqueness-from-point-counts, not
-group-law uniqueness). CLEAN.
+**So the cheap route has exactly one API gap, L3.2**, and it is the statement my own memory already
+flagged: *mathlib has no normality/regularity ascent along étale.* Verified again just now — no
+`IsIntegrallyClosed` results anywhere in `Mathlib/RingTheory/Etale/`, `Smooth/`, or `Unramified/`, and
+no `Morphisms/Normal.lean` under `AlgebraicGeometry/`.
 
-## API gaps (each with sub-tree status)
+**But note the target-specific instance may be much cheaper than the general lemma.** L3.1b only needs
+`C` integrally closed for the *two* algebras actually in play:
+* `C = A[x]/(xᴺ − 1)` — the coordinate ring of `μ_{N,S}`, with `N` invertible;
+* `C = ` the coordinate ring of `E[N]` over an affine chart.
+For the first, `A[x]/(xᴺ−1)` with `N` invertible in a normal `A` decomposes over the divisors of `N`
+and might be handled directly. **Attack this before attempting general étale-normality ascent** — the
+general lemma is a mathlib-scale project, the instance may not be.
 
-- **AG-1 (= T-W7.8)**: arbitrary-`S` canonicity via EGA IV §8 spreading-out (Hom-descent
-  along filtered colimits). NOT skeletonized — no source transcription of EGA IV 8.8.2 has
-  been done and mathlib's approximation infra is in flux; skeletonizing it now would violate
-  quote-or-delete. Status: OPEN, low priority; gates ONLY the unrestricted
-  `abelEnrichment_unique` (which stays as the sorried statement of record); reviewer
-  follow-up F1′ asks whether any downstream consumer needs it. FC Rem. 1.2(a) names the
-  vehicle (quote in quotes file).
-- **AG-2 (conditional)**: `isReduced_of_smoothOfRelativeDimension` if the mathlib search at
-  implementation comes back empty — self-contained fallback via the repo's standard-smooth
-  chart presentations (`locally_isStandardSmooth_…` ⓟ); escalate only on a confirmed gap.
+### Comparison of the two routes, as decomposed
 
-## Confidence gate (Step 5)
+| | arbitrary `S` (register as stated) | normal integral `S`/ℚ (cheap route) |
+|---|---|---|
+| source | KM 2.8.1 / Oda §1 Thm 1.1 | Stacks 0BQI + Silverman III.8 |
+| construction | rigidified line bundles + Čech cocycles | extend the generic-fibre morphism |
+| already proved in tree | `Picard/` normalized cocycles (aimed at it) | L1, L2 — *the whole field side* |
+| API gaps | relative Picard/Poincaré; Cartier–Nishi for perfectness (finite-étale dual only if `N` invertible) | **one**: L3.2 étale-normality ascent (or its two instances) |
+| discharges the register? | yes | **no** — fixed `S` only |
 
-1. Every leaf mathlib-discharged / project-discharged / explicit-gap: ✓ (two verify-at-impl
-   discharge names inside L-R2, flagged; AG-1/AG-2 explicit).
-2. Skeleton compiles: ✓ — `lake build` through `GroupLawDescent` (top of the chain):
-   "Build completed successfully (2969 jobs)", sorries only.
-3. Verbatim quote + Lean↔source match per leaf: ✓ (inline or via `tw7-source-quotes.md`).
-4. Adversarial pass per leaf and internal node, ≥3 attacks, outcomes recorded: ✓ — and the
-   pass CHANGED the plan in five places (L-0a witness ring; L-0b generality; L-0c3
-   minor-identities; L-0cnat square orientation; L-0g unit/inv naturality; plus the
-   `DecidableEq` surface at L-0c6). A pass that changes nothing wasn't adversarial.
-5. Prior-B2 consulted: ✓ (one relevant entry; addressed at L-0f/L-1b; none unaddressed).
-6. Tree mirrors the sources: ✓ — R-B mirrors GIT 6.1→6.2→6.3→6.4→6.6 verbatim; R-A mirrors
-   the reviewer-reply spine with B–L (Thm 1/Thm 2/§5) as the construction source. LOC
-   estimates only where source-anchored.
-7. Single-conclusion leaves: ✓ (documented exceptions: two rigidity shared-witness
-   `∃ sec, _ ∧ _`; one `∃!`; the comparison theorem's shared-witness `∃ C, ∃ hW, _`).
+### Status of Phase 1e
+Steps 1 and 2 done (this file). **Steps 2.5–6 not done**: no Lean skeleton yet, no per-leaf adversarial
+pass, no `b2_log` consultation, gate not run. The route-β tickets on the board are now known to be
+unsourced and should be retired before any skeleton is written — that is a `/develop --continue`
+action, not a `--decompose` one.
 
-**REVIEW-PENDING:** none blocking T-W7a or T-W7b-loc-noeth (F1′/F2/F3 refine, don't gate).
+## Step 4 (partial) — L3.2 attacked, and the recommendation FLIPS
+
+Attack on the "target-specific instance is cheaper" hope: for `N` invertible in a normal `A`,
+`x^N − 1` factors into the `Φ_d`, `d | N`, which are pairwise coprime **only** because `N` is
+invertible, so `A[x]/(x^N−1) ≅ ∏_{d | N} A[ζ_d]`. Integral closedness of the product reduces to that of
+each `A[ζ_d] = A[x]/Φ_d(x)` — a finite free `A`-algebra, étale because `N` is invertible. So the
+instance reduces to: *`A` normal and `A → A[ζ_d]` étale ⟹ `A[ζ_d]` normal.* **That is the general
+étale-normality ascent again, not a cheaper special case.** The hope is dead; L3.2 is irreducible at
+this level and is a mathlib-scale theorem (Stacks 025P / 033C territory).
+
+**Therefore the recommendation flips.** The "cheap" route's single gap is a normality-ascent theorem
+absent from mathlib; the KM/Oda route's gaps are relative Picard/Poincaré infrastructure — expensive,
+but *the tree is already building exactly that* in `ModularCurves/Picard/` (normalized transition
+cocycles, glue effectivity, finite affine trivialising covers), and it is the **sourced** route, and it
+is the only one that discharges the register as stated (arbitrary `S`, arbitrary `N`).
+
+## Phase 1e status — the confidence gate has NOT passed
+
+| Step | Status |
+|---|---|
+| 1 — read the source's full proof | **done** (KM 2.8, pp. 87–91, verbatim quotes above) |
+| 2 — ordered lemma list mirroring the source | **done** for both routes |
+| 2.5 — Lean skeleton, `:= by sorry`, `lake build` green | **not done** |
+| 3 — verbatim quote + Lean↔source paragraph per leaf | partial (quotes for KM 2.8.1's steps; none for the KM tree's leaves, which Step 2 has not yet enumerated) |
+| 4 — provability per leaf | partial (L3.2 attacked and rejected as "cheap") |
+| 4.5 — adversarial pass, ≥3 attacks per leaf | **not done** |
+| 4.6 — prior-B2 log consultation | **not done** |
+| 5 — gate | **NOT PASSED** |
+| 6 — artifact | this file |
+
+**No tickets may be created from this pass.** What it has established is a redirect, not a plan:
+* route β is unsourced — retire its tickets (`/develop --continue`);
+* the generic-fibre route is blocked on one mathlib-scale theorem;
+* the KM 2.8 / Oda route is the sourced one, discharges the register as stated, and its infrastructure
+  is what `Picard/` is already for.
+
+**Next `--decompose` pass should transcribe KM 2.8.1 itself** into the Step-2 lemma list — the
+`K_E^×` sheaf, `Pic ≅ H¹(K^×)` with `H⁰ = 1`, Abel (KM 2.1), the unique `h_i/h_j` factorisation,
+the patching of `h_i ∘ P` — and check each leaf against `ModularCurves/Picard/`.
+
+## Step 2 (KM route) — checked against `Picard/`, and the answer is that IT IS ALREADY BUILT
+
+The instruction at the end of the last block was "transcribe KM 2.8.1 into the Step-2 lemma list and
+check each leaf against `Picard/`". Doing that produces a finding that dominates everything above.
+
+`Picard/SelfAdjointN.lean` (505 lines) is **exactly this transcription, already written**. Its module
+docstring opens: *"The decisive input for the Katz–Mazur / GME construction of the relative Weil
+pairing"*, and it is labelled **DS4 Gap A**. It proves, for `κ_T(Q) = [𝒪(Q − 0)]` and `m_N = [N]`:
+
+| decl | content | status |
+|---|---|---|
+| `kappa`, `sectionCls`, `zeroCls` | the Abel map `E(T) → Pic(E_T)` | proved |
+| `kappa_mem_ker` | lands in `picRel = Ker(0^*)` | proved |
+| `kappa_add`, `kappa_nsmul`, `kappa_zsmul` | `κ` is a group hom (Abel / KM 2.1) | proved |
+| `picMap_mulByHom_kappa_pow` | `(★)` `m_N^* κ(Q) = κ(Q)^N` | proved from the leaf |
+| **`picMap_mulByHom_kappa_eq_one`** | **`(★′)` `[N]Q = 0 ⟹ m_N^* κ(Q) = 1`** | **proved from the leaf** |
+
+`(★′)` is precisely the input KM 2.8.1 constructs `e_N` from: it is what supplies the function
+`f_Q` on `E_T` with `div f_Q = m_N^*(Q) − m_N^*(0)`, whose evaluation on `E[N]` is the pairing.
+
+**The whole file rests on ONE classical leaf** (`:= by sorry`, line 267):
+
+    exists_invertible_tensor_idealModule_add :
+      ∃ N, IsInvertible N ∧ Nonempty (I(D_Q) ⊗ I(D_{Q'}) ≅ (I(D_{Q+Q'}) ⊗ I(D_0)) ⊗ π^* N)
+
+— the **relative theorem of the square**, Silverman III.3.5 sheafified. The second sorry (line 488,
+`exists_pic_map_snd_picMap_mulByHom_kappa`) is documented in-file as *"NOT AN INDEPENDENT LEAF —
+formal consequence of leaf (i)"*, discharged by building the normalized Poincaré bundle `𝒫` and its
+symmetry `τ^*𝒫 ≅ 𝒫` (from `m ∘ τ = m`). Its route is written out in the docstring.
+
+The leaf's route is written out too, and it already survives the attacks I would have run:
+1. universal pair `B = C ×_U C` over the universal smooth cubic — **reduced**, in fact integral;
+2. fibrewise triviality of the rigidified discrepancy `Δ^rig` from the *field* theorem
+   `HasseWeil.Pic0.RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv` (proved, any characteristic);
+3. reduced seesaw ⟹ `Δ^rig ≅ f_B^* M`, then `0^*` gives `M ≅ 𝒪_B`;
+4. base-change down to arbitrary, **possibly non-reduced**, `T`.
+Two alternatives are recorded as *rejected with reasons*: arbitrary-base fibrewise seesaw is **false**
+(the `k[ε]/(ε²)` counterexample — this is [[seesaw-needs-reduced-base]]), and the explicit Weierstrass
+line-and-vertical function needs the degenerate loci as closed subschemes. Two feeders are proved
+(`_of_tensor_iso`, `Modules.nonempty_iso_of_tensorObj_unitObj`), and the remaining bricks are named
+**(A)** the chart-local exact iso and **(B)** the normalized-glue descent assembly.
+
+### Verdict of the decompose pass
+
+| route | leaves outstanding | generality | status |
+|---|---|---|---|
+| β (level-cover determinant descent) | — | invertible `N` | **unsourced — dead** |
+| generic fibre + Stacks 0BQI | 1, **mathlib-scale** (étale-normality ascent) | normal integral `S` only | dominated |
+| **KM 2.8 / GME via `Picard/`** | **1 classical** (rel. thm of the square) + 1 bookkeeping | **arbitrary `S`, arbitrary `N`** | **take this** |
+
+The KM route is the sourced one, the general one, *and* the one with the fewest outstanding leaves —
+and 95% of it is already in the tree with the leaf isolated and its route written.
+
+### The meta-finding (third instance this window)
+
+This is [[grep-the-conclusion-not-the-inputs]] at the level of **routes**, not lemmas. The tree already
+contained the answer, in a file whose docstring names DS4 and Katz–Mazur explicitly. I built route β
+and costed a "cheap route" without ever grepping `Picard/` for the conclusion `[N]^* κ(Q)`. The rule
+needs extending: **before choosing a route, grep the tree for the route's characteristic conclusion,
+not just for the target theorem's statement.** A 505-line file named after the route's key property
+will not surface from greps for `weilPairing`.
 
 ---
 
-## COORDINATOR-AUDIT ADDENDUM (2026-07-07T14:06Z, per the all-lanes directive)
+# `/develop --decompose` — adversarial rounds, 2026-08-05
 
-- **L-ext discharge names, now execution-verified** (supersedes the "verify-at-impl" notes):
-  `isClosedImmersion_equalizer_ι_left` (Mathlib/AlgebraicGeometry/Morphisms/Separated.lean:273),
-  `isIso_of_isClosedImmersion_of_surjective` (with `[IsReduced]` — hence L-ext is REDUCED-ONLY),
-  `Scheme.fromSpecResidueField`. **L-ext must NOT be cited as the discharge for P1's c5**
-  (coordinator §2-P1): an ext principle proves equality of existing morphisms; c5 must
-  CONSTRUCT `addOnZ`/`addOnY` — the two new c5 leaves (factorization bridge;
-  (2,2)-triple→morphism plumbing) are P1's to skeletonize.
-- **L-R1′ NEAR-MISS (attack-log correction — the adversarial pass MISSED a dropped
-  hypothesis).** The skeleton statement of `rigidity_of_subsingleton_base` as committed in
-  `ba82784b` OMITTED GIT 6.1's constancy hypothesis ("If, for one point s ∈ S, f(X_s) is
-  set-theoretically a single point") — over a one-point base the hypothesis is still needed:
-  counterexample `f = 𝟙 (ℙ¹_k)` over `Spec k` (no factorization through a section). The
-  original attack block claimed source-fidelity without re-checking the hypothesis list
-  against the quote — a Step-4.5 attack-4 failure. Statement since corrected in-lane (P4).
-  **Sweep order (open):** re-check every GIT-transcribed skeleton statement's hypothesis
-  list verbatim against `tw7-source-quotes.md` (rigidity, C1–C4 forms) before proving into
-  them; record per-leaf sweep outcomes here.
-- **L-1b source status: DESIGN-DERIVED (downgraded from source-quoted).** 1b has no verbatim
-  KM §2.2/Deligne-formulaire quote (KM is an image-only scan; the route was re-derived in
-  audit A1). Per the directive it carries its own attack obligations: (1) the b2 bridge —
-  the landed `poleOrderFiltration` is a MONOMIAL SPAN, which a ring iso does NOT preserve
-  for free; the intrinsic (section-ideal) characterization is a REQUIRED new leaf gating all
-  of 1b; (2) b3 is several hundred lines (unitness of α,γ; α³ = γ²; five coefficient
-  equations), not bookkeeping; (3) skeleton decls for b1/b2-bridge/b3/b5 must exist before
-  proving into 1b. Board updated accordingly (P3 lane).
-- **L-0c1 discharge text STALE** (pre-dates the c5 reroute): the "repo Proj chart plumbing"
-  one-liner is withdrawn; see the two new c5 leaves above (P1).
-- **T-W7.8 relabel**: mathlib spreading-out EXISTS at the pin (`spread_out_of_isGermInjective`
-  et al.) — AG-1 demoted from "genuine infra" to "thin wrapper; re-check at implementation".
+Run at the user's instruction after a run of avoidable errors. Disposition: **red team**. Target: the
+`[KM-SEESAW]` sub-tree (`ForMathlib/Seesaw.lean`) and the parent leaf it serves,
+`exists_invertible_tensor_idealModule_add` (`Picard/SelfAdjointN.lean:267`).
 
-### Attack-log addendum (lane P4 / fable-P4, 2026-07-07T14:25Z — coordinator §2)
+## Round 1 — the Seesaw sub-tree
 
-- **L-R1′ NEAR-MISS (logged; new sweep rule)**: the committed skeleton statement of
-  `rigidity_of_subsingleton_base` was FALSE — GIT case 1's collapse hypothesis ("`f(X_s)`
-  is set-theoretically a single point") was dropped; counterexample `f = 𝟙 ℙ¹` over a
-  field. Caught at implementation (103ae635); fixed by the STRONGER
-  `rigidity_of_subsingleton_range` (any base, `Set.Subsingleton (Set.range f.base)`,
-  separatedness dropped) + chart core `rigidity_of_range_le_affine` (3199e396). New rule:
-  every GIT-transcribed leaf gets a hypothesis-by-hypothesis diff against its verbatim
-  quote in `tw7-source-quotes.md` BEFORE proving.
-- **Sweep of remaining GIT leaves (fable-P4, 2026-07-07T14:25Z)**: `rigidity` (r2) vs GIT
-  Prop 6.1 — connected ✓ loc.noeth ✓ flat ✓ proper(-as-closed, case 2) ✓ section ✓
-  separated target ✓ one collapsed fibre ✓; `UniversallyOConnected` replaces
-  `H⁰(X_s) = κ(s)` (documented swap, audit A4). COMPLETE.
-  `isMonHom_of_one_comp_eq` (C3) vs Cor 6.3/6.4: GIT's Cor 6.3 runs connectedness along
-  the SECOND factor — needs `A` (not just `S`) connected componentwise: the sub-leaf
-  **L-C2conn** ("`E` connected when `S` is": flat + proper + surjective + connected fibres
-  + O-connected ⟹ connected total space; no single mathlib name) is REQUIRED and was
-  unplanned — ticketed with the r2 4-leaf split. `abelEnrichment_unique_of_isLocallyNoetherian`
-  (C4) vs Cor 6.6: packaging only; hypothesis-complete relative to C3. No other drops.
+### Attack 5 (discharge) — PASSED, all ten citations real
+
+Every name the file's route cites, re-verified with **full** grep output (the earlier `head -1` that
+produced a false "stale citations" report is the reason this is spelled out):
+
+| cited | location | ✓ |
+|---|---|---|
+| `HomologicalComplex.baseChangeKernelZeroLinearEquiv` | `ForMathlib/LowDegreeFiniteProjectiveReplacement.lean:164` | ✓ |
+| `orderedBaseCechComplexBaseChangeIso` | `ForMathlib/AffineModuleCechBaseChange.lean:1037` | ✓ |
+| `kernelZeroLinearEquivOfHom` | `ForMathlib/CochainComplexKernel.lean:41` | ✓ |
+| `baseSectionsIsoKernelOrderedBaseCechDifferential` | `ForMathlib/SchemeModuleOrderedBaseCechZero.lean:256` | ✓ |
+| `baseCechKernelOrderedBaseChangeLinearEquiv` | `ForMathlib/SchemeModuleOrderedBaseCechZero.lean:161` | ✓ |
+| `orderedBaseCechObject_flat_of_isInvertible` | `ForMathlib/SchemeModuleOrderedBaseCech.lean:357` | ✓ |
+| `IsInvertible.exists_finiteAffineBaseCech_flat` | `Picard/InvertibleSheafBaseCechFlat.lean:23` | ✓ |
+| `nonempty_unitObj_iso_of_normalized_glue` | `Picard/RigidDescent.lean:65` | ✓ |
+| `LinearMap.finrank_ker_baseChange_eq` | `ForMathlib/BaseChangeKerCoker.lean:586` | ✓ |
+| `affineFieldFactor_residue_isScalarTower` | `ForMathlib/AffineFieldPointTower.lean:94` | ✓ (relocated today) |
+
+### Attack 2 (edge-case instantiation) on the descent leaf — **SUCCEEDED. Leaf was FALSE.**
+
+`exists_pullback_iso_of_kernel_finrank` assumed only `hrank`: `finrank K (ker (d⁰ ⊗ K)) = 1` at every
+field-valued point, i.e. `h⁰(X_s, M_s) = 1`. Instantiate at `S = Spec k`, `X = E` an elliptic curve,
+`M = 𝒪_E(P)` with `P ≠ 0` rational. Riemann–Roch at genus `1`, `deg = 1 > 2g-2 = 0`: `h¹ = 0`,
+`h⁰ = deg + 1 - g = 1`, stable under field extension — so `hrank` holds. The conclusion would give
+`M ≅ π^* N` with `N` invertible on `Spec k`, hence `𝒪_E(P) ≅ 𝒪_E`, false (degrees `1` vs `0`). The counit
+`π^*π_*𝒪_E(P) → 𝒪_E(P)` is the inclusion `𝒪_E → 𝒪_E(P)`: injective, **not** surjective.
+
+**Diagnosis.** Stacks 0EX7 assumes `ℰ|_{X_s} ≅ 𝒪^{⊕ r_s}` — *geometric* triviality. I replaced it by its
+*numerical* consequence `h⁰ = 1`, which loses the fact that the generator of `Γ(X_s, M_s)` is nowhere
+vanishing — exactly what makes the counit surjective. **Fixed**: the descent leaf is now
+`exists_pullback_iso_of_kernel_finrank_of_fibre_trivial`, carrying `hrank` *and* `hfib`, with the two
+roles spelled out in its docstring (`hrank` ⟹ local freeness of `π_*M`, needing `IsReduced`; `hfib` ⟹
+surjectivity of the counit). Logged in `b2_log.jsonl`. Build green; the parent still assembles, now
+feeding `hfib` to both children.
+
+### Attack 3 (hypothesis strength) on the rank leaf — flaw found, non-fatal
+
+`orderedBaseCech_residueField_kernel_finrank_of_fibre_trivial` carries `[Flat π]`, `[IsProper π]`,
+`[LocallyOfFinitePresentation π]`, `[IsNoetherian X]`. None appears to be used: `Γ(X_s, 𝒪) = κ(s)` comes
+from `hπ` alone (instantiate `UniversallyOConnected` at `T = Spec κ(s)`, `U = ⊤` — that *is* the
+statement), and the base-change iso needs only `M.IsQuasicoherent`, from `hM`. **Over-specified.** Kept
+as-is for source-faithfulness to 0EX7's hypothesis set; recorded so a later `/generalise` can strip them.
+
+### Attack 4 (source drift) on both leaves — **the structural finding of this round**
+
+0EX7's own proof goes through Stacks 0BDP and derived-category machinery. My two leaves go through Čech
+kernel ranks. **They are therefore invented, not transcribed** — precisely what the source-faithfulness
+rule warns against — and *both* invented leaves have now turned out false (`KM-SEESAW-1` on exactness,
+`KM-SEESAW-2′` on the rank). Rule 4 of that section says two false leaves means the source proves it a
+different, easier way, or that the result is not the one needed. That is now an open question referred to
+the second opinion (below), not a settled plan.
+
+## Round 2 — the parent leaf, and whether the seesaw is on the critical path
+
+### Attack 1 (counterexample search) / grep-the-conclusion — no cube material exists
+
+`theorem.*cube` returns 74 raw hits and **zero** relevant declarations: all are `sCubeCoord₀/₁/₂`,
+`root_cube_eq`, `exists_unit_sq_cube` (Weierstrass coordinate algebra) and `atlasCubeCover` (an
+unrelated index set). No `theoremOfCube`, no `cubeBundle`, no `Poincare`/`poincareBundle`, no
+`theoremOfSquare`. The field-level square exists only as `tos_divisor`, `tos_toClass`,
+`tos_pullback_principal_of_{dual_additive_at,sigma_eq_zero}` (`HasseWeil/Pic0/`). **So the cube route is
+a from-scratch build**, and the earlier "the KM route is 95% done" framing covers `(★)`/`(★′)` only —
+*not* the leaf beneath them.
+
+### Consistency check that did pass
+
+The leaf's `π^* N'` correction term is consistent with the field-level `tos_divisor` having none: over a
+field `Pic(k) = 0`, so no correction term is expressible there. The relative statement needs one exactly
+because `Pic(T) ≠ 0`. Shapes agree.
+
+### Referred to the second opinion (not settled by me)
+
+`SelfAdjointN.lean:236` asserts an **exact** tensor iso is false, by "restricting along the constant zero
+section would force a degree-`2` bundle to agree with a degree-`4` one" for the family `E × E ⟶ E` with
+`Q = Q' = ` the diagonal. I could not verify this argument to my own satisfaction, and the leaf's *shape*
+(with or without `π^* N'`) depends on it. Asked as Q2 of the second opinion, together with: whether the
+cube instantiation at `X = Y = Z = E_T` genuinely satisfies 0BF4's hypotheses (2)/(3)/(4) and yields the
+`π^* N'` form (Q1); whether the cube needs the seesaw at all, given 0BF4's proof cites 37.33.1/4/7 and
+**not** 37.33.2 (Q3); whether a route avoids both (Q4); whether 0BF4 is valid over **non-reduced** bases,
+since the leaf must apply over arbitrary `T` while 0EX7 demands reducedness (Q5); and whether any
+standard reference states the relative square in the `π^* N'` form for transcription (Q6).
+
+## Step 4.6 — prior-B2 log consultation (16 entries)
+
+No name- or shape-match for the current leaves other than my own two entries from this session. But the
+log has a **dominant failure shape** across the project, and it is the one that bit me twice today:
+
+> 7 of the 14 substantive entries (`T-A4`, `T-E5`, `T-H4`, `T-H6`×2, `T-E5f`, `T-G3a-SUB3`) are
+> **hypothesis loss in transcription** — a statement that drops or weakens a hypothesis the source
+> maintains (`IsUnit (2 : R)`; "relatively representable"; global vs. local orbits; bare presheaf vs.
+> sheaf). `KM-SEESAW-1` and `KM-SEESAW-2′` are the same shape at one remove: substituting a
+> *cohomological/numerical* consequence for a *geometric* hypothesis.
+
+**Actionable rule for this project**: when a leaf replaces a source hypothesis with something derived
+from it, that substitution is the first thing to attack. In both of today's cases one edge-case
+instantiation (genus-1 `H¹ ≠ 0`; `𝒪(P)` of degree 1) killed the leaf immediately.
+
+## Round 3 — second opinion (gpt-5.6-sol, max effort), and the primary-source verification that settles it
+
+### First: the reviewer's headline objection does NOT apply to the code — my question was defective
+
+The review opens with a "preliminary fatal issue": that `κ_raw(Q) = 𝒪(D_Q) ⊗ 𝒪(D_0)^{-1}` does not land in
+`ker(0^*)`, so `kappa_mem_ker` and `(★)` would both be false. Its counterexample is correct *for the raw
+class*: with `T = C`, `E_T = C × C → C`, `Q(t) = (t,t)`, one gets `0^*κ_raw(Q) ≅ 𝒪_C([0])`, of degree `1`.
+
+**But the tree does not use the raw class.** Verified directly:
+* `kappa E hsm t Q := (sectionToPicRel …).1` (`Picard/SelfAdjointN.lean:173`);
+* `kappa_eq_picRelProj` (`:222`) — `kappa = picRelProj (sectionCls Q * zeroCls⁻¹)`;
+* `picRelProj` (`Picard/RelativePic.lean:81`) is exactly `x ↦ x * (f_T^*(0_T^* x))⁻¹`, and
+  `picRel := (Pic.map (baseChangeZero …)).ker` (`:57`);
+* so `kappa_mem_ker` (`:230`) is true **by construction** — it is `MonoidHom.mem_ker.mp (…).2`.
+
+That is precisely the `κ⁰ = κ_raw ⊗ f^*(0^*κ_raw)^{-1}` normalisation the review prescribes as the fix.
+**I wrote the question with the normalisation dropped**, so the reviewer correctly attacked what I wrote
+rather than what the tree does. Recorded because the same slip in a docstring would mislead the next
+reader: `SelfAdjointN.lean`'s `κ_T(Q) = [𝒪(Q − 0)]` shorthand reads as the raw class and is not.
+
+### Findings that DO survive against the code
+
+| # | finding | status |
+|---|---|---|
+| 1 | the 7-term cube I proposed is wrong — needs an 8th factor `p_{E³}^*(e^*A)^{-1}`, or `A^{rig} = A ⊗ f^*(e^*A)^{-1}`, else 0BF4's hypothesis (2) fails since `e^*𝒪(D_0) ≅ ω^{-1}` | **my plan was wrong** |
+| 2 | 0BF4 hypothesis (4) — `Z` connected — **fails for arbitrary `T`**; must reuse 0BF4's *proof* (the triviality locus is open-and-closed and meets the zero section on every component) rather than instantiate its statement | **my plan was wrong** |
+| 3 | pulling back along `(Q,Q',0) : T → E_T³` yields a bundle on `T`, not an iso on `E_T`; the correct map is `u ↦ (u, −Q, −Q')` | **my plan was wrong** |
+| 4 | **0EX7 is not used in 0BF4's proof** (chain: 0BDP → 0BF0 → 0BF3 + Künneth/base-change) | confirms Q3's suspicion |
+| 5 | the `ℓ/v` line-and-vertical route cannot work globally — a global `ℓ/v` would make `(P)+(Q)−(P+Q)−(0)` principal, i.e. give the exact iso already disproved | agrees with `SelfAdjointN`'s own rejection |
+| 6 | my degree-`2`-vs-`4` argument is **valid**, but its stated *reason* is not what the counterexample shows: in the constant family the normal bundle is **trivial**; `0^*I(D_Q)^{⊗2}` has degree `−2` and `0^*I(D_{2Q}) ≅ 𝒪(−[2]^*[0])` degree `−4`. `SelfAdjointN.lean:236`'s "the normal bundle is generally nontrivial" is a *different* (also true) point | docstring reason to correct |
+| 7 | **Katz–Mazur Theorem 2.1.2 states the leaf verbatim for arbitrary `S`** | **the answer — verified below** |
+| 8 | a Picard-*class* equality does not yield a pairing; normalized isomorphisms + base-change compatibility + cubical cocycle/symmetry are a separate coherence leaf | real, and consistent with `SelfAdjointN`'s "rigidification trap" note |
+
+### The primary-source verification — KM 2.1.2, book p. 63 (`refs/…/katz-mazur-arithmetic-moduli-FULL.pdf` p. 74)
+
+(2.1.1) fixes the notation: `I(P)` is "the ideal sheaf of `P` viewed as an effective Cartier divisor of
+degree one in `E`", and `I⁻¹(P)` the inverse ideal sheaf. Then, verbatim:
+
+> "**THEOREM 2.1.2 (Abel).** There exists a unique structure of commutative group-scheme on `E/S` such
+> that for any `S`-scheme `T`, and any three points `P, Q, R` in `E(T) = E_T(T)`, we have
+> `P + Q = R`
+> if and only if there exists an invertible sheaf `ℒ₀` on `T` and an isomorphism of invertible sheaves on
+> `E_T`
+> `I⁻¹(P) ⊗ I⁻¹(Q) ⊗ I(0) ≃ I⁻¹(R) ⊗ f_T^*(ℒ₀)`."
+
+**Lean ↔ source match.** Put `R = P + Q` and invert: `I(P) ⊗ I(Q) ≅ I(P+Q) ⊗ I(0) ⊗ f_T^*(ℒ₀^{-1})`.
+That **is** `exists_invertible_tensor_idealModule_add` (`Picard/SelfAdjointN.lean:267`) with `N' = ℒ₀^{-1}`
+— same four ideal sheaves, same `f^*`-correction, arbitrary `S`, no reducedness, no invertibility of `N`.
+The leaf is a **transcription**, not a derivation.
+
+### KM's proof (book pp. 64–66) — and why it needs neither the cube nor the seesaw
+
+1. Reduce to: `E(T) → Pic^{(1)}(E_T/T)`, `P ↦ [I⁻¹(P)]`, is **bijective**, where `Pic^{(1)}` is
+   fibrewise-degree-one invertible sheaves modulo `ℒ ∼ ℒ ⊗ f_T^*ℒ₀`. Given bijectivity, `I⁻¹(P) ⊗ I⁻¹(Q) ⊗
+   I(0)` is fibrewise degree one, hence of the form `I⁻¹(R) ⊗ f^*ℒ₀` for a **unique** `R` — which both
+   defines the group law and proves the theorem.
+2. Zariski-local on `S`, using `f_*(𝒪_E) = 𝒪_S` — **this is the tree's `UniversallyOConnected`**.
+3. Finite presentation reduces to `S` affine **noetherian**.
+4. The crux: for `ℒ` fibre-by-fibre of degree one, `f_*ℒ` is invertible and of formation compatible with
+   arbitrary base change, and `R¹f_*ℒ = 0`. KM's reason: `R¹f_*` is compatible with base change (`f`
+   proper and flat) and over an algebraically closed field `H¹(E, ℒ) = 0` because `deg ℒ = 1 > 2g − 2 = 0`;
+   then Nakayama. Cites **[Mum 4, p. 53]** (Mumford, *Abelian Varieties*) for "`R¹f_*ℒ = 0` ⟹ `f_*ℒ`
+   locally free and base-change compatible".
+5. Pick an `𝒪_S`-basis `ℓ` of `f_*ℒ` Zariski-locally; `(ℒ, ℓ)` defines an effective Cartier divisor.
+
+**The decisive structural point.** KM needs `H¹ = 0`, and it *has* it — because the sheaves in play are
+**fibrewise degree one**, where `deg > 2g − 2`. Nothing here is a seesaw, and nothing needs the base
+reduced. That is exactly why KM 2.1.2 is stated over an arbitrary `S`.
+
+**Consequence: `ForMathlib/Seesaw.lean` is off the critical path.** 0EX7 is used neither by 0BF4 (per the
+review) nor by KM 2.1.2 (per the source). Its two remaining leaves need not be proved for DS4. And the
+reducedness / universal-pair / reduced-seesaw apparatus in `SelfAdjointN.lean`'s route sections is
+likewise unnecessary — it was solving a problem (`H¹ ≠ 0` for degree-zero sheaves) that KM sidesteps by
+never leaving degree one.
+
+**And the tree already has KM's step 4, for exactly the right sheaf.**
+`FibrewiseElliptic.sectionPoleSheafPower_residueField_orderedBaseCech_exactAt_succ`
+(`EllipticCurve/PoleSheafBaseCechHigher.lean:295`) gives positive-degree Čech exactness for `𝒪(n[0])`
+under `hn : 1 ≤ n` — i.e. `H¹ = 0` in exactly the degree-`≥ 1` range KM uses — and
+`…_field_orderedBaseCech_kernel_finrank` (`:360`) gives `h⁰ = n`, so `h⁰ = 1` at `n = 1`. The `hn : 1 ≤ n`
+that made those results *useless* for the seesaw is precisely what makes them *right* for KM 2.1.2.
+
+### Verdict of the three rounds
+
+The route is **KM 2.1.2, transcribed**, and the tree is much closer to it than to anything I planned:
+`UniversallyOConnected` (step 2) ✓ proved; Noetherian approximation (step 3) ✓ in `Picard/InvertibleSheaf
+NoetherianSmoothStage.lean`; `H¹ = 0` and `h⁰ = 1` for degree-one sheaves (step 4) ✓ in
+`PoleSheafBaseCechHigher.lean`; effective-Cartier-divisor-from-a-section (step 5) ✓ in
+`EllipticCurve/PoleSheaf.lean`. What is genuinely missing is the **bijectivity of
+`E(T) → Pic^{(1)}(E_T/T)`** — one internal node with the four steps above as its children — plus finding 8's
+coherence leaf.
+
+**Do not** build: the cube, the seesaw, the universal-pair/reduced-seesaw route, or the `ℓ/v` route.
+
+---
+
+# Rounds 4–6 — the KM 2.1.2 tree, transcribed from the source's own proof
+
+## Round 4, Step 1 — KM's FULL proof, read to the end (book pp. 63–67 = pdf 74–78)
+
+The proof does not stop where I stopped last round. Its complete structure, with pages:
+
+**Reduction (p. 64).** Show `E(T) → Pic^{(1)}(E_T/T)`, `P ↦ [I⁻¹(P)]`, is **bijective**, where `Pic^{(1)}`
+is "the set of isomorphism classes of invertible sheaves `ℒ` on `E_T` which are fiber-by-fiber of degree
+one, modulo the equivalence relation `ℒ ∼ ℒ ⊗ f_T^*(ℒ₀)`". Given bijectivity: `I⁻¹(P) ⊗ I⁻¹(Q) ⊗ I(0)` is
+fibre-by-fibre of degree one, hence isomorphic to `I⁻¹(R) ⊗ f^*(ℒ₀)` for a **unique** `R ∈ E(T)` — "therefore
+the group-law is unique", and it exists by composing with the bijection `Pic^{(1)} → Pic^{(0)}`,
+`ℒ ↦ ℒ ⊗ I(0)`.
+
+**Then bijectivity, in five steps** (replacing `E/S` by `E_T/T` reduces to `T = S`):
+
+* **(p. 65)** The question is *Zariski-local on `S`*: given `ℒ, ℒ'`, an affine open cover `{U_i}`,
+  invertible `ℒ_{0,i}` on `U_i`, and isomorphisms `φ_i : ℒ ≅ ℒ' ⊗ f^*(ℒ_{0,i})` over `f⁻¹(U_i)`, there is a
+  global `ℒ₀` and `φ : ℒ ≅ ℒ' ⊗ f^*(ℒ₀)`. Because `f_*(𝒪_E) = 𝒪_S`, one has `f_*f^*(ℒ_{0,i}) = ℒ_{0,i}`; the
+  `φ_i` show `f_*(ℒ^{-1} ⊗ ℒ')` and `f_*(ℒ ⊗ (ℒ')^{-1})` are mutually inverse invertible sheaves; naming the
+  second `ℒ₀` and putting `ℒ'' = ℒ' ⊗ f^*(ℒ₀)` gives `f_*(ℒ^{-1} ⊗ ℒ'') = 𝒪_S = f_*(ℒ ⊗ (ℒ'')^{-1})`, "under
+  which the unit section `1 ∈ Γ(S, 𝒪_S)` is the required isomorphism `ℒ ≅ ℒ''`".
+* **(p. 66)** Reduce to `S` affine, then — "because `E/S` is of finite presentation" — to `S` affine
+  **noetherian** ("even a finitely generated `ℤ`-algebra if we like").
+* **(p. 66)** For `ℒ` fibre-by-fibre of degree one: `f_*ℒ` is invertible, of formation compatible with
+  arbitrary base change, and `R¹f_*ℒ = 0`. KM: *"It suffices to prove that `R¹f_*ℒ = 0`, for then
+  [Mum 4, p. 53] `f_*ℒ` is automatically locally free and of formation compatible with arbitrary change of
+  base, so necessarily of rank one because this is obviously so over an algebraically closed field. Now
+  `R¹f_*ℒ = 0` because it is of formation compatible with arbitrary change of base (being an `R¹f_*` for
+  `f` proper and flat) and because over an algebraically closed field, `H¹(E, ℒ) = 0` for
+  `degree(ℒ) > 2g−2 = 0`. As `R¹f_*ℒ` is a coherent sheaf on `S` with all fibers zero, it vanishes by
+  Nakayama's lemma."*
+* **(pp. 66–67)** `f_*ℒ` invertible ⟹ Zariski-locally pick an `𝒪_S`-basis `ℓ`; then `(ℒ, ℓ)` defines an
+  effective Cartier divisor, i.e. `0 → 𝒪 --ℓ--> ℒ → ℒ/𝒪 → 0` with `ℒ/𝒪` flat over `S`. This "amounts to the
+  statement that the map of invertible sheaves `𝒪 --ℓ--> ℒ` on `E` is injective, and remains so after any
+  base change `T → S`. For this we are reduced to the case `S = Spec(k)` with `k` a field, and
+  `ℓ ∈ H⁰(E, ℒ)` a `k`-basis, so non-zero, in which case the assertion is obvious."
+* **(p. 67)** The divisor is fibre-by-fibre of degree one, and *"by (1.2.7), any effective Cartier divisor
+  of degree one is a section `P ∈ E(S)`"*. Finally *"one verifies easily that the two maps … are inverse
+  isomorphisms. Q.E.D."*
+
+## Round 4, Step 2 — the tree, mirroring those pages
+
+```
+R  exists_invertible_tensor_idealModule_add          KM 2.1.2, p. 63  ← the leaf in SelfAdjointN:267
+   └ L0 (internal) E(T) ≃ Pic⁽¹⁾(E_T/T)              KM pp. 64–67
+       ├ L1 Zariski-descent of the f^*-equivalence   p. 65   ← f_*𝒪_E = 𝒪_S
+       ├ L2 reduction to an affine noetherian base   p. 66   ← finite presentation
+       ├ L3 R¹f_*ℒ = 0 for fibrewise-degree-1 ℒ      p. 66   ← base-change compat + H¹=0 + Nakayama
+       ├ L4 f_*ℒ invertible & base-change compatible p. 66   ← Mumford AV p. 53   **API GAP**
+       ├ L5 𝒪 --ℓ--> ℒ injective, universally        pp. 66–67 ← reduce to a field, ℓ ≠ 0
+       ├ L6 (ℒ,ℓ) is an effective Cartier divisor    pp. 66–67
+       ├ L7 degree-one effective Cartier divisor = a section   KM (1.2.7)
+       └ L8 the two maps are mutually inverse        p. 67 ("one verifies easily")
+   └ L9 (internal) bijectivity ⟹ the theorem          p. 64
+       └ L10 Pic⁽¹⁾ → Pic⁽⁰⁾, ℒ ↦ ℒ ⊗ I(0), is a bijection   p. 64
+```
+
+Depth 2, eight leaves under `L0`. Every leaf has a page in KM. **This is a transcription** — contrast the
+two invented Seesaw leaves, both of which were false.
+
+## Round 5, Step 4 — provability per leaf, checked against the tree
+
+| leaf | status |
+|---|---|
+| L1 | **project** — `locallyWeierstrass_pushforward_O_eq_O` (`EllipticCurve/PoleFiltration.lean:3000`), packaged as `UniversallyOConnected` (`EllipticCurve/Rigidity.lean:54`). The descent argument itself is elementary given it. |
+| L2 | **project** — Noetherian approximation in `Picard/InvertibleSheafNoetherianSmoothStage.lean:257` and `ForMathlib/NoethApprox.lean` |
+| L3 | **partial** — the tree has the Čech form for `𝒪(n[0])`, `n ≥ 1` (`PoleSheafBaseCechHigher.lean:295`), *not* for a general fibrewise-degree-one `ℒ` |
+| **L4** | **API GAP** — nothing in tree or mathlib. This is the real gap. |
+| L5 | gap, but KM calls it obvious after reducing to a field |
+| L6 | **partial** — `RelEffCartierDiv.sectionDivisor*` and `sectionDivisor_degree` (`LevelStructure/CartierDivisor.lean:186`) give the *forward* direction |
+| L7 | **citation to verify** — KM (1.2.7); the converse direction, not yet located in the tree |
+| L8 | gap, elementary |
+
+### The API gap, named precisely, with its source verified
+
+**Mumford, *Abelian Varieties*, p. 53, Corollary 3** — read at `refs/…/mumford-abelian-varieties.pdf`
+p. 64, verbatim:
+
+> "**COROLLARY 3.** Let `X, Y, f` and `ℱ` be as above (*unlike Corollary 2, `Y` need not be reduced*).
+> Assume for some `p` that `H^p(X_y, ℱ_y) = (0)`, all `y ∈ Y`. Then the natural map
+> `R^{p-1}f_*(ℱ) ⊗_{𝒪_Y} k(y) → H^{p-1}(X_y, ℱ_y)` is an isomorphism for all `y ∈ Y`."
+
+**This settles the reducedness question against the source of the citation.** Mumford's *Lemma 1* (p. 51)
+— "if `Y` is **reduced** and `dim[ℱ ⊗ k(y)] = r` for all `y`, then `ℱ` is locally free of rank `r`" — is the
+reduced-base statement, and it is exactly where my `k[ε]/(ε²)` counterexample lives. But **Corollary 3
+carries an explicit parenthetical that `Y` need not be reduced**, and local freeness of `f_*` comes from
+the `K^•`-splitting argument on p. 52, not from Lemma 1. So KM 2.1.2 genuinely holds over an arbitrary,
+possibly non-reduced `S` — which is why KM states it that way, and why **every reducedness hypothesis I
+introduced this session was an artifact of my own route, not of the mathematics.**
+
+## Round 6 — adversarial pass
+
+### L3 — attacks
+* **[1] Counterexample.** The obvious attack is the one that killed `KM-SEESAW-1`: `H¹(E, 𝒪) = k ≠ 0` at
+  genus 1. It does **not** apply — L3's `ℒ` is fibrewise degree **one**, and `deg = 1 > 2g−2 = 0` gives
+  `H¹ = 0`. The degree-zero case, where the attack bites, never occurs in KM's route.
+* **[2] Edge cases.** `g = 1` is the only genus in play, so the bound `deg > 2g−2` reads `deg > 0`; degree
+  exactly `1` is the boundary and satisfies it strictly. Non-reduced `S`: covered — Mumford Cor. 3 states
+  it. Empty `S`: vacuous.
+* **[3] Hypothesis strength.** `f` proper **and** flat are both used (base-change compatibility of
+  `R¹f_*`); coherence of `R¹f_*ℒ` is what lets Nakayama conclude from vanishing fibres. Dropping fibrewise
+  degree one breaks it immediately (previous bullet). No hidden reducedness.
+* **[4] Source drift.** The Lean statement would read "`R¹f_*ℒ = 0` for `ℒ` fibrewise of degree one on a
+  proper flat `E/S`", which is KM p. 66's sentence verbatim. No drift.
+* **Verdict: SURVIVED.**
+
+### L4 — attacks
+* **[1] Counterexample.** Local freeness of a pushforward with constant fibre dimension is false over a
+  non-reduced base *in general* (Mumford Lemma 1 needs `Y` reduced; `k[ε]/(ε²)` realises the failure). The
+  attack fails **here** only because L4's hypothesis is `R¹f_*ℒ = 0`, not "constant fibre dimension" — and
+  Corollary 3 is explicitly reduced-free. **This is the same distinction I collapsed in `KM-SEESAW-2′`;
+  the leaf must be stated from `R¹ = 0`, never from a dimension count.**
+* **[2] Edge cases.** `p = 1` is the case used; `p = 0` is vacuous. Rank one comes from the fibre value
+  over an algebraically closed field.
+* **[3] Hypothesis strength.** `Y` reduced must **not** be added — adding it would silently reintroduce the
+  restriction KM's statement avoids and would make the leaf inapplicable over the non-reduced bases the
+  register needs.
+* **[5] Discharge.** Nothing in mathlib (three searches last round: `leansearch`, `local_search
+  "cohomologyBaseChange"`, `loogle` on `IsProper → pushforward` — all empty) and nothing in the tree. A
+  genuine API gap needing its own sub-tree.
+* **Verdict: leaf is well-stated; discharge is an API GAP.**
+
+### L0 (internal) — composition attack
+Could L1–L8 all hold and `E(T) ≃ Pic⁽¹⁾` fail? The composition is KM's own: L1 makes the claim
+Zariski-local, L2 makes it noetherian-affine, L3+L4 construct `f_*ℒ` as an invertible sheaf, L5+L6 turn a
+local basis of it into an effective Cartier divisor, L7 turns that divisor into a section, L8 checks the
+two constructions invert one another. The one place a gap could hide is L8 ("one verifies easily"), which
+is where the *`ℒ₀`-equivalence* must be shown to be respected in both directions — KM does not spell it
+out. Flagged as the node most likely to expand.
+
+## Gate (Step 5) — which conditions hold
+
+| # | condition | verdict |
+|---|---|---|
+| 1 | every leaf discharged or an explicit API gap | **partial** — L5, L7, L8 not yet located; L4 is a named gap |
+| 2 | Lean skeleton compiles | **not done** for this tree (the Seesaw skeleton is now off-path) |
+| 3 | verbatim source quote per leaf | **yes for R, L0's five steps, L3, L4**; L7 needs KM (1.2.7) read |
+| 4 | adversarial pass on every leaf/node | **done for L3, L4, L0**; not for L1, L2, L5–L8, L9, L10 |
+| 5 | prior-B2 log checked | **yes** — and both prior B2s are *avoided* by this tree, since KM never leaves degree one |
+| 6 | tree mirrors the source's structure | **yes** — every node cites a KM page |
+| 7 | single-conclusion leaves | yes as decomposed |
+
+**Gate NOT passed.** But the tree is now a transcription with a page per node, the one real API gap is
+named and sourced (Mumford AV p. 53 Cor. 3), and the two false-leaf traps are understood well enough that
+the attack on L4 caught the same collapse *before* it was written this time.
+
+---
+
+# Rounds 7–9
+
+## Round 7 — L7's source secured (KM Lemma 1.2.7, book p. 11 = pdf 22)
+
+The converse half, verbatim:
+
+> "Conversely, if `D` is an effective Cartier divisor in `C/S`, proper over `S` of degree one, then we have
+> a diagram `D ↪ C → S` in which the diagonal arrow is an isomorphism (because locally on `S`, say
+> `S = Spec(R)`, it turns the affine ring of `D` into an `R`-algebra which is an invertible `R`-module,
+> i.e., into `R` itself). Q.E.D."
+
+**Lean ↔ source match.** L7 asserts: a `RelEffCartierDiv π` proper over `S` with fibre degree `1`
+everywhere is `sectionDivisor π z hz` for some section `z`. The quote gives exactly that, and gives the
+proof in one sentence — `Γ(D)` is an invertible `R`-module, hence free of rank one, hence `D ≅ S`. A
+genuine leaf, and a cheap one.
+
+**Attacks.** [1] No contradicting statement in the tree; the *forward* direction is `sectionDivisor_degree`
+(`LevelStructure/CartierDivisor.lean:186`) and agrees. [2] Edge cases: degree `0` (`D = ∅`) and degree
+`≥ 2` are excluded by hypothesis and would both make the diagonal non-iso, so the hypothesis is not
+over-specified. [3] Properness over `S` is needed — without it `Γ(D)` need not be finite locally free.
+[4] No drift. **SURVIVED.**
+
+## Round 8 — Step 2.5 attempted, and it is BLOCKED on two missing definitions
+
+The skeleton cannot be written yet. Checked, not assumed:
+
+| vocabulary the tree needs for the KM tree | status |
+|---|---|
+| `RelEffCartierDiv.degree D s` | **exists** — `LevelStructure/CartierDivisor.lean:108` |
+| fibrewise degree of an *invertible sheaf* | **absent** — only prose mentions of "fibrewise" |
+| `Pic⁽¹⁾(E_T/T)` = fibrewise-degree-one classes modulo `f_T^*` | **absent** — the notion does not exist |
+| `R¹f_*` / higher pushforward | **absent entirely** |
+| KM 1.2.7's converse (degree-one divisor ⟹ section) | **absent** |
+
+So gate condition 2 is blocked behind **two prerequisite definitions** (fibrewise degree of an invertible
+sheaf; `Pic⁽¹⁾`), which are themselves an API-design step, not leaves.
+
+**But `R¹f_*` is not needed.** The tree's Čech formulation expresses L3 and L4 without any derived functor:
+L3 becomes "the base-Čech complex is exact at position 1 after base change to each residue field" — which
+is literally `PoleSheafBaseCechHigher`'s `exactAt_succ` shape, already proved for `𝒪(n[0])`, `n ≥ 1` — and
+L4 becomes "`ker d⁰` is invertible", the `kernel_finrank` shape. This is why the Čech layer exists: it is
+the derived-functor-free surrogate, and the degree-one restriction that made it useless for a seesaw is
+exactly the range KM works in.
+
+## Round 9 — a structural simplification the source's own framing hides
+
+KM proves *full bijectivity* of `E(T) → Pic⁽¹⁾` because KM is **constructing the group law** — 2.1.2 says
+"there exists a unique structure of commutative group-scheme … such that …". **The tree already has the
+group law**: `(E.baseChange t).Point (𝟙 T)` carries `AddCommGroup`, and `kappa`/`kappa_add`/`kappa_nsmul`
+are proved against it.
+
+So the leaf `R` is not "construct the group law". It is: **the tree's existing group law agrees with the
+Abel/Picard one on the specific sheaf `I⁻¹(P) ⊗ I⁻¹(Q) ⊗ I(0)`.** That needs the Abel map's injectivity
+plus a surjectivity statement *only for that sheaf*, not the full `Pic⁽¹⁾` bijection — and it is why the
+leaf can be stated (as it already is in `SelfAdjointN.lean:267`) with no mention of `Pic⁽¹⁾` at all.
+
+**This cuts L0's eight leaves down to what R actually consumes**: L3 + L4 for that sheaf (Čech form,
+partially present), L5 + L6 + L7 to turn the resulting basis into a section, and an identification of that
+section with `P + Q` in the tree's group law. L1, L2, L8, L10 and the `Pic⁽¹⁾` definition are needed only
+for KM's *uniqueness* claim, which the tree does not need.
+
+**Caution recorded.** This is a deviation from the source's structure — exactly the move that produced two
+false leaves earlier this session. It is admissible here only because the omitted parts are KM's
+*construction of a group law the tree already has*, not steps of the isomorphism argument. The next round
+must verify that claim by checking how the tree's group law was in fact constructed; if it was built from
+a Weierstrass chart, then "the two group laws agree" is itself a theorem needing its own decomposition,
+and this simplification is premature.
+
+## Gate after nine rounds
+
+| # | condition | verdict |
+|---|---|---|
+| 1 | leaves discharged or explicit API gap | **partial** — L4 named + sourced; L5/L8 unlocated; L3 partial |
+| 2 | skeleton compiles | **BLOCKED** — needs the two prerequisite definitions above |
+| 3 | verbatim quote per leaf | R ✓, L0's five steps ✓, L3 ✓, L4 ✓, **L7 ✓ (this round)** |
+| 4 | adversarial pass | L3, L4, L0, **L7** done; L1/L2/L5/L6/L8/L9/L10 not |
+| 5 | prior-B2 log | ✓ — both prior B2s are structurally avoided, since KM stays in degree one |
+| 6 | mirrors the source | ✓ for rounds 4–7; **round 9's simplification deliberately departs from it and is flagged, not adopted** |
+| 7 | single-conclusion | ✓ |
+
+**Still not passed**, and the binding blocker is now precise: two definitions (fibrewise degree of an
+invertible sheaf, `Pic⁽¹⁾`) must be designed before any skeleton exists, unless round 9's simplification
+survives its verification — in which case neither definition is needed.
+
+---
+
+# Round 10 — the verification round 9 required, and it terminates the pass
+
+Round 9 flagged a simplification and made it conditional on one check: **how was the tree's group law
+actually constructed?** Answer, verified in `EllipticCurve/GroupLaw.lean`:
+
+```lean
+structure EllipticCurve (S : Scheme.{u}) extends EllipticCurveGeom S where
+  grp : GrpObj (Over.mk π)                    -- the group-object structure, as DATA
+  comm : letI := grp; IsCommMonObj (Over.mk π)
+  one_eq_zero : …                              -- the unit is the zero section
+```
+
+and `pointAddCommGroup` (`:124`) is transported from that carried field via `Hom.commGroup`. **The group
+law is a hypothesis, not a theorem.**
+
+**So round 9's simplification FAILS.** "The tree's group law agrees with the Abel one" is not a shortcut
+around `L0` — it *is* `abelEnrichment_unique`, and both it and `abelEnrichment_exists` are already stated
+in the tree, at `GroupLaw.lean:80` and `:84`, as `:= by sorry`, labelled **T-A6b / T-A6c, "deferred purity
+project"**. Those are two of the 114 project sorries.
+
+## The tree had already produced this decomposition, under expert review, and fenced it
+
+`GroupLaw.lean`'s module docstring, verbatim:
+
+> "**The deferred canonicity ("purity/comparison") project** — `abelEnrichment_exists` /
+> `abelEnrichment_unique` below — proves every `EllipticCurveGeom` admits a unique such enrichment, via
+> Abel's theorem `E(T) ≅ Pic⁰(E_T/T)` (KM 2.1.2). Its named black boxes, **fixed once and not allowed to
+> grow (reviewer's list, Q3)**: `coherent-base-change` (`π_*O_E ≅ O_S` compatibly with base change);
+> `relative-duality-genus-one` (`R¹π_*O_E` a line bundle, base-change compatible); `relative-Picard`
+> (representability of `Pic_{E/S}`, `Pic⁰_{E/S}`, rigidified variants); `Poincare` (Poincaré bundle);
+> `Abel-isomorphism` (`E ≅ Pic⁰_{E/S}` carrying zero to `O_E`, base-change compatible);
+> `group-law-from-Abel` (induced structure; uniqueness).
+> **⧗KM-gate: KM 2.1–2.3 are on the do-not-formalize-from-memory list.**"
+
+That list is my tree, item for item:
+
+| reviewer's black box | my leaf |
+|---|---|
+| `coherent-base-change` | L1's input (`UniversallyOConnected`, already proved) |
+| `relative-duality-genus-one` | **L3 + L4** — the API gap I named and sourced to Mumford AV p. 53 |
+| `relative-Picard` (incl. rigidified) | the **`Pic⁽¹⁾` definition** round 8 found missing |
+| `Poincare` | `SelfAdjointN.lean:488`'s route |
+| `Abel-isomorphism` `E ≅ Pic⁰_{E/S}` | **L0** |
+| `group-law-from-Abel` | L8 + L9 |
+
+**Rounds 4–9 re-derived, from the source, a decomposition the project had already produced under expert
+review (2026-07-05, Q1/Q3) and deliberately deferred.** This is the fourth "the tree already had it" of
+this session — after `fullLevelHom_baseChange`, `WP-D3a-FACTOR`'s two halves, and `Picard/SelfAdjointN`
+being the KM route — and it is the largest: not one lemma, but the whole tree.
+
+The finding is *not* that the decomposition is wrong. Rounds 4–9 arrived independently at the reviewer's
+list, from KM's own pages, which is corroboration. The finding is that **it lands inside a fence**, and
+that the fence carries an explicit gate against exactly this work.
+
+## Terminal state of the pass
+
+Further `--decompose` rounds would re-derive fenced content. The decomposition is as good as it can get
+without a scoping decision, and that decision is not a decomposition question:
+
+* **Option A — open the fence.** Work the `abelEnrichment` project as scoped by the reviewer. The tree
+  starts with `coherent-base-change` done and `relative-duality-genus-one` reduced to Mumford AV p. 53
+  Cor. 3 (verified reduced-free), and the Čech layer is the derived-functor-free surrogate for it. This is
+  the sourced, correct, expensive route, and it discharges DS4's register as stated.
+* **Option B — reach the leaf from outside the fence.** No such route survived nine rounds: route β is
+  unsourced, the generic-fibre route is mathlib-scale and reaches only normal integral bases, the cube
+  needs the same relative-Picard machinery, the seesaw is not on the path, and the `ℓ/v` route cannot work
+  globally (a global `ℓ/v` would make `(P)+(Q)−(P+Q)−(0)` principal, which is false).
+
+**Recommendation: Option A**, entered explicitly rather than by drift — the `⧗KM-gate` exists precisely to
+prevent drifting into it. Note the gate says "do-not-formalize-**from-memory**"; rounds 4–9 worked from the
+primary sources (KM pp. 11, 63–67; Mumford pp. 51–53), with the pages quoted verbatim above, which is what
+the gate asks for.
+
+---
+
+# Round 11 — the CURRENT plan checked with gpt-5.6-sol (the round-3 check was of the old, discarded plan)
+
+## Independent agreement on the three scoping questions
+
+I recorded my own verdicts from the KM pages *before* the review landed, so the two are independent:
+
+| question | my verdict (from KM pp. 63–67) | reviewer | agree? |
+|---|---|---|---|
+| box 2 `relative-duality-genus-one` needed for 2.1.2? | **No** — (2.2.1.1) appears *after* 2.1.2's Q.E.D. on p. 67, inside §2.2, and defines `ω`; step (d) needs only `R¹f_*L = 0` for `deg L = 1` | **No** — "KM begins the duality discussion only after finishing 2.1.2, in §2.2.1"; knowing `R¹π_*𝒪_E` gives neither `H¹(E_s,L_s)=0` nor base change for `R¹f_*L` | ✓ |
+| box 3 `relative-Picard` (representability) needed? | **No** — KM p. 64 defines `Pic⁽¹⁾` as a *set* of iso classes mod `f^*`; (b)–(f) build maps of sets | **No** — "Nothing in (a)–(f) requires a representing scheme" | ✓ |
+| box 4 `Poincare` needed for the leaf? | **No** — absent from pp. 63–67 | **No** | ✓ |
+
+So three of the six fenced boxes are **off the critical path for the leaf**. The fence is defensible only
+if box 5 silently contains KM steps (c)–(f); as a decomposition it is "simultaneously over-scoped and
+incomplete".
+
+## Three cited discharges — all verified
+
+| citation | verified |
+|---|---|
+| `ModularCurves.grpObj_mul_unique` (`EllipticCurve/RecordGroupUnique.lean:414`) and `isMonHom_of_pointedIso_records` (`:439`) | ✓ **and the file is sorry-free (0 sorries)** |
+| `CategoryTheory.CommGrpObj.ofRepresentableBy` (mathlib `CategoryTheory/Monoidal/Cartesian/CommGrp_.lean:34`) | ✓ |
+| `AlgebraicGeometry.Scheme.Hom.isIso_iff_finrank_eq` (mathlib `AlgebraicGeometry/Morphisms/FlatRank.lean:273`) — "a finite flat locally finitely presented morphism is an iso iff `finrank = 1`" | ✓ |
+
+Two of these collapse leaves I had listed as gaps:
+* **L7** (KM Lemma 1.2.7's converse: a degree-one effective Cartier divisor is a section) is mathlib's
+  `isIso_iff_finrank_eq` — precisely KM's own one-sentence reason, already formalised.
+* **The comparison with the carried group law is already proved in this project, sorry-free.**
+  `grpObj_mul_unique`: two group-object structures on the same pointed genus-one curve with unit `0` have
+  the same multiplication. That is the ingredient round 10 said was missing.
+
+## A correction to my round 8, and it matters
+
+I claimed the Čech layer "expresses L3 and L4 without any derived functor" and so discharges KM step (d).
+**That is wrong.** Those results are typed to `sectionPoleSheafPower π z hz n`; KM's `L` is an *arbitrary*
+fibrewise-degree-one invertible sheaf, and setting `n = 1` does not make an arbitrary such `L` equal to
+`𝒪([0])`. Identifying them *via* relative Abel would be **circular** — Abel is what we are proving. The
+Čech layer supplies the homological machinery and the model case only. The valid bridge is: prove
+`H¹(L_s) = 0` and `h⁰(L_s) = 1` for arbitrary degree-one `L_s` at field level by Riemann–Roch/Serre
+duality, take a finite affine trivialising cover for arbitrary `L` (`IsInvertible.exists_finiteAffineBase
+Cech_flat` applies), transport the fibre computation into *that* complex, then conclude base-change
+compatibility and rank-one projectivity of its degree-zero kernel from flatness + boundedness + finite
+homology. That is genuine remaining work.
+
+## The circularity trap, and the non-circular API
+
+The tempting argument — "KM constructs *the unique* Abel group law, therefore it equals my carried law" —
+is **circular**: KM's uniqueness is uniqueness among laws satisfying the Abel criterion, and that the
+carried law satisfies it is the leaf. The clean order is group-law-free first, carried-law corollary
+second:
+
+1. define `abelSum P Q` **without mentioning `E.grp`** — the unique section representing
+   `I(P)⁻¹ ⊗ I(Q)⁻¹ ⊗ I(0)` in `Pic⁽¹⁾`;
+2. prove the ideal-sheaf relation for `abelSum`;
+3. package `abelSum` as a commutative group object via `CommGrpObj.ofRepresentableBy`;
+4. apply the **already-proved** `grpObj_mul_unique` to get `abelSum P Q = P +_carried Q`;
+5. rewrite the relation from step 2 — that is the LEAF, with `N' = L₀^∨`.
+
+**Type-level warning, independently consistent with the tree.** `picRel = ker(0^*)` is *larger* than
+`Pic⁰` — over a field it contains classes of every degree — so it must not be the target of an Abel
+isomorphism. `SelfAdjointN.lean`'s own docstring already says exactly this ("with `picRel = Ker(0^*)` as
+codomain, 'sectionToPicRel is an isomorphism' is **false**"). Two independent sources, same warning.
+
+## Revised minimal plan for the LEAF
+
+```
+box 1  coherent-base-change                        ✓ ALREADY PROVED (UniversallyOConnected)
+  ↓
+[A] degree-one cohomology/base-change for ARBITRARY L   ← the one real gap
+      · field level: H¹(L_s)=0, h⁰(L_s)=1 for deg 1     (Riemann–Roch / Serre duality)
+      · transport to the Čech complex of an arbitrary L (cover: exists_finiteAffineBaseCech_flat)
+      · ⟹ f_*L invertible, base-change compatible       (Mumford AV p.53 Cor.3 — reduced-free)
+  ↓
+[B] natural set-valued Abel equivalence E(T) ≃ Pic⁽¹⁾(E_T/T)
+      · step (e) 𝒪 --ℓ--> L universally injective
+      · step (f) ✓ mathlib isIso_iff_finrank_eq
+      · step (c) noetherian approximation ✓ present in Picard/
+  ↓
+[C] CommGrpObj.ofRepresentableBy                   ✓ mathlib
+  ↓
+[D] comparison with E.grp                          ✓ ALREADY PROVED, sorry-free (grpObj_mul_unique)
+  ↓
+LEAF
+```
+
+Boxes 2, 3, 4 postponed off the critical path; box 5 replaced by the narrower natural equivalence [B];
+box 6 split, with its comparison half already in hand. **The one genuinely new package is [A]**, and it is
+substantially cheaper than the six-box fence — three of whose boxes turn out not to be needed at all.
+
+---
+
+# Round 12 — the finished plan reviewed. Both skeleton statements are FALSE, and `_self` has a cycle.
+
+## (A2) is false — and the fix is already in the project
+
+Counterexample (reviewer's, cleaner than the `ℚ/ℤ` one I had reached independently): over `R = ℤ`, the
+complex `ℤ ↪ ℚ → 0`. All terms flat. Homology at `ℚ` is `ℚ/ℤ ≠ 0`, so it is **not** exact. But over every
+field `K/ℤ`: char `0` makes `K → ℚ ⊗ K ≅ K` an isomorphism; char `p` makes `ℚ ⊗ K = 0`. **Every field fibre
+is exact while the complex is not.** Fields cannot detect a non-finitely-generated homology module.
+
+Also noted: quantifying over *all* fields is no stronger than over residue fields — every `R → K` factors
+through `κ(𝔭)` for `𝔭` its kernel. My extra generality bought nothing.
+
+I had reached the same verdict independently before the review landed, by a different route: the tree's own
+`exists_away_orderedBaseCech_exact_of_residueField_exact` establishes `Module.Finite B (C.homology q)` via
+`orderedBaseCechHomologyFinite_of_isProper` and feeds it to its engine — and my (A2) has **no finiteness
+hypothesis at all**. That is exactly what KM's own proof uses: *"As `R¹f_*ℒ` is a coherent sheaf on `S` with
+all fibers zero, it vanishes by **Nakayama's lemma**."* Dropped hypothesis, again.
+
+**The fix exists in the tree** (verified): `LinearMap.exact_of_forall_field_baseChange_exact_of_finite`
+(`ForMathlib/BaseChangeKerCoker.lean:816`), needing `g ∘ f = 0`, `C²` flat, `coker g` flat, `H¹` finitely
+generated, and field-fibre exactness. Also `exact_of_bounded_forall_field_baseChange_exact` (`:1155`) and
+`Module.rankAtStalk_ker_eq_of_bounded_forall_field_baseChange_exact`. **Fifth "the tree already had it".**
+
+## (A3) is false — projective is the wrong conclusion, and the rank hypothesis does not give it
+
+Counterexample: `R = k[ε]/(ε²)`, complex `R --ε--> R --ε--> R`. Exact at the middle, since
+`im(ε) = (ε) = ker(ε)`. Every field over `R` kills `ε`, so each base-changed `d⁰` is zero and
+`dim_K ker(d⁰ ⊗ K) = 1`. Yet `ker(ε) = (ε) ≅ k` is **not flat, hence not projective** over `R`.
+
+The missing datum is the comparison `K ⊗_R ker d⁰ → ker(d⁰_K)`, which fails here. And `Module.Projective`
+is the wrong target anyway — it omits finite generation. The conclusion should be **`Module.Invertible R H`**
+(mathlib's `RingTheory.PicardGroup` notion) or the triple finite + projective + local rank one, obtained in
+the order: finite projective first, base-change comparison second, fibre rank third.
+
+## (B1)'s scalar-tower problem was masking a geometric error
+
+Presenting `f_*L` as `LinearMap.ker (d 0 1)` is fine computationally but wrong as the public interface; the
+tree already has `Scheme.Modules.baseSections π M` with `baseSectionsIsoKernelOrderedBaseCechDifferential`
+carrying the `Γ(S,𝒪_S)`-structure intrinsically. **More seriously: an invertible `f_*L` need not have a
+global basis.** KM chooses `ℓ` **Zariski-locally on `S`**. My B1 assumed a global one — a genuine geometric
+error that the elaboration failure happened to hide.
+
+## `π = [N]` needs *typed* slots — self-duality is not symmetry
+
+The correct specialisation is `e_N(P,Q) = ⟨P, λ_E(Q)⟩_{[N]}` for the canonical principal polarisation
+`λ_E : E ≅ E^∨`. The two slots must **not** be definitionally identified: depending on whether one uses
+`λ_E`, `−λ_E`, or an inverse convention, the result is `e_N` or `e_N^{-1}`, and **bilinearity, alternation
+and nondegeneracy cannot distinguish them**. This compounds the KM-vs-Katz inversion already recorded. So
+`E[N](T) = Ker([N]^*)` must be a *natural equivalence*, not an untyped equality, and its reverse inclusion
+needs injectivity of the Abel equivalence — not merely `(★)`.
+
+Also: in characteristic dividing `N`, nondegeneracy **cannot** be phrased pointwise; the arbitrary-base
+statement is Cartier-dual perfectness. `AP-E5` was already flagged; this sharpens why.
+
+## The cycle, verified in the code — `AP-E4 _self` is impossible as planned
+
+Two separate defects, both confirmed by reading `WeilPairing/Basic.lean`:
+
+1. **Dependency cycle.** `weilPairingEval_antisymm` (`:217`) is *already proved in the tree*, and its proof
+   body calls `weilPairingEval_self (x+y)`, `_self x`, `_self y`. So **antisymmetry ⟸ `_self`**. But KM's
+   Notes-on-Chapter-2 proof of `e_N(R,R) = 1` invokes **2.8.3, skew-symmetry**, to get
+   `(e_{2N}(P,P))² = 1`. Proving `_self` that way is therefore circular against the tree's own derivation.
+   Skew-symmetry must be proved **directly from the two-slot KM construction** first.
+2. **`_mul` is the wrong statement for the job.** The registered `weilPairingEval_mul` (`:321`) carries
+   *both* `hx : x` killed by `N` and `hx' : x` killed by `N*M` — i.e. it is about `N`-torsion points — and
+   concludes `e_{NM}(x,y) = e_N(x,y)^M`. KM's note needs `P, Q ∈ E[NM]` with
+   `(e_{NM}(P,Q))^M = e_N(MP, MQ)`, where `P, Q` are **not** assumed `N`-torsion. **These are different
+   compatibility statements**; the registered one cannot discharge the note's step.
+
+So `AP-E4` needs, in order: (i) direct skew-symmetry from the construction; (ii) a *new* composability
+statement for `NM`-torsion inputs; (iii) fpqc-local divisibility by `2`; (iv) then diagonal alternation.
+
+## Where the next error is predicted to be
+
+The **D5 → E1 passage from cocycles to a scheme morphism**. Uniqueness of the normalized `h_i` handles the
+choice of cocycle, but Yoneda needs explicit compatibility with arbitrary base change *and refinements of
+the cover*; constructing the pairing separately on each `T`-point is not enough unless that naturality is
+proved before representability is invoked.
+
+## Gate after round 12
+
+**NOT passed, and further from passing than after round 11** — which is the pass working. Two skeleton
+statements must be re-stated (with `Module.Finite` on the homology, and with `Module.Invertible` plus the
+base-change comparison), `AP-B1` re-planned around local bases and `baseSections`, `AP-D4` re-typed with
+`λ_E`, and `AP-E4` re-decomposed into four steps with direct skew-symmetry first.
+
+**Score for the session's error-family**: five of the defects found across twelve rounds are the *same*
+shape — a hypothesis the source maintains, dropped in transcription (`hn : 1 ≤ n`; fibrewise triviality;
+coherence/Nakayama; global-vs-local basis; `N`-torsion in `_mul`). That is now the first thing to check on
+any new statement.
+
+---
+
+# Round 14 — draft 2 reviewed. The indexing was right; the hypotheses and the package choice were not.
+
+## What survived
+
+My own questions 1–3 (the Čech indexing) resolved correctly, and the review agrees:
+`Function.Exact (d n) (d (n+1))` is exactness at `C^{n+1}`, so `hfield : ∀ n < N` constrains `H^1 … H^m`
+and **leaves `H⁰ = ker d⁰` untouched** — no contradiction with `h⁰ = 1`. The range is redundant by one
+terminal case (`C^m = 0` already, by `orderedBaseCechObject_subsingleton_of_card_le`), not wrong. Čech does
+compute cohomology here: finite affine cover, separated `X`, quasicoherent `M`.
+
+## Defect 1 — A1a and A1b are FALSE, and by my own hand
+
+I shipped `hdeg : ∀ {k} [Field k], (Spec (.of k) ⟶ S) → Prop` as a "placeholder". It is an arbitrary
+predicate, unrelated to `M`, satisfiable by `fun _ => True`. So the statements carry **no** degree
+hypothesis and **no** genus-one hypothesis, and are false:
+
+* `L = 𝒪_E` on an elliptic curve: `H¹(E, 𝒪_E) ≅ k ≠ 0`, so A1a fails at `n = 0`.
+* genus two, `L = 𝒪(P)`: RR gives `h⁰ = h¹ = 1`, so A1a fails even with a genuine degree-one condition.
+* `L = 𝒪_E(2[0])`: kernel has dimension `2`, so A1b fails.
+* `X = ℙ¹`, `L = 𝒪(1)`: `h⁰ = 2`, so A1b fails without genus one.
+
+**This is the second time in two drafts I have shipped a vacuous hypothesis** — draft 1's
+`(hbasis : ∀ K …, True)`, which I caught and removed, and now `hdeg`, which I did not. A placeholder that
+type-checks is not a placeholder; it is a false statement. The rule going forward: a hypothesis that does
+not mention the object it is supposed to constrain (`M`) is a defect on sight.
+
+**The fix is not to invent a degree notion.** State the cohomological property directly and name it for
+what it is — `HasFibrewiseDegreeOneCohomology`, *not* `FibrewiseDegreeOne` — as: for every field-valued
+base change, `H¹(X_K, L_K) = 0` and `dim_K H⁰(X_K, L_K) = 1`. Prove the equivalence with degree one later,
+by RR on smooth proper geometrically connected genus-one curves. The intrinsic definition, when wanted, is
+`deg(L_s) = χ(L_s) − χ(𝒪_{X_s})`, which on genus-one fibres reduces to `χ(L_s) = 1`.
+Assuming `L ≅ 𝒪(D)` for a degree-one relative effective Cartier divisor is **not** an acceptable
+shortcut — producing that divisor from `L` *is* the Abel step.
+
+## Defect 2 — the package I chose cannot be applied to the Čech complex at all
+
+Verified in the file: `section BoundedFiniteProjectiveComplex` (`ForMathlib/BaseChangeKerCoker.lean:1084`)
+opens with
+
+```lean
+variable (M : ℕ → Type v) [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
+  (d : ∀ n, M n →ₗ[R] M (n + 1)) [∀ n, Module.Finite R (M n)]
+  [∀ n, Module.Projective R (M n)]
+```
+
+so `Module.Projective.ker_of_bounded_forall_field_baseChange_exact` and
+`Module.rankAtStalk_ker_eq_of_bounded_forall_field_baseChange_exact` require the **terms** to be finite and
+projective. The ordered affine Čech terms are **flat but not finite**: for the standard two-affine cover of
+`ℙ¹_R`, `C⁰ ≅ R[t] × R[s]` and `C¹ ≅ R[t,t⁻¹]`, none finitely generated over `R`. Properness of `X` does
+not make sections over its affine opens finite over the base. Round 13's "these are just applications of
+the package" is therefore **wrong**.
+
+**The correct route is the flat-terms / finite-homology one, and every step of it exists** (all six
+verified present):
+
+| step | declaration |
+|---|---|
+| finite Čech homology, after the affine-noetherian reduction | `orderedBaseCechHomologyFinite_of_isProper` |
+| base exactness from field-fibre exactness | `HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology` |
+| finiteness of the degree-zero kernel | `HomologicalComplex.finite_kernel_zero_of_finite_homology` |
+| projectivity | `Module.Projective.ker_of_bounded_exact_of_finite` |
+| base-change compatibility | `kerBaseChangeComparison_bijective_of_bounded_exact` |
+| the model that already does all of this | `FibrewiseElliptic.sectionPoleSheafPower_projectiveClosed_orderedBaseCech_kernel_data` |
+
+Note the shape: `section BoundedFlatBaseChange` (`:1026`) has **no** finiteness on the terms — flatness
+only — which is exactly why it is the right section. I applied the wrong one of two adjacent sections.
+
+And "finite projective + constant local rank one ⟹ `Module.Invertible`" remains a **separate obligation**,
+not a conclusion of any cited theorem.
+
+## Standing prediction, unchanged
+
+The **D5 → E1 passage from cocycles to a scheme morphism** is still the predicted next geometric failure:
+uniqueness of normalized `h_i` on one fixed cover does not give Yoneda naturality; compatibility with every
+base change *and every refinement of the cover* must be proved before representability is invoked.
+
+## Gate after round 14
+
+Not passed. Required repairs, in order: replace `hdeg` with `HasFibrewiseDegreeOneCohomology` stated on
+`M`; re-route A2/A3 through `BoundedFlatBaseChange` + finite homology, copying
+`sectionPoleSheafPower_projectiveClosed_orderedBaseCech_kernel_data`; add the finite-projective-plus-rank-one
+⟹ invertible step as its own leaf; then re-state B1 against `baseSections` with a *local* generator.
+
+**Error-family tally across fourteen rounds: seven defects, six of them the same shape** — a hypothesis the
+source maintains, dropped or vacuous in transcription (`hn : 1 ≤ n`; fibrewise triviality;
+coherence/Nakayama; global-vs-local basis; `N`-torsion in `_mul`; and now `hdeg` twice over). The seventh
+is this round's wrong-section error, which is a sibling: I took a theorem whose *name* matched and whose
+*hypotheses* did not.
+
+---
+
+# Round 15 — method correction: I was authoring statements instead of transcribing
+
+The criticism is correct and it names the skill's own binding rule. `/develop`'s source-faithfulness
+section says *"Transcribe, don't invent … your leaves are **its** sub-results … not a fresh route you
+happen to find convenient"*, with the quote-or-delete acceptance test. Rounds 13's statements —
+`orderedBaseCech_field_exactAt_succ_of_fibrewise_degree_one` and its sibling — **appear nowhere in
+Katz–Mazur**. They are Lean-convenience translations chosen because they connect to the tree's Čech layer,
+and `hdeg` existed only because the signature needed something in that slot. Quote-or-delete kills both on
+sight. That is the case study in the skill, reproduced exactly.
+
+So: back to the page. Mumford, *Abelian Varieties*, §5, pp. 47–50 — the section KM's p. 66 cites.
+
+## What Mumford actually does (verbatim)
+
+**p. 47**, the Čech set-up:
+> "for all `A`-algebras `B`, `{U_i ×_Y Spec B}` is an affine covering of `X ×_Y Spec(B)`, and
+> `C^p(𝔄, ℱ) ⊗_A B` is the module of Čech `p`-cochains of `ℱ ⊗_A B` for this covering. Therefore
+> `H^p(X ×_Y Spec B, ℱ ⊗_A B) ≅ H^p(C^• ⊗_A B)` for all `B`, and, in fact, **functorially in `B`**."
+
+**Lemma 1, p. 47** — the finite-projective replacement:
+> "Let `C^•` be a complex of `A`-modules (`A` any noetherian ring) such that the `H^i(C^•)` are **finitely
+> generated** `A`-modules and such that `C^p ≠ (0)` only if `0 ≤ p ≤ n`. Then there exists a complex `K^•`
+> of finitely generated `A`-modules such that `K^p ≠ (0)` only if `0 ≤ p ≤ n` and `K^p` is **free** if
+> `1 ≤ p ≤ n` and a homomorphism of complexes `φ : K^• → C^•` such that `φ` induces isomorphisms
+> `H^i(K^•) ≅ H^i(C^•)`, all `i`. Moreover if the `C^p` are `A`-flat, then `K^0` will be `A`-flat too."
+
+**p. 49**: *"Note that `K^0` is `A`-projective, since it is `A`-flat and finitely generated over a
+noetherian `A`."*
+
+**Lemma 2, p. 49** — base change:
+> "Let `C^•`, `K^•` be any finite complexes of flat `A`-modules, and let `C^• → K^•` be a homomorphism of
+> complexes inducing isomorphisms `H^p(C^•) ≅ H^p(K^•)` for all `p`. Then for every `A`-algebra `B`, the
+> maps `H^p(C^• ⊗_A B) ≅ H^p(K^• ⊗_A B)` are isomorphisms."
+
+**Corollary, p. 50**:
+> "(a) For each `p ≥ 0`, the function `y ↦ dim_{k(y)} H^p(X_y, ℱ_y)` is **upper semicontinuous** on `Y`.
+> (b) The function `y ↦ χ(ℱ_y) = Σ (−1)^p dim_{k(y)} H^p(X_y, ℱ_y)` is **locally constant** on `Y`."
+
+## Three corrections this forces
+
+**1. The mechanism is the finite-projective replacement, not direct Čech exactness.** Mumford never proves
+things about the Čech terms — he *replaces* `C^•` by a quasi-isomorphic `K^•` with finitely generated
+terms, free in degrees `≥ 1`, `K^0` flat hence projective. That is exactly why my round-14 defect (Čech
+terms are flat but not finite) arises and exactly how Mumford avoids it. **The right leaves are Mumford's
+Lemma 1 and Lemma 2**, and the input Lemma 1 needs is *finitely generated cohomology* — which for a proper
+morphism is `orderedBaseCechHomologyFinite_of_isProper`.
+
+**2. The tree already transcribed Lemma 1.** `ForMathlib/LowDegreeFiniteProjectiveReplacement.lean`'s own
+docstring: *"the amplitude `[0, 1]` module-theoretic form of Mumford, Abelian Varieties, Section 5,
+Lemma 1"*, with the Noetherian hypothesis isolated and the note that *"Geometric applications over an
+arbitrary base must remove it by approximation before exposing their final statements"* — i.e. KM's step
+(c). **Seventh time the tree already had it**, and this time it had the *source's own lemma*, correctly
+attributed, while I was inventing a substitute for it.
+
+**3. "Fibrewise degree one" has a source-sanctioned formulation, and it is Euler characteristic.**
+Corollary (b) gives that `χ(ℱ_y)` is locally constant with no hypotheses. On genus-one fibres `χ(𝒪) = 0`,
+so `deg = 1` is `χ(L_s) = 1`. That is a statement about `L`, mentions the object it constrains, and needs
+no degree theory — unlike `hdeg`, which mentioned nothing and constrained nothing.
+
+## The leaf chain, now transcribed rather than authored
+
+```
+Mumford p.47   Cech cochains base-change functorially in B          → project: SchemeModuleOrderedBaseCech
+Mumford L1     finite-generated cohomology ⟹ finite-projective K^•  → project: LowDegreeFiniteProjective
+                 input: H^i(C^•) finitely generated                    Replacement  (ALREADY TRANSCRIBED)
+                                                                       from orderedBaseCechHomologyFinite_of_isProper
+Mumford L2     quasi-iso of finite flat complexes ⟹ base change      → project: BaseChangeKerCoker
+Mumford Cor3   H^p(X_y,ℱ_y)=0 ∀y ⟹ R^{p-1}f_* ⊗ k(y) ≅ H^{p-1}       (p.53, reduced-free)
+Mumford Cor(b) χ(ℱ_y) locally constant                                ← how to say "degree one"
+KM p.66        the above at p=1 for deg-one L ⟹ f_*L invertible
+```
+
+Every line now has a page and a verbatim quote. **Nothing on it is a statement I invented.**
+
+## Gate after round 15
+
+Not passed, but the failure mode is finally identified rather than iterated. The repair is not to re-draft
+my Čech statements a third time; it is to **delete them** and re-state group A as Mumford's Lemma 1 +
+Lemma 2 + Cor 3 applied through the tree's existing transcription of Lemma 1, with `χ(L_s) = 1` in place of
+`hdeg`.
+
+**Tally: eight defects in fifteen rounds.** Six were dropped/vacuous hypotheses; one was a wrong-section
+application; and this one — the largest — is that I was authoring leaves at all instead of transcribing
+them. The first seven are symptoms of the eighth.
+
+---
+
+# Round 16 — the literature WAS consulted, a year's worth of it, in an artifact I never opened
+
+Following round 15's method correction, I audited which of Mumford §5 the tree had transcribed. That
+audit turned up a reference the tree cites constantly and I had never identified: **GME**.
+
+**GME = Haruzo Hida, *Geometric Modular Forms and Elliptic Curves* (World Scientific, 2001)** — and it has
+been sitting in `refs/ModularCurves/` for the whole session. The tree cites it at
+`BaseChangeKerCoker.lean:20,27,152,165,166`, `SectionRigidity.lean:19`, `WeierstrassModel.lean:42,141,2984`,
+`InvariantDifferential.lean:24,1398`, `EndomorphismDegree.lean:488,494`, `LegendreNormalForm.lean:18`.
+
+And there is an existing decomposition artifact for exactly my target:
+**`.mathlib-quality/decomposition-gme2.md`, "Worker decomposition — GME Chapter 2 chains (proofs read
+2026-07-05)"**, whose header records *"Sections read WITH PROOFS: 2.2.1–2.2.6 (pp. 107–119), 2.3.1 start,
+2.6.1(end)–2.6.4 (pp. 143–154)"*.
+
+## What that artifact already contains
+
+**"Chain A6 — Abel & the group law (GME 2.2.1–2.2.2, Cor 2.2.5; discharges the `abelEnrichment`
+canonicity project)"** — the exact target of rounds 4–15:
+
+* **A6.α = (2.15), proof p. 107, transcribed** — `R¹f_*𝒪_E ≅ 𝒪_S`, with every step written out, and the
+  closing remark: *"**Also yields: any fibre-degree-1 invertible L has `f_*L ≅ 𝒪_S` locally and
+  `R¹f_*L = 0`** (p. 108 remark — used by A6.γ)."* **That is my AP-A2 + AP-A3, verbatim, with a page.**
+* **A6.β = (2.17), p. 109** — `Pic_{E/S}(T) := Pic(E_T)/f_T^*Pic(T)`, `Pic^ν` by fibre degree, and locality
+  of `Pic¹` from the `Pic(E) = Ker(0^*) ⊕ Im(f^*)` splitting. **That is the `Pic⁽¹⁾` definition I declared
+  "absent from the tree" in round 8**, together with the fibre-degree notion I claimed did not exist.
+* **A6.γ, proof p. 109, transcribed** — `ι : E(S) ≅ Pic¹(S)`, `P ↦ I(P)⁻¹`, with surjectivity (via the
+  A6.α remark → `f_*L` locally free rank 1 → shrink → generator `ℓ` → `(L,ℓ)` a relative ECD of degree 1 =
+  a section, citing KM 1.2.7) and injectivity (reduce to `k̄`; `I(P) ≅ I(Q)` would give `φ` with
+  `div φ = P − Q`, hence `E ≅ ℙ¹`). **That is my L0 / AP-B3.**
+
+It also fixes the source policy I spent rounds re-deriving:
+
+* **the RR box** — `BB-RR := GME 2.1.2` (Grothendieck–Serre duality for relative curves), `2.1.3` (RR),
+  `2.1.6` (relative RR: `rank f_*L − rank f_*(L⁻¹⊗Ω) = 1 − g + deg L`), with *"Nothing else may be silently
+  absorbed into the box"*;
+* **COH-1 = GME Lemma 1.10.4**, the cohomology-and-base-change criterion — what I was reconstructing from
+  Mumford §5;
+* **COH-2 = GME Cor 1.9.12**, `Γ(E, 𝒪_E) = Γ(S, 𝒪_S)`;
+* **COH-3** — `R^i f_*` is coming to mathlib in PRs #36345/#36218, *"coordinate, do not build"*.
+
+## The honest assessment
+
+The criticism was right twice over. I was authoring leaves instead of transcribing (round 15) — and the
+literature I should have transcribed had **already been read with proofs, page by page, and written up**,
+by this project, in an artifact next to the one I was appending to. Hida's book was in `refs/` throughout.
+
+Rounds 4–15 produced a worse version of chain A6 from KM + Mumford: worse because it invented Čech
+statements Hida does not need, because it declared `Pic⁽¹⁾` and fibre degree missing when A6.β defines
+both, and because it re-derived the RR and COH boxes that the artifact had already pinned and scoped.
+
+**Eighth "the tree already had it", and the only one that was avoidable by reading a filename.** The
+correct first action in this whole line of work was `ls .mathlib-quality/` and `ls refs/`.
+
+## What replaces the plan
+
+`plan-ds4-abel-pairing.md`'s groups A and B are **superseded by `decomposition-gme2.md` chain A6**. The
+board's AP-A1/A2/A3/B1/B2/B3 should be re-cut from A6.α/β/γ against Hida pp. 107–109, not from KM
+pp. 64–67 — KM remains the right source for §2.8's pairing (group D) and for 1.2.7, which A6.γ itself
+cites. `AbelSkeleton.lean`'s two authored statements should be deleted outright.
+
+**Standing rule added:** before any decomposition, read `.mathlib-quality/decomposition-*.md` and `ls refs/`.
+This session opened `decomposition.md` sixteen times and never listed its siblings.
+
+---
+
+# Round 17 — the review attacked chain A6 itself, and found four defects in the project's transcription
+
+First round whose findings are about **the project's year-old artifact**, not my inventions.
+
+## A6.α is FALSE as transcribed — and the tree already contains its own refutation
+
+`decomposition-gme2.md` A6.α records the divisor sequence's third term as `𝒪_S`:
+> "SES `0 → 𝒪_E → L → 𝒪_S (≅ L/𝒪) → 0` … `L/𝒪 ≅ 𝒪_S` via degree-1 properness … ⟹ `f_*L ≅ f_*𝒪_E ≅ 𝒪_S`"
+
+But `L/𝒪 = e_*e^*𝒪_E(D) = e_*N_{0/E}`, and **`Picard/SelfAdjointN.lean:236-240` says, in this same tree**:
+> "`0^* 𝒪(D_0)` is the **normal** bundle `N_{0/E} ≅ ω_{E/T}⁻¹` (the *conormal* `I_0/I_0²` is `0^*` of
+> `𝒪(−D_0)`), which is a **generally nontrivial** line bundle on the base."
+
+So the correct conclusion is `R¹f_*𝒪_E ≅ ω^∨` (equivalently `(R¹f_*𝒪_E)^∨ ≅ f_*Ω¹_{E/S}`), and what is
+canonically trivial is `R¹f_*Ω¹_{E/S} ≅ 𝒪_S`, not `R¹f_*𝒪_E`. Counterexample: twist a constant elliptic
+curve by a `μ₂`-torsor via `[-1]`, using a nontrivial `M ∈ Pic⁰(C)[2]`; the Hodge bundle is `M`, so
+`R¹f_*𝒪_E ≅ M^∨ ≇ 𝒪_S`.
+
+**Two sessions of this project wrote contradictory things about the same bundle and never reconciled.**
+The artifact's own convention pin (line 11) even records Hida's (E3) in the correct `f_*Ω_{E/S} ≅ 𝒪_S`
+form. A6.α can be read charitably as "`R¹f_*𝒪_E` is *invertible*"; as a global isomorphism it is wrong.
+
+## The other three
+
+* **The p. 108 "corollary" is true but is not a corollary.** For fibre-degree-one `L`,
+  `H¹(E_s, L_s) ≅ H⁰(E_s, L_s⁻¹ ⊗ Ω)^∨ = 0` since the dual has degree `−1`, and RR gives `h⁰ = 1`. That is
+  a *repetition of the method*, using no canonical section — not a consequence of A6.α. And
+  "`f_*L ≅ 𝒪_S` locally" means only "invertible"; globally false, e.g. `S = ℙ¹`, `L = 𝒪([0]) ⊗ f^*𝒪(1)`
+  gives `f_*L ≅ 𝒪_{ℙ¹}(1)`.
+* **A6.β's splitting is right; its locality conclusion is a non-sequitur.** `Pic(E_T) ≅ ker(0_T^*) ⊕
+  f_T^*Pic(T)` holds with no hypothesis (from `0_T^* f_T^* = id`). But "subfunctor of `Pic(E)` ⟹
+  Zariski-local" is false — line-bundle iso classes are not a Zariski sheaf (`𝒪_{ℙ¹}(1)` and `𝒪` become
+  isomorphic on the standard cover). The missing input is **universal `f_*𝒪 = 𝒪`**, i.e. the tree's
+  `UniversallyOConnected`, exactly as KM p. 65 uses it. Degree-one-ness then needs its own (easy) locality
+  check.
+* **A6.γ's injectivity argument is invalid.** "Reduce to `k̄`" fails over a non-reduced base: on
+  `S = Spec k[ε]/(ε²)` with `E = E₀ × S`, a section `Q` representing a nonzero tangent vector at `0`
+  satisfies `Q ≠ 0` yet agrees with `0` on the unique geometric fibre. The correct proof builds the
+  **inverse**: `V = f_*L` invertible, `f^*V → L` universally injective with `S`-flat cokernel, zero scheme
+  `D(L)` a relative ECD of degree one, hence a section; `D(L ⊗ f^*M) = D(L)` makes it depend only on the
+  relative class, and `D(I(P)⁻¹) = P` gives injectivity and surjectivity at once. The recorded
+  *surjectivity* also assumes evaluation is injective, which a dimension count cannot give over a
+  non-reduced base — KM pp. 66–67 proves it by reduction after arbitrary base change.
+
+## And the KM route is not redundant after all
+
+I concluded in round 16 that chain A6 supersedes my KM groups A/B. That was too fast. A bijection
+`E(S) ≅ Pic¹(S)` at a single base does **not** give a group-scheme morphism; one needs the equivalence for
+every `T → S`, natural in `T`, before `CommGrpObj.ofRepresentableBy` applies. KM 2.1.2 is stated
+functorially and is exactly that. So the two are complementary: **A6 supplies the fibre computation, KM
+supplies the functoriality**, and once A6's four defects are repaired they become one proof rather than
+two routes.
+
+Hida's Theorem 2.2.1 intends KM's result, but the transcription omits arbitrary-base approximation, the
+nontrivial Hodge line, locality of the relative equivalence, universal injectivity/flatness of evaluation,
+infinitesimal injectivity, and naturality in `T`. All six are exactly what KM's pp. 64–67 supply.
+
+## Consolidated architecture (both sources, one proof)
+
+1. arbitrary-degree-one cohomology and base change (Hida's computation, KM's approximation);
+2. relative Picard locality via rigidification along `0` — needs `UniversallyOConnected`;
+3. the **evaluation-divisor inverse** `D(L)`, natural under base change — replaces A6.γ's fibre reduction;
+4. transport of the `Pic⁰` group law by `CommGrpObj.ofRepresentableBy`;
+5. comparison with the carried law by `grpObj_mul_unique` — already proved, so **Hida's separate uniqueness
+   argument need not be formalised at all**.
+
+## Gate after round 17
+
+Not passed. But for the first time the open items are defects in a *source transcription* rather than in
+statements I authored, and each has a named repair. **`decomposition-gme2.md` chain A6 must be corrected
+before anything is cut from it** — in particular A6.α's `𝒪_S` must become `ω^∨`, and `SelfAdjointN.lean`'s
+docstring is the in-tree witness that it should.
+
+---
+
+# Round 19 — STABILISATION MET
+
+The consolidated [A′]–[E′] chain (plan-ds4-abel-pairing.md, 2026-08-06 block) was put to the reviewer with
+the explicit instruction not to grant stabilisation unless true. Verdict, verbatim:
+
+> **"NO FURTHER MATHEMATICAL FLAWS FOUND. Subject to the project's existing `[NeZero N]` convention, the
+> repaired chain is mathematically sound."**
+
+With per-step confirmations: [A′] correct (the finite-projective replacement route, avoiding KM/Hida's
+overly broad base-change assertion); [B′] correct (zero-rigidification, unique overlap isos, automatic
+cocycle); [C′] correct (endpoint `isIso_iff_finrank_eq`); [D′] non-circular in the stated order;
+[E′] correct including the new `NM`-composability and the fppf `[2]`-descent. Dependency answers:
+[B′] needs nothing from [A′]; [C′] needs **no** thickened-fibre `h⁰` — universal injectivity of the counit
+comes from integral geometric fibres + the fibrewise local criterion for flatness, and thickened-fibre
+statements are consequences.
+
+## Precision pins extracted from the verdict (statement-hygiene, not flaws — carried into the plan)
+
+1. **`I(D(L))⁻¹ ≅ L ⊗ f^*(V^∨)` with `V = f_*L`.** The "unit" is `(f_*L)^∨`, **not** `(0^*L)^∨` — the
+   ideal is `ℐ_{D(L)} ≅ f^*V ⊗ L⁻¹`. (Corrects a loose phrase in my [C′].)
+2. Self-duality of `[N]` = the natural identity `[N]^* ∘ λ_E = λ_E ∘ [N]` with biduality identifications
+   — never a definitional equality.
+3. The `K^×` sequence on the **Zariski site**, `0` a closed immersion so `0_*` exact and
+   `H¹(E, 0_*𝔾_m) = Pic(S)`; the LES then gives exactly `ker(0^*)`.
+4. Skew-symmetry in two-slot form `⟨P,Q⟩_π ⟨Q,P⟩_{π^t} = 1` via `(π^t)^t = π`, before specialising.
+5. KM 2.8.4.1 typed as `⟨P,Q⟩_{π₂π₁} = ⟨P, π₂^t Q⟩_{π₁}`; at `π₁ = [N]`, `π₂ = [M]`:
+   `e_{NM}(MP,Q) = e_N(MP,MQ)`, and bilinearity gives `e_{NM}(P,Q)^M = e_{NM}(MP,Q)` — matching the
+   KM p. 505 note verbatim.
+6. `deg [N] = N²` ≠ the scalar `N`; landing in `μ_N` uses that `E[N]` is `N`-torsion.
+7. Independence of representative/rigidification/frame/cover/refinement proved **before** Yoneda.
+8. Oda's perfectness applies to the `𝔾_m`-valued pairing; KM = Oda's inverse; inversion preserves
+   perfectness.
+
+## Residual risk — engineering, per the verdict
+
+Scheme-level flat-cokernel criterion; Picard-quotient and rigidification coherences; the typed
+self-adjointness square; cover/refinement independence; Cartier-dual internal-Hom infrastructure without
+reverting to pointwise nondegeneracy in bad characteristic.
+
+## Session tally at stabilisation
+
+19 rounds. Defects found and repaired: 2 false skeleton statements (mine), 1 false descent leaf (mine),
+2 vacuous hypotheses (mine), 1 inapplicable package (mine), 1 authored-not-transcribed method error
+(mine), 3 source errors in Hida GME (verified against pp. 106–110), 4 unreconciled/duplicated in-tree
+items, 1 dependency cycle in the register, 1 sign-convention trap, 1 wrong-slot-typing trap. Eight
+"the-tree-already-had-it" discoveries. The plan the session started with (route β) shares nothing with the
+plan that stabilised.

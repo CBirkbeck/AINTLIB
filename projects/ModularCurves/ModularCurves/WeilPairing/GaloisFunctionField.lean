@@ -39,20 +39,23 @@ namespace ModularCurves
 
 variable {k : Type u} [Field k] (W : WeierstrassCurve k)
 
-/-- `CoordinateRing.map` along a ring **equivalence** of the base field is surjective. -/
-theorem coordRingMap_surjective_of_ringEquiv {L : Type v} [Field L] [Algebra k L]
-    (e : L ≃+* L) :
+/-- `CoordinateRing.map` along a ring **equivalence** of the base field is surjective.
+
+Stated for a ring equivalence between two *different* fields — the semilinear transport of the
+Weil pairing (WP-D3c-2d, `WeilPairing/PairingTransport.lean`) needs it in that generality, and
+nothing in the proof uses that the source and target coincide. -/
+theorem coordRingMap_surjective_of_ringEquiv {L : Type v} [Field L] {L' : Type v} [Field L']
+    (V : WeierstrassCurve L) (e : L ≃+* L') :
     Function.Surjective
-      (WeierstrassCurve.Affine.CoordinateRing.map (W.baseChange L).toAffine
-        (e : L →+* L)) := by
+      (WeierstrassCurve.Affine.CoordinateRing.map V.toAffine (e : L →+* L')) := by
   intro y
   obtain ⟨q, rfl⟩ := AdjoinRoot.mk_surjective y
-  refine ⟨AdjoinRoot.mk _ (q.map (Polynomial.mapRingHom (e.symm : L →+* L))), ?_⟩
+  refine ⟨AdjoinRoot.mk _ (q.map (Polynomial.mapRingHom (e.symm : L' →+* L))), ?_⟩
   rw [WeierstrassCurve.Affine.CoordinateRing.map_mk]
   congr 1
   rw [Polynomial.map_map]
-  have hid : (Polynomial.mapRingHom (e : L →+* L)).comp
-      (Polynomial.mapRingHom (e.symm : L →+* L)) = RingHom.id L[X] := by
+  have hid : (Polynomial.mapRingHom (e : L →+* L')).comp
+      (Polynomial.mapRingHom (e.symm : L' →+* L)) = RingHom.id L'[X] := by
     refine Polynomial.ringHom_ext ?_ ?_
     · intro a
       simp only [RingHom.comp_apply, Polynomial.coe_mapRingHom, Polynomial.map_C,
@@ -63,14 +66,13 @@ theorem coordRingMap_surjective_of_ringEquiv {L : Type v} [Field L] [Algebra k L
   rw [hid, Polynomial.map_id]
 
 /-- `CoordinateRing.map` along a ring equivalence of the base field is bijective. -/
-theorem coordRingMap_bijective_of_ringEquiv {L : Type v} [Field L] [Algebra k L]
-    (e : L ≃+* L) :
+theorem coordRingMap_bijective_of_ringEquiv {L : Type v} [Field L] {L' : Type v} [Field L']
+    (V : WeierstrassCurve L) (e : L ≃+* L') :
     Function.Bijective
-      (WeierstrassCurve.Affine.CoordinateRing.map (W.baseChange L).toAffine
-        (e : L →+* L)) :=
+      (WeierstrassCurve.Affine.CoordinateRing.map V.toAffine (e : L →+* L')) :=
   ⟨WeierstrassCurve.Affine.CoordinateRing.map_injective
-      (W' := (W.baseChange L).toAffine) (EquivLike.injective e),
-    coordRingMap_surjective_of_ringEquiv W e⟩
+      (W' := V.toAffine) (EquivLike.injective e),
+    coordRingMap_surjective_of_ringEquiv V e⟩
 
 /-- A `k`-algebra automorphism of an extension `L` fixes the base-changed curve `W ⊗ L`. -/
 theorem map_algEquiv_baseChange_eq {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L) :
@@ -86,7 +88,7 @@ noncomputable def galoisCoordRingEquiv {L : Type v} [Field L] [Algebra k L] (σ 
     (W.baseChange L).toAffine.CoordinateRing ≃+*
       ((W.baseChange L).map (σ : L →+* L)).toAffine.CoordinateRing :=
   RingEquiv.ofBijective _
-    (coordRingMap_bijective_of_ringEquiv W (σ : L ≃+* L))
+    (coordRingMap_bijective_of_ringEquiv (W.baseChange L) (σ : L ≃+* L))
 
 /-- **(M1b-3a)** The function-field automorphism induced by `σ : L ≃ₐ[k] L`: lift
 `galoisCoordRingEquiv` to fraction fields and cast the codomain back along

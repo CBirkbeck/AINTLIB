@@ -1,0 +1,733 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import ModularCurves.EllipticCurve.PointsDictionary
+import ModularCurves.EllipticCurve.PointsDictionaryGalois
+import ModularCurves.EllipticCurve.ModelVariableChange
+import ModularCurves.EllipticCurve.MulByHomDegree
+import ModularCurves.ForMathlib.DominantFunctionField
+import ModularCurves.GroupScheme.TranslationBySection
+import ModularCurves.LevelStructure.Factorization
+import HasseWeil.HasseBound.WeilPairing.PairingProps
+
+/-!
+# The scheme ↔ function-field bridge for the field-level comparison (AP-E4a-U5c)
+
+T-C4's substrate, per the validated E4a plan (`decomposition-e4a-self.md`, U5 subcut):
+to compare the KM pairing (`weilPairingEval` over `Spec K`) with HasseWeil's classical
+pairing (`weilPairing`, defined by the translation characterisation
+`τ_S g_T = e_ℓ(S,T) • g_T` in `W.toAffine.FunctionField`), the two languages meet at
+
+* the **points dictionary** — `projModelPointsEquiv` (`EllipticCurve/PointsDictionary`),
+  already pointed and chart-value-characterised;
+* the **function-field dictionary** — `(projModel W).functionField ≃+* W.toAffine.FunctionField`
+  (below): the `Z`-chart of the projective model is an affine open whose sections
+  identify with the affine coordinate ring, and both sides are fraction fields
+  (`functionField_isFractionRing_of_isAffineOpen` on the scheme side, the
+  `FunctionField` instances on the HasseWeil side);
+* the **translation bridge** — the scheme-level translation automorphism
+  (`translateByPoint`) induces, through `Scheme.Hom.functionFieldMap`
+  (`ForMathlib/DominantFunctionField`), precisely HasseWeil's
+  `translateAlgEquivOfPoint` under the two dictionaries.
+
+With these, U5b's glued rational function from the KM splitting satisfies HasseWeil's
+characterising identity, `weilPairing_spec` pins the scalar, and `weilPairing_self`
+closes the field leaf (U5d/U5e).
+-/
+
+universe u
+
+open AlgebraicGeometry CategoryTheory Limits HomogeneousIdeal
+  CategoryTheory.MonoidalCategory
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+namespace ModularCurves
+
+namespace EllipticCurve
+
+section Bridge
+
+variable {K : Type u} [Field K] [DecidableEq K]
+variable (W : WeierstrassCurve K) [W.IsElliptic] [W.toAffine.IsElliptic]
+
+/- **(U5c-1(ii)) — DISCHARGED BY REUSE.** `projModelFunctionFieldEquiv` already exists:
+`EllipticCurve/MulByHomDegree.lean:85` (K4 (B)), the identical `coordRingToZSection` +
+`functionField_isFractionRing_of_isAffineOpen` construction. The name clash that caught the
+duplication is the workspace working as intended. That file also carries the `[N]`-precedent
+for U5c-2: the L4-iii comparison `functionFieldMap [N] = mulByInt_pullbackAlgHom` mod
+`projModelFunctionFieldEquiv`, with `functionFieldMap_germToFunctionField` computing the
+chart-coordinate side — the translation bridge below mirrors that shape. -/
+
+/- **(U5c-2, the translation bridge — the core comparison API)** The function-field
+action of the scheme-level translation automorphism (`translateByIso` on the model
+record, no base-change clothing) is HasseWeil's `translateAlgEquivOfPoint`, conjugated
+through `projModelFunctionFieldEquiv`. The section `x` and the affine point `P'`
+correspond under the points dictionary (`projModelPointsEquiv`), expressed through the
+underlying morphism of `x`.
+
+Convention check (recorded per the validation): whether the right-hand side is
+`translateAlgEquivOfPoint W P'` or its inverse is pinned during the proof by computing
+one coordinate on the `Z`-chart; the statement records the natural orientation.
+
+Proof strategy (validated): both sides are ring maps out of `W.toAffine.FunctionField`
+determined by their values on the coordinate generators; compute the left side's values
+via the `KE`-valued `specPoints` machinery (`mulModelHom_specPoints` at `K := KE`
+applied to the translated generic point) and match HasseWeil's slope formulas. -/
+/- U5c-2 design record: `P'` is quantified dictionary-native at `W.baseChange K` (no in-tree
+precedent had hit the self-base-change wrinkle); the `▸`-free repackaging `basePointCast`
+carries it to `W.toAffine.Point` for the HasseWeil side. Proven below. -/
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The tautological `K(E)`-point, in the record's `Point`-group over
+`Spec.map (algebraMap K K(E))` (definitional repackaging of `genericSpecPoint`). -/
+noncomputable def genericModelPoint : (modelEllipticCurve W).Point
+    (Spec.map (CommRingCat.ofHom (algebraMap K W.toAffine.FunctionField))) :=
+  genericSpecPoint W
+
+/-- **(hx piece (i))** Composing the tautological `K(E)`-point with translation-by-`x`
+is the Point-group sum with the pulled section — the val-level form of
+`pointMapOfHom_translateBy`. -/
+theorem genericSpecPoint_comp_translateBy
+    (x : 𝟙_ (Over (Spec (CommRingCat.of K))) ⟶ (modelEllipticCurve W).asOver) :
+    (genericSpecPoint W).1 ≫ ((modelEllipticCurve W).translateBy x).left
+      = (genericModelPoint W +
+          ((modelEllipticCurve W).pointEquivOverHom
+              (Spec.map (CommRingCat.ofHom
+                (algebraMap K W.toAffine.FunctionField)))).symm
+            (CategoryTheory.CartesianMonoidalCategory.toUnit
+              (CategoryTheory.Over.mk (Spec.map (CommRingCat.ofHom
+                (algebraMap K W.toAffine.FunctionField)))) ≫ x)).1 :=
+  congrArg Subtype.val (pointMapOfHom_translateBy (E := modelEllipticCurve W) x
+    (genericModelPoint W))
+
+/- **(hx piece (ii) — INLINE AT USE)**: the dictionary-read of the sum is the two-rewrite
+composite `projModelPointsEquiv_add` (MulByHomDegree:54) then
+`projModelPointsEquiv_genericSpecPoint` (:780). A standalone statement fights the
+`W_KE`-vs-`baseChange` def-level typing; at the use site the expected types drive the
+defeq. -/
+
+/-- **(R-side entry, reusable)** `projModelFunctionFieldEquiv.symm` reads the class of a
+coordinate-ring element as the class of its `Z`-chart section — the generalisation of
+hinv's `h1` from constants to arbitrary elements. -/
+theorem projModelFunctionFieldEquiv_symm_algebraMap [IsIntegral (projModel W)]
+    [Nonempty (zChart W : (projModel W).Opens)]
+    (c : W.toAffine.CoordinateRing) :
+    (projModelFunctionFieldEquiv W).symm.toRingHom
+      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField c)
+    = algebraMap Γ(projModel W, zChart W) ((projModel W).functionField)
+        (coordRingToZSection W c) := by
+  haveI hZaff : IsAffineOpen (zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : IsFractionRing Γ(projModel W, zChart W) (projModel W).functionField :=
+    functionField_isFractionRing_of_isAffineOpen (projModel W) _ hZaff
+  refine (RingEquiv.symm_apply_eq _).mpr ?_
+  rw [projModelFunctionFieldEquiv_germ W (coordRingToZSection W c),
+    RingEquiv.symm_apply_apply]
+
+/-- **(U5c-2 sub-brick — the chart-constants identification)** The chart identification
+`coordRingToZSection` carries the `K`-constant of the coordinate ring to the restriction
+of the structure-pulled global constant. The `chartZAffineEquiv`-leg is an `≃ₐ[K]`
+(`.commutes` free); the remaining legs are `algebraMap_gradeZero_comp_eq`
+(WeierstrassModel:373) and the `awayι`/`toSpecZero` compatibility. -/
+theorem coordRingToZSection_algebraMap (a : K) :
+    coordRingToZSection W (algebraMap K W.toAffine.CoordinateRing a)
+      = ((projModel W).presheaf.map (homOfLE le_top).op)
+          ((projModelπ W).app ⊤ ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a)) := by
+  unfold coordRingToZSection
+  simp only [RingEquiv.coe_trans, Function.comp_apply]
+  have hA : (chartZRingEquiv W).symm ((algebraMap K W.toAffine.CoordinateRing) a)
+      = (chartCoordEquiv W 2) (algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux K 2 W.toProjective.polynomial}) a) := by
+    show ((chartCoordEquiv W 2).symm.trans
+      (chartZAffineEquiv W).toRingEquiv).symm _ = _
+    rw [RingEquiv.symm_trans_apply]
+    exact congrArg (chartCoordEquiv W 2) ((chartZAffineEquiv W).symm.commutes a)
+  rw [hA]
+  -- Leg C morphism algebra: the awayι-composite of the structure morphism is Spec of the
+  -- zero-degree composite
+  have hπ : Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos ≫ projModelπ W
+      = Spec.map (CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+          (quotientGrading (projIdeal W))
+          (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) ≫
+        Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))) := by
+    show _ ≫ (Proj.toSpecZero _ ≫ Spec.map _) = _
+    rw [← Category.assoc, Proj.awayι_toSpecZero]
+  -- S1: re-express the restriction through the awayι presentation
+  have hres := (Iso.comp_inv_eq _).mp (Proj_awayι_appTop_ΓSpecIso
+    (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+    (mk_X_mem_quotientGrading_one W 2) one_pos).symm
+  rw [hres]
+  -- S2: the constant's transport through the two Spec.map legs
+  have helt : (Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).appTop.hom
+      ((projModelπ W).appTop.hom ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a))
+    = (Scheme.ΓSpecIso _).inv ((CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+        (quotientGrading (projIdeal W))
+        (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).hom
+          ((CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))).hom a)) := by
+    have h0 := congrArg
+      (fun m : Spec (CommRingCat.of (HomogeneousLocalization.Away
+          (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) ⟶
+        Spec (CommRingCat.of K) =>
+        m.appTop.hom ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a)) hπ
+    refine h0.trans ?_
+    have hn1 : (CommRingCat.Hom.hom (Scheme.Hom.app (Spec.map
+          (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W)))) ⊤))
+          ((ConcreteCategory.hom (Scheme.ΓSpecIso (CommRingCat.of K)).inv) a)
+        = (ConcreteCategory.hom (Scheme.ΓSpecIso
+              (CommRingCat.of ↥((projIdeal W).quotientGrading 0))).inv)
+            ((CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))).hom a) :=
+      (congrArg (fun m => CommRingCat.Hom.hom m a)
+        (Scheme.ΓSpecIso_inv_naturality
+          (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))))).symm
+    have hn2 : (CommRingCat.Hom.hom (Scheme.Hom.app (Spec.map
+          (CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+            (quotientGrading (projIdeal W))
+            (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))))) ⊤))
+          ((ConcreteCategory.hom (Scheme.ΓSpecIso
+              (CommRingCat.of ↥((projIdeal W).quotientGrading 0))).inv)
+            ((CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))).hom a))
+        = (ConcreteCategory.hom (Scheme.ΓSpecIso _).inv)
+            ((CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+              (quotientGrading (projIdeal W))
+              (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).hom
+              ((CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))).hom a)) :=
+      (congrArg (fun m => CommRingCat.Hom.hom m
+          ((CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))).hom a))
+        (Scheme.ΓSpecIso_inv_naturality
+          (CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+            (quotientGrading (projIdeal W))
+            (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))))).symm
+    exact (congrArg (CommRingCat.Hom.hom (Scheme.Hom.app (Spec.map
+        (CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom
+          (quotientGrading (projIdeal W))
+          (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))))) ⊤))
+      hn1).trans hn2
+  -- Leg B: the chart equivalence carries the constant to the zero-degree constant
+  have hlegB : (chartCoordEquiv W 2) ((algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K ⧸
+        Ideal.span {(MvPolynomial.dehomogenizeAux K 2) W.toProjective.polynomial})) a)
+      = (HomogeneousLocalization.fromZeroRingHom (quotientGrading (projIdeal W))
+          (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+        ((algebraMapGradeZero (projIdeal W)) a) := by
+    have hcomp := congrArg (fun (m : K →+* HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) => m a)
+      (algebraMap_gradeZero_comp_eq W 2)
+    have hchase : (chartCoordEquiv W 2) ((algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K ⧸
+          Ideal.span {(MvPolynomial.dehomogenizeAux K 2) W.toProjective.polynomial})) a)
+        = (HomogeneousLocalization.Away.map (quotientGradingHom (projIdeal W))
+            (MvPolynomial.X 2))
+          (((MvPolynomial.chartRingEquiv K (2 : Fin 3)).symm :
+            MvPolynomial {j : Fin 3 // j ≠ 2} K →+*
+              HomogeneousLocalization.Away
+                (MvPolynomial.homogeneousSubmodule (Fin 3) K) (MvPolynomial.X 2))
+            ((algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K)) a)) := by
+      have h0 : (algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K ⧸
+            Ideal.span {(MvPolynomial.dehomogenizeAux K 2) W.toProjective.polynomial})) a
+          = Ideal.Quotient.mk _ ((algebraMap K (MvPolynomial {j : Fin 3 // j ≠ 2} K)) a) :=
+        rfl
+      rw [h0]
+      simp only [chartCoordEquiv, chartQuotientEquiv, RingEquiv.trans_apply,
+        Ideal.quotientEquiv_symm_mk,
+        Ideal.quotEquivOfEq_mk, RingHom.quotientKerEquivOfSurjective_apply_mk]
+      rfl
+    exact hchase.trans (hcomp.symm.trans (by rfl))
+  refine Eq.trans (congrArg (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).commRingCatIsoToRingEquiv hlegB) ?_
+  refine Eq.trans ?_ (congrArg (fun z => (ConcreteCategory.hom
+      (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).hom)
+      ((ConcreteCategory.hom (Scheme.ΓSpecIso (CommRingCat.of
+        (HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).hom) z)) helt.symm)
+  exact congrArg (ConcreteCategory.hom (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos).hom)
+    (CategoryTheory.inv_hom_id_apply (Scheme.ΓSpecIso (CommRingCat.of
+      (HomogeneousLocalization.Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) _).symm
+
+/-- **(U5c-2 brick)** The self-base-change collapse on function fields:
+`W.baseChange K = W.map (algebraMap K K) = W.map (RingHom.id K) = W`, transported to the
+function fields. Sealed as a named equiv so the U5c-2 conjugation never exposes the
+cast. -/
+noncomputable def functionFieldSelfBaseChangeEquiv :
+    W.toAffine.FunctionField ≃+* (W.baseChange K).toAffine.FunctionField := by
+  have h : W.baseChange K = W := by
+    show W.map (algebraMap K K) = W
+    rw [Algebra.algebraMap_self, WeierstrassCurve.map_id]
+  rw [h]
+
+/-- The self-base-change collapse `W.baseChange K = W` over the base field itself. -/
+theorem baseChange_self_eq : W.baseChange K = W := by
+  show W.map (algebraMap K K) = W
+  rw [Algebra.algebraMap_self, WeierstrassCurve.map_id]
+
+/-- Nonsingularity transfers through the self-base-change collapse. -/
+theorem nonsingular_of_baseChange_self {xk yk : K}
+    (h : ((W.baseChange K).toAffine).Nonsingular xk yk) :
+    W.toAffine.Nonsingular xk yk := by
+  rw [baseChange_self_eq W] at h
+  exact h
+
+/-- **(U5c-2 cast)** The cast-free repackaging of a `W.baseChange K`-point as a `W`-point,
+by structural recursion rather than `▸`-transport, so that its value lemmas are `rfl`. -/
+noncomputable def basePointCast : ((W.baseChange K).toAffine).Point → W.toAffine.Point
+  | .zero => .zero
+  | .some xk yk h => .some xk yk (nonsingular_of_baseChange_self W h)
+
+@[simp] theorem basePointCast_zero :
+    basePointCast W WeierstrassCurve.Affine.Point.zero
+      = WeierstrassCurve.Affine.Point.zero := rfl
+
+@[simp] theorem basePointCast_some {xk yk : K}
+    (h : ((W.baseChange K).toAffine).Nonsingular xk yk) :
+    basePointCast W (WeierstrassCurve.Affine.Point.some xk yk h)
+      = WeierstrassCurve.Affine.Point.some xk yk (nonsingular_of_baseChange_self W h) := rfl
+
+/-- **(U5c-2 g4/g5 bundle)** The translated dictionary value in `some`-form together with the
+`translateAlgEquivOfPoint` values on the two generators: one case split on `P'`, consumed by
+both generator anchors of the bridge theorem. -/
+private theorem generic_add_cast_bundle [AlgebraicGeometry.IsIntegral (projModel W)]
+    [(W.baseChange K).toAffine.IsElliptic]
+    (P' : ((W.baseChange K).toAffine).Point) (P₀ : W.toAffine.Point)
+    (hP₀ : P₀ = basePointCast W P') :
+    ∃ (xa ya : W.toAffine.FunctionField)
+      (hns : ((W.baseChange W.toAffine.FunctionField).toAffine).Nonsingular xa ya),
+      projModelPointsEquiv W W.toAffine.FunctionField (genericSpecPoint W)
+          + WeierstrassCurve.Affine.Point.map
+            (IsScalarTower.toAlgHom K K W.toAffine.FunctionField) P'
+        = WeierstrassCurve.Affine.Point.some xa ya hns
+      ∧ HasseWeil.translateAlgEquivOfPoint W P₀ (HasseWeil.x_gen W) = xa
+      ∧ HasseWeil.translateAlgEquivOfPoint W P₀ (HasseWeil.y_gen W) = ya := by
+  cases P' with
+  | zero =>
+      refine ⟨HasseWeil.x_gen W, HasseWeil.y_gen W, HasseWeil.generic_nonsingular W,
+        ?_, ?_, ?_⟩
+      · refine Eq.trans (congrArg (projModelPointsEquiv W W.toAffine.FunctionField
+            (genericSpecPoint W) + ·) (WeierstrassCurve.Affine.Point.map_zero
+              (f := IsScalarTower.toAlgHom K K W.toAffine.FunctionField))) ?_
+        refine Eq.trans (add_zero _) ?_
+        exact projModelPointsEquiv_genericSpecPoint W
+      · rw [hP₀]
+        rfl
+      · rw [hP₀]
+        rfl
+  | some xk yk h =>
+      have h₀ : W.toAffine.Nonsingular xk yk := nonsingular_of_baseChange_self W h
+      have hmap : WeierstrassCurve.Affine.Point.map
+          (IsScalarTower.toAlgHom K K W.toAffine.FunctionField)
+          (WeierstrassCurve.Affine.Point.some xk yk h)
+          = HasseWeil.liftSomePoint W xk yk h₀ := by
+        rw [WeierstrassCurve.Affine.Point.map_some]
+        rfl
+      have hadd := HasseWeil.genericPoint_add_liftSomePoint W xk yk h₀
+      have hchain : projModelPointsEquiv W W.toAffine.FunctionField (genericSpecPoint W)
+          + WeierstrassCurve.Affine.Point.map
+            (IsScalarTower.toAlgHom K K W.toAffine.FunctionField)
+            (WeierstrassCurve.Affine.Point.some xk yk h)
+          = _ :=
+        (congrArg (projModelPointsEquiv W W.toAffine.FunctionField
+            (genericSpecPoint W) + ·) hmap).trans
+          ((congrArg (· + HasseWeil.liftSomePoint W xk yk h₀)
+            (projModelPointsEquiv_genericSpecPoint W)).trans hadd)
+      refine ⟨_, _, _, hchain, ?_, ?_⟩
+      · rw [hP₀, basePointCast_some]
+        by_cases h2 : yk = W.toAffine.negY xk yk
+        · rw [HasseWeil.translateAlgEquivOfPoint_some_2tor W xk yk
+            (nonsingular_of_baseChange_self W h) h2]
+          exact HasseWeil.translateAlgHom_of_2tor_apply_x_gen W xk yk
+            (nonsingular_of_baseChange_self W h) h2
+        · rw [HasseWeil.translateAlgEquivOfPoint_some_nonTor W xk yk
+            (nonsingular_of_baseChange_self W h) h2]
+          exact HasseWeil.translateAlgHom_apply_x_gen W xk yk
+            (nonsingular_of_baseChange_self W h) h2
+      · rw [hP₀, basePointCast_some]
+        by_cases h2 : yk = W.toAffine.negY xk yk
+        · rw [HasseWeil.translateAlgEquivOfPoint_some_2tor W xk yk
+            (nonsingular_of_baseChange_self W h) h2]
+          exact HasseWeil.translateAlgHom_of_2tor_apply_y_gen W xk yk
+            (nonsingular_of_baseChange_self W h) h2
+        · rw [HasseWeil.translateAlgEquivOfPoint_some_nonTor W xk yk
+            (nonsingular_of_baseChange_self W h) h2]
+          exact HasseWeil.translateAlgHom_apply_y_gen W xk yk
+            (nonsingular_of_baseChange_self W h) h2
+
+/-- **(U5c-2)** The translation bridge: the function-field action of the scheme-level
+translation automorphism equals HasseWeil's `translateAlgEquivOfPoint` (at the
+self-base-changed curve, per the recorded design), conjugated through the two proven
+dictionaries. Orientation to be convention-checked on one `Z`-chart coordinate during
+the proof; proof strategy: both sides are determined on the coordinate generators —
+compute the left side via the `KE`-valued specPoints machinery. -/
+theorem functionFieldMap_translateBy [IsIntegral (projModel W)]
+    [(W.baseChange K).toAffine.IsElliptic]
+    (x : 𝟙_ (Over (Spec (CommRingCat.of K))) ⟶ (modelEllipticCurve W).asOver)
+    (p : SpecPoints (projModel W) (projModelπ W) K)
+    (hxp : x.left = p.1)
+    (P' : ((W.baseChange K).toAffine).Point)
+    (hP' : projModelPointsEquiv W K p = P')
+    (P₀ : W.toAffine.Point)
+    (hP₀ : P₀ = basePointCast W P')
+    (τ : projModel W ⟶ projModel W)
+    (hτ : τ = (translateByIso (modelEllipticCurve W) x).hom.left)
+    [IsDominant τ] :
+    (HasseWeil.translateAlgEquivOfPoint W P₀).toRingEquiv.toRingHom =
+    (projModelFunctionFieldEquiv W).toRingHom.comp
+      (τ.functionFieldMap.hom.comp
+        (projModelFunctionFieldEquiv W).symm.toRingHom) := by
+  -- PROOF SCAFFOLD (recorded; the two computations are the real content):
+  -- 1. `IsFractionRing.ringHom_ext` (mathlib FractionRing.lean:355): two ring homs out of
+  --    the fraction field `W.toAffine.FunctionField` agree iff they agree on
+  --    `CoordinateRing`.
+  -- 2. `CoordinateRing = AdjoinRoot (W-poly over K[X])`: reduce to the `x`- and
+  --    `y`-generators (AdjoinRoot-ext + Polynomial-ext).
+  -- 3. τ-side value on a generator: through `projModelFunctionFieldEquiv` the generator is
+  --    the class of a `Z`-chart section; `functionFieldMap_germToFunctionField`
+  --    (DominantFunctionField:95) computes `τ.functionFieldMap` on it as the class of
+  --    `τ.app (chart-section)` — the translated chart coordinate, evaluated by the
+  --    addition/translation spec-points machinery (`mulModelHom_specPoints`-genre at the
+  --    generic point).
+  -- 4. HasseWeil side on the generators: the slope-formula cases of
+  --    `translateAlgEquivOfPoint` (TranslationOrd.lean:3290) — plus
+  --    `mulByInt_pullbackAlgHom_x_gen` (MulByHomDegree:324) as the proven [n]-anchor
+  --    exemplar.
+  -- 5. Orientation/convention pinned at the first generator computation.
+  refine IsFractionRing.ringHom_ext (A := W.toAffine.CoordinateRing) ?_
+  intro c
+  induction c using AdjoinRoot.induction_on with
+  | _ f => ?_
+  -- three anchors: the K-constants, the x-generator, the y-generator (the root)
+  set L := ((HasseWeil.translateAlgEquivOfPoint W P₀).toRingEquiv.toRingHom).comp
+    (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) with hL
+  set R := ((projModelFunctionFieldEquiv W).toRingHom.comp
+    ((CommRingCat.Hom.hom (Scheme.Hom.functionFieldMap τ)).comp
+      (projModelFunctionFieldEquiv W).symm.toRingHom)).comp
+    (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) with hR
+  have hK : ∀ a : K, L ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C (Polynomial.C a)))
+      = R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C (Polynomial.C a))) := by
+    intro a
+    have ha : (AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C (Polynomial.C a))
+        = algebraMap K W.toAffine.CoordinateRing a := rfl
+    rw [ha]
+    simp only [hL, hR, RingHom.comp_apply]
+    rw [← IsScalarTower.algebraMap_apply K W.toAffine.CoordinateRing W.toAffine.FunctionField]
+    rw [show ((HasseWeil.translateAlgEquivOfPoint W P₀).toRingEquiv.toRingHom)
+        ((algebraMap K W.toAffine.FunctionField) a)
+      = algebraMap K W.toAffine.FunctionField a from
+        (HasseWeil.translateAlgEquivOfPoint W P₀).commutes a]
+    -- the τ-invariance of the K-constant's function-field class (isolated brick:
+    -- provable via functionFieldMap_comp at τ ≫ π = π once the chart-constants
+    -- identification lands; see the board's U5c-2 entry)
+    have hinv : (CommRingCat.Hom.hom (Scheme.Hom.functionFieldMap τ))
+        ((projModelFunctionFieldEquiv W).symm.toRingHom
+          ((algebraMap K W.toAffine.FunctionField) a)) =
+      (projModelFunctionFieldEquiv W).symm.toRingHom
+        ((algebraMap K W.toAffine.FunctionField) a) := by
+      haveI hZaff : IsAffineOpen (zChart W) :=
+        Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+      haveI : Nontrivial Γ(projModel W, zChart W) :=
+        (coordRingToZSection W).toEquiv.symm.nontrivial
+      haveI : Nonempty (zChart W : (projModel W).Opens) :=
+        ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+      haveI : IsFractionRing Γ(projModel W, zChart W) (projModel W).functionField :=
+        functionField_isFractionRing_of_isAffineOpen (projModel W) _ hZaff
+      have h1 : (projModelFunctionFieldEquiv W).symm.toRingHom
+          ((algebraMap K W.toAffine.FunctionField) a)
+        = algebraMap Γ(projModel W, zChart W) ((projModel W).functionField)
+            (coordRingToZSection W (algebraMap K W.toAffine.CoordinateRing a)) := by
+        refine (RingEquiv.symm_apply_eq _).mpr ?_
+        rw [projModelFunctionFieldEquiv_germ W
+          (coordRingToZSection W (algebraMap K W.toAffine.CoordinateRing a)),
+          RingEquiv.symm_apply_apply]
+        exact (IsScalarTower.algebraMap_apply K W.toAffine.CoordinateRing
+          W.toAffine.FunctionField a).symm
+      rw [h1, coordRingToZSection_algebraMap W a]
+      have hπτ : τ ≫ projModelπ W = projModelπ W := by
+        rw [hτ]
+        exact Over.w ((modelEllipticCurve W).translateByIso x).hom
+      -- the restricted class is the global class
+      have h2 : ∀ s : Γ(projModel W, ⊤),
+          (algebraMap Γ(projModel W, zChart W) ((projModel W).functionField))
+            ((ConcreteCategory.hom ((projModel W).presheaf.map
+              (homOfLE (le_top : (zChart W : (projModel W).Opens) ≤ ⊤)).op)) s)
+          = (projModel W).germToFunctionField ⊤ s := by
+        intro s
+        exact TopCat.Presheaf.germ_res_apply (projModel W).presheaf
+          (homOfLE le_top) (genericPoint (projModel W)) _ s
+      have h3 : (τ.appTop).hom (((projModelπ W).appTop).hom
+          ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a))
+        = ((projModelπ W).appTop).hom ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a) :=
+        congrArg (fun (m : projModel W ⟶ Spec (CommRingCat.of K)) =>
+          (Scheme.Hom.appTop m).hom ((Scheme.ΓSpecIso (CommRingCat.of K)).inv a)) hπτ
+      refine Eq.trans (congrArg (CommRingCat.Hom.hom (Scheme.Hom.functionFieldMap τ))
+        (h2 _)) (Eq.trans (functionFieldMap_germToFunctionField τ ⊤ _)
+          (Eq.trans (congrArg (ConcreteCategory.hom ((projModel W).presheaf.germ
+            (τ ⁻¹ᵁ ⊤) (genericPoint (projModel W))
+            (genericPoint_mem_preimage τ ⊤))) h3) (h2 _).symm))
+    rw [hinv]
+    exact (RingEquiv.apply_symm_apply _ _).symm
+  -- τ-hMASTER (case-free): the R-side on any coordinate-ring element is the
+  -- appLE-evaluation of its chart section at the translated tautological point
+  -- (brick6_intertwining's h1+h2+hfold with [N] replaced by τ).
+  haveI hZaffM : IsAffineOpen (zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : Nontrivial Γ(projModel W, zChart W) :=
+    (coordRingToZSection W).toEquiv.symm.nontrivial
+  haveI : Nonempty (zChart W : (projModel W).Opens) :=
+    ⟨hZaffM.isoSpec.inv.base (Classical.arbitrary _)⟩
+  -- (g2) the composed tautological point and its dictionary value
+  have hπτ2 : τ ≫ projModelπ W = projModelπ W := by
+    rw [hτ]
+    exact Over.w ((modelEllipticCurve W).translateByIso x).hom
+  have hg2 : projModelPointsEquiv W W.toAffine.FunctionField
+      ⟨(genericSpecPoint W).1 ≫ τ, by
+        rw [Category.assoc, hπτ2]
+        exact (genericSpecPoint W).2⟩
+    = projModelPointsEquiv W W.toAffine.FunctionField (genericSpecPoint W)
+      + WeierstrassCurve.Affine.Point.map
+          (IsScalarTower.toAlgHom K K W.toAffine.FunctionField) P' := by
+    -- (a) the composed SpecPoint IS the Point-sum, as subtypes
+    have ha : (⟨(genericSpecPoint W).1 ≫ τ, by
+          rw [Category.assoc, hπτ2]
+          exact (genericSpecPoint W).2⟩ :
+        SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField)
+      = (genericModelPoint W +
+          ((modelEllipticCurve W).pointEquivOverHom
+              (Spec.map (CommRingCat.ofHom
+                (algebraMap K W.toAffine.FunctionField)))).symm
+            (CategoryTheory.CartesianMonoidalCategory.toUnit
+              (CategoryTheory.Over.mk (Spec.map (CommRingCat.ofHom
+                (algebraMap K W.toAffine.FunctionField)))) ≫ x) :
+          (modelEllipticCurve W).Point _) := by
+      refine Subtype.ext ?_
+      exact (congrArg ((genericSpecPoint W).1 ≫ ·) hτ).trans
+        (genericSpecPoint_comp_translateBy W x)
+    rw [ha, projModelPointsEquiv_add]
+    congr 1
+    -- (c) the pulled section is the extension of `p`; g1 + hP' close
+    have hpx : (((modelEllipticCurve W).pointEquivOverHom
+          (Spec.map (CommRingCat.ofHom
+            (algebraMap K W.toAffine.FunctionField)))).symm
+        (CategoryTheory.CartesianMonoidalCategory.toUnit
+          (CategoryTheory.Over.mk (Spec.map (CommRingCat.ofHom
+            (algebraMap K W.toAffine.FunctionField)))) ≫ x) :
+        SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField)
+      = extendSpecPoint W p := by
+      refine Subtype.ext ?_
+      show (CategoryTheory.CartesianMonoidalCategory.toUnit
+          (CategoryTheory.Over.mk (Spec.map (CommRingCat.ofHom
+            (algebraMap K W.toAffine.FunctionField)))) ≫ x).left
+        = Spec.map (CommRingCat.ofHom (algebraMap K W.toAffine.FunctionField)) ≫ p.1
+      rw [CategoryTheory.Over.comp_left, hxp]
+      rfl
+    rw [hpx, projModelPointsEquiv_extendSpecPoint W p, hP']
+  have hτV : (genericSpecPoint W).1.base
+      (IsLocalRing.closedPoint (W.toAffine.FunctionField)) ∈ τ ⁻¹ᵁ (zChart W) := by
+    show τ.base ((genericSpecPoint W).1.base
+      (IsLocalRing.closedPoint (W.toAffine.FunctionField))) ∈ (zChart W)
+    rw [genericSpecPoint_base_closedPoint W]
+    show τ.base (genericPoint (projModel W)) ∈ (zChart W)
+    rw [genericPoint_eq_of_isDominant τ]
+    exact genericPoint_mem_zChart W
+  have hMASTERτ : ∀ c : W.toAffine.CoordinateRing,
+      projModelFunctionFieldEquiv W (τ.functionFieldMap.hom
+          ((projModel W).germToFunctionField (zChart W) (coordRingToZSection W c)))
+        = (((genericSpecPoint W).1 ≫ τ).appLE (zChart W) ⊤
+            (le_trans (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge le_rfl)
+          ≫ (Scheme.ΓSpecIso (CommRingCat.of (W.toAffine.FunctionField))).hom).hom
+            (coordRingToZSection W c) := by
+    intro c
+    have h1 : τ.functionFieldMap.hom
+        ((projModel W).germToFunctionField (zChart W) (coordRingToZSection W c))
+        = (projModel W).presheaf.germ (τ ⁻¹ᵁ (zChart W)) (genericPoint _)
+            (genericPoint_mem_preimage τ (zChart W))
+            (τ.app (zChart W) (coordRingToZSection W c)) :=
+      functionFieldMap_germToFunctionField τ (zChart W) (coordRingToZSection W c)
+    have h2 := projModelFunctionFieldEquiv_germ_eval W (τ ⁻¹ᵁ (zChart W))
+      (genericPoint_mem_preimage τ (zChart W)) hτV
+      (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge
+      (τ.app (zChart W) (coordRingToZSection W c))
+    rw [h1, h2]
+    have hfold : (((genericSpecPoint W).1.appLE (τ ⁻¹ᵁ (zChart W)) ⊤
+          (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge)
+        ≫ (Scheme.ΓSpecIso (CommRingCat.of (W.toAffine.FunctionField))).hom).hom
+        ((τ.app (zChart W)).hom (coordRingToZSection W c))
+        = ((((genericSpecPoint W).1 ≫ τ).appLE (zChart W) ⊤
+            (le_trans (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge le_rfl))
+          ≫ (Scheme.ΓSpecIso (CommRingCat.of (W.toAffine.FunctionField))).hom).hom
+            (coordRingToZSection W c) := by
+      rw [Scheme.Hom.comp_appLE]
+      rfl
+    exact hfold
+  have hx : L ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X))
+      = R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X)) := by
+    have hR1 : R ((AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X))
+        = projModelFunctionFieldEquiv W (τ.functionFieldMap.hom
+            ((projModel W).germToFunctionField (zChart W)
+              (coordRingToZSection W ((AdjoinRoot.mk W.toAffine.polynomial)
+                (Polynomial.C Polynomial.X))))) := by
+      simp only [hR, RingHom.comp_apply]
+      rw [projModelFunctionFieldEquiv_symm_algebraMap]
+      rfl
+    rw [hR1, hMASTERτ]
+    -- (bundle) the dictionary some-form + the generator values of the translation
+    obtain ⟨xa, ya, hns, hsum, hLx, hLy⟩ := generic_add_cast_bundle W P' P₀ hP₀
+    have hsome : projModelPointsEquiv W W.toAffine.FunctionField
+        ⟨(genericSpecPoint W).1 ≫ τ, by
+          rw [Category.assoc, hπτ2]
+          exact (genericSpecPoint W).2⟩
+        = WeierstrassCurve.Affine.Point.some xa ya hns := hg2.trans hsum
+    -- readback: the translated tautological point is the chart-constructed point
+    have hb5 : (genericSpecPoint W).1 ≫ τ
+        = (chartSpecPoint W xa ya
+            (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)).1 :=
+      congrArg Subtype.val (eq_chartSpecPoint_of_projModelPointsEquiv_some W hsome)
+    simp only [hb5]
+    have hT3 := chartSpecPoint_appLE_eval W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)
+      (by
+        rw [← hb5]
+        exact le_trans (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge le_rfl)
+    refine Eq.trans ?_ (DFunLike.congr_fun (congrArg CommRingCat.Hom.hom hT3)
+      (coordRingToZSection W ((AdjoinRoot.mk W.toAffine.polynomial)
+        (Polynomial.C Polynomial.X)))).symm
+    have hread : (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv.hom
+        (coordRingToZSection W ((AdjoinRoot.mk W.toAffine.polynomial)
+          (Polynomial.C Polynomial.X)))
+        = (chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+            (Polynomial.C Polynomial.X)) := by
+      show (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv.hom
+        ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).hom.hom
+          ((chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+            (Polynomial.C Polynomial.X)))) = _
+      exact DFunLike.congr_fun (congrArg CommRingCat.Hom.hom
+        (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).hom_inv_id)
+        ((chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+          (Polynomial.C Polynomial.X)))
+    refine Eq.trans ?_ (congrArg (chartSolutionHom W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)) hread).symm
+    have hxelt : (chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+        (Polynomial.C Polynomial.X))
+        = HomogeneousLocalization.Away.isLocalizationElem
+            (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0) :=
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_x W).symm
+    refine Eq.trans ?_ (congrArg (chartSolutionHom W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)) hxelt).symm
+    refine Eq.trans (show L ((AdjoinRoot.mk W.toAffine.polynomial)
+        (Polynomial.C Polynomial.X)) = xa from hLx) ?_
+    exact (chartSolutionHom_x W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)).symm
+  have hy : L ((AdjoinRoot.mk W.toAffine.polynomial) Polynomial.X)
+      = R ((AdjoinRoot.mk W.toAffine.polynomial) Polynomial.X) := by
+    have hR1 : R ((AdjoinRoot.mk W.toAffine.polynomial) Polynomial.X)
+        = projModelFunctionFieldEquiv W (τ.functionFieldMap.hom
+            ((projModel W).germToFunctionField (zChart W)
+              (coordRingToZSection W ((AdjoinRoot.mk W.toAffine.polynomial)
+                Polynomial.X)))) := by
+      simp only [hR, RingHom.comp_apply]
+      rw [projModelFunctionFieldEquiv_symm_algebraMap]
+      rfl
+    rw [hR1, hMASTERτ]
+    -- (bundle) the dictionary some-form + the generator values of the translation
+    obtain ⟨xa, ya, hns, hsum, hLx, hLy⟩ := generic_add_cast_bundle W P' P₀ hP₀
+    have hsome : projModelPointsEquiv W W.toAffine.FunctionField
+        ⟨(genericSpecPoint W).1 ≫ τ, by
+          rw [Category.assoc, hπτ2]
+          exact (genericSpecPoint W).2⟩
+        = WeierstrassCurve.Affine.Point.some xa ya hns := hg2.trans hsum
+    -- readback: the translated tautological point is the chart-constructed point
+    have hb5 : (genericSpecPoint W).1 ≫ τ
+        = (chartSpecPoint W xa ya
+            (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)).1 :=
+      congrArg Subtype.val (eq_chartSpecPoint_of_projModelPointsEquiv_some W hsome)
+    simp only [hb5]
+    have hT3 := chartSpecPoint_appLE_eval W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)
+      (by
+        rw [← hb5]
+        exact le_trans (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge le_rfl)
+    refine Eq.trans ?_ (DFunLike.congr_fun (congrArg CommRingCat.Hom.hom hT3)
+      (coordRingToZSection W ((AdjoinRoot.mk W.toAffine.polynomial)
+        Polynomial.X))).symm
+    have hread : (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv.hom
+        (coordRingToZSection W ((AdjoinRoot.mk W.toAffine.polynomial)
+          Polynomial.X))
+        = (chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+            Polynomial.X) := by
+      show (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv.hom
+        ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).hom.hom
+          ((chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+            Polynomial.X))) = _
+      exact DFunLike.congr_fun (congrArg CommRingCat.Hom.hom
+        (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).hom_inv_id)
+        ((chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+          Polynomial.X))
+    refine Eq.trans ?_ (congrArg (chartSolutionHom W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)) hread).symm
+    have hxelt : (chartZRingEquiv W).symm ((AdjoinRoot.mk W.toAffine.polynomial)
+        Polynomial.X)
+        = HomogeneousLocalization.Away.isLocalizationElem
+            (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1) :=
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_y W).symm
+    refine Eq.trans ?_ (congrArg (chartSolutionHom W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)) hxelt).symm
+    refine Eq.trans (show L ((AdjoinRoot.mk W.toAffine.polynomial)
+        Polynomial.X) = ya from hLy) ?_
+    exact (chartSolutionHom_y W xa ya
+      (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)).symm
+  show L ((AdjoinRoot.mk W.toAffine.polynomial) f) = R ((AdjoinRoot.mk W.toAffine.polynomial) f)
+  induction f using Polynomial.induction_on with
+  | C q =>
+      induction q using Polynomial.induction_on with
+      | C a => exact hK a
+      | add p₁ q₁ h₁ h₂ =>
+          simpa only [map_add] using congrArg₂ (· + ·) h₁ h₂
+      | monomial n a ih =>
+          have h1 : (Polynomial.C (Polynomial.C a * Polynomial.X ^ (n + 1)) :
+              Polynomial (Polynomial K)) =
+              Polynomial.C (Polynomial.C a * Polynomial.X ^ n) *
+                Polynomial.C Polynomial.X := by
+            rw [← Polynomial.C_mul, mul_assoc, pow_succ]
+          rw [h1, map_mul (AdjoinRoot.mk W.toAffine.polynomial), map_mul L, map_mul R,
+            ih, hx]
+  | add p q hp hq =>
+      simpa only [map_add] using congrArg₂ (· + ·) hp hq
+  | monomial n a ih =>
+      have h1 : (Polynomial.C a * Polynomial.X ^ (n + 1) :
+          Polynomial (Polynomial K)) =
+          Polynomial.C a * Polynomial.X ^ n * Polynomial.X := by
+        rw [mul_assoc, pow_succ]
+      rw [h1, map_mul (AdjoinRoot.mk W.toAffine.polynomial), map_mul L, map_mul R,
+        ih, hy]
+
+end Bridge
+
+end EllipticCurve
+
+end ModularCurves

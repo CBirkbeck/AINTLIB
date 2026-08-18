@@ -310,6 +310,33 @@ theorem AffineIntersectionUnitCocycle.exists_modelAtLaterStage
           (Mq.le_stage (Scheme.GlueData.affineIntersectionPairIndex i j)))).trans
           (congrArg Units.val (hg i j))
 
+private theorem units_map_naturality {A J : Type u} [CommRing A]
+    {F G : Finset J ⥤ CommAlgCat.{u} A} (α : F ⟶ G) {X Y : Finset J} (φ : X ⟶ Y)
+    (u : (F.obj X)ˣ) :
+    Units.map (G.map φ).hom.toMonoidHom (Units.map (α.app X).hom.toMonoidHom u) =
+      Units.map (α.app Y).hom.toMonoidHom (Units.map (F.map φ).hom.toMonoidHom u) := by
+  apply Units.ext
+  simp only [Units.coe_map, MonoidHom.coe_coe]
+  exact congrArg (fun ψ : CommAlgCat.Hom (F.obj X) (G.obj Y) => ψ.hom (u : F.obj X))
+    (α.naturality φ).symm
+
+/-- **[W3.4.c brick] Transport a unit cocycle along a map of affine-intersection algebra
+functors.** Naturality carries the cocycle identity across, so a cocycle on the total
+space's diagram pushes to one on the base's — which is how the `z`-values of the
+comparison units become the cocycle that glues the base bundle `N`. -/
+noncomputable def AffineIntersectionUnitCocycle.mapAlong
+    {A J : Type u} [CommRing A] {F G : Finset J ⥤ CommAlgCat.{u} A} (α : F ⟶ G)
+    (c : AffineIntersectionUnitCocycle F) : AffineIntersectionUnitCocycle G where
+  transition i j :=
+    Units.map (α.app (Scheme.GlueData.affineIntersectionPairIndex i j)).hom.toMonoidHom
+      (c.transition i j)
+  cocycle i j k := by
+    rw [units_map_naturality α (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k),
+      units_map_naturality α
+        (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k),
+      units_map_naturality α (Scheme.GlueData.affineIntersectionPairToTripleRight i j k),
+      ← map_mul, c.cocycle i j k]
+
 end
 
 end AlgebraicGeometry.Scheme.Modules

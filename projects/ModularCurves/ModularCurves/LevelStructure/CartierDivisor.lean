@@ -147,7 +147,7 @@ theorem isPullback_sectionBaseChange {π : C ⟶ S} (z : S ⟶ C) (hz : z ≫ π
     exact h
 
 /-- A section of a separated morphism is a closed immersion. -/
-private lemma SectionsIdeal.isClosedImmersion {π : C ⟶ S} [IsSeparated π] {z : S ⟶ C}
+lemma SectionsIdeal.isClosedImmersion {π : C ⟶ S} [IsSeparated π] {z : S ⟶ C}
     (hz : z ≫ π = 𝟙 S) : IsClosedImmersion z := by
   have h1 : IsClosedImmersion (z ≫ π) := by rw [hz]; infer_instance
   exact IsClosedImmersion.of_comp z π
@@ -704,7 +704,7 @@ private lemma KerPrincipal.ideal_map_span {A B : Type u} [CommRing A] [CommRing 
 variable (π) in
 /-- Composing `π.appLE` with `z.appLE` along a "retraction pair" of opens gives the
 identity, because `z ≫ π = 𝟙 S`. -/
-private lemma KerPrincipal.retraction (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+lemma KerPrincipal.retraction (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
     {U : S.Opens} {V : C.Opens} (hVU : V ≤ π ⁻¹ᵁ U) (hUV : U ≤ z ⁻¹ᵁ V) :
     π.appLE U V hVU ≫ z.appLE V U hUV = 𝟙 Γ(S, U) := by
   rw [Scheme.Hom.appLE_comp_appLE]
@@ -750,7 +750,7 @@ private lemma KerPrincipal.preimage_le (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
 variable (π) in
 /-- Kernels of `z.app` and `z.appLE` agree on a retraction pair (the two target opens
 are equal). -/
-private lemma KerPrincipal.ker_app (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+lemma KerPrincipal.ker_app (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
     {U : S.Opens} {V : C.Opens} (hVU : V ≤ π ⁻¹ᵁ U) (hUV : U ≤ z ⁻¹ᵁ V) :
     RingHom.ker (z.app V).hom = RingHom.ker (z.appLE V U hUV).hom := by
   haveI h3 : IsIso (homOfLE hUV) :=
@@ -1023,7 +1023,7 @@ private lemma SectionsIdeal.ideal_eq_top_of_disjoint (I : C.IdealSheafData)
   exact PrimeSpectrum.zeroLocus_empty_iff_eq_top.mp h4
 
 /-- Restriction to an affine basic open preserves "principal on a nonzerodivisor". -/
-private lemma SectionsIdeal.basicOpen_span_nzd {I : C.IdealSheafData} {V : C.affineOpens}
+lemma SectionsIdeal.basicOpen_span_nzd {I : C.IdealSheafData} {V : C.affineOpens}
     {f : Γ(C, V.1)} (hspan : I.ideal V = Ideal.span {f})
     (hnzd : f ∈ nonZeroDivisors Γ(C, V.1)) (t : Γ(C, V.1)) :
     I.ideal (C.affineBasicOpen t) =
@@ -1039,7 +1039,7 @@ private lemma SectionsIdeal.basicOpen_span_nzd {I : C.IdealSheafData} {V : C.aff
 /-- **Multi-section chart**: around any point of the total space there is an affine open on
 which the kernel ideal of *every* section in a finite family is principal on a
 nonzerodivisor (T-D22, iterated via common basic-open refinements). -/
-private lemma SectionsIdeal.exists_multiChart (π : C ⟶ S) [IsSeparated π]
+lemma SectionsIdeal.exists_multiChart (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (c : C) :
     ∃ V : C.affineOpens, c ∈ V.1 ∧ ∀ i : Fin n, ∃ f : Γ(C, V.1),
@@ -1074,7 +1074,7 @@ private lemma SectionsIdeal.exists_multiChart (π : C ⟶ S) [IsSeparated π]
       exact ⟨_, h1, h2⟩
 
 /-- Evaluation of a finite product of ideal sheaves on an affine open. -/
-private lemma SectionsIdeal.ideal_prod {ι : Type*} (s : Finset ι)
+lemma SectionsIdeal.ideal_prod {ι : Type*} (s : Finset ι)
     (I : ι → C.IdealSheafData) (U : C.affineOpens) :
     (∏ i ∈ s, I i).ideal U = ∏ i ∈ s, (I i).ideal U := by
   classical
@@ -1085,7 +1085,7 @@ private lemma SectionsIdeal.ideal_prod {ι : Type*} (s : Finset ι)
       Pi.mul_apply, ih]
 
 /-- The support of the product of the section ideals is the union of the section images. -/
-private lemma SectionsIdeal.support_prod (π : C ⟶ S) [IsSeparated π] {n : ℕ}
+lemma SectionsIdeal.support_prod (π : C ⟶ S) [IsSeparated π] {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
     ((∏ i, Scheme.Hom.ker (P i).1).support : Set C) = ⋃ i, Set.range (P i).1.base := by
   classical
@@ -1112,7 +1112,7 @@ private lemma SectionsIdeal.support_prod (π : C ⟶ S) [IsSeparated π] {n : �
 any `t : A` the short exact sequence
 `0 → A ⧸ (t) →(·f₀) A ⧸ (f₀·t) →(σ₀) R → 0`
 splits (its cokernel `R` is free, hence projective), giving `A ⧸ (f₀·t) ≃ₗ[R] (A ⧸ (t)) × R`. -/
-private theorem SectionsIdeal.quotient_prod {R A : Type u} [CommRing R] [CommRing A]
+theorem SectionsIdeal.quotient_prod {R A : Type u} [CommRing R] [CommRing A]
     [Algebra R A] (f₀ : A) (hf₀ : f₀ ∈ nonZeroDivisors A) (σ₀ : A →ₐ[R] R)
     (hσ₀ : RingHom.ker σ₀ = Ideal.span {f₀}) (t : A) :
     Nonempty ((A ⧸ Ideal.span {f₀ * t}) ≃ₗ[R] (A ⧸ Ideal.span {t}) × R) := by
@@ -1170,7 +1170,7 @@ open Function in
 `R`-algebra `A`, each generating the kernel of an `R`-algebra retraction `σ i : A →ₐ[R] R`,
 then `A ⧸ (∏ᵢ f i)` is a free `R`-module of rank `m` (successive extensions
 `0 → A/(f₁⋯f_{k-1}) → A/(f₀⋯f_{k-1}) → A/(f₀) → 0` split since `A/(f₀) ≅ R` is free). -/
-private theorem SectionsIdeal.free_quotient {R A : Type u} [CommRing R] [CommRing A]
+theorem SectionsIdeal.free_quotient {R A : Type u} [CommRing R] [CommRing A]
     [Algebra R A] :
     ∀ (m : ℕ) (f : Fin m → A), (∀ i, f i ∈ nonZeroDivisors A) →
       ∀ σ : Fin m → (A →ₐ[R] R), (∀ i, RingHom.ker (σ i) = Ideal.span {f i}) →
@@ -1258,7 +1258,7 @@ affine `U`, meeting only the sections listed in `g` (the other section ideals be
 unit ideal on `W'`), with retraction pairs and principal-nzd kernel ideals for `i ∈ g`,
 the coordinate ring of the divisor piece is a free module of rank `g.card` over
 `Γ(S, U)`. -/
-private theorem SectionsIdeal.piece_free (π : C ⟶ S) [IsSeparated π] {n : ℕ}
+theorem SectionsIdeal.piece_free (π : C ⟶ S) [IsSeparated π] {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (U : S.affineOpens) (W' : C.affineOpens)
     (hVU : W'.1 ≤ π ⁻¹ᵁ U.1) (g : Finset (Fin n))
     (hsec : ∀ i ∈ g, U.1 ≤ (P i).1 ⁻¹ᵁ W'.1)

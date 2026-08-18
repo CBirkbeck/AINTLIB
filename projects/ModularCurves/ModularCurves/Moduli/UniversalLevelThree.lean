@@ -243,6 +243,24 @@ theorem universalE3_ringMap {R R' : CommRingCat.{u}} (f : R ⟶ R') :
 
 end StageD
 
+/-- **(WP-A7.1 input)** The relation that survives on the `ℰ₃` moduli ring. The defining
+relation `β³ = (β+γ)³` factors as `γ · (3β² + 3βγ + γ²) = 0`, and `γ` is inverted
+(`isUnit_e3Gamma`), so the `γ = 0` component is excised and only the quadratic survives.
+
+This is what makes `E3ModuliRing` integral even though `E3Quotient` is not: the defining
+polynomial `X₀³ − (X₀+X₁)³ = −X₁ · (3X₀² + 3X₀X₁ + X₁²)` is reducible, but the
+localisation kills the linear factor. The surviving quadratic has discriminant `−3γ²` in
+`β`, so it stays irreducible over `ℚ` and splits exactly over `ℚ(√−3) = ℚ(ζ₃)` — which is
+the geometric reason the Weil-pairing root of unity lives on this base. -/
+theorem universalE3_quadratic_rel :
+    3 * e3Beta R ^ 2 + 3 * e3Beta R * e3Gamma R + e3Gamma R ^ 2 = 0 := by
+  have hrel : e3Map R (X 0 ^ 3 - (X 0 + X 1) ^ 3) = 0 := e3Rel_map_eq_zero R
+  rw [map_sub, map_pow, map_pow, map_add] at hrel
+  have hrel' : e3Beta R ^ 3 - (e3Beta R + e3Gamma R) ^ 3 = 0 := hrel
+  have hflex : e3Gamma R * (3 * e3Beta R ^ 2 + 3 * e3Beta R * e3Gamma R + e3Gamma R ^ 2)
+      = 0 := by linear_combination -hrel'
+  exact (isUnit_e3Gamma R).mul_right_eq_zero.mp hflex
+
 /-- **(B2-fix v10.256)** The universal `Q = (γ, β+γ)` is a `3`-torsion point at the
 coordinate level: `x(Q) = γ` roots the `3`-division cofactor `3x³ + a₁²x² + 3a₁a₃x + 3a₃²`.
 This is now provable — it was *false* pre-B2 on the (now-excluded) `γ = 0` component. The

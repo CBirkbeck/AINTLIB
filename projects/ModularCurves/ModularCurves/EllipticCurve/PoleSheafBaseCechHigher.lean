@@ -2,6 +2,7 @@ import ModularCurves.EllipticCurve.PoleSheafBaseCechHOne
 import ModularCurves.EllipticCurve.PoleSheafBaseCechFlat
 import ModularCurves.ForMathlib.AcyclicAffineCechComparison
 import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
+import ModularCurves.ForMathlib.AffineFieldPointTower
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 
 /-!
@@ -17,110 +18,7 @@ universe u
 
 namespace ModularCurves
 
-private theorem affineFieldFactor_isScalarTower
-    {S : Scheme.{u}} [IsAffine S]
-    (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K] :
-    let t : Spec (.of K) ⟶ S :=
-      Spec.map (CommRingCat.ofHom (algebraMap Γ(S, (⊤ : S.Opens)) K)) ≫
-        S.isoSpec.inv
-    let x := Scheme.SpecToEquivOfField K S t
-    let s := x.1
-    let ψ := x.2
-    let A := Γ(Spec (S.residueField s),
-      (⊤ : (Spec (S.residueField s)).Opens))
-    letI : Algebra Γ(S, (⊤ : S.Opens)) A :=
-      (S.fromSpecResidueField s).appTop.hom.toAlgebra
-    let χ : A →+* K :=
-      ((Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ).hom
-    letI : Algebra A K := χ.toAlgebra
-    IsScalarTower Γ(S, (⊤ : S.Opens)) A K := by
-  dsimp only
-  let R := Γ(S, (⊤ : S.Opens))
-  let t : Spec (.of K) ⟶ S :=
-    Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ S.isoSpec.inv
-  let x := Scheme.SpecToEquivOfField K S t
-  let s := x.1
-  let ψ := x.2
-  let A := Γ(Spec (S.residueField s),
-    (⊤ : (Spec (S.residueField s)).Opens))
-  letI : Algebra R A :=
-    (S.fromSpecResidueField s).appTop.hom.toAlgebra
-  let χ : A →+* K :=
-    ((Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ).hom
-  letI : Algebra A K := χ.toAlgebra
-  have hfac : Spec.map ψ ≫ S.fromSpecResidueField s = t := by
-    simpa only [x, s, ψ, Scheme.SpecToEquivOfField_symm_apply] using
-      (Scheme.SpecToEquivOfField K S).symm_apply_apply t
-  have hcomp₀ :
-      (S.fromSpecResidueField s).appTop ≫
-          (Spec.map ψ).appTop ≫ (Scheme.ΓSpecIso (.of K)).hom =
-        CommRingCat.ofHom (algebraMap R K) := by
-    rw [← Category.assoc]
-    rw [← Scheme.Hom.comp_appTop (Spec.map ψ)
-      (S.fromSpecResidueField s), hfac]
-    dsimp only [t]
-    rw [Scheme.Hom.comp_appTop, Category.assoc,
-      Scheme.ΓSpecIso_naturality]
-    have hΓ : (Scheme.ΓSpecIso (.of R)).hom =
-        S.isoSpec.hom.appTop := by
-      dsimp only [R]
-      exact (Scheme.toSpecΓ_appTop S).symm
-    rw [hΓ]
-    rw [← Category.assoc]
-    rw [← Scheme.Hom.comp_appTop S.isoSpec.hom S.isoSpec.inv,
-      S.isoSpec.hom_inv_id]
-    simp only [Scheme.Hom.id_app, Category.id_comp]
-  have hcomp : CommRingCat.ofHom (algebraMap R K) =
-      (S.fromSpecResidueField s).appTop ≫
-        (Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ := by
-    rw [← Scheme.ΓSpecIso_naturality ψ]
-    exact hcomp₀.symm
-  apply IsScalarTower.of_algebraMap_eq'
-  change (CommRingCat.ofHom (algebraMap R K)).hom =
-    ((S.fromSpecResidueField s).appTop ≫
-      (Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ).hom
-  exact congrArg CommRingCat.Hom.hom hcomp
-
-private theorem affineFieldFactor_residue_isScalarTower
-    {S : Scheme.{u}} [IsAffine S]
-    (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K] :
-    let t : Spec (.of K) ⟶ S :=
-      Spec.map (CommRingCat.ofHom (algebraMap Γ(S, (⊤ : S.Opens)) K)) ≫
-        S.isoSpec.inv
-    let x := Scheme.SpecToEquivOfField K S t
-    let s := x.1
-    let ψ := x.2
-    let k := ↑(S.residueField s)
-    letI : Algebra Γ(S, (⊤ : S.Opens)) k :=
-      ((S.fromSpecResidueField s).appTop ≫
-        (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
-    letI : Algebra k K := ψ.hom.toAlgebra
-    IsScalarTower Γ(S, (⊤ : S.Opens)) k K := by
-  dsimp only
-  let R := Γ(S, (⊤ : S.Opens))
-  let t : Spec (.of K) ⟶ S :=
-    Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ S.isoSpec.inv
-  let x := Scheme.SpecToEquivOfField K S t
-  let s := x.1
-  let ψ := x.2
-  let k := ↑(S.residueField s)
-  letI : Algebra R k :=
-    ((S.fromSpecResidueField s).appTop ≫
-      (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
-  letI : Algebra k K := ψ.hom.toAlgebra
-  let A := Γ(Spec (S.residueField s),
-    (⊤ : (Spec (S.residueField s)).Opens))
-  letI : Algebra R A :=
-    (S.fromSpecResidueField s).appTop.hom.toAlgebra
-  let χ : A →+* K :=
-    ((Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ).hom
-  letI : Algebra A K := χ.toAlgebra
-  letI : IsScalarTower R A K := affineFieldFactor_isScalarTower K
-  apply IsScalarTower.of_algebraMap_eq
-  intro r
-  exact IsScalarTower.algebraMap_apply R A K r
-
-private theorem baseChange_exact_of_forall_schemeResidueField_baseChange_exact
+theorem baseChange_exact_of_forall_schemeResidueField_baseChange_exact
     {S : Scheme.{u}} [IsAffine S]
     {P Q T : Type u} [AddCommGroup P] [AddCommGroup Q] [AddCommGroup T]
     [Module Γ(S, (⊤ : S.Opens)) P] [Module Γ(S, (⊤ : S.Opens)) Q]
