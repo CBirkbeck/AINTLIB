@@ -235,7 +235,44 @@ theorem weilPairingEval_self_of_isAlgClosed {K : Type u} [Field K] [DecidableEq 
         (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) Q)).hom
   haveI hDomτ : IsDominant (translateByPoint (modelEllipticCurve W)
       (𝟙 (Spec (CommRingCat.of K))) Q) := inferInstance
-  sorry
+  -- stage 5b: the chart choice, the L4-pin, and the L5-close
+  haveI hIrr : IrreducibleSpace ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) := inferInstance
+  obtain ⟨c₀, hc₀⟩ : ∃ i, (Nonempty.some inferInstance : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ∈ Wc i := by
+    have h1 : (Nonempty.some inferInstance : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ∈
+        ((⨆ i, Wc i) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) := by
+      rw [hWc]; trivial
+    rwa [TopologicalSpace.Opens.mem_iSup] at h1
+  obtain ⟨ypre, hypre⟩ := (mulByHom_surjective_global
+    ((modelEllipticCurve W).baseChange (𝟙 (Spec (CommRingCat.of K)))) N).surj
+    (Nonempty.some inferInstance : ↥(pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
+  haveI hNec₀ : Nonempty ((mulByN (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) N ⁻¹ᵁ Wc c₀) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))).Opens) :=
+    ⟨⟨ypre, show (mulByN (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) N).base ypre ∈ Wc c₀ from hypre ▸ hc₀⟩⟩
+  have hxp : (overPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) Q ≫
+      baseChangeIdFstOver (modelEllipticCurve W)).left = p.1 := rfl
+  have hNZ : ((N : ℤ) : K) ≠ 0 := by exact_mod_cast hNK
+  have hN0 : (N : ℤ) ≠ 0 := by exact_mod_cast NeZero.ne N
+  -- the L4-pin
+  rw [weilPairingEval_eq_torsionSplittingEval (modelEllipticCurve W)
+    (Point.mapIso Φ x) (Point.mapIso Φ x) hx' hx' M hM Wc hWc e hnorm]
+  -- the L5-close through the ΓSpecIso injectivity
+  set zQm : Spec (CommRingCat.of K) ⟶ pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) := Subtype.val Q with hzQmdef
+  haveI : QuasiCompact zQm := hQC
+  haveI : IsClosedImmersion zQm := hICI
+  have h5 := torsionSplittingEval_self_eq_one (W := W)
+    (hsm := (modelEllipticCurve W).smooth) (N := N) (hNZ := hNZ) (hN0 := hN0)
+    (Q := Q) (hQ := hQ) (M := M) (hM := hM) (Wc := Wc) (hWc := hWc) (e := e)
+    (hnorm := hnorm) (h := h) (hn := hn) (hsplit := hsplit) (c₀ := c₀)
+    (p := p) (hxp := hxp) (hT := hT) (V := V) (f₁ := f₁) (f₂ := f₂) (ch := ch)
+    (A := A) (zQm := zQm)
+    (hzQm := show zQm ≫
+      pullback.snd (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))) =
+      𝟙 (Spec (CommRingCat.of K)) from Q.2)
+    (hzQfst := rfl) (hspan₁ := hspan₁) (hnzd₁ := hnzd₁) (hspan₂ := hspan₂)
+    (hnzd₂ := hnzd₂) (hWch := hWch) (hu := fun i j hne => hu i j hWch hne)
+  exact ((Scheme.ΓSpecIso (CommRingCat.of K)).commRingCatIsoToRingEquiv).injective
+    (h5.trans (map_one _).symm)
 
 end EllipticCurve
 
