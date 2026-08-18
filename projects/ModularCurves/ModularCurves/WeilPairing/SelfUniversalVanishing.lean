@@ -828,6 +828,129 @@ theorem weilPairingEval_self_model {R : Type u} [CommRing R] (W : WeierstrassCur
   letI : Algebra WeierstrassAtlasRingU.{u} R := c.toAlgebra
   exact weilPairingEval_self_model_map x hx
 
+/-- **([BC-VALUE])** The value on the base-changed record equals the value on the
+original record at the corresponding point. -/
+theorem weilPairingEval_baseChange_eq {S : Scheme.{u}} (E : EllipticCurve S)
+    {B T : Scheme.{u}} (σ : T ⟶ S) (g : B ⟶ T) {N : ℕ} [NeZero N]
+    (y : (E.baseChange σ).Point g)
+    (hykill : y.1 ≫ (E.baseChange σ).mulByHom N = g ≫ (E.baseChange σ).zero)
+    (hzkill : (EllipticCurve.Point.baseChangeEquiv E σ g y).1 ≫ E.mulByHom N =
+      (g ≫ σ) ≫ E.zero) :
+    ((E.baseChange σ).weilPairingEval y y hykill hykill : Γ(B, ⊤)) =
+      (E.weilPairingEval (EllipticCurve.Point.baseChangeEquiv E σ g y)
+        (EllipticCurve.Point.baseChangeEquiv E σ g y) hzkill hzkill : Γ(B, ⊤)) := by
+  set z := EllipticCurve.Point.baseChangeEquiv E σ g y with hzdef0
+  haveI hsepU : IsSeparated E.π :=
+    inferInstance
+  haveI hsepBC : IsSeparated
+      ((E.baseChange σ).π) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) _ _ hsepU
+  have hsmBC : SmoothOfRelativeDimension 1
+      ((E.baseChange σ).π) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) _ _
+      E.smooth
+  rw [(E.baseChange σ).weilPairingEval_eq_weilPairingKM
+    y y hykill hykill,
+    E.weilPairingEval_eq_weilPairingKM
+    z z hzkill hzkill]
+  refine congrArg Units.val ?_
+  have hasec := asSection_comp_bcSwapGenIso
+    E σ g y
+  have hzdef : z = EllipticCurve.Point.baseChangeEquiv
+      E σ g y := rfl
+  -- the swapped point of `asSection z` is `asSection y`
+  have hcancel : (EllipticCurve.Point.asSection
+      (E.baseChange σ) g y).1 =
+      (EllipticCurve.Point.asSection
+        E (g ≫ σ) z).1 ≫
+      (bcSwapGenIso E σ g).inv := by
+    rw [hzdef, ← hasec]
+    exact ((Category.assoc _ _ _).trans
+      ((congrArg (fun m => (EllipticCurve.Point.asSection
+        (E.baseChange σ) g y).1 ≫ m)
+        (bcSwapGenIso E σ g).hom_inv_id).trans
+      (Category.comp_id _))).symm
+  have hswcond : ((EllipticCurve.Point.asSection
+      E (g ≫ σ) z).1 ≫
+      (bcSwapGenIso E σ g).inv) ≫
+      pullback.snd ((E.baseChange σ).π) g =
+      𝟙 B := by
+    rw [← hcancel]
+    exact (EllipticCurve.Point.asSection
+      (E.baseChange σ) g y).2
+  have hswpt : EllipticCurve.Point.asSection
+      (E.baseChange σ) g y =
+      (⟨(EllipticCurve.Point.asSection
+          E (g ≫ σ) z).1 ≫
+        (bcSwapGenIso E σ g).inv,
+        hswcond⟩ :
+        ((E.baseChange σ).baseChange g).Point
+          (𝟙 B)) := by
+    exact Subtype.ext hcancel
+  have hswt : (⟨(EllipticCurve.Point.asSection
+        E (g ≫ σ) z).1 ≫
+      (bcSwapGenIso E σ g).inv,
+      hswcond⟩ :
+      ((E.baseChange σ).baseChange g).Point
+        (𝟙 B)) ∈
+      torsionPoints (E.baseChange σ) g N :=
+    hswpt ▸ asSection_mem_torsionPoints
+      (E.baseChange σ) y hykill
+  rw [weilPairingKM_congr
+    (E.baseChange σ) hsmBC g N
+    hswpt hswpt (asSection_mem_torsionPoints _ y hykill)
+    (asSection_mem_torsionPoints _ y hykill)]
+  exact weilPairingKM_bcSwapGen E σ g
+    E.smooth hsmBC N
+    (EllipticCurve.Point.asSection _ (g ≫ σ) z)
+    (asSection_mem_torsionPoints _ z hzkill)
+    (EllipticCurve.Point.asSection _ (g ≫ σ) z)
+    (asSection_mem_torsionPoints _ z hzkill) hswcond hswt hswcond hswt
+
+/-- **([ASM-4d])** The diagonal value is `1` whenever the record is a base change of a
+model along a map factoring through an affine open on which `localModel` applies. -/
+theorem weilPairingEval_self_of_recordIso {S : Scheme.{u}} (E : EllipticCurve S)
+    {R : Type u} [CommRing R] (W : WeierstrassCurve R) [W.IsElliptic]
+    {N : ℕ} [NeZero N] {B : Scheme.{u}} (σ : Spec (CommRingCat.of R) ⟶ S)
+    (φ : (E.baseChange σ).asOver ≅ (modelEllipticCurve W).asOver) [IsMonHom φ.hom]
+    {g : B ⟶ Spec (CommRingCat.of R)}
+    (x : E.Point (g ≫ σ)) (hx : x.1 ≫ E.mulByHom N = (g ≫ σ) ≫ E.zero) :
+    (E.weilPairingEval x x hx hx : Γ(B, ⊤)) = 1 := by
+  classical
+  haveI hsepE : IsSeparated E.π := inferInstance
+  haveI hsepBC : IsSeparated ((E.baseChange σ).π) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π σ hsepE
+  have hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange σ).π) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) _ _ E.smooth
+  -- the point, viewed on the base-changed record over `B`
+  set y : (E.baseChange σ).Point g :=
+    ((EllipticCurve.Point.baseChangeEquiv E σ g).symm x) with hy
+  have hyval : y.1 ≫ pullback.fst E.π σ = x.1 := by
+    rw [hy]
+    exact pullback.lift_fst _ _ _
+  have hykill : y.1 ≫ (E.baseChange σ).mulByHom N = g ≫ (E.baseChange σ).zero := by
+    rw [← (E.baseChange σ).smul_eq_zero_iff_comp_mulByHom g N y, hy,
+      ← map_zsmul (EllipticCurve.Point.baseChangeEquiv E σ g).symm,
+      (E.smul_eq_zero_iff_comp_mulByHom (g ≫ σ) N x).mpr hx]
+    exact map_zero _
+  -- the model value at the transported point
+  have hmodel := weilPairingEval_self_model W (N := N)
+    (Point.mapIso φ y) (Point.mapIso_killedBy φ hykill)
+  have hmap := weilPairingEval_mapIso φ y y hykill hykill
+    (Point.mapIso_killedBy φ hykill) (Point.mapIso_killedBy φ hykill)
+  -- the base-changed record's value equals `E`'s value at `x`
+  have hxeq : EllipticCurve.Point.baseChangeEquiv E σ g y = x := by
+    rw [hy]
+    exact (EllipticCurve.Point.baseChangeEquiv E σ g).apply_symm_apply x
+  have hbc : ((E.baseChange σ).weilPairingEval y y hykill hykill : Γ(B, ⊤)) =
+      (E.weilPairingEval x x hx hx : Γ(B, ⊤)) := by
+    have h0 := weilPairingEval_baseChange_eq E σ g y hykill (hxeq ▸ hx)
+    rw [h0]
+    exact E.weilPairingEval_congr hxeq hxeq _ _ hx hx
+  exact hbc.symm.trans (hmap.symm.trans hmodel)
+
 end EllipticCurve
 
 end ModularCurves
