@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Generator
 import Mathlib.Algebra.Category.ModuleCat.Monoidal.Closed
+import Mathlib.CategoryTheory.Monoidal.Closed.Braided
 import Mathlib.CategoryTheory.Localization.Monoidal.Functor
 import Mathlib.CategoryTheory.Monoidal.Cartesian.FunctorCategory
 import Mathlib.LinearAlgebra.Finsupp.Pi
