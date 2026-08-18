@@ -3208,3 +3208,17 @@ U4d `isReduced_torsion_sections_of_field` + `geometricallyReduced_torsionpi` +
 REMAINING for leaf A over an ARBITRARY base: the universal-family step — classify (E, x)
 by a map into X_N, pull the universal value back, and evaluate it by U4-reduced on the
 N-inverted locus plus the schematic-density injection.
+
+**[U4-REGULAR + DENSITY] (cont.30bi, e1eb8fa24)**: `injective_res_basicOpen_of_nonZeroDivisor`
+(affine sections inject into the basic open of a nonzerodivisor) and
+`weilPairingEval_self_of_nonZeroDivisor` (over an AFFINE base where `N` is a nonzerodivisor
+and the `N`-inverted locus is reduced, e_N(x,x) = 1) — both axiom-clean. This is the form
+the universal family consumes: `X_N` is affine (U4a), `N` is a nonzerodivisor on its ring
+(U4c), and `D(N) subset X_N` is the torsion over the `N`-inverted atlas, reduced by
+`isReduced_torsion` (U4d). What remains for leaf A: (i) instantiate at the universal
+`(X_N, tautTorsionPoint)` to get the universal value = 1 — needs `IsReduced (D(N))` for
+the universal X_N, i.e. identify `D(N)` with the torsion over `Spec A[1/N]` (base-change of
+the torsion along the open immersion, `torsion_baseChange_isPullback`); (ii) the
+classification/gluing step: every `(E, x, hx)` over `T` is locally a pullback of the
+universal one, so its value is the pullback of 1 (via `weilPairingEval_restrict` + U1);
+(iii) wire `weilPairingEval_self'` and `Basic.lean:372`.
