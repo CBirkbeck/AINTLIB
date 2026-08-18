@@ -396,6 +396,61 @@ theorem weilPairingEval_self_of_field' {K : Type u} [Field K] [DecidableEq K]
   rw [← E.weilPairingEval_restrict δ x x hx hx hxr hxr]
   exact hbridge.symm.trans hAC
 
+/-- **(U5, point-over-a-field form)** For a record over an arbitrary base and a point
+over a field in which `N` is invertible, the diagonal value is `1`. This is the shape the
+universal-family argument consumes. -/
+theorem weilPairingEval_self_of_pointOverField {S : Scheme.{u}} (E : EllipticCurve S)
+    {k : Type u} [Field k] {N : ℕ} [NeZero N] (hNk : (N : k) ≠ 0)
+    (g : Spec (CommRingCat.of k) ⟶ S) (x : E.Point g)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x x hx hx : Γ(Spec (CommRingCat.of k), ⊤)) = 1 := by
+  classical
+  haveI : IsLocallyNoetherian (Spec (CommRingCat.of k)) := by
+    haveI : IsNoetherianRing k := inferInstance
+    infer_instance
+  set E' : EllipticCurve (Spec (CommRingCat.of k)) := E.baseChange g with hE'
+  set x' : E'.Point (𝟙 (Spec (CommRingCat.of k))) :=
+    EllipticCurve.Point.asSection E g x with hx'def
+  have hx'kill : x'.1 ≫ E'.mulByHom N = 𝟙 _ ≫ E'.zero := by
+    rw [← (E.baseChange g).smul_eq_zero_iff_comp_mulByHom (𝟙 _) N x']
+    exact asSection_mem_torsionPoints E x hx
+  have hAC := weilPairingEval_self_of_field' E' hNk x' hx'kill
+  haveI hsepE : IsSeparated E.π := inferInstance
+  haveI hsepBC : IsSeparated ((E.baseChange g).π) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π g hsepE
+  have hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange g).π) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) _ _ E.smooth
+  have hswcond : (x'.1 ≫ (bcSwapIso E g).inv) ≫
+      pullback.snd ((E.baseChange g).π) (𝟙 (Spec (CommRingCat.of k))) =
+      𝟙 (Spec (CommRingCat.of k)) := by
+    rw [← asSection_eq_bcSwap E g x']
+    exact (EllipticCurve.Point.asSection (E.baseChange g)
+      (𝟙 (Spec (CommRingCat.of k))) x').2
+  have hswpt : EllipticCurve.Point.asSection E' (𝟙 (Spec (CommRingCat.of k))) x' =
+      (⟨x'.1 ≫ (bcSwapIso E g).inv, hswcond⟩ :
+        ((E.baseChange g).baseChange (𝟙 (Spec (CommRingCat.of k)))).Point
+          (𝟙 (Spec (CommRingCat.of k)))) :=
+    Subtype.ext (asSection_eq_bcSwap E g x')
+  have hswt : (⟨x'.1 ≫ (bcSwapIso E g).inv, hswcond⟩ :
+      ((E.baseChange g).baseChange (𝟙 (Spec (CommRingCat.of k)))).Point
+        (𝟙 (Spec (CommRingCat.of k)))) ∈
+      torsionPoints (E.baseChange g) (𝟙 (Spec (CommRingCat.of k))) N :=
+    hswpt ▸ asSection_mem_torsionPoints E' x' hx'kill
+  have hbridge : (E'.weilPairingEval x' x' hx'kill hx'kill :
+      Γ(Spec (CommRingCat.of k), ⊤)) =
+      (E.weilPairingEval x x hx hx : Γ(Spec (CommRingCat.of k), ⊤)) := by
+    rw [E'.weilPairingEval_eq_weilPairingKM x' x' hx'kill hx'kill,
+      E.weilPairingEval_eq_weilPairingKM x x hx hx]
+    refine congrArg Units.val ?_
+    rw [weilPairingKM_congr E' E'.smooth (𝟙 (Spec (CommRingCat.of k))) N
+      hswpt hswpt (asSection_mem_torsionPoints E' x' hx'kill)
+      (asSection_mem_torsionPoints E' x' hx'kill)]
+    exact weilPairingKM_bcSwap E g E.smooth hsmBC N x'
+      (asSection_mem_torsionPoints E x hx) x'
+      (asSection_mem_torsionPoints E x hx) hswcond hswt hswcond hswt
+  exact hbridge.symm.trans hAC
+
 end EllipticCurve
 
 end ModularCurves
