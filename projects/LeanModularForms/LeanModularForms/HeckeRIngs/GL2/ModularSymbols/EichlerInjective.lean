@@ -634,7 +634,7 @@ private lemma integrableOn_shifted_pow_mul_exp_neg {a c : ℝ} (_ha : 0 ≤ a) (
   have hterm : ∀ i : ℕ, IntegrableOn (fun s : ℝ => s ^ i * Real.exp (-c * s)) (Set.Ioi 0) := by
     intro i
     have h := integrableOn_rpow_mul_exp_neg_mul_rpow (p := (1 : ℝ)) (s := (i : ℝ)) (b := c)
-      (neg_one_lt_zero.trans_le (Nat.cast_nonneg i)) le_rfl hc
+      (neg_one_lt_zero.trans_le (Nat.cast_nonneg i)) one_pos hc
     refine h.congr_fun (fun s hs => ?_) measurableSet_Ioi
     rw [Set.mem_Ioi] at hs
     simp only [Real.rpow_natCast, Real.rpow_one]
@@ -985,7 +985,7 @@ private lemma integrableOn_eichlerTerm (f : CuspForm ((Gamma1 N).map (mapGL ℝ)
       linarith
     have hint : IntegrableOn
         (fun t : ℝ ↦ (t : ℝ) ^ (n₂ : ℝ) * Real.exp (-(2 * π * m) * t ^ (1 : ℝ))) (Set.Ioi 0) :=
-      integrableOn_rpow_mul_exp_neg_mul_rpow hn2nonneg le_rfl hr0
+      integrableOn_rpow_mul_exp_neg_mul_rpow hn2nonneg one_pos hr0
     refine MeasureTheory.Integrable.mono'
       (g := fun t : ℝ ↦ ‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ *
         Real.exp (-(2 * π * m * z.im)) *
@@ -1034,7 +1034,7 @@ private lemma summable_integral_norm_eichlerTerm (f : CuspForm ((Gamma1 N).map (
     have hr0 : (0 : ℝ) < 2 * π * c := by have := Real.pi_pos; positivity
     have hn2nonneg : (-1 : ℝ) < (n₂ : ℝ) := by
       have : (0 : ℝ) ≤ (n₂ : ℝ) := Nat.cast_nonneg n₂; linarith
-    have := integrableOn_rpow_mul_exp_neg_mul_rpow hn2nonneg (le_refl (1 : ℝ)) hr0
+    have := integrableOn_rpow_mul_exp_neg_mul_rpow hn2nonneg one_pos hr0
     refine this.congr_fun (fun t ht => ?_) measurableSet_Ioi
     have htpos : (0 : ℝ) < t := ht
     simp only [Real.rpow_natCast, Real.rpow_one]
@@ -1717,7 +1717,7 @@ private lemma eichlerIntegralGen_isBoundedAtImInfty {F : Type*} [FunLike F ℍ �
   -- The reference Gamma integral `K = ∫_0^∞ tⁿ exp(-c t) dt ≥ 0`.
   have hKint : IntegrableOn (fun t : ℝ => (t : ℝ) ^ n * Real.exp (-c * t)) (Set.Ioi 0) := by
     have h := integrableOn_rpow_mul_exp_neg_mul_rpow (p := (1 : ℝ)) (s := (n : ℝ)) (b := c)
-      (neg_one_lt_zero.trans_le (Nat.cast_nonneg n)) le_rfl hc
+      (neg_one_lt_zero.trans_le (Nat.cast_nonneg n)) one_pos hc
     refine h.congr_fun (fun s hs => ?_) measurableSet_Ioi
     simp only [Real.rpow_natCast, Real.rpow_one]
   set K : ℝ := ∫ t in Set.Ioi (0 : ℝ), (t : ℝ) ^ n * Real.exp (-c * t) with hKdef
