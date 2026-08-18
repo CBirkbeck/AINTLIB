@@ -2210,4 +2210,41 @@ theorem torsionSplittingEval_bcSwap {S : Scheme.{u}} (E : EllipticCurve S)
       (Units.map (((bcSwapIso E t).hom).app (mulByN E t N ⁻¹ᵁ W i)).hom.toMonoidHom (h i)))
     hn' hsplit' hC).symm
 
+/-- **([KM-BCSWAP])** The canonical pairing is invariant under the collapse iso: the
+`E/t`-value at `(P, Q)` equals the doubled-base-change value at the swapped points. -/
+theorem weilPairingKM_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (t : T ⟶ S)
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)] (N : ℕ)
+    (Pt : (E.baseChange t).Point (𝟙 T)) (hPt : Pt ∈ torsionPoints E t N)
+    (Q : (E.baseChange t).Point (𝟙 T)) (hQ : Q ∈ torsionPoints E t N)
+    (hPsw : (Pt.1 ≫ (bcSwapIso E t).inv) ≫
+      pullback.snd ((E.baseChange t).π) (𝟙 T) = 𝟙 T)
+    (hPswt : (⟨Pt.1 ≫ (bcSwapIso E t).inv, hPsw⟩ :
+      ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T)) ∈
+      torsionPoints (E.baseChange t) (𝟙 T) N)
+    (hQsw : (Q.1 ≫ (bcSwapIso E t).inv) ≫
+      pullback.snd ((E.baseChange t).π) (𝟙 T) = 𝟙 T)
+    (hQswt : (⟨Q.1 ≫ (bcSwapIso E t).inv, hQsw⟩ :
+      ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T)) ∈
+      torsionPoints (E.baseChange t) (𝟙 T) N) :
+    weilPairingKM (E.baseChange t) hsmBC (𝟙 T) N
+        (⟨Pt.1 ≫ (bcSwapIso E t).inv, hPsw⟩ :
+          ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T)) hPswt
+        (⟨Q.1 ≫ (bcSwapIso E t).inv, hQsw⟩ :
+          ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T)) hQswt =
+      weilPairingKM E hsm t N Pt hPt Q hQ := by
+  obtain ⟨A, hA, J, W, hW, e, hnorm⟩ := exists_normalized_dataset E hsm t Q
+  rw [weilPairingKM_eq_torsionSplittingEval E hsm t N Pt hPt Q hQ A hA W hW e hnorm,
+    weilPairingKM_eq_torsionSplittingEval (E.baseChange t) hsmBC (𝟙 T) N _ hPswt _ hQswt
+      ((Scheme.Modules.pullback (bcSwapIso E t).hom).obj A)
+      (hM_bcSwap E t hsm hsmBC Q hQsw A hA)
+      (fun i => (bcSwapIso E t).hom ⁻¹ᵁ W i)
+      (((bcSwapIso E t).hom).iSup_preimage_eq_top hW)
+      (fun i => Scheme.Modules.localPullbackTrivializationT (bcSwapIso E t).hom A (W i) (e i))
+      (hnorm_bcSwap E t A W e hnorm)]
+  exact torsionSplittingEval_bcSwap E t hsm hsmBC N Q hQ hQsw hQswt A hA W hW e hnorm
+    Pt hPt hPsw hPswt
+
 end ModularCurves
