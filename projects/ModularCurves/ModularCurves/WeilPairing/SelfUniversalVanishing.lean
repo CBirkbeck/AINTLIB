@@ -739,6 +739,42 @@ private theorem localModel_recordIso_pi {S : Scheme.{u}} (E : EllipticCurve S)
         U.2.isoSpec.inv_hom_id).trans (Category.comp_id _)))))).trans ?_
   exact bcSwapGenIso_inv_snd E U.1.ι U.2.isoSpec.inv
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **([ASM-4b-0])** The zero-section compatibility: the base-changed zero section is
+carried by the collapse to the `localModel`'s section (own elaboration budget). -/
+private theorem localModel_recordIso_zero {S : Scheme.{u}} (E : EllipticCurve S)
+    (U : S.affineOpens)
+    (hzc : (U.1.ι ≫ E.zero) ≫ E.π = 𝟙 (U.1 : Scheme.{u}) ≫ U.1.ι) :
+    (E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).zero ≫
+        ((bcSwapGenIso E U.1.ι U.2.isoSpec.inv).inv ≫
+          pullback.fst ((E.baseChange U.1.ι).π) U.2.isoSpec.inv) =
+      U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ E.zero) (𝟙 _) hzc := by
+  refine pullback.hom_ext ?_ ?_
+  · -- the `E`-leg: both sides are `isoSpec.inv ≫ U.ι ≫ E.zero`
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (fun m => (E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).zero ≫ m)
+      (bcSwapGenIso_inv_fst_fst E U.1.ι U.2.isoSpec.inv)).trans ?_
+    refine (pullback.lift_fst _ _ _).trans ?_
+    refine Eq.symm ((Category.assoc _ _ _).trans ?_)
+    refine (congrArg (fun m => U.2.isoSpec.inv ≫ m) (pullback.lift_fst _ _ _)).trans ?_
+    exact (Category.assoc _ _ _).symm
+  · -- the base leg: both sides are `isoSpec.inv`
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (fun m => (E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).zero ≫ m)
+      ((Category.assoc _ _ _).trans
+        (congrArg (fun m => (bcSwapGenIso E U.1.ι U.2.isoSpec.inv).inv ≫ m)
+          pullback.condition))).trans ?_
+    refine (congrArg (fun m => (E.baseChange (U.2.isoSpec.inv ≫ U.1.ι)).zero ≫ m)
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (fun m => m ≫ U.2.isoSpec.inv)
+          (bcSwapGenIso_inv_snd E U.1.ι U.2.isoSpec.inv)))).trans ?_
+    refine (Category.assoc _ _ _).symm.trans ?_
+    refine (congrArg (fun m => m ≫ U.2.isoSpec.inv) (pullback.lift_snd _ _ _)).trans ?_
+    refine (Category.id_comp _).trans ?_
+    refine Eq.symm ((Category.assoc _ _ _).trans ?_)
+    refine (congrArg (fun m => U.2.isoSpec.inv ≫ m) (pullback.lift_snd _ _ _)).trans ?_
+    exact Category.comp_id _
+
 end EllipticCurve
 
 end ModularCurves

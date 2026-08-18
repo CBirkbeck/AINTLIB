@@ -2789,6 +2789,16 @@ theorem weilPairingKM_bcSwapGen
     (bcSwapGenIso E t g).inv_hom_id).trans ?_
   exact Category.id_comp _
 
+@[reassoc] theorem bcSwapGenIso_inv_fst_fst :
+    (bcSwapGenIso E t g).inv ≫ pullback.fst ((E.baseChange t).π) g ≫ pullback.fst E.π t =
+      pullback.fst E.π (g ≫ t) := by
+  refine (congrArg (fun m => (bcSwapGenIso E t g).inv ≫ m)
+    (bcSwapGenIso_hom_fst E t g).symm).trans ?_
+  refine (Category.assoc _ _ _).symm.trans ?_
+  refine (congrArg (fun m => m ≫ pullback.fst E.π (g ≫ t))
+    (bcSwapGenIso E t g).inv_hom_id).trans ?_
+  exact Category.id_comp _
+
 end BcSwapGen
 
 end ModularCurves
