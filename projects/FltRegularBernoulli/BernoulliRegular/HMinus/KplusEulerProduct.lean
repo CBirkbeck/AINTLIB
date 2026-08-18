@@ -106,7 +106,7 @@ lemma idealNormMultiplicityNF_p_pow_eq_one_plus (hp_odd : p ≠ 2) (k : ℕ) :
           have : NeZero R := ⟨hR_ne⟩
           have hI_le_Q : I ≤ Q := by
             rw [hIeq]
-            exact Ideal.mul_le_left
+            exact Ideal.mul_le_right
           have hR_dvd_I : Ideal.absNorm R ∣ p ^ k := by
             rw [← hI_norm]
             exact dvd_trans (Ideal.absNorm_dvd_absNorm_of_le hQ_le_R)
