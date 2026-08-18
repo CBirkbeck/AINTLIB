@@ -2258,4 +2258,47 @@ theorem weilPairingKM_bcSwap {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.
   exact torsionSplittingEval_bcSwap E t hsm hsmBC N Q hQ hQsw hQswt A hA W hW e hnorm
     Pt hPt hPsw hPswt
 
+section BcSwapGen
+
+variable {S : Scheme.{u}} (E : EllipticCurve S) {T T' : Scheme.{u}} (t : T ⟶ S) (g : T' ⟶ T)
+
+/-- **([BC-SWAP-GEN ι])** The iterated-pullback collapse:
+`pullback ((E.baseChange t).π) g ≅ pullback E.π (g ≫ t)`. -/
+noncomputable def bcSwapGenIso :
+    pullback ((E.baseChange t).π) g ≅ pullback E.π (g ≫ t) :=
+  pullbackLeftPullbackSndIso E.π t g
+
+@[reassoc (attr := simp)] theorem bcSwapGenIso_hom_fst :
+    (bcSwapGenIso E t g).hom ≫ pullback.fst E.π (g ≫ t) =
+      pullback.fst ((E.baseChange t).π) g ≫ pullback.fst E.π t :=
+  pullbackLeftPullbackSndIso_hom_fst _ _ _
+
+@[reassoc (attr := simp)] theorem bcSwapGenIso_hom_snd :
+    (bcSwapGenIso E t g).hom ≫ pullback.snd E.π (g ≫ t) =
+      pullback.snd ((E.baseChange t).π) g :=
+  pullbackLeftPullbackSndIso_hom_snd _ _ _
+
+/-- The zero sections correspond under [BC-SWAP-GEN]. -/
+theorem baseChangeZero_comp_bcSwapGenIso :
+    Scheme.Modules.baseChangeZero ((E.baseChange t).π) ((E.baseChange t).zero)
+        ((E.baseChange t).zero_π) g ≫ (bcSwapGenIso E t g).hom =
+      Scheme.Modules.baseChangeZero E.π E.zero E.zero_π (g ≫ t) := by
+  refine pullback.hom_ext ?_ ?_
+  · refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (fun m => Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+      ((E.baseChange t).zero) ((E.baseChange t).zero_π) g ≫ m)
+      (bcSwapGenIso_hom_fst E t g)).trans ?_
+    refine (Category.assoc _ _ _).symm.trans ?_
+    refine (congrArg (fun m => m ≫ pullback.fst E.π t) (pullback.lift_fst _ _ _)).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (fun m => g ≫ m) (pullback.lift_fst _ _ _)).trans ?_
+    exact ((Category.assoc _ _ _).symm.trans (pullback.lift_fst _ _ _).symm)
+  · refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (fun m => Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+      ((E.baseChange t).zero) ((E.baseChange t).zero_π) g ≫ m)
+      (bcSwapGenIso_hom_snd E t g)).trans ?_
+    exact (pullback.lift_snd _ _ _).trans (pullback.lift_snd _ _ _).symm
+
+end BcSwapGen
+
 end ModularCurves
