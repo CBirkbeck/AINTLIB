@@ -3247,3 +3247,19 @@ LEAF A now needs only: (ASM-3) the MODEL case over an arbitrary noetherian ring 
 `classifyRingHomU W` + `Point.baseChangeEquiv` + the U1/BC-SWAP bridge — the same hbridge
 block as `weilPairingEval_self_of_pointOverField`), and (ASM-4) the general case
 (`localModel` + U1 + gluing over an affine cover of `T`).
+
+**[ASM-3 ASSEMBLED — ONE BRIDGE LEFT] (cont.30bl, 2c491b0da)**: `weilPairingEval_self_model_map`
+is fully wired (classifying-map Algebra instance, `modelBaseChangeIsoAsOver_ring` (now
+hypothesis-free), `Point.mapIso`/`isMonHom_symm`/`mapIso_killedBy` (noetherian dropped),
+the `baseChangeEquiv` kill-transport, `weilPairingEval_self_universalModel`, and the
+`mapIso`-value transport). The ONE remaining sorry is the bridge
+```
+hbc : value of ((E.baseChange σ), y, over g) = value of (E, z, over g ≫ σ)   (z = baseChangeEquiv y)
+```
+i.e. **BC-SWAP at a general base map** — my `bcSwapIso`/`weilPairingKM_bcSwap` campaign
+proved exactly this for `g = 𝟙`. The general version needs the iso
+`pullback ((E.baseChange σ).π) g ≅ pullback E.π (g ≫ σ)` (mathlib's iterated-pullback
+`pullbackLeftPullbackFstIso` family) and then a mechanical replay of the 7 BC-SWAP pieces
+(sectionCls/zeroCls/kappa/hM/hnorm, the mulByN + UMAP squares, TSE, the KM pin) with that
+iso in place of `bcSwapIso`. Also dropped this session: `[IsLocallyNoetherian S]` from
+`weilPairingEval_mapIso` (U1 now holds over any base).
