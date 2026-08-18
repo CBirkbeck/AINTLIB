@@ -3173,3 +3173,23 @@ U4a–U4f notes above) and the **assembly** (`weilPairingEval_self'` = U2-localM
 U3-gluing + U4 + U5), then wire `Basic.lean:372`; `AlternationReduction` then closes
 leaf A. NOTE: SelfUniversal's own `weilPairingEval_self_of_field` sorry is now redundant —
 the real theorem lives in SelfField (primed name); wire or delete at assembly time.
+
+**[U4 ROUTE REFINED — scheme-side, cont.30bg]**: the tensor-chain of the original U4d/U4f
+notes is superseded. New route, all tools verified present:
+1. `X_N` affine (U4a ✓), its ring `ℤ`-flat (U4b/U4c ✓), so `N` is a nonzerodivisor there
+   (`natCast_mem_nonZeroDivisors_universalTorsionRing` ✓) — this gives the **injectivity**
+   of restriction to the basic open `D(N) ⊆ X_N` (RegularSectionDensity's
+   `Localization.Away.ker_algebraMap_eq_bot` / `ker_basicOpenι_eq_bot` machinery).
+2. `D(N)` is the torsion over the `N`-inverted base, so `torsionπ` there is **étale**;
+   its **geometric** fibres are the torsion rings of the fibre curves, reduced by
+   `isReduced_torsion_sections_of_field` (U4d-i ✓ landed) + `torsion_baseChange_isPullback`
+   (TorsionFibre:251) ⟹ `GeometricallyReduced`.
+3. `GeometricallyReduced.isReduced_of_flat_of_isLocallyNoetherian` (mathlib,
+   Geometrically/Reduced.lean:109) + `Flat` (étale) + reduced/noetherian base ⟹
+   `IsReduced D(N)`.
+4. The universal value `u` satisfies: `u - 1` vanishes in every residue field of `D(N)`
+   (U4e: `weilPairingEval_restrict` + `weilPairingEval_self_of_field'` ✓ + the
+   BC-SWAP/asSection plumbing already built for U5-DESCENT) ⟹ `basicOpen (u-1) = ⊥` ⟹
+   `eq_zero_of_basicOpen_eq_bot` (mathlib Properties.lean:179) ⟹ `u = 1` on `D(N)` ⟹
+   `u = 1` on `X_N` by step 1.
+Then the assembly (U2 classification + U1 + U3 + U4) closes leaf A.
