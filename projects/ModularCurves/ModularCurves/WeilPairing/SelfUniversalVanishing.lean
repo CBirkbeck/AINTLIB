@@ -290,6 +290,19 @@ theorem weilPairingEval_self_of_reduced {S : Scheme.{u}} (E : EllipticCurve S)
     ((E.weilPairingEval x x hx hx : Γ(T, ⊤)))
     (fun t => weilPairingEval_self_evaluation_eq_one E hN x hx t)
 
+/-- **([U4-DENSITY])** On an affine scheme, restriction to the basic open of a
+nonzerodivisor is injective on sections. -/
+theorem injective_res_basicOpen_of_nonZeroDivisor {X : Scheme.{u}} [IsAffine X]
+    (s : Γ(X, ⊤)) (hs : s ∈ nonZeroDivisors (Γ(X, ⊤) : CommRingCat.{u})) :
+    Function.Injective
+      ((X.presheaf.map (homOfLE (le_top : X.basicOpen s ≤ ⊤)).op).hom) := by
+  haveI hloc := (isAffineOpen_top X).isLocalization_basicOpen s
+  have hmapeq : ((X.presheaf.map (homOfLE (le_top : X.basicOpen s ≤ ⊤)).op).hom) =
+      algebraMap (Γ(X, ⊤) : CommRingCat.{u}) (Γ(X, X.basicOpen s) : CommRingCat.{u}) := rfl
+  rw [hmapeq]
+  exact IsLocalization.injective (M := Submonoid.powers s) _
+    (Submonoid.powers_le.mpr hs)
+
 end EllipticCurve
 
 end ModularCurves
