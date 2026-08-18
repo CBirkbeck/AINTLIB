@@ -572,7 +572,13 @@ theorem weilPairingEval_self_model_map {R : Type u} [CommRing R]
       σ g y with hz
   have hzkill : z.1 ≫ (modelEllipticCurve universalWeierstrassLocU.{u}).mulByHom N =
       (g ≫ σ) ≫ (modelEllipticCurve universalWeierstrassLocU.{u}).zero := by
-    sorry
+    rw [← (modelEllipticCurve universalWeierstrassLocU.{u}).smul_eq_zero_iff_comp_mulByHom
+      (g ≫ σ) N z, hz]
+    rw [← map_zsmul (EllipticCurve.Point.baseChangeEquiv
+      (modelEllipticCurve universalWeierstrassLocU.{u}) σ g)]
+    rw [((modelEllipticCurve universalWeierstrassLocU.{u}).baseChange
+      σ).smul_eq_zero_iff_comp_mulByHom g N y |>.mpr hykill]
+    exact map_zero _
   -- the universal statement at `z`
   have huniv := weilPairingEval_self_universalModel z hzkill
   sorry
