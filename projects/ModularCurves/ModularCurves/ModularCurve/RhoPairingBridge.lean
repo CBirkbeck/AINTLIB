@@ -1,4 +1,5 @@
 import ModularCurves.ModularCurve.YRho
+import ModularCurves.WeilPairing.SelfUniversalVanishing
 
 /-!
 # [T-EQ-3c-PIN] The pairing-side bridge: value-level symplectic condition ⟹
@@ -375,7 +376,7 @@ theorem torsionPairEval_comb (D : GaloisRepData N) [Fact (1 < N)]
       rw [Category.assoc, muNRootsPowScheme_π, pairEZMap_π, Category.id_comp])
     ?_
   refine Eq.trans (torsionPairEval_read D sT (𝟙 T) _ _ _ _) ?_
-  refine Eq.trans (E.weilPairingEval_symplectic L.1.1 L.1.2
+  refine Eq.trans (EllipticCurve.weilPairingEval_symplectic_general E L.1.1 L.1.2
     ((v 0).val : ℤ) ((v 1).val : ℤ) ((w 0).val : ℤ) ((w 1).val : ℤ)
     ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp L.2.1.1)
     ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp L.2.1.2)

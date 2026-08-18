@@ -1,4 +1,5 @@
 import ModularCurves.ForMathlib.FiniteEtaleFundamentalGroup
+import ModularCurves.WeilPairing.SelfUniversalVanishing
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.WeilPairing.CurveNaturality
 import ModularCurves.Moduli.Representability
@@ -3317,7 +3318,7 @@ theorem framedSymp_glSmul (D : GaloisRepData N) {T : Scheme.{0}}
       ((m 1 1).val : ℤ))
     rwa [hQQ] at this
   -- 3. the registered symplectic formula
-  have hW := E.weilPairingEval_symplectic
+  have hW := EllipticCurve.weilPairingEval_symplectic_general E
     (EllipticCurve.Point.pull E t P) (EllipticCurve.Point.pull E t Q)
     (((m 0 0).val : ℤ)) (((m 1 0).val : ℤ)) (((m 0 1).val : ℤ)) (((m 1 1).val : ℤ))
     hppk hpqk hcomb1 hcomb2
@@ -6422,7 +6423,7 @@ theorem pairingCompat_framedPinned (D : GaloisRepData N) {T : Scheme.{0}}
       Γ(Spec (.of (AlgebraicClosure ℚ)), ⊤)) ^
       ((((ux 0).val : ℤ) * ((uy 1).val : ℤ) -
         ((ux 1).val : ℤ) * ((uy 0).val : ℤ)) % (N : ℤ)).toNat from
-    E.weilPairingEval_symplectic _ _ _ _ _ _ _ _ hx hy]
+    EllipticCurve.weilPairingEval_symplectic_general E _ _ _ _ _ _ _ _ hx hy]
   rw [map_pow, hsymp t ht]
   -- the exponent arithmetic: (p z)^K = p (z^K), and the cast of K is the pairing
   rw [← Units.val_pow_eq_pow_val, ← SubmonoidClass.coe_pow, ← map_pow]
@@ -7636,7 +7637,7 @@ theorem univLevel_glSmul_eval {X : EllObj (CommRingCat.of ℚ)}
         (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val := by
   set m : Matrix (Fin 2) (Fin 2) (ZMod N) := (γ : Matrix (Fin 2) (Fin 2) (ZMod N))
     with hm
-  have hW := (X.curve.baseChange dE.f).weilPairingEval_symplectic
+  have hW := EllipticCurve.weilPairingEval_symplectic_general (X.curve.baseChange dE.f)
     (univP dE) (univQ dE)
     (((m 0 0).val : ℤ)) (((m 1 0).val : ℤ)) (((m 0 1).val : ℤ))
     (((m 1 1).val : ℤ))
@@ -8256,7 +8257,7 @@ theorem fullLevel_glSmul_eval {T : Scheme.{0}} (E : EllipticCurve T)
         (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val := by
   set m : Matrix (Fin 2) (Fin 2) (ZMod N) := (γ : Matrix (Fin 2) (Fin 2) (ZMod N))
     with hm
-  have hW := E.weilPairingEval_symplectic L.1.1 L.1.2
+  have hW := EllipticCurve.weilPairingEval_symplectic_general E L.1.1 L.1.2
     (((m 0 0).val : ℤ)) (((m 1 0).val : ℤ)) (((m 0 1).val : ℤ))
     (((m 1 1).val : ℤ))
     ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.1).mp L.2.1.1)
