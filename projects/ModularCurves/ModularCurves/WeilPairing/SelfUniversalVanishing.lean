@@ -105,6 +105,62 @@ theorem natCast_mem_nonZeroDivisors_universalTorsionRing (N : ℕ) [NeZero N] :
       nonZeroDivisors (universalTorsionRing.{u} N) :=
   isSMulRegular_natCast_of_flat _ (by exact_mod_cast NeZero.ne N)
 
+/-- **([U4d-i])** Over a field in which `N` is invertible, the `N`-torsion of any
+elliptic-curve record has reduced section ring: `torsionπ` is étale, hence the section
+ring is formally unramified over the field, hence reduced. -/
+theorem isReduced_torsion_sections_of_field {k : Type u} [Field k]
+    (E' : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N] (hNk : (N : k) ≠ 0) :
+    IsReduced (Γ(E'.torsion N, ⊤) : CommRingCat.{u}) := by
+  haveI hfin : IsFinite (E'.torsionπ N) := E'.torsionπ_isFinite N
+  haveI hAff : IsAffine (E'.torsion N) := isAffine_of_isAffineHom (E'.torsionπ N)
+  haveI hetale : Etale (E'.torsionπ N) :=
+    E'.torsionπ_etale N ((nIsInvertible_spec_iff k N).mpr hNk)
+  haveI hFU : AlgebraicGeometry.FormallyUnramified (E'.torsionπ N) := inferInstance
+  -- read the property at the ring level, with `k` itself as the base
+  letI : Algebra k (Γ(E'.torsion N, ⊤) : CommRingCat.{u}) :=
+    (((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E'.torsionπ N).appTop).hom).toAlgebra
+  letI : Algebra k (Γ(Spec (CommRingCat.of k), ⊤) : CommRingCat.{u}) :=
+    ((Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom).toAlgebra
+  letI : Algebra (Γ(Spec (CommRingCat.of k), ⊤) : CommRingCat.{u})
+      (Γ(E'.torsion N, ⊤) : CommRingCat.{u}) :=
+    ((E'.torsionπ N).appTop).hom.toAlgebra
+  haveI hUnram : Algebra.FormallyUnramified
+      (Γ(Spec (CommRingCat.of k), ⊤) : CommRingCat.{u})
+      (Γ(E'.torsion N, ⊤) : CommRingCat.{u}) :=
+    (HasRingHomProperty.iff_of_isAffine (P := @AlgebraicGeometry.FormallyUnramified)
+      (Q := RingHom.FormallyUnramified)).mp hFU
+  haveI : IsScalarTower k (Γ(Spec (CommRingCat.of k), ⊤) : CommRingCat.{u})
+      (Γ(E'.torsion N, ⊤) : CommRingCat.{u}) :=
+    IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  haveI hUnramBase : Algebra.FormallyUnramified k
+      (Γ(Spec (CommRingCat.of k), ⊤) : CommRingCat.{u}) :=
+    Algebra.FormallyUnramified.of_equiv (R := k) (A := k)
+      (AlgEquiv.ofRingEquiv (f :=
+        ((Scheme.ΓSpecIso (CommRingCat.of k)).symm.commRingCatIsoToRingEquiv :
+          (CommRingCat.of k : CommRingCat.{u}) ≃+*
+            (Γ(Spec (CommRingCat.of k), ⊤) : CommRingCat.{u}))) (fun _ => rfl))
+  haveI : Algebra.FormallyUnramified k (Γ(E'.torsion N, ⊤) : CommRingCat.{u}) :=
+    Algebra.FormallyUnramified.comp k (Γ(Spec (CommRingCat.of k), ⊤) : CommRingCat.{u}) _
+  -- finiteness of the torsion algebra, for `EssFiniteType`
+  haveI hfinRing : Module.Finite (Γ(Spec (CommRingCat.of k), ⊤) : CommRingCat.{u})
+      (Γ(E'.torsion N, ⊤) : CommRingCat.{u}) := by
+    have h := ((isFinite_iff (f := E'.torsionπ N)).mp hfin).2 ⊤ (isAffineOpen_top _)
+    exact h
+  haveI : Module.Finite k (Γ(Spec (CommRingCat.of k), ⊤) : CommRingCat.{u}) := by
+    refine Module.Finite.of_surjective (Algebra.linearMap k _) (fun z => ?_)
+    refine ⟨(Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom z, ?_⟩
+    show ((Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom)
+      ((Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom z) = z
+    rw [← CommRingCat.comp_apply, Iso.hom_inv_id]
+    rfl
+  haveI : Module.Finite k (Γ(E'.torsion N, ⊤) : CommRingCat.{u}) :=
+    Module.Finite.trans (Γ(Spec (CommRingCat.of k), ⊤) : CommRingCat.{u}) _
+  haveI : Algebra.FiniteType k (Γ(E'.torsion N, ⊤) : CommRingCat.{u}) :=
+    Module.Finite.finiteType (Γ(E'.torsion N, ⊤) : CommRingCat.{u})
+  haveI : Algebra.EssFiniteType k (Γ(E'.torsion N, ⊤) : CommRingCat.{u}) :=
+    Algebra.EssFiniteType.of_finiteType k _
+  exact Algebra.FormallyUnramified.isReduced_of_field k _
+
 end EllipticCurve
 
 end ModularCurves
