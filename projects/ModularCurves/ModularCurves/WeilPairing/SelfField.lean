@@ -17,12 +17,9 @@ Katz–Mazur dataset through the κ-dictionary + G2′ chart machinery, and read
 through `weilPairingEval_eq_torsionSplittingEval` (U5-L4) +
 `torsionSplittingEval_self_eq_one` (U5-L5).
 
-Stage plan (each stage replaces the trailing `sorry`):
-1. model transport (DONE here);
-2. the model-side instances (IsIntegral, Dedekind, Flat/IsFinite/LOFP for `[N]`);
-3. the dataset (KAPPA-DICT + officiality + G2′);
-4. the H-side splittings (D4-pipe) + the dictionaries (p, hxp, hT, zQm-data);
-5. the L4-pin + L5-close.
+The file also contains the descent to an arbitrary field
+(`weilPairingEval_self_of_field'`) and the point-over-a-field form
+(`weilPairingEval_self_of_pointOverField`) that the universal-family argument consumes.
 -/
 
 universe u

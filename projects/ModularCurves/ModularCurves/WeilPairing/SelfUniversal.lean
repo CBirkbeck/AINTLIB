@@ -122,31 +122,13 @@ theorem tautTorsionPoint_killedBy (E : EllipticCurve S) (N : ℕ) :
     (tautTorsionPoint E N).1 ≫ E.mulByHom N = E.torsionπ N ≫ E.zero :=
   pullback.condition
 
-/-- **(U4, universal vanishing — conditional on the field leaf U5)** Over
-`X_N := (modelEllipticCurve 𝕌).torsion N`, the diagonal pairing of the tautological
-point is `1`. Proof: `X_N` is affine (torsion is finite over the affine atlas) and its
-section ring is `ℤ`-flat (torsion flat over the `ℤ`-flat atlas ring), so sections
-inject into the `N`-inverted locus, which is reduced (it embeds into the generic-fibre
-torsion algebra, finite étale over a field); the value − 1 vanishes at every residue
-field there by base-change naturality and the field leaf; a section of a reduced ring
-vanishing at every residue field is zero. -/
-theorem weilPairingEval_self_universal {N : ℕ} [NeZero N]
-    (hfield : ∀ (K : Type u) [Field K] (E' : EllipticCurve (Spec (CommRingCat.of K))),
-      (N : K) ≠ 0 → ∀ (x : E'.Point (𝟙 (Spec (CommRingCat.of K))))
-      (hx : x.1 ≫ E'.mulByHom N = 𝟙 _ ≫ E'.zero),
-      (E'.weilPairingEval (N := N) x x hx hx : Γ(Spec (CommRingCat.of K), ⊤)) = 1) :
-    ((modelEllipticCurve universalWeierstrassLocU.{u}).weilPairingEval (N := N)
-        (tautTorsionPoint _ N) (tautTorsionPoint _ N)
-        (tautTorsionPoint_killedBy _ N) (tautTorsionPoint_killedBy _ N) :
-      Γ((modelEllipticCurve universalWeierstrassLocU.{u}).torsion N, ⊤)) = 1 := by sorry
+/-! ## U4 — the universal vanishing and the final assembly
 
-/-- **(FINAL ASSEMBLY — the statement of `Basic.lean:372`, proven downstream)**
-`e_N(x, x) = 1` over an arbitrary base: classification (U2) + transport (U1) +
-gluing/naturality (U3) + universal vanishing (U4) + the field leaf (U5). -/
-theorem weilPairingEval_self' {N : ℕ} [NeZero N] (E : EllipticCurve S)
-    {T : Scheme.{u}} {g : T ⟶ S}
-    (x : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
-    (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by sorry
+**PROVED** in `WeilPairing/SelfUniversalVanishing.lean`:
+`weilPairingEval_self_universal_eq_one` (the universal diagonal value is `1`),
+`weilPairingEval_self_model_map` (the model case over any ring), and
+`weilPairingEval_self_of_locally` (the locality principle). The final assembly for an
+arbitrary record lives there too. -/
 
 end EllipticCurve
 
