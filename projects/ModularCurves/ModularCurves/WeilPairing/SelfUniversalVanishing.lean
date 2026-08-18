@@ -439,6 +439,61 @@ theorem weilPairingEval_self_universal_eq_one (N : ℕ) [NeZero N] :
     (natCast_mem_nonZeroDivisors_universalTorsionRing N)
     (tautTorsionPoint _ N) (tautTorsionPoint_killedBy _ N)
 
+/-- **([ASM-1])** The record-level base-change iso for models over an arbitrary ring map
+(the general-ring sibling of `modelBaseChangeIsoAsOver`). -/
+theorem modelBaseChangeIsoAsOver_ring {R : Type u} [CommRing R] [IsNoetherianRing R]
+    (W : WeierstrassCurve R) [W.IsElliptic]
+    (R' : Type u) [CommRing R'] [IsNoetherianRing R'] [Algebra R R']
+    [(W.map (algebraMap R R')).IsElliptic] :
+    ∃ φ : ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap R R')))).asOver ≅
+      (modelEllipticCurve (W.map (algebraMap R R'))).asOver,
+      IsMonHom φ.hom := by
+  haveI : IsLocallyNoetherian (Spec (CommRingCat.of R')) := by infer_instance
+  have b := isPullback_projModelBaseChange (R' := R') W
+  let e' : ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap R R')))).asOver.left ≅
+      (modelEllipticCurve (W.map (algebraMap R R'))).asOver.left := b.isoPullback.symm
+  have heπ' : e'.hom ≫ (modelEllipticCurve (W.map (algebraMap R R'))).asOver.hom
+      = ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap R R')))).asOver.hom := by
+    show b.isoPullback.inv ≫ projModelπ (W.map (algebraMap R R')) = _
+    exact (Iso.inv_comp_eq _).mpr b.isoPullback_hom_snd.symm
+  refine ⟨Over.isoMk e' heπ', isMonHom_of_pointed _ ?_⟩
+  have hz : ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap R R')))).zero ≫ e'.hom
+      = (modelEllipticCurve (W.map (algebraMap R R'))).zero := by
+    have hfst : ((modelEllipticCurve W).baseChange
+          (Spec.map (CommRingCat.ofHom (algebraMap R R')))).zero ≫
+          pullback.fst (modelEllipticCurve W).π
+            (Spec.map (CommRingCat.ofHom (algebraMap R R')))
+        = Spec.map (CommRingCat.ofHom (algebraMap R R')) ≫ (modelEllipticCurve W).zero :=
+      pullback.lift_fst _ _ _
+    have hsnd : ((modelEllipticCurve W).baseChange
+          (Spec.map (CommRingCat.ofHom (algebraMap R R')))).zero ≫
+          pullback.snd (modelEllipticCurve W).π
+            (Spec.map (CommRingCat.ofHom (algebraMap R R')))
+        = 𝟙 _ :=
+      pullback.lift_snd _ _ _
+    have hz2 : projModelZero (W.map (algebraMap R R')) ≫ b.isoPullback.hom
+        = ((modelEllipticCurve W).baseChange
+          (Spec.map (CommRingCat.ofHom (algebraMap R R')))).zero := by
+      refine pullback.hom_ext ?_ ?_
+      · refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg (CategoryStruct.comp _) b.isoPullback_hom_fst).trans ?_
+        exact (projModelZero_baseChange (R' := R') W).trans hfst.symm
+      · refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg (CategoryStruct.comp _) b.isoPullback_hom_snd).trans ?_
+        exact (projModelZero_projModelπ (W.map (algebraMap R R'))).trans hsnd.symm
+    show _ ≫ b.isoPullback.inv = projModelZero (W.map (algebraMap R R'))
+    exact (Iso.comp_inv_eq _).mpr hz2.symm
+  ext1
+  rw [Over.comp_left, show (Over.isoMk e' heπ').hom.left = e'.hom from rfl,
+    ((modelEllipticCurve W).baseChange
+      (Spec.map (CommRingCat.ofHom (algebraMap R R')))).one_eq_zero,
+    (modelEllipticCurve (W.map (algebraMap R R'))).one_eq_zero]
+  exact (Category.assoc _ _ _).trans (congrArg _ hz)
+
 end EllipticCurve
 
 end ModularCurves
