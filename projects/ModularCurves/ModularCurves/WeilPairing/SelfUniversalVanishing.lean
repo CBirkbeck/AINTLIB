@@ -211,6 +211,42 @@ theorem eq_one_of_forall_evaluation_eq_one {X : Scheme.{u}} [IsReduced X]
     rw [map_sub, h x, map_one, sub_self]
   linear_combination h0
 
+/-- **([U4e-bridge])** The residue-field evaluation of a global section is its
+restriction along `Spec κ(x) ⟶ X`, read through `ΓSpecIso`. -/
+theorem evaluation_eq_fromSpecResidueField {X : Scheme.{u}} (x : X) (s : Γ(X, ⊤)) :
+    X.evaluation ⊤ x trivial s =
+      (Scheme.ΓSpecIso (X.residueField x)).hom
+        ((X.fromSpecResidueField x).appTop s) := by
+  have h1 : (X.fromSpecResidueField x).appTop =
+      (X.fromSpecStalk x).appTop ≫ (Spec.map (X.residue x)).appTop :=
+    Scheme.Hom.comp_app _ _ _
+  rw [h1]
+  rw [Scheme.fromSpecStalk_appTop]
+  show _ = (Scheme.ΓSpecIso (X.residueField x)).hom
+    ((Spec.map (X.residue x)).appTop
+      ((Spec (X.presheaf.stalk x)).presheaf.map (homOfLE le_top).op
+        ((Scheme.ΓSpecIso (X.presheaf.stalk x)).inv
+          (X.presheaf.germ ⊤ x trivial s))))
+  have h2 : (Spec (X.presheaf.stalk x)).presheaf.map (homOfLE le_top).op =
+      𝟙 _ := by
+    rw [show (homOfLE (le_top : (⊤ : (Spec (X.presheaf.stalk x)).Opens) ≤ ⊤)).op =
+      𝟙 (Opposite.op (⊤ : (Spec (X.presheaf.stalk x)).Opens)) from rfl]
+    exact (Spec (X.presheaf.stalk x)).presheaf.map_id _
+  rw [h2]
+  show _ = (Scheme.ΓSpecIso (X.residueField x)).hom
+    ((Spec.map (X.residue x)).appTop
+      ((Scheme.ΓSpecIso (X.presheaf.stalk x)).inv
+        (X.presheaf.germ ⊤ x trivial s)))
+  have h3 := Scheme.ΓSpecIso_naturality (X.residue x)
+  have h4 := congrArg (fun m : Γ(Spec (X.presheaf.stalk x), ⊤) ⟶ X.residueField x =>
+    m.hom ((Scheme.ΓSpecIso (X.presheaf.stalk x)).inv.hom
+      (X.presheaf.germ ⊤ x trivial s))) h3
+  simp only [CommRingCat.comp_apply] at h4
+  rw [h4]
+  simp only [CommRingCat.comp_apply]
+  rw [Iso.inv_hom_id_apply]
+  rfl
+
 end EllipticCurve
 
 end ModularCurves
