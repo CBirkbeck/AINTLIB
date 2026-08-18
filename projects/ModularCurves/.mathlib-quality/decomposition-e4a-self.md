@@ -3277,3 +3277,10 @@ ONLY ASM-4 REMAINS for leaf A: the general case — for arbitrary `E`/`S`, use `
 to cover `S` by affines over which `E` is a Weierstrass model (then ASM-3 applies via the
 classifying map), transport with U1, and glue the value equation over the induced cover of
 `T` (sections form a sheaf).
+
+**[ASM-4a LANDED] (cont.30bn, 97b5358b7)**: `weilPairingEval_self_of_locally` — the value
+equation is local on the base (`Presheaf.IsSheaf.section_ext` + the `topIso`/`Γ.map`
+bridge), axiom-clean. What remains for leaf A is exactly **ASM-4b**: produce, for each
+point of `T`, an open `V` on which the record becomes a Weierstrass model (via
+`E.localModel` at the image point, pulled back along `g`), and chain
+U1 + BC-SWAP-GEN + ASM-3 there. All the transport tools for that chain are proven.
