@@ -2577,6 +2577,34 @@ theorem mulByN_preimage_bcSwapGenIso (N : ℕ) (V : (pullback E.π (g ≫ t)).Op
     ((congrArg (· ⁻¹ᵁ V) (mulByN_comp_bcSwapGenIso E t g N)).trans
       (Scheme.Hom.comp_preimage _ _ _))
 
+/-- **([UMAP-SQ-BCSWAP-GEN])** The `Units.map ∘ app` collapse along the general square. -/
+private theorem unitsMap_app_mulByN_bcSwapGenIso (N : ℕ)
+    (V : (pullback E.π (g ≫ t)).Opens) (a : Γ(pullback E.π (g ≫ t), V)ˣ) :
+    Units.map ((mulByN (E.baseChange t) g N).app ((bcSwapGenIso E t g).hom ⁻¹ᵁ V)).hom.toMonoidHom
+        (Units.map (((bcSwapGenIso E t g).hom).app V).hom.toMonoidHom a) =
+      Scheme.resUnit (le_of_eq (mulByN_preimage_bcSwapGenIso E t g N V))
+        (Units.map (((bcSwapGenIso E t g).hom).app (mulByN E (g ≫ t) N ⁻¹ᵁ V)).hom.toMonoidHom
+          (Units.map ((mulByN E (g ≫ t) N).app V).hom.toMonoidHom a)) := by
+  refine ((congrArg (Units.map ((mulByN (E.baseChange t) g N).app
+      ((bcSwapGenIso E t g).hom ⁻¹ᵁ V)).hom.toMonoidHom)
+    (map_app_eq_unitPullback ((bcSwapGenIso E t g).hom) V a)).trans ?_)
+  refine ((map_app_eq_unitPullback (mulByN (E.baseChange t) g N) ((bcSwapGenIso E t g).hom ⁻¹ᵁ V)
+    (unitPullback ((bcSwapGenIso E t g).hom) V ((bcSwapGenIso E t g).hom ⁻¹ᵁ V) le_rfl a)).trans ?_)
+  refine ((unitPullback_unitPullback (mulByN (E.baseChange t) g N) ((bcSwapGenIso E t g).hom)
+    le_rfl le_rfl a).trans ?_)
+  refine ((unitPullback_congr (mulByN_comp_bcSwapGenIso E t g N) V _ _
+    (le_of_eq (mulByN_preimage_bcSwapGenIso E t g N V)) a).trans ?_)
+  refine Eq.trans ?_ (congrArg (Scheme.resUnit (le_of_eq
+      (mulByN_preimage_bcSwapGenIso E t g N V)))
+    ((congrArg (Units.map (((bcSwapGenIso E t g).hom).app (mulByN E (g ≫ t) N ⁻¹ᵁ V)).hom.toMonoidHom)
+      (map_app_eq_unitPullback (mulByN E (g ≫ t) N) V a)).trans
+     ((map_app_eq_unitPullback ((bcSwapGenIso E t g).hom) (mulByN E (g ≫ t) N ⁻¹ᵁ V)
+        (unitPullback (mulByN E (g ≫ t) N) V (mulByN E (g ≫ t) N ⁻¹ᵁ V) le_rfl a)).trans
+      (unitPullback_unitPullback ((bcSwapGenIso E t g).hom) (mulByN E (g ≫ t) N) le_rfl le_rfl a))).symm)
+  exact (resUnit_unitPullback (((bcSwapGenIso E t g).hom) ≫ mulByN E (g ≫ t) N)
+    (le_rfl.trans ((((bcSwapGenIso E t g).hom)).preimage_mono le_rfl))
+    (le_of_eq (mulByN_preimage_bcSwapGenIso E t g N V)) a).symm
+
 end BcSwapGen
 
 end ModularCurves
