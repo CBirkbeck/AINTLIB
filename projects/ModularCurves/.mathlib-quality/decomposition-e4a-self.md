@@ -3263,3 +3263,17 @@ proved exactly this for `g = 𝟙`. The general version needs the iso
 (sectionCls/zeroCls/kappa/hM/hnorm, the mulByN + UMAP squares, TSE, the KM pin) with that
 iso in place of `bcSwapIso`. Also dropped this session: `[IsLocallyNoetherian S]` from
 `weilPairingEval_mapIso` (U1 now holds over any base).
+
+**★★★ [ASM-3 COMPLETE AXIOM-CLEAN — BC-SWAP-GEN LANDED] (cont.30bm, e150996cb)**:
+`weilPairingEval_self_model_map` — for ANY base change of the universal model along a ring
+map, e_N(x,x) = 1 at any torsion point over any base. SelfUniversalVanishing.lean is
+sorry-free. The last bridge was closed by the **BC-SWAP-GEN campaign** (KMNaturality's
+`BcSwapGen` section): `bcSwapGenIso` (mathlib `pullbackLeftPullbackSndIso`) + legs +
+zero-compat, `sectionCls/zeroCls/kappa_bcSwapGen` (+ the budget-split squares/unfolds),
+`hM/hnorm_bcSwapGen`, `mulByN_comp_bcSwapGenIso` + preimage square,
+`unitsMap_app_mulByN_bcSwapGenIso`, `torsionSplittingEval_bcSwapGen`,
+`weilPairingKM_bcSwapGen`, plus `asSection_comp_bcSwapGenIso` (SelfField).
+ONLY ASM-4 REMAINS for leaf A: the general case — for arbitrary `E`/`S`, use `localModel`
+to cover `S` by affines over which `E` is a Weierstrass model (then ASM-3 applies via the
+classifying map), transport with U1, and glue the value equation over the induced cover of
+`T` (sections form a sheaf).
