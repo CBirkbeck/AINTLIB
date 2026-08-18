@@ -3338,3 +3338,16 @@ sorried register entry, which cannot be filled there because the proof chain imp
 **`weilPairingEval_symplectic_general`** — the register's most-consumed law (11 call sites
 in RhoPairingBridge / RhoSections / YRho). **Follow-up:** re-point those consumers to the
 `_general` versions; then the Y(ρ̄) chain no longer inherits `sorryAx` from Basic:372.
+
+**[LEAF A CONSUMERS RE-POINTED] (cont.30br, 9b392cc6c)**: RhoPairingBridge, YRho (×4) and
+RhoSections (×4) now call `weilPairingEval_symplectic_general`; no import cycle, all green.
+`yRho_representable` still reports `sorryAx` — its remaining sources are **leaf B**
+(`weilPairingEval_nondegenerate`, Basic:435) and **leaf C** (`IsOfficialCartier.isFinite`),
+plus Basic's own now-superseded `weilPairingEval_self` entry (only its in-file consumers).
+**Leaf B route**: reduce to the model over the algebraically closed field (the U5-AC
+machinery: `exists_projModelIso_of_field` + U1 + BC-SWAP), cross to HasseWeil's field
+pairing with L4 (`weilPairingEval_eq_torsionSplittingEval`) + L3
+(`torsionSplittingEval_eq_weilPairing`), apply
+`HasseWeil.WeilPairing.weilPairing_nondegenerate` (PairingNondeg.lean:215 — nondegenerate in
+the SECOND slot, so swap with antisymmetry), and transport the conclusion back through the
+point dictionary (`projModelPointsEquiv`, `basePointCast_injective`).
