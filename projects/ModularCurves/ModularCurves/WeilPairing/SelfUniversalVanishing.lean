@@ -247,6 +247,40 @@ theorem evaluation_eq_fromSpecResidueField {X : Scheme.{u}} (x : X) (s : Γ(X, �
   rw [Iso.inv_hom_id_apply]
   rfl
 
+/-- **([U4e])** The diagonal pairing value of a torsion point evaluates to `1` in every
+residue field of the base, provided `N` is invertible there. -/
+theorem weilPairingEval_self_evaluation_eq_one {S : Scheme.{u}} (E : EllipticCurve S)
+    {T : Scheme.{u}} {g : T ⟶ S} {N : ℕ} [NeZero N] (hN : NIsInvertible T N)
+    (x : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) (t : T) :
+    T.evaluation ⊤ t trivial (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by
+  classical
+  -- the restriction of the point along `Spec κ(t) ⟶ T`
+  set δ : Spec (T.residueField t) ⟶ T := T.fromSpecResidueField t with hδ
+  have hxr : (EllipticCurve.Point.restrict E δ x).1 ≫ E.mulByHom N = (δ ≫ g) ≫ E.zero := by
+    show (δ ≫ x.1) ≫ E.mulByHom N = (δ ≫ g) ≫ E.zero
+    rw [Category.assoc, hx, ← Category.assoc]
+  haveI : NIsInvertible (Spec (T.residueField t)) N := NIsInvertible.of_hom δ hN
+  have hNk : (N : (T.residueField t : CommRingCat.{u})) ≠ 0 := by
+    have h1 : IsUnit (N : Γ(Spec (T.residueField t), ⊤)) := ‹_›
+    have h2 := h1.map (Scheme.ΓSpecIso (T.residueField t)).hom.hom
+    rw [map_natCast] at h2
+    exact isUnit_iff_ne_zero.mp h2
+  have hspecEq : Spec (CommRingCat.of (T.residueField t : Type u)) =
+      Spec (T.residueField t) := rfl
+  have hfield := weilPairingEval_self_of_pointOverField E
+    (k := (T.residueField t : Type u)) hNk (δ ≫ g)
+    (EllipticCurve.Point.restrict E δ x) hxr
+  have hrestr := E.weilPairingEval_restrict δ x x hx hx hxr hxr
+  rw [evaluation_eq_fromSpecResidueField t (E.weilPairingEval x x hx hx : Γ(T, ⊤))]
+  have hval : (T.fromSpecResidueField t).appTop
+      (E.weilPairingEval x x hx hx : Γ(T, ⊤)) =
+      (E.weilPairingEval (EllipticCurve.Point.restrict E δ x)
+        (EllipticCurve.Point.restrict E δ x) hxr hxr :
+        Γ(Spec (T.residueField t), ⊤)) := by
+    rw [hrestr, Scheme.Γ_map_op]
+    rfl
+  rw [hval, hfield, map_one]
+
 end EllipticCurve
 
 end ModularCurves
