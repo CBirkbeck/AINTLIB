@@ -194,6 +194,23 @@ theorem isReduced_torsion {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ) [NeZe
   haveI : Flat (E.torsionπ N) := E.torsionπ_flat N
   exact GeometricallyReduced.isReduced_of_flat_of_isLocallyNoetherian (E.torsionπ N)
 
+/-- **([U4f], the vanishing principle)** On a reduced scheme, a global section vanishing
+in every residue field is zero. -/
+theorem eq_zero_of_forall_evaluation_eq_zero {X : Scheme.{u}} [IsReduced X]
+    (s : Γ(X, ⊤)) (h : ∀ x : X, X.evaluation ⊤ x trivial s = 0) : s = 0 :=
+  eq_zero_of_basicOpen_eq_bot s
+    ((X.basicOpen_eq_bot_iff_forall_evaluation_eq_zero s).mpr (fun x => h x.1))
+
+/-- **([U4f], unit form)** On a reduced scheme, a global unit whose value is `1` in every
+residue field is `1`. -/
+theorem eq_one_of_forall_evaluation_eq_one {X : Scheme.{u}} [IsReduced X]
+    (u : Γ(X, ⊤)ˣ) (h : ∀ x : X, X.evaluation ⊤ x trivial (u : Γ(X, ⊤)) = 1) :
+    (u : Γ(X, ⊤)) = 1 := by
+  have h0 : ((u : Γ(X, ⊤)) - 1) = 0 := by
+    refine eq_zero_of_forall_evaluation_eq_zero _ (fun x => ?_)
+    rw [map_sub, h x, map_one, sub_self]
+  linear_combination h0
+
 end EllipticCurve
 
 end ModularCurves
