@@ -2605,6 +2605,145 @@ private theorem unitsMap_app_mulByN_bcSwapGenIso (N : ℕ)
     (le_rfl.trans ((((bcSwapGenIso E t g).hom)).preimage_mono le_rfl))
     (le_of_eq (mulByN_preimage_bcSwapGenIso E t g N V)) a).symm
 
+/-- **([TSE-BCSWAP-GEN])** The E6-d mirror at the general collapse. -/
+theorem torsionSplittingEval_bcSwapGen
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)] (N : ℕ)
+    (Q : (E.baseChange (g ≫ t)).Point (𝟙 T')) (hQ : Q ∈ torsionPoints E (g ≫ t) N)
+    (hQsw : (Q.1 ≫ (bcSwapGenIso E t g).inv) ≫
+      pullback.snd ((E.baseChange t).π) g = 𝟙 T')
+    (hQswt : (⟨Q.1 ≫ (bcSwapGenIso E t g).inv, hQsw⟩ :
+      ((E.baseChange t).baseChange g).Point (𝟙 T')) ∈
+      torsionPoints (E.baseChange t) g N)
+    (A : (pullback E.π (g ≫ t)).Modules)
+    (hA : letI := Scheme.Modules.monoidalCategory (pullback E.π (g ≫ t))
+      (kappa E hsm (g ≫ t) Q).val = toSkeleton A)
+    {J : Type*} (W : J → (pullback E.π (g ≫ t)).Opens) (hW : iSup W = ⊤)
+    (e : ∀ i, A.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π (g ≫ t)).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover A W e i j ∈
+      sectionUnits (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π (g ≫ t)) (W i ⊓ W j))
+    (Pt : (E.baseChange (g ≫ t)).Point (𝟙 T')) (hPt : Pt ∈ torsionPoints E (g ≫ t) N)
+    (hPsw : (Pt.1 ≫ (bcSwapGenIso E t g).inv) ≫
+      pullback.snd ((E.baseChange t).π) g = 𝟙 T')
+    (hPswt : (⟨Pt.1 ≫ (bcSwapGenIso E t g).inv, hPsw⟩ :
+      ((E.baseChange t).baseChange g).Point (𝟙 T')) ∈
+      torsionPoints (E.baseChange t) g N) :
+    torsionSplittingEval (E.baseChange t) hsmBC g N
+        (⟨Q.1 ≫ (bcSwapGenIso E t g).inv, hQsw⟩ :
+          ((E.baseChange t).baseChange g).Point (𝟙 T')) hQswt
+        ((Scheme.Modules.pullback (bcSwapGenIso E t g).hom).obj A)
+        (hM_bcSwapGen E t g hsm hsmBC Q hQsw A hA)
+        (fun i => (bcSwapGenIso E t g).hom ⁻¹ᵁ W i)
+        (((bcSwapGenIso E t g).hom).iSup_preimage_eq_top hW)
+        (fun i => Scheme.Modules.localPullbackTrivializationT (bcSwapGenIso E t g).hom A (W i) (e i))
+        (hnorm_bcSwapGen E t g A W e hnorm)
+        (⟨Pt.1 ≫ (bcSwapGenIso E t g).inv, hPsw⟩ :
+          ((E.baseChange t).baseChange g).Point (𝟙 T')) hPswt =
+      torsionSplittingEval E hsm (g ≫ t) N Q hQ A hA W hW e hnorm Pt hPt := by
+  obtain ⟨h, hn, hsplit⟩ := exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints
+    E hsm (g ≫ t) N Q hQ A hA W hW e hnorm
+  have hres := resUnit_torsionSplittingEval E hsm (g ≫ t) N Q hQ A hA W hW e hnorm Pt hPt
+    h hn hsplit
+  have hle : ∀ i, mulByN (E.baseChange t) g N ⁻¹ᵁ ((bcSwapGenIso E t g).hom ⁻¹ᵁ W i) ≤
+      (bcSwapGenIso E t g).hom ⁻¹ᵁ (mulByN E (g ≫ t) N ⁻¹ᵁ W i) :=
+    fun i => le_of_eq (mulByN_preimage_bcSwapGenIso E t g N (W i))
+  have hn' : ∀ i, Scheme.resUnit (hle i)
+      (Units.map (((bcSwapGenIso E t g).hom).app (mulByN E (g ≫ t) N ⁻¹ᵁ W i)).hom.toMonoidHom (h i)) ∈
+      sectionUnits (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+          ((E.baseChange t).zero) ((E.baseChange t).zero_π) g)
+        (mulByN (E.baseChange t) g N ⁻¹ᵁ ((bcSwapGenIso E t g).hom ⁻¹ᵁ W i)) := by
+    intro i
+    rw [mem_sectionUnits_iff, sectionEval_resUnit,
+      show sectionEval (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+        ((E.baseChange t).zero) ((E.baseChange t).zero_π) g)
+        ((bcSwapGenIso E t g).hom ⁻¹ᵁ (mulByN E (g ≫ t) N ⁻¹ᵁ W i))
+        (Units.map (((bcSwapGenIso E t g).hom).app (mulByN E (g ≫ t) N ⁻¹ᵁ W i)).hom.toMonoidHom (h i)) = 1 from
+      mem_sectionUnits_pullback (baseChangeZero_comp_bcSwapGenIso E t g)
+        (mulByN E (g ≫ t) N ⁻¹ᵁ W i) (hn i), map_one]
+  have hsplit' : ∀ i j,
+      Units.map ((mulByN (E.baseChange t) g N).app
+          ((bcSwapGenIso E t g).hom ⁻¹ᵁ W i ⊓ (bcSwapGenIso E t g).hom ⁻¹ᵁ W j)).hom.toMonoidHom
+        (transitionUnitOfCover ((Scheme.Modules.pullback (bcSwapGenIso E t g).hom).obj A)
+          (fun i => (bcSwapGenIso E t g).hom ⁻¹ᵁ W i)
+          (fun i => Scheme.Modules.localPullbackTrivializationT (bcSwapGenIso E t g).hom A (W i) (e i)) i j) =
+      Scheme.resUnit inf_le_left (Scheme.resUnit (hle i)
+        (Units.map (((bcSwapGenIso E t g).hom).app (mulByN E (g ≫ t) N ⁻¹ᵁ W i)).hom.toMonoidHom (h i))) *
+        (Scheme.resUnit inf_le_right (Scheme.resUnit (hle j)
+          (Units.map (((bcSwapGenIso E t g).hom).app (mulByN E (g ≫ t) N ⁻¹ᵁ W j)).hom.toMonoidHom (h j))))⁻¹ := by
+    intro i j
+    refine ((congrArg (Units.map ((mulByN (E.baseChange t) g N).app
+        ((bcSwapGenIso E t g).hom ⁻¹ᵁ W i ⊓ (bcSwapGenIso E t g).hom ⁻¹ᵁ W j)).hom.toMonoidHom)
+        (transitionUnitOfCover_localPullback ((bcSwapGenIso E t g).hom) A W e i j)).trans ?_)
+    refine ((unitsMap_app_mulByN_bcSwapGenIso E t g N (W i ⊓ W j)
+        (transitionUnitOfCover A W e i j)).trans ?_)
+    refine ((congrArg (Scheme.resUnit _) (congrArg
+        (Units.map (((bcSwapGenIso E t g).hom).app (mulByN E (g ≫ t) N ⁻¹ᵁ (W i ⊓ W j))).hom.toMonoidHom)
+        (hsplit i j))).trans ?_)
+    refine ((congrArg (Scheme.resUnit _) (map_mul _ _ _)).trans ?_)
+    refine ((map_mul _ _ _).trans ?_)
+    have hVi : mulByN (E.baseChange t) g N ⁻¹ᵁ ((bcSwapGenIso E t g).hom ⁻¹ᵁ W i) ⊓
+        mulByN (E.baseChange t) g N ⁻¹ᵁ ((bcSwapGenIso E t g).hom ⁻¹ᵁ W j) ≤
+        (bcSwapGenIso E t g).hom ⁻¹ᵁ (mulByN E (g ≫ t) N ⁻¹ᵁ W i ⊓ mulByN E (g ≫ t) N ⁻¹ᵁ W j) :=
+      le_of_eq (by exact mulByN_preimage_bcSwapGenIso E t g N (W i ⊓ W j))
+    refine congrArg₂ (· * ·) ?_ ?_
+    · exact EllipticCurve.resUnit_unitsMap_app_resUnit ((bcSwapGenIso E t g).hom)
+        (inf_le_left : mulByN E (g ≫ t) N ⁻¹ᵁ W i ⊓ mulByN E (g ≫ t) N ⁻¹ᵁ W j ≤
+          mulByN E (g ≫ t) N ⁻¹ᵁ W i)
+        hVi (le_of_eq (mulByN_preimage_bcSwapGenIso E t g N (W i))) inf_le_left (h i)
+    · refine ((congrArg (Scheme.resUnit _) (map_inv _ _)).trans ?_)
+      refine ((map_inv _ _).trans ?_)
+      refine congrArg (·⁻¹) ?_
+      exact EllipticCurve.resUnit_unitsMap_app_resUnit ((bcSwapGenIso E t g).hom)
+        (inf_le_right : mulByN E (g ≫ t) N ⁻¹ᵁ W i ⊓ mulByN E (g ≫ t) N ⁻¹ᵁ W j ≤
+          mulByN E (g ≫ t) N ⁻¹ᵁ W j)
+        hVi (le_of_eq (mulByN_preimage_bcSwapGenIso E t g N (W j))) inf_le_right (h j)
+  have hC : ∀ i, Scheme.resUnit
+      (le_top : ((⟨Pt.1 ≫ (bcSwapGenIso E t g).inv, hPsw⟩ :
+          ((E.baseChange t).baseChange g).Point (𝟙 T')).1 :
+          T' ⟶ pullback ((E.baseChange t).π) g) ⁻¹ᵁ
+        (mulByN (E.baseChange t) g N ⁻¹ᵁ ((bcSwapGenIso E t g).hom ⁻¹ᵁ W i)) ≤ ⊤)
+      (torsionSplittingEval E hsm (g ≫ t) N Q hQ A hA W hW e hnorm Pt hPt) =
+      sectionEval ((⟨Pt.1 ≫ (bcSwapGenIso E t g).inv, hPsw⟩ :
+          ((E.baseChange t).baseChange g).Point (𝟙 T')).1 :
+          T' ⟶ pullback ((E.baseChange t).π) g)
+        (mulByN (E.baseChange t) g N ⁻¹ᵁ ((bcSwapGenIso E t g).hom ⁻¹ᵁ W i))
+        (Scheme.resUnit (hle i)
+          (Units.map (((bcSwapGenIso E t g).hom).app (mulByN E (g ≫ t) N ⁻¹ᵁ W i)).hom.toMonoidHom (h i))) := by
+    intro i
+    have hcomp : (Pt.1 ≫ (bcSwapGenIso E t g).inv) ≫ (bcSwapGenIso E t g).hom = Pt.1 :=
+      (Category.assoc _ _ _).trans
+        ((congrArg (fun m => Pt.1 ≫ m) (bcSwapGenIso E t g).inv_hom_id).trans
+          (Category.comp_id _))
+    refine Eq.symm ?_
+    have hmicro := sectionEval_congr_morphism hcomp (mulByN E (g ≫ t) N ⁻¹ᵁ W i) (h i)
+    refine ((sectionEval_resUnit _ (hle i) _).trans ?_)
+    refine ((congrArg (Scheme.resUnit
+        ((Pt.1 ≫ (bcSwapGenIso E t g).inv).preimage_mono (hle i)))
+      (sectionEval_pullback ((bcSwapGenIso E t g).hom) (Pt.1 ≫ (bcSwapGenIso E t g).inv)
+        (mulByN E (g ≫ t) N ⁻¹ᵁ W i) (h i))).trans ?_)
+    have houter : ((Pt.1 ≫ (bcSwapGenIso E t g).inv) ⁻¹ᵁ
+        (mulByN (E.baseChange t) g N ⁻¹ᵁ ((bcSwapGenIso E t g).hom ⁻¹ᵁ W i))) ≤
+        Pt.1 ⁻¹ᵁ (mulByN E (g ≫ t) N ⁻¹ᵁ W i) :=
+      ((Pt.1 ≫ (bcSwapGenIso E t g).inv).preimage_mono (hle i)).trans
+        (le_of_eq (congrArg (· ⁻¹ᵁ (mulByN E (g ≫ t) N ⁻¹ᵁ W i)) hcomp))
+    refine (((Scheme.resUnit_resUnit houter
+      (le_of_eq (congrArg (· ⁻¹ᵁ (mulByN E (g ≫ t) N ⁻¹ᵁ W i)) hcomp.symm)) _).symm.trans
+      (congrArg (Scheme.resUnit houter) hmicro)).trans ?_)
+    refine ((congrArg (Scheme.resUnit houter) (hres i).symm).trans ?_)
+    exact Scheme.resUnit_resUnit _ _ _
+  exact (eq_torsionSplittingEval (E.baseChange t) hsmBC g N _ hQswt
+    ((Scheme.Modules.pullback (bcSwapGenIso E t g).hom).obj A)
+    (hM_bcSwapGen E t g hsm hsmBC Q hQsw A hA)
+    (fun i => (bcSwapGenIso E t g).hom ⁻¹ᵁ W i)
+    (((bcSwapGenIso E t g).hom).iSup_preimage_eq_top hW)
+    (fun i => Scheme.Modules.localPullbackTrivializationT (bcSwapGenIso E t g).hom A (W i) (e i))
+    (hnorm_bcSwapGen E t g A W e hnorm) _ hPswt
+    (fun i => Scheme.resUnit (hle i)
+      (Units.map (((bcSwapGenIso E t g).hom).app (mulByN E (g ≫ t) N ⁻¹ᵁ W i)).hom.toMonoidHom (h i)))
+    hn' hsplit' hC).symm
+
 end BcSwapGen
 
 end ModularCurves
