@@ -204,9 +204,8 @@ theorem eq_zero_of_forall_evaluation_eq_zero {X : Scheme.{u}} [IsReduced X]
 /-- **([U4f], unit form)** On a reduced scheme, a global unit whose value is `1` in every
 residue field is `1`. -/
 theorem eq_one_of_forall_evaluation_eq_one {X : Scheme.{u}} [IsReduced X]
-    (u : Γ(X, ⊤)ˣ) (h : ∀ x : X, X.evaluation ⊤ x trivial (u : Γ(X, ⊤)) = 1) :
-    (u : Γ(X, ⊤)) = 1 := by
-  have h0 : ((u : Γ(X, ⊤)) - 1) = 0 := by
+    (u : Γ(X, ⊤)) (h : ∀ x : X, X.evaluation ⊤ x trivial u = 1) : u = 1 := by
+  have h0 : (u - 1) = 0 := by
     refine eq_zero_of_forall_evaluation_eq_zero _ (fun x => ?_)
     rw [map_sub, h x, map_one, sub_self]
   linear_combination h0
@@ -280,6 +279,16 @@ theorem weilPairingEval_self_evaluation_eq_one {S : Scheme.{u}} (E : EllipticCur
     rw [hrestr, Scheme.Γ_map_op]
     rfl
   rw [hval, hfield, map_one]
+
+/-- **(U4, the reduced-base vanishing)** Over a reduced locally-noetherian base on which
+`N` is invertible, the diagonal pairing value of any `N`-torsion point is `1`. -/
+theorem weilPairingEval_self_of_reduced {S : Scheme.{u}} (E : EllipticCurve S)
+    {T : Scheme.{u}} {g : T ⟶ S} {N : ℕ} [NeZero N] (hN : NIsInvertible T N)
+    [IsReduced T] (x : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 :=
+  eq_one_of_forall_evaluation_eq_one
+    ((E.weilPairingEval x x hx hx : Γ(T, ⊤)))
+    (fun t => weilPairingEval_self_evaluation_eq_one E hN x hx t)
 
 end EllipticCurve
 
