@@ -2397,6 +2397,102 @@ theorem zeroCls_bcSwapGen
     _ = zeroCls (E.baseChange t) hsmBC g :=
         sectionCls_congr (E.baseChange t) hsmBC g _ _ hswap
 
+/-- The `snd`-square of the general collapse (own elaboration budget). -/
+private theorem picMap_bcSwapGen_snd : ∀ y : Scheme.Pic T',
+    Scheme.Pic.map (bcSwapGenIso E t g).hom
+      (Scheme.Pic.map (pullback.snd E.π (g ≫ t)) y) =
+    Scheme.Pic.map (pullback.snd ((E.baseChange t).π) g) y := by
+  intro y
+  calc Scheme.Pic.map (bcSwapGenIso E t g).hom
+        (Scheme.Pic.map (pullback.snd E.π (g ≫ t)) y)
+      = Scheme.Pic.map ((bcSwapGenIso E t g).hom ≫ pullback.snd E.π (g ≫ t)) y := by
+        rw [Scheme.Pic.map_comp]; rfl
+    _ = Scheme.Pic.map (pullback.snd ((E.baseChange t).π) g) y := by
+        rw [bcSwapGenIso_hom_snd]
+
+/-- The zero-square of the general collapse (own elaboration budget). -/
+private theorem picMap_bcSwapGen_zero : ∀ y : Scheme.Pic (pullback E.π (g ≫ t)),
+    Scheme.Pic.map (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+        ((E.baseChange t).zero) ((E.baseChange t).zero_π) g)
+      (Scheme.Pic.map (bcSwapGenIso E t g).hom y) =
+    Scheme.Pic.map (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π (g ≫ t)) y := by
+  intro y
+  calc Scheme.Pic.map (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+          ((E.baseChange t).zero) ((E.baseChange t).zero_π) g)
+        (Scheme.Pic.map (bcSwapGenIso E t g).hom y)
+      = Scheme.Pic.map (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+          ((E.baseChange t).zero) ((E.baseChange t).zero_π) g ≫
+            (bcSwapGenIso E t g).hom) y := by
+        rw [Scheme.Pic.map_comp]; rfl
+    _ = Scheme.Pic.map (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π (g ≫ t)) y := by
+        rw [baseChangeZero_comp_bcSwapGenIso]
+
+/-- `κ` on the general base change, unfolded (own elaboration budget). -/
+private theorem picRelProj_val_bcGen
+    (x : Scheme.Pic (pullback ((E.baseChange t).π) g)) :
+    ((picRelProj ((E.baseChange t).π) ((E.baseChange t).zero)
+        ((E.baseChange t).zero_π) g x :
+        picRel ((E.baseChange t).π) ((E.baseChange t).zero)
+          ((E.baseChange t).zero_π) g) :
+        Scheme.Pic (pullback ((E.baseChange t).π) g)) =
+      x * (Scheme.Pic.map (pullback.snd ((E.baseChange t).π) g)
+        (Scheme.Pic.map (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+          ((E.baseChange t).zero) ((E.baseChange t).zero_π) g) x))⁻¹ := rfl
+
+private theorem kappa_bcGen_unfold
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)]
+    (Q' : ((E.baseChange t).baseChange g).Point (𝟙 T')) :
+    kappa (E.baseChange t) hsmBC g Q' =
+      (sectionCls (E.baseChange t) hsmBC g Q'.1 Q'.2 *
+          (zeroCls (E.baseChange t) hsmBC g)⁻¹) *
+        (Scheme.Pic.map (pullback.snd ((E.baseChange t).π) g)
+          (Scheme.Pic.map (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+            ((E.baseChange t).zero) ((E.baseChange t).zero_π) g)
+            (sectionCls (E.baseChange t) hsmBC g Q'.1 Q'.2 *
+              (zeroCls (E.baseChange t) hsmBC g)⁻¹)))⁻¹ :=
+  (kappa_eq_picRelProj (E.baseChange t) hsmBC g Q').trans (picRelProj_val_bcGen E t g _)
+
+/-- **([KAPPA-BCSWAP-GEN])** `κ` transports along the general collapse. -/
+theorem kappa_bcSwapGen
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)]
+    (Q : (E.baseChange (g ≫ t)).Point (𝟙 T'))
+    (hQsw : (Q.1 ≫ (bcSwapGenIso E t g).inv) ≫
+      pullback.snd ((E.baseChange t).π) g = 𝟙 T') :
+    Scheme.Pic.map (bcSwapGenIso E t g).hom (kappa E hsm (g ≫ t) Q) =
+      kappa (E.baseChange t) hsmBC g
+        (⟨Q.1 ≫ (bcSwapGenIso E t g).inv, hQsw⟩ :
+          ((E.baseChange t).baseChange g).Point (𝟙 T')) := by
+  have hval : ∀ (x : Scheme.Pic (pullback E.π (g ≫ t))),
+      ((picRelProj E.π E.zero E.zero_π (g ≫ t) x :
+        picRel E.π E.zero E.zero_π (g ≫ t)) :
+        Scheme.Pic (pullback E.π (g ≫ t))) =
+      x * (Scheme.Pic.map (pullback.snd E.π (g ≫ t))
+        (Scheme.Pic.map (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π (g ≫ t)) x))⁻¹ :=
+    fun _ => rfl
+  set x := sectionCls E hsm (g ≫ t) Q.1 Q.2 * (zeroCls E hsm (g ≫ t))⁻¹ with hx
+  set x' := sectionCls (E.baseChange t) hsmBC g (Q.1 ≫ (bcSwapGenIso E t g).inv) hQsw *
+    (zeroCls (E.baseChange t) hsmBC g)⁻¹ with hx'
+  have hratio : Scheme.Pic.map (bcSwapGenIso E t g).hom x = x' := by
+    rw [hx, hx', map_mul, map_inv]
+    congr 1
+    · exact sectionCls_bcSwapGen E t g hsm hsmBC Q.1 Q.2 hQsw
+    · exact congrArg (·⁻¹) (zeroCls_bcSwapGen E t g hsm hsmBC)
+  have hsq1 := picMap_bcSwapGen_snd E t g
+  have hsq2 := picMap_bcSwapGen_zero E t g
+  refine ((congrArg (Scheme.Pic.map (bcSwapGenIso E t g).hom)
+    ((kappa_eq_picRelProj E hsm (g ≫ t) Q).trans (hval x))).trans ?_).trans
+    (kappa_bcGen_unfold E t g hsmBC _).symm
+  exact map_mul_inv_transport (Scheme.Pic.map (bcSwapGenIso E t g).hom)
+    (Scheme.Pic.map (pullback.snd E.π (g ≫ t)))
+    (Scheme.Pic.map (pullback.snd ((E.baseChange t).π) g))
+    (Scheme.Pic.map (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π (g ≫ t)))
+    (Scheme.Pic.map (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+      ((E.baseChange t).zero) ((E.baseChange t).zero_π) g))
+    hsq1 hsq2 hratio
+
 end BcSwapGen
 
 end ModularCurves
