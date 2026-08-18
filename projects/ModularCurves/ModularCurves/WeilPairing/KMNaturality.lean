@@ -2299,6 +2299,104 @@ theorem baseChangeZero_comp_bcSwapGenIso :
       (bcSwapGenIso_hom_snd E t g)).trans ?_
     exact (pullback.lift_snd _ _ _).trans (pullback.lift_snd _ _ _).symm
 
+/-- **([SECTIONCLS-BCSWAP-GEN])** Section-class transport along the general collapse. -/
+theorem sectionCls_bcSwapGen
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)]
+    (P : T' ⟶ pullback E.π (g ≫ t)) (hP : P ≫ pullback.snd E.π (g ≫ t) = 𝟙 T')
+    (hPsw : (P ≫ (bcSwapGenIso E t g).inv) ≫
+      pullback.snd ((E.baseChange t).π) g = 𝟙 T') :
+    Scheme.Pic.map (bcSwapGenIso E t g).hom (sectionCls E hsm (g ≫ t) P hP) =
+      sectionCls (E.baseChange t) hsmBC g (P ≫ (bcSwapGenIso E t g).inv) hPsw := by
+  letI := Scheme.Modules.monoidalCategory (pullback E.π (g ≫ t))
+  letI := Scheme.Modules.monoidalCategory (pullback ((E.baseChange t).π) g)
+  haveI hsepE : IsSeparated (pullback.snd E.π (g ≫ t)) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π (g ≫ t) ‹_›
+  haveI hsepB : IsSeparated (pullback.snd ((E.baseChange t).π) g) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) _ _ ‹_›
+  have hsmE : SmoothOfRelativeDimension 1 (pullback.snd E.π (g ≫ t)) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) E.π (g ≫ t) hsm
+  have hsmB : SmoothOfRelativeDimension 1 (pullback.snd ((E.baseChange t).π) g) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) _ _ hsmBC
+  haveI hciP : IsClosedImmersion P := by
+    refine MorphismProperty.of_postcomp (W := @IsClosedImmersion)
+      (W' := @IsSeparated) _ (pullback.snd E.π (g ≫ t)) hsepE ?_
+    rw [hP]
+    infer_instance
+  haveI hciPsw : IsClosedImmersion (P ≫ (bcSwapGenIso E t g).inv) := by
+    refine MorphismProperty.of_postcomp (W := @IsClosedImmersion)
+      (W' := @IsSeparated) _ (pullback.snd ((E.baseChange t).π) g) hsepB ?_
+    rw [hPsw]
+    infer_instance
+  have hkercollapse : (Scheme.Hom.ker P).comap (bcSwapGenIso E t g).hom =
+      Scheme.Hom.ker (P ≫ (bcSwapGenIso E t g).inv) :=
+    EllipticCurve.ker_comap_iso (bcSwapGenIso E t g) P
+  have hJ : ∀ c : ↥(pullback E.π (g ≫ t)),
+      ∃ V : (pullback E.π (g ≫ t)).affineOpens, c ∈ V.1 ∧
+      ∃ f : Γ(pullback E.π (g ≫ t), V.1),
+        (Scheme.Hom.ker P).ideal V = Ideal.span {f} ∧
+          f ∈ nonZeroDivisors Γ(pullback E.π (g ≫ t), V.1) :=
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsmE P hP).locallyPrincipal
+  have hJ' : ∀ c : ↥(pullback ((E.baseChange t).π) g),
+      ∃ V : (pullback ((E.baseChange t).π) g).affineOpens, c ∈ V.1 ∧
+      ∃ f : Γ(pullback ((E.baseChange t).π) g, V.1),
+        ((Scheme.Hom.ker P).comap (bcSwapGenIso E t g).hom).ideal V = Ideal.span {f} ∧
+          f ∈ nonZeroDivisors Γ(pullback ((E.baseChange t).π) g, V.1) := by
+    rw [hkercollapse]
+    exact (RelEffCartierDiv.sectionDivisor_isOfficial hsmB _ hPsw).locallyPrincipal
+  obtain ⟨eiso⟩ := nonempty_pullback_idealModule (bcSwapGenIso E t g).hom
+    (Scheme.Hom.ker P) hJ hJ'
+  have hcore : Scheme.Pic.map (bcSwapGenIso E t g).hom
+      (((RelEffCartierDiv.sectionDivisor (pullback.snd E.π (g ≫ t))
+          P hP).isInvertible_idealModule
+        (RelEffCartierDiv.sectionDivisor_isOfficial hsmE P hP)).isUnit_toSkeleton.unit) =
+      ((RelEffCartierDiv.sectionDivisor (pullback.snd ((E.baseChange t).π) g)
+          (P ≫ (bcSwapGenIso E t g).inv) hPsw).isInvertible_idealModule
+        (RelEffCartierDiv.sectionDivisor_isOfficial hsmB _ hPsw)).isUnit_toSkeleton.unit := by
+    refine Units.ext ?_
+    refine (Scheme.Pic.map_val (bcSwapGenIso E t g).hom _).trans ?_
+    refine (congrArg (Scheme.Modules.pullback (bcSwapGenIso E t g).hom).mapSkeleton.obj
+      (IsUnit.unit_spec _)).trans ?_
+    refine (Functor.mapSkeleton_obj_toSkeleton _ _).trans ?_
+    refine (toSkeleton_eq_toSkeleton_iff.mpr
+      ⟨eiso ≪≫ eqToIso (congrArg Scheme.Modules.idealModule hkercollapse)⟩).trans ?_
+    exact (IsUnit.unit_spec _).symm
+  refine Eq.trans (map_inv (Scheme.Pic.map (bcSwapGenIso E t g).hom) _) ?_
+  exact congrArg (·⁻¹) hcore
+
+/-- **([ZEROCLS-BCSWAP-GEN])** Zero-class transport along the general collapse. -/
+theorem zeroCls_bcSwapGen
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)] :
+    Scheme.Pic.map (bcSwapGenIso E t g).hom (zeroCls E hsm (g ≫ t)) =
+      zeroCls (E.baseChange t) hsmBC g := by
+  have hz := baseChangeZero_comp_bcSwapGenIso E t g
+  have hswap : Scheme.Modules.baseChangeZero E.π E.zero E.zero_π (g ≫ t) ≫
+      (bcSwapGenIso E t g).inv =
+      Scheme.Modules.baseChangeZero ((E.baseChange t).π) ((E.baseChange t).zero)
+        ((E.baseChange t).zero_π) g :=
+    (congrArg (fun m => m ≫ (bcSwapGenIso E t g).inv) hz.symm).trans
+      ((Category.assoc _ _ _).trans
+        ((congrArg (fun m => Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+            ((E.baseChange t).zero) ((E.baseChange t).zero_π) g ≫ m)
+          (bcSwapGenIso E t g).hom_inv_id).trans (Category.comp_id _)))
+  have hzsw : (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π (g ≫ t) ≫
+      (bcSwapGenIso E t g).inv) ≫ pullback.snd ((E.baseChange t).π) g = 𝟙 T' :=
+    (congrArg (fun m => m ≫ pullback.snd ((E.baseChange t).π) g) hswap).trans
+      (Scheme.Modules.baseChangeZero_snd _ _ _ _)
+  calc Scheme.Pic.map (bcSwapGenIso E t g).hom (zeroCls E hsm (g ≫ t))
+      = sectionCls (E.baseChange t) hsmBC g
+          (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π (g ≫ t) ≫
+            (bcSwapGenIso E t g).inv) hzsw :=
+        sectionCls_bcSwapGen E t g hsm hsmBC _
+          (Scheme.Modules.baseChangeZero_snd E.π E.zero E.zero_π (g ≫ t)) hzsw
+    _ = zeroCls (E.baseChange t) hsmBC g :=
+        sectionCls_congr (E.baseChange t) hsmBC g _ _ hswap
+
 end BcSwapGen
 
 end ModularCurves
