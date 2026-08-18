@@ -2054,4 +2054,160 @@ private theorem unitsMap_app_mulByN_bcSwapIso {S : Scheme.{u}} (E : EllipticCurv
     (le_rfl.trans ((((bcSwapIso E t).hom)).preimage_mono le_rfl))
     (le_of_eq (mulByN_preimage_bcSwapIso E t N V)) a).symm
 
+/-- Transport of `sectionEval` along an equality of the section morphism (the opens are
+propositionally equal, so this needs a `subst`). -/
+private theorem sectionEval_congr_morphism {X Y : Scheme.{u}} {P P' : Y ⟶ X} (h : P = P')
+    (U : X.Opens) (u : Γ(X, U)ˣ) :
+    Scheme.resUnit (le_of_eq (congrArg (· ⁻¹ᵁ U) h.symm)) (sectionEval P U u) =
+      sectionEval P' U u := by
+  subst h
+  refine Units.ext ?_
+  rw [Scheme.resUnit_val]
+  exact Scheme.resLE_rfl _ _
+
+/-- **([TSE-BCSWAP])** The torsion-splitting value is invariant under the collapse iso:
+the doubled-base-change evaluation on the pulled dataset equals the `E/t` evaluation on
+the original dataset, at corresponding points. -/
+theorem torsionSplittingEval_bcSwap {S : Scheme.{u}} (E : EllipticCurve S)
+    {T : Scheme.{u}} (t : T ⟶ S)
+    (hsm : SmoothOfRelativeDimension 1 E.π) [IsSeparated E.π]
+    (hsmBC : SmoothOfRelativeDimension 1 ((E.baseChange t).π))
+    [IsSeparated ((E.baseChange t).π)] (N : ℕ)
+    (Q : (E.baseChange t).Point (𝟙 T)) (hQ : Q ∈ torsionPoints E t N)
+    (hQsw : (Q.1 ≫ (bcSwapIso E t).inv) ≫
+      pullback.snd ((E.baseChange t).π) (𝟙 T) = 𝟙 T)
+    (hQswt : (⟨Q.1 ≫ (bcSwapIso E t).inv, hQsw⟩ :
+      ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T)) ∈
+      torsionPoints (E.baseChange t) (𝟙 T) N)
+    (A : (pullback E.π t).Modules)
+    (hA : letI := Scheme.Modules.monoidalCategory (pullback E.π t)
+      (kappa E hsm t Q).val = toSkeleton A)
+    {J : Type*} (W : J → (pullback E.π t).Opens) (hW : iSup W = ⊤)
+    (e : ∀ i, A.over (W i) ≅
+      _root_.SheafOfModules.unit ((pullback E.π t).ringCatSheaf.over (W i)))
+    (hnorm : ∀ i j, transitionUnitOfCover A W e i j ∈
+      sectionUnits (Scheme.Modules.baseChangeZero E.π E.zero E.zero_π t) (W i ⊓ W j))
+    (Pt : (E.baseChange t).Point (𝟙 T)) (hPt : Pt ∈ torsionPoints E t N)
+    (hPsw : (Pt.1 ≫ (bcSwapIso E t).inv) ≫
+      pullback.snd ((E.baseChange t).π) (𝟙 T) = 𝟙 T)
+    (hPswt : (⟨Pt.1 ≫ (bcSwapIso E t).inv, hPsw⟩ :
+      ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T)) ∈
+      torsionPoints (E.baseChange t) (𝟙 T) N) :
+    torsionSplittingEval (E.baseChange t) hsmBC (𝟙 T) N
+        (⟨Q.1 ≫ (bcSwapIso E t).inv, hQsw⟩ :
+          ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T)) hQswt
+        ((Scheme.Modules.pullback (bcSwapIso E t).hom).obj A)
+        (hM_bcSwap E t hsm hsmBC Q hQsw A hA)
+        (fun i => (bcSwapIso E t).hom ⁻¹ᵁ W i)
+        (((bcSwapIso E t).hom).iSup_preimage_eq_top hW)
+        (fun i => Scheme.Modules.localPullbackTrivializationT (bcSwapIso E t).hom A (W i) (e i))
+        (hnorm_bcSwap E t A W e hnorm)
+        (⟨Pt.1 ≫ (bcSwapIso E t).inv, hPsw⟩ :
+          ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T)) hPswt =
+      torsionSplittingEval E hsm t N Q hQ A hA W hW e hnorm Pt hPt := by
+  obtain ⟨h, hn, hsplit⟩ := exists_normalized_transitionUnit_eq_mul_inv_of_mem_torsionPoints
+    E hsm t N Q hQ A hA W hW e hnorm
+  have hres := resUnit_torsionSplittingEval E hsm t N Q hQ A hA W hW e hnorm Pt hPt
+    h hn hsplit
+  have hle : ∀ i, mulByN (E.baseChange t) (𝟙 T) N ⁻¹ᵁ ((bcSwapIso E t).hom ⁻¹ᵁ W i) ≤
+      (bcSwapIso E t).hom ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) :=
+    fun i => le_of_eq (mulByN_preimage_bcSwapIso E t N (W i))
+  have hn' : ∀ i, Scheme.resUnit (hle i)
+      (Units.map (((bcSwapIso E t).hom).app (mulByN E t N ⁻¹ᵁ W i)).hom.toMonoidHom (h i)) ∈
+      sectionUnits (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+          ((E.baseChange t).zero) ((E.baseChange t).zero_π) (𝟙 T))
+        (mulByN (E.baseChange t) (𝟙 T) N ⁻¹ᵁ ((bcSwapIso E t).hom ⁻¹ᵁ W i)) := by
+    intro i
+    rw [mem_sectionUnits_iff, sectionEval_resUnit,
+      show sectionEval (Scheme.Modules.baseChangeZero ((E.baseChange t).π)
+        ((E.baseChange t).zero) ((E.baseChange t).zero_π) (𝟙 T))
+        ((bcSwapIso E t).hom ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i))
+        (Units.map (((bcSwapIso E t).hom).app (mulByN E t N ⁻¹ᵁ W i)).hom.toMonoidHom (h i)) = 1 from
+      mem_sectionUnits_pullback (baseChangeZero_comp_bcSwapIso E t)
+        (mulByN E t N ⁻¹ᵁ W i) (hn i), map_one]
+  have hsplit' : ∀ i j,
+      Units.map ((mulByN (E.baseChange t) (𝟙 T) N).app
+          ((bcSwapIso E t).hom ⁻¹ᵁ W i ⊓ (bcSwapIso E t).hom ⁻¹ᵁ W j)).hom.toMonoidHom
+        (transitionUnitOfCover ((Scheme.Modules.pullback (bcSwapIso E t).hom).obj A)
+          (fun i => (bcSwapIso E t).hom ⁻¹ᵁ W i)
+          (fun i => Scheme.Modules.localPullbackTrivializationT (bcSwapIso E t).hom A (W i) (e i)) i j) =
+      Scheme.resUnit inf_le_left (Scheme.resUnit (hle i)
+        (Units.map (((bcSwapIso E t).hom).app (mulByN E t N ⁻¹ᵁ W i)).hom.toMonoidHom (h i))) *
+        (Scheme.resUnit inf_le_right (Scheme.resUnit (hle j)
+          (Units.map (((bcSwapIso E t).hom).app (mulByN E t N ⁻¹ᵁ W j)).hom.toMonoidHom (h j))))⁻¹ := by
+    intro i j
+    refine ((congrArg (Units.map ((mulByN (E.baseChange t) (𝟙 T) N).app
+        ((bcSwapIso E t).hom ⁻¹ᵁ W i ⊓ (bcSwapIso E t).hom ⁻¹ᵁ W j)).hom.toMonoidHom)
+        (transitionUnitOfCover_localPullback ((bcSwapIso E t).hom) A W e i j)).trans ?_)
+    refine ((unitsMap_app_mulByN_bcSwapIso E t N (W i ⊓ W j)
+        (transitionUnitOfCover A W e i j)).trans ?_)
+    refine ((congrArg (Scheme.resUnit _) (congrArg
+        (Units.map (((bcSwapIso E t).hom).app (mulByN E t N ⁻¹ᵁ (W i ⊓ W j))).hom.toMonoidHom)
+        (hsplit i j))).trans ?_)
+    refine ((congrArg (Scheme.resUnit _) (map_mul _ _ _)).trans ?_)
+    refine ((map_mul _ _ _).trans ?_)
+    have hVi : mulByN (E.baseChange t) (𝟙 T) N ⁻¹ᵁ ((bcSwapIso E t).hom ⁻¹ᵁ W i) ⊓
+        mulByN (E.baseChange t) (𝟙 T) N ⁻¹ᵁ ((bcSwapIso E t).hom ⁻¹ᵁ W j) ≤
+        (bcSwapIso E t).hom ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j) :=
+      le_of_eq (by exact mulByN_preimage_bcSwapIso E t N (W i ⊓ W j))
+    refine congrArg₂ (· * ·) ?_ ?_
+    · exact EllipticCurve.resUnit_unitsMap_app_resUnit ((bcSwapIso E t).hom)
+        (inf_le_left : mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j ≤ mulByN E t N ⁻¹ᵁ W i)
+        hVi (le_of_eq (mulByN_preimage_bcSwapIso E t N (W i))) inf_le_left (h i)
+    · refine ((congrArg (Scheme.resUnit _) (map_inv _ _)).trans ?_)
+      refine ((map_inv _ _).trans ?_)
+      refine congrArg (·⁻¹) ?_
+      exact EllipticCurve.resUnit_unitsMap_app_resUnit ((bcSwapIso E t).hom)
+        (inf_le_right : mulByN E t N ⁻¹ᵁ W i ⊓ mulByN E t N ⁻¹ᵁ W j ≤ mulByN E t N ⁻¹ᵁ W j)
+        hVi (le_of_eq (mulByN_preimage_bcSwapIso E t N (W j))) inf_le_right (h j)
+  have hC : ∀ i, Scheme.resUnit
+      (le_top : ((⟨Pt.1 ≫ (bcSwapIso E t).inv, hPsw⟩ :
+          ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T)).1 :
+          T ⟶ pullback ((E.baseChange t).π) (𝟙 T)) ⁻¹ᵁ
+        (mulByN (E.baseChange t) (𝟙 T) N ⁻¹ᵁ ((bcSwapIso E t).hom ⁻¹ᵁ W i)) ≤ ⊤)
+      (torsionSplittingEval E hsm t N Q hQ A hA W hW e hnorm Pt hPt) =
+      sectionEval ((⟨Pt.1 ≫ (bcSwapIso E t).inv, hPsw⟩ :
+          ((E.baseChange t).baseChange (𝟙 T)).Point (𝟙 T)).1 :
+          T ⟶ pullback ((E.baseChange t).π) (𝟙 T))
+        (mulByN (E.baseChange t) (𝟙 T) N ⁻¹ᵁ ((bcSwapIso E t).hom ⁻¹ᵁ W i))
+        (Scheme.resUnit (hle i)
+          (Units.map (((bcSwapIso E t).hom).app (mulByN E t N ⁻¹ᵁ W i)).hom.toMonoidHom (h i))) := by
+    intro i
+    have hcomp : (Pt.1 ≫ (bcSwapIso E t).inv) ≫ (bcSwapIso E t).hom = Pt.1 :=
+      (Category.assoc _ _ _).trans
+        ((congrArg (fun m => Pt.1 ≫ m) (bcSwapIso E t).inv_hom_id).trans
+          (Category.comp_id _))
+    refine Eq.symm ?_
+    -- the two typed transports: onto `Pt.1`'s open, then onto the top
+    have hmicro := sectionEval_congr_morphism hcomp (mulByN E t N ⁻¹ᵁ W i) (h i)
+    have hLE : ((Pt.1 ≫ (bcSwapIso E t).inv) ⁻¹ᵁ
+        ((bcSwapIso E t).hom ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i))) ≤
+        ((Pt.1 ≫ (bcSwapIso E t).inv) ≫ (bcSwapIso E t).hom) ⁻¹ᵁ
+          (mulByN E t N ⁻¹ᵁ W i) := le_of_eq rfl
+    refine ((sectionEval_resUnit _ (hle i) _).trans ?_)
+    refine ((congrArg (Scheme.resUnit
+        ((Pt.1 ≫ (bcSwapIso E t).inv).preimage_mono (hle i)))
+      (sectionEval_pullback ((bcSwapIso E t).hom) (Pt.1 ≫ (bcSwapIso E t).inv)
+        (mulByN E t N ⁻¹ᵁ W i) (h i))).trans ?_)
+    have houter : ((Pt.1 ≫ (bcSwapIso E t).inv) ⁻¹ᵁ
+        (mulByN (E.baseChange t) (𝟙 T) N ⁻¹ᵁ ((bcSwapIso E t).hom ⁻¹ᵁ W i))) ≤
+        Pt.1 ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i) :=
+      ((Pt.1 ≫ (bcSwapIso E t).inv).preimage_mono (hle i)).trans
+        (le_of_eq (congrArg (· ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i)) hcomp))
+    refine (((Scheme.resUnit_resUnit houter
+      (le_of_eq (congrArg (· ⁻¹ᵁ (mulByN E t N ⁻¹ᵁ W i)) hcomp.symm)) _).symm.trans
+      (congrArg (Scheme.resUnit houter) hmicro)).trans ?_)
+    refine ((congrArg (Scheme.resUnit houter) (hres i).symm).trans ?_)
+    exact Scheme.resUnit_resUnit _ _ _
+  exact (eq_torsionSplittingEval (E.baseChange t) hsmBC (𝟙 T) N _ hQswt
+    ((Scheme.Modules.pullback (bcSwapIso E t).hom).obj A)
+    (hM_bcSwap E t hsm hsmBC Q hQsw A hA)
+    (fun i => (bcSwapIso E t).hom ⁻¹ᵁ W i)
+    (((bcSwapIso E t).hom).iSup_preimage_eq_top hW)
+    (fun i => Scheme.Modules.localPullbackTrivializationT (bcSwapIso E t).hom A (W i) (e i))
+    (hnorm_bcSwap E t A W e hnorm) _ hPswt
+    (fun i => Scheme.resUnit (hle i)
+      (Units.map (((bcSwapIso E t).hom).app (mulByN E t N ⁻¹ᵁ W i)).hom.toMonoidHom (h i)))
+    hn' hsplit' hC).symm
+
 end ModularCurves
