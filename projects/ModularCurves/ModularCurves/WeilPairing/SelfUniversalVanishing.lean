@@ -101,9 +101,12 @@ instance flat_int_universalTorsionRing (N : ℕ) [NeZero N] :
 
 /-- **([U4c])** `N` is a nonzerodivisor on the universal torsion section ring. -/
 theorem natCast_mem_nonZeroDivisors_universalTorsionRing (N : ℕ) [NeZero N] :
-    ((N : ℤ) : universalTorsionRing.{u} N) ∈
-      nonZeroDivisors (universalTorsionRing.{u} N) :=
-  isSMulRegular_natCast_of_flat _ (by exact_mod_cast NeZero.ne N)
+    ((N : ℕ) : universalTorsionRing.{u} N) ∈
+      nonZeroDivisors (universalTorsionRing.{u} N) := by
+  have h := isSMulRegular_natCast_of_flat (universalTorsionRing.{u} N)
+    (N := (N : ℤ)) (by exact_mod_cast NeZero.ne N)
+  rwa [show (((N : ℤ) : universalTorsionRing.{u} N)) =
+    ((N : ℕ) : universalTorsionRing.{u} N) from by push_cast; ring] at h
 
 /-- **([U4d-i])** Over a field in which `N` is invertible, the `N`-torsion of any
 elliptic-curve record has reduced section ring: `torsionπ` is étale, hence the section
@@ -411,6 +414,30 @@ theorem isReduced_basicOpen_natCast_torsion {S : Scheme.{u}} (E : EllipticCurve 
   have hiso := (E.torsionBaseChangeHom N V.ι).isoOpensRange
   rw [hoRange, hpre] at hiso
   exact isReduced_of_isOpenImmersion hiso.inv
+
+/-- **(U4, the universal vanishing)** The diagonal pairing value of the tautological
+point over the universal `N`-torsion base is `1`. -/
+theorem weilPairingEval_self_universal_eq_one (N : ℕ) [NeZero N] :
+    ((modelEllipticCurve universalWeierstrassLocU.{u}).weilPairingEval (N := N)
+        (tautTorsionPoint _ N) (tautTorsionPoint _ N)
+        (tautTorsionPoint_killedBy _ N) (tautTorsionPoint_killedBy _ N) :
+      Γ((modelEllipticCurve universalWeierstrassLocU.{u}).torsion N, ⊤)) = 1 := by
+  haveI : IsReduced (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})) := by
+    haveI : _root_.IsReduced (CommRingCat.of WeierstrassAtlasRingU.{u}) :=
+      inferInstanceAs (_root_.IsReduced WeierstrassAtlasRingU.{u})
+    infer_instance
+  haveI : IsLocallyNoetherian (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})) := by
+    haveI : IsNoetherianRing WeierstrassAtlasRingU.{u} := inferInstance
+    infer_instance
+  haveI : IsReduced
+      (((modelEllipticCurve universalWeierstrassLocU.{u}).torsion N).basicOpen
+        ((N : ℕ) : Γ((modelEllipticCurve universalWeierstrassLocU.{u}).torsion N, ⊤)) :
+        Scheme.{u}) :=
+    isReduced_basicOpen_natCast_torsion (modelEllipticCurve universalWeierstrassLocU.{u}) N
+  exact weilPairingEval_self_of_nonZeroDivisor
+    (modelEllipticCurve universalWeierstrassLocU.{u})
+    (natCast_mem_nonZeroDivisors_universalTorsionRing N)
+    (tautTorsionPoint _ N) (tautTorsionPoint_killedBy _ N)
 
 end EllipticCurve
 
