@@ -361,7 +361,9 @@ lemma posDetInt_le_commensurator :
   have hK_le_gH : K ≤ ConjAct.toConjAct g • H := congruence_ker_image_le_conj n g A hA hAdet_ne
   have hK_le_ginvH : K ≤ ConjAct.toConjAct g⁻¹ • H :=
     congruence_ker_image_le_conj_inv n g A hA hAdet_ne
-  refine ⟨ne_zero_of_dvd_ne_zero hK_relIndex (Subgroup.relIndex_dvd_of_le_left H hK_le_gH), ?_⟩
+  refine ⟨⟨ne_zero_of_dvd_ne_zero hK_relIndex
+    (Subgroup.relIndex_dvd_of_le_left H hK_le_gH)⟩, ⟨?_⟩⟩
+  show H.relIndex (ConjAct.toConjAct g • H) ≠ 0
   have h1 : ConjAct.toConjAct g⁻¹ • (ConjAct.toConjAct g • H) = H := by
     rw [smul_smul, ← map_mul, inv_mul_cancel, map_one, one_smul]
   rw [(Subgroup.relIndex_pointwise_smul (ConjAct.toConjAct g⁻¹) H

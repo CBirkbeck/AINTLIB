@@ -599,7 +599,7 @@ theorem pthSymbolAtPrime_canonical_eq_zero_of_eta_factor
     have hp_pos : 0 < p := (Fact.out : p.Prime).pos
     rcases Nat.exists_eq_succ_of_ne_zero (by omega : p ≠ 0) with ⟨k, hk⟩
     rw [hk, pow_succ]
-    exact Ideal.mul_le_left
+    exact Ideal.mul_le_right
   exact hP_b (hb_pow_le hη_in_span)
 
 /-- **Unconditional ideal-level vanishing at `-α^p` for odd p**: rewrites

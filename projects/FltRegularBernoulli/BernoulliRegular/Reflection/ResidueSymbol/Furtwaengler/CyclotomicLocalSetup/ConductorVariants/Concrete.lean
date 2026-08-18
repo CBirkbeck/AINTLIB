@@ -294,7 +294,7 @@ theorem isGalDescentTo_OK_of_field_descent (a : ℕ) (h : ∃ y : K, algebraMap 
     rw [hy]
     exact NumberField.RingOfIntegers.isIntegral_coe (S.gaussSumInt a ^ p)
   have h_int : IsIntegral ℤ y :=
-    (isIntegral_algebraMap_iff (FaithfulSMul.algebraMap_injective K R')).mp h_int_R'
+    isIntegral_algebraMap_iff.mp h_int_R'
   refine ⟨⟨y, h_int⟩, ?_⟩
   -- The algebraMap (𝓞 K) (𝓞 R') γ has the right image in R'.
   apply NumberField.RingOfIntegers.coe_injective (K := R')
