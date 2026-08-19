@@ -1,3 +1,7 @@
+import LeanModularForms.HeckeRIngs.GL2.Degree
+import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.Cocycle822
+import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ManinFD
+import LeanModularForms.HeckeRIngs.GL2.Unified.ShimuraHom
 import LeanModularForms.Modularforms.AtImInfty
 import LeanModularForms.Modularforms.DimensionFormulas
 import LeanModularForms.Modularforms.ForMathlib_Cusps

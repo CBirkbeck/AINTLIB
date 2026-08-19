@@ -1384,7 +1384,7 @@ theorem caseII_zetaSubOne_sq_dvd_data_pair_realGenerator_K {m : ℕ} (D : RealCa
   rw [← Ideal.span_singleton_le_span_singleton, ← Ideal.span_singleton_pow,
     caseII_data_pair_realGenerator_K_eq, ← caseII_etaInv_coe (K := K) η,
     ← caseII_pair_principal_ideal_eq D hp η, pow_two]
-  exact Ideal.mul_mono Ideal.mul_le_left Ideal.mul_le_left
+  exact Ideal.mul_mono Ideal.mul_le_right Ideal.mul_le_right
 
 /-- **The σ-stable pair generator divided by `(ζ-1)²` is in `𝓞 K`.** Concrete element witness
 of `caseII_zetaSubOne_sq_dvd_data_pair_realGenerator_K`: the quotient
@@ -3580,7 +3580,7 @@ theorem caseII_K_zeta_sub_one_dvd_symmetric_at_etaTwo {m : ℕ} (D : RealCaseIID
         divZetaSubOneDvdGcd hp D.hζ D.equation D.hy D.etaTwo *
         Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) ≤
         Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) :=
-      Ideal.mul_le_left
+      Ideal.mul_le_right
     exact h_le h_mem
   exact h_dvd.mul_right _
 
@@ -3599,7 +3599,7 @@ theorem caseII_K_zeta_sub_one_dvd_x_add_y_etaTwoInv {m : ℕ} (D : RealCaseIIDat
       divZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv D.etaTwo) *
       Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) ≤
       Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) :=
-    Ideal.mul_le_left
+    Ideal.mul_le_right
   exact h_le h_mem
 
 /-- **`(ζ - 1)² ∣ Q_2`.** Combining the two single-factor divisibilities. -/
@@ -3620,7 +3620,7 @@ theorem caseII_K_zeta_sub_one_sq_dvd_symmetric_at_etaTwo {m : ℕ} (D : RealCase
         divZetaSubOneDvdGcd hp D.hζ D.equation D.hy D.etaTwo *
         Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) ≤
         Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) :=
-      Ideal.mul_le_left
+      Ideal.mul_le_right
     exact h_le h_mem
   · -- (ζ-1) ∣ (D.x + D.y·η_2^36):
     exact caseII_K_zeta_sub_one_dvd_x_add_y_etaTwoInv D hp
@@ -3643,7 +3643,7 @@ theorem caseII_K_zeta_sub_one_sq_dvd_symmetric_at_etaOne {m : ℕ} (D : RealCase
         divZetaSubOneDvdGcd hp D.hζ D.equation D.hy D.etaOne *
         Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) ≤
         Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) :=
-      Ideal.mul_le_left
+      Ideal.mul_le_right
     exact h_le h_mem
   · have h_inv_coe : (D.etaOne : 𝓞 K) ^ 36 = (caseII_etaInv D.etaOne : 𝓞 K) := rfl
     rw [h_inv_coe, ← Ideal.mem_span_singleton]
@@ -3656,7 +3656,7 @@ theorem caseII_K_zeta_sub_one_sq_dvd_symmetric_at_etaOne {m : ℕ} (D : RealCase
         divZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv D.etaOne) *
         Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) ≤
         Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) :=
-      Ideal.mul_le_left
+      Ideal.mul_le_right
     exact h_le h_mem
 
 /-- **`(ζ-1)^(37m+1) ∣ (D.x + D.y)`** in `RealCaseIIData37`. Direct from
@@ -3861,7 +3861,7 @@ theorem caseII_K_zeta_sub_one_dvd_x_add_y_times_root {m : ℕ} (D : RealCaseIIDa
       divZetaSubOneDvdGcd hp D.hζ D.equation D.hy η *
       Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) ≤
       Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) :=
-    Ideal.mul_le_left
+    Ideal.mul_le_right
   exact h_le h_mem
 
 /-- **`(ζ-1)² ∣ P_K_η`** for any 37-th root η. -/

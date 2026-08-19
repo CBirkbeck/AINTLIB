@@ -50,7 +50,7 @@ theorem caseIIEx811Bridge_evalₐ_nsmul_thirtyseven_eq_zero
         (Ideal.mem_span_singleton_self ((37 : ℕ) : ValuedIntegerRing 37 K))
     obtain ⟨d, hd⟩ := Nat.exists_eq_add_of_le hN
     rw [hd, pow_add] at h36
-    exact Ideal.mul_le_right h36
+    exact Ideal.mul_le_left h36
   have hzero : ((37 : ℕ) : ValuedIntegerRing 37 K ⧸ (lambdaIdeal 37 K) ^ N) = 0 := by
     rw [show ((37 : ℕ) : ValuedIntegerRing 37 K ⧸ (lambdaIdeal 37 K) ^ N) =
         Ideal.Quotient.mk ((lambdaIdeal 37 K) ^ N) ((37 : ℕ) : ValuedIntegerRing 37 K) by
