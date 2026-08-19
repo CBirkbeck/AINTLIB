@@ -36,7 +36,6 @@ namespace LocalPresentation
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([hArb-3a] translation to the origin)** A chart marking `σ` at `(p₀, q₀)` twists
 by the pure translation `⟨1, p₀, 0, q₀⟩` to a chart marking `σ` at the origin. -/
 theorem marksAt_origin_ofVC {S : Scheme.{u}} {G : EllipticCurveGeom S}
@@ -107,7 +106,6 @@ noncomputable def chartRecordIso :
       simp [Category.assoc])
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([hArb-3c-β] pointedness)** The record comparison carries the base-changed zero
 section to the model zero section. -/
 theorem chartRecordIso_unit :
@@ -174,7 +172,6 @@ noncomputable def chartPointsEquiv {T : Scheme.{u}} (tV : T ⟶ Spec Γ(S, V.1))
 
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([hArb-3c-δ] the marked value)** Under the chart points equivalence, the pull of a
 marked section evaluates to the (pulled) affine-point section of its chart
 coordinates. -/
@@ -221,7 +218,6 @@ theorem chartPointsEquiv_pull_marked {T : Scheme.{u}} (tV : T ⟶ Spec Γ(S, V.1
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([hArb-3c-ε] the `a₃`-certificate ★★)** On a chart marking a fibrewise-nonzero
 `3`-torsion section at the origin, `a₃` is a unit: at every residue point the marked
 model point is `some(0,0)`, nonzero and `3`-torsion, hence not `2`-torsion — but
@@ -311,7 +307,6 @@ theorem isUnit_a₃_of_marked_origin {S : Scheme.{u}} {E : EllipticCurve S}
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([hArb-3a′] the general marking transport)** Twisting a chart moves a marking by
 the coordinate change: `(p, q) ↦ (vcX p, vcY p q)`. -/
 theorem marksAt_ofVC_vc {S : Scheme.{u}} {G : EllipticCurveGeom S}
@@ -354,7 +349,6 @@ end LocalPresentation
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([hArb-3b] the B-locus hypothesis is redundant ★★)** On a flex-normal-form chart
 with a marked `3`-torsion point `(p, q)`, the `isE3Form_of_threeTorsion` B-quantity is
 AUTOMATICALLY a unit: its norm over the chart quotient is `27·a₃⁸·(a₁³−27a₃)² = 27a₃²Δ²`,
@@ -402,7 +396,6 @@ theorem isUnit_e3B {A : Type u} [CommRing A] {W : WeierstrassCurve A} {p q : A}
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **([hArb] THE CONDITIONAL ASSEMBLY ★★★)** Modulo the two torsion→coordinate
 bridges (`BRIDGE-P`: the `a₂`-obstruction of an origin-marked chart vanishes;
 `BRIDGE-Q`: the flex-chart cubic at the second marked point — the KM-split content,
@@ -561,7 +554,6 @@ theorem bridgeQ_of_psi3_eval {A : Type u} [CommRing A] {W : WeierstrassCurve A}
 
 open WeierstrassCurve LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **([O2b] the abscissa-unit certificate ★★)** On a chart marking `P` at the origin
 and `Q` at `(p, q)`, if the pulled points satisfy `Q̄ ≠ ±P̄` at every geometric point,
 then `p = x(Q)` is a unit: a vanishing fibre abscissa forces `q̄(q̄ + a₃̄) = 0` (the
@@ -689,7 +681,6 @@ theorem isUnit_x_of_marked_pair {S : Scheme.{u}} {E : EllipticCurve S}
 
 open WeierstrassCurve LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **The general marked-pair abscissa-difference certificate.** On a chart marking `P`
 at `(pP, qP)` and `Q` at `(pQ, qQ)`, if the pulled points satisfy `Q̄ ≠ ±P̄` at every
 geometric point, then the abscissa difference `x(Q) − x(P) = pQ − pP` is a unit: a

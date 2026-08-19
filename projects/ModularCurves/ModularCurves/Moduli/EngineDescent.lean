@@ -1659,7 +1659,6 @@ treatment as `Moduli/EngineMouthCharts.lean`. -/
 set_option allowUnsafeReducibility true in
 attribute [local irreducible] ModularCurves.projModel
 
-set_option maxHeartbeats 800000 in
 /-- **([a5-W6-loc], the per-point chart from a LOCALIZED model — ABSTRACT)** The `lw_chart_at`
 engine with the global-model inputs (`W₀A`, `φA`, `act`, `Cvc`, `hΨ`) replaced by their
 restrictions to the invariant basic localization `A_a`, `a ∉ s`: a Weierstrass model

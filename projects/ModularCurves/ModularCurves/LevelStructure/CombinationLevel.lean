@@ -540,7 +540,6 @@ theorem torsionMapSection_congr {T : Scheme.{u}} {g : T ⟶ S}
   rfl
 
 set_option synthInstance.maxHeartbeats 160000 in
-set_option maxHeartbeats 1600000 in
 /-- **The classifying equivalence (ENGINE AXIOM 2, points form).** `T`-points of the
 full-level locus over `g` are exactly the naive full level-`N` structures on
 `E ×_S T`. -/

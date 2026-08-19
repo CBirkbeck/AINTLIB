@@ -63,7 +63,6 @@ noncomputable def basisUnitOn {V : S.affineOpens} (P : LocalPresentation G V)
 
 open Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 /-- **(E12-A)** The per-chart basis units agree on chart overlaps: the `b`-compatibility
 cocycle is exactly the chart-comparison cocycle (`omegaCocycle_res`), and the
 comparisons compose (`transUnit_trans`). -/
@@ -105,7 +104,6 @@ private theorem basisUnitOn_agree {V : S.affineOpens} (P : LocalPresentation G V
 
 open Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E12-A, KM 2.2.5)** The **basis unit** of a presentation: the unique unit of
 `Γ(V)` comparing the `ω`-basis `b` with the standard chart differential of `P` —
 glued over the atlas from `basisUnitOn`. -/
@@ -172,7 +170,6 @@ def IsAdapted {V : S.affineOpens} (P : LocalPresentation G V) (b : OmegaBasis G)
   (P.basisUnitAt b).1 = 1
 open Scheme WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E12-B)** Twisting scales the basis unit by the `u`-component of the twist:
 `basisUnitAt (P.ofVC C) b = C.u · basisUnitAt P b`. -/
 theorem basisUnitAt_ofVC {V : S.affineOpens} (P : LocalPresentation G V)
@@ -224,7 +221,6 @@ theorem isAdapted_adapt {V : S.affineOpens} (P : LocalPresentation G V)
 
 open Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E12-B)** The basis unit is a `transUnit`-cocycle in the presentation: comparing
 through any second presentation over the same affine splits off their comparison
 unit. -/
@@ -362,7 +358,6 @@ theorem isUnit_ofNat_res {n : ℕ} [n.AtLeastTwo]
 
 open Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E12-C)** The basis unit restricts: adaptedness is a local property. -/
 theorem basisUnitAt_restrict {V : S.affineOpens} (P : LocalPresentation G V)
     (b : OmegaBasis G) {V' : S.affineOpens} (h : V'.1 ≤ V.1) :
@@ -415,7 +410,6 @@ theorem restrict_W_a₆ {V : S.affineOpens} (P : LocalPresentation G V)
 
 open Scheme WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E12-C core)** Any two adapted short-normal-form presentations over (possibly
 different) affines have equal chart curves on every common affine subopen: the local
 uniqueness (E12-B) globalises. -/
@@ -459,7 +453,6 @@ theorem adaptedLocal_isShortNF (G : EllipticCurveGeom S) (b : OmegaBasis G)
 
 open Scheme WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(E12-C ★)** The **global adapted coefficient** `a₄`: the `a₄`-coefficients of
 the unique local `ω`-adapted short-normal-form models glue to a global section
 (overlap agreement = `adapted_shortNF_res_eq`). Together with `adaptedCoeff₆` this is
@@ -520,7 +513,6 @@ noncomputable def adaptedCoeff₄ (G : EllipticCurveGeom S) (b : OmegaBasis G)
 
 open Scheme WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(E12-C ★)** The **global adapted coefficient** `a₆`: the `a₆`-coefficients of
 the unique local `ω`-adapted short-normal-form models glue to a global section
 (overlap agreement = `adapted_shortNF_res_eq`). Companion of `adaptedCoeff₄`; together they are
@@ -600,7 +592,6 @@ private noncomputable def ofPresentationUnit {V₀ : S.affineOpens} (hV₀ : V�
 
 open Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E12-D2 ★)** The `ω`-basis associated to a global presentation over an affine
 base: chartwise the comparison unit against the presentation. This is the universal
 `ω = dx/y` of T-E12's representing object (KM 2.2.5: the basis the model is adapted
@@ -653,7 +644,6 @@ noncomputable def _root_.ModularCurves.OmegaBasis.ofPresentation
 
 open Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E12-D2 ★)** A global presentation is adapted to its own basis: KM 2.2.5's
 tautology — the model is adapted to the `ω` it defines. Stated for restrictions so it
 feeds `adaptedLocal`-style consumers directly. -/
@@ -697,7 +687,6 @@ theorem isAdapted_restrict_ofPresentation {V₀ : S.affineOpens} (hV₀ : V₀.1
 
 open Scheme WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E12-D3)** The global discriminant of the adapted coefficients is a unit:
 chartwise it is the discriminant of the (elliptic) adapted model. -/
 theorem adaptedDelta_isUnit (G : EllipticCurveGeom S) (b : OmegaBasis G)
@@ -763,7 +752,6 @@ theorem pointedIso_hom_of_transVC_eq_one {V : S.affineOpens}
 
 open Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E12-D4)** The basis unit is equivariant for the global-unit action. -/
 theorem basisUnitAt_smul {V : S.affineOpens} (P : LocalPresentation G V)
     (u : Γ(S, ⊤)ˣ) (b : OmegaBasis G) :

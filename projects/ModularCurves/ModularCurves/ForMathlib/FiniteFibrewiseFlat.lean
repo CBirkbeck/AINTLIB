@@ -365,7 +365,6 @@ theorem flat_baseChange_of_fiberInclusion_flat (q : Ideal A) [q.IsPrime]
     (AlgebraTensorModule.cancelBaseChange R (K ⊗[A] R) D D T).symm
 
 attribute [local instance] Algebra.TensorProduct.rightAlgebra in
-set_option maxHeartbeats 1000000 in
 /-- **The fibrewise flatness criterion, ring level.** Let `A → R → T` with `T` a
 finitely presented `R`-module, flat over `A`. If for every prime `q ⊆ A` the fibre map
 `κ(q) ⊗[A] R → κ(q) ⊗[A] T` is flat, then `T` is flat over `R`. (The module-finite

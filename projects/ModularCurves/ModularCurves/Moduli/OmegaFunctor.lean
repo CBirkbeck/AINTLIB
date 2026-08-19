@@ -300,7 +300,6 @@ theorem omegaBasisMap_id (X : EllObj R) (b : OmegaBasis X.curve.toEllipticCurveG
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- The mixed comparison of a composite factors through the two comparisons: the
 cocycle condition of the ω-functoriality, affine-locally at the value level. -/
 private theorem omegaCompat_comp_w_val {X X' X'' : EllObj R} (φ : X'' ⟶ X') (ψ : X' ⟶ X)
@@ -488,7 +487,6 @@ private theorem omegaCompat_comp_w_val {X X' X'' : EllObj R} (φ : X'' ⟶ X') (
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-OM-B7 ★★)** Contravariant functoriality of the ω-base-change: transporting a
 basis along a composite is the composite of the transports. With `omegaBasisMap_id`
 and `omegaBasisMap_smul` this makes the ω-rigidified moduli problems functors on
@@ -773,7 +771,6 @@ private theorem omegaCompat_neg_w (X : EllObj R)
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-OM-B9 ★)** The inversion acts by `−1` on the `S`-bases of `ω_{E/S}` —
 KM 4.6.2's `{±1}`-action, `[-1]^* ω = −ω`. -/
 theorem omegaBasisMap_negEll (X : EllObj R)

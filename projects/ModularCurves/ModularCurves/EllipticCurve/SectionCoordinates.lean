@@ -203,7 +203,6 @@ theorem eq_affineSection_of_zChart_factor (W : WeierstrassCurve R)
   simpa [hgc, hgaff] using this
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([hArb-1] companion: coordinate uniqueness)** The affine-point section determines
 its coordinates: compose with the chart factorisation and read the two chart
 coordinates off the evaluation homs. -/

@@ -153,7 +153,6 @@ section Assembly
 
 open IsLocalRing
 
-set_option maxHeartbeats 1600000 in
 /-- **BB-FLAT, general base**: multiplication by `N ≥ 1` is a flat endomorphism of any
 elliptic curve over any base scheme. -/
 theorem mulByHom_flat_general (E : EllipticCurve S) (N : ℕ) [NeZero N] :
@@ -402,7 +401,6 @@ theorem mulByHom_flat_general (E : EllipticCurve S) (N : ℕ) [NeZero N] :
       exact Flat.SpecMap_iff.mp hflatSpec
     exact hcrit
 
-set_option maxHeartbeats 800000 in
 /-- **BB-DEG, general base**: `[N]` has fibre rank `N²` at every point of any elliptic
 curve over any base. The rank is read off the residue fibre through the `[N]`
 base-change square (`finrank_of_isPullback`), where the fibre curve is

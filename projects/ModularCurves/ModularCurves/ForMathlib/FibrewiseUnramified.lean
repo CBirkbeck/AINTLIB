@@ -83,7 +83,6 @@ private lemma subsingleton_tensor_transfer
   rw [hz z₁, hz z₂]
 
 attribute [local instance] Algebra.TensorProduct.rightAlgebra in
-set_option maxHeartbeats 1600000 in
 /-- **The fibrewise criterion for formal unramifiedness**: if all residue fibres of
 `R → T` over `A` are formally unramified and `T` is essentially of finite type over
 `R`, then `T` is formally unramified over `R`. -/

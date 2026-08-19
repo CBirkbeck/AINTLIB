@@ -35,7 +35,6 @@ namespace ModularCurves
 
 variable {p : ℕ} [Fact p.Prime] {G : Type*} [AddCommGroup G]
 
-set_option maxHeartbeats 800000 in
 /-- **(AX2-e core)** In a `(ℤ/p)`-vector space of cardinality `p²`, a pair spans (as an
 additive subgroup) iff all `p²−1` nontrivial `(ℤ/p)`-combinations avoid zero. -/
 theorem zmodModule_closure_pair_eq_top_iff [Module (ZMod p) G]

@@ -249,7 +249,6 @@ noncomputable def sectionMapHom :
           (fun P Q => EllipticCurve.Point.pull_add (modelEllipticCurve W) _ P Q))))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([RING-DBL E] the transport value)** The section transport carries affine-point
 sections to the affine-point sections of the mapped coordinates (the Stage-D matched
 section, as a value of `sectionMapHom`). -/
@@ -291,7 +290,6 @@ end Transport
 
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **([RING-DBL D] the universal identity ★★★)** Over the universal doubling base,
 doubling the tautological marked section lands at the ring doubling coordinates. -/
 theorem two_zsmul_affineSection_universal :
@@ -512,7 +510,6 @@ theorem section_dbl_congr {A : Type u} [CommRing A] {W₁ W₂ : WeierstrassCurv
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(`RING-DBL` ★★★★)** Ring-level doubling of a marked affine-point section on the
 unit-tangent-denominator locus: `2 • affineSection (p, q) = affineSection (dblX, dblY)`
 over ANY commutative ring — the identity transports from the universal domain along the

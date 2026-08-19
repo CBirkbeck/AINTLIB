@@ -303,7 +303,6 @@ theorem exists_mem_stableAffineOpen_aux (N : ℕ) [NeZero N]
       rw [← Scheme.Hom.comp_apply, E.mulByHom_π]
     rwa [hππp] at hpV
 
-set_option maxHeartbeats 1000000 in
 /-- **[HG-C3 chart existence]** For `G` killed by `N`, every point of `E` lies in a
 `G`-stable affine open lying over an affine open of the base. This is the geometric heart
 of the `[HG-C3]` cover; the freeness refinement (shrinking the base patch until `groupRing`

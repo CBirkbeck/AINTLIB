@@ -124,7 +124,6 @@ theorem hdbl_of_dblX_eq {A' : Type*} [CommRing A'] (W : WeierstrassCurve A')
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(the tangent-denominator certificate)** On a chart marking a fibrewise-nonzero
 `3`-torsion section at `(p, q)`, the tangent denominator is a unit (a vanishing fibre
 value would make the point `2`-torsion, but `3`- and `2`-torsion force zero). -/
@@ -214,7 +213,6 @@ theorem isUnit_tangentDen_of_marked {S : Scheme.{u}} {E : EllipticCurve S}
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(the master bridge input ★★★)** A chart-marked fibrewise-nonzero `3`-torsion
 section satisfies the cleared doubling condition `hdbl`: `RING-DBL` + the negation
 coordinate + coordinate injectivity. -/
@@ -288,7 +286,6 @@ theorem hdbl_of_marked_three_torsion {S : Scheme.{u}} {E : EllipticCurve S}
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(BRIDGE-P ★★★)** The `a₂`-obstruction of an origin-marked chart of the first
 marked section vanishes. -/
 theorem bridgeP_holds {R : CommRingCat.{u}} (X : EllObj R) (hR : IsUnit (3 : R))
@@ -313,7 +310,6 @@ theorem bridgeP_holds {R : CommRingCat.{u}} (X : EllObj R) (hR : IsUnit (3 : R))
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(BRIDGE-Q ★★★)** The flex-chart cubic at the second marked point vanishes. -/
 theorem bridgeQ_holds {R : CommRingCat.{u}} (X : EllObj R) (hR : IsUnit (3 : R))
     (L : X.curve.FullLevelPt 3) (V : X.base.affineOpens)

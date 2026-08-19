@@ -1592,7 +1592,6 @@ private theorem transportTheta_neg (i : G.atlas.ι)
     rw [hconj, pullback.lift_snd]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(T-OM-B9 core)** Transporting an atlas chart along the inversion square compares
 to its plain restriction by exactly the negation variable change — KM 4.6.2's `{±1}`:
 `[-1]^* ω = −ω` chartwise (through `negModelHom_eq_negVC`). -/

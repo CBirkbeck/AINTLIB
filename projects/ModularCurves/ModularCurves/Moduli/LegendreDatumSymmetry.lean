@@ -30,7 +30,6 @@ namespace ModularCurves
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([T-E14-ACT'] the `{±1}`-flip of a Legendre datum)** A Legendre datum for
 `(L, b)` is one for `(L, (-1) • b)`: twist each witness chart by the scaling variable
 change `⟨-1, 0, 0, 0⟩`. -/
@@ -118,7 +117,6 @@ theorem IsLegendreDatum.smul_of_sq_eq_one {R : CommRingCat.{u}} {X : EllObj R}
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([T-E14-ACT'] uniqueness up to `±`: the `μ₂`-torsor pinning)** Two Legendre data
 for the same level structure compare by a global unit `g` (the `ω`-pseudotorsor) with
 `g² = 1`: locally, the `g`-twisted second witness is adapted to the first basis, the
