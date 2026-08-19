@@ -1536,7 +1536,6 @@ private theorem coUnitDatum_span_le_ker
       ⟨b, Submonoid.mem_powers b⟩).trans (map_one _)
   rw [hmul, sub_self]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- `⊆` of (8.2.1)-plus — the completion comparison. The quotient
@@ -1684,7 +1683,6 @@ private theorem unitDatum_ker_le_span
   simp only [Function.comp_apply, hh', map_zero] at hfun
   exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- `⊆` of (8.2.1)-minus — the completion comparison, mirror of
@@ -1962,7 +1960,6 @@ private theorem coUnitDatum_quotEquiv_canonicalMap
   rw [h1, h2]
   erw [Ideal.quotEquivOfEq_mk]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **General `ker ≤ aI` for the Example-6.38 evaluation** (the parametric form of the
 completion comparison; see the section TODO). Inputs: `aI` closed, the denominator a
@@ -2326,7 +2323,6 @@ private noncomputable def bivariateSpan_equiv_B₁₂gen (b : A) :
         (Ideal.span {algebraMap A ↥(TateAlgebra₂ A) b - TateAlgebra₂.X})).symm.trans
       (Ideal.quotEquivOfEq (map_span_bSubX_eq_laurentFSubZeta b)))
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Fully parametric backward engine** (membership-based; generalizes
 `datum_ker_le_span_of_unit_mod` to an arbitrary `m`-variable evaluation `Φ`, e.g. the
@@ -2468,7 +2464,6 @@ private theorem tate_ker_le_of_backward
   simp only [Function.comp_apply, hh2, map_zero] at hfun
   exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Backward-data export variant of `tate_ker_le_of_backward`** (same hypotheses and
 body): returns the backward extension `β` and the localization lift `ψ'` with the
@@ -2610,7 +2605,6 @@ private theorem tate_backward_exists
     exact RingHom.congr_fun hcomp p
   exact ⟨β, ψ, hβ_cont, hext, hβ_coe, hψ_alg⟩
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Surjectivity from the backward round-trip**: an evaluation `Φ` satisfying the
 backward-engine hypotheses *at its own kernel* is surjective. `kerLift Φ` is continuous
@@ -2818,7 +2812,6 @@ private theorem tate_quotPresentation_symm_mk
   simp only [RingEquiv.symm_trans_apply, RingEquiv.symm_symm]
   exact RingHom.quotientKerEquivOfSurjective_apply_mk _ z
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- The presentation equivalence sends `canonicalMap x` to the constant class
 `mk (algebraMap x)` (generic tracking; mirrors `datum_quotEquiv_taut_canonicalMap`). -/
@@ -2944,7 +2937,6 @@ private noncomputable def unitCover_overlapTuple
     (unitCover_overlapDatum_B D₀ f).coeRingHom
       (divByS (1 : presheafValue D₀) (unitCover_overlapDatum_B D₀ f).s)]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- Both annulus tuple entries are power-bounded (their `divByS` numerators lie in
 `T = {1, b, b²}`, so the elements lie in the ring of definition `locSubring`). -/
@@ -3029,7 +3021,6 @@ private theorem unitCover_overlapDatum_s [IsTateRing A] [IsNoetherianRing A]
   show (1 : presheafValue D₀) * D₀.canonicalMap f = D₀.canonicalMap f
   rw [one_mul]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- The annulus evaluation kills `b − X` (both map to `b`: `X ↦ b²/s_O = b`). -/
 private theorem unitCover_overlapEval_gen1 [IsTateRing A] [IsNoetherianRing A]
@@ -3082,7 +3073,6 @@ private theorem unitCover_overlapEval_gen1 [IsTateRing A] [IsNoetherianRing A]
     ring
   rw [hdiv, sub_self, map_zero]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- The annulus evaluation kills `1 − b·Y` (`Y ↦ 1/s_O = 1/b`, and `b·(1/b) = 1`). -/
 private theorem unitCover_overlapEval_gen2 [IsTateRing A] [IsNoetherianRing A]
@@ -3210,7 +3200,6 @@ private theorem unitCover_overlapIdeal_rel [IsTateRing A] [IsNoetherianRing A]
     rw [hfac]
     exact Ideal.mul_mem_left _ _ hgen₁
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **The Example-6.38 half of the overlap bridge**: `O_X^B(annulus) ≃+*
 B⟨X,Y⟩/(b − X, 1 − bY)`, by `tate_quotPresentation` at the bivariate annulus
@@ -3309,7 +3298,6 @@ private noncomputable def unitCover_overlapQuotEquiv
       rw [← hXzeta]
       exact (unitCover_overlapIdeal_rel D₀ f).2.2
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- The overlap presentation sends `canonicalMap x` to the constant class
 `mk (algebraMap x)` (instance of `tate_quotPresentation_canonicalMap`, by
@@ -3455,7 +3443,6 @@ private theorem unitCover_relPlus_forwardLocHom_algebraMap
 --     and discharge `unitCover_relativePlus`; `_restrictionMap`-tracking follows from
 --     (7)'s base-hom being literally the restriction.
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-plus per-generator witnesses (piece 4)**: every `t ∈ T_inter` has a
 `locSubring`-witness `y` over the B-datum with `F (divByS t s_inter) = coeRingHom_B y`.
@@ -3576,7 +3563,6 @@ private theorem unitCover_relPlus_forward_witness
     rw [e1, hps p, map_mul, map_mul]
     ring
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-plus forward continuity (piece 5)**: the completed forward composite
 is continuous for the A-side localization topology (`locTopology_continuous_lift`,
@@ -3747,7 +3733,6 @@ private theorem unitCover_relPlus_sf_mem_T_inter
   refine Finset.mem_image.mpr ⟨(D₀.s, f), Finset.mem_product.mpr
     ⟨Finset.mem_insert_self _ _, Finset.mem_insert_of_mem (Finset.mem_singleton_self _)⟩, rfl⟩
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-plus backward continuity (piece 7e)**: the backward loc-hom is continuous
 for the B-side localization topology (`locTopology_continuous_lift`; the sole generator
@@ -3935,7 +3920,6 @@ private theorem unitCover_relPlus_locRoundtrip2
     unitCover_relPlus_forwardLocHom_algebraMap]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Roundtrip 1 (piece 8e)**: `backward ∘ forward = id` on `O_X(U₁)`
 (continuous extensions agreeing on the dense algebraic side). -/
@@ -3976,7 +3960,6 @@ private theorem unitCover_relPlus_backward_forward
   rw [unitCover_relPlus_forward_coe, unitCover_relPlus_backward_coe]
   exact RingHom.congr_fun (unitCover_relPlus_locRoundtrip1 D₀ f) a
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Forward-restriction intertwining (piece 8f)**: `forward (restriction x) =
 canMap_B x` — the relative identification sends the restriction of `x ∈ O_X(D₀)` to its
@@ -4029,7 +4012,6 @@ private theorem unitCover_relPlus_forward_restriction
   rw [unitCover_relPlus_forward_coe]
   exact congrArg _ (RingHom.congr_fun (unitCover_relPlus_locRoundtrip2 D₀ f) z)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Roundtrip 2 (piece 8g)**: `forward ∘ backward = id` on `O_X^B(R(b/1))`. -/
 private theorem unitCover_relPlus_forward_backward
@@ -4139,7 +4121,6 @@ private theorem unitCover_relMinus_forwardLocHom_algebraMap
   rw [unitCover_relMinus_forwardLocHom, IsLocalization.Away.lift_eq]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-minus per-generator witnesses (M4)**: every `t ∈ T_inter` (a product `p·1`,
 `p ∈ insert D₀.s D₀.T`) has a `locSubring`-witness over the B-side minus datum:
@@ -4274,7 +4255,6 @@ private theorem unitCover_relMinus_forward_witness
           (DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
             DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s)) := by ring
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-minus forward continuity (M5)**. -/
 private theorem unitCover_relMinus_forwardCompletion_continuous
@@ -4455,7 +4435,6 @@ private theorem unitCover_relMinus_s1_mem_T_inter
   refine Finset.mem_image.mpr ⟨(D₀.s, 1), Finset.mem_product.mpr
     ⟨Finset.mem_insert_self _ _, Finset.mem_insert_of_mem (Finset.mem_singleton_self _)⟩, rfl⟩
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-minus backward continuity (M7e)**: the sole generator `1/b` lands on the
 ring-of-definition element `(D₀.s·1)/s_inter`. -/
@@ -4657,7 +4636,6 @@ private theorem unitCover_relMinus_locRoundtrip2
     unitCover_relMinus_forwardLocHom_algebraMap]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Minus roundtrip 1 (M8e)**: `backward ∘ forward = id` on `O_X(U₂)`. -/
 private theorem unitCover_relMinus_backward_forward
@@ -4697,7 +4675,6 @@ private theorem unitCover_relMinus_backward_forward
   rw [unitCover_relMinus_forward_coe, unitCover_relMinus_backward_coe]
   exact RingHom.congr_fun (unitCover_relMinus_locRoundtrip1 D₀ f) a
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Minus forward-restriction intertwining (M8f)**. -/
 private theorem unitCover_relMinus_forward_restriction
@@ -4748,7 +4725,6 @@ private theorem unitCover_relMinus_forward_restriction
   rw [unitCover_relMinus_forward_coe]
   exact congrArg _ (RingHom.congr_fun (unitCover_relMinus_locRoundtrip2 D₀ f) z)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Minus roundtrip 2 (M8g)**: `forward ∘ backward = id` on `O_X^B(R(1/b))`. -/
 private theorem unitCover_relMinus_forward_backward
@@ -4928,7 +4904,6 @@ private theorem coe_divByS_mem_concretePair_A₀
       divByS_mem_locSubring D₀.P D₀.T D₀.s hp'⟩, rfl⟩
 
 open Classical in
-set_option maxHeartbeats 800000 in
 set_option linter.unusedSectionVars false in
 /-- **Classification of the first (`R(f/1)`-side) annulus factor.** Every generator `p`
 of `R(insert f D₀.T / D₀.s)` (= `insert (s·1) (interSamePair (unitDatum f)).T`) has
@@ -4961,7 +4936,6 @@ private theorem coe_divByS_unitInter_classification
       rfl
 
 open Classical in
-set_option maxHeartbeats 800000 in
 set_option linter.unusedSectionVars false in
 /-- **Classification of the second (`R(1/f)`-side) annulus factor.** Every generator `q`
 of the co-unit half (= `insert (s·f) (interSamePair (coUnitDatum f)).T`) has
@@ -4995,7 +4969,6 @@ private theorem coe_divByS_coUnitInter_classification
       rw [Finset.mem_singleton.mp h1, divByS_mul_eq_mul_algebraMap D₀ p' 1,
         map_mul, map_one, map_one, mul_one]
 
-set_option maxHeartbeats 800000 in
 set_option linter.unusedSectionVars false in
 /-- **B-side inverse of `b = canMap f` (O4-`K=0`)**: `canMap_B (canMap f) · coe (1/s_B) = 1`,
 i.e. `1/b` is the witness fraction inverting the B-annulus parameter `b`. -/
@@ -5026,7 +4999,6 @@ private theorem unitCover_overlapDatum_B_aMb_mul_coe_divByS_one
     rw [map_mul]; rfl]
   rw [h8, map_one, map_one]
 
-set_option maxHeartbeats 800000 in
 set_option linter.unusedSectionVars false in
 /-- **B-side image of `b²/s_B` (O4-`K=2`)**: `coe (b²/s_B) = canMap_B (canMap f)`, the
 witness fraction realising `b` itself in the B-annulus. -/
@@ -5061,7 +5033,6 @@ private theorem unitCover_overlapDatum_B_coe_divByS_bb
   rw [h9, map_mul, map_mul]
   rfl
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **Witness assembly from the two factor classifications (O4 core).** Given a product
 generator `p·q` whose factors classify as `coe (p/s) = c_p·bᵏᵖ`, `coe (q/s) = c_q·bᵏᵠ`
@@ -5212,7 +5183,6 @@ private theorem unitCover_relOverlap_forward_witness_assemble
     rw [haMbb, map_mul (OD.canonicalMap), map_mul (OD.canonicalMap)]
     ring
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-overlap per-generator witnesses (O4)**: every `t ∈ T_inter` (a product
 `p·q` over the two factor-data) has a `locSubring`-witness over the B-side annulus datum.
@@ -5248,7 +5218,6 @@ private theorem unitCover_relOverlap_forward_witness
   rw [show (((p, q).1 : A) * (p, q).2 : A) = p * q from rfl]
   exact unitCover_relOverlap_forward_witness_assemble D₀ f p q hc_p hc_q hcase_p hcase_q
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-overlap forward continuity (O5)**. -/
 private theorem unitCover_relOverlap_forwardCompletion_continuous
@@ -5439,7 +5408,6 @@ private theorem unitCover_relOverlap_sfsf_mem
   exact Finset.mem_image.mpr ⟨(D₀.s, f), Finset.mem_product.mpr
     ⟨Finset.mem_insert_self _ _, Finset.mem_insert_of_mem (Finset.mem_singleton_self _)⟩, rfl⟩
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **The two annulus generator identities in `O_X(U₁∩U₂)` (O7d)**:
 `canMap f · ((s·1)²/s_DII) = 1` and `((s·f)²/s_DII) = canMap f`. -/
@@ -5511,7 +5479,6 @@ private theorem unitCover_relOverlap_gen_identities
     refine u_f.mul_left_cancel ?_
     linear_combination h1
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-overlap backward continuity (O7e)**: the three annulus generators
 `{1, b, b²}` land on `((s·1)²/s_DII)`, `1`, `((s·f)²/s_DII)` respectively. -/
@@ -5773,7 +5740,6 @@ private theorem unitCover_relOverlap_locRoundtrip2
     unitCover_relOverlap_forwardLocHom_algebraMap]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Overlap roundtrip 1 (O8e)**: `backward ∘ forward = id` on `O_X(U₁∩U₂)`. -/
 private theorem unitCover_relOverlap_backward_forward
@@ -5824,7 +5790,6 @@ private theorem unitCover_relOverlap_backward_forward
   rw [unitCover_relOverlap_forward_coe, unitCover_relOverlap_backward_coe]
   exact RingHom.congr_fun (unitCover_relOverlap_locRoundtrip1 D₀ f) a
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Overlap forward-restriction intertwining (O8f)**. -/
 private theorem unitCover_relOverlap_forward_restriction
@@ -5885,7 +5850,6 @@ private theorem unitCover_relOverlap_forward_restriction
   rw [unitCover_relOverlap_forward_coe]
   exact congrArg _ (RingHom.congr_fun (unitCover_relOverlap_locRoundtrip2 D₀ f) z)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Overlap roundtrip 2 (O8g)**: `forward ∘ backward = id` on `O_X^B(annulus)`. -/
 private theorem unitCover_relOverlap_forward_backward
@@ -6490,7 +6454,6 @@ private theorem unitCover_example639Minus_symm_continuous
     exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T _ h1T
   exact tateQuotientToPresheafHom_continuous_of_tate (unitCover_minusDatum_B D₀ f) hb
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- S6: the overlap presentation's inverse on `mk`-classes is the bivariate evaluation
 (instance of `tate_quotPresentation_symm_mk` by unification against the definition). -/
@@ -6598,7 +6561,6 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
         exact (unitCover_overlapIdeal_rel D₀ f).2.2)
     z
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- S7: the overlap presentation's inverse is continuous (quotient universal property:
 `symm ∘ mk = overlapEval` is continuous). -/
@@ -6643,7 +6605,6 @@ private theorem unitCover_overlapQuotEquiv_symm_continuous
   rw [hfun]
   exact mvEvalHomBounded_continuous _ _ _ _
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **SQ1 (plus, dense side)**: precomposed with `mk : B⟨X⟩ → B₁_gen b`, the two
@@ -6969,7 +6930,6 @@ private theorem unitCover_negIncl_X {B : Type*} [CommRing B] [TopologicalSpace B
   · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
     intro h2; exact he (by rw [h2]; simp [Finsupp.single_eq_same])
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **SQ1 (minus, dense side)**: precomposed with `mk : B⟨X⟩ → B₂_gen b`, the two
@@ -9308,7 +9268,6 @@ theorem imageGenCover_isRational
     exact RationalLocData.isRational_of_span_eq_top
       (by rw [genPieceDatum_T]; exact imageGenCover_span D₀ T hspan)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G2′: the B-level image cover is generated by the image of `T`. -/
 theorem imageGenCover_isGeneratedBy
@@ -9363,7 +9322,6 @@ private theorem globalCollapseLocHom_algebraMap (P : PairOfDefinition A) (a : A)
   rw [globalCollapseLocHom, IsLocalization.Away.lift_eq]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3a-2: the collapse is continuous for the global localization topology. -/
 private theorem globalCollapseLocHom_continuous
@@ -9453,7 +9411,6 @@ private theorem globalSections_backward_canonicalMap
     (algebraMap A (Localization.Away ((globalLocData P).s)) a) from rfl]
   rw [globalSections_backward_coe, globalCollapseLocHom_algebraMap]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3a-5: `canonicalMap ∘ backward = id` (the completion roundtrip). -/
 private theorem globalSections_canonicalMap_backward
@@ -9537,7 +9494,6 @@ private theorem imagePieceDatum_eq_genPieceDatum
         (D₀.canonicalMap t) (imageGenCover_span D₀ T hspan) :=
   rfl
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **G3c-separation**: the separation half of the A-level restricted cover transports
 from the B-level image cover (via `globalSections_equiv` + the G1-trackings +
@@ -9716,7 +9672,6 @@ private theorem genPiece_relOverlap_forwardLocHom_algebraMap
   rw [genPiece_relOverlap_forwardLocHom, IsLocalization.Away.lift_eq]
   rfl
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-4: the 3-layer per-generator witnesses for the double-intersection. -/
 private theorem genPiece_relOverlap_forward_witness
@@ -9887,7 +9842,6 @@ private theorem genPiece_relOverlap_forward_witness
           EII.coeRingHom (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s)) := by
         ring
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-5: forward continuity. -/
 private theorem genPiece_relOverlap_forwardCompletion_continuous
@@ -10029,7 +9983,6 @@ private theorem genPiece_relOverlap_forward_coe
         hspan t₁ t₂))
     (genPiece_relOverlap_forwardCompletion_continuous D₀ T hspan t₁ t₂) y
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-7a: backward base unit. -/
 private theorem genPiece_relOverlap_backward_baseHom_isUnit
@@ -10116,7 +10069,6 @@ private theorem genPiece_relOverlap_backwardLocHom_algebraMap
           (RationalLocData.interSamePair_subset_left _ _ _)) x := by
   rw [genPiece_relOverlap_backwardLocHom, IsLocalization.Away.lift_eq]
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-7e: backward continuity (each `T_EII`-generator lands on the A-side
 ring-of-definition element `((D₀.s·q′)·q)/s_DII`). -/
@@ -10329,7 +10281,6 @@ private theorem genPiece_relOverlap_backward_coe
     (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂)
     (genPiece_relOverlap_backwardLocHom_continuous D₀ T hspan t₁ t₂) y
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-8c: loc-level roundtrip 1. -/
 private theorem genPiece_relOverlap_locRoundtrip1
@@ -10364,7 +10315,6 @@ private theorem genPiece_relOverlap_locRoundtrip1
     genPiece_relOverlap_backwardLocHom_algebraMap, restrictionMapHom_canonicalMap]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-8e: `backward ∘ forward = id`. -/
 private theorem genPiece_relOverlap_backward_forward
@@ -10434,7 +10384,6 @@ private theorem genPiece_relOverlap_backward_forward
   rw [genPiece_relOverlap_forward_coe, genPiece_relOverlap_backward_coe]
   exact RingHom.congr_fun (genPiece_relOverlap_locRoundtrip1 D₀ T hspan t₁ t₂) a
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-8f: forward-restriction intertwining. -/
 private theorem genPiece_relOverlap_forward_restriction
@@ -10575,7 +10524,6 @@ private theorem genPiece_relOverlap_forward_restriction
   rw [genPiece_relOverlap_forward_coe]
   exact congrArg _ (RingHom.congr_fun hRT2 z)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-8g: `forward ∘ backward = id`. -/
 private theorem genPiece_relOverlap_forward_backward
@@ -11070,7 +11018,6 @@ private theorem genPiece_relative_overlap_square₂
       exact hcomp a
     exact RingHom.congr_fun hhom y
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **G3c-W′ (pairwise transport, restriction form)**: for any two generators, the
 transported piece-sections agree after restriction into the B-side double piece,
@@ -11171,7 +11118,6 @@ private theorem imageGenCover_piece_exists_gen
   obtain ⟨t, ht, rfl⟩ := hu
   exact ⟨t, ht, rfl⟩
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **G3c-gluing, B-compatibility step**: for `t₁ t₂ ∈ T`, the transported image-piece
@@ -11248,7 +11194,6 @@ private theorem genPiece_imageFamily_pair_restr
   congr 1
   exact genPiece_family_pair_compat D₀ T hspan t₁ t₂ g₁ g₂ hcompat
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **G3c-gluing (assembly)**: given the B-side gluing of the image cover, every
@@ -11463,7 +11408,6 @@ theorem genRestrictedCover_gluing
         (f (tof Et) (htof_mem Et))) from
     hg_restr Et _ hro_eq.symm.le)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **G4: the bundled acyclicity transport (T-R2-ACYCLIC-TRANSPORT)**: if the B-level
 image cover of `Spa 𝒪_X(D₀)` is `O_X`-acyclic, so is the A-level restricted cover
@@ -12117,7 +12061,6 @@ theorem isOXAcyclic_of_empty_complement
         (hplus_empty D.1 D.2 hD') (hempty D.1 D.2 hD')
       exact Subsingleton.elim _ _
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **The B-level image cover of a unit-image generating set is `O_X`-acyclic**
 (Wedhorn p. 84, parts (ii)→(iii) composed AT `B := 𝒪_X(D₀)`): when every
@@ -13696,7 +13639,6 @@ sheafy. **No per-cover hypothesis leak** — the hypothesis bundle is
 exactly what Wedhorn states.
 -/
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- The R2 image cover is `O_X`-acyclic: it is a whole-space rational covering of
 `Spa B` for the complete strongly noetherian Tate ring `B := 𝒪_X(C.base)`, so the
@@ -13759,7 +13701,6 @@ private theorem restrictionMap_eqRec {B : Type*} [CommRing B] [TopologicalSpace 
       restrictionMap X G (by rw [h]; exact hG) v := by
   cases h; rfl
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **Keystone compatibility on overlaps** (Wedhorn Prop 8.16 + Prop 7.31(2)):
@@ -13876,7 +13817,6 @@ private theorem imageCover_keystone_compat [DecidableEq A]
       hD₁₂_sub₂ ((hC.piece D₂.2).span_eq_top) hspanD₁₂ (f D₂),
     hcompat D₁ D₂ D₁₂ hD₁₂_sub₁ hD₁₂_sub₂]
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **The R2 gluing transport** (Wedhorn Prop 8.2 + 8.16): a compatible family on
 a Def-7.29 rational covering `C` glues, given gluing for the `B`-side image cover.
@@ -14002,7 +13942,6 @@ theorem imageCover_gluing_transport [DecidableEq A]
         ((hC.piece (ψ ⟨_, hmemD⟩).2).span_eq_top))
       hopen_eq.le (le_refl _)).symm
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Wedhorn's main intermediate, general base** (Wedhorn p. 83): every
 rational covering (Definition 7.29) of every rational subset is `O_X`-acyclic.
