@@ -102,7 +102,6 @@ def universalLegendreOmega (hR : IsUnit (2 : R)) :
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-AX1 stage 3 ★)** The tautological presentation marks the affine-point
 section at the (mapped) point: the universal marking. Mirrors `tautPresentation`'s
 `compat_zero` with `projModelAffineSection_baseChange` in place of
@@ -186,7 +185,6 @@ theorem tautPresentation_isAdapted_legendre (hR : IsUnit (2 : R)) :
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-AX1 stage 4 ★)** The universal Legendre datum: given the naive-full-level
 clause for the marked pair (2-torsionness + geometric generation — ticket [T-E14-LVL],
 the leaf-(a) `E[2]`-classification input), the tautologically marked pair with the
@@ -562,7 +560,6 @@ theorem projModelAffineSection_congr {A : Type u} [CommRing A]
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-1 ★★, KM 4.6.2 uniqueness)** Marked adapted Legendre witnesses are
 UNIQUE: two `b`-adapted presentations over the same affine whose chart curves are
 Legendre and which mark the same section at `x = 0` have comparison `1` and equal
@@ -633,7 +630,6 @@ theorem restrict_W_legendre {S : Scheme.{u}} {G : EllipticCurveGeom S}
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-2 ★)** Witness `λ`-values agree on common affines: restrict both
 witnesses and apply the KM 4.6.2 uniqueness. -/
 theorem legendre_witness_lam_agree {R : CommRingCat.{u}} {X : EllObj R}
@@ -658,7 +654,6 @@ theorem legendre_witness_lam_agree {R : CommRingCat.{u}} {X : EllObj R}
 
 open LocalPresentation WeierstrassCurve TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E14-CLS-2 ★★)** The **glued Legendre parameter** of a Legendre datum: the
 witness `λ`'s glue to a global section restricting to EVERY witness's parameter
 (mirrors `adaptedCoeff₄`; agreement = `legendre_witness_lam_agree`). This is KM
@@ -724,7 +719,6 @@ noncomputable def legendreLambda {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-3 ★)** The glued parameter satisfies the moduli condition:
 `λ(λ−1)` is a global unit — chartwise it is the witness's `lam(lam−1)`, a unit by
 ellipticity of the witness chart curve (mirrors `adaptedDelta_isUnit`). -/
@@ -807,7 +801,6 @@ theorem legendreClassifyingRingHom_algebraMap {R : CommRingCat.{u}} (X : EllObj 
 
 open LocalPresentation MvPolynomial in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-4 ★)** The per-witness coefficient match: specializing the universal
 Legendre curve along the classifying map, restricted to a witness affine, recovers
 exactly the witness chart curve (mirrors `universalShortNF_map_classifying`; the
@@ -988,7 +981,6 @@ open CategoryTheory Limits in
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-5, ≈E3c)** The piece map is witness-independent at a fixed affine
 (uniqueness of marked adapted Legendre witnesses). -/
 theorem legendrePiece_congr {R : CommRingCat.{u}} {X : EllObj R}
@@ -1020,7 +1012,6 @@ theorem legendrePiece_congr {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 private theorem legendrePiece_agree {R : CommRingCat.{u}} {X : EllObj R}
     {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
     (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
@@ -1176,7 +1167,6 @@ theorem legendreTop_piece {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 /-- **(T-E14-CLS-6, ≈E2-π)** The piece map lies over the restricted classifying map
 (mirrors `chartPiece_π`). -/
 theorem legendrePiece_π {R : CommRingCat.{u}} {X : EllObj R}
@@ -1210,7 +1200,6 @@ theorem legendrePiece_π {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-6, ≈E4-π ★)** The glued comparison lies over the classifying map
 (mirrors `classifyingTop_π_w`). -/
 theorem legendreTop_π_w {R : CommRingCat.{u}} {X : EllObj R}
@@ -1329,7 +1318,6 @@ theorem legendreTop_zero {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-6, ≈E4)** The classifying map lies over `Spec R` (mirrors
 `classifyingMap_structMap`). -/
 theorem legendreClassifyingMap_structMap {R : CommRingCat.{u}} {X : EllObj R}
@@ -1378,7 +1366,6 @@ theorem restrict_legendreClassifyingMap {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-6, ≈E4)** The per-witness classifying square is cartesian (mirrors
 `chartPiece_isPullback`). -/
 theorem legendrePiece_isPullback {R : CommRingCat.{u}} {X : EllObj R}
@@ -1433,7 +1420,6 @@ theorem legendrePiece_isPullback {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E14-CLS-6 ★★, ≈E4)** The classifying square is cartesian: `X` is the
 pullback of the universal Legendre curve along the classifying map (mirrors
 `isPullback_classifyingTop`). -/
@@ -1500,7 +1486,6 @@ noncomputable def legendreClassifyingEllHom {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-7, rt1-level ★)** The marking downstairs: a marked section composed
 with the glued comparison is the classifying map followed by the universal marked
 section. Per witness affine: the section factors through the piece, the marking reads
@@ -1575,7 +1560,6 @@ theorem section_comp_legendreTop {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-7, rt1-level ★★)** Pulling the universal marked `P` back along the
 classifying morphism recovers the given `P`. -/
 theorem pullSection_legendreClassifyingEllHom_P {R : CommRingCat.{u}} {X : EllObj R}
@@ -1612,7 +1596,6 @@ theorem pullSection_legendreClassifyingEllHom_P {R : CommRingCat.{u}} {X : EllOb
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-7, rt1-level ★★)** Pulling the universal marked `Q` back along the
 classifying morphism recovers the given `Q`. -/
 theorem pullSection_legendreClassifyingEllHom_Q {R : CommRingCat.{u}} {X : EllObj R}
@@ -1876,7 +1859,6 @@ theorem transVC_transport_legendre {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E14-CLS-7 rt1 ★★)** Roundtrip, `ω`-half: pulling the universal Legendre
 `ω`-basis back along the classifying morphism recovers the given basis. The ratio
 unit reads as the witness-vs-transported-taut transition unit, which is `1` by the
@@ -1987,7 +1969,6 @@ variable {R : CommRingCat.{u}} {X : EllObj R} {hR : IsUnit (2 : R)}
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E14-CLS-8 rt2 ★)** The transported tautological witness of the pulled datum:
 for ANY `Ell/R`-morphism `φ` to the universal Legendre object (with the universal
 level clause `hL`), the transported taut chart over any affine is a Legendre witness
@@ -2054,7 +2035,6 @@ noncomputable def pulledWitness (φ : X ⟶ universalLegendreObj R hR)
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E14-CLS-8 rt2a ★)** The classifying algebra of the pulled datum is the
 algebra of `φ` itself (mirrors `classifyingRingHom_omegaBasisMap`): `C`-scalars via
 `base_w`, and the `λ`-generator via the pulled-witness family + `legendreLambda`'s
@@ -2191,7 +2171,6 @@ theorem legendreClassifyingMap_pulled (φ : X ⟶ universalLegendreObj R hR)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(T-E14-CLS-8 rt2b ★★)** Top determination: the glued classifying comparison of
 the pulled datum IS `φ`'s total-space morphism (mirrors `classifyingTop_omegaBasisMap`;
 `legendrePiece_congr` at the pulled witness replaces the e-determination step). -/
@@ -2335,7 +2314,6 @@ theorem EllObj.isUnit_two {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-AX1 ★★★, KM 4.6.2's engine axiom 1, conditional form)** GIVEN the
 naive-full-level clause for the universal marked pair (ticket [T-E14-LVL-b]: the
 geometric `E[2]`-generation, deferred to the KM keystone), the Legendre `δ` is
