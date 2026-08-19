@@ -344,17 +344,15 @@ theorem isDiscreteValuationRing_atPrime_of_polynomialX_not_mem
   exact IsDiscreteValuationRing.atPrime_of_comap_ringEquiv
     (xAdjoinRootEquiv W).toRingEquiv P hP0
 
-theorem isDedekindDomainDvr : IsDedekindDomainDvr W.CoordinateRing := by
+-- mathlib dropped the `IsDedekindDomainDvr` class; the DVR-at-every-nonzero-prime
+-- characterisation is now `isDedekindDomain_iff_isDiscreteValuationRing_atPrime`.
+theorem isDedekindDomain : IsDedekindDomain W.CoordinateRing := by
   letI : IsNoetherianRing W.CoordinateRing := IsNoetherianRing.of_finite k[X] _
-  refine { is_dvr_at_nonzero_prime := ?_ }
+  refine isDedekindDomain_iff_isDiscreteValuationRing_atPrime.mpr ⟨inferInstance, ?_⟩
   intro P hP0 hPprime
   rcases coordinate_derivatives_not_both_mem W P with hX | hY
   · exact isDiscreteValuationRing_atPrime_of_polynomialX_not_mem W P hP0 hX
   · exact isDiscreteValuationRing_atPrime_of_polynomialY_not_mem W P hP0 hY
-
-theorem isDedekindDomain : IsDedekindDomain W.CoordinateRing := by
-  letI := isDedekindDomainDvr W
-  infer_instance
 
 noncomputable instance instIsDedekindDomainCoordinateRing :
     IsDedekindDomain W.CoordinateRing := isDedekindDomain W
