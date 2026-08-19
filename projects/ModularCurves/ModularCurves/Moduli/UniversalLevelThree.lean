@@ -366,7 +366,6 @@ def universalE3Q : (universalE3Obj R).curve.Section :=
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([T-E15-NORM] the killing engine ★★)** Over a reduced universal base, a marked
 affine-point section of the universal `ℰ₃` curve whose evaluation at every field point
 is `3`-torsion (in mathlib's affine point group) is killed by `3` at the section level:
@@ -673,7 +672,6 @@ theorem isE3Chart {S : Scheme.{u}} {G : EllipticCurveGeom S} {V : S.affineOpens}
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 4, the ring-level uniqueness certificate ★★)** A variable change
 between marked `ℰ₃`-forms is trivial and identifies the parameters: given `r = t = 0`
 (from the `P`-marking) and the `Q`-marking coordinate identities, the `a₁/a₄`-
@@ -808,7 +806,6 @@ theorem three_zsmul_universalE3P
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 /-- **([T-E15-NORM] hL-killing, `Q` ★★)** The universal marked `Q = (γ, β+γ)` is killed
 by `3`: the Stage-A doubling (`slope = den/den = 1`) with the `den`-unit certificate
 `isUnit_e3Den` supplying the nowhere-`2`-torsion input. -/
@@ -919,7 +916,6 @@ theorem section_killing_congr {A : Type u} [CommRing A] {W₁ W₂ : Weierstrass
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(Stage D instantiation ★★)** Transport of a marked-section killing from `ℤ[1/3]`'s
 universal base to `R`'s along the classifying map: the D-1 functoriality identifies the
 mapped universal curve with `R`'s, and the Stage-D transport
@@ -967,7 +963,6 @@ theorem three_zsmul_section_map (R₀ R : CommRingCat.{u}) (f : R₀ ⟶ R)
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([T-E15-NORM] hL-killing unconditional, `P` ★★★)** `[3]P = 0` on the universal
 `ℰ₃` over ANY coefficient ring with `3` invertible — Stage D transports the `ℤ[1/3]`
 (UFD ⟹ reduced-base) killing along the classifying map. -/
@@ -987,7 +982,6 @@ theorem three_zsmul_universalE3P_of_isUnit (R : CommRingCat.{u})
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([T-E15-NORM] hL-killing unconditional, `Q` ★★★)** `[3]Q = 0` on the universal
 `ℰ₃` over ANY coefficient ring with `3` invertible — Stage D transports the `ℤ[1/3]`
 killing along the classifying map (`γ`, `β` are functorial by D-1). -/
@@ -1009,7 +1003,6 @@ theorem three_zsmul_universalE3Q_of_isUnit (R : CommRingCat.{u})
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([T-E15-NORM] hL-generation ★★)** At every geometric point of the universal base,
 the pulled marked pair `(P̄, Q̄)` generates the `3`-torsion of the point group: KM's
 `torsion_geometricFibre_rank_two` supplies `#T₃ = 9`, the Stage-B dictionary evaluates the
@@ -1187,7 +1180,6 @@ theorem universalE3_generation (hR : IsUnit (3 : R)) (k : Type u) [Field k]
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([T-E14-LVL-b] E[2]-generation ★★)** At every geometric point of the Legendre
 base, the pulled marked pair `(P̄, Q̄) = (some(0,0), some(1,0))` generates the
 `2`-torsion of the point group: KM's `torsion_geometricFibre_rank_two` supplies
@@ -1326,7 +1318,6 @@ theorem e3form_flex {A : Type u} [CommRing A] {W : WeierstrassCurve A} {β γ : 
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 /-- **(T-E15a stage 5)** The marking chase: a section marked at `(p₁,q₁)` on `Pr` and
 `(p₂,q₂)` on `Qr` gives the variable-change coordinate identities for `Pr.transVC Qr`. -/
 theorem e3_markChase {S : Scheme.{u}} {G : EllipticCurveGeom S} {V : S.affineOpens}
@@ -1355,7 +1346,6 @@ theorem e3_markChase {S : Scheme.{u}} {G : EllipticCurveGeom S} {V : S.affineOpe
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 5 ★★)** KM Ex. 2.2.2 uniqueness at the presentation level: two
 `E3`-form witnesses marking the same `P` at `(0,0)` and `Q` at `(γᵢ, βᵢ+γᵢ)` have
 `transVC = 1` and equal parameters. -/
@@ -1521,7 +1511,6 @@ theorem IsE3Datum.map {R : CommRingCat.{u}} {X' X : EllObj R} (φ : X' ⟶ X)
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 6 ★)** Witness `(β,γ)`-values agree on common affines: restrict
 both witnesses and apply the KM Ex. 2.2.2 uniqueness. -/
 theorem e3_witness_param_agree {R : CommRingCat.{u}} {X : EllObj R}
@@ -1548,7 +1537,6 @@ theorem e3_witness_param_agree {R : CommRingCat.{u}} {X : EllObj R}
 
 open LocalPresentation TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E15a stage 7)** The glued γ parameter of an `E3` datum. -/
 noncomputable def e3GammaGlued {R : CommRingCat.{u}} (X : EllObj R)
     (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
@@ -1609,7 +1597,6 @@ noncomputable def e3GammaGlued {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E15a stage 7)** The glued β parameter of an `E3` datum. -/
 noncomputable def e3BetaGlued {R : CommRingCat.{u}} (X : EllObj R)
     (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
@@ -1670,7 +1657,6 @@ noncomputable def e3BetaGlued {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 8)** The glued parameters satisfy the flex relation `β³=(β+γ)³`. -/
 theorem e3_glued_flex {R : CommRingCat.{u}} (X : EllObj R)
     (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
@@ -1695,7 +1681,6 @@ theorem e3_glued_flex {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation TopologicalSpace WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 8 ★)** The discriminant factor `(a₁³−27a₃)·a₃` at the glued
 parameters is a global unit (germwise: chartwise the witness discriminant, a unit by
 ellipticity). -/
@@ -1850,7 +1835,6 @@ theorem e3ClassifyingRingHom_beta {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation MvPolynomial WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 10 ★, the E1 coefficient match)** Specializing the universal `ℰ₃`
 curve along the classifying map, restricted to a witness affine, recovers the witness
 chart curve. -/
@@ -2023,7 +2007,6 @@ open CategoryTheory Limits in
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 10)** The piece is witness-independent at a fixed affine. -/
 theorem e3Piece_congr {R : CommRingCat.{u}} {X : EllObj R}
     {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L)
@@ -2053,7 +2036,6 @@ theorem e3Piece_congr {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 private theorem e3Piece_agree {R : CommRingCat.{u}} {X : EllObj R}
     {L : X.curve.FullLevelPt 3}
     (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤)))
@@ -2208,7 +2190,6 @@ theorem e3Top_piece {R : CommRingCat.{u}} {X : EllObj R}
   (e3WitnessCover hD).ι_glueMorphisms _ _ w
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 /-- **(T-E14-CLS-6, ≈E2-π)** The piece map lies over the restricted classifying map
 (mirrors `chartPiece_π`). -/
 theorem e3Piece_π {R : CommRingCat.{u}} {X : EllObj R}
@@ -2242,7 +2223,6 @@ theorem e3Piece_π {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-6, ≈E4-π ★)** The glued comparison lies over the classifying map
 (mirrors `classifyingTop_π_w`). -/
 theorem e3Top_π_w {R : CommRingCat.{u}} {X : EllObj R}
@@ -2361,7 +2341,6 @@ theorem e3Top_zero {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-6, ≈E4)** The classifying map lies over `Spec R` (mirrors
 `classifyingMap_structMap`). -/
 theorem e3ClassifyingMap_structMap {R : CommRingCat.{u}} {X : EllObj R}
@@ -2450,7 +2429,6 @@ theorem sectionsMapLE_e3ClassifyingMap {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-6, ≈E4)** The per-witness classifying square is cartesian (mirrors
 `chartPiece_isPullback`). -/
 theorem e3Piece_isPullback {R : CommRingCat.{u}} {X : EllObj R}
@@ -2505,7 +2483,6 @@ theorem e3Piece_isPullback {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E14-CLS-6 ★★, ≈E4)** The classifying square is cartesian: `X` is the
 pullback of the universal Legendre curve along the classifying map (mirrors
 `isPullback_classifyingTop`). -/
@@ -2571,7 +2548,6 @@ noncomputable def e3ClassifyingEllHom {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 11, rt1)** The marking downstairs: a marked section composed with
 the glued comparison is the classifying map followed by the universal marked point. -/
 theorem section_comp_e3Top {R : CommRingCat.{u}} {X : EllObj R}
@@ -2639,7 +2615,6 @@ theorem section_comp_e3Top {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 11, rt1 ★★)** Pulling the universal marked `P` back recovers `P`. -/
 theorem pullSection_e3ClassifyingEllHom_P {R : CommRingCat.{u}} {X : EllObj R}
     {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L)
@@ -2669,7 +2644,6 @@ theorem pullSection_e3ClassifyingEllHom_P {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 11, rt1 ★★)** Pulling the universal marked `Q` back recovers `Q`. -/
 theorem pullSection_e3ClassifyingEllHom_Q {R : CommRingCat.{u}} {X : EllObj R}
     {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L)
@@ -2780,7 +2754,6 @@ noncomputable def e3PulledWitness (V : X.base.affineOpens) :
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **([T-E15-NORM] rt2a ★)** The classifying ring map of the pulled datum is the ring map
 of `φ` itself. Adapts Legendre's `legendreClassifyingRingHom_pulled`: `R`-scalars via
 `base_w` (`hψR`), then the **two** generators `γ, β` via the pulled-witness family +
