@@ -1561,258 +1561,261 @@ noncomputable def omega3_witness_coeff_X6 (W : WeierstrassCurve K) : K :=
   W.a₁*W.a₂*W.a₆ + 2*W.a₁*W.a₄^2 +
   W.a₂^3*W.a₃ + 2*W.a₃^3
 
-set_option maxHeartbeats 2000000 in
+/-- Part 1 of `omega3_witness_coeff_X0`: split so each piece elaborates inside the
+default heartbeat budget — the whole 68-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X0_part1 (W : WeierstrassCurve K) : K :=
+  W.a₁^5*W.a₃^6*W.a₄*W.a₆^3 + W.a₁^5*W.a₄*W.a₆^6 + 2*W.a₁^4*W.a₂*W.a₃^9*W.a₆^2
+  + W.a₁^4*W.a₂*W.a₃^7*W.a₆^3 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^5 + W.a₁^4*W.a₂*W.a₃*W.a₆^6
+  + 2*W.a₁^3*W.a₂*W.a₃^10*W.a₄*W.a₆ + 2*W.a₁^3*W.a₂*W.a₃^6*W.a₄*W.a₆^3
+  + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆^4 + 2*W.a₁^3*W.a₂*W.a₄*W.a₆^6 + W.a₁^3*W.a₃^12*W.a₆
+  + W.a₁^3*W.a₃^6*W.a₄^3*W.a₆^2 + 2*W.a₁^3*W.a₃^6*W.a₆^4 + W.a₁^3*W.a₄^3*W.a₆^5 + W.a₁^3*W.a₆^7
+  + W.a₁^2*W.a₂^2*W.a₃^11*W.a₆ + 2*W.a₁^2*W.a₂^2*W.a₃^7*W.a₆^3
+
+/-- Part 2 of `omega3_witness_coeff_X0`: split so each piece elaborates inside the
+default heartbeat budget — the whole 68-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X0_part2 (W : WeierstrassCurve K) : K :=
+  W.a₁^2*W.a₂^2*W.a₃^5*W.a₆^4 + 2*W.a₁^2*W.a₂^2*W.a₃*W.a₆^6 + 2*W.a₁^2*W.a₂*W.a₃^11*W.a₄^2
+  + 2*W.a₁^2*W.a₂*W.a₃^9*W.a₄^2*W.a₆ + 2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^2*W.a₆^3
+  + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆^4 + 2*W.a₁^2*W.a₃^13*W.a₄ + 2*W.a₁^2*W.a₃^9*W.a₄^4
+  + W.a₁^2*W.a₃^7*W.a₄^4*W.a₆ + W.a₁^2*W.a₃^7*W.a₄*W.a₆^3 + 2*W.a₁^2*W.a₃^3*W.a₄^4*W.a₆^3
+  + W.a₁^2*W.a₃*W.a₄^4*W.a₆^4 + 2*W.a₁^2*W.a₃*W.a₄*W.a₆^6 + 2*W.a₁*W.a₂^2*W.a₃^12*W.a₄
+  + W.a₁*W.a₂^2*W.a₃^10*W.a₄*W.a₆ + W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆^4 + W.a₁*W.a₂^2*W.a₄*W.a₆^6
+
+/-- Part 3 of `omega3_witness_coeff_X0`: split so each piece elaborates inside the
+default heartbeat budget — the whole 68-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X0_part3 (W : WeierstrassCurve K) : K :=
+  W.a₁*W.a₂*W.a₃^14 + W.a₁*W.a₂*W.a₃^12*W.a₆ + 2*W.a₁*W.a₂*W.a₃^8*W.a₄^3*W.a₆
+  + 2*W.a₁*W.a₂*W.a₃^8*W.a₆^3 + W.a₁*W.a₂*W.a₃^6*W.a₄^3*W.a₆^2 + 2*W.a₁*W.a₂*W.a₃^6*W.a₆^4
+  + 2*W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆^4 + W.a₁*W.a₂*W.a₃^2*W.a₆^6 + W.a₁*W.a₂*W.a₄^3*W.a₆^5
+  + W.a₁*W.a₂*W.a₆^7 + 2*W.a₁*W.a₃^12*W.a₄^2 + W.a₁*W.a₃^8*W.a₄^5 + W.a₁*W.a₃^6*W.a₄^5*W.a₆
+  + W.a₁*W.a₃^6*W.a₄^2*W.a₆^3 + W.a₁*W.a₃^2*W.a₄^5*W.a₆^3 + W.a₁*W.a₄^5*W.a₆^4
+  + 2*W.a₁*W.a₄^2*W.a₆^6
+
+/-- Part 4 of `omega3_witness_coeff_X0`: split so each piece elaborates inside the
+default heartbeat budget — the whole 68-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X0_part4 (W : WeierstrassCurve K) : K :=
+  2*W.a₂^3*W.a₃^13 + 2*W.a₂^3*W.a₃^11*W.a₆ + W.a₂^3*W.a₃^9*W.a₆^2 + 2*W.a₂^3*W.a₃^5*W.a₆^4
+  + W.a₂^3*W.a₃^3*W.a₆^5 + W.a₂^3*W.a₃*W.a₆^6 + W.a₂^2*W.a₃^11*W.a₄^2 + W.a₂^2*W.a₃^9*W.a₄^2*W.a₆
+  + W.a₂^2*W.a₃^5*W.a₄^2*W.a₆^3 + W.a₂^2*W.a₃^3*W.a₄^2*W.a₆^4 + W.a₂*W.a₃^9*W.a₄^4
+  + W.a₂*W.a₃^3*W.a₄^4*W.a₆^3 + 2*W.a₃^15 + W.a₃^9*W.a₆^3 + 2*W.a₃^7*W.a₄^6 + 2*W.a₃^3*W.a₆^6
+  + 2*W.a₃*W.a₄^6*W.a₆^3
+
 /-- **Witness coefficient at X⁰** (constant term, q=3 char-3): ~70-term
-    polynomial. -/
+    polynomial, assembled from its parts. -/
 noncomputable def omega3_witness_coeff_X0 (W : WeierstrassCurve K) : K :=
-  W.a₁^5*W.a₃^6*W.a₄*W.a₆^3 + W.a₁^5*W.a₄*W.a₆^6 +
-  2*W.a₁^4*W.a₂*W.a₃^9*W.a₆^2 + W.a₁^4*W.a₂*W.a₃^7*W.a₆^3 +
-  2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^5 + W.a₁^4*W.a₂*W.a₃*W.a₆^6 +
-  2*W.a₁^3*W.a₂*W.a₃^10*W.a₄*W.a₆ + 2*W.a₁^3*W.a₂*W.a₃^6*W.a₄*W.a₆^3 +
-  2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆^4 + 2*W.a₁^3*W.a₂*W.a₄*W.a₆^6 +
-  W.a₁^3*W.a₃^12*W.a₆ + W.a₁^3*W.a₃^6*W.a₄^3*W.a₆^2 +
-  2*W.a₁^3*W.a₃^6*W.a₆^4 + W.a₁^3*W.a₄^3*W.a₆^5 + W.a₁^3*W.a₆^7 +
-  W.a₁^2*W.a₂^2*W.a₃^11*W.a₆ + 2*W.a₁^2*W.a₂^2*W.a₃^7*W.a₆^3 +
-  W.a₁^2*W.a₂^2*W.a₃^5*W.a₆^4 + 2*W.a₁^2*W.a₂^2*W.a₃*W.a₆^6 +
-  2*W.a₁^2*W.a₂*W.a₃^11*W.a₄^2 + 2*W.a₁^2*W.a₂*W.a₃^9*W.a₄^2*W.a₆ +
-  2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^2*W.a₆^3 +
-  2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆^4 + 2*W.a₁^2*W.a₃^13*W.a₄ +
-  2*W.a₁^2*W.a₃^9*W.a₄^4 + W.a₁^2*W.a₃^7*W.a₄^4*W.a₆ +
-  W.a₁^2*W.a₃^7*W.a₄*W.a₆^3 + 2*W.a₁^2*W.a₃^3*W.a₄^4*W.a₆^3 +
-  W.a₁^2*W.a₃*W.a₄^4*W.a₆^4 + 2*W.a₁^2*W.a₃*W.a₄*W.a₆^6 +
-  2*W.a₁*W.a₂^2*W.a₃^12*W.a₄ + W.a₁*W.a₂^2*W.a₃^10*W.a₄*W.a₆ +
-  W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆^4 + W.a₁*W.a₂^2*W.a₄*W.a₆^6 +
-  W.a₁*W.a₂*W.a₃^14 + W.a₁*W.a₂*W.a₃^12*W.a₆ +
-  2*W.a₁*W.a₂*W.a₃^8*W.a₄^3*W.a₆ + 2*W.a₁*W.a₂*W.a₃^8*W.a₆^3 +
-  W.a₁*W.a₂*W.a₃^6*W.a₄^3*W.a₆^2 + 2*W.a₁*W.a₂*W.a₃^6*W.a₆^4 +
-  2*W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆^4 + W.a₁*W.a₂*W.a₃^2*W.a₆^6 +
-  W.a₁*W.a₂*W.a₄^3*W.a₆^5 + W.a₁*W.a₂*W.a₆^7 +
-  2*W.a₁*W.a₃^12*W.a₄^2 + W.a₁*W.a₃^8*W.a₄^5 +
-  W.a₁*W.a₃^6*W.a₄^5*W.a₆ + W.a₁*W.a₃^6*W.a₄^2*W.a₆^3 +
-  W.a₁*W.a₃^2*W.a₄^5*W.a₆^3 + W.a₁*W.a₄^5*W.a₆^4 +
-  2*W.a₁*W.a₄^2*W.a₆^6 + 2*W.a₂^3*W.a₃^13 +
-  2*W.a₂^3*W.a₃^11*W.a₆ + W.a₂^3*W.a₃^9*W.a₆^2 +
-  2*W.a₂^3*W.a₃^5*W.a₆^4 + W.a₂^3*W.a₃^3*W.a₆^5 +
-  W.a₂^3*W.a₃*W.a₆^6 + W.a₂^2*W.a₃^11*W.a₄^2 +
-  W.a₂^2*W.a₃^9*W.a₄^2*W.a₆ + W.a₂^2*W.a₃^5*W.a₄^2*W.a₆^3 +
-  W.a₂^2*W.a₃^3*W.a₄^2*W.a₆^4 + W.a₂*W.a₃^9*W.a₄^4 +
-  W.a₂*W.a₃^3*W.a₄^4*W.a₆^3 + 2*W.a₃^15 + W.a₃^9*W.a₆^3 +
-  2*W.a₃^7*W.a₄^6 + 2*W.a₃^3*W.a₆^6 + 2*W.a₃*W.a₄^6*W.a₆^3
+  omega3_witness_coeff_X0_part1 W + omega3_witness_coeff_X0_part2 W + omega3_witness_coeff_X0_part3 W + omega3_witness_coeff_X0_part4 W
 
-set_option maxHeartbeats 2500000 in
-set_option maxRecDepth 4096 in
-/-- **Witness coefficient at X¹** (q=3 char-3): ~85-term polynomial. -/
+/-- Part 1 of `omega3_witness_coeff_X1`: split so each piece elaborates inside the default
+heartbeat budget — the whole 106-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X1_part1 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^8*W.a₃^3*W.a₄*W.a₆^3 + 2*W.a₁^7*W.a₂*W.a₃^4*W.a₆^3 + 2*W.a₁^7*W.a₂*W.a₆^5
+  + W.a₁^6*W.a₂*W.a₃^3*W.a₄*W.a₆^3 + 2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆^4 + W.a₁^6*W.a₃^9*W.a₆
+  + 2*W.a₁^6*W.a₃^3*W.a₄^3*W.a₆^2 + W.a₁^6*W.a₃^3*W.a₆^4 + W.a₁^5*W.a₂^2*W.a₃^4*W.a₆^3
+  + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆^4 + 2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^2*W.a₆^3
+  + 2*W.a₁^5*W.a₂*W.a₄^2*W.a₆^4 + 2*W.a₁^5*W.a₃^10*W.a₄ + W.a₁^5*W.a₃^6*W.a₄^4
+  + 2*W.a₁^5*W.a₃^4*W.a₄^4*W.a₆ + 2*W.a₁^5*W.a₃^4*W.a₄*W.a₆^3 + W.a₁^5*W.a₄^4*W.a₆^3
+  + W.a₁^4*W.a₂^2*W.a₃^3*W.a₄*W.a₆^3 + W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆^4 + W.a₁^4*W.a₂*W.a₃^11
+  + 2*W.a₁^4*W.a₂*W.a₃^9*W.a₆ + W.a₁^4*W.a₂*W.a₃^7*W.a₄^3 + W.a₁^4*W.a₂*W.a₃^5*W.a₄^3*W.a₆
+  + W.a₁^4*W.a₂*W.a₃^5*W.a₆^3 + W.a₁^4*W.a₂*W.a₃^3*W.a₄^3*W.a₆^2 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^4
+  + 2*W.a₁^4*W.a₂*W.a₃*W.a₄^3*W.a₆^3
+
+/-- Part 2 of `omega3_witness_coeff_X1`: split so each piece elaborates inside the default
+heartbeat budget — the whole 106-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X1_part2 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^4*W.a₃^9*W.a₄^2 + 2*W.a₁^4*W.a₃^5*W.a₄^5 + 2*W.a₁^4*W.a₃^3*W.a₄^5*W.a₆
+  + 2*W.a₁^4*W.a₃^3*W.a₄^2*W.a₆^3 + 2*W.a₁^3*W.a₂^3*W.a₃^6*W.a₆^2 + W.a₁^3*W.a₂^3*W.a₃^4*W.a₆^3
+  + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆^4 + W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^2*W.a₆^3
+  + W.a₁^3*W.a₂^2*W.a₄^2*W.a₆^4 + 2*W.a₁^3*W.a₂*W.a₃^10*W.a₄ + W.a₁^3*W.a₂*W.a₃^6*W.a₄^4
+  + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄^4*W.a₆ + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆^3
+  + W.a₁^3*W.a₂*W.a₄^4*W.a₆^3 + 2*W.a₁^3*W.a₃^12 + W.a₁^3*W.a₃^6*W.a₄^3*W.a₆
+  + 2*W.a₁^3*W.a₃^6*W.a₆^3 + W.a₁^3*W.a₃^4*W.a₄^6 + W.a₁^3*W.a₄^6*W.a₆^2 + W.a₁^3*W.a₄^3*W.a₆^4
+  + 2*W.a₁^2*W.a₂^3*W.a₃^9*W.a₄ + 2*W.a₁^2*W.a₂^3*W.a₃^7*W.a₄*W.a₆
+  + 2*W.a₁^2*W.a₂^3*W.a₃^3*W.a₄*W.a₆^3 + 2*W.a₁^2*W.a₂^3*W.a₃*W.a₄*W.a₆^4 + W.a₁^2*W.a₂^2*W.a₃^11
+  + W.a₁^2*W.a₂^2*W.a₃^7*W.a₄^3 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₄^3*W.a₆
+
+/-- Part 3 of `omega3_witness_coeff_X1`: split so each piece elaborates inside the default
+heartbeat budget — the whole 106-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X1_part3 (W : WeierstrassCurve K) : K :=
+  W.a₁^2*W.a₂^2*W.a₃^5*W.a₆^3 + 2*W.a₁^2*W.a₂*W.a₃^9*W.a₄^2 + 2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^5
+  + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^5*W.a₆ + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆^3
+  + 2*W.a₁^2*W.a₃^7*W.a₄^4 + 2*W.a₁^2*W.a₃^3*W.a₄^7 + W.a₁^2*W.a₃*W.a₄^7*W.a₆
+  + 2*W.a₁^2*W.a₃*W.a₄^4*W.a₆^3 + 2*W.a₁*W.a₂^4*W.a₃^10 + W.a₁*W.a₂^4*W.a₃^8*W.a₆
+  + 2*W.a₁*W.a₂^4*W.a₃^6*W.a₆^2 + 2*W.a₁*W.a₂^4*W.a₃^4*W.a₆^3 + W.a₁*W.a₂^4*W.a₃^2*W.a₆^4
+  + 2*W.a₁*W.a₂^4*W.a₆^5 + 2*W.a₁*W.a₂^3*W.a₃^8*W.a₄^2 + 2*W.a₁*W.a₂^3*W.a₃^6*W.a₄^2*W.a₆
+  + 2*W.a₁*W.a₂^3*W.a₃^2*W.a₄^2*W.a₆^3 + 2*W.a₁*W.a₂^3*W.a₄^2*W.a₆^4 + W.a₁*W.a₂^2*W.a₃^10*W.a₄
+  + W.a₁*W.a₂^2*W.a₃^6*W.a₄^4 + W.a₁*W.a₂^2*W.a₃^4*W.a₄^4*W.a₆ + W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆^3
+  + W.a₁*W.a₂*W.a₃^12 + W.a₁*W.a₂*W.a₃^8*W.a₄^3 + W.a₁*W.a₂*W.a₃^6*W.a₄^3*W.a₆
+  + 2*W.a₁*W.a₂*W.a₃^6*W.a₆^3
+
+/-- Part 4 of `omega3_witness_coeff_X1`: split so each piece elaborates inside the default
+heartbeat budget — the whole 106-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X1_part4 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₂*W.a₃^2*W.a₄^6*W.a₆ + W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆^3 + W.a₁*W.a₂*W.a₄^6*W.a₆^2
+  + W.a₁*W.a₂*W.a₄^3*W.a₆^4 + W.a₁*W.a₂*W.a₆^6 + 2*W.a₁*W.a₃^6*W.a₄^5 + W.a₁*W.a₃^2*W.a₄^8
+  + W.a₁*W.a₄^8*W.a₆ + 2*W.a₁*W.a₄^5*W.a₆^3 + 2*W.a₂^3*W.a₃^11 + 2*W.a₂^3*W.a₃^9*W.a₆
+  + 2*W.a₂^3*W.a₃^7*W.a₄^3 + 2*W.a₂^3*W.a₃^5*W.a₄^3*W.a₆ + 2*W.a₂^3*W.a₃^5*W.a₆^3
+  + W.a₂^3*W.a₃^3*W.a₄^3*W.a₆^2 + 2*W.a₂^3*W.a₃^3*W.a₆^4 + W.a₂^3*W.a₃*W.a₄^3*W.a₆^3
+  + W.a₂^2*W.a₃^9*W.a₄^2 + W.a₂^2*W.a₃^5*W.a₄^5 + W.a₂^2*W.a₃^3*W.a₄^5*W.a₆
+  + W.a₂^2*W.a₃^3*W.a₄^2*W.a₆^3 + W.a₂*W.a₃^3*W.a₄^7 + W.a₃^9*W.a₄^3 + W.a₃^3*W.a₄^3*W.a₆^3
+  + 2*W.a₃*W.a₄^9
+
+/-- Witness coefficient (q=3 char-3): 106-term polynomial, assembled from its parts. -/
 noncomputable def omega3_witness_coeff_X1 (W : WeierstrassCurve K) : K :=
-  2*W.a₁^8*W.a₃^3*W.a₄*W.a₆^3 + 2*W.a₁^7*W.a₂*W.a₃^4*W.a₆^3 +
-  2*W.a₁^7*W.a₂*W.a₆^5 + W.a₁^6*W.a₂*W.a₃^3*W.a₄*W.a₆^3 +
-  2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆^4 + W.a₁^6*W.a₃^9*W.a₆ +
-  2*W.a₁^6*W.a₃^3*W.a₄^3*W.a₆^2 + W.a₁^6*W.a₃^3*W.a₆^4 +
-  W.a₁^5*W.a₂^2*W.a₃^4*W.a₆^3 + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆^4 +
-  2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^2*W.a₆^3 +
-  2*W.a₁^5*W.a₂*W.a₄^2*W.a₆^4 + 2*W.a₁^5*W.a₃^10*W.a₄ +
-  W.a₁^5*W.a₃^6*W.a₄^4 + 2*W.a₁^5*W.a₃^4*W.a₄^4*W.a₆ +
-  2*W.a₁^5*W.a₃^4*W.a₄*W.a₆^3 + W.a₁^5*W.a₄^4*W.a₆^3 +
-  W.a₁^4*W.a₂^2*W.a₃^3*W.a₄*W.a₆^3 +
-  W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆^4 + W.a₁^4*W.a₂*W.a₃^11 +
-  2*W.a₁^4*W.a₂*W.a₃^9*W.a₆ + W.a₁^4*W.a₂*W.a₃^7*W.a₄^3 +
-  W.a₁^4*W.a₂*W.a₃^5*W.a₄^3*W.a₆ + W.a₁^4*W.a₂*W.a₃^5*W.a₆^3 +
-  W.a₁^4*W.a₂*W.a₃^3*W.a₄^3*W.a₆^2 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^4 +
-  2*W.a₁^4*W.a₂*W.a₃*W.a₄^3*W.a₆^3 + 2*W.a₁^4*W.a₃^9*W.a₄^2 +
-  2*W.a₁^4*W.a₃^5*W.a₄^5 + 2*W.a₁^4*W.a₃^3*W.a₄^5*W.a₆ +
-  2*W.a₁^4*W.a₃^3*W.a₄^2*W.a₆^3 + 2*W.a₁^3*W.a₂^3*W.a₃^6*W.a₆^2 +
-  W.a₁^3*W.a₂^3*W.a₃^4*W.a₆^3 + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆^4 +
-  W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^2*W.a₆^3 +
-  W.a₁^3*W.a₂^2*W.a₄^2*W.a₆^4 + 2*W.a₁^3*W.a₂*W.a₃^10*W.a₄ +
-  W.a₁^3*W.a₂*W.a₃^6*W.a₄^4 + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄^4*W.a₆ +
-  2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆^3 + W.a₁^3*W.a₂*W.a₄^4*W.a₆^3 +
-  2*W.a₁^3*W.a₃^12 + W.a₁^3*W.a₃^6*W.a₄^3*W.a₆ +
-  2*W.a₁^3*W.a₃^6*W.a₆^3 + W.a₁^3*W.a₃^4*W.a₄^6 +
-  W.a₁^3*W.a₄^6*W.a₆^2 + W.a₁^3*W.a₄^3*W.a₆^4 +
-  2*W.a₁^2*W.a₂^3*W.a₃^9*W.a₄ + 2*W.a₁^2*W.a₂^3*W.a₃^7*W.a₄*W.a₆ +
-  2*W.a₁^2*W.a₂^3*W.a₃^3*W.a₄*W.a₆^3 +
-  2*W.a₁^2*W.a₂^3*W.a₃*W.a₄*W.a₆^4 + W.a₁^2*W.a₂^2*W.a₃^11 +
-  W.a₁^2*W.a₂^2*W.a₃^7*W.a₄^3 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₄^3*W.a₆ +
-  W.a₁^2*W.a₂^2*W.a₃^5*W.a₆^3 + 2*W.a₁^2*W.a₂*W.a₃^9*W.a₄^2 +
-  2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^5 + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^5*W.a₆ +
-  2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆^3 + 2*W.a₁^2*W.a₃^7*W.a₄^4 +
-  2*W.a₁^2*W.a₃^3*W.a₄^7 + W.a₁^2*W.a₃*W.a₄^7*W.a₆ +
-  2*W.a₁^2*W.a₃*W.a₄^4*W.a₆^3 + 2*W.a₁*W.a₂^4*W.a₃^10 +
-  W.a₁*W.a₂^4*W.a₃^8*W.a₆ + 2*W.a₁*W.a₂^4*W.a₃^6*W.a₆^2 +
-  2*W.a₁*W.a₂^4*W.a₃^4*W.a₆^3 + W.a₁*W.a₂^4*W.a₃^2*W.a₆^4 +
-  2*W.a₁*W.a₂^4*W.a₆^5 + 2*W.a₁*W.a₂^3*W.a₃^8*W.a₄^2 +
-  2*W.a₁*W.a₂^3*W.a₃^6*W.a₄^2*W.a₆ +
-  2*W.a₁*W.a₂^3*W.a₃^2*W.a₄^2*W.a₆^3 +
-  2*W.a₁*W.a₂^3*W.a₄^2*W.a₆^4 + W.a₁*W.a₂^2*W.a₃^10*W.a₄ +
-  W.a₁*W.a₂^2*W.a₃^6*W.a₄^4 + W.a₁*W.a₂^2*W.a₃^4*W.a₄^4*W.a₆ +
-  W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆^3 + W.a₁*W.a₂*W.a₃^12 +
-  W.a₁*W.a₂*W.a₃^8*W.a₄^3 + W.a₁*W.a₂*W.a₃^6*W.a₄^3*W.a₆ +
-  2*W.a₁*W.a₂*W.a₃^6*W.a₆^3 + 2*W.a₁*W.a₂*W.a₃^2*W.a₄^6*W.a₆ +
-  W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆^3 + W.a₁*W.a₂*W.a₄^6*W.a₆^2 +
-  W.a₁*W.a₂*W.a₄^3*W.a₆^4 + W.a₁*W.a₂*W.a₆^6 +
-  2*W.a₁*W.a₃^6*W.a₄^5 + W.a₁*W.a₃^2*W.a₄^8 +
-  W.a₁*W.a₄^8*W.a₆ + 2*W.a₁*W.a₄^5*W.a₆^3 +
-  2*W.a₂^3*W.a₃^11 + 2*W.a₂^3*W.a₃^9*W.a₆ +
-  2*W.a₂^3*W.a₃^7*W.a₄^3 + 2*W.a₂^3*W.a₃^5*W.a₄^3*W.a₆ +
-  2*W.a₂^3*W.a₃^5*W.a₆^3 + W.a₂^3*W.a₃^3*W.a₄^3*W.a₆^2 +
-  2*W.a₂^3*W.a₃^3*W.a₆^4 + W.a₂^3*W.a₃*W.a₄^3*W.a₆^3 +
-  W.a₂^2*W.a₃^9*W.a₄^2 + W.a₂^2*W.a₃^5*W.a₄^5 +
-  W.a₂^2*W.a₃^3*W.a₄^5*W.a₆ + W.a₂^2*W.a₃^3*W.a₄^2*W.a₆^3 +
-  W.a₂*W.a₃^3*W.a₄^7 + W.a₃^9*W.a₄^3 + W.a₃^3*W.a₄^3*W.a₆^3 +
-  2*W.a₃*W.a₄^9
+  omega3_witness_coeff_X1_part1 W + omega3_witness_coeff_X1_part2 W + omega3_witness_coeff_X1_part3 W + omega3_witness_coeff_X1_part4 W
 
-set_option maxHeartbeats 1500000 in
-set_option maxRecDepth 4096 in
-/-- **Witness coefficient at X²** (q=3 char-3): ~70-term polynomial. -/
+/-- Part 1 of `omega3_witness_coeff_X2`: split so each piece elaborates inside the default
+heartbeat budget — the whole 85-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X2_part1 (W : WeierstrassCurve K) : K :=
+  W.a₁^11*W.a₄*W.a₆^3 + W.a₁^10*W.a₂*W.a₃*W.a₆^3 + 2*W.a₁^9*W.a₂*W.a₄*W.a₆^3
+  + W.a₁^9*W.a₄^3*W.a₆^2 + 2*W.a₁^9*W.a₆^4 + 2*W.a₁^8*W.a₂^2*W.a₃*W.a₆^3 + 2*W.a₁^8*W.a₃^3*W.a₄^4
+  + W.a₁^8*W.a₃*W.a₄^4*W.a₆ + W.a₁^8*W.a₃*W.a₄*W.a₆^3 + W.a₁^7*W.a₂^2*W.a₄*W.a₆^3
+  + 2*W.a₁^7*W.a₂*W.a₃^4*W.a₄^3 + 2*W.a₁^7*W.a₂*W.a₃^2*W.a₄^3*W.a₆ + 2*W.a₁^7*W.a₂*W.a₃^2*W.a₆^3
+  + W.a₁^7*W.a₃^2*W.a₄^5 + W.a₁^7*W.a₄^5*W.a₆ + W.a₁^7*W.a₄^2*W.a₆^3
+  + W.a₁^6*W.a₂^3*W.a₃^3*W.a₆^2 + W.a₁^6*W.a₂^3*W.a₃*W.a₆^3 + 2*W.a₁^6*W.a₂*W.a₃^3*W.a₄^4
+  + 2*W.a₁^6*W.a₂*W.a₃*W.a₄^4*W.a₆ + 2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆^3 + 2*W.a₁^6*W.a₃^3*W.a₄^3*W.a₆
+
+/-- Part 2 of `omega3_witness_coeff_X2`: split so each piece elaborates inside the default
+heartbeat budget — the whole 85-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X2_part2 (W : WeierstrassCurve K) : K :=
+  W.a₁^6*W.a₃^3*W.a₆^3 + 2*W.a₁^6*W.a₃*W.a₄^6 + W.a₁^5*W.a₂^3*W.a₃^6*W.a₄
+  + W.a₁^5*W.a₂^3*W.a₃^4*W.a₄*W.a₆ + W.a₁^5*W.a₂^3*W.a₄*W.a₆^3 + 2*W.a₁^5*W.a₂^2*W.a₃^4*W.a₄^3
+  + W.a₁^5*W.a₂^2*W.a₃^2*W.a₄^3*W.a₆ + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆^3 + 2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^5
+  + 2*W.a₁^5*W.a₂*W.a₄^5*W.a₆ + 2*W.a₁^5*W.a₂*W.a₄^2*W.a₆^3 + W.a₁^5*W.a₃^4*W.a₄^4
+  + W.a₁^4*W.a₂^4*W.a₃^7 + 2*W.a₁^4*W.a₂^4*W.a₃^5*W.a₆ + W.a₁^4*W.a₂^4*W.a₃*W.a₆^3
+  + W.a₁^4*W.a₂^3*W.a₃^5*W.a₄^2 + W.a₁^4*W.a₂^3*W.a₃^3*W.a₄^2*W.a₆
+  + W.a₁^4*W.a₂^2*W.a₃*W.a₄^4*W.a₆ + W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆^3 + 2*W.a₁^4*W.a₂*W.a₃^5*W.a₄^3
+  + W.a₁^4*W.a₂*W.a₃*W.a₄^6 + W.a₁^4*W.a₃^3*W.a₄^5
+
+/-- Part 3 of `omega3_witness_coeff_X2`: split so each piece elaborates inside the default
+heartbeat budget — the whole 85-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X2_part3 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₂^4*W.a₃^4*W.a₄*W.a₆ + 2*W.a₁^3*W.a₂^4*W.a₄*W.a₆^3 + 2*W.a₁^3*W.a₂^3*W.a₃^4*W.a₄^3
+  + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₄^3*W.a₆ + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆^3
+  + W.a₁^3*W.a₂^3*W.a₄^3*W.a₆^2 + 2*W.a₁^3*W.a₂^3*W.a₆^4 + W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^5
+  + W.a₁^3*W.a₂^2*W.a₄^5*W.a₆ + W.a₁^3*W.a₂^2*W.a₄^2*W.a₆^3 + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄^4
+  + 2*W.a₁^3*W.a₂*W.a₄^7 + W.a₁^3*W.a₄^3*W.a₆^3 + W.a₁^2*W.a₂^5*W.a₃^5*W.a₆
+  + 2*W.a₁^2*W.a₂^5*W.a₃*W.a₆^3 + 2*W.a₁^2*W.a₂^4*W.a₃^5*W.a₄^2
+  + 2*W.a₁^2*W.a₂^4*W.a₃^3*W.a₄^2*W.a₆ + W.a₁^2*W.a₂^3*W.a₃^3*W.a₄^4
+  + W.a₁^2*W.a₂^2*W.a₃^5*W.a₄^3 + W.a₁^2*W.a₂^2*W.a₃*W.a₄^6 + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^5
+  + 2*W.a₁*W.a₂^5*W.a₃^6*W.a₄
+
+/-- Part 4 of `omega3_witness_coeff_X2`: split so each piece elaborates inside the default
+heartbeat budget — the whole 85-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X2_part4 (W : WeierstrassCurve K) : K :=
+  W.a₁*W.a₂^5*W.a₃^4*W.a₄*W.a₆ + W.a₁*W.a₂^5*W.a₄*W.a₆^3 + 2*W.a₁*W.a₂^4*W.a₃^4*W.a₄^3
+  + W.a₁*W.a₂^2*W.a₃^4*W.a₄^4 + 2*W.a₁*W.a₂^2*W.a₄^7 + 2*W.a₂^6*W.a₃^7 + 2*W.a₂^6*W.a₃^5*W.a₆
+  + W.a₂^6*W.a₃^3*W.a₆^2 + W.a₂^6*W.a₃*W.a₆^3 + W.a₂^5*W.a₃^5*W.a₄^2 + W.a₂^5*W.a₃^3*W.a₄^2*W.a₆
+  + W.a₂^4*W.a₃^3*W.a₄^4 + 2*W.a₂^3*W.a₃^9 + 2*W.a₂^3*W.a₃^5*W.a₄^3 + 2*W.a₂^3*W.a₃^3*W.a₄^3*W.a₆
+  + 2*W.a₂^3*W.a₃^3*W.a₆^3 + 2*W.a₂^3*W.a₃*W.a₄^6 + W.a₂^2*W.a₃^3*W.a₄^5 + 2*W.a₃^3*W.a₄^6
+
+/-- Witness coefficient (q=3 char-3): 85-term polynomial, assembled from its parts. -/
 noncomputable def omega3_witness_coeff_X2 (W : WeierstrassCurve K) : K :=
-  W.a₁^11*W.a₄*W.a₆^3 + W.a₁^10*W.a₂*W.a₃*W.a₆^3 +
-  2*W.a₁^9*W.a₂*W.a₄*W.a₆^3 + W.a₁^9*W.a₄^3*W.a₆^2 +
-  2*W.a₁^9*W.a₆^4 + 2*W.a₁^8*W.a₂^2*W.a₃*W.a₆^3 +
-  2*W.a₁^8*W.a₃^3*W.a₄^4 + W.a₁^8*W.a₃*W.a₄^4*W.a₆ +
-  W.a₁^8*W.a₃*W.a₄*W.a₆^3 + W.a₁^7*W.a₂^2*W.a₄*W.a₆^3 +
-  2*W.a₁^7*W.a₂*W.a₃^4*W.a₄^3 + 2*W.a₁^7*W.a₂*W.a₃^2*W.a₄^3*W.a₆ +
-  2*W.a₁^7*W.a₂*W.a₃^2*W.a₆^3 + W.a₁^7*W.a₃^2*W.a₄^5 +
-  W.a₁^7*W.a₄^5*W.a₆ + W.a₁^7*W.a₄^2*W.a₆^3 +
-  W.a₁^6*W.a₂^3*W.a₃^3*W.a₆^2 + W.a₁^6*W.a₂^3*W.a₃*W.a₆^3 +
-  2*W.a₁^6*W.a₂*W.a₃^3*W.a₄^4 + 2*W.a₁^6*W.a₂*W.a₃*W.a₄^4*W.a₆ +
-  2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆^3 + 2*W.a₁^6*W.a₃^3*W.a₄^3*W.a₆ +
-  W.a₁^6*W.a₃^3*W.a₆^3 + 2*W.a₁^6*W.a₃*W.a₄^6 +
-  W.a₁^5*W.a₂^3*W.a₃^6*W.a₄ + W.a₁^5*W.a₂^3*W.a₃^4*W.a₄*W.a₆ +
-  W.a₁^5*W.a₂^3*W.a₄*W.a₆^3 + 2*W.a₁^5*W.a₂^2*W.a₃^4*W.a₄^3 +
-  W.a₁^5*W.a₂^2*W.a₃^2*W.a₄^3*W.a₆ + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆^3 +
-  2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^5 + 2*W.a₁^5*W.a₂*W.a₄^5*W.a₆ +
-  2*W.a₁^5*W.a₂*W.a₄^2*W.a₆^3 + W.a₁^5*W.a₃^4*W.a₄^4 +
-  W.a₁^4*W.a₂^4*W.a₃^7 + 2*W.a₁^4*W.a₂^4*W.a₃^5*W.a₆ +
-  W.a₁^4*W.a₂^4*W.a₃*W.a₆^3 + W.a₁^4*W.a₂^3*W.a₃^5*W.a₄^2 +
-  W.a₁^4*W.a₂^3*W.a₃^3*W.a₄^2*W.a₆ +
-  W.a₁^4*W.a₂^2*W.a₃*W.a₄^4*W.a₆ + W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆^3 +
-  2*W.a₁^4*W.a₂*W.a₃^5*W.a₄^3 + W.a₁^4*W.a₂*W.a₃*W.a₄^6 +
-  W.a₁^4*W.a₃^3*W.a₄^5 + 2*W.a₁^3*W.a₂^4*W.a₃^4*W.a₄*W.a₆ +
-  2*W.a₁^3*W.a₂^4*W.a₄*W.a₆^3 + 2*W.a₁^3*W.a₂^3*W.a₃^4*W.a₄^3 +
-  2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₄^3*W.a₆ +
-  2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆^3 + W.a₁^3*W.a₂^3*W.a₄^3*W.a₆^2 +
-  2*W.a₁^3*W.a₂^3*W.a₆^4 + W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^5 +
-  W.a₁^3*W.a₂^2*W.a₄^5*W.a₆ + W.a₁^3*W.a₂^2*W.a₄^2*W.a₆^3 +
-  2*W.a₁^3*W.a₂*W.a₃^4*W.a₄^4 + 2*W.a₁^3*W.a₂*W.a₄^7 +
-  W.a₁^3*W.a₄^3*W.a₆^3 + W.a₁^2*W.a₂^5*W.a₃^5*W.a₆ +
-  2*W.a₁^2*W.a₂^5*W.a₃*W.a₆^3 + 2*W.a₁^2*W.a₂^4*W.a₃^5*W.a₄^2 +
-  2*W.a₁^2*W.a₂^4*W.a₃^3*W.a₄^2*W.a₆ +
-  W.a₁^2*W.a₂^3*W.a₃^3*W.a₄^4 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₄^3 +
-  W.a₁^2*W.a₂^2*W.a₃*W.a₄^6 + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^5 +
-  2*W.a₁*W.a₂^5*W.a₃^6*W.a₄ + W.a₁*W.a₂^5*W.a₃^4*W.a₄*W.a₆ +
-  W.a₁*W.a₂^5*W.a₄*W.a₆^3 + 2*W.a₁*W.a₂^4*W.a₃^4*W.a₄^3 +
-  W.a₁*W.a₂^2*W.a₃^4*W.a₄^4 + 2*W.a₁*W.a₂^2*W.a₄^7 +
-  2*W.a₂^6*W.a₃^7 + 2*W.a₂^6*W.a₃^5*W.a₆ +
-  W.a₂^6*W.a₃^3*W.a₆^2 + W.a₂^6*W.a₃*W.a₆^3 +
-  W.a₂^5*W.a₃^5*W.a₄^2 + W.a₂^5*W.a₃^3*W.a₄^2*W.a₆ +
-  W.a₂^4*W.a₃^3*W.a₄^4 + 2*W.a₂^3*W.a₃^9 +
-  2*W.a₂^3*W.a₃^5*W.a₄^3 + 2*W.a₂^3*W.a₃^3*W.a₄^3*W.a₆ +
-  2*W.a₂^3*W.a₃^3*W.a₆^3 + 2*W.a₂^3*W.a₃*W.a₄^6 +
-  W.a₂^2*W.a₃^3*W.a₄^5 + 2*W.a₃^3*W.a₄^6
+  omega3_witness_coeff_X2_part1 W + omega3_witness_coeff_X2_part2 W + omega3_witness_coeff_X2_part3 W + omega3_witness_coeff_X2_part4 W
 
-set_option maxHeartbeats 2000000 in
-set_option maxRecDepth 4096 in
-/-- **Witness coefficient at X³** (q=3 char-3): ~100-term polynomial. -/
+/-- Part 1 of `omega3_witness_coeff_X3`: split so each piece elaborates inside the default
+heartbeat budget — the whole 122-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X3_part1 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^13*W.a₂*W.a₆^2 + 2*W.a₁^12*W.a₂*W.a₃*W.a₄*W.a₆ + W.a₁^12*W.a₃^3*W.a₆
+  + W.a₁^11*W.a₂^2*W.a₃^2*W.a₆ + 2*W.a₁^11*W.a₂*W.a₃^2*W.a₄^2 + 2*W.a₁^11*W.a₂*W.a₄^2*W.a₆
+  + 2*W.a₁^11*W.a₃^4*W.a₄ + 2*W.a₁^10*W.a₂^2*W.a₃^3*W.a₄ + W.a₁^10*W.a₂^2*W.a₃*W.a₄*W.a₆
+  + W.a₁^10*W.a₂*W.a₃^5 + W.a₁^10*W.a₂*W.a₃^3*W.a₆ + W.a₁^10*W.a₂*W.a₃*W.a₄^3
+  + 2*W.a₁^10*W.a₃^3*W.a₄^2 + 2*W.a₁^9*W.a₂^3*W.a₃^4 + 2*W.a₁^9*W.a₂^3*W.a₃^2*W.a₆
+  + W.a₁^9*W.a₂^2*W.a₃^2*W.a₄^2 + W.a₁^9*W.a₂^2*W.a₄^2*W.a₆ + 2*W.a₁^9*W.a₂*W.a₄^4
+  + 2*W.a₁^9*W.a₃^6 + W.a₁^9*W.a₄^3*W.a₆ + 2*W.a₁^8*W.a₂^3*W.a₃^3*W.a₄
+  + 2*W.a₁^8*W.a₂^3*W.a₃*W.a₄*W.a₆ + W.a₁^8*W.a₂^2*W.a₃*W.a₄^3 + 2*W.a₁^8*W.a₃*W.a₄^4
+  + 2*W.a₁^7*W.a₂^4*W.a₃^4 + W.a₁^7*W.a₂^4*W.a₃^2*W.a₆ + W.a₁^7*W.a₂^4*W.a₆^2
+  + 2*W.a₁^7*W.a₂^3*W.a₃^2*W.a₄^2 + 2*W.a₁^7*W.a₂^3*W.a₄^2*W.a₆ + 2*W.a₁^7*W.a₂^2*W.a₄^4
+  + W.a₁^7*W.a₂*W.a₃^2*W.a₄^3
+
+/-- Part 2 of `omega3_witness_coeff_X3`: split so each piece elaborates inside the default
+heartbeat budget — the whole 122-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X3_part2 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^7*W.a₂*W.a₄^3*W.a₆ + W.a₁^7*W.a₂*W.a₆^3 + 2*W.a₁^7*W.a₄^5
+  + 2*W.a₁^6*W.a₂^4*W.a₃*W.a₄*W.a₆ + 2*W.a₁^6*W.a₂*W.a₃*W.a₄^4 + W.a₁^5*W.a₂^5*W.a₃^2*W.a₆
+  + 2*W.a₁^5*W.a₂^4*W.a₃^2*W.a₄^2 + 2*W.a₁^5*W.a₂^4*W.a₄^2*W.a₆ + W.a₁^5*W.a₂^2*W.a₃^2*W.a₄^3
+  + 2*W.a₁^5*W.a₂*W.a₄^5 + W.a₁^5*W.a₃^6*W.a₄ + 2*W.a₁^5*W.a₄*W.a₆^3
+  + 2*W.a₁^4*W.a₂^5*W.a₃^3*W.a₄ + W.a₁^4*W.a₂^5*W.a₃*W.a₄*W.a₆ + W.a₁^4*W.a₂^4*W.a₃^3*W.a₆
+  + W.a₁^4*W.a₂^4*W.a₃*W.a₄^3 + W.a₁^4*W.a₂^2*W.a₃*W.a₄^4 + W.a₁^4*W.a₂*W.a₃^7
+  + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₄^3 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^2 + 2*W.a₁^4*W.a₂*W.a₃*W.a₆^3
+  + 2*W.a₁^3*W.a₂^6*W.a₃^4 + 2*W.a₁^3*W.a₂^6*W.a₃^2*W.a₆ + W.a₁^3*W.a₂^5*W.a₃^2*W.a₄^2
+  + W.a₁^3*W.a₂^5*W.a₄^2*W.a₆ + 2*W.a₁^3*W.a₂^4*W.a₃^4*W.a₄ + 2*W.a₁^3*W.a₂^4*W.a₄^4
+  + W.a₁^3*W.a₂^3*W.a₃^6 + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₄^3 + W.a₁^3*W.a₂^3*W.a₄^3*W.a₆
+  + W.a₁^3*W.a₂^2*W.a₄^5
+
+/-- Part 3 of `omega3_witness_coeff_X3`: split so each piece elaborates inside the default
+heartbeat budget — the whole 122-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X3_part3 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₂*W.a₃^6*W.a₄ + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆ + W.a₁^3*W.a₂*W.a₄*W.a₆^3
+  + 2*W.a₁^3*W.a₃^6*W.a₆ + W.a₁^3*W.a₄^6 + W.a₁^3*W.a₄^3*W.a₆^2 + 2*W.a₁^3*W.a₆^4
+  + 2*W.a₁^2*W.a₂^6*W.a₃^3*W.a₄ + 2*W.a₁^2*W.a₂^6*W.a₃*W.a₄*W.a₆ + W.a₁^2*W.a₂^5*W.a₃^5
+  + W.a₁^2*W.a₂^5*W.a₃*W.a₄^3 + 2*W.a₁^2*W.a₂^4*W.a₃^3*W.a₄^2 + W.a₁^2*W.a₂^3*W.a₃*W.a₄^4
+  + 2*W.a₁^2*W.a₂^2*W.a₃^7 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₆ + W.a₁^2*W.a₂^2*W.a₃*W.a₆^3
+  + 2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^2 + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆ + W.a₁^2*W.a₃^7*W.a₄
+  + 2*W.a₁^2*W.a₃^3*W.a₄^4 + W.a₁^2*W.a₃*W.a₄^4*W.a₆ + W.a₁^2*W.a₃*W.a₄*W.a₆^3
+  + 2*W.a₁*W.a₂^7*W.a₃^4 + W.a₁*W.a₂^7*W.a₃^2*W.a₆ + 2*W.a₁*W.a₂^7*W.a₆^2
+  + 2*W.a₁*W.a₂^6*W.a₃^2*W.a₄^2 + 2*W.a₁*W.a₂^6*W.a₄^2*W.a₆ + W.a₁*W.a₂^5*W.a₃^4*W.a₄
+  + 2*W.a₁*W.a₂^5*W.a₄^4 + W.a₁*W.a₂^4*W.a₃^6 + 2*W.a₁*W.a₂^4*W.a₃^2*W.a₄^3
+
+/-- Part 4 of `omega3_witness_coeff_X3`: split so each piece elaborates inside the default
+heartbeat budget — the whole 122-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X3_part4 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₂^4*W.a₄^3*W.a₆ + W.a₁*W.a₂^4*W.a₆^3 + W.a₁*W.a₂^3*W.a₄^5
+  + W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆ + 2*W.a₁*W.a₂^2*W.a₄*W.a₆^3 + 2*W.a₁*W.a₂*W.a₃^8
+  + 2*W.a₁*W.a₂*W.a₃^6*W.a₆ + 2*W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆ + 2*W.a₁*W.a₂*W.a₃^2*W.a₆^3
+  + 2*W.a₁*W.a₂*W.a₄^6 + W.a₁*W.a₂*W.a₄^3*W.a₆^2 + 2*W.a₁*W.a₂*W.a₆^4 + W.a₁*W.a₃^6*W.a₄^2
+  + W.a₁*W.a₃^2*W.a₄^5 + W.a₁*W.a₄^5*W.a₆ + W.a₁*W.a₄^2*W.a₆^3 + 2*W.a₂^6*W.a₃^5
+  + 2*W.a₂^6*W.a₃^3*W.a₆ + W.a₂^5*W.a₃^3*W.a₄^2 + 2*W.a₂^3*W.a₃^5*W.a₆ + 2*W.a₂^3*W.a₃^3*W.a₄^3
+  + W.a₂^3*W.a₃^3*W.a₆^2 + 2*W.a₂^3*W.a₃*W.a₆^3 + W.a₂^2*W.a₃^5*W.a₄^2
+  + W.a₂^2*W.a₃^3*W.a₄^2*W.a₆ + W.a₂*W.a₃^3*W.a₄^4 + W.a₃^9 + W.a₃^3*W.a₆^3 + 2*W.a₃*W.a₄^6
+
+/-- Witness coefficient (q=3 char-3): 122-term polynomial, assembled from its parts. -/
 noncomputable def omega3_witness_coeff_X3 (W : WeierstrassCurve K) : K :=
-  2*W.a₁^13*W.a₂*W.a₆^2 + 2*W.a₁^12*W.a₂*W.a₃*W.a₄*W.a₆ +
-  W.a₁^12*W.a₃^3*W.a₆ + W.a₁^11*W.a₂^2*W.a₃^2*W.a₆ +
-  2*W.a₁^11*W.a₂*W.a₃^2*W.a₄^2 + 2*W.a₁^11*W.a₂*W.a₄^2*W.a₆ +
-  2*W.a₁^11*W.a₃^4*W.a₄ + 2*W.a₁^10*W.a₂^2*W.a₃^3*W.a₄ +
-  W.a₁^10*W.a₂^2*W.a₃*W.a₄*W.a₆ + W.a₁^10*W.a₂*W.a₃^5 +
-  W.a₁^10*W.a₂*W.a₃^3*W.a₆ + W.a₁^10*W.a₂*W.a₃*W.a₄^3 +
-  2*W.a₁^10*W.a₃^3*W.a₄^2 + 2*W.a₁^9*W.a₂^3*W.a₃^4 +
-  2*W.a₁^9*W.a₂^3*W.a₃^2*W.a₆ + W.a₁^9*W.a₂^2*W.a₃^2*W.a₄^2 +
-  W.a₁^9*W.a₂^2*W.a₄^2*W.a₆ + 2*W.a₁^9*W.a₂*W.a₄^4 +
-  2*W.a₁^9*W.a₃^6 + W.a₁^9*W.a₄^3*W.a₆ +
-  2*W.a₁^8*W.a₂^3*W.a₃^3*W.a₄ + 2*W.a₁^8*W.a₂^3*W.a₃*W.a₄*W.a₆ +
-  W.a₁^8*W.a₂^2*W.a₃*W.a₄^3 + 2*W.a₁^8*W.a₃*W.a₄^4 +
-  2*W.a₁^7*W.a₂^4*W.a₃^4 + W.a₁^7*W.a₂^4*W.a₃^2*W.a₆ +
-  W.a₁^7*W.a₂^4*W.a₆^2 + 2*W.a₁^7*W.a₂^3*W.a₃^2*W.a₄^2 +
-  2*W.a₁^7*W.a₂^3*W.a₄^2*W.a₆ + 2*W.a₁^7*W.a₂^2*W.a₄^4 +
-  W.a₁^7*W.a₂*W.a₃^2*W.a₄^3 + 2*W.a₁^7*W.a₂*W.a₄^3*W.a₆ +
-  W.a₁^7*W.a₂*W.a₆^3 + 2*W.a₁^7*W.a₄^5 +
-  2*W.a₁^6*W.a₂^4*W.a₃*W.a₄*W.a₆ + 2*W.a₁^6*W.a₂*W.a₃*W.a₄^4 +
-  W.a₁^5*W.a₂^5*W.a₃^2*W.a₆ + 2*W.a₁^5*W.a₂^4*W.a₃^2*W.a₄^2 +
-  2*W.a₁^5*W.a₂^4*W.a₄^2*W.a₆ + W.a₁^5*W.a₂^2*W.a₃^2*W.a₄^3 +
-  2*W.a₁^5*W.a₂*W.a₄^5 + W.a₁^5*W.a₃^6*W.a₄ +
-  2*W.a₁^5*W.a₄*W.a₆^3 + 2*W.a₁^4*W.a₂^5*W.a₃^3*W.a₄ +
-  W.a₁^4*W.a₂^5*W.a₃*W.a₄*W.a₆ + W.a₁^4*W.a₂^4*W.a₃^3*W.a₆ +
-  W.a₁^4*W.a₂^4*W.a₃*W.a₄^3 + W.a₁^4*W.a₂^2*W.a₃*W.a₄^4 +
-  W.a₁^4*W.a₂*W.a₃^7 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₄^3 +
-  2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^2 + 2*W.a₁^4*W.a₂*W.a₃*W.a₆^3 +
-  2*W.a₁^3*W.a₂^6*W.a₃^4 + 2*W.a₁^3*W.a₂^6*W.a₃^2*W.a₆ +
-  W.a₁^3*W.a₂^5*W.a₃^2*W.a₄^2 + W.a₁^3*W.a₂^5*W.a₄^2*W.a₆ +
-  2*W.a₁^3*W.a₂^4*W.a₃^4*W.a₄ + 2*W.a₁^3*W.a₂^4*W.a₄^4 +
-  W.a₁^3*W.a₂^3*W.a₃^6 + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₄^3 +
-  W.a₁^3*W.a₂^3*W.a₄^3*W.a₆ + W.a₁^3*W.a₂^2*W.a₄^5 +
-  2*W.a₁^3*W.a₂*W.a₃^6*W.a₄ + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆ +
-  W.a₁^3*W.a₂*W.a₄*W.a₆^3 + 2*W.a₁^3*W.a₃^6*W.a₆ +
-  W.a₁^3*W.a₄^6 + W.a₁^3*W.a₄^3*W.a₆^2 + 2*W.a₁^3*W.a₆^4 +
-  2*W.a₁^2*W.a₂^6*W.a₃^3*W.a₄ + 2*W.a₁^2*W.a₂^6*W.a₃*W.a₄*W.a₆ +
-  W.a₁^2*W.a₂^5*W.a₃^5 + W.a₁^2*W.a₂^5*W.a₃*W.a₄^3 +
-  2*W.a₁^2*W.a₂^4*W.a₃^3*W.a₄^2 + W.a₁^2*W.a₂^3*W.a₃*W.a₄^4 +
-  2*W.a₁^2*W.a₂^2*W.a₃^7 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₆ +
-  W.a₁^2*W.a₂^2*W.a₃*W.a₆^3 + 2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^2 +
-  2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆ + W.a₁^2*W.a₃^7*W.a₄ +
-  2*W.a₁^2*W.a₃^3*W.a₄^4 + W.a₁^2*W.a₃*W.a₄^4*W.a₆ +
-  W.a₁^2*W.a₃*W.a₄*W.a₆^3 + 2*W.a₁*W.a₂^7*W.a₃^4 +
-  W.a₁*W.a₂^7*W.a₃^2*W.a₆ + 2*W.a₁*W.a₂^7*W.a₆^2 +
-  2*W.a₁*W.a₂^6*W.a₃^2*W.a₄^2 + 2*W.a₁*W.a₂^6*W.a₄^2*W.a₆ +
-  W.a₁*W.a₂^5*W.a₃^4*W.a₄ + 2*W.a₁*W.a₂^5*W.a₄^4 +
-  W.a₁*W.a₂^4*W.a₃^6 + 2*W.a₁*W.a₂^4*W.a₃^2*W.a₄^3 +
-  2*W.a₁*W.a₂^4*W.a₄^3*W.a₆ + W.a₁*W.a₂^4*W.a₆^3 +
-  W.a₁*W.a₂^3*W.a₄^5 + W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆ +
-  2*W.a₁*W.a₂^2*W.a₄*W.a₆^3 + 2*W.a₁*W.a₂*W.a₃^8 +
-  2*W.a₁*W.a₂*W.a₃^6*W.a₆ + 2*W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆ +
-  2*W.a₁*W.a₂*W.a₃^2*W.a₆^3 + 2*W.a₁*W.a₂*W.a₄^6 +
-  W.a₁*W.a₂*W.a₄^3*W.a₆^2 + 2*W.a₁*W.a₂*W.a₆^4 +
-  W.a₁*W.a₃^6*W.a₄^2 + W.a₁*W.a₃^2*W.a₄^5 +
-  W.a₁*W.a₄^5*W.a₆ + W.a₁*W.a₄^2*W.a₆^3 +
-  2*W.a₂^6*W.a₃^5 + 2*W.a₂^6*W.a₃^3*W.a₆ +
-  W.a₂^5*W.a₃^3*W.a₄^2 + 2*W.a₂^3*W.a₃^5*W.a₆ +
-  2*W.a₂^3*W.a₃^3*W.a₄^3 + W.a₂^3*W.a₃^3*W.a₆^2 +
-  2*W.a₂^3*W.a₃*W.a₆^3 + W.a₂^2*W.a₃^5*W.a₄^2 +
-  W.a₂^2*W.a₃^3*W.a₄^2*W.a₆ + W.a₂*W.a₃^3*W.a₄^4 +
-  W.a₃^9 + W.a₃^3*W.a₆^3 + 2*W.a₃*W.a₄^6
+  omega3_witness_coeff_X3_part1 W + omega3_witness_coeff_X3_part2 W + omega3_witness_coeff_X3_part3 W + omega3_witness_coeff_X3_part4 W
 
-set_option maxHeartbeats 800000 in
-/-- **Witness coefficient at X⁴** (q=3 char-3): ~70-term polynomial. -/
+/-- Part 1 of `omega3_witness_coeff_X4`: split so each piece elaborates inside the default
+heartbeat budget — the whole 79-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X4_part1 (W : WeierstrassCurve K) : K :=
+  W.a₁^15*W.a₆ + 2*W.a₁^14*W.a₃*W.a₄ + W.a₁^13*W.a₂*W.a₃^2 + 2*W.a₁^13*W.a₂*W.a₆
+  + 2*W.a₁^13*W.a₄^2 + 2*W.a₁^12*W.a₂*W.a₃*W.a₄ + 2*W.a₁^12*W.a₃^3 + W.a₁^11*W.a₂^2*W.a₃^2
+  + 2*W.a₁^11*W.a₂*W.a₄^2 + W.a₁^10*W.a₂^2*W.a₃*W.a₄ + W.a₁^10*W.a₂*W.a₃^3
+  + 2*W.a₁^9*W.a₂^3*W.a₃^2 + 2*W.a₁^9*W.a₂^3*W.a₆ + W.a₁^9*W.a₂^2*W.a₄^2 + W.a₁^9*W.a₄^3
+  + 2*W.a₁^8*W.a₃^3*W.a₄ + W.a₁^7*W.a₂^4*W.a₆ + 2*W.a₁^7*W.a₂*W.a₃^4 + 2*W.a₁^7*W.a₂*W.a₄^3
+  + 2*W.a₁^7*W.a₂*W.a₆^2
+
+/-- Part 2 of `omega3_witness_coeff_X4`: split so each piece elaborates inside the default
+heartbeat budget — the whole 79-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X4_part2 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^6*W.a₂^4*W.a₃*W.a₄ + 2*W.a₁^6*W.a₂^3*W.a₃^3 + W.a₁^6*W.a₂*W.a₃^3*W.a₄
+  + 2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆ + W.a₁^6*W.a₃^3*W.a₆ + W.a₁^5*W.a₂^5*W.a₃^2
+  + 2*W.a₁^5*W.a₂^4*W.a₄^2 + W.a₁^5*W.a₂^2*W.a₃^4 + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆
+  + 2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^2 + 2*W.a₁^5*W.a₂*W.a₄^2*W.a₆ + 2*W.a₁^5*W.a₃^4*W.a₄
+  + W.a₁^5*W.a₄^4 + W.a₁^4*W.a₂^5*W.a₃*W.a₄ + W.a₁^4*W.a₂^4*W.a₃^3 + W.a₁^4*W.a₂^2*W.a₃^3*W.a₄
+  + W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆ + W.a₁^4*W.a₂*W.a₃^5 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆
+  + 2*W.a₁^4*W.a₂*W.a₃*W.a₄^3
+
+/-- Part 3 of `omega3_witness_coeff_X4`: split so each piece elaborates inside the default
+heartbeat budget — the whole 79-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X4_part3 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^4*W.a₃^3*W.a₄^2 + 2*W.a₁^3*W.a₂^6*W.a₃^2 + W.a₁^3*W.a₂^6*W.a₆ + W.a₁^3*W.a₂^5*W.a₄^2
+  + W.a₁^3*W.a₂^3*W.a₃^4 + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆ + W.a₁^3*W.a₂^3*W.a₄^3
+  + W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^2 + W.a₁^3*W.a₂^2*W.a₄^2*W.a₆ + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄
+  + W.a₁^3*W.a₂*W.a₄^4 + 2*W.a₁^3*W.a₃^6 + W.a₁^3*W.a₄^3*W.a₆ + W.a₁^2*W.a₂^6*W.a₃*W.a₄
+  + 2*W.a₁^2*W.a₂^3*W.a₃^3*W.a₄ + 2*W.a₁^2*W.a₂^3*W.a₃*W.a₄*W.a₆ + W.a₁^2*W.a₂^2*W.a₃^5
+  + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2 + 2*W.a₁^2*W.a₃*W.a₄^4 + 2*W.a₁*W.a₂^7*W.a₃^2
+
+/-- Part 4 of `omega3_witness_coeff_X4`: split so each piece elaborates inside the default
+heartbeat budget — the whole 79-term polynomial did not. -/
+private noncomputable def omega3_witness_coeff_X4_part4 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₂^7*W.a₆ + W.a₁*W.a₂^6*W.a₄^2 + 2*W.a₁*W.a₂^4*W.a₃^4 + W.a₁*W.a₂^4*W.a₃^2*W.a₆
+  + 2*W.a₁*W.a₂^4*W.a₄^3 + 2*W.a₁*W.a₂^4*W.a₆^2 + 2*W.a₁*W.a₂^3*W.a₃^2*W.a₄^2
+  + 2*W.a₁*W.a₂^3*W.a₄^2*W.a₆ + W.a₁*W.a₂^2*W.a₃^4*W.a₄ + 2*W.a₁*W.a₂*W.a₃^6
+  + W.a₁*W.a₂*W.a₃^2*W.a₄^3 + W.a₁*W.a₂*W.a₄^3*W.a₆ + 2*W.a₁*W.a₂*W.a₆^3 + 2*W.a₁*W.a₄^5
+  + 2*W.a₂^3*W.a₃^5 + 2*W.a₂^3*W.a₃^3*W.a₆ + W.a₂^3*W.a₃*W.a₄^3 + W.a₂^2*W.a₃^3*W.a₄^2
+  + W.a₃^3*W.a₄^3
+
+/-- Witness coefficient (q=3 char-3): 79-term polynomial, assembled from its parts. -/
 noncomputable def omega3_witness_coeff_X4 (W : WeierstrassCurve K) : K :=
-  W.a₁^15*W.a₆ + 2*W.a₁^14*W.a₃*W.a₄ + W.a₁^13*W.a₂*W.a₃^2 +
-  2*W.a₁^13*W.a₂*W.a₆ + 2*W.a₁^13*W.a₄^2 + 2*W.a₁^12*W.a₂*W.a₃*W.a₄ +
-  2*W.a₁^12*W.a₃^3 + W.a₁^11*W.a₂^2*W.a₃^2 + 2*W.a₁^11*W.a₂*W.a₄^2 +
-  W.a₁^10*W.a₂^2*W.a₃*W.a₄ + W.a₁^10*W.a₂*W.a₃^3 +
-  2*W.a₁^9*W.a₂^3*W.a₃^2 + 2*W.a₁^9*W.a₂^3*W.a₆ +
-  W.a₁^9*W.a₂^2*W.a₄^2 + W.a₁^9*W.a₄^3 + 2*W.a₁^8*W.a₃^3*W.a₄ +
-  W.a₁^7*W.a₂^4*W.a₆ + 2*W.a₁^7*W.a₂*W.a₃^4 + 2*W.a₁^7*W.a₂*W.a₄^3 +
-  2*W.a₁^7*W.a₂*W.a₆^2 + 2*W.a₁^6*W.a₂^4*W.a₃*W.a₄ +
-  2*W.a₁^6*W.a₂^3*W.a₃^3 + W.a₁^6*W.a₂*W.a₃^3*W.a₄ +
-  2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆ + W.a₁^6*W.a₃^3*W.a₆ +
-  W.a₁^5*W.a₂^5*W.a₃^2 + 2*W.a₁^5*W.a₂^4*W.a₄^2 +
-  W.a₁^5*W.a₂^2*W.a₃^4 + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆ +
-  2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^2 + 2*W.a₁^5*W.a₂*W.a₄^2*W.a₆ +
-  2*W.a₁^5*W.a₃^4*W.a₄ + W.a₁^5*W.a₄^4 +
-  W.a₁^4*W.a₂^5*W.a₃*W.a₄ + W.a₁^4*W.a₂^4*W.a₃^3 +
-  W.a₁^4*W.a₂^2*W.a₃^3*W.a₄ + W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆ +
-  W.a₁^4*W.a₂*W.a₃^5 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆ +
-  2*W.a₁^4*W.a₂*W.a₃*W.a₄^3 + 2*W.a₁^4*W.a₃^3*W.a₄^2 +
-  2*W.a₁^3*W.a₂^6*W.a₃^2 + W.a₁^3*W.a₂^6*W.a₆ +
-  W.a₁^3*W.a₂^5*W.a₄^2 + W.a₁^3*W.a₂^3*W.a₃^4 +
-  2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆ + W.a₁^3*W.a₂^3*W.a₄^3 +
-  W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^2 + W.a₁^3*W.a₂^2*W.a₄^2*W.a₆ +
-  2*W.a₁^3*W.a₂*W.a₃^4*W.a₄ + W.a₁^3*W.a₂*W.a₄^4 +
-  2*W.a₁^3*W.a₃^6 + W.a₁^3*W.a₄^3*W.a₆ +
-  W.a₁^2*W.a₂^6*W.a₃*W.a₄ + 2*W.a₁^2*W.a₂^3*W.a₃^3*W.a₄ +
-  2*W.a₁^2*W.a₂^3*W.a₃*W.a₄*W.a₆ + W.a₁^2*W.a₂^2*W.a₃^5 +
-  2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2 + 2*W.a₁^2*W.a₃*W.a₄^4 +
-  2*W.a₁*W.a₂^7*W.a₃^2 + 2*W.a₁*W.a₂^7*W.a₆ +
-  W.a₁*W.a₂^6*W.a₄^2 + 2*W.a₁*W.a₂^4*W.a₃^4 +
-  W.a₁*W.a₂^4*W.a₃^2*W.a₆ + 2*W.a₁*W.a₂^4*W.a₄^3 +
-  2*W.a₁*W.a₂^4*W.a₆^2 + 2*W.a₁*W.a₂^3*W.a₃^2*W.a₄^2 +
-  2*W.a₁*W.a₂^3*W.a₄^2*W.a₆ + W.a₁*W.a₂^2*W.a₃^4*W.a₄ +
-  2*W.a₁*W.a₂*W.a₃^6 + W.a₁*W.a₂*W.a₃^2*W.a₄^3 +
-  W.a₁*W.a₂*W.a₄^3*W.a₆ + 2*W.a₁*W.a₂*W.a₆^3 + 2*W.a₁*W.a₄^5 +
-  2*W.a₂^3*W.a₃^5 + 2*W.a₂^3*W.a₃^3*W.a₆ +
-  W.a₂^3*W.a₃*W.a₄^3 + W.a₂^2*W.a₃^3*W.a₄^2 + W.a₃^3*W.a₄^3
+  omega3_witness_coeff_X4_part1 W + omega3_witness_coeff_X4_part2 W + omega3_witness_coeff_X4_part3 W + omega3_witness_coeff_X4_part4 W
 
 /-- **Witness coefficient at X⁵** (q=3 char-3): 30-term polynomial. -/
 noncomputable def omega3_witness_coeff_X5 (W : WeierstrassCurve K) : K :=
