@@ -2233,7 +2233,6 @@ theorem alpha_cubed_basis_form_char_three (W : WeierstrassCurve K)
   ring
 
 omit [Fintype K] [DecidableEq K] in
-set_option maxHeartbeats 800000 in
 /-- **K(E)-level sum decomposition of `ω_ff W 3` via natDegree bound**:
     given `(W.ω 3).natDegree ≤ 5`, expresses `ω_ff W 3` as the explicit
     sum over Y-degrees 0..5 of `aeval x_gen (coeff_k) · y_gen^k`.
@@ -2287,7 +2286,6 @@ theorem omega_ff_three_decomp_via_nat_degree_bound
   ring
 
 omit [Fintype K] [DecidableEq K] in
-set_option maxHeartbeats 1000000 in
 /-- **Witness-parametric `OmegaThreeBasisHoldsReduced` discharge**:
     given the polynomial-algebra decomposition of `ω_ff W 3` as a sum
     over Y-degrees 0..5, the Weierstrass-reduced basis decomposition
