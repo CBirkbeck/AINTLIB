@@ -20,6 +20,8 @@ import ModularCurves.EllipticCurve.AdditionLawField
 import ModularCurves.EllipticCurve.AdditionLawOnCurve
 import ModularCurves.EllipticCurve.Basic
 import ModularCurves.EllipticCurve.Comparison
+import ModularCurves.EllipticCurve.FibreCechPresentation
+import ModularCurves.EllipticCurve.FibreConstantField
 import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.ModelGroupUniq
 import ModularCurves.EllipticCurve.ModelRecord
@@ -215,6 +217,7 @@ import ModularCurves.Picard.RigidDescent
 import ModularCurves.Picard.SectionAffineIntersection
 import ModularCurves.Picard.SelfAdjointN
 import ModularCurves.Picard.UnitPullback
+import ModularCurves.Vendored.RiemannRoch
 import ModularCurves.WeilPairing.AlternationReduction
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.WeilPairing.CharZeroAssembly
@@ -225,6 +228,7 @@ import ModularCurves.ForMathlib.FactorIntegrallyClosed
 import ModularCurves.ForMathlib.SmoothCurveComponents
 import ModularCurves.WeilPairing.ConstReading
 import ModularCurves.WeilPairing.DetCocycle
+import ModularCurves.WeilPairing.FactorRoot
 import ModularCurves.WeilPairing.MuNBaseChange
 import ModularCurves.WeilPairing.PairingTransport
 import ModularCurves.WeilPairing.PoincareBiextension

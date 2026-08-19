@@ -31,6 +31,7 @@ import «Adic spaces».GeometricReduction
 import «Adic spaces».GeometricSeries
 import «Adic spaces».HubnerSeparation
 import «Adic spaces».HuberRings
+import «Adic spaces».PrimeExtensionClosed
 import «Adic spaces».QuotientTate
 import «Adic spaces».IdealClosedness
 import «Adic spaces».IdealLocalization
@@ -87,6 +88,9 @@ import «Adic spaces».TateAlgebra
 import «Adic spaces».TateAlgebraTopology
 import «Adic spaces».TateAlgebraWedhorn
 import «Adic spaces».MvTateAlgebraTopology
+import «Adic spaces».Wedhorn834C1SupplierLocalInterface
+import «Adic spaces».WedhornC1StrongSupplierCore
+import «Adic spaces».WedhornC1SupplierLaurentAssembly
 import «Adic spaces».WedhornCechAcyclicity
 import «Adic spaces».Tilting
 import «Adic spaces».Uniform
@@ -98,6 +102,14 @@ import «Adic spaces».ValuationPrimeConvex
 import «Adic spaces».ValuationSpectrum
 import «Adic spaces».ValuationSpectrumCompact
 import «Adic spaces».ValuativeRel.Comap
+import «Adic spaces».WedhornCor732PerTauUpperBoundResidual
+import «Adic spaces».WedhornDenominatorClearedCandidate
+import «Adic spaces».WedhornFinalPart2PointwiseClearingThreading
+import «Adic spaces».WedhornFinalPart2SigmaPowerThreading
+import «Adic spaces».WedhornFinalPart2SigmaSupplierThreading
+import «Adic spaces».WedhornMPowerStructuralDataHonestFromCor732
+import «Adic spaces».WedhornSourceLaurentMembershipInLocalizationBase
+import «Adic spaces».WedhornValueGroupLocalizationStrictMono
 import «Adic spaces».WittVectorPrimitive
 -- Wedhorn 6.18 chain (planning skeleton, audit-pass-2 proof providers)
 import «Adic spaces».BanachOMT

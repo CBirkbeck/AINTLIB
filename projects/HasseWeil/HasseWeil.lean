@@ -2,11 +2,14 @@ import HasseWeil.Foundation.Auxiliary.DivisionPolynomial
 import HasseWeil.Foundation.Auxiliary.PullbackKaehler
 import HasseWeil.Foundation.Basic
 import HasseWeil.Foundation.ChordExpansion
+import HasseWeil.Foundation.Curves.Frobenius.QuotientCurve
+import HasseWeil.Foundation.Curves.FunctionElementAlgebra
 import HasseWeil.Foundation.Curves.Map.BaseChange
 import HasseWeil.Foundation.Curves.Basic
 import HasseWeil.Foundation.Curves.Map.CurveMap
 import HasseWeil.Foundation.Curves.Differentials
 import HasseWeil.Foundation.Curves.Divisor.Divisors
+import HasseWeil.Foundation.Curves.Ramification.InertiaDegAtAlgClosed
 import HasseWeil.Foundation.Curves.Valuation.DVR
 import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
 import HasseWeil.Foundation.Curves.Valuation.NormValuation
@@ -16,6 +19,7 @@ import HasseWeil.Foundation.Curves.NormBezout
 import HasseWeil.Foundation.Curves.Divisor.ProjectiveTuple
 import HasseWeil.Foundation.Curves.Ramification.RamificationAtInfinity
 import HasseWeil.Foundation.Curves.Map.RationalMap
+import HasseWeil.Foundation.Curves.Valuation.ResidueFieldAtSmoothPoint
 import HasseWeil.Foundation.Curves.Valuation.Valuation
 import HasseWeil.FormalGroup.Associated
 import HasseWeil.FormalGroup.CharP
@@ -29,7 +33,13 @@ import HasseWeil.FormalGroup.MulByNat
 import HasseWeil.FormalGroup.OrderSubst
 import HasseWeil.FormalGroup.PadicValFactorial
 import HasseWeil.FormalGroup.FormalGroupLawSpec
+import HasseWeil.Foundation.EC.GroupLaw
+import HasseWeil.Foundation.EC.TranslationEvaluation
+import HasseWeil.Foundation.EvenFunctions
 import HasseWeil.Foundation.InvariantDifferential
+import HasseWeil.Foundation.LegendreForm
+import HasseWeil.Foundation.SingularPoint
+import HasseWeil.Isogeny.Degree
 import HasseWeil.Isogeny.Endomorphism
 import HasseWeil.Isogeny.Dual.Relation
 import HasseWeil.Foundation.EC.MulByIntBaseCase
@@ -37,7 +47,9 @@ import HasseWeil.Foundation.EC.MulByIntComp
 import HasseWeil.Foundation.EC.AffinePointMap
 import HasseWeil.Foundation.EC.GenericPoint
 import HasseWeil.Foundation.EC.GenericPointZsmul
+import HasseWeil.Isogeny.Frobenius.GeometricCompat
 import HasseWeil.Isogeny.Kernel
+import HasseWeil.Isogeny.KernelDegree
 import HasseWeil.Isogeny.OrdTransport
 import HasseWeil.Foundation.EC.MulByIntUnramified
 import HasseWeil.Foundation.EC.PointMapSurjective
@@ -53,7 +65,9 @@ import HasseWeil.Foundation.InvariantDifferentialPullback
 import HasseWeil.Foundation.PullbackCoeff
 import HasseWeil.Foundation.OmegaCoeffMulByIntFiniteField
 import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
+import HasseWeil.Isogeny.Surjective
 import HasseWeil.Isogeny.VerschiebungFactorization
+import HasseWeil.NTorsion.TorsionGeneralN
 import HasseWeil.Pic0.PicDualDegreeViaIsDualOf
 import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
 import HasseWeil.Pic0.PicDualClassMapMultiplicativity
