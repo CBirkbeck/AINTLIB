@@ -81,6 +81,15 @@ noncomputable local instance instDecEqACOSAR : DecidableEq (AlgebraicClosure K) 
 
 variable [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
 
+/-- `W` base-changed to the algebraic closure. Statements below name it rather than respelling
+`W.baseChange (AlgebraicClosure K)`: some signatures mention it a dozen times, and elaborating
+the expanded form that often overran the heartbeat budget. Reducible, so every consumer's
+expanded form still matches definitionally. -/
+private noncomputable abbrev Wbar : WeierstrassCurve (AlgebraicClosure K) := W.baseChange (AlgebraicClosure K)
+
+/-- The base-changed curve as a `SmoothPlaneCurve`; see `Wbar` for why this is named. -/
+private noncomputable abbrev Cbar : SmoothPlaneCurve (AlgebraicClosure K) := ⟨(Wbar W).toAffine⟩
+
 /-- **The base-changed `−π` summand isogeny** `α₂ = negFrobBaseChange` over `K̄`.  Its
 pullback is the
 honest function-field base change `baseChangePullback (negFrobeniusIsog W).pullback` (the same
@@ -515,8 +524,6 @@ theorem oneSub_frob_eq_neg_at_doubling (hq : 2 ≤ Fintype.card K)
   rw [WeierstrassCurve.Affine.negY_negY] at h
   exact h.symm
 
--- Elaborating this unchanged base-changed statement exceeds the default heartbeat budget.
-set_option maxHeartbeats 5000000 in
 omit [Fintype W.toAffine.Point] in
 /-- **The doubling slope residue `addSlopePair (id, −π) ≡ ν(P)/u(P)`** (the tangent /
 `L'Hôpital`
@@ -535,23 +542,21 @@ vanish at `P`, so
 `ord_P φ ≥ 2` (`two_le_ord_P_of_Dω_vanishes_of_uniformizer`).  Hence
 `addSlopePair − λ = φ/f` has `ord_P ≥ 1`, i.e. `addSlopePair ≡ λ`. -/
 theorem oneSub_addSlopePair_resid_doubling (hq : 2 ≤ Fintype.card K)
-    (P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
-      SmoothPlaneCurve (AlgebraicClosure K)).SmoothPoint)
+    (P : (Cbar W).SmoothPoint)
     (hx_eq : P.x = (FiniteField.frobeniusAlgHom K (AlgebraicClosure K)) P.x)
     (hfrobneg : (FiniteField.frobeniusAlgHom K (AlgebraicClosure K)) P.y =
-      (W.baseChange (AlgebraicClosure K)).toAffine.negY P.x P.y)
-    (huP : 2 * P.y + (W.baseChange (AlgebraicClosure K)).a₁ * P.x +
-      (W.baseChange (AlgebraicClosure K)).a₃ ≠ 0) :
-    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
-        SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P
-      (addSlopePair (Isogeny.id (W.baseChange (AlgebraicClosure K)).toAffine)
+      (Wbar W).toAffine.negY P.x P.y)
+    (huP : 2 * P.y + (Wbar W).a₁ * P.x +
+      (Wbar W).a₃ ≠ 0) :
+    (Cbar W).pointValuation P
+      (addSlopePair (Isogeny.id (Wbar W).toAffine)
           (negFrobBaseChange W p r) -
-        algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
-          ((3 * P.x ^ 2 + 2 * (W.baseChange (AlgebraicClosure K)).a₂ * P.x +
-              (W.baseChange (AlgebraicClosure K)).a₄ -
-              (W.baseChange (AlgebraicClosure K)).a₁ * P.y) /
-            (2 * P.y + (W.baseChange (AlgebraicClosure K)).a₁ * P.x +
-              (W.baseChange (AlgebraicClosure K)).a₃))) < 1 := by
+        algebraMap (AlgebraicClosure K) (Wbar W).toAffine.FunctionField
+          ((3 * P.x ^ 2 + 2 * (Wbar W).a₂ * P.x +
+              (Wbar W).a₄ -
+              (Wbar W).a₁ * P.y) /
+            (2 * P.y + (Wbar W).a₁ * P.x +
+              (Wbar W).a₃))) < 1 := by
   set L := AlgebraicClosure K
   revert P hx_eq hfrobneg huP
   set Wb := W.baseChange L
