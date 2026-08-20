@@ -910,8 +910,20 @@ theorem seriesEval_phi_at_root_of_summable {G : PowerSeries K} {z : K}
     show (1 + z) ^ p - 1 = 0 by rw [hzp, sub_self], pow_zero, mul_one,
     PowerSeries.coeff_zero_eq_constantCoeff_apply]
 
-set_option maxHeartbeats 1000000 in
--- The nested `tsum`/Cauchy-product rewrites over `PowerSeries.coeff` are heartbeat-heavy.
+omit [NormedAlgebra ℚ_[p] K] [CompleteSpace K] [IsUltrametricDist K] in
+/-- The pointwise Cauchy-product step of `seriesEval_mul`, split out so neither the
+antidiagonal rewriting nor the surrounding `tsum` manipulation has to be elaborated inside
+the other. -/
+private theorem coeff_mul_pow_eq_sum_antidiagonal (F H : PowerSeries K) (z : K) (j : ℕ) :
+    PowerSeries.coeff j (F * H) * z ^ j =
+      ∑ ab ∈ Finset.antidiagonal j,
+        (PowerSeries.coeff ab.1 F * z ^ ab.1) * (PowerSeries.coeff ab.2 H * z ^ ab.2) := by
+  rw [PowerSeries.coeff_mul, Finset.sum_mul]
+  refine Finset.sum_congr rfl fun ab hab => ?_
+  have hj : ab.1 + ab.2 = j := Finset.mem_antidiagonal.mp hab
+  rw [show z ^ j = z ^ ab.1 * z ^ ab.2 from by rw [← pow_add, hj]]
+  ring
+
 omit [NormedAlgebra ℚ_[p] K] [CompleteSpace K] in
 /-- `seriesEval` is multiplicative on factors whose evaluations converge (nonarchimedean
 Cauchy product): `(F·H)(z) = F(z)·H(z)`. -/
@@ -919,16 +931,10 @@ theorem seriesEval_mul {F H : PowerSeries K} {z : K}
     (hF : Summable fun n : ℕ => PowerSeries.coeff n F * z ^ n)
     (hH : Summable fun n : ℕ => PowerSeries.coeff n H * z ^ n) :
     seriesEval (F * H) z = seriesEval F z * seriesEval H z := by
-  have hfg : Summable fun ab : ℕ × ℕ =>
-      (PowerSeries.coeff ab.1 F * z ^ ab.1) * (PowerSeries.coeff ab.2 H * z ^ ab.2) :=
-    hF.mul_of_nonarchimedean hH
+  -- no type ascription: bridging the written form to the lemma's own output was the cost
+  have hfg := hF.mul_of_nonarchimedean hH
   rw [seriesEval, seriesEval, seriesEval, hF.tsum_mul_tsum_eq_tsum_sum_antidiagonal hH hfg]
-  refine tsum_congr fun j => ?_
-  rw [PowerSeries.coeff_mul, Finset.sum_mul]
-  refine Finset.sum_congr rfl fun ab hab => ?_
-  have hj : ab.1 + ab.2 = j := Finset.mem_antidiagonal.mp hab
-  rw [show z ^ j = z ^ ab.1 * z ^ ab.2 from by rw [← pow_add, hj]]
-  ring
+  exact tsum_congr fun j => coeff_mul_pow_eq_sum_antidiagonal F H z j
 
 omit [NormedAlgebra ℚ_[p] K] [IsUltrametricDist K] [CompleteSpace K] in
 /-- A polynomial-coefficient series `(1+X)^i` evaluates to `(1+z)^i` (finite support). -/
