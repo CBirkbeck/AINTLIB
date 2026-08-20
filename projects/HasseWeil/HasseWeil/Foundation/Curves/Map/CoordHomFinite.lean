@@ -395,7 +395,6 @@ private theorem module_finite_of_adjoin_singleton_mul_span
   Module.finite_def.mpr (top_le_iff.mp hspan ▸
     Submodule.FG.mul hx.fg_adjoin_singleton (Submodule.fg_span hs))
 
-set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
 -- (`AdjoinRoot`-quotients) need a higher budget; same settings as
 -- `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`.
@@ -417,24 +416,30 @@ theorem algHom_coordinateRing_module_finite
   letI : Module C₂.CoordinateRing C₁.CoordinateRing := Algebra.toModule
   haveI : IsScalarTower F C₂.CoordinateRing C₁.CoordinateRing :=
     IsScalarTower.of_algebraMap_eq fun c ↦ (ψ.commutes c).symm
+  -- name the coordinate generator once: spelled out, each of its 6 occurrences
+  -- re-ran instance synthesis at the `AdjoinRoot`-quotient coordinate ring.
+  set x₁ : C₁.CoordinateRing := algebraMap (Polynomial F) C₁.CoordinateRing Polynomial.X with hx₁
   have hx : IsIntegral C₂.CoordinateRing
-      (algebraMap (Polynomial F) C₁.CoordinateRing Polynomial.X) :=
+      (x₁) :=
     algHom_coordinateRing_isIntegralElem_X ψ hψ
   -- polynomials in `x₁` with `F`-coefficients lie in the `F[C₂]`-adjoin of `x₁`
   have hadj : ∀ g : Polynomial F, algebraMap (Polynomial F) C₁.CoordinateRing g ∈
       Algebra.adjoin C₂.CoordinateRing
-        {algebraMap (Polynomial F) C₁.CoordinateRing Polynomial.X} := by
+        {x₁} := by
     intro g
     rw [← aeval_algebraMap_X C₁ g]
-    have h1 : Polynomial.aeval (algebraMap (Polynomial F) C₁.CoordinateRing Polynomial.X) g ∈
-        Algebra.adjoin F {algebraMap (Polynomial F) C₁.CoordinateRing Polynomial.X} := by
+    have h1 : Polynomial.aeval (x₁) g ∈
+        Algebra.adjoin F {x₁} := by
       rw [Algebra.adjoin_singleton_eq_range_aeval]
       exact ⟨g, rfl⟩
     have h2 : Algebra.adjoin F
-        {algebraMap (Polynomial F) C₁.CoordinateRing Polynomial.X} ≤
+        {x₁} ≤
         (Algebra.adjoin C₂.CoordinateRing
-          {algebraMap (Polynomial F) C₁.CoordinateRing Polynomial.X}).restrictScalars F :=
-      Algebra.adjoin_le_iff.mpr fun w hw ↦ Algebra.subset_adjoin hw
+          {x₁}).restrictScalars F :=
+      Algebra.adjoin_le_iff.mpr fun w hw ↦
+        -- `R` and `s` given explicitly: left implicit, unifying the `restrictScalars`
+        -- structures over the two `AdjoinRoot`-quotient coordinate rings blows the budget.
+        Algebra.subset_adjoin (R := C₂.CoordinateRing) (s := ({x₁} : Set C₁.CoordinateRing)) hw
     exact h2 h1
   -- assemble via the abstract lemma; the `{1, Y}` basis spans `F[C₁]` over the adjoin
   refine module_finite_of_adjoin_singleton_mul_span hx
