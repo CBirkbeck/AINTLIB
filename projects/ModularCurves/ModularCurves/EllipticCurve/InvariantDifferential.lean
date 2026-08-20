@@ -66,40 +66,67 @@ theorem localPresentationZeroCond (G : EllipticCurveGeom S) (V : S.affineOpens) 
     (V.1.ι ≫ G.zero) ≫ G.π = 𝟙 (V.1 : Scheme.{u}) ≫ V.1.ι := by
   rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp]
 
--- v4.33 bump: elaborating this structure's FIELD TYPES (`projModel W`, `V.2.isoSpec`)
--- exceeds the default `whnf` budget. Both inline proofs have already been extracted
--- (`localPresentationZeroCond`, `localPresentationZeroSection`) and a local reducibility
--- downgrade of `projModel` does not help — there is no proof left to break up, so the
--- budget is raised for this one DATA declaration only.
-set_option maxHeartbeats 6400000 in
-/-- **(T-OM-B1)** A pointed Weierstrass presentation of a geometric elliptic curve over
-an affine open `V`: an elliptic Weierstrass curve over the sections together with a
-pointed chart isomorphism — the per-index data of `WeierstrassAtlasData` at a single
-affine open. -/
-structure LocalPresentation (G : EllipticCurveGeom S) (V : S.affineOpens) where
+/-- The curve half of `LocalPresentation`. The five fields cannot live in one `structure`:
+each field type elaborates cheaply on its own, but a field whose type mentions a *preceding*
+field (`e` mentions `W`) makes the telescope blow the heartbeat budget. Splitting on that
+dependency — `W` becomes a parameter of the chart half — keeps every piece inside the
+default budget. -/
+structure LocalPresentationData (G : EllipticCurveGeom S) (V : S.affineOpens) where
   /-- The chart Weierstrass curve. -/
   W : WeierstrassCurve Γ(S, V.1)
   /-- The chart curve is elliptic. -/
   elliptic : W.IsElliptic
+
+/-- The chart half of `LocalPresentation`, over a *parameter* `W`; see `LocalPresentationData`. -/
+structure LocalPresentationChart (G : EllipticCurveGeom S) (V : S.affineOpens)
+    (W : WeierstrassCurve Γ(S, V.1)) where
   /-- The pointed chart isomorphism. -/
   e : pullback G.π V.1.ι ≅ projModel W
   /-- The chart isomorphism respects the structure morphisms. -/
   compat_π : e.hom ≫ projModelπ W = pullback.snd G.π V.1.ι ≫ V.2.isoSpec.hom
   /-- The chart isomorphism respects the zero sections. -/
   compat_zero : (V.2.isoSpec.inv ≫ pullback.lift (V.1.ι ≫ G.zero) (𝟙 _)
-      (localPresentationZeroCond G V)) ≫ e.hom =
-    projModelZero W
+      (localPresentationZeroCond G V)) ≫ e.hom = projModelZero W
 
+/-- **(T-OM-B1)** A pointed Weierstrass presentation of a geometric elliptic curve over
+an affine open `V`: an elliptic Weierstrass curve over the sections together with a
+pointed chart isomorphism — the per-index data of `WeierstrassAtlasData` at a single
+affine open. -/
+structure LocalPresentation (G : EllipticCurveGeom S) (V : S.affineOpens) where
+  /-- The curve and its ellipticity. -/
+  data : LocalPresentationData G V
+  /-- The chart isomorphism and its compatibilities. -/
+  chart : LocalPresentationChart G V data.W
+
+/-! The original field names, so every consumer keeps its dot-notation. Types are left to
+inference: writing them out would re-elaborate exactly what the split avoids. -/
+
+/-- The chart Weierstrass curve. -/
+abbrev LocalPresentation.W {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P : LocalPresentation G V) := P.data.W
+
+/-- The chart curve is elliptic. -/
+abbrev LocalPresentation.elliptic {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P : LocalPresentation G V) := P.data.elliptic
+
+/-- The pointed chart isomorphism. -/
+abbrev LocalPresentation.e {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P : LocalPresentation G V) := P.chart.e
+
+/-- The chart isomorphism respects the structure morphisms. -/
+abbrev LocalPresentation.compat_π {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P : LocalPresentation G V) := P.chart.compat_π
+
+/-- The chart isomorphism respects the zero sections. -/
+abbrev LocalPresentation.compat_zero {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P : LocalPresentation G V) := P.chart.compat_zero
 variable {G : EllipticCurveGeom S}
 
 /-- **(T-OM-B1)** The atlas chart at an index, as a `LocalPresentation`. -/
 noncomputable def WeierstrassAtlasData.presentation (A : WeierstrassAtlasData G)
     (i : A.ι) : LocalPresentation G (A.U i) where
-  W := A.W i
-  elliptic := A.elliptic i
-  e := A.e i
-  compat_π := A.compat_π i
-  compat_zero := A.compat_zero i
+  data := { W := A.W i, elliptic := A.elliptic i }
+  chart := { e := A.e i, compat_π := A.compat_π i, compat_zero := A.compat_zero i }
 
 namespace LocalPresentation
 
