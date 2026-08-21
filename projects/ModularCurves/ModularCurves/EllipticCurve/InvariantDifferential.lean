@@ -66,40 +66,64 @@ theorem localPresentationZeroCond (G : EllipticCurveGeom S) (V : S.affineOpens) 
     (V.1.ι ≫ G.zero) ≫ G.π = 𝟙 (V.1 : Scheme.{u}) ≫ V.1.ι := by
   rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp]
 
--- v4.33 bump: elaborating this structure's FIELD TYPES (`projModel W`, `V.2.isoSpec`)
--- exceeds the default `whnf` budget. Both inline proofs have already been extracted
--- (`localPresentationZeroCond`, `localPresentationZeroSection`) and a local reducibility
--- downgrade of `projModel` does not help — there is no proof left to break up, so the
--- budget is raised for this one DATA declaration only.
-set_option maxHeartbeats 6400000 in
-/-- **(T-OM-B1)** A pointed Weierstrass presentation of a geometric elliptic curve over
-an affine open `V`: an elliptic Weierstrass curve over the sections together with a
-pointed chart isomorphism — the per-index data of `WeierstrassAtlasData` at a single
-affine open. -/
-structure LocalPresentation (G : EllipticCurveGeom S) (V : S.affineOpens) where
+/-- The curve half of `LocalPresentation`. The five fields cannot share one `structure`:
+each field type is cheap alone, and the iso field over a *parameter* `W` is cheap too, but a
+field whose type mentions a *preceding* field makes the telescope exceed the heartbeat
+budget. Splitting on that dependency keeps every piece inside the default. -/
+structure LocalPresentationData (G : EllipticCurveGeom S) (V : S.affineOpens) where
   /-- The chart Weierstrass curve. -/
   W : WeierstrassCurve Γ(S, V.1)
   /-- The chart curve is elliptic. -/
   elliptic : W.IsElliptic
+
+/-- The chart half of `LocalPresentation`, over a *parameter* `W`. -/
+structure LocalPresentationChart (G : EllipticCurveGeom S) (V : S.affineOpens)
+    (W : WeierstrassCurve Γ(S, V.1)) where
   /-- The pointed chart isomorphism. -/
   e : pullback G.π V.1.ι ≅ projModel W
   /-- The chart isomorphism respects the structure morphisms. -/
   compat_π : e.hom ≫ projModelπ W = pullback.snd G.π V.1.ι ≫ V.2.isoSpec.hom
   /-- The chart isomorphism respects the zero sections. -/
   compat_zero : (V.2.isoSpec.inv ≫ pullback.lift (V.1.ι ≫ G.zero) (𝟙 _)
-      (localPresentationZeroCond G V)) ≫ e.hom =
-    projModelZero W
+      (localPresentationZeroCond G V)) ≫ e.hom = projModelZero W
 
+/-- **(T-OM-B1)** A pointed Weierstrass presentation of a geometric elliptic curve over
+an affine open `V`. -/
+structure LocalPresentation (G : EllipticCurveGeom S) (V : S.affineOpens) where
+  /-- The curve and its ellipticity. -/
+  data : LocalPresentationData G V
+  /-- The chart isomorphism and its compatibilities. -/
+  chart : LocalPresentationChart G V data.W
+
+/-! Original field names preserved for consumers; types inferred so they do not
+re-elaborate what the split avoids. -/
+
+/-- The chart Weierstrass curve. -/
+abbrev LocalPresentation.W {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P : LocalPresentation G V) := P.data.W
+
+/-- The chart curve is elliptic. -/
+abbrev LocalPresentation.elliptic {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P : LocalPresentation G V) := P.data.elliptic
+
+/-- The pointed chart isomorphism. -/
+abbrev LocalPresentation.e {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P : LocalPresentation G V) := P.chart.e
+
+/-- The chart isomorphism respects the structure morphisms. -/
+abbrev LocalPresentation.compat_π {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P : LocalPresentation G V) := P.chart.compat_π
+
+/-- The chart isomorphism respects the zero sections. -/
+abbrev LocalPresentation.compat_zero {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P : LocalPresentation G V) := P.chart.compat_zero
 variable {G : EllipticCurveGeom S}
 
 /-- **(T-OM-B1)** The atlas chart at an index, as a `LocalPresentation`. -/
 noncomputable def WeierstrassAtlasData.presentation (A : WeierstrassAtlasData G)
     (i : A.ι) : LocalPresentation G (A.U i) where
-  W := A.W i
-  elliptic := A.elliptic i
-  e := A.e i
-  compat_π := A.compat_π i
-  compat_zero := A.compat_zero i
+  data := { W := A.W i, elliptic := A.elliptic i }
+  chart := { e := A.e i, compat_π := A.compat_π i, compat_zero := A.compat_zero i }
 
 namespace LocalPresentation
 
@@ -349,22 +373,15 @@ lemma transportE_baseChange (f : S' ⟶ S) (t : G'.E ⟶ G.E)
       (transport_isPullback_model f hV' P).isoPullback_inv_fst,
     (transport_isPullback' f t hsq P hV').isoPullback_hom_fst]
 
-/-- **(T-OM-B3)** Transport of a presentation along a cartesian pointed square over
-`f : S' ⟶ S`, to an affine open inside the preimage of the chart: the chart curve is
-the coefficient base change, the chart isomorphism the induced comparison of pullbacks
-(`isPullback_projModelBaseChange` + pasting). Restriction is the case `f = 𝟙 S`. -/
-noncomputable def transport (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+/-- The zero-section compatibility of `LocalPresentation.transport`, extracted so the
+structure instance is a thin assembly. -/
+private theorem transport_compat_zero (f : S' ⟶ S) (t : G'.E ⟶ G.E)
     (hsq : IsPullback t G'.π G.π f) (hz : G'.zero ≫ t = f ≫ G.zero)
     (P : LocalPresentation G V)
     {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
-    LocalPresentation G' V' where
-  W := P.W.map (sectionsMapLE f hV')
-  elliptic := by
-    letI := P.elliptic
-    exact ⟨by rw [WeierstrassCurve.map_Δ]; exact P.W.isUnit_Δ.map _⟩
-  e := transportE f t hsq P hV'
-  compat_π := transportE_π f t hsq P hV'
-  compat_zero := by
+    (V'.2.isoSpec.inv ≫ pullback.lift (V'.1.ι ≫ G'.zero) (𝟙 _)
+        (localPresentationZeroCond G' V')) ≫ (transportE f t hsq P hV').hom =
+      projModelZero (P.W.map (sectionsMapLE f hV')) := by
     letI : Algebra Γ(S, V.1) Γ(S', V'.1) := (sectionsMapLE f hV').toAlgebra
     refine (transport_isPullback_model f hV' P).hom_ext ?_ ?_
     · -- the `projModelBaseChange` leg: reduce to `P.compat_zero` via the zero-section
@@ -415,6 +432,25 @@ noncomputable def transport (f : S' ⟶ S) (t : G'.E ⟶ G.E)
       rw [pullback.lift_snd, Category.id_comp, Iso.inv_hom_id]
       rfl
 
+
+/-- **(T-OM-B3)** Transport of a presentation along a cartesian pointed square over
+`f : S' ⟶ S`, to an affine open inside the preimage of the chart: the chart curve is
+the coefficient base change, the chart isomorphism the induced comparison of pullbacks
+(`isPullback_projModelBaseChange` + pasting). Restriction is the case `f = 𝟙 S`. -/
+noncomputable def transport (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) (hz : G'.zero ≫ t = f ≫ G.zero)
+    (P : LocalPresentation G V)
+    {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
+    LocalPresentation G' V' where
+  data :=
+    { W := P.W.map (sectionsMapLE f hV')
+      elliptic := by
+        letI := P.elliptic
+        exact ⟨by rw [WeierstrassCurve.map_Δ]; exact P.W.isUnit_Δ.map _⟩ }
+  chart :=
+    { e := transportE f t hsq P hV'
+      compat_π := transportE_π f t hsq P hV'
+      compat_zero := transport_compat_zero f t hsq hz P hV' }
 end Transport
 
 @[simp] theorem transport_W {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
@@ -654,7 +690,7 @@ private lemma transportE_restrict_restrict {VP : S.affineOpens}
         transportE_baseChange (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
           P (show V.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using p)]
     have hRHS : ((P.restrict (h.trans p)).e.hom ≫
-        eqToHom (by rw [hWW])) ≫
+        eqToHom (by exact congrArg projModel hWW)) ≫
         projModelBaseChangeOf (sectionsMapLE (𝟙 S)
           (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p))
           P.W ((P.restrict p).restrict h).W hWcomp =
@@ -663,7 +699,7 @@ private lemma transportE_restrict_restrict {VP : S.affineOpens}
           transportTheta (G' := G) (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
             (V := VP) (V' := V) (by simpa using p)) ≫ P.e.hom := by
       rw [Category.assoc]
-      rw [show eqToHom (by rw [hWW]) ≫
+      rw [show eqToHom (by exact congrArg projModel hWW) ≫
           projModelBaseChangeOf (sectionsMapLE (𝟙 S)
             (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p))
             P.W ((P.restrict p).restrict h).W hWcomp =
@@ -763,8 +799,8 @@ presentations through their charts up to the canonical transport: presentations 
 equal curves and `eqToHom`-related chart isomorphisms have equal comparisons. -/
 theorem transVC_congr {V'' : S.affineOpens} (P₁ P₂ Q₁ Q₂ : LocalPresentation G V'')
     (w₁ : Q₁.W = P₁.W) (w₂ : Q₂.W = P₂.W)
-    (he₁ : P₁.e.hom = Q₁.e.hom ≫ eqToHom (by rw [w₁]))
-    (he₂ : P₂.e.hom = Q₂.e.hom ≫ eqToHom (by rw [w₂])) :
+    (he₁ : P₁.e.hom = Q₁.e.hom ≫ eqToHom (by exact congrArg projModel w₁))
+    (he₂ : P₂.e.hom = Q₂.e.hom ≫ eqToHom (by exact congrArg projModel w₂)) :
     P₁.transVC P₂ = Q₁.transVC Q₂ := by
   have hPinv : P₁.e.inv = eqToHom (show projModel P₁.W = projModel Q₁.W by rw [w₁]) ≫
       Q₁.e.inv := by
@@ -779,7 +815,7 @@ theorem transVC_congr {V'' : S.affineOpens} (P₁ P₂ Q₁ Q₂ : LocalPresenta
         eqToHom (show projModel Q₁.W = projModel P₁.W by rw [w₁]) ≫ P₁.e.inv := by
       rw [hPinv, ← Category.assoc, eqToHom_trans, eqToHom_refl, Category.id_comp]
     have hQ₂hom : Q₂.e.hom = P₂.e.hom ≫
-        eqToHom (show projModel P₂.W = projModel Q₂.W by rw [w₂]) := by
+        eqToHom (show projModel P₂.W = projModel Q₂.W from congrArg projModel w₂.symm) := by
       rw [he₂, Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
     rw [Iso.trans_hom, Iso.symm_hom, hQ₁inv, hQ₂hom]
     simp only [Category.assoc]
@@ -792,8 +828,8 @@ theorem transVC_congr {V'' : S.affineOpens} (P₁ P₂ Q₁ Q₂ : LocalPresenta
 /-- **(T-OM-B7 coherence, unit form)** -/
 theorem transUnit_congr {V'' : S.affineOpens} (P₁ P₂ Q₁ Q₂ : LocalPresentation G V'')
     (w₁ : Q₁.W = P₁.W) (w₂ : Q₂.W = P₂.W)
-    (he₁ : P₁.e.hom = Q₁.e.hom ≫ eqToHom (by rw [w₁]))
-    (he₂ : P₂.e.hom = Q₂.e.hom ≫ eqToHom (by rw [w₂])) :
+    (he₁ : P₁.e.hom = Q₁.e.hom ≫ eqToHom (by exact congrArg projModel w₁))
+    (he₂ : P₂.e.hom = Q₂.e.hom ≫ eqToHom (by exact congrArg projModel w₂)) :
     P₁.transUnit P₂ = Q₁.transUnit Q₂ := by
   rw [transUnit, transUnit, transVC_congr P₁ P₂ Q₁ Q₂ w₁ w₂ he₁ he₂]
 
@@ -885,14 +921,14 @@ private lemma transportE_restrict_transport {S' : Scheme.{u}} {G' : EllipticCurv
       rw [show (P.transport f t hsq hz hV').e = transportE f t hsq P hV' from rfl]
       rw [Category.assoc, Category.assoc, transportE_baseChange f t hsq P hV']
     have hRHS : ((P.transport f t hsq hz (h.trans hV')).e.hom ≫
-        eqToHom (by rw [hWW])) ≫
+        eqToHom (by exact congrArg projModel hWW)) ≫
         projModelBaseChangeOf (sectionsMapLE f (h.trans hV'))
           P.W ((P.transport f t hsq hz hV').restrict h).W hWcomp =
         (transportTheta (G' := G') (𝟙 S') (𝟙 G'.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
             (V := V') (V' := V'') (by simpa using h) ≫
           transportTheta f t hsq hV') ≫ P.e.hom := by
       rw [Category.assoc]
-      rw [show eqToHom (by rw [hWW]) ≫
+      rw [show eqToHom (by exact congrArg projModel hWW) ≫
           projModelBaseChangeOf (sectionsMapLE f (h.trans hV'))
             P.W ((P.transport f t hsq hz hV').restrict h).W hWcomp =
         projModelBaseChangeOf (sectionsMapLE f (h.trans hV'))
@@ -1019,7 +1055,7 @@ lemma transportE_transport_restrict {S' : Scheme.{u}} {G' : EllipticCurveGeom S'
           P (show W₀.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using w)]
     have hRHS : ((P.transport f t hsq hz
         (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE w)).le)).e.hom ≫
-        eqToHom (by rw [hWW])) ≫
+        eqToHom (by exact congrArg projModel hWW)) ≫
         projModelBaseChangeOf
           (sectionsMapLE f (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE w)).le))
           P.W ((P.restrict w).transport f t hsq hz hV'').W hWcomp =
@@ -1027,7 +1063,7 @@ lemma transportE_transport_restrict {S' : Scheme.{u}} {G' : EllipticCurveGeom S'
           transportTheta (G' := G) (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
             (V := VP) (V' := W₀) (by simpa using w)) ≫ P.e.hom := by
       rw [Category.assoc]
-      rw [show eqToHom (by rw [hWW]) ≫
+      rw [show eqToHom (by exact congrArg projModel hWW) ≫
           projModelBaseChangeOf
             (sectionsMapLE f (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE w)).le))
             P.W ((P.restrict w).transport f t hsq hz hV'').W hWcomp =
@@ -1222,13 +1258,13 @@ lemma transportE_transport_transport {S'' S' : Scheme.{u}}
     have hRHS : ((P.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
         hzc
         (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).e.hom ≫
-        eqToHom (by rw [hWW])) ≫
+        eqToHom (by exact congrArg projModel hWW)) ≫
         projModelBaseChangeOf (sectionsMapLE (f ≫ g)
           (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le))
           P.W ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W hWcomp =
         (transportTheta f t hsq_f hV'' ≫ transportTheta g s hsq_g hV') ≫ P.e.hom := by
       rw [Category.assoc]
-      rw [show eqToHom (by rw [hWW]) ≫
+      rw [show eqToHom (by exact congrArg projModel hWW) ≫
           projModelBaseChangeOf (sectionsMapLE (f ≫ g)
             (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le))
             P.W ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W
@@ -1677,17 +1713,19 @@ set_option backward.isDefEq.respectTransparency false in
 model read through `projModelVCIso`. The chart curve becomes `C • P.W`. -/
 noncomputable def ofVC {V : S.affineOpens} (P : LocalPresentation G V)
     (C : VariableChange Γ(S, V.1)) : LocalPresentation G V where
-  W := C • P.W
-  elliptic := by letI := P.elliptic; infer_instance
-  e := P.e ≪≫ (projModelVCIso C P.W).symm
-  compat_π := by
-    rw [Iso.trans_hom, Iso.symm_hom, Category.assoc, ← P.compat_π]
-    congr 1
-    rw [← projModelVCIso_π C P.W, Iso.inv_hom_id_assoc]
-  compat_zero := by
-    rw [Iso.trans_hom, Iso.symm_hom, ← Category.assoc, P.compat_zero,
-      Iso.comp_inv_eq]
-    exact (projModelVCIso_zero C P.W).symm
+  data :=
+    { W := C • P.W
+      elliptic := by letI := P.elliptic; infer_instance }
+  chart :=
+    { e := P.e ≪≫ (projModelVCIso C P.W).symm
+      compat_π := by
+        rw [Iso.trans_hom, Iso.symm_hom, Category.assoc, ← P.compat_π]
+        congr 1
+        rw [← projModelVCIso_π C P.W, Iso.inv_hom_id_assoc]
+      compat_zero := by
+        rw [Iso.trans_hom, Iso.symm_hom, ← Category.assoc, P.compat_zero,
+          Iso.comp_inv_eq]
+        exact (projModelVCIso_zero C P.W).symm }
 
 @[simp] theorem ofVC_W {V : S.affineOpens} (P : LocalPresentation G V)
     (C : WeierstrassCurve.VariableChange Γ(S, V.1)) : (P.ofVC C).W = C • P.W :=

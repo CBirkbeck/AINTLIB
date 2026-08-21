@@ -46,7 +46,8 @@ theorem nonempty_localPresentation_top (G : EllipticCurveGeom (Spec (CommRingCat
   have hU : U = (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of k)).affineOpens) :=
     Subtype.ext (eq_top_of_mem_specField hsU)
   subst hU
-  exact ⟨{ W := W, elliptic := hell, e := e, compat_π := heπ, compat_zero := hez }⟩
+  exact ⟨{ data := { W := W, elliptic := hell }
+           chart := { e := e, compat_π := heπ, compat_zero := hez } }⟩
 
 /-- **(DS4 M1c-1)** A choice of global Weierstrass presentation over a field. -/
 noncomputable def localPresentationTop (G : EllipticCurveGeom (Spec (CommRingCat.of k))) :

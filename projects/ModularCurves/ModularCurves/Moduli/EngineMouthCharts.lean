@@ -150,7 +150,7 @@ theorem exists_presentation_cover_span_top [IsAffine X]
         (algebraMap ↑Γ(X, ⊤) (Localization S')) m.toPrimeSpectrum))
     obtain ⟨g, hgle, hgmem⟩ :=
       (isAffineOpen_top X).exists_basicOpen_le (V := U.1) ⟨_, hxU⟩ trivial
-    exact ⟨g, (⟨W, hell, e, hπ, hz⟩ : LocalPresentation C U).restrict hgle, hgmem⟩
+    exact ⟨g, (⟨⟨W, hell⟩, ⟨e, hπ, hz⟩⟩ : LocalPresentation C U).restrict hgle, hgmem⟩
   choose g P hmem using hchart
   refine ⟨MaximalSpectrum (Localization S'), Fintype.ofFinite _, g, P, ?_⟩
   -- the span condition: no maximal ideal of `Localization S'` contains all the `g m`
@@ -2809,7 +2809,7 @@ lemma gluePiece_chart_congr [IsAffine X] (a g : ↑Γ(X, ⊤))
     calc eqToHom (congrArg projModel hQW).symm ≫ Q.e.inv
         = eqToHom (congrArg projModel hQW).symm ≫ (Q.e.inv ≫ Q'.e.hom) ≫ Q'.e.inv := by
           rw [Category.assoc, Iso.hom_inv_id, Category.comp_id]
-      _ = eqToHom (congrArg projModel hQW).symm ≫ eqToHom (by rw [hQW, hQW']) ≫ Q'.e.inv := by
+      _ = eqToHom (congrArg projModel hQW).symm ≫ eqToHom (by exact congrArg projModel (hQW.trans hQW'.symm)) ≫ Q'.e.inv := by
           rw [hIso]
       _ = eqToHom (congrArg projModel hQW').symm ≫ Q'.e.inv := by
           rw [← Category.assoc, eqToHom_trans]
@@ -3223,17 +3223,17 @@ theorem nativeGlue_agree [IsAffine X] (a : ↑Γ(X, ⊤)) {ι : Type u}
   have hR1 : (sectionsMapLE (𝟙 X) hk).comp (awayToSections a (f k))
       = (sectionsMapLE (𝟙 X) hl).comp (awayToSections a (f l)) := hρk_om.trans hρl_om.symm
   have hpi : ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).e.inv ≫ fstV
-      = eqToHom (by rw [show ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).W = ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).W from by
+      = eqToHom (by exact congrArg projModel (show ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).W = ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).W from by
           have := ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).transVC_smul ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl)
-          rwa [hVC1 k l, one_smul] at this])
+          rwa [hVC1 k l, one_smul] at this).symm)
         ≫ ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).e.inv ≫ fstV := by
     have hIso := pointedIso_hom_of_transVC_eq_one_loc (hVC1 k l)
     rw [show (((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).pointedIso ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl)).hom
       = ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).e.inv ≫ ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).e.hom from rfl] at hIso
     have hEk : ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).e.inv
-        = eqToHom (by rw [show ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).W = ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).W from by
+        = eqToHom (by exact congrArg projModel (show ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).W = ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).W from by
             have := ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).transVC_smul ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl)
-            rwa [hVC1 k l, one_smul] at this])
+            rwa [hVC1 k l, one_smul] at this).symm)
           ≫ ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).e.inv := by
       rw [← hIso, Category.assoc, Iso.hom_inv_id, Category.comp_id]
     rw [hEk, Category.assoc]

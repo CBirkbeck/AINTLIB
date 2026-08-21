@@ -100,14 +100,16 @@ noncomputable def tautPresentation {A : Type u} [CommRing A] (W : WeierstrassCur
   have hφ : Spec.map (CommRingCat.ofHom (algebraMap A ↑Γ(S, (⊤ : S.Opens)))) =
       S.isoSpec.inv := (Scheme.isoSpec_Spec_inv (.of A)).symm
   refine
-    { W := W.map (algebraMap A ↑Γ(S, (⊤ : S.Opens)))
-      elliptic := inferInstance
-      e := asIso (pullback.fst (projModelπ W) (⊤ : S.Opens).ι) ≪≫
-        (asIso (pullback.fst (projModelπ W) (Spec.map (CommRingCat.ofHom
-          (algebraMap A ↑Γ(S, (⊤ : S.Opens))))))).symm ≪≫
-        (isPullback_projModelBaseChange W).isoPullback.symm
-      compat_π := ?_
-      compat_zero := ?_ }
+    { data :=
+        { W := W.map (algebraMap A ↑Γ(S, (⊤ : S.Opens)))
+          elliptic := inferInstance }
+      chart :=
+        { e := asIso (pullback.fst (projModelπ W) (⊤ : S.Opens).ι) ≪≫
+            (asIso (pullback.fst (projModelπ W) (Spec.map (CommRingCat.ofHom
+              (algebraMap A ↑Γ(S, (⊤ : S.Opens))))))).symm ≪≫
+            (isPullback_projModelBaseChange W).isoPullback.symm
+          compat_π := ?_
+          compat_zero := ?_ } }
   · have hcrux : ∀ (h : (⊤ : S.Opens) ∈ S.affineOpens),
         (IsAffineOpen.isoSpec h).hom ≫ Spec.map (CommRingCat.ofHom
           (algebraMap A ↑Γ(S, (⊤ : S.Opens)))) = (⊤ : S.Opens).ι := by
