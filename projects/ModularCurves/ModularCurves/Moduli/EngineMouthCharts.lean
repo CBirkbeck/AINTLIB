@@ -150,7 +150,7 @@ theorem exists_presentation_cover_span_top [IsAffine X]
         (algebraMap ↑Γ(X, ⊤) (Localization S')) m.toPrimeSpectrum))
     obtain ⟨g, hgle, hgmem⟩ :=
       (isAffineOpen_top X).exists_basicOpen_le (V := U.1) ⟨_, hxU⟩ trivial
-    exact ⟨g, (⟨⟨W, hell⟩, ⟨e, hπ, hz⟩⟩ : LocalPresentation C U).restrict hgle, hgmem⟩
+    exact ⟨g, (⟨W, hell, e, hπ, hz⟩ : LocalPresentation C U).restrict hgle, hgmem⟩
   choose g P hmem using hchart
   refine ⟨MaximalSpectrum (Localization S'), Fintype.ofFinite _, g, P, ?_⟩
   -- the span condition: no maximal ideal of `Localization S'` contains all the `g m`
