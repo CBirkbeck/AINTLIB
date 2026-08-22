@@ -69,3 +69,21 @@ theorem wp_8_1_stronglySheafy (s : ℕ) :
 
 /-- **[WP] Theorem 8.1 (not stably uniform)**: `𝒜` is not stably uniform. -/
 theorem wp_8_1_not_isStablyUniform : ¬ IsStablyUniform (WPA K (fun k => k)) := sorry
+
+/-- **[WP] Theorem 8.1 (`𝒜°` is a ring of integral elements)**: the maximal plus ring
+`ringPlus 𝒜 = 𝒜°` is open and integrally closed, hence a legitimate `A⁺`.
+
+As on the finite-jet side, this is what stops `wp_8_1_isSheafyComplete` being vacuous:
+`IsSheafyComplete` quantifies over the subtype `RingOfIntegralElements 𝒜`, and this exhibits
+an inhabitant, so sheafiness at `(𝒜, 𝒜°)` follows by instantiation. -/
+theorem wp_8_1_powerBounded_isRingOfIntegralElements :
+    IsRingOfIntegralElements ((ringPlus (WPA K (fun k => k)) : Subring (WPA K (fun k => k)))) :=
+  sorry
+
+/-- **[WP] Theorem 8.1 (the shifted-weight algebras have a ring of integral elements)**: the
+maximal plus ring of `𝒜_{w+s}` is one, so `wp_8_1_stronglySheafy` is not a vacuous
+quantification either. -/
+theorem wp_8_1_shifted_powerBounded_isRingOfIntegralElements (s : ℕ) :
+    IsRingOfIntegralElements
+      ((ringPlus (WPA K (shiftWeight (fun k => k) s)) :
+        Subring (WPA K (shiftWeight (fun k => k) s)))) := sorry

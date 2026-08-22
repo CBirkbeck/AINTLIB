@@ -142,6 +142,7 @@ import «Adic spaces».OpenMapping
 import «Adic spaces».OrderedGroupConvex
 import «Adic spaces».PerfectoidRing
 import «Adic spaces».PerfectoidSpace
+import «Adic spaces».PowerBoundedIntegralElements
 import «Adic spaces».Presheaf
 import «Adic spaces».PresheafAdicCompletion
 import «Adic spaces».PresheafFunctoriality

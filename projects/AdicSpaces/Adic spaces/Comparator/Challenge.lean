@@ -95,3 +95,26 @@ theorem fjp_1_1_stronglySheafy (n : ℕ) :
 
 /-- **[FJP] Theorem 1.1 (not stably uniform)**: 𝓐 is not stably uniform. -/
 theorem fjp_1_1_not_isStablyUniform : ¬ IsStablyUniform (JetA K) := sorry
+
+/-- **[FJP] Theorem 1.1 (`𝓐°` is a ring of integral elements)**: the maximal plus ring
+`ringPlus 𝓐 = 𝓐°` is open and integrally closed, hence a legitimate `A⁺`.
+
+This is what stops `fjp_1_1_isSheafyComplete` being vacuous. `IsSheafyComplete 𝓐` quantifies
+over `RingOfIntegralElements 𝓐`, a *subtype*; without an inhabitant the quantification says
+nothing. Certifying this exhibits one, so sheafiness at `(𝓐, 𝓐°)` — the pair the paper
+claims — follows by instantiating `fjp_1_1_isSheafyComplete` at `⟨𝓐°, this⟩`. -/
+theorem fjp_1_1_powerBounded_isRingOfIntegralElements :
+    IsRingOfIntegralElements ((ringPlus (JetA K) : Subring (JetA K))) := sorry
+
+/-- **[FJP] Theorem 1.1 (the Tate extensions have a ring of integral elements)**: the maximal
+plus ring of `𝓐⟨V₁,…,Vₙ⟩` is one, so `fjp_1_1_stronglySheafy` is not a vacuous quantification
+either. The extension carries a basis-defined topology rather than a norm, so this does not
+follow from the normed argument that covers `𝓐` itself. -/
+theorem fjp_1_1_tateExt_powerBounded_isRingOfIntegralElements (n : ℕ) :
+    letI := mvTateAlgebraTopology' (A := JetA K) n
+    haveI := mvTate_isTateRing (A := JetA K) n
+    haveI := mvTate_nonarchimedean (A := JetA K) n
+    haveI := mvTateAlgebraTopology'_isTopologicalRing (A := JetA K) n
+    IsRingOfIntegralElements
+      (TopologicalRing.powerBoundedSubring.toSubring
+        ↥(restrictedMvPowerSeriesSubring n (JetA K))) := sorry

@@ -58,3 +58,14 @@ theorem wp_8_1_stronglySheafy (s : ℕ) :
 /-- **[WP] Theorem 8.1 (not stably uniform)**. -/
 theorem wp_8_1_not_isStablyUniform : ¬ IsStablyUniform (WPA K (fun k => k)) :=
   weightedParity_not_stablyUniform_of_dvr K
+
+/-- **[WP] Theorem 8.1 (`𝒜°` is a ring of integral elements)**. -/
+theorem wp_8_1_powerBounded_isRingOfIntegralElements :
+    IsRingOfIntegralElements ((ringPlus (WPA K (fun k => k)) : Subring (WPA K (fun k => k)))) :=
+  inferInstance
+
+/-- **[WP] Theorem 8.1 (the shifted-weight algebras have a ring of integral elements)**. -/
+theorem wp_8_1_shifted_powerBounded_isRingOfIntegralElements (s : ℕ) :
+    IsRingOfIntegralElements
+      ((ringPlus (WPA K (shiftWeight (fun k => k) s)) :
+        Subring (WPA K (shiftWeight (fun k => k) s)))) := inferInstance

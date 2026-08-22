@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FJP.Over.SheafyEndpoints
+import «Adic spaces».PowerBoundedIntegralElements
 import «Adic spaces».FJP.Over.StrongSheafy
 
 /-!
@@ -62,3 +63,22 @@ theorem fjp_1_1_stronglySheafy (n : ℕ) :
 /-- **[FJP] Theorem 1.1 (not stably uniform)**. -/
 theorem fjp_1_1_not_isStablyUniform : ¬ IsStablyUniform (JetA K) :=
   finiteJet_not_stablyUniform_of_dvr K
+
+/-- **[FJP] Theorem 1.1 (`𝓐°` is a ring of integral elements)**. -/
+theorem fjp_1_1_powerBounded_isRingOfIntegralElements :
+    IsRingOfIntegralElements ((ringPlus (JetA K) : Subring (JetA K))) := inferInstance
+
+/-- **[FJP] Theorem 1.1 (the Tate extensions have a ring of integral elements)**. -/
+theorem fjp_1_1_tateExt_powerBounded_isRingOfIntegralElements (n : ℕ) :
+    letI := mvTateAlgebraTopology' (A := JetA K) n
+    haveI := mvTate_isTateRing (A := JetA K) n
+    haveI := mvTate_nonarchimedean (A := JetA K) n
+    haveI := mvTateAlgebraTopology'_isTopologicalRing (A := JetA K) n
+    IsRingOfIntegralElements
+      (TopologicalRing.powerBoundedSubring.toSubring
+        ↥(restrictedMvPowerSeriesSubring n (JetA K))) := by
+  letI := mvTateAlgebraTopology' (A := JetA K) n
+  haveI := mvTate_isTateRing (A := JetA K) n
+  haveI := mvTate_nonarchimedean (A := JetA K) n
+  haveI := mvTateAlgebraTopology'_isTopologicalRing (A := JetA K) n
+  exact isRingOfIntegralElements_powerBoundedSubring

@@ -8,7 +8,9 @@
         "fjp_1_1_not_isNoetherianRing",
         "fjp_1_1_powerBounded_eq_unitBall",
         "fjp_1_1_stronglySheafy",
-        "fjp_1_1_not_isStablyUniform"
+        "fjp_1_1_not_isStablyUniform",
+        "fjp_1_1_powerBounded_isRingOfIntegralElements",
+        "fjp_1_1_tateExt_powerBounded_isRingOfIntegralElements"
     ],
     "permitted_axioms": [
         "propext",

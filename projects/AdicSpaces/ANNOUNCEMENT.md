@@ -22,7 +22,24 @@ headline theorems of *Uniform sheafy Tate rings that are not stably uniform*
    an integral domain, so the failure of stable uniformity is *not* caused by a nilpotent.
    * Statements: `Adic spaces/WP/Main.lean` (headline endpoints, two base layers).
 
-All fourteen certified statements (seven per theorem) are kernel-certified; see below.
+All eighteen certified statements (nine per theorem) are kernel-certified; see below.
+
+Two of the nine on each side rule out vacuity rather than adding mathematics.
+`IsSheafyComplete` quantifies over `RingOfIntegralElements`, a *subtype*: over an empty
+subtype it holds vacuously and says nothing about `(𝓐, 𝓐°)`. So the maximal plus ring is
+certified to be a ring of integral elements, for `𝓐` and `𝒜` and separately for the Tate
+extensions and shifted-weight algebras the strong-sheafiness statements range over. The
+extension case needed `ValuationSpectrum.isRingOfIntegralElements_powerBoundedSubring`, which
+proves this for any Huber ring — the older argument took openness from a metric ball, and the
+extensions carry a basis-defined topology rather than a norm.
+
+`IsStablyUniform` also changed on 2026-08-22: it now quantifies only over data satisfying
+`D.IsRational`. `RationalLocData` is raw data and carries no guarantee that `T ∪ {s}` generates
+the unit ideal. Quantifying over all of it made the class stronger than stable uniformity in
+the standard sense, and so its negation weaker than the standard failure — the only way this
+development uses it. The proofs were unaffected: they always instantiated at the chart datum,
+whose rationality `chartDatum_isRational` proves.
+
 
 ## Why this toolchain
 
@@ -43,9 +60,9 @@ replayed through the Lean kernel. Both runs end `Your solution is okay!`. See
 `Adic spaces/Comparator/README.md` for the trust boundary and the full status, and run:
 
 ```sh
-bash projects/AdicSpaces/scripts/certify.sh                    # Theorem 1.1 (seven statements)
+bash projects/AdicSpaces/scripts/certify.sh                    # Theorem 1.1 (nine statements)
 CONFIG="projects/AdicSpaces/Adic spaces/Comparator/wp-config.json" \
-  bash projects/AdicSpaces/scripts/certify.sh                  # Theorem 8.1 (seven statements)
+  bash projects/AdicSpaces/scripts/certify.sh                  # Theorem 8.1 (nine statements)
 ```
 
 ## Manifests
@@ -84,7 +101,7 @@ announcement's path, owned by the central bump process):
 
 ## Sorry policy on this branch
 
-**Every certified statement — all fourteen — has a `sorry`-free proof closure**; the axiom
+**Every certified statement — all eighteen — has a `sorry`-free proof closure**; the axiom
 set of each is exactly `[propext, Quot.sound, Classical.choice]`, verified by
 `#print axioms` and re-checked by comparator. The wider repository tree contains `sorry`s
 outside this announcement's scope: the Nonarchimedean Scottish Book *statements* (open

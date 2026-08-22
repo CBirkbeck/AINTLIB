@@ -4,13 +4,17 @@
 # [propext, Quot.sound, Classical.choice], and kernel acceptance.
 #
 # Prerequisites (one-time):
-#   git clone https://github.com/leanprover/comparator /tmp/comparator
-#   cd /tmp/comparator && lake build            # its toolchain matches this project exactly
+#   git clone https://github.com/leanprover/comparator ~/.cache/lean-certify/comparator
+#   cd ~/.cache/lean-certify/comparator
+#   # PIN IT: comparator's HEAD tracks the newest toolchain, but the judging kernel must
+#   # match the judged development. This project is v4.33.0, so check out the last commit
+#   # on that line (c0c5a52 as of 2026-08-22) before building.
+#   git switch --detach c0c5a52 && lake build
 #   # the lean4export artifact lake fetches is a Linux ELF; build it natively instead:
-#   git clone https://github.com/leanprover/lean4export /tmp/lean4export
-#   cd /tmp/lean4export && git checkout \
+#   git clone https://github.com/leanprover/lean4export ~/.cache/lean-certify/lean4export
+#   cd ~/.cache/lean-certify/lean4export && git switch --detach \
 #     $(python3 -c "import json;print([p['rev'] for p in \
-#       json.load(open('/tmp/comparator/lake-manifest.json'))['packages'] \
+#       json.load(open('$HOME/.cache/lean-certify/comparator/lake-manifest.json'))['packages'] \
 #       if p['name']=='lean4export'][0])") && lake build
 #
 # On Linux, install the real landrun (github.com/Zouuup/landrun) for sandboxing.
@@ -29,8 +33,12 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 CONFIG="${CONFIG:-projects/AdicSpaces/Adic spaces/Comparator/comparator-config.json}"
 
-COMPARATOR_DIR="${COMPARATOR_DIR:-/tmp/comparator}"
-export COMPARATOR_LEAN4EXPORT="${COMPARATOR_LEAN4EXPORT:-/tmp/lean4export/.lake/build/bin/lean4export}"
+# Persistent by default. These lived in /tmp until 2026-08-22, when a cleared /tmp
+# silently broke reproduction: both Lean builds passed and only the kernel replay failed.
+# Override with COMPARATOR_DIR / COMPARATOR_LEAN4EXPORT if you keep them elsewhere.
+CERTIFY_CACHE="${CERTIFY_CACHE:-$HOME/.cache/lean-certify}"
+COMPARATOR_DIR="${COMPARATOR_DIR:-$CERTIFY_CACHE/comparator}"
+export COMPARATOR_LEAN4EXPORT="${COMPARATOR_LEAN4EXPORT:-$CERTIFY_CACHE/lean4export/.lake/build/bin/lean4export}"
 if ! command -v landrun >/dev/null 2>&1; then
   export COMPARATOR_LANDRUN="${COMPARATOR_LANDRUN:-$COMPARATOR_DIR/scripts/fake-landrun.sh}"
 fi

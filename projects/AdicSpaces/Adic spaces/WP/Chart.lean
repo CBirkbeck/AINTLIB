@@ -1096,7 +1096,8 @@ uniformity need not be caused by a nilpotent in the bad rational localization"; 
 theorem not_isStablyUniform_WPA (hwu : ∀ M : ℕ, ∃ n : ℕ, 1 ≤ n ∧ M ≤ w n)
     (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
     ¬ IsStablyUniform (WPA K w) := fun h =>
-  not_isUniform_chart hwu ϖ hK₀ ⟨h.presheafValue_isUniform (chartDatum ϖ)⟩
+  not_isUniform_chart hwu ϖ hK₀
+    ⟨h.presheafValue_isUniform (chartDatum ϖ) (chartDatum_isRational ϖ)⟩
 
 variable {K w} in
 /-- The bad chart is reduced — with NO classical input (a domain is reduced).  The

@@ -1468,7 +1468,8 @@ structure of `𝓐` is taken as an instance hypothesis (any witness — e.g.
 choice). -/
 theorem not_isStablyUniform_JetA (ϖ : Uniformizer K) [IsHuberRing (JetA K)] :
     ¬ TopologicalRing.IsStablyUniform (JetA K) := fun h =>
-  not_isUniform_chart K ϖ ⟨h.presheafValue_isUniform (chartDatum K ϖ)⟩
+  not_isUniform_chart K ϖ
+    ⟨h.presheafValue_isUniform (chartDatum K ϖ) (chartDatum_isRational K ϖ)⟩
 
 end
 

@@ -20,11 +20,11 @@ numbering (`fjp_1_1_*`, `wp_8_1_*`).
 
 | file | role |
 |---|---|
-| `Challenge.lean` | [FJP] Thm 1.1: the seven statements, each `:= sorry` |
-| `Solution.lean` | the same seven, forwarded to the library's proofs |
+| `Challenge.lean` | [FJP] Thm 1.1: the nine statements, each `:= sorry` |
+| `Solution.lean` | the same nine, forwarded to the library's proofs |
 | `comparator-config.json` | `theorem_names` + `permitted_axioms` for the above |
-| `WPChallenge.lean` | [WP] Thm 8.1: the seven statements, each `:= sorry` |
-| `WPSolution.lean` | the same seven, forwarded to the library's proofs |
+| `WPChallenge.lean` | [WP] Thm 8.1: the nine statements, each `:= sorry` |
+| `WPSolution.lean` | the same nine, forwarded to the library's proofs |
 | `wp-config.json` | `theorem_names` + `permitted_axioms` for the above |
 | `../../scripts/certify.sh` | one-time setup instructions + the run |
 
@@ -107,7 +107,7 @@ Lean default kernel accepts the solution
 Your solution is okay!        # exit 0
 ```
 
-**[FJP] Theorem 1.1 — all seven statements certified** (statement pinned against
+**[FJP] Theorem 1.1 — all nine statements certified** (statement pinned against
 `Challenge.lean`, kernel-accepted, axioms within `propext / Quot.sound /
 Classical.choice`): `fjp_1_1_isSheafy`, `fjp_1_1_isUniform`, `fjp_1_1_isDomain`,
 `fjp_1_1_not_isNoetherianRing`, `fjp_1_1_powerBounded_eq_unitBall`,
@@ -123,7 +123,7 @@ challenge's closure). The instance now lives in the definition layer
 (`FiniteJetRings.lean`), so every environment containing `JetA` elaborates the headline
 statements to structurally identical types.
 
-**[WP] Theorem 8.1 — all seven statements certified** (`wp-config.json`):
+**[WP] Theorem 8.1 — all nine statements certified** (`wp-config.json`):
 `wp_8_1_isUniform`, `wp_8_1_isDomain`, `wp_8_1_not_isNoetherianRing`,
 `wp_8_1_powerBounded_eq_unitBall`, `wp_8_1_isSheafyComplete`, `wp_8_1_stronglySheafy`,
 `wp_8_1_not_isStablyUniform`.

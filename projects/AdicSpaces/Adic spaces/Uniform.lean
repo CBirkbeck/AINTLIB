@@ -49,9 +49,19 @@ class IsUniform : Prop where
 uniform (Definition 7.37 of Wedhorn). -/
 class IsStablyUniform [PlusSubring A] [IsHuberRing A] : Prop where
   /-- The presheaf value (= completion of the localization) is uniform for every
-  rational localization datum `D`. -/
+  localization datum `D` that actually presents a rational subset.
+
+  The `D.IsRational` hypothesis is essential and was missing until 2026-08-22.
+  `RationalLocData` is raw data — a pair of definition, a finite `T`, an `s`, and the
+  bounded-denominator condition — and carries no guarantee that `T ∪ {s}` generates the
+  unit ideal; `IsRational` is the separate predicate saying it does. Quantifying over all
+  data made this class *stronger* than stable uniformity in the standard sense, and hence
+  made its negation *weaker* than the standard failure. Since the only use of the class in
+  this development is to negate it, that turned the headline claim into a strictly weaker
+  surrogate. -/
   presheafValue_isUniform :
-    ∀ (D : RationalLocData A), IsBounded (powerBoundedSubring (presheafValue D))
+    ∀ (D : RationalLocData A), D.IsRational →
+      IsBounded (powerBoundedSubring (presheafValue D))
 
 /-! ### Discrete rings are uniform -/
 

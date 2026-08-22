@@ -8,7 +8,9 @@
         "wp_8_1_powerBounded_eq_unitBall",
         "wp_8_1_isSheafyComplete",
         "wp_8_1_stronglySheafy",
-        "wp_8_1_not_isStablyUniform"
+        "wp_8_1_not_isStablyUniform",
+        "wp_8_1_powerBounded_isRingOfIntegralElements",
+        "wp_8_1_shifted_powerBounded_isRingOfIntegralElements"
     ],
     "permitted_axioms": [
         "propext",

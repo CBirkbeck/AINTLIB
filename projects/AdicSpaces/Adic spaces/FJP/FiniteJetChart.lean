@@ -1565,7 +1565,8 @@ theorem not_isUniform_chart :
 
 /-- **[FJP] Corollary 3.2**: 𝓐 is not stably uniform. -/
 theorem not_isStablyUniform_JetA : ¬ TopologicalRing.IsStablyUniform (JetA F) := fun h =>
-  not_isUniform_chart F ⟨h.presheafValue_isUniform (chartDatum F)⟩
+  not_isUniform_chart F
+    ⟨h.presheafValue_isUniform (chartDatum F) (chartDatum_isRational F)⟩
 
 end
 
