@@ -34,8 +34,10 @@ proves this for any Huber ring — the older argument took openness from a metri
 extensions carry a basis-defined topology rather than a norm.
 
 `IsStablyUniform` also changed on 2026-08-22: it now quantifies only over data satisfying
-`D.IsRational`. `RationalLocData` is raw data and carries no guarantee that `T ∪ {s}` generates
-the unit ideal. Quantifying over all of it made the class stronger than stable uniformity in
+`D.IsRational`. `RationalLocData` is raw data and carries no guarantee that the ideal generated
+by `T` is open — Wedhorn Definition 7.29's condition for `D` to present a rational subset, a
+condition on `T` alone, equivalent to `span T = ⊤` because `𝓐` is Tate. Quantifying over all of
+it made the class stronger than stable uniformity in
 the standard sense, and so its negation weaker than the standard failure — the only way this
 development uses it. The proofs were unaffected: they always instantiated at the chart datum,
 whose rationality `chartDatum_isRational` proves.
