@@ -341,6 +341,7 @@ theorem sectionPoleSheaf_cartier_away_overlap_transition
   exact sectionPoleSheaf_cartier_away_subopen_transition
     z hz U r hr hspan hnzd V hV (U.1 ⊓ V) inf_le_left inf_le_right
 
+set_option maxHeartbeats 3200000 in
 /-- The Cartier generator restricts to a unit on the overlap with an open
 disjoint from the marked section. -/
 theorem sectionPoleSheaf_cartier_away_overlap_generator_isUnit

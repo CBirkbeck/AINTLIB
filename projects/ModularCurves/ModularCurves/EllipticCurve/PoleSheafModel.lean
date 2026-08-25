@@ -841,6 +841,7 @@ theorem projModelZeroIdealOverlapTrivialization_inv_comp
     projModelSectionRootOverlap]
   all_goals rfl
 
+set_option maxHeartbeats 1600000 in
 theorem projModelZeroIdealOverlapTrivializationZ_inv_comp
     (W : WeierstrassCurve R) :
     (projModelZeroIdealOverlapTrivializationZ W).inv ≫
