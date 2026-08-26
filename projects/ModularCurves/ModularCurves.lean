@@ -1,17 +1,3 @@
-/-!
-The `ProjectiveSpaceTwist` subtree is temporarily wired out of this root (daily bump
-2026-08-25, mathlib `e4b72ca0` / Lean `v4.34.0-rc2`): four theorems in
-`ModularCurves.EllipticCurve.ProjectiveSpaceTwist` — `coordinateHyperplanePoleSection_localTrivializationTopSection`,
-`coordinateHyperplanePoleSheafTrivialization_restrict_transition`,
-`coordinateHyperplanePoleSheafPowerTrivialization_restrict_transition`,
-`coordinateHyperplaneDualPairing_frameSection` — no longer pass the kernel under lean4#14806
-(the kernel's defeq cache is no longer transitive): their checks run away in memory under any
-`maxHeartbeats` budget, although every isolated proof step is cheap. Statements are untouched.
-The module and its 148 dependents (the imports removed here, see
-`.mathlib-quality/bump-pst-root-removals.txt` / `bump-pst-dependents.txt` on the bump branch) are
-NOT built until the proofs are repaired; re-add the imports once they are.
--/
-
 import ModularCurves.Basic
 import ModularCurves.EllipticCurve.AdditionChartAgree
 import ModularCurves.EllipticCurve.AdditionChartAway
@@ -310,3 +296,17 @@ import ModularCurves.WeilPairing.FibreWeierstrassPresentation
 import ModularCurves.WeilPairing.TheoremOfSquareFibrewise
 import ModularCurves.WeilPairing.TheoremOfSquareField
 import ModularCurves.WeilPairing.UnitSheaf
+
+/-!
+The `ProjectiveSpaceTwist` subtree is temporarily wired out of this root (daily bump
+2026-08-25, mathlib `e4b72ca0` / Lean `v4.34.0-rc2`): four theorems in
+`ModularCurves.EllipticCurve.ProjectiveSpaceTwist` — `coordinateHyperplanePoleSection_localTrivializationTopSection`,
+`coordinateHyperplanePoleSheafTrivialization_restrict_transition`,
+`coordinateHyperplanePoleSheafPowerTrivialization_restrict_transition`,
+`coordinateHyperplaneDualPairing_frameSection` — no longer pass the kernel under lean4#14806
+(the kernel's defeq cache is no longer transitive): their checks run away in memory under any
+`maxHeartbeats` budget, although every isolated proof step is cheap. Statements are untouched.
+The module and its 148 dependents (the imports removed here, see
+`.mathlib-quality/bump-pst-root-removals.txt` / `bump-pst-dependents.txt` on the bump branch) are
+NOT built until the proofs are repaired; re-add the imports once they are.
+-/
