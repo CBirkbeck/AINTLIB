@@ -1393,6 +1393,7 @@ theorem coordinateHyperplanePoleSectionPower_localTrivializationTopSection
         coordinateHyperplanePoleSection_localTrivializationTopSection]
       exact (pow_succ _ n).symm
 
+set_option maxHeartbeats 400000 in
 /-- A quasicoherent section that vanishes on a standard coordinate open is
 annihilated globally after tensoring with a sufficiently high power of the
 corresponding coordinate-hyperplane section. This is the injective half of
