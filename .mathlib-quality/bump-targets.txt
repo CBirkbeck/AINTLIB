@@ -1,0 +1,13 @@
+Common
+FltRegular
+HasseWeil
+LeanModularForms
+«Adic spaces»
+BernoulliRegular
+PadicLFunctions
+LutzNagell
+CebotarevDensity
+DedekindResidue
+ModularCurves
+LeanModularForms.HeckeRIngs.GL2.ModularSymbols.Skeleton
+ModularCurves.WeilPairing.TensorSection
