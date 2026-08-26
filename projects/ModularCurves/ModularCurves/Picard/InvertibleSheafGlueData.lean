@@ -254,17 +254,19 @@ theorem AffineIntersectionUnitCocycle.chartTransitionIso_self
     let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
     (c.chartTransitionIso hopen hpush i i).hom =
       ((pullbackCongr (diagonalFac D i)).app (unitObj (D.U i))).hom := by
-  dsimp only
-  rw [AffineIntersectionUnitCocycle.chartTransitionIso_hom,
-    c.overlapTransitionIso_self]
-  simp only [Iso.refl_hom]
-  rw [← cancel_mono (pullbackUnitIso
-    ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t i i ≫
-      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).f i i)).hom]
-  simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id]
-  exact (ModularCurves.pullbackUnitIso_congrLow
-    (diagonalFac
-      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush) i)).symm
+  -- Keep `D` as a `let`-bound glue datum and state every helper fact in terms of `D`:
+  -- `dsimp only` would unfold the `abbrev` `ofAffineIntersectionFunctor` and reduce
+  -- `D.t`/`D.f`/`D.U` to their field bodies, and the mixed forms cost the rc2 kernel
+  -- (lean4#14806) an unbounded defeq check.
+  intro D
+  have h1 : (c.chartTransitionIso hopen hpush i i).hom =
+      (pullbackUnitIso (D.f i i)).hom ≫ (c.overlapTransitionIso i i).hom ≫
+        (pullbackUnitIso (D.t i i ≫ D.f i i)).inv :=
+    AffineIntersectionUnitCocycle.chartTransitionIso_hom c hopen hpush i i
+  rw [h1, c.overlapTransitionIso_self, Iso.refl_hom, Category.id_comp,
+    ← cancel_mono (pullbackUnitIso (D.t i i ≫ D.f i i)).hom, Category.assoc,
+    Iso.inv_hom_id, Category.comp_id]
+  exact (ModularCurves.pullbackUnitIso_congrLow (diagonalFac D i)).symm
 
 private theorem pairSwapFac
     (D : Scheme.GlueData) (i j : D.J) :
@@ -372,13 +374,11 @@ private theorem chartTransitionIso_swap_right
         ((pullbackCongr h).app (unitObj (D.U i))).hom ≫
         (pullbackUnitIso (D.f i j)).hom =
       (pullbackUnitIso (D.t i j)).hom := by
-  dsimp only
-  simpa only [Functor.mapIso_inv] using unitCompExit
-    ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t i j)
-    ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t j i ≫
-      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).f i j)
-    (pairSwapFac
-      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush) i j)
+  -- Keep `D` as a `let`-bound glue datum: `dsimp only` would unfold the `abbrev`
+  -- `ofAffineIntersectionFunctor` and reduce `D.t`/`D.f` to their field bodies, and the
+  -- resulting mixed forms cost the rc2 kernel (lean4#14806) an unbounded defeq check.
+  intro D h
+  simpa only [Functor.mapIso_inv] using unitCompExit (D.t i j) (D.t j i ≫ D.f i j) h
 
 private theorem composite_eq_of_conjugate
     {C : Type u} [Category C] {A B Q O : C}
