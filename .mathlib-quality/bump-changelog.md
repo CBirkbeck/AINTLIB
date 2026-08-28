@@ -135,3 +135,11 @@ under every budget tried (800k–4M) and four proof shapes, although every isola
 dev ticket: GitHub issue #8574. `Picard/InvertibleSheafGlueData` was repaired by proof surgery
 (`intro D` instead of `dsimp only` on the `abbrev` glue datum); the two pole-sheaf theorems and
 `ProjectiveSpaceTwist:1400` carry measured per-declaration budgets.
+
+Extension (2026-08-28, user decision): `Picard/InvertibleSheafGlueDataDescent` — never compiled on
+this pin (it sits behind `InvertibleSheafGlueData`) — shows the same pathology:
+`chartTransitionPullHom_toUnit` and `chartTransitionPullHom_self` need 400k, but
+`chartTransitionPullHom_comp` exceeds 6.4M and `chartDescentPullHom_comp_raw` exceeds 3.2M, with every
+isolated step of the former already over 400k. That module and its 6 dependents (2 root imports;
+`bump-descent-*.txt`) are wired out of the root as well. Total excluded: 156 modules, all inside
+`ModularCurves`; tracked in #8574.
