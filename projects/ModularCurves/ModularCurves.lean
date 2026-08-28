@@ -38,7 +38,6 @@ import ModularCurves.EllipticCurve.PoleSheafFibreHOne
 import ModularCurves.EllipticCurve.PoleSheafModel
 import ModularCurves.EllipticCurve.PoleSheafModelHOne
 import ModularCurves.EllipticCurve.PoleSheafIteratedBaseChange
-import ModularCurves.EllipticCurve.PoleSheafNoetherianStage
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
 import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
@@ -202,7 +201,6 @@ import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
 import ModularCurves.Picard.InvertibleSheafFiniteStageModel
 import ModularCurves.Picard.InvertibleSheafGlueData
 import ModularCurves.Picard.InvertibleSheafLocallyFree
-import ModularCurves.Picard.InvertibleSheafNoetherianStage
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PrincipalIdealModuleIso
 import ModularCurves.Picard.PullbackTensorObj
@@ -309,4 +307,13 @@ The `ProjectiveSpaceTwist` subtree is temporarily wired out of this root (daily 
 The module and its 148 dependents (the imports removed here, see
 `.mathlib-quality/bump-pst-root-removals.txt` / `bump-pst-dependents.txt` on the bump branch) are
 NOT built until the proofs are repaired; re-add the imports once they are.
+
+Likewise the `InvertibleSheafGlueDataDescent` subtree (that module and its 6 dependents:
+`EllipticCurve.PoleSheafNoetherianStage`, `Picard.InvertibleSheafCocycleSmoothStage`,
+`Picard.InvertibleSheafGlueBaseChange`, `Picard.InvertibleSheafGlueEffectivity`,
+`Picard.InvertibleSheafNoetherianSmoothStage`, `Picard.InvertibleSheafNoetherianStage`; the two
+root imports removed are listed in `.mathlib-quality/bump-descent-root-removals.txt`): its
+`chartTransitionPullHom_comp` and `chartDescentPullHom_comp_raw` exceed 6.4M resp. 3.2M
+heartbeats under the same kernel change, with every isolated proof step already over 400k;
+`chartTransitionPullHom_toUnit` and `chartTransitionPullHom_self` need 400k. Tracked in #8574.
 -/
