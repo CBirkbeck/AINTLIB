@@ -175,7 +175,7 @@ theorem logOf_expSeries_eq_logSeries :
     have hbase :
         (PowerSeries.derivative ℚ) (PowerSeries.log ℚ) *
             (1 + (PowerSeries.X : PowerSeries ℚ)) = 1 := by
-      rw [PowerSeries.deriv_log]
+      rw [PowerSeries.derivative_log]
       let G : PowerSeries ℚ := PowerSeries.mk fun n ↦ ((-1 : ℚ) ^ n)
       change G * (1 + PowerSeries.X) = 1
       rw [mul_add, mul_one]

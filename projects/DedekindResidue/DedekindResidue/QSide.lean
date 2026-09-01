@@ -18,6 +18,14 @@ namespace DedekindResidue
 
 open NumberField
 
+/-- The 2026-09-01 mathlib bump swapped `Ideal.absNorm`'s hypothesis `[Module.Free ℤ S]` for
+`[Infinite S]`. Upstream does not make that bridge a global instance — it declares it `local` at each
+use site (`Mathlib/RingTheory/Ideal/Norm/AbsNorm.lean`, `Ideal/Norm/RelNorm.lean`,
+`FractionalIdeal/Norm.lean`). Same idiom here, so every statement below is unchanged. -/
+local instance instInfiniteOfModuleFreeInt {A : Type*} [CommRing A] [Nontrivial A]
+    [Module.Free ℤ A] : Infinite A :=
+  Module.Free.infinite ℤ A
+
 /-- `ℤ⧸(n)` has `n` elements, so the principal ideal `(n)` has absolute norm `n`. -/
 theorem absNorm_span_natCast (n : ℕ) :
     Ideal.absNorm (Ideal.span {(n : ℤ)}) = n := by
