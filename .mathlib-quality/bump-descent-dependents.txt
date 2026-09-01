@@ -1,0 +1,7 @@
+ModularCurves.Picard.InvertibleSheafGlueDataDescent
+ModularCurves.EllipticCurve.PoleSheafNoetherianStage
+ModularCurves.Picard.InvertibleSheafCocycleSmoothStage
+ModularCurves.Picard.InvertibleSheafGlueBaseChange
+ModularCurves.Picard.InvertibleSheafGlueEffectivity
+ModularCurves.Picard.InvertibleSheafNoetherianSmoothStage
+ModularCurves.Picard.InvertibleSheafNoetherianStage

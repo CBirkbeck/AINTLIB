@@ -38,14 +38,9 @@ import ModularCurves.EllipticCurve.PoleSheafFibreHOne
 import ModularCurves.EllipticCurve.PoleSheafModel
 import ModularCurves.EllipticCurve.PoleSheafModelHOne
 import ModularCurves.EllipticCurve.PoleSheafIteratedBaseChange
-import ModularCurves.EllipticCurve.PoleSheafNoetherianStage
-import ModularCurves.EllipticCurve.PoleSheafNoetherianStageCech
-import ModularCurves.EllipticCurve.PoleSheafNeighborhoodHOne
-import ModularCurves.EllipticCurve.FibrewiseLocallyWeierstrass
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
 import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
-import ModularCurves.EllipticCurve.PoleSheafRankTwoThree
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.EllipticCurve.SectionRigidity
 import ModularCurves.EllipticCurve.Torsion
@@ -111,7 +106,6 @@ import ModularCurves.ForMathlib.SchemeModuleBaseCechTupleHomotopy
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechBaseChangeExact
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHomotopyEquiv
 import ModularCurves.ForMathlib.SchemeModulePullbackIteratedBaseChange
-import ModularCurves.ForMathlib.SchemeModuleProperLowDegreeCechFinite
 import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.ForMathlib.SchemeModuleSheaf
@@ -175,7 +169,6 @@ import ModularCurves.ModularCurve.YFullSmoothAffine
 import ModularCurves.ModularCurve.YOneAssembly
 import ModularCurves.ModularCurve.YOneAtlasClassify
 import ModularCurves.ModularCurve.YOneTatePoint
-import ModularCurves.ModularCurve.YRho
 import ModularCurves.Moduli.GammaOneNaiveRelRep
 import ModularCurves.Moduli.GammaFullToGammaOne
 import ModularCurves.Moduli.Coarse
@@ -208,75 +201,37 @@ import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
 import ModularCurves.Picard.InvertibleSheafFiniteStageModel
 import ModularCurves.Picard.InvertibleSheafGlueData
 import ModularCurves.Picard.InvertibleSheafLocallyFree
-import ModularCurves.Picard.InvertibleSheafNoetherianStage
-import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PrincipalIdealModuleIso
 import ModularCurves.Picard.PullbackTensorObj
 import ModularCurves.Picard.RigidDescent
 import ModularCurves.Picard.SectionAffineIntersection
-import ModularCurves.Picard.SelfAdjointN
 import ModularCurves.Picard.UnitPullback
 import ModularCurves.Vendored.RiemannRoch
-import ModularCurves.WeilPairing.AlternationReduction
-import ModularCurves.WeilPairing.Basic
-import ModularCurves.WeilPairing.CharZeroAssembly
-import ModularCurves.WeilPairing.DescentFaithful
 import ModularCurves.ForMathlib.StandardSmoothIntegrallyClosed
 import ModularCurves.ForMathlib.AdjoinRootBaseChange
 import ModularCurves.ForMathlib.FactorIntegrallyClosed
 import ModularCurves.ForMathlib.SmoothCurveComponents
-import ModularCurves.WeilPairing.ConstReading
-import ModularCurves.WeilPairing.DetCocycle
 import ModularCurves.WeilPairing.FactorRoot
-import ModularCurves.WeilPairing.MuNBaseChange
-import ModularCurves.WeilPairing.PairingTransport
-import ModularCurves.WeilPairing.PoincareBiextension
-import ModularCurves.WeilPairing.TensorCocycle
-import ModularCurves.WeilPairing.TorsionBaseChange
-import ModularCurves.WeilPairing.TorsionSqBaseChange
 import ModularCurves.WeilPairing.FieldComparisonBridge
-import ModularCurves.WeilPairing.FieldPairingUnique
-import ModularCurves.WeilPairing.FieldPairingValue
-import ModularCurves.WeilPairing.FullLevelBaseChange
-import ModularCurves.WeilPairing.FullLevelPairing
-import ModularCurves.WeilPairing.FieldPairingDet
 import ModularCurves.WeilPairing.FullLevelCover
-import ModularCurves.WeilPairing.RootPowerPoints
-import ModularCurves.WeilPairing.SelfUniversal
-import ModularCurves.WeilPairing.RootSplitting
 import ModularCurves.WeilPairing.UniversalRootBase
 import ModularCurves.WeilPairing.UniversalRootThree
 import ModularCurves.WeilPairing.RootThreeDet
-import ModularCurves.WeilPairing.FibrePointDict
-import ModularCurves.WeilPairing.GaloisFieldPairing
-import ModularCurves.WeilPairing.GlobalFibreChart
 import ModularCurves.WeilPairing.LineVertical
 import ModularCurves.WeilPairing.ChordIdentity
 import ModularCurves.WeilPairing.TautologicalPair
 import ModularCurves.WeilPairing.DescentFromCharts
 import ModularCurves.WeilPairing.ChartCover
-import ModularCurves.WeilPairing.ChartFromUniversalPair
-import ModularCurves.WeilPairing.ChartGroupSum
 import ModularCurves.WeilPairing.IteratedTwist
-import ModularCurves.WeilPairing.KMBilinear
 import ModularCurves.WeilPairing.KMNormalisation
-import ModularCurves.WeilPairing.KMPairing
-import ModularCurves.WeilPairing.KMPatching
 import ModularCurves.WeilPairing.KMSplitting
-import ModularCurves.WeilPairing.KMUniqueness
-import ModularCurves.WeilPairing.Translation
 import ModularCurves.WeilPairing.LineVerticalAssembly
 import ModularCurves.WeilPairing.LineVerticalConsumers
 import ModularCurves.EllipticCurve.IntegralOverField
 import ModularCurves.EllipticCurve.KernelBound
 import ModularCurves.EllipticCurve.PoleSheafBaseSectionsMulFiltration
 import ModularCurves.EllipticCurve.PoleSheafMulFiltration
-import ModularCurves.EllipticCurve.PoleSheafPowerOneAwayBaseChangeBasis
-import ModularCurves.EllipticCurve.PoleSheafPowerOneProjectiveBaseChange
-import ModularCurves.EllipticCurve.PoleSheafPowerOneProjectiveCoordinates
-import ModularCurves.EllipticCurve.PoleSheafProjectiveCoordinates
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechHOne
 import ModularCurves.EllipticCurve.TorsionDivisibility
 import ModularCurves.ForMathlib.Acyclicity
 import ModularCurves.ForMathlib.AmitsurDescent
@@ -327,13 +282,6 @@ import ModularCurves.ForMathlib.UnitRetraction
 import ModularCurves.GroupScheme.HomogeneityLemmas
 import ModularCurves.GroupScheme.NIsogSpace
 import ModularCurves.GroupScheme.StableComplement
-import ModularCurves.ModularCurve.IrreducibilityScoping
-import ModularCurves.ModularCurve.RhoDescent
-import ModularCurves.ModularCurve.RhoPairingBridge
-import ModularCurves.ModularCurve.RhoPoints
-import ModularCurves.ModularCurve.RhoSections
-import ModularCurves.ModularCurve.RhoSmooth
-import ModularCurves.ModularCurve.VRhoGroup
 import ModularCurves.Moduli.BaseChangeIso
 import ModularCurves.Moduli.CoarseSpace
 import ModularCurves.Moduli.GammaHSemiBorel
@@ -343,8 +291,29 @@ import ModularCurves.Moduli.LegendreTorsor
 import ModularCurves.Moduli.ProductProblem
 import ModularCurves.WeilPairing.GaloisEquivariance
 import ModularCurves.WeilPairing.FibreWeierstrassPresentation
-import ModularCurves.WeilPairing.TheoremOfSquareBaseChange
 import ModularCurves.WeilPairing.TheoremOfSquareFibrewise
 import ModularCurves.WeilPairing.TheoremOfSquareField
-import ModularCurves.WeilPairing.TheoremOfSquareUniversal
 import ModularCurves.WeilPairing.UnitSheaf
+
+/-!
+The `ProjectiveSpaceTwist` subtree is temporarily wired out of this root (daily bump
+2026-08-25, mathlib `e4b72ca0` / Lean `v4.34.0-rc2`): four theorems in
+`ModularCurves.EllipticCurve.ProjectiveSpaceTwist` — `coordinateHyperplanePoleSection_localTrivializationTopSection`,
+`coordinateHyperplanePoleSheafTrivialization_restrict_transition`,
+`coordinateHyperplanePoleSheafPowerTrivialization_restrict_transition`,
+`coordinateHyperplaneDualPairing_frameSection` — no longer pass the kernel under lean4#14806
+(the kernel's defeq cache is no longer transitive): their checks run away in memory under any
+`maxHeartbeats` budget, although every isolated proof step is cheap. Statements are untouched.
+The module and its 148 dependents (the imports removed here, see
+`.mathlib-quality/bump-pst-root-removals.txt` / `bump-pst-dependents.txt` on the bump branch) are
+NOT built until the proofs are repaired; re-add the imports once they are.
+
+Likewise the `InvertibleSheafGlueDataDescent` subtree (that module and its 6 dependents:
+`EllipticCurve.PoleSheafNoetherianStage`, `Picard.InvertibleSheafCocycleSmoothStage`,
+`Picard.InvertibleSheafGlueBaseChange`, `Picard.InvertibleSheafGlueEffectivity`,
+`Picard.InvertibleSheafNoetherianSmoothStage`, `Picard.InvertibleSheafNoetherianStage`; the two
+root imports removed are listed in `.mathlib-quality/bump-descent-root-removals.txt`): its
+`chartTransitionPullHom_comp` and `chartDescentPullHom_comp_raw` exceed 6.4M resp. 3.2M
+heartbeats under the same kernel change, with every isolated proof step already over 400k;
+`chartTransitionPullHom_toUnit` and `chartTransitionPullHom_self` need 400k. Tracked in #8574.
+-/
