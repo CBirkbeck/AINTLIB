@@ -75,7 +75,7 @@ private theorem t2Space_of_moduleTopology_finite (M : Type u) [AddCommGroup M] [
   letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
   haveI : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup
   haveI : (uniformity A).IsCountablyGenerated := IsUniformAddGroup.uniformity_countably_generated
-  haveI : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
+  haveI : IsTopologicalAddGroup M := IsModuleTopology.isTopologicalAddGroup A M
   haveI : ContinuousSMul A M := inferInstance
   -- Present `M` as an open quotient of `Aⁿ`.
   obtain ⟨n, ν, hν⟩ := Module.Finite.exists_fin' A M
@@ -122,12 +122,12 @@ private theorem muMap_bijective_of_finite (M : Type u) [AddCommGroup M] [Module 
     [Module.Finite A M] :
     letI : TopologicalSpace M := moduleTopology A M
     haveI : IsModuleTopology A M := ⟨rfl⟩
-    haveI : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
+    haveI : IsTopologicalAddGroup M := IsModuleTopology.isTopologicalAddGroup A M
     haveI : ContinuousSMul A M := inferInstance
     Function.Bijective (muMap (A := A) (M := M)) := by
   letI : TopologicalSpace M := moduleTopology A M
   haveI : IsModuleTopology A M := ⟨rfl⟩
-  haveI : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
+  haveI : IsTopologicalAddGroup M := IsModuleTopology.isTopologicalAddGroup A M
   haveI : ContinuousSMul A M := inferInstance
   haveI : ContinuousConstSMul A M := inferInstance
   haveI : T2Space M := t2Space_of_moduleTopology_finite (A := A) M
@@ -151,12 +151,12 @@ private theorem tensorTate_map_injective
     Function.Injective (TensorProduct.map i (LinearMap.id (R := A) (M := ↥(TateAlgebra A)))) := by
   letI : TopologicalSpace N := moduleTopology A N
   haveI : IsModuleTopology A N := ⟨rfl⟩
-  haveI : IsTopologicalAddGroup N := IsModuleTopology.topologicalAddGroup A N
+  haveI : IsTopologicalAddGroup N := IsModuleTopology.isTopologicalAddGroup A N
   haveI : ContinuousSMul A N := inferInstance
   haveI : ContinuousConstSMul A N := inferInstance
   letI : TopologicalSpace M := moduleTopology A M
   haveI : IsModuleTopology A M := ⟨rfl⟩
-  haveI : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
+  haveI : IsTopologicalAddGroup M := IsModuleTopology.isTopologicalAddGroup A M
   haveI : ContinuousSMul A M := inferInstance
   haveI : ContinuousConstSMul A M := inferInstance
   -- `i` is continuous (linear out of the module topology).
@@ -455,7 +455,7 @@ private theorem quotient_oneSubfXIdeal_completeSpace_faithful [IsStronglyNoether
   letI τ : TopologicalSpace ↥(TateAlgebra A) := instTopologicalSpaceTateAlgebra
   haveI _hring : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
   haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
-    IsTopologicalRing.to_topologicalAddGroup
+    IsTopologicalRing.isTopologicalAddGroup
   haveI : FirstCountableTopology ↥(TateAlgebra A) := instFirstCountableTopologyTateAlgebra
   haveI hCS : @CompleteSpace ↥(TateAlgebra A)
       (IsTopologicalAddGroup.rightUniformSpace ↥(TateAlgebra A)) :=
@@ -1123,7 +1123,7 @@ theorem mvEvalHomBounded_continuous [IsTateRing R] {n : ℕ}
     MvTateAlgebra.mvTateAlgebraTopology' n
   haveI hringC : @IsTopologicalRing _ τC _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.to_topologicalAddGroup
+  haveI haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.isTopologicalAddGroup
   haveI hNA : NonarchimedeanRing S := inferInstance
   refine continuous_of_continuousAt_zero (mvEvalHomBounded g hg b hb) ?_
   rw [ContinuousAt, map_zero, Filter.tendsto_def]
@@ -1392,7 +1392,7 @@ theorem example638_evalHom_continuous (D : RationalLocData A) :
     MvTateAlgebra.mvTateAlgebraTopology' n
   haveI hringC : @IsTopologicalRing _ τC _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.to_topologicalAddGroup
+  haveI haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.isTopologicalAddGroup
   -- `presheafValue D` is a nonarchimedean topological ring.
   haveI hNA : NonarchimedeanRing (presheafValue D) := inferInstance
   -- Reduce to continuity at 0 (additive-group hom).
@@ -1456,7 +1456,7 @@ omit [CompatiblePlusSubring A] in
 theorem mvQuot_isTopologicalAddGroup (n : ℕ)
     (a : Ideal ↥(restrictedMvPowerSeriesSubring n A)) :
     @IsTopologicalAddGroup (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) (mvQuotTopology n a) _ :=
-  @IsTopologicalRing.to_topologicalAddGroup _ _ (mvQuotTopology n a) (mvQuot_isTopologicalRing n a)
+  @IsTopologicalRing.isTopologicalAddGroup _ _ (mvQuotTopology n a) (mvQuot_isTopologicalRing n a)
 
 omit [CompatiblePlusSubring A] in
 /-- The uniform space on the quotient `C ⧸ a` (right uniformity of the quotient Tate topology). -/
@@ -1487,7 +1487,7 @@ theorem mvQuot_completeSpace (n : ℕ)
     MvTateAlgebra.mvTateAlgebraTopology' n
   haveI _hring : @IsTopologicalRing _ τ _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.to_topologicalAddGroup
+  haveI haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.isTopologicalAddGroup
   letI uC : UniformSpace ↥(restrictedMvPowerSeriesSubring n A) :=
     MvTateAlgebra.mvTateUniformSpace n
   haveI : @IsUniformAddGroup _ uC _ := MvTateAlgebra.mvTate_isUniformAddGroup n
@@ -1511,7 +1511,7 @@ theorem mvQuot_t2Space (n : ℕ)
     MvTateAlgebra.mvTateAlgebraTopology' n
   haveI _hring : @IsTopologicalRing _ τ _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.to_topologicalAddGroup
+  haveI haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.isTopologicalAddGroup
   haveI hac : @IsClosed _ τ (a.toAddSubgroup : Set ↥(restrictedMvPowerSeriesSubring n A)) := ha
   letI : TopologicalSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) := mvQuotTopology n a
   haveI : @IsTopologicalAddGroup _ (mvQuotTopology n a) _ := mvQuot_isTopologicalAddGroup n a

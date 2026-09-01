@@ -237,7 +237,7 @@ variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 /-- The `IsTopologicalAddGroup` instance from the localization topology. -/
 @[reducible] noncomputable def RationalLocData.isTopologicalAddGroup (D : RationalLocData A) :
     @IsTopologicalAddGroup (Localization.Away D.s) D.topology _ :=
-  @IsTopologicalRing.to_topologicalAddGroup _ _ D.topology D.isTopologicalRing
+  @IsTopologicalRing.isTopologicalAddGroup _ _ D.topology D.isTopologicalRing
 
 /-- The `UniformSpace` induced by the localization topology. -/
 @[reducible] noncomputable def RationalLocData.uniformSpace (D : RationalLocData A) :

@@ -54,6 +54,14 @@ variable [Algebra R L] [Algebra K L] [IsScalarTower R S L] [IsScalarTower R K L]
 variable [Module.Finite R S] [Module.IsTorsionFree R S]
 variable [Module.Free ℤ R] [Module.Free ℤ S]
 
+/-- The 2026-09-01 mathlib bump swapped `Ideal.absNorm`'s hypothesis `[Module.Free ℤ S]` for
+`[Infinite S]`. Upstream does not make that bridge a global instance — it declares it `local` at each
+use site (`Mathlib/RingTheory/Ideal/Norm/AbsNorm.lean`, `Ideal/Norm/RelNorm.lean`,
+`FractionalIdeal/Norm.lean`). Same idiom here, so every statement below is unchanged. -/
+local instance instInfiniteOfModuleFreeInt {A : Type*} [CommRing A] [Nontrivial A]
+    [Module.Free ℤ A] : Infinite A :=
+  Module.Free.infinite ℤ A
+
 /--
 Under `SplitsCompletely`, every prime `Q` of `S` lying above `p` has the
 same absolute norm as `p`. Indeed, by `absNorm_eq_pow_inertiaDeg_of_liesOver`,

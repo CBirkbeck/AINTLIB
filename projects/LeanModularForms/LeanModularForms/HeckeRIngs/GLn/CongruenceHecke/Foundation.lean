@@ -3,12 +3,12 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import Mathlib.Basic.Denumerable
 import Mathlib.Data.Int.GCD
 import Mathlib.Data.Int.ModEq
 import Mathlib.Data.Nat.ChineseRemainder
 import Mathlib.Data.Nat.Factorization.Basic
 import Mathlib.Data.Rat.Encodable
-import Mathlib.Logic.Denumerable
 import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
 import Mathlib.RingTheory.AlgebraicIndependent.Defs
 import Mathlib.RingTheory.Ideal.Maps

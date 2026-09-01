@@ -594,7 +594,7 @@ Exposed as a `def` (not a global `instance`) to avoid a uniform-space diamond at
     UniformSpace ↥(restrictedMvPowerSeriesSubring n A) :=
   @IsTopologicalAddGroup.rightUniformSpace _ _
     (mvTateAlgebraTopology' n)
-    (@IsTopologicalRing.to_topologicalAddGroup _ _
+    (@IsTopologicalRing.isTopologicalAddGroup _ _
       (mvTateAlgebraTopology' n) (mvTateAlgebraTopology'_isTopologicalRing n))
 
 omit [IsTopologicalRing A] in
@@ -603,7 +603,7 @@ omit [IsTopologicalRing A] in
 theorem mvTate_isUniformAddGroup [IsTateRing A] (n : ℕ) :
     @IsUniformAddGroup ↥(restrictedMvPowerSeriesSubring n A) (mvTateUniformSpace n) _ :=
   @isUniformAddGroup_of_addCommGroup _ _ (mvTateAlgebraTopology' n)
-    (@IsTopologicalRing.to_topologicalAddGroup _ _
+    (@IsTopologicalRing.isTopologicalAddGroup _ _
       (mvTateAlgebraTopology' n) (mvTateAlgebraTopology'_isTopologicalRing n))
 
 omit [IsTopologicalRing A] [NonarchimedeanRing A] in
@@ -632,7 +632,7 @@ theorem mvTate_t2Space [IsTateRing A] [T2Space A] (n : ℕ) :
   haveI : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology'_isTopologicalRing n
   haveI : IsTopologicalAddGroup ↥(restrictedMvPowerSeriesSubring n A) :=
-    IsTopologicalRing.to_topologicalAddGroup
+    IsTopologicalRing.isTopologicalAddGroup
   apply IsTopologicalAddGroup.t2Space_of_zero_sep
   intro y hy_ne
   obtain ⟨l, hl⟩ : ∃ l, MvPowerSeries.coeff l y.val ≠ 0 := by
@@ -680,7 +680,7 @@ theorem mvTate_uniformity_isCountablyGenerated [IsTateRing A] (n : ℕ) :
   haveI hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology'_isTopologicalRing n
   haveI haddgrp : IsTopologicalAddGroup ↥(restrictedMvPowerSeriesSubring n A) :=
-    IsTopologicalRing.to_topologicalAddGroup
+    IsTopologicalRing.isTopologicalAddGroup
   letI uT : UniformSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateUniformSpace n
   haveI : @IsUniformAddGroup _ uT _ := mvTate_isUniformAddGroup n
   haveI : (@nhds _ τ (0 : ↥(restrictedMvPowerSeriesSubring n A))).IsCountablyGenerated :=
@@ -714,7 +714,7 @@ theorem mvTate_completeSpace [IsTateRing A] [T2Space A] (n : ℕ)
   haveI hring : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring n A) :=
     mvTateAlgebraTopology'_isTopologicalRing n
   haveI haddgrp : IsTopologicalAddGroup ↥(restrictedMvPowerSeriesSubring n A) :=
-    IsTopologicalRing.to_topologicalAddGroup
+    IsTopologicalRing.isTopologicalAddGroup
   letI uT : UniformSpace ↥(restrictedMvPowerSeriesSubring n A) := mvTateUniformSpace n
   haveI : @IsUniformAddGroup _ uT _ := mvTate_isUniformAddGroup n
   -- Step 1: The uniformity is countably generated (basis indexed by ℕ).

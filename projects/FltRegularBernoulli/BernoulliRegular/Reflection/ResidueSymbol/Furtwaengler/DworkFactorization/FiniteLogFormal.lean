@@ -33,7 +33,7 @@ theorem deriv_log_mul_one_add_X :
     congrArg (PowerSeries.rescale (-1 : A))
       (PowerSeries.mk_one_mul_one_sub_eq_one A)
   rw [map_mul, map_one] at h
-  simpa [PowerSeries.deriv_log, PowerSeries.rescale_mk, PowerSeries.rescale_X] using h
+  simpa [PowerSeries.derivative_log, PowerSeries.rescale_mk, PowerSeries.rescale_X] using h
 
 theorem subst_deriv_log_mul_one_add {a : PowerSeries A} (ha : PowerSeries.HasSubst a) :
     (PowerSeries.subst a (d⁄dX A (PowerSeries.log A))) * (1 + a) = 1 := by

@@ -82,7 +82,7 @@ noncomputable instance B₁_gen_isTopologicalRing :
 /-- `B₁_gen f` is a topological additive group. -/
 noncomputable instance B₁_gen_isTopologicalAddGroup :
     @IsTopologicalAddGroup (B₁_gen f) (B₁_gen_topology f) _ :=
-  @IsTopologicalRing.to_topologicalAddGroup _ _
+  @IsTopologicalRing.isTopologicalAddGroup _ _
     (B₁_gen_topology f) (B₁_gen_isTopologicalRing f)
 
 /-- Canonical quotient topology on `B₂_gen f`, induced from the
@@ -102,7 +102,7 @@ noncomputable instance B₂_gen_isTopologicalRing :
 /-- `B₂_gen f` is a topological additive group. -/
 noncomputable instance B₂_gen_isTopologicalAddGroup :
     @IsTopologicalAddGroup (B₂_gen f) (B₂_gen_topology f) _ :=
-  @IsTopologicalRing.to_topologicalAddGroup _ _
+  @IsTopologicalRing.isTopologicalAddGroup _ _
     (B₂_gen_topology f) (B₂_gen_isTopologicalRing f)
 
 /-- Canonical quotient topology on `LaurentTateAlgebra A`, induced
@@ -126,7 +126,7 @@ noncomputable instance laurentTateAlgebra_isTopologicalRing :
 noncomputable instance laurentTateAlgebra_isTopologicalAddGroup :
     @IsTopologicalAddGroup (LaurentTateAlgebra A)
       laurentTateAlgebra_topology _ :=
-  @IsTopologicalRing.to_topologicalAddGroup _ _
+  @IsTopologicalRing.isTopologicalAddGroup _ _
     laurentTateAlgebra_topology laurentTateAlgebra_isTopologicalRing
 
 /-- Canonical quotient topology on `B₁₂_gen f`, built as the further
@@ -146,7 +146,7 @@ noncomputable instance B₁₂_gen_isTopologicalRing :
 /-- `B₁₂_gen f` is a topological additive group. -/
 noncomputable instance B₁₂_gen_isTopologicalAddGroup :
     @IsTopologicalAddGroup (B₁₂_gen f) (B₁₂_gen_topology f) _ :=
-  @IsTopologicalRing.to_topologicalAddGroup _ _
+  @IsTopologicalRing.isTopologicalAddGroup _ _
     (B₁₂_gen_topology f) (B₁₂_gen_isTopologicalRing f)
 
 omit [IsNoetherianRing A] [IsDomain A] in

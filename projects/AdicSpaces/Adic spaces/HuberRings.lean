@@ -272,7 +272,7 @@ instance IsHuberRing.firstCountableTopology {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsHuberRing A] : FirstCountableTopology A := by
   obtain ⟨P⟩ := ‹IsHuberRing A›.exists_pairOfDefinition
   have : IsTopologicalRing A := IsHuberRing.toIsTopologicalRing
-  have : IsTopologicalAddGroup A := IsTopologicalRing.to_topologicalAddGroup
+  have : IsTopologicalAddGroup A := IsTopologicalRing.isTopologicalAddGroup
   have h0 : (nhds (0 : A)).IsCountablyGenerated :=
     P.hasBasis_nhds_zero.isCountablyGenerated
   refine ⟨fun a ↦ ?_⟩
