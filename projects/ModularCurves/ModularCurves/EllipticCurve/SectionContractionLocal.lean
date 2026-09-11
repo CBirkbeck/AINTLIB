@@ -187,10 +187,11 @@ private theorem tensorUnitStructureIso_hom_tensorSection
   erw [PresheafOfModules.comp_app, ModuleCat.comp_apply,
     PresheafOfModules.comp_app, ModuleCat.comp_apply] at hpresheafApply
   have hright : ((ρ_ M.val).hom.app (.op U)) q₀ = a • x := by
-    erw [PresheafOfModules.rightUnitor_hom_app]
-    exact ModuleCat.MonoidalCategory.rightUnitor_hom_apply
+    have happ := ConcreteCategory.congr_hom
+      (PresheafOfModulesOfCommRing.rightUnitor_hom_app M.val (.op U)) q₀
+    exact happ.trans (ModuleCat.MonoidalCategory.rightUnitor_hom_apply
       (R := X.sheaf.obj.obj (.op U)) x
-      (show X.sheaf.obj.obj (.op U) from a)
+      (show X.sheaf.obj.obj (.op U) from a))
   dsimp only [uq]
   exact hpresheafApply.trans hright
 
@@ -348,10 +349,11 @@ private theorem unitStructureTensorIso_hom_tensorSection
   erw [PresheafOfModules.comp_app, ModuleCat.comp_apply,
     PresheafOfModules.comp_app, ModuleCat.comp_apply] at hpresheafApply
   have hleft : ((λ_ M.val).hom.app (.op U)) q₀ = a • x := by
-    erw [PresheafOfModules.leftUnitor_hom_app]
-    exact ModuleCat.MonoidalCategory.leftUnitor_hom_apply
+    have happ := ConcreteCategory.congr_hom
+      (PresheafOfModulesOfCommRing.leftUnitor_hom_app M.val (.op U)) q₀
+    exact happ.trans (ModuleCat.MonoidalCategory.leftUnitor_hom_apply
       (R := X.sheaf.obj.obj (.op U))
-      (show X.sheaf.obj.obj (.op U) from a) x
+      (show X.sheaf.obj.obj (.op U) from a) x)
   dsimp only [uq]
   exact hpresheafApply.trans hleft
 
