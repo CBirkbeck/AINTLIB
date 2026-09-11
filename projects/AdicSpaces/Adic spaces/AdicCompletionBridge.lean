@@ -418,8 +418,7 @@ theorem ker_evalₐ_eq {R : Type*} [CommRing R] (I : Ideal R)
       rwa [← AdicCompletion.map_exact (I := I) Subtype.val_injective
         (LinearMap.exact_subtype_mkQ _) (Submodule.mkQ_surjective _)]
     obtain ⟨t, rfl⟩ := AdicCompletion.ofTensorProduct_surjective_of_finite I _ z
-    refine TensorProduct.induction_on t ?_ ?_ ?_
-    · simp [map_zero]
+    refine TensorProduct.inductionOn t ?_ ?_
     · intro c a
       rw [AdicCompletion.ofTensorProduct_tmul, map_smul, AdicCompletion.map_of]
       have ha_mem : (a : R) ∈ (I ^ n : Ideal R) := by

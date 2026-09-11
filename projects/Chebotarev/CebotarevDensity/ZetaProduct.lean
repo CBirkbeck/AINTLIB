@@ -172,7 +172,7 @@ private theorem norm_galoisCharacterOnIdeal_le_one
     (χ : galoisCharacter K L) (𝔞 : Ideal (𝓞 K)) :
     ‖galoisCharacterOnIdeal K L χ 𝔞‖ ≤ 1 := by
   rw [galoisCharacterOnIdeal, norm_prod]
-  refine Finset.prod_le_one (fun i _ ↦ norm_nonneg _) (fun 𝔭 _ ↦ ?_)
+  refine Finset.prod_le_one₀ (fun i _ ↦ norm_nonneg _) (fun 𝔭 _ ↦ ?_)
   rw [norm_pow]
   by_cases h : UnramifiedIn K L 𝔭
   · rw [if_pos h, norm_galoisCharacter_out, one_pow]
@@ -1203,7 +1203,7 @@ private theorem sum_rpow_le_euler_prod (K : Type*) [Field K] [NumberField K]
         rw [Finset.prod_sum P (fun _ ↦ Finset.range (Kn + 1))
           (fun 𝔭 k ↦ (((Ideal.absNorm 𝔭 : ℝ)) ^ e) ^ k)]
     _ ≤ ∏ 𝔭 ∈ P, (1 - ((Ideal.absNorm 𝔭 : ℝ)) ^ e)⁻¹ := by
-        refine Finset.prod_le_prod
+        refine Finset.prod_le_prod₀
           (fun 𝔭 h𝔭 ↦ Finset.sum_nonneg fun k _ ↦ pow_nonneg (hx0 𝔭 h𝔭) k) (fun 𝔭 h𝔭 ↦ ?_)
         have h1x : 0 < 1 - ((Ideal.absNorm 𝔭 : ℝ)) ^ e := by have := hxlt 𝔭 h𝔭; linarith
         have hkey := geom_sum_mul (((Ideal.absNorm 𝔭 : ℝ)) ^ e) (Kn + 1)

@@ -47,7 +47,6 @@ theorem norm_tensor_map (ψ : A →ₐ[R] A') (f : A ⊗[R] B) :
     apply LinearMap.ext
     intro y
     induction y with
-    | zero => rw [map_zero, map_zero]
     | add y₁ y₂ h₁ h₂ => rw [map_add, map_add, h₁, h₂]
     | tmul a' z =>
       simp only [LinearMap.comp_apply, LinearEquiv.coe_coe,
@@ -60,7 +59,6 @@ theorem norm_tensor_map (ψ : A →ₐ[R] A') (f : A ⊗[R] B) :
       rw [LinearMap.baseChange_tmul]
       simp only [LinearMap.mul_apply']
       induction f with
-      | zero => rw [map_zero, zero_mul, zero_mul, tmul_zero, map_zero]
       | add f₁ f₂ g₁ g₂ =>
         rw [map_add, add_mul, add_mul, tmul_add, map_add, g₁, g₂]
       | tmul a b =>

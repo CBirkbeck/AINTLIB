@@ -178,7 +178,6 @@ private theorem span_fibreEval_eq_top (n : Ideal S) (N : Submodule R M)
   rw [eq_top_iff]
   rintro x -
   induction x with
-  | zero => exact Submodule.zero_mem _
   | tmul c z =>
     have hz : z ∈ Submodule.span S (N : Set M) := hN ▸ Submodule.mem_top
     induction hz using Submodule.span_induction with
@@ -202,7 +201,6 @@ private theorem maximalIdeal_smul_fibre (n : Ideal S)
     (hmn : (IsLocalRing.maximalIdeal R).map (algebraMap R S) ≤ n)
     {c : R} (hc : c ∈ IsLocalRing.maximalIdeal R) (v : (S ⧸ n) ⊗[S] M) : c • v = 0 := by
   induction v with
-  | zero => rw [smul_zero]
   | tmul a m =>
     rw [TensorProduct.smul_tmul', Algebra.smul_def,
       IsScalarTower.algebraMap_apply R S (S ⧸ n),
@@ -295,7 +293,10 @@ private theorem exists_mem_forall_fibreEval_notMem_span {s : ℕ} (n : Fin s →
       (maximalIdeal_smul_quotient_fibre_eq_bot (n j) (hmn j) ((W j).restrictScalars S))
       (h j) (x := ⟨z, hzN⟩) fun h0 => ?_
     exact hzW ((Submodule.Quotient.mk_eq_zero ((W j).restrictScalars S)).mp h0)
-  obtain ⟨z, hz⟩ := exists_one_tmul_baseChange_ne_zero h hne
+  -- Supplying the instance families explicitly avoids a `whnf` timeout unifying them with the
+  -- instances on the `let`-bound quotients `T j`.
+  obtain ⟨z, hz⟩ := @exists_one_tmul_baseChange_ne_zero R _ _ _ N _ _ s T
+    (fun _ => inferInstance) (fun _ => inferInstance) h hne
   refine ⟨z, z.2, fun j hmem => hz j ?_⟩
   rw [LinearMap.baseChange_tmul,
     show h j z = 0 from (Submodule.Quotient.mk_eq_zero _).mpr hmem,

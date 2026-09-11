@@ -80,7 +80,7 @@ theorem X_sub_C_notMem_substKer {S : Finset ι} {j : ι} (hj : j ∉ S) :
   have h0 : substHom a S (X j - C (a j)) = 0 := hmem
   rw [map_sub, substHom_X, if_neg hj] at h0
   simp only [substHom, aeval_C, algebraMap_eq, sub_eq_zero] at h0
-  have hcoeff := congrArg (fun q : MvPolynomial ι k => coeff (Finsupp.single j 1) q) h0
+  have hcoeff := congrArg (fun q : MvPolynomial ι k => q.coeff (Finsupp.single j 1)) h0
   simp [coeff_X, coeff_C, eq_comm (a := (0 : ι →₀ ℕ)), Finsupp.single_eq_zero] at hcoeff
 
 theorem substKer_lt {S T : Finset ι} (h : S ⊆ T) {j : ι} (hjT : j ∈ T) (hjS : j ∉ S) :

@@ -237,7 +237,7 @@ private lemma formalSlopeBiv_diag_term (n : ℕ) (d : Fin 2 →₀ ℕ) :
 `λ(z,z) = w′(z)`. -/
 private theorem formalSlopeBiv_diag_const :
     MvPowerSeries.subst (fun _ : Fin 2 ↦ (PowerSeries.X : PowerSeries R)) (formalSlopeBiv W)
-      = d⁄dX R (formalW W) := by
+      = d⁄dX (formalW W) := by
   have hX : MvPowerSeries.HasSubst (fun _ : Fin 2 ↦ (PowerSeries.X : PowerSeries R)) :=
     MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ ↦ MvPowerSeries.constantCoeff_X ()
   apply PowerSeries.ext fun n ↦ ?_
@@ -287,7 +287,7 @@ private theorem formalSlopeBiv_diag_const :
 theorem formalSlopeBiv_diag_X :
     MvPowerSeries.subst (![PowerSeries.X, PowerSeries.X] : Fin 2 → PowerSeries R)
         (formalSlopeBiv W)
-      = d⁄dX R (formalW W) := by
+      = d⁄dX (formalW W) := by
   rw [show (![PowerSeries.X, PowerSeries.X] : Fin 2 → PowerSeries R)
       = fun _ : Fin 2 ↦ PowerSeries.X from funext fun s ↦ by fin_cases s <;> rfl]
   exact formalSlopeBiv_diag_const W
@@ -296,7 +296,7 @@ theorem formalSlopeBiv_diag_X :
 the same series `f` (of positive order) into both slots of `λ` computes `w′∘f`. -/
 theorem formalSlopeBiv_diag (f : PowerSeries R) (hf : 1 ≤ f.order) :
     MvPowerSeries.subst (![f, f] : Fin 2 → PowerSeries R) (formalSlopeBiv W)
-      = PowerSeries.subst f (d⁄dX R (formalW W)) := by
+      = PowerSeries.subst f (d⁄dX (formalW W)) := by
   have hf0 : PowerSeries.constantCoeff f = 0 :=
     PowerSeries.one_le_order_iff_constCoeff_eq_zero.mp hf
   have hX : MvPowerSeries.HasSubst (fun _ : Fin 2 ↦ (PowerSeries.X : PowerSeries R)) :=

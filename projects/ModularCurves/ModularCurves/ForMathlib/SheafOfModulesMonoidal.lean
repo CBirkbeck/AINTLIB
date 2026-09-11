@@ -38,6 +38,12 @@ universe v v' u u'
 
 open CategoryTheory MonoidalCategory
 
+/-- The commutative ring structure on the underlying ring of a presheaf of commutative rings
+(removed from mathlib in #43193; restored locally). -/
+local instance {C : Type*} [Category* C] {R : Cᵒᵖ ⥤ CommRingCat.{u}} (X : Cᵒᵖ) :
+    CommRing ((R ⋙ forget₂ _ RingCat).obj X) :=
+  inferInstanceAs (CommRing (R.obj X))
+
 namespace PresheafOfModules
 
 variable {C : Type u'} [Category.{v'} C] {J : GrothendieckTopology C}
@@ -124,8 +130,8 @@ lemma isLocallySurjective_tensorHom (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
       have ha' : f.app (Opposite.op V) a = M₂.map p.op m := ha
       have hb' : g.app (Opposite.op V) b = N₂.map p.op n := hb
       show (f ⊗ₘ g).app (Opposite.op V) (a ⊗ₜ b) = (M₂ ⊗ N₂).map p.op (m ⊗ₜ n)
-      erw [Monoidal.tensorHom_app, ModuleCat.MonoidalCategory.tensorHom_tmul,
-        Monoidal.tensorObj_map_tmul]
+      erw [ModuleCat.MonoidalCategory.tensorHom_tmul,
+        PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul]
       rw [ha', hb']
       rfl
   | add t₁ t₂ h₁ h₂ =>
@@ -170,7 +176,7 @@ theorem tensorHom_precomp_injective (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
         rw [hnat]
         have hres : (M₂ ⊗ N₂).map p.op (m ⊗ₜ n) =
             (f ⊗ₘ g).app (Opposite.op V) (a ⊗ₜ b) := by
-          erw [Monoidal.tensorObj_map_tmul, Monoidal.tensorHom_app,
+          erw [PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul,
             ModuleCat.MonoidalCategory.tensorHom_tmul]
           rw [ha, hb]
           rfl
@@ -234,7 +240,8 @@ private lemma chi_app_congr {V : C} (a a' : M₁.obj (Opposite.op V))
     fun x => (CategoryTheory.congr_fun (χ.naturality q.op) x).symm
   erw [hnat, hnat]
   congr 1
-  erw [Monoidal.tensorObj_map_tmul, Monoidal.tensorObj_map_tmul]
+  erw [PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul,
+    PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul]
   have hqa' : M₁.map q.op a = M₁.map q.op a' := hqa
   have hqb' : N₁.map q.op b = N₁.map q.op b' := hqb
   rw [hqa', hqb']
@@ -265,7 +272,8 @@ private lemma chi_value {V W : C} (q : W ⟶ V) (a : M₁.obj (Opposite.op V))
     P.presheaf.map q.op (χ.app (Opposite.op V) (a ⊗ₜ b)) =
       χ.app (Opposite.op W) (M₁.map q.op a ⊗ₜ N₁.map q.op b) := by
   refine ((CategoryTheory.congr_fun (χ.naturality q.op) (a ⊗ₜ b)).symm).trans ?_
-  exact congrArg (χ.app (Opposite.op W)) (by erw [Monoidal.tensorObj_map_tmul]; rfl)
+  exact congrArg (χ.app (Opposite.op W))
+    (by erw [PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul]; rfl)
 
 variable {f g} in
 /-- Restricting a local preimage-pair of `(m, n)` over `p` along `q` gives a local
@@ -413,7 +421,8 @@ private lemma pairingSection_smul_left {U : Cᵒᵖ}
     erw [P.map_smul]
     rw [pairingSection_spec f g hP χ m n (q ≫ p) a₀ (N₁.map q.op b) ha₀' hbW]
     exact ((χ.app (Opposite.op W)).hom.map_smul r' _).symm.trans
-      (congrArg (χ.app (Opposite.op W)) (TensorProduct.smul_tmul' r' a₀ _))
+      (congrArg (χ.app (Opposite.op W))
+        (TensorProduct.smul_tmul' (show ↑(S.obj (Opposite.op W)) from r') a₀ _))
   rw [hL, chi_value χ q a b]
   refine chi_app_congr f g hP χ _ _ _ _ ?_ rfl
   exact (map_smul ((f.app (Opposite.op W)).hom) r' a₀).trans
@@ -479,7 +488,8 @@ private lemma pairingSection_smul_right {U : Cᵒᵖ}
     erw [P.map_smul]
     rw [pairingSection_spec f g hP χ m n (q ≫ p) (M₁.map q.op a) b₀ haW hb₀']
     exact ((χ.app (Opposite.op W)).hom.map_smul r' _).symm.trans
-      (congrArg (χ.app (Opposite.op W)) (TensorProduct.tmul_smul r' _ b₀).symm)
+      (congrArg (χ.app (Opposite.op W))
+        (TensorProduct.tmul_smul (show ↑(S.obj (Opposite.op W)) from r') _ b₀).symm)
   rw [hL, chi_value χ q a b]
   refine chi_app_congr f g hP χ _ _ _ _ rfl ?_
   exact (map_smul ((g.app (Opposite.op W)).hom) r' b₀).trans
@@ -530,7 +540,7 @@ private noncomputable def gluedHom : M₂ ⊗ N₂ ⟶ P where
         have h2 : (M₂ ⊗ N₂).map p (m ⊗ₜ n) =
             (show ↑(M₂.obj V) from M₂.map p m) ⊗ₜ
               (show ↑(N₂.obj V) from N₂.map p n) := by
-          erw [Monoidal.tensorObj_map_tmul]
+          erw [PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul]
           rfl
         rw [h2]
         exact (pairingSection_map f g hP χ p.unop m n).symm
@@ -553,12 +563,12 @@ private lemma gluedHom_fac : (f ⊗ₘ g) ≫ gluedHom f g hP χ = χ := by
       show TensorProduct.lift (pairingLinear f g hP χ U)
         ((f ⊗ₘ g).app U (a ⊗ₜ b)) = χ.app U (a ⊗ₜ b)
       have h1 : (f ⊗ₘ g).app U (a ⊗ₜ b) = f.app U a ⊗ₜ g.app U b := by
-        erw [Monoidal.tensorHom_app, ModuleCat.MonoidalCategory.tensorHom_tmul]
+        erw [ModuleCat.MonoidalCategory.tensorHom_tmul]
       rw [h1]
       have h2 : TensorProduct.lift (pairingLinear f g hP χ U)
           (f.app U a ⊗ₜ g.app U b) =
             pairingSection f g hP χ (f.app U a) (g.app U b) := rfl
-      rw [h2]
+      erw [h2]
       have hida : f.app U a = M₂.map (𝟙 U.unop).op (f.app U a) :=
         ((CategoryTheory.congr_fun (M₂.presheaf.map_id U) (f.app U a)).trans rfl).symm
       have hidb : g.app U b = N₂.map (𝟙 U.unop).op (g.app U b) :=

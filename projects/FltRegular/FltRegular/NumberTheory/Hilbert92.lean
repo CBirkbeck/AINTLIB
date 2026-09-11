@@ -110,7 +110,7 @@ lemma lemma2 [Module A G] (S : systemOfUnits p G s) (hs : S.IsFundamental)
       · rw [Finsupp.mapDomain_notin_range, zero_add, hij]
         rwa [← this]
       · obtain ⟨j, rfl⟩ := not_imp_comm.mp this.mpr hij
-        rw [Finsupp.mapDomain_apply Fin.succAbove_right_injective, add_zero,
+        rw [Finsupp.mapDomain_apply_of_injective Fin.succAbove_right_injective, add_zero,
           Finsupp.comapDomain_apply]
     have := S'.isMaximal p hp G hf
     suffices Submodule.span A (Set.range S.units) < Submodule.span A (Set.range S'.units) by
@@ -265,7 +265,7 @@ include σ hp hKL hσ in
 open Polynomial in
 lemma isTors' [IsGalois k K] : Module.IsTorsionBySet ℤ[X]
     (Module.AEval' (addMonoidEndRingEquivInt _
-      (MulEquiv.Monoid.End <| relativeUnitsMapHom <|
+      (MulEquiv.monoidEnd _ <| relativeUnitsMapHom <|
         ((AlgEquiv.algHomUnitsEquiv _ _).symm σ).val)))
     (Ideal.span {cyclotomic p ℤ}) := by
   classical
@@ -282,9 +282,9 @@ lemma isTors' [IsGalois k K] : Module.IsTorsionBySet ℤ[X]
     enter [1, 2, c]
     rw [← map_pow, ← map_pow, ← map_pow, ← Units.val_pow_eq_pow_val, ← map_pow,
       AlgEquiv.val_algHomUnitsEquiv_symm_apply, relativeUnitsMapHom_apply,
-      MulEquiv.Monoid.End_apply, addMonoidEndRingEquivInt_apply, AddHom.toFun_eq_coe,
+      addMonoidEndRingEquivInt_apply, AddHom.toFun_eq_coe,
       LinearMap.coe_toAddHom, LinearEquiv.coe_coe, addMonoidHomLequivInt_apply,
-      AddMonoidHom.coe_toIntLinearMap, AddMonoidHom.coe_mk, ZeroHom.coe_mk, toMul_ofMul,
+      AddMonoidHom.coe_toIntLinearMap, MulEquiv.monoidEnd_apply_apply, toMul_ofMul,
       relativeUnitsMap_mk]
   rw [← ofMul_prod, ← QuotientGroup.mk_prod, ofMul_eq_zero, QuotientGroup.eq_one_iff]
   use Units.map (RingOfIntegers.norm k) x
@@ -528,7 +528,7 @@ instance relativeUnitsModule : Module A G := by
 lemma relativeUnitsModule_zeta_smul (x) :
     (zeta p) • mkG x = mkG (Units.map (galRestrictHom (𝓞 k) k K (𝓞 K) σ) x) := by
   let φ := (addMonoidEndRingEquivInt _
-      (MulEquiv.Monoid.End <| relativeUnitsMap <| ((AlgEquiv.algHomUnitsEquiv _ _).symm σ).val))
+      (MulEquiv.monoidEnd _ <| relativeUnitsMap <| ((AlgEquiv.algHomUnitsEquiv _ _).symm σ).val))
   change QuotientAddGroup.mk ((Module.AEval'.of φ).symm <|
     Polynomial.X (R := ℤ) • Module.AEval'.of φ (Additive.ofMul (QuotientGroup.mk x))) = _
   simp only [Module.AEval.of_symm_smul, Polynomial.aeval_X,

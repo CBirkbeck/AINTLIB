@@ -58,11 +58,9 @@ instance instTensorProduct : MulSemiringAction G (A ⊗[R] R') where
     rw [Algebra.TensorProduct.one_def, smul_tmul', smul_one]
   smul_mul g x y := by
     induction x with
-    | zero => simp only [zero_mul, smul_zero]
     | add x₁ x₂ h₁ h₂ => simp only [add_mul, smul_add, h₁, h₂]
     | tmul a r =>
       induction y with
-      | zero => simp only [mul_zero, smul_zero]
       | add y₁ y₂ h₁ h₂ => simp only [mul_add, smul_add, h₁, h₂]
       | tmul b s =>
         rw [Algebra.TensorProduct.tmul_mul_tmul, smul_tmul', smul_tmul', smul_tmul',
@@ -77,7 +75,6 @@ theorem smul_tmul_baseChange (g : G) (a : A) (r : R') :
 instance instSMulCommClassTensorProduct : SMulCommClass G R (A ⊗[R] R') where
   smul_comm g r x := by
     induction x with
-    | zero => simp only [smul_zero]
     | add x₁ x₂ h₁ h₂ => simp only [smul_add, h₁, h₂]
     | tmul a s =>
       rw [smul_tmul', TensorProduct.smul_tmul', smul_tmul',
@@ -96,7 +93,6 @@ noncomputable def fixedPointsBaseChange : (FixedPoints.subalgebra R A G) ⊗[R] 
     (by
       intro x
       induction x with
-      | zero => exact Subalgebra.zero_mem _
       | add x₁ x₂ h₁ h₂ => simpa using Subalgebra.add_mem _ h₁ h₂
       | tmul a r =>
         intro g
@@ -128,14 +124,14 @@ private theorem exact_subtype_invariantsDelta :
     simpa [invariantsDelta_apply, sub_eq_zero] using congrFun hy g
   · rintro ⟨⟨x, hx⟩, rfl⟩
     funext g
-    simpa [invariantsDelta_apply, sub_eq_zero] using hx g
+    show g • x - x = 0
+    exact sub_eq_zero.mpr (hx g)
 
 omit [SMulCommClass R G A] in
 private theorem map_val_id_eq_rTensor (x : (FixedPoints.subalgebra R A G) ⊗[R] R') :
     (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val (AlgHom.id R R')) x =
     LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype x := by
   induction x with
-  | zero => simp only [map_zero]
   | add x₁ x₂ h₁ h₂ => simp only [map_add, h₁, h₂]
   | tmul a r => rfl
 
@@ -160,8 +156,6 @@ private theorem piLeft_rTensor_invariantsDelta [Fintype G] [DecidableEq G]
       (LinearMap.rTensor R' (invariantsDelta G R A) x) g = g • x - x := by
   classical
   induction x with
-  | zero =>
-    simp only [map_zero, Pi.zero_apply, smul_zero, sub_self]
   | add x₁ x₂ h₁ h₂ =>
     rw [map_add, map_add]
     simp only [Pi.add_apply]
@@ -229,7 +223,6 @@ private theorem rTensor_dividedTrace [Fintype G] (c : R) (x : A ⊗[R] R') :
     LinearMap.rTensor R' (dividedTrace (G := G) (R := R) (A := A) c) x =
       c • ∑ g : G, g • x := by
   induction x with
-  | zero => simp only [map_zero, smul_zero, Finset.sum_const_zero]
   | add x₁ x₂ h₁ h₂ =>
     rw [map_add, h₁, h₂, ← smul_add, ← Finset.sum_add_distrib]
     congr 1

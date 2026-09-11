@@ -119,6 +119,7 @@ theorem relNorm_eq_pow_of_isMaximal_of_isSeparable
   letI : IsGalois (FractionRing S) (FractionRing T) :=
     IsGalois.tower_top_of_isGalois (FractionRing R) (FractionRing S) (FractionRing T)
   rw [inertiaDeg'_eq_inertiaDeg p P]
+  haveI : IsTorsionFree S T := FaithfulSMul.to_isTorsionFree S T
   rwa [← relNorm_relNorm R S, relNorm_eq_pow_of_isPrime_isGalois Q P, map_pow,
     inertiaDeg_tower (R := R) P Q, pow_mul, pow_left_inj (inertiaDeg_pos Q S).ne'] at h
 

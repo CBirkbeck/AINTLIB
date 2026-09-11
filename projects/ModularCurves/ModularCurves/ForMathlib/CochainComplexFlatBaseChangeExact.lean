@@ -29,7 +29,6 @@ theorem TensorProduct.subsingleton_right (A : Type v) [CommRing A] [Algebra R A]
     Subsingleton (A ⊗[R] M) := by
   refine subsingleton_of_forall_eq 0 fun x ↦ ?_
   induction x with
-  | zero => rfl
   | tmul a m => rw [Subsingleton.elim m 0, tmul_zero]
   | add x y hx hy => rw [hx, hy, add_zero]
 
@@ -90,7 +89,6 @@ theorem kerBaseChangeComparison_bijective_of_tower
       eBB (eK (eA (eCancel.symm x))) := by
     intro x
     induction x with
-    | zero => simp only [map_zero]
     | add x y hx hy => simp only [map_add, hx, hy]
     | tmul k m =>
         apply Subtype.ext

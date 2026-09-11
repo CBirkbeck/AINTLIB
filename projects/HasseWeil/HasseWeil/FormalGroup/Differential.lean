@@ -795,7 +795,7 @@ unfolds (via `coeff_mul` and `coeff_derivative`) to the explicit range sum
 bijection `k ↦ (k, n - k)`. -/
 private theorem coeff_derivative_mul_dX_eq_sum (F G : FormalGroup R)
     (f : FormalGroupHom F G) (n : ℕ) :
-    PowerSeries.coeff n (PowerSeries.derivative R f.toSeries * F.dX_at_zero) =
+    PowerSeries.coeff n (PowerSeries.derivative f.toSeries * F.dX_at_zero) =
     coeff_10_sum F G f n := by
   rw [coeff_10_sum]
   -- Expand the RHS via `coeff_mul` and `coeff_derivative`, then match the range sum against
@@ -824,11 +824,11 @@ private theorem coeff_derivative_mul_dX_eq_sum (F G : FormalGroup R)
 private theorem coeff_10_lhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n : ℕ) :
     MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)
       (PowerSeries.subst F.toSeries f.toSeries) =
-    PowerSeries.coeff n (PowerSeries.derivative R f.toSeries * F.dX_at_zero) :=
+    PowerSeries.coeff n (PowerSeries.derivative f.toSeries * F.dX_at_zero) :=
   (coeff_10_subst_eq_sum F G f n).trans (coeff_derivative_mul_dX_eq_sum F G f n).symm
 
 theorem FormalGroup.dX_at_zero_chain (f : FormalGroupHom F G) :
-    (PowerSeries.derivative R f.toSeries) * F.dX_at_zero =
+    (PowerSeries.derivative f.toSeries) * F.dX_at_zero =
       PowerSeries.C (PowerSeries.coeff 1 f.toSeries) *
         PowerSeries.subst f.toSeries G.dX_at_zero := by
   ext n
@@ -882,14 +882,14 @@ invariant differential.
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, IV.4, Corollary 4.3. -/
 theorem FormalGroup.invariantDiff_chain (f : FormalGroupHom F G) :
     PowerSeries.subst f.toSeries G.invariantDiff *
-      (PowerSeries.derivative R f.toSeries) =
+      (PowerSeries.derivative f.toSeries) =
     PowerSeries.C (PowerSeries.coeff 1 f.toSeries) * F.invariantDiff := by
   -- Set up abbreviations to ensure all terms are in PowerSeries R, avoiding
   -- MvPowerSeries Unit R / PowerSeries R defeq issues with rw/simp.
   set c₁ : PowerSeries R := PowerSeries.C (PowerSeries.coeff 1 f.toSeries)
   set ωG' : PowerSeries R := PowerSeries.subst f.toSeries G.invariantDiff
   set dG' : PowerSeries R := PowerSeries.subst f.toSeries G.dX_at_zero
-  set f' : PowerSeries R := PowerSeries.derivative R f.toSeries
+  set f' : PowerSeries R := PowerSeries.derivative f.toSeries
   set ωF : PowerSeries R := F.invariantDiff
   set dF : PowerSeries R := F.dX_at_zero
   -- Two ingredients: the `dX_at_zero` chain identity `f' * dF = c₁ * dG'` and the

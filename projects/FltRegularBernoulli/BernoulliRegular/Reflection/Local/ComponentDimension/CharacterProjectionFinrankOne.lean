@@ -588,7 +588,6 @@ theorem completedPrincipalUnitModPEigenspace_eq_zero_of_mem_filtration_succ
         completedPrincipalUnitModPEigenspace_mem_filtration_succ_of_exists_pow_ne
           (p := p) (K := K) n j hnp hne hxE hprev
       convert hstep using 2
-      omega
   have hbot_mem : x ∈ completedPrincipalUnitModPFiltration (p := p) (K := K) (p + 1)
       (by omega : 1 ≤ p + 1) := by
     have h := hmem_t (p - j) (by omega : p - j ≤ p - j)
@@ -735,7 +734,8 @@ theorem completedPrincipalUnitModPCharacterProjectionRangeToGraded_injective
     completedPrincipalUnitModPCharacterProjectionRangeToGraded
       (p := p) (K := K) hp_gt_two hj_low hj_high
   have hdiff : f (z - w) = 0 := by
-    rw [map_sub, hzw, sub_self]
+    rw [map_sub, hzw]
+    exact sub_self (f w)
   let zwF : completedPrincipalUnitModPFiltration (p := p) (K := K) j hj_one :=
     ⟨(z - w).1,
       completedPrincipalUnitModPEigenspace_le_filtration (p := p) (K := K)

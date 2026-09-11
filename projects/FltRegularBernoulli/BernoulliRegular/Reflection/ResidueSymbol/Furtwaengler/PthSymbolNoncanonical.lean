@@ -1,6 +1,7 @@
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Basic
+public import Mathlib.Algebra.CharZero.Infinite
 public import Mathlib.NumberTheory.NumberField.Basic
 public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
 

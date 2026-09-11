@@ -274,14 +274,10 @@ theorem boundedVariationOn_auxF_mul_exp (hX : 1 < X) {c : ℝ}
 /-- The real-part projection is `1`-Lipschitz. -/
 theorem lipschitzWith_complex_re : LipschitzWith 1 Complex.re := by
   convert (RCLike.lipschitzWith_re (K := ℂ)) using 1
-  ext z
-  rfl
 
 /-- The imaginary-part projection is `1`-Lipschitz. -/
 theorem lipschitzWith_complex_im : LipschitzWith 1 Complex.im := by
   convert (RCLike.lipschitzWith_im (K := ℂ)) using 1
-  ext z
-  rfl
 
 /-- **Bounded variation of `F_{s,X}` on the whole line** (for `Re s > 1/2`): the `c = 0`
 case of `boundedVariationOn_auxF_mul_exp`, with the trivial `e^{0·x} = 1` weight removed. -/

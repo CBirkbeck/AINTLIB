@@ -118,9 +118,7 @@ theorem ftc_log_neg_on_segment {f : ℝ → ℂ} {a b : ℝ} (hab : a ≤ b)
   have hF_deriv : ∀ x ∈ Ioo a b, HasDerivAt (fun t ↦ Complex.log (-(f t)))
       (deriv f x / f x) x := fun x hx ↦ by
     convert (hf_diff x hx).hasDerivAt.neg.clog_real (hf_slit x (Ioo_subset_Icc_self hx)) using 1
-    · funext t
-      rw [Pi.neg_apply]
-    · exact (neg_div_neg_eq (deriv f x) (f x)).symm
+    exact (neg_div_neg_eq (deriv f x) (f x)).symm
   have hint : IntervalIntegrable (fun t ↦ deriv f t / f t) volume a b :=
     (Set.uIcc_of_le hab ▸ hf_deriv_cont.div hf_cont
       fun t ht ↦ neg_ne_zero.mp (Complex.slitPlane_ne_zero (hf_slit t ht))).intervalIntegrable

@@ -32,11 +32,11 @@ theorem eval₂_mul_left {φ : MvPolynomial σ R} {n : ℕ} (hφ : φ.IsHomogene
   rw [MvPolynomial.eval₂_eq, MvPolynomial.eval₂_eq, Finset.mul_sum]
   refine Finset.sum_congr rfl fun d hd => ?_
   have hdeg : n = ∑ i ∈ d.support, d i := hφ.degree_eq_sum_deg_support hd
-  calc f (coeff d φ) * ∏ i ∈ d.support, (c * g i) ^ d i
-      = f (coeff d φ) * ((∏ i ∈ d.support, c ^ d i) * ∏ i ∈ d.support, g i ^ d i) := by
+  calc f (φ.coeff d) * ∏ i ∈ d.support, (c * g i) ^ d i
+      = f (φ.coeff d) * ((∏ i ∈ d.support, c ^ d i) * ∏ i ∈ d.support, g i ^ d i) := by
         simp_rw [mul_pow]
         rw [Finset.prod_mul_distrib]
-    _ = c ^ n * (f (coeff d φ) * ∏ i ∈ d.support, g i ^ d i) := by
+    _ = c ^ n * (f (φ.coeff d) * ∏ i ∈ d.support, g i ^ d i) := by
         rw [Finset.prod_pow_eq_pow_sum, ← hdeg]
         ring
 

@@ -755,12 +755,12 @@ theorem ringEquivMvPolynomial_algebraMap [DiscreteTopology A] (a : A) :
 
 theorem ringEquivMvPolynomial_X [DiscreteTopology A] :
     ringEquivMvPolynomial (X : ↥(TateAlgebra A)) = MvPolynomial.X (0 : Fin 1) := by
-  suffices h : ∀ s, MvPolynomial.coeff s (ringEquivMvPolynomial (X : ↥(TateAlgebra A))) =
-      MvPolynomial.coeff s (MvPolynomial.X (0 : Fin 1)) by
+  suffices h : ∀ s, (ringEquivMvPolynomial (X : ↥(TateAlgebra A))).coeff s =
+      (MvPolynomial.X (0 : Fin 1) : MvPolynomial (Fin 1) A).coeff s by
     ext s; exact h s
   intro s
-  show MvPolynomial.coeff s (toMvPolynomial (X : ↥(TateAlgebra A))) = _
-  rw [toMvPolynomial, MvPolynomial.coeff, AddMonoidAlgebra.coeff_ofCoeff]
+  show (toMvPolynomial (X : ↥(TateAlgebra A))).coeff s = _
+  rw [toMvPolynomial, AddMonoidAlgebra.coeff_ofCoeff]
   simp only [toFinsupp, Finsupp.onFinset_apply]
   change MvPowerSeries.coeff s (MvPowerSeries.X (0 : Fin 1)) = _
   rw [MvPowerSeries.coeff_X]

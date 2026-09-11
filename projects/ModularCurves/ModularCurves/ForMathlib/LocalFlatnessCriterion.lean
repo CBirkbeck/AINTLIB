@@ -450,14 +450,12 @@ private theorem injective_idealSMulMap (I : Ideal A) (P : Type*) [AddCommGroup P
 private theorem idealSMulMap_lTensor (I : Ideal A) (u : P →ₗ[A] Q) (t : I ⊗[A] P) :
     idealSMulMap I Q (LinearMap.lTensor I u t) = u (idealSMulMap I P t) := by
   induction t with
-  | zero => simp
   | tmul a p => simp
   | add s t hs ht => simp [hs, ht]
 
 private theorem mem_smul_of_idealSMulMap_lTensor_subtype (I : Ideal A) (W : Submodule A P)
     (s : I ⊗[A] W) : idealSMulMap I P (LinearMap.lTensor I W.subtype s) ∈ I • W := by
   induction s with
-  | zero => simpa using Submodule.zero_mem _
   | tmul a y => exact Submodule.smul_mem_smul a.2 y.2
   | add s t hs ht => simpa using Submodule.add_mem _ hs ht
 
