@@ -56,7 +56,6 @@ theorem cancelBaseChange_one_tmul (y : B ⊗[R] A) :
       = (Algebra.TensorProduct.map (Algebra.TensorProduct.includeLeft (S := R))
           (AlgHom.id R A)) y := by
   induction y with
-  | zero => simp
   | tmul b a =>
       rw [TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul,
         Algebra.TensorProduct.map_tmul]
@@ -93,7 +92,6 @@ theorem eq_zero_of_sum_smul_map_coaction_eq_zero (ρ : B →ₐ[R] B ⊗[R] A)
             (AlgHom.id R A)) y) := by
     intro y
     induction y with
-    | zero => simp
     | tmul b a =>
         rw [Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.map_tmul, hΞdef,
           Algebra.TensorProduct.congr_apply, Algebra.TensorProduct.map_tmul]
@@ -104,7 +102,7 @@ theorem eq_zero_of_sum_smul_map_coaction_eq_zero (ρ : B →ₐ[R] B ⊗[R] A)
   have hsmul : ∀ (u : B ⊗[R] A) (z : (B ⊗[R] A) ⊗[R] A),
       Ξ (u • z) = coactionShearEquiv ρ hρ u • Ξ z := by
     intro u z
-    rw [Algebra.smul_def, Algebra.smul_def, map_mul]
+    rw [Algebra.smul_def (A := (B ⊗[R] A) ⊗[R] A), Algebra.smul_def, map_mul]
     congr 1
   -- transport the relation across `Ξ` and use independence of `includeLeftBasis`
   have hrel : ∑ i, (coactionShearEquiv ρ hρ).symm (d i) • includeLeftBasis R A hb i
@@ -239,7 +237,8 @@ noncomputable def galoisLinear (ρ : B →ₐ[R] B ⊗[R] A) :
   map_add' := map_add _
   map_smul' := by
     intro b y
-    rw [RingHom.id_apply, Algebra.smul_def, Algebra.smul_def, map_mul]
+    rw [RingHom.id_apply, Algebra.smul_def (A := B ⊗[coinvariants ρ] B), Algebra.smul_def,
+      map_mul]
     congr 1
     exact AlgHom.congr_fun (canonicalGaloisMap_comp_includeLeft ρ) b
 

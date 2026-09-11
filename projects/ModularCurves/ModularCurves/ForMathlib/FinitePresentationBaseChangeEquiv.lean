@@ -287,7 +287,6 @@ private theorem tensorProductMapOverLeft_cancelBaseChange
   apply Algebra.TensorProduct.ext'
   intro a x
   induction x with
-  | zero => simp only [tmul_zero, map_zero]
   | add x y hx hy => rw [tmul_add, map_add, map_add, hx, hy]
   | tmul s c =>
       simp only [AlgHom.comp_apply, Algebra.TensorProduct.map_tmul,
