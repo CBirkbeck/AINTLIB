@@ -1629,10 +1629,15 @@ private theorem
   have heik' := congrArg
     (fun m ↦ (pullback t.p₁₃).map (pullbackUnitIso q).hom ≫ m) heik
   have hunit' := congrArg (fun m ↦ m ≫ eik.inv) hunit
-  have hhead := hmap'.trans (heik'.symm.trans hunit'.symm)
+  -- Re-associate explicitly at each junction and close with `exact`: leaving the
+  -- associativity to definitional unfolding (in `trans` or `convert … <;> rfl`) makes the
+  -- lean4#14806 kernel unfold the module categories and exceed the budget.
+  have hhead := hmap'.trans ((Category.assoc _ _ _).trans
+    (heik'.symm.trans ((Category.assoc _ _ _).symm.trans hunit'.symm)))
   have hhead' := congrArg (fun m ↦ m ≫ tij) hhead
-  have h := htail'.trans hhead'
-  convert h using 1 <;> rfl
+  have h := htail'.trans ((Category.assoc _ _ _).symm.trans
+    (hhead'.trans ((Category.assoc _ _ _).trans (Category.assoc _ _ _))))
+  exact h
 
 private noncomputable def
     AffineIntersectionUnitCocycle.chartLocalComponentLeftBaseChanged
@@ -4729,13 +4734,9 @@ private theorem affineIntersectionTwoTransition
         affineIntersectionTransportedChartTrivialization
           π U e hU j (sq i j).p₂ q.inv := by
   classical
-  dsimp only
-  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let D := π.affineIntersectionGlueData U hU
-  let sq := affineIntersectionChartChosenPullback hopen hpush
-  let g := π.affineIntersectionGluedToOriginal U hU
-  let q := π.affineIntersectionOverlapIso U hU i j
+  -- Keep the statement's `let`s bound: `dsimp only` would unfold the glue-datum `abbrev`s
+  -- inside the composites, and the mixed forms cost the lean4#14806 kernel an unbounded check.
+  intro hopen hpush D sq g M q Li Lj scalar
   let hcI := affineIntersectionOverlapIso_inv_comp_left_chartIso π U hU i j
   let hcJ := affineIntersectionOverlapIso_inv_comp_right_chartIso π U hU i j
   let hSourceI : (q.inv ≫ (sq i j).p₁) ≫ (D.ι i ≫ g) =
@@ -4779,15 +4780,8 @@ private theorem affineIntersectionLeftScalarNormalization
       affineIntersectionTransportedChartTrivialization
           π U e hU i (sq i j).p₁ q.inv ≫ scalar := by
   classical
-  dsimp only
-  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let sq := affineIntersectionChartChosenPullback hopen hpush
-  let q := π.affineIntersectionOverlapIso U hU i j
-  let scalar := ModularCurves.unitEndomorphismOfTopSection
-    (openTopSection (U i ⊓ U j)
-      (trivializingCoverTransitionUnitOn U e (U i ⊓ U j) i j
-        inf_le_left inf_le_right : Γ(X, U i ⊓ U j)))
+  -- Keep the statement's `let`s bound (see `affineIntersectionTwoTransition`).
+  intro hopen hpush sq q scalar
   have hi := affineIntersectionOriginalChartTrivialization_comp_precomp_hom
     π U e hU i (sq i j).p₁ q.inv
   exact (comp_four_group_first_three _ _ _ _).trans
@@ -4820,20 +4814,8 @@ private theorem affineIntersectionRightPrefixNormalization
         affineIntersectionTransportedChartTrivialization
           π U e hU j (sq i j).p₂ q.inv := by
   classical
-  dsimp only
-  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let D := π.affineIntersectionGlueData U hU
-  let sq := affineIntersectionChartChosenPullback hopen hpush
-  let g := π.affineIntersectionGluedToOriginal U hU
-  let M := (pullback g).obj N
-  let q := π.affineIntersectionOverlapIso U hU i j
-  let Li := ((pullbackComp (sq i j).p₁ (D.ι i)).app M) ≪≫
-    ((pullbackCongr (sq i j).hp₁).app M)
-  let Lj := ((pullbackComp (sq i j).p₂ (D.ι j)).app M) ≪≫
-    ((pullbackCongr (sq i j).hp₂).app M)
-  let tj := (pullback (sq i j).p₂).map
-    (affineIntersectionOriginalChartTrivialization π U e hU j).hom
+  -- Keep the statement's `let`s bound (see `affineIntersectionTwoTransition`).
+  intro hopen hpush D sq g M q Li Lj tj
   have hj := affineIntersectionOriginalChartTrivialization_comp_precomp_hom
     π U e hU j (sq i j).p₂ q.inv
   exact comp_pair_with_triple_of_eq
@@ -4954,8 +4936,10 @@ theorem affineIntersectionOriginalChartTrivialization_isCompatible
     c.IsCompatibleChartTrivialization hopen hpush M
       (affineIntersectionOriginalChartTrivialization π U e hU) := by
   classical
-  dsimp only [AffineIntersectionUnitCocycle.IsCompatibleChartTrivialization]
-  intro i j
+  -- Introduce the statement's `let`s and the two indices without `dsimp`: reducing the
+  -- glue-datum `abbrev`s in the unfolded compatibility condition leaves mixed forms that the
+  -- lean4#14806 kernel cannot match against `…_pulled_transition` within the budget.
+  intro hopen hpush D g M c i j
   let q := π.affineIntersectionOverlapIso U hU i j
   letI : (pullback q.inv).IsEquivalence :=
     pullback_isEquivalence_of_iso q.symm
