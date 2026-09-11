@@ -87,7 +87,6 @@ lemma idealMapTensorComparison_surjective (q : Ideal A) :
     Function.Surjective (idealMapTensorComparison (B := B) (M := M) q) := by
   intro z
   induction z with
-  | zero => exact ⟨0, map_zero _⟩
   | add x y hx hy =>
     obtain ⟨x', rfl⟩ := hx
     obtain ⟨y', rfl⟩ := hy
@@ -142,7 +141,6 @@ theorem rTensor_subtype_map_injective_of_flat [Module.Flat A M] (q : Ideal A) :
           (LinearMap.rTensor M q.subtype z) := by
     intro z
     induction z with
-    | zero => simp
     | add x y hx hy => simp only [map_add, hx, hy]
     | tmul a m =>
       simp only [idealMapTensorComparison_tmul, LinearMap.rTensor_tmul,

@@ -324,8 +324,8 @@ theorem isLocalRing_coinvariants_coactionBaseChange
     refine ⟨1, 0, fun h => ?_⟩
     have := congrArg (Subtype.val) h
     exact one_ne_zero this
-  exact IsLocalRing.of_surjective' (baseChangeCoinvariantsMap R A ρ C')
-    (surjective_baseChangeCoinvariantsMap R A ρ C')
+  exact IsLocalRing.of_surjective' (S := coinvariants (coactionBaseChange R A ρ C'))
+    (baseChangeCoinvariantsMap R A ρ C') (surjective_baseChangeCoinvariantsMap R A ρ C')
 
 /-- The residue field of the base-changed co-invariants is (up to isomorphism) the
 residue field of the scalars, hence inherits infiniteness: the scalar map is a
@@ -336,7 +336,8 @@ theorem infinite_residueField_coinvariants_coactionBaseChange
     [Infinite (IsLocalRing.ResidueField C')] :
     Infinite (IsLocalRing.ResidueField (coinvariants (coactionBaseChange R A ρ C'))) := by
   haveI hπloc : IsLocalHom (baseChangeCoinvariantsMap R A ρ C') :=
-    .of_surjective _ (surjective_baseChangeCoinvariantsMap R A ρ C')
+    .of_surjective (S := coinvariants (coactionBaseChange R A ρ C'))
+      (baseChangeCoinvariantsMap R A ρ C') (surjective_baseChangeCoinvariantsMap R A ρ C')
   set φ := (IsLocalRing.residue (coinvariants (coactionBaseChange R A ρ C'))).comp
     (baseChangeCoinvariantsMap R A ρ C') with hφdef
   have hφs : Function.Surjective φ :=
@@ -382,7 +383,8 @@ theorem smul_coactionBaseChange_one_tmul (c' : C') (b c : B) :
         • (coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] c))
       = (baseChangeAssoc R A ρ C').symm
           (c' ⊗ₜ[coinvariants ρ] ((b ⊗ₜ[R] (1 : A)) * ρ c)) := by
-  rw [Algebra.smul_def, coactionBaseChange_tmul]
+  erw [Algebra.smul_def (R := C' ⊗[coinvariants ρ] B) (A := (C' ⊗[coinvariants ρ] B) ⊗[R] A)]
+  rw [coactionBaseChange_tmul]
   rw [show (algebraMap (C' ⊗[coinvariants ρ] B) ((C' ⊗[coinvariants ρ] B) ⊗[R] A))
       (c' ⊗ₜ[coinvariants ρ] b) = (c' ⊗ₜ[coinvariants ρ] b) ⊗ₜ[R] (1 : A) from rfl]
   rw [show ((c' ⊗ₜ[coinvariants ρ] b) ⊗ₜ[R] (1 : A) :
@@ -413,16 +415,12 @@ theorem span_range_coactionBaseChange_eq_top
             Set ((C' ⊗[coinvariants ρ] B) ⊗[R] A)) := by
     intro w
     induction w with
-    | zero => rw [map_zero]; exact Submodule.zero_mem _
     | add w₁ w₂ h₁ h₂ => rw [map_add]; exact Submodule.add_mem _ h₁ h₂
     | tmul c' v =>
         obtain ⟨t, ht⟩ := hsurj v
         rw [← ht]
         clear ht
         induction t with
-        | zero =>
-            rw [map_zero, TensorProduct.tmul_zero, map_zero]
-            exact Submodule.zero_mem _
         | add t₁ t₂ h₁ h₂ =>
             rw [map_add, TensorProduct.tmul_add, map_add]
             exact Submodule.add_mem _ h₁ h₂
@@ -461,9 +459,10 @@ theorem exists_shifted_basis_coactionBaseChange
     (fun j => hfin.mem_toFinset.mp (hfin.toFinset.equivFin.symm j).2)
     (fun P hP => ⟨hfin.toFinset.equivFin ⟨P, hfin.mem_toFinset.mpr hP⟩, by
       rw [Equiv.symm_apply_apply]⟩)
-    (fun j => maximalIdeal_map_le_of_isMaximal R A _
-      (isCoaction_coactionBaseChange R A ρ C' hρ) _
-      (hfin.mem_toFinset.mp (hfin.toFinset.equivFin.symm j).2))
+    (fun j => by
+      exact maximalIdeal_map_le_of_isMaximal R A _
+        (isCoaction_coactionBaseChange R A ρ C' hρ) _
+        (hfin.mem_toFinset.mp (hfin.toFinset.equivFin.symm j).2))
     (r := Module.finrank (C' ⊗[coinvariants ρ] B) ((C' ⊗[coinvariants ρ] B) ⊗[R] A))
     rfl
     (LinearMap.range (coactionOverCoinvariants (coactionBaseChange R A ρ C')).toLinearMap)
@@ -484,7 +483,7 @@ noncomputable def basisOverScalarsOfBasisOverCoinvariants
       have hsmul : ∀ (c' : C') (v : C' ⊗[coinvariants ρ] B),
           c' • v = (baseChangeCoinvariantsMap R A ρ C' c') • v := by
         intro c' v
-        rw [Algebra.smul_def, Algebra.smul_def]
+        rw [Algebra.smul_def (A := C' ⊗[coinvariants ρ] B), Subalgebra.smul_def, smul_eq_mul]
         congr 1
       have hπinj : Function.Injective (baseChangeCoinvariantsMap R A ρ C') := by
         intro a b h
@@ -496,13 +495,13 @@ noncomputable def basisOverScalarsOfBasisOverCoinvariants
         rw [← hg]
         exact Finset.sum_congr rfl (fun j _ => (hsmul (g j) (bx j)).symm)
       have := Fintype.linearIndependent_iff.mp bx.linearIndependent
-        (fun j => baseChangeCoinvariantsMap R A ρ C' (g j)) h2 i
+        (fun j => baseChangeCoinvariantsMap R A ρ C' (g j)) (by exact h2) i
       exact hπinj (by rw [this, map_zero]))
     (by
       have hsmul : ∀ (c' : C') (v : C' ⊗[coinvariants ρ] B),
           c' • v = (baseChangeCoinvariantsMap R A ρ C' c') • v := by
         intro c' v
-        rw [Algebra.smul_def, Algebra.smul_def]
+        rw [Algebra.smul_def (A := C' ⊗[coinvariants ρ] B), Subalgebra.smul_def, smul_eq_mul]
         congr 1
       intro v _
       have hexp : v = ∑ j, bx.repr v j • bx j := (bx.sum_repr v).symm
@@ -579,7 +578,6 @@ theorem coactionBaseChange_one_tmul_eq_embed (c : B) :
       = baseChangeEmbed R A ρ C' (ρ c) := by
   rw [coactionBaseChange_tmul]
   induction ρ c with
-  | zero => rw [TensorProduct.tmul_zero, map_zero, map_zero]
   | add w₁ w₂ h₁ h₂ =>
       rw [TensorProduct.tmul_add, map_add, map_add, h₁, h₂]
   | tmul x a =>
@@ -605,9 +603,6 @@ theorem smul_coactionBaseChange_one_tmul' (c' : C') (b c : B) :
           (c' ⊗ₜ[coinvariants ρ] ((b ⊗ₜ[R] (1 : A)) * ρ c)) := by
   rw [coactionBaseChange_one_tmul_eq_embed]
   induction ρ c with
-  | zero =>
-      rw [map_zero, smul_zero, mul_zero, TensorProduct.tmul_zero,
-        map_zero (assocT R A ρ C').symm]
   | add w₁ w₂ h₁ h₂ =>
       rw [map_add, smul_add, h₁, h₂, mul_add, TensorProduct.tmul_add,
         map_add (assocT R A ρ C').symm]
@@ -650,18 +645,11 @@ theorem lTensor_canonicalGaloisMap_eq_galoisProductMap
       (tmul_one_mem_coinvariants_coactionBaseChange R A ρ C' c')) with hG
   intro u
   induction u with
-  | zero =>
-      rw [map_zero S₁, map_zero S₂, map_zero G, map_zero (assocT R A ρ C'),
-        map_zero (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
   | add u₁ u₂ h₁ h₂ =>
       rw [map_add S₁, map_add S₂, map_add G, map_add (assocT R A ρ C'), h₁, h₂,
         ← map_add (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
   | tmul c' w =>
       induction w with
-      | zero =>
-          rw [TensorProduct.tmul_zero, map_zero S₁, map_zero S₂, map_zero G,
-            map_zero (assocT R A ρ C'),
-            map_zero (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
       | add w₁ w₂ h₁ h₂ =>
           rw [TensorProduct.tmul_add, map_add S₁, map_add S₂, map_add G,
             map_add (assocT R A ρ C'), h₁, h₂,
@@ -677,7 +665,8 @@ theorem lTensor_canonicalGaloisMap_eq_galoisProductMap
                 * (coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] b₂))
               = ((c' ⊗ₜ[coinvariants ρ] b₁ : C' ⊗[coinvariants ρ] B))
                 • (coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] b₂)) from by
-            rw [Algebra.smul_def]
+            erw [Algebra.smul_def (R := C' ⊗[coinvariants ρ] B)
+              (A := (C' ⊗[coinvariants ρ] B) ⊗[R] A)]
             rfl]
           rw [smul_coactionBaseChange_one_tmul' R A ρ C' c' b₁ b₂,
             LinearEquiv.apply_symm_apply]
@@ -811,7 +800,6 @@ theorem surjective_canonicalGaloisMap
       canonicalGaloisMap ρ (collapseScalars R A ρ t) = galoisPrecursor R A ρ t := by
     intro t
     induction t with
-    | zero => rw [map_zero, map_zero, map_zero]
     | add t₁ t₂ h₁ h₂ => rw [map_add, map_add, map_add, h₁, h₂]
     | tmul b b' =>
         rw [collapseScalars_tmul, galoisPrecursor_tmul, canonicalGaloisMap_tmul]

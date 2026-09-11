@@ -128,12 +128,12 @@ theorem locSubring_subspace_eq_adic (D₀ : RationalLocData A) :
       (locIdeal D₀.P D₀.T D₀.s).adicTopology := by
     have htag_ind : @IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s)
         (TopologicalSpace.induced (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology) _ :=
-      @IsTopologicalRing.to_topologicalAddGroup _ _
+      @IsTopologicalRing.isTopologicalAddGroup _ _
         (TopologicalSpace.induced (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology)
         (Subring.instIsTopologicalRing (locSubring D₀.P D₀.T D₀.s))
     have htag_adic : @IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s)
         (locIdeal D₀.P D₀.T D₀.s).adicTopology _ :=
-      @IsTopologicalRing.to_topologicalAddGroup _ _ (locIdeal D₀.P D₀.T D₀.s).adicTopology
+      @IsTopologicalRing.isTopologicalAddGroup _ _ (locIdeal D₀.P D₀.T D₀.s).adicTopology
         (RingFilterBasis.isTopologicalRing
           (locIdeal D₀.P D₀.T D₀.s).adic_basis.toRing_subgroups_basis.toRingFilterBasis)
     apply @IsTopologicalAddGroup.ext (locSubring D₀.P D₀.T D₀.s) _ _ _ htag_ind htag_adic
@@ -392,7 +392,7 @@ private theorem locIdeal_pow_toAddSubgroup_isOpen (D₀ : RationalLocData A) (n 
   rw [locSubring_induced_eq_adicTopology D₀]
   letI : TopologicalSpace (locSubring D₀.P D₀.T D₀.s) := J.adicTopology
   haveI : IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s) :=
-    @IsTopologicalRing.to_topologicalAddGroup _ _ J.adicTopology
+    @IsTopologicalRing.isTopologicalAddGroup _ _ J.adicTopology
       (RingFilterBasis.isTopologicalRing
         J.adic_basis.toRing_subgroups_basis.toRingFilterBasis)
   exact AddSubgroup.isOpen_of_mem_nhds _
@@ -469,7 +469,7 @@ private theorem idealOfDef_pow_isClosed_aux (D₀ : RationalLocData A) (n : ℕ)
     QuotientAddGroup.discreteTopology hJn_open
   haveI : @IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n)
       inferInstance _ :=
-    @IsTopologicalRing.to_topologicalAddGroup _ _ inferInstance inferInstance
+    @IsTopologicalRing.isTopologicalAddGroup _ _ inferInstance inferInstance
   letI : UniformSpace (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) :=
     @IsTopologicalAddGroup.rightUniformSpace _ _ inferInstance inferInstance
   haveI : @IsUniformAddGroup (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) _ _ :=

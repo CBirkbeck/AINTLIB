@@ -332,7 +332,7 @@ private theorem coeff_pow_add_C_mul_X_pow
           term k =
               (PowerSeries.coeff (R := ℚ) n)
                 (A ^ k * y * PowerSeries.C (((k + 1).choose k : ℕ) : ℚ)) := by
-                simp [term, hsub]
+                simp only [term, hsub, pow_one]
           _ =
               (PowerSeries.coeff (R := ℚ) n) (A ^ k * y) *
                 (((k + 1).choose k : ℕ) : ℚ) := by

@@ -705,7 +705,6 @@ theorem localIdealGeneratorHom_chartBasicOpen_formula {X Y : Scheme.{u}}
     rw [← ConcreteCategory.comp_apply, ← (idealModule f).presheaf.map_comp]
     exact congr($((idealModule f).presheaf.congr_map
       (Subsingleton.elim _ _)).hom (localIdealElement f U r hr))
-  · rfl
 
 set_option backward.isDefEq.respectTransparency false in
 /-- A Cartier generator makes the local ideal-generator morphism bijective on every
@@ -2323,7 +2322,7 @@ theorem tensorSection_restrict {X : Scheme.{u}} (M N : X.Modules)
   have h₂ := congrArg (κ.app (.op V)) hqApply.symm
   have hA : A.map i t =
       (M.val.map i x ⊗ₜ N.val.map i y : A.obj (.op V)) := by
-    erw [PresheafOfModules.Monoidal.tensorObj_map_tmul]
+    erw [PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul]
     rfl
   have h₃ := congrArg
     (fun a ↦ κ.app (.op V) (q.app (.op V) a)) hA
@@ -5809,7 +5808,7 @@ theorem unitObjTensorIso_hom_tensorSection (X : Scheme.{u})
   erw [PresheafOfModules.comp_app, ModuleCat.comp_apply,
     PresheafOfModules.comp_app, ModuleCat.comp_apply] at hpresheafApply
   have hleft : ((λ_ A.val).hom.app (.op U)) q₀ = a * b := by
-    have happ := PresheafOfModules.leftUnitor_hom_app A.val (.op U)
+    have happ := PresheafOfModulesOfCommRing.leftUnitor_hom_app A.val (.op U)
     have heval := ConcreteCategory.congr_hom happ q₀
     have hmodule :
         ((λ_ (ModuleCat.of (X.sheaf.obj.obj (.op U))

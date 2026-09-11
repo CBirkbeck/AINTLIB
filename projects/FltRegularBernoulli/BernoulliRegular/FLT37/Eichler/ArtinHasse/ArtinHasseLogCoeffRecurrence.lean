@@ -68,25 +68,25 @@ theorem constantCoeff_gAH : PowerSeries.constantCoeff gAH = 1 := by
 `ℓ′·g_AH = subst(a)(log′)·g_AH·g_AH′ = g_AH′`.  Mirror of
 `KummerLogFormal.derivative_logOf_formalExpNormalizedMinusOne_mul_self`. -/
 theorem derivative_logOf_gAH_mul_self :
-    (d⁄dX ℚ logG) * gAH = d⁄dX ℚ gAH := by
+    (d⁄dX logG) * gAH = d⁄dX gAH := by
   have hc0 : PowerSeries.constantCoeff (gAH - 1) = 0 := by
     rw [map_sub, map_one, constantCoeff_gAH, sub_self]
   have hsubst : PowerSeries.HasSubst (gAH - 1) :=
     PowerSeries.HasSubst.of_constantCoeff_zero' hc0
   have hgeom :
-      PowerSeries.subst (gAH - 1) (d⁄dX ℚ (PowerSeries.log ℚ)) * gAH = 1 := by
+      PowerSeries.subst (gAH - 1) (d⁄dX (PowerSeries.log ℚ)) * gAH = 1 := by
     have h := Furtwaengler.FiniteLogFormal.subst_deriv_log_mul_one_add (A := ℚ) hsubst
     have hone_add : (1 : PowerSeries ℚ) + (gAH - 1) = gAH := by ring
     rwa [hone_add] at h
   rw [logG, PowerSeries.logOf_eq, PowerSeries.derivative_subst hsubst]
-  have hderiv_sub : d⁄dX ℚ (gAH - 1) = d⁄dX ℚ gAH := by simp
+  have hderiv_sub : d⁄dX (gAH - 1) = d⁄dX gAH := by simp
   calc
-    (PowerSeries.subst (gAH - 1) (d⁄dX ℚ (PowerSeries.log ℚ)) *
-          d⁄dX ℚ (gAH - 1)) * gAH
-        = (PowerSeries.subst (gAH - 1) (d⁄dX ℚ (PowerSeries.log ℚ)) * gAH) *
-            d⁄dX ℚ (gAH - 1) := by ring
-    _ = 1 * d⁄dX ℚ (gAH - 1) := by rw [hgeom]
-    _ = d⁄dX ℚ gAH := by rw [one_mul, hderiv_sub]
+    (PowerSeries.subst (gAH - 1) (d⁄dX (PowerSeries.log ℚ)) *
+          d⁄dX (gAH - 1)) * gAH
+        = (PowerSeries.subst (gAH - 1) (d⁄dX (PowerSeries.log ℚ)) * gAH) *
+            d⁄dX (gAH - 1) := by ring
+    _ = 1 * d⁄dX (gAH - 1) := by rw [hgeom]
+    _ = d⁄dX gAH := by rw [one_mul, hderiv_sub]
 
 /-! ## 3. The coefficient recurrence for `ℓ = logOf(g_AH)` -/
 

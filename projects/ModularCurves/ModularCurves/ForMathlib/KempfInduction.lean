@@ -36,7 +36,6 @@ private lemma restrict_cokernel_H_subsingleton
     infer_instance
   rw [Subsingleton.elim x₂ 0]
   simp only [map_zero]
-  rfl
 
 private lemma map_restrictPushforward_shortExact
     (pres : ShortComplex (Sheaf AddCommGrpCat.{u} X)) (presEx : pres.ShortExact)

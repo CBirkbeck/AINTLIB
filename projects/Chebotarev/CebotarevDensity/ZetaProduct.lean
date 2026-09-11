@@ -172,7 +172,7 @@ private theorem norm_galoisCharacterOnIdeal_le_one
     (χ : galoisCharacter K L) (𝔞 : Ideal (𝓞 K)) :
     ‖galoisCharacterOnIdeal K L χ 𝔞‖ ≤ 1 := by
   rw [galoisCharacterOnIdeal, norm_prod]
-  refine Finset.prod_le_one (fun i _ ↦ norm_nonneg _) (fun 𝔭 _ ↦ ?_)
+  refine Finset.prod_le_one₀ (fun i _ ↦ norm_nonneg _) (fun 𝔭 _ ↦ ?_)
   rw [norm_pow]
   by_cases h : UnramifiedIn K L 𝔭
   · rw [if_pos h, norm_galoisCharacter_out, one_pow]
@@ -1203,7 +1203,7 @@ private theorem sum_rpow_le_euler_prod (K : Type*) [Field K] [NumberField K]
         rw [Finset.prod_sum P (fun _ ↦ Finset.range (Kn + 1))
           (fun 𝔭 k ↦ (((Ideal.absNorm 𝔭 : ℝ)) ^ e) ^ k)]
     _ ≤ ∏ 𝔭 ∈ P, (1 - ((Ideal.absNorm 𝔭 : ℝ)) ^ e)⁻¹ := by
-        refine Finset.prod_le_prod
+        refine Finset.prod_le_prod₀
           (fun 𝔭 h𝔭 ↦ Finset.sum_nonneg fun k _ ↦ pow_nonneg (hx0 𝔭 h𝔭) k) (fun 𝔭 h𝔭 ↦ ?_)
         have h1x : 0 < 1 - ((Ideal.absNorm 𝔭 : ℝ)) ^ e := by have := hxlt 𝔭 h𝔭; linarith
         have hkey := geom_sum_mul (((Ideal.absNorm 𝔭 : ℝ)) ^ e) (Kn + 1)
@@ -2464,6 +2464,14 @@ private theorem norm_one_sub_inv_sub_one_le {y : ℂ} (hy : ‖y‖ ≤ 1 / 2) :
     exact inv_anti₀ (by norm_num) hnorm_lb
   rw [mul_comm 2 ‖y‖]
   gcongr
+
+/-- The 2026-09-01 mathlib bump swapped `Ideal.absNorm`'s hypothesis `[Module.Free ℤ S]` for
+`[Infinite S]`. Upstream does not make that bridge a global instance — it declares it `local` at each
+use site (`Mathlib/RingTheory/Ideal/Norm/AbsNorm.lean`, `Ideal/Norm/RelNorm.lean`,
+`FractionalIdeal/Norm.lean`). Same idiom here, so every statement below is unchanged. -/
+local instance instInfiniteOfModuleFreeInt {A : Type*} [CommRing A] [Nontrivial A]
+    [Module.Free ℤ A] : Infinite A :=
+  Module.Free.infinite ℤ A
 
 /-- A nonzero prime ideal `𝔭` of a number ring has `2 ≤ N𝔭`: its norm is neither `0` (only `⊥` has
 norm `0`) nor `1` (only `⊤` has norm `1`). -/

@@ -319,8 +319,6 @@ lemma isClosed_stalkSupport
   apply e.symm.isClosed_preimage.mp
   convert hpre using 1
   · rfl
-  · ext x
-    rfl
 
 /-- For a finite-type quasicoherent module, the closure in `closedStalkSupport` is
 redundant. -/

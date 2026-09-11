@@ -626,13 +626,13 @@ private lemma π_injective : Function.Injective π_hom := by
     (fun i : GenIdx ↦ T_gen 2 i.1.1 i.2) P) D_s = 0 at h_zero
   rw [MvPolynomial.eval₂_eq] at h_zero
   change (∑ d ∈ MvPolynomial.support P,
-    (Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d P) *
+    (Int.castRingHom (HeckeAlgebra 2)) (P.coeff d) *
     ∏ i ∈ d.support, T_gen 2 (↑i.1) i.2 ^ d i) D_s = 0 at h_zero
   rw [show (∑ d ∈ MvPolynomial.support P,
-        (Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d P) *
+        (Int.castRingHom (HeckeAlgebra 2)) (P.coeff d) *
         ∏ i ∈ d.support, T_gen 2 (↑i.1) i.2 ^ d i) D_s =
       ∑ d ∈ MvPolynomial.support P,
-        ((Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d P) *
+        ((Int.castRingHom (HeckeAlgebra 2)) (P.coeff d) *
         ∏ i ∈ d.support, T_gen 2 (↑i.1) i.2 ^ d i) D_s from Finset.sum_apply' _] at h_zero
   have h_term : ∀ d ∈ P.support,
       (((Int.castRingHom (HeckeAlgebra 2)) (P.coeff d)) *

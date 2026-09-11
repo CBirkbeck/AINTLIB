@@ -576,11 +576,11 @@ lemma derivativeFun_subst_exp_K (F : PowerSeries K) :
   have hg := hasSubst_exp_sub_one_K (K := K)
   have hone : (1 : PowerSeries K).subst (exp K - 1) = 1 := by
     rw [← coe_substAlgHom hg, map_one]
-  have hder : d⁄dX K (exp K - 1) = exp K := by
+  have hder : d⁄dX (exp K - 1) = exp K := by
     rw [map_sub, derivative_exp, Derivation.map_one_eq_zero, sub_zero]
   calc PowerSeries.derivativeFun (F.subst (exp K - 1))
-      = d⁄dX K (F.subst (exp K - 1)) := rfl
-    _ = (d⁄dX K F).subst (exp K - 1) * d⁄dX K (exp K - 1) :=
+      = d⁄dX (F.subst (exp K - 1)) := rfl
+    _ = (d⁄dX F).subst (exp K - 1) * d⁄dX (exp K - 1) :=
         derivative_subst hg
     _ = (delField F).subst (exp K - 1) := by
         rw [hder, delField, PadicLFunctions.del_def, subst_mul hg, subst_add hg, subst_X hg, hone]
@@ -608,7 +608,7 @@ lemma constantCoeff_iterate_derivativeFun_K (k : ℕ) (G : PowerSeries K) :
   | zero => simp [PowerSeries.coeff_zero_eq_constantCoeff]
   | succ k ih =>
     rw [Function.iterate_succ_apply, ih,
-      show G.derivativeFun = d⁄dX K G from rfl, coeff_derivative, Nat.factorial_succ]
+      show G.derivativeFun = d⁄dX G from rfl, coeff_derivative, Nat.factorial_succ]
     push_cast
     ring
 
@@ -622,7 +622,7 @@ lemma constantCoeff_iterate_delField (k : ℕ) (F : PowerSeries K) :
   | succ k ih =>
     rw [Function.iterate_succ_apply, ih (delField F), ← derivativeFun_subst_exp_K,
       show PowerSeries.derivativeFun (F.subst (exp K - 1))
-        = d⁄dX K (F.subst (exp K - 1)) from rfl,
+        = d⁄dX (F.subst (exp K - 1)) from rfl,
       coeff_derivative, Nat.factorial_succ]
     push_cast
     ring

@@ -348,24 +348,24 @@ theorem evalHom_injective_one (p : ℕ) (hp : p.Prime) : Function.Injective (eva
   set D := T_diag (n := 1) (fun _ ↦ p ^ (s 0))
   have h0 : (evalHom 1 p R).toFun D = 0 := by rw [hR]; rfl
   apply hcoeff
-  suffices h : ((evalHom 1 p) R).toFun D = MvPolynomial.coeff s R from h ▸ h0
+  suffices h : ((evalHom 1 p) R).toFun D = R.coeff s from h ▸ h0
   show Finsupp.toFun (MvPolynomial.eval₂Hom (Int.castRingHom (HeckeAlgebra 1))
     (fun k ↦ T_gen 1 p k) R) D = _
   simp only [MvPolynomial.coe_eval₂Hom, MvPolynomial.eval₂_eq', Fin.prod_univ_one]
   have h_sum_eq : (∑ x ∈ R.support,
-      (Int.castRingHom (HeckeAlgebra 1)) (MvPolynomial.coeff x R) * T_gen 1 p 0 ^ x 0) =
+      (Int.castRingHom (HeckeAlgebra 1)) (R.coeff x) * T_gen 1 p 0 ^ x 0) =
     (∑ x ∈ R.support,
       (Finsupp.single (T_diag (n := 1) (fun _ ↦ p ^ x 0))
-        (MvPolynomial.coeff x R) : HeckeCoset (GL_pair 1) →₀ ℤ)) :=
+        (R.coeff x) : HeckeCoset (GL_pair 1) →₀ ℤ)) :=
     Finset.sum_congr rfl (fun x _ ↦ by
       rw [T_gen_pow_one p hp]
       exact intCast_mul_T_elem_eq_single (fun _ ↦ p ^ x 0) (R.coeff x))
   show (∑ x ∈ R.support,
-      (Int.castRingHom (HeckeAlgebra 1)) (MvPolynomial.coeff x R) * T_gen 1 p 0 ^ x 0)
-        D = MvPolynomial.coeff s R
+      (Int.castRingHom (HeckeAlgebra 1)) (R.coeff x) * T_gen 1 p 0 ^ x 0)
+        D = R.coeff s
   rw [h_sum_eq]
   show (∑ x ∈ R.support, (Finsupp.single (T_diag (n := 1) (fun _ ↦ p ^ x 0))
-      (MvPolynomial.coeff x R) : HeckeCoset (GL_pair 1) →₀ ℤ)) D = MvPolynomial.coeff s R
+      (R.coeff x) : HeckeCoset (GL_pair 1) →₀ ℤ)) D = R.coeff s
   rw [Finsupp.finsetSum_apply]
   simp only [Finsupp.single_apply, D]
   rw [Finset.sum_eq_single s (fun b _ hbs ↦ if_neg (fun hb ↦ hbs
@@ -904,11 +904,11 @@ private lemma evalHom_apply_eq_sum_monomial (p : ℕ) (R : MvPolynomial (Fin 2) 
   change (MvPolynomial.eval₂ (Int.castRingHom (HeckeAlgebra 2))
     (fun k : Fin 2 ↦ T_gen 2 p k) R) D = _
   rw [MvPolynomial.eval₂_eq]
-  show (∑ d ∈ R.support, (Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d R) *
+  show (∑ d ∈ R.support, (Int.castRingHom (HeckeAlgebra 2)) (R.coeff d) *
     ∏ i ∈ d.support, T_gen 2 p i ^ d i) D = _
-  rw [show (∑ d ∈ R.support, (Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d R) *
+  rw [show (∑ d ∈ R.support, (Int.castRingHom (HeckeAlgebra 2)) (R.coeff d) *
         ∏ i ∈ d.support, T_gen 2 p i ^ d i) D =
-      ∑ d ∈ R.support, ((Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d R) *
+      ∑ d ∈ R.support, ((Int.castRingHom (HeckeAlgebra 2)) (R.coeff d) *
         ∏ i ∈ d.support, T_gen 2 p i ^ d i) D from Finset.sum_apply' _]
   refine Finset.sum_congr rfl (fun d _ ↦ ?_)
   show (((R.coeff d : ℤ) : HeckeAlgebra 2) * (∏ k ∈ d.support, T_gen 2 p k ^ d k)) D = _

@@ -403,7 +403,8 @@ theorem aeval_oneTmul_map (q : MvPolynomial σ' W₁) :
         = algebraMap W₁ _ w := rfl
     have h2 : algebraMap W₂
         (W₂ ⊗[W₁] (MvPolynomial σ' W₁ ⧸ Ideal.span (Set.range g')))
-        (algebraMap W₁ W₂ w) = (algebraMap W₁ W₂ w) ⊗ₜ[W₁] 1 := rfl
+        (algebraMap W₁ W₂ w) = (algebraMap W₁ W₂ w) ⊗ₜ[W₁] 1 :=
+      Algebra.TensorProduct.algebraMap_apply _
     rw [h1, h2, Algebra.algebraMap_eq_smul_one, Algebra.algebraMap_eq_smul_one,
       TensorProduct.smul_tmul]
   | add p q hp hq =>
@@ -965,7 +966,7 @@ theorem IsFilteredAlgColimit.exists_map_poly_eq (H : IsFilteredAlgColimit R 𝒮
     (fun d : ↥(P.support ∪ Q.support) => P.coeff d)
     (fun d : ↥(P.support ∪ Q.support) => Q.coeff d)
     (fun d => by
-      have hc := congrArg (MvPolynomial.coeff d.1) hPQ
+      have hc := congrArg (fun q : MvPolynomial σ A => q.coeff d.1) hPQ
       rwa [MvPolynomial.coeff_map, MvPolynomial.coeff_map] at hc)
   refine ⟨j, h, MvPolynomial.ext _ _ fun d => ?_⟩
   rw [MvPolynomial.coeff_map, MvPolynomial.coeff_map]
@@ -3305,9 +3306,7 @@ theorem FinitePresentation.of_comp_of_faithfullyFlat
     exact h9
   have hffl₂ : ∀ ⦃Q : {i // D.i₀ ≤ i}⦄, P₂ ≤ Q →
       Module.FaithfullyFlat (PresentationSystem.stage R A Q.1)
-        (MvPolynomial (Fin D.m) (PresentationSystem.stage R A Q.1) ⧸
-          Ideal.span (Set.range fun j => MvPolynomial.map
-            ((PresentationSystem.transition R A Q.2).toRingHom) (D.g j))) := by
+        (D.spreadStage (t := PresentationSystem.transition R A) Q.2) := by
     intro Q hQ
     exact hffl (hP₁F.trans (hP₂₁.trans hQ))
   have hpqχ : ∀ a : A, pLim (algebraMap A B a) = qLim (algebraMap A B a) := by

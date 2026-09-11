@@ -70,7 +70,6 @@ theorem sum_rightCoeff_tmul (x : M ⊗[R] A) :
     ∑ i, rightCoeff R A i x ⊗ₜ[R] (hopfBasis R A) i = x := by
   classical
   induction x with
-  | zero => simp
   | tmul m a =>
     calc ∑ i, rightCoeff R A i (m ⊗ₜ[R] a) ⊗ₜ[R] (hopfBasis R A) i
         = ∑ i, m ⊗ₜ[R] ((hopfBasis R A).coord i a • (hopfBasis R A) i) := by
@@ -260,7 +259,6 @@ omit [Module.Finite R A] in
 theorem rightCoeff_smul (i : hopfBasisIndex R A) (b : B) (x : B ⊗[R] A) :
     rightCoeff R A i (b • x) = b * rightCoeff R A i x := by
   induction x with
-  | zero => simp
   | tmul m a =>
     rw [TensorProduct.smul_tmul', rightCoeff_tmul, rightCoeff_tmul, smul_eq_mul,
       Algebra.mul_smul_comm]

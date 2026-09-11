@@ -238,7 +238,7 @@ structure. -/
 noncomputable instance quotientPlusFSubXIdealTopology_isTopologicalAddGroup (b : B) :
     @IsTopologicalAddGroup (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b)
       (quotientPlusFSubXIdealTopology B b) _ :=
-  @IsTopologicalRing.to_topologicalAddGroup _ _
+  @IsTopologicalRing.isTopologicalAddGroup _ _
     (quotientPlusFSubXIdealTopology B b)
     (quotientPlusFSubXIdealTopology_isTopologicalRing B b)
 
@@ -294,7 +294,7 @@ theorem quotient_plusFSubXIdeal_completeSpace
   letI τ : TopologicalSpace ↥(TateAlgebra B) := instTopologicalSpaceTateAlgebra
   haveI _hring : IsTopologicalRing ↥(TateAlgebra B) := instIsTopologicalRingTateAlgebra
   haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra B) :=
-    IsTopologicalRing.to_topologicalAddGroup
+    IsTopologicalRing.isTopologicalAddGroup
   haveI : FirstCountableTopology ↥(TateAlgebra B) := instFirstCountableTopologyTateAlgebra
   haveI hCS : @CompleteSpace ↥(TateAlgebra B)
       (IsTopologicalAddGroup.rightUniformSpace ↥(TateAlgebra B)) :=

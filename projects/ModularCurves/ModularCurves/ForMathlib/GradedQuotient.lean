@@ -185,17 +185,17 @@ lemma algebraMapGradeZero_surjective_mvPolynomial
   have hp0 : p.totalDegree = 0 :=
     (MvPolynomial.totalDegree_zero_iff_isHomogeneous σ).mpr
       ((MvPolynomial.mem_homogeneousSubmodule _ _).mp hp)
-  have hpC : p = MvPolynomial.C (MvPolynomial.coeff 0 p) :=
+  have hpC : p = MvPolynomial.C (p.coeff 0) :=
     MvPolynomial.totalDegree_eq_zero_iff_eq_C.mp hp0
-  refine ⟨MvPolynomial.coeff 0 p, Subtype.ext ?_⟩
-  change algebraMap R (MvPolynomial σ R ⧸ J.toIdeal) (MvPolynomial.coeff 0 p) = x
+  refine ⟨p.coeff 0, Subtype.ext ?_⟩
+  change algebraMap R (MvPolynomial σ R ⧸ J.toIdeal) (p.coeff 0) = x
   rw [← hpx]
-  change algebraMap R (MvPolynomial σ R ⧸ J.toIdeal) (MvPolynomial.coeff 0 p) =
+  change algebraMap R (MvPolynomial σ R ⧸ J.toIdeal) (p.coeff 0) =
     Ideal.Quotient.mk J.toIdeal p
   calc
-    _ = Ideal.Quotient.mk J.toIdeal (MvPolynomial.C (MvPolynomial.coeff 0 p)) := by
+    _ = Ideal.Quotient.mk J.toIdeal (MvPolynomial.C (p.coeff 0)) := by
       change Ideal.Quotient.mk J.toIdeal
-          (algebraMap R (MvPolynomial σ R) (MvPolynomial.coeff 0 p)) = _
+          (algebraMap R (MvPolynomial σ R) (p.coeff 0)) = _
       rw [MvPolynomial.algebraMap_eq]
     _ = Ideal.Quotient.mk J.toIdeal p := congrArg (Ideal.Quotient.mk J.toIdeal) hpC.symm
 

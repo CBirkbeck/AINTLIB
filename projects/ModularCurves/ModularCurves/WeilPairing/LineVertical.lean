@@ -34,6 +34,12 @@ namespace AlgebraicGeometry.Scheme.Modules
 
 variable {C : Scheme.{u}} (J : C.IdealSheafData)
 
+/-- The commutative ring structure on the underlying ring of a presheaf of commutative rings
+(removed from mathlib in #43193; restored locally). -/
+local instance {D : Type*} [Category* D] {R : Dᵒᵖ ⥤ CommRingCat.{u}} (X : Dᵒᵖ) :
+    CommRing ((R ⋙ forget₂ _ RingCat).obj X) :=
+  inferInstanceAs (CommRing (R.obj X))
+
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- The inclusion of the ideal module of `J` into the structure sheaf: componentwise
@@ -164,7 +170,6 @@ private theorem idealActionPre_app_injective_of_span
         from g) • (TensorProduct.lid _ _ w) := by
     intro w
     induction w with
-    | zero => simp
     | add a b ha hb =>
         rw [map_add, map_add, ha, hb, map_add, smul_add]
     | tmul a l =>
@@ -1159,7 +1164,6 @@ theorem divisorTwistHom_comp_cokernelπ_eq_zero {J₁ J₂ : C.IdealSheafData}
               0 := by
           intro s
           induction s with
-          | zero => rw [map_zero, map_zero]
           | add a b ha hb => rw [map_add, map_add, ha, hb, add_zero]
           | tmul m l =>
               have hcast := idealActionPre_app_tmul J₁ L (Opposite.op W) m l

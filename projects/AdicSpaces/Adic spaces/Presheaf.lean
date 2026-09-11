@@ -237,7 +237,7 @@ variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 /-- The `IsTopologicalAddGroup` instance from the localization topology. -/
 @[reducible] noncomputable def RationalLocData.isTopologicalAddGroup (D : RationalLocData A) :
     @IsTopologicalAddGroup (Localization.Away D.s) D.topology _ :=
-  @IsTopologicalRing.to_topologicalAddGroup _ _ D.topology D.isTopologicalRing
+  @IsTopologicalRing.isTopologicalAddGroup _ _ D.topology D.isTopologicalRing
 
 /-- The `UniformSpace` induced by the localization topology. -/
 @[reducible] noncomputable def RationalLocData.uniformSpace (D : RationalLocData A) :
@@ -1973,8 +1973,7 @@ theorem isIntegral_of_forall_continuous_valuation_le_one
             obtain ⟨n, hn⟩ := ConvexSubgroup.withZero_inv_pow_cofinal_of_convexGenerated
               hu_inv_gt1 γ hγ
             exact ⟨n, by
-              convert hn using 2
-              exact WithZero.coe_inj.mpr (Subtype.ext (inv_inv u_max).symm)⟩
+              convert hn using 2⟩
           exact Valuation.isContinuous_of_le_one_and_pow_cofinal P v_ext h_le_ext
             hg_bound h_cofinal
     · -- Empty P.I: degenerate case.

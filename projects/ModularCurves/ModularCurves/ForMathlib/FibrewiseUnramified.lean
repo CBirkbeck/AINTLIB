@@ -75,7 +75,6 @@ private lemma subsingleton_tensor_transfer
   have hz : ∀ z : L ⊗[T] M, z = 0 := by
     intro z
     induction z with
-    | zero => rfl
     | add x y hx hy => rw [hx, hy, add_zero]
     | tmul x m =>
       rw [show x ⊗ₜ[T] m = x • ((1 : L) ⊗ₜ[T] m) from by

@@ -76,7 +76,7 @@ private lemma ppow_mem_π_range (p : ℕ) (hp : p.Prime)
 private lemma prod_removePrime_lt (a : Fin 2 → ℕ) (ha : ∀ i, 0 < a i)
     (p : ℕ) (hp : p.Prime) (hp_dvd : p ∣ ∏ i, a i) :
     ∏ i, removePrime 2 p a i < ∏ i, a i := by
-  refine Finset.prod_lt_prod (fun i _ ↦ removePrime_pos 2 p a ha i)
+  refine Finset.prod_lt_prod₀ (fun i _ ↦ removePrime_pos 2 p a ha i)
     (fun i _ ↦ Nat.le_of_dvd (ha i) (Nat.ordCompl_dvd (a i) p)) ?_
   simp only [Fin.prod_univ_two] at hp_dvd
   have strict (i : Fin 2) (hi : p ∣ a i) : removePrime 2 p a i < a i := by

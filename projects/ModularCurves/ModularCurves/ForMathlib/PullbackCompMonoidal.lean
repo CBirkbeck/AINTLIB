@@ -879,7 +879,7 @@ noncomputable local instance {X Y : Scheme.{u}} (f : X ⟶ Y) :
     (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat) =
       ((TopologicalSpace.Opens.map f.base).op ⋙ X.sheaf.obj) ⋙
         forget₂ CommRingCat RingCat by rfl]
-  exact _root_.PresheafOfModules.monoidalCategory
+  exact _root_.PresheafOfModulesOfCommRing.monoidalCategory
 
 private abbrev exactRingSheaf (X : Scheme.{u}) :=
   (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat,

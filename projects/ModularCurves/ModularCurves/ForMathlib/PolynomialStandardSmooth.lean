@@ -47,13 +47,6 @@ lemma SubmersivePresentation.mvPolynomialFree_dimension :
     (SubmersivePresentation.mvPolynomialFree R ι).dimension = Nat.card ι := by
   simp [Presentation.dimension]
 
-/-- The polynomial algebra on a finite type is standard smooth of relative
-dimension its cardinality. -/
-theorem IsStandardSmoothOfRelativeDimension.mvPolynomial :
-    IsStandardSmoothOfRelativeDimension (Nat.card ι) R (MvPolynomial ι R) :=
-  (SubmersivePresentation.mvPolynomialFree R ι).isStandardSmoothOfRelativeDimension
-    (SubmersivePresentation.mvPolynomialFree_dimension R ι)
-
 /-- The univariate polynomial algebra is standard smooth of relative
 dimension one. -/
 theorem IsStandardSmoothOfRelativeDimension.polynomial :

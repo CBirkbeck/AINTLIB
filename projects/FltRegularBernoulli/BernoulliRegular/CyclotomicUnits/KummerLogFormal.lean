@@ -162,55 +162,55 @@ theorem bernoulliPowerSeries_mul_formalExpNormalizedMinusOne :
     _ = PowerSeries.X * (1 : PowerSeries ℚ) := by rw [mul_one]
 
 theorem derivative_logOf_formalExpNormalizedMinusOne_mul_self :
-    (d⁄dX ℚ (PowerSeries.logOf formalExpNormalizedMinusOne)) *
+    (d⁄dX (PowerSeries.logOf formalExpNormalizedMinusOne)) *
         formalExpNormalizedMinusOne =
-      d⁄dX ℚ formalExpNormalizedMinusOne := by
+      d⁄dX formalExpNormalizedMinusOne := by
   let N : PowerSeries ℚ := formalExpNormalizedMinusOne
   have hN0 : PowerSeries.constantCoeff (N - 1) = 0 := by
     simp [N]
   have hsubst : PowerSeries.HasSubst (N - 1) :=
     PowerSeries.HasSubst.of_constantCoeff_zero' hN0
   have hgeom :
-      PowerSeries.subst (N - 1) (d⁄dX ℚ (PowerSeries.log ℚ)) * N = 1 := by
+      PowerSeries.subst (N - 1) (d⁄dX (PowerSeries.log ℚ)) * N = 1 := by
     have h :=
       Furtwaengler.FiniteLogFormal.subst_deriv_log_mul_one_add (A := ℚ) hsubst
     simpa [N, sub_eq_add_neg, add_assoc] using h
   rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst hsubst]
-  have hderiv_sub : d⁄dX ℚ (N - 1) = d⁄dX ℚ N := by simp
+  have hderiv_sub : d⁄dX (N - 1) = d⁄dX N := by simp
   calc
-    (PowerSeries.subst (N - 1) (d⁄dX ℚ (PowerSeries.log ℚ)) *
-          d⁄dX ℚ (N - 1)) * N
+    (PowerSeries.subst (N - 1) (d⁄dX (PowerSeries.log ℚ)) *
+          d⁄dX (N - 1)) * N
         =
-          (PowerSeries.subst (N - 1) (d⁄dX ℚ (PowerSeries.log ℚ)) * N) *
-            d⁄dX ℚ N := by
+          (PowerSeries.subst (N - 1) (d⁄dX (PowerSeries.log ℚ)) * N) *
+            d⁄dX N := by
           rw [hderiv_sub]
           ring
-    _ = 1 * d⁄dX ℚ N := by rw [hgeom]
-    _ = d⁄dX ℚ N := by rw [one_mul]
+    _ = 1 * d⁄dX N := by rw [hgeom]
+    _ = d⁄dX N := by rw [one_mul]
 
 theorem X_mul_derivative_logOf_formalExpNormalizedMinusOne :
-    PowerSeries.X * (d⁄dX ℚ (PowerSeries.logOf formalExpNormalizedMinusOne)) =
+    PowerSeries.X * (d⁄dX (PowerSeries.logOf formalExpNormalizedMinusOne)) =
       PowerSeries.X + _root_.bernoulliPowerSeries ℚ - 1 := by
   let N : PowerSeries ℚ := formalExpNormalizedMinusOne
   let B : PowerSeries ℚ := _root_.bernoulliPowerSeries ℚ
-  let D : PowerSeries ℚ := d⁄dX ℚ (PowerSeries.logOf N)
+  let D : PowerSeries ℚ := d⁄dX (PowerSeries.logOf N)
   have hBN : B * N = 1 := by
     simpa [B, N] using bernoulliPowerSeries_mul_formalExpNormalizedMinusOne
   have hNB : N * B = 1 := by rw [mul_comm, hBN]
-  have hDN : D * N = d⁄dX ℚ N := by
+  have hDN : D * N = d⁄dX N := by
     simpa [D, N] using derivative_logOf_formalExpNormalizedMinusOne_mul_self
-  have hD_eq : D = B * (d⁄dX ℚ N) := by
+  have hD_eq : D = B * (d⁄dX N) := by
     calc
       D = D * 1 := by rw [mul_one]
       _ = D * (N * B) := by rw [hNB]
       _ = (D * N) * B := by ring
-      _ = (d⁄dX ℚ N) * B := by rw [hDN]
-      _ = B * (d⁄dX ℚ N) := by ring
+      _ = (d⁄dX N) * B := by rw [hDN]
+      _ = B * (d⁄dX N) := by ring
   have hN_XdN :
-      N + PowerSeries.X * (d⁄dX ℚ N) = PowerSeries.exp ℚ := by
+      N + PowerSeries.X * (d⁄dX N) = PowerSeries.exp ℚ := by
     calc
-      N + PowerSeries.X * (d⁄dX ℚ N)
-          = d⁄dX ℚ (PowerSeries.X * N) := by
+      N + PowerSeries.X * (d⁄dX N)
+          = d⁄dX (PowerSeries.X * N) := by
             change N + PowerSeries.X * PowerSeries.derivativeFun N =
               PowerSeries.derivativeFun (PowerSeries.X * N)
             rw [PowerSeries.derivativeFun_mul]
@@ -218,7 +218,7 @@ theorem X_mul_derivative_logOf_formalExpNormalizedMinusOne :
               PowerSeries.derivative_X
             rw [hdx]
             ring
-      _ = d⁄dX ℚ (PowerSeries.exp ℚ - 1) := by
+      _ = d⁄dX (PowerSeries.exp ℚ - 1) := by
             rw [← exp_sub_one_eq_X_mul_formalExpNormalizedMinusOne]
       _ = PowerSeries.exp ℚ := by
             simp [PowerSeries.derivative_exp]
@@ -233,10 +233,10 @@ theorem X_mul_derivative_logOf_formalExpNormalizedMinusOne :
       _ = PowerSeries.X + B := by rw [hBN, mul_one]
   calc
     PowerSeries.X * D
-        = PowerSeries.X * (B * (d⁄dX ℚ N)) := by rw [hD_eq]
-    _ = B * (PowerSeries.X * (d⁄dX ℚ N)) := by ring
+        = PowerSeries.X * (B * (d⁄dX N)) := by rw [hD_eq]
+    _ = B * (PowerSeries.X * (d⁄dX N)) := by ring
     _ = B * (PowerSeries.exp ℚ - N) := by
-          have hsub : PowerSeries.X * (d⁄dX ℚ N) = PowerSeries.exp ℚ - N := by
+          have hsub : PowerSeries.X * (d⁄dX N) = PowerSeries.exp ℚ - N := by
             rw [← hN_XdN]
             abel
           rw [hsub]

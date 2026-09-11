@@ -164,18 +164,18 @@ theorem logOf_expSeries_eq_logSeries :
   have hE_subst : PowerSeries.HasSubst (E - 1) :=
     PowerSeries.HasSubst.of_constantCoeff_zero' hE_sub_const
   have hE_deriv :
-      (PowerSeries.derivative ℚ) E =
-        E * (PowerSeries.derivative ℚ) L := by
+      PowerSeries.derivative E =
+        E * PowerSeries.derivative L := by
     simp only [E, L, expSeries]
     simp only [Furtwaengler.artinHasseExpSeries]
     rw [PowerSeries.derivative_subst (logSeries_hasSubst p), PowerSeries.derivative_exp]
   have hgeom :
-      PowerSeries.subst (E - 1) ((PowerSeries.derivative ℚ) (PowerSeries.log ℚ)) *
+      PowerSeries.subst (E - 1) (PowerSeries.derivative (PowerSeries.log ℚ)) *
           E = 1 := by
     have hbase :
-        (PowerSeries.derivative ℚ) (PowerSeries.log ℚ) *
+        PowerSeries.derivative (PowerSeries.log ℚ) *
             (1 + (PowerSeries.X : PowerSeries ℚ)) = 1 := by
-      rw [PowerSeries.deriv_log]
+      rw [PowerSeries.derivative_log]
       let G : PowerSeries ℚ := PowerSeries.mk fun n ↦ ((-1 : ℚ) ^ n)
       change G * (1 + PowerSeries.X) = 1
       rw [mul_add, mul_one]
@@ -188,7 +188,7 @@ theorem logOf_expSeries_eq_logSeries :
           simp [G, pow_succ]
     have hsubst :
         PowerSeries.subst (E - 1)
-            ((PowerSeries.derivative ℚ) (PowerSeries.log ℚ) *
+            (PowerSeries.derivative (PowerSeries.log ℚ) *
               (1 + (PowerSeries.X : PowerSeries ℚ))) =
           PowerSeries.subst (E - 1) (1 : PowerSeries ℚ) := by
       rw [hbase]
@@ -204,12 +204,12 @@ theorem logOf_expSeries_eq_logSeries :
   · rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst hE_subst, map_sub,
       Derivation.map_one_eq_zero, sub_zero, hE_deriv]
     calc
-      PowerSeries.subst (E - 1) ((PowerSeries.derivative ℚ) (PowerSeries.log ℚ)) *
-          (E * (PowerSeries.derivative ℚ) L)
+      PowerSeries.subst (E - 1) (PowerSeries.derivative (PowerSeries.log ℚ)) *
+          (E * PowerSeries.derivative L)
           =
-        (PowerSeries.subst (E - 1) ((PowerSeries.derivative ℚ) (PowerSeries.log ℚ)) *
-            E) * (PowerSeries.derivative ℚ) L := by ring
-      _ = (PowerSeries.derivative ℚ) L := by rw [hgeom, one_mul]
+        (PowerSeries.subst (E - 1) (PowerSeries.derivative (PowerSeries.log ℚ)) *
+            E) * PowerSeries.derivative L := by ring
+      _ = PowerSeries.derivative L := by rw [hgeom, one_mul]
   · rw [PowerSeries.constantCoeff_logOf hE_const]
     simp
 

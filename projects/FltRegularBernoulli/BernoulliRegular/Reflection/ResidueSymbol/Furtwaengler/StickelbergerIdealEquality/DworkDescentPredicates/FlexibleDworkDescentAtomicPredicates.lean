@@ -430,8 +430,8 @@ theorem stickelbergerSupportInOrbit_of_descentGaussSum
       (R := 𝓞 K) (S := 𝓞 R') b hker_le
   have : B.IsPrime := hB_prime
   have h_algMap_in_B : algebraMap (𝓞 K) (𝓞 R') γ ∈ B := by
-    have : γ ∈ B.comap (algebraMap (𝓞 K) (𝓞 R')) := hB_under ▸ hγ_in_b
-    rwa [Ideal.mem_comap] at this
+    have : γ ∈ B.under (𝓞 K) := hB_under ▸ hγ_in_b
+    rwa [Ideal.mem_under] at this
   have h_gauss_in_B : S.gaussSumInt a ^ p ∈ B := hγ ▸ h_algMap_in_B
   have h_ell_in_B : (ℓ : 𝓞 R') ∈ B :=
     S.ell_mem_of_gaussSumInt_pow_p_mem ha₁ ha₂ h_gauss_in_B

@@ -359,7 +359,6 @@ instance instModuleFiniteModularSymbols (N : ℕ) [NeZero N] (k : ℤ) :
   -- Conclude by simple-tensor induction (instance-clean, avoids `span_tmul_eq_top`).
   refine top_unique fun t _ => ?_
   induction t with
-  | zero => exact Submodule.zero_mem _
   | tmul d x => exact hdx d x
   | add a b ha hb => exact Submodule.add_mem _ (ha trivial) (hb trivial)
 

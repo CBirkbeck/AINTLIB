@@ -92,7 +92,6 @@ noncomputable def qSupportedOnDvdSubmodule (N : ℕ) [NeZero N] (k : ℤ) (d : �
       convert ModularForm.qExpansion_add (Γ := (Gamma1 N).map (mapGL ℝ))
         (h := 1) (a := k) (b := k)
         one_pos (one_mem_strictPeriods_Gamma1_map N) f g using 2
-      exact CuspForm.coe_add f g
     show (PowerSeries.coeff n) (qExpansion (1 : ℝ) ⇑(f + g)) = 0
     rw [h_eq, map_add, hf n hn, hg n hn, zero_add]
   smul_mem' c f hf n hn := by
@@ -101,7 +100,6 @@ noncomputable def qSupportedOnDvdSubmodule (N : ℕ) [NeZero N] (k : ℤ) (d : �
       convert ModularForm.qExpansion_smul (Γ := (Gamma1 N).map (mapGL ℝ))
         (k := k) (h := 1) one_pos
         (one_mem_strictPeriods_Gamma1_map N) c f using 2
-      rfl
     show (PowerSeries.coeff n) (qExpansion (1 : ℝ) ⇑(c • f)) = 0
     rw [h_eq, show (PowerSeries.coeff n) (c • qExpansion (1 : ℝ) ⇑f) =
       c * (PowerSeries.coeff n) (qExpansion (1 : ℝ) ⇑f) by simp [smul_eq_mul],

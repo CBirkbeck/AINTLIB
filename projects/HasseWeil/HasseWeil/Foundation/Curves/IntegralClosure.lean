@@ -110,7 +110,7 @@ instance dimensionLEOne_coordinateRing :
   maximalOfPrime := by
     intro 𝔭 hp_ne hp_prime
     have : 𝔭.IsPrime := hp_prime
-    refine Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := Polynomial F)
+    refine Ideal.isMaximal_of_isIntegral_of_isMaximal_under (R := Polynomial F)
       (S := C.CoordinateRing) 𝔭 ?_
     have hcomap_ne :
         𝔭.comap (algebraMap (Polynomial F) C.CoordinateRing) ≠ ⊥ := by

@@ -61,7 +61,7 @@ private theorem exists_expand_of_coeff_vanishing (p : ℕ) (hp : p ≠ 0)
 vanishes unless `p ∣ n` (or `n = 0`). -/
 private theorem coeff_eq_zero_of_derivative_eq_zero_charP {p : ℕ}
     [Fact p.Prime] [CharP R p] {f : PowerSeries R}
-    (hf : PowerSeries.derivative R f = 0)
+    (hf : PowerSeries.derivative f = 0)
     (n : ℕ) (hpn : ¬ p ∣ n) :
     PowerSeries.coeff n f = 0 := by
   -- `n ≠ 0` since `p ∣ 0`; write `n = m + 1`.
@@ -101,7 +101,7 @@ theorem FormalGroup.mulByP_exists_expand (F : FormalGroup R) (p : ℕ)
   apply exists_expand_of_coeff_vanishing p hp_prime.out.ne_zero
   intro n hpn
   -- `derivative [p] = 0`, from the chain rule and `[p] = 0` in characteristic `p`.
-  have hder : PowerSeries.derivative R (F.mulByNatHom p).toSeries = 0 := by
+  have hder : PowerSeries.derivative (F.mulByNatHom p).toSeries = 0 := by
     have chain := FormalGroupHom.invariantDifferential_chain (F.mulByNatHom p)
     have hp_zero :
         PowerSeries.C (PowerSeries.coeff 1 (F.mulByNatHom p).toSeries) *

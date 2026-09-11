@@ -283,7 +283,7 @@ private lemma nonempty_witness_of_doubleCoset_eq (g₁ g₂ : P.Δ) (c : G)
     Nonempty ↑{x : decompQuot P g₁ × decompQuot P g₂ |
       ({(↑x.1.out : G) * (↑g₁ : G)} : Set G) *
         {(↑x.2.out : G) * (↑g₂ : G)} * P.H = {c} * (P.H : Set G)} := by
-  obtain ⟨h₁, hh₁, h₂, hh₂, hprod⟩ := (DoubleCoset.eq P.H P.H _ _).mp
+  obtain ⟨h₁, hh₁, h₂, hh₂, hprod⟩ := DoubleCoset.eq.mp
     (DoubleCoset.mk_eq_of_doubleCoset_eq hset_eq)
   set α := (↑g₁ : G)
   set β := (↑g₂ : G)

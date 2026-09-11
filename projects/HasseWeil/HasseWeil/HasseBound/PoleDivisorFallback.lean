@@ -2496,7 +2496,7 @@ theorem bridgeA_intermediateField_adjoin_eq_fractionRing_finrank
         f⁻¹
       have h_e1_symm_val : ∀ x : IntermediateField.adjoin K ({f⁻¹} :
             Set W.toAffine.FunctionField),
-          (e1.symm x).val = x.val := fun x ↦ rfl
+          (e1.symm x).val = x.val := fun x ↦ by simp [e1]
       rw [h_e1_symm_val]
       exact RatFunc.algEquivOfTranscendental_X f⁻¹ h_inv
     rw [h_LHS, h_RHS]

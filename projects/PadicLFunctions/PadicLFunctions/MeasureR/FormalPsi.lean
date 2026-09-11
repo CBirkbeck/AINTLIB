@@ -166,13 +166,13 @@ theorem one_add_mul_derivative_phiSeries (F : PowerSeries R) :
     (1 + PowerSeries.X) * PowerSeries.derivativeFun (phiSeries p F)
       = (p : R) • phiSeries p
           ((1 + PowerSeries.X) * PowerSeries.derivativeFun F) := by
-  change (1 + PowerSeries.X) * PowerSeries.derivative R (phiSeries p F)
-    = (p : R) • phiSeries p ((1 + PowerSeries.X) * PowerSeries.derivative R F)
+  change (1 + PowerSeries.X) * PowerSeries.derivative (phiSeries p F)
+    = (p : R) • phiSeries p ((1 + PowerSeries.X) * PowerSeries.derivative F)
   have hS := hasSubst_one_add_X_pow_sub_one (R := R) p
   set S : PowerSeries R := (1 + PowerSeries.X) ^ p - 1 with hSdef
   have hone_sub : (1 : PowerSeries R).subst S = 1 := by
     rw [← PowerSeries.coe_substAlgHom hS, map_one]
-  have hderS : d⁄dX R S = (p : R) • (1 + PowerSeries.X) ^ (p - 1) := by
+  have hderS : d⁄dX S = (p : R) • (1 + PowerSeries.X) ^ (p - 1) := by
     rw [hSdef, map_sub, Derivation.map_one_eq_zero, sub_zero, Derivation.leibniz_pow,
       map_add, Derivation.map_one_eq_zero, PowerSeries.derivative_X, zero_add, smul_eq_mul,
       mul_one, ← Nat.cast_smul_eq_nsmul R]
@@ -184,7 +184,7 @@ theorem one_add_mul_derivative_phiSeries (F : PowerSeries R) :
     PowerSeries.subst_mul hS, PowerSeries.subst_add hS, PowerSeries.subst_X hS, hone_sub,
     hSplus, mul_smul_comm, mul_smul_comm]
   refine congrArg _ ?_
-  rw [← mul_assoc, mul_comm (1 + PowerSeries.X) ((d⁄dX R F).subst S), mul_assoc, hpow,
+  rw [← mul_assoc, mul_comm (1 + PowerSeries.X) ((d⁄dX F).subst S), mul_assoc, hpow,
     mul_comm]
 
 end digits
@@ -1182,14 +1182,14 @@ theorem exists_antideriv (B : PowerSeries K) :
   set E : PowerSeries K := (p : K)⁻¹ • (B * Ring.inverse (1 + PowerSeries.X)) with hE
   refine ⟨PowerSeries.mk fun n => if n = 0 then 0 else PowerSeries.coeff (n - 1) E / n, ?_, ?_⟩
   · rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_mk, if_pos rfl]
-  · have hDC : PowerSeries.derivative K
+  · have hDC : PowerSeries.derivative
         (PowerSeries.mk fun n => if n = 0 then 0 else PowerSeries.coeff (n - 1) E / n) = E := by
       refine PowerSeries.ext fun n => ?_
       rw [PowerSeries.coeff_derivative, PowerSeries.coeff_mk, if_neg (Nat.succ_ne_zero n),
         Nat.add_sub_cancel]
       have hne : ((n : K) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
       rw [Nat.cast_succ, div_mul_cancel₀ _ hne]
-    change (p : K) • ((1 + PowerSeries.X) * PowerSeries.derivative K
+    change (p : K) • ((1 + PowerSeries.X) * PowerSeries.derivative
       (PowerSeries.mk fun n => if n = 0 then 0 else PowerSeries.coeff (n - 1) E / n)) = B
     rw [hDC, hE, mul_smul_comm, smul_smul, mul_inv_cancel₀ hp0, one_smul,
       mul_comm (1 + PowerSeries.X), mul_assoc, Ring.inverse_mul_cancel _ hunit, mul_one]
@@ -1207,12 +1207,12 @@ theorem eq_C_constantCoeff_of_one_add_mul_derivative_eq_zero
     rw [PowerSeries.isUnit_iff_constantCoeff, map_add, PowerSeries.constantCoeff_one,
       PowerSeries.constantCoeff_X, add_zero]
     exact isUnit_one
-  have hD : PowerSeries.derivative K F = 0 := (hunit.mul_right_eq_zero).mp h
+  have hD : PowerSeries.derivative F = 0 := (hunit.mul_right_eq_zero).mp h
   refine PowerSeries.ext fun n => ?_
   cases n with
   | zero => rw [PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_zero_C]
   | succ n =>
-    have hcoeff : PowerSeries.coeff n (PowerSeries.derivative K F) = 0 := by rw [hD, map_zero]
+    have hcoeff : PowerSeries.coeff n (PowerSeries.derivative F) = 0 := by rw [hD, map_zero]
     rw [PowerSeries.coeff_derivative] at hcoeff
     have hne : ((n : ℕ) + 1 : K) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
     rw [PowerSeries.coeff_succ_C, (mul_eq_zero.mp hcoeff).resolve_right hne]
@@ -1245,7 +1245,7 @@ identity `∂(log(1+X)) = 1/(1+X)`. -/
 theorem one_add_mul_derivative_formalLog :
     (1 + PowerSeries.X) * PowerSeries.derivativeFun (formalLog K) = 1 := by
   haveI := charZero_of_qpAlgebra (M := K) p
-  change (1 + PowerSeries.X) * PowerSeries.derivative K (formalLog K) = 1
+  change (1 + PowerSeries.X) * PowerSeries.derivative (formalLog K) = 1
   ext n
   rw [add_mul, one_mul, map_add, PowerSeries.coeff_one]
   cases n with
@@ -1273,19 +1273,19 @@ theorem phiSeries_formalLog :
   haveI := charZero_of_qpAlgebra (M := K) p
   have hphi1 : phiSeries p (1 : PowerSeries K) = 1 := by
     rw [phiSeries, ← PowerSeries.coe_substAlgHom (hasSubst_one_add_X_pow_sub_one p), map_one]
-  have hlogD : (1 + PowerSeries.X) * PowerSeries.derivative K (formalLog K) = 1 :=
+  have hlogD : (1 + PowerSeries.X) * PowerSeries.derivative (formalLog K) = 1 :=
     one_add_mul_derivative_formalLog (p := p)
-  have hphiD : (1 + PowerSeries.X) * PowerSeries.derivative K (phiSeries p (formalLog K))
+  have hphiD : (1 + PowerSeries.X) * PowerSeries.derivative (phiSeries p (formalLog K))
       = (p : K) • phiSeries p
-        ((1 + PowerSeries.X) * PowerSeries.derivative K (formalLog K)) :=
+        ((1 + PowerSeries.X) * PowerSeries.derivative (formalLog K)) :=
     one_add_mul_derivative_phiSeries p (formalLog K)
-  have hLHS : (1 + PowerSeries.X) * PowerSeries.derivative K (phiSeries p (formalLog K))
+  have hLHS : (1 + PowerSeries.X) * PowerSeries.derivative (phiSeries p (formalLog K))
       = (p : K) • (1 : PowerSeries K) := by
     rw [hphiD, hlogD, hphi1]
-  have hRHS : (1 + PowerSeries.X) * PowerSeries.derivative K ((p : K) • formalLog K)
+  have hRHS : (1 + PowerSeries.X) * PowerSeries.derivative ((p : K) • formalLog K)
       = (p : K) • (1 : PowerSeries K) := by
-    rw [(PowerSeries.derivative K).map_smul, mul_smul_comm, hlogD]
-  have hker : (1 + PowerSeries.X) * PowerSeries.derivative K
+    rw [(PowerSeries.derivative (R := K)).map_smul, mul_smul_comm, hlogD]
+  have hker : (1 + PowerSeries.X) * PowerSeries.derivative
       (phiSeries p (formalLog K) - (p : K) • formalLog K) = 0 := by
     rw [map_sub, mul_sub, hLHS, hRHS, sub_self]
   have heqC := eq_C_constantCoeff_of_one_add_mul_derivative_eq_zero (p := p) hker

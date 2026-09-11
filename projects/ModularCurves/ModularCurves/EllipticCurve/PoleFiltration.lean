@@ -1564,7 +1564,8 @@ theorem overlap_pair_eq_baseRing (W : WeierstrassCurve R)
       simp only [infChartBasis_apply, Algebra.smul_def,
         Fin.val_zero, Fin.val_one,
         Fin.val_two, pow_zero, pow_one, mul_one]
-    rw [hbexp, hb0, hb1, hb2, map_zero, zero_mul, add_zero, zero_mul, add_zero,
+    rw [hbexp, hb0, hb1, hb2, map_zero (algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W))),
+      zero_mul, add_zero, zero_mul, add_zero,
       IsScalarTower.algebraMap_apply R (Polynomial R) (AdjoinRoot (infChartCubic W)),
       Polynomial.algebraMap_eq]
 

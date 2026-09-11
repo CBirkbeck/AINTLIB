@@ -17,6 +17,12 @@ universe u
 
 namespace ModularCurves
 
+/-- The commutative ring structure on the underlying ring of a presheaf of commutative rings
+(removed from mathlib in #43193; restored locally). -/
+local instance {D : Type*} [Category* D] {R : Dᵒᵖ ⥤ CommRingCat.{u}} (X : Dᵒᵖ) :
+    CommRing ((R ⋙ forget₂ _ RingCat).obj X) :=
+  inferInstanceAs (CommRing (R.obj X))
+
 noncomputable section
 
 local instance poleSheafBaseSectionsMulMonoidalCategory (X : Scheme.{u}) :

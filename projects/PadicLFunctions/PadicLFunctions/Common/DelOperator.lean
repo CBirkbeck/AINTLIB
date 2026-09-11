@@ -26,7 +26,7 @@ variable {R : Type*} [CommRing R]
 /-- Bridge between the deprecated unbundled `PowerSeries.derivativeFun` (used in this file's
 statements) and the bundled derivation `PowerSeries.derivative` that carries mathlib's API. -/
 private lemma derivativeFun_eq (F : PowerSeries R) :
-    F.derivativeFun = PowerSeries.derivative R F := rfl
+    F.derivativeFun = PowerSeries.derivative F := rfl
 
 /-- The operator `∂ = (1+T)·d/dT` on `R⟦T⟧` (RJW Lem. 3.24). -/
 noncomputable def del (F : PowerSeries R) : PowerSeries R :=

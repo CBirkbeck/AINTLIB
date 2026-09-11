@@ -60,7 +60,6 @@ theorem amitsurContract_lTensor_amitsurD (t : S ⊗[R] S) :
     amitsurContract R S (LinearMap.lTensor S (amitsurD R S) t) =
       t - (amitsurMul R S t) ⊗ₜ[R] (1 : S) := by
   induction t with
-  | zero => simp
   | tmul a b =>
     rw [LinearMap.lTensor_tmul, amitsurD_apply, TensorProduct.tmul_sub,
       map_sub, amitsurContract_tmul, amitsurContract_tmul, amitsurMul_tmul,

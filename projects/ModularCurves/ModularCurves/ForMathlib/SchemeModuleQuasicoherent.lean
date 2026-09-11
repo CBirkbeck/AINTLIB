@@ -1322,8 +1322,6 @@ theorem Modules.isLocalizedModuleAway_basicOpen_of_isQuasicoherent_of_isAffineOp
         (Module.End Γ(X, X.basicOpen f) Γ(M, X.basicOpen f)))
     rw [Module.End.isUnit_iff] at hunitEnd ⊢
     convert hunitEnd using 1
-    ext x
-    rfl
   · intro s
     obtain ⟨n, t, ht⟩ :=
       Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_of_isAffineOpen

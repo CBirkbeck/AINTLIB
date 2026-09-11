@@ -75,7 +75,7 @@ private theorem t2Space_of_moduleTopology_finite (M : Type u) [AddCommGroup M] [
   letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
   haveI : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup
   haveI : (uniformity A).IsCountablyGenerated := IsUniformAddGroup.uniformity_countably_generated
-  haveI : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
+  haveI : IsTopologicalAddGroup M := IsModuleTopology.isTopologicalAddGroup A M
   haveI : ContinuousSMul A M := inferInstance
   -- Present `M` as an open quotient of `Aⁿ`.
   obtain ⟨n, ν, hν⟩ := Module.Finite.exists_fin' A M
@@ -122,12 +122,12 @@ private theorem muMap_bijective_of_finite (M : Type u) [AddCommGroup M] [Module 
     [Module.Finite A M] :
     letI : TopologicalSpace M := moduleTopology A M
     haveI : IsModuleTopology A M := ⟨rfl⟩
-    haveI : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
+    haveI : IsTopologicalAddGroup M := IsModuleTopology.isTopologicalAddGroup A M
     haveI : ContinuousSMul A M := inferInstance
     Function.Bijective (muMap (A := A) (M := M)) := by
   letI : TopologicalSpace M := moduleTopology A M
   haveI : IsModuleTopology A M := ⟨rfl⟩
-  haveI : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
+  haveI : IsTopologicalAddGroup M := IsModuleTopology.isTopologicalAddGroup A M
   haveI : ContinuousSMul A M := inferInstance
   haveI : ContinuousConstSMul A M := inferInstance
   haveI : T2Space M := t2Space_of_moduleTopology_finite (A := A) M
@@ -151,12 +151,12 @@ private theorem tensorTate_map_injective
     Function.Injective (TensorProduct.map i (LinearMap.id (R := A) (M := ↥(TateAlgebra A)))) := by
   letI : TopologicalSpace N := moduleTopology A N
   haveI : IsModuleTopology A N := ⟨rfl⟩
-  haveI : IsTopologicalAddGroup N := IsModuleTopology.topologicalAddGroup A N
+  haveI : IsTopologicalAddGroup N := IsModuleTopology.isTopologicalAddGroup A N
   haveI : ContinuousSMul A N := inferInstance
   haveI : ContinuousConstSMul A N := inferInstance
   letI : TopologicalSpace M := moduleTopology A M
   haveI : IsModuleTopology A M := ⟨rfl⟩
-  haveI : IsTopologicalAddGroup M := IsModuleTopology.topologicalAddGroup A M
+  haveI : IsTopologicalAddGroup M := IsModuleTopology.isTopologicalAddGroup A M
   haveI : ContinuousSMul A M := inferInstance
   haveI : ContinuousConstSMul A M := inferInstance
   -- `i` is continuous (linear out of the module topology).
@@ -255,7 +255,7 @@ private theorem mem_idealMap_of_forall_coeff_mem (I : Ideal A) (h : ↥(TateAlge
   rw [hh_eq, ← hu, LinearMap.rTensor_def]
   -- The map `i₀ ⊗ p ↦ algebraMap ↑i₀ * p` lands in `Ideal.map I`.
   -- Reduce to pure tensors via the tensor-product universal property.
-  refine TensorProduct.induction_on u (by simp) (fun i₀ p ↦ ?_)
+  refine TensorProduct.inductionOn u (fun i₀ p ↦ ?_)
     (fun a b ha hb ↦ by rw [map_add, map_add, map_add]; exact Ideal.add_mem _ ha hb)
   -- Generator case: `μ_A ((I.subtype ⊗ id) (i₀ ⊗ p)) = i₀ • (coeffs of p)`,
   -- which through `restrictedModuleA_equiv` is `algebraMap ↑i₀ * p`.
@@ -455,7 +455,7 @@ private theorem quotient_oneSubfXIdeal_completeSpace_faithful [IsStronglyNoether
   letI τ : TopologicalSpace ↥(TateAlgebra A) := instTopologicalSpaceTateAlgebra
   haveI _hring : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
   haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
-    IsTopologicalRing.to_topologicalAddGroup
+    IsTopologicalRing.isTopologicalAddGroup
   haveI : FirstCountableTopology ↥(TateAlgebra A) := instFirstCountableTopologyTateAlgebra
   haveI hCS : @CompleteSpace ↥(TateAlgebra A)
       (IsTopologicalAddGroup.rightUniformSpace ↥(TateAlgebra A)) :=
@@ -1123,7 +1123,7 @@ theorem mvEvalHomBounded_continuous [IsTateRing R] {n : ℕ}
     MvTateAlgebra.mvTateAlgebraTopology' n
   haveI hringC : @IsTopologicalRing _ τC _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.to_topologicalAddGroup
+  haveI haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.isTopologicalAddGroup
   haveI hNA : NonarchimedeanRing S := inferInstance
   refine continuous_of_continuousAt_zero (mvEvalHomBounded g hg b hb) ?_
   rw [ContinuousAt, map_zero, Filter.tendsto_def]
@@ -1392,7 +1392,7 @@ theorem example638_evalHom_continuous (D : RationalLocData A) :
     MvTateAlgebra.mvTateAlgebraTopology' n
   haveI hringC : @IsTopologicalRing _ τC _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.to_topologicalAddGroup
+  haveI haddC : @IsTopologicalAddGroup _ τC _ := IsTopologicalRing.isTopologicalAddGroup
   -- `presheafValue D` is a nonarchimedean topological ring.
   haveI hNA : NonarchimedeanRing (presheafValue D) := inferInstance
   -- Reduce to continuity at 0 (additive-group hom).
@@ -1456,7 +1456,7 @@ omit [CompatiblePlusSubring A] in
 theorem mvQuot_isTopologicalAddGroup (n : ℕ)
     (a : Ideal ↥(restrictedMvPowerSeriesSubring n A)) :
     @IsTopologicalAddGroup (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) (mvQuotTopology n a) _ :=
-  @IsTopologicalRing.to_topologicalAddGroup _ _ (mvQuotTopology n a) (mvQuot_isTopologicalRing n a)
+  @IsTopologicalRing.isTopologicalAddGroup _ _ (mvQuotTopology n a) (mvQuot_isTopologicalRing n a)
 
 omit [CompatiblePlusSubring A] in
 /-- The uniform space on the quotient `C ⧸ a` (right uniformity of the quotient Tate topology). -/
@@ -1487,7 +1487,7 @@ theorem mvQuot_completeSpace (n : ℕ)
     MvTateAlgebra.mvTateAlgebraTopology' n
   haveI _hring : @IsTopologicalRing _ τ _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.to_topologicalAddGroup
+  haveI haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.isTopologicalAddGroup
   letI uC : UniformSpace ↥(restrictedMvPowerSeriesSubring n A) :=
     MvTateAlgebra.mvTateUniformSpace n
   haveI : @IsUniformAddGroup _ uC _ := MvTateAlgebra.mvTate_isUniformAddGroup n
@@ -1511,7 +1511,7 @@ theorem mvQuot_t2Space (n : ℕ)
     MvTateAlgebra.mvTateAlgebraTopology' n
   haveI _hring : @IsTopologicalRing _ τ _ :=
     MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing n
-  haveI haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.to_topologicalAddGroup
+  haveI haddgrp : @IsTopologicalAddGroup _ τ _ := IsTopologicalRing.isTopologicalAddGroup
   haveI hac : @IsClosed _ τ (a.toAddSubgroup : Set ↥(restrictedMvPowerSeriesSubring n A)) := ha
   letI : TopologicalSpace (↥(restrictedMvPowerSeriesSubring n A) ⧸ a) := mvQuotTopology n a
   haveI : @IsTopologicalAddGroup _ (mvQuotTopology n a) _ := mvQuot_isTopologicalAddGroup n a
@@ -2115,8 +2115,8 @@ private lemma presheafValue_mvRestricted_iU_denseRange
       ext w
       rw [MvPolynomial.coeff_coe, show MvPowerSeries.coeff w g.val = g.val w from
         MvPowerSeries.coeff_apply g.val w]
-      rw [show MvPolynomial.coeff w (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) =
-          ∑ v ∈ box, MvPolynomial.coeff w (MvPolynomial.monomial v (g.val v)) from
+      rw [show (∑ v ∈ box, MvPolynomial.monomial v (g.val v)).coeff w =
+          ∑ v ∈ box, (MvPolynomial.monomial v (g.val v)).coeff w from
         MvPolynomial.coeff_sum _ _ _]
       by_cases hw : ∀ i, w i < N
       · rw [Finset.sum_eq_single w]
@@ -2393,7 +2393,7 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
         (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hXi_pb
   -- (ii) `iU p`'s coefficient at `v` is `coeRingHom (coeff_v p)` (`iU = coe ∘ map coeRingHom`).
   have hiU_coeff : ∀ (p : MvPolynomial (Fin m) (Localization.Away D.s)) (v : Fin m →₀ ℕ),
-      MvPowerSeries.coeff v (iU p).val = D.coeRingHom (MvPolynomial.coeff v p) := by
+      MvPowerSeries.coeff v (iU p).val = D.coeRingHom (p.coeff v) := by
     -- `(iU p).val = ↑(MvPolynomial.map coeRingHom p)` (coe to power series), coeff-wise.
     have hiU_val : ∀ p : MvPolynomial (Fin m) (Localization.Away D.s),
         (iU p).val = (↑(MvPolynomial.map D.coeRingHom p) :
@@ -2481,7 +2481,7 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
   rw [Set.mem_preimage]
   apply hVgV
   -- expand `fU p = ∑_{v ∈ supp p} ψγ(coeff_v p) · ∏ⱼ (fU Xⱼ)^(vⱼ)`.
-  rw [show fU p = ∑ v ∈ p.support, ψγ (MvPolynomial.coeff v p) *
+  rw [show fU p = ∑ v ∈ p.support, ψγ (p.coeff v) *
       ∏ j, fU (MvPolynomial.X j) ^ (v j) from by
     have hfe : fU p = MvPolynomial.eval₂ ψγ (fun j ↦ fU (MvPolynomial.X j)) p := by
       have hvar : (fun j ↦ fU (MvPolynomial.X j)) =
@@ -2495,12 +2495,12 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
   -- each term lies in `Vg` (open subgroup), so the sum does.
   refine AddSubgroup.sum_mem _ (fun v hv ↦ ?_)
   -- `coeff_v(iU p) = coeRingHom(coeff_v p) ∈ image(P_T.I^k) ⊆ O`, so `coeff_v p ∈ ψγ⁻¹ V'`.
-  have hcoeffO : D.coeRingHom (MvPolynomial.coeff v p) ∈ O := by
+  have hcoeffO : D.coeRingHom (p.coeff v) ∈ O := by
     apply hk
     obtain ⟨bb, hbI, hbeq⟩ := MvTateAlgebra.mvTateAlgNhd_coeff_mem m P_T k hp v
     rw [← hiU_coeff p v, ← hbeq]
     exact ⟨bb, hbI, rfl⟩
-  have hψV' : ψγ (MvPolynomial.coeff v p) ∈ V' := hO_sub hcoeffO
+  have hψV' : ψγ (p.coeff v) ∈ V' := hO_sub hcoeffO
   -- term `= (∏ⱼ (fU Xⱼ)^vⱼ) · ψγ(coeff_v p) ∈ R_γ · V' ⊆ Vg`.
   rw [mul_comm]
   exact hV'R (Set.mul_mem_mul ⟨v, rfl⟩ hψV')

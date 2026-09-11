@@ -328,8 +328,8 @@ private lemma clearingHom_mul_pow (i : σ) {p : MvPolynomial σ R} {n : ℕ}
     simpa [Finsupp.weight_apply, smul_eq_mul, mul_one, Finsupp.sum]
       using hp (mem_support_iff.mp hd)
   rw [monomial_eq, map_mul, map_mul, ← hdeg]
-  have hC : clearingHom R i (C (coeff d p)) =
-      algebraMap (MvPolynomial σ R) _ (C (coeff d p)) := by
+  have hC : clearingHom R i (C (p.coeff d)) =
+      algebraMap (MvPolynomial σ R) _ (C (p.coeff d)) := by
     rw [clearingHom_C, Localization.mk_one_eq_algebraMap]
   rw [hC, mul_assoc]
   congr 1

@@ -46,6 +46,7 @@ theorem exists_prime_over_coinvariants (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCo
     ∃ q : Ideal B, q.IsPrime ∧ Ideal.comap (algebraMap (coinvariants ρ) B) q = p := by
   haveI := isIntegral_algebra_coinvariants R A ρ hρ
   obtain ⟨q, -, hq, hcomap⟩ := Ideal.exists_ideal_over_prime_of_isIntegral p ⊥ (by
+    show Ideal.comap (algebraMap (coinvariants ρ) B) ⊥ ≤ p
     rw [Ideal.comap_bot_of_injective (algebraMap (coinvariants ρ) B)
       (Subtype.val_injective)]
     exact bot_le)
@@ -86,13 +87,11 @@ theorem coactionBaseChange_naturality (π : D →ₐ[coinvariants ρ] C'')
           (AlgHom.id R A))
           (coactionBaseChange R A ρ D x) := by
   induction x with
-  | zero => simp
   | tmul d b =>
     rw [Algebra.TensorProduct.map_tmul]
     rw [show (AlgHom.id (coinvariants ρ) B) b = b from rfl,
       coactionBaseChange_tmul, coactionBaseChange_tmul]
     induction ρ b with
-    | zero => simp [TensorProduct.tmul_zero]
     | tmul b₀ a =>
       rw [show (baseChangeAssoc R A ρ C'').symm
           (π d ⊗ₜ[coinvariants ρ] (b₀ ⊗ₜ[R] a))
@@ -147,10 +146,9 @@ theorem pow_card_mem_range_algebraMap_of_mem_coinvariants (hρ : IsCoaction ρ)
       = (coactionCharpoly R A
           (coactionBaseChange R A ρ (MvPolynomial C'' (coinvariants ρ))) g).map
           (πB.restrictScalars R).toRingHom := by
-    rw [coactionCharpoly, coactionCharpoly, ← Matrix.charpoly_map]
-    congr 1
-    rw [← hg, coactionBaseChange_naturality R A ρ C'' π g]
-    exact mulMatrix_map R A ((πB.restrictScalars R)) _
+    rw [coactionCharpoly, coactionCharpoly, ← hg, coactionBaseChange_naturality R A ρ C'' π g,
+      mulMatrix_map]
+    exact Matrix.charpoly_map _ _
   -- conclude: the constant coefficient of (X − f)^r is in the image
   have hpow := coactionCharpoly_of_mem_coinvariants R A ρ C'' f hf
   obtain ⟨d₀, hd₀⟩ := hcoeffD 0
@@ -171,9 +169,10 @@ theorem pow_card_mem_range_algebraMap_of_mem_coinvariants (hρ : IsCoaction ρ)
       = (-1) ^ Fintype.card (hopfBasisIndex R A)
         * f ^ Fintype.card (hopfBasisIndex R A) := by
     rw [hpow, Polynomial.coeff_zero_eq_eval_zero, Polynomial.eval_pow,
-      Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C, zero_sub, neg_pow]
+      Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C, zero_sub,
+      neg_pow (R := C'' ⊗[coinvariants ρ] B)]
   rw [map_mul, map_pow, map_neg, map_one, ← hcoeff0, hval, ← mul_assoc, ← mul_pow,
-    neg_mul_neg, one_mul, one_pow, one_mul]
+    neg_mul_neg (α := C'' ⊗[coinvariants ρ] B), one_mul, one_pow, one_mul]
 
 end PowerWitness
 
@@ -342,7 +341,6 @@ theorem coactionBaseChange_one_tmul (ρ : B →ₐ[R] B ⊗[R] A) (C' : Type*) [
           (AlgHom.id R A) (ρ b) := by
   rw [coactionBaseChange_tmul]
   induction ρ b with
-  | zero => simp
   | tmul b₀ a =>
     rw [show (baseChangeAssoc R A ρ C').symm
         ((1 : C') ⊗ₜ[coinvariants ρ] (b₀ ⊗ₜ[R] a))
@@ -594,7 +592,7 @@ theorem finite_setOf_isMaximal_of_isLocalRing (ρ : B →ₐ[R] B ⊗[R] A) (hρ
     haveI := hn
     have hcomap : IsLocalRing.maximalIdeal (coinvariants ρ)
         = Ideal.comap (algebraMap (coinvariants ρ) B) n := by
-      haveI := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal
+      haveI := Ideal.isMaximal_under_of_isIntegral_of_isMaximal
         (R := coinvariants ρ) (S := B) n
       exact (IsLocalRing.eq_maximalIdeal inferInstance).symm
     let q : κ →+* B ⧸ n :=
@@ -695,10 +693,11 @@ theorem maximalIdeal_map_le_of_isMaximal (ρ : B →ₐ[R] B ⊗[R] A) (hρ : Is
   haveI : Algebra.IsIntegral (coinvariants ρ) B :=
     isIntegral_algebra_coinvariants R A ρ hρ
   haveI := hn
-  haveI := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal
+  haveI := Ideal.isMaximal_under_of_isIntegral_of_isMaximal
     (R := coinvariants ρ) (S := B) n
   rw [Ideal.map_le_iff_le_comap, IsLocalRing.eq_maximalIdeal
-    (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := coinvariants ρ) (S := B) n)]
+    (show (Ideal.comap (algebraMap (coinvariants ρ) B) n).IsMaximal from
+      Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := coinvariants ρ) (S := B) n)]
 
 end Orbit
 

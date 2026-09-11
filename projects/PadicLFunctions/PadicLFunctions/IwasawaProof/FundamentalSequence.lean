@@ -544,7 +544,7 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
   ext n
   rw [add_mul, one_mul, map_add, PowerSeries.smul_eq_C_mul, PowerSeries.coeff_C_mul,
     coeff_binomialSeries']
-  rw [show B.derivativeFun = PowerSeries.derivative ℤ_[p] B from rfl,
+  rw [show B.derivativeFun = PowerSeries.derivative B from rfl,
     PowerSeries.coeff_derivative, hB, coeff_binomialSeries']
   cases n with
   | zero =>
@@ -618,7 +618,7 @@ private theorem eq_C_constantCoeff_of_derivativeFun_zero {g : PowerSeries ℤ_[p
   | succ m =>
     rw [PowerSeries.coeff_C, if_neg (Nat.succ_ne_zero m)]
     have hcoeff := congrArg (PowerSeries.coeff m) h
-    rw [show g.derivativeFun = PowerSeries.derivative ℤ_[p] g from rfl,
+    rw [show g.derivativeFun = PowerSeries.derivative g from rfl,
       PowerSeries.coeff_derivative, map_zero] at hcoeff
     have hne : ((m : ℤ_[p]) + 1) ≠ 0 := by
       exact_mod_cast Nat.succ_ne_zero m

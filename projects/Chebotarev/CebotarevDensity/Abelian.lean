@@ -643,7 +643,7 @@ private theorem unramifiedIn_tower_descend
   rw [hunderP] at hP1
   have htower := Ideal.ramificationIdx_algebra_tower (R := 𝓞 K) (S := 𝓞 L) (T := 𝓞 M)
     (p := 𝔭) (P := 𝔮) (Q := 𝔓) (Ideal.map_ne_bot_of_ne_bot h𝔮bot)
-    (Ideal.map_ne_bot_of_ne_bot hunr.1) (by rw [Ideal.map_le_iff_le_comap, h𝔓comap])
+    (Ideal.map_ne_bot_of_ne_bot hunr.1) (by rw [Ideal.map_le_iff_le_comap]; exact h𝔓comap.ge)
   rw [hP1] at htower
   have he𝔮 : 𝔭.ramificationIdx' 𝔮 = 1 := Nat.eq_one_of_mul_eq_one_right htower.symm
   rw [← Ideal.ramificationIdx_eq_one_iff,

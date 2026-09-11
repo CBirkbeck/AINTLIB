@@ -230,16 +230,9 @@ theorem addVal_logCoeffSum_thirtytwo_eq_eight
   simp only [IntegralLogCoeffValuationAt] at hint
   -- `v₃₇(B₃₂/32) = 1`, so `(p−1)(v+1) = 36·2 = 72`, giving `(addVal Λ).toNat = 8`.
   rw [valuation_bernoulliFactorQp_thirtytwo] at hint
+  -- `norm_num` reduces `(addVal Λ).toNat + 64 = 72` to `addVal Λ = 8` (`ENat.toNat_eq_iff`).
   norm_num at hint
-  -- `(addVal Λ).toNat = 8` and `addVal Λ` finite (the product order is finite) ⟹ `= 8`.
-  have hfin_Λ : addVal S.O (S.logCoeffSum c 32) ≠ ⊤ := by
-    intro htop
-    simp only [IntegralProductBernoulliOrderAt] at hprod
-    rw [addVal_mul, htop, top_add] at hprod
-    exact (ENat.coe_ne_top _) hprod.symm
-  -- `.toNat = 8` from `hint`, then convert to `= (8 : ℕ∞)`.
-  have h8 : (addVal S.O (S.logCoeffSum c 32)).toNat = 8 := by omega
-  rw [← ENat.coe_toNat hfin_Λ, h8]; rfl
+  exact hint
 
 /-- **The reconciled equivalence** `addVal(Λ 32) = 8 ⟺ normVal(Λ 32) = 2/9` (the
 `(p−1)`-division read-off).  `normVal x = (addVal x).toNat / 36`, so the `addVal`

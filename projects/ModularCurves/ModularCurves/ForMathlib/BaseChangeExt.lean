@@ -289,12 +289,10 @@ private lemma isLocalizedModule_mapExt_succ [IsNoetherianRing S] (Y : ModuleCat.
     simp only [hρ', hρ, hiP, hiK, Ext.precompOfLinear, Ext.bilinearCompOfLinear_apply_apply,
       Functor.mapExtLinearMap_apply, Ext.mapExactFunctor_comp, Ext.mapExactFunctor_mk₀,
       ShortComplex.map_f]
-    rfl
   have hnat2 : ∀ e, δ' (iK e) = iX (δ e) := by
     intro e
     simp only [hδ', hδ, hiK, hiX, Ext.precompOfLinear, Ext.bilinearCompOfLinear_apply_apply,
       Functor.mapExtLinearMap_apply, Ext.mapExactFunctor_comp, Ext.mapExactFunctor_extClass]
-    rfl
   -- naturality of the localized ladder
   have hc₁ : ρ'.comp (LocalizedModule.lift 𝔪 iP hU_P)
       = (LocalizedModule.lift 𝔪 iK hU_K).comp Lρ := by

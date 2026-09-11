@@ -114,7 +114,6 @@ private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRi
           (Set.range fun m : M => (1 : p.asIdeal.ResidueField) ⊗ₜ[R] m) := by
         rintro z -
         induction z with
-        | zero => exact Submodule.zero_mem _
         | tmul c m =>
           rw [show c ⊗ₜ[R] m = c • ((1 : p.asIdeal.ResidueField) ⊗ₜ[R] m) by
             rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]]
@@ -231,9 +230,6 @@ private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRi
         (Submodule.span R (Set.range x)).subtype) := htop ▸ Submodule.mem_top
     obtain ⟨w, rfl⟩ := hz
     induction w with
-    | zero =>
-      rw [map_zero]
-      exact Submodule.zero_mem _
     | tmul c s =>
       obtain ⟨s, hs⟩ := s
       simp only [TensorProduct.map_tmul, LinearMap.id_coe, id_eq, Submodule.coe_subtype]
@@ -1188,7 +1184,6 @@ private theorem locallyFreeRankLocus_sections_equiv {X : Scheme.{u}} [IsAffine X
         (Scheme.Opens.topIso (f ⁻¹ᵁ U.1)).hom_inv_id
     · refine LinearMap.ext fun z => ?_
       induction z with
-      | zero => simp
       | tmul u m =>
         show inv₁ (LinearMap.liftBaseChange _ ℓ (u ⊗ₜ m)) = u ⊗ₜ m
         rw [LinearMap.liftBaseChange_tmul, map_smul]
@@ -1222,7 +1217,6 @@ private theorem locallyFreeRankLocus_finrank_le_of_span {R B K M : Type u} [Comm
   have hΦ : ∀ b : B, ∀ w : B ⊗[R] M, Φ (b • w) = e b • Φ w := by
     intro b w
     induction w with
-    | zero => simp
     | tmul b₀ m =>
         simp only [TensorProduct.smul_tmul', smul_eq_mul, Φ, TensorProduct.congr_tmul,
           LinearEquiv.refl_apply]

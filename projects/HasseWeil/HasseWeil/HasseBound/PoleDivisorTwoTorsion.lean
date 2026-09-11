@@ -116,7 +116,8 @@ theorem ord_P_x_gen_sub_const_ge_two_at_2tor (xk yk : K)
       ((y_gen W - algebraMap K KE yk) *
         (y_gen W + algebraMap K KE yk +
           algebraMap K KE W.a₁ * x_gen W + algebraMap K KE W.a₃)) := by
-    rw [h_LHS_mul, h_yd_ord]
+    rw [h_LHS_mul, h_yd_ord,
+      show ((2 : ℤ) : WithTop ℤ) = ((1 : ℤ) : WithTop ℤ) + ((1 : ℤ) : WithTop ℤ) by norm_cast]
     exact add_le_add (le_refl _) h_A_ge
   have h_RHS_ord : ((2 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ord_P P
       ((x_gen W - algebraMap K KE xk) *

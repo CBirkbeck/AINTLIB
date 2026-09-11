@@ -1071,7 +1071,7 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
   ext n
   rw [add_mul, one_mul, map_add, PowerSeries.smul_eq_C_mul, PowerSeries.coeff_C_mul,
     coeff_binomialSeries']
-  rw [show B.derivativeFun = PowerSeries.derivative ℤ_[p] B from rfl,
+  rw [show B.derivativeFun = PowerSeries.derivative B from rfl,
     PowerSeries.coeff_derivative, hB, coeff_binomialSeries']
   cases n with
   | zero =>

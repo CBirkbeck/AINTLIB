@@ -82,25 +82,25 @@ theorem logOf_artinHasseExpSeries (ell : ℕ) [Fact (Nat.Prime ell)] :
     PowerSeries.HasSubst.of_constantCoeff_zero' ha0
   have hLsubst : PowerSeries.HasSubst L := by
     simpa [L] using artinHasseLogSeries_hasSubst ell
-  have hE_deriv : d⁄dX ℚ E = E * d⁄dX ℚ L := by
-    change d⁄dX ℚ (PowerSeries.subst L (PowerSeries.exp ℚ)) =
-      PowerSeries.subst L (PowerSeries.exp ℚ) * d⁄dX ℚ L
+  have hE_deriv : d⁄dX E = E * d⁄dX L := by
+    change d⁄dX (PowerSeries.subst L (PowerSeries.exp ℚ)) =
+      PowerSeries.subst L (PowerSeries.exp ℚ) * d⁄dX L
     rw [PowerSeries.derivative_subst hLsubst, PowerSeries.derivative_exp]
   have hgeom :
-      PowerSeries.subst a (d⁄dX ℚ (PowerSeries.log ℚ)) * E = 1 := by
+      PowerSeries.subst a (d⁄dX (PowerSeries.log ℚ)) * E = 1 := by
     have h := FiniteLogFormal.subst_deriv_log_mul_one_add (A := ℚ) ha
     simpa [a] using h
   refine PowerSeries.derivative.ext ?_ ?_
   · rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst ha]
-    have hda : d⁄dX ℚ a = d⁄dX ℚ E := by
+    have hda : d⁄dX a = d⁄dX E := by
       simp [a]
     rw [hda, hE_deriv]
     calc
-      PowerSeries.subst a (d⁄dX ℚ (PowerSeries.log ℚ)) * (E * d⁄dX ℚ L)
-          = (PowerSeries.subst a (d⁄dX ℚ (PowerSeries.log ℚ)) * E) *
-              d⁄dX ℚ L := by
+      PowerSeries.subst a (d⁄dX (PowerSeries.log ℚ)) * (E * d⁄dX L)
+          = (PowerSeries.subst a (d⁄dX (PowerSeries.log ℚ)) * E) *
+              d⁄dX L := by
             ring
-      _ = d⁄dX ℚ L := by
+      _ = d⁄dX L := by
             rw [hgeom, one_mul]
   · rw [PowerSeries.constantCoeff_logOf hE0, hL0]
 

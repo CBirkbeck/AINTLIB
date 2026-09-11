@@ -739,7 +739,6 @@ private theorem mapBaseChange_eq_zero_of_kaehlerMap_eq_zero
       W.toAffine.FunctionField = 0 := by
   refine LinearMap.ext fun η ↦ ?_
   induction η with
-  | zero => simp
   | tmul x y => simp [KaehlerDifferential.mapBaseChange_tmul, h_map_zero]
   | add x y hx hy => simp [map_add, hx, hy]
 

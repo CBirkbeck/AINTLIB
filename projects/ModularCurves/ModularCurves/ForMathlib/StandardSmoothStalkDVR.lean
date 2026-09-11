@@ -168,7 +168,6 @@ private theorem stalkDVRAux_jz {K B : Type u} [Field K] [CommRing B] [Algebra K 
         KaehlerDifferential.D K (Polynomial K) Polynomial.X) := by
     intro t
     induction t with
-    | zero => exact ⟨0, by simp⟩
     | tmul p ω =>
       obtain ⟨q, rfl⟩ : ∃ q : Polynomial K,
           ω = q • KaehlerDifferential.D K (Polynomial K) Polynomial.X := by

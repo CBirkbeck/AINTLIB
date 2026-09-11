@@ -2630,7 +2630,7 @@ private theorem pow_sum_toNat_le_norm_prod_sub {F : Finset ℂ} {D : ℂ → ℤ
     (hzu : ∀ u ∈ F, b ≤ ‖z - u‖) :
     b ^ (∑ u ∈ F, (D u).toNat) ≤ ‖∏ u ∈ F, (z - u) ^ D u‖ := by
   rw [norm_prod_sub_zpow hD, ← Finset.prod_pow_eq_pow_sum]
-  exact Finset.prod_le_prod (fun u _ => by positivity)
+  exact Finset.prod_le_prod₀ (fun u _ => by positivity)
     (fun u hu => pow_le_pow_left₀ hb (hzu u hu) _)
 
 /-- Upper bound for the norm of a monic-type product: if every factor distance `‖z - u‖`
@@ -2640,7 +2640,7 @@ private theorem norm_prod_sub_le_pow {F : Finset ℂ} {D : ℂ → ℤ}
     (hzu : ∀ u ∈ F, ‖z - u‖ ≤ B) :
     ‖∏ u ∈ F, (z - u) ^ D u‖ ≤ B ^ (∑ u ∈ F, (D u).toNat) := by
   rw [norm_prod_sub_zpow hD, ← Finset.prod_pow_eq_pow_sum]
-  exact Finset.prod_le_prod (fun u _ => by positivity)
+  exact Finset.prod_le_prod₀ (fun u _ => by positivity)
     (fun u hu => pow_le_pow_left₀ (norm_nonneg _) (hzu u hu) _)
 
 /-- **Divisor monotonicity from an open ball to its closed ball.** For an everywhere-analytic

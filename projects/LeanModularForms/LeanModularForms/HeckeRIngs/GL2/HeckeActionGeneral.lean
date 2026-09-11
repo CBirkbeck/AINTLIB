@@ -300,8 +300,7 @@ private lemma h_coset_mem_H_gen (D : HeckeCoset P)
     ConjAct.smul_def] at h_K
   simp only [ConjAct.ofConjAct_toConjAct, map_inv, inv_inv] at h_K
   exact P.H.mul_mem (by
-    convert h_K using 2
-    simp only [Subgroup.coe_mul, Subgroup.coe_inv]) hh₂
+    convert h_K using 2) hh₂
 
 omit [HeckePairAction P] in
 private lemma adjugate_decomp_eq_gen (D : HeckeCoset P)

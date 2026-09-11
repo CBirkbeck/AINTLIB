@@ -567,7 +567,7 @@ theorem locToQuotientOneSubfX_gen_continuous (D : RationalLocData A)
   letI : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientTTopology_isTopologicalRing D.s
   haveI : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
-    @IsTopologicalRing.to_topologicalAddGroup _ _
+    @IsTopologicalRing.isTopologicalAddGroup _ _
       (quotientTTopology D.s) (quotientTTopology_isTopologicalRing D.s)
   -- Step 1: Reduce to continuity at 0 using additive group structure.
   apply continuous_of_continuousAt_zero (locToQuotientOneSubfX_gen D.s)
@@ -647,7 +647,7 @@ extends `locToQuotientOneSubfX_gen` to the completion, giving:
 noncomputable instance quotientTTopology_isTopologicalAddGroup (f : A) :
     @IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal f)
       (quotientTTopology f) _ :=
-  @IsTopologicalRing.to_topologicalAddGroup _ _
+  @IsTopologicalRing.isTopologicalAddGroup _ _
     (quotientTTopology f) (quotientTTopology_isTopologicalRing f)
 
 /-- The `UniformSpace` on the quotient T-topology. -/
@@ -1305,7 +1305,7 @@ theorem oneSubfXIdeal_isClosed_tTopology (s : A)
     (hcs_tate : @CompleteSpace ↥(TateAlgebra A)
       (@IsTopologicalAddGroup.rightUniformSpace _ _
         (TateAlgebraWedhorn.tateTopologyT s)
-        (@IsTopologicalRing.to_topologicalAddGroup _ _
+        (@IsTopologicalRing.isTopologicalAddGroup _ _
           (TateAlgebraWedhorn.tateTopologyT s)
           (TateAlgebraWedhorn.tateTopologyT_isTopologicalRing s))))
     (ht2_tate : @T2Space ↥(TateAlgebra A) (TateAlgebraWedhorn.tateTopologyT s))
@@ -1339,7 +1339,7 @@ theorem quotientTTopology_completeSpace (s : A)
     (hcs_tate : @CompleteSpace ↥(TateAlgebra A)
       (@IsTopologicalAddGroup.rightUniformSpace _ _
         (TateAlgebraWedhorn.tateTopologyT s)
-        (@IsTopologicalRing.to_topologicalAddGroup _ _
+        (@IsTopologicalRing.isTopologicalAddGroup _ _
           (TateAlgebraWedhorn.tateTopologyT s)
           (TateAlgebraWedhorn.tateTopologyT_isTopologicalRing s))))
     (_ht2_tate : @T2Space ↥(TateAlgebra A) (TateAlgebraWedhorn.tateTopologyT s))
@@ -1351,7 +1351,7 @@ theorem quotientTTopology_completeSpace (s : A)
   haveI : IsTopologicalRing ↥(TateAlgebra A) :=
     TateAlgebraWedhorn.tateTopologyT_isTopologicalRing s
   haveI : IsTopologicalAddGroup ↥(TateAlgebra A) :=
-    IsTopologicalRing.to_topologicalAddGroup
+    IsTopologicalRing.isTopologicalAddGroup
   haveI : FirstCountableTopology A := IsHuberRing.firstCountableTopology
   haveI hfc_pi : @FirstCountableTopology ((Fin 1 →₀ ℕ) → A) Pi.topologicalSpace :=
     inferInstance
@@ -1369,7 +1369,7 @@ theorem quotientTTopology_t0Space (s : A)
     (hcs_tate : @CompleteSpace ↥(TateAlgebra A)
       (@IsTopologicalAddGroup.rightUniformSpace _ _
         (TateAlgebraWedhorn.tateTopologyT s)
-        (@IsTopologicalRing.to_topologicalAddGroup _ _
+        (@IsTopologicalRing.isTopologicalAddGroup _ _
           (TateAlgebraWedhorn.tateTopologyT s)
           (TateAlgebraWedhorn.tateTopologyT_isTopologicalRing s))))
     (ht2_tate : @T2Space ↥(TateAlgebra A) (TateAlgebraWedhorn.tateTopologyT s))
@@ -1381,7 +1381,7 @@ theorem quotientTTopology_t0Space (s : A)
   haveI : IsTopologicalRing ↥(TateAlgebra A) :=
     TateAlgebraWedhorn.tateTopologyT_isTopologicalRing s
   haveI : IsTopologicalAddGroup ↥(TateAlgebra A) :=
-    IsTopologicalRing.to_topologicalAddGroup
+    IsTopologicalRing.isTopologicalAddGroup
   haveI : @IsClosed ↥(TateAlgebra A) τT
       (oneSubfXIdeal s : Set ↥(TateAlgebra A)) :=
     oneSubfXIdeal_isClosed_tTopology s hcs_tate ht2_tate J hadic
@@ -1458,7 +1458,7 @@ theorem tateQuotientToPresheafHom_continuous (D : RationalLocData A)
   haveI hTR : IsTopologicalRing ↥(TateAlgebra A) :=
     TateAlgebraWedhorn.tateTopologyT_isTopologicalRing D.s
   haveI : IsTopologicalAddGroup ↥(TateAlgebra A) :=
-    IsTopologicalRing.to_topologicalAddGroup
+    IsTopologicalRing.isTopologicalAddGroup
   letI τQ : TopologicalSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientTTopology D.s
   -- tateQuotientToPresheafHom = Quotient.lift tateEvalPresheafHom.
@@ -1809,7 +1809,7 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
   letI : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientOneSubfXIdealTopology_isTopologicalRing D.s
   haveI : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
-    @IsTopologicalRing.to_topologicalAddGroup _ _
+    @IsTopologicalRing.isTopologicalAddGroup _ _
       (quotientOneSubfXIdealTopology D.s) (quotientOneSubfXIdealTopology_isTopologicalRing D.s)
   -- Reduce to continuity at 0.
   apply continuous_of_continuousAt_zero (locToQuotientOneSubfX_gen D.s)

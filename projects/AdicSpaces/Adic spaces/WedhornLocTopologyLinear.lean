@@ -127,7 +127,7 @@ theorem locNhd_span_isOpen
         @nhds _ (locTopology P T s hopen) 0 :=
       (locBasis P T s hopen).hasBasis_nhds_zero.mem_of_mem (i := n) trivial
     haveI : @IsTopologicalAddGroup _ (locTopology P T s hopen) _ :=
-      @IsTopologicalRing.to_topologicalAddGroup _ _
+      @IsTopologicalRing.isTopologicalAddGroup _ _
         (locTopology P T s hopen)
         (locBasis P T s hopen).toRingFilterBasis.isTopologicalRing
     exact (locNhd P T s n).isOpen_of_mem_nhds hmem

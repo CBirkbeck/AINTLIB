@@ -251,7 +251,7 @@ theorem _root_.IsPrimitiveRoot.norm_pow_sub_one_eq_one {ζ : L} {D : ℕ}
         ∏ k ∈ (Finset.range n).erase i, ‖1 - ζ ^ (k + 1)‖ = 1 :=
       (Finset.mul_prod_erase _ (fun k => ‖1 - ζ ^ (k + 1)‖) hi).trans hP
     nlinarith [hsplit, norm_nonneg (1 - ζ ^ (i + 1)),
-      Finset.prod_le_one (s := (Finset.range n).erase i)
+      Finset.prod_le_one₀ (s := (Finset.range n).erase i)
         (fun k _ => norm_nonneg (1 - ζ ^ (k + 1))) (fun k _ => hfac k),
       Finset.prod_nonneg
         (fun k (_ : k ∈ (Finset.range n).erase i) => norm_nonneg (1 - ζ ^ (k + 1)))]

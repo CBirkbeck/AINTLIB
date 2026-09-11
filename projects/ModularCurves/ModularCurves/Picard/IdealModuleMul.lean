@@ -251,10 +251,7 @@ theorem exists_secA_tmul_secB
     (t : ↑(((idealModule JA).val ⊗ (idealModule JB).val).obj (op W))) :
     ∃ z : Γ(C, W), (D.secA i hW z ⊗ₜ[↑(C.ringCatSheaf.obj.obj (op W))] D.secB i hW :
       ↑(((idealModule JA).val ⊗ (idealModule JB).val).obj (op W))) = t := by
-  refine TensorProduct.induction_on t ⟨0, ?_⟩ (fun a b => ?_) ?_
-  · refine Eq.trans (congrArg (fun s => s ⊗ₜ[↑(C.ringCatSheaf.obj.obj (op W))] D.secB i hW)
-      (show D.secA i hW 0 = 0 from Subtype.ext (mul_zero _))) ?_
-    exact TensorProduct.zero_tmul _ _
+  refine TensorProduct.inductionOn t (fun a b => ?_) ?_
   · obtain ⟨x, hx⟩ : ∃ x : Γ(C, W), (D.genA i |_ₗ W ⟪hW⟫) * x = a.1 :=
       D.exists_genA_mul i hW a.2
     obtain ⟨y, hy⟩ : ∃ y : Γ(C, W), (D.genB i |_ₗ W ⟪hW⟫) * y = b.1 :=

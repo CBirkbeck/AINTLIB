@@ -606,10 +606,10 @@ theorem one_add_mul_derivative_FtildeA {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (ha0 
     have hsubF : ∀ x y : PowerSeries K,
         PowerSeries.derivativeFun (x - y)
           = PowerSeries.derivativeFun x - PowerSeries.derivativeFun y :=
-      fun x y => map_sub (PowerSeries.derivative K) x y
+      fun x y => map_sub (PowerSeries.derivative (R := K)) x y
     have hnsmul : ∀ (n : ℕ) (f : PowerSeries K),
         PowerSeries.derivativeFun (n • f) = n • PowerSeries.derivativeFun f :=
-      fun n f => map_nsmul (PowerSeries.derivative K) n f
+      fun n f => map_nsmul (PowerSeries.derivative (R := K)) n f
     have hDF : PowerSeries.derivativeFun (FtildeA p K a)
         = -(P * DuA) + (a - 1 : ℕ) • PowerSeries.derivativeFun (formalLog (K := K)) := by
       have dsubst : PowerSeries.derivativeFun ((formalLog (K := K)).subst (uA K a - 1))
@@ -931,7 +931,7 @@ theorem p_mul_constantCoeff_mahlerK_rhoA {a : ℕ} (ha : ¬ (p : ℕ) ∣ a)
     rw [show PowerSeries.derivativeFun (FtildeA p K a - mahlerK p K (rhoA p K a))
         = PowerSeries.derivativeFun (FtildeA p K a)
           - PowerSeries.derivativeFun (mahlerK p K (rhoA p K a)) from
-        map_sub (PowerSeries.derivative K) _ _,
+        map_sub (PowerSeries.derivative (R := K)) _ _,
       mul_sub, hFder, hAder]
     ring
   -- `(1+X)·∂(φ C₁) = φ B`  (∂φ = p·φ∂ + scalar pull-through)
@@ -949,7 +949,7 @@ theorem p_mul_constantCoeff_mahlerK_rhoA {a : ℕ} (ha : ¬ (p : ℕ) ∣ a)
           ((FtildeA p K a - mahlerK p K (rhoA p K a)) - phiSeries p C₁)
         = PowerSeries.derivativeFun (FtildeA p K a - mahlerK p K (rhoA p K a))
           - PowerSeries.derivativeFun (phiSeries p C₁) from
-        map_sub (PowerSeries.derivative K) _ _,
+        map_sub (PowerSeries.derivative (R := K)) _ _,
       mul_sub, hWder, hphiC₁der, sub_self]
   have hWeq := eq_C_constantCoeff_of_one_add_mul_derivative_eq_zero (p := p) hker
   set c₀ := PowerSeries.constantCoeff

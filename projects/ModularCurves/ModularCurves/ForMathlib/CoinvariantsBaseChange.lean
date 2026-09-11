@@ -64,7 +64,6 @@ theorem baseChangeAssoc_tmul_one (x : C' ⊗[coinvariants ρ] B) :
       = (Algebra.TensorProduct.map (AlgHom.id C' C')
           (includeLeftOverCoinvariants ρ)) x := by
   induction x with
-  | zero => simp [TensorProduct.zero_tmul]
   | tmul c' b =>
     show (Algebra.TensorProduct.assoc R (coinvariants ρ) C' C' B A)
         ((c' ⊗ₜ[coinvariants ρ] b) ⊗ₜ[R] (1 : A))
@@ -107,7 +106,6 @@ private theorem exists_tmul_one_eq_map_equalizer_val
           (AlgHom.equalizer (coactionOverCoinvariants ρ)
             (includeLeftOverCoinvariants ρ)).val) y := by
   induction y with
-  | zero => exact ⟨0, by rw [map_zero, TensorProduct.zero_tmul]⟩
   | tmul c' e =>
     have he : (e : B) ∈ coinvariants ρ := by
       have h2 := e.2
@@ -173,7 +171,6 @@ private theorem rid_map_counit_baseChangeAssoc_symm (c' : C') (z : B ⊗[R] A) :
           ((Algebra.TensorProduct.rid R R B)
             ((Algebra.TensorProduct.map (AlgHom.id R B) (Bialgebra.counitAlgHom R A)) z)) := by
   induction z with
-  | zero => simp [TensorProduct.tmul_zero]
   | tmul b a =>
     rw [show (baseChangeAssoc R A ρ C').symm (c' ⊗ₜ[coinvariants ρ] (b ⊗ₜ[R] a))
         = (c' ⊗ₜ[coinvariants ρ] b) ⊗ₜ[R] a from
@@ -193,7 +190,6 @@ theorem coactionBaseChange_counit (hρ : IsCoaction ρ) :
       = AlgHom.id R (C' ⊗[coinvariants ρ] B) := by
   refine AlgHom.ext fun x => ?_
   induction x with
-  | zero => simp
   | tmul c' b =>
     show (Algebra.TensorProduct.rid R R (C' ⊗[coinvariants ρ] B))
         ((Algebra.TensorProduct.map (AlgHom.id R (C' ⊗[coinvariants ρ] B))
@@ -223,7 +219,6 @@ private theorem assoc_baseChangeAssoc_symm_tmul (c' : C') (w : B ⊗[R] A) (a : 
       = graftMap R A ρ C' c'
           ((TensorProduct.assoc R B A A) (w ⊗ₜ[R] a)) := by
   induction w with
-  | zero => simp [TensorProduct.zero_tmul, graftMap]
   | tmul b' a'' =>
     rw [show (baseChangeAssoc R A ρ C').symm (c' ⊗ₜ[coinvariants ρ] (b' ⊗ₜ[R] a''))
         = (c' ⊗ₜ[coinvariants ρ] b') ⊗ₜ[R] a'' from
@@ -246,7 +241,6 @@ private theorem assoc_map_coactionBaseChange (c' : C') (z : B ⊗[R] A) :
           ((TensorProduct.assoc R B A A)
             ((Algebra.TensorProduct.map ρ (AlgHom.id R A)) z)) := by
   induction z with
-  | zero => simp [graftMap]
   | tmul b₀ a =>
     rw [show (baseChangeAssoc R A ρ C').symm (c' ⊗ₜ[coinvariants ρ] (b₀ ⊗ₜ[R] a))
         = (c' ⊗ₜ[coinvariants ρ] b₀) ⊗ₜ[R] a from
@@ -268,7 +262,6 @@ private theorem map_comul_baseChangeAssoc_symm (c' : C') (z : B ⊗[R] A) :
       = graftMap R A ρ C' c'
           ((Algebra.TensorProduct.map (AlgHom.id R B) (Bialgebra.comulAlgHom R A)) z) := by
   induction z with
-  | zero => simp [graftMap]
   | tmul b₀ a =>
     rw [show (baseChangeAssoc R A ρ C').symm (c' ⊗ₜ[coinvariants ρ] (b₀ ⊗ₜ[R] a))
         = (c' ⊗ₜ[coinvariants ρ] b₀) ⊗ₜ[R] a from
@@ -287,7 +280,6 @@ theorem coactionBaseChange_coassoc (hρ : IsCoaction ρ) :
           (Bialgebra.comulAlgHom R A)).comp (coactionBaseChange R A ρ C') := by
   refine AlgHom.ext fun x => ?_
   induction x with
-  | zero => simp
   | tmul c' b =>
     show (Algebra.TensorProduct.assoc R R R (C' ⊗[coinvariants ρ] B) A A)
         ((Algebra.TensorProduct.map (coactionBaseChange R A ρ C') (AlgHom.id R A))

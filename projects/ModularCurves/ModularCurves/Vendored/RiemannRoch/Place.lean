@@ -521,7 +521,7 @@ theorem principalDivisorA_apply_finite (x : Additive Kˣ)
     Finsupp.mapDomain Sum.inr
       (FractionalIdeal.principalDivisor (R := infiniteIntegers k K) (K := K) x)
         (Sum.inl v) = _
-  rw [Finsupp.mapDomain_apply Sum.inl_injective]
+  rw [Finsupp.mapDomain_apply_of_injective Sum.inl_injective]
   rw [Finsupp.mapDomain_notin_range]
   · simp
   · rintro ⟨w, h⟩
@@ -539,7 +539,7 @@ theorem principalDivisorA_apply_infinite (x : Additive Kˣ)
     Finsupp.mapDomain Sum.inr
       (FractionalIdeal.principalDivisor (R := infiniteIntegers k K) (K := K) x)
         (Sum.inr v) = _
-  rw [Finsupp.mapDomain_apply Sum.inr_injective]
+  rw [Finsupp.mapDomain_apply_of_injective Sum.inr_injective]
   rw [Finsupp.mapDomain_notin_range]
   · simp
   · rintro ⟨w, h⟩

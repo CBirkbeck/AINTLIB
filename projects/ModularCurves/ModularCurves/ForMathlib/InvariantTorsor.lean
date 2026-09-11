@@ -92,7 +92,6 @@ instance (C : Type u) [CommRing C] [Algebra ↥(FixedPoints.subalgebra R A G) C]
   smul_comm g s z := by
     show g • ((s : A) • z) = (s : A) • (g • z)
     induction z with
-    | zero => simp
     | add z₁ z₂ h₁ h₂ => simp only [smul_add, h₁, h₂]
     | tmul a r =>
       simp only [TensorProduct.smul_tmul']

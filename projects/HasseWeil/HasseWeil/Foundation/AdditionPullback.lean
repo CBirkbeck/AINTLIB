@@ -311,7 +311,7 @@ private lemma addPullback_x_quadratic_over_F_case_two
   rw [Polynomial.aeval_eq_sum_range, h_eq_2_F] at h_aeval
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     pow_zero, pow_one, Algebra.smul_def, mul_one] at h_aeval
-  rw [h_lc_2, map_one, one_mul] at h_aeval
+  rw [h_lc_2, map_one (algebraMap F KE), one_mul] at h_aeval
   rw [map_neg, neg_mul, sub_neg_eq_add]
   linear_combination h_aeval
 

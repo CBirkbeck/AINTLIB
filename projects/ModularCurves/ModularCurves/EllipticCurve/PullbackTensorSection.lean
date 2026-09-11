@@ -882,7 +882,7 @@ theorem tensorSection_smul_left
   let t : TT := xx ⊗ₜ yy
   have h :
       ((aa • xx) ⊗ₜ yy : TT) = aa • t := by
-    exact (TensorProduct.smul_tmul' aa xx yy).symm
+    exact (TensorProduct.smul_tmul' (show ↑(X.sheaf.obj.obj (.op U)) from aa) xx yy).symm
   change e'.hom (η'.hom ((aa • xx) ⊗ₜ yy)) =
     aa • e'.hom (η'.hom (xx ⊗ₜ yy))
   calc
