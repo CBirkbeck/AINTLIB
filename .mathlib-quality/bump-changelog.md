@@ -318,3 +318,32 @@ confirms the learning that a build's error list is a lower bound.
 ## Outcome
 
 Full tree green on round 10: all 11 library roots + 2 orphan modules build with zero errors on mathlib `63025c440a76` / Lean `v4.34.0-rc2`, with no statement changed (spelling-only respellings listed above), no `sorry`/`admit`/`axiom` and no heartbeat budget added. The #8574 ModularCurves exclusions and the 189 undocumented orphan ModularCurves modules predate this bump and remain unbuilt.
+
+## Full-coverage check (every library module, not just the roots)
+
+The rounds above build `bump-targets.txt` (11 library roots + 2 orphans), which reaches 2452 of the
+2796 library modules. The remaining 344 — all in ModularCurves — were then built explicitly by module
+name, under the same watchdog (no kills), with mathlib served entirely from `lake exe cache get`
+(no `Mathlib.*` olean rebuilt).
+
+- **189 orphans** (imported by no library root, not in the #8574 exclusions; none of them imports an
+  excluded module): 4 failed and were fixed, after which all 189 compile.
+  - `ForMathlib/SegreDiagonalSurjectivity` — M3, bare `coeff a p` → `p.coeff a`.
+  - `EllipticCurve/SectionContractionLocal` — M6, unitor `*_app` lemmas moved to
+    `PresheafOfModulesOfCommRing` and stated with `Hom.app'`; `congr_hom … |>.trans` instead of `erw`.
+  - `ForMathlib/SchemeModuleOrderedBaseCech{SupportInduction,LowDegreeFinite}` — **mathlib #42351**
+    (`3212d40da5`, `IsWellFounded` deprecated, `WellFounded` is now the class): `IsWellFounded.induction`
+    and the `InvImage`/`Closeds` `IsWellFounded` instances are gone. Binders `[IsWellFounded α r]` of
+    `of_wellFounded_comodels` kept; the proof builds `WellFounded rel := InvImage.wf rank IsWellFounded.wf`
+    and inducts with `hwf.induction` (case `h`); call sites supply
+    `IsWellFounded (Closeds X) (· < ·) := ⟨wellFounded_lt⟩` locally.
+- **155 #8574 exclusions**: blocked by exactly the two pre-existing roots, failing at the same declarations
+  and lines (±1) recorded on 2026-08-25/28 under the old pin — `EllipticCurve/ProjectiveSpaceTwist`
+  (kernel deterministic timeouts at :940, :1197, :2232; `(kernel) unknown constant` cascades at :1354,
+  :1531, :2295) and `Picard/InvertibleSheafGlueDataDescent` (kernel timeouts at :78, :223, cascades). Their
+  153 dependents cannot be checked until those are repaired (dev ticket #8574); not bump fallout.
+- `lake exe mk_all` is not usable on this repo: it expects each library at `<LibName>/` under the package
+  root (AINTLIB uses `projects/…` srcDirs) and aborts with "no such file or directory: ModularCurves";
+  regenerating roots would also re-import the deliberately excluded #8574 subtree.
+- 27 `.lean` files belong to no `lean_lib` (Verso blueprint projects, `.mathlib-quality` scratch) and are not
+  buildable in this workspace.
