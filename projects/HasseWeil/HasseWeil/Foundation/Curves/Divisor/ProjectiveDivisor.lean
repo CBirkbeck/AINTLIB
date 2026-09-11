@@ -233,7 +233,7 @@ theorem projectiveDivisorOf_apply_affine (f : C.FunctionField) (P : C.SmoothPoin
       (ProjectiveSmoothPoint.infinity : ProjectiveSmoothPoint C) := by
     intro h; nomatch h
   rw [Finsupp.add_apply, Finsupp.single_eq_of_ne h_ne, add_zero,
-    Finsupp.mapDomain_apply ProjectiveSmoothPoint.affine_injective
+    Finsupp.mapDomain_apply_of_injective ProjectiveSmoothPoint.affine_injective
       (C.divisorOf f) P, C.divisorOf_apply]
 
 theorem projectiveDivisorOf_apply_infinity (f : C.FunctionField) :

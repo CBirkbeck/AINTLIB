@@ -687,8 +687,8 @@ theorem stickelbergerSupportInOrbit_of_descentGaussSum
   have : B.IsPrime := hB_prime
   -- Step 3: algebraMap γ ∈ B (since γ ∈ b = B.comap algebraMap).
   have h_algMap_in_B : algebraMap (𝓞 K) (𝓞 R') γ ∈ B := by
-    have : γ ∈ B.comap (algebraMap (𝓞 K) (𝓞 R')) := hB_under ▸ hγ_in_b
-    rwa [Ideal.mem_comap] at this
+    have : γ ∈ B.under (𝓞 K) := hB_under ▸ hγ_in_b
+    rwa [Ideal.mem_under] at this
   -- Step 4: gaussSumInt(a)^p ∈ B.
   have h_gauss_in_B : S.gaussSumInt a ^ p ∈ B := hγ ▸ h_algMap_in_B
   -- Step 5: (ℓ : 𝓞 R') ∈ B.

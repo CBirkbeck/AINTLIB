@@ -401,14 +401,14 @@ private theorem artinHasseLogSeries_smul_subst_X_pow_eq_smul_X
 
 private theorem artinHasseExpSeries_derivative
     (r : ℕ) [Fact (Nat.Prime r)] :
-    (PowerSeries.derivative ℚ) (artinHasseExpSeries r) =
-      artinHasseExpSeries r * (PowerSeries.derivative ℚ) (artinHasseLogSeries r) := by
+    PowerSeries.derivative (artinHasseExpSeries r) =
+      artinHasseExpSeries r * PowerSeries.derivative (artinHasseLogSeries r) := by
   simp only [artinHasseExpSeries]
   rw [PowerSeries.derivative_subst (artinHasseLogSeries_hasSubst r),
     PowerSeries.derivative_exp]
 
 private theorem derivative_rescale_exp_rat (a : ℚ) :
-    (PowerSeries.derivative ℚ) (PowerSeries.rescale a (PowerSeries.exp ℚ)) =
+    PowerSeries.derivative (PowerSeries.rescale a (PowerSeries.exp ℚ)) =
       a • PowerSeries.rescale a (PowerSeries.exp ℚ) := by
   rw [PowerSeries.rescale_eq_subst,
     PowerSeries.derivative_subst (PowerSeries.HasSubst.smul_X' a),
@@ -418,11 +418,11 @@ private theorem derivative_rescale_exp_rat (a : ℚ) :
 
 private theorem eq_rescale_exp_of_derivative_eq_smul
     (a : ℚ) {F : PowerSeries ℚ}
-    (hderiv : (PowerSeries.derivative ℚ) F = a • F)
+    (hderiv : PowerSeries.derivative F = a • F)
     (hconst : PowerSeries.constantCoeff F = 1) :
     F = PowerSeries.rescale a (PowerSeries.exp ℚ) := by
   let H : PowerSeries ℚ := PowerSeries.rescale a (PowerSeries.exp ℚ)
-  have hHderiv : (PowerSeries.derivative ℚ) H = a • H := by
+  have hHderiv : PowerSeries.derivative H = a • H := by
     simpa [H] using derivative_rescale_exp_rat a
   ext n
   induction n with
@@ -433,11 +433,11 @@ private theorem eq_rescale_exp_of_derivative_eq_smul
       simp
   | succ n ih =>
       have eqF :
-          (PowerSeries.coeff (R := ℚ) n) ((PowerSeries.derivative ℚ) F) =
+          (PowerSeries.coeff (R := ℚ) n) (PowerSeries.derivative F) =
             (PowerSeries.coeff (R := ℚ) n) (a • F) := by
         rw [hderiv]
       have eqH :
-          (PowerSeries.coeff (R := ℚ) n) ((PowerSeries.derivative ℚ) H) =
+          (PowerSeries.coeff (R := ℚ) n) (PowerSeries.derivative H) =
             (PowerSeries.coeff (R := ℚ) n) (a • H) := by
         rw [hHderiv]
       rw [PowerSeries.coeff_derivative, PowerSeries.coeff_smul] at eqF
@@ -475,19 +475,19 @@ theorem artinHasseExpSeries_dwork_quotient_eq_rescale_exp
   have hMsubst : PowerSeries.HasSubst M :=
     PowerSeries.HasSubst.of_constantCoeff_zero' hM0
   have hEderiv :
-      (PowerSeries.derivative ℚ) E = E * (PowerSeries.derivative ℚ) L := by
+      PowerSeries.derivative E = E * PowerSeries.derivative L := by
     simpa [E, L] using artinHasseExpSeries_derivative r
   have hS_as_exp : S = PowerSeries.subst M (PowerSeries.exp ℚ) := by
     simp [S, E, M, L, artinHasseExpSeries,
       PowerSeries.subst_comp_subst_apply (artinHasseLogSeries_hasSubst r) hXr]
   have hSderiv :
-      (PowerSeries.derivative ℚ) S = S * (PowerSeries.derivative ℚ) M := by
+      PowerSeries.derivative S = S * PowerSeries.derivative M := by
     rw [hS_as_exp, PowerSeries.derivative_subst hMsubst, PowerSeries.derivative_exp]
   have hlog_deriv :
-      (r : ℚ) • (PowerSeries.derivative ℚ) L - (PowerSeries.derivative ℚ) M =
+      (r : ℚ) • PowerSeries.derivative L - PowerSeries.derivative M =
         (r : ℚ) • (1 : PowerSeries ℚ) := by
     have h :=
-      congrArg (fun F : PowerSeries ℚ ↦ (PowerSeries.derivative ℚ) F)
+      congrArg (fun F : PowerSeries ℚ ↦ PowerSeries.derivative F)
         (artinHasseLogSeries_smul_subst_X_pow_eq_smul_X r)
     simpa [L, M] using h
   have hS0 : PowerSeries.constantCoeff S = 1 := by
@@ -498,46 +498,46 @@ theorem artinHasseExpSeries_dwork_quotient_eq_rescale_exp
     PowerSeries.mul_inv_cancel S (by simp [hS0])
   let G : PowerSeries ℚ := E ^ r * S⁻¹
   have hGderiv_pre :
-      (PowerSeries.derivative ℚ) G =
-        ((r : ℚ) • (PowerSeries.derivative ℚ) L -
-          (PowerSeries.derivative ℚ) M) * G := by
+      PowerSeries.derivative G =
+        ((r : ℚ) • PowerSeries.derivative L -
+          PowerSeries.derivative M) * G := by
     dsimp [G]
     change PowerSeries.derivativeFun (E ^ r * S⁻¹) =
-      ((r : ℚ) • (PowerSeries.derivative ℚ) L -
-        (PowerSeries.derivative ℚ) M) * (E ^ r * S⁻¹)
+      ((r : ℚ) • PowerSeries.derivative L -
+        PowerSeries.derivative M) * (E ^ r * S⁻¹)
     rw [PowerSeries.derivativeFun_mul]
-    change E ^ r * (PowerSeries.derivative ℚ) S⁻¹ +
-        S⁻¹ * (PowerSeries.derivative ℚ) (E ^ r) =
-      ((r : ℚ) • (PowerSeries.derivative ℚ) L -
-        (PowerSeries.derivative ℚ) M) * (E ^ r * S⁻¹)
+    change E ^ r * PowerSeries.derivative S⁻¹ +
+        S⁻¹ * PowerSeries.derivative (E ^ r) =
+      ((r : ℚ) • PowerSeries.derivative L -
+        PowerSeries.derivative M) * (E ^ r * S⁻¹)
     rw [PowerSeries.derivative_inv', PowerSeries.derivative_pow, hEderiv, hSderiv]
     simp only [PowerSeries.smul_eq_C_mul]
     have hcancel_inv :
-        S⁻¹ ^ 2 * (S * (PowerSeries.derivative ℚ) M) =
-          S⁻¹ * (PowerSeries.derivative ℚ) M := by
+        S⁻¹ ^ 2 * (S * PowerSeries.derivative M) =
+          S⁻¹ * PowerSeries.derivative M := by
       rw [pow_two]
       calc
-        (S⁻¹ * S⁻¹) * (S * (PowerSeries.derivative ℚ) M)
-            = (S⁻¹ * S) * (S⁻¹ * (PowerSeries.derivative ℚ) M) := by
+        (S⁻¹ * S⁻¹) * (S * PowerSeries.derivative M)
+            = (S⁻¹ * S) * (S⁻¹ * PowerSeries.derivative M) := by
                   ring
-        _ = S⁻¹ * (PowerSeries.derivative ℚ) M := by
+        _ = S⁻¹ * PowerSeries.derivative M := by
                   rw [hSinv_mul]
                   ring
     have hEpow : E ^ (r - 1) * E = E ^ r := by
       rw [← pow_succ, Nat.sub_add_cancel hr_prime.pos]
     have hcancel_inv_neg :
-        -S⁻¹ ^ 2 * (S * (PowerSeries.derivative ℚ) M) =
-          -(S⁻¹ * (PowerSeries.derivative ℚ) M) := by
+        -S⁻¹ ^ 2 * (S * PowerSeries.derivative M) =
+          -(S⁻¹ * PowerSeries.derivative M) := by
       calc
-        -S⁻¹ ^ 2 * (S * (PowerSeries.derivative ℚ) M)
-            = -(S⁻¹ ^ 2 * (S * (PowerSeries.derivative ℚ) M)) := by
+        -S⁻¹ ^ 2 * (S * PowerSeries.derivative M)
+            = -(S⁻¹ ^ 2 * (S * PowerSeries.derivative M)) := by
                 ring
-        _ = -(S⁻¹ * (PowerSeries.derivative ℚ) M) := by
+        _ = -(S⁻¹ * PowerSeries.derivative M) := by
                 rw [hcancel_inv]
     rw [hcancel_inv_neg, ← hEpow]
     norm_num
     ring
-  have hGderiv : (PowerSeries.derivative ℚ) G = (r : ℚ) • G := by
+  have hGderiv : PowerSeries.derivative G = (r : ℚ) • G := by
     rw [hGderiv_pre, hlog_deriv]
     simp [PowerSeries.smul_eq_C_mul]
   exact eq_rescale_exp_of_derivative_eq_smul (r : ℚ) hGderiv (by

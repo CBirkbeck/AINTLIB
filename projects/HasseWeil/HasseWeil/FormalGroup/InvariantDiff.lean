@@ -159,7 +159,7 @@ Reference: Silverman, *The Arithmetic of Elliptic Curves*, IV.4, Cor. 4.3. -/
 theorem FormalGroupHom.invariantDifferential_chain {F G : FormalGroup R}
     (f : FormalGroupHom F G) :
     PowerSeries.subst f.toSeries G.normalizedDifferential.toSeries *
-      (PowerSeries.derivative R f.toSeries) =
+      (PowerSeries.derivative f.toSeries) =
     PowerSeries.C (PowerSeries.coeff 1 f.toSeries) *
       F.normalizedDifferential.toSeries :=
   FormalGroup.invariantDiff_chain f

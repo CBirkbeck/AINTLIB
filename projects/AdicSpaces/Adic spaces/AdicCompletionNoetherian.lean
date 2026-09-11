@@ -586,14 +586,14 @@ private lemma _mvPowerSeriesEval_partial_map_mul_support_high {n : ℕ}
         MvPowerSeries.trunc R n_k S = 0 := by
       intro S
       ext β
-      rw [hn_k_zero, MvPowerSeries.coeff_trunc, MvPolynomial.coeff_zero]
+      rw [hn_k_zero, MvPowerSeries.coeff_trunc, MvPolynomial.coeff_zero, Finsupp.zero_apply]
       have hβ_not_lt : ¬ β < (0 : Fin 0 →₀ ℕ) := by
         have : β = 0 := Subsingleton.elim _ _
         rw [this]
         exact lt_irrefl _
       rw [if_neg hβ_not_lt]
     rw [h_trunc_zero, h_trunc_zero, h_trunc_zero, zero_mul, sub_zero,
-      MvPolynomial.coeff_zero]
+      MvPolynomial.coeff_zero, Finsupp.zero_apply]
   · -- n ≥ 1: α < n_k, so both sides of the difference give coeff α (P*Q).
     have h_lt : α < n_k := by
       rw [Finsupp.lt_def]
@@ -1273,13 +1273,13 @@ private theorem _mvPowerSeriesEval_surjective_inductive_step_strong
     intro α₀ hα₀
     have hcoeff_zero :
         ((δ_poly : MvPowerSeries (Fin n) R)) α₀ = 0 := by
-      change MvPolynomial.coeff α₀ δ_poly = 0
+      change δ_poly.coeff α₀ = 0
       rw [hδ_def, MvPolynomial.coeff_neg]
-      rw [show MvPolynomial.coeff α₀
-          (∑ j : Fin m, MvPolynomial.C (d j) * ∏ i, (MvPolynomial.X i :
-            MvPolynomial (Fin n) R) ^ (α j i)) =
-          ∑ j : Fin m, MvPolynomial.coeff α₀ (MvPolynomial.C (d j) * ∏ i,
-            (MvPolynomial.X i : MvPolynomial (Fin n) R) ^ (α j i)) from
+      rw [show (∑ j : Fin m, MvPolynomial.C (d j) * ∏ i, (MvPolynomial.X i :
+            MvPolynomial (Fin n) R) ^ (α j i) : MvPolynomial (Fin n) R).coeff α₀ =
+          ∑ j : Fin m, (MvPolynomial.C (d j) * ∏ i,
+            (MvPolynomial.X i : MvPolynomial (Fin n) R) ^ (α j i) :
+              MvPolynomial (Fin n) R).coeff α₀ from
           MvPolynomial.coeff_sum _ _ _]
       refine neg_eq_zero.mpr ?_
       apply Finset.sum_eq_zero
