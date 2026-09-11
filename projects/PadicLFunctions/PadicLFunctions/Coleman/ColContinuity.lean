@@ -626,7 +626,7 @@ theorem continuous_colemanPipe2 :
     refine (continuous_const.mul ?_).mul continuous_snd
     refine continuous_of_coeff _ (fun n => ?_)
     simp only [show ∀ G : PowerSeries ℤ_[p], G.derivativeFun
-        = PowerSeries.derivative ℤ_[p] G from fun _ => rfl,
+        = PowerSeries.derivative G from fun _ => rfl,
       PowerSeries.coeff_derivative]
     exact (PowerSeries.WithPiTopology.continuous_coeff ℤ_[p] (n + 1)).comp continuous_fst |>.mul
       continuous_const
