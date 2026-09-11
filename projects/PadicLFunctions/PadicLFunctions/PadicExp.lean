@@ -488,7 +488,7 @@ variable {L : Type*} [NormedField L] [NormedAlgebra ℚ_[p] L]
 /-- `(1 + X)·D(log) = 1` over any `ℚ`-algebra: the formal geometric identity
 `D(log(1+X)) = 1/(1+X)`. -/
 theorem oneAddX_mul_derivative_log (A : Type*) [CommRing A] [Algebra ℚ A] :
-    (1 + PowerSeries.X) * (d⁄dX A (PowerSeries.log A)) = 1 := by
+    (1 + PowerSeries.X) * (d⁄dX (PowerSeries.log A)) = 1 := by
   rw [deriv_log]
   ext n
   rw [coeff_one]
@@ -497,7 +497,6 @@ theorem oneAddX_mul_derivative_log (A : Type*) [CommRing A] [Algebra ℚ A] :
   | (k + 1) =>
     rw [add_mul, one_mul, map_add, coeff_succ_X_mul, coeff_mk, coeff_mk,
       if_neg (Nat.succ_ne_zero k)]
-    simp only [map_pow, map_neg, map_one]
     rw [pow_succ]
     ring
 
@@ -512,9 +511,9 @@ theorem exp_subst_log (A : Type*) [CommRing A] [Algebra ℚ A] :
     rw [← map_natCast (algebraMap ℚ A)]
     exact (isUnit_iff_ne_zero.mpr (by exact_mod_cast hn)).map _
   set F := (exp A).subst (PowerSeries.log A) with hF
-  have hDF : d⁄dX A F = F * d⁄dX A (PowerSeries.log A) := by
+  have hDF : d⁄dX F = F * d⁄dX (PowerSeries.log A) := by
     rw [hF, derivative_subst hg, derivative_exp]
-  have hrec : (1 + PowerSeries.X) * d⁄dX A F = F := by
+  have hrec : (1 + PowerSeries.X) * d⁄dX F = F := by
     rw [hDF, ← mul_assoc, mul_comm (1 + PowerSeries.X) F, mul_assoc,
       oneAddX_mul_derivative_log, mul_one]
   have hc0 : constantCoeff F = 1 := by
@@ -570,7 +569,7 @@ theorem log_subst_exp_sub_one (A : Type*) [CommRing A] [Algebra ℚ A] :
   refine PowerSeries.derivative.ext ?_ ?_
   · rw [derivative_subst hg, map_sub, derivative_exp, Derivation.map_one_eq_zero,
       sub_zero, derivative_X]
-    have key : ((1 + PowerSeries.X) * d⁄dX A (PowerSeries.log A)).subst
+    have key : ((1 + PowerSeries.X) * d⁄dX (PowerSeries.log A)).subst
         (exp A - 1) = 1 := by
       rw [oneAddX_mul_derivative_log, ← coe_substAlgHom hg, map_one]
     have hone : (1 : PowerSeries A).subst (exp A - 1) = 1 := by
@@ -753,7 +752,7 @@ theorem norm_coeff_prod_le (G : PowerSeries ℚ_[p])
     rw [norm_prod, Finset.mem_finsuppAntidiag] at *
     obtain ⟨hsum, _⟩ := hl
     rw [← Finset.prod_pow]
-    refine le_trans (Finset.prod_le_prod (fun i _ => by positivity)
+    refine le_trans (Finset.prod_le_prod₀ (fun i _ => by positivity)
       fun i hi => hcoeff (l i) (hpos i hi)) ?_
     rw [Finset.prod_pow_eq_pow_sum]
     have hsumeq : ∑ i ∈ Finset.range n, (l i - 1) = k - n := by

@@ -1228,7 +1228,7 @@ set_option backward.isDefEq.respectTransparency false in
 `(z,w)`-Weierstrass operator `f(z,s) = z³ + a₁zs + a₂z²s + a₃s² + a₄zs² + a₆s³`.
 Obtained by differentiating the fixed point `w = f(X, w)` ([Sil] IV.1.1). -/
 private lemma derivative_formalW_key :
-    d⁄dX F (formalW W)
+    d⁄dX (formalW W)
         * (1 - (PowerSeries.C W.a₁ * PowerSeries.X + PowerSeries.C W.a₂ * PowerSeries.X ^ 2
             + 2 * (PowerSeries.C W.a₃ * formalW W)
             + 2 * (PowerSeries.C W.a₄ * (PowerSeries.X * formalW W))
@@ -1236,14 +1236,14 @@ private lemma derivative_formalW_key :
       = 3 * PowerSeries.X ^ 2 + PowerSeries.C W.a₁ * formalW W
         + 2 * (PowerSeries.C W.a₂ * (PowerSeries.X * formalW W))
         + PowerSeries.C W.a₄ * formalW W ^ 2 := by
-  have hd := congrArg (d⁄dX F) (formalW_fixedPoint W)
+  have hd := congrArg (PowerSeries.derivative (R := F)) (formalW_fixedPoint W)
   unfold weierstrassZWAt at hd
   simp only [map_add, Derivation.leibniz, Derivation.leibniz_pow, PowerSeries.derivative_X,
     PowerSeries.derivative_C, smul_eq_mul, nsmul_eq_mul, mul_one, mul_zero, add_zero,
     Nat.cast_ofNat, Nat.reduceSub, pow_one] at hd
   exact implicit_diff_rearrange (PowerSeries.C W.a₁) (PowerSeries.C W.a₂) (PowerSeries.C W.a₃)
     (PowerSeries.C W.a₄) (PowerSeries.C W.a₆) PowerSeries.X (formalW W)
-    (d⁄dX F (formalW W)) hd
+    (d⁄dX (formalW W)) hd
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
 -- The transparency override is again required for the `map_*` rewrites to
@@ -1257,7 +1257,7 @@ tangent case work for inseparable summands, where `f′ = 0`).
 De-privatized 2026-06-11: the IV.4.3 chain-rule leaf (`pullback_invariantDiff_coeff_zero`,
 `GapQfKernel.lean`, FG-C4) consumes this as its `hkey` input. -/
 lemma subst_derivative_formalW_key (f : PowerSeries F) (hf : PowerSeries.HasSubst f) :
-    PowerSeries.subst f (d⁄dX F (formalW W))
+    PowerSeries.subst f (d⁄dX (formalW W))
         * (1 - (PowerSeries.C W.a₁ * f + PowerSeries.C W.a₂ * f ^ 2
             + 2 * (PowerSeries.C W.a₃ * PowerSeries.subst f (formalW W))
             + 2 * (PowerSeries.C W.a₄ * (f * PowerSeries.subst f (formalW W)))
