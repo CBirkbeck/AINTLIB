@@ -175,7 +175,7 @@ private lemma h_coset_mem_H (D : HeckeCoset (GL_pair 2))
     ConjAct.smul_def] at h_K
   simp only [ConjAct.ofConjAct_toConjAct, map_inv, inv_inv] at h_K
   exact (GL_pair 2).H.mul_mem
-    (by convert h_K using 1; simp only [Subgroup.coe_mul, Subgroup.coe_inv]) hh₂
+    (by convert h_K using 1) hh₂
 
 private lemma transpose_decomp_eq (D : HeckeCoset (GL_pair 2))
     (q : decompQuot (GL_pair 2) (HeckeCoset.rep D))

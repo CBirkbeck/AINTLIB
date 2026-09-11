@@ -261,7 +261,7 @@ theorem exists_smoothPoint_under
     (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
     ∃ Q : C₂.SmoothPoint, v.asIdeal.under C₂.CoordinateRing = C₂.maximalIdealAt Q := by
   haveI hPunder_max : (v.asIdeal.under C₂.CoordinateRing).IsMaximal :=
-    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal v.asIdeal
+    Ideal.isMaximal_under_of_isIntegral_of_isMaximal v.asIdeal
   obtain ⟨Q, hQ⟩ := C₂.exists_smoothPoint_of_isMaximal hPunder_max
   exact ⟨Q, hQ.symm⟩
 
@@ -2028,7 +2028,7 @@ private theorem count_factors_relNorm_B_pow_eq_ite (Q : C₂.SmoothPoint)
   have h_vp_irr : Irreducible (Associates.mk vp.asIdeal) := vp.associates_irreducible
   haveI hPmax : P.asIdeal.IsMaximal := Ideal.IsPrime.isMaximal P.isPrime P.ne_bot
   haveI hPunder_max : (P.asIdeal.under C₂.CoordinateRing).IsMaximal :=
-    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal P.asIdeal
+    Ideal.isMaximal_under_of_isIntegral_of_isMaximal P.asIdeal
   have hrelP : Ideal.relNorm C₂.CoordinateRing P.asIdeal = P.asIdeal.under C₂.CoordinateRing :=
     relNorm_eq_under P.asIdeal hPmax hPunder_max
   by_cases h_over : P.asIdeal ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂))

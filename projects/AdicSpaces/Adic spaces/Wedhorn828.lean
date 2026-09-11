@@ -255,7 +255,7 @@ private theorem mem_idealMap_of_forall_coeff_mem (I : Ideal A) (h : ↥(TateAlge
   rw [hh_eq, ← hu, LinearMap.rTensor_def]
   -- The map `i₀ ⊗ p ↦ algebraMap ↑i₀ * p` lands in `Ideal.map I`.
   -- Reduce to pure tensors via the tensor-product universal property.
-  refine TensorProduct.induction_on u (by simp) (fun i₀ p ↦ ?_)
+  refine TensorProduct.inductionOn u (fun i₀ p ↦ ?_)
     (fun a b ha hb ↦ by rw [map_add, map_add, map_add]; exact Ideal.add_mem _ ha hb)
   -- Generator case: `μ_A ((I.subtype ⊗ id) (i₀ ⊗ p)) = i₀ • (coeffs of p)`,
   -- which through `restrictedModuleA_equiv` is `algebraMap ↑i₀ * p`.
@@ -2115,8 +2115,8 @@ private lemma presheafValue_mvRestricted_iU_denseRange
       ext w
       rw [MvPolynomial.coeff_coe, show MvPowerSeries.coeff w g.val = g.val w from
         MvPowerSeries.coeff_apply g.val w]
-      rw [show MvPolynomial.coeff w (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) =
-          ∑ v ∈ box, MvPolynomial.coeff w (MvPolynomial.monomial v (g.val v)) from
+      rw [show (∑ v ∈ box, MvPolynomial.monomial v (g.val v)).coeff w =
+          ∑ v ∈ box, (MvPolynomial.monomial v (g.val v)).coeff w from
         MvPolynomial.coeff_sum _ _ _]
       by_cases hw : ∀ i, w i < N
       · rw [Finset.sum_eq_single w]
@@ -2393,7 +2393,7 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
         (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hXi_pb
   -- (ii) `iU p`'s coefficient at `v` is `coeRingHom (coeff_v p)` (`iU = coe ∘ map coeRingHom`).
   have hiU_coeff : ∀ (p : MvPolynomial (Fin m) (Localization.Away D.s)) (v : Fin m →₀ ℕ),
-      MvPowerSeries.coeff v (iU p).val = D.coeRingHom (MvPolynomial.coeff v p) := by
+      MvPowerSeries.coeff v (iU p).val = D.coeRingHom (p.coeff v) := by
     -- `(iU p).val = ↑(MvPolynomial.map coeRingHom p)` (coe to power series), coeff-wise.
     have hiU_val : ∀ p : MvPolynomial (Fin m) (Localization.Away D.s),
         (iU p).val = (↑(MvPolynomial.map D.coeRingHom p) :
@@ -2481,7 +2481,7 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
   rw [Set.mem_preimage]
   apply hVgV
   -- expand `fU p = ∑_{v ∈ supp p} ψγ(coeff_v p) · ∏ⱼ (fU Xⱼ)^(vⱼ)`.
-  rw [show fU p = ∑ v ∈ p.support, ψγ (MvPolynomial.coeff v p) *
+  rw [show fU p = ∑ v ∈ p.support, ψγ (p.coeff v) *
       ∏ j, fU (MvPolynomial.X j) ^ (v j) from by
     have hfe : fU p = MvPolynomial.eval₂ ψγ (fun j ↦ fU (MvPolynomial.X j)) p := by
       have hvar : (fun j ↦ fU (MvPolynomial.X j)) =
@@ -2495,12 +2495,12 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
   -- each term lies in `Vg` (open subgroup), so the sum does.
   refine AddSubgroup.sum_mem _ (fun v hv ↦ ?_)
   -- `coeff_v(iU p) = coeRingHom(coeff_v p) ∈ image(P_T.I^k) ⊆ O`, so `coeff_v p ∈ ψγ⁻¹ V'`.
-  have hcoeffO : D.coeRingHom (MvPolynomial.coeff v p) ∈ O := by
+  have hcoeffO : D.coeRingHom (p.coeff v) ∈ O := by
     apply hk
     obtain ⟨bb, hbI, hbeq⟩ := MvTateAlgebra.mvTateAlgNhd_coeff_mem m P_T k hp v
     rw [← hiU_coeff p v, ← hbeq]
     exact ⟨bb, hbI, rfl⟩
-  have hψV' : ψγ (MvPolynomial.coeff v p) ∈ V' := hO_sub hcoeffO
+  have hψV' : ψγ (p.coeff v) ∈ V' := hO_sub hcoeffO
   -- term `= (∏ⱼ (fU Xⱼ)^vⱼ) · ψγ(coeff_v p) ∈ R_γ · V' ⊆ Vg`.
   rw [mul_comm]
   exact hV'R (Set.mul_mem_mul ⟨v, rfl⟩ hψV')
