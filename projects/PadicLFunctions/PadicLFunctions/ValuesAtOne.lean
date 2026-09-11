@@ -192,7 +192,7 @@ theorem one_add_mul_derivative_logSeriesAt {u : K} (hu : IsUnit (u - 1)) :
   cases n with
   | zero =>
     rw [if_pos rfl, hsplit, map_add, PowerSeries.coeff_zero_X_mul, add_zero,
-      show ∀ G : PowerSeries K, G.derivativeFun = PowerSeries.derivative K G
+      show ∀ G : PowerSeries K, G.derivativeFun = PowerSeries.derivative G
         from fun _ => rfl,
       PowerSeries.coeff_derivative, logSeriesAt, PowerSeries.coeff_mk,
       if_neg (Nat.succ_ne_zero 0), PowerSeries.coeff_C_mul, PowerSeries.coeff_mk, ha]
@@ -202,7 +202,7 @@ theorem one_add_mul_derivative_logSeriesAt {u : K} (hu : IsUnit (u - 1)) :
   | succ m =>
     rw [if_neg (Nat.succ_ne_zero m), zero_add, hsplit, map_add,
       PowerSeries.coeff_succ_X_mul,
-      show ∀ G : PowerSeries K, G.derivativeFun = PowerSeries.derivative K G
+      show ∀ G : PowerSeries K, G.derivativeFun = PowerSeries.derivative G
         from fun _ => rfl,
       PowerSeries.coeff_derivative, PowerSeries.coeff_derivative, logSeriesAt,
       PowerSeries.coeff_mk, PowerSeries.coeff_mk, if_neg (Nat.succ_ne_zero (m + 1)),
@@ -238,11 +238,11 @@ theorem one_add_mul_derivative_Ftilde {N : ℕ} [NeZero N] (hN : 1 < N)
           * PowerSeries.derivativeFun (logSeriesAt p K (ε ^ c)) := by
     rw [Ftilde, show PowerSeries.derivativeFun (-∑ c ∈ Finset.range N,
           PowerSeries.C (θ⁻¹ ((c : ZMod N))) * logSeriesAt p K (ε ^ c))
-        = d⁄dX K (-∑ c ∈ Finset.range N,
+        = d⁄dX (-∑ c ∈ Finset.range N,
           PowerSeries.C (θ⁻¹ ((c : ZMod N))) * logSeriesAt p K (ε ^ c)) from rfl,
       map_neg, map_sum, neg_inj]
     refine Finset.sum_congr rfl fun c _ => ?_
-    rw [show (d⁄dX K) (PowerSeries.C (θ⁻¹ ((c : ZMod N))) * logSeriesAt p K (ε ^ c))
+    rw [show d⁄dX (PowerSeries.C (θ⁻¹ ((c : ZMod N))) * logSeriesAt p K (ε ^ c))
         = PowerSeries.derivativeFun (PowerSeries.C (θ⁻¹ ((c : ZMod N)))
             * logSeriesAt p K (ε ^ c)) from rfl,
       show PowerSeries.C (θ⁻¹ ((c : ZMod N))) * logSeriesAt p K (ε ^ c)
@@ -664,7 +664,7 @@ theorem exists_antideriv_bounded (B : PowerSeries K)
   · have hDC : PowerSeries.derivativeFun
         (PowerSeries.mk fun n => if n = 0 then 0 else PowerSeries.coeff (n - 1) E / n) = E := by
       refine PowerSeries.ext fun n => ?_
-      rw [show ∀ G : PowerSeries K, G.derivativeFun = PowerSeries.derivative K G
+      rw [show ∀ G : PowerSeries K, G.derivativeFun = PowerSeries.derivative G
           from fun _ => rfl,
         PowerSeries.coeff_derivative, PowerSeries.coeff_mk, if_neg (Nat.succ_ne_zero n),
         Nat.add_sub_cancel]
@@ -833,7 +833,7 @@ theorem p_mul_constantCoeff_mahlerK_rhoTheta {D : ℕ} [NeZero D] (hD1 : 1 < D)
           (PowerSeries.C G⁻¹ * Ftilde p K θK hε - mahlerK p K (rhoTheta p K η hζ hD χ))
         = PowerSeries.derivativeFun (PowerSeries.C G⁻¹ * Ftilde p K θK hε)
           - PowerSeries.derivativeFun (mahlerK p K (rhoTheta p K η hζ hD χ)) from
-        map_sub (PowerSeries.derivative K) _ _,
+        map_sub (PowerSeries.derivative (R := K)) _ _,
       mul_sub, hCFder, hAder]
     ring
   -- `(1+X)·∂(φ C₁) = φ B`  (∂φ = p·φ∂ + scalar pull-through)
@@ -854,7 +854,7 @@ theorem p_mul_constantCoeff_mahlerK_rhoTheta {D : ℕ} [NeZero D] (hD1 : 1 < D)
         = PowerSeries.derivativeFun
             (PowerSeries.C G⁻¹ * Ftilde p K θK hε - mahlerK p K (rhoTheta p K η hζ hD χ))
           - PowerSeries.derivativeFun (phiSeries p C₁) from
-        map_sub (PowerSeries.derivative K) _ _,
+        map_sub (PowerSeries.derivative (R := K)) _ _,
       mul_sub, hWder, hphiC₁der, sub_self]
   have hWeq := eq_C_constantCoeff_of_one_add_mul_derivative_eq_zero (p := p) hker
   set c₀ := PowerSeries.constantCoeff

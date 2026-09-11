@@ -1070,7 +1070,7 @@ omit [DecidableEq F] in
 both sides; nonnegative indices are `PowerSeries.coeff_derivative`). -/
 theorem laurent_derivative_ofPowerSeries (g : PowerSeries F) :
     LaurentSeries.derivative F (HahnSeries.ofPowerSeries ℤ F g) =
-      HahnSeries.ofPowerSeries ℤ F (d⁄dX F g) := by
+      HahnSeries.ofPowerSeries ℤ F (d⁄dX g) := by
   ext m
   rw [laurent_derivative_coeff]
   rcases le_or_gt 0 m with hm | hm
@@ -1082,8 +1082,8 @@ theorem laurent_derivative_ofPowerSeries (g : PowerSeries F) :
     ring
   · rcases lt_or_eq_of_le (by omega : m + 1 ≤ 0) with h | h
     · rw [laurent_ofPowerSeries_coeff_neg g h, smul_zero,
-        laurent_ofPowerSeries_coeff_neg (d⁄dX F g) hm]
-    · rw [h, zero_smul, laurent_ofPowerSeries_coeff_neg (d⁄dX F g) hm]
+        laurent_ofPowerSeries_coeff_neg (d⁄dX g) hm]
+    · rw [h, zero_smul, laurent_ofPowerSeries_coeff_neg (d⁄dX g) hm]
 
 /-- Coefficients of `formalX` vanish below `-2`. -/
 theorem formalX_coeff_of_lt {j : ℤ} (hj : j < -2) : (formalX W).coeff j = 0 :=
@@ -1381,14 +1381,14 @@ theorem pullback_invariantDiff_core (f : PowerSeries F)
       + PowerSeries.C W.a₆ * PowerSeries.subst f (formalW W) ^ 3 :=
     subst_formalW_fixedPoint W f hford
   have hkey := subst_derivative_formalW_key W f hfsub
-  have hchain : d⁄dX F (PowerSeries.subst f (formalW W)) =
-      PowerSeries.subst f (d⁄dX F (formalW W)) * d⁄dX F f :=
+  have hchain : d⁄dX (PowerSeries.subst f (formalW W)) =
+      PowerSeries.subst f (d⁄dX (formalW W)) * d⁄dX f :=
     PowerSeries.derivative_subst hfsub
   have hstar := pullback_diff_rearrange (PowerSeries.C W.a₁) (PowerSeries.C W.a₂)
     (PowerSeries.C W.a₃) (PowerSeries.C W.a₄) (PowerSeries.C W.a₆) f
-    (PowerSeries.subst f (formalW W)) (d⁄dX F f)
-    (d⁄dX F (PowerSeries.subst f (formalW W)))
-    (PowerSeries.subst f (d⁄dX F (formalW W))) hfix hkey hchain
+    (PowerSeries.subst f (formalW W)) (d⁄dX f)
+    (d⁄dX (PowerSeries.subst f (formalW W)))
+    (PowerSeries.subst f (d⁄dX (formalW W))) hfix hkey hchain
   -- ## Push to Laurent series along the ring hom `ofPowerSeries`
   have hstar_L := congrArg (HahnSeries.ofPowerSeries ℤ F) hstar
   -- `hstar` comes from applying `pullback_diff_rearrange`; its LHS product carries the `d⁄dX`
@@ -1456,7 +1456,7 @@ theorem pullback_invariantDiff_core (f : PowerSeries F)
   have hDxU2 : LaurentSeries.derivative F xL * ((1 : LaurentSeries F) - PL)
         * (HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W))
           * HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W)))
-      = HahnSeries.ofPowerSeries ℤ F (d⁄dX F f) * U
+      = HahnSeries.ofPowerSeries ℤ F (d⁄dX f) * U
         * (HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W))
           * HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W))) := by
     -- `set` already folded the sum to `PL` in the goal; `hPL_push : PL = …` (also folded by
@@ -1489,19 +1489,19 @@ theorem pullback_invariantDiff_core (f : PowerSeries F)
                       * HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W))))
               + 3 * (HahnSeries.ofPowerSeries ℤ F (PowerSeries.C W.a₆)
                   * HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W)) ^ 2)))
-          * HahnSeries.ofPowerSeries ℤ F (d⁄dX F (PowerSeries.subst f (formalW W)))) * hxT
+          * HahnSeries.ofPowerSeries ℤ F (d⁄dX (PowerSeries.subst f (formalW W)))) * hxT
       + hstar_L
-      - (HahnSeries.ofPowerSeries ℤ F (d⁄dX F f)
+      - (HahnSeries.ofPowerSeries ℤ F (d⁄dX f)
           * HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W))) * hUT
   have hDxU : LaurentSeries.derivative F xL * ((1 : LaurentSeries F) - PL)
-      = HahnSeries.ofPowerSeries ℤ F (d⁄dX F f) * U :=
+      = HahnSeries.ofPowerSeries ℤ F (d⁄dX f) * U :=
     mul_right_cancel₀ (mul_ne_zero hT_ne hT_ne) hDxU2
   -- ## Divide by the unit `U` and read off `coeff 0`
   have hMP : (U⁻¹ * LaurentSeries.derivative F xL) * ((1 : LaurentSeries F) - PL) =
-      HahnSeries.ofPowerSeries ℤ F (d⁄dX F f) := by
+      HahnSeries.ofPowerSeries ℤ F (d⁄dX f) := by
     rw [mul_assoc, hDxU, mul_comm _ U, ← mul_assoc, inv_mul_cancel₀ hU_ne, one_mul]
   have hM_eq : U⁻¹ * LaurentSeries.derivative F xL =
-      HahnSeries.ofPowerSeries ℤ F (d⁄dX F f) * ((1 : LaurentSeries F) - PL)⁻¹ :=
+      HahnSeries.ofPowerSeries ℤ F (d⁄dX f) * ((1 : LaurentSeries F) - PL)⁻¹ :=
     (eq_mul_inv_iff_mul_eq₀ h1P_ne).mpr hMP
   have h1Pinv_ord : (((1 : LaurentSeries F) - PL)⁻¹).orderTop = ((0 : ℤ) : WithTop ℤ) := by
     rw [HahnSeries.orderTop_inv_eq_neg h1P_ne, h1P_ord]
@@ -1517,7 +1517,7 @@ theorem pullback_invariantDiff_core (f : PowerSeries F)
           rw [zero_add]; exact_mod_cast zero_lt_one
       _ ≤ _ := add_le_add hM_ord hPL1
   have hsplit : U⁻¹ * LaurentSeries.derivative F xL =
-      HahnSeries.ofPowerSeries ℤ F (d⁄dX F f)
+      HahnSeries.ofPowerSeries ℤ F (d⁄dX f)
         + (U⁻¹ * LaurentSeries.derivative F xL) * PL := by
     linear_combination hMP
   have hc := congrArg (fun z : LaurentSeries F ↦ z.coeff 0) hsplit

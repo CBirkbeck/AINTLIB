@@ -66,7 +66,7 @@ def E37 : PowerSeries ℚ := Furtwaengler.artinHasseExpSeries 37
 (`derivative_subst`) applied to `E₃₇ = subst(L₃₇, exp)`, together with `exp′ = exp`
 (`derivative_exp`) and `subst(L₃₇, exp) = E₃₇`. -/
 theorem derivative_E37 :
-    d⁄dX ℚ E37 = E37 * d⁄dX ℚ L37 := by
+    d⁄dX E37 = E37 * d⁄dX L37 := by
   rw [E37, L37]
   have hsub : HasSubst (Furtwaengler.artinHasseLogSeries 37) :=
     Furtwaengler.artinHasseLogSeries_hasSubst 37
@@ -83,7 +83,7 @@ theorem derivative_E37 :
 positive power of `37`, else `0`.  For `j+1 ≤ 73` the only powers of `37` are `1` (`j = 0`, giving
 `1·1 = 1`) and `37` (`j = 36`, giving `37·(1/37) = 1`); all other coefficients vanish. -/
 theorem coeff_derivative_L37_of_le {j : ℕ} (hj : j ≤ 72) :
-    (PowerSeries.coeff (R := ℚ) j) (d⁄dX ℚ L37) =
+    (PowerSeries.coeff (R := ℚ) j) (d⁄dX L37) =
       (if j = 0 then 1 else if j = 36 then 1 else 0 : ℚ) := by
   rw [L37, coeff_derivative, Furtwaengler.artinHasseLogSeries_coeff]
   -- The `if`-condition `37 ^ log₃₇(j+1) = j+1 ∧ j+1 ≠ 0` is equivalent to `j+1 ∈ {1, 37}`.
@@ -129,7 +129,7 @@ theorem coeff_E37_recurrence {n : ℕ} (hn : n ≤ 72) :
   -- `n - k = 0` (i.e. `k = n`, value `1`) or `n - k = 36` (i.e. `k = n - 36`, value `1`).
   have hsummand : ∀ k ∈ Finset.range (n + 1),
       (PowerSeries.coeff (R := ℚ) k) E37 *
-          (PowerSeries.coeff (R := ℚ) (n - k)) (d⁄dX ℚ L37) =
+          (PowerSeries.coeff (R := ℚ) (n - k)) (d⁄dX L37) =
         (if k = n then (PowerSeries.coeff (R := ℚ) n) E37 else 0) +
           (if k = n - 36 then
             (if 36 ≤ n then (PowerSeries.coeff (R := ℚ) (n - 36)) E37 else 0) else 0) := by
