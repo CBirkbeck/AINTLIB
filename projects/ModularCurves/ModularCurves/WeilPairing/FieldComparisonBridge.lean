@@ -253,7 +253,7 @@ theorem coordRingToZSection_algebraMap (a : K) :
   exact congrArg (ConcreteCategory.hom (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
       (mk_X_mem_quotientGrading_one W 2) one_pos).hom)
-    (CategoryTheory.inv_hom_id_apply (Scheme.ΓSpecIso (CommRingCat.of
+    (CategoryTheory.Iso.inv_hom_id_apply (Scheme.ΓSpecIso (CommRingCat.of
       (HomogeneousLocalization.Away (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) _).symm
 

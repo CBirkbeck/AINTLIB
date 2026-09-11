@@ -164,7 +164,6 @@ private theorem twistLTensor_surjective [Module A (Twist (lTM))]
   refine ⟨eInv (Twist.toB (lTM) z), ?_⟩
   apply Twist.toB_injective (lTM)
   induction (Twist.toB (lTM) z) with
-  | zero => simp only [map_zero]; rfl
   | add x y hx hy =>
       rw [map_add, map_add, Twist.toB_add]
       rw [show Twist.toB (lTM) (eFwd (eInv x)) = x from hx,
@@ -188,14 +187,9 @@ private theorem twistLTensor_leftInverse [Module A (Twist (lTM))]
     ∀ t : (L ⊗[F] A) ⊗[A] (Twist f), eInv (Twist.toB (lTM) (eFwd t)) = t := by
   intro t
   induction t with
-  | zero => rw [map_zero (f := eFwd), show Twist.toB (lTM) 0 = 0 from rfl,
-      map_zero (f := eInv)]
   | add x y hx hy => rw [map_add (f := eFwd), Twist.toB_add, map_add (f := eInv), hx, hy]
   | tmul w m =>
       induction w with
-      | zero =>
-          rw [TensorProduct.zero_tmul, map_zero (f := eFwd),
-            show Twist.toB (lTM) 0 = 0 from rfl, map_zero (f := eInv)]
       | add x y hx hy =>
           rw [TensorProduct.add_tmul, map_add (f := eFwd), Twist.toB_add, map_add (f := eInv),
             hx, hy]

@@ -709,7 +709,7 @@ theorem caseI_antiRadical_not_pth_power
           h_finmult_zab),
         FiniteMultiplicity.multiplicity_pow h_prime h_finmult_num]
       have h_zab_mult_zero : multiplicity (ζ - 1 : 𝓞 K) (ζ * (a : 𝓞 K) + (b : 𝓞 K)) = 0 := by
-        rw [multiplicity_eq_zero]; exact h_zab_coprime
+        exact multiplicity_eq_zero_of_not_dvd h_zab_coprime
       omega
     have h_rhs :
         multiplicity (ζ - 1 : 𝓞 K) ((ζ * (a : 𝓞 K) + ζ ^ 2 * (b : 𝓞 K)) * (den₀ : 𝓞 K) ^ p) =
@@ -720,7 +720,7 @@ theorem caseI_antiRadical_not_pth_power
         FiniteMultiplicity.multiplicity_pow h_prime h_finmult_den]
       have h_zaz2b_mult_zero :
           multiplicity (ζ - 1 : 𝓞 K) (ζ * (a : 𝓞 K) + ζ ^ 2 * (b : 𝓞 K)) = 0 := by
-        rw [multiplicity_eq_zero]; exact h_zaz2b_coprime
+        exact multiplicity_eq_zero_of_not_dvd h_zaz2b_coprime
       omega
     have h_eq_mult : p * multiplicity (ζ - 1 : 𝓞 K) (num₀ : 𝓞 K) =
         p * multiplicity (ζ - 1 : 𝓞 K) (den₀ : 𝓞 K) := by
