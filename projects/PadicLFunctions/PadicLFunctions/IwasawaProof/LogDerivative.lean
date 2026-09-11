@@ -209,8 +209,8 @@ private theorem del_one_add_X_pow (j : ℕ) :
     rw [derivativeFun_add, derivativeFun_one, zero_add]; exact derivative_X
   rw [PadicMeasure.del_def,
     show derivativeFun ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ j)
-      = d⁄dX ℤ_[p] ((1 + PowerSeries.X) ^ j) from rfl, derivative_pow,
-    show d⁄dX ℤ_[p] (1 + PowerSeries.X : PowerSeries ℤ_[p]) = derivativeFun (1 + PowerSeries.X)
+      = d⁄dX ((1 + PowerSeries.X) ^ j) from rfl, derivative_pow,
+    show d⁄dX (1 + PowerSeries.X : PowerSeries ℤ_[p]) = derivativeFun (1 + PowerSeries.X)
       from rfl, hDoneX, mul_one]
   cases j with
   | zero => simp
@@ -228,7 +228,7 @@ private theorem del_sum {ι : Type*} (s : Finset ι) (g : ι → PowerSeries ℤ
     PadicMeasure.del p (∑ i ∈ s, g i) = ∑ i ∈ s, PadicMeasure.del p (g i) := by
   rw [PadicMeasure.del_def,
     show (∑ i ∈ s, g i).derivativeFun = ∑ i ∈ s, (g i).derivativeFun from
-      map_sum (PowerSeries.derivative ℤ_[p]) g s, Finset.mul_sum]
+      map_sum (PowerSeries.derivative (R := ℤ_[p])) g s, Finset.mul_sum]
   rfl
 
 /-- `φ(C a) = C a` over `ℤ_[p]` (φ fixes constants). -/
@@ -310,7 +310,7 @@ private theorem digitMatrix_del (f : PowerSeries ℤ_[p]) (i j : Fin p) :
 private theorem del_row_smul {n : ℕ} (M : Matrix (Fin n) (Fin n) (PowerSeries ℤ_[p]))
     (i : Fin n) :
     ((1 + PowerSeries.X) : PowerSeries ℤ_[p])
-        * (M.updateRow i (fun j => PowerSeries.derivative ℤ_[p] (M i j))).det
+        * (M.updateRow i (fun j => PowerSeries.derivative (M i j))).det
       = (M.updateRow i (fun j => PadicMeasure.del p (M i j))).det := by
   rw [← Matrix.det_updateRow_smul]; rfl
 
@@ -334,8 +334,8 @@ private theorem del_det_eq_smul_trace {n : ℕ}
     PadicMeasure.del p (M.det)
       = M.det • Matrix.trace ((M.map (PadicMeasure.del p)) * N) := by
   rw [PadicMeasure.del_def,
-    show M.det.derivativeFun = (PowerSeries.derivative ℤ_[p]) M.det from rfl,
-    derivation_det (PowerSeries.derivative ℤ_[p]) M, Finset.mul_sum,
+    show M.det.derivativeFun = (PowerSeries.derivative (R := ℤ_[p])) M.det from rfl,
+    derivation_det (PowerSeries.derivative (R := ℤ_[p])) M, Finset.mul_sum,
     Finset.sum_congr rfl (fun i _ => del_row_smul p M i),
     Finset.sum_congr rfl (fun i _ => det_updateRow_eq_sum_adjugate M i
       (fun j => PadicMeasure.del p (M i j))),
@@ -674,7 +674,7 @@ private theorem X_deriv_eq_aw (H : PowerSeries (ZMod p)) :
       Finset.sum_singleton, PowerSeries.coeff_mk, PowerSeries.coeff_mk, WfpCoe_zero, mul_zero]
   · obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
     rw [PowerSeries.coeff_succ_X_mul,
-      show ∀ G : PowerSeries (ZMod p), G.derivativeFun = PowerSeries.derivative (ZMod p) G
+      show ∀ G : PowerSeries (ZMod p), G.derivativeFun = PowerSeries.derivative G
         from fun _ => rfl,
       PowerSeries.coeff_derivative, PowerSeries.coeff_mk,
       coeff_afp_mul_wfp p H hn]
@@ -815,14 +815,14 @@ private theorem derivativeFun_one_add_X_pow_zmod (i : ℕ) :
   have h1 : derivativeFun (1 + PowerSeries.X : PowerSeries (ZMod p)) = 1 := by
     rw [derivativeFun_add, derivativeFun_one, zero_add]; exact derivative_X
   rw [show derivativeFun ((1 + PowerSeries.X : PowerSeries (ZMod p)) ^ i)
-      = d⁄dX (ZMod p) ((1 + PowerSeries.X) ^ i) from rfl, derivative_pow,
-    show d⁄dX (ZMod p) (1 + PowerSeries.X : PowerSeries (ZMod p))
+      = d⁄dX ((1 + PowerSeries.X) ^ i) from rfl, derivative_pow,
+    show d⁄dX (1 + PowerSeries.X : PowerSeries (ZMod p))
       = derivativeFun (1 + PowerSeries.X) from rfl, h1, mul_one]
 
 /-- A `p`-th power has zero derivative over `ZMod p` (`∂(g^p) = p·g^{p−1}·g′ = 0`). -/
 private theorem derivativeFun_pow_p_zmod (g : PowerSeries (ZMod p)) :
     derivativeFun (g ^ p) = 0 := by
-  rw [show derivativeFun (g ^ p) = d⁄dX (ZMod p) (g ^ p) from rfl, derivative_pow,
+  rw [show derivativeFun (g ^ p) = d⁄dX (g ^ p) from rfl, derivative_pow,
     show ((p : ℕ) : PowerSeries (ZMod p)) = PowerSeries.C (R := ZMod p) (p : ZMod p) from by
       rw [map_natCast], show (p : ZMod p) = 0 from by exact_mod_cast (ZMod.natCast_self p),
     map_zero, zero_mul, zero_mul]
@@ -867,12 +867,12 @@ private theorem sum_pow_smul_eq_zero {E : Fin p → PowerSeries (ZMod p)}
         (∑ i : Fin p, PowerSeries.C ((i : ZMod p) ^ m) * ((1 + PowerSeries.X) ^ (i : ℕ) * E i))
         = 0 := by
       rw [ih, show derivativeFun (0 : PowerSeries (ZMod p)) = 0 from
-        map_zero (derivative (ZMod p)), mul_zero]
+        map_zero (derivative (R := ZMod p)), mul_zero]
     rw [show derivativeFun
           (∑ i : Fin p, PowerSeries.C ((i : ZMod p) ^ m) * ((1 + PowerSeries.X) ^ (i : ℕ) * E i))
         = ∑ i : Fin p, derivativeFun
           (PowerSeries.C ((i : ZMod p) ^ m) * ((1 + PowerSeries.X) ^ (i : ℕ) * E i)) from
-        map_sum (derivative (ZMod p)) _ _, Finset.mul_sum] at hstep
+        map_sum (derivative (R := ZMod p)) _ _, Finset.mul_sum] at hstep
     rw [← hstep]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [theta_smul_eigen p (hE i) (i : ℕ) ((i : ZMod p) ^ m), pow_succ,
@@ -927,7 +927,7 @@ private theorem digits_unique_zmod {G H : Fin p → PowerSeries (ZMod p)}
     rw [hEval, phiSeries_eq_pow_zmod, phiSeries_eq_pow_zmod,
       show derivativeFun ((G i) ^ p - (H i) ^ p)
         = derivativeFun ((G i) ^ p) - derivativeFun ((H i) ^ p) from
-        map_sub (derivative (ZMod p)) _ _, derivativeFun_pow_p_zmod, derivativeFun_pow_p_zmod,
+        map_sub (derivative (R := ZMod p)) _ _, derivativeFun_pow_p_zmod, derivativeFun_pow_p_zmod,
       sub_zero]
   have hsum : ∑ i : Fin p, (1 + PowerSeries.X) ^ (i : ℕ) * E i = 0 := by
     simp only [hEval, mul_sub]
@@ -1149,9 +1149,9 @@ private theorem map_toZMod_dlog {g : PowerSeries ℤ_[p]} (hg : IsUnit g) :
         = derivativeFun (PowerSeries.map (PadicInt.toZMod : ℤ_[p] →+* ZMod p) f) := fun f => by
     ext n
     rw [PowerSeries.coeff_map,
-      show f.derivativeFun = PowerSeries.derivative ℤ_[p] f from rfl,
+      show f.derivativeFun = PowerSeries.derivative f from rfl,
       show (PowerSeries.map (PadicInt.toZMod : ℤ_[p] →+* ZMod p) f).derivativeFun
-          = PowerSeries.derivative (ZMod p)
+          = PowerSeries.derivative
             (PowerSeries.map (PadicInt.toZMod : ℤ_[p] →+* ZMod p) f) from rfl,
       PowerSeries.coeff_derivative, PowerSeries.coeff_derivative, PowerSeries.coeff_map,
       map_mul, map_add, map_natCast, map_one]
@@ -1508,7 +1508,7 @@ theorem dlog_surjective_onto_psiId {F : PowerSeries ℤ_[p]} (hF : F ∈ psiIdSe
         rw [PowerSeries.WithPiTopology.tendsto_iff_coeff_tendsto]
         intro m
         simp_rw [show ∀ G : PowerSeries ℤ_[p], G.derivativeFun
-            = PowerSeries.derivative ℤ_[p] G from fun _ => rfl,
+            = PowerSeries.derivative G from fun _ => rfl,
           PowerSeries.coeff_derivative]
         exact (tendsto_coeff hconv (m + 1)).mul_const _
       exact Filter.Tendsto.const_mul _ hderiv
@@ -1561,7 +1561,7 @@ private theorem eq_C_constantCoeff_of_derivativeFun_zero (g : PowerSeries ℤ_[p
     rw [PowerSeries.coeff_C, if_neg (Nat.succ_ne_zero m)]
     have hcoeff := congrArg (PowerSeries.coeff m) h
     rw [show ∀ G : PowerSeries ℤ_[p], G.derivativeFun
-          = PowerSeries.derivative ℤ_[p] G from fun _ => rfl,
+          = PowerSeries.derivative G from fun _ => rfl,
       PowerSeries.coeff_derivative, map_zero] at hcoeff
     exact (mul_eq_zero.mp hcoeff).resolve_right (Nat.cast_add_one_ne_zero m)
 
@@ -1616,7 +1616,7 @@ private theorem coeff_one_one_add_X_pow :
         + PowerSeries.X * derivativeFun ((1 + PowerSeries.X) ^ p) from by ring,
     map_add, PowerSeries.coeff_zero_X_mul, add_zero,
     show ∀ G : PowerSeries ℤ_[p], G.derivativeFun
-        = PowerSeries.derivative ℤ_[p] G from fun _ => rfl,
+        = PowerSeries.derivative G from fun _ => rfl,
     PowerSeries.coeff_derivative,
     show (p : PowerSeries ℤ_[p]) * (1 + PowerSeries.X) ^ p
       = PowerSeries.C (p : ℤ_[p]) * (1 + PowerSeries.X) ^ p from by rw [map_natCast],
