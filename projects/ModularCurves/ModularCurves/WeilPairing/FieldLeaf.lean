@@ -1528,7 +1528,6 @@ theorem sheafificationMap_whiskerLeft_unitEndomorphism {Y : Scheme.{u}}
   | tmul x a =>
       simp only [Functor.id_map, PresheafOfModules.comp_app, ModuleCat.hom_comp,
         LinearMap.comp_apply]
-      erw [PresheafOfModules.whiskerLeft_app]
       erw [ModuleCat.MonoidalCategory.whiskerLeft_apply]
       erw [ModularCurves.unitEndomorphismOfTopSection_app_apply]
       erw [smulEndo_app_apply]
@@ -1552,8 +1551,7 @@ theorem sheafificationMap_whiskerLeft_unitEndomorphism {Y : Scheme.{u}}
           (𝟙 Y.ringCatSheaf.obj)).unit.app
             (MonoidalCategoryStruct.tensorObj A.val (unitObj Y).val)).app U)) ?_
       refine Eq.trans (congrArg (fun t => x ⊗ₜ t) ?_) (TensorProduct.tmul_smul
-        (show ↑(((sheafToPresheaf (Opens.grothendieckTopology ↥Y) CommRingCat).obj
-            Y.sheaf ⋙ forget₂ CommRingCat RingCat).obj U) from
+        (show ↑(Y.sheaf.obj.obj U) from
           (CategoryTheory.ConcreteCategory.hom
             (Y.ringCatSheaf.obj.map (homOfLE (le_top : U.unop ≤ ⊤)).op)) r) x a)
       exact mul_comm (G := Γ(Y, U.unop)) _ _
