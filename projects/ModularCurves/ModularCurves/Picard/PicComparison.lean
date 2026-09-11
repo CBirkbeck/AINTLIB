@@ -216,6 +216,12 @@ namespace AlgebraicGeometry.Scheme.Modules
 
 variable {X : Scheme.{u}}
 
+/-- The commutative ring structure on the underlying ring of a presheaf of commutative rings
+(removed from mathlib in #43193; restored locally). -/
+local instance {C : Type*} [Category* C] {R : Cᵒᵖ ⥤ CommRingCat.{u}} (X : Cᵒᵖ) :
+    CommRing ((R ⋙ forget₂ _ RingCat).obj X) :=
+  inferInstanceAs (CommRing (R.obj X))
+
 /-- The identity morphism on `X`'s structure sheaf viewed in `RingCat`, the sheafification
 parameter that `Modules.monoidalCategory` is built from.  Named once here: it otherwise appears
 verbatim six times inside `nonempty_tensorObj_iso_tensor`. -/
@@ -372,12 +378,16 @@ theorem bijective_evPre_app_of_triv {M : X.Modules} {W : X.Opens}
       ↑((dualObj M).val.obj (Opposite.op W)) :=
     inferInstanceAs (Module ↑(X.sheaf.obj.obj (Opposite.op W))
       ↑((dualObj M).val.obj (Opposite.op W)))
+  letI : Module ↑(X.sheaf.obj.obj (Opposite.op W))
+      ↑((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op W)) :=
+    inferInstanceAs (Module ↑(X.sheaf.obj.obj (Opposite.op W))
+      ↑(X.sheaf.obj.obj (Opposite.op W)))
   -- the inverse component `c ↦ hL⁻¹ c ⊗ ψ.hom`, as a hom of module categories
   let k : (𝟙_ (_root_.PresheafOfModules
         (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).obj (Opposite.op W) ⟶
       (M.val ⊗ (dualObj M).val : _root_.PresheafOfModules
         (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op W) :=
-    ModuleCat.ofHom
+    ModuleCat.ofHom (R := X.sheaf.obj.obj (Opposite.op W))
       (((TensorProduct.mk (X.ringCatSheaf.obj.obj (Opposite.op W))
         (M.val.obj (Opposite.op W)) ((dualObj M).val.obj (Opposite.op W))).flip ψ.hom) ∘ₗ
         hL.symm.toLinearMap)
@@ -639,7 +649,7 @@ theorem exists_pairingElem_tmul_eq_one {M N : X.Modules} (ε : tensorObj M N ≅
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map iV.op
         (pairingElem ε V₀ (p.1 ⊗ₜ p.2)) :=
     (congrArg (pairingElem ε V)
-      (PresheafOfModules.Monoidal.tensorObj_map_tmul iV.op p.1 p.2).symm).trans
+      (PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul iV.op p.1 p.2).symm).trans
       (pairingElem_map ε iV.op (p.1 ⊗ₜ p.2))
   have hsm := pairingElem_smul ε V c
     (m₁ ⊗ₜ[
@@ -714,7 +724,7 @@ noncomputable def pairingHom {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X
   refine (congrArg (fun t => pairingElem ε (Opposite.unop Vf').left
       ((M.val.map (i.unop.left).op s) ⊗ₜ t)) h₁).trans ?_
   refine (congrArg (pairingElem ε (Opposite.unop Vf').left)
-      (PresheafOfModules.Monoidal.tensorObj_map_tmul (i.unop.left).op s
+      (PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul (i.unop.left).op s
         (N.val.map ((Opposite.unop Vf).hom).op n)).symm).trans ?_
   exact pairingElem_map ε (i.unop.left).op _
 
@@ -742,7 +752,7 @@ theorem unitHomEquiv_symm_overSection_comp_pairingHom {M N : X.Modules}
       ((M.val.map (Opposite.unop V).hom.op m) ⊗ₜ
         N.val.map (Opposite.unop V).hom.op n) = _
   exact (congrArg (pairingElem ε (Opposite.unop V).left)
-      (PresheafOfModules.Monoidal.tensorObj_map_tmul
+      (PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul
         ((Opposite.unop V).hom).op m n).symm).trans
     ((pairingElem_map ε ((Opposite.unop V).hom).op (m ⊗ₜ n)).trans
       ((congrArg ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map

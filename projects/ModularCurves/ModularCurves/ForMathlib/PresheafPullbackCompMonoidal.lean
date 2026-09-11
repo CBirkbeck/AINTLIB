@@ -28,7 +28,7 @@ theorem pullbackComp_hom_isMonoidal
         (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat) =
           ((TopologicalSpace.Opens.map f.base).op ⋙ X.sheaf.obj) ⋙
             forget₂ CommRingCat RingCat by rfl]
-      exact PresheafOfModules.monoidalCategory
+      exact PresheafOfModulesOfCommRing.monoidalCategory
     letI := pullbackMonoidal g
     letI := pullbackMonoidal f
     letI : (pullback
@@ -46,7 +46,7 @@ theorem pullbackComp_hom_isMonoidal
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat) =
         ((TopologicalSpace.Opens.map f.base).op ⋙ X.sheaf.obj) ⋙
           forget₂ CommRingCat RingCat by rfl]
-    exact PresheafOfModules.monoidalCategory
+    exact PresheafOfModulesOfCommRing.monoidalCategory
   let φg := schemeRingPresheafHom g
   let φf := schemeRingPresheafHom f
   let φfg := schemeRingPresheafHom (f ≫ g)
