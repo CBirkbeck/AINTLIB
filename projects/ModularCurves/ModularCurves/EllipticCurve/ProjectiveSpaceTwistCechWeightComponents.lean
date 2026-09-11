@@ -71,7 +71,7 @@ theorem coordinateHomogeneousLaurentDeleteLinearMap_coeff
         (coordinateLaurentExponentDeleteEmbedding a k d e) = x.coeff e := by
   rw [coordinateHomogeneousLaurentDeleteLinearMap,
     AddMonoidAlgebra.coeff_mapDomainLinearMap,
-    Finsupp.mapDomain_apply (coordinateLaurentExponentDeleteEmbedding a k d).injective]
+    Finsupp.mapDomain_apply_of_injective (coordinateLaurentExponentDeleteEmbedding a k d).injective]
 
 private abbrev coordinateHomogeneousLaurentWeightFactor
     [LinearOrder σ] (d : ℤ) {n : ℕ}
