@@ -35,6 +35,12 @@ universe v₁ v₂ v₃ u₁ u₂ u₃ u w w'
 
 open CategoryTheory MonoidalCategory Functor
 
+/-- The commutative ring structure on the underlying ring of a presheaf of commutative rings
+(removed from mathlib in #43193; restored locally). -/
+local instance {C : Type*} [Category* C] {R : Cᵒᵖ ⥤ CommRingCat.{u}} (X : Cᵒᵖ) :
+    CommRing ((R ⋙ forget₂ _ RingCat).obj X) :=
+  inferInstanceAs (CommRing (R.obj X))
+
 namespace CategoryTheory
 
 variable {C : Type u₁} {D : Type u₂}
@@ -221,7 +227,7 @@ noncomputable def restrictScalarsLaxμ
       (restrictScalars ψ).obj (P ⊗ Q) where
   app U := restrictScalarsLaxμApp ψ P Q U
   naturality {U V} f := ModuleCat.MonoidalCategory.tensor_ext (fun p q => by
-    erw [Monoidal.tensorObj_map_tmul])
+    erw [PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul])
 
 /-- **[D-PresPB′-general], leaf B1a.** Presheaf-level restriction of scalars along an
 arbitrary morphism of `CommRingCat`-valued ring presheaves is lax monoidal (sectionwise
@@ -619,7 +625,7 @@ noncomputable def freeTensorPair (F G : Cᵒᵖ ⥤ Type u) :
       (((free (T ⋙ forget₂ CommRingCat RingCat)).obj F ⊗
         (free (T ⋙ forget₂ CommRingCat RingCat)).obj G).map f)
         (ModuleCat.freeMk z.1 ⊗ₜ ModuleCat.freeMk z.2)
-    erw [Monoidal.tensorObj_map_tmul]
+    erw [PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul]
     rw [freeObj_map_freeMk T f z.1, freeObj_map_freeMk T f z.2]
     erw [CategoryTheory.tensor_apply]
     rfl

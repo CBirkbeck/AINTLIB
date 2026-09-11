@@ -539,7 +539,6 @@ private theorem KerPrincipal.kill {R A : Type u} [CommRing R] [CommRing A] [Alge
         KaehlerDifferential.D R (Polynomial R) Polynomial.X) := by
     intro t
     induction t with
-    | zero => exact ⟨0, by simp⟩
     | tmul p ω =>
       obtain ⟨q, rfl⟩ : ∃ q : Polynomial R,
           ω = q • KaehlerDifferential.D R (Polynomial R) Polynomial.X := by
@@ -2919,7 +2918,6 @@ theorem sectionBaseChange_tensor_map {A A' : Type u} [CommRing A] [CommRing A']
     AlgHom.sectionBaseChange R B A' P (Algebra.TensorProduct.map ψ (AlgHom.id R B) f) =
       ψ (AlgHom.sectionBaseChange R B A P f) := by
   induction f with
-  | zero => simp
   | add f₁ f₂ h₁ h₂ => simp [h₁, h₂]
   | tmul a b =>
     simp [AlgHom.sectionBaseChange, Algebra.smul_def, map_mul]
@@ -3032,7 +3030,6 @@ theorem isFullSetOfSectionsAlg_iff_charpoly [Module.Free R B] [Module.Finite R B
       · rw [Algebra.TensorProduct.one_def, Algebra.TensorProduct.cancelBaseChange_tmul,
           one_smul]
       · induction f with
-        | zero => simp
         | add f₁ f₂ h₁ h₂ => rw [tmul_add, map_add, map_add, h₁, h₂]
         | tmul a b =>
           rw [Algebra.TensorProduct.cancelBaseChange_tmul,
