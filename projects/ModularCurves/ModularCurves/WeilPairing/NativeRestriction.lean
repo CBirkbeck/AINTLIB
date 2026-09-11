@@ -753,7 +753,7 @@ private theorem mu_bridge_lhs_e4 (U : (Opens ↥X)ᵒᵖ)
         (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op (x ⊗ₜ y) =
         (A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ
           (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y) :=
-      PresheafOfModules.Monoidal.tensorObj_map_tmul _ x y
+      PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul _ x y
     exact hunit.trans (hnat'.trans (congrArg
       (fun z => ((PresheafOfModules.sheafificationAdjunction
         (𝟙 X.ringCatSheaf.obj)).unit.app
