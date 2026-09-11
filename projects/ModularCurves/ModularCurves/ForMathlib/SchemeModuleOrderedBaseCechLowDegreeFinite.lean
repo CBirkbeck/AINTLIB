@@ -157,11 +157,10 @@ theorem of_wellFounded_comodels
     ∀ M, P M → OrderedBaseCechLowDegreeFinite π U M := by
   let rel : X.Modules → X.Modules → Prop :=
     fun A B ↦ r (rank A) (rank B)
-  haveI : IsWellFounded X.Modules rel :=
-    inferInstanceAs (IsWellFounded X.Modules (InvImage r rank))
+  have hwf : WellFounded rel := InvImage.wf rank (IsWellFounded.wf (r := r))
   intro M hM
-  induction M using IsWellFounded.induction rel with
-  | ind M ih =>
+  induction M using hwf.induction with
+  | h M ih =>
       letI : M.IsQuasicoherent := hPqc M hM
       obtain ⟨E, f, hE, hPK, hPQ, hKsmaller, hQsmaller⟩ :=
         hcomodel M hM
@@ -253,8 +252,9 @@ theorem of_closedStalkSupport_comodels
               closedStalkSupport M))
     (hgood :
       ∀ E, Good E → OrderedBaseCechLowDegreeFinite π U E) :
-    ∀ M, P M → OrderedBaseCechLowDegreeFinite π U M :=
-  of_wellFounded_comodels π U hU
+    ∀ M, P M → OrderedBaseCechLowDegreeFinite π U M := by
+  haveI : IsWellFounded (Closeds X) (fun Z W : Closeds X ↦ Z < W) := ⟨wellFounded_lt⟩
+  exact of_wellFounded_comodels π U hU
     (fun Z W : Closeds X ↦ Z < W)
     closedStalkSupport P Good hPqc hGoodqc hcomodel hgood
 

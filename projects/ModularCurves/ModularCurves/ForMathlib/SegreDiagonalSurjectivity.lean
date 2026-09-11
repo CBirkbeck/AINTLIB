@@ -102,7 +102,7 @@ lemma pureTensor_homogeneous_mem_segreCoordinateRange
   apply Submodule.sum_mem
   intro b hb
   exact pureTensor_monomial_mem_segreCoordinateRange R m n a b
-    (coeff a p) (coeff b q)
+    (p.coeff a) (q.coeff b)
     ((hp'.degree_eq_sum_deg_support ha).symm.trans
       (hq'.degree_eq_sum_deg_support hb))
 
