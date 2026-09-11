@@ -51,6 +51,37 @@ private theorem comp_of_eq
     p ≫ q = r :=
   ((congrArg₂ (fun a b => a ≫ b) hp hq).trans hcomp).trans hr.symm
 
+/-- Congruence for a composite whose middle object is only definitionally equal to the other
+one. Under lean4#14806 the kernel does not compare the arguments of `≫` before unfolding it, so
+two composites that differ only in definitionally equal leaves (e.g. `D.U i` against the reduced
+chart) are expensive to identify; with this lemma the kernel compares the middle objects and the
+two factors separately, at top level. -/
+private theorem comp_congr_heq
+    {C : Type u} [Category C] {B Z Z' O : C}
+    (p : B ⟶ Z) (p' : B ⟶ Z') (q : Z ⟶ O) (q' : Z' ⟶ O)
+    (hZ : Z = Z') (hp : HEq p p') (hq : HEq q q') :
+    p ≫ q = p' ≫ q' := by
+  subst hZ
+  obtain rfl := eq_of_heq hp
+  obtain rfl := eq_of_heq hq
+  rfl
+
+/-- Transport an equation `p' ≫ q' = r'` to an equation between composites whose objects and
+morphisms are only definitionally equal to the primed ones, comparing each piece separately
+(see `comp_congr_heq`). -/
+private theorem comp_eq_comp_of_heq
+    {C : Type u} [Category C] {A B D A' B' D' : C}
+    {p' : A' ⟶ B'} {q' : B' ⟶ D'} {r' : A' ⟶ D'} (h : p' ≫ q' = r')
+    {p : A ⟶ B} {q : B ⟶ D} {r : A ⟶ D}
+    (hA : A = A') (hB : B = B') (hD : D = D')
+    (hp : HEq p p') (hq : HEq q q') (hr : HEq r r') :
+    p ≫ q = r := by
+  subst hA hB hD
+  obtain rfl := eq_of_heq hp
+  obtain rfl := eq_of_heq hq
+  obtain rfl := eq_of_heq hr
+  exact h
+
 private noncomputable def AffineIntersectionUnitCocycle.chartTransitionPullHom
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
     (c : AffineIntersectionUnitCocycle F)
@@ -95,9 +126,24 @@ theorem AffineIntersectionUnitCocycle.chartTransitionPullHom_toUnit
           (c.chartTransitionIso hopen hpush i j).hom g gLeft gRight hLeft hRight ≫
         (pullbackUnitIso gRight).hom =
       c.chartTransitionIsoCoordinatePullback hopen hpush i j g := by
-  rw [pullbackPseudofunctor_pullHom_unit]
-  exact (c.chartTransitionIsoCoordinatePullback_chartTransition
-    hopen hpush i j g).symm
+  -- The statement elaborates the implicit arguments of `pullHom` in the reduced forms
+  -- (`affineIntersectionChart`, `affineIntersectionOverlapι`), while the unit coherence
+  -- lemmas use the glue-datum projections `D.U`/`D.f`. Matching the two forms inside the
+  -- `≫`-composite costs the lean4#14806 kernel an unbounded check, so first restate the
+  -- `pullHom` in glue-datum form via `comp_congr_heq` (a top-level comparison).
+  have hct := c.chartTransitionIsoCoordinatePullback_chartTransition hopen hpush i j g
+  refine Eq.trans (congrArg (fun x => (pullbackUnitIso gLeft).inv ≫ x)
+    (comp_congr_heq _
+      (Pseudofunctor.LocallyDiscreteOpToCat.pullHom (F := pullbackPseudofunctor)
+        (X₁ := (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).U i)
+        (X₂ := (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).U j)
+        (Y := (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j))
+        (f₁ := (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).f i j)
+        (f₂ := (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t i j ≫
+          (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).f j i)
+        (c.chartTransitionIso hopen hpush i j).hom g gLeft gRight hLeft hRight)
+      _ _ rfl HEq.rfl HEq.rfl)) ?_
+  exact (pullbackPseudofunctor_pullHom_unit _ _ _ _ _ _ _ _).trans hct.symm
 
 private theorem AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback_self
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
@@ -127,19 +173,13 @@ private theorem AffineIntersectionUnitCocycle.chartTransitionPullHom_self
     Pseudofunctor.LocallyDiscreteOpToCat.pullHom
         (F := pullbackPseudofunctor)
         (c.chartTransitionIso hopen hpush i i).hom g (𝟙 _) (𝟙 _) hLeft hRight = 𝟙 _ := by
-  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
-  apply eq_id_of_conjugate (pullbackUnitIso (𝟙 (D.U i)))
-  calc
-    (pullbackUnitIso (𝟙 (D.U i))).inv ≫
-          Pseudofunctor.LocallyDiscreteOpToCat.pullHom
-            (F := pullbackPseudofunctor)
-            (c.chartTransitionIso hopen hpush i i).hom g
-            (𝟙 (D.U i)) (𝟙 (D.U i)) hLeft hRight ≫
-          (pullbackUnitIso (𝟙 (D.U i))).hom =
-        c.chartTransitionIsoCoordinatePullback hopen hpush i i g := by
-          exact c.chartTransitionPullHom_toUnit hopen hpush i i g
-            (𝟙 (D.U i)) (𝟙 (D.U i)) hLeft hRight
-    _ = 𝟙 _ := c.chartTransitionIsoCoordinatePullback_self hopen hpush i g
+  -- Let the elaborator instantiate `chartTransitionPullHom_toUnit` against the goal instead of
+  -- restating the conjugate with `D.U i`: the restated form differs from the statement's
+  -- reduced `pullHom` arguments inside a `≫`-composite, which the lean4#14806 kernel cannot
+  -- identify within the default budget.
+  apply eq_id_of_conjugate (pullbackUnitIso (𝟙 _))
+  exact (c.chartTransitionPullHom_toUnit hopen hpush i i g (𝟙 _) (𝟙 _) hLeft hRight).trans
+    (c.chartTransitionIsoCoordinatePullback_self hopen hpush i g)
 
 private theorem AffineIntersectionUnitCocycle.chartTransitionPullHom_comp
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
@@ -160,38 +200,26 @@ private theorem AffineIntersectionUnitCocycle.chartTransitionPullHom_comp
         (F := pullbackPseudofunctor)
         (c.chartTransitionIso hopen hpush i k).hom
         t.p₁₃ t.p₁ t.p₃ t.p₁₃_p₁ t.p₁₃_p₃ := by
-  dsimp only
-  let t := affineIntersectionChartChosenPullback₃ hopen hpush i j k
-  let p₁₂ := Pseudofunctor.LocallyDiscreteOpToCat.pullHom
-    (F := pullbackPseudofunctor) (c.chartTransitionIso hopen hpush i j).hom
-    t.p₁₂ t.p₁ t.p₂ t.p₁₂_p₁ t.p₁₂_p₂
-  let p₂₃ := Pseudofunctor.LocallyDiscreteOpToCat.pullHom
-    (F := pullbackPseudofunctor) (c.chartTransitionIso hopen hpush j k).hom
-    t.p₂₃ t.p₂ t.p₃ t.p₂₃_p₂ t.p₂₃_p₃
-  let p₁₃ := Pseudofunctor.LocallyDiscreteOpToCat.pullHom
-    (F := pullbackPseudofunctor) (c.chartTransitionIso hopen hpush i k).hom
-    t.p₁₃ t.p₁ t.p₃ t.p₁₃_p₁ t.p₁₃_p₃
-  change p₁₂ ≫ p₂₃ = p₁₃
-  have h₁₂ : (pullbackUnitIso t.p₁).inv ≫ p₁₂ ≫ (pullbackUnitIso t.p₂).hom =
-      c.chartTransitionIsoCoordinatePullback hopen hpush i j t.p₁₂ :=
-    c.chartTransitionPullHom_toUnit hopen hpush i j t.p₁₂ t.p₁ t.p₂
-      t.p₁₂_p₁ t.p₁₂_p₂
-  have h₂₃ : (pullbackUnitIso t.p₂).inv ≫ p₂₃ ≫ (pullbackUnitIso t.p₃).hom =
-      c.chartTransitionIsoCoordinatePullback hopen hpush j k t.p₂₃ :=
-    c.chartTransitionPullHom_toUnit hopen hpush j k t.p₂₃ t.p₂ t.p₃
-      t.p₂₃_p₂ t.p₂₃_p₃
-  have h₁₃ : (pullbackUnitIso t.p₁).inv ≫ p₁₃ ≫ (pullbackUnitIso t.p₃).hom =
+  -- Keep `t` let-bound: `dsimp only` would unfold the `abbrev` glue datum inside the
+  -- `pullHom` arguments, and the mixed forms cost the lean4#14806 kernel an unbounded check.
+  -- With `intro t` the goal's `pullHom`s are syntactically the `chartTransitionPullHom_toUnit`
+  -- instances. The cocycle is stated on the triple intersection's `Spec.map`s, so it is
+  -- transported to `t.p₁₂`/`t.p₂₃`/`t.p₁₃` piece by piece with `comp_eq_comp_of_heq`.
+  intro t
+  have hco : c.chartTransitionIsoCoordinatePullback hopen hpush i j t.p₁₂ ≫
+      c.chartTransitionIsoCoordinatePullback hopen hpush j k t.p₂₃ =
       c.chartTransitionIsoCoordinatePullback hopen hpush i k t.p₁₃ :=
-    c.chartTransitionPullHom_toUnit hopen hpush i k t.p₁₃ t.p₁ t.p₃
-      t.p₁₃_p₁ t.p₁₃_p₃
+    comp_eq_comp_of_heq (c.chartTransitionIsoCoordinatePullback_cocycle hopen hpush i j k)
+      rfl rfl rfl HEq.rfl HEq.rfl HEq.rfl
   exact comp_eq_of_conjugates
-    (pullbackUnitIso t.p₁) (pullbackUnitIso t.p₂) (pullbackUnitIso t.p₃)
-    p₁₂ p₂₃ p₁₃
+    (pullbackUnitIso t.p₁) (pullbackUnitIso t.p₂) (pullbackUnitIso t.p₃) _ _ _
     (c.chartTransitionIsoCoordinatePullback hopen hpush i j t.p₁₂)
     (c.chartTransitionIsoCoordinatePullback hopen hpush j k t.p₂₃)
     (c.chartTransitionIsoCoordinatePullback hopen hpush i k t.p₁₃)
-    h₁₂ h₂₃ h₁₃
-    (c.chartTransitionIsoCoordinatePullback_cocycle hopen hpush i j k)
+    (c.chartTransitionPullHom_toUnit hopen hpush i j t.p₁₂ t.p₁ t.p₂ t.p₁₂_p₁ t.p₁₂_p₂)
+    (c.chartTransitionPullHom_toUnit hopen hpush j k t.p₂₃ t.p₂ t.p₃ t.p₂₃_p₂ t.p₂₃_p₃)
+    (c.chartTransitionPullHom_toUnit hopen hpush i k t.p₁₃ t.p₁ t.p₃ t.p₁₃_p₁ t.p₁₃_p₃)
+    hco
 
 /-- The unit module on an affine chart, viewed in the fibre of the pullback pseudofunctor. -/
 noncomputable def chartDescentObj
@@ -236,11 +264,16 @@ private theorem AffineIntersectionUnitCocycle.chartDescentPullHom_comp_raw
       Pseudofunctor.LocallyDiscreteOpToCat.pullHom
         (F := pullbackPseudofunctor) (c.chartDescentHom hopen hpush i k)
         t.p₁₃ t.p₁ t.p₃ t.p₁₃_p₁ t.p₁₃_p₃ := by
-  dsimp only
+  -- Keep `t` let-bound (see `chartTransitionPullHom_comp`). After unfolding
+  -- `chartDescentHom`, the `pullHom`s still carry the chosen-pullback (`sq`) forms of their
+  -- implicit arguments, while `chartTransitionPullHom_comp` carries the glue-datum forms;
+  -- `comp_eq_comp_of_heq` identifies them piece by piece instead of inside the composite.
+  intro t
   rw [AffineIntersectionUnitCocycle.chartDescentHom_def,
     AffineIntersectionUnitCocycle.chartDescentHom_def,
     AffineIntersectionUnitCocycle.chartDescentHom_def]
-  exact c.chartTransitionPullHom_comp hopen hpush i j k
+  exact comp_eq_comp_of_heq (c.chartTransitionPullHom_comp hopen hpush i j k)
+    rfl rfl rfl HEq.rfl HEq.rfl HEq.rfl
 
 theorem AffineIntersectionUnitCocycle.chartDescentHom_self
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
