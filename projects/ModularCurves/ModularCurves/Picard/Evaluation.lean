@@ -173,17 +173,11 @@ noncomputable def evPre (M : X.Modules) :
         (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ⟶
       𝟙_ (_root_.PresheafOfModules
         (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) where
-  app U := ModuleCat.ofHom (TensorProduct.lift (by
+  app U := by
     letI := dualSectionsModule X.ringCatSheaf M U.unop
-    letI : SMulCommClass
-        ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
-        ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
-        ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U) :=
-      ⟨fun a b c => by
-        show a * (b * c) = b * (a * c)
-        rw [← mul_assoc, mul_comm' a b, mul_assoc]⟩
-    exact LinearMap.mk₂
-      ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
+    exact ModuleCat.MonoidalCategory.tensorLift (R := X.sheaf.obj.obj U)
+      (M₃ := (𝟙_ (_root_.PresheafOfModules
+        (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).obj U)
       (fun m φ => evalSection X.ringCatSheaf M U.unop φ m)
       (fun m m' φ => evalSection_add_right
         X.ringCatSheaf M U.unop φ m m')
@@ -192,7 +186,7 @@ noncomputable def evPre (M : X.Modules) :
       (fun m φ ψ => evalSection_add_left
         X.ringCatSheaf M U.unop φ ψ m)
       (fun r m φ => evalSection_smul_left
-        X.ringCatSheaf M U.unop φ r m)))
+        X.ringCatSheaf M U.unop φ r m)
   naturality {U V} i := by
     refine ModuleCat.MonoidalCategory.tensor_ext (fun m φ => ?_)
     exact evalSection_naturality X.ringCatSheaf M i φ m

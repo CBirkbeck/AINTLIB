@@ -249,9 +249,9 @@ theorem algebraMapGradeZero_bijective (W : WeierstrassCurve R) :
     obtain ⟨p, hp, rfl⟩ := Submodule.mem_map.mp hx
     rw [MvPolynomial.mem_homogeneousSubmodule] at hp
     have hdeg : p.totalDegree = 0 := Nat.le_zero.mp hp.totalDegree_le
-    have hC : p = MvPolynomial.C (MvPolynomial.coeff 0 p) :=
+    have hC : p = MvPolynomial.C (p.coeff 0) :=
       MvPolynomial.totalDegree_eq_zero_iff_eq_C.mp hdeg
-    refine ⟨MvPolynomial.coeff 0 p, Subtype.ext ?_⟩
+    refine ⟨p.coeff 0, Subtype.ext ?_⟩
     show algebraMap R (projCoordRing W) _ = Ideal.Quotient.mk (projIdeal W).toIdeal p
     rw [IsScalarTower.algebraMap_eq R (MvPolynomial (Fin 3) R) (projCoordRing W),
       RingHom.comp_apply, Ideal.Quotient.algebraMap_eq, MvPolynomial.algebraMap_eq, ← hC]
@@ -325,7 +325,7 @@ lemma poly_irrelevant_le_idealOfVars :
         (MvPolynomial.homogeneousSubmodule (Fin 3) R)).toIdeal ≤
       MvPolynomial.idealOfVars (Fin 3) R := by
   intro p hp
-  have hp0 : MvPolynomial.coeff 0 p = 0 := by
+  have hp0 : p.coeff 0 = 0 := by
     have h1 : GradedRing.proj (MvPolynomial.homogeneousSubmodule (Fin 3) R) 0 p = 0 := hp
     rw [GradedRing.proj_apply] at h1
     have h2 : (DirectSum.decompose (MvPolynomial.homogeneousSubmodule (Fin 3) R) p 0 :

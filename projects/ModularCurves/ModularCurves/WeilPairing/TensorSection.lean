@@ -60,7 +60,7 @@ theorem tensorSection_smul_left {T : Scheme.{u}} (A B : T.Modules) (U : T.Opens)
     (r : ↑Γ(T, U)) (a : Γ(A, U)) (b : Γ(B, U)) :
     tensorSection A B U (r • a) b = r • tensorSection A B U a b := by
   have h1 : ((r • a) ⊗ₜ b : ↑((A.val ⊗ B.val).obj (op U))) =
-      (show ↑((T.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (op U)) from r) •
+      (show ↑(T.sheaf.obj.obj (op U)) from r) •
         ((a ⊗ₜ b : ↑((A.val ⊗ B.val).obj (op U)))) := by
     dsimp +instances
     erw [TensorProduct.smul_tmul']
@@ -68,7 +68,7 @@ theorem tensorSection_smul_left {T : Scheme.{u}} (A B : T.Modules) (U : T.Opens)
   have h2 : tensorSection A B U (r • a) b =
       ((PresheafOfModules.sheafificationAdjunction
         (𝟙 T.ringCatSheaf.obj)).unit.app (A.val ⊗ B.val)).app (op U)
-        ((show ↑((T.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (op U)) from r) •
+        ((show ↑(T.sheaf.obj.obj (op U)) from r) •
           ((a ⊗ₜ b : ↑((A.val ⊗ B.val).obj (op U))))) :=
     congrArg (fun z : ↑((A.val ⊗ B.val).obj (op U)) =>
       ((PresheafOfModules.sheafificationAdjunction
@@ -86,7 +86,7 @@ theorem tensorSection_smul_right {T : Scheme.{u}} (A B : T.Modules) (U : T.Opens
     (r : ↑Γ(T, U)) (a : Γ(A, U)) (b : Γ(B, U)) :
     tensorSection A B U a (r • b) = r • tensorSection A B U a b := by
   have h1 : ((a ⊗ₜ (r • b)) : ↑((A.val ⊗ B.val).obj (op U))) =
-      (show ↑((T.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (op U)) from r) •
+      (show ↑(T.sheaf.obj.obj (op U)) from r) •
         ((a ⊗ₜ b : ↑((A.val ⊗ B.val).obj (op U)))) := by
     dsimp +instances
     conv_lhs => rw [← one_smul ↑Γ(T, U) a]
@@ -96,7 +96,7 @@ theorem tensorSection_smul_right {T : Scheme.{u}} (A B : T.Modules) (U : T.Opens
   have h2 : tensorSection A B U a (r • b) =
       ((PresheafOfModules.sheafificationAdjunction
         (𝟙 T.ringCatSheaf.obj)).unit.app (A.val ⊗ B.val)).app (op U)
-        ((show ↑((T.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (op U)) from r) •
+        ((show ↑(T.sheaf.obj.obj (op U)) from r) •
           ((a ⊗ₜ b : ↑((A.val ⊗ B.val).obj (op U))))) :=
     congrArg (fun z : ↑((A.val ⊗ B.val).obj (op U)) =>
       ((PresheafOfModules.sheafificationAdjunction

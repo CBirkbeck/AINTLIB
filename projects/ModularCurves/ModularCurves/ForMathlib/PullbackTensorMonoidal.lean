@@ -57,6 +57,10 @@ universe v₁ v₂ u₁ u₂ u
 
 open CategoryTheory MonoidalCategory Functor
 
+local instance {C : Type*} [Category* C] {R : Cᵒᵖ ⥤ CommRingCat.{u}} (X : Cᵒᵖ) :
+    CommRing ((R ⋙ forget₂ _ RingCat).obj X) :=
+  inferInstanceAs (CommRing (R.obj X))
+
 namespace PresheafOfModules
 
 variable {C : Type u} [Category.{u} C] {J : GrothendieckTopology C}
@@ -182,7 +186,7 @@ noncomputable def restrictScalarsTensorObjIso
       (ConcreteCategory.bijective_of_isIso (ψ.app X)) (M.obj X) (N.obj X))
     (fun X Y f => ModuleCat.MonoidalCategory.tensor_ext (fun m n => by
       dsimp
-      erw [Monoidal.tensorObj_map_tmul]))
+      erw [PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul]))
 
 end RestrictScalarsTensor
 
