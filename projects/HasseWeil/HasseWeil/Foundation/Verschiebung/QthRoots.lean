@@ -1561,258 +1561,408 @@ noncomputable def omega3_witness_coeff_X6 (W : WeierstrassCurve K) : K :=
   W.a₁*W.a₂*W.a₆ + 2*W.a₁*W.a₄^2 +
   W.a₂^3*W.a₃ + 2*W.a₃^3
 
-set_option maxHeartbeats 2000000 in
+private noncomputable def omega3_witness_coeff_X0_a₁5 (W : WeierstrassCurve K) : K :=
+  W.a₁^5*W.a₃^6*W.a₄*W.a₆^3 + W.a₁^5*W.a₄*W.a₆^6
+
+private noncomputable def omega3_witness_coeff_X0_a₁4 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^4*W.a₂*W.a₃^9*W.a₆^2 + W.a₁^4*W.a₂*W.a₃^7*W.a₆^3 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^5 +
+  W.a₁^4*W.a₂*W.a₃*W.a₆^6
+
+private noncomputable def omega3_witness_coeff_X0_a₁3 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₂*W.a₃^10*W.a₄*W.a₆ + 2*W.a₁^3*W.a₂*W.a₃^6*W.a₄*W.a₆^3 +
+  2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆^4 + 2*W.a₁^3*W.a₂*W.a₄*W.a₆^6 + W.a₁^3*W.a₃^12*W.a₆ +
+  W.a₁^3*W.a₃^6*W.a₄^3*W.a₆^2 + 2*W.a₁^3*W.a₃^6*W.a₆^4 + W.a₁^3*W.a₄^3*W.a₆^5 + W.a₁^3*W.a₆^7
+
+private noncomputable def omega3_witness_coeff_X0_a₁2 (W : WeierstrassCurve K) : K :=
+  W.a₁^2*W.a₂^2*W.a₃^11*W.a₆ + 2*W.a₁^2*W.a₂^2*W.a₃^7*W.a₆^3 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₆^4 +
+  2*W.a₁^2*W.a₂^2*W.a₃*W.a₆^6 + 2*W.a₁^2*W.a₂*W.a₃^11*W.a₄^2 + 2*W.a₁^2*W.a₂*W.a₃^9*W.a₄^2*W.a₆ +
+  2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^2*W.a₆^3 + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆^4 + 2*W.a₁^2*W.a₃^13*W.a₄ +
+  2*W.a₁^2*W.a₃^9*W.a₄^4 + W.a₁^2*W.a₃^7*W.a₄^4*W.a₆ + W.a₁^2*W.a₃^7*W.a₄*W.a₆^3 +
+  2*W.a₁^2*W.a₃^3*W.a₄^4*W.a₆^3 + W.a₁^2*W.a₃*W.a₄^4*W.a₆^4 + 2*W.a₁^2*W.a₃*W.a₄*W.a₆^6
+
+private noncomputable def omega3_witness_coeff_X0_a₁1_a₂2 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₂^2*W.a₃^12*W.a₄ + W.a₁*W.a₂^2*W.a₃^10*W.a₄*W.a₆ + W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆^4 +
+  W.a₁*W.a₂^2*W.a₄*W.a₆^6
+
+private noncomputable def omega3_witness_coeff_X0_a₁1_a₂1 (W : WeierstrassCurve K) : K :=
+  W.a₁*W.a₂*W.a₃^14 + W.a₁*W.a₂*W.a₃^12*W.a₆ + 2*W.a₁*W.a₂*W.a₃^8*W.a₄^3*W.a₆ +
+  2*W.a₁*W.a₂*W.a₃^8*W.a₆^3 + W.a₁*W.a₂*W.a₃^6*W.a₄^3*W.a₆^2 + 2*W.a₁*W.a₂*W.a₃^6*W.a₆^4 +
+  2*W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆^4 + W.a₁*W.a₂*W.a₃^2*W.a₆^6 + W.a₁*W.a₂*W.a₄^3*W.a₆^5 +
+  W.a₁*W.a₂*W.a₆^7
+
+private noncomputable def omega3_witness_coeff_X0_a₁1_a₂0 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₃^12*W.a₄^2 + W.a₁*W.a₃^8*W.a₄^5 + W.a₁*W.a₃^6*W.a₄^5*W.a₆ + W.a₁*W.a₃^6*W.a₄^2*W.a₆^3 +
+  W.a₁*W.a₃^2*W.a₄^5*W.a₆^3 + W.a₁*W.a₄^5*W.a₆^4 + 2*W.a₁*W.a₄^2*W.a₆^6
+
+private noncomputable def omega3_witness_coeff_X0_a₁0_a₂3 (W : WeierstrassCurve K) : K :=
+  2*W.a₂^3*W.a₃^13 + 2*W.a₂^3*W.a₃^11*W.a₆ + W.a₂^3*W.a₃^9*W.a₆^2 + 2*W.a₂^3*W.a₃^5*W.a₆^4 +
+  W.a₂^3*W.a₃^3*W.a₆^5 + W.a₂^3*W.a₃*W.a₆^6
+
+private noncomputable def omega3_witness_coeff_X0_a₁0_a₂2 (W : WeierstrassCurve K) : K :=
+  W.a₂^2*W.a₃^11*W.a₄^2 + W.a₂^2*W.a₃^9*W.a₄^2*W.a₆ + W.a₂^2*W.a₃^5*W.a₄^2*W.a₆^3 +
+  W.a₂^2*W.a₃^3*W.a₄^2*W.a₆^4
+
+private noncomputable def omega3_witness_coeff_X0_a₁0_a₂1 (W : WeierstrassCurve K) : K :=
+  W.a₂*W.a₃^9*W.a₄^4 + W.a₂*W.a₃^3*W.a₄^4*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X0_a₁0_a₂0 (W : WeierstrassCurve K) : K :=
+  2*W.a₃^15 + W.a₃^9*W.a₆^3 + 2*W.a₃^7*W.a₄^6 + 2*W.a₃^3*W.a₆^6 + 2*W.a₃*W.a₄^6*W.a₆^3
+
 /-- **Witness coefficient at X⁰** (constant term, q=3 char-3): ~70-term
     polynomial. -/
 noncomputable def omega3_witness_coeff_X0 (W : WeierstrassCurve K) : K :=
-  W.a₁^5*W.a₃^6*W.a₄*W.a₆^3 + W.a₁^5*W.a₄*W.a₆^6 +
-  2*W.a₁^4*W.a₂*W.a₃^9*W.a₆^2 + W.a₁^4*W.a₂*W.a₃^7*W.a₆^3 +
-  2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^5 + W.a₁^4*W.a₂*W.a₃*W.a₆^6 +
-  2*W.a₁^3*W.a₂*W.a₃^10*W.a₄*W.a₆ + 2*W.a₁^3*W.a₂*W.a₃^6*W.a₄*W.a₆^3 +
-  2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆^4 + 2*W.a₁^3*W.a₂*W.a₄*W.a₆^6 +
-  W.a₁^3*W.a₃^12*W.a₆ + W.a₁^3*W.a₃^6*W.a₄^3*W.a₆^2 +
-  2*W.a₁^3*W.a₃^6*W.a₆^4 + W.a₁^3*W.a₄^3*W.a₆^5 + W.a₁^3*W.a₆^7 +
-  W.a₁^2*W.a₂^2*W.a₃^11*W.a₆ + 2*W.a₁^2*W.a₂^2*W.a₃^7*W.a₆^3 +
-  W.a₁^2*W.a₂^2*W.a₃^5*W.a₆^4 + 2*W.a₁^2*W.a₂^2*W.a₃*W.a₆^6 +
-  2*W.a₁^2*W.a₂*W.a₃^11*W.a₄^2 + 2*W.a₁^2*W.a₂*W.a₃^9*W.a₄^2*W.a₆ +
-  2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^2*W.a₆^3 +
-  2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆^4 + 2*W.a₁^2*W.a₃^13*W.a₄ +
-  2*W.a₁^2*W.a₃^9*W.a₄^4 + W.a₁^2*W.a₃^7*W.a₄^4*W.a₆ +
-  W.a₁^2*W.a₃^7*W.a₄*W.a₆^3 + 2*W.a₁^2*W.a₃^3*W.a₄^4*W.a₆^3 +
-  W.a₁^2*W.a₃*W.a₄^4*W.a₆^4 + 2*W.a₁^2*W.a₃*W.a₄*W.a₆^6 +
-  2*W.a₁*W.a₂^2*W.a₃^12*W.a₄ + W.a₁*W.a₂^2*W.a₃^10*W.a₄*W.a₆ +
-  W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆^4 + W.a₁*W.a₂^2*W.a₄*W.a₆^6 +
-  W.a₁*W.a₂*W.a₃^14 + W.a₁*W.a₂*W.a₃^12*W.a₆ +
-  2*W.a₁*W.a₂*W.a₃^8*W.a₄^3*W.a₆ + 2*W.a₁*W.a₂*W.a₃^8*W.a₆^3 +
-  W.a₁*W.a₂*W.a₃^6*W.a₄^3*W.a₆^2 + 2*W.a₁*W.a₂*W.a₃^6*W.a₆^4 +
-  2*W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆^4 + W.a₁*W.a₂*W.a₃^2*W.a₆^6 +
-  W.a₁*W.a₂*W.a₄^3*W.a₆^5 + W.a₁*W.a₂*W.a₆^7 +
-  2*W.a₁*W.a₃^12*W.a₄^2 + W.a₁*W.a₃^8*W.a₄^5 +
-  W.a₁*W.a₃^6*W.a₄^5*W.a₆ + W.a₁*W.a₃^6*W.a₄^2*W.a₆^3 +
-  W.a₁*W.a₃^2*W.a₄^5*W.a₆^3 + W.a₁*W.a₄^5*W.a₆^4 +
-  2*W.a₁*W.a₄^2*W.a₆^6 + 2*W.a₂^3*W.a₃^13 +
-  2*W.a₂^3*W.a₃^11*W.a₆ + W.a₂^3*W.a₃^9*W.a₆^2 +
-  2*W.a₂^3*W.a₃^5*W.a₆^4 + W.a₂^3*W.a₃^3*W.a₆^5 +
-  W.a₂^3*W.a₃*W.a₆^6 + W.a₂^2*W.a₃^11*W.a₄^2 +
-  W.a₂^2*W.a₃^9*W.a₄^2*W.a₆ + W.a₂^2*W.a₃^5*W.a₄^2*W.a₆^3 +
-  W.a₂^2*W.a₃^3*W.a₄^2*W.a₆^4 + W.a₂*W.a₃^9*W.a₄^4 +
-  W.a₂*W.a₃^3*W.a₄^4*W.a₆^3 + 2*W.a₃^15 + W.a₃^9*W.a₆^3 +
-  2*W.a₃^7*W.a₄^6 + 2*W.a₃^3*W.a₆^6 + 2*W.a₃*W.a₄^6*W.a₆^3
+  omega3_witness_coeff_X0_a₁5 W + omega3_witness_coeff_X0_a₁4 W + omega3_witness_coeff_X0_a₁3 W +
+  omega3_witness_coeff_X0_a₁2 W + omega3_witness_coeff_X0_a₁1_a₂2 W +
+  omega3_witness_coeff_X0_a₁1_a₂1 W + omega3_witness_coeff_X0_a₁1_a₂0 W +
+  omega3_witness_coeff_X0_a₁0_a₂3 W + omega3_witness_coeff_X0_a₁0_a₂2 W +
+  omega3_witness_coeff_X0_a₁0_a₂1 W + omega3_witness_coeff_X0_a₁0_a₂0 W
 
-set_option maxHeartbeats 2500000 in
-set_option maxRecDepth 4096 in
+private noncomputable def omega3_witness_coeff_X1_a₁8 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^8*W.a₃^3*W.a₄*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X1_a₁7 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^7*W.a₂*W.a₃^4*W.a₆^3 + 2*W.a₁^7*W.a₂*W.a₆^5
+
+private noncomputable def omega3_witness_coeff_X1_a₁6 (W : WeierstrassCurve K) : K :=
+  W.a₁^6*W.a₂*W.a₃^3*W.a₄*W.a₆^3 + 2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆^4 + W.a₁^6*W.a₃^9*W.a₆ +
+  2*W.a₁^6*W.a₃^3*W.a₄^3*W.a₆^2 + W.a₁^6*W.a₃^3*W.a₆^4
+
+private noncomputable def omega3_witness_coeff_X1_a₁5 (W : WeierstrassCurve K) : K :=
+  W.a₁^5*W.a₂^2*W.a₃^4*W.a₆^3 + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆^4 + 2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^2*W.a₆^3 +
+  2*W.a₁^5*W.a₂*W.a₄^2*W.a₆^4 + 2*W.a₁^5*W.a₃^10*W.a₄ + W.a₁^5*W.a₃^6*W.a₄^4 +
+  2*W.a₁^5*W.a₃^4*W.a₄^4*W.a₆ + 2*W.a₁^5*W.a₃^4*W.a₄*W.a₆^3 + W.a₁^5*W.a₄^4*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X1_a₁4 (W : WeierstrassCurve K) : K :=
+  W.a₁^4*W.a₂^2*W.a₃^3*W.a₄*W.a₆^3 + W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆^4 + W.a₁^4*W.a₂*W.a₃^11 +
+  2*W.a₁^4*W.a₂*W.a₃^9*W.a₆ + W.a₁^4*W.a₂*W.a₃^7*W.a₄^3 + W.a₁^4*W.a₂*W.a₃^5*W.a₄^3*W.a₆ +
+  W.a₁^4*W.a₂*W.a₃^5*W.a₆^3 + W.a₁^4*W.a₂*W.a₃^3*W.a₄^3*W.a₆^2 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^4 +
+  2*W.a₁^4*W.a₂*W.a₃*W.a₄^3*W.a₆^3 + 2*W.a₁^4*W.a₃^9*W.a₄^2 + 2*W.a₁^4*W.a₃^5*W.a₄^5 +
+  2*W.a₁^4*W.a₃^3*W.a₄^5*W.a₆ + 2*W.a₁^4*W.a₃^3*W.a₄^2*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X1_a₁3_a₂3 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₂^3*W.a₃^6*W.a₆^2 + W.a₁^3*W.a₂^3*W.a₃^4*W.a₆^3 + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆^4
+
+private noncomputable def omega3_witness_coeff_X1_a₁3_a₂2 (W : WeierstrassCurve K) : K :=
+  W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^2*W.a₆^3 + W.a₁^3*W.a₂^2*W.a₄^2*W.a₆^4
+
+private noncomputable def omega3_witness_coeff_X1_a₁3_a₂1 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₂*W.a₃^10*W.a₄ + W.a₁^3*W.a₂*W.a₃^6*W.a₄^4 + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄^4*W.a₆ +
+  2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆^3 + W.a₁^3*W.a₂*W.a₄^4*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X1_a₁3_a₂0 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₃^12 + W.a₁^3*W.a₃^6*W.a₄^3*W.a₆ + 2*W.a₁^3*W.a₃^6*W.a₆^3 + W.a₁^3*W.a₃^4*W.a₄^6 +
+  W.a₁^3*W.a₄^6*W.a₆^2 + W.a₁^3*W.a₄^3*W.a₆^4
+
+private noncomputable def omega3_witness_coeff_X1_a₁2_a₂3 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^2*W.a₂^3*W.a₃^9*W.a₄ + 2*W.a₁^2*W.a₂^3*W.a₃^7*W.a₄*W.a₆ +
+  2*W.a₁^2*W.a₂^3*W.a₃^3*W.a₄*W.a₆^3 + 2*W.a₁^2*W.a₂^3*W.a₃*W.a₄*W.a₆^4
+
+private noncomputable def omega3_witness_coeff_X1_a₁2_a₂2 (W : WeierstrassCurve K) : K :=
+  W.a₁^2*W.a₂^2*W.a₃^11 + W.a₁^2*W.a₂^2*W.a₃^7*W.a₄^3 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₄^3*W.a₆ +
+  W.a₁^2*W.a₂^2*W.a₃^5*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X1_a₁2_a₂1 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^2*W.a₂*W.a₃^9*W.a₄^2 + 2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^5 + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^5*W.a₆ +
+  2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X1_a₁2_a₂0 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^2*W.a₃^7*W.a₄^4 + 2*W.a₁^2*W.a₃^3*W.a₄^7 + W.a₁^2*W.a₃*W.a₄^7*W.a₆ +
+  2*W.a₁^2*W.a₃*W.a₄^4*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X1_a₁1_a₂4 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₂^4*W.a₃^10 + W.a₁*W.a₂^4*W.a₃^8*W.a₆ + 2*W.a₁*W.a₂^4*W.a₃^6*W.a₆^2 +
+  2*W.a₁*W.a₂^4*W.a₃^4*W.a₆^3 + W.a₁*W.a₂^4*W.a₃^2*W.a₆^4 + 2*W.a₁*W.a₂^4*W.a₆^5
+
+private noncomputable def omega3_witness_coeff_X1_a₁1_a₂3 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₂^3*W.a₃^8*W.a₄^2 + 2*W.a₁*W.a₂^3*W.a₃^6*W.a₄^2*W.a₆ +
+  2*W.a₁*W.a₂^3*W.a₃^2*W.a₄^2*W.a₆^3 + 2*W.a₁*W.a₂^3*W.a₄^2*W.a₆^4
+
+private noncomputable def omega3_witness_coeff_X1_a₁1_a₂2 (W : WeierstrassCurve K) : K :=
+  W.a₁*W.a₂^2*W.a₃^10*W.a₄ + W.a₁*W.a₂^2*W.a₃^6*W.a₄^4 + W.a₁*W.a₂^2*W.a₃^4*W.a₄^4*W.a₆ +
+  W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X1_a₁1_a₂1 (W : WeierstrassCurve K) : K :=
+  W.a₁*W.a₂*W.a₃^12 + W.a₁*W.a₂*W.a₃^8*W.a₄^3 + W.a₁*W.a₂*W.a₃^6*W.a₄^3*W.a₆ +
+  2*W.a₁*W.a₂*W.a₃^6*W.a₆^3 + 2*W.a₁*W.a₂*W.a₃^2*W.a₄^6*W.a₆ + W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆^3 +
+  W.a₁*W.a₂*W.a₄^6*W.a₆^2 + W.a₁*W.a₂*W.a₄^3*W.a₆^4 + W.a₁*W.a₂*W.a₆^6
+
+private noncomputable def omega3_witness_coeff_X1_a₁1_a₂0 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₃^6*W.a₄^5 + W.a₁*W.a₃^2*W.a₄^8 + W.a₁*W.a₄^8*W.a₆ + 2*W.a₁*W.a₄^5*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X1_a₁0_a₂3 (W : WeierstrassCurve K) : K :=
+  2*W.a₂^3*W.a₃^11 + 2*W.a₂^3*W.a₃^9*W.a₆ + 2*W.a₂^3*W.a₃^7*W.a₄^3 + 2*W.a₂^3*W.a₃^5*W.a₄^3*W.a₆ +
+  2*W.a₂^3*W.a₃^5*W.a₆^3 + W.a₂^3*W.a₃^3*W.a₄^3*W.a₆^2 + 2*W.a₂^3*W.a₃^3*W.a₆^4 +
+  W.a₂^3*W.a₃*W.a₄^3*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X1_a₁0_a₂2 (W : WeierstrassCurve K) : K :=
+  W.a₂^2*W.a₃^9*W.a₄^2 + W.a₂^2*W.a₃^5*W.a₄^5 + W.a₂^2*W.a₃^3*W.a₄^5*W.a₆ +
+  W.a₂^2*W.a₃^3*W.a₄^2*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X1_a₁0_a₂1 (W : WeierstrassCurve K) : K :=
+  W.a₂*W.a₃^3*W.a₄^7
+
+private noncomputable def omega3_witness_coeff_X1_a₁0_a₂0 (W : WeierstrassCurve K) : K :=
+  W.a₃^9*W.a₄^3 + W.a₃^3*W.a₄^3*W.a₆^3 + 2*W.a₃*W.a₄^9
+
 /-- **Witness coefficient at X¹** (q=3 char-3): ~85-term polynomial. -/
 noncomputable def omega3_witness_coeff_X1 (W : WeierstrassCurve K) : K :=
-  2*W.a₁^8*W.a₃^3*W.a₄*W.a₆^3 + 2*W.a₁^7*W.a₂*W.a₃^4*W.a₆^3 +
-  2*W.a₁^7*W.a₂*W.a₆^5 + W.a₁^6*W.a₂*W.a₃^3*W.a₄*W.a₆^3 +
-  2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆^4 + W.a₁^6*W.a₃^9*W.a₆ +
-  2*W.a₁^6*W.a₃^3*W.a₄^3*W.a₆^2 + W.a₁^6*W.a₃^3*W.a₆^4 +
-  W.a₁^5*W.a₂^2*W.a₃^4*W.a₆^3 + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆^4 +
-  2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^2*W.a₆^3 +
-  2*W.a₁^5*W.a₂*W.a₄^2*W.a₆^4 + 2*W.a₁^5*W.a₃^10*W.a₄ +
-  W.a₁^5*W.a₃^6*W.a₄^4 + 2*W.a₁^5*W.a₃^4*W.a₄^4*W.a₆ +
-  2*W.a₁^5*W.a₃^4*W.a₄*W.a₆^3 + W.a₁^5*W.a₄^4*W.a₆^3 +
-  W.a₁^4*W.a₂^2*W.a₃^3*W.a₄*W.a₆^3 +
-  W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆^4 + W.a₁^4*W.a₂*W.a₃^11 +
-  2*W.a₁^4*W.a₂*W.a₃^9*W.a₆ + W.a₁^4*W.a₂*W.a₃^7*W.a₄^3 +
-  W.a₁^4*W.a₂*W.a₃^5*W.a₄^3*W.a₆ + W.a₁^4*W.a₂*W.a₃^5*W.a₆^3 +
-  W.a₁^4*W.a₂*W.a₃^3*W.a₄^3*W.a₆^2 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^4 +
-  2*W.a₁^4*W.a₂*W.a₃*W.a₄^3*W.a₆^3 + 2*W.a₁^4*W.a₃^9*W.a₄^2 +
-  2*W.a₁^4*W.a₃^5*W.a₄^5 + 2*W.a₁^4*W.a₃^3*W.a₄^5*W.a₆ +
-  2*W.a₁^4*W.a₃^3*W.a₄^2*W.a₆^3 + 2*W.a₁^3*W.a₂^3*W.a₃^6*W.a₆^2 +
-  W.a₁^3*W.a₂^3*W.a₃^4*W.a₆^3 + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆^4 +
-  W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^2*W.a₆^3 +
-  W.a₁^3*W.a₂^2*W.a₄^2*W.a₆^4 + 2*W.a₁^3*W.a₂*W.a₃^10*W.a₄ +
-  W.a₁^3*W.a₂*W.a₃^6*W.a₄^4 + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄^4*W.a₆ +
-  2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆^3 + W.a₁^3*W.a₂*W.a₄^4*W.a₆^3 +
-  2*W.a₁^3*W.a₃^12 + W.a₁^3*W.a₃^6*W.a₄^3*W.a₆ +
-  2*W.a₁^3*W.a₃^6*W.a₆^3 + W.a₁^3*W.a₃^4*W.a₄^6 +
-  W.a₁^3*W.a₄^6*W.a₆^2 + W.a₁^3*W.a₄^3*W.a₆^4 +
-  2*W.a₁^2*W.a₂^3*W.a₃^9*W.a₄ + 2*W.a₁^2*W.a₂^3*W.a₃^7*W.a₄*W.a₆ +
-  2*W.a₁^2*W.a₂^3*W.a₃^3*W.a₄*W.a₆^3 +
-  2*W.a₁^2*W.a₂^3*W.a₃*W.a₄*W.a₆^4 + W.a₁^2*W.a₂^2*W.a₃^11 +
-  W.a₁^2*W.a₂^2*W.a₃^7*W.a₄^3 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₄^3*W.a₆ +
-  W.a₁^2*W.a₂^2*W.a₃^5*W.a₆^3 + 2*W.a₁^2*W.a₂*W.a₃^9*W.a₄^2 +
-  2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^5 + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^5*W.a₆ +
-  2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆^3 + 2*W.a₁^2*W.a₃^7*W.a₄^4 +
-  2*W.a₁^2*W.a₃^3*W.a₄^7 + W.a₁^2*W.a₃*W.a₄^7*W.a₆ +
-  2*W.a₁^2*W.a₃*W.a₄^4*W.a₆^3 + 2*W.a₁*W.a₂^4*W.a₃^10 +
-  W.a₁*W.a₂^4*W.a₃^8*W.a₆ + 2*W.a₁*W.a₂^4*W.a₃^6*W.a₆^2 +
-  2*W.a₁*W.a₂^4*W.a₃^4*W.a₆^3 + W.a₁*W.a₂^4*W.a₃^2*W.a₆^4 +
-  2*W.a₁*W.a₂^4*W.a₆^5 + 2*W.a₁*W.a₂^3*W.a₃^8*W.a₄^2 +
-  2*W.a₁*W.a₂^3*W.a₃^6*W.a₄^2*W.a₆ +
-  2*W.a₁*W.a₂^3*W.a₃^2*W.a₄^2*W.a₆^3 +
-  2*W.a₁*W.a₂^3*W.a₄^2*W.a₆^4 + W.a₁*W.a₂^2*W.a₃^10*W.a₄ +
-  W.a₁*W.a₂^2*W.a₃^6*W.a₄^4 + W.a₁*W.a₂^2*W.a₃^4*W.a₄^4*W.a₆ +
-  W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆^3 + W.a₁*W.a₂*W.a₃^12 +
-  W.a₁*W.a₂*W.a₃^8*W.a₄^3 + W.a₁*W.a₂*W.a₃^6*W.a₄^3*W.a₆ +
-  2*W.a₁*W.a₂*W.a₃^6*W.a₆^3 + 2*W.a₁*W.a₂*W.a₃^2*W.a₄^6*W.a₆ +
-  W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆^3 + W.a₁*W.a₂*W.a₄^6*W.a₆^2 +
-  W.a₁*W.a₂*W.a₄^3*W.a₆^4 + W.a₁*W.a₂*W.a₆^6 +
-  2*W.a₁*W.a₃^6*W.a₄^5 + W.a₁*W.a₃^2*W.a₄^8 +
-  W.a₁*W.a₄^8*W.a₆ + 2*W.a₁*W.a₄^5*W.a₆^3 +
-  2*W.a₂^3*W.a₃^11 + 2*W.a₂^3*W.a₃^9*W.a₆ +
-  2*W.a₂^3*W.a₃^7*W.a₄^3 + 2*W.a₂^3*W.a₃^5*W.a₄^3*W.a₆ +
-  2*W.a₂^3*W.a₃^5*W.a₆^3 + W.a₂^3*W.a₃^3*W.a₄^3*W.a₆^2 +
-  2*W.a₂^3*W.a₃^3*W.a₆^4 + W.a₂^3*W.a₃*W.a₄^3*W.a₆^3 +
-  W.a₂^2*W.a₃^9*W.a₄^2 + W.a₂^2*W.a₃^5*W.a₄^5 +
-  W.a₂^2*W.a₃^3*W.a₄^5*W.a₆ + W.a₂^2*W.a₃^3*W.a₄^2*W.a₆^3 +
-  W.a₂*W.a₃^3*W.a₄^7 + W.a₃^9*W.a₄^3 + W.a₃^3*W.a₄^3*W.a₆^3 +
-  2*W.a₃*W.a₄^9
+  omega3_witness_coeff_X1_a₁8 W + omega3_witness_coeff_X1_a₁7 W + omega3_witness_coeff_X1_a₁6 W +
+  omega3_witness_coeff_X1_a₁5 W + omega3_witness_coeff_X1_a₁4 W +
+  omega3_witness_coeff_X1_a₁3_a₂3 W + omega3_witness_coeff_X1_a₁3_a₂2 W +
+  omega3_witness_coeff_X1_a₁3_a₂1 W + omega3_witness_coeff_X1_a₁3_a₂0 W +
+  omega3_witness_coeff_X1_a₁2_a₂3 W + omega3_witness_coeff_X1_a₁2_a₂2 W +
+  omega3_witness_coeff_X1_a₁2_a₂1 W + omega3_witness_coeff_X1_a₁2_a₂0 W +
+  omega3_witness_coeff_X1_a₁1_a₂4 W + omega3_witness_coeff_X1_a₁1_a₂3 W +
+  omega3_witness_coeff_X1_a₁1_a₂2 W + omega3_witness_coeff_X1_a₁1_a₂1 W +
+  omega3_witness_coeff_X1_a₁1_a₂0 W + omega3_witness_coeff_X1_a₁0_a₂3 W +
+  omega3_witness_coeff_X1_a₁0_a₂2 W + omega3_witness_coeff_X1_a₁0_a₂1 W +
+  omega3_witness_coeff_X1_a₁0_a₂0 W
 
-set_option maxHeartbeats 1500000 in
-set_option maxRecDepth 4096 in
+private noncomputable def omega3_witness_coeff_X2_a₁11 (W : WeierstrassCurve K) : K :=
+  W.a₁^11*W.a₄*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X2_a₁10 (W : WeierstrassCurve K) : K :=
+  W.a₁^10*W.a₂*W.a₃*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X2_a₁9 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^9*W.a₂*W.a₄*W.a₆^3 + W.a₁^9*W.a₄^3*W.a₆^2 + 2*W.a₁^9*W.a₆^4
+
+private noncomputable def omega3_witness_coeff_X2_a₁8 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^8*W.a₂^2*W.a₃*W.a₆^3 + 2*W.a₁^8*W.a₃^3*W.a₄^4 + W.a₁^8*W.a₃*W.a₄^4*W.a₆ +
+  W.a₁^8*W.a₃*W.a₄*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X2_a₁7 (W : WeierstrassCurve K) : K :=
+  W.a₁^7*W.a₂^2*W.a₄*W.a₆^3 + 2*W.a₁^7*W.a₂*W.a₃^4*W.a₄^3 + 2*W.a₁^7*W.a₂*W.a₃^2*W.a₄^3*W.a₆ +
+  2*W.a₁^7*W.a₂*W.a₃^2*W.a₆^3 + W.a₁^7*W.a₃^2*W.a₄^5 + W.a₁^7*W.a₄^5*W.a₆ + W.a₁^7*W.a₄^2*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X2_a₁6 (W : WeierstrassCurve K) : K :=
+  W.a₁^6*W.a₂^3*W.a₃^3*W.a₆^2 + W.a₁^6*W.a₂^3*W.a₃*W.a₆^3 + 2*W.a₁^6*W.a₂*W.a₃^3*W.a₄^4 +
+  2*W.a₁^6*W.a₂*W.a₃*W.a₄^4*W.a₆ + 2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆^3 + 2*W.a₁^6*W.a₃^3*W.a₄^3*W.a₆ +
+  W.a₁^6*W.a₃^3*W.a₆^3 + 2*W.a₁^6*W.a₃*W.a₄^6
+
+private noncomputable def omega3_witness_coeff_X2_a₁5 (W : WeierstrassCurve K) : K :=
+  W.a₁^5*W.a₂^3*W.a₃^6*W.a₄ + W.a₁^5*W.a₂^3*W.a₃^4*W.a₄*W.a₆ + W.a₁^5*W.a₂^3*W.a₄*W.a₆^3 +
+  2*W.a₁^5*W.a₂^2*W.a₃^4*W.a₄^3 + W.a₁^5*W.a₂^2*W.a₃^2*W.a₄^3*W.a₆ + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆^3 +
+  2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^5 + 2*W.a₁^5*W.a₂*W.a₄^5*W.a₆ + 2*W.a₁^5*W.a₂*W.a₄^2*W.a₆^3 +
+  W.a₁^5*W.a₃^4*W.a₄^4
+
+private noncomputable def omega3_witness_coeff_X2_a₁4 (W : WeierstrassCurve K) : K :=
+  W.a₁^4*W.a₂^4*W.a₃^7 + 2*W.a₁^4*W.a₂^4*W.a₃^5*W.a₆ + W.a₁^4*W.a₂^4*W.a₃*W.a₆^3 +
+  W.a₁^4*W.a₂^3*W.a₃^5*W.a₄^2 + W.a₁^4*W.a₂^3*W.a₃^3*W.a₄^2*W.a₆ + W.a₁^4*W.a₂^2*W.a₃*W.a₄^4*W.a₆ +
+  W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆^3 + 2*W.a₁^4*W.a₂*W.a₃^5*W.a₄^3 + W.a₁^4*W.a₂*W.a₃*W.a₄^6 +
+  W.a₁^4*W.a₃^3*W.a₄^5
+
+private noncomputable def omega3_witness_coeff_X2_a₁3 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₂^4*W.a₃^4*W.a₄*W.a₆ + 2*W.a₁^3*W.a₂^4*W.a₄*W.a₆^3 + 2*W.a₁^3*W.a₂^3*W.a₃^4*W.a₄^3 +
+  2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₄^3*W.a₆ + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆^3 + W.a₁^3*W.a₂^3*W.a₄^3*W.a₆^2 +
+  2*W.a₁^3*W.a₂^3*W.a₆^4 + W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^5 + W.a₁^3*W.a₂^2*W.a₄^5*W.a₆ +
+  W.a₁^3*W.a₂^2*W.a₄^2*W.a₆^3 + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄^4 + 2*W.a₁^3*W.a₂*W.a₄^7 +
+  W.a₁^3*W.a₄^3*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X2_a₁2 (W : WeierstrassCurve K) : K :=
+  W.a₁^2*W.a₂^5*W.a₃^5*W.a₆ + 2*W.a₁^2*W.a₂^5*W.a₃*W.a₆^3 + 2*W.a₁^2*W.a₂^4*W.a₃^5*W.a₄^2 +
+  2*W.a₁^2*W.a₂^4*W.a₃^3*W.a₄^2*W.a₆ + W.a₁^2*W.a₂^3*W.a₃^3*W.a₄^4 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₄^3 +
+  W.a₁^2*W.a₂^2*W.a₃*W.a₄^6 + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^5
+
+private noncomputable def omega3_witness_coeff_X2_a₁1 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₂^5*W.a₃^6*W.a₄ + W.a₁*W.a₂^5*W.a₃^4*W.a₄*W.a₆ + W.a₁*W.a₂^5*W.a₄*W.a₆^3 +
+  2*W.a₁*W.a₂^4*W.a₃^4*W.a₄^3 + W.a₁*W.a₂^2*W.a₃^4*W.a₄^4 + 2*W.a₁*W.a₂^2*W.a₄^7
+
+private noncomputable def omega3_witness_coeff_X2_a₁0 (W : WeierstrassCurve K) : K :=
+  2*W.a₂^6*W.a₃^7 + 2*W.a₂^6*W.a₃^5*W.a₆ + W.a₂^6*W.a₃^3*W.a₆^2 + W.a₂^6*W.a₃*W.a₆^3 +
+  W.a₂^5*W.a₃^5*W.a₄^2 + W.a₂^5*W.a₃^3*W.a₄^2*W.a₆ + W.a₂^4*W.a₃^3*W.a₄^4 + 2*W.a₂^3*W.a₃^9 +
+  2*W.a₂^3*W.a₃^5*W.a₄^3 + 2*W.a₂^3*W.a₃^3*W.a₄^3*W.a₆ + 2*W.a₂^3*W.a₃^3*W.a₆^3 +
+  2*W.a₂^3*W.a₃*W.a₄^6 + W.a₂^2*W.a₃^3*W.a₄^5 + 2*W.a₃^3*W.a₄^6
+
 /-- **Witness coefficient at X²** (q=3 char-3): ~70-term polynomial. -/
 noncomputable def omega3_witness_coeff_X2 (W : WeierstrassCurve K) : K :=
-  W.a₁^11*W.a₄*W.a₆^3 + W.a₁^10*W.a₂*W.a₃*W.a₆^3 +
-  2*W.a₁^9*W.a₂*W.a₄*W.a₆^3 + W.a₁^9*W.a₄^3*W.a₆^2 +
-  2*W.a₁^9*W.a₆^4 + 2*W.a₁^8*W.a₂^2*W.a₃*W.a₆^3 +
-  2*W.a₁^8*W.a₃^3*W.a₄^4 + W.a₁^8*W.a₃*W.a₄^4*W.a₆ +
-  W.a₁^8*W.a₃*W.a₄*W.a₆^3 + W.a₁^7*W.a₂^2*W.a₄*W.a₆^3 +
-  2*W.a₁^7*W.a₂*W.a₃^4*W.a₄^3 + 2*W.a₁^7*W.a₂*W.a₃^2*W.a₄^3*W.a₆ +
-  2*W.a₁^7*W.a₂*W.a₃^2*W.a₆^3 + W.a₁^7*W.a₃^2*W.a₄^5 +
-  W.a₁^7*W.a₄^5*W.a₆ + W.a₁^7*W.a₄^2*W.a₆^3 +
-  W.a₁^6*W.a₂^3*W.a₃^3*W.a₆^2 + W.a₁^6*W.a₂^3*W.a₃*W.a₆^3 +
-  2*W.a₁^6*W.a₂*W.a₃^3*W.a₄^4 + 2*W.a₁^6*W.a₂*W.a₃*W.a₄^4*W.a₆ +
-  2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆^3 + 2*W.a₁^6*W.a₃^3*W.a₄^3*W.a₆ +
-  W.a₁^6*W.a₃^3*W.a₆^3 + 2*W.a₁^6*W.a₃*W.a₄^6 +
-  W.a₁^5*W.a₂^3*W.a₃^6*W.a₄ + W.a₁^5*W.a₂^3*W.a₃^4*W.a₄*W.a₆ +
-  W.a₁^5*W.a₂^3*W.a₄*W.a₆^3 + 2*W.a₁^5*W.a₂^2*W.a₃^4*W.a₄^3 +
-  W.a₁^5*W.a₂^2*W.a₃^2*W.a₄^3*W.a₆ + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆^3 +
-  2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^5 + 2*W.a₁^5*W.a₂*W.a₄^5*W.a₆ +
-  2*W.a₁^5*W.a₂*W.a₄^2*W.a₆^3 + W.a₁^5*W.a₃^4*W.a₄^4 +
-  W.a₁^4*W.a₂^4*W.a₃^7 + 2*W.a₁^4*W.a₂^4*W.a₃^5*W.a₆ +
-  W.a₁^4*W.a₂^4*W.a₃*W.a₆^3 + W.a₁^4*W.a₂^3*W.a₃^5*W.a₄^2 +
-  W.a₁^4*W.a₂^3*W.a₃^3*W.a₄^2*W.a₆ +
-  W.a₁^4*W.a₂^2*W.a₃*W.a₄^4*W.a₆ + W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆^3 +
-  2*W.a₁^4*W.a₂*W.a₃^5*W.a₄^3 + W.a₁^4*W.a₂*W.a₃*W.a₄^6 +
-  W.a₁^4*W.a₃^3*W.a₄^5 + 2*W.a₁^3*W.a₂^4*W.a₃^4*W.a₄*W.a₆ +
-  2*W.a₁^3*W.a₂^4*W.a₄*W.a₆^3 + 2*W.a₁^3*W.a₂^3*W.a₃^4*W.a₄^3 +
-  2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₄^3*W.a₆ +
-  2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆^3 + W.a₁^3*W.a₂^3*W.a₄^3*W.a₆^2 +
-  2*W.a₁^3*W.a₂^3*W.a₆^4 + W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^5 +
-  W.a₁^3*W.a₂^2*W.a₄^5*W.a₆ + W.a₁^3*W.a₂^2*W.a₄^2*W.a₆^3 +
-  2*W.a₁^3*W.a₂*W.a₃^4*W.a₄^4 + 2*W.a₁^3*W.a₂*W.a₄^7 +
-  W.a₁^3*W.a₄^3*W.a₆^3 + W.a₁^2*W.a₂^5*W.a₃^5*W.a₆ +
-  2*W.a₁^2*W.a₂^5*W.a₃*W.a₆^3 + 2*W.a₁^2*W.a₂^4*W.a₃^5*W.a₄^2 +
-  2*W.a₁^2*W.a₂^4*W.a₃^3*W.a₄^2*W.a₆ +
-  W.a₁^2*W.a₂^3*W.a₃^3*W.a₄^4 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₄^3 +
-  W.a₁^2*W.a₂^2*W.a₃*W.a₄^6 + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^5 +
-  2*W.a₁*W.a₂^5*W.a₃^6*W.a₄ + W.a₁*W.a₂^5*W.a₃^4*W.a₄*W.a₆ +
-  W.a₁*W.a₂^5*W.a₄*W.a₆^3 + 2*W.a₁*W.a₂^4*W.a₃^4*W.a₄^3 +
-  W.a₁*W.a₂^2*W.a₃^4*W.a₄^4 + 2*W.a₁*W.a₂^2*W.a₄^7 +
-  2*W.a₂^6*W.a₃^7 + 2*W.a₂^6*W.a₃^5*W.a₆ +
-  W.a₂^6*W.a₃^3*W.a₆^2 + W.a₂^6*W.a₃*W.a₆^3 +
-  W.a₂^5*W.a₃^5*W.a₄^2 + W.a₂^5*W.a₃^3*W.a₄^2*W.a₆ +
-  W.a₂^4*W.a₃^3*W.a₄^4 + 2*W.a₂^3*W.a₃^9 +
-  2*W.a₂^3*W.a₃^5*W.a₄^3 + 2*W.a₂^3*W.a₃^3*W.a₄^3*W.a₆ +
-  2*W.a₂^3*W.a₃^3*W.a₆^3 + 2*W.a₂^3*W.a₃*W.a₄^6 +
-  W.a₂^2*W.a₃^3*W.a₄^5 + 2*W.a₃^3*W.a₄^6
+  omega3_witness_coeff_X2_a₁11 W + omega3_witness_coeff_X2_a₁10 W + omega3_witness_coeff_X2_a₁9 W +
+  omega3_witness_coeff_X2_a₁8 W + omega3_witness_coeff_X2_a₁7 W + omega3_witness_coeff_X2_a₁6 W +
+  omega3_witness_coeff_X2_a₁5 W + omega3_witness_coeff_X2_a₁4 W + omega3_witness_coeff_X2_a₁3 W +
+  omega3_witness_coeff_X2_a₁2 W + omega3_witness_coeff_X2_a₁1 W + omega3_witness_coeff_X2_a₁0 W
 
-set_option maxHeartbeats 2000000 in
-set_option maxRecDepth 4096 in
+private noncomputable def omega3_witness_coeff_X3_a₁13 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^13*W.a₂*W.a₆^2
+
+private noncomputable def omega3_witness_coeff_X3_a₁12 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^12*W.a₂*W.a₃*W.a₄*W.a₆ + W.a₁^12*W.a₃^3*W.a₆
+
+private noncomputable def omega3_witness_coeff_X3_a₁11 (W : WeierstrassCurve K) : K :=
+  W.a₁^11*W.a₂^2*W.a₃^2*W.a₆ + 2*W.a₁^11*W.a₂*W.a₃^2*W.a₄^2 + 2*W.a₁^11*W.a₂*W.a₄^2*W.a₆ +
+  2*W.a₁^11*W.a₃^4*W.a₄
+
+private noncomputable def omega3_witness_coeff_X3_a₁10 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^10*W.a₂^2*W.a₃^3*W.a₄ + W.a₁^10*W.a₂^2*W.a₃*W.a₄*W.a₆ + W.a₁^10*W.a₂*W.a₃^5 +
+  W.a₁^10*W.a₂*W.a₃^3*W.a₆ + W.a₁^10*W.a₂*W.a₃*W.a₄^3 + 2*W.a₁^10*W.a₃^3*W.a₄^2
+
+private noncomputable def omega3_witness_coeff_X3_a₁9 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^9*W.a₂^3*W.a₃^4 + 2*W.a₁^9*W.a₂^3*W.a₃^2*W.a₆ + W.a₁^9*W.a₂^2*W.a₃^2*W.a₄^2 +
+  W.a₁^9*W.a₂^2*W.a₄^2*W.a₆ + 2*W.a₁^9*W.a₂*W.a₄^4 + 2*W.a₁^9*W.a₃^6 + W.a₁^9*W.a₄^3*W.a₆
+
+private noncomputable def omega3_witness_coeff_X3_a₁8 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^8*W.a₂^3*W.a₃^3*W.a₄ + 2*W.a₁^8*W.a₂^3*W.a₃*W.a₄*W.a₆ + W.a₁^8*W.a₂^2*W.a₃*W.a₄^3 +
+  2*W.a₁^8*W.a₃*W.a₄^4
+
+private noncomputable def omega3_witness_coeff_X3_a₁7 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^7*W.a₂^4*W.a₃^4 + W.a₁^7*W.a₂^4*W.a₃^2*W.a₆ + W.a₁^7*W.a₂^4*W.a₆^2 +
+  2*W.a₁^7*W.a₂^3*W.a₃^2*W.a₄^2 + 2*W.a₁^7*W.a₂^3*W.a₄^2*W.a₆ + 2*W.a₁^7*W.a₂^2*W.a₄^4 +
+  W.a₁^7*W.a₂*W.a₃^2*W.a₄^3 + 2*W.a₁^7*W.a₂*W.a₄^3*W.a₆ + W.a₁^7*W.a₂*W.a₆^3 + 2*W.a₁^7*W.a₄^5
+
+private noncomputable def omega3_witness_coeff_X3_a₁6 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^6*W.a₂^4*W.a₃*W.a₄*W.a₆ + 2*W.a₁^6*W.a₂*W.a₃*W.a₄^4
+
+private noncomputable def omega3_witness_coeff_X3_a₁5 (W : WeierstrassCurve K) : K :=
+  W.a₁^5*W.a₂^5*W.a₃^2*W.a₆ + 2*W.a₁^5*W.a₂^4*W.a₃^2*W.a₄^2 + 2*W.a₁^5*W.a₂^4*W.a₄^2*W.a₆ +
+  W.a₁^5*W.a₂^2*W.a₃^2*W.a₄^3 + 2*W.a₁^5*W.a₂*W.a₄^5 + W.a₁^5*W.a₃^6*W.a₄ + 2*W.a₁^5*W.a₄*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X3_a₁4 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^4*W.a₂^5*W.a₃^3*W.a₄ + W.a₁^4*W.a₂^5*W.a₃*W.a₄*W.a₆ + W.a₁^4*W.a₂^4*W.a₃^3*W.a₆ +
+  W.a₁^4*W.a₂^4*W.a₃*W.a₄^3 + W.a₁^4*W.a₂^2*W.a₃*W.a₄^4 + W.a₁^4*W.a₂*W.a₃^7 +
+  2*W.a₁^4*W.a₂*W.a₃^3*W.a₄^3 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^2 + 2*W.a₁^4*W.a₂*W.a₃*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X3_a₁3_a₂6 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₂^6*W.a₃^4 + 2*W.a₁^3*W.a₂^6*W.a₃^2*W.a₆
+
+private noncomputable def omega3_witness_coeff_X3_a₁3_a₂5 (W : WeierstrassCurve K) : K :=
+  W.a₁^3*W.a₂^5*W.a₃^2*W.a₄^2 + W.a₁^3*W.a₂^5*W.a₄^2*W.a₆
+
+private noncomputable def omega3_witness_coeff_X3_a₁3_a₂4 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₂^4*W.a₃^4*W.a₄ + 2*W.a₁^3*W.a₂^4*W.a₄^4
+
+private noncomputable def omega3_witness_coeff_X3_a₁3_a₂3 (W : WeierstrassCurve K) : K :=
+  W.a₁^3*W.a₂^3*W.a₃^6 + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₄^3 + W.a₁^3*W.a₂^3*W.a₄^3*W.a₆
+
+private noncomputable def omega3_witness_coeff_X3_a₁3_a₂2 (W : WeierstrassCurve K) : K :=
+  W.a₁^3*W.a₂^2*W.a₄^5
+
+private noncomputable def omega3_witness_coeff_X3_a₁3_a₂1 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₂*W.a₃^6*W.a₄ + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆ + W.a₁^3*W.a₂*W.a₄*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X3_a₁3_a₂0 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₃^6*W.a₆ + W.a₁^3*W.a₄^6 + W.a₁^3*W.a₄^3*W.a₆^2 + 2*W.a₁^3*W.a₆^4
+
+private noncomputable def omega3_witness_coeff_X3_a₁2 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^2*W.a₂^6*W.a₃^3*W.a₄ + 2*W.a₁^2*W.a₂^6*W.a₃*W.a₄*W.a₆ + W.a₁^2*W.a₂^5*W.a₃^5 +
+  W.a₁^2*W.a₂^5*W.a₃*W.a₄^3 + 2*W.a₁^2*W.a₂^4*W.a₃^3*W.a₄^2 + W.a₁^2*W.a₂^3*W.a₃*W.a₄^4 +
+  2*W.a₁^2*W.a₂^2*W.a₃^7 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₆ + W.a₁^2*W.a₂^2*W.a₃*W.a₆^3 +
+  2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^2 + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆ + W.a₁^2*W.a₃^7*W.a₄ +
+  2*W.a₁^2*W.a₃^3*W.a₄^4 + W.a₁^2*W.a₃*W.a₄^4*W.a₆ + W.a₁^2*W.a₃*W.a₄*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X3_a₁1_a₂7 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₂^7*W.a₃^4 + W.a₁*W.a₂^7*W.a₃^2*W.a₆ + 2*W.a₁*W.a₂^7*W.a₆^2
+
+private noncomputable def omega3_witness_coeff_X3_a₁1_a₂6 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₂^6*W.a₃^2*W.a₄^2 + 2*W.a₁*W.a₂^6*W.a₄^2*W.a₆
+
+private noncomputable def omega3_witness_coeff_X3_a₁1_a₂5 (W : WeierstrassCurve K) : K :=
+  W.a₁*W.a₂^5*W.a₃^4*W.a₄ + 2*W.a₁*W.a₂^5*W.a₄^4
+
+private noncomputable def omega3_witness_coeff_X3_a₁1_a₂4 (W : WeierstrassCurve K) : K :=
+  W.a₁*W.a₂^4*W.a₃^6 + 2*W.a₁*W.a₂^4*W.a₃^2*W.a₄^3 + 2*W.a₁*W.a₂^4*W.a₄^3*W.a₆ +
+  W.a₁*W.a₂^4*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X3_a₁1_a₂3 (W : WeierstrassCurve K) : K :=
+  W.a₁*W.a₂^3*W.a₄^5
+
+private noncomputable def omega3_witness_coeff_X3_a₁1_a₂2 (W : WeierstrassCurve K) : K :=
+  W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆ + 2*W.a₁*W.a₂^2*W.a₄*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X3_a₁1_a₂1 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₂*W.a₃^8 + 2*W.a₁*W.a₂*W.a₃^6*W.a₆ + 2*W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆ +
+  2*W.a₁*W.a₂*W.a₃^2*W.a₆^3 + 2*W.a₁*W.a₂*W.a₄^6 + W.a₁*W.a₂*W.a₄^3*W.a₆^2 + 2*W.a₁*W.a₂*W.a₆^4
+
+private noncomputable def omega3_witness_coeff_X3_a₁1_a₂0 (W : WeierstrassCurve K) : K :=
+  W.a₁*W.a₃^6*W.a₄^2 + W.a₁*W.a₃^2*W.a₄^5 + W.a₁*W.a₄^5*W.a₆ + W.a₁*W.a₄^2*W.a₆^3
+
+private noncomputable def omega3_witness_coeff_X3_a₁0 (W : WeierstrassCurve K) : K :=
+  2*W.a₂^6*W.a₃^5 + 2*W.a₂^6*W.a₃^3*W.a₆ + W.a₂^5*W.a₃^3*W.a₄^2 + 2*W.a₂^3*W.a₃^5*W.a₆ +
+  2*W.a₂^3*W.a₃^3*W.a₄^3 + W.a₂^3*W.a₃^3*W.a₆^2 + 2*W.a₂^3*W.a₃*W.a₆^3 + W.a₂^2*W.a₃^5*W.a₄^2 +
+  W.a₂^2*W.a₃^3*W.a₄^2*W.a₆ + W.a₂*W.a₃^3*W.a₄^4 + W.a₃^9 + W.a₃^3*W.a₆^3 + 2*W.a₃*W.a₄^6
+
 /-- **Witness coefficient at X³** (q=3 char-3): ~100-term polynomial. -/
 noncomputable def omega3_witness_coeff_X3 (W : WeierstrassCurve K) : K :=
-  2*W.a₁^13*W.a₂*W.a₆^2 + 2*W.a₁^12*W.a₂*W.a₃*W.a₄*W.a₆ +
-  W.a₁^12*W.a₃^3*W.a₆ + W.a₁^11*W.a₂^2*W.a₃^2*W.a₆ +
-  2*W.a₁^11*W.a₂*W.a₃^2*W.a₄^2 + 2*W.a₁^11*W.a₂*W.a₄^2*W.a₆ +
-  2*W.a₁^11*W.a₃^4*W.a₄ + 2*W.a₁^10*W.a₂^2*W.a₃^3*W.a₄ +
-  W.a₁^10*W.a₂^2*W.a₃*W.a₄*W.a₆ + W.a₁^10*W.a₂*W.a₃^5 +
-  W.a₁^10*W.a₂*W.a₃^3*W.a₆ + W.a₁^10*W.a₂*W.a₃*W.a₄^3 +
-  2*W.a₁^10*W.a₃^3*W.a₄^2 + 2*W.a₁^9*W.a₂^3*W.a₃^4 +
-  2*W.a₁^9*W.a₂^3*W.a₃^2*W.a₆ + W.a₁^9*W.a₂^2*W.a₃^2*W.a₄^2 +
-  W.a₁^9*W.a₂^2*W.a₄^2*W.a₆ + 2*W.a₁^9*W.a₂*W.a₄^4 +
-  2*W.a₁^9*W.a₃^6 + W.a₁^9*W.a₄^3*W.a₆ +
-  2*W.a₁^8*W.a₂^3*W.a₃^3*W.a₄ + 2*W.a₁^8*W.a₂^3*W.a₃*W.a₄*W.a₆ +
-  W.a₁^8*W.a₂^2*W.a₃*W.a₄^3 + 2*W.a₁^8*W.a₃*W.a₄^4 +
-  2*W.a₁^7*W.a₂^4*W.a₃^4 + W.a₁^7*W.a₂^4*W.a₃^2*W.a₆ +
-  W.a₁^7*W.a₂^4*W.a₆^2 + 2*W.a₁^7*W.a₂^3*W.a₃^2*W.a₄^2 +
-  2*W.a₁^7*W.a₂^3*W.a₄^2*W.a₆ + 2*W.a₁^7*W.a₂^2*W.a₄^4 +
-  W.a₁^7*W.a₂*W.a₃^2*W.a₄^3 + 2*W.a₁^7*W.a₂*W.a₄^3*W.a₆ +
-  W.a₁^7*W.a₂*W.a₆^3 + 2*W.a₁^7*W.a₄^5 +
-  2*W.a₁^6*W.a₂^4*W.a₃*W.a₄*W.a₆ + 2*W.a₁^6*W.a₂*W.a₃*W.a₄^4 +
-  W.a₁^5*W.a₂^5*W.a₃^2*W.a₆ + 2*W.a₁^5*W.a₂^4*W.a₃^2*W.a₄^2 +
-  2*W.a₁^5*W.a₂^4*W.a₄^2*W.a₆ + W.a₁^5*W.a₂^2*W.a₃^2*W.a₄^3 +
-  2*W.a₁^5*W.a₂*W.a₄^5 + W.a₁^5*W.a₃^6*W.a₄ +
-  2*W.a₁^5*W.a₄*W.a₆^3 + 2*W.a₁^4*W.a₂^5*W.a₃^3*W.a₄ +
-  W.a₁^4*W.a₂^5*W.a₃*W.a₄*W.a₆ + W.a₁^4*W.a₂^4*W.a₃^3*W.a₆ +
-  W.a₁^4*W.a₂^4*W.a₃*W.a₄^3 + W.a₁^4*W.a₂^2*W.a₃*W.a₄^4 +
-  W.a₁^4*W.a₂*W.a₃^7 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₄^3 +
-  2*W.a₁^4*W.a₂*W.a₃^3*W.a₆^2 + 2*W.a₁^4*W.a₂*W.a₃*W.a₆^3 +
-  2*W.a₁^3*W.a₂^6*W.a₃^4 + 2*W.a₁^3*W.a₂^6*W.a₃^2*W.a₆ +
-  W.a₁^3*W.a₂^5*W.a₃^2*W.a₄^2 + W.a₁^3*W.a₂^5*W.a₄^2*W.a₆ +
-  2*W.a₁^3*W.a₂^4*W.a₃^4*W.a₄ + 2*W.a₁^3*W.a₂^4*W.a₄^4 +
-  W.a₁^3*W.a₂^3*W.a₃^6 + 2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₄^3 +
-  W.a₁^3*W.a₂^3*W.a₄^3*W.a₆ + W.a₁^3*W.a₂^2*W.a₄^5 +
-  2*W.a₁^3*W.a₂*W.a₃^6*W.a₄ + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄*W.a₆ +
-  W.a₁^3*W.a₂*W.a₄*W.a₆^3 + 2*W.a₁^3*W.a₃^6*W.a₆ +
-  W.a₁^3*W.a₄^6 + W.a₁^3*W.a₄^3*W.a₆^2 + 2*W.a₁^3*W.a₆^4 +
-  2*W.a₁^2*W.a₂^6*W.a₃^3*W.a₄ + 2*W.a₁^2*W.a₂^6*W.a₃*W.a₄*W.a₆ +
-  W.a₁^2*W.a₂^5*W.a₃^5 + W.a₁^2*W.a₂^5*W.a₃*W.a₄^3 +
-  2*W.a₁^2*W.a₂^4*W.a₃^3*W.a₄^2 + W.a₁^2*W.a₂^3*W.a₃*W.a₄^4 +
-  2*W.a₁^2*W.a₂^2*W.a₃^7 + W.a₁^2*W.a₂^2*W.a₃^5*W.a₆ +
-  W.a₁^2*W.a₂^2*W.a₃*W.a₆^3 + 2*W.a₁^2*W.a₂*W.a₃^5*W.a₄^2 +
-  2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2*W.a₆ + W.a₁^2*W.a₃^7*W.a₄ +
-  2*W.a₁^2*W.a₃^3*W.a₄^4 + W.a₁^2*W.a₃*W.a₄^4*W.a₆ +
-  W.a₁^2*W.a₃*W.a₄*W.a₆^3 + 2*W.a₁*W.a₂^7*W.a₃^4 +
-  W.a₁*W.a₂^7*W.a₃^2*W.a₆ + 2*W.a₁*W.a₂^7*W.a₆^2 +
-  2*W.a₁*W.a₂^6*W.a₃^2*W.a₄^2 + 2*W.a₁*W.a₂^6*W.a₄^2*W.a₆ +
-  W.a₁*W.a₂^5*W.a₃^4*W.a₄ + 2*W.a₁*W.a₂^5*W.a₄^4 +
-  W.a₁*W.a₂^4*W.a₃^6 + 2*W.a₁*W.a₂^4*W.a₃^2*W.a₄^3 +
-  2*W.a₁*W.a₂^4*W.a₄^3*W.a₆ + W.a₁*W.a₂^4*W.a₆^3 +
-  W.a₁*W.a₂^3*W.a₄^5 + W.a₁*W.a₂^2*W.a₃^4*W.a₄*W.a₆ +
-  2*W.a₁*W.a₂^2*W.a₄*W.a₆^3 + 2*W.a₁*W.a₂*W.a₃^8 +
-  2*W.a₁*W.a₂*W.a₃^6*W.a₆ + 2*W.a₁*W.a₂*W.a₃^2*W.a₄^3*W.a₆ +
-  2*W.a₁*W.a₂*W.a₃^2*W.a₆^3 + 2*W.a₁*W.a₂*W.a₄^6 +
-  W.a₁*W.a₂*W.a₄^3*W.a₆^2 + 2*W.a₁*W.a₂*W.a₆^4 +
-  W.a₁*W.a₃^6*W.a₄^2 + W.a₁*W.a₃^2*W.a₄^5 +
-  W.a₁*W.a₄^5*W.a₆ + W.a₁*W.a₄^2*W.a₆^3 +
-  2*W.a₂^6*W.a₃^5 + 2*W.a₂^6*W.a₃^3*W.a₆ +
-  W.a₂^5*W.a₃^3*W.a₄^2 + 2*W.a₂^3*W.a₃^5*W.a₆ +
-  2*W.a₂^3*W.a₃^3*W.a₄^3 + W.a₂^3*W.a₃^3*W.a₆^2 +
-  2*W.a₂^3*W.a₃*W.a₆^3 + W.a₂^2*W.a₃^5*W.a₄^2 +
-  W.a₂^2*W.a₃^3*W.a₄^2*W.a₆ + W.a₂*W.a₃^3*W.a₄^4 +
-  W.a₃^9 + W.a₃^3*W.a₆^3 + 2*W.a₃*W.a₄^6
+  omega3_witness_coeff_X3_a₁13 W + omega3_witness_coeff_X3_a₁12 W + omega3_witness_coeff_X3_a₁11 W +
+  omega3_witness_coeff_X3_a₁10 W + omega3_witness_coeff_X3_a₁9 W + omega3_witness_coeff_X3_a₁8 W +
+  omega3_witness_coeff_X3_a₁7 W + omega3_witness_coeff_X3_a₁6 W + omega3_witness_coeff_X3_a₁5 W +
+  omega3_witness_coeff_X3_a₁4 W + omega3_witness_coeff_X3_a₁3_a₂6 W +
+  omega3_witness_coeff_X3_a₁3_a₂5 W + omega3_witness_coeff_X3_a₁3_a₂4 W +
+  omega3_witness_coeff_X3_a₁3_a₂3 W + omega3_witness_coeff_X3_a₁3_a₂2 W +
+  omega3_witness_coeff_X3_a₁3_a₂1 W + omega3_witness_coeff_X3_a₁3_a₂0 W +
+  omega3_witness_coeff_X3_a₁2 W + omega3_witness_coeff_X3_a₁1_a₂7 W +
+  omega3_witness_coeff_X3_a₁1_a₂6 W + omega3_witness_coeff_X3_a₁1_a₂5 W +
+  omega3_witness_coeff_X3_a₁1_a₂4 W + omega3_witness_coeff_X3_a₁1_a₂3 W +
+  omega3_witness_coeff_X3_a₁1_a₂2 W + omega3_witness_coeff_X3_a₁1_a₂1 W +
+  omega3_witness_coeff_X3_a₁1_a₂0 W + omega3_witness_coeff_X3_a₁0 W
 
-set_option maxHeartbeats 800000 in
+private noncomputable def omega3_witness_coeff_X4_a₁15 (W : WeierstrassCurve K) : K :=
+  W.a₁^15*W.a₆
+
+private noncomputable def omega3_witness_coeff_X4_a₁14 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^14*W.a₃*W.a₄
+
+private noncomputable def omega3_witness_coeff_X4_a₁13 (W : WeierstrassCurve K) : K :=
+  W.a₁^13*W.a₂*W.a₃^2 + 2*W.a₁^13*W.a₂*W.a₆ + 2*W.a₁^13*W.a₄^2
+
+private noncomputable def omega3_witness_coeff_X4_a₁12 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^12*W.a₂*W.a₃*W.a₄ + 2*W.a₁^12*W.a₃^3
+
+private noncomputable def omega3_witness_coeff_X4_a₁11 (W : WeierstrassCurve K) : K :=
+  W.a₁^11*W.a₂^2*W.a₃^2 + 2*W.a₁^11*W.a₂*W.a₄^2
+
+private noncomputable def omega3_witness_coeff_X4_a₁10 (W : WeierstrassCurve K) : K :=
+  W.a₁^10*W.a₂^2*W.a₃*W.a₄ + W.a₁^10*W.a₂*W.a₃^3
+
+private noncomputable def omega3_witness_coeff_X4_a₁9 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^9*W.a₂^3*W.a₃^2 + 2*W.a₁^9*W.a₂^3*W.a₆ + W.a₁^9*W.a₂^2*W.a₄^2 + W.a₁^9*W.a₄^3
+
+private noncomputable def omega3_witness_coeff_X4_a₁8 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^8*W.a₃^3*W.a₄
+
+private noncomputable def omega3_witness_coeff_X4_a₁7 (W : WeierstrassCurve K) : K :=
+  W.a₁^7*W.a₂^4*W.a₆ + 2*W.a₁^7*W.a₂*W.a₃^4 + 2*W.a₁^7*W.a₂*W.a₄^3 + 2*W.a₁^7*W.a₂*W.a₆^2
+
+private noncomputable def omega3_witness_coeff_X4_a₁6 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^6*W.a₂^4*W.a₃*W.a₄ + 2*W.a₁^6*W.a₂^3*W.a₃^3 + W.a₁^6*W.a₂*W.a₃^3*W.a₄ +
+  2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆ + W.a₁^6*W.a₃^3*W.a₆
+
+private noncomputable def omega3_witness_coeff_X4_a₁5 (W : WeierstrassCurve K) : K :=
+  W.a₁^5*W.a₂^5*W.a₃^2 + 2*W.a₁^5*W.a₂^4*W.a₄^2 + W.a₁^5*W.a₂^2*W.a₃^4 + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆ +
+  2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^2 + 2*W.a₁^5*W.a₂*W.a₄^2*W.a₆ + 2*W.a₁^5*W.a₃^4*W.a₄ + W.a₁^5*W.a₄^4
+
+private noncomputable def omega3_witness_coeff_X4_a₁4 (W : WeierstrassCurve K) : K :=
+  W.a₁^4*W.a₂^5*W.a₃*W.a₄ + W.a₁^4*W.a₂^4*W.a₃^3 + W.a₁^4*W.a₂^2*W.a₃^3*W.a₄ +
+  W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆ + W.a₁^4*W.a₂*W.a₃^5 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆ +
+  2*W.a₁^4*W.a₂*W.a₃*W.a₄^3 + 2*W.a₁^4*W.a₃^3*W.a₄^2
+
+private noncomputable def omega3_witness_coeff_X4_a₁3 (W : WeierstrassCurve K) : K :=
+  2*W.a₁^3*W.a₂^6*W.a₃^2 + W.a₁^3*W.a₂^6*W.a₆ + W.a₁^3*W.a₂^5*W.a₄^2 + W.a₁^3*W.a₂^3*W.a₃^4 +
+  2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆ + W.a₁^3*W.a₂^3*W.a₄^3 + W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^2 +
+  W.a₁^3*W.a₂^2*W.a₄^2*W.a₆ + 2*W.a₁^3*W.a₂*W.a₃^4*W.a₄ + W.a₁^3*W.a₂*W.a₄^4 + 2*W.a₁^3*W.a₃^6 +
+  W.a₁^3*W.a₄^3*W.a₆
+
+private noncomputable def omega3_witness_coeff_X4_a₁2 (W : WeierstrassCurve K) : K :=
+  W.a₁^2*W.a₂^6*W.a₃*W.a₄ + 2*W.a₁^2*W.a₂^3*W.a₃^3*W.a₄ + 2*W.a₁^2*W.a₂^3*W.a₃*W.a₄*W.a₆ +
+  W.a₁^2*W.a₂^2*W.a₃^5 + 2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2 + 2*W.a₁^2*W.a₃*W.a₄^4
+
+private noncomputable def omega3_witness_coeff_X4_a₁1 (W : WeierstrassCurve K) : K :=
+  2*W.a₁*W.a₂^7*W.a₃^2 + 2*W.a₁*W.a₂^7*W.a₆ + W.a₁*W.a₂^6*W.a₄^2 + 2*W.a₁*W.a₂^4*W.a₃^4 +
+  W.a₁*W.a₂^4*W.a₃^2*W.a₆ + 2*W.a₁*W.a₂^4*W.a₄^3 + 2*W.a₁*W.a₂^4*W.a₆^2 +
+  2*W.a₁*W.a₂^3*W.a₃^2*W.a₄^2 + 2*W.a₁*W.a₂^3*W.a₄^2*W.a₆ + W.a₁*W.a₂^2*W.a₃^4*W.a₄ +
+  2*W.a₁*W.a₂*W.a₃^6 + W.a₁*W.a₂*W.a₃^2*W.a₄^3 + W.a₁*W.a₂*W.a₄^3*W.a₆ + 2*W.a₁*W.a₂*W.a₆^3 +
+  2*W.a₁*W.a₄^5
+
+private noncomputable def omega3_witness_coeff_X4_a₁0 (W : WeierstrassCurve K) : K :=
+  2*W.a₂^3*W.a₃^5 + 2*W.a₂^3*W.a₃^3*W.a₆ + W.a₂^3*W.a₃*W.a₄^3 + W.a₂^2*W.a₃^3*W.a₄^2 +
+  W.a₃^3*W.a₄^3
+
 /-- **Witness coefficient at X⁴** (q=3 char-3): ~70-term polynomial. -/
 noncomputable def omega3_witness_coeff_X4 (W : WeierstrassCurve K) : K :=
-  W.a₁^15*W.a₆ + 2*W.a₁^14*W.a₃*W.a₄ + W.a₁^13*W.a₂*W.a₃^2 +
-  2*W.a₁^13*W.a₂*W.a₆ + 2*W.a₁^13*W.a₄^2 + 2*W.a₁^12*W.a₂*W.a₃*W.a₄ +
-  2*W.a₁^12*W.a₃^3 + W.a₁^11*W.a₂^2*W.a₃^2 + 2*W.a₁^11*W.a₂*W.a₄^2 +
-  W.a₁^10*W.a₂^2*W.a₃*W.a₄ + W.a₁^10*W.a₂*W.a₃^3 +
-  2*W.a₁^9*W.a₂^3*W.a₃^2 + 2*W.a₁^9*W.a₂^3*W.a₆ +
-  W.a₁^9*W.a₂^2*W.a₄^2 + W.a₁^9*W.a₄^3 + 2*W.a₁^8*W.a₃^3*W.a₄ +
-  W.a₁^7*W.a₂^4*W.a₆ + 2*W.a₁^7*W.a₂*W.a₃^4 + 2*W.a₁^7*W.a₂*W.a₄^3 +
-  2*W.a₁^7*W.a₂*W.a₆^2 + 2*W.a₁^6*W.a₂^4*W.a₃*W.a₄ +
-  2*W.a₁^6*W.a₂^3*W.a₃^3 + W.a₁^6*W.a₂*W.a₃^3*W.a₄ +
-  2*W.a₁^6*W.a₂*W.a₃*W.a₄*W.a₆ + W.a₁^6*W.a₃^3*W.a₆ +
-  W.a₁^5*W.a₂^5*W.a₃^2 + 2*W.a₁^5*W.a₂^4*W.a₄^2 +
-  W.a₁^5*W.a₂^2*W.a₃^4 + W.a₁^5*W.a₂^2*W.a₃^2*W.a₆ +
-  2*W.a₁^5*W.a₂*W.a₃^2*W.a₄^2 + 2*W.a₁^5*W.a₂*W.a₄^2*W.a₆ +
-  2*W.a₁^5*W.a₃^4*W.a₄ + W.a₁^5*W.a₄^4 +
-  W.a₁^4*W.a₂^5*W.a₃*W.a₄ + W.a₁^4*W.a₂^4*W.a₃^3 +
-  W.a₁^4*W.a₂^2*W.a₃^3*W.a₄ + W.a₁^4*W.a₂^2*W.a₃*W.a₄*W.a₆ +
-  W.a₁^4*W.a₂*W.a₃^5 + 2*W.a₁^4*W.a₂*W.a₃^3*W.a₆ +
-  2*W.a₁^4*W.a₂*W.a₃*W.a₄^3 + 2*W.a₁^4*W.a₃^3*W.a₄^2 +
-  2*W.a₁^3*W.a₂^6*W.a₃^2 + W.a₁^3*W.a₂^6*W.a₆ +
-  W.a₁^3*W.a₂^5*W.a₄^2 + W.a₁^3*W.a₂^3*W.a₃^4 +
-  2*W.a₁^3*W.a₂^3*W.a₃^2*W.a₆ + W.a₁^3*W.a₂^3*W.a₄^3 +
-  W.a₁^3*W.a₂^2*W.a₃^2*W.a₄^2 + W.a₁^3*W.a₂^2*W.a₄^2*W.a₆ +
-  2*W.a₁^3*W.a₂*W.a₃^4*W.a₄ + W.a₁^3*W.a₂*W.a₄^4 +
-  2*W.a₁^3*W.a₃^6 + W.a₁^3*W.a₄^3*W.a₆ +
-  W.a₁^2*W.a₂^6*W.a₃*W.a₄ + 2*W.a₁^2*W.a₂^3*W.a₃^3*W.a₄ +
-  2*W.a₁^2*W.a₂^3*W.a₃*W.a₄*W.a₆ + W.a₁^2*W.a₂^2*W.a₃^5 +
-  2*W.a₁^2*W.a₂*W.a₃^3*W.a₄^2 + 2*W.a₁^2*W.a₃*W.a₄^4 +
-  2*W.a₁*W.a₂^7*W.a₃^2 + 2*W.a₁*W.a₂^7*W.a₆ +
-  W.a₁*W.a₂^6*W.a₄^2 + 2*W.a₁*W.a₂^4*W.a₃^4 +
-  W.a₁*W.a₂^4*W.a₃^2*W.a₆ + 2*W.a₁*W.a₂^4*W.a₄^3 +
-  2*W.a₁*W.a₂^4*W.a₆^2 + 2*W.a₁*W.a₂^3*W.a₃^2*W.a₄^2 +
-  2*W.a₁*W.a₂^3*W.a₄^2*W.a₆ + W.a₁*W.a₂^2*W.a₃^4*W.a₄ +
-  2*W.a₁*W.a₂*W.a₃^6 + W.a₁*W.a₂*W.a₃^2*W.a₄^3 +
-  W.a₁*W.a₂*W.a₄^3*W.a₆ + 2*W.a₁*W.a₂*W.a₆^3 + 2*W.a₁*W.a₄^5 +
-  2*W.a₂^3*W.a₃^5 + 2*W.a₂^3*W.a₃^3*W.a₆ +
-  W.a₂^3*W.a₃*W.a₄^3 + W.a₂^2*W.a₃^3*W.a₄^2 + W.a₃^3*W.a₄^3
+  omega3_witness_coeff_X4_a₁15 W + omega3_witness_coeff_X4_a₁14 W + omega3_witness_coeff_X4_a₁13 W +
+  omega3_witness_coeff_X4_a₁12 W + omega3_witness_coeff_X4_a₁11 W + omega3_witness_coeff_X4_a₁10 W +
+  omega3_witness_coeff_X4_a₁9 W + omega3_witness_coeff_X4_a₁8 W + omega3_witness_coeff_X4_a₁7 W +
+  omega3_witness_coeff_X4_a₁6 W + omega3_witness_coeff_X4_a₁5 W + omega3_witness_coeff_X4_a₁4 W +
+  omega3_witness_coeff_X4_a₁3 W + omega3_witness_coeff_X4_a₁2 W + omega3_witness_coeff_X4_a₁1 W +
+  omega3_witness_coeff_X4_a₁0 W
 
 /-- **Witness coefficient at X⁵** (q=3 char-3): 30-term polynomial. -/
 noncomputable def omega3_witness_coeff_X5 (W : WeierstrassCurve K) : K :=
@@ -2233,7 +2383,6 @@ theorem alpha_cubed_basis_form_char_three (W : WeierstrassCurve K)
   ring
 
 omit [Fintype K] [DecidableEq K] in
-set_option maxHeartbeats 800000 in
 /-- **K(E)-level sum decomposition of `ω_ff W 3` via natDegree bound**:
     given `(W.ω 3).natDegree ≤ 5`, expresses `ω_ff W 3` as the explicit
     sum over Y-degrees 0..5 of `aeval x_gen (coeff_k) · y_gen^k`.
@@ -2287,7 +2436,6 @@ theorem omega_ff_three_decomp_via_nat_degree_bound
   ring
 
 omit [Fintype K] [DecidableEq K] in
-set_option maxHeartbeats 1000000 in
 /-- **Witness-parametric `OmegaThreeBasisHoldsReduced` discharge**:
     given the polynomial-algebra decomposition of `ω_ff W 3` as a sum
     over Y-degrees 0..5, the Weierstrass-reduced basis decomposition

@@ -38,9 +38,16 @@ import ModularCurves.EllipticCurve.PoleSheafFibreHOne
 import ModularCurves.EllipticCurve.PoleSheafModel
 import ModularCurves.EllipticCurve.PoleSheafModelHOne
 import ModularCurves.EllipticCurve.PoleSheafIteratedBaseChange
+import ModularCurves.EllipticCurve.PoleSheafNoetherianStageCech
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
+import ModularCurves.EllipticCurve.PoleSheafPowerOneAwayBaseChangeBasis
+import ModularCurves.EllipticCurve.PoleSheafPowerOneProjectiveBaseChange
+import ModularCurves.EllipticCurve.PoleSheafPowerOneProjectiveCoordinates
+import ModularCurves.EllipticCurve.PoleSheafProjectiveCoordinates
 import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
+import ModularCurves.EllipticCurve.PoleSheafRankTwoThree
+import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechHOne
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.EllipticCurve.SectionRigidity
 import ModularCurves.EllipticCurve.Torsion
@@ -105,6 +112,7 @@ import ModularCurves.ForMathlib.SchemeAppLE
 import ModularCurves.ForMathlib.SchemeModuleBaseCechTupleHomotopy
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechBaseChangeExact
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHomotopyEquiv
+import ModularCurves.ForMathlib.SchemeModuleProperLowDegreeCechFinite
 import ModularCurves.ForMathlib.SchemeModulePullbackIteratedBaseChange
 import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
@@ -201,20 +209,54 @@ import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
 import ModularCurves.Picard.InvertibleSheafFiniteStageModel
 import ModularCurves.Picard.InvertibleSheafGlueData
 import ModularCurves.Picard.InvertibleSheafLocallyFree
+import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PrincipalIdealModuleIso
 import ModularCurves.Picard.PullbackTensorObj
 import ModularCurves.Picard.RigidDescent
 import ModularCurves.Picard.SectionAffineIntersection
+import ModularCurves.Picard.SelfAdjointN
 import ModularCurves.Picard.UnitPullback
 import ModularCurves.Vendored.RiemannRoch
 import ModularCurves.ForMathlib.StandardSmoothIntegrallyClosed
 import ModularCurves.ForMathlib.AdjoinRootBaseChange
 import ModularCurves.ForMathlib.FactorIntegrallyClosed
 import ModularCurves.ForMathlib.SmoothCurveComponents
+import ModularCurves.WeilPairing.AlternationReduction
+import ModularCurves.WeilPairing.Basic
+import ModularCurves.WeilPairing.CharZeroAssembly
+import ModularCurves.WeilPairing.ChartFromUniversalPair
+import ModularCurves.WeilPairing.ChartGroupSum
+import ModularCurves.WeilPairing.ConstReading
+import ModularCurves.WeilPairing.DescentFaithful
+import ModularCurves.WeilPairing.DetCocycle
 import ModularCurves.WeilPairing.FactorRoot
+import ModularCurves.WeilPairing.FibrePointDict
 import ModularCurves.WeilPairing.FieldComparisonBridge
+import ModularCurves.WeilPairing.FieldPairingDet
+import ModularCurves.WeilPairing.FieldPairingUnique
+import ModularCurves.WeilPairing.FieldPairingValue
+import ModularCurves.WeilPairing.FullLevelBaseChange
 import ModularCurves.WeilPairing.FullLevelCover
+import ModularCurves.WeilPairing.FullLevelPairing
+import ModularCurves.WeilPairing.GaloisFieldPairing
+import ModularCurves.WeilPairing.GlobalFibreChart
+import ModularCurves.WeilPairing.KMBilinear
+import ModularCurves.WeilPairing.KMPairing
+import ModularCurves.WeilPairing.KMPatching
+import ModularCurves.WeilPairing.KMUniqueness
+import ModularCurves.WeilPairing.MuNBaseChange
+import ModularCurves.WeilPairing.PairingTransport
+import ModularCurves.WeilPairing.PoincareBiextension
+import ModularCurves.WeilPairing.RootPowerPoints
+import ModularCurves.WeilPairing.RootSplitting
+import ModularCurves.WeilPairing.SelfUniversal
+import ModularCurves.WeilPairing.TensorCocycle
+import ModularCurves.WeilPairing.TheoremOfSquareBaseChange
+import ModularCurves.WeilPairing.TheoremOfSquareUniversal
+import ModularCurves.WeilPairing.TorsionBaseChange
+import ModularCurves.WeilPairing.TorsionSqBaseChange
+import ModularCurves.WeilPairing.Translation
 import ModularCurves.WeilPairing.UniversalRootBase
 import ModularCurves.WeilPairing.UniversalRootThree
 import ModularCurves.WeilPairing.RootThreeDet
@@ -296,24 +338,25 @@ import ModularCurves.WeilPairing.TheoremOfSquareField
 import ModularCurves.WeilPairing.UnitSheaf
 
 /-!
-The `ProjectiveSpaceTwist` subtree is temporarily wired out of this root (daily bump
-2026-08-25, mathlib `e4b72ca0` / Lean `v4.34.0-rc2`): four theorems in
-`ModularCurves.EllipticCurve.ProjectiveSpaceTwist` — `coordinateHyperplanePoleSection_localTrivializationTopSection`,
-`coordinateHyperplanePoleSheafTrivialization_restrict_transition`,
-`coordinateHyperplanePoleSheafPowerTrivialization_restrict_transition`,
-`coordinateHyperplaneDualPairing_frameSection` — no longer pass the kernel under lean4#14806
-(the kernel's defeq cache is no longer transitive): their checks run away in memory under any
-`maxHeartbeats` budget, although every isolated proof step is cheap. Statements are untouched.
-The module and its 148 dependents (the imports removed here, see
-`.mathlib-quality/bump-pst-root-removals.txt` / `bump-pst-dependents.txt` on the bump branch) are
-NOT built until the proofs are repaired; re-add the imports once they are.
+The `WeilPairing.OrdPipeline` and `Picard.InvertibleSheafGlueEffectivity` subtrees are wired out
+of this root (tracked in #8574). Under lean4#14806 the kernel's defeq cache is no longer
+transitive, and three declarations exceed the kernel budget:
+`translateByPoint_base_zChartPoint_of_add` and `..._of_add_zero` (OrdPipeline) and
+`AffineIntersectionUnitCocycle.chartLocalComponent_left` (GlueEffectivity).
 
-Likewise the `InvertibleSheafGlueDataDescent` subtree (that module and its 6 dependents:
-`EllipticCurve.PoleSheafNoetherianStage`, `Picard.InvertibleSheafCocycleSmoothStage`,
-`Picard.InvertibleSheafGlueBaseChange`, `Picard.InvertibleSheafGlueEffectivity`,
-`Picard.InvertibleSheafNoetherianSmoothStage`, `Picard.InvertibleSheafNoetherianStage`; the two
-root imports removed are listed in `.mathlib-quality/bump-descent-root-removals.txt`): its
-`chartTransitionPullHom_comp` and `chartDescentPullHom_comp_raw` exceed 6.4M resp. 3.2M
-heartbeats under the same kernel change, with every isolated proof step already over 400k;
-`chartTransitionPullHom_toUnit` and `chartTransitionPullHom_self` need 400k. Tracked in #8574.
+These are NOT fixable by proof decomposition, which was measured rather than assumed. For
+OrdPipeline, four full-file variants all timed out: the original 68-line proofs (320s), four
+extracted helpers assembled with `rw` (498s), the same helpers with motive-free `Eq.trans`
+chains (541s), and helpers with both endpoints as free variables (503s). For
+`chartLocalComponent_left`, six variants timed out, decisively including a lemma whose entire
+proof is `exact c.chartLocalCompositePullback_eq ...` and whose statement is merely a let-free
+respelling of the same composite: it times out on its own at 130s. The cost therefore tracks the
+STATEMENT, not the proof, so no decomposition can help - any helper must restate the composite
+and pays the same price. The remedy needs a statement change or a heartbeat budget, both of which
+are out of scope here; the theorem statements are untouched.
+
+The 12 imports removed here pull in 20 modules in total. Each excluded module's
+`/- DECOMPOSE -/` block records the full variant table so the dead ends are not repeated.
+Re-add these imports once the three declarations are repaired.
 -/
+

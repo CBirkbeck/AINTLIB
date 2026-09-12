@@ -841,22 +841,33 @@ theorem projModelZeroIdealOverlapTrivialization_inv_comp
     projModelSectionRootOverlap]
   all_goals rfl
 
-set_option maxHeartbeats 1600000 in
+/-- A trivialization of a module over an open `U` whose inverse, composed with a map to
+the unit object, is multiplication by `1` restricts to any smaller open `V ≤ U` with the
+same property. -/
+private theorem restrictOverTrivialization_inv_comp_over_one
+    {X : Scheme.{u}} {M : X.Modules}
+    (i : M ⟶ Scheme.Modules.unitObj X) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (h : e.inv ≫ i.over U =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U (1 : Γ(X, U)))
+    {V : X.Opens} (hVU : V ≤ U) :
+    (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M U e
+          (Over.mk (homOfLE hVU))).inv ≫ i.over V =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V (1 : Γ(X, V)) := by
+  simpa only [map_one] using
+    restrictOverTrivialization_inv_comp_over i U e 1 h hVU
+
 theorem projModelZeroIdealOverlapTrivializationZ_inv_comp
     (W : WeierstrassCurve R) :
     (projModelZeroIdealOverlapTrivializationZ W).inv ≫
         (idealModuleToUnit (projModelZero W)).over (projModelPoleOverlap W) =
       SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
-        (projModelPoleOverlap W) (1 : Γ(projModel W, projModelPoleOverlap W)) := by
-  have hres := restrictOverTrivialization_inv_comp_over
+        (projModelPoleOverlap W) (1 : Γ(projModel W, projModelPoleOverlap W)) :=
+  restrictOverTrivialization_inv_comp_over_one
     (idealModuleToUnit (projModelZero W)) (projModelZChart W)
-      (projModelZeroIdealOverTrivializationZ W)
-        (1 : Γ(projModel W, projModelZChart W))
-          (projModelZeroIdealOverTrivializationZ_inv_comp W)
-            (projModelPoleOverlap_le_ZChart W)
-  convert hres using 1
-  all_goals simp only [projModelZeroIdealOverlapTrivializationZ, map_one]
-  all_goals rfl
+    (projModelZeroIdealOverTrivializationZ W)
+    (projModelZeroIdealOverTrivializationZ_inv_comp W)
+    (projModelPoleOverlap_le_ZChart W)
 
 section
 

@@ -57,11 +57,9 @@ its elaboration profile — unchanged.
 set_option allowUnsafeReducibility true in
 attribute [local irreducible] ModularCurves.projModel
 
-set_option maxHeartbeats 1600000
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false
 
-set_option synthInstance.maxHeartbeats 25600000
 set_option maxSynthPendingDepth 5
 
 universe u
@@ -2793,7 +2791,6 @@ lemma chart_baseChange_fst {V : X.affineOpens} (Q : LocalPresentation C V)
   exact (cancel_epi (Q.restrict h).e.hom).mp goal2
 
 open Scheme LocalPresentation in
-set_option maxHeartbeats 25600000 in
 /-- **(reversed `chartPiece_index_congr`)** Two presentations of `C` over the same away-affine,
 both with chart curve `W₀.map (awayToSections a g)` and trivial comparison, give the same
 native-glue piece. -/

@@ -3040,8 +3040,31 @@ theorem TA_B_bivariate_to_outerQuotient_evalHom₂_Y
 
 /-! #### Step 7: kernel lemmas + factored backward quotient hom -/
 
--- Bumped from default: bivariate Laurent overlap kernel proof exercises
--- nested typeclass synthesis through bivariate Tate algebra quotients.
+/-- The outer-quotient base hom sends `b` to `Ybar`: in `B₁_gen b` the class of
+`algebraMap b` is the class of `TateAlgebra.X`, by `quotient_algebraMap_b_eq_X`. -/
+private theorem outerQuotient_baseHom_eq_YbarTgt (b : B) :
+    outerQuotient_baseHom b b = outerQuotient_YbarTgt b := by
+  show (Ideal.Quotient.mk (outerLaurentOverlapIdeal b))
+      ((algebraMap (LaurentCover.B₁_gen b) _)
+        ((Ideal.Quotient.mk (plusFSubXIdeal B b))
+          ((algebraMap B ↥(TateAlgebra B)) b))) = _
+  unfold outerQuotient_YbarTgt
+  rw [quotient_algebraMap_b_eq_X]
+
+/-- The defining relation of `outerLaurentOverlapIdeal`: `1 - Ybar · X_out` is the image of
+the ideal's singleton generator, hence zero in the outer quotient. -/
+private theorem one_sub_YbarTgt_mul_XoutTgt_eq_zero (b : B) :
+    1 - outerQuotient_YbarTgt b * outerQuotient_XoutTgt b = 0 := by
+  have hmem : (1 : ↥(TateAlgebra (LaurentCover.B₁_gen b))) -
+      algebraMap (LaurentCover.B₁_gen b) ↥(TateAlgebra (LaurentCover.B₁_gen b))
+        ((Ideal.Quotient.mk (plusFSubXIdeal B b)) (TateAlgebra.X (A := B))) *
+      (TateAlgebra.X (A := LaurentCover.B₁_gen b)) ∈ outerLaurentOverlapIdeal b := by
+    unfold outerLaurentOverlapIdeal
+    exact Ideal.subset_span rfl
+  have h := Ideal.Quotient.eq_zero_iff_mem.mpr hmem
+  rw [map_sub, map_one, map_mul] at h
+  exact h
+
 /-- Kernel lemma for `bivariateOverlapIdeal` generator `algMap b - TA₂.X`:
 `evalHom₂(algMap b - TA₂.X) = 0`. Uses `quotient_algebraMap_b_eq_X` in
 `B₁_gen b` (image of `algMap b = X` in plusFSubX quotient). -/
@@ -3050,23 +3073,9 @@ theorem TA_B_bivariate_to_outerQuotient_evalHom₂_algMap_b_sub_X_eq_zero
     TA_B_bivariate_to_outerQuotient_evalHom₂ b h
         (algebraMap B ↥(TateAlgebra₂ B) b - TateAlgebra₂.X) = 0 := by
   rw [map_sub, TA_B_bivariate_to_outerQuotient_evalHom₂_algebraMap,
-    TA_B_bivariate_to_outerQuotient_evalHom₂_X]
-  -- Goal: baseHom(b) - Ybar = 0
-  -- baseHom(b) = mk_outer(algMap(mk_inner(algMap b)))
-  -- Ybar = mk_outer(algMap(mk_inner(TA.X)))
-  -- Since mk_inner(algMap b) = mk_inner(TA.X), both are equal.
-  change (Ideal.Quotient.mk (outerLaurentOverlapIdeal b))
-      ((algebraMap (LaurentCover.B₁_gen b) _)
-        ((Ideal.Quotient.mk (plusFSubXIdeal B b))
-          ((algebraMap B ↥(TateAlgebra B)) b))) -
-    outerQuotient_YbarTgt b = 0
-  unfold outerQuotient_YbarTgt
-  rw [quotient_algebraMap_b_eq_X]
+    TA_B_bivariate_to_outerQuotient_evalHom₂_X, outerQuotient_baseHom_eq_YbarTgt]
   exact sub_self _
 
-set_option maxHeartbeats 800000 in
--- Bumped from default: backward quotient hom assembly through bivariate
--- Laurent overlap typeclass chain requires elevated heartbeats.
 /-- Kernel lemma for `bivariateOverlapIdeal` generator `1 - algMap b · TA₂.Y`:
 `evalHom₂(1 - algMap b · TA₂.Y) = 0`. Uses `quotient_algebraMap_b_eq_X` +
 the outer ideal relation `1 - Ybar · X_out ∈ outerLaurentOverlapIdeal`. -/
@@ -3076,31 +3085,8 @@ theorem TA_B_bivariate_to_outerQuotient_evalHom₂_one_sub_algMap_b_Y_eq_zero
         (1 - algebraMap B ↥(TateAlgebra₂ B) b * TateAlgebra₂.Y) = 0 := by
   rw [map_sub, map_one, map_mul,
     TA_B_bivariate_to_outerQuotient_evalHom₂_algebraMap,
-    TA_B_bivariate_to_outerQuotient_evalHom₂_Y]
-  -- Goal: 1 - baseHom(b) · X_out = 0
-  -- baseHom(b) · X_out = mk_outer(algMap(mk_inner(algMap b)) · TA.X)
-  --                    = mk_outer(algMap(mk_inner(TA.X)) · TA.X)  [by plusFSubX relation]
-  --                    = mk_outer(1)                              [by outerLaurentOverlap relation]
-  change (1 : _) - (Ideal.Quotient.mk (outerLaurentOverlapIdeal b))
-      ((algebraMap (LaurentCover.B₁_gen b) _)
-        ((Ideal.Quotient.mk (plusFSubXIdeal B b))
-          ((algebraMap B ↥(TateAlgebra B)) b))) *
-    outerQuotient_XoutTgt b = 0
-  unfold outerQuotient_XoutTgt
-  rw [quotient_algebraMap_b_eq_X, show (1 : _) =
-      Ideal.Quotient.mk (outerLaurentOverlapIdeal b) 1 from rfl,
-    ← map_mul, ← map_sub, Ideal.Quotient.eq_zero_iff_mem]
-  have h_eq : (1 : ↥(TateAlgebra (LaurentCover.B₁_gen b))) -
-      algebraMap (LaurentCover.B₁_gen b) ↥(TateAlgebra (LaurentCover.B₁_gen b))
-        ((Ideal.Quotient.mk (plusFSubXIdeal B b)) TateAlgebra.X) *
-      TateAlgebra.X =
-        (1 : ↥(TateAlgebra (LaurentCover.B₁_gen b))) -
-          algebraMap (LaurentCover.B₁_gen b) ↥(TateAlgebra (LaurentCover.B₁_gen b))
-            ((Ideal.Quotient.mk (plusFSubXIdeal B b)) TateAlgebra.X) *
-          TateAlgebra.X := rfl
-  rw [h_eq]
-  unfold outerLaurentOverlapIdeal
-  exact Ideal.subset_span rfl
+    TA_B_bivariate_to_outerQuotient_evalHom₂_Y, outerQuotient_baseHom_eq_YbarTgt]
+  exact one_sub_YbarTgt_mul_XoutTgt_eq_zero b
 
 /-- **Specialized Laurent-overlap quotient bridge, backward direction**:
 `TA₂ B ⧸ bivariateOverlapIdeal b →+* TA(B₁_gen b) ⧸ outerLaurentOverlapIdeal b`.

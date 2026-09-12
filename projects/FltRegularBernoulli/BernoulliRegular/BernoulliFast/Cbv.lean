@@ -656,7 +656,6 @@ example : bernoulliPascalFrac 18 = (43867, 798) := by cbv
 example : bernoulliPascalFrac 20 = (-174611, 330) := by cbv
 
 set_option maxRecDepth 1_000_000_000 in
-set_option maxHeartbeats 1_000_000_000 in
 -- This example is a stress-test for the intended B100 proof-producing evaluation use case.
 set_option cbv.maxSteps 10_000_000 in
 example :

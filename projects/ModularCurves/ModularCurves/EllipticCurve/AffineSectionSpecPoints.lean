@@ -55,7 +55,6 @@ noncomputable def affineSectionSpecPoint (p q : R) (h : W.toAffine.Equation p q)
     rw [Category.assoc, projModelAffineSection_projModelπ, Category.comp_id]⟩
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 /-- **(Stage B-1)** The evaluated section is `Spec` of the composite evaluation hom,
 followed by the `Z`-chart immersion — the explicit `InZChart` factorization. -/
 theorem affineSectionSpecPoint_eq_spec (p q : R) (h : W.toAffine.Equation p q) :
@@ -283,7 +282,6 @@ theorem modelBaseChangeIso_hom_left :
       (isPullback_projModelBaseChange (R' := A') W).isoPullback.inv := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(Stage D-3)** The comparison is pointed: the base-changed zero section maps to the
 mapped model's zero section. -/
 theorem modelBaseChangeIso_zero :
@@ -342,7 +340,6 @@ theorem isMonHom_modelBaseChangeIso :
             (modelBaseChangeIso (A' := A') W) hη }
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(Stage D ★★, the killing transport)** A marked affine-point section killed by `N`
 stays killed after arbitrary coefficient base change: pull + `asSection` transport the
 killing to the base-changed model, and the pointed monoid iso carries it to the mapped

@@ -317,9 +317,143 @@ private theorem invariantsπ_preimage_basicOpen {A : Type u} [CommRing A] [MulSe
       = (PrimeSpectrum.basicOpen ((a : A)) : (Spec (CommRingCat.of A)).Opens) :=
   TopologicalSpace.Opens.ext rfl
 
+/-! #### Scheme-level glue for the orbit-in-an-affine-open argument
+
+These four helpers carry no `G`-action data (or, for the last one, only the invariance of
+`a`); keeping them out of the main proof is what keeps its elaboration inside the default
+heartbeat budget. -/
+
+/-- The range of the localization map `Spec A_f ⟶ Spec A` is the basic open `D(f)`. -/
+private theorem opensRange_specMap_algebraMap_away {A : Type u} [CommRing A] (f : A)
+    [IsOpenImmersion (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away f))))] :
+    (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away f)))).opensRange
+      = (PrimeSpectrum.basicOpen f : (Spec (CommRingCat.of A)).Opens) := by
+  ext1
+  exact PrimeSpectrum.localization_away_comap_range _ f
+
+/-- A point of an open `V` whose image is `c` witnesses `c` in the image open `f ''ᵁ V`. -/
+private theorem mem_image_opens_of_base_eq {Y Z : Scheme.{u}} (f : Y ⟶ Z) [IsOpenImmersion f]
+    (V : Y.Opens) (p : Y) {c : Z} (hpV : p ∈ V) (hpc : f.base p = c) : c ∈ f ''ᵁ V := by
+  subst hpc
+  show f.base p ∈ (↑(f ''ᵁ V) : Set ↥Z)
+  rw [Scheme.Hom.coe_image]
+  exact ⟨p, hpV, rfl⟩
+
+/-- In a pullback square along an open immersion `i`, a point of the base whose image under
+`g` lies in the range of `i` lifts to the pullback. -/
+private theorem exists_preimage_of_isPullback_of_mem_opensRange
+    {P Y Z W : Scheme.{u}} {π : P ⟶ Y} {ρ : P ⟶ W} {i : Y ⟶ Z} {g : W ⟶ Z}
+    [IsOpenImmersion i] (hsq : IsPullback π ρ i g) {c : W}
+    (hc : g.base c ∈ i.opensRange) : ∃ p : P, ρ.base p = c := by
+  have hc' : c ∈ (pullback.snd i g).opensRange := by
+    rw [Scheme.Hom.opensRange_pullbackSnd]
+    exact hc
+  obtain ⟨p', hp'⟩ := Scheme.Hom.mem_opensRange.mp hc'
+  have hii : hsq.isoPullback.hom.base (hsq.isoPullback.inv.base p') = p' := by
+    rw [← Scheme.Hom.comp_apply, hsq.isoPullback.inv_hom_id]; simp
+  refine ⟨hsq.isoPullback.inv.base p', ?_⟩
+  have hcong := congrArg (fun m : P ⟶ W => m.base (hsq.isoPullback.inv.base p'))
+    hsq.isoPullback_hom_snd
+  rw [Scheme.Hom.comp_apply] at hcong
+  rw [← hcong, hii]
+  exact hp'
+
+/-- The composite `E ⟶ X ≅ Spec A ⟶ Spec Aᴳ` is `G`-invariant: the action is equivariant on
+`E` (`hact.π_equivariant`) and `invariantsπ` swallows the induced action on `Spec A`. -/
+private theorem comp_invariantsπ_equivariant [IsAffine X] (hact : IsCurveAction σ C σE)
+    (γ : G) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    σE.hom γ ≫ C.π ≫ X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ
+      = C.π ≫ X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ := by
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  have hqfix : σ.hom γ ≫ X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ
+      = X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ := by
+    rw [← Category.assoc, hom_isoSpec_toRingHom σ γ, Category.assoc,
+      show Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G ↑Γ(X, ⊤) γ))
+          = specSMul γ from rfl, specSMul_invariantsπ]
+  rw [← Category.assoc (σE.hom γ), hact.π_equivariant γ, Category.assoc, hqfix]
+
+/-- **KEY** The whole `G`-orbit of `e` lies over the basic open `D(a)` cut out by an
+invariant `a` outside the prime below `π(e)`: `invariantsπ` is constant along the orbit. -/
+private theorem orbit_mem_basicOpen_of_invariant [IsAffine X] (hact : IsCurveAction σ C σE) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    ∀ (a : FixedPoints.subring ↑Γ(X, ⊤) G) (e : C.E),
+      a ∉ ((X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ).base (C.π.base e)).asIdeal →
+      ∀ γ : G, (C.π ≫ X.isoSpec.hom).base ((σE.hom γ).base e)
+        ∈ (PrimeSpectrum.basicOpen ((a : ↑Γ(X, ⊤))) :
+            (Spec (CommRingCat.of ↑Γ(X, ⊤))).Opens) := by
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  intro a e hap γ
+  rw [← invariantsπ_preimage_basicOpen (G := G) (A := ↑Γ(X, ⊤)) a]
+  show (invariantsπ G ↑Γ(X, ⊤) ℤ).base ((C.π ≫ X.isoSpec.hom).base ((σE.hom γ).base e))
+    ∈ PrimeSpectrum.basicOpen a
+  have hs := (PrimeSpectrum.mem_basicOpen a _).mpr hap
+  have hfix := congrArg (fun m : C.E ⟶ _ => m.base e) (comp_invariantsπ_equivariant hact γ)
+  simp only [Scheme.Hom.comp_apply] at hfix hs ⊢
+  rw [hfix]
+  exact hs
+
 open WeierstrassCurve.Projective HomogeneousIdeal WeierstrassCurve in
 attribute [local instance] MvPolynomial.gradedAlgebra in
-set_option maxHeartbeats 800000 in
+/-- The zero-section branch: an orbit sitting on the zero section lands in the `Y`-chart of
+`projModel W₀R`, via the package's zero-leg `hρzero`. -/
+private theorem orbit_mem_image_yChart_of_mem_range_zero [IsAffine X] {A : Type u} [CommRing A]
+    (W₀R : WeierstrassCurve A)
+    (iA : Spec (CommRingCat.of A) ⟶ Spec (CommRingCat.of ↑Γ(X, ⊤))) [IsOpenImmersion iA]
+    (ρR : projModel W₀R ⟶ C.E) [IsOpenImmersion ρR]
+    (hρzero : projModelZero W₀R ≫ ρR = iA ≫ X.isoSpec.inv ≫ C.zero)
+    (hact : IsCurveAction σ C σE) {e : C.E} (he : e ∈ Set.range C.zero.base) (γ : G)
+    (horb : (C.π ≫ X.isoSpec.hom).base ((σE.hom γ).base e) ∈ iA.opensRange) :
+    (σE.hom γ).base e ∈ ρR ''ᵁ Proj.basicOpen (quotientGrading (projIdeal W₀R))
+      ((quotientGradingHom (projIdeal W₀R)) (MvPolynomial.X 1)) := by
+  obtain ⟨x', hx'⟩ := mem_range_zero_of_smul hact γ he
+  have hx'π : C.π.base ((σE.hom γ).base e) = x' := by
+    rw [← hx', ← Scheme.Hom.comp_apply, C.zero_π]; simp
+  rw [Scheme.Hom.comp_apply, hx'π] at horb
+  obtain ⟨w, hw⟩ := Scheme.Hom.mem_opensRange.mp horb
+  refine mem_image_opens_of_base_eq ρR _ ((projModelZero W₀R).base w) ?_ ?_
+  · have hmem : w ∈ projModelZero W₀R ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W₀R))
+        ((quotientGradingHom (projIdeal W₀R)) (MvPolynomial.X 1)) := by
+      rw [projModelZero_preimage_yChart W₀R]
+      trivial
+    exact hmem
+  · have hz : (projModelZero W₀R ≫ ρR).base w = (iA ≫ X.isoSpec.inv ≫ C.zero).base w := by
+      rw [hρzero]
+    rw [Scheme.Hom.comp_apply] at hz
+    rw [hz, Scheme.Hom.comp_apply, Scheme.Hom.comp_apply, hw]
+    have hinv : X.isoSpec.inv.base (X.isoSpec.hom.base x') = x' := by
+      rw [← Scheme.Hom.comp_apply, X.isoSpec.hom_inv_id]; simp
+    rw [hinv, hx']
+
+open WeierstrassCurve.Projective HomogeneousIdeal WeierstrassCurve in
+attribute [local instance] MvPolynomial.gradedAlgebra in
+/-- The off-zero branch: an orbit missing the zero section lands in the `Z`-chart — a point
+outside it would force the orbit back onto the zero section. -/
+private theorem orbit_mem_image_zChart_of_notMem_range_zero [IsAffine X] {A : Type u} [CommRing A]
+    (W₀R : WeierstrassCurve A)
+    (iA : Spec (CommRingCat.of A) ⟶ Spec (CommRingCat.of ↑Γ(X, ⊤))) [IsOpenImmersion iA]
+    (ρR : projModel W₀R ⟶ C.E) [IsOpenImmersion ρR]
+    (hρsq : IsPullback (projModelπ W₀R) ρR iA (C.π ≫ X.isoSpec.hom))
+    (hρzero : projModelZero W₀R ≫ ρR = iA ≫ X.isoSpec.inv ≫ C.zero)
+    (hact : IsCurveAction σ C σE) {e : C.E} (he : e ∉ Set.range C.zero.base) (γ : G)
+    (horb : (C.π ≫ X.isoSpec.hom).base ((σE.hom γ).base e) ∈ iA.opensRange) :
+    (σE.hom γ).base e ∈ ρR ''ᵁ Proj.basicOpen (quotientGrading (projIdeal W₀R))
+      ((quotientGradingHom (projIdeal W₀R)) (MvPolynomial.X 2)) := by
+  have he' : (σE.hom γ).base e ∉ Set.range C.zero.base :=
+    fun h => he (mem_range_zero_of_smul_mem hact γ h)
+  obtain ⟨p, hp⟩ := exists_preimage_of_isPullback_of_mem_opensRange hρsq horb
+  refine mem_image_opens_of_base_eq ρR _ p ?_ hp
+  by_contra hpZ
+  obtain ⟨w, hw⟩ := mem_range_zero_of_not_mem_zChart (W := W₀R) (p := p) hpZ
+  apply he'
+  refine ⟨X.isoSpec.inv.base (iA.base w), ?_⟩
+  have hz : (projModelZero W₀R ≫ ρR).base w = (iA ≫ X.isoSpec.inv ≫ C.zero).base w := by
+    rw [hρzero]
+  rw [Scheme.Hom.comp_apply, hw, hp, Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hz
+  exact hz.symm
+
+open WeierstrassCurve.Projective HomogeneousIdeal WeierstrassCurve in
+attribute [local instance] MvPolynomial.gradedAlgebra in
 /-- **([a2-M], route-1 — the orbit-in-an-affine-open input, DISCHARGED)** Every `G`-orbit of an
 `IsCurveAction` lift `σE` on the total space of a geometric elliptic curve `C/X` over an affine
 base with a free `σ`-action lies in an affine open of `E`. This is the geometric heart consumed by
@@ -333,12 +467,11 @@ basic-open localization `iAA : Spec A_a ⟶ Spec A ≅ X` makes `ρR` an open im
 `π⁻¹(D(a))` (`MorphismProperty.of_isPullback` + `Scheme.Hom.opensRange_pullbackSnd`). The basic
 open `D((a:A))` is `G`-stable — `a` is invariant, so `invariantsπ` is constant on the base orbit
 (`specSMul_invariantsπ`) — hence the whole orbit of `e` maps into `D(a)`
-(`invariantsπ_preimage_basicOpen`, `horbitDa`). The two `projModel` charts push forward along `ρR`
+(`orbit_mem_basicOpen_of_invariant`). The two `projModel` charts push forward along `ρR`
 to affine opens of `E` (`IsAffineOpen.image_of_isOpenImmersion` on
-`Proj.isAffineOpen_basicOpen`), and the `orbit_mem_isAffineOpen_of_charts` dichotomy runs inside
-`π⁻¹(D(a))`: the orbit is either entirely on the zero section (Y-chart, via
-`projModelZero_preimage_yChart` and the package's zero-leg `hρzero`) or entirely off it (Z-chart,
-via `mem_range_zero_of_not_mem_zChart` + `mem_range_zero_of_smul_mem`).
+`Proj.isAffineOpen_basicOpen`), and the dichotomy runs inside `π⁻¹(D(a))`: the orbit is either
+entirely on the zero section (`orbit_mem_image_yChart_of_mem_range_zero`) or entirely off it
+(`orbit_mem_image_zChart_of_notMem_range_zero`).
 
 Carries `sorryAx` transitively through `exists_localModel_package_at` → `exists_localModel_core_at`
 (the a5-P-loc deep geometric core) and nothing else. -/
@@ -349,120 +482,26 @@ theorem exists_orbit_isAffineOpen_of_curveAction [Finite G] [IsAffine X]
     ∃ U : (C.E).Opens, IsAffineOpen U ∧ ∀ γ : G, (σE.hom γ).base e ∈ U := by
   classical
   letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
-  -- the invariant prime below `x := π(e)`, and the localized global model there
-  set s₀ : ↥(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ ↑Γ(X, ⊤) G))) :=
-    (X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ).base (C.π.base e) with hs₀
   obtain ⟨a, hap, W₀R, hW₀R, ρR, hρsq, hρzero, CvcR, hCvcR, hρact, W₁, Ecob, hW₁, hcob⟩ :=
-    exists_localModel_package_at hact hfreeX s₀
-  -- the localization map `iAA : Spec A_a ⟶ Spec A`, open immersion with range `D(a)`
-  set iAA : Spec (CommRingCat.of (Localization.Away ((a : ↑Γ(X, ⊤)))))
-      ⟶ Spec (CommRingCat.of (↑Γ(X, ⊤))) :=
-    Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤) (Localization.Away ((a : ↑Γ(X, ⊤))))))
-    with hiAA
-  haveI hiAAoi : IsOpenImmersion iAA := IsOpenImmersion.of_isLocalization ((a : ↑Γ(X, ⊤)))
-  have hiAArange : iAA.opensRange = (PrimeSpectrum.basicOpen ((a : ↑Γ(X, ⊤))) :
-      (Spec (CommRingCat.of (↑Γ(X, ⊤)))).Opens) := by
-    ext1
-    exact PrimeSpectrum.localization_away_comap_range _ ((a : ↑Γ(X, ⊤)))
-  -- `ρR` is an open immersion (base change of `iAA`)
-  haveI hρRoi : IsOpenImmersion ρR :=
-    MorphismProperty.of_isPullback (P := @IsOpenImmersion) hρsq hiAAoi
-  -- the two `projModel` charts (`Y`-chart, `Z`-chart)
-  set chartY : (projModel W₀R).Opens := Proj.basicOpen (quotientGrading (projIdeal W₀R))
-    ((quotientGradingHom (projIdeal W₀R)) (MvPolynomial.X 1)) with hchartY
-  set chartZ : (projModel W₀R).Opens := Proj.basicOpen (quotientGrading (projIdeal W₀R))
-    ((quotientGradingHom (projIdeal W₀R)) (MvPolynomial.X 2)) with hchartZ
-  have hchartYaff : IsAffineOpen chartY :=
-    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W₀R 1) one_pos
-  have hchartZaff : IsAffineOpen chartZ :=
-    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W₀R 2) one_pos
-  -- image-along-open-immersion membership helper
-  have hmemimg : ∀ (V : (projModel W₀R).Opens) (p : projModel W₀R) (c : C.E),
-      p ∈ V → ρR.base p = c → c ∈ ρR ''ᵁ V := by
-    intro V p c hpV hpc
-    subst hpc
-    show ρR.base p ∈ (↑(ρR ''ᵁ V) : Set ↥C.E)
-    rw [Scheme.Hom.coe_image]
-    exact ⟨p, hpV, rfl⟩
-  -- the invariants-quotient map fixes the base orbit
-  have hqfix : ∀ γ : G, σ.hom γ ≫ X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ
-      = X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ := by
-    intro γ
-    rw [← Category.assoc, hom_isoSpec_toRingHom σ γ, Category.assoc,
-      show Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G ↑Γ(X, ⊤) γ))
-          = specSMul γ from rfl, specSMul_invariantsπ]
-  have hcompfix : ∀ γ : G, σE.hom γ ≫ C.π ≫ X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ
-      = C.π ≫ X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ := by
-    intro γ
-    rw [← Category.assoc (σE.hom γ), hact.π_equivariant γ, Category.assoc, hqfix γ]
-  -- the bridge `D((a:A)) = invariantsπ ⁻¹ D(a)`
-  have hbridge := invariantsπ_preimage_basicOpen (G := G) (A := ↑Γ(X, ⊤)) a
-  -- KEY: every base-orbit point of `x` lies in `D(a)`
-  have horbitDa : ∀ γ : G,
-      (C.π ≫ X.isoSpec.hom).base ((σE.hom γ).base e) ∈ iAA.opensRange := by
-    have hs := (PrimeSpectrum.mem_basicOpen a _).mpr hap
-    rw [hs₀] at hs
-    intro γ
-    rw [hiAArange, ← hbridge]
-    show (invariantsπ G ↑Γ(X, ⊤) ℤ).base ((C.π ≫ X.isoSpec.hom).base ((σE.hom γ).base e))
-      ∈ PrimeSpectrum.basicOpen a
-    have hfix := congrArg (fun m : C.E ⟶ _ => m.base e) (hcompfix γ)
-    simp only [Scheme.Hom.comp_apply] at hfix hs ⊢
-    rw [hfix]
-    exact hs
-  -- pointwise lift into `projModel W₀R` for points over `D(a)`
-  have hlift : ∀ c : C.E, (C.π ≫ X.isoSpec.hom).base c ∈ iAA.opensRange →
-      ∃ p : projModel W₀R, ρR.base p = c := by
-    intro c hc
-    have hc' : c ∈ (pullback.snd iAA (C.π ≫ X.isoSpec.hom)).opensRange := by
-      rw [Scheme.Hom.opensRange_pullbackSnd]; exact hc
-    obtain ⟨p', hp'⟩ := Scheme.Hom.mem_opensRange.mp hc'
-    have hii : hρsq.isoPullback.hom.base (hρsq.isoPullback.inv.base p') = p' := by
-      rw [← Scheme.Hom.comp_apply, hρsq.isoPullback.inv_hom_id]; simp
-    refine ⟨hρsq.isoPullback.inv.base p', ?_⟩
-    have hcong := congrArg (fun m : projModel W₀R ⟶ C.E => m.base (hρsq.isoPullback.inv.base p'))
-      hρsq.isoPullback_hom_snd
-    rw [Scheme.Hom.comp_apply] at hcong
-    rw [← hcong, hii]
-    exact hp'
-  -- dichotomy on whether `e` is on the zero section
+    exists_localModel_package_at hact hfreeX
+      ((X.isoSpec.hom ≫ invariantsπ G ↑Γ(X, ⊤) ℤ).base (C.π.base e))
+  haveI : IsOpenImmersion (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+      (Localization.Away ((a : ↑Γ(X, ⊤))))))) :=
+    IsOpenImmersion.of_isLocalization ((a : ↑Γ(X, ⊤)))
+  haveI : IsOpenImmersion ρR := MorphismProperty.of_isPullback (P := @IsOpenImmersion) hρsq ‹_›
+  have horb : ∀ γ : G, (C.π ≫ X.isoSpec.hom).base ((σE.hom γ).base e)
+      ∈ (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+          (Localization.Away ((a : ↑Γ(X, ⊤))))))).opensRange := fun γ => by
+    rw [opensRange_specMap_algebraMap_away]
+    exact orbit_mem_basicOpen_of_invariant hact a e hap γ
   by_cases he : e ∈ Set.range C.zero.base
-  · -- orbit entirely on the zero section: it lands in the `Y`-chart image
-    refine ⟨ρR ''ᵁ chartY, hchartYaff.image_of_isOpenImmersion ρR, fun γ => ?_⟩
-    obtain ⟨x', hx'⟩ := mem_range_zero_of_smul hact γ he
-    have hx'π : C.π.base ((σE.hom γ).base e) = x' := by
-      rw [← hx', ← Scheme.Hom.comp_apply, C.zero_π]; simp
-    have hmemrange : X.isoSpec.hom.base x' ∈ iAA.opensRange := by
-      have h := horbitDa γ
-      rw [Scheme.Hom.comp_apply, hx'π] at h
-      exact h
-    obtain ⟨w, hw⟩ := Scheme.Hom.mem_opensRange.mp hmemrange
-    refine hmemimg chartY ((projModelZero W₀R).base w) ((σE.hom γ).base e) ?_ ?_
-    · have hmem : w ∈ projModelZero W₀R ⁻¹ᵁ chartY := by
-        rw [hchartY, projModelZero_preimage_yChart W₀R]; trivial
-      exact hmem
-    · have hz : (projModelZero W₀R ≫ ρR).base w = (iAA ≫ X.isoSpec.inv ≫ C.zero).base w := by
-        rw [hρzero]
-      rw [Scheme.Hom.comp_apply] at hz
-      rw [hz, Scheme.Hom.comp_apply, Scheme.Hom.comp_apply, hw]
-      have hinv : X.isoSpec.inv.base (X.isoSpec.hom.base x') = x' := by
-        rw [← Scheme.Hom.comp_apply, X.isoSpec.hom_inv_id]; simp
-      rw [hinv, hx']
-  · -- orbit entirely off the zero section: it lands in the `Z`-chart image
-    refine ⟨ρR ''ᵁ chartZ, hchartZaff.image_of_isOpenImmersion ρR, fun γ => ?_⟩
-    have he' : (σE.hom γ).base e ∉ Set.range C.zero.base :=
-      fun h => he (mem_range_zero_of_smul_mem hact γ h)
-    obtain ⟨p, hp⟩ := hlift ((σE.hom γ).base e) (horbitDa γ)
-    refine hmemimg chartZ p ((σE.hom γ).base e) ?_ hp
-    by_contra hpZ
-    obtain ⟨w, hw⟩ := mem_range_zero_of_not_mem_zChart (W := W₀R) (p := p)
-      (by rw [hchartZ] at hpZ; exact hpZ)
-    apply he'
-    refine ⟨X.isoSpec.inv.base (iAA.base w), ?_⟩
-    have hz : (projModelZero W₀R ≫ ρR).base w = (iAA ≫ X.isoSpec.inv ≫ C.zero).base w := by
-      rw [hρzero]
-    rw [Scheme.Hom.comp_apply, hw, hp, Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hz
-    exact hz.symm
+  · exact ⟨_, (Proj.isAffineOpen_basicOpen _ _
+      (mk_X_mem_quotientGrading_one W₀R 1) one_pos).image_of_isOpenImmersion ρR,
+      fun γ => orbit_mem_image_yChart_of_mem_range_zero W₀R _ ρR hρzero hact he γ (horb γ)⟩
+  · exact ⟨_, (Proj.isAffineOpen_basicOpen _ _
+      (mk_X_mem_quotientGrading_one W₀R 2) one_pos).image_of_isOpenImmersion ρR,
+      fun γ => orbit_mem_image_zChart_of_notMem_range_zero W₀R _ ρR hρsq hρzero hact he γ
+        (horb γ)⟩
 
 /-- **([a5-compat], the true half — ENGINE PROVEN; residual = the localized model package)**
 `locallyWeierstrass_quotientπ` for a section pair carrying the descent compatibilities

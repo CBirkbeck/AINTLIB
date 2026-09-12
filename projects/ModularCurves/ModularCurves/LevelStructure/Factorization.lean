@@ -2303,7 +2303,6 @@ theorem Section.HasExactOrder.smul_nsmul_ne_zero {k : Type u} [Field k] [IsSepCl
   exact absurd haM (Nat.not_lt.mpr (Nat.le_of_dvd ha0 hdvda))
 
 open EllipticCurve in
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **[F3-geom-input] (the geometric criterion input for `K·P` at order `M`)** Over any
 base with `M` invertible: at every algebraically closed geometric point, the multiples
 `a·(K·P)`, `0 < a < M`, are nonzero — the fibre distinctness transported through the

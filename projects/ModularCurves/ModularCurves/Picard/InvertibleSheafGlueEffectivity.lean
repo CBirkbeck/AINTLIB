@@ -1984,6 +1984,50 @@ private theorem AffineIntersectionUnitCocycle.chartLocalLeftMap_right_self_isIso
   exact IsIso.comp_isIso' hmap
     (IsIso.comp_isIso' hcomp (IsIso.comp_isIso' hcongr hunit))
 
+/- DECOMPOSE: UNRESOLVED — do not retry without new information. 55 lines (statement 17,
+   proof 38); the target was a <15-line proof.
+   Reason: (kernel) deterministic timeout at the default budget (lean4#14806); no override to
+   remove. This theorem CANNOT be decomposed without changing a statement or restoring a
+   heartbeat budget, both of which are forbidden. Leave it exactly as it is; the 8-module
+   GlueEffectivity subtree stays excluded, which is the status quo and not a regression.
+   MATH: On the triple overlap, the left chart-local component of the cocycle, i.e. tuple
+     component, then restrict iso, then chartToOverlapLeft, then overlap restrict iso, is the
+     adjoint transpose along `t.p₃` of `pullbackUnitIso ≫ transition⁻¹ ≫ transition-pullback`.
+   ROOT CAUSE (measured, decisive): the kernel cannot relate the composite in
+     `chartLocalCompositePullback_eq` (l. 1586) to ANY other spelling of itself within budget.
+     A lemma whose statement is a let-free spelling of that same composite and whose entire
+     proof is `exact c.chartLocalCompositePullback_eq hopen hpush k i j` ITSELF times out.
+     Since every decomposition necessarily restates the fact, no extracted helper can be cheap:
+     the only affordable use of l. 1586 is the verbatim one this proof already makes.
+   MEASURED — variants compiled one at a time against a truncated 2109-line copy of this file
+   (cut just after this theorem). The control reproduces the failure, so the harness is valid:
+     control, unchanged                          timeout @ this theorem    99 s / 4 GB
+     left-assoc variant of l. 1586, by replay    timeout @ THE VARIANT     (consumer → cascade)
+     generic re-assoc helper on free vars, apply timeout @ this theorem    96 s
+     ditto, consumer as one explicit exact term  timeout @ this theorem    96 s
+     let-free restatement of l. 1586 (unused)    timeout @ THE RESTATEMENT 130 s
+     ditto, consumer switched to it              timeout @ THE RESTATEMENT  98 s
+   The left-assoc replay is the key negative: it never touches l. 1586, yet the variant alone
+   times out. So the cost follows the STATEMENT, not any conversion — which retroactively
+   explains why every `convert`/`exact`/`rw` path below also measured 33 s. The two re-assoc
+   variants then eliminate association as the operative variable altogether, and the let-free
+   pair eliminates the statement-level `let`.
+   ALSO RULED OUT EARLIER (previous session, same method):
+     unchanged proof = kernel timeout at 32.9-33.3 s; truncated after the `change` = passes, no
+     kernel step > 100 ms; a generic whole-argument helper = helper < 100 ms but consumer still
+     32.9 s; regular-definition wrappers + `simp only [← …]` = still 33 s; flattened mate helper
+     with the l. 1586 fact STUBBED = passes fast, with the real fact = 33 s.
+   Mismatched leaves are NOT the problem: 141 object-level pairs (`GlueData.V (i,k)` vs
+     `ChosenPullback.pullback (sq i k)`, `unitObj X` vs `SheafOfModules.unit X.ringCatSheaf`,
+     `D.t`/`D.f` vs `overlapTransition`/`affineIntersectionOverlapι`) each check in 0 ms. The
+     cost is the kernel REACHING them under projection heads (`≫`, `Functor.map`, `NatTrans.app`,
+     `homEquiv`), which it reduces before comparing arguments.
+   TOOLING NOTE: `Meta`-level `Kernel.isDefEq` probes are UNFAITHFUL here — all 62 argument
+     crossings measured under 150 ms while the declaration took 33 s, because in `Meta` the two
+     sides share pointer-identical subterms and keep `let`s folded. Bisect by compiling variants.
+   WHAT WOULD ACTUALLY HELP: an upstream fix for lean4#14806, or a defeq-cheap reformulation of
+     the module-category composition itself — neither is in scope for a decomposition pass.
+-/
 private theorem AffineIntersectionUnitCocycle.chartLocalComponent_left
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
     (c : AffineIntersectionUnitCocycle F)

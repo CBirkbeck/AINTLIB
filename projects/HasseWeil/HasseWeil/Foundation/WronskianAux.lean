@@ -30,30 +30,21 @@ to `R[X]`. The `C`-normalization lemmas imported from `CNorm.lean` handle the
 `C (Nat.cast n : R)` vs `C (OfNat.ofNat n : R)` atomization issue that
 otherwise blocks `ring` from closing the residual.
 
-Resource usage (vs original):
+Resource usage: both `wronskian_aux_three` and `wronskian_aux_four` now run at the
+default `maxHeartbeats 200000` (originally 32M and 64M respectively).
 
-* `wronskian_aux_three`: default `maxHeartbeats 200000` (was 32M, 160× reduction).
-* `wronskian_aux_four`: `maxHeartbeats 350000` (was 64M, ~180× reduction; measured
-  minimum — 300000 fails). See TODO below for reducing to default.
-
-TODO (cleanup): reduce `wronskian_aux_four` `maxHeartbeats` to 200K (default).
-
-The 350K is required because `ring` must normalize a single degree-30 polynomial
-identity against the degree-26 multiplier `M`; the `evalMulProd` step in ring's
-normalization exceeds 300K heartbeats. Options to fit default:
-
-* Coefficient-wise approach via `Polynomial.ext_iff_natDegree_le`: works for
-  `coeff 0` at default (using `eval 0` trick, which is a ring hom), but
-  `Polynomial.coeff_mul` on nested products (`Ψ₃^3`, `preΨ₄ * Ψ₂Sq^2`, etc.)
-  makes simp hit `max_steps` for `coeff i > 0`. Over arbitrary `CommRing R`,
-  `(derivative^i p).eval 0 = i! · coeff i p` can't be inverted (no division).
-* New tactic: bounded-degree coefficient extraction avoiding simp's antidiagonal
-  explosion — doesn't exist in mathlib yet.
-* Formalize in the quotient ring `ℤ[b₂,b₄,b₆,b₈] / (4b₈ - b₂b₆ + b₄²)` where
-  `b_relation` becomes a ring identity — would work on 3 atoms instead of 4,
-  smaller ring work, likely fits default. Requires building the quotient.
-* Manual algebraic split of m=4 into smaller sub-identities — research-level
-  mathematical work.
+For `wronskian_aux_four` the cost was **not** `ring`'s normalization of the
+degree-30 residual, as an earlier note here claimed: a probe with
+`linear_combination (norm := skip)` times out at exactly the same position, so the
+budget was consumed by `linear_combination` *elaborating* its ~400-monomial
+multiplier argument — it expands the argument syntactically and elaborates every
+leaf of the `+`/`*`/`^` tree with its own postponed default-instance metavariables.
+Naming the multiplier as a definition (`wronskianFourMultiplier`, assembled from the
+eight `wronskianFourMultiplierPart*` pieces so that no single command elaborates more
+than ~45 lines of the literal) elaborates it once, top-down, and the `norm :=` tactic
+unfolds the definition again only for `ring`.  Splitting merely in half is *not*
+enough: the low half alone still exhausts the default budget at
+`«synthesize pending MVars»`.
 
 RAM usage: ~1-2 GB (was ~57 GB, ~30× reduction).
 
@@ -104,36 +95,9 @@ lemma wronskian_aux_three :
     + Polynomial.C (4 * W.b₂) * Polynomial.X ^ 7
     + Polynomial.C 9 * Polynomial.X ^ 8) * b_relation_poly W
 
--- Measured minimum (2026-07-16, #7205): 300000 fails at `synthesize pending MVars`
--- (ring's normalization of the degree-30 residual), 350000 passes. Removal attempts:
--- default budget and a type-ascribed multiplier both time out — the structural fix is the
--- quotient-ring route documented above (producer/decompose work).
-set_option maxHeartbeats 350000 in
-/-- Wronskian auxiliary identity, `m = 4` case (Silverman III.3.7).
-
-Multiplier `M(X)` is a degree-26 polynomial in `W.b₂, W.b₄, W.b₆, W.b₈` with
-integer coefficients, computed offline by polynomial division of `LHS - RHS`
-by `(4b₈ - b₂b₆ + b₄²)` over `ℤ[b₂, b₄, b₆, b₈]`. See
-`scripts/compute_multipliers.py` for the derivation. -/
-lemma wronskian_aux_four :
-    (W.preΨ₄ ^ 2 * W.Ψ₂Sq) ^ 2 -
-    (Polynomial.derivative (W.Ψ₃ * (W.preΨ₄ * W.Ψ₂Sq ^ 2 - W.Ψ₃ ^ 3)) *
-        (W.preΨ₄ ^ 2 * W.Ψ₂Sq) -
-      W.Ψ₃ * (W.preΨ₄ * W.Ψ₂Sq ^ 2 - W.Ψ₃ ^ 3) *
-        Polynomial.derivative (W.preΨ₄ ^ 2 * W.Ψ₂Sq)) =
-    Polynomial.C 4 *
-      (W.Ψ₃ ^ 2 * W.preΨ₄ *
-          (W.Ψ₃ * ((W.preΨ₄ * W.Ψ₂Sq ^ 2 - W.Ψ₃ ^ 3) - W.preΨ₄ ^ 2)) -
-        W.preΨ₄ * (W.preΨ₄ * W.Ψ₂Sq ^ 2 - W.Ψ₃ ^ 3) ^ 2) := by
-  linear_combination (norm := (
-    simp only [Ψ₃, preΨ₄, Ψ₂Sq,
-      Polynomial.derivative_mul, Polynomial.derivative_pow,
-      Polynomial.derivative_add, Polynomial.derivative_sub,
-      Polynomial.derivative_X, Polynomial.derivative_C, Polynomial.derivative_ofNat,
-      Polynomial.C_mul, Polynomial.C_sub, Polynomial.C_add, Polynomial.C_pow,
-      Polynomial.C_neg, Polynomial.C_ofNat, Nat.cast_ofNat]
-    ring))
-    (Polynomial.C (-W.b₆ ^ 6 * W.b₈ ^ 2 + (-2 * W.b₆ ^ 2 * W.b₈ ^ 5)
+/-- Coefficients `X^0 … X^3` of the `m = 4` Wronskian multiplier `M(X)`. -/
+private noncomputable def wronskianFourMultiplierPart1 : R[X] :=
+    Polynomial.C (-W.b₆ ^ 6 * W.b₈ ^ 2 + (-2 * W.b₆ ^ 2 * W.b₈ ^ 5)
                      + 2 * W.b₄ * W.b₈ ^ 6
                      + (-W.b₄ ^ 2 * W.b₆ ^ 2 * W.b₈ ^ 4)
                      + 2 * W.b₄ * W.b₆ ^ 4 * W.b₈ ^ 3)
@@ -169,7 +133,10 @@ lemma wronskian_aux_four :
                       + (-16 * W.b₂ * W.b₄ ^ 2 * W.b₆ ^ 2 * W.b₈ ^ 3)
                       + (-8 * W.b₂ ^ 2 * W.b₄ * W.b₆ * W.b₈ ^ 4)
                       + 44 * W.b₂ * W.b₄ * W.b₆ ^ 4 * W.b₈ ^ 2) * Polynomial.X ^ 3
-    + Polynomial.C (-136 * W.b₆ ^ 6 * W.b₈ + (-76 * W.b₄ ^ 2 * W.b₆ ^ 6)
+
+/-- Coefficients `X^4 … X^5` of the `m = 4` Wronskian multiplier `M(X)`. -/
+private noncomputable def wronskianFourMultiplierPart2 : R[X] :=
+    Polynomial.C (-136 * W.b₆ ^ 6 * W.b₈ + (-76 * W.b₄ ^ 2 * W.b₆ ^ 6)
                       + (-9 * W.b₂ * W.b₆ ^ 7)
                       + (-8 * W.b₄ ^ 5 * W.b₈ ^ 3) + 12 * W.b₂ ^ 2 * W.b₈ ^ 5
                       + 48 * W.b₄ ^ 3 * W.b₈ ^ 4 + 356 * W.b₄ * W.b₈ ^ 5
@@ -204,7 +171,10 @@ lemma wronskian_aux_four :
                       + 24 * W.b₂ ^ 2 * W.b₄ * W.b₆ ^ 3 * W.b₈ ^ 2
                       + 122 * W.b₂ * W.b₄ ^ 2 * W.b₆ ^ 4 * W.b₈
                       + 528 * W.b₂ * W.b₄ * W.b₆ ^ 2 * W.b₈ ^ 3) * Polynomial.X ^ 5
-    + Polynomial.C (664 * W.b₈ ^ 5 + (-W.b₂ ^ 4 * W.b₈ ^ 4) + (-64 * W.b₄ ^ 4 * W.b₆ ^ 4)
+
+/-- Coefficients `X^6 … X^7` of the `m = 4` Wronskian multiplier `M(X)`. -/
+private noncomputable def wronskianFourMultiplierPart3 : R[X] :=
+    Polynomial.C (664 * W.b₈ ^ 5 + (-W.b₂ ^ 4 * W.b₈ ^ 4) + (-64 * W.b₄ ^ 4 * W.b₆ ^ 4)
                       + (-6 * W.b₂ ^ 2 * W.b₆ ^ 6) + 116 * W.b₄ * W.b₆ ^ 6
                       + 116 * W.b₄ ^ 4 * W.b₈ ^ 3 + 1500 * W.b₄ ^ 2 * W.b₈ ^ 4
                       + 2572 * W.b₆ ^ 4 * W.b₈ ^ 2 + (-W.b₂ ^ 3 * W.b₆ ^ 3 * W.b₈ ^ 2)
@@ -247,7 +217,10 @@ lemma wronskian_aux_four :
                       + 108 * W.b₂ * W.b₄ ^ 2 * W.b₆ ^ 2 * W.b₈ ^ 2
                       + 116 * W.b₂ ^ 2 * W.b₄ ^ 2 * W.b₆ ^ 3 * W.b₈
                       + 240 * W.b₂ ^ 2 * W.b₄ * W.b₆ * W.b₈ ^ 3) * Polynomial.X ^ 7
-    + Polynomial.C (-883 * W.b₆ ^ 6 + (-W.b₂ ^ 3 * W.b₆ ^ 5) + 198 * W.b₄ ^ 5 * W.b₈ ^ 2
+
+/-- Coefficients `X^8 … X^9` of the `m = 4` Wronskian multiplier `M(X)`. -/
+private noncomputable def wronskianFourMultiplierPart4 : R[X] :=
+    Polynomial.C (-883 * W.b₆ ^ 6 + (-W.b₂ ^ 3 * W.b₆ ^ 5) + 198 * W.b₄ ^ 5 * W.b₈ ^ 2
                       + 216 * W.b₂ ^ 2 * W.b₈ ^ 4 + 790 * W.b₄ ^ 3 * W.b₆ ^ 4
                       + 4720 * W.b₄ ^ 3 * W.b₈ ^ 3 + 5526 * W.b₄ * W.b₈ ^ 4
                       + 26236 * W.b₆ ^ 2 * W.b₈ ^ 3 + (-918 * W.b₄ ^ 4 * W.b₆ ^ 2 * W.b₈)
@@ -291,7 +264,10 @@ lemma wronskian_aux_four :
                       + 18 * W.b₂ ^ 3 * W.b₄ ^ 2 * W.b₆ ^ 2 * W.b₈
                       + 546 * W.b₂ ^ 2 * W.b₄ ^ 2 * W.b₆ * W.b₈ ^ 2
                       + 21708 * W.b₂ * W.b₄ * W.b₆ ^ 2 * W.b₈ ^ 2) * Polynomial.X ^ 9
-    + Polynomial.C (3532 * W.b₈ ^ 4 + (-9537 * W.b₄ ^ 2 * W.b₆ ^ 4)
+
+/-- Coefficients `X^10 … X^11` of the `m = 4` Wronskian multiplier `M(X)`. -/
+private noncomputable def wronskianFourMultiplierPart5 : R[X] :=
+    Polynomial.C (3532 * W.b₈ ^ 4 + (-9537 * W.b₄ ^ 2 * W.b₆ ^ 4)
                       + (-936 * W.b₂ * W.b₆ ^ 5)
                       + 24 * W.b₂ ^ 4 * W.b₈ ^ 3 + 114 * W.b₄ ^ 5 * W.b₆ ^ 2
                       + 6304 * W.b₄ ^ 4 * W.b₈ ^ 2 + 27864 * W.b₄ ^ 2 * W.b₈ ^ 3
@@ -331,7 +307,10 @@ lemma wronskian_aux_four :
                       + (-240 * W.b₂ ^ 3 * W.b₄ * W.b₆ ^ 2 * W.b₈)
                       + 12480 * W.b₂ ^ 2 * W.b₄ * W.b₆ * W.b₈ ^ 2
                       + 13560 * W.b₂ * W.b₄ ^ 2 * W.b₆ ^ 2 * W.b₈) * Polynomial.X ^ 11
-    + Polynomial.C (-4902 * W.b₄ ^ 4 * W.b₆ ^ 2 + (-545 * W.b₂ ^ 2 * W.b₆ ^ 4)
+
+/-- Coefficients `X^12 … X^14` of the `m = 4` Wronskian multiplier `M(X)`. -/
+private noncomputable def wronskianFourMultiplierPart6 : R[X] :=
+    Polynomial.C (-4902 * W.b₄ ^ 4 * W.b₆ ^ 2 + (-545 * W.b₂ ^ 2 * W.b₆ ^ 4)
                       + 1932 * W.b₄ ^ 5 * W.b₈ + 5736 * W.b₂ ^ 2 * W.b₈ ^ 3
                       + 35344 * W.b₄ * W.b₆ ^ 4 + 45144 * W.b₄ * W.b₈ ^ 3
                       + 46752 * W.b₄ ^ 3 * W.b₈ ^ 2 + 105356 * W.b₆ ^ 2 * W.b₈ ^ 2
@@ -376,7 +355,10 @@ lemma wronskian_aux_four :
                       + 85700 * W.b₂ * W.b₆ * W.b₈ ^ 2 + 308736 * W.b₄ * W.b₆ ^ 2 * W.b₈
                       + 2394 * W.b₂ ^ 3 * W.b₄ * W.b₆ * W.b₈
                       + 116300 * W.b₂ * W.b₄ ^ 2 * W.b₆ * W.b₈) * Polynomial.X ^ 14
-    + Polynomial.C (2472 * W.b₂ ^ 3 * W.b₈ ^ 2 + 7232 * W.b₂ ^ 2 * W.b₆ ^ 3
+
+/-- Coefficients `X^15 … X^19` of the `m = 4` Wronskian multiplier `M(X)`. -/
+private noncomputable def wronskianFourMultiplierPart7 : R[X] :=
+    Polynomial.C (2472 * W.b₂ ^ 3 * W.b₈ ^ 2 + 7232 * W.b₂ ^ 2 * W.b₆ ^ 3
                       + 22172 * W.b₄ ^ 4 * W.b₆ + 108016 * W.b₆ * W.b₈ ^ 2
                       + 132592 * W.b₄ * W.b₆ ^ 3 + (-380 * W.b₂ ^ 2 * W.b₄ ^ 3 * W.b₆)
                       + (-100 * W.b₂ ^ 3 * W.b₄ * W.b₆ ^ 2)
@@ -421,7 +403,10 @@ lemma wronskian_aux_four :
                       + 57464 * W.b₆ * W.b₈
                       + 97500 * W.b₄ ^ 2 * W.b₆ + 20040 * W.b₂ ^ 2 * W.b₄ * W.b₆
                       + 47624 * W.b₂ * W.b₄ * W.b₈) * Polynomial.X ^ 19
-    + Polynomial.C (22160 * W.b₄ ^ 3 + 36374 * W.b₆ ^ 2 + 112 * W.b₂ ^ 4 * W.b₄
+
+/-- Coefficients `X^20 … X^26` of the `m = 4` Wronskian multiplier `M(X)`. -/
+private noncomputable def wronskianFourMultiplierPart8 : R[X] :=
+    Polynomial.C (22160 * W.b₄ ^ 3 + 36374 * W.b₆ ^ 2 + 112 * W.b₂ ^ 4 * W.b₄
                       + 1874 * W.b₂ ^ 3 * W.b₆ + 6675 * W.b₂ ^ 2 * W.b₄ ^ 2
                       + 6828 * W.b₂ ^ 2 * W.b₈
                       + 39492 * W.b₄ * W.b₈
@@ -435,6 +420,48 @@ lemma wronskian_aux_four :
     + Polynomial.C (412 * W.b₂ ^ 3 + 8440 * W.b₆ + 8216 * W.b₂ * W.b₄) * Polynomial.X ^ 23
     + Polynomial.C (1064 * W.b₂ ^ 2 + 5306 * W.b₄) * Polynomial.X ^ 24
     + Polynomial.C (1362 * W.b₂) * Polynomial.X ^ 25
-    + Polynomial.C 692 * Polynomial.X ^ 26) * b_relation_poly W
+    + Polynomial.C 692 * Polynomial.X ^ 26
+
+/-- The degree-26 multiplier `M(X)` of the `m = 4` Wronskian identity, computed offline by
+dividing `LHS − RHS` by `4b₈ − b₂b₆ + b₄²` over `ℤ[b₂,b₄,b₆,b₈]` (see
+`scripts/compute_multipliers.py`).  Assembled from parts so that no single command
+elaborates more than ~45 lines of the literal. -/
+private noncomputable def wronskianFourMultiplier : R[X] :=
+  wronskianFourMultiplierPart1 W + wronskianFourMultiplierPart2 W +
+  wronskianFourMultiplierPart3 W + wronskianFourMultiplierPart4 W +
+  wronskianFourMultiplierPart5 W + wronskianFourMultiplierPart6 W +
+  wronskianFourMultiplierPart7 W + wronskianFourMultiplierPart8 W
+
+
+/-- Wronskian auxiliary identity, `m = 4` case (Silverman III.3.7).
+
+Multiplier `M(X)` is a degree-26 polynomial in `W.b₂, W.b₄, W.b₆, W.b₈` with
+integer coefficients, computed offline by polynomial division of `LHS - RHS`
+by `(4b₈ - b₂b₆ + b₄²)` over `ℤ[b₂, b₄, b₆, b₈]`. See
+`scripts/compute_multipliers.py` for the derivation. -/
+lemma wronskian_aux_four :
+    (W.preΨ₄ ^ 2 * W.Ψ₂Sq) ^ 2 -
+    (Polynomial.derivative (W.Ψ₃ * (W.preΨ₄ * W.Ψ₂Sq ^ 2 - W.Ψ₃ ^ 3)) *
+        (W.preΨ₄ ^ 2 * W.Ψ₂Sq) -
+      W.Ψ₃ * (W.preΨ₄ * W.Ψ₂Sq ^ 2 - W.Ψ₃ ^ 3) *
+        Polynomial.derivative (W.preΨ₄ ^ 2 * W.Ψ₂Sq)) =
+    Polynomial.C 4 *
+      (W.Ψ₃ ^ 2 * W.preΨ₄ *
+          (W.Ψ₃ * ((W.preΨ₄ * W.Ψ₂Sq ^ 2 - W.Ψ₃ ^ 3) - W.preΨ₄ ^ 2)) -
+        W.preΨ₄ * (W.preΨ₄ * W.Ψ₂Sq ^ 2 - W.Ψ₃ ^ 3) ^ 2) := by
+  linear_combination (norm := (
+    simp only [wronskianFourMultiplier,
+      wronskianFourMultiplierPart1, wronskianFourMultiplierPart2,
+      wronskianFourMultiplierPart3, wronskianFourMultiplierPart4,
+      wronskianFourMultiplierPart5, wronskianFourMultiplierPart6,
+      wronskianFourMultiplierPart7, wronskianFourMultiplierPart8,
+      Ψ₃, preΨ₄, Ψ₂Sq,
+      Polynomial.derivative_mul, Polynomial.derivative_pow,
+      Polynomial.derivative_add, Polynomial.derivative_sub,
+      Polynomial.derivative_X, Polynomial.derivative_C, Polynomial.derivative_ofNat,
+      Polynomial.C_mul, Polynomial.C_sub, Polynomial.C_add, Polynomial.C_pow,
+      Polynomial.C_neg, Polynomial.C_ofNat, Nat.cast_ofNat]
+    ring))
+    (wronskianFourMultiplier W) * b_relation_poly W
 
 end HasseWeil

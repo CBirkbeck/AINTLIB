@@ -457,7 +457,6 @@ private theorem term_norm_distinct {n : ℕ} (hn : 1 ≤ n) {qa qb : ℚ_[p]} {a
       rw [abs_mul, abs_of_pos hMz]; exact le_mul_of_one_le_left hMz.le (Int.one_le_abs h0)
     rw [hfactor] at hge; omega
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- the `adjoin.powerBasis`/`Basis.sum_repr` computation runs through the
 -- `IntermediateField.adjoin ℚ_[p] {π_n}` power-basis layer; instance synthesis and the
 -- power-basis term elaboration exceed the defaults
@@ -754,7 +753,6 @@ private theorem linearIndependent_zetaPow {n : ℕ} (hn : 1 ≤ n) :
     (by simpa using hproj)
   simpa using Subtype.ext (congrFun hzero i)
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- the module/basis synthesis through the nested `IntermediateField (K p n) (extendScalars …)`
 -- layer (a second `IntermediateField` over `K p n`) exceeds the default budget
 /-- The `ξ_{n+1}`-power `K_n`-basis of `K_{n+1}` (a `LinearIndependent` family of the
@@ -765,7 +763,6 @@ private noncomputable def zetaBasis {n : ℕ} (hn : 1 ≤ n) :
   basisOfLinearIndependentOfCardEqFinrank (linearIndependent_zetaPow (p := p) hn)
     (by rw [Fintype.card_fin, finrank_K_succ p hn])
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (see `zetaBasis`)
 @[simp]
 private theorem zetaBasis_apply {n : ℕ} (hn : 1 ≤ n) (i : Fin p) :
@@ -778,7 +775,6 @@ private noncomputable def evalPiES (f : PowerSeries ℤ_[p]) {n : ℕ} (hn : 1 �
   ⟨evalPi p f (n + 1), (IntermediateField.mem_extendScalars (K_le_succ p n)).2
     (Subring.mem_inf.1 (evalPi_mem_O p f (Nat.le_succ_of_le hn))).1⟩
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (see `zetaBasis`)
 /-- The matrix-entry identification (T907 crux): the multiplication-by-`evalPi f (n+1)`
 matrix in the `ξ_{n+1}`-power basis has entries (coerced to `ℂ_p`) exactly the
@@ -803,7 +799,6 @@ private theorem leftMulMatrix_zetaBasis_coe (f : PowerSeries ℤ_[p]) {n : ℕ} 
     rw [IntermediateField.coe_smul, zetaBasis_apply, zetaPow_coe, ha]; rfl
   rw [Algebra.leftMulMatrix_eq_repr_mul, hmul, (zetaBasis (p := p) hn).repr_sum_self]
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (see `zetaBasis`)
 /-- **The evaluation/norm commuting square** (T907, RJW lem:norm power series vs units,
 TeX 2673–2692): for `n ≥ 1`,

@@ -102,7 +102,6 @@ def universalLegendreOmega (hR : IsUnit (2 : R)) :
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-AX1 stage 3 ★)** The tautological presentation marks the affine-point
 section at the (mapped) point: the universal marking. Mirrors `tautPresentation`'s
 `compat_zero` with `projModelAffineSection_baseChange` in place of
@@ -186,7 +185,6 @@ theorem tautPresentation_isAdapted_legendre (hR : IsUnit (2 : R)) :
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-AX1 stage 4 ★)** The universal Legendre datum: given the naive-full-level
 clause for the marked pair (2-torsionness + geometric generation — ticket [T-E14-LVL],
 the leaf-(a) `E[2]`-classification input), the tautologically marked pair with the
@@ -562,7 +560,6 @@ theorem projModelAffineSection_congr {A : Type u} [CommRing A]
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-1 ★★, KM 4.6.2 uniqueness)** Marked adapted Legendre witnesses are
 UNIQUE: two `b`-adapted presentations over the same affine whose chart curves are
 Legendre and which mark the same section at `x = 0` have comparison `1` and equal
@@ -633,7 +630,6 @@ theorem restrict_W_legendre {S : Scheme.{u}} {G : EllipticCurveGeom S}
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-2 ★)** Witness `λ`-values agree on common affines: restrict both
 witnesses and apply the KM 4.6.2 uniqueness. -/
 theorem legendre_witness_lam_agree {R : CommRingCat.{u}} {X : EllObj R}
@@ -658,7 +654,6 @@ theorem legendre_witness_lam_agree {R : CommRingCat.{u}} {X : EllObj R}
 
 open LocalPresentation WeierstrassCurve TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E14-CLS-2 ★★)** The **glued Legendre parameter** of a Legendre datum: the
 witness `λ`'s glue to a global section restricting to EVERY witness's parameter
 (mirrors `adaptedCoeff₄`; agreement = `legendre_witness_lam_agree`). This is KM
@@ -724,7 +719,6 @@ noncomputable def legendreLambda {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-3 ★)** The glued parameter satisfies the moduli condition:
 `λ(λ−1)` is a global unit — chartwise it is the witness's `lam(lam−1)`, a unit by
 ellipticity of the witness chart curve (mirrors `adaptedDelta_isUnit`). -/
@@ -807,7 +801,6 @@ theorem legendreClassifyingRingHom_algebraMap {R : CommRingCat.{u}} (X : EllObj 
 
 open LocalPresentation MvPolynomial in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-4 ★)** The per-witness coefficient match: specializing the universal
 Legendre curve along the classifying map, restricted to a witness affine, recovers
 exactly the witness chart curve (mirrors `universalShortNF_map_classifying`; the
@@ -988,7 +981,6 @@ open CategoryTheory Limits in
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-5, ≈E3c)** The piece map is witness-independent at a fixed affine
 (uniqueness of marked adapted Legendre witnesses). -/
 theorem legendrePiece_congr {R : CommRingCat.{u}} {X : EllObj R}
@@ -1020,7 +1012,6 @@ theorem legendrePiece_congr {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 private theorem legendrePiece_agree {R : CommRingCat.{u}} {X : EllObj R}
     {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
     (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
@@ -1176,7 +1167,6 @@ theorem legendreTop_piece {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 /-- **(T-E14-CLS-6, ≈E2-π)** The piece map lies over the restricted classifying map
 (mirrors `chartPiece_π`). -/
 theorem legendrePiece_π {R : CommRingCat.{u}} {X : EllObj R}
@@ -1210,7 +1200,6 @@ theorem legendrePiece_π {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-6, ≈E4-π ★)** The glued comparison lies over the classifying map
 (mirrors `classifyingTop_π_w`). -/
 theorem legendreTop_π_w {R : CommRingCat.{u}} {X : EllObj R}
@@ -1254,9 +1243,17 @@ noncomputable def legendreBaseCover {R : CommRingCat.{u}} {X : EllObj R}
       obtain ⟨V, hxV, Pr, lam, hAd, hW, hMP, hMQ⟩ := hD x
       exact ⟨⟨V, Pr, lam, hAd, hW, hMP, hMQ⟩, ⟨x, hxV⟩, rfl⟩)
 
+section OpaqueProjModelLegendreTop
+
+/- Same device as `OpaqueProjModelLegendre` above (and as `e4Top_zero` in
+UniversalLevelFour): the goal carries `eqToHom (congrArg projModel _)` at the universal
+Legendre coefficients over `LegendreModuliRing R = Localization.Away (legendrePoly R)`, and
+every `rw`/`simp only [Category.assoc]` re-chases the whole `Proj` construction. -/
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-6 ★, ≈E4-zero)** The glued comparison respects the zero sections
 (mirrors `classifyingTop_zero`). -/
 theorem legendreTop_zero {R : CommRingCat.{u}} {X : EllObj R}
@@ -1327,9 +1324,10 @@ theorem legendreTop_zero {R : CommRingCat.{u}} {X : EllObj R}
     w.V.1.ι ≫ legendreClassifyingMap X L b hD h2 from by rw [Category.assoc]; rfl]
   simp only [Category.assoc]
 
+end OpaqueProjModelLegendreTop
+
 open AlgebraicGeometry CategoryTheory Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-6, ≈E4)** The classifying map lies over `Spec R` (mirrors
 `classifyingMap_structMap`). -/
 theorem legendreClassifyingMap_structMap {R : CommRingCat.{u}} {X : EllObj R}
@@ -1378,7 +1376,6 @@ theorem restrict_legendreClassifyingMap {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-6, ≈E4)** The per-witness classifying square is cartesian (mirrors
 `chartPiece_isPullback`). -/
 theorem legendrePiece_isPullback {R : CommRingCat.{u}} {X : EllObj R}
@@ -1433,7 +1430,6 @@ theorem legendrePiece_isPullback {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E14-CLS-6 ★★, ≈E4)** The classifying square is cartesian: `X` is the
 pullback of the universal Legendre curve along the classifying map (mirrors
 `isPullback_classifyingTop`). -/
@@ -1500,7 +1496,6 @@ noncomputable def legendreClassifyingEllHom {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-7, rt1-level ★)** The marking downstairs: a marked section composed
 with the glued comparison is the classifying map followed by the universal marked
 section. Per witness affine: the section factors through the piece, the marking reads
@@ -1575,7 +1570,6 @@ theorem section_comp_legendreTop {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-7, rt1-level ★★)** Pulling the universal marked `P` back along the
 classifying morphism recovers the given `P`. -/
 theorem pullSection_legendreClassifyingEllHom_P {R : CommRingCat.{u}} {X : EllObj R}
@@ -1612,7 +1606,6 @@ theorem pullSection_legendreClassifyingEllHom_P {R : CommRingCat.{u}} {X : EllOb
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-7, rt1-level ★★)** Pulling the universal marked `Q` back along the
 classifying morphism recovers the given `Q`. -/
 theorem pullSection_legendreClassifyingEllHom_Q {R : CommRingCat.{u}} {X : EllObj R}
@@ -1691,9 +1684,16 @@ theorem sectionsMapLE_legendreClassifyingMap {R : CommRingCat.{u}} {X : EllObj R
   have hofHom := Spec.map_injective hSpec
   exact congrArg CommRingCat.Hom.hom hofHom
 
+section OpaqueProjModelTransVCTransportLegendre
+
+/- As in `OpaqueProjModelLegendre`: `simp only [Category.assoc]` and `cancel_epi` force
+`whnf` through `projModel (universalLegendre R)` over
+`LegendreModuliRing R = Localization.Away (legendrePoly R)` at every step, uncached. -/
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(T-E14-CLS-7 rt1-core ★★)** Transporting the tautological chart of the
 universal Legendre curve along the classifying morphism recovers the witness: the
 geometric sign-pinning (mirrors `transVC_transport_taut`). -/
@@ -1874,9 +1874,10 @@ theorem transVC_transport_legendre {R : CommRingCat.{u}} {X : EllObj R}
         _).compat_π
   rw [hkey, Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
 
+end OpaqueProjModelTransVCTransportLegendre
+
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E14-CLS-7 rt1 ★★)** Roundtrip, `ω`-half: pulling the universal Legendre
 `ω`-basis back along the classifying morphism recovers the given basis. The ratio
 unit reads as the witness-vs-transported-taut transition unit, which is `1` by the
@@ -1987,7 +1988,6 @@ variable {R : CommRingCat.{u}} {X : EllObj R} {hR : IsUnit (2 : R)}
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E14-CLS-8 rt2 ★)** The transported tautological witness of the pulled datum:
 for ANY `Ell/R`-morphism `φ` to the universal Legendre object (with the universal
 level clause `hL`), the transported taut chart over any affine is a Legendre witness
@@ -2054,7 +2054,6 @@ noncomputable def pulledWitness (φ : X ⟶ universalLegendreObj R hR)
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(T-E14-CLS-8 rt2a ★)** The classifying algebra of the pulled datum is the
 algebra of `φ` itself (mirrors `classifyingRingHom_omegaBasisMap`): `C`-scalars via
 `base_w`, and the `λ`-generator via the pulled-witness family + `legendreLambda`'s
@@ -2191,7 +2190,6 @@ theorem legendreClassifyingMap_pulled (φ : X ⟶ universalLegendreObj R hR)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(T-E14-CLS-8 rt2b ★★)** Top determination: the glued classifying comparison of
 the pulled datum IS `φ`'s total-space morphism (mirrors `classifyingTop_omegaBasisMap`;
 `legendrePiece_congr` at the pulled witness replaces the e-determination step). -/
@@ -2210,102 +2208,31 @@ theorem legendreTop_pulled (φ : X ⟶ universalLegendreObj R hR)
     ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
       ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
     rfl rfl with hD'def
-  letI : Algebra (LegendreModuliRing R)
-      Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤) :=
-    (Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom.toAlgebra
-  haveI : IsIso (⊤ : (Spec (CommRingCat.of (LegendreModuliRing R))).Opens).ι := by
-    rw [← Scheme.topIso_hom]
-    infer_instance
-  haveI : IsIso (Spec.map (CommRingCat.ofHom (algebraMap (LegendreModuliRing R)
-      Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤)))) := by
-    have h : CommRingCat.ofHom (algebraMap (LegendreModuliRing R)
-        Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤)) =
-      (Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv := rfl
-    rw [h]
-    infer_instance
-  have hfst : pullback.fst (projModelπ (universalLegendre R))
-      (⊤ : (Spec (CommRingCat.of (LegendreModuliRing R))).Opens).ι =
-      (tautPresentation (universalLegendre R)).e.hom ≫
-        (isPullback_projModelBaseChange (universalLegendre R)).isoPullback.hom ≫
-        pullback.fst (projModelπ (universalLegendre R))
-          (Spec.map (CommRingCat.ofHom (algebraMap (LegendreModuliRing R)
-            Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤)))) := by
-    rw [show (tautPresentation (universalLegendre R)).e.hom =
-      (asIso (pullback.fst (projModelπ (universalLegendre R))
-        (⊤ : (Spec (CommRingCat.of (LegendreModuliRing R))).Opens).ι) ≪≫
-      (asIso (pullback.fst (projModelπ (universalLegendre R))
-        (Spec.map (CommRingCat.ofHom (algebraMap (LegendreModuliRing R)
-          Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤)))))).symm ≪≫
-      (isPullback_projModelBaseChange (universalLegendre R)).isoPullback.symm).hom
-      from rfl]
-    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
-      Iso.inv_hom_id_assoc, IsIso.inv_hom_id, Category.comp_id]
   refine (legendreWitnessCover hD').hom_ext _ _ (fun w => ?_)
+  have hle : w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+      (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+        (LegendreModuliRing R))).affineOpens).1 := fun x _ => trivial
   rw [legendreTop_piece hD' h2 w, legendreWitnessCover_f]
   rw [legendrePiece_congr hD' h2 w (pulledWitness φ hL w.V) rfl, eqToHom_refl,
     Category.id_comp]
-  -- now: chartPiece(pulled) = fst ≫ φ.top; unfold the φ-side through the transport
+  -- chartPiece(pulled) = fst ≫ φ.top; unfold the φ-side, then collapse the entire
+  -- universal-side chain with the abstract-curve barrier `taut_universalSide` (so the
+  -- `universalLegendre` coefficient `whnf` is paid exactly once — no `maxHeartbeats` bump).
   rw [show pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι ≫ φ.top =
-    transportTheta φ.baseHom φ.top φ.isPullback
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial) ≫
+    transportTheta φ.baseHom φ.top φ.isPullback hle ≫
       pullback.fst (projModelπ (universalLegendre R))
         (⊤ : (Spec (CommRingCat.of (LegendreModuliRing R))).Opens).ι from
     (transportTheta_fst φ.baseHom φ.top φ.isPullback _).symm]
-  rw [hfst, ← Category.assoc,
-    show transportTheta φ.baseHom φ.top φ.isPullback
-        (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-            (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial) ≫
-      (tautPresentation (universalLegendre R)).e.hom =
-    ((tautPresentation (universalLegendre R)).transport
-      φ.baseHom φ.top φ.isPullback φ.zero_w
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial)).e.hom ≫
-      projModelBaseChange (sectionsMapLE φ.baseHom
-        (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-            (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial))
-        (tautPresentation (universalLegendre R)).W from
-    (transport_e_baseChange φ.baseHom φ.top φ.isPullback φ.zero_w
-      (tautPresentation (universalLegendre R)) _).symm]
-  -- collapse the universal-side chain into a single base change along the composite
-  have hσ : (sectionsMapLE φ.baseHom
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial)).comp
+  rw [taut_universalSide (universalLegendre R) φ.baseHom φ.top φ.isPullback
+    φ.zero_w hle]
+  have hσ : (sectionsMapLE φ.baseHom hle).comp
       ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom) =
       ((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
         (legendreClassifyingRingHom X _ _ hD' h2) := by
-    rw [sectionsMapLE_congr_hom (legendreClassifyingMap_pulled φ hL h2).symm
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial)]
+    rw [sectionsMapLE_congr_hom (legendreClassifyingMap_pulled φ hL h2).symm hle]
     exact sectionsMapLE_legendreClassifyingMap hD' h2 w.V (fun x _ => trivial)
-  rw [show projModelBaseChange (sectionsMapLE φ.baseHom
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial))
-      (tautPresentation (universalLegendre R)).W =
-    projModelBaseChange (sectionsMapLE φ.baseHom
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial))
-      ((universalLegendre R).map
-        ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom)) from rfl]
-  rw [show (isPullback_projModelBaseChange (universalLegendre R)).isoPullback.hom ≫
-      pullback.fst (projModelπ (universalLegendre R))
-        (Spec.map (CommRingCat.ofHom (algebraMap (LegendreModuliRing R)
-          Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤)))) =
-    projModelBaseChange
-      ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom)
-      (universalLegendre R) from
-    (isPullback_projModelBaseChange (universalLegendre R)).isoPullback_hom_fst]
-  rw [Category.assoc, ← projModelBaseChange_comp',
-    projModelBaseChange_congr_hom hσ (universalLegendre R)]
-  rw [legendrePiece]
+  rw [projModelBaseChange_congr_hom hσ (universalLegendre R)]
+  conv_lhs => rw [legendrePiece]
   rfl
 
 
@@ -2335,7 +2262,6 @@ theorem EllObj.isUnit_two {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-AX1 ★★★, KM 4.6.2's engine axiom 1, conditional form)** GIVEN the
 naive-full-level clause for the universal marked pair (ticket [T-E14-LVL-b]: the
 geometric `E[2]`-generation, deferred to the KM keystone), the Legendre `δ` is

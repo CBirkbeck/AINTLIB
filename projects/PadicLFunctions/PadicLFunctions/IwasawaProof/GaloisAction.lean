@@ -328,48 +328,52 @@ private theorem adjoinSimple_zetaSysK_eq_top (n : ℕ) :
     (isIntegral_zetaSysK p n).isAlgebraic, IntermediateField.top_toSubalgebra,
     adjoin_zetaSysK_eq_top p n]
 
--- Field theory over the `restrict`-subtype `↥(KPlusRestrict p n)` (a `fieldRange` of an
--- inclusion) makes instance search and `compute_degree`/`minpoly.min` heavy; raised limits.
-set_option synthInstance.maxHeartbeats 400000 in
+/-- **A quadratic generator forces degree ≤ 2**: if `x` generates `E` over `F` and is a root of
+the monic quadratic `X² − βX + 1` with `β : F`, then `[E : F] ≤ 2`.  Stated over abstract fields:
+at the call site the base field is a nested `IntermediateField.restrict` subtype, where instance
+search for `Module F F[X]` walks two layers of subtype module structures. -/
+private theorem finrank_le_two_of_adjoin_eq_top_of_isRoot_quadratic {F E : Type*} [Field F]
+    [Field E] [Algebra F E] {x : E} {β : F} (hx : IsIntegral F x)
+    (htop : IntermediateField.adjoin F {x} = ⊤)
+    (hroot : x ^ 2 - algebraMap F E β * x + 1 = 0) :
+    Module.finrank F E ≤ 2 := by
+  set g : Polynomial F := Polynomial.X ^ 2 - Polynomial.C β * Polynomial.X + 1 with hg
+  have hgmonic : g.Monic := by rw [hg]; monicity!
+  have hgdeg : g.natDegree = 2 := by rw [hg]; compute_degree!
+  have hgroot : (Polynomial.aeval x) g = 0 := by
+    rw [hg, map_add, map_sub, map_pow, map_mul, Polynomial.aeval_X, Polynomial.aeval_C,
+      Polynomial.aeval_one]
+    exact hroot
+  rw [show Module.finrank F E = Module.finrank F (IntermediateField.adjoin F {x}) from by
+      rw [htop]; exact (LinearEquiv.finrank_eq IntermediateField.topEquiv.toLinearEquiv).symm,
+    IntermediateField.adjoin.finrank hx]
+  calc (minpoly F x).natDegree
+      ≤ g.natDegree := Polynomial.natDegree_le_natDegree (minpoly.min _ _ hgmonic hgroot)
+    _ = 2 := hgdeg
+
 /-- `[K_n : K_n⁺] ≤ 2`: `ξ_n` is a root of the monic degree-2 polynomial
 `X² − (ξ+ξ⁻¹)X + 1` over `K_n⁺`, and `K_n = K_n⁺(ξ_n)` (since `ℚ_p(ξ_n) = K_n`), so the
 relative degree is `(minpoly K_n⁺ ξ_n).natDegree ≤ 2`. -/
 theorem finrank_K_over_KPlusRestrict_le {n : ℕ} (_hn : 1 ≤ n) :
     Module.finrank (KPlusRestrict p n) (K p n) ≤ 2 := by
-  set ξK : K p n := ⟨zetaSys p n, zetaSys_mem_K p n⟩ with hξK
-  have htop : IntermediateField.adjoin (KPlusRestrict p n) {ξK} = ⊤ :=
-    IntermediateField.adjoin_eq_top_of_adjoin_eq_top (F := ℚ_[p])
-      (adjoinSimple_zetaSysK_eq_top p n)
-  have hξint : IsIntegral (KPlusRestrict p n) ξK := (isIntegral_zetaSysK p n).tower_top
   have hβmem : (zetaSys p n + (zetaSys p n)⁻¹) ∈ KPlus p n :=
     IntermediateField.subset_adjoin _ _ (Set.mem_singleton _)
-  set βK : K p n := ⟨zetaSys p n + (zetaSys p n)⁻¹, KPlus_le_K p n hβmem⟩ with hβK
-  have hβrestrict : βK ∈ KPlusRestrict p n :=
-    (IntermediateField.mem_restrict (KPlus_le_K p n) βK).2 hβmem
-  set β : KPlusRestrict p n := ⟨βK, hβrestrict⟩ with hβdef
-  set g : Polynomial (KPlusRestrict p n) := Polynomial.X ^ 2 - Polynomial.C β * Polynomial.X + 1
-    with hg
-  have hgmonic : g.Monic := by rw [hg]; monicity!
-  have hgdeg : g.natDegree = 2 := by rw [hg]; compute_degree!
-  have hroot : (Polynomial.aeval ξK) g = 0 := by
-    have hξne : zetaSys p n ≠ 0 :=
-      (zetaSys_primitiveRoot p n).ne_zero (pow_pos hp.out.pos n).ne'
-    rw [hg, map_add, map_sub, map_pow, map_mul, Polynomial.aeval_X, Polynomial.aeval_C,
-      Polynomial.aeval_one]
-    apply Subtype.ext
-    have hcoe : ((algebraMap (KPlusRestrict p n) (K p n) β : K p n) : ℂ_[p])
-        = zetaSys p n + (zetaSys p n)⁻¹ := rfl
-    push_cast [hξK]
-    rw [hcoe]
-    field_simp
-    ring
-  rw [show Module.finrank (KPlusRestrict p n) (K p n)
-      = Module.finrank (KPlusRestrict p n) (IntermediateField.adjoin (KPlusRestrict p n) {ξK}) from
-    by rw [htop]; exact (LinearEquiv.finrank_eq IntermediateField.topEquiv.toLinearEquiv).symm,
-    IntermediateField.adjoin.finrank hξint]
-  calc (minpoly (KPlusRestrict p n) ξK).natDegree
-      ≤ g.natDegree := Polynomial.natDegree_le_natDegree (minpoly.min _ _ hgmonic hroot)
-    _ = 2 := hgdeg
+  set ξK : K p n := ⟨zetaSys p n, zetaSys_mem_K p n⟩ with hξK
+  set β : KPlusRestrict p n := ⟨⟨zetaSys p n + (zetaSys p n)⁻¹, KPlus_le_K p n hβmem⟩,
+    (IntermediateField.mem_restrict (KPlus_le_K p n) _).2 hβmem⟩ with hβdef
+  refine finrank_le_two_of_adjoin_eq_top_of_isRoot_quadratic (β := β)
+    (isIntegral_zetaSysK p n).tower_top
+    (IntermediateField.adjoin_eq_top_of_adjoin_eq_top (F := ℚ_[p])
+      (adjoinSimple_zetaSysK_eq_top p n)) ?_
+  have hξne : zetaSys p n ≠ 0 :=
+    (zetaSys_primitiveRoot p n).ne_zero (pow_pos hp.out.pos n).ne'
+  have hcoe : ((algebraMap (KPlusRestrict p n) (K p n) β : K p n) : ℂ_[p])
+      = zetaSys p n + (zetaSys p n)⁻¹ := rfl
+  apply Subtype.ext
+  push_cast [hξK]
+  rw [hcoe]
+  field_simp
+  ring
 
 /-- **RJW §12, the Galois fixed-field characterisation of `K_n⁺`**: the maximal totally real
 subfield `K_n⁺ = ℚ_p(ξ + ξ⁻¹)` is exactly the fixed field of complex conjugation

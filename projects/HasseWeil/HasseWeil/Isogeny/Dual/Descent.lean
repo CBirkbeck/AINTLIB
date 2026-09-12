@@ -653,11 +653,6 @@ theorem descendFun_eq_iff {C₁ C₂ : SmoothPlaneCurve F}
   · intro h; exact C₁.functionFieldMap_injective L
       ((functionFieldMap_descendFun L hξ f).trans h.symm)
 
--- Importing the two-curve fixed-field machinery (`TwoCurveDualRange`) transitively brings the
--- kernel-translation `MulSemiringAction` on `FunctionField` into scope, which expands instance
--- search through the `Submodule` lattice during this `AlgHom`-structure elaboration — the same
--- `synthInstance` pressure handled identically in `EC/KernelCountGeneral.lean`.
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **DUAL-Q2(b)** — the descended pullback `ξ↓ : F(E₂) →ₐ[F] F(E₁)`, packaged as an `F`-algebra
 hom. The ring/algebra structure is forced by the round-trip `functionFieldMap_descendFun` and the
 injectivity of `functionFieldMap`: `ξ↓` is the unique map making the base-change square commute, and

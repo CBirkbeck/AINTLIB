@@ -26,7 +26,6 @@ set_option backward.isDefEq.respectTransparency false
 
 -- v4.33 bump: the `≃+`-to-`AddMonoidHomClass` search for these point types exceeds the
 -- default instance budget, and the nested search does not inherit a per-declaration option.
-set_option synthInstance.maxHeartbeats 800000
 set_option maxSynthPendingDepth 5
 
 open AlgebraicGeometry CategoryTheory Polynomial
