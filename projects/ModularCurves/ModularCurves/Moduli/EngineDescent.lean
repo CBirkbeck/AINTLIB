@@ -51,7 +51,6 @@ The group law on the quotient is *not* part of this file: `EllipticCurveGeom.toE
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
 set_option maxSynthPendingDepth 5
 
 universe u
@@ -1659,7 +1658,6 @@ treatment as `Moduli/EngineMouthCharts.lean`. -/
 set_option allowUnsafeReducibility true in
 attribute [local irreducible] ModularCurves.projModel
 
-set_option maxHeartbeats 800000 in
 /-- **([a5-W6-loc], the per-point chart from a LOCALIZED model — ABSTRACT)** The `lw_chart_at`
 engine with the global-model inputs (`W₀A`, `φA`, `act`, `Cvc`, `hΨ`) replaced by their
 restrictions to the invariant basic localization `A_a`, `a ∉ s`: a Weierstrass model

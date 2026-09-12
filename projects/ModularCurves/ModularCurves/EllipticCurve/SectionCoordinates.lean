@@ -58,8 +58,123 @@ theorem affineChartHom_comp_algebraMap (W : WeierstrassCurve R) (p q : R)
   have h3 := Spec.map_injective h2
   exact congrArg CommRingCat.Hom.hom h3
 
-set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+/-- The `Z`-chart ring presented by the plane coordinate ring, evaluated on the coordinate
+`X j`, reads off the affine coordinates of the affine-point evaluation. -/
+private lemma affineChartHom_chartCoordEquiv_X (W : WeierstrassCurve R) (a b : R)
+    (ha : W.toAffine.Equation a b) (j : {j : Fin 3 // j ≠ 2}) :
+    (affineChartHom W a b ha)
+        (chartCoordEquiv W 2 (Ideal.Quotient.mk
+          (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
+          (MvPolynomial.X j))) =
+      MvPolynomial.eval ![a, b, 1] (MvPolynomial.X j.1) := by
+  rw [chartCoordEquiv_mk_X]
+  rw [show Away.isLocalizationElem (mk_X_mem_quotientGrading_one W 2)
+      (mk_X_mem_quotientGrading_one W j.1) =
+    Away.mk (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 2) 1
+      (((quotientGradingHom (projIdeal W)) (MvPolynomial.X j.1)) ^ 1)
+      (by
+        simpa using SetLike.pow_mem_graded 1
+          (mk_X_mem_quotientGrading_one W j.1)) from rfl]
+  rw [affineChartHom_mk, map_pow, pow_one]
+  rw [show (quotientGradingHom (projIdeal W)) (MvPolynomial.X j.1) =
+    Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X j.1) from rfl]
+  rw [projModelAffineEval_mk]
+
+/-- The values of an `R`-compatible `Z`-chart hom on the two chart coordinates solve the
+Weierstrass equation, because the dehomogenised cubic vanishes in the chart ring. -/
+private lemma chartHom_coord_equation (W : WeierstrassCurve R)
+    (φ : Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) →+* R)
+    (hφ : φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))).comp
+      ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+      algebraMap R R)
+    {p q : R}
+    (hp : φ (chartCoordEquiv W 2 (Ideal.Quotient.mk
+      (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
+      (MvPolynomial.X ⟨0, by decide⟩))) = p)
+    (hq : φ (chartCoordEquiv W 2 (Ideal.Quotient.mk
+      (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
+      (MvPolynomial.X ⟨1, by decide⟩))) = q) :
+    W.toAffine.Equation p q := by
+  have hcubic0 : φ (chartCoordEquiv W 2 (Ideal.Quotient.mk
+      (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
+      (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial))) = 0 := by
+    rw [Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _),
+      map_zero, map_zero]
+  have haev := chart_hom_aeval W 2 φ hφ
+    (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial)
+  rw [hcubic0] at haev
+  have hpoly : MvPolynomial.aeval (fun j : {j : Fin 3 // j ≠ 2} =>
+      φ (chartCoordEquiv W 2 (Ideal.Quotient.mk
+        (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
+        (MvPolynomial.X j))))
+      (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial) =
+      q ^ 2 + W.a₁ * p * q + W.a₃ * q
+        - (p ^ 3 + W.a₂ * p ^ 2 + W.a₄ * p + W.a₆) := by
+    subst hp
+    subst hq
+    simp only [WeierstrassCurve.Projective.polynomial]
+    simp only [map_sub, map_add, map_mul, map_pow, MvPolynomial.dehomogenizeAux_C,
+      MvPolynomial.dehomogenizeAux_X_self,
+      MvPolynomial.dehomogenizeAux_X_ne _ _ (show (0 : Fin 3) ≠ 2 by decide),
+      MvPolynomial.dehomogenizeAux_X_ne _ _ (show (1 : Fin 3) ≠ 2 by decide),
+      MvPolynomial.aeval_C, MvPolynomial.aeval_X, mul_one, one_pow]
+    rfl
+  rw [WeierstrassCurve.Affine.equation_iff]
+  linear_combination hpoly.symm.trans haev.symm
+
+/-- An `R`-compatible `Z`-chart hom is determined by its values on the two chart
+coordinates: it is the affine-chart evaluation at those coordinates. -/
+private lemma eq_affineChartHom_of_coord_values (W : WeierstrassCurve R)
+    (φ : Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) →+* R)
+    (hφ : φ.comp ((algebraMap (↥(quotientGrading (projIdeal W) 0))
+        (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))).comp
+      ((gradeZeroRingEquiv W) : R →+* ↥(quotientGrading (projIdeal W) 0))) =
+      algebraMap R R)
+    {p q : R} (heq : W.toAffine.Equation p q)
+    (hp : φ (chartCoordEquiv W 2 (Ideal.Quotient.mk
+      (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
+      (MvPolynomial.X ⟨0, by decide⟩))) = p)
+    (hq : φ (chartCoordEquiv W 2 (Ideal.Quotient.mk
+      (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
+      (MvPolynomial.X ⟨1, by decide⟩))) = q) :
+    φ = affineChartHom W p q heq := by
+  have hext : φ.comp (((chartCoordEquiv W 2 : _ ≃+* _) :
+        MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial} →+*
+        Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) =
+      (affineChartHom W p q heq).comp (((chartCoordEquiv W 2 : _ ≃+* _) :
+        MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸
+          Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial} →+*
+        Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) := by
+    refine Ideal.Quotient.ringHom_ext
+      (MvPolynomial.ringHom_ext (fun r => ?_) (fun j => ?_))
+    · show φ (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.C r))) =
+        (affineChartHom W p q heq)
+          (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.C r)))
+      rw [chartCoordEquiv_mk_C]
+      exact (RingHom.congr_fun hφ r).trans
+        (RingHom.congr_fun (affineChartHom_comp_algebraMap W p q heq) r).symm
+    · show φ (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.X j))) =
+        (affineChartHom W p q heq)
+          (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.X j)))
+      rw [affineChartHom_chartCoordEquiv_X W p q heq j]
+      rcases j with ⟨j, hj⟩
+      fin_cases j
+      · exact hp.trans (by simp)
+      · exact hq.trans (by simp)
+      · simp at hj
+  refine RingHom.ext fun a => ?_
+  obtain ⟨b, rfl⟩ := (chartCoordEquiv W 2).surjective a
+  exact RingHom.congr_fun hext b
+
 /-- **([hArb-1] the coordinate reading)** A section of the projective model over
 `Spec R` factoring through the `Z`-chart is the affine-point section of a solution of
 the Weierstrass equation. -/
@@ -76,134 +191,28 @@ theorem eq_affineSection_of_zChart_factor (W : WeierstrassCurve R)
       τ = projModelAffineSection W p q heq := by
   have hπ' : τ ≫ projModelπ W = Spec.map (CommRingCat.ofHom (algebraMap R R)) := by
     rw [hπ, Algebra.algebraMap_self, CommRingCat.ofHom_id, Spec.map_id]
-  set gc : { g : SpecPoints (projModel W) (projModelπ W) R //
-      ∃ h : Spec (CommRingCat.of R) ⟶ Spec (CommRingCat.of
-          (Away (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))),
-        h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
-          (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 } :=
-    ⟨⟨τ, hπ'⟩, h₀, hfac⟩ with hgc
-  set φ := chartHomEquiv W 2 R gc with hφdef
-  -- the coordinates: the chart hom's values on `X/Z` and `Y/Z`
-  set p : R := φ.1 (chartCoordEquiv W 2 (Ideal.Quotient.mk
+  obtain ⟨⟨φ, hφ⟩, hgc⟩ :
+      ∃ ψ, chartHomEquiv W 2 R ⟨⟨τ, hπ'⟩, h₀, hfac⟩ = ψ := ⟨_, rfl⟩
+  obtain ⟨p, hp⟩ : ∃ p : R, φ (chartCoordEquiv W 2 (Ideal.Quotient.mk
     (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
-    (MvPolynomial.X ⟨0, by decide⟩))) with hp
-  set q : R := φ.1 (chartCoordEquiv W 2 (Ideal.Quotient.mk
+    (MvPolynomial.X ⟨0, by decide⟩))) = p := ⟨_, rfl⟩
+  obtain ⟨q, hq⟩ : ∃ q : R, φ (chartCoordEquiv W 2 (Ideal.Quotient.mk
     (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
-    (MvPolynomial.X ⟨1, by decide⟩))) with hq
-  -- the Weierstrass equation, from the dehomogenised cubic relation
-  have hcubic0 : φ.1 (chartCoordEquiv W 2 (Ideal.Quotient.mk
-      (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
-      (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial))) = 0 := by
-    rw [Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _),
-      map_zero, map_zero]
-  have haev := chart_hom_aeval W 2 φ.1 φ.2
-    (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial)
-  rw [hcubic0] at haev
-  have hpoly : MvPolynomial.aeval (fun j : {j : Fin 3 // j ≠ 2} =>
-      φ.1 (chartCoordEquiv W 2 (Ideal.Quotient.mk
-        (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
-        (MvPolynomial.X j))))
-      (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial) =
-      q ^ 2 + W.a₁ * p * q + W.a₃ * q
-        - (p ^ 3 + W.a₂ * p ^ 2 + W.a₄ * p + W.a₆) := by
-    simp only [WeierstrassCurve.Projective.polynomial]
-    simp only [map_sub, map_add, map_mul, map_pow, MvPolynomial.dehomogenizeAux_C,
-      MvPolynomial.dehomogenizeAux_X_self,
-      MvPolynomial.dehomogenizeAux_X_ne _ _ (show (0 : Fin 3) ≠ 2 by decide),
-      MvPolynomial.dehomogenizeAux_X_ne _ _ (show (1 : Fin 3) ≠ 2 by decide),
-      MvPolynomial.aeval_C, MvPolynomial.aeval_X, mul_one, one_pow]
-    rfl
-  have heq : W.toAffine.Equation p q := by
-    rw [WeierstrassCurve.Affine.equation_iff]
-    have hval : q ^ 2 + W.a₁ * p * q + W.a₃ * q
-        - (p ^ 3 + W.a₂ * p ^ 2 + W.a₄ * p + W.a₆) = 0 :=
-      hpoly.symm.trans haev.symm
-    linear_combination hval
-  refine ⟨p, q, heq, ?_⟩
-  -- the affine section as a chart-factoring point
+    (MvPolynomial.X ⟨1, by decide⟩))) = q := ⟨_, rfl⟩
+  have heq : W.toAffine.Equation p q := chartHom_coord_equation W φ hφ hp hq
   have hπaff : projModelAffineSection W p q heq ≫ projModelπ W =
       Spec.map (CommRingCat.ofHom (algebraMap R R)) := by
     rw [projModelAffineSection_projModelπ, Algebra.algebraMap_self,
       CommRingCat.ofHom_id, Spec.map_id]
-  set gaff : { g : SpecPoints (projModel W) (projModelπ W) R //
-      ∃ h : Spec (CommRingCat.of R) ⟶ Spec (CommRingCat.of
-          (Away (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))),
-        h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
-          (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 } :=
-    ⟨⟨projModelAffineSection W p q heq, hπaff⟩,
-      projModelAffineChart W p q heq, projModelAffineChart_fac W p q heq⟩ with hgaff
-  -- the chart hom of the affine section is the affine-chart evaluation
-  have h1 : chartHomEquiv W 2 R gaff =
-      ⟨affineChartHom W p q heq, affineChartHom_comp_algebraMap W p q heq⟩ :=
-    chartHomEquiv_eq_of_specMap W 2 gaff
-      ⟨affineChartHom W p q heq, affineChartHom_comp_algebraMap W p q heq⟩
-      (spec_affineChartHom_awayι W p q heq)
-  -- the two chart homs agree (values on constants and the two coordinates)
-  have hhom : φ.1 = affineChartHom W p q heq := by
-    have hext : φ.1.comp (((chartCoordEquiv W 2 :
-          MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸
-            Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial} ≃+*
-          Away (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) :
-          MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸
-            Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial} →+*
-          Away (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) =
-        (affineChartHom W p q heq).comp (((chartCoordEquiv W 2 : _ ≃+* _) :
-          MvPolynomial {j : Fin 3 // j ≠ 2} R ⧸
-            Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial} →+*
-          Away (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) := by
-      refine Ideal.Quotient.ringHom_ext
-        (MvPolynomial.ringHom_ext (fun r => ?_) (fun j => ?_))
-      · -- constants: both sides are the `R`-structure
-        show φ.1 (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.C r))) =
-          (affineChartHom W p q heq)
-            (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.C r)))
-        rw [chartCoordEquiv_mk_C]
-        exact (RingHom.congr_fun φ.2 r).trans
-          (RingHom.congr_fun (affineChartHom_comp_algebraMap W p q heq) r).symm
-      · -- coordinates: `X/Z ↦ p`, `Y/Z ↦ q`
-        show φ.1 (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.X j))) =
-          (affineChartHom W p q heq)
-            (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.X j)))
-        have hval : (affineChartHom W p q heq)
-            (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.X j))) =
-            MvPolynomial.eval ![p, q, 1] (MvPolynomial.X j.1) := by
-          rw [chartCoordEquiv_mk_X]
-          rw [show Away.isLocalizationElem (mk_X_mem_quotientGrading_one W 2)
-              (mk_X_mem_quotientGrading_one W j.1) =
-            Away.mk (quotientGrading (projIdeal W))
-              (mk_X_mem_quotientGrading_one W 2) 1
-              (((quotientGradingHom (projIdeal W)) (MvPolynomial.X j.1)) ^ 1)
-              (by
-                simpa using SetLike.pow_mem_graded 1
-                  (mk_X_mem_quotientGrading_one W j.1)) from rfl]
-          rw [affineChartHom_mk, map_pow, pow_one]
-          rw [show (quotientGradingHom (projIdeal W)) (MvPolynomial.X j.1) =
-            Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X j.1) from rfl]
-          rw [projModelAffineEval_mk]
-        rw [hval]
-        rcases j with ⟨j, hj⟩
-        fin_cases j
-        · exact hp.symm.trans (by simp)
-        · exact hq.symm.trans (by simp)
-        · simp at hj
-    refine RingHom.ext fun a => ?_
-    obtain ⟨b, rfl⟩ := (chartCoordEquiv W 2).surjective a
-    exact RingHom.congr_fun hext b
-  -- injectivity of the chart-point correspondence
-  have hgceq : gc = gaff := by
-    refine (chartHomEquiv W 2 R).injective ?_
-    rw [h1, ← hφdef]
-    exact Subtype.ext hhom
-  have := congrArg (fun z => z.1.1) hgceq
-  simpa [hgc, hgaff] using this
+  refine ⟨p, q, heq, congrArg (fun z => z.1.1) ((chartHomEquiv W 2 R).injective
+    (hgc.trans (Subtype.ext (eq_affineChartHom_of_coord_values W φ hφ heq hp hq)) |>.trans
+      (chartHomEquiv_eq_of_specMap W 2
+        ⟨⟨projModelAffineSection W p q heq, hπaff⟩,
+          projModelAffineChart W p q heq, projModelAffineChart_fac W p q heq⟩
+        ⟨affineChartHom W p q heq, affineChartHom_comp_algebraMap W p q heq⟩
+        (spec_affineChartHom_awayι W p q heq)).symm))⟩
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([hArb-1] companion: coordinate uniqueness)** The affine-point section determines
 its coordinates: compose with the chart factorisation and read the two chart
 coordinates off the evaluation homs. -/
@@ -221,37 +230,18 @@ theorem projModelAffineSection_injective (W : WeierstrassCurve R) {p q p' q' : R
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
         (mk_X_mem_quotientGrading_one W 2) one_pos)).mp this
     exact congrArg CommRingCat.Hom.hom (Spec.map_injective h1)
-  -- read the coordinates
-  have hval : ∀ (j : {j : Fin 3 // j ≠ 2}) (a b : R) (ha : W.toAffine.Equation a b),
-      (affineChartHom W a b ha)
-        (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.X j))) =
-        MvPolynomial.eval ![a, b, 1] (MvPolynomial.X j.1) := by
-    intro j a b ha
-    rw [chartCoordEquiv_mk_X]
-    rw [show Away.isLocalizationElem (mk_X_mem_quotientGrading_one W 2)
-        (mk_X_mem_quotientGrading_one W j.1) =
-      Away.mk (quotientGrading (projIdeal W))
-        (mk_X_mem_quotientGrading_one W 2) 1
-        (((quotientGradingHom (projIdeal W)) (MvPolynomial.X j.1)) ^ 1)
-        (by
-          simpa using SetLike.pow_mem_graded 1
-            (mk_X_mem_quotientGrading_one W j.1)) from rfl]
-    rw [affineChartHom_mk, map_pow, pow_one]
-    rw [show (quotientGradingHom (projIdeal W)) (MvPolynomial.X j.1) =
-      Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X j.1) from rfl]
-    rw [projModelAffineEval_mk]
   constructor
   · have h0 := congrArg (fun (ψ : Away (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) →+* R) =>
       ψ (chartCoordEquiv W 2 (Ideal.Quotient.mk _
         (MvPolynomial.X (⟨0, by decide⟩ : {j : Fin 3 // j ≠ 2}))))) hch
-    simp only [hval] at h0
+    simp only [affineChartHom_chartCoordEquiv_X] at h0
     simpa using h0
   · have h0 := congrArg (fun (ψ : Away (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) →+* R) =>
       ψ (chartCoordEquiv W 2 (Ideal.Quotient.mk _
         (MvPolynomial.X (⟨1, by decide⟩ : {j : Fin 3 // j ≠ 2}))))) hch
-    simp only [hval] at h0
+    simp only [affineChartHom_chartCoordEquiv_X] at h0
     simpa using h0
 
 end ModularCurves

@@ -3413,93 +3413,11 @@ theorem e4ClassifyingMap_pulled :
   rw [← SpecMap_ΓSpecIso_hom, ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id]
   exact Category.comp_id _
 
-open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
-set_option backward.isDefEq.respectTransparency false in
-/-- **(E4A-13, abstract-curve barrier i)** The tautological presentation's chart
-isomorphism factors the fibre `pullback.fst` over the whole `Spec`. Proved once over an
-abstract elliptic `W` — where `(tautPresentation W).e.hom` folds cheaply because `W` is a
-variable — so the concrete `universalE4`-instance never re-`whnf`s its localized-quotient
-coefficients. -/
-private theorem tautPresentation_fst_factor {A : Type u} [CommRing A]
-    (W : WeierstrassCurve A) [W.IsElliptic] :
-    letI : Algebra A Γ(Spec (CommRingCat.of A), ⊤) :=
-      (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom.toAlgebra
-    pullback.fst (projModelπ W) (⊤ : (Spec (CommRingCat.of A)).Opens).ι =
-      (tautPresentation W).e.hom ≫
-        (isPullback_projModelBaseChange W).isoPullback.hom ≫
-        pullback.fst (projModelπ W)
-          (Spec.map (CommRingCat.ofHom (algebraMap A
-            Γ(Spec (CommRingCat.of A), ⊤)))) := by
-  letI : Algebra A Γ(Spec (CommRingCat.of A), ⊤) :=
-    (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom.toAlgebra
-  haveI : IsIso (⊤ : (Spec (CommRingCat.of A)).Opens).ι := by
-    rw [← Scheme.topIso_hom]; infer_instance
-  haveI : IsIso (Spec.map (CommRingCat.ofHom (algebraMap A
-      Γ(Spec (CommRingCat.of A), ⊤)))) := by
-    have h : CommRingCat.ofHom (algebraMap A Γ(Spec (CommRingCat.of A), ⊤)) =
-      (Scheme.ΓSpecIso (CommRingCat.of A)).inv := rfl
-    rw [h]; infer_instance
-  rw [show (tautPresentation W).e.hom =
-    (asIso (pullback.fst (projModelπ W) (⊤ : (Spec (CommRingCat.of A)).Opens).ι) ≪≫
-    (asIso (pullback.fst (projModelπ W) (Spec.map (CommRingCat.ofHom
-      (algebraMap A Γ(Spec (CommRingCat.of A), ⊤)))))).symm ≪≫
-    (isPullback_projModelBaseChange W).isoPullback.symm).hom from rfl]
-  simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
-    Iso.inv_hom_id_assoc, IsIso.inv_hom_id, Category.comp_id]
-
-open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
-set_option backward.isDefEq.respectTransparency false in
-/-- **(E4A-13, abstract-curve barrier ii)** `transport_e_baseChange` for the tautological
-presentation, with `(tautPresentation W).W` pre-folded to `W.map _` in the conclusion (a
-defeq that is cheap over an abstract `W`, expensive over `universalE4`). -/
-private lemma taut_transport_fold {A : Type u} [CommRing A] (W : WeierstrassCurve A)
-    [W.IsElliptic] {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
-    (f : S' ⟶ Spec (CommRingCat.of A))
-    (t : G'.E ⟶ (modelEllipticCurve W).toEllipticCurveGeom.E)
-    (hsq : IsPullback t G'.π (modelEllipticCurve W).toEllipticCurveGeom.π f)
-    (hz : G'.zero ≫ t = f ≫ (modelEllipticCurve W).toEllipticCurveGeom.zero)
-    {V' : S'.affineOpens}
-    (hV' : V'.1 ≤ f ⁻¹ᵁ (⟨⊤, isAffineOpen_top _⟩ :
-      (Spec (CommRingCat.of A)).affineOpens).1) :
-    transportTheta f t hsq hV' ≫ (tautPresentation W).e.hom =
-      ((tautPresentation W).transport f t hsq hz hV').e.hom ≫
-        projModelBaseChange (sectionsMapLE f hV')
-          (W.map ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom)) :=
-  (transport_e_baseChange f t hsq hz (tautPresentation W) hV').symm
-
-open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
-set_option backward.isDefEq.respectTransparency false in
-/-- **(E4A-13, abstract-curve barrier iii)** The whole universal-side chain — fibre
-factorisation (`tautPresentation_fst_factor`), transport base change (`taut_transport_fold`),
-`isoPullback_hom_fst`, and the base-change composite (`projModelBaseChange_comp'`) — collapsed
-to a single base change along `(sectionsMapLE f hV').comp _`. Assembled once over an abstract
-`W`; instantiating at `universalE4` in `e4Top_pulled` then pays the coefficient `whnf` exactly
-once, which is what removes the historical `maxHeartbeats` bump. -/
-private lemma taut_universalSide {A : Type u} [CommRing A] (W : WeierstrassCurve A)
-    [W.IsElliptic] {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
-    (f : S' ⟶ Spec (CommRingCat.of A))
-    (t : G'.E ⟶ (modelEllipticCurve W).toEllipticCurveGeom.E)
-    (hsq : IsPullback t G'.π (modelEllipticCurve W).toEllipticCurveGeom.π f)
-    (hz : G'.zero ≫ t = f ≫ (modelEllipticCurve W).toEllipticCurveGeom.zero)
-    {V' : S'.affineOpens}
-    (hV' : V'.1 ≤ f ⁻¹ᵁ (⟨⊤, isAffineOpen_top _⟩ :
-      (Spec (CommRingCat.of A)).affineOpens).1) :
-    transportTheta f t hsq hV' ≫ pullback.fst (projModelπ W)
-        (⊤ : (Spec (CommRingCat.of A)).Opens).ι =
-      ((tautPresentation W).transport f t hsq hz hV').e.hom ≫
-        projModelBaseChange ((sectionsMapLE f hV').comp
-          ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom)) W := by
-  letI : Algebra A Γ(Spec (CommRingCat.of A), ⊤) :=
-    (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom.toAlgebra
-  rw [tautPresentation_fst_factor W, ← Category.assoc,
-    taut_transport_fold W f t hsq hz hV']
-  simp only [Category.assoc]
-  rw [show (isPullback_projModelBaseChange W).isoPullback.hom ≫
-      pullback.fst (projModelπ W) (Spec.map (CommRingCat.ofHom
-        (algebraMap A Γ(Spec (CommRingCat.of A), ⊤)))) =
-    projModelBaseChange ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom) W from
-    (isPullback_projModelBaseChange W).isoPullback_hom_fst]
-  rw [← projModelBaseChange_comp']
+-- `tautPresentation_fst_factor`, `taut_transport_fold` and `taut_universalSide` used to
+-- be private here; they are now public in `Moduli/UniversalAdapted.lean`, immediately
+-- after `tautPresentation` — the earliest file of the import chain — so the whole
+-- universal-curve family (`classifyingTop_omegaBasisMap`, `legendreTop_pulled`,
+-- `e3Top_pulled`, `e4Top_pulled`) shares one abstract-curve barrier.
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in

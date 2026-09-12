@@ -1629,10 +1629,15 @@ private theorem
   have heik' := congrArg
     (fun m ↦ (pullback t.p₁₃).map (pullbackUnitIso q).hom ≫ m) heik
   have hunit' := congrArg (fun m ↦ m ≫ eik.inv) hunit
-  have hhead := hmap'.trans (heik'.symm.trans hunit'.symm)
+  -- Re-associate explicitly at each junction and close with `exact`: leaving the
+  -- associativity to definitional unfolding (in `trans` or `convert … <;> rfl`) makes the
+  -- lean4#14806 kernel unfold the module categories and exceed the budget.
+  have hhead := hmap'.trans ((Category.assoc _ _ _).trans
+    (heik'.symm.trans ((Category.assoc _ _ _).symm.trans hunit'.symm)))
   have hhead' := congrArg (fun m ↦ m ≫ tij) hhead
-  have h := htail'.trans hhead'
-  convert h using 1 <;> rfl
+  have h := htail'.trans ((Category.assoc _ _ _).symm.trans
+    (hhead'.trans ((Category.assoc _ _ _).trans (Category.assoc _ _ _))))
+  exact h
 
 private noncomputable def
     AffineIntersectionUnitCocycle.chartLocalComponentLeftBaseChanged
@@ -1979,6 +1984,50 @@ private theorem AffineIntersectionUnitCocycle.chartLocalLeftMap_right_self_isIso
   exact IsIso.comp_isIso' hmap
     (IsIso.comp_isIso' hcomp (IsIso.comp_isIso' hcongr hunit))
 
+/- DECOMPOSE: UNRESOLVED — do not retry without new information. 55 lines (statement 17,
+   proof 38); the target was a <15-line proof.
+   Reason: (kernel) deterministic timeout at the default budget (lean4#14806); no override to
+   remove. This theorem CANNOT be decomposed without changing a statement or restoring a
+   heartbeat budget, both of which are forbidden. Leave it exactly as it is; the 8-module
+   GlueEffectivity subtree stays excluded, which is the status quo and not a regression.
+   MATH: On the triple overlap, the left chart-local component of the cocycle, i.e. tuple
+     component, then restrict iso, then chartToOverlapLeft, then overlap restrict iso, is the
+     adjoint transpose along `t.p₃` of `pullbackUnitIso ≫ transition⁻¹ ≫ transition-pullback`.
+   ROOT CAUSE (measured, decisive): the kernel cannot relate the composite in
+     `chartLocalCompositePullback_eq` (l. 1586) to ANY other spelling of itself within budget.
+     A lemma whose statement is a let-free spelling of that same composite and whose entire
+     proof is `exact c.chartLocalCompositePullback_eq hopen hpush k i j` ITSELF times out.
+     Since every decomposition necessarily restates the fact, no extracted helper can be cheap:
+     the only affordable use of l. 1586 is the verbatim one this proof already makes.
+   MEASURED — variants compiled one at a time against a truncated 2109-line copy of this file
+   (cut just after this theorem). The control reproduces the failure, so the harness is valid:
+     control, unchanged                          timeout @ this theorem    99 s / 4 GB
+     left-assoc variant of l. 1586, by replay    timeout @ THE VARIANT     (consumer → cascade)
+     generic re-assoc helper on free vars, apply timeout @ this theorem    96 s
+     ditto, consumer as one explicit exact term  timeout @ this theorem    96 s
+     let-free restatement of l. 1586 (unused)    timeout @ THE RESTATEMENT 130 s
+     ditto, consumer switched to it              timeout @ THE RESTATEMENT  98 s
+   The left-assoc replay is the key negative: it never touches l. 1586, yet the variant alone
+   times out. So the cost follows the STATEMENT, not any conversion — which retroactively
+   explains why every `convert`/`exact`/`rw` path below also measured 33 s. The two re-assoc
+   variants then eliminate association as the operative variable altogether, and the let-free
+   pair eliminates the statement-level `let`.
+   ALSO RULED OUT EARLIER (previous session, same method):
+     unchanged proof = kernel timeout at 32.9-33.3 s; truncated after the `change` = passes, no
+     kernel step > 100 ms; a generic whole-argument helper = helper < 100 ms but consumer still
+     32.9 s; regular-definition wrappers + `simp only [← …]` = still 33 s; flattened mate helper
+     with the l. 1586 fact STUBBED = passes fast, with the real fact = 33 s.
+   Mismatched leaves are NOT the problem: 141 object-level pairs (`GlueData.V (i,k)` vs
+     `ChosenPullback.pullback (sq i k)`, `unitObj X` vs `SheafOfModules.unit X.ringCatSheaf`,
+     `D.t`/`D.f` vs `overlapTransition`/`affineIntersectionOverlapι`) each check in 0 ms. The
+     cost is the kernel REACHING them under projection heads (`≫`, `Functor.map`, `NatTrans.app`,
+     `homEquiv`), which it reduces before comparing arguments.
+   TOOLING NOTE: `Meta`-level `Kernel.isDefEq` probes are UNFAITHFUL here — all 62 argument
+     crossings measured under 150 ms while the declaration took 33 s, because in `Meta` the two
+     sides share pointer-identical subterms and keep `let`s folded. Bisect by compiling variants.
+   WHAT WOULD ACTUALLY HELP: an upstream fix for lean4#14806, or a defeq-cheap reformulation of
+     the module-category composition itself — neither is in scope for a decomposition pass.
+-/
 private theorem AffineIntersectionUnitCocycle.chartLocalComponent_left
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
     (c : AffineIntersectionUnitCocycle F)
@@ -4729,13 +4778,9 @@ private theorem affineIntersectionTwoTransition
         affineIntersectionTransportedChartTrivialization
           π U e hU j (sq i j).p₂ q.inv := by
   classical
-  dsimp only
-  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let D := π.affineIntersectionGlueData U hU
-  let sq := affineIntersectionChartChosenPullback hopen hpush
-  let g := π.affineIntersectionGluedToOriginal U hU
-  let q := π.affineIntersectionOverlapIso U hU i j
+  -- Keep the statement's `let`s bound: `dsimp only` would unfold the glue-datum `abbrev`s
+  -- inside the composites, and the mixed forms cost the lean4#14806 kernel an unbounded check.
+  intro hopen hpush D sq g M q Li Lj scalar
   let hcI := affineIntersectionOverlapIso_inv_comp_left_chartIso π U hU i j
   let hcJ := affineIntersectionOverlapIso_inv_comp_right_chartIso π U hU i j
   let hSourceI : (q.inv ≫ (sq i j).p₁) ≫ (D.ι i ≫ g) =
@@ -4779,15 +4824,8 @@ private theorem affineIntersectionLeftScalarNormalization
       affineIntersectionTransportedChartTrivialization
           π U e hU i (sq i j).p₁ q.inv ≫ scalar := by
   classical
-  dsimp only
-  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let sq := affineIntersectionChartChosenPullback hopen hpush
-  let q := π.affineIntersectionOverlapIso U hU i j
-  let scalar := ModularCurves.unitEndomorphismOfTopSection
-    (openTopSection (U i ⊓ U j)
-      (trivializingCoverTransitionUnitOn U e (U i ⊓ U j) i j
-        inf_le_left inf_le_right : Γ(X, U i ⊓ U j)))
+  -- Keep the statement's `let`s bound (see `affineIntersectionTwoTransition`).
+  intro hopen hpush sq q scalar
   have hi := affineIntersectionOriginalChartTrivialization_comp_precomp_hom
     π U e hU i (sq i j).p₁ q.inv
   exact (comp_four_group_first_three _ _ _ _).trans
@@ -4820,20 +4858,8 @@ private theorem affineIntersectionRightPrefixNormalization
         affineIntersectionTransportedChartTrivialization
           π U e hU j (sq i j).p₂ q.inv := by
   classical
-  dsimp only
-  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
-  let D := π.affineIntersectionGlueData U hU
-  let sq := affineIntersectionChartChosenPullback hopen hpush
-  let g := π.affineIntersectionGluedToOriginal U hU
-  let M := (pullback g).obj N
-  let q := π.affineIntersectionOverlapIso U hU i j
-  let Li := ((pullbackComp (sq i j).p₁ (D.ι i)).app M) ≪≫
-    ((pullbackCongr (sq i j).hp₁).app M)
-  let Lj := ((pullbackComp (sq i j).p₂ (D.ι j)).app M) ≪≫
-    ((pullbackCongr (sq i j).hp₂).app M)
-  let tj := (pullback (sq i j).p₂).map
-    (affineIntersectionOriginalChartTrivialization π U e hU j).hom
+  -- Keep the statement's `let`s bound (see `affineIntersectionTwoTransition`).
+  intro hopen hpush D sq g M q Li Lj tj
   have hj := affineIntersectionOriginalChartTrivialization_comp_precomp_hom
     π U e hU j (sq i j).p₂ q.inv
   exact comp_pair_with_triple_of_eq
@@ -4954,8 +4980,10 @@ theorem affineIntersectionOriginalChartTrivialization_isCompatible
     c.IsCompatibleChartTrivialization hopen hpush M
       (affineIntersectionOriginalChartTrivialization π U e hU) := by
   classical
-  dsimp only [AffineIntersectionUnitCocycle.IsCompatibleChartTrivialization]
-  intro i j
+  -- Introduce the statement's `let`s and the two indices without `dsimp`: reducing the
+  -- glue-datum `abbrev`s in the unfolded compatibility condition leaves mixed forms that the
+  -- lean4#14806 kernel cannot match against `…_pulled_transition` within the budget.
+  intro hopen hpush D g M c i j
   let q := π.affineIntersectionOverlapIso U hU i j
   letI : (pullback q.inv).IsEquivalence :=
     pullback_isEquivalence_of_iso q.symm

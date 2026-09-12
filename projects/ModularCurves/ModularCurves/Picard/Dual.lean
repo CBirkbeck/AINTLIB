@@ -449,14 +449,34 @@ private noncomputable def iteratedOverEquivalence (U : C) (V : Over U) :
     (S := (R.over U).over V) (R := R.over V.left) (𝟙 _) (𝟙 _)
     (by ext : 2; exact R.1.map_id _) (by ext : 2; exact R.1.map_id _)).symm
 
-set_option maxHeartbeats 2000000 in
+/-- The iterated-slice equivalence carries the twice-restricted module to the restriction
+to `Over V.left`.  Built COMPONENTWISE (`Iso.refl` at each object) rather than as a single
+structural `isDefEq` on whole `SheafOfModules`. -/
+private noncomputable def iteratedOverObjIso (M : _root_.SheafOfModules R) (U : C)
+    (V : Over U) :
+    (iteratedOverEquivalence R U V).functor.obj ((M.over U).over V) ≅ M.over V.left :=
+  (_root_.SheafOfModules.fullyFaithfulForget _).preimageIso
+    (PresheafOfModules.isoMk (fun _ ↦ Iso.refl _))
+
+/-- The same componentwise identification for the unit module. -/
+private noncomputable def iteratedOverUnitIso (U : C) (V : Over U) :
+    (iteratedOverEquivalence R U V).functor.obj
+        (_root_.SheafOfModules.unit ((R.over U).over V)) ≅
+      _root_.SheafOfModules.unit (R.over V.left) :=
+  (_root_.SheafOfModules.fullyFaithfulForget _).preimageIso
+    (PresheafOfModules.isoMk (fun _ ↦ Iso.refl _))
+
+/-- Reindexing a local functional along the iterated-slice identification. -/
 private noncomputable def iteratedDualSectionsEquiv
     (M : _root_.SheafOfModules R) (U : C) (V : Over U) :
     (((M.over U).over V ⟶ _root_.SheafOfModules.unit ((R.over U).over V))) ≃
       (M.over V.left ⟶ _root_.SheafOfModules.unit (R.over V.left)) :=
-  (iteratedOverEquivalence R U V).fullyFaithfulFunctor.homEquiv
+  (iteratedOverEquivalence R U V).fullyFaithfulFunctor.homEquiv.trans
+    (Iso.homCongr (iteratedOverObjIso R M U V) (iteratedOverUnitIso R U V))
 
-set_option maxHeartbeats 2000000 in
+/-- The reindexing equivalence is additive and `R(V.left)`-linear: it is the identity on
+underlying sections, and both module structures are postcomposition with scalar
+multiplication on the unit module. -/
 private noncomputable def iteratedDualSectionsLinearEquiv
     (M : _root_.SheafOfModules R) (U : C) (V : Over U) :
     letI : Module (R.obj.obj (op V.left))
@@ -472,8 +492,22 @@ private noncomputable def iteratedDualSectionsLinearEquiv
   letI := dualSectionsModule R M V.left
   exact
     { toEquiv := iteratedDualSectionsEquiv R M U V
-      map_add' := by intros; rfl
-      map_smul' := by intros; rfl }
+      map_add' := fun _ _ => by
+        apply (_root_.SheafOfModules.forget _).map_injective
+        apply PresheafOfModules.hom_ext
+        intro W
+        apply ModuleCat.hom_ext
+        apply LinearMap.ext
+        intro x
+        rfl
+      map_smul' := fun _ _ => by
+        apply (_root_.SheafOfModules.forget _).map_injective
+        apply PresheafOfModules.hom_ext
+        intro W
+        apply ModuleCat.hom_ext
+        apply LinearMap.ext
+        intro x
+        rfl }
 
 /-- Restricting a dual presheaf to an over-site agrees with taking the dual after
 restriction. -/

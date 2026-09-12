@@ -67,7 +67,6 @@ private noncomputable def restrictAbsES {n : ℕ} :
     rw [norm_eq_zero]; exact ⟨fun h => by exact_mod_cast h, fun h => by rw [h]; rfl⟩
   add_le' x y := by push_cast; exact norm_add_le _ _
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- the `spectralNorm`/`finiteDimensional` reasoning runs through the nested
 -- `IntermediateField (K p n) (extendScalars …)` layer; instance synthesis exceeds defaults
 private theorem norm_coe_eq_spectralNorm_ES {n : ℕ}
@@ -82,7 +81,6 @@ private theorem norm_coe_eq_spectralNorm_ES {n : ℕ}
       = algebraMap ℚ_[p] ℂ_[p] k by rw [← IntermediateField.algebraMap_apply]; rfl]
   simp
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- the `minpoly`/`spectralNorm` reasoning runs through the nested
 -- `IntermediateField (K p n) (extendScalars …)` layer; instance synthesis exceeds defaults
 private theorem norm_algEquiv_ES {n : ℕ}
@@ -93,7 +91,6 @@ private theorem norm_algEquiv_ES {n : ℕ}
   rw [norm_coe_eq_spectralNorm_ES p (σ z), norm_coe_eq_spectralNorm_ES p z,
     spectralNorm, spectralNorm, minpoly.algEquiv_eq σ z]
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- the `IsGalois`/`norm_eq_prod_automorphisms` reasoning runs through the nested
 -- `IntermediateField (K p n) (extendScalars …)` layer; instance synthesis exceeds defaults
 /-- **Norm-residue compatibility** (RJW §12.1, TeX 3162 — totally-ramified ⟹ trivial residue

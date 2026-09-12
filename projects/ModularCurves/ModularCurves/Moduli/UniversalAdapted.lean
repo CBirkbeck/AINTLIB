@@ -29,9 +29,7 @@ short-normal-form Weierstrass curve `y² = x³ + A₄x + A₆` over it — the c
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false
 
-set_option synthInstance.maxHeartbeats 6400000
 set_option maxSynthPendingDepth 5
-set_option maxHeartbeats 6400000
 
 universe u
 
@@ -136,6 +134,94 @@ noncomputable def tautPresentation {A : Type u} [CommRing A] (W : WeierstrassCur
       ← (isPullback_projModelBaseChange W).isoPullback_hom_fst_assoc,
       IsIso.hom_inv_id_assoc, Iso.hom_inv_id, Category.comp_id]
 
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(abstract-curve barrier i)** The tautological presentation's chart isomorphism
+factors the fibre `pullback.fst` over the whole `Spec`. Proved once over an abstract
+elliptic `W` — where `(tautPresentation W).e.hom` folds cheaply because `W` is a
+variable — so a concrete universal-curve instance never re-`whnf`s its
+localized-quotient coefficients. -/
+theorem tautPresentation_fst_factor {A : Type u} [CommRing A]
+    (W : WeierstrassCurve A) [W.IsElliptic] :
+    letI : Algebra A Γ(Spec (CommRingCat.of A), ⊤) :=
+      (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom.toAlgebra
+    pullback.fst (projModelπ W) (⊤ : (Spec (CommRingCat.of A)).Opens).ι =
+      (tautPresentation W).e.hom ≫
+        (isPullback_projModelBaseChange W).isoPullback.hom ≫
+        pullback.fst (projModelπ W)
+          (Spec.map (CommRingCat.ofHom (algebraMap A
+            Γ(Spec (CommRingCat.of A), ⊤)))) := by
+  letI : Algebra A Γ(Spec (CommRingCat.of A), ⊤) :=
+    (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom.toAlgebra
+  haveI : IsIso (⊤ : (Spec (CommRingCat.of A)).Opens).ι := by
+    rw [← Scheme.topIso_hom]; infer_instance
+  haveI : IsIso (Spec.map (CommRingCat.ofHom (algebraMap A
+      Γ(Spec (CommRingCat.of A), ⊤)))) := by
+    have h : CommRingCat.ofHom (algebraMap A Γ(Spec (CommRingCat.of A), ⊤)) =
+      (Scheme.ΓSpecIso (CommRingCat.of A)).inv := rfl
+    rw [h]; infer_instance
+  rw [show (tautPresentation W).e.hom =
+    (asIso (pullback.fst (projModelπ W) (⊤ : (Spec (CommRingCat.of A)).Opens).ι) ≪≫
+    (asIso (pullback.fst (projModelπ W) (Spec.map (CommRingCat.ofHom
+      (algebraMap A Γ(Spec (CommRingCat.of A), ⊤)))))).symm ≪≫
+    (isPullback_projModelBaseChange W).isoPullback.symm).hom from rfl]
+  simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
+    Iso.inv_hom_id_assoc, IsIso.inv_hom_id, Category.comp_id]
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(abstract-curve barrier ii)** `transport_e_baseChange` for the tautological
+presentation, with `(tautPresentation W).W` pre-folded to `W.map _` in the conclusion (a
+defeq that is cheap over an abstract `W`, expensive over a universal curve). -/
+lemma taut_transport_fold {A : Type u} [CommRing A] (W : WeierstrassCurve A)
+    [W.IsElliptic] {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
+    (f : S' ⟶ Spec (CommRingCat.of A))
+    (t : G'.E ⟶ (modelEllipticCurve W).toEllipticCurveGeom.E)
+    (hsq : IsPullback t G'.π (modelEllipticCurve W).toEllipticCurveGeom.π f)
+    (hz : G'.zero ≫ t = f ≫ (modelEllipticCurve W).toEllipticCurveGeom.zero)
+    {V' : S'.affineOpens}
+    (hV' : V'.1 ≤ f ⁻¹ᵁ (⟨⊤, isAffineOpen_top _⟩ :
+      (Spec (CommRingCat.of A)).affineOpens).1) :
+    transportTheta f t hsq hV' ≫ (tautPresentation W).e.hom =
+      ((tautPresentation W).transport f t hsq hz hV').e.hom ≫
+        projModelBaseChange (sectionsMapLE f hV')
+          (W.map ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom)) :=
+  (transport_e_baseChange f t hsq hz (tautPresentation W) hV').symm
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(abstract-curve barrier iii)** The whole universal-side chain — fibre
+factorisation (`tautPresentation_fst_factor`), transport base change (`taut_transport_fold`),
+`isoPullback_hom_fst`, and the base-change composite (`projModelBaseChange_comp'`) — collapsed
+to a single base change along `(sectionsMapLE f hV').comp _`. Assembled once over an abstract
+`W`; instantiating at a universal curve then pays the coefficient `whnf` exactly once, which
+is what removes the historical `maxHeartbeats` bumps in the `*Top_pulled` family. -/
+lemma taut_universalSide {A : Type u} [CommRing A] (W : WeierstrassCurve A)
+    [W.IsElliptic] {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
+    (f : S' ⟶ Spec (CommRingCat.of A))
+    (t : G'.E ⟶ (modelEllipticCurve W).toEllipticCurveGeom.E)
+    (hsq : IsPullback t G'.π (modelEllipticCurve W).toEllipticCurveGeom.π f)
+    (hz : G'.zero ≫ t = f ≫ (modelEllipticCurve W).toEllipticCurveGeom.zero)
+    {V' : S'.affineOpens}
+    (hV' : V'.1 ≤ f ⁻¹ᵁ (⟨⊤, isAffineOpen_top _⟩ :
+      (Spec (CommRingCat.of A)).affineOpens).1) :
+    transportTheta f t hsq hV' ≫ pullback.fst (projModelπ W)
+        (⊤ : (Spec (CommRingCat.of A)).Opens).ι =
+      ((tautPresentation W).transport f t hsq hz hV').e.hom ≫
+        projModelBaseChange ((sectionsMapLE f hV').comp
+          ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom)) W := by
+  letI : Algebra A Γ(Spec (CommRingCat.of A), ⊤) :=
+    (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom.toAlgebra
+  rw [tautPresentation_fst_factor W, ← Category.assoc,
+    taut_transport_fold W f t hsq hz hV']
+  simp only [Category.assoc]
+  rw [show (isPullback_projModelBaseChange W).isoPullback.hom ≫
+      pullback.fst (projModelπ W) (Spec.map (CommRingCat.ofHom
+        (algebraMap A Γ(Spec (CommRingCat.of A), ⊤)))) =
+    projModelBaseChange ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom) W from
+    (isPullback_projModelBaseChange W).isoPullback_hom_fst]
+  rw [← projModelBaseChange_comp']
+
 open Scheme in
 /-- **(E12-D2 ★)** The universal `(E, ω)`-datum over the moduli base: the projective
 model of the universal short-normal-form curve together with the `ω`-basis its
@@ -190,7 +276,6 @@ noncomputable def classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E1)** The per-chart coefficient match: specializing the universal curve
 along the classifying map, restricted to a chart-supported affine, recovers exactly
 the adapted local model. -/
@@ -269,7 +354,6 @@ noncomputable def chartPiece {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E2)** The piece map lies over the restricted classifying map. -/
 theorem chartPiece_π {R : CommRingCat.{u}} (Y : EllObj R)
     (b : OmegaBasis Y.curve.toEllipticCurveGeom)
@@ -303,9 +387,19 @@ theorem chartPiece_π {R : CommRingCat.{u}} (Y : EllObj R)
     Category.assoc]
 
 
+section OpaqueProjModelChartPiece
+
+/- `projModel` is a `Proj`-of-graded-ring construction; `cancel_epi` drives `whnf` through
+it inside the `eqToHom (congrArg projModel _)` transports below without bound on this pin
+(lean4#14806 removed the transitive kernel defeq cache, so nothing is memoised between
+re-visits). Opacity is the fix — a heartbeat budget is not — and it is scoped because the
+`projModel*` API elsewhere in the file needs transparency. Same device as
+`legendrePiece_restrict` (UniversalLegendre) and `e3Piece_restrict` (UniversalLevelThree). -/
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E3b)** The piece maps are compatible with restriction: the classifying
 pieces glue. Core: the restricted adapted model IS the smaller adapted model
 (`transVC_eq_one_of_isAdapted` through `pointedIso_hom_of_transVC_eq_one`) and the
@@ -373,7 +467,6 @@ theorem chartPiece_restrict {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E3c)** The piece map does not depend on the chart supporting the affine:
 adapted uniqueness at the shared affine. -/
 theorem chartPiece_index_congr {R : CommRingCat.{u}} (Y : EllObj R)
@@ -407,6 +500,8 @@ theorem chartPiece_index_congr {R : CommRingCat.{u}} (Y : EllObj R)
   rw [cancel_epi (Q₂.e.hom)]
   simp only [eqToHom_trans_assoc]
 
+
+end OpaqueProjModelChartPiece
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 /-- **(E12-D3-E3d)** The cover of the total space by the chart-supported affine
@@ -442,7 +537,6 @@ open CategoryTheory Limits in
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E3d)** The classifying pieces agree on overlaps: refine the fibre
 product by common affines; per-affine two restrictions plus the index congruence. -/
 private theorem chartPiece_agree {R : CommRingCat.{u}} (Y : EllObj R)
@@ -597,7 +691,6 @@ theorem classifyingTop_piece {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E4)** The glued comparison lies over the classifying map: the base
 square of the classifying `EllHom` commutes. -/
 theorem classifyingTop_π_w {R : CommRingCat.{u}} (Y : EllObj R)
@@ -644,9 +737,18 @@ noncomputable def adaptedBaseCover {R : CommRingCat.{u}} (Y : EllObj R) :
         (show x ∈ (Y.curve.toEllipticCurveGeom.atlas.U i).1 from hxi)
       exact ⟨⟨⟨⟨V₀, hVaff⟩, i⟩, hVle⟩, ⟨x, hxV⟩, rfl⟩)
 
+section OpaqueProjModelClassifyingTopZero
+
+/- As in `OpaqueProjModelChartPiece`: the leaf is `projModel (universalShortNF R)` under
+`eqToHom (congrArg projModel _)` inside `projModelZero_congr`'s transport, and the closing
+`simp only [Category.assoc]` re-chases it when the kernel re-checks the assembled term —
+which is why the failure surfaces at the declaration rather than in a tactic. Mirrors the
+`e4Top_zero` wrapper in UniversalLevelFour. -/
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E4)** The glued comparison respects the zero sections. -/
 theorem classifyingTop_zero {R : CommRingCat.{u}} (Y : EllObj R)
     (b : OmegaBasis Y.curve.toEllipticCurveGeom)
@@ -720,6 +822,8 @@ theorem classifyingTop_zero {R : CommRingCat.{u}} (Y : EllObj R)
   simp only [Category.assoc]
 
 
+end OpaqueProjModelClassifyingTopZero
+
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
 /-- **(E12-D3-E4)** The classifying map restricted to a chart-supported affine is the
@@ -746,7 +850,6 @@ theorem restrict_classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E4)** The per-chart classifying square is cartesian: the chart
 isomorphism square pasted with the model base-change square. -/
 theorem chartPiece_isPullback {R : CommRingCat.{u}} (Y : EllObj R)
@@ -802,7 +905,6 @@ theorem chartPiece_isPullback {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E4 ★★)** The classifying square is cartesian: `Y` is the pullback of the
 universal curve along the classifying map — the universality of GME Thm 2.2.3,
 geometric half. -/
@@ -884,7 +986,6 @@ theorem classifyingRingHom_algebraMap {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D4)** The classifying map lies over `Spec R`. -/
 theorem classifyingMap_structMap {R : CommRingCat.{u}} (Y : EllObj R)
     (b : OmegaBasis Y.curve.toEllipticCurveGeom)
@@ -922,7 +1023,6 @@ noncomputable def classifyingEllHom {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D4 bridge)** The basis unit is natural under `Ell/R`-transport: the basis
 unit of a transported presentation against the pulled basis is the section-comparison
 image of the original basis unit (transport-analogue of `basisUnitAt_restrict`). -/
@@ -1132,7 +1232,6 @@ theorem IsAdapted.transport {R : CommRingCat.{u}} {Y' Y : EllObj R} (φ : Y' ⟶
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D4 rt1)** The section comparison of the classifying map is the restricted
 classifying algebra (`Spec`-side determination through `restrict_classifyingMap`). -/
 theorem sectionsMapLE_classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
@@ -1173,9 +1272,16 @@ theorem sectionsMapLE_classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
   exact congrArg CommRingCat.Hom.hom hofHom
 
 
+section OpaqueProjModelTransVCTransportTaut
+
+/- As in `OpaqueProjModelChartPiece`: `simp only [Category.assoc]` and `cancel_epi` force
+`whnf` through `projModel (universalShortNF R)` over `ModuliRingE12 R`, repeatedly and
+without memoisation. -/
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D4 rt1-core ★★)** Transporting the tautological chart of the universal
 curve along the classifying morphism recovers the adapted local model: the geometric
 content of the right-inverse roundtrip. -/
@@ -1356,6 +1462,8 @@ theorem transVC_transport_taut {R : CommRingCat.{u}} (Y : EllObj R)
         _).compat_π
   rw [hkey, Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
 
+end OpaqueProjModelTransVCTransportTaut
+
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 /-- The tautological presentation is adapted to the universal `ω`-basis it induces
 (the reflexive-restriction case of `isAdapted_restrict_ofPresentation`). -/
@@ -1377,7 +1485,6 @@ theorem tautPresentation_isAdapted (R : CommRingCat.{u}) :
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D4 rt1 ★)** Roundtrip: pulling the universal `ω`-basis back along the
 classifying morphism recovers the given basis, `(classifyingEllHom Y b)^* ω_univ = b`.
 The pulled basis and `b` differ by a global unit `u` (the `𝔾ₘ`-torsor); on every
@@ -1558,7 +1665,6 @@ theorem transport_taut_e_eq {R : CommRingCat.{u}} {Y : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D4 rt2a ★)** The classifying algebra of the pulled basis is the algebra of
 `φ` itself: any `Ell/R`-morphism to the universal object induces on global sections
 exactly the classifying ring map of the basis it pulls back. Generators: `C`-scalars
@@ -1729,9 +1835,16 @@ theorem classifyingMap_omegaBasisMap {R : CommRingCat.{u}} {Y : EllObj R}
   rw [← SpecMap_ΓSpecIso_hom, ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id]
   exact Category.comp_id _
 
+section OpaqueProjModelClassifyingTopOmegaBasisMap
+
+/- As in `OpaqueProjModelChartPiece`: the `show`/`rw` bookkeeping re-decides defeqs whose
+leaf is `projModel (universalShortNF R)`, and the kernel repeats the chase when it
+re-checks the finished term. -/
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(E12-D4 rt2b ★)** Top determination: the glued classifying comparison of the
 pulled basis IS `φ`'s total-space morphism. Per chart-supported affine piece, both
 equal the chart piece of the pulled basis: `φ`'s side by `transportTheta_fst` +
@@ -1741,126 +1854,34 @@ theorem classifyingTop_omegaBasisMap {R : CommRingCat.{u}} {Y : EllObj R}
     (φ : Y ⟶ universalEllObj R)
     (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
     classifyingTop Y (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 = φ.top := by
-  letI : Algebra (ModuliRingE12 R)
-      Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤) :=
-    (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom.toAlgebra
-  haveI : IsIso (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens).ι := by
-    rw [← Scheme.topIso_hom]
-    infer_instance
-  haveI : IsIso (Spec.map (CommRingCat.ofHom (algebraMap (ModuliRingE12 R)
-      Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤)))) := by
-    have h : CommRingCat.ofHom (algebraMap (ModuliRingE12 R)
-        Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤)) =
-      (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv := rfl
-    rw [h]
-    infer_instance
-  have hfst : pullback.fst (projModelπ (universalShortNF R))
-      (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens).ι =
-      (tautPresentation (universalShortNF R)).e.hom ≫
-        (isPullback_projModelBaseChange (universalShortNF R)).isoPullback.hom ≫
-        pullback.fst (projModelπ (universalShortNF R))
-          (Spec.map (CommRingCat.ofHom (algebraMap (ModuliRingE12 R)
-            Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤)))) := by
-    rw [show (tautPresentation (universalShortNF R)).e.hom =
-      (asIso (pullback.fst (projModelπ (universalShortNF R))
-        (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens).ι) ≪≫
-      (asIso (pullback.fst (projModelπ (universalShortNF R))
-        (Spec.map (CommRingCat.ofHom (algebraMap (ModuliRingE12 R)
-          Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤)))))).symm ≪≫
-      (isPullback_projModelBaseChange (universalShortNF R)).isoPullback.symm).hom
-      from rfl]
-    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
-      Iso.inv_hom_id_assoc, IsIso.inv_hom_id, Category.comp_id]
   refine (adaptedTotalCover Y).hom_ext _ _ (fun p => ?_)
+  have hle : p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
+      (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+        (ModuliRingE12 R))).affineOpens).1 := fun x _ => trivial
   rw [classifyingTop_piece Y (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 p,
     adaptedTotalCover_f]
-  -- now: chartPiece(pulled) = fst ≫ φ.top; unfold the φ-side through the transport
+  -- chartPiece(pulled) = fst ≫ φ.top; unfold the φ-side, then collapse the entire
+  -- universal-side chain with the abstract-curve barrier `taut_universalSide` (so the
+  -- `universalShortNF` coefficient `whnf` is paid exactly once).
   rw [show pullback.fst Y.curve.toEllipticCurveGeom.π p.1.1.1.ι ≫ φ.top =
-    transportTheta φ.baseHom φ.top φ.isPullback
-      (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial) ≫
+    transportTheta φ.baseHom φ.top φ.isPullback hle ≫
       pullback.fst (projModelπ (universalShortNF R))
         (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens).ι from
     (transportTheta_fst φ.baseHom φ.top φ.isPullback _).symm]
-  rw [hfst, ← Category.assoc,
-    show transportTheta φ.baseHom φ.top φ.isPullback
-        (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
-          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-            (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial) ≫
-      (tautPresentation (universalShortNF R)).e.hom =
-    ((tautPresentation (universalShortNF R)).transport
-      φ.baseHom φ.top φ.isPullback φ.zero_w
-      (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).e.hom ≫
-      projModelBaseChange (sectionsMapLE φ.baseHom
-        (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
-          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-            (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial))
-        (tautPresentation (universalShortNF R)).W from
-    (transport_e_baseChange φ.baseHom φ.top φ.isPullback φ.zero_w
-      (tautPresentation (universalShortNF R)) _).symm]
-  rw [transport_taut_e_eq φ h2 h3 p.1.1 p.1.2 p.2]
-  -- collapse the universal-side chain into a single base change along the composite
-  have hσ : (sectionsMapLE φ.baseHom
-      (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).comp
+  rw [taut_universalSide (universalShortNF R) φ.baseHom φ.top φ.isPullback
+    φ.zero_w hle, transport_taut_e_eq φ h2 h3 p.1.1 p.1.2 p.2]
+  have hσ : (sectionsMapLE φ.baseHom hle).comp
       ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom) =
       ((Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op).hom).comp
         (classifyingRingHom Y (omegaBasisMap φ (universalOmegaBasis R)) h2 h3) := by
-    rw [sectionsMapLE_congr_hom (classifyingMap_omegaBasisMap φ h2 h3).symm
-      (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)]
+    rw [sectionsMapLE_congr_hom (classifyingMap_omegaBasisMap φ h2 h3).symm hle]
     exact sectionsMapLE_classifyingMap Y
       (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 p.1.1 (fun x _ => trivial)
-  rw [show projModelBaseChange (sectionsMapLE φ.baseHom
-      (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial))
-      (tautPresentation (universalShortNF R)).W =
-    projModelBaseChange (sectionsMapLE φ.baseHom
-      (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial))
-      ((universalShortNF R).map
-        ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom)) from rfl]
-  rw [Category.assoc, Category.assoc,
-    show (isPullback_projModelBaseChange (universalShortNF R)).isoPullback.hom ≫
-      pullback.fst (projModelπ (universalShortNF R))
-        (Spec.map (CommRingCat.ofHom (algebraMap (ModuliRingE12 R)
-          Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤)))) =
-    projModelBaseChange
-      ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom)
-      (universalShortNF R) from
-    (isPullback_projModelBaseChange (universalShortNF R)).isoPullback_hom_fst,
-    ← projModelBaseChange_comp', projModelBaseChange_congr_hom hσ
-      (universalShortNF R)]
-  rw [chartPiece]
-  show (adaptedLocal Y.curve.toEllipticCurveGeom
-      (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 p.1.1 p.1.2 p.2).e.hom ≫
-    eqToHom _ ≫
-      projModelBaseChange (((Y.base.presheaf.map (homOfLE
-        (le_top : p.1.1.1 ≤ ⊤)).op).hom).comp
-        (classifyingRingHom Y (omegaBasisMap φ (universalOmegaBasis R)) h2 h3))
-        (universalShortNF R) =
-    (adaptedLocal Y.curve.toEllipticCurveGeom
-      (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 p.1.1 p.1.2 p.2).e.hom ≫
-    (eqToHom _ : projModel (adaptedLocal Y.curve.toEllipticCurveGeom
-        (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 p.1.1 p.1.2 p.2).W ⟶
-      projModel ((universalShortNF R).map
-        ((sectionsMapLE φ.baseHom (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ (⟨⊤,
-          isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-            (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).comp
-          ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom)))) ≫
-    eqToHom _ ≫
-      projModelBaseChange (((Y.base.presheaf.map (homOfLE
-        (le_top : p.1.1.1 ≤ ⊤)).op).hom).comp
-        (classifyingRingHom Y (omegaBasisMap φ (universalOmegaBasis R)) h2 h3))
-        (universalShortNF R)
-  rw [eqToHom_trans_assoc]
+  rw [projModelBaseChange_congr_hom hσ (universalShortNF R)]
+  conv_lhs => rw [chartPiece]
+  simp only [Category.assoc, eqToHom_trans_assoc]
+
+end OpaqueProjModelClassifyingTopOmegaBasisMap
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 /-- **(E12-D4 rt2 ★★)** Uniqueness half of GME Thm 2.2.3: ANY `Ell/R`-morphism to

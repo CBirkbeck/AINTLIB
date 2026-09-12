@@ -17,9 +17,7 @@ The remaining crux `isClosedImmersion_chartActPair` is the stable-chart restrict
 proven `isClosedImmersion_actPair_left` (battle plan: `decomposition-c2-heart.md`, step 4).
 -/
 
-set_option synthInstance.maxHeartbeats 800000
 set_option maxSynthPendingDepth 5
-set_option maxHeartbeats 1600000
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

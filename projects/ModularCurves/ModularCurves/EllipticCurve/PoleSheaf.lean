@@ -285,7 +285,24 @@ noncomputable def idealModuleAppIdealIso {X Y : Scheme.{u}} (f : X ⟶ Y)
     ((ModuleCat.kernelIsoKer _).trans ?_)
   exact (LinearEquiv.ofEq _ _ (by rw [Scheme.Hom.ker_apply]; rfl)).toModuleIso
 
-set_option maxHeartbeats 800000 in
+/-- Evaluating a kernel through a kernel-preserving functor into `ModuleCat`: the
+underlying element of the kernel-submodule comparison is the image of the kernel
+inclusion. -/
+private theorem kernelIsoKer_preservesKernelIso_coe
+    {C : Type*} [Category C] [HasZeroMorphisms C] {S : Type u} [Ring S]
+    (F : C ⥤ ModuleCat.{u} S) [F.PreservesZeroMorphisms]
+    {A B : C} (g : A ⟶ B) [HasKernel g] [PreservesLimit (parallelPair g 0) F]
+    (x : F.obj (kernel g)) :
+    (((ModuleCat.kernelIsoKer (F.map g)).hom
+        ((PreservesKernel.iso F g).hom x) : (F.map g).hom.ker) : F.obj A)
+      = F.map (kernel.ι g) x := by
+  have hcomp : (PreservesKernel.iso F g).hom ≫
+      (ModuleCat.kernelIsoKer (F.map g)).hom ≫
+      ModuleCat.ofHom (F.map g).hom.ker.subtype = F.map (kernel.ι g) := by
+    rw [ModuleCat.kernelIsoKer_hom_ker_subtype, PreservesKernel.iso_hom,
+      kernelComparison_comp_ι]
+  exact ConcreteCategory.congr_hom hcomp x
+
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
@@ -306,12 +323,7 @@ theorem idealModuleAppIdealIso_coe {X Y : Scheme.{u}} (f : X ⟶ Y)
   change ((LinearEquiv.ofEq _ _ hker)
     ((ModuleCat.kernelIsoKer (F.map g)).hom ((PreservesKernel.iso F g).hom x))).1 = _
   rw [ofEq_coe]
-  change (ModuleCat.ofHom (F.map g).hom.ker.subtype)
-    (((PreservesKernel.iso F g).hom ≫ (ModuleCat.kernelIsoKer (F.map g)).hom) x) = _
-  rw [← ConcreteCategory.comp_apply]
-  rw [Category.assoc, ModuleCat.kernelIsoKer_hom_ker_subtype]
-  rw [PreservesKernel.iso_hom, kernelComparison_comp_ι]
-  rfl
+  exact kernelIsoKer_preservesKernelIso_coe F g x
 
 /-- The restricted ideal module maps to the restricted structure sheaf. -/
 noncomputable def restrictIdealModuleToUnit {X Y Y' : Scheme.{u}}
@@ -1472,9 +1484,79 @@ theorem localIdealGeneratorPullbackIso_hom_comp_pulledIdealModuleToUnit
   exact localIdealGeneratorPullbackIso_hom_comp_toUnit
     f U r hr hspan hnzd
 
-set_option maxHeartbeats 1200000 in
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
+/-- Conjugating by the pullback comparison isomorphism transports a
+"trivialization composed with the map to the unit object is multiplication by `s`"
+identity to the pulled-back section `q♯ s`. -/
+private theorem pullback_iso_comp_toUnit_eq_scalar
+    {X Y : Scheme.{u}} (q : X ⟶ Y) {M : Y.Modules}
+    (e : Scheme.Modules.unitObj Y ≅ M) (φ : M ⟶ Scheme.Modules.unitObj Y)
+    (s : Γ(Y, (⊤ : Y.Opens)))
+    (h : e.hom ≫ φ = unitEndomorphismOfTopSection s) :
+    (Scheme.Modules.pullbackUnitIso q).inv ≫
+        ((Scheme.Modules.pullback q).mapIso e).hom ≫
+        (Scheme.Modules.pullback q).map φ ≫
+        (Scheme.Modules.pullbackUnitIso q).hom =
+      unitEndomorphismOfTopSection (q.appTop.hom s) := by
+  rw [← pullback_unitEndomorphismOfTopSection q s, ← h, Functor.map_comp]
+  simp only [Functor.mapIso_hom, Category.assoc]
+
+/-- The pullback comparison chain of `pullbackLocalIdealGeneratorIso`, stated on a free
+commuting square and a free module `N`, so the unifier has nothing to unfold while the
+naturality squares are rewritten. -/
+private theorem pullbackComparison_chain_comp_toUnit
+    {X Y X' Y' : Scheme.{u}} (g : X ⟶ Y) (ιU : X' ⟶ X) (ιV : Y' ⟶ Y) (q : X' ⟶ Y')
+    (hsq : q ≫ ιV = ιU ≫ g) {N : Y.Modules}
+    (ψ : N ⟶ Scheme.Modules.unitObj Y)
+    (eV : Scheme.Modules.unitObj Y' ≅ (Scheme.Modules.pullback ιV).obj N)
+    (s : Γ(Y', (⊤ : Y'.Opens)))
+    (hbase : eV.hom ≫ (Scheme.Modules.pullback ιV).map ψ ≫
+        (Scheme.Modules.pullbackUnitIso ιV).hom =
+      unitEndomorphismOfTopSection s) :
+    ((Scheme.Modules.pullbackUnitIso q).symm ≪≫
+        (Scheme.Modules.pullback q).mapIso eV ≪≫
+        (Scheme.Modules.pullbackComp q ιV).app N ≪≫
+        (Scheme.Modules.pullbackCongr hsq).app N ≪≫
+        ((Scheme.Modules.pullbackComp ιU g).app N).symm).hom ≫
+        (Scheme.Modules.pullback ιU).map
+          ((Scheme.Modules.pullback g).map ψ ≫
+            (Scheme.Modules.pullbackUnitIso g).hom) ≫
+        (Scheme.Modules.pullbackUnitIso ιU).hom =
+      unitEndomorphismOfTopSection (q.appTop.hom s) := by
+  have hαunit : (Scheme.Modules.pullbackComp ιU g).inv.app
+        (Scheme.Modules.unitObj Y) ≫
+      (Scheme.Modules.pullback ιU).map
+        (Scheme.Modules.pullbackUnitIso g).hom ≫
+      (Scheme.Modules.pullbackUnitIso ιU).hom =
+      (Scheme.Modules.pullbackUnitIso (ιU ≫ g)).hom := by
+    rw [← pullbackUnitIso_comp ιU g]
+    exact Iso.inv_hom_id_assoc
+      ((Scheme.Modules.pullbackComp ιU g).app (Scheme.Modules.unitObj Y)) _
+  simp only [Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom, Functor.map_comp,
+    Category.assoc]
+  rw [show (Scheme.Modules.pullback ιU).map ((Scheme.Modules.pullback g).map ψ) =
+    (Scheme.Modules.pullback g ⋙ Scheme.Modules.pullback ιU).map ψ from rfl]
+  erw [← (Scheme.Modules.pullbackComp ιU g).inv.naturality_assoc ψ]
+  erw [← (Scheme.Modules.pullbackCongr hsq).hom.naturality_assoc ψ]
+  erw [← (Scheme.Modules.pullbackComp q ιV).hom.naturality_assoc ψ]
+  have hγunit : (Scheme.Modules.pullbackCongr hsq).hom.app
+        (Scheme.Modules.unitObj Y) ≫
+      (Scheme.Modules.pullbackUnitIso (ιU ≫ g)).hom =
+      (Scheme.Modules.pullbackUnitIso (q ≫ ιV)).hom :=
+    pullbackUnitIso_congr hsq
+  have hβunit : (Scheme.Modules.pullbackComp q ιV).hom.app
+        (Scheme.Modules.unitObj Y) ≫
+      (Scheme.Modules.pullbackUnitIso (q ≫ ιV)).hom =
+      (Scheme.Modules.pullback q).map
+          (Scheme.Modules.pullbackUnitIso ιV).hom ≫
+        (Scheme.Modules.pullbackUnitIso q).hom :=
+    pullbackUnitIso_comp q ιV
+  rw [hαunit, hγunit, hβunit]
+  have hkey := pullback_iso_comp_toUnit_eq_scalar q eV
+    ((Scheme.Modules.pullback ιV).map ψ ≫
+      (Scheme.Modules.pullbackUnitIso ιV).hom) s hbase
+  simpa only [Functor.mapIso_hom, Functor.map_comp, Functor.comp_map,
+    Category.assoc] using hkey
+
 theorem pullbackLocalIdealGeneratorIso_hom_comp_toUnit
     {A X Y : Scheme.{u}} (k : A ⟶ Y) [QuasiCompact k] (g : X ⟶ Y)
     (U : X.affineOpens) (V : Y.affineOpens) (hUV : U.1 ≤ g ⁻¹ᵁ V.1)
@@ -1485,86 +1567,12 @@ theorem pullbackLocalIdealGeneratorIso_hom_comp_toUnit
         (Scheme.Modules.pullback U.1.ι).map (pulledIdealModuleToUnit k g) ≫
         (Scheme.Modules.pullbackUnitIso U.1.ι).hom =
       unitEndomorphismOfTopSection
-        ((g.resLE V.1 U.1 hUV).appTop.hom (affineOpenTopSection V r)) := by
-  let q := g.resLE V.1 U.1 hUV
-  let α := Scheme.Modules.pullbackComp U.1.ι g
-  let β := Scheme.Modules.pullbackComp q V.1.ι
-  let γ := Scheme.Modules.pullbackCongr (g.resLE_comp_ι hUV)
-  have hαunit : α.inv.app (Scheme.Modules.unitObj Y) ≫
-      (Scheme.Modules.pullback U.1.ι).map
-        (Scheme.Modules.pullbackUnitIso g).hom ≫
-      (Scheme.Modules.pullbackUnitIso U.1.ι).hom =
-      (Scheme.Modules.pullbackUnitIso (U.1.ι ≫ g)).hom := by
-    rw [← pullbackUnitIso_comp U.1.ι g]
-    exact Iso.inv_hom_id_assoc (α.app (Scheme.Modules.unitObj Y)) _
-  have hγunit : γ.hom.app (Scheme.Modules.unitObj Y) ≫
-      (Scheme.Modules.pullbackUnitIso (U.1.ι ≫ g)).hom =
-      (Scheme.Modules.pullbackUnitIso (q ≫ V.1.ι)).hom := by
-    exact pullbackUnitIso_congr (g.resLE_comp_ι hUV)
-  have hβunit : β.hom.app (Scheme.Modules.unitObj Y) ≫
-      (Scheme.Modules.pullbackUnitIso (q ≫ V.1.ι)).hom =
-      (Scheme.Modules.pullback q).map
-          (Scheme.Modules.pullbackUnitIso V.1.ι).hom ≫
-        (Scheme.Modules.pullbackUnitIso q).hom := by
-    exact pullbackUnitIso_comp q V.1.ι
-  let eV := localIdealGeneratorPullbackIso k V r hr hspan hnzd
-  have hlocalBase : eV.hom ≫
-      (Scheme.Modules.pullback V.1.ι).map (idealModuleToUnit k) ≫
-        (Scheme.Modules.pullbackUnitIso V.1.ι).hom =
-      unitEndomorphismOfTopSection (affineOpenTopSection V r) := by
-    change eV.hom ≫ pulledIdealModuleToUnit k V.1.ι = _
-    exact localIdealGeneratorPullbackIso_hom_comp_pulledIdealModuleToUnit
-      k V r hr hspan hnzd
-  have hlocal : ((Scheme.Modules.pullback q).mapIso eV).hom ≫
-      (Scheme.Modules.pullback V.1.ι ⋙ Scheme.Modules.pullback q).map
-        (idealModuleToUnit k) ≫
-      (Scheme.Modules.pullback q).map
-        (Scheme.Modules.pullbackUnitIso V.1.ι).hom =
-      (Scheme.Modules.pullback q).map
-        (unitEndomorphismOfTopSection (affineOpenTopSection V r)) := by
-    change (Scheme.Modules.pullback q).map eV.hom ≫
-      (Scheme.Modules.pullback q).map
-        ((Scheme.Modules.pullback V.1.ι).map (idealModuleToUnit k)) ≫
-      (Scheme.Modules.pullback q).map
-        (Scheme.Modules.pullbackUnitIso V.1.ι).hom = _
-    simpa only [Functor.map_comp, Category.assoc] using
-      congrArg (fun a => (Scheme.Modules.pullback q).map a) hlocalBase
-  have hlocalFull : (Scheme.Modules.pullbackUnitIso q).inv ≫
-      ((Scheme.Modules.pullback q).mapIso eV).hom ≫
-      (Scheme.Modules.pullback V.1.ι ⋙ Scheme.Modules.pullback q).map
-        (idealModuleToUnit k) ≫
-      (Scheme.Modules.pullback q).map
-        (Scheme.Modules.pullbackUnitIso V.1.ι).hom ≫
-      (Scheme.Modules.pullbackUnitIso q).hom =
-      (Scheme.Modules.pullbackUnitIso q).inv ≫
-        (Scheme.Modules.pullback q).map
-          (unitEndomorphismOfTopSection (affineOpenTopSection V r)) ≫
-        (Scheme.Modules.pullbackUnitIso q).hom := by
-    simpa only [Category.assoc] using congrArg
-      (fun a => (Scheme.Modules.pullbackUnitIso q).inv ≫ a ≫
-        (Scheme.Modules.pullbackUnitIso q).hom) hlocal
-  dsimp only [pullbackLocalIdealGeneratorIso, pulledIdealModuleToUnit]
-  simp only [Iso.trans_hom, Functor.map_comp, Category.assoc]
-  rw [show (Scheme.Modules.pullback U.1.ι).map
-      ((Scheme.Modules.pullback g).map (idealModuleToUnit k)) =
-    (Scheme.Modules.pullback g ⋙ Scheme.Modules.pullback U.1.ι).map
-      (idealModuleToUnit k) by rfl]
-  erw [← (Scheme.Modules.pullbackComp U.1.ι g).inv.naturality_assoc
-    (idealModuleToUnit k)]
-  erw [← (Scheme.Modules.pullbackCongr
-    (g.resLE_comp_ι hUV)).hom.naturality_assoc (idealModuleToUnit k)]
-  erw [← (Scheme.Modules.pullbackComp q V.1.ι).hom.naturality_assoc
-    (idealModuleToUnit k)]
-  rw [hαunit, hγunit, hβunit]
-  change (Scheme.Modules.pullbackUnitIso q).inv ≫
-      ((Scheme.Modules.pullback q).mapIso eV).hom ≫
-      (Scheme.Modules.pullback V.1.ι ⋙ Scheme.Modules.pullback q).map
-        (idealModuleToUnit k) ≫
-      (Scheme.Modules.pullback q).map
-        (Scheme.Modules.pullbackUnitIso V.1.ι).hom ≫
-      (Scheme.Modules.pullbackUnitIso q).hom = _
-  rw [hlocalFull]
-  exact pullback_unitEndomorphismOfTopSection q (affineOpenTopSection V r)
+        ((g.resLE V.1 U.1 hUV).appTop.hom (affineOpenTopSection V r)) :=
+  pullbackComparison_chain_comp_toUnit g U.1.ι V.1.ι (g.resLE V.1 U.1 hUV)
+    (g.resLE_comp_ι hUV) (idealModuleToUnit k)
+    (localIdealGeneratorPullbackIso k V r hr hspan hnzd) (affineOpenTopSection V r)
+    (localIdealGeneratorPullbackIso_hom_comp_pulledIdealModuleToUnit
+      k V r hr hspan hnzd)
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in

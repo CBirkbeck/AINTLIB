@@ -335,7 +335,6 @@ theorem pi_mem_O {n : ℕ} (hn : 1 ≤ n) : pi p n ∈ O p n := by
   rw [O, Subring.mem_inf]
   exact ⟨pi_mem_K p n, (norm_pi_lt_one p hn).le⟩
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- the `Module.finrank_mul_finrank` tower needs `Module.Free (K p n) (extendScalars …)`,
 -- whose synthesis through the `IntermediateField.extendScalars` layer exceeds the default
 /-- R10.2 (tower step): the minimal polynomial of `ξ_{p^{n+1}}` over `K_n`
@@ -410,7 +409,6 @@ theorem levelNorm_one (n : ℕ) : levelNorm p n 1 = 1 := by
       IntermediateField.extendScalars (K_le_succ p n)) = 1 from rfl, map_one]
   rfl
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- the `Algebra.norm_algebraMap`/`finrank` computation runs through the nested
 -- `IntermediateField (K p n) (extendScalars …)` layer; instance synthesis exceeds defaults
 /-- **The level norm of a base constant is its `p`-th power** (RJW §12.1 norm-compatibility
@@ -485,7 +483,6 @@ theorem primitiveRoot_notMem_K {n : ℕ} (hn : 1 ≤ n) {w : ℂ_[p]}
     exact (Nat.mul_lt_mul_right (by have := hp.out.two_le; omega : 0 < p - 1)).2 hpow
   omega
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- adjoin/finrank reasoning through the `IntermediateField.extendScalars` layer (a
 -- second `IntermediateField` over `K p n`) forces nested instance synthesis past the default
 /-- If the `ℂ_p`-value of `V : extendScalars (K_n ≤ K_{n+1})` is not in `K_n`,
@@ -514,7 +511,6 @@ theorem extendScalars_adjoin_eq_top {n : ℕ} (hn : 1 ≤ n)
     exact hbot (hval ▸ c.2)
   · exact hp'
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis through the
 -- second `IntermediateField` over `K p n` exceeds the default budget
 /-- The norm of a generator `V` of `K_{n+1}/K_n` with minimal polynomial
@@ -562,7 +558,6 @@ private theorem norm_extendScalars_translated {n : ℕ} (hn : 1 ≤ n) (hp2 : p 
     (hp.out.odd_of_ne_two hp2).neg_one_pow]
   ring
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis exceeds the default
 /-- The minimal polynomial over `K_n` of the extendScalars element `W` whose
 value is a primitive `p^{n+1}`-th root `w` (with `w^p = (c : ℂ_p)`, `c ∈ K_n`)
@@ -859,7 +854,6 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
       _ = 1 := by simp
   exact le_of_pow_le_pow_left₀ hMpos.ne' (by norm_num) (by rwa [one_pow])
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis and the
 -- `adjoin.powerBasis`/`Basis.sum_repr` term elaboration both exceed the default budgets
 /-- `K_n`-coordinate expansion in the tower step: for an integral generator `W` of
@@ -1000,7 +994,6 @@ theorem O_succ_exists_digits {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ 
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rfl
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis exceeds the default
 /-- The `ξ_{n+1}`-powers `{ξ_{n+1}^i : i < p}` are `K_n`-linearly independent in `ℂ_p`:
 a `K_n`-combination `∑_{i<p} e_i ξ_{n+1}^i = 0` with `e_i ∈ K_n` has all `e_i = 0`. (They

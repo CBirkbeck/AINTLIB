@@ -93,8 +93,7 @@ theorem sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator_mul
         localTrivializationCoefficient
           (sectionPoleSheafPower π z hz (n + 1)) U
           (sectionPoleSheafPowerTrivialization z hz U.1 ePole (n + 1)) y by
-      convert hmul using 1
-      congr 3]
+      convert hmul using 1]
   rw [map_mul, map_mul]
   rw [← hx, ← hy]
   rfl

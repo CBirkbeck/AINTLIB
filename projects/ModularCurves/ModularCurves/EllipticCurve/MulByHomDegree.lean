@@ -511,8 +511,6 @@ theorem projModelPointsEquiv_chartSpecPoint (x y : L)
     rfl
 
 
-set_option maxHeartbeats 1600000
-
 open HomogeneousLocalization
 
 /-- The solution ring hom attached to a chart point datum (the underlying hom of
@@ -610,6 +608,69 @@ lemma chartSolutionHom_fromZero (x y : L) (h : (W.baseChange L).toAffine.Equatio
       ((algebraMapGradeZero (projIdeal W)) r)) = algebraMap K L r :=
   RingHom.congr_fun ((chartSolutionsEquiv W 2 L).symm (chartSolution W x y h)).2 r
 
+/-- The `appLE` of an open subscheme immersion onto its own image is the top-sections
+identification. -/
+private lemma opens_ι_appLE_self {X : Scheme.{u}} (U : X.Opens) :
+    U.ι.appLE U ⊤ U.ι_preimage_self.ge = U.topIso.inv := by
+  rw [Scheme.Opens.ι_appLE, Scheme.Opens.topIso]
+  show X.presheaf.map _ = (X.presheaf.mapIso _).inv
+  rw [Functor.mapIso_inv]
+  exact congrArg X.presheaf.map (Subsingleton.elim _ _)
+
+/-- The top-sections map of the inverse of the comparison `D₊(s) ≅ Spec (A_s)₀`. -/
+private lemma proj_basicOpenIsoSpec_inv_appLE_top
+    {σ' : Type*} {A : Type u} [CommRing A] [SetLike σ' A] [AddSubgroupClass σ' A]
+    (𝒜 : ℕ → σ') [GradedRing 𝒜] (s : A) {m : ℕ} (s_deg : s ∈ 𝒜 m) (hm : 0 < m) :
+    (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).inv.appLE ⊤ ⊤ le_rfl =
+      (Proj.basicOpen 𝒜 s).topIso.hom ≫
+        (Proj.basicOpenIsoAway 𝒜 s s_deg hm).inv ≫
+        (Scheme.ΓSpecIso ↧(Away 𝒜 s)).inv := by
+  have happ : (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).inv.appLE ⊤ ⊤ le_rfl =
+      (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).inv.appTop :=
+    (Scheme.Hom.app_eq_appLE _).symm
+  have hround : (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).hom.appTop
+      ≫ (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).inv.appTop = 𝟙 _ := by
+    rw [← Scheme.Hom.comp_appTop, Iso.inv_hom_id, Scheme.Hom.id_appTop]
+  have hBA : ((Proj.basicOpen 𝒜 s).topIso.hom
+        ≫ (Proj.basicOpenIsoAway 𝒜 s s_deg hm).inv
+        ≫ (Scheme.ΓSpecIso ↧(Away 𝒜 s)).inv)
+      ≫ (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).hom.appTop = 𝟙 _ := by
+    rw [show (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).hom
+        = Proj.basicOpenToSpec 𝒜 s from Proj.basicOpenIsoSpec_hom _ _ _ _]
+    rw [show (Proj.basicOpenToSpec 𝒜 s).appTop
+        = (Scheme.ΓSpecIso _).hom ≫ Proj.awayToSection _ _
+          ≫ (Proj.basicOpen 𝒜 s).topIso.inv from Proj.basicOpenToSpec_app_top _ _]
+    rw [show Proj.awayToSection 𝒜 s
+        = (Proj.basicOpenIsoAway 𝒜 s s_deg hm).hom from rfl]
+    simp only [Category.assoc, Iso.inv_hom_id_assoc, Iso.hom_inv_id]
+  calc (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).inv.appLE ⊤ ⊤ le_rfl
+      = ((_ ≫ (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).hom.appTop)
+        ≫ (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).inv.appTop) := by
+        rw [hBA, Category.id_comp, happ]
+    _ = _ ≫ ((Proj.basicOpenIsoSpec 𝒜 s s_deg hm).hom.appTop
+          ≫ (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).inv.appTop) := by rw [Category.assoc]
+    _ = _ := by rw [hround, Category.comp_id]
+
+/-- The `appLE`-pullback of `D₊(s)`-sections along `awayι`, read through `ΓSpecIso`, is
+the inverse of the `awayToSection` presentation. -/
+private lemma proj_awayι_appLE_top
+    {σ' : Type*} {A : Type u} [CommRing A] [SetLike σ' A] [AddSubgroupClass σ' A]
+    (𝒜 : ℕ → σ') [GradedRing 𝒜] (s : A) {m : ℕ} (s_deg : s ∈ 𝒜 m) (hm : 0 < m)
+    (hle : (⊤ : (Spec ↧(Away 𝒜 s)).Opens) ≤
+      (Proj.awayι 𝒜 s s_deg hm) ⁻¹ᵁ Proj.basicOpen 𝒜 s) :
+    (Proj.awayι 𝒜 s s_deg hm).appLE (Proj.basicOpen 𝒜 s) ⊤ hle ≫
+        (Scheme.ΓSpecIso ↧(Away 𝒜 s)).hom =
+      (Proj.basicOpenIsoAway 𝒜 s s_deg hm).inv := by
+  show ((Proj.basicOpenIsoSpec 𝒜 s s_deg hm).inv ≫
+      (Proj.basicOpen 𝒜 s).ι).appLE (Proj.basicOpen 𝒜 s) ⊤ hle ≫
+      (Scheme.ΓSpecIso ↧(Away 𝒜 s)).hom =
+    (Proj.basicOpenIsoAway 𝒜 s s_deg hm).inv
+  rw [← Scheme.Hom.appLE_comp_appLE
+    (Proj.basicOpenIsoSpec 𝒜 s s_deg hm).inv (Proj.basicOpen 𝒜 s).ι
+    (Proj.basicOpen 𝒜 s) ⊤ ⊤ (Proj.basicOpen 𝒜 s).ι_preimage_self.ge le_rfl,
+    opens_ι_appLE_self, proj_basicOpenIsoSpec_inv_appLE_top]
+  simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id, Iso.inv_hom_id_assoc]
+
 /-- **(T3-away — the chart immersion evaluates sections through `awayToSection`)** The
 `appLE`-pullback of `basicOpen`-sections along `awayι`, read through `ΓSpecIso`, is the inverse of
 the `awayToSection` presentation. -/
@@ -625,100 +686,10 @@ lemma awayι_appLE_eval
           ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).hom
     = (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
-        (mk_X_mem_quotientGrading_one W 2) one_pos).inv := by
-  show ((Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-          (mk_X_mem_quotientGrading_one W 2) one_pos).inv
-        ≫ (Proj.basicOpen (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).ι).appLE
-      (zChart W : (projModel W).Opens) ⊤ hZle
-      ≫ (Scheme.ΓSpecIso (CommRingCat.of (Away (quotientGrading (projIdeal W))
-          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).hom
-    = (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
-        (mk_X_mem_quotientGrading_one W 2) one_pos).inv
-  rw [← Scheme.Hom.appLE_comp_appLE
-    (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-      (mk_X_mem_quotientGrading_one W 2) one_pos).inv
-    (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).ι
-    (zChart W : (projModel W).Opens) ⊤ ⊤
-    (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).ι_preimage_self.ge le_rfl]
-  -- the ι-part is the top-sections identification
-  have hι : (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).ι.appLE
-      (zChart W : (projModel W).Opens) ⊤
-      (Proj.basicOpen (quotientGrading (projIdeal W))
-          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).ι_preimage_self.ge
-      = (Proj.basicOpen (quotientGrading (projIdeal W))
-          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).topIso.inv := by
-    rw [Scheme.Opens.ι_appLE, Scheme.Opens.topIso]
-    show (projModel W).presheaf.map _ = ((projModel W).presheaf.mapIso _).inv
-    rw [Functor.mapIso_inv]
-    exact congrArg (projModel W).presheaf.map (Subsingleton.elim _ _)
-  rw [hι]
-  -- the isoSpec-inverse part: appTop of the inverse is the inverse of the appTop
-  have hspec : (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-        (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appLE ⊤ ⊤ le_rfl
-      = (Proj.basicOpen (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).topIso.hom
-        ≫ (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
-            (mk_X_mem_quotientGrading_one W 2) one_pos).inv
-        ≫ (Scheme.ΓSpecIso (CommRingCat.of (Away (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).inv := by
-    have happ : (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-          (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appLE ⊤ ⊤ le_rfl
-        = (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-            (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appTop := by
-      exact (Scheme.Hom.app_eq_appLE _).symm
-    have hround : (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-          (mk_X_mem_quotientGrading_one W 2) one_pos).hom.appTop
-        ≫ (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-            (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appTop = 𝟙 _ := by
-      rw [← Scheme.Hom.comp_appTop, Iso.inv_hom_id, Scheme.Hom.id_appTop]
-    have hBA : ((Proj.basicOpen (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).topIso.hom
-          ≫ (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
-              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
-              (mk_X_mem_quotientGrading_one W 2) one_pos).inv
-          ≫ (Scheme.ΓSpecIso (CommRingCat.of (Away (quotientGrading (projIdeal W))
-              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).inv)
-        ≫ (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-            (mk_X_mem_quotientGrading_one W 2) one_pos).hom.appTop = 𝟙 _ := by
-      rw [show (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-            (mk_X_mem_quotientGrading_one W 2) one_pos).hom
-          = Proj.basicOpenToSpec (quotientGrading (projIdeal W))
-              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) from
-        Proj.basicOpenIsoSpec_hom _ _ _ _]
-      rw [show (Proj.basicOpenToSpec (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).appTop
-          = (Scheme.ΓSpecIso _).hom
-            ≫ Proj.awayToSection _ _
-            ≫ (Proj.basicOpen (quotientGrading (projIdeal W))
-                ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).topIso.inv from
-        Proj.basicOpenToSpec_app_top _ _]
-      rw [show Proj.awayToSection (quotientGrading (projIdeal W))
-            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
-          = (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
-              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
-              (mk_X_mem_quotientGrading_one W 2) one_pos).hom from rfl]
-      simp only [Category.assoc, Iso.inv_hom_id_assoc, Iso.hom_inv_id]
-    calc (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-          (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appLE ⊤ ⊤ le_rfl
-        = ((_ ≫ (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-              (mk_X_mem_quotientGrading_one W 2) one_pos).hom.appTop)
-          ≫ (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-              (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appTop) := by
-          rw [hBA, Category.id_comp, happ]
-      _ = _ ≫ ((Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-              (mk_X_mem_quotientGrading_one W 2) one_pos).hom.appTop
-            ≫ (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
-              (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appTop) := by
-          rw [Category.assoc]
-      _ = _ := by rw [hround, Category.comp_id]
-  rw [hspec]
-  simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id, Iso.inv_hom_id_assoc]
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv :=
+  proj_awayι_appLE_top (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+    (mk_X_mem_quotientGrading_one W 2) one_pos hZle
 
 /-- **(T3 — evaluation of a chart-factored point on chart sections)** Pulling a `zChart`-section
 back along `chartSpecPoint` and reading the global section of `Spec L` computes the solution hom

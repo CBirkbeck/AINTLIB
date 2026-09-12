@@ -935,6 +935,48 @@ theorem coordinateHyperplanePoleUnitHom_over_comp_trivialization
     (coordinateHyperplaneLocalEquation (R := R) i j)
     (coordinateHyperplaneIdealOverTrivialization_inv_comp (R := R) i j)
 
+/-- Two composites agree when their objects and morphisms agree up to heterogeneous equality.
+This lets the kernel compare the leaves directly instead of unfolding the composites. -/
+private theorem eq_comp_of_heq {C : Type*} [Category C] {A B D A' B' D' : C}
+    {p' : A' ⟶ B'} {q' : B' ⟶ D'} {r' : A' ⟶ D'} (h : r' = p' ≫ q')
+    {p : A ⟶ B} {q : B ⟶ D} {r : A ⟶ D}
+    (hA : A = A') (hB : B = B') (hD : D = D')
+    (hp : HEq p p') (hq : HEq q q') (hr : HEq r r') :
+    r = p ≫ q := by
+  subst hA hB hD
+  cases hp
+  cases hq
+  cases hr
+  exact h
+
+/-- The dual restriction trivialization is the open-subscheme form of the dual over-site
+trivialization. Stated for an arbitrary module so that the kernel checks the defeq once,
+without unfolding any concrete module. -/
+private theorem dualRestrictIsoOfRestrictIso_eq_restrictTrivializationOfOverIso
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme) :
+    Scheme.Modules.dualRestrictIsoOfRestrictIso M U e =
+      ModularCurves.restrictTrivializationOfOverIso (Scheme.Modules.dualObj M) U
+        (ModularCurves.SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M U
+          (Scheme.Modules.overTrivializationOfRestrictIso M U e)) := by
+  apply Iso.ext
+  rfl
+
+/-- `localTrivializationTopSection_unitHom_apply_one` for an affine open given as an open
+together with its affineness proof, so that callers can state the hypothesis on the open itself. -/
+private theorem localTrivializationTopSection_unitHom_apply_one_of_isAffineOpen
+    {X : Scheme.{u}} (M : X.Modules) (V : X.Opens) (hV : IsAffineOpen V)
+    (f : Scheme.Modules.unitObj X ⟶ M)
+    (e : M.over V ≅ SheafOfModules.unit (X.ringCatSheaf.over V))
+    (r : Γ(X, V))
+    (h : f.over V ≫ e.hom =
+      ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf V r) :
+    ModularCurves.localTrivializationTopSection M ⟨V, hV⟩
+        (ModularCurves.restrictTrivializationOfOverIso M V e)
+        (f.val.app (.op ⊤) (show X.presheaf.obj (.op ⊤) from 1)) =
+      ModularCurves.affineOpenTopSection ⟨V, hV⟩ r :=
+  ModularCurves.localTrivializationTopSection_unitHom_apply_one M ⟨V, hV⟩ f e r h
+
 /-- In the standard-chart frame, the canonical global section of `O(1)` has
 coordinate equal to the local equation of the coordinate hyperplane. -/
 theorem coordinateHyperplanePoleSection_localTrivializationTopSection
@@ -947,25 +989,27 @@ theorem coordinateHyperplanePoleSection_localTrivializationTopSection
       ModularCurves.affineOpenTopSection
         ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩
         (coordinateHyperplaneLocalEquation (R := R) i j) := by
-  let U : (Proj (homogeneousSubmodule σ R)).affineOpens :=
-    ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩
-  let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
-    (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)) U.1
-      (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
-  let ePole := ModularCurves.SheafOfModules.dualOverIsoOfIso
-    (Proj (homogeneousSubmodule σ R)).ringCatSheaf
-    (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)) U.1 eIdeal
-  have h := ModularCurves.localTrivializationTopSection_unitHom_apply_one
-    (coordinateHyperplanePoleSheaf (R := R) j) U
-    (coordinateHyperplanePoleUnitHom (R := R) j) ePole
+  have h := localTrivializationTopSection_unitHom_apply_one_of_isAffineOpen
+    (coordinateHyperplanePoleSheaf (R := R) j) (coordinateOpen (R := R) i)
+    (coordinateOpen_isAffineOpen i) (coordinateHyperplanePoleUnitHom (R := R) j)
+    (ModularCurves.SheafOfModules.dualOverIsoOfIso
+      (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+      (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+      (coordinateOpen (R := R) i)
+      (Scheme.Modules.overTrivializationOfRestrictIso _ _
+        (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm))
     (coordinateHyperplaneLocalEquation (R := R) i j)
-    (coordinateHyperplanePoleUnitHom_over_comp_trivialization
-      (R := R) i j)
+    (coordinateHyperplanePoleUnitHom_over_comp_trivialization (R := R) i j)
   have he : coordinateHyperplanePoleSheafTrivialization (R := R) i j =
       ModularCurves.restrictTrivializationOfOverIso
-        (coordinateHyperplanePoleSheaf (R := R) j) U.1 ePole := by
-    apply Iso.ext
-    rfl
+        (coordinateHyperplanePoleSheaf (R := R) j) (coordinateOpen (R := R) i)
+        (ModularCurves.SheafOfModules.dualOverIsoOfIso
+          (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+          (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+          (coordinateOpen (R := R) i)
+          (Scheme.Modules.overTrivializationOfRestrictIso _ _
+            (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm)) :=
+    dualRestrictIsoOfRestrictIso_eq_restrictTrivializationOfOverIso _ _ _
   rw [he]
   exact h
 
@@ -1262,7 +1306,7 @@ theorem coordinateHyperplanePoleSheafTrivialization_restrict_transition
   change tK = ModularCurves.restrictTrivializationOfOverIso
     (Scheme.Modules.dualObj M) (coordinateOpenOverlap (R := R) i k) dK at htK
   rw [← htI, ← htK] at hScheme
-  exact hScheme
+  exact eq_comp_of_heq hScheme rfl rfl rfl HEq.rfl HEq.rfl HEq.rfl
 
 end
 
@@ -1393,7 +1437,73 @@ theorem coordinateHyperplanePoleSectionPower_localTrivializationTopSection
         coordinateHyperplanePoleSection_localTrivializationTopSection]
       exact (pow_succ _ n).symm
 
-set_option maxHeartbeats 400000 in
+/-- Transporting a power through the top-section identification of an affine open. -/
+@[simp]
+private theorem affineOpenTopSection_pow {Y : Scheme.{u}} (U : Y.affineOpens)
+    (r : Γ(Y, U.1)) (n : ℕ) :
+    ModularCurves.affineOpenTopSection U (r ^ n) =
+      ModularCurves.affineOpenTopSection U r ^ n := by
+  unfold ModularCurves.affineOpenTopSection
+  rw [map_pow, map_pow]
+
+/-- A pure tensor `t ⊗ y` restricted to an affine open on which the second factor is
+trivialized with frame coordinate `r` vanishes as soon as `r` annihilates `t` there. -/
+private theorem localTrivializationRestriction_tensorSection_eq_zero_of_smul_eq_zero
+    {X : Scheme.{u}} (U : X.affineOpens) (M N : X.Modules)
+    (e : (Scheme.Modules.restrictFunctor U.1.ι).obj N ≅
+      Scheme.Modules.unitObj U.1.toScheme)
+    (t : Γ(M, (⊤ : X.Opens))) (y : Γ(N, (⊤ : X.Opens))) (r : Γ(X, U.1))
+    (hcoord : e.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
+        (ModularCurves.localTrivializationRestriction N U y) =
+      (show Γ(Scheme.Modules.unitObj U.1.toScheme, ⊤) from
+        ModularCurves.affineOpenTopSection U r))
+    (hsmul : r • M.presheaf.map U.1.leTop.op t = 0) :
+    ModularCurves.localTrivializationRestriction (M ⊗ N) U
+      (ModularCurves.tensorSection M N ⊤ t y) = 0 := by
+  let P := (Scheme.Modules.restrictFunctor U.1.ι).obj M
+  let Q := (Scheme.Modules.restrictFunctor U.1.ι).obj N
+  let d := ModularCurves.restrictMonoidalTensorIso U.1.ι M N
+  let k : P ⊗ Q ≅ P ⊗ Scheme.Modules.unitObj U.1.toScheme := Iso.refl P ⊗ᵢ e
+  have hscalar : ModularCurves.affineOpenTopSection U r •
+      ModularCurves.localTrivializationRestriction M U t = 0 := by
+    have htransport := congrArg
+      (fun z ↦ (M.restrictAppIso U.1.ι (⊤ : U.1.toScheme.Opens)).inv
+        (M.presheaf.map (eqToHom U.1.ι_image_top).op z)) hsmul
+    rw [map_zero, map_zero] at htransport
+    exact (ModularCurves.localTrivializationRestriction_smul_restrict
+      M U r t).symm.trans htransport
+  have hzero := ModularCurves.tensorSection_eq_zero_of_smul_eq_zero P ⊤
+    (ModularCurves.localTrivializationRestriction M U t)
+    (ModularCurves.affineOpenTopSection U r) hscalar
+  have hk : k.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
+        (ModularCurves.tensorSection P Q ⊤
+          (ModularCurves.localTrivializationRestriction M U t)
+          (ModularCurves.localTrivializationRestriction N U y)) =
+      ModularCurves.tensorSection P (Scheme.Modules.unitObj U.1.toScheme) ⊤
+        (ModularCurves.localTrivializationRestriction M U t)
+        (show Γ(Scheme.Modules.unitObj U.1.toScheme, ⊤) from
+          ModularCurves.affineOpenTopSection U r) := by
+    rw [← hcoord]
+    exact ModularCurves.tensorSection_map (𝟙 P) e.hom ⊤
+      (ModularCurves.localTrivializationRestriction M U t)
+      (ModularCurves.localTrivializationRestriction N U y)
+  have hlocalTensor : ModularCurves.tensorSection P Q ⊤
+      (ModularCurves.localTrivializationRestriction M U t)
+      (ModularCurves.localTrivializationRestriction N U y) = 0 := by
+    have hback := congrArg
+      (fun z ↦ k.inv.val.app (.op (⊤ : U.1.toScheme.Opens)) z) (hk.trans hzero)
+    exact (Scheme.Modules.iso_hom_inv_app_applyT k
+      (.op (⊤ : U.1.toScheme.Opens)) _).symm.trans (hback.trans (map_zero _))
+  have hd : d.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
+      (ModularCurves.localTrivializationRestriction (M ⊗ N) U
+        (ModularCurves.tensorSection M N ⊤ t y)) = 0 :=
+    (ModularCurves.tensorSection_localTrivializationRestriction
+      M N U t y).trans hlocalTensor
+  have hback := congrArg
+    (fun z ↦ d.inv.val.app (.op (⊤ : U.1.toScheme.Opens)) z) hd
+  exact (Scheme.Modules.iso_hom_inv_app_applyT d
+    (.op (⊤ : U.1.toScheme.Opens)) _).symm.trans (hback.trans (map_zero _))
+
 /-- A quasicoherent section that vanishes on a standard coordinate open is
 annihilated globally after tensoring with a sufficiently high power of the
 corresponding coordinate-hyperplane section. This is the injective half of
@@ -1412,105 +1522,23 @@ theorem exists_tensorSection_coordinateHyperplanePoleSectionPower_eq_zero_of_res
     exists_pow_coordinateHyperplaneLocalEquation_smul_restrict_eq_zero_forall
       M j t ht
   refine ⟨n, ?_⟩
-  let X := Proj (homogeneousSubmodule σ R)
-  let N := coordinateHyperplanePoleSheafPower (R := R) j n
-  let s := coordinateHyperplanePoleSectionPower (R := R) j n
-  let q := ModularCurves.tensorSection M N ⊤ t s
-  change q = 0
-  refine TopCat.Presheaf.IsSheaf.section_ext (M ⊗ N).2 fun x hx ↦ ?_
-  have hxCover : x ∈ ⨆ i : σ, coordinateOpen (R := R) i := by
-    rw [iSup_coordinateOpen_eq_top]
-    exact hx
-  obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp hxCover
-  let U : X.affineOpens :=
-    ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen (R := R) i⟩
-  refine ⟨U.1, le_top, hi, ?_⟩
+  refine TopCat.Presheaf.IsSheaf.section_ext
+    (M ⊗ coordinateHyperplanePoleSheafPower (R := R) j n).2 fun x hx ↦ ?_
+  obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp
+    (show x ∈ ⨆ i : σ, coordinateOpen (R := R) i by
+      rw [iSup_coordinateOpen_eq_top]; exact hx)
+  refine ⟨coordinateOpen (R := R) i, le_top, hi, ?_⟩
   refine Eq.trans ?_ (map_zero _).symm
-  apply (ModularCurves.localTrivializationRestriction_eq_zero_iff
-    (M ⊗ N) U q).mp
-  let P := (Scheme.Modules.restrictFunctor U.1.ι).obj M
-  let Q := (Scheme.Modules.restrictFunctor U.1.ι).obj N
-  let d := ModularCurves.restrictMonoidalTensorIso U.1.ι M N
-  let e := coordinateHyperplanePoleSheafPowerTrivialization
-    (R := R) i j n
-  let k : P ⊗ Q ≅ P ⊗ Scheme.Modules.unitObj U.1.toScheme :=
-    Iso.refl P ⊗ᵢ e
-  let a : Γ(U.1.toScheme, ⊤) :=
-    ModularCurves.affineOpenTopSection U
-      (coordinateHyperplaneLocalEquation (R := R) i j ^ n)
-  have hscalar :
-      a • ModularCurves.localTrivializationRestriction M U t = 0 := by
-    have htransport := congrArg
-      (fun y ↦
-        (M.restrictAppIso U.1.ι (⊤ : U.1.toScheme.Opens)).inv
-          (M.presheaf.map (eqToHom U.1.ι_image_top).op y)) (hn i)
-    rw [map_zero, map_zero] at htransport
-    exact (ModularCurves.localTrivializationRestriction_smul_restrict
-      M U (coordinateHyperplaneLocalEquation (R := R) i j ^ n) t).symm.trans
-        htransport
-  have hpow :
-      ModularCurves.affineOpenTopSection U
-          (coordinateHyperplaneLocalEquation (R := R) i j ^ n) =
-        (ModularCurves.affineOpenTopSection U
-          (coordinateHyperplaneLocalEquation (R := R) i j)) ^ n := by
-    unfold ModularCurves.affineOpenTopSection
-    rw [map_pow, map_pow]
-  have hcoordinate :
-      e.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
-          (ModularCurves.localTrivializationRestriction N U s) =
-        (show Γ(Scheme.Modules.unitObj U.1.toScheme, ⊤) from a) := by
-    exact (coordinateHyperplanePoleSectionPower_localTrivializationTopSection
-      (R := R) i j n).trans hpow.symm
-  have hzero :
-      ModularCurves.tensorSection P (Scheme.Modules.unitObj U.1.toScheme) ⊤
-          (ModularCurves.localTrivializationRestriction M U t)
-          (show Γ(Scheme.Modules.unitObj U.1.toScheme, ⊤) from a) = 0 :=
-    ModularCurves.tensorSection_eq_zero_of_smul_eq_zero P ⊤
-      (ModularCurves.localTrivializationRestriction M U t)
-      a hscalar
-  have hd :
-      d.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
-          (ModularCurves.localTrivializationRestriction (M ⊗ N) U q) =
-        ModularCurves.tensorSection P Q ⊤
-          (ModularCurves.localTrivializationRestriction M U t)
-          (ModularCurves.localTrivializationRestriction N U s) := by
-    exact ModularCurves.tensorSection_localTrivializationRestriction M N U t s
-  have hk :
-      k.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
-          (ModularCurves.tensorSection P Q ⊤
-            (ModularCurves.localTrivializationRestriction M U t)
-            (ModularCurves.localTrivializationRestriction N U s)) =
-        ModularCurves.tensorSection P (Scheme.Modules.unitObj U.1.toScheme) ⊤
-          (ModularCurves.localTrivializationRestriction M U t)
-          (show Γ(Scheme.Modules.unitObj U.1.toScheme, ⊤) from a) := by
-    rw [← hcoordinate]
-    exact ModularCurves.tensorSection_map (𝟙 P) e.hom ⊤
-      (ModularCurves.localTrivializationRestriction M U t)
-      (ModularCurves.localTrivializationRestriction N U s)
-  have hkzero :
-      k.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
-          (ModularCurves.tensorSection P Q ⊤
-            (ModularCurves.localTrivializationRestriction M U t)
-            (ModularCurves.localTrivializationRestriction N U s)) = 0 :=
-    hk.trans hzero
-  have hlocalTensor :
-      ModularCurves.tensorSection P Q ⊤
-          (ModularCurves.localTrivializationRestriction M U t)
-          (ModularCurves.localTrivializationRestriction N U s) = 0 := by
-    have hback := congrArg
-      (fun y ↦ k.inv.val.app (.op (⊤ : U.1.toScheme.Opens)) y) hkzero
-    exact (Scheme.Modules.iso_hom_inv_app_applyT k
-      (.op (⊤ : U.1.toScheme.Opens)) _).symm.trans
-        (hback.trans (map_zero _))
-  have hdzero :
-      d.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
-          (ModularCurves.localTrivializationRestriction (M ⊗ N) U q) = 0 :=
-    hd.trans hlocalTensor
-  have hback := congrArg
-    (fun y ↦ d.inv.val.app (.op (⊤ : U.1.toScheme.Opens)) y) hdzero
-  exact (Scheme.Modules.iso_hom_inv_app_applyT d
-    (.op (⊤ : U.1.toScheme.Opens)) _).symm.trans
-      (hback.trans (map_zero _))
+  refine (ModularCurves.localTrivializationRestriction_eq_zero_iff _
+    ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩ _).mp ?_
+  refine localTrivializationRestriction_tensorSection_eq_zero_of_smul_eq_zero
+    ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩ M
+    (coordinateHyperplanePoleSheafPower (R := R) j n)
+    (coordinateHyperplanePoleSheafPowerTrivialization (R := R) i j n)
+    t (coordinateHyperplanePoleSectionPower (R := R) j n)
+    (coordinateHyperplaneLocalEquation (R := R) i j ^ n) ?_ (hn i)
+  exact (coordinateHyperplanePoleSectionPower_localTrivializationTopSection
+    (R := R) i j n).trans (affineOpenTopSection_pow _ _ n).symm
 
 /-- Every nonnegative coordinate-hyperplane twist `O(n)` is invertible. -/
 theorem coordinateHyperplanePoleSheafPower_isInvertible (j : σ) (n : ℕ) :
@@ -1544,41 +1572,37 @@ theorem coordinateHyperplanePoleSheafPowerTrivialization_restrict_transition
             (coordinateOpenTransitionUnit (R := R) i k :
               Γ(Proj (homogeneousSubmodule σ R),
                 coordinateOpenOverlap (R := R) i k))) ^ n) := by
-  let U := coordinateOpenOverlap (R := R) i k
-  let eI := Scheme.Modules.restrictOpenTrivialization
-    (coordinateOpenOverlap_le_left (R := R) i k)
-    (coordinateHyperplanePoleSheafTrivialization (R := R) i j)
-  let eK := Scheme.Modules.restrictOpenTrivialization
-    (coordinateOpenOverlap_le_right (R := R) i k)
-    (coordinateHyperplanePoleSheafTrivialization (R := R) k j)
-  let r := Scheme.Modules.openTopSection U
-    (coordinateOpenTransitionUnit (R := R) i k :
-      Γ(Proj (homogeneousSubmodule σ R), U))
-  have hbase : eI.hom = eK.hom ≫
-      ModularCurves.unitEndomorphismOfTopSection r := by
-    exact coordinateHyperplanePoleSheafTrivialization_restrict_transition i k j
-  have hpower := ModularCurves.recursiveTensorTrivialization_hom_eq_comp_scalar U
-    (fun e n => coordinateHyperplanePoleSheafPowerTrivializationOf U j e n)
-    (fun n => ModularCurves.restrictMonoidalTensorIso U.ι
+  have hpower := ModularCurves.recursiveTensorTrivialization_hom_eq_comp_scalar
+    (coordinateOpenOverlap (R := R) i k)
+    (fun e n => coordinateHyperplanePoleSheafPowerTrivializationOf
+      (coordinateOpenOverlap (R := R) i k) j e n)
+    (fun n => ModularCurves.restrictMonoidalTensorIso (coordinateOpenOverlap (R := R) i k).ι
       (coordinateHyperplanePoleSheafPower (R := R) j n)
       (coordinateHyperplanePoleSheaf (R := R) j))
-    (fun _ _ => rfl) (fun _ _ => rfl) eI eK r hbase n
+    (fun _ _ => rfl) (fun _ _ => rfl) _ _ _
+    (coordinateHyperplanePoleSheafTrivialization_restrict_transition (R := R) i k j) n
   have hI :
       Scheme.Modules.restrictOpenTrivialization
           (coordinateOpenOverlap_le_left (R := R) i k)
-          (coordinateHyperplanePoleSheafPowerTrivialization
-            (R := R) i j n) =
-        coordinateHyperplanePoleSheafPowerTrivializationOf U j eI n := by
-    exact coordinateHyperplanePoleSheafPowerTrivializationOf_restrictOpen
+          (coordinateHyperplanePoleSheafPowerTrivialization (R := R) i j n) =
+        coordinateHyperplanePoleSheafPowerTrivializationOf
+          (coordinateOpenOverlap (R := R) i k) j
+          (Scheme.Modules.restrictOpenTrivialization
+            (coordinateOpenOverlap_le_left (R := R) i k)
+            (coordinateHyperplanePoleSheafTrivialization (R := R) i j)) n :=
+    coordinateHyperplanePoleSheafPowerTrivializationOf_restrictOpen
       (coordinateOpenOverlap_le_left (R := R) i k) j
         (coordinateHyperplanePoleSheafTrivialization (R := R) i j) n
   have hK :
       Scheme.Modules.restrictOpenTrivialization
           (coordinateOpenOverlap_le_right (R := R) i k)
-          (coordinateHyperplanePoleSheafPowerTrivialization
-            (R := R) k j n) =
-        coordinateHyperplanePoleSheafPowerTrivializationOf U j eK n := by
-    exact coordinateHyperplanePoleSheafPowerTrivializationOf_restrictOpen
+          (coordinateHyperplanePoleSheafPowerTrivialization (R := R) k j n) =
+        coordinateHyperplanePoleSheafPowerTrivializationOf
+          (coordinateOpenOverlap (R := R) i k) j
+          (Scheme.Modules.restrictOpenTrivialization
+            (coordinateOpenOverlap_le_right (R := R) i k)
+            (coordinateHyperplanePoleSheafTrivialization (R := R) k j)) n :=
+    coordinateHyperplanePoleSheafPowerTrivializationOf_restrictOpen
       (coordinateOpenOverlap_le_right (R := R) i k) j
         (coordinateHyperplanePoleSheafTrivialization (R := R) k j) n
   rw [hI, hK]
@@ -2270,9 +2294,8 @@ theorem coordinateHyperplaneDualPairing_frameSection (i j : σ) :
   have hrestrict :
       coordinateHyperplanePoleSheafTrivialization (R := R) i j =
         ModularCurves.restrictTrivializationOfOverIso
-          (Scheme.Modules.dualObj M) U d := by
-    apply Iso.ext
-    rfl
+          (Scheme.Modules.dualObj M) U d :=
+    dualRestrictIsoOfRestrictIso_eq_restrictTrivializationOfOverIso M U _
   have hd :
       Scheme.Modules.overTrivializationOfRestrictIso
           (Scheme.Modules.dualObj M) U

@@ -483,12 +483,12 @@ theorem toProjective_equivMapDomain {L : Type v} [Field L] [Algebra k L] (σ : L
         (galoisSmoothPointEquiv W σ)) := fun A B h =>
       (galoisSmoothPointEquiv W σ).injective
         (HasseWeil.Curves.ProjectiveSmoothPoint.affine_injective h)
-    have hval := Finsupp.mapDomain_apply hinj D ((galoisSmoothPointEquiv W σ).symm P)
+    have hval := Finsupp.mapDomain_apply_of_injective hinj D ((galoisSmoothPointEquiv W σ).symm P)
     rw [show (HasseWeil.Curves.ProjectiveSmoothPoint.affine ∘
         (galoisSmoothPointEquiv W σ)) ((galoisSmoothPointEquiv W σ).symm P) =
       HasseWeil.Curves.ProjectiveSmoothPoint.affine P from by
         simp only [Function.comp_apply, Equiv.apply_symm_apply]] at hval
-    rw [hval, Finsupp.mapDomain_apply
+    rw [hval, Finsupp.mapDomain_apply_of_injective
       (fun _ _ h => HasseWeil.Curves.ProjectiveSmoothPoint.affine_injective h)]
   | infinity =>
     rw [show ((galoisProjPointEquiv W σ).symm

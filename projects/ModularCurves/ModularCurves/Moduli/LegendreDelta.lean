@@ -68,7 +68,6 @@ def MarksAt {V : S.affineOpens} (Pr : LocalPresentation G V)
       projModelAffineSection Pr.W p q h
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14b-2 ★)** Markings transport along cartesian pointed squares: if `Pr` marks
 `σ` at `(p, q)` and `σ'` lies over `σ` (`σ' ≫ t = f ≫ σ`), the transported
 presentation marks `σ'` at the restricted point. Mirrors the `compat_zero` field of
@@ -191,7 +190,6 @@ def IsLegendreDatum {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14b ★)** The Legendre condition is functorial: it pulls back along
 `Ell/R`-morphisms (level datum by `EllHom.pullSection`, `ω`-datum by
 `omegaBasisMap`, witness presentations by `LocalPresentation.transport`). -/

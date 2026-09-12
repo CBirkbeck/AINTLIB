@@ -63,10 +63,6 @@ attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
 
 universe u
 
--- The `MulByHomFibresGlobal` import subtree (BB-QF closure via `Torsion`) enlarges the
--- instance pool; `map_zsmul`/`map_zero` synthesis on `≃+` needs more headroom here.
-set_option synthInstance.maxHeartbeats 80000
-
 namespace ModularCurves
 
 variable {S : Scheme.{u}}
@@ -618,63 +614,43 @@ theorem EllObj.pullSection_negHom (X : EllObj R) (P : X.curve.Section) :
       Category.comp_id]
   · rw [(EllHom.pullSection R (EllObj.negHom R X) P).2, (-P).2]
 
-/-- **(T-H7c)** Over a base with a geometric point, `[-1] ≠ 𝟙`: the geometric fibre
-has a nonzero point of odd order `M ∈ {3,5}` (T-B6), while `[-1] = 𝟙` forces every
-point to be `2`-torsion. -/
-theorem EllipticCurve.mulByHom_neg_one_ne_id (E : EllipticCurve S) (k : Type u)
-    [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S) :
-    E.mulByHom (-1) ≠ 𝟙 E.E := by
-  intro hid
-  -- If `[-1] = 𝟙`, every point over the geometric point is 2-torsion.
-  have h2tor : ∀ x : E.Point t, (2 : ℤ) • x = 0 := by
-    intro x
-    have hsm := E.point_smul_eq_comp_mulBy t (-1) x
-    rw [hid, Category.comp_id] at hsm
-    have hneg : -x = x := by
-      apply Subtype.ext
-      calc ((-x : E.Point t) : Spec (CommRingCat.of k) ⟶ E.E)
-          = (((-1 : ℤ) • x : E.Point t) : Spec (CommRingCat.of k) ⟶ E.E) := by
-            rw [neg_one_zsmul]
-        _ = (x : Spec (CommRingCat.of k) ⟶ E.E) := hsm
-    rw [two_zsmul]
-    nth_rewrite 2 [← hneg]
-    exact add_neg_cancel x
-  -- But for odd `M ≥ 3` invertible in `k`, `E[M](k) ≅ (ℤ/M)²` has a nonzero point,
-  -- and a 2-torsion `M`-torsion point with `gcd(2,M) = 1` is zero.
-  have key : ∀ M : ℕ, 3 ≤ M → Odd M → (M : k) ≠ 0 → False := by
-    intro M hM3 hModd hMk
-    haveI : NeZero M := ⟨by omega⟩
-    obtain ⟨e⟩ := E.torsion_geometricFibre_rank_two M k t hMk
-    set xt := e.symm ![1, 0] with hxtdef
-    have hx0 : xt ≠ 0 := by
-      intro h0
-      have h1 : (![1, 0] : Fin 2 → ZMod M) = 0 := by
-        have h := congrArg e h0
-        rwa [hxtdef, AddEquiv.apply_symm_apply, map_zero] at h
-      have hone : (1 : ZMod M) = 0 := by simpa using congrFun h1 0
-      haveI : Fact (1 < M) := ⟨by omega⟩
-      exact one_ne_zero hone
-    have hxM : (M : ℤ) • (xt : E.Point t) = 0 :=
-      (Submodule.mem_torsionBy_iff _ _).mp xt.2
-    have hcop : IsCoprime (2 : ℤ) (M : ℤ) := by
-      have hnot2 : ¬ (2 ∣ M) := by
-        rw [Nat.odd_iff] at hModd
-        omega
-      have hnat : Nat.Coprime 2 M := (Nat.prime_two.coprime_iff_not_dvd).mpr hnot2
-      exact_mod_cast Nat.isCoprime_iff_coprime.mpr hnat
-    obtain ⟨u, v, huv⟩ := hcop
-    apply hx0
-    have hcoe : (xt : E.Point t) = 0 := by
-      calc (xt : E.Point t)
-          = (1 : ℤ) • (xt : E.Point t) := (one_zsmul _).symm
-        _ = (u * 2 + v * (M : ℤ)) • (xt : E.Point t) := by rw [huv]
-        _ = u • ((2 : ℤ) • (xt : E.Point t)) + v • ((M : ℤ) • (xt : E.Point t)) := by
-            rw [add_zsmul, mul_zsmul, mul_zsmul]
-        _ = 0 := by rw [h2tor, hxM, smul_zero, smul_zero, add_zero]
-    exact_mod_cast hcoe
-  -- Choose `M ∈ {3, 5}` by the residue characteristic.
+/-! ### Coordinate arithmetic on a `(ℤ/M)²`-fibre (abstract) -/
+
+/-- In an additive group, `-x = x` says exactly that `x` is `2`-torsion. -/
+private theorem neg_eq_self_iff_two_zsmul_eq_zero {A : Type*} [AddGroup A] {x : A} :
+    -x = x ↔ (2 : ℤ) • x = 0 := by
+  rw [neg_eq_iff_add_eq_zero, two_zsmul]
+
+/-- A pair killed by `n` kills the whole subgroup it generates. -/
+private theorem zsmul_eq_zero_of_mem_closure_pair {A : Type*} [AddCommGroup A] {n : ℤ}
+    {a b y : A} (ha : n • a = 0) (hb : n • b = 0)
+    (hy : y ∈ AddSubgroup.closure ({a, b} : Set A)) : n • y = 0 := by
+  have hle : AddSubgroup.closure ({a, b} : Set A) ≤
+      (AddMonoidHom.mk' (fun x : A => n • x) (smul_add n)).ker := by
+    rw [AddSubgroup.closure_le]
+    rintro z (rfl | rfl)
+    · exact AddMonoidHom.mem_ker.mpr ha
+    · exact AddMonoidHom.mem_ker.mpr hb
+  exact AddMonoidHom.mem_ker.mp (hle hy)
+
+/-- **The coordinate lemma.** If `e` presents `H` as `(ℤ/M)²` and `n` kills the first basis
+vector, then `M ∣ n`. Stated over an ABSTRACT `H`, so the `≃+` class instances are read off
+`e`'s type and no instance search over the ambient scheme instances happens. -/
+private theorem natCast_dvd_of_zsmul_addEquiv_symm_basis_eq_zero {H : Type*} [AddCommGroup H]
+    {M : ℕ} [NeZero M] (e : H ≃+ (Fin 2 → ZMod M)) {n : ℤ}
+    (h : n • e.symm ![1, 0] = 0) : (M : ℤ) ∣ n := by
+  have hv : n • (![1, 0] : Fin 2 → ZMod M) = 0 := by
+    have h' := congrArg e h
+    rwa [map_zsmul, AddEquiv.apply_symm_apply, AddEquiv.map_zero e] at h'
+  refine (ZMod.intCast_zmod_eq_zero_iff_dvd n M).mp ?_
+  have h0 := congrFun hv 0
+  rwa [Pi.smul_apply, Matrix.cons_val_zero, zsmul_eq_mul, mul_one, Pi.zero_apply] at h0
+
+/-- Every field carries an invertible natural number `≥ 3`: one of `3`, `5` always works. -/
+private theorem exists_three_le_natCast_ne_zero (k : Type*) [Field k] :
+    ∃ M : ℕ, 3 ≤ M ∧ (M : k) ≠ 0 := by
   by_cases h3 : (3 : k) = 0
-  · refine key 5 (by norm_num) ⟨2, by norm_num⟩ ?_
+  · refine ⟨5, by norm_num, ?_⟩
     intro h5
     haveI : CharP k (ringChar k) := ringChar.charP k
     have hd3 : ringChar k ∣ 3 :=
@@ -688,7 +664,41 @@ theorem EllipticCurve.mulByHom_neg_one_ne_id (E : EllipticCurve S) (k : Type u)
     have h := Nat.dvd_sub hd3 hd2
     norm_num at h
     exact not_subsingleton k h
-  · exact key 3 le_rfl ⟨1, by norm_num⟩ h3
+  · exact ⟨3, le_rfl, by exact_mod_cast h3⟩
+
+/-- If `[-1] = 𝟙` on `E` then every point of `E` over any base is `2`-torsion. -/
+private theorem two_zsmul_point_eq_zero_of_mulByHom_neg_one_eq_id (E : EllipticCurve S)
+    (hid : E.mulByHom (-1) = 𝟙 E.E) {T : Scheme.{u}} (t : T ⟶ S) (x : E.Point t) :
+    (2 : ℤ) • x = 0 := by
+  refine neg_eq_self_iff_two_zsmul_eq_zero.mp (Subtype.ext ?_)
+  have hsm := E.point_smul_eq_comp_mulBy t (-1) x
+  rw [hid, Category.comp_id] at hsm
+  calc ((-x : E.Point t) : T ⟶ E.E)
+      = (((-1 : ℤ) • x : E.Point t) : T ⟶ E.E) := by rw [neg_one_zsmul]
+    _ = (x : T ⟶ E.E) := hsm
+
+/-- A section fixed by `[-1]` pulls back to a `2`-torsion point over any base. -/
+private theorem two_zsmul_pull_eq_zero_of_neg_eq_self (E : EllipticCurve S) {T : Scheme.{u}}
+    (t : T ⟶ S) (Z : E.Section) (hZ : -Z = Z) :
+    (2 : ℤ) • EllipticCurve.Point.pull E t Z = 0 :=
+  neg_eq_self_iff_two_zsmul_eq_zero.mp (by
+    rw [← neg_one_zsmul, ← EllipticCurve.Point.pull_zsmul, neg_one_zsmul, hZ])
+
+/-- **(T-H7c)** Over a base with a geometric point, `[-1] ≠ 𝟙`: the geometric fibre
+has a nonzero point of order `M ≥ 3` (T-B6), while `[-1] = 𝟙` forces every
+point to be `2`-torsion, so `M ∣ 2`. -/
+theorem EllipticCurve.mulByHom_neg_one_ne_id (E : EllipticCurve S) (k : Type u)
+    [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S) :
+    E.mulByHom (-1) ≠ 𝟙 E.E := by
+  intro hid
+  obtain ⟨M, hM3, hMk⟩ := exists_three_le_natCast_ne_zero k
+  haveI : NeZero M := ⟨by omega⟩
+  obtain ⟨e⟩ := E.torsion_geometricFibre_rank_two M k t hMk
+  have hle : (M : ℤ) ≤ 2 := Int.le_of_dvd (by norm_num)
+    (natCast_dvd_of_zsmul_addEquiv_symm_basis_eq_zero e (by
+      rw [← Submodule.coe_eq_zero, Submodule.coe_smul]
+      exact two_zsmul_point_eq_zero_of_mulByHom_neg_one_eq_id E hid t _))
+  omega
 
 /-- **(T-H7b-i)** Sections of an elliptic curve over `Spec k̄` are separated by their
 value at the closed point (`AlgebraicGeometry.ext_of_apply_closedPoint_eq`: `E` is
@@ -777,6 +787,109 @@ theorem EllipticCurve.Point.restrict_injective {k k' : Type u} [Field k] [Field 
     congrArg Subtype.val hxy
   exact Subtype.ext (Scheme.hom_ext_of_comp_specMap_field f x.1 y.1 h1)
 
+/-! ### Existence of naive full level structures for `N ≤ 2` -/
+
+/-- The coordinate map `v ↦ pull (e.symm v)` is injective: `e.symm` is injective, the
+submodule coercion is injective, and points are separated along field extensions
+(`pull_injective`). -/
+private theorem pull_addEquivSymm_injective (k k' : Type u) [Field k] [IsAlgClosed k]
+    [Field k'] (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (t : Spec (CommRingCat.of k') ⟶ Spec (CommRingCat.of k)) {M : ℕ} {m : ℤ}
+    (e : ↥(Submodule.torsionBy ℤ (E.Point (𝟙 (Spec (CommRingCat.of k)))) m)
+      ≃+ (Fin 2 → ZMod M)) :
+    Function.Injective fun v : Fin 2 → ZMod M =>
+      EllipticCurve.Point.pull E t (e.symm v).1 :=
+  fun _ _ h => e.symm.injective (Subtype.ext (E.pull_injective k k' t h))
+
+/-- `Fin 2 → ZMod 2` as a pair.  The four-element exhaustion below is stated on the PRODUCT
+because `decide` has no `Decidable` instance for a `∀` over the Pi type. -/
+private def piFinTwoAddEquivProd : (Fin 2 → ZMod 2) ≃+ ZMod 2 × ZMod 2 where
+  toFun v := (v 0, v 1)
+  invFun z := ![z.1, z.2]
+  left_inv v := by
+    funext i
+    fin_cases i <;> rfl
+  right_inv _ := rfl
+  map_add' _ _ := rfl
+
+/-- **Klein-four generation.** Two distinct nonzero elements of a group presented as
+`(ℤ/2)²` generate it — stated for the image under an additive map, which is how it is
+consumed. `H` is ABSTRACT, which is what makes the instance search at the call site
+trivial. -/
+private theorem mem_closure_pair_image_of_addEquiv_pi_fin_two_zmod_two {H A : Type*}
+    [AddCommGroup H] [AddCommGroup A] (e : H ≃+ (Fin 2 → ZMod 2)) (f : H →+ A)
+    {p q : H} (hp : p ≠ 0) (hq : q ≠ 0) (hpq : p ≠ q) (x : H) :
+    f x ∈ AddSubgroup.closure ({f p, f q} : Set A) := by
+  have hd : ∀ v w u : ZMod 2 × ZMod 2, w ≠ 0 → u ≠ 0 → w ≠ u →
+      v = 0 ∨ v = w ∨ v = u ∨ v = w + u := by decide
+  obtain ⟨e'⟩ : Nonempty (H ≃+ ZMod 2 × ZMod 2) := ⟨e.trans piFinTwoAddEquivProd⟩
+  have hep : e' p ≠ 0 := fun h0 => hp ((AddEquiv.map_eq_zero_iff e').mp h0)
+  have heq : e' q ≠ 0 := fun h0 => hq ((AddEquiv.map_eq_zero_iff e').mp h0)
+  have hepq : e' p ≠ e' q := fun h0 => hpq (e'.injective h0)
+  have hx : x ∈ AddSubgroup.closure ({p, q} : Set H) := by
+    obtain ⟨v, rfl⟩ : ∃ v, x = e'.symm v := ⟨e' x, (e'.symm_apply_apply x).symm⟩
+    rcases hd v (e' p) (e' q) hep heq hepq with rfl | rfl | rfl | rfl
+    · rw [AddEquiv.map_zero e'.symm]
+      exact zero_mem _
+    · rw [e'.symm_apply_apply]
+      exact AddSubgroup.subset_closure (Set.mem_insert _ _)
+    · rw [e'.symm_apply_apply]
+      exact AddSubgroup.subset_closure (Set.mem_insert_of_mem _ rfl)
+    · rw [map_add e'.symm, e'.symm_apply_apply, e'.symm_apply_apply]
+      exact add_mem (AddSubgroup.subset_closure (Set.mem_insert _ _))
+        (AddSubgroup.subset_closure (Set.mem_insert_of_mem _ rfl))
+  have himg : f x ∈ AddSubgroup.closure (f '' ({p, q} : Set H)) := by
+    rw [← AddMonoidHom.map_closure]
+    exact AddSubgroup.mem_map_of_mem f hx
+  rwa [Set.image_pair] at himg
+
+/-- **(T-H7b, the `N = 2` case)** A basis of `E[2](k)` is a naive full level-`2`
+structure: after base change to `k'` the two pulled basis sections stay nonzero and
+distinct, and in the Klein four-group `E[2](k')` two such elements generate. -/
+private theorem isNaiveFullLevel_two_of_torsionBasis (k : Type u) [Field k] [IsAlgClosed k]
+    (E : EllipticCurve (Spec (CommRingCat.of k))) (hk : ((2 : ℕ) : k) ≠ 0)
+    (e : ↥(Submodule.torsionBy ℤ (E.Point (𝟙 (Spec (CommRingCat.of k)))) ((2 : ℕ) : ℤ))
+      ≃+ (Fin 2 → ZMod 2)) :
+    E.IsNaiveFullLevel 2 (e.symm ![1, 0]).1 (e.symm ![0, 1]).1 := by
+  refine ⟨⟨(Submodule.mem_torsionBy_iff _ _).mp (e.symm ![1, 0]).2,
+    (Submodule.mem_torsionBy_iff _ _).mp (e.symm ![0, 1]).2⟩, ?_⟩
+  intro k' _ _ t x hx
+  have hk2' : ((2 : ℕ) : k') ≠ 0 := by
+    have hm := (isUnit_iff_ne_zero.mpr hk).map (Spec.preimage t).hom
+    rw [map_natCast] at hm
+    exact hm.ne_zero
+  obtain ⟨e'⟩ := E.torsion_geometricFibre_rank_two 2 k' t hk2'
+  have hinj := pull_addEquivSymm_injective k k' E t e
+  have hmem : ∀ v : Fin 2 → ZMod 2,
+      EllipticCurve.Point.pull E t (e.symm v).1 ∈
+        Submodule.torsionBy ℤ (E.Point t) ((2 : ℕ) : ℤ) := fun v =>
+    (Submodule.mem_torsionBy_iff _ _).mpr (by
+      rw [← EllipticCurve.Point.pull_zsmul,
+        (Submodule.mem_torsionBy_iff _ _).mp (e.symm v).2, EllipticCurve.Point.pull_zero])
+  have hz : EllipticCurve.Point.pull E t (e.symm (0 : Fin 2 → ZMod 2)).1
+      = (0 : E.Point t) := by
+    rw [AddEquiv.map_zero e.symm, ZeroMemClass.coe_zero, EllipticCurve.Point.pull_zero]
+  have hne0 : ∀ v : Fin 2 → ZMod 2, v ≠ 0 →
+      (⟨_, hmem v⟩ : ↥(Submodule.torsionBy ℤ (E.Point t) ((2 : ℕ) : ℤ))) ≠ 0 :=
+    fun v hv h0 => hv (hinj ((congrArg Subtype.val h0).trans hz.symm))
+  have hdist : ∀ v w : Fin 2 → ZMod 2, v ≠ w →
+      (⟨_, hmem v⟩ : ↥(Submodule.torsionBy ℤ (E.Point t) ((2 : ℕ) : ℤ))) ≠ ⟨_, hmem w⟩ :=
+    fun v w hvw h0 => hvw (hinj (congrArg Subtype.val h0))
+  haveI : Fact (1 < 2) := ⟨one_lt_two⟩
+  have h10 : (![1, 0] : Fin 2 → ZMod 2) ≠ 0 := fun hv => by
+    have h : (1 : ZMod 2) = 0 := by simpa using congrFun hv 0
+    exact one_ne_zero h
+  have h01 : (![0, 1] : Fin 2 → ZMod 2) ≠ 0 := fun hv => by
+    have h : (1 : ZMod 2) = 0 := by simpa using congrFun hv 1
+    exact one_ne_zero h
+  have h1001 : (![1, 0] : Fin 2 → ZMod 2) ≠ ![0, 1] := fun hv => by
+    have h : (1 : ZMod 2) = 0 := by simpa using congrFun hv 0
+    exact one_ne_zero h
+  exact mem_closure_pair_image_of_addEquiv_pi_fin_two_zmod_two e'
+    (Submodule.torsionBy ℤ (E.Point t) ((2 : ℕ) : ℤ)).subtype.toAddMonoidHom
+    (hne0 ![1, 0] h10) (hne0 ![0, 1] h01)
+    (hdist ![1, 0] ![0, 1] h1001) ⟨x, (Submodule.mem_torsionBy_iff _ _).mpr hx⟩
+
 /-- **(T-H7b)** Naive full level-`N` structures exist over an algebraically closed
 base when `N ≤ 2` and `N` is invertible: for `N = 1` the zero pair works (the killing
 clause forces it); for `N = 2` a basis of `E[2]` from the geometric-fibre structure
@@ -785,124 +898,14 @@ theorem EllipticCurve.exists_isNaiveFullLevel_of_le_two (k : Type u) [Field k]
     [IsAlgClosed k] (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ)
     [NeZero N] (hN : N ≤ 2) (hk : (N : k) ≠ 0) :
     ∃ P Q : E.Section, E.IsNaiveFullLevel N P Q := by
-  have hcases : N = 1 ∨ N = 2 := by
-    have := NeZero.ne N
-    omega
+  have hcases : N = 1 ∨ N = 2 := by have := NeZero.ne N; omega
   rcases hcases with rfl | rfl
-  · -- N = 1: the zero pair; killing forces everything, generation is vacuous.
-    refine ⟨0, 0, ⟨⟨by simp, by simp⟩, ?_⟩⟩
+  · refine ⟨0, 0, ⟨⟨by simp, by simp⟩, ?_⟩⟩
     intro k' _ _ _t x hx
-    have hx0 : x = 0 := by simpa using hx
-    rw [hx0]
+    rw [show x = 0 by simpa using hx]
     exact zero_mem _
-  · -- N = 2: a basis of `E[2](k)` from the T-B6 geometric-fibre structure.
-    obtain ⟨e⟩ := E.torsion_geometricFibre_rank_two 2 k (𝟙 _) hk
-    refine ⟨(e.symm ![1, 0]).1, (e.symm ![0, 1]).1,
-      ⟨⟨(Submodule.mem_torsionBy_iff _ _).mp (e.symm ![1, 0]).2,
-        (Submodule.mem_torsionBy_iff _ _).mp (e.symm ![0, 1]).2⟩, ?_⟩⟩
-    intro k' _ _ t x hx
-    -- Transport `IsUnit 2` along `t` for the fibre count over `k'`.
-    have hk2' : ((2 : ℕ) : k') ≠ 0 := by
-      have h2u : IsUnit ((2 : ℕ) : k) := isUnit_iff_ne_zero.mpr hk
-      have hm := h2u.map (Spec.preimage t).hom
-      rw [map_natCast] at hm
-      exact hm.ne_zero
-    obtain ⟨e'⟩ := E.torsion_geometricFibre_rank_two 2 k' t hk2'
-    -- The two pulled basis sections and `x`, as 2-torsion elements over `k'`.
-    have hmem : ∀ Z : E.Section, ((2 : ℕ) : ℤ) • Z = 0 →
-        ((2 : ℕ) : ℤ) • EllipticCurve.Point.pull E t Z = 0 := by
-      intro Z hZ
-      rw [← EllipticCurve.Point.pull_zsmul, hZ, EllipticCurve.Point.pull_zero]
-    set p : Submodule.torsionBy ℤ (E.Point t) ((2 : ℕ) : ℤ) :=
-      ⟨EllipticCurve.Point.pull E t (e.symm ![1, 0]).1,
-        (Submodule.mem_torsionBy_iff _ _).mpr
-          (hmem _ ((Submodule.mem_torsionBy_iff _ _).mp (e.symm ![1, 0]).2))⟩ with hpdef
-    set q : Submodule.torsionBy ℤ (E.Point t) ((2 : ℕ) : ℤ) :=
-      ⟨EllipticCurve.Point.pull E t (e.symm ![0, 1]).1,
-        (Submodule.mem_torsionBy_iff _ _).mpr
-          (hmem _ ((Submodule.mem_torsionBy_iff _ _).mp (e.symm ![0, 1]).2))⟩ with hqdef
-    set x' : Submodule.torsionBy ℤ (E.Point t) ((2 : ℕ) : ℤ) :=
-      ⟨x, (Submodule.mem_torsionBy_iff _ _).mpr hx⟩ with hxdef
-    -- Nonvanishing and distinctness, via `pull_injective` + the `e`-coordinates.
-    haveI : Fact (1 < 2) := ⟨one_lt_two⟩
-    have hbase : ∀ v : Fin 2 → ZMod 2, (e.symm v).1 = 0 → v = 0 := by
-      intro v hv
-      have h0 : e.symm v = 0 := by
-        apply Subtype.ext
-        simpa using hv
-      have := congrArg e h0
-      rwa [AddEquiv.apply_symm_apply, map_zero] at this
-    have hp0 : p ≠ 0 := by
-      intro h0
-      have hval : EllipticCurve.Point.pull E t (e.symm ![1, 0]).1 =
-          (0 : E.Point t) := congrArg Subtype.val h0
-      have h00 : (e.symm ![1, 0]).1 = (0 : E.Section) :=
-        E.pull_injective k k' t (by rw [hval, EllipticCurve.Point.pull_zero])
-      have hv := hbase ![1, 0] h00
-      have h1 : (1 : ZMod 2) = 0 := by simpa using congrFun hv 0
-      exact one_ne_zero h1
-    have hq0 : q ≠ 0 := by
-      intro h0
-      have hval : EllipticCurve.Point.pull E t (e.symm ![0, 1]).1 =
-          (0 : E.Point t) := congrArg Subtype.val h0
-      have h00 : (e.symm ![0, 1]).1 = (0 : E.Section) :=
-        E.pull_injective k k' t (by rw [hval, EllipticCurve.Point.pull_zero])
-      have hv := hbase ![0, 1] h00
-      have h1 : (1 : ZMod 2) = 0 := by simpa using congrFun hv 1
-      exact one_ne_zero h1
-    have hpq : p ≠ q := by
-      intro h0
-      have hval : EllipticCurve.Point.pull E t (e.symm ![1, 0]).1 =
-          EllipticCurve.Point.pull E t (e.symm ![0, 1]).1 :=
-        congrArg Subtype.val h0
-      have h00 := E.pull_injective k k' t hval
-      have hsymm : e.symm ![1, 0] = e.symm ![0, 1] := Subtype.ext h00
-      have hv : (![1, 0] : Fin 2 → ZMod 2) = ![0, 1] := by
-        have := congrArg e hsymm
-        rwa [AddEquiv.apply_symm_apply, AddEquiv.apply_symm_apply] at this
-      have h1 : (1 : ZMod 2) = 0 := by simpa using congrFun hv 0
-      exact one_ne_zero h1
-    -- Klein-four exhaustion, in pair coordinates (where `decide` computes).
-    let π2 : (Fin 2 → ZMod 2) ≃+ ZMod 2 × ZMod 2 :=
-      { toFun := fun v => (v 0, v 1)
-        invFun := fun z => ![z.1, z.2]
-        left_inv := fun v => by
-          funext i
-          fin_cases i <;> rfl
-        right_inv := fun z => rfl
-        map_add' := fun _ _ => rfl }
-    let e'' := e'.trans π2
-    have hd : ∀ v w u : ZMod 2 × ZMod 2, w ≠ 0 → u ≠ 0 → w ≠ u →
-        v = 0 ∨ v = w ∨ v = u ∨ v = w + u := by decide
-    have hew : e'' p ≠ 0 := fun h0 => hp0 (e''.injective (by rw [h0, map_zero]))
-    have heu : e'' q ≠ 0 := fun h0 => hq0 (e''.injective (by rw [h0, map_zero]))
-    have hwu : e'' p ≠ e'' q := fun h0 => hpq (e''.injective h0)
-    have hfour := hd (e'' x') (e'' p) (e'' q) hew heu hwu
-    have hcases4 : x' = 0 ∨ x' = p ∨ x' = q ∨ x' = p + q := by
-      rcases hfour with h | h | h | h
-      · exact Or.inl (e''.injective (by rw [h, map_zero]))
-      · exact Or.inr (Or.inl (e''.injective h))
-      · exact Or.inr (Or.inr (Or.inl (e''.injective h)))
-      · exact Or.inr (Or.inr (Or.inr (e''.injective (by rw [h, map_add]))))
-    -- Land in the closure.
-    rcases hcases4 with h | h | h | h
-    · have hx0 : x = (0 : E.Point t) := congrArg Subtype.val h
-      rw [hx0]
-      exact zero_mem _
-    · have hxp : x = EllipticCurve.Point.pull E t (e.symm ![1, 0]).1 :=
-        congrArg Subtype.val h
-      rw [hxp]
-      exact AddSubgroup.subset_closure (Set.mem_insert _ _)
-    · have hxq : x = EllipticCurve.Point.pull E t (e.symm ![0, 1]).1 :=
-        congrArg Subtype.val h
-      rw [hxq]
-      exact AddSubgroup.subset_closure (Set.mem_insert_of_mem _ rfl)
-    · have hxpq : x = EllipticCurve.Point.pull E t (e.symm ![1, 0]).1 +
-          EllipticCurve.Point.pull E t (e.symm ![0, 1]).1 :=
-        congrArg Subtype.val h
-      rw [hxpq]
-      exact add_mem (AddSubgroup.subset_closure (Set.mem_insert _ _))
-        (AddSubgroup.subset_closure (Set.mem_insert_of_mem _ rfl))
+  · obtain ⟨e⟩ := E.torsion_geometricFibre_rank_two 2 k (𝟙 _) hk
+    exact ⟨_, _, isNaiveFullLevel_two_of_torsionBasis k E hk e⟩
 
 /-- **(T-H7d)** A nonempty `R`-scheme base has a geometric point in which every
 `R`-invertible `N` stays invertible: take the algebraic closure of a residue field. -/
@@ -954,7 +957,7 @@ theorem EllObj.exists_geometricPoint_at (X : EllObj R) (s : X.base)
 
 private theorem neg_eq_self_of_zsmul_eq_zero_of_le_two {G : Type*} [AddGroup G] {N : ℕ} [NeZero N]
     (hN : N ≤ 2) {Z : G} (hZ : (N : ℤ) • Z = 0) : -Z = Z := by
-  rw [neg_eq_iff_add_eq_zero, ← two_zsmul]
+  refine neg_eq_self_iff_two_zsmul_eq_zero.mpr ?_
   rcases (by have := NeZero.ne N; lia : N = 1 ∨ N = 2) with rfl | rfl
   · simp [show Z = 0 by simpa using hZ]
   · exact_mod_cast hZ
@@ -1012,52 +1015,22 @@ theorem gammaFullNaiveProblem_map_negIso_ne_of_three_le (N : ℕ) [NeZero N] (hN
     (L : (gammaFullNaiveProblem R N).obj (Opposite.op X)) :
     (gammaFullNaiveProblem R N).map (EllObj.negIso R X).hom.op L ≠ L := by
   intro heq
-  -- A fixed point forces `−P = P` and `−Q = Q`.
   have hP : -L.1.1 = L.1.1 :=
     (EllObj.pullSection_negHom R X L.1.1).symm.trans (congrArg (fun z => z.1.1) heq)
   have hQ : -L.1.2 = L.1.2 :=
     (EllObj.pullSection_negHom R X L.1.2).symm.trans (congrArg (fun z => z.1.2) heq)
-  -- Base change to a geometric point where `N` is invertible.
   obtain ⟨k, fk, ak, t, hk⟩ := EllObj.exists_geometricPoint R X hne N hinv
   letI := fk; letI := ak
-  -- There, the pulled sections are `2`-torsion.
-  have h2 : ∀ Z : X.curve.Section, -Z = Z →
-      (2 : ℤ) • EllipticCurve.Point.pull X.curve t Z = 0 := by
-    intro Z hZ
-    have hneg : -(EllipticCurve.Point.pull X.curve t Z) =
-        EllipticCurve.Point.pull X.curve t Z := by
-      rw [← neg_one_zsmul, ← EllipticCurve.Point.pull_zsmul, neg_one_zsmul, hZ]
-    rw [two_zsmul]; nth_rewrite 2 [← hneg]; exact add_neg_cancel _
-  -- Hence the whole subgroup they generate is `2`-torsion.
-  let dbl : X.curve.Point t →+ X.curve.Point t :=
-    AddMonoidHom.mk' (fun x => (2 : ℤ) • x) (fun a b => smul_add 2 a b)
-  have hsub : AddSubgroup.closure {EllipticCurve.Point.pull X.curve t L.1.1,
-      EllipticCurve.Point.pull X.curve t L.1.2} ≤ dbl.ker := by
-    rw [AddSubgroup.closure_le]
-    rintro y (rfl | rfl)
-    · exact h2 _ hP
-    · exact h2 _ hQ
-  -- But `E[N] ≅ (ℤ/N)²` supplies an `N`-torsion point; the full-level condition puts it in
-  -- that subgroup, so it is `2`-torsion — impossible for `N ≥ 3`.
   obtain ⟨e⟩ := X.curve.torsion_geometricFibre_rank_two N k t hk
-  have hxtN : (N : ℤ) • ((e.symm ![1, 0] :
-      Submodule.torsionBy ℤ (X.curve.Point t) (N : ℤ)) : X.curve.Point t) = 0 :=
-    (Submodule.mem_torsionBy_iff _ _).mp (e.symm ![1, 0]).2
   have hxt2 : (2 : ℤ) • ((e.symm ![1, 0] :
       Submodule.torsionBy ℤ (X.curve.Point t) (N : ℤ)) : X.curve.Point t) = 0 :=
-    AddMonoidHom.mem_ker.mp (hsub (L.2.2 k t _ hxtN))
-  have hy2 : (2 : ℤ) • (e.symm ![1, 0] :
-      Submodule.torsionBy ℤ (X.curve.Point t) (N : ℤ)) = 0 := by
-    rw [← Submodule.coe_eq_zero, Submodule.coe_smul]
-    exact hxt2
-  have h20 : (2 : ℤ) • (![1, 0] : Fin 2 → ZMod N) = 0 := by
-    have h := congrArg e hy2
-    rwa [map_zsmul, AddEquiv.apply_symm_apply, map_zero] at h
-  have h2z : ((2 : ℤ) : ZMod N) = 0 := by
-    have h := congrFun h20 0
-    rwa [Pi.smul_apply, Matrix.cons_val_zero, zsmul_eq_mul, mul_one, Pi.zero_apply] at h
-  have hdvd : (N : ℤ) ∣ 2 := (ZMod.intCast_zmod_eq_zero_iff_dvd 2 N).mp h2z
-  have hle : N ≤ 2 := by exact_mod_cast Int.le_of_dvd (by norm_num) hdvd
+    zsmul_eq_zero_of_mem_closure_pair (two_zsmul_pull_eq_zero_of_neg_eq_self X.curve t _ hP)
+      (two_zsmul_pull_eq_zero_of_neg_eq_self X.curve t _ hQ)
+      (L.2.2 k t _ ((Submodule.mem_torsionBy_iff _ _).mp (e.symm ![1, 0]).2))
+  have hle : (N : ℤ) ≤ 2 := Int.le_of_dvd (by norm_num)
+    (natCast_dvd_of_zsmul_addEquiv_symm_basis_eq_zero e (by
+      rw [← Submodule.coe_eq_zero, Submodule.coe_smul]
+      exact hxt2))
   omega
 
 end GammaH

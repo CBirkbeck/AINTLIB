@@ -49,7 +49,6 @@ pins proved outright from `choose_spec`.
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
 set_option maxSynthPendingDepth 5
 
 open AlgebraicGeometry CategoryTheory Limits

@@ -35,7 +35,6 @@ open AlgebraicGeometry CategoryTheory Limits HomogeneousIdeal HomogeneousLocaliz
 namespace LocalPresentation
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([hArb-1] marking existence)** If the chart image of a section lies in the
 `Z`-chart at every point of `Spec Γ(V)`, the presentation marks the section at honest
 affine coordinates. -/
@@ -75,7 +74,6 @@ theorem marksAt_of_forall_basicOpen {S : Scheme.{u}}
   exact ⟨p, q, heq, hτ⟩
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([hArb-2a] marking existence from zero-avoidance)** A section avoiding the zero
 section topologically over `V` is marked at honest coordinates: off the zero section is
 in the `Z`-chart (`mem_range_zero_of_not_mem_zChart`), so `marksAt_of_forall_basicOpen`
@@ -176,7 +174,6 @@ theorem forall_not_mem_range_of_pull_ne {S : Scheme.{u}} {C : Scheme.{u}} {π : 
   exact hc
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([hArb-2] marking existence from fibrewise nonvanishing)** A section of a
 geometric elliptic curve whose pull differs from zero at every algebraically closed
 geometric point of the base is marked at honest coordinates on every affine piece —

@@ -15,6 +15,7 @@ import ModularCurves.Moduli.E3DatumAssembly
 import ModularCurves.Moduli.BridgeAssembly
 import ModularCurves.Moduli.SqrtCoverGlue
 import ModularCurves.LevelStructure.CombinationLevel
+import Mathlib.CategoryTheory.Limits.Shapes.FunctorToTypes
 
 /-!
 # The KM 4.7 bootstrap objects (T-E12–T-E15)
@@ -367,36 +368,53 @@ noncomputable def gammaFullNaiveGlAction (N : ℕ) [NeZero N] :
     rw [mul_inv_rev]
     exact X.unop.curve.glSmul_mul δ⁻¹ γ⁻¹ L
 
+/-! ### Lifting an automorphism along a product of type-valued functors
+
+`FunctorToTypes.prod` has no `prod.map` / `Aut`-lifting API in mathlib; the three lemmas
+below supply it. Keeping them on ABSTRACT `F G : D ⥤ Type u` is what makes the naturality
+squares cheap: every leaf is a variable, so the unifier never unfolds `omegaProblem`. -/
+
+universe v₁ u₁
+
+section ProdFst
+
+variable {D : Type u₁} [Category.{v₁} D] {F F' F'' : D ⥤ Type u} (G : D ⥤ Type u)
+
+/-- Act by `β` on the first factor of `FunctorToTypes.prod F G`, by the identity on the
+second. -/
+def prodFstNatTrans (β : F ⟶ F') :
+    FunctorToTypes.prod F G ⟶ FunctorToTypes.prod F' G where
+  app X := ↾fun x => (β.app X x.1, x.2)
+  naturality X Y φ := by
+    ext x
+    · exact CategoryTheory.congr_fun (β.naturality φ) x.1
+    · rfl
+
+@[simp]
+theorem prodFstNatTrans_id : prodFstNatTrans G (𝟙 F) = 𝟙 _ := by
+  ext X x <;> rfl
+
+@[simp]
+theorem prodFstNatTrans_comp (β : F ⟶ F') (β' : F' ⟶ F'') :
+    prodFstNatTrans G (β ≫ β') = prodFstNatTrans G β ≫ prodFstNatTrans G β' := by
+  ext X x <;> rfl
+
+/-- Lift an automorphism of `F` to an automorphism of `FunctorToTypes.prod F G`
+(the identity on the second factor). -/
+def prodFstAut (α : Aut F) : Aut (FunctorToTypes.prod F G) where
+  hom := prodFstNatTrans G α.hom
+  inv := prodFstNatTrans G α.inv
+  hom_inv_id := by rw [← prodFstNatTrans_comp, α.hom_inv_id, prodFstNatTrans_id]
+  inv_hom_id := by rw [← prodFstNatTrans_comp, α.inv_hom_id, prodFstNatTrans_id]
+
+end ProdFst
+
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
 /-- **(T-E14-ACT)** Lift an automorphism of the level problem to the Legendre product
 (identity on the `ω`-datum). -/
 noncomputable def legendreBootstrapLevelAut (α : Aut (gammaFullNaiveProblem R 2)) :
-    Aut (legendreBootstrapProblem R) where
-  hom :=
-    { app := fun X => ↾fun x : (gammaFullNaiveProblem R 2).obj X ×
-          OmegaBasis X.unop.curve.toEllipticCurveGeom =>
-        (α.hom.app X x.1, x.2)
-      naturality := fun X Y φ => by
-        ext x
-        refine Prod.ext ?_ rfl
-        exact CategoryTheory.congr_fun (α.hom.naturality φ) x.1 }
-  inv :=
-    { app := fun X => ↾fun x : (gammaFullNaiveProblem R 2).obj X ×
-          OmegaBasis X.unop.curve.toEllipticCurveGeom =>
-        (α.inv.app X x.1, x.2)
-      naturality := fun X Y φ => by
-        ext x
-        refine Prod.ext ?_ rfl
-        exact CategoryTheory.congr_fun (α.inv.naturality φ) x.1 }
-  hom_inv_id := by
-    ext X x
-    refine Prod.ext ?_ rfl
-    exact CategoryTheory.congr_fun (NatTrans.congr_app α.hom_inv_id X) x.1
-  inv_hom_id := by
-    ext X x
-    refine Prod.ext ?_ rfl
-    exact CategoryTheory.congr_fun (NatTrans.congr_app α.inv_hom_id X) x.1
+    Aut (legendreBootstrapProblem R) :=
+  prodFstAut (omegaProblem R) α
 
 /-- **(T-E14-ACT)** The level-factor action on the Legendre problem. -/
 noncomputable def legendreBootstrapGlAction :

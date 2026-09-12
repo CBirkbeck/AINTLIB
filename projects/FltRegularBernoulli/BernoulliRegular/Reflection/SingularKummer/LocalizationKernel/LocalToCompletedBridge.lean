@@ -874,7 +874,6 @@ theorem singularGroupLocalizationToCompletedPrincipalUnits_equivariant
     (p := p) (K := K)
     (singularGroupLocalizationToCyclotomicLocalUnits_equivariant (p := p) (K := K)) a x
 
-set_option synthInstance.maxHeartbeats 80000 in
 -- The completed quotient's `ZMod p` module is synthesized through additive
 -- and quotient-group wrappers.
 /-- Linear form of the concrete completed localization map. -/

@@ -51,7 +51,6 @@ theorem markedCoordsAt_marksAt {σ : S ⟶ G.E} (hσ : σ ≫ G.π = 𝟙 S)
 variable {σP σQ : S ⟶ G.E}
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **([O1] the compatibility)** The marked abscissa differences are `u⁻²`-compatible
 across charts: both markings chase through the chart comparison
 (`e3_markChase`), and the translation part cancels in the difference. -/

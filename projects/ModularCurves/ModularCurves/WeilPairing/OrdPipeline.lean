@@ -1332,6 +1332,132 @@ private theorem eq_invFst_of_fst_eq
     show ((𝟙 (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) : (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))) ⟶ (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base q = q from rfl] at h5
   exact h5
 
+/-- **([TAU-PT] morphism step)** Composing a section with translation by `P` adds `P`, read
+on points: the translate of the image of `Q` is the image of `Q + P`. -/
+private theorem asSection_comp_translateByPoint_base {S T : Scheme.{u}} (E : EllipticCurve S)
+    (t : T ⟶ S) (P Q : (E.baseChange t).Point (𝟙 T)) (x : T) :
+    (translateByPoint E t P).base (Q.1.base x) = (Q + P).1.base x := by
+  have hcomp : Q.1 ≫ translateByPoint E t P = (Q + P).1 :=
+    congrArg CategoryTheory.CommaMorphism.left (overPoint_comp_translateBy E t P Q)
+  exact congrArg (fun (m : T ⟶ pullback E.π t) => m.base x) hcomp
+
+/-- **([TAU-PT] at named endpoints)** Translation read between two named points. Abstracting
+both endpoints as free variables lets the use site match syntactically, instead of making the
+lean4#14806 kernel whnf `translateBy` under a `congrArg` motive. -/
+private theorem translateByPoint_base_eq_of_asSection_base {S T : Scheme.{u}}
+    (E : EllipticCurve S) (t : T ⟶ S) (P Q : (E.baseChange t).Point (𝟙 T)) (x : T)
+    {u v : ↥(pullback E.π t)} (hu : Q.1.base x = u) (hv : (Q + P).1.base x = v) :
+    (translateByPoint E t P).base u = v := by
+  subst hu
+  subst hv
+  exact asSection_comp_translateByPoint_base E t P Q x
+
+/-- **([CAST-G] family)** `asSection` of a cast sum splits as the sum of the cast sections. -/
+private theorem asSection_cast_add {S T : Scheme.{u}} (E : EllipticCurve S)
+    {g g' : T ⟶ S} (h : g = g') (P Q : E.Point g) :
+    EllipticCurve.Point.asSection E g' (h ▸ P) +
+        EllipticCurve.Point.asSection E g' (h ▸ Q) =
+      EllipticCurve.Point.asSection E g' (h ▸ (P + Q)) := by
+  subst h
+  exact (asSection_add' E g P Q).symm
+
+/-- **([PT-0] transported)** At the unique point of `Spec K`, the section attached to a model
+point reads off as the `inv fst`-image of the `z`-chart point of the matching smooth point. -/
+private theorem asSection_cast_base_default_eq_invFst_zChartPoint
+    (pmod : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap K K))))
+    {x y : K} {hxy : (W.baseChange K).toAffine.Nonsingular x y}
+    (hp : projModelPointsEquiv W K pmod =
+      WeierstrassCurve.Affine.Point.some x y hxy)
+    (P : (⟨W⟩ : SmoothPlaneCurve K).SmoothPoint) (hPx : P.x = x) (hPy : P.y = y) :
+    (EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+        (specMap_algebraMap_self_eq_id (K := K) ▸ pmod)).1.base
+          (default : (Spec (CommRingCat.of K))) =
+      ((inv (pullback.fst (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W P) := by
+  refine eq_invFst_of_fst_eq W _ _ ?_
+  have hfst := congrArg (fun (m : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =>
+    m.base (default : (Spec (CommRingCat.of K))))
+    (EllipticCurve.Point.asSection_val_fst (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) (specMap_algebraMap_self_eq_id (K := K) ▸ pmod))
+  simp only at hfst
+  rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base
+      ((EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+        (specMap_algebraMap_self_eq_id (K := K) ▸ pmod)).1.base
+          (default : (Spec (CommRingCat.of K)))) =
+    ((EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+      (specMap_algebraMap_self_eq_id (K := K) ▸ pmod)).1 ≫
+        (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base
+          (default : (Spec (CommRingCat.of K))) from rfl, hfst,
+    show ((specMap_algebraMap_self_eq_id (K := K) ▸ pmod :
+        (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K)))) :
+        (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =
+      (pmod : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) from
+      castPointG_coe (specMap_algebraMap_self_eq_id (K := K)) pmod,
+    eq_chartSpecPoint_of_projModelPointsEquiv_some (W := W) hp]
+  exact chartSpecPoint_base_default_eq_zChartPoint W x y _ P hPx hPy
+
+/-- **([PT-0] transported, zero case)** The same reading when the model point is the zero of
+the dictionary: the section lands on the `inv fst`-image of the zero section's point. -/
+private theorem asSection_cast_base_default_eq_invFst_projModelZero
+    (pmod : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap K K))))
+    (hp : projModelPointsEquiv W K pmod = 0) :
+    (EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+        (specMap_algebraMap_self_eq_id (K := K) ▸ pmod)).1.base
+          (default : (Spec (CommRingCat.of K))) =
+      ((inv (pullback.fst (modelEllipticCurve W).π
+        (𝟙 (Spec (CommRingCat.of K)))))).base ((projModelZero W).base
+          ((Spec.map (CommRingCat.ofHom (algebraMap K K))).base
+            (default : (Spec (CommRingCat.of K))))) := by
+  have hpz : pmod = ⟨Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫ projModelZero W, by
+    rw [Category.assoc, show (modelEllipticCurve W).π = projModelπ W from rfl,
+      projModelZero_projModelπ, Category.comp_id]⟩ :=
+    (projModelPointsEquiv W K).injective (by rw [hp, projModelPointsEquiv_zero])
+  refine eq_invFst_of_fst_eq W _ _ ?_
+  have hfst := congrArg (fun (m : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =>
+    m.base (default : (Spec (CommRingCat.of K))))
+    (EllipticCurve.Point.asSection_val_fst (modelEllipticCurve W)
+      (𝟙 (Spec (CommRingCat.of K))) (specMap_algebraMap_self_eq_id (K := K) ▸ pmod))
+  simp only at hfst
+  rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base
+      ((EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+        (specMap_algebraMap_self_eq_id (K := K) ▸ pmod)).1.base
+          (default : (Spec (CommRingCat.of K)))) =
+    ((EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
+      (specMap_algebraMap_self_eq_id (K := K) ▸ pmod)).1 ≫
+        (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base
+          (default : (Spec (CommRingCat.of K))) from rfl, hfst,
+    show ((specMap_algebraMap_self_eq_id (K := K) ▸ pmod :
+        (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K)))) :
+        (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =
+      (pmod : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) from
+      castPointG_coe (specMap_algebraMap_self_eq_id (K := K)) pmod,
+    hpz]
+  rfl
+
+/- DECOMPOSE: UNRESOLVED — decomposition does not fix this; do not retry without new
+   information. Reason: (kernel) deterministic timeout at the default budget (lean4#14806).
+   The proof below IS already decomposed (68 lines -> one `exact`), and every helper it uses
+   kernel-checks in isolation, yet this declaration still times out. The cost tracks the
+   ASSEMBLED STATEMENT, not the proof structure, so no further decomposition can help --
+   decomposition only changes proof structure. Leave as is; the dependent modules stay blocked.
+   A fix needs a statement change or a heartbeat budget (both forbidden), or lean4#14806 upstream.
+   MEASURED (full-file compiles, 40 GB guard, one variant at a time):
+     original 68-line proof (baseline)             timeout   320 s / 24 GB
+     4 helpers + `rw` assembly                     timeout   498 s / 24 GB
+     4 helpers + motive-free `Eq.trans` chain      timeout   541 s / 24 GB
+     5 helpers + free-variable endpoints (current) timeout   503 s / 24 GB
+   WHAT WAS ELIMINATED AND DID NOT HELP: `rw`'s `Eq.mpr` motives over the whole composite
+     (variant 2 -> 3); and the `congrArg` motive `(translateByPoint ...).base`, which drags the
+     kernel through the `translateBy`/`Over` machinery (variant 3 -> 4, via
+     `translateByPoint_base_eq_of_asSection_base`, which abstracts both endpoints).
+   The two downstream `(kernel) unknown constant` errors are pure fallout of this failure and of
+     `..._of_add_zero` below; they heal only when these do.
+   KEPT ANYWAY: the helpers above are sound, kernel-check individually, are shared with the
+     `_zero` theorem, and shorten both proofs to a single `exact`. The file's error count is
+     identical to the baseline, so this is structure-only progress, not a regression.
+-/
 /-- **([TAU-PT])** The translation's point action through the dictionary: at chart
 points, `τ_(T)` sends the `A`-point to the `A + T`-point. The `overPoint`-composition
 identity plus PT-0 at both ends. -/
@@ -1351,75 +1477,23 @@ private theorem translateByPoint_base_zChartPoint_of_add
           (specMap_algebraMap_self_eq_id (K := K) ▸ pmodT))).base
       (((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W A)) =
     ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W Spt) := by
-  set h := specMap_algebraMap_self_eq_id (K := K)
-  set QA := EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodA) with hQA
-  set PT' := EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodT) with hPT'
-  -- the composition identity at lefts
-  have hcomp := congrArg CategoryTheory.CommaMorphism.left
-    (overPoint_comp_translateBy (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT' QA)
-  have hcomp2 : QA.1 ≫ translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT' = (QA + PT').1 := hcomp
-  -- the sum collapses through the casts
-  have hsum : QA + PT' = EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
-      (h ▸ (pmodA + pmodT)) :=
-    ((asSection_add' (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodA) (h ▸ pmodT)).symm).trans
-      (congrArg (EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))))
-        (castPointG_add h pmodA pmodT).symm)
-  -- point images at default
-  have hbase := congrArg (fun (m : (Spec (CommRingCat.of K)) ⟶ (pullback (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) =>
-    m.base (default : (Spec (CommRingCat.of K)))) hcomp2
-  simp only at hbase
-  -- the A-side point
-  have hA2 := eq_chartSpecPoint_of_projModelPointsEquiv_some (W := W) hA
-  have hApt : QA.1.base (default : (Spec (CommRingCat.of K))) =
-      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W A) := by
-    refine eq_invFst_of_fst_eq W _ _ ?_
-    have hfst := congrArg (fun (m : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =>
-      m.base (default : (Spec (CommRingCat.of K))))
-      (EllipticCurve.Point.asSection_val_fst (modelEllipticCurve W)
-        (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodA))
-    simp only at hfst
-    rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (QA.1.base (default : (Spec (CommRingCat.of K)))) =
-      (QA.1 ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (default : (Spec (CommRingCat.of K))) from rfl]
-    rw [hQA, hfst]
-    rw [show ((h ▸ pmodA : (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K)))) :
-        (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =
-      (pmodA : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) from castPointG_coe h pmodA]
-    rw [hA2]
-    exact chartSpecPoint_base_default_eq_zChartPoint W xa ya _ A hAx hAy
-  -- the sum-side point
-  have hS2 := eq_chartSpecPoint_of_projModelPointsEquiv_some (W := W) hS
-  have hSpt : (QA + PT').1.base (default : (Spec (CommRingCat.of K))) =
-      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W Spt) := by
-    have hc1 : (QA + PT').1.base (default : (Spec (CommRingCat.of K))) =
-        (EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
-          (h ▸ (pmodA + pmodT))).1.base (default : (Spec (CommRingCat.of K))) := by
-      exact congrArg (fun X => (X.1).base (default : (Spec (CommRingCat.of K)))) hsum
-    rw [hc1]
-    refine eq_invFst_of_fst_eq W _ _ ?_
-    have hfst := congrArg (fun (m : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =>
-      m.base (default : (Spec (CommRingCat.of K))))
-      (EllipticCurve.Point.asSection_val_fst (modelEllipticCurve W)
-        (𝟙 (Spec (CommRingCat.of K))) (h ▸ (pmodA + pmodT)))
-    simp only at hfst
-    rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base ((EllipticCurve.Point.asSection (modelEllipticCurve W)
-        (𝟙 (Spec (CommRingCat.of K))) (h ▸ (pmodA + pmodT))).1.base (default : (Spec (CommRingCat.of K)))) =
-      ((EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
-        (h ▸ (pmodA + pmodT))).1 ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (default : (Spec (CommRingCat.of K))) from rfl]
-    rw [hfst]
-    rw [show ((h ▸ (pmodA + pmodT) : (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K)))) :
-        (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =
-      ((pmodA + pmodT : (modelEllipticCurve W).Point _) :
-        (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) from castPointG_coe h _]
-    rw [hS2]
-    exact chartSpecPoint_base_default_eq_zChartPoint W xs ys _ Spt hSx hSy
-  rw [← hApt]
-  rw [show (translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT').base
-      (QA.1.base (default : (Spec (CommRingCat.of K)))) =
-    (QA.1 ≫ translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT').base
-      (default : (Spec (CommRingCat.of K))) from rfl]
-  rw [hcomp2]
-  exact hSpt
+  -- Both endpoints are handed to the helper as free variables, so the kernel never reduces
+  -- `translateBy` under a `congrArg` motive (lean4#14806).
+  exact translateByPoint_base_eq_of_asSection_base (modelEllipticCurve W)
+    (𝟙 (Spec (CommRingCat.of K))) _ _ (default : (Spec (CommRingCat.of K)))
+    (asSection_cast_base_default_eq_invFst_zChartPoint W pmodA hA A hAx hAy)
+    ((congrArg (fun X : ((modelEllipticCurve W).baseChange
+          (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))) =>
+        X.1.base (default : (Spec (CommRingCat.of K))))
+        (asSection_cast_add (modelEllipticCurve W)
+          (specMap_algebraMap_self_eq_id (K := K)) pmodA pmodT)).trans
+      (asSection_cast_base_default_eq_invFst_zChartPoint W (pmodA + pmodT) hS Spt hSx hSy))
 
+/- DECOMPOSE: UNRESOLVED — see the block above `translateByPoint_base_zChartPoint_of_add`
+   for the full measurement table and root cause. This theorem shares all of that theorem's
+   helpers and fails the same way: (kernel) deterministic timeout at the default budget
+   (lean4#14806), unchanged across all four decompositions tried. Leave as is.
+-/
 /-- **([TAU-PT-ZERO])** The translation's point action, zero-sum case: when
 `A + T = 0` in the dictionary, `τ_T` sends the `A`-chart point to the zero image. -/
 private theorem translateByPoint_base_zChartPoint_of_add_zero
@@ -1437,74 +1511,16 @@ private theorem translateByPoint_base_zChartPoint_of_add_zero
     ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base ((projModelZero W).base
       ((Spec.map (CommRingCat.ofHom (algebraMap K K))).base
         (default : (Spec (CommRingCat.of K))))) := by
-  set h := specMap_algebraMap_self_eq_id (K := K)
-  set QA := EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodA) with hQA
-  set PT' := EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodT) with hPT'
-  have hcomp := congrArg CategoryTheory.CommaMorphism.left
-    (overPoint_comp_translateBy (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT' QA)
-  have hcomp2 : QA.1 ≫ translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT' = (QA + PT').1 := hcomp
-  have hsum : QA + PT' = EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
-      (h ▸ (pmodA + pmodT)) :=
-    ((asSection_add' (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodA) (h ▸ pmodT)).symm).trans
-      (congrArg (EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))))
-        (castPointG_add h pmodA pmodT).symm)
-  have hA2 := eq_chartSpecPoint_of_projModelPointsEquiv_some (W := W) hA
-  have hApt : QA.1.base (default : (Spec (CommRingCat.of K))) =
-      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base (zChartPoint W A) := by
-    refine eq_invFst_of_fst_eq W _ _ ?_
-    have hfst := congrArg (fun (m : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =>
-      m.base (default : (Spec (CommRingCat.of K))))
-      (EllipticCurve.Point.asSection_val_fst (modelEllipticCurve W)
-        (𝟙 (Spec (CommRingCat.of K))) (h ▸ pmodA))
-    simp only at hfst
-    rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (QA.1.base (default : (Spec (CommRingCat.of K)))) =
-      (QA.1 ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (default : (Spec (CommRingCat.of K))) from rfl]
-    rw [hQA, hfst]
-    rw [show ((h ▸ pmodA : (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K)))) :
-        (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =
-      (pmodA : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) from castPointG_coe h pmodA]
-    rw [hA2]
-    exact chartSpecPoint_base_default_eq_zChartPoint W xa ya _ A hAx hAy
-  -- the zero-sum side: the model sum is the zero point
-  have hpz : pmodA + pmodT = ⟨Spec.map (CommRingCat.ofHom (algebraMap K K)) ≫
-      projModelZero W, by
-    rw [Category.assoc, show (modelEllipticCurve W).π = projModelπ W from rfl,
-      projModelZero_projModelπ, Category.comp_id]⟩ :=
-    (projModelPointsEquiv W K).injective
-      (by rw [hS, projModelPointsEquiv_zero])
-  have hSpt : (QA + PT').1.base (default : (Spec (CommRingCat.of K))) =
-      ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))).base ((projModelZero W).base
-        ((Spec.map (CommRingCat.ofHom (algebraMap K K))).base
-          (default : (Spec (CommRingCat.of K))))) := by
-    have hc1 : (QA + PT').1.base (default : (Spec (CommRingCat.of K))) =
-        (EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
-          (h ▸ (pmodA + pmodT))).1.base (default : (Spec (CommRingCat.of K))) := by
-      exact congrArg (fun X => (X.1).base (default : (Spec (CommRingCat.of K)))) hsum
-    rw [hc1]
-    refine eq_invFst_of_fst_eq W _ _ ?_
-    have hfst := congrArg (fun (m : (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =>
-      m.base (default : (Spec (CommRingCat.of K))))
-      (EllipticCurve.Point.asSection_val_fst (modelEllipticCurve W)
-        (𝟙 (Spec (CommRingCat.of K))) (h ▸ (pmodA + pmodT)))
-    simp only at hfst
-    rw [show ((pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base ((EllipticCurve.Point.asSection (modelEllipticCurve W)
-        (𝟙 (Spec (CommRingCat.of K))) (h ▸ (pmodA + pmodT))).1.base (default : (Spec (CommRingCat.of K)))) =
-      ((EllipticCurve.Point.asSection (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K)))
-        (h ▸ (pmodA + pmodT))).1 ≫ (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))).base (default : (Spec (CommRingCat.of K))) from rfl]
-    rw [hfst]
-    rw [show ((h ▸ (pmodA + pmodT) : (modelEllipticCurve W).Point (𝟙 (Spec (CommRingCat.of K)))) :
-        (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) =
-      ((pmodA + pmodT : (modelEllipticCurve W).Point _) :
-        (Spec (CommRingCat.of K)) ⟶ (modelEllipticCurve W).E) from castPointG_coe h _]
-    rw [hpz]
-    rfl
-  rw [← hApt]
-  rw [show (translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT').base
-      (QA.1.base (default : (Spec (CommRingCat.of K)))) =
-    (QA.1 ≫ translateByPoint (modelEllipticCurve W) (𝟙 (Spec (CommRingCat.of K))) PT').base
-      (default : (Spec (CommRingCat.of K))) from rfl]
-  rw [hcomp2]
-  exact hSpt
+  -- Same free-variable endpoint helper as in `translateByPoint_base_zChartPoint_of_add`.
+  exact translateByPoint_base_eq_of_asSection_base (modelEllipticCurve W)
+    (𝟙 (Spec (CommRingCat.of K))) _ _ (default : (Spec (CommRingCat.of K)))
+    (asSection_cast_base_default_eq_invFst_zChartPoint W pmodA hA A hAx hAy)
+    ((congrArg (fun X : ((modelEllipticCurve W).baseChange
+          (𝟙 (Spec (CommRingCat.of K)))).Point (𝟙 (Spec (CommRingCat.of K))) =>
+        X.1.base (default : (Spec (CommRingCat.of K))))
+        (asSection_cast_add (modelEllipticCurve W)
+          (specMap_algebraMap_self_eq_id (K := K)) pmodA pmodT)).trans
+      (asSection_cast_base_default_eq_invFst_projModelZero W (pmodA + pmodT) hS))
 
 /-- **([TAU-ISO])** `translateByPoint` is an isomorphism (hence dominant): it is the
 `.left` of the translation automorphism. -/

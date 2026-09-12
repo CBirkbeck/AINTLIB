@@ -122,6 +122,24 @@ For any `D₀ : RationalLocData A` and `f : A`, the 2-element cover
 
 variable [DecidableEq (RationalLocData A)]
 
+/-- **Extension by density for presheaf values**: two continuous ring homomorphisms out of
+`𝒪_X(D)` that agree on the canonical image of `A` are equal. They agree on
+`Localization.Away D.s` by `IsLocalization.ringHom_ext` at `Submonoid.powers D.s`, and that
+localization is dense in its completion `presheafValue D`. -/
+private theorem presheafValue_ringHom_ext_of_canonicalMap {S : Type*} [Semiring S]
+    [TopologicalSpace S] [T2Space S] (D : RationalLocData A) (f g : presheafValue D →+* S)
+    (hf : Continuous f) (hg : Continuous g)
+    (h : ∀ a : A, f (D.canonicalMap a) = g (D.canonicalMap a)) (x : presheafValue D) :
+    f x = g x := by
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  have hloc : f.comp D.coeRingHom = g.comp D.coeRingHom :=
+    IsLocalization.ringHom_ext (Submonoid.powers D.s) (RingHom.ext h)
+  exact congrFun (Continuous.ext_on
+    (UniformSpace.Completion.denseRange_coe (α := Localization.Away D.s)) hf hg
+    (by rintro _ ⟨y, rfl⟩; exact RingHom.congr_fun hloc y)) x
+
 /-- The Laurent 2-element rational cover of `D₀` at `f ∈ A`. Equivalent to
 Wedhorn's `𝒰_f = {R(f/1), R(1/f)}` (p. 83), with `R(f/1)` and `R(1/f)`
 defined relative to `D₀`. -/
@@ -1536,7 +1554,6 @@ private theorem coUnitDatum_span_le_ker
       ⟨b, Submonoid.mem_powers b⟩).trans (map_one _)
   rw [hmul, sub_self]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- `⊆` of (8.2.1)-plus — the completion comparison. The quotient
@@ -1684,7 +1701,6 @@ private theorem unitDatum_ker_le_span
   simp only [Function.comp_apply, hh', map_zero] at hfun
   exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- `⊆` of (8.2.1)-minus — the completion comparison, mirror of
@@ -1962,7 +1978,6 @@ private theorem coUnitDatum_quotEquiv_canonicalMap
   rw [h1, h2]
   erw [Ideal.quotEquivOfEq_mk]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **General `ker ≤ aI` for the Example-6.38 evaluation** (the parametric form of the
 completion comparison; see the section TODO). Inputs: `aI` closed, the denominator a
@@ -2326,7 +2341,6 @@ private noncomputable def bivariateSpan_equiv_B₁₂gen (b : A) :
         (Ideal.span {algebraMap A ↥(TateAlgebra₂ A) b - TateAlgebra₂.X})).symm.trans
       (Ideal.quotEquivOfEq (map_span_bSubX_eq_laurentFSubZeta b)))
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Fully parametric backward engine** (membership-based; generalizes
 `datum_ker_le_span_of_unit_mod` to an arbitrary `m`-variable evaluation `Φ`, e.g. the
@@ -2468,7 +2482,6 @@ private theorem tate_ker_le_of_backward
   simp only [Function.comp_apply, hh2, map_zero] at hfun
   exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Backward-data export variant of `tate_ker_le_of_backward`** (same hypotheses and
 body): returns the backward extension `β` and the localization lift `ψ'` with the
@@ -2610,7 +2623,6 @@ private theorem tate_backward_exists
     exact RingHom.congr_fun hcomp p
   exact ⟨β, ψ, hβ_cont, hext, hβ_coe, hψ_alg⟩
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Surjectivity from the backward round-trip**: an evaluation `Φ` satisfying the
 backward-engine hypotheses *at its own kernel* is surjective. `kerLift Φ` is continuous
@@ -2818,7 +2830,6 @@ private theorem tate_quotPresentation_symm_mk
   simp only [RingEquiv.symm_trans_apply, RingEquiv.symm_symm]
   exact RingHom.quotientKerEquivOfSurjective_apply_mk _ z
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- The presentation equivalence sends `canonicalMap x` to the constant class
 `mk (algebraMap x)` (generic tracking; mirrors `datum_quotEquiv_taut_canonicalMap`). -/
@@ -2944,7 +2955,6 @@ private noncomputable def unitCover_overlapTuple
     (unitCover_overlapDatum_B D₀ f).coeRingHom
       (divByS (1 : presheafValue D₀) (unitCover_overlapDatum_B D₀ f).s)]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- Both annulus tuple entries are power-bounded (their `divByS` numerators lie in
 `T = {1, b, b²}`, so the elements lie in the ring of definition `locSubring`). -/
@@ -3029,7 +3039,6 @@ private theorem unitCover_overlapDatum_s [IsTateRing A] [IsNoetherianRing A]
   show (1 : presheafValue D₀) * D₀.canonicalMap f = D₀.canonicalMap f
   rw [one_mul]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- The annulus evaluation kills `b − X` (both map to `b`: `X ↦ b²/s_O = b`). -/
 private theorem unitCover_overlapEval_gen1 [IsTateRing A] [IsNoetherianRing A]
@@ -3082,7 +3091,6 @@ private theorem unitCover_overlapEval_gen1 [IsTateRing A] [IsNoetherianRing A]
     ring
   rw [hdiv, sub_self, map_zero]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- The annulus evaluation kills `1 − b·Y` (`Y ↦ 1/s_O = 1/b`, and `b·(1/b) = 1`). -/
 private theorem unitCover_overlapEval_gen2 [IsTateRing A] [IsNoetherianRing A]
@@ -3210,7 +3218,6 @@ private theorem unitCover_overlapIdeal_rel [IsTateRing A] [IsNoetherianRing A]
     rw [hfac]
     exact Ideal.mul_mem_left _ _ hgen₁
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **The Example-6.38 half of the overlap bridge**: `O_X^B(annulus) ≃+*
 B⟨X,Y⟩/(b − X, 1 − bY)`, by `tate_quotPresentation` at the bivariate annulus
@@ -3309,7 +3316,6 @@ private noncomputable def unitCover_overlapQuotEquiv
       rw [← hXzeta]
       exact (unitCover_overlapIdeal_rel D₀ f).2.2
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- The overlap presentation sends `canonicalMap x` to the constant class
 `mk (algebraMap x)` (instance of `tate_quotPresentation_canonicalMap`, by
@@ -3455,7 +3461,6 @@ private theorem unitCover_relPlus_forwardLocHom_algebraMap
 --     and discharge `unitCover_relativePlus`; `_restrictionMap`-tracking follows from
 --     (7)'s base-hom being literally the restriction.
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-plus per-generator witnesses (piece 4)**: every `t ∈ T_inter` has a
 `locSubring`-witness `y` over the B-datum with `F (divByS t s_inter) = coeRingHom_B y`.
@@ -3576,7 +3581,6 @@ private theorem unitCover_relPlus_forward_witness
     rw [e1, hps p, map_mul, map_mul]
     ring
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-plus forward continuity (piece 5)**: the completed forward composite
 is continuous for the A-side localization topology (`locTopology_continuous_lift`,
@@ -3747,7 +3751,6 @@ private theorem unitCover_relPlus_sf_mem_T_inter
   refine Finset.mem_image.mpr ⟨(D₀.s, f), Finset.mem_product.mpr
     ⟨Finset.mem_insert_self _ _, Finset.mem_insert_of_mem (Finset.mem_singleton_self _)⟩, rfl⟩
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-plus backward continuity (piece 7e)**: the backward loc-hom is continuous
 for the B-side localization topology (`locTopology_continuous_lift`; the sole generator
@@ -3935,7 +3938,6 @@ private theorem unitCover_relPlus_locRoundtrip2
     unitCover_relPlus_forwardLocHom_algebraMap]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Roundtrip 1 (piece 8e)**: `backward ∘ forward = id` on `O_X(U₁)`
 (continuous extensions agreeing on the dense algebraic side). -/
@@ -3976,7 +3978,6 @@ private theorem unitCover_relPlus_backward_forward
   rw [unitCover_relPlus_forward_coe, unitCover_relPlus_backward_coe]
   exact RingHom.congr_fun (unitCover_relPlus_locRoundtrip1 D₀ f) a
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Forward-restriction intertwining (piece 8f)**: `forward (restriction x) =
 canMap_B x` — the relative identification sends the restriction of `x ∈ O_X(D₀)` to its
@@ -4029,7 +4030,6 @@ private theorem unitCover_relPlus_forward_restriction
   rw [unitCover_relPlus_forward_coe]
   exact congrArg _ (RingHom.congr_fun (unitCover_relPlus_locRoundtrip2 D₀ f) z)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Roundtrip 2 (piece 8g)**: `forward ∘ backward = id` on `O_X^B(R(b/1))`. -/
 private theorem unitCover_relPlus_forward_backward
@@ -4139,7 +4139,6 @@ private theorem unitCover_relMinus_forwardLocHom_algebraMap
   rw [unitCover_relMinus_forwardLocHom, IsLocalization.Away.lift_eq]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-minus per-generator witnesses (M4)**: every `t ∈ T_inter` (a product `p·1`,
 `p ∈ insert D₀.s D₀.T`) has a `locSubring`-witness over the B-side minus datum:
@@ -4274,7 +4273,6 @@ private theorem unitCover_relMinus_forward_witness
           (DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
             DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s)) := by ring
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-minus forward continuity (M5)**. -/
 private theorem unitCover_relMinus_forwardCompletion_continuous
@@ -4455,7 +4453,6 @@ private theorem unitCover_relMinus_s1_mem_T_inter
   refine Finset.mem_image.mpr ⟨(D₀.s, 1), Finset.mem_product.mpr
     ⟨Finset.mem_insert_self _ _, Finset.mem_insert_of_mem (Finset.mem_singleton_self _)⟩, rfl⟩
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-minus backward continuity (M7e)**: the sole generator `1/b` lands on the
 ring-of-definition element `(D₀.s·1)/s_inter`. -/
@@ -4657,7 +4654,6 @@ private theorem unitCover_relMinus_locRoundtrip2
     unitCover_relMinus_forwardLocHom_algebraMap]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Minus roundtrip 1 (M8e)**: `backward ∘ forward = id` on `O_X(U₂)`. -/
 private theorem unitCover_relMinus_backward_forward
@@ -4697,7 +4693,6 @@ private theorem unitCover_relMinus_backward_forward
   rw [unitCover_relMinus_forward_coe, unitCover_relMinus_backward_coe]
   exact RingHom.congr_fun (unitCover_relMinus_locRoundtrip1 D₀ f) a
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Minus forward-restriction intertwining (M8f)**. -/
 private theorem unitCover_relMinus_forward_restriction
@@ -4748,7 +4743,6 @@ private theorem unitCover_relMinus_forward_restriction
   rw [unitCover_relMinus_forward_coe]
   exact congrArg _ (RingHom.congr_fun (unitCover_relMinus_locRoundtrip2 D₀ f) z)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Minus roundtrip 2 (M8g)**: `forward ∘ backward = id` on `O_X^B(R(1/b))`. -/
 private theorem unitCover_relMinus_forward_backward
@@ -4928,7 +4922,6 @@ private theorem coe_divByS_mem_concretePair_A₀
       divByS_mem_locSubring D₀.P D₀.T D₀.s hp'⟩, rfl⟩
 
 open Classical in
-set_option maxHeartbeats 800000 in
 set_option linter.unusedSectionVars false in
 /-- **Classification of the first (`R(f/1)`-side) annulus factor.** Every generator `p`
 of `R(insert f D₀.T / D₀.s)` (= `insert (s·1) (interSamePair (unitDatum f)).T`) has
@@ -4961,7 +4954,6 @@ private theorem coe_divByS_unitInter_classification
       rfl
 
 open Classical in
-set_option maxHeartbeats 800000 in
 set_option linter.unusedSectionVars false in
 /-- **Classification of the second (`R(1/f)`-side) annulus factor.** Every generator `q`
 of the co-unit half (= `insert (s·f) (interSamePair (coUnitDatum f)).T`) has
@@ -4995,7 +4987,6 @@ private theorem coe_divByS_coUnitInter_classification
       rw [Finset.mem_singleton.mp h1, divByS_mul_eq_mul_algebraMap D₀ p' 1,
         map_mul, map_one, map_one, mul_one]
 
-set_option maxHeartbeats 800000 in
 set_option linter.unusedSectionVars false in
 /-- **B-side inverse of `b = canMap f` (O4-`K=0`)**: `canMap_B (canMap f) · coe (1/s_B) = 1`,
 i.e. `1/b` is the witness fraction inverting the B-annulus parameter `b`. -/
@@ -5026,7 +5017,6 @@ private theorem unitCover_overlapDatum_B_aMb_mul_coe_divByS_one
     rw [map_mul]; rfl]
   rw [h8, map_one, map_one]
 
-set_option maxHeartbeats 800000 in
 set_option linter.unusedSectionVars false in
 /-- **B-side image of `b²/s_B` (O4-`K=2`)**: `coe (b²/s_B) = canMap_B (canMap f)`, the
 witness fraction realising `b` itself in the B-annulus. -/
@@ -5061,7 +5051,6 @@ private theorem unitCover_overlapDatum_B_coe_divByS_bb
   rw [h9, map_mul, map_mul]
   rfl
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **Witness assembly from the two factor classifications (O4 core).** Given a product
 generator `p·q` whose factors classify as `coe (p/s) = c_p·bᵏᵖ`, `coe (q/s) = c_q·bᵏᵠ`
@@ -5212,7 +5201,6 @@ private theorem unitCover_relOverlap_forward_witness_assemble
     rw [haMbb, map_mul (OD.canonicalMap), map_mul (OD.canonicalMap)]
     ring
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-overlap per-generator witnesses (O4)**: every `t ∈ T_inter` (a product
 `p·q` over the two factor-data) has a `locSubring`-witness over the B-side annulus datum.
@@ -5248,7 +5236,6 @@ private theorem unitCover_relOverlap_forward_witness
   rw [show (((p, q).1 : A) * (p, q).2 : A) = p * q from rfl]
   exact unitCover_relOverlap_forward_witness_assemble D₀ f p q hc_p hc_q hcase_p hcase_q
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-overlap forward continuity (O5)**. -/
 private theorem unitCover_relOverlap_forwardCompletion_continuous
@@ -5439,7 +5426,6 @@ private theorem unitCover_relOverlap_sfsf_mem
   exact Finset.mem_image.mpr ⟨(D₀.s, f), Finset.mem_product.mpr
     ⟨Finset.mem_insert_self _ _, Finset.mem_insert_of_mem (Finset.mem_singleton_self _)⟩, rfl⟩
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **The two annulus generator identities in `O_X(U₁∩U₂)` (O7d)**:
 `canMap f · ((s·1)²/s_DII) = 1` and `((s·f)²/s_DII) = canMap f`. -/
@@ -5511,7 +5497,6 @@ private theorem unitCover_relOverlap_gen_identities
     refine u_f.mul_left_cancel ?_
     linear_combination h1
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **Relative-overlap backward continuity (O7e)**: the three annulus generators
 `{1, b, b²}` land on `((s·1)²/s_DII)`, `1`, `((s·f)²/s_DII)` respectively. -/
@@ -5773,7 +5758,6 @@ private theorem unitCover_relOverlap_locRoundtrip2
     unitCover_relOverlap_forwardLocHom_algebraMap]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Overlap roundtrip 1 (O8e)**: `backward ∘ forward = id` on `O_X(U₁∩U₂)`. -/
 private theorem unitCover_relOverlap_backward_forward
@@ -5824,7 +5808,6 @@ private theorem unitCover_relOverlap_backward_forward
   rw [unitCover_relOverlap_forward_coe, unitCover_relOverlap_backward_coe]
   exact RingHom.congr_fun (unitCover_relOverlap_locRoundtrip1 D₀ f) a
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Overlap forward-restriction intertwining (O8f)**. -/
 private theorem unitCover_relOverlap_forward_restriction
@@ -5885,7 +5868,6 @@ private theorem unitCover_relOverlap_forward_restriction
   rw [unitCover_relOverlap_forward_coe]
   exact congrArg _ (RingHom.congr_fun (unitCover_relOverlap_locRoundtrip2 D₀ f) z)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Overlap roundtrip 2 (O8g)**: `forward ∘ backward = id` on `O_X^B(annulus)`. -/
 private theorem unitCover_relOverlap_forward_backward
@@ -6490,7 +6472,6 @@ private theorem unitCover_example639Minus_symm_continuous
     exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T _ h1T
   exact tateQuotientToPresheafHom_continuous_of_tate (unitCover_minusDatum_B D₀ f) hb
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- S6: the overlap presentation's inverse on `mk`-classes is the bivariate evaluation
 (instance of `tate_quotPresentation_symm_mk` by unification against the definition). -/
@@ -6598,7 +6579,6 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
         exact (unitCover_overlapIdeal_rel D₀ f).2.2)
     z
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- S7: the overlap presentation's inverse is continuous (quotient universal property:
 `symm ∘ mk = overlapEval` is continuous). -/
@@ -6643,7 +6623,6 @@ private theorem unitCover_overlapQuotEquiv_symm_continuous
   rw [hfun]
   exact mvEvalHomBounded_continuous _ _ _ _
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **SQ1 (plus, dense side)**: precomposed with `mk : B⟨X⟩ → B₁_gen b`, the two
@@ -6969,7 +6948,6 @@ private theorem unitCover_negIncl_X {B : Type*} [CommRing B] [TopologicalSpace B
   · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
     intro h2; exact he (by rw [h2]; simp [Finsupp.single_eq_same])
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **SQ1 (minus, dense side)**: precomposed with `mk : B⟨X⟩ → B₂_gen b`, the two
@@ -9308,7 +9286,6 @@ theorem imageGenCover_isRational
     exact RationalLocData.isRational_of_span_eq_top
       (by rw [genPieceDatum_T]; exact imageGenCover_span D₀ T hspan)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G2′: the B-level image cover is generated by the image of `T`. -/
 theorem imageGenCover_isGeneratedBy
@@ -9363,7 +9340,6 @@ private theorem globalCollapseLocHom_algebraMap (P : PairOfDefinition A) (a : A)
   rw [globalCollapseLocHom, IsLocalization.Away.lift_eq]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3a-2: the collapse is continuous for the global localization topology. -/
 private theorem globalCollapseLocHom_continuous
@@ -9453,7 +9429,6 @@ private theorem globalSections_backward_canonicalMap
     (algebraMap A (Localization.Away ((globalLocData P).s)) a) from rfl]
   rw [globalSections_backward_coe, globalCollapseLocHom_algebraMap]
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3a-5: `canonicalMap ∘ backward = id` (the completion roundtrip). -/
 private theorem globalSections_canonicalMap_backward
@@ -9537,7 +9512,6 @@ private theorem imagePieceDatum_eq_genPieceDatum
         (D₀.canonicalMap t) (imageGenCover_span D₀ T hspan) :=
   rfl
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **G3c-separation**: the separation half of the A-level restricted cover transports
 from the B-level image cover (via `globalSections_equiv` + the G1-trackings +
@@ -9716,7 +9690,6 @@ private theorem genPiece_relOverlap_forwardLocHom_algebraMap
   rw [genPiece_relOverlap_forwardLocHom, IsLocalization.Away.lift_eq]
   rfl
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-4: the 3-layer per-generator witnesses for the double-intersection. -/
 private theorem genPiece_relOverlap_forward_witness
@@ -9887,7 +9860,6 @@ private theorem genPiece_relOverlap_forward_witness
           EII.coeRingHom (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s)) := by
         ring
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-5: forward continuity. -/
 private theorem genPiece_relOverlap_forwardCompletion_continuous
@@ -10029,7 +10001,6 @@ private theorem genPiece_relOverlap_forward_coe
         hspan t₁ t₂))
     (genPiece_relOverlap_forwardCompletion_continuous D₀ T hspan t₁ t₂) y
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-7a: backward base unit. -/
 private theorem genPiece_relOverlap_backward_baseHom_isUnit
@@ -10116,7 +10087,6 @@ private theorem genPiece_relOverlap_backwardLocHom_algebraMap
           (RationalLocData.interSamePair_subset_left _ _ _)) x := by
   rw [genPiece_relOverlap_backwardLocHom, IsLocalization.Away.lift_eq]
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-7e: backward continuity (each `T_EII`-generator lands on the A-side
 ring-of-definition element `((D₀.s·q′)·q)/s_DII`). -/
@@ -10329,7 +10299,6 @@ private theorem genPiece_relOverlap_backward_coe
     (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂)
     (genPiece_relOverlap_backwardLocHom_continuous D₀ T hspan t₁ t₂) y
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-8c: loc-level roundtrip 1. -/
 private theorem genPiece_relOverlap_locRoundtrip1
@@ -10364,7 +10333,6 @@ private theorem genPiece_relOverlap_locRoundtrip1
     genPiece_relOverlap_backwardLocHom_algebraMap, restrictionMapHom_canonicalMap]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-8e: `backward ∘ forward = id`. -/
 private theorem genPiece_relOverlap_backward_forward
@@ -10434,7 +10402,6 @@ private theorem genPiece_relOverlap_backward_forward
   rw [genPiece_relOverlap_forward_coe, genPiece_relOverlap_backward_coe]
   exact RingHom.congr_fun (genPiece_relOverlap_locRoundtrip1 D₀ T hspan t₁ t₂) a
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-8f: forward-restriction intertwining. -/
 private theorem genPiece_relOverlap_forward_restriction
@@ -10575,7 +10542,6 @@ private theorem genPiece_relOverlap_forward_restriction
   rw [genPiece_relOverlap_forward_coe]
   exact congrArg _ (RingHom.congr_fun hRT2 z)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G3b-8g: `forward ∘ backward = id`. -/
 private theorem genPiece_relOverlap_forward_backward
@@ -10680,7 +10646,206 @@ private noncomputable def genPiece_relative_overlap_equiv
     (RingHom.ext (genPiece_relOverlap_forward_backward D₀ T hspan t₁ t₂))
     (RingHom.ext (genPiece_relOverlap_backward_forward D₀ T hspan t₁ t₂))
 
-set_option maxHeartbeats 1600000 in
+set_option linter.unusedSectionVars false in
+/-- The double-intersection identification is continuous: its forward half is the
+completion extension `genPiece_relOverlap_forward`. -/
+private theorem genPiece_relative_overlap_equiv_continuous
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
+    haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+    haveI : IsNoetherianRing (presheafValue D₀) :=
+      presheafValue_isNoetherianRing_faithful D₀
+    haveI : IsStronglyNoetherian (presheafValue D₀) :=
+      presheafValue_isStronglyNoetherian_faithful D₀
+    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    Continuous (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂) := by
+  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+  haveI : IsNoetherianRing (presheafValue D₀) :=
+    presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) :=
+    presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  letI : UniformSpace (Localization.Away
+      ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+        (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
+    ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
+  letI : IsTopologicalRing (Localization.Away
+      ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+        (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
+    ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away
+      ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+        (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
+    ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).isUniformAddGroup
+  exact UniformSpace.Completion.continuous_extension
+
+set_option linter.unusedSectionVars false in
+/-- The single-piece identification (Wedhorn Prop 8.2) is continuous: its forward half is
+the completion extension `genPiece_rel_forward`. -/
+private theorem genPiece_relative_equiv_continuous
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A) (t : A)
+    (hspan : Ideal.span (T : Set A) = ⊤) :
+    haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+    haveI : IsNoetherianRing (presheafValue D₀) :=
+      presheafValue_isNoetherianRing_faithful D₀
+    haveI : IsStronglyNoetherian (presheafValue D₀) :=
+      presheafValue_isStronglyNoetherian_faithful D₀
+    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    Continuous (genPiece_relative_equiv D₀ T t hspan) := by
+  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+  haveI : IsNoetherianRing (presheafValue D₀) :=
+    presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) :=
+    presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  letI : UniformSpace (Localization.Away
+      (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s) :=
+    (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).uniformSpace
+  letI : IsTopologicalRing (Localization.Away
+      (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s) :=
+    (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away
+      (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s) :=
+    (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).isUniformAddGroup
+  exact UniformSpace.Completion.continuous_extension
+
+set_option linter.unusedSectionVars false in
+/-- The double-intersection identification tracks canonical maps: it sends the canonical
+image of `a : A` in the `A`-side double piece to the canonical image of `D₀.canonicalMap a`
+in the `B`-side double piece. -/
+private theorem genPiece_relative_overlap_equiv_canonicalMap
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) (a : A) :
+    haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+    haveI : IsNoetherianRing (presheafValue D₀) :=
+      presheafValue_isNoetherianRing_faithful D₀
+    haveI : IsStronglyNoetherian (presheafValue D₀) :=
+      presheafValue_isStronglyNoetherian_faithful D₀
+    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂
+        (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+          (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a) =
+      ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+        (imagePieceDatum D₀ T t₂ hspan) rfl).canonicalMap (D₀.canonicalMap a) := by
+  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+  haveI : IsNoetherianRing (presheafValue D₀) :=
+    presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) :=
+    presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  show genPiece_relOverlap_forward D₀ T hspan t₁ t₂
+      (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+        (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom (algebraMap A _ a)) = _
+  rw [genPiece_relOverlap_forward_coe, genPiece_relOverlap_forwardLocHom_algebraMap]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- The single-piece identification tracks canonical maps (Wedhorn Prop 8.2 naturality),
+read off from `genPiece_relative_equiv_restrictionMap` at `x = D₀.canonicalMap a`. -/
+private theorem genPiece_relative_equiv_canonicalMap
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A) (t : A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (a : A) :
+    haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+    haveI : IsNoetherianRing (presheafValue D₀) :=
+      presheafValue_isNoetherianRing_faithful D₀
+    haveI : IsStronglyNoetherian (presheafValue D₀) :=
+      presheafValue_isStronglyNoetherian_faithful D₀
+    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    genPiece_relative_equiv D₀ T t hspan
+        ((D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).canonicalMap a) =
+      (imagePieceDatum D₀ T t hspan).canonicalMap (D₀.canonicalMap a) := by
+  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+  haveI : IsNoetherianRing (presheafValue D₀) :=
+    presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) :=
+    presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  rw [← restrictionMapHom_canonicalMap D₀
+    (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl)
+    (RationalLocData.interSamePair_subset_left _ _ _) a]
+  exact genPiece_relative_equiv_restrictionMap D₀ T t hspan (D₀.canonicalMap a)
+
+set_option linter.unusedSectionVars false in
+/-- **G3b square (general piece)**: for any generator `t`, restricting `𝒪_X(D₀∩R(T/t))`
+into the `A`-side double piece and then applying the double-intersection identification
+agrees with applying the single-piece identification (Wedhorn Prop 8.2) at `t` and then
+restricting on the `B`-side. Both composites are continuous and agree on the canonical
+image of `A`, hence agree by `presheafValue_ringHom_ext_of_canonicalMap`. The two
+inclusion proofs are arguments of `restrictionMap`, so `square₁` and `square₂` are the
+cases `t = t₁` (left inclusions) and `t = t₂` (right inclusions). -/
+private theorem genPiece_relative_overlap_square
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ t : A)
+    (hA : rationalOpen ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+        (genPieceDatum D₀.P T t₂ hspan) rfl).T
+        ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+        (genPieceDatum D₀.P T t₂ hspan) rfl).s ⊆
+      rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).T
+        (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s)
+    (g : presheafValue (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl)) :
+    haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+    haveI : IsNoetherianRing (presheafValue D₀) :=
+      presheafValue_isNoetherianRing_faithful D₀
+    haveI : IsStronglyNoetherian (presheafValue D₀) :=
+      presheafValue_isStronglyNoetherian_faithful D₀
+    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    ∀ hB : rationalOpen ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+        (imagePieceDatum D₀ T t₂ hspan) rfl).T
+        ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+        (imagePieceDatum D₀ T t₂ hspan) rfl).s ⊆
+      rationalOpen (imagePieceDatum D₀ T t hspan).T (imagePieceDatum D₀ T t hspan).s,
+    genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂
+        (restrictionMap (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl)
+          ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+            (genPieceDatum D₀.P T t₂ hspan) rfl) hA g) =
+      restrictionMap (imagePieceDatum D₀ T t hspan)
+        ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+          (imagePieceDatum D₀ T t₂ hspan) rfl) hB
+        (genPiece_relative_equiv D₀ T t hspan g) := by
+  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+  haveI : IsNoetherianRing (presheafValue D₀) :=
+    presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) :=
+    presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  intro hB
+  refine presheafValue_ringHom_ext_of_canonicalMap _
+    ((genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂).toRingHom.comp
+      (restrictionMapHom _ _ hA))
+    ((restrictionMapHom _ _ hB).comp (genPiece_relative_equiv D₀ T t hspan).toRingHom)
+    ((genPiece_relative_overlap_equiv_continuous D₀ T hspan t₁ t₂).comp
+      (restrictionMapHom_continuous _ _ hA))
+    ((restrictionMapHom_continuous _ _ hB).comp
+      (genPiece_relative_equiv_continuous D₀ T t hspan))
+    (fun a ↦ ?_) g
+  simp only [RingHom.coe_comp, Function.comp_apply, RingEquiv.toRingHom_eq_coe,
+    RingEquiv.coe_toRingHom]
+  rw [restrictionMapHom_canonicalMap, genPiece_relative_overlap_equiv_canonicalMap,
+    genPiece_relative_equiv_canonicalMap, restrictionMapHom_canonicalMap]
+
 set_option linter.unusedSectionVars false in
 /-- **G3b square (left)**: restricting `O_X(D₀∩R(T/t₁))` into the double intersection
 commutes with the relative identifications. -/
@@ -10707,165 +10872,11 @@ private theorem genPiece_relative_overlap_square₁
         ((imagePieceDatum D₀ T t₁ hspan).interSamePair
           (imagePieceDatum D₀ T t₂ hspan) rfl)
         (RationalLocData.interSamePair_subset_left _ _ _)
-        (genPiece_relative_equiv D₀ T t₁ hspan g) := by
-  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI hNoethB : IsNoetherianRing (presheafValue D₀) :=
-    presheafValue_isNoetherianRing_faithful D₀
-  haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
-    presheafValue_isStronglyNoetherian_faithful D₀
-  haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
-  letI : UniformSpace (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).isUniformAddGroup
-  letI : UniformSpace (Localization.Away
-      ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-        (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
-    ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away
-      ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-        (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
-    ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away
-      ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-        (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
-    ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).isUniformAddGroup
-  letI : UniformSpace (Localization.Away (imagePieceDatum D₀ T t₁ hspan).s) :=
-    (imagePieceDatum D₀ T t₁ hspan).uniformSpace
-  letI : IsTopologicalRing (Localization.Away (imagePieceDatum D₀ T t₁ hspan).s) :=
-    (imagePieceDatum D₀ T t₁ hspan).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away (imagePieceDatum D₀ T t₁ hspan).s) :=
-    (imagePieceDatum D₀ T t₁ hspan).isUniformAddGroup
-  letI : UniformSpace (Localization.Away
-      ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-        (imagePieceDatum D₀ T t₂ hspan) rfl).s) :=
-    ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away
-      ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-        (imagePieceDatum D₀ T t₂ hspan) rfl).s) :=
-    ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away
-      ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-        (imagePieceDatum D₀ T t₂ hspan) rfl).s) :=
-    ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).isUniformAddGroup
-  revert g
-  suffices h : ∀ g, (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂).toRingHom.comp
-      (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl)
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-          (genPieceDatum D₀.P T t₂ hspan) rfl)
-        (RationalLocData.interSamePair_subset_left _ _ _)) g =
-      (restrictionMapHom (imagePieceDatum D₀ T t₁ hspan)
-        ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-          (imagePieceDatum D₀ T t₂ hspan) rfl)
-        (RationalLocData.interSamePair_subset_left _ _ _)).comp
-        (genPiece_relative_equiv D₀ T t₁ hspan).toRingHom g by
-    intro g; exact h g
-  intro g
-  revert g
-  refine fun g ↦ ?_
-  refine congrFun (Continuous.ext_on
-    (UniformSpace.Completion.denseRange_coe
-      (α := Localization.Away (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s))
-    ?_ ?_ ?_) g
-  · exact UniformSpace.Completion.continuous_extension.comp
-      UniformSpace.Completion.continuous_extension
-  · exact (restrictionMapHom_continuous _ _ _).comp
-      UniformSpace.Completion.continuous_extension
-  · rintro _ ⟨y, rfl⟩
-    show (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
-        (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-            (genPieceDatum D₀.P T t₂ hspan) rfl)
-          (RationalLocData.interSamePair_subset_left _ _ _)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).coeRingHom y)) =
-      restrictionMapHom (imagePieceDatum D₀ T t₁ hspan)
-        ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-          (imagePieceDatum D₀ T t₂ hspan) rfl)
-        (RationalLocData.interSamePair_subset_left _ _ _)
-        ((genPiece_relative_equiv D₀ T t₁ hspan)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).coeRingHom y))
-    -- both sides as Loc-level ring homs; ringHom_ext at the A-generators
-    have hcomp : ∀ a : A,
-        (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
-          (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl)
-            ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-              (genPieceDatum D₀.P T t₂ hspan) rfl)
-            (RationalLocData.interSamePair_subset_left _ _ _)
-            ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).canonicalMap a)) =
-        restrictionMapHom (imagePieceDatum D₀ T t₁ hspan)
-          ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-            (imagePieceDatum D₀ T t₂ hspan) rfl)
-          (RationalLocData.interSamePair_subset_left _ _ _)
-          ((genPiece_relative_equiv D₀ T t₁ hspan)
-            ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).canonicalMap a)) := by
-      intro a
-      rw [restrictionMapHom_canonicalMap]
-      rw [show ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-          (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a =
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-          (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-          (algebraMap A _ a) from rfl]
-      rw [show (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
-          (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-            (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) =
-        genPiece_relOverlap_forward D₀ T hspan t₁ t₂
-          (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-            (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) from rfl]
-      rw [genPiece_relOverlap_forward_coe, genPiece_relOverlap_forwardLocHom_algebraMap]
-      rw [show ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).canonicalMap a) =
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).coeRingHom
-          (algebraMap A _ a)) from rfl]
-      rw [show (genPiece_relative_equiv D₀ T t₁ hspan)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) =
-        genPiece_rel_forward D₀ T t₁ hspan
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) from rfl]
-      rw [genPiece_rel_forward_coe, genPiece_rel_forwardLocHom_algebraMap]
-      rw [show (algebraMap (presheafValue D₀)
-          (Localization.Away (imagePieceDatum D₀ T t₁ hspan).s))
-          (D₀.canonicalMap a) =
-        algebraMap (presheafValue D₀) _ (D₀.canonicalMap a) from rfl]
-      rw [show (imagePieceDatum D₀ T t₁ hspan).coeRingHom
-          (algebraMap (presheafValue D₀) _ (D₀.canonicalMap a)) =
-        (imagePieceDatum D₀ T t₁ hspan).canonicalMap (D₀.canonicalMap a) from rfl]
-      rw [restrictionMapHom_canonicalMap]
-      rfl
-    -- extend from the canonical image to the full localization
-    have hhom : ((genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂).toRingHom.comp
-        (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-            (genPieceDatum D₀.P T t₂ hspan) rfl)
-          (RationalLocData.interSamePair_subset_left _ _ _))).comp
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).coeRingHom) =
-        ((restrictionMapHom (imagePieceDatum D₀ T t₁ hspan)
-          ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-            (imagePieceDatum D₀ T t₂ hspan) rfl)
-          (RationalLocData.interSamePair_subset_left _ _ _)).comp
-          (genPiece_relative_equiv D₀ T t₁ hspan).toRingHom).comp
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).coeRingHom) := by
-      refine IsLocalization.ringHom_ext
-        (Submonoid.powers (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s) ?_
-      ext a
-      simp only [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe,
-        RingEquiv.coe_toRingHom]
-      exact hcomp a
-    exact RingHom.congr_fun hhom y
+        (genPiece_relative_equiv D₀ T t₁ hspan g) :=
+  genPiece_relative_overlap_square D₀ T hspan t₁ t₂ t₁
+    (RationalLocData.interSamePair_subset_left _ _ _) g
+    (RationalLocData.interSamePair_subset_left _ _ _)
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **G3b square (right)**: the `t₂`-side square. The B-side restriction is from the
@@ -10899,178 +10910,16 @@ private theorem genPiece_relative_overlap_square₂
         ((imagePieceDatum D₀ T t₁ hspan).interSamePair
           (imagePieceDatum D₀ T t₂ hspan) rfl)
         (RationalLocData.interSamePair_subset_right _ _ _)
-        (genPiece_relative_equiv D₀ T t₂ hspan g) := by
-  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI hNoethB : IsNoetherianRing (presheafValue D₀) :=
-    presheafValue_isNoetherianRing_faithful D₀
-  haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
-    presheafValue_isStronglyNoetherian_faithful D₀
-  haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
-  letI : UniformSpace (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).isUniformAddGroup
-  letI : UniformSpace (Localization.Away
-      ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-        (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
-    ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away
-      ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-        (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
-    ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away
-      ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-        (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
-    ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).isUniformAddGroup
-  letI : UniformSpace (Localization.Away (imagePieceDatum D₀ T t₂ hspan).s) :=
-    (imagePieceDatum D₀ T t₂ hspan).uniformSpace
-  letI : IsTopologicalRing (Localization.Away (imagePieceDatum D₀ T t₂ hspan).s) :=
-    (imagePieceDatum D₀ T t₂ hspan).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away (imagePieceDatum D₀ T t₂ hspan).s) :=
-    (imagePieceDatum D₀ T t₂ hspan).isUniformAddGroup
-  letI : UniformSpace (Localization.Away
-      ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-        (imagePieceDatum D₀ T t₂ hspan) rfl).s) :=
-    ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away
-      ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-        (imagePieceDatum D₀ T t₂ hspan) rfl).s) :=
-    ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away
-      ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-        (imagePieceDatum D₀ T t₂ hspan) rfl).s) :=
-    ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-      (imagePieceDatum D₀ T t₂ hspan) rfl).isUniformAddGroup
-  revert g
-  suffices h : ∀ g, (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂).toRingHom.comp
-      (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-          (genPieceDatum D₀.P T t₂ hspan) rfl)
-        (by
-            rw [RationalLocData.interSamePair_rationalOpen,
-              RationalLocData.interSamePair_rationalOpen,
-              RationalLocData.interSamePair_rationalOpen]
-            intro v hv
-            exact ⟨hv.1.1, hv.2⟩)) g =
-      (restrictionMapHom (imagePieceDatum D₀ T t₂ hspan)
-        ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-          (imagePieceDatum D₀ T t₂ hspan) rfl)
-        (RationalLocData.interSamePair_subset_right _ _ _)).comp
-        (genPiece_relative_equiv D₀ T t₂ hspan).toRingHom g by
-    intro g; exact h g
-  intro g
-  revert g
-  refine fun g ↦ congrFun (Continuous.ext_on
-    (UniformSpace.Completion.denseRange_coe
-      (α := Localization.Away (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s))
-    ?_ ?_ ?_) g
-  · exact UniformSpace.Completion.continuous_extension.comp
-      UniformSpace.Completion.continuous_extension
-  · exact (restrictionMapHom_continuous _ _ _).comp
-      UniformSpace.Completion.continuous_extension
-  · rintro _ ⟨y, rfl⟩
-    show (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
-        (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-            (genPieceDatum D₀.P T t₂ hspan) rfl)
-          (by
-            rw [RationalLocData.interSamePair_rationalOpen,
-              RationalLocData.interSamePair_rationalOpen,
-              RationalLocData.interSamePair_rationalOpen]
-            intro v hv
-            exact ⟨hv.1.1, hv.2⟩)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom y)) =
-      restrictionMapHom (imagePieceDatum D₀ T t₂ hspan)
-        ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-          (imagePieceDatum D₀ T t₂ hspan) rfl)
-        (RationalLocData.interSamePair_subset_right _ _ _)
-        ((genPiece_relative_equiv D₀ T t₂ hspan)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom y))
-    have hcomp : ∀ a : A,
-        (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
-          (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
-            ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-              (genPieceDatum D₀.P T t₂ hspan) rfl)
-            (by
-            rw [RationalLocData.interSamePair_rationalOpen,
-              RationalLocData.interSamePair_rationalOpen,
-              RationalLocData.interSamePair_rationalOpen]
-            intro v hv
-            exact ⟨hv.1.1, hv.2⟩)
-            ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a)) =
-        restrictionMapHom (imagePieceDatum D₀ T t₂ hspan)
-          ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-            (imagePieceDatum D₀ T t₂ hspan) rfl)
-          (RationalLocData.interSamePair_subset_right _ _ _)
-          ((genPiece_relative_equiv D₀ T t₂ hspan)
-            ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a)) := by
-      intro a
-      rw [restrictionMapHom_canonicalMap]
-      rw [show ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-          (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a =
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-          (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-          (algebraMap A _ a) from rfl]
-      rw [show (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
-          (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-            (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) =
-        genPiece_relOverlap_forward D₀ T hspan t₁ t₂
-          (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-            (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) from rfl]
-      rw [genPiece_relOverlap_forward_coe, genPiece_relOverlap_forwardLocHom_algebraMap]
-      rw [show ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a) =
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-          (algebraMap A _ a)) from rfl]
-      rw [show (genPiece_relative_equiv D₀ T t₂ hspan)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) =
-        genPiece_rel_forward D₀ T t₂ hspan
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) from rfl]
-      rw [genPiece_rel_forward_coe, genPiece_rel_forwardLocHom_algebraMap]
-      rw [show (imagePieceDatum D₀ T t₂ hspan).coeRingHom
-          (algebraMap (presheafValue D₀) _ (D₀.canonicalMap a)) =
-        (imagePieceDatum D₀ T t₂ hspan).canonicalMap (D₀.canonicalMap a) from rfl]
-      rw [restrictionMapHom_canonicalMap]
-      rfl
-    have hhom : ((genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂).toRingHom.comp
-        (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-            (genPieceDatum D₀.P T t₂ hspan) rfl)
-          (by
-            rw [RationalLocData.interSamePair_rationalOpen,
-              RationalLocData.interSamePair_rationalOpen,
-              RationalLocData.interSamePair_rationalOpen]
-            intro v hv
-            exact ⟨hv.1.1, hv.2⟩))).comp
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom) =
-        ((restrictionMapHom (imagePieceDatum D₀ T t₂ hspan)
-          ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-            (imagePieceDatum D₀ T t₂ hspan) rfl)
-          (RationalLocData.interSamePair_subset_right _ _ _)).comp
-          (genPiece_relative_equiv D₀ T t₂ hspan).toRingHom).comp
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom) := by
-      refine IsLocalization.ringHom_ext
-        (Submonoid.powers (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s) ?_
-      ext a
-      simp only [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe,
-        RingEquiv.coe_toRingHom]
-      exact hcomp a
-    exact RingHom.congr_fun hhom y
+        (genPiece_relative_equiv D₀ T t₂ hspan g) :=
+  genPiece_relative_overlap_square D₀ T hspan t₁ t₂ t₂
+    (by
+      rw [RationalLocData.interSamePair_rationalOpen,
+        RationalLocData.interSamePair_rationalOpen,
+        RationalLocData.interSamePair_rationalOpen]
+      intro v hv
+      exact ⟨hv.1.1, hv.2⟩) g
+    (RationalLocData.interSamePair_subset_right _ _ _)
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **G3c-W′ (pairwise transport, restriction form)**: for any two generators, the
 transported piece-sections agree after restriction into the B-side double piece,
@@ -11171,7 +11020,6 @@ private theorem imageGenCover_piece_exists_gen
   obtain ⟨t, ht, rfl⟩ := hu
   exact ⟨t, ht, rfl⟩
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **G3c-gluing, B-compatibility step**: for `t₁ t₂ ∈ T`, the transported image-piece
@@ -11248,7 +11096,6 @@ private theorem genPiece_imageFamily_pair_restr
   congr 1
   exact genPiece_family_pair_compat D₀ T hspan t₁ t₂ g₁ g₂ hcompat
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **G3c-gluing (assembly)**: given the B-side gluing of the image cover, every
@@ -11463,7 +11310,6 @@ theorem genRestrictedCover_gluing
         (f (tof Et) (htof_mem Et))) from
     hg_restr Et _ hro_eq.symm.le)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **G4: the bundled acyclicity transport (T-R2-ACYCLIC-TRANSPORT)**: if the B-level
 image cover of `Spa 𝒪_X(D₀)` is `O_X`-acyclic, so is the A-level restricted cover
@@ -11829,7 +11675,99 @@ theorem isOXAcyclic_of_isGeneratedBy_ring_units [DecidableEq A]
       hVP (hplus_pieces D.1 D.2)
 
 
-set_option maxHeartbeats 4000000 in
+/-- Every point of `Spa R` lies in the global rational open `R({1}/1)`: the conditions are
+`v 1 ≤ v 1` and `¬ v 1 ≤ v 0`. -/
+private theorem mem_rationalOpen_globalLocData {R : Type*} [CommRing R] [TopologicalSpace R]
+    [IsTopologicalRing R] [PlusSubring R] (P : PairOfDefinition R) {v : Spv R}
+    (hv : v ∈ Spa R R⁺) :
+    v ∈ rationalOpen (globalLocData P).T (globalLocData P).s :=
+  ⟨hv, fun x hx ↦ by
+    rw [Finset.mem_singleton.mp hx]
+    exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
+
+set_option linter.unusedSectionVars false in
+/-- The image datum `R_B(im D.T / im D.s)` of a single piece `D` of `C`, over
+`B = 𝒪_X(C.base)`. Named so that the (expensive) `imagePieceDatum` elaboration is done once
+in a declaration of its own, rather than inside the `Finset.image` of
+`imageCoverPieces`. -/
+noncomputable def imagePieceOfCover [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCovering A) (hC : C.IsRational) (D : {x // x ∈ C.covers}) :
+    RationalLocData (presheafValue C.base) :=
+  haveI hTateB : IsTateRing (presheafValue C.base) :=
+    presheafValue_isTateRing_faithful C.base
+  haveI : IsNoetherianRing (presheafValue C.base) :=
+    presheafValue_isNoetherianRing_faithful C.base
+  haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
+  letI : DecidableEq (presheafValue C.base) := Classical.decEq _
+  imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top)
+
+set_option linter.unusedSectionVars false in
+/-- The pieces of the R2 image cover: the image data `R_B(im D.T / im D.s)` over
+`B = 𝒪_X(C.base)`, one for each piece of `C`. The `Classical.decEq` choice is made once
+here, so the `Finset.image` instance argument is a single constant instead of a fresh term
+at every use site. -/
+noncomputable def imageCoverPieces [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCovering A) (hC : C.IsRational) :
+    Finset (RationalLocData (presheafValue C.base)) :=
+  letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
+  C.covers.attach.image (imagePieceOfCover C hC)
+
+set_option linter.unusedSectionVars false in
+/-- Membership in `imageCoverPieces`: the members are exactly the image data of the pieces
+of `C`. Stated in the `imagePieceDatum` spelling, which is the form the consumers use. -/
+theorem mem_imageCoverPieces [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCovering A) (hC : C.IsRational)
+    (E : RationalLocData (presheafValue C.base)) :
+    E ∈ imageCoverPieces C hC ↔ ∃ D : {x // x ∈ C.covers},
+      imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top) = E := by
+  unfold imageCoverPieces imagePieceOfCover
+  simp only [Finset.mem_image, Finset.mem_attach, true_and]
+
+set_option linter.unusedSectionVars false in
+/-- The image pieces cover `Spa B`: a point `w` of `Spa B` pulls back along `canonicalMap`
+to a point of `R(C.base)`, which lies in some piece `D` of `C`; then `w` lies in the image
+piece of `D` by `imagePieceDatum_mem_rationalOpen_iff`. -/
+theorem imageCoverPieces_cover [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCovering A) (hC : C.IsRational) :
+    haveI hTateB : IsTateRing (presheafValue C.base) :=
+      presheafValue_isTateRing_faithful C.base
+    haveI : IsNoetherianRing (presheafValue C.base) :=
+      presheafValue_isNoetherianRing_faithful C.base
+    haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
+    ∀ w ∈ rationalOpen (globalLocData (presheafValue_concretePair C.base)).T
+        (globalLocData (presheafValue_concretePair C.base)).s,
+      ∃ E ∈ imageCoverPieces C hC, w ∈ rationalOpen E.T E.s := by
+  haveI hTateB : IsTateRing (presheafValue C.base) :=
+    presheafValue_isTateRing_faithful C.base
+  haveI : IsNoetherianRing (presheafValue C.base) :=
+    presheafValue_isNoetherianRing_faithful C.base
+  haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
+  intro w hw
+  have hw_spa : w ∈ Spa (presheafValue C.base) (presheafValue C.base)⁺ := hw.1
+  have hv := comap_canonicalMap_mem_rationalOpen C.base
+    (canonicalMap_continuous C.base) hw_spa
+  obtain ⟨D, hD, hvD⟩ := C.hcover _ hv
+  refine ⟨imagePieceDatum C.base D.T D.s ((hC.piece hD).span_eq_top), ?_, ?_⟩
+  · exact (mem_imageCoverPieces C hC _).mpr ⟨⟨D, hD⟩, rfl⟩
+  · rw [imagePieceDatum_mem_rationalOpen_iff]
+    exact ⟨hw_spa, hvD⟩
+
 set_option linter.unusedSectionVars false in
 /-- **The R2 image cover** (Wedhorn Prop 8.2 + Remark 8.4 + Prop 8.16, the
 "we may assume X = V" reduction): a Def-7.29 rational covering `C` of
@@ -11849,26 +11787,10 @@ noncomputable def imageCover [DecidableEq A]
   haveI : IsNoetherianRing (presheafValue C.base) :=
     presheafValue_isNoetherianRing_faithful C.base
   haveI : IsHuberRing (presheafValue C.base) := hTateB.toIsHuberRing
-  letI : DecidableEq (presheafValue C.base) := Classical.decEq _
-  letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
   { base := globalLocData (presheafValue_concretePair C.base)
-    covers := C.covers.attach.image (fun D ↦
-      imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top))
-    hsubset := by
-      intro E hE v hv
-      exact ⟨hv.1, fun x hx ↦ by
-        rw [Finset.mem_singleton.mp hx]
-        exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
-    hcover := by
-      intro w hw
-      have hw_spa : w ∈ Spa (presheafValue C.base) (presheafValue C.base)⁺ := hw.1
-      have hv := comap_canonicalMap_mem_rationalOpen C.base
-        (canonicalMap_continuous C.base) hw_spa
-      obtain ⟨D, hD, hvD⟩ := C.hcover _ hv
-      refine ⟨imagePieceDatum C.base D.T D.s ((hC.piece hD).span_eq_top),
-        Finset.mem_image.mpr ⟨⟨D, hD⟩, Finset.mem_attach _ _, rfl⟩, ?_⟩
-      rw [imagePieceDatum_mem_rationalOpen_iff]
-      exact ⟨hw_spa, hvD⟩ }
+    covers := imageCoverPieces C hC
+    hsubset := fun _ _ _ hv ↦ mem_rationalOpen_globalLocData _ hv.1
+    hcover := imageCoverPieces_cover C hC }
 
 set_option linter.unusedSectionVars false in
 /-- **B-side per-pair plus-containment** (Wedhorn Prop 8.2 base change of
@@ -12117,7 +12039,6 @@ theorem isOXAcyclic_of_empty_complement
         (hplus_empty D.1 D.2 hD') (hempty D.1 D.2 hD')
       exact Subsingleton.elim _ _
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **The B-level image cover of a unit-image generating set is `O_X`-acyclic**
 (Wedhorn p. 84, parts (ii)→(iii) composed AT `B := 𝒪_X(D₀)`): when every
@@ -13696,7 +13617,6 @@ sheafy. **No per-cover hypothesis leak** — the hypothesis bundle is
 exactly what Wedhorn states.
 -/
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- The R2 image cover is `O_X`-acyclic: it is a whole-space rational covering of
 `Spa B` for the complete strongly noetherian Tate ring `B := 𝒪_X(C.base)`, so the
@@ -13745,7 +13665,7 @@ theorem imageCover_isOXAcyclic [DecidableEq A]
       rw [Finset.mem_singleton.mp hx]
       exact (w.vle_total 1 1).elim id id, w.not_vle_one_zero⟩
   · intro E hE
-    obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hE
+    obtain ⟨D, rfl⟩ := (mem_imageCoverPieces C hC E).mp hE
     exact hplusB
 
 /-- Restriction commutes with transport along an equality of data (`Eq.rec`
@@ -13759,7 +13679,6 @@ private theorem restrictionMap_eqRec {B : Type*} [CommRing B] [TopologicalSpace 
       restrictionMap X G (by rw [h]; exact hG) v := by
   cases h; rfl
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **Keystone compatibility on overlaps** (Wedhorn Prop 8.16 + Prop 7.31(2)):
@@ -13876,7 +13795,6 @@ private theorem imageCover_keystone_compat [DecidableEq A]
       hD₁₂_sub₂ ((hC.piece D₂.2).span_eq_top) hspanD₁₂ (f D₂),
     hcompat D₁ D₂ D₁₂ hD₁₂_sub₁ hD₁₂_sub₂]
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **The R2 gluing transport** (Wedhorn Prop 8.2 + 8.16): a compatible family on
 a Def-7.29 rational covering `C` glues, given gluing for the `B`-side image cover.
@@ -13927,7 +13845,7 @@ theorem imageCover_gluing_transport [DecidableEq A]
   have hmem : ∀ E : ↥(imageCover C hC).covers, ∃ D : ↥C.covers,
       imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top) = E.1 := by
     intro E
-    obtain ⟨D, -, hDE⟩ := Finset.mem_image.mp E.2
+    obtain ⟨D, hDE⟩ := (mem_imageCoverPieces C hC E.1).mp E.2
     exact ⟨D, hDE⟩
   choose ψ hψ using hmem
   -- the B-side family (cast along the presentation equality)
@@ -13955,7 +13873,7 @@ theorem imageCover_gluing_transport [DecidableEq A]
   -- LHS = im-piece canonical of (backward x') = restriction of x' to the image piece
   have hmemD : imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top) ∈
       (imageCover C hC).covers :=
-    Finset.mem_image.mpr ⟨D, Finset.mem_attach _ _, rfl⟩
+    (mem_imageCoverPieces C hC _).mpr ⟨D, rfl⟩
   have htrack : (imagePieceDatum C.base D.1.T D.1.s
       ((hC.piece D.2).span_eq_top)).canonicalMap
         (globalSections_backward (presheafValue_concretePair C.base) x') =
@@ -14002,7 +13920,6 @@ theorem imageCover_gluing_transport [DecidableEq A]
         ((hC.piece (ψ ⟨_, hmemD⟩).2).span_eq_top))
       hopen_eq.le (le_refl _)).symm
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- **Wedhorn's main intermediate, general base** (Wedhorn p. 83): every
 rational covering (Definition 7.29) of every rational subset is `O_X`-acyclic.
@@ -14044,7 +13961,7 @@ theorem every_rational_cover_is_OXAcyclic [DecidableEq A]
     have hy0 : y = 0 := by
       refine hCB.separation y ?_
       intro E hE
-      obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hE
+      obtain ⟨D, rfl⟩ := (mem_imageCoverPieces C hC E).mp hE
       rw [show restrictionMap (imageCover C hC).base
           (imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top))
           ((imageCover C hC).hsubset _ hE) y =

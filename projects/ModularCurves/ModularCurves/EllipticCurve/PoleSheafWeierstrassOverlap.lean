@@ -341,7 +341,34 @@ theorem sectionPoleSheaf_cartier_away_overlap_transition
   exact sectionPoleSheaf_cartier_away_subopen_transition
     z hz U r hr hspan hnzd V hV (U.1 ⊓ V) inf_le_left inf_le_right
 
-set_option maxHeartbeats 3200000 in
+/-- Multiplication by a section of the structure sheaf on the unit module over the
+over-site of an open is an isomorphism only if the section is a unit. -/
+private theorem isUnit_of_isIso_overUnitScalarEnd {X : Scheme.{u}} (U : X.Opens)
+    (r : Γ(X, U))
+    (h : IsIso (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r)) :
+    IsUnit r := by
+  have hEnd : IsUnit (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) := by
+    rw [CategoryTheory.isUnit_iff_isIso]
+    exact h
+  let E := SheafOfModules.overUnitScalarEndRingEquiv X.ringCatSheaf U
+  change IsUnit (E r) at hEnd
+  exact (E.symm_apply_apply r) ▸ hEnd.map E.symm
+
+/-- Two trivializations of the same module over an open differ by multiplication by a
+unit: if one is the other composed with multiplication by `r`, then `r` is a unit. -/
+private theorem isUnit_of_overTrivialization_eq_comp_scalar
+    {X : Scheme.{u}} {M : X.Modules} {U : X.Opens}
+    {e f : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)} {r : Γ(X, U)}
+    (h : e.hom =
+      f.hom ≫ SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) :
+    IsUnit r := by
+  refine isUnit_of_isIso_overUnitScalarEnd U r ?_
+  have hscalar :
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r = f.inv ≫ e.hom := by
+    rw [h, ← Category.assoc, f.inv_hom_id, Category.id_comp]
+  rw [hscalar]
+  infer_instance
+
 /-- The Cartier generator restricts to a unit on the overlap with an open
 disjoint from the marked section. -/
 theorem sectionPoleSheaf_cartier_away_overlap_generator_isUnit
@@ -352,41 +379,9 @@ theorem sectionPoleSheaf_cartier_away_overlap_generator_isUnit
     (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
     (V : C.Opens) (hV : z ⁻¹ᵁ V = ⊥) :
     IsUnit (C.presheaf.map
-      (homOfLE (inf_le_left : U.1 ⊓ V ≤ U.1)).op r) := by
-  let W := U.1 ⊓ V
-  let eCartier :=
-    Scheme.Modules.overTrivializationOfRestrictIso
-      (sectionPoleSheaf π z hz) W
-      (Scheme.Modules.restrictOpenTrivialization inf_le_left
-        (sectionPoleSheafTrivializationOfCartierGenerator
-          z hz U r hr hspan hnzd))
-  let eAway :=
-    Scheme.Modules.overTrivializationOfRestrictIso
-      (sectionPoleSheaf π z hz) W
-      (Scheme.Modules.restrictOpenTrivialization inf_le_right
-        (sectionPoleSheafTrivializationOfSectionPreimageEqBot z hz V hV))
-  let rW := C.presheaf.map
-    (homOfLE (inf_le_left : W ≤ U.1)).op r
-  have htransition :=
-    sectionPoleSheaf_cartier_away_overlap_transition
-      z hz U r hr hspan hnzd V hV
-  dsimp only at htransition
-  have hscalar :
-      SheafOfModules.overUnitScalarEnd C.ringCatSheaf W rW =
-        eAway.inv ≫ eCartier.hom := by
-    rw [← cancel_epi eAway.hom]
-    simpa only [← Category.assoc, eAway.hom_inv_id, Category.id_comp] using
-      htransition.symm
-  have hEnd :
-      IsUnit (SheafOfModules.overUnitScalarEnd C.ringCatSheaf W rW) := by
-    rw [CategoryTheory.isUnit_iff_isIso, hscalar]
-    infer_instance
-  let E := SheafOfModules.overUnitScalarEndRingEquiv C.ringCatSheaf W
-  change IsUnit (E rW) at hEnd
-  have hrW : IsUnit rW := by
-    have hmap := hEnd.map E.symm
-    exact (E.symm_apply_apply rW) ▸ hmap
-  simpa only [rW, W] using hrW
+      (homOfLE (inf_le_left : U.1 ⊓ V ≤ U.1)).op r) :=
+  isUnit_of_overTrivialization_eq_comp_scalar
+    (sectionPoleSheaf_cartier_away_overlap_transition z hz U r hr hspan hnzd V hV)
 
 private theorem sectionPoleSheafPower_cartier_away_subopen_transition
     {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
