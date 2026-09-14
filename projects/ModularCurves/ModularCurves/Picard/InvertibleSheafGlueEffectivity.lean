@@ -1173,7 +1173,7 @@ private theorem AffineIntersectionUnitCocycle.chartLocalTuple_π
           (pushforward (D.t j k ≫ D.f k j)).obj (unitObj (D.V (j, k)))) i =
       c.chartLocalTupleComponent hopen hpush k i := by
   dsimp only [AffineIntersectionUnitCocycle.chartLocalTuple]
-  exact Pi.lift_π _ i
+  exact Pi.lift_comp_π _ i
 
 private noncomputable def AffineIntersectionUnitCocycle.chartLocalSource
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
@@ -2480,7 +2480,7 @@ private theorem AffineIntersectionUnitCocycle.chartGlueLeft_π
       Pi.π (fun l : J ↦ c.chartExtension hopen hpush l) i ≫
         c.chartToOverlapLeft hopen hpush i j := by
   dsimp only [AffineIntersectionUnitCocycle.chartGlueLeft]
-  exact Pi.lift_π _ (i, j)
+  exact Pi.lift_comp_π _ (i, j)
 
 @[reassoc]
 private theorem AffineIntersectionUnitCocycle.chartGlueRight_π
@@ -2495,7 +2495,7 @@ private theorem AffineIntersectionUnitCocycle.chartGlueRight_π
       Pi.π (fun l : J ↦ c.chartExtension hopen hpush l) j ≫
         c.chartToOverlapRight hopen hpush i j := by
   dsimp only [AffineIntersectionUnitCocycle.chartGlueRight]
-  exact Pi.lift_π _ (i, j)
+  exact Pi.lift_comp_π _ (i, j)
 
 @[reassoc]
 private theorem AffineIntersectionUnitCocycle.restrictChartGlueLeft_π
@@ -3829,7 +3829,7 @@ private theorem AffineIntersectionUnitCocycle.descentChartSource_π
     c.descentChartSource hopen hpush M e ≫
         Pi.π (fun j : J ↦ c.chartExtension hopen hpush j) i =
       c.descentChartComponent hopen hpush M e i := by
-  exact Pi.lift_π _ i
+  exact Pi.lift_comp_π _ i
 
 private theorem AffineIntersectionUnitCocycle.descentIso_transition
     (M : (D).glued.Modules)

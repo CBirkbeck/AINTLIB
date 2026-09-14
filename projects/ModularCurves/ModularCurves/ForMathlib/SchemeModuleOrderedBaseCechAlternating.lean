@@ -298,7 +298,7 @@ theorem baseCechPermutationF_comp_π
       Pi.π (fun k : Fin (n + 1) → ι => baseCechFactor π M U n k) (j ∘ σ) ≫
         (baseModulePresheaf π M).map
           (((FormalCoproduct.mk _ U).mapPower σ).φ j).op) ≫ _ = _
-  exact Pi.lift_π _ i
+  exact Pi.lift_comp_π _ i
 
 theorem baseCechXIsoPi_hom_comp_proj
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)

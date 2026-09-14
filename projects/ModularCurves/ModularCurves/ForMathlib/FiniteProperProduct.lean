@@ -46,7 +46,7 @@ def lift {T : Scheme.{u}} (q : T ⟶ S) (f : ∀ i, T ⟶ Z i)
 @[reassoc]
 lemma lift_proj {T : Scheme.{u}} (q : T ⟶ S) (f : ∀ i, T ⟶ Z i)
     (hf : ∀ i, f i ≫ p i = q) (i : ι) : lift p q f hf ≫ proj p i = f i := by
-  have h := Pi.lift_π (f := fun i ↦ Over.mk (p i)) (P := Over.mk q)
+  have h := Pi.lift_comp_π (f := fun i ↦ Over.mk (p i)) (P := Over.mk q)
     (fun i ↦ Over.homMk (U := Over.mk q) (V := Over.mk (p i)) (f i) (hf i)) i
   exact congrArg Over.Hom.left h
 

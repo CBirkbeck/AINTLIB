@@ -119,7 +119,7 @@ theorem subsingleton_HPrime_succ_of_subsingleton_restrict_H
         have hxδ : CategoryTheory.Sheaf.H.δ hSU (n + 1) (n + 2) rfl x = 0 :=
           Subsingleton.elim _ _
         obtain ⟨y, hy⟩ := CategoryTheory.Sheaf.H.longSequence_exact₃
-          hSU (n + 1) (n + 2) rfl x hxδ
+          hSU (n₀ := n + 1) (n₁ := n + 2) x rfl hxδ
         rw [← hy, Subsingleton.elim y 0, map_zero]
       letI : Subsingleton (TopCat.Sheaf.H (R.obj S.X₃) (n + 1)) := by
         change Subsingleton (TopCat.Sheaf.H SU.X₃ (n + 1))

@@ -37,7 +37,7 @@ private theorem cechToOrderedProductF_comp_π (n : ℕ)
     cechToOrderedProductF F U n ≫
         Pi.π (orderedCechTermFactor F U n) i =
       Pi.π (cechTermFactor F U n) i.1 :=
-  Pi.lift_π _ i
+  Pi.lift_comp_π _ i
 
 /-- Extend ordered Cech cochains by zero on tuples that are not strictly
 increasing. -/
@@ -59,7 +59,7 @@ theorem orderedToCechZeroExtensionF_comp_π_of_strictMono (n : ℕ)
       if h : StrictMono j then
         Pi.π (orderedCechTermFactor F U n) ⟨j, h⟩
       else 0) ≫ Pi.π (cechTermFactor F U n) i = _
-  rw [Pi.lift_π, dif_pos hi]
+  rw [Pi.lift_comp_π, dif_pos hi]
 
 theorem orderedToCechZeroExtensionF_comp_π_of_not_strictMono
     (n : ℕ) (i : Fin (n + 1) → ι) (hi : ¬ StrictMono i) :
@@ -70,7 +70,7 @@ theorem orderedToCechZeroExtensionF_comp_π_of_not_strictMono
       if h : StrictMono j then
         Pi.π (orderedCechTermFactor F U n) ⟨j, h⟩
       else 0) ≫ Pi.π (cechTermFactor F U n) i = 0
-  rw [Pi.lift_π, dif_neg hi]
+  rw [Pi.lift_comp_π, dif_neg hi]
 
 /-- Reindex native sheaf Cech cochains by a permutation of tuple positions. -/
 noncomputable def cechPermutationF (n : ℕ)
@@ -95,7 +95,7 @@ theorem cechPermutationF_comp_π (n : ℕ)
       Pi.π (cechTermFactor F U n) (j ∘ σ) ≫
         cechTermFactorRestriction F
           (leOfHom (((FormalCoproduct.mk _ U).mapPower σ).φ j))) ≫ _ = _
-  exact Pi.lift_π _ i
+  exact Pi.lift_comp_π _ i
 
 omit [LinearOrder ι] in
 private theorem cechPermutationF_one (n : ℕ) :
@@ -103,7 +103,7 @@ private theorem cechPermutationF_one (n : ℕ) :
   unfold cechPermutationF
   apply Pi.hom_ext
   intro i
-  rw [Category.id_comp, Pi.lift_π]
+  rw [Category.id_comp, Pi.lift_comp_π]
   change
     Pi.π (cechTermFactor F U n) i ≫
         cechTermFactorRestriction F

@@ -139,7 +139,7 @@ theorem cechCoface_apply (V : Opens X) (x : (cechTerm F U n).obj.obj (op V))
         Pi.π (cechTermFactor F U n)
             (i ∘ (SimplexCategory.δ k).toOrderHom.toFun) ≫
           cechTermFactorRestriction F (cechTupleLE U n k i)
-    exact Pi.lift_π _ i
+    exact Pi.lift_comp_π _ i
   have hcomponent :
       (Pi.π (cechTermFactor F U (n + 1)) i).hom.app (op V)
           ((cechCoface F U n k).hom.app (op V) x) =

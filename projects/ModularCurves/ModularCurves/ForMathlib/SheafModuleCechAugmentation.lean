@@ -39,10 +39,10 @@ private theorem moduleCechAugmentation_comp_coface_eq :
   unfold moduleCechAugmentation moduleCechCoface moduleCechTerm
   apply Pi.hom_ext
   intro i
-  rw [Category.assoc, Pi.lift_π]
-  rw [Category.assoc, Pi.lift_π]
-  rw [← Category.assoc, Pi.lift_π]
-  rw [← Category.assoc, Pi.lift_π]
+  rw [Category.assoc, Pi.lift_comp_π]
+  rw [Category.assoc, Pi.lift_comp_π]
+  rw [← Category.assoc, Pi.lift_comp_π]
+  rw [← Category.assoc, Pi.lift_comp_π]
   apply CategoryTheory.Sheaf.hom_ext
   apply NatTrans.ext
   funext V

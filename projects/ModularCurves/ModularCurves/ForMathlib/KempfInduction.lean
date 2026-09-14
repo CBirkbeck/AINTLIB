@@ -29,7 +29,7 @@ private lemma restrict_cokernel_H_subsingleton
   have hnext' : Subsingleton (presU.X₁.H (r + 1)) := hnext
   refine subsingleton_of_forall_eq 0 fun x => ?_
   obtain ⟨x₂, rfl⟩ := CategoryTheory.Sheaf.H.longSequence_exact₃
-    presUEx r (r + 1) rfl x (Subsingleton.elim _ _)
+    presUEx (n₀ := r) (n₁ := r + 1) x rfl (Subsingleton.elim _ _)
   have hmiddle : Subsingleton (presU.X₂.H r) := by
     haveI : presU.X₂.IsFlasque := IsFlasque.of_restrict _ pres.X₂ U.isOpenEmbedding
     rw [(Nat.sub_eq_iff_eq_add hr).mp rfl]
@@ -119,7 +119,7 @@ theorem kempfProp1 (F : Sheaf AddCommGrpCat.{u} X) (n : ℕ) {B : Set (Opens X)}
       have presEx : pres.ShortExact :=
         (EnoughInjectives.presentation F).some.shortExact_shortComplex
       obtain ⟨b, hb⟩ := CategoryTheory.Sheaf.H.longSequence_exact₁ presEx
-        (n + 1) (n + 2) rfl c (Subsingleton.elim _ _)
+        (n₀ := n + 1) (n₁ := n + 2) c (Subsingleton.elim _ _) rfl
       obtain ⟨I, U, hU₁, hU₂⟩ := hn pres.X₃ (by
         intro r U hr₁ hr₂ hU
         exact restrict_cokernel_H_subsingleton pres presEx r U hr₁

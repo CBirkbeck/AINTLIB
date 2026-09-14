@@ -92,7 +92,7 @@ private theorem modulePiForgetIso_naturality
   apply Pi.hom_ext
   intro j
   simp only [Category.assoc, modulePiForgetIso_hom_π,
-    Pi.lift_π, ← Functor.map_comp]
+    Pi.lift_comp_π, ← Functor.map_comp]
   rw [modulePiForgetIso_hom_π_assoc, ← Functor.map_comp]
 
 private noncomputable def evalOpForgetIsoApp

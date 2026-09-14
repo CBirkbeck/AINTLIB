@@ -480,7 +480,7 @@ theorem baseCechAugmentation_comp_π
             (op (∏ᶜ fun k : Fin 1 => U (j k)))) i =
       (baseModulePresheaf π M).map
         (homOfLE (show (∏ᶜ fun k : Fin 1 => U (i k)) ≤ ⊤ from le_top)).op := by
-  exact Pi.lift_π _ i
+  exact Pi.lift_comp_π _ i
 
 /-- Forgetting the base action on global sections agrees with the global
 sections object of the underlying additive sheaf. -/

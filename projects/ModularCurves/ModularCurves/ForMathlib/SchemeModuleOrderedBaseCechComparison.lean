@@ -69,7 +69,7 @@ theorem baseCechCoface_comp_π
         (baseModulePresheaf π M).map
           (((FormalCoproduct.mk _ U).mapPower
             (SimplexCategory.δ k).toOrderHom.toFun).φ j).op) ≫ _ = _
-  exact Pi.lift_π _ i
+  exact Pi.lift_comp_π _ i
 
 /-- Projection from all tuple components to strictly increasing components. -/
 noncomputable def baseCechToOrderedF
