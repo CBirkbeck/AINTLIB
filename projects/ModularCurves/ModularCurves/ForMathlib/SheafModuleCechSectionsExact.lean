@@ -47,7 +47,7 @@ theorem moduleCechAugmentation_apply
           (∏ᶜ fun k : Fin 1 => U (i k))).app F).hom.app (op W) x := by
     exact ConcreteCategory.congr_hom
       (congrArg (fun f => f.hom.app (op W))
-        (Pi.lift_π (fun i : Fin 1 → ι =>
+        (Pi.lift_comp_π (fun i : Fin 1 → ι =>
           (toRestrict (ModuleCat R)
             (∏ᶜ fun k : Fin 1 => U (i k))).app F) i)) x
   rw [hcomponent]

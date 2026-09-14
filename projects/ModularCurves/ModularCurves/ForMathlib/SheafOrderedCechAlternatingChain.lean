@@ -407,7 +407,7 @@ private theorem cechCoface_comp_π (n : ℕ) (k : Fin (n + 2))
         cechTermFactorRestriction F
           (leOfHom (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ j))) ≫
       Pi.π (cechTermFactor F U (n + 1)) i = _
-  exact Pi.lift_π _ i
+  exact Pi.lift_comp_π _ i
 
 private noncomputable def cechDifferentialProductF (n : ℕ) :
     (∏ᶜ cechTermFactor F U n) ⟶

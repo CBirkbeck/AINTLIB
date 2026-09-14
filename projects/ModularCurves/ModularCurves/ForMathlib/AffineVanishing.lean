@@ -213,7 +213,7 @@ private lemma H_map_injective_of_subsingleton_cokernel
   rw [injective_iff_map_eq_zero]
   intro c hc
   obtain ⟨x, hx⟩ := CategoryTheory.Sheaf.H.longSequence_exact₁
-    hS n (n + 1) rfl c hc
+    hS (n₀ := n) (n₁ := n + 1) c hc rfl
   rw [← hx, Subsingleton.elim x 0, map_zero]
 
 private theorem affine_H_one_subsingleton [IsAffine X] [F.IsQuasicoherent] :
@@ -251,9 +251,9 @@ private theorem affine_H_one_subsingleton [IsAffine X] [F.IsQuasicoherent] :
     change Function.Surjective (H.map S.g.sheafHom 0)
     exact H_zero_surjective_of_quasicoherent_epi S.g
   obtain ⟨x₃, hx₃⟩ := CategoryTheory.Sheaf.H.longSequence_exact₁
-    hSsheaf 0 1 rfl c (by
+    hSsheaf (n₀ := 0) (n₁ := 1) c (by
       change H.map (F.toCoverSheaf U).sheafHom 1 c = 0
-      exact F.toCoverSheaf_H_map_zero U 1 c fun i ↦ (vanish i.1).2)
+      exact F.toCoverSheaf_H_map_zero U 1 c fun i ↦ (vanish i.1).2) rfl
   obtain ⟨x₂, hx₂⟩ := hsurj x₃
   rw [← hx₃, ← hx₂]
   exact CategoryTheory.Sheaf.H.longSequence_comp_zero₃ hSsheaf 0 1 rfl x₂

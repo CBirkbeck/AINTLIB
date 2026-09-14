@@ -100,7 +100,7 @@ private theorem cechCoface_π
   rw [CosimplicialObject.δ,
     FormalCoproduct.cosimplicialObjectFunctor_obj_map,
     FormalCoproduct.cech_map]
-  exact Pi.lift_π _ i
+  exact Pi.lift_comp_π _ i
 
 private noncomputable def baseCechFactorBaseChangeIso
     {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)

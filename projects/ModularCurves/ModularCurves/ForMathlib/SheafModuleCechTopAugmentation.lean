@@ -52,7 +52,7 @@ theorem moduleCechTopSectionsAugmentation_π
         ((toRestrict (ModuleCat R)
           (∏ᶜ fun k : Fin 1 => U (i k))).app F).hom.app (op ⊤) := by
     exact congrArg (fun f => f.hom.app (op ⊤))
-      (Pi.lift_π (fun j : Fin 1 → ι =>
+      (Pi.lift_comp_π (fun j : Fin 1 → ι =>
         (toRestrict (ModuleCat R)
           (∏ᶜ fun k : Fin 1 => U (j k))).app F) i)
   rw [haugmentation]

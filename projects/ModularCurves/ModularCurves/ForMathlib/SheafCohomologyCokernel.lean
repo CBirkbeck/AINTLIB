@@ -30,13 +30,13 @@ private noncomputable def zeroOneShortComplex : ShortComplex AddCommGrpCat.{w'} 
 private theorem zeroOneShortComplex_exact : (zeroOneShortComplex hS).Exact := by
   rw [ShortComplex.ab_exact_iff]
   intro x hx
-  exact longSequence_exact₃ hS 0 1 rfl x hx
+  exact longSequence_exact₃ hS (n₀ := 0) (n₁ := 1) x rfl hx
 
 private theorem zeroOneShortComplex_epi
     [Subsingleton (H S.X₂ 1)] : Epi (zeroOneShortComplex hS).g := by
   rw [AddCommGrpCat.epi_iff_surjective]
   intro x
-  exact longSequence_exact₁ hS 0 1 rfl x (Subsingleton.elim _ _)
+  exact longSequence_exact₁ hS (n₀ := 0) (n₁ := 1) x (Subsingleton.elim _ _) rfl
 
 /-- If the middle sheaf in a short exact sequence has vanishing `H¹`, then the
 connecting homomorphism identifies `H¹` of the kernel with the cokernel of the

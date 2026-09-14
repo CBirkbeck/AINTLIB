@@ -407,7 +407,7 @@ theorem baseModuleCechTermAppRestrictIso_comp_coface
             TopCat.Sheaf.moduleCechTermFactorRestriction
               (baseModuleTopSheaf π M) h := by
       unfold TopCat.Sheaf.moduleCechCoface
-      exact Pi.lift_π _ i
+      exact Pi.lift_comp_π _ i
     exact congrArg (fun f => f.hom.app (op W)) hcoface
   have hSourceSections :
       sourceFactorRestriction ≫ sourceHighSections =

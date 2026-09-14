@@ -59,7 +59,7 @@ theorem orderedCechCoface_apply (V : Opens X)
           Pi.π (orderedCechTermFactor F U (n + 1)) i =
         Pi.π (orderedCechTermFactor F U n) (i.delete k) ≫
           cechTermFactorRestriction F (orderedCechTupleLE U n k i)
-    exact Pi.lift_π _ i
+    exact Pi.lift_comp_π _ i
   have hcomponent :
       (Pi.π (orderedCechTermFactor F U (n + 1)) i).hom.app (op V)
           ((orderedCechCoface F U n k).hom.app (op V) x) =

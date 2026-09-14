@@ -25,7 +25,7 @@ object. -/
 lemma longSequence_equiv₀_exact₁ (x₁ : H S.X₁ 1) (hx₁ : map S.f 1 x₁ = 0) :
     ∃ x₃ : S.X₃.obj.obj (op T),
       δ hS 0 1 rfl ((equiv₀ S.X₃ hT).symm x₃) = x₁ := by
-  obtain ⟨x₃, hx₃⟩ := longSequence_exact₁ hS 0 1 rfl x₁ hx₁
+  obtain ⟨x₃, hx₃⟩ := longSequence_exact₁ hS (n₀ := 0) (n₁ := 1) x₁ hx₁ rfl
   exact ⟨equiv₀ S.X₃ hT x₃, by simpa using hx₃⟩
 
 end CategoryTheory.Sheaf.H

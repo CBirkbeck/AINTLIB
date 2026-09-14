@@ -1964,9 +1964,9 @@ theorem coordinateHyperplaneTwistOrderedBaseCechCoface_of_ne_zero
   unfold FormalCoproduct.evalOp
   apply Pi.hom_ext
   intro a
-  erw [Category.assoc, Pi.lift_π, Pi.mapIso_hom_π_assoc,
+  erw [Category.assoc, Pi.lift_comp_π, Pi.mapIso_hom_π_assoc,
     Category.assoc, Pi.mapIso_hom_π]
-  conv_rhs => erw [← Category.assoc, Pi.lift_π]
+  conv_rhs => erw [← Category.assoc, Pi.lift_comp_π]
   let a' : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1) := a
   change Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
       Scheme.Modules.baseCechFactor
@@ -2049,7 +2049,7 @@ theorem coordinateHyperplaneTwistOrderedBaseCechFirstCoface_comp_π
         (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
           (coordinateOpenCechDelete (R := R) a 0).op ≫
       coordinateOpenCechFirstTransitionFactorEnd (R := R) a d := by
-  exact Pi.lift_π _ a
+  exact Pi.lift_comp_π _ a
 
 /-- The exceptional first twist coface becomes the coordinate coface carrying
 the first-chart transition factor. -/
@@ -2072,9 +2072,9 @@ theorem coordinateHyperplaneTwistOrderedBaseCechCoface_zero
   unfold FormalCoproduct.evalOp
   apply Pi.hom_ext
   intro a
-  erw [Category.assoc, Pi.lift_π, Pi.mapIso_hom_π_assoc,
+  erw [Category.assoc, Pi.lift_comp_π, Pi.mapIso_hom_π_assoc,
     Category.assoc, Pi.mapIso_hom_π]
-  conv_rhs => erw [← Category.assoc, Pi.lift_π]
+  conv_rhs => erw [← Category.assoc, Pi.lift_comp_π]
   let a' : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1) := a
   change Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
       Scheme.Modules.baseCechFactor

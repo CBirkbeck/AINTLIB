@@ -121,7 +121,7 @@ theorem coordinateHomogeneousLaurentOrderedCechCoface_comp_π
               e.IsAllowedOn (fun l => (b.1 l).down)})) (a.delete k) ≫
         ModuleCat.ofHom
           (coordinateHomogeneousLaurentDeleteLinearMap (R := R) a k d) := by
-  exact Pi.lift_π _ a
+  exact Pi.lift_comp_π _ a
 
 /-- On the first face, the homogeneous-weight deletion map is conjugate to restriction followed
 by the first-face transition factor. -/
@@ -183,7 +183,7 @@ theorem coordinateHomogeneousLaurentOrderedCechCoface_naturality
   unfold coordinateHomogeneousLaurentOrderedCechCoface
   apply Pi.hom_ext
   intro a
-  erw [Category.assoc, Pi.lift_π, Pi.mapIso_hom_π_assoc,
+  erw [Category.assoc, Pi.lift_comp_π, Pi.mapIso_hom_π_assoc,
     Category.assoc, Pi.mapIso_hom_π]
   by_cases hk : k = 0
   · subst k

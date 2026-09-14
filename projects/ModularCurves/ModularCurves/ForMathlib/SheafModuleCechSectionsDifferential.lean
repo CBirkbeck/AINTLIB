@@ -83,7 +83,7 @@ theorem moduleCechCoface_apply
             (i ∘ (SimplexCategory.δ k).toOrderHom.toFun) ≫
           moduleCechTermFactorRestriction F h := by
     unfold moduleCechCoface moduleCechTerm
-    exact Pi.lift_π _ i
+    exact Pi.lift_comp_π _ i
   have hcomponent :
       (Pi.π (moduleCechTermFactor F U (n + 1)) i).hom.app (op W)
           ((moduleCechCoface F U n k).hom.app (op W) x) =

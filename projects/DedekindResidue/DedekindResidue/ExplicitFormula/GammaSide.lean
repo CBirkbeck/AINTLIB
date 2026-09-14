@@ -2479,7 +2479,8 @@ theorem tendsto_eLpNorm_indicator_truncation {g : ℝ → ℂ}
       = (∫⁻ x, ((Set.Ioc (-(n:ℝ)) (n:ℝ))ᶜ.indicator (fun y => ‖g y‖ₑ ^ (2:ℝ)) x))
         ^ (1/(2:ℝ)) := by
     intro n
-    rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)]
+    rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)
+      ((hg.aestronglyMeasurable.indicator measurableSet_Ioc).sub hg.aestronglyMeasurable)]
     rw [show ((2:ℝ≥0∞).toReal) = (2:ℝ) by norm_num]
     congr 1
     refine lintegral_congr (fun x => ?_)
@@ -2507,7 +2508,8 @@ theorem tendsto_eLpNorm_indicator_truncation {g : ℝ → ℂ}
       · rw [Set.indicator_of_notMem hx]
         exact bot_le
     · have := hg.eLpNorm_lt_top
-      rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num),
+      rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)
+          hg.aestronglyMeasurable,
         show ((2:ℝ≥0∞).toReal) = (2:ℝ) by norm_num] at this
       have h1 : (∫⁻ x, ‖g x‖ₑ ^ (2:ℝ)) < ⊤ := by
         by_contra hcon
@@ -2615,11 +2617,7 @@ theorem gammaFT_ae_eq_fourierL2 {F : ℝ → ℂ} (hF : Integrable F)
     exact tendsto_eLpNorm_indicator_truncation hFdiv2
   have hmeas : TendstoInMeasure volume (fun n : ℕ => 𝓕 (fun x : ℝ => hn n x)) atTop
       ((𝓕 (hFdiv2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) := by
-    refine tendstoInMeasure_of_tendsto_eLpNorm (p := 2) (by norm_num) ?_ ?_ heLp
-    · intro n
-      refine Continuous.aestronglyMeasurable ?_
-      exact VectorFourier.fourierIntegral_continuous (by fun_prop) (by fun_prop) (hn1 n)
-    · exact (MeasureTheory.Lp.memLp _).aestronglyMeasurable
+    exact tendstoInMeasure_of_tendsto_eLpNorm (p := 2) (by norm_num) heLp
   obtain ⟨ns, hns_mono, hns_ae⟩ := hmeas.exists_seq_tendsto_ae
   have hqmp : Measure.QuasiMeasurePreserving (fun t : ℝ => -t/(2*π))
       volume volume := by

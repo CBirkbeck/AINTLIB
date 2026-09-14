@@ -75,7 +75,7 @@ theorem cechCoface_apply (x : ((cechComplexFunctor U).obj F).X n)
     (i ∘ (SimplexCategory.δ k).toOrderHom.toFun)
   rw [hout, hin, cechCoface_eq]
   exact ConcreteCategory.congr_hom
-    (Pi.lift_π (fun i : Fin (n + 2) → ι =>
+    (Pi.lift_comp_π (fun i : Fin (n + 2) → ι =>
       Pi.π (fun j : Fin (n + 1) → ι =>
         F.obj (op (∏ᶜ fun a : Fin (n + 1) => U (j a))))
           (i ∘ (SimplexCategory.δ k).toOrderHom.toFun) ≫

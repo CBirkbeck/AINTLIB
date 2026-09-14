@@ -37,7 +37,7 @@ theorem cechToOrderedF_comp_π (n : ℕ)
       Pi.π (cechTermFactor F U n) i.1) ≫
         Pi.π (orderedCechTermFactor F U n) i =
       Pi.π (cechTermFactor F U n) i.1
-  exact Pi.lift_π _ i
+  exact Pi.lift_comp_π _ i
 
 /-- On sections, `cechToOrderedF` forgets all components except the strictly
 increasing ones. -/
@@ -87,10 +87,10 @@ private theorem cechCoface_comp_cechToOrderedF (n : ℕ)
     cechToOrderedF_comp_π F U n (i.delete k)
   have hnative : cechCoface F U n k ≫ q = s ≫ e := by
     dsimp only [q, s, e]
-    exact Pi.lift_π _ i.1
+    exact Pi.lift_comp_π _ i.1
   have hordered : orderedCechCoface F U n k ≫ p = r ≫ e := by
     dsimp only [p, r, e]
-    exact Pi.lift_π _ i
+    exact Pi.lift_comp_π _ i
   calc
     (cechCoface F U n k ≫ cechToOrderedF F U (n + 1)) ≫ p =
         cechCoface F U n k ≫ q := by

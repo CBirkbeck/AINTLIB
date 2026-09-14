@@ -95,7 +95,7 @@ theorem subsingleton_H_X₃_of_shortExact
   letI : Subsingleton (H S.X₁ (q + 1)) := hleft
   refine subsingleton_of_forall_eq 0 fun x ↦ ?_
   obtain ⟨x₂, hx₂⟩ := CategoryTheory.Sheaf.H.longSequence_exact₃
-    hS q (q + 1) rfl x (Subsingleton.elim _ _)
+    hS (n₀ := q) (n₁ := q + 1) x rfl (Subsingleton.elim _ _)
   rw [Subsingleton.elim x₂ 0, map_zero] at hx₂
   exact hx₂.symm
 

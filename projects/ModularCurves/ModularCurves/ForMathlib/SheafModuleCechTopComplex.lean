@@ -114,7 +114,7 @@ theorem moduleCechTermTopSectionsIso_comp_coface
             (i ∘ (SimplexCategory.δ k).toOrderHom.toFun) ≫
           moduleCechTermFactorRestriction F h := by
     unfold moduleCechCoface moduleCechTerm
-    exact Pi.lift_π _ i
+    exact Pi.lift_comp_π _ i
   have hcofaceTop := congrArg (fun f => f.hom.app (op ⊤)) hcoface
   have hcofaceTop' :
       (moduleCechCoface F U n k).hom.app (op ⊤) ≫
@@ -142,7 +142,7 @@ theorem moduleCechTermTopSectionsIso_comp_coface
           F.obj.map (((FormalCoproduct.mk _ U).mapPower
             (SimplexCategory.δ k).toOrderHom.toFun).φ i).op := by
     unfold moduleNativeCechCoface
-    exact Pi.lift_π _ i
+    exact Pi.lift_comp_π _ i
   change
     ((moduleCechTermTopSectionsIso F U n).hom ≫
         moduleNativeCechCoface F U n k) ≫

@@ -391,7 +391,7 @@ private theorem coordinateHomogeneousLaurentWeightProjection_inclusion_apply
   unfold coordinateHomogeneousLaurentWeightInclusion
   unfold coordinateHomogeneousLaurentWeightProjection
   have h := congrArg (fun f => f.hom s)
-    (Pi.lift_π
+    (Pi.lift_comp_π
       (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
         coordinateHomogeneousLaurentWeightSingle (R := R) d e b) a)
   exact h

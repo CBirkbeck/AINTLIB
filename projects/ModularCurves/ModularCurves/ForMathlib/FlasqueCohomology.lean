@@ -202,8 +202,8 @@ private theorem H_one_isZero (F : Sheaf AddCommGrpCat X) [IsFlasque F] :
   let S := pres.shortComplex
   have hS : S.ShortExact := pres.shortExact_shortComplex
   letI : Subsingleton (H F 1) := subsingleton_of_forall_eq 0 fun c ↦ by
-    obtain ⟨x₃, hx₃⟩ := CategoryTheory.Sheaf.H.longSequence_exact₁ hS 0 1 rfl c
-      (Subsingleton.elim _ _)
+    obtain ⟨x₃, hx₃⟩ := CategoryTheory.Sheaf.H.longSequence_exact₁ hS (n₀ := 0) (n₁ := 1) c
+      (Subsingleton.elim _ _) rfl
     have hg : Function.Surjective (S.g.hom.app (op ⊤)) :=
       AddCommGrpCat.epi_iff_surjective _ |>.mp (epi_of_shortExact hS)
     obtain ⟨s₂, hs₂⟩ := hg (H.equiv₀ S.X₃ x₃)
@@ -229,7 +229,7 @@ private theorem H_succ_isZero (n : ℕ)
     AddCommGrpCat.subsingleton_of_isZero (ih S.X₃ inferInstance)
   letI : Subsingleton (H F (n + 2)) := subsingleton_of_forall_eq 0 fun c ↦ by
     obtain ⟨x₃, hx₃⟩ := CategoryTheory.Sheaf.H.longSequence_exact₁ hS
-      (n + 1) (n + 2) rfl c (Subsingleton.elim _ _)
+      (n₀ := n + 1) (n₁ := n + 2) c (Subsingleton.elim _ _) rfl
     rw [← hx₃, Subsingleton.elim x₃ 0, map_zero]
   exact AddCommGrpCat.isZero_of_subsingleton _
 

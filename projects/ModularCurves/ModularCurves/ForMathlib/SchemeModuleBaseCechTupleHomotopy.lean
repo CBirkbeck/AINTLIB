@@ -262,7 +262,7 @@ theorem baseCechTupleMapF_comp_π
         Pi.π (fun q : Fin (n + 1) → ι =>
           baseCechFactor π M U n q) i =
       baseCechTupleMapComponent π M U f hf i :=
-  Pi.lift_π _ i
+  Pi.lift_comp_π _ i
 
 /-- The identity tuple-chain map does not enlarge support. -/
 theorem cechTupleSupportNonincreasing_id
