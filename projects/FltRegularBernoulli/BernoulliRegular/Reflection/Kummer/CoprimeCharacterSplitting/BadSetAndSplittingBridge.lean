@@ -247,10 +247,10 @@ theorem not_mem_eta_of_not_mem_kummerCharacterBadSet
     intro x hx
     rw [Set.mem_singleton_iff] at hx
     simpa [hx] using hηP
-  have hmem : P ∈ (normalizedFactors (Ideal.span ({η} : Set (𝓞 K)))).toFinset :=
-    Multiset.mem_toFinset.mpr
-      ((Ideal.mem_normalizedFactors_iff hη_span).mpr ⟨inferInstance, hle⟩)
-  exact hP_not_mem (by simp [kummerCharacterBadSet, hmem])
+  have hmem : P ∈ normalizedFactors (Ideal.span ({η} : Set (𝓞 K))) :=
+    (Ideal.mem_normalizedFactors_iff hη_span).mpr ⟨inferInstance, hle⟩
+  exact hP_not_mem (by
+    simp [kummerCharacterBadSet, mem_primeFactors, hmem])
 
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- A nonzero prime outside the canonical bad set does not lie above `p`. -/
@@ -269,10 +269,10 @@ theorem not_mem_p_of_not_mem_kummerCharacterBadSet
     intro x hx
     rw [Set.mem_singleton_iff] at hx
     simpa [hx] using hpP
-  have hmem : P ∈ (normalizedFactors (Ideal.span ({(p : 𝓞 K)} : Set (𝓞 K)))).toFinset :=
-    Multiset.mem_toFinset.mpr
-      ((Ideal.mem_normalizedFactors_iff hp_span).mpr ⟨inferInstance, hle⟩)
-  exact hP_not_mem (by simp [kummerCharacterBadSet, hmem])
+  have hmem : P ∈ normalizedFactors (Ideal.span ({(p : 𝓞 K)} : Set (𝓞 K))) :=
+    (Ideal.mem_normalizedFactors_iff hp_span).mpr ⟨inferInstance, hle⟩
+  exact hP_not_mem (by
+    simp [kummerCharacterBadSet, mem_primeFactors, hmem])
 
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- The canonical bad set contains the Kummer-Dedekind conductor factors. -/
@@ -282,7 +282,8 @@ theorem conductorFactors_subset_kummerCharacterBadSet
     (normalizedFactors (splittingFieldRootConductorComap (p := p) (K := K) η)).toFinset ⊆
       kummerCharacterBadSet (p := p) (K := K) η := by
   intro P hP
-  simp [kummerCharacterBadSet, hP]
+  simp [kummerCharacterBadSet, mem_primeFactors,
+    Multiset.mem_toFinset.mp hP]
 
 /-- In the cyclotomic field, a prime not above `p` has residue field size
 congruent to `1` modulo `p`.  This is the residue-field form of the fact that
@@ -889,8 +890,8 @@ theorem coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet_of_locallyP
               locallyPrimaryPseudoUnit_principalSymbol_eq_zero_canonical_of_coprime_badSet
                 p hp_odd K B (kummerCharacterBadSet (p := p) (K := K) η)
                 hη_ne hz hη_prime_to_p hη_local hsing
-                (by intro P hP; simp [kummerCharacterBadSet, hP])
-                (by intro P hP; simp [kummerCharacterBadSet, hP])
+                (by intro P hP; simp [kummerCharacterBadSet, mem_primeFactors, hP])
+                (by intro P hP; simp [kummerCharacterBadSet, mem_primeFactors, hP])
                 hzcop)
             hI hJ hmk) ≠ 1 :=
   coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet_of_coprime_vanishing
@@ -899,8 +900,8 @@ theorem coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet_of_locallyP
         locallyPrimaryPseudoUnit_principalSymbol_eq_zero_canonical_of_coprime_badSet
           p hp_odd K B (kummerCharacterBadSet (p := p) (K := K) η)
           hη_ne hz hη_prime_to_p hη_local hsing
-          (by intro P hP; simp [kummerCharacterBadSet, hP])
-          (by intro P hP; simp [kummerCharacterBadSet, hP])
+          (by intro P hP; simp [kummerCharacterBadSet, mem_primeFactors, hP])
+          (by intro P hP; simp [kummerCharacterBadSet, mem_primeFactors, hP])
           hzcop)
 
 end Kummer
