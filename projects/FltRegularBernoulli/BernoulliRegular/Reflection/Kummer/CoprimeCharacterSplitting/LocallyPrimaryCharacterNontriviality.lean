@@ -48,8 +48,12 @@ theorem locallyPrimaryCoprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badS
           (splittingFieldRootConductorComap_ne_bot
             (p := p) (K := K) hp_ne_two η hη_not_pow))
         hη_ne hη_prime_to_p hη_local hsing
-        (by intro P hP; simp [kummerCharacterBadSet, hP])
-        (by intro P hP; simp [kummerCharacterBadSet, hP]) ≠ 1 := by
+        (by
+          intro P hP
+          simp [kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP])
+        (by
+          intro P hP
+          simp [kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP]) ≠ 1 := by
   haveI : NumberField (SplittingField (X ^ p - C (η : K))) :=
     splittingField_X_pow_sub_C_numberField (p := p) (K := K) (η := (η : K))
   exact
@@ -66,8 +70,12 @@ theorem locallyPrimaryCoprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badS
             (splittingFieldRootConductorComap_ne_bot
               (p := p) (K := K) hp_ne_two η hη_not_pow))
           hη_ne hη_prime_to_p hη_local hsing
-          (by intro P hP; simp [kummerCharacterBadSet, hP])
-          (by intro P hP; simp [kummerCharacterBadSet, hP])
+          (by
+            intro P hP
+            simp [kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP])
+          (by
+            intro P hP
+            simp [kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP])
           hI hJ hmk)
 
 /-- Linear-form version of
@@ -97,8 +105,12 @@ theorem locallyPrimaryCoprimeCanonicalClassGroupModPLinear_nontrivial_of_not_isP
           (splittingFieldRootConductorComap_ne_bot
             (p := p) (K := K) hp_ne_two η hη_not_pow))
         hη_ne hη_prime_to_p hη_local hsing
-        (by intro P hP; simp [kummerCharacterBadSet, hP])
-        (by intro P hP; simp [kummerCharacterBadSet, hP]) v ≠ 0 := by
+        (by
+          intro P hP
+          simp [kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP])
+        (by
+          intro P hP
+          simp [kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP]) v ≠ 0 := by
   haveI : NumberField (SplittingField (X ^ p - C (η : K))) :=
     splittingField_X_pow_sub_C_numberField (p := p) (K := K) (η := (η : K))
   let S := kummerCharacterBadSet (p := p) (K := K) η
@@ -114,12 +126,12 @@ theorem locallyPrimaryCoprimeCanonicalClassGroupModPLinear_nontrivial_of_not_isP
       ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors
           (Ideal.span ({η} : Set (𝓞 K))), P ∈ S := by
     intro P hP
-    simp [S, kummerCharacterBadSet, hP]
+    simp [S, kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP]
   let hS_p :
       ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors
           (Ideal.span ({(p : 𝓞 K)} : Set (𝓞 K))), P ∈ S := by
     intro P hP
-    simp [S, kummerCharacterBadSet, hP]
+    simp [S, kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP]
   let χ :=
     Furtwaengler.locallyPrimaryCoprimeCanonicalClassGroupModPHom
       (p := p) (K := K) hp_odd η B S hSprime hS_ne hη_ne
@@ -168,8 +180,12 @@ noncomputable def locallyPrimaryKummerBadSetClassGroupModPLinear
       (splittingFieldRootConductorComap_ne_bot
         (p := p) (K := K) hp_ne_two η hη_not_pow))
     hη_ne hη_prime_to_p hη_local hsing
-    (by intro P hP; simp [kummerCharacterBadSet, hP])
-    (by intro P hP; simp [kummerCharacterBadSet, hP])
+    (by
+      intro P hP
+      simp [kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP])
+    (by
+      intro P hP
+      simp [kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP])
 
 /-- Galois covariance of the WR-05 Kummer bad-set character.
 
@@ -215,12 +231,12 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i
       ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors
           (Ideal.span ({η} : Set (𝓞 K))), P ∈ S := by
     intro P hP
-    simp [S, kummerCharacterBadSet, hP]
+    simp [S, kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP]
   let hS_p :
       ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors
           (Ideal.span ({(p : 𝓞 K)} : Set (𝓞 K))), P ∈ S := by
     intro P hP
-    simp [S, kummerCharacterBadSet, hP]
+    simp [S, kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP]
   let hclass :
       ∀ {I J : (Ideal (𝓞 K))⁰}
         (_hI : ∀ P ∈ S, IsCoprime (I : Ideal (𝓞 K)) P)
@@ -266,7 +282,7 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i
       have hQ_nf :
           Q ∈ UniqueFactorizationMonoid.normalizedFactors
               (Ideal.span ({u} : Set (𝓞 K))) := by
-        simpa using hQ
+        simpa [UniqueFactorizationMonoid.mem_primeFactors] using hQ
       obtain ⟨hQ_prime, _hQ_ne, _hQ_max⟩ :=
         Furtwaengler.isPrime_of_mem_normalizedFactors (K := K) hQ_nf
       haveI : Q.IsPrime := hQ_prime
@@ -288,7 +304,7 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i
       have hQ_nf :
           Q ∈ UniqueFactorizationMonoid.normalizedFactors
               (Ideal.span ({u} : Set (𝓞 K))) := by
-        simpa using hQ
+        simpa [UniqueFactorizationMonoid.mem_primeFactors] using hQ
       obtain ⟨_hQ_prime, hQ_ne, _hQ_max⟩ :=
         Furtwaengler.isPrime_of_mem_normalizedFactors (K := K) hQ_nf
       exact cyclotomicGaloisConjugate_ne_bot (p := p) (K := K) a⁻¹ hQ_ne
@@ -313,7 +329,8 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i
       (S ∪ Sinv) ∪ Uinv
     rw [Finset.mem_union]
     refine Or.inr ?_
-    exact Finset.mem_image.mpr ⟨Q, by simpa using hQ, rfl⟩
+    exact Finset.mem_image.mpr
+      ⟨Q, by simpa [UniqueFactorizationMonoid.mem_primeFactors] using hQ, rfl⟩
   have hrep : ∀ c : ClassGroup (𝓞 K),
       ∃ I : (Ideal (𝓞 K))⁰,
         ClassGroup.mk0 I = c ∧
@@ -388,12 +405,12 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i_clear_
       ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors
           (Ideal.span ({η} : Set (𝓞 K))), P ∈ S := by
     intro P hP
-    simp [S, kummerCharacterBadSet, hP]
+    simp [S, kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP]
   let hS_p :
       ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors
           (Ideal.span ({(p : 𝓞 K)} : Set (𝓞 K))), P ∈ S := by
     intro P hP
-    simp [S, kummerCharacterBadSet, hP]
+    simp [S, kummerCharacterBadSet, UniqueFactorizationMonoid.mem_primeFactors, hP]
   let hclass :
       ∀ {I J : (Ideal (𝓞 K))⁰}
         (_hI : ∀ P ∈ S, IsCoprime (I : Ideal (𝓞 K)) P)
@@ -437,7 +454,7 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i_clear_
         have hQ_nf :
             Q ∈ UniqueFactorizationMonoid.normalizedFactors
                 (Ideal.span ({z} : Set (𝓞 K))) := by
-          simpa using hQ
+          simpa [UniqueFactorizationMonoid.mem_primeFactors] using hQ
         obtain ⟨hQ_prime, _hQ_ne, _hQ_max⟩ :=
           Furtwaengler.isPrime_of_mem_normalizedFactors (K := K) hQ_nf
         haveI : Q.IsPrime := hQ_prime
@@ -447,7 +464,7 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i_clear_
       have hQ_nf :
           Q ∈ UniqueFactorizationMonoid.normalizedFactors
               (Ideal.span ({w} : Set (𝓞 K))) := by
-        simpa using hQ
+        simpa [UniqueFactorizationMonoid.mem_primeFactors] using hQ
       obtain ⟨hQ_prime, _hQ_ne, _hQ_max⟩ :=
         Furtwaengler.isPrime_of_mem_normalizedFactors (K := K) hQ_nf
       haveI : Q.IsPrime := hQ_prime
@@ -471,7 +488,7 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i_clear_
         have hQ_nf :
             Q ∈ UniqueFactorizationMonoid.normalizedFactors
                 (Ideal.span ({z} : Set (𝓞 K))) := by
-          simpa using hQ
+          simpa [UniqueFactorizationMonoid.mem_primeFactors] using hQ
         obtain ⟨_hQ_prime, hQ_ne, _hQ_max⟩ :=
           Furtwaengler.isPrime_of_mem_normalizedFactors (K := K) hQ_nf
         exact cyclotomicGaloisConjugate_ne_bot (p := p) (K := K) a⁻¹ hQ_ne
@@ -480,7 +497,7 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i_clear_
       have hQ_nf :
           Q ∈ UniqueFactorizationMonoid.normalizedFactors
               (Ideal.span ({w} : Set (𝓞 K))) := by
-        simpa using hQ
+        simpa [UniqueFactorizationMonoid.mem_primeFactors] using hQ
       obtain ⟨_hQ_prime, hQ_ne, _hQ_max⟩ :=
         Furtwaengler.isPrime_of_mem_normalizedFactors (K := K) hQ_nf
       exact cyclotomicGaloisConjugate_ne_bot (p := p) (K := K) a⁻¹ hQ_ne
@@ -505,7 +522,8 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i_clear_
       ((S ∪ Sinv) ∪ Zinv) ∪ Winv
     rw [Finset.mem_union, Finset.mem_union]
     refine Or.inl (Or.inr ?_)
-    exact Finset.mem_image.mpr ⟨Q, by simpa using hQ, rfl⟩
+    exact Finset.mem_image.mpr
+      ⟨Q, by simpa [UniqueFactorizationMonoid.mem_primeFactors] using hQ, rfl⟩
   have hT_invw :
       ∀ Q ∈ UniqueFactorizationMonoid.normalizedFactors
           (Ideal.span ({w} : Set (𝓞 K))),
@@ -515,7 +533,8 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i_clear_
       ((S ∪ Sinv) ∪ Zinv) ∪ Winv
     rw [Finset.mem_union]
     refine Or.inr ?_
-    exact Finset.mem_image.mpr ⟨Q, by simpa using hQ, rfl⟩
+    exact Finset.mem_image.mpr
+      ⟨Q, by simpa [UniqueFactorizationMonoid.mem_primeFactors] using hQ, rfl⟩
   have hrep : ∀ c : ClassGroup (𝓞 K),
       ∃ I : (Ideal (𝓞 K))⁰,
         ClassGroup.mk0 I = c ∧
