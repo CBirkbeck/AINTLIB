@@ -440,12 +440,15 @@ assembled from `tensorSection_restrict` (naturality) and `tensorSection_comparis
 theorem tensorSection_restrict_comparison {X : Scheme.{u}} (M N : X.Modules)
     {V₁ V₂ W : X.Opens} (h₁ : W ≤ V₁) (h₂ : W ≤ V₂) (a b : Γ(X, W))
     (x₁ : Γ(M, V₁)) (x₂ : Γ(M, V₂)) (y₁ : Γ(N, V₁)) (y₂ : Γ(N, V₂))
-    (hx : M.val.map (homOfLE h₁).op x₁ = a • M.val.map (homOfLE h₂).op x₂)
-    (hy : N.val.map (homOfLE h₁).op y₁ = b • N.val.map (homOfLE h₂).op y₂) :
+    (hx : M.val.map (homOfLE h₁).op x₁ =
+      a • show Γ(M, W) from M.val.map (homOfLE h₂).op x₂)
+    (hy : N.val.map (homOfLE h₁).op y₁ =
+      b • show Γ(N, W) from N.val.map (homOfLE h₂).op y₂) :
     (MonoidalCategory.tensorObj M N).val.map (homOfLE h₁).op
         (tensorSection M N V₁ x₁ y₁) =
-      (a * b) • (MonoidalCategory.tensorObj M N).val.map (homOfLE h₂).op
-        (tensorSection M N V₂ x₂ y₂) := by
+      (a * b) • show Γ(MonoidalCategory.tensorObj M N, W) from
+        (MonoidalCategory.tensorObj M N).val.map (homOfLE h₂).op
+          (tensorSection M N V₂ x₂ y₂) := by
   rw [tensorSection_restrict M N h₁ x₁ y₁, tensorSection_restrict M N h₂ x₂ y₂]
   exact tensorSection_comparison M N W a b _ _ _ _ hx hy
 

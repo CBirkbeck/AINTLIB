@@ -223,16 +223,16 @@ theorem uniformizer_of_span_maximalIdealAt (W : WeierstrassCurve K) [W.IsEllipti
       (Ideal.primeCompl_le_nonZeroDivisors _) (h0.trans (map_zero _).symm))
   have hgen : (IsDiscreteValuationRing.maximalIdeal
       ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).asIdeal =
-      Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
-        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r} := by
+      Ideal.span {(algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r)} := by
     show IsLocalRing.maximalIdeal _ = _
     rw [← Localization.AtPrime.map_eq_maximalIdeal]
     refine (congrArg (Ideal.map (algebraMap _ _)) hspan).trans ?_
     rw [Ideal.map_span, Set.image_singleton]
   have hgen' : (IsDiscreteValuationRing.maximalIdeal
       ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).asIdeal =
-      Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
-        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r} := by
+      Ideal.span {(algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r)} := by
     show IsLocalRing.maximalIdeal _ = _
     exact hgen
   have hval := IsDedekindDomain.HeightOneSpectrum.intValuation_singleton
@@ -282,8 +282,8 @@ theorem uniformizer_of_localized_span (W : WeierstrassCurve K) [W.IsElliptic]
     (r : (⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
     (hgen : IsLocalRing.maximalIdeal
         ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) =
-      Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
-        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r}) :
+      Ideal.span {(algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r)}) :
     SmoothPlaneCurve.Uniformizer (⟨W⟩ : SmoothPlaneCurve K) P
       (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
         ((⟨W⟩ : SmoothPlaneCurve K).FunctionField) r) := by
@@ -303,8 +303,8 @@ theorem uniformizer_of_localized_span (W : WeierstrassCurve K) [W.IsElliptic]
     exact Ideal.span_singleton_eq_bot.mpr rfl
   have hgen' : (IsDiscreteValuationRing.maximalIdeal
       ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)).asIdeal =
-      Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
-        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r} := by
+      Ideal.span {(algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
+        ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) r)} := by
     show IsLocalRing.maximalIdeal _ = _
     exact hgen
   have hval := IsDedekindDomain.HeightOneSpectrum.intValuation_singleton

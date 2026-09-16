@@ -61,8 +61,8 @@ theorem caseI_factor_idealSpan_eq_pow
     {ζ : 𝓞 (CyclotomicField p ℚ)}
     (hζ : ζ ∈ nthRootsFinset p (1 : 𝓞 (CyclotomicField p ℚ))) :
     ∃ I : Ideal (𝓞 (CyclotomicField p ℚ)),
-      Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) + ζ *
-        (b : 𝓞 (CyclotomicField p ℚ))} :
+      Ideal.span ({((a : 𝓞 (CyclotomicField p ℚ)) + ζ *
+        (b : 𝓞 (CyclotomicField p ℚ)))} :
           Set (𝓞 (CyclotomicField p ℚ))) = I ^ p :=
   FltRegular.exists_ideal hp5 heq hgcd hcaseI hζ
 

@@ -45,8 +45,8 @@ noncomputable abbrev projModelZChart (W : WeierstrassCurve R) :
 /-- On the `Y`-chart, the zero-section ideal is the augmentation ideal `(s, t)`. -/
 theorem projModelZero_ker_ideal_chartY (W : WeierstrassCurve R) :
     (projModelZero W).ker.ideal (projModelYChart W) =
-      Ideal.span {(chartYSectionsRingEquiv W).symm
-          (AdjoinRoot.root (infChartCubic W)),
+      Ideal.span {((chartYSectionsRingEquiv W).symm
+          (AdjoinRoot.root (infChartCubic W))),
         (chartYSectionsRingEquiv W).symm (infChartTElem W)} := by
   rw [Scheme.Hom.ker_apply]
   let e := chartYSectionsRingEquiv W

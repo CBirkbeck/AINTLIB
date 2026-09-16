@@ -267,8 +267,8 @@ theorem ofReciprocalPhiCandidateAtomicSplit_symbol_pos_cyclotomic_sourceCoprime
   letI : P'.IsPrime := hP'_prime
   letI : P'.IsMaximal := Ideal.IsPrime.isMaximal hP'_prime hP'_bot
   have h_span :
-      Ideal.span ({reciprocalPhiCandidate
-          (ℓ := ℓ) (p := p) (k := 𝓞 K ⧸ P) (K := K) (R' := R') S h_ne_zero} :
+      Ideal.span ({(reciprocalPhiCandidate
+          (ℓ := ℓ) (p := p) (k := 𝓞 K ⧸ P) (K := K) (R' := R') S h_ne_zero)} :
             Set (𝓞 K)) =
         stickelbergerIdeal (p := p) (K := K) P :=
     reciprocalPhiCandidate_span_of_atomic_split

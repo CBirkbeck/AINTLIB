@@ -439,9 +439,9 @@ distributions) evaluates the limit.
 **The archimedean side $`I_G`.** For admissible even $`F`,
 $$`\lim_{T\to\infty}\int_{-T}^{T} 2\operatorname{Re}
 \frac{\gamma_K'}{\gamma_K}\Bigl(\tfrac12+it\Bigr)\varphi(t)\,dt
-= 2\pi\Bigl\{ -\bigl(n_K(\gamma_E + \log 8\pi) + r_1\tfrac{\pi}{2}\bigr)F(0)
-+ n_K \int_0^\infty \frac{F(0)-F(y)}{2\sinh(y/2)}\,dy
-+ r_1 \int_0^\infty \frac{F(0)-F(y)}{2\cosh(y/2)}\,dy \Bigr\}.`
+= 2\pi\Bigl\{ (-\bigl(n_K(\gamma_E + \log 8\pi) + r_1\tfrac{\pi}{2}\bigr)F(0)
++ n_K \int_0^\infty \frac{F(0)-F(y)}{2\sinh(y/2)}\),(dy
++ r_1 \int_0^\infty \frac{F(0)-F(y)}{2\cosh(y/2)}\),dy \Bigr\}.`
 :::
 
 :::proof "gamma-side-limit"

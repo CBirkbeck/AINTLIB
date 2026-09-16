@@ -65,8 +65,8 @@ theorem caseI_is_principal_of_not_dvd_hPlus
         (b : 𝓞 (CyclotomicField p ℚ)) ≠ 0)
     (h_class_eq_input :
       ∀ {I : Ideal (𝓞 (CyclotomicField p ℚ))} (h𝔞_nz : I ≠ ⊥),
-        Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) + ζ *
-            (b : 𝓞 (CyclotomicField p ℚ))} : Set _) = I ^ p →
+        Ideal.span ({((a : 𝓞 (CyclotomicField p ℚ)) + ζ *
+            (b : 𝓞 (CyclotomicField p ℚ)))} : Set _) = I ^ p →
         ClassGroup.mk0
             (⟨I.map (ringOfIntegersComplexConj _).toRingEquiv.toRingHom,
               mem_nonZeroDivisors_iff_ne_zero.mpr
@@ -101,8 +101,8 @@ theorem caseI_is_principal_of_not_dvd_hPlus
   -- Now hI : Ideal.span {a + ζ b} = I^p. From hα : I = Ideal.span {α}, get
   -- I^p = Ideal.span {α^p}. So Ideal.span {a + ζ b} = Ideal.span {α^p}.
   -- Hence ∃ u, u * α^p = a + ζ b (or its associate).
-  have hαp_span : Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) + ζ *
-      (b : 𝓞 (CyclotomicField p ℚ))} : Set _) = Ideal.span ({α ^ p} : Set _) := by
+  have hαp_span : Ideal.span ({((a : 𝓞 (CyclotomicField p ℚ)) + ζ *
+      (b : 𝓞 (CyclotomicField p ℚ)))} : Set _) = Ideal.span ({α ^ p} : Set _) := by
     rw [hI]
     rw [show I = Ideal.span ({α} : Set _) from hα]
     exact hα_pow

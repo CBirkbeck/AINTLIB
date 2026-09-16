@@ -848,7 +848,7 @@ lemma preservesColimitsOfShape_tensorRight
       have h2 := isColimitOfPreserves (MonoidalCategory.tensorRight (Q.obj V)) h1
       exact h2.ofIsoColimit (Cocone.ext (Iso.refl _) (fun j => by
         dsimp
-        rw [Category.comp_id])) }
+        simp)) }
 
 /-- **[D-PresPB′-general], leaf G3-TC (left half).** Symmetric to the right half, by the
 braiding. -/

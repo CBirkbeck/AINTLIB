@@ -250,9 +250,9 @@ hypothesis**: when the maximal ideal of the local ring at `P` equals
 private theorem pointValuation_algMap_XClass_eq_exp_neg_one_of_maxIdeal_span
     (xk : F) (P : (W_smooth W).SmoothPoint)
     (h_max_eq : IsLocalRing.maximalIdeal ((W_smooth W).localRingAt P) =
-      Ideal.span ({algebraMap (W_smooth W).CoordinateRing
+      Ideal.span ({(algebraMap (W_smooth W).CoordinateRing
         ((W_smooth W).localRingAt P)
-        (Affine.CoordinateRing.XClass W.toAffine xk)} : Set _)) :
+        (Affine.CoordinateRing.XClass W.toAffine xk))} : Set _)) :
     (W_smooth W).pointValuation P
         (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
           (Affine.CoordinateRing.XClass W.toAffine xk)) =
@@ -281,9 +281,9 @@ theorem ord_P_x_gen_sub_const_le_one_of_maxIdeal_span
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
     (h_max_eq : IsLocalRing.maximalIdeal
         ((W_smooth W).localRingAt (negSmoothPoint W xk yk h_ns)) =
-      Ideal.span ({algebraMap (W_smooth W).CoordinateRing
+      Ideal.span ({(algebraMap (W_smooth W).CoordinateRing
         ((W_smooth W).localRingAt (negSmoothPoint W xk yk h_ns))
-        (Affine.CoordinateRing.XClass W.toAffine xk)} : Set _)) :
+        (Affine.CoordinateRing.XClass W.toAffine xk))} : Set _)) :
     (W_smooth W).ord_P (negSmoothPoint W xk yk h_ns)
         (x_gen W - algebraMap F KE xk) ≤ ((1 : ℤ) : WithTop ℤ) := by
   set P := negSmoothPoint W xk yk h_ns
@@ -300,9 +300,9 @@ theorem ord_P_x_gen_sub_const_eq_one_of_maxIdeal_span
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
     (h_max_eq : IsLocalRing.maximalIdeal
         ((W_smooth W).localRingAt (negSmoothPoint W xk yk h_ns)) =
-      Ideal.span ({algebraMap (W_smooth W).CoordinateRing
+      Ideal.span ({(algebraMap (W_smooth W).CoordinateRing
         ((W_smooth W).localRingAt (negSmoothPoint W xk yk h_ns))
-        (Affine.CoordinateRing.XClass W.toAffine xk)} : Set _)) :
+        (Affine.CoordinateRing.XClass W.toAffine xk))} : Set _)) :
     (W_smooth W).ord_P (negSmoothPoint W xk yk h_ns)
         (x_gen W - algebraMap F KE xk) = ((1 : ℤ) : WithTop ℤ) :=
   le_antisymm
@@ -433,9 +433,9 @@ theorem maximalIdeal_localRingAt_eq_span_XClass_of_non_2_tor
     (h_not_2_tor : yk ≠ W.toAffine.negY xk yk) :
     IsLocalRing.maximalIdeal
         ((W_smooth W).localRingAt (negSmoothPoint W xk yk h_ns)) =
-      Ideal.span ({algebraMap (W_smooth W).CoordinateRing
+      Ideal.span ({(algebraMap (W_smooth W).CoordinateRing
         ((W_smooth W).localRingAt (negSmoothPoint W xk yk h_ns))
-        (Affine.CoordinateRing.XClass W.toAffine xk)} : Set _) := by
+        (Affine.CoordinateRing.XClass W.toAffine xk))} : Set _) := by
   set P_smooth := negSmoothPoint W xk yk h_ns
   set P_ideal : Ideal (W_smooth W).CoordinateRing :=
     (W_smooth W).maximalIdealAt P_smooth with hPIdef
@@ -724,8 +724,8 @@ private theorem map_XClass_mem_span_YClass_of_2_tor
     let f := algebraMap (W_smooth W).CoordinateRing
       ((W_smooth W).localRingAt P_smooth)
     f (Affine.CoordinateRing.XClass W.toAffine xk) ∈
-      Ideal.span ({f (Affine.CoordinateRing.YClass W.toAffine
-        (Polynomial.C (W.toAffine.negY xk yk)))} : Set _) := by
+      Ideal.span ({(f (Affine.CoordinateRing.YClass W.toAffine
+        (Polynomial.C (W.toAffine.negY xk yk))))} : Set _) := by
   intro P_smooth f
   have h_eq_at : W.toAffine.Equation xk (W.toAffine.negY xk yk) :=
     ((Affine.nonsingular_neg xk yk).mpr h_ns).1
@@ -764,10 +764,10 @@ theorem maximalIdeal_localRingAt_eq_span_YClass_of_2_tor
     (h_2_tor : yk = W.toAffine.negY xk yk) :
     IsLocalRing.maximalIdeal
         ((W_smooth W).localRingAt (negSmoothPoint W xk yk h_ns)) =
-      Ideal.span ({algebraMap (W_smooth W).CoordinateRing
+      Ideal.span ({(algebraMap (W_smooth W).CoordinateRing
         ((W_smooth W).localRingAt (negSmoothPoint W xk yk h_ns))
         (Affine.CoordinateRing.YClass W.toAffine
-          (Polynomial.C (W.toAffine.negY xk yk)))} : Set _) := by
+          (Polynomial.C (W.toAffine.negY xk yk))))} : Set _) := by
   set P_smooth := negSmoothPoint W xk yk h_ns
   set f := algebraMap (W_smooth W).CoordinateRing
     ((W_smooth W).localRingAt P_smooth) with hf
@@ -807,9 +807,9 @@ which lifts to the function field via `valuation_of_algebraMap`. -/
 private theorem pointValuation_algMap_YClass_eq_exp_neg_one_of_maxIdeal_span
     (yk' : F) (P : (W_smooth W).SmoothPoint)
     (h_max_eq : IsLocalRing.maximalIdeal ((W_smooth W).localRingAt P) =
-      Ideal.span ({algebraMap (W_smooth W).CoordinateRing
+      Ideal.span ({(algebraMap (W_smooth W).CoordinateRing
         ((W_smooth W).localRingAt P)
-        (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C yk'))} : Set _)) :
+        (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C yk')))} : Set _)) :
     (W_smooth W).pointValuation P
         (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
           (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C yk'))) =
@@ -836,10 +836,10 @@ theorem ord_P_y_gen_sub_negY_const_le_one_of_maxIdeal_span
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
     (h_max_eq : IsLocalRing.maximalIdeal
         ((W_smooth W).localRingAt (negSmoothPoint W xk yk h_ns)) =
-      Ideal.span ({algebraMap (W_smooth W).CoordinateRing
+      Ideal.span ({(algebraMap (W_smooth W).CoordinateRing
         ((W_smooth W).localRingAt (negSmoothPoint W xk yk h_ns))
         (Affine.CoordinateRing.YClass W.toAffine
-          (Polynomial.C (W.toAffine.negY xk yk)))} : Set _)) :
+          (Polynomial.C (W.toAffine.negY xk yk))))} : Set _)) :
     (W_smooth W).ord_P (negSmoothPoint W xk yk h_ns)
         (y_gen W - algebraMap F KE (W.toAffine.negY xk yk)) ≤
       ((1 : ℤ) : WithTop ℤ) := by

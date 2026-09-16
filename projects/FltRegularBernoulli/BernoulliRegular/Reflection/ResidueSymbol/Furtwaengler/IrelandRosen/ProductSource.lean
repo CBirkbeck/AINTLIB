@@ -75,8 +75,8 @@ theorem reciprocalPrincipalPhiElement_span_eq_stickelbergerIdeal
         P ∈ normalizedFactors (Ideal.span ({α} : Set (𝓞 K))) →
           PhiPrimeElement (p := p) (K := K) P) :
     Ideal.span
-        ({(reciprocalPrincipalPhiElement
-          (p := p) (K := K) α primePhi).gamma} : Set (𝓞 K)) =
+        ({((reciprocalPrincipalPhiElement
+          (p := p) (K := K) α primePhi).gamma)} : Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K)
         (Ideal.span ({α} : Set (𝓞 K))) := by
   have hA : Ideal.span ({α} : Set (𝓞 K)) ≠ ⊥ :=

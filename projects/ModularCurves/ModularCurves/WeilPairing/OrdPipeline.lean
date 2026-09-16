@@ -670,8 +670,8 @@ private theorem secOrd_maximalIdeal_stalk_eq_span_germ_f0
           (s ^ n) =
       (projModel W).presheaf.map (homOfLE ((projModel W).basicOpen_le s)).op f₀) :
     IsLocalRing.maximalIdeal ((projModel W).presheaf.stalk (zChartPoint W P)) =
-      Ideal.span {(projModel W).presheaf.germ (EllipticCurve.zChart W)
-        (zChartPoint W P) hPz f₀} := by
+      Ideal.span {((projModel W).presheaf.germ (EllipticCurve.zChart W)
+        (zChartPoint W P) hPz f₀)} := by
   haveI hVaff' : IsAffineOpen ((inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1) :=
     V.2.preimage_of_isIso (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K)))))
   letI halg : Algebra Γ((modelEllipticCurve W).E, (inv (pullback.fst (modelEllipticCurve W).π (𝟙 (Spec (CommRingCat.of K))))) ⁻¹ᵁ V.1)
@@ -756,8 +756,8 @@ private theorem secOrd_ord_f0_eq_one
       (projModel W).presheaf.germ (EllipticCurve.zChart W) (zChartPoint W P) hPz a :=
     fun a => rfl
   have hstm : Ideal.map (algebraMap Γ(projModel W, EllipticCurve.zChart W) ((projModel W).presheaf.stalk (zChartPoint W P))) (zChartMaximalIdeal W P) =
-      Ideal.span {(projModel W).presheaf.germ (EllipticCurve.zChart W)
-        (zChartPoint W P) hPz f₀} :=
+      Ideal.span {((projModel W).presheaf.germ (EllipticCurve.zChart W)
+        (zChartPoint W P) hPz f₀)} :=
     (IsLocalization.AtPrime.map_eq_maximalIdeal _ _).trans hSt
   have hc : ∀ a : Γ(projModel W, EllipticCurve.zChart W),
       (IsLocalization.ringEquivOfRingEquiv
@@ -825,8 +825,8 @@ private theorem secOrd_ord_f0_eq_one
         simpa using ha
       exact hle hx
   have hgen : IsLocalRing.maximalIdeal ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P) =
-      Ideal.span {algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
-        ((coordRingToZSection W).symm f₀)} :=
+      Ideal.span {(algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing) ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P)
+        ((coordRingToZSection W).symm f₀))} :=
     ((Localization.AtPrime.map_eq_maximalIdeal).symm.trans
       (congrArg (Ideal.map (algebraMap ((⟨W⟩ : SmoothPlaneCurve K).CoordinateRing)
         ((⟨W⟩ : SmoothPlaneCurve K).localRingAt P))) hround)).trans h9
@@ -1295,6 +1295,9 @@ private theorem baseChangeEquiv_asSection'
   show R.1 = 𝟙 T ≫ R.1
   rw [Category.id_comp]
 
+-- `map_add` at `Point.baseChangeEquiv` no longer fits the default
+-- `synthInstance.maxHeartbeats` budget.
+set_option synthInstance.maxHeartbeats 80000 in
 /-- Local copy of `Point.asSection_add` (same provenance). -/
 private theorem asSection_add'
     {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}

@@ -647,8 +647,8 @@ theorem antiKummerLift_h_K_gen
       (antiKummerLift (p := p) K α₀ hα₀)]
     exact ⟨k, h_k_in_Kplus, rfl⟩
   refine (Algebra.adjoin_le_iff (S := Algebra.adjoin (NumberField.maximalRealSubfield K)
-      ({algebraMap K (antiKummerLift (p := p) K α₀ hα₀)
-        (IsCyclotomicExtension.zeta p ℚ K)} : Set _))).mpr ?_ h_image_in
+      ({(algebraMap K (antiKummerLift (p := p) K α₀ hα₀)
+        (IsCyclotomicExtension.zeta p ℚ K))} : Set _))).mpr ?_ h_image_in
   rintro x ⟨b, ⟨n, hn_eq, _hn_ne, hb_pow⟩, rfl⟩
   rw [Set.mem_singleton_iff] at hn_eq
   rw [hn_eq] at hb_pow

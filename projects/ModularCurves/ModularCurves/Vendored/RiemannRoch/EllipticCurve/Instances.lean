@@ -252,6 +252,10 @@ theorem isSeparable [W.IsElliptic] : Algebra.IsSeparable k⟮X⟯ K := by
       · simp only [SetLike.mem_coe, Subalgebra.mem_toSubmodule, basisRatFunc_one]
         exact IntermediateField.mem_adjoin_simple_self k⟮X⟯ (W.yCoord K)
     exact hle hz
+  -- Pin the `k⟮X⟯`-algebra structure on the adjoined field: leaving it to instance search
+  -- exhausts `synthInstance.maxHeartbeats`.
+  letI : Algebra k⟮X⟯ ↥(IntermediateField.adjoin k⟮X⟯ {W.yCoord K}) :=
+    IntermediateField.algebra' _
   haveI : Algebra.IsSeparable k⟮X⟯ (IntermediateField.adjoin k⟮X⟯ {W.yCoord K}) :=
     (IntermediateField.isSeparable_adjoin_simple_iff_isSeparable k⟮X⟯ K).mpr hsep
   letI : Algebra k⟮X⟯ (⊤ : IntermediateField k⟮X⟯ K) := IntermediateField.algebra' _

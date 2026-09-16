@@ -278,8 +278,8 @@ private def factorIdealData
     (hcaseI : ¬ (37 : ℤ) ∣ a * b * c) (i : ℕ) :
     { I : Ideal (𝓞 (CyclotomicField 37 ℚ)) //
       ∃ hI : I ∈ (Ideal (𝓞 (CyclotomicField 37 ℚ)))⁰,
-        Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) + factorRoot i *
-          (b : 𝓞 (CyclotomicField 37 ℚ))} : Set _) = I ^ 37 ∧
+        Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) + factorRoot i *
+          (b : 𝓞 (CyclotomicField 37 ℚ)))} : Set _) = I ^ 37 ∧
         ClassGroup.mk0 ⟨I, hI⟩ ^ 37 = 1 } :=
   ⟨Classical.choose
       (caseI_factor_class_pow_eq_one (p := 37) (by norm_num) heq hgcd hcaseI
@@ -323,8 +323,8 @@ private theorem factorNZ_span
     (heq : a ^ 37 + b ^ 37 = c ^ 37)
     (hgcd : ({a, b, c} : Finset ℤ).gcd id = 1)
     (hcaseI : ¬ (37 : ℤ) ∣ a * b * c) (i : ℕ) :
-    Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) + factorRoot i *
-        (b : 𝓞 (CyclotomicField 37 ℚ))} : Set _) =
+    Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) + factorRoot i *
+        (b : 𝓞 (CyclotomicField 37 ℚ)))} : Set _) =
       (factorNZ heq hgcd hcaseI i : Ideal (𝓞 (CyclotomicField 37 ℚ))) ^ 37 :=
   (factorIdealData heq hgcd hcaseI i).2.choose_spec.1
 

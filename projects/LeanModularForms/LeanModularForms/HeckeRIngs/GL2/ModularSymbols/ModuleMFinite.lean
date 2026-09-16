@@ -221,8 +221,7 @@ theorem exists_div0_orbit_span :
         ∃ g : CongruenceSubgroup.Gamma1 N, ∃ d ∈ S_Div, div0Rep ℤ g.1 d = v} = ⊤ := by
   classical
   -- A finite generating set for `Γ₁(N)`.
-  obtain ⟨gens, hgens⟩ :=
-    (Group.fg_def.mp inferInstance : (⊤ : Subgroup (CongruenceSubgroup.Gamma1 N)).FG)
+  obtain ⟨gens, hgens⟩ := Group.exists_of_isMulFG (CongruenceSubgroup.Gamma1 N)
   -- A basepoint representative.
   obtain ⟨x₀⟩ := (inferInstance : Nonempty ℙ¹ℚ)
   obtain ⟨c₀, hc₀reps, -⟩ := exists_mem_orbitReps N x₀

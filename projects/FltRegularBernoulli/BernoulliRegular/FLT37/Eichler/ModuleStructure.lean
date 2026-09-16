@@ -61,8 +61,8 @@ theorem caseI_factor_class_pow_eq_one {p : ℕ} [Fact p.Prime] (hp5 : 5 ≤ p)
     (hζ : ζ ∈ nthRootsFinset p (1 : 𝓞 (CyclotomicField p ℚ))) :
     ∃ (I : Ideal (𝓞 (CyclotomicField p ℚ)))
       (hI : I ∈ (Ideal (𝓞 (CyclotomicField p ℚ)))⁰),
-      Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) + ζ *
-        (b : 𝓞 (CyclotomicField p ℚ))} :
+      Ideal.span ({((a : 𝓞 (CyclotomicField p ℚ)) + ζ *
+        (b : 𝓞 (CyclotomicField p ℚ)))} :
           Set (𝓞 (CyclotomicField p ℚ))) = I ^ p ∧
       ClassGroup.mk0 ⟨I, hI⟩ ^ p = 1 := by
   obtain ⟨I, hI_eq⟩ :=
@@ -91,8 +91,8 @@ theorem caseI_factor_class_pow_eq_one {p : ℕ} [Fact p.Prime] (hp5 : 5 ≤ p)
     have : (c : 𝓞 (CyclotomicField p ℚ)) = 0 := by
       simpa using pow_eq_zero_iff (Fact.out (p := p.Prime)).pos.ne' |>.mp hcp0
     exact hc0 (by exact_mod_cast this)
-  have hspan_ne : Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) + ζ *
-      (b : 𝓞 (CyclotomicField p ℚ))} : Set (𝓞 (CyclotomicField p ℚ))) ≠ ⊥ := by
+  have hspan_ne : Ideal.span ({((a : 𝓞 (CyclotomicField p ℚ)) + ζ *
+      (b : 𝓞 (CyclotomicField p ℚ)))} : Set (𝓞 (CyclotomicField p ℚ))) ≠ ⊥ := by
     simpa [Ideal.span_singleton_eq_bot] using hfac_ne
   have hIp_ne : I ^ p ≠ ⊥ := hI_eq ▸ hspan_ne
   have hI_ne : I ≠ ⊥ := fun h ↦ hIp_ne (by rw [h, Ideal.bot_pow (Fact.out (p := p.Prime)).ne_zero])
@@ -142,11 +142,11 @@ theorem caseI_factor_class_galAction_eq {p : ℕ} [Fact p.Prime]
     {I J : Ideal (𝓞 (CyclotomicField p ℚ))}
     (hI_ne : I ∈ (Ideal (𝓞 (CyclotomicField p ℚ)))⁰)
     (hJ_ne : J ∈ (Ideal (𝓞 (CyclotomicField p ℚ)))⁰)
-    (hI : Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) +
-        ζ * (b : 𝓞 (CyclotomicField p ℚ))} : Set _) = I ^ p)
-    (hJ : Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) +
+    (hI : Ideal.span ({((a : 𝓞 (CyclotomicField p ℚ)) +
+        ζ * (b : 𝓞 (CyclotomicField p ℚ)))} : Set _) = I ^ p)
+    (hJ : Ideal.span ({((a : 𝓞 (CyclotomicField p ℚ)) +
         (cyclotomicRingOfIntegersEquiv (p := p) (CyclotomicField p ℚ) g ζ) *
-          (b : 𝓞 (CyclotomicField p ℚ))} : Set _) = J ^ p) :
+          (b : 𝓞 (CyclotomicField p ℚ)))} : Set _) = J ^ p) :
     cyclotomicGalActionOnClassGroup g (ClassGroup.mk0 ⟨I, hI_ne⟩) =
       ClassGroup.mk0 ⟨J, hJ_ne⟩ := by
   haveI : NeZero p := ⟨(Fact.out (p := p.Prime)).ne_zero⟩

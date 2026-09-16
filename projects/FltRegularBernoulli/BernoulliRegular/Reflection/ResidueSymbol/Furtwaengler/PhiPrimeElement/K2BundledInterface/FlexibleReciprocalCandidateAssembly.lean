@@ -32,8 +32,8 @@ theorem flexibleReciprocalPhiCandidate_span_of_repeatedExactOnOrbit
       S.StickelbergerRepeatedExactExponentsOnOrbit
         (flexibleReciprocalPhiCandidate
           (ℓ := ℓ) (p := p) (k := k) (K := K) (R' := R') S h_psi h_ne_zero)) :
-    Ideal.span ({flexibleReciprocalPhiCandidate
-        (ℓ := ℓ) (p := p) (k := k) (K := K) (R' := R') S h_psi h_ne_zero} :
+    Ideal.span ({(flexibleReciprocalPhiCandidate
+        (ℓ := ℓ) (p := p) (k := k) (K := K) (R' := R') S h_psi h_ne_zero)} :
           Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P := by
   set γ : 𝓞 K :=
@@ -257,8 +257,8 @@ structure K2_2FlexibleReciprocalSourceData
   ideal. -/
   h_span :
     letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-    Ideal.span ({S.phiPrimeGenDescent h_psi
-      (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero} :
+    Ideal.span ({(S.phiPrimeGenDescent h_psi
+      (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero)} :
         Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P
 

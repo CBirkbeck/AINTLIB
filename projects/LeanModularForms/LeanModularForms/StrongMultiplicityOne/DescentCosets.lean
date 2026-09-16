@@ -685,7 +685,7 @@ private lemma descendCosetCount_val_eq_p {p N : ℕ}
     (v : Fin (descendCosetCount p N)) (hv : ¬ v.val < p) : v.val = p := by
   have hlt := v.isLt
   simp only [descendCosetCount] at hlt
-  split_ifs at hlt <;> lia
+  split_ifs at hlt <;> omega
 
 /-- If a `Fin (descendCosetCount p N)` index `v` falls in the extra branch
 (`¬ v.val < p`), then `p² ∤ N` (the upper-triangular branch has only `p`
@@ -695,7 +695,7 @@ lemma not_p_sq_dvd_of_not_lt {p N : ℕ}
   intro h
   have hlt := v.isLt
   simp only [descendCosetCount, h, ite_true] at hlt
-  lia
+  omega
 
 private lemma p_lt_descendCosetCount_of_not_p_sq_dvd {p N : ℕ}
     (hp_sq : ¬ p ^ 2 ∣ N) : p < descendCosetCount p N := by

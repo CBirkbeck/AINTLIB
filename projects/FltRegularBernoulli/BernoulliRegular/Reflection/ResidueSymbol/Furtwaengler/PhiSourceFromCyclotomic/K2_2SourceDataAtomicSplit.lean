@@ -195,8 +195,8 @@ theorem K2_2SourceData_h_span_of_atomic_split
       letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
       (S.toConcreteStickelbergerSetup.descentPrime.under ℤ).inertiaDegIn (𝓞 K) = 1) :
     letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-    Ideal.span ({phiPrimeGenDescent S
-      (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero} : Set (𝓞 K)) =
+    Ideal.span ({(phiPrimeGenDescent S
+      (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero)} : Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   set γ := phiPrimeGenDescent S (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero
@@ -244,8 +244,8 @@ theorem K2_2ReciprocalSourceData_h_span_of_atomic_split
       letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
       (S.toConcreteStickelbergerSetup.descentPrime.under ℤ).inertiaDegIn (𝓞 K) = 1) :
     letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-    Ideal.span ({phiPrimeGenDescent S
-      (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero} :
+    Ideal.span ({(phiPrimeGenDescent S
+      (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero)} :
         Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P

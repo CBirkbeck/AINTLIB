@@ -646,8 +646,8 @@ noncomputable def zChartQuotEquiv (W : WeierstrassCurve R) :
 is a nonzerodivisor: the chart cubic has constant coefficient `−1` in the `z`-outer
 presentation. -/
 lemma zChart_z_nonZeroDivisor (W : WeierstrassCurve R) :
-    (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R 0
-        W.toProjective.polynomial}) (MvPolynomial.X ⟨2, by decide⟩)) ∈
+    (Ideal.Quotient.mk (Ideal.span {(MvPolynomial.dehomogenizeAux R 0
+        W.toProjective.polynomial)}) (MvPolynomial.X ⟨2, by decide⟩)) ∈
       nonZeroDivisors (MvPolynomial {k : Fin 3 // k ≠ 0} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial}) := by
   refine mem_nonZeroDivisors_of_ringEquiv (zChartQuotEquiv W).toRingEquiv ?_
@@ -667,8 +667,8 @@ lemma zChart_z_nonZeroDivisor (W : WeierstrassCurve R) :
 /-- **(chart-1 `t`-nonzerodivisor, quotient spelling)** The class of the `Z/Y`-coordinate
 in the infinity-chart ring is a nonzerodivisor. -/
 lemma infChart_t_nonZeroDivisor (W : WeierstrassCurve R) :
-    (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R 1
-        W.toProjective.polynomial}) (MvPolynomial.X infChartT)) ∈
+    (Ideal.Quotient.mk (Ideal.span {(MvPolynomial.dehomogenizeAux R 1
+        W.toProjective.polynomial)}) (MvPolynomial.X infChartT)) ∈
       nonZeroDivisors (MvPolynomial {j : Fin 3 // j ≠ 1} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial}) := by
   rcases subsingleton_or_nontrivial R with hR | hR
@@ -1635,8 +1635,8 @@ lemma chartYRingEquiv_fromZero (W : WeierstrassCurve R) (r : R) :
     rw [RingEquiv.symm_apply_eq]
     exact (chartCoordEquiv_mk_C W 1 r).symm
   rw [hkey]
-  have : (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R 1
-      W.toProjective.polynomial}) (MvPolynomial.C r)) =
+  have : (Ideal.Quotient.mk (Ideal.span {(MvPolynomial.dehomogenizeAux R 1
+      W.toProjective.polynomial)}) (MvPolynomial.C r)) =
       algebraMap R _ r := rfl
   rw [this]
   exact (infChartQuotEquiv W).commutes r
@@ -1693,8 +1693,8 @@ lemma chartZRingEquiv_fromZero (W : WeierstrassCurve R) (r : R) :
     rw [RingEquiv.symm_apply_eq]
     exact (chartCoordEquiv_mk_C W 2 r).symm
   rw [hkey]
-  have : (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R 2
-      W.toProjective.polynomial}) (MvPolynomial.C r)) =
+  have : (Ideal.Quotient.mk (Ideal.span {(MvPolynomial.dehomogenizeAux R 2
+      W.toProjective.polynomial)}) (MvPolynomial.C r)) =
       algebraMap R _ r := rfl
   rw [this]
   exact (chartZAffineEquiv W).commutes r
@@ -2713,8 +2713,8 @@ theorem projModel_globalSections_eq_baseRing (W : WeierstrassCurve R) :
 (the monic-in-`s` chart relation has constant-coefficient-1 `t`-content) powering
 scheme-density of the affine part. Source: audit A1 (b4 derivation). -/
 theorem infChart_s_nonZeroDivisor (W : WeierstrassCurve R) :
-    (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R 1
-        W.toProjective.polynomial}) (MvPolynomial.X ⟨0, by decide⟩)) ∈
+    (Ideal.Quotient.mk (Ideal.span {(MvPolynomial.dehomogenizeAux R 1
+        W.toProjective.polynomial)}) (MvPolynomial.X ⟨0, by decide⟩)) ∈
       nonZeroDivisors (MvPolynomial {j : Fin 3 // j ≠ 1} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial}) := by
   have hs : infChartQuotEquiv W (Ideal.Quotient.mk _ (MvPolynomial.X infChartS)) =
@@ -2723,8 +2723,8 @@ theorem infChart_s_nonZeroDivisor (W : WeierstrassCurve R) :
       (Ideal.Quotient.mk _ (MvPolynomial.X infChartS)) = _
     rw [Ideal.quotientEquivAlg_mk, infChartPolyEquiv_X_s]
     rfl
-  have key : ∀ m, m * (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R 1
-      W.toProjective.polynomial}) (MvPolynomial.X ⟨0, by decide⟩)) = 0 → m = 0 := by
+  have key : ∀ m, m * (Ideal.Quotient.mk (Ideal.span {(MvPolynomial.dehomogenizeAux R 1
+      W.toProjective.polynomial)}) (MvPolynomial.X ⟨0, by decide⟩)) = 0 → m = 0 := by
     intro m hm
     have h1 : infChartQuotEquiv W m * AdjoinRoot.root (infChartCubic W) = 0 := by
       rw [← hs, ← map_mul, hm, map_zero]

@@ -653,8 +653,8 @@ theorem K_chain_at_h_stick_gen_via_extracted_unit_index_one
     (hP'_bot : P' ≠ ⊥) (hP'_max : P'.IsMaximal)
     (h_phi_notin_P' : phiPrimeGenDescent S
       (le_refl 1) h_one_le_p_minus_one h_ne_zero ∉ P')
-    (h_span : Ideal.span ({phiPrimeGenDescent S
-      (le_refl 1) h_one_le_p_minus_one h_ne_zero} : Set (𝓞 K)) =
+    (h_span : Ideal.span ({(phiPrimeGenDescent S
+      (le_refl 1) h_one_le_p_minus_one h_ne_zero)} : Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P)
     (h_K_chain :
       BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
@@ -671,8 +671,8 @@ theorem K_chain_at_h_stick_gen_via_extracted_unit_index_one
       letI h_phi_ne := phiPrimeGenDescent_ne_zero S
         (le_refl 1) h_one_le_p_minus_one h_ne_zero
       letI h_span_eq : Ideal.span ({h_stick.gen} : Set (𝓞 K)) =
-        Ideal.span ({phiPrimeGenDescent S
-          (le_refl 1) h_one_le_p_minus_one h_ne_zero} : Set (𝓞 K)) := by
+        Ideal.span ({(phiPrimeGenDescent S
+          (le_refl 1) h_one_le_p_minus_one h_ne_zero)} : Set (𝓞 K)) := by
         rw [h_stick.span_gen, ← h_span]
       BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
         (p := p) (K := K)

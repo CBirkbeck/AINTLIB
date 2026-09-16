@@ -265,8 +265,8 @@ theorem antiRadical_spanSingleton_pow_eq
   rw [hI_pow]
   have h_sigma_span :
       Ideal.span
-        ({NumberField.IsCMField.ringOfIntegersComplexConj K
-          ((a : 𝓞 K) + ζ * (b : 𝓞 K))} : Set (𝓞 K)) =
+        ({(NumberField.IsCMField.ringOfIntegersComplexConj K
+          ((a : 𝓞 K) + ζ * (b : 𝓞 K)))} : Set (𝓞 K)) =
       (I.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom) ^ p := by
     have h_map := congrArg
       (fun J : Ideal (𝓞 K) ↦
@@ -798,8 +798,8 @@ theorem AK5a_PrincipalMinusIdeals_of_factor_class_square_eq_and_not_dvd_hPlus_cy
         ¬ (p : ℤ) ∣ a * b * c → a ^ p + b ^ p = c ^ p →
         ∀ {ζ : 𝓞 (CyclotomicField p ℚ)}, IsPrimitiveRoot ζ p →
         ∀ {I : Ideal (𝓞 (CyclotomicField p ℚ))}, (hI_nz : I ≠ ⊥) →
-          Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) +
-            ζ * (b : 𝓞 (CyclotomicField p ℚ))} :
+          Ideal.span ({((a : 𝓞 (CyclotomicField p ℚ)) +
+            ζ * (b : 𝓞 (CyclotomicField p ℚ)))} :
               Set (𝓞 (CyclotomicField p ℚ))) = I ^ p →
           (ClassGroup.mk0
               (⟨Ideal.map

@@ -463,8 +463,8 @@ theorem fermatLastTheoremFor_thirtyseven_of_cor8_19_factorIdealClass_caseIIDesce
         ∀ {ζ : 𝓞 (CyclotomicField 37 ℚ)}, IsPrimitiveRoot ζ 37 →
         (_hab : ¬ (a = 0 ∧ b = 0)) →
         ∀ {I : Ideal (𝓞 (CyclotomicField 37 ℚ))}, (hI_ne : I ≠ ⊥) →
-        (hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37) →
         ClassGroup.mk0
           (⟨I, mem_nonZeroDivisors_iff_ne_zero.mpr hI_ne⟩ :
@@ -507,8 +507,8 @@ theorem
         ∀ {ζ : 𝓞 (CyclotomicField 37 ℚ)}, IsPrimitiveRoot ζ 37 →
         (_hab : ¬ (a = 0 ∧ b = 0)) →
         ∀ {I : Ideal (𝓞 (CyclotomicField 37 ℚ))}, I ≠ ⊥ →
-        Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37 →
         I.IsPrincipal)
     (caseII_step :
@@ -545,8 +545,8 @@ theorem fermatLastTheoremFor_thirtyseven_of_cor8_19_caseISquare_caseIIDescent_no
         ¬ (37 : ℤ) ∣ a * b * c → a ^ 37 + b ^ 37 = c ^ 37 →
         ∀ {ζ : 𝓞 (CyclotomicField 37 ℚ)}, IsPrimitiveRoot ζ 37 →
         ∀ {I : Ideal (𝓞 (CyclotomicField 37 ℚ))}, (hI_ne : I ≠ ⊥) →
-          Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-            ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+          Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+            ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
               Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37 →
           (ClassGroup.mk0
               (⟨I.map
@@ -593,8 +593,8 @@ theorem fermatLastTheoremFor_thirtyseven_of_cor8_19_caseIAK5UnitCongr_caseIIDesc
         {ζ : 𝓞 (CyclotomicField 37 ℚ)} (_hζ : IsPrimitiveRoot ζ 37)
         (hab : ¬ (a = 0 ∧ b = 0))
         (I : Ideal (𝓞 (CyclotomicField 37 ℚ))) (_hI_ne : I ≠ ⊥)
-        (_hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (_hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37),
         ∃ (γ : CyclotomicField 37 ℚ) (_hγ_ne : γ ≠ 0)
           (u : (𝓞 (CyclotomicField 37 ℚ))ˣ),
@@ -641,8 +641,8 @@ theorem
         {ζ : 𝓞 (CyclotomicField 37 ℚ)} (_hζ : IsPrimitiveRoot ζ 37)
         (hab : ¬ (a = 0 ∧ b = 0))
         (I : Ideal (𝓞 (CyclotomicField 37 ℚ))) (_hI_ne : I ≠ ⊥)
-        (_hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (_hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37),
         ∃ (γ : CyclotomicField 37 ℚ) (_hγ_ne : γ ≠ 0)
           (u : (𝓞 (CyclotomicField 37 ℚ))ˣ),
@@ -690,8 +690,8 @@ theorem
         {ζ : 𝓞 (CyclotomicField 37 ℚ)} (_hζ : IsPrimitiveRoot ζ 37)
         (hab : ¬ (a = 0 ∧ b = 0))
         (I : Ideal (𝓞 (CyclotomicField 37 ℚ))) (_hI_ne : I ≠ ⊥)
-        (_hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (_hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37),
         ∃ (γ : CyclotomicField 37 ℚ) (_hγ_ne : γ ≠ 0)
           (u : (𝓞 (CyclotomicField 37 ℚ))ˣ),
@@ -817,8 +817,8 @@ theorem
         ∀ {ζ : 𝓞 (CyclotomicField 37 ℚ)}, IsPrimitiveRoot ζ 37 →
         (_hab : ¬ (a = 0 ∧ b = 0)) →
         ∀ {I : Ideal (𝓞 (CyclotomicField 37 ℚ))}, (hI_ne : I ≠ ⊥) →
-        (hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37) →
         ∃ δ : (CyclotomicField 37 ℚ)ˣ,
           ((I : FractionalIdeal (𝓞 (CyclotomicField 37 ℚ))⁰
@@ -887,8 +887,8 @@ theorem
         ∀ {ζ : 𝓞 (CyclotomicField 37 ℚ)}, IsPrimitiveRoot ζ 37 →
         (_hab : ¬ (a = 0 ∧ b = 0)) →
         ∀ {I : Ideal (𝓞 (CyclotomicField 37 ℚ))}, (hI_ne : I ≠ ⊥) →
-        (hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37) →
         ∃ δ : (CyclotomicField 37 ℚ)ˣ,
           ((I : FractionalIdeal (𝓞 (CyclotomicField 37 ℚ))⁰
@@ -1074,8 +1074,8 @@ theorem fermatLastTheoremFor_thirtyseven_of_exact_pollaczek_caseISquare_caseIIDe
         ¬ (37 : ℤ) ∣ a * b * c → a ^ 37 + b ^ 37 = c ^ 37 →
         ∀ {ζ : 𝓞 (CyclotomicField 37 ℚ)}, IsPrimitiveRoot ζ 37 →
         ∀ {I : Ideal (𝓞 (CyclotomicField 37 ℚ))}, (hI_ne : I ≠ ⊥) →
-          Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-            ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+          Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+            ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
               Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37 →
           (ClassGroup.mk0
               (⟨I.map
@@ -1118,8 +1118,8 @@ theorem fermatLastTheoremFor_thirtyseven_of_exact_pollaczek_caseISquare_caseIIDe
         ¬ (37 : ℤ) ∣ a * b * c → a ^ 37 + b ^ 37 = c ^ 37 →
         ∀ {ζ : 𝓞 (CyclotomicField 37 ℚ)}, IsPrimitiveRoot ζ 37 →
         ∀ {I : Ideal (𝓞 (CyclotomicField 37 ℚ))}, (hI_ne : I ≠ ⊥) →
-          Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-            ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+          Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+            ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
               Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37 →
           (ClassGroup.mk0
               (⟨I.map
@@ -2421,8 +2421,8 @@ theorem
         {ζ : 𝓞 (CyclotomicField 37 ℚ)} (_hζ : IsPrimitiveRoot ζ 37)
         (hab : ¬ (a = 0 ∧ b = 0))
         (I : Ideal (𝓞 (CyclotomicField 37 ℚ))) (_hI_ne : I ≠ ⊥)
-        (_hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (_hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37),
         ∃ (γ : CyclotomicField 37 ℚ) (_hγ_ne : γ ≠ 0)
           (u : (𝓞 (CyclotomicField 37 ℚ))ˣ),
@@ -2515,8 +2515,8 @@ theorem
         {ζ : 𝓞 (CyclotomicField 37 ℚ)} (_hζ : IsPrimitiveRoot ζ 37)
         (hab : ¬ (a = 0 ∧ b = 0))
         (I : Ideal (𝓞 (CyclotomicField 37 ℚ))) (_hI_ne : I ≠ ⊥)
-        (_hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (_hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37),
         ∃ (γ : CyclotomicField 37 ℚ) (_hγ_ne : γ ≠ 0)
           (u : (𝓞 (CyclotomicField 37 ℚ))ˣ),
@@ -2604,8 +2604,8 @@ theorem
         {ζ : 𝓞 (CyclotomicField 37 ℚ)} (_hζ : IsPrimitiveRoot ζ 37)
         (hab : ¬ (a = 0 ∧ b = 0))
         (I : Ideal (𝓞 (CyclotomicField 37 ℚ))) (_hI_ne : I ≠ ⊥)
-        (_hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (_hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37),
         ∃ (γ : CyclotomicField 37 ℚ) (_hγ_ne : γ ≠ 0)
           (u : (𝓞 (CyclotomicField 37 ℚ))ˣ),
@@ -2711,8 +2711,8 @@ theorem
         {ζ : 𝓞 (CyclotomicField 37 ℚ)} (_hζ : IsPrimitiveRoot ζ 37)
         (hab : ¬ (a = 0 ∧ b = 0))
         (I : Ideal (𝓞 (CyclotomicField 37 ℚ))) (_hI_ne : I ≠ ⊥)
-        (_hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (_hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37),
         ∃ (γ : CyclotomicField 37 ℚ) (_hγ_ne : γ ≠ 0)
           (u : (𝓞 (CyclotomicField 37 ℚ))ˣ),
@@ -3075,8 +3075,8 @@ theorem fermatLastTheoremFor_thirtyseven_of_factorIdealClass_base_caseII_sources
         ∀ {ζ : 𝓞 (CyclotomicField 37 ℚ)}, IsPrimitiveRoot ζ 37 →
         (_hab : ¬ (a = 0 ∧ b = 0)) →
         ∀ {I : Ideal (𝓞 (CyclotomicField 37 ℚ))}, (hI_ne : I ≠ ⊥) →
-        (hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37) →
         ClassGroup.mk0
           (⟨I, mem_nonZeroDivisors_iff_ne_zero.mpr hI_ne⟩ :
@@ -3133,8 +3133,8 @@ theorem fermatLastTheoremFor_thirtyseven_of_factorIdealClass_and_caseII_sources
         ∀ {ζ : 𝓞 (CyclotomicField 37 ℚ)}, IsPrimitiveRoot ζ 37 →
         (_hab : ¬ (a = 0 ∧ b = 0)) →
         ∀ {I : Ideal (𝓞 (CyclotomicField 37 ℚ))}, (hI_ne : I ≠ ⊥) →
-        (hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField 37 ℚ)) +
-          ζ * (b : 𝓞 (CyclotomicField 37 ℚ))} :
+        (hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField 37 ℚ)) +
+          ζ * (b : 𝓞 (CyclotomicField 37 ℚ)))} :
             Set (𝓞 (CyclotomicField 37 ℚ))) = I ^ 37) →
         ClassGroup.mk0
           (⟨I, mem_nonZeroDivisors_iff_ne_zero.mpr hI_ne⟩ :

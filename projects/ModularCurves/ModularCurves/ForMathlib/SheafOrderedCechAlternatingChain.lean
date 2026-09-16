@@ -14,6 +14,10 @@ open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
 
 universe u
 
+-- The products `∏ᶜ cechTermFactor F U (n + 1)` over `Fin (n + 1 + 1) → ι` no longer fit the
+-- default `synthInstance.maxHeartbeats` budget.
+set_option synthInstance.maxHeartbeats 40000
+
 namespace TopCat.Sheaf
 
 open AlgebraicGeometry.Scheme.Modules
@@ -677,6 +681,8 @@ private theorem orderedToCechAlternatingF_comp_d_comp_π_of_strictMono
         orderedToCechAlternatingF F U (n + 1) ≫ p := by
       rw [ha]
 
+-- The `change`/`calc` chain below now elaborates just past the default heartbeat budget.
+set_option maxHeartbeats 400000 in
 private theorem orderedToCechAlternatingF_comp_d_comp_π_of_injective
     (n : ℕ) (i : Fin (n + 2) → ι) (hi : Function.Injective i) :
     orderedToCechAlternatingF F U n ≫ cechDifferentialProductF F U n ≫

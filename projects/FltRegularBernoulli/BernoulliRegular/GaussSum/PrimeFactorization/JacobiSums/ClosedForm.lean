@@ -93,8 +93,8 @@ private lemma distinguishedPrimeExponent_stickelbergerComplexCharacterGenerator_
         have hprod : (g ^ (j : ℕ)) * (g ^ (k : ℕ)) ≠ 1 := by
           simpa [g, pow_add] using hgsum
         let JI : Ideal (𝓞 L) :=
-          Ideal.span ({jacobiSumLift (p := p) (L := L)
-            (g ^ (j : ℕ)) (g ^ (k : ℕ))} : Set (𝓞 L))
+          Ideal.span ({(jacobiSumLift (p := p) (L := L)
+            (g ^ (j : ℕ)) (g ^ (k : ℕ)))} : Set (𝓞 L))
         have hJ_ne : JI ≠ ⊥ :=
           Ideal.span_singleton_eq_bot.not.mpr
             (jacobiSumLift_ne_zero (p := p) (L := L) hprod)

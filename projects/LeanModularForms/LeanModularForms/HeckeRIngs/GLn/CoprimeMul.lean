@@ -815,10 +815,10 @@ private lemma heckeMultiplicity_coprime_le_one (a b : Fin n → ℕ) (ha_pos : �
         ((j₁.out : GL (Fin n) ℚ) * δ_b') ∈
         ({(i₂.out : GL (Fin n) ℚ) * δ_a' *
           ((j₂.out : GL (Fin n) ℚ) * δ_b')} : Set _) * (H : Set _) := by
-      have h12' : ({(i₁.out : GL (Fin n) ℚ) * δ_a' *
-          ((j₁.out : GL (Fin n) ℚ) * δ_b')} : Set _) * (H : Set _) =
-          ({(i₂.out : GL (Fin n) ℚ) * δ_a' *
-          ((j₂.out : GL (Fin n) ℚ) * δ_b')} : Set _) * (H : Set _) := by
+      have h12' : ({((i₁.out : GL (Fin n) ℚ) * δ_a' *
+          ((j₁.out : GL (Fin n) ℚ) * δ_b'))} : Set _) * (H : Set _) =
+          ({((i₂.out : GL (Fin n) ℚ) * δ_a' *
+          ((j₂.out : GL (Fin n) ℚ) * δ_b'))} : Set _) * (H : Set _) := by
         rw [Set.singleton_mul_singleton, Set.singleton_mul_singleton] at h12
         exact h12
       rw [← h12']

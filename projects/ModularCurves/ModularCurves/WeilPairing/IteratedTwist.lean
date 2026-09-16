@@ -686,10 +686,10 @@ theorem span_iteratedChartMultiplier_eq (J₁ J₂ : C.IdealSheafData) (L : C.Mo
     (eI₁ : (restrictFunctor U.1.ι).obj (idealModule J₁) ≅ unitObj U.1.toScheme)
     (eI₂ : (restrictFunctor U.1.ι).obj (idealModule J₂) ≅ unitObj U.1.toScheme)
     (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme) :
-    Ideal.span {chartMultiplier U.1 (iteratedTwistHom J₁ J₂ L)
-        (iteratedChartTriv J₁ J₂ L U.1 eI₁ eI₂ eL) eL} =
-      Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₁ *
-        (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₂} := by
+    Ideal.span {(chartMultiplier U.1 (iteratedTwistHom J₁ J₂ L)
+        (iteratedChartTriv J₁ J₂ L U.1 eI₁ eI₂ eL) eL)} =
+      Ideal.span {((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₁ *
+        (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₂)} := by
   rw [chartMultiplier_comp U.1 (divisorTwistHom J₁ (tensorObj (idealModule J₂) L))
     (divisorTwistHom J₂ L) (iteratedChartTriv J₁ J₂ L U.1 eI₁ eI₂ eL)
     (twistChartTensorTriv J₂ L U.1 eI₂ eL) eL]
@@ -920,11 +920,11 @@ theorem span_iteratedChartMultiplier₃_eq (J₁ J₂ J₃ : C.IdealSheafData) (
     (eI₂ : (restrictFunctor U.1.ι).obj (idealModule J₂) ≅ unitObj U.1.toScheme)
     (eI₃ : (restrictFunctor U.1.ι).obj (idealModule J₃) ≅ unitObj U.1.toScheme)
     (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme) :
-    Ideal.span {chartMultiplier U.1 (iteratedTwistHom₃ J₁ J₂ J₃ L)
-        (iteratedChartTriv₃ J₁ J₂ J₃ L U.1 eI₁ eI₂ eI₃ eL) eL} =
-      Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₁ *
+    Ideal.span {(chartMultiplier U.1 (iteratedTwistHom₃ J₁ J₂ J₃ L)
+        (iteratedChartTriv₃ J₁ J₂ J₃ L U.1 eI₁ eI₂ eI₃ eL) eL)} =
+      Ideal.span {((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₁ *
         ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₂ *
-          (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₃)} := by
+          (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₃))} := by
   rw [chartMultiplier_comp U.1
     (divisorTwistHom J₁ (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L)))
     (iteratedTwistHom J₂ J₃ L)

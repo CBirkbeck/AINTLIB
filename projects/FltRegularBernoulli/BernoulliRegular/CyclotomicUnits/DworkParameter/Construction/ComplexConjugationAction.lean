@@ -477,8 +477,8 @@ theorem lambdaIdeal_map_valuedIntegerComplexConj :
       lambdaIdeal p K := by
   rw [lambdaIdeal, Ideal.map_span]
   rw [Set.image_singleton]
-  change Ideal.span ({valuedIntegerComplexConj (p := p) K
-      (valuedCyclotomicLambdaInteger p K)} : Set (ValuedIntegerRing p K)) =
+  change Ideal.span ({(valuedIntegerComplexConj (p := p) K
+      (valuedCyclotomicLambdaInteger p K))} : Set (ValuedIntegerRing p K)) =
     lambdaIdeal p K
   rw [valuedIntegerComplexConj_valuedCyclotomicLambdaInteger]
   exact (lambdaIdeal_eq_span_conjugateLambda (p := p) (K := K)).symm

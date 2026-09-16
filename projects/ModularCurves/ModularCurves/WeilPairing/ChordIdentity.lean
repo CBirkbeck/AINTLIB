@@ -908,8 +908,8 @@ theorem chord_exact_order_in_coordinateRing {R : Type u} [CommRing R]
     (hk₂ : RingHom.ker (σ₂ : W.toAffine.CoordinateRing →+* R) =
       Ideal.span {coordX W - algebraMap R _ x₂})
     (hk₃ : RingHom.ker (σ₃ : W.toAffine.CoordinateRing →+* R) =
-      Ideal.span {coordX W -
-        algebraMap R _ (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)})
+      Ideal.span {(coordX W -
+        algebraMap R _ (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂))})
     (hσ₁ : σ₁ (coordY W - (algebraMap R _ ℓ * (coordX W - algebraMap R _ x₁) +
       algebraMap R _ y₁)) = 0)
     (hx₂ : σ₂ (coordX W) = x₂) (hy₂ : σ₂ (coordY W) = y₂)
@@ -1085,9 +1085,9 @@ theorem chord_identity_of_isUnit_hypotheses {R : Type u} [CommRing R]
     (hk₂ : RingHom.ker (σ₂ : W.toAffine.CoordinateRing →+* R) =
       Ideal.span {coordX W - algebraMap R _ x₂})
     (hk₃ : RingHom.ker (σ₃ : W.toAffine.CoordinateRing →+* R) =
-      Ideal.span {coordX W -
+      Ideal.span {(coordX W -
         algebraMap R _ (((y₂ - y₁) * d) ^ 2 + W.a₁ * ((y₂ - y₁) * d) -
-          W.a₂ - x₁ - x₂)})
+          W.a₂ - x₁ - x₂))})
     (hσ₁ : σ₁ (coordY W -
       (algebraMap R _ ((y₂ - y₁) * d) * (coordX W - algebraMap R _ x₁) +
         algebraMap R _ y₁)) = 0)

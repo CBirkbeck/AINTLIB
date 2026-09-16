@@ -487,7 +487,8 @@ Its forward map is `frickeCharRestrict`; the inverse is `c⁻¹ •` the other F
 noncomputable def frickeCharEquiv (k : ℤ) (χ : (ZMod N)ˣ →* ℂˣ) :
     modFormCharSpace k χ ≃ₗ[ℂ] modFormCharSpace k (chiConj χ) where
   toLinearMap := frickeCharRestrict k χ
-  invFun := (frickeScalar N k)⁻¹ • frickeCharRestrict k (chiConj χ)
+  invFun := ((frickeScalar N k)⁻¹ • frickeCharRestrict k (chiConj χ) :
+    modFormCharSpace k (chiConj χ) →ₗ[ℂ] modFormCharSpace k χ)
   left_inv f := by
     have hc := frickeScalar_ne_zero (N := N) k
     apply Subtype.ext

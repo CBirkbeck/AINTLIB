@@ -110,8 +110,8 @@ theorem K2_2_index_one_of_canonical_zeta_choices_ofDescent
     (h_ne_zero : letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
       S.gaussSumInt 1 ^ p ≠ 0)
     (h_span : letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-      Ideal.span ({phiPrimeGenDescent S
-        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero} : Set (𝓞 K)) =
+      Ideal.span ({(phiPrimeGenDescent S
+        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero)} : Set (𝓞 K)) =
         stickelbergerIdeal (p := p) (K := K) P)
     {P' : Ideal (𝓞 K)}
     (hP'_bot : P' ≠ ⊥) [hP'_max : P'.IsMaximal]
@@ -159,8 +159,8 @@ theorem K2_2_index_one_of_canonical_zeta_choices_ofDescent_of_absNorm_coprime
     (h_ne_zero : letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
       S.gaussSumInt 1 ^ p ≠ 0)
     (h_span : letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-      Ideal.span ({phiPrimeGenDescent S
-        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero} : Set (𝓞 K)) =
+      Ideal.span ({(phiPrimeGenDescent S
+        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero)} : Set (𝓞 K)) =
         stickelbergerIdeal (p := p) (K := K) P)
     {P' : Ideal (𝓞 K)}
     (hP'_bot : P' ≠ ⊥) [hP'_max : P'.IsMaximal]
@@ -211,8 +211,8 @@ theorem K2_2_sub_one_of_canonical_zeta_choices_ofDescent_of_absNorm_coprime
     (h_ne_zero : letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
       S.gaussSumInt (p - 1) ^ p ≠ 0)
     (h_span : letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-      Ideal.span ({phiPrimeGenDescent S
-        (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero} :
+      Ideal.span ({(phiPrimeGenDescent S
+        (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero)} :
           Set (𝓞 K)) =
         stickelbergerIdeal (p := p) (K := K) P)
     {P' : Ideal (𝓞 K)}
@@ -279,8 +279,8 @@ structure K2_2SourceData
   /-- The descended index-one Φ element generates the Stickelberger ideal. -/
   h_span :
     letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-    Ideal.span ({phiPrimeGenDescent S
-      (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero} : Set (𝓞 K)) =
+    Ideal.span ({(phiPrimeGenDescent S
+      (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero)} : Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P
 
 /-- The actual index-one Φ element associated to bundled source-side K2-2
@@ -418,8 +418,8 @@ structure K2_2ReciprocalSourceData
   /-- The descended reciprocal-index Φ element generates the Stickelberger ideal. -/
   h_span :
     letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-    Ideal.span ({phiPrimeGenDescent S
-      (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero} :
+    Ideal.span ({(phiPrimeGenDescent S
+      (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero)} :
         Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P
 
@@ -499,8 +499,8 @@ noncomputable def ofFlexibleDescentIndexOne
     (h_ne_zero : S.gaussSumInt 1 ^ p ≠ 0)
     {P : Ideal (𝓞 K)}
     (h_span :
-      Ideal.span ({S.phiPrimeGenDescent h_psi
-          (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero} :
+      Ideal.span ({(S.phiPrimeGenDescent h_psi
+          (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero)} :
             Set (𝓞 K)) =
         stickelbergerIdeal (p := p) (K := K) P) :
     PhiPrimeElement (p := p) (K := K) P where
@@ -557,8 +557,8 @@ structure K2_2FlexibleSourceData
   /-- The descended index-one Φ element generates the Stickelberger ideal. -/
   h_span :
     letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-    Ideal.span ({S.phiPrimeGenDescent h_psi
-      (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero} :
+    Ideal.span ({(S.phiPrimeGenDescent h_psi
+      (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero)} :
         Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P
 
@@ -614,8 +614,8 @@ noncomputable def ofFlexibleDescentSubOne
     (h_ne_zero : S.gaussSumInt (p - 1) ^ p ≠ 0)
     {P : Ideal (𝓞 K)}
     (h_span :
-      Ideal.span ({S.phiPrimeGenDescent h_psi
-          (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero} :
+      Ideal.span ({(S.phiPrimeGenDescent h_psi
+          (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero)} :
             Set (𝓞 K)) =
         stickelbergerIdeal (p := p) (K := K) P) :
     PhiPrimeElement (p := p) (K := K) P where
@@ -721,8 +721,8 @@ theorem flexibleReciprocalPhiCandidate_span_of_atomic_split
           (ℓ := ℓ) (p := p) (k := k) (K := K) (R' := R') S h_psi h_ne_zero))
     (he : (S.concrete.descentPrime.under ℤ).ramificationIdxIn (𝓞 K) = 1)
     (hf : (S.concrete.descentPrime.under ℤ).inertiaDegIn (𝓞 K) = 1) :
-    Ideal.span ({flexibleReciprocalPhiCandidate
-        (ℓ := ℓ) (p := p) (k := k) (K := K) (R' := R') S h_psi h_ne_zero} :
+    Ideal.span ({(flexibleReciprocalPhiCandidate
+        (ℓ := ℓ) (p := p) (k := k) (K := K) (R' := R') S h_psi h_ne_zero)} :
           Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P := by
   set γ : 𝓞 K :=
@@ -769,8 +769,8 @@ theorem flexibleReciprocalPhiCandidate_span_of_repeatedExact
       S.StickelbergerRepeatedExactExponents
         (flexibleReciprocalPhiCandidate
           (ℓ := ℓ) (p := p) (k := k) (K := K) (R' := R') S h_psi h_ne_zero)) :
-    Ideal.span ({flexibleReciprocalPhiCandidate
-        (ℓ := ℓ) (p := p) (k := k) (K := K) (R' := R') S h_psi h_ne_zero} :
+    Ideal.span ({(flexibleReciprocalPhiCandidate
+        (ℓ := ℓ) (p := p) (k := k) (K := K) (R' := R') S h_psi h_ne_zero)} :
           Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P := by
   set γ : 𝓞 K :=

@@ -729,8 +729,8 @@ theorem chordIdealIdentity {F : Type*} [Field F] [DecidableEq F] {W : Weierstras
     (hxy : ¬(x₁ = x₂ ∧ y₁ = W.negY x₂ y₂)) :
     Ideal.span {XClass W (W.addX x₁ x₂ <| W.slope x₁ x₂ y₁ y₂)} *
         (XYIdeal W x₁ (C y₁) * XYIdeal W x₂ (C y₂)) =
-      Ideal.span {YClass W (WeierstrassCurve.Affine.linePolynomial x₁ y₁ <|
-          W.slope x₁ x₂ y₁ y₂)} *
+      Ideal.span {(YClass W (WeierstrassCurve.Affine.linePolynomial x₁ y₁ <|
+          W.slope x₁ x₂ y₁ y₂))} *
         (XYIdeal W (W.addX x₁ x₂ <| W.slope x₁ x₂ y₁ y₂)
           (C <| W.addY x₁ x₂ y₁ <| W.slope x₁ x₂ y₁ y₂) * (⊤ : Ideal W.CoordinateRing)) := by
   rw [Ideal.mul_top]

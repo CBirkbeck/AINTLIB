@@ -272,6 +272,8 @@ def Prop812SecondOrderCoeff37
           (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1) *
             ((e a : ℤ) : ZMod (37 ^ 2)))
 
+-- The closing `simp` no longer fits the default `synthInstance.maxHeartbeats` budget.
+set_option synthInstance.maxHeartbeats 80000 in
 /-- **`Prop812SecondOrderCoeff37` is non-vacuous** (proven): the zero exponent vector `e = 0`
 satisfies the coefficient-value identity — both sides are `0` — so the residual is a real statement,
 not vacuously true. -/

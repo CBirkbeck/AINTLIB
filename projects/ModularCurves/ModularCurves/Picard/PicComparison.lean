@@ -320,7 +320,8 @@ theorem isIso_ev_unitObj (Y : Scheme.{u}) : IsIso (ev (unitObj Y)) := by
       h2)).symm)
     show ModularCurves.SheafOfModules.evalSection Y.ringCatSheaf (unitObj Y)
         (Opposite.unop V) φ r =
-      (ConcreteCategory.hom (hd.hom.app V)) φ • r
+      (show ((Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V) from
+        (ConcreteCategory.hom (hd.hom.app V)) φ) • r
     have hφ : (ConcreteCategory.hom (hd.hom.app V)) φ =
         ModularCurves.SheafOfModules.dualUnitSectionsEquiv Y.ringCatSheaf
           (Opposite.unop V) φ := rfl

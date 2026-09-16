@@ -246,11 +246,11 @@ theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair_of_sections
     rw [← MulEquivClass.map_nonZeroDivisors
       (asIso (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge)).commRingCatIsoToRingEquiv]
     exact ⟨rP, hnzdP, rfl⟩
-  have hv : Ideal.span {twistChartMultiplier
+  have hv : Ideal.span {(twistChartMultiplier
       (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal
-        L U.1 eI eL} =
-      Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rP *
-        (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rQ} := by
+        L U.1 eI eL)} =
+      Ideal.span {((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rP *
+        (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rQ)} := by
     rw [← map_mul]
     exact span_twistChartMultiplier_eq _ L U (rP * rQ) hspanU hnzdPQ eI eL
   -- the evaluation equivalences
@@ -512,9 +512,9 @@ theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_single_of_section
     rw [hsupp]
     refine Set.disjoint_left.mpr fun c hc hcW => ?_
     exact (hWV hcW) hc
-  have hv : Ideal.span {twistChartMultiplier
+  have hv : Ideal.span {(twistChartMultiplier
       (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal
-        L U.1 eI eL} =
+        L U.1 eI eL)} =
       Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rR} :=
     span_twistChartMultiplier_eq _ L U rR hspanU hnzdR eI eL
   obtain ⟨eP⟩ := nonempty_evaluation_quotEquiv_of_ker_span
