@@ -195,9 +195,9 @@ theorem reciprocalPrimePhiElement_span_eq_stickelbergerIdeal
     (he :
       letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
       S.concrete.descentRamificationIdx = ℓ - 1) :
-    Ideal.span ({(reciprocalPrimePhiElement_of_f_eq_orderOf
+    Ideal.span ({((reciprocalPrimePhiElement_of_f_eq_orderOf
         (ℓ := ℓ) (p := p) (K := K) (P := P) (R' := R')
-        S h_psi h_descentPrime h_source_coprime h_ne_zero hℓp hf he).gamma} :
+        S h_psi h_descentPrime h_source_coprime h_ne_zero hℓp hf he).gamma)} :
           Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P :=
   (reciprocalPrimePhiElement_of_f_eq_orderOf

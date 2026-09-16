@@ -530,10 +530,10 @@ lemma specPoint_factors_through_chart (W : WeierstrassCurve R)
 /-- The chart of the model as a quotient of the chart of `ℙ²`. -/
 noncomputable def chartQuotientEquiv (W : WeierstrassCurve R) (i : Fin 3) :
     (Away (MvPolynomial.homogeneousSubmodule (Fin 3) R) (MvPolynomial.X i) ⧸
-      Ideal.span {HomogeneousLocalization.Away.mk
+      Ideal.span {(HomogeneousLocalization.Away.mk
         (MvPolynomial.homogeneousSubmodule (Fin 3) R)
         (MvPolynomial.X_mem_homogeneousSubmodule_one R i) 3 W.toProjective.polynomial
-        (by simp [projective_polynomial_isHomogeneous W])}) ≃+*
+        (by simp [projective_polynomial_isHomogeneous W]))}) ≃+*
     Away (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) :=
   (Ideal.quotEquivOfEq (show Ideal.span _ =
@@ -554,13 +554,13 @@ noncomputable def chartCoordEquiv (W : WeierstrassCurve R) (i : Fin 3) :
     Away (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) :=
   ((Ideal.quotientEquiv
-    (Ideal.span {HomogeneousLocalization.Away.mk
+    (Ideal.span {(HomogeneousLocalization.Away.mk
       (MvPolynomial.homogeneousSubmodule (Fin 3) R)
       (MvPolynomial.X_mem_homogeneousSubmodule_one R i) 3 W.toProjective.polynomial
       (by
         rw [smul_eq_mul, mul_one]
         exact (MvPolynomial.mem_homogeneousSubmodule _ _).mpr
-          (projective_polynomial_isHomogeneous W))})
+          (projective_polynomial_isHomogeneous W)))})
     (Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
     ((MvPolynomial.chartRingEquiv R i) :
       Away (MvPolynomial.homogeneousSubmodule (Fin 3) R) (MvPolynomial.X i) ≃+*
@@ -1746,8 +1746,8 @@ theorem locally_isStandardSmooth_algebraMap_gradeZero_away (W : WeierstrassCurve
       (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial) j
     rwa [hcard] at h2
   fin_cases i
-  · refine ⟨{Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨1, by decide⟩
-        (MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial)),
+  · refine ⟨{(Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨1, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial))),
       Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨2, by decide⟩
         (MvPolynomial.dehomogenizeAux R 0 W.toProjective.polynomial))}, ?_, ?_⟩
     · have h3 := congrArg (Ideal.map (Ideal.Quotient.mk
@@ -1763,8 +1763,8 @@ theorem locally_isStandardSmooth_algebraMap_gradeZero_away (W : WeierstrassCurve
       rcases ht with rfl | rfl
       · exact hstep ⟨1, by decide⟩
       · exact hstep ⟨2, by decide⟩
-  · refine ⟨{Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨0, by decide⟩
-        (MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial)),
+  · refine ⟨{(Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨0, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial))),
       Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨2, by decide⟩
         (MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial))}, ?_, ?_⟩
     · have h3 := congrArg (Ideal.map (Ideal.Quotient.mk
@@ -1780,8 +1780,8 @@ theorem locally_isStandardSmooth_algebraMap_gradeZero_away (W : WeierstrassCurve
       rcases ht with rfl | rfl
       · exact hstep ⟨0, by decide⟩
       · exact hstep ⟨2, by decide⟩
-  · refine ⟨{Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨0, by decide⟩
-        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial)),
+  · refine ⟨{(Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨0, by decide⟩
+        (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial))),
       Ideal.Quotient.mk _ (MvPolynomial.pderiv ⟨1, by decide⟩
         (MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial))}, ?_, ?_⟩
     · have h3 := congrArg (Ideal.map (Ideal.Quotient.mk
@@ -2067,13 +2067,13 @@ noncomputable def sChartBaseChange (W : WeierstrassCurve R) (i : Fin 3) :
     (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
       Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial}) →ₐ[R]
     (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
-      Ideal.span {MvPolynomial.dehomogenizeAux R' i
-        (W.map (algebraMap R R')).toProjective.polynomial}) := by
+      Ideal.span {(MvPolynomial.dehomogenizeAux R' i
+        (W.map (algebraMap R R')).toProjective.polynomial)}) := by
   refine Ideal.Quotient.liftₐ _
     ((Ideal.Quotient.mkₐ R _).comp
       (MvPolynomial.mapAlgHom (Algebra.ofId R R'))) fun a ha => ?_
-  suffices h : Ideal.span {MvPolynomial.dehomogenizeAux R i
-      W.toProjective.polynomial} ≤ RingHom.ker ((Ideal.Quotient.mkₐ R _).comp
+  suffices h : Ideal.span {(MvPolynomial.dehomogenizeAux R i
+      W.toProjective.polynomial)} ≤ RingHom.ker ((Ideal.Quotient.mkₐ R _).comp
       (MvPolynomial.mapAlgHom (R := R) (Algebra.ofId R R'))).toRingHom from h ha
   rw [Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe, RingHom.mem_ker]
   show Ideal.Quotient.mk _ (MvPolynomial.map (algebraMap R R')
@@ -2104,11 +2104,11 @@ private lemma sChartTensorInvAux_map_algebraMap (W : WeierstrassCurve R) (i : Fi
       1 ⊗ₜ[R] (Ideal.Quotient.mk _ p) := by
   rw [sChartTensorInvAux, MvPolynomial.aeval_map_algebraMap]
   have h : (MvPolynomial.aeval (R := R) fun j => ((1 : R') ⊗ₜ[R]
-      (Ideal.Quotient.mk (Ideal.span {MvPolynomial.dehomogenizeAux R i
-        W.toProjective.polynomial}) (MvPolynomial.X j)))) =
+      (Ideal.Quotient.mk (Ideal.span {(MvPolynomial.dehomogenizeAux R i
+        W.toProjective.polynomial)}) (MvPolynomial.X j)))) =
       (Algebra.TensorProduct.includeRight.comp
-        (Ideal.Quotient.mkₐ R (Ideal.span {MvPolynomial.dehomogenizeAux R i
-          W.toProjective.polynomial}))) := by
+        (Ideal.Quotient.mkₐ R (Ideal.span {(MvPolynomial.dehomogenizeAux R i
+          W.toProjective.polynomial)}))) := by
     refine MvPolynomial.algHom_ext fun j => ?_
     simp
   rw [h]
@@ -2120,14 +2120,14 @@ noncomputable def sChartTensorEquiv (W : WeierstrassCurve R) (i : Fin 3) :
     (R' ⊗[R] (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
       Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial}))
       ≃ₐ[R'] (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
-      Ideal.span {MvPolynomial.dehomogenizeAux R' i
-        (W.map (algebraMap R R')).toProjective.polynomial}) := by
+      Ideal.span {(MvPolynomial.dehomogenizeAux R' i
+        (W.map (algebraMap R R')).toProjective.polynomial)}) := by
   refine AlgEquiv.ofAlgHom
     (Algebra.TensorProduct.lift (Algebra.ofId R' _)
       (sChartBaseChange (R' := R') W i) fun _ _ => Commute.all _ _)
     (Ideal.Quotient.liftₐ _ (sChartTensorInvAux W i) fun a ha => ?_) ?_ ?_
-  · suffices h : Ideal.span {MvPolynomial.dehomogenizeAux R' i
-        (W.map (algebraMap R R')).toProjective.polynomial} ≤
+  · suffices h : Ideal.span {(MvPolynomial.dehomogenizeAux R' i
+        (W.map (algebraMap R R')).toProjective.polynomial)} ≤
         RingHom.ker (sChartTensorInvAux (R' := R') W i).toRingHom from h ha
     rw [Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe, RingHom.mem_ker,
       ← dehomog_baseChange]
@@ -2178,28 +2178,28 @@ lemma isPushout_sChart (W : WeierstrassCurve R) (i : Fin 3) :
         (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
           Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
         (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
-          Ideal.span {MvPolynomial.dehomogenizeAux R' i
-            (W.map (algebraMap R R')).toProjective.polynomial}) :=
+          Ideal.span {(MvPolynomial.dehomogenizeAux R' i
+            (W.map (algebraMap R R')).toProjective.polynomial)}) :=
       ((sChartBaseChange (R' := R') W i).toRingHom).toAlgebra
     Algebra.IsPushout R R'
       (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
       (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
-        Ideal.span {MvPolynomial.dehomogenizeAux R' i
-          (W.map (algebraMap R R')).toProjective.polynomial}) := by
+        Ideal.span {(MvPolynomial.dehomogenizeAux R' i
+          (W.map (algebraMap R R')).toProjective.polynomial)}) := by
   letI : Algebra
       (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
       (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
-        Ideal.span {MvPolynomial.dehomogenizeAux R' i
-          (W.map (algebraMap R R')).toProjective.polynomial}) :=
+        Ideal.span {(MvPolynomial.dehomogenizeAux R' i
+          (W.map (algebraMap R R')).toProjective.polynomial)}) :=
     ((sChartBaseChange (R' := R') W i).toRingHom).toAlgebra
   haveI : IsScalarTower R
       (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
       (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
-        Ideal.span {MvPolynomial.dehomogenizeAux R' i
-          (W.map (algebraMap R R')).toProjective.polynomial}) :=
+        Ideal.span {(MvPolynomial.dehomogenizeAux R' i
+          (W.map (algebraMap R R')).toProjective.polynomial)}) :=
     IsScalarTower.of_algebraMap_eq fun r =>
       ((sChartBaseChange (R' := R') W i).commutes r).symm
   refine ⟨IsBaseChange.of_equiv
@@ -2222,22 +2222,22 @@ lemma isPushout_sChart_commRingCat (W : WeierstrassCurve R) (i : Fin 3) :
           Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})))
       (CommRingCat.ofHom (algebraMap R'
         (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
-          Ideal.span {MvPolynomial.dehomogenizeAux R' i
-            (W.map (algebraMap R R')).toProjective.polynomial})))
+          Ideal.span {(MvPolynomial.dehomogenizeAux R' i
+            (W.map (algebraMap R R')).toProjective.polynomial)})))
       (CommRingCat.ofHom ((sChartBaseChange (R' := R') W i).toRingHom)) := by
   letI : Algebra
       (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
       (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
-        Ideal.span {MvPolynomial.dehomogenizeAux R' i
-          (W.map (algebraMap R R')).toProjective.polynomial}) :=
+        Ideal.span {(MvPolynomial.dehomogenizeAux R' i
+          (W.map (algebraMap R R')).toProjective.polynomial)}) :=
     ((sChartBaseChange (R' := R') W i).toRingHom).toAlgebra
   haveI : IsScalarTower R
       (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
       (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
-        Ideal.span {MvPolynomial.dehomogenizeAux R' i
-          (W.map (algebraMap R R')).toProjective.polynomial}) :=
+        Ideal.span {(MvPolynomial.dehomogenizeAux R' i
+          (W.map (algebraMap R R')).toProjective.polynomial)}) :=
     IsScalarTower.of_algebraMap_eq fun r =>
       ((sChartBaseChange (R' := R') W i).commutes r).symm
   haveI := isPushout_sChart (R' := R') W i
@@ -2249,14 +2249,14 @@ lemma isPullback_sChart_spec (W : WeierstrassCurve R) (i : Fin 3) :
     IsPullback
       (Spec.map (CommRingCat.ofHom (algebraMap R'
         (MvPolynomial {j : Fin 3 // j ≠ i} R' ⧸
-          Ideal.span {MvPolynomial.dehomogenizeAux R' i
-            (W.map (algebraMap R R')).toProjective.polynomial}))))
+          Ideal.span {(MvPolynomial.dehomogenizeAux R' i
+            (W.map (algebraMap R R')).toProjective.polynomial)}))))
       (Spec.map (CommRingCat.ofHom ((sChartBaseChange (R' := R') W i).toRingHom)))
       (Spec.map (CommRingCat.ofHom (algebraMap R R')))
       (Spec.map (CommRingCat.ofHom (algebraMap R
         (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
-          Ideal.span {MvPolynomial.dehomogenizeAux R i
-            W.toProjective.polynomial})))) :=
+          Ideal.span {(MvPolynomial.dehomogenizeAux R i
+            W.toProjective.polynomial)})))) :=
   AlgebraicGeometry.isPullback_SpecMap_of_isPushout _ _ _ _
     (isPushout_sChart_commRingCat (R' := R') W i)
 
@@ -2278,8 +2278,8 @@ lemma isPullback_piece (W : WeierstrassCurve R) (j : Fin 3) :
           ((chartCoordEquiv W j).symm.toRingHom))))
       (Spec.map (CommRingCat.ofHom (algebraMap R'
         (MvPolynomial {k : Fin 3 // k ≠ j} R' ⧸
-          Ideal.span {MvPolynomial.dehomogenizeAux R' j
-            (W.map (algebraMap R R')).toProjective.polynomial}))))
+          Ideal.span {(MvPolynomial.dehomogenizeAux R' j
+            (W.map (algebraMap R R')).toProjective.polynomial)}))))
       ((modelChartCover W).openCover.f j ≫ projModelπ W)
       (Spec.map (CommRingCat.ofHom (algebraMap R R'))) := by
   have h := (isPullback_sChart_spec (R' := R') W j).flip
@@ -2407,8 +2407,8 @@ private lemma isPullback_coverPiece (W : WeierstrassCurve R) (j : Fin 3) :
 /-- The wall-crossing identification of the base-changed chart `Spec`s. -/
 private noncomputable def thetaIso (W : WeierstrassCurve R) (j : Fin 3) :
     Spec (.of (MvPolynomial {k : Fin 3 // k ≠ j} R' ⧸
-      Ideal.span {MvPolynomial.dehomogenizeAux R' j
-        (W.map (algebraMap R R')).toProjective.polynomial})) ≅
+      Ideal.span {(MvPolynomial.dehomogenizeAux R' j
+        (W.map (algebraMap R R')).toProjective.polynomial)})) ≅
     Spec (.of (Away (quotientGrading (projIdeal (W.map (algebraMap R R'))))
       ((baseChangeGradedHom (algebraMap R R') W)
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))))) :=
@@ -2516,8 +2516,8 @@ private lemma theta_awayι_π (W : WeierstrassCurve R) (j : Fin 3) :
       projModelπ (W.map (algebraMap R R')) =
     Spec.map (CommRingCat.ofHom (algebraMap R'
       (MvPolynomial {k : Fin 3 // k ≠ j} R' ⧸
-        Ideal.span {MvPolynomial.dehomogenizeAux R' j
-          (W.map (algebraMap R R')).toProjective.polynomial}))) := by
+        Ideal.span {(MvPolynomial.dehomogenizeAux R' j
+          (W.map (algebraMap R R')).toProjective.polynomial)}))) := by
   simp only [thetaIso, Iso.trans_hom, asIso_hom, Category.assoc]
   rw [reassoc_of% (awayι_awayCongr (W.map (algebraMap R R'))
     (baseChangeGradedHom_mk_X (R' := R') W j)
@@ -2563,8 +2563,8 @@ lemma isPullback_lift_piece (W : WeierstrassCurve R) (j : Fin 3) :
         (Spec.map (CommRingCat.ofHom (algebraMap R R'))) =
       Spec.map (CommRingCat.ofHom (algebraMap R'
         (MvPolynomial {k : Fin 3 // k ≠ j} R' ⧸
-          Ideal.span {MvPolynomial.dehomogenizeAux R' j
-            (W.map (algebraMap R R')).toProjective.polynomial}))) :=
+          Ideal.span {(MvPolynomial.dehomogenizeAux R' j
+            (W.map (algebraMap R R')).toProjective.polynomial)}))) :=
     (isPullback_piece (R' := R') W j).isoPullback_hom_snd
   have hbcfst : (thetaIso (R' := R') W j).hom ≫
       Proj.awayι (quotientGrading (projIdeal (W.map (algebraMap R R'))))

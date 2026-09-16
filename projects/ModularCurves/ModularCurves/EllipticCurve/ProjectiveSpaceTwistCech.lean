@@ -1129,7 +1129,7 @@ theorem coordinateOpenCechFirstTransition_laurent [LinearOrder σ] {n : ℕ}
     (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) :
     let h10 : (a.1 1).down ≠ (a.1 0).down := by
       intro h
-      have ha : a.1 1 = a.1 0 := ULift.ext _ _ h
+      have ha : a.1 1 = a.1 0 := ULift.ext h
       exact one_ne_zero (a.2.injective ha)
     coordinateOpenCechIntersectionLaurentRingEquiv (R := R) a.1
         ((Proj (homogeneousSubmodule σ R)).presheaf.map
@@ -1146,7 +1146,7 @@ theorem coordinateOpenCechFirstTransition_laurent [LinearOrder σ] {n : ℕ}
   dsimp only
   let h10 : (a.1 1).down ≠ (a.1 0).down := by
     intro h
-    have ha : a.1 1 = a.1 0 := ULift.ext _ _ h
+    have ha : a.1 1 = a.1 0 := ULift.ext h
     exact one_ne_zero (a.2.injective ha)
   let q : HomogeneousLocalization.Away
       (homogeneousSubmodule σ R) (X (a.1 0).down) :=
@@ -1223,7 +1223,7 @@ theorem coordinateOpenCechFirstSecond_ne [LinearOrder σ] {n : ℕ}
     (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) :
     (a.1 1).down ≠ (a.1 0).down := by
   intro h
-  have ha : a.1 1 = a.1 0 := ULift.ext _ _ h
+  have ha : a.1 1 = a.1 0 := ULift.ext h
   exact one_ne_zero (a.2.injective ha)
 
 /-- The local Laurent exponent of an integer power of the first transition unit. -/

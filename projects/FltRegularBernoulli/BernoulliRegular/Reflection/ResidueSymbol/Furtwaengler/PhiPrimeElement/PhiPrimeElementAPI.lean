@@ -488,8 +488,8 @@ noncomputable def ofDescentIndexOne
     (S : FullTeichDworkSetup ℓ p k K R')
     (h_ne_zero : S.gaussSumInt 1 ^ p ≠ 0)
     {P : Ideal (𝓞 K)}
-    (h_span : Ideal.span ({phiPrimeGenDescent S
-        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero} : Set (𝓞 K)) =
+    (h_span : Ideal.span ({(phiPrimeGenDescent S
+        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero)} : Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P) :
     PhiPrimeElement (p := p) (K := K) P :=
   ofDescent S (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero h_span
@@ -503,8 +503,8 @@ noncomputable def ofDescentIndexOne
     (S : FullTeichDworkSetup ℓ p k K R')
     (h_ne_zero : S.gaussSumInt 1 ^ p ≠ 0)
     {P : Ideal (𝓞 K)}
-    (h_span : Ideal.span ({phiPrimeGenDescent S
-        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero} : Set (𝓞 K)) =
+    (h_span : Ideal.span ({(phiPrimeGenDescent S
+        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero)} : Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P) :
     (ofDescentIndexOne S h_ne_zero h_span).gamma =
       phiPrimeGenDescent S
@@ -521,8 +521,8 @@ noncomputable def ofDescentSubOne
     (S : FullTeichDworkSetup ℓ p k K R')
     (h_ne_zero : S.gaussSumInt (p - 1) ^ p ≠ 0)
     {P : Ideal (𝓞 K)}
-    (h_span : Ideal.span ({phiPrimeGenDescent S
-        (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero} :
+    (h_span : Ideal.span ({(phiPrimeGenDescent S
+        (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero)} :
           Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P) :
     PhiPrimeElement (p := p) (K := K) P :=
@@ -538,8 +538,8 @@ noncomputable def ofDescentSubOne
     (S : FullTeichDworkSetup ℓ p k K R')
     (h_ne_zero : S.gaussSumInt (p - 1) ^ p ≠ 0)
     {P : Ideal (𝓞 K)}
-    (h_span : Ideal.span ({phiPrimeGenDescent S
-        (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero} :
+    (h_span : Ideal.span ({(phiPrimeGenDescent S
+        (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero)} :
           Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P) :
     (ofDescentSubOne S h_ne_zero h_span).gamma =
@@ -642,8 +642,8 @@ theorem reciprocalPhiCandidate_span_of_atomic_split
         (𝓞 K) = 1)
     (hf : (S.toConcreteStickelbergerSetup.descentPrime.under ℤ).inertiaDegIn
         (𝓞 K) = 1) :
-    Ideal.span ({reciprocalPhiCandidate
-        (ℓ := ℓ) (p := p) (k := k) (K := K) (R' := R') S h_ne_zero} :
+    Ideal.span ({(reciprocalPhiCandidate
+        (ℓ := ℓ) (p := p) (k := k) (K := K) (R' := R') S h_ne_zero)} :
           Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P := by
   set γ : 𝓞 K :=
@@ -738,8 +738,8 @@ noncomputable def ofReciprocalPhiCandidateAtomicSplit
     (S : FullTeichDworkSetup ℓ p k K R')
     (h_ne_zero : S.gaussSumInt (p - 1) ^ p ≠ 0)
     {P : Ideal (𝓞 K)}
-    (h_span : Ideal.span ({phiPrimeGenDescent S
-        (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero} :
+    (h_span : Ideal.span ({(phiPrimeGenDescent S
+        (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero)} :
           Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P) :
     (ofDescentSubOne S h_ne_zero h_span).gamma =

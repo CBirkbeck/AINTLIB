@@ -53,6 +53,9 @@ variable [Algebra k[X] K] [IsScalarTower k[X] W.CoordinateRing K]
 
 include W
 
+-- `map_sub`/`map_add` over `infiniteIntegers k K ⧸ v.asIdeal` no longer fit the default
+-- `synthInstance.maxHeartbeats` budget.
+set_option synthInstance.maxHeartbeats 80000 in
 /-- **(`AP2-A1e`)** The constant field of an elliptic function field is full: every element
 algebraic over the base field is a constant. -/
 theorem isFullConstantField : IsFullConstantField k K := by

@@ -457,11 +457,11 @@ theorem fltCaseI_factor_isCoprime
     (hc : ¬ (p : ℤ) ∣ c) (hab : IsCoprime a b)
     {k l : ℕ} (hk : k < p) (hl : l < p) (hkl : k ≠ l) :
     IsCoprime
-      (Ideal.span ({(a : 𝓞 K) +
-        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K)} :
+      (Ideal.span ({((a : 𝓞 K) +
+        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K))} :
           Set (𝓞 K)))
-      (Ideal.span ({(a : 𝓞 K) +
-        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ l * (b : 𝓞 K)} :
+      (Ideal.span ({((a : 𝓞 K) +
+        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ l * (b : 𝓞 K))} :
           Set (𝓞 K))) := by
   rw [Ideal.isCoprime_iff_sup_eq]
   by_contra h_ne
@@ -522,9 +522,9 @@ theorem fltCaseI_factorization_ideal (p : ℕ) [Fact p.Prime] (hp_odd : Odd p)
     (a b c : ℤ) (heq : a ^ p + b ^ p = c ^ p) :
     (Ideal.span ({(c : 𝓞 K)} : Set (𝓞 K))) ^ p =
       ∏ k ∈ Finset.range p,
-        Ideal.span ({(a : 𝓞 K) +
+        Ideal.span ({((a : 𝓞 K) +
           (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k *
-            (b : 𝓞 K)} : Set (𝓞 K)) := by
+            (b : 𝓞 K))} : Set (𝓞 K)) := by
   rw [Ideal.prod_span_singleton, Ideal.span_singleton_pow]
   congr 1
   rw [Set.singleton_eq_singleton_iff]
@@ -543,17 +543,17 @@ theorem fltCaseI_factor_isPrincipal_pow
     {a b c : ℤ} (heq : a ^ p + b ^ p = c ^ p)
     (hc : ¬ (p : ℤ) ∣ c) (hab : IsCoprime a b) {k : ℕ} (hk : k < p) :
     ∃ I : Ideal (𝓞 K),
-      Ideal.span ({(a : 𝓞 K) +
-        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K)} :
+      Ideal.span ({((a : 𝓞 K) +
+        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K))} :
           Set (𝓞 K)) = I ^ p := by
   have h_factorization := fltCaseI_factorization_ideal p hp_odd K a b c heq
   have h_coprime : ∀ i ∈ Finset.range p, ∀ j ∈ Finset.range p, i ≠ j →
       IsCoprime
-        (Ideal.span ({(a : 𝓞 K) +
-          (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ i * (b : 𝓞 K)} :
+        (Ideal.span ({((a : 𝓞 K) +
+          (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ i * (b : 𝓞 K))} :
             Set (𝓞 K)))
-        (Ideal.span ({(a : 𝓞 K) +
-          (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ j * (b : 𝓞 K)} :
+        (Ideal.span ({((a : 𝓞 K) +
+          (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ j * (b : 𝓞 K))} :
             Set (𝓞 K))) := by
     intro i hi j hj hij
     rw [Finset.mem_range] at hi hj
@@ -569,8 +569,8 @@ theorem fltCaseI_factor_pow_isPrincipal
     {a b c : ℤ} (heq : a ^ p + b ^ p = c ^ p)
     (hc : ¬ (p : ℤ) ∣ c) (hab : IsCoprime a b) {k : ℕ} (hk : k < p) :
     ∃ I : Ideal (𝓞 K), (I ^ p).IsPrincipal ∧
-      Ideal.span ({(a : 𝓞 K) +
-        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K)} :
+      Ideal.span ({((a : 𝓞 K) +
+        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K))} :
           Set (𝓞 K)) = I ^ p := by
   obtain ⟨I, hI⟩ := fltCaseI_factor_isPrincipal_pow p hp_odd K heq hc hab hk
   exact ⟨I, hI ▸ ⟨_, rfl⟩, hI⟩
@@ -592,13 +592,13 @@ theorem fltCaseI_factor_isPrincipal_of_regular
         (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K)) ≠ 0)
     {k : ℕ} (hk : k < p) :
     ∃ I : Ideal (𝓞 K), I.IsPrincipal ∧
-      Ideal.span ({(a : 𝓞 K) +
-        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K)} :
+      Ideal.span ({((a : 𝓞 K) +
+        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K))} :
           Set (𝓞 K)) = I ^ p := by
   obtain ⟨I, hI_pow_principal, hI⟩ :=
     fltCaseI_factor_pow_isPrincipal p hp_odd K heq hc hab hk
-  have h_span_ne : Ideal.span ({(a : 𝓞 K) +
-      (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K)} :
+  have h_span_ne : Ideal.span ({((a : 𝓞 K) +
+      (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K))} :
         Set (𝓞 K)) ≠ ⊥ :=
     fun hbot => h_factor_ne_zero k hk (Ideal.span_singleton_eq_bot.mp hbot)
   have hI_pow_ne : I ^ p ≠ ⊥ := hI ▸ h_span_ne
@@ -631,8 +631,8 @@ theorem fltCaseI_factor_eq_unit_mul_pow_of_regular
     fltCaseI_factor_isPrincipal_of_regular p hp_odd K h_reg heq hc hab
       h_factor_ne_zero hk
   obtain ⟨γ, hγ⟩ := hI_principal
-  have hI' : Ideal.span ({(a : 𝓞 K) +
-      (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K)} :
+  have hI' : Ideal.span ({((a : 𝓞 K) +
+      (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K))} :
         Set (𝓞 K)) = Ideal.span ({γ ^ p} : Set (𝓞 K)) := by
     rw [hI, ← Ideal.span_singleton_pow, ← Ideal.submodule_span_eq, ← hγ]
   obtain ⟨u, hu⟩ := Ideal.span_singleton_eq_span_singleton.mp hI'

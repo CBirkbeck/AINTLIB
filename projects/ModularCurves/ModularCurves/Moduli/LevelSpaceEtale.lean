@@ -324,8 +324,8 @@ theorem isFullLevel_baseChange_comp_iff (N : ℕ) [NeZero N] (hNV : NIsInvertibl
               ((bridgeEquiv E p t' tb).toAddMonoidHom.map_zsmul ((N : ℤ)) x').symm
           _ = 0 := by rw [hx']; exact (bridgeEquiv E p t' tb).toAddMonoidHom.map_zero
       have hx := h k tb ((bridgeEquiv E p t' tb) x') hkill
-      have hset : ({Point.pull (E.baseChange (t' ≫ p)) tb
-            (Point.asSection E (t' ≫ p) ((Point.baseChangeEquiv E p t') P')),
+      have hset : ({(Point.pull (E.baseChange (t' ≫ p)) tb
+            (Point.asSection E (t' ≫ p) ((Point.baseChangeEquiv E p t') P'))),
           Point.pull (E.baseChange (t' ≫ p)) tb
             (Point.asSection E (t' ≫ p) ((Point.baseChangeEquiv E p t') Q'))} :
             Set ((E.baseChange (t' ≫ p)).Point tb))
@@ -347,8 +347,8 @@ theorem isFullLevel_baseChange_comp_iff (N : ℕ) [NeZero N] (hNV : NIsInvertibl
               ((bridgeEquiv E p t' tb).symm.toAddMonoidHom.map_zsmul ((N : ℤ)) x).symm
           _ = 0 := by rw [hx]; exact (bridgeEquiv E p t' tb).symm.toAddMonoidHom.map_zero
       have hx' := h k tb ((bridgeEquiv E p t' tb).symm x) hkill
-      have hset : ({Point.pull ((E.baseChange p).baseChange t') tb
-            (Point.asSection (E.baseChange p) t' P'),
+      have hset : ({(Point.pull ((E.baseChange p).baseChange t') tb
+            (Point.asSection (E.baseChange p) t' P')),
           Point.pull ((E.baseChange p).baseChange t') tb
             (Point.asSection (E.baseChange p) t' Q')} :
             Set (((E.baseChange p).baseChange t').Point tb))

@@ -749,11 +749,8 @@ private theorem mu_bridge_lhs_e4 (U : (Opens ↥X)ᵒᵖ)
           (𝟙 X.ringCatSheaf.obj)).unit.app
             (MonoidalCategoryStruct.tensorObj A.val B.val))
         (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op (x ⊗ₜ y)).symm
-    have htm' : (MonoidalCategoryStruct.tensorObj A.val B.val).map
-        (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op (x ⊗ₜ y) =
-        (A.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x) ⊗ₜ
-          (B.val.map (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op y) :=
-      PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul _ x y
+    have htm' := PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul
+      (homOfLE (Scheme.Hom.image_preimage_le f U.unop)).op x y
     exact hunit.trans (hnat'.trans (congrArg
       (fun z => ((PresheafOfModules.sheafificationAdjunction
         (𝟙 X.ringCatSheaf.obj)).unit.app
@@ -1312,31 +1309,29 @@ private theorem slot_walk_tail (Wo : X.Opens) (g₁ : Γ(X, Wo))
                   (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op hg₁⟩)))) := by
   -- [A3] fuse the two mapped factors into the mapped tensor (typed have: the
   -- DFunLike annotation on `tensorObj_map_tmul` blocks `rw`; `exact` crosses it)
-  have e3 : (((Scheme.Modules.pullback Wo.ι).obj M).val.map (eqToHom hpre.symm).op
-        (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app M).val.app
-          (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U))) (M.val.map (homOfLE hIMle).op m))) ⊗ₜ
-      (((Scheme.Modules.pullback Wo.ι).obj
-          (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val.map
-        (eqToHom hpre.symm).op
-        (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app
-          (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val.app
-          (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)))
-          (⟨X.presheaf.map (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op g₁,
-            idealSections_map J₁ (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op hg₁⟩))) =
-      (MonoidalCategoryStruct.tensorObj
-          ((Scheme.Modules.pullback Wo.ι).obj M).val
-          ((Scheme.Modules.pullback Wo.ι).obj
-            (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val).map
-        (eqToHom hpre.symm).op
-        ((((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app M).val.app
-            (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U))) (M.val.map (homOfLE hIMle).op m)) ⊗ₜ
-          (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app
-            (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val.app
-            (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)))
-            (⟨X.presheaf.map (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op g₁,
-              idealSections_map J₁ (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op hg₁⟩))) :=
-    rfl
-  rw [e3]
+  have e3 := (PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul
+      (M₁ := ((Scheme.Modules.pullback Wo.ι).obj M).val)
+      (M₂ := ((Scheme.Modules.pullback Wo.ι).obj
+        (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val)
+      (eqToHom hpre.symm).op
+      (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app M).val.app
+        (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U))) (M.val.map (homOfLE hIMle).op m))
+      (((Scheme.Modules.pullbackPushforwardAdjunction Wo.ι).unit.app
+        (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val.app
+        (Opposite.op (Wo.ι ''ᵁ (Wo.ι ⁻¹ᵁ U)))
+        (⟨X.presheaf.map (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op g₁,
+          idealSections_map J₁ (homOfLE (Wo.ι_image_le (Wo.ι ⁻¹ᵁ U))).op hg₁⟩))).symm
+  refine Eq.trans (congrArg (fun z =>
+    (pullbackTensorObjIsoOfIsOpenImmersion Wo.ι M
+        (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).symm.hom.val.app
+      (Opposite.op (Wo.ι ⁻¹ᵁ U))
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 Wo.toScheme.ringCatSheaf.obj)).unit.app
+          (MonoidalCategoryStruct.tensorObj
+            ((Scheme.Modules.pullback Wo.ι).obj M).val
+            ((Scheme.Modules.pullback Wo.ι).obj
+              (AlgebraicGeometry.Scheme.Modules.idealModule J₁)).val)).app
+        (Opposite.op (Wo.ι ⁻¹ᵁ U)) z)) e3) ?_
   -- [A4+A5] cross the eqToHom re-index through the unit and the comparison at once
   refine Eq.trans (comparison_shUnit_app_map_eqToHom M J₁ Wo hpre.symm _) ?_
   -- [A6] the comparison value on the tmul of unit images at the image open
@@ -1691,19 +1686,13 @@ private theorem slot_sq_meet_inner_x {V W : X.Opens} (hWV : W ≤ V) (g₁ : Γ(
         (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val)).app
     (Opposite.op (W.ι ''ᵁ (W.ι ⁻¹ᵁ U)))) ?_
   -- [b4] the tensor restriction on the pure tensor is the tensor of restrictions
-  have e4 : (MonoidalCategoryStruct.tensorObj M.val
-      (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val).map
+  have e4 := PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul
+      (M₁ := M.val) (M₂ := (AlgebraicGeometry.Scheme.Modules.idealModule J₁).val)
       (homOfLE hle).op
-      ((M.val.map (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op m) ⊗ₜ
-        (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
-          idealSections_map J₁
-            (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩)) =
-      (M.val.map (homOfLE hle).op
-        (M.val.map (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op m)) ⊗ₜ
-      ((AlgebraicGeometry.Scheme.Modules.idealModule J₁).val.map (homOfLE hle).op
-        (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
-          idealSections_map J₁
-            (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩)) := rfl
+      (M.val.map (homOfLE (Scheme.Hom.image_preimage_le V.ι U)).op m)
+      (⟨X.presheaf.map (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op g₁,
+        idealSections_map J₁
+          (homOfLE (V.ι_image_le (V.ι ⁻¹ᵁ U))).op hg₁⟩)
   refine Eq.trans ?_ e4.symm
   -- [b5] the two legs: composite restrictions fuse (poset arrows are equal)
   have hm : M.val.map (homOfLE (Scheme.Hom.image_preimage_le W.ι U)).op m =

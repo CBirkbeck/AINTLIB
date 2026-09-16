@@ -257,8 +257,8 @@ theorem K2_2SourceData.ofCanonicalConcrete
       letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
       letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) :=
         CyclotomicLocalSetup.algebra_zmod_residueField (ℓ₀ := ℓ) (K₀ := K) P hℓ_in_P
-      Ideal.span ({phiPrimeGenDescent S
-        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero} : Set (𝓞 K)) =
+      Ideal.span ({(phiPrimeGenDescent S
+        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero)} : Set (𝓞 K)) =
         stickelbergerIdeal (p := p) (K := K) P) :
     letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) :=
@@ -324,8 +324,8 @@ theorem K2_2SourceData.ofCanonicalTraceForm
       letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
       letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) :=
         CyclotomicLocalSetup.algebra_zmod_residueField (ℓ₀ := ℓ) (K₀ := K) P hℓ_in_P
-      Ideal.span ({phiPrimeGenDescent S
-        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero} : Set (𝓞 K)) =
+      Ideal.span ({(phiPrimeGenDescent S
+        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero)} : Set (𝓞 K)) =
         stickelbergerIdeal (p := p) (K := K) P) :
     letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) :=

@@ -727,8 +727,8 @@ lemma gaussSumL_count_recursion {j : ℕ} (hj1 : 1 < j) (hjp : j < p)
   -- `span` of products = product of spans; `normalizedFactors_mul` splits the count.
   have hcount_lhs :
       (UniqueFactorizationMonoid.normalizedFactors
-          (Ideal.span ({gaussSum (χ ^ j) (addCharL (p := p) (ℓ := ℓ) (L := L)) *
-            jacobiSum (χ ^ (j - 1)) χ} : Set (𝓞 L)))).count 𝔓₀ =
+          (Ideal.span ({(gaussSum (χ ^ j) (addCharL (p := p) (ℓ := ℓ) (L := L)) *
+            jacobiSum (χ ^ (j - 1)) χ)} : Set (𝓞 L)))).count 𝔓₀ =
         (UniqueFactorizationMonoid.normalizedFactors
             (Ideal.span ({gaussSum (χ ^ j) (addCharL (p := p) (ℓ := ℓ) (L := L))} :
               Set (𝓞 L)))).count 𝔓₀ +
@@ -740,8 +740,8 @@ lemma gaussSumL_count_recursion {j : ℕ} (hj1 : 1 < j) (hjp : j < p)
         (Ideal.span_singleton_eq_bot.not.mpr hJ), Multiset.count_add]
   have hcount_rhs :
       (UniqueFactorizationMonoid.normalizedFactors
-          (Ideal.span ({gaussSum (χ ^ (j - 1)) (addCharL (p := p) (ℓ := ℓ) (L := L)) *
-            gaussSum χ (addCharL (p := p) (ℓ := ℓ) (L := L))} : Set (𝓞 L)))).count 𝔓₀ =
+          (Ideal.span ({(gaussSum (χ ^ (j - 1)) (addCharL (p := p) (ℓ := ℓ) (L := L)) *
+            gaussSum χ (addCharL (p := p) (ℓ := ℓ) (L := L)))} : Set (𝓞 L)))).count 𝔓₀ =
         (UniqueFactorizationMonoid.normalizedFactors
             (Ideal.span ({gaussSum (χ ^ (j - 1)) (addCharL (p := p) (ℓ := ℓ) (L := L))} :
               Set (𝓞 L)))).count 𝔓₀ +
@@ -985,10 +985,10 @@ This is the mechanism that ties the orbit valuations together; it requires the
 def GaussSumGaloisTwist : Prop :=
   ∀ (χ : MulChar (ZMod ℓ) (𝓞 L)), orderOf χ = p →
     ∀ a : (ZMod p)ˣ, ∃ σ : 𝓞 L ≃+* 𝓞 L,
-      (Ideal.span ({gaussSum (χ ^ (a : ZMod p).val)
-          (addCharL (p := p) (ℓ := ℓ) (L := L))} : Set (𝓞 L))) =
-        Ideal.map σ (Ideal.span ({gaussSum χ
-          (addCharL (p := p) (ℓ := ℓ) (L := L))} : Set (𝓞 L)))
+      (Ideal.span ({(gaussSum (χ ^ (a : ZMod p).val)
+          (addCharL (p := p) (ℓ := ℓ) (L := L)))} : Set (𝓞 L))) =
+        Ideal.map σ (Ideal.span ({(gaussSum χ
+          (addCharL (p := p) (ℓ := ℓ) (L := L)))} : Set (𝓞 L)))
 
 /-- **(iv-b2) THE deepest sub-leaf: single-prime power-character valuation
 (Stickelberger congruence proper).**
@@ -1044,8 +1044,8 @@ def SinglePrimePowerValuation : Prop :=
     ∀ (𝔓₀ : Ideal (𝓞 L)), 𝔓₀.IsPrime → 𝔓₀.LiesOver (Ideal.span {(ℓ : ℤ)}) →
       ∃ b₀ : (ZMod p)ˣ, ∀ j : (ZMod p)ˣ,
         (UniqueFactorizationMonoid.normalizedFactors
-          (Ideal.span ({gaussSum (χ ^ (j : ZMod p).val)
-            (addCharL (p := p) (ℓ := ℓ) (L := L))} : Set (𝓞 L)))).count 𝔓₀ =
+          (Ideal.span ({(gaussSum (χ ^ (j : ZMod p).val)
+            (addCharL (p := p) (ℓ := ℓ) (L := L)))} : Set (𝓞 L)))).count 𝔓₀ =
           ((j * b₀ : (ZMod p)ˣ) : ZMod p).val
 
 /-- **(iv) Stickelberger digit-sum valuation — THE deep theorem (Gross–Koblitz /

@@ -1743,9 +1743,9 @@ theorem isTranslateMaxIdealCompatible_on_CoordinateRing_some
       (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) h := by
   obtain ⟨h_xy_x, h_xy_y⟩ := isTranslateXY_evaluatesAt_some W P xk yk h_ns h
   intro r h_mem
-  have h_mem' : r ∈ Ideal.span ({Affine.CoordinateRing.XClass (W_smooth W).toAffine
+  have h_mem' : r ∈ Ideal.span ({(Affine.CoordinateRing.XClass (W_smooth W).toAffine
         (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-          (W_smooth W).toAffine.Point) h).x,
+          (W_smooth W).toAffine.Point) h).x),
       Affine.CoordinateRing.YClass (W_smooth W).toAffine
         (Polynomial.C (P.translate_of_finite (Affine.Point.some xk yk h_ns :
           (W_smooth W).toAffine.Point) h).y)} :

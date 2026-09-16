@@ -152,8 +152,8 @@ theorem K2_2_phiPrimeGen_of_canonical_zeta_choices_via_extracted_unit_index_one
     {ℓ' : ℕ} [Fact ℓ'.Prime] [CharP (𝓞 R' ⧸ 𝔭) ℓ']
     (hℓ_ne_ℓ' : ℓ ≠ ℓ')
     (h_span : letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-      Ideal.span ({phiPrimeGenDescent S
-        (le_refl 1) h_one_le_p_minus_one h_ne_zero} : Set (𝓞 K)) =
+      Ideal.span ({(phiPrimeGenDescent S
+        (le_refl 1) h_one_le_p_minus_one h_ne_zero)} : Set (𝓞 K)) =
         stickelbergerIdeal (p := p) (K := K) P)
     (h_stick_gen_notin :
       letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
@@ -166,8 +166,8 @@ theorem K2_2_phiPrimeGen_of_canonical_zeta_choices_via_extracted_unit_index_one
       letI h_phi_ne := phiPrimeGenDescent_ne_zero S
         (le_refl 1) h_one_le_p_minus_one h_ne_zero
       letI h_span_eq : Ideal.span ({h_stick.gen} : Set (𝓞 K)) =
-        Ideal.span ({phiPrimeGenDescent S
-          (le_refl 1) h_one_le_p_minus_one h_ne_zero} : Set (𝓞 K)) := by
+        Ideal.span ({(phiPrimeGenDescent S
+          (le_refl 1) h_one_le_p_minus_one h_ne_zero)} : Set (𝓞 K)) := by
         rw [h_stick.span_gen, ← h_span]
       BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
         (p := p) (K := K)

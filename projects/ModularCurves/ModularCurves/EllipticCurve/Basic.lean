@@ -120,7 +120,6 @@ lemma FibrewiseElliptic.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
       apply pullback.hom_ext
       · simp [sectionFiberPoint, Category.assoc]
       · simp [sectionFiberPoint, Category.assoc]
-        exact Category.id_comp _
     apply pullback.hom_ext
     · simp only [Category.assoc]
       rw [hA.isoPullback_hom_fst, hB.isoPullback_hom_fst, projModelZero_baseChange,

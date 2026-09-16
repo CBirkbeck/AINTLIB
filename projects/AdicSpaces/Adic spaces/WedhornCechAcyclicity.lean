@@ -3145,8 +3145,8 @@ set_option linter.unusedSectionVars false in
 /-- The annulus ideal `(b − X, 1 − bY)` over `B`, abbreviated. -/
 private noncomputable def unitCover_overlapIdeal [IsTateRing A] [IsNoetherianRing A]
     (D₀ : RationalLocData A) (f : A) : Ideal ↥(TateAlgebra₂ (presheafValue D₀)) :=
-  Ideal.span {algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀))
-      (D₀.canonicalMap f) - TateAlgebra₂.X,
+  Ideal.span {(algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀))
+      (D₀.canonicalMap f) - TateAlgebra₂.X),
     1 - algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀))
       (D₀.canonicalMap f) * TateAlgebra₂.Y}
 
@@ -6364,8 +6364,8 @@ private theorem unitCover_example638Plus_symm_mk
       CompleteSpace (presheafValue D₀)) :=
       presheafValue_completeSpace_rightUniformSpace D₀
     (unitCover_example638Plus D₀ f).symm (Ideal.Quotient.mk
-        (Ideal.span {algebraMap (presheafValue D₀) ↥(TateAlgebra (presheafValue D₀))
-          (D₀.canonicalMap f) - TateAlgebra.X}) z) =
+        (Ideal.span {(algebraMap (presheafValue D₀) ↥(TateAlgebra (presheafValue D₀))
+          (D₀.canonicalMap f) - TateAlgebra.X)}) z) =
       example638_evalHom (unitDatum (presheafValue_concretePair D₀)
         (D₀.canonicalMap f)) z := by
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
@@ -6416,13 +6416,13 @@ private theorem unitCover_example638Plus_symm_continuous
        CompleteSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
   have hQM : Topology.IsQuotientMap (Ideal.Quotient.mk
-      (Ideal.span {algebraMap (presheafValue D₀) ↥(TateAlgebra (presheafValue D₀))
-        (D₀.canonicalMap f) - TateAlgebra.X})) :=
+      (Ideal.span {(algebraMap (presheafValue D₀) ↥(TateAlgebra (presheafValue D₀))
+        (D₀.canonicalMap f) - TateAlgebra.X)})) :=
     (QuotientRing.isOpenQuotientMap_mk _).isQuotientMap
   rw [hQM.continuous_iff]
   have hfun : ⇑((unitCover_example638Plus D₀ f).symm) ∘ ⇑(Ideal.Quotient.mk
-      (Ideal.span {algebraMap (presheafValue D₀) ↥(TateAlgebra (presheafValue D₀))
-        (D₀.canonicalMap f) - TateAlgebra.X})) =
+      (Ideal.span {(algebraMap (presheafValue D₀) ↥(TateAlgebra (presheafValue D₀))
+        (D₀.canonicalMap f) - TateAlgebra.X)})) =
       ⇑(example638_evalHom (unitDatum (presheafValue_concretePair D₀)
         (D₀.canonicalMap f))) :=
     funext fun z ↦ unitCover_example638Plus_symm_mk D₀ f z
@@ -6440,8 +6440,8 @@ private theorem unitCover_example639Minus_symm_mk
     (D₀ : RationalLocData A) (f : A)
     (hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f)))
     (z : ↥(TateAlgebra (presheafValue D₀)) ⧸
-      Ideal.span {1 - algebraMap (presheafValue D₀)
-        ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}) :
+      Ideal.span {(1 - algebraMap (presheafValue D₀)
+        ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X)}) :
     (unitCover_example639Minus D₀ f).symm z =
       tateQuotientToPresheafHom (unitCover_minusDatum_B D₀ f) hb z :=
   rfl
@@ -6651,8 +6651,8 @@ private theorem unitCover_sq_plus_dense
         (RationalLocData.interSamePair_subset_left _ _ _)
       (unitCover_relPlus_backward D₀ f
         ((unitCover_example638Plus D₀ f).symm
-          (Ideal.Quotient.mk (Ideal.span {algebraMap (presheafValue D₀)
-            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) - TateAlgebra.X}) z))) =
+          (Ideal.Quotient.mk (Ideal.span {(algebraMap (presheafValue D₀)
+            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) - TateAlgebra.X)}) z))) =
     unitCover_relOverlap_backward D₀ f
       (unitCover_overlapEval D₀ f (LaurentTateAlgebra.posIncl z)) := by
   classical
@@ -6691,9 +6691,9 @@ private theorem unitCover_sq_plus_dense
         (RationalLocData.interSamePair_subset_left _ _ _)
       (unitCover_relPlus_backward D₀ f
         ((unitCover_example638Plus D₀ f).symm
-          (Ideal.Quotient.mk (Ideal.span {algebraMap (presheafValue D₀)
+          (Ideal.Quotient.mk (Ideal.span {(algebraMap (presheafValue D₀)
             ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) -
-              TateAlgebra.X}) z)))) =
+              TateAlgebra.X)}) z)))) =
     (fun z : ↥(TateAlgebra (presheafValue D₀)) ↦
       unitCover_relOverlap_backward D₀ f
         (unitCover_overlapEval D₀ f (LaurentTateAlgebra.posIncl z))) := by
@@ -6714,8 +6714,8 @@ private theorem unitCover_sq_plus_dense
         (RationalLocData.interSamePair_subset_left _ _ _)).comp
         ((unitCover_relPlus_backward D₀ f).comp
           ((RingEquiv.toRingHom (unitCover_example638Plus D₀ f).symm).comp
-            (Ideal.Quotient.mk (Ideal.span {algebraMap (presheafValue D₀)
-              ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) - TateAlgebra.X}))))).comp
+            (Ideal.Quotient.mk (Ideal.span {(algebraMap (presheafValue D₀)
+              ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) - TateAlgebra.X)}))))).comp
           (MvTateAlgebra.mvPolynomialToTate (A := presheafValue D₀) 1) =
         ((unitCover_relOverlap_backward D₀ f).comp
         ((unitCover_overlapEval D₀ f).comp
@@ -6884,8 +6884,8 @@ private theorem unitCover_posLift_bridgePlus
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   obtain ⟨z, hz⟩ := Ideal.Quotient.mk_surjective (unitCover_bridgePlus D₀ f g₁)
   have hg₁ : g₁ = (unitCover_bridgePlus D₀ f).symm (Ideal.Quotient.mk
-      (Ideal.span {algebraMap (presheafValue D₀) ↥(TateAlgebra (presheafValue D₀))
-        (D₀.canonicalMap f) - TateAlgebra.X}) z) := by
+      (Ideal.span {(algebraMap (presheafValue D₀) ↥(TateAlgebra (presheafValue D₀))
+        (D₀.canonicalMap f) - TateAlgebra.X)}) z) := by
     rw [hz, RingEquiv.symm_apply_apply]
   rw [← hz]
   refine (unitCover_bridgeOverlap D₀ f).symm.injective ?_
@@ -6977,8 +6977,8 @@ private theorem unitCover_sq_minus_dense
         (RationalLocData.interSamePair_subset_right _ _ _)
       (unitCover_relMinus_backward D₀ f
         ((unitCover_example639Minus D₀ f).symm
-          (Ideal.Quotient.mk (Ideal.span {1 - algebraMap (presheafValue D₀)
-            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}) z))) =
+          (Ideal.Quotient.mk (Ideal.span {(1 - algebraMap (presheafValue D₀)
+            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X)}) z))) =
     unitCover_relOverlap_backward D₀ f
       (unitCover_overlapEval D₀ f (LaurentTateAlgebra.negIncl z)) := by
   classical
@@ -7016,8 +7016,8 @@ private theorem unitCover_sq_minus_dense
         (RationalLocData.interSamePair_subset_right _ _ _)
       (unitCover_relMinus_backward D₀ f
         ((unitCover_example639Minus D₀ f).symm
-          (Ideal.Quotient.mk (Ideal.span {1 - algebraMap (presheafValue D₀)
-            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}) z)))) =
+          (Ideal.Quotient.mk (Ideal.span {(1 - algebraMap (presheafValue D₀)
+            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X)}) z)))) =
     (fun z : ↥(TateAlgebra (presheafValue D₀)) ↦
       unitCover_relOverlap_backward D₀ f
         (unitCover_overlapEval D₀ f (LaurentTateAlgebra.negIncl z))) := by
@@ -7043,8 +7043,8 @@ private theorem unitCover_sq_minus_dense
         (RationalLocData.interSamePair_subset_right _ _ _)).comp
         ((unitCover_relMinus_backward D₀ f).comp
           ((RingEquiv.toRingHom (unitCover_example639Minus D₀ f).symm).comp
-            (Ideal.Quotient.mk (Ideal.span {1 - algebraMap (presheafValue D₀)
-            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}))))).comp
+            (Ideal.Quotient.mk (Ideal.span {(1 - algebraMap (presheafValue D₀)
+            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X)}))))).comp
           (MvTateAlgebra.mvPolynomialToTate (A := presheafValue D₀) 1) =
         ((unitCover_relOverlap_backward D₀ f).comp
           ((unitCover_overlapEval D₀ f).comp
@@ -7221,8 +7221,8 @@ private theorem unitCover_negLift_bridgeMinus
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   obtain ⟨z, hz⟩ := Ideal.Quotient.mk_surjective (unitCover_bridgeMinus D₀ f g₂)
   have hg₂ : g₂ = (unitCover_bridgeMinus D₀ f).symm (Ideal.Quotient.mk
-      (Ideal.span {1 - algebraMap (presheafValue D₀) ↥(TateAlgebra (presheafValue D₀))
-        (D₀.canonicalMap f) * TateAlgebra.X}) z) := by
+      (Ideal.span {(1 - algebraMap (presheafValue D₀) ↥(TateAlgebra (presheafValue D₀))
+        (D₀.canonicalMap f) * TateAlgebra.X)}) z) := by
     rw [hz, RingEquiv.symm_apply_apply]
   rw [← hz]
   refine (unitCover_bridgeOverlap D₀ f).symm.injective ?_

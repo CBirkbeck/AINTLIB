@@ -344,12 +344,12 @@ the linear descent identity `(x)·J_η = (y)·J_η₀` of
 `caseII_descended_anchored_real_generators`. -/
 theorem caseII_pair_two_prime_cross_eq {m : ℕ} (D : RealCaseIIData37 K m)
     (hp : (37 : ℕ) ≠ 2) (η η₀ : nthRootsFinset 37 (1 : 𝓞 K)) :
-    Ideal.span ({(D.x + D.y * (η₀ : 𝓞 K)) *
-        (D.x + D.y * ((caseII_etaInv η₀ : 𝓞 K))) } : Set (𝓞 K)) *
+    Ideal.span ({((D.x + D.y * (η₀ : 𝓞 K)) *
+        (D.x + D.y * ((caseII_etaInv η₀ : 𝓞 K)))) } : Set (𝓞 K)) *
       (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η *
         rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η)) ^ 37 =
-    Ideal.span ({(D.x + D.y * (η : 𝓞 K)) *
-        (D.x + D.y * ((caseII_etaInv η : 𝓞 K))) } : Set (𝓞 K)) *
+    Ideal.span ({((D.x + D.y * (η : 𝓞 K)) *
+        (D.x + D.y * ((caseII_etaInv η : 𝓞 K)))) } : Set (𝓞 K)) *
       (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η₀ *
         rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy
           (caseII_etaInv η₀)) ^ 37 := by
@@ -2421,8 +2421,8 @@ theorem caseII_p_pow_dvd_a_caseII_etaInv_etaZero {m : ℕ} (D : RealCaseIIData37
     Ideal.dvd_iff_le.mpr h_map_le
   rw [RealCaseIIData37.map_rootIdeal D hp D.etaZero] at h_sigma_dvd
   rw [Ideal.map_pow, Ideal.map_span, Set.image_singleton] at h_sigma_dvd
-  rwa [show Ideal.span ({(NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom
-          (D.hζ.toInteger - 1)} : Set (𝓞 K)) =
+  rwa [show Ideal.span ({((NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom
+          (D.hζ.toInteger - 1))} : Set (𝓞 K)) =
       Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) from ?_] at h_sigma_dvd
   · exact Ideal.span_singleton_eq_span_singleton.mpr
       (caseII_sigma_zeta_sub_one_associated D).symm
@@ -3014,14 +3014,14 @@ theorem caseII_sigma_pair_pow37_cross_realGenerator_associated {m : ℕ}
   have h_LHS : Ideal.span ({algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.xPlus} :
         Set (𝓞 K)) ^ 37 *
         Ideal.span ({caseII_data_pair_realGenerator_K D η} : Set (𝓞 K)) =
-      Ideal.span ({(algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.xPlus) ^ 37 *
-        caseII_data_pair_realGenerator_K D η} : Set (𝓞 K)) := by
+      Ideal.span ({((algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.xPlus) ^ 37 *
+        caseII_data_pair_realGenerator_K D η)} : Set (𝓞 K)) := by
     rw [Ideal.span_singleton_pow, Ideal.span_singleton_mul_span_singleton]
   have h_RHS : Ideal.span ({algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.yPlus} :
         Set (𝓞 K)) ^ 37 *
         Ideal.span ({caseII_data_pair_realGenerator_K D D.etaZero} : Set (𝓞 K)) =
-      Ideal.span ({(algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.yPlus) ^ 37 *
-        caseII_data_pair_realGenerator_K D D.etaZero} : Set (𝓞 K)) := by
+      Ideal.span ({((algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.yPlus) ^ 37 *
+        caseII_data_pair_realGenerator_K D D.etaZero)} : Set (𝓞 K)) := by
     rw [Ideal.span_singleton_pow, Ideal.span_singleton_mul_span_singleton]
   rw [h_LHS, h_RHS] at h
   exact Ideal.span_singleton_eq_span_singleton.mp h
@@ -4077,13 +4077,13 @@ theorem caseII_span_LambdaCyc_pow_dvd_K_plus_LHS_span {m : ℕ}
     ∃ u_KP : (𝓞 (NumberField.maximalRealSubfield K))ˣ,
       Ideal.span ({caseII_LambdaCyc D} :
           Set (𝓞 (NumberField.maximalRealSubfield K))) ^ (37 * m) ∣
-        Ideal.span ({G.xPlus ^ 37 *
+        Ideal.span ({(G.xPlus ^ 37 *
           caseII_pair_realGenerator_div_LambdaCyc_general D hp η *
-          (u_KP : 𝓞 _)} : Set (𝓞 (NumberField.maximalRealSubfield K))) := by
+          (u_KP : 𝓞 _))} : Set (𝓞 (NumberField.maximalRealSubfield K))) := by
   obtain ⟨u_KP, h⟩ := caseII_LambdaCyc_pow_dvd_xPlus_pow_times_Q D hp η G
   refine ⟨u_KP, ?_⟩
-  have h_le : Ideal.span ({G.xPlus ^ 37 *
-      caseII_pair_realGenerator_div_LambdaCyc_general D hp η * (u_KP : 𝓞 _)} :
+  have h_le : Ideal.span ({(G.xPlus ^ 37 *
+      caseII_pair_realGenerator_div_LambdaCyc_general D hp η * (u_KP : 𝓞 _))} :
       Set (𝓞 (NumberField.maximalRealSubfield K))) ≤
       Ideal.span ({caseII_LambdaCyc D ^ (37 * m)} :
         Set (𝓞 (NumberField.maximalRealSubfield K))) :=
@@ -4101,8 +4101,8 @@ theorem caseII_span_LHS_factored {m : ℕ} (D : RealCaseIIData37 K m)
     (hp : (37 : ℕ) ≠ 2) (η : nthRootsFinset 37 (1 : 𝓞 K))
     (G : CaseIISigmaPairAnchoredFixedGenerator37 D hp η)
     (u_KP : (𝓞 (NumberField.maximalRealSubfield K))ˣ) :
-    Ideal.span ({G.xPlus ^ 37 *
-        caseII_pair_realGenerator_div_LambdaCyc_general D hp η * (u_KP : 𝓞 _)} :
+    Ideal.span ({(G.xPlus ^ 37 *
+        caseII_pair_realGenerator_div_LambdaCyc_general D hp η * (u_KP : 𝓞 _))} :
         Set (𝓞 (NumberField.maximalRealSubfield K))) =
       Ideal.span ({G.xPlus} :
           Set (𝓞 (NumberField.maximalRealSubfield K))) ^ 37 *

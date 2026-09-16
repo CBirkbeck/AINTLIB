@@ -138,6 +138,9 @@ private lemma baseChangeEquiv_pull_asSection {X Y : EllObj R} (f : X ⟶ Y)
   rw [Category.assoc, EllipticCurve.Point.asSection_val_fst]
   rfl
 
+-- `map_zsmul`/`map_zero` at `Point.baseChangeEquiv` no longer fit the default
+-- `synthInstance.maxHeartbeats` budget.
+set_option synthInstance.maxHeartbeats 80000 in
 /-- Naive `Γ₁(N)` structures transport to the base change along an `Ell/R` morphism's base:
 the target-side input of `isNaiveGammaOne_pullSection_iff`. -/
 private lemma isNaiveGammaOne_asSection_pull (N : ℕ) [NeZero N] {X Y : EllObj R} (f : X ⟶ Y)

@@ -200,7 +200,8 @@ theorem exists_frame_pow (M : X.Modules) {ι : Type*} (W : ι → X.Opens)
       toSkeleton A = toSkeleton M ^ k ∧ (∀ i, IsFrame A (W i) (σ i)) ∧
         ∀ i j, A.val.map (homOfLE (inf_le_left : W i ⊓ W j ≤ W i)).op (σ i) =
           ((transitionUnitOfCover M W e i j : Γ(X, W i ⊓ W j)) ^ k) •
-            A.val.map (homOfLE (inf_le_right : W i ⊓ W j ≤ W j)).op (σ j) := by
+            show Γ(A, W i ⊓ W j) from
+              A.val.map (homOfLE (inf_le_right : W i ⊓ W j ≤ W j)).op (σ j) := by
   induction k with
   | zero =>
     refine ⟨Scheme.Modules.unitObj X, fun i => (1 : Γ(X, W i)), ?_,
@@ -220,7 +221,8 @@ theorem exists_frame_pow (M : X.Modules) {ι : Type*} (W : ι → X.Opens)
       have hR : W i ⊓ W j ≤ W j := inf_le_right
       have hμ : M.val.map (homOfLE hL).op (overTrivializationSection M (W i) (e i) 1) =
           (transitionUnitOfCover M W e i j : Γ(X, W i ⊓ W j)) •
-            M.val.map (homOfLE hR).op (overTrivializationSection M (W j) (e j) 1) :=
+            show Γ(M, W i ⊓ W j) from
+              M.val.map (homOfLE hR).op (overTrivializationSection M (W j) (e j) 1) :=
         frame_eq_transitionUnit_smul _ _
           ((frameCoeff_restrict M hL (e i) _).trans
             ((congrArg (X.presheaf.map (homOfLE hL).op).hom
@@ -242,7 +244,8 @@ theorem exists_frame_mul (M M' : X.Modules) {ι : Type*} (W : ι → X.Opens)
         ∀ i j, (M ⊗ M').val.map (homOfLE (inf_le_left : W i ⊓ W j ≤ W i)).op (σ i) =
           ((transitionUnitOfCover M W e i j : Γ(X, W i ⊓ W j)) *
               (transitionUnitOfCover M' W e' i j : Γ(X, W i ⊓ W j))) •
-            (M ⊗ M').val.map (homOfLE (inf_le_right : W i ⊓ W j ≤ W j)).op (σ j) := by
+            show Γ(M ⊗ M', W i ⊓ W j) from
+              (M ⊗ M').val.map (homOfLE (inf_le_right : W i ⊓ W j ≤ W j)).op (σ j) := by
   refine ⟨fun i => tensorSection M M' (W i) (overTrivializationSection M (W i) (e i) 1)
     (overTrivializationSection M' (W i) (e' i) 1),
     fun i => (isFrame_overTrivializationSection M (W i) (e i)).tensor
@@ -251,7 +254,8 @@ theorem exists_frame_mul (M M' : X.Modules) {ι : Type*} (W : ι → X.Opens)
   have hR : W i ⊓ W j ≤ W j := inf_le_right
   have hμ : M.val.map (homOfLE hL).op (overTrivializationSection M (W i) (e i) 1) =
       (transitionUnitOfCover M W e i j : Γ(X, W i ⊓ W j)) •
-        M.val.map (homOfLE hR).op (overTrivializationSection M (W j) (e j) 1) :=
+        show Γ(M, W i ⊓ W j) from
+          M.val.map (homOfLE hR).op (overTrivializationSection M (W j) (e j) 1) :=
     frame_eq_transitionUnit_smul _ _
       ((frameCoeff_restrict M hL (e i) _).trans
         ((congrArg (X.presheaf.map (homOfLE hL).op).hom
@@ -261,7 +265,8 @@ theorem exists_frame_mul (M M' : X.Modules) {ι : Type*} (W : ι → X.Opens)
           (overTrivializationSection_coefficient M (W j) (e j) 1)).trans (map_one _)))
   have hμ' : M'.val.map (homOfLE hL).op (overTrivializationSection M' (W i) (e' i) 1) =
       (transitionUnitOfCover M' W e' i j : Γ(X, W i ⊓ W j)) •
-        M'.val.map (homOfLE hR).op (overTrivializationSection M' (W j) (e' j) 1) :=
+        show Γ(M', W i ⊓ W j) from
+          M'.val.map (homOfLE hR).op (overTrivializationSection M' (W j) (e' j) 1) :=
     frame_eq_transitionUnit_smul _ _
       ((frameCoeff_restrict M' hL (e' i) _).trans
         ((congrArg (X.presheaf.map (homOfLE hL).op).hom
@@ -281,7 +286,8 @@ theorem exists_over_trivialization_of_frames (A : X.Modules) {ι : Type*}
     (r : ∀ i j, Γ(X, W i ⊓ W j)ˣ)
     (hrel : ∀ i j, A.val.map (homOfLE (inf_le_left : W i ⊓ W j ≤ W i)).op (σ i) =
       (r i j : Γ(X, W i ⊓ W j)) •
-        A.val.map (homOfLE (inf_le_right : W i ⊓ W j ≤ W j)).op (σ j)) :
+        show Γ(A, W i ⊓ W j) from
+          A.val.map (homOfLE (inf_le_right : W i ⊓ W j ≤ W j)).op (σ j)) :
     ∃ e'' : ∀ i, A.over (W i) ≅ SheafOfModules.unit (X.ringCatSheaf.over (W i)),
       ∀ i j, transitionUnitOfCover A W e'' i j = r i j := by
   refine ⟨fun i => (hfr i).choose, fun i j => ?_⟩
@@ -301,7 +307,7 @@ theorem exists_over_trivialization_of_frames (A : X.Modules) {ι : Type*}
         (map_one _))
   have hdict : A.val.map (homOfLE hL).op (σ i) =
       (transitionUnitOfCover A W (fun i => (hfr i).choose) i j : Γ(X, W i ⊓ W j)) •
-        A.val.map (homOfLE hR).op (σ j) :=
+        show Γ(A, W i ⊓ W j) from A.val.map (homOfLE hR).op (σ j) :=
     frame_eq_transitionUnit_smul _ _ hσi hσj
   -- cancel on the frame by reading coefficients in the `j`-restricted trivialisation
   refine Units.ext ?_
@@ -309,7 +315,7 @@ theorem exists_over_trivialization_of_frames (A : X.Modules) {ι : Type*}
       frameCoeff A (W i ⊓ W j)
         (restrictOverTrivialization X.ringCatSheaf A (W j) (hfr j).choose
           (Over.mk (homOfLE hR)))
-        (a • A.val.map (homOfLE hR).op (σ j)) = a := by
+        (a • show Γ(A, W i ⊓ W j) from A.val.map (homOfLE hR).op (σ j)) = a := by
     intro a
     rw [frameCoeff_eq_evalSection, evalSection_smul_right, ← frameCoeff_eq_evalSection,
       hσj, smul_eq_mul, mul_one]
@@ -318,7 +324,8 @@ theorem exists_over_trivialization_of_frames (A : X.Modules) {ι : Type*}
           (restrictOverTrivialization X.ringCatSheaf A (W j) (hfr j).choose
             (Over.mk (homOfLE hR)))
           ((transitionUnitOfCover A W (fun i => (hfr i).choose) i j :
-            Γ(X, W i ⊓ W j)) • A.val.map (homOfLE hR).op (σ j)) := (hread _).symm
+            Γ(X, W i ⊓ W j)) • show Γ(A, W i ⊓ W j) from
+              A.val.map (homOfLE hR).op (σ j)) := (hread _).symm
     _ = frameCoeff A (W i ⊓ W j)
           (restrictOverTrivialization X.ringCatSheaf A (W j) (hfr j).choose
             (Over.mk (homOfLE hR))) (A.val.map (homOfLE hL).op (σ i)) :=
@@ -326,7 +333,8 @@ theorem exists_over_trivialization_of_frames (A : X.Modules) {ι : Type*}
     _ = frameCoeff A (W i ⊓ W j)
           (restrictOverTrivialization X.ringCatSheaf A (W j) (hfr j).choose
             (Over.mk (homOfLE hR)))
-          ((r i j : Γ(X, W i ⊓ W j)) • A.val.map (homOfLE hR).op (σ j)) :=
+          ((r i j : Γ(X, W i ⊓ W j)) • show Γ(A, W i ⊓ W j) from
+            A.val.map (homOfLE hR).op (σ j)) :=
         congrArg _ (hrel i j)
     _ = (r i j : Γ(X, W i ⊓ W j)) := hread _
 

@@ -122,8 +122,8 @@ theorem PhiPrimeElement.ofDescentIndexOne_gamma_isSemiPrimary
     (S : FullTeichDworkSetup ℓ p k K R')
     (h_ne_zero : S.gaussSumInt 1 ^ p ≠ 0)
     {P : Ideal (𝓞 K)}
-    (h_span : Ideal.span ({phiPrimeGenDescent S
-        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero} : Set (𝓞 K)) =
+    (h_span : Ideal.span ({(phiPrimeGenDescent S
+        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero)} : Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P)
     (hp_three : 3 ≤ p)
     (h_zeta_p_int_eq :
@@ -147,8 +147,8 @@ theorem PhiPrimeElement.ofDescentSubOne_gamma_isSemiPrimary
     (S : FullTeichDworkSetup ℓ p k K R')
     (h_ne_zero : S.gaussSumInt (p - 1) ^ p ≠ 0)
     {P : Ideal (𝓞 K)}
-    (h_span : Ideal.span ({phiPrimeGenDescent S
-        (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero} :
+    (h_span : Ideal.span ({(phiPrimeGenDescent S
+        (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero)} :
           Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) P)
     (hp_three : 3 ≤ p)

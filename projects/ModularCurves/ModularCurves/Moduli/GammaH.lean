@@ -311,6 +311,9 @@ noncomputable def hOrbitSetoid {N : ℕ} [NeZero N]
     · rintro L L' L'' ⟨g, hg, rfl⟩ ⟨g', hg', rfl⟩
       exact ⟨g * g', H.mul_mem hg hg', by rw [E.glSmul_mul]⟩⟩
 
+-- `map_zsmul`/`map_zero` at `Point.baseChangeEquiv` no longer fit the default
+-- `synthInstance.maxHeartbeats` budget.
+set_option synthInstance.maxHeartbeats 80000 in
 /-- **(T-H2b, membership)** The naive full-level condition is stable under base change:
 killing transports through `pull_zsmul`/`asSection_zsmul`, and fibrewise generation
 transports through the additive base-change point dictionary `Point.baseChangeEquiv`

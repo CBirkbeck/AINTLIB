@@ -1094,8 +1094,8 @@ theorem stage2KummerRatioK_of_AK5_unit_form_and_p_congr_cyclotomic
       {ζ : 𝓞 (CyclotomicField p ℚ)} (_hζ : IsPrimitiveRoot ζ p)
       (hab : ¬ (a = 0 ∧ b = 0))
       (I : Ideal (𝓞 (CyclotomicField p ℚ))) (_hI_ne : I ≠ ⊥)
-      (_hI_pow : Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) +
-        ζ * (b : 𝓞 (CyclotomicField p ℚ))} :
+      (_hI_pow : Ideal.span ({((a : 𝓞 (CyclotomicField p ℚ)) +
+        ζ * (b : 𝓞 (CyclotomicField p ℚ)))} :
           Set (𝓞 (CyclotomicField p ℚ))) = I ^ p),
       ∃ (γ : CyclotomicField p ℚ) (_hγ_ne : γ ≠ 0)
         (u : (𝓞 (CyclotomicField p ℚ))ˣ),
@@ -2173,8 +2173,8 @@ theorem stage2KummerRatioK_of_factor_class_square_eq_and_not_dvd_hPlus_cyclotomi
         ¬ (p : ℤ) ∣ a * b * c → a ^ p + b ^ p = c ^ p →
         ∀ {ζ : 𝓞 (CyclotomicField p ℚ)}, IsPrimitiveRoot ζ p →
         ∀ {I : Ideal (𝓞 (CyclotomicField p ℚ))}, (hI_nz : I ≠ ⊥) →
-          Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) +
-            ζ * (b : 𝓞 (CyclotomicField p ℚ))} :
+          Ideal.span ({((a : 𝓞 (CyclotomicField p ℚ)) +
+            ζ * (b : 𝓞 (CyclotomicField p ℚ)))} :
               Set (𝓞 (CyclotomicField p ℚ))) = I ^ p →
           (ClassGroup.mk0
               (⟨Ideal.map

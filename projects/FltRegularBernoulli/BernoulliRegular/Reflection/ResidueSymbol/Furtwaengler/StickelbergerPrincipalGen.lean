@@ -147,8 +147,8 @@ theorem span_stickelbergerPrincipalGen (α : 𝓞 K) :
             (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) ^ ((a : ZMod p).val)}
           : Set (𝓞 K)) =
         ∏ a : CyclotomicUnitDelta p,
-          Ideal.span ({(cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) ^
-              ((a : ZMod p).val)} : Set (𝓞 K)) from ?_]
+          Ideal.span ({((cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) ^
+              ((a : ZMod p).val))} : Set (𝓞 K)) from ?_]
   · refine Finset.prod_congr rfl fun a _ ↦ ?_
     rw [Ideal.span_singleton_pow]
   · -- span singleton of a finite product = product of span singletons.

@@ -518,8 +518,8 @@ theorem B₁_gen_t2Space
       ↥(pairSubring (IsTateRing.principalPair A).toPairOfDefinition)) :
     @T2Space (B₁_gen f) (B₁_gen_topology f) := by
   haveI : IsClosed
-      ((Ideal.span {algebraMap A ↥(TateAlgebra A) f -
-          TateAlgebra.X}).toAddSubgroup :
+      ((Ideal.span {(algebraMap A ↥(TateAlgebra A) f -
+          TateAlgebra.X)}).toAddSubgroup :
         Set ↥(TateAlgebra A)) :=
     plusFSubXIdeal_local_isClosed f hA_complete hnoeth
   infer_instance
@@ -533,8 +533,8 @@ theorem B₂_gen_t2Space
       ↥(pairSubring (IsTateRing.principalPair A).toPairOfDefinition)) :
     @T2Space (B₂_gen f) (B₂_gen_topology f) := by
   haveI hclosed : IsClosed
-      ((Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f *
-          TateAlgebra.X}).toAddSubgroup : Set ↥(TateAlgebra A)) := by
+      ((Ideal.span {(1 - algebraMap A ↥(TateAlgebra A) f *
+          TateAlgebra.X)}).toAddSubgroup : Set ↥(TateAlgebra A)) := by
     haveI : IsNoetherianRing ↥(tateAlgebra_pairOfDefinition (A := A)).A₀ := hnoeth
     exact tateAlgebra_isClosed_ideal hA_complete _
   infer_instance

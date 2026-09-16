@@ -331,8 +331,8 @@ theorem caseII_productHalf_C_real_generator
   have hmap_span : J.map (algebraMap
       (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))
       (𝓞 (CyclotomicField 37 ℚ))) =
-      Ideal.span ({algebraMap (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))
-        (𝓞 (CyclotomicField 37 ℚ)) a} : Set (𝓞 (CyclotomicField 37 ℚ))) := by
+      Ideal.span ({(algebraMap (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))
+        (𝓞 (CyclotomicField 37 ℚ)) a)} : Set (𝓞 (CyclotomicField 37 ℚ))) := by
     rw [ha', Ideal.map_span, Set.image_singleton]
   -- `C = J.map _ = span{algebraMap a}`.
   refine ⟨algebraMap (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))

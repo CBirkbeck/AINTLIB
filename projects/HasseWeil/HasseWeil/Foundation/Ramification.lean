@@ -1159,8 +1159,8 @@ private lemma mkCpi_mem_span_polynomialY_of_charNe2 (E : Affine F) [E.IsElliptic
         AdjoinRoot.mk E.polynomial E.polynomialY =
         AdjoinRoot.mk E.polynomial (C π) * AdjoinRoot.mk E.polynomial (C d₀)) :
     (algebraMap E.CoordinateRing (Localization.AtPrime P)) (AdjoinRoot.mk E.polynomial (C π)) ∈
-      Ideal.span {(algebraMap E.CoordinateRing (Localization.AtPrime P))
-        (AdjoinRoot.mk E.polynomial E.polynomialY)} := by
+      Ideal.span {((algebraMap E.CoordinateRing (Localization.AtPrime P))
+        (AdjoinRoot.mk E.polynomial E.polynomialY))} := by
   set f := algebraMap E.CoordinateRing (Localization.AtPrime P) with hf_def
   have hfsq : f (AdjoinRoot.mk E.polynomial E.polynomialY) *
       f (AdjoinRoot.mk E.polynomial E.polynomialY) =
@@ -1222,14 +1222,14 @@ private lemma map_eq_span_of_charNe2 (E : Affine F) [E.IsElliptic]
     (hY : AdjoinRoot.mk E.polynomial E.polynomialY ∈ P)
     (hmkCπ_in_span : (algebraMap E.CoordinateRing (Localization.AtPrime P))
         (AdjoinRoot.mk E.polynomial (C π)) ∈
-      Ideal.span {(algebraMap E.CoordinateRing (Localization.AtPrime P))
-        (AdjoinRoot.mk E.polynomial E.polynomialY)})
+      Ideal.span {((algebraMap E.CoordinateRing (Localization.AtPrime P))
+        (AdjoinRoot.mk E.polynomial E.polynomialY))})
     (hP_le_span : P ≤ Ideal.span
       ({AdjoinRoot.mk E.polynomial (C π),
         AdjoinRoot.mk E.polynomial E.polynomialY} : Set E.CoordinateRing)) :
     Ideal.map (algebraMap E.CoordinateRing (Localization.AtPrime P)) P = Ideal.span
-      ({(algebraMap E.CoordinateRing (Localization.AtPrime P))
-        (AdjoinRoot.mk E.polynomial E.polynomialY)} : Set (Localization.AtPrime P)) := by
+      ({((algebraMap E.CoordinateRing (Localization.AtPrime P))
+        (AdjoinRoot.mk E.polynomial E.polynomialY))} : Set (Localization.AtPrime P)) := by
   set f := algebraMap E.CoordinateRing (Localization.AtPrime P) with hf_def
   apply le_antisymm
   · rw [Ideal.map_le_iff_le_comap]

@@ -382,8 +382,8 @@ theorem idealNatDegree_mul {A B : Ideal F[X]} (hA : A ≠ ⊥) (hB : B ≠ ⊥) 
   have hgB : Submodule.IsPrincipal.generator B ≠ 0 := by
     intro h; exact hB (by rw [e2, h, Ideal.span_singleton_zero])
   calc idealNatDegree (A * B)
-      = idealNatDegree (Ideal.span {Submodule.IsPrincipal.generator A *
-          Submodule.IsPrincipal.generator B}) := by
+      = idealNatDegree (Ideal.span {(Submodule.IsPrincipal.generator A *
+          Submodule.IsPrincipal.generator B)}) := by
         conv_lhs => rw [e1, e2, Ideal.span_singleton_mul_span_singleton]
     _ = (Submodule.IsPrincipal.generator A * Submodule.IsPrincipal.generator B).natDegree :=
         idealNatDegree_span _

@@ -935,16 +935,16 @@ theorem twoCurve_ord_conorm_eq_sum_fiber
     exact hconorm_ne rfl
   have hLHS : (⟨W₂⟩ : SmoothPlaneCurve F).ord_P Q (conorm φ aw) =
       (((Associates.mk ((⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q)).count
-        (Associates.mk (Ideal.span {Algebra.intNorm (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        (Associates.mk (Ideal.span {(Algebra.intNorm (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
           (NormConormIntegralClosure.B
             (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F))
-            (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) wB})).factors
+            (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) wB)})).factors
           : ℤ) : WithTop ℤ) := by
     rw [hconorm_eq, (⟨W₂⟩ : SmoothPlaneCurve F).ord_P_algebraMap_eq_count Q hintNorm_ne]
-  have hrelN : Ideal.span ({Algebra.intNorm (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+  have hrelN : Ideal.span ({(Algebra.intNorm (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
         (NormConormIntegralClosure.B
           (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F))
-          (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) wB} :
+          (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) wB)} :
         Set (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing) =
       Ideal.relNorm (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
         (Ideal.span ({wB} : Set (NormConormIntegralClosure.B
