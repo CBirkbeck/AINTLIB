@@ -431,13 +431,13 @@ variable {R : Type*} [CommRing R]
 noncomputable def coarsenByUnits
     (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ) :
     Valuation R (WithZero (Γ₀ˣ ⧸ H.toSubgroup)) :=
-  v.map (coarsenMapOfValueGroup H) (coarsenMapOfValueGroup_monotone H)
+  v.map ⟨coarsenMapOfValueGroup H, coarsenMapOfValueGroup_monotone H⟩
 
 /-- Unfolding lemma: `coarsenByUnits` applies the coarsening map to `v r`. -/
 theorem coarsenByUnits_apply
     (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ) (r : R) :
     v.coarsenByUnits H r = coarsenMapOfValueGroup H (v r) :=
-  Valuation.map_apply _ _ _ _
+  Valuation.map_apply _ _ _
 
 /-- The support of a coarsened valuation equals the support of the original. -/
 theorem coarsenByUnits_supp
