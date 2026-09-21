@@ -129,13 +129,13 @@ The coarsened valuation is the composition `R →ᵥ Γ₀ →π (Γ/H)₀` wher
 quotient projection (§7.1 of Wedhorn). -/
 noncomputable def coarsen (v : Valuation R (WithZero Γ)) (H : ConvexSubgroup Γ) :
     Valuation R (WithZero (Γ ⧸ H.toSubgroup)) :=
-  v.map (WithZero.mapMonoidWithZeroHom (QuotientGroup.mk' H.toSubgroup))
-    (WithZero.mapMonoidWithZeroHom_monotone _ H.quotientMk_monotone)
+  v.map ⟨WithZero.mapMonoidWithZeroHom (QuotientGroup.mk' H.toSubgroup),
+    WithZero.mapMonoidWithZeroHom_monotone _ H.quotientMk_monotone⟩
 
 @[simp]
 theorem coarsen_apply (v : Valuation R (WithZero Γ)) (H : ConvexSubgroup Γ) (r : R) :
     v.coarsen H r = WithZero.mapMonoidWithZeroHom (QuotientGroup.mk' H.toSubgroup) (v r) :=
-  Valuation.map_apply _ _ _ _
+  Valuation.map_apply _ _ _
 
 /-- Coarsening preserves the support: `supp(v.coarsen H) = supp(v)`. -/
 theorem coarsen_supp (v : Valuation R (WithZero Γ)) (H : ConvexSubgroup Γ) :

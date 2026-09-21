@@ -225,8 +225,8 @@ the canonical iso `Γ₀ ≃o WithZero Γ₀ˣ` to get a valuation in `WithZero 
 form (suitable for the `coarsen` API which expects `WithZero Γ`). -/
 noncomputable def asWithZeroUnits (v : Valuation A Γ₀) :
     Valuation A (WithZero Γ₀ˣ) :=
-  v.map (WithZero.withZeroUnitsEquiv.symm.toMonoidWithZeroHom)
-    WithZero.withZeroUnitsEquiv_symm_strictMono.monotone
+  v.map ⟨WithZero.withZeroUnitsEquiv.symm.toMonoidWithZeroHom,
+    WithZero.withZeroUnitsEquiv_symm_strictMono.monotone⟩
 
 /-- **The Wedhorn 7.3 coarsening of `v` by `cΓ_v(I)`.** This is the
 fundamental retraction step that takes a valuation `v ∈ Spv A` and
@@ -273,9 +273,8 @@ theorem coarsenIdeal_eq_one_of_mem_ideal (v : Valuation A Γ₀)
   -- Step: (asWithZeroUnits v) a = (Units.mk0 (v a) hva : Γ₀ˣ) coerced to WithZero
   have h1 : asWithZeroUnits v a = ((Units.mk0 (v a) hva : Γ₀ˣ) : WithZero Γ₀ˣ) := by
     unfold asWithZeroUnits
-    rw [Valuation.map_apply]
-    simp only [MulEquiv.toMonoidWithZeroHom_apply,
-      WithZero.withZeroUnitsEquiv_symm_apply, dif_neg hva]
+    change WithZero.withZeroUnitsEquiv.symm (v a) = _
+    simp only [WithZero.withZeroUnitsEquiv_symm_apply, dif_neg hva]
   rw [h1, WithZero.mapMonoidWithZeroHom_apply_coe]
   -- Apply the membership: [Units.mk0 (v a) hva] = 1 in quotient (since it ∈ H).
   have hmem : Units.mk0 (v a) hva ∈ cGammaIdeal v I :=

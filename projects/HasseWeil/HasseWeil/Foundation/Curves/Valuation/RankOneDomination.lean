@@ -70,7 +70,7 @@ theorem valuationSubring_isDVR_of_surjective_withZeroInt
     {F : Type*} [Field F] (v : Valuation F (WithZero (Multiplicative ℤ)))
     (hv : Function.Surjective v) :
     IsDiscreteValuationRing v.valuationSubring := by
-  have hvg : MonoidWithZeroHom.valueGroup (.ofClass v) = ⊤ := by
+  have hvg : v.valueGroup = ⊤ := by
     rw [eq_top_iff]
     intro y _
     rw [MonoidWithZeroHom.mem_valueGroup_iff_of_comm]
@@ -82,11 +82,11 @@ theorem valuationSubring_isDVR_of_surjective_withZeroInt
       WithZero.unitsWithZeroEquiv.symm.surjective
   haveI : Nontrivial (WithZero (Multiplicative ℤ))ˣ :=
     WithZero.unitsWithZeroEquiv.symm.toEquiv.nontrivial
-  haveI : IsCyclic (MonoidWithZeroHom.valueGroup (.ofClass v)) := by
+  haveI : IsCyclic (v.valueGroup) := by
     rw [hvg]
     exact isCyclic_of_surjective Subgroup.topEquiv.symm.toMonoidHom
       Subgroup.topEquiv.symm.surjective
-  haveI : Nontrivial (MonoidWithZeroHom.valueGroup (.ofClass v)) := by
+  haveI : Nontrivial (v.valueGroup) := by
     rw [hvg]; exact Subgroup.topEquiv.symm.toEquiv.nontrivial
   exact Valuation.valuationSubring_isDiscreteValuationRing v
 
