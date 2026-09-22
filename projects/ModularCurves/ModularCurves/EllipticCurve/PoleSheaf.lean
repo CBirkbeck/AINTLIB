@@ -280,7 +280,10 @@ noncomputable def idealModuleAppIdealIso {X Y : Scheme.{u}} (f : X ⟶ Y)
     [QuasiCompact f] (U : Y.affineOpens) :
     (SheafOfModules.evaluation Y.ringCatSheaf (.op U.1)).obj (idealModule f) ≅
       ModuleCat.of Γ(Y, U.1) (f.ker.ideal U) := by
-  refine (PreservesKernel.iso (SheafOfModules.evaluation Y.ringCatSheaf (.op U.1))
+  -- the instance search now exceeds `synthInstance.maxSize`, so supply it directly
+  haveI : (SheafOfModules.evaluation.{u} Y.ringCatSheaf (.op U.1)).PreservesZeroMorphisms :=
+    Functor.preservesZeroMorphisms_of_preserves_terminal_object
+  refine (PreservesKernel.iso (SheafOfModules.evaluation.{u} Y.ringCatSheaf (.op U.1))
       (SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom)).trans
     ((ModuleCat.kernelIsoKer _).trans ?_)
   exact (LinearEquiv.ofEq _ _ (by rw [Scheme.Hom.ker_apply]; rfl)).toModuleIso
@@ -315,7 +318,8 @@ theorem idealModuleAppIdealIso_coe {X Y : Scheme.{u}} (f : X ⟶ Y)
     ModuleCat.ofHom (f.ker.ideal U).subtype) x) = _
   simp only [idealModuleAppIdealIso, idealModule, idealModuleRaw, Iso.trans_hom,
     ConcreteCategory.comp_apply, LinearEquiv.toModuleIso_hom]
-  let F := SheafOfModules.evaluation Y.ringCatSheaf (.op U.1)
+  let F := SheafOfModules.evaluation.{u} Y.ringCatSheaf (.op U.1)
+  have : F.PreservesZeroMorphisms := Functor.preservesZeroMorphisms_of_preserves_terminal_object
   let g := SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom
   have hker : (F.map g).hom.ker = f.ker.ideal U := by
     rw [Scheme.Hom.ker_apply]
