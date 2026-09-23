@@ -327,7 +327,7 @@ private lemma Spec_map_awayCongr_awayι
   rw [show
     (ModularCurves.awayCongr (𝒜 := 𝒜) (rfl : s = s)).toRingHom =
         RingHom.id _ by
-      rw [ModularCurves.awayCongr_rfl, RingEquiv.toRingHom_refl]]
+      rw [ModularCurves.awayCongr_rfl, RingEquiv.toRingHom_refl']]
   rw [CommRingCat.ofHom_id, Spec.map_id, Category.id_comp]
 
 lemma isPullback_coefficientChart_coefficientMap

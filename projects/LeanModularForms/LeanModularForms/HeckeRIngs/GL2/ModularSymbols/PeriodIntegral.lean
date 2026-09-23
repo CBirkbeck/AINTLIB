@@ -5,6 +5,7 @@ Authors: LeanModularForms contributors
 -/
 import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.CoefficientSystem
 import LeanModularForms.Modularforms.ResToImagAxis
+import Mathlib.NumberTheory.ModularForms.NormTrace
 import Mathlib.NumberTheory.ModularForms.QExpansion
 import Mathlib.MeasureTheory.Integral.Asymptotics
 import Mathlib.MeasureTheory.Integral.ExpDecay
