@@ -5,6 +5,7 @@ Authors: LeanModularForms contributors
 -/
 import LeanModularForms.HeckeRIngs.GL2.LevelEmbed
 import Mathlib.Analysis.Complex.Periodic
+import Mathlib.NumberTheory.ModularForms.NormTrace
 import Mathlib.NumberTheory.ModularForms.QExpansion
 
 /-!
