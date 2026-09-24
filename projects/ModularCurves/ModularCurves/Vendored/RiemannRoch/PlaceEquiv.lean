@@ -381,7 +381,8 @@ theorem infinite_X_gt_one
   have hpow : 1 < (u.valuation k⟮X⟯ RatFunc.X) ^
       u.asIdeal.ramificationIdx' w.asIdeal := by
     exact one_lt_pow₀ hbaseX he
-  rw [u.valuation_liesOver K w RatFunc.X] at hpow
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx u.asIdeal w.asIdeal u.ne_bot,
+    u.valuation_liesOver K w RatFunc.X] at hpow
   exact hpow
 
 theorem ofChart_injective : Function.Injective (Place.ofChart k K) := by
