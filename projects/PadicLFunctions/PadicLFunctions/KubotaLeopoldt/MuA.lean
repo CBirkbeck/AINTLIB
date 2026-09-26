@@ -369,7 +369,7 @@ theorem psi_phi_mul (ν μ : PadicMeasure p ℤ_[p]) :
       ((LocallyConstant.charFn ℤ_[p] (isClopen_pZp p) : C(ℤ_[p], ℤ_[p])) *
       f.comp (shiftDiv p))).comp (mulCM p (p : ℤ_[p]))) = ν (convInner p (psi p μ) f)
   congr 1
-  ext x
+  ext x : 1
   change μ (((LocallyConstant.charFn ℤ_[p] (isClopen_pZp p) : C(ℤ_[p], ℤ_[p])) *
         f.comp (shiftDiv p)).comp ⟨fun y => (p : ℤ_[p]) * x + y, by fun_prop⟩)
       = μ ((LocallyConstant.charFn ℤ_[p] (isClopen_pZp p) : C(ℤ_[p], ℤ_[p])) *

@@ -136,7 +136,7 @@ theorem norm_apply_le (μ : PadicMeasure p X) (f : C(X, ℤ_[p])) : ‖μ f‖ �
       Continuous.subtype_mk
         ((continuous_subtype_val.comp (map_continuous f)).div_const _) hbound⟩ with hg
   have hfg : f = (p : ℤ_[p]) ^ n • g := by
-    ext x
+    ext x : 1
     refine Subtype.ext ?_
     simp only [hg, ContinuousMap.smul_apply, smul_eq_mul, PadicInt.coe_mul, PadicInt.coe_pow,
       PadicInt.coe_natCast, ContinuousMap.coe_mk]

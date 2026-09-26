@@ -1072,7 +1072,7 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
     (1 + PowerSeries.X) * PowerSeries.derivativeFun (PowerSeries.binomialSeries ℤ_[p] r)
       = r • PowerSeries.binomialSeries ℤ_[p] r := by
   set B : PowerSeries ℤ_[p] := PowerSeries.binomialSeries ℤ_[p] r with hB
-  ext n
+  ext n : 1
   rw [add_mul, one_mul, map_add, PowerSeries.smul_eq_C_mul, PowerSeries.coeff_C_mul,
     coeff_binomialSeries']
   rw [show B.derivativeFun = PowerSeries.derivative B from rfl,
@@ -1179,7 +1179,7 @@ private theorem cancel_a_extendByZero (a : ℤ_[p]ˣ) (f : C(ℤ_[p]ˣ, ℤ_[p])
         (PadicMeasure.mulCM p (a : ℤ_[p])))
       = PadicMeasure.extendByZero p (PadicMeasure.invCM p * f.comp (unitsMulLeftCM p a)) := by
   classical
-  ext x
+  ext x : 1
   simp only [ContinuousMap.smul_apply, ContinuousMap.comp_apply, smul_eq_mul]
   change (a : ℤ_[p]) * PadicMeasure.extendByZero p (PadicMeasure.invCM p * f) ((a : ℤ_[p]) * x)
       = PadicMeasure.extendByZero p (PadicMeasure.invCM p * f.comp (unitsMulLeftCM p a)) x

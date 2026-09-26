@@ -80,7 +80,7 @@ lemma zetaNum_apply_unitsPowCM (a : ℕ) {k : ℕ} (hk : 0 < k) :
   rw [Nat.succ_sub_one]
   change muAUnits p a (invCM p * unitsPowCM p (k' + 1)) = muAUnits p a (unitsPowCM p k')
   congr 1
-  ext u
+  ext u : 1
   change ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) * (u : ℤ_[p]) ^ (k' + 1) = (u : ℤ_[p]) ^ k'
   calc ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) * (u : ℤ_[p]) ^ (k' + 1)
       = (u : ℤ_[p]) ^ k' * (((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) * (u : ℤ_[p])) := by ring

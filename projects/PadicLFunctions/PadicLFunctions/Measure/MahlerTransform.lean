@@ -145,7 +145,7 @@ Source: RJW Thm. 3.20, proof: "Visibly we have 𝓐_{μ_g} = g" (TeX line 1004).
 @[simp]
 theorem mahlerTransform_ofPowerSeries (g : PowerSeries ℤ_[p]) :
     mahlerTransform p (ofPowerSeries p g) = g := by
-  ext k
+  ext k : 1
   rw [coeff_mahlerTransform]
   change ∑' n, Δ_[1]^[n] (⇑(mahler k : C(ℤ_[p], ℤ_[p]))) 0 * PowerSeries.coeff n g
       = PowerSeries.coeff k g

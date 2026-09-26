@@ -123,7 +123,7 @@ theorem mul_apply (μ ν : PadicMeasure p ℤ_[p]) (f : C(ℤ_[p], ℤ_[p])) :
         exact congrArg μ (ContinuousMap.ext fun x => by simp [ContinuousMap.smul_comp]) }
   suffices h : μ * ν = ρ from h ▸ rfl
   apply mahlerTransform_injective p
-  ext n
+  ext n : 1
   rw [mahlerTransform_mul, PowerSeries.coeff_mul, coeff_mahlerTransform]
   change _ = μ (convInner p ν (mahler n))
   -- Chu–Vandermonde on the Mahler basis
@@ -132,7 +132,7 @@ theorem mul_apply (μ ν : PadicMeasure p ℤ_[p]) (f : C(ℤ_[p], ℤ_[p])) :
         = ∑ ij ∈ Finset.antidiagonal n,
             Ring.choose x ij.1 • (mahler ij.2 : C(ℤ_[p], ℤ_[p])) := by
     intro x
-    ext y
+    ext y : 1
     simp only [ContinuousMap.comp_apply, ContinuousMap.coe_mk, mahler_apply,
       ContinuousMap.coe_sum, Finset.sum_apply, ContinuousMap.coe_smul, Pi.smul_apply,
       smul_eq_mul]
@@ -140,7 +140,7 @@ theorem mul_apply (μ ν : PadicMeasure p ℤ_[p]) (f : C(ℤ_[p], ℤ_[p])) :
   have key : convInner p ν (mahler n)
       = ∑ ij ∈ Finset.antidiagonal n,
           ν (mahler ij.2) • (mahler ij.1 : C(ℤ_[p], ℤ_[p])) := by
-    ext x
+    ext x : 1
     simp only [convInner_apply, hcomp x, map_sum, map_smul, smul_eq_mul,
       ContinuousMap.coe_sum, Finset.sum_apply, ContinuousMap.coe_smul, Pi.smul_apply]
     exact Finset.sum_congr rfl fun ij _ => by rw [mahler_apply, mul_comm]

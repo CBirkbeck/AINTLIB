@@ -88,7 +88,7 @@ private theorem elems_pow (u : NormCompatUnits p) (k n : ℕ) :
 forces `g = 0` (coefficientwise, `ℤ_[p]` a `CharZero` domain). -/
 private theorem zsmul_powerSeries_eq_zero {g : PowerSeries ℤ_[p]} {k : ℕ} (hk : k ≠ 0)
     (h : (k : ℤ) • g = 0) : g = 0 := by
-  ext n
+  ext n : 1
   have hcoef : (k : ℤ) • PowerSeries.coeff n g = 0 := by
     rw [← map_zsmul (PowerSeries.coeff n) (k : ℤ) g, h, map_zero]
   rw [map_zero]

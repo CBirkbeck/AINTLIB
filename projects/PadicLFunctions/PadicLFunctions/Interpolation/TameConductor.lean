@@ -834,7 +834,7 @@ lemma cmul_powCM_one_iota_zetaNum (a : ℕ) :
         * ((PadicMeasure.powCM p 1 * f).comp (PadicMeasure.unitsValCM p)))
     = PadicMeasure.muAUnits p a (f.comp (PadicMeasure.unitsValCM p))
   congr 1
-  ext u
+  ext u : 1
   change ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) * ((u : ℤ_[p]) ^ 1 * f ((u : ℤ_[p])))
     = f ((u : ℤ_[p]))
   rw [pow_one, ← mul_assoc, ← Units.val_mul, inv_mul_cancel, Units.val_one, one_mul]

@@ -532,7 +532,7 @@ the form `ω(x)^i⟨x⟩^k` if and only if `k ≡ i mod (p−1)`"; we need the "
 `PadicMeasure.unitsPowCM` is §4's `x^k`-on-units. -/
 lemma branchChar_natCast {i k : ℕ} (hik : (k : ZMod (p - 1)) = (i : ZMod (p - 1))) :
     branchChar p i (k : ℤ_[p]) = PadicMeasure.unitsPowCM p k := by
-  ext x
+  ext x : 1
   rw [branchChar_apply, onePAdicPow_natCast,
     show PadicMeasure.unitsPowCM p k x = ((x : ℤ_[p])) ^ k from rfl]
   -- units-level: `ω(x)^i·(ω(x)⁻¹x)^k = x^k` since `ω(x)^i = ω(x)^k`

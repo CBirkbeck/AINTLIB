@@ -525,7 +525,7 @@ theorem modEqPow_of_tendsto {k : ℕ} {gj : ℕ → PowerSeries ℤ_[p]} {g c : 
 forces equality (`⋂_k p^k ℤ_[p] = 0`). -/
 theorem eq_of_forall_modEqPow {a b : PowerSeries ℤ_[p]} (h : ∀ k, ModEqPow p k a b) :
     a = b := by
-  ext m
+  ext m : 1
   rw [← sub_eq_zero, ← map_sub, ← norm_le_zero_iff]
   have hbound : ∀ k : ℕ, ‖PowerSeries.coeff m (a - b)‖ ≤ (p : ℝ) ^ (-(k : ℤ)) := fun k => by
     have := h k m
@@ -1552,7 +1552,7 @@ theorem dlog_surjective_onto_psiId {F : PowerSeries ℤ_[p]} (hF : F ∈ psiIdSe
 private theorem eq_C_constantCoeff_of_derivativeFun_zero (g : PowerSeries ℤ_[p])
     (h : PowerSeries.derivativeFun g = 0) :
     g = PowerSeries.C (PowerSeries.constantCoeff (R := ℤ_[p]) g) := by
-  ext n
+  ext n : 1
   cases n with
   | zero =>
     rw [PowerSeries.coeff_zero_eq_constantCoeff_apply,

@@ -84,27 +84,27 @@ noncomputable instance : CommRing (PadicMeasure p G) where
     change a (innerInt p b ((innerInt p c (f.comp (mulCM₂ G))).comp (mulCM₂ G)))
       = a (innerInt p (conv p b c) (f.comp (mulCM₂ G)))
     congr 1
-    ext x
+    ext x : 1
     change b _ = b _
     congr 1
-    ext y
+    ext y : 1
     change c _ = c _
     congr 1
-    ext z
+    ext z : 1
     change f (x * y * z) = f (x * (y * z))
     rw [mul_assoc]
   one_mul a := by
     refine LinearMap.ext fun f => ?_
     change a ((f.comp (mulCM₂ G)).curry 1) = a f
     congr 1
-    ext y
+    ext y : 1
     change f (1 * y) = f y
     rw [one_mul]
   mul_one a := by
     refine LinearMap.ext fun f => ?_
     change a (innerInt p (dirac p 1) (f.comp (mulCM₂ G))) = a f
     congr 1
-    ext x
+    ext x : 1
     change f (x * 1) = f x
     rw [mul_one]
   left_distrib a b c := by
@@ -127,10 +127,10 @@ noncomputable instance : CommRing (PadicMeasure p G) where
     change a (innerInt p b (f.comp (mulCM₂ G))) = b (innerInt p a (f.comp (mulCM₂ G)))
     rw [integral_swap]
     congr 1
-    ext y
+    ext y : 1
     change a _ = a _
     congr 1
-    ext x
+    ext x : 1
     change f (x * y) = f (y * x)
     rw [mul_comm]
 
@@ -154,7 +154,7 @@ noncomputable def deg : PadicMeasure p G →+* ℤ_[p] where
     change μ (innerInt p ν ((1 : C(G, ℤ_[p])).comp (mulCM₂ G))) = μ 1 * ν 1
     have h1 : innerInt p ν ((1 : C(G, ℤ_[p])).comp (mulCM₂ G))
         = ν 1 • (1 : C(G, ℤ_[p])) := by
-      ext x
+      ext x : 1
       change ν _ = _
       have hc : ((1 : C(G, ℤ_[p])).comp (mulCM₂ G)).curry x
           = (1 : C(G, ℤ_[p])) := ContinuousMap.ext fun y => rfl
@@ -280,7 +280,7 @@ noncomputable def levelMap (n : ℕ) :
         ((levelChar p n c).comp (unitsMulCM₂ p)).curry x
           = levelChar p n ((unitsToZModPow p n x)⁻¹ * c) := by
       intro c x
-      ext y
+      ext y : 1
       change levelChar p n c (x * y) = _
       by_cases hy : unitsToZModPow p n y = (unitsToZModPow p n x)⁻¹ * c
       · rw [levelChar_apply_eq p (by rw [map_mul, hy, mul_inv_cancel_left]),
@@ -500,7 +500,7 @@ theorem levelMap_jointly_injective (μ : PadicMeasure p ℤ_[p]ˣ)
   have hg : (g : C(ℤ_[p]ˣ, ℤ_[p]))
       = ∑ c : (ZMod (p ^ N))ˣ,
           g ((unitsToZModPow_surjective p N hN c).choose) • levelChar p N c := by
-    ext u
+    ext u : 1
     simp only [ContinuousMap.coe_sum, Finset.sum_apply, ContinuousMap.coe_smul,
       Pi.smul_apply, smul_eq_mul]
     rw [Finset.sum_eq_single (unitsToZModPow p N u)]
@@ -519,7 +519,7 @@ lemma sum_levelChar_fiber {n m : ℕ} (h : n ≤ m) (cbar : (ZMod (p ^ n))ˣ) :
         (fun c : (ZMod (p ^ m))ˣ => ZMod.unitsMap (pow_dvd_pow p h) c = cbar),
       levelChar p m c) = levelChar p n cbar := by
   classical
-  ext u
+  ext u : 1
   simp only [ContinuousMap.coe_sum, Finset.sum_apply]
   by_cases hu : unitsToZModPow p n u = cbar
   · rw [levelChar_apply_eq p hu, Finset.sum_eq_single (unitsToZModPow p m u)]
@@ -680,7 +680,7 @@ theorem eq_zero_of_forall_unitsPowCM_eq_zero (μ : PadicMeasure p ℤ_[p]ˣ)
     have hfun : (n.factorial • mahler n : C(ℤ_[p], ℤ_[p]))
         = ⟨fun x => (descPochhammer ℤ_[p] n).eval x,
             (descPochhammer ℤ_[p] n).continuous⟩ := by
-      ext x
+      ext x : 1
       change n.factorial • mahler n x = (descPochhammer ℤ_[p] n).eval x
       rw [mahler_apply, hbridge x, Ring.descPochhammer_eq_factorial_smul_choose]
     have hint : (iota p μ) (n.factorial • mahler n) = 0 := by
@@ -690,7 +690,7 @@ theorem eq_zero_of_forall_unitsPowCM_eq_zero (μ : PadicMeasure p ℤ_[p]ˣ)
       have hcomp : ((⟨fun x => (descPochhammer ℤ_[p] n).eval x,
             (descPochhammer ℤ_[p] n).continuous⟩ : C(ℤ_[p], ℤ_[p])).comp (unitsValCM p))
           = ∑ i ∈ Finset.range (q.natDegree + 1), q.coeff i • unitsPowCM p (i + 1) := by
-        ext u
+        ext u : 1
         simp only [ContinuousMap.comp_apply, ContinuousMap.coe_mk, unitsValCM,
           ContinuousMap.coe_sum, Finset.sum_apply, ContinuousMap.coe_smul, Pi.smul_apply,
           smul_eq_mul, unitsPowCM]
@@ -756,11 +756,11 @@ lemma units_mul_apply_unitsPowCM (μ ν : PadicMeasure p ℤ_[p]ˣ) (k : ℕ) :
   rw [units_mul_apply]
   have hfn : innerInt p ν ((unitsPowCM p k).comp (unitsMulCM₂ p))
       = ν (unitsPowCM p k) • unitsPowCM p k := by
-    ext x
+    ext x : 1
     rw [innerInt_apply]
     have hcurry : ((unitsPowCM p k).comp (unitsMulCM₂ p)).curry x
         = ((x : ℤ_[p]) ^ k) • unitsPowCM p k := by
-      ext y
+      ext y : 1
       change ((x * y : ℤ_[p]ˣ) : ℤ_[p]) ^ k = _
       simp only [Units.val_mul, mul_pow, ContinuousMap.smul_apply, unitsPowCM,
         ContinuousMap.coe_mk, smul_eq_mul]

@@ -541,7 +541,7 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
     (1 + PowerSeries.X) * PowerSeries.derivativeFun (PowerSeries.binomialSeries ℤ_[p] r)
       = r • PowerSeries.binomialSeries ℤ_[p] r := by
   set B : PowerSeries ℤ_[p] := PowerSeries.binomialSeries ℤ_[p] r with hB
-  ext n
+  ext n : 1
   rw [add_mul, one_mul, map_add, PowerSeries.smul_eq_C_mul, PowerSeries.coeff_C_mul,
     coeff_binomialSeries']
   rw [show B.derivativeFun = PowerSeries.derivative B from rfl,
@@ -611,7 +611,7 @@ private theorem dlogInverse {g : PowerSeries ℤ_[p]} (hg : IsUnit g) :
 private theorem eq_C_constantCoeff_of_derivativeFun_zero {g : PowerSeries ℤ_[p]}
     (h : PowerSeries.derivativeFun g = 0) :
     g = PowerSeries.C (PowerSeries.constantCoeff (R := ℤ_[p]) g) := by
-  ext n
+  ext n : 1
   cases n with
   | zero => rw [PowerSeries.coeff_zero_eq_constantCoeff_apply,
       ← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_zero_C]
