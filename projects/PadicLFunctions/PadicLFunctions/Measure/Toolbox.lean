@@ -95,11 +95,11 @@ private lemma coeff_del (F : PowerSeries ℤ_[p]) (n : ℕ) :
 Source: RJW Lem. 3.24 (`LemmaMultiplicationbyx`, TeX lines 1066–1075). -/
 theorem mahlerTransform_cmul_X (μ : PadicMeasure p ℤ_[p]) :
     mahlerTransform p (cmul p (ContinuousMap.id ℤ_[p]) μ) = del p (mahlerTransform p μ) := by
-  ext n
+  ext n : 1
   rw [coeff_mahlerTransform]
   have hpt : (ContinuousMap.id ℤ_[p] * mahler n : C(ℤ_[p], ℤ_[p]))
       = (n + 1 : ℤ_[p]) • mahler (n + 1) + (n : ℤ_[p]) • mahler n := by
-    ext x
+    ext x : 1
     simpa only [ContinuousMap.mul_apply, ContinuousMap.id_apply, mahler_apply,
       ContinuousMap.add_apply, ContinuousMap.smul_apply, smul_eq_mul] using mul_choose_eq p x n
   change μ (ContinuousMap.id ℤ_[p] * mahler n) = _
@@ -153,7 +153,7 @@ theorem res_union {U V : Set ℤ_[p]} (hU : IsClopen U) (hV : IsClopen V)
   have hchar : (LocallyConstant.charFn ℤ_[p] (hU.union hV) : C(ℤ_[p], ℤ_[p]))
       = (LocallyConstant.charFn ℤ_[p] hU : C(ℤ_[p], ℤ_[p]))
         + (LocallyConstant.charFn ℤ_[p] hV : C(ℤ_[p], ℤ_[p])) := by
-    ext x
+    ext x : 1
     simp only [LocallyConstant.coe_continuousMap, LocallyConstant.coe_charFn,
       ContinuousMap.add_apply]
     exact congrFun (Set.indicator_union_of_disjoint hUV 1) x
@@ -203,7 +203,7 @@ theorem mahlerTransform_pushforward_mulCM (c : ℤ_[p]) (μ : PadicMeasure p ℤ
   have hvanish : ∀ {n d : ℕ}, n < d → PowerSeries.coeff n (B' ^ d) = 0 := fun {n d} hnd =>
     PowerSeries.X_pow_dvd_iff.1
       (pow_dvd_pow_of_dvd (PowerSeries.X_dvd_iff.2 hconst) d) n hnd
-  ext n
+  ext n : 1
   rw [coeff_mahlerTransform, PowerSeries.coeff_subst' hsub,
     finsum_eq_finsetSum_of_support_subset _ (s := Finset.range (n + 1)) (by
       intro d hd

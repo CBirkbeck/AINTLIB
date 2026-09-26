@@ -2569,7 +2569,7 @@ theorem gammaFT_ae_eq_fourierL2 {F : ℝ → ℂ} (hF : Integrable F)
   have hn2 : ∀ n : ℕ, MemLp (hn n) 2 (volume : Measure ℝ) := by
     intro n
     rw [hhn]
-    exact hFdiv2.indicator measurableSet_Ioc
+    exact hFdiv2.indicator measurableSet_Ioc.nullMeasurableSet
   have hbr : ∀ u : Lp ℂ 2 (volume : Measure ℝ),
       (𝓕 u : Lp ℂ 2 (volume : Measure ℝ))
         = MeasureTheory.Lp.fourierTransformₗᵢ ℝ ℂ u := fun _ => rfl

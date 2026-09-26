@@ -135,6 +135,6 @@ The codomain `↥(compatSubring ℓ)` is the projective-limit subtype
 noncomputable def padicIntEquivLimZMod : ℤ_[ℓ] ≃+* compatSubring ℓ :=
   RingEquiv.ofRingHom (padicToLimZMod ℓ) (limZModToPadic ℓ)
     (by ext x n; simp)
-    (by ext z; exact PadicInt.ext_of_toZModPow.mp (fun n => by simp))
+    (by ext z : 1; exact PadicInt.ext_of_toZModPow.mp (fun n => by simp))
 
 end HasseWeil.NTorsion

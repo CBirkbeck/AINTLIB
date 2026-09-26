@@ -144,7 +144,7 @@ theorem approxDirac_apply_eq {μ : PadicMeasure p ℤ_[p]ˣ} {n : ℕ} (hn : 0 <
   have hg : (g : C(ℤ_[p]ˣ, ℤ_[p]))
       = ∑ c : (ZMod (p ^ n))ˣ,
           g ((unitsToZModPow_surjective p n hn c).choose) • levelChar p n c := by
-    ext u
+    ext u : 1
     rw [show (∑ c : (ZMod (p ^ n))ˣ,
         g ((unitsToZModPow_surjective p n hn c).choose) • levelChar p n c) u
         = ∑ c : (ZMod (p ^ n))ˣ,

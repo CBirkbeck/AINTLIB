@@ -155,7 +155,7 @@ open Classical in
 lemma extendByZero_comp_unitsVal (f : C(ℤ_[p], ℤ_[p])) :
     extendByZero p (f.comp (unitsValCM p))
       = (LocallyConstant.charFn ℤ_[p] (isClopen_units p) : C(ℤ_[p], ℤ_[p])) * f := by
-  ext x
+  ext x : 1
   change (if h : IsUnit x then (f.comp (unitsValCM p)) h.unit else 0) = _
   by_cases hx : IsUnit x
   · simp only [dif_pos hx, ContinuousMap.comp_apply, unitsValCM, ContinuousMap.coe_mk,

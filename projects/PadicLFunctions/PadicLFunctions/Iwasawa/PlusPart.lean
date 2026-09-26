@@ -317,7 +317,7 @@ lemma evenPart_even (hp2 : p ≠ 2) (f : C(ℤ_[p]ˣ, ℤ_[p])) (u : ℤ_[p]ˣ) 
 `(2)⁻¹·(f + f) = (2)⁻¹·2·f = f`). -/
 private lemma evenPart_of_even (hp2 : p ≠ 2) (f : C(ℤ_[p]ˣ, ℤ_[p]))
     (hf : ∀ u : ℤ_[p]ˣ, f (-u) = f u) : evenPart p hp2 f = f := by
-  ext u
+  ext u : 1
   simp only [evenPart, ContinuousMap.smul_apply, ContinuousMap.add_apply,
     ContinuousMap.comp_apply, smul_eq_mul]
   change _ * (f u + f (-u)) = f u
@@ -328,7 +328,7 @@ private lemma evenPart_of_even (hp2 : p ≠ 2) (f : C(ℤ_[p]ˣ, ℤ_[p]))
 (`(f∘c)+((f∘c)∘c) = f + f∘c` since `c²=id`). -/
 private lemma evenPart_comp_negTranslate (hp2 : p ≠ 2) (f : C(ℤ_[p]ˣ, ℤ_[p])) :
     evenPart p hp2 (f.comp (negTranslate p)) = evenPart p hp2 f := by
-  ext u
+  ext u : 1
   simp only [evenPart, ContinuousMap.smul_apply, ContinuousMap.add_apply,
     ContinuousMap.comp_apply]
   change _ • (f (-u) + f (-(-u))) = _ • (f u + f (-u))
@@ -345,7 +345,7 @@ def plusSection (hp2 : p ≠ 2) :
         -- linearity of `ν` reduces to additivity of `evenPart` (pointwise after `mk`)
         rw [← map_add]
         congr 1
-        ext x
+        ext x : 1
         induction x using QuotientGroup.induction_on with
         | _ u =>
           rw [ContinuousMap.add_apply, descendEven_mk, descendEven_mk, descendEven_mk]
@@ -357,7 +357,7 @@ def plusSection (hp2 : p ≠ 2) :
       map_smul' := fun c f => by
         rw [RingHom.id_apply, ← map_smul]
         congr 1
-        ext x
+        ext x : 1
         induction x using QuotientGroup.induction_on with
         | _ u =>
           rw [ContinuousMap.smul_apply, descendEven_mk, descendEven_mk]
@@ -396,7 +396,7 @@ private lemma comp_quotientMk_even (g : C(GPlus p, ℤ_[p])) (u : ℤ_[p]ˣ) :
 private lemma descendEven_comp_quotientMk (g : C(GPlus p, ℤ_[p]))
     (hg : ∀ u : ℤ_[p]ˣ, (g.comp (quotientMk p)) (-u) = (g.comp (quotientMk p)) u) :
     descendEven p (g.comp (quotientMk p)) hg = g := by
-  ext x
+  ext x : 1
   induction x using QuotientGroup.induction_on with
   | _ u => rw [descendEven_mk]; rfl
 
@@ -416,7 +416,7 @@ theorem projPlus_plusSection (hp2 : p ≠ 2) (ν : PadicMeasure p (GPlus p)) :
 (here `g = evenPart f`). -/
 private lemma descendEven_comp (g : C(ℤ_[p]ˣ, ℤ_[p])) (hg : ∀ u : ℤ_[p]ˣ, g (-u) = g u) :
     (descendEven p g hg).comp (quotientMk p) = g := by
-  ext u; change descendEven p g hg (QuotientGroup.mk u) = g u; rw [descendEven_mk]
+  ext u : 1; change descendEven p g hg (QuotientGroup.mk u) = g u; rw [descendEven_mk]
 
 /-- For a `c`-invariant `μ`, the even part integrates to the same value: `μ (evenPart f) = μ f`. -/
 private lemma apply_evenPart_of_mem_plusPart (hp2 : p ≠ 2) {μ : PadicMeasure p ℤ_[p]ˣ}

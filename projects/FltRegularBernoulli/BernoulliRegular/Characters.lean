@@ -239,7 +239,7 @@ lemma card_dirichletCharacter : Nat.card (DirichletCharacter ℤ_[p] p) = p - 1 
 of the Teichmüller character is the trivial character. This is the
 concrete form of "characters cycle with period `p-1`". -/
 lemma teichmullerChar_pow_sub_one_eq_one : (teichmullerChar p) ^ (p - 1) = 1 := by
-  ext a
+  ext a : 1
   rw [MulChar.pow_apply_coe, teichmullerChar_apply, MulChar.one_apply_coe]
   exact teichmuller_pow_sub_one a.ne_zero
 

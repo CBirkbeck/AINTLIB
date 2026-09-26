@@ -198,7 +198,7 @@ theorem integral_swap [CompactSpace X] [CompactSpace Y]
         have hcolsum : col = ∑ g ∈ R,
             g y • (LocallyConstant.charFn ℤ_[p]
               (Φ.isLocallyConstant.isClopen_fiber g) : C(X, ℤ_[p])) := by
-          ext x
+          ext x : 1
           simp only [hcol, ContinuousMap.coe_mk, ContinuousMap.coe_sum, Finset.sum_apply,
             ContinuousMap.coe_smul, Pi.smul_apply, smul_eq_mul]
           exact ((Finset.sum_congr rfl fun g _ => mul_comm _ _).trans

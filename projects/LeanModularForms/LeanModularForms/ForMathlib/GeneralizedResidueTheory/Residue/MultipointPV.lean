@@ -138,7 +138,7 @@ private theorem aEStronglyMeasurable_pv_integrand_residue {γ : ℝ → ℂ} {a 
   have h_prod_meas : AEStronglyMeasurable (fun t ↦ (c / (γ t - s)) * deriv γ t)
       (volume.restrict ({t | ε < ‖γ t - s‖} ∩ Icc a b)) :=
     aEStronglyMeasurable_residueProd_on_goodset hε hγ hγ'_off_P
-  refine ((AEStronglyMeasurable.piecewise hGoodSet_meas h_prod_meas
+  refine ((AEStronglyMeasurable.piecewise hGoodSet_meas.nullMeasurableSet h_prod_meas
     h_zero_meas).mono_measure Measure.restrict_le_self).congr ?_
   filter_upwards [ae_restrict_mem isClosed_Icc.measurableSet] with t ht
   simp only [Set.piecewise, Set.mem_inter_iff, Set.mem_setOf_eq, gt_iff_lt]
@@ -195,7 +195,7 @@ theorem aEStronglyMeasurable_pv_integrand_decomposed {g_reg : ℂ → ℂ} {γ :
     AEStronglyMeasurable (fun t ↦ if ∃ s ∈ S, ‖γ t - s‖ ≤ ε then 0
       else (g_reg (γ t) + ∑ s ∈ S, coeffs s / (γ t - s)) * deriv γ t)
       (volume.restrict (Icc a b)) :=
-  ((AEStronglyMeasurable.piecewise (measurableSet_multipoint_goodset S hγ)
+  ((AEStronglyMeasurable.piecewise (measurableSet_multipoint_goodset S hγ).nullMeasurableSet
     (aEStronglyMeasurable_decomposed_on_goodset S coeffs hε hg hγ hγ'_off_P)
     aestronglyMeasurable_const).mono_measure Measure.restrict_le_self).congr
     (goodset_piecewise_ae_eq_decomposed S coeffs).symm
