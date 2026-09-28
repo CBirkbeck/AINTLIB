@@ -13,6 +13,7 @@ public import Mathlib.RingTheory.Polynomial.Cyclotomic.Expand
 public import Mathlib.RingTheory.Polynomial.Cyclotomic.Factorization
 public import Mathlib.NumberTheory.EulerProduct.Basic
 public import Mathlib.NumberTheory.LSeries.SumCoeff
+public import Mathlib.Algebra.BigOperators.Ring.Nat
 
 /-!
 # Generic number-field Euler-product infrastructure

@@ -2,6 +2,8 @@ module
 
 public import Mathlib.NumberTheory.Cyclotomic.Basic
 import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
+public import Mathlib.RingTheory.Prime
+public import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
 
 @[expose] public section
 

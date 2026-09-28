@@ -8,6 +8,7 @@ module
 public import Mathlib.RingTheory.Ideal.Norm.RelNorm
 public import Mathlib.FieldTheory.SeparableClosure
 public import Mathlib.NumberTheory.RamificationInertia.Inertia
+public import Mathlib.Algebra.GroupWithZero.Torsion
 
 /-!
 # Relative norms in finite separable extensions

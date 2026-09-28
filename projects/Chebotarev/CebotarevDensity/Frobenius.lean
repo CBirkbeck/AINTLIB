@@ -12,6 +12,7 @@ public import Mathlib.RingTheory.Frobenius
 public import Mathlib.NumberTheory.RamificationInertia.Inertia
 
 public import CebotarevDensity.Density
+public import Mathlib.FieldTheory.Finite.GaloisField
 
 /-!
 # Frobenius element of a Galois extension of number fields

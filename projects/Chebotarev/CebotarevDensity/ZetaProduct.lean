@@ -13,6 +13,7 @@ public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
 public import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
 public import Mathlib.Analysis.SpecialFunctions.Log.Summable
+public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 
 /-!
 # Zeta factorisation for an abelian extension

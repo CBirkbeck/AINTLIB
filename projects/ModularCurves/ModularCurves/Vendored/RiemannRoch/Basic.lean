@@ -8,6 +8,7 @@ module
 public import ModularCurves.Vendored.RiemannRoch.FunctionField.Divisor
 public import Mathlib.FieldTheory.AlgebraicClosure
 public import Mathlib.FieldTheory.RatFunc.Basic
+public import Mathlib.FieldTheory.RatFunc.IntermediateField
 
 /-!
 # Basic divisor API aliases
