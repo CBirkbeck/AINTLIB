@@ -7,6 +7,7 @@ module
 
 public import BernoulliRegular.UnitQuotient.Components
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 
 /-!
 # Unit quotients: the actual cyclotomic `Delta` action

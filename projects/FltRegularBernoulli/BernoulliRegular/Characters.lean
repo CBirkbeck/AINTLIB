@@ -7,6 +7,7 @@ public import Mathlib.FieldTheory.Finite.Basic
 public import Mathlib.Algebra.CharP.Algebra
 public import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
 public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+public import Mathlib.LinearAlgebra.SModEq.Pow
 
 /-!
 # Characters of `Gal(ℚ(ζ_p)/ℚ)` — Teichmüller character

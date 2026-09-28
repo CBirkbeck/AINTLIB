@@ -4,6 +4,7 @@ public import Mathlib.RingTheory.AdicCompletion.Algebra
 public import Mathlib.RingTheory.AdicCompletion.Completeness
 public import Mathlib.RingTheory.Henselian
 public import BernoulliRegular.Reflection.Local.Graded
+public import Mathlib.Data.Nat.Choose.Dvd
 
 /-!
 # Completed local principal units

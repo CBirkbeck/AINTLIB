@@ -1,6 +1,8 @@
 module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter.PowerBasis.PowerBasisSurjective
+public import Mathlib.GroupTheory.ArchimedeanDensely
+public import Mathlib.Algebra.Order.Archimedean.Submonoid
 
 /-!
 # Power-basis approximation and the adic structure of the rational `(p)`-adic integers

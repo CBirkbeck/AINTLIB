@@ -1,6 +1,7 @@
 module
 
 public import BernoulliRegular.ZetaFactorisation.Basic
+public import Mathlib.Algebra.BigOperators.Ring.Nat
 
 /-!
 # Generic number-field Euler-product infrastructure

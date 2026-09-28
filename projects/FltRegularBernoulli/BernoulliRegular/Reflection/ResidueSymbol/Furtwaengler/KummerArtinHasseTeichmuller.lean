@@ -7,6 +7,7 @@ module
 
 public import Mathlib.RingTheory.Teichmuller
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerArtinHasseUnitResidue
+public import Mathlib.Algebra.CharP.CharAndCard
 
 /-!
 # Teichmüller residue-unit lifts at `lambda`

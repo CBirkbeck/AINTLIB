@@ -2,6 +2,7 @@ module
 
 public import BernoulliRegular.GaussSum.PrimeFactorization.GaloisAction.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Inertia
+public import Mathlib.NumberTheory.NumberField.Ideal.Basic
 
 /-!
 # Character subfield primes in the Stickelberger field

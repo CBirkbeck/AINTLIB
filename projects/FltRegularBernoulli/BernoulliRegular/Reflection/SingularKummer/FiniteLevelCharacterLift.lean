@@ -2,6 +2,7 @@ module
 
 public import BernoulliRegular.Reflection.SingularKummer.FiniteLevelCoefficientReduction
 public import BernoulliRegular.Characters
+public import Mathlib.RingTheory.ZMod
 
 /-!
 # Singular Kummer: finite-level Teichmuller character lift

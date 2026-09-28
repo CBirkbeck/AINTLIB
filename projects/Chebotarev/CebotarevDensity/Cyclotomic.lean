@@ -7,6 +7,7 @@ public import Mathlib.GroupTheory.FiniteAbelian.Duality
 public import Mathlib.NumberTheory.Cyclotomic.Basic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 public import Mathlib.NumberTheory.NumberField.Ideal.Basic
+public import Mathlib.Analysis.Calculus.SmoothSeries
 
 /-!
 # Chebotarev's theorem: cyclotomic case
