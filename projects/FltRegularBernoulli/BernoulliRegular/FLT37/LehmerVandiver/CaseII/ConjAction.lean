@@ -1,4 +1,5 @@
 import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
+import Mathlib.RingTheory.ClassGroup.ExtendedHom
 
 /-!
 # [II1-TARGET-AUDIT] Complex conjugation on the Case-II Washington ideals
@@ -265,21 +266,7 @@ theorem caseII_classGroup_conj_mk0 {𝔞 : Ideal (𝓞 K)} (h𝔞 : 𝔞 ≠ ⊥
       ClassGroup.mk0 ⟨𝔞.map
           (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom,
         mem_nonZeroDivisors_iff_ne_zero.mpr ((map_ne_bot_iff_complexConj K 𝔞).mpr h𝔞)⟩ := by
-  have hmid : (Units.mapEquiv (FractionalIdeal.ringEquivOfRingEquiv (FractionRing (𝓞 K))
-        (FractionRing (𝓞 K))
-        (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv).toMulEquiv)
-        (FractionalIdeal.mk0 (FractionRing (𝓞 K))
-          ⟨𝔞, mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞⟩) =
-      FractionalIdeal.mk0 (FractionRing (𝓞 K))
-        ⟨𝔞.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom,
-          mem_nonZeroDivisors_iff_ne_zero.mpr ((map_ne_bot_iff_complexConj K 𝔞).mpr h𝔞)⟩ := by
-    apply Units.ext
-    simp only [Units.coe_mapEquiv, FractionalIdeal.coe_mk0]
-    exact caseII_ringEquivOfRingEquiv_coeIdeal 𝔞
-  rw [RingEquiv.toMulEquiv_eq_coe] at hmid
-  simp only [ClassGroup.mulEquiv, MulEquiv.trans_apply, ClassGroup.equiv_mk0,
-    QuotientGroup.congr_mk', hmid]
-  rw [← ClassGroup.equiv_mk0, MulEquiv.symm_apply_apply]
+  exact ClassGroup.mulEquiv_mk0 _ _
 
 set_option maxRecDepth 4000 in
 omit [IsCyclotomicExtension {37} ℚ K] in
