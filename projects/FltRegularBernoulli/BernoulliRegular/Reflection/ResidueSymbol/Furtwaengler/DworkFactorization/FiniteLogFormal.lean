@@ -59,6 +59,10 @@ theorem log_subst_mul_one_add_scaled [IsAddTorsionFree A] (x y : A) :
         (PowerSeries.log A) =
       PowerSeries.subst (PowerSeries.X * PowerSeries.C x) (PowerSeries.log A) +
         PowerSeries.subst (PowerSeries.X * PowerSeries.C y) (PowerSeries.log A) := by
+  -- `PowerSeries.derivative.ext` asks for `HasUniqueDiv A` since mathlib#42407; over a
+  -- commutative ring this is equivalent to the `IsAddTorsionFree A` hypothesis.
+  have : HasUniqueDiv A :=
+    ⟨fun _ hn _ _ h ↦ eq_of_nsmul_eq_nsmul_of_addCommute hn (AddCommute.all _ _) h⟩
   let a : PowerSeries A := PowerSeries.X * PowerSeries.C x
   let b : PowerSeries A := PowerSeries.X * PowerSeries.C y
   let z : PowerSeries A := (1 + a) * (1 + b) - 1
