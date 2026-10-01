@@ -8,7 +8,7 @@ module
 public import ModularCurves.Vendored.RiemannRoch.AdeleSpace.Basic
 public import ModularCurves.Vendored.RiemannRoch.Genus.Polar
 public import ModularCurves.Vendored.RiemannRoch.Genus.Ramification
-public import Mathlib.Data.Int.LeastGreatest
+public import Mathlib.Order.Int.LeastGreatest
 public import Mathlib.FieldTheory.RatFunc.Basic
 public import Mathlib.LinearAlgebra.Basis.Basic
 

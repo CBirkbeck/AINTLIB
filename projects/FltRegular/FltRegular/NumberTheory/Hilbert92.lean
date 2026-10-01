@@ -314,6 +314,11 @@ local notation "G" =>
   Additive (relativeUnitsWithGenerator p hp hKL σ hσ) ⧸
     AddCommGroup.torsion (Additive (relativeUnitsWithGenerator p hp hKL σ hσ))
 
+/-- `G` is commutative and torsion-free, hence has unique division. Since mathlib#42407 this is
+what `Module.IsTorsionFree ℤ G` (and so `Module.Free ℤ G`) is derived from. -/
+instance : HasUniqueDiv G :=
+  ⟨fun _ hn _ _ h ↦ eq_of_nsmul_eq_nsmul_of_addCommute hn (AddCommute.all _ _) h⟩
+
 /-- The image of a unit in the torsion-free quotient of relative units. -/
 def unitToU (u : (𝓞 K)ˣ) : G := QuotientAddGroup.mk (Additive.ofMul <| QuotientGroup.mk u)
 

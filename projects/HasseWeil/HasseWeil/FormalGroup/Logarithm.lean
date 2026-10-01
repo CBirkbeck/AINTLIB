@@ -1217,7 +1217,7 @@ private theorem coeff_zero_of_pderiv_zero_fin2 [Module ℚ R]
     (h : MvPowerSeries (Fin 2) R) (hd : MvPowerSeries.pderiv' 0 h = 0)
     (e : Fin 2 →₀ ℕ) (he : e 0 ≠ 0) :
     MvPowerSeries.coeff e h = 0 := by
-  have : IsAddTorsionFree R := IsAddTorsionFree.of_module_rat R
+  have : HasUniqueDiv R := HasUniqueDiv.of_module_rat R
   -- Obtain a : ℕ with e 0 = a + 1.
   obtain ⟨a, ha⟩ := Nat.exists_eq_succ_of_ne_zero he
   -- Let d = e - single 0 1, so that d + single 0 1 = e and d 0 = a.

@@ -7,7 +7,7 @@ import Mathlib.Algebra.Lie.OfAssociative
 import Mathlib.Analysis.Normed.Lp.WithLp
 import Mathlib.Analysis.Normed.Ring.Lemmas
 import Mathlib.Data.Finsupp.Pointwise
-import Mathlib.Data.Int.Star
+import Mathlib.Algebra.Order.Star.Int
 import Mathlib.GroupTheory.Commensurable
 import Mathlib.GroupTheory.DoubleCoset
 import Mathlib.Order.CompletePartialOrder

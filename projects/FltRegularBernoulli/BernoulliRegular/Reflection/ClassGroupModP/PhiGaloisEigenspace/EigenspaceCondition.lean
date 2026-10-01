@@ -398,7 +398,7 @@ theorem ideal_pow_left_inj_of_ne_bot
       UniqueFactorizationMonoid.normalizedFactors_pow] at hfact
   have hfact' : UniqueFactorizationMonoid.normalizedFactors A =
       UniqueFactorizationMonoid.normalizedFactors B :=
-    IsAddTorsionFree.nsmul_right_injective hn hfact
+    nsmul_right_injective hn hfact
   have hassoc : Associated A B :=
     (UniqueFactorizationMonoid.associated_iff_normalizedFactors_eq_normalizedFactors
       hA hB).mpr hfact'

@@ -39,7 +39,7 @@ namespace CaseI
 
 Proof: `Ideal R` is a UniqueFactorizationMonoid. From `A^n = B^n` and
 `normalizedFactors_pow`, `n • normalizedFactors A = n • normalizedFactors B`.
-By `Multiset` torsion-freeness (`IsAddTorsionFree.nsmul_right_injective`),
+By `Multiset` torsion-freeness (`HasUniqueDiv.nsmul_right_injective`),
 `normalizedFactors A = normalizedFactors B`. By
 `associated_iff_normalizedFactors_eq_normalizedFactors`, `A` and `B` are
 associated. For non-zero ideals in `Ideal R`, associated ⟺ equal. -/
@@ -54,7 +54,7 @@ theorem Ideal.pow_left_inj_of_ne_zero
       ← UniqueFactorizationMonoid.normalizedFactors_pow, h]
   have hfact' : UniqueFactorizationMonoid.normalizedFactors A =
       UniqueFactorizationMonoid.normalizedFactors B :=
-    IsAddTorsionFree.nsmul_right_injective hn hfact
+    nsmul_right_injective hn hfact
   obtain ⟨u, hu⟩ :=
     (UniqueFactorizationMonoid.associated_iff_normalizedFactors_eq_normalizedFactors
       hA hB).mpr hfact'

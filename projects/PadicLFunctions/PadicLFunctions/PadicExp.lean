@@ -565,7 +565,7 @@ from `D(log.subst(exp−1)) = 1` and matching constant coefficients. -/
 theorem log_subst_exp_sub_one (A : Type*) [CommRing A] [Algebra ℚ A] :
     (PowerSeries.log A).subst (exp A - 1) = PowerSeries.X := by
   have hg : HasSubst (exp A - 1) := HasSubst.exp_sub_one
-  haveI : IsAddTorsionFree A := IsAddTorsionFree.of_module_rat A
+  haveI : HasUniqueDiv A := HasUniqueDiv.of_module_rat A
   refine PowerSeries.derivative.ext ?_ ?_
   · rw [derivative_subst hg, map_sub, derivative_exp, Derivation.map_one_eq_zero,
       sub_zero, derivative_X]
