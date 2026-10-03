@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.DualPullback.OverRestriction
-import ModularCurves.Picard.DualPullback.RestrictComp
-import ModularCurves.Picard.DualPullback.UnitComp
-import ModularCurves.Picard.DualPullback.UnitSquare
+module
+
+public import ModularCurves.Picard.DualPullback.OverRestriction
+public import ModularCurves.Picard.DualPullback.RestrictComp
+public import ModularCurves.Picard.DualPullback.UnitComp
+public import ModularCurves.Picard.DualPullback.UnitSquare
 
 /-!
 # Restricting local trivializations
@@ -16,6 +18,8 @@ It compares the direct restriction-functor construction with the pullback constr
 and identifies both with restriction on the over-site. It also records compatibility with
 sheaf duals.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Opposite
 

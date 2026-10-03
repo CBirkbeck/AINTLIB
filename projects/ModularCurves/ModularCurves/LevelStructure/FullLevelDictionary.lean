@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.FullLevelBridge
+module
+
+public import ModularCurves.LevelStructure.FullLevelBridge
 
 /-!
 # The T-D8 dictionary, axiom-clean form
@@ -15,6 +17,8 @@ v10.304-KM) instead of the `Basic.lean:115` register-box shell (which stays sorr
 for import-order reasons). Consumers of `isFullLevel_iff_naive` repoint here; the
 statement is identical.
 -/
+
+@[expose] public section
 
 universe u
 

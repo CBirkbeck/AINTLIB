@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.FieldTheory.Extension
-import Mathlib.FieldTheory.IsAlgClosed.Basic
-import Mathlib.FieldTheory.Normal.Basic
+module
 
-import HasseWeil.Foundation.EC.GenericPointZsmul
-import HasseWeil.Foundation.EC.SeparableKernelTorsor
+public import Mathlib.FieldTheory.Extension
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.FieldTheory.Normal.Basic
+
+public import HasseWeil.Foundation.EC.GenericPointZsmul
+public import HasseWeil.Foundation.EC.SeparableKernelTorsor
 
 /-!
 # Kernel-rationality of `[ℓ]` over `K̄` (Silverman III.4.10c)
@@ -32,6 +34,8 @@ equation over `K̄`.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, III.4.10c.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

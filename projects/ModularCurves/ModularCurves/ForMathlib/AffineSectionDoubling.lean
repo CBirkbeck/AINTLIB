@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.SectionCoordinates
-import ModularCurves.ForMathlib.ThreeTorsionRingCertificate
+module
+
+public import ModularCurves.EllipticCurve.SectionCoordinates
+public import ModularCurves.ForMathlib.ThreeTorsionRingCertificate
 
 /-!
 # Ring-level doubling coordinates (`RING-DBL`, part A/B)
@@ -20,6 +22,8 @@ The scheme-level identity `2 • affineSection = affineSection (dblX, dblY)` is 
 top of this in `AffineSectionDoublingIdentity.lean` via the universal-domain transport
 (KM's banked route, `decomposition-km-integral.md` [RING-DBL]).
 -/
+
+@[expose] public section
 
 universe u
 

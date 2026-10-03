@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornVKMaxElementComparisonDischarge
+module
+
+public import «Adic spaces».WedhornVKMaxElementComparisonDischarge
 
 /-!
 # Wedhorn 8.34(ii) — Base rational-subset comap residual via Wedhorn
@@ -93,6 +95,8 @@ premises, matching Wedhorn 7.45's exact statement.
   `P.A₀ ≤ A⁺`), needed by `localizationLocSubring_aplus_le_comap`.
   In Wedhorn-Tate rings this gives `A⁺ = A₀` (the standard setting).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

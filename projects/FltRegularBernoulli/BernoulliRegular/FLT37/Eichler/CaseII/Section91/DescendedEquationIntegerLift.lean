@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjNormReassembly
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjNormReassembly
 
 /-!
 # [FLT37-CASEII-R2] The integer-level descended equation (Section §9.1 output, lifted to `𝓞 K`)

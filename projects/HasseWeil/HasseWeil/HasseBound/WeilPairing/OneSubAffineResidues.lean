@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.AffineResidueCalculus
+module
+
+public import HasseWeil.HasseBound.WeilPairing.AffineResidueCalculus
 
 /-!
 # Discharging the closed-point residues of the concrete `(1 − π)_{K̄}` (CoordHom-free,
@@ -66,6 +68,8 @@ identity also handles both non-2-torsion and 2-torsion affine images, using the 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, I.2 (base change), III.4 (Frobenius),
 II.2.5–2.6, III.4.10c, III.5.5.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

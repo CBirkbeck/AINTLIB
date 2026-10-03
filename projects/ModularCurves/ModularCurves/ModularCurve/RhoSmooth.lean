@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ModularCurve.RhoSections
-import ModularCurves.Moduli.LegendreSmooth
-import ModularCurves.Moduli.BaseChangeIso
-import ModularCurves.Moduli.ProductProblem
-import ModularCurves.ForMathlib.SmoothDescentScheme
-import ModularCurves.Moduli.LevelThreeSmooth
+module
+
+public import ModularCurves.ModularCurve.RhoSections
+public import ModularCurves.Moduli.LegendreSmooth
+public import ModularCurves.Moduli.BaseChangeIso
+public import ModularCurves.Moduli.ProductProblem
+public import ModularCurves.ForMathlib.SmoothDescentScheme
+public import ModularCurves.Moduli.LevelThreeSmooth
 
 /-!
 # The Legendre-anchored ρ-cover is smooth of relative dimension one
@@ -20,6 +22,8 @@ the `Y(ρ̄)` smoothness leaf: `Y(ρ̄)` itself receives a finite étale surject
 cover from this scheme (the Legendre-datum forget map), so its smoothness
 follows once smoothness descends along finite étale covers (T-YR-6 (c1)).
 -/
+
+@[expose] public section
 
 noncomputable section
 

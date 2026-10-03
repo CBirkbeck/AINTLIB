@@ -3,7 +3,9 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.CauchyPrincipalValue
+module
+
+public import LeanModularForms.ForMathlib.CauchyPrincipalValue
 
 /-!
 # Generalized Winding Number
@@ -43,6 +45,8 @@ via the bridge theorem when needed.
 
 * K. Hungerbühler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Set Filter Topology MeasureTheory Complex
 open scoped Interval

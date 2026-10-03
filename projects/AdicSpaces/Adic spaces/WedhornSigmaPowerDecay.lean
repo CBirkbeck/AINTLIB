@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornFactorExtractionPowerDecay
-import «Adic spaces».Cor732
+module
+
+public import «Adic spaces».WedhornFactorExtractionPowerDecay
+public import «Adic spaces».Cor732
 
 /-!
 # Wedhorn σ-power-decay bridge
@@ -89,6 +91,8 @@ factor extraction alone.
   `Cor732` (for `exists_mem_basicOpen_pow_of_tn` and
   `exists_dominating_unit`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

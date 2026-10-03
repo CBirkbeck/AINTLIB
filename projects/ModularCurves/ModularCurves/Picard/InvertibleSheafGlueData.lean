@@ -1,6 +1,8 @@
-import ModularCurves.Picard.InvertibleSheafFiniteStageModel
-import ModularCurves.Picard.PullbackPseudofunctorUnit
-import Mathlib.CategoryTheory.Sites.Descent.DescentDataPrime
+module
+
+public import ModularCurves.Picard.InvertibleSheafFiniteStageModel
+public import ModularCurves.Picard.PullbackPseudofunctorUnit
+public import Mathlib.CategoryTheory.Sites.Descent.DescentDataPrime
 
 /-!
 # Glue data from finite-stage invertible-sheaf cocycles
@@ -9,6 +11,10 @@ This file records the coherence laws for the chart transition isomorphisms attac
 `AffineIntersectionUnitCocycle`. The statements retain the canonical pullback transports, so
 they can be used directly in a later effectivity construction on the glued scheme.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

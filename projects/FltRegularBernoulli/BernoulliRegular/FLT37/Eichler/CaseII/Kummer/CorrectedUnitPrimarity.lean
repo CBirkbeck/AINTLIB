@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerUnramifiedToConjFixed
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerUnramifiedToConjFixed
 
 /-!
 # [FLT37-CASEII-R1] The finite local `(ζ-1)`-adic primarity congruence (Washington Lemma 9.1)

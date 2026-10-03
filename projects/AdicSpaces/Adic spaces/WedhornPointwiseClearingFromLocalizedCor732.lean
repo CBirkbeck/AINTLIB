@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalizedCor732SigmaSupplier
-import «Adic spaces».WedhornPointwiseClearingSupplierFromSigmaPower
+module
+
+public import «Adic spaces».WedhornLocalizedCor732SigmaSupplier
+public import «Adic spaces».WedhornPointwiseClearingSupplierFromSigmaPower
 
 /-!
 # Wedhorn 8.34(ii) — Pointwise clearing supplier from localized Cor 7.32 output (T081)
@@ -102,6 +104,8 @@ the residual as the single named algebraic identity tied to T065's
   bivariate-overlap content.
 * No final `ValuationSpectrum.tateAcyclicity` hypothesis additions.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

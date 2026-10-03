@@ -1,6 +1,8 @@
-import «Adic spaces».RestrictedPowerSeries
-import «Adic spaces».StructureSheaf
-import Mathlib.RingTheory.Localization.AtPrime.Basic
+module
+
+public import «Adic spaces».RestrictedPowerSeries
+public import «Adic spaces».StructureSheaf
+public import Mathlib.RingTheory.Localization.AtPrime.Basic
 
 /-!
 # Nonarchimedean Scottish Book — Problem 30
@@ -28,6 +30,8 @@ Open.
 - **Stalk of structure sheaf**: The colimit O_{X,x} = colim_{x ∈ U} O_X(U) over open
   neighborhoods of x in Spa(A, A+).
 -/
+
+@[expose] public section
 
 open ValuationSpectrum Filter
 

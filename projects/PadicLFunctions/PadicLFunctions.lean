@@ -1,56 +1,58 @@
-import PadicLFunctions.Basic
-import PadicLFunctions.Common.DelOperator
-import PadicLFunctions.Measure.Basic
-import PadicLFunctions.Measure.MahlerTransform
-import PadicLFunctions.Measure.Convolution
-import PadicLFunctions.Measure.Toolbox
-import PadicLFunctions.Measure.UnitsZp
-import PadicLFunctions.Measure.Fubini
-import PadicLFunctions.Measure.PseudoMeasure
-import PadicLFunctions.KubotaLeopoldt.ZetaValues
-import PadicLFunctions.KubotaLeopoldt.ZetaValuesComplex
-import PadicLFunctions.KubotaLeopoldt.MuA
-import PadicLFunctions.KubotaLeopoldt.ZetaP
-import PadicLFunctions.Coefficients
-import PadicLFunctions.MeasureR.Basic
-import PadicLFunctions.MeasureR.MahlerTransform
-import PadicLFunctions.MeasureR.Convolution
-import PadicLFunctions.MeasureR.Toolbox
-import PadicLFunctions.MeasureR.UnitsZp
-import PadicLFunctions.MeasureR.Fubini
-import PadicLFunctions.MeasureR.UnitsRing
-import PadicLFunctions.MeasureR.BaseChange
-import PadicLFunctions.Interpolation.Characters
-import PadicLFunctions.Interpolation.GenBernoulli
-import PadicLFunctions.Interpolation.GenBernoulliComplex
-import PadicLFunctions.Interpolation.Sawtooth
-import PadicLFunctions.Interpolation.Twist
-import PadicLFunctions.Interpolation.TameConductor
-import PadicLFunctions.Interpolation.NonTame
-import PadicLFunctions.Interpolation.Branches
-import PadicLFunctions.Interpolation.LpFunction
-import PadicLFunctions.PadicExp
-import PadicLFunctions.ExtLog
-import PadicLFunctions.MeasureR.FormalPsi
-import PadicLFunctions.ValuesAtOneComplex
-import PadicLFunctions.ValuesAtOne
-import PadicLFunctions.ResidueZeta
-import PadicLFunctions.EisensteinFamily
-import PadicLFunctions.EisensteinComplex
-import PadicLFunctions.Coleman.Tower
-import PadicLFunctions.Coleman.NormOperator
-import PadicLFunctions.Coleman.Theorem
-import PadicLFunctions.Coleman.Map
-import PadicLFunctions.Iwasawa.PlusPart
-import PadicLFunctions.Iwasawa.ZetaGalois
-import PadicLFunctions.Iwasawa.LocalUnits
-import PadicLFunctions.Iwasawa.CyclotomicUnits
-import PadicLFunctions.IwasawaProof.GaloisAction
-import PadicLFunctions.IwasawaProof.LogDerivative
-import PadicLFunctions.IwasawaProof.Equivariance
-import PadicLFunctions.IwasawaProof.FundamentalSequence
-import PadicLFunctions.IwasawaProof.Generators
-import PadicLFunctions.IwasawaProof.Main
+module
+
+public import PadicLFunctions.Basic
+public import PadicLFunctions.Common.DelOperator
+public import PadicLFunctions.Measure.Basic
+public import PadicLFunctions.Measure.MahlerTransform
+public import PadicLFunctions.Measure.Convolution
+public import PadicLFunctions.Measure.Toolbox
+public import PadicLFunctions.Measure.UnitsZp
+public import PadicLFunctions.Measure.Fubini
+public import PadicLFunctions.Measure.PseudoMeasure
+public import PadicLFunctions.KubotaLeopoldt.ZetaValues
+public import PadicLFunctions.KubotaLeopoldt.ZetaValuesComplex
+public import PadicLFunctions.KubotaLeopoldt.MuA
+public import PadicLFunctions.KubotaLeopoldt.ZetaP
+public import PadicLFunctions.Coefficients
+public import PadicLFunctions.MeasureR.Basic
+public import PadicLFunctions.MeasureR.MahlerTransform
+public import PadicLFunctions.MeasureR.Convolution
+public import PadicLFunctions.MeasureR.Toolbox
+public import PadicLFunctions.MeasureR.UnitsZp
+public import PadicLFunctions.MeasureR.Fubini
+public import PadicLFunctions.MeasureR.UnitsRing
+public import PadicLFunctions.MeasureR.BaseChange
+public import PadicLFunctions.Interpolation.Characters
+public import PadicLFunctions.Interpolation.GenBernoulli
+public import PadicLFunctions.Interpolation.GenBernoulliComplex
+public import PadicLFunctions.Interpolation.Sawtooth
+public import PadicLFunctions.Interpolation.Twist
+public import PadicLFunctions.Interpolation.TameConductor
+public import PadicLFunctions.Interpolation.NonTame
+public import PadicLFunctions.Interpolation.Branches
+public import PadicLFunctions.Interpolation.LpFunction
+public import PadicLFunctions.PadicExp
+public import PadicLFunctions.ExtLog
+public import PadicLFunctions.MeasureR.FormalPsi
+public import PadicLFunctions.ValuesAtOneComplex
+public import PadicLFunctions.ValuesAtOne
+public import PadicLFunctions.ResidueZeta
+public import PadicLFunctions.EisensteinFamily
+public import PadicLFunctions.EisensteinComplex
+public import PadicLFunctions.Coleman.Tower
+public import PadicLFunctions.Coleman.NormOperator
+public import PadicLFunctions.Coleman.Theorem
+public import PadicLFunctions.Coleman.Map
+public import PadicLFunctions.Iwasawa.PlusPart
+public import PadicLFunctions.Iwasawa.ZetaGalois
+public import PadicLFunctions.Iwasawa.LocalUnits
+public import PadicLFunctions.Iwasawa.CyclotomicUnits
+public import PadicLFunctions.IwasawaProof.GaloisAction
+public import PadicLFunctions.IwasawaProof.LogDerivative
+public import PadicLFunctions.IwasawaProof.Equivariance
+public import PadicLFunctions.IwasawaProof.FundamentalSequence
+public import PadicLFunctions.IwasawaProof.Generators
+public import PadicLFunctions.IwasawaProof.Main
 
 /-!
 # p-adic L-functions
@@ -66,3 +68,5 @@ blueprint (`PadicLFunctionsBlueprint`). Individual results are laid down as
 dependency graph colours in automatically as the referenced declarations are
 completed.
 -/
+
+@[expose] public section

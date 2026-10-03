@@ -2,11 +2,13 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».ValuativeRel.Comap
-import Mathlib.RingTheory.Valuation.Quotient
-import Mathlib.RingTheory.Valuation.ExtendToLocalization
-import Mathlib.Topology.Order
-import Mathlib.RingTheory.Spectrum.Prime.Topology
+module
+
+public import «Adic spaces».ValuativeRel.Comap
+public import Mathlib.RingTheory.Valuation.Quotient
+public import Mathlib.RingTheory.Valuation.ExtendToLocalization
+public import Mathlib.Topology.Order
+public import Mathlib.RingTheory.Spectrum.Prime.Topology
 
 /-!
 # The Valuation Spectrum of a Ring
@@ -27,6 +29,8 @@ We define the valuation spectrum `Spv A` following Definition 4.1 of Wedhorn.
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Definition 4.1, Remark 4.3, Remark 4.4,
   Proposition 4.7(2)
 -/
+
+@[expose] public section
 
 /-- The *valuation spectrum* `Spv A` of a commutative ring `A` (Definition 4.1 of Wedhorn). -/
 @[ext]

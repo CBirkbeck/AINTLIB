@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.ComparisonCoefficients
+module
+
+public import ModularCurves.EllipticCurve.ComparisonCoefficients
 
 /-!
 # Coordinate action of the projective variable-change isomorphism (T-W7.1b bridge)
@@ -23,6 +25,8 @@ These feed the `main`/`b5` leaves: `bridge_coordX`/`_coordY` instantiate the bri
 
 AINTLIB ModularCurves T-W7.1b (lane P3-parallel, beastmode-P3b3).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve CategoryTheory
 namespace ModularCurves

@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».RestrictedPowerSeries
-import Mathlib.RingTheory.RingHom.Flat
+module
+
+public import «Adic spaces».RestrictedPowerSeries
+public import Mathlib.RingTheory.RingHom.Flat
 
 /-!
 # Nonarchimedean Scottish Book — Problem 29
@@ -31,6 +33,10 @@ RESOLVED: No (Gabber counterexample).
 - **Tate algebra A⟨T⟩**: The ring of restricted power series in one variable over A,
   i.e., `restrictedMvPowerSeriesSubring 1 A`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace ScottishBook
 

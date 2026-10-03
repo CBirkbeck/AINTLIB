@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.Divisors
-import Mathlib.RingTheory.Valuation.Integral
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.Divisors
+public import Mathlib.RingTheory.Valuation.Integral
 
 /-!
 # Algebraic elements have nonnegative order at every smooth point
@@ -33,6 +35,8 @@ transcendental over `F`. This avoids needing the global "constant field of
 
 * Silverman, *The Arithmetic of Elliptic Curves*, II.1 (algebraic Liouville).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

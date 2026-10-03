@@ -1,6 +1,8 @@
-import Mathlib.AlgebraicGeometry.Modules.Sheaf
-import Mathlib.CategoryTheory.Sites.Descent.IsPrestack
-import Mathlib.CategoryTheory.Sites.Descent.DescentDataPrime
+module
+
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.CategoryTheory.Sites.Descent.IsPrestack
+public import Mathlib.CategoryTheory.Sites.Descent.DescentDataPrime
 
 /-!
 # The pullback pseudofunctor for scheme modules
@@ -8,6 +10,8 @@ import Mathlib.CategoryTheory.Sites.Descent.DescentDataPrime
 This file exposes the left-adjoint part of mathlib's existing scheme-module pseudofunctor and
 identifies its flexible composition isomorphisms with `pullbackComp` followed by `pullbackCongr`.
 -/
+
+@[expose] public section
 
 universe u
 

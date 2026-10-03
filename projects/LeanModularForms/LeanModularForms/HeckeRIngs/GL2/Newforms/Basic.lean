@@ -3,23 +3,25 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheoryPetersson
-import LeanModularForms.HeckeRIngs.GL2.CharacterDecomp
-import LeanModularForms.HeckeRIngs.GL2.LevelEmbed
-import LeanModularForms.HeckeRIngs.GL2.LevelRaise
-import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
-import LeanModularForms.Modularforms.LFunction
-import LeanModularForms.Modularforms.PeterssonLevelN
-import LeanModularForms.Modularforms.DimensionFormulas
-import LeanModularForms.Modularforms.SlashActionAuxil
-import LeanModularForms.Eigenforms.ConductorTheorem
-import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
-import Mathlib.NumberTheory.EulerProduct.Basic
-import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
-import Mathlib.NumberTheory.LSeries.AbstractFuncEq
-import Mathlib.NumberTheory.LSeries.DirichletContinuation
-import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheoryPetersson
+public import LeanModularForms.HeckeRIngs.GL2.CharacterDecomp
+public import LeanModularForms.HeckeRIngs.GL2.LevelEmbed
+public import LeanModularForms.HeckeRIngs.GL2.LevelRaise
+public import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
+public import LeanModularForms.Modularforms.LFunction
+public import LeanModularForms.Modularforms.PeterssonLevelN
+public import LeanModularForms.Modularforms.DimensionFormulas
+public import LeanModularForms.Modularforms.SlashActionAuxil
+public import LeanModularForms.Eigenforms.ConductorTheorem
+public import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+public import Mathlib.NumberTheory.EulerProduct.Basic
+public import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
+public import Mathlib.NumberTheory.LSeries.AbstractFuncEq
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
 /-!
 # Newforms: eigenforms, oldforms, the new subspace, and Hecke stability
@@ -28,6 +30,10 @@ Core definitions for the newform theory: the `Eigenform` structure and its eigen
 oldform/new-subspace submodules, `petN` left-linearity, the `CuspForm → ModularForm` embedding,
 the old/new projection API, and `heckeT_n` stability (DS Prop 5.6.2).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

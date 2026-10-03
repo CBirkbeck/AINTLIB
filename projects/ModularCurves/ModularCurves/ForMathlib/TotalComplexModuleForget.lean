@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.TotalComplexUpNatVerticalEdge
-import Mathlib.Algebra.Category.ModuleCat.Colimits
+module
+
+public import ModularCurves.ForMathlib.TotalComplexUpNatVerticalEdge
+public import Mathlib.Algebra.Category.ModuleCat.Colimits
 
 /-!
 # Forgetting scalars commutes with total complexes
@@ -9,6 +11,10 @@ coproducts defining the total complex of a first-quadrant bicomplex. This file
 packages the resulting isomorphism and its formulas on coproduct injections and
 differentials.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits
 

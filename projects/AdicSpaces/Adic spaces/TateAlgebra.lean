@@ -2,23 +2,25 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».RestrictedPowerSeries
-import «Adic spaces».RestrictedModule
-import «Adic spaces».NoetherianTateModules
-import «Adic spaces».HuberRings
-import «Adic spaces».Lemma745
-import «Adic spaces».WedhornBanachTheorem
-import Mathlib.RingTheory.Ideal.Quotient.Basic
-import Mathlib.RingTheory.Ideal.Quotient.Noetherian
-import Mathlib.RingTheory.Filtration
-import Mathlib.Data.Finsupp.Antidiagonal
-import Mathlib.RingTheory.Flat.Basic
-import Mathlib.RingTheory.Flat.EquationalCriterion
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
-import Mathlib.RingTheory.Flat.Localization
-import Mathlib.RingTheory.Spectrum.Prime.RingHom
-import Mathlib.Algebra.MvPolynomial.CommRing
-import Mathlib.RingTheory.MvPolynomial.Localization
+module
+
+public import «Adic spaces».RestrictedPowerSeries
+public import «Adic spaces».RestrictedModule
+public import «Adic spaces».NoetherianTateModules
+public import «Adic spaces».HuberRings
+public import «Adic spaces».Lemma745
+public import «Adic spaces».WedhornBanachTheorem
+public import Mathlib.RingTheory.Ideal.Quotient.Basic
+public import Mathlib.RingTheory.Ideal.Quotient.Noetherian
+public import Mathlib.RingTheory.Filtration
+public import Mathlib.Data.Finsupp.Antidiagonal
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Flat.EquationalCriterion
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+public import Mathlib.RingTheory.Flat.Localization
+public import Mathlib.RingTheory.Spectrum.Prime.RingHom
+public import Mathlib.Algebra.MvPolynomial.CommRing
+public import Mathlib.RingTheory.MvPolynomial.Localization
 
 /-!
 # Tate and Laurent Algebras
@@ -46,6 +48,8 @@ These are the central reusable objects for the Tate acyclicity proof (Theorem 8.
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §6.9, §8.29–8.33
 -/
+
+@[expose] public section
 
 open Filter MvPowerSeries
 

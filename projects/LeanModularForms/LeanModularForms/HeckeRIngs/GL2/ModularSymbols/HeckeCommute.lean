@@ -3,8 +3,10 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeSymbol
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeFinite
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeSymbol
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeFinite
 
 /-!
 # Commutativity of the modular-symbol Hecke and diamond operators
@@ -29,6 +31,8 @@ matrices satisfy the CRT product identity `upperMat p b * upperMat q c = upperMa
 so the double sums reindex; at the diamond level the representatives multiply commutatively modulo
 `Γ₁(N)`.
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2.ModularSymbols
 

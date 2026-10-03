@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPerTFactoredBranchLink
-import «Adic spaces».WedhornLocalizedCor732Application
-import «Adic spaces».WedhornStandardCoverRefinement
+module
+
+public import «Adic spaces».WedhornPerTFactoredBranchLink
+public import «Adic spaces».WedhornLocalizedCor732Application
+public import «Adic spaces».WedhornStandardCoverRefinement
 
 /-!
 # Wedhorn local Cor 7.32 → factored chain bridge
@@ -70,6 +72,8 @@ specific structural output.
   `764ecac`) and `rationalOpen_subset_base_via_local_Cor732_chain`
   (commit `4197d87`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

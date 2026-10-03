@@ -1,8 +1,10 @@
-import Mathlib.Algebra.Category.Grp.Abelian
-import Mathlib.Algebra.Category.Grp.Biproducts
-import Mathlib.Algebra.Category.Grp.Limits
-import Mathlib.CategoryTheory.Sites.SheafCohomology.Cech
-import ModularCurves.ForMathlib.AcyclicAffineOpenCover
+module
+
+public import Mathlib.Algebra.Category.Grp.Abelian
+public import Mathlib.Algebra.Category.Grp.Biproducts
+public import Mathlib.Algebra.Category.Grp.Limits
+public import Mathlib.CategoryTheory.Sites.SheafCohomology.Cech
+public import ModularCurves.ForMathlib.AcyclicAffineOpenCover
 
 /-!
 # Concrete Cech cochains on topological spaces
@@ -11,6 +13,8 @@ This file gives an elementwise description of mathlib's Cech complex for preshea
 abelian groups and connects its intersection opens to affine quasicoherent vanishing.
 The construction follows mathlib PR #35073, specialized to the API needed here.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

@@ -1,9 +1,11 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Bridge
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.BridgeAssembly
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ADivPrincipal
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.NoSecondOrderHelper
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificDischarge
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Cor8_19Forward
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Bridge
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.BridgeAssembly
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ADivPrincipal
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.NoSecondOrderHelper
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificDischarge
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Cor8_19Forward
 
 /-!
 # LV-route chain compositionality tests

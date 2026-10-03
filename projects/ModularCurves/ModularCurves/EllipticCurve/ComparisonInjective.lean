@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.ComparisonBridge
+module
+
+public import ModularCurves.EllipticCurve.ComparisonBridge
 
 /-!
 # Faithfulness of the projective variable-change action (T-W7.1b b5)
@@ -30,6 +32,8 @@ sorry in `ModelVariableChange.lean` once the b2 filtration leaf lands and the wi
 
 AINTLIB ModularCurves T-W7.1b (lane P3-parallel, beastmode-P3b3).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve CategoryTheory
 

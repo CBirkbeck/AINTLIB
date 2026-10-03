@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Fiber.GenericFiber
-import HasseWeil.Foundation.Curves.Fiber.GoodAffineLocus
-import HasseWeil.Foundation.Curves.Map.PointFunctor
-import HasseWeil.Foundation.Curves.Valuation.Infinity
-import HasseWeil.Foundation.Curves.Valuation.NormValuation
-import Mathlib.Algebra.Polynomial.Lifts
+module
+
+public import HasseWeil.Foundation.Curves.Fiber.GenericFiber
+public import HasseWeil.Foundation.Curves.Fiber.GoodAffineLocus
+public import HasseWeil.Foundation.Curves.Map.PointFunctor
+public import HasseWeil.Foundation.Curves.Valuation.Infinity
+public import HasseWeil.Foundation.Curves.Valuation.NormValuation
+public import Mathlib.Algebra.Polynomial.Lifts
 
 /-!
 # The localized fibre dictionary (ROUTE-W, ticket W-3b)
@@ -50,6 +52,8 @@ isogenies.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.6(b), II.2.7, III.4.10(c).
 -/
+
+@[expose] public section
 
 open scoped nonZeroDivisors
 

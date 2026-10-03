@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.BoundaryWindingSeg1Proof
+module
+
+public import LeanModularForms.ForMathlib.BoundaryWindingSeg1Proof
 
 /-!
 # SmoothBoundaryWindingData for seg4 (left vertical edge)
@@ -17,6 +19,8 @@ Symmetric to seg1: at a point `z₀` strictly inside the left vertical edge
 * `smoothBoundaryData_seg4_of_ftcHyp` -- constructs `SmoothBoundaryWindingData`
   at a generic smooth seg4 point from an external `ArcFTCHyp`
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

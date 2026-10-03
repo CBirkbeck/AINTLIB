@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.FiniteProperClosurePreimage
+module
+
+public import ModularCurves.ForMathlib.FiniteProperClosurePreimage
 
 /-!
 # Proper surjective covers from finite proper closures
@@ -6,6 +8,10 @@ import ModularCurves.ForMathlib.FiniteProperClosurePreimage
 This file proves that the glued morphism from the union of inverse-image charts is proper and,
 when the common source is scheme-theoretically dense in the target, surjective.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory
 

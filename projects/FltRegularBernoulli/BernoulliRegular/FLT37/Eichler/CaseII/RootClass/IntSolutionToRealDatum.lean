@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ProductDescent
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ProductDescent
 
 /-!
 # [FLT37-CASEII-REAL-PRODUCER] Real Case-II descent data from an integer FLT solution

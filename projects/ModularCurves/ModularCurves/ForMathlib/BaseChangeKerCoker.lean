@@ -3,15 +3,18 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.TensorProduct.Prod
-import Mathlib.LinearAlgebra.TensorProduct.RightExactness
-import Mathlib.LinearAlgebra.TensorProduct.Tower
-import Mathlib.RingTheory.Flat.EquationalCriterion
-import Mathlib.RingTheory.Flat.Equalizer
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
-import Mathlib.RingTheory.LocalRing.Module
-import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
-import Mathlib.RingTheory.Support
+module
+
+public import Mathlib.LinearAlgebra.TensorProduct.Prod
+public import Mathlib.LinearAlgebra.TensorProduct.RightExactness
+public import Mathlib.LinearAlgebra.TensorProduct.Tower
+import all Mathlib.LinearAlgebra.TensorProduct.Tower
+public import Mathlib.RingTheory.Flat.EquationalCriterion
+public import Mathlib.RingTheory.Flat.Equalizer
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.LocalRing.Module
+public import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
+public import Mathlib.RingTheory.Support
 
 /-!
 # Base change of kernels and cokernels of linear maps
@@ -67,6 +70,10 @@ Decomposition, verbatim source quotes and adversarial attack logs:
 `.mathlib-quality/decomposition-pic-coh.md` (stream v10.11, worker fable-PIC0).
 Upstream candidates throughout.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open TensorProduct
 
@@ -510,22 +517,9 @@ noncomputable def LinearMap.baseChangeBaseChangeKernelEquiv
       LinearMap.ker (f.baseChange B) := by
   let eP := AlgebraTensorModule.cancelBaseChange R A B B P
   let eQ := AlgebraTensorModule.cancelBaseChange R A B B Q
-  refine
-    { toFun := fun x ↦ ⟨eP.toLinearMap x, ?_⟩
-      invFun := fun x ↦ ⟨eP.symm.toLinearMap x, ?_⟩
-      left_inv := fun x ↦ by
-        ext
-        exact eP.symm_apply_apply x
-      right_inv := fun x ↦ by
-        ext
-        exact eP.apply_symm_apply x
-      map_add' := fun x y ↦ by
-        ext
-        exact eP.map_add x y
-      map_smul' := fun r x ↦ by
-        ext
-        exact eP.map_smul r x }
-  · change (f.baseChange B) (eP.toLinearMap x) = 0
+  have hP (x : LinearMap.ker ((f.baseChange A).baseChange B)) :
+      (f.baseChange B) (eP.toLinearMap x) = 0 := by
+    change (f.baseChange B) (eP.toLinearMap x) = 0
     have hx : eQ.symm.toLinearMap ((f.baseChange B) (eP.toLinearMap x)) = 0 := by
       calc
         _ = ((f.baseChange A).baseChange B) x := by
@@ -538,7 +532,9 @@ noncomputable def LinearMap.baseChangeBaseChangeKernelEquiv
         (eQ.apply_symm_apply ((f.baseChange B) (eP.toLinearMap x))).symm
       _ = eQ.toLinearMap 0 := congrArg eQ.toLinearMap hx
       _ = 0 := eQ.toLinearMap.map_zero
-  · change ((f.baseChange A).baseChange B) (eP.symm.toLinearMap x) = 0
+  have hQ (x : LinearMap.ker (f.baseChange B)) :
+      ((f.baseChange A).baseChange B) (eP.symm.toLinearMap x) = 0 := by
+    change ((f.baseChange A).baseChange B) (eP.symm.toLinearMap x) = 0
     have hx : (f.baseChange B) x = 0 := x.2
     calc
       _ = eQ.symm.toLinearMap
@@ -550,6 +546,21 @@ noncomputable def LinearMap.baseChangeBaseChangeKernelEquiv
         exact congrArg eQ.symm.toLinearMap
           (congrArg (f.baseChange B) (eP.apply_symm_apply x.1))
       _ = 0 := by rw [hx, map_zero]
+  refine
+    { toFun := fun x ↦ ⟨eP.toLinearMap x, hP x⟩
+      invFun := fun x ↦ ⟨eP.symm.toLinearMap x, hQ x⟩
+      left_inv := fun x ↦ by
+        apply Subtype.ext
+        exact eP.symm_apply_apply x.1
+      right_inv := fun x ↦ by
+        apply Subtype.ext
+        exact eP.apply_symm_apply x.1
+      map_add' := fun x y ↦ by
+        apply Subtype.ext
+        exact eP.map_add x.1 y.1
+      map_smul' := fun r x ↦ by
+        apply Subtype.ext
+        exact eP.map_smul r x.1 }
 
 /-- **Fibre identification** (GME p. 107: "Again by Lemma 1.10.4, we know `f_*𝓛` is
 locally free and `(f_*𝓛) ⊗ k(s) ≅ f_*(𝓛(s))`"): for an `R`-algebra `A`, if `Q` and

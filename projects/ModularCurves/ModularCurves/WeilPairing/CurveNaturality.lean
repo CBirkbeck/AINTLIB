@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.KMNaturality
-import ModularCurves.Moduli.Representability
+module
+
+public import ModularCurves.WeilPairing.KMNaturality
+public import ModularCurves.Moduli.Representability
 
 /-!
 # Curve-direction naturality of the Katz–Mazur pairing (YR-1, KM 2.8.4.2)
@@ -22,6 +24,8 @@ induced by `g.top`. This file (step 1) builds the pasting map and its three comm
 squares (structure/zero/`[N]`), and the section transport. Source: KM 2.8.4.2 ("the
 pairing commutes with base change" — the curve leg).
 -/
+
+@[expose] public section
 
 universe u
 

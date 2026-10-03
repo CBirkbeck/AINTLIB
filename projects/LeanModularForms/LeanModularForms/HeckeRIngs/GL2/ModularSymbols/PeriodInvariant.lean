@@ -3,10 +3,12 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodMap
-import LeanModularForms.Modularforms.PeterssonLevelN
-import Mathlib.Analysis.Complex.HasPrimitives
-import Mathlib.Analysis.Calculus.MeanValue
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodMap
+public import LeanModularForms.Modularforms.PeterssonLevelN
+public import Mathlib.Analysis.Complex.HasPrimitives
+public import Mathlib.Analysis.Calculus.MeanValue
 
 /-!
 # Γ-invariance of the period pairing (ES-3b-inv)
@@ -17,6 +19,8 @@ path-independence statement (Shimura §8.2): the period pairing of a cusp form a
 degree `0` is unchanged under the simultaneous `γ`-action on the cusps and the `symRep`-action on
 the polynomial coefficient.
 -/
+
+@[expose] public section
 
 noncomputable section
 

@@ -3,11 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.Morphisms.Separated
-import ModularCurves.ForMathlib.SchemeModuleBaseCechFlat
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
-import ModularCurves.Picard.InvertibleSheafLocallyFree
+module
+
+import Mathlib.RingTheory.Flat.Localization
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.Morphisms.Separated
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechFlat
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+public import ModularCurves.Picard.InvertibleSheafLocallyFree
 
 /-!
 # Flat Cech factors from local trivializations
@@ -17,6 +20,8 @@ module with the coordinate ring of that open.  Retaining the scalar action
 from an affine base then makes the section module flat whenever the structural
 morphism is flat.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
 

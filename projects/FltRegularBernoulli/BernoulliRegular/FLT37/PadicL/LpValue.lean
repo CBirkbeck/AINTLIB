@@ -1,7 +1,9 @@
-import Mathlib.NumberTheory.Bernoulli
-import Mathlib.NumberTheory.Padics.PadicVal.Basic
-import BernoulliRegular.FLT37.PadicL.ValuationExactness
-import BernoulliRegular.BernoulliFast.KellnerSecondOrder
+module
+
+public import Mathlib.NumberTheory.Bernoulli
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+public import BernoulliRegular.FLT37.PadicL.ValuationExactness
+public import BernoulliRegular.BernoulliFast.KellnerSecondOrder
 
 /-!
 # B-C1.0 (part 2) — the `p`-adic `L`-value `L_p(1, ω^i)` and its valuation
@@ -34,6 +36,10 @@ named structure field `PadicLFunction.valuation_eq_bernoulliFactor`).
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83,
   Thm 5.11, Cor 5.13, Thm 5.18, Prop 8.12, Cor 8.23.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

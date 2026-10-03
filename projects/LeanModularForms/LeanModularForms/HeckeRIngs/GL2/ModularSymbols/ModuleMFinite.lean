@@ -3,11 +3,13 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.CoefficientSystem
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleM
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.SL2Generation
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.CoinvariantsFinite
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.FinitelyManyCusps
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.CoefficientSystem
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleM
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.SL2Generation
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.CoinvariantsFinite
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.FinitelyManyCusps
 
 /-!
 # Finiteness of the integral modular-symbol module `𝕄 N k`
@@ -38,6 +40,8 @@ The proof has two layers:
 * `HeckeRing.GL2.ModularSymbols.instModuleFiniteModularSymbols` :
   `Module.Finite ℤ (𝕄 N k)`.
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2.ModularSymbols
 

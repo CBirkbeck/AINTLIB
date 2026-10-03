@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.IdealModule
+module
+
+public import ModularCurves.Picard.IdealModule
 
 /-!
 # Locally surjective maps of invertible modules are isomorphisms
@@ -19,6 +21,8 @@ This is the [A7-2] engine for `sheafificationW_idealPullHom`
 (`Picard/IdealModulePullback.lean`): the sheafified ideal-pullback comparison is a map
 of invertible modules, and only its local surjectivity needs elementwise work.
 -/
+
+@[expose] public section
 
 universe u
 

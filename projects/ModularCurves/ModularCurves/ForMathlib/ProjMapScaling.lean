@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
+module
+
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
 
 /-!
 # `Proj.map` of a degreewise rescaling is the identity
@@ -28,6 +30,8 @@ a projective Weierstrass model (T-W7.0b, `negModelHom_zero`).
 
 AINTLIB ModularCurves (T-W7.0b infrastructure); upstream candidate.
 -/
+
+@[expose] public section
 
 universe u
 

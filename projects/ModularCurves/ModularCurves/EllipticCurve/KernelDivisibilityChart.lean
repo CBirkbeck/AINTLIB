@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
-import ModularCurves.EllipticCurve.MulByHomFlat
+module
+
+public import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
+public import ModularCurves.EllipticCurve.MulByHomFlat
 
 /-!
 # Kernel divisibility, chart-locally (BB-FLAT route (G), the core)
@@ -22,6 +24,10 @@ replaced here by the `y₀`-separation and `pairLift_key`). Deliverables:
 The gluing to arbitrary tests and the consumption into `Flat [N]` live downstream
 (`MulByHomFlat.lean` chain).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj TensorProduct

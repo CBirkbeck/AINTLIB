@@ -2,12 +2,14 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StructureSheaf
-import «Adic spaces».Presheaf
-import «Adic spaces».PresheafIdentification
-import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
-import «Adic spaces».CompletedResidueField
-import Mathlib.Topology.Algebra.UniformRing
+module
+
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».Presheaf
+public import «Adic spaces».PresheafIdentification
+public import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
+public import «Adic spaces».CompletedResidueField
+public import Mathlib.Topology.Algebra.UniformRing
 
 /-!
 # C3 — `Spa_presheafValue_eq_rationalOpen` (Wedhorn 8.2)
@@ -108,6 +110,8 @@ to a continuous valuation `ŵ` on the completion `presheafValue D`.
 **Materialised form** in `/beastmode`: `Valuation (presheafValue D) Γ` with
 `Valuation.IsContinuous` and the extension equality.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

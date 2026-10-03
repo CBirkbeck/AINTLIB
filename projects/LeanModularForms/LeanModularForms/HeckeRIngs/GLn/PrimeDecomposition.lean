@@ -3,9 +3,11 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GLn.CoprimeMul
-import Mathlib.Data.Nat.Factorization.Basic
-import Mathlib.Data.Nat.GCD.BigOperators
+module
+
+public import LeanModularForms.HeckeRIngs.GLn.CoprimeMul
+public import Mathlib.Data.Nat.Factorization.Basic
+public import Mathlib.Data.Nat.GCD.BigOperators
 
 /-!
 # Prime Decomposition of Hecke Ring Elements
@@ -31,6 +33,8 @@ Every `T(a₁,...,aₙ)` factors into a product of p-power `T`-elements via copr
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.2
 -/
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Pointwise HeckeRing DoubleCoset
 

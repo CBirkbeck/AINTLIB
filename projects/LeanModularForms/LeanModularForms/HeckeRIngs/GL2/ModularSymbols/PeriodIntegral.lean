@@ -3,15 +3,17 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.CoefficientSystem
-import LeanModularForms.Modularforms.ResToImagAxis
-import Mathlib.NumberTheory.ModularForms.NormTrace
-import Mathlib.NumberTheory.ModularForms.QExpansion
-import Mathlib.MeasureTheory.Integral.Asymptotics
-import Mathlib.MeasureTheory.Integral.ExpDecay
-import Mathlib.Topology.Algebra.MvPolynomial
-import Mathlib.Geometry.Manifold.Notation
-import Mathlib.Analysis.Complex.UpperHalfPlane.Manifold
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.CoefficientSystem
+public import LeanModularForms.Modularforms.ResToImagAxis
+public import Mathlib.NumberTheory.ModularForms.NormTrace
+public import Mathlib.NumberTheory.ModularForms.QExpansion
+public import Mathlib.MeasureTheory.Integral.Asymptotics
+public import Mathlib.MeasureTheory.Integral.ExpDecay
+public import Mathlib.Topology.Algebra.MvPolynomial
+public import Mathlib.Geometry.Manifold.Notation
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Manifold
 
 /-!
 # Period integrals for modular symbols (ES-3a)
@@ -50,6 +52,8 @@ integral and prove that it converges (the integrand is integrable along the impr
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §8.2.
 -/
+
+@[expose] public section
 
 noncomputable section
 

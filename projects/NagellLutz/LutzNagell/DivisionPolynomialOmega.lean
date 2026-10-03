@@ -3,7 +3,9 @@ Copyright (c) 2024 Junyan Xu. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Junyan Xu, David Kurniadi Angdinata
 -/
-import LutzNagell.DivisionPolynomial
+module
+
+public import LutzNagell.DivisionPolynomial
 
 /-!
 # The omega division polynomials and related definitions
@@ -19,6 +21,8 @@ the `ZSMul` proof.
  * `WeierstrassCurve.ω`: the bivariate polynomials `ωₙ`.
  * `WeierstrassCurve.isEllSequence_ψ`: the `ψ` family forms an elliptic sequence.
 -/
+
+@[expose] public section
 
 open Polynomial
 open scoped Polynomial.Bivariate

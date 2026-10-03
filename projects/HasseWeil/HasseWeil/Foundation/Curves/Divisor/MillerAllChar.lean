@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.Miller
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.Miller
 
 /-!
 # Miller's relation — char-uniform version
@@ -50,6 +52,8 @@ hypothesis, so composing the iso itself needs no characteristic assumption.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.3.4(e) (p. 63).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

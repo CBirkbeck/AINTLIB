@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalSubsetViaFactoredChains
-import «Adic spaces».WedhornMultiBranchSubsetInequality
-import «Adic spaces».WedhornDominatingUnitInequality
+module
+
+public import «Adic spaces».WedhornLocalSubsetViaFactoredChains
+public import «Adic spaces».WedhornMultiBranchSubsetInequality
+public import «Adic spaces».WedhornDominatingUnitInequality
 
 /-!
 # Wedhorn per-`t'` factored chain — α_s_D branch link
@@ -63,6 +65,8 @@ inequality into the desired per-`t'` factored bound.
 * No σ-power-decay derivation; uses the structural inequality
   `h_Wedhorn_α_s_D` directly.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

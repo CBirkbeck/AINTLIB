@@ -3,17 +3,19 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.QuotientProblem
-import ModularCurves.EllipticCurve.AdditionBaseChange
-import ModularCurves.EllipticCurve.GroupLawAxioms
-import ModularCurves.EllipticCurve.ModelVariableChange
-import ModularCurves.ForMathlib.PullbackLocalAtTarget
-import ModularCurves.ForMathlib.SchemeActionFree
-import ModularCurves.ForMathlib.GaloisDescentModule
-import ModularCurves.ForMathlib.QuotientCurveModel
-import ModularCurves.ForMathlib.QuotientLift
-import ModularCurves.ForMathlib.WeierstrassInvariantLocal
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.Moduli.QuotientProblem
+public import ModularCurves.EllipticCurve.AdditionBaseChange
+public import ModularCurves.EllipticCurve.GroupLawAxioms
+public import ModularCurves.EllipticCurve.ModelVariableChange
+public import ModularCurves.ForMathlib.PullbackLocalAtTarget
+public import ModularCurves.ForMathlib.SchemeActionFree
+public import ModularCurves.ForMathlib.GaloisDescentModule
+public import ModularCurves.ForMathlib.QuotientCurveModel
+public import ModularCurves.ForMathlib.QuotientLift
+public import ModularCurves.ForMathlib.WeierstrassInvariantLocal
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Route (a): the KM 4.7 ⇐-curve as a quotient `E/G` (T-E5c leaves a2–a5)
@@ -48,6 +50,10 @@ The group law on the quotient is *not* part of this file: `EllipticCurveGeom.toE
 (T-W7, beastmode-A/P3b3) upgrades any geometric elliptic curve to the full record, so route
 (a) only ever has to produce an `EllipticCurveGeom`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

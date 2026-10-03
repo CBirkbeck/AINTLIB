@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.NaiveGammaOneLocus
-import ModularCurves.ModularCurve.YFullToYOne
-import ModularCurves.Moduli.QuotientProblem
-import ModularCurves.LevelStructure.NaiveGammaOneLevel
+module
+
+public import ModularCurves.GroupScheme.NaiveGammaOneLocus
+public import ModularCurves.ModularCurve.YFullToYOne
+public import ModularCurves.Moduli.QuotientProblem
+public import ModularCurves.LevelStructure.NaiveGammaOneLevel
 
 /-!
 # The candidate `Y(N)` built over `Y₁(N)` (WP-D2c)
@@ -33,6 +35,8 @@ What remains (WP-D2c-3) is that `X₀` *represents* the full-level problem; the 
 half of that is `yFullToYOneFibreEquiv` (WP-D2b) and the relative half is
 `fullLevelLocusPointsEquiv`.
 -/
+
+@[expose] public section
 
 universe u
 

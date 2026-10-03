@@ -3,9 +3,11 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.ArcFTC
-import LeanModularForms.ForMathlib.SegmentFTC
-import Mathlib.Analysis.SpecialFunctions.Complex.Log
+module
+
+public import LeanModularForms.ForMathlib.ArcFTC
+public import LeanModularForms.ForMathlib.SegmentFTC
+public import Mathlib.Analysis.SpecialFunctions.Complex.Log
 
 /-!
 # Arc FTC Limit at i — Slit Plane Membership and Log-Arg Computation
@@ -26,6 +28,8 @@ establishes the log difference formula and limit `E(δ) → -πi`.
 * `fdBoundaryFun_arg_right` — `arg(γ(2/5+δ) - i) = 5δπ/12 - π`
 * `fdBoundaryFun_log_diff_core_tendsto` — `log(γ(2/5-δ)-i) - log(γ(2/5+δ)-i) → πi`
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

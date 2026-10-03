@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.StrongMultiplicityOne.InductiveStep
+module
+
+public import LeanModularForms.StrongMultiplicityOne.InductiveStep
 
 /-!
 # Strong Multiplicity One via Miyake §4.6
@@ -39,6 +41,10 @@ the finale `strongMultiplicityOne` itself is assembled downstream in
 * **[Li]** W.-C. W. Li, *Newforms and functional equations*,
   Math. Ann. **212** (1975), 285–315.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup
 open scoped MatrixGroups ModularForm

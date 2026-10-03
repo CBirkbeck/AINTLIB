@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.OmegaPullbackCoeff
-import HasseWeil.Foundation.Verschiebung.DivPolyExpand
-import HasseWeil.Foundation.Verschiebung.PurelyInsep
-import Mathlib.Algebra.Polynomial.Expand
-import Mathlib.Tactic.ReduceModChar
+module
+
+public import HasseWeil.Foundation.OmegaPullbackCoeff
+public import HasseWeil.Foundation.Verschiebung.DivPolyExpand
+public import HasseWeil.Foundation.Verschiebung.PurelyInsep
+public import Mathlib.Algebra.Polynomial.Expand
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # q-th roots for `mulByInt q`'s coordinate generators (Session 3 — explicit construction)
@@ -67,6 +69,10 @@ unconditional discharge of `mulByInt_x q ∈ Im(π*)`.
 The y-coordinate analog (`mulByInt_y q ∈ Im(π*)`) requires bivariate
 versions of the same, ~150 LOC.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

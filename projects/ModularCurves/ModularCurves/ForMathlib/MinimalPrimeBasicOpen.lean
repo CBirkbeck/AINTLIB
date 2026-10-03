@@ -5,10 +5,12 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.AlgebraicGeometry.Limits
-import Mathlib.AlgebraicGeometry.Properties
-import Mathlib.AlgebraicGeometry.Morphisms.QuasiSeparated
-import Mathlib.RingTheory.Ideal.MinimalPrime.Localization
+module
+
+public import Mathlib.AlgebraicGeometry.Limits
+public import Mathlib.AlgebraicGeometry.Properties
+public import Mathlib.AlgebraicGeometry.Morphisms.QuasiSeparated
+public import Mathlib.RingTheory.Ideal.MinimalPrime.Localization
 
 /-!
 # Basic-open neighborhoods of minimal primes
@@ -17,6 +19,8 @@ An element of a minimal prime can be killed, up to nilpotence, by an element out
 Consequently, a minimal prime has a basic-open neighborhood disjoint from any quasi-compact open
 that does not contain it. This is [Stacks Project, Tag 00EV](https://stacks.math.columbia.edu/tag/00EV).
 -/
+
+@[expose] public section
 
 open TopologicalSpace
 

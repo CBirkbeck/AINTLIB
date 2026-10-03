@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.LambdaExponentCollapseToOmega32
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.LambdaExponentCollapseToOmega32
 
 /-!
 # Washington Exercise 8.11 for `p = 37`

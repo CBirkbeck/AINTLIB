@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.FactorCountDescentArchitecture
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerUnramifiedToConjFixed
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.IdealKummerUnramified
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.CorrectedUnitPrimarity
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.FactorCountDescentArchitecture
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerUnramifiedToConjFixed
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.IdealKummerUnramified
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.CorrectedUnitPrimarity
 
 /-!
 # [FLT37-CASEII-R2] Discharging `CaseIIFactorDescentDichotomy37` (Washington Theorem 9.4)

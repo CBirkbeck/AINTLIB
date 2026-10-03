@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Ramification
-import Mathlib.FieldTheory.Finite.Basic
+module
+
+public import HasseWeil.Foundation.Ramification
+public import Mathlib.FieldTheory.Finite.Basic
 
 /-!
 # Kernel-Degree Theorem and Frobenius Fixed Points
@@ -19,6 +21,8 @@ The first fact is pure group theory. The second requires ramification theory.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], Proposition III.4.10, V.1.1
 -/
+
+@[expose] public section
 
 open WeierstrassCurve FiniteField
 

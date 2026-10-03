@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornRationalOpenLocalizationTransfer
-import «Adic spaces».WedhornLocalizedCor732Application
-import «Adic spaces».WedhornCor732BranchTransfer
+module
+
+public import «Adic spaces».WedhornRationalOpenLocalizationTransfer
+public import «Adic spaces».WedhornLocalizedCor732Application
+public import «Adic spaces».WedhornCor732BranchTransfer
 
 /-!
 # Wedhorn local per-branch chain — base subset inclusion via localization
@@ -69,6 +71,8 @@ file consumes the σ-strict-domination output directly.
   `rationalOpen_subset_via_localization_locSubring`
   (committed `78961d8`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

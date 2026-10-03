@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.BaseChange.Concrete
-import HasseWeil.Foundation.EC.GenericPoint
+module
+
+public import HasseWeil.Isogeny.BaseChange.Concrete
+public import HasseWeil.Foundation.EC.GenericPoint
 
 /-!
 # Wall A: the concrete base-changed pullback realized at the generic point (CoordHom-free)
@@ -64,6 +66,8 @@ naturality (`functionFieldMap`) which is complete in the project.
 * Silverman, *The Arithmetic of Elliptic Curves*, I.2 (base change), III.4.2 (generic point),
   III.8.2 (translation covariance).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 open scoped TensorProduct

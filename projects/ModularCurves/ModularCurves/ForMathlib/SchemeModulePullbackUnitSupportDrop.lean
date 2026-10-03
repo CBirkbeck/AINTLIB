@@ -6,10 +6,12 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed
 `SchemeModulePullbackUnitSupportDrop.lean` in Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.SchemeModuleComparisonCoherent
-import ModularCurves.ForMathlib.SchemeModuleComparisonSupport
-import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
-import ModularCurves.ForMathlib.SchemeModulePushforwardPullbackSupport
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleComparisonCoherent
+public import ModularCurves.ForMathlib.SchemeModuleComparisonSupport
+public import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
+public import ModularCurves.ForMathlib.SchemeModulePushforwardPullbackSupport
 
 /-!
 # Support drop for the pullback-pushforward unit
@@ -18,6 +20,8 @@ When a morphism is an isomorphism over an open meeting the support of a
 module, both residuals of the pullback-pushforward unit have strictly
 smaller closed stalk support.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 

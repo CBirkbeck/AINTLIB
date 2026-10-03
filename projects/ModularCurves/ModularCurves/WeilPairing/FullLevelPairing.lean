@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.DetCocycle
-import ModularCurves.WeilPairing.RootPowerPoints
-import ModularCurves.WeilPairing.TorsionSqBaseChange
-import ModularCurves.GroupScheme.ConstSchemeSquare
-import ModularCurves.GroupScheme.GLSchemeAction
-import ModularCurves.GroupScheme.LevelCoord
+module
+
+public import ModularCurves.WeilPairing.DetCocycle
+public import ModularCurves.WeilPairing.RootPowerPoints
+public import ModularCurves.WeilPairing.TorsionSqBaseChange
+public import ModularCurves.GroupScheme.ConstSchemeSquare
+public import ModularCurves.GroupScheme.GLSchemeAction
+public import ModularCurves.GroupScheme.LevelCoord
 
 /-!
 # The Weil pairing over a base with a full level structure (route β, step 1)
@@ -29,6 +31,8 @@ The determinant law re-enters only one step later, when descending from such a b
 one; there it is the `GL₂(ℤ/N)`-equivariance of this pairing, whose stabiliser case is
 `fieldWeilPairing_det_of_galois` (`WeilPairing/PairingTransport.lean`).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StandardCover
+module
+
+public import «Adic spaces».StandardCover
 
 /-!
 # Wedhorn Outside-Base Rescue: audit + minimal bridge
@@ -85,6 +87,8 @@ augmented family, or (b) the `base = Spa` simplification below.
 * Imports only `StandardCover` (for `Spa`, `rationalOpen`,
   `RationalCovering`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

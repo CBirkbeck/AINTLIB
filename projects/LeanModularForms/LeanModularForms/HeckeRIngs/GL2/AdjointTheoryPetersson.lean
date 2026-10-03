@@ -3,8 +3,10 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.ConcreteFamily
-import LeanModularForms.HeckeRIngs.GL2.Unified.RingTransport
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.ConcreteFamily
+public import LeanModularForms.HeckeRIngs.GL2.Unified.RingTransport
 
 /-!
 # Hecke adjoint theory: Petersson development and eigenform diagonalization
@@ -32,6 +34,10 @@ the imported `AdjointTheory.lean`; this file builds on top of it.
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.5
 * [Miy] Miyake, *Modular Forms*, §4.5 (Thm 4.5.4–4.5.5)
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

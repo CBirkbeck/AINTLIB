@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Map.PointFunctor
-import HasseWeil.Foundation.Curves.Valuation.Valuation
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+module
+
+public import HasseWeil.Foundation.Curves.Map.PointFunctor
+public import HasseWeil.Foundation.Curves.Valuation.Valuation
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 
 /-!
 # Ord-transport Step (A): smooth-point translation by a group element
@@ -33,6 +35,10 @@ Step (B) follows in subsequent sessions:
   identity `pointValuation P (τ_k f) = pointValuation (P + k) f`.
 - Step (C): bridge `ordAtInfty ↔ ord_P` at translated points (~50-100 LOC).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PresheafIdentification
-import «Adic spaces».TateAlgebraWedhorn
-import Mathlib.Data.Finsupp.Encodable
+module
+
+public import «Adic spaces».PresheafIdentification
+public import «Adic spaces».TateAlgebraWedhorn
+public import Mathlib.Data.Finsupp.Encodable
 
 /-!
 # Topology Comparison: Completion Isomorphism (Non-Discrete)
@@ -24,6 +26,8 @@ strongly noetherian Tate rings.
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §5.6, §8.1
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

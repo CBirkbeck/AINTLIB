@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
-import ModularCurves.ForMathlib.FinrankComp
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import ModularCurves.ForMathlib.FinrankComp
 
 /-!
 # Rank loci of finite flat morphisms are clopen; the rank-one locus is an iso-locus
@@ -21,6 +23,8 @@ is an isomorphism — e.g. where a tuple of torsion sections is a *full set* of 
 clopen, with the restriction an iso. Étale enters only through `LocallyOfFinitePresentation`
 and flatness; no group structure is needed.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits TopologicalSpace
 

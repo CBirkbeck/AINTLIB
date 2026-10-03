@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeights
-import ModularCurves.ForMathlib.OrderedCechSupportContraction
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeights
+public import ModularCurves.ForMathlib.OrderedCechSupportContraction
 
 /-!
 # Fixed-weight components of the projective twist Cech complex
@@ -13,6 +15,10 @@ This file identifies each global homogeneous Laurent weight in the ordered proje
 complex with the ordered support-restricted complex used in the Stacks Project computation of the
 cohomology of projective space.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

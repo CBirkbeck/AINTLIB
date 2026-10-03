@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.GroupScheme.StableCharts
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.GroupScheme.StableCharts
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The chart geometry bridges (`[HG-C4b]`)
@@ -19,6 +21,8 @@ of the quotient construction so the `[HG-C2]` precursor-immersion proof can cons
 * `specSwapIso`, `chartTensorIso` and its two leg lemmas — the chart-first assembly
   (consumed by the glue kernel-pair transport and the precursor immersion).
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

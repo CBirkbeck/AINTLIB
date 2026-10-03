@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.DualPullback.LocalTrivializationInv
+module
+
+public import ModularCurves.Picard.DualPullback.LocalTrivializationInv
 
 /-!
 # Pulled local trivializations on a distinguished section, module-generically
@@ -17,6 +19,8 @@ pullback–pushforward adjunction unit (`localPullbackTrivialization_inv_one_ofS
 Consumed by `RelPicLocal.glueSectionA_compat`, where `A := N` on the base of the family and
 the adjunction-unit form makes restriction to overlaps a naturality statement.
 -/
+
+@[expose] public section
 
 universe u v
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ModularCurve.YRho
-import ModularCurves.ForMathlib.IrreducibleConnected
-import ModularCurves.ForMathlib.SmoothSchemeIrreducible
+module
+
+public import ModularCurves.ModularCurve.YRho
+public import ModularCurves.ForMathlib.IrreducibleConnected
+public import ModularCurves.ForMathlib.SmoothSchemeIrreducible
 
 /-!
 # Scoping skeleton for `yRho_geometricallyIrreducible` (T-IRR0, stream IRR)
@@ -46,6 +48,8 @@ uniformising the ℂ-points of the curve by the upper half plane".
 
 AINTLIB ModularCurves T-IRR0 (stream IRR, planning-only; late-phase, `MAJOR-INFRA`).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

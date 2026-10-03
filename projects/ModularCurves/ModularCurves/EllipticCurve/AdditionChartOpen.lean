@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartCover
-import ModularCurves.EllipticCurve.AdditionChartOverlap
-import ModularCurves.ForMathlib.SpecBasicOpenAway
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartCover
+public import ModularCurves.EllipticCurve.AdditionChartOverlap
+public import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
 # The regularity opens on a chart-product piece (T-W7.0c-c5β, c4.1)
@@ -20,6 +22,8 @@ Over a Jacobson domain (the universal atlas) both laws land on the curve there (
 a single law's `k`- and `l`-pieces agree (`chartι_comp_specMap_chartAwayHom_eq`, 3166d104). So
 these opens are exactly the domains on which `addOnY` / `addOnZ` are about to be glued.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory ModularCurves
 

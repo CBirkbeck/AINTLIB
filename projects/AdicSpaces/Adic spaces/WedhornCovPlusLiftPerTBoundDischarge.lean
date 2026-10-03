@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornC1ComapLiftRestrictedSupplier
+module
+
+public import «Adic spaces».WedhornC1ComapLiftRestrictedSupplier
 
 /-!
 # Wedhorn 8.34(ii) — Source-restricted Cov+ lift per-`t` bound discharge (T044)
@@ -91,6 +93,8 @@ attempt that — it composes it cleanly into T043's predicate.
 * No global universal-over-`Spa` per-`w` upper-bound resurrection:
   this file's discharge is source-restricted at every layer.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

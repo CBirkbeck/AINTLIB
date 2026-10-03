@@ -3,8 +3,10 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
-import LeanModularForms.HeckeRIngs.GL2.HeckeAction
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
+public import LeanModularForms.HeckeRIngs.GL2.HeckeAction
 
 /-!
 # Hecke Operator T_p on M_k(Γ₁(N))
@@ -34,6 +36,10 @@ where `⟨p⟩` is the diamond operator for `p ∈ (ℤ/Nℤ)ˣ`.
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.2, Proposition 5.2.1
 * Miyake, *Modular Forms*, §4.5
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup
 

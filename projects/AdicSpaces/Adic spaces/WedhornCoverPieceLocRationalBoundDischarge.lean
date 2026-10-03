@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPerWCoverPieceUpperBound
+module
+
+public import «Adic spaces».WedhornPerWCoverPieceUpperBound
 
 /-!
 # Wedhorn 8.34(ii) — Discharge of `WedhornCoverPieceLocRationalBound`
@@ -93,6 +95,8 @@ the cleanest statement of the remaining content:
   mathematical residual** at this layer; the V_∅ branch is fully
   discharged here.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

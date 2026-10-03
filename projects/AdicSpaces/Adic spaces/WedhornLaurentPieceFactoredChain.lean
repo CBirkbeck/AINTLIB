@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalCor732ToFactoredChain
+module
+
+public import «Adic spaces».WedhornLocalCor732ToFactoredChain
 
 /-!
 # Wedhorn 8.34(ii) per-Laurent-piece factored chain arithmetic (T029)
@@ -62,6 +64,8 @@ V_∅ of that full refinement.)
   (`WedhornMultiBranchSubsetInequality`).
 * Does NOT import or edit Secondary-owned T028 files.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

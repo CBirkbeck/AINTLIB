@@ -1,4 +1,6 @@
-import «Adic spaces».Basic
+module
+
+public import «Adic spaces».Basic
 
 /-!
 # Nonarchimedean Scottish Book — Problem 16
@@ -24,3 +26,5 @@ Open (partial results known).
   that is a quotient of a perfectoid space by a pro-étale equivalence relation.
 - **Geometric points**: Points valued in algebraically closed perfectoid fields.
 -/
+
+@[expose] public section

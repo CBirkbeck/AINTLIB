@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.SymmetricUnitClearing
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AssumptionIIFromR3
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.SymmetricUnitClearing
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AssumptionIIFromR3
 
 /-!
 # [FLT37-CASEII-R2] Assembling the ε₁-37th-power resolution into the unit-clearing step

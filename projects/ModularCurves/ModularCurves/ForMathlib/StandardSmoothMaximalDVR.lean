@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. BB-FLAT ticket [FF-2].
 -/
-import ModularCurves.ForMathlib.StandardSmoothStalkDVR
+module
+
+public import ModularCurves.ForMathlib.StandardSmoothStalkDVR
 
 /-!
 # Localizations of a standard-smooth curve at maximal ideals are DVRs
@@ -28,6 +30,8 @@ closed points": a finite torsion-free module over `Localization.AtPrime q` is th
 flat (`Module.flat_iff_torsion_eq_bot_of_isBezout`), the stalkwise input of the
 fibre case of BB-FLAT (`mulByHom_flat` over field bases).
 -/
+
+@[expose] public section
 
 universe u
 

@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.AcyclicAffineCechComparison
-import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
+module
+
+public import ModularCurves.ForMathlib.AcyclicAffineCechComparison
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
 
 /-!
 # Base-linear Cech complexes of scheme modules
@@ -8,6 +10,10 @@ Retain the module structure over the global functions on the base in the
 native Cech complex of a scheme module, and compare its underlying additive
 complex with the existing sheaf-valued Cech complex.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicTopology CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

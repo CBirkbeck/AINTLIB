@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealBundleViaKellner
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealBundleViaKellner
 
 /-!
 # FLT37 consumer wrapper using the AK chain

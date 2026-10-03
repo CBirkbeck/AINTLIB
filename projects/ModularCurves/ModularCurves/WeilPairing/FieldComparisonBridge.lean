@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PointsDictionary
-import ModularCurves.EllipticCurve.PointsDictionaryGalois
-import ModularCurves.EllipticCurve.ModelVariableChange
-import ModularCurves.EllipticCurve.MulByHomDegree
-import ModularCurves.ForMathlib.DominantFunctionField
-import ModularCurves.GroupScheme.TranslationBySection
-import ModularCurves.LevelStructure.Factorization
-import HasseWeil.HasseBound.WeilPairing.PairingProps
+module
+
+public import ModularCurves.EllipticCurve.PointsDictionary
+public import ModularCurves.EllipticCurve.PointsDictionaryGalois
+public import ModularCurves.EllipticCurve.ModelVariableChange
+public import ModularCurves.EllipticCurve.MulByHomDegree
+public import ModularCurves.ForMathlib.DominantFunctionField
+public import ModularCurves.GroupScheme.TranslationBySection
+public import ModularCurves.LevelStructure.Factorization
+public import HasseWeil.HasseBound.WeilPairing.PairingProps
 
 /-!
 # The scheme ↔ function-field bridge for the field-level comparison (AP-E4a-U5c)
@@ -36,6 +38,10 @@ With these, U5b's glued rational function from the KM splitting satisfies HasseW
 characterising identity, `weilPairing_spec` pins the scalar, and `weilPairing_self`
 closes the field leaf (U5d/U5e).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

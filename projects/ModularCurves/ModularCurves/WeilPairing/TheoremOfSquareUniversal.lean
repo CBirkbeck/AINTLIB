@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.FibreWeierstrassPresentation
-import ModularCurves.ForMathlib.SeesawGlobalBase
+module
+
+public import ModularCurves.WeilPairing.FibreWeierstrassPresentation
+public import ModularCurves.ForMathlib.SeesawGlobalBase
 
 /-!
 # The theorem of the square through the seesaw (B3-steps 2–4)
@@ -72,6 +74,8 @@ the model do not restrict to affine opens of `π ⁻¹ᵁ W`, so
 predicate `HasHighCechExactness` is discharged, which is the one the projective model's theorems
 use. See the report on ticket B3-step4.
 -/
+
+@[expose] public section
 
 universe u
 

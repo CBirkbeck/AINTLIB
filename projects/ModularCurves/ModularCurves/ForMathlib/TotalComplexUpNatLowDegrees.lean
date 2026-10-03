@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.TotalComplexUpNat
+module
+
+public import ModularCurves.ForMathlib.TotalComplexUpNat
 
 /-!
 # Low degrees of a first-quadrant total complex
@@ -6,6 +8,8 @@ import ModularCurves.ForMathlib.TotalComplexUpNat
 Expose component projections, the decompositions in total degrees zero and one, and the
 signed differential formula for mathlib's total complex of an `ℕ × ℕ` cochain bicomplex.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
 

@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.SeparableKernelTorsor
-import HasseWeil.HasseBound.PointCount
-import HasseWeil.HasseBound.WeilPairing.PencilCovariance
-import HasseWeil.Isogeny.Bridge
-import HasseWeil.Isogeny.Dual.Morphism
-import HasseWeil.Isogeny.SeparableWitnessReductions
+module
+
+public import HasseWeil.Foundation.EC.SeparableKernelTorsor
+public import HasseWeil.HasseBound.PointCount
+public import HasseWeil.HasseBound.WeilPairing.PencilCovariance
+public import HasseWeil.Isogeny.Bridge
+public import HasseWeil.Isogeny.Dual.Morphism
+public import HasseWeil.Isogeny.SeparableWitnessReductions
 
 /-!
 # Discharging the dual-isogeny fixed-field equality from the project's Galois infra
@@ -38,6 +40,8 @@ makes the dual-witness reduction non-vacuous.
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4.10c (the kernel
   translation Galois group), III.4.11 (factor through), III.6.1 (the dual).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

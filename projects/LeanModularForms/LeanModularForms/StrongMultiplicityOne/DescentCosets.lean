@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.StrongMultiplicityOne.LevelChangeCharSpace
+module
+
+public import LeanModularForms.StrongMultiplicityOne.LevelChangeCharSpace
 
 /-!
 # Strong Multiplicity One via Miyake §4.6 — descent coset list
@@ -26,6 +28,10 @@ action properties, culminating in `descendCosetList_action`.
 * `descendCosetList_det` — every descent coset representative has determinant `p`.
 * `descendCosetList_action` — the action of the descent coset list (the culmination).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup
 open scoped MatrixGroups ModularForm

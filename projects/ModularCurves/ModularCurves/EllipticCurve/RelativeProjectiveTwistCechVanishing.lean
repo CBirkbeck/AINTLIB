@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceClosedPositiveTwistCechVanishing
-import ModularCurves.EllipticCurve.RelativeProjectiveTwistAffineComparison
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceClosedPositiveTwistCechVanishing
+public import ModularCurves.EllipticCurve.RelativeProjectiveTwistAffineComparison
 
 /-!
 # Cech vanishing for relative projective twists
@@ -12,6 +14,10 @@ import ModularCurves.EllipticCurve.RelativeProjectiveTwistAffineComparison
 On a Noetherian stage, sufficiently positive chosen relative projective
 twists have exact ordered Cech complexes over every affine base open.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits
 

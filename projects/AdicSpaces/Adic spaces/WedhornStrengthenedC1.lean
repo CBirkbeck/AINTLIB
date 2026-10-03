@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StandardCover
+module
+
+public import «Adic spaces».StandardCover
 
 /-!
 # Wedhorn Strengthened C1: third-clause `¬ v.vle f 0` audit + small bridge
@@ -80,6 +82,8 @@ will consume once the strengthened compactness extraction is in scope.
 * No final-acyclicity hypotheses, no Lane B / Cor 8.32 / Jacobson /
   T001 / faithful-flatness content.
 * Imports only `StandardCover`. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

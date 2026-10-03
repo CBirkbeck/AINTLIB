@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LutzNagell.DivisionPolynomial
+module
+
+public import LutzNagell.DivisionPolynomial
 
 /-!
 # Eval bridge lemmas for Lutz-Nagell
@@ -21,6 +23,8 @@ on-curve point `(x, y)`.
 * `evalEval_φ_eq_eval_Φ`: `evalEval x y (φ n) = (Φ n).eval x`.
 * `evalEval_Ψ_sq_eq_eval_ΨSq`: `evalEval x y (Ψ n) ^ 2 = (ΨSq n).eval x`.
 -/
+
+@[expose] public section
 
 open Polynomial
 open scoped Polynomial.Bivariate

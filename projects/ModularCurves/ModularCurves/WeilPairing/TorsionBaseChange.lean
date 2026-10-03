@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.MuNBaseChange
+module
+
+public import ModularCurves.WeilPairing.MuNBaseChange
 
 /-!
 # The torsion algebra under base change of the field (WP-D3c-2c)
@@ -17,6 +19,8 @@ This file supplies the affineness that makes that possible: the torsion scheme o
 curve over an affine base is affine, so `Scheme.isoSpec` applies to all three corners of the
 square and `AlgebraicGeometry.pullbackSpecIso` can be read off.
 -/
+
+@[expose] public section
 
 universe u
 

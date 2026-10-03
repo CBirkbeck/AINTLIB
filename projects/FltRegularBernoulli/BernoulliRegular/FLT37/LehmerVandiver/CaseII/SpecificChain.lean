@@ -1,10 +1,12 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ProvedAuxiliaries
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ADivPrincipal
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificDischarge
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Main
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealClosure
-import BernoulliRegular.TotallyRealSubfield.FixedAssociate
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ProvedAuxiliaries
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ADivPrincipal
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificDischarge
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Main
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealClosure
+public import BernoulliRegular.TotallyRealSubfield.FixedAssociate
 
 /-!
 # LV-CaseII parallel chain using `CaseIIPrincipalDischargeOnSpecific`

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.FieldTheory.IsAlgClosed.Basic
-import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 
 /-!
 # The Legendre normal form `y² = x(x−1)(x−λ)` (T-E14a)
@@ -23,6 +25,8 @@ The residual `{±1}` (the `u`-ambiguity left after pinning `x(P) = 0`, `x(Q) = 1
 exactly the `ω`-factor of KM's engine axiom 2 — `negVC` with `u = −1`
 (`EllipticCurve/InvariantDifferential.lean`, T-OM-B8/B9).
 -/
+
+@[expose] public section
 
 universe u
 

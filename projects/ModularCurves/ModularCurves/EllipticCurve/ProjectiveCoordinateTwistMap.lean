@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
-import ModularCurves.ForMathlib.SchemeModuleOpenCoverIso
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
+public import ModularCurves.ForMathlib.SchemeModuleOpenCoverIso
 
 /-!
 # Projective coordinate twist maps
@@ -14,6 +16,10 @@ into its tensor twist. For the coordinate-hyperplane pole sheaf and its
 nonnegative powers, this map is invertible on the corresponding standard
 projective chart.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory MonoidalCategory
 

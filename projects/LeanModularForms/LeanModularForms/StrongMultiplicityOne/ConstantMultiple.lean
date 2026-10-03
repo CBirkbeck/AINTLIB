@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.StrongMultiplicityOne
-import LeanModularForms.HeckeRIngs.GL2.Unified.EigenformFromRing
+module
+
+public import LeanModularForms.StrongMultiplicityOne
+public import LeanModularForms.HeckeRIngs.GL2.Unified.EigenformFromRing
 
 /-!
 # Strong Multiplicity One, full constant-multiple form (Miyake Theorem 4.6.12)
@@ -67,6 +69,10 @@ character-agnostic, Diamond–Shurman-style definition.  Bridging the two (espec
 * **[Miy]** T. Miyake, *Modular Forms*, 2nd ed., Springer SMM, 2006, §4.6.
 * **[DS]**  F. Diamond, J. Shurman, *A First Course in Modular Forms*, GTM 228, 2005.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup
 open scoped MatrixGroups ModularForm

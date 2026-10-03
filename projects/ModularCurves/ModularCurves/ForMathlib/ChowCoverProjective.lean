@@ -5,9 +5,11 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.ChowAmbientProjective
-import ModularCurves.ForMathlib.ProperAffineIntersectionModel
-import ModularCurves.ForMathlib.RelativeProjectiveFactorization
+module
+
+public import ModularCurves.ForMathlib.ChowAmbientProjective
+public import ModularCurves.ForMathlib.ProperAffineIntersectionModel
+public import ModularCurves.ForMathlib.RelativeProjectiveFactorization
 
 /-!
 # Projectivity of the Chow cover
@@ -16,6 +18,8 @@ For a proper family, the open Chow source is also closed in its projective ambie
 Consequently the Chow source is projective over the affine base and relative projective over
 the original family.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

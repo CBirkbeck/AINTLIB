@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornVKNonemptyRationalBoundDischarge
+module
+
+public import «Adic spaces».WedhornVKNonemptyRationalBoundDischarge
 
 /-!
 # Wedhorn 8.34(ii) — Source-restricted comap-lift C1 supplier (T043)
@@ -130,6 +132,8 @@ the leaf and does not edit T037–T042.
   remaining work is the honest σ-construction-style proof, restricted
   to LHS-satisfying `w`.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

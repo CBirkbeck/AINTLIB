@@ -2,16 +2,18 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.Localization.Away.Basic
-import Mathlib.RingTheory.Noetherian.Nilpotent
-import Mathlib.RingTheory.Valuation.LocalSubring
-import «Adic spaces».AdicCompletionBridge
-import «Adic spaces».CompleteTopCommRingCat
-import «Adic spaces».LocalizationTopology
-import «Adic spaces».OrderedGroupConvex
-import «Adic spaces».Prop752
-import «Adic spaces».RationalSubsets
-import «Adic spaces».WedhornLocalizationContinuity
+module
+
+public import Mathlib.RingTheory.Localization.Away.Basic
+public import Mathlib.RingTheory.Noetherian.Nilpotent
+public import Mathlib.RingTheory.Valuation.LocalSubring
+public import «Adic spaces».AdicCompletionBridge
+public import «Adic spaces».CompleteTopCommRingCat
+public import «Adic spaces».LocalizationTopology
+public import «Adic spaces».OrderedGroupConvex
+public import «Adic spaces».Prop752
+public import «Adic spaces».RationalSubsets
+public import «Adic spaces».WedhornLocalizationContinuity
 
 /-!
 # The Presheaf on the Adic Spectrum
@@ -42,6 +44,8 @@ localization topology from `LocalizationTopology.lean`.
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Section 8.1, Remark 8.3
 -/
+
+@[expose] public section
 
 open ValuationSpectrum
 

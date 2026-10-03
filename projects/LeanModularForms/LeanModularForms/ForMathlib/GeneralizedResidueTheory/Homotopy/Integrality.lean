@@ -3,7 +3,9 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.ClassicalCPV
+module
+
+public import LeanModularForms.ForMathlib.ClassicalCPV
 
 /-!
 # `limUnder` of an eventually-constant filter
@@ -19,6 +21,8 @@ None of that material is reachable from the protected theorems
 `LeanModularForms.hw_3_3_clean_full_mero` or `valence_formula_textbook`, so it has
 been removed.
 -/
+
+@[expose] public section
 
 open Filter Topology
 

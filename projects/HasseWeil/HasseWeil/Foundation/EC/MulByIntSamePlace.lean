@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.OrdTransport
-import HasseWeil.Foundation.EC.MulByIntUnramified
-import HasseWeil.Foundation.EC.TranslateOrdInfty
-import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
-import HasseWeil.HasseBound.WeilPairing.TorsionKernelRational
+module
+
+public import HasseWeil.Isogeny.OrdTransport
+public import HasseWeil.Foundation.EC.MulByIntUnramified
+public import HasseWeil.Foundation.EC.TranslateOrdInfty
+public import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
+public import HasseWeil.HasseBound.WeilPairing.TorsionKernelRational
 
 /-!
 # The **(SamePlace)** fact for the multiplication isogeny `[ℓ]`
@@ -59,6 +61,8 @@ over both cases.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.2.5–2.6, III.4.10c.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

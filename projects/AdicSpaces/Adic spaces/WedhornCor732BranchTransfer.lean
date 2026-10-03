@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornMultiDominatingUnit
-import «Adic spaces».WedhornDominatingBranchInequality
-import «Adic spaces».WedhornSigmaPowerDecay
+module
+
+public import «Adic spaces».WedhornMultiDominatingUnit
+public import «Adic spaces».WedhornDominatingBranchInequality
+public import «Adic spaces».WedhornSigmaPowerDecay
 
 /-!
 # Wedhorn Cor 7.32 branch-compatibility bridge
@@ -57,6 +59,8 @@ T_test choice" docblock confirmed this fails.
   `rationalOpen_subset_via_strict_sigma_domination`
   (`WedhornMultiDominatingUnit.lean:148`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

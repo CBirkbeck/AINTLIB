@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.LegendreDeltaRelRep
-import ModularCurves.Moduli.LegendreDatumSymmetry
-import ModularCurves.Moduli.AbscissaDifference
-import ModularCurves.Moduli.LevelMarking
-import ModularCurves.Moduli.E3DatumAssembly
-import ModularCurves.GroupScheme.SqrtUnitCover
-import Mathlib.AlgebraicGeometry.RelativeGluing
+module
+
+public import ModularCurves.Moduli.LegendreDeltaRelRep
+public import ModularCurves.Moduli.LegendreDatumSymmetry
+public import ModularCurves.Moduli.AbscissaDifference
+public import ModularCurves.Moduli.LevelMarking
+public import ModularCurves.Moduli.E3DatumAssembly
+public import ModularCurves.GroupScheme.SqrtUnitCover
+public import Mathlib.AlgebraicGeometry.RelativeGluing
 
 /-! ## ⚠ QUARANTINED SUBTREE (B2-DECISION, board v10.342/v10.343, 2026-07-20)
 
@@ -25,6 +27,10 @@ twisted μ₂-extension of GL₂(𝔽₂)). The sorried declarations below are D
 NON-GOALS (kept per statement-protection protocol; a groupoid-descent engine
 would be required to make the Legendre route viable — see decomposition-e4.md).
 Do NOT work these sorries as receipt leaves. -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 
 

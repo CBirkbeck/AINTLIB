@@ -1,4 +1,6 @@
-import HasseWeil.Foundation.Curves.Map.CurveMap
+module
+
+public import HasseWeil.Foundation.Curves.Map.CurveMap
 
 /-!
 # Point functor for `CurveMap`s
@@ -29,6 +31,8 @@ restricted to the smooth-affine setting.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.4(c), III.4
 -/
+
+@[expose] public section
 
 open scoped Polynomial.Bivariate
 

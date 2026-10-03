@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartAgree
-import ModularCurves.EllipticCurve.AdditionChartHom
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartAgree
+public import ModularCurves.EllipticCurve.AdditionChartHom
 
 /-!
 # Proportional triples define the same chart morphism (T-W7.0c-c5β, β4(b))
@@ -24,6 +26,8 @@ Applied to `lawOneTriple` / `lawTwoTriple` — whose minors are `lawOneTriple_mu
 (389c933f, the six certified minors) — this says `addOnZPieceHom` and `addOnYPieceHom` agree on
 the overlap of the two regularity opens: the two Bosma–Lenstra laws glue.
 -/
+
+@[expose] public section
 
 open MvPolynomial
 

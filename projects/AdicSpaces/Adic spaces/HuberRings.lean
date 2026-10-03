@@ -2,11 +2,13 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Topology.Algebra.Nonarchimedean.AdicTopology
-import Mathlib.Topology.Algebra.OpenSubgroup
-import Mathlib.RingTheory.Finiteness.Ideal
-import Mathlib.RingTheory.Ideal.Maps
-import «Adic spaces».Bounded
+module
+
+public import Mathlib.Topology.Algebra.Nonarchimedean.AdicTopology
+public import Mathlib.Topology.Algebra.OpenSubgroup
+public import Mathlib.RingTheory.Finiteness.Ideal
+public import Mathlib.RingTheory.Ideal.Maps
+public import «Adic spaces».Bounded
 
 /-!
 # Huber Rings (f-adic Rings)
@@ -49,6 +51,8 @@ following §6 of [Wedhorn, *Adic Spaces*].
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §6
 -/
+
+@[expose] public section
 
 /-- A **pair of definition** `(A₀, I)` for a topological ring `A` consists of an
 open subring `A₀ ⊆ A` and a finitely generated ideal `I ⊆ A₀` such that the subspace

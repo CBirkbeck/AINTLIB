@@ -3,13 +3,15 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Data.ZMod.Basic
-import Mathlib.Data.ZMod.Coprime
-import Mathlib.Data.ZMod.Units
-import Mathlib.LinearAlgebra.Matrix.FixedDetMatrices
-import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
-import Mathlib.RingTheory.Int.Basic
-import Mathlib.Tactic.LinearCombination
+module
+
+public import Mathlib.Data.ZMod.Basic
+public import Mathlib.Data.ZMod.Coprime
+public import Mathlib.Data.ZMod.Units
+public import Mathlib.LinearAlgebra.Matrix.FixedDetMatrices
+public import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
+public import Mathlib.RingTheory.Int.Basic
+public import Mathlib.Tactic.LinearCombination
 
 /-!
 # Surjectivity of the reduction map SL₂(ℤ) → SL₂(ℤ/dℤ)
@@ -47,6 +49,10 @@ Given `g = !![a, b; c, d] ∈ SL₂(ℤ/dℤ)` with `a * d - b * c = 1`:
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §1.6
 * Serre, *A Course in Arithmetic*, Ch. VII, Lemma 15
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix SpecialLinearGroup
 

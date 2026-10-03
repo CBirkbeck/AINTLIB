@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.TranslateOrdInfty
-import HasseWeil.Foundation.EC.TranslateValuation
-import HasseWeil.HasseBound.WeilPairing.Constancy
-import HasseWeil.HasseBound.WeilPairing.WeilFunction
+module
+
+public import HasseWeil.Foundation.EC.TranslateOrdInfty
+public import HasseWeil.Foundation.EC.TranslateValuation
+public import HasseWeil.HasseBound.WeilPairing.Constancy
+public import HasseWeil.HasseBound.WeilPairing.WeilFunction
 
 /-!
 # Divisor transport under translation
@@ -31,6 +33,8 @@ point on a Weierstrass curve, as used in the Weil pairing construction.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.8.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

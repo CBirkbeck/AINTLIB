@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LaurentRefinementCore
+module
+
+public import «Adic spaces».LaurentRefinementCore
 
 /-!
 # Tate acyclicity gluing assembly (Wedhorn Theorem 8.28(b))
@@ -24,6 +26,10 @@ Lane-C consumer tower) and `TateAcyclicityFinalAssembly.lean`
 * `tateAcyclicity_gluing` — Part 2 of Wedhorn 8.28(b)
 * `tateAcyclicity` — Wedhorn 8.28(b) headline (Part 1 ∧ Part 2)
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Classical
 

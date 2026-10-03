@@ -1,11 +1,13 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ProductDescent
-import BernoulliRegular.FLT37.KummerUnits
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitRealityAndSigmaCollapse
-import BernoulliRegular.FLT37.PrimaryUnits.IsPrimaryPlusAndCyclotomicUnits
-import BernoulliRegular.FLT37.Primary
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassTrivialOverRealData
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassConjugateFixed
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ProductDescent
+public import BernoulliRegular.FLT37.KummerUnits
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitRealityAndSigmaCollapse
+public import BernoulliRegular.FLT37.PrimaryUnits.IsPrimaryPlusAndCyclotomicUnits
+public import BernoulliRegular.FLT37.Primary
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassTrivialOverRealData
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassConjugateFixed
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
 
 /-!
 # [FLT37-CASEII-R2] The **factor-count** descent architecture (Washington Theorem 9.4)

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.BaseChangeKerCoker
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
-import ModularCurves.Picard.InvertibleSheafBaseCechFlat
-import ModularCurves.Picard.RigidDescent
+module
+
+public import ModularCurves.ForMathlib.BaseChangeKerCoker
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
+public import ModularCurves.Picard.InvertibleSheafBaseCechFlat
+public import ModularCurves.Picard.RigidDescent
 
 /-!
 # The degree-one cohomology package for the Abel route (`AP2-A0`)
@@ -37,6 +39,8 @@ stated** (round 14 counterexamples: `𝒪_E`, genus two `𝒪(P)`, `𝒪_E(2[0])
 Deleted by `AP2-A0`; the content returns as `AP2-A1` (degree ⟹ package, RR at field level) and
 `AP2-A2` (package ⟹ `f_*M` invertible + base-change compatible, finite-homology route only).
 -/
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry Limits TopologicalSpace
 open AlgebraicGeometry.Scheme.Modules

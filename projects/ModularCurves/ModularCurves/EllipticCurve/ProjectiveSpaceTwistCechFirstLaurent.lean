@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCech
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCech
 
 /-!
 # First-anchor Laurent naturality for projective Cech intersections
@@ -11,6 +13,10 @@ import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCech
 This file handles the exceptional first Cech face, where deleting the first coordinate changes the
 affine chart anchor. It identifies restriction with the induced change of Laurent exponents.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

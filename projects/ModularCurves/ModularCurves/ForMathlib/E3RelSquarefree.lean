@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.MvPolynomial.PDeriv
-import Mathlib.Algebra.MvPolynomial.Division
-import Mathlib.Data.Fin.VecNotation
-import Mathlib.RingTheory.Polynomial.UniqueFactorization
-import Mathlib.RingTheory.Ideal.Quotient.Nilpotent
-import Mathlib.RingTheory.LocalProperties.Reduced
-import Mathlib.RingTheory.Nilpotent.Lemmas
-import Mathlib.Algebra.Squarefree.Basic
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.Algebra.MvPolynomial.Division
+public import Mathlib.Data.Fin.VecNotation
+public import Mathlib.RingTheory.Polynomial.UniqueFactorization
+public import Mathlib.RingTheory.Ideal.Quotient.Nilpotent
+public import Mathlib.RingTheory.LocalProperties.Reduced
+public import Mathlib.RingTheory.Nilpotent.Lemmas
+public import Mathlib.Algebra.Squarefree.Basic
 
 /-!
 # The flex relation `β³ − (β+γ)³` is squarefree ([T-E15-NORM] Stage C heart)
@@ -30,6 +32,8 @@ In the first case `X₁² ∣ f` forces `X₁ ∣ S`, contradicting `S(X,0) = 3X
 in the second `r ∣ (2X₀+X₁)−(X₀+X₁) = X₀` forces `X₀ ∣ f`, contradicting
 `f(0,X) = X³ ≠ 0`. Only `3 ∈ Aˣ` and the UFD structure are used.
 -/
+
+@[expose] public section
 
 open MvPolynomial
 

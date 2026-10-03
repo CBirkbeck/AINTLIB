@@ -1,4 +1,6 @@
-import ModularCurves.EllipticCurve.PoleSheaf
+module
+
+public import ModularCurves.EllipticCurve.PoleSheaf
 
 /-!
 # Pole-sheaf multiplication and the pole filtration
@@ -6,6 +8,10 @@ import ModularCurves.EllipticCurve.PoleSheaf
 Multiplication of pole sheaves commutes with the canonical inclusion in the
 right tensor factor.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory MonoidalCategory
 

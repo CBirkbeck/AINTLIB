@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.GenericPointZsmul
-import HasseWeil.Foundation.EC.TranslationOrd
-import HasseWeil.Isogeny.Frobenius.Dual
+module
+
+public import HasseWeil.Foundation.EC.GenericPointZsmul
+public import HasseWeil.Foundation.EC.TranslationOrd
+public import HasseWeil.Isogeny.Frobenius.Dual
 
 /-!
 # `[·]*`-multiplicativity and the faithful dual-of-composition (Silverman III.6.1)
@@ -74,6 +76,8 @@ the pullback). It is packaged as `Isogeny.MulByIntPullbackCovariant` and:
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4.2 (`[m] ∘ [n] = [m·n]`), III.4.8
   (isogenies are group homomorphisms), III.6.1 (the dual isogeny; `(ψ∘φ)^ = φ̂ ∘ ψ̂`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.FiniteAffineImageProjective
-import ModularCurves.ForMathlib.ProjectiveFactorization
+module
+
+public import ModularCurves.ForMathlib.FiniteAffineImageProjective
+public import ModularCurves.ForMathlib.ProjectiveFactorization
 
 /-!
 # Projective factorizations of affine compactifications
@@ -14,6 +16,8 @@ import ModularCurves.ForMathlib.ProjectiveFactorization
 The homogenized projective closures chosen by finite algebra presentations, and the wrappers
 through which the Chow construction uses them, have the concrete projective factorization.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

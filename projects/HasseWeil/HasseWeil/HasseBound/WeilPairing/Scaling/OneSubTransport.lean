@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.OneSubDualDivisor
-import HasseWeil.HasseBound.WeilPairing.ProjOrdTransportLocal
-import HasseWeil.HasseBound.WeilPairing.WallAGeometricRealization
-import HasseWeil.HasseBound.WeilPairing.OneSubInftyResidues
+module
+
+public import HasseWeil.HasseBound.WeilPairing.OneSubDualDivisor
+public import HasseWeil.HasseBound.WeilPairing.ProjOrdTransportLocal
+public import HasseWeil.HasseBound.WeilPairing.WallAGeometricRealization
+public import HasseWeil.HasseBound.WeilPairing.OneSubInftyResidues
 
 /-!
 # `OneSubFrobeniusScaling` from the sharpened local witnesses for `1 − π` (CoordHom-free)
@@ -45,6 +47,8 @@ refined to the per-place comap witnesses.
 * Silverman, *The Arithmetic of Elliptic Curves*, III.4.10c (unramified order-transport),
   III.6.1b/III.6.2(a) (divisor-pushforward dual), III.8.1d/III.8.6.1 (the scaling), V.1.3.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

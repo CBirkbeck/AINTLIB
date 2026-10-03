@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Pullbacks
-import ModularCurves.ForMathlib.PullbackTensorGeneral
+module
+
+public import Mathlib.AlgebraicGeometry.Pullbacks
+public import ModularCurves.ForMathlib.PullbackTensorGeneral
 
 /-!
 # The relative Picard functor (GME §2.2.2, functor layer of (2.16))
@@ -30,6 +32,8 @@ isomorphism `E ≅ Pic⁰` ((2.16) proper) are explicitly deferred there.
 * `AlgebraicGeometry.Scheme.Modules.picRelFunctor`: `Pic_{E/S}` as a contravariant
   group-valued functor on `S`-schemes.
 -/
+
+@[expose] public section
 
 universe u
 

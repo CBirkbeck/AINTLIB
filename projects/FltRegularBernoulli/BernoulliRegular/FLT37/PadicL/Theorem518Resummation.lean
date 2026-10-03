@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.PadicL.GaussSumValuationF1Stickelberger
-import BernoulliRegular.FLT37.PadicL.LpValueFormula
-import Mathlib.Algebra.Group.ForwardDiff
-import Mathlib.NumberTheory.Bernoulli
+module
+
+public import BernoulliRegular.FLT37.PadicL.GaussSumValuationF1Stickelberger
+public import BernoulliRegular.FLT37.PadicL.LpValueFormula
+public import Mathlib.Algebra.Group.ForwardDiff
+public import Mathlib.NumberTheory.Bernoulli
 
 /-!
 # Washington Theorem 5.18 resummation — the genuine analytic pieces (4b, 4e, …)
@@ -50,6 +52,8 @@ finite-difference annihilation already discharged).
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83,
   Thm 5.18 (pp. 63–66), Lemma 5.19, Cor 5.13.
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

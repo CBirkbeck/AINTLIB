@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Smooth.StandardSmooth
-import Mathlib.Algebra.MvPolynomial.Equiv
-import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+module
+
+public import Mathlib.RingTheory.Smooth.StandardSmooth
+public import Mathlib.Algebra.MvPolynomial.Equiv
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 
 /-!
 # Polynomial algebras are standard smooth of their rank
@@ -20,6 +22,8 @@ These are the missing base instances for the λ-line chart computation of the
 `.trans` and `.localization_away` then give relative dimension 1 for localized
 polynomial algebras.
 -/
+
+@[expose] public section
 
 namespace Algebra
 

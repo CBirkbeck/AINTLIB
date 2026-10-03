@@ -1,4 +1,6 @@
-import Mathlib.Algebra.Homology.TotalComplexSymmetry
+module
+
+public import Mathlib.Algebra.Homology.TotalComplexSymmetry
 
 /-!
 # Total complexes of first-quadrant bicomplexes
@@ -6,6 +8,8 @@ import Mathlib.Algebra.Homology.TotalComplexSymmetry
 Supply the standard signs for cochain complexes indexed by the natural numbers, so that
 mathlib's existing total-complex construction applies to first-quadrant bicomplexes.
 -/
+
+@[expose] public section
 
 namespace ComplexShape
 

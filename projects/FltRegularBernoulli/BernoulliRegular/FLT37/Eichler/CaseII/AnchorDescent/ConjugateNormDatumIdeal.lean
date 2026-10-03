@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.ConjNormDatumAssembly
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.ConjNormDatumAssembly
 
 /-!
 # [FLT37-CASEII-REAL-ANCHOR-DATUM-ASSEMBLY] Washington §9.1 Thm 9.4 conjugate-normed assembly

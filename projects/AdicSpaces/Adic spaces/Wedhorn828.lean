@@ -2,11 +2,13 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StructureSheaf
-import «Adic spaces».Example638
-import «Adic spaces».TateAlgebra
-import «Adic spaces».Cor832
-import «Adic spaces».MvTateAlgebraTopology
+module
+
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».Example638
+public import «Adic spaces».TateAlgebra
+public import «Adic spaces».Cor832
+public import «Adic spaces».MvTateAlgebraTopology
 
 /-!
 # Wedhorn Theorem 8.28(b): strongly noetherian Tate ⇒ sheafy — clean top-down skeleton
@@ -39,6 +41,10 @@ Lemma 8.34 supplies `gluing`.
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Theorem 8.28, Lemmas 8.31/8.33/8.34,
   Cor 8.32, Remark 8.29, Prop A.3/A.4.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

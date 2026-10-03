@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.AffineCechH1
+module
+
+public import ModularCurves.ForMathlib.AffineCechH1
 
 /-!
 # Semilocal splitting of unit-valued Čech `1`-cocycles on a finite basic cover
@@ -39,6 +41,8 @@ Everything is stated over the join submonoids `powers fᵢ ⊔ powers fⱼ` (as 
 `ForMathlib/AffineCechH1`); the bridges `isLocalizedModule_sup_of_powers_mul` /
 `…_sup_sup_of_powers_mul` re-express `Localization.Away (fᵢ * fⱼ)` data in this form.
 -/
+
+@[expose] public section
 
 open IsLocalizedModule TensorProduct
 

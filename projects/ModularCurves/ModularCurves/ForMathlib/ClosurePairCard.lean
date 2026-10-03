@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.GroupTheory.Torsion
-import Mathlib.Data.ZMod.Basic
-import Mathlib.SetTheory.Cardinal.Finite
+module
+
+public import Mathlib.GroupTheory.Torsion
+public import Mathlib.Data.ZMod.Basic
+public import Mathlib.SetTheory.Cardinal.Finite
 
 /-!
 # Two generators of an `N²`-element torsion group have exact order `N` (WP-D1a, algebra half)
@@ -22,6 +24,8 @@ element of order `d` would confine the whole subgroup to at most `d · N` elemen
 The geometric half (that `E[N](k̄)` has `N²` elements) is supplied downstream from
 `HasseWeil`'s `torsion_genN_addEquiv` through the fibre-point dictionary.
 -/
+
+@[expose] public section
 
 namespace ModularCurves
 

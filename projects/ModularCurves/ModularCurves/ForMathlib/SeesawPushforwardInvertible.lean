@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.CochainComplexBoundedFlat
-import ModularCurves.ForMathlib.ConstantKernelRankProjective
-import ModularCurves.ForMathlib.InvertibleOfRankOne
-import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
-import ModularCurves.ForMathlib.SchemeModuleProperLowDegreeCechFinite
+module
+
+public import ModularCurves.ForMathlib.CochainComplexBoundedFlat
+public import ModularCurves.ForMathlib.ConstantKernelRankProjective
+public import ModularCurves.ForMathlib.InvertibleOfRankOne
+public import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
+public import ModularCurves.ForMathlib.SchemeModuleProperLowDegreeCechFinite
 
 /-!
 # The seesaw pushforward is invertible over a reduced base (`KM-SEESAW-2`)
@@ -57,6 +59,10 @@ Over an arbitrary Noetherian affine base that hypothesis is discharged by
 `Spec (.of R)`-shaped Chow-comodel chain along `S.isoSpec` through
 `Scheme.Modules.OrderedBaseCechHomologyFinite.of_comp`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 

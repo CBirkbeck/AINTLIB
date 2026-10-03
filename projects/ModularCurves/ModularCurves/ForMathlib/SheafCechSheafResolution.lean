@@ -1,5 +1,7 @@
-import Mathlib.Algebra.Homology.Augment
-import ModularCurves.ForMathlib.SheafCechSheafPositiveExact
+module
+
+public import Mathlib.Algebra.Homology.Augment
+public import ModularCurves.ForMathlib.SheafCechSheafPositiveExact
 
 /-!
 # The augmented sheaf-level Cech resolution
@@ -8,6 +10,10 @@ This file proves that the augmentation into the sheaf-level Cech complex is moni
 open cover, then packages the augmentation and the Cech complex into an acyclic cochain
 complex.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

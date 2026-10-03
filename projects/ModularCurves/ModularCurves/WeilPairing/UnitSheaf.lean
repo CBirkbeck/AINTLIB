@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.RigidDescent
-import ModularCurves.Picard.InvertibleSheafCocycle
+module
+
+public import ModularCurves.Picard.RigidDescent
+public import ModularCurves.Picard.InvertibleSheafCocycle
 
 /-!
 # The unit sheaf `K_E^×` normalized along the zero section (`AP-D1`)
@@ -27,6 +29,8 @@ use.
 Precision pin 3 (round 19): the `H¹(K^×) ≅ ker(0^*)` identification (`AP-D3`) works on the Zariski
 site via the five-term sequence, with no hypothesis on `Pic(S)`.
 -/
+
+@[expose] public section
 
 universe u
 

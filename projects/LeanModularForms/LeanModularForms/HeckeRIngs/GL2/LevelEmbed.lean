@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
 
 /-!
 # Level monotonicity of the congruence subgroups
@@ -21,6 +23,8 @@ definition-level prerequisites for level-raising and primitive-form theory (Miya
 * Miyake, *Modular Forms*, §4.6 (Lemma 4.6.1, p.162)
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.7
 -/
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup CongruenceSubgroup
 

@@ -1,7 +1,9 @@
-import ModularCurves.GroupScheme.ChartCoaction
-import ModularCurves.GroupScheme.HopfGaloisCharts
-import ModularCurves.GroupScheme.ActPairImmersion
-import ModularCurves.GroupScheme.ChartPrecursorImmersion
+module
+
+public import ModularCurves.GroupScheme.ChartCoaction
+public import ModularCurves.GroupScheme.HopfGaloisCharts
+public import ModularCurves.GroupScheme.ActPairImmersion
+public import ModularCurves.GroupScheme.ChartPrecursorImmersion
 
 /-!
 # The per-chart Hopf–Galois datum (`[HG-C1d]` assembly + `[HG-C2]` last mile)
@@ -32,6 +34,8 @@ This file supplies:
   hypothesis is `Module.Free P.baseRing P.groupRing` (freeness of `G` per chart, from `[HG-C3]`
   base-shrinking; diamond-free to hypothesis-wire).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 open scoped TensorProduct

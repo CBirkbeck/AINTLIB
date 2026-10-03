@@ -1,7 +1,9 @@
-import HasseWeil.Isogeny.Dual.Relation
-import HasseWeil.Isogeny.Endomorphism
-import HasseWeil.Foundation.AdditionPullback
-import HasseWeil.Foundation.EC.MulByIntAddRecurrence
+module
+
+public import HasseWeil.Isogeny.Dual.Relation
+public import HasseWeil.Isogeny.Endomorphism
+public import HasseWeil.Foundation.AdditionPullback
+public import HasseWeil.Foundation.EC.MulByIntAddRecurrence
 
 /-!
 # Degree as a Positive Definite Quadratic Form
@@ -34,6 +36,8 @@ From these, pointwise arithmetic on E.Point gives the expansion.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, Corollary III.6.3, Proposition III.8.6
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

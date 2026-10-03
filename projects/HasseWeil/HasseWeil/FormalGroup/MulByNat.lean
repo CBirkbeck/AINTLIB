@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.Definition
+module
+
+public import HasseWeil.FormalGroup.Definition
 
 /-!
 # Multiplication by a natural number as a formal-group homomorphism (Silverman IV.2)
@@ -27,6 +29,8 @@ This file packages `HasseWeil.FG.mulByNatSeries F n` as a
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.2.3.
 -/
+
+@[expose] public section
 
 open MvPowerSeries
 

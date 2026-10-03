@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.IwasawaProof.GaloisAction
-import PadicLFunctions.Iwasawa.ResidueField
+module
+
+public import PadicLFunctions.IwasawaProof.GaloisAction
+public import PadicLFunctions.Iwasawa.ResidueField
 
 /-!
 # Equivariance of the Coleman map (RJW §12.1, TeX 3117–3243) — 12.1
@@ -21,6 +23,10 @@ execution.) The `μ_{p−1}`-killing (`Col_eq_zero_of_torsion`) and the `Λ(𝒢
 compatibility `norm_levelNorm_sub_one_lt_one`, the `𝒪_n`-residue `residueZp`, and the constant
 Teichmüller system `omegaNCU`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman
 

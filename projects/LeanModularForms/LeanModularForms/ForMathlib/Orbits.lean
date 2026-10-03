@@ -3,10 +3,12 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Analysis.Meromorphic.NormalForm
-import Mathlib.LinearAlgebra.Matrix.FixedDetMatrices
-import Mathlib.NumberTheory.ModularForms.LevelOne.Basic
-import LeanModularForms.ForMathlib.ModularInvariance
+module
+
+public import Mathlib.Analysis.Meromorphic.NormalForm
+public import Mathlib.LinearAlgebra.Matrix.FixedDetMatrices
+public import Mathlib.NumberTheory.ModularForms.LevelOne.Basic
+public import LeanModularForms.ForMathlib.ModularInvariance
 
 /-!
 # SL₂(ℤ) Orbits on the Upper Half-Plane
@@ -31,6 +33,8 @@ on orbits and establish finite support for the orbit sum.
 * `orbit_has_fd_repFM` — every orbit has a representative in `𝒟`
 * `orb_rho_plus_one_eq_orb_rhoFM` — T-equivalence of elliptic orbits
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups

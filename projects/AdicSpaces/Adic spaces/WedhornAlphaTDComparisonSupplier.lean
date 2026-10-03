@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornFullLaurentAlphaTDBranch
+module
+
+public import «Adic spaces».WedhornFullLaurentAlphaTDBranch
 
 /-!
 # Wedhorn 8.34(ii) α_T_D branch comparison supplier (T034)
@@ -101,6 +103,8 @@ localized Spa. Discharging this residual on every `w` requires either:
 * No revival of σ-power-decay, T001 / Lane-B, Cor832/Jacobson,
   faithful-flatness, Zavyalov, or bivariate-overlap content.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

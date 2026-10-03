@@ -3,8 +3,10 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInvariant
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeFinite
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInvariant
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeFinite
 
 /-!
 # Hecke- and diamond-equivariance of the period map (ES-3c)
@@ -32,6 +34,8 @@ naturality engine of `PeriodInvariant.lean`.
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §8.2, §3.5.
 -/
+
+@[expose] public section
 
 noncomputable section
 

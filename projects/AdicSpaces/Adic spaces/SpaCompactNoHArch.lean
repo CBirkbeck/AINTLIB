@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».SpaCompact
-import «Adic spaces».Presheaf
-import «Adic spaces».SpvAITopology
+module
+
+public import «Adic spaces».SpaCompact
+public import «Adic spaces».Presheaf
+public import «Adic spaces».SpvAITopology
 
 /-!
 # No-`hArch` compactness and per-`v` cofinality (T-COMPACT-NO-HARCH)
@@ -31,6 +33,8 @@ continuity + topological nilpotence of `π`.
 References: Wedhorn §7.1–§7.2 + §7.5 (arXiv:1910.05934). Round-22
 reviewer reply at `.mathlib-quality/expert-review/2026-05-16-3/reply.md`.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

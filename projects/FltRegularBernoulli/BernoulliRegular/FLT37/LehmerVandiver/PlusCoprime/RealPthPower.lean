@@ -1,5 +1,7 @@
-import Mathlib.NumberTheory.NumberField.CMField
-import Mathlib.NumberTheory.Cyclotomic.Basic
+module
+
+public import Mathlib.NumberTheory.NumberField.CMField
+public import Mathlib.NumberTheory.Cyclotomic.Basic
 
 /-!
 # T-PIVOT-2: Real-unit-side `p`-th-power equivalence
@@ -31,6 +33,8 @@ Hence `β_K = alg β` for some `β ∈ (𝓞 K⁺)ˣ`. By injectivity of the alg
 * `Mathlib.NumberTheory.NumberField.CMField` — `unitsMulComplexConjInv`,
   `realUnits`, `unitsMulComplexConjInv_ker`, `unitsMulComplexConjInv_apply_torsion`.
 -/
+
+set_option backward.privateInPublic true
 
 @[expose] public section
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.LegendreDelta
+module
+
+public import ModularCurves.Moduli.LegendreDelta
 
 /-!
 # The universal Legendre object over `M'₂ = Spec R[λ][(λ(λ−1))⁻¹]` (T-E14-AX1)
@@ -15,6 +17,10 @@ universal `ω`-basis, and the tautologically marked sections `P = (0,0)`, `Q = (
 (via `projModelAffineSection`) — the ingredients of KM engine axiom 1 for the
 corrected `δ` (`legendreDelta_representable_by_affine`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

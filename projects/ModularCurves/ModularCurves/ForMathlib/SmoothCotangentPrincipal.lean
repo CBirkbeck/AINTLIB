@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
-import Mathlib.RingTheory.Smooth.Basic
-import Mathlib.LinearAlgebra.Dimension.Constructions
+module
+
+public import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+public import Mathlib.RingTheory.Smooth.Basic
+public import Mathlib.LinearAlgebra.Dimension.Constructions
 
 /-!
 # The cotangent space at a rational point of a smooth algebra (T-SMOOTH-REG brick 4)
@@ -24,6 +26,8 @@ Combined with `ForMathlib/KrullDimQuotientSpan.lean` (the dimension lower bound)
 "smooth of relative dimension one over an algebraically closed field ⟹ the local rings are
 regular, hence domains".
 -/
+
+@[expose] public section
 
 universe u
 

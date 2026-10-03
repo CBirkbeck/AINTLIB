@@ -1,4 +1,7 @@
-import BernoulliRegular.FLT37.PadicL.LogCoeffPiOrder
+module
+
+import all BernoulliRegular.FLT37.PadicL.LpValue
+public import BernoulliRegular.FLT37.PadicL.LogCoeffPiOrder
 
 /-!
 # The `π`-digit ladder of `Λ 32` — the Coleman log-series `𝔓`-grading engine

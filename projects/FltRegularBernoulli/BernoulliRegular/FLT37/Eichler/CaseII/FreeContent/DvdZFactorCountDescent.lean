@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.Section91FactorEquationsAssembly
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimeDvdZDescent
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.Lemma98RealData
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.Section91FactorEquationsAssembly
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimeDvdZDescent
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.Lemma98RealData
 
 /-!
 # [FLT37-CASEII-R2] The combined `ℓ ∣ z` **free-content** descent: factor-count well-ordering

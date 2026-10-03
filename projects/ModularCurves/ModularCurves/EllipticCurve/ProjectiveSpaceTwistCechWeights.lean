@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechFirstLaurent
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechFirstLaurent
 
 /-!
 # Homogeneous-weight coordinates for the projective twist Cech complex
@@ -11,6 +13,8 @@ import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechFirstLaurent
 This file reindexes each standard-intersection factor of the existing ordered Cech complex by its
 allowed global homogeneous Laurent weights.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

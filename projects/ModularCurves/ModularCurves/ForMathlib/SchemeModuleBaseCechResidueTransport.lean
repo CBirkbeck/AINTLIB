@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafBaseCechHigher
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafBaseCechHigher
 
 /-!
 # Residue-field transport for base-linear Čech exactness, module-generically
@@ -16,6 +18,8 @@ the fibre pullback of `M`, and the output is exactness at `q + 1` of the ordered
 fibre input is produced by `twoCover_subsingleton_H_one` (`q = 0`) and
 `subsingleton_H_add_two_of_two_affine_open_cover` (`q ≥ 1`) on a presented invertible module.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 

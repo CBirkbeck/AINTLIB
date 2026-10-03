@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.LocalTrivialization
+module
+
+public import ModularCurves.Picard.DualPullback.LocalTrivialization
 
 /-!
 # Inverse local trivializations for pulled dual modules
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.LocalTrivialization
 The inverse source trivialization sends `1` to the canonical pulled dual section, allowing
 the local dual-pullback map to be recognized as an isomorphism.
 -/
+
+@[expose] public section
 
 universe u
 

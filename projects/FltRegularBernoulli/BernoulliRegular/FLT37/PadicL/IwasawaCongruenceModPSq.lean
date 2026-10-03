@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.PadicL.LpValue
-import BernoulliRegular.IrregularPrimes.KummerCongruenceFull
+module
+
+public import BernoulliRegular.FLT37.PadicL.LpValue
+public import BernoulliRegular.IrregularPrimes.KummerCongruenceFull
 
 /-!
 # B-C1.0′ — the `L_p`–Bernoulli **valuation** bridge via the mod-`p²` Iwasawa congruence
@@ -66,6 +68,10 @@ genuine open analytic content of `v_p(L_p) = v_p(B_i/i)` at the sharp level is t
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83,
   Thm 5.11, Thm 5.12, Cor 5.13, Thm 5.18, Prop 8.12, Cor 8.23.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

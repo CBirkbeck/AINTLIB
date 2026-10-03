@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.AffineProjectiveClosure
-import ModularCurves.ForMathlib.FiniteAffineImageCover
+module
+
+public import ModularCurves.ForMathlib.AffineProjectiveClosure
+public import ModularCurves.ForMathlib.FiniteAffineImageCover
 
 /-!
 # Projective compactifications of finite affine image covers
@@ -15,6 +17,8 @@ Over a Noetherian affine base, each affine chart pulled back to the scheme-theor
 a proper projective compactification. The standard open immersion commutes with the chart's
 structure morphism.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

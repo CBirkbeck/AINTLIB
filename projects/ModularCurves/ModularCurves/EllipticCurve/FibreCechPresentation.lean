@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.FibreDivisorDictionary
-import ModularCurves.EllipticCurve.PoleFiltration
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
-import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
+module
+
+public import ModularCurves.EllipticCurve.FibreDivisorDictionary
+public import ModularCurves.EllipticCurve.PoleFiltration
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
 
 /-!
 # Čech presentations of invertible sheaves on the projective Weierstrass model (`AP2-A1a/b`)
@@ -32,6 +34,8 @@ proved for the trivial divisor in `memRRspaceOn_finitePlaces_zero_iff_coordinate
 overlap misses only finitely many places from each — the `(S₀ \ S₁).Finite` input of the
 splitting.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 open FunctionField FunctionField.Chart Polynomial

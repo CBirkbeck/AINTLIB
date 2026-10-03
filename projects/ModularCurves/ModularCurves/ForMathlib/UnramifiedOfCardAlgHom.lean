@@ -1,12 +1,14 @@
-import ModularCurves.ForMathlib.EtaleSectionsCount
-import Mathlib.RingTheory.Etale.Field
-import Mathlib.RingTheory.Unramified.Pi
-import Mathlib.RingTheory.RingHom.Unramified
-import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
-import Mathlib.LinearAlgebra.LinearIndependent.Lemmas
-import Mathlib.LinearAlgebra.Dual.Lemmas
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.ForMathlib.EtaleSectionsCount
+public import Mathlib.RingTheory.Etale.Field
+public import Mathlib.RingTheory.Unramified.Pi
+public import Mathlib.RingTheory.RingHom.Unramified
+public import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+public import Mathlib.LinearAlgebra.LinearIndependent.Lemmas
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Unramifiedness from the count of algebra homomorphisms
@@ -19,6 +21,8 @@ formally unramified.
 This is the endgame of the BB-DIFF kernel-count argument: `Γ(E[N])` over `κ̄` has `N²`
 points (HasseWeil) and rank `N²` (BB-DEG), so it is étale.
 -/
+
+@[expose] public section
 
 -- v4.33 bump: opens/hom coercions are no longer transparent enough for the
 -- `≫`-associativity and `comp_apply` rewrites below.

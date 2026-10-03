@@ -2,7 +2,8 @@
 # Canonical branch + synced commit per project live in sources/manifest.toml.
 # The blueprint atlas is preserved on the `blueprint-atlas` branch.
 name = "AINTLIB"
-defaultTargets = ["Common", "HasseWeil", "LeanModularForms", "«Adic spaces»", "BernoulliRegular"]
+requiresModuleSystem = true
+defaultTargets = ["Common", "HasseWeil", "LeanModularForms", "«Adic spaces»", "BernoulliRegular", "ModuleSystemTests"]
 
 [leanOptions]
 pp.unicode.fun = true   # universal across all origin projects
@@ -108,3 +109,8 @@ srcDir = "projects/ModularCurves"
 autoImplicit = false
 relaxedAutoImplicit = false
 maxSynthPendingDepth = 3
+
+# Importing clients exercise public exports and proof-producing meta extensions.
+[[lean_lib]]
+name = "ModuleSystemTests"
+srcDir = "tests"

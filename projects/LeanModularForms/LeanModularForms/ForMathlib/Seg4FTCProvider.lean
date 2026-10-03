@@ -3,11 +3,13 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.BoundaryWindingSeg4Proof
-import LeanModularForms.ForMathlib.SegmentAnalysis
-import LeanModularForms.ForMathlib.SegmentFTC
-import LeanModularForms.ForMathlib.VertSegFTCProvider
-import LeanModularForms.ForMathlib.WindingWeightProofs
+module
+
+public import LeanModularForms.ForMathlib.BoundaryWindingSeg4Proof
+public import LeanModularForms.ForMathlib.SegmentAnalysis
+public import LeanModularForms.ForMathlib.SegmentFTC
+public import LeanModularForms.ForMathlib.VertSegFTCProvider
+public import LeanModularForms.ForMathlib.WindingWeightProofs
 
 /-!
 # `ArcFTCHyp` for the left vertical edge (seg4) at a generic point
@@ -25,6 +27,8 @@ The arc, seg3, and seg5 pieces are shared with `Seg1FTCProvider.lean` via
 
 * `arcFTCHyp_seg4` — the full `ArcFTCHyp` at any seg4 interior point
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

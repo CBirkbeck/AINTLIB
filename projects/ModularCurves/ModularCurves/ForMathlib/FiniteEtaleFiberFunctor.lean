@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.TensorProduct.Pi
-import ModularCurves.ForMathlib.FiniteEtaleGalois
+module
+
+public import Mathlib.RingTheory.TensorProduct.Pi
+public import ModularCurves.ForMathlib.FiniteEtaleGalois
 
 /-!
 # The fiber functor on finite étale algebras is a Galois fiber functor
@@ -25,6 +27,10 @@ reduces to an exactness property of the base change functor
   base change);
 * the fiber functor reflects isomorphisms (counting via `natCard_algHom_sepClosure`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

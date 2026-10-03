@@ -1,5 +1,7 @@
-import ModularCurves.ModularCurve.YRho
-import Mathlib.AlgebraicGeometry.Sites.Fpqc
+module
+
+public import ModularCurves.ModularCurve.YRho
+public import Mathlib.AlgebraicGeometry.Sites.Fpqc
 
 /-!
 # [T-EQ-3b] Descent of ρ-level structures along flat covers
@@ -16,6 +18,8 @@ carved quotient produce `ρ`-structures étale-locally (through the torsor and t
 dictionary), agreeing on overlaps by `rhoLevelStructureOfFramed_glSmul` (T-EQ-2),
 and descend by this module.
 -/
+
+@[expose] public section
 
 -- v4.33 bump: neither the `Scheme`/`CommAlgCat` category instances nor the semireducible
 -- component types are transparent enough for the rewrites and instance searches below.

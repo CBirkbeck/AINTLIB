@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Map.CurveMap
+module
+
+public import HasseWeil.Foundation.Curves.Map.CurveMap
 
 /-!
 # Module-finiteness along a coordinate-ring witness (the standing `hfin`, DERIVED)
@@ -71,6 +73,8 @@ places" wall is bypassed entirely by the explicit Weierstrass presentation.
   of morphisms of smooth curves) — obtained here by direct
   Weierstrass-presentation algebra instead of valuation theory.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

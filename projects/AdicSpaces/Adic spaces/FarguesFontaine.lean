@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Tilting
-import «Adic spaces».PerfectoidSpace
-import Mathlib.RingTheory.WittVector.Frobenius
-import Mathlib.RingTheory.WittVector.Teichmuller
+module
+
+public import «Adic spaces».Tilting
+public import «Adic spaces».PerfectoidSpace
+public import Mathlib.RingTheory.WittVector.Frobenius
+public import Mathlib.RingTheory.WittVector.Teichmuller
 
 /-!
 # The Adic Fargues--Fontaine Curve
@@ -69,6 +71,8 @@ disconnected, so the quotient `Y_FF / φ^ℤ` inherits the structure of an adic 
 * [P. Scholze, J. Weinstein, *Berkeley Lectures on p-adic Geometry*]
   [scholzeweinstein2020berkeley], Lectures 7--8
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

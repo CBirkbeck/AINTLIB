@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.TranslateValuation
-import HasseWeil.Foundation.EC.TranslationOrd
-import HasseWeil.HasseBound.PoleDivisorTwoTorsion
+module
+
+public import HasseWeil.Foundation.EC.TranslateValuation
+public import HasseWeil.Foundation.EC.TranslationOrd
+public import HasseWeil.HasseBound.PoleDivisorTwoTorsion
 
 /-!
 # Order-at-infinity transport under translation (Step (C))
@@ -46,6 +48,8 @@ Reading off the additive value gives `ord_P P (τ_k f) = ordAtInfty f`.
 * Silverman, *The Arithmetic of Elliptic Curves*, III.8 (translation), IV.1
   (place at infinity).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.InvertibleSheaf
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.PushforwardContinuous
-import Mathlib.CategoryTheory.Sites.SheafHom
-import Mathlib.CategoryTheory.Sites.Subsheaf
+module
+
+public import ModularCurves.Picard.InvertibleSheaf
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.PushforwardContinuous
+public import Mathlib.CategoryTheory.Sites.SheafHom
+public import Mathlib.CategoryTheory.Sites.Subsheaf
 
 /-!
 # Duals of invertible sheaves
@@ -15,6 +17,10 @@ This file constructs the sheaf dual `Hom_O(M, O)` from module-linear morphisms o
 over-sites.  It is used for the pole sheaves `O(n[0])` in the abstract-to-Weierstrass
 comparison.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite
 

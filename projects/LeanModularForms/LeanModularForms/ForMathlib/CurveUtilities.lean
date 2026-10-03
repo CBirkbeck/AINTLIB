@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.PiecewiseC1Path
-import Mathlib.Analysis.Complex.Basic
+module
+
+public import LeanModularForms.ForMathlib.PiecewiseC1Path
+public import Mathlib.Analysis.Complex.Basic
 
 /-!
 # Curve Utilities and Avoidance
@@ -14,6 +16,8 @@ Utility lemmas for working with `PiecewiseC1Path` partition structure and curve 
 
 * `PiecewiseC1Path.infDist` — infimum distance from `z₀` to the path image on `[0, 1]`.
 -/
+
+@[expose] public section
 
 open Set Complex Metric
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassChartIdeal
-import ModularCurves.EllipticCurve.PoleSheafAwaySections
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapOverlap
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassChartIdeal
+public import ModularCurves.EllipticCurve.PoleSheafAwaySections
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapOverlap
 
 /-!
 # The zero ideal under the pole-sheaf Weierstrass comparison
@@ -14,6 +16,8 @@ import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapOverlap
 The normalized `Y`-chart calculation is transported through the
 coprime-coordinate constructor and restriction to an affine source.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 open WeierstrassCurve.Projective HomogeneousIdeal

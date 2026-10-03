@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-D32.
 -/
-import Mathlib.RingTheory.LocalRing.Module
-import Mathlib.RingTheory.LocalProperties.Exactness
+module
+
+public import Mathlib.RingTheory.LocalRing.Module
+public import Mathlib.RingTheory.LocalProperties.Exactness
 
 /-!
 # Bijectivity of linear maps is detected on residue-field fibres
@@ -36,6 +38,8 @@ Upstream candidates: the Nakayama toolkit used (`map_tensorProduct_mk_eq_top`,
 `split_injective_iff_lTensor_residueField_injective`, `bijective_of_isLocalized_maximal`)
 is all in mathlib, but none of the three composed statements above is.
 -/
+
+@[expose] public section
 
 open Function TensorProduct IsLocalRing
 

@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.NumberTheory.ArithmeticFunction.Moebius
-import Mathlib.NumberTheory.DirichletCharacter.Basic
-import Mathlib.NumberTheory.ModularForms.QExpansion
-import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
-import LeanModularForms.HeckeRIngs.GL2.LevelRaise
-import LeanModularForms.Modularforms.QExpansionSlash
+module
+
+public import Mathlib.NumberTheory.ArithmeticFunction.Moebius
+public import Mathlib.NumberTheory.DirichletCharacter.Basic
+public import Mathlib.NumberTheory.ModularForms.QExpansion
+public import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
+public import LeanModularForms.HeckeRIngs.GL2.LevelRaise
+public import LeanModularForms.Modularforms.QExpansionSlash
 
 /-!
 # Miyake Theorem 4.6.5 — coprime sieving (downstream-facing helpers)
@@ -22,6 +24,10 @@ by the SMO obligation chain.
 * Miyake, *Modular Forms*, Theorem 4.6.5.
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.6.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open scoped ModularForm ArithmeticFunction MatrixGroups
 open ModularFormClass CongruenceSubgroup Matrix.SpecialLinearGroup

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
-import Mathlib.LinearAlgebra.Matrix.Trace
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.LinearAlgebra.Matrix.Trace
 
 /-!
 # Route 2 — the 2×2 determinant identity (Silverman V.2.3.1, Step 6)
@@ -21,6 +23,8 @@ into `int_eq_of_congr_all_primes_ne` (Step 7) closes Leaf 1.
 
 This file is pure commutative-ring linear algebra — no elliptic-curve content.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.WeilPairing
 

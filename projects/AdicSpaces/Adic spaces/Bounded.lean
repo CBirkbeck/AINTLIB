@@ -2,16 +2,18 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Topology.Algebra.Ring.Basic
-import Mathlib.Topology.Algebra.Group.Pointwise
-import Mathlib.Topology.Algebra.TopologicallyNilpotent
-import Mathlib.RingTheory.IntegralClosure.IsIntegral.Defs
-import Mathlib.RingTheory.Polynomial.Basic
-import Mathlib.Data.Nat.Choose.Sum
-import Mathlib.Topology.Algebra.LinearTopology
-import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
-import Mathlib.RingTheory.Ideal.Quotient.Operations
-import «Adic spaces».GeometricSeries
+module
+
+public import Mathlib.Topology.Algebra.Ring.Basic
+public import Mathlib.Topology.Algebra.Group.Pointwise
+public import Mathlib.Topology.Algebra.TopologicallyNilpotent
+public import Mathlib.RingTheory.IntegralClosure.IsIntegral.Defs
+public import Mathlib.RingTheory.Polynomial.Basic
+public import Mathlib.Data.Nat.Choose.Sum
+public import Mathlib.Topology.Algebra.LinearTopology
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
+public import «Adic spaces».GeometricSeries
 
 /-!
 # Bounded Subsets and Power-Bounded Elements
@@ -54,6 +56,8 @@ elements** for topological rings, following §5 of [Wedhorn, *Adic Spaces*].
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Definition 5.25, Definition 5.27,
   Proposition 5.30
 -/
+
+@[expose] public section
 
 open Filter Topology Pointwise Polynomial
 

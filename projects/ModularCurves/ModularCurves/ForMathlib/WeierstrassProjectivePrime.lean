@@ -5,15 +5,17 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.Algebra.MvPolynomial.Division
-import Mathlib.Algebra.MvPolynomial.Equiv
-import Mathlib.RingTheory.Ideal.Maximal
-import Mathlib.RingTheory.Ideal.Quotient.Basic
-import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
-import Mathlib.RingTheory.Polynomial.UniqueFactorization
-import Mathlib.RingTheory.Prime
+module
 
-import ModularCurves.EllipticCurve.WeierstrassModel
+public import Mathlib.Algebra.MvPolynomial.Division
+public import Mathlib.Algebra.MvPolynomial.Equiv
+public import Mathlib.RingTheory.Ideal.Maximal
+public import Mathlib.RingTheory.Ideal.Quotient.Basic
+public import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
+public import Mathlib.RingTheory.Polynomial.UniqueFactorization
+public import Mathlib.RingTheory.Prime
+
+public import ModularCurves.EllipticCurve.WeierstrassModel
 
 /-!
 # The projective Weierstrass cubic is prime
@@ -45,6 +47,8 @@ hence — transporting along the ring isomorphism `finSuccEquiv` — so is `W.po
 
 The argument is independent of `a₁, …, a₆` and of any discriminant/ellipticity hypothesis.
 -/
+
+@[expose] public section
 
 open scoped Polynomial
 

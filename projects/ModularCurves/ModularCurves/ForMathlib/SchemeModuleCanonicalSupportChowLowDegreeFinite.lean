@@ -3,17 +3,19 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.RelativeProjectiveCoordinateTwistCechVanishing
-import ModularCurves.ForMathlib.ProjectiveFactorizationCechHOne
-import ModularCurves.ForMathlib.ProjectiveFactorizationFiniteSections
-import ModularCurves.ForMathlib.SchemeModuleBaseCechPushforward
-import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportChowComparison
-import ModularCurves.ForMathlib.SchemeModuleCechAffineRestriction
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHomologyRetract
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFinite
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechLowDegreeFinite
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
-import ModularCurves.ForMathlib.SheafModuleCechTwoCoverHomology
+module
+
+public import ModularCurves.EllipticCurve.RelativeProjectiveCoordinateTwistCechVanishing
+public import ModularCurves.ForMathlib.ProjectiveFactorizationCechHOne
+public import ModularCurves.ForMathlib.ProjectiveFactorizationFiniteSections
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechPushforward
+public import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportChowComparison
+public import ModularCurves.ForMathlib.SchemeModuleCechAffineRestriction
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHomologyRetract
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFinite
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechLowDegreeFinite
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
+public import ModularCurves.ForMathlib.SheafModuleCechTwoCoverHomology
 
 /-!
 # Cech finiteness from support-adapted Chow charts
@@ -25,6 +27,10 @@ Comparing the pullback of that cover with an affine cover of the projective
 source transfers finite generation in every Cech degree to the coordinate
 comodel.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 

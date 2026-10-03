@@ -3,9 +3,11 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.EllipticPoints
-import Mathlib.Analysis.Complex.Convex
-import Mathlib.NumberTheory.ModularForms.Identities
+module
+
+public import LeanModularForms.ForMathlib.EllipticPoints
+public import Mathlib.Analysis.Complex.Convex
+public import Mathlib.NumberTheory.ModularForms.Identities
 
 /-!
 # Modular Invariance of Vanishing Order
@@ -18,6 +20,8 @@ We also provide:
 * `fdBox` and `modularForm_finitely_many_zeros_in_fdBox` — finiteness of zeros
 * Cusp nonvanishing (`exists_height_cusp_nonvanishing`)
 -/
+
+@[expose] public section
 
 open Complex Set Filter Topology CongruenceSubgroup
 open scoped Real UpperHalfPlane ModularForm Modular MatrixGroups

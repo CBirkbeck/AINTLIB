@@ -3,8 +3,10 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.NumberTheory.ModularForms.Cusps
-import Mathlib.LinearAlgebra.Projectivization.Action
+module
+
+public import Mathlib.NumberTheory.ModularForms.Cusps
+public import Mathlib.LinearAlgebra.Projectivization.Action
 
 /-!
 # Finitely many cusps for `Γ₁(N)`
@@ -21,6 +23,8 @@ obtained by mapping `SL(2, ℤ) → SL(2, ℚ)` (entrywise via `ℤ → ℚ`) an
 * `HeckeRing.GL2.ModularSymbols.instFiniteCuspsGamma1` : `Γ₁(N)` has only finitely many orbits on
   `ℙ¹(ℚ)`.
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2.ModularSymbols
 

@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLaurentPieceFactoredChain
+module
+
+public import «Adic spaces».WedhornLaurentPieceFactoredChain
 
 /-!
 # Wedhorn 8.34(ii) full Laurent lower-branch σ_loc-bound supplier (T030)
@@ -47,6 +49,8 @@ from two natural rational-open hypotheses:
 * Does NOT edit T028's `WedhornMPowerStructuralDataHonestFromLaurentPiece.lean`
   or any other accepted file.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

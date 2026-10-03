@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.DivisorGalois
-import HasseWeil.HasseBound.WeilPairing.FrobeniusFunctionFieldEquiv
-import HasseWeil.HasseBound.WeilPairing.DivisorTranslate
-import HasseWeil.HasseBound.WeilPairing.Pairing
-import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
-import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
-import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
+module
+
+public import HasseWeil.HasseBound.WeilPairing.DivisorGalois
+public import HasseWeil.HasseBound.WeilPairing.FrobeniusFunctionFieldEquiv
+public import HasseWeil.HasseBound.WeilPairing.DivisorTranslate
+public import HasseWeil.HasseBound.WeilPairing.Pairing
+public import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
+public import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
+public import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
 
 /-!
 # Divisor Galois descent for the arithmetic Frobenius `σ` of `K̄(E)`
@@ -25,6 +27,8 @@ ord_P (σ g) = ord_{Q} g     where  Q  has coordinates  (P.x^{1/q}, P.y^{1/q}) =
 This is the affine half of the divisor Galois descent `div(σ g) = π̄_*(div g)` feeding the two
 geometric facts (conjugation, σ-naturality) of `FrobeniusGaloisGeometric`.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves IsDedekindDomain Polynomial
 

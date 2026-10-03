@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Map.PointFunctor
-import HasseWeil.Foundation.Curves.IntegralClosure
-import HasseWeil.Pic0.ToClassSurjective
+module
+
+public import HasseWeil.Foundation.Curves.Map.PointFunctor
+public import HasseWeil.Foundation.Curves.IntegralClosure
+public import HasseWeil.Pic0.ToClassSurjective
 
 /-!
 # Functoriality of `E ≅ Pic⁰(E)` on the point map (Silverman III.3.4) — ideal-level core
@@ -100,6 +102,8 @@ point-level `Pic⁰` infrastructure cannot supply.
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.4 (morphism ↔ comorphism), III.3.4
   (functoriality of `E ≅ Pic⁰(E)`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 open scoped nonZeroDivisors

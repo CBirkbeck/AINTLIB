@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.AffineModulePatchBaseChange
+module
+
+public import ModularCurves.ForMathlib.AffineModulePatchBaseChange
 
 /-!
 # Naturality of affine module patch base change
@@ -7,6 +9,10 @@ The affine-patch module comparison commutes with restriction to a smaller
 affine source patch.  This is the compatibility needed to assemble the
 patchwise comparisons into a base-linear Cech complex.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace TensorProduct
 open scoped ChangeOfRings

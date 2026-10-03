@@ -1,7 +1,9 @@
-import ModularCurves.EllipticCurve.PoleSheafModelHigherCohomology
-import ModularCurves.EllipticCurve.PoleSheafPointedIso
-import ModularCurves.ForMathlib.SheafCohomologyIso
-import ModularCurves.ForMathlib.SchemeModuleSheaf
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafModelHigherCohomology
+public import ModularCurves.EllipticCurve.PoleSheafPointedIso
+public import ModularCurves.ForMathlib.SheafCohomologyIso
+public import ModularCurves.ForMathlib.SchemeModuleSheaf
 
 /-!
 # First cohomology of pole sheaves on residue fibres
@@ -9,6 +11,10 @@ import ModularCurves.ForMathlib.SchemeModuleSheaf
 This file transports model-side vanishing of `H¹(O(n[0]))` across the pointed
 isomorphism supplied by `FibrewiseElliptic`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TopologicalSpace
 

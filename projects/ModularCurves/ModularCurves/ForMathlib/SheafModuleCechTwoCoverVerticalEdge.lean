@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafModuleCechNativeDegreeExact
-import ModularCurves.ForMathlib.SheafModuleCechSectionsExact
-import ModularCurves.ForMathlib.TotalComplexUpNatVerticalEdgeModule
+module
+
+public import ModularCurves.ForMathlib.SheafModuleCechNativeDegreeExact
+public import ModularCurves.ForMathlib.SheafModuleCechSectionsExact
+public import ModularCurves.ForMathlib.TotalComplexUpNatVerticalEdgeModule
 
 /-!
 # Vertical edge of the module-valued two-cover Cech bicomplex
@@ -15,6 +17,10 @@ monicity of the vertical augmentation. Exactness at the next outer Cech
 degree remains an explicit acyclicity input on the degree-zero inner tuple
 opens.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

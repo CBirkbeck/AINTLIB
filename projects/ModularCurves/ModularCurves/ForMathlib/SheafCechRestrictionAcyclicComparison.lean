@@ -1,7 +1,9 @@
-import Mathlib.Algebra.Homology.HomologySequenceLemmas
-import ModularCurves.ForMathlib.SheafCechFlasqueExact
-import ModularCurves.ForMathlib.SheafCechInjectiveCokernel
-import ModularCurves.ForMathlib.SheafCechInjectiveComparison
+module
+
+public import Mathlib.Algebra.Homology.HomologySequenceLemmas
+public import ModularCurves.ForMathlib.SheafCechFlasqueExact
+public import ModularCurves.ForMathlib.SheafCechInjectiveCokernel
+public import ModularCurves.ForMathlib.SheafCechInjectiveComparison
 
 /-!
 # Cech comparison from acyclic finite intersections
@@ -12,6 +14,10 @@ exact sequence of native Cech complexes. Dimension shifting transfers both
 the global cohomology hypothesis and acyclicity on every finite intersection
 to the cokernel.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

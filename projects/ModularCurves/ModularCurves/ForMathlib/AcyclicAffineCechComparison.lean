@@ -1,6 +1,8 @@
-import ModularCurves.ForMathlib.SheafCechCochains
-import ModularCurves.ForMathlib.SheafCechInjectiveComparison
-import ModularCurves.ForMathlib.SheafCechRestrictionAcyclicComparison
+module
+
+public import ModularCurves.ForMathlib.SheafCechCochains
+public import ModularCurves.ForMathlib.SheafCechInjectiveComparison
+public import ModularCurves.ForMathlib.SheafCechRestrictionAcyclicComparison
 
 /-!
 # Cech comparison for affine covers
@@ -8,6 +10,8 @@ import ModularCurves.ForMathlib.SheafCechRestrictionAcyclicComparison
 Specialize the injective-Cech comparison to quasicoherent modules on affine
 open covers.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

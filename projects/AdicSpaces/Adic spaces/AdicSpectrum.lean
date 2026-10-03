@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».ContinuousValuations
-import «Adic spaces».GeometricSeries
-import Mathlib.Topology.Algebra.Ring.Ideal
-import Mathlib.RingTheory.Localization.FractionRing
+module
+
+public import «Adic spaces».ContinuousValuations
+public import «Adic spaces».GeometricSeries
+public import Mathlib.Topology.Algebra.Ring.Ideal
+public import Mathlib.RingTheory.Localization.FractionRing
 
 /-!
 # The Adic Spectrum
@@ -42,6 +44,8 @@ following Definition 7.23 of [Wedhorn, *Adic Spaces*].
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Definition 7.23, Example 7.26,
   Remark 7.28, Definition 7.29, Proposition 5.38, Proposition 7.51, Proposition 7.52
 -/
+
+@[expose] public section
 
 open Topology Pointwise WithZero
 

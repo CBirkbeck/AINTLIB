@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Differentials
-import HasseWeil.Foundation.Curves.Ramification.InseparableDegree
-import HasseWeil.Isogeny.Kernel
-import HasseWeil.Isogeny.Frobenius.PointCount
-import HasseWeil.Foundation.InvariantDifferentialPullback
-import HasseWeil.Foundation.PullbackCoeff
-import HasseWeil.Foundation.OmegaCoeffMulByIntGeneral
+module
+
+public import HasseWeil.Foundation.Curves.Differentials
+public import HasseWeil.Foundation.Curves.Ramification.InseparableDegree
+public import HasseWeil.Isogeny.Kernel
+public import HasseWeil.Isogeny.Frobenius.PointCount
+public import HasseWeil.Foundation.InvariantDifferentialPullback
+public import HasseWeil.Foundation.PullbackCoeff
+public import HasseWeil.Foundation.OmegaCoeffMulByIntGeneral
 
 /-!
 # Witness-parametric Silverman III.5.5 and V.1.2
@@ -45,6 +47,8 @@ conclusion by pure rewriting.
 ## References
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.5.5, V.1.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

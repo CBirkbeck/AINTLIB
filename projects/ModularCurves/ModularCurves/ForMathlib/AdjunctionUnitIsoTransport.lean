@@ -6,7 +6,9 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `AdjunctionUnitIsoTransport.lean`
 in Vilin97/Clawristotle.
 -/
-import Mathlib.CategoryTheory.Adjunction.Mates
+module
+
+public import Mathlib.CategoryTheory.Adjunction.Mates
 
 /-!
 # Transporting invertibility of adjunction units
@@ -14,6 +16,8 @@ import Mathlib.CategoryTheory.Adjunction.Mates
 Invertibility of an adjunction-unit component depends only on the left
 adjoint up to natural isomorphism.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

@@ -1,5 +1,7 @@
-import Mathlib.RingTheory.Localization.Away.Basic
-import Mathlib.RingTheory.Support
+module
+
+public import Mathlib.RingTheory.Localization.Away.Basic
+public import Mathlib.RingTheory.Support
 
 /-!
 # Patching a finite ring homomorphism across a Cartier divisor
@@ -8,6 +10,8 @@ A finite ring homomorphism is bijective if it is bijective away from a
 source nonzerodivisor and surjective modulo the corresponding principal
 ideal.
 -/
+
+@[expose] public section
 
 open scoped Pointwise
 

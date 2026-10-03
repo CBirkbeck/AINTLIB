@@ -3,8 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.PadicL.Theorem518Resummation
-import BernoulliRegular.IrregularPrimes.KummerCongruenceFull
+module
+
+import all BernoulliRegular.FLT37.PadicL.LpValue
+public import BernoulliRegular.FLT37.PadicL.Theorem518Resummation
+public import BernoulliRegular.IrregularPrimes.KummerCongruenceFull
 
 /-!
 # The Kubota–Leopoldt core of Washington Theorem 5.18 — `LogCoeffBernoulliValuation`
@@ -73,6 +76,8 @@ and the concrete `p = 37, i = 32` target `normVal(Λ 32) = 2/9`
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83,
   Thm 5.18 (pp. 63–66), Cor 5.13, Lemma 5.19, §5.4 (the `L_p` limit).
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

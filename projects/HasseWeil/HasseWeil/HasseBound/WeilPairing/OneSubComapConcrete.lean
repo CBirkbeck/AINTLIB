@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.AdditionPullback.SamePlace
-import HasseWeil.HasseBound.WeilPairing.WallAGeometricRealization
-import HasseWeil.HasseBound.WeilPairing.PencilSeparable
+module
+
+public import HasseWeil.Foundation.AdditionPullback.SamePlace
+public import HasseWeil.HasseBound.WeilPairing.WallAGeometricRealization
+public import HasseWeil.HasseBound.WeilPairing.PencilSeparable
 
 /-!
 # The affine comap-valuation identity for the concrete `(1 − π)_{K̄}` (CoordHom-free, no `he1`)
@@ -39,6 +41,8 @@ identity to it with item (1) discharged.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.2.5–2.6, III.4.10c, III.5.5.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

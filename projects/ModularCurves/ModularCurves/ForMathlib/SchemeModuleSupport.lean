@@ -6,12 +6,14 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed
 `CoherentCohomologyFinite/ModuleSupport.lean` in Vilin97/Clawristotle.
 -/
-import Mathlib.RingTheory.Spectrum.Prime.Module
-import Mathlib.Algebra.Category.Grp.Zero
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.Abelian
-import Mathlib.Topology.Sheaves.Abelian
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
-import ModularCurves.ForMathlib.SchemeModuleSheaf
+module
+
+public import Mathlib.RingTheory.Spectrum.Prime.Module
+public import Mathlib.Algebra.Category.Grp.Zero
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.Abelian
+public import Mathlib.Topology.Sheaves.Abelian
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+public import ModularCurves.ForMathlib.SchemeModuleSheaf
 
 /-!
 # Support of a finite-type quasicoherent module
@@ -19,6 +21,8 @@ import ModularCurves.ForMathlib.SchemeModuleSheaf
 The nonzero-stalk locus of a finite-type quasicoherent module is closed. This file packages
 that locus as a closed subset and records its behavior in short exact sequences.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 

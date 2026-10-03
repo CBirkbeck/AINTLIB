@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.FinitePresentationAwayMap
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationAwayMap
 
 /-!
 # Synchronizing finite families of principal-localization maps
@@ -7,6 +9,10 @@ Bijectivity of canonical away maps persists under later spread transitions.
 Consequently finitely many such maps between varying spread models can be
 realized at one common stage.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

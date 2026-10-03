@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-DEV1b (finite free resolutions).
 -/
-import Mathlib.RingTheory.Noetherian.Basic
+module
+
+public import Mathlib.RingTheory.Noetherian.Basic
 
 /-!
 # Finite free resolutions over a Noetherian ring (Stacks Tag 00LP)
@@ -53,6 +55,8 @@ syzygy finiteness above.
 
 * [Stacks Tag 00LP](https://stacks.math.columbia.edu/tag/00LP)
 -/
+
+@[expose] public section
 
 open Function
 

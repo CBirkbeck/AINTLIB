@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Measure.MahlerTransform
-import PadicLFunctions.MeasureR.Basic
-import Mathlib.RingTheory.PowerSeries.Binomial
+module
+
+public import PadicLFunctions.Measure.MahlerTransform
+public import PadicLFunctions.MeasureR.Basic
+public import Mathlib.RingTheory.PowerSeries.Binomial
 
 /-!
 # The Mahler transform over the integer ring of a nonarchimedean field
@@ -24,6 +26,8 @@ of `PadicLFunctions/Measure/MahlerTransform.lean` (see the TW2 replan note).
 * `MeasureR.ofPowerSeries` — the inverse.
 * `MeasureR.mahlerLinearEquiv` — RJW Thm 3.20 over `R`, linear part.
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 open PowerSeries

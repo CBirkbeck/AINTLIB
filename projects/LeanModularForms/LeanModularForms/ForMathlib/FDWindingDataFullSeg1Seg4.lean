@@ -3,17 +3,19 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.ArcFTCAtI
-import LeanModularForms.ForMathlib.ArcGenericFTCProvider
-import LeanModularForms.ForMathlib.CornerFTCAtRho
-import LeanModularForms.ForMathlib.CrossingAtI
-import LeanModularForms.ForMathlib.CrossingAtRho
-import LeanModularForms.ForMathlib.FDWindingDataFullAssembly
-import LeanModularForms.ForMathlib.InteriorContourIntegral
-import LeanModularForms.ForMathlib.PVChainProof
-import LeanModularForms.ForMathlib.Seg1FTCProvider
-import LeanModularForms.ForMathlib.Seg4FTCProvider
-import LeanModularForms.ForMathlib.WindingWeightsUnconditional
+module
+
+public import LeanModularForms.ForMathlib.ArcFTCAtI
+public import LeanModularForms.ForMathlib.ArcGenericFTCProvider
+public import LeanModularForms.ForMathlib.CornerFTCAtRho
+public import LeanModularForms.ForMathlib.CrossingAtI
+public import LeanModularForms.ForMathlib.CrossingAtRho
+public import LeanModularForms.ForMathlib.FDWindingDataFullAssembly
+public import LeanModularForms.ForMathlib.InteriorContourIntegral
+public import LeanModularForms.ForMathlib.PVChainProof
+public import LeanModularForms.ForMathlib.Seg1FTCProvider
+public import LeanModularForms.ForMathlib.Seg4FTCProvider
+public import LeanModularForms.ForMathlib.WindingWeightsUnconditional
 
 /-!
 # `FDWindingDataFull` from all three FTC providers (fully unconditional)
@@ -30,6 +32,10 @@ This file plugs the now-unconditional seg1, seg4, and arc FTC providers into
 * `mkFDWindingDataFull_seg1seg4_unconditional` — legacy version still
   taking an arc FTC provider as hypothesis.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups

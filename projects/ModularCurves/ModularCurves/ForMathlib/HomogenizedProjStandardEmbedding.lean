@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.HomogeneousProjReindex
+module
+
+public import ModularCurves.ForMathlib.HomogeneousProjReindex
 
 /-!
 # Standard projective embeddings of homogenized closures
@@ -13,6 +15,8 @@ import ModularCurves.ForMathlib.HomogeneousProjReindex
 A homogenized presentation in `Fin n` affine variables is naturally a closed subscheme of
 projective space with `Fin (n+1)` homogeneous coordinates.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

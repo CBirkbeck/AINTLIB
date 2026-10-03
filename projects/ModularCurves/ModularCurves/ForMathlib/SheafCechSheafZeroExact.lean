@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SheafCechSheafAugmentation
+module
+
+public import ModularCurves.ForMathlib.SheafCechSheafAugmentation
 
 /-!
 # Degree-zero exactness of the sheaf-level Cech complex
@@ -8,6 +10,10 @@ degree zero when the chosen opens cover the whole space. The proof first contrac
 over any open contained in one cover member, then applies this local result to stalk
 representatives.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

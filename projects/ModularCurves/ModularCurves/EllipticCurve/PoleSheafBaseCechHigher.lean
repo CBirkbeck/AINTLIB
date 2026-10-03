@@ -1,9 +1,11 @@
-import ModularCurves.EllipticCurve.PoleSheafBaseCechHOne
-import ModularCurves.EllipticCurve.PoleSheafBaseCechFlat
-import ModularCurves.ForMathlib.AcyclicAffineCechComparison
-import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
-import ModularCurves.ForMathlib.AffineFieldPointTower
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafBaseCechHOne
+public import ModularCurves.EllipticCurve.PoleSheafBaseCechFlat
+public import ModularCurves.ForMathlib.AcyclicAffineCechComparison
+public import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
+public import ModularCurves.ForMathlib.AffineFieldPointTower
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 
 /-!
 # Higher base-linear Cech exactness for pole sheaves
@@ -11,6 +13,8 @@ import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 Prove exactness in every positive degree after extending the base-linear Cech
 complex of a pole sheaf to a residue field.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TensorProduct TopologicalSpace
 

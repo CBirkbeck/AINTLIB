@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.FinitePresentationBaseChangeEquiv
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationBaseChangeEquiv
 
 /-!
 # Compact opens over filtered colimits
@@ -13,6 +15,8 @@ import ModularCurves.ForMathlib.FinitePresentationBaseChangeEquiv
 A compact open in a finitely presented affine scheme whose scalar extension is clopen
 is already clopen after scalar extension to one later stage.
 -/
+
+@[expose] public section
 
 open TensorProduct TopologicalSpace
 

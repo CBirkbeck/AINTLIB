@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.ValenceFormulaBridged
+module
+
+public import LeanModularForms.ForMathlib.ValenceFormulaBridged
 
 /-!
 # The Valence Formula — Final Unconditional Theorem
@@ -44,6 +46,8 @@ When these components are PR'd to mathlib, this file becomes a one-line invocati
 * Diamond–Shurman, *A First Course in Modular Forms*, Theorem 3.1.1
 * Hungerbühler–Wasem, *A generalized notion of winding numbers*, arXiv:1808.00997v2
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups

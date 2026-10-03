@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.TorsionModule
+module
+
+public import HasseWeil.HasseBound.WeilPairing.TorsionModule
 
 /-!
 # The `ℓⁿ`-torsion `E[ℓⁿ]` — cardinality and `ZMod (ℓⁿ)`-module structure
@@ -23,6 +25,8 @@ No new geometry: everything is the prime-`ℓ` development re-run at the integer
 Reference: Silverman, *The Arithmetic of Elliptic Curves* (2nd ed), §III.7, p. 87
 ("each `E[ℓⁿ]` is a `ℤ/ℓⁿℤ`-module") and III.6.4(b) (`#E[m] = m²`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

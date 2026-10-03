@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodMap
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleMFinite
-import LeanModularForms.Modularforms.PeterssonLevelN
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodMap
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleMFinite
+public import LeanModularForms.Modularforms.PeterssonLevelN
 
 /-!
 # The `Γ₁(N)` fundamental-domain boundary as a `Γ`-paired-edge cycle (ES-4 leaf L2)
@@ -70,6 +72,8 @@ contributions `divDiff (γ • c) c`, which are exactly Shimura's boundary symbo
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §8.2, (8.2.22).
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.4 (Manin symbols / side pairings).
 -/
+
+@[expose] public section
 
 noncomputable section
 

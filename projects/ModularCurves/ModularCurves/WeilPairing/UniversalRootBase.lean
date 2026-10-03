@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
-import Mathlib.RingTheory.Localization.FractionRing
+module
+
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+public import Mathlib.RingTheory.Localization.FractionRing
 
 /-!
 # Roots of unity descend to an integrally closed ring (WP-A7.2)
@@ -18,6 +20,8 @@ That last step is this file's lemma, and it is general-purpose: an `N`-th root o
 the fraction field of an integrally closed domain is a root of the monic `X ^ N - 1`, hence
 integral, hence in the ring.
 -/
+
+@[expose] public section
 
 universe u v
 

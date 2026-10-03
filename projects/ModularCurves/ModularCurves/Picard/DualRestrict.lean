@@ -1,4 +1,8 @@
-import ModularCurves.Picard.Dual
+module
+
+public import ModularCurves.Picard.Dual
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite
 

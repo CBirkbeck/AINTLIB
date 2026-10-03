@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Tilting
+module
+
+public import «Adic spaces».Tilting
 
 /-!
 # Nonarchimedean Scottish Book — Problem 22
@@ -34,6 +36,8 @@ The "tilted morphism" is stated existentially since constructing the functorial 
 morphism requires establishing that the tilt operation is functorial on the ring of
 power-bounded elements.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

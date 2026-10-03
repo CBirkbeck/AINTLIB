@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.PadicL.Prop812
+module
+
+public import BernoulliRegular.FLT37.PadicL.Prop812
 
 /-!
 # B-C1.1′ — `L_p(1, ω^i)` via Washington Theorem 5.18 and the valuation of `log_p`-sums
@@ -61,6 +63,10 @@ Combining (★) with (LogBernoulli) gives `v(LpValue i) = v_p(B_i / i)`, hence t
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83,
   Thm 5.18 (pp. 63–66), Cor 5.13, Prop 6.13, Prop 8.12.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

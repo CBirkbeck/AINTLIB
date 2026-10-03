@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.VerschiebungFactorization
-import HasseWeil.HasseBound.WeilPairing.PencilDualDivisor
-import HasseWeil.Isogeny.SeparableWitnessReductions
-import HasseWeil.HasseBound.WeilPairing.OmegaBaseChange
+module
+
+public import HasseWeil.Isogeny.VerschiebungFactorization
+public import HasseWeil.HasseBound.WeilPairing.PencilDualDivisor
+public import HasseWeil.Isogeny.SeparableWitnessReductions
+public import HasseWeil.HasseBound.WeilPairing.OmegaBaseChange
 
 /-!
 # Separability of the base-changed pencil `(rπ − s)_{K̄}` (Silverman III.5.5)
@@ -41,6 +43,8 @@ the differential analogue of the **degree** base change `baseChangePullback_finr
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.5.2, III.5.3, III.5.5.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

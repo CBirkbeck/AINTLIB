@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.IntegralClosure
-import HasseWeil.Foundation.Curves.Ramification.RamificationFinite
-import Mathlib.RingTheory.DedekindDomain.Dvr
-import Mathlib.RingTheory.Localization.LocalizationLocalization
+module
+
+public import HasseWeil.Foundation.Curves.IntegralClosure
+public import HasseWeil.Foundation.Curves.Ramification.RamificationFinite
+public import Mathlib.RingTheory.DedekindDomain.Dvr
+public import Mathlib.RingTheory.Localization.LocalizationLocalization
 
 /-!
 # Good affine loci on a smooth plane curve and finiteness of the ramified locus
@@ -48,6 +50,8 @@ Similarly the compatible `Af`-algebra structure on `C₁.FunctionField` is suppl
 `Af → C₂.FunctionField → C₁.FunctionField`; see the precise list at the end of the
 module docstring of this file's `Extension` section.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves.GoodAffineLocus
 

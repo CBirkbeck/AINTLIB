@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.Pairing
-import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
-import HasseWeil.HasseBound.WeilPairing.FrobeniusFunctionFieldEquiv
-import HasseWeil.HasseBound.WeilPairing.FrobeniusDivisorGalois
-import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
-import HasseWeil.HasseBound.WeilPairing.FrobeniusConjugation
+module
+
+public import HasseWeil.HasseBound.WeilPairing.Pairing
+public import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
+public import HasseWeil.HasseBound.WeilPairing.FrobeniusFunctionFieldEquiv
+public import HasseWeil.HasseBound.WeilPairing.FrobeniusDivisorGalois
+public import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
+public import HasseWeil.HasseBound.WeilPairing.FrobeniusConjugation
 
 /-!
 # Galois equivariance of the Weil pairing (Silverman III.8.1d), the algebra core
@@ -55,6 +57,8 @@ Galois-descent `div(σ g_T) = [ℓ]^*(σ T) − [ℓ]^*(O) = div(g_{σ T})`.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.8.1 (Prop 8.1d, Galois equivariance).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

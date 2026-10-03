@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.TranslationOrd
+module
+
+public import HasseWeil.Foundation.EC.TranslationOrd
 
 /-!
 # `Affine.Point.map` is a group homomorphism (named API + specialisations)
@@ -43,6 +45,8 @@ between arbitrary commutative base rings and is unrelated to the algebra-hom bun
 
 * [J Silverman, *The Arithmetic of Elliptic Curves*][silverman2009], III.4.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

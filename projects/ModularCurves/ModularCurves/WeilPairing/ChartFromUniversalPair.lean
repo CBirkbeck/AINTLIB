@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.TheoremOfSquareBaseChange
+module
+
+public import ModularCurves.WeilPairing.TheoremOfSquareBaseChange
 
 /-!
 # Weierstrass charts as base changes of the universal pair (B3-step5a)
@@ -68,6 +70,8 @@ carries the third section to the `mulModelHom`-sum of the first two, i.e. that i
 isomorphism. That is not attempted here; its arbitrary-base primitive is
 `isMonHom_of_pointedIso_records` (`EllipticCurve/RecordGroupUnique.lean`, proved).
 -/
+
+@[expose] public section
 
 universe u
 

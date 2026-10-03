@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SheafCechFlasqueTerms
-import ModularCurves.ForMathlib.SheafCechGlobalSections
+module
+
+public import ModularCurves.ForMathlib.SheafCechFlasqueTerms
+public import ModularCurves.ForMathlib.SheafCechGlobalSections
 
 /-!
 # Degree-one Cech acyclicity for flasque sheaves
@@ -9,6 +11,10 @@ The proof factors the first Cech differential through the cycle sheaf, uses the
 sheaf-level Cech resolution to obtain a short exact sequence with the original sheaf as
 kernel, and then applies global section lifting for a flasque kernel.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

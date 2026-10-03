@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornC1StrongSupplierBridge
-import «Adic spaces».WedhornBaseSpaFinalBridgeStrong
-import «Adic spaces».TateAcyclicityFinalAssembly
+module
+
+public import «Adic spaces».WedhornC1StrongSupplierBridge
+public import «Adic spaces».WedhornBaseSpaFinalBridgeStrong
+public import «Adic spaces».TateAcyclicityFinalAssembly
 
 /-!
 # Wedhorn 8.34(ii) — Part 2 consumer of `C1SupplierStrong_local C` (T063)
@@ -94,6 +96,8 @@ assembly.
 * The deliverable substantively composes three accepted bridges; the
   proof is mechanical composition of theorem applications.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

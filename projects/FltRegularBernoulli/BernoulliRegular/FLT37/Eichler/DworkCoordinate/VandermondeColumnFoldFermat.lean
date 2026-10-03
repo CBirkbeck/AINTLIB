@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.Level71NormalizedUnitCoordSecondOrder
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.Level71NormalizedUnitCoordSecondOrder
 
 /-!
 # Fermat Fold for the Degree-`68` Dwork Column

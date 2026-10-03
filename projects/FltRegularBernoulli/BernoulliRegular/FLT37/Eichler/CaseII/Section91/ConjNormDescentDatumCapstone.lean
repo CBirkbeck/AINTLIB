@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescendedEquationIntegerLift
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescentEquationPackaging
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescendedEquationIntegerLift
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescentEquationPackaging
 
 /-!
 # Descended free-content datum from the factor equations

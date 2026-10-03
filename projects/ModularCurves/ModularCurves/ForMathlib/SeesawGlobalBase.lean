@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.Seesaw
+module
+
+public import ModularCurves.ForMathlib.Seesaw
 
 /-!
 # The seesaw theorem over an arbitrary base (`KM-SEESAW-GLOBAL`, T8b)
@@ -65,6 +67,8 @@ over all opens is strictly more uniform and costs the consumer nothing: for a re
 `Picard/SelfAdjointN.lean`'s `exists_invertible_tensor_idealModule_add`, the single classical leaf
 under `(★)`/`(★′)` and hence under the Katz–Mazur construction of the relative Weil pairing (DS4).
 -/
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry Limits TopologicalSpace
 open AlgebraicGeometry.Scheme.Modules

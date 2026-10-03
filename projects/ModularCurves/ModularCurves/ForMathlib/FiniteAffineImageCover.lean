@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.FiniteAffineOpenCover
-import ModularCurves.ForMathlib.SchemeTheoreticImage
+module
+
+public import ModularCurves.ForMathlib.FiniteAffineOpenCover
+public import ModularCurves.ForMathlib.SchemeTheoreticImage
 
 /-!
 # Finite affine covers of scheme-theoretic images
@@ -15,6 +17,8 @@ This file replaces a scheme by the scheme-theoretic image of the common intersec
 affine open cover. The pulled-back affine opens still cover the image, and the common open maps
 scheme-theoretically dominantly into it.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

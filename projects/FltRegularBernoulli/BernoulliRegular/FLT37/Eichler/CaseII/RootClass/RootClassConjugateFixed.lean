@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassTrivialOverRealData
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassTrivialOverRealData
 
 /-!
 # [FLT37-CASEII-REAL-ROOTCLASS-CONJFIXED] The genuinely-true Case-II II1 residual
@@ -50,6 +52,8 @@ It imports `CaseIIRealAnchoredClass.lean` (reusing its proven ideal/class machin
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, GTM 83, §9.1 (Lemma 9.1, Lemma 9.2), Thm 9.4.
 -/
+
+set_option backward.privateInPublic true
 
 @[expose] public section
 

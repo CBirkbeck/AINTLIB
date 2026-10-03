@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.IntSolutionToRealDatum
-import BernoulliRegular.FLT37.Eichler.FLT37CaseIWired
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.IntSolutionToRealDatum
+public import BernoulliRegular.FLT37.Eichler.FLT37CaseIWired
 
 /-!
 # [FLT37-CASEII-II1-REROUTE] The genuine single-root linear-measure Case-II descent

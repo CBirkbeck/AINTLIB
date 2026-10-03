@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.UnscaledCoordDeg32SliceDecomposition
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68OnwardCorrectionDischarge
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.UnscaledCoordDeg32SliceDecomposition
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68OnwardCorrectionDischarge
 
 /-!
 # The deg-`≠32,68` slice-vanishing: the `varpi^{32}` Dwork power-basis fold (mod `37²`)

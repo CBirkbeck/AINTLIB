@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.Lemma98RealData
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.GammaRatioPthPowerProven
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AssumptionIIFromR3
-import BernoulliRegular.FLT37.Eichler.FLT37GenuineResiduals
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.Lemma98RealData
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.GammaRatioPthPowerProven
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AssumptionIIFromR3
+public import BernoulliRegular.FLT37.Eichler.FLT37GenuineResiduals
 
 /-!
 # Washington Lemma 9.9 opening: the §9.1 descent ratio is a `37`-th power mod `𝔩` (route (a))

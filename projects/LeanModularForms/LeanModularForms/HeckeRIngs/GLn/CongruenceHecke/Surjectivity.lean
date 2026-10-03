@@ -3,7 +3,9 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GLn.CongruenceHecke.DegreeCombinatorics
+module
+
+public import LeanModularForms.HeckeRIngs.GLn.CongruenceHecke.DegreeCombinatorics
 
 /-!
 # Hecke Ring for Congruence Subgroups (Shimura §3.3) — Surjectivity (Theorem 3.35)
@@ -20,6 +22,10 @@ and the `ψ`-range computations.
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.3
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Pointwise Matrix.SpecialLinearGroup
 

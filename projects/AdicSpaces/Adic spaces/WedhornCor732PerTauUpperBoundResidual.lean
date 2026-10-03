@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornCor732ChainIdentityFromLocalizedOutput
-import «Adic spaces».WedhornPointwiseClearingFromLocalizedCor732
+module
+
+public import «Adic spaces».WedhornCor732ChainIdentityFromLocalizedOutput
+public import «Adic spaces».WedhornPointwiseClearingFromLocalizedCor732
 
 /-!
 # Wedhorn 8.34(ii) — Per-τ upper-bound residual from localized Cor 7.32 arithmetic (T087)
@@ -89,6 +91,8 @@ universal-Spa claims, no global lower bound.
 * All declarations are fully proven, depend only on the standard Lean
   kernel postulates, and avoid native compilation and unchecked tactics.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

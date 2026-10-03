@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPerPieceLaurentCoverAssembly
-import «Adic spaces».WedhornPerPieceLaurentC1Supplier
-import «Adic spaces».WedhornStrengthenedC1
+module
+
+public import «Adic spaces».WedhornPerPieceLaurentCoverAssembly
+public import «Adic spaces».WedhornPerPieceLaurentC1Supplier
+public import «Adic spaces».WedhornStrengthenedC1
 
 /-!
 # Wedhorn 8.34(ii) — Final-closure bridge from T056/T057 to `C1SupplierStrong_local` (T061)
@@ -125,6 +127,8 @@ explicit by routing through T057's already-landed structured blocker.
   input; it does **not** prove the Lemma 8.33 multi-piece collapse
   itself (that is the named residual `h_lemma833`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

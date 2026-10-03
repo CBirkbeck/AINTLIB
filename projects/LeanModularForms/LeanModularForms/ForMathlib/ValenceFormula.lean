@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.BigOperators.Finprod
-import LeanModularForms.ForMathlib.CanonicalReps
+module
+
+public import Mathlib.Algebra.BigOperators.Finprod
+public import LeanModularForms.ForMathlib.CanonicalReps
 
 /-!
 # The Valence Formula for Modular Forms
@@ -31,6 +33,8 @@ $$\operatorname{ord}_\infty(f) + \tfrac{1}{2}\operatorname{ord}_i(f)
 * `valence_formula_textbook_orbit_finsum` — the valence formula in literal orbit-sum form,
   conditional on the core identity (supplied as the hypothesis `h_core`)
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups

@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.Filtration
-import Mathlib.RingTheory.AdicCompletion.Topology
-import Mathlib.RingTheory.Ideal.Quotient.Noetherian
-import «Adic spaces».GeometricSeries
+module
+
+public import Mathlib.RingTheory.Filtration
+public import Mathlib.RingTheory.AdicCompletion.Topology
+public import Mathlib.RingTheory.Ideal.Quotient.Noetherian
+public import «Adic spaces».GeometricSeries
 
 /-!
 # Closedness of Ideals in the I-adic Topology
@@ -33,6 +35,8 @@ This is a topological consequence of Artin–Rees / Krull (Stacks 00IN / 00IP).
 Used downstream by the Tate-acyclicity `coeRingHom_preserves_proper` chain
 (`Cor832.lean`).
 -/
+
+@[expose] public section
 
 open Topology
 

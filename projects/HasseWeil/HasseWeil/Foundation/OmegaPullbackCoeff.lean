@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.FormalGroupCorrespondence
-import HasseWeil.Foundation.Auxiliary.DiffQuotientRule
-import HasseWeil.Foundation.WronskianAux
-import Mathlib.Algebra.Polynomial.Derivation
+module
+
+public import HasseWeil.FormalGroup.FormalGroupCorrespondence
+public import HasseWeil.Foundation.Auxiliary.DiffQuotientRule
+public import HasseWeil.Foundation.WronskianAux
+public import Mathlib.Algebra.Polynomial.Derivation
 
 /-!
 # The Omega-Based Pullback Coefficient
@@ -37,6 +39,8 @@ The pullback coefficient is this `c`.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.1.5, III.5
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

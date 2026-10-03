@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.RegularIndexEigenspaceCollapse
-import BernoulliRegular.FLT37.Eichler.HerbrandBoundAnalytic
-import Mathlib.LinearAlgebra.SModEq.Pow
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.RegularIndexEigenspaceCollapse
+public import BernoulliRegular.FLT37.Eichler.HerbrandBoundAnalytic
+public import Mathlib.LinearAlgebra.SModEq.Pow
 
 /-!
 # Washington Corollary 8.23 / Theorem 9.4 for `p = 37`: the **second-order** ω³²-collapse

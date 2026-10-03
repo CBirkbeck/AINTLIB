@@ -1,161 +1,163 @@
-import «Adic spaces».AdicCompletionBridge
-import «Adic spaces».AdicCompletionFaithfullyFlat
-import «Adic spaces».AdicCompletionNoetherian
-import «Adic spaces».AdicCompletionTransfer
-import «Adic spaces».CompletionLocalization
-import «Adic spaces».PresheafAdicCompletion
-import «Adic spaces».AdicConvergence
-import «Adic spaces».ArtinReesConvergence
-import «Adic spaces».AdicMorphisms
-import «Adic spaces».AdicSpectrum
-import «Adic spaces».AlmostMathematics
-import «Adic spaces».CechCohomology
-import «Adic spaces».AnalyticPoints
-import «Adic spaces».AffinoidRings
-import «Adic spaces».Basic
-import «Adic spaces».BivariateContinuity
-import «Adic spaces».Bounded
-import «Adic spaces».CoherentRing
-import «Adic spaces».CompletedAlgClosure
-import «Adic spaces».CompletionExact
-import «Adic spaces».CompletedResidueField
-import «Adic spaces».CompleteTopCommRingCat
-import «Adic spaces».ContinuousValuations
-import «Adic spaces».Cor732
-import «Adic spaces».Cor832
-import «Adic spaces».EmbeddingTopo
-import «Adic spaces».ExcellentRing
-import «Adic spaces».FarguesFontaine
-import «Adic spaces».FlatnessResults
-import «Adic spaces».GeometricReduction
-import «Adic spaces».GeometricSeries
-import «Adic spaces».HubnerSeparation
-import «Adic spaces».HuberRings
-import «Adic spaces».PrimeExtensionClosed
-import «Adic spaces».QuotientTate
-import «Adic spaces».IdealClosedness
-import «Adic spaces».IdealLocalization
-import «Adic spaces».IdealLocalizationCompletion
-import «Adic spaces».IntegralStructureSheaf
-import «Adic spaces».Example638
-import «Adic spaces».IteratedOverlapEquiv
-import «Adic spaces».IteratedRational
-import «Adic spaces».LaurentBaireSupport
-import «Adic spaces».LaurentCoverExact
-import «Adic spaces».LaurentCoverTopology
-import «Adic spaces».LaneAReverseRoundTrip
-import «Adic spaces».LaurentMinusNormalized
-import «Adic spaces».LaurentOverlap
-import «Adic spaces».LaurentOverlapConsumer
-import «Adic spaces».LaurentRefinementCore
-import «Adic spaces».LaurentRefinementAcyclic
-import «Adic spaces».Lemma745
-import «Adic spaces».LocalBasis
-import «Adic spaces».LocalizationTopology
-import «Adic spaces».NoetherianTateModules
-import «Adic spaces».OpenIdeals
-import «Adic spaces».OpenMapping
-import «Adic spaces».OrderedGroupConvex
-import «Adic spaces».PerfectoidRing
-import «Adic spaces».PerfectoidSpace
-import «Adic spaces».Presheaf
-import «Adic spaces».PresheafIdentification
-import «Adic spaces».Prop752
-import «Adic spaces».PresheafTateStructure
-import «Adic spaces».PseudoUniformizer
-import «Adic spaces».RationalRefinement
-import «Adic spaces».RationalSubsets
-import «Adic spaces».RelativeRationalLocData
-import «Adic spaces».RestrictionFlatness
-import «Adic spaces».LaurentRefinement
-import «Adic spaces».LaurentRefinementTree
-import «Adic spaces».LaurentSeparationPresheaf
-import «Adic spaces».RestrictedPowerSeries
-import «Adic spaces».RestrictedModule
-import «Adic spaces».SeminormalRing
-import «Adic spaces».CharacteristicSubgroup
-import «Adic spaces».SpaCompact
-import «Adic spaces».SpaCompactNoHArch
-import «Adic spaces».SpvAI
-import «Adic spaces».SpvAITopology
-import «Adic spaces».SpvCompletionExtension
-import «Adic spaces».StandardCover
-import «Adic spaces».StructureSheaf
-import «Adic spaces».TateAcyclicity
-import «Adic spaces».TateAcyclicityFinalAssembly
-import «Adic spaces».TateAcyclicityResiduals
-import «Adic spaces».TateAlgebra
-import «Adic spaces».TateAlgebraTopology
-import «Adic spaces».TateAlgebraWedhorn
-import «Adic spaces».MvTateAlgebraTopology
-import «Adic spaces».Wedhorn834C1SupplierLocalInterface
-import «Adic spaces».WedhornC1StrongSupplierCore
-import «Adic spaces».WedhornC1SupplierLaurentAssembly
-import «Adic spaces».WedhornCechAcyclicity
-import «Adic spaces».Tilting
-import «Adic spaces».Uniform
-import «Adic spaces».UniformBanach
-import «Adic spaces».ValuationAction
-import «Adic spaces».ValuationCoarsening
-import «Adic spaces».ValuationContinuity
-import «Adic spaces».ValuationPrimeConvex
-import «Adic spaces».ValuationSpectrum
-import «Adic spaces».ValuationSpectrumCompact
-import «Adic spaces».ValuativeRel.Comap
-import «Adic spaces».WedhornCor732PerTauUpperBoundResidual
-import «Adic spaces».WedhornDenominatorClearedCandidate
-import «Adic spaces».WedhornFinalPart2PointwiseClearingThreading
-import «Adic spaces».WedhornFinalPart2SigmaPowerThreading
-import «Adic spaces».WedhornFinalPart2SigmaSupplierThreading
-import «Adic spaces».WedhornMPowerStructuralDataHonestFromCor732
-import «Adic spaces».WedhornSourceLaurentMembershipInLocalizationBase
-import «Adic spaces».WedhornValueGroupLocalizationStrictMono
-import «Adic spaces».WittVectorPrimitive
+module
+
+public import «Adic spaces».AdicCompletionBridge
+public import «Adic spaces».AdicCompletionFaithfullyFlat
+public import «Adic spaces».AdicCompletionNoetherian
+public import «Adic spaces».AdicCompletionTransfer
+public import «Adic spaces».CompletionLocalization
+public import «Adic spaces».PresheafAdicCompletion
+public import «Adic spaces».AdicConvergence
+public import «Adic spaces».ArtinReesConvergence
+public import «Adic spaces».AdicMorphisms
+public import «Adic spaces».AdicSpectrum
+public import «Adic spaces».AlmostMathematics
+public import «Adic spaces».CechCohomology
+public import «Adic spaces».AnalyticPoints
+public import «Adic spaces».AffinoidRings
+public import «Adic spaces».Basic
+public import «Adic spaces».BivariateContinuity
+public import «Adic spaces».Bounded
+public import «Adic spaces».CoherentRing
+public import «Adic spaces».CompletedAlgClosure
+public import «Adic spaces».CompletionExact
+public import «Adic spaces».CompletedResidueField
+public import «Adic spaces».CompleteTopCommRingCat
+public import «Adic spaces».ContinuousValuations
+public import «Adic spaces».Cor732
+public import «Adic spaces».Cor832
+public import «Adic spaces».EmbeddingTopo
+public import «Adic spaces».ExcellentRing
+public import «Adic spaces».FarguesFontaine
+public import «Adic spaces».FlatnessResults
+public import «Adic spaces».GeometricReduction
+public import «Adic spaces».GeometricSeries
+public import «Adic spaces».HubnerSeparation
+public import «Adic spaces».HuberRings
+public import «Adic spaces».PrimeExtensionClosed
+public import «Adic spaces».QuotientTate
+public import «Adic spaces».IdealClosedness
+public import «Adic spaces».IdealLocalization
+public import «Adic spaces».IdealLocalizationCompletion
+public import «Adic spaces».IntegralStructureSheaf
+public import «Adic spaces».Example638
+public import «Adic spaces».IteratedOverlapEquiv
+public import «Adic spaces».IteratedRational
+public import «Adic spaces».LaurentBaireSupport
+public import «Adic spaces».LaurentCoverExact
+public import «Adic spaces».LaurentCoverTopology
+public import «Adic spaces».LaneAReverseRoundTrip
+public import «Adic spaces».LaurentMinusNormalized
+public import «Adic spaces».LaurentOverlap
+public import «Adic spaces».LaurentOverlapConsumer
+public import «Adic spaces».LaurentRefinementCore
+public import «Adic spaces».LaurentRefinementAcyclic
+public import «Adic spaces».Lemma745
+public import «Adic spaces».LocalBasis
+public import «Adic spaces».LocalizationTopology
+public import «Adic spaces».NoetherianTateModules
+public import «Adic spaces».OpenIdeals
+public import «Adic spaces».OpenMapping
+public import «Adic spaces».OrderedGroupConvex
+public import «Adic spaces».PerfectoidRing
+public import «Adic spaces».PerfectoidSpace
+public import «Adic spaces».Presheaf
+public import «Adic spaces».PresheafIdentification
+public import «Adic spaces».Prop752
+public import «Adic spaces».PresheafTateStructure
+public import «Adic spaces».PseudoUniformizer
+public import «Adic spaces».RationalRefinement
+public import «Adic spaces».RationalSubsets
+public import «Adic spaces».RelativeRationalLocData
+public import «Adic spaces».RestrictionFlatness
+public import «Adic spaces».LaurentRefinement
+public import «Adic spaces».LaurentRefinementTree
+public import «Adic spaces».LaurentSeparationPresheaf
+public import «Adic spaces».RestrictedPowerSeries
+public import «Adic spaces».RestrictedModule
+public import «Adic spaces».SeminormalRing
+public import «Adic spaces».CharacteristicSubgroup
+public import «Adic spaces».SpaCompact
+public import «Adic spaces».SpaCompactNoHArch
+public import «Adic spaces».SpvAI
+public import «Adic spaces».SpvAITopology
+public import «Adic spaces».SpvCompletionExtension
+public import «Adic spaces».StandardCover
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».TateAcyclicity
+public import «Adic spaces».TateAcyclicityFinalAssembly
+public import «Adic spaces».TateAcyclicityResiduals
+public import «Adic spaces».TateAlgebra
+public import «Adic spaces».TateAlgebraTopology
+public import «Adic spaces».TateAlgebraWedhorn
+public import «Adic spaces».MvTateAlgebraTopology
+public import «Adic spaces».Wedhorn834C1SupplierLocalInterface
+public import «Adic spaces».WedhornC1StrongSupplierCore
+public import «Adic spaces».WedhornC1SupplierLaurentAssembly
+public import «Adic spaces».WedhornCechAcyclicity
+public import «Adic spaces».Tilting
+public import «Adic spaces».Uniform
+public import «Adic spaces».UniformBanach
+public import «Adic spaces».ValuationAction
+public import «Adic spaces».ValuationCoarsening
+public import «Adic spaces».ValuationContinuity
+public import «Adic spaces».ValuationPrimeConvex
+public import «Adic spaces».ValuationSpectrum
+public import «Adic spaces».ValuationSpectrumCompact
+public import «Adic spaces».ValuativeRel.Comap
+public import «Adic spaces».WedhornCor732PerTauUpperBoundResidual
+public import «Adic spaces».WedhornDenominatorClearedCandidate
+public import «Adic spaces».WedhornFinalPart2PointwiseClearingThreading
+public import «Adic spaces».WedhornFinalPart2SigmaPowerThreading
+public import «Adic spaces».WedhornFinalPart2SigmaSupplierThreading
+public import «Adic spaces».WedhornMPowerStructuralDataHonestFromCor732
+public import «Adic spaces».WedhornSourceLaurentMembershipInLocalizationBase
+public import «Adic spaces».WedhornValueGroupLocalizationStrictMono
+public import «Adic spaces».WittVectorPrimitive
 -- Wedhorn 6.18 chain (planning skeleton, audit-pass-2 proof providers)
-import «Adic spaces».BanachOMT
-import «Adic spaces».WedhornBanachTheorem
-import «Adic spaces».WedhornStronglyNoetherian
-import «Adic spaces».AuditCleanWrappers
+public import «Adic spaces».BanachOMT
+public import «Adic spaces».WedhornBanachTheorem
+public import «Adic spaces».WedhornStronglyNoetherian
+public import «Adic spaces».AuditCleanWrappers
 -- Nonarchimedean Scottish Book (Kedlaya et al., 2015–2022)
 -- Described (docstring only, no Lean formalization yet)
-import «Adic spaces».ScottishBook.Described.Problem011
-import «Adic spaces».ScottishBook.Described.Problem016
-import «Adic spaces».ScottishBook.Described.Problem018
-import «Adic spaces».ScottishBook.Described.Problem040
+public import «Adic spaces».ScottishBook.Described.Problem011
+public import «Adic spaces».ScottishBook.Described.Problem016
+public import «Adic spaces».ScottishBook.Described.Problem018
+public import «Adic spaces».ScottishBook.Described.Problem040
 -- Stated (with sorry)
-import «Adic spaces».ScottishBook.Stated.Problem001
-import «Adic spaces».ScottishBook.Stated.Problem002
-import «Adic spaces».ScottishBook.Stated.Problem003
-import «Adic spaces».ScottishBook.Stated.Problem004
-import «Adic spaces».ScottishBook.Stated.Problem005
-import «Adic spaces».ScottishBook.Stated.Problem006
-import «Adic spaces».ScottishBook.Stated.Problem007
-import «Adic spaces».ScottishBook.Stated.Problem008
-import «Adic spaces».ScottishBook.Stated.Problem009
-import «Adic spaces».ScottishBook.Stated.Problem010
-import «Adic spaces».ScottishBook.Stated.Problem012
-import «Adic spaces».ScottishBook.Stated.Problem013
-import «Adic spaces».ScottishBook.Stated.Problem014
-import «Adic spaces».ScottishBook.Stated.Problem015
-import «Adic spaces».ScottishBook.Stated.Problem017
-import «Adic spaces».ScottishBook.Stated.Problem019
-import «Adic spaces».ScottishBook.Stated.Problem020
-import «Adic spaces».ScottishBook.Stated.Problem021
-import «Adic spaces».ScottishBook.Stated.Problem022
-import «Adic spaces».ScottishBook.Stated.Problem023
-import «Adic spaces».ScottishBook.Stated.Problem024
-import «Adic spaces».ScottishBook.Stated.Problem025
-import «Adic spaces».ScottishBook.Stated.Problem026
-import «Adic spaces».ScottishBook.Stated.Problem027
-import «Adic spaces».ScottishBook.Stated.Problem028
-import «Adic spaces».ScottishBook.Stated.Problem029
-import «Adic spaces».ScottishBook.Stated.Problem030
-import «Adic spaces».ScottishBook.Stated.Problem031
-import «Adic spaces».ScottishBook.Stated.Problem032
-import «Adic spaces».ScottishBook.Stated.Problem033
-import «Adic spaces».ScottishBook.Stated.Problem034
-import «Adic spaces».ScottishBook.Stated.Problem035
-import «Adic spaces».ScottishBook.Stated.Problem036
-import «Adic spaces».ScottishBook.Stated.Problem037
-import «Adic spaces».ScottishBook.Stated.Problem038
-import «Adic spaces».ScottishBook.Stated.Problem039
+public import «Adic spaces».ScottishBook.Stated.Problem001
+public import «Adic spaces».ScottishBook.Stated.Problem002
+public import «Adic spaces».ScottishBook.Stated.Problem003
+public import «Adic spaces».ScottishBook.Stated.Problem004
+public import «Adic spaces».ScottishBook.Stated.Problem005
+public import «Adic spaces».ScottishBook.Stated.Problem006
+public import «Adic spaces».ScottishBook.Stated.Problem007
+public import «Adic spaces».ScottishBook.Stated.Problem008
+public import «Adic spaces».ScottishBook.Stated.Problem009
+public import «Adic spaces».ScottishBook.Stated.Problem010
+public import «Adic spaces».ScottishBook.Stated.Problem012
+public import «Adic spaces».ScottishBook.Stated.Problem013
+public import «Adic spaces».ScottishBook.Stated.Problem014
+public import «Adic spaces».ScottishBook.Stated.Problem015
+public import «Adic spaces».ScottishBook.Stated.Problem017
+public import «Adic spaces».ScottishBook.Stated.Problem019
+public import «Adic spaces».ScottishBook.Stated.Problem020
+public import «Adic spaces».ScottishBook.Stated.Problem021
+public import «Adic spaces».ScottishBook.Stated.Problem022
+public import «Adic spaces».ScottishBook.Stated.Problem023
+public import «Adic spaces».ScottishBook.Stated.Problem024
+public import «Adic spaces».ScottishBook.Stated.Problem025
+public import «Adic spaces».ScottishBook.Stated.Problem026
+public import «Adic spaces».ScottishBook.Stated.Problem027
+public import «Adic spaces».ScottishBook.Stated.Problem028
+public import «Adic spaces».ScottishBook.Stated.Problem029
+public import «Adic spaces».ScottishBook.Stated.Problem030
+public import «Adic spaces».ScottishBook.Stated.Problem031
+public import «Adic spaces».ScottishBook.Stated.Problem032
+public import «Adic spaces».ScottishBook.Stated.Problem033
+public import «Adic spaces».ScottishBook.Stated.Problem034
+public import «Adic spaces».ScottishBook.Stated.Problem035
+public import «Adic spaces».ScottishBook.Stated.Problem036
+public import «Adic spaces».ScottishBook.Stated.Problem037
+public import «Adic spaces».ScottishBook.Stated.Problem038
+public import «Adic spaces».ScottishBook.Stated.Problem039

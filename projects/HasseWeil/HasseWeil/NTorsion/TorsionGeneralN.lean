@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.NTorsion.TorsionPowStructure
-import Mathlib.Data.ZMod.QuotientRing
-import Mathlib.Algebra.Module.Torsion.Basic
+module
+
+public import HasseWeil.NTorsion.TorsionPowStructure
+public import Mathlib.Data.ZMod.QuotientRing
+public import Mathlib.Algebra.Module.Torsion.Basic
 
 /-!
 # `E[N] ≅ (ZMod N)²` for general `N` — the rank-2 torsion structure via CRT
@@ -34,6 +36,8 @@ Main result:
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves* (2nd ed), §III.6 (Cor 6.4(b)).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

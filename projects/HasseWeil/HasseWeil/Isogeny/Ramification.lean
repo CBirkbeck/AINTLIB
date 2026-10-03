@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
-import HasseWeil.Isogeny.Basic
+module
+
+public import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
+public import HasseWeil.Isogeny.Basic
 
 /-!
 # The ramification-pullback formula at infinity, for isogenies (Silverman II.2.6)
@@ -40,6 +42,8 @@ discharged (`pos_ordAtInfty_pullback_uniformizer`).
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2 (ramification index),
   II.2.6 (`Σ e = deg`), III.4.10a (`e = deg_i`, separable ⟹ `e = 1`), IV.1.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

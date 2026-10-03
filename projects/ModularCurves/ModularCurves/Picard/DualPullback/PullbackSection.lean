@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.OpenAdjunction
+module
+
+public import ModularCurves.Picard.DualPullback.OpenAdjunction
 
 /-!
 # Pulling back module sections
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.OpenAdjunction
 Component formulas for isomorphisms and the pullback-adjunction unit on a top-open
 module section.
 -/
+
+@[expose] public section
 
 -- v4.33 bump: neither the category instances nor the semireducible component types are
 -- transparent enough for the steps below at `implicit` transparency.

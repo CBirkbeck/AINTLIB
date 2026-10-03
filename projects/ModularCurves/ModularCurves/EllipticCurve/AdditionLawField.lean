@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionLaw
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
+module
+
+public import ModularCurves.EllipticCurve.AdditionLaw
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
 
 /-!
 # The second Bosma–Lenstra law lands on the curve, over a field (T-W7.0c-c5α, field layer)
@@ -25,6 +27,8 @@ of `E_U ×_U E_U`) follows from this field case by evaluation at maximal ideals 
 `eq_zero_of_forall_isMaximal_mem` (proven in `AdditionLaw.lean`) — that wiring is the next
 c5α increment.
 -/
+
+@[expose] public section
 
 local notation3 "x" => (0 : Fin 3)
 

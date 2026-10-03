@@ -3,15 +3,17 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Map.BaseChange
-import HasseWeil.Foundation.Curves.Map.CurveMap
-import Mathlib.Algebra.Polynomial.Basis
-import Mathlib.FieldTheory.LinearDisjoint
-import Mathlib.RingTheory.AlgebraTower
-import Mathlib.RingTheory.Flat.Basic
-import Mathlib.RingTheory.Localization.BaseChange
-import Mathlib.RingTheory.TensorProduct.Basic
-import Mathlib.RingTheory.TensorProduct.Free
+module
+
+public import HasseWeil.Foundation.Curves.Map.BaseChange
+public import HasseWeil.Foundation.Curves.Map.CurveMap
+public import Mathlib.Algebra.Polynomial.Basis
+public import Mathlib.FieldTheory.LinearDisjoint
+public import Mathlib.RingTheory.AlgebraTower
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Localization.BaseChange
+public import Mathlib.RingTheory.TensorProduct.Basic
+public import Mathlib.RingTheory.TensorProduct.Free
 
 /-!
 # Base change of curves and curve maps
@@ -48,6 +50,8 @@ diamond that blocks synthesis of the tensor-product algebra/module structures. S
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], I.2 — base change.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 open scoped TensorProduct

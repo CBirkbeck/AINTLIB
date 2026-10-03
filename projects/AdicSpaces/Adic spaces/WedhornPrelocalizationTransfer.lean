@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».RationalSubsets
+module
+
+public import «Adic spaces».RationalSubsets
 
 /-!
 # Wedhorn 8.34(ii) pre-localisation transfer (Route B audit + first lemma)
@@ -83,6 +85,8 @@ implement that route.
 
 No Lane B / Cor 8.32 / Jacobson / faithful-flatness / T001 content.
 No new final acyclicity hypotheses. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

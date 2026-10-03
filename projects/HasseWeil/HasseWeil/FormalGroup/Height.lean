@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.CharP
-import HasseWeil.FormalGroup.Hom
-import HasseWeil.FormalGroup.OrderSubst
-import Mathlib.NumberTheory.Padics.PadicVal.Basic
-import Mathlib.RingTheory.PowerSeries.Order
+module
+
+public import HasseWeil.FormalGroup.CharP
+public import HasseWeil.FormalGroup.Hom
+public import HasseWeil.FormalGroup.OrderSubst
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+public import Mathlib.RingTheory.PowerSeries.Order
 
 /-!
 # Height of a formal group in characteristic `p` (Silverman IV.7)
@@ -42,6 +44,8 @@ the case for every nonzero formal group hom in char `p`).
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.7.
 -/
+
+@[expose] public section
 
 set_option linter.dupNamespace false
 

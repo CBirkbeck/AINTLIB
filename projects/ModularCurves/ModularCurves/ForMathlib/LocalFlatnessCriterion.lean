@@ -53,7 +53,11 @@ finite `S`-modules.  Here we prove the **`R`-substrate**: `N` is finite over `R`
 merely `R`-flat (not necessarily finite).  This is the form needed to bridge scalars to the
 `S`-algebra version; the finiteness that the residue-field core actually consumes is that of `N`.
 -/
-import Mathlib
+module
+
+public import Mathlib
+
+@[expose] public section
 
 -- v4.33 bump: neither the category instances nor the semireducible component types are
 -- transparent enough for the rewrites and instance searches below.

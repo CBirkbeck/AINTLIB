@@ -1,10 +1,14 @@
-import ModularCurves.Picard.DualPullback.UnitSquare
+module
+
+public import ModularCurves.Picard.DualPullback.UnitSquare
 
 /-!
 # Restriction of the local structure-module pullback
 
 The canonical local pullback of the structure module is compatible with shrinking opens.
 -/
+
+@[expose] public section
 
 universe u v
 

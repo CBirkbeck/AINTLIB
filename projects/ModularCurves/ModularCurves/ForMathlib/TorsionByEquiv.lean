@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.Algebra.Module.Torsion.Basic
+module
+
+public import Mathlib.Algebra.Module.Torsion.Basic
 
 /-!
 # Transport equivalences for `Submodule.torsionBy`
@@ -17,6 +19,8 @@ and identifying nested torsion conditions.
 * `Submodule.torsionByNsmulKerEquiv`: for `d ∣ N`, the `d`-killed part of the `N`-torsion
   is the `d`-torsion.
 -/
+
+@[expose] public section
 
 universe u
 

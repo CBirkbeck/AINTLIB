@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Mathlib.AlgebraicGeometry.Morphisms.Smooth
-import ModularCurves.ForMathlib.FibrewiseFinite
+module
+
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import ModularCurves.ForMathlib.FibrewiseFinite
 
 /-!
 # A smooth chart on which a finite closed subscheme has finite fibres
@@ -29,6 +31,8 @@ of the subscheme on it is a **basic** open of an affine chart of the subscheme
 a module-finite algebra, and `module_finite_tensor_of_localizationAway` applies fibre by
 fibre.
 -/
+
+@[expose] public section
 
 universe u
 

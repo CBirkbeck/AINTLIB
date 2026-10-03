@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.KummerMatrixKernelCollapse
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.GaloisEigenspaceCollapse
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.KummerMatrixKernelCollapse
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.GaloisEigenspaceCollapse
 
 /-!
 # Washington Exercise 8.11 for `p = 37`: the eigenbasis ↔ Dwork-log Vandermonde compatibility
@@ -56,6 +58,8 @@ and `c_{17} = 0` is automatic.  This is the eigenbasis ↔ Dwork-log Vandermonde
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, Exercise 8.11 (p. 166),
   §8.3 (Theorem 8.16), §9.2 Lemma 9.9 (pp. 180–181).
 -/
+
+set_option backward.privateInPublic true
 
 @[expose] public section
 

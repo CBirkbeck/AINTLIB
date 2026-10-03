@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
+module
+
+public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 
 /-!
 # Units from residue-field nonvanishing ([hArb-3], unit certificates)
@@ -13,6 +15,8 @@ image in every `κ(𝔭)` is nonzero. This is point-checkable over ARBITRARY (in
 particular non-reduced) rings, unlike equational identities; the `ℰ₃`-datum unit
 certificates (`a₃`, `3`, the B-locus) are supplied fibrewise through it.
 -/
+
+@[expose] public section
 
 namespace ModularCurves
 

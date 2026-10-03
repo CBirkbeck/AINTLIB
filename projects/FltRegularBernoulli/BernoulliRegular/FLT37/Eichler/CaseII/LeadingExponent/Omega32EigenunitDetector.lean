@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordValuationNonDegeneracy
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.EigenbasisVandermondeCompatibility
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordValuationNonDegeneracy
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.EigenbasisVandermondeCompatibility
 
 /-!
 # The `ω³²` collapse via the **eigenunit projection** `E₃₂`: the reviewer's whole-element argument,

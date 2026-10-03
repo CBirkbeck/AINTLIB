@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SheafCechSheafComplex
-import ModularCurves.ForMathlib.SheafOrderedCechSheafDifferential
+module
+
+public import ModularCurves.ForMathlib.SheafCechSheafComplex
+public import ModularCurves.ForMathlib.SheafOrderedCechSheafDifferential
 
 /-!
 # The ordered sheaf-level Cech complex
@@ -7,6 +9,10 @@ import ModularCurves.ForMathlib.SheafOrderedCechSheafDifferential
 This file proves that consecutive ordered sheaf-level Cech differentials
 compose to zero and packages them as a cochain complex.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
   TopologicalSpace Opposite

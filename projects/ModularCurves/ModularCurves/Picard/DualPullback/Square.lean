@@ -1,5 +1,7 @@
-import ModularCurves.Picard.DualPullback
-import Mathlib.CategoryTheory.Bicategory.Strict.Pseudofunctor
+module
+
+public import ModularCurves.Picard.DualPullback
+public import Mathlib.CategoryTheory.Bicategory.Strict.Pseudofunctor
 
 /-!
 # Pullback square coherence
@@ -7,6 +9,8 @@ import Mathlib.CategoryTheory.Bicategory.Strict.Pseudofunctor
 Option-free coherence lemmas for pasting pullback squares and comparing the induced
 natural isomorphisms. These are proof dependencies for pullback of sheaf duals.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Bicategory
 

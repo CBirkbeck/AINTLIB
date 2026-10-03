@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.DivisorTranslate
-import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
-import HasseWeil.HasseBound.WeilPairing.TorsionModule
+module
+
+public import HasseWeil.HasseBound.WeilPairing.DivisorTranslate
+public import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
+public import HasseWeil.HasseBound.WeilPairing.TorsionModule
 
 /-!
 # The Weil pairing `e_ℓ(S, T)` (Silverman III.8, ticket T-R2-PAIRING-DEF)
@@ -47,6 +49,8 @@ has trivial divisor, hence is a nonzero constant `e_ℓ(S, T) ∈ F`
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.8.1.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

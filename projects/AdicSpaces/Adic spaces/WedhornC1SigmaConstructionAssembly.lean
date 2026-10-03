@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPerPieceSubsetAdapterFromT056
-import «Adic spaces».WedhornPointwiseSigmaProductClearing
+module
+
+public import «Adic spaces».WedhornPerPieceSubsetAdapterFromT056
+public import «Adic spaces».WedhornPointwiseSigmaProductClearing
 
 /-!
 # Wedhorn 8.34(ii) — C1 σ-construction endgame assembly (T072)
@@ -117,6 +119,8 @@ genuinely refined relative to T067 / T069.
   Lean kernel postulates, and avoid native compilation and unchecked
   tactics.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

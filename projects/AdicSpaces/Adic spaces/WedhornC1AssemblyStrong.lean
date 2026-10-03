@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornStrengthenedC1
-import «Adic spaces».WedhornStrengthenedCompactExtraction
+module
+
+public import «Adic spaces».WedhornStrengthenedC1
+public import «Adic spaces».WedhornStrengthenedCompactExtraction
 
 /-!
 # Wedhorn Strong C1 Assembly: total `mk_S_D` with nonzero-coverage clause
@@ -47,6 +49,8 @@ coverage clause carries the third clause `¬ v.vle f 0` (i.e.,
 * `mk_S_D` is built by `Classical.dec` dispatch on `D ∈ C.covers`
   (no project-level `DecidableEq` for `RationalLocData A`); on
   out-of-cover inputs `mk_S_D D = ∅`. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

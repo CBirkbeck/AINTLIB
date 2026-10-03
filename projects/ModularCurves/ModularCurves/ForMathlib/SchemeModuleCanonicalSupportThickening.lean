@@ -6,7 +6,9 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `CanonicalSupportThickening.lean` in
 Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.FiniteSupportIdealSheafPullbackUnit
+module
+
+public import ModularCurves.ForMathlib.FiniteSupportIdealSheafPullbackUnit
 
 /-!
 # Canonical closed thickenings of scheme-module support
@@ -16,6 +18,8 @@ power of the vanishing ideal of its closed stalk support annihilates the
 module scheme-theoretically. This file packages the resulting closed
 thickening and the pullback-pushforward comparison isomorphism.
 -/
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace
 

@@ -3,24 +3,26 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Basic.Denumerable
-import Mathlib.Data.Int.GCD
-import Mathlib.Data.Int.ModEq
-import Mathlib.Data.Nat.ChineseRemainder
-import Mathlib.Data.Nat.Factorization.Basic
-import Mathlib.Data.Rat.Encodable
-import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
-import Mathlib.RingTheory.AlgebraicIndependent.Defs
-import Mathlib.RingTheory.Ideal.Maps
+module
 
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Ring
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.StabConjugation
-import LeanModularForms.HeckeRIngs.GLn.Basic
-import LeanModularForms.HeckeRIngs.GLn.DiagonalCosets
-import LeanModularForms.HeckeRIngs.GLn.PolynomialRing
-import LeanModularForms.HeckeRIngs.GLn.PrimeDecomposition
-import LeanModularForms.HeckeRIngs.GLn.SL2Surjection
-import LeanModularForms.HeckeRIngs.GLn.TransposeAntiInvolution
+public import Mathlib.Basic.Denumerable
+public import Mathlib.Data.Int.GCD
+public import Mathlib.Data.Int.ModEq
+public import Mathlib.Data.Nat.ChineseRemainder
+public import Mathlib.Data.Nat.Factorization.Basic
+public import Mathlib.Data.Rat.Encodable
+public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
+public import Mathlib.RingTheory.AlgebraicIndependent.Defs
+public import Mathlib.RingTheory.Ideal.Maps
+
+public import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Ring
+public import LeanModularForms.HeckeRIngs.AbstractHeckeRing.StabConjugation
+public import LeanModularForms.HeckeRIngs.GLn.Basic
+public import LeanModularForms.HeckeRIngs.GLn.DiagonalCosets
+public import LeanModularForms.HeckeRIngs.GLn.PolynomialRing
+public import LeanModularForms.HeckeRIngs.GLn.PrimeDecomposition
+public import LeanModularForms.HeckeRIngs.GLn.SL2Surjection
+public import LeanModularForms.HeckeRIngs.GLn.TransposeAntiInvolution
 
 /-!
 # Hecke Ring for Congruence Subgroups (Shimura §3.3) — Foundation
@@ -34,6 +36,8 @@ double-coset comparison `doubleCoset_eq_of_Gamma0_coprimeDet`.
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.3
 -/
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Pointwise Matrix.SpecialLinearGroup
 

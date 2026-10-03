@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedLocus
-import HasseWeil.Foundation.EC.AffinePointMap
-import Mathlib.FieldTheory.Finite.Basic
-import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+module
+
+public import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedLocus
+public import HasseWeil.Foundation.EC.AffinePointMap
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 
 /-!
 # Geometric Frobenius on points over the algebraic closure (Route B, Step 2)
@@ -64,6 +66,8 @@ via `HasseWeil.Affine.Point.map (algebraMap K L)`.
 * mathlib: `FiniteField.frobeniusAlgHom`, `WeierstrassCurve.map_baseChange`,
   `WeierstrassCurve.Affine.Point.map`.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

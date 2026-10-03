@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
-import HasseWeil.HasseBound.WeilPairing.PairingAdjoint
-import HasseWeil.HasseBound.WeilPairing.PairingDet
-import HasseWeil.HasseBound.WeilPairing.PairingNondeg
-import HasseWeil.HasseBound.WeilPairing.Representation
-import HasseWeil.HasseBound.WeilPairing.RootsOfUnity
+module
+
+public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+public import HasseWeil.HasseBound.WeilPairing.PairingAdjoint
+public import HasseWeil.HasseBound.WeilPairing.PairingDet
+public import HasseWeil.HasseBound.WeilPairing.PairingNondeg
+public import HasseWeil.HasseBound.WeilPairing.Representation
+public import HasseWeil.HasseBound.WeilPairing.RootsOfUnity
 
 /-!
 # Route 2A — the Weil-pairing determinant identity `det(ρ_ℓ φ) = deg φ` (Silverman III.8.6)
@@ -52,6 +54,8 @@ alternating) form `omegaForm` by its determinant.  The Weil scaling
 * Silverman, *The Arithmetic of Elliptic Curves*, III.8.1 (the pairing), III.8.6 (`det φ_ℓ = deg φ`
   via the symplectic scaling), V.2.3.1 (the Hasse-bound assembly).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves Matrix
 

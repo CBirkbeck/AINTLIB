@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Algebra.Order.Archimedean.Basic
-import Mathlib.Algebra.Order.Group.Defs
-import Mathlib.Algebra.Order.Monoid.Unbundled.Pow
-import Mathlib.GroupTheory.QuotientGroup.Basic
+module
+
+public import Mathlib.Algebra.Order.Archimedean.Basic
+public import Mathlib.Algebra.Order.Group.Defs
+public import Mathlib.Algebra.Order.Monoid.Unbundled.Pow
+public import Mathlib.GroupTheory.QuotientGroup.Basic
 
 /-!
 # Convex Subgroups of Linearly Ordered Commutative Groups
@@ -24,6 +26,8 @@ basic properties, following §7.1 of [Wedhorn, *Adic Spaces*].
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §7.1
 -/
+
+@[expose] public section
 
 variable (Γ : Type*) [CommGroup Γ] [LinearOrder Γ] [IsOrderedMonoid Γ]
 

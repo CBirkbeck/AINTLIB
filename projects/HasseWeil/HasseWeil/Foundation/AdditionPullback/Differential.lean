@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
-import HasseWeil.Isogeny.Frobenius.OrdAtInfty
-import HasseWeil.Foundation.BridgeFrobenius
-import HasseWeil.Foundation.Curves.Differentials
-import HasseWeil.HasseBound.QuadraticFormHoleE
+module
+
+public import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
+public import HasseWeil.Isogeny.Frobenius.OrdAtInfty
+public import HasseWeil.Foundation.BridgeFrobenius
+public import HasseWeil.Foundation.Curves.Differentials
+public import HasseWeil.HasseBound.QuadraticFormHoleE
 
 /-!
 # Differential pullback for the addition isogeny `1 − π`
@@ -34,6 +36,8 @@ take that hypothesis in different shapes and produce the separability conclusion
 * Silverman, *The Arithmetic of Elliptic Curves*, III.5.2 (additivity),
   III.5.3 (`[m]*ω = m·ω`), III.5.5 (Frobenius is purely inseparable).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

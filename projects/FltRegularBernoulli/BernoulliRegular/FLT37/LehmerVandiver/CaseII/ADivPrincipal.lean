@@ -1,5 +1,9 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.PrincipalDischarge
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificDischarge
+module
+
+import FltRegular.CaseII.AuxLemmas
+import FltRegular.NumberTheory.Cyclotomic.MoreLemmas
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.PrincipalDischarge
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificDischarge
 
 /-!
 # LV-CaseII parametric `a_div_principal`

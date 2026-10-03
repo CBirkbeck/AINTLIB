@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.FiniteType
-import ModularCurves.EllipticCurve.PoleFiltrationMonomialSequence
+module
+
+public import Mathlib.RingTheory.FiniteType
+public import ModularCurves.EllipticCurve.PoleFiltrationMonomialSequence
 
 /-!
 # The ordered monomial basis of the model pole filtration
@@ -12,6 +14,10 @@ import ModularCurves.EllipticCurve.PoleFiltrationMonomialSequence
 The existing model filtration basis is reindexed so that its vectors are
 literally `1, x, y, x², xy, x³, ...`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry
 

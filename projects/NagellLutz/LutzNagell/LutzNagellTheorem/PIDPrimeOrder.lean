@@ -1,8 +1,10 @@
-import LutzNagell.DivisionPolynomialDegree
-import LutzNagell.ZSMul
-import LutzNagell.LutzNagellTheorem.PIDDenominators
-import LutzNagell.LutzNagellTheorem.EvalBridge
-import Mathlib.RingTheory.Polynomial.RationalRoot
+module
+
+public import LutzNagell.DivisionPolynomialDegree
+public import LutzNagell.ZSMul
+public import LutzNagell.LutzNagellTheorem.PIDDenominators
+public import LutzNagell.LutzNagellTheorem.EvalBridge
+public import Mathlib.RingTheory.Polynomial.RationalRoot
 
 /-!
 # Prime-order torsion integrality for Weierstrass curves over UFDs
@@ -25,6 +27,8 @@ denominator must appear with multiplicity ≥ 2 in the division polynomial's lea
   has integral coordinates.
 * `den_dvd_of_order_two`: for an order-2 point, `den_R(x) ∣ 4`.
 -/
+
+@[expose] public section
 
 namespace LutzNagell
 namespace PID

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Interpolation.NonTame
+module
+
+public import PadicLFunctions.Interpolation.NonTame
 
 /-!
 # The p-adic L-function of a Dirichlet character (RJW §5.3, TeX 1929–1957)
@@ -21,6 +23,8 @@ the character algebra `χω^{−1}(x)⟨x⟩^{k−1} = χω^{−k}(x)x^{k−1}` 
 claim to the twisted moments of `ζ_η` (`zetaEta_twisted_moments`) at the
 primitive core of `χω^{−k}`.
 -/
+
+@[expose] public section
 
 namespace PadicLFunctions
 

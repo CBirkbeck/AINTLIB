@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.GaloisActionDecompositionAndEigenspace
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.IndexFormula
-import Mathlib.NumberTheory.Bernoulli
+module
+
+public import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.GaloisActionDecompositionAndEigenspace
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.IndexFormula
+public import Mathlib.NumberTheory.Bernoulli
 
 /-!
 # Washington §8.3 route to `¬ 37 ∣ h⁺` (Vandiver for 37)

@@ -3,10 +3,12 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.ValenceFormula.PVChain.Helpers
-import LeanModularForms.ForMathlib.ValenceFormula.PVChain.ResidueSideInfra
-import LeanModularForms.ForMathlib.ModularInvariance
-import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Smooth
+module
+
+public import LeanModularForms.ForMathlib.ValenceFormula.PVChain.Helpers
+public import LeanModularForms.ForMathlib.ValenceFormula.PVChain.ResidueSideInfra
+public import LeanModularForms.ForMathlib.ModularInvariance
+public import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Smooth
 
 /-!
 # Arc Contribution to the PV Chain
@@ -33,6 +35,10 @@ where `m(ε) → 2`.
 * `arc_cpv_eventually_eq_union` — bridge from `sArcOfS S ∪ sVertOfS S` to `sArcOfS S`
 * `tendsto_pvIntegral_arc_bridge` — final bridge for Assembly.lean
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups

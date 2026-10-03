@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.SingleCrossing
-import LeanModularForms.ForMathlib.EllipticPoints
+module
+
+public import LeanModularForms.ForMathlib.SingleCrossing
+public import LeanModularForms.ForMathlib.EllipticPoints
 
 /-!
 # Fundamental Domain Boundary
@@ -32,6 +34,8 @@ parameterized on `[0, 1]` with breakpoints at `1/5, 2/5, 3/5, 4/5`.
 * `fdBoundaryFun_closed` — the contour is closed
 * `fdBoundaryFun_at_*` — values at the five junction points
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

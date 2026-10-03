@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreProductChartTransitionGeometry`.
 -/
-import ModularCurves.ForMathlib.SegreOverlapSecondCompatibility
+module
+
+public import ModularCurves.ForMathlib.SegreOverlapSecondCompatibility
 
 /-!
 # The inverse morphism for the Segre product comparison
@@ -15,6 +17,10 @@ The standard affine cover of the Segre image is reindexed by pairs of projective
 coordinates. The inverse of each local Segre chart isomorphism then gives a map
 back to the product of projective spaces.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry
 

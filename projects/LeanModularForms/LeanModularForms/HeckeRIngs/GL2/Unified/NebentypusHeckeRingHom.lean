@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheory
-import LeanModularForms.HeckeRIngs.GL2.MultiplicationTable
-import LeanModularForms.HeckeRIngs.GL2.LevelEmbed
-import LeanModularForms.HeckeRIngs.GL2.Unified.Gamma0RingDn
-import LeanModularForms.HeckeRIngs.GL2.Unified.TwistedHeckeRing
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheory
+public import LeanModularForms.HeckeRIngs.GL2.MultiplicationTable
+public import LeanModularForms.HeckeRIngs.GL2.LevelEmbed
+public import LeanModularForms.HeckeRIngs.GL2.Unified.Gamma0RingDn
+public import LeanModularForms.HeckeRIngs.GL2.Unified.TwistedHeckeRing
 
 /-!
 # Nebentypus Hecke ring action
@@ -45,6 +47,10 @@ character space and bridges it to the concrete Hecke operators.
 * [F. Diamond and J. Shurman, *A First Course in Modular Forms*][diamondshurman2005],
   §5.2 (Hecke operators and the nebentypus / diamond decomposition).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup CongruenceSubgroup HeckeRing.GLn
 open HeckeRing

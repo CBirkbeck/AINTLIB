@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.PiecewiseC1PathOn
-import Mathlib.Topology.Path
+module
+
+public import LeanModularForms.ForMathlib.PiecewiseC1PathOn
+public import Mathlib.Topology.Path
 
 /-!
 # Piecewise C¹ Paths
@@ -37,6 +39,8 @@ covers `ℂ` as the main application.
 
 * K. Hungerbühler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Set Filter Topology
 

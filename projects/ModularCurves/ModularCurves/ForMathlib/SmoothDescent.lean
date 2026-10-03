@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Mathlib.AlgebraicGeometry.Morphisms.Smooth
-import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
-import Mathlib.AlgebraicGeometry.Limits
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
+public import Mathlib.AlgebraicGeometry.Limits
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
 
 /-!
 # Smoothness descends along surjective étale precomposition (Stacks 02KM)
@@ -43,6 +45,8 @@ REGISTERED ring-level gates [02KL-CORE] and [02KM-CORE] below (board: STREAM-YFU
 * `AlgebraicGeometry.Smooth.of_precomp_etale_of_surjective` (PROVEN modulo
   [02KL-CORE] + [02KM-CORE]): the target, Stacks 02KM at étale generality.
 -/
+
+@[expose] public section
 
 universe u
 

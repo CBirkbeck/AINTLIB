@@ -3,12 +3,14 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.Basic
-import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
-import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
-import ModularCurves.ForMathlib.FunctorMapZpow
-import ModularCurves.ForMathlib.OverPullbackMul
-import Mathlib.AlgebraicGeometry.Group.Smooth
+module
+
+public import ModularCurves.EllipticCurve.Basic
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+public import ModularCurves.ForMathlib.FunctorMapZpow
+public import ModularCurves.ForMathlib.OverPullbackMul
+public import Mathlib.AlgebraicGeometry.Group.Smooth
 
 /-!
 # The working record: elliptic curves with their group structure
@@ -36,6 +38,10 @@ fixed once and not allowed to grow (reviewer's list, Q3):
 `O_E`, base-change compatible); `group-law-from-Abel` (induced structure; uniqueness).
 ⧗KM-gate: KM 2.1–2.3 are on the do-not-formalize-from-memory list.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj

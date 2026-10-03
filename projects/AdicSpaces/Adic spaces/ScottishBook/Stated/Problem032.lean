@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidRing
+module
+
+public import «Adic spaces».PerfectoidRing
 
 /-!
 # Nonarchimedean Scottish Book — Problem 32
@@ -31,6 +33,8 @@ We state: given a perfectoid field `K`, a perfectoid `K`-algebra `A`, and a Tate
 Since the completed tensor product is not yet formalized, we state the existence of a ring
 `C` representing `A ⊗̂_K B` with the required sheafy property.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

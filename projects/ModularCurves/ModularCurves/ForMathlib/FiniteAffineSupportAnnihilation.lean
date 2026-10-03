@@ -6,10 +6,12 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `FiniteAffineSupportAnnihilation.lean`
 in Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.FiniteFamilySupportAnnihilation
-import ModularCurves.ForMathlib.SchemeModuleSupport
-import Mathlib.AlgebraicGeometry.Cover.Open
-import Mathlib.AlgebraicGeometry.IdealSheaf.Basic
+module
+
+public import ModularCurves.ForMathlib.FiniteFamilySupportAnnihilation
+public import ModularCurves.ForMathlib.SchemeModuleSupport
+public import Mathlib.AlgebraicGeometry.Cover.Open
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Basic
 
 /-!
 # Uniform support annihilation on a finite affine cover
@@ -18,6 +20,10 @@ Global containment of a finite-type quasicoherent module's closed stalk
 support in an ideal-sheaf support yields one ideal power annihilating the
 module on every member of a finite affine cover.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

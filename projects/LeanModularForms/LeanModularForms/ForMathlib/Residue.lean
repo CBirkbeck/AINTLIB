@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.GeneralizedWindingNumber
-import Mathlib.MeasureTheory.Integral.CircleIntegral
+module
+
+public import LeanModularForms.ForMathlib.GeneralizedWindingNumber
+public import Mathlib.MeasureTheory.Integral.CircleIntegral
 
 /-!
 # Residue Theory
@@ -22,6 +24,8 @@ Definitions and basic results for residues of meromorphic functions.
 
 * K. Hungerbühler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Complex Set Filter Topology MeasureTheory
 open scoped Interval Real

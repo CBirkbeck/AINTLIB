@@ -3,17 +3,19 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.MeasureR.FormalPsi
-import Mathlib.LinearAlgebra.Basis.Basic
-import Mathlib.RingTheory.Norm.Basic
-import Mathlib.RingTheory.Trace.Basic
-import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
-import Mathlib.RingTheory.PowerSeries.Expand
-import Mathlib.FieldTheory.Finite.Basic
-import Mathlib.NumberTheory.Padics.RingHoms
-import Mathlib.RingTheory.PowerSeries.PiTopology
-import Mathlib.Topology.Metrizable.Uniformity
-import Mathlib.Data.Finsupp.Encodable
+module
+
+public import PadicLFunctions.MeasureR.FormalPsi
+public import Mathlib.LinearAlgebra.Basis.Basic
+public import Mathlib.RingTheory.Norm.Basic
+public import Mathlib.RingTheory.Trace.Basic
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
+public import Mathlib.RingTheory.PowerSeries.Expand
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.RingTheory.PowerSeries.PiTopology
+public import Mathlib.Topology.Metrizable.Uniformity
+public import Mathlib.Data.Finsupp.Encodable
 
 /-!
 # The norm operator `𝒩` on `ℤ_p⟦T⟧` via the digit basis
@@ -48,6 +50,8 @@ extraction in Coleman's theorem (T910).
 
 Tickets: T906 (norm operator) + T909 (compactness); decomposition R10.4/R10.6.
 -/
+
+@[expose] public section
 
 open PowerSeries
 

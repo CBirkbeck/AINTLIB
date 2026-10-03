@@ -1,8 +1,10 @@
-import Mathlib.RingTheory.QuasiFinite.Basic
-import Mathlib.RingTheory.RingHom.QuasiFinite
-import Mathlib.RingTheory.Finiteness.Descent
-import Mathlib.AlgebraicGeometry.Morphisms.LocalFlatDescent
-import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+module
+
+public import Mathlib.RingTheory.QuasiFinite.Basic
+public import Mathlib.RingTheory.RingHom.QuasiFinite
+public import Mathlib.RingTheory.Finiteness.Descent
+public import Mathlib.AlgebraicGeometry.Morphisms.LocalFlatDescent
+public import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
 
 /-!
 # Quasi-finiteness descends along faithfully flat maps (mathlib gap, BB-QF seam-i)
@@ -16,6 +18,8 @@ prime `p` of `R` base-changes to the fibre of `S ⊗[R] T` at any prime `Q` of `
 `DescendsAlong @LocallyQuasiFinite (@Surjective ⊓ @Flat ⊓ @QuasiCompact)` instance, in the
 exact shape of `Mathlib.AlgebraicGeometry.Morphisms.LocalFlatDescent`.
 -/
+
+@[expose] public section
 
 open TensorProduct
 

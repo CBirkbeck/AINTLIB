@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.KrullDimQuotientSpan
-import ModularCurves.ForMathlib.MvPolynomialMaximalHeight
-import ModularCurves.ForMathlib.SmoothCotangentPrincipal
+module
+
+public import ModularCurves.ForMathlib.KrullDimQuotientSpan
+public import ModularCurves.ForMathlib.MvPolynomialMaximalHeight
+public import ModularCurves.ForMathlib.SmoothCotangentPrincipal
 
 /-!
 # A curve smooth over an algebraically closed field has domain local rings (T-SMOOTH-REG)
@@ -25,6 +27,8 @@ field `k`, every localization `A_𝔭` is a **regular local domain**. Geometrica
 curve over `k̄` is locally irreducible, which is the missing algebraic leaf of
 `yRho_geometricallyIrreducible` (`ModularCurve/IrreducibilityScoping.lean`).
 -/
+
+@[expose] public section
 
 universe u
 

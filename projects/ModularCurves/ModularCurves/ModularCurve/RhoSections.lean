@@ -1,8 +1,10 @@
-import ModularCurves.ModularCurve.RhoDescent
-import ModularCurves.WeilPairing.SelfUniversalVanishing
-import ModularCurves.WeilPairing.Nondegenerate
-import ModularCurves.ModularCurve.RhoPairingBridge
-import Mathlib.AlgebraicGeometry.Sites.Fpqc
+module
+
+public import ModularCurves.ModularCurve.RhoDescent
+public import ModularCurves.WeilPairing.SelfUniversalVanishing
+public import ModularCurves.WeilPairing.Nondegenerate
+public import ModularCurves.ModularCurve.RhoPairingBridge
+public import Mathlib.AlgebraicGeometry.Sites.Fpqc
 
 /-!
 # [T-EQ-3c] Sections ↔ ρ-structures: the quotient dictionary
@@ -23,6 +25,8 @@ structures and back:
 * (3d) ρ-level structures give sections by étale-local trivialisation and gluing;
 * (3e) the two constructions are mutually inverse.
 -/
+
+@[expose] public section
 
 -- v4.33 bump: neither the category instances nor the semireducible component types are
 -- transparent enough for the rewrites and instance searches below.

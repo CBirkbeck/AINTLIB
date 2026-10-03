@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModCube
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.FormalSum68ThirdOrderResidue
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModCube
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.FormalSum68ThirdOrderResidue
 
 /-!
 # The mod-`37³` degree-`68` Dwork-slice factorial extraction (at the level-`107` precision)

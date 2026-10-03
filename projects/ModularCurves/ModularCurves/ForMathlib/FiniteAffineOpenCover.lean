@@ -1,6 +1,8 @@
-import Mathlib.AlgebraicGeometry.Morphisms.Proper
-import Mathlib.AlgebraicGeometry.Noetherian
-import ModularCurves.ForMathlib.MinimalPrimeBasicOpen
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Proper
+public import Mathlib.AlgebraicGeometry.Noetherian
+public import ModularCurves.ForMathlib.MinimalPrimeBasicOpen
 
 /-!
 # Finite affine open covers
@@ -9,6 +11,8 @@ This file constructs the finite affine covers used to build Čech complexes over
 affine base. Properness supplies compactness, while separatedness makes every nonempty
 finite intersection of the chosen affine opens affine.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits TopologicalSpace
 

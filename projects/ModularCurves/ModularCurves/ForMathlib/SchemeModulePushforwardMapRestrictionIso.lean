@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
 
 /-!
 # Local isomorphisms and pushforward
@@ -6,6 +8,8 @@ import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
 This file proves that pushforward preserves a module morphism which is an isomorphism over the
 inverse image of a target open.
 -/
+
+@[expose] public section
 
 universe u
 

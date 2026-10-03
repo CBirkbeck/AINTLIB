@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.ArcFTCLimit
-import LeanModularForms.ForMathlib.CrossingAtRho
-import LeanModularForms.ForMathlib.SegmentAnalysis
+module
+
+public import LeanModularForms.ForMathlib.ArcFTCLimit
+public import LeanModularForms.ForMathlib.CrossingAtRho
+public import LeanModularForms.ForMathlib.SegmentAnalysis
 
 /-!
 # CornerFTCHyp at rho and rho+1
@@ -18,6 +20,10 @@ Constructs complete `CornerFTCHyp` instances for the corner crossings at:
 * `cornerFTCHyp_atRho` -- complete `CornerFTCHyp` at rho
 * `cornerFTCHyp_atRhoPlusOne_unconditional` -- complete `CornerFTCHyp` at rho+1
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

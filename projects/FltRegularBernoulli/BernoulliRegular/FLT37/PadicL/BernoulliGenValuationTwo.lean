@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.PadicL.IwasawaModSqCorrected
-import BernoulliRegular.FLT37.Eichler.HerbrandBoundAnalytic
+module
+
+public import BernoulliRegular.FLT37.PadicL.IwasawaModSqCorrected
+public import BernoulliRegular.FLT37.Eichler.HerbrandBoundAnalytic
 
 /-!
 # Discharge of `bernoulliGenOmegaValuationTwo37` — the mod-`37³` Teichmüller core
@@ -80,6 +82,10 @@ a datum separate from Kellner.
 * Kellner, Math. Comp. 76 (2007), Prop 2.7 (the `s`-direction Iwasawa datum — NOT
   used here).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

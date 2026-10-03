@@ -5,8 +5,10 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 
 Adapted from Clawristotle's `CoherentCohomologyFinite.SegreDiagonalSurjectivity`.
 -/
-import ModularCurves.ForMathlib.SegreExponentMatrix
-import Mathlib.LinearAlgebra.TensorProduct.Basis
+module
+
+public import ModularCurves.ForMathlib.SegreExponentMatrix
+public import Mathlib.LinearAlgebra.TensorProduct.Basis
 
 /-!
 # Equal-bidegree surjectivity of the Segre coordinate map
@@ -14,6 +16,8 @@ import Mathlib.LinearAlgebra.TensorProduct.Basis
 Every pure tensor of homogeneous polynomials of the same degree lies in the
 range of the Segre coordinate map.
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

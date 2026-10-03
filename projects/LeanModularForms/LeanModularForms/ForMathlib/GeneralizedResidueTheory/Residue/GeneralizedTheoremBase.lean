@@ -3,9 +3,11 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue.MultipointPV
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue.MultipointPV.DominatedConvergence
-import Mathlib.Analysis.Meromorphic.Order
+module
+
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue.MultipointPV
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue.MultipointPV.DominatedConvergence
+public import Mathlib.Analysis.Meromorphic.Order
 
 /-!
 # Generalized Residue Theorem -- Base Infrastructure
@@ -21,6 +23,8 @@ infrastructure used by both the convex and null-homologous versions.
 * `generalizedResidueTheorem'` -- CPV equals `2 pi i . Sigma winding . residue`
   (convex domain, with explicit PV hypothesis)
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology Metric
 open scoped Real Interval

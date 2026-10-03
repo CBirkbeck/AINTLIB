@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.Scaling.OneSub
+module
+
+public import HasseWeil.HasseBound.WeilPairing.Scaling.OneSub
 
 /-!
 # Concrete base-change of a function-field pullback (CoordHom-free)
@@ -73,6 +75,8 @@ concrete base-change of a non-Frobenius isogeny's *point map* (only the witness-
 * Silverman, *The Arithmetic of Elliptic Curves*, II.2.11 (degree under base change),
   III.4.10a/c, III.6.2(a), III.8.2, III.8.6.1.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 open scoped TensorProduct

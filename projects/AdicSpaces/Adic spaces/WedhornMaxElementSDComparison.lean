@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornAlphaTDComparisonSupplier
+module
+
+public import «Adic spaces».WedhornAlphaTDComparisonSupplier
 
 /-!
 # Wedhorn 8.34(ii) max-element ≤ s_D comparison supplier (T035)
@@ -113,6 +115,8 @@ attempt and was shown false in T023).
   rational-open / σ-cancellation API.
 * Does NOT edit T027/T028/T031/T032/T033/T034 accepted files.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

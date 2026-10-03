@@ -1,8 +1,10 @@
-import BernoulliRegular.FLT37.CaseI.FactorDecompositionAndNorm
-import BernoulliRegular.FLT37.KummerUnits
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AKPrimarity
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
+module
+
+public import BernoulliRegular.FLT37.CaseI.FactorDecompositionAndNorm
+public import BernoulliRegular.FLT37.KummerUnits
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AKPrimarity
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
 
 /-!
 # Case-I antiRadical is not a p-th power

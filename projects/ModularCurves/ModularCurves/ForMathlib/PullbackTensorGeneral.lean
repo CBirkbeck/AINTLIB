@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Category.ModuleCat.Presheaf.Generator
-import Mathlib.Algebra.Category.ModuleCat.Monoidal.Closed
-import Mathlib.CategoryTheory.Monoidal.Closed.Braided
-import Mathlib.CategoryTheory.Localization.Monoidal.Functor
-import Mathlib.CategoryTheory.Monoidal.Cartesian.FunctorCategory
-import Mathlib.LinearAlgebra.Finsupp.Pi
-import ModularCurves.Picard.Pic
-import ModularCurves.ForMathlib.PullbackTensorMonoidal
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Presheaf.Generator
+public import Mathlib.Algebra.Category.ModuleCat.Monoidal.Closed
+public import Mathlib.CategoryTheory.Monoidal.Closed.Braided
+public import Mathlib.CategoryTheory.Localization.Monoidal.Functor
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.FunctorCategory
+public import Mathlib.LinearAlgebra.Finsupp.Pi
+public import ModularCurves.Picard.Pic
+public import ModularCurves.ForMathlib.PullbackTensorMonoidal
 
 /-!
 # General pullback–tensor compatibility — decomposition skeleton (Route G)
@@ -30,6 +32,8 @@ discipline; the data is built at execution time, each structure landing only whe
 sorry-free). Full route adjudication, verbatim anchors and attack logs:
 `.mathlib-quality/decomposition-pullback-monoidal-general.md`.
 -/
+
+@[expose] public section
 
 universe v₁ v₂ v₃ u₁ u₂ u₃ u w w'
 

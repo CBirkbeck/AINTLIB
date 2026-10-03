@@ -5,14 +5,17 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Proper
-import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
-import Mathlib.RingTheory.MvPolynomial.Ideal
-import ModularCurves.ForMathlib.GradedQuotient
-import ModularCurves.ForMathlib.MvPolynomialHomogenize
-import ModularCurves.ForMathlib.ProjClosedImmersion
-import ModularCurves.ForMathlib.ProjToSpecZero
-import ModularCurves.ForMathlib.ProjectiveSpaceChart
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Immersion
+public import Mathlib.AlgebraicGeometry.Morphisms.Proper
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
+public import Mathlib.RingTheory.MvPolynomial.Ideal
+public import ModularCurves.ForMathlib.GradedQuotient
+public import ModularCurves.ForMathlib.MvPolynomialHomogenize
+public import ModularCurves.ForMathlib.ProjClosedImmersion
+public import ModularCurves.ForMathlib.ProjToSpecZero
+public import ModularCurves.ForMathlib.ProjectiveSpaceChart
 
 /-!
 # Projective closures from homogenized relations
@@ -20,6 +23,10 @@ import ModularCurves.ForMathlib.ProjectiveSpaceChart
 A family of affine polynomial relations determines a homogeneous quotient after adjoining one
 variable. With finitely many polynomial variables, its `Proj` is proper over the coefficient ring.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

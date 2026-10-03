@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.Moduli.GammaHMaster
-import ModularCurves.Moduli.KeystoneGeometricPoint
+module
+
+public import ModularCurves.Moduli.GammaHMaster
+public import ModularCurves.Moduli.KeystoneGeometricPoint
 
 /-!
 # Γ_H rigidity for semi-Borel level subgroups, and the Borel no-go
@@ -38,6 +40,8 @@ future worker attempts a fine `Y₀(N)` through the `orderOf` interface. `Y₀(N
 KM Ch. 8 *coarse* moduli scheme (KM 8.1.5: `M(𝒫)/G ≅ M(𝒫/G)`; Loeffler Def 3.6.2:
 `Y₀(N) = Y₁(N)/(ℤ/N)ˣ`) — a separate stream (M3).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
 

@@ -1,4 +1,6 @@
-import ModularCurves.GroupScheme.SubgroupQuotientInterface
+module
+
+public import ModularCurves.GroupScheme.SubgroupQuotientInterface
 
 /-!
 # The translation action of a finite locally free subgroup scheme
@@ -21,6 +23,8 @@ so their over-`S` compatibility (`… ≫ E.π = pr ≫ E.π`) is `Over.w`, free
 ## Main results
 * `translationAction_left_π` / `actionProj_left_π` — both are morphisms over `S` (free from `Over`).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

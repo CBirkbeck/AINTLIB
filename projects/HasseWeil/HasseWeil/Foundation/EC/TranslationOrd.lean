@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.Translation
-import HasseWeil.Foundation.Curves.Valuation.AlgebraicNonNegOrd
-import HasseWeil.Foundation.EC.GenericPoint
-import HasseWeil.Foundation.Curves.Valuation.SmoothPointTranslate
-import HasseWeil.Foundation.OrdAtInftyBridge
+module
+
+public import HasseWeil.Foundation.EC.Translation
+public import HasseWeil.Foundation.Curves.Valuation.AlgebraicNonNegOrd
+public import HasseWeil.Foundation.EC.GenericPoint
+public import HasseWeil.Foundation.Curves.Valuation.SmoothPointTranslate
+public import HasseWeil.Foundation.OrdAtInftyBridge
 
 /-!
 # Order of `x_gen − xk` at the smooth point `(xk, −y_T)`
@@ -31,6 +33,8 @@ which by `transcendental_of_neg_ord_P` yields transcendence of
 
 * Silverman, *The Arithmetic of Elliptic Curves*, II.1, II.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

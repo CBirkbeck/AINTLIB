@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidRing
+module
+
+public import «Adic spaces».PerfectoidRing
 
 /-!
 # Nonarchimedean Scottish Book — Problem 14
@@ -32,6 +34,8 @@ The problem asks whether such extensions complete to perfectoid fields.
 Since the formalization of ramification theory is beyond the current library, we define
 `IsArithmeticallyProfinite` as an abstract predicate on valued fields.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p
 
 /-!
 # Hecke operators T_n for general n on M_k(Γ₁(N))
@@ -45,6 +47,10 @@ When `p ∣ N` the diamond operator `⟨p⟩ = 0`, so the recurrence simplifies 
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.2–5.3
 * [Miy] Miyake, *Modular Forms*, §4.5
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup
 

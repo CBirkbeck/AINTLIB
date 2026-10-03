@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.TensorProduct.Basic
+module
+
+public import Mathlib.RingTheory.TensorProduct.Basic
 
 /-!
 # Co-invariants of a co-action
@@ -21,6 +23,8 @@ The remaining crux — `B` is *faithfully flat* over `B^{coρ}` (the torsor / Ho
 whence `Spec B → Spec B^{coρ}` is the affine coequalizer via
 `isRegularEpi_of_flat_of_surjective_of_isAffine` — is deferred (multi-week, mathlib-gap-filling).
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

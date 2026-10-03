@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Data.Fin.Tuple.Sort
-import ModularCurves.ForMathlib.OrderedCechSupportContraction
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
+module
+
+public import Mathlib.Data.Fin.Tuple.Sort
+public import ModularCurves.ForMathlib.OrderedCechSupportContraction
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 
 /-!
 # Alternating extension of ordered support-restricted Cech cochains
@@ -13,6 +15,10 @@ import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 This file compares the native support-restricted Cech cochains with their ordered version.
 Alternating extension from strictly increasing tuples is a section of restriction to those tuples.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Set
 

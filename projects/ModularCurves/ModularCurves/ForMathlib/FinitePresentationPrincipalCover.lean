@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.FinitePresentationLocalization
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationLocalization
 
 /-!
 # Spreading finite principal affine covers
@@ -8,6 +10,8 @@ generate the unit ideal in the colimit algebra, they generate the unit ideal at 
 later finite stage. Thus their principal localizations form an affine cover there,
 and each member recovers the original principal open after base change.
 -/
+
+@[expose] public section
 
 open TensorProduct
 

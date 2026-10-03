@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
+module
+
+public import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
 
 /-!
 # Surjectivity of `Affine.Point.map` and the geometric Frobenius over `K̄`
@@ -30,6 +32,8 @@ discharge surjectivity of `1 − π` or `r·π − s`, which is the Lang/finite-
   `FiniteField.frobeniusAlgEquivOfAlgebraic`.
 * Silverman, *The Arithmetic of Elliptic Curves*, III.4.10a.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

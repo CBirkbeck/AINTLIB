@@ -1,11 +1,13 @@
-import Mathlib.AlgebraicGeometry.Limits
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
-import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
-import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
-import Mathlib.RingTheory.Etale.StandardEtale
-import Mathlib.Topology.LocallyConstant.Algebra
+module
+
+public import Mathlib.AlgebraicGeometry.Limits
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+public import Mathlib.RingTheory.Etale.StandardEtale
+public import Mathlib.Topology.LocallyConstant.Algebra
 
 /-!
 # The group schemes `μ_N` and `ℤ/N` over a base
@@ -42,6 +44,10 @@ exhibits `(Xᴺ − 1, C N)` as a standard étale pair; the converse reduces alo
 fields to the field case, where `X^{N/q} − 1` is a nonzero nilpotent in characteristic
 `q ∣ N`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 -- v4.33 bump: the `↥U` / `↥↑U` opens coercion is no longer transparent enough for the
 -- `Scheme.comp_apply` / `Category.assoc` rewrites below.

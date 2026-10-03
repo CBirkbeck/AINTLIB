@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.RepresentableByMap
-import ModularCurves.Moduli.GammaFullToGammaOne
-import ModularCurves.ModularCurve.YOneTatePoint
+module
+
+public import ModularCurves.ForMathlib.RepresentableByMap
+public import ModularCurves.Moduli.GammaFullToGammaOne
+public import ModularCurves.ModularCurve.YOneTatePoint
 
 /-!
 # The morphism `Y(N) ⟶ Y₁(N)` (WP-D1c, construction)
@@ -27,6 +29,8 @@ subscheme of `E[N]`, so `fullLevelLocus`'s finiteness and étaleness machinery
 (`Moduli/Bootstrap.lean`'s `naiveLevelThree_relativelyRepresentable_finiteEtale` is the
 model) should apply one level down.
 -/
+
+@[expose] public section
 
 universe u
 

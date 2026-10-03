@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.AlgebraicGeometry.AffineScheme
+module
+
+public import Mathlib.AlgebraicGeometry.AffineScheme
 
 /-!
 # `Spec` of an away-localization is the basic open (ForMathlib, c4.2a)
@@ -18,6 +20,8 @@ along a basic-open cover needs.
 
 Upstream candidate.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

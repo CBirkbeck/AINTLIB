@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ModularCurve.RhoSmooth
-import ModularCurves.Moduli.LegendreTorsor
+module
+
+public import ModularCurves.ModularCurve.RhoSmooth
+public import ModularCurves.Moduli.LegendreTorsor
 
 /-!
 # `T`-points of the representing curve as pairs `(E, α)`
@@ -14,6 +16,8 @@ import ModularCurves.Moduli.LegendreTorsor
 ρ-level structure — modulo pointed isomorphisms carrying the structure across. This
 is the `Quot`-points clause of `RepresentsYRho` (in the DEF-17 corrected form).
 -/
+
+@[expose] public section
 
 noncomputable section
 

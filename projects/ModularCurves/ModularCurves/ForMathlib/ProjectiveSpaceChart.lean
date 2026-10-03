@@ -5,10 +5,12 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-A2d (step 4).
 -/
-import ModularCurves.ForMathlib.AwayCongr
-import Mathlib.RingTheory.GradedAlgebra.HomogeneousLocalization
-import Mathlib.RingTheory.MvPolynomial.Homogeneous
-import Mathlib.RingTheory.Localization.Away.Basic
+module
+
+public import ModularCurves.ForMathlib.AwayCongr
+public import Mathlib.RingTheory.GradedAlgebra.HomogeneousLocalization
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+public import Mathlib.RingTheory.Localization.Away.Basic
 
 /-!
 # The affine charts of projective space, ring-theoretically
@@ -20,6 +22,8 @@ variable `X i` is a polynomial ring on the remaining variables:
 This is the chart description underlying `ℙⁿ_R = Proj R[X₀,…,Xₙ]` and, through
 quotient gradings, the affine charts of projective hypersurfaces.
 -/
+
+@[expose] public section
 
 namespace HomogeneousLocalization
 

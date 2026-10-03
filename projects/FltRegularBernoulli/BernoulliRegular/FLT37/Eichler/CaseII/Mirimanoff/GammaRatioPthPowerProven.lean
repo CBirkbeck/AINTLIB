@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.Step6SigmaReductionRealData
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.IdealKummerUnramified
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.Step6SigmaReductionRealData
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.IdealKummerUnramified
 
 /-!
 # Washington Lemma 9.8 step 6 `ρ_a`-reality, fully discharged (R4, the irregular-index local power)

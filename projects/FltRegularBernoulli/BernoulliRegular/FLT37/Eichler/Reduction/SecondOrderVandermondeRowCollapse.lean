@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.Eichler.Reduction.IrregularUnitPthPowerOfRationalModSq
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.EigenbasisVandermondeCompatibility
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.LambdaExponentCollapseToOmega32
-import BernoulliRegular.BernoulliFast.KellnerSecondOrder
+module
+
+public import BernoulliRegular.FLT37.Eichler.Reduction.IrregularUnitPthPowerOfRationalModSq
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.EigenbasisVandermondeCompatibility
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.LambdaExponentCollapseToOmega32
+public import BernoulliRegular.BernoulliFast.KellnerSecondOrder
 
 /-!
 # Washington Proposition 8.12 at the irregular index `i = 32`, second order: the `ω³²`-collapse

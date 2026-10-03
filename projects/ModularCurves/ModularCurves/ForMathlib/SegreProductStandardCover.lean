@@ -6,8 +6,11 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreProductStandardCover`.
 -/
-import ModularCurves.ForMathlib.SegreStandardChartEquivalence
-import Mathlib.AlgebraicGeometry.Pullbacks
+module
+
+import Mathlib.AlgebraicGeometry.PullbackCarrier
+public import ModularCurves.ForMathlib.SegreStandardChartEquivalence
+public import Mathlib.AlgebraicGeometry.Pullbacks
 
 /-!
 # The standard affine cover of a product of projective spaces
@@ -17,6 +20,8 @@ affine cover. Each product chart is the spectrum of the tensor product of the fa
 rings and hence, by the local Segre algebra equivalence, isomorphic to the corresponding
 standard chart of the Segre-image `Proj`.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry TopologicalSpace.Opens
 

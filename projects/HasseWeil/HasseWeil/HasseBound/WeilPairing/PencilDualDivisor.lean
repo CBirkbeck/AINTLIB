@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.OneSubDualDivisor
-import HasseWeil.Isogeny.BaseChange.Concrete
+module
+
+public import HasseWeil.HasseBound.WeilPairing.OneSubDualDivisor
+public import HasseWeil.Isogeny.BaseChange.Concrete
 
 /-!
 # The divisor-pushforward dual of `rπ − s`, and the `PencilScaling` leaf (CoordHom-free)
@@ -71,6 +73,8 @@ internally (CRT, `deg_eq_of_frob_det_data`), so `deg` needs no external degree f
   III.8.2 (the translation covariance behind the separable adjoint), III.8.6.1 (the symplectic
   scaling `e_ℓ(φS, φT) = e_ℓ(S,T)^{deg φ}`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

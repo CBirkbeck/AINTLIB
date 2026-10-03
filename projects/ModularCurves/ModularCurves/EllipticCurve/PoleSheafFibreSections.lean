@@ -1,6 +1,8 @@
-import ModularCurves.EllipticCurve.PoleSheafPointedIso
-import ModularCurves.EllipticCurve.PoleSheafModel
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafPointedIso
+public import ModularCurves.EllipticCurve.PoleSheafModel
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
 # Global pole sections on residue fibres
@@ -9,6 +11,10 @@ This file transports the explicit basis of pole sections on a projective Weierst
 model across the pointed isomorphism supplied by `FibrewiseElliptic`. It proves the
 dimension of `Γ(O(n[0]))` on every residue fibre for `n >= 1`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory SheafOfModules
   TopologicalSpace

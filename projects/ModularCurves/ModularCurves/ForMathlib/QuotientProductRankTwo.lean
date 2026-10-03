@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Ideal.Quotient.Operations
-import Mathlib.LinearAlgebra.Quotient.Basic
+module
+
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
+public import Mathlib.LinearAlgebra.Quotient.Basic
 
 /-!
 # The quotient by a product of two evaluation ideals is free of rank two
@@ -15,6 +17,8 @@ by two "evaluations", the quotient `A ⧸ (rP·rQ)` is free of rank two — via 
 sequence `0 → A/(rQ) → A/(rP·rQ) → A/(rP) → 0` (multiplication by `rP`, then the
 projection), which is valid uniformly in `rP = rQ` (the tangent case).
 -/
+
+@[expose] public section
 
 namespace ModularCurves
 

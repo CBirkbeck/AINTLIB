@@ -3,12 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.FreeModule.Norm
-import Mathlib.NumberTheory.RamificationInertia.Basic
-import Mathlib.RingTheory.ClassGroup.Basic
-import Mathlib.RingTheory.Ideal.Norm.RelNorm
-import Mathlib.RingTheory.Localization.AtPrime.Extension
-import Mathlib.RingTheory.OrderOfVanishing.Basic
+module
+
+public import Mathlib.LinearAlgebra.FreeModule.Norm
+public import Mathlib.NumberTheory.RamificationInertia.Basic
+public import Mathlib.RingTheory.ClassGroup.Basic
+public import Mathlib.RingTheory.Ideal.Norm.RelNorm
+public import Mathlib.RingTheory.DedekindDomain.Instances
+public import Mathlib.RingTheory.Localization.AtPrime.Extension
+public import Mathlib.RingTheory.OrderOfVanishing.Basic
 
 /-!
 # The class-group relative norm
@@ -27,6 +30,8 @@ ideal is principal
 
 * `HasseWeil.ClassGroup.relNorm_mk0`: the value of `relNorm` on the class of an integral ideal.
 -/
+
+@[expose] public section
 
 open scoped nonZeroDivisors
 

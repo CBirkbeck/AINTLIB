@@ -1,9 +1,11 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.AnchorCubeAndObstruction
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.ConjNormDescendedDatum
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.ParityObstruction
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.RealGenerator
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.CaseIIRealDescent
-import BernoulliRegular.UnitQuotient.Washington83UnitForward
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.AnchorCubeAndObstruction
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.ConjNormDescendedDatum
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.ParityObstruction
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.RealGenerator
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.CaseIIRealDescent
+public import BernoulliRegular.UnitQuotient.Washington83UnitForward
 
 /-!
 # [FLT37-CASEII-R2-L1] Washington's real anchor `ρ₀` (GTM 83 §9.1 p.169)

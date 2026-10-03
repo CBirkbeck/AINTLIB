@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.PadicL.LpValue
+module
+
+public import BernoulliRegular.FLT37.PadicL.LpValue
 
 /-!
 # B-C1.2 — Proposition 6.13 at `f = 1`: `v_p(τ(ω^{-i})) = i/(p-1)`
@@ -42,6 +44,8 @@ unconditionally.
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83,
   Prop 6.13, Lemmas 6.11–6.12 (pp. 87–97).
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

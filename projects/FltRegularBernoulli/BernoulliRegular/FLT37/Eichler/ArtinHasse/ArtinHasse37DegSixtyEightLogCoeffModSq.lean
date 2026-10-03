@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseDeg68FrobeniusCorrection
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseDeg68FrobeniusCorrection
 
 /-!
 # The degree-`68` Artin-Hasse normalized log coefficient `formalSum68` mod `37²`: the verified value

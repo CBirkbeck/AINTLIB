@@ -3,20 +3,23 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.FinitePresentation
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
-import Mathlib.RingTheory.RingHom.FaithfullyFlat
-import Mathlib.RingTheory.TensorProduct.Basic
-import Mathlib.RingTheory.TensorProduct.Maps
-import Mathlib.RingTheory.FiniteStability
-import Mathlib.RingTheory.Spectrum.Prime.Chevalley
-import Mathlib.RingTheory.Spectrum.Prime.RingHom
-import Mathlib.RingTheory.Spectrum.Prime.Topology
-import Mathlib.Topology.Spectral.ConstructibleTopology
-import Mathlib.LinearAlgebra.Finsupp.LinearCombination
-import Mathlib.RingTheory.Ideal.Quotient.Operations
-import Mathlib.Tactic.Algebraize
-import ModularCurves.ForMathlib.FaithfullyFlatEqualizer
+module
+
+import Mathlib.Topology.WithTopology
+public import Mathlib.RingTheory.FinitePresentation
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+public import Mathlib.RingTheory.RingHom.FaithfullyFlat
+public import Mathlib.RingTheory.TensorProduct.Basic
+public import Mathlib.RingTheory.TensorProduct.Maps
+public import Mathlib.RingTheory.FiniteStability
+public import Mathlib.RingTheory.Spectrum.Prime.Chevalley
+public import Mathlib.RingTheory.Spectrum.Prime.RingHom
+public import Mathlib.RingTheory.Spectrum.Prime.Topology
+public import Mathlib.Topology.Spectral.ConstructibleTopology
+public import Mathlib.LinearAlgebra.Finsupp.LinearCombination
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
+public import Mathlib.Tactic.Algebraize
+public import ModularCurves.ForMathlib.FaithfullyFlatEqualizer
 
 /-!
 # [02KL-CORE]: finite presentation reflects along a faithfully flat, finitely presented composite
@@ -49,6 +52,10 @@ Architecture ("ENDING-1", concrete filtered systems, no category-theory transpor
   wrapper `RingHom.FinitePresentation.of_comp_of_faithfullyFlat'` (primed to avoid a name
   clash with the registered gate; the gate flips to this on completion, board-coordinated).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u v
 

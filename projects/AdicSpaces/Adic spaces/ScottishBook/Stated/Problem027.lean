@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».IntegralStructureSheaf
+module
+
+public import «Adic spaces».IntegralStructureSheaf
 
 /-!
 # Nonarchimedean Scottish Book — Problem 27
@@ -53,6 +55,8 @@ A positive answer is known for:
 * Wedhorn, *Adic Spaces*, §8.1 (integral structure sheaf)
 * Scholze, *Perfectoid Spaces*, Theorem 6.3
 -/
+
+@[expose] public section
 
 open ValuationSpectrum
 

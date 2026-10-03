@@ -3,11 +3,13 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.Moduli.GammaHRepresentability
-import ModularCurves.Moduli.Bootstrap
-import ModularCurves.Moduli.QuotientStack
-import ModularCurves.ForMathlib.EtaleSectionsCount
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.Moduli.GammaHRepresentability
+public import ModularCurves.Moduli.Bootstrap
+public import ModularCurves.Moduli.QuotientStack
+public import ModularCurves.ForMathlib.EtaleSectionsCount
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # T-E15b — the level-3 `TorsorData` package (KM 4.7, axiom 2, at `(N, G) = (3, GL₂(𝔽₃))`)
@@ -77,6 +79,8 @@ axiom 2 upgrades to a finite étale `G`-torsor.
   (`ForMathlib/EtaleIsoLocus.lean` route) reduces the iso to constant fibre rank 1 =
   exactly-one-`γ`-per-fibre-pair.
 -/
+
+@[expose] public section
 
 -- v4.33 bump: neither the `Scheme` category instance nor the semireducible component
 -- types are transparent enough for the rewrites below at `implicit` transparency.

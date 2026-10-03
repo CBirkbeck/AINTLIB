@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.MuN
+module
+
+public import ModularCurves.GroupScheme.MuN
 
 /-!
 # The fibre square of constant schemes (route β, step 1's input)
@@ -22,6 +24,8 @@ Two ingredients, neither of which needs the universality of coproducts:
 * the double coproduct `∐_B ∐_A S` is `∐_{B × A} S` by a reindexing whose two directions are
   built from `Sigma.desc`/`Sigma.ι` and shown inverse by `Sigma.hom_ext` alone.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

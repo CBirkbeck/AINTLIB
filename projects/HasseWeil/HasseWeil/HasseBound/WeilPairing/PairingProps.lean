@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.DivisorPullback
-import HasseWeil.HasseBound.WeilPairing.Pairing
+module
+
+public import HasseWeil.HasseBound.WeilPairing.DivisorPullback
+public import HasseWeil.HasseBound.WeilPairing.Pairing
 
 /-!
 # Weil-pairing properties: bilinearity in the second slot and alternating (Silverman III.8.1)
@@ -48,6 +50,8 @@ core `weilPairing_pow_eq_one` reduce `e_ℓ(T, T)` to a power that collapses.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.8.1 (Prop 8.1b, 8.1d).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

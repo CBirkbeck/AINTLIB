@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorConjNormFactorDrop
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorConjNormFactorDrop
 
 /-!
 # [FLT37-CASEII-R2] The **free-content** Case-II descent datum (Washington's doubled measure)

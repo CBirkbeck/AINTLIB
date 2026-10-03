@@ -2,16 +2,18 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.AdicCompletion.Algebra
-import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
-import Mathlib.RingTheory.AdicCompletion.Exactness
-import Mathlib.RingTheory.PowerSeries.Ideal
-import Mathlib.RingTheory.MvPowerSeries.Basic
-import Mathlib.RingTheory.MvPowerSeries.Trunc
-import Mathlib.RingTheory.Polynomial.Basic
-import Mathlib.Algebra.MvPolynomial.Eval
-import Mathlib.Algebra.MvPolynomial.CommRing
-import «Adic spaces».AdicCompletionBridge
+module
+
+public import Mathlib.RingTheory.AdicCompletion.Algebra
+public import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
+public import Mathlib.RingTheory.AdicCompletion.Exactness
+public import Mathlib.RingTheory.PowerSeries.Ideal
+public import Mathlib.RingTheory.MvPowerSeries.Basic
+public import Mathlib.RingTheory.MvPowerSeries.Trunc
+public import Mathlib.RingTheory.Polynomial.Basic
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.Algebra.MvPolynomial.CommRing
+public import «Adic spaces».AdicCompletionBridge
 
 /-!
 # Stacks 0316 — I-adic completion of a Noetherian ring is Noetherian
@@ -73,6 +75,8 @@ modulo these sorries. After execution by `/beastmode`, this file provides
   (Addison-Wesley 1969), §10 Theorem 10.27.
 * Matsumura, H., *Commutative Ring Theory* (Cambridge 1986), Theorem 8.4.
 -/
+
+@[expose] public section
 
 namespace AdicCompletion
 

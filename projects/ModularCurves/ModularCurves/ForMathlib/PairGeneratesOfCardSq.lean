@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Module.ZMod
-import Mathlib.Algebra.Field.ZMod
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
-import Mathlib.LinearAlgebra.Dimension.OrzechProperty
-import Mathlib.FieldTheory.Finiteness
+module
+
+public import Mathlib.Algebra.Module.ZMod
+public import Mathlib.Algebra.Field.ZMod
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+public import Mathlib.LinearAlgebra.Dimension.OrzechProperty
+public import Mathlib.FieldTheory.Finiteness
 
 /-!
 # Pair generation in a `p²`-torsion group ([T-E15-NORM]/AX2-e leaf)
@@ -28,6 +30,8 @@ geometric fibre with `G = E[p](k̄)` (`#G = p²` from BB-DEG rank + étaleness).
 `addSubgroup_closure_pair_eq_top_iff` takes the torsion hypothesis and speaks
 `ℕ`-multiples only.
 -/
+
+@[expose] public section
 
 open Module
 

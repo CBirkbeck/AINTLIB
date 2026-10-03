@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalizationLiftContinuity
-import «Adic spaces».WedhornExtendValuationContinuity
-import «Adic spaces».WedhornValuationLocalizationLift
+module
+
+public import «Adic spaces».WedhornLocalizationLiftContinuity
+public import «Adic spaces».WedhornExtendValuationContinuity
+public import «Adic spaces».WedhornValuationLocalizationLift
 
 /-!
 # Bounded-hypothesis Spv-level localization lift continuity bridge
@@ -64,6 +66,8 @@ deriving them automatically is the documented residual below.
 * No edits to committed bridge files.
 * No Lane B / Cor 8.32 / Jacobson / T001 / faithful-flatness /
   final-acyclicity content. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.GroupScheme.SubgroupQuotientGlue
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.GroupScheme.SubgroupQuotientGlue
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The subgroup-scheme quotient glue data (`[HG-C4c-2]` S5)
@@ -17,6 +19,8 @@ project, descend); every glue-data identity reduces along `restrictedπ_hom_ext`
 window-level identity, which `window_hom_ext` closes because every window map in sight
 fixes the ambient curve.
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

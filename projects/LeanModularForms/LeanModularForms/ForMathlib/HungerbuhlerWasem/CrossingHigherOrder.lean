@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.HungerbuhlerWasem.SectorCancellation
-import LeanModularForms.ForMathlib.HungerbuhlerWasem.CrossingDataBuilder
-import LeanModularForms.ForMathlib.ExitTime
-import Mathlib.MeasureTheory.Integral.DivergenceTheorem
+module
+
+public import LeanModularForms.ForMathlib.HungerbuhlerWasem.SectorCancellation
+public import LeanModularForms.ForMathlib.HungerbuhlerWasem.CrossingDataBuilder
+public import LeanModularForms.ForMathlib.ExitTime
+public import Mathlib.MeasureTheory.Integral.DivergenceTheorem
 
 /-!
 # Higher-order CPV discharger from immersion data (T-BR-03)
@@ -32,6 +34,8 @@ of inputs:
   smooth specialisation at off-partition points, deriving `L_- = L_+` and
   the even-power `h_B` from the simpler `(k-1)·π ∈ 2π·ℤ` form of (B).
 -/
+
+@[expose] public section
 
 open Filter Topology Set Complex MeasureTheory
 open scoped Real Interval

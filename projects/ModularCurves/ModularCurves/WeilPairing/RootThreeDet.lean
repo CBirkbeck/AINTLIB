@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.UniversalLevelThree
-import ModularCurves.Moduli.Bootstrap
-import ModularCurves.WeilPairing.UniversalRootThree
+module
+
+public import ModularCurves.Moduli.UniversalLevelThree
+public import ModularCurves.Moduli.Bootstrap
+public import ModularCurves.WeilPairing.UniversalRootThree
 
 /-!
 # The `GL₂(ℤ/3)`-action on the level-three moduli object (WP-D3c-N3)
@@ -23,6 +25,8 @@ that problem at `N = 3`. Transporting an automorphism of a representable functor
 representing object is `Functor.RepresentableBy.ofIso` followed by
 `Functor.RepresentableBy.uniqueUpToIso`.
 -/
+
+@[expose] public section
 
 universe u
 

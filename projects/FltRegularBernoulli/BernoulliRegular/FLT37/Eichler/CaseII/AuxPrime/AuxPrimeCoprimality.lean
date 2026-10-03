@@ -1,8 +1,10 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerUnramifiedToConjFixed
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjugateNormRealGeneratorPower
-import BernoulliRegular.FLT37.LehmerVandiver.PollaczekLog.PrimeIdentification
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.CoprimeDescentPreservation
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerUnramifiedToConjFixed
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjugateNormRealGeneratorPower
+public import BernoulliRegular.FLT37.LehmerVandiver.PollaczekLog.PrimeIdentification
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.CoprimeDescentPreservation
 
 /-!
 # [F4] Washington Lemma 9.6 for `p = 37`, `ℓ = 149` — PROVEN

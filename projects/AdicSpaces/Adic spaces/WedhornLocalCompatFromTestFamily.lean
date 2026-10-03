@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalPerBranchChain
-import «Adic spaces».WedhornLocalizedCor732Application
-import «Adic spaces».WedhornMultiDominatingUnit
-import «Adic spaces».WedhornStandardCoverRefinement
+module
+
+public import «Adic spaces».WedhornLocalPerBranchChain
+public import «Adic spaces».WedhornLocalizedCor732Application
+public import «Adic spaces».WedhornMultiDominatingUnit
+public import «Adic spaces».WedhornStandardCoverRefinement
 
 /-!
 # Wedhorn local-compatibility from canonical test family
@@ -63,6 +65,8 @@ that is the genuine Wedhorn-content residual at this lane.
 * Reuses `not_vle_zero_of_strict_dominator`
   (`WedhornMultiDominatingUnit.lean:189`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

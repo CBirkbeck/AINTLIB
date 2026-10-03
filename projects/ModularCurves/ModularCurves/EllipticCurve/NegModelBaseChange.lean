@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.GroupLawConstruction
+module
+
+public import ModularCurves.EllipticCurve.GroupLawConstruction
 
 /-!
 # Base-change naturality of negation on the projective Weierstrass model
@@ -24,6 +26,8 @@ formulaic) negation substitution: `negVec (W.map f) = MvPolynomial.map f ∘ neg
   projModelBaseChange f W ≫ negModelHom W`. Consumed by the `invOver` group-axiom transport
   (c5β's T-G4).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MvPolynomial HomogeneousIdeal
 

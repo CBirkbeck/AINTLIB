@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafModuleCechFixedFactorSections
-import ModularCurves.ForMathlib.SchemeModuleCechAffineRestriction
-import ModularCurves.ForMathlib.SheafModuleCechTwoCoverHomology
+module
+
+public import ModularCurves.ForMathlib.SheafModuleCechFixedFactorSections
+public import ModularCurves.ForMathlib.SchemeModuleCechAffineRestriction
+public import ModularCurves.ForMathlib.SheafModuleCechTwoCoverHomology
 
 /-!
 # Degree-one Cech comparison for finite affine covers
@@ -15,6 +17,8 @@ exactness assumptions in the two-cover comparison hold for finite affine
 open covers. Consequently, finite generation of native Cech cohomology in
 degree one transfers between any two such covers.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

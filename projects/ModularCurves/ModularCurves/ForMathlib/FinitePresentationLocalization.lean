@@ -1,6 +1,8 @@
-import Mathlib.RingTheory.Localization.Away.AdjoinRoot
-import Mathlib.RingTheory.Localization.BaseChange
-import ModularCurves.ForMathlib.FinitePresentationDescent
+module
+
+public import Mathlib.RingTheory.Localization.Away.AdjoinRoot
+public import Mathlib.RingTheory.Localization.BaseChange
+public import ModularCurves.ForMathlib.FinitePresentationDescent
 
 /-!
 # Spreading principal opens of finitely presented affine algebras
@@ -9,6 +11,10 @@ This file supplements finite-presentation spreading with the element and localiz
 data defining a principal open. The resulting stage localization is finitely presented,
 and base change to the filtered colimit recovers the original localization.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open TensorProduct
 

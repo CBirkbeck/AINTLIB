@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartRing
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartRing
 
 /-!
 # The chart-product ladder (T-W7.0c-c5β, β2b)
@@ -23,6 +25,10 @@ The proof is a three-step quotient transport: reorder and split the two relation
 (where `rename Sum.inr` becomes a coefficient constant — `sumAlgEquiv_comp_rename_inr`),
 and absorb it into the coefficients (`quotientEquivQuotientMvPolynomial`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open MvPolynomial
 

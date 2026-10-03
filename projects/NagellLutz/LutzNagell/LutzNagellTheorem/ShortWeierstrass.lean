@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
-import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
-import Mathlib.Tactic.Ring
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+public import Mathlib.Tactic.Ring
 
 /-!
 # Short Weierstrass model for Lutz-Nagell
@@ -18,6 +20,8 @@ over `ℤ` and its base change to `ℚ`, and proves basic rewriting lemmas (equa
 
 Downstream Lutz-Nagell files should import this file instead of re-expanding `Δ`/`Equation`.
 -/
+
+@[expose] public section
 
 open scoped Polynomial.Bivariate
 

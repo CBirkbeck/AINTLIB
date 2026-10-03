@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafAwaySections
-import ModularCurves.EllipticCurve.PoleSheafModel
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafAwaySections
+public import ModularCurves.EllipticCurve.PoleSheafModel
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
 
 /-!
 # The affine-chart preimage of the pole-sheaf comparison
@@ -14,6 +16,10 @@ The projective `Z`-chart pulls back under the pole-sheaf comparison to the
 complement of the marked section. This identifies the source open on which
 the comparison can be studied as a morphism of affine schemes.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.B0Principalization
-import BernoulliRegular.FLT37.PrimaryUnits.IsPrimaryPlusAndCyclotomicUnits
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.B0Principalization
+public import BernoulliRegular.FLT37.PrimaryUnits.IsPrimaryPlusAndCyclotomicUnits
 
 /-!
 # Real-generator bridge for Washington 9.4 Case-II (FLT37)

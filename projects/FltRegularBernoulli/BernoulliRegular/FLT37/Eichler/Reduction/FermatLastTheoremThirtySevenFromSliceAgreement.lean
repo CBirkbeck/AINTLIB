@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68SlicePrecisionBridgeReduction
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68OnwardCorrectionDischarge
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseSlicePrecisionReduction
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68SlicePrecisionBridgeReduction
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68OnwardCorrectionDischarge
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseSlicePrecisionReduction
 
 /-!
 # FLT37 II2 (route B), with the mod-`37³` precision bridge replaced by the clean same-level deg-`68`

@@ -1,5 +1,7 @@
-import ModularCurves.Picard.InvertibleSheafCocycleBaseChange
-import ModularCurves.Picard.InvertibleSheafGlueEffectivity
+module
+
+public import ModularCurves.Picard.InvertibleSheafCocycleBaseChange
+public import ModularCurves.Picard.InvertibleSheafGlueEffectivity
 
 /-!
 # Base change of affine-intersection line-bundle descent
@@ -7,6 +9,10 @@ import ModularCurves.Picard.InvertibleSheafGlueEffectivity
 This file compares the concrete Cech-glued invertible sheaf attached to a finite-stage
 unit cocycle with its pullback to the filtered-colimit base.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

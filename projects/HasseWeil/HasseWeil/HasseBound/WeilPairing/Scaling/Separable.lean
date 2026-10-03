@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.DetDeg
-import HasseWeil.HasseBound.WeilPairing.HfactLemma
-import HasseWeil.HasseBound.WeilPairing.PicDualDivisorClassLemma
+module
+
+public import HasseWeil.HasseBound.WeilPairing.DetDeg
+public import HasseWeil.HasseBound.WeilPairing.HfactLemma
+public import HasseWeil.HasseBound.WeilPairing.PicDualDivisorClassLemma
 
 /-!
 # CoordHom-free Weil-pairing scaling for separable genuine isogenies (Silverman III.8.2/8.6.1)
@@ -69,6 +71,8 @@ The CoordHom-free analogues, mirroring the `picDual`-keyed chain but parametric 
   III.6.2(a) (`φ̂ ∘ φ = [deg φ]`), III.8.2 (the separable adjoint via the multiplicity-free
   pullback), III.8.6 (`det φ_ℓ = deg φ` via the scaling).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.WashingtonThetaReal
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.WashingtonThetaReal
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
 
 /-!
 # [FLT37-CASEII-REAL-DESCENT-PROOF] Discharging the reality-preserving single-root descent

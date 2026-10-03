@@ -3,9 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.PadicExp
-import Mathlib.GroupTheory.FiniteAbelian.Basic
-import Mathlib.RingTheory.Finiteness.Cardinality
+module
+
+import Mathlib.Data.Nat.Choose.Dvd
+public import PadicLFunctions.PadicExp
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+public import Mathlib.RingTheory.Finiteness.Cardinality
 
 /-!
 # The extended (Iwasawa-branch) p-adic logarithm (RJW §6, decomposition W6a)
@@ -24,6 +27,8 @@ lands inside the exponential ball.
 
 Decomposition: `.mathlib-quality/decomposition.md` R6, cluster W6a.
 -/
+
+@[expose] public section
 
 open Filter Topology
 

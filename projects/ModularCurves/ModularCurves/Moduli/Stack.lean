@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.EllCategory
-import ModularCurves.Moduli.GammaH
-import Mathlib.AlgebraicGeometry.Sites.Fpqc
-import Mathlib.AlgebraicGeometry.Sites.BigZariski
-import Mathlib.CategoryTheory.Sites.Descent.IsStack
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.Moduli.EllCategory
+public import ModularCurves.Moduli.GammaH
+public import Mathlib.AlgebraicGeometry.Sites.Fpqc
+public import Mathlib.AlgebraicGeometry.Sites.BigZariski
+public import Mathlib.CategoryTheory.Sites.Descent.IsStack
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The stack of elliptic curves: descent statements (the "stack bridge")
@@ -38,6 +40,8 @@ Per the project's design decision (KM formalism + stack bridge), the working eng
 
 The fppf Grothendieck topology used below is obtained from mathlib's `fppfPrecoverage`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

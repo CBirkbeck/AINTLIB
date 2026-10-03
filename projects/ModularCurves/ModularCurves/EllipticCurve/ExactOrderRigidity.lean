@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.EndomorphismDegree
+module
+
+public import ModularCurves.EllipticCurve.EndomorphismDegree
 
 /-!
 # [RIG-2] The level-agnostic orbit-freeness core (KM 2.7.3/2.7.4)
@@ -36,6 +38,8 @@ difference endomorphism `δ = ε * 𝟙⁻¹` (Hom.commGroup spelling of `ε −
 kills the entire cyclic subgroup `⟨P⟩` as soon as `ε` fixes `P`, and `⟨P⟩` has `N`
 distinct members; so the pin forces `δ = 0`, i.e. `ε = 𝟙`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

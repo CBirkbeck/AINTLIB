@@ -3,11 +3,13 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.Moduli.PullSectionAdd
-import ModularCurves.EllipticCurve.RigiditySpreadingOut
-import ModularCurves.EllipticCurve.RecordGroupUnique
-import ModularCurves.LevelStructure.IsoTransport
-import ModularCurves.EllipticCurve.TorsionFibre
+module
+
+public import ModularCurves.Moduli.PullSectionAdd
+public import ModularCurves.EllipticCurve.RigiditySpreadingOut
+public import ModularCurves.EllipticCurve.RecordGroupUnique
+public import ModularCurves.LevelStructure.IsoTransport
+public import ModularCurves.EllipticCurve.TorsionFibre
 
 /-!
 # The T-E4 transport, reduced to the single canonicity primitive (Y1-D2)
@@ -67,6 +69,8 @@ parked/`sorry`'d transport gates. Every one bottoms out at the *single* primitiv
 * Loeffler, §3.3/§3.7/§3.8 (the `Ell/R`-presheaf functor laws).
 * Katz–Mazur, 2.1.2 / 3.2 (canonicity of the group law; naive level structures).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj

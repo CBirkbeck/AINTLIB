@@ -1,7 +1,9 @@
-import Mathlib.AlgebraicGeometry.ZariskisMainTheorem
-import ModularCurves.EllipticCurve.PoleSheafAwayChartFactor
-import ModularCurves.EllipticCurve.PoleSheafAwayModel
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapProper
+module
+
+public import Mathlib.AlgebraicGeometry.ZariskisMainTheorem
+public import ModularCurves.EllipticCurve.PoleSheafAwayChartFactor
+public import ModularCurves.EllipticCurve.PoleSheafAwayModel
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapProper
 
 /-!
 # Finiteness of the punctured pole-sheaf comparison
@@ -9,6 +11,8 @@ import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapProper
 The exact restriction of a pole-sheaf comparison to the marked-section
 complement and the standard affine Weierstrass chart is finite.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 open CategoryTheory.Limits

@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StandardCoverConditionalBridge
-import «Adic spaces».WedhornCompactExtraction
+module
+
+public import «Adic spaces».StandardCoverConditionalBridge
+public import «Adic spaces».WedhornCompactExtraction
 
 /-!
 # Wedhorn C1 Assembly: composition of conditional-bridge + compactness layers
@@ -48,6 +50,8 @@ and a per-E `hZavyalov_per_E` discharge:
 * `mk_S_D` is built by `Classical.dec` dispatch on `D ∈ C.covers`
   (no project-level `DecidableEq` for `RationalLocData A`); on
   out-of-cover inputs `mk_S_D D = ∅`. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

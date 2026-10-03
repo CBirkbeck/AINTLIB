@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Analysis.SpecialFunctions.ExpDeriv
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+module
+
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 
 /-!
 # Arc Calculus
@@ -22,6 +24,8 @@ Used for computing winding numbers, distances, and derivatives along circular ar
 * `exp_sub_norm_sq` - distance formula between arc points via cosine
 * `sin_pos_of_mem_Ioo_zero_pi` - sin is positive on (0, π)
 -/
+
+@[expose] public section
 
 open Complex Real Set
 

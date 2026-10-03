@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Dual.Morphism
-import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
+module
+
+public import HasseWeil.Isogeny.Dual.Morphism
+public import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
 
 /-!
 # The universal `DualGaloisData` statement is false (B2 refutation)
@@ -74,6 +76,8 @@ Verschiebung route `hasDualWitnessRelativeFrobeniusOf` /
   required for the Galois fixed-field description), III.6.1 Case 2 (the
   inseparable side goes through Frobenius/Verschiebung instead).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

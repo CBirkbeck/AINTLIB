@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68SliceThirdOrderCoordRelation
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseDeg68FrobeniusCorrection
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasse37DegSixtyEightLogCoeffModSq
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68SliceThirdOrderCoordRelation
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseDeg68FrobeniusCorrection
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasse37DegSixtyEightLogCoeffModSq
 
 /-!
 # Discharging `CaseIICor823Level71Deg68OnwardCorrection37` from the deg-`68` slice value (grounded

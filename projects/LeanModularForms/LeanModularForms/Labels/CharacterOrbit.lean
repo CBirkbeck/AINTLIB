@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.Labels.Encoding
-import Mathlib.NumberTheory.DirichletCharacter.Basic
-import Mathlib.NumberTheory.MulChar.Lemmas
-import Mathlib.NumberTheory.MulChar.Duality
-import Mathlib.GroupTheory.OrderOfElement
-import Mathlib.SetTheory.Cardinal.Order
+module
+
+public import LeanModularForms.Labels.Encoding
+public import Mathlib.NumberTheory.DirichletCharacter.Basic
+public import Mathlib.NumberTheory.MulChar.Lemmas
+public import Mathlib.NumberTheory.MulChar.Duality
+public import Mathlib.GroupTheory.OrderOfElement
+public import Mathlib.SetTheory.Cardinal.Order
 
 /-!
 # LMFDB character-orbit label `a`
@@ -82,6 +84,8 @@ Nebentypus convention `(ZMod N)ˣ →* ℂˣ` (used in `cuspFormCharSpace` / `mo
   `orbitRankKey_injOn_orbits` together with injectivity of the ranking (`orbitIndex_inj`) and of
   `letterEncode`.
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFinite
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFinite
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
 
 /-!
 # Finiteness of ordered Cech homology under pushforward
@@ -15,6 +17,8 @@ The ordered base-Cech complex of a pushforward on a cover is isomorphic
 to the ordered base-Cech complex upstairs on the inverse-image cover.
 Consequently finiteness of every homology module is equivalent.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

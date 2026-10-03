@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.GlueTrivialization
-import ModularCurves.EllipticCurve.SectionRigidity
+module
+
+public import ModularCurves.Picard.GlueTrivialization
+public import ModularCurves.EllipticCurve.SectionRigidity
 
 /-!
 # Rigidified descent: locally trivial on the base ⟹ trivial (Gap A workhorse)
@@ -33,6 +35,8 @@ base (see the module docstring of `Picard/SelfAdjointN.lean` for the `k[ε]/(ε�
 counterexample). The theorem of the square is proved on the universal — hence reduced —
 pair of points, and this lemma is what converts its output into a class equality.
 -/
+
+@[expose] public section
 
 universe u
 

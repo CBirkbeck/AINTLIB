@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
 # A basic-open criterion for quasicoherence
@@ -6,6 +8,8 @@ import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 This file reconstructs quasicoherence on an affine spectrum from compatible
 tensor-product descriptions of sections on basic opens.
 -/
+
+@[expose] public section
 
 open CategoryTheory Opposite TensorProduct TopologicalSpace
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.BernoulliFast.Tactic
-import BernoulliRegular.Main
-import FltRegular.FltRegular
+module
+
+public import BernoulliRegular.BernoulliFast.Tactic
+public import BernoulliRegular.Main
+public import FltRegular.FltRegular
 
 /-!
 # The prime `23`
@@ -13,6 +15,8 @@ import FltRegular.FltRegular
 This file certifies the Bernoulli-number side of regularity for `23`, and
 packages regularity and FLT for exponent `23`.
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular
 

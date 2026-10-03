@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Kernel
-import HasseWeil.Foundation.EC.TranslationOrd
-import HasseWeil.Isogeny.Frobenius.PointCount
-import HasseWeil.Foundation.OmegaPullbackCoeff
-import HasseWeil.Foundation.Verschiebung.QthRoots
+module
+
+public import HasseWeil.Isogeny.Kernel
+public import HasseWeil.Foundation.EC.TranslationOrd
+public import HasseWeil.Isogeny.Frobenius.PointCount
+public import HasseWeil.Foundation.OmegaPullbackCoeff
+public import HasseWeil.Foundation.Verschiebung.QthRoots
 
 /-!
 # `E(F_q) = ker(1 − π)` on rational points (Silverman V.1 setup, T-V-1-001)
@@ -29,6 +31,8 @@ closes the counting side needed for `pointCount_eq` (T-V-1-003).
 ## References
 * [Silverman, *The Arithmetic of Elliptic Curves*], V.1 setup.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

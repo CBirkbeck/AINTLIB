@@ -2,10 +2,13 @@
 Copyright (c) 2026 AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Algebra.Category.ModuleCat.Descent
-import Mathlib.Algebra.Category.ModuleCat.ProjectiveDimension
-import Mathlib.Algebra.Polynomial.Module.TensorProduct
-import Mathlib.CategoryTheory.Preadditive.Projective.Preserves
+module
+
+import Mathlib.Algebra.Category.ModuleCat.Projective
+public import Mathlib.Algebra.Category.ModuleCat.Descent
+public import Mathlib.Algebra.Category.ModuleCat.ProjectiveDimension
+public import Mathlib.Algebra.Polynomial.Module.TensorProduct
+public import Mathlib.CategoryTheory.Preadditive.Projective.Preserves
 
 /-!
 # Hilbert's syzygy theorem
@@ -63,6 +66,8 @@ the Tor-free flat-locus development (DEV-1) — goes through with mathlib's pres
 entire theorem reduces to the classical `exists_characteristicShortExact`, now proved from existing
 mathlib ingredients.  No Buchsbaum–Eisenbud criterion is required.
 -/
+
+@[expose] public section
 
 universe u
 

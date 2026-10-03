@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.CategoryTheory.Limits.FormalCoproducts.Basic
-import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
+module
+
+public import Mathlib.CategoryTheory.Limits.FormalCoproducts.Basic
+public import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
 
 /-!
 # Additivity of formal coproduct evaluation
@@ -12,6 +14,8 @@ import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
 The extension of a presheaf to formal coproducts by products is additive when its target is
 preadditive.
 -/
+
+@[expose] public section
 
 open CategoryTheory Opposite
 

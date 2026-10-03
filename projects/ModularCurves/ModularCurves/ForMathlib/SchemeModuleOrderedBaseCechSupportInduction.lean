@@ -6,8 +6,10 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed
 `WellFoundedSheafCohomologyCodesvissage.lean` in Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFinite
-import ModularCurves.ForMathlib.SchemeModuleSupport
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFinite
+public import ModularCurves.ForMathlib.SchemeModuleSupport
 
 /-!
 # Ordered base-Cech finiteness by closed-support induction
@@ -17,6 +19,8 @@ base-Cech homology finiteness to the two residuals in the
 kernel-image-cokernel factorization. Strict decrease of a well-founded rank,
 specialized to closed stalk support on a Noetherian space, closes the induction.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 

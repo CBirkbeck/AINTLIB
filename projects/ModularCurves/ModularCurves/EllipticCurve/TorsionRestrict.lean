@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.EndomorphismDegree
+module
+
+public import ModularCurves.EllipticCurve.EndomorphismDegree
 
 /-!
 # Pointed endomorphisms restrict to torsion ([RIG-1a], step 1)
@@ -18,6 +20,8 @@ This is the restriction half of the [RIG-1] detection route: the fibrewise-trivi
 automorphism is compared with the identity on the finite étale `E[M]` (where the
 `UnramifiedEqualizer` engine applies), and `aut_endo_eq_one` then closes.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

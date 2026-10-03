@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.PullbackTensorGeneral
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
-import ModularCurves.ForMathlib.SchemeModuleSupport
+module
+
+public import ModularCurves.ForMathlib.PullbackTensorGeneral
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+public import ModularCurves.ForMathlib.SchemeModuleSupport
 
 /-!
 # Quasicoherence after tensoring by an invertible sheaf
@@ -14,6 +16,8 @@ An invertible sheaf is trivial on an open cover. Refining that cover by affine
 opens identifies the restriction of its tensor product with the restriction of
 the other factor, so quasicoherence descends from the affine refinement.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory TopologicalSpace
 

@@ -1,7 +1,9 @@
-import HasseWeil.Foundation.Curves.Valuation.NormValuation
-import HasseWeil.Foundation.Curves.Map.CurveMap
-import HasseWeil.Foundation.Curves.Fiber.GenericFiber
-import Mathlib.RingTheory.Finiteness.Quotient
+module
+
+public import HasseWeil.Foundation.Curves.Valuation.NormValuation
+public import HasseWeil.Foundation.Curves.Map.CurveMap
+public import HasseWeil.Foundation.Curves.Fiber.GenericFiber
+public import Mathlib.RingTheory.Finiteness.Quotient
 
 /-!
 # Residue-field AlgEquiv route for Piece 9
@@ -44,6 +46,8 @@ The remaining gap is the final transport step — the instance-search
 concern that neither worker-K nor worker A could work around in the
 generic `CurveMap` setting.
 -/
+
+@[expose] public section
 
 open IsDedekindDomain
 

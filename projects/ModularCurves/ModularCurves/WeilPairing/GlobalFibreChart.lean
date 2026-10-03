@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.FibreGalois
-import ModularCurves.EllipticCurve.GlobalChartOverField
-import ModularCurves.Moduli.KeystoneGeometricPoint
+module
+
+public import ModularCurves.WeilPairing.FibreGalois
+public import ModularCurves.EllipticCurve.GlobalChartOverField
+public import ModularCurves.Moduli.KeystoneGeometricPoint
 
 /-!
 # The Galois fibre chart over a field (DS4 M1c, node F′)
@@ -26,6 +28,8 @@ The two things to transport are exactly the ones the plan flagged:
 Everything is split into single steps; the `Opens`/`ΓSpecIso` coercions in this file are
 exactly where a monolithic proof would stall.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.GammaRatioPthPowerProven
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.MirimanoffResidualAndSumMembership
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitLocalPower
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.GammaRatioPthPowerProven
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.MirimanoffResidualAndSumMembership
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitLocalPower
 
 /-!
 # [FLT37-CASEII-R4] Washington Theorem 9.5 Case-II `ℓ ∣ z` content, assembled over

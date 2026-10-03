@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
-import HasseWeil.Foundation.Curves.Valuation.OrdAtPoint
-import HasseWeil.HasseBound.Infrastructure
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
+public import HasseWeil.Foundation.Curves.Valuation.OrdAtPoint
+public import HasseWeil.HasseBound.Infrastructure
 
 /-!
 # Open lemma primitives — substantive primitives from the Hasse-era trace
@@ -42,6 +44,8 @@ that were NOT already stated in `OpenLemmas.lean`.
   V.1.3 (separable degree of `1 - pi`), III.3 (Abel-Jacobi).
 * `proof-dependency-trace.md` — the missing-primitive inventory.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 open HasseWeil.Curves.RamificationAtInfinity

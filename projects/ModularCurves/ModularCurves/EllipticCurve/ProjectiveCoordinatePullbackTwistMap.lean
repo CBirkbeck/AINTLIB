@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveCoordinateTwistMap
-import ModularCurves.ForMathlib.SchemeModulePullbackLocalIso
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveCoordinateTwistMap
+public import ModularCurves.ForMathlib.SchemeModulePullbackLocalIso
 
 /-!
 # Pullbacks of projective coordinate twist maps
@@ -14,6 +16,8 @@ an arbitrary source, invertible over the preimage of its standard chart.
 Tensoring gives the corresponding coordinate multiplication map on every
 source module.
 -/
+
+@[expose] public section
 
 open CategoryTheory MonoidalCategory
 

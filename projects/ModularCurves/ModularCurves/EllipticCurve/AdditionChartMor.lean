@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartAway
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartAway
 
 /-!
 # The addition laws as scheme morphisms on each piece (T-W7.0c-c5β, β3 geometric half)
@@ -21,6 +23,8 @@ pieces of `addOnY`; the union of the three `D(t_k)` is the regularity open of la
 (the complement of its exceptional divisor — where the triple vanishes identically), i.e. the
 piece's contribution to `blOpenY`.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory
 

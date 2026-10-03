@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SchemeModuleBaseCechTrivialFlat
-import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechTrivialFlat
+public import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
 
 /-!
 # Flat Cech models for invertible sheaves
@@ -8,6 +10,8 @@ An invertible sheaf on a compact scheme admits a finite affine trivializing
 cover.  For a separated flat family over an affine base, the associated
 base-linear Cech complex is therefore termwise flat.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

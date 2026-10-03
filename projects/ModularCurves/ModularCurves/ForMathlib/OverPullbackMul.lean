@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+module
+
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
 
 /-!
 # The projection intertwines the pullback monoid multiplication
@@ -23,6 +25,8 @@ is semireducible, and `rw`/`simp` matchers (`kabstract`) re-check compositions a
 
 AINTLIB ModularCurves (T-H2b); upstream candidate.
 -/
+
+@[expose] public section
 
 open CategoryTheory MonoidalCategory CartesianMonoidalCategory Limits MonObj
 

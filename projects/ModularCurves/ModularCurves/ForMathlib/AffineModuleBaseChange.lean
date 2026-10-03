@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.AdjunctionUnitIsoTransport
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+module
+
+public import ModularCurves.ForMathlib.AdjunctionUnitIsoTransport
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
 # Affine base change for quasicoherent modules
@@ -8,6 +10,10 @@ On affine spectra, global sections of a pulled-back quasicoherent module are
 obtained by extension of scalars. The construction compares the composite
 tilde-pullback adjunction with the extension-of-scalars-tilde adjunction.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Opposite TopologicalSpace
 

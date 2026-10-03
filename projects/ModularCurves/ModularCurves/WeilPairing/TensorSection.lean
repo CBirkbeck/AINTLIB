@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.InvertibleSheaf
+module
+
+public import ModularCurves.Picard.InvertibleSheaf
 
 /-!
 # Sections of the sheafified tensor product (`AP2-B1a-iii`)
@@ -14,6 +16,8 @@ per-open value is the module tensor `Γ(A,U) ⊗[Γ(T,U)] Γ(B,U)` — the const
 of `a ⊗ₜ b` under the sheafification unit, with its restriction naturality. Consumed by `AP2-B1a`'s
 glue obligation (`WeilPairing/RelPicLocal.lean`).
 -/
+
+@[expose] public section
 
 universe u
 

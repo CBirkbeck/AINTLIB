@@ -3,10 +3,12 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves stream D
 -/
-import Mathlib.RingTheory.AdjoinRoot
-import Mathlib.RingTheory.Polynomial.Vieta
-import Mathlib.RingTheory.Nakayama
-import Mathlib.RingTheory.LocalRing.MaximalIdeal.Basic
+module
+
+public import Mathlib.RingTheory.AdjoinRoot
+public import Mathlib.RingTheory.Polynomial.Vieta
+public import Mathlib.RingTheory.Nakayama
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Basic
 
 /-!
 # Ring-theoretic leaves of the KM 6.2/6.3 homogeneity block ([KM-62-63-HOMOG])
@@ -33,6 +35,8 @@ computation, decoupled from the (Ell)-moduli-problem frame (the [HOMOG-FRAME] ga
   whose target has no `q`-torsion and whose `q`-reduction is injective on preimages, has
   zero kernel (for `q` in the Jacobson radical).
 -/
+
+@[expose] public section
 
 open Multiset Polynomial
 

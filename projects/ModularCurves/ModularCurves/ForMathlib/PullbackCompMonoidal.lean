@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.PresheafPullbackCompMonoidal
-import ModularCurves.Picard.PullbackTensorObj
-import ModularCurves.Picard.DualPullback.RestrictComp
+module
+
+public import ModularCurves.ForMathlib.PresheafPullbackCompMonoidal
+public import ModularCurves.Picard.PullbackTensorObj
+public import ModularCurves.Picard.DualPullback.RestrictComp
 
 /-!
 # Monoidality of pullback composition for sheaves of modules
@@ -15,6 +17,8 @@ of schemes is monoidal. The proof identifies its pullback along module sheafific
 with the corresponding presheaf comparison, proves that comparison monoidal, and then
 descends through the monoidal localization.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory MonoidalCategory Functor.LaxMonoidal
 

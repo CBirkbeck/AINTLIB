@@ -1,6 +1,8 @@
-import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdge
-import Mathlib.Algebra.Homology.ConcreteCategory
-import Mathlib.Algebra.Homology.QuasiIso
+module
+
+public import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdge
+public import Mathlib.Algebra.Homology.ConcreteCategory
+public import Mathlib.Algebra.Homology.QuasiIso
 
 /-!
 # Degree-one homology of the horizontal edge map
@@ -9,6 +11,8 @@ An explicit cycle-and-boundary chase shows that the horizontal edge map into a
 first-quadrant total complex is a quasi-isomorphism in degree one under the
 minimal low-row exactness hypotheses.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
 

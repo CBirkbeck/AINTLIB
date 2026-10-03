@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.GenericCovarianceGeneral
-import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
-import HasseWeil.HasseBound.WeilPairing.TorsionKernelRational
-import HasseWeil.Isogeny.MulByInt.Basepoint
+module
+
+public import HasseWeil.Foundation.EC.GenericCovarianceGeneral
+public import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
+public import HasseWeil.HasseBound.WeilPairing.TorsionKernelRational
+public import HasseWeil.Isogeny.MulByInt.Basepoint
 
 /-!
 # The separable dual over `K̄`: fixed-field equality and `DualGaloisData` without `[Fintype F]`
@@ -71,6 +73,8 @@ They are therefore carried as named per-isogeny witnesses, exactly as in
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4.10–4.11, III.6.1.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

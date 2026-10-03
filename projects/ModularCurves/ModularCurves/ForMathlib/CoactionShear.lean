@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.Coaction
-import Mathlib.RingTheory.HopfAlgebra.Convolution
+module
+
+public import ModularCurves.ForMathlib.Coaction
+public import Mathlib.RingTheory.HopfAlgebra.Convolution
 
 /-!
 # The shear automorphism of a Hopf co-action
@@ -32,6 +34,8 @@ Downstream (`[HG-B2]`, `[HG-B5]`) this transports every `ρ`-side structure on `
 (module structure, freeness, faithful flatness) to the plain left-factor structure — the
 "only left instances" design pin of the charter.
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.Fiber
-import HasseWeil.Foundation.Curves.Divisor.PicZero
+module
+
+public import HasseWeil.HasseBound.WeilPairing.Fiber
+public import HasseWeil.Foundation.Curves.Divisor.PicZero
 
 /-!
 # Route 2A — the multiplicity-free geometric divisor pullback (keystone)
@@ -18,6 +20,8 @@ both the pairing construction (`div g = [ℓ]*((T)) − [ℓ]*((O))`) and the se
 This file ships the definition and its **degree**: `deg(f*((Q))) = #fibre = #ker f` (Silverman
 III.4.10c, the separable case). The `σ`-bridge and the addition-formula linkage are downstream.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.WeilPairing
 

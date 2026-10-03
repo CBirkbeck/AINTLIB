@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DescentDetectorVanishing
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DescentDetectorVanishing
 
 /-!
 # `Cor823Omega32SecondOrderCollapse37` from the genuine second-order coefficient core

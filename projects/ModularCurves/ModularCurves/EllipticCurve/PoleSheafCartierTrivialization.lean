@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafPowerOneSection
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafPowerOneSection
 
 /-!
 # Cartier-chart coefficients of pole sections
@@ -13,6 +15,10 @@ named explicitly, and the pole-filtration inclusion is computed in those
 coordinates. In particular, the literal first-pole section has coefficient
 equal to the Cartier generator.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory MonoidalCategory
 

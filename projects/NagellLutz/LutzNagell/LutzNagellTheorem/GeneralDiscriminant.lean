@@ -1,6 +1,8 @@
-import LutzNagell.LutzNagellTheorem.GeneralMain
-import LutzNagell.LutzNagellTheorem.GeneralIntegralMultiple
-import LutzNagell.LutzNagellTheorem.PIDMain
+module
+
+public import LutzNagell.LutzNagellTheorem.GeneralMain
+public import LutzNagell.LutzNagellTheorem.GeneralIntegralMultiple
+public import LutzNagell.LutzNagellTheorem.PIDMain
 
 /-!
 # General discriminant divisibility for Weierstrass curves
@@ -26,6 +28,8 @@ For a nonzero torsion point `(x₀, y₀) ∈ ℤ²` on a general Weierstrass cu
    identity `h(x₀)² ≡ 0 (mod κ₀²)` and the Bézout step `d₁·Ψ₂Sq + d₂·h² = 4Δ` that
    conclude `κ₀ = 0 ∨ κ₀² | 4Δ`.
 -/
+
+@[expose] public section
 
 namespace LutzNagell
 namespace LutzNagellTheorem

@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Ideal.MinimalPrime.Localization
-import Mathlib.RingTheory.Localization.AtPrime.Basic
-import Mathlib.RingTheory.LocalProperties.Reduced
-import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
-import Mathlib.RingTheory.Localization.Away.Lemmas
+module
+
+public import Mathlib.RingTheory.Ideal.MinimalPrime.Localization
+public import Mathlib.RingTheory.Localization.AtPrime.Basic
+public import Mathlib.RingTheory.LocalProperties.Reduced
+public import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
+public import Mathlib.RingTheory.Localization.Away.Lemmas
 
 /-!
 # A ring with local domains has comaximal minimal primes (WP-D3a-DOM)
@@ -29,6 +31,8 @@ domain then `⊥` is prime, and its contraction `P₀ := (algebraMap A A_m)⁻¹
 `r` is prime and `s ∉ r`. Minimality of `r` then forces `r = P₀`, so all minimal primes below
 `m` are the same one.
 -/
+
+@[expose] public section
 
 universe u
 

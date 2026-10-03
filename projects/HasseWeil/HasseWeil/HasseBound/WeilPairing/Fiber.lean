@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.Tactic
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.Tactic
 
 /-!
 # Route 2A — fibres of point-map endomorphisms as kernel cosets (keystone foundation)
@@ -20,6 +22,8 @@ level at which the Weil pairing and the pullback divisor operate.
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, III.4 (fibres of an isogeny are cosets of
 the kernel).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.WeilPairing
 

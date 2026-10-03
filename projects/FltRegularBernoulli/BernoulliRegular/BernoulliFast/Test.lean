@@ -3,11 +3,15 @@ Copyright (c) 2026 Bernoulli-Regular project contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bernoulli-Regular project contributors
 -/
-import BernoulliRegular.BernoulliFast.Tactic
+module
+
+public import BernoulliRegular.BernoulliFast.Tactic
 
 /-!
 # Tests for the `Cbv.bernoulliFrac`-backed `bernoulli_decide`
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular.BernoulliFast
 

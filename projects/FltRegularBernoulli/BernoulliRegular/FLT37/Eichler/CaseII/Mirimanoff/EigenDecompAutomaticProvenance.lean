@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AllConjugateResidueCollapse
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AllConjugateResidueCollapse
 
 /-!
 # Washington Lemma 9.9 for `p = 37`: the eigencomponent decomposition is automatic, and the

@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafProjectiveCech
-import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
-import ModularCurves.EllipticCurve.PullbackTensorSection
-import ModularCurves.ForMathlib.FiniteAffineOpenCover
-import ModularCurves.ForMathlib.SchemeModuleBaseSectionsBaseChange
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
-import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafProjectiveCech
+public import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
+public import ModularCurves.EllipticCurve.PullbackTensorSection
+public import ModularCurves.ForMathlib.FiniteAffineOpenCover
+public import ModularCurves.ForMathlib.SchemeModuleBaseSectionsBaseChange
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
+public import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
 
 /-!
 # Base change for projectively presented pole-section modules
@@ -17,6 +19,10 @@ import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
 This file proves formation of global sections of `O(n[0])` commutes with every affine base
 change for a projectively presented fibrewise elliptic family over a Noetherian ring.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
 open TensorProduct

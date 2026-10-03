@@ -1,6 +1,8 @@
-import Mathlib.RingTheory.Extension.Presentation.Basic
-import ModularCurves.ForMathlib.FinitePresentationEquiv
-import ModularCurves.ForMathlib.FilteredColimitClopen
+module
+
+public import Mathlib.RingTheory.Extension.Presentation.Basic
+public import ModularCurves.ForMathlib.FinitePresentationEquiv
+public import ModularCurves.ForMathlib.FilteredColimitClopen
 
 /-!
 # Reflecting equivalences of finitely presented base changes
@@ -10,6 +12,8 @@ filtered colimit already becomes an equivalence at a later stage. The proof
 uses mathlib's finite presentations to place the two tensor-product systems in
 the existing `SpreadData` framework.
 -/
+
+@[expose] public section
 
 universe u
 

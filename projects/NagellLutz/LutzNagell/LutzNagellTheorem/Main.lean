@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LutzNagell.LutzNagellTheorem.ShortWeierstrass
-import LutzNagell.LutzNagellTheorem.GeneralMain
-import LutzNagell.LutzNagellTheorem.GeneralDiscriminant
+module
+
+public import LutzNagell.LutzNagellTheorem.ShortWeierstrass
+public import LutzNagell.LutzNagellTheorem.GeneralMain
+public import LutzNagell.LutzNagellTheorem.GeneralDiscriminant
 
 /-!
 # The Lutz–Nagell Theorem
@@ -25,6 +27,8 @@ If `(x, y)` is a nonidentity rational point of finite order on `E`, then:
 * T. Nagell, *Solution de quelques problèmes dans la théorie arithmétique des cubiques planes
   du premier genre*, 1935.
 -/
+
+@[expose] public section
 
 namespace LutzNagell
 namespace LutzNagellTheorem

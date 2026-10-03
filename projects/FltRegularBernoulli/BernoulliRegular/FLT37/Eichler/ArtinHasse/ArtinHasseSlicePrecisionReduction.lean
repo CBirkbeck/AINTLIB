@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseNumeratorLevelComparison
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68SlicePrecisionBridgeReduction
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseNumeratorLevelComparison
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68SlicePrecisionBridgeReduction
 
 /-!
 # The level-`107` deg-`68` slice, folded to precision `72`, **equals** the level-`71` deg-`68` slice
@@ -36,6 +38,8 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §8.4.
 -/
+
+set_option backward.privateInPublic true
 
 @[expose] public section
 

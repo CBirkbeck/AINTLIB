@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.PoleDivisorFallback
+module
+
+public import HasseWeil.HasseBound.PoleDivisorFallback
 
 /-!
 # Bridge at `addPullbackNumerator_negFrobenius` for 2-torsion (T-T21-2TORSION-BRIDGE)
@@ -50,6 +52,8 @@ T22 composer becomes unconditional.
 * `EC/TranslationOrd.lean:2566+` — the 2-torsion `A`-factorisation and
   per-piece order bounds.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

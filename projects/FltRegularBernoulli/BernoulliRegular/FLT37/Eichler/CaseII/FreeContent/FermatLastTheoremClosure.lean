@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescentDatum
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.FactorCountDescentArchitecture
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescentDatum
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.FactorCountDescentArchitecture
 
 /-!
 # [FLT37-CASEII-R2] FLT37 Case-II via the **free-content** factor-count descent

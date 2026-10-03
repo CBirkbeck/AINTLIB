@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornMPowerStructuralDataHonest
-import «Adic spaces».WedhornLocalArithmeticPerTChain
-import «Adic spaces».WedhornLocalCor732ToFactoredChain
-import «Adic spaces».Presheaf
+module
+
+public import «Adic spaces».WedhornMPowerStructuralDataHonest
+public import «Adic spaces».WedhornLocalArithmeticPerTChain
+public import «Adic spaces».WedhornLocalCor732ToFactoredChain
+public import «Adic spaces».Presheaf
 
 /-!
 # `WedhornMPowerStructuralDataHonest` from localized Cor 7.32 / branch
@@ -119,6 +121,10 @@ audit). This file's wrapper is callsite-ready packaging.
 * Reuses `WedhornMPowerStructuralDataHonest` (target def),
   `vle_iff_mul_unit_right` (σ-cancellation),
   `mem_localizedTestFamily_iff` (test-family branch case-split). -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

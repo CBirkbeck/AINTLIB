@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.IntegralClosure
-import HasseWeil.Foundation.Curves.Valuation.NormValuation
-import HasseWeil.Foundation.EC.TranslateLocalRing
-import HasseWeil.Foundation.Ramification
+module
+
+public import HasseWeil.Foundation.Curves.IntegralClosure
+public import HasseWeil.Foundation.Curves.Valuation.NormValuation
+public import HasseWeil.Foundation.EC.TranslateLocalRing
+public import HasseWeil.Foundation.Ramification
 
 /-!
 # Discharge of `IsTranslateValuationCompatible` for non-zero translation
@@ -43,6 +45,8 @@ This file ships pieces 1–4 step by step.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, II.1, II.2, III.4.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

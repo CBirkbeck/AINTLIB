@@ -3,8 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.RingTheory.Grassmannian
-import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
+module
+
+public import Mathlib.RingTheory.Grassmannian
+import all Mathlib.RingTheory.Grassmannian
+public import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
 
 /-!
 # Affine charts of the Grassmannian functor ([NISOG-GRASS], wave 1)
@@ -24,6 +27,10 @@ by `x : Fin k → M` … the composition `R^k → M → M⧸N` is an isomorphism
 Consumer: KM 6.5.1's ambient space for `[N-Isog]` (`exists_nIsogSpace`,
 `GroupScheme/NIsogeny.lean`, gate [NISOG-GRASS]).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u v
 

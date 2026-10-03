@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.Saturation.RealCyclotomicUnitSaturation
-import BernoulliRegular.CyclotomicUnits.NormalizedIndex
-import BernoulliRegular.UnitQuotient.Washington814ForwardD
+module
+
+public import BernoulliRegular.FLT37.Eichler.Saturation.RealCyclotomicUnitSaturation
+public import BernoulliRegular.CyclotomicUnits.NormalizedIndex
+public import BernoulliRegular.UnitQuotient.Washington814ForwardD
 
 /-!
 # The Galois `Δ`-action eigenvalue on the real cyclotomic units, and the

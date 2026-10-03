@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Dual.Relation
-import HasseWeil.Foundation.EC.GenericPointZsmul
-import HasseWeil.Foundation.Verschiebung.Construction
+module
+
+public import HasseWeil.Isogeny.Dual.Relation
+public import HasseWeil.Foundation.EC.GenericPointZsmul
+public import HasseWeil.Foundation.Verschiebung.Construction
 
 /-!
 # Verschiebung as `IsDualOf` Frobenius (Session 5)
@@ -36,6 +38,8 @@ The key facts used:
 Witness-parametric on the Session 3 inclusion. When Session 3's
 unconditional discharge lands, this file's outputs become axiom-clean.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

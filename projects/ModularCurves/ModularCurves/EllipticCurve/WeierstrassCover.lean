@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.GroupLaw
+module
+
+public import ModularCurves.EllipticCurve.GroupLaw
 
 /-!
 # The Weierstrass cover of the base
@@ -22,6 +24,8 @@ be fibrewise trivial and still nontrivial, so a chartwise argument does not asse
 `Picard/SelfAdjointN.lean`). The cover remains useful wherever a Weierstrass model is needed
 locally on the base.
 -/
+
+@[expose] public section
 
 universe u
 

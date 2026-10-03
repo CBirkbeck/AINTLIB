@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.CauchyPrincipalValue
+module
+
+public import LeanModularForms.ForMathlib.CauchyPrincipalValue
 
 /-!
 # PV Integral Splitting at Crossings
@@ -27,6 +29,8 @@ On the far segments, the cutoff condition is satisfied so the integrand equals
 * `pv_tendsto_of_crossing_limit_asymmetric` — variant with different cutoff radii on
   left and right of the crossing point.
 -/
+
+@[expose] public section
 
 open Set MeasureTheory Complex Filter intervalIntegral
 open scoped Interval Topology

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.DivisorClass
-import ModularCurves.EllipticCurve.PoleSheaf
-import ModularCurves.Picard.SurjectiveInvertible
+module
+
+public import ModularCurves.Picard.DivisorClass
+public import ModularCurves.EllipticCurve.PoleSheaf
+public import ModularCurves.Picard.SurjectiveInvertible
 
 /-!
 # Pullback compatibility of ideal modules (naturality layer for (2.16))
@@ -20,6 +22,8 @@ local generator through, mirroring `bijective_idealGenHom_app`.
 
 Statement-only skeleton (next-session execution per board v10.166).
 -/
+
+@[expose] public section
 
 universe u
 

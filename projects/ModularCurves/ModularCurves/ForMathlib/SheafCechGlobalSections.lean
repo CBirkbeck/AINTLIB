@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SheafCohomologyFiniteProducts
-import ModularCurves.ForMathlib.SheafDerivedGlobalSections
+module
+
+public import ModularCurves.ForMathlib.SheafCohomologyFiniteProducts
+public import ModularCurves.ForMathlib.SheafDerivedGlobalSections
 
 /-!
 # Global sections of the sheaf-level Cech complex
@@ -8,6 +10,10 @@ This file identifies the complex obtained by applying global sections degreewise
 sheaf-level Cech resolution with mathlib's native Cech complex of the underlying
 presheaf. The comparison is compatible with the Cech differentials.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

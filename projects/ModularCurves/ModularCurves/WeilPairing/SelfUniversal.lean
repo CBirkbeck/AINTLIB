@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.AlternationReduction
-import ModularCurves.EllipticCurve.ModelRecord
-import ModularCurves.EllipticCurve.AdditionBaseChange
+module
+
+public import ModularCurves.WeilPairing.AlternationReduction
+public import ModularCurves.EllipticCurve.ModelRecord
+public import ModularCurves.EllipticCurve.AdditionBaseChange
 
 /-!
 # Alternation via the universal Weierstrass family (AP-E4a, skeleton)
@@ -32,6 +34,8 @@ case, per the plan validated 2026-08-10 (ChatGPT 5.6 consultation; see
    (`eq_mul_globalTwist_of_translate` on the KM side, `weilPairing_spec` on the
    HasseWeil side) and HasseWeil's proved `weilPairing_self`.
 -/
+
+@[expose] public section
 
 universe u
 

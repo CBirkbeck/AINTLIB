@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.LevelEmbed
-import Mathlib.Analysis.Complex.Periodic
-import Mathlib.NumberTheory.ModularForms.NormTrace
-import Mathlib.NumberTheory.ModularForms.QExpansion
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.LevelEmbed
+public import Mathlib.Analysis.Complex.Periodic
+public import Mathlib.NumberTheory.ModularForms.NormTrace
+public import Mathlib.NumberTheory.ModularForms.QExpansion
 
 /-!
 # Level-raising operator for cusp forms (Miyake §4.6 Lemma 4.6.1)
@@ -35,6 +37,10 @@ equals the Fourier coefficient of `f` at `q`. In matrix form:
 * Miyake, *Modular Forms*, §4.6 (Lemma 4.6.1, p.162).
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.7 (DS (5.16)).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup CongruenceSubgroup CuspForm ModularFormClass
   UpperHalfPlane

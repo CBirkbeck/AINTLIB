@@ -3,9 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.HeckeRingHomCharSpace
-import LeanModularForms.HeckeRIngs.GL2.HeckeActionGeneral
-import LeanModularForms.HeckeRIngs.GLn.CongruenceHecke
+module
+
+import Mathlib.LinearAlgebra.Matrix.Integer
+public import LeanModularForms.HeckeRIngs.GL2.HeckeRingHomCharSpace
+public import LeanModularForms.HeckeRIngs.GL2.HeckeActionGeneral
+public import LeanModularForms.HeckeRIngs.GLn.CongruenceHecke
 
 /-!
 # Twisted `Γ₀(N)` Hecke-ring action on Nebentypus spaces
@@ -32,6 +35,10 @@ decomposition of each double coset, and its multiplicativity over the ring.
 * `twistedHeckeSumFunction_mul`: the endomorphism-valued action is
   multiplicative on `𝕋 (Gamma0_pair N) ℤ`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix HeckeRing.GLn
 

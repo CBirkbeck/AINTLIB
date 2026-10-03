@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Vendored.RiemannRoch.EllipticCurve.GenusOne
-import Mathlib.RingTheory.SimpleModule.Rank
+module
+
+public import ModularCurves.Vendored.RiemannRoch.EllipticCurve.GenusOne
+public import Mathlib.RingTheory.SimpleModule.Rank
 
 /-!
 # The constant field of an elliptic function field is full (`AP2-A1e`)
@@ -23,6 +25,8 @@ Riemann–Roch space of `-[∞]`, a divisor of degree `-1 < 0`, which is trivial
 (`RRspace_neg_deg` — no constant-field hypothesis). Hence `f = c`. No linear disjointness, no
 base change, all characteristics.
 -/
+
+@[expose] public section
 
 open FunctionField FunctionField.Chart WeierstrassCurve.Affine.Chart Polynomial
 

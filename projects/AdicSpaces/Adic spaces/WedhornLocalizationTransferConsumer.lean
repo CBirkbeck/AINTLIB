@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalizationContinuity
-import «Adic spaces».WedhornLocalizationPlus
-import «Adic spaces».WedhornPrelocalizationTransfer
+module
+
+public import «Adic spaces».WedhornLocalizationContinuity
+public import «Adic spaces».WedhornLocalizationPlus
+public import «Adic spaces».WedhornPrelocalizationTransfer
 
 /-!
 # Wedhorn 8.34(ii) rational-open transfer consumer
@@ -55,6 +57,8 @@ either supply their own plus-subring or use the canonical image form
 documented inline.
 
 No Lane B / Cor 8.32 / Jacobson / faithful-flatness / T001 content. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

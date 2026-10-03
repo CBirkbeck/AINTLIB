@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescentEquationPackaging
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescendedContentIsPContent
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.CorrectedUnitPrimarity
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescentEquationPackaging
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescendedContentIsPContent
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.CorrectedUnitPrimarity
 
 /-!
 # [FLT37-CASEII-R2-L5b] The sharp `𝔭`-invariants `hxy'`/`hdenom'` are DERIVABLE from L1/L2

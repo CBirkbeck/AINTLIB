@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.FiniteProperClosureUnion
+module
+
+public import ModularCurves.ForMathlib.FiniteProperClosureUnion
 
 /-!
 # Target preimages in finite proper closure chart unions
@@ -6,6 +8,10 @@ import ModularCurves.ForMathlib.FiniteProperClosureUnion
 This file compares each inverse-image chart in a finite proper closure with the inverse image of
 the corresponding target chart under the glued morphism from the chart union.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory
 

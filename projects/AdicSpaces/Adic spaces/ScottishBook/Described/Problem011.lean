@@ -1,4 +1,6 @@
-import «Adic spaces».Basic
+module
+
+public import «Adic spaces».Basic
 
 /-!
 # Nonarchimedean Scottish Book — Problem 11
@@ -28,3 +30,5 @@ Open.
 - **Open immersion**: A morphism that identifies the source with an open subspace of the
   target.
 -/
+
+@[expose] public section

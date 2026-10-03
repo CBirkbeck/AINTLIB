@@ -3,12 +3,14 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.LinearAlgebra.FreeModule.PID
-import Mathlib.LinearAlgebra.Projectivization.Action
-import Mathlib.RepresentationTheory.Coinvariants
-import Mathlib.RingTheory.MvPolynomial.Homogeneous
+module
 
-import LeanModularForms.Labels.HeckeFieldArithmetic
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.LinearAlgebra.Projectivization.Action
+public import Mathlib.RepresentationTheory.Coinvariants
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+
+public import LeanModularForms.Labels.HeckeFieldArithmetic
 
 /-!
 # Integral modular-symbol substrate — PLANNING SKELETON (all `sorry`)
@@ -29,6 +31,8 @@ Leaves (see the decomposition doc):
 Source anchor: Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, Ch. 8 +
 (3.5.20). Weight convention `n = k - 2` (his `S_{n+2} = S_k`, `ρ_n = Sym^n`).
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2.ModularSymbols
 

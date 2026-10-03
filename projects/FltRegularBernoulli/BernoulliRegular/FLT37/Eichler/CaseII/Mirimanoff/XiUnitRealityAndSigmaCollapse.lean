@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitTelescoping
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitTelescoping
 
 /-!
 # Reality of the §8.1 units `ξ_b` and `E₃₂ = (∏ ξ)²`, for `p = 37`

@@ -1,6 +1,8 @@
-import Mathlib.AlgebraicGeometry.Modules.Sheaf
-import Mathlib.CategoryTheory.Adjunction.Reflective
-import Mathlib.Topology.Sheaves.AddCommGrpCat
+module
+
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.CategoryTheory.Adjunction.Reflective
+public import Mathlib.Topology.Sheaves.AddCommGrpCat
 
 /-!
 # The additive sheaf underlying a scheme module
@@ -10,6 +12,8 @@ proposed upstream in mathlib PR #36345: forget the module structure, then sheafi
 underlying additive presheaf. The resulting functor is additive, faithful, and preserves
 finite limits and all colimits.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits TopologicalSpace
 

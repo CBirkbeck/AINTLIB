@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Basic
-import HasseWeil.Foundation.Curves.Map.BaseChange
-import HasseWeil.Foundation.Curves.Map.Maps
-import Mathlib.LinearAlgebra.Dimension.Constructions
-import Mathlib.FieldTheory.Finite.Basic
+module
+
+public import HasseWeil.Foundation.Basic
+public import HasseWeil.Foundation.Curves.Map.BaseChange
+public import HasseWeil.Foundation.Curves.Map.Maps
+public import Mathlib.LinearAlgebra.Dimension.Constructions
+public import Mathlib.FieldTheory.Finite.Basic
 
 /-!
 # Base-change of isogenies (witness-parametric API)
@@ -42,6 +44,8 @@ Verschiebung, ℤ[π] elements).
   via base-change to `AlgebraicClosure F`; descend the integer
   `qf_nonneg` inequality.
 -/
+
+@[expose] public section
 
 namespace HasseWeil
 

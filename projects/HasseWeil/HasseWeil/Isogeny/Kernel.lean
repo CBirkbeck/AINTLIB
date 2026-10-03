@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Basic
-import Mathlib.FieldTheory.Galois.Basic
-import Mathlib.FieldTheory.SeparableDegree
+module
+
+public import HasseWeil.Foundation.Basic
+public import Mathlib.FieldTheory.Galois.Basic
+public import Mathlib.FieldTheory.SeparableDegree
 
 /-!
 # Kernel of an Isogeny
@@ -37,6 +39,8 @@ Once available, these unblock the dual isogeny chain (T-III-6-001 etc.).
 * [J Silverman, *The Arithmetic of Elliptic Curves*][silverman2009], III.4.10.
 
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

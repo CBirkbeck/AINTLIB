@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Basic
-import HasseWeil.Foundation.Ramification
-import HasseWeil.Pic0.ClassGroupNorm
+module
+
+public import HasseWeil.Foundation.Basic
+public import HasseWeil.Foundation.Ramification
+public import HasseWeil.Pic0.ClassGroupNorm
 
 /-!
 # The isogeny ↔ class-group bridge (reusable Pic⁰ infrastructure)
@@ -62,6 +64,8 @@ they are instantiable per isogeny (Frobenius, multiplication-by-`n`).
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.3.4, III.4, III.6.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 open scoped nonZeroDivisors

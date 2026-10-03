@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.PolynomialStandardSmooth
-import ModularCurves.Moduli.UniversalLegendre
+module
+
+public import ModularCurves.ForMathlib.PolynomialStandardSmooth
+public import ModularCurves.Moduli.UniversalLegendre
 
 /-!
 # The Legendre moduli scheme is smooth of relative dimension one
@@ -13,6 +15,8 @@ import ModularCurves.Moduli.UniversalLegendre
 λ-line chart of the `Y(ρ̄)` smoothness leaf (T-YR-6 (b1)+(b2a) applied to the
 `T-E14` universal Legendre object).
 -/
+
+@[expose] public section
 
 noncomputable section
 

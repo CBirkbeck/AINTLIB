@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.AffineSourcePushforwardCohomology
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechGlobalSections
-import ModularCurves.ForMathlib.SheafOrderedCechAcyclicComparison
-import ModularCurves.ForMathlib.SheafOrderedCechCohomologyFiniteProducts
+module
+
+public import ModularCurves.ForMathlib.AffineSourcePushforwardCohomology
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechGlobalSections
+public import ModularCurves.ForMathlib.SheafOrderedCechAcyclicComparison
+public import ModularCurves.ForMathlib.SheafOrderedCechCohomologyFiniteProducts
 
 /-!
 # Ordered Cech cohomology for affine open covers
@@ -15,6 +17,10 @@ For a finite affine open cover of a separated scheme, every positive cohomology 
 every ordered sheaf-Cech term vanishes. Consequently, exactness of the ordered base-linear
 Cech complex is equivalent to vanishing of intrinsic sheaf cohomology.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

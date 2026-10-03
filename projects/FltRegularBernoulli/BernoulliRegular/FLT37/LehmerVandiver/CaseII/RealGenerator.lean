@@ -1,9 +1,11 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ConjAction
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiRadicalNotPthPower
-import BernoulliRegular.TotallyRealSubfield.FixedAssociate
-import BernoulliRegular.HMinus.KplusPrimeArithmetic
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.GaloisDescent
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.CaseIIRealDescent
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ConjAction
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiRadicalNotPthPower
+public import BernoulliRegular.TotallyRealSubfield.FixedAssociate
+public import BernoulliRegular.HMinus.KplusPrimeArithmetic
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.GaloisDescent
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.CaseIIRealDescent
 
 /-!
 # [II1-REAL-GEN] Real generator for the σ-stable Case-II object

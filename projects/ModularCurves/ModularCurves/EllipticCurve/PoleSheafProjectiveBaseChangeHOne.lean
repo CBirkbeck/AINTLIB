@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafProjectiveCech
-import ModularCurves.ForMathlib.AffineModuleCechBaseChange
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafProjectiveCech
+public import ModularCurves.ForMathlib.AffineModuleCechBaseChange
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
 
 /-!
 # Base change of projective pole-sheaf H1 vanishing
@@ -14,6 +16,8 @@ The bounded ordered Cech model transports projective-stage vanishing of
 `H¹(O(n[0]))` through every affine base change, without a Noetherian hypothesis
 on the new base.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 

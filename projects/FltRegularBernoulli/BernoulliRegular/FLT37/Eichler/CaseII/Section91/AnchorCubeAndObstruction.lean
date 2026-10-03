@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.FLT37GenuineUnitEndpoint
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.Lemma98RealData
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.ConjNormDatumAssembly
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.FLT37GenuineUnitEndpoint
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.Lemma98RealData
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.ConjNormDatumAssembly
 
 /-!
 # [FLT37-CASEII-R2-PRODUCER] The §9.1 extraction-data producer, and the precise anchor obstruction

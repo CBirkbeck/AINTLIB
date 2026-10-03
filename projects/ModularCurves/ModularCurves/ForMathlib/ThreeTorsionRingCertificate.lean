@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 
 /-!
 # The ring-level `3`-torsion coordinate certificate (KM L4-iii / CHARTER-K, K1)
@@ -22,6 +24,8 @@ Certificate (CAS-verified, stated in `E3NormalForm.lean:144` and `TateNormalForm
 where `N = 3p² + 2a₂p + a₄ − a₁q` (tangent slope numerator) and `d = 2q + a₁p + a₃ = ψ₂`.
 So on the curve, the cleared doubling condition `N² + a₁Nd − (a₂+3p)d² = 0` gives `Ψ₃(p) = 0`.
 -/
+
+@[expose] public section
 
 open Polynomial WeierstrassCurve
 

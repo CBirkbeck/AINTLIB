@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.DworkCoordSecondDigitValue
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.DworkCoordSecondDigitValue
 
 /-!
 # Soundness correction of the level-`71` unscaled `varpi^{32}` Dwork coordinate: the genuine second

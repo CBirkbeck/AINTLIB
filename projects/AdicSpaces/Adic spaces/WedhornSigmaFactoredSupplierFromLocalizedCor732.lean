@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornSigmaPowerClearedInequalitySupplier
-import «Adic spaces».WedhornLocalizedCor732SigmaSupplier
+module
+
+public import «Adic spaces».WedhornSigmaPowerClearedInequalitySupplier
+public import «Adic spaces».WedhornLocalizedCor732SigmaSupplier
 
 /-!
 # Wedhorn 8.34(ii) — σ-factored supplier from localized Cor 7.32 (T076)
@@ -112,6 +114,8 @@ specific algebraic identity at this layer.
   Lean kernel postulates, and avoid native compilation and unchecked
   tactics.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

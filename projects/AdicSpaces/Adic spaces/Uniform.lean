@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Bounded
-import «Adic spaces».Presheaf
+module
+
+public import «Adic spaces».Bounded
+public import «Adic spaces».Presheaf
 
 /-!
 # Uniform and Stably Uniform Huber Pairs
@@ -27,6 +29,8 @@ We define **uniform** and **stably uniform** Huber pairs following §7 of
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Definitions 7.36, 7.37
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

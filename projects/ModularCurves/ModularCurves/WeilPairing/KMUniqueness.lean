@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.KMPatching
+module
+
+public import ModularCurves.WeilPairing.KMPatching
 
 /-!
 # Uniqueness of the normalised splitting units on general opens (ticket AP-D5-uniq)
@@ -75,6 +77,10 @@ uniqueness statement is vacuous, while `h(P)` is the unique unit of `Γ(T, ⊤)`
 well. Nothing needs the cover to be finite, the index type to be nonempty, or `P` to differ from
 the zero section.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

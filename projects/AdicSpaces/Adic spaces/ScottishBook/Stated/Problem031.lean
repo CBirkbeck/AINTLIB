@@ -1,7 +1,9 @@
-import «Adic spaces».RestrictedPowerSeries
-import «Adic spaces».StructureSheaf
-import Mathlib.Topology.NoetherianSpace
-import Mathlib.RingTheory.Spectrum.Prime.Topology
+module
+
+public import «Adic spaces».RestrictedPowerSeries
+public import «Adic spaces».StructureSheaf
+public import Mathlib.Topology.NoetherianSpace
+public import Mathlib.RingTheory.Spectrum.Prime.Topology
 
 /-!
 # Nonarchimedean Scottish Book — Problem 31
@@ -29,6 +31,8 @@ Open.
 - **Restricted power series ring**: A⟨T_1, ..., T_n⟩ = `restrictedMvPowerSeriesSubring n A`,
   the subring of `MvPowerSeries (Fin n) A` with coefficients tending to 0.
 -/
+
+@[expose] public section
 
 open ValuationSpectrum TopologicalSpace
 

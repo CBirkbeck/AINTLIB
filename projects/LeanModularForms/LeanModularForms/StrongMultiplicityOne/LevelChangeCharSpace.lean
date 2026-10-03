@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.Eigenforms.AtkinLehner
-import LeanModularForms.Eigenforms.ConductorTheorem
-import LeanModularForms.Eigenforms.MainLemma
-import LeanModularForms.HeckeRIngs.GL2.Newforms
+module
+
+public import LeanModularForms.Eigenforms.AtkinLehner
+public import LeanModularForms.Eigenforms.ConductorTheorem
+public import LeanModularForms.Eigenforms.MainLemma
+public import LeanModularForms.HeckeRIngs.GL2.Newforms
 
 /-!
 # Strong Multiplicity One via Miyake §4.6 — Lemma 4.6.5
@@ -23,6 +25,10 @@ coprime filter and its iterated forms).
 * `miyake_h_form_general` — the general `h`-form construction: a level-`l'² · N`
   cusp form with `q`-expansion supported on `(n, l') ≠ 1`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup
 open scoped MatrixGroups ModularForm

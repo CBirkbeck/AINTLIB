@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorConjNormFactorDrop
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorConjNormFactorDrop
 
 /-!
 # [FLT37-CASEII-R2] Washington §9.1 element-level Case-II descent (the analytic core of R2)

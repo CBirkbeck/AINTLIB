@@ -3,10 +3,12 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.NumberTheory.ModularForms.Discriminant
-import Mathlib.NumberTheory.ModularForms.NormTrace
-import LeanModularForms.ForMathlib.ValenceFormulaFinal
-import LeanModularForms.Modularforms.ForMathlib_Cusps
+module
+
+public import Mathlib.NumberTheory.ModularForms.Discriminant
+public import Mathlib.NumberTheory.ModularForms.NormTrace
+public import LeanModularForms.ForMathlib.ValenceFormulaFinal
+public import LeanModularForms.Modularforms.ForMathlib_Cusps
 
 /-!
 # The modular `j`-function
@@ -15,6 +17,10 @@ The `j`-function `j = E₄³ / Δ` is the fundamental weight-zero modular functi
 This file defines `j`, proves it is `SL₂(ℤ)`-invariant, holomorphic on `ℍ`, surjective, and
 (via the valence formula) injective on a fundamental domain.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Filter ModularForm ModularFormClass MatrixGroups Function CongruenceSubgroup
 open scoped Manifold

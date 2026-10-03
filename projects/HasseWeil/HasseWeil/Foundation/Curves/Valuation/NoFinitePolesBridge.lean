@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Fiber.AFConditional
-import HasseWeil.Foundation.Curves.Valuation.NormValuation
-import Mathlib.RingTheory.DedekindDomain.AdicValuation
+module
+
+public import HasseWeil.Foundation.Curves.Fiber.AFConditional
+public import HasseWeil.Foundation.Curves.Valuation.NormValuation
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation
 
 /-!
 # No-finite-poles bridge: from `ord_P ≥ 0` everywhere to CR-image
@@ -37,6 +39,8 @@ through the `extendToLocalization` framework + matching with the project's
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.1.2
 -/
+
+@[expose] public section
 
 open WeierstrassCurve IsDedekindDomain
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.InvariantDiff
-import Mathlib.Algebra.Module.Rat
+module
+
+public import HasseWeil.FormalGroup.InvariantDiff
+public import Mathlib.Algebra.Module.Rat
 
 /-!
 # The formal logarithm of a formal group (Silverman IV.5)
@@ -33,6 +35,8 @@ constant term `0` and linear coefficient `1`.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.5.
 -/
+
+@[expose] public section
 
 set_option linter.dupNamespace false
 

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealConjugate
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealConjugate
 
 /-!
 # LV010-class-eq-1: From `𝔞 · σ𝔞^{-1} = (β)`, derive `[σ𝔞] = [𝔞]`
@@ -19,6 +21,8 @@ which is the substantive piece.
 * Vandiver, Bull. AMS 40 (1934), Theorem 1.
 * Washington, *Introduction to Cyclotomic Fields*, §9.1, Theorem 9.3.
 -/
+
+set_option backward.privateInPublic true
 
 @[expose] public section
 

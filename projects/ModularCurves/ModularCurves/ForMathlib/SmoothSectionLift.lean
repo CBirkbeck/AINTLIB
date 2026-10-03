@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 
 /-!
 # Sections of a smooth morphism lift along nilpotent thickenings
@@ -14,6 +16,8 @@ extends to a genuine section of `f` restricting to the given one.
 
 Both results are generic (no modular-curve content) and are ForMathlib-bound.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

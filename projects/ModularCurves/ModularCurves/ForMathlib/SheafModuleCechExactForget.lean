@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
-import ModularCurves.ForMathlib.SheafModuleCechTopExact
+module
+
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+public import ModularCurves.ForMathlib.SheafModuleCechTopExact
 
 /-!
 # Exactness after forgetting Cech-complex coefficients
@@ -12,6 +14,8 @@ import ModularCurves.ForMathlib.SheafModuleCechTopExact
 Exactness of a module-valued Cech complex can be checked after forgetting
 the module structure.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

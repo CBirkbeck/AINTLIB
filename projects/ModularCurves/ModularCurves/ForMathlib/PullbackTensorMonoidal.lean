@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackContinuous
-import Mathlib.Algebra.Category.ModuleCat.Presheaf.Monoidal
-import Mathlib.Algebra.Category.ModuleCat.Presheaf.PushforwardZeroMonoidal
-import Mathlib.Algebra.Category.ModuleCat.Monoidal.Adjunction
-import ModularCurves.ForMathlib.SheafOfModulesMonoidal
-import ModularCurves.Picard.InvertibleSheaf
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackContinuous
+public import Mathlib.Algebra.Category.ModuleCat.Presheaf.Monoidal
+public import Mathlib.Algebra.Category.ModuleCat.Presheaf.PushforwardZeroMonoidal
+public import Mathlib.Algebra.Category.ModuleCat.Monoidal.Adjunction
+public import ModularCurves.ForMathlib.SheafOfModulesMonoidal
+public import ModularCurves.Picard.InvertibleSheaf
 
 /-!
 # Pullback of sheaves of modules and the sheafified tensor — [PIC-P1b-MONO]
@@ -52,6 +54,8 @@ only the *sheafified* comparison is an iso (stalkwise, hence locally bijective).
 notes, verbatim source quotes and attack logs:
 `.mathlib-quality/decomposition-pullback-monoidal.md`.
 -/
+
+@[expose] public section
 
 universe v₁ v₂ u₁ u₂ u
 

@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.Filtration
-import «Adic spaces».Lemma745
-import «Adic spaces».LocalizationTopology
+module
+
+public import Mathlib.RingTheory.Filtration
+public import «Adic spaces».Lemma745
+public import «Adic spaces».LocalizationTopology
 
 /-!
 # Proposition 7.52: Exact support via Zorn
@@ -22,6 +24,8 @@ minimization step that produces a valuation in a specific rational open subset.
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Proposition 7.52, §8.1
 -/
+
+@[expose] public section
 
 open ValuationSpectrum PairOfDefinition
 

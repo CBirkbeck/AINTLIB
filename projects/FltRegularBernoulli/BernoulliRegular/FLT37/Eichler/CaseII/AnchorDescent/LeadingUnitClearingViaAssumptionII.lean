@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.ThreeTermDescentEquation
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.ThreeTermDescentEquation
 
 /-!
 # [FLT37-CASEII] Discharging the Case-II descent **unit clearing** via Assumption II

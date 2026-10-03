@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.LevelStructure.Basic
-import ModularCurves.LevelStructure.ExactOrder
-import ModularCurves.ForMathlib.IdealSheafComapMul
+module
+
+public import ModularCurves.LevelStructure.Basic
+public import ModularCurves.LevelStructure.ExactOrder
+public import ModularCurves.ForMathlib.IdealSheafComapMul
 
 /-!
 # The divisor apparatus under a pointed group isomorphism (the T-H8a iso-leg)
@@ -41,6 +43,8 @@ the endgame canonicity (route (c)), and both Drinfeld memberships become mechani
 * `RelEffCartierDiv.IsSubgroup.of_ideal_comap`: the subgroup-divisor property transports.
 * `Section.HasExactOrder.pointMap`: exact order transports (the `IsGammaOne` iso-leg).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj

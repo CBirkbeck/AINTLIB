@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.UniformStepBound
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue
+module
+
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.UniformStepBound
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue
 
 /-!
 # On-Curve Principal Value: General Infrastructure
@@ -13,6 +15,8 @@ General PV convergence machinery for piecewise C¹ curves: dyadic PV limits,
 measurability of cutout integrands, arc angle injectivity, CPV avoidance
 and concatenation lemmas. These results work for arbitrary curves and functions.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.AffineFieldPointTower
-import ModularCurves.ForMathlib.BaseChangeKerCoker
-import ModularCurves.ForMathlib.SeesawBaseLocallyTrivial
-import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
-import ModularCurves.Picard.RigidDescent
-import ModularCurves.WeilPairing.RelPicLocal
+module
+
+public import ModularCurves.ForMathlib.AffineFieldPointTower
+public import ModularCurves.ForMathlib.BaseChangeKerCoker
+public import ModularCurves.ForMathlib.SeesawBaseLocallyTrivial
+public import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
+public import ModularCurves.Picard.RigidDescent
+public import ModularCurves.WeilPairing.RelPicLocal
 
 /-!
 # The seesaw theorem over a reduced base (`KM-SEESAW`, Stacks 0EX7 at rank 1)
@@ -76,6 +78,8 @@ The relative theorem of the square, `exists_invertible_tensor_idealModule_add`
 (`Picard/SelfAdjointN.lean:267`), which is the single classical leaf under `(★)`/`(★′)` and hence under
 the Katz–Mazur construction of the relative Weil pairing (DS4).
 -/
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry Limits TopologicalSpace
 open AlgebraicGeometry.Scheme.Modules

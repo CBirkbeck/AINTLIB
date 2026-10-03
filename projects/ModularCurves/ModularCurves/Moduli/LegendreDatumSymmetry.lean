@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.UniversalLevelThree
+module
+
+public import ModularCurves.Moduli.UniversalLevelThree
 
 /-!
 # The `{±1}`-symmetry of Legendre data ([T-E14-ACT'] datum layer)
@@ -20,6 +22,8 @@ This is one of the two fibre-pinning lemmas of the `±ω` scale-torsor over the 
 locus (G0's `legendreDelta_relRep_finiteEtale_of_scaleTorsor` funnel for
 `Bootstrap.lean:206`); the other (uniqueness-up-to-`±`) is tracked separately.
 -/
+
+@[expose] public section
 
 universe u
 

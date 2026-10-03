@@ -1,8 +1,10 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.RealKummerLemma
-import BernoulliRegular.TotallyRealSubfield.FixedAssociate
-import BernoulliRegular.TotallyRealSubfield.ZetaPrime
-import FltRegular.NumberTheory.KummersLemma.Field
-import Mathlib.FieldTheory.KummerExtension
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.RealKummerLemma
+public import BernoulliRegular.TotallyRealSubfield.FixedAssociate
+public import BernoulliRegular.TotallyRealSubfield.ZetaPrime
+public import FltRegular.NumberTheory.KummersLemma.Field
+public import Mathlib.FieldTheory.KummerExtension
 
 /-!
 # AK-1: σ-anti radical from case-I Stage 2 data

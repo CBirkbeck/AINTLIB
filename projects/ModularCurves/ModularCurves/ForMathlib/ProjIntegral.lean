@@ -5,9 +5,11 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Basic
-import Mathlib.AlgebraicGeometry.Properties
-import Mathlib.RingTheory.LocalProperties.Reduced
+module
+
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Basic
+public import Mathlib.AlgebraicGeometry.Properties
+public import Mathlib.RingTheory.LocalProperties.Reduced
 
 /-!
 # `Proj` of a graded domain is an integral scheme
@@ -40,6 +42,8 @@ homogeneous element of positive degree, then `Proj 𝒜` is an integral scheme.
 The positivity hypothesis is `∃ i, 0 < i ∧ ∃ x ∈ 𝒜 i, x ≠ 0` ("nonzero positive-degree part"),
 which is exactly what makes the zero ideal *relevant* (not containing the irrelevant ideal).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry HomogeneousLocalization ProjectiveSpectrum TopologicalSpace
 

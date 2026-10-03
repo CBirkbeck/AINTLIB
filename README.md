@@ -47,7 +47,20 @@ lake exe cache get            # mathlib oleans
 lake build PadicLFunctions    # any project's lib; builds are incremental
 ```
 
-Pinned: Lean **v4.31.0-rc2**, mathlib **@d90090f** (moves with the daily bump).
+The toolchain and Mathlib revision are pinned in `lean-toolchain` and `lakefile.toml`.
+
+Library sources use Lean's module system. A downstream module can import the Hasse bound directly:
+
+```lean
+module
+import HasseWeil.HasseBound
+
+#check HasseWeil.WeilPairing.hasse_bound
+```
+
+`lake build ModuleSystemTests` checks a module-system importing client, guards the Hasse theorem's
+axiom dependencies, and exercises the exported Bernoulli `cbv` evaluator. This target is included in
+`lake build` alongside the existing default libraries.
 
 ## Layout
 

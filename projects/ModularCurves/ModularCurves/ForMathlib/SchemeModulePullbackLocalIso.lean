@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.Picard.DualPullback.Square
+module
+
+public import ModularCurves.Picard.DualPullback.Square
 
 /-!
 # Local isomorphisms and pullback of scheme modules
@@ -13,6 +15,8 @@ import ModularCurves.Picard.DualPullback.Square
 A module morphism that is invertible on an open remains invertible after
 pullback and restriction to the inverse-image open.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

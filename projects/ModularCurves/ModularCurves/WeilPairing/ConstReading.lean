@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.CharZeroDescent
+module
+
+public import ModularCurves.WeilPairing.CharZeroDescent
 
 /-!
 # Readings and `constSchemeMap` (route β, the last gap's public API)
@@ -18,6 +20,8 @@ decomposition: `constSchemePointsEquiv_natural`, `constSchemePointsEquiv_sigmaι
 `constSchemeMap f` applies `f` to the reading. It is the tool that turns the scheme-level identity
 `fullLevelHom_eq_of_levelCoord` into the pointwise comparison `hdet` needs.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

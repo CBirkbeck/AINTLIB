@@ -1,9 +1,11 @@
-import BernoulliRegular.UnitQuotient.PadicTensor
-import BernoulliRegular.UnitQuotient.FreeProjectorRanges
-import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction
-import BernoulliRegular.Thaine.RankOneComponent
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.Bridge
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.CertificateAudit
+module
+
+public import BernoulliRegular.UnitQuotient.PadicTensor
+public import BernoulliRegular.UnitQuotient.FreeProjectorRanges
+public import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction
+public import BernoulliRegular.Thaine.RankOneComponent
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.Bridge
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.CertificateAudit
 
 /-!
 # Rank-one specialisation of the Padic χ-eigenspace at ω^32, p = 37
@@ -22,6 +24,8 @@ non-trivial even characters.
   V_37^(ω³²) is a free ℤ_37-module of rank 1.
 
 -/
+
+@[expose] public section
 
 noncomputable section
 

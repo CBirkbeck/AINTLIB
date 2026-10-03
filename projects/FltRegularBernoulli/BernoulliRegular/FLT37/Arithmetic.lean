@@ -1,4 +1,6 @@
-import BernoulliRegular.BernoulliFast.Tactic
+module
+
+public import BernoulliRegular.BernoulliFast.Tactic
 
 /-!
 # Arithmetic non-divisibility lemmas for `p = 37` (ticket FLT37a)
@@ -16,6 +18,8 @@ which is even.
 All proofs reduce to the `bernoulli_decide` tactic on concrete numerator
 values cached by `BernoulliRegular.BernoulliFast`.
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular
 

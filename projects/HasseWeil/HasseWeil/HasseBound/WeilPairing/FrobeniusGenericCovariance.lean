@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.MapTranslateGenericAdditive
-import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
-import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
+module
+
+public import HasseWeil.HasseBound.WeilPairing.MapTranslateGenericAdditive
+public import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
+public import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
 
 /-!
 # The Frobenius generic-point covariance leaf is PROVABLE over `K̄` (reviewer round-21 "Wall B")
@@ -78,6 +80,8 @@ K̄)` by the scalar tower `𝔽_q → K̄ → K̄(E)`.  The bridge between the t
 * Silverman, *The Arithmetic of Elliptic Curves*, III.8.2 (translation covariance), III.4
 (Frobenius).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

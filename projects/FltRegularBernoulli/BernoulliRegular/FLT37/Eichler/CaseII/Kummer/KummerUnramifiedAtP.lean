@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerDifferentTrivial
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.PrimaryRadicalUnramified
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AKPrimarity
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerDifferentTrivial
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.PrimaryRadicalUnramified
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AKPrimarity
 
 /-!
 # [FLT37-CASEII-LEMMA-9.1-AT37] The "at 37" half of Washington Lemma 9.1

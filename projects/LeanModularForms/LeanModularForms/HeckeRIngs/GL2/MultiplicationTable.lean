@@ -3,11 +3,13 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Data.Finset.NatDivisors
-import Mathlib.NumberTheory.ArithmeticFunction.Misc
-import LeanModularForms.HeckeRIngs.GL2.Basic
-import LeanModularForms.HeckeRIngs.GLn.Degree
-import LeanModularForms.HeckeRIngs.GLn.TransposeAntiInvolution
+module
+
+public import Mathlib.Data.Finset.NatDivisors
+public import Mathlib.NumberTheory.ArithmeticFunction.Misc
+public import LeanModularForms.HeckeRIngs.GL2.Basic
+public import LeanModularForms.HeckeRIngs.GLn.Degree
+public import LeanModularForms.HeckeRIngs.GLn.TransposeAntiInvolution
 
 /-!
 # Shimura Theorem 3.24: Multiplication Table for GL₂ Hecke Algebra
@@ -26,6 +28,8 @@ Degree formulas (identities 6--7) are in `GL2.Degree`.
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, Theorem 3.24
 -/
+
+@[expose] public section
 
 open HeckeRing HeckeRing.GLn HeckeRing.GL2
 open scoped ArithmeticFunction.sigma

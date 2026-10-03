@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ModularCurve.YFullFromYOne
-import ModularCurves.Moduli.GammaOneNaiveRelRep
-import ModularCurves.Moduli.Bootstrap
-import ModularCurves.Moduli.LevelThreeSmooth
-import ModularCurves.Moduli.GammaHClosure
+module
+
+public import ModularCurves.ModularCurve.YFullFromYOne
+public import ModularCurves.Moduli.GammaOneNaiveRelRep
+public import ModularCurves.Moduli.Bootstrap
+public import ModularCurves.Moduli.LevelThreeSmooth
+public import ModularCurves.Moduli.GammaHClosure
 
 /-!
 # `Y(N)` is smooth and affine (WP-D2c-5 / -6)
@@ -35,6 +37,8 @@ Two arms, because the two available inputs have different ranges.
   `Spec (E3ModuliRing R)`, and `E3ModuliRing R` is standard smooth of relative dimension one
   over `R` (`e3ModuliRing_isStandardSmoothOfRelativeDimension`).
 -/
+
+@[expose] public section
 
 universe u
 

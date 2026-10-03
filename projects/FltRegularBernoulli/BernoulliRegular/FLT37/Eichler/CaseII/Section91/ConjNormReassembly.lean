@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitRealityAndSigmaCollapse
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ProductDescent
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitRealityAndSigmaCollapse
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ProductDescent
 
 /-!
 # Washington §9.1 conjugate-norm reassembly algebra (the algebraic heart of FLT37 Case-II)

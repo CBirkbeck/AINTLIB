@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
-import ModularCurves.ForMathlib.SchemeModuleBaseCechTrivialFlat
+module
+
+public import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechTrivialFlat
 
 /-!
 # Ordered base-linear Cech complexes
@@ -14,6 +16,8 @@ strictly increasing tuples. Unlike the native all-tuples Cech complex, this comp
 bounded by the cardinality of the cover. Its terms retain their module structure over
 global functions on the base and are flat when the cover affinely trivializes the module.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Category
   CategoryTheory.Limits CategoryTheory.Preadditive Opposite TopologicalSpace

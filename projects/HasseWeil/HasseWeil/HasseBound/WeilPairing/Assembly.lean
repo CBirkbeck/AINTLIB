@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.Reduction
-import HasseWeil.HasseBound.WeilPairing.Discriminant
-import HasseWeil.HasseBound.WeilPairing.PairingDet
+module
+
+public import HasseWeil.HasseBound.WeilPairing.Reduction
+public import HasseWeil.HasseBound.WeilPairing.Discriminant
+public import HasseWeil.HasseBound.WeilPairing.PairingDet
 
 /-!
 # Route 2A — the capstone reduction (Silverman V.2.3.1 + V.1.1)
@@ -27,6 +29,8 @@ The **entire** remaining mathematical work of Route 2A is now exactly the hypoth
 discharged by `PairingDet.det_eq_of_symplectic_adjoint` once the pairing, its symplectic
 adjoint, and `φ̂φ = [deg]` are in hand.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.WeilPairing
 

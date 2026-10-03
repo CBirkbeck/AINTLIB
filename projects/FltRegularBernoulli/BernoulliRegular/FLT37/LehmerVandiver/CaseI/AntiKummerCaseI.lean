@@ -1,6 +1,9 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerL3
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Stage2Interface
+module
+
+import Mathlib.NumberTheory.RamificationInertia.Basic
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerL3
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Stage2Interface
 
 /-!
 # Case-I FLT data → AK chain inputs

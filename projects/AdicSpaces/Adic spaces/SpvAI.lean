@@ -2,12 +2,14 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».ValuationContinuity
-import «Adic spaces».HuberRings
-import «Adic spaces».ValuationSpectrum
-import «Adic spaces».CharacteristicSubgroup
-import «Adic spaces».Lemma745
-import Mathlib.Combinatorics.Pigeonhole
+module
+
+public import «Adic spaces».ValuationContinuity
+public import «Adic spaces».HuberRings
+public import «Adic spaces».ValuationSpectrum
+public import «Adic spaces».CharacteristicSubgroup
+public import «Adic spaces».Lemma745
+public import Mathlib.Combinatorics.Pigeonhole
 
 /-!
 # `Spv(A, I)` infrastructure (Wedhorn §7.1) — T-COMPACT-NO-HARCH foundation
@@ -38,6 +40,8 @@ and the cofinality predicate used in Wedhorn 7.10's reverse direction.
 * Wedhorn, *Adic Spaces*, §7.1 (Definition 7.3, Lemma 7.4),
   arXiv:1910.05934.
 -/
+
+@[expose] public section
 
 open Pointwise
 

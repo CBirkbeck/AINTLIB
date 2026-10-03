@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AffinePointSection
-import ModularCurves.EllipticCurve.MulByHomDegree
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.EllipticCurve.RecordGroupUnique
-import ModularCurves.EllipticCurve.MulByHomFibres
-import ModularCurves.LevelStructure.ExactOrder
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.EllipticCurve.AffinePointSection
+public import ModularCurves.EllipticCurve.MulByHomDegree
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.EllipticCurve.RecordGroupUnique
+public import ModularCurves.EllipticCurve.MulByHomFibres
+public import ModularCurves.LevelStructure.ExactOrder
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Affine-point sections at field points ([T-E15-NORM] Stage B — the fibre evaluation)
@@ -32,6 +34,8 @@ hom (`projModelAffineChart_eq_spec`), so its composite with a field point is
 `affineChartHom_mk` + `projModelAffineEval_mk` compute the two `Z`-chart coordinates to
 `(p̄, q̄)`; `projModelPointsEquiv_some` closes.
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

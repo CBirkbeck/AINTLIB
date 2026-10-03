@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Fiber.LocalizedDictionary
-import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
-import HasseWeil.Foundation.Curves.Ramification.RamificationFinite
-import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
-import HasseWeil.Foundation.Curves.Valuation.RankOneDomination
-import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
-import Mathlib.RingTheory.Valuation.IsTrivialOn
+module
+
+public import HasseWeil.Foundation.Curves.Fiber.LocalizedDictionary
+public import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
+public import HasseWeil.Foundation.Curves.Ramification.RamificationFinite
+public import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
+public import HasseWeil.Foundation.Curves.Valuation.RankOneDomination
+public import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
+public import Mathlib.RingTheory.Valuation.IsTrivialOn
 
 /-!
 # The norm–conorm count over the integral closure `B` (CoordHom-free, Silverman II.3.6)
@@ -35,6 +37,8 @@ This file ports the affine template over `B`:
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.6, II.3.6, III.4.10(c).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 open scoped nonZeroDivisors

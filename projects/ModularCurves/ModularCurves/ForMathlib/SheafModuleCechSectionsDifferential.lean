@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Algebra.Category.ModuleCat.Products
-import ModularCurves.ForMathlib.SheafModuleCechTopSections
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Products
+public import ModularCurves.ForMathlib.SheafModuleCechTopSections
 
 /-!
 # Differentials on sections of module-valued sheaf Cech complexes
@@ -13,6 +15,8 @@ The arbitrary-open section comparison for a module-valued sheaf Cech term
 identifies its cofaces and differential with the usual tuple-deletion
 restrictions.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

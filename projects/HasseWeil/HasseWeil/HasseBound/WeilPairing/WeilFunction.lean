@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.PicZero
-import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
-import HasseWeil.Foundation.Curves.Divisor.EffectiveSumReduce
-import HasseWeil.HasseBound.WeilPairing.Pullback
-import HasseWeil.HasseBound.WeilPairing.SigmaBridge
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.PicZero
+public import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
+public import HasseWeil.Foundation.Curves.Divisor.EffectiveSumReduce
+public import HasseWeil.HasseBound.WeilPairing.Pullback
+public import HasseWeil.HasseBound.WeilPairing.SigmaBridge
 
 /-!
 # Route 2A — the Weil function divisor (Weil pairing construction, step 1)
@@ -24,6 +26,8 @@ This file ships the divisor `D_T := ℓ(T) − ℓ(O)` and the two Abel–Jacobi
 Together these say `D_T` lies in the kernel of `(deg, σ)`, i.e. `D_T` is principal — the input to
 extracting the Weil function `f_T`.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

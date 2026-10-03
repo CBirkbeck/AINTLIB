@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.NaiveGammaOneLevel
-import ModularCurves.Moduli.LevelLocusNatural
+module
+
+public import ModularCurves.LevelStructure.NaiveGammaOneLevel
+public import ModularCurves.Moduli.LevelLocusNatural
 
 /-!
 # `[Γ₁(N)]` is relatively representable, affine and étale over `(Ell)` (WP-D1c-coarse)
@@ -27,6 +29,8 @@ Throughout the *naive* locus is used, never `levelSpaceΓ₁` — the latter is 
 Drinfeld `exists_exactOrderLocus` and would re-introduce the still-open register box T-D6,
 whereas `gammaOneNaiveProblem` is stated with `IsNaiveGammaOne` and needs none of it.
 -/
+
+@[expose] public section
 
 universe u
 

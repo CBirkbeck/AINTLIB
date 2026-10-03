@@ -3,9 +3,11 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Analysis.SpecialFunctions.Complex.Log
-import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
-import LeanModularForms.ForMathlib.PiecewiseContourIntegral
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Complex.Log
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
+public import LeanModularForms.ForMathlib.PiecewiseContourIntegral
 
 /-!
 # Segment FTC and Log-Derivative
@@ -33,6 +35,8 @@ and log-derivative FTC. These are the building blocks for computing integrals of
 
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Set MeasureTheory Complex
 open scoped Interval

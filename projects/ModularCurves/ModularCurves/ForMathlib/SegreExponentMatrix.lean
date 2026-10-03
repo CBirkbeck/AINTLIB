@@ -5,8 +5,10 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 
 Adapted from Clawristotle's `CoherentCohomologyFinite.SegreExponentMatrix`.
 -/
-import ModularCurves.ForMathlib.SegreCoordinateAlgebra
-import Mathlib.Data.Finsupp.Multiset
+module
+
+public import ModularCurves.ForMathlib.SegreCoordinateAlgebra
+public import Mathlib.Data.Finsupp.Multiset
 
 /-!
 # Exponent matrices for Segre monomials
@@ -14,6 +16,8 @@ import Mathlib.Data.Finsupp.Multiset
 Exponent vectors of equal total degree are the row and column sums of a finitely
 supported exponent matrix.
 -/
+
+@[expose] public section
 
 noncomputable section
 

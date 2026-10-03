@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistFixedPresentation
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistShiftIso
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistTensorEquivalence
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistFixedPresentation
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistShiftIso
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistTensorEquivalence
 
 /-!
 # Shifted presentations by projective twists
@@ -13,6 +15,8 @@ import ModularCurves.EllipticCurve.ProjectiveSpaceTwistTensorEquivalence
 Tensoring a fixed-coordinate negative-twist presentation by a sufficiently
 large positive twist produces a presentation by nonnegative twists.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

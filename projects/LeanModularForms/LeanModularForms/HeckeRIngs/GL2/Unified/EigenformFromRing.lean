@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
-import LeanModularForms.HeckeRIngs.GL2.Newforms
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
+public import LeanModularForms.HeckeRIngs.GL2.Newforms
 
 /-!
 # Eigenforms come from the Hecke ring action
@@ -38,6 +40,8 @@ of the ring.
 * [G. Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*][shimura1971],
   §3.4–3.5.
 -/
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup CongruenceSubgroup HeckeRing HeckeRing.GLn
 open scoped ModularForm UpperHalfPlane

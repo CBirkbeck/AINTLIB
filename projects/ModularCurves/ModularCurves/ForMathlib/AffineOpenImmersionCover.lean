@@ -1,6 +1,8 @@
-import Mathlib.AlgebraicGeometry.Morphisms.OpenImmersion
-import Mathlib.AlgebraicGeometry.Morphisms.QuasiCompact
-import ModularCurves.ForMathlib.FinitePresentationFunctorCover
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.OpenImmersion
+public import Mathlib.AlgebraicGeometry.Morphisms.QuasiCompact
+public import ModularCurves.ForMathlib.FinitePresentationFunctorCover
 
 /-!
 # Detecting affine open immersions on principal covers
@@ -10,6 +12,8 @@ back to a principal cover of its source and the morphism is an isomorphism on ea
 corresponding principal open. This criterion retains exactly the finite data that can
 be transported through a filtered approximation.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

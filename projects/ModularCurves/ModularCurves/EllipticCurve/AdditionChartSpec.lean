@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartTensor
-import ModularCurves.EllipticCurve.WeierstrassModel
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartTensor
+public import ModularCurves.EllipticCurve.WeierstrassModel
 
 /-!
 # `Spec` of the chart-product ring is the chart-product open (T-W7.0c-c5β, β1 scheme half)
@@ -27,6 +29,8 @@ The upshot, `chartPieceIso`, is what lets the addition-law triples — which liv
 be read as functions on an honest open subscheme of `E ×_R E`, which is what `addOnZ`/`addOnY`
 need (β3).
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves HomogeneousIdeal HomogeneousLocalization
 open AlgebraicGeometry CategoryTheory Limits TensorProduct

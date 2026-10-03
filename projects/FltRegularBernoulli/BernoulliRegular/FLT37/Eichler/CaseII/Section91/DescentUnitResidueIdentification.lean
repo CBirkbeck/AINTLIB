@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.LocalPowerDvdZ
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.FurtwanglerResidueAndBaseDvdZ
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.LocalPowerDvdZ
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.FurtwanglerResidueAndBaseDvdZ
 
 /-!
 # [FLT37-CASEII-R4(i)] The §9.1 residue identification over GENUINE real descent data

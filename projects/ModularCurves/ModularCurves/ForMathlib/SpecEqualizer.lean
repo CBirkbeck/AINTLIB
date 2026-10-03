@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.AffineScheme
-import Mathlib.Algebra.Algebra.Subalgebra.Basic
+module
+
+public import Mathlib.AlgebraicGeometry.AffineScheme
+public import Mathlib.Algebra.Algebra.Subalgebra.Basic
 
 /-!
 # `Spec` of an equalizer subalgebra is a cofork
@@ -19,6 +21,8 @@ content (`Spec B` finite locally free over `Spec (eq f g)`), deferred.
 The two ring maps model the two legs `act^#, pr_E^#` of the translation groupoid restricted to a
 `G`-stable affine chart; `eq(act^#, pr_E^#) = B^{coG}` are the co-invariants.
 -/
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry
 

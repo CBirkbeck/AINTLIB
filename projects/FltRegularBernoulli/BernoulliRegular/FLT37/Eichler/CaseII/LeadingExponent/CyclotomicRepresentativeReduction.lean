@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.CompletedLogValuationHalf
-import BernoulliRegular.UnitQuotient.Washington814ForwardD
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.CompletedLogValuationHalf
+public import BernoulliRegular.UnitQuotient.Washington814ForwardD
 
 /-!
 # Cyclotomic representative reduction for `p = 37`

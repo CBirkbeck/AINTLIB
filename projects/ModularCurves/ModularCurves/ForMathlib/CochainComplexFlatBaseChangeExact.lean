@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.BaseChangeKerCoker
+module
+
+public import ModularCurves.ForMathlib.BaseChangeKerCoker
 
 /-!
 # Universal exactness of bounded flat complexes under iterated base change
@@ -14,6 +16,8 @@ the bounded splice, flat cokernels, so its exactness is preserved by every addit
 base change. This is the forward (non-flat) companion of
 `LinearMap.baseChange_exact_iff_of_faithfullyFlat`.
 -/
+
+@[expose] public section
 
 universe u v
 

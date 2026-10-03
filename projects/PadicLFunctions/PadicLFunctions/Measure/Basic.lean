@@ -1,7 +1,9 @@
-import Mathlib.NumberTheory.Padics.MahlerBasis
-import Mathlib.Topology.ContinuousMap.Compact
-import Mathlib.Topology.LocallyConstant.Algebra
-import Mathlib.Topology.MetricSpace.Ultra.ContinuousMaps
+module
+
+public import Mathlib.NumberTheory.Padics.MahlerBasis
+public import Mathlib.Topology.ContinuousMap.Compact
+public import Mathlib.Topology.LocallyConstant.Algebra
+public import Mathlib.Topology.MetricSpace.Ultra.ContinuousMaps
 
 /-!
 # p-adic measures on a compact space
@@ -33,6 +35,8 @@ development pass (see `.mathlib-quality/plan.md`, Generality Decisions).
 * `PadicMeasure.ext_locallyConstant`: a measure is determined by its values on locally
   constant functions (source: Eq. (3.1), `eq:restrict measures`).
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 

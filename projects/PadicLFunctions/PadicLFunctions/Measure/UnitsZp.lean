@@ -1,5 +1,7 @@
-import PadicLFunctions.Measure.Toolbox
-import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+module
+
+public import PadicLFunctions.Measure.Toolbox
+public import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
 
 /-!
 # Measures on ℤ_p^×
@@ -12,6 +14,8 @@ We work with the units type `ℤ_[p]ˣ` (with its standard topology from
 `Topology.Algebra.Constructions`); the coercion `Units.val` is a closed embedding with
 clopen range `{x | IsUnit x} = {x | ‖x‖ = 1}`.
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 

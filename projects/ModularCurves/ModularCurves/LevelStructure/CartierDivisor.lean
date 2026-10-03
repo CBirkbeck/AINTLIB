@@ -3,34 +3,37 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.GroupLaw
-import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
-import Mathlib.AlgebraicGeometry.Morphisms.Separated
-import Mathlib.AlgebraicGeometry.Morphisms.Smooth
-import Mathlib.RingTheory.Norm.Basic
-import Mathlib.RingTheory.Etale.Kaehler
-import Mathlib.RingTheory.Flat.TorsionFree
-import Mathlib.RingTheory.Kaehler.Basic
-import Mathlib.RingTheory.Kaehler.Polynomial
-import Mathlib.RingTheory.Nakayama
-import Mathlib.RingTheory.Smooth.Flat
-import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
-import Mathlib.RingTheory.TensorProduct.Basic
-import Mathlib.RingTheory.TensorProduct.Free
-import Mathlib.RingTheory.Localization.FractionRing
-import Mathlib.Algebra.MvPolynomial.Nilpotent
-import ModularCurves.ForMathlib.CharpolyNorm
-import ModularCurves.ForMathlib.FibrewiseFinite
-import ModularCurves.ForMathlib.DivisorChartFibre
-import ModularCurves.ForMathlib.FinrankExact
-import ModularCurves.ForMathlib.IdealSheafComapMul
-import ModularCurves.ForMathlib.NormBaseChange
-import ModularCurves.ForMathlib.ReducedSeparation
-import ModularCurves.ForMathlib.SheafDisjointUnion
-import ModularCurves.ForMathlib.StandardSmoothStalkDVR
+module
+
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+public import ModularCurves.EllipticCurve.GroupLaw
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import Mathlib.AlgebraicGeometry.Morphisms.Separated
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import Mathlib.RingTheory.Norm.Basic
+public import Mathlib.RingTheory.Etale.Kaehler
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Kaehler.Basic
+public import Mathlib.RingTheory.Kaehler.Polynomial
+public import Mathlib.RingTheory.Nakayama
+public import Mathlib.RingTheory.Smooth.Flat
+public import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+public import Mathlib.RingTheory.TensorProduct.Basic
+public import Mathlib.RingTheory.TensorProduct.Free
+public import Mathlib.RingTheory.Localization.FractionRing
+public import Mathlib.Algebra.MvPolynomial.Nilpotent
+public import ModularCurves.ForMathlib.CharpolyNorm
+public import ModularCurves.ForMathlib.FibrewiseFinite
+public import ModularCurves.ForMathlib.DivisorChartFibre
+public import ModularCurves.ForMathlib.FinrankExact
+public import ModularCurves.ForMathlib.IdealSheafComapMul
+public import ModularCurves.ForMathlib.NormBaseChange
+public import ModularCurves.ForMathlib.ReducedSeparation
+public import ModularCurves.ForMathlib.SheafDisjointUnion
+public import ModularCurves.ForMathlib.StandardSmoothStalkDVR
 
 /-!
 # Relative effective Cartier divisors and full sets of sections (KM Ch. 1)
@@ -57,6 +60,10 @@ has in full, with proofs, via the KM preview: §§1.1–1.9).
   sums of divisors via ideal products). The sum is a registered construction (DS4a,
   ticket `T-D3`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

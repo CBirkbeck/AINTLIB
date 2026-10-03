@@ -3,21 +3,23 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.BernoulliFast.KellnerSecondOrder
-import BernoulliRegular.FLT37.Final
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiRadicalNotPthPower
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.RealPthRootDescent
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealBundleViaKellner
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.FinalSynthesis
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.Bridge
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.CertificateAudit
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.ReflectionOther
-import BernoulliRegular.HMinus.HMinusCriterion
-import BernoulliRegular.Reflection.ClassGroupModP.AtomC
-import BernoulliRegular.Reflection.ClassGroupModP.SP2
-import BernoulliRegular.Reflection.FinalReflection.WeakReflection
-import BernoulliRegular.UnitQuotient.PadicEigenspaceRankOne
+module
+
+public import BernoulliRegular.BernoulliFast.KellnerSecondOrder
+public import BernoulliRegular.FLT37.Final
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiRadicalNotPthPower
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.RealPthRootDescent
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealBundleViaKellner
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.FinalSynthesis
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.Bridge
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.CertificateAudit
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.ReflectionOther
+public import BernoulliRegular.HMinus.HMinusCriterion
+public import BernoulliRegular.Reflection.ClassGroupModP.AtomC
+public import BernoulliRegular.Reflection.ClassGroupModP.SP2
+public import BernoulliRegular.Reflection.FinalReflection.WeakReflection
+public import BernoulliRegular.UnitQuotient.PadicEigenspaceRankOne
 
 /-!
 # Unconditional FLT37 with temporary source boundaries
@@ -81,6 +83,8 @@ Modulo: the `B_1184` second-order Bernoulli computation plus the
 Kučera/Thaine, Herbrand/Ribet, Case-I AK5a, and Washington Case-II source
 constants above.
 -/
+
+set_option backward.privateInPublic true
 
 @[expose] public section
 

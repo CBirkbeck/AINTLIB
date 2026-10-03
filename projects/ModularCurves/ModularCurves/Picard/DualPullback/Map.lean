@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.UnitRestriction
+module
+
+public import ModularCurves.Picard.DualPullback.UnitRestriction
 
 /-!
 # The canonical pullback map on dual modules
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.UnitRestriction
 Local pullback of functionals is natural under restriction, hence bundles to the canonical
 map `f^*(M^∨) ⟶ (f^*M)^∨`.
 -/
+
+@[expose] public section
 
 universe u
 

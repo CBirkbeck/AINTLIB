@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalizationDenominatorClearing
-import «Adic spaces».ValuationSpectrum
+module
+
+public import «Adic spaces».WedhornLocalizationDenominatorClearing
+public import «Adic spaces».ValuationSpectrum
 
 /-!
 # Wedhorn Localization Denominator-Cleared Unit Nondegeneracy
@@ -42,6 +44,8 @@ supplier-core route.
 * Does not edit Tertiary's `WedhornValuationLocalizationLift.lean`,
   `WedhornC1StrongSupplierCore.lean`, or any other in-flight file.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

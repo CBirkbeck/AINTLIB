@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassAway
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassChart
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassOverlap
-import ModularCurves.EllipticCurve.WeierstrassModelCoordinateTransition
-import ModularCurves.ForMathlib.ProjFromGlobalSectionsMap
-import ModularCurves.Picard.InvertibleSheafFiniteStageModel
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassAway
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassChart
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassOverlap
+public import ModularCurves.EllipticCurve.WeierstrassModelCoordinateTransition
+public import ModularCurves.ForMathlib.ProjFromGlobalSectionsMap
+public import ModularCurves.Picard.InvertibleSheafFiniteStageModel
 
 /-!
 # Weierstrass comparison maps on Cartier/away overlaps
@@ -16,6 +18,10 @@ import ModularCurves.Picard.InvertibleSheafFiniteStageModel
 The local pole coordinates from a Cartier frame and the canonical frame away
 from the marked section are compared after restriction to their overlap.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

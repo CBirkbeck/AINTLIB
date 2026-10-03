@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
-import ModularCurves.ForMathlib.SchemeModuleOpenCoverIso
-import ModularCurves.Picard.DualPullback.LocalTrivializationInv
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
+public import ModularCurves.ForMathlib.SchemeModuleOpenCoverIso
+public import ModularCurves.Picard.DualPullback.LocalTrivializationInv
 
 /-!
 # Cancellation for projective-space twists
@@ -13,6 +15,10 @@ import ModularCurves.Picard.DualPullback.LocalTrivializationInv
 The explicit evaluation pairing between the concrete coordinate-hyperplane
 twists `O(-n)` and `O(n)` is an isomorphism over every commutative base ring.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

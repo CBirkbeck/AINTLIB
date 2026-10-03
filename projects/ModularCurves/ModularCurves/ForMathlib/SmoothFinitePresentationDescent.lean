@@ -1,5 +1,7 @@
-import Mathlib.RingTheory.Smooth.NoetherianDescent
-import ModularCurves.ForMathlib.FinitePresentationDescent
+module
+
+public import Mathlib.RingTheory.Smooth.NoetherianDescent
+public import ModularCurves.ForMathlib.FinitePresentationDescent
 
 /-!
 # Smooth models over filtered-colimit stages
@@ -9,6 +11,8 @@ smooth at a sufficiently large stage. The proof uses the finite-type coefficient
 from Stacks Project, Tag 00TP and then identifies it with the chosen model by descending
 an algebra equivalence and both inverse identities.
 -/
+
+@[expose] public section
 
 universe u
 

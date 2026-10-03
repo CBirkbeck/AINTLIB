@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafCechInjectiveComparison
-import ModularCurves.ForMathlib.SheafModuleCechTopAugmentation
-import ModularCurves.ForMathlib.SchemeModuleBaseCech
+module
+
+public import ModularCurves.ForMathlib.SheafCechInjectiveComparison
+public import ModularCurves.ForMathlib.SheafModuleCechTopAugmentation
+public import ModularCurves.ForMathlib.SchemeModuleBaseCech
 
 /-!
 # Exactness of top sections of module-valued Cech complexes
@@ -15,6 +17,10 @@ a module-valued sheaf with the native additive Cech complex. Consequently,
 the sheaf condition gives exactness at degree zero without losing the module
 structure.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicTopology CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

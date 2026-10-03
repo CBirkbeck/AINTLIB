@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreStandardChartEquivalence`.
 -/
-import ModularCurves.ForMathlib.SegreImageChartGeneration
+module
+
+public import ModularCurves.ForMathlib.SegreImageChartGeneration
 
 /-!
 # The standard Segre chart equivalence
@@ -14,6 +16,8 @@ import ModularCurves.ForMathlib.SegreImageChartGeneration
 The forward dehomogenization map and the anchor-insertion map are inverse
 on every standard affine chart.
 -/
+
+@[expose] public section
 
 open HomogeneousLocalization
 open scoped TensorProduct

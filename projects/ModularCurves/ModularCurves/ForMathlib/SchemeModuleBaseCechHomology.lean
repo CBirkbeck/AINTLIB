@@ -1,5 +1,7 @@
-import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
-import ModularCurves.ForMathlib.SchemeModuleBaseCech
+module
+
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+public import ModularCurves.ForMathlib.SchemeModuleBaseCech
 
 /-!
 # Homology of base-linear Cech complexes
@@ -7,6 +9,8 @@ import ModularCurves.ForMathlib.SchemeModuleBaseCech
 Transport exactness through the comparison between the base-linear Cech
 complex of a scheme module and the native additive Cech complex.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

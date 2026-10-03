@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.LinearAlgebra.Matrix.Rank
-import Mathlib.RingTheory.Ideal.BigOperators
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Rank
+public import Mathlib.RingTheory.Ideal.BigOperators
 
 /-!
 # Ideal of minors of a map of finite free modules (Stacks 00N1 / 07ZA) — [T-FIT]
@@ -37,6 +39,8 @@ openness of the fibre-exact locus (Stacks 00RB).
 The single hard direction of McCoy (`r ≤ M.rank ⟹ some r × r minor ≠ 0`) is isolated as
 `Matrix.exists_det_submatrix_ne_zero_of_le_rank` — see its docstring for the exact gap.
 -/
+
+@[expose] public section
 
 open TensorProduct
 

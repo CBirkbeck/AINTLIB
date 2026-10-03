@@ -3,10 +3,12 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.ForMathlib.GrassmannianChart
-import ModularCurves.ForMathlib.GrassmannianTransition
-import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
-import Mathlib.LinearAlgebra.Matrix.ToLin
+module
+
+public import ModularCurves.ForMathlib.GrassmannianChart
+public import ModularCurves.ForMathlib.GrassmannianTransition
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.LinearAlgebra.Matrix.ToLin
 
 /-!
 # The chart-overlap criterion for the Grassmannian ([NISOG-GRASS], [GR-E2])
@@ -21,6 +23,8 @@ second chart `ι'` is a determinant condition: the **pointwise transition matrix
 generic-matrix-ring half of this statement lives in `GrassmannianTransition.lean`
 ([GR-E3]); the spec tying the two is the next increment.
 -/
+
+@[expose] public section
 
 universe u
 

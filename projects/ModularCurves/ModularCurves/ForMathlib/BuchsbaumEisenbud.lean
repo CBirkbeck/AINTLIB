@@ -54,12 +54,16 @@ make-or-break; the Ext-support idea is a clean optional replacement for [T-GRADE
 research-grade formalization (multi-week+).  Everything else assembles existing pieces and is
 tractable.  See the decomposition doc for the per-leaf verdict.
 -/
-import Mathlib
-import ModularCurves.ForMathlib.FlatLocus
-import ModularCurves.ForMathlib.FittingIdeals
-import ModularCurves.ForMathlib.Grade
-import ModularCurves.ForMathlib.Acyclicity
-import ModularCurves.ForMathlib.LocalizedModuleComap
+module
+
+public import Mathlib
+public import ModularCurves.ForMathlib.FlatLocus
+public import ModularCurves.ForMathlib.FittingIdeals
+public import ModularCurves.ForMathlib.Grade
+public import ModularCurves.ForMathlib.Acyclicity
+public import ModularCurves.ForMathlib.LocalizedModuleComap
+
+@[expose] public section
 
 open TensorProduct
 

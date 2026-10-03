@@ -3,13 +3,15 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.Algebra.Module.LocalizedModule.Exact
-import Mathlib.LinearAlgebra.Dimension.Free
-import Mathlib.RingTheory.FiniteType
-import Mathlib.RingTheory.Flat.Rank
-import Mathlib.RingTheory.LocalProperties.Submodule
-import Mathlib.RingTheory.Localization.Finiteness
-import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
+module
+
+public import Mathlib.Algebra.Module.LocalizedModule.Exact
+public import Mathlib.LinearAlgebra.Dimension.Free
+public import Mathlib.RingTheory.FiniteType
+public import Mathlib.RingTheory.Flat.Rank
+public import Mathlib.RingTheory.LocalProperties.Submodule
+public import Mathlib.RingTheory.Localization.Finiteness
+public import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
 
 /-!
 # A surjection of free modules of equal rank is injective (YFULL route γ)
@@ -25,6 +27,8 @@ ring has the Orzech property (`instOrzechPropertyOfCommRing`), i.e. a surjection
 finite module that also *embeds* into it is injective
 (`OrzechProperty.injective_of_surjective_of_injective`).
 -/
+
+@[expose] public section
 
 open Module
 

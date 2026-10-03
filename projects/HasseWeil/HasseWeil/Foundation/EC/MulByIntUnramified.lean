@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.DifferentialOrd
-import HasseWeil.Isogeny.OrdTransport
-import HasseWeil.Foundation.EC.TranslationOrd
-import HasseWeil.Foundation.EC.WronskianGeneral
-import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
+module
+
+public import HasseWeil.Foundation.EC.DifferentialOrd
+public import HasseWeil.Isogeny.OrdTransport
+public import HasseWeil.Foundation.EC.TranslationOrd
+public import HasseWeil.Foundation.EC.WronskianGeneral
+public import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
 
 /-!
 # Unramifiedness of `[ℓ]` at an affine non-2-torsion image point (the `e = 1` input)
@@ -39,6 +41,8 @@ Write `h := mulByInt_x ℓ − x_Q = (Φ_ℓ(x_gen) − x_Q·ΨSq_ℓ(x_gen)) / 
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.2.5, III.4.10c.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves Polynomial
 

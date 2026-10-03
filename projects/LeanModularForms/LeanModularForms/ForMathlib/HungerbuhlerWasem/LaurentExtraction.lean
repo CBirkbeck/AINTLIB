@@ -2,11 +2,13 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.FlatnessConditions
-import LeanModularForms.ForMathlib.HungerbuhlerWasem
-import Mathlib.Analysis.Meromorphic.Order
-import Mathlib.Analysis.Analytic.Order
-import Mathlib.Analysis.Analytic.IsolatedZeros
+module
+
+public import LeanModularForms.ForMathlib.FlatnessConditions
+public import LeanModularForms.ForMathlib.HungerbuhlerWasem
+public import Mathlib.Analysis.Meromorphic.Order
+public import Mathlib.Analysis.Analytic.Order
+public import Mathlib.Analysis.Analytic.IsolatedZeros
 
 /-!
 # Laurent extraction for HungerbuhlerWasem (T-LE-01)
@@ -32,6 +34,10 @@ We use `Classical.choose` on `hCondB.laurent_compatible` to extract the data
 `order = 0` (empty polar part) and the analytic remainder is `f` locally.
 This adds no axioms beyond the existing `Classical.choice`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Filter Topology Set Complex MeasureTheory Metric
 

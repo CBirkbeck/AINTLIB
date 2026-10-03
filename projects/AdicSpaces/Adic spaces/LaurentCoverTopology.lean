@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LaurentCoverExact
-import «Adic spaces».TateAlgebraTopology
+module
+
+public import «Adic spaces».LaurentCoverExact
+public import «Adic spaces».TateAlgebraTopology
 
 /-!
 # Quotient topology API for the Laurent cover (T131)
@@ -53,6 +55,8 @@ quotient topologies. The proofs use the basic-neighborhood basis
 together with the existing coefficient bridges
 `tateAlgNhd_coeff_mem` and `tateAlgNhd₂_of_coeff_mem_principal`.
 -/
+
+@[expose] public section
 
 namespace LaurentCover
 

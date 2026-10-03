@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.CartierDivisor
-import ModularCurves.EllipticCurve.Torsion
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Mathlib.FieldTheory.IsAlgClosed.Basic
-import Mathlib.RingTheory.AdjoinRoot
-import Mathlib.LinearAlgebra.TensorProduct.Basis
+module
+
+public import ModularCurves.LevelStructure.CartierDivisor
+public import ModularCurves.EllipticCurve.Torsion
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.AdjoinRoot
+public import Mathlib.LinearAlgebra.TensorProduct.Basis
 
 /-!
 # Points of exact order N (Drinfeld / KM 1.4)
@@ -35,6 +37,10 @@ This is precisely the subtlety flagged for `Y₁(N)`: "what it means to be a poi
 order `N` … is slightly delicate over schemes, even if `N` is invertible on the base."
 The naive fibrewise notion is recovered — as a *theorem* — exactly when `N` is invertible.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

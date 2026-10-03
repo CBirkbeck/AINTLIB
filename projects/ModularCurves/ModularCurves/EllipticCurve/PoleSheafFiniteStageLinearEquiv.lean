@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleFiltrationMonomialBasis
-import ModularCurves.EllipticCurve.PoleSheafUniformMonomialBasis
+module
+
+public import ModularCurves.EllipticCurve.PoleFiltrationMonomialBasis
+public import ModularCurves.EllipticCurve.PoleSheafUniformMonomialBasis
 
 /-!
 # Finite-stage comparison with the model pole filtration
@@ -12,6 +14,8 @@ import ModularCurves.EllipticCurve.PoleSheafUniformMonomialBasis
 The compatible basis of each abstract pole module is identified with the
 ordered monomial basis of the corresponding Weierstrass-model filtration.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

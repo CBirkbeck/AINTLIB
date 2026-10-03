@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.AcyclicAffineCechComparison
-import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
-import ModularCurves.ForMathlib.SchemeModuleBaseCechPushforward
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+module
+
+public import ModularCurves.ForMathlib.AcyclicAffineCechComparison
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechPushforward
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
 # Cohomology of pushforwards from affine schemes
@@ -15,6 +17,8 @@ This file proves positive-degree cohomology vanishing for the pushforward of a q
 module along an affine morphism with affine source. The proof transports exactness between
 native base-linear Cech complexes and then applies the finite affine-cover Cech comparison.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

@@ -1,8 +1,10 @@
-import ModularCurves.Picard.InvertibleSheafGlueDataDescent
-import ModularCurves.Picard.DualPullback.OpenAdjunction
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
-import ModularCurves.ForMathlib.SchemeModuleRestrictLimits
-import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
+module
+
+public import ModularCurves.Picard.InvertibleSheafGlueDataDescent
+public import ModularCurves.Picard.DualPullback.OpenAdjunction
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+public import ModularCurves.ForMathlib.SchemeModuleRestrictLimits
+public import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
 
 /-!
 # Effectivity of affine-intersection line-bundle descent
@@ -11,6 +13,10 @@ This file glues the chartwise unit modules attached to an
 `AffineIntersectionUnitCocycle`. The glued module is the usual Cech equalizer of
 the chart extensions, with one overlap map twisted by the transition isomorphism.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u u₁ u₂ v₁ v₂
 

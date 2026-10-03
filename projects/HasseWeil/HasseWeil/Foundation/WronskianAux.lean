@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Algebra.Polynomial.Derivation
-import HasseWeil.Foundation.WronskianAux.CNorm
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+public import Mathlib.Algebra.Polynomial.Derivation
+public import HasseWeil.Foundation.WronskianAux.CNorm
 
 /-!
 # Wronskian identities for Weierstrass division polynomials
@@ -52,6 +54,8 @@ RAM usage: ~1-2 GB (was ~57 GB, ~30× reduction).
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.3 Exercise 3.7.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

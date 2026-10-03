@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import ModularCurves.ForMathlib.EtaleIsoLocus
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import ModularCurves.ForMathlib.EtaleIsoLocus
 
 /-!
 # The iso-locus of a finite locally free morphism (YFULL route γ, [YF-ISOLOC])
@@ -27,6 +29,8 @@ Since `Etale ⟹ Flat` and `Etale ⟹ LocallyOfFinitePresentation` are instances
 results apply verbatim to any finite étale `ψ` with only `[IsFinite ψ] [Etale ψ]` in
 scope.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

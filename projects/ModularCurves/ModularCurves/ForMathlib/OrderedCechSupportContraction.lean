@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.RingTheory.Noetherian.Basic
-import ModularCurves.ForMathlib.CechSupportContraction
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
+module
+
+public import Mathlib.RingTheory.Noetherian.Basic
+public import ModularCurves.ForMathlib.CechSupportContraction
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
 
 /-!
 # Degree-one contraction of ordered support-restricted Cech cochains
@@ -15,6 +17,8 @@ This file gives the ordered degree-one specialization of the support contraction
 For an index outside the required support, insertion into an ordered singleton contracts every
 degree-one cocycle.
 -/
+
+@[expose] public section
 
 open Set
 

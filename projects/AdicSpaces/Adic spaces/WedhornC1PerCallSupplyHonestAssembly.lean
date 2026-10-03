@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornC1PerCallSupplyHonest
+module
+
+public import «Adic spaces».WedhornC1PerCallSupplyHonest
 
 /-!
 # Wedhorn 8.34(ii) — Honest per-call supply assembly
@@ -52,6 +54,8 @@ external hypothesis at the per-call layer.
 * No T001, Lane B, Cor 8.32, Jacobson, faithful-flatness, Zavyalov,
   or bivariate-overlap content.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

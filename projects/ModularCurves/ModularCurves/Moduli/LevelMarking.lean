@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.SectionMarking
-import ModularCurves.Moduli.GammaH
-import ModularCurves.EllipticCurve.TorsionFibre
+module
+
+public import ModularCurves.Moduli.SectionMarking
+public import ModularCurves.Moduli.GammaH
+public import ModularCurves.EllipticCurve.TorsionFibre
 
 /-!
 # Level sections avoid the zero section ([hArb-2c])
@@ -19,6 +21,8 @@ point, giving a surjection from `ZMod N` and the contradiction `N² ≤ N`.
 Combined with `marksAt_of_forall_pull_ne_zero` ([hArb-2]), every marked level section
 gets honest chart coordinates on every affine piece of the base.
 -/
+
+@[expose] public section
 
 universe u
 

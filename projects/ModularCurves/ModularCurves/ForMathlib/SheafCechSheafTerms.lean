@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SheafCechCochains
-import ModularCurves.ForMathlib.TopCatSheafRestrict
+module
+
+public import ModularCurves.ForMathlib.SheafCechCochains
+public import ModularCurves.ForMathlib.TopCatSheafRestrict
 
 /-!
 # Sheaf-level Cech terms
@@ -9,6 +11,10 @@ open subsets. In degree `n`, the term is the product of the pushforwards of the 
 to all `(n + 1)`-fold intersections. Its sections on an open `V` are identified with families
 of sections on the intersections of `V` with those tuple intersections.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

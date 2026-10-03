@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GLn.Basic
-import LeanModularForms.HeckeRIngs.GLn.SL2Surjection
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Basic
-import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
-import Mathlib.LinearAlgebra.Eigenspace.Basic
-import Mathlib.NumberTheory.ModularForms.Basic
+module
+
+public import LeanModularForms.HeckeRIngs.GLn.Basic
+public import LeanModularForms.HeckeRIngs.GLn.SL2Surjection
+public import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Basic
+public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.NumberTheory.ModularForms.Basic
 
 /-!
 # Hecke Pair for Γ₁(N)
@@ -41,6 +43,10 @@ for `Γ₁(N)` and the associated Nebentypus character spaces.
 * Miyake, *Modular Forms*, §4.5
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.1
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup
 

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentEndpoint
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentEndpoint
 
 /-!
 # [FLT37-CASEII-R2-L5c] Discharging the integer-witness packaging of the §9.1 propagation data
@@ -38,6 +40,8 @@ residual.
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §9.1 (Theorem 9.4), p. 172;
   Lemma 9.6 (p. 179).
 -/
+
+set_option backward.privateInPublic true
 
 @[expose] public section
 

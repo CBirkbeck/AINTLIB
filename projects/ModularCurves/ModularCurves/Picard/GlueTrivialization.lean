@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.PicComparison
-import Mathlib.Topology.Sheaves.SheafCondition.UniqueGluing
+module
+
+public import ModularCurves.Picard.PicComparison
+public import Mathlib.Topology.Sheaves.SheafCondition.UniqueGluing
 
 /-!
 # Gluing a trivialization from cover-local generating sections
@@ -27,6 +29,8 @@ on `E ×_S T`; the overlap agreement is *forced*, not checked, because the local
 normalized along the zero section and `ModularCurves.eq_one_of_pullback_eq_one` says a unit
 which is `1` along the zero section is `1`.
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

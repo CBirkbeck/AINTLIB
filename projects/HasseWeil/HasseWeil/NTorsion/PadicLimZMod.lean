@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.NumberTheory.Padics.RingHoms
-import Mathlib.Algebra.Ring.Pi
+module
+
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.Algebra.Ring.Pi
 
 /-!
 # `ℤ_[ℓ] ≅ lim_n ZMod (ℓ^n)` — the `ℓ`-adic integers as the projective limit of the `ZMod` tower
@@ -37,6 +39,8 @@ Reference: Silverman, *The Arithmetic of Elliptic Curves* (2nd ed), §III.7, p. 
 ("we mimic the inverse limit construction of the `ℓ`-adic integers `ℤ_ℓ` from the finite
 groups `ℤ/ℓⁿℤ`"). Mathlib API: `Mathlib/NumberTheory/Padics/RingHoms.lean`.
 -/
+
+@[expose] public section
 
 open PadicInt
 

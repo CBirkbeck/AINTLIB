@@ -3,15 +3,17 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
-import Mathlib.RingTheory.Localization.Away.Basic
-import Mathlib.Algebra.MvPolynomial.CommRing
-import ModularCurves.EllipticCurve.ModelRecord
-import ModularCurves.Moduli.AdaptedModel
-import ModularCurves.Moduli.EllCategory
-import ModularCurves.Moduli.OmegaFunctor
-import ModularCurves.ForMathlib.PullbackLocalAtTarget
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
+public import Mathlib.RingTheory.Localization.Away.Basic
+public import Mathlib.Algebra.MvPolynomial.CommRing
+public import ModularCurves.EllipticCurve.ModelRecord
+public import ModularCurves.Moduli.AdaptedModel
+public import ModularCurves.Moduli.EllCategory
+public import ModularCurves.Moduli.OmegaFunctor
+public import ModularCurves.ForMathlib.PullbackLocalAtTarget
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The universal ω-adapted curve and its moduli ring (T-E12, E12-D1)
@@ -25,6 +27,10 @@ short-normal-form Weierstrass curve `y² = x³ + A₄x + A₆` over it — the c
 `(g₂, g₃) = (−4A₄, −4A₆)`-style; the short form matches `adaptedCoeff₄/₆`,
 `Moduli/AdaptedModel.lean`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

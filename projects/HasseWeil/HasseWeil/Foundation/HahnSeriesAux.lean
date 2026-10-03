@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.HahnSeries.Multiplication
-import Mathlib.RingTheory.HahnSeries.Summable
-import Mathlib.RingTheory.LaurentSeries
+module
+
+public import Mathlib.RingTheory.HahnSeries.Multiplication
+public import Mathlib.RingTheory.HahnSeries.Summable
+public import Mathlib.RingTheory.LaurentSeries
 
 /-!
 # Auxiliary order and leading coefficient lemmas for Hahn series
@@ -19,6 +21,8 @@ quotients of Hahn series.
 * `HahnSeries.leadingCoeff_inv` — the leading coefficient analogue for inverses.
 * `HahnSeries.leadingCoeff_div` — the leading coefficient analogue for quotients.
 -/
+
+@[expose] public section
 
 namespace HahnSeries
 

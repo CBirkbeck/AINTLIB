@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.TranslateOrdInfty
+module
+
+public import HasseWeil.Foundation.EC.TranslateOrdInfty
 
 /-!
 # General DVR order-transport along a field hom (Silverman II.2.5, the unramified case)
@@ -28,6 +30,8 @@ in `Hasse/L6Witnesses.lean`, which no longer exists, so these are now the only c
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.2.5–2.6, III.4.10c.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
-import HasseWeil.Foundation.Curves.Fiber.AFConditional
-import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
+public import HasseWeil.Foundation.Curves.Fiber.AFConditional
+public import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
 
 /-!
 # Silverman III.4.8: every isogeny is a group homomorphism
@@ -42,6 +44,8 @@ II.3.6/II.3.7) is supplied by
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4.8, III.3.4, II.3.6/7.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

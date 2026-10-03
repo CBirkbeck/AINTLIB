@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.MulByInt.Composition
+module
+
+public import HasseWeil.Isogeny.MulByInt.Composition
 
 /-!
 # The dual witness through the Frobenius factorization (Silverman II.2.12 + III.6.1)
@@ -90,6 +92,8 @@ reduced to the witness for its **separable part**, via the Frobenius factorizati
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.11–2.12 (the Frobenius
   factorization), III.6.1 (the dual isogeny).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

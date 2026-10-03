@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.CyclotomicRepresentativeReduction
-import BernoulliRegular.UnitQuotient.Washington816
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.CyclotomicRepresentativeReduction
+public import BernoulliRegular.UnitQuotient.Washington816
 
 /-!
 # Washington Exercise 8.11 for `p = 37`: the matrix-kernel half of `LeadingExponentEx811Core37`

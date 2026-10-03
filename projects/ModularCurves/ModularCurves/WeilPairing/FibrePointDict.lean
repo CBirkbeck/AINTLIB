@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.FieldPairing
-import ModularCurves.Moduli.E3DatumAssembly
+module
+
+public import ModularCurves.WeilPairing.FieldPairing
+public import ModularCurves.Moduli.E3DatumAssembly
 
 /-!
 # The geometric-fibre point dictionary and the Weil pairing on scheme points (DS4 M1b-1/2)
@@ -23,6 +25,8 @@ input (`exists_pairingAlgebraHom_of_galoisEquivariant`) lives on the *scheme* po
 This is the M1b input: everything here is sorry-free, so the remaining DS4 field-level
 work is Galois equivariance (M1b-3) plus the descent call (M1c).
 -/
+
+@[expose] public section
 
 universe u
 

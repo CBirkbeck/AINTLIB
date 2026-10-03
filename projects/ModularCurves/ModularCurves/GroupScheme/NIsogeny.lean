@@ -1,10 +1,12 @@
-import ModularCurves.GroupScheme.CyclicSubgroup
-import ModularCurves.GroupScheme.DeligneOrder
-import ModularCurves.GroupScheme.SubgroupQuotient
-import ModularCurves.LevelStructure.Incidence
-import ModularCurves.EllipticCurve.GroupLawDescent
-import ModularCurves.EllipticCurve.RigiditySpreadingOut
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.GroupScheme.CyclicSubgroup
+public import ModularCurves.GroupScheme.DeligneOrder
+public import ModularCurves.GroupScheme.SubgroupQuotient
+public import ModularCurves.LevelStructure.Incidence
+public import ModularCurves.EllipticCurve.GroupLawDescent
+public import ModularCurves.EllipticCurve.RigiditySpreadingOut
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Cyclic `N`-isogenies: KM Chapter 6 (STREAM-NISOG skeleton)
@@ -46,6 +48,10 @@ their pins, per the plan.md DS rule). All other data (`generatorSpace`,
 `Classical.choose` definitions off sorried existence theorems, with their specification
 pins proved outright from `choose_spec`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

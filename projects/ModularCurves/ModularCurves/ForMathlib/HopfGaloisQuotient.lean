@@ -3,13 +3,15 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.ForMathlib.HopfGalois
-import ModularCurves.ForMathlib.SpecEqualizer
-import Mathlib.Algebra.Category.Ring.Constructions
-import Mathlib.AlgebraicGeometry.EffectiveEpi
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.Pullbacks
-import Mathlib.CategoryTheory.Limits.Shapes.KernelPair
+module
+
+public import ModularCurves.ForMathlib.HopfGalois
+public import ModularCurves.ForMathlib.SpecEqualizer
+public import Mathlib.Algebra.Category.Ring.Constructions
+public import Mathlib.AlgebraicGeometry.EffectiveEpi
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.Pullbacks
+public import Mathlib.CategoryTheory.Limits.Shapes.KernelPair
 
 /-!
 # The affine quotient map is a regular epimorphism
@@ -33,6 +35,8 @@ iso `IsHopfGalois.galoisEquiv` transports it to `Spec(B ⊗_R A)` with legs `Spe
 `IsColimit`. This is the full route-independent reduction `IsHopfGalois ρ ⟹ IsColimit`, feeding
 `exists_unique_lift_of_isColimit` and thence the `SubgroupQuotient` pins.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry
 open scoped TensorProduct

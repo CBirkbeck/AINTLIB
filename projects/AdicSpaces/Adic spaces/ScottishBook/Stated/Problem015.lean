@@ -1,8 +1,10 @@
-import Mathlib.RingTheory.WittVector.Basic
-import Mathlib.RingTheory.Valuation.ValuationRing
-import Mathlib.FieldTheory.Perfect
-import Mathlib.Algebra.Field.IsField
-import «Adic spaces».CoherentRing
+module
+
+public import Mathlib.RingTheory.WittVector.Basic
+public import Mathlib.RingTheory.Valuation.ValuationRing
+public import Mathlib.FieldTheory.Perfect
+public import Mathlib.Algebra.Field.IsField
+public import «Adic spaces».CoherentRing
 
 /-!
 # Nonarchimedean Scottish Book -- Problem 15
@@ -30,6 +32,8 @@ Open.
 - **Coherent ring**: A ring in which every finitely generated ideal is finitely presented
   as a module over itself. See `IsCoherentRing` in `CoherentRing.lean`.
 -/
+
+@[expose] public section
 
 /-- **Problem 15** (Kedlaya, 2015): Let `R` be a perfect valuation ring of characteristic `p`
 (not a field). Is `𝕎 R` (the ring of `p`-typical Witt vectors over `R`) coherent?

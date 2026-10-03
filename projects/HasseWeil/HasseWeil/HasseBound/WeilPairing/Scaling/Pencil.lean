@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.PencilCovariance
-import HasseWeil.HasseBound.WeilPairing.ProjOrdTransportLocal
-import HasseWeil.HasseBound.WeilPairing.Scaling.Separable
-import HasseWeil.HasseBound.WeilPairing.PencilDualDivisor
-import HasseWeil.Isogeny.SeparableWitnessReductions
+module
+
+public import HasseWeil.HasseBound.WeilPairing.PencilCovariance
+public import HasseWeil.HasseBound.WeilPairing.ProjOrdTransportLocal
+public import HasseWeil.HasseBound.WeilPairing.Scaling.Separable
+public import HasseWeil.HasseBound.WeilPairing.PencilDualDivisor
+public import HasseWeil.Isogeny.SeparableWitnessReductions
 
 /-!
 # `PencilScaling` for `(rπ − s)_{K̄}` from the local comap witnesses (δ-free, surjectivity-free)
@@ -45,6 +47,8 @@ hkerdeg}`
 * Silverman, *The Arithmetic of Elliptic Curves*, III.4.10c (unramified order-transport),
   III.8.1d/III.8.6.1 (the scaling).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

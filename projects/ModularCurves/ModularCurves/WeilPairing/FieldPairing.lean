@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.PairingNondeg
-import HasseWeil.HasseBound.WeilPairing.PairingProps
-import ModularCurves.WeilPairing.Basic
+module
+
+public import HasseWeil.HasseBound.WeilPairing.PairingNondeg
+public import HasseWeil.HasseBound.WeilPairing.PairingProps
+public import ModularCurves.WeilPairing.Basic
 
 /-!
 # The Weil pairing at a geometric fibre (DS4 milestone M1a)
@@ -25,6 +27,10 @@ i.e. as a `{u : F // u ^ N = 1}`-valued pairing of `N`-torsion points indexed by
 Everything here is a thin, sorry-free wrapper: no new mathematical content beyond the
 `ℤ`-indexed → `ℕ`-indexed translation and the `μ_N`-bundling.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

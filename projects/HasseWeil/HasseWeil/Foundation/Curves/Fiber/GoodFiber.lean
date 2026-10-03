@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
-import HasseWeil.Foundation.Curves.Fiber.GenericFiber
-import HasseWeil.Foundation.Curves.Ramification.RamificationFinite
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
+public import HasseWeil.Foundation.Curves.Fiber.GenericFiber
+public import HasseWeil.Foundation.Curves.Ramification.RamificationFinite
 
 /-!
 # The good fibre of a separable curve map has `deg φ` points (ROUTE-W, ticket W-3, layer 1)
@@ -32,6 +34,8 @@ of the function-field extension, **all but finitely many fibres of the point map
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.6(b), II.2.7 (for III.4.10c).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves.CurveMap
 

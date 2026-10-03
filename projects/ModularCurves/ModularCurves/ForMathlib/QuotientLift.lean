@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.AffineQuotient
-import ModularCurves.ForMathlib.SchemeActionFree
+module
+
+public import ModularCurves.ForMathlib.AffineQuotient
+public import ModularCurves.ForMathlib.SchemeActionFree
 
 /-!
 # Morphism descent over an open of the scheme quotient ([a5-W2])
@@ -27,6 +29,8 @@ descends uniquely to `Q'`.
 This is what descends the `[a5]` fppf-comparison `E|_{D(a)} ⟶ projModel W₁` through the curve's
 quotient to `(E/G)|` — the last morphism-level descent the KM 4.7 engine needs.
 -/
+
+@[expose] public section
 open AlgebraicGeometry CategoryTheory Limits
 universe u
 namespace AlgebraicGeometry.SchemeAction

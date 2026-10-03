@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.CategoryTheory.Limits.Final
-import Mathlib.Topology.Category.TopCat.Opens
+module
+
+public import Mathlib.CategoryTheory.Limits.Final
+public import Mathlib.Topology.Category.TopCat.Opens
 
 /-!
 # The opens-preimage functor is final
@@ -19,6 +21,8 @@ This feeds mathlib's `SheafOfModules.pullbackObjUnitToUnit` isomorphism (which r
 any morphism of schemes is the unit — AINTLIB ModularCurves T-PIC1a-FIN. Upstream
 candidate.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

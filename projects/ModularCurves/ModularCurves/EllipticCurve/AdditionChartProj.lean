@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartHom
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartHom
 
 /-!
 # Compatibility of projective charts
@@ -20,6 +22,8 @@ through either affine chart of a Weierstrass curve.
 * `chartι_comp_specMap_chartAwayHom_eq`: a projective triple gives the same morphism through either
   chart on which it is regular.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves HomogeneousIdeal HomogeneousLocalization
 open AlgebraicGeometry CategoryTheory

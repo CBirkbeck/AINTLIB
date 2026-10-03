@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Differentials
-import HasseWeil.Foundation.EC.MulByIntAddRecurrence
-import HasseWeil.Isogeny.FormalSeries
+module
+
+public import HasseWeil.Foundation.Curves.Differentials
+public import HasseWeil.Foundation.EC.MulByIntAddRecurrence
+public import HasseWeil.Isogeny.FormalSeries
 
 /-!
 # Route B over a general field: `[n]^*ω = n·ω` and separability of `[n]`
@@ -41,6 +43,8 @@ graph, so `Separability`/`PullbackCoeff` can discharge `a_{[n]} = n` through the
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, III.5.2–III.5.4.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

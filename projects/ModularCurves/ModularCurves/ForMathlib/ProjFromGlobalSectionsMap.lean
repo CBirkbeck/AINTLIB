@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
+module
+
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
 
 /-!
 # Naturality of `Proj.fromOfGlobalSections` under `Proj.map`
@@ -30,6 +32,10 @@ the section at infinity (T-W7.0b, `negModelHom_zero`).
 
 AINTLIB ModularCurves (T-W7.0b infrastructure); upstream candidate.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open HomogeneousIdeal HomogeneousLocalization TopologicalSpace CategoryTheory Graded
 open AlgebraicGeometry ProjectiveSpectrum Proj Limits
@@ -156,17 +162,13 @@ private lemma basicOpen_toSpecAway
             (algebraMap Γ(X, ⊤) (Localization.Away r))) =
         Spec.map (CommRingCat.ofHom ρ) := by
     rw [← Spec.map_comp, ← CommRingCat.ofHom_comp, hψ]
-  rw [← cancel_mono
+  apply (cancel_mono
     (Spec.map (CommRingCat.ofHom
-      (algebraMap Γ(X, ⊤) (Localization.Away r))))]
-  slice_lhs 3 4 =>
-    rw [basicOpenIsoSpecAway_hom_SpecMap]
-  slice_lhs 2 3 =>
-    rw [morphismRestrict_ι X.toSpecΓ
-      (PrimeSpectrum.basicOpen r :
-        (Spec (CommRingCat.of Γ(X, ⊤))).Opens)]
-  slice_lhs 1 2 =>
-    rw [Scheme.isoOfEq_inv_ι]
+      (algebraMap Γ(X, ⊤) (Localization.Away r))))).1
+  simp only [Category.assoc, basicOpenIsoSpecAway_hom_SpecMap]
+  rw [morphismRestrict_ι X.toSpecΓ
+    (PrimeSpectrum.basicOpen r : (Spec (CommRingCat.of Γ(X, ⊤))).Opens)]
+  rw [← Category.assoc, Scheme.isoOfEq_inv_ι]
   change (X.basicOpen r).ι ≫ X.toSpecΓ =
     (X.basicOpen r).toScheme.toSpecΓ ≫
       (Spec.map (CommRingCat.ofHom ψ) ≫

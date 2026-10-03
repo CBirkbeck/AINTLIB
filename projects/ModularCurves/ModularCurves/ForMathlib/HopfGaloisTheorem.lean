@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.HopfGaloisBootstrap
-import ModularCurves.ForMathlib.CoinvariantsPoints
-import ModularCurves.ForMathlib.CoinvariantsBaseChange
-import ModularCurves.ForMathlib.FlatLocalInfiniteResidue
-import ModularCurves.ForMathlib.SemilocalBasis
-import ModularCurves.ForMathlib.FaithfullyFlatEqualizer
-import ModularCurves.ForMathlib.FaithfullyFlatFiniteDescent
+module
+
+public import ModularCurves.ForMathlib.HopfGaloisBootstrap
+public import ModularCurves.ForMathlib.CoinvariantsPoints
+public import ModularCurves.ForMathlib.CoinvariantsBaseChange
+public import ModularCurves.ForMathlib.FlatLocalInfiniteResidue
+public import ModularCurves.ForMathlib.SemilocalBasis
+public import ModularCurves.ForMathlib.FaithfullyFlatEqualizer
+public import ModularCurves.ForMathlib.FaithfullyFlatFiniteDescent
 
 /-!
 # The Hopf–Galois theorem for co-actions of finite free Hopf algebras
@@ -29,6 +31,8 @@ with infinite residue field (`LocalPolynomialExtension`), base-change the
 co-action, harvest the shifted basis via semi-locality + the semi-local basis
 selection, conclude Galois upstairs by the bootstrap, and descend.
 -/
+
+@[expose] public section
 
 namespace ModularCurves
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.MeasureR.MahlerTransform
+module
+
+public import PadicLFunctions.MeasureR.MahlerTransform
 
 /-!
 # The convolution algebra structure over the integer ring of a field
@@ -21,6 +23,8 @@ as in the `ℤ_p`-layer `PadicLFunctions/Measure/Convolution.lean`.
 * `MeasureR.mul_apply` — the convolution formula (RJW Rem 3.11).
 * `MeasureR.dirac_mul_dirac` — `[a]·[b] = [a+b]`.
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 open PowerSeries

@@ -3,15 +3,17 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.CharP.Algebra
-import Mathlib.FieldTheory.Finite.Basic
-import Mathlib.FieldTheory.Perfect
-import Mathlib.NumberTheory.DirichletCharacter.Basic
-import Mathlib.NumberTheory.Padics.AddChar
-import Mathlib.NumberTheory.Padics.RingHoms
-import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
-import Mathlib.RingTheory.Teichmuller
-import PadicLFunctions.KubotaLeopoldt.ZetaP
+module
+
+public import Mathlib.Algebra.CharP.Algebra
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.FieldTheory.Perfect
+public import Mathlib.NumberTheory.DirichletCharacter.Basic
+public import Mathlib.NumberTheory.Padics.AddChar
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Mathlib.RingTheory.Teichmuller
+public import PadicLFunctions.KubotaLeopoldt.ZetaP
 
 /-!
 # Branches of the p-adic zeta function (RJW §5.3, TeX 1885–1979)
@@ -27,6 +29,8 @@ L5.3.3). The `i`-th branch of the Kubota–Leopoldt `p`-adic L-function is
 `ζ_{p,i}(s) = ∫_{ℤ_p^×} ω(x)^i⟨x⟩^{1−s}·ζ_p` (Def 5.16) with interpolation
 `ζ_{p,i}(1−k) = (1−p^{k−1})ζ(1−k)` for `k ≡ i mod (p−1)` (Thm 5.17).
 -/
+
+@[expose] public section
 
 open Filter Topology
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.UniversalLegendre
+module
+
+public import ModularCurves.Moduli.UniversalLegendre
 
 /-!
 # The general ring-level negation coordinate (KM CHARTER-K / K1, a RING-DBL leaf)
@@ -18,6 +20,8 @@ Used in the `RING-DBL` chain: `3•σ = 0 ⟹ 2•σ = −σ`, and `−σ = affi
 by this lemma, so the doubling-equals-negation abscissa comparison closes via
 `projModelAffineSection_injective`.
 -/
+
+@[expose] public section
 
 universe u
 

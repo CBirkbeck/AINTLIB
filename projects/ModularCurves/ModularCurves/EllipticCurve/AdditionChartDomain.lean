@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartLadder
-import ModularCurves.EllipticCurve.PoleFiltration
-import ModularCurves.ForMathlib.MonicQuotientDescent
-import ModularCurves.ForMathlib.WeierstrassProjectivePrime
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartLadder
+public import ModularCurves.EllipticCurve.PoleFiltration
+public import ModularCurves.ForMathlib.MonicQuotientDescent
+public import ModularCurves.ForMathlib.WeierstrassProjectivePrime
 
 /-!
 # The chart-product is a domain, and both laws land on the curve there (T-W7.0c-c5β, β2b)
@@ -30,6 +32,8 @@ The remaining chart is `Y` (`affineChartRing W 1`): PoleFiltration presents it a
 `infChartCubic_monic`), so the same fraction-field descent applies once the cubic is known
 prime over `Frac R [t]` — see `T-W7.0c-c5β` on the board.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves HomogeneousIdeal
 

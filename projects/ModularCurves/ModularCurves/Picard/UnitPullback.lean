@@ -1,5 +1,7 @@
-import ModularCurves.Picard.InvertibleSheaf
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
+module
+
+public import ModularCurves.Picard.InvertibleSheaf
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
 
 /-!
 # Scalar endomorphisms of structure sheaves under pullback
@@ -7,6 +9,8 @@ import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
 This file records the canonical scalar endomorphism of a scheme's structure module and
 its compatibility with pushforward and pullback.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

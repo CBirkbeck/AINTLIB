@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreStandardChartInverse`.
 -/
-import ModularCurves.ForMathlib.SegreStandardChartForward
+module
+
+public import ModularCurves.ForMathlib.SegreStandardChartForward
 
 /-!
 # The inverse map on a standard Segre chart
@@ -16,6 +18,8 @@ ring into the Segre coordinate image. These graded maps induce maps on standard
 projective charts, whose tensor-product lift is the inverse candidate to
 Segre dehomogenization.
 -/
+
+@[expose] public section
 
 open HomogeneousLocalization
 open scoped TensorProduct

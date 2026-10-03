@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AbelEquivalence
-import ModularCurves.ForMathlib.SeesawPushforwardInvertible
-import ModularCurves.Picard.GlueTrivialization
+module
+
+public import ModularCurves.EllipticCurve.AbelEquivalence
+public import ModularCurves.ForMathlib.SeesawPushforwardInvertible
+public import ModularCurves.Picard.GlueTrivialization
 
 /-!
 # The seesaw sheaf is trivial over a Zariski cover of the base (`KM-SEESAW-3`)
@@ -87,6 +89,10 @@ is divided out rather than computed.
 `exists_pullback_iso_of_kernel_finrank_of_fibre_trivial` (`ForMathlib/Seesaw.lean`), whose
 `hglue`-shaped input is precisely the per-base-open trivialization produced here.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

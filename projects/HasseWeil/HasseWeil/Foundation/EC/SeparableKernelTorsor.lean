@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Differentials
-import HasseWeil.Foundation.EC.TranslationOrd
-import HasseWeil.Isogeny.Kernel
+module
+
+public import HasseWeil.Foundation.Curves.Differentials
+public import HasseWeil.Foundation.EC.TranslationOrd
+public import HasseWeil.Isogeny.Kernel
 
 /-!
 # Separable isogeny: `#ker φ = deg φ` over an algebraically closed field
@@ -29,6 +31,8 @@ below is the general route (reviewer round 19, Q1).
 
 Reference: Silverman III.4.10c, III.6.4.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

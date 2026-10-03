@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.KubotaLeopoldt.ZetaValues
-import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
+module
+
+public import PadicLFunctions.KubotaLeopoldt.ZetaValues
+public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 
 /-!
 # The complex bridge for `zetaNeg`
@@ -13,6 +15,8 @@ Identifies the rational value `zetaNeg k` with the complex Riemann zeta function
 `−k` (mathlib's `riemannZeta_neg_nat_eq_bernoulli`). Quarantined in its own file so
 that the p-adic development does not import complex analysis.
 -/
+
+@[expose] public section
 
 open Complex
 

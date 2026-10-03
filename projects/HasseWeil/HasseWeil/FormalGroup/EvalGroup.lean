@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.Definition
-import HasseWeil.FormalGroup.Inverse
-import Mathlib.Algebra.Group.MinimalAxioms
-import Mathlib.RingTheory.AdicCompletion.Topology
-import Mathlib.RingTheory.PowerSeries.Evaluation
+module
+
+public import HasseWeil.FormalGroup.Definition
+public import HasseWeil.FormalGroup.Inverse
+public import Mathlib.Algebra.Group.MinimalAxioms
+public import Mathlib.RingTheory.AdicCompletion.Topology
+public import Mathlib.RingTheory.PowerSeries.Evaluation
 
 /-!
 # The group `F(M)` associated to a formal group over a complete local ring
@@ -52,6 +54,10 @@ space structure coming from the `M`-adic topology, and `M`-adically complete.
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.3 (Definition of the group
   `F(M)`, p. 122).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option linter.dupNamespace false
 

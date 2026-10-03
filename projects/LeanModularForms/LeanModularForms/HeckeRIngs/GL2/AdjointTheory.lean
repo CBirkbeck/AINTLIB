@@ -3,18 +3,20 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.Analysis.Complex.Polynomial.Basic
-import Mathlib.Analysis.Complex.UpperHalfPlane.Metric
-import Mathlib.Analysis.InnerProductSpace.Semisimple
-import Mathlib.LinearAlgebra.Eigenspace.Pi
-import Mathlib.LinearAlgebra.Eigenspace.Semisimple
-import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
-import Mathlib.MeasureTheory.Measure.Hausdorff
-import LeanModularForms.HeckeRIngs.GL2.FourierHecke
-import LeanModularForms.HeckeRIngs.GL2.HeckeModularForm_Gamma0
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma1
-import LeanModularForms.Modularforms.PeterssonInner
-import LeanModularForms.Modularforms.PeterssonLevelN
+module
+
+public import Mathlib.Analysis.Complex.Polynomial.Basic
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Metric
+public import Mathlib.Analysis.InnerProductSpace.Semisimple
+public import Mathlib.LinearAlgebra.Eigenspace.Pi
+public import Mathlib.LinearAlgebra.Eigenspace.Semisimple
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+public import Mathlib.MeasureTheory.Measure.Hausdorff
+public import LeanModularForms.HeckeRIngs.GL2.FourierHecke
+public import LeanModularForms.HeckeRIngs.GL2.HeckeModularForm_Gamma0
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma1
+public import LeanModularForms.Modularforms.PeterssonInner
+public import LeanModularForms.Modularforms.PeterssonLevelN
 
 /-!
 # Hecke adjoint theory: core cusp/Hecke infrastructure
@@ -37,6 +39,10 @@ identity, and the GL₂⁺ change-of-variables lemma `peterssonInner_slash_adjoi
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.5
 * [Miy] Miyake, *Modular Forms*, §4.5 (Thm 4.5.4–4.5.5)
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

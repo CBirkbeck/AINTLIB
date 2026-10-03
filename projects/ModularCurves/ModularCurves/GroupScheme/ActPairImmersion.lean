@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.TranslationAction
+module
+
+public import ModularCurves.GroupScheme.TranslationAction
 
 /-!
 # The action-pair is a closed immersion
@@ -27,6 +29,8 @@ surjective, which is exactly the `precursorSurjective` field of `StableAffineCha
 ## Main results
 * `FiniteLocallyFreeSubgroup.actPair_eq_shear` — the decomposition.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

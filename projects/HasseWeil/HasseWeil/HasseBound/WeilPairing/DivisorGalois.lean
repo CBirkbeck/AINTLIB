@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.RingTheory.DedekindDomain.AdicValuation
-import Mathlib.RingTheory.Localization.FractionRing
-import HasseWeil.Foundation.Curves.Valuation.Infinity
-import HasseWeil.Foundation.Curves.Valuation.Valuation
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation
+public import Mathlib.RingTheory.Localization.FractionRing
+public import HasseWeil.Foundation.Curves.Valuation.Infinity
+public import HasseWeil.Foundation.Curves.Valuation.Valuation
 
 /-!
 # Adic-valuation transport under ring equivalences
@@ -17,6 +19,8 @@ prime ideals and their adic valuations. The main algebraic result is
 `valuation_map_ringEquiv`; the later lemmas record coordinate-ring and curve-cast transport
 facts used by Weil-pairing Galois descent.
 -/
+
+@[expose] public section
 
 open IsDedekindDomain
 

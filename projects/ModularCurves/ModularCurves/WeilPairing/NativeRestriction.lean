@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.FieldLeaf
+module
+
+public import ModularCurves.WeilPairing.FieldLeaf
 
 /-!
 # Restriction-compatibility of the native tensor-ideal trivialisation ([NAT-RESTRICT])
@@ -23,6 +25,10 @@ the native trivialisation *restricts on the nose*:
   of the native trivialisation *is* the native trivialisation of the restricted
   generators.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.Level71UnitDworkSliceBridge
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.Level71UnitDworkSliceBridge
 
 /-!
 # The level-`71` unit ↔ Dwork-slice coordinate bridge: the assembled second-order part value with

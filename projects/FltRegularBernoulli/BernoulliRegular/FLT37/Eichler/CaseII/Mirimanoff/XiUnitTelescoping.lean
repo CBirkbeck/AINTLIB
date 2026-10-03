@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitRatioIdentity
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DiscreteLogIndexCollapse
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimeDvdZSoundnessRepair
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealClosure
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitRatioIdentity
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DiscreteLogIndexCollapse
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimeDvdZSoundnessRepair
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealClosure
 
 /-!
 # Washington §9.1 Lemma 9.8 (steps 5–8) for `p = 37`: the Mirimanoff telescoping
@@ -45,6 +47,8 @@ particular `E₃₂ = pollaczekUnitPlus 37 K 32` — a `p`-th power mod `𝔩` (
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §8.1 (Lemma 8.1), §9.1–9.2
   (Lemma 9.8, pp. 178–179).
 -/
+
+set_option backward.privateInPublic true
 
 @[expose] public section
 

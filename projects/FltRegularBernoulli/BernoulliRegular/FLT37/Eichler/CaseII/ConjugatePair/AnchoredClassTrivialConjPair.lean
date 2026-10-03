@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.ConjPairDatum
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.ConjPairDatum
 
 /-!
 # [FLT37-CASEII-R2] II1 (`c = 1`) over σ-conjugate-pair data — the *clean* collapse

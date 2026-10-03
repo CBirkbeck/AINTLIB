@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdgeHOne
+module
+
+public import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdgeHOne
 
 /-!
 # The vertical edge map into a first-quadrant total complex
@@ -6,6 +8,8 @@ import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdgeHOne
 Construct the vertical edge map by applying the horizontal construction to the
 flipped bicomplex and transporting along mathlib's total-complex symmetry.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Preadditive
 

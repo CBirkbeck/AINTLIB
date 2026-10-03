@@ -3,19 +3,21 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.NaiveProblems
-import ModularCurves.Moduli.Representability
-import ModularCurves.Moduli.GammaH
-import ModularCurves.Moduli.OmegaFunctor
-import ModularCurves.Moduli.UniversalAdapted
-import ModularCurves.Moduli.LegendreDelta
-import ModularCurves.Moduli.UniversalLegendre
-import ModularCurves.Moduli.UniversalLevelThree
-import ModularCurves.Moduli.E3DatumAssembly
-import ModularCurves.Moduli.BridgeAssembly
-import ModularCurves.Moduli.SqrtCoverGlue
-import ModularCurves.LevelStructure.CombinationLevel
-import Mathlib.CategoryTheory.Limits.Shapes.FunctorToTypes
+module
+
+public import ModularCurves.Moduli.NaiveProblems
+public import ModularCurves.Moduli.Representability
+public import ModularCurves.Moduli.GammaH
+public import ModularCurves.Moduli.OmegaFunctor
+public import ModularCurves.Moduli.UniversalAdapted
+public import ModularCurves.Moduli.LegendreDelta
+public import ModularCurves.Moduli.UniversalLegendre
+public import ModularCurves.Moduli.UniversalLevelThree
+public import ModularCurves.Moduli.E3DatumAssembly
+public import ModularCurves.Moduli.BridgeAssembly
+public import ModularCurves.Moduli.SqrtCoverGlue
+public import ModularCurves.LevelStructure.CombinationLevel
+public import Mathlib.CategoryTheory.Limits.Shapes.FunctorToTypes
 
 /-!
 # The KM 4.7 bootstrap objects (T-E12–T-E15)
@@ -55,6 +57,10 @@ holds the two **bootstrap objects** it consumes, i.e. the `δ`'s and their axiom
 The `ℤ[1/2]`-half of the bootstrap is hence UNBLOCKED alongside the `ℤ[1/3]`-half. (The
 level-4 alternative recorded on the board is now moot but retained there for history.)
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartDomain
-import ModularCurves.EllipticCurve.AdditionChartHom
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartDomain
+public import ModularCurves.EllipticCurve.AdditionChartHom
 
 /-!
 # The addition laws as chart morphisms on the localized chart-product (T-W7.0c-c5β, β3)
@@ -19,6 +21,8 @@ piece of `addOnY` on the `(i,j)` chart-product; `addOnZPieceHom` is the same for
 `addXYZ` (law 1). Applying `Spec` and composing with `Proj.awayι` gives the chart morphisms
 themselves; β1's `chartPieceIso` identifies the source with an open of `E ×_R E`.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves
 

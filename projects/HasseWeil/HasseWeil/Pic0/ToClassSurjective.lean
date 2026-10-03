@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.DirectSum.Finite
-import Mathlib.RingTheory.Ideal.Norm.RelNorm
-import Mathlib.RingTheory.OrderOfVanishing.Basic
-import Mathlib.RingTheory.Polynomial.DegreeLT
-import HasseWeil.Foundation.Ramification
+module
+
+public import Mathlib.LinearAlgebra.DirectSum.Finite
+public import Mathlib.RingTheory.Ideal.Norm.RelNorm
+public import Mathlib.RingTheory.OrderOfVanishing.Basic
+public import Mathlib.RingTheory.Polynomial.DegreeLT
+public import HasseWeil.Foundation.Ramification
 
 /-!
 # Surjectivity of `Point.toClass` and the isomorphism `E ≅ Pic⁰(E)` (affine model)
@@ -91,6 +93,10 @@ genus-1 codimension reduction `ClassReducesToCodimLEOne`, which is **now also pr
 Everything in this file is `#print axioms`-clean (`[propext, Classical.choice, Quot.sound]`),
 including the unconditional `toClass_surjective'` and `toClassEquiv'`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Polynomial Module
 

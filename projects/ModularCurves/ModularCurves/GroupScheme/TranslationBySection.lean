@@ -1,4 +1,6 @@
-import ModularCurves.GroupScheme.TranslationAction
+module
+
+public import ModularCurves.GroupScheme.TranslationAction
 
 /-!
 # Translation by a section
@@ -16,6 +18,8 @@ maps into the group object `E.asOver` form a commutative group under `Hom.commGr
 * `EllipticCurve.translateBy` — the endomorphism `p ↦ p + x`.
 * `EllipticCurve.translateByIso` — the automorphism, inverse `translateBy (-x)`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

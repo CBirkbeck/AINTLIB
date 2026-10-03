@@ -3,24 +3,26 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
-import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
-import Mathlib.NumberTheory.EulerProduct.Basic
-import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
-import Mathlib.NumberTheory.LSeries.AbstractFuncEq
-import Mathlib.NumberTheory.LSeries.DirichletContinuation
-import LeanModularForms.Eigenforms.ConductorTheorem
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheoryPetersson
-import LeanModularForms.HeckeRIngs.GL2.CharacterDecomp
-import LeanModularForms.HeckeRIngs.GL2.LevelEmbed
-import LeanModularForms.HeckeRIngs.GL2.LevelRaise
-import LeanModularForms.HeckeRIngs.GL2.Newforms.LevelRaiseComm
-import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
-import LeanModularForms.Modularforms.DimensionFormulas
-import LeanModularForms.Modularforms.LFunction
-import LeanModularForms.Modularforms.PeterssonLevelN
-import LeanModularForms.Modularforms.SlashActionAuxil
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
+public import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+public import Mathlib.NumberTheory.EulerProduct.Basic
+public import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
+public import Mathlib.NumberTheory.LSeries.AbstractFuncEq
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+public import LeanModularForms.Eigenforms.ConductorTheorem
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheoryPetersson
+public import LeanModularForms.HeckeRIngs.GL2.CharacterDecomp
+public import LeanModularForms.HeckeRIngs.GL2.LevelEmbed
+public import LeanModularForms.HeckeRIngs.GL2.LevelRaise
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.LevelRaiseComm
+public import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
+public import LeanModularForms.Modularforms.DimensionFormulas
+public import LeanModularForms.Modularforms.LFunction
+public import LeanModularForms.Modularforms.PeterssonLevelN
+public import LeanModularForms.Modularforms.SlashActionAuxil
 
 /-!
 # Newforms: character decomposition, the `Newform` structure, eigenvalue identity
@@ -30,6 +32,10 @@ primitive forms, and the eigenvalue-as-Fourier-coefficient identity.  The Atkinâ
 Lemma (DS Thm 5.7.1) itself is assembled in `Newforms.MainLemmaProof` (which imports
 `SMOObligations` for the per-character route-B descent, sitting above this file in the DAG).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

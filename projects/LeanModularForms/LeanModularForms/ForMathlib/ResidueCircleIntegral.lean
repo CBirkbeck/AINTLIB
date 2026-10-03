@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.Residue
-import Mathlib.Analysis.Complex.CauchyIntegral
+module
+
+public import LeanModularForms.ForMathlib.Residue
+public import Mathlib.Analysis.Complex.CauchyIntegral
 
 /-!
 # Residue via Circle Integral
@@ -30,6 +32,8 @@ Properties of the residue `residue f z₀`, defined as the circle-integral limit
 
 * K. Hungerbühler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Complex Set Filter Topology MeasureTheory Metric
 open scoped Interval Real

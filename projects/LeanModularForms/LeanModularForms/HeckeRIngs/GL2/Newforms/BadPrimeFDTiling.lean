@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.DeltaBSystem
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.DeltaBSystem
 
 /-!
 # The bad-prime Hecke fundamental-domain tiling (T006-b-L4)
@@ -17,6 +19,10 @@ upper-triangular / `Γ⁰(p)` / index-`p` case — the `M_∞` tile and the Béz
 **deleted**,
 because the bad-prime obstruction (`p ∣ a`) is vacuous (Diamond–Shurman §5.2, Exercise 5.2.1).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

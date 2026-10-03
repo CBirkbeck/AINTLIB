@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.NumberTheory.ModularForms.QExpansion
-import LeanModularForms.Eigenforms.ConductorTheorem
-import LeanModularForms.Eigenforms.MainLemma
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
-import LeanModularForms.HeckeRIngs.GL2.LevelRaise
-import LeanModularForms.HeckeRIngs.GL2.Newforms
-import LeanModularForms.Modularforms.QExpansionSlash
+module
+
+public import Mathlib.NumberTheory.ModularForms.QExpansion
+public import LeanModularForms.Eigenforms.ConductorTheorem
+public import LeanModularForms.Eigenforms.MainLemma
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
+public import LeanModularForms.HeckeRIngs.GL2.LevelRaise
+public import LeanModularForms.HeckeRIngs.GL2.Newforms
+public import LeanModularForms.Modularforms.QExpansionSlash
 
 /-!
 # Atkin-Lehner same-level `p`-supported projection API
@@ -32,6 +34,10 @@ index coprime to `N` is an oldform.  The framework captures "support on multiple
 * Atkin–Lehner, "Hecke operators on Γ₀(m)", Math. Ann. 185 (1970).
 * Miyake, *Modular Forms*, §4.6.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open scoped ModularForm
 open ModularFormClass CongruenceSubgroup Matrix.SpecialLinearGroup UpperHalfPlane

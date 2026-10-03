@@ -3,7 +3,9 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Ring
+module
+
+public import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Ring
 
 /-!
 # Hecke Rings: Degree Map
@@ -34,6 +36,8 @@ We show `deg(f) = coeffSum(f • 1)` where `coeffSum` sums all coefficients, and
 result is `coeffSum(f • m) = deg(f) * coeffSum(m)`, which follows from the orbit cardinality
 lemma `smulOrbit_card`.
 -/
+
+@[expose] public section
 
 open Classical MulOpposite Set DoubleCoset Subgroup
 

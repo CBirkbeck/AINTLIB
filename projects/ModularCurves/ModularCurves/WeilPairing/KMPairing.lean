@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.SelfAdjointN
-import ModularCurves.WeilPairing.KMSplitting
+module
+
+public import ModularCurves.Picard.SelfAdjointN
+public import ModularCurves.WeilPairing.KMSplitting
 
 /-!
 # `E[N](S) = Ker([N]^*)` on the relative Picard group (KM (2.8.1.7), ticket AP-D4)
@@ -79,6 +81,8 @@ Everything above except the last two declarations is axiom-clean (`propext`, `Cl
 `kappa_image_torsionPoints_eq_kerMulByN` depend on `sorryAx`; nothing else in this file does, and
 in particular the `⊆` direction and the detection theorem are free of it.
 -/
+
+@[expose] public section
 
 universe u
 

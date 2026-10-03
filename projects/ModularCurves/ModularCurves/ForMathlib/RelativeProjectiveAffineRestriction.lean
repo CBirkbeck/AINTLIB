@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.RelativeProjectiveFactorization
+module
+
+public import ModularCurves.ForMathlib.RelativeProjectiveFactorization
 
 /-!
 # Restricting relative projective factorizations
@@ -13,6 +15,8 @@ import ModularCurves.ForMathlib.RelativeProjectiveFactorization
 Relative projective space commutes with restriction to an open subscheme of its base. Consequently,
 a relative projective factorization restricts to every base open.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits
 

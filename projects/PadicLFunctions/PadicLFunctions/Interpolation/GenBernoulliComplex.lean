@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.NumberTheory.LSeries.DirichletContinuation
-import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
-import PadicLFunctions.Interpolation.GenBernoulli
-import PadicLFunctions.Interpolation.Sawtooth
+module
+
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
+public import PadicLFunctions.Interpolation.GenBernoulli
+public import PadicLFunctions.Interpolation.Sawtooth
 
 /-!
 # The complex bridge: `L(χ, −k) = −B_{k+1,χ}/(k+1)`
@@ -25,6 +27,8 @@ Source: RJW Lem 5.5 / Lem 5.9 (TeX 1702–1740, 1801–1807), whose proofs go
 through the §2 Mellin theory; the value identity itself is classical
 (Washington Thm 4.2).
 -/
+
+@[expose] public section
 
 namespace PadicLFunctions
 

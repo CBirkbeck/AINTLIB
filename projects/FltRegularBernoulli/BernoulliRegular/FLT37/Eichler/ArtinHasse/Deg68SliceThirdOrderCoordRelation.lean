@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.DworkSliceDeg68SecondDigit
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.UnscaledCoordDeg32SliceDecomposition
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.DworkSliceDeg68SecondDigit
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.UnscaledCoordDeg32SliceDecomposition
 
 /-!
 # The deg-`68` slice value `unscaled32SliceCoord 68 = 37·4`, from the proven mod-`37³` relation and

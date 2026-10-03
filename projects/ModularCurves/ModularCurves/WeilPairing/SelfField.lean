@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.OrdPipeline
-import ModularCurves.WeilPairing.SelfUniversal
-import ModularCurves.Moduli.KeystoneGeometricPoint
+module
+
+public import ModularCurves.WeilPairing.OrdPipeline
+public import ModularCurves.WeilPairing.SelfUniversal
+public import ModularCurves.Moduli.KeystoneGeometricPoint
 
 /-!
 # The field leaf of `e_N(x,x) = 1` (U5-AC)
@@ -21,6 +23,8 @@ The file also contains the descent to an arbitrary field
 (`weilPairingEval_self_of_field'`) and the point-over-a-field form
 (`weilPairingEval_self_of_pointOverField`) that the universal-family argument consumes.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.Localization.Away.Basic
-import Mathlib.Topology.Algebra.InfiniteSum.Nonarchimedean
-import «Adic spaces».TateAlgebra
+module
+
+public import Mathlib.RingTheory.Localization.Away.Basic
+public import Mathlib.Topology.Algebra.InfiniteSum.Nonarchimedean
+public import «Adic spaces».TateAlgebra
 
 /-!
 # Laurent Cover Exactness (Wedhorn Lemma 8.33)
@@ -43,6 +45,8 @@ For `[IsDomain A] [IsNoetherianRing A]` without `[DiscreteTopology A]`:
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Lemma 8.33
 -/
+
+@[expose] public section
 
 open TateAlgebra LaurentTateAlgebra
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.ForMathlib.SpecQuotientIso
-import Mathlib.AlgebraicGeometry.Morphisms.Affine
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+module
+
+public import ModularCurves.ForMathlib.SpecQuotientIso
+public import Mathlib.AlgebraicGeometry.Morphisms.Affine
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 
 /-!
 # A closed immersion of finite locally free schemes of equal rank is an isomorphism (YFULL γ)
@@ -20,6 +22,8 @@ Over an affine base both `X` and `Y` are affine (finite over affine), so `j` tra
 `Spec` of its (surjective) global-sections comorphism, and
 `isIso_SpecMap_of_surjective_of_flat_rankAtStalk_eq` applies.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

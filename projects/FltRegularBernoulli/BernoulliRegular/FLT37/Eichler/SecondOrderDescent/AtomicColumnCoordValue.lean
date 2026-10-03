@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.ColumnSumCoeffLinearityReduction
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.ColumnSumCoeffLinearityReduction
 
 /-!
 # The level-`72` mod-`37²` Dwork column-coordinate value: the genuine atomic residual of R4

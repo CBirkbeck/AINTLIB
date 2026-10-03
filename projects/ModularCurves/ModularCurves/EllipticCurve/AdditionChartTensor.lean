@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartRing
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartRing
 
 /-!
 # The chart-product ring is the tensor product of the chart rings (T-W7.0c-c5β, β1 core)
@@ -21,6 +23,10 @@ rename-and-quotient maps. The two key computation lemmas say that the forward ma
 `rename Sum.inl`/`rename Sum.inr` into `· ⊗ₜ 1` / `1 ⊗ₜ ·`, which is exactly why the two curve
 relations die.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open MvPolynomial TensorProduct
 

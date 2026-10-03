@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.Representability
-import ModularCurves.EllipticCurve.Rigidity
+module
+
+public import ModularCurves.Moduli.Representability
+public import ModularCurves.EllipticCurve.Rigidity
 
 /-!
 # Additivity of section-pullback over locally noetherian bases (T-E4a-noeth)
@@ -24,6 +26,8 @@ The unrestricted statement (`EllHom.pullSection_add`, Representability.lean) sta
 behind the arbitrary-base canonicity upgrade T-W7.8 per the owner decision (2026-07-08):
 `EllObj R` keeps arbitrary bases.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj

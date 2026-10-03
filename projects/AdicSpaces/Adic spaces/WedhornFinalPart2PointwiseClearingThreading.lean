@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornFinalPart2NoExtraHypThreading
-import «Adic spaces».WedhornDirectUpperBoundSupplierFromPointwiseClearing
+module
+
+public import «Adic spaces».WedhornFinalPart2NoExtraHypThreading
+public import «Adic spaces».WedhornDirectUpperBoundSupplierFromPointwiseClearing
 
 /-!
 # Wedhorn 8.34(ii) — Part-2 boundary consuming T077 pointwise-clearing
@@ -79,6 +81,8 @@ this file, **not** changes to the root theorem signature.
   only mechanical composition of two accepted bridges.
 * Both wrappers are fully axiom-clean.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

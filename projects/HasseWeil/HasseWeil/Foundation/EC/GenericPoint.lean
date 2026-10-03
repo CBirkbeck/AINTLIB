@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.MulByIntPullback
+module
+
+public import HasseWeil.Foundation.MulByIntPullback
 
 /-!
 # The generic point of an elliptic curve (T-III-4-020b-1)
@@ -29,6 +31,8 @@ composition formula falls out.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.4.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

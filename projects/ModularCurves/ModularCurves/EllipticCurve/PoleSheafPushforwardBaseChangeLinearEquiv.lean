@@ -1,7 +1,9 @@
-import ModularCurves.EllipticCurve.PoleSheafPowerOneBaseChange
-import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
-import ModularCurves.ForMathlib.PrescribedLocalizedBasis
-import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChangeLinearEquiv
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafPowerOneBaseChange
+public import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
+public import ModularCurves.ForMathlib.PrescribedLocalizedBasis
+public import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChangeLinearEquiv
 
 /-!
 # Pole-section modules from pushforward base change
@@ -11,6 +13,8 @@ base-change morphism gives the expected equivalence on base-linear global
 sections. In degree one this equivalence preserves the canonical pole
 section.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits Opposite
 open TopologicalSpace TensorProduct

@@ -1,14 +1,18 @@
-import Mathlib.AlgebraicGeometry.Morphisms.Immersion
-import Mathlib.AlgebraicGeometry.Morphisms.Proper
-import Mathlib.CategoryTheory.Limits.Constructions.Over.Products
-import Mathlib.CategoryTheory.Limits.MorphismProperty
-import Mathlib.CategoryTheory.ObjectProperty.FiniteProducts
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Immersion
+public import Mathlib.AlgebraicGeometry.Morphisms.Proper
+public import Mathlib.CategoryTheory.Limits.Constructions.Over.Products
+public import Mathlib.CategoryTheory.Limits.MorphismProperty
+public import Mathlib.CategoryTheory.ObjectProperty.FiniteProducts
 
 /-!
 # Finite products of proper schemes over a base
 
 This file packages the finite product in `Over S` of a family of schemes proper over `S`.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits
 

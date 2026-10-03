@@ -3,15 +3,17 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.IdealModule
-import ModularCurves.Picard.IdealModuleMono
-import ModularCurves.ForMathlib.CrossProductKernel
-import ModularCurves.ForMathlib.QuotientProductRankTwo
-import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
-import ModularCurves.EllipticCurve.PoleSheaf
-import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
-import ModularCurves.LevelStructure.CartierDivisor
-import ModularCurves.Picard.UnitPullback
+module
+
+public import ModularCurves.Picard.IdealModule
+public import ModularCurves.Picard.IdealModuleMono
+public import ModularCurves.ForMathlib.CrossProductKernel
+public import ModularCurves.ForMathlib.QuotientProductRankTwo
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
+public import ModularCurves.EllipticCurve.PoleSheaf
+public import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
+public import ModularCurves.LevelStructure.CartierDivisor
+public import ModularCurves.Picard.UnitPullback
 
 /-!
 # The line and the vertical as rank-one kernels ([GAP-A-4])
@@ -25,6 +27,8 @@ the norm `N`.
 This file starts with the ambient-module inclusion of an ideal module
 (`idealModuleInclusion`), the mono that seeds every restriction cokernel downstream.
 -/
+
+@[expose] public section
 
 universe u
 

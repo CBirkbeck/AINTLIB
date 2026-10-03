@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.EngineDescent
-import ModularCurves.Moduli.EngineDescentCore
-import ModularCurves.EllipticCurve.GroupLawDescent
-import ModularCurves.ForMathlib.RelativeInvariantSpec
+module
+
+public import ModularCurves.Moduli.EngineDescent
+public import ModularCurves.Moduli.EngineDescentCore
+public import ModularCurves.EllipticCurve.GroupLawDescent
+public import ModularCurves.ForMathlib.RelativeInvariantSpec
 
 /-!
 # [T-Q6d.γ] The KM 4.7 engine mouth
@@ -22,6 +24,10 @@ This file sits **downstream of `EngineDescent`** precisely so the geometric inte
 first assembled inside `QuotientProblem.lean`, where that machinery is not importable; the
 `section EngineMouth` was moved here verbatim — v10.327 import surgery, statements unchanged).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 -- v4.33 bump: the `Scheme` category instance inside `appTop`/`pointToTorsion` arguments is
 -- no longer transparent enough for the `≫`-associativity rewrites below.

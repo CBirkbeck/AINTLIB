@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidRing
-import «Adic spaces».CompletedResidueField
+module
+
+public import «Adic spaces».PerfectoidRing
+public import «Adic spaces».CompletedResidueField
 
 /-!
 # Nonarchimedean Scottish Book — Problem 21
@@ -31,6 +33,8 @@ perfectoid ring structure, then `A` is perfectoid.
 
 The `completedResidueField` is defined (as a placeholder) in `CompletedResidueField.lean`.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

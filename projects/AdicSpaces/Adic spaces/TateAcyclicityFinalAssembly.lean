@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».GeometricReduction
-import «Adic spaces».HubnerSeparation
-import «Adic spaces».Cor832
+module
+
+public import «Adic spaces».GeometricReduction
+public import «Adic spaces».HubnerSeparation
+public import «Adic spaces».Cor832
 
 /-!
 # Final Part-2 assembly: direct per-E route with abstract Lane A/B suppliers
@@ -81,6 +83,8 @@ theorem is the legacy final `ValuationSpectrum.tateAcyclicity` in
   sorry blocking axiom-clean closure of every `restrictionMap`-consuming
   theorem).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

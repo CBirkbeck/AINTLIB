@@ -3,7 +3,9 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.WindingWeightProofs
+module
+
+public import LeanModularForms.ForMathlib.WindingWeightProofs
 
 /-!
 # Arc FTC — Crossing Angles and Winding Numbers for FD Boundary
@@ -20,6 +22,8 @@ on-curve points `i`, `ρ`, `ρ+1`, used in the `ArcFTCHyp` construction.
 
 * K. Hungerbühler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Complex Set
 

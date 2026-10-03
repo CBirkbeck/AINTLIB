@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.CechTupleAlternatingHomotopy
+module
+
+public import ModularCurves.ForMathlib.CechTupleAlternatingHomotopy
 
 /-!
 # Lifting tuple-chain homotopies to base-linear Cech cochains
@@ -12,6 +14,8 @@ This file turns a support-nonincreasing map of free tuple chains into a map betw
 the existing base-linear Cech complex. A tuple in the support of the image uses only indices from
 the source tuple, so restriction of sections supplies the corresponding matrix coefficient.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Category
   CategoryTheory.Limits CategoryTheory.Preadditive Opposite Set

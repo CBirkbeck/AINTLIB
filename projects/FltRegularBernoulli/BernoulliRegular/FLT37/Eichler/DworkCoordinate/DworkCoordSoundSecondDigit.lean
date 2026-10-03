@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.UnscaledCoordDeg32SliceDecomposition
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.UnscaledCoordDeg32SliceDecomposition
 
 /-!
 # The SOUND level-`71` unit ↔ Dwork-slice coordinate bridge: the genuine `ρ₀ = (32!)⁻¹ + c₆₈` value,

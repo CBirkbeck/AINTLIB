@@ -5,24 +5,26 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-D11 (T-D23 revived).
 -/
-import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
-import Mathlib.RingTheory.Etale.Field
-import Mathlib.RingTheory.Smooth.Flat
-import Mathlib.RingTheory.Etale.Kaehler
-import Mathlib.RingTheory.DiscreteValuationRing.TFAE
-import Mathlib.RingTheory.Kaehler.Polynomial
-import Mathlib.RingTheory.Localization.LocalizationLocalization
-import Mathlib.RingTheory.Localization.Ideal
-import Mathlib.RingTheory.Localization.Submodule
-import Mathlib.RingTheory.Artinian.Ring
-import Mathlib.RingTheory.Unramified.LocalRing
-import Mathlib.RingTheory.Flat.Localization
-import Mathlib.RingTheory.Flat.Stability
-import Mathlib.RingTheory.PrincipalIdealDomain
-import Mathlib.RingTheory.Ideal.Over
-import Mathlib.Algebra.Polynomial.FieldDivision
-import ModularCurves.ForMathlib.FlatNonZeroDivisor
-import ModularCurves.ForMathlib.PrincipalMaximalDVR
+module
+
+public import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+public import Mathlib.RingTheory.Etale.Field
+public import Mathlib.RingTheory.Smooth.Flat
+public import Mathlib.RingTheory.Etale.Kaehler
+public import Mathlib.RingTheory.DiscreteValuationRing.TFAE
+public import Mathlib.RingTheory.Kaehler.Polynomial
+public import Mathlib.RingTheory.Localization.LocalizationLocalization
+public import Mathlib.RingTheory.Localization.Ideal
+public import Mathlib.RingTheory.Localization.Submodule
+public import Mathlib.RingTheory.Artinian.Ring
+public import Mathlib.RingTheory.Unramified.LocalRing
+public import Mathlib.RingTheory.Flat.Localization
+public import Mathlib.RingTheory.Flat.Stability
+public import Mathlib.RingTheory.PrincipalIdealDomain
+public import Mathlib.RingTheory.Ideal.Over
+public import Mathlib.Algebra.Polynomial.FieldDivision
+public import ModularCurves.ForMathlib.FlatNonZeroDivisor
+public import ModularCurves.ForMathlib.PrincipalMaximalDVR
 
 /-!
 # Stalks of standard-smooth curves over a field are discrete valuation rings
@@ -47,6 +49,8 @@ ideal downstairs, and the principal-maximal-ideal criterion
 kills the generic (field-stalk) case: `k[X]` embeds torsion-freely into the stalk,
 which in that case is a localization of the finite-dimensional algebra `A ⧸ I`.
 -/
+
+@[expose] public section
 
 universe u
 

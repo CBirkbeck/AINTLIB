@@ -3,14 +3,16 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Analysis.Calculus.DSlope
-import Mathlib.Analysis.Calculus.Deriv.Shift
-import Mathlib.Analysis.Complex.Convex
-import Mathlib.Analysis.Complex.Liouville
-import Mathlib.Analysis.Complex.RemovableSingularity
-import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-import Mathlib.Analysis.SpecificLimits.RCLike
-import Mathlib.MeasureTheory.Integral.DominatedConvergence
+module
+
+public import Mathlib.Analysis.Calculus.DSlope
+public import Mathlib.Analysis.Calculus.Deriv.Shift
+public import Mathlib.Analysis.Complex.Convex
+public import Mathlib.Analysis.Complex.Liouville
+public import Mathlib.Analysis.Complex.RemovableSingularity
+public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+public import Mathlib.Analysis.SpecificLimits.RCLike
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-!
 # `dslope` as a parameter integral
@@ -32,6 +34,8 @@ From this integral representation we deduce:
 
 * `dslope_eq_integral_deriv` — `dslope f c w = ∫₀¹ deriv f (c + t•(w-c))` on convex `U`
 -/
+
+@[expose] public section
 
 open Set MeasureTheory Filter Topology intervalIntegral
 

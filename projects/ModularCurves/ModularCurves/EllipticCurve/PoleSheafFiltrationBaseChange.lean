@@ -1,4 +1,6 @@
-import ModularCurves.EllipticCurve.PoleSheafUnitBaseChange
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafUnitBaseChange
 
 /-!
 # Base change for the pole-sheaf filtration
@@ -7,6 +9,10 @@ The canonical inclusions `𝒪_C(n[0]) → 𝒪_C((n+1)[0])` commute with arbitr
 Together with base change for the pole unit, this keeps the literal section `1` compatible in
 all pole modules used to construct local Weierstrass coordinates.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

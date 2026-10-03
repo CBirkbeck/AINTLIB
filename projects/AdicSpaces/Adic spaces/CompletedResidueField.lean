@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».AdicSpectrum
-import Mathlib.Topology.Algebra.Valued.WithVal
-import Mathlib.RingTheory.Localization.FractionRing
+module
+
+public import «Adic spaces».AdicSpectrum
+public import Mathlib.Topology.Algebra.Valued.WithVal
+public import Mathlib.RingTheory.Localization.FractionRing
 
 /-!
 # Completed Residue Fields of the Adic Spectrum
@@ -32,6 +34,8 @@ Given `v ∈ Spv(A)`:
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Section 2.4
 -/
+
+@[expose] public section
 
 universe u
 

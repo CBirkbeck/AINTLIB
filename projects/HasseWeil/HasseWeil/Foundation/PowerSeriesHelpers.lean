@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.PowerSeries.Order
+module
+
+public import Mathlib.RingTheory.PowerSeries.Order
 
 /-!
 # Auxiliary lemmas for `PowerSeries`
@@ -23,6 +25,8 @@ Used by formal-group uniqueness arguments, e.g. `formalW_unique`
 (Silverman IV.1.1(b)), where the hypothesis `f = g · f` arises by factoring
 a difference of Weierstrass recurrences.
 -/
+
+@[expose] public section
 
 namespace PowerSeries
 

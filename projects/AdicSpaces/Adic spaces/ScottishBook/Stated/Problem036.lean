@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».CompletedAlgClosure
+module
+
+public import «Adic spaces».CompletedAlgClosure
 
 /-!
 # Nonarchimedean Scottish Book — Problem 36
@@ -53,6 +55,8 @@ More broadly, the problem asks for intrinsic conditions on `f` (or on
 
 * Kedlaya, *The Nonarchimedean Scottish Book*, Problem 36
 -/
+
+@[expose] public section
 
 namespace ScottishBook
 

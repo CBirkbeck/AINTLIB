@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafPowerOneBaseChange
-import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChange
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafPowerOneBaseChange
+public import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChange
 
 /-!
 # Nonvanishing of the first pole section after projective base change
@@ -13,6 +15,8 @@ The projective pole-section base-change equivalence carries the pure tensor of
 the literal first-pole section to a nonzero section on every nonempty affine
 base change.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TopologicalSpace
 open TensorProduct

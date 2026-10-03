@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.GroupLawAxioms
-import ModularCurves.EllipticCurve.GroupLaw
+module
+
+public import ModularCurves.EllipticCurve.GroupLawAxioms
+public import ModularCurves.EllipticCurve.GroupLaw
 
 /-!
 # An elliptic curve over a field is an integral scheme
@@ -19,6 +21,8 @@ This discharges the `[IsIntegral E.E]` hypothesis of the endomorphism-degree tra
 (`endDeg_comp_of_isIntegral`, `endDeg_comp_mulBy_of_isIntegral`, `endo_surjective` —
 `EndomorphismDegree.lean`) at every geometric-fibre call site `S = Spec k`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

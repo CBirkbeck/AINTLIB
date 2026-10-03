@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Measure.Convolution
-import PadicLFunctions.Common.DelOperator
-import Mathlib.RingTheory.PowerSeries.Derivative
-import Mathlib.RingTheory.PowerSeries.Substitution
+module
+
+public import PadicLFunctions.Measure.Convolution
+public import PadicLFunctions.Common.DelOperator
+public import Mathlib.RingTheory.PowerSeries.Derivative
+public import Mathlib.RingTheory.PowerSeries.Substitution
 
 /-!
 # The measure-theoretic toolbox
@@ -26,6 +28,10 @@ coefficients; the two formulas requiring `p`-power roots of unity
   `ψ ∘ φ = id`, `φ ∘ ψ = Res_{pℤ_p}`, `Res_{ℤ_p^×} = 1 − φψ` (Eq. `res to Zp`), and
   `μ` supported on `ℤ_p^×` ⟺ `ψ(μ) = 0` (Cor. 3.32, `CorollarySupportedZpet`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open scoped fwdDiff
 open PowerSeries

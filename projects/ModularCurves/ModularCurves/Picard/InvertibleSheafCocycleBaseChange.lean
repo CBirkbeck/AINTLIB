@@ -1,4 +1,6 @@
-import ModularCurves.Picard.AffineIntersectionUnitCocycleFiniteStage
+module
+
+public import ModularCurves.Picard.AffineIntersectionUnitCocycleFiniteStage
 
 /-!
 # Base change of finite-stage affine-intersection cocycles
@@ -6,6 +8,8 @@ import ModularCurves.Picard.AffineIntersectionUnitCocycleFiniteStage
 This file compares finite-stage affine-intersection unit cocycles with their images over
 the filtered-colimit base and synchronizes cocycle descent with the affine gluing conditions.
 -/
+
+@[expose] public section
 
 universe u
 

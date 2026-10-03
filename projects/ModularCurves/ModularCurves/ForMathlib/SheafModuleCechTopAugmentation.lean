@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafModuleCechAugmentation
-import ModularCurves.ForMathlib.SheafModuleCechTopComplex
+module
+
+public import ModularCurves.ForMathlib.SheafModuleCechAugmentation
+public import ModularCurves.ForMathlib.SheafModuleCechTopComplex
 
 /-!
 # Top sections of module-valued sheaf Cech augmentations
@@ -13,6 +15,8 @@ The canonical restriction from top sections of a module-valued sheaf to
 degree zero of its native Cech complex is natural in the sheaf and lands in
 the kernel of the first differential.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

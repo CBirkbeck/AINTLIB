@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Presheaf
-import «Adic spaces».SpaCompact
+module
+
+public import «Adic spaces».Presheaf
+public import «Adic spaces».SpaCompact
 
 /-!
 # Wedhorn Compactness Extraction (C1 → finite `mk_S_D`)
@@ -47,6 +49,8 @@ subcover-index `T₀ : Finset K`.
 This is **purely a topological extraction wrapper**: no Lane B content, no
 Cor 8.32, no Jacobson, no T001, no faithful-flatness, no final acyclicity
 hypotheses propagate. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

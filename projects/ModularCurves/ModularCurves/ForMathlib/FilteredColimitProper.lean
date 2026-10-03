@@ -5,9 +5,11 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.FilteredColimitOpenImmersion
-import ModularCurves.ForMathlib.NoetherianChowCover
-import ModularCurves.ForMathlib.ProperAffineIntersectionModel
+module
+
+public import ModularCurves.ForMathlib.FilteredColimitOpenImmersion
+public import ModularCurves.ForMathlib.NoetherianChowCover
+public import ModularCurves.ForMathlib.ProperAffineIntersectionModel
 
 /-!
 # Properness over filtered colimits
@@ -16,6 +18,8 @@ A finitely presented, quasi-compact, separated scheme over a Noetherian stage wh
 scalar extension to a filtered colimit is proper becomes proper after scalar extension
 to some later stage.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

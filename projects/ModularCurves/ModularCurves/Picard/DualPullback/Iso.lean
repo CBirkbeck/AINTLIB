@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.LocalTrivializationInv
+module
+
+public import ModularCurves.Picard.DualPullback.LocalTrivializationInv
 
 /-!
 # Pullback of dual invertible modules
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.LocalTrivializationInv
 The canonical map from the pullback of a dual to the dual of the pullback is an
 isomorphism for every cover-locally invertible module.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.HungerbuhlerWasem.MultiCrossingCPV
+module
+
+public import LeanModularForms.ForMathlib.HungerbuhlerWasem.MultiCrossingCPV
 
 /-!
 # HW Theorem 3.3 — final paper-faithful clean form
@@ -26,6 +28,8 @@ machinery.
   hMero, hCondA, hCondB`) plus the single structural residual
   `hx_notin_S` (basepoint off the singular set).
 -/
+
+@[expose] public section
 
 noncomputable section
 

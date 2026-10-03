@@ -1,7 +1,9 @@
-import ModularCurves.EllipticCurve.MulByHomFlatFibre
-import ModularCurves.ForMathlib.FiniteFibrewiseFlat
-import ModularCurves.ForMathlib.FinitePresentationCancel
-import Mathlib.AlgebraicGeometry.Pullbacks
+module
+
+public import ModularCurves.EllipticCurve.MulByHomFlatFibre
+public import ModularCurves.ForMathlib.FiniteFibrewiseFlat
+public import ModularCurves.ForMathlib.FinitePresentationCancel
+public import Mathlib.AlgebraicGeometry.Pullbacks
 
 /-!
 # BB-FLAT: `[N] : E ⟶ E` is flat over an arbitrary base
@@ -20,6 +22,8 @@ criterion `flat_of_fibre_flat_of_finitePresentation`:
   is the spectrum of `κ(q) ⊗[A] Γ(E, V)` (`isoIsPullback` of the restricted pullback
   square against the `pullbackSpecIso` square).
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

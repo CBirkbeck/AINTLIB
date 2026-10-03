@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartMor
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartMor
 
 /-!
 # The regularity open of an addition law on a chart-product (T-W7.0c-c5β, β3 cover)
@@ -22,6 +24,8 @@ them over `k` (via the six certified minors) and over `(i,j)` (dehomogenisation 
 `regularityOpen_law_ne_top_of_exceptional` records the sharp form of "one law never suffices":
 if the triple has a common zero (a point of the exceptional divisor), the open is not everything.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory
 

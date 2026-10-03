@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Proper
-import ModularCurves.ForMathlib.SchemeTheoreticImage
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Proper
+public import ModularCurves.ForMathlib.SchemeTheoreticImage
 
 /-!
 # Proper morphisms extending dense open immersions
@@ -14,6 +16,8 @@ import ModularCurves.ForMathlib.SchemeTheoreticImage
 A proper morphism which extends an open immersion from a quasi-compact
 scheme-theoretically dense open is an isomorphism over the range of that open.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

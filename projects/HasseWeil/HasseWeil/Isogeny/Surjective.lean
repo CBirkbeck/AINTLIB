@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.DivisorPullback
-import Mathlib.RingTheory.Valuation.LocalSubring
+module
+
+public import HasseWeil.HasseBound.WeilPairing.DivisorPullback
+public import Mathlib.RingTheory.Valuation.LocalSubring
 
 /-!
 # Surjectivity of a nonconstant isogeny on `K̄`-points (place-theoretic)
@@ -49,6 +51,8 @@ uniform across the affine/infinity split.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.2.3, III.4.10c.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

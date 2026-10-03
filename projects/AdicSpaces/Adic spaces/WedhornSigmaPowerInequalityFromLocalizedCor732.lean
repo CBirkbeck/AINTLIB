@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornMultiBranchSubsetInequality
-import «Adic spaces».WedhornPointwiseClearingSupplierFromSigmaPower
-import «Adic spaces».WedhornSigmaFactoredSupplierFromLocalizedCor732
+module
+
+public import «Adic spaces».WedhornMultiBranchSubsetInequality
+public import «Adic spaces».WedhornPointwiseClearingSupplierFromSigmaPower
+public import «Adic spaces».WedhornSigmaFactoredSupplierFromLocalizedCor732
 
 /-!
 # Wedhorn 8.34(ii) — σ-power inequality from localized Cor 7.32 output (T083)
@@ -163,6 +165,8 @@ exponent intact, supplying T079/T080's σ-power-cleared input directly.
   existentially quantified per-`(w, t')`.
 * No final `ValuationSpectrum.tateAcyclicity` hypothesis additions.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

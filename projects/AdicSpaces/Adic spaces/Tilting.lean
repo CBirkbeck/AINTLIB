@@ -2,13 +2,15 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidRing
-import «Adic spaces».WittVectorPrimitive
-import Mathlib.RingTheory.Perfection
-import Mathlib.RingTheory.WittVector.Defs
-import Mathlib.RingTheory.WittVector.DiscreteValuationRing
-import Mathlib.RingTheory.Perfectoid.FontaineTheta
-import Mathlib.FieldTheory.Perfect
+module
+
+public import «Adic spaces».PerfectoidRing
+public import «Adic spaces».WittVectorPrimitive
+public import Mathlib.RingTheory.Perfection
+public import Mathlib.RingTheory.WittVector.Defs
+public import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+public import Mathlib.RingTheory.Perfectoid.FontaineTheta
+public import Mathlib.FieldTheory.Perfect
 
 /-!
 # Tilting Functor, A_inf, and Fontaine's Theta Map
@@ -57,6 +59,10 @@ system cannot synthesize automatically (due to a `Module R R` diamond for
   d'un corps local; construction d'un anneau de Barsotti-Tate*][fontaine1982certains]
 * [J.-M. Fontaine, *Le corps des périodes p-adiques*][fontaine1994corps]
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

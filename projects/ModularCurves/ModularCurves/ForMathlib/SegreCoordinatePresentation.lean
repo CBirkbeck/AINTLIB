@@ -6,8 +6,10 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from the algebraic part of Clawristotle's
 `CoherentCohomologyFinite.SegreCoordinatePresentation`.
 -/
-import ModularCurves.ForMathlib.SegreDiagonalSurjectivity
-import Mathlib.Algebra.MvPolynomial.Equiv
+module
+
+public import ModularCurves.ForMathlib.SegreDiagonalSurjectivity
+public import Mathlib.Algebra.MvPolynomial.Equiv
 
 /-!
 # The coordinate presentation of the Segre image
@@ -15,6 +17,8 @@ import Mathlib.Algebra.MvPolynomial.Equiv
 The standard coordinates of the target projective space are reindexed by pairs.
 The homogeneous coordinate ring of the image is the range of the resulting map.
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

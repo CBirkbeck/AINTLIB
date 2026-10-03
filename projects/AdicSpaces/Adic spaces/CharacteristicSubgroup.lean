@@ -2,13 +2,15 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».OrderedGroupConvex
-import «Adic spaces».ValuationCoarsening
-import «Adic spaces».ValuationContinuity
-import «Adic spaces».ValuationSpectrum
-import Mathlib.RingTheory.Valuation.Basic
-import Mathlib.Algebra.Order.Group.Units
-import Mathlib.Algebra.Order.GroupWithZero.WithZero
+module
+
+public import «Adic spaces».OrderedGroupConvex
+public import «Adic spaces».ValuationCoarsening
+public import «Adic spaces».ValuationContinuity
+public import «Adic spaces».ValuationSpectrum
+public import Mathlib.RingTheory.Valuation.Basic
+public import Mathlib.Algebra.Order.Group.Units
+public import Mathlib.Algebra.Order.GroupWithZero.WithZero
 
 /-!
 # The characteristic subgroup `cΓ_v` (Wedhorn 4.13)
@@ -42,6 +44,8 @@ spectrality).
 
 * [Wedhorn 2019] Definition 4.13, p. 27.
 -/
+
+@[expose] public section
 
 namespace Valuation
 

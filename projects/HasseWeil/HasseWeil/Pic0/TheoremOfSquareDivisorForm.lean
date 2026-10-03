@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
-import HasseWeil.Foundation.Ramification
-import HasseWeil.Pic0.PicDualClassMapMultiplicativity
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
+public import HasseWeil.Foundation.Ramification
+public import HasseWeil.Pic0.PicDualClassMapMultiplicativity
 
 /-!
 # The theorem of the square in divisor form
@@ -32,6 +34,8 @@ Frobenius-trace relation used by the Route C degree argument.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.3.4–3.5 and III.6.1–III.6.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 open HasseWeil.Curves

@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Algebra.Category.ModuleCat.Products
-import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
-import ModularCurves.ForMathlib.SheafModuleCechTwoCoverBicomplex
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Products
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+public import ModularCurves.ForMathlib.SheafModuleCechTwoCoverBicomplex
 
 /-!
 # Exactness in a fixed degree of a native module-valued Cech complex
@@ -14,6 +16,8 @@ A fixed degree of a native Cech complex is a product over tuple
 intersections. Products of pointwise exact pairs are exact in modules, and
 products of pointwise monomorphisms are monic.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

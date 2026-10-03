@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalCompatFromTestFamily
-import «Adic spaces».WedhornMultiBranchSubsetInequality
+module
+
+public import «Adic spaces».WedhornLocalCompatFromTestFamily
+public import «Adic spaces».WedhornMultiBranchSubsetInequality
 
 /-!
 # Wedhorn local arithmetic per-`t'` chain — σ-factor cancellation
@@ -63,6 +65,8 @@ see the documented residual at the bottom of this file.
 * No final-acyclicity hypotheses, no Lane B / Cor 8.32 / Jacobson / T001
   / faithful-flatness / Zavyalov / bivariate-overlap content.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

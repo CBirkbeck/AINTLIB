@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Basic
-import HasseWeil.Foundation.Curves.Transcendence
-import HasseWeil.Foundation.Auxiliary.PullbackKaehler
-import HasseWeil.Foundation.InvariantDifferentialPullback
-import HasseWeil.Foundation.OmegaPullbackCoeff
-import HasseWeil.Isogeny.Kernel
-import Mathlib.RingTheory.Kaehler.Basic
-import Mathlib.RingTheory.Unramified.Field
+module
+
+public import HasseWeil.Foundation.Curves.Basic
+public import HasseWeil.Foundation.Curves.Transcendence
+public import HasseWeil.Foundation.Auxiliary.PullbackKaehler
+public import HasseWeil.Foundation.InvariantDifferentialPullback
+public import HasseWeil.Foundation.OmegaPullbackCoeff
+public import HasseWeil.Isogeny.Kernel
+public import Mathlib.RingTheory.Kaehler.Basic
+public import Mathlib.RingTheory.Unramified.Field
 
 /-!
 # Differentials on a smooth plane curve
@@ -52,6 +54,8 @@ This closes tickets `T-II-4-001` and `T-II-4-004`.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.4
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

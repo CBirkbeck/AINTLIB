@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
-import Mathlib.RingTheory.ClassGroup.ExtendedHom
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
+public import Mathlib.RingTheory.ClassGroup.ExtendedHom
 
 /-!
 # [II1-TARGET-AUDIT] Complex conjugation on the Case-II Washington ideals

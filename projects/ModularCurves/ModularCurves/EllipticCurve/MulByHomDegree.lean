@@ -1,10 +1,12 @@
-import ModularCurves.EllipticCurve.ModelRecord
-import ModularCurves.EllipticCurve.PointsDictionary
-import ModularCurves.EllipticCurve.FinrankFractionField
-import ModularCurves.ForMathlib.DominantFunctionField
-import HasseWeil.Foundation.Basic
-import HasseWeil.Foundation.EC.GenericPoint
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.EllipticCurve.ModelRecord
+public import ModularCurves.EllipticCurve.PointsDictionary
+public import ModularCurves.EllipticCurve.FinrankFractionField
+public import ModularCurves.ForMathlib.DominantFunctionField
+public import HasseWeil.Foundation.Basic
+public import HasseWeil.Foundation.EC.GenericPoint
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The degree of `[N]` on the projective model: `finrank = N²` (K4 field-level crux)
@@ -31,6 +33,8 @@ For an arbitrary elliptic curve `E/S`, `Torsion.mulByHom_finrank` reduces to thi
 statement fibre-by-fibre (the fibre `E_s` over `κ(s)` is `≅ projModel W_s` by
 `E.localModel : LocallyWeierstrass`, `S = Spec κ(s)` being a one-point base).
 -/
+
+@[expose] public section
 
 -- v4.33 bump: opens/hom coercions are no longer transparent enough for the
 -- `≫`-associativity and `comp_apply` rewrites below.

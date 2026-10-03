@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorRealGenerator
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.AnchorCubeAndObstruction
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.DescendedDataSharpValuation
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorRealGenerator
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.AnchorCubeAndObstruction
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.DescendedDataSharpValuation
 
 /-!
 # [FLT37-CASEII-R2-L5] Closing Washington's §9.1 second-case descent: L1 + L2 wired in

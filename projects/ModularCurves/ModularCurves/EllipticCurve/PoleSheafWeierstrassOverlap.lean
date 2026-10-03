@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafAwayCoordinate
-import ModularCurves.EllipticCurve.PoleSheafCartierTrivialization
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafAwayCoordinate
+public import ModularCurves.EllipticCurve.PoleSheafCartierTrivialization
 
 /-!
 # Pole-coordinate transitions on Cartier/away overlaps
@@ -13,6 +15,10 @@ The pole coordinates induced by a Cartier generator are compared with the
 canonical coordinates away from the marked section. The transition for
 `O(n[z])` is the `n`th power of the restricted Cartier generator.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory MonoidalCategory
 

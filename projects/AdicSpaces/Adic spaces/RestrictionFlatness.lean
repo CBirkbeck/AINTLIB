@@ -2,11 +2,13 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StructureSheaf
-import «Adic spaces».LaurentRefinement
-import «Adic spaces».LaurentMinusNormalized
-import «Adic spaces».RelativeRationalLocData
-import Mathlib.RingTheory.Flat.Basic
+module
+
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».LaurentRefinement
+public import «Adic spaces».LaurentMinusNormalized
+public import «Adic spaces».RelativeRationalLocData
+public import Mathlib.RingTheory.Flat.Basic
 
 /-!
 # Flatness of the restriction map via Wedhorn Prop 8.30 + Wedhorn Lemma 2.13
@@ -45,6 +47,8 @@ presheafValue (iteratedMinusDatum_B P D₀ f)` (the
 * `docs/STATUS.md` — Reframe of T-FLAT-VIA-WEDHORN830.
 * `Adic spaces/StructureSheaf.lean` — template `presheafValue_flat_of_tateQuotient`.
 -/
+
+@[expose] public section
 
 open ValuationSpectrum CompletionLocalization
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafNeighborhoodHOne
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassComparison
-import ModularCurves.Moduli.EngineDescent
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafNeighborhoodHOne
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassComparison
+public import ModularCurves.Moduli.EngineDescent
 
 /-!
 # Fibrewise elliptic families are locally Weierstrass (FLW-6)
@@ -27,6 +29,10 @@ Cartier data restricts to the basic open and crosses the pointed identification;
 produces the Weierstrass presentation, which `LocallyWeierstrass.of_iso_over` carries back
 to the restricted family and pullback-composition carries up to the original base.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 

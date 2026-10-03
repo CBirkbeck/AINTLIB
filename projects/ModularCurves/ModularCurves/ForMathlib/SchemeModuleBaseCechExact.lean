@@ -5,13 +5,15 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.Algebra.Category.ModuleCat.Products
-import Mathlib.Algebra.Homology.HomologicalComplexAbelian
-import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
-import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
-import ModularCurves.ForMathlib.SchemeModuleSheaf
-import ModularCurves.ForMathlib.SheafCechCochains
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Products
+public import Mathlib.Algebra.Homology.HomologicalComplexAbelian
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+public import ModularCurves.ForMathlib.SchemeModuleSheaf
+public import ModularCurves.ForMathlib.SheafCechCochains
 
 /-!
 # Exact sequences of base-linear Cech complexes
@@ -20,6 +22,8 @@ This file proves that a short exact sequence of quasicoherent scheme modules rem
 after taking base-linear sections over an affine open. The finite affine Cech-complex consequence
 is assembled degreewise below.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.IntegralClosure
-import HasseWeil.Foundation.Curves.Map.CurveMapBaseChange
-import HasseWeil.Foundation.Curves.Valuation.Infinity
+module
+
+public import HasseWeil.Foundation.Curves.IntegralClosure
+public import HasseWeil.Foundation.Curves.Map.CurveMapBaseChange
+public import HasseWeil.Foundation.Curves.Valuation.Infinity
 
 /-!
 # Base change of the order at infinity (Silverman I.2 + IV.1)
@@ -37,6 +39,8 @@ transports; it discharges the `OrdAtInftyBaseChange` leaf of the `(1 − π)_{K�
 
 * Silverman, *The Arithmetic of Elliptic Curves*, I.2 (base change), IV.1 (`ord_∞`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

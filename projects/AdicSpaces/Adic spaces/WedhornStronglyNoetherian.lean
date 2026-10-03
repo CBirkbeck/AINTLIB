@@ -2,13 +2,15 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornBanachTheorem
-import «Adic spaces».HuberRings
-import «Adic spaces».RestrictedPowerSeries
-import «Adic spaces».TateAlgebra
-import «Adic spaces».StructureSheaf
-import «Adic spaces».AdicCompletionNoetherian
-import Mathlib.RingTheory.AdicCompletion.Algebra
+module
+
+public import «Adic spaces».WedhornBanachTheorem
+public import «Adic spaces».HuberRings
+public import «Adic spaces».RestrictedPowerSeries
+public import «Adic spaces».TateAlgebra
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».AdicCompletionNoetherian
+public import Mathlib.RingTheory.AdicCompletion.Algebra
 
 /-!
 # Wedhorn 6.36 / 6.18 chain — strongly noetherian Tate equivalences
@@ -45,6 +47,8 @@ This file ports the audit-pass-2 trio referenced by the Wedhorn-exact
 
 See `docs/plans/2026-05-17-wedhorn-618-roadmap.md` Layers 5-6.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

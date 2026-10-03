@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.RegularLocalDomain
+module
+
+public import ModularCurves.ForMathlib.RegularLocalDomain
 
 /-!
 # Cutting down the Krull dimension by finitely many equations (T-SMOOTH-REG brick 1)
@@ -21,6 +23,8 @@ equations" into "`dim S_𝔪 ≥ n`".
 
 Stacks 00KW / Matsumura Thm. 13.6.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves stream D
 -/
-import ModularCurves.GroupScheme.NIsogeny
-import ModularCurves.ForMathlib.GrassmannianGlueData
+module
+
+public import ModularCurves.GroupScheme.NIsogeny
+public import ModularCurves.ForMathlib.GrassmannianGlueData
 
 /-!
 # The moduli space of `N`-isogeny data ([L15] = KM 6.5.1) — STREAM-NISOG wave M2
@@ -29,6 +31,8 @@ This file executes the decomposition `.mathlib-quality/decomposition-nisog-L15.m
 * [L15-e] classification via `pointOfMember` (gate-proven forward map).
 * [L15-f] finiteness (KM's fibre count; c5β substrate hypothesis-wired).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TensorProduct ModularCurves.EllipticCurve
 

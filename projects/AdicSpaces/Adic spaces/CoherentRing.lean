@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Algebra.Module.FinitePresentation
+module
+
+public import Mathlib.Algebra.Module.FinitePresentation
 
 /-!
 # Coherent Rings
@@ -16,6 +18,8 @@ Ch. I, §2, Exercise 12). A Noetherian ring is coherent, but the converse does n
 * `IsCoherentRing R` : A ring `R` is coherent if every finitely generated ideal is finitely
   presented as an `R`-module.
 -/
+
+@[expose] public section
 
 /-- A ring is *coherent* if every finitely generated ideal, viewed as a submodule,
 is finitely presented. Equivalently, for every surjection `Rⁿ →ₗ[R] I` with `I`

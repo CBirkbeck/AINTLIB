@@ -3,18 +3,20 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.AwayCongr
-import ModularCurves.ForMathlib.GradedQuotient
-import ModularCurves.ForMathlib.StandardSmoothHypersurface
-import ModularCurves.ForMathlib.ProjClosedImmersion
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Basic
-import Mathlib.AlgebraicGeometry.Morphisms.Smooth
-import Mathlib.AlgebraicGeometry.Morphisms.Proper
-import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
-import Mathlib.Algebra.MvPolynomial.PDeriv
-import Mathlib.RingTheory.MvPolynomial.Homogeneous
-import Mathlib.RingTheory.MvPolynomial.Ideal
+module
+
+public import ModularCurves.ForMathlib.AwayCongr
+public import ModularCurves.ForMathlib.GradedQuotient
+public import ModularCurves.ForMathlib.StandardSmoothHypersurface
+public import ModularCurves.ForMathlib.ProjClosedImmersion
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Basic
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import Mathlib.AlgebraicGeometry.Morphisms.Proper
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+public import Mathlib.RingTheory.MvPolynomial.Ideal
 
 /-!
 # The projective Weierstrass model as a scheme
@@ -51,6 +53,10 @@ expert review Q2).
 * [Sil] Silverman, *AEC* III.3.1 (every pointed smooth genus-1 curve over a field is a
   Weierstrass cubic — the Riemann–Roch input, black-boxed by this project).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

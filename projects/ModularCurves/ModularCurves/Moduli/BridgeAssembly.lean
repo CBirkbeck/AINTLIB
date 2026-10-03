@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.AffineSectionDoublingIdentity
-import ModularCurves.ForMathlib.NegModelAffineSection
-import ModularCurves.Moduli.E3DatumAssembly
+module
+
+public import ModularCurves.ForMathlib.AffineSectionDoublingIdentity
+public import ModularCurves.ForMathlib.NegModelAffineSection
+public import ModularCurves.Moduli.E3DatumAssembly
 
 /-!
 # The bridge assembly: `3•σ = 0 ⟹ hdbl` (the hArb close)
@@ -16,6 +18,8 @@ a marked section into the cleared doubling condition `hdbl`, which fires KM's
 certificate (`ThreeTorsionRingCertificate`) into the two `isE3Datum_of_bridges`
 bridge-Props — closing `Bootstrap:95`.
 -/
+
+@[expose] public section
 
 universe u
 

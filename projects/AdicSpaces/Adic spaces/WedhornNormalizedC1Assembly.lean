@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornC1Assembly
-import «Adic spaces».WedhornCoverNormalization
+module
+
+public import «Adic spaces».WedhornC1Assembly
+public import «Adic spaces».WedhornCoverNormalization
 
 /-!
 # Wedhorn Normalized C1 Assembly
@@ -41,6 +43,8 @@ internally via `RationalCovering.insertDenom_normalized`.
   content.
 * Axioms used: `propext`, `Classical.choice`, `Quot.sound` only.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

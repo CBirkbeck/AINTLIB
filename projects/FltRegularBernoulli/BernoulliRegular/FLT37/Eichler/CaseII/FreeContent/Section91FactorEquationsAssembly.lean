@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjNormDescentDatumCapstone
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjugateNormRealGeneratorPower
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.ParityObstruction
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjNormDescentDatumCapstone
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjugateNormRealGeneratorPower
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.ParityObstruction
 
 /-!
 # [FLT37-CASEII-R2] Final assembly: §9.1 factor equations into the free-content descent step

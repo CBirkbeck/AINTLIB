@@ -6,8 +6,10 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreImageAffineCover`.
 -/
-import ModularCurves.ForMathlib.MvPolynomialProjectiveClosure
-import ModularCurves.ForMathlib.SegreImageProj
+module
+
+public import ModularCurves.ForMathlib.MvPolynomialProjectiveClosure
+public import ModularCurves.ForMathlib.SegreImageProj
 
 /-!
 # Standard affine charts on the Segre image
@@ -16,6 +18,8 @@ The images of the standard Segre coordinates are homogeneous of degree one
 and generate an ideal containing the irrelevant ideal. They therefore give
 a finite affine open cover of the `Proj` of the Segre image algebra.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry
 open HomogeneousIdeal

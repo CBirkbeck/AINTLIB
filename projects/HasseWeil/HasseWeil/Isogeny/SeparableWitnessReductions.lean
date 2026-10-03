@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.SeparableKernelTorsor
-import HasseWeil.Foundation.WallA.VSideDual
-import HasseWeil.HasseBound.WeilPairing.HcommLemma
-import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
-import HasseWeil.HasseBound.WeilPairing.PencilDualDivisor
+module
+
+public import HasseWeil.Foundation.EC.SeparableKernelTorsor
+public import HasseWeil.Foundation.WallA.VSideDual
+public import HasseWeil.HasseBound.WeilPairing.HcommLemma
+public import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
+public import HasseWeil.HasseBound.WeilPairing.PencilDualDivisor
 
 /-!
 # The shared separable witnesses for `(1 − π)_{K̄}` and `(rπ − s)_{K̄}` (CoordHom-free)
@@ -90,6 +92,8 @@ per-isogeny witness.  `HsurjWitness` records the exact statement for both isogen
 * Silverman, *The Arithmetic of Elliptic Curves*, III.4.10a/c, III.5.5, III.6.1b/6.2a, III.8.2,
   III.8.6.1, V.1.3.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

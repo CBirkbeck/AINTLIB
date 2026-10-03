@@ -3,7 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.PadicL.LogCoeffPiDigit
+module
+
+import all BernoulliRegular.FLT37.PadicL.LpValue
+public import BernoulliRegular.FLT37.PadicL.LogCoeffPiDigit
 
 /-!
 # The concrete Coleman log coefficients `c_j` and the `π`-digit rungs of `Λ 32`

@@ -2,15 +2,17 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».AuditCleanWrappers
-import «Adic spaces».CechCohomology
-import «Adic spaces».LaurentRefinementCore
-import «Adic spaces».Presheaf
-import «Adic spaces».RelativePieceKeystone
-import «Adic spaces».SpaCompactNoHArch
-import «Adic spaces».StructureSheaf
-import «Adic spaces».TateAcyclicityResiduals
-import «Adic spaces».Wedhorn828
+module
+
+public import «Adic spaces».AuditCleanWrappers
+public import «Adic spaces».CechCohomology
+public import «Adic spaces».LaurentRefinementCore
+public import «Adic spaces».Presheaf
+public import «Adic spaces».RelativePieceKeystone
+public import «Adic spaces».SpaCompactNoHArch
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».TateAcyclicityResiduals
+public import «Adic spaces».Wedhorn828
 
 /-!
 # Wedhorn-Čech acyclicity: bridge to `IsSheafy`
@@ -62,6 +64,10 @@ Reusable infrastructure: `RationalCovering.eqRec_restrictionMap_direct`
 + `presheafValue_eqRec_double_cancel_forward` extracted for general
 Eq.rec cast manipulation on `presheafValue`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

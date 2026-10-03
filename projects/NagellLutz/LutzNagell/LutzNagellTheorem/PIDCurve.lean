@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
-import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
-import Mathlib.RingTheory.Localization.FractionRing
-import Mathlib.Tactic.Ring
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+public import Mathlib.RingTheory.Localization.FractionRing
+public import Mathlib.Tactic.Ring
 
 /-!
 # General Weierstrass model over a PID and its fraction field
@@ -16,6 +18,8 @@ base change to the fraction field `K`, along with basic rewriting lemmas.
 
 This generalizes `GeneralCurve.lean` from `ℤ/ℚ` to an arbitrary PID `R` with fraction field `K`.
 -/
+
+@[expose] public section
 
 open scoped Polynomial.Bivariate
 

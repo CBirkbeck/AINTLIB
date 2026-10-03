@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.HfactLemma
+module
+
+public import HasseWeil.HasseBound.WeilPairing.HfactLemma
 
 /-!
 # Discharging `PicDualDivisorClass` via Abel (Silverman III.6.1b)
@@ -61,6 +63,8 @@ relation, both of which the project already supplies per isogeny.
 * Silverman, *The Arithmetic of Elliptic Curves*, III.3.5 (Abel: degree-0 ∧ `σ = O` ⟺ principal),
   III.6.1(b) (`φ̂ = κ⁻¹ ∘ φ^* ∘ κ`), III.6.2(a) (`φ̂ ∘ φ = [deg φ]`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.Torsion
-import ModularCurves.EllipticCurve.MulByHomDegree
+module
+
+public import ModularCurves.EllipticCurve.Torsion
+public import ModularCurves.EllipticCurve.MulByHomDegree
 
 /-!
 # Surjectivity of `[N] : E ⟶ E` over an arbitrary base
@@ -22,6 +24,8 @@ Consumed by the Weil-pairing alternation reduction (`WeilPairing/AlternationRedu
 `[2]` flat (`mulByHom_flat`) + surjective (here) makes the `[2]`-fibre product over any
 point a flat surjective halving cover.
 -/
+
+@[expose] public section
 
 universe u
 

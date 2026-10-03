@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.AdditionPullback
-import HasseWeil.Foundation.EC.GenericPointZsmul
-import HasseWeil.Foundation.OmegaPullbackCoeff
+module
+
+public import HasseWeil.Foundation.AdditionPullback
+public import HasseWeil.Foundation.EC.GenericPointZsmul
+public import HasseWeil.Foundation.OmegaPullbackCoeff
 
 /-!
 # The `[m] ⊞ [1] = [m+1]` addition recurrence on the generic point (Silverman III.5.3)
@@ -19,6 +21,8 @@ This lives in its own minimal-import module to avoid an `AddCommGroup` instance 
 `(W_KE W).toAffine.Point` that appears when the heavier `SilvermanIV14` / `OpenLemmaPrimitives`
 modules are in scope (there the canonical `zsmul` lemmas fail to fire on `m • genericPoint`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

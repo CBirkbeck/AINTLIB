@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SplitInjectiveLocalization
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
-import Mathlib.RingTheory.LocalRing.Module
-import Mathlib.Algebra.Module.LocalizedModule.IsLocalization
-import Mathlib.RingTheory.Localization.Module
-import Mathlib.RingTheory.Nakayama
+module
+
+public import ModularCurves.ForMathlib.SplitInjectiveLocalization
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.LocalRing.Module
+public import Mathlib.Algebra.Module.LocalizedModule.IsLocalization
+public import Mathlib.RingTheory.Localization.Module
+public import Mathlib.RingTheory.Nakayama
 
 /-!
 # Unit retractions of faithfully flat finitely presented algebras
@@ -19,6 +21,8 @@ maximal ideal this is the unimodularity of `1` in a finite free module over a
 local ring (Nakayama); globally it glues by
 `LinearMap.split_injective_of_localization_maximal`.
 -/
+
+@[expose] public section
 
 open IsLocalRing
 

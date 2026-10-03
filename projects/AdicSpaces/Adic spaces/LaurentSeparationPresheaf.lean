@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LaurentRefinement
+module
+
+public import «Adic spaces».LaurentRefinement
 
 /-!
 # Lifting algebraic Laurent separation to the presheafValue level (R2)
@@ -50,6 +52,8 @@ purely algebraic Krull route.
   `laurentCover_gluing_presheaf_viaRow3`
   (gluing companion, mirror structure).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

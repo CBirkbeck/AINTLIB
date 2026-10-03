@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.TorsionCombination
+module
+
+public import ModularCurves.GroupScheme.TorsionCombination
 
 /-!
 # The naive `Γ₁(N)` locus in `E[N]` (WP-D1c-rel)
@@ -27,6 +29,8 @@ zero section of `E[N] → S` is clopen when `N` is invertible, and `E[N] → S` 
 The payoff (WP-D1c) is that the forgetful map `fullLevelLocus ⟶ naiveGammaOneLocus` is then
 finite étale by `Etale.of_comp`, with no further input.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

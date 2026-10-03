@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Register-box support (T-D3/T-D1).
 -/
-import Mathlib.Topology.Sheaves.SheafCondition.UniqueGluing
+module
+
+public import Mathlib.Topology.Sheaves.SheafCondition.UniqueGluing
 
 /-!
 # Sections of a sheaf over a disjoint union of opens
@@ -24,6 +26,8 @@ subscheme attached to a product of section ideals decomposes, over a suitable af
 base, into finitely many disjoint affine pieces, and its ring of functions is computed
 as the product of the rings of the pieces.
 -/
+
+@[expose] public section
 
 universe x
 

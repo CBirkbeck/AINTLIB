@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Topology.Order.IntermediateValue
-import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
+module
+
+public import Mathlib.Topology.Order.IntermediateValue
+public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
 /-!
 # Exit-time function for curves crossing a point
@@ -23,6 +25,8 @@ ball `B_ε(s)`, and replace it with a "connecting arc" on the boundary
 By flatness of order `n` (Hungerbühler-Wasem condition (A)), the connecting
 arc length is `o(ε^n)`, controlling the contribution of arcs in the limit.
 -/
+
+@[expose] public section
 
 open Set Filter Topology
 

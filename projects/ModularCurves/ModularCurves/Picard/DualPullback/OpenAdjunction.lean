@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.Map
+module
+
+public import ModularCurves.Picard.DualPullback.Map
 
 /-!
 # Pullback adjunction over an open target
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.Map
 The adjunction-defined comparison square agrees with the explicit pullback/restriction
 isomorphism over an open subscheme.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Opposite
 

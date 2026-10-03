@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».AdicCompletionTransfer
-import «Adic spaces».Presheaf
+module
+
+public import «Adic spaces».AdicCompletionTransfer
+public import «Adic spaces».Presheaf
 
 /-!
 # Presheaf Value via Adic Completion of the Subring
@@ -23,6 +25,8 @@ is obtained from `Completion(locSubring)` by inverting the Tate unit.
 * `locSubringIsAdic` : `IsAdic locIdeal` (by definition).
 * `locSubring_completion_flat` : The completion of `locSubring` is flat.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

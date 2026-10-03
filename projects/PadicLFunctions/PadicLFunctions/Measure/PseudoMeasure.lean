@@ -1,9 +1,11 @@
-import PadicLFunctions.Measure.UnitsZp
-import PadicLFunctions.Measure.Fubini
-import Mathlib.Algebra.MonoidAlgebra.Basic
-import Mathlib.RingTheory.LocalRing.Basic
-import Mathlib.RingTheory.Localization.FractionRing
-import Mathlib.RingTheory.ZMod.UnitsCyclic
+module
+
+public import PadicLFunctions.Measure.UnitsZp
+public import PadicLFunctions.Measure.Fubini
+public import Mathlib.Algebra.MonoidAlgebra.Basic
+public import Mathlib.RingTheory.LocalRing.Basic
+public import Mathlib.RingTheory.Localization.FractionRing
+public import Mathlib.RingTheory.ZMod.UnitsCyclic
 
 /-!
 # The convolution algebra Λ(ℤ_p^×) and pseudo-measures
@@ -25,6 +27,8 @@ by `PadicMeasure.levelMap` below.
 Throughout this file `p` is odd where stated (the source's standing assumption from §4
 onwards; `(ℤ/p^n)^×` cyclic requires it).
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 open PowerSeries

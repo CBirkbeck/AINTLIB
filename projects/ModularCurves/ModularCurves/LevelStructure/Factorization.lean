@@ -3,17 +3,19 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.ExactOrder
-import ModularCurves.GroupScheme.DeligneOrder
-import ModularCurves.GroupScheme.CartierDivisorMapIso
-import ModularCurves.GroupScheme.TranslationBySection
-import ModularCurves.LevelStructure.IsoTransport
-import ModularCurves.EllipticCurve.EndomorphismDegree
-import ModularCurves.EllipticCurve.MulByHomFlatFibre
-import ModularCurves.ForMathlib.FlatOfRetract
-import ModularCurves.ForMathlib.FinrankPullbackComp
-import ModularCurves.ForMathlib.EtaleSectionsCount
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.LevelStructure.ExactOrder
+public import ModularCurves.GroupScheme.DeligneOrder
+public import ModularCurves.GroupScheme.CartierDivisorMapIso
+public import ModularCurves.GroupScheme.TranslationBySection
+public import ModularCurves.LevelStructure.IsoTransport
+public import ModularCurves.EllipticCurve.EndomorphismDegree
+public import ModularCurves.EllipticCurve.MulByHomFlatFibre
+public import ModularCurves.ForMathlib.FlatOfRetract
+public import ModularCurves.ForMathlib.FinrankPullbackComp
+public import ModularCurves.ForMathlib.EtaleSectionsCount
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Prime-power factorization of Drinfeld exact order (KM 1.7.2 / 3.5.1, Γ₁-instance)
@@ -35,6 +37,10 @@ The skeleton keeps the repo's divisor encoding (`Section.HasExactOrder`,
 KM 1.4.1): no `φ`-homomorphism vocabulary is introduced — for the cyclic group
 `ℤ/N` a homomorphism *is* its value at `1` (KM 1.5.2).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

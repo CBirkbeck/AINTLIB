@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
+module
+
+public import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
 
 /-!
 # Route C (geometric): discharging the `hcompat` residual from the construction
@@ -44,6 +46,8 @@ The `mulByInt` and `addIsog`/`addPullbackAlgHomPair` blocks, and their
 composition into `genuineIsogSmulSub`, are tracked as the precise residual (see
 the module note at the end of the file).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 open scoped nonZeroDivisors

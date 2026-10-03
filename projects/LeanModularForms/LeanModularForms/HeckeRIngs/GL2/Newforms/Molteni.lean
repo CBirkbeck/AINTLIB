@@ -3,10 +3,12 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
-import Mathlib.Data.Nat.PrimeFin
-import Mathlib.Data.Nat.Factorization.Basic
-import Mathlib.LinearAlgebra.Basis.Basic
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
+public import Mathlib.Data.Nat.PrimeFin
+public import Mathlib.Data.Nat.Factorization.Basic
+public import Mathlib.LinearAlgebra.Basis.Basic
 
 /-!
 # Molteni's linear-independence lemma for multiplicative functions
@@ -35,6 +37,8 @@ elsewhere, satisfy `f₁ − 2f₂ + f₃ = 0`); the non-equivalence hypothesis 
 * `linearIndependent_of_pairwise_not_equiv'` — pairwise non-`Equiv'` multiplicative functions
   are `ℂ`-linearly independent (in the zero-extended `∑ cᵢ Fᵢ n = 0 ∀ n ⟹ cᵢ = 0` form).
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2.Molteni
 

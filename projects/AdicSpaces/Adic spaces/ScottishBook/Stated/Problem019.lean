@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StructureSheaf
-import Mathlib.RingTheory.Finiteness.Basic
+module
+
+public import «Adic spaces».StructureSheaf
+public import Mathlib.RingTheory.Finiteness.Basic
 
 /-!
 # Nonarchimedean Scottish Book — Problem 19
@@ -51,6 +53,8 @@ Gabber has announced positive answers to both questions.
 * Kedlaya, *The Nonarchimedean Scottish Book*, Problem 19
 * Wedhorn, *Adic Spaces*, §8 (Definition 8.26)
 -/
+
+@[expose] public section
 
 open ValuationSpectrum CategoryTheory
 

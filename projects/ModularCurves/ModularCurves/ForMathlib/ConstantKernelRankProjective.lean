@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.BaseChangeKerCoker
-import ModularCurves.ForMathlib.ReducedConstantRankFree
+module
+
+public import ModularCurves.ForMathlib.BaseChangeKerCoker
+public import ModularCurves.ForMathlib.ReducedConstantRankFree
 
 /-!
 # Constant kernel rank over a reduced ring (Mumford, *Abelian Varieties* §5)
@@ -47,6 +49,8 @@ direct summand of `K₁` and hence projective, which in turn splits
 Note that no *pointwise* inequality `rk_p K₀ ≤ rk_p K₁ + n` is asserted anywhere: the arithmetic
 is done with the two additive identities and `omega`, never by rearranging `ℕ`-subtractions.
 -/
+
+@[expose] public section
 
 universe u v
 

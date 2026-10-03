@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.LocalUnit
+module
+
+public import ModularCurves.Picard.DualPullback.LocalUnit
 
 /-!
 # Local trivializations of pulled dual modules
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.LocalUnit
 A local trivialization of a module determines compatible trivializations of its dual and
 of the pullback of that dual; the distinguished dual section maps to `1`.
 -/
+
+@[expose] public section
 
 universe u v
 

@@ -3,8 +3,10 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.Labels.NewformOrbit
-import Mathlib.NumberTheory.EulerProduct.Basic
+module
+
+public import LeanModularForms.Labels.NewformOrbit
+public import Mathlib.NumberTheory.EulerProduct.Basic
 
 /-!
 # The Euler product of the L-function of a Hecke eigenform
@@ -33,6 +35,10 @@ The proof has three ingredients:
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.9–5.10.
 * [Miy] Miyake, *Modular Forms*, Thm 4.5.16.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open scoped BigOperators
 open Complex UpperHalfPlane

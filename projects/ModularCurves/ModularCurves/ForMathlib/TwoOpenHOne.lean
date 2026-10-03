@@ -1,9 +1,11 @@
-import Mathlib.CategoryTheory.Sites.SheafCohomology.MayerVietoris
-import Mathlib.Topology.Sheaves.Flasque
-import Mathlib.Topology.Sheaves.MayerVietoris
+module
 
-import ModularCurves.ForMathlib.KempfLocalKilling
-import ModularCurves.ForMathlib.SheafCohomologyTerminal
+public import Mathlib.CategoryTheory.Sites.SheafCohomology.MayerVietoris
+public import Mathlib.Topology.Sheaves.Flasque
+public import Mathlib.Topology.Sheaves.MayerVietoris
+
+public import ModularCurves.ForMathlib.KempfLocalKilling
+public import ModularCurves.ForMathlib.SheafCohomologyTerminal
 
 /-!
 # Degree-one cohomology from a two-open cover
@@ -13,6 +15,8 @@ calculation. The forward implication represents a degree-one class using an inje
 presentation and kills it by ordinary sheaf gluing. The converse transports mathlib's
 Mayer--Vietoris exact sequence from the cohomology presheaf `H'` to concrete sections.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits Opposite TopologicalSpace
 

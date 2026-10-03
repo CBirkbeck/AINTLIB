@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.Final
-import BernoulliRegular.UnitQuotient.Washington83UnitForward
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.BridgeAssembly
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Unconditional
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.RealGeneratorBridge
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ProductDescent
+module
+
+public import BernoulliRegular.FLT37.Final
+public import BernoulliRegular.UnitQuotient.Washington83UnitForward
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.BridgeAssembly
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Unconditional
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.RealGeneratorBridge
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ProductDescent
 
 /-!
 # Vandiver's conjecture for `37` (plus-side), proven

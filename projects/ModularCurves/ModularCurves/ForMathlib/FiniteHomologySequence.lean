@@ -5,9 +5,11 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.Algebra.Homology.HomologySequence
-import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
-import ModularCurves.ForMathlib.BaseChangeKerCoker
+module
+
+public import Mathlib.Algebra.Homology.HomologySequence
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+public import ModularCurves.ForMathlib.BaseChangeKerCoker
 
 /-!
 # Finiteness in long homology sequences
@@ -16,6 +18,8 @@ Over a Noetherian ring, each exact pair in the long homology sequence of a short
 sequence of complexes transfers finite generation from the two surrounding terms to the
 middle term.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

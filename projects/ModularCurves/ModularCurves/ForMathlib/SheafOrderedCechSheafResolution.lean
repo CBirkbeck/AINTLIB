@@ -1,6 +1,8 @@
-import Mathlib.Algebra.Homology.Augment
-import ModularCurves.ForMathlib.SheafCechSheafResolution
-import ModularCurves.ForMathlib.SheafOrderedCechAlternatingChain
+module
+
+public import Mathlib.Algebra.Homology.Augment
+public import ModularCurves.ForMathlib.SheafCechSheafResolution
+public import ModularCurves.ForMathlib.SheafOrderedCechAlternatingChain
 
 /-!
 # The augmented ordered sheaf-level Cech resolution
@@ -10,6 +12,10 @@ Cech cochains to ordered Cech cochains is an isomorphism. This extends the
 native-to-ordered chain retract across the augmentation and transfers
 acyclicity of the native augmented resolution.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

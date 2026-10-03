@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StructureSheaf
-import «Adic spaces».LaurentRefinement
-import «Adic spaces».LaurentRefinementTree
+module
+
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».LaurentRefinement
+public import «Adic spaces».LaurentRefinementTree
 
 /-!
 # Topological embedding boundary for `IsSheafy.embedding`
@@ -41,6 +43,8 @@ alone.
   ingredient (1).
 * `docs/plans/2026-04-08-wedhorn-vs-zavyalov.md`.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

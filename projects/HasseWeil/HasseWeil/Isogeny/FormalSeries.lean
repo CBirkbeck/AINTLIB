@@ -3,13 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.MvPowerSeries.Substitution
-import HasseWeil.Foundation.AdditionPullback
-import HasseWeil.Foundation.Curves.WithTopArith
-import HasseWeil.Foundation.EC.MulByIntBaseCase
-import HasseWeil.Foundation.LocalExpansion
-import HasseWeil.Foundation.OmegaPullbackCoeff
-import HasseWeil.Foundation.OrdAtInftyBridge
+module
+
+import all HasseWeil.Foundation.Basic
+public import Mathlib.RingTheory.MvPowerSeries.Substitution
+public import HasseWeil.Foundation.AdditionPullback
+public import HasseWeil.Foundation.Curves.WithTopArith
+public import HasseWeil.Foundation.EC.MulByIntBaseCase
+public import HasseWeil.Foundation.LocalExpansion
+public import HasseWeil.Foundation.OmegaPullbackCoeff
+public import HasseWeil.Foundation.OrdAtInftyBridge
 
 /-!
 # Formal isogeny series and the bridge to `omegaPullbackCoeff`
@@ -56,6 +59,8 @@ docstrings record the counterexamples).
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.1, IV.2, IV.4.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve PowerSeries LaurentSeries
 

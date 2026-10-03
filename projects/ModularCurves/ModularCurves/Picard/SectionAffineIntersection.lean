@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.FiniteIntersectionFunctor
+module
+
+public import ModularCurves.ForMathlib.FiniteIntersectionFunctor
 
 /-!
 # Finite intersections and preimages (W3.4.c)
@@ -13,6 +15,8 @@ the base with that of its preimage cover on the total space, the comparison bein
 evaluation along a section `z`. The first step is purely lattice-theoretic: a finite
 intersection of preimages is the preimage of the finite intersection.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.KMNaturality
-import ModularCurves.EllipticCurve.EndomorphismDegree
+module
+
+public import ModularCurves.WeilPairing.KMNaturality
+public import ModularCurves.EllipticCurve.EndomorphismDegree
 
 /-!
 # Level compatibility of the Katz–Mazur pairing (AP-E6, KM 2.8.4.1 at `π₁ = [N]`, `π₂ = [M]`)
@@ -29,6 +31,10 @@ read the same functions at the same point.
 * `torsionSplittingEval_mulByN_pullback` — the shared-splittings evaluation identity.
 * `weilPairingKM_mul_smul_right` — `e_{N·M}(P, Q) = e_N(P, M • Q)` for the canonical pairing.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

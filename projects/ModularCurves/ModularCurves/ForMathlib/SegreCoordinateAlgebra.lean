@@ -5,8 +5,10 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 
 Adapted from Clawristotle's `CoherentCohomologyFinite.SegreCoordinateAlgebra`.
 -/
-import Mathlib.LinearAlgebra.TensorProduct.RightExactness
-import Mathlib.RingTheory.MvPolynomial.Homogeneous
+module
+
+public import Mathlib.LinearAlgebra.TensorProduct.RightExactness
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
 
 /-!
 # Coordinate algebra for the Segre embedding
@@ -14,6 +16,8 @@ import Mathlib.RingTheory.MvPolynomial.Homogeneous
 The coordinate indexed by `(i, j)` maps to `X i ⊗ X j`. The standard quadratic
 Segre relations lie in the kernel and are homogeneous.
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

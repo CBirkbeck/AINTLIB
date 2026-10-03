@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.HungerbuhlerWasem.CrossingDataBuilder
-import LeanModularForms.ForMathlib.WindingInteger
+module
+
+public import LeanModularForms.ForMathlib.HungerbuhlerWasem.CrossingDataBuilder
+public import LeanModularForms.ForMathlib.WindingInteger
 
 /-!
 # Cauchy principal-value existence at a transverse crossing
@@ -32,6 +34,8 @@ the full CPV existence theorem.
   pieces expresses the integral as a log difference.
 * `hasCauchyPV_inv_sub_of_flat_one_full`: the headline CPV existence theorem.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology Asymptotics
 open scoped Real Interval

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
+module
+
+public import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
 
 /-!
 # Exactness after scalar extension
@@ -11,6 +13,8 @@ import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
 This file translates algebraic exactness of consecutive base-changed
 differentials into categorical exactness of the scalar-extended complex.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

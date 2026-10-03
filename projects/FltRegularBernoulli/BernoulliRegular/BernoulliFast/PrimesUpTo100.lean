@@ -1,5 +1,7 @@
-import BernoulliRegular.BernoulliFast.ValuesUpTo100
-import BernoulliRegular.Main
+module
+
+public import BernoulliRegular.BernoulliFast.ValuesUpTo100
+public import BernoulliRegular.Main
 
 /-!
 # Regularity of primes below 100
@@ -16,6 +18,8 @@ Irregular primes below `100`:
 The computational Bernoulli steps are discharged by `norm_num` using the
 `@[simp]` values from `BernoulliRegular.BernoulliFast.ValuesUpTo100`.
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular
 

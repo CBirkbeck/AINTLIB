@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
-import ModularCurves.EllipticCurve.MulByHomQuasiFinite
-import ModularCurves.EllipticCurve.MulByHomSmooth
+module
+
+public import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
+public import ModularCurves.EllipticCurve.MulByHomQuasiFinite
+public import ModularCurves.EllipticCurve.MulByHomSmooth
 
 /-!
 # Étaleness of `[N]` and of the torsion, rewired through the proven quasi-finiteness
@@ -20,6 +22,8 @@ This file exists (rather than editing `MulByHomUnramified.lean` in place) so tha
 `HasseWeil`/`IsoTransport` import closure of the quasi-finiteness proof does not enter
 sibling-lane files upstream.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

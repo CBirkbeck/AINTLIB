@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPart2LaneBIntegratedConsumer
-import «Adic spaces».WedhornC1SigmaConstructionAssembly
+module
+
+public import «Adic spaces».WedhornPart2LaneBIntegratedConsumer
+public import «Adic spaces».WedhornC1SigmaConstructionAssembly
 
 /-!
 # Wedhorn 8.34(ii) — Final Part-2 boundary threading T071+T072 (T074)
@@ -93,6 +95,8 @@ duplication of T073 arithmetic.
   named intermediate supplier-boundary residuals, especially the
   source-restricted `SigmaProductClearedInequalitySupplier`.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

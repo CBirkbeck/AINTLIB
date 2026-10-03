@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpacePoleSheafBaseChange
-import ModularCurves.ForMathlib.RelativeProjectiveTwistRestriction
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpacePoleSheafBaseChange
+public import ModularCurves.ForMathlib.RelativeProjectiveTwistRestriction
 
 /-!
 # Relative projective twists over affine base opens
@@ -12,6 +14,8 @@ import ModularCurves.ForMathlib.RelativeProjectiveTwistRestriction
 Restriction of a chosen nonnegative relative projective twist over an affine
 base open is the pullback of the corresponding absolute projective twist.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits
 

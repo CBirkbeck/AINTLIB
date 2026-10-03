@@ -3,9 +3,11 @@ Copyright (c) 2026 Bernoulli-Regular project contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bernoulli-Regular project contributors
 -/
-import BernoulliRegular.BernoulliFast.Cbv
-import Mathlib.Data.Rat.Lemmas
-import Mathlib.Tactic
+module
+
+public import BernoulliRegular.BernoulliFast.Cbv
+public import Mathlib.Data.Rat.Lemmas
+public import Mathlib.Tactic
 
 /-!
 # Tactic for certifying Bernoulli number values
@@ -36,6 +38,8 @@ Only the standard axioms used by rational arithmetic.  No `native_decide`; the
 custom fraction representation is connected to `ℚ` by theorem-level proofs in
 `BernoulliRegular.BernoulliFast.Cbv`.
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular.BernoulliFast
 

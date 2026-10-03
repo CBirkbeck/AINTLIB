@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.ThreeTermDescentEquation
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.ThreeTermDescentEquation
 
 /-!
 # [FLT37-CASEII-R2] The **paired-units** σ-conjugate-pair datum (no-clearing descent)

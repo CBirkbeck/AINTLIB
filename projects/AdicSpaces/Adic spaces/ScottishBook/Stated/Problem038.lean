@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Tilting
+module
+
+public import «Adic spaces».Tilting
 
 /-!
 # Nonarchimedean Scottish Book — Problem 38
@@ -29,6 +31,8 @@ We state the negation: there exists a perfectoid field `K` of characteristic 0 w
 `K♭` contains a perfectoid subfield `E` that is not the tilt of any perfectoid subfield
 of `K`.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

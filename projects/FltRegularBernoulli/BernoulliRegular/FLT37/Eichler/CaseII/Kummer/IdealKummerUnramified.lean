@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.CorrectedUnitPrimarity
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.CorrectedUnitPrimarity
 
 /-!
 # [FLT37-CASEII-IDEAL-KUMMER] The non-circular discharge of the Case-II II1 unramifiedness

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartMor
-import ModularCurves.EllipticCurve.AdditionChartProj
-import ModularCurves.EllipticCurve.AdditionChartGlue
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartMor
+public import ModularCurves.EllipticCurve.AdditionChartProj
+public import ModularCurves.EllipticCurve.AdditionChartGlue
 
 /-!
 # The piece morphisms agree on overlaps (T-W7.0c-c5β, c4.2c step 2b)
@@ -34,6 +36,8 @@ special cases `t := lawTwoTriple`/`lawOneTriple` (`addOnYPieceMor_eq`, `addOnZPi
 `regularityOpen_eq_top_iff`, and the *law-1-vs-law-2* agreement is
 `chartHomOfTriple_lawOne_eq_lawTwo`; this file is only the within-one-law, across-charts half.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory
 

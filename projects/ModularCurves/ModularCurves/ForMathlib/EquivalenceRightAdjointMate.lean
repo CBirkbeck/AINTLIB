@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.CategoryTheory.Adjunction.Unique
+module
+
+public import Mathlib.CategoryTheory.Adjunction.Unique
 
 /-!
 # Mating equivalences across adjunctions
@@ -14,6 +16,8 @@ the original autoequivalences commute across the corresponding left adjoint.
 The construction is adapted from Clawristotle's Apache-licensed
 `EquivalencePullbackPushforwardMate.lean`.
 -/
+
+@[expose] public section
 
 namespace CategoryTheory
 

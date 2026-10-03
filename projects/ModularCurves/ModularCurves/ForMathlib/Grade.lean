@@ -74,10 +74,18 @@ Consequently the **entire grade/openness chain is fully proved and axiom-clean**
 
 See `projects/ModularCurves/.mathlib-quality/decomposition-buchsbaum-eisenbud.md` [T-GRADE].
 -/
-import Mathlib.RingTheory.Regular.ProjectiveDimension
-import Mathlib.RingTheory.Depth.Rees
-import Mathlib.RingTheory.Regular.Flat
-import ModularCurves.ForMathlib.BaseChangeExt
+module
+
+public import Mathlib.RingTheory.Regular.Category
+public import Mathlib.RingTheory.Spectrum.Prime.Topology
+public import Mathlib.RingTheory.Regular.ProjectiveDimension
+public import Mathlib.RingTheory.Depth.Rees
+public import Mathlib.RingTheory.Regular.Flat
+public import ModularCurves.ForMathlib.BaseChangeExt
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

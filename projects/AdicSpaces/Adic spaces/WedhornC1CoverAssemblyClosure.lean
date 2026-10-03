@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPerPieceLaurentC1Supplier
-import «Adic spaces».WedhornPerPieceLaurentCoverAssembly
+module
+
+public import «Adic spaces».WedhornPerPieceLaurentC1Supplier
+public import «Adic spaces».WedhornPerPieceLaurentCoverAssembly
 
 /-!
 # Wedhorn 8.34(ii) — C1 supplier cover-assembly closure (T060)
@@ -76,6 +78,8 @@ Secondary's lane.
 * No global universal-over-Spa multi-element clearing claim (per
   T035's counter-example).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

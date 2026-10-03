@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.Modularforms.PeterssonInnerProduct
+module
+
+public import LeanModularForms.Modularforms.PeterssonInnerProduct
 
 /-!
 # Petersson inner product: algebraic API for cusp forms
@@ -35,6 +37,8 @@ lacks a compatible `NormedAddCommGroup` structure.
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.4
 * [Miy] Miyake, *Modular Forms*, §2.7–2.8
 -/
+
+@[expose] public section
 
 noncomputable section
 

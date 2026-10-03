@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from the overlap-open calculation in Clawristotle's
 `CoherentCohomologyFinite.SegreProductStandardOverlap`.
 -/
-import ModularCurves.ForMathlib.SegreProductCoverGeometry
+module
+
+public import ModularCurves.ForMathlib.SegreProductCoverGeometry
 
 /-!
 # Double overlaps in the standard Segre product cover
@@ -14,6 +16,10 @@ import ModularCurves.ForMathlib.SegreProductCoverGeometry
 This file identifies the intersection of two standard product charts with the distinguished
 open cut out by the product of the two projective coordinate transitions.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry TopologicalSpace
 

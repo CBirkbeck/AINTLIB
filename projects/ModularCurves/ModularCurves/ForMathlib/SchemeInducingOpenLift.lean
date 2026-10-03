@@ -6,7 +6,9 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `SchemeInducingOpenLift.lean` in
 Vilin97/Clawristotle.
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 
 /-!
 # Lifting opens along inducing scheme morphisms
@@ -14,6 +16,8 @@ import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 Every open in the source of an inducing scheme morphism is the inverse
 image of a chosen target open.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry TopologicalSpace
 

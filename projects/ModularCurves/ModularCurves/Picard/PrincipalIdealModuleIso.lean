@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.IdealModule
+module
+
+public import ModularCurves.Picard.IdealModule
 
 /-!
 # A principal divisor trivialises the corresponding ideal module (T10-cmp-core)
@@ -65,6 +67,8 @@ being an isomorphism), and which produce `t` by gluing the local products `num i
 immediate from the uniqueness clause, and bijectivity on *every* open — no cover argument
 needed — comes from running the same construction for `f⁻¹` (`PrincipalDivisorData.symm`).
 -/
+
+@[expose] public section
 
 universe u
 

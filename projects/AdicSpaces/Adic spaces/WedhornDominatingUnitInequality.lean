@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».ValuationSpectrum
+module
+
+public import «Adic spaces».ValuationSpectrum
 
 /-!
 # Wedhorn dominating-unit valuation-inequality core
@@ -65,6 +67,8 @@ intermediate `v.vle (τ^N * intermediate) C.base.s`.
 * Imports only `«Adic spaces».ValuationSpectrum` plus its transitive
   closure (Spv, vle, ValuativeRel infrastructure).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

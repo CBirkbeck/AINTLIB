@@ -2,11 +2,13 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Cor732
-import «Adic spaces».Presheaf
-import «Adic spaces».RationalSubsets
-import «Adic spaces».WedhornLocalizationTransferConsumer
-import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
+module
+
+public import «Adic spaces».Cor732
+public import «Adic spaces».Presheaf
+public import «Adic spaces».RationalSubsets
+public import «Adic spaces».WedhornLocalizationTransferConsumer
+public import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
 
 /-!
 # Wedhorn multi-element dominating-unit step (smallest reusable lemmas)
@@ -81,6 +83,8 @@ inequality at every plus-piece point.
 No Lane B / Cor 8.32 / Jacobson / faithful-flatness / T001 content.
 No new final acyclicity hypotheses. Strict adherence to the Wedhorn
 8.34(ii) σ-domination route. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

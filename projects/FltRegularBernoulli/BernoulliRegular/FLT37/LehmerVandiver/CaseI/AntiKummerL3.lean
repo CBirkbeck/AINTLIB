@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer
-import BernoulliRegular.TotallyRealSubfield.ConjZetaPow
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer
+public import BernoulliRegular.TotallyRealSubfield.ConjZetaPow
 
 /-!
 # AK-3 Galois structure for L⁺/K⁺ — finrank theorems

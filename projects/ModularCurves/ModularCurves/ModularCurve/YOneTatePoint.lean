@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.MulByHomEtale
-import ModularCurves.ForMathlib.SmoothSectionLift
-import ModularCurves.ModularCurve.YFullRoute
-import ModularCurves.ModularCurve.YOneAtlasClassify
+module
+
+public import ModularCurves.EllipticCurve.MulByHomEtale
+public import ModularCurves.ForMathlib.SmoothSectionLift
+public import ModularCurves.ModularCurve.YFullRoute
+public import ModularCurves.ModularCurve.YOneAtlasClassify
 
 /-!
 # The marked Tate point and `Y₁(N)` (STREAM-Y1 cap file)
@@ -33,6 +35,10 @@ unprimed `Torsionπ.etale`/`torsionπ_isFinite` in the E5 core) were swapped to 
 invertible-case variants when BB-FLAT closed (`MulByHom.flat_of_nIsInvertible`,
 `MulByHomSmooth.lean`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits HomogeneousIdeal HomogeneousLocalization
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.DivisorPullback
+module
+
+public import HasseWeil.HasseBound.WeilPairing.DivisorPullback
 
 /-!
 # `ProjOrdTransport` for a general separable isogeny from the local comap-valuation witnesses
@@ -49,6 +51,8 @@ discharged here.
 * Silverman, *The Arithmetic of Elliptic Curves*, III.4.10c (unramifiedness of a separable isogeny),
   III.8.1–2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

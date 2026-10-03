@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.FiniteType
-import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
-import Mathlib.AlgebraicGeometry.AlgClosed.Basic
-import Mathlib.Topology.JacobsonSpace
-import Mathlib.RingTheory.Spectrum.Prime.Jacobson
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FiniteType
+public import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
+public import Mathlib.AlgebraicGeometry.AlgClosed.Basic
+public import Mathlib.Topology.JacobsonSpace
+public import Mathlib.RingTheory.Spectrum.Prime.Jacobson
 
 /-!
 # Connectedness from closed points, and along surjections (Gap B, the cheap bridge)
@@ -29,6 +31,8 @@ coherent-sheaf comparison:
 
 Reviewed by gpt-5.6-sol; the mathlib lemmas used were verified present before being cited.
 -/
+
+@[expose] public section
 
 universe u
 

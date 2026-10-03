@@ -1,4 +1,6 @@
-import «Adic spaces».Basic
+module
+
+public import «Adic spaces».Basic
 
 /-!
 # Nonarchimedean Scottish Book — Problem 40
@@ -27,3 +29,5 @@ Open.
 - **Affinoid perfectoid space**: An adic space of the form Spa(A, A+) where A is a
   perfectoid ring.
 -/
+
+@[expose] public section

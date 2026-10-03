@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.FieldLeaf
-import ModularCurves.WeilPairing.NativeRestriction
+module
+
+public import ModularCurves.WeilPairing.FieldLeaf
+public import ModularCurves.WeilPairing.NativeRestriction
 
 /-!
 # The glue dataset ([G2])
@@ -15,6 +17,10 @@ every overlap. This is `exists_normalized_dataset` (KMDataset) replayed with the
 `[G1]` chart family in place of the invertibility choice, tracking the transition
 formula through the normalisation's refine-and-rescale.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

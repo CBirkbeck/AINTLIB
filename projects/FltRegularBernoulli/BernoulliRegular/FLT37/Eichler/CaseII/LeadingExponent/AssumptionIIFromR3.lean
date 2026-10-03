@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.Reduction.FLT37PostII1Reduction
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.EigenbasisVandermondeCompatibility
+module
+
+public import BernoulliRegular.FLT37.Eichler.Reduction.FLT37PostII1Reduction
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.EigenbasisVandermondeCompatibility
 
 /-!
 # [FLT37-CASEII] Assumption II assembled over the genuine descent data, with **R3 PROVEN**

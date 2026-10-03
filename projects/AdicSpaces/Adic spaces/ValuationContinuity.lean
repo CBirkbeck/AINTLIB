@@ -2,12 +2,14 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».AnalyticPoints
-import «Adic spaces».AffinoidRings
-import «Adic spaces».ValuationCoarsening
-import «Adic spaces».ValuationPrimeConvex
-import Mathlib.RingTheory.Valuation.LocalSubring
-import Mathlib.GroupTheory.ArchimedeanDensely
+module
+
+public import «Adic spaces».AnalyticPoints
+public import «Adic spaces».AffinoidRings
+public import «Adic spaces».ValuationCoarsening
+public import «Adic spaces».ValuationPrimeConvex
+public import Mathlib.RingTheory.Valuation.LocalSubring
+public import Mathlib.GroupTheory.ArchimedeanDensely
 
 /-!
 # Valuation Continuity Infrastructure
@@ -34,6 +36,8 @@ including the domination theorem, coarsening, restriction to convex subgroups
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Lemma 7.44, Lemma 7.45
 -/
+
+@[expose] public section
 
 open Filter Topology
 

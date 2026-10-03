@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.WittVector.Complete
-import Mathlib.RingTheory.WittVector.Teichmuller
-import Mathlib.RingTheory.WittVector.Identities
-import «Adic spaces».AdicConvergence
+module
+
+public import Mathlib.RingTheory.WittVector.Complete
+public import Mathlib.RingTheory.WittVector.Teichmuller
+public import Mathlib.RingTheory.WittVector.Identities
+public import «Adic spaces».AdicConvergence
 
 /-!
 # Primitive Elements in Witt Vectors
@@ -31,6 +33,8 @@ by a primitive element of degree 1 (Scholze-Weinstein, Berkeley Lectures, Lemma 
 
 * Scholze-Weinstein, *Berkeley Lectures on p-adic Geometry*, Definitions 6.2.9-6.2.10
 -/
+
+@[expose] public section
 
 open WittVector
 

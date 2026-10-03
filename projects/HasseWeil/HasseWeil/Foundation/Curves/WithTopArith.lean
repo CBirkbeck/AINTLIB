@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Valuation.Infinity
+module
+
+public import HasseWeil.Foundation.Curves.Valuation.Infinity
 
 /-!
 # WithTop ℤ arithmetic helpers for ordAtInfty calculations
@@ -69,6 +71,8 @@ doesn't rediscover them.
   direction; `.le` extracts the `≤` from the resulting equation.
   One-liner replacement for a 2-line tactic block.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves.SmoothPlaneCurve
 

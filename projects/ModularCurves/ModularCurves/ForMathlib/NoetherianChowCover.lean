@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.FiniteAffineImageProjective
-import ModularCurves.ForMathlib.FiniteProperClosureCover
+module
+
+public import ModularCurves.ForMathlib.FiniteAffineImageProjective
+public import ModularCurves.ForMathlib.FiniteProperClosureCover
 
 /-!
 # Chow covers of Noetherian schemes over affine bases
@@ -16,6 +18,10 @@ chartwise projective compactifications into a proper-surjective cover. It first 
 scheme-theoretic image of the common open, then composes with its proper-surjective closed
 inclusion into the original scheme.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

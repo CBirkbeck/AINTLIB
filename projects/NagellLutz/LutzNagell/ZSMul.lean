@@ -3,7 +3,9 @@ Copyright (c) 2024 Junyan Xu. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Junyan Xu
 -/
-import LutzNagell.DivisionPolynomialOmega
+module
+
+public import LutzNagell.DivisionPolynomialOmega
 
 /-!
 # Integer multiples of a rational point on a elliptic curve in terms of division polynomials
@@ -70,6 +72,8 @@ instead of `Frac(Universal.Ring) = Frac(ℤ[A₁,A₂,A₃,A₄,A₆,X,Y]/⟨P�
 `smulY_add_sub_negY` requires 2 to be invertible, so we do need to obtain the characteristic 2
 result by specializing the characteristic 0, universal result.
 -/
+
+@[expose] public section
 
 open scoped Polynomial.Bivariate
 

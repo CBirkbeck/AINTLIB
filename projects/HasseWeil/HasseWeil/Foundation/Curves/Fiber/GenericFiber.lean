@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Map.CoordHomFinite
-import HasseWeil.Foundation.Curves.Map.CurveMap
-import HasseWeil.Foundation.Curves.Valuation.SmoothPointPrime
-import Mathlib.FieldTheory.IsAlgClosed.Basic
-import Mathlib.NumberTheory.RamificationInertia.Unramified
-import Mathlib.RingTheory.DedekindDomain.Different
-import Mathlib.RingTheory.DedekindDomain.Factorization
+module
+
+public import HasseWeil.Foundation.Curves.Map.CoordHomFinite
+public import HasseWeil.Foundation.Curves.Map.CurveMap
+public import HasseWeil.Foundation.Curves.Valuation.SmoothPointPrime
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.NumberTheory.RamificationInertia.Unramified
+public import Mathlib.RingTheory.DedekindDomain.Different
+public import Mathlib.RingTheory.DedekindDomain.Factorization
 
 /-!
 # Generic fiber cardinality (T-II-2-009, Silverman II.2.6(b))
@@ -45,6 +47,8 @@ main piece still missing; see the progress note at the end.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.6(b).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

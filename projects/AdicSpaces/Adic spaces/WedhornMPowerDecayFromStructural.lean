@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalCor732ToFactoredChain
-import «Adic spaces».WedhornMultiDominatingUnit
+module
+
+public import «Adic spaces».WedhornLocalCor732ToFactoredChain
+public import «Adic spaces».WedhornMultiDominatingUnit
 
 /-!
 # Wedhorn M-power-decay: reduction to one Wedhorn structural inequality
@@ -66,6 +68,8 @@ below. Its proof is the genuinely-new Wedhorn 8.34(ii) Route B content
 * Reuses `not_vle_zero_of_strict_dominator`
   (`WedhornMultiDominatingUnit.lean:189`) for the auto-discharge.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

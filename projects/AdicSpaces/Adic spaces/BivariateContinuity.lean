@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LaurentOverlap
-import «Adic spaces».TopologyComparison
+module
+
+public import «Adic spaces».LaurentOverlap
+public import «Adic spaces».TopologyComparison
 
 /-!
 # Bivariate continuity of `example638Bivariate_evalHom` / `_forwardHom`
@@ -57,6 +59,8 @@ previously required in `LaneAReverseRoundTrip.lean`.
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Proposition 6.18,
   Example 6.39.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

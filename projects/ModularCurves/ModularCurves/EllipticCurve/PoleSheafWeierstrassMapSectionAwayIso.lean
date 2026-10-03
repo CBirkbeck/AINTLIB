@@ -1,4 +1,6 @@
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapFinite
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapFinite
 
 /-!
 # The pole-sheaf comparison on the marked-section complement
@@ -6,6 +8,8 @@ import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapFinite
 The finite punctured comparison is an isomorphism for the normalized
 degree-two and degree-three pole coordinates.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Opposite TopologicalSpace
 open WeierstrassCurve.Projective

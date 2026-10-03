@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SheafCohomologyFiniteProducts
-import ModularCurves.ForMathlib.SheafOrderedCechSheafResolution
+module
+
+public import ModularCurves.ForMathlib.SheafCohomologyFiniteProducts
+public import ModularCurves.ForMathlib.SheafOrderedCechSheafResolution
 
 /-!
 # Cohomology of ordered sheaf-level Cech terms
@@ -7,6 +9,8 @@ import ModularCurves.ForMathlib.SheafOrderedCechSheafResolution
 Finite ordered Cech terms inherit cohomology vanishing from their
 restriction-pushforward factors.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

@@ -3,15 +3,19 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.FieldTheory.IsAlgClosed.Basic
-import Mathlib.NumberTheory.RamificationInertia.Basic
-import Mathlib.RingTheory.AdjoinRoot
-import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
-import Mathlib.RingTheory.Ideal.Norm.RelNorm
-import Mathlib.RingTheory.Jacobson.Ring
-import Mathlib.RingTheory.Polynomial.Quotient
+module
 
-import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.NumberTheory.RamificationInertia.Basic
+public import Mathlib.RingTheory.AdjoinRoot
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+public import Mathlib.RingTheory.Ideal.Norm.RelNorm
+public import Mathlib.RingTheory.Jacobson.Ring
+public import Mathlib.RingTheory.Polynomial.Quotient
+
+public import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
+
+@[expose] public section
 
 open scoped Polynomial.Bivariate
 

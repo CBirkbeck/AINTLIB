@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.SquaredFormToFactorEquation
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.SquaredFormToFactorEquation
 
 /-!
 # [FLT37-CASEII-R2] Washington §9.1 squared form: the *quotient* half (Lemma 9.2, unconditional)

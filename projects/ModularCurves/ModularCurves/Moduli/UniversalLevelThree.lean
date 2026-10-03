@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.UniversalLegendre
-import ModularCurves.EllipticCurve.AffineSectionSpecPoints
-import ModularCurves.ForMathlib.E3RelSquarefree
-import ModularCurves.ForMathlib.PairGeneratesOfCardSq
-import ModularCurves.Moduli.LevelSpaceEtale
-import ModularCurves.EllipticCurve.E3NormalForm
+module
+
+public import ModularCurves.Moduli.UniversalLegendre
+public import ModularCurves.EllipticCurve.AffineSectionSpecPoints
+public import ModularCurves.ForMathlib.E3RelSquarefree
+public import ModularCurves.ForMathlib.PairGeneratesOfCardSq
+public import ModularCurves.Moduli.LevelSpaceEtale
+public import ModularCurves.EllipticCurve.E3NormalForm
 
 /-!
 # The universal naive level-3 object `ℰ₃` over `ℤ[1/3]` (T-E15a)
@@ -24,6 +26,10 @@ The construction replays the T-E14-AX1 stack (`Moduli/UniversalLegendre.lean`):
 moduli ring → universal curve → ellipticity → tautological presentation → marked
 sections via `projModelAffineSection`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

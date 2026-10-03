@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.AdditionPullback
-import HasseWeil.Foundation.Curves.WithTopArith
-import HasseWeil.Isogeny.Frobenius.PointCount
-import HasseWeil.Foundation.EC.GenericPointZsmul
-import HasseWeil.Foundation.EC.MulByIntBaseCase
+module
+
+public import HasseWeil.Foundation.AdditionPullback
+public import HasseWeil.Foundation.Curves.WithTopArith
+public import HasseWeil.Isogeny.Frobenius.PointCount
+public import HasseWeil.Foundation.EC.GenericPointZsmul
+public import HasseWeil.Foundation.EC.MulByIntBaseCase
 
 /-!
 # Frobenius-specialized addition-pullback ord-at-infinity computations
@@ -28,6 +30,10 @@ HOLE D in the unconditional Hasse-Weil bound.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, IV.1 (orders at infinity).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

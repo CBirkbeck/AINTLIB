@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornTateAcyclicityPart2C1Consumer
-import «Adic spaces».TateAcyclicityFinalAssembly
-import «Adic spaces».Wedhorn834SupplierAssembly
+module
+
+public import «Adic spaces».WedhornTateAcyclicityPart2C1Consumer
+public import «Adic spaces».TateAcyclicityFinalAssembly
+public import «Adic spaces».Wedhorn834SupplierAssembly
 
 /-!
 # Wedhorn 8.34(ii) — Part 2 consumer with Lane A internalized (T066)
@@ -96,6 +98,8 @@ route).
   `tateAcyclicity_Part2_end_to_end_via_primary_laneA` /
   `part2_via_primary_laneA_allow_empty`.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.Newforms.LevelRaiseComm
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.LevelRaiseComm
 
 /-!
 # Bad-prime stability of the extended oldform subspace
@@ -16,6 +18,10 @@ each sent back into the old space by `U_p`.
 The good-prime, non-extended analogue is `heckeT_n_preserves_cuspFormsOld` (LevelRaiseComm.lean);
 this file handles the bad prime and the extra level-inclusion generators.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

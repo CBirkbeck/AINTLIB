@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.Comparison
-import ModularCurves.EllipticCurve.PoleSheafSuccessorHOne
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapSectionNeighborhood
+module
+
+public import ModularCurves.EllipticCurve.Comparison
+public import ModularCurves.EllipticCurve.PoleSheafSuccessorHOne
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapSectionNeighborhood
 
 /-!
 # The pole-sheaf Weierstrass comparison
@@ -14,6 +16,8 @@ This file converts the global pointed pole-sheaf comparison into the
 `LocallyWeierstrass` predicate and packages the construction from normalized
 Cartier-chart pole coordinates.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

@@ -1,7 +1,9 @@
-import Mathlib.AlgebraicGeometry.Morphisms.Smooth
-import ModularCurves.ForMathlib.FiniteIntersectionFunctor
-import ModularCurves.ForMathlib.FinitePresentationSchemeGlueData
-import ModularCurves.ForMathlib.SmoothFinitePresentationDescent
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import ModularCurves.ForMathlib.FiniteIntersectionFunctor
+public import ModularCurves.ForMathlib.FinitePresentationSchemeGlueData
+public import ModularCurves.ForMathlib.SmoothFinitePresentationDescent
 
 /-!
 # Smooth affine-intersection models over filtered-colimit stages
@@ -10,6 +12,8 @@ This file transports smoothness of the singleton affine charts of an affine-inte
 functor to its glued structural morphism. It also synchronizes smooth spread models for a
 finite family of singleton charts at one stage of a filtered algebra system.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

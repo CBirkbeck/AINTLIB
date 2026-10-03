@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.AffineScheme
+module
+
+public import Mathlib.AlgebraicGeometry.AffineScheme
 
 /-!
 # Two-element covers by basic opens (W1 i11)
@@ -16,6 +18,8 @@ functions generate the unit ideal, and then the two basic opens cover the curve.
 This file provides that cover in the shape the trivialization criteria consume: an
 `ι`-indexed family with `iSup = ⊤`, together with the unit restrictions on each member.
 -/
+
+@[expose] public section
 
 universe u
 

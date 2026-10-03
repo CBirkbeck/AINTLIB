@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DiscreteLogIndexCollapse
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitLocalPower
-import BernoulliRegular.FLT37.Eichler.FLT37GenuineResiduals
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DiscreteLogIndexCollapse
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitLocalPower
+public import BernoulliRegular.FLT37.Eichler.FLT37GenuineResiduals
 
 /-!
 # [FLT37-CASEII-R4] The single-index local power for `i = 32`, under the genuine `ℓ ∣ z` datum

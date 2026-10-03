@@ -3,8 +3,10 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.CoreIdentityProof
-import LeanModularForms.ForMathlib.BoundaryWinding
+module
+
+public import LeanModularForms.ForMathlib.CoreIdentityProof
+public import LeanModularForms.ForMathlib.BoundaryWinding
 
 /-!
 # Smooth Boundary Winding Proof — Constructing `FDWindingDataFull`
@@ -39,6 +41,8 @@ construction of `SmoothBoundaryWindingData`.
 * Diamond--Shurman, *A First Course in Modular Forms*, Theorem 3.1.1
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Complex
 open scoped Real UpperHalfPlane

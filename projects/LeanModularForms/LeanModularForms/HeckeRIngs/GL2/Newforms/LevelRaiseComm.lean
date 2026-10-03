@@ -3,24 +3,26 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
-import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
-import Mathlib.NumberTheory.EulerProduct.Basic
-import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
-import Mathlib.NumberTheory.LSeries.AbstractFuncEq
-import Mathlib.NumberTheory.LSeries.DirichletContinuation
-import LeanModularForms.Eigenforms.ConductorTheorem
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheoryPetersson
-import LeanModularForms.HeckeRIngs.GL2.CharacterDecomp
-import LeanModularForms.HeckeRIngs.GL2.LevelEmbed
-import LeanModularForms.HeckeRIngs.GL2.LevelRaise
-import LeanModularForms.HeckeRIngs.GL2.Newforms.Basic
-import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
-import LeanModularForms.Modularforms.DimensionFormulas
-import LeanModularForms.Modularforms.LFunction
-import LeanModularForms.Modularforms.PeterssonLevelN
-import LeanModularForms.Modularforms.SlashActionAuxil
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
+public import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+public import Mathlib.NumberTheory.EulerProduct.Basic
+public import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
+public import Mathlib.NumberTheory.LSeries.AbstractFuncEq
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+public import LeanModularForms.Eigenforms.ConductorTheorem
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheoryPetersson
+public import LeanModularForms.HeckeRIngs.GL2.CharacterDecomp
+public import LeanModularForms.HeckeRIngs.GL2.LevelEmbed
+public import LeanModularForms.HeckeRIngs.GL2.LevelRaise
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.Basic
+public import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
+public import LeanModularForms.Modularforms.DimensionFormulas
+public import LeanModularForms.Modularforms.LFunction
+public import LeanModularForms.Modularforms.PeterssonLevelN
+public import LeanModularForms.Modularforms.SlashActionAuxil
 
 /-!
 # Newforms: level-raise / `T_p` commutation machinery
@@ -29,6 +31,10 @@ Matrix helpers for level raising and the commutation `heckeT_n_levelRaise_comm`
 (Diamond–Shurman Thm 5.6.2), together with the trivial-inclusion oldform API for the
 bad-prime (`p ∣ d`) case.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

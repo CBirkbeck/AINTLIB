@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SemilocalUnitCocycleSplit
-import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
-import Mathlib.RingTheory.LocalProperties.Exactness
+module
+
+public import ModularCurves.ForMathlib.SemilocalUnitCocycleSplit
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+public import Mathlib.RingTheory.LocalProperties.Exactness
 
 /-!
 # Affine Čech `H⁰`: gluing ring elements over a finite basic cover
@@ -31,6 +33,8 @@ bijective by `bijective_of_isLocalized_span`.
 The consumer is Stage 3c of the engine mouth core (`Moduli/EngineMouthCharts.lean`): the
 corrected Weierstrass chart coefficients agree on overlaps and glue to a global model.
 -/
+
+@[expose] public section
 
 open IsLocalizedModule
 

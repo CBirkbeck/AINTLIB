@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.AffineScheme
-import Mathlib.AlgebraicGeometry.Restrict
+module
+
+public import Mathlib.AlgebraicGeometry.AffineScheme
+public import Mathlib.AlgebraicGeometry.Restrict
 
 /-!
 # Basic computation rules for `Scheme.Hom.appLE`
@@ -17,6 +19,8 @@ Nothing here is specific to any construction — these are `mathlib`-shaped fact
 `Scheme.Hom.appLE`, kept in `ForMathlib` so that they are findable from the `AlgebraicGeometry`
 namespace rather than from whichever development first needed them.
 -/
+
+@[expose] public section
 
 universe u
 

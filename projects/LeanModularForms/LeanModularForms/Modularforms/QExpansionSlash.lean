@@ -3,12 +3,14 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
-import LeanModularForms.Modularforms.AtImInfty
-import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
-import Mathlib.RingTheory.RootsOfUnity.Complex
-import Mathlib.Algebra.Field.GeomSum
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
+public import LeanModularForms.Modularforms.AtImInfty
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Mathlib.RingTheory.RootsOfUnity.Complex
+public import Mathlib.Algebra.Field.GeomSum
 
 /-!
 # Q-expansion coefficients under Hecke operators
@@ -34,6 +36,10 @@ period-`1` (canonical Fourier) conventions.
 * [Miy] Miyake, *Modular Forms*, §4.5 Thm 4.5.13 (period-1 Fourier
   convention)
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

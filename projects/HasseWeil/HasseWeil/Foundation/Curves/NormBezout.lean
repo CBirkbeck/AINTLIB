@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.FiniteOverKx
-import Mathlib.RingTheory.Norm.Basic
+module
+
+public import HasseWeil.Foundation.Curves.FiniteOverKx
+public import Mathlib.RingTheory.Norm.Basic
 
 /-!
 # Algebra norm on the function field
@@ -28,6 +30,8 @@ This closes ticket T-II-INFRA-D-003 of the Stream-A infrastructure plan.
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.1.2 (proof sketch);
   the norm approach is standard — see e.g. Hartshorne II.6.10.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

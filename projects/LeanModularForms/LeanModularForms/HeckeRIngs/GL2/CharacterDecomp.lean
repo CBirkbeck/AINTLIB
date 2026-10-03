@@ -3,18 +3,21 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.DirectSum.Module
-import Mathlib.FieldTheory.IsAlgClosed.Basic
-import Mathlib.FieldTheory.Separable
-import Mathlib.LinearAlgebra.Dimension.Constructions
-import Mathlib.LinearAlgebra.Eigenspace.Pi
-import Mathlib.LinearAlgebra.Eigenspace.Semisimple
-import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
-import Mathlib.LinearAlgebra.Semisimple
-import Mathlib.NumberTheory.MulChar.Duality
+module
 
-import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
-import LeanModularForms.Modularforms.DimensionFormulas
+public import Mathlib.Analysis.Complex.Polynomial.Basic
+public import Mathlib.Algebra.DirectSum.Module
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.FieldTheory.Separable
+public import Mathlib.LinearAlgebra.Dimension.Constructions
+public import Mathlib.LinearAlgebra.Eigenspace.Pi
+public import Mathlib.LinearAlgebra.Eigenspace.Semisimple
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+public import Mathlib.LinearAlgebra.Semisimple
+public import Mathlib.NumberTheory.MulChar.Duality
+
+public import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
+public import LeanModularForms.Modularforms.DimensionFormulas
 
 /-!
 # Character decomposition of `ModularForm (Γ₁(N)) k`
@@ -45,6 +48,10 @@ submodules.
   are equal — the gluing principle for extending Hecke-operator identities proven
   per character space to the whole space.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup CongruenceSubgroup Polynomial
 

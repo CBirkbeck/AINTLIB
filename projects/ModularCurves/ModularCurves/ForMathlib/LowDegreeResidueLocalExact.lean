@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
+module
+
+public import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
 
 /-!
 # Local exactness from a residue fibre
@@ -11,6 +13,8 @@ import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
 This file transports exactness of a short complex over a residue field to
 surjectivity of the finite-projective low-degree replacement.
 -/
+
+@[expose] public section
 
 open Function
 open CategoryTheory

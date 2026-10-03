@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ModularCurve.YRho
+module
+
+public import ModularCurves.ModularCurve.YRho
 
 /-!
 # The group structure on `V_ρ` (T-F1c)
@@ -13,6 +15,8 @@ Galois-equivariant because `ρ σ` acts linearly.  This file constructs the addi
 morphism on the `ContAction` side (leaf F1c-1) and will transport it through the
 Galois correspondence to a group-scheme structure on `V_ρ` (leaves F1c-2..5).
 -/
+
+@[expose] public section
 
 universe u
 

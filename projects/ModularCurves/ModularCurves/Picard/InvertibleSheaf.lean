@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Category.ModuleCat.Presheaf.Monoidal
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
-import Mathlib.AlgebraicGeometry.Modules.Sheaf
+module
 
-import ModularCurves.ForMathlib.OpensMapFinal
-import ModularCurves.ForMathlib.SheafOfModulesMonoidal
+public import Mathlib.Algebra.Category.ModuleCat.Presheaf.Monoidal
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
+
+public import ModularCurves.ForMathlib.OpensMapFinal
+public import ModularCurves.ForMathlib.SheafOfModulesMonoidal
 
 /-!
 # Invertible sheaves of modules on a scheme
@@ -40,6 +42,8 @@ Decomposition, verbatim source quotes and adversarial attack logs:
 Upstream candidate (mathlib `RingTheory/PicardGroup.lean` has the ring case and a
 TODO "Connect to invertible sheaves on `Spec R`").
 -/
+
+@[expose] public section
 
 universe u
 

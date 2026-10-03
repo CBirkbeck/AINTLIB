@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.GenericCovarianceGeneral
-import HasseWeil.Isogeny.Kernel
+module
+
+public import HasseWeil.Foundation.EC.GenericCovarianceGeneral
+public import HasseWeil.Isogeny.Kernel
 
 /-!
 # Two-curve kernel-translation covariance (Silverman III.4.10(b))
@@ -40,6 +42,8 @@ Two functions of `K(E₁)` agreeing at cofinitely many points are equal.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, II.1.2, III.4.10(b).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

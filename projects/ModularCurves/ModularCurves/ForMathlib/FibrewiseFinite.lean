@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Artinian.Ring
-import Mathlib.RingTheory.Localization.BaseChange
-import Mathlib.RingTheory.TensorProduct.Quotient
-import Mathlib.RingTheory.TensorProduct.Finite
+module
+
+public import Mathlib.RingTheory.Artinian.Ring
+public import Mathlib.RingTheory.Localization.BaseChange
+public import Mathlib.RingTheory.TensorProduct.Quotient
+public import Mathlib.RingTheory.TensorProduct.Finite
 
 /-!
 # Fibrewise finiteness of a quotient
@@ -29,6 +31,8 @@ it *is* inherited by charts: `K ⊗[ℤ] ℤ[1/2]` is `K` or `0`. The mechanism 
 algebra becomes Artinian, and a localization of an Artinian ring is a quotient of it
 (`IsArtinianRing.localization_surjective`), hence still finite.
 -/
+
+@[expose] public section
 
 universe u
 

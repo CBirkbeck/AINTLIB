@@ -3,10 +3,12 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.Newforms.Newform
-import LeanModularForms.HeckeRIngs.GL2.Newforms.Molteni
-import LeanModularForms.StrongMultiplicityOne
-import Mathlib.NumberTheory.LSeries.PrimesInAP
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.Newform
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.Molteni
+public import LeanModularForms.StrongMultiplicityOne
+public import Mathlib.NumberTheory.LSeries.PrimesInAP
 
 /-!
 # The Atkin–Lehner Main Lemma (DS Theorem 5.7.1), assembled
@@ -26,6 +28,10 @@ The Nebentypus character decomposition `f = ∑_χ g_χ` reduces the global stat
 per-character version, given that each component inherits the coprime-index coefficient
 vanishing (`qExpansion_charComponent_coprime_eq_zero`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

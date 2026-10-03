@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.PadicL.Theorem518
-import BernoulliRegular.FLT37.PadicL.GaussSumValuation
+module
+
+public import BernoulliRegular.FLT37.PadicL.Theorem518
+public import BernoulliRegular.FLT37.PadicL.GaussSumValuation
 
 /-!
 # B-C1.4 — Washington Proposition 8.12: the valuation assembly
@@ -51,6 +53,10 @@ eigencomponent value `eigenLog i` to literally equal the product (the form Prop
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, Prop 8.12,
   Prop 6.13, Thm 5.18, §8.4.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

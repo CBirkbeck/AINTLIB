@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.GroupScheme.ChartBridges
-import ModularCurves.GroupScheme.ActPairImmersion
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.GroupScheme.ChartBridges
+public import ModularCurves.GroupScheme.ActPairImmersion
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The chart precursor is a closed immersion (`[HG-C2]` geometric heart)
@@ -16,6 +18,8 @@ is conjugate, under the chart tensor identification and the `(U,U)`-Künneth, to
 The remaining crux `isClosedImmersion_chartActPair` is the stable-chart restriction of the
 proven `isClosedImmersion_actPair_left` (battle plan: `decomposition-c2-heart.md`, step 4).
 -/
+
+@[expose] public section
 
 set_option maxSynthPendingDepth 5
 

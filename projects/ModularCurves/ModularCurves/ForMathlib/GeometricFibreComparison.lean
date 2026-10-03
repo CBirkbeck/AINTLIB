@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.PointsDictionary
-import ModularCurves.EllipticCurve.ModelRecord
+module
+
+public import ModularCurves.EllipticCurve.PointsDictionary
+public import ModularCurves.EllipticCurve.ModelRecord
 
 /-!
 # [T-B6′-IFACE] — the geometric-fibre point comparison (scheme ↔ affine), as a group iso
@@ -36,6 +38,8 @@ mathlib's affine `Point` group — the `[T-B6′]` pin is **discharged** (no `so
 * `EllipticCurve.geomFibrePointAddEquiv` — **[T-B6′-IFACE]** the scheme-fibre ↔ affine group `≃+`,
   fully proven (axiom-clean).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

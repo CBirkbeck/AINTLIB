@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornActualC1PerCallClosure
-import «Adic spaces».WedhornLaurentLocalBoundsFromCor732
+module
+
+public import «Adic spaces».WedhornActualC1PerCallClosure
+public import «Adic spaces».WedhornLaurentLocalBoundsFromCor732
 
 /-!
 # Wedhorn 8.34(ii) — Per-piece subset via product clearing (T067)
@@ -97,6 +99,8 @@ committing to a particular factor structure, leaving room for the
   bivariate-overlap content.
 * No global universal-over-Spa multi-element clearing claim.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

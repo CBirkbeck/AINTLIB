@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInvariant
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeterssonStokes
-import LeanModularForms.Modularforms.PeterssonLevelN
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInvariant
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeterssonStokes
+public import LeanModularForms.Modularforms.PeterssonLevelN
 
 /-!
 # Injectivity of the period map (ES-4)
@@ -49,6 +51,8 @@ of the `ℂ`-linear `periodMap'` reduces to exactly `periodMap' f = 0 → f = 0`
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §8.2,
   Theorem 8.4 and (8.2.17)–(8.2.22); the non-degeneracy is (8.2.18c).
 -/
+
+@[expose] public section
 
 noncomputable section
 

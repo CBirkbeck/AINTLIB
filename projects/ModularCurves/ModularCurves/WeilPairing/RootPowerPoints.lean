@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.RootSplitting
+module
+
+public import ModularCurves.WeilPairing.RootSplitting
 
 /-!
 # Root-powers on points, and the exponent step of `hdet` (route β, item (B))
@@ -20,6 +22,8 @@ exist in `GroupScheme/MuN.lean`:
 Together with `rootPower`'s definition (the point with value `ζ ^ k.val`) this reduces `hdet`'s
 exponent step to a single equation in `Γ(W, ⊤)`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

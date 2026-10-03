@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DescentUnitPadicLCoeffFLT37
-import BernoulliRegular.FLT37.Eichler.Reduction.SecondOrderVandermondeRowCollapse
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DescentUnitPadicLCoeffFLT37
+public import BernoulliRegular.FLT37.Eichler.Reduction.SecondOrderVandermondeRowCollapse
 
 /-!
 # `Prop812DescentCoeff37` reduced to the single-column second-order coefficient

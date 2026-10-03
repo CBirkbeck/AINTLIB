@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.EvalGroup
-import HasseWeil.FormalGroup.Hom
-import HasseWeil.FormalGroup.MulByNat
-import Mathlib.Data.Nat.Factorization.Basic
+module
+
+public import HasseWeil.FormalGroup.EvalGroup
+public import HasseWeil.FormalGroup.Hom
+public import HasseWeil.FormalGroup.MulByNat
+public import Mathlib.Data.Nat.Factorization.Basic
 
 /-!
 # The associated groups `Ĝ_a(M)` and `Ĝ_m(M)` (Silverman IV.3.1)
@@ -38,6 +40,10 @@ content of Silverman's Proposition IV.3.1:
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.3.1.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option linter.dupNamespace false
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Category.ModuleCat.Products
-import Mathlib.RingTheory.Flat.Basic
-import Common
-import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Products
+public import Mathlib.RingTheory.Flat.Basic
+public import Common
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
 
 /-!
 # Flat terms in the base-linear Cech complex
@@ -15,6 +17,8 @@ A degree of the base-linear Cech complex is flat whenever all of its
 intersection-section factors are flat, via `Module.Flat.pi` (finite products of flat
 modules are flat) from the shared `Common` library.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits Opposite
 

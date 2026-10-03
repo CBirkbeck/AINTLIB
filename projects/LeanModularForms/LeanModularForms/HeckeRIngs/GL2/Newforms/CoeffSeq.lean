@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.Newforms.Newform
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.Newform
 
 /-!
 # Newforms: minimal coefficient-sequence API
@@ -19,6 +21,8 @@ identifiers consumed outside `Newforms/` survive:
 * `Newform.dirichletLift` — the canonical lift of a Newform character to
   a Mathlib `DirichletCharacter ℂ N`
 -/
+
+@[expose] public section
 
 noncomputable section
 

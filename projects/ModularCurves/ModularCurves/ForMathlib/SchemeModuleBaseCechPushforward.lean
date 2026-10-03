@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
 
 /-!
 # Cech complexes and pushforward
@@ -11,6 +13,10 @@ import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
 This file identifies the native all-tuples base-linear Cech complex of a module on an
 inverse-image cover with the Cech complex of its pushforward.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
 

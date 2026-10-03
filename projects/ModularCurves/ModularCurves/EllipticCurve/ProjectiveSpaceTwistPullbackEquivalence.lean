@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistTensorEquivalence
-import ModularCurves.ForMathlib.PullbackTensorGeneral
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistTensorEquivalence
+public import ModularCurves.ForMathlib.PullbackTensorGeneral
 
 /-!
 # Pullback equivalences from projective-space twists
@@ -13,6 +15,8 @@ The concrete equivalence given by tensoring with `O(n)` pulls back along an
 arbitrary morphism to polynomial projective space. Its inverse is tensoring
 with the pullback of `O(-n)`.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

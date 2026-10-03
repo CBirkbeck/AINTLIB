@@ -1,7 +1,9 @@
-import Mathlib.Analysis.Normed.Field.Basic
-import Mathlib.Topology.MetricSpace.Ultra.Basic
-import Mathlib.Algebra.Field.IsField
-import «Adic spaces».UniformBanach
+module
+
+public import Mathlib.Analysis.Normed.Field.Basic
+public import Mathlib.Topology.MetricSpace.Ultra.Basic
+public import Mathlib.Algebra.Field.IsField
+public import «Adic spaces».UniformBanach
 
 /-!
 # Nonarchimedean Scottish Book — Problem 1
@@ -35,6 +37,8 @@ Open.
 
 * Kedlaya, *The Nonarchimedean Scottish Book*, Problem 1
 -/
+
+@[expose] public section
 
 namespace ScottishBook
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.ProblemBaseChange
-import Mathlib.CategoryTheory.Whiskering
-import ModularCurves.Moduli.EngineWiring
+module
+
+public import ModularCurves.Moduli.ProblemBaseChange
+public import Mathlib.CategoryTheory.Whiskering
+public import ModularCurves.Moduli.EngineWiring
 
 /-!
 # Base change along an isomorphism of base rings
@@ -16,6 +18,8 @@ representability of `P.baseChange ρ` transports back to representability of `P`
 with the *same* base scheme. This is what lets the engine's affine `D(3)`-leg over
 `ℚ[1/3]` produce an affine representing object for a problem over `ℚ`.
 -/
+
+@[expose] public section
 
 noncomputable section
 

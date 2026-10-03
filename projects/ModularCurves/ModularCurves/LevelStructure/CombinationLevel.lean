@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.TorsionCombinationSpec
-import ModularCurves.LevelStructure.Basic
-import ModularCurves.ForMathlib.PairGeneratesOfCardSq
-import ModularCurves.Moduli.LevelSpaceEtale
+module
+
+public import ModularCurves.GroupScheme.TorsionCombinationSpec
+public import ModularCurves.LevelStructure.Basic
+public import ModularCurves.ForMathlib.PairGeneratesOfCardSq
+public import ModularCurves.Moduli.LevelSpaceEtale
 
 /-!
 # The combination locus classifies naive full level structures
@@ -24,6 +26,10 @@ Ingredients:
 * the combination criterion `addSubgroup_closure_pair_eq_top_iff`
   (`PairGeneratesOfCardSq`, AX2-e).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

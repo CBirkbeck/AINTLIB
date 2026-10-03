@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Category.ModuleCat.ChangeOfRings
-import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
-import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
-import Mathlib.CategoryTheory.Adjunction.Unique
-import ModularCurves.ForMathlib.BaseChangeKerCoker
-import ModularCurves.ForMathlib.FiniteFreeResolution
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.ChangeOfRings
+public import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+public import Mathlib.CategoryTheory.Adjunction.Unique
+public import ModularCurves.ForMathlib.BaseChangeKerCoker
+public import ModularCurves.ForMathlib.FiniteFreeResolution
 
 /-!
 # A finite-projective replacement for a two-term complex
@@ -24,6 +26,10 @@ The Noetherian hypothesis belongs only to this algebraic construction. Geometric
 applications over an arbitrary base must remove it by approximation before
 exposing their final statements.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Function
 open CategoryTheory

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.Pullback
+module
+
+public import HasseWeil.HasseBound.WeilPairing.Pullback
 
 /-!
 # Route 2A — the σ-bridge computation (Silverman III.6.1(b))
@@ -13,6 +15,8 @@ the dual: `σ` of the pullback divisor of `(Q) − (O)` is `[deg_s f] P₀`, whi
 (`deg_s = deg`) is `f̂(Q)`. Pure group theory over the kernel coset — the bridge the separable
 adjoint (Silverman III.8.2) consumes once linked to the genuine dual.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.WeilPairing
 

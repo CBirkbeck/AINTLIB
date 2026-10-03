@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.ForMathlib.ClosurePairCard
-import ModularCurves.LevelStructure.Basic
+module
+
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.ForMathlib.ClosurePairCard
+public import ModularCurves.LevelStructure.Basic
 
 /-!
 # A naive full level-`N` structure forgets to a naive `Γ₁(N)`-structure (WP-D1a)
@@ -27,6 +29,8 @@ that `P` have *exact order* `N` there. The bridge is a counting argument, split 
 
 Both halves are axiom-verified, so this file is too.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -2,11 +2,13 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.CurveUtilities
-import Mathlib.Analysis.Calculus.Deriv.Inverse
-import Mathlib.Analysis.Calculus.Deriv.MeanValue
-import Mathlib.Analysis.Normed.Module.HahnBanach
-import Mathlib.Topology.Compactness.Compact
+module
+
+public import LeanModularForms.ForMathlib.CurveUtilities
+public import Mathlib.Analysis.Calculus.Deriv.Inverse
+public import Mathlib.Analysis.Calculus.Deriv.MeanValue
+public import Mathlib.Analysis.Normed.Module.HahnBanach
+public import Mathlib.Topology.Compactness.Compact
 
 /-!
 # Crossing Analysis — Proposition 2.2
@@ -34,6 +36,8 @@ Hungerbühler–Wasem.
 
 * K. Hungerbühler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Set Filter Topology
 

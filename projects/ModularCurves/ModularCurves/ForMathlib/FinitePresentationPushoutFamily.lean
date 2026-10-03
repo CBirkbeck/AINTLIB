@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.FinitePresentationPushout
-import ModularCurves.ForMathlib.FinitePresentationFunctorCover
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationPushout
+public import ModularCurves.ForMathlib.FinitePresentationFunctorCover
 
 /-!
 # Synchronizing finite families of spread pushout squares
@@ -8,6 +10,10 @@ A pushout square of spread-stage algebra maps remains a pushout under every
 later transition. Consequently finitely many colimit pushout squares can be
 realized simultaneously at one common stage.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

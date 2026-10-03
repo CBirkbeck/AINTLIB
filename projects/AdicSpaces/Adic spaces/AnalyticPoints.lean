@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.AdicCompletion.Basic
-import «Adic spaces».HuberRings
-import «Adic spaces».OpenIdeals
+module
+
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import «Adic spaces».HuberRings
+public import «Adic spaces».OpenIdeals
 
 /-!
 # Analytic Points of the Adic Spectrum
@@ -30,6 +32,8 @@ of `Spa(A, A⁺)` is analytic when `A` is a Tate ring.
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Definition 8.35, Proposition 8.36
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

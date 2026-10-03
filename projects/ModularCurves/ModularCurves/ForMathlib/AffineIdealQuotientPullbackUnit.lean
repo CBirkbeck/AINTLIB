@@ -1,7 +1,9 @@
-import Mathlib.Algebra.Module.Torsion.Basic
+module
 
-import ModularCurves.ForMathlib.AffineModuleBaseChange
-import ModularCurves.ForMathlib.SurjectiveRestrictionScalars
+public import Mathlib.Algebra.Module.Torsion.Basic
+
+public import ModularCurves.ForMathlib.AffineModuleBaseChange
+public import ModularCurves.ForMathlib.SurjectiveRestrictionScalars
 
 /-!
 # Pullback--pushforward units for affine ideal quotients
@@ -9,6 +11,8 @@ import ModularCurves.ForMathlib.SurjectiveRestrictionScalars
 An ideal-annihilated module descends to the quotient ring. This identifies the
 pullback--pushforward unit along the quotient-spectrum map as an isomorphism.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

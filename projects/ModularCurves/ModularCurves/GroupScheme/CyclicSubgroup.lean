@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.Subgroup
-import ModularCurves.LevelStructure.Basic
+module
+
+public import ModularCurves.GroupScheme.Subgroup
+public import ModularCurves.LevelStructure.Basic
 
 /-!
 # Cyclic finite locally free subgroup schemes — the Γ₀(N) datum of record (T-SG2)
@@ -47,6 +49,8 @@ subgroup field `T-SG1b`.
 * `GammaZeroStructure`: a Γ₀(N)-structure — a cyclic finite locally free subgroup scheme
   of rank `N` (KM 3.4), the datum representability theorems must target.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

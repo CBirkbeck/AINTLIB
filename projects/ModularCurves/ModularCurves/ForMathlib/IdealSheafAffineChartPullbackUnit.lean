@@ -1,7 +1,9 @@
-import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
+module
 
-import ModularCurves.ForMathlib.AffineIdealQuotientPullbackUnit
-import ModularCurves.ForMathlib.SchemeModulePullbackUnitComposition
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
+
+public import ModularCurves.ForMathlib.AffineIdealQuotientPullbackUnit
+public import ModularCurves.ForMathlib.SchemeModulePullbackUnitComposition
 
 /-!
 # Pullback units on affine ideal-sheaf charts
@@ -10,6 +12,8 @@ The ideal-sheaf chart map is an ideal-quotient spectrum map followed by the
 canonical affine-open spectrum isomorphism. Thus ideal annihilation makes the
 pullback--pushforward unit invertible on the chart.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

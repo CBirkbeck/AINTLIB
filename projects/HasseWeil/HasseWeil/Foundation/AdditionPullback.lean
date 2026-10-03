@@ -3,11 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
-import Mathlib.RingTheory.Algebraic.Integral
-import HasseWeil.Foundation.Basic
-import HasseWeil.Foundation.MulByIntPullback
-import HasseWeil.Foundation.OrdAtInftyBridge
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
+public import Mathlib.RingTheory.Algebraic.Integral
+public import HasseWeil.Foundation.Basic
+import all HasseWeil.Foundation.Basic
+public import HasseWeil.Foundation.MulByIntPullback
+public import HasseWeil.Foundation.OrdAtInftyBridge
 
 /-!
 # Addition-Law Pullback on Function Fields
@@ -31,6 +34,10 @@ addition formulas from mathlib.
   III.3.6's proof at book p. 64).
 * Mathlib: `WeierstrassCurve.Affine.equation_add`
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

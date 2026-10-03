@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocTopologyLinear
+module
+
+public import «Adic spaces».WedhornLocTopologyLinear
 
 /-!
 # Away-to-away map saturation support (T105)
@@ -79,6 +81,8 @@ Primary's saturation proof unfolds at each algebraic step.
   imports, or final theorem signatures.
 * No new sorries / custom axioms / partial declarations / native compilation.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

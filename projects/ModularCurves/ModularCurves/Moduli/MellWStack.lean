@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Sites.Etale
-import Mathlib.CategoryTheory.Bicategory.Functor.LocallyDiscrete
-import Mathlib.CategoryTheory.Sites.Descent.IsStack
-import ModularCurves.Moduli.MellWeierstrass
+module
+
+public import Mathlib.AlgebraicGeometry.Sites.Etale
+public import Mathlib.CategoryTheory.Bicategory.Functor.LocallyDiscrete
+public import Mathlib.CategoryTheory.Sites.Descent.IsStack
+public import ModularCurves.Moduli.MellWeierstrass
 
 /-!
 # T-E8: the stack statements for `M_ell^W` (statement-level bridge)
@@ -24,6 +26,8 @@ T-W6 groupoid presentation); étale descent additionally consumes torsor descent
 (T-Q5/A711 layer). Nothing here is consumed by the active representability streams —
 Y(N)/Y₁(N) ride the (Ell)-relative engine, not stack descent.
 -/
+
+@[expose] public section
 
 universe u
 

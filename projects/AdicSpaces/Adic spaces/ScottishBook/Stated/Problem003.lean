@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidRing
-import Mathlib.GroupTheory.GroupAction.FixedPoints
+module
+
+public import «Adic spaces».PerfectoidRing
+public import Mathlib.GroupTheory.GroupAction.FixedPoints
 
 /-!
 # Nonarchimedean Scottish Book — Problem 3
@@ -30,6 +32,8 @@ We state that the fixed-point subring `MulAction.fixedPoints G A` of a perfectoi
 under a finite group action is again perfectoid (with appropriate topological structure).
 The resolution is affirmative.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

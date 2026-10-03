@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.FiniteProperProduct
-import ModularCurves.ForMathlib.ProjectiveFactorizationProduct
+module
+
+public import ModularCurves.ForMathlib.FiniteProperProduct
+public import ModularCurves.ForMathlib.ProjectiveFactorizationProduct
 
 /-!
 # Finite products of projective factorizations
@@ -14,6 +16,10 @@ import ModularCurves.ForMathlib.ProjectiveFactorizationProduct
 A nonempty finite product over an affine base has a projective factorization whenever each factor
 does.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits
 

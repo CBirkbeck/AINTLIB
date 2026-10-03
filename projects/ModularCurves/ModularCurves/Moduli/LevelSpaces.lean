@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.Incidence
-import ModularCurves.GroupScheme.CyclicSubgroup
+module
+
+public import ModularCurves.LevelStructure.Incidence
+public import ModularCurves.GroupScheme.CyclicSubgroup
 
 /-!
 # Level spaces over the Weierstrass atlas (T-W8)
@@ -24,6 +26,8 @@ raw `Classical.choose`.
 * `levelSpaceΓ₁ E N` : `U_{Γ₁(N)}`, closed in `E[N]`, cut by the exact-order locus.
 * `levelSpaceΓ E N`   : `U_{Γ(N)}`, closed in `E[N] ×_S E[N]`, cut by the full-level locus.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

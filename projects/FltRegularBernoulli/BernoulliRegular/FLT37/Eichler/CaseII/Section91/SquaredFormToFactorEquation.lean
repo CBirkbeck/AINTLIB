@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjNormReassembly
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjNormReassembly
 
 /-!
 # [FLT37-CASEII-R2] Washington §9.1 factor-equation extraction (the squared-form → factor step)

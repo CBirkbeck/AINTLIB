@@ -1,6 +1,8 @@
-import ModularCurves.ForMathlib.TotalComplexUpNatCycleElimination
-import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdge
-import Mathlib.Algebra.Homology.QuasiIso
+module
+
+public import ModularCurves.ForMathlib.TotalComplexUpNatCycleElimination
+public import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdge
+public import Mathlib.Algebra.Homology.QuasiIso
 
 /-!
 # Higher-degree horizontal-edge comparison
@@ -8,6 +10,8 @@ import Mathlib.Algebra.Homology.QuasiIso
 The positive vertical components of a total cycle can be eliminated, leaving a
 horizontal-axis cycle lifted from the augmenting complex.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Interpolation.Twist
-import PadicLFunctions.Interpolation.GenBernoulli
-import PadicLFunctions.KubotaLeopoldt.ZetaP
+module
+
+public import PadicLFunctions.Interpolation.Twist
+public import PadicLFunctions.Interpolation.GenBernoulli
+public import PadicLFunctions.KubotaLeopoldt.ZetaP
 
 /-!
 # Interpolation at characters of p-power conductor (RJW Thm 5.1)
@@ -18,6 +20,8 @@ quarantined in `GenBernoulliComplex.lean`); the ζ_p-pairing follows the §4
 witness encoding of `PadicMeasure.kubotaLeopoldt`, with the §4 measures
 crossing into the `R`-layer through `baseChange ∘ iota`.
 -/
+
+@[expose] public section
 
 namespace PadicLFunctions
 

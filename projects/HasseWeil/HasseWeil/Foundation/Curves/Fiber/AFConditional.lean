@@ -1,6 +1,8 @@
-import HasseWeil.Foundation.Curves.Divisor.EffectiveSumReduce
-import HasseWeil.Foundation.Curves.Ramification.PoleOrderParity
-import HasseWeil.Isogeny.GroupHom.PicZero
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.EffectiveSumReduce
+public import HasseWeil.Foundation.Curves.Ramification.PoleOrderParity
+public import HasseWeil.Isogeny.GroupHom.PicZero
 
 /-!
 # AF unified package: conditional witnesses
@@ -25,6 +27,8 @@ construction, the only remaining genuinely-new mathematical piece).
 
 * `T-PIC-AF-UNIFIED.md` for the full plan.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

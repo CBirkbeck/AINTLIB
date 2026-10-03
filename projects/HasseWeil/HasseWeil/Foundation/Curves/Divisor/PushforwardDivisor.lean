@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.PicZeroPushforward
-import HasseWeil.Foundation.Curves.Map.CoordHomFinite
-import HasseWeil.Foundation.Curves.Valuation.NormValuation
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.PicZeroPushforward
+public import HasseWeil.Foundation.Curves.Map.CoordHomFinite
+public import HasseWeil.Foundation.Curves.Valuation.NormValuation
 
 /-!
 # The divisor pushforward of a finite curve map preserves principal divisors
@@ -47,6 +49,8 @@ norm–conorm identity NEW-1(ii).
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.3.6, II.3.7, III.4.8.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

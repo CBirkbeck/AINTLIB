@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 
 /-!
 # Even functions on Weierstrass curves
@@ -28,6 +30,10 @@ not on `y`). This is the algebraic content of Silverman III.2.3.1.
 
 * [J Silverman, *The Arithmetic of Elliptic Curves*][silverman2009], III.2.3.1
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Polynomial
 

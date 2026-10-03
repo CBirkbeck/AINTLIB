@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Analysis.Normed.Ring.Basic
-import Mathlib.Analysis.Normed.Group.Bounded
+module
+
+public import Mathlib.Analysis.Normed.Ring.Basic
+public import Mathlib.Analysis.Normed.Group.Bounded
 
 /-!
 # Norm-Power-Bounded Elements and Uniform Banach Rings
@@ -26,6 +28,8 @@ Banach ring, where the set of norm-power-bounded elements is metrically bounded.
 * `isNormPowerBounded_one` : One is norm-power-bounded.
 * `isUniformBanach_iff` : Characterization via a uniform bound on power-bounded elements.
 -/
+
+@[expose] public section
 
 open Bornology
 

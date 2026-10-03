@@ -1,8 +1,10 @@
-import ModularCurves.ForMathlib.FiniteFibrewiseFlat
-import Mathlib.RingTheory.RingHom.Unramified
-import Mathlib.RingTheory.Unramified.Locus
-import Mathlib.RingTheory.Kaehler.TensorProduct
-import Mathlib.RingTheory.Support
+module
+
+public import ModularCurves.ForMathlib.FiniteFibrewiseFlat
+public import Mathlib.RingTheory.RingHom.Unramified
+public import Mathlib.RingTheory.Unramified.Locus
+public import Mathlib.RingTheory.Kaehler.TensorProduct
+public import Mathlib.RingTheory.Support
 
 /-!
 # The fibrewise criterion for formal unramifiedness
@@ -24,6 +26,8 @@ vanishes.
 This mirrors `flat_of_fibre_flat_of_finitePresentation` (the BB-FLAT engine) with the
 same `fiberInclusion` interface, so the scheme-level chart assembly transports verbatim.
 -/
+
+@[expose] public section
 
 open TensorProduct
 

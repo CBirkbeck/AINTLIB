@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.BoundaryWindingSeg1Proof
-import LeanModularForms.ForMathlib.SegmentAnalysis
-import LeanModularForms.ForMathlib.SegmentFTC
+module
+
+public import LeanModularForms.ForMathlib.BoundaryWindingSeg1Proof
+public import LeanModularForms.ForMathlib.SegmentAnalysis
+public import LeanModularForms.ForMathlib.SegmentFTC
 
 /-!
 # Shared helpers for the vertical-edge `ArcFTCHyp` providers
@@ -31,6 +33,8 @@ Side-specific lemmas (the `slitPlane` membership for `-h` versus `h`,
 the seg1-vs-seg4 t₀ computations, and the final FTC telescopes)
 remain in their respective files.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

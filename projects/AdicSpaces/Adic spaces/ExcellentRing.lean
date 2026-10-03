@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.Ideal.Height
-import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
-import Mathlib.RingTheory.FiniteType
+module
+
+public import Mathlib.RingTheory.Ideal.Height
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+public import Mathlib.RingTheory.FiniteType
 
 /-!
 # Excellent Rings
@@ -26,6 +28,8 @@ following EGA IV, §7.8.
 * [A. Grothendieck, *Éléments de géométrie algébrique IV*, §7.8][EGA4]
 * [T. Wedhorn, *Adic Spaces*, Definition 6.9][Wedhorn]
 -/
+
+@[expose] public section
 
 universe u
 

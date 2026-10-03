@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.CoreIdentityProof
+module
+
+public import LeanModularForms.ForMathlib.CoreIdentityProof
 
 /-!
 # PV Chain Proof
@@ -24,6 +26,8 @@ This file packages the principal-value chain identity used in the valence formul
 * Diamond--Shurman, *A First Course in Modular Forms*, Theorem 3.1.1
 * Serre, *A Course in Arithmetic*, Chapter VII
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups

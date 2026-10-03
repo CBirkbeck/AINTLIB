@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.PicZero
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.PicZero
 
 /-!
 # Effective sum reduction via Miller's relation
@@ -47,6 +49,10 @@ and collects the `∞`-coefficients (`deg D' + n = deg D`). Restricting to
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.3.5 (corollary).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open WeierstrassCurve
 

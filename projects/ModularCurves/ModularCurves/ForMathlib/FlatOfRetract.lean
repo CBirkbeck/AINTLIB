@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
 
 /-!
 # Flatness is stable under retracts of schemes over a base
@@ -20,6 +22,8 @@ Route: the stalkwise criterion (`AlgebraicGeometry.Flat.of_stalkMap` /
 KM (print p. 27, the use site): *"the sheaf of `S`-algebras defining `G[N₁]` is an
 `S`-direct factor of that defining `G`, so flat over `S`."*
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

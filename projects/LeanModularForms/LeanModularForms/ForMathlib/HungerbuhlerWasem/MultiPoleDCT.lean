@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.HungerbuhlerWasem
+module
+
+public import LeanModularForms.ForMathlib.HungerbuhlerWasem
 
 /-!
 # Multi-pole DCT lift for the polar-part Cauchy principal value (T-BR-Y5)
@@ -40,6 +42,8 @@ For `f = decomp.polarPart s`:
   singleton-to-multipole CPV lift (the headline T-BR-Y5 result).
 
 -/
+
+@[expose] public section
 
 open Set Filter Topology Complex MeasureTheory Metric
 open scoped Real Interval

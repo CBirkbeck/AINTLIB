@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Flat.Localization
-import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
+module
+
+public import Mathlib.RingTheory.Flat.Localization
+public import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
 
 /-!
 # Bounded flat cochain complexes
@@ -12,6 +14,8 @@ import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
 This file translates between categorical homology of cochain complexes of modules and the
 explicit kernels and quotients used by the algebraic base-change API.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 open TensorProduct

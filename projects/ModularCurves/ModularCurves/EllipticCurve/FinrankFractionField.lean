@@ -1,6 +1,8 @@
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
-import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
-import Mathlib.RingTheory.Algebraic.Integral
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
+public import Mathlib.RingTheory.Algebraic.Integral
 
 /-!
 # Scheme fibre-rank of `Spec S → Spec R` over a domain = the `R`-rank of `S`
@@ -18,6 +20,8 @@ The proof is a two-step composition of existing mathlib API:
 * `Module.rankAtStalk_eq` + `Ideal.finrank_fiber_eq_finrank` (the latter needs `IsDomain R`) :
   `rankAtStalk S x = finrank κ(x) (Fiber S x) = finrank R S`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

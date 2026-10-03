@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.TranslationAction
-import ModularCurves.ForMathlib.HopfGaloisTheorem
-import Mathlib.AlgebraicGeometry.Pullbacks
+module
+
+public import ModularCurves.GroupScheme.TranslationAction
+public import ModularCurves.ForMathlib.HopfGaloisTheorem
+public import Mathlib.AlgebraicGeometry.Pullbacks
 
 /-!
 # The translation co-action on a stable affine chart
@@ -36,6 +38,8 @@ charts, the closed-immersion property of `actPair`) are Wave-C leaves `[HG-C3]`/
 The bridge lemmas identifying these fields with `Γ`-images of the scheme-level data are
 the content of `[HG-C1]`/`[HG-C2]`; the assembly consuming this structure is `[HG-C4]`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TensorProduct
 

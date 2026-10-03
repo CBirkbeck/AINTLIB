@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.EtaleDescent
+module
+
+public import ModularCurves.WeilPairing.EtaleDescent
 
 /-!
 # The Galois action on geometric fibres of an affine scheme over a field (DS4 M1c step 2)
@@ -20,6 +22,8 @@ That is the content of this file — a one-line consequence of the contravarianc
 recorded because every later comparison (torsion points, `μ_N`-points, the Weil pairing)
 factors through it.
 -/
+
+@[expose] public section
 
 -- v4.33 bump: the `Scheme` category instance inside `appTop`/`pointToTorsion` arguments is
 -- no longer transparent enough for the `≫`-associativity rewrites below.

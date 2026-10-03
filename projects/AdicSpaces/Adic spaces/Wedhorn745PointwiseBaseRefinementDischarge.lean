@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornBaseRationalComapResidualDischarge
-import «Adic spaces».WedhornStandardCoverRefinement
+module
+
+public import «Adic spaces».WedhornBaseRationalComapResidualDischarge
+public import «Adic spaces».WedhornStandardCoverRefinement
 
 /-!
 # Wedhorn 7.45 pointwise base-refinement discharge for the strong C1
@@ -87,6 +89,8 @@ representation AND non-vanishing on D. This is the natural
 * No global universal-over-Spa bounds; all clauses are pointwise or
   per-D source-restricted.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

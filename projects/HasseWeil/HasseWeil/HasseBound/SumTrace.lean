@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Verschiebung.IsDual
-import HasseWeil.Isogeny.Frobenius.OrdAtInfty
-import HasseWeil.Foundation.DegreeQuadraticForm
+module
+
+public import HasseWeil.Foundation.Verschiebung.IsDual
+public import HasseWeil.Isogeny.Frobenius.OrdAtInfty
+public import HasseWeil.Foundation.DegreeQuadraticForm
 
 /-!
 # Sum-trace identity for Frobenius + Verschiebung (Silverman III.6.2(b))
@@ -36,6 +38,8 @@ This file ships:
 * Silverman, *The Arithmetic of Elliptic Curves*, III.6.3 (degree
   quadratic form).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornDominatingBranchInequality
-import «Adic spaces».WedhornLocalizationDenominatorUnit
+module
+
+public import «Adic spaces».WedhornDominatingBranchInequality
+public import «Adic spaces».WedhornLocalizationDenominatorUnit
 
 /-!
 # Wedhorn multi-branch subset inequality (algebraic core)
@@ -61,6 +63,8 @@ factor-extraction from `∏ T_D` after a separate boundedness argument
   primitives) and `WedhornLocalizationDenominatorUnit` (for
   `not_vle_zero_pow`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

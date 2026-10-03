@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Basic
-import HasseWeil.Foundation.MulByIntPullback
-import HasseWeil.Isogeny.Ramification
+module
+
+public import HasseWeil.Isogeny.Basic
+public import HasseWeil.Foundation.MulByIntPullback
+public import HasseWeil.Isogeny.Ramification
 
 /-!
 # The dual isogeny as a morphism (Silverman III.6.1)
@@ -56,6 +58,8 @@ see the final section's pointers.
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4.11 (factor through a
   separable isogeny), III.6.1 (the dual isogeny).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

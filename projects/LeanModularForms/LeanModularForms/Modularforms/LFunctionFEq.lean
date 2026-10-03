@@ -3,10 +3,12 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.Modularforms.LFunction
-import Mathlib.NumberTheory.LSeries.MellinEqDirichlet
-import Mathlib.NumberTheory.LSeries.AbstractFuncEq
-import Mathlib.NumberTheory.LSeries.Deriv
+module
+
+public import LeanModularForms.Modularforms.LFunction
+public import Mathlib.NumberTheory.LSeries.MellinEqDirichlet
+public import Mathlib.NumberTheory.LSeries.AbstractFuncEq
+public import Mathlib.NumberTheory.LSeries.Deriv
 
 /-!
 # Functional equation and analytic continuation of the L-function of a level-1 cusp form
@@ -60,6 +62,10 @@ function agreeing with `L(s, f)` on the convergence half-plane.
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.10.
 * [Miy] Miyake, *Modular Forms*, Thm 4.3.5.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Filter Topology Asymptotics Set MeasureTheory Complex UpperHalfPlane
 open scoped Real ModularForm MatrixGroups

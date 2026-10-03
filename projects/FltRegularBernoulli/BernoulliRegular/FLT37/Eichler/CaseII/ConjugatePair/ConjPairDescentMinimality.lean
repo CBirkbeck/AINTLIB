@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.RealToConjPairTransition
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.RealToConjPairTransition
 
 /-!
 # [FLT37-CASEII-R2] The σ-conjugate-pair descent: constructor, minimality, and the precise residual

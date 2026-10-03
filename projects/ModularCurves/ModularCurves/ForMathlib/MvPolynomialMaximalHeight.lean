@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Nullstellensatz
-import Mathlib.RingTheory.KrullDimension.Polynomial
+module
+
+public import Mathlib.RingTheory.Nullstellensatz
+public import Mathlib.RingTheory.KrullDimension.Polynomial
 
 /-!
 # Maximal ideals of a polynomial ring over an algebraically closed field have full height
@@ -27,6 +29,8 @@ inclusion strict because `X j - C (a j)` lies in `𝔭_S` exactly when `j ∈ S`
 The upper bound is `Ideal.height_le_ringKrullDim_of_isPrime` plus mathlib's dimension
 formula.
 -/
+
+@[expose] public section
 
 universe u v
 

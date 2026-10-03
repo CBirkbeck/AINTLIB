@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalizationLiftContinuityBounded
+module
+
+public import «Adic spaces».WedhornLocalizationLiftContinuityBounded
 
 /-!
 # Spa-rationalOpen wrapper for the bounded localization lift
@@ -43,6 +45,8 @@ inputs.
 * No edits to committed bridge files.
 * No Lane B / Cor 8.32 / Jacobson / T001 / faithful-flatness /
   final-acyclicity content. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

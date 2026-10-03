@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveCoordinatePullbackTwistMap
-import ModularCurves.ForMathlib.SchemeIsomorphismOpenShrink
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveCoordinatePullbackTwistMap
+public import ModularCurves.ForMathlib.SchemeIsomorphismOpenShrink
 
 /-!
 # Shrinking an isomorphism locus to a projective chart
@@ -13,6 +15,10 @@ Every point of polynomial projective space belongs to a standard
 coordinate chart. Over an open where a morphism is an isomorphism, the
 chart through the lifted point transports to a smaller target open.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory
 

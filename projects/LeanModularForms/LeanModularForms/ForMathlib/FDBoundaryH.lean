@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.ClassicalCPV
-import LeanModularForms.ForMathlib.EllipticPoints
+module
+
+public import LeanModularForms.ForMathlib.ClassicalCPV
+public import LeanModularForms.ForMathlib.EllipticPoints
 
 /-!
 # Fundamental Domain Boundary – Basic Definitions
@@ -22,6 +24,8 @@ for SL₂(ℤ), both at fixed height `heightCutoff` and at variable height `H`.
 * `fdBoundary_H_partition` — partition for H-parameterized boundary
 * `seg5_q_radius_H` — q-expansion radius e^(-2πH)
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

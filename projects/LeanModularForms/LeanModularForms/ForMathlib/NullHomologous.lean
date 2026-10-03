@@ -3,9 +3,11 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.GeneralizedWindingNumber
-import LeanModularForms.ForMathlib.CurveUtilities
-import LeanModularForms.ForMathlib.WindingArgDiff
+module
+
+public import LeanModularForms.ForMathlib.GeneralizedWindingNumber
+public import LeanModularForms.ForMathlib.CurveUtilities
+public import LeanModularForms.ForMathlib.WindingArgDiff
 
 /-!
 # Null-Homologous Curves
@@ -41,6 +43,8 @@ downstream applications need the actual numerical value `0`.
 
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Complex Set Filter Topology MeasureTheory
 open scoped Real Interval

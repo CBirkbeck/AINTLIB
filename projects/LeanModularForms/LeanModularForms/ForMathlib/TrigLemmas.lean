@@ -3,13 +3,17 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
 
 /-!
 # Shared Trigonometric Identities
 
 Exact values of `cos` and `sin` at `2π/3`.
 -/
+
+@[expose] public section
 
 open Complex
 

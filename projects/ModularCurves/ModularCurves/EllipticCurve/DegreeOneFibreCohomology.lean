@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AbelSkeleton
-import ModularCurves.ForMathlib.SchemeModuleBaseCechResidueTransport
-import ModularCurves.ForMathlib.SchemeModuleProperLowDegreeCechFinite
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
-import ModularCurves.ForMathlib.InvertibleOfRankOne
+module
+
+public import ModularCurves.EllipticCurve.AbelSkeleton
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechResidueTransport
+public import ModularCurves.ForMathlib.SchemeModuleProperLowDegreeCechFinite
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
+public import ModularCurves.ForMathlib.InvertibleOfRankOne
 
 /-!
 # Assembly of the degree-one fibre cohomology package (`AP2-A1d`)
@@ -29,6 +31,8 @@ The composition is the module-generic residue-field route of the pole-sheaf engi
 `baseChange_exact_of_forall_schemeResidueField_baseChange_exact`, and
 `LinearMap.finrank_ker_baseChange_eq`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 

@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LaurentRefinement
+module
+
+public import «Adic spaces».LaurentRefinement
 
 /-!
 # Normalized Laurent-minus datum
@@ -62,6 +64,8 @@ algebraic identity.
 * Wedhorn, *Adic Spaces*, §8.32 / §8.33 (Laurent cover decomposition).
 * External reviewer guidance, 2026-05-12: "normalized minus datum".
 -/
+
+@[expose] public section
 
 open ValuationSpectrum CompletionLocalization
 

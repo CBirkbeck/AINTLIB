@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Valuation.Infinity
-import HasseWeil.Foundation.Curves.Valuation.Valuation
-import HasseWeil.Foundation.Curves.Divisor.Divisors
+module
+
+public import HasseWeil.Foundation.Curves.Valuation.Infinity
+public import HasseWeil.Foundation.Curves.Valuation.Valuation
+public import HasseWeil.Foundation.Curves.Divisor.Divisors
 
 /-!
 # The order at an arbitrary closed point of a smooth plane curve
@@ -41,6 +43,8 @@ correspondence) and by future projective valuation tickets.
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.1 (definitions of
   `ord_P`); IV.1 (place at infinity).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

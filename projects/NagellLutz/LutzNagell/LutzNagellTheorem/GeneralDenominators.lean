@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LutzNagell.LutzNagellTheorem.GeneralCurve
-import LutzNagell.LutzNagellTheorem.PIDDenominators
-import Mathlib.RingTheory.Localization.Rat
+module
+
+public import LutzNagell.LutzNagellTheorem.GeneralCurve
+public import LutzNagell.LutzNagellTheorem.PIDDenominators
+public import Mathlib.RingTheory.Localization.Rat
 
 /-!
 # Denominators on general Weierstrass curves
@@ -26,6 +28,8 @@ This suffices for the Lutz–Nagell integrality argument: when the rational root
 * `LutzNagell.LutzNagellTheorem.den_ne_prime_of_on_general_curve`: if `(x, y)` is on the
   general Weierstrass curve and `x.den = p` (prime), then `False`.
 -/
+
+@[expose] public section
 
 namespace LutzNagell
 namespace LutzNagellTheorem

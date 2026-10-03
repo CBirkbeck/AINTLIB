@@ -1,6 +1,8 @@
-import Mathlib.Algebra.Homology.DerivedCategory.Ext.ExactSequences
-import Mathlib.CategoryTheory.Sites.SheafCohomology.Basic
-import Mathlib.CategoryTheory.Sites.SheafCohomology.ExactSequences
+module
+
+public import Mathlib.Algebra.Homology.DerivedCategory.Ext.ExactSequences
+public import Mathlib.CategoryTheory.Sites.SheafCohomology.Basic
+public import Mathlib.CategoryTheory.Sites.SheafCohomology.ExactSequences
 
 /-!
 # Exact sequences in sheaf cohomology
@@ -10,6 +12,8 @@ and its elementwise exactness lemmas are in mathlib
 (`Mathlib.CategoryTheory.Sites.SheafCohomology.ExactSequences`, upstreamed from #36218).
 This file adds further consequences for a short exact sequence of additive sheaves.
 -/
+
+@[expose] public section
 
 open CategoryTheory Abelian AddCommGrpCat
 

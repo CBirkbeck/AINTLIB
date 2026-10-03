@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafModuleCechTwoCoverExact
-import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdgeModule
+module
+
+public import ModularCurves.ForMathlib.SheafModuleCechTwoCoverExact
+public import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdgeModule
 
 /-!
 # Horizontal edge of the module-valued two-cover Cech bicomplex
@@ -13,6 +15,8 @@ The horizontal edge from the native Cech complex for the outer family is a
 degree-one quasi-isomorphism when the inner family covers and its native Cech
 complex on the zeroth outer Cech term is exact in degree one.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

@@ -3,12 +3,14 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.CauchyPrincipalValue
-import LeanModularForms.ForMathlib.ClassicalCPV
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.CauchyPrimitive
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Homotopy.Invariance
-import LeanModularForms.ForMathlib.Residue
-import Mathlib.Topology.Order.ExtendFrom
+module
+
+public import LeanModularForms.ForMathlib.CauchyPrincipalValue
+public import LeanModularForms.ForMathlib.ClassicalCPV
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.CauchyPrimitive
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Homotopy.Invariance
+public import LeanModularForms.ForMathlib.Residue
+public import Mathlib.Topology.Order.ExtendFrom
 
 /-!
 # Residue Theory
@@ -35,6 +37,8 @@ The multi-point PV integrand `cpvIntegrandOn` is imported from
 * `integral_eq_sum_residues_of_avoids` — classical residue theorem
 * `pv_integral_simple_pole` — PV of c/(z-s) = 2πi · winding · c
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

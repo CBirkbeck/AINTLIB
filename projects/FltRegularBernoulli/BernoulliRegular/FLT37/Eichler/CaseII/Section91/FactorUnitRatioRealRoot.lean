@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.IntegralUnitDescentGeometry
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimePropagationTriple
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.FLT37GenuineUnitEndpoint
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.IntegralUnitDescentGeometry
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimePropagationTriple
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.FLT37GenuineUnitEndpoint
 
 /-!
 # [F1] Real Assumption II for the §9.1 factor units, PROVEN (route (a), Washington Lemma 9.9)
@@ -72,6 +74,8 @@ it does **not** modify any existing file.
   (pp. 180–181, `η_a/η_b ≡ (ρ_b/ρ_a)^p (mod 𝔩)` and the index collapse), Proposition 1.5
   (the `ζ^k`-absorption of real units).
 -/
+
+set_option backward.privateInPublic true
 
 @[expose] public section
 

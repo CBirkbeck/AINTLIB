@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.ModelRecord
-import ModularCurves.EllipticCurve.Rigidity
+module
+
+public import ModularCurves.EllipticCurve.ModelRecord
+public import ModularCurves.EllipticCurve.Rigidity
 
 /-!
 # T-W7.0h: variable-change equivariance of the model multiplication
@@ -27,6 +29,10 @@ This discharges the single remaining `sorry` below the T-W7 descent layer
 (`GroupLawConstruction.lean`'s `mulModelHom_vc`, relocated here per the v10.117 doctrine —
 the rigidity/record imports must sit above `ModelRecord`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj WeierstrassCurve

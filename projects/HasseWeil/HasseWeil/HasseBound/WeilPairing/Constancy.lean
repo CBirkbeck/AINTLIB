@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
-import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
+public import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
 
 /-!
 # Constancy of Weil pairing values
@@ -23,6 +25,8 @@ It then derives constancy and multiplicativity properties used to construct the 
 
 * [Joseph H. Silverman, *The Arithmetic of Elliptic Curves*, Chapter II, Proposition 1.2]
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

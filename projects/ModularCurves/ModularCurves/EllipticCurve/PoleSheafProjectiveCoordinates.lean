@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Flat.LocallyFree
-import Mathlib.RingTheory.Localization.Free
-import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChange
+module
+
+public import Mathlib.RingTheory.Flat.LocallyFree
+public import Mathlib.RingTheory.Localization.Free
+public import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChange
 
 /-!
 # Local coordinates for projectively presented pole-section modules
@@ -13,6 +15,8 @@ import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChange
 This file turns finite projectivity and constant rank of the pole-section modules into
 bases on principal neighborhoods of the affine base.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

@@ -1,8 +1,10 @@
-import Mathlib.Algebra.Module.Projective
-import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
-import ModularCurves.ForMathlib.AffinePatchBaseChange
-import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
-import ModularCurves.ForMathlib.SheafDisjointUnion
+module
+
+public import Mathlib.Algebra.Module.Projective
+public import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
+public import ModularCurves.ForMathlib.AffinePatchBaseChange
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
+public import ModularCurves.ForMathlib.SheafDisjointUnion
 
 /-!
 # Sections of successive pole quotients
@@ -10,6 +12,8 @@ import ModularCurves.ForMathlib.SheafDisjointUnion
 This file computes global sections of a consecutive pole-filtration quotient from
 any open neighborhood of the marked section.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

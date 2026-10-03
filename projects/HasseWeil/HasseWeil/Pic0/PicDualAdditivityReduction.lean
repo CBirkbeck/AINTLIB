@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Pic0.PicDual
-import HasseWeil.Isogeny.Frobenius.OrdAtInfty
+module
+
+public import HasseWeil.Pic0.PicDual
+public import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 
 /-!
 # Route C — dual additivity for the Frobenius family (Silverman III.6.2(c) / III.8)
@@ -87,6 +89,8 @@ is the genuine irreducible residual.
 * Silverman, *The Arithmetic of Elliptic Curves*, III.6.2(c) (PDF p.84), III.6.3 (degree QF),
   III.8 (trace).  Verified against the in-repo PDF (offset +18).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 open scoped nonZeroDivisors

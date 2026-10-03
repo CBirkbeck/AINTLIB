@@ -1,4 +1,6 @@
-import ModularCurves.EllipticCurve.PullbackTensorSection
+module
+
+public import ModularCurves.EllipticCurve.PullbackTensorSection
 
 /-!
 # Local evaluation of section contraction
@@ -7,6 +9,10 @@ This file evaluates contraction by a global tensor section after restricting tha
 section to an arbitrary open. The proof separates the structure-sheaf unit
 comparisons from the associator and braiding calculation.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory SheafOfModules
   TopologicalSpace

@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.ProjectiveFactorization
-import ModularCurves.ForMathlib.SegreEmbedding
+module
+
+public import ModularCurves.ForMathlib.ProjectiveFactorization
+public import ModularCurves.ForMathlib.SegreEmbedding
 
 /-!
 # Binary products of projective factorizations
@@ -15,6 +17,8 @@ The fibre product of two schemes embedded in polynomial projective spaces embeds
 subscheme of the product of those spaces. The Segre embedding then gives one polynomial
 projective-space factorization over the original affine base.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits
 

@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Smooth.Fiber
-import Mathlib.RingTheory.Smooth.Flat
-import Mathlib.RingTheory.Etale.Kaehler
-import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
-import Mathlib.RingTheory.RingHom.Etale
-import ModularCurves.ForMathlib.InvariantTorsor
+module
+
+public import Mathlib.RingTheory.Smooth.Fiber
+public import Mathlib.RingTheory.Smooth.Flat
+public import Mathlib.RingTheory.Etale.Kaehler
+public import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.RingHom.Etale
+public import ModularCurves.ForMathlib.InvariantTorsor
 
 /-!
 # Finite étale cancellation along a split cover ([GHB6-RING])
@@ -38,6 +40,8 @@ The invariants instantiation (`RingHom.invariantsCorestrict_finite` /
 `ForMathlib/SchemeActionFree.lean`: the descended structure map of a free quotient is
 finite étale over each affine chart of the base.
 -/
+
+@[expose] public section
 
 universe u v
 

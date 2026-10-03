@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.Iso
+module
+
+public import ModularCurves.Picard.DualPullback.Iso
 
 /-!
 # Naturality of dual pullback on the unit module
@@ -7,6 +9,10 @@ This file proves that the dual-pullback comparison respects the canonical self-d
 structure sheaf. The proof reduces the comparison to the section `1` on the terminal open and
 then computes it through the existing local pullback trivialization.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

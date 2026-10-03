@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.AffineModuleCechBaseChange
-import ModularCurves.ForMathlib.CochainComplexBaseChangeExactAt
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
+module
+
+public import ModularCurves.ForMathlib.AffineModuleCechBaseChange
+public import ModularCurves.ForMathlib.CochainComplexBaseChangeExactAt
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
 
 /-!
 # Exactness of ordered Cech complexes after affine base change
@@ -13,6 +15,8 @@ import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
 This file transports exactness of algebraically base-changed ordered Cech
 differentials to the ordered Cech complex of an isomorphic pulled-back module.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 

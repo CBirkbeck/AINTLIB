@@ -1,6 +1,8 @@
-import Mathlib.AlgebraicGeometry.Modules.Sheaf
-import Mathlib.AlgebraicGeometry.Restrict
-import Mathlib.Topology.Sheaves.Stalks
+module
+
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.AlgebraicGeometry.Restrict
+public import Mathlib.Topology.Sheaves.Stalks
 
 /-!
 # Detecting scheme-module isomorphisms on an open cover
@@ -8,6 +10,8 @@ import Mathlib.Topology.Sheaves.Stalks
 A morphism of scheme modules is an isomorphism if its restriction to every
 member of a pointwise open cover is an isomorphism.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

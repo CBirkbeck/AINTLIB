@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Tickets T-Q3a, T-Q3b, T-Q3c.
 -/
-import Mathlib.Algebra.Algebra.Subalgebra.Operations
-import Mathlib.RingTheory.Localization.Away.Basic
+module
+
+public import Mathlib.Algebra.Algebra.Subalgebra.Operations
+public import Mathlib.RingTheory.Localization.Away.Basic
 
 /-!
 # Group actions on localizations at an invariant element
@@ -34,6 +36,8 @@ group ([Loeffler, *Modular curves*, Prop 3.6.1] "one can show that these patch
 nicely"; SGA I V.1.1; Stacks 07S5): the scheme-level universal property is
 `ModularCurves/ForMathlib/AffineQuotient.lean` (ticket T-Q3).
 -/
+
+@[expose] public section
 
 universe u v
 

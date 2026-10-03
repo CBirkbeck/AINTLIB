@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.HungerbuhlerWasem.Crossing
+module
+
+public import LeanModularForms.ForMathlib.HungerbuhlerWasem.Crossing
 
 /-!
 # Multi-crossing CPV existence — general cardinality (T-BR-Y9d, T-BR-Y9e)
@@ -49,6 +51,10 @@ Given `D : MultiPoleCrossData γ s` with `crossings.card = n`:
 * K. Hungerbühler, J. Wasem, *A generalized notion of winding numbers*,
   arXiv:1808.00997v2 §3.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Filter Topology Set Complex MeasureTheory
 open scoped Real Interval

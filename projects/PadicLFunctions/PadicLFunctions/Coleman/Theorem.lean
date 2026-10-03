@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Coleman.Tower
-import PadicLFunctions.Coleman.NormOperator
-import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
+module
+
+public import PadicLFunctions.Coleman.Tower
+public import PadicLFunctions.Coleman.NormOperator
+public import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
 
 /-!
 # Evaluation of `ℤ_p`-power series at the uniformisers `π_n` (RJW §9)
@@ -43,6 +45,8 @@ The deliverables (T904):
   `Nat.rec` digit recursion `f = Σ a_k T^k` with telescoping convergence
   `‖u − Σ_{j<m} a_j π_n^j‖ ≤ ‖π_n‖^m → 0`; `f` is a unit since `‖a_0‖ = ‖u‖ = 1`.
 -/
+
+@[expose] public section
 
 open PowerSeries
 open scoped IntermediateField

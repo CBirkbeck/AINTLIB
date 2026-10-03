@@ -6,10 +6,12 @@ Authors: AINTLIB ModularCurves project
 STREAM-FIN [KVC-consumer] (board v10.327/v10.328): the geometric-point consumer layer of
 the Hasse-free keystone core.
 -/
-import ModularCurves.EllipticCurve.AutFixedPoints
-import ModularCurves.EllipticCurve.AffineSectionSpecPoints
-import ModularCurves.EllipticCurve.EndomorphismDegree
-import ModularCurves.LevelStructure.IsoTransport
+module
+
+public import ModularCurves.EllipticCurve.AutFixedPoints
+public import ModularCurves.EllipticCurve.AffineSectionSpecPoints
+public import ModularCurves.EllipticCurve.EndomorphismDegree
+public import ModularCurves.LevelStructure.IsoTransport
 
 /-!
 # [KVC] Keystone consumers at a geometric point (THE RULING v10.320)
@@ -55,6 +57,8 @@ THE RULING: every headline keystone consumer is a ∀-geometric-point pin over
 The EDIT-SITE LIST for the F4 pin-discharge builder is the comment block at the end of
 this file.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
   MonoidalCategory CartesianMonoidalCategory MonObj

@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.AlgebraicGeometry.OpenImmersion
-import Mathlib.AlgebraicGeometry.Restrict
+module
+
+public import Mathlib.AlgebraicGeometry.OpenImmersion
+public import Mathlib.AlgebraicGeometry.Restrict
 
 /-!
 # A point from a one-point scheme factors through a member of a supremum of opens
@@ -12,6 +14,8 @@ import Mathlib.AlgebraicGeometry.Restrict
 A morphism from a one-point scheme to a supremum of open subschemes factors through one of
 the members.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

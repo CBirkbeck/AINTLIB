@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.DegreeOneFibreCohomology
-import ModularCurves.LevelStructure.CartierDivisor
-import ModularCurves.Picard.IdealModule
-import ModularCurves.ForMathlib.LocalFlatnessCriterion
-import Mathlib.RingTheory.LocalProperties.Exactness
+module
+
+public import ModularCurves.EllipticCurve.DegreeOneFibreCohomology
+public import ModularCurves.LevelStructure.CartierDivisor
+public import ModularCurves.Picard.IdealModule
+public import ModularCurves.ForMathlib.LocalFlatnessCriterion
+public import Mathlib.RingTheory.LocalProperties.Exactness
 
 /-!
 # The Abel equivalence, evaluation-divisor side (`AP2-B2`/`AP2-B3`, KM pp. 66–67)
@@ -31,6 +33,8 @@ fibrewise flatness criterion is in-tree (`ForMathlib/LocalFlatnessCriterion.lean
 statements below are EXISTENCE-form (Pic-level consumers only need the class), keeping all
 defs sorry-free.
 -/
+
+@[expose] public section
 
 universe u
 

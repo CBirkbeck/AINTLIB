@@ -3,11 +3,13 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapSectionNeighborhoodAway
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapZeroIdeal
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapPreimage
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassPointed
-import ModularCurves.ForMathlib.FiniteRingHomCartierPatch
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapSectionNeighborhoodAway
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapZeroIdeal
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapPreimage
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassPointed
+public import ModularCurves.ForMathlib.FiniteRingHomCartierPatch
 
 /-!
 # The pole-sheaf comparison on the section neighborhood
@@ -15,6 +17,8 @@ import ModularCurves.ForMathlib.FiniteRingHomCartierPatch
 This file combines the punctured comparison with the scheme-theoretic
 marked-section quotient on the canonical affine neighborhood.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

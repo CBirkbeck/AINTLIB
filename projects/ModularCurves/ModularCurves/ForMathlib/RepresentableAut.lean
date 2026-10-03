@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q6d.
 -/
-import Mathlib.CategoryTheory.Yoneda
-import Mathlib.CategoryTheory.Endomorphism
+module
+
+public import Mathlib.CategoryTheory.Yoneda
+public import Mathlib.CategoryTheory.Endomorphism
 
 /-!
 # Transport of endomorphisms and automorphisms along representability
@@ -23,6 +25,8 @@ its action on `δ`", KM p. 112); it is stated for arbitrary categories.
 The characterizing property is `homEquiv_comp_transportHom`:
 `r.homEquiv (v ≫ r.transportHom η) = η.app _ (r.homEquiv v)`.
 -/
+
+@[expose] public section
 
 universe v v₁ u₁
 

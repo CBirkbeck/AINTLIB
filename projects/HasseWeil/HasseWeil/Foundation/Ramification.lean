@@ -3,27 +3,29 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Polynomial.SpecificDegree
-import Mathlib.FieldTheory.IntermediateField.Algebraic
-import Mathlib.FieldTheory.SeparableDegree
-import Mathlib.NumberTheory.RamificationInertia.Basic
-import Mathlib.RingTheory.Algebraic.Integral
-import Mathlib.RingTheory.Artinian.Ring
-import Mathlib.RingTheory.DedekindDomain.Basic
-import Mathlib.RingTheory.DedekindDomain.Dvr
-import Mathlib.RingTheory.DedekindDomain.IntegralClosure
-import Mathlib.RingTheory.HopkinsLevitzki
-import Mathlib.RingTheory.Ideal.Quotient.Nilpotent
-import Mathlib.RingTheory.IsAdjoinRoot
-import Mathlib.RingTheory.KrullDimension.Field
-import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
-import Mathlib.RingTheory.KrullDimension.Polynomial
-import Mathlib.RingTheory.LocalProperties.Reduced
-import Mathlib.RingTheory.Localization.FractionRing
-import Mathlib.RingTheory.Polynomial.GaussLemma
+module
 
-import HasseWeil.Isogeny.FunctionField
-import HasseWeil.Foundation.Valuation
+public import Mathlib.Algebra.Polynomial.SpecificDegree
+public import Mathlib.FieldTheory.IntermediateField.Algebraic
+public import Mathlib.FieldTheory.SeparableDegree
+public import Mathlib.NumberTheory.RamificationInertia.Basic
+public import Mathlib.RingTheory.Algebraic.Integral
+public import Mathlib.RingTheory.Artinian.Ring
+public import Mathlib.RingTheory.DedekindDomain.Basic
+public import Mathlib.RingTheory.DedekindDomain.Dvr
+public import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+public import Mathlib.RingTheory.HopkinsLevitzki
+public import Mathlib.RingTheory.Ideal.Quotient.Nilpotent
+public import Mathlib.RingTheory.IsAdjoinRoot
+public import Mathlib.RingTheory.KrullDimension.Field
+public import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+public import Mathlib.RingTheory.KrullDimension.Polynomial
+public import Mathlib.RingTheory.LocalProperties.Reduced
+public import Mathlib.RingTheory.Localization.FractionRing
+public import Mathlib.RingTheory.Polynomial.GaussLemma
+
+public import HasseWeil.Isogeny.FunctionField
+public import HasseWeil.Foundation.Valuation
 
 /-!
 # Ramification Theory for Elliptic Curve Isogenies
@@ -80,6 +82,8 @@ provides are complete and axiom-clean.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2, III.4.10
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial Ideal IntermediateField
 open scoped Polynomial.Bivariate nonZeroDivisors IntermediateField

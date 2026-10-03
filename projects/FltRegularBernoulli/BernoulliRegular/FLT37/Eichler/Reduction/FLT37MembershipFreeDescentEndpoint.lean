@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.VandiverProven
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.MembershipFreeDescentReduction
+module
+
+public import BernoulliRegular.FLT37.VandiverProven
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.MembershipFreeDescentReduction
 
 /-!
 # FLT37 endpoint with the membership-free Case-II descent-unit input

@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.ProjectiveSpaceChart
-import ModularCurves.ForMathlib.LaurentMonomialBasis
+module
+
+public import ModularCurves.ForMathlib.ProjectiveSpaceChart
+public import ModularCurves.ForMathlib.LaurentMonomialBasis
 
 /-!
 # Coordinate intersections in projective space
@@ -12,6 +14,10 @@ import ModularCurves.ForMathlib.LaurentMonomialBasis
 The degree-zero homogeneous localization at a product of projective coordinates is identified with
 an affine polynomial ring localized at a monomial. This gives its canonical Laurent-monomial basis.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace HomogeneousLocalization
 

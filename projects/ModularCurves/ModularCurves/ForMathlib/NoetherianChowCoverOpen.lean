@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.NoetherianChowCover
-import ModularCurves.ForMathlib.ProperDenseOpenRestriction
+module
+
+public import ModularCurves.ForMathlib.NoetherianChowCover
+public import ModularCurves.ForMathlib.ProperDenseOpenRestriction
 
 /-!
 # The common-open isomorphism locus of a Noetherian Chow cover
@@ -15,6 +17,8 @@ The finite-proper-closure construction of a Chow cover contains the common open 
 finite affine cover. This file exposes that map and proves that the Chow cover is an isomorphism
 over the corresponding target open.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

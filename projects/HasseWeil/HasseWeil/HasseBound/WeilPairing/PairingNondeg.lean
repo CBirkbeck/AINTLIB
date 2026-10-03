@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
-import HasseWeil.Foundation.EC.SeparableKernelTorsor
-import HasseWeil.HasseBound.WeilPairing.DivisorPullback
-import HasseWeil.HasseBound.WeilPairing.Pairing
-import HasseWeil.HasseBound.WeilPairing.PairingProps
-import HasseWeil.HasseBound.WeilPairing.TorsionCardEll
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
+public import HasseWeil.Foundation.EC.SeparableKernelTorsor
+public import HasseWeil.HasseBound.WeilPairing.DivisorPullback
+public import HasseWeil.HasseBound.WeilPairing.Pairing
+public import HasseWeil.HasseBound.WeilPairing.PairingProps
+public import HasseWeil.HasseBound.WeilPairing.TorsionCardEll
 
 /-!
 # Nondegeneracy of the Weil pairing
@@ -25,6 +27,8 @@ points, injectivity of divisor pullback, the Galois fixed-field description, and
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.3.3, III.4.10b, and III.8.1c.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Endomorphism
-import HasseWeil.Isogeny.Frobenius.FunctionField
-import HasseWeil.Foundation.OrdAtInftyBridge
-import Mathlib.FieldTheory.Finite.Basic
+module
+
+public import HasseWeil.Isogeny.Endomorphism
+public import HasseWeil.Isogeny.Frobenius.FunctionField
+public import HasseWeil.Foundation.OrdAtInftyBridge
+public import Mathlib.FieldTheory.Finite.Basic
 
 /-!
 # Frobenius Endomorphism and Point Counting
@@ -25,6 +27,8 @@ isogeny with concrete pullback `f ↦ f^q` and connect it to point counting.
 * Silverman, *The Arithmetic of Elliptic Curves*, III.4.6, V.1.1
 * Sutherland, *18.783 Lecture 7*, Theorem 7.17
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Algebraic.Integral
-import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
-import Mathlib.RingTheory.Flat.Rank
-import Mathlib.RingTheory.Flat.Stability
-import Mathlib.RingTheory.Localization.FractionRing
+module
+
+public import Mathlib.RingTheory.Algebraic.Integral
+public import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
+public import Mathlib.RingTheory.Flat.Rank
+public import Mathlib.RingTheory.Flat.Stability
+public import Mathlib.RingTheory.Localization.FractionRing
 
 /-!
 # Tower multiplicativity of module rank for finite flat algebras over domains
@@ -29,6 +31,8 @@ the `endDeg_comp` multiplicativity pin of the endomorphism-degree keystone
 The helper `FaithfulSMul.of_flat_of_nontrivial` (a finite flat nontrivial algebra over a domain
 has injective structure map — its rank is a positive constant) is of independent use.
 -/
+
+@[expose] public section
 
 open Module
 

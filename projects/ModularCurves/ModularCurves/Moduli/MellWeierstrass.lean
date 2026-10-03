@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Smooth
-import ModularCurves.EllipticCurve.GroupLawAxioms
-import ModularCurves.EllipticCurve.ModelVariableChange
-import ModularCurves.Moduli.WeierstrassAtlas
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import ModularCurves.EllipticCurve.GroupLawAxioms
+public import ModularCurves.EllipticCurve.ModelVariableChange
+public import ModularCurves.Moduli.WeierstrassAtlas
 
 /-!
 # The Weierstrass coordinate-change action and the moduli groupoid `M_ell^W = [U/G]`
@@ -37,6 +39,10 @@ The groupoid-valued functor `M_ell^W` and the T-W6 equivalence with Weierstrass-
 records (T-A8) build on this layer in the same file, next increment. Decomposition
 notes: board v10.36; v10.24(b) interfaces accompany each heavy definition as it lands.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits WeierstrassCurve
 

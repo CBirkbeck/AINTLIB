@@ -1,5 +1,7 @@
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
-import Mathlib.RingTheory.TensorProduct.Basic
+module
+
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.TensorProduct.Basic
 
 /-!
 # Amitsur exactness in degree ≤ 1 for faithfully flat algebras
@@ -18,6 +20,8 @@ The proof is the classical one: after applying `S ⊗[R] -` the sequence acquire
 contracting homotopy (multiplication of the first two tensor factors), so it is
 exact; faithful flatness reflects exactness (`Module.FaithfullyFlat.lTensor_reflects_exact`).
 -/
+
+@[expose] public section
 
 namespace ModularCurves
 

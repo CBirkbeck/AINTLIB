@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.UnitClearingAssembly
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.UnitClearingAssembly
 
 /-!
 # [FLT37-CASEII-R2] The first descent step Real → ConjPair, with the ε₁-37th-power clearing

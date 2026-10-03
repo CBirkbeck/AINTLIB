@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.AffineModuleCechBaseChange
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
+module
+
+public import ModularCurves.ForMathlib.AffineModuleCechBaseChange
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
 
 /-!
 # Base change for global sections from a Cech kernel
@@ -12,6 +14,10 @@ import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
 This file turns base change for the first kernel of a finite affine Cech complex into base
 change for global sections.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
 open TensorProduct

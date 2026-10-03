@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.CombinationLevel
-import ModularCurves.Moduli.Representability
+module
+
+public import ModularCurves.LevelStructure.CombinationLevel
+public import ModularCurves.Moduli.Representability
 
 /-!
 # Pinning and naturality of the full-level locus points dictionary (T-G3b brick 1)
@@ -21,6 +23,8 @@ sections produced by the dictionary are, on the nose,
 read through `pullback.fst` of the base-changed curve. Naturality in `T` is then a
 one-line consequence (both sides are pinned to the same morphism).
 -/
+
+@[expose] public section
 
 -- v4.33 bump: component types coming from semireducible `baseChange*`/`pullback` defs are
 -- defeq only after delta, which `rw`/`simp`/`calc` will not do at `implicit` transparency.

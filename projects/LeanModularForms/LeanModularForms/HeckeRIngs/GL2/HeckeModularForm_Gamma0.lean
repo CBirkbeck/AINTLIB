@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.HeckeActionGeneral
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.HeckeActionGeneral
 
 /-!
 # Hecke algebra acting on `ModularForm ((Gamma0 N).map (mapGL ℝ)) k`
@@ -33,6 +35,10 @@ Atkin–Lehner anti-involution, exposed as
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.4
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup Subgroup.Commensurable Pointwise CongruenceSubgroup
 open HeckeRing DoubleCoset HeckeRing.GLn HeckeRing.GL2

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Data.ZMod.Basic
-import Mathlib.Data.Nat.Prime.Infinite
+module
+
+public import Mathlib.Data.ZMod.Basic
+public import Mathlib.Data.Nat.Prime.Infinite
 
 /-!
 # Route 2 endgame — integer separation from per-`ℓ` congruences (Silverman V.2.3.1, Step 7)
@@ -25,6 +27,8 @@ determinant congruence is this self-contained arithmetic, with **no** elliptic-c
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, V.2.3.1 (the integer equality `det = deg`
 is pinned by reducing modulo infinitely many `ℓ`).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.WeilPairing
 

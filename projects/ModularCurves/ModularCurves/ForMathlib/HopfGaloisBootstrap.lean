@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.CoactionShear
-import ModularCurves.ForMathlib.HopfGalois
-import ModularCurves.ForMathlib.CoactionCharpoly
-import Mathlib.LinearAlgebra.TensorProduct.Tower
+module
+
+public import ModularCurves.ForMathlib.CoactionShear
+public import ModularCurves.ForMathlib.HopfGalois
+public import ModularCurves.ForMathlib.CoactionCharpoly
+public import Mathlib.LinearAlgebra.TensorProduct.Tower
 
 /-!
 # The Hopf–Galois bootstrap: from a shifted basis to the Galois property
@@ -29,6 +31,8 @@ into the co-invariants. No faithful flatness, no Amitsur equalizer, and no twist
 instances enter: the only `B`-module structure used on `B ⊗[R] A` is the canonical
 left-factor one, and the `ρ`-side is handled by the shear automorphism.
 -/
+
+@[expose] public section
 
 namespace ModularCurves
 

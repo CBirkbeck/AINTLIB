@@ -1,6 +1,8 @@
-import ModularCurves.ForMathlib.AffineOpenImmersionCover
-import ModularCurves.ForMathlib.FinitePresentationAwayMapFamily
-import ModularCurves.ForMathlib.FinitePresentationFunctorCover
+module
+
+public import ModularCurves.ForMathlib.AffineOpenImmersionCover
+public import ModularCurves.ForMathlib.FinitePresentationAwayMapFamily
+public import ModularCurves.ForMathlib.FinitePresentationFunctorCover
 
 /-!
 # Spreading finite families of affine open immersions
@@ -10,6 +12,10 @@ transport once the canonical maps on the corresponding principal localizations
 are bijective. Combining this observation with finite synchronization gives one
 stage at which finitely many affine spectrum maps are all open immersions.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

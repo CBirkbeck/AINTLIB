@@ -3,11 +3,13 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.LinearAlgebra.FiniteDimensional.Basic
-import Mathlib.LinearAlgebra.TensorProduct.Basis
-import Mathlib.RingTheory.Flat.LocallyFree
-import Mathlib.RingTheory.Localization.Free
-import Mathlib.RingTheory.LocalRing.Module
+module
+
+public import Mathlib.LinearAlgebra.FiniteDimensional.Basic
+public import Mathlib.LinearAlgebra.TensorProduct.Basis
+public import Mathlib.RingTheory.Flat.LocallyFree
+public import Mathlib.RingTheory.Localization.Free
+public import Mathlib.RingTheory.LocalRing.Module
 
 /-!
 # A prescribed basis vector after localization
@@ -15,6 +17,8 @@ import Mathlib.RingTheory.LocalRing.Module
 A nonzero vector in a rank-one residue fibre of a finitely presented flat module becomes
 the unique vector of a basis after restricting to a principal neighbourhood.
 -/
+
+@[expose] public section
 
 open TensorProduct
 

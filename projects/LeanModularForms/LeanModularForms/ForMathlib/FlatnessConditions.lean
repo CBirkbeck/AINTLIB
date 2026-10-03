@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Analysis.Calculus.FDeriv.Extend
-import Mathlib.Analysis.Meromorphic.Order
-import LeanModularForms.ForMathlib.WindingDecomposition
+module
+
+public import Mathlib.Analysis.Calculus.FDeriv.Extend
+public import Mathlib.Analysis.Meromorphic.Order
+public import LeanModularForms.ForMathlib.WindingDecomposition
 
 /-!
 # Flatness Conditions for CPV Convergence (Definition 3.2)
@@ -32,6 +34,8 @@ Hungerbuhler-Wasem ensuring Cauchy principal value convergence at higher-order p
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*,
   arXiv:1808.00997v2, Definition 3.2 and Theorem 3.3
 -/
+
+@[expose] public section
 
 open Complex Set Filter Topology Asymptotics
 open scoped Real Interval

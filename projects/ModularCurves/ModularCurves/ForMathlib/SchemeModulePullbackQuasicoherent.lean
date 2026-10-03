@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.AffineModuleBaseChange
-import ModularCurves.Picard.InvertibleSheaf
+module
+
+public import ModularCurves.ForMathlib.AffineModuleBaseChange
+public import ModularCurves.Picard.InvertibleSheaf
 
 /-!
 # Pullback of quasicoherent finite-type scheme modules
@@ -13,6 +15,8 @@ Pullback along an arbitrary scheme morphism preserves quasicoherence and finite
 type. The proof refines inverse images of affine target opens by affine source
 opens and uses the existing affine pullback comparison on each refinement.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits TopologicalSpace
 

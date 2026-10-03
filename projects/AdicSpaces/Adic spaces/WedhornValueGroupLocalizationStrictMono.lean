@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalizedArchimedeanTransfer
+module
+
+public import «Adic spaces».WedhornLocalizedArchimedeanTransfer
 
 /-!
 # Value-group strictMono hom audit + corrected target signature
@@ -112,6 +114,8 @@ needs excavation):
   branch-compatibility files.
 * No Lane B / Cor 8.32 / Jacobson / T001 / faithful-flatness /
   final-acyclicity content. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

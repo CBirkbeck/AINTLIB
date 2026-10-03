@@ -3,13 +3,15 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Algebra.BigOperators.Fin
-import Mathlib.Algebra.BigOperators.Module
-import Mathlib.Algebra.BigOperators.Ring.Finset
-import Mathlib.Algebra.Module.LinearMap.Basic
-import Mathlib.Algebra.Module.Pi
-import Mathlib.Algebra.Module.Submodule.Basic
-import Mathlib.AlgebraicTopology.SimplexCategory.Basic
+module
+
+public import Mathlib.Algebra.BigOperators.Fin
+public import Mathlib.Algebra.BigOperators.Module
+public import Mathlib.Algebra.BigOperators.Ring.Finset
+public import Mathlib.Algebra.Module.LinearMap.Basic
+public import Mathlib.Algebra.Module.Pi
+public import Mathlib.Algebra.Module.Submodule.Basic
+public import Mathlib.AlgebraicTopology.SimplexCategory.Basic
 
 /-!
 # Contraction of support-restricted Cech cochains
@@ -19,6 +21,10 @@ This file implements the combinatorial contraction in the proof of
 A cochain is supported on tuples whose range contains a fixed set `N`. If `i₀ ∉ N`,
 prepending `i₀` gives a contraction of the alternating deletion differential.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Set
 

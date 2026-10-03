@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StandardCover
-import «Adic spaces».WedhornMultiDominatingUnit
+module
+
+public import «Adic spaces».StandardCover
+public import «Adic spaces».WedhornMultiDominatingUnit
 
 /-!
 # Wedhorn Standard-Cover Refinement: single-`t` C1 helpers
@@ -65,6 +67,8 @@ precise missing API; see the docblock at the end of this file.
 No Lane B / Cor 8.32 / Jacobson / faithful-flatness / T001 content.
 No new final acyclicity hypotheses.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

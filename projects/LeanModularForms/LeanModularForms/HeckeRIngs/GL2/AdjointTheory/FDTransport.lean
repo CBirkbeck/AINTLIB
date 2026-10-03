@@ -3,18 +3,20 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheory
-import LeanModularForms.HeckeRIngs.GL2.FourierHecke
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma1
-import LeanModularForms.Modularforms.PeterssonInner
-import LeanModularForms.Modularforms.PeterssonLevelN
-import Mathlib.Analysis.Complex.UpperHalfPlane.Metric
-import Mathlib.MeasureTheory.Measure.Hausdorff
-import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
-import Mathlib.LinearAlgebra.Eigenspace.Pi
-import Mathlib.LinearAlgebra.Eigenspace.Semisimple
-import Mathlib.Analysis.Complex.Polynomial.Basic
-import Mathlib.Analysis.InnerProductSpace.Semisimple
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheory
+public import LeanModularForms.HeckeRIngs.GL2.FourierHecke
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma1
+public import LeanModularForms.Modularforms.PeterssonInner
+public import LeanModularForms.Modularforms.PeterssonLevelN
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Metric
+public import Mathlib.MeasureTheory.Measure.Hausdorff
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+public import Mathlib.LinearAlgebra.Eigenspace.Pi
+public import Mathlib.LinearAlgebra.Eigenspace.Semisimple
+public import Mathlib.Analysis.Complex.Polynomial.Basic
+public import Mathlib.Analysis.InnerProductSpace.Semisimple
 
 /-!
 # Hecke adjoint theory: FD-transport infrastructure.
@@ -22,6 +24,10 @@ import Mathlib.Analysis.InnerProductSpace.Semisimple
 The Hecke conjugate intersection group `Γ_p(α)`, fundamental-domain transport
 adapters, and their `PSL(2, ℝ)` ambient instantiations.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

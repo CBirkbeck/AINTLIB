@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.FurtwanglerResidueAndBaseDvdZ
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.GammaRatioLocalPower
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DiscreteLogIndexCollapse
-import BernoulliRegular.FLT37.Eichler.FLT37CaseIWired
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.FurtwanglerResidueAndBaseDvdZ
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.GammaRatioLocalPower
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DiscreteLogIndexCollapse
+public import BernoulliRegular.FLT37.Eichler.FLT37CaseIWired
 
 /-!
 # [FLT37-CASEII-THM95] Washington Theorem 9.5 framing resolved: the `ℓ ∣ z`-restricted descent
@@ -112,6 +114,8 @@ Washington input Lemma 9.6 (`149 ∤ a, b`).
   The Basic Argument** (the generalized equation `ωᵖ + θᵖ = ηλᵐξᵖ` and the minimal-prime-factor
   contradiction, pp. 167–173).
 -/
+
+set_option backward.privateInPublic true
 
 @[expose] public section
 

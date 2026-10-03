@@ -3,8 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Iwasawa.LocalUnits
-import PadicLFunctions.Coleman.Map
+module
+
+public import Mathlib.Topology.Algebra.Group.Units
+public import PadicLFunctions.Iwasawa.LocalUnits
+public import PadicLFunctions.Coleman.Map
 
 /-!
 # Cyclotomic units: the global modules 𝒟_n and their local closures 𝒞 (RJW §11.3)
@@ -27,6 +30,10 @@ NOT here (recorded deferrals): the class-number index theorem
 permanently deferred prose) and `thm:iwasawa` itself (TeX 3098 — statement and proof
 on the §12 board, where its Λ(𝒢⁺)-module structures are constructed).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open scoped IntermediateField
 

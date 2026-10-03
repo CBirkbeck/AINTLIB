@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.KMUniqueness
-import ModularCurves.WeilPairing.TensorCocycle
-import ModularCurves.WeilPairing.Translation
+module
+
+public import ModularCurves.WeilPairing.KMUniqueness
+public import ModularCurves.WeilPairing.TensorCocycle
+public import ModularCurves.WeilPairing.Translation
 
 /-!
 # Bilinearity and `μ_N` for the Katz–Mazur pairing (ticket AP-D7)
@@ -89,6 +91,10 @@ Nothing here touches `exists_torsionPoint_of_mem_kerMulByN` (`WeilPairing/KMPair
 AP-D4 `⊇` direction), so no declaration below inherits *that* `sorryAx`. Only the proved `⊆`
 direction enters, through AP-D5.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

@@ -3,11 +3,13 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.GroupScheme.GroupRingFree
-import ModularCurves.GroupScheme.StableChartData
-import ModularCurves.GroupScheme.ChartBridges
-import ModularCurves.ForMathlib.HopfGaloisQuotient
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.GroupScheme.GroupRingFree
+public import ModularCurves.GroupScheme.StableChartData
+public import ModularCurves.GroupScheme.ChartBridges
+public import ModularCurves.ForMathlib.HopfGaloisQuotient
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The subgroup-scheme quotient, per-patch layer (`[HG-C4a]`)
@@ -24,6 +26,8 @@ point of `E` by `[HG-C3f]` (`exists_affineChartPatch_free`).
 The geometry bridge (invariant morphisms coequalize the chart pair — `[HG-C4b]`) and the
 two-stage glue (`[HG-C4c]`) consume this layer.
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

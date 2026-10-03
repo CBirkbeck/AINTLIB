@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Coleman.Map
-import PadicLFunctions.Iwasawa.LocalUnits
-import Mathlib.NumberTheory.Cyclotomic.Gal
+module
+
+public import PadicLFunctions.Coleman.Map
+public import PadicLFunctions.Iwasawa.LocalUnits
+public import Mathlib.NumberTheory.Cyclotomic.Gal
 
 /-!
 # The Galois action on the cyclotomic tower (RJW §12.1, TeX 3182–3243) — E12.1
@@ -24,6 +26,10 @@ ticket fills them (its first step: make Tower's `isCyclotomicExtension_K` public
 `galAut p a n := (IsCyclotomicExtension.autEquivPow (K p n) (cyclotomic_irreducible_Qp …)).symm
 (unitsToZModPow p n a)`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman
 

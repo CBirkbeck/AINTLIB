@@ -1,6 +1,8 @@
-import Mathlib.Data.Real.Basic
-import Mathlib.NumberTheory.Padics.PadicVal.Basic
-import Mathlib.Tactic.Positivity
+module
+
+public import Mathlib.Data.Real.Basic
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+public import Mathlib.Tactic.Positivity
 
 /-!
 # Silverman IV.6.2: bound on the p-adic valuation of `n!`
@@ -30,6 +32,8 @@ convergence arguments about the formal logarithm.
   `n ≥ 1` hypothesis, bounding by `n / (p - 1)` (slightly looser, but vacuous
   for `n = 0`).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.FormalGroup
 

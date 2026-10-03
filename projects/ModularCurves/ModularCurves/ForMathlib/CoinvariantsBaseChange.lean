@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.HopfGalois
-import Mathlib.RingTheory.Flat.Equalizer
+module
+
+public import ModularCurves.ForMathlib.HopfGalois
+public import Mathlib.RingTheory.Flat.Equalizer
 
 /-!
 # Base change of a co-action along the co-invariants
@@ -28,6 +30,8 @@ change along `C → (LocalPolynomialExtension (Localization.AtPrime p))` preserv
 co-invariants, so the semi-local heart (03C1 + 03C8) applies upstairs and its conclusions
 descend.
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

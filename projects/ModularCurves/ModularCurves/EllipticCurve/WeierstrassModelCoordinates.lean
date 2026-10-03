@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.WeierstrassModel
+module
+
+public import ModularCurves.EllipticCurve.WeierstrassModel
 
 /-!
 # Homogeneous coordinates on a projective Weierstrass model
@@ -13,6 +15,8 @@ map from the model's homogeneous coordinate ring. If one coordinate is a unit,
 this map sends the irrelevant ideal onto the unit ideal, which is the algebraic
 input required by `Proj.fromOfGlobalSections`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

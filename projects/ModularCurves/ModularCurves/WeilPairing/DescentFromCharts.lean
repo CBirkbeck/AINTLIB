@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PullbackTensorSection
-import ModularCurves.WeilPairing.IteratedTwist
-import ModularCurves.Picard.IdealModulePullback
-import ModularCurves.Picard.RigidDescent
+module
+
+public import ModularCurves.EllipticCurve.PullbackTensorSection
+public import ModularCurves.WeilPairing.IteratedTwist
+public import ModularCurves.Picard.IdealModulePullback
+public import ModularCurves.Picard.RigidDescent
 
 /-!
 # Descent of a trivialization from charts of the base (W2)
@@ -22,6 +24,8 @@ The zero-section normalization stays a hypothesis: it is the rigidification step
 theorem of the square is exactly the statement that it can be arranged (after twisting by
 the base bundle `N = 0^*Δ`).
 -/
+
+@[expose] public section
 
 universe u
 

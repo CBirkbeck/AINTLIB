@@ -1,4 +1,6 @@
-import Mathlib.Algebra.Polynomial.Basic
+module
+
+public import Mathlib.Algebra.Polynomial.Basic
 
 /-!
 # C-normalization simp set for polynomial ring tactics
@@ -23,3 +25,5 @@ simp only [..., Polynomial.C_ofNat, Polynomial.C_mul, Polynomial.C_sub,
 (`Nat.cast_ofNat` fires automatically since it is `@[simp]` — `simp only`
 actually does not pick it up, so include it too for safety.)
 -/
+
+@[expose] public section

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.CharZeroDescent
+module
+
+public import ModularCurves.WeilPairing.CharZeroDescent
 
 /-!
 # The torsion square commutes with base change (route β, the descent's plumbing)
@@ -27,6 +29,8 @@ The proof is pure pullback pasting on top of `torsion_baseChange_isPullback`
   the *first-projection* square, which pastes **vertically** with the torsion base-change square to
   give the statement about `torsionSqπ`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

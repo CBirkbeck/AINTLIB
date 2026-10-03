@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafProjectiveXY
-import ModularCurves.EllipticCurve.PoleSheafBaseSectionsMul
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafProjectiveXY
+public import ModularCurves.EllipticCurve.PoleSheafBaseSectionsMul
 
 /-!
 # Multiplication of successor pole coordinates
@@ -12,6 +14,8 @@ import ModularCurves.EllipticCurve.PoleSheafBaseSectionsMul
 The highest consecutive-quotient coordinate of a product of positive pole
 sections is the product of their highest coordinates.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 open TensorProduct

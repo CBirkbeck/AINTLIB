@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LutzNagell.DivisionPolynomialDegree
-import LutzNagell.ZSMul
-import LutzNagell.LutzNagellTheorem.EvalBridge
-import LutzNagell.LutzNagellTheorem.GeneralCurve
-import LutzNagell.LutzNagellTheorem.GeneralPrimeOrder
-import LutzNagell.LutzNagellTheorem.PIDIntegralMultiple
-import Mathlib.RingTheory.Localization.Rat
-import Mathlib.RingTheory.Polynomial.RationalRoot
+module
+
+public import LutzNagell.DivisionPolynomialDegree
+public import LutzNagell.ZSMul
+public import LutzNagell.LutzNagellTheorem.EvalBridge
+public import LutzNagell.LutzNagellTheorem.GeneralCurve
+public import LutzNagell.LutzNagellTheorem.GeneralPrimeOrder
+public import LutzNagell.LutzNagellTheorem.PIDIntegralMultiple
+public import Mathlib.RingTheory.Localization.Rat
+public import Mathlib.RingTheory.Polynomial.RationalRoot
 
 /-!
 # Integral multiple implies integral point (general Weierstrass curves)
@@ -27,6 +29,8 @@ statements below are the `R = ℤ`, `K = ℚ` specialisations of those general l
 downstream `GeneralMain`/`GeneralDiscriminant` consumers. `curveQ W` is definitionally
 `PID.curveK ℤ ℚ W`, so the specialisation is immediate.
 -/
+
+@[expose] public section
 
 namespace LutzNagell
 namespace LutzNagellTheorem

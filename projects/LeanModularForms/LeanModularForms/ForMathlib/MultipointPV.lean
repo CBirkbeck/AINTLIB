@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.CauchyPrincipalValue
+module
+
+public import LeanModularForms.ForMathlib.CauchyPrincipalValue
 
 /-!
 # Multi-Point Cauchy Principal Value Infrastructure
@@ -33,6 +35,8 @@ blocks for the generalized residue theorem.
 
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Set Filter Topology MeasureTheory Complex
 open scoped Interval

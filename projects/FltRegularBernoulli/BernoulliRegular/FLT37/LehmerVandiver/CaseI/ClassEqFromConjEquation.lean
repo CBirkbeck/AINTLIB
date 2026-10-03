@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqFromKummerRatioInt
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqFromKummerRatioInt
 
 /-!
 # LV010-class-eq-1d: Class equality from σ-conjugate Kummer equation

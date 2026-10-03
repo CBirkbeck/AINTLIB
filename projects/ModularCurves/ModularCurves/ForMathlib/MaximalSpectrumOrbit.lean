@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Finiteness of the maximal spectrum of an invariant extension
@@ -21,6 +23,8 @@ over the semilocalization `L` of the engine's mouth core (`Moduli/EngineDescent`
 there `A = Lᴳ` is local (`Unique (MaximalSpectrum A)`), and `MaximalSpectrum L` is the single
 finite `G`-orbit of primes over its closed point.
 -/
+
+@[expose] public section
 
 open Pointwise
 

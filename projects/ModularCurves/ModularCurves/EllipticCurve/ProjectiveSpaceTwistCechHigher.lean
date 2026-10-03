@@ -3,11 +3,13 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
-import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
-import Mathlib.AlgebraicGeometry.Noetherian
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeightAssembly
-import ModularCurves.ForMathlib.OrderedCechSupportAlternating
+module
+
+public import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+public import Mathlib.AlgebraicGeometry.Noetherian
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeightAssembly
+public import ModularCurves.ForMathlib.OrderedCechSupportAlternating
 
 /-!
 # Higher exactness for nonnegative projective twists
@@ -16,6 +18,10 @@ This file assembles the all-degree support contraction from
 [Stacks Project, Lemma 30.8.1 (Tag 01XT)](https://stacks.math.columbia.edu/tag/01XT) weight by
 weight in the homogeneous Laurent presentation of the ordered Cech complex.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

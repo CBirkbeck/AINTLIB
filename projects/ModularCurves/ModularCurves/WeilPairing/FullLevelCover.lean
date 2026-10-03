@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.LevelThreeTorsor
+module
+
+public import ModularCurves.Moduli.LevelThreeTorsor
 
 /-!
 # The full-level space as an fppf cover (WP-COVER)
@@ -21,6 +23,8 @@ geometric point, produce a naive full level-`N` structure on the fibre
 (`exists_isNaiveFullLevel_of_isAlgClosed`, general `N`), classify it through the
 points-equivalence family (`YFull.exists_pointsEquiv_family`), and read off its image.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

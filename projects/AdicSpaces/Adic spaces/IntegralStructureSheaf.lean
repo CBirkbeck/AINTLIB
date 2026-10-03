@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Presheaf
-import «Adic spaces».Bounded
-import «Adic spaces».HuberRings
+module
+
+public import «Adic spaces».Presheaf
+public import «Adic spaces».Bounded
+public import «Adic spaces».HuberRings
 
 /-!
 # The Integral Structure Presheaf O⁺
@@ -28,6 +30,8 @@ We also define the sheaf cohomology groups `H^i(Spa(A, A⁺), O⁺)` as opaque t
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §8.1
 * [K. Kedlaya, *The Nonarchimedean Scottish Book*], Problems 27, 39
 -/
+
+@[expose] public section
 
 open ValuationSpectrum TopologicalRing
 

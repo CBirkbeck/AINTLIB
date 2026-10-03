@@ -1,7 +1,9 @@
-import ModularCurves.EllipticCurve.RelativeProjectiveTwistCechVanishing
-import ModularCurves.ForMathlib.RelativeProjectivePushforwardFiniteType
-import ModularCurves.ForMathlib.SchemeModuleOrderedAffineCechCohomology
-import ModularCurves.Picard.InvertibleSheafTensorQuasicoherent
+module
+
+public import ModularCurves.EllipticCurve.RelativeProjectiveTwistCechVanishing
+public import ModularCurves.ForMathlib.RelativeProjectivePushforwardFiniteType
+public import ModularCurves.ForMathlib.SchemeModuleOrderedAffineCechCohomology
+public import ModularCurves.Picard.InvertibleSheafTensorQuasicoherent
 
 /-!
 # Cech vanishing for arbitrary relative projective coordinate twists
@@ -10,6 +12,10 @@ The existing relative-projective wrapper treats the structure module and coordin
 file gives the corresponding affine restriction comparison and eventual Cech exactness for an
 arbitrary finite-type quasicoherent source module and any projective coordinate.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

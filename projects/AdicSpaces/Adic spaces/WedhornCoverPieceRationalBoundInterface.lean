@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornMPowerStructuralDataHonestFromLaurentPiece
-import «Adic spaces».WedhornMaxElementSDComparison
+module
+
+public import «Adic spaces».WedhornMPowerStructuralDataHonestFromLaurentPiece
+public import «Adic spaces».WedhornMaxElementSDComparison
 
 /-!
 # Wedhorn 8.34(ii) cover-piece rational-bound interface for T021 (T036)
@@ -93,6 +95,8 @@ becomes mechanical: `rationalOpen_subset_base_via_local_Cor732_chain`
   common ancestor.
 * Does NOT edit T027/T028/T031/T032/T033/T034/T035 accepted files.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

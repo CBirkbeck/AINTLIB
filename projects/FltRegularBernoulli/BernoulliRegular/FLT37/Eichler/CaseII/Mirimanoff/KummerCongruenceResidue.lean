@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitRealness
-import BernoulliRegular.FLT37.Eichler.Reduction.FLT37MembershipFreeDescentEndpoint
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitRealness
+public import BernoulliRegular.FLT37.Eichler.Reduction.FLT37MembershipFreeDescentEndpoint
 
 /-!
 # Washington Lemma 9.8 for `p = 37`: the mod-`𝔩` Kummer congruence from the σ-stable producer

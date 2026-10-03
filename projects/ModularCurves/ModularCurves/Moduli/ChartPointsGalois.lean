@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PointsDictionaryGalois
-import ModularCurves.Moduli.E3DatumAssembly
+module
+
+public import ModularCurves.EllipticCurve.PointsDictionaryGalois
+public import ModularCurves.Moduli.E3DatumAssembly
 
 /-!
 # Galois naturality of the chart point dictionaries (DS4 M1c, nodes B–D)
@@ -31,6 +33,8 @@ dictionary, so node B is `Subtype.ext` plus
 `Point.baseChangeEquiv⁻¹` and `pointAddEquiv`; the second is postcomposition (pure
 associativity), the first is `pullback.lift` and needs the universal property.
 -/
+
+@[expose] public section
 
 -- v4.33 bump: component types coming from semireducible `baseChange*`/`pullback`/`resLE`
 -- defs are defeq only after delta, which `rw`/`simp` will not do at `implicit`

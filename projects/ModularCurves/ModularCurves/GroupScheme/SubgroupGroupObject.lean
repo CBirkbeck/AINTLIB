@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.TranslationAction
-import ModularCurves.GroupScheme.DeligneOrder
+module
+
+public import ModularCurves.GroupScheme.TranslationAction
+public import ModularCurves.GroupScheme.DeligneOrder
 
 /-!
 # The group-scheme structure on a finite locally free subgroup
@@ -28,6 +30,8 @@ transports from `E.Point`'s `AddCommGroup` by cancelling `ι`.
 * the defining specifications `unitHom_ι`, `invHom_ι`, `mulHom_ι`, each characterising the
   map by its composite with `ι` (unique by `cancel_mono`).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

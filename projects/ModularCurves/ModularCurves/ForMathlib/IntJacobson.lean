@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Jacobson.Ring
-import Mathlib.RingTheory.PrincipalIdealDomain
+module
+
+public import Mathlib.RingTheory.Jacobson.Ring
+public import Mathlib.RingTheory.PrincipalIdealDomain
 
 /-!
 # `ℤ` is a Jacobson ring
@@ -21,6 +23,8 @@ is what the Bosma–Lenstra group-law base-change transport needs.
 Jacobson radical) whose nilradical/`⊥` has Jacobson radical `⊥`: an integer lying in every maximal
 ideal `(p)` — equivalently `x·y + 1` a unit for all `y` — must be `0` (take `y = 1, 2`).
 -/
+
+@[expose] public section
 
 open Ideal
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportChowLowDegreeAssembly
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechSupportInduction
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportChowLowDegreeAssembly
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechSupportInduction
 
 /-!
 # Cech finiteness for proper schemes
@@ -22,6 +24,10 @@ therefore also given for an **arbitrary** Noetherian affine base
 ordered base-Cech complex of `f ≫ g` is the ordered base-Cech complex of `f` with scalars
 restricted along `g.appTop`, and `ModuleCat.restrictScalars` preserves products and homology.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 

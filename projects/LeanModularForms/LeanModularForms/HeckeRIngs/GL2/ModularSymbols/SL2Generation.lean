@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.LinearAlgebra.Matrix.FixedDetMatrices
-import Mathlib.GroupTheory.Schreier
-import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
+module
+
+public import Mathlib.LinearAlgebra.Matrix.FixedDetMatrices
+public import Mathlib.GroupTheory.Schreier
+public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
 
 /-!
 # `SL(2, ℤ)` is finitely generated
@@ -30,6 +32,8 @@ instance `CongruenceSubgroup.instFiniteIndexGamma1 [NeZero N]`, typeclass infere
 `Group.FG (CongruenceSubgroup.Gamma1 N)` for any `[NeZero N]` automatically (no helper instance is
 required). This is needed for a downstream leaf that generates `Div⁰(ℙ¹ℚ)` over `ℤ[Γ₁N]`.
 -/
+
+@[expose] public section
 
 open scoped MatrixGroups
 

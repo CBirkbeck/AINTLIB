@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseIClose
-import BernoulliRegular.FLT37.VandiverProven
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseIClose
+public import BernoulliRegular.FLT37.VandiverProven
 
 /-!
 # Wiring the proven first case of FLT for `p = 37` into the top-level chain

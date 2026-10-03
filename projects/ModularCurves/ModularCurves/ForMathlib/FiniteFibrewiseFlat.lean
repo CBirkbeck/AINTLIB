@@ -1,13 +1,15 @@
-import Mathlib.RingTheory.LocalRing.Module
-import Mathlib.RingTheory.Flat.Basic
-import Mathlib.RingTheory.Flat.Localization
-import Mathlib.RingTheory.Flat.Stability
-import Mathlib.RingTheory.Ideal.Maps
-import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
-import Mathlib.RingTheory.Localization.BaseChange
-import Mathlib.RingTheory.RingHom.Flat
-import Mathlib.LinearAlgebra.TensorProduct.Tower
-import Mathlib.LinearAlgebra.TensorProduct.RightExactness
+module
+
+public import Mathlib.RingTheory.LocalRing.Module
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Flat.Localization
+public import Mathlib.RingTheory.Flat.Stability
+public import Mathlib.RingTheory.Ideal.Maps
+public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
+public import Mathlib.RingTheory.Localization.BaseChange
+public import Mathlib.RingTheory.RingHom.Flat
+public import Mathlib.LinearAlgebra.TensorProduct.Tower
+public import Mathlib.LinearAlgebra.TensorProduct.RightExactness
 
 /-!
 # The fibrewise flatness criterion for finitely presented modules over a local ring
@@ -38,6 +40,8 @@ flatness inputs:
 No noetherian hypotheses, no Buchsbaum–Eisenbud/flat-locus theory, no Tor modules.
 Everything is elementary tensor algebra on top of mathlib's `LocalRing/Module` endgame.
 -/
+
+@[expose] public section
 
 open TensorProduct
 

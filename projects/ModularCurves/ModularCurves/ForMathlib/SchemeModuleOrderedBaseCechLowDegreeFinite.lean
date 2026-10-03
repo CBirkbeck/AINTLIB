@@ -6,8 +6,10 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed
 `WellFoundedSheafCohomologyCodesvissage.lean` in Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFinite
-import ModularCurves.ForMathlib.SchemeModuleSupport
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFinite
+public import ModularCurves.ForMathlib.SchemeModuleSupport
 
 /-!
 # Low-degree ordered base-Cech finiteness
@@ -15,6 +17,8 @@ import ModularCurves.ForMathlib.SchemeModuleSupport
 Finiteness of ordered base-Cech homology in degrees zero and one is stable
 under the two exact-sequence operations needed by closed-support codévissage.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 

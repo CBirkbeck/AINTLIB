@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.FlasqueCohomology
+module
+
+public import ModularCurves.ForMathlib.FlasqueCohomology
 
 /-!
 # Cohomology over a terminal object
@@ -8,6 +10,10 @@ and its value at a terminal object with ordinary sheaf cohomology. The latter fi
 terminal-object comparison TODO recorded in
 `Mathlib.CategoryTheory.Sites.SheafCohomology.Basic`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits Opposite TopologicalSpace
 

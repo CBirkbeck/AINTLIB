@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.NumberTheory.Bernoulli
+module
+
+public import Mathlib.NumberTheory.Bernoulli
 
 /-!
 # Rational zeta values at non-positive integers
@@ -15,6 +17,8 @@ value, cast into `ℚ_p`. The identification with the complex `riemannZeta (−k
 bridge `zetaNeg_eq_riemannZeta` in `ZetaValuesComplex.lean` (kept separate so the main
 chain does not import complex analysis).
 -/
+
+@[expose] public section
 
 /-- The rational number `ζ(−k) = (−1)^k B_{k+1}/(k+1)` (RJW TeX line 1455; mathlib's
 `bernoulli` convention). For the identification with the complex zeta function see

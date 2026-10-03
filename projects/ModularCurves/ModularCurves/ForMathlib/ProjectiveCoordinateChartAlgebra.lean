@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.ProjectiveCoordinateChartAlgebra`.
 -/
-import ModularCurves.ForMathlib.ProjectiveStandardIntersectionRing
+module
+
+public import ModularCurves.ForMathlib.ProjectiveStandardIntersectionRing
 
 /-!
 # Algebra on a standard projective coordinate chart
@@ -15,6 +17,8 @@ The standard coordinate ratios define a dehomogenization map to the degree-zero
 homogeneous localization. AINTLIB's existing projective chart equivalence gives
 a short proof that this map is surjective.
 -/
+
+@[expose] public section
 
 open HomogeneousLocalization
 

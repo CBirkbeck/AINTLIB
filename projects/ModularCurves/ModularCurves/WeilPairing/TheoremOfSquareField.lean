@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.IdealModuleMul
-import ModularCurves.EllipticCurve.MulByHomDegree
-import ModularCurves.EllipticCurve.SectionCoordinates
-import ModularCurves.EllipticCurve.AffineSectionSpecPoints
-import ModularCurves.EllipticCurve.PoleSheafModel
-import ModularCurves.LevelStructure.CartierDivisor
-import HasseWeil.Pic0.TheoremOfSquareDivisorForm
+module
+
+public import ModularCurves.Picard.IdealModuleMul
+public import ModularCurves.EllipticCurve.MulByHomDegree
+public import ModularCurves.EllipticCurve.SectionCoordinates
+public import ModularCurves.EllipticCurve.AffineSectionSpecPoints
+public import ModularCurves.EllipticCurve.PoleSheafModel
+public import ModularCurves.LevelStructure.CartierDivisor
+public import HasseWeil.Pic0.TheoremOfSquareDivisorForm
 
 /-!
 # The theorem of the square as a module triviality over a field (T10-asm)
@@ -103,6 +105,8 @@ halves of the bridge) and `ModularCurves.idealModule (f : X ⟶ Y)`, the kernel 
 `projModelSectionRoot_mem_nonZeroDivisors`) are about `(projModelZero W).ker` and so do feed the
 first.
 -/
+
+@[expose] public section
 
 universe u
 

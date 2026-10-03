@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
+module
+
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
 
 /-!
 # Monoidal functors preserve powers of morphisms into a group object
@@ -12,6 +14,8 @@ import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
 action on hom-into-`G` preserves integer powers — `F.map (f ^ n) = (F.map f) ^ n`.
 This is the `zpow` companion of mathlib's `Functor.map_inv'`. Upstream candidate.
 -/
+
+@[expose] public section
 
 open CategoryTheory MonObj
 

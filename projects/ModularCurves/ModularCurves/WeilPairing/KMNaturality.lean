@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.KMDataset
-import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
+module
+
+public import ModularCurves.WeilPairing.KMDataset
+public import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
 
 /-!
 # The canonical Katz–Mazur pairing and the universal torsion points (AP-E1)
@@ -22,6 +24,10 @@ genuine function of the pair of torsion sections:
   universal base `E[N] ×_S E[N]`, which the Yoneda step (`WeilPairing/Basic.lean`,
   `weilPairing`) evaluates the pairing at.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

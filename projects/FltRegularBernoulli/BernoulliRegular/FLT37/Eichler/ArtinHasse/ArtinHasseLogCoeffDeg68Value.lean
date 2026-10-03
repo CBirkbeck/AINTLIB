@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseLogCoeffRecurrence
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasse37DegSixtyEightLogCoeffModSq
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseLogCoeffRecurrence
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasse37DegSixtyEightLogCoeffModSq
 
 /-!
 # `(formalSum68 : ℚ) = 68!·Lr 68 = N/120`: the degree-`68` Artin-Hasse log coefficient, DISCHARGED
@@ -32,6 +34,8 @@ the corrected second digit `r₆₈ = 21` in the actual power series.
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §8.4.
 -/
+
+set_option backward.privateInPublic true
 
 @[expose] public section
 

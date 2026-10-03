@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
-import ModularCurves.ForMathlib.SheafModuleCechNativeDegreeExact
-import ModularCurves.ForMathlib.SheafModuleCechSectionsDifferential
+module
+
+public import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
+public import ModularCurves.ForMathlib.SheafModuleCechNativeDegreeExact
+public import ModularCurves.ForMathlib.SheafModuleCechSectionsDifferential
 
 /-!
 # Native Cech complexes of module-valued sheaf Cech terms
@@ -15,6 +17,8 @@ is the product of the corresponding degrees for its
 restriction-pushforward factors. Consequently, degree-one exactness for all
 factors implies degree-one exactness for the product term.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

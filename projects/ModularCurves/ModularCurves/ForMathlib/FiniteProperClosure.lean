@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.FiniteProperProduct
-import ModularCurves.ForMathlib.SchemeTheoreticImage
+module
+
+public import ModularCurves.ForMathlib.FiniteProperProduct
+public import ModularCurves.ForMathlib.SchemeTheoreticImage
 
 /-!
 # Scheme-theoretic closures in finite products of proper schemes
@@ -7,6 +9,8 @@ import ModularCurves.ForMathlib.SchemeTheoreticImage
 This file packages the closure of a compatible family of morphisms in a finite product of
 proper schemes over a common base.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

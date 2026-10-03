@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LaurentRefinement
-import «Adic spaces».StructureSheaf
-import «Adic spaces».Cor732
+module
+
+public import «Adic spaces».LaurentRefinement
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».Cor732
 
 /-!
 # Standard-Cover Reduction (R1 of 2026-04-14 acyclicity plan)
@@ -121,6 +123,10 @@ plan revision" (Q1 directive) for details.
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Theorem 8.28(b), Lemma 8.34.
 * `docs/plans/2026-04-14-acyclicity-completion.md` (R1 ticket).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

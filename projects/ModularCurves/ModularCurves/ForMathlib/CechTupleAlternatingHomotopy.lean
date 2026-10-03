@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Data.Fin.Tuple.Sort
-import Mathlib.LinearAlgebra.Finsupp.LSum
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
+module
+
+public import Mathlib.Data.Fin.Tuple.Sort
+public import Mathlib.LinearAlgebra.Finsupp.LSum
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 
 /-!
 # The tuple-chain homotopy for alternating Cech cochains
@@ -14,6 +16,10 @@ This file formalizes the support-preserving free-chain construction in Conrad,
 *Cech Cohomology and Alternating Cochains*. It is the combinatorial core of the
 homotopy in Stacks Project, Lemma 20.23.6 (Tag 01FM).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Set
 

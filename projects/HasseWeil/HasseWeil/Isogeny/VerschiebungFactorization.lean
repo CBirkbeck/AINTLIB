@@ -3,18 +3,20 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.AdditionPullback.Differential
-import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
-import HasseWeil.Foundation.Curves.FintypeProjectiveSmoothPoint
-import HasseWeil.Isogeny.Dual.Relation
-import HasseWeil.Isogeny.Kernel
-import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
-import HasseWeil.HasseBound.SepDegreeEqPointCount
-import HasseWeil.HasseBound.SepDegreeWitnesses
-import HasseWeil.HasseBound.PointCount
-import HasseWeil.HasseBound.PoleDivisorTwoTorsion
-import HasseWeil.Foundation.Verschiebung.VerschiebungIsDualOfFrobenius
-import HasseWeil.Foundation.Verschiebung.UniversalQthRootWitness
+module
+
+public import HasseWeil.Foundation.AdditionPullback.Differential
+public import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
+public import HasseWeil.Foundation.Curves.FintypeProjectiveSmoothPoint
+public import HasseWeil.Isogeny.Dual.Relation
+public import HasseWeil.Isogeny.Kernel
+public import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
+public import HasseWeil.HasseBound.SepDegreeEqPointCount
+public import HasseWeil.HasseBound.SepDegreeWitnesses
+public import HasseWeil.HasseBound.PointCount
+public import HasseWeil.HasseBound.PoleDivisorTwoTorsion
+public import HasseWeil.Foundation.Verschiebung.VerschiebungIsDualOfFrobenius
+public import HasseWeil.Foundation.Verschiebung.UniversalQthRootWitness
 
 /-!
 # Middle spines of the Hasse skeleton (GAP-QF dual chain + GAP-L6 point count)
@@ -36,6 +38,8 @@ non-negativity is proven on the live route via
 `WeilPairing/HasseAssembly.lean`'s `qf_nonneg_skeleton_of_weil_det_data`, feeding the
 proven bound `WeilPairing.hasse_bound_unconditional`.)
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

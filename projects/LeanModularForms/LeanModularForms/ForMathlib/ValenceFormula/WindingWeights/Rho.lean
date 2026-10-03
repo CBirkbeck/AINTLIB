@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.ContourIntegral.CrossingLimit
-import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.Common
+module
+
+public import LeanModularForms.ForMathlib.ContourIntegral.CrossingLimit
+public import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.Common
 
 /-!
 # Winding Number Weight at ρ
@@ -16,6 +18,8 @@ PV integral computation for `fdBoundary_H` around the elliptic point
 
 * `pv_integral_at_rho_tendsto` — PV integral converges to -iπ/3
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

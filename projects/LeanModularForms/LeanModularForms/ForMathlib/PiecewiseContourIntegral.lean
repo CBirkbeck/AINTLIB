@@ -3,9 +3,11 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
-import LeanModularForms.ForMathlib.PiecewiseC1Path
+module
+
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+public import LeanModularForms.ForMathlib.PiecewiseC1Path
 
 /-!
 # Contour Integration along Piecewise C¹ Paths
@@ -38,6 +40,8 @@ endpoints. On each smooth segment, standard FTC applies; adjacent segments teles
 
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Set MeasureTheory Filter Topology
 open scoped Interval

@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.OverRestriction
+module
+
+public import ModularCurves.Picard.DualPullback.OverRestriction
 
 /-!
 # Restriction of the local pullback module comparison
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.OverRestriction
 A staged, option-free proof that `localPullbackModuleIso` is compatible with shrinking
 the target open.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Opposite
 

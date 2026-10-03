@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.Coaction
-import Mathlib.RingTheory.HopfAlgebra.Basic
-import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
-import Mathlib.RingTheory.IntegralClosure.IsIntegral.Basic
-import Mathlib.Algebra.Polynomial.Lifts
+module
+
+public import ModularCurves.ForMathlib.Coaction
+public import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
+public import Mathlib.RingTheory.IntegralClosure.IsIntegral.Basic
+public import Mathlib.Algebra.Polynomial.Lifts
 
 /-!
 # The comultiplication matrix of a finite free Hopf algebra
@@ -33,6 +35,8 @@ characteristic polynomial** `coactionCharpoly` has coinvariant coefficients
 (`map_coactionCharpoly`, 03BH) and witnesses integrality of `B` over the co-invariants
 (`isIntegral_coinvariants`, 03BJ).
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

@@ -1,6 +1,8 @@
-import PadicLFunctions.Measure.PseudoMeasure
-import PadicLFunctions.KubotaLeopoldt.ZetaValues
-import Mathlib.RingTheory.PowerSeries.Exp
+module
+
+public import PadicLFunctions.Measure.PseudoMeasure
+public import PadicLFunctions.KubotaLeopoldt.ZetaValues
+public import Mathlib.RingTheory.PowerSeries.Exp
 
 /-!
 # The measures `μ_a` (RJW §4.1–§4.2)
@@ -24,6 +26,8 @@ projection formula `ψ(φν·μ) = ν·ψμ` and the finite Dirac-sum identity
 Restricting to `ℤ_p^×` then removes the Euler factor:
 `∫_{ℤ_p^×} x^k dμ_a = (−1)^k (1−p^k)(1−a^{k+1}) ζ(−k)` (RJW Prop. 4.8).
 -/
+
+@[expose] public section
 
 noncomputable section
 

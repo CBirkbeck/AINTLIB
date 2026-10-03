@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.PowerSeries.Evaluation
-import PadicLFunctions.MeasureR.BaseChange
-import PadicLFunctions.Interpolation.Characters
+module
+
+public import Mathlib.RingTheory.PowerSeries.Evaluation
+public import PadicLFunctions.MeasureR.BaseChange
+public import PadicLFunctions.Interpolation.Characters
 
 /-!
 # Twisting measures by Dirichlet characters (RJW §5.1)
@@ -18,6 +20,8 @@ Mahler transform of the twist (RJW Lem 5.4, TeX 1675–1678). Denominators are
 cleared per the recorded replan note R5-CLEAR (`.mathlib-quality/
 decomposition.md` §5).
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 open PowerSeries

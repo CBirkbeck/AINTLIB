@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.FinitePresentationBaseChangeEquiv
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationBaseChangeEquiv
 
 /-!
 # Reflecting principal-localization equivalences at a finite stage
@@ -7,6 +9,10 @@ The explicit base-change equivalence for a spread algebra extends to its
 principal localizations. This identifies scalar extension of a canonical away
 map with the literal away map between the later spread models.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

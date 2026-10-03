@@ -3,10 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.AdjoinRoot
-import Mathlib.Algebra.Polynomial.Degree.Domain
-import Mathlib.RingTheory.GradedAlgebra.HomogeneousLocalization
-import Mathlib.RingTheory.Localization.Away.Basic
+module
+
+import Mathlib.Algebra.Ring.Hom.InjSurj
+public import Mathlib.RingTheory.AdjoinRoot
+public import Mathlib.Algebra.Polynomial.Degree.Domain
+public import Mathlib.RingTheory.GradedAlgebra.HomogeneousLocalization
+public import Mathlib.RingTheory.Localization.Away.Basic
 
 /-!
 # Monic descent for `AdjoinRoot`, and domains of homogeneous localizations (ForMathlib)
@@ -23,6 +26,8 @@ Two reusable facts extracted while closing `T-W7.0c-c5β`:
 
 Both are stated for arbitrary commutative rings and are upstream candidates.
 -/
+
+@[expose] public section
 
 open Polynomial
 

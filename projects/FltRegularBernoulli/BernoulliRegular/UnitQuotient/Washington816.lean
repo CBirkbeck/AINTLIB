@@ -1,6 +1,8 @@
-import BernoulliRegular.UnitQuotient.Washington814ForwardD
-import BernoulliRegular.CyclotomicUnits.KummerLogDeterminant
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.RealPthRootDescent
+module
+
+public import BernoulliRegular.UnitQuotient.Washington814ForwardD
+public import BernoulliRegular.CyclotomicUnits.KummerLogDeterminant
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.RealPthRootDescent
 
 /-!
 # Washington Theorem 8.16 (class form): `[pollaczekUnit i]_{mod 37} = 0 ⟹ 37 ∣ B_i`

@@ -2,14 +2,16 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».AdicCompletionBridge
-import «Adic spaces».Presheaf
-import Mathlib.RingTheory.Localization.Basic
-import Mathlib.RingTheory.Localization.Away.Basic
-import Mathlib.RingTheory.Localization.Submodule
-import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
-import Mathlib.RingTheory.RingHom.Flat
-import Mathlib.RingTheory.Filtration
+module
+
+public import «Adic spaces».AdicCompletionBridge
+public import «Adic spaces».Presheaf
+public import Mathlib.RingTheory.Localization.Basic
+public import Mathlib.RingTheory.Localization.Away.Basic
+public import Mathlib.RingTheory.Localization.Submodule
+public import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
+public import Mathlib.RingTheory.RingHom.Flat
+public import Mathlib.RingTheory.Filtration
 
 /-!
 # Completion Commutes with Localization
@@ -40,6 +42,10 @@ flat adic completions, hence are flat.
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §5.6, Prop 8.30
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open ValuationSpectrum
 

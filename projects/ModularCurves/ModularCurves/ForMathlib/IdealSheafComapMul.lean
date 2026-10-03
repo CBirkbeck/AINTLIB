@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.IdealSheaf.Functorial
-import Mathlib.RingTheory.TensorProduct.Quotient
+module
+
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Functorial
+public import Mathlib.RingTheory.TensorProduct.Quotient
 
 /-!
 # Scheme-theoretic preimage of ideal sheaves is multiplicative
@@ -24,6 +26,8 @@ Strategy (per the T-D6a-i design):
 
 Upstream candidate. Ticket: T-D6a-i (ModularCurves).
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits
 

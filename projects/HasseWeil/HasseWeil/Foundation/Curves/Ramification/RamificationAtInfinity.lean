@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.NumberTheory.RamificationInertia.Basic
-import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+module
+
+public import Mathlib.NumberTheory.RamificationInertia.Basic
+public import Mathlib.RingTheory.DedekindDomain.IntegralClosure
 
 /-!
 # Abstract ramification at infinity (Worker A Action 1)
@@ -80,6 +82,8 @@ triggers under `Ideal.sum_ramification_inertia` (commit 538ff64).
 * Mathlib's `Ideal.sum_ramification_inertia` provides the abstract
   fundamental identity `Σ e · f = [Frac S : Frac R]`.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

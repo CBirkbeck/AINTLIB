@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafFiniteStageLinearEquiv
-import ModularCurves.EllipticCurve.PoleSheafAwayCoordinate
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafFiniteStageLinearEquiv
+public import ModularCurves.EllipticCurve.PoleSheafAwayCoordinate
 
 /-!
 # Away coefficients of the compatible pole bases
@@ -12,6 +14,8 @@ import ModularCurves.EllipticCurve.PoleSheafAwayCoordinate
 In the canonical frame away from the marked section, the compatible basis of
 each abstract pole module has coefficients `1, X, Y, X², XY, X³, ...`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

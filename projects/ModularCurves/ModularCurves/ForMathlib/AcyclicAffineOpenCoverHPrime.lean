@@ -1,6 +1,8 @@
-import ModularCurves.ForMathlib.AcyclicAffineOpenCover
-import ModularCurves.ForMathlib.SheafCohomologyOpen
-import ModularCurves.ForMathlib.SheafCohomologyMayerVietoris
+module
+
+public import ModularCurves.ForMathlib.AcyclicAffineOpenCover
+public import ModularCurves.ForMathlib.SheafCohomologyOpen
+public import ModularCurves.ForMathlib.SheafCohomologyMayerVietoris
 
 /-!
 # Cohomology-presheaf vanishing on affine opens
@@ -8,6 +10,8 @@ import ModularCurves.ForMathlib.SheafCohomologyMayerVietoris
 This file transfers ordinary affine-open vanishing for quasicoherent modules to the
 cohomology-presheaf values used by the Mayer--Vietoris sequence.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SemilocalUnitCocycleSplit
+module
+
+public import ModularCurves.ForMathlib.SemilocalUnitCocycleSplit
 
 /-!
 # Semilocal splitting of `VariableChange`-valued Čech `1`-cocycles on a finite basic cover
@@ -43,6 +45,8 @@ in the `SemilocalUnitSplit.resLoc` vocabulary (as in `ForMathlib/SemilocalUnitCo
 the bridges `isLocalizedModule_sup_of_powers_mul` / `…_sup_sup_of_powers_mul`
 (`ForMathlib/AffineCechH1`) re-express `Localization.Away (fᵢ * fⱼ)` data in this form.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

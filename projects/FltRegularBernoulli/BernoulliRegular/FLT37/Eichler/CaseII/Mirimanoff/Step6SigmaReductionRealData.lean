@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.MirimanoffStep6CongProducer
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.WashingtonThetaReal
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.MirimanoffStep6CongProducer
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.WashingtonThetaReal
 
 /-!
 # Washington Lemma 9.8 step 6 over `RealCaseIIData37` (the `ρ_a`-reality core, real data)

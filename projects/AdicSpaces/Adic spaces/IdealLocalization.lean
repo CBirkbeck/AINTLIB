@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LocalizationTopology
-import «Adic spaces».IdealClosedness
-import «Adic spaces».Prop752
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+module
+
+public import «Adic spaces».LocalizationTopology
+public import «Adic spaces».IdealClosedness
+public import «Adic spaces».Prop752
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
 
 /-!
 # Ideal Closedness Transfer from `locSubring` to `Localization.Away s`
@@ -48,6 +50,8 @@ case, via `Ideal.isClosed_of_le_jacobson` + `locSubring_topology_eq_adic`).
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §8.1, §8.2
 * `.mathlib-quality/tickets.md` T-IDEAL-2 / S-IDEAL-LOC
 -/
+
+@[expose] public section
 
 open Topology Filter
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.EtaleDescent
-import ModularCurves.ForMathlib.AdjoinRootBaseChange
+module
+
+public import ModularCurves.WeilPairing.EtaleDescent
+public import ModularCurves.ForMathlib.AdjoinRootBaseChange
 
 /-!
 # The `μ_N` finite étale algebra, in coordinates (WP-D3c-2b)
@@ -18,6 +20,8 @@ file turns it into a `k`-algebra identification of the carriers.
 With that plus `quotSpanBaseChange` (`ForMathlib/AdjoinRootBaseChange.lean`) the `μ_N` side of
 the field-change transport of the Weil pairing becomes pure algebra.
 -/
+
+@[expose] public section
 
 universe u
 

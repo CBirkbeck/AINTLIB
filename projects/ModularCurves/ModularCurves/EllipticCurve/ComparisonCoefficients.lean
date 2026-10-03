@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.ModelVariableChange
+module
+
+public import ModularCurves.EllipticCurve.ModelVariableChange
 
 /-!
 # Coefficient extraction for the comparison theorem (T-W7.1b, second half)
@@ -21,6 +23,10 @@ from the `b1`/`b2` construction; the wiring into `pointedIsoCoordEquiv_coordX` /
 
 AINTLIB ModularCurves T-W7.1b (lane P3-parallel, beastmode-P3b3).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open WeierstrassCurve
 

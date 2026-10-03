@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionBaseChange
-import ModularCurves.EllipticCurve.Comparison
-import ModularCurves.EllipticCurve.GroupLawDescent
-import ModularCurves.EllipticCurve.GroupLawConstruction
-import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
-import ModularCurves.ForMathlib.UnitCocycleSheaf
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.EllipticCurve.AdditionBaseChange
+public import ModularCurves.EllipticCurve.Comparison
+public import ModularCurves.EllipticCurve.GroupLawDescent
+public import ModularCurves.EllipticCurve.GroupLawConstruction
+public import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
+public import ModularCurves.ForMathlib.UnitCocycleSheaf
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The invariant differential `ω_{E/S}` (T-OM-B*, route R1)
@@ -46,6 +48,10 @@ the modular-forms Hodge bundle) consumes exactly this presentation.
 The `(Ell/R)`-functoriality (base change of bases along cartesian pointed squares,
 `omegaBasisMap`) is in `Moduli/OmegaFunctor.lean` (T-OM-B7).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
 

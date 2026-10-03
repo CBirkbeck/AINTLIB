@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.NTorsion.PadicLimZMod
-import HasseWeil.NTorsion.TorsionPowStructure
+module
+
+public import HasseWeil.NTorsion.PadicLimZMod
+public import HasseWeil.NTorsion.TorsionPowStructure
 
 /-!
 # The Tate module `T_ℓ(E) = lim_n E[ℓⁿ] ≅ ℤ_ℓ²` (Silverman III.7, Prop 7.1a)
@@ -35,6 +37,8 @@ Reference: Silverman, *The Arithmetic of Elliptic Curves* (2nd ed.), §III.7, pp
 the Definition of `T_ℓ(E) = lim_n E[ℓⁿ]` ("natural structure as a `ℤ_ℓ`-module") and Prop 7.1a
 (`T_ℓ(E) ≅ ℤ_ℓ × ℤ_ℓ` for `ℓ ≠ char K`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.Factorial37Deg68SliceExtraction
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.Factorial37Deg68SliceExtraction
 
 /-!
 # The second-order (mod `37²`) normalized-unit ↔ Dwork-parameter bridge: the level-`71` finite-log

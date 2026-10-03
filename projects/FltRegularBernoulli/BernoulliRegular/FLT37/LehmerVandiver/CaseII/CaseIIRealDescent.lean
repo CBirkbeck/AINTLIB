@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.GaloisDescent
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.GaloisDescent
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
 
 /-!
 # Case-II II1: real-ideal descent of the anchored quotients

@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.HomogeneousProjProper
-import ModularCurves.ForMathlib.HomogenizedProjStandardEmbedding
+module
+
+public import ModularCurves.ForMathlib.HomogeneousProjProper
+public import ModularCurves.ForMathlib.HomogenizedProjStandardEmbedding
 
 /-!
 # Projective factorizations over affine schemes
@@ -14,6 +16,8 @@ import ModularCurves.ForMathlib.HomogenizedProjStandardEmbedding
 A morphism to an affine scheme has a projective factorization if it factors through a closed
 immersion into a finite-dimensional polynomial projective space over the same base.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

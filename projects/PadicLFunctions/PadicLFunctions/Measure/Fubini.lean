@@ -1,5 +1,7 @@
-import PadicLFunctions.Measure.Basic
-import Mathlib.Topology.CompactOpen
+module
+
+public import PadicLFunctions.Measure.Basic
+public import Mathlib.Topology.CompactOpen
 
 /-!
 # A Fubini theorem for p-adic measures
@@ -19,6 +21,8 @@ fibres, so both iterated integrals of the approximation collapse to the same fin
 This route needs no total-disconnectedness or Hausdorff hypotheses (an earlier plan via
 clopen-box decompositions did — replan recorded in `.mathlib-quality/tickets.md` T018).
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 

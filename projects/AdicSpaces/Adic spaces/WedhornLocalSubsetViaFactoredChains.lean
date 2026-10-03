@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalArithmeticPerTChain
-import «Adic spaces».WedhornLocalCompatFromTestFamily
-import «Adic spaces».WedhornLocalPerBranchChain
+module
+
+public import «Adic spaces».WedhornLocalArithmeticPerTChain
+public import «Adic spaces».WedhornLocalCompatFromTestFamily
+public import «Adic spaces».WedhornLocalPerBranchChain
 
 /-!
 # Wedhorn local-subset consumer via σ-factored chains
@@ -46,6 +48,8 @@ This file composes:
   `h_T_test_compat_loc_canonical_via_factored_chains` and
   `rationalOpen_subset_base_via_local_Cor732_chain` directly.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

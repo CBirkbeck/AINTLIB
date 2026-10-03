@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.NTorsion.TateModule
-import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+module
+
+public import HasseWeil.NTorsion.TateModule
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
 
 /-!
 # The ℓ-adic Galois representation `ρ_ℓ` (Silverman III.7)
@@ -36,6 +38,8 @@ module `T_ℓ(E) = lim_n E[ℓⁿ]`. The resulting homomorphism `Gal(F/K) → Au
 Reference: Silverman, *The Arithmetic of Elliptic Curves* (2nd ed.), §III.7, pp. 87–88
 (the Galois action on `E[ℓⁿ]`, its commutation with `[ℓ]`, and the Definition of `ρ_ℓ`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Matrix
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.DescentFromCharts
-import ModularCurves.WeilPairing.TautologicalPair
-import ModularCurves.WeilPairing.TheoremOfSquareField
-import ModularCurves.ForMathlib.IdealSheafComapMul
+module
+
+public import ModularCurves.WeilPairing.DescentFromCharts
+public import ModularCurves.WeilPairing.TautologicalPair
+public import ModularCurves.WeilPairing.TheoremOfSquareField
+public import ModularCurves.ForMathlib.IdealSheafComapMul
 
 /-!
 # The theorem of the square, fibrewise (B3-step1)
@@ -76,6 +78,8 @@ matching of `P + Q` at the level of *scheme morphisms* from `mulModelHom_map` +
 `mulModelHom_specPoints`, giving the hypothesis-free
 `nonempty_pullback_discrepancy_iso_unitObj_projModel`.
 -/
+
+@[expose] public section
 
 universe u
 

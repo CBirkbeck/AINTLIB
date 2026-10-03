@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.TotalComplexUpNatDecomposition
-import Mathlib.Algebra.Homology.ConcreteCategory
+module
+
+public import ModularCurves.ForMathlib.TotalComplexUpNatDecomposition
+public import Mathlib.Algebra.Homology.ConcreteCategory
 
 /-!
 # Component elimination in first-quadrant total complexes
@@ -7,6 +9,8 @@ import Mathlib.Algebra.Homology.ConcreteCategory
 Convert the total-cycle equation into vertical closedness of one bidegree
 component, and compute the projections of a one-bidegree correction boundary.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
 open scoped BigOperators

@@ -1,9 +1,11 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.EigenbasisVandermondeCompatibility
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AssumptionIIFromR3
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.SquarePowerKernelAndAssumedII
-import BernoulliRegular.FLT37.Eichler.Reduction.FermatLastTheoremThirtySeven
-import BernoulliRegular.FLT37.KummerUnits
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealPthPower
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.EigenbasisVandermondeCompatibility
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AssumptionIIFromR3
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.SquarePowerKernelAndAssumedII
+public import BernoulliRegular.FLT37.Eichler.Reduction.FermatLastTheoremThirtySeven
+public import BernoulliRegular.FLT37.KummerUnits
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealPthPower
 
 /-!
 # Washington Theorem 8.22 / Corollary 8.23 for `p = 37`: discharging

@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StructureSheaf
-import «Adic spaces».Uniform
+module
+
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».Uniform
 
 /-!
 # Nonarchimedean Scottish Book — Problem 7
@@ -39,6 +41,8 @@ this asks whether the converse holds among uniform Huber pairs.
 * Wedhorn, *Adic Spaces*, §7 (Definitions 7.36, 7.37)
 * Buzzard–Verberkmoes, *Stably uniform affinoids are sheafy*
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

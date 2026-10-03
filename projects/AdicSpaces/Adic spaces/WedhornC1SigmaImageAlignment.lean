@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPerPieceLaurentCoverAssembly
-import «Adic spaces».WedhornLocalCompatFromTestFamily
+module
+
+public import «Adic spaces».WedhornPerPieceLaurentCoverAssembly
+public import «Adic spaces».WedhornLocalCompatFromTestFamily
 
 /-!
 # Wedhorn 8.34(ii) — C1 D_T ↔ σ-rescaled image alignment (T062)
@@ -126,6 +128,8 @@ C1 supplier closure.
   kernel postulates, and avoid native compilation and unchecked
   tactics.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

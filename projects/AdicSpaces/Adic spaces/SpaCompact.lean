@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».ValuationSpectrumCompact
-import «Adic spaces».AdicSpectrum
-import «Adic spaces».HuberRings
-import «Adic spaces».ValuationContinuity
+module
+
+public import «Adic spaces».ValuationSpectrumCompact
+public import «Adic spaces».AdicSpectrum
+public import «Adic spaces».HuberRings
+public import «Adic spaces».ValuationContinuity
 
 /-!
 # Compactness of the Adic Spectrum `Spa(A, A⁺)`
@@ -67,6 +69,8 @@ coarsening to archimedean quotients (Wedhorn §7.1), which is future work.
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Theorem 7.30, Corollary 7.32.
 * R. Huber, *Continuous valuations*, Math. Z. 212 (1993), 445–477.
 -/
+
+@[expose] public section
 
 open Topology
 

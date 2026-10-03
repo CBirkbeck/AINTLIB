@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.FieldPairingUnique
+module
+
+public import ModularCurves.WeilPairing.FieldPairingUnique
 
 /-!
 # The field pairing as a root of unity in the base field (WP-D3d step 2)
@@ -18,6 +20,8 @@ That is the shape the componentwise construction of `ζ` needs (`factorRootOfUni
 each component of the cover, the pairing of the tautological basis is a root of unity in that
 component's function field.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

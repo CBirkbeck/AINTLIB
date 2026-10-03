@@ -1,8 +1,10 @@
-import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
-import ModularCurves.ForMathlib.AcyclicAffineOpenCover
-import ModularCurves.ForMathlib.AffinePatchBaseChange
-import ModularCurves.ForMathlib.SheafCohomologyExact
-import ModularCurves.ForMathlib.TwoOpenHOne
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
+public import ModularCurves.ForMathlib.AcyclicAffineOpenCover
+public import ModularCurves.ForMathlib.AffinePatchBaseChange
+public import ModularCurves.ForMathlib.SheafCohomologyExact
+public import ModularCurves.ForMathlib.TwoOpenHOne
 
 /-!
 # Cohomology of successive pole quotients
@@ -11,6 +13,8 @@ This file proves the first cohomological consequence of the pole-filtration supp
 calculation. A successive quotient has vanishing first cohomology whenever an affine
 open containing its support and an open disjoint from the section cover the curve.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

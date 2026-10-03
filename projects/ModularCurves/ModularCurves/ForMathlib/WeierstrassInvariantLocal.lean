@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.WeierstrassInvariant
-import ModularCurves.ForMathlib.InvariantLocalization
+module
+
+public import ModularCurves.ForMathlib.WeierstrassInvariant
+public import ModularCurves.ForMathlib.InvariantLocalization
 
 /-!
 # a5-P-loc: localized descent + spread of the invariant Weierstrass model
@@ -23,6 +25,8 @@ Strategy:
 3. Spread: all the finitely many numerators/denominators involved live over a single basic
    localization `Away a`, `a ∉ p`, and the equations descend by `IsLocalization` uniqueness.
 -/
+
+@[expose] public section
 
 
 /-!

@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.IntegralClosure
-import HasseWeil.Foundation.Curves.NormBezout
-import HasseWeil.Foundation.Curves.Valuation.Valuation
-import Mathlib.FieldTheory.RatFunc.Degree
-import Mathlib.RingTheory.Localization.NormTrace
+module
+
+public import HasseWeil.Foundation.Curves.IntegralClosure
+public import HasseWeil.Foundation.Curves.NormBezout
+public import HasseWeil.Foundation.Curves.Valuation.Valuation
+public import Mathlib.FieldTheory.RatFunc.Degree
+public import Mathlib.RingTheory.Localization.NormTrace
 
 /-!
 # The order at the point at infinity on a smooth plane curve
@@ -48,6 +50,8 @@ This closes (partial form) ticket `T-II-INFRA-D-002`.
 * [Hartshorne, *Algebraic Geometry*], II.6.10 (norm approach to counting
   zeros and poles on a smooth curve).
 -/
+
+@[expose] public section
 
 open scoped RatFunc Polynomial.Bivariate
 

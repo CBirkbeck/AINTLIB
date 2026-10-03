@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
-import Mathlib.AlgebraicGeometry.Morphisms.Separated
-import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+public import Mathlib.AlgebraicGeometry.Morphisms.Separated
+public import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 
 /-!
 # The agreement locus of two maps into an étale morphism is clopen (YFULL route γ)
@@ -23,6 +25,8 @@ where two of the `N²` torsion sections `[a]P + [b]Q` coincide is the agreement 
 two sections of the finite-étale `E[N] ×_S E[N] → S`, hence clopen; the full-level locus
 is the complement of the union of these finitely many closed agreement loci, hence open.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

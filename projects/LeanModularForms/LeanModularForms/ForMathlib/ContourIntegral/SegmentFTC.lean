@@ -3,9 +3,11 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Data.Complex.Basic
-import Mathlib.Order.Interval.Basic
-import LeanModularForms.ForMathlib.SegmentFTC
+module
+
+public import Mathlib.Data.Complex.Basic
+public import Mathlib.Order.Interval.Basic
+public import LeanModularForms.ForMathlib.SegmentFTC
 
 /-!
 # Telescoping FTC for Log-Derivative on Piecewise Segments
@@ -20,6 +22,8 @@ the total integral reduces to log(g(t₀-δ)) - log(g(t₀+δ)).
 * `ftc_telescope_closed_split` — for closed curves, the full integral telescopes
   to the log difference at the crossing boundary
 -/
+
+@[expose] public section
 
 open Set MeasureTheory Complex
 open scoped Interval

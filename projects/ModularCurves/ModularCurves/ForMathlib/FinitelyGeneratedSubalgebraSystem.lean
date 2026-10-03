@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.AlgebraicGeometry.AffineTransitionLimit
-import Mathlib.RingTheory.FiniteType
+module
+
+public import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+public import Mathlib.RingTheory.FiniteType
 
 /-!
 # Finitely generated subalgebras as a filtered system
@@ -13,6 +15,8 @@ Every commutative ring is the filtered colimit of its finitely generated `ℤ`-s
 Each stage is Noetherian, and applying `Spec` gives the corresponding cofiltered limit of
 affine schemes.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

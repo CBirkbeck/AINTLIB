@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.Bridge
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.PthPowerLift
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
-import BernoulliRegular.FLT37.LehmerVandiver.PollaczekLog.FLT37Closure
-import BernoulliRegular.FLT37.Final
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.Bridge
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.PthPowerLift
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
+public import BernoulliRegular.FLT37.LehmerVandiver.PollaczekLog.FLT37Closure
+public import BernoulliRegular.FLT37.Final
 
 /-!
 # LV005 main: `¬ IsPthPowerModPrime pollaczekUnitPlus ⇒ ¬ p ∣ hPlus`
@@ -29,6 +31,8 @@ instantiate it with the FLT37 bundle.
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed. (Springer
   GTM 83), Corollary 8.19 (p. 158).
 -/
+
+@[expose] public section
 
 noncomputable section
 

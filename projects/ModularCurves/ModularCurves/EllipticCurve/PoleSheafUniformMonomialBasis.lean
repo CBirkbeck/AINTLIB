@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafMonomialSequence
-import ModularCurves.EllipticCurve.PoleSheafSuccessorBasis
-import ModularCurves.EllipticCurve.PoleSheafSuccessorHOne
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafMonomialSequence
+public import ModularCurves.EllipticCurve.PoleSheafSuccessorBasis
+public import ModularCurves.EllipticCurve.PoleSheafSuccessorHOne
 
 /-!
 # Compatible monomial bases in every positive pole order
@@ -15,6 +17,10 @@ and three extend recursively to compatible bases of all positive pole modules.
 The last vector in each successor basis is the corresponding normalized
 monomial.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.Reduction.IrregularEigencollapseGenericDworkFactor
+module
+
+public import BernoulliRegular.FLT37.Eichler.Reduction.IrregularEigencollapseGenericDworkFactor
 
 /-!
 # The level-`72` mod-`37²` Dwork column coordinate: the proven first-order lift, and the smallest

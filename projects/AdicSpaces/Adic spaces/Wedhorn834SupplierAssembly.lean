@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornBaseSpaFinalBridgeStrong
-import «Adic spaces».WedhornC1StrongSupplierBridge
+module
+
+public import «Adic spaces».WedhornBaseSpaFinalBridgeStrong
+public import «Adic spaces».WedhornC1StrongSupplierBridge
 
 /-!
 # Wedhorn 8.34(ii) Supplier Assembly Skeleton
@@ -87,6 +89,8 @@ a residual.
   non-open-prime content.
 * Axioms (verified post-build): only `propext`, `Classical.choice`,
   `Quot.sound`. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

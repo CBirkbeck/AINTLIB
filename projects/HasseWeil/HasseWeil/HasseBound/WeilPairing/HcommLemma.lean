@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
-import HasseWeil.Isogeny.VerschiebungFactorization
+module
+
+public import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
+public import HasseWeil.Isogeny.VerschiebungFactorization
 
 /-!
 # The translation–isogeny pullback commutation (`hcomm`)
@@ -45,6 +47,8 @@ is automatic from `ℓ •`-linearity of `Point.map τ_S` — this is the shippe
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, III.8.2 (the translation covariance
 behind the separable adjoint).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

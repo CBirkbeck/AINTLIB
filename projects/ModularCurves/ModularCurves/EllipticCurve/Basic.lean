@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Fiber
+module
 
-import ModularCurves.EllipticCurve.WeierstrassModel
+public import Mathlib.AlgebraicGeometry.Fiber
+
+public import ModularCurves.EllipticCurve.WeierstrassModel
 
 /-!
 # Elliptic curves over a base scheme: the geometric record
@@ -46,6 +48,8 @@ identification. Once coherent cohomology lands, the equivalence with the genus
 formulation becomes a theorem (ticket `T-A9`, API gap AG-COH) and the geometric-fibre
 genus form becomes the statement of record.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

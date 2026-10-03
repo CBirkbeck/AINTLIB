@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.RepresentationTheory.Coinvariants
+module
+
+public import Mathlib.RepresentationTheory.Coinvariants
 
 /-!
 # Finiteness of coinvariants from a finite generating set of orbits
@@ -22,6 +24,8 @@ collapses onto the image of the finite generating set, which therefore spans the
 * `Representation.Coinvariants.finite_of_span_orbit_top`: if the span of the orbit of a finite set
   is all of `V`, then `Representation.Coinvariants ρ` is a finite `k`-module.
 -/
+
+@[expose] public section
 
 namespace Representation.Coinvariants
 

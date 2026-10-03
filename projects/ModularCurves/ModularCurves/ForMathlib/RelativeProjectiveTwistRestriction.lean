@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.RelativeProjectiveFactorizationAffineMap
-import ModularCurves.ForMathlib.RelativeProjectiveTwist
+module
+
+public import ModularCurves.ForMathlib.RelativeProjectiveFactorizationAffineMap
+public import ModularCurves.ForMathlib.RelativeProjectiveTwist
 
 /-!
 # Restricting twists from a relative projective factorization
@@ -14,6 +16,8 @@ import ModularCurves.ForMathlib.RelativeProjectiveTwist
 Restriction of a chosen relative projective twist is pullback along the restricted source
 inclusion followed by the chosen projective map.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

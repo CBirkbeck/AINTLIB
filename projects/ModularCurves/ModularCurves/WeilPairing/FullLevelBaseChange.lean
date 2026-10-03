@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.FullLevelPairing
-import ModularCurves.Moduli.GammaHRepresentability
+module
+
+public import ModularCurves.WeilPairing.FullLevelPairing
+public import ModularCurves.Moduli.GammaHRepresentability
 
 /-!
 # The level trivialisation commutes with base change (route β, item (A) step 1)
@@ -24,6 +26,8 @@ The proof works the **right-hand** side down: rewriting the left first unfolds
 `↑(v₀ • P + v₁ • Q)` into a `CartesianMonoidalCategory.lift …` normal form that nothing matches
 afterwards.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

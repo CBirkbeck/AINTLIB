@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornStrengthenedC1
-import «Adic spaces».WedhornCoverPieceStructuralData
+module
+
+public import «Adic spaces».WedhornStrengthenedC1
+public import «Adic spaces».WedhornCoverPieceStructuralData
 
 /-!
 # Wedhorn 8.34(ii) — Cover-piece source-restricted C1 supplier interface (T038)
@@ -53,6 +55,8 @@ in favour of T037's per-`w` source-restricted form.
   Spa rational-bound claims, T001/Lane-B, Cor 8.32/Jacobson, faithful-
   flatness, Zavyalov, or bivariate-overlap content.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

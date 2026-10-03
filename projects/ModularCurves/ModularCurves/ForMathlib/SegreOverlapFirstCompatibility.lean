@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from the first-chart block of Clawristotle's
 `CoherentCohomologyFinite.SegreStandardOverlapCompatibility`.
 -/
-import ModularCurves.ForMathlib.SegreProductOverlapLocalization
+module
+
+public import ModularCurves.ForMathlib.SegreProductOverlapLocalization
 
 /-!
 # First-chart compatibility of the localized Segre equivalence
@@ -14,6 +16,8 @@ import ModularCurves.ForMathlib.SegreProductOverlapLocalization
 The localized standard-chart equivalence extends the original Segre chart map. Contravariantly,
 the corresponding affine-spectrum isomorphism commutes with the maps to the first charts.
 -/
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry
 open HomogeneousLocalization

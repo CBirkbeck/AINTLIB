@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.Definition
-import HasseWeil.FormalGroup.Logarithm
+module
+
+public import HasseWeil.FormalGroup.Definition
+public import HasseWeil.FormalGroup.Logarithm
 
 /-!
 # The formal inverse of a formal group (Silverman IV.2)
@@ -43,6 +45,8 @@ previously-computed coefficients.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.2.
 -/
+
+@[expose] public section
 
 set_option linter.dupNamespace false
 

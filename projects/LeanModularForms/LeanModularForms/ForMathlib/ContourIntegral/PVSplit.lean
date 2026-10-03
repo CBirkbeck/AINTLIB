@@ -3,12 +3,14 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.ClassicalCPV
-import Mathlib.Analysis.Calculus.Deriv.Basic
-import Mathlib.Analysis.Complex.Exponential
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-import Mathlib.Data.Complex.Basic
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+module
+
+public import LeanModularForms.ForMathlib.ClassicalCPV
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.Complex.Exponential
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Mathlib.Data.Complex.Basic
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 /-!
 # PV Integral Splitting at Crossings
@@ -26,6 +28,8 @@ On the far segments, the cutoff condition is satisfied so the integrand equals
 * `pv_split_at_crossing` — the PV cutoff integral equals the sum of left and
   right integrals of `(γ t - s)⁻¹ * deriv γ t`, where the middle part is zero.
 -/
+
+@[expose] public section
 
 open Set MeasureTheory Complex Filter intervalIntegral
 

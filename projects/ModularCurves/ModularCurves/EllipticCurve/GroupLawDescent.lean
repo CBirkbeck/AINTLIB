@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.GroupLaw
-import ModularCurves.EllipticCurve.GroupLawConstruction
-import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
-import ModularCurves.EllipticCurve.GroupLaw
-import ModularCurves.EllipticCurve.RecordGroupUnique
-import ModularCurves.EllipticCurve.Comparison
-import ModularCurves.EllipticCurve.ModelVCEquivariance
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.EllipticCurve.GroupLaw
+public import ModularCurves.EllipticCurve.GroupLawConstruction
+public import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
+public import ModularCurves.EllipticCurve.GroupLaw
+public import ModularCurves.EllipticCurve.RecordGroupUnique
+public import ModularCurves.EllipticCurve.Comparison
+public import ModularCurves.EllipticCurve.ModelVCEquivariance
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Descent of the group law to every locally-Weierstrass family
@@ -28,6 +30,10 @@ hence globally by the cover extensionality. This yields the existence milestone 
 Sources: reviewer round 1 §3/§Q5 (existence by base change + atlas gluing, valid over
 non-reduced `S`); audits A1/A6; `Scheme.Cover.glueMorphisms`/`hom_ext` (mathlib, verified).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 -- v4.33 bump: opens/hom coercions are no longer transparent enough for the
 -- `≫`-associativity and `comp_apply` rewrites below.

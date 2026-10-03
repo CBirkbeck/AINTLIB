@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafModuleCechTopSections
+module
+
+public import ModularCurves.ForMathlib.SheafModuleCechTopSections
 
 /-!
 # Top sections of module-valued sheaf Cech complexes
@@ -12,6 +14,10 @@ The degreewise comparison between top sections of the sheaf-level Cech
 complex and the native module-valued Cech complex commutes with cofaces and
 differentials.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

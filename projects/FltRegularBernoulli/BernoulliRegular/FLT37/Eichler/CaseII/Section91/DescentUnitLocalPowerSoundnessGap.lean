@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitResidueIdentification
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AssumptionIIFromR3
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitResidueIdentification
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AssumptionIIFromR3
 
 /-!
 # [FLT37-CASEII-R4(i)] The abstract↔real gap for the §9.1 identification, characterised honestly

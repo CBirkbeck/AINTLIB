@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».AdicSpectrum
-import «Adic spaces».Bounded
+module
+
+public import «Adic spaces».AdicSpectrum
+public import «Adic spaces».Bounded
 
 /-!
 # Affinoid Rings
@@ -29,6 +31,8 @@ following Definition 7.14 and Remark 7.15 of [Wedhorn, *Adic Spaces*].
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Definition 7.14, Remark 7.15
 -/
+
+@[expose] public section
 
 open Filter Topology
 

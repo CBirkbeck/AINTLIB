@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.Divisors
-import Mathlib.FieldTheory.IsAlgClosed.Basic
-import Mathlib.FieldTheory.RatFunc.Degree
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.Divisors
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.FieldTheory.RatFunc.Degree
 
 /-!
 # Projective divisors on a smooth plane curve
@@ -51,6 +53,8 @@ equation, the projective closure has a unique point at infinity
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.3 (projective form).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

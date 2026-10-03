@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DvdZFactorCountDescent
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DvdZFactorCountDescent
 
 /-!
 # [FLT37-CASEII-R2] The non-`p`-content gap of the free-content Case-II descent: dissolved

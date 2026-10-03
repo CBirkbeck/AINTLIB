@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.Moduli.LevelSpaces
-import ModularCurves.ForMathlib.OpenImmersionOfSection
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.Moduli.LevelSpaces
+public import ModularCurves.ForMathlib.OpenImmersionOfSection
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The tautological full-level section (YFULL route γ, [YF-TAUT])
@@ -25,6 +27,10 @@ the closed immersion `levelSpaceΓι` to an open immersion — the `Y(N)` clopen
 classifier leaf `[YF-CLASSIFIER]` (the divisor↔iso dictionary); this file is the
 construction-free plumbing that turns it into a section.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

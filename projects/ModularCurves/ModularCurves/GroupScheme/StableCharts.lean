@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.TranslationAction
-import Mathlib.AlgebraicGeometry.Pullbacks
+module
+
+public import ModularCurves.GroupScheme.TranslationAction
+public import Mathlib.AlgebraicGeometry.Pullbacks
 
 /-!
 # Stable opens for the translation action
@@ -22,6 +24,10 @@ the chart co-action `[HG-C1b]`.
 * `FiniteLocallyFreeSubgroup.restrictedAction` / `restrictedProj` — the two legs of the
   action restricted to a stable open, as morphisms `(pr⁻¹U) ⟶ U`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
 open scoped TensorProduct

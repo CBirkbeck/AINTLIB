@@ -1,4 +1,6 @@
-import «Adic spaces».Basic
+module
+
+public import «Adic spaces».Basic
 
 /-!
 # Nonarchimedean Scottish Book — Problem 18
@@ -27,3 +29,5 @@ Open.
   étale site of Spa(A, A+).
 - **Perfectoid**: A Tate ring satisfying the perfectoid condition.
 -/
+
+@[expose] public section

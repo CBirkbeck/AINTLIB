@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.Labels.Encoding
-import LeanModularForms.Labels.HeckeFieldArithmetic
-import LeanModularForms.Labels.HeckeAlgFiniteFinal
-import LeanModularForms.StrongMultiplicityOne.ConstantMultiple
-import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
-import Mathlib.NumberTheory.NumberField.Basic
+module
+
+public import LeanModularForms.Labels.Encoding
+public import LeanModularForms.Labels.HeckeFieldArithmetic
+public import LeanModularForms.Labels.HeckeAlgFiniteFinal
+public import LeanModularForms.StrongMultiplicityOne.ConstantMultiple
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
 
 /-!
 # LMFDB newform-orbit label `x`
@@ -99,6 +101,8 @@ structure built on it is real and sorry-free.
 * `Newform.newformOrbitLabel_injOn_orbits` — injectivity of the label on distinct orbits, via the
   orbit-level trace separation `Newform.traceSeq_injOn_orbits` (proved).
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

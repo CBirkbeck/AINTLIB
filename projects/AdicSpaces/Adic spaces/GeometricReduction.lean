@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LaurentRefinement
-import «Adic spaces».LaurentOverlapConsumer
-import «Adic spaces».RationalRefinement
-import «Adic spaces».StandardCover
+module
+
+public import «Adic spaces».LaurentRefinement
+public import «Adic spaces».LaurentOverlapConsumer
+public import «Adic spaces».RationalRefinement
+public import «Adic spaces».StandardCover
 
 /-!
 # Geometric reduction: from Laurent-cover acyclicity to arbitrary-cover acyclicity
@@ -97,6 +99,10 @@ following external dependencies (tracked in `.mathlib-quality/tickets.md`):
 * [Hübner, *Adic spaces* (arXiv 2405.06435), Lemma 3.7, Lemma 3.8]
 * [T. Wedhorn, *Adic Spaces* (2019 lecture notes), Lemma 8.33, Lemma 8.34]
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

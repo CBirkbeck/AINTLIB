@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.NTorsion.TorsionPow
+module
+
+public import HasseWeil.NTorsion.TorsionPow
 
 /-!
 # The inverse system `… → E[ℓⁿ⁺¹] --[ℓ]--> E[ℓⁿ] → …`
@@ -23,6 +25,8 @@ Reference: Silverman, *The Arithmetic of Elliptic Curves* (2nd ed), §III.7, p. 
 ("the natural maps `E[ℓⁿ⁺¹] --[ℓ]--> E[ℓⁿ]`") and p. 88 ("commutes with the
 multiplication-by-`ℓ` map").
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

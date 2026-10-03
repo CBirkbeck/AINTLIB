@@ -1,4 +1,6 @@
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapSectionAwayIso
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapSectionAwayIso
 
 /-!
 # Global finiteness of the pole-sheaf Weierstrass comparison
@@ -6,6 +8,8 @@ import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapSectionAwayIso
 A structurally compatible comparison is finite once it is an isomorphism on
 the exact complement of the marked section.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

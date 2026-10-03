@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.FlatnessConditions
+module
+
+public import LeanModularForms.ForMathlib.FlatnessConditions
 
 /-!
 # Chord-to-tangent bounds from flatness
@@ -33,6 +35,8 @@ definition, which is the cleanest extraction. The full chord bound (orthogonal
 plus parallel correction) is left as a documented sub-task: it requires
 Pythagoras + sqrt asymptotic.
 -/
+
+@[expose] public section
 
 open Set Filter Topology Asymptotics
 

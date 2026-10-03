@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.FieldTheory.Finite.Basic
-import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
-import Mathlib.RingTheory.Localization.FractionRing
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+public import Mathlib.RingTheory.Localization.FractionRing
 
 /-!
 # The arithmetic Frobenius automorphism `σ` of the function field `K̄(E)`
@@ -57,6 +59,8 @@ are *not* in this file; see `FrobeniusGaloisScaling.lean` (`frobeniusGaloisData_
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.8.1 (Galois equivariance of the Weil pairing).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

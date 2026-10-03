@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.ChordIdentity
-import ModularCurves.ForMathlib.PullbackTensorGeneral
-import ModularCurves.Picard.IdealModulePullback
-import ModularCurves.EllipticCurve.PointsDictionary
+module
+
+public import ModularCurves.WeilPairing.ChordIdentity
+public import ModularCurves.ForMathlib.PullbackTensorGeneral
+public import ModularCurves.Picard.IdealModulePullback
+public import ModularCurves.EllipticCurve.PointsDictionary
 
 /-!
 # The tautological pair of points (W1-d3.0)
@@ -21,6 +23,8 @@ This file constructs that pair. It is pure fibre-product plumbing (no geometry),
 is what lets the chord–tangent computation be carried out once, over a base which for
 the universal Weierstrass family is a domain.
 -/
+
+@[expose] public section
 
 universe u
 

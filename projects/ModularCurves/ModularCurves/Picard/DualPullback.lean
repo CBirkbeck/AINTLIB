@@ -1,5 +1,7 @@
-import ModularCurves.Picard.DualRestrict
-import ModularCurves.Picard.UnitPullback
+module
+
+public import ModularCurves.Picard.DualRestrict
+public import ModularCurves.Picard.UnitPullback
 
 /-!
 # Pullback of dual modules
@@ -7,6 +9,8 @@ import ModularCurves.Picard.UnitPullback
 This file constructs the canonical comparison from the pullback of a module dual to the
 dual of its pullback.  For invertible modules the comparison is an isomorphism.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Opposite
 

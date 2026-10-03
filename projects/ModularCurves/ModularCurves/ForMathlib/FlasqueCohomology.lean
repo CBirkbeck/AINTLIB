@@ -1,8 +1,11 @@
-import Mathlib.CategoryTheory.Abelian.GrothendieckCategory.EnoughInjectives
-import Mathlib.CategoryTheory.Abelian.Injective.Resolution
-import Mathlib.CategoryTheory.Limits.Constructions.EpiMono
-import Mathlib.Topology.Sheaves.Flasque
-import ModularCurves.ForMathlib.SheafCohomologyExact
+module
+
+import Mathlib.Algebra.Category.Grp.Zero
+public import Mathlib.CategoryTheory.Abelian.GrothendieckCategory.EnoughInjectives
+public import Mathlib.CategoryTheory.Abelian.Injective.Resolution
+public import Mathlib.CategoryTheory.Limits.Constructions.EpiMono
+public import Mathlib.Topology.Sheaves.Flasque
+public import ModularCurves.ForMathlib.SheafCohomologyExact
 
 /-!
 # Cohomology of flasque sheaves
@@ -12,6 +15,10 @@ PR #35790. It constructs the free abelian sheaves which detect restriction maps,
 proves that injective additive sheaves are flasque, and deduces vanishing of their
 positive-degree sheaf cohomology.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace Opposite Limits
 

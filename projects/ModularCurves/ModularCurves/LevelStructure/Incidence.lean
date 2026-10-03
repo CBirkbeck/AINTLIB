@@ -1,11 +1,13 @@
-import ModularCurves.LevelStructure.ExactOrder
-import ModularCurves.LevelStructure.Basic
-import Mathlib.Algebra.Module.FinitePresentation
-import Mathlib.Algebra.Module.LocalizedModule.Submodule
-import Mathlib.LinearAlgebra.Basis.Defs
-import Mathlib.LinearAlgebra.TensorProduct.Basis
-import Mathlib.RingTheory.Localization.Module
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.LevelStructure.ExactOrder
+public import ModularCurves.LevelStructure.Basic
+public import Mathlib.Algebra.Module.FinitePresentation
+public import Mathlib.Algebra.Module.LocalizedModule.Submodule
+public import Mathlib.LinearAlgebra.Basis.Defs
+public import Mathlib.LinearAlgebra.TensorProduct.Basis
+public import Mathlib.RingTheory.Localization.Module
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The Cartier-incidence representability block (KM 1.3; expert-review addition)
@@ -40,6 +42,10 @@ finite abelian `A`; this file states the two instances the modular-curve program
 consumes (`A = ℤ/N`: the exact-order locus in `E[N]`; `A = (ℤ/N)²`: the full-level
 locus in `E[N] ×_S E[N]`), with the general statement recorded as ticket `T-D21`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

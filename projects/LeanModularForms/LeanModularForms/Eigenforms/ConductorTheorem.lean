@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.Analysis.Complex.UpperHalfPlane.Manifold
-import Mathlib.NumberTheory.DirichletCharacter.Basic
-import Mathlib.NumberTheory.ModularForms.QExpansion
-import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
-import LeanModularForms.HeckeRIngs.GL2.LevelRaise
+module
+
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Manifold
+public import Mathlib.NumberTheory.DirichletCharacter.Basic
+public import Mathlib.NumberTheory.ModularForms.QExpansion
+public import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
+public import LeanModularForms.HeckeRIngs.GL2.LevelRaise
 
 /-!
 # Miyake Theorem 4.6.4 — Conductor theorem
@@ -32,6 +34,10 @@ The main results are `conductor_theorem_dichotomy` /
 
 * Miyake, *Modular Forms*, Theorem 4.6.4.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup CongruenceSubgroup CuspForm
 

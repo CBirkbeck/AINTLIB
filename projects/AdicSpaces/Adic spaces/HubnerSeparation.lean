@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LaurentRefinement
+module
+
+public import «Adic spaces».LaurentRefinement
 
 /-!
 # Hübner-route separation (Hübner Lemma 3.8 / Wedhorn Thm 8.28 Part 1)
@@ -87,6 +89,8 @@ route) — escalation packet in `.mathlib-quality/chatgpt-packet-hubner-nondomai
 * Mathlib `Ideal.mem_iInf_smul_pow_eq_bot_iff` — general Krull without
   `[IsDomain]`, only `[IsNoetherianRing R]` + `[Module.Finite R M]`.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

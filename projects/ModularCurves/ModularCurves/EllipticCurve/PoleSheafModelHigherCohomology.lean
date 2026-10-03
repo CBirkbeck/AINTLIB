@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.PoleSheafModelHOne
-import ModularCurves.ForMathlib.AcyclicAffineOpenCoverHPrime
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafModelHOne
+public import ModularCurves.ForMathlib.AcyclicAffineOpenCoverHPrime
 
 /-!
 # Higher cohomology of pole sheaves on Weierstrass models
@@ -8,6 +10,8 @@ The canonical affine `Z`-chart and affine section neighborhood cover a projectiv
 Weierstrass model. Mayer--Vietoris therefore gives vanishing above degree one for
 every quasicoherent pole sheaf.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

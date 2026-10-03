@@ -1,9 +1,11 @@
-import Mathlib.Algebra.Category.ModuleCat.Kernels
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
-import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
-import ModularCurves.ForMathlib.SheafCechInjectiveComparison
-import ModularCurves.ForMathlib.SheafCohomologyExact
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Kernels
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
+public import ModularCurves.ForMathlib.SheafCechInjectiveComparison
+public import ModularCurves.ForMathlib.SheafCohomologyExact
 
 /-!
 # Global sections as the kernel of the base-linear Cech differential
@@ -12,6 +14,8 @@ For a scheme module over a base scheme, identify its module of global sections
 with the kernel of the first differential in the base-linear Cech complex of an
 open cover.
 -/
+
+@[expose] public section
 
 open AlgebraicTopology CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

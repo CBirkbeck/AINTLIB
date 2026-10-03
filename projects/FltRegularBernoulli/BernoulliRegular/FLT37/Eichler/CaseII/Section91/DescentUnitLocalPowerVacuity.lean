@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitResidueIdentification
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitResidueIdentification
 
 /-!
 # [FLT37-CASEII-R4(i)] The producer-`δ` real-data §9.1 form is VACUOUS in the `ℓ ∣ z` regime

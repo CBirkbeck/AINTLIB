@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.AdicCompletion.Exactness
-import «Adic spaces».NoetherianTateModules
+module
+
+public import Mathlib.RingTheory.AdicCompletion.Exactness
+public import «Adic spaces».NoetherianTateModules
 
 /-!
 # Completion Preserves Strict Exact Sequences
@@ -34,6 +36,8 @@ and `map_injective`. These work for `AdicCompletion I M` (the projective limit
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §6.18, §8.28
 * Stacks Project, Tag 00MA (completion of Noetherian modules)
 -/
+
+@[expose] public section
 
 /-! ### Short exact sequences under completion -/
 

@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SheafCechSheafDifferential
+module
+
+public import ModularCurves.ForMathlib.SheafCechSheafDifferential
 
 /-!
 # The sheaf-level Cech complex
@@ -8,6 +10,10 @@ associated to the presheaf of restriction-pushforward factors. In particular, th
 that two consecutive differentials compose to zero follows from the native cosimplicial
 construction.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

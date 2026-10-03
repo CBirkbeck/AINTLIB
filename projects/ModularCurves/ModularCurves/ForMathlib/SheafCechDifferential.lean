@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SheafCechCochains
+module
+
+public import ModularCurves.ForMathlib.SheafCechCochains
 
 /-!
 # The Cech differential on local sections
@@ -7,6 +9,8 @@ This file computes the coface maps and the alternating differential of mathlib's
 complex under `TopologicalSpace.cechCochainAddEquiv`. Each coface restricts the section
 indexed by the tuple obtained by deleting one entry.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

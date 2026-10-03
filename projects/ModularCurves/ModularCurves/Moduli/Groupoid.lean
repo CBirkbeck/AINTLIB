@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.EndomorphismDegree
-import ModularCurves.Moduli.EllCategory
+module
+
+public import ModularCurves.EllipticCurve.EndomorphismDegree
+public import ModularCurves.Moduli.EllCategory
 
 /-!
 # Groupoid-valued moduli of elliptic curves
@@ -23,6 +25,8 @@ automorphisms.
 * `aut_hom_eq_id_of_fullLevel`: an automorphism fixing a full level structure is the identity.
 * `aut_trivial_of_fullLevel`: the corresponding automorphism is the identity isomorphism.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 
