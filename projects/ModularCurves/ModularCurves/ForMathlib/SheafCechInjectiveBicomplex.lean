@@ -13,8 +13,6 @@ bicomplex has exact augmented rows in degree zero and exact rows in degree one. 
 the horizontal inputs for the degree-one total-complex comparison.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace

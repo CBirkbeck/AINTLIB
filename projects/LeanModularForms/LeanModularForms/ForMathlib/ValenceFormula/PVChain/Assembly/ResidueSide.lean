@@ -21,8 +21,6 @@ integral of `f'/f` around `fdBoundary_H H` tends to `2πi · Σ gWN · ord`.
   `2πi · Σ gWN · ord`
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup

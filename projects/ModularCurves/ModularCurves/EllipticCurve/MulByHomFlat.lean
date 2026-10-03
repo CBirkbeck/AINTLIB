@@ -1,5 +1,6 @@
 module
 
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
 public import ModularCurves.EllipticCurve.MulByHomFlatFibre
 public import ModularCurves.ForMathlib.FiniteFibrewiseFlat
 public import ModularCurves.ForMathlib.FinitePresentationCancel

@@ -13,8 +13,6 @@ are bijective. Combining this observation with finite synchronization gives one
 stage at which finitely many affine spectrum maps are all open immersions.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 universe u

@@ -52,8 +52,6 @@ Given `D : MultiPoleCrossData γ s` with `crossings.card = n`:
   arXiv:1808.00997v2 §3.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Filter Topology Set Complex MeasureTheory

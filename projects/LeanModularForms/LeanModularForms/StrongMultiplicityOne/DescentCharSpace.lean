@@ -30,8 +30,6 @@ split of `StrongMultiplicityOne.lean`.
   commutes with `q`-expansion coefficient extraction.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup

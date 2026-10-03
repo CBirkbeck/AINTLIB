@@ -856,6 +856,8 @@ private theorem projModelVCIso_congr₂ {S : Type u} [CommRing S] {C1 C2 : Varia
       = eqToHom (congrArg projModel (by rw [hC])) ≫ (projModelVCIso C2 V).hom := by
   subst hC; simp
 
+-- Match projModelVCIso_map: unfold the algebraMap supplied by the local RingHom algebra.
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Base-change naturality of the change-of-variables iso, for an arbitrary ring hom `ρ`
 (the two-ring form of `projModelVCIso_map_hom`). -/
 private theorem projModelVCIso_map₂ {S₀ S₁ : Type u} [CommRing S₀] [CommRing S₁]
@@ -864,10 +866,7 @@ private theorem projModelVCIso_map₂ {S₀ S₁ : Type u} [CommRing S₀] [Comm
       eqToHom (by rw [map_variableChange]) ≫
         (projModelVCIso (C.map ρ) (V.map ρ)).hom ≫ projModelBaseChange ρ V := by
   letI : Algebra S₀ S₁ := ρ.toAlgebra
-  have h := projModelVCIso_map (R' := S₁) C V
-  have he : (algebraMap S₀ S₁ : S₀ →+* S₁) = ρ := ρ.algebraMap_toAlgebra
-  rw [he] at h
-  exact h
+  exact projModelVCIso_map (R' := S₁) C V
 
 /-- Two-ring form of `isPullback_projModelBaseChange`: the eqToHom-free base-change square
 `isPullback_projModelBaseChangeOf` at the definitional target `V.map ρ`. -/

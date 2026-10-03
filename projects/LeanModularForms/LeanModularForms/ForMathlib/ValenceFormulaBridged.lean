@@ -31,8 +31,6 @@ theorem that requires only `hf : f ≠ 0` as input.
   finsum-over-orbits form, proved unconditionally
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup

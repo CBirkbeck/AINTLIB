@@ -11,8 +11,6 @@ open cover, then packages the augmentation and the Cech complex into an acyclic 
 complex.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite

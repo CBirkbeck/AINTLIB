@@ -35,8 +35,6 @@ index coprime to `N` is an oldform.  The framework captures "support on multiple
 * Miyake, *Modular Forms*, §4.6.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open scoped ModularForm

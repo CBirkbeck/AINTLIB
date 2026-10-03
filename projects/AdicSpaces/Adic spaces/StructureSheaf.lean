@@ -43,8 +43,6 @@ We define the structure sheaf `𝒪_X` on `X = Spa(A, A⁺)` following §8.1 of 
   Theorem 8.28(c)
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 universe u

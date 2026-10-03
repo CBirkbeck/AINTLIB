@@ -24,8 +24,6 @@ compatibility `norm_levelNorm_sub_one_lt_one`, the `𝒪_n`-residue `residueZp`,
 Teichmüller system `omegaNCU`).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman

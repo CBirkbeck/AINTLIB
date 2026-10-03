@@ -14,8 +14,6 @@ The descent witness, the inductive step, and the subset-indexed helper for
 Miyake Theorem 4.6.8. Part of a multi-file split of `StrongMultiplicityOne.lean`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup

@@ -45,8 +45,6 @@ level-raise of a `T`-invariant function.
 * [Miy] Miyake, *Modular Forms*, §4.6
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

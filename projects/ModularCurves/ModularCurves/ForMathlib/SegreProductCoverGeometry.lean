@@ -8,6 +8,7 @@ Adapted from the first geometric block of Clawristotle's
 -/
 module
 
+import Mathlib.AlgebraicGeometry.PullbackCarrier
 public import ModularCurves.ForMathlib.SegreProductStandardCover
 public import ModularCurves.ForMathlib.SegreStandardChartOverlapAlgebra
 

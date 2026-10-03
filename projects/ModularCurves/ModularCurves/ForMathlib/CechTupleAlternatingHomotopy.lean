@@ -17,8 +17,6 @@ This file formalizes the support-preserving free-chain construction in Conrad,
 homotopy in Stacks Project, Lemma 20.23.6 (Tag 01FM).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Set

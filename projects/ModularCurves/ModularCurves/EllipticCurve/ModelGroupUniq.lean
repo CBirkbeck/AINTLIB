@@ -24,8 +24,6 @@ The keystone consumed by the records-level canonicity primitive (K3): every poin
 structure on `modelOver W` has the T-G4 multiplication `mulOver W`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory

@@ -36,8 +36,6 @@ where `m(ε) → 2`.
 * `tendsto_pvIntegral_arc_bridge` — final bridge for Assembly.lean
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup

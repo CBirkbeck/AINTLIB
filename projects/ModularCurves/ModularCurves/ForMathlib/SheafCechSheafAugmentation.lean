@@ -10,8 +10,6 @@ sheaf-level Cech complex. Its composite with the first differential is zero beca
 two degree-zero cofaces agree after restriction.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite

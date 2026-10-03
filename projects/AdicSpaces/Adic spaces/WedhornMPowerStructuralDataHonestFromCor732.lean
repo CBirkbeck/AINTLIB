@@ -122,8 +122,6 @@ audit). This file's wrapper is callsite-ready packaging.
   `vle_iff_mul_unit_right` (σ-cancellation),
   `mem_localizedTestFamily_iff` (test-family branch case-split). -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 namespace ValuationSpectrum

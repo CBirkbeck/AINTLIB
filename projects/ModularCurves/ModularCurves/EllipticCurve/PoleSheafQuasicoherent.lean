@@ -15,6 +15,8 @@ quasicoherent. This is the sheaf-theoretic input required by affine vanishing an
 cohomology-and-base-change arguments.
 -/
 
+set_option backward.privateInPublic true
+
 @[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace

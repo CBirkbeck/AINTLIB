@@ -16,8 +16,6 @@ through one of the two regularity opens (`blOpen_cover` + the unique point of `S
 the multiplication restricts to the corresponding Bosma–Lenstra law.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory Limits WeierstrassCurve

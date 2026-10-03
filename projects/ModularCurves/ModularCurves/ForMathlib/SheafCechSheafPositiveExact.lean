@@ -12,8 +12,6 @@ cycle on a neighborhood contained in one cover member, where the local contracti
 a preimage.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite

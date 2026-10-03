@@ -25,8 +25,6 @@ together with closure, boundary and containment lemmas for them.
 * `sArcOfS`, `sVertOfS` — arc and vertical singular sets of `S`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup

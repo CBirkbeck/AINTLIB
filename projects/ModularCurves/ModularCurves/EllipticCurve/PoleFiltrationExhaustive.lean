@@ -14,8 +14,6 @@ Every regular function on the affine Weierstrass chart has some finite pole
 order at the zero section.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open AlgebraicGeometry

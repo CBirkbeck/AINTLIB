@@ -13,8 +13,6 @@ of a commutative algebra square is used to reflect the pushout condition from
 a filtered colimit to one finite stage.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 universe u

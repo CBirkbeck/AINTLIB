@@ -34,8 +34,6 @@ level Γ₀(N).
 * Diamond–Shurman, §5.2, Proposition 5.2.1.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Matrix Subgroup.Commensurable Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup

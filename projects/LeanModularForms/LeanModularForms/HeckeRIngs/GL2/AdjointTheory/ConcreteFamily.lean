@@ -15,8 +15,6 @@ concrete `Option (Fin p)` projective T_p tile family and the resulting
 symmetric-form adjoint identity for `petN`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

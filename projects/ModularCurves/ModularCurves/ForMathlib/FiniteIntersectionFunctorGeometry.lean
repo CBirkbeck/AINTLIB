@@ -10,8 +10,6 @@ The coordinate-algebra functor of a family of affine open intersections has open
 singleton-to-pair spectrum maps, and its singleton/pair/triple squares are pushouts.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 universe u

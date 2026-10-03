@@ -39,8 +39,6 @@ destructurings live in instance-free helper lemmas, and cross-record morphism eq
 spelled with `eqToHom` (homogeneous) rather than `HEq`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj

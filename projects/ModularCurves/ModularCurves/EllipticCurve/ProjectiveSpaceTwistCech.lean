@@ -18,6 +18,8 @@ projective-space twists. It identifies the sections of `O(d)` on each ordered
 intersection with the sections of the structure sheaf there.
 -/
 
+set_option backward.privateInPublic true
+
 @[expose] public section
 
 namespace MvPolynomial

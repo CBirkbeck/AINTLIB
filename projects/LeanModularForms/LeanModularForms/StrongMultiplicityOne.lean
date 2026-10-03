@@ -42,8 +42,6 @@ the finale `strongMultiplicityOne` itself is assembled downstream in
   Math. Ann. **212** (1975), 285–315.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup

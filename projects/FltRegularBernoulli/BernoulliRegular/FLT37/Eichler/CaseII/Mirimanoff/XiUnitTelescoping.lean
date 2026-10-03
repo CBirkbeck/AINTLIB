@@ -48,8 +48,6 @@ particular `E₃₂ = pollaczekUnitPlus 37 K 32` — a `p`-th power mod `𝔩` (
   (Lemma 9.8, pp. 178–179).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

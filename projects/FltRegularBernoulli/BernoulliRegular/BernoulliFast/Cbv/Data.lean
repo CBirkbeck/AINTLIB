@@ -5,26 +5,21 @@ Authors: Bernoulli-Regular project contributors
 -/
 module
 
+public import BernoulliRegular.BernoulliFast.Cbv.Frac
 public import BernoulliRegular.BernoulliFast.Correctness
 public import Mathlib.Data.List.Defs
 
 /-!
 # Fraction arithmetic and certified Bernoulli recurrences
 
-This module supplies the fraction representation, arithmetic primitives,
-Bernoulli recurrences, and their rational correctness proofs. The proof-producing
+This module supplies Bernoulli recurrences and their rational correctness proofs,
+using the fraction arithmetic in `BernoulliFast.Cbv.Frac`. The proof-producing
 simprocs and concrete evaluation examples are in `BernoulliFast.Cbv`.
 -/
-
-set_option backward.privateInPublic true
 
 @[expose] public section
 
 namespace BernoulliRegular.BernoulliFast.Cbv
-
-/-- Integer numerator and natural denominator, used only for fast ground
-normalization by `cbv`. -/
-abbrev Frac := Int × Nat
 
 /-- Interpret a `Frac` as a rational number. -/
 def toRat (f : Frac) : ℚ :=
@@ -32,40 +27,6 @@ def toRat (f : Frac) : ℚ :=
 
 private def valid (f : Frac) : Prop :=
   f.2 ≠ 0
-
-/-! ## Fraction primitives -/
-
-private def simplify : Frac → Frac
-  | (_, 0) => (0, 1)
-  | (p, q) =>
-    let g := Nat.gcd p.natAbs q
-    (p / (g : Int), q / g)
-
-private def negF (f : Frac) : Frac := (-f.1, f.2)
-
-private def addF : Frac → Frac → Frac
-  | (p1, q1), (p2, q2) =>
-    let g := Nat.gcd q1 q2
-    let lcm := q1 / g * q2
-    simplify (p1 * ((q2 / g) : Int) + p2 * ((q1 / g) : Int), lcm)
-
-private def mulF : Frac → Frac → Frac
-  | (p1, q1), (p2, q2) =>
-    simplify (p1 * p2, q1 * q2)
-
-private def mulN (f : Frac) (c : Nat) : Frac :=
-  let (p, q) := f
-  let g := Nat.gcd c q
-  simplify (p * ((c / g) : Int), q / g)
-
-private def mulZ (f : Frac) (z : Int) : Frac :=
-  let (p, q) := f
-  simplify (p * z, q)
-
-private def divN (f : Frac) (d : Nat) : Frac :=
-  let (p, q) := f
-  let g := Nat.gcd p.natAbs d
-  simplify (p / (g : Int), q * (d / g))
 
 /-! ## Rational soundness of the fraction primitives -/
 
@@ -314,6 +275,7 @@ private theorem toRat_divN {f : Frac} (hf : f.2 ≠ 0) {d : Nat} (hd : d ≠ 0) 
 
 /-! ## Certified mirror of `BernoulliFast.bernoulliCompute` -/
 
+set_option backward.privateInPublic true in
 private def binomSumFrac.loop (m : Nat) : List Frac → Nat → Frac → Frac → Frac
   | [], _, _, acc => acc
   | b :: rest, k, c, acc =>
@@ -321,9 +283,11 @@ private def binomSumFrac.loop (m : Nat) : List Frac → Nat → Frac → Frac �
       (divN (mulZ c ((m : Int) - (k : Int))) (k + 1))
       (addF acc (mulF c b))
 
+set_option backward.privateInPublic true in
 private def binomSumFrac (bs : List Frac) (m : Nat) : Frac :=
   binomSumFrac.loop m bs 0 (1, 1) (0, 1)
 
+set_option backward.privateInPublic true in
 /-- The same recurrence as `BernoulliFast.bernoulliList`, but using the
 `Frac` primitives so concrete proofs can normalize by `cbv`. -/
 def bernoulliComputeFracList : Nat → List Frac
@@ -469,12 +433,14 @@ theorem bernoulliFrac_toRat_eq_bernoulli (n : Nat) :
 
 /-! ## Pascal-row recurrence -/
 
+set_option backward.privateInPublic true in
 /-- Next Pascal row: `[C(n,0), C(n,1), ..., C(n,n)]` to
 `[C(n+1,0), C(n+1,1), ..., C(n+1,n+1)]`. -/
 private def nextPascalRow (row : List Nat) : List Nat :=
   let mid := (row.zip row.tail).map (fun (a, b) ↦ a + b)
   [1] ++ mid ++ [1]
 
+set_option backward.privateInPublic true in
 /-- Given known Bernoulli numbers and the matching Pascal row, compute the
 next Bernoulli number.  `bs.zip row` truncates to `bs.length` pairs; the row
 is intentionally one coefficient longer. -/
@@ -483,11 +449,13 @@ private def nextBernoulli (bs : List Frac) (row : List Nat) : Frac :=
   let weightedSum := (bs.zip row).foldl (fun acc (bj, cj) ↦ addF acc (mulN bj cj)) (0, 1)
   negF (divN weightedSum (k + 1))
 
+set_option backward.privateInPublic true in
 /-- Carry the Pascal row as a second accumulator. -/
 private def go : Nat → List Frac → List Nat → List Frac
   | 0, bs, _ => bs
   | n + 1, bs, row => go n (bs ++ [nextBernoulli bs row]) (nextPascalRow row)
 
+set_option backward.privateInPublic true in
 /-- Pascal-row table `[B₀, ..., Bₙ]`, represented as `Frac`s. -/
 def bernoulliPascalFracList (n : Nat) : List Frac :=
   go n [(1, 1)] [1, 2, 1]

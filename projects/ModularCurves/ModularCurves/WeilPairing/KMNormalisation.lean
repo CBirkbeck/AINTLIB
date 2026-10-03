@@ -78,8 +78,6 @@ makes the trivialisation hypothesis `e i` unsatisfiable except in degenerate cas
 not live over base opens, which is exactly why the normalising constant has to be glued.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 universe u

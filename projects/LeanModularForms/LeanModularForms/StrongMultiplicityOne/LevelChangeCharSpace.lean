@@ -26,8 +26,6 @@ coprime filter and its iterated forms).
   cusp form with `q`-expansion supported on `(n, l') ≠ 1`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup

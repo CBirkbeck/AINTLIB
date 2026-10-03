@@ -10,8 +10,6 @@ strictly increasing tuples. This file constructs that projection as a chain
 map.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive

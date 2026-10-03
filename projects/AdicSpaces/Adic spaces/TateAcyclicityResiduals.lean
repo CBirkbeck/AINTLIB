@@ -39,8 +39,6 @@ This file develops the remaining inputs for Wedhorn's Tate acyclicity theorem an
 * `isSheafyComplete`: closure of the sheafiness argument.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 namespace ValuationSpectrum

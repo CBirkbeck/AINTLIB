@@ -15,8 +15,6 @@ unitarity, the GL₂⁺ coset adjoint lifted to `petN`, and the summand-level ad
 finite-union bridge.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

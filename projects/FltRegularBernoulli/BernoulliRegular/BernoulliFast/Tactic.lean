@@ -36,7 +36,7 @@ example : (691 : ℤ) ∣ (bernoulli 12).num := by bernoulli_decide
 
 Only the standard axioms used by rational arithmetic.  No `native_decide`; the
 custom fraction representation is connected to `ℚ` by theorem-level proofs in
-`BernoulliRegular.BernoulliFast.Cbv`.
+`BernoulliRegular.BernoulliFast.Cbv.Data`.
 -/
 
 @[expose] public section

@@ -48,8 +48,6 @@ When `p ∣ N` the diamond operator `⟨p⟩ = 0`, so the recurrence simplifies 
 * [Miy] Miyake, *Modular Forms*, §4.5
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Matrix Subgroup.Commensurable Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup

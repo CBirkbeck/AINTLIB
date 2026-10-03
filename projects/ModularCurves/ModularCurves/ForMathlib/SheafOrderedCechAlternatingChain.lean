@@ -11,8 +11,6 @@ cochains commutes with the Cech differentials. Consequently, the ordered
 complex is a chain-level retract of the native complex.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive

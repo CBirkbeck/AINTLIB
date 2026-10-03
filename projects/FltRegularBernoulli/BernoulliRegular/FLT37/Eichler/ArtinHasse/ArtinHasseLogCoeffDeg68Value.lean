@@ -35,8 +35,6 @@ the corrected second digit `r₆₈ = 21` in the actual power series.
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §8.4.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

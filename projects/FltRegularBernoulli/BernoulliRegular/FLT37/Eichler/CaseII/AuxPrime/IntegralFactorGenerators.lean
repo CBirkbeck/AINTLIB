@@ -41,8 +41,6 @@ residual.
   Lemma 9.6 (p. 179).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

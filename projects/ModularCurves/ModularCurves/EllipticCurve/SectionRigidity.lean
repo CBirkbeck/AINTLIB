@@ -30,8 +30,6 @@ Everything here is elementary: `UniversallyOConnected` says exactly that `f.app 
 isomorphism, and `z` splits it.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 universe u

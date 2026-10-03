@@ -11,8 +11,6 @@ cycle equation on that larger tuple then identifies the preceding differential w
 original cycle.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite

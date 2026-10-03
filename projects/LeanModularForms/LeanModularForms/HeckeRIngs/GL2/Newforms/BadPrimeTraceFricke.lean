@@ -31,8 +31,6 @@ coprime case), summing slashes turns the trace into
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.5 (Ex 5.5.1(b))
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

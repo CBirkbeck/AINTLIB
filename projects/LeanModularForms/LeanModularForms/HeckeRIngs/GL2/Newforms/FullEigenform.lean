@@ -24,8 +24,6 @@ vanishing prime-to-`N` Fourier coefficients (so it is old by the Main Lemma), he
 * `Newform.isFullEigenform` — a `Newform` is a `T_n`-eigenform for all `n`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

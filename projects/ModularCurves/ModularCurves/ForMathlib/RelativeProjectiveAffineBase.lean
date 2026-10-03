@@ -18,8 +18,6 @@ sections of that open. The comparison commutes with both the structural projecti
 projective space over the original coefficient ring.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory Limits

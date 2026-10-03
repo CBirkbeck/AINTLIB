@@ -11,8 +11,6 @@ isomorphism of schemes. It then compares the global unit with the unit of a
 restriction to an open subscheme.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace

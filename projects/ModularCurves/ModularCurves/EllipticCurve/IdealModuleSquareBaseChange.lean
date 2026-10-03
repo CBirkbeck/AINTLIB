@@ -16,6 +16,8 @@ an affine criterion proving that map is an isomorphism when matching
 nonzerodivisor generators cut out the two ideals.
 -/
 
+set_option backward.privateInPublic true
+
 @[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits SheafOfModules

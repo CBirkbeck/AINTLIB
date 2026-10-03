@@ -32,8 +32,6 @@ Matrix helpers for level raising and the commutation `heckeT_n_levelRaise_comm`
 bad-prime (`p ∣ d`) case.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

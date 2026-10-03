@@ -56,8 +56,6 @@ are the convention used downstream in `Newforms.lean` / `LFunction.lean`.
 * [Miy] Miyake, *Modular Forms*, §4.5 Thm 4.5.13, Thm 4.5.16
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Matrix Subgroup.Commensurable Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup

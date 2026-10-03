@@ -13,6 +13,8 @@ This file computes global sections of a consecutive pole-filtration quotient fro
 any open neighborhood of the marked section.
 -/
 
+set_option backward.privateInPublic true
+
 @[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace

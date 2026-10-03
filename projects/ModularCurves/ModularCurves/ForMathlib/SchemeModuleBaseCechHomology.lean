@@ -1,5 +1,6 @@
 module
 
+import Mathlib.Algebra.Category.Grp.Zero
 public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
 public import ModularCurves.ForMathlib.SchemeModuleBaseCech
 

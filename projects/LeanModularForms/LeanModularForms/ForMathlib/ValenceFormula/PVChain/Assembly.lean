@@ -23,8 +23,6 @@ Assembles the modular side of the PV chain using `Tendsto` statements for the
     `fdBoundary_H H` tends to `-(2πi · (k/12 - ord_∞(f)))`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup

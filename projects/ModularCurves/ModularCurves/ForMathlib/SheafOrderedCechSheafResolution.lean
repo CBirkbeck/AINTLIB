@@ -13,8 +13,6 @@ native-to-ordered chain retract across the augmentation and transfers
 acyclicity of the native augmented resolution.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace

@@ -30,8 +30,6 @@ Instantiated at `f := classifyRingHomU W` this fills GLC's `mulModelHom` for eve
 over every ring (T-W7.0c·c4 + T-W7.0d), with `mulModelHom_map` following from lift-uniqueness.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory Limits WeierstrassCurve

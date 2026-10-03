@@ -14,8 +14,6 @@ evaluating an injective resolution on the open and using the represented-free-sh
 description of sections.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory Limits Opposite TopologicalSpace

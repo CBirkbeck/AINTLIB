@@ -23,8 +23,6 @@ and the `ψ`-range computations.
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.3
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Matrix Subgroup.Commensurable Pointwise Matrix.SpecialLinearGroup

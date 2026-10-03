@@ -115,8 +115,6 @@ Washington input Lemma 9.6 (`149 ∤ a, b`).
   contradiction, pp. 167–173).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

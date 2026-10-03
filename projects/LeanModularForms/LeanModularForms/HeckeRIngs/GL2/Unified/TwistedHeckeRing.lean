@@ -36,8 +36,6 @@ decomposition of each double coset, and its multiplicativity over the ring.
   multiplicative on `𝕋 (Gamma0_pair N) ℤ`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Matrix HeckeRing.GLn

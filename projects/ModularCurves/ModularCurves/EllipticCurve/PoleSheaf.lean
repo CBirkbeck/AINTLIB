@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 module
 
+import Mathlib.Algebra.Category.ModuleCat.Presheaf.EpiMono
 public import ModularCurves.LevelStructure.CartierDivisor
 public import ModularCurves.Picard.Evaluation
 public import ModularCurves.Picard.DualPullback.Iso

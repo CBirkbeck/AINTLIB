@@ -70,8 +70,6 @@ character-agnostic, Diamond–Shurman-style definition.  Bridging the two (espec
 * **[DS]**  F. Diamond, J. Shurman, *A First Course in Modular Forms*, GTM 228, 2005.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup

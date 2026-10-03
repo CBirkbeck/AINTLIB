@@ -36,8 +36,6 @@ Atkin–Lehner anti-involution, exposed as
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.4
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup Subgroup.Commensurable Pointwise CongruenceSubgroup

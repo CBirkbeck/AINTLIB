@@ -34,8 +34,6 @@ formalised here:
 arguments themselves are `p`-agnostic.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman

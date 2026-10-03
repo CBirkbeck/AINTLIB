@@ -15,8 +15,6 @@ Coset agreement across levels, slash-sum commutation, and Miyake Lemma 4.6.6
 split of `StrongMultiplicityOne.lean`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup

@@ -29,8 +29,6 @@ per-character version, given that each component inherits the coprime-index coef
 vanishing (`qExpansion_charComponent_coprime_eq_zero`).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

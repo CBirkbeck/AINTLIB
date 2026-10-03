@@ -1,5 +1,6 @@
 module
 
+import Mathlib.Algebra.Category.Grp.Zero
 public import Mathlib.Algebra.Homology.HomologySequenceLemmas
 public import ModularCurves.ForMathlib.SheafCechFlasqueExact
 public import ModularCurves.ForMathlib.SheafCechInjectiveCokernel

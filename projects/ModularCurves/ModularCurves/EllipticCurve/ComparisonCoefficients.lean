@@ -24,8 +24,6 @@ from the `b1`/`b2` construction; the wiring into `pointedIsoCoordEquiv_coordX` /
 AINTLIB ModularCurves T-W7.1b (lane P3-parallel, beastmode-P3b3).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open WeierstrassCurve

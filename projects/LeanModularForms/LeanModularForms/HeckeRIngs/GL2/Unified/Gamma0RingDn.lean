@@ -58,8 +58,6 @@ avoids ever mixing the two elaboration paths. The pure-`ℕ` divisor-combinatori
 reproduced from the operator layer `HeckeT_n.lean` because this file does not import it.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 namespace HeckeRing.GL2.Unified

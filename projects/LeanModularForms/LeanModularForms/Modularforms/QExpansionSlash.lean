@@ -37,8 +37,6 @@ period-`1` (canonical Fourier) conventions.
   convention)
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

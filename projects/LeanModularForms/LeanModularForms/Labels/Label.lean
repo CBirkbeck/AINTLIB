@@ -58,8 +58,6 @@ is therefore read off the canonical Mathlib `DirichletCharacter ℂ N` lift of t
   conjugacies.  It carries the same hypotheses Phase 2's injectivity does.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open scoped BigOperators

@@ -25,8 +25,6 @@ by the SMO obligation chain.
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.6.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open scoped ModularForm ArithmeticFunction MatrixGroups

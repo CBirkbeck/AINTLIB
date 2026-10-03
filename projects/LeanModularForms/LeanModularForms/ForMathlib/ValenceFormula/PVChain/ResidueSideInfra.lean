@@ -5,7 +5,7 @@ Authors:
 -/
 module
 
-import all Mathlib.Analysis.Complex.Norm
+public import Mathlib.Analysis.Complex.Norm
 public import LeanModularForms.ForMathlib.ValenceFormula.PVChain.OnCurveCapture
 public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue.GeneralizedTheoremBase
 public import LeanModularForms.ForMathlib.ModularInvariance
@@ -373,7 +373,7 @@ private lemma fdBoundary_H_eq_fdBoundary_on_13 (H : ℝ) {t : ℝ}
 
 omit f hf in
 private lemma norm_ge_one_of_normSq_ge_one {w : ℂ} (h : normSq w ≥ 1) : ‖w‖ ≥ 1 :=
-  calc ‖w‖ = Real.sqrt (normSq w) := rfl
+  calc ‖w‖ = Real.sqrt (normSq w) := Complex.norm_def w
     _ ≥ Real.sqrt 1 := Real.sqrt_le_sqrt h
     _ = 1 := Real.sqrt_one
 

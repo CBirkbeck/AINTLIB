@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 module
 
-import all Mathlib.Analysis.Complex.Norm
+public import Mathlib.Analysis.Complex.Norm
 public import Mathlib.Analysis.Meromorphic.Order
 public import Mathlib.NumberTheory.Modular
 public import Mathlib.NumberTheory.ModularForms.Basic
@@ -74,11 +74,11 @@ private lemma rho_plus_one_normSq_eq_one :
   nlinarith [Real.sq_sqrt (show (3 : ℝ) ≥ 0 by norm_num)]
 
 theorem ellipticPointRhoPlusOne_norm : ‖ellipticPointRhoPlusOne‖ = 1 := by
-  change Real.sqrt (Complex.normSq _) = 1
+  rw [Complex.norm_def]
   rw [rho_plus_one_normSq_eq_one, Real.sqrt_one]
 
 theorem ellipticPointRho_norm : ‖ellipticPointRho‖ = 1 := by
-  change Real.sqrt (Complex.normSq _) = 1
+  rw [Complex.norm_def]
   rw [rho_normSq_eq_one, Real.sqrt_one]
 
 theorem ellipticPointI_mem_fd : ellipticPointI' ∈ 𝒟 := by

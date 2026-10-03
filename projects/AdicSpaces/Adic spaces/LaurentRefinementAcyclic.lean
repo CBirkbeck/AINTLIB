@@ -27,8 +27,6 @@ Lane-C consumer tower) and `TateAcyclicityFinalAssembly.lean`
 * `tateAcyclicity` — Wedhorn 8.28(b) headline (Part 1 ∧ Part 2)
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Classical

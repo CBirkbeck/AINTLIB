@@ -73,8 +73,6 @@ The remaining gaps for the general case are topological:
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Definition 6.36, Theorem 8.28(b)
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open ValuationSpectrum

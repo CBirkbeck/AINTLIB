@@ -23,8 +23,6 @@ invariance properties. Part of a multi-file split of `StrongMultiplicityOne.lean
 * `miyake_hecke_descend_Gamma1_inv` — `Γ₁(N)`-invariance of the descent sum.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup

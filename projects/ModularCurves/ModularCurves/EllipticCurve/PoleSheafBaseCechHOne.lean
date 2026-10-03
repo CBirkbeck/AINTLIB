@@ -17,6 +17,8 @@ Retain the affine-base module structure on the Cech model computing degree-one
 cohomology of the pole line bundles on a smooth proper pointed relative curve.
 -/
 
+set_option backward.privateInPublic true
+
 @[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TopologicalSpace

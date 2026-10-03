@@ -25,8 +25,6 @@ The Hecke conjugate intersection group `Γ_p(α)`, fundamental-domain transport
 adapters, and their `PSL(2, ℝ)` ambient instantiations.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

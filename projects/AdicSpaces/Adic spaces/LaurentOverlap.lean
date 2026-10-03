@@ -97,8 +97,6 @@ bivariate analog of `example638Plus_equiv` / `example638Minus_equiv`
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Example 6.38, 6.39, Lemma 8.33.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 namespace ValuationSpectrum

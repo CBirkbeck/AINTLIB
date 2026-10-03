@@ -30,8 +30,6 @@ computation `Col '' 𝒞_{∞,1} = I(𝒢)ζ_p`.
   compact-Hausdorff homeomorphism trick), and `Col u = colemanPipe (colemanSeries u)`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman

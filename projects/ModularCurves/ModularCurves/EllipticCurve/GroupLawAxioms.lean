@@ -33,8 +33,6 @@ Sources: Bosma–Lenstra Thm 2 + p. 231 (universality); mathlib `Affine.Point` g
 reviewer round 1 §Q4/Q5; audit A5/A6.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open MvPolynomial AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal

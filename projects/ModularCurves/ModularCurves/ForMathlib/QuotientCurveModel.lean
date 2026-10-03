@@ -30,8 +30,6 @@ with `isPullback_quotientπ` and fppf descent along `X → X/G`, this yields the
 `LocallyWeierstrass` iso of `locallyWeierstrass_quotientπ`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve
@@ -122,6 +120,7 @@ theorem cartesianIso_hom_zero (g : R →+* R) (W : WeierstrassCurve R)
 
 /-! ### Cocycle-ness infrastructure — base-change automorphism forms -/
 
+-- Match projModelVCIso_map: unfold the algebraMap supplied by the local RingHom algebra.
 set_option backward.isDefEq.respectTransparency.types false in
 /-- Automorphism form of `projModelVCIso_map` (base-change naturality of the change-of-variables
 iso), via `RingHom.toAlgebra g`. Backbone of the cocycle identity: it commutes a `projModelVCIso`

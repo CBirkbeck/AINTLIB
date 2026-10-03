@@ -17,8 +17,6 @@ bicomplex. Its two edge augmentations are compatible with both
 differentials.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite

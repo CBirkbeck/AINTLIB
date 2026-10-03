@@ -11,8 +11,6 @@ that two consecutive differentials compose to zero follows from the native cosim
 construction.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite

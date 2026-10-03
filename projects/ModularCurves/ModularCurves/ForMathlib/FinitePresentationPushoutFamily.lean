@@ -11,8 +11,6 @@ later transition. Consequently finitely many colimit pushout squares can be
 realized simultaneously at one common stage.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 universe u

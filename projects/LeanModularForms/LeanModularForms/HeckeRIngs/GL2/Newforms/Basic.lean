@@ -31,8 +31,6 @@ oldform/new-subspace submodules, `petN` left-linearity, the `CuspForm → Modula
 the old/new projection API, and `heckeT_n` stability (DS Prop 5.6.2).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

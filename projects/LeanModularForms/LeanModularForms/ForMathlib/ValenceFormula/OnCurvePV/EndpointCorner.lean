@@ -5,7 +5,7 @@ Authors:
 -/
 module
 
-import all Mathlib.Analysis.Complex.Norm
+public import Mathlib.Analysis.Complex.Norm
 public import LeanModularForms.ForMathlib.ValenceFormula.OnCurvePV.Basic
 
 /-!
@@ -14,8 +14,6 @@ public import LeanModularForms.ForMathlib.ValenceFormula.OnCurvePV.Basic
 Cauchy principal value existence at the endpoint `1/2 + H*I` and corner `-1/2 + H*I`
 of the fundamental domain boundary `fdBoundary_H H`.
 -/
-
-set_option backward.privateInPublic true
 
 @[expose] public section
 
@@ -34,7 +32,7 @@ private lemma mul_inv_rev_cancel (a b : ℂ) (hb : b ≠ 0) : (a * b)⁻¹ * b =
 private lemma one_lt_norm_corner (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s : ℂ)
     (hs_re : s.re ^ 2 = 1/4) (hs_im : s.im = H) : 1 < ‖s‖ := by
   have hH0 : 0 < H := by linarith [Real.sqrt_pos.mpr (show (0:ℝ) < 3 by norm_num)]
-  rw [show ‖s‖ = Real.sqrt (Complex.normSq s) from rfl, Real.lt_sqrt (by norm_num)]
+  rw [Complex.norm_def s, Real.lt_sqrt (by norm_num)]
   rw [Complex.normSq_apply, hs_im, show s.re * s.re = s.re ^ 2 by ring, hs_re]
   nlinarith [mul_lt_mul hH hH.le (by positivity : (0:ℝ) < Real.sqrt 3 / 2) hH0.le,
              Real.mul_self_sqrt (show (0:ℝ) ≤ 3 by norm_num)]

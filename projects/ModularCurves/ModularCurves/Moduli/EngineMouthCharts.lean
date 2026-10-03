@@ -52,8 +52,6 @@ its elaboration profile — unchanged.
   the transition cocycle.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 -- v4.33 bump: `projModel` is `@[reducible]` over a `Proj`; the elaborator now unfolds it

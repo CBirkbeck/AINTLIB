@@ -1,5 +1,6 @@
 module
 
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
 public import ModularCurves.LevelStructure.ExactOrder
 public import ModularCurves.LevelStructure.Basic
 public import Mathlib.Algebra.Module.FinitePresentation

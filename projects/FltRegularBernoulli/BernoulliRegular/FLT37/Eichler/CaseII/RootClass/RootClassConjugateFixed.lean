@@ -53,8 +53,6 @@ It imports `CaseIIRealAnchoredClass.lean` (reusing its proven ideal/class machin
 * Washington, *Introduction to Cyclotomic Fields*, GTM 83, §9.1 (Lemma 9.1, Lemma 9.2), Thm 9.4.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

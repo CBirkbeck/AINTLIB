@@ -30,8 +30,6 @@ abstract χ-twisted Hecke slash with the explicit `T_p` coset sum.
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.4
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Matrix Subgroup.Commensurable Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup

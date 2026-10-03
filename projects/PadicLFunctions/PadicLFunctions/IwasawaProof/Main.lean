@@ -36,8 +36,6 @@ remaining input for `col_image_cycloTower1_eq_zetaIdeal` and hence for the miles
 `iwasawa_theorem`/`iwasawa_exact_sequence`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman

@@ -11,8 +11,6 @@ This file constructs the alternating extension from increasing tuples to all
 tuples and proves that restriction back to increasing tuples is the identity.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive

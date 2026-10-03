@@ -60,8 +60,6 @@ system cannot synthesize automatically (due to a `Module R R` diamond for
 * [J.-M. Fontaine, *Le corps des périodes p-adiques*][fontaine1994corps]
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open TopologicalRing ValuationSpectrum

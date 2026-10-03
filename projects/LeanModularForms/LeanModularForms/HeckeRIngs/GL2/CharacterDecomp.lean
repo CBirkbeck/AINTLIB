@@ -49,8 +49,6 @@ submodules.
   per character space to the whole space.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup CongruenceSubgroup Polynomial

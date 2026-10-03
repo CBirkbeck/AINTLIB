@@ -54,8 +54,6 @@ It imports only; it does **not** modify any existing file.
 * Diekmann (2023), Proposition 55 (`classGroupMap_injective`, underlying the K⁺-principalization).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

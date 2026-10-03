@@ -30,8 +30,6 @@ the
 former, and a `▸` transport across that equality would be gratuitous.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory Limits HomogeneousLocalization

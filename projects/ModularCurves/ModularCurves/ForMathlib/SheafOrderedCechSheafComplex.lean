@@ -10,8 +10,6 @@ This file proves that consecutive ordered sheaf-level Cech differentials
 compose to zero and packages them as a cochain complex.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive

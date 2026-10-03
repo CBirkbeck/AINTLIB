@@ -31,8 +31,6 @@ permanently deferred prose) and `thm:iwasawa` itself (TeX 3098 — statement and
 on the §12 board, where its Λ(𝒢⁺)-module structures are constructed).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open scoped IntermediateField

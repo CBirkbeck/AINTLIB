@@ -38,8 +38,6 @@ following §7.5 and §8.4 of [Wedhorn, *Adic Spaces*].
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §7.5, §8.4
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 namespace ValuationSpectrum

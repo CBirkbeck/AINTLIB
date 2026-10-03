@@ -1,5 +1,6 @@
 module
 
+public meta import Mathlib.Algebra.Field.ZMod
 public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.Level71UnitDworkSliceBridge
 
 /-!

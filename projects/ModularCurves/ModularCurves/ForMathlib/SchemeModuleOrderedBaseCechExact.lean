@@ -15,8 +15,6 @@ This file proves that the ordered base-linear Cech complex on an affine family s
 sequences of quasicoherent scheme modules to degreewise short exact sequences.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace

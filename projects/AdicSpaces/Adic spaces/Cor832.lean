@@ -85,8 +85,6 @@ is NOT introduced by Cor 8.32 work; it lives upstream of everything that uses
 * `docs/plans/2026-04-08-wedhorn-vs-zavyalov.md` — Phase 3 of the Wedhorn plan.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open ValuationSpectrum TensorProduct

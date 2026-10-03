@@ -6,8 +6,7 @@ Authors: Bernoulli-Regular project contributors
 module
 
 public import BernoulliRegular.BernoulliFast.Cbv.Data
-public meta import BernoulliRegular.BernoulliFast.Cbv.Data
-import all BernoulliRegular.BernoulliFast.Cbv.Data
+public meta import BernoulliRegular.BernoulliFast.Cbv.Frac
 public meta import Lean.Meta.Sym.LitValues
 public meta import Lean.Meta.Sym.InferType
 public meta import Lean.Meta.Tactic.Cbv.Util
@@ -21,7 +20,10 @@ This module provides a proof-producing evaluator for concrete Bernoulli
 numbers.  It uses a small fraction representation and `cbv` simprocs that
 collapse ground fraction operations and literal-list traversals in one step.
 
-The main public definitions are:
+The fraction primitives are defined in `BernoulliFast.Cbv.Frac`; the public evaluators
+and their rational correctness lemmas are defined in `BernoulliFast.Cbv.Data`.
+
+The main public definitions re-exported here are:
 
 * `BernoulliRegular.BernoulliFast.Cbv.Frac` — the integer/natural fraction
   representation used by the evaluator;
@@ -29,8 +31,6 @@ The main public definitions are:
   a rational number;
 * `BernoulliRegular.BernoulliFast.Cbv.bernoulliFrac` — the concrete evaluator.
 -/
-
-set_option backward.privateInPublic true
 
 @[expose] public section
 

@@ -29,8 +29,6 @@ action properties, culminating in `descendCosetList_action`.
 * `descendCosetList_action` — the action of the descent coset list (the culmination).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup

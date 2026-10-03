@@ -36,8 +36,6 @@ circle integral using the factorization `F(q) = q^m · g(q)`:
     `PVChain.Assembly`.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Complex MeasureTheory Topology CongruenceSubgroup

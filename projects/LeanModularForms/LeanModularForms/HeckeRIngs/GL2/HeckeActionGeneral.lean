@@ -41,8 +41,6 @@ subgroups like `Γ₁(N)` also satisfy `HeckePairAction`. For 2×2 matrices,
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §§3.4
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup Subgroup.Commensurable Pointwise CongruenceSubgroup

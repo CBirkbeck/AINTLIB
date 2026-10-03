@@ -13,8 +13,6 @@ public import LeanModularForms.ForMathlib.ValenceFormula.OnCurvePV.EndpointCorne
 For any point `s` on `fdBoundary_H H`, the CPV integral of `(z - s)⁻¹` exists.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Complex MeasureTheory Set Filter Topology

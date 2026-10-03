@@ -18,8 +18,6 @@ alternatingly recovers the original cocycle. This transfers degree-one exactness
 ordered Cech complex to the native all-tuples Cech complex.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Category

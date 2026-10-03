@@ -41,8 +41,6 @@ adjoint operator is genuinely *not* a level-`N` Hecke operator.
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.6 (Prop 5.6.2, Exer 5.6.3)
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

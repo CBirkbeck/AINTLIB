@@ -15,8 +15,6 @@ DS-standard `δ_b` representative-system helpers and the associated
 fundamental-domain swap machinery.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

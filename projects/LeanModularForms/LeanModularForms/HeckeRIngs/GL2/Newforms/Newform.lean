@@ -33,8 +33,6 @@ Lemma (DS Thm 5.7.1) itself is assembled in `Newforms.MainLemmaProof` (which imp
 `SMOObligations` for the per-character route-B descent, sitting above this file in the DAG).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

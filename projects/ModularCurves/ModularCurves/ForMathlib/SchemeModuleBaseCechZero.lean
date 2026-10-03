@@ -15,6 +15,8 @@ with the kernel of the first differential in the base-linear Cech complex of an
 open cover.
 -/
 
+set_option backward.privateInPublic true
+
 @[expose] public section
 
 open AlgebraicTopology CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite

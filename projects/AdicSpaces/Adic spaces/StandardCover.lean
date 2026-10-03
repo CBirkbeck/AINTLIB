@@ -124,8 +124,6 @@ plan revision" (Q1 directive) for details.
 * `docs/plans/2026-04-14-acyclicity-completion.md` (R1 ticket).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

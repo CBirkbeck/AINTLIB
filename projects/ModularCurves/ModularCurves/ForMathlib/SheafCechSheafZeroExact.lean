@@ -11,8 +11,6 @@ over any open contained in one cover member, then applies this local result to s
 representatives.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite

@@ -30,8 +30,6 @@ This discharges the single remaining `sorry` below the T-W7 descent layer
 the rigidity/record imports must sit above `ModelRecord`).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory

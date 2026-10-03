@@ -32,8 +32,6 @@ finishes the proof.
 * Diamond–Shurman, *A First Course in Modular Forms*, Prop 5.6.2, Ex 5.6.3(e).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

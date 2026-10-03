@@ -75,8 +75,6 @@ it does **not** modify any existing file.
   (the `ζ^k`-absorption of real units).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

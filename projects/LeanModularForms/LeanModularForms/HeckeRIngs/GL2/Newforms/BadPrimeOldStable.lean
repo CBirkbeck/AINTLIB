@@ -19,8 +19,6 @@ The good-prime, non-extended analogue is `heckeT_n_preserves_cuspFormsOld` (Leve
 this file handles the bad prime and the extra level-inclusion generators.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

@@ -47,8 +47,6 @@ The proof composes three pieces:
   theorem.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open Filter Topology Set Complex MeasureTheory

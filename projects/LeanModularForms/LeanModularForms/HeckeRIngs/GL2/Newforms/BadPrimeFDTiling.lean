@@ -20,8 +20,6 @@ upper-triangular / `Γ⁰(p)` / index-`p` case — the `M_∞` tile and the Béz
 because the bad-prime obstruction (`p ∣ a`) is vacuous (Diamond–Shurman §5.2, Exercise 5.2.1).
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 noncomputable section

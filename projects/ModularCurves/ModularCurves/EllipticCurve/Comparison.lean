@@ -25,8 +25,6 @@ leaves are discharged here, above the whole stack. Statements are the verbatim t
 * `projModelVCIso_injective` (b5): the model action of `VariableChange` is faithful.
 -/
 
-set_option backward.privateInPublic true
-
 @[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
