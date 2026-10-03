@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornMultiBranchSubsetInequality
-import «Adic spaces».WedhornStructuralInequalityFromSigmaPower
+module
+
+public import «Adic spaces».WedhornMultiBranchSubsetInequality
+public import «Adic spaces».WedhornStructuralInequalityFromSigmaPower
 
 /-!
 # Wedhorn M-power-decay: honest supplier without T_D non-vanishing
@@ -89,6 +91,8 @@ itself, which is Wedhorn's natural per-`t'` output (equivalent to
   `mem_localizedTestFamily_iff` (commit `6fc4d08`),
   `Spv.mul_vle_mul_left` (`ValuationSpectrum`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

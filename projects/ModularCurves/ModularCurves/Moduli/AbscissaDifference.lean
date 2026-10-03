@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.SectionMarking
-import ModularCurves.Moduli.UniversalLevelThree
+module
+
+public import ModularCurves.Moduli.SectionMarking
+public import ModularCurves.Moduli.UniversalLevelThree
 
 /-!
 # The `ω^{⊗-2}`-valued abscissa difference ([O1], G0's ask-1)
@@ -21,6 +23,8 @@ abscissa difference `d` of G0's `±ω` scale-torsor over the level-2 locus
 * `abscissaDiff` — the glued section of `(omegaCocycle G).zpow (-2)`.
 * `abscissaDiff_res` — its value in any chart: the marked abscissa difference.
 -/
+
+@[expose] public section
 
 universe u
 

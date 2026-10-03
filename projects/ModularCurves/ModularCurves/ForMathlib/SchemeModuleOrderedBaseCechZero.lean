@@ -1,7 +1,9 @@
-import ModularCurves.ForMathlib.CochainComplexKernel
-import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
-import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
+module
+
+public import ModularCurves.ForMathlib.CochainComplexKernel
+public import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 
 /-!
 # Global sections and the ordered base-linear Cech complex
@@ -10,6 +12,10 @@ Identify global sections with the kernel of the first differential in the bounde
 base-linear Cech complex. In degree zero, every one-tuple is strictly increasing, so the
 projection from the native Cech complex to the ordered complex is an isomorphism.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Category
   CategoryTheory.Limits Opposite TopologicalSpace

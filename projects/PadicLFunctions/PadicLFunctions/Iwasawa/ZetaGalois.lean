@@ -1,5 +1,7 @@
-import PadicLFunctions.Iwasawa.PlusPart
-import PadicLFunctions.KubotaLeopoldt.ZetaP
+module
+
+public import PadicLFunctions.Iwasawa.PlusPart
+public import PadicLFunctions.KubotaLeopoldt.ZetaP
 
 /-!
 # ζ_p as a pseudo-measure on 𝒢⁺ and the ideal I(𝒢)ζ_p
@@ -21,6 +23,8 @@ identified Galois side (replan R11.1; `𝒢⁺ = GPlus p`).
   (**RJW Proposition, TeX 3052–3057**), with their `Ideal.span` descriptions via the
   principality of the augmentation ideals.
 -/
+
+@[expose] public section
 
 noncomputable section
 

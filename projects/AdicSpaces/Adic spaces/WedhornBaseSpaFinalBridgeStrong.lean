@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornNormalizedC1AssemblyStrong
-import «Adic spaces».WedhornBaseSpaFinalBridge
+module
+
+public import «Adic spaces».WedhornNormalizedC1AssemblyStrong
+public import «Adic spaces».WedhornBaseSpaFinalBridge
 
 /-!
 # Wedhorn Base-Spa Final Bridge (Strong Variant)
@@ -54,6 +56,8 @@ hypothesis `h_base_eq_Spa : rationalOpen C.base.T C.base.s = Spa A A⁺`:
 | `h_nonzero_cover_supplier`| **discharged** internally via Primary's strong wrapper |
 | `h_outside_rescue`        | **discharged** internally via `h_base_eq_Spa` |
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

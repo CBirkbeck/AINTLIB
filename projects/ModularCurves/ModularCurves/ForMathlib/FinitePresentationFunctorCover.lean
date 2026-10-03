@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.FinitePresentationFunctor
-import ModularCurves.ForMathlib.FinitePresentationPrincipalCover
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationFunctor
+public import ModularCurves.ForMathlib.FinitePresentationPrincipalCover
 
 /-!
 # Transporting spread functors with principal affine covers
@@ -9,6 +11,8 @@ retain a finite principal-open cover on one of its objects. This file transports
 whole functor, including its literal functor laws and colimit compatibility, and keeps
 the cover functions at the same later stage.
 -/
+
+@[expose] public section
 
 open CategoryTheory TensorProduct
 

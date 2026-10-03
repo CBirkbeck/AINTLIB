@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.FormalGroup
-import Mathlib.RingTheory.PowerSeries.Basic
+module
+
+public import HasseWeil.FormalGroup.FormalGroup
+public import Mathlib.RingTheory.PowerSeries.Basic
 
 /-!
 # Groups Associated to Formal Groups (Silverman IV.3)
@@ -30,6 +32,10 @@ higher-order terms involve products of elements of `I`).
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.2–IV.3
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open WeierstrassCurve PowerSeries Finset
 

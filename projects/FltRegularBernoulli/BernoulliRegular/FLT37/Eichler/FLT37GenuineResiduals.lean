@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassConjugateFixed
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.LambdaExponentCollapseToOmega32
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassConjugateFixed
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.LambdaExponentCollapseToOmega32
 
 /-!
 # Fermat's Last Theorem for `p = 37`, reduced to the four genuine (non-vacuous) Case-II residuals

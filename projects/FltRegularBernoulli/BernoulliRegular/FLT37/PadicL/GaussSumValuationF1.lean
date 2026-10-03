@@ -3,10 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.PadicL.GaussSumValuation
-import Mathlib.RingTheory.DiscreteValuationRing.Basic
-import Mathlib.Data.Nat.Choose.Sum
-import Mathlib.FieldTheory.Finite.Basic
+module
+
+public import Mathlib.Data.Nat.Prime.Factorial
+public import BernoulliRegular.FLT37.PadicL.GaussSumValuation
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.Data.Nat.Choose.Sum
+public import Mathlib.FieldTheory.Finite.Basic
 
 /-!
 # B-C1.2, discharged — Washington Proposition 6.13 at `f = 1` over an abstract DVR
@@ -54,6 +57,8 @@ statement about an explicit element, carried as a named `Prop`, **not** an axiom
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, Prop 6.13,
   Lemmas 6.2–6.4, §6.2.
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

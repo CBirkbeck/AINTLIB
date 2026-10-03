@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.HeckeRingHomCharSpace
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.HeckeRingHomCharSpace
 
 /-!
 # The Fricke operator on `M_k(Γ₁(N))`
@@ -36,6 +38,10 @@ as the Fricke conjugate of the existing companion `Φ = heckeRingHomCharSpace`.
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.
 * Atkin–Lehner, *Hecke operators on `Γ₀(m)`*.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup
 open scoped Pointwise MatrixGroups ModularForm UpperHalfPlane Manifold

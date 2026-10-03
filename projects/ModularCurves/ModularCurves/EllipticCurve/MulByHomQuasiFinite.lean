@@ -3,13 +3,15 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.RecordGroupUnique
-import ModularCurves.LevelStructure.IsoTransport
-import ModularCurves.ForMathlib.GeometricFibreComparison
-import ModularCurves.ForMathlib.JacobsonPointCount
-import ModularCurves.ForMathlib.TorsionByEquiv
-import HasseWeil.NTorsion.TorsionGeneralN
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.EllipticCurve.RecordGroupUnique
+public import ModularCurves.LevelStructure.IsoTransport
+public import ModularCurves.ForMathlib.GeometricFibreComparison
+public import ModularCurves.ForMathlib.JacobsonPointCount
+public import ModularCurves.ForMathlib.TorsionByEquiv
+public import HasseWeil.NTorsion.TorsionGeneralN
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Quasi-finiteness of `[N]` for `N` invertible (BB-QF, invertible case)
@@ -30,6 +32,10 @@ HasseWeil's `torsion_genN_addEquiv` counts those (`E[N] ≃+ (ZMod N)²`, the cr
 anchor). Finitely many sections force a finite fibre space by the Jacobson bridge
 (`Scheme.finite_of_finite_sections`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

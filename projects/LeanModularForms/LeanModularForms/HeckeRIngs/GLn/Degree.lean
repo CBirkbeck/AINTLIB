@@ -3,9 +3,11 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GLn.CosetDecomposition
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Degree
-import LeanModularForms.HeckeRIngs.GL2.CongruenceIndex
+module
+
+public import LeanModularForms.HeckeRIngs.GLn.CosetDecomposition
+public import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Degree
+public import LeanModularForms.HeckeRIngs.GL2.CongruenceIndex
 
 /-!
 # Degree Formulas for GL_n Hecke Ring
@@ -38,6 +40,8 @@ function `ψ(d) = d · ∏_{p | d} (1 + 1/p)`. For the prime-power case needed f
 
 * Shimura, Proposition 3.14, 3.18, Theorem 3.24
 -/
+
+@[expose] public section
 
 open HeckeRing HeckeRing.GL2 Finset CongruenceSubgroup Matrix.SpecialLinearGroup Matrix
   ModularGroup

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.InvariantDifferential
-import ModularCurves.ForMathlib.PicSubsingletonFree
+module
+
+public import ModularCurves.EllipticCurve.InvariantDifferential
+public import ModularCurves.ForMathlib.PicSubsingletonFree
 
 /-!
 # Over a semilocal base the `ω` line bundle has a global basis
@@ -69,6 +71,8 @@ rank-one global-section module over the field `Γ(𝒪) = k` yet no nowhere-vani
 so it cannot be discharged from `Module.Invertible` + `Finite (MaximalSpectrum)` alone. It is
 boarded as residual (i) of `exists_localModel_core_at`.
 -/
+
+@[expose] public section
 
 universe u
 

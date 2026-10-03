@@ -3,9 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
-import Mathlib.AlgebraicGeometry.Pullbacks
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+import all Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import Mathlib.AlgebraicGeometry.Pullbacks
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The fibre rank of a fibre product of finite flat morphisms
@@ -22,6 +25,8 @@ the affine auxiliary over a chart, identify the product's global sections with t
 tensor product through the pushout square of the pullback, and finish with
 `Module.rankAtStalk_tensorProduct`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TensorProduct
 

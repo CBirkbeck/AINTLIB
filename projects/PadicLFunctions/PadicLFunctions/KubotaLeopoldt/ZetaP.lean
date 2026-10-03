@@ -1,4 +1,6 @@
-import PadicLFunctions.KubotaLeopoldt.MuA
+module
+
+public import PadicLFunctions.KubotaLeopoldt.MuA
 
 /-!
 # The Kubota–Leopoldt p-adic L-function (RJW §4.3 and Thm. 4.1)
@@ -19,6 +21,8 @@ pseudo-measure on `ℤ_p^×` with `∫_{ℤ_p^×} x^k ζ_p = (1−p^{k−1}) ζ(
 `k > 0` — stated via the witnessing measures of `([b]−[1])·ζ_p`, the same moment
 encoding as `pseudoMeasure_eq_zero_of_moments`.
 -/
+
+@[expose] public section
 
 noncomputable section
 

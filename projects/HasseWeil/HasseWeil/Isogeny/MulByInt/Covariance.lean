@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Dual.Additivity
+module
+
+public import HasseWeil.Isogeny.Dual.Additivity
 
 /-!
 # Discharging the `[n]`-pullback covariance for the `PullbackEvaluation` class
@@ -99,6 +101,8 @@ witnesses.  Those are built from two new reusable pieces:
 * Silverman, *The Arithmetic of Elliptic Curves*, III.4.2, III.4.8, III.6.1–III.6.2,
   II.1.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

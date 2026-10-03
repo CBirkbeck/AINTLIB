@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.TensorProduct.Basis
-import ModularCurves.EllipticCurve.PoleSheafPowerOneProjectiveCoordinates
-import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChangeLinearEquiv
+module
+
+public import Mathlib.LinearAlgebra.TensorProduct.Basis
+public import ModularCurves.EllipticCurve.PoleSheafPowerOneProjectiveCoordinates
+public import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChangeLinearEquiv
 
 /-!
 # The normalized first pole basis after affine base change
@@ -14,6 +16,10 @@ For a projectively presented fibrewise elliptic curve, the canonical section
 of the first pole module becomes the sole vector of a basis after passing to a
 suitable principal affine neighborhood of any chosen base point.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 open TensorProduct

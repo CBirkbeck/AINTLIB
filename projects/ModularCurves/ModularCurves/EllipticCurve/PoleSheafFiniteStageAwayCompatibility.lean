@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafMonomialBasisAway
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafMonomialBasisAway
 
 /-!
 # Compatibility of finite pole stages with the section complement
@@ -12,6 +14,10 @@ The finite-stage linear equivalence from abstract pole sections to model
 Weierstrass monomials agrees with evaluation on every open disjoint from the
 marked section.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

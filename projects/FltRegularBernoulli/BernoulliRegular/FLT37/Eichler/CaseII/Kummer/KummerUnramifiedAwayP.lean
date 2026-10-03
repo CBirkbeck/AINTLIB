@@ -1,8 +1,10 @@
-import Mathlib.RingTheory.DedekindDomain.Instances
-import Mathlib.RingTheory.FractionalIdeal.Extended
-import Mathlib.RingTheory.Localization.AtPrime.Extension
+module
 
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerDifferentTrivial
+public import Mathlib.RingTheory.DedekindDomain.Instances
+public import Mathlib.RingTheory.FractionalIdeal.Extended
+public import Mathlib.RingTheory.Localization.AtPrime.Extension
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerDifferentTrivial
 
 /-!
 # [FLT37-CASEII-LEMMA-9.1-AWAY] The "away from 37" half of Washington Lemma 9.1

@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.RealRadicalConjAndSignTwist
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.RealToConjPairDescentStep
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.RealRadicalConjAndSignTwist
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.RealToConjPairDescentStep
 
 /-!
 # [FLT37-CASEII-R2] The precise σ-twist of the descent units `σε₁ = (-1)^m·ζ·ε₂`

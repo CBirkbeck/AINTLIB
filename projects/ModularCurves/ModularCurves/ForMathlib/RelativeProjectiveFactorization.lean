@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.ProjectiveFactorization
+module
+
+public import ModularCurves.ForMathlib.ProjectiveFactorization
 
 /-!
 # Relative projective factorizations
@@ -14,6 +16,8 @@ Standard relative projective space over a scheme is the base change of polynomia
 space. A compatible absolute projective factorization becomes a relative one over a separated
 intermediate scheme.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits
 

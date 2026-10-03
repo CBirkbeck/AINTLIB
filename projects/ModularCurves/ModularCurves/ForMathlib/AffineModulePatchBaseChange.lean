@@ -1,7 +1,9 @@
-import ModularCurves.ForMathlib.AffineModuleBaseChange
-import ModularCurves.ForMathlib.AffinePatchBaseChangeNaturality
-import ModularCurves.ForMathlib.SchemeModuleBaseCech
-import ModularCurves.Picard.DualPullback.OpenUnit
+module
+
+public import ModularCurves.ForMathlib.AffineModuleBaseChange
+public import ModularCurves.ForMathlib.AffinePatchBaseChangeNaturality
+public import ModularCurves.ForMathlib.SchemeModuleBaseCech
+public import ModularCurves.Picard.DualPullback.OpenUnit
 
 /-!
 # Base change for module sections on affine patches
@@ -10,6 +12,10 @@ This file identifies sections of a quasicoherent module on an affine source
 patch after affine base change.  The comparison is expressed over the new
 base ring so that it can be assembled into a base-linear Cech complex.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace TensorProduct
 open scoped ChangeOfRings

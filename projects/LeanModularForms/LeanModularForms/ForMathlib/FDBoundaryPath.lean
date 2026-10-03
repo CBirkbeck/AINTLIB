@@ -3,7 +3,9 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.FDBoundary
+module
+
+public import LeanModularForms.ForMathlib.FDBoundary
 
 /-!
 # PiecewiseC1Path for the FD Boundary
@@ -20,6 +22,10 @@ segment away from partition points.
 
 * `fdBoundaryPC1Path_eq` — the path agrees with `fdBoundaryFun` on `[0, 1]`
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

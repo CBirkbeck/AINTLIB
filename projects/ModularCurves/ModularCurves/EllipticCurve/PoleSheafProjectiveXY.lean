@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChangeHOne
-import ModularCurves.EllipticCurve.PoleSheafSuccessorSections
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChangeHOne
+public import ModularCurves.EllipticCurve.PoleSheafSuccessorSections
 
 /-!
 # Local pole coordinates on a projectively presented elliptic family
@@ -13,6 +15,8 @@ After shrinking the affine base, the first two positive successor quotients
 have normalized lifts. These are the pole-order-two and pole-order-three
 coordinates used to construct a generalized Weierstrass equation.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 

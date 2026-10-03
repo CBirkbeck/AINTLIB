@@ -5,11 +5,13 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-A2a.
 -/
-import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Ideal
-import Mathlib.RingTheory.GradedAlgebra.RingHom
-import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Maps
-import Mathlib.RingTheory.Ideal.Quotient.Operations
-import Mathlib.RingTheory.MvPolynomial.Homogeneous
+module
+
+public import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Ideal
+public import Mathlib.RingTheory.GradedAlgebra.RingHom
+public import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Maps
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
 
 /-!
 # The quotient of a graded ring by a homogeneous ideal is graded
@@ -29,6 +31,10 @@ as `Proj (R[X,Y,Z]/(F))` with `F` homogeneous), for which mathlib provides
 * `HomogeneousIdeal.quotientGrading`: the induced grading on `A ⧸ I.toIdeal`.
 * `HomogeneousIdeal.quotientGradingGradedAlgebra`: the `GradedAlgebra` instance on it.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace HomogeneousIdeal
 

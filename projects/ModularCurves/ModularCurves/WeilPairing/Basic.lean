@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.FieldTheory.IsAlgClosed.Basic
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.ForMathlib.RootOfUnityIntPow
-import ModularCurves.GroupScheme.MuN
-import ModularCurves.WeilPairing.KMCompatibility
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.ForMathlib.RootOfUnityIntPow
+public import ModularCurves.GroupScheme.MuN
+public import ModularCurves.WeilPairing.KMCompatibility
 
 /-!
 # The Weil pairing over a base scheme (KM 2.8)
@@ -29,6 +31,8 @@ Q-WP1/Q-WP2.
 Everything downstream must consume the pairing through `weilPairing` and the specification
 statements below; no other properties may be assumed of it.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

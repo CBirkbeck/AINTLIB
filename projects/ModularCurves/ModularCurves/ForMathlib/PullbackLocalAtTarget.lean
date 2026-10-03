@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.FlatDescent
-import Mathlib.AlgebraicGeometry.Morphisms.IsIso
-import Mathlib.AlgebraicGeometry.Pullbacks
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatDescent
+public import Mathlib.AlgebraicGeometry.Morphisms.IsIso
+public import Mathlib.AlgebraicGeometry.Pullbacks
 
 /-!
 # Cartesianness is Zariski-local at the target
@@ -35,6 +37,8 @@ The consumer is leaf `[a3-ii]` of `[T-E5c-ROUTE-A]`: the square
 is cartesian because it is so over each affine chart of `E/G`, where it is `Spec` of the
 Galois-descent pushout `Γ(W) ≅ Γ(X) ⊗_{Γ(X)ᴳ} Γ(W)ᴳ`.
 -/
+
+@[expose] public section
 
 universe u v
 

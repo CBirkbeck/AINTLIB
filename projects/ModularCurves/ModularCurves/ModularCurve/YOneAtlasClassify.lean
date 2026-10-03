@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.Comparison
-import ModularCurves.ModularCurve.YOneAssembly
-import ModularCurves.Moduli.QuotientProblem
+module
+
+public import ModularCurves.EllipticCurve.Comparison
+public import ModularCurves.ModularCurve.YOneAssembly
+public import ModularCurves.Moduli.QuotientProblem
 
 /-!
 # The Y₁ Tate-atlas classifying clause: local algebra
@@ -15,6 +17,10 @@ This file is the NEW-ATLAS workspace for the classifying part of `exists_tatePoi
 package the proved ring-level Tate-normal-form result (T-E1), the relative Tate-ring map, and the
 proved pointed-model comparison theorem (T-W7.1b) in the shapes needed by the atlas gluing step.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits HomogeneousIdeal HomogeneousLocalization
 

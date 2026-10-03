@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Analysis.Real.Pi.Bounds
-import LeanModularForms.ForMathlib.ArcFTCLimit
-import LeanModularForms.ForMathlib.WindingWeightProofs
+module
+
+public import Mathlib.Analysis.Real.Pi.Bounds
+public import LeanModularForms.ForMathlib.ArcFTCLimit
+public import LeanModularForms.ForMathlib.WindingWeightProofs
 
 /-!
 # Unconditional Winding Weights Assembly
@@ -16,6 +18,8 @@ a `SingleCrossingData` with FTC limit `-(πi)`.
 
 * `hasWindingNumber_atI_of_scd` — winding number at `i` is `-1/2`.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

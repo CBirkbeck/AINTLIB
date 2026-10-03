@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Kernel
+module
+
+public import HasseWeil.Isogeny.Kernel
 
 /-!
 # Cardinality of `E[m]` from the separable-kernel-degree witness (T-III-6-010)
@@ -30,6 +32,8 @@ This file closes T-III-6-010 in witness-parametric form: the caller supplies
 ## References
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.6.4(a).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

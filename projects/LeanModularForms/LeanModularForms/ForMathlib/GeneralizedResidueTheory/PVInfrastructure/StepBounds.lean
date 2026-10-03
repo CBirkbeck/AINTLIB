@@ -3,7 +3,9 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 
 /-!
 # PV Infrastructure: Step Bounds
@@ -22,6 +24,8 @@ telescoping bounds.
 * `exists_dyadic_bracket` — `ε` lies between two consecutive dyadic levels
 * `telescoping_sum_bound` — accumulated bound from geometric step bounds
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

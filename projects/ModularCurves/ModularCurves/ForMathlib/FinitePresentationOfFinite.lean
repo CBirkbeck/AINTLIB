@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+module
+
+public import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
 
 /-!
 # Finite presentation from module-finite + module-projective ([A711-FP])
@@ -27,6 +29,8 @@ extension `A/Aᴳ` — Stacks 08WD (3)⟹(1) assembles étale from unramified + 
 
 Decomposition artifact: `.mathlib-quality/decomposition-a711-fp.md` ([STREAM-FP], fable-FP).
 -/
+
+@[expose] public section
 
 /-- **[A711-FP]** A module-finite, module-projective algebra over an arbitrary commutative
 ring is of finite presentation as an algebra — no noetherian hypothesis (KM A7.1.1's

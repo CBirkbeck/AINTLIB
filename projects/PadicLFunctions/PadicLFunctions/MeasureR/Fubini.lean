@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.MeasureR.Toolbox
+module
+
+public import PadicLFunctions.MeasureR.Toolbox
 
 /-!
 # Fubini for measures over the integer ring of a field
@@ -16,6 +18,8 @@ locally constant map (the general ultrametric approximation lemma), collapse
 both iterated integrals of the approximation to the same finite sum, and
 control the error by `‖μ‖, ‖ν‖ ≤ 1`.
 -/
+
+@[expose] public section
 
 namespace PadicLFunctions
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.TorsionModule
-import Mathlib.LinearAlgebra.Matrix.ToLin
-import Mathlib.LinearAlgebra.Determinant
-import Mathlib.LinearAlgebra.Trace
+module
+
+public import HasseWeil.HasseBound.WeilPairing.TorsionModule
+public import Mathlib.LinearAlgebra.Matrix.ToLin
+public import Mathlib.LinearAlgebra.Determinant
+public import Mathlib.LinearAlgebra.Trace
 
 /-!
 # The mod-`ℓ` matrix representation `ρ_ℓ` of endomorphisms
@@ -39,6 +41,8 @@ The structural identities are the substance for the trace/determinant endgame:
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, III.7–8, V.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Matrix
 

@@ -1,8 +1,10 @@
-import LutzNagell.LutzNagellTheorem.GeneralCurve
-import LutzNagell.LutzNagellTheorem.GeneralPrimeOrder
-import LutzNagell.LutzNagellTheorem.GeneralIntegralMultiple
-import LutzNagell.LutzNagellTheorem.ShortWeierstrass
-import Mathlib.GroupTheory.OrderOfElement
+module
+
+public import LutzNagell.LutzNagellTheorem.GeneralCurve
+public import LutzNagell.LutzNagellTheorem.GeneralPrimeOrder
+public import LutzNagell.LutzNagellTheorem.GeneralIntegralMultiple
+public import LutzNagell.LutzNagellTheorem.ShortWeierstrass
+public import Mathlib.GroupTheory.OrderOfElement
 
 /-!
 # Generalized Lutz–Nagell integrality theorem
@@ -18,6 +20,8 @@ For a nonzero finite-order point on a general Weierstrass curve
 * `lutz_nagell_integrality_short`: its specialization to short Weierstrass curves
   `y² = x³ + Ax + B`, where the order-2 branch collapses and the coordinates are integral.
 -/
+
+@[expose] public section
 
 namespace LutzNagell
 namespace LutzNagellTheorem

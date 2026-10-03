@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Ideal
-import Mathlib.RingTheory.MvPolynomial.Homogeneous
+module
+
+public import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Ideal
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
 
 /-!
 # Homogenizing a multivariate polynomial
@@ -14,6 +16,8 @@ import Mathlib.RingTheory.MvPolynomial.Homogeneous
 We adjoin one variable using `Option σ`, with `none` as the homogenizing variable and
 `some i` as the image of the original variable `i`.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

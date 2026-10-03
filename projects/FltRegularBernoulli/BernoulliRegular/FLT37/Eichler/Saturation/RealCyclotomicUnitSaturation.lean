@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DiscreteLogIndexCollapse
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PSaturation
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DiscreteLogIndexCollapse
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PSaturation
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
 
 /-!
 # Washington Corollary 8.15 and Lemma 9.8 for `p = 37`: the saturation/generation core

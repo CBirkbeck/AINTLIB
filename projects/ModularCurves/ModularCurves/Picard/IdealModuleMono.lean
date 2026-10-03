@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.IdealModule
+module
+
+public import ModularCurves.Picard.IdealModule
 
 /-!
 # Monotone maps of ideal modules
@@ -12,6 +14,8 @@ The subtype inclusion `idealModule J₁ ⟶ idealModule J₂` for nested ideal s
 in a minimal-import file: the same declarations time out at kernel level when
 elaborated inside the heavy `WeilPairing/LineVertical.lean` import environment.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqFromConjEquation
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqFromConjEquation
 
 /-!
 # LV010-class-eq-1e: Class equality from K-level Kummer ratio

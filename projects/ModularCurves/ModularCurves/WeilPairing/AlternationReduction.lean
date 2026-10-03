@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.Basic
-import ModularCurves.WeilPairing.DescentFaithful
-import ModularCurves.EllipticCurve.MulByHomSurjective
+module
+
+public import ModularCurves.WeilPairing.Basic
+public import ModularCurves.WeilPairing.DescentFaithful
+public import ModularCurves.EllipticCurve.MulByHomSurjective
 
 /-!
 # Reduction of `e_N(x, x) = 1` to the level-`2N` diagonal square (AP-E4, KM Notes on Ch. 2)
@@ -30,6 +32,8 @@ The two remaining inputs are tracked separately: the halving cover (finite local
 surjective `[2]`-splitting cover, gated on the `mulByHom`-flatness substrate) and the
 diagonal square (AP-E4a, biextension-theoretic).
 -/
+
+@[expose] public section
 
 universe u
 

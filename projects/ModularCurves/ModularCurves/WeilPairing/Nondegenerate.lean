@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.SelfUniversalVanishing
+module
+
+public import ModularCurves.WeilPairing.SelfUniversalVanishing
 
 /-!
 # Leaf B — fibrewise nondegeneracy of the Weil pairing (KM 2.8)
@@ -25,6 +27,8 @@ pairing trivially with every `N`-torsion point is zero. The argument crosses to 
 The last is the axiom-clean replacement for the register entry
 `EllipticCurve.weilPairingEval_nondegenerate`.
 -/
+
+@[expose] public section
 
 universe u
 

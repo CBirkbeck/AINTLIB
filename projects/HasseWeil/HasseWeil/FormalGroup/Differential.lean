@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.Definition
-import HasseWeil.FormalGroup.PDeriv
-import Mathlib.RingTheory.PowerSeries.Derivative
-import Mathlib.RingTheory.PowerSeries.Inverse
-import Mathlib.Tactic.LinearCombination
+module
+
+public import HasseWeil.FormalGroup.Definition
+public import HasseWeil.FormalGroup.PDeriv
+public import Mathlib.RingTheory.PowerSeries.Derivative
+public import Mathlib.RingTheory.PowerSeries.Inverse
+public import Mathlib.Tactic.LinearCombination
 
 /-!
 # Invariant Differential for Formal Groups (Silverman IV.4)
@@ -32,6 +34,8 @@ identity `φ*(ω) = a_φ · ω`.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.4 (Prop. 4.2, Cor. 4.3)
 -/
+
+@[expose] public section
 
 open MvPowerSeries
 

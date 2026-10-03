@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Coefficients
-import PadicLFunctions.Measure.Fubini
+module
+
+public import PadicLFunctions.Coefficients
+public import PadicLFunctions.Measure.Fubini
 
 /-!
 # Measures with values in the integer ring of a nonarchimedean field
@@ -35,6 +37,8 @@ base-change map of ticket TW6.
 * `MeasureR.ext_locallyConstant` — measures agree if they agree on locally
   constant functions.
 -/
+
+@[expose] public section
 
 open Filter Topology
 

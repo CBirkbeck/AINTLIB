@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Vendored.RiemannRoch.EllipticCurve.GenusOne
-import ModularCurves.Vendored.RiemannRoch.Genus.AdeleQuotient
+module
+
+public import ModularCurves.Vendored.RiemannRoch.EllipticCurve.GenusOne
+public import ModularCurves.Vendored.RiemannRoch.Genus.AdeleQuotient
 
 /-!
 # Function-field facts for the degree-one fibre package (`AP2-A1b/c`, field level)
@@ -28,6 +30,8 @@ pole-peeling induction is needed.
 section spaces of the two affine charts and of their overlap in the Čech complex of a
 presented invertible sheaf (`AP2-A1a`, `FibreCechPresentation` downstream).
 -/
+
+@[expose] public section
 
 open FunctionField FunctionField.Chart Polynomial
 

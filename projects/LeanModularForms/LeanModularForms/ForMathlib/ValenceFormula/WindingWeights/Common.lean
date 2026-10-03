@@ -3,10 +3,12 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
-import LeanModularForms.ForMathlib.SegmentFTC
-import LeanModularForms.ForMathlib.TrigLemmas
-import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Smooth
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
+public import LeanModularForms.ForMathlib.SegmentFTC
+public import LeanModularForms.ForMathlib.TrigLemmas
+public import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Smooth
 
 /-!
 # Shared Infrastructure for Winding Weight Computations
@@ -15,6 +17,8 @@ Common helpers used across the ρ, ρ+1, and i winding weight proofs:
 trigonometric identities, old-style segment selectors, the unified arc
 formula, and FTC lemmas for log-derivative integrals.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

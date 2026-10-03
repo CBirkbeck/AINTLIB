@@ -19,8 +19,12 @@ same module as localising at `qᶜ`:
 This is the `M_𝔮 ≅ M_{𝔮ᴾ}` step of the polynomial-ring reduction (`[T-REDUCEP]`) in the flat-locus
 spreading argument, isolated so it does not depend on the Buchsbaum–Eisenbud machinery.
 -/
-import Mathlib
-import ModularCurves.ForMathlib.FlatLocus
+module
+
+public import Mathlib
+public import ModularCurves.ForMathlib.FlatLocus
+
+@[expose] public section
 
 open scoped TensorProduct
 

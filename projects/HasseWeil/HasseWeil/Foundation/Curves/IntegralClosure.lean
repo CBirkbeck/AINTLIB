@@ -3,17 +3,19 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Squarefree.Basic
-import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
-import Mathlib.FieldTheory.Separable
-import Mathlib.RingTheory.DedekindDomain.AdicValuation
-import Mathlib.RingTheory.DedekindDomain.IntegralClosure
-import Mathlib.RingTheory.Ideal.GoingUp
-import Mathlib.RingTheory.Localization.NormTrace
-import Mathlib.RingTheory.Localization.NumDen
-import Mathlib.RingTheory.Polynomial.Resultant.Basic
+module
 
-import HasseWeil.Foundation.Curves.FiniteOverKx
+public import Mathlib.Algebra.Squarefree.Basic
+public import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
+public import Mathlib.FieldTheory.Separable
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation
+public import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+public import Mathlib.RingTheory.Ideal.GoingUp
+public import Mathlib.RingTheory.Localization.NormTrace
+public import Mathlib.RingTheory.Localization.NumDen
+public import Mathlib.RingTheory.Polynomial.Resultant.Basic
+
+public import HasseWeil.Foundation.Curves.FiniteOverKx
 
 /-!
 # Integral closure infrastructure for smooth plane curves
@@ -43,6 +45,8 @@ Future content (see the plan):
 - Silverman, *Arithmetic of Elliptic Curves*, II.1 (algebraic curves).
 - Hartshorne, *Algebraic Geometry*, I.6.
 -/
+
+@[expose] public section
 
 /-- **Squarefree extraction**: if `q ∈ FractionRing R` (R a UFD like F[X])
 satisfies `q² · algebraMap D = algebraMap r` for some `r : R` and `D`

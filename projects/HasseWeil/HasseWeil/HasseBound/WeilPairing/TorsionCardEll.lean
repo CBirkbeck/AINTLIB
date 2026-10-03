@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
-import HasseWeil.HasseBound.WeilPairing.TorsionKernelRational
+module
+
+public import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
+public import HasseWeil.HasseBound.WeilPairing.TorsionKernelRational
 
 /-!
 # `#E[ℓ] = ℓ²` — assembly of the separable-kernel torsor at `φ = [ℓ]`
@@ -26,6 +28,8 @@ discharged (over `K̄`), `card_torsion_ell` is immediate.
 
 Reference: Silverman III.4.10c (the torsor), III.6.4(a) (`#E[m] = m²`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

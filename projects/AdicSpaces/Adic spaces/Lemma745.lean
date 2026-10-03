@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».ValuationContinuity
+module
+
+public import «Adic spaces».ValuationContinuity
 
 /-!
 # Lemma 7.45: Non-open primes are supports in Spa
@@ -23,6 +25,8 @@ This file contains the proof assembly using the infrastructure from
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Lemma 7.45, Lemma 7.44
 -/
+
+@[expose] public section
 
 /-! ### Section 7: Lemma 7.45 -- full proof
 

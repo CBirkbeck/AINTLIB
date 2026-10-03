@@ -3,11 +3,13 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.ProjectiveSpaceHyperplane
-import ModularCurves.ForMathlib.SchemeModuleEpiCover
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
-import ModularCurves.EllipticCurve.PoleSheaf
-import ModularCurves.EllipticCurve.SectionContractionLocal
+module
+
+public import ModularCurves.ForMathlib.ProjectiveSpaceHyperplane
+public import ModularCurves.ForMathlib.SchemeModuleEpiCover
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+public import ModularCurves.EllipticCurve.PoleSheaf
+public import ModularCurves.EllipticCurve.SectionContractionLocal
 
 /-!
 # Twists on polynomial projective space
@@ -16,6 +18,10 @@ This file starts the concrete construction of projective-space twists by showing
 that the ideal module of a coordinate hyperplane is invertible. It is the model
 of `O(-1)` used in the standard-cover cohomology calculation.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

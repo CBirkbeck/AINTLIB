@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLaurentLocalBoundsFromCor732
+module
+
+public import «Adic spaces».WedhornLaurentLocalBoundsFromCor732
 
 /-!
 # Wedhorn 8.34(ii) — Multi-piece Laurent cover refinement (T054)
@@ -96,6 +98,8 @@ the next theorem-sized step beyond T054.
 * No global universal-over-Spa multi-element clearing claim (per
   T035's counter-example).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

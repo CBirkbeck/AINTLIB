@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Wedhorn828
-import «Adic spaces».LaurentRefinementCore
-import «Adic spaces».GeometricReduction
-import «Adic spaces».PresheafIdentification
+module
+
+public import «Adic spaces».Wedhorn828
+public import «Adic spaces».LaurentRefinementCore
+public import «Adic spaces».GeometricReduction
+public import «Adic spaces».PresheafIdentification
 
 /-!
 # The relative-piece keystone (Wedhorn Prop 8.2 / Prop 8.16) and Prop 8.30 / Cor 8.32
@@ -27,6 +29,8 @@ flatness chain see the keystone.
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Prop 8.2, Remark 8.4, Prop 8.16,
   Remark 7.55, Prop 8.30, Cor 8.32 (wedhorn.txt:3504-3517, 4095-4140)
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

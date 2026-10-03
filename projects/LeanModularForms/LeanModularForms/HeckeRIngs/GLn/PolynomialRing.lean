@@ -3,10 +3,12 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.MvPolynomial.Basic
-import LeanModularForms.HeckeRIngs.GL2.MultiplicationTable
-import LeanModularForms.HeckeRIngs.GLn.PrimeDecomposition
-import LeanModularForms.HeckeRIngs.GLn.TransposeAntiInvolution
+module
+
+public import Mathlib.RingTheory.MvPolynomial.Basic
+public import LeanModularForms.HeckeRIngs.GL2.MultiplicationTable
+public import LeanModularForms.HeckeRIngs.GLn.PrimeDecomposition
+public import LeanModularForms.HeckeRIngs.GLn.TransposeAntiInvolution
 
 /-!
 # Polynomial Ring Structure of the p-local Hecke Ring
@@ -32,6 +34,8 @@ ring `ℤ[X₁,...,Xₙ]` in `n` variables.
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.2, Theorem 3.20
 -/
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Pointwise HeckeRing DoubleCoset Matrix.SpecialLinearGroup
 

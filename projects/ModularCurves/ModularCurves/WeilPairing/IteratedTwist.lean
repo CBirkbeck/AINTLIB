@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.LineVerticalConsumers
+module
+
+public import ModularCurves.WeilPairing.LineVerticalConsumers
 
 /-!
 # Iterated twists and the multiplier calculus
@@ -24,6 +26,8 @@ that the chart trivializations conjugate it to — so everything is done here fo
 map of invertible modules, and the key computation is that the multiplier of a composite
 is the product of the multipliers (`chartMultiplier_comp`).
 -/
+
+@[expose] public section
 
 universe u
 

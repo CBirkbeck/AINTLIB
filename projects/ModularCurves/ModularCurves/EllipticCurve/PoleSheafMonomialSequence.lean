@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafSuccessorCoordinateMul
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafSuccessorCoordinateMul
 
 /-!
 # Normalized monomials in pole sections
@@ -12,6 +14,8 @@ Normalized pole-order-two and pole-order-three sections determine the sequence
 `x, y, x², xy, x³, ...`. Every term has leading Cartier coefficient one in
 its pole-order successor quotient.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 open TensorProduct

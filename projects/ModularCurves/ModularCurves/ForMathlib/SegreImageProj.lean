@@ -6,8 +6,10 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreProductProjComparison`.
 -/
-import ModularCurves.ForMathlib.ProjMapClosedImmersion
-import ModularCurves.ForMathlib.SegreImageGrading
+module
+
+public import ModularCurves.ForMathlib.ProjMapClosedImmersion
+public import ModularCurves.ForMathlib.SegreImageGrading
 
 /-!
 # The Segre image in polynomial projective space
@@ -16,6 +18,8 @@ The canonical coordinate map onto the graded Segre image is surjective.
 It therefore induces a closed immersion from the `Proj` of the image
 grading into the ambient polynomial `Proj`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry
 open HomogeneousIdeal

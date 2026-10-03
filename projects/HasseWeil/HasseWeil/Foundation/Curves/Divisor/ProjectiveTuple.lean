@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Valuation.Valuation
-import Mathlib.LinearAlgebra.Projectivization.Basic
+module
+
+public import HasseWeil.Foundation.Curves.Valuation.Valuation
+public import Mathlib.LinearAlgebra.Projectivization.Basic
 
 /-!
 # Projective tuples on a smooth plane curve
@@ -23,6 +25,8 @@ Phase B.
 * [Silverman, *The Arithmetic of Elliptic Curves*], I.3 (definition of
   rational map into projective space)
 -/
+
+@[expose] public section
 
 open scoped LinearAlgebra.Projectivization
 

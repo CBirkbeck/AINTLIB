@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Auxiliary.DivisionPolynomial
+module
+
+public import HasseWeil.Foundation.Auxiliary.DivisionPolynomial
 
 /-!
 # The Pullback of [n] on Function Fields
@@ -27,6 +29,8 @@ the equation from the resulting Jacobian point.
 * `mulByInt_weierstrass`: the generic point of `[n]` satisfies the Weierstrass equation.
 * `mulByInt_coordHom_injective`: the coordinate-ring hom is injective.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.E3DatumAssembly
-import ModularCurves.Moduli.LevelMarking
-import ModularCurves.ForMathlib.NegModelAffineSection
+module
+
+public import ModularCurves.Moduli.E3DatumAssembly
+public import ModularCurves.Moduli.LevelMarking
+public import ModularCurves.ForMathlib.NegModelAffineSection
 
 /-!
 # The Legendre chart: normalising a marked char-≠2 presentation (T-G3a-SUB2)
@@ -26,6 +28,8 @@ four conjuncts of `IsLegendreDatum` at a point.
 The field/algebraically-closed hypotheses are **not** needed here — they enter only when
 producing `e₃` (`exists_third_root_vieta`) and `u` (`IsAlgClosed.exists_pow_nat_eq`).
 -/
+
+@[expose] public section
 
 universe u
 

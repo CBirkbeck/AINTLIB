@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.AdditionChartSpec
-import ModularCurves.ForMathlib.HomogeneousEval
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartSpec
+public import ModularCurves.ForMathlib.HomogeneousEval
 
 /-!
 # A projective triple on the curve gives a chart morphism (T-W7.0c-c5β, β3 ring core)
@@ -35,6 +37,8 @@ The two computational inputs:
 Together: the rescaled vector `(t · * u)` has `k`-th entry `1`, so evaluating the dehomogenised
 cubic there is evaluating the cubic at `(t · * u)`, which is `u ^ 3 * (curve equation at t) = 0`.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves
 

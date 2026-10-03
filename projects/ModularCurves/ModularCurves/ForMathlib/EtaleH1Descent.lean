@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.StandardEtaleH1
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
-import Mathlib.RingTheory.Localization.BaseChange
+module
+
+public import ModularCurves.ForMathlib.StandardEtaleH1
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.Localization.BaseChange
 
 /-!
 # Vanishing of `H¹` descends along étale faithfully flat maps
@@ -21,6 +23,8 @@ the base-change isomorphism `C ⊗[A] H¹(L_{A/k}) ≃ H¹(L_{C/k}) = 0`
 maximal ideal, the annihilator is the unit ideal, so `B ⊗[A] H¹(L_{A/k}) = 0`,
 and faithful flatness descends the vanishing to `A`.
 -/
+
+@[expose] public section
 
 open TensorProduct
 

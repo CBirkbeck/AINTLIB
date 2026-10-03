@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.AlgebraicGeometry.IdealSheaf.Basic
-import Mathlib.RingTheory.Ideal.Operations
+module
+
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Basic
+public import Mathlib.RingTheory.Ideal.Operations
 
 /-!
 # Product equals intersection for pairwise-comaximal ideal sheaves (YFULL route γ)
@@ -18,6 +20,8 @@ This is the comaximality half of the `Y(N)` full-level `⊇` step: over the locu
 `N²` torsion sections `[a]P + [b]Q` are pairwise disjoint, their kernel ideal sheaves are
 pairwise comaximal, so the section divisor's ideal `∏ ker` equals `⋂ ker`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

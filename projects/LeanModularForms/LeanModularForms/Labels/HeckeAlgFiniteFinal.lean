@@ -3,13 +3,15 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.Labels.HeckeFieldArithmetic
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeFinite
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeCommute
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInvariant
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInjective
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.EichlerInjective
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodHecke
+module
+
+public import LeanModularForms.Labels.HeckeFieldArithmetic
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeFinite
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeCommute
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInvariant
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInjective
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.EichlerInjective
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodHecke
 
 /-!
 # Installing the live `heckeAlgℤ_finite` instance via the period route (`k ≥ 2`)
@@ -37,6 +39,8 @@ former upstream instance; only the *proof* is rerouted by a case split on the we
 The `[T004b]` eigenvalue-ring finiteness lemma `newformEigenHom_range_finite` is also placed here
 (downstream of the live instance it consumes).
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2
 

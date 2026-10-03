@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.FinitePresentationFunctorCover
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationFunctorCover
 
 /-!
 # Spreading finite families of algebra equivalences
@@ -8,6 +10,8 @@ colimit can be represented by equivalences at one common stage. Both directions 
 spread simultaneously, and the two inverse identities are synchronized before the
 stage equivalences are assembled.
 -/
+
+@[expose] public section
 
 universe u
 

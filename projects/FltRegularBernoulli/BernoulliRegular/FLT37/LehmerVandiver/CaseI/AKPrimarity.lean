@@ -1,8 +1,10 @@
-import BernoulliRegular.FLT37.Hilbert90
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerFLTConsumer
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ProvedAuxiliaries
-import BernoulliRegular.FLT37.PrimaryDescent
+module
+
+public import BernoulliRegular.FLT37.Hilbert90
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerFLTConsumer
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ProvedAuxiliaries
+public import BernoulliRegular.FLT37.PrimaryDescent
 
 /-!
 # AK-5: case-I primarity argument for `CaseIAntiKummerLKUnramified`

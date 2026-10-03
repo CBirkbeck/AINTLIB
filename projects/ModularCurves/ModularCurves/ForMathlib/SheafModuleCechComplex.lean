@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.CategoryTheory.Preadditive.Basic
-import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
-import ModularCurves.ForMathlib.TopCatSheafRestrict
+module
+
+public import Mathlib.CategoryTheory.Preadditive.Basic
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
+public import ModularCurves.ForMathlib.TopCatSheafRestrict
 
 /-!
 # Sheaf-level Cech complexes with module coefficients
@@ -14,6 +16,10 @@ This file specializes the sheaf-level Cech construction to sheaves valued in
 modules over a fixed ring. The resulting complex retains the coefficient-ring
 action needed by the two-cover comparison.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

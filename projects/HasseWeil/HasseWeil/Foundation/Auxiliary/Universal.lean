@@ -3,7 +3,9 @@ Copyright (c) 2024 Junyan Xu. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Junyan Xu
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Point
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Point
 
 /-!
 # Additions to Affine.Point and the universal elliptic curve
@@ -33,6 +35,8 @@ order on the universal pointed elliptic curve.
 
 Ported from the LutzNagell project (`LutzNagell/Universal.lean`).
 -/
+
+@[expose] public section
 
 noncomputable section
 

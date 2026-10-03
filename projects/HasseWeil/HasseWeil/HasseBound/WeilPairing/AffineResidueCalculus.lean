@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.OneSubComapConcrete
-import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
-import HasseWeil.HasseBound.WeilPairing.WallAGenericRealization
+module
+
+public import HasseWeil.HasseBound.WeilPairing.OneSubComapConcrete
+public import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
+public import HasseWeil.HasseBound.WeilPairing.WallAGenericRealization
 
 /-!
 # Affine residue calculus for addition-formula isogenies
@@ -13,6 +15,8 @@ import HasseWeil.HasseBound.WeilPairing.WallAGenericRealization
 This file provides residue arithmetic for the base-changed Weierstrass function field and the
 invariant-differential tangent-slope residue for a pair of isogenies with equal affine image.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

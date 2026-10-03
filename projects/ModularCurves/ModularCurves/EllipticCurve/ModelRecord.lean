@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.GroupLawAxioms
-import ModularCurves.EllipticCurve.Rigidity
-import ModularCurves.EllipticCurve.Comparison
+module
+
+public import ModularCurves.EllipticCurve.GroupLawAxioms
+public import ModularCurves.EllipticCurve.Rigidity
+public import ModularCurves.EllipticCurve.Comparison
 
 /-!
 # [T-B6′ step (b)] — the model working record, and point-addition rigidity
@@ -36,6 +38,8 @@ statement about point addition below keeps its records as *variables*; the recor
 destructurings live in instance-free helper lemmas, and cross-record morphism equalities are
 spelled with `eqToHom` (homogeneous) rather than `HEq`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

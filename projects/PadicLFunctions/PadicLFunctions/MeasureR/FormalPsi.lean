@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.PowerSeries.Inverse
+module
 
-import PadicLFunctions.MeasureR.Toolbox
+public import Mathlib.RingTheory.PowerSeries.Inverse
+
+public import PadicLFunctions.MeasureR.Toolbox
 
 /-!
 # The formal ψ-operator on power series (RJW §6, decomposition W6b)
@@ -23,6 +25,8 @@ formal-series form is ill-posed (recorded replan, decomposition R6).
 
 Decomposition: `.mathlib-quality/decomposition.md` R6, cluster W6b.
 -/
+
+@[expose] public section
 
 open PowerSeries
 

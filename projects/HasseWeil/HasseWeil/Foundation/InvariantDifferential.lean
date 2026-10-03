@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Basic
-import Mathlib.RingTheory.Kaehler.Basic
-import Mathlib.RingTheory.Kaehler.Polynomial
-import Mathlib.RingTheory.Unramified.Field
+module
+
+public import HasseWeil.Foundation.Basic
+public import Mathlib.RingTheory.Kaehler.Basic
+public import Mathlib.RingTheory.Kaehler.Polynomial
+public import Mathlib.RingTheory.Unramified.Field
 
 /-!
 # The Invariant Differential
@@ -18,6 +20,8 @@ and the pullback coefficient map End(E) → K.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.1.5, III.5
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial.Bivariate
 

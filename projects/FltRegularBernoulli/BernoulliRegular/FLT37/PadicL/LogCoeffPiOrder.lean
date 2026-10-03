@@ -1,4 +1,7 @@
-import BernoulliRegular.FLT37.PadicL.PowerSumModPCubed
+module
+
+import all BernoulliRegular.FLT37.PadicL.LpValue
+public import BernoulliRegular.FLT37.PadicL.PowerSumModPCubed
 
 /-!
 # The `𝔓`-graded order of `Λ 32` — Washington Prop 8.12 single-unit `p`-adic-log

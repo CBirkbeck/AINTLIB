@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.AdditionChartOverlap
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartOverlap
 
 /-!
 # The chart-product transition (T-W7.0c-c5β, c4.3 ring layer)
@@ -29,6 +31,8 @@ law-2 triple rescaled by the bidegree-`(2,2)` factor. Combined with
 `chartAwayHomOfTriple_dblAddXYZ_smul` this says the two chart-products define the SAME
 morphism on their overlap — the cross-chart-product agreement, at ring level.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves TensorProduct AlgebraicGeometry CategoryTheory
 

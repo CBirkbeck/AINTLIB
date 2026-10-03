@@ -3,17 +3,19 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.CharP.IntermediateField
-import Mathlib.FieldTheory.Finite.Basic
-import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
-import Mathlib.FieldTheory.IntermediateField.Basic
-import Mathlib.FieldTheory.PurelyInseparable.Basic
-import Mathlib.FieldTheory.RatFunc.Luroth
-import Mathlib.RingTheory.Algebraic.Integral
-import Mathlib.RingTheory.IsTensorProduct
+module
 
-import HasseWeil.Foundation.Auxiliary.Universal
-import HasseWeil.Isogeny.FunctionField
+public import Mathlib.Algebra.CharP.IntermediateField
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.FieldTheory.IntermediateField.Basic
+public import Mathlib.FieldTheory.PurelyInseparable.Basic
+public import Mathlib.FieldTheory.RatFunc.Luroth
+public import Mathlib.RingTheory.Algebraic.Integral
+public import Mathlib.RingTheory.IsTensorProduct
+
+public import HasseWeil.Foundation.Auxiliary.Universal
+public import HasseWeil.Isogeny.FunctionField
 
 /-!
 # The Frobenius Isogeny via Function Fields
@@ -52,6 +54,8 @@ via `Algebra.finrank_eq_of_equiv_equiv`.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*][silverman2009], III.4.6, II.2.11
 -/
+
+@[expose] public section
 
 open WeierstrassCurve FiniteField
 open scoped Polynomial

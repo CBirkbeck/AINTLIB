@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalizationPlus
-import «Adic spaces».WedhornLocalizationContinuity
+module
+
+public import «Adic spaces».WedhornLocalizationPlus
+public import «Adic spaces».WedhornLocalizationContinuity
 
 /-!
 # Wedhorn 8.34(ii) valuation lift to localization
@@ -84,6 +86,8 @@ s n`) are mapped into appropriate value-group neighborhoods.
   lives there) or any committed bridge file.
 * No Lane B / Cor 8.32 / Jacobson / T001 / faithful-flatness /
   final-acyclicity content. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

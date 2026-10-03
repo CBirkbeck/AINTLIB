@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
-import HasseWeil.Pic0.PicDualAdditivityReduction
+module
+
+public import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
+public import HasseWeil.Pic0.PicDualAdditivityReduction
 
 /-!
 # Route C — the theorem-of-the-square reduction of dual additivity (Silverman III.6.2(c))
@@ -118,6 +120,8 @@ the `K(E₁)`-function-field `Div⁰` proof, *not* to this class-group identity)
   III.6.1 (the dual), III.6.2(c) (dual additivity), book p.83–84.  Verified vs the in-repo PDF
   (`Silverman-Arithmetic_of_EC.pdf`, offset +18).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 open scoped nonZeroDivisors

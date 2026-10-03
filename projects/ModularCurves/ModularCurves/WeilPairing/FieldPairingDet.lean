@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.PairingAdjoint
-import ModularCurves.ForMathlib.RootOfUnityIntPow
-import ModularCurves.WeilPairing.FieldPairing
+module
+
+public import HasseWeil.HasseBound.WeilPairing.PairingAdjoint
+public import ModularCurves.ForMathlib.RootOfUnityIntPow
+public import ModularCurves.WeilPairing.FieldPairing
 
 /-!
 # The determinant law of the field-level Weil pairing (WP-A1)
@@ -24,6 +26,8 @@ the `ZMod`-exponent form used by the descent is derived from it downstream.
 
 Source: Silverman, *AEC* III.8.1 — (a) bilinearity, (b) alternation, (c) antisymmetry.
 -/
+
+@[expose] public section
 
 universe u
 

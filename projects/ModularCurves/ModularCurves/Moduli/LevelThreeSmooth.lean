@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.StandardSmoothHypersurface
-import ModularCurves.Moduli.UniversalLevelThree
+module
+
+public import ModularCurves.ForMathlib.StandardSmoothHypersurface
+public import ModularCurves.Moduli.UniversalLevelThree
 
 /-!
 # The `ℰ₃` moduli scheme is smooth of relative dimension one
@@ -23,6 +25,8 @@ This is the level-`3` counterpart of `Moduli/LegendreSmooth.lean`, and it is wha
 `Y(ρ̄)` smoothness leaf run on the (axiom-clean) level-`3` rigidifier instead of the
 Legendre one.
 -/
+
+@[expose] public section
 
 noncomputable section
 

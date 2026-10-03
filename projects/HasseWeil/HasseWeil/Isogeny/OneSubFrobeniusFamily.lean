@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
+module
+
+public import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
 
 /-!
 # Substantive `xy_family` for `isogOneSub_negFrobenius`
@@ -35,6 +37,8 @@ At the K(E)-lifted level this becomes invariance of `addPullback_x` and
    distributing `translateAlgEquivOfPoint W k.val` over the
    `addX` / `addY` formulas via the AlgHom structure.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

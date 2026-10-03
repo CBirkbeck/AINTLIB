@@ -3,13 +3,16 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Analysis.Meromorphic.Order
-import Mathlib.NumberTheory.Modular
-import Mathlib.NumberTheory.ModularForms.Basic
-import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
-import Mathlib.NumberTheory.ModularForms.LevelOne.Basic
-import Mathlib.NumberTheory.ModularForms.QExpansion
-import Mathlib.RingTheory.PowerSeries.Order
+module
+
+public import Mathlib.Analysis.Complex.Norm
+public import Mathlib.Analysis.Meromorphic.Order
+public import Mathlib.NumberTheory.Modular
+public import Mathlib.NumberTheory.ModularForms.Basic
+public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
+public import Mathlib.NumberTheory.ModularForms.LevelOne.Basic
+public import Mathlib.NumberTheory.ModularForms.QExpansion
+public import Mathlib.RingTheory.PowerSeries.Order
 
 /-!
 # Valence Formula Definitions
@@ -19,6 +22,10 @@ orbifold coefficients, the order of vanishing, and the canonical fundamental dom
 
 We use `ModularGroup.fd` (notation `𝒟`) from mathlib for the standard fundamental domain.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular
@@ -67,11 +74,11 @@ private lemma rho_plus_one_normSq_eq_one :
   nlinarith [Real.sq_sqrt (show (3 : ℝ) ≥ 0 by norm_num)]
 
 theorem ellipticPointRhoPlusOne_norm : ‖ellipticPointRhoPlusOne‖ = 1 := by
-  change Real.sqrt (Complex.normSq _) = 1
+  rw [Complex.norm_def]
   rw [rho_plus_one_normSq_eq_one, Real.sqrt_one]
 
 theorem ellipticPointRho_norm : ‖ellipticPointRho‖ = 1 := by
-  change Real.sqrt (Complex.normSq _) = 1
+  rw [Complex.norm_def]
   rw [rho_normSq_eq_one, Real.sqrt_one]
 
 theorem ellipticPointI_mem_fd : ellipticPointI' ∈ 𝒟 := by

@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.RingTheory.TotallySplit
-import Mathlib.LinearAlgebra.FiniteDimensional.Basic
+module
+
+public import Mathlib.RingTheory.TotallySplit
+public import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 
 /-!
 # Hom-duality for finite split algebras
@@ -18,6 +20,8 @@ criterion (`[C5B-2 L2b-ii]`):
 * `Algebra.IsFiniteSplit.bijective_of_precomp_bijective` — an algebra map of finite split
   algebras whose dual map on `k`-points is bijective is itself bijective.
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

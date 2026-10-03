@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.ExactOrder
-import ModularCurves.ForMathlib.CartierDual
-import Mathlib.AlgebraicGeometry.Morphisms.Affine
+module
+
+public import ModularCurves.LevelStructure.ExactOrder
+public import ModularCurves.ForMathlib.CartierDual
+public import Mathlib.AlgebraicGeometry.Morphisms.Affine
 
 /-!
 # Deligne's order theorem — Layer B: the geometric bridge (BB-DELIGNE)
@@ -52,6 +54,8 @@ is therefore built here from scratch, along these leaves:
 Full plan: `.mathlib-quality/plan-deligne.md`. `sorry`s here are Layer-B leaves, tracked as
 sub-tickets T-D5h..k (WIP, producer discipline).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 open scoped TensorProduct

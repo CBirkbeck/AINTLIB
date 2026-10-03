@@ -2,15 +2,17 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».AdicCompletionBridge
-import «Adic spaces».CompletionLocalization
-import «Adic spaces».Presheaf
-import «Adic spaces».PresheafIdentification
-import «Adic spaces».TopologyComparison
-import «Adic spaces».WedhornAwayMapSaturation
-import «Adic spaces».WedhornLocTopologyLinear
-import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
-import Mathlib.RingTheory.AdicCompletion.Exactness
+module
+
+public import «Adic spaces».AdicCompletionBridge
+public import «Adic spaces».CompletionLocalization
+public import «Adic spaces».Presheaf
+public import «Adic spaces».PresheafIdentification
+public import «Adic spaces».TopologyComparison
+public import «Adic spaces».WedhornAwayMapSaturation
+public import «Adic spaces».WedhornLocTopologyLinear
+public import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
+public import Mathlib.RingTheory.AdicCompletion.Exactness
 
 /-!
 # Tate Ring Structure on Presheaf Values (Wedhorn Proposition 8.15)
@@ -36,6 +38,10 @@ subset `R(T/s)` is the structure presheaf of the Tate ring `presheafValue D₀`.
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Proposition 8.15, Example 6.38
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

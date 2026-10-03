@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
-import Mathlib.AlgebraicGeometry.Morphisms.OpenImmersion
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+public import Mathlib.AlgebraicGeometry.Morphisms.OpenImmersion
 
 /-!
 # Open-immersion criterion via an image bound and a section (YFULL route γ, [YF-OI-CRIT])
@@ -22,6 +24,8 @@ the closed immersion to an open immersion. A closed immersion with clopen image 
 automatically an open immersion (a non-reduced thickening of a clopen point is a
 counterexample); the section is exactly the extra datum that rules this out.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

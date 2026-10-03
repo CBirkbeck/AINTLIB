@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.RingTheory.Extension.Presentation.Basic
-import ModularCurves.ForMathlib.MvPolynomialProjectiveClosure
+module
+
+public import Mathlib.RingTheory.Extension.Presentation.Basic
+public import ModularCurves.ForMathlib.MvPolynomialProjectiveClosure
 
 /-!
 # Projective closures of algebra presentations
@@ -14,6 +16,8 @@ import ModularCurves.ForMathlib.MvPolynomialProjectiveClosure
 A finite-variable algebra presentation realizes its affine spectrum as the standard open chart
 of a proper homogenized projective closure over the coefficient ring.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

@@ -1,8 +1,10 @@
-import Mathlib.Algebra.Homology.Embedding.ExtendHomology
-import Mathlib.CategoryTheory.Abelian.Injective.Ext
-import Mathlib.CategoryTheory.Abelian.RightDerived
-import Mathlib.CategoryTheory.Sites.GlobalSections
-import ModularCurves.ForMathlib.FlasqueCohomology
+module
+
+public import Mathlib.Algebra.Homology.Embedding.ExtendHomology
+public import Mathlib.CategoryTheory.Abelian.Injective.Ext
+public import Mathlib.CategoryTheory.Abelian.RightDerived
+public import Mathlib.CategoryTheory.Sites.GlobalSections
+public import ModularCurves.ForMathlib.FlasqueCohomology
 
 /-!
 # Sheaf cohomology as derived global sections
@@ -11,6 +13,10 @@ This file identifies `Ext` from a representing object with the right-derived fun
 the represented additive functor. It then specializes this comparison to identify genuine
 sheaf cohomology with right-derived global sections.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits
 

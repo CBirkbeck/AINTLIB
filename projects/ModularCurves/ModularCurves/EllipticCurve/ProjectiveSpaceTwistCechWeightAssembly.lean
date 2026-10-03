@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeightComponents
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeightComponents
 
 /-!
 # Finite assembly of projective twist Cech weight components
@@ -12,6 +14,8 @@ For a finite coordinate set, every cochain in the ordered projective twist Cech 
 finitely many active global Laurent weights. This file records those weights and reconstructs the
 cochain as the finite sum of its fixed-weight components.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

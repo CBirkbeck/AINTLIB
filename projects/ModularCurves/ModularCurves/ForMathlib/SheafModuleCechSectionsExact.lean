@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafCechSheafResolution
-import ModularCurves.ForMathlib.SheafModuleCechSectionsDifferential
-import ModularCurves.ForMathlib.SheafModuleCechTopExact
+module
+
+public import ModularCurves.ForMathlib.SheafCechSheafResolution
+public import ModularCurves.ForMathlib.SheafModuleCechSectionsDifferential
+public import ModularCurves.ForMathlib.SheafModuleCechTopExact
 
 /-!
 # Exactness of evaluated module-valued sheaf Cech complexes
@@ -15,6 +17,8 @@ the evaluated module-valued Cech augmentation and differential with their
 additive counterparts. The sheaf condition therefore gives exactness in
 degree zero and monicity of the evaluated augmentation.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

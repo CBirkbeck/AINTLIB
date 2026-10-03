@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidRing
-import «Adic spaces».PerfectoidSpace
+module
+
+public import «Adic spaces».PerfectoidRing
+public import «Adic spaces».PerfectoidSpace
 
 /-!
 # Nonarchimedean Scottish Book — Problem 2
@@ -31,6 +33,8 @@ We state the problem as: if `Spa(A, A⁺)` (viewed as an adic space) is a perfec
 does `A` admit a perfectoid ring structure? The counterexample shows this is false in general,
 so we also state the stably uniform variant which remains open.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

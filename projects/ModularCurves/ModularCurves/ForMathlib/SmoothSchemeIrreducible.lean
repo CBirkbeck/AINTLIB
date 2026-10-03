@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Smooth
-import ModularCurves.ForMathlib.SmoothRegularLocal
-import ModularCurves.ForMathlib.IrreducibleConnected
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import ModularCurves.ForMathlib.SmoothRegularLocal
+public import ModularCurves.ForMathlib.IrreducibleConnected
 
 /-!
 # A connected smooth curve over an algebraically closed field is irreducible (T-G4a)
@@ -23,6 +25,8 @@ The scheme-level assembly of the `T-SMOOTH-REG` stream:
 This discharges the leaf `L1` of the geometric-irreducibility decomposition
 (`ModularCurve/IrreducibilityScoping.lean`).
 -/
+
+@[expose] public section
 
 universe u
 

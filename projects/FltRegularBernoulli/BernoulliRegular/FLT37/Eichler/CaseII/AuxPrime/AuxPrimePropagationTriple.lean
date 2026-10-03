@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.IntegralUnitDescentGeometry
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.IntegralUnitDescentGeometry
 
 /-!
 # [F2] The aux-prime `ℓ`-propagation conjuncts of the clean Case-II residual, PROVEN

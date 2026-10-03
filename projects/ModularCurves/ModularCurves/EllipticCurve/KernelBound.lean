@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.EtaleSectionsCount
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.EllipticCurve.EndomorphismDegree
+module
+
+public import ModularCurves.ForMathlib.EtaleSectionsCount
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.EllipticCurve.EndomorphismDegree
 
 /-!
 # The isogeny kernel bound `|ker δ| ≤ deg δ` ([KEY-KER], STREAM-GH input to KM 2.7.2)
@@ -21,6 +23,8 @@ isogeny, and tolerates an inseparable `δ`.
 with `E.endDeg δ` (the endDeg-via-K4-scheme-finrank ruling) to obtain `(N : ℤ) ≤ E.endDeg δ`.
 The finiteness/flatness of `δ.left` are the isogeny fibre inputs, taken as instance hypotheses.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

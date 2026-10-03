@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorSupportArithmetic
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorSupportArithmetic
 
 /-!
 # [FLT37-CASEII-FACTOR-DESCENT-STEP] Discharging `CaseIIFactorDescentStep37` (Washington Thm 9.4)

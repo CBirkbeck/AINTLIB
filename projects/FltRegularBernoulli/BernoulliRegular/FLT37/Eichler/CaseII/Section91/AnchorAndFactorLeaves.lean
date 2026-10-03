@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.Section91FactorEquationsAssembly
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorRealGenerator
-import BernoulliRegular.UnitQuotient.Washington83UnitForward
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.Section91FactorEquationsAssembly
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorRealGenerator
+public import BernoulliRegular.UnitQuotient.Washington83UnitForward
 
 /-!
 # [FLT37-CASEII-R2-SKELETON] Washington §9.1 second-case descent: the two genuine-new leaves

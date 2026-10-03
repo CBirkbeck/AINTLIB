@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.PoleDivisorFallback
-import HasseWeil.HasseBound.Infrastructure
-import HasseWeil.HasseBound.Primitives
+module
+
+public import HasseWeil.HasseBound.PoleDivisorFallback
+public import HasseWeil.HasseBound.Infrastructure
+public import HasseWeil.HasseBound.Primitives
 
 /-!
 # L6 (V.1.1 proof identity) via the pole-divisor route — witness-parametric closure
@@ -45,6 +47,8 @@ W.toAffine` (= L6 = Witness #3).
 * `tickets/EXECUTION-PLAN-R23.md` — Phase B (B3, B4, B5).
 * `tickets/hasse/T-V-1-003-card-Eq-eq-deg.md` — the project's V-1-003 spec.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 open HasseWeil.Curves.RamificationAtInfinity

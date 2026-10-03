@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.KummerCongruenceResidue
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.KummerCongruenceResidue
 
 /-!
 # Washington §9.1 cyclotomic identification of the Case-II descent unit (local-power half)

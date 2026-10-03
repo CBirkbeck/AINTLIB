@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.PrincipalIdealModuleIso
+module
+
+public import ModularCurves.Picard.PrincipalIdealModuleIso
 
 /-!
 # A product of ideal sheaves is the tensor product of the ideal modules (T10-mult)
@@ -59,6 +61,8 @@ the sections of `I(JA)` over `W` are exactly its multiples, and likewise for `ge
 `(genA i · genB i) · z`, and both injectivity and surjectivity fall out of the nonzerodivisor
 cancellation.
 -/
+
+@[expose] public section
 
 universe u
 

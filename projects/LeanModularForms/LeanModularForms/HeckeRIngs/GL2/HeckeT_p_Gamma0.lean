@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_GLpair
-import LeanModularForms.HeckeRIngs.GL2.HeckeModularForm_Gamma0
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_GLpair
+public import LeanModularForms.HeckeRIngs.GL2.HeckeModularForm_Gamma0
 
 /-!
 # The Hecke double coset `D_p` in `𝕋(Γ₀(N))`
@@ -31,6 +33,8 @@ level Γ₀(N).
 * Shimura, §3.4, Theorem 3.35.
 * Diamond–Shurman, §5.2, Proposition 5.2.1.
 -/
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup
 

@@ -1,4 +1,6 @@
-import ModularCurves.Picard.InvertibleSheafGlueData
+module
+
+public import ModularCurves.Picard.InvertibleSheafGlueData
 
 /-!
 # Descent data from affine-intersection unit cocycles
@@ -6,6 +8,10 @@ import ModularCurves.Picard.InvertibleSheafGlueData
 This file turns the chart transition morphisms attached to an
 `AffineIntersectionUnitCocycle` into module descent data on the glued scheme.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

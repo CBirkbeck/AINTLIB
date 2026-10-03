@@ -1,8 +1,10 @@
-import HasseWeil.FormalGroup.FormalGroup
-import Mathlib.RingTheory.MvPowerSeries.Inverse
-import Mathlib.RingTheory.MvPowerSeries.Substitution
-import Mathlib.RingTheory.PowerSeries.Derivative
-import Mathlib.RingTheory.PowerSeries.Substitution
+module
+
+public import HasseWeil.FormalGroup.FormalGroup
+public import Mathlib.RingTheory.MvPowerSeries.Inverse
+public import Mathlib.RingTheory.MvPowerSeries.Substitution
+public import Mathlib.RingTheory.PowerSeries.Derivative
+public import Mathlib.RingTheory.PowerSeries.Substitution
 
 /-!
 # The specification layer for the legacy formal group law (Silverman IV §1)
@@ -49,6 +51,8 @@ NOT "fix" this file to match the book.
   `linear_combination` work and are used directly.
 * `2 •`/`3 •` in `chordB` are ℕ-scalar actions (char-safe).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve PowerSeries Finset
 

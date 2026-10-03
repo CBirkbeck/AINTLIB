@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
-import HasseWeil.HasseBound.Primitives
-import HasseWeil.Foundation.EC.MulByIntAddRecurrence
+module
+
+public import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
+public import HasseWeil.HasseBound.Primitives
+public import HasseWeil.Foundation.EC.MulByIntAddRecurrence
 
 /-!
 # Silverman III.5.3: `a_{[m]} = m` via curve-side additivity (Route B assembly)
@@ -20,6 +22,8 @@ the formal-group correspondence.
 
 This is Silverman III.5.2 `(φ+ψ)*ω = φ*ω + ψ*ω` specialised to `φ = id`, then III.5.3's induction.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

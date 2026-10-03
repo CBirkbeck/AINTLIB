@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.Basic
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
-import ModularCurves.ForMathlib.FiniteEtaleGalois
-import ModularCurves.ForMathlib.FiniteEtaleFundamentalGroup
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.WeilPairing.Basic
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
+public import ModularCurves.ForMathlib.FiniteEtaleGalois
+public import ModularCurves.ForMathlib.FiniteEtaleFundamentalGroup
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The char-0 étale-descent Weil pairing (T-C0)
@@ -77,6 +79,8 @@ axiom-clean (`propext`/`Classical.choice`/`Quot.sound` only); `sorryAx` enters
 `torsionPairAlgebra`/`torsionPairAlgebraPointsEquiv`/
 `exists_pairingAlgebraHom_of_galoisEquivariant` only through `torsionAlgebra`.
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

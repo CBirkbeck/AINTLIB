@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.FactorIntegrallyClosed
-import ModularCurves.WeilPairing.UniversalRootBase
+module
+
+public import ModularCurves.ForMathlib.FactorIntegrallyClosed
+public import ModularCurves.WeilPairing.UniversalRootBase
 
 /-!
 # Roots of unity on a component of a smooth curve (WP-D3d step 3)
@@ -18,6 +20,8 @@ point. This file is the interface between the two:
 `isIntegrallyClosed_quotient_minimalPrime` (`ForMathlib/FactorIntegrallyClosed.lean`) to supply the
 `IsIntegrallyClosed` hypothesis that `rootOfUnityDescend` needs.
 -/
+
+@[expose] public section
 
 universe u
 

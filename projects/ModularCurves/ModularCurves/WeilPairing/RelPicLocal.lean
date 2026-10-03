@@ -3,16 +3,18 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.DualPullback
-import ModularCurves.Picard.DualPullback.LocalTrivializationSection
-import ModularCurves.Picard.DualPullback.Iso
-import ModularCurves.Picard.InvertibleSheafCocycle
+module
+
+public import ModularCurves.Picard.DualPullback
+public import ModularCurves.Picard.DualPullback.LocalTrivializationSection
+public import ModularCurves.Picard.DualPullback.Iso
+public import ModularCurves.Picard.InvertibleSheafCocycle
 -- `ModularCurves.WeilPairing.TensorSection` is deliberately NOT imported: nothing in this file uses
 -- it, and its four `tensorSection*` declarations collide by full name with the ones in
 -- `EllipticCurve/PoleSheaf.lean` and `EllipticCurve/PullbackTensorSection.lean`, which the seesaw
 -- consumer of this file (`ForMathlib/Seesaw.lean`) imports. Restoring the import breaks that build.
-import ModularCurves.WeilPairing.UnitSheaf
-import ModularCurves.Picard.InvertibleSheafBaseCechFlat
+public import ModularCurves.WeilPairing.UnitSheaf
+public import ModularCurves.Picard.InvertibleSheafBaseCechFlat
 
 /-!
 # Zariski locality of the relative Picard equivalence (`AP2-B1`, KM p. 65)
@@ -34,6 +36,8 @@ Hida's corresponding locality claim (p. 109, *"Since the formation of invertible
 Round-19 architecture step `[B′]`; consumed by `AP2-B4`'s naturality and by `AP-D5`'s cocycle
 refinement independence.
 -/
+
+@[expose] public section
 
 universe u
 

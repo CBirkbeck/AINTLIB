@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartOpen
-import ModularCurves.EllipticCurve.AdditionChartTransition
-import ModularCurves.ForMathlib.AwayLiftAlgHom
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartOpen
+public import ModularCurves.EllipticCurve.AdditionChartTransition
+public import ModularCurves.ForMathlib.AwayLiftAlgHom
 
 /-!
 # The two Bosma–Lenstra laws on `E ×_R E` (T-W7.0c-c5β, c4.3 assembly)
@@ -27,6 +29,8 @@ Each piece is transported into `E ×_R E` along `pieceι` (an open immersion) us
 the
 former, and a `▸` transport across that equality would be gratuitous.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory Limits HomogeneousLocalization
 

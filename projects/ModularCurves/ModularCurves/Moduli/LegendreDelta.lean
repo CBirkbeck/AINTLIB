@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.UniversalAdapted
-import ModularCurves.Moduli.Representability
-import ModularCurves.Moduli.GammaH
-import ModularCurves.EllipticCurve.AffinePointSection
-import ModularCurves.EllipticCurve.LegendreNormalForm
+module
+
+public import ModularCurves.Moduli.UniversalAdapted
+public import ModularCurves.Moduli.Representability
+public import ModularCurves.Moduli.GammaH
+public import ModularCurves.EllipticCurve.AffinePointSection
+public import ModularCurves.EllipticCurve.LegendreNormalForm
 
 /-!
 # The Legendre `δ`: KM 4.6.2's coupled marking condition (T-E14b)
@@ -37,6 +39,8 @@ The engine axioms 1/2 for this `δ` (representability by
 `M'₂ = Spec ℤ[1/2][λ][(λ(λ−1))⁻¹]`, finite-étale torsor fibres) are T-E14's remaining
 proof obligations, stated in `Moduli/Bootstrap.lean`.
 -/
+
+@[expose] public section
 
 universe u
 

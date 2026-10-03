@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.NumberTheory.Basic
-import Mathlib.NumberTheory.Padics.Complex
-import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
-import PadicLFunctions.Interpolation.Branches
-import PadicLFunctions.ValuesAtOne
+module
+
+public import Mathlib.NumberTheory.Basic
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+public import PadicLFunctions.Interpolation.Branches
+public import PadicLFunctions.ValuesAtOne
 
 /-!
 # The residue of ζ_p at s = 1 (RJW §7, TeX 2181–2360)
@@ -29,6 +31,8 @@ with the `ξ ∈ μ_p`-machinery run in a field `K ⊇ ℚ_p(μ_p)` (ℂ_p) and
 descended by injectivity. RJW's Lemma 7.4 (`ℛ⁺`-membership) is not needed
 on this route.
 -/
+
+@[expose] public section
 
 open PowerSeries
 

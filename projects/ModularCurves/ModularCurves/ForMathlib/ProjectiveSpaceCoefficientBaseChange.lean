@@ -5,9 +5,11 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.ProjMapClosedImmersion
-import ModularCurves.ForMathlib.SegreProductStandardCover
-import Mathlib.RingTheory.TensorProduct.MvPolynomial
+module
+
+public import ModularCurves.ForMathlib.ProjMapClosedImmersion
+public import ModularCurves.ForMathlib.SegreProductStandardCover
+public import Mathlib.RingTheory.TensorProduct.MvPolynomial
 
 /-!
 # Coefficient base change for polynomial projective space
@@ -16,6 +18,10 @@ Polynomial projective space commutes with extension of its coefficient ring. The
 each standard projective chart with a polynomial ring and uses the scalar-extension equivalence for
 multivariate polynomial rings.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry
 open HomogeneousIdeal HomogeneousLocalization

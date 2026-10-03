@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.CartierDivisor
-import ModularCurves.Picard.GlueTrivialization
-import ModularCurves.Picard.IdealModule
-import ModularCurves.Picard.RelativePic
+module
+
+public import ModularCurves.LevelStructure.CartierDivisor
+public import ModularCurves.Picard.GlueTrivialization
+public import ModularCurves.Picard.IdealModule
+public import ModularCurves.Picard.RelativePic
 
 /-!
 # The Picard class of a relative effective Cartier divisor (the D2 seam)
@@ -23,6 +25,8 @@ effective Cartier divisor is invertible (KM 1.1.1's official form, via
   relative effective Cartier divisor is invertible.
 * `ModularCurves.RelEffCartierDiv.picClass`: the class `[I(D)]⁻¹ ∈ Pic C`.
 -/
+
+@[expose] public section
 
 universe u
 

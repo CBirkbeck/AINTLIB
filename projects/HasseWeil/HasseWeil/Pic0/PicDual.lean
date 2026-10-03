@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.ClassGroup
-import HasseWeil.Pic0.ToClassSurjective
-import HasseWeil.Foundation.Basic
+module
+
+public import HasseWeil.Isogeny.ClassGroup
+public import HasseWeil.Pic0.ToClassSurjective
+public import HasseWeil.Foundation.Basic
 
 /-!
 # The Pic⁰ dual isogeny and the dual relation `α ∘ α̂ = [deg α]` (Silverman III.6.1)
@@ -71,6 +73,8 @@ per isogeny: Frobenius, multiplication-by-`n`), keeping every theorem `#print ax
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.3.6–3.7 (divisor pullback/pushforward,
   `φ_*φ* = [deg]`), III.3.4 (functoriality of `E ≅ Pic⁰(E)`), III.6.1 (the dual isogeny).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 open scoped nonZeroDivisors

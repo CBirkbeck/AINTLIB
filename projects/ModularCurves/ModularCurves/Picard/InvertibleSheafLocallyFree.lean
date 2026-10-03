@@ -1,5 +1,7 @@
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.LocallyFree
-import ModularCurves.Picard.InvertibleSheaf
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.LocallyFree
+public import ModularCurves.Picard.InvertibleSheaf
 
 /-!
 # Invertible sheaves are locally free
@@ -9,6 +11,8 @@ to mathlib's `SheafOfModules.IsLocallyFree`. The bridge makes mathlib's existing
 locally-free-implies-quasicoherent instance available to the pole sheaves used in the
 fibrewise-to-Weierstrass comparison.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

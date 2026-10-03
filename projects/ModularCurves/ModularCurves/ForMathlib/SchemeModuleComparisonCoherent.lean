@@ -6,8 +6,10 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `CoherentComparisonResiduals.lean`
 in Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
-import ModularCurves.ForMathlib.SheafModuleFiniteTypeQuotient
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+public import ModularCurves.ForMathlib.SheafModuleFiniteTypeQuotient
 
 /-!
 # Coherence of comparison residuals
@@ -16,6 +18,8 @@ On a locally Noetherian scheme, both residuals in the
 kernel-image-cokernel factorization of a morphism between finite-type
 quasicoherent modules are again finite type and quasicoherent.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

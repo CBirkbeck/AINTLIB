@@ -5,11 +5,13 @@ Authors: AINTLIB ModularCurves project
 Adapted in part from the Apache-licensed `FiniteEventualUniformBound.lean`
 in Vilin97/Clawristotle.
 -/
-import Mathlib.Data.Finset.Lattice.Fold
-import ModularCurves.EllipticCurve.ProjectiveSpacePositiveTwistCechVanishing
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistPushforward
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+module
+
+public import Mathlib.Data.Finset.Lattice.Fold
+public import ModularCurves.EllipticCurve.ProjectiveSpacePositiveTwistCechVanishing
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistPushforward
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
 # Positive-twist Cech vanishing on projective closed subschemes
@@ -18,6 +20,10 @@ The projective-space positive-twist vanishing theorem transfers to a closed
 subscheme by pushforward, the projective-twist projection formula, and the
 ordered-Cech comparison for an inverse-image cover.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

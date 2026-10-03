@@ -5,11 +5,13 @@ Authors: AINTLIB ModularCurves project
 
 Ticket T-Q6 (quotients of rigidified moduli problems — the KM 4.7 ⇐ engine).
 -/
-import ModularCurves.Moduli.EllCategory
-import ModularCurves.ForMathlib.RepresentableAut
-import ModularCurves.ForMathlib.SchemeQuotient
-import ModularCurves.ForMathlib.TorsorMap
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.Moduli.EllCategory
+public import ModularCurves.ForMathlib.RepresentableAut
+public import ModularCurves.ForMathlib.SchemeQuotient
+public import ModularCurves.ForMathlib.TorsorMap
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The simultaneous moduli problem and the Katz–Mazur 4.7 engine (T-Q6)
@@ -38,6 +40,10 @@ subsequent T-Q6 leaves; the étale-torsor input is `ForMathlib/InvariantTorsor.l
 (T-Q2, SGA III Exp. V 4.1) and the affine quotient is
 `ForMathlib/AffineQuotient.lean` (T-Q3).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

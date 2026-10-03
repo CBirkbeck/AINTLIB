@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreProductChartTransitionGeometry`.
 -/
-import ModularCurves.ForMathlib.SegreProductChartTransitionAlgebra
+module
+
+public import ModularCurves.ForMathlib.SegreProductChartTransitionAlgebra
 
 /-!
 # Geometry of transitions between product charts
@@ -14,6 +16,8 @@ import ModularCurves.ForMathlib.SegreProductChartTransitionAlgebra
 The two affine charts in each projective factor induce the same map to projective space on their
 common double homogeneous localization.
 -/
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry HomogeneousLocalization
 

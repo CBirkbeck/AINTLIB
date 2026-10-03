@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.Basic
-import ModularCurves.Moduli.Stack
+module
+
+public import ModularCurves.WeilPairing.Basic
+public import ModularCurves.Moduli.Stack
 
 /-!
 # The `T`-relative Weil pairing by fppf descent (T-C0e, `weilPairingCharZero`)
@@ -41,6 +43,10 @@ would discharge the DS4 `weilPairing` sorry over `ℚ`-schemes.
 
 Source: KM 2.8; the descent is SGA 1 VIII / Stacks 023Q (fppf covers are effective epis).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

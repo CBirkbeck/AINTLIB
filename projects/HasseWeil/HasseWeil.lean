@@ -1,143 +1,145 @@
-import HasseWeil.Foundation.Auxiliary.DivisionPolynomial
-import HasseWeil.Foundation.Auxiliary.PullbackKaehler
-import HasseWeil.Foundation.Basic
-import HasseWeil.Foundation.ChordExpansion
-import HasseWeil.Foundation.Curves.Frobenius.QuotientCurve
-import HasseWeil.Foundation.Curves.FunctionElementAlgebra
-import HasseWeil.Foundation.Curves.Map.BaseChange
-import HasseWeil.Foundation.Curves.Basic
-import HasseWeil.Foundation.Curves.Map.CurveMap
-import HasseWeil.Foundation.Curves.Differentials
-import HasseWeil.Foundation.Curves.Divisor.Divisors
-import HasseWeil.Foundation.Curves.Ramification.InertiaDegAtAlgClosed
-import HasseWeil.Foundation.Curves.Valuation.DVR
-import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
-import HasseWeil.Foundation.Curves.Valuation.NormValuation
-import HasseWeil.Foundation.Curves.FiniteOverKx
-import HasseWeil.Foundation.Curves.GaloisAction
-import HasseWeil.Foundation.Curves.NormBezout
-import HasseWeil.Foundation.Curves.Divisor.ProjectiveTuple
-import HasseWeil.Foundation.Curves.Ramification.RamificationAtInfinity
-import HasseWeil.Foundation.Curves.Map.RationalMap
-import HasseWeil.Foundation.Curves.Valuation.ResidueFieldAtSmoothPoint
-import HasseWeil.Foundation.Curves.Valuation.Valuation
-import HasseWeil.FormalGroup.Associated
-import HasseWeil.FormalGroup.CharP
-import HasseWeil.FormalGroup.EvalGroup
-import HasseWeil.FormalGroup.Height
-import HasseWeil.FormalGroup.Hom
-import HasseWeil.FormalGroup.InvariantDiff
-import HasseWeil.FormalGroup.Inverse
-import HasseWeil.FormalGroup.Logarithm
-import HasseWeil.FormalGroup.MulByNat
-import HasseWeil.FormalGroup.OrderSubst
-import HasseWeil.FormalGroup.PadicValFactorial
-import HasseWeil.FormalGroup.FormalGroupLawSpec
-import HasseWeil.Foundation.EC.GroupLaw
-import HasseWeil.Foundation.EC.TranslationEvaluation
-import HasseWeil.Foundation.EvenFunctions
-import HasseWeil.Foundation.InvariantDifferential
-import HasseWeil.Foundation.LegendreForm
-import HasseWeil.Foundation.SingularPoint
-import HasseWeil.Isogeny.Degree
-import HasseWeil.Isogeny.Endomorphism
-import HasseWeil.Isogeny.Dual.Relation
-import HasseWeil.Foundation.EC.MulByIntBaseCase
-import HasseWeil.Foundation.EC.MulByIntComp
-import HasseWeil.Foundation.EC.AffinePointMap
-import HasseWeil.Foundation.EC.GenericPoint
-import HasseWeil.Foundation.EC.GenericPointZsmul
-import HasseWeil.Isogeny.Frobenius.GeometricCompat
-import HasseWeil.Isogeny.Kernel
-import HasseWeil.Isogeny.KernelDegree
-import HasseWeil.Isogeny.OrdTransport
-import HasseWeil.Foundation.EC.MulByIntUnramified
-import HasseWeil.Foundation.EC.PointMapSurjective
-import HasseWeil.Foundation.DegreeQuadraticForm
-import HasseWeil.Isogeny.Frobenius.PointCount
-import HasseWeil.HasseBound.Parametric
-import HasseWeil.HasseBound.PointCount
-import HasseWeil.Foundation.EC.PointMap
-import HasseWeil.HasseBound.Separability
-import HasseWeil.HasseBound.TorsionCard
-import HasseWeil.Foundation.DiscriminantBounds
-import HasseWeil.Foundation.InvariantDifferentialPullback
-import HasseWeil.Foundation.PullbackCoeff
-import HasseWeil.Foundation.OmegaCoeffMulByIntFiniteField
-import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
-import HasseWeil.Isogeny.Surjective
-import HasseWeil.Isogeny.VerschiebungFactorization
-import HasseWeil.NTorsion.TorsionGeneralN
-import HasseWeil.Pic0.PicDualDegreeViaIsDualOf
-import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
-import HasseWeil.Pic0.PicDualClassMapMultiplicativity
-import HasseWeil.Pic0.TheoremOfSquareDivisorForm
-import HasseWeil.Pic0.PicDualPullbackTheoremOfSquare
-import HasseWeil.HasseBound.WeilPairing.Assembly
-import HasseWeil.HasseBound.WeilPairing.SigmaBridge
-import HasseWeil.HasseBound.WeilPairing.WeilFunction
-import HasseWeil.HasseBound.WeilPairing.RootsOfUnity
-import HasseWeil.HasseBound.WeilPairing.Constancy
-import HasseWeil.HasseBound.WeilPairing.PairingProps
-import HasseWeil.HasseBound.WeilPairing.DetDeg
-import HasseWeil.HasseBound.WeilPairing.HasseAssembly
-import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
-import HasseWeil.HasseBound.WeilPairing.DivisorGalois
-import HasseWeil.HasseBound.WeilPairing.FrobeniusDivisorGalois
-import HasseWeil.HasseBound.WeilPairing.Scaling.FrobeniusGalois
-import HasseWeil.HasseBound.WeilPairing.Scaling.OneSub
-import HasseWeil.Isogeny.BaseChange.Concrete
-import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
-import HasseWeil.HasseBound.WeilPairing.OneSubDualDivisor
-import HasseWeil.HasseBound.WeilPairing.PencilDualDivisor
-import HasseWeil.Isogeny.SeparableWitnessReductions
-import HasseWeil.HasseBound.WeilPairing.MapTranslateGenericAdditive
-import HasseWeil.HasseBound.WeilPairing.FrobeniusGenericCovariance
-import HasseWeil.HasseBound.WeilPairing.PencilSeparable
-import HasseWeil.HasseBound.WeilPairing.Scaling.OneSubTransport
-import HasseWeil.HasseBound.WeilPairing.PencilCovariance
-import HasseWeil.HasseBound.WeilPairing.Scaling.Pencil
-import HasseWeil.HasseBound.WeilPairing.PencilComapPointValuation
-import HasseWeil.HasseBound
+module
+
+public import HasseWeil.Foundation.Auxiliary.DivisionPolynomial
+public import HasseWeil.Foundation.Auxiliary.PullbackKaehler
+public import HasseWeil.Foundation.Basic
+public import HasseWeil.Foundation.ChordExpansion
+public import HasseWeil.Foundation.Curves.Frobenius.QuotientCurve
+public import HasseWeil.Foundation.Curves.FunctionElementAlgebra
+public import HasseWeil.Foundation.Curves.Map.BaseChange
+public import HasseWeil.Foundation.Curves.Basic
+public import HasseWeil.Foundation.Curves.Map.CurveMap
+public import HasseWeil.Foundation.Curves.Differentials
+public import HasseWeil.Foundation.Curves.Divisor.Divisors
+public import HasseWeil.Foundation.Curves.Ramification.InertiaDegAtAlgClosed
+public import HasseWeil.Foundation.Curves.Valuation.DVR
+public import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
+public import HasseWeil.Foundation.Curves.Valuation.NormValuation
+public import HasseWeil.Foundation.Curves.FiniteOverKx
+public import HasseWeil.Foundation.Curves.GaloisAction
+public import HasseWeil.Foundation.Curves.NormBezout
+public import HasseWeil.Foundation.Curves.Divisor.ProjectiveTuple
+public import HasseWeil.Foundation.Curves.Ramification.RamificationAtInfinity
+public import HasseWeil.Foundation.Curves.Map.RationalMap
+public import HasseWeil.Foundation.Curves.Valuation.ResidueFieldAtSmoothPoint
+public import HasseWeil.Foundation.Curves.Valuation.Valuation
+public import HasseWeil.FormalGroup.Associated
+public import HasseWeil.FormalGroup.CharP
+public import HasseWeil.FormalGroup.EvalGroup
+public import HasseWeil.FormalGroup.Height
+public import HasseWeil.FormalGroup.Hom
+public import HasseWeil.FormalGroup.InvariantDiff
+public import HasseWeil.FormalGroup.Inverse
+public import HasseWeil.FormalGroup.Logarithm
+public import HasseWeil.FormalGroup.MulByNat
+public import HasseWeil.FormalGroup.OrderSubst
+public import HasseWeil.FormalGroup.PadicValFactorial
+public import HasseWeil.FormalGroup.FormalGroupLawSpec
+public import HasseWeil.Foundation.EC.GroupLaw
+public import HasseWeil.Foundation.EC.TranslationEvaluation
+public import HasseWeil.Foundation.EvenFunctions
+public import HasseWeil.Foundation.InvariantDifferential
+public import HasseWeil.Foundation.LegendreForm
+public import HasseWeil.Foundation.SingularPoint
+public import HasseWeil.Isogeny.Degree
+public import HasseWeil.Isogeny.Endomorphism
+public import HasseWeil.Isogeny.Dual.Relation
+public import HasseWeil.Foundation.EC.MulByIntBaseCase
+public import HasseWeil.Foundation.EC.MulByIntComp
+public import HasseWeil.Foundation.EC.AffinePointMap
+public import HasseWeil.Foundation.EC.GenericPoint
+public import HasseWeil.Foundation.EC.GenericPointZsmul
+public import HasseWeil.Isogeny.Frobenius.GeometricCompat
+public import HasseWeil.Isogeny.Kernel
+public import HasseWeil.Isogeny.KernelDegree
+public import HasseWeil.Isogeny.OrdTransport
+public import HasseWeil.Foundation.EC.MulByIntUnramified
+public import HasseWeil.Foundation.EC.PointMapSurjective
+public import HasseWeil.Foundation.DegreeQuadraticForm
+public import HasseWeil.Isogeny.Frobenius.PointCount
+public import HasseWeil.HasseBound.Parametric
+public import HasseWeil.HasseBound.PointCount
+public import HasseWeil.Foundation.EC.PointMap
+public import HasseWeil.HasseBound.Separability
+public import HasseWeil.HasseBound.TorsionCard
+public import HasseWeil.Foundation.DiscriminantBounds
+public import HasseWeil.Foundation.InvariantDifferentialPullback
+public import HasseWeil.Foundation.PullbackCoeff
+public import HasseWeil.Foundation.OmegaCoeffMulByIntFiniteField
+public import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
+public import HasseWeil.Isogeny.Surjective
+public import HasseWeil.Isogeny.VerschiebungFactorization
+public import HasseWeil.NTorsion.TorsionGeneralN
+public import HasseWeil.Pic0.PicDualDegreeViaIsDualOf
+public import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
+public import HasseWeil.Pic0.PicDualClassMapMultiplicativity
+public import HasseWeil.Pic0.TheoremOfSquareDivisorForm
+public import HasseWeil.Pic0.PicDualPullbackTheoremOfSquare
+public import HasseWeil.HasseBound.WeilPairing.Assembly
+public import HasseWeil.HasseBound.WeilPairing.SigmaBridge
+public import HasseWeil.HasseBound.WeilPairing.WeilFunction
+public import HasseWeil.HasseBound.WeilPairing.RootsOfUnity
+public import HasseWeil.HasseBound.WeilPairing.Constancy
+public import HasseWeil.HasseBound.WeilPairing.PairingProps
+public import HasseWeil.HasseBound.WeilPairing.DetDeg
+public import HasseWeil.HasseBound.WeilPairing.HasseAssembly
+public import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
+public import HasseWeil.HasseBound.WeilPairing.DivisorGalois
+public import HasseWeil.HasseBound.WeilPairing.FrobeniusDivisorGalois
+public import HasseWeil.HasseBound.WeilPairing.Scaling.FrobeniusGalois
+public import HasseWeil.HasseBound.WeilPairing.Scaling.OneSub
+public import HasseWeil.Isogeny.BaseChange.Concrete
+public import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
+public import HasseWeil.HasseBound.WeilPairing.OneSubDualDivisor
+public import HasseWeil.HasseBound.WeilPairing.PencilDualDivisor
+public import HasseWeil.Isogeny.SeparableWitnessReductions
+public import HasseWeil.HasseBound.WeilPairing.MapTranslateGenericAdditive
+public import HasseWeil.HasseBound.WeilPairing.FrobeniusGenericCovariance
+public import HasseWeil.HasseBound.WeilPairing.PencilSeparable
+public import HasseWeil.HasseBound.WeilPairing.Scaling.OneSubTransport
+public import HasseWeil.HasseBound.WeilPairing.PencilCovariance
+public import HasseWeil.HasseBound.WeilPairing.Scaling.Pencil
+public import HasseWeil.HasseBound.WeilPairing.PencilComapPointValuation
+public import HasseWeil.HasseBound
 
 -- Silverman continuation (2026-06-09): faithful isogeny + III.4.8, the Tate module, isogeny classes
-import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
-import HasseWeil.Isogeny.GroupHom.Basic
-import HasseWeil.Isogeny.GroupHom.Descend
-import HasseWeil.Isogeny.Dual.Morphism
-import HasseWeil.Isogeny.Class
-import HasseWeil.Isogeny.Label
-import HasseWeil.Isogeny.Dual.Descent
-import HasseWeil.Isogeny.Dual.Galois
-import HasseWeil.Isogeny.Bridge
-import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
-import HasseWeil.Isogeny.Ramification
-import HasseWeil.Foundation.EC.GenericCovarianceGeneral
-import HasseWeil.Isogeny.Dual.GaloisClosed
-import HasseWeil.Isogeny.Frobenius.Dual
-import HasseWeil.Isogeny.MulByInt.Composition
-import HasseWeil.Isogeny.Dual.Reduction
-import HasseWeil.Foundation.Curves.Ramification.RamificationFinite
-import HasseWeil.Foundation.Curves.Fiber.GoodAffineLocus
-import HasseWeil.Foundation.Curves.Fiber.GoodFiber
-import HasseWeil.Foundation.EC.KernelCount
-import HasseWeil.NTorsion.PadicLimZMod
-import HasseWeil.NTorsion.TorsionPow
-import HasseWeil.NTorsion.TorsionPowStructure
-import HasseWeil.NTorsion.InverseSystem
-import HasseWeil.NTorsion.TateModule
-import HasseWeil.NTorsion.Representation
-import HasseWeil.Isogeny.Dual.GaloisUnconditional
-import HasseWeil.Foundation.Curves.Fiber.LocalizedDictionary
-import HasseWeil.Foundation.EC.KernelCountGeneral
-import HasseWeil.Foundation.Curves.Ramification.KernelOfDifferential
-import HasseWeil.Isogeny.Frobenius.Twist
-import HasseWeil.Isogeny.Frobenius.Factorization
-import HasseWeil.Isogeny.Dual.Canonical
-import HasseWeil.Isogeny.Adjoint
-import HasseWeil.Isogeny.Dual.Additivity
-import HasseWeil.Isogeny.MulByInt.Covariance
-import HasseWeil.Isogeny.Dual.Universal
-import HasseWeil.Isogeny.BaseChange.Morphism
-import HasseWeil.Foundation.Curves.Map.CoordHomFinite
-import HasseWeil.Foundation.OmegaCoeffMulByIntGeneral
+public import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
+public import HasseWeil.Isogeny.GroupHom.Basic
+public import HasseWeil.Isogeny.GroupHom.Descend
+public import HasseWeil.Isogeny.Dual.Morphism
+public import HasseWeil.Isogeny.Class
+public import HasseWeil.Isogeny.Label
+public import HasseWeil.Isogeny.Dual.Descent
+public import HasseWeil.Isogeny.Dual.Galois
+public import HasseWeil.Isogeny.Bridge
+public import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
+public import HasseWeil.Isogeny.Ramification
+public import HasseWeil.Foundation.EC.GenericCovarianceGeneral
+public import HasseWeil.Isogeny.Dual.GaloisClosed
+public import HasseWeil.Isogeny.Frobenius.Dual
+public import HasseWeil.Isogeny.MulByInt.Composition
+public import HasseWeil.Isogeny.Dual.Reduction
+public import HasseWeil.Foundation.Curves.Ramification.RamificationFinite
+public import HasseWeil.Foundation.Curves.Fiber.GoodAffineLocus
+public import HasseWeil.Foundation.Curves.Fiber.GoodFiber
+public import HasseWeil.Foundation.EC.KernelCount
+public import HasseWeil.NTorsion.PadicLimZMod
+public import HasseWeil.NTorsion.TorsionPow
+public import HasseWeil.NTorsion.TorsionPowStructure
+public import HasseWeil.NTorsion.InverseSystem
+public import HasseWeil.NTorsion.TateModule
+public import HasseWeil.NTorsion.Representation
+public import HasseWeil.Isogeny.Dual.GaloisUnconditional
+public import HasseWeil.Foundation.Curves.Fiber.LocalizedDictionary
+public import HasseWeil.Foundation.EC.KernelCountGeneral
+public import HasseWeil.Foundation.Curves.Ramification.KernelOfDifferential
+public import HasseWeil.Isogeny.Frobenius.Twist
+public import HasseWeil.Isogeny.Frobenius.Factorization
+public import HasseWeil.Isogeny.Dual.Canonical
+public import HasseWeil.Isogeny.Adjoint
+public import HasseWeil.Isogeny.Dual.Additivity
+public import HasseWeil.Isogeny.MulByInt.Covariance
+public import HasseWeil.Isogeny.Dual.Universal
+public import HasseWeil.Isogeny.BaseChange.Morphism
+public import HasseWeil.Foundation.Curves.Map.CoordHomFinite
+public import HasseWeil.Foundation.OmegaCoeffMulByIntGeneral

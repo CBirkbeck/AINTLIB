@@ -3,11 +3,13 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.FiniteType
-import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
-import Mathlib.AlgebraicGeometry.PullbackCarrier
-import Mathlib.FieldTheory.IsAlgClosed.Basic
-import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FiniteType
+public import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+public import Mathlib.AlgebraicGeometry.PullbackCarrier
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 
 /-!
 # Point counting on Jacobson schemes (BB-QF bridge, ForMathlib)
@@ -24,6 +26,8 @@ Two bridge facts for fibre-finiteness arguments over a field:
 Together: the space of such a scheme injects (via closed points) into its set of
 `k`-sections, so finitely many `k`-sections force a finite space.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

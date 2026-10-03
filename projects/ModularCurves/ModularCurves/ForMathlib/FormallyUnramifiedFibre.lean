@@ -3,15 +3,17 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Mathlib.AlgebraicGeometry.Fiber
-import Mathlib.RingTheory.Kaehler.TensorProduct
-import Mathlib.RingTheory.LocalRing.Module
-import Mathlib.RingTheory.LocalRing.ResidueField.Fiber
-import Mathlib.RingTheory.RingHom.Unramified
-import Mathlib.RingTheory.Support
-import Mathlib.RingTheory.Unramified.Basic
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.AlgebraicGeometry.Fiber
+public import Mathlib.RingTheory.Kaehler.TensorProduct
+public import Mathlib.RingTheory.LocalRing.Module
+public import Mathlib.RingTheory.LocalRing.ResidueField.Fiber
+public import Mathlib.RingTheory.RingHom.Unramified
+public import Mathlib.RingTheory.Support
+public import Mathlib.RingTheory.Unramified.Basic
 
 /-!
 # A fibrewise criterion for formal unramifiedness
@@ -34,6 +36,8 @@ The intended consumer is `ModularCurves.EllipticCurve.Torsionπ.formallyUnramifi
 BB-DIFF): `E[N] → S` is finite and — after transporting the HasseWeil separability of `[N]` through
 a geometric-fibre comparison — has formally unramified geometric fibres, hence is unramified.
 -/
+
+@[expose] public section
 
 open TensorProduct CategoryTheory Limits
 

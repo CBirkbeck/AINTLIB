@@ -5,12 +5,14 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-D24.
 -/
-import Mathlib.Algebra.Exact.Basic
-import Mathlib.Algebra.Module.Projective
-import Mathlib.LinearAlgebra.Dimension.Constructions
-import Mathlib.RingTheory.Flat.Localization
-import Mathlib.RingTheory.LocalRing.Module
-import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
+module
+
+public import Mathlib.Algebra.Exact.Basic
+public import Mathlib.Algebra.Module.Projective
+public import Mathlib.LinearAlgebra.Dimension.Constructions
+public import Mathlib.RingTheory.Flat.Localization
+public import Mathlib.RingTheory.LocalRing.Module
+public import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
 
 /-!
 # Rank additivity in short exact sequences
@@ -35,6 +37,8 @@ lemma over division rings, and the bundled single-universe analogue
 `Ring R`) — but none of the three statements above in unbundled, multi-universe,
 Semiring/CommRing form.
 -/
+
+@[expose] public section
 
 open Module
 

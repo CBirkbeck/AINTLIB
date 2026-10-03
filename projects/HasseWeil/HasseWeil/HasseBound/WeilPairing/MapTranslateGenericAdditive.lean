@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.SeparableWitnessReductions
+module
+
+public import HasseWeil.Isogeny.SeparableWitnessReductions
 
 /-!
 # The generic-point covariance leaf `hgcomm` is additive (reviewer round-21 formal-local route)
@@ -50,6 +52,8 @@ remaining leaf.
 * Silverman, *The Arithmetic of Elliptic Curves*, III.5.2 (the differential additivity that the
   formal linear coefficient lives in), III.8.2 (translation covariance).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

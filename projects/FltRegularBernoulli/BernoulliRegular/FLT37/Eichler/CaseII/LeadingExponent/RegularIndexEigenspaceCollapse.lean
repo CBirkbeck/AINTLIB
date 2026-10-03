@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DescentQuotientRationalCongruence
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.MembershipFreeDescentReduction
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DescentQuotientRationalCongruence
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.MembershipFreeDescentReduction
 
 /-!
 # Regular-Index Eigenspace Collapse for `p = 37`

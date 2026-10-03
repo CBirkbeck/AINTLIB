@@ -3,9 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Basic
-import HasseWeil.Foundation.Curves.Valuation.Infinity
-import Mathlib.Data.Finsupp.Defs
+module
+
+public import HasseWeil.Foundation.Curves.Basic
+public import HasseWeil.Foundation.Curves.Valuation.Infinity
+public import Mathlib.Data.Finsupp.Defs
+
+@[expose] public section
 
 open scoped Polynomial.Bivariate
 

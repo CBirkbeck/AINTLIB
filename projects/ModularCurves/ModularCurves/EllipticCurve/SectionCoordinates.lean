@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AffinePointSection
+module
+
+public import ModularCurves.EllipticCurve.AffinePointSection
 
 /-!
 # Reading affine coordinates off a model section ([hArb-1] core)
@@ -23,6 +25,8 @@ This is the coordinate-reading step of the `IsE3Datum` cover assembly (hArb,
 `Moduli/Bootstrap.lean:95`): level sections avoid the zero section fibrewise, hence
 land in the `Z`-chart locally on the base, hence are marked at honest coordinates.
 -/
+
+@[expose] public section
 
 universe u
 

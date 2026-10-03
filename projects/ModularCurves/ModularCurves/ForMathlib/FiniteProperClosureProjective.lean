@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.FiniteProperClosure
-import ModularCurves.ForMathlib.FiniteProjectiveFactorization
+module
+
+public import ModularCurves.ForMathlib.FiniteProperClosure
+public import ModularCurves.ForMathlib.FiniteProjectiveFactorization
 
 /-!
 # Projectivity of finite proper closures
@@ -14,6 +16,8 @@ import ModularCurves.ForMathlib.FiniteProjectiveFactorization
 The scheme-theoretic closure inside a nonempty finite product of projectively factored schemes
 still has a projective factorization over the affine base.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

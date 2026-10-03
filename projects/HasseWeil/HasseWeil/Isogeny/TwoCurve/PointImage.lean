@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.TwoCurve.Covariance
-import HasseWeil.Isogeny.OrdTransport
-import HasseWeil.Foundation.LocalExpansion
+module
+
+public import HasseWeil.Isogeny.TwoCurve.Covariance
+public import HasseWeil.Isogeny.OrdTransport
+public import HasseWeil.Foundation.LocalExpansion
 
 /-!
 # The CoordHom-free geometric point map of a separable two-curve isogeny (PE-1, route A)
@@ -55,6 +57,10 @@ as the named hypothesis `hgrouphom` (Phase 4b).
 
 * Silverman, *The Arithmetic of Elliptic Curves*, II.2.5, III.4.8, III.4.10(b,c).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

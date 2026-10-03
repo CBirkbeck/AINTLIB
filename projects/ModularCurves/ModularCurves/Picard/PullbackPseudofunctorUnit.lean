@@ -1,5 +1,7 @@
-import ModularCurves.Picard.DualPullback.UnitComp
-import ModularCurves.Picard.PullbackPseudofunctor
+module
+
+public import ModularCurves.Picard.DualPullback.UnitComp
+public import ModularCurves.Picard.PullbackPseudofunctor
 
 /-!
 # Unit coordinates for pullback descent
@@ -7,6 +9,8 @@ import ModularCurves.Picard.PullbackPseudofunctor
 This file identifies the generic descent pullback of a morphism between pulled-back structure
 modules with ordinary pullback in structure-module coordinates.
 -/
+
+@[expose] public section
 
 universe u
 

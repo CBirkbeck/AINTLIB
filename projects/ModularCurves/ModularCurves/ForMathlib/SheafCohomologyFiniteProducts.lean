@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SheafCechSheafResolution
+module
+
+public import ModularCurves.ForMathlib.SheafCechSheafResolution
 
 /-!
 # Sheaf cohomology of finite products
@@ -7,6 +9,8 @@ This file identifies genuine sheaf cohomology of a finite product with the produ
 the cohomology groups, then applies the result to the finite products occurring in the
 sheaf-level Cech resolution.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

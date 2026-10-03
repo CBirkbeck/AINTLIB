@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.LocalRing.Module
-import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
-import Mathlib.RingTheory.LocalProperties.Projective
-import Mathlib.RingTheory.LocalProperties.Reduced
+module
+
+public import Mathlib.RingTheory.LocalRing.Module
+public import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
+public import Mathlib.RingTheory.LocalProperties.Projective
+public import Mathlib.RingTheory.LocalProperties.Reduced
 
 /-!
 # Constant fibre rank over a reduced ring (Stacks 0FWG)
@@ -51,6 +53,8 @@ Note (external review, 2026-08-08): step 3 asserts that the *composite* `K → R
 vanishes, i.e. `K_q ⊆ q R_q^n`. It does **not** assert `K ⊗ κ(q) = 0`, which does not follow.
 The Noetherian hypothesis is not needed anywhere; `Module.Finite R M` suffices.
 -/
+
+@[expose] public section
 
 universe u
 

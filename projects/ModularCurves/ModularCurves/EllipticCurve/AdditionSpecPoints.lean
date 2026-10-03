@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.GroupLawConstruction
-import ModularCurves.ForMathlib.UniquePointFactorsISup
+module
+
+public import ModularCurves.EllipticCurve.GroupLawConstruction
+public import ModularCurves.ForMathlib.UniquePointFactorsISup
 
 /-!
 # Field-points of the two-law multiplication (T-W7.0c·c6, [C6-SPECPOINTS])
@@ -13,6 +15,8 @@ The evaluation layer for `mulModelHom_specPoints`: a field-valued point of `E ×
 through one of the two regularity opens (`blOpen_cover` + the unique point of `Spec K`), where
 the multiplication restricts to the corresponding Bosma–Lenstra law.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory Limits WeierstrassCurve
 open scoped TensorProduct

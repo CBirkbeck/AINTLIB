@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
 
 /-!
 # Degree-one finiteness from ordered to native Cech complexes
@@ -12,6 +14,8 @@ Alternating extension from the ordered Cech complex surjects on degree-one
 homology. Thus finite generation of ordered Cech homology transfers to the
 native all-tuples Cech complex in degree one.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

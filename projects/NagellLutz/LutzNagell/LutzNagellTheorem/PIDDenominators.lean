@@ -1,5 +1,7 @@
-import LutzNagell.LutzNagellTheorem.PIDCurve
-import Mathlib.RingTheory.Localization.NumDen
+module
+
+public import LutzNagell.LutzNagellTheorem.PIDCurve
+public import Mathlib.RingTheory.Localization.NumDen
 
 /-!
 # Denominators on general Weierstrass curves over UFDs
@@ -17,6 +19,8 @@ we reach a contradiction.
 * `LutzNagell.PID.den_not_prime_of_on_curve`: the corollary that `den(x)` cannot be a
   prime element (the special case `q = den(x)`).
 -/
+
+@[expose] public section
 
 namespace LutzNagell
 namespace PID

@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornMultiPieceLaurentRefinement
+module
+
+public import «Adic spaces».WedhornMultiPieceLaurentRefinement
 
 /-!
 # Wedhorn 8.34(ii) — Per-piece Laurent C1 supplier reroute (T056)
@@ -87,6 +89,8 @@ PDF page 84's actual approach:
 * Does NOT reintroduce the false universal `MultiElementLowerBoundResidual`
   for `|D_T| > 1` as a goal.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

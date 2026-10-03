@@ -1,9 +1,11 @@
-import ModularCurves.EllipticCurve.PoleSheaf
-import ModularCurves.Picard.InvertibleSheafLocallyFree
-import ModularCurves.ForMathlib.SheafDisjointUnion
-import Mathlib.Algebra.Category.Grp.Zero
-import Mathlib.Topology.Sheaves.AddCommGrpCat
-import Mathlib.Topology.Sheaves.LocallySurjective
+module
+
+public import ModularCurves.EllipticCurve.PoleSheaf
+public import ModularCurves.Picard.InvertibleSheafLocallyFree
+public import ModularCurves.ForMathlib.SheafDisjointUnion
+public import Mathlib.Algebra.Category.Grp.Zero
+public import Mathlib.Topology.Sheaves.AddCommGrpCat
+public import Mathlib.Topology.Sheaves.LocallySurjective
 
 /-!
 # Quasicoherence of pole sheaves
@@ -12,6 +14,10 @@ The pole line bundle of the zero section and all of its nonnegative tensor power
 quasicoherent. This is the sheaf-theoretic input required by affine vanishing and by
 cohomology-and-base-change arguments.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

@@ -1,4 +1,6 @@
-import ModularCurves.GroupScheme.SubgroupQuotientGlueData
+module
+
+public import ModularCurves.GroupScheme.SubgroupQuotientGlueData
 
 /-!
 # The quotient of an elliptic curve by a finite locally free subgroup scheme
@@ -25,6 +27,8 @@ Consumers: `T-G3d`'s `E/E[N] ≅ E` (via `[N]`), the review-Q8 `N`-Isog named bl
 * `quotientπ_isInvariant`, `quotient_lift` — the universal property (pins).
 * `quotientπ_hom_ext` — `π` is epi (PROVED from the pins).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

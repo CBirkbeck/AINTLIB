@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.FDBoundaryReparametrization
-import LeanModularForms.ForMathlib.FDWindingDataFullSeg1Seg4
-import LeanModularForms.ForMathlib.ResidueSide
+module
+
+public import LeanModularForms.ForMathlib.FDBoundaryReparametrization
+public import LeanModularForms.ForMathlib.FDWindingDataFullSeg1Seg4
+public import LeanModularForms.ForMathlib.ResidueSide
 
 /-!
 # Fully-ForMathlib Valence Formula (via bridged residue/modular sides)
@@ -28,6 +30,8 @@ theorem that requires only `hf : f ≠ 0` as input.
 * `valence_formula_textbook_orbit_finsum_FM` — the textbook valence formula in
   finsum-over-orbits form, proved unconditionally
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups

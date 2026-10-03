@@ -5,9 +5,11 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.ProjectiveFactorization
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFinite
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechFinite
+module
+
+public import ModularCurves.ForMathlib.ProjectiveFactorization
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFinite
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechFinite
 
 /-!
 # Cech finiteness from a projective factorization
@@ -15,6 +17,10 @@ import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechFinite
 A projective factorization supplies a standard coordinate cover on which every ordered
 base-Cech homology module of a finite-type quasicoherent module is finite.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory
 

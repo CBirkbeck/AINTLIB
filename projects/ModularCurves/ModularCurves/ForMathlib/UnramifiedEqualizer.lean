@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Separated
-import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Separated
+public import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
 
 /-!
 # The equalizer of morphisms into an unramified scheme is open ([RIG-1b])
@@ -21,6 +23,8 @@ are equal. This is the detection engine of [RIG-1]: an automorphism of an ellipt
 curve agreeing with the identity on every geometric fibre of the (finite étale)
 `N`-torsion agrees with it globally on `E[N]`.
 -/
+
+@[expose] public section
 
 universe u
 

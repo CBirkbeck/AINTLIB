@@ -3,12 +3,14 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.ForMathlib.FormallyUnramifiedFibre
-import ModularCurves.ForMathlib.NilpotentKerSpecMap
-import ModularCurves.GroupScheme.PatchHopf
-import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.ForMathlib.FormallyUnramifiedFibre
+public import ModularCurves.ForMathlib.NilpotentKerSpecMap
+public import ModularCurves.GroupScheme.PatchHopf
+public import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # L-BC: `E[N] ⟶ S` is formally unramified when `N` is invertible (BB-DIFF, the fibre leg)
@@ -34,6 +36,10 @@ The three `Point`-restriction lemmas at the head are relocated byte-identically 
 `MulByHomUnramified.lean` (which now imports this file; pointer comments at the old site) —
 they are needed on both sides of the L-A/L-BC split.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.AffinePointMap
-import HasseWeil.Foundation.EC.GenericPoint
-import HasseWeil.Foundation.EC.MulByIntBaseCase
-import HasseWeil.Foundation.EC.MulByIntComp
+module
+
+public import HasseWeil.Foundation.EC.AffinePointMap
+public import HasseWeil.Foundation.EC.GenericPoint
+public import HasseWeil.Foundation.EC.MulByIntBaseCase
+public import HasseWeil.Foundation.EC.MulByIntComp
 
 /-!
 # `n • genericPoint W = .some (mulByInt_x W n) (mulByInt_y W n)` (T-III-4-020b-2)
@@ -59,6 +61,8 @@ These are the `W_KE`-specific analogs of the universal lemmas:
 * Silverman, *The Arithmetic of Elliptic Curves*, III.4.2.
 * mathlib: `HasseWeil/Auxiliary/DivisionPolynomial.lean:423` (universal analog).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

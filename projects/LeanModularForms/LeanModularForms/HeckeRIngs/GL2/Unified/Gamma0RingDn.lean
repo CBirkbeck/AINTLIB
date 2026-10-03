@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma0
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma0
 
 /-!
 # Ring-side Hecke elements `D_n` in `𝕋(Γ₀(N))`
@@ -55,6 +57,8 @@ instantiated at `𝕋 (Gamma0_pair N) ℤ`, which carries both a global `Ring` i
 avoids ever mixing the two elaboration paths. The pure-`ℕ` divisor-combinatorics helpers are
 reproduced from the operator layer `HeckeT_n.lean` because this file does not import it.
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2.Unified
 

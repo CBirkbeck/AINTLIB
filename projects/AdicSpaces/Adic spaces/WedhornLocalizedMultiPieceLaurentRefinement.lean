@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornMultiPieceLaurentRefinement
-import «Adic spaces».WedhornLocalCompatFromTestFamily
-import «Adic spaces».WedhornLocalArithmeticPerTChain
+module
+
+public import «Adic spaces».WedhornMultiPieceLaurentRefinement
+public import «Adic spaces».WedhornLocalCompatFromTestFamily
+public import «Adic spaces».WedhornLocalArithmeticPerTChain
 
 /-!
 # Wedhorn 8.34(ii) — Localized multi-piece Laurent cover refinement (T171)
@@ -84,6 +86,8 @@ instances, using `localizedTestFamily s T_D s_D` as the test family.
 * No `locSubring` integral-closedness, no T001/T004/T015/final/root/C1
   edits.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

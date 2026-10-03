@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.InvariantDifferentialPullback
-import HasseWeil.HasseBound.WeilPairing.WallAGenericRealization
-import HasseWeil.Isogeny.BaseChange.Concrete
+module
+
+public import HasseWeil.Foundation.InvariantDifferentialPullback
+public import HasseWeil.HasseBound.WeilPairing.WallAGenericRealization
+public import HasseWeil.Isogeny.BaseChange.Concrete
 
 /-!
 # Base change of the invariant-differential pullback coefficient (Silverman III.5)
@@ -45,6 +47,8 @@ omega coefficient gives the value transport.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.5.2, III.5.3, III.5.5.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 open scoped TensorProduct

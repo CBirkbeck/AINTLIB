@@ -1,5 +1,7 @@
-import Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
-import Mathlib.RingTheory.RingHom.Bijective
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
+public import Mathlib.RingTheory.RingHom.Bijective
 
 /-!
 # Away maps from basic-open restrictions
@@ -7,6 +9,8 @@ import Mathlib.RingTheory.RingHom.Bijective
 This file relates isomorphisms between affine basic opens to bijectivity of
 the corresponding canonical away-localized ring homomorphism.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.Basis.Prod
-import ModularCurves.EllipticCurve.PoleSheafSuccessorSections
+module
+
+public import Mathlib.LinearAlgebra.Basis.Prod
+public import ModularCurves.EllipticCurve.PoleSheafSuccessorSections
 
 /-!
 # Compatible bases of successive pole-section modules
@@ -12,6 +14,8 @@ import ModularCurves.EllipticCurve.PoleSheafSuccessorSections
 A normalized lift of the rank-one successive quotient extends any basis of the
 lower pole-section module to a basis of the next pole-section module.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

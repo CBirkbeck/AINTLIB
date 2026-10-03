@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.PadicL.GaussSumValuationF1
-import Mathlib.NumberTheory.GaussSum
-import Mathlib.NumberTheory.JacobiSum.Basic
-import Mathlib.NumberTheory.LegendreSymbol.AddCharacter
+module
+
+public import BernoulliRegular.FLT37.PadicL.GaussSumValuationF1
+public import Mathlib.NumberTheory.GaussSum
+public import Mathlib.NumberTheory.JacobiSum.Basic
+public import Mathlib.NumberTheory.LegendreSymbol.AddCharacter
 
 /-!
 # B-C1.2, fully discharged — the integral `f = 1` Stickelberger valuation via Gauss sums
@@ -50,6 +52,8 @@ two multiplicative identities above.
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, Prop 6.13,
   Lemmas 6.11–6.12.
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.GroupLaw
-import ModularCurves.EllipticCurve.ModelGroupUniq
-import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
-import ModularCurves.ForMathlib.OverPullbackMul
+module
+
+public import ModularCurves.EllipticCurve.GroupLaw
+public import ModularCurves.EllipticCurve.ModelGroupUniq
+public import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
+public import ModularCurves.ForMathlib.OverPullbackMul
 
 /-!
 # Uniqueness of the pointed group structure on a locally Weierstrass record (K3)
@@ -28,6 +30,8 @@ supplies the `h64`/`hμ` arguments of `transportSection_add_of_finitePresentatio
 `IsoTransport` lemmas, replacing the sorried route (a) primitive
 (`isMonHom_of_one_comp_eq'_of_finitePresentation`) on the MASTER trail.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj WeierstrassCurve

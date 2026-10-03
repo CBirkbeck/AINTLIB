@@ -3,10 +3,12 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.DoubleCosetAdjoint
-import LeanModularForms.HeckeRIngs.GL2.Fricke
-import LeanModularForms.HeckeRIngs.GL2.Newforms.BadPrimeFDTiling
-import LeanModularForms.HeckeRIngs.GL2.Newforms.LevelRaiseComm
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.DoubleCosetAdjoint
+public import LeanModularForms.HeckeRIngs.GL2.Fricke
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.BadPrimeFDTiling
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.LevelRaiseComm
 
 /-!
 # The bad-prime trace ↔ Fricke identity (T006-b-L4-FD-e.1, DS Ex 5.5.1(b))
@@ -28,6 +30,8 @@ coprime case), summing slashes turns the trace into
 
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.5 (Ex 5.5.1(b))
 -/
+
+@[expose] public section
 
 noncomputable section
 

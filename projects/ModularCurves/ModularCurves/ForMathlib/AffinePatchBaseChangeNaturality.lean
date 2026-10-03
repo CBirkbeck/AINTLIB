@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.AffinePatchBaseChange
+module
+
+public import ModularCurves.ForMathlib.AffinePatchBaseChange
 
 /-!
 # Naturality of affine patch base change
@@ -6,6 +8,8 @@ import ModularCurves.ForMathlib.AffinePatchBaseChange
 The tensor-product description of sections on a pulled-back affine source
 patch is compatible with restriction to a smaller affine patch.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits TensorProduct
 

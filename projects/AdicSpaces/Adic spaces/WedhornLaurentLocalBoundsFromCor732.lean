@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLaurentPieceCor732RationalOpenData
-import «Adic spaces».WedhornStandardCoverRefinement
+module
+
+public import «Adic spaces».WedhornLaurentPieceCor732RationalOpenData
+public import «Adic spaces».WedhornStandardCoverRefinement
 
 /-!
 # Wedhorn 8.34(ii) — Laurent-piece local bounds from Cor 7.32 (T053)
@@ -94,6 +96,8 @@ D.T" (T052's required input).
 * No global universal-over-Spa multi-clearing claim (per T035's
   counter-example).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

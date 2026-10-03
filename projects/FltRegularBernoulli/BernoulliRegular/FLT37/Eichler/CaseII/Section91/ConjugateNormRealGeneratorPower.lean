@@ -1,8 +1,10 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjugateFactorEquations
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.RealGenerator
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.B0Principalization
-import BernoulliRegular.FLT37.PrimaryUnits.IsPrimaryPlusAndCyclotomicUnits
-import BernoulliRegular.UnitQuotient.Washington83UnitForward
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjugateFactorEquations
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.RealGenerator
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.B0Principalization
+public import BernoulliRegular.FLT37.PrimaryUnits.IsPrimaryPlusAndCyclotomicUnits
+public import BernoulliRegular.UnitQuotient.Washington83UnitForward
 
 /-!
 # [FLT37-CASEII-R2] Washington §9.1 product half (`X·X̄ = η'·γ³⁷`, B₀ real-generator argument)

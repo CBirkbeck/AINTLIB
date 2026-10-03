@@ -1,8 +1,10 @@
-import BernoulliRegular.FLT37.Eichler.HerbrandBoundAnalytic
-import BernoulliRegular.FLT37.Eichler.ModuleStructure
-import BernoulliRegular.FLT37.KummerUnits
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiRadicalNotPthPower
-import FltRegular.MayAssume.Lemmas
+module
+
+public import BernoulliRegular.FLT37.Eichler.HerbrandBoundAnalytic
+public import BernoulliRegular.FLT37.Eichler.ModuleStructure
+public import BernoulliRegular.FLT37.KummerUnits
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiRadicalNotPthPower
+public import FltRegular.MayAssume.Lemmas
 
 /-!
 # Eichler's first-case FLT argument for `p = 37` (`CaseIClose`)

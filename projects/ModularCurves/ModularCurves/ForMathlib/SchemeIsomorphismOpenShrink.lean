@@ -7,7 +7,9 @@ ForMathlib (OURS, not vendored): upstream candidate.
 Adapted from the Apache-licensed `SchemeIsomorphismOpenShrink.lean`
 in Vilin97/Clawristotle.
 -/
-import Mathlib.AlgebraicGeometry.Restrict
+module
+
+public import Mathlib.AlgebraicGeometry.Restrict
 
 /-!
 # Shrinking an isomorphism open
@@ -16,6 +18,8 @@ If a morphism is an isomorphism over a target open, an upstairs open can
 be transported through the inverse to a smaller target open. Its inverse
 image is the intersection with the original isomorphism locus.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits TopologicalSpace
 

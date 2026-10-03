@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Polynomial.Quotient
-import Mathlib.RingTheory.Flat.Localization
-import Mathlib.RingTheory.Flat.Stability
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
-import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+module
+
+public import Mathlib.RingTheory.Polynomial.Quotient
+public import Mathlib.RingTheory.Flat.Localization
+public import Mathlib.RingTheory.Flat.Stability
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+public import Mathlib.RingTheory.LocalRing.ResidueField.Basic
 
 /-!
 # A faithfully flat local extension with infinite residue field
@@ -31,6 +33,8 @@ translation groupoid along this extension preserves the co-invariants
 (`Flat/Equalizer.lean`) and puts an infinite field under the semi-local basis-selection
 lemma (`[HG-A4]`).
 -/
+
+@[expose] public section
 
 open Polynomial IsLocalRing
 

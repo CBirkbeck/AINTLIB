@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornSigmaFactoredInequalityAtCor732Sigma
+module
+
+public import «Adic spaces».WedhornSigmaFactoredInequalityAtCor732Sigma
 
 /-!
 # Wedhorn 8.34(ii) — Cor 7.32 σ direct upper bound residual from denominator identity (T084)
@@ -130,6 +132,8 @@ D_T_loc relations).
 * All declarations are fully proven, depend only on the standard Lean
   kernel postulates, and avoid native compilation and unchecked tactics.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

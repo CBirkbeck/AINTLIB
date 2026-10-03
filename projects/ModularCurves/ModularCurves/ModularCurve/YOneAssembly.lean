@@ -3,15 +3,17 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.Representability
-import ModularCurves.Moduli.GammaH
-import ModularCurves.Moduli.PullSectionCanonicity
-import ModularCurves.Moduli.QuotientProblem
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.EllipticCurve.GroupLawConstruction
-import ModularCurves.ForMathlib.GeometricFibreComparison
-import Mathlib.NumberTheory.Divisors
-import ModularCurves.Moduli.NaiveProblems
+module
+
+public import ModularCurves.Moduli.Representability
+public import ModularCurves.Moduli.GammaH
+public import ModularCurves.Moduli.PullSectionCanonicity
+public import ModularCurves.Moduli.QuotientProblem
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.EllipticCurve.GroupLawConstruction
+public import ModularCurves.ForMathlib.GeometricFibreComparison
+public import Mathlib.NumberTheory.Divisors
+public import ModularCurves.Moduli.NaiveProblems
 
 /-!
 # The Y₁(N) assembly (T-E7 / STREAM-Y1): Loeffler Def 3.3.6 + Thm 3.4.4
@@ -55,6 +57,10 @@ This assembly is `sorry`-free; the results below are cited as proven inputs:
 
 AINTLIB ModularCurves STREAM-Y1 (T-E7; assembled term-mode from the leaves, `sorry`-free).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits HomogeneousIdeal HomogeneousLocalization
 

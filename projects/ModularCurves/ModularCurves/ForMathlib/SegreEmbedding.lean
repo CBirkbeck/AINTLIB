@@ -6,8 +6,10 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's `CoherentCohomologyFinite.ProjectiveFactorization`
 and `CoherentCohomologyFinite.SegreProductChartTransitionGeometry`.
 -/
-import ModularCurves.ForMathlib.SegreGlobalInverse
-import ModularCurves.ForMathlib.ProjToSpecZero
+module
+
+public import ModularCurves.ForMathlib.SegreGlobalInverse
+public import ModularCurves.ForMathlib.ProjToSpecZero
 
 /-!
 # The binary Segre embedding over an affine base
@@ -17,6 +19,10 @@ of the Segre-image coordinate ring. Composing this isomorphism with the closed
 immersion of the Segre image gives a closed embedding into one polynomial
 projective space, compatible with the structural maps to the coefficient ring.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry
 

@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».HuberRings
-import Mathlib.Topology.Algebra.Ring.Ideal
-import Mathlib.Topology.Algebra.IsUniformGroup.Basic
-import Mathlib.RingTheory.Ideal.Quotient.Operations
+module
+
+public import «Adic spaces».HuberRings
+public import Mathlib.Topology.Algebra.Ring.Ideal
+public import Mathlib.Topology.Algebra.IsUniformGroup.Basic
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
 
 /-!
 # Tate-ring structure on closed quotients
@@ -32,6 +34,8 @@ pair of definition on `R ⧸ I` (with the quotient topology) and packages the
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §6 (definitions) and Prop 6.17
   (closed ideals in noetherian Tate rings).
 -/
+
+@[expose] public section
 
 namespace IsTateRing
 

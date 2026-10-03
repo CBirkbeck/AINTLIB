@@ -1,4 +1,6 @@
-import ModularCurves.GroupScheme.Subgroup
+module
+
+public import ModularCurves.GroupScheme.Subgroup
 
 /-!
 # The `G`-invariance interface for the quotient `E/G`
@@ -11,6 +13,8 @@ Only `IsInvariant` (+ `IsInvariant.comp`) lives here; the pins
 (`quotient` / `quotientS` / `quotientπ` / …) stay in `SubgroupQuotient.lean`, where they are
 discharged against the glue construction.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

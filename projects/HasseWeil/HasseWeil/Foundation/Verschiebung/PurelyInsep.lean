@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Verschiebung.FieldTower
-import Mathlib.FieldTheory.PurelyInseparable.Basic
+module
+
+public import HasseWeil.Foundation.Verschiebung.FieldTower
+public import Mathlib.FieldTheory.PurelyInseparable.Basic
 
 /-!
 # Purely-inseparable structure for `K(E) / Im(π*)` (Session 3)
@@ -65,6 +67,8 @@ Total ~280-330 LOC of focused work. The structural blocker is now
 **resolved**: the inclusion `Im([q]*) ⊆ Im(π*)` IS provable, via
 explicit q-th-root construction.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

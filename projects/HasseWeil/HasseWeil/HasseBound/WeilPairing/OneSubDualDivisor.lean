@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.Scaling.OneSub
-import HasseWeil.HasseBound.WeilPairing.PicDualDivisorClassLemma
-import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
-import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
+module
+
+public import HasseWeil.HasseBound.WeilPairing.Scaling.OneSub
+public import HasseWeil.HasseBound.WeilPairing.PicDualDivisorClassLemma
+public import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
+public import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
 
 /-!
 # The divisor-pushforward dual of a separable isogeny, and the `1 − π` scaling (CoordHom-free)
@@ -72,6 +74,8 @@ fibre count.
 * Silverman, *The Arithmetic of Elliptic Curves*, III.6.1(b) (`φ̂ = κ⁻¹ ∘ φ^* ∘ κ`),
   III.6.2(a) (`φ̂ ∘ φ = [deg φ]`), III.3.4 (`Pic⁰(E) ≅ E`), III.4.10c / III.8.6.1.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

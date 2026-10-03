@@ -1,7 +1,9 @@
-import LutzNagell.DivisionPolynomialDegree
-import LutzNagell.LutzNagellTheorem.PIDPrimeOrder
-import LutzNagell.ZSMul
-import Mathlib.RingTheory.Polynomial.RationalRoot
+module
+
+public import LutzNagell.DivisionPolynomialDegree
+public import LutzNagell.LutzNagellTheorem.PIDPrimeOrder
+public import LutzNagell.ZSMul
+public import Mathlib.RingTheory.Polynomial.RationalRoot
 
 /-!
 # Integral multiple implies integral point (over integrally closed domains)
@@ -20,6 +22,8 @@ the unique-factorization integral-root theorem, so a UFD hypothesis is not neede
 * `x_coord_nsmul_eq`: the coordinate identity `x' · ΨSq_n(x) = Φ_n(x)` for `n • P`.
 * `monic_Φ_sub_smul_ΨSq`: the polynomial `Φ_n - c • ΨSq_n` is monic.
 -/
+
+@[expose] public section
 
 namespace LutzNagell
 namespace PID

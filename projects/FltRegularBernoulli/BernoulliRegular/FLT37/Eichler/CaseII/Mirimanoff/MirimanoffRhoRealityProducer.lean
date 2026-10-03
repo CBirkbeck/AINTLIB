@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitRealityAndSigmaCollapse
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.MirimanoffResidualAndSumMembership
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitRealityAndSigmaCollapse
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.MirimanoffResidualAndSumMembership
 
 /-!
 # Discharge of `Lemma98MirimanoffPthPower37` to Washington's step-5 `ρ_a`-reality (`p = 37`)

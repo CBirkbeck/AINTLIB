@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
-import Mathlib.LinearAlgebra.Determinant
-import Mathlib.Tactic
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.LinearAlgebra.Determinant
+public import Mathlib.Tactic
 
 /-!
 # Route 2A — the Weil-pairing determinant identity (Silverman III.8.6, abstract finite-level core)
@@ -26,6 +28,8 @@ input the shipped `Reduction`/discriminant machinery consumes.
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, III.8.6 (`det φ_ℓ = deg φ` via the Weil
 pairing); the symplectic-adjoint formulation of the pairing's adjoint property (III.8.2/8.3).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.WeilPairing
 

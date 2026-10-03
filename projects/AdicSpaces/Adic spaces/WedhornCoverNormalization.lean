@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Presheaf
-import «Adic spaces».RationalSubsets
+module
+
+public import «Adic spaces».Presheaf
+public import «Adic spaces».RationalSubsets
 
 /-!
 # Wedhorn Cover Normalization (insert-denominator transform)
@@ -35,6 +37,8 @@ Jacobson / faithful-flatness / T001 / final-acyclicity content. The single
 analytic ingredient is `locSubring_mono_T`, which is a one-line monotonicity
 on `Subring.closure`.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

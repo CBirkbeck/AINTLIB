@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealPowCancel
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqFromKummerRatio
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealPowCancel
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqFromKummerRatio
 
 /-!
 # LV010-class-eq-1c: Class equality from integral Kummer ratio

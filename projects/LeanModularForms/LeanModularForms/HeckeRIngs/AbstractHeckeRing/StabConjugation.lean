@@ -3,7 +3,9 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Multiplication
+module
+
+public import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Multiplication
 
 /-!
 # Stabilizer invariance and conjugation equivalences on `decompQuot`
@@ -18,6 +20,10 @@ For an abstract `HeckePair P`:
   (`decompQuot_mul_left_equiv`, `decompQuot_double_H_equiv`) used in the
   `CongruenceHecke` degree-combinatorics computations.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open scoped Pointwise
 

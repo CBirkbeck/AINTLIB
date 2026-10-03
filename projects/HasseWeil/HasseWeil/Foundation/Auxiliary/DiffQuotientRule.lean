@@ -3,14 +3,18 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.InvariantDifferential
-import Mathlib.RingTheory.Kaehler.Basic
+module
+
+public import HasseWeil.Foundation.InvariantDifferential
+public import Mathlib.RingTheory.Kaehler.Basic
 
 /-!
 # Derivation Calculus for Function Fields of Elliptic Curves
 
 Quotient rule and inverse rule for the universal derivation.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

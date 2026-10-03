@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
 
 /-!
 # Comparison with the native Cech complex
@@ -12,6 +14,10 @@ This file defines the canonical projection from the native all-tuples Cech compl
 bounded complex indexed by strictly increasing tuples. Degreewise, this projection is a split
 epimorphism: its section extends an ordered tuple family by zero on non-increasing tuples.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Category
   CategoryTheory.Limits CategoryTheory.Preadditive Opposite TopologicalSpace

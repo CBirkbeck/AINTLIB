@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.Thm95ComputationalRoute
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
-import BernoulliRegular.FLT37.VandiverProven
-import Mathlib.LinearAlgebra.Vandermonde
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.Thm95ComputationalRoute
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
+public import BernoulliRegular.FLT37.VandiverProven
+public import Mathlib.LinearAlgebra.Vandermonde
 
 /-!
 # Washington Theorem 9.5 Case-II descent for `p = 37`: discharge pieces

@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.PoleSheaf
+module
+
+public import ModularCurves.EllipticCurve.PoleSheaf
 
 /-!
 # Base change of ideal modules along a commutative square
@@ -13,6 +15,10 @@ morphism to the ideal module of a morphism in a commutative square. It also give
 an affine criterion proving that map is an isomorphism when matching
 nonzerodivisor generators cut out the two ideals.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits SheafOfModules
 

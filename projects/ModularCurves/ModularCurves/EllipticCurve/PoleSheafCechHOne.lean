@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
-import ModularCurves.ForMathlib.AcyclicAffineCechComparison
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
+public import ModularCurves.ForMathlib.AcyclicAffineCechComparison
 
 /-!
 # Cech comparison for pole sheaves
@@ -7,6 +9,8 @@ import ModularCurves.ForMathlib.AcyclicAffineCechComparison
 Apply the affine-cover Cech comparison to the pole line bundles of a smooth
 proper pointed relative curve.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

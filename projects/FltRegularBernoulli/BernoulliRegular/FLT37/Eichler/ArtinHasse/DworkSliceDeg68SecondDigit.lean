@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.DworkSliceDeg68ModCubeFactorialExtraction
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.DworkSliceDeg68ModCubeFactorialExtraction
 
 /-!
 # The mod-`37³` degree-`68` Dwork-slice value, and the genuine second digit `c₆₈ = 4` of the

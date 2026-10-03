@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalizedCor732SigmaSupplier
-import «Adic spaces».WedhornActualC1PerCallClosure
-import «Adic spaces».WedhornPerPieceSubsetProductClearing
+module
+
+public import «Adic spaces».WedhornLocalizedCor732SigmaSupplier
+public import «Adic spaces».WedhornActualC1PerCallClosure
+public import «Adic spaces».WedhornPerPieceSubsetProductClearing
 
 /-!
 # Wedhorn 8.34(ii) — Per-piece subset adapter from T056 to T064 / T065 (T069)
@@ -82,6 +84,8 @@ the τ → t conversion at each call site.
   Lean kernel postulates, and avoid native compilation and unchecked
   tactics.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

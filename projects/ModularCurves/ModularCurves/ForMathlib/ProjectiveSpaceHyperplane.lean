@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.MvPolynomialProjectiveClosure
+module
+
+public import ModularCurves.ForMathlib.MvPolynomialProjectiveClosure
 
 /-!
 # Coordinate hyperplanes in projective space
@@ -14,6 +16,8 @@ This file constructs the coordinate hyperplane `X_j = 0` as the `Proj` of the
 corresponding homogeneous quotient. Its ideal sheaf will be the concrete model
 of `O(-1)` used in the projective-space cohomology calculation.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

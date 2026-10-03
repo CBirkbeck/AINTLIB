@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Polynomial.Expand
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+module
+
+public import Mathlib.Algebra.Polynomial.Expand
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 
 /-!
 # Generic-CommRing division polynomial expand-range membership
@@ -33,6 +35,8 @@ including K-level `[Field K] [CharP K p]` and universal-MvPolynomial-level
 
 Silverman, *The Arithmetic of Elliptic Curves*, III.6.2.
 -/
+
+@[expose] public section
 
 namespace HasseWeil
 

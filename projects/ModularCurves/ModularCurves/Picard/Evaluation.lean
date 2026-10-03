@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.Dual
+module
+
+public import ModularCurves.Picard.Dual
 
 /-!
 # Evaluation against the sheaf dual
@@ -11,6 +13,8 @@ import ModularCurves.Picard.Dual
 This file isolates the evaluation pairing from the Picard comparison.  It is
 used independently by the projective-twist construction.
 -/
+
+@[expose] public section
 
 universe u
 

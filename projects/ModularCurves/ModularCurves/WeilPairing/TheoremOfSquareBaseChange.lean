@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.DescentFromCharts
-import ModularCurves.WeilPairing.TheoremOfSquareUniversal
+module
+
+public import ModularCurves.WeilPairing.DescentFromCharts
+public import ModularCurves.WeilPairing.TheoremOfSquareUniversal
 
 /-!
 # The relative theorem of the square, transported and glued (B3-step5)
@@ -66,6 +68,8 @@ remain between them, both of which are genuinely about the chart, not about the 
    (`EllipticCurve/RecordGroupUnique.lean`, proved, via `modelGrpObj_unique`) says a pointed
    isomorphism of working records is a homomorphism of their group structures over any base.
 -/
+
+@[expose] public section
 
 universe u
 

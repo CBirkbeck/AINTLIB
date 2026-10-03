@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Frobenius.OrdAtInfty
-import HasseWeil.HasseBound.QuadraticFormHoleE
-import HasseWeil.Foundation.Verschiebung.IsDual
-import HasseWeil.Foundation.Verschiebung.QthRoots
+module
+
+public import HasseWeil.Isogeny.Frobenius.OrdAtInfty
+public import HasseWeil.HasseBound.QuadraticFormHoleE
+public import HasseWeil.Foundation.Verschiebung.IsDual
+public import HasseWeil.Foundation.Verschiebung.QthRoots
 
 /-!
 # Wire-up: Verschiebung witness → HOLE E (Session 6)
@@ -31,6 +33,8 @@ When Session 3's inclusion is discharged unconditional (via Frobenius
 factorization on the function-field side, ~200 LOC of focused work), the
 entire chain becomes axiom-clean and discharges HOLE E end-to-end.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

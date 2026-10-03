@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPointwiseSigmaProductClearing
-import «Adic spaces».WedhornDirectUpperBoundSupplierFromPointwiseClearing
+module
+
+public import «Adic spaces».WedhornPointwiseSigmaProductClearing
+public import «Adic spaces».WedhornDirectUpperBoundSupplierFromPointwiseClearing
 
 /-!
 # Wedhorn 8.34(ii) — Pointwise clearing supplier from σ-power data (T079)
@@ -102,6 +104,8 @@ intermediate at every call site.
 * No final Tate acyclicity hypothesis additions. No edits to
   Primary's final threading file or Secondary's T076 file.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

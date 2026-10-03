@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Pic0.TheoremOfSquareDivisorForm
-import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
+module
+
+public import HasseWeil.Pic0.TheoremOfSquareDivisorForm
+public import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
 
 /-!
 # Route C — the **pulled-back theorem of the square** over `F̄` (Silverman III.6.2(c))
@@ -113,6 +115,8 @@ Lean form is `DualAddMulByIntResidual` (the σ = O / pullback-additivity at ever
   divisor, dual additivity), book p.82–85.  Char-free over `F̄` (perfect).  Verified vs the in-repo
   PDF (`Silverman-Arithmetic_of_EC.pdf`, offset +18).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 open scoped nonZeroDivisors

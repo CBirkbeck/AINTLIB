@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Topology.Algebra.Valued.ValuedField
-import Mathlib.Topology.UniformSpace.Completion
-import «Adic spaces».ContinuousValuations
+module
+
+public import Mathlib.Topology.Algebra.Valued.ValuedField
+public import Mathlib.Topology.UniformSpace.Completion
+public import «Adic spaces».ContinuousValuations
 
 /-!
 # Multiplicative-continuity bridge: non-vanishing on units of the completion
@@ -14,6 +16,8 @@ vanish on elements `α : R` whose image `coe α` in `UniformSpace.Completion R`
 is a unit. Avoids the substantive Wedhorn 7.49 Spv-extension construction by
 exploiting density of `coe` + multiplicativity + continuity at `1`.
 -/
+
+@[expose] public section
 
 open UniformSpace
 

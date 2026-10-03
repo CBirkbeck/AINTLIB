@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.Rigidity
-import Mathlib.AlgebraicGeometry.AffineTransitionLimit
-import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
+module
+
+public import ModularCurves.EllipticCurve.Rigidity
+public import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+public import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 
 /-!
 # Rigidity / canonicity of the group law over an arbitrary base, via spreading out
@@ -70,6 +72,8 @@ elliptic-curve model cut out by explicit Weierstrass equations) it holds.
   morphisms), `081D`/`081E`/`01ZP`/`01ZQ` (descending properties of morphisms), `01ZC`
   (finite presentation ⟺ `Hom`-sets commute with cofiltered limits).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

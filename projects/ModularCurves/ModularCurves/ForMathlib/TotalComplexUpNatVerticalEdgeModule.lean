@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdgeModule
+module
+
+public import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdgeModule
 
 /-!
 # Module-valued vertical edge maps
@@ -6,6 +8,8 @@ import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdgeModule
 The module-valued vertical edge theorem follows from the horizontal theorem by
 flipping the bicomplex and composing with the total-flip isomorphism.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

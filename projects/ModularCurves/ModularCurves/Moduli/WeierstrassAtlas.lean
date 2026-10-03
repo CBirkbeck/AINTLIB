@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.Basic
-import ModularCurves.EllipticCurve.Comparison
-import Mathlib.RingTheory.Localization.Away.Basic
+module
+
+public import ModularCurves.EllipticCurve.Basic
+public import ModularCurves.EllipticCurve.Comparison
+public import Mathlib.RingTheory.Localization.Away.Basic
 
 /-!
 # The universal Weierstrass atlas `U` and the universal Weierstrass curve `E_U → U`
@@ -19,6 +21,8 @@ This is the atlas of the quotient-stack presentation `M_ell^W = [U/G]` (`G =
 WeierstrassCurve.VariableChange`, T-W4). Concretely built over `Localization.Away Δ` of the
 coefficient polynomial ring; the universe is `0` (the coefficient ring is `Type 0`).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory WeierstrassCurve
 

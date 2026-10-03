@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.AlgebraicGeometry.Modules.Sheaf
+module
+
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
 
 /-!
 # Epimorphisms of scheme modules on open covers
@@ -11,6 +13,8 @@ import Mathlib.AlgebraicGeometry.Modules.Sheaf
 This file proves that epimorphisms of scheme modules can be checked after
 restriction to an open cover.
 -/
+
+@[expose] public section
 
 open CategoryTheory Opposite TopologicalSpace
 

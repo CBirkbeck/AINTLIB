@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.SingleCrossing
+module
+
+public import LeanModularForms.ForMathlib.SingleCrossing
 
 /-!
 # Asymmetric single-crossing winding-number framework
@@ -28,6 +30,8 @@ bound when `δ_R ≠ δ_L`).
 
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Interval

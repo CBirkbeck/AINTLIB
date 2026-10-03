@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.UniversalLevelThree
-import ModularCurves.Moduli.SectionMarking
-import ModularCurves.Moduli.LevelMarking
-import ModularCurves.ForMathlib.IsUnitOfResidue
+module
+
+public import ModularCurves.Moduli.UniversalLevelThree
+public import ModularCurves.Moduli.SectionMarking
+public import ModularCurves.Moduli.LevelMarking
+public import ModularCurves.ForMathlib.IsUnitOfResidue
 
 /-!
 # The `ℰ₃`-datum assembly layers ([hArb-3])
@@ -18,6 +20,8 @@ inputs of `isE3Datum_of_flexCharts` are the two torsion→coordinate bridges
 (`3•σP = 0 ⟹` flex-normalizability; `3•σQ = 0 ⟹` the cubic), KM-coordinated per
 board v10.307.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.DixonDiff
-import Mathlib.Analysis.Complex.Liouville
+module
+
+public import LeanModularForms.ForMathlib.DixonDiff
+public import Mathlib.Analysis.Complex.Liouville
 
 /-!
 # Dixon Theorem: the Dixon Function is Identically Zero
@@ -46,6 +48,8 @@ so `h2(w) = 2πi · n(γ,w) · f(w)`.
 * J. D. Dixon, *A brief proof of Cauchy's integral theorem*, 1971
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Complex Set Filter MeasureTheory
 open scoped Real Interval

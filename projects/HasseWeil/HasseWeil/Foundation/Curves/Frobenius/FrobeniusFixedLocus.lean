@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.FieldTheory.Finite.Basic
-import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+module
+
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 
 /-!
 # Frobenius fixed locus in the algebraic closure of a finite field
@@ -39,6 +41,10 @@ roots. The fixed-point characterisation follows since `a ^ q = a` iff `a` is a r
 * Silverman, *The Arithmetic of Elliptic Curves*, V.1.
 * `FiniteField.pow_card`, `FiniteField.roots_X_pow_card_sub_X`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Polynomial
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Category.ModuleCat.Presheaf.Monoidal
-import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
-import Mathlib.CategoryTheory.Localization.Monoidal.Basic
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Presheaf.Monoidal
+public import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
+public import Mathlib.CategoryTheory.Localization.Monoidal.Basic
 
 /-!
 # Towards the monoidal structure on sheaves of modules ([GAP1-W-MONO])
@@ -33,6 +35,8 @@ with `ε` the sheafified-unit counit iso hands `SheafOfModules` its monoidal str
 with monoidal sheafification — the GAP-1 kernel, tensor-closure of invertible sheaves,
 and the Pic-group coherences (board v10.64).
 -/
+
+@[expose] public section
 
 universe v v' u u'
 

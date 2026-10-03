@@ -1,5 +1,7 @@
-import Mathlib.Algebra.Homology.HomologicalComplexAbelian
-import ModularCurves.ForMathlib.SheafCechInjectiveAugmentation
+module
+
+public import Mathlib.Algebra.Homology.HomologicalComplexAbelian
+public import ModularCurves.ForMathlib.SheafCechInjectiveAugmentation
 
 /-!
 # Cech complexes of an injective presentation
@@ -9,6 +11,10 @@ applying a native Cech complex whenever `H¹(F)` vanishes on every finite
 intersection in the cover. The only right-exactness input is the resulting
 local surjectivity on sections.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

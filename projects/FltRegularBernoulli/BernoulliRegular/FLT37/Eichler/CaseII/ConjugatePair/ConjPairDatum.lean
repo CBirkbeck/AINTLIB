@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassTrivialOverRealData
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassTrivialOverRealData
 
 /-!
 # [FLT37-CASEII-R2] The σ-conjugate-pair descent datum and its clean σ-action

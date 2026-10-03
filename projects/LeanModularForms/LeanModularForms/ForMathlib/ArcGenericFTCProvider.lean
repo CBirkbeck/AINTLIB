@@ -3,11 +3,13 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.BoundaryWindingArcProof
-import LeanModularForms.ForMathlib.BoundaryWindingSeg1Proof
-import LeanModularForms.ForMathlib.SegmentAnalysis
-import LeanModularForms.ForMathlib.SegmentFTC
-import LeanModularForms.ForMathlib.WindingWeightProofs
+module
+
+public import LeanModularForms.ForMathlib.BoundaryWindingArcProof
+public import LeanModularForms.ForMathlib.BoundaryWindingSeg1Proof
+public import LeanModularForms.ForMathlib.SegmentAnalysis
+public import LeanModularForms.ForMathlib.SegmentFTC
+public import LeanModularForms.ForMathlib.WindingWeightProofs
 
 /-!
 # `ArcFTCHyp` for the unit-circle arc at a generic angle
@@ -32,6 +34,10 @@ junction equalities. The crossing contribution at `t₀` converges to `0`.
 * `arcFTCHyp_arc_generic` — full `ArcFTCHyp` at any non-elliptic, non-I
   arc point, axiom-clean.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

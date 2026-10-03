@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SchemeQuotient
-import ModularCurves.ForMathlib.PullbackLocalAtTarget
-import Mathlib.AlgebraicGeometry.EffectiveEpi
-import Mathlib.AlgebraicGeometry.Sites.Fpqc
+module
+
+public import ModularCurves.ForMathlib.SchemeQuotient
+public import ModularCurves.ForMathlib.PullbackLocalAtTarget
+public import Mathlib.AlgebraicGeometry.EffectiveEpi
+public import Mathlib.AlgebraicGeometry.Sites.Fpqc
 
 /-!
 # G-maps of finite étale G-torsors ([B2a]/[B2b], KM pp. 115–116)
@@ -29,6 +31,8 @@ import Mathlib.AlgebraicGeometry.Sites.Fpqc
 
 These are the torsor facts of the KM 4.7.0 representability argument.
 -/
+
+@[expose] public section
 open AlgebraicGeometry CategoryTheory Limits
 universe u
 namespace ModularCurves

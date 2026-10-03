@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.TranslationOrd
+module
+
+public import HasseWeil.Foundation.EC.TranslationOrd
 
 /-!
 # Step (B'') localRingAt-image lifts for x_gen, y_gen, and constants
@@ -21,6 +23,8 @@ valuation bounds.
   `(W_smooth W).localRingAt P` for any constant `c : F`.
 - `y_gen_sub_const_mem_localRingAt_image`: companion for the y-coord.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

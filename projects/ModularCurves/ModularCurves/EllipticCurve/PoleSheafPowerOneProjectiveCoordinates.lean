@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.PoleSheafPowerOneProjectiveBaseChange
-import ModularCurves.EllipticCurve.PoleSheafProjectiveCoordinates
-import ModularCurves.ForMathlib.PrescribedLocalizedBasis
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafPowerOneProjectiveBaseChange
+public import ModularCurves.EllipticCurve.PoleSheafProjectiveCoordinates
+public import ModularCurves.ForMathlib.PrescribedLocalizedBasis
 
 /-!
 # The prescribed first basis vector for projective pole sections
@@ -14,6 +16,10 @@ The canonical first-pole section is the unique vector of a global basis of the
 rank-one first pole-section module. In particular, this remains true on every
 principal neighbourhood of a base prime.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 open TensorProduct

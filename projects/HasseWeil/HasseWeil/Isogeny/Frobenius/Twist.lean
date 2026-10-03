@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Map.Maps
-import HasseWeil.Isogeny.BaseChange.Basic
-import HasseWeil.Isogeny.Basic
-import HasseWeil.Isogeny.Dual.Reduction
-import HasseWeil.Isogeny.MulByInt.Basepoint
-import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
-import HasseWeil.Isogeny.VerschiebungFactorization
+module
+
+public import HasseWeil.Foundation.Curves.Map.Maps
+public import HasseWeil.Isogeny.BaseChange.Basic
+public import HasseWeil.Isogeny.Basic
+public import HasseWeil.Isogeny.Dual.Reduction
+public import HasseWeil.Isogeny.MulByInt.Basepoint
+public import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
+public import HasseWeil.Isogeny.VerschiebungFactorization
 
 /-!
 # G2: the explicit Frobenius-twist package (cross-curve relative Frobenius)
@@ -62,6 +64,8 @@ This file builds ON the existing twist machinery, it does not duplicate it:
 * Silverman, *The Arithmetic of Elliptic Curves*, II.2.11–II.2.12, III.4
   Example 4.6 (the Frobenius twist and the relative Frobenius morphism).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

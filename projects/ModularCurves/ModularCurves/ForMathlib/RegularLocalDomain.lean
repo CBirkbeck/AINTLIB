@@ -3,15 +3,19 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.RegularLocalRing.Defs
-import Mathlib.RingTheory.Ideal.MinimalPrime.Basic
-import Mathlib.RingTheory.Nakayama
-import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
-import Mathlib.RingTheory.LocalRing.MaximalIdeal.Square
-import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
-import Mathlib.RingTheory.RingHom.Flat
-import Mathlib.RingTheory.Ideal.Quotient.Operations
-import Mathlib.RingTheory.KrullDimension.Regular
+module
+
+public import Mathlib.RingTheory.Ideal.Quotient.Noetherian
+
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.Ideal.MinimalPrime.Basic
+public import Mathlib.RingTheory.Nakayama
+public import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Square
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+public import Mathlib.RingTheory.RingHom.Flat
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
+public import Mathlib.RingTheory.KrullDimension.Regular
 
 /-!
 # Regular local rings are domains (T-REG)
@@ -37,6 +41,10 @@ This file develops the pieces, bottom-up. The argument is the classical inductio
 All four steps are formalised here; the file culminates in
 `ModularCurves.IsRegularLocalRing.isDomain`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

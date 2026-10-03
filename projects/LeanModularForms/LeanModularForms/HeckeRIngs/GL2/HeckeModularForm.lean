@@ -3,7 +3,9 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.HeckeAction
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.HeckeAction
 
 /-!
 # Hecke Operators as Endomorphisms of Modular Forms
@@ -28,6 +30,8 @@ Hecke algebra `𝕋 (GL_pair 2) ℤ` as a ring of endomorphisms.
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.4
 -/
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup Subgroup.Commensurable Pointwise
 open HeckeRing DoubleCoset HeckeRing.GLn HeckeRing.GL2

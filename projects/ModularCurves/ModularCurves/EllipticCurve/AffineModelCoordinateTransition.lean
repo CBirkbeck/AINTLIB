@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.AffineModelCoordinates
-import ModularCurves.EllipticCurve.WeierstrassModelCoordinateTransition
+module
+
+public import ModularCurves.EllipticCurve.AffineModelCoordinates
+public import ModularCurves.EllipticCurve.WeierstrassModelCoordinateTransition
 
 /-!
 # The affine evaluation map on the projective `Z`-chart
@@ -8,6 +10,8 @@ The chart homomorphism attached to a projective triple `[x,y,1]` is the
 affine Weierstrass evaluation map after identifying the `Z`-chart ring with
 the affine coordinate ring.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 open WeierstrassCurve.Projective

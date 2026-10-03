@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Frobenius.OrdAtInfty
-import HasseWeil.Foundation.DegreeQuadraticForm
-import HasseWeil.HasseBound.PointCount
-import HasseWeil.Foundation.DiscriminantBounds
+module
+
+public import HasseWeil.Isogeny.Frobenius.OrdAtInfty
+public import HasseWeil.Foundation.DegreeQuadraticForm
+public import HasseWeil.HasseBound.PointCount
+public import HasseWeil.Foundation.DiscriminantBounds
 
 /-!
 # Hasse bound from QF non-negativity in `ℤ`
@@ -49,6 +51,8 @@ witnesses for the proven bound lives in the Weil-pairing route
 ## References
 * [Silverman, *The Arithmetic of Elliptic Curves*], V.1.1.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Real
 

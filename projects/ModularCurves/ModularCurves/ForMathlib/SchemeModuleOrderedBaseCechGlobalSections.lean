@@ -1,7 +1,9 @@
-import ModularCurves.ForMathlib.SchemeModuleBaseCech
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
-import ModularCurves.ForMathlib.SheafOrderedCechSheafComplex
-import ModularCurves.ForMathlib.SheafDerivedGlobalSections
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleBaseCech
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
+public import ModularCurves.ForMathlib.SheafOrderedCechSheafComplex
+public import ModularCurves.ForMathlib.SheafDerivedGlobalSections
 
 /-!
 # Global sections of ordered base-linear Cech complexes
@@ -10,6 +12,10 @@ After forgetting the module structure over the base, the ordered base-linear
 Cech complex of a scheme module agrees with global sections of its ordered
 sheaf-level Cech complex.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits
   TopologicalSpace Opposite

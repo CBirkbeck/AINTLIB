@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.KMBilinear
+module
+
+public import ModularCurves.WeilPairing.KMBilinear
 
 /-!
 # Independence of the Katz–Mazur pairing from the trivialisation dataset (AP-E1-IND)
@@ -30,6 +32,10 @@ value to depend on `(P, Q)` alone. This file proves that independence in four le
 Nothing here touches `exists_torsionPoint_of_mem_kerMulByN` (AP-D4 `⊇`), so no declaration
 below inherits its `sorryAx`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

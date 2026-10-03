@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SmoothDescent
-import ModularCurves.EllipticCurve.MulByHomEtale
-import ModularCurves.Moduli.GammaH
-import ModularCurves.Moduli.LevelSpaces
-import ModularCurves.LevelStructure.FullLevelDictionary
-import ModularCurves.Moduli.NaiveProblems
+module
+
+public import ModularCurves.ForMathlib.SmoothDescent
+public import ModularCurves.EllipticCurve.MulByHomEtale
+public import ModularCurves.Moduli.GammaH
+public import ModularCurves.Moduli.LevelSpaces
+public import ModularCurves.LevelStructure.FullLevelDictionary
+public import ModularCurves.Moduli.NaiveProblems
 
 /-!
 # STREAM-YFULL: the Y(N) representability route (T-E9)
@@ -57,6 +59,10 @@ Sources: [KM] SCHOLIE 4.7.0 (p. 111), engine p. 112, Cor 4.7.1 (p. 116), Cor 4.7
 (PDF = print + 11); [Loe] Fact 3.8.1, Prop 3.8.2, Prop 3.8.3 (§3.8, p. 19). Verbatim
 quotes per leaf: `.mathlib-quality/decomposition-yfull-route.md`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

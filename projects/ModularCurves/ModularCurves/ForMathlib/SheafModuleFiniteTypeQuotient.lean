@@ -6,15 +6,19 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `SheafFiniteTypeQuotient.lean`
 in Vilin97/Clawristotle.
 -/
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.Generators
-import Mathlib.CategoryTheory.Adjunction.Limits
-import Mathlib.CategoryTheory.Limits.Constructions.EpiMono
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.Generators
+public import Mathlib.CategoryTheory.Adjunction.Limits
+public import Mathlib.CategoryTheory.Limits.Constructions.EpiMono
 
 /-!
 # Finite-type sheaves of modules and quotients
 
 Finite local generators descend along an epimorphism.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits
 

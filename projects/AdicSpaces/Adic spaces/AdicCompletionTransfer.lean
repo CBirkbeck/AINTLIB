@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».AdicCompletionBridge
-import Mathlib.RingTheory.AdicCompletion.Exactness
-import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
+module
+
+public import «Adic spaces».AdicCompletionBridge
+public import Mathlib.RingTheory.AdicCompletion.Exactness
+public import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
 
 /-!
 # Transfer of AdicCompletion results to UniformSpace.Completion
@@ -17,6 +19,8 @@ transfer Mathlib's exactness, injectivity, and flatness results from
 
 * `completion_flat` : `Completion R` is flat over `R` (for noetherian `R`)
 -/
+
+@[expose] public section
 
 namespace AdicCompletionBridge
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpacePositiveTwistCoproductCech
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistShiftIso
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistTensorEquivalence
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpacePositiveTwistCoproductCech
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistShiftIso
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistTensorEquivalence
 
 /-!
 # Cech exactness after an additional positive projective twist
@@ -14,6 +16,8 @@ Positive coordinate twists add under tensor product. Consequently,
 tensoring a finite coproduct of positive twists by another positive twist
 preserves its positive-degree ordered-Cech exactness.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Frobenius.OrdAtInfty
-import HasseWeil.Isogeny.Frobenius.PointCount
-import HasseWeil.Isogeny.Kernel
+module
+
+public import HasseWeil.Isogeny.Frobenius.OrdAtInfty
+public import HasseWeil.Isogeny.Frobenius.PointCount
+public import HasseWeil.Isogeny.Kernel
 
 /-!
 # Bundled witnesses for the Hasse bound
@@ -28,6 +30,8 @@ for why the placeholder cannot be wired through the bound.
 | `pc_fiber_witness` | III.4.10(a) / T-III-4-012 | C (translation / fixed-field) |
 | `qf_nonneg` | III.6.3 | A (T-FROBENIUS-VERSCHIEBUNG-QF) |
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.PullbackTensorGeneral
+module
+
+public import ModularCurves.ForMathlib.PullbackTensorGeneral
 
 /-!
 # The monoidal pullback unit is the structure-sheaf pullback
@@ -13,6 +15,10 @@ The monoidal structure on pullback is descended through sheafification, whereas
 that the two canonical unit comparisons agree. The proof compares their transposes
 through the composite sheafification and pullback adjunctions.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory MonoidalCategory SheafOfModules
   TopologicalSpace

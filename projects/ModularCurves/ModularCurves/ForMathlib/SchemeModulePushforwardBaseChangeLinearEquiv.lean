@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
 
 /-!
 # Global sections from an isomorphic pushforward base-change component
@@ -7,6 +9,8 @@ For affine source and target bases, an isomorphic component of the
 pullback--pushforward base-change morphism induces the expected linear
 equivalence on global sections.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
 open TensorProduct

@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.GroupScheme.StableCharts
-import ModularCurves.EllipticCurve.WeierstrassModel
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.GroupScheme.StableCharts
+public import ModularCurves.EllipticCurve.WeierstrassModel
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The `G`-stable affine cover of `E` — complement stability (`[HG-C3b]`)
@@ -22,6 +24,8 @@ compatible pairs (`Scheme.Pullback.exists_preimage_pullback`).
 The complement chart `complOpen` is the first of the two charts of the `[HG-C3e]` cover; its
 affineness is `[HG-C3c]` (the Proj basic-open route).
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

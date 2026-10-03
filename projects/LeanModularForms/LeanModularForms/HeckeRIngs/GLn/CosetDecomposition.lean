@@ -3,8 +3,10 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.Matrix.Block
-import LeanModularForms.HeckeRIngs.GLn.DiagonalCosets
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Block
+public import LeanModularForms.HeckeRIngs.GLn.DiagonalCosets
 
 /-!
 # Left Coset Decomposition for GL_n Hecke Ring
@@ -33,6 +35,8 @@ distinct left cosets.
 
 * Shimura, Proposition 3.22
 -/
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Pointwise HeckeRing Matrix.SpecialLinearGroup
 

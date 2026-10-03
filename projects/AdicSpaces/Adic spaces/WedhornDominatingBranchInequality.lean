@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornDominatingUnitInequality
+module
+
+public import «Adic spaces».WedhornDominatingUnitInequality
 
 /-!
 # Wedhorn dominating-unit branch candidate inequality
@@ -56,6 +58,8 @@ of this file as `subset_inequality_target`.
 * Imports only `«Adic spaces».WedhornDominatingUnitInequality` plus its
   transitive closure (`ValuationSpectrum`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

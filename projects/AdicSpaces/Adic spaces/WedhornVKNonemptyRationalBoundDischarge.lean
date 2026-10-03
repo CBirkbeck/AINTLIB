@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornCoverPieceLocRationalBoundDischarge
+module
+
+public import «Adic spaces».WedhornCoverPieceLocRationalBoundDischarge
 
 /-!
 # Wedhorn 8.34(ii) — V_K-nonempty rational-bound max-element factoring (T042)
@@ -139,6 +141,8 @@ valuation-arithmetic input as the max-element bound.
   layer; honest discharge requires definition-level tightening of
   T039's universal quantifier or forbidden power-decay arguments.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

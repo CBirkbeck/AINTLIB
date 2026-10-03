@@ -3,16 +3,18 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.Representability
-import ModularCurves.Moduli.Groupoid
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.Moduli.PullSectionCanonicity
-import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
-import Mathlib.AlgebraicGeometry.AlgClosed.Basic
-import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
-import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
-import ModularCurves.Moduli.NaiveProblems
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.Moduli.Representability
+public import ModularCurves.Moduli.Groupoid
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.Moduli.PullSectionCanonicity
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+public import Mathlib.AlgebraicGeometry.AlgClosed.Basic
+public import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
+public import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
+public import ModularCurves.Moduli.NaiveProblems
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # General level structures P_H, and full level N over an arbitrary base
@@ -52,6 +54,10 @@ concretely (owner question, 2026-07-05; Loeffler §3.8; KM Ch. 3–5, 7).
   record is the levelled groupoid (`FullLevelGroupoid`), per design D6. Coarse spaces:
   `Moduli/Coarse.lean`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

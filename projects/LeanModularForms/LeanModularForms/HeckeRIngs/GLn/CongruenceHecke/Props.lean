@@ -3,7 +3,9 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GLn.CongruenceHecke.Foundation
+module
+
+public import LeanModularForms.HeckeRIngs.GLn.CongruenceHecke.Foundation
 
 /-!
 # Hecke Ring for Congruence Subgroups (Shimura §3.3) — Propositions 3.30–3.33
@@ -17,6 +19,8 @@ on coprime-determinant cosets (Prop 3.31), the `N`-power determinant structure
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.3
 -/
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Pointwise Matrix.SpecialLinearGroup
 

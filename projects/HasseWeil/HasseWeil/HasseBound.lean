@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
-import HasseWeil.HasseBound.WeilPairing.PencilComapPointValuation
-import HasseWeil.HasseBound.WeilPairing.Scaling.FrobeniusGalois
-import HasseWeil.HasseBound.WeilPairing.Scaling.OneSubTransport
+module
+
+public import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
+public import HasseWeil.HasseBound.WeilPairing.PencilComapPointValuation
+public import HasseWeil.HasseBound.WeilPairing.Scaling.FrobeniusGalois
+public import HasseWeil.HasseBound.WeilPairing.Scaling.OneSubTransport
 
 /-!
 # The unconditional Hasse bound `|#E(𝔽_q) − q − 1| ≤ 2√q`
@@ -35,6 +37,8 @@ per-`(p, r)` `hscale` discharge we force `p = p₀` (`CharP` uniqueness) and `r 
 * Silverman, *The Arithmetic of Elliptic Curves*, V.1.1 (the Hasse bound), III.8.6 (the Weil-pairing
   symplectic scaling).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

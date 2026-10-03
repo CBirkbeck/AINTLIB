@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.TensorProduct.Finiteness
-import ModularCurves.Picard.Evaluation
-import ModularCurves.Picard.PullbackTensorObj
-import ModularCurves.Picard.InvertibleSheaf
+module
+
+public import Mathlib.LinearAlgebra.TensorProduct.Finiteness
+public import ModularCurves.Picard.Evaluation
+public import ModularCurves.Picard.PullbackTensorObj
+public import ModularCurves.Picard.InvertibleSheaf
 
 /-!
 # The Picard comparison: cover-local invertibility ↔ ⊗-invertibility
@@ -28,6 +30,10 @@ Leaves (`Nonempty`-wrapped `Prop`s, v10.8 discipline):
 * `isInvertible_of_isUnit` **[CMP-←]**: a ⊗-unit is cover-locally trivial (Zariski-local
   freeness of invertible modules — independent of the dual machinery).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 -- v4.33 bump: neither the category instances nor the semireducible component types are
 -- transparent enough for the `show`/`rfl`/`rw` steps below at `implicit` transparency.

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Basic
-import HasseWeil.Isogeny.Kernel
-import Mathlib.Algebra.CharP.Lemmas
+module
+
+public import HasseWeil.Foundation.Basic
+public import HasseWeil.Isogeny.Kernel
+public import Mathlib.Algebra.CharP.Lemmas
 
 /-!
 # Factorisation of `[p]` via the relative Frobenius (Silverman II.2.12)
@@ -42,6 +44,8 @@ is separable.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, II.2.11–II.2.12.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

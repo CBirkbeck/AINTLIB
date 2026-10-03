@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornSigmaDominationClearing
+module
+
+public import «Adic spaces».WedhornSigmaDominationClearing
 
 /-!
 # Wedhorn 8.34(ii) — Laurent-piece product/lower-bound supplier (T051)
@@ -92,6 +94,8 @@ Wedhorn 8.34(ii) structure:
   construction at the base side, paralleling the localized
   `WedhornStandardCoverRefinement.cor732_laurent_piece_membership_at`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

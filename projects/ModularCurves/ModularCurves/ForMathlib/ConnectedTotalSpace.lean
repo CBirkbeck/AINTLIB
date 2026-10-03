@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Topology.Connected.Clopen
-import Mathlib.Topology.LocalAtTarget
+module
+
+public import Mathlib.Topology.Connected.Clopen
+public import Mathlib.Topology.LocalAtTarget
 
 /-!
 # Connected total space of an open–closed map with connected fibres
@@ -24,6 +26,8 @@ would be vacuous). No continuity of `f` is needed.
 
 AINTLIB ModularCurves (T-W7.7 rigidity infrastructure); upstream candidate.
 -/
+
+@[expose] public section
 
 open Set
 

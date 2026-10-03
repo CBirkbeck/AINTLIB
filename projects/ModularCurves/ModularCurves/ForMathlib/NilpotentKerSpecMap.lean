@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.IdealSheaf.Basic
-import Mathlib.RingTheory.Nilpotent.Defs
+module
+
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Basic
+public import Mathlib.RingTheory.Nilpotent.Defs
 
 /-!
 # Nilpotence of the scheme-theoretic kernel of a square-zero `Spec.map`
@@ -25,6 +27,8 @@ produced by `AlgebraicGeometry.FormallyUnramified.of_hom_ext`, which supplies on
 * `AlgebraicGeometry.isNilpotent_ker_SpecMap`:
   `RingHom.ker φ ^ 2 = ⊥ → IsNilpotent (Spec.map φ).ker`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

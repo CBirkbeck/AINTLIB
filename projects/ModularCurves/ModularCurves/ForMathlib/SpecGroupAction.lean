@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q1.
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Integral
-import Mathlib.RingTheory.Invariant.Basic
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Integral
+public import Mathlib.RingTheory.Invariant.Basic
 
 /-!
 # Finite group actions on affine schemes and the invariants morphism
@@ -34,6 +36,8 @@ Upstream note: mathlib's `RingTheory/Invariant/Basic.lean` has the prime-level
 statements (`Algebra.IsInvariant.isIntegral`, `exists_smul_of_under_eq`); nothing in
 `Mathlib/AlgebraicGeometry/` currently touches `MulSemiringAction`.
 -/
+
+@[expose] public section
 
 universe u v
 

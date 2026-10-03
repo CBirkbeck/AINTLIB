@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SheafCohomologyExact
+module
+
+public import ModularCurves.ForMathlib.SheafCohomologyExact
 
 /-!
 # Degree-one sheaf cohomology as a cokernel
@@ -7,6 +9,10 @@ This file extracts the first nontrivial consequence of the long exact sequence i
 sheaf cohomology. When the middle sheaf has vanishing first cohomology, the connecting
 homomorphism presents the first cohomology of the kernel as a cokernel in abelian groups.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits
 

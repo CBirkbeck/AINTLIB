@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Algebra.Homology.HomologicalBicomplex
-import ModularCurves.ForMathlib.SheafModuleCechTopAugmentation
+module
+
+public import Mathlib.Algebra.Homology.HomologicalBicomplex
+public import ModularCurves.ForMathlib.SheafModuleCechTopAugmentation
 
 /-!
 # The module-valued Cech bicomplex of two open families
@@ -14,6 +16,8 @@ sheaf-level Cech complex for another produces a coefficient-preserving
 bicomplex. Its two edge augmentations are compatible with both
 differentials.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

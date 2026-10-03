@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SheafCechInjectiveAugmentation
+module
+
+public import ModularCurves.ForMathlib.SheafCechInjectiveAugmentation
 
 /-!
 # Degree-one Cech comparison through an injective bicomplex
@@ -9,6 +11,10 @@ the sheaf-level Cech resolution to exact low rows, so the horizontal and
 vertical edge quasi-isomorphisms identify degree-one Cech homology with
 genuine sheaf cohomology.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

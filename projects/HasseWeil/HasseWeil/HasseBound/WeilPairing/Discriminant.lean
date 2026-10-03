@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Order.Archimedean.Basic
-import Mathlib.Algebra.Prime.Lemmas
-import Mathlib.Algebra.Ring.Basic
-import Mathlib.Data.Int.GCD
-import Mathlib.Data.Nat.Prime.Basic
-import Mathlib.Data.Nat.Prime.Infinite
-import Mathlib.Tactic.Linarith
-import Mathlib.Tactic.Ring
+module
+
+public import Mathlib.Algebra.Order.Archimedean.Basic
+public import Mathlib.Algebra.Prime.Lemmas
+public import Mathlib.Algebra.Ring.Basic
+public import Mathlib.Data.Int.GCD
+public import Mathlib.Data.Nat.Prime.Basic
+public import Mathlib.Data.Nat.Prime.Infinite
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.Ring
 
 /-!
 # Route 2A — the discriminant lemma (Silverman V.1.1, Leaf 5)
@@ -30,6 +32,8 @@ arithmetic — no elliptic-curve content — and uses no real analysis: a balanc
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, V.1.1 / Lemma 1.2 (deg is a positive
 definite quadratic form ⟹ `|t| ≤ 2√q`).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.WeilPairing
 

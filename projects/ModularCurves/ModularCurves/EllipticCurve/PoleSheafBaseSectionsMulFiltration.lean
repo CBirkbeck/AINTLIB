@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.PoleSheafBaseSectionsMul
-import ModularCurves.EllipticCurve.PoleSheafMulFiltration
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafBaseSectionsMul
+public import ModularCurves.EllipticCurve.PoleSheafMulFiltration
 
 /-!
 # Base-section multiplication and the pole filtration
@@ -7,6 +9,10 @@ import ModularCurves.EllipticCurve.PoleSheafMulFiltration
 Multiplication on global sections of pole sheaves commutes with the canonical
 inclusion in the right factor.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory MonoidalCategory Opposite
 

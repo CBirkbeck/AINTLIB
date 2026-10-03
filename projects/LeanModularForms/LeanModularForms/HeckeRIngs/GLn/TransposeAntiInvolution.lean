@@ -3,8 +3,10 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GLn.DiagonalCosets
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Commutativity
+module
+
+public import LeanModularForms.HeckeRIngs.GLn.DiagonalCosets
+public import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Commutativity
 
 /-!
 # GL_n Hecke Algebra Commutativity via Transpose
@@ -19,6 +21,8 @@ gives commutativity of the Hecke ring.
 * `GL_pair_antiInvolution` -- the transpose as an `AntiInvolution` for `GL_pair n`
 * `instCommRing_HeckeAlgebra` -- `CommRing (HeckeAlgebra n)`
 -/
+
+@[expose] public section
 
 open Matrix HeckeRing HeckeRing.GLn Matrix.SpecialLinearGroup
 

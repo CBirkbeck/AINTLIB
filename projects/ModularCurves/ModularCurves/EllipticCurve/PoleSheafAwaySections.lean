@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassOverlap
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassOverlap
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
 # Sections away from a marked section
@@ -8,6 +10,10 @@ This file identifies the overlap of a Cartier-generator chart with the open comp
 marked section. This is the geometric input for extending regular functions on the complement
 to sections with a finite-order pole along the marked section.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.HeckeActionGeneral
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_GLpair
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.HeckeActionGeneral
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_GLpair
 
 /-!
 # Connection between `heckeT_p_fun` and `heckeSlash_gen (Gamma1_pair N)`
@@ -20,6 +22,10 @@ coset `D_p_Gamma1` and the diamond identity `slash_M_infty_eq_diamond_slash_T_p_
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.2, Proposition 5.2.1
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.4
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup
 

@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.PrimaryNormalization
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqFromKummerRatioK
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqDischarge
-import FltRegular.FltRegular
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.PrimaryNormalization
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqFromKummerRatioK
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqDischarge
+public import FltRegular.FltRegular
 
 /-!
 # LV010 Stage 2 interface: Kummer's ratio adapted

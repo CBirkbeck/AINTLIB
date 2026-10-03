@@ -1,7 +1,9 @@
-import PadicLFunctions.Measure.PseudoMeasure
-import PadicLFunctions.EisensteinFamily
-import Mathlib.Topology.Algebra.Group.Quotient
-import Mathlib.Topology.Algebra.Group.Units
+module
+
+public import PadicLFunctions.Measure.PseudoMeasure
+public import PadicLFunctions.EisensteinFamily
+public import Mathlib.Topology.Algebra.Group.Quotient
+public import Mathlib.Topology.Algebra.Group.Units
 
 /-!
 # The ±-decomposition of Λ(𝒢) and the plus quotient Λ(𝒢⁺)
@@ -26,6 +28,8 @@ Galois group 𝒢 is `ℤ_[p]ˣ`, complex conjugation `c` is `(-1 : ℤ_[p]ˣ)`,
   the even-part section `plusSection`, and the isomorphism Λ(𝒢)⁺ ≅ Λ(𝒢⁺)
   (RJW TeX 3006–3015; functional-route proof, replan R11.2).
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 

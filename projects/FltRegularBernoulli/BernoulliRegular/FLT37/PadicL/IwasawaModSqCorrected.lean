@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.PadicL.IwasawaCongruenceModPSq
-import BernoulliRegular.FLT37.PadicL.PowerSumModPCubed
+module
+
+public import BernoulliRegular.FLT37.PadicL.IwasawaCongruenceModPSq
+public import BernoulliRegular.FLT37.PadicL.PowerSumModPCubed
 
 /-!
 # The **corrected** sharp Iwasawa congruence at `(p, i) = (37, 32)`
@@ -97,6 +99,10 @@ repo via `teichmuller_sub_pow_val_mem_pow_two`), **not** Kellner.
   Thm 5.13 (Kummer congruences), Cor 5.13, Thm 5.18, Prop 8.12, Cor 8.23.
 * Kellner, Math. Comp. 76 (2007), Prop 2.7 (the `s`-direction Iwasawa datum).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

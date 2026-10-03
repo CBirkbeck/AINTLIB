@@ -3,21 +3,24 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.CartierDivisor
-import ModularCurves.Picard.Evaluation
-import ModularCurves.Picard.DualPullback.Iso
-import ModularCurves.Picard.DualRestrict
-import ModularCurves.Picard.Pic
-import ModularCurves.Picard.UnitPullback
-import ModularCurves.ForMathlib.PullbackCompMonoidal
-import ModularCurves.ForMathlib.FlatNonZeroDivisor
-import ModularCurves.ForMathlib.PullbackTensorGeneral
-import ModularCurves.ForMathlib.PullbackTensorMonoidal
-import ModularCurves.ForMathlib.PullbackUnitMonoidal
-import ModularCurves.Picard.DualPullback.TrivializationRestriction
-import Mathlib.Algebra.Category.ModuleCat.Kernels
-import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
+module
+
+import Mathlib.Algebra.Category.ModuleCat.Presheaf.EpiMono
+public import ModularCurves.LevelStructure.CartierDivisor
+public import ModularCurves.Picard.Evaluation
+public import ModularCurves.Picard.DualPullback.Iso
+public import ModularCurves.Picard.DualRestrict
+public import ModularCurves.Picard.Pic
+public import ModularCurves.Picard.UnitPullback
+public import ModularCurves.ForMathlib.PullbackCompMonoidal
+public import ModularCurves.ForMathlib.FlatNonZeroDivisor
+public import ModularCurves.ForMathlib.PullbackTensorGeneral
+public import ModularCurves.ForMathlib.PullbackTensorMonoidal
+public import ModularCurves.ForMathlib.PullbackUnitMonoidal
+public import ModularCurves.Picard.DualPullback.TrivializationRestriction
+public import Mathlib.Algebra.Category.ModuleCat.Kernels
+public import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
 
 /-!
 # Pole sheaves attached to a section
@@ -27,6 +30,8 @@ It packages the ideal of a section as an actual sheaf of modules, rather than on
 `Scheme.IdealSheafData`.  The local-principal theorem in `CartierDivisor.lean` will then
 identify this kernel sheaf locally with the structure sheaf.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory SheafOfModules
   TopologicalSpace

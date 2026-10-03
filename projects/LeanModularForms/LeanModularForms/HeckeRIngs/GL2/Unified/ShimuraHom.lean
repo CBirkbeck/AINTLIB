@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
-import LeanModularForms.HeckeRIngs.GL2.Fricke
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
+public import LeanModularForms.HeckeRIngs.GL2.Fricke
 
 /-!
 # The Shimura-convention Hecke action `Ψ_χ` as the Fricke conjugate of `Φ_χ`
@@ -36,6 +38,8 @@ automorphism of `End`.
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.4–3.5.
 * Atkin–Lehner, *Hecke operators on `Γ₀(m)`*.
 -/
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup CongruenceSubgroup HeckeRing.GLn
 open scoped Pointwise MatrixGroups ModularForm UpperHalfPlane

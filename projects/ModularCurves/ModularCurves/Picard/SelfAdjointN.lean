@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.DivisorClass
-import ModularCurves.EllipticCurve.Torsion
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.WeilPairing.ChartGroupSum
+module
+
+public import ModularCurves.Picard.DivisorClass
+public import ModularCurves.EllipticCurve.Torsion
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.WeilPairing.ChartGroupSum
 -- ADDED (2026-08-09, DS4-poincare): supplies `EllipticCurve.picMap_mulByHom_eq_pow`, the
 -- input of `exists_pic_map_snd_picMap_mulByHom_kappa` below. No statement in this file is
 -- changed by it.
-import ModularCurves.WeilPairing.PoincareBiextension
+public import ModularCurves.WeilPairing.PoincareBiextension
 
 /-!
 # Restricted self-adjointness of `[N]` on the relative Picard group (DS4 Gap A, `(★)`/`(★′)`)
@@ -163,6 +165,8 @@ Note that (A) is where the universal-curve/reduced-seesaw discussion above lands
 degenerate loci (`Q = Q'`, `Q = −Q'`, either `= 0`) are handled by proving (A) on the
 universal pair and base-changing, not by case analysis over the given base.
 -/
+
+@[expose] public section
 
 universe u
 

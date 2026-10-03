@@ -5,16 +5,18 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-FL* (openness of the flat locus).
 -/
-import Mathlib.RingTheory.Flat.Localization
-import Mathlib.RingTheory.Flat.Stability
-import Mathlib.RingTheory.Localization.BaseChange
-import Mathlib.RingTheory.Spectrum.Prime.Topology
-import Mathlib.RingTheory.Spectrum.Prime.ConstructibleSet
-import Mathlib.RingTheory.Spectrum.Prime.Noetherian
-import Mathlib.Topology.NoetherianSpace
-import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
-import Mathlib.Algebra.Module.LocalizedModule.Exact
-import ModularCurves.ForMathlib.GenericFlatness
+module
+
+public import Mathlib.RingTheory.Flat.Localization
+public import Mathlib.RingTheory.Flat.Stability
+public import Mathlib.RingTheory.Localization.BaseChange
+public import Mathlib.RingTheory.Spectrum.Prime.Topology
+public import Mathlib.RingTheory.Spectrum.Prime.ConstructibleSet
+public import Mathlib.RingTheory.Spectrum.Prime.Noetherian
+public import Mathlib.Topology.NoetherianSpace
+public import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
+public import Mathlib.Algebra.Module.LocalizedModule.Exact
+public import ModularCurves.ForMathlib.GenericFlatness
 
 /-!
 # Openness of the flat locus (Stacks Tag 00RC / Theorem 10.129.4)
@@ -35,6 +37,8 @@ Noetherian induction on `Spec R`.
   (`M_f` free over `R_f`) puts the basic open `D(algebraMap R S f)` inside the flat locus.
 * `isOpen_flatLocus`: the flat locus is open.
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 open TensorProduct

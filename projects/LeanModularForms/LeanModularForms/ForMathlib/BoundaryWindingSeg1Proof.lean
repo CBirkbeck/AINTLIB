@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.BoundaryWinding
-import LeanModularForms.ForMathlib.InteriorWinding
-import LeanModularForms.ForMathlib.SmoothBoundaryWindingProof
+module
+
+public import LeanModularForms.ForMathlib.BoundaryWinding
+public import LeanModularForms.ForMathlib.InteriorWinding
+public import LeanModularForms.ForMathlib.SmoothBoundaryWindingProof
 
 /-!
 # SmoothBoundaryWindingData for seg1 (right vertical edge)
@@ -26,6 +28,8 @@ speed. For `z₀ = 1/2 + c·I` with `c ∈ (√3/2, H)`, the crossing parameter 
 * `smoothBoundaryData_seg1_of_ftcHyp` -- constructs `SmoothBoundaryWindingData`
   at a generic smooth seg1 point from an external `ArcFTCHyp`
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.MulByIntPullback
-import HasseWeil.FormalGroup.FormalGroup
-import Mathlib.RingTheory.LaurentSeries
-import Mathlib.RingTheory.PowerSeries.Inverse
+module
+
+public import HasseWeil.Foundation.MulByIntPullback
+public import HasseWeil.FormalGroup.FormalGroup
+public import Mathlib.RingTheory.LaurentSeries
+public import Mathlib.RingTheory.PowerSeries.Inverse
 
 /-!
 # Local Expansion at the Identity O (Phase 1 of the Local Expansion Bridge)
@@ -56,6 +58,10 @@ detailed comments. Phase 2 (`IsogenyLocalExpansion.lean`) builds on this API.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, IV.1 (pp. 115–119)
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open WeierstrassCurve PowerSeries LaurentSeries
 

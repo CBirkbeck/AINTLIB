@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.ProblemBaseChange
-import ModularCurves.Moduli.QuotientProblem
-import ModularCurves.Moduli.Stack
-import ModularCurves.EllipticCurve.GroupLawDescent
-import Mathlib.RingTheory.Spectrum.Prime.Topology
-import Mathlib.AlgebraicGeometry.Gluing
-import Mathlib.AlgebraicGeometry.PullbackCarrier
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.Moduli.ProblemBaseChange
+public import ModularCurves.Moduli.QuotientProblem
+public import ModularCurves.Moduli.Stack
+public import ModularCurves.EllipticCurve.GroupLawDescent
+public import Mathlib.RingTheory.Spectrum.Prime.Topology
+public import Mathlib.AlgebraicGeometry.Gluing
+public import Mathlib.AlgebraicGeometry.PullbackCarrier
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # [T-E5f] The Katz–Mazur recollement theorem
@@ -29,6 +31,10 @@ This file contains the abstract recollement infrastructure on `ModularCurves.Ell
   Scheme-gluing recollement of the two representing `Ell`-objects) is decomposed in the
   docstring and left as the outstanding engine gap.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 
 /-!

@@ -3,13 +3,15 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.Newforms.LevelRaiseComm
-import LeanModularForms.HeckeRIngs.GL2.Fricke
-import LeanModularForms.HeckeRIngs.GL2.Newforms.FrickeOldStable
-import LeanModularForms.HeckeRIngs.GL2.Newforms.BadPrimeOldStable
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.DoubleCosetAdjoint
-import LeanModularForms.HeckeRIngs.GL2.Newforms.BadPrimeFDTiling
-import LeanModularForms.HeckeRIngs.GL2.Newforms.BadPrimeTraceFricke
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.LevelRaiseComm
+public import LeanModularForms.HeckeRIngs.GL2.Fricke
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.FrickeOldStable
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.BadPrimeOldStable
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.DoubleCosetAdjoint
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.BadPrimeFDTiling
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.BadPrimeTraceFricke
 
 /-!
 # Bad-prime `U_p` Petersson adjoint (Diamond–Shurman §5.6)
@@ -38,6 +40,8 @@ adjoint operator is genuinely *not* a level-`N` Hecke operator.
 
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.6 (Prop 5.6.2, Exer 5.6.3)
 -/
+
+@[expose] public section
 
 noncomputable section
 

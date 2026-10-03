@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.TheoremOfSquareFibrewise
+module
+
+public import ModularCurves.WeilPairing.TheoremOfSquareFibrewise
 
 /-!
 # The Weierstrass presentation of a field-valued fibre (B3-step1b)
@@ -56,6 +58,8 @@ hence removes the presentation hypothesis from
 The general-base statement `nonempty_pullback_discrepancy_iso_unitObj_of_field` is kept as is:
 this file only *adds* the hypothesis-free specialisation.
 -/
+
+@[expose] public section
 
 universe u
 

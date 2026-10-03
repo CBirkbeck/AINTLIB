@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.LocalPowerDvdZ
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.LocalPowerDvdZ
 
 /-!
 # [FLT37-CASEII-R4-ELLZ] Washington Lemma 9.7 / 9.8 `ℓ ∣ z` over the Case-II descent, corrected

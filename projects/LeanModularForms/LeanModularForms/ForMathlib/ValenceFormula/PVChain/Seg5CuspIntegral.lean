@@ -3,12 +3,14 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.ValenceFormula.PVChain.Helpers
-import LeanModularForms.ForMathlib.ModularInvariance
-import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Smooth
-import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Bounds
-import LeanModularForms.ForMathlib.SegmentFTC
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
+module
+
+public import LeanModularForms.ForMathlib.ValenceFormula.PVChain.Helpers
+public import LeanModularForms.ForMathlib.ModularInvariance
+public import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Smooth
+public import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Bounds
+public import LeanModularForms.ForMathlib.SegmentFTC
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
 
 /-!
 # Seg5 Cusp Integral
@@ -33,6 +35,8 @@ circle integral using the factorization `F(q) = q^m · g(q)`:
 * `seg5_logDeriv_integral_value_bridge` — bridge to the form used in
     `PVChain.Assembly`.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Topology CongruenceSubgroup
 open scoped Real UpperHalfPlane MatrixGroups

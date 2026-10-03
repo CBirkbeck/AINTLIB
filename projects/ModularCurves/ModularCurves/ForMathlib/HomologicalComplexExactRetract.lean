@@ -3,13 +3,17 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
+module
+
+public import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
 
 /-!
 # Exactness of retracts of homological complexes
 
 Exactness at a fixed degree descends from a homological complex to any chain-level retract.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Category CategoryTheory.Limits
 

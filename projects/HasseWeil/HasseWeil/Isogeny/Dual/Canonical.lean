@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Frobenius.Factorization
-import HasseWeil.Isogeny.Dual.GaloisClosed
+module
+
+public import HasseWeil.Isogeny.Frobenius.Factorization
+public import HasseWeil.Isogeny.Dual.GaloisClosed
 
 /-!
 # The canonical dual isogeny (Silverman III.6.1–III.6.2)
@@ -80,6 +82,8 @@ composition `(ψ∘φ)^ = φ̂ ∘ ψ̂`, and the canonical packaging `Isogeny.c
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.6.1–III.6.2 (pp. 81–83), III.4.8.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

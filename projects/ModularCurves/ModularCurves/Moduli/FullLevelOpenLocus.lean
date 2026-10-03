@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.Moduli.FullLevelTautSection
-import ModularCurves.EllipticCurve.PointVanishingClopen
+module
+
+public import ModularCurves.Moduli.FullLevelTautSection
+public import ModularCurves.EllipticCurve.PointVanishingClopen
 
 /-!
 # The full-level locus is open (YFULL route γ, [YF-U])
@@ -22,6 +24,10 @@ It supplies the open `U` of the clopen leaf `isOpenImmersion_levelSpaceΓι_of_t
 remaining inputs are the image bound `[YF-⊆]` (`range levelSpaceΓι ⊆ U`) and the full-level
 witness `[YF-⊇]` (the taut pair is full-level over `U`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

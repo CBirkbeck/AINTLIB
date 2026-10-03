@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PresheafTateStructure
-import «Adic spaces».TopologyComparison
-import «Adic spaces».CompletionLocalization
+module
+
+public import «Adic spaces».PresheafTateStructure
+public import «Adic spaces».TopologyComparison
+public import «Adic spaces».CompletionLocalization
 
 /-!
 # Wedhorn Example 6.38: generic `f − X` / `1 − fX` identifications
@@ -37,6 +39,8 @@ generic over a `B` with `RationalLocData B` (depending only on
 ## References
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Example 6.38, Prop 6.17.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

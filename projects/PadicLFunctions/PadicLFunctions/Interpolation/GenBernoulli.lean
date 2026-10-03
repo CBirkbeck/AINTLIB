@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.FieldTheory.KummerExtension
-import Mathlib.NumberTheory.BernoulliPolynomials
-import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
-import Mathlib.NumberTheory.DirichletCharacter.Basic
-import Mathlib.RingTheory.PowerSeries.WellKnown
-import PadicLFunctions.KubotaLeopoldt.ZetaValues
+module
+
+public import Mathlib.FieldTheory.KummerExtension
+public import Mathlib.NumberTheory.BernoulliPolynomials
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Mathlib.NumberTheory.DirichletCharacter.Basic
+public import Mathlib.RingTheory.PowerSeries.WellKnown
+public import PadicLFunctions.KubotaLeopoldt.ZetaValues
 
 /-!
 # Generalised Bernoulli numbers (the L-values of RJW §5)
@@ -25,6 +27,8 @@ complex bridge is `GenBernoulliComplex.lean`.
 Prop 4.1's polynomial form; the `a`-range `1..N` matters — it makes the
 trivial-character case reduce to `B_k(1) = bernoulli' k`).
 -/
+
+@[expose] public section
 
 open Finset
 

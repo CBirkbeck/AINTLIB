@@ -3,10 +3,12 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Mathlib.CategoryTheory.Category.Cat
-import ModularCurves.ForMathlib.TorsorMap
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.CategoryTheory.Category.Cat
+public import ModularCurves.ForMathlib.TorsorMap
 
 /-!
 # Quotient prestacks and torsor pairs
@@ -22,6 +24,8 @@ on a scheme. It also develops finite etale torsor pairs, their trivialization, a
 * `trivialTorsorPair`: the torsor pair associated to a point.
 * `TorsorPair.pullback`: base change of a torsor pair.
 -/
+
+@[expose] public section
 
 universe u
 

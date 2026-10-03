@@ -1,8 +1,10 @@
-import ModularCurves.ForMathlib.FiniteAffineSupportAnnihilation
-import ModularCurves.ForMathlib.IdealSheafPowerSubscheme
-import ModularCurves.ForMathlib.IdealSheafSubschemeRestrictPullbackUnit
-import ModularCurves.ForMathlib.SchemeModuleOpenCoverIso
-import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
+module
+
+public import ModularCurves.ForMathlib.FiniteAffineSupportAnnihilation
+public import ModularCurves.ForMathlib.IdealSheafPowerSubscheme
+public import ModularCurves.ForMathlib.IdealSheafSubschemeRestrictPullbackUnit
+public import ModularCurves.ForMathlib.SchemeModuleOpenCoverIso
+public import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
 
 /-!
 # A finite ideal-sheaf thickening supporting a module
@@ -10,6 +12,8 @@ import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
 One positive power of an ideal sheaf supports a finite-type quasicoherent module
 whose closed stalk support lies in the ideal-sheaf support.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

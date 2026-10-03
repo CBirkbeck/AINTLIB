@@ -1,7 +1,9 @@
-import Mathlib.CategoryTheory.Abelian.Injective.Ext
-import Mathlib.CategoryTheory.Preadditive.Injective.Preserves
-import ModularCurves.ForMathlib.SheafCechInjectiveAugmentation
-import ModularCurves.ForMathlib.SheafCohomologyTerminal
+module
+
+public import Mathlib.CategoryTheory.Abelian.Injective.Ext
+public import Mathlib.CategoryTheory.Preadditive.Injective.Preserves
+public import ModularCurves.ForMathlib.SheafCechInjectiveAugmentation
+public import ModularCurves.ForMathlib.SheafCohomologyTerminal
 
 /-!
 # Sheaf cohomology over open subsets
@@ -11,6 +13,8 @@ after restriction to an open subset. The degree-one comparison is obtained by
 evaluating an injective resolution on the open and using the represented-free-sheaf
 description of sections.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits Opposite TopologicalSpace
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.GammaH
+module
+
+public import ModularCurves.Moduli.GammaH
 
 /-!
 # Coarse moduli statements: the j-line, Y₀(N), and coarse Y_{P_H} (KM Ch. 8 ⧗)
@@ -27,6 +29,8 @@ The universal property (initiality among maps to schemes) requires the
 moduli-problem-morphism vocabulary of stream Q (T-Q6/T-Q7); here we state the
 geometric-points characterisation, which is what downstream consumers use.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

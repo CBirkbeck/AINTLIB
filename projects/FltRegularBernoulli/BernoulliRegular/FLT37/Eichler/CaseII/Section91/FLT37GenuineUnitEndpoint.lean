@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescendedContentIsPContent
-import BernoulliRegular.FLT37.Eichler.Reduction.ConjugateResidueEqnsFromR3
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.GammaRatioLocalPower
-import BernoulliRegular.FLT37.Eichler.Saturation.SingleIndexExpansionFromResidueEqns
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescendedContentIsPContent
+public import BernoulliRegular.FLT37.Eichler.Reduction.ConjugateResidueEqnsFromR3
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.GammaRatioLocalPower
+public import BernoulliRegular.FLT37.Eichler.Saturation.SingleIndexExpansionFromResidueEqns
 
 /-!
 # [FLT37-CASEII-MODULO-KELLNER] The cleanest FLT37 Case-II endpoint and the minimal residual

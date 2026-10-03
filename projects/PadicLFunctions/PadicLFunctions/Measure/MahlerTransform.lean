@@ -1,5 +1,7 @@
-import PadicLFunctions.Measure.Basic
-import Mathlib.RingTheory.PowerSeries.Binomial
+module
+
+public import PadicLFunctions.Measure.Basic
+public import Mathlib.RingTheory.PowerSeries.Binomial
 
 /-!
 # The Mahler (Amice) transform
@@ -20,6 +22,8 @@ The analytic input (RJW Thm. 3.13, Mahler's theorem) is entirely in mathlib:
 * `PadicMeasure.ofPowerSeries g`: the inverse, `φ ↦ ∑' n, Δⁿφ(0) * g_n`.
 * `PadicMeasure.mahlerLinearEquiv`: RJW Thm. 3.20 as a `ℤ_[p]`-linear equivalence.
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 open PowerSeries

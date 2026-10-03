@@ -1,6 +1,8 @@
-import ModularCurves.ForMathlib.AcyclicAffineCechComparison
-import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
-import ModularCurves.ForMathlib.SchemeModuleCechRestrict
+module
+
+public import ModularCurves.ForMathlib.AcyclicAffineCechComparison
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
+public import ModularCurves.ForMathlib.SchemeModuleCechRestrict
 
 /-!
 # Cech exactness after affine open restriction
@@ -8,6 +10,8 @@ import ModularCurves.ForMathlib.SchemeModuleCechRestrict
 Evaluation on an affine open of the module-valued Cech complex of a finite
 affine cover is exact in degree one for quasicoherent coefficients.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

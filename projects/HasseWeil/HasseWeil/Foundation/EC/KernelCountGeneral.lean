@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Fiber.LocalizedDictionary
-import HasseWeil.Foundation.EC.KernelCount
-import HasseWeil.Foundation.EC.SeparableKernelTorsor
-import HasseWeil.Isogeny.Dual.GaloisUnconditional
-import HasseWeil.Isogeny.SeparableWitnessReductions
-import Mathlib.FieldTheory.Fixed
+module
+
+public import HasseWeil.Foundation.Curves.Fiber.LocalizedDictionary
+public import HasseWeil.Foundation.EC.KernelCount
+public import HasseWeil.Foundation.EC.SeparableKernelTorsor
+public import HasseWeil.Isogeny.Dual.GaloisUnconditional
+public import HasseWeil.Isogeny.SeparableWitnessReductions
+public import Mathlib.FieldTheory.Fixed
 
 /-!
 # Kernels of general separable isogenies
@@ -29,6 +31,8 @@ isogeny data from the same witness.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.6(b), III.4.10(c).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

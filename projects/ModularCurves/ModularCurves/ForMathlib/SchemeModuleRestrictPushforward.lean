@@ -1,4 +1,6 @@
-import Mathlib.AlgebraicGeometry.Modules.Sheaf
+module
+
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
 
 /-!
 # Restriction and pushforward of scheme modules
@@ -6,6 +8,8 @@ import Mathlib.AlgebraicGeometry.Modules.Sheaf
 This file compares restriction of a pushforward with pushforward after restriction in a
 cartesian square whose vertical maps are open immersions.
 -/
+
+@[expose] public section
 
 universe u
 

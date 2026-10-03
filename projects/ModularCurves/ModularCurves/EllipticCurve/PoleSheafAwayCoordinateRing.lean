@@ -1,6 +1,8 @@
-import ModularCurves.EllipticCurve.PoleFiltrationExhaustive
-import ModularCurves.EllipticCurve.PoleSheafAwayCoefficientInjective
-import ModularCurves.EllipticCurve.PoleSheafFiniteStageAwayCompatibility
+module
+
+public import ModularCurves.EllipticCurve.PoleFiltrationExhaustive
+public import ModularCurves.EllipticCurve.PoleSheafAwayCoefficientInjective
+public import ModularCurves.EllipticCurve.PoleSheafFiniteStageAwayCompatibility
 
 /-!
 # The coordinate ring of the complement of a marked section
@@ -10,6 +12,8 @@ corresponding filtration of an affine Weierstrass coordinate ring. Exhaustion
 and denominator clearing promote this finite-stage comparison to a bijection
 on the exact complement of the marked section.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

@@ -1,5 +1,7 @@
-import Common.Analysis.DirichletBounds
-import Mathlib.RingTheory.Flat.Basic
+module
+
+public import Common.Analysis.DirichletBounds
+public import Mathlib.RingTheory.Flat.Basic
 
 /-!
 # AINTLIB.Common
@@ -14,6 +16,8 @@ consumers are rewired to it.
 repos can `require` it and reuse these results on the development side — see
 `docs/superpowers/specs/2026-06-14-ant-consolidation-monorepo-design.md`.
 -/
+
+@[expose] public section
 
 /-- Finite products of flat modules are flat. (An *arbitrary* product of flat modules need
 not be flat, so `Finite ι` is essential; mathlib has the `directSum`/`dfinsupp`/`finsupp`

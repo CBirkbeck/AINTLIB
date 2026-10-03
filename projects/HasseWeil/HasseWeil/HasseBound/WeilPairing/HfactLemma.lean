@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.PairingAdjoint
-import HasseWeil.HasseBound.WeilPairing.DivisorPullback
-import HasseWeil.HasseBound.WeilPairing.Constancy
-import HasseWeil.Pic0.PicDual
+module
+
+public import HasseWeil.HasseBound.WeilPairing.PairingAdjoint
+public import HasseWeil.HasseBound.WeilPairing.DivisorPullback
+public import HasseWeil.HasseBound.WeilPairing.Constancy
+public import HasseWeil.Pic0.PicDual
 
 /-!
 # The separable divisor factorisation `hfact` (Silverman III.8.2 / III.6.1b)
@@ -61,6 +63,8 @@ isogeny just as `ProjOrdTransport`/`Naturality` are throughout the project, and 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.6.1 (the dual isogeny, `φ̂ = κ⁻¹ ∘ φ^* ∘ κ`),
   III.8.2 (Prop 8.2, the separable adjoint via the multiplicity-free pullback).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

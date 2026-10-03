@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.FibrePointDict
-import ModularCurves.WeilPairing.FieldPairingDet
-import ModularCurves.WeilPairing.GaloisFieldPairing
-import ModularCurves.Moduli.ChartPointsGalois
-import ModularCurves.WeilPairing.GaloisFibre
+module
+
+public import ModularCurves.WeilPairing.FibrePointDict
+public import ModularCurves.WeilPairing.FieldPairingDet
+public import ModularCurves.WeilPairing.GaloisFieldPairing
+public import ModularCurves.Moduli.ChartPointsGalois
+public import ModularCurves.WeilPairing.GaloisFibre
 
 /-!
 # Galois equivariance at a geometric fibre (DS4 M1c, nodes D–E)
@@ -22,6 +24,8 @@ scheme-level Galois action is `P ↦ Spec σ ≫ P`, and `Spec σ ≫ t = t` onl
 propositionally, so carrying it in a dependent type is what makes these arguments
 expensive.
 -/
+
+@[expose] public section
 
 universe u
 

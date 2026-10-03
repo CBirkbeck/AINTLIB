@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.DworkCoordFunctionalPrecisionCompat
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68SliceThirdOrderCoordRelation
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.DworkCoordFunctionalPrecisionCompat
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68SliceThirdOrderCoordRelation
 
 /-!
 # The precision-bridge residual reduced to a single same-level (`72`) deg-`68` slice-coordinate

@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreImageChartGeneration`.
 -/
-import ModularCurves.ForMathlib.SegreStandardChartInverse
+module
+
+public import ModularCurves.ForMathlib.SegreStandardChartInverse
 
 /-!
 # Generators of a standard Segre-image chart
@@ -15,6 +17,8 @@ The degree-zero localization of the Segre coordinate algebra is generated
 by the standard coordinate ratios. This detects equality of algebra maps
 out of a Segre-image chart.
 -/
+
+@[expose] public section
 
 open DirectSum
 open HomogeneousLocalization

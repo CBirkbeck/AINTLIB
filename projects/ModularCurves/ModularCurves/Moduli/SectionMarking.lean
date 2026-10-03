@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.SectionCoordinates
-import ModularCurves.EllipticCurve.ModelVariableChange
-import ModularCurves.LevelStructure.Factorization
-import ModularCurves.Moduli.LegendreDelta
+module
+
+public import ModularCurves.EllipticCurve.SectionCoordinates
+public import ModularCurves.EllipticCurve.ModelVariableChange
+public import ModularCurves.LevelStructure.Factorization
+public import ModularCurves.Moduli.LegendreDelta
 
 /-!
 # Marking existence for chart-avoiding sections ([hArb-1])
@@ -21,6 +23,8 @@ image avoids the point at infinity everywhere over an affine piece is MARKED the
 The remaining input — the pointwise `Z`-chart membership — is supplied by the level
 structure (fibrewise nonvanishing of the marked sections; [hArb-2]).
 -/
+
+@[expose] public section
 
 universe u
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.NaiveGammaOneLocus
-import ModularCurves.LevelStructure.CombinationLevel
-import ModularCurves.Moduli.LevelLocusNatural
+module
+
+public import ModularCurves.GroupScheme.NaiveGammaOneLocus
+public import ModularCurves.LevelStructure.CombinationLevel
+public import ModularCurves.Moduli.LevelLocusNatural
 
 /-!
 # The naive `Γ₁(N)` locus classifies naive `Γ₁(N)`-structures (WP-D1c-coarse)
@@ -22,6 +24,8 @@ be mirrored is the *multiple* zero test, and it is strictly simpler than the com
 one — with a single generator the `pullback.lift` plumbing and the `torsionPair` detour both
 disappear.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.InvariantDifferential
-import ModularCurves.ForMathlib.AffineCechH0
-import ModularCurves.ForMathlib.MaximalSpectrumOrbit
-import ModularCurves.ForMathlib.SemilocalVariableChangeSplit
-import ModularCurves.ForMathlib.SpecGroupAction
-import ModularCurves.ForMathlib.WeierstrassInvariantLocal
-import ModularCurves.ForMathlib.PullbackLocalAtTarget
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.EllipticCurve.InvariantDifferential
+public import ModularCurves.ForMathlib.AffineCechH0
+public import ModularCurves.ForMathlib.MaximalSpectrumOrbit
+public import ModularCurves.ForMathlib.SemilocalVariableChangeSplit
+public import ModularCurves.ForMathlib.SpecGroupAction
+public import ModularCurves.ForMathlib.WeierstrassInvariantLocal
+public import ModularCurves.ForMathlib.PullbackLocalAtTarget
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The engine mouth core, Stage 3a–3b: the semilocal chart cover and its split transition
@@ -49,6 +51,8 @@ its elaboration profile — unchanged.
   of `Spec L` together with a per-chart `VariableChange` cochain `D` whose coboundary is
   the transition cocycle.
 -/
+
+@[expose] public section
 
 -- v4.33 bump: `projModel` is `@[reducible]` over a `Proj`; the elaborator now unfolds it
 -- inside the `eqToHom (congrArg projModel _)` transports below, which blows up `whnf`

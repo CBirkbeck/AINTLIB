@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Valuation.LocalSubring
-import HasseWeil.Foundation.Curves.Valuation.RankOneDomination
-import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
-import HasseWeil.Foundation.Curves.Divisor.PicZero
-import HasseWeil.HasseBound.SepDegreeEqPointCount
-import HasseWeil.HasseBound.PointCount
-import HasseWeil.HasseBound.PoleDivisorTwoTorsion
-import HasseWeil.HasseBound.PoleDivisorFallback
+module
+
+public import Mathlib.RingTheory.Valuation.LocalSubring
+public import HasseWeil.Foundation.Curves.Valuation.RankOneDomination
+public import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
+public import HasseWeil.Foundation.Curves.Divisor.PicZero
+public import HasseWeil.HasseBound.SepDegreeEqPointCount
+public import HasseWeil.HasseBound.PointCount
+public import HasseWeil.HasseBound.PoleDivisorTwoTorsion
+public import HasseWeil.HasseBound.PoleDivisorFallback
 
 /-!
 # L6 substantive witnesses — T5, T6, T6-SUB
@@ -45,6 +47,8 @@ Hasse-bound route:
 * `HasseWeil/Hasse/PoleDivisorFallback.lean:95` —
   `ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen` (the ∞ case).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

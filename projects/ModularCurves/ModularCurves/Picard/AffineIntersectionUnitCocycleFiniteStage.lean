@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.FinitePresentationFunctorCover
-import ModularCurves.ForMathlib.FinitePresentationSchemeGlueData
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationFunctorCover
+public import ModularCurves.ForMathlib.FinitePresentationSchemeGlueData
 
 /-!
 # Finite-stage affine-intersection unit cocycles
@@ -8,6 +10,10 @@ This file defines multiplicative cocycles on finite affine-intersection diagrams
 descends their finite collection of transition units and cocycle equations through a
 filtered colimit.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

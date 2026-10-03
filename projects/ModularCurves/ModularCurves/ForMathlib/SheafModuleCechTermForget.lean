@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.CategoryTheory.Sites.Limits
-import ModularCurves.ForMathlib.SheafModuleCechTopExact
+module
+
+public import Mathlib.CategoryTheory.Sites.Limits
+public import ModularCurves.ForMathlib.SheafModuleCechTopExact
 
 /-!
 # Forgetting coefficients in sheaf-level Cech terms
@@ -12,6 +14,10 @@ import ModularCurves.ForMathlib.SheafModuleCechTopExact
 Forgetting the module structure in a module-valued sheaf Cech term gives
 the corresponding additive sheaf Cech term.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

@@ -1,8 +1,10 @@
-import ModularCurves.ForMathlib.SheafCechInjectiveBicomplex
-import ModularCurves.ForMathlib.SheafCohomologyExact
-import ModularCurves.ForMathlib.SheafDerivedGlobalSections
-import ModularCurves.ForMathlib.TopCatSheafRestrict
-import ModularCurves.ForMathlib.TotalComplexUpNatVerticalEdge
+module
+
+public import ModularCurves.ForMathlib.SheafCechInjectiveBicomplex
+public import ModularCurves.ForMathlib.SheafCohomologyExact
+public import ModularCurves.ForMathlib.SheafDerivedGlobalSections
+public import ModularCurves.ForMathlib.TopCatSheafRestrict
+public import ModularCurves.ForMathlib.TotalComplexUpNatVerticalEdge
 
 /-!
 # The Cech augmentation into an injective resolution
@@ -10,6 +12,10 @@ import ModularCurves.ForMathlib.TotalComplexUpNatVerticalEdge
 Apply the native Cech functor to the augmentation of the chosen injective
 resolution and record the low-column exactness used by the vertical total edge.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

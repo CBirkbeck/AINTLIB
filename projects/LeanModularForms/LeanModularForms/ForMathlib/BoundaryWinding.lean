@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.FDBoundaryPath
-import LeanModularForms.ForMathlib.SingleCrossing
-import LeanModularForms.ForMathlib.CrossingAtI
+module
+
+public import LeanModularForms.ForMathlib.FDBoundaryPath
+public import LeanModularForms.ForMathlib.SingleCrossing
+public import LeanModularForms.ForMathlib.CrossingAtI
 
 /-!
 # Smooth Boundary Winding Number
@@ -42,6 +44,8 @@ content is:
 
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

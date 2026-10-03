@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.ProjectiveSpaceCoefficientBaseChange
-import ModularCurves.ForMathlib.RelativeProjectiveAffineRestriction
+module
+
+public import ModularCurves.ForMathlib.ProjectiveSpaceCoefficientBaseChange
+public import ModularCurves.ForMathlib.RelativeProjectiveAffineRestriction
 
 /-!
 # Relative projective space over an affine base
@@ -15,6 +17,8 @@ Relative projective space over an affine open is ordinary projective space over 
 sections of that open. The comparison commutes with both the structural projection and the map to
 projective space over the original coefficient ring.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits
 

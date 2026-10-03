@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.PullbackSection
+module
+
+public import ModularCurves.Picard.DualPullback.PullbackSection
 
 /-!
 # Pullback sections over open subschemes
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.PullbackSection
 Component formulas comparing the local and global adjunction units and transporting a
 module section to the corresponding open subscheme.
 -/
+
+@[expose] public section
 
 universe u
 

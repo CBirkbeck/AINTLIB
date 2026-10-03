@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Cor832
-import «Adic spaces».IdealLocalization
+module
+
+public import «Adic spaces».Cor832
+public import «Adic spaces».IdealLocalization
 
 /-!
 # T001-PRIME-EXTENSION-CLOSED: conditional bridge for prime-extension closedness
@@ -66,6 +68,8 @@ per `Cor832.lean:1542-1546`).
   `spa_point_nonOpen_of_rational_subset_tate_of_prime_extension_closed`
   (downstream consumer).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

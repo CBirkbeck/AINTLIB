@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.ValenceFormula
-import LeanModularForms.ForMathlib.FDBoundary
-import LeanModularForms.ForMathlib.GeneralizedWindingNumber
+module
+
+public import LeanModularForms.ForMathlib.ValenceFormula
+public import LeanModularForms.ForMathlib.FDBoundary
+public import LeanModularForms.ForMathlib.GeneralizedWindingNumber
 
 /-!
 # Core Identity Proof for the Valence Formula
@@ -52,6 +54,8 @@ completed, `h_pvChain` can be discharged unconditionally.
 * Diamond--Shurman, *A First Course in Modular Forms*, Theorem 3.1.1
 * Serre, *A Course in Arithmetic*, Chapter VII
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups

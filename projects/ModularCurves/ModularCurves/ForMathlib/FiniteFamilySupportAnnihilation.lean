@@ -6,7 +6,10 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `FiniteFamilySupportAnnihilation.lean`
 in Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.FiniteModuleSupportAnnihilation
+module
+
+import Mathlib.Data.Fintype.Order
+public import ModularCurves.ForMathlib.FiniteModuleSupportAnnihilation
 
 /-!
 # Uniform support annihilation over a finite family
@@ -14,6 +17,8 @@ import ModularCurves.ForMathlib.FiniteModuleSupportAnnihilation
 Local support arguments on a finite family yield one common annihilating
 exponent, even when the rings and modules vary with the index.
 -/
+
+@[expose] public section
 
 noncomputable section
 

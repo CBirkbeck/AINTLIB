@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornSigmaFactoredSupplierFromLocalizedCor732
-import «Adic spaces».WedhornLocalArithmeticPerTChain
+module
+
+public import «Adic spaces».WedhornSigmaFactoredSupplierFromLocalizedCor732
+public import «Adic spaces».WedhornLocalArithmeticPerTChain
 
 /-!
 # Wedhorn 8.34(ii) — σ-factored inequality at the T065-produced σ_loc (T082)
@@ -109,6 +111,8 @@ each Laurent piece.
   Lean kernel postulates, and avoid native compilation and unchecked
   tactics.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

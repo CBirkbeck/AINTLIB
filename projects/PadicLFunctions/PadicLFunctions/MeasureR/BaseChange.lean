@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.MeasureR.UnitsRing
+module
+
+public import PadicLFunctions.MeasureR.UnitsRing
 
 /-!
 # Base change of p-adic measures along `ℤ_p → integerRing K`
@@ -20,6 +22,8 @@ measure integrates to the image of the original integral. Naturality with
 respect to the toolbox operators follows by checking on locally constant
 functions (`ext_locallyConstant`).
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 open PowerSeries

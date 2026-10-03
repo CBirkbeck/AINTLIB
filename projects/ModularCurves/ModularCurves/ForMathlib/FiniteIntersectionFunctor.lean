@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.FinitePresentationSchemeGlueData
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationSchemeGlueData
 
 /-!
 # Algebra diagrams of finite affine intersections
@@ -8,6 +10,10 @@ algebras: inclusions of finite index sets give restriction maps on the correspon
 intersections. The empty intersection is augmented by the coordinate ring of the base,
 so finite presentation of global functions on the total space is not required.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

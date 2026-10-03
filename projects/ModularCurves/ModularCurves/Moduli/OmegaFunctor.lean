@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.InvariantDifferential
-import ModularCurves.Moduli.EllCategory
+module
+
+public import ModularCurves.EllipticCurve.InvariantDifferential
+public import ModularCurves.Moduli.EllCategory
 
 /-!
 # Base change of `ω`-bases over the elliptic-curve category (T-OM-B7 ★★)
@@ -25,6 +27,10 @@ argument through `omegaCocycle_res` and the four transport/restriction coherence
 `omegaCompat` glues the mixed comparisons into `UnitCocycle.Compat` data; and
 `Compat.sectionsEquiv` transports bases.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

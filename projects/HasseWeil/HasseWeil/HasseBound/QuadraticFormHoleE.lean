@@ -3,15 +3,17 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.DegreeQuadraticForm
-import HasseWeil.Isogeny.Frobenius.PointCount
-import HasseWeil.Isogeny.Dual.Relation
-import HasseWeil.HasseBound.Parametric
-import HasseWeil.HasseBound.QuadraticForm
-import HasseWeil.HasseBound.PointCount
-import HasseWeil.HasseBound.Separability
-import HasseWeil.HasseBound.OneSubFrobenius
-import HasseWeil.Isogeny.Frobenius.OrdAtInfty
+module
+
+public import HasseWeil.Foundation.DegreeQuadraticForm
+public import HasseWeil.Isogeny.Frobenius.PointCount
+public import HasseWeil.Isogeny.Dual.Relation
+public import HasseWeil.HasseBound.Parametric
+public import HasseWeil.HasseBound.QuadraticForm
+public import HasseWeil.HasseBound.PointCount
+public import HasseWeil.HasseBound.Separability
+public import HasseWeil.HasseBound.OneSubFrobenius
+public import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 
 /-!
 # The Hasse bound from the `negFrobenius` witness, in non-negativity form
@@ -36,6 +38,8 @@ discharges the fiber witness with `hole_d_of_hom_and_sepDegree`.
 Both are witness-parametric. The unconditional statement, with every hypothesis
 here discharged, is `WeilPairing.hasse_bound_unconditional`.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

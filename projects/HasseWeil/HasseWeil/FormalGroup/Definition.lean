@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.MvPowerSeries.Substitution
-import Mathlib.RingTheory.PowerSeries.Substitution
+module
+
+public import Mathlib.RingTheory.MvPowerSeries.Substitution
+public import Mathlib.RingTheory.PowerSeries.Substitution
 
 /-!
 # Formal Group Laws (Silverman IV.2, definition)
@@ -42,6 +44,8 @@ three variables correspond to `X, Y, Z`.
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.2 (Definition of formal
   group law, p. 120).
 -/
+
+@[expose] public section
 
 open MvPowerSeries
 

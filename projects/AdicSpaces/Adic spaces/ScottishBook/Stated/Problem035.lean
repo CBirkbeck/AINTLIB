@@ -1,5 +1,7 @@
-import «Adic spaces».ScottishBook.Stated.Problem007
-import «Adic spaces».CompletedResidueField
+module
+
+public import «Adic spaces».ScottishBook.Stated.Problem007
+public import «Adic spaces».CompletedResidueField
 
 /-!
 # Nonarchimedean Scottish Book — Problem 35
@@ -28,6 +30,8 @@ Open.
   completed residue fields is an isomorphism.
   See `ValuationSpectrum.completedResidueField` in `CompletedResidueField.lean`.
 -/
+
+@[expose] public section
 
 open ValuationSpectrum ScottishBook
 

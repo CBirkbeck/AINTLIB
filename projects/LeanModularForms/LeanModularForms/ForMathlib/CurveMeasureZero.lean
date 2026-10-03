@@ -3,10 +3,12 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.MeasureTheory.Measure.Hausdorff
-import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
-import Mathlib.Topology.MetricSpace.HausdorffDimension
-import LeanModularForms.ForMathlib.PiecewiseC1Path
+module
+
+public import Mathlib.MeasureTheory.Measure.Hausdorff
+public import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
+public import Mathlib.Topology.MetricSpace.HausdorffDimension
+public import LeanModularForms.ForMathlib.PiecewiseC1Path
 
 /-!
 # Curve images have Lebesgue measure zero
@@ -24,6 +26,8 @@ nonempty intersection with a continuous Lipschitz curve, there exists a point in
 * `exists_mem_not_mem_image_of_isOpen_of_lipschitz` — for open nonempty `U` and
   Lipschitz `f : ℝ → ℂ`, there exists `w₀ ∈ U` off `f '' s`.
 -/
+
+@[expose] public section
 
 open MeasureTheory Measure Set Filter Topology
 

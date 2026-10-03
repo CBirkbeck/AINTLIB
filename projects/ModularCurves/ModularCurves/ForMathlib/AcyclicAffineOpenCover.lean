@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.AffineVanishing
-import ModularCurves.ForMathlib.FiniteAffineOpenCover
+module
+
+public import ModularCurves.ForMathlib.AffineVanishing
+public import ModularCurves.ForMathlib.FiniteAffineOpenCover
 
 /-!
 # Acyclic finite affine covers
@@ -7,6 +9,8 @@ import ModularCurves.ForMathlib.FiniteAffineOpenCover
 A proper scheme over an affine base has a finite affine cover on whose nonempty finite
 intersections every quasicoherent module has vanishing positive-degree sheaf cohomology.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits TopologicalSpace
 

@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafBaseCechHigher
-import ModularCurves.EllipticCurve.PoleSheafIteratedBaseChange
-import ModularCurves.ForMathlib.BaseChangeKerCoker
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechBaseChangeExact
-import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafBaseCechHigher
+public import ModularCurves.EllipticCurve.PoleSheafIteratedBaseChange
+public import ModularCurves.ForMathlib.BaseChangeKerCoker
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechBaseChangeExact
+public import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
 
 /-!
 # Cech exactness for Noetherian-stage pole models
@@ -15,6 +17,8 @@ import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
 This file transfers fibrewise pole-sheaf exactness through an iterated base
 change and reflects it from a field-valued point to its kernel residue field.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 

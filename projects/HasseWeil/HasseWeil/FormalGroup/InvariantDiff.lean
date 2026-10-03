@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.Differential
+module
+
+public import HasseWeil.FormalGroup.Differential
 
 /-!
 # Invariant Differentials on Formal Groups (Silverman IV.4)
@@ -36,6 +38,8 @@ the main results of Silverman IV.4.2 and IV.4.3:
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.4, Prop 4.2 and Cor 4.3.
 -/
+
+@[expose] public section
 
 set_option linter.dupNamespace false
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.FunctionField
-import Mathlib.FieldTheory.SeparableDegree
+module
+
+public import HasseWeil.Isogeny.FunctionField
+public import Mathlib.FieldTheory.SeparableDegree
 
 /-!
 # Separable and Inseparable Degree of Isogenies
@@ -26,6 +28,8 @@ We define the separable and inseparable degrees of an isogeny using mathlib's
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Field
 

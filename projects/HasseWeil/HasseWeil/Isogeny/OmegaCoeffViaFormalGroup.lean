@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.ChordExpansion
-import HasseWeil.Foundation.EC.MulByIntAddRecurrence
-import HasseWeil.Isogeny.FormalSeries
-import HasseWeil.Foundation.Ramification
-import HasseWeil.Foundation.OmegaCoeffMulByIntFiniteField
-import HasseWeil.Foundation.Curves.Valuation.Infinity
+module
+
+public import HasseWeil.Foundation.ChordExpansion
+public import HasseWeil.Foundation.EC.MulByIntAddRecurrence
+public import HasseWeil.Isogeny.FormalSeries
+public import HasseWeil.Foundation.Ramification
+public import HasseWeil.Foundation.OmegaCoeffMulByIntFiniteField
+public import HasseWeil.Foundation.Curves.Valuation.Infinity
 
 /-!
 # GAP-QF kernel: `omegaPullbackCoeff (mulByInt m) = m` via the formal group
@@ -43,6 +45,8 @@ formal-group way (Chapter IV). Each statement is cross-checked against the Silve
 
 Full decomposition + fillability: `.mathlib-quality/GAP-QF-KERNEL-SKELETON.md`.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve PowerSeries
 

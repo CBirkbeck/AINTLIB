@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreProductChartTransitionAlgebra`.
 -/
-import ModularCurves.ForMathlib.SegreProductOverlapLocalization
+module
+
+public import ModularCurves.ForMathlib.SegreProductOverlapLocalization
 
 /-!
 # Transition algebra between product charts
@@ -14,6 +16,10 @@ import ModularCurves.ForMathlib.SegreProductOverlapLocalization
 On the overlap of two product charts, each projective transition ratio becomes a unit because
 their tensor product is the element inverted in the overlap ring.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open HomogeneousLocalization
 open scoped TensorProduct

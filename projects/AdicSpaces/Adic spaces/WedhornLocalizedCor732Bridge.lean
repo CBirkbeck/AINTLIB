@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Cor732
-import «Adic spaces».Prop752
-import «Adic spaces».WedhornExtendValuationContinuity
-import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
+module
+
+public import «Adic spaces».Cor732
+public import «Adic spaces».Prop752
+public import «Adic spaces».WedhornExtendValuationContinuity
+public import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
 
 /-!
 # Wedhorn 8.34(ii): Localized plus-subring choice and lift upgrade
@@ -77,6 +79,8 @@ localized hypotheses' derivation from `A`'s setup.
   `WedhornSigmaPowerDecay.lean` (Secondary).
 * No Lane B / Cor 8.32 / Jacobson / T001 / faithful-flatness /
   final-acyclicity content. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

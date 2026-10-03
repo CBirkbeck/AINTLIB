@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafAwaySections
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafAwaySections
 
 /-!
 # Injectivity of pole coefficients away from a marked section
@@ -12,6 +14,8 @@ Restriction from a Cartier chart to the complement of its marked section is
 localization at a nonzerodivisor. Consequently, a global section of any pole
 power is determined by its ordinary coefficient away from the section.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

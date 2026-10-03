@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Data.Fin.Tuple.Sort
-import Mathlib.GroupTheory.Perm.Fin
-import ModularCurves.ForMathlib.HomologicalComplexExactRetract
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechComparison
+module
+
+public import Mathlib.Data.Fin.Tuple.Sort
+public import Mathlib.GroupTheory.Perm.Fin
+public import ModularCurves.ForMathlib.HomologicalComplexExactRetract
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechComparison
 
 /-!
 # Alternating extension of ordered Cech cochains
@@ -15,6 +17,8 @@ This file constructs the alternating degreewise section from the bounded Cech co
 strictly increasing tuples to the native Cech complex indexed by all tuples. Restricting the
 alternating extension back to increasing tuples is the identity.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Category
   CategoryTheory.Limits CategoryTheory.Preadditive Opposite TopologicalSpace

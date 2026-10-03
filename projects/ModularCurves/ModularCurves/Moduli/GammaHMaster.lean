@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.GammaHRepresentability
-import ModularCurves.Moduli.QuotientRepresentability
-import ModularCurves.Moduli.KeystoneGeometricPoint
-import ModularCurves.Moduli.EngineWiring
-import ModularCurves.EllipticCurve.TorsionRestrict
-import ModularCurves.EllipticCurve.ExactOrderRigidity
-import ModularCurves.ForMathlib.UnramifiedEqualizer
-import ModularCurves.Moduli.DrinfeldRepresentability
+module
+
+public import ModularCurves.Moduli.GammaHRepresentability
+public import ModularCurves.Moduli.QuotientRepresentability
+public import ModularCurves.Moduli.KeystoneGeometricPoint
+public import ModularCurves.Moduli.EngineWiring
+public import ModularCurves.EllipticCurve.TorsionRestrict
+public import ModularCurves.EllipticCurve.ExactOrderRigidity
+public import ModularCurves.ForMathlib.UnramifiedEqualizer
+public import ModularCurves.Moduli.DrinfeldRepresentability
 
 /-!
 # The Γ_H MASTER assembly (KM 4.7.0 applied to `P_H`) — interface
@@ -38,6 +40,10 @@ NAMED HYPOTHESIS here, so the seams are visible pins:
 The assembly itself is pure: relative representability of `P_H` is repackaged from
 `qpd.relRep` and everything else is the engine.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

@@ -1,5 +1,8 @@
-import ModularCurves.ForMathlib.FlasqueCohomology
-import ModularCurves.ForMathlib.TopCatSheafRestrict
+module
+
+public import Mathlib.Topology.Sheaves.LocallySurjective
+public import ModularCurves.ForMathlib.FlasqueCohomology
+public import ModularCurves.ForMathlib.TopCatSheafRestrict
 
 /-!
 # Local vanishing of degree-one sheaf cohomology classes
@@ -8,6 +11,10 @@ This file gives the option-free degree-one local-killing step in Kempf's proof o
 quasicoherent vanishing. A class in `H¹(X, F)` restricts to zero on a basis open around any
 chosen point of `X`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits Opposite TopologicalSpace
 

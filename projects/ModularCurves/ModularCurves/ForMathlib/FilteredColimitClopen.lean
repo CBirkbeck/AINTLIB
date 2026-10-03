@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.FinitePresentationDescent
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationDescent
 
 /-!
 # Clopen subsets over filtered colimits
@@ -13,6 +15,8 @@ import ModularCurves.ForMathlib.FinitePresentationDescent
 A finite union of basic opens generated at one stage of a filtered colimit which becomes
 clopen over the colimit is already clopen at a later stage.
 -/
+
+@[expose] public section
 
 open TopologicalSpace
 

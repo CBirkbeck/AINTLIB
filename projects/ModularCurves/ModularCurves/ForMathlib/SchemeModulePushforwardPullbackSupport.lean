@@ -6,10 +6,12 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed
 `SchemeModulePushforwardPullbackSupport.lean` in Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
-import ModularCurves.ForMathlib.SchemeModuleSupportDrop
-import ModularCurves.Picard.DualPullback.OpenAdjunction
-import ModularCurves.Picard.InvertibleSheafTensorQuasicoherent
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
+public import ModularCurves.ForMathlib.SchemeModuleSupportDrop
+public import ModularCurves.Picard.DualPullback.OpenAdjunction
+public import ModularCurves.Picard.InvertibleSheafTensorQuasicoherent
 
 /-!
 # Support of a pushforward after pullback
@@ -18,6 +20,8 @@ For a finite-type quasicoherent module `M`, the support of `f_* f^* M`
 is contained in the support of `M`. No finiteness or quasicoherence
 hypothesis on the pushforward is needed.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry MonoidalCategory
   TopologicalSpace

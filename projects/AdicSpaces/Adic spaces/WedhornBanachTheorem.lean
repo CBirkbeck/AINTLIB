@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».BanachOMT
-import «Adic spaces».HuberRings
-import Mathlib.RingTheory.Noetherian.Defs
-import Mathlib.RingTheory.Finiteness.Defs
+module
+
+public import «Adic spaces».BanachOMT
+public import «Adic spaces».HuberRings
+public import Mathlib.RingTheory.Noetherian.Defs
+public import Mathlib.RingTheory.Finiteness.Defs
 
 /-!
 # Wedhorn §6.3 — Banach's theorem for Tate rings
@@ -38,6 +40,8 @@ BGR §3.7. Specifically:
 See `docs/plans/2026-05-17-wedhorn-618-roadmap.md` for the full layered plan,
 source quotes, and Lean ↔ source match analysis.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

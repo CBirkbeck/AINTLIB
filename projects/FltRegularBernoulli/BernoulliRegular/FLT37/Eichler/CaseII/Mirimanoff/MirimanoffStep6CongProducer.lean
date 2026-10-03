@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.MirimanoffRhoRealityProducer
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.MirimanoffRhoRealityProducer
 
 /-!
 # Washington Lemma 9.8 step 5 (the `ρ_a`-reality ratio congruence) for `p = 37`

@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».CompletedAlgClosure
+module
+
+public import «Adic spaces».CompletedAlgClosure
 
 /-!
 # Nonarchimedean Scottish Book — Problem 23
@@ -59,6 +61,8 @@ integral over the tame closure), then `f` cannot be surjective.
 
 * Kedlaya, *The Nonarchimedean Scottish Book*, Problem 23
 -/
+
+@[expose] public section
 
 open ScottishBook
 

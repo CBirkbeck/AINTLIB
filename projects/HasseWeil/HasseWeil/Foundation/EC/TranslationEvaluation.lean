@@ -1,5 +1,7 @@
-import HasseWeil.Foundation.EC.Translation
-import HasseWeil.Foundation.EC.TranslationOrd
+module
+
+public import HasseWeil.Foundation.EC.Translation
+public import HasseWeil.Foundation.EC.TranslationOrd
 
 /-!
 # Lemma-discovery file for Helper 2 of ord-transport Step (B'') discharge
@@ -39,6 +41,8 @@ via:
 
 The following `#check` statements verify the existing lemma signatures
 needed by Helper 2's downstream construction. -/
+
+@[expose] public section
 
 namespace HasseWeil
 

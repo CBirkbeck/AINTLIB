@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.FieldTheory.IsAlgClosed.Basic
+module
 
-import HasseWeil.Foundation.Curves.Differentials
-import HasseWeil.Foundation.EC.SeparableKernelTorsor
-import HasseWeil.HasseBound.TorsionCard
-import HasseWeil.Foundation.OmegaCoeffMulByIntGeneral
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+
+public import HasseWeil.Foundation.Curves.Differentials
+public import HasseWeil.Foundation.EC.SeparableKernelTorsor
+public import HasseWeil.HasseBound.TorsionCard
+public import HasseWeil.Foundation.OmegaCoeffMulByIntGeneral
 
 /-!
 # `#E[ℓ] = ℓ²` over an algebraically closed field, via the separable-kernel torsor
@@ -29,6 +31,8 @@ was born in this file as a `K → F` re-derivation of the `[Fintype K]`-scoped
 
 Reference: Silverman III.4.10c (the torsor), III.5.3 (`a_{[m]} = m`), III.6.4(a) (`#E[m] = m²`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

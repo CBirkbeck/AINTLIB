@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechComparison
-import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
-import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechComparison
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
+public import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
 
 /-!
 # Ordered Cech complexes and pushforward
@@ -14,6 +16,10 @@ This file identifies the ordered base-linear Cech complex of a module on the inv
 cover with the ordered Cech complex of its pushforward. The comparison uses that inverse image
 preserves the finite intersections occurring in each Cech factor.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
 

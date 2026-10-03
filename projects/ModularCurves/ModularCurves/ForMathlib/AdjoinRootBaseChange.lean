@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.TensorProduct.Quotient
-import Mathlib.RingTheory.TensorProduct.Maps
-import Mathlib.RingTheory.AdjoinRoot
-import Mathlib.RingTheory.Polynomial.Basic
+module
+
+public import Mathlib.RingTheory.TensorProduct.Quotient
+public import Mathlib.RingTheory.TensorProduct.Maps
+public import Mathlib.RingTheory.AdjoinRoot
+public import Mathlib.RingTheory.Polynomial.Basic
 
 /-!
 # `AdjoinRoot` commutes with base change (WP-D3c-2a)
@@ -22,6 +24,8 @@ The proof is the standard three-step chain — `polyEquivTensor` to recognise `k
 `k' ⊗[k] k[X]`, `Algebra.TensorProduct.cancelBaseChange` to move the tensor over `k[X]`, and
 `Algebra.TensorProduct.quotIdealMapEquivTensorQuot` to identify the quotient.
 -/
+
+@[expose] public section
 
 universe u
 

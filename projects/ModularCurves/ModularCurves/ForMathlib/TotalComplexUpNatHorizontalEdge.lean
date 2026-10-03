@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.TotalComplexUpNatLowDegrees
+module
+
+public import ModularCurves.ForMathlib.TotalComplexUpNatLowDegrees
 
 /-!
 # The horizontal edge map into a first-quadrant total complex
@@ -6,6 +8,8 @@ import ModularCurves.ForMathlib.TotalComplexUpNatLowDegrees
 An augmentation into the zeroth horizontal degree of a bicomplex induces a map from the
 augmenting cochain complex to the total complex.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Preadditive
 

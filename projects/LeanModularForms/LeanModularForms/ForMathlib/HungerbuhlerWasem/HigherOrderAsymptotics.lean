@@ -2,8 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.FlatChordBound
-import LeanModularForms.ForMathlib.FlatnessConditions
+module
+
+import Mathlib.Analysis.Calculus.Deriv.Pow
+public import LeanModularForms.ForMathlib.FlatChordBound
+public import LeanModularForms.ForMathlib.FlatnessConditions
 
 /-!
 # F-diff asymptotic chain (T-SC-00a)
@@ -25,6 +28,8 @@ sector-cancellation argument of T-SC-01.
   from the right, under flatness and `n ≥ k`.
 * `F_diff_at_tangent_target_tendsto_zero_left` — mirror form on the left.
 -/
+
+@[expose] public section
 
 open Complex Set Filter Topology MeasureTheory
 open scoped Classical Real Interval

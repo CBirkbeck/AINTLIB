@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LocalizationTopology
-import Mathlib.Topology.Algebra.LinearTopology
-import Mathlib.RingTheory.Filtration
-import Mathlib.RingTheory.Localization.Submodule
+module
+
+public import «Adic spaces».LocalizationTopology
+public import Mathlib.Topology.Algebra.LinearTopology
+public import Mathlib.RingTheory.Filtration
+public import Mathlib.RingTheory.Localization.Submodule
 
 /-!
 # `IsLinearTopology` for `locTopology` (audit + minimal building block)
@@ -88,6 +90,8 @@ and is the next concrete sub-target.
   per-branch-chain file.
 * No Lane B / Cor 8.32 / Jacobson / T001 / faithful-flatness /
   final-acyclicity / T005 / T013 / T016 content. -/
+
+@[expose] public section
 
 open Pointwise
 

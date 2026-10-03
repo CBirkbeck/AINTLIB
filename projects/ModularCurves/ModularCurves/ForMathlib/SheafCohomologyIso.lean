@@ -1,7 +1,9 @@
-import Mathlib.Algebra.Homology.DerivedCategory.Ext.MapBijective
-import Mathlib.CategoryTheory.Sites.Equivalence
-import ModularCurves.ForMathlib.FlasqueCohomology
-import ModularCurves.ForMathlib.TopCatSheafRestrict
+module
+
+public import Mathlib.Algebra.Homology.DerivedCategory.Ext.MapBijective
+public import Mathlib.CategoryTheory.Sites.Equivalence
+public import ModularCurves.ForMathlib.FlasqueCohomology
+public import ModularCurves.ForMathlib.TopCatSheafRestrict
 
 /-!
 # Sheaf cohomology under homeomorphisms
@@ -10,6 +12,8 @@ This file proves that the genuine `Sheaf.H` groups are transported by a
 homeomorphism. The proof compares constant sheaves and maps Ext through the
 induced equivalence of additive sheaf categories.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits TopologicalSpace
 

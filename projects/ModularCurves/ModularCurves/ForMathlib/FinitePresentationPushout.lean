@@ -1,7 +1,9 @@
-import ModularCurves.ForMathlib.FinitePresentationOpenImmersionFamily
-import Mathlib.Algebra.Category.Ring.Under.Basic
-import Mathlib.CategoryTheory.Adjunction.Limits
-import Mathlib.CategoryTheory.Limits.Constructions.Over.Connected
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationOpenImmersionFamily
+public import Mathlib.Algebra.Category.Ring.Under.Basic
+public import Mathlib.CategoryTheory.Adjunction.Limits
+public import Mathlib.CategoryTheory.Limits.Constructions.Over.Connected
 
 /-!
 # Spreading affine pushout squares
@@ -10,6 +12,8 @@ The canonical comparison from a tensor-product pushout to the fourth corner
 of a commutative algebra square is used to reflect the pushout condition from
 a filtered colimit to one finite stage.
 -/
+
+@[expose] public section
 
 universe u
 

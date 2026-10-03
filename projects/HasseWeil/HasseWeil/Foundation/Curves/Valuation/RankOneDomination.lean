@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Valuation.LocalSubring
-import Mathlib.RingTheory.DiscreteValuationRing.Basic
-import Mathlib.RingTheory.DedekindDomain.Basic
-import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
-import Mathlib.Algebra.GroupWithZero.WithZero
+module
+
+public import Mathlib.RingTheory.Valuation.LocalSubring
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.DedekindDomain.Basic
+public import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
+public import Mathlib.Algebra.GroupWithZero.WithZero
 
 /-!
 # Rank-one valuation-subring domination
@@ -38,6 +40,8 @@ and `DiscreteValuationRing` API) so that the place classification need not impor
 * `Valuation.isEquiv_of_valuationSubring_le` — downward valuation-subring domination
   `O_v ≤ O_w` implies `v.IsEquiv w`.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Measure.Toolbox
-import PadicLFunctions.MeasureR.Convolution
+module
+
+public import PadicLFunctions.Measure.Toolbox
+public import PadicLFunctions.MeasureR.Convolution
 
 /-!
 # The measure-theoretic toolbox over the integer ring of a field
@@ -16,6 +18,8 @@ the `ℤ_p^×`-action `σ_a`, and the operators `φ`, `ψ` with their identities
 space-side gadgets (`digit`, `shiftDiv`, the clopen sets) are coefficient-free
 and reused from the `ℤ_p`-layer `PadicLFunctions/Measure/Toolbox.lean`.
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 open PowerSeries

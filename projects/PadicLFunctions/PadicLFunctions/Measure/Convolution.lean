@@ -1,4 +1,6 @@
-import PadicLFunctions.Measure.MahlerTransform
+module
+
+public import PadicLFunctions.Measure.MahlerTransform
 
 /-!
 # The convolution algebra structure on measures on ℤ_p
@@ -23,6 +25,8 @@ all continuous functions.
 * `PadicMeasure.mul_apply` — the convolution formula (RJW Rem. 3.11).
 * `PadicMeasure.dirac_mul_dirac` — `δ_a * δ_b = δ_{a+b}` (`[a]·[b] = [a+b]`).
 -/
+
+@[expose] public section
 
 open scoped fwdDiff
 open PowerSeries

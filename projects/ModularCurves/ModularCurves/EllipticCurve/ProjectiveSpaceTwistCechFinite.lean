@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechHigher
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistFinitePresentation
-import ModularCurves.ForMathlib.FiniteHomologySequence
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechExact
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
-import ModularCurves.Picard.InvertibleSheafLocallyFree
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechHigher
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistFinitePresentation
+public import ModularCurves.ForMathlib.FiniteHomologySequence
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechExact
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+public import ModularCurves.Picard.InvertibleSheafLocallyFree
 
 /-!
 # Finite homology for finite families of projective twists
@@ -18,6 +20,10 @@ import ModularCurves.Picard.InvertibleSheafLocallyFree
 This file combines the degree-zero and positive-degree finiteness theorems for a projective twist,
 then transfers the result to finite coproducts using additivity of ordered Cech homology.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

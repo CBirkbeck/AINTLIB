@@ -3,10 +3,12 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.Algebra.Module.FinitePresentation
-import Mathlib.RingTheory.Flat.Equalizer
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
-import Mathlib.RingTheory.TensorProduct.Finite
+module
+
+public import Mathlib.Algebra.Module.FinitePresentation
+public import Mathlib.RingTheory.Flat.Equalizer
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.TensorProduct.Finite
 
 /-!
 # Faithfully flat descent of module finiteness and finite presentation
@@ -30,6 +32,8 @@ In the Hopf-Galois endgame (`[HG-B6]`) this is the step turning the Galois isomo
 `B` finitely presented over `C`, whence finite locally free
 (`Module.Flat.projective_of_finitePresentation`).
 -/
+
+@[expose] public section
 
 open TensorProduct
 

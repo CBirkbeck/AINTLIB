@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornFinalAssemblyBridge
-import «Adic spaces».WedhornOutsideRescue
+module
+
+public import «Adic spaces».WedhornFinalAssemblyBridge
+public import «Adic spaces».WedhornOutsideRescue
 
 /-!
 # Wedhorn Base-Spa Final Bridge
@@ -45,6 +47,8 @@ Spa A A⁺`, which holds automatically in Wedhorn's standard setup
   `WedhornCoverNormalization`, `StandardCover`, root imports, or
   Primary/Tertiary work.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

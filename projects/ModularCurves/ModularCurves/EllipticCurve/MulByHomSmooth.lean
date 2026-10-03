@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.KernelDivisibilityGlue
+module
+
+public import ModularCurves.EllipticCurve.KernelDivisibilityGlue
 
 /-!
 # Smoothness and flatness of `[N]` for `N` invertible (BB-FLAT route (G), step N6)
@@ -27,6 +29,10 @@ square-zero ideal `I`:
   square-zero thickenings are homeomorphisms, so it re-algebraizes to the desired
   lift `Γ(V) →ₐ B` by full faithfulness of `Spec` on affines.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TensorProduct
 

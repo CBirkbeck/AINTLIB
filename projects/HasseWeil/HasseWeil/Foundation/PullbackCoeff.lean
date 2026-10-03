@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Dual.Relation
-import HasseWeil.Foundation.InvariantDifferentialPullback
-import HasseWeil.Foundation.OmegaCoeffMulByIntGeneral
+module
+
+public import HasseWeil.Isogeny.Dual.Relation
+public import HasseWeil.Foundation.InvariantDifferentialPullback
+public import HasseWeil.Foundation.OmegaCoeffMulByIntGeneral
 
 /-!
 # The Pullback Coefficient and Dual Additivity (Silverman III.5.6, III.6.2c)
@@ -41,6 +43,8 @@ written as `c · D(x)`. The pullback coefficient is this scalar `c`.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.5 (pp.75–80), IV.4 (pp.125–127)
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

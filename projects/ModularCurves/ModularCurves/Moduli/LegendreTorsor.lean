@@ -3,10 +3,12 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.Moduli.GammaHRepresentability
-import ModularCurves.Moduli.Bootstrap
-import ModularCurves.Moduli.LegendreDatumSymmetry
-import ModularCurves.Moduli.LegendreChart
+module
+
+public import ModularCurves.Moduli.GammaHRepresentability
+public import ModularCurves.Moduli.Bootstrap
+public import ModularCurves.Moduli.LegendreDatumSymmetry
+public import ModularCurves.Moduli.LegendreChart
 
 /-! ## ⚠ QUARANTINED SUBTREE (B2-DECISION, board v10.342/v10.343, 2026-07-20)
 
@@ -22,6 +24,8 @@ twisted μ₂-extension of GL₂(𝔽₂)). The sorried declarations below are D
 NON-GOALS (kept per statement-protection protocol; a groupoid-descent engine
 would be required to make the Legendre route viable — see decomposition-e4.md).
 Do NOT work these sorries as receipt leaves. -/
+
+@[expose] public section
 
 
 

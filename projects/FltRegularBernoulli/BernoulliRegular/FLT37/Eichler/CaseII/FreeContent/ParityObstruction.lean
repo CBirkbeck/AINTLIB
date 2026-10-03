@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.FermatLastTheoremClosure
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.FermatLastTheoremClosure
 
 /-!
 # [FLT37-CASEII-R2] The free-content descent step on `37`-content data, and the parity obstruction

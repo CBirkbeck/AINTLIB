@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.EngineDescent
-import ModularCurves.Moduli.EngineDescentCore
-import ModularCurves.ForMathlib.QuotientTorsor
-import ModularCurves.Moduli.GlobalModelTransport
-import ModularCurves.ForMathlib.TorsorMap
-import ModularCurves.EllipticCurve.GroupLawDescent
+module
+
+public import ModularCurves.Moduli.EngineDescent
+public import ModularCurves.Moduli.EngineDescentCore
+public import ModularCurves.ForMathlib.QuotientTorsor
+public import ModularCurves.Moduli.GlobalModelTransport
+public import ModularCurves.ForMathlib.TorsorMap
+public import ModularCurves.EllipticCurve.GroupLawDescent
 
 /-!
 # [B3] The Katz–Mazur 4.7.0 representability capstone (global-model form)
@@ -21,6 +23,10 @@ The T-W7 leaf (`EllipticCurveGeom.toEllipticCurve` → `grpObj`) is PROVEN — v
 axiom-clean {propext, Classical.choice, Quot.sound} (v10.330; the group-law enrichment
 chain is complete, and no sorryAx reaches this file from the group-law side).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 -- v4.33 bump: component types coming from semireducible `baseChange*`/`pullback` defs are
 -- defeq only after delta, which `rw`/`simp`/`calc` will not do at `implicit` transparency.

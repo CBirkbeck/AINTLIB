@@ -1,5 +1,7 @@
-import Mathlib.Algebra.Category.ModuleCat.ChangeOfRings
-import Mathlib.CategoryTheory.Adjunction.FullyFaithful
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.ChangeOfRings
+public import Mathlib.CategoryTheory.Adjunction.FullyFaithful
 
 /-!
 # Restriction of scalars along surjective homomorphisms
@@ -7,6 +9,8 @@ import Mathlib.CategoryTheory.Adjunction.FullyFaithful
 This file records full faithfulness of restriction of scalars along a surjective ring
 homomorphism and the resulting counit isomorphism for extension of scalars.
 -/
+
+@[expose] public section
 
 universe u v w
 

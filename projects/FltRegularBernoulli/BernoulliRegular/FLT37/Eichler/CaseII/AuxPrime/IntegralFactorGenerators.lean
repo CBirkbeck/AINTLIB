@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentEndpoint
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentEndpoint
 
 /-!
 # [FLT37-CASEII-R2-L5c] Discharging the integer-witness packaging of the §9.1 propagation data

@@ -1,8 +1,10 @@
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.GroupScheme.MuN
-import Mathlib.RingTheory.TotallySplit
-import Mathlib.RingTheory.Flat.Rank
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.GroupScheme.MuN
+public import Mathlib.RingTheory.TotallySplit
+public import Mathlib.RingTheory.Flat.Rank
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # T-F1-general — the étale-local trivialisation of `E[N]` (KM 2.3.1)
@@ -21,6 +23,8 @@ this pin meanwhile (v10.154 adjudication).
 
 BOUNDARY: does NOT build the Weil pairing (p2's `[T-C1-KM28]`).
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

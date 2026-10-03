@@ -3,7 +3,9 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Basic
+module
+
+public import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Basic
 
 /-!
 # Hecke Rings: Multiplication
@@ -12,6 +14,10 @@ Shimura's multiplicity `heckeMultiplicity`, the multiplication finsupp `m`, the 
 on `𝕋 P ℤ`,
 and the `NonUnitalNonAssocSemiring` instance. Proves that `HeckeCoset.one` is the identity element.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Classical MulOpposite Set DoubleCoset Subgroup
 

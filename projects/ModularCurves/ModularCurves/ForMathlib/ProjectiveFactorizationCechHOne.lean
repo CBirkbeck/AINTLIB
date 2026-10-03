@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.ProjectiveFactorizationCechFinite
-import ModularCurves.ForMathlib.SchemeModuleCechTwoAffineCover
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHomotopyEquiv
+module
+
+public import ModularCurves.ForMathlib.ProjectiveFactorizationCechFinite
+public import ModularCurves.ForMathlib.SchemeModuleCechTwoAffineCover
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHomotopyEquiv
 
 /-!
 # Degree-one Cech finiteness from a projective factorization
@@ -14,6 +16,8 @@ Over a Noetherian affine base, a finite-type quasicoherent module on a
 projectively factored scheme has finite native Cech homology in degree one
 for every finite affine open cover.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

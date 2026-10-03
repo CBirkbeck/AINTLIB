@@ -1,7 +1,13 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqDischarge
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipal
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Main
-import BernoulliRegular.FLT37.CaseI
+module
+
+public import Mathlib.NumberTheory.FLT.Three
+import FltRegular.CaseI.AuxLemmas
+import FltRegular.MayAssume.Lemmas
+import Mathlib.NumberTheory.FLT.Basic
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqDischarge
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipal
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Main
+public import BernoulliRegular.FLT37.CaseI
 
 /-!
 # LV010-D: case-I bridge under `¬ p ∣ h⁺` (parametric on class equality)

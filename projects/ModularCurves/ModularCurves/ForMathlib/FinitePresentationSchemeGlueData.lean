@@ -1,10 +1,12 @@
-import ModularCurves.ForMathlib.FinitePresentationOpenImmersionFamily
-import ModularCurves.ForMathlib.FinitePresentationPushoutFamily
-import Mathlib.AlgebraicGeometry.AffineScheme
-import Mathlib.AlgebraicGeometry.Gluing
-import Mathlib.AlgebraicGeometry.Morphisms.Constructors
-import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
-import Mathlib.AlgebraicGeometry.Morphisms.Separated
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationOpenImmersionFamily
+public import ModularCurves.ForMathlib.FinitePresentationPushoutFamily
+public import Mathlib.AlgebraicGeometry.AffineScheme
+public import Mathlib.AlgebraicGeometry.Gluing
+public import Mathlib.AlgebraicGeometry.Morphisms.Constructors
+public import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
+public import Mathlib.AlgebraicGeometry.Morphisms.Separated
 
 /-!
 # Affine finite-intersection glue data
@@ -14,6 +16,10 @@ charts and all their finite intersections.  If the singleton-to-pair maps are
 open immersions on spectra and the singleton/pair/triple squares are pushouts,
 the functor determines scheme glue data.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

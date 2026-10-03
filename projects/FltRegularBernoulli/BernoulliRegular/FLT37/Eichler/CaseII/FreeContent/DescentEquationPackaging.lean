@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescentDatum
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescentDatum
 
 /-!
 # [FLT37-CASEII-R2] Packaging Washington's descended equation into a `FreeContentCaseIIData37`

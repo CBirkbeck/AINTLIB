@@ -1,6 +1,8 @@
-import ModularCurves.EllipticCurve.MulByHomFibres
-import ModularCurves.EllipticCurve.ModelFibreCount
-import ModularCurves.ForMathlib.QuasiFiniteDescent
+module
+
+public import ModularCurves.EllipticCurve.MulByHomFibres
+public import ModularCurves.EllipticCurve.ModelFibreCount
+public import ModularCurves.ForMathlib.QuasiFiniteDescent
 
 /-!
 # BB-QF BETA global assembly — `[N]` locally quasi-finite from the per-fibre transport
@@ -21,6 +23,8 @@ Once `fiber_mulByHom_locallyQuasiFinite` lands, `mulByHom_locallyQuasiFinite_ass
 (by the boarded mechanical relocation below `Torsion`) the `Torsion.mulByHom_locallyQuasiFinite` sorry
 closes ⟹ `mulByHom_isFinite` ⟹ `torsionπ_isFinite` (the whole E[N]-finiteness trail).
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

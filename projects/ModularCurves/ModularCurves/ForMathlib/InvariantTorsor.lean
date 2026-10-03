@@ -7,11 +7,13 @@ ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q2 (statements) +
 T-Q2-A711 / [A711-BC] / [A711-DESC] / [FP-B] (proofs). Fully proved as of 2026-07-08:
 the last gap ([A711-FP]) was closed by `FinitePresentationOfFinite.lean`.
 -/
-import ModularCurves.ForMathlib.InvariantBaseChange
-import ModularCurves.ForMathlib.FinitePresentationOfFinite
-import Mathlib.RingTheory.Etale.Basic
-import Mathlib.RingTheory.Smooth.Fiber
-import Mathlib.RingTheory.Finiteness.Nakayama
+module
+
+public import ModularCurves.ForMathlib.InvariantBaseChange
+public import ModularCurves.ForMathlib.FinitePresentationOfFinite
+public import Mathlib.RingTheory.Etale.Basic
+public import Mathlib.RingTheory.Smooth.Fiber
+public import Mathlib.RingTheory.Finiteness.Nakayama
 
 /-!
 # Free actions and the étale-torsor theorem
@@ -29,6 +31,8 @@ The finite-presentation input is `Algebra.FinitePresentation.of_finite_of_projec
 See Katz–Mazur, Appendix A7; SGA III, Exposé V, Theorem 4.1; and
 Demazure–Gabriel, III §2, 6.1.
 -/
+
+@[expose] public section
 
 universe u v
 

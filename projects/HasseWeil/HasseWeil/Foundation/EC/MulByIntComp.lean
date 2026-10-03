@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.MulByIntBaseCase
+module
+
+public import HasseWeil.Foundation.EC.MulByIntBaseCase
 
 /-!
 # Composition of multiplication-by-integer isogenies (T-III-4-020b)
@@ -41,6 +43,8 @@ identity is the subject of T-III-4-020b's core work.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

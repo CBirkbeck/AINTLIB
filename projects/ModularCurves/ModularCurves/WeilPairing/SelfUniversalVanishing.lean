@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.SelfField
-import ModularCurves.ForMathlib.RegularSectionDensity
+module
+
+public import ModularCurves.WeilPairing.SelfField
+public import ModularCurves.ForMathlib.RegularSectionDensity
 
 /-!
 # U4 — vanishing over the universal torsion base
@@ -24,6 +26,10 @@ This file develops the pieces in order:
 * [U4e] pointwise vanishing at residue fields;
 * [U4f] the conclusion.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

@@ -3,18 +3,20 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
-import Mathlib.Algebra.Module.Projective
-import Mathlib.AlgebraicGeometry.AffineScheme
-import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
-import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
-import Mathlib.RingTheory.Flat.EquationalCriterion
-import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
+public import Mathlib.Algebra.Module.Projective
+public import Mathlib.AlgebraicGeometry.AffineScheme
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import Mathlib.RingTheory.Flat.EquationalCriterion
+public import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Rank rigidity for surjections of finite projective modules
@@ -26,6 +28,8 @@ everywhere, hence subsingleton. This is the module engine behind KM 1.10.2 ("a c
 subscheme of a finite flat scheme of the same constant rank is the whole scheme") —
 the scheme-level statement reduces to this over affines.
 -/
+
+@[expose] public section
 
 -- v4.33 bump: opens/hom coercions are no longer transparent enough for the
 -- `≫`-associativity and `comp_apply` rewrites below.

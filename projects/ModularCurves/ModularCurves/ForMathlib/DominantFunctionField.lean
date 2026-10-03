@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.AlgebraicGeometry.FunctionField
-import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
-import Mathlib.AlgebraicGeometry.Stalk
+module
+
+public import Mathlib.AlgebraicGeometry.FunctionField
+public import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
+public import Mathlib.AlgebraicGeometry.Stalk
 
 /-!
 ForMathlib (OURS, not vendored): upstream candidate.
@@ -21,6 +23,8 @@ This is the scheme-morphism → function-field functoriality that mathlib curren
 packages `germToFunctionField`), and the substrate for the finrank ↔ function-field-degree bridge
 (`[N]`'s scheme fibre rank = its function-field extension degree).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistPairingIso
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistPairingIso
 
 /-!
 # Tensor equivalences from projective-space twists
@@ -11,6 +13,8 @@ import ModularCurves.EllipticCurve.ProjectiveSpaceTwistPairingIso
 Tensoring by the concrete positive coordinate-hyperplane twist `O(n)` is an
 equivalence, with quasi-inverse given by tensoring by `O(-n)`.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

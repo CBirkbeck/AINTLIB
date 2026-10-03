@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidRing
-import «Adic spaces».SeminormalRing
+module
+
+public import «Adic spaces».PerfectoidRing
+public import «Adic spaces».SeminormalRing
 
 /-!
 # Nonarchimedean Scottish Book — Problem 20
@@ -30,6 +32,8 @@ We state: given a perfectoid ring `A`, a finite `A`-algebra `B` that is seminorm
 completion `B̂` of `B`, is `B̂` perfectoid? The completion and topology on `B` are left
 existential since the seminormalization construction requires additional infrastructure.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

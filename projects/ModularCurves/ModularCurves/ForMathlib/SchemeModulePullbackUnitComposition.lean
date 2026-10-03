@@ -6,8 +6,10 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `SchemeModulePullbackUnitComposition.lean`
 in Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.AdjunctionUnitIsoTransport
-import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
+module
+
+public import ModularCurves.ForMathlib.AdjunctionUnitIsoTransport
+public import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
 
 /-!
 # Pullback--pushforward units and composition
@@ -15,6 +17,8 @@ import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
 The pullback functor of a composite is naturally isomorphic to the composite
 pullback functor, so invertibility of their adjunction units agrees.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

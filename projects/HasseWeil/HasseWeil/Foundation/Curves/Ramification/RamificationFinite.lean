@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.DedekindDomain.Different
-import Mathlib.RingTheory.DedekindDomain.IntegralClosure
-import Mathlib.RingTheory.UniqueFactorizationDomain.Finite
+module
+
+public import Mathlib.RingTheory.DedekindDomain.Different
+public import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+public import Mathlib.RingTheory.UniqueFactorizationDomain.Finite
 
 /-!
 # Finiteness of the ramified locus of a separable extension of Dedekind domains
@@ -49,6 +51,8 @@ all the hypotheses.
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2 (used for III.4.10c)
 * [J. Neukirch, *Algebraic Number Theory*], III.2
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves.RamificationFinite
 

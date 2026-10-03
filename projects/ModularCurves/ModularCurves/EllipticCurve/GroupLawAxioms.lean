@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.AdditionSpecPoints
-import ModularCurves.EllipticCurve.NegModelBaseChange
-import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
+module
+
+public import ModularCurves.EllipticCurve.AdditionSpecPoints
+public import ModularCurves.EllipticCurve.NegModelBaseChange
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
 
 /-!
 # Group axioms for the two-law multiplication (T-W7.0g, [0c-i])
@@ -30,6 +32,8 @@ Weierstrass curve over every ring. Architecture (universality-by-instantiation, 
 Sources: Bosma–Lenstra Thm 2 + p. 231 (universality); mathlib `Affine.Point` group instance;
 reviewer round 1 §Q4/Q5; audit A5/A6.
 -/
+
+@[expose] public section
 
 open MvPolynomial AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
   MonoidalCategory CartesianMonoidalCategory

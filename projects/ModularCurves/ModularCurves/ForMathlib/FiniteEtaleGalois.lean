@@ -3,16 +3,18 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Category.CommAlgCat.Basic
-import Mathlib.Algebra.Category.Ring.Colimits
-import Mathlib.CategoryTheory.Galois.Basic
-import Mathlib.CategoryTheory.Limits.Comma
-import Mathlib.CategoryTheory.Limits.Constructions.Over.Connected
-import Mathlib.CategoryTheory.Limits.FullSubcategory
-import Mathlib.CategoryTheory.Limits.Shapes.Opposites.Products
-import Mathlib.CategoryTheory.Limits.Shapes.Opposites.Pullbacks
-import Mathlib.RingTheory.Etale.Finite
-import ModularCurves.ForMathlib.EtaleSectionsCount
+module
+
+public import Mathlib.Algebra.Category.CommAlgCat.Basic
+public import Mathlib.Algebra.Category.Ring.Colimits
+public import Mathlib.CategoryTheory.Galois.Basic
+public import Mathlib.CategoryTheory.Limits.Comma
+public import Mathlib.CategoryTheory.Limits.Constructions.Over.Connected
+public import Mathlib.CategoryTheory.Limits.FullSubcategory
+public import Mathlib.CategoryTheory.Limits.Shapes.Opposites.Products
+public import Mathlib.CategoryTheory.Limits.Shapes.Opposites.Pullbacks
+public import Mathlib.RingTheory.Etale.Finite
+public import ModularCurves.ForMathlib.EtaleSectionsCount
 
 /-!
 # Towards `PreGaloisCategory ((CommAlgCat.FiniteEtale k)ᵒᵖ)` (AG-GG-1)
@@ -32,6 +34,8 @@ infrastructure leaf by leaf (ticket AG-GG-1):
 Upstream candidate: `Mathlib.RingTheory.Etale.Finite` (nothing imports that file yet;
 if mathlib lands this instance at a later bump, swap this file out for it).
 -/
+
+@[expose] public section
 
 universe u
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.IteratedTwist
-import ModularCurves.Picard.PicComparison
+module
+
+public import ModularCurves.WeilPairing.IteratedTwist
+public import ModularCurves.Picard.PicComparison
 
 /-!
 # From the line and the vertical to the theorem of the square (GAP-A-5c)
@@ -24,6 +26,8 @@ The two inputs are the outputs of `WeilPairing/IteratedTwist.lean`; the chord–
 identity that produces them (that the third zero of the chord is `-(P+Q)`) is the
 remaining mathematical input of the prong.
 -/
+
+@[expose] public section
 
 universe u
 

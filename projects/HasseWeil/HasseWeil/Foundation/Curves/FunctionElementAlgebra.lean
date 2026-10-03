@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.FiniteOverKx
-import Mathlib.RingTheory.Polynomial.Basic
+module
+
+public import HasseWeil.Foundation.Curves.FiniteOverKx
+public import Mathlib.RingTheory.Polynomial.Basic
 
 /-!
 # Function-element-as-algebra-source — foundational piece for Computation A
@@ -26,6 +28,8 @@ This is the **first piece** of the multi-session Computation A arc
 **Status (this commit)**: Algebra-instance constructor + non-degeneracy
 properties for non-constant f. Foundation for subsequent multi-session arc.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

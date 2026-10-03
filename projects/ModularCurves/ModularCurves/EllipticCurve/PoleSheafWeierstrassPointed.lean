@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
 
 /-!
 # Pointedness of the pole-sheaf Weierstrass comparison
@@ -12,6 +14,10 @@ The normalized Cartier coordinates restrict to `[0, 1, 0]` along the marked
 section. Consequently, the local comparison morphism carries the marked
 section to the point at infinity of the projective Weierstrass model.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

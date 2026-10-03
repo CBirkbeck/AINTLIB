@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StandardCover
+module
+
+public import «Adic spaces».StandardCover
 
 /-!
 # Wedhorn Stage-2 Span Extractor: small bridge + precise residual obligation
@@ -51,6 +53,8 @@ ideal-theoretic span-top conclusion.
   `WedhornStandardCoverRefinement.lean`, or `WedhornC1Assembly.lean`.
 * Imports only `StandardCover` (for `Spa`, `rationalOpen`,
   `RationalCovering`, `spanTop_iff_noCommonZero_spa`). -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

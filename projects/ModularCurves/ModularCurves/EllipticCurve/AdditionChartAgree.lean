@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartRing
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartRing
 
 /-!
 # The two laws are projectively proportional on a chart-product (T-W7.0c-c5β, β4(a))
@@ -22,6 +24,8 @@ No certificate is re-proved here: the identities are `addX_mul_dblAddY`, `addX_m
 `addY_mul_dblAddZ` (dba3aa8c) applied to the tautological points, whose curve equations are
 `equation_biChartPointFst` / `_Snd` (4eebfdee).
 -/
+
+@[expose] public section
 
 open MvPolynomial
 

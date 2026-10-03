@@ -1,6 +1,8 @@
-import Mathlib.Data.Fin.Tuple.Sort
-import ModularCurves.ForMathlib.SheafOrderedCechComparison
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
+module
+
+public import Mathlib.Data.Fin.Tuple.Sort
+public import ModularCurves.ForMathlib.SheafOrderedCechComparison
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 
 /-!
 # Degreewise alternating extension of ordered sheaf Cech cochains
@@ -8,6 +10,8 @@ import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 This file constructs the alternating extension from increasing tuples to all
 tuples and proves that restriction back to increasing tuples is the identity.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
   TopologicalSpace Opposite

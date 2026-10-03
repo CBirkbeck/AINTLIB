@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornFinalPart2NoExtraHypThreading
-import «Adic spaces».WedhornPointwiseClearingSupplierFromSigmaPower
+module
+
+public import «Adic spaces».WedhornFinalPart2NoExtraHypThreading
+public import «Adic spaces».WedhornPointwiseClearingSupplierFromSigmaPower
 
 /-!
 # Wedhorn 8.34(ii) — Final Part-2 boundary threading T079 σ-power lane (T080)
@@ -105,6 +107,8 @@ T072's `SigmaProductClearedInequalitySupplier`.
   composes T079 with T074 without adding hypotheses to the final
   `ValuationSpectrum.tateAcyclicity` signature.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

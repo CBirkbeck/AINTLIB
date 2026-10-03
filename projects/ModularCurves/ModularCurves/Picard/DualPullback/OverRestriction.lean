@@ -1,10 +1,14 @@
-import ModularCurves.Picard.DualPullback.Naturality
+module
+
+public import ModularCurves.Picard.DualPullback.Naturality
 
 /-!
 # Over-site restriction coherence
 
 Comparison of iterated over-site restriction with restriction on open subschemes.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Opposite
 

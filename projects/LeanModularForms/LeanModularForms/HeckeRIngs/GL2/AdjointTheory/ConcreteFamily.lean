@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.DeltaBSystem
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.DeltaBSystem
 
 /-!
 # Hecke adjoint theory: concrete `Option (Fin p)` projective T_p tile family.
@@ -12,6 +14,8 @@ Fifth module of the split of `AdjointTheoryPetersson`. Covers the Phase E3
 concrete `Option (Fin p)` projective T_p tile family and the resulting
 symmetric-form adjoint identity for `petN`.
 -/
+
+@[expose] public section
 
 noncomputable section
 
@@ -367,7 +371,7 @@ theorem isFundamentalDomain_Hecke_tiles_biUnion_Gamma_p_α :
           (Gamma1_fundDomain_PSL N : Set ℍ)) := by
     refine Set.iUnion_congr fun i ↦ ?_
     cases i <;> simp
-  rw [hset]
+  erw [hset]
   exact isFundamentalDomain_Hecke_tiles_Gamma_p_α p hp hpN
 
 include hp hpN in
@@ -669,7 +673,7 @@ private theorem petN_heckeT_p_adjoint_via_trace :
     intro γ hγ
     rw [ModularForm.SL_slash, glMap_T_p_lower_eq_map_castHom]
     exact slash_α_Gamma_p_α_invariant_cuspForm (T_p_lower p hp.pos) g hγ
-  rw [petN_heckeT_p_LHS_eq_aggregate p hp hpN f g,
+  erw [petN_heckeT_p_LHS_eq_aggregate p hp hpN f g,
     peterssonInner_T_p_reps_sum_slashes_eq_aggregate_HeckeFD p hp hpN f g hm h_int_per hfi,
     aggregate_D_petersson_eq_Gamma_p_A_fundDomain p hp hpN f g
       (isFundamentalDomain_Hecke_tiles_biUnion_Gamma_p_α p hp hpN),

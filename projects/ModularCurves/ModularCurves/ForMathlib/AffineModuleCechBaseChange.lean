@@ -1,6 +1,8 @@
-import ModularCurves.ForMathlib.AffineModulePatchBaseChangeNaturality
-import ModularCurves.ForMathlib.SheafCechCochains
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
+module
+
+public import ModularCurves.ForMathlib.AffineModulePatchBaseChangeNaturality
+public import ModularCurves.ForMathlib.SheafCechCochains
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
 
 /-!
 # Base change for affine Cech complexes of scheme modules
@@ -9,6 +11,10 @@ The patchwise affine module base-change comparisons assemble over a finite
 affine cover into a degreewise comparison, and then into an isomorphism of
 base-linear Cech complexes.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry AlgebraicTopology CategoryTheory Limits Opposite
   TopologicalSpace TensorProduct

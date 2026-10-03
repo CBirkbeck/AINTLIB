@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.LineVerticalAssembly
-import ModularCurves.EllipticCurve.PointsDictionary
-import ModularCurves.EllipticCurve.AdditionSpecPoints
-import ModularCurves.EllipticCurve.AffineSectionSpecPoints
+module
+
+public import ModularCurves.WeilPairing.LineVerticalAssembly
+public import ModularCurves.EllipticCurve.PointsDictionary
+public import ModularCurves.EllipticCurve.AdditionSpecPoints
+public import ModularCurves.EllipticCurve.AffineSectionSpecPoints
 
 /-!
 # The chord identity (W1) — statement and downstream wiring
@@ -27,6 +29,8 @@ trivialization of each twisted module), and `nonempty_tensorObj_iso_of_chordDatu
 derives the theorem of the square from it — so the interface is compile-verified and
 the remaining work is exactly the construction of a `ChordDatum`.
 -/
+
+@[expose] public section
 
 universe u
 

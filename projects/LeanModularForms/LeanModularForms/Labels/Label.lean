@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.Labels.CharacterOrbit
-import LeanModularForms.Labels.NewformOrbit
-import LeanModularForms.HeckeRIngs.GL2.Newforms.CoeffSeq
+module
+
+public import LeanModularForms.Labels.CharacterOrbit
+public import LeanModularForms.Labels.NewformOrbit
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.CoeffSeq
 
 /-!
 # The full LMFDB newform label `N.k.a.x`
@@ -55,6 +57,8 @@ is therefore read off the canonical Mathlib `DirichletCharacter ℂ N` lift of t
   `charOrbitLabel_injOn_orbits` / Phase 2's `newformOrbitLabel_injOn_orbits` conclude the two
   conjugacies.  It carries the same hypotheses Phase 2's injectivity does.
 -/
+
+@[expose] public section
 
 open scoped BigOperators
 

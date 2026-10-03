@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.AdditionPullback
-import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
-import HasseWeil.Foundation.Curves.WithTopArith
-import HasseWeil.Foundation.OmegaPullbackCoeff
-import HasseWeil.Foundation.OrdAtInftyBridge
-import HasseWeil.Isogeny.Basic
+module
+
+public import HasseWeil.Foundation.AdditionPullback
+public import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
+public import HasseWeil.Foundation.Curves.WithTopArith
+public import HasseWeil.Foundation.OmegaPullbackCoeff
+public import HasseWeil.Foundation.OrdAtInftyBridge
+public import HasseWeil.Isogeny.Basic
 
 /-!
 # The basepoint condition for `[n]`: `MulByIntBasepoint` holds unconditionally
@@ -54,6 +56,8 @@ The ultrametric inequality `ordAtInfty_add_ge_min` then yields
 
 * Silverman, *The Arithmetic of Elliptic Curves*, II.1, III.4.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

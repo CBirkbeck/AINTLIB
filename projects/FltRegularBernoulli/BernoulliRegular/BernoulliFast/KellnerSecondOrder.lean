@@ -1,6 +1,8 @@
-import BernoulliRegular.BernoulliFast.Tactic
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
-import Mathlib.Data.ZMod.Basic
+module
+
+public import BernoulliRegular.BernoulliFast.Tactic
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
+public import Mathlib.Data.ZMod.Basic
 
 /-!
 # T-KELLNER-SECOND-ORDER: Kellner higher-order irregular-pair test

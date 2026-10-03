@@ -1,6 +1,8 @@
-import Mathlib.CategoryTheory.Sites.SheafCohomology.MayerVietoris
-import Mathlib.Topology.Sheaves.MayerVietoris
-import ModularCurves.ForMathlib.SheafCohomologyTerminal
+module
+
+public import Mathlib.CategoryTheory.Sites.SheafCohomology.MayerVietoris
+public import Mathlib.Topology.Sheaves.MayerVietoris
+public import ModularCurves.ForMathlib.SheafCohomologyTerminal
 
 /-!
 # Vanishing from the Mayer--Vietoris sequence
@@ -8,6 +10,8 @@ import ModularCurves.ForMathlib.SheafCohomologyTerminal
 This file extracts an elementwise vanishing criterion from the Mayer--Vietoris
 long exact sequence for two open subsets of a topological space.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits Opposite TopologicalSpace
 

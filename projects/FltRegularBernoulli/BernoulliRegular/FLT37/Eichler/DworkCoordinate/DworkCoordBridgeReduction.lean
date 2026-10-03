@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordCyclotomicActionModSq
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordCyclotomicActionModSq
 
 /-!
 # Reduction of the level-`71` unit ↔ Dwork-slice coordinate bridge to the single Dwork-specialized

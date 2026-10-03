@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.InvariantTorsor
-import Mathlib.AlgebraicGeometry.Pullbacks
-import Mathlib.Algebra.Category.Ring.Constructions
+module
+
+public import ModularCurves.ForMathlib.InvariantTorsor
+public import Mathlib.AlgebraicGeometry.Pullbacks
+public import Mathlib.Algebra.Category.Ring.Constructions
 
 /-!
 # Galois descent of semilinear modules ([A711-DESC], general form)
@@ -33,6 +35,8 @@ Consumer: `[a3-ii]` of `[T-E5c-ROUTE-A]` — for a `G`-stable affine open `W` of
 curve, `Γ(W) ≅ Γ(W)ᴳ ⊗_{Aᴳ} A`, i.e. `W ≅ (W/G) ×_{X/G} X`. That is the cartesianness of the
 KM descent square, obtained without SGA I Exp. VIII 7.8.
 -/
+
+@[expose] public section
 
 universe u v
 

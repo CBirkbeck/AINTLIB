@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.MulByNat
-import HasseWeil.FormalGroup.Logarithm
+module
+
+public import HasseWeil.FormalGroup.MulByNat
+public import HasseWeil.FormalGroup.Logarithm
 
 /-!
 # Formal group homomorphisms: identity, composition, and basic API
@@ -38,6 +40,8 @@ subtleties around Hom-sets).
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.2.
 -/
+
+@[expose] public section
 
 set_option linter.dupNamespace false
 

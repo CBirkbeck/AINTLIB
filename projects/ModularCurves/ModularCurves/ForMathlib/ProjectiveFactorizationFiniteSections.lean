@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.ProjectiveFactorizationCechFinite
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
+module
+
+public import ModularCurves.ForMathlib.ProjectiveFactorizationCechFinite
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
 
 /-!
 # Finite sections for projective factorizations
@@ -14,6 +16,10 @@ global sections. The dimension-bumped projective factorization theorem therefore
 gives finite base-linear global sections without a nontrivial-coordinate
 hypothesis.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

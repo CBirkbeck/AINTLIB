@@ -1,10 +1,14 @@
-import ModularCurves.Picard.DualPullback.RestrictComp
+module
+
+public import ModularCurves.Picard.DualPullback.RestrictComp
 
 /-!
 ## Local pullback naturality: core stages
 
 The first half of the option-free coherence proof for restricting local pullbacks.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Opposite
 

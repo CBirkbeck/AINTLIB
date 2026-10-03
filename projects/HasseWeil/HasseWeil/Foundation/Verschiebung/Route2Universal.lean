@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Verschiebung.QthRoots
-import HasseWeil.Foundation.Verschiebung.DivPolyExpand
-import HasseWeil.Foundation.EC.MulByIntBaseCase
-import HasseWeil.Foundation.EC.GenericPointZsmul
-import HasseWeil.Foundation.OrdAtInftyBridge
-import Mathlib.Algebra.MvPolynomial.Basic
-import Mathlib.Data.ZMod.Basic
+module
+
+public import HasseWeil.Foundation.Verschiebung.QthRoots
+public import HasseWeil.Foundation.Verschiebung.DivPolyExpand
+public import HasseWeil.Foundation.EC.MulByIntBaseCase
+public import HasseWeil.Foundation.EC.GenericPointZsmul
+public import HasseWeil.Foundation.OrdAtInftyBridge
+public import Mathlib.Algebra.MvPolynomial.Basic
+public import Mathlib.Data.ZMod.Basic
 
 /-!
 # Route 2: universal `MvPolynomial AVar (ZMod p)` scaffold
@@ -80,6 +82,8 @@ For the universal identity proofs, the strategy in priority order:
   Route 2 generalises by stating identities universally.
 
 -/
+
+@[expose] public section
 
 namespace HasseWeil
 

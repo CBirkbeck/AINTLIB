@@ -47,7 +47,40 @@ lake exe cache get            # mathlib oleans
 lake build PadicLFunctions    # any project's lib; builds are incremental
 ```
 
-Pinned: Lean **v4.31.0-rc2**, mathlib **@d90090f** (moves with the daily bump).
+The toolchain and Mathlib revision are pinned in `lean-toolchain` and `lakefile.toml`.
+
+Library sources use Lean's module system. A downstream module can import the Hasse bound directly:
+
+```lean
+module
+import HasseWeil.HasseBound
+
+#check HasseWeil.WeilPairing.hasse_bound
+```
+
+`lake build ModuleSystemTests` checks a module-system importing client, guards the Hasse theorem's
+axiom dependencies, and exercises the exported Bernoulli `cbv` simproc and `bernoulli_decide` tactic. This target is included in
+`lake build` alongside the existing default libraries.
+
+## Lean module headers
+
+New library files start with `module` after the copyright comment. Use `public import` for
+dependencies needed by exported declarations, and ordinary `import` for proof-only dependencies.
+An `@[expose] public section` exports declarations and allows clients to unfold their definitions.
+Meta evaluators import executable helpers with `meta import` (or `public meta import` when those
+helpers are also needed by exported meta declarations).
+
+When integrating a legacy development branch, migrate its imports before their consumers. Use
+the `script/Modulize.lean` shipped with the Lean version in `lean-toolchain`: obtain the script from
+that exact Lean tag and run `lake env lean --run Modulize.lean path/to/File.lean ...`. Build the
+affected targets with `lake build`, resolve missing direct imports and visibility errors, then run
+`lake build ModuleSystemTests`. A module-system source cannot import a legacy source.
+
+Some existing public declarations use intentionally private helpers or instances. Their files
+retain `set_option backward.privateInPublic true` for compatibility; modules that need a private
+dependency explicitly use `import all`. Prefer public APIs in new proofs. When narrowing the
+option, apply it to the helper declarations as well as their public consumers: the option on a
+consumer alone cannot restore a helper that was not exported when declared.
 
 ## Layout
 

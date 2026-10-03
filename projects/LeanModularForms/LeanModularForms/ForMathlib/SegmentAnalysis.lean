@@ -3,9 +3,11 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.ArcFTCLimit
-import LeanModularForms.ForMathlib.FDBoundaryPath
-import LeanModularForms.ForMathlib.SegmentFTC
+module
+
+public import LeanModularForms.ForMathlib.ArcFTCLimit
+public import LeanModularForms.ForMathlib.FDBoundaryPath
+public import LeanModularForms.ForMathlib.SegmentFTC
 
 /-!
 # Segment FTC and Integrability for FD Boundary Segments
@@ -26,6 +28,8 @@ boundary, for the crossing point `z₀ = i`.
 * `transfer_integrability` — from `fdBoundaryFun` to `γ.toPath.extend`
 * `transfer_integral` — integral equality transfer
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

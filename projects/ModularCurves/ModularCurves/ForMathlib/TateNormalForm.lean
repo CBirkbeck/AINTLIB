@@ -20,8 +20,10 @@ Local changes relative to the PR (kept minimal, adapt-don't-fork):
   division-polynomial bridge `Ψ₃.eval P.X = …`) is OURS, not in the PR —
   upstream candidates to offer on the PR thread.
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 
 /-!
 # Tate normal form of elliptic curves (vendored)
@@ -35,6 +37,8 @@ The equation is $$y^2 + (1-c)xy - by = x^3 - bx^2$$, and the point `P` is moved 
 `IsUnit ((W.a₂ + 3P.X)·pY² + pX·a₁·pY − pX²)` (the latter equals `Ψ₃.eval P.X` on the
 curve — see `Ψ₃_eval_X` below).
 -/
+
+@[expose] public section
 
 noncomputable section
 

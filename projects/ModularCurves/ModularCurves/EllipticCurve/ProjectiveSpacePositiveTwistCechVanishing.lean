@@ -3,13 +3,15 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Algebra.Homology.HomologySequenceLemmas
-import ModularCurves.EllipticCurve.ProjectiveSpacePositiveTwistQuasicoherent
-import ModularCurves.EllipticCurve.ProjectiveSpacePositiveTwistTensorCech
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistShiftedPresentation
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechExact
-import ModularCurves.ForMathlib.SheafModuleFiniteTypeQuotient
-import ModularCurves.Picard.InvertibleSheafLocallyFree
+module
+
+public import Mathlib.Algebra.Homology.HomologySequenceLemmas
+public import ModularCurves.EllipticCurve.ProjectiveSpacePositiveTwistQuasicoherent
+public import ModularCurves.EllipticCurve.ProjectiveSpacePositiveTwistTensorCech
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistShiftedPresentation
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechExact
+public import ModularCurves.ForMathlib.SheafModuleFiniteTypeQuotient
+public import ModularCurves.Picard.InvertibleSheafLocallyFree
 
 /-!
 # Cech vanishing after a sufficiently positive projective twist
@@ -22,6 +24,10 @@ The proof uses finite presentations by coordinate twists and shifts
 exactness along their kernels. The induction terminates at the cardinality
 bound for the finite standard coordinate cover.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

@@ -3,7 +3,9 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GLn.CongruenceHecke.Props
+module
+
+public import LeanModularForms.HeckeRIngs.GLn.CongruenceHecke.Props
 
 /-!
 # Hecke Ring for Congruence Subgroups (Shimura §3.3) — Atkin–Lehner involution
@@ -26,6 +28,10 @@ Via Shimura Prop 3.8 this yields commutativity of `𝕋 (Γ₀(N)) ℤ`.
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.3
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup
 

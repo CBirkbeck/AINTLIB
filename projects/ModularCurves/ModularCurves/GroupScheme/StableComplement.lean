@@ -1,4 +1,6 @@
-import ModularCurves.GroupScheme.TranslationAction
+module
+
+public import ModularCurves.GroupScheme.TranslationAction
 
 /-!
 # The action shear and stability of the complement of `G`
@@ -13,6 +15,8 @@ stability predicate for the `[HG-C3]` cover.
 ## Main definitions
 * `FiniteLocallyFreeSubgroup.actionShear` — the shear automorphism of `G ×_S E`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

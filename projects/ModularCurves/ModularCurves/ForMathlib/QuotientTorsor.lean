@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SchemeActionFree
-import ModularCurves.ForMathlib.TorsorMap
+module
+
+public import ModularCurves.ForMathlib.SchemeActionFree
+public import ModularCurves.ForMathlib.TorsorMap
 /-!
 # The quotient projection is a geometric `G`-torsor ([B3-g3a], T-Q2 torsor part)
 
@@ -15,6 +17,8 @@ square (`isPullback_quotientπ_quotientChart`) via `IsIso` being Zariski-local a
 The helper lemmas (`isIso_torsorCompare_spec` over an affine, `isPullback_torsorCompare_baseChange`)
 are general T-Q2 infrastructure.
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

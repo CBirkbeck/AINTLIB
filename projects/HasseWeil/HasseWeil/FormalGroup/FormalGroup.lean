@@ -1,11 +1,15 @@
-import HasseWeil.Foundation.PowerSeriesHelpers
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.RingTheory.PowerSeries.Basic
-import Mathlib.RingTheory.MvPowerSeries.Basic
+module
+
+public import HasseWeil.Foundation.PowerSeriesHelpers
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import Mathlib.RingTheory.MvPowerSeries.Basic
 
 /-!
 # The Formal Group of an Elliptic Curve (Silverman Ch. IV)
 -/
+
+@[expose] public section
 
 open WeierstrassCurve PowerSeries Finset
 

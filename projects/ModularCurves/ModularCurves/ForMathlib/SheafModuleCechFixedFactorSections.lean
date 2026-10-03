@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafModuleCechTermNativeProduct
-import ModularCurves.ForMathlib.SchemeModuleCechRestrict
+module
+
+public import ModularCurves.ForMathlib.SheafModuleCechTermNativeProduct
+public import ModularCurves.ForMathlib.SchemeModuleCechRestrict
 
 /-!
 # Native Cech complexes of restriction-pushforward factors
@@ -13,6 +15,10 @@ The native Cech complex of one restriction-pushforward factor is naturally
 isomorphic to the original module-valued sheaf Cech complex evaluated on
 the indexing open of that factor.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

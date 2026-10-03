@@ -3,12 +3,14 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
-import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeightAssembly
-import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
-import ModularCurves.Picard.InvertibleSheafLocallyFree
+module
+
+public import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeightAssembly
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
+public import ModularCurves.Picard.InvertibleSheafLocallyFree
 
 /-!
 # Degree-one exactness for nonnegative projective twists
@@ -18,6 +20,8 @@ This file assembles the fixed-weight contraction from
 degree-one exactness of the homogeneous Laurent presentation of the ordered Cech complex for a
 nonnegative projective twist.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

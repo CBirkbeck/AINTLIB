@@ -1,6 +1,8 @@
-import ModularCurves.EllipticCurve.PoleSheafBaseSectionsMul
-import ModularCurves.EllipticCurve.PoleSheafPowerOneSection
-import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafBaseSectionsMul
+public import ModularCurves.EllipticCurve.PoleSheafPowerOneSection
+public import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
 
 /-!
 # Pole coordinates away from the marked section
@@ -9,6 +11,8 @@ On an open disjoint from the marked section, the canonical frames of all pole
 powers identify their sections with ordinary regular functions. This file
 records the additive, scalar, unit, and filtration rules for those coordinates.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory MonoidalCategory
 

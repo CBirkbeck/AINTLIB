@@ -1,4 +1,6 @@
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 
 /-!
 # Functorial action of ring homs on `Affine.Point` (T-III-4-020b-2, Phase 0a)
@@ -26,6 +28,8 @@ build the group-hom properties on top.
 * mathlib: `Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point`
 * Silverman, *The Arithmetic of Elliptic Curves*, III.4 (group law).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

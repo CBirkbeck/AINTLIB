@@ -1,5 +1,7 @@
-import ModularCurves.Picard.InvertibleSheafNoetherianStage
-import ModularCurves.Picard.InvertibleSheafCocycleSmoothStage
+module
+
+public import ModularCurves.Picard.InvertibleSheafNoetherianStage
+public import ModularCurves.Picard.InvertibleSheafCocycleSmoothStage
 
 /-!
 # Smooth proper Noetherian models of invertible sheaves
@@ -8,6 +10,10 @@ This file combines smooth affine-intersection descent with properness descent ov
 canonical Noetherian presentation system of an arbitrary affine base. The resulting
 family and invertible sheaf recover the original pair after base change.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits
 

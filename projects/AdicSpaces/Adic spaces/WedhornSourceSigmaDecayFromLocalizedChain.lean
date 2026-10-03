@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornSigmaPowerInequalityFromLocalizedCor732
-import «Adic spaces».WedhornCor732DirectUpperBoundResidual
-import «Adic spaces».WedhornLocalizedCor732Bridge
+module
+
+public import «Adic spaces».WedhornSigmaPowerInequalityFromLocalizedCor732
+public import «Adic spaces».WedhornCor732DirectUpperBoundResidual
+public import «Adic spaces».WedhornLocalizedCor732Bridge
 
 /-!
 # Wedhorn 8.34(ii) — Source σ-decay chain from localized denominator-clearing chain (T086)
@@ -147,6 +149,8 @@ the proven part of the bridge.
   over-Spa multi-element bound, no all-units σ residual.
 * No final `ValuationSpectrum.tateAcyclicity` hypothesis additions.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

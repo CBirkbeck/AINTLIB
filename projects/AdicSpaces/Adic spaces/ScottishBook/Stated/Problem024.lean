@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Presheaf
-import «Adic spaces».HuberRings
-import Mathlib.RingTheory.Flat.Basic
+module
+
+public import «Adic spaces».Presheaf
+public import «Adic spaces».HuberRings
+public import Mathlib.RingTheory.Flat.Basic
 
 /-!
 # Nonarchimedean Scottish Book — Problem 24
@@ -46,6 +48,8 @@ Problem 24 asks whether these are flat `A`-modules.
 * Wedhorn, *Adic Spaces*, §8.1 (rational localizations)
 * Huber, *Étale Cohomology of Rigid Analytic Varieties and Adic Spaces*
 -/
+
+@[expose] public section
 
 open ValuationSpectrum
 

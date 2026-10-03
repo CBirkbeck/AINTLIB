@@ -3,12 +3,14 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.IdealModuleSquareBaseChange
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
-import ModularCurves.ForMathlib.PullbackTensorGeneral
-import ModularCurves.ForMathlib.ProjectiveSpaceCoefficientBaseChange
-import ModularCurves.ForMathlib.SchemeModuleOpenCoverIso
-import ModularCurves.Picard.DualPullback.Iso
+module
+
+public import ModularCurves.EllipticCurve.IdealModuleSquareBaseChange
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
+public import ModularCurves.ForMathlib.PullbackTensorGeneral
+public import ModularCurves.ForMathlib.ProjectiveSpaceCoefficientBaseChange
+public import ModularCurves.ForMathlib.SchemeModuleOpenCoverIso
+public import ModularCurves.Picard.DualPullback.Iso
 
 /-!
 # Base change for the coordinate hyperplane pole sheaf
@@ -16,6 +18,10 @@ import ModularCurves.Picard.DualPullback.Iso
 This file proves that coefficient extension preserves the coordinate hyperplane
 and its associated ideal and pole modules.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry MonoidalCategory
 open HomogeneousIdeal HomogeneousLocalization

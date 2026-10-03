@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.MulByIntPullback
-import HasseWeil.Foundation.OmegaPullbackCoeff
-import HasseWeil.Foundation.Curves.Valuation.Infinity
+module
+
+public import HasseWeil.Foundation.MulByIntPullback
+public import HasseWeil.Foundation.OmegaPullbackCoeff
+public import HasseWeil.Foundation.Curves.Valuation.Infinity
 
 /-!
 # Bridge from `W.toAffine` to `SmoothPlaneCurve` for `ordAtInfty`
@@ -35,6 +37,8 @@ witnesses are supplied per-isogeny (e.g. in `AdditionPullback/Frobenius.lean`).
 
 * Silverman, *The Arithmetic of Elliptic Curves*, IV.1.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

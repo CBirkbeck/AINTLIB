@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SheafCechAcyclicComparison
-import ModularCurves.ForMathlib.SheafCechFlasqueTerms
+module
+
+public import ModularCurves.ForMathlib.SheafCechAcyclicComparison
+public import ModularCurves.ForMathlib.SheafCechFlasqueTerms
 
 /-!
 # Exactness of Cech complexes of flasque sheaves
@@ -8,6 +10,8 @@ For a finite open cover, every positive cohomology group of every Cech term of
 a flasque sheaf vanishes. The acyclic-cover comparison therefore makes its
 native Cech complex exact in every positive degree.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

@@ -1,14 +1,16 @@
-import ModularCurves.EllipticCurve.ProjectiveCoordinatePullbackTwistMap
-import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportChowChart
-import ModularCurves.ForMathlib.SchemeModuleComparisonCoherent
-import ModularCurves.ForMathlib.SchemeModuleComparisonSupport
-import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
-import ModularCurves.ForMathlib.SchemeModulePushforwardMapRestrictionIso
-import ModularCurves.ForMathlib.SchemeModulePullbackQuasicoherent
-import ModularCurves.ForMathlib.SchemeModulePushforwardPullbackSupport
-import ModularCurves.ForMathlib.SchemeModuleRestrictionIsoMonotone
-import ModularCurves.ForMathlib.RelativeProjectivePushforwardFiniteType
-import ModularCurves.Picard.InvertibleSheafTensorQuasicoherent
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveCoordinatePullbackTwistMap
+public import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportChowChart
+public import ModularCurves.ForMathlib.SchemeModuleComparisonCoherent
+public import ModularCurves.ForMathlib.SchemeModuleComparisonSupport
+public import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
+public import ModularCurves.ForMathlib.SchemeModulePushforwardMapRestrictionIso
+public import ModularCurves.ForMathlib.SchemeModulePullbackQuasicoherent
+public import ModularCurves.ForMathlib.SchemeModulePushforwardPullbackSupport
+public import ModularCurves.ForMathlib.SchemeModuleRestrictionIsoMonotone
+public import ModularCurves.ForMathlib.RelativeProjectivePushforwardFiniteType
+public import ModularCurves.Picard.InvertibleSheafTensorQuasicoherent
 
 /-!
 # Coordinate-twist comparisons on support-adapted Chow charts
@@ -18,6 +20,8 @@ isomorphism locus of the Chow cover. Multiplication by a power of this coordinat
 produces a comparison from the original module to a twisted pushforward which is an isomorphism
 on that locus.
 -/
+
+@[expose] public section
 
 universe u
 

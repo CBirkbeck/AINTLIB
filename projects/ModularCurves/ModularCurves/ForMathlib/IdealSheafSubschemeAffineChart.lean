@@ -1,5 +1,7 @@
-import Mathlib.AlgebraicGeometry.Cover.Open
-import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
+module
+
+public import Mathlib.AlgebraicGeometry.Cover.Open
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
 
 /-!
 # Affine charts of ideal-sheaf subschemes
@@ -7,6 +9,10 @@ import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
 The inverse image of an affine open under an ideal-sheaf subscheme inclusion is
 canonically the spectrum of the corresponding quotient ring.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory
 

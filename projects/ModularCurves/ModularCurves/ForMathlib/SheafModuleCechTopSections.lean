@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafModuleCechAugmentation
+module
+
+public import ModularCurves.ForMathlib.SheafModuleCechAugmentation
 
 /-!
 # Top sections of module-valued sheaf Cech terms
@@ -11,6 +13,10 @@ import ModularCurves.ForMathlib.SheafModuleCechAugmentation
 Top sections of a sheaf-level Cech term are identified with the corresponding
 degree of the native Cech complex while retaining the coefficient-ring action.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

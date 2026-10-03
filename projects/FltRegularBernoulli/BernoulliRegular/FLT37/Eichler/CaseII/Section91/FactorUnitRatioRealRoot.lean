@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.IntegralUnitDescentGeometry
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimePropagationTriple
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.FLT37GenuineUnitEndpoint
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.IntegralUnitDescentGeometry
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimePropagationTriple
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.FLT37GenuineUnitEndpoint
 
 /-!
 # [F1] Real Assumption II for the §9.1 factor units, PROVEN (route (a), Washington Lemma 9.9)

@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.Bridge
-import BernoulliRegular.BernoulliFast.ValuesUpTo100
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.Bridge
+public import BernoulliRegular.BernoulliFast.ValuesUpTo100
 
 /-!
 # T-PIVOT-5: `reflectionOtherComponents` — Spiegelung at non-irregular indices

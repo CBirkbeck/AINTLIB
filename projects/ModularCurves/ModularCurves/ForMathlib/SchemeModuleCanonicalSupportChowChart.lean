@@ -3,11 +3,13 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectivePointChartShrink
-import ModularCurves.ForMathlib.ChowCoverProjective
-import ModularCurves.ForMathlib.NoetherianChowCoverOpen
-import ModularCurves.ForMathlib.RelativeProjectiveFactorizationChoice
-import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportFull
+module
+
+public import ModularCurves.EllipticCurve.ProjectivePointChartShrink
+public import ModularCurves.ForMathlib.ChowCoverProjective
+public import ModularCurves.ForMathlib.NoetherianChowCoverOpen
+public import ModularCurves.ForMathlib.RelativeProjectiveFactorizationChoice
+public import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportFull
 
 /-!
 # Support-adapted Chow charts
@@ -16,6 +18,8 @@ A nonzero canonical support model admits a Chow cover whose isomorphism
 locus can be shrunk into one standard chart of the cover's chosen relative
 projective embedding. The resulting open still meets the model support.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry
   TopologicalSpace

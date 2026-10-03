@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
-import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
-import Mathlib.FieldTheory.Fixed
-import ModularCurves.ForMathlib.InvariantTorsor
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+public import Mathlib.FieldTheory.Fixed
+public import ModularCurves.ForMathlib.InvariantTorsor
 
 /-!
 # Descent of a `G`-invariant Weierstrass curve to the fixed subring
@@ -24,6 +26,8 @@ the model of the quotient curve `E/G` over `X/G = Spec Aᴳ`.
 `FixedPoints.subring A G` is defeq to `FixedPoints.subalgebra ℤ A G` (the ring the project's
 `localQuotient`/`invariantsπ` are `Spec` of), so this interoperates with the descent geometry.
 -/
+
+@[expose] public section
 
 open scoped Pointwise
 

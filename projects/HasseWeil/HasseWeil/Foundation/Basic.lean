@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
-import Mathlib.FieldTheory.IntermediateField.Basic
-import Mathlib.FieldTheory.RatFunc.Luroth
-import Mathlib.LinearAlgebra.Basis.VectorSpace
-import Mathlib.LinearAlgebra.Dimension.Finrank
+module
 
-import HasseWeil.Foundation.MulByIntPullback
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.FieldTheory.IntermediateField.Basic
+public import Mathlib.FieldTheory.RatFunc.Luroth
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+public import Mathlib.LinearAlgebra.Dimension.Finrank
+
+public import HasseWeil.Foundation.MulByIntPullback
 
 /-!
 # Isogenies between Elliptic Curves
@@ -44,6 +46,10 @@ construction in `MulByIntPullback.lean`; `mulByInt_degree` proves `deg [n] = n²
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4
 * [Sutherland, *18.783 Elliptic Curves*], Lecture 7
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

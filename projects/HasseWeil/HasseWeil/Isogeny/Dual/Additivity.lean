@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.GenericCovarianceGeneral
-import HasseWeil.Isogeny.Adjoint
-import HasseWeil.Isogeny.Dual.Canonical
+module
+
+public import HasseWeil.Foundation.EC.GenericCovarianceGeneral
+public import HasseWeil.Isogeny.Adjoint
+public import HasseWeil.Isogeny.Dual.Canonical
 
 /-!
 # Dual additivity `(φ+ψ)^ = φ̂ + ψ̂` in arbitrary characteristic (Silverman III.6.2(c))
@@ -76,6 +78,8 @@ nondegeneracy, and the separable adjoint.
 * Silverman, *The Arithmetic of Elliptic Curves*, III.6.2(c), Exercise 3.31, III.8,
   II.1.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

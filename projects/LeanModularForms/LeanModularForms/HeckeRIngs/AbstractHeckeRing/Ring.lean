@@ -3,13 +3,17 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Associativity
+module
+
+public import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Associativity
 
 /-!
 # Hecke Rings: Ring Instance and API
 
 The `Ring (𝕋 P ℤ)` instance and user-facing API lemmas for working with Hecke rings.
 -/
+
+@[expose] public section
 
 open Classical MulOpposite Set DoubleCoset Subgroup
 

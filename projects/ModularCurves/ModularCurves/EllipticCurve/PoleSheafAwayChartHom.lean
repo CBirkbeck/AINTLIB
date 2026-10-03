@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.AffineModelCoordinateTransition
-import ModularCurves.EllipticCurve.PoleSheafAwayAffineModelEval
+module
+
+public import ModularCurves.EllipticCurve.AffineModelCoordinateTransition
+public import ModularCurves.EllipticCurve.PoleSheafAwayAffineModelEval
 
 /-!
 # The projective chart map on the section complement
@@ -7,6 +9,8 @@ import ModularCurves.EllipticCurve.PoleSheafAwayAffineModelEval
 The affine pole coordinates on the complement of the marked section induce
 a bijective homomorphism from the standard projective `Z`-chart ring.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 open WeierstrassCurve.Projective

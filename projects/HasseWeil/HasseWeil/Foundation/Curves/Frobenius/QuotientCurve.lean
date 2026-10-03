@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Basic
-import HasseWeil.Isogeny.BaseChange.Basic
-import HasseWeil.Isogeny.Frobenius.PointCount
-import HasseWeil.Isogeny.Kernel
+module
+
+public import HasseWeil.Foundation.Basic
+public import HasseWeil.Isogeny.BaseChange.Basic
+public import HasseWeil.Isogeny.Frobenius.PointCount
+public import HasseWeil.Isogeny.Kernel
 
 /-!
 # Quotient curve and Frobenius twist for finite-field isogenies
@@ -27,6 +29,8 @@ separable isogeny and the Frobenius twist iso for `K = F_{p^r}`.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.12.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

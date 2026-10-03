@@ -6,7 +6,9 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `CanonicalSupportChowSupport.lean` in
 Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportThickening
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportThickening
 
 /-!
 # Full support of the canonical support model
@@ -15,6 +17,8 @@ The model module on its canonical closed support thickening has a
 nonzero stalk at every point. Consequently its closed stalk support is
 the whole thickening.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 

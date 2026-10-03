@@ -3,11 +3,13 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInvariant
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.FundamentalDomainBoundary
-import LeanModularForms.ForMathlib.FDBoundary
-import Mathlib.MeasureTheory.Integral.DivergenceTheorem
-import Mathlib.MeasureTheory.Integral.CurveIntegral.Poincare
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInvariant
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.FundamentalDomainBoundary
+public import LeanModularForms.ForMathlib.FDBoundary
+public import Mathlib.MeasureTheory.Integral.DivergenceTheorem
+public import Mathlib.MeasureTheory.Integral.CurveIntegral.Poincare
 
 /-!
 # The Petersson area integral as a boundary integral (Eichler–Shimura, Green's identity)
@@ -55,6 +57,8 @@ of `FundamentalDomainBoundary.lean`.
   (8.2.17)/(8.2.22).
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.4.
 -/
+
+@[expose] public section
 
 noncomputable section
 

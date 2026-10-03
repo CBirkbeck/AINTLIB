@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».SpvAI
-import «Adic spaces».RationalSubsets
-import «Adic spaces».ValuationSpectrumCompact
+module
+
+public import «Adic spaces».SpvAI
+public import «Adic spaces».RationalSubsets
+public import «Adic spaces».ValuationSpectrumCompact
 
 /-!
 # Spectral structure on `Spv(A, I)` (Wedhorn 7.5) — T-SPV-AI-WEDHORN-710
@@ -37,6 +39,8 @@ declaration docstrings for the proof plans.
 
 * [Wedhorn 2019] Section 7.1, Lemma 7.5 (p. 57–58), arXiv:1910.05934.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

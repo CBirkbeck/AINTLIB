@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.LineVertical
-import ModularCurves.Picard.SurjectiveInvertible
-import ModularCurves.ForMathlib.PullbackTensorMonoidal
+module
+
+public import ModularCurves.WeilPairing.LineVertical
+public import ModularCurves.Picard.SurjectiveInvertible
+public import ModularCurves.ForMathlib.PullbackTensorMonoidal
 
 /-!
 # Consumer wiring for the line and vertical (GAP-A-4)
@@ -17,6 +19,8 @@ data from support avoidance, and the chart trivializations from principal
 kernels. The heavy cohomological input (`H¹`-vanishing) remains a hypothesis
 slot, exactly as in the rank ladder of `PoleSheafRankTwoThree`.
 -/
+
+@[expose] public section
 
 universe u
 

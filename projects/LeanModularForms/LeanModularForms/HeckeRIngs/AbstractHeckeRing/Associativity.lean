@@ -3,7 +3,9 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Module
+module
+
+public import LeanModularForms.HeckeRIngs.AbstractHeckeRing.Module
 
 /-!
 # Hecke Rings: Associativity
@@ -19,6 +21,8 @@ Proposition 3.4.
 * `HeckeRing.instIsScalarTower`: the scalar tower property `(x * y) • z = y • (x • z)`, which is
   equivalent to associativity of multiplication in the Hecke ring.
 -/
+
+@[expose] public section
 
 open Classical
 

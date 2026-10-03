@@ -3,10 +3,12 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.ContourIntegral.PVSplit
-import LeanModularForms.ForMathlib.ContourIntegral.SegmentFTC
-import Mathlib.Data.Complex.Basic
-import Mathlib.Order.Filter.Defs
+module
+
+public import LeanModularForms.ForMathlib.ContourIntegral.PVSplit
+public import LeanModularForms.ForMathlib.ContourIntegral.SegmentFTC
+public import Mathlib.Data.Complex.Basic
+public import Mathlib.Order.Filter.Defs
 
 /-!
 # Crossing Limit Theorem
@@ -23,6 +25,8 @@ to reduce PV computation to a single crossing-local limit.
 * `pv_tendsto_of_crossing_limit` — the PV integral tends to L if the log
   ratio at the crossing tends to L
 -/
+
+@[expose] public section
 
 open Set MeasureTheory Complex Filter
 

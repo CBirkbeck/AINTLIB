@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.EigenDecompAutomaticProvenance
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ProductDescent
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.EigenDecompAutomaticProvenance
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ProductDescent
 
 /-!
 # Washington §9.1 Case-II descent: the descent unit `η_a/η_b = ε₁/ε₂` is real (Lemma 9.2 core)

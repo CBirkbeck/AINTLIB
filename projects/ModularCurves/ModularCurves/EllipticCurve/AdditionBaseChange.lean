@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartGlobal
-import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
-import ModularCurves.ForMathlib.IntJacobson
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartGlobal
+public import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
+public import ModularCurves.ForMathlib.IntJacobson
 
 /-!
 # Base change of the Bosma–Lenstra multiplication (T-W7.0c·c4.5)
@@ -27,6 +29,8 @@ particular over the universal atlas ring. This file transports it to EVERY ring:
 Instantiated at `f := classifyRingHomU W` this fills GLC's `mulModelHom` for every elliptic `W`
 over every ring (T-W7.0c·c4 + T-W7.0d), with `mulModelHom_map` following from lift-uniqueness.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves AlgebraicGeometry CategoryTheory Limits WeierstrassCurve
 

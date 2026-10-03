@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitRatioIdentity
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DiscreteLogIndexCollapse
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimeDvdZSoundnessRepair
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealClosure
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.XiUnitRatioIdentity
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DiscreteLogIndexCollapse
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimeDvdZSoundnessRepair
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealClosure
 
 /-!
 # Washington §9.1 Lemma 9.8 (steps 5–8) for `p = 37`: the Mirimanoff telescoping

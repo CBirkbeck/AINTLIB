@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SchemeActionFree
-import Mathlib.AlgebraicGeometry.Sites.SmallAffineZariski
+module
+
+public import ModularCurves.ForMathlib.SchemeActionFree
+public import Mathlib.AlgebraicGeometry.Sites.SmallAffineZariski
 
 /-!
 # The quotient of a relatively-affine scheme by a finite group action (relative Spec)
@@ -45,6 +47,8 @@ data: the three consumers in `Moduli/GammaHRepresentability.lean`
 `IsAffineHom (pullback.diagonal (terminal.from Z))` instance, which was FALSE for
 general `Ell/R` bases (a constant curve over a plane with doubled origin).
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
-import Mathlib.RingTheory.TensorProduct.Basic
+module
+
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+public import Mathlib.RingTheory.TensorProduct.Basic
 
 /-!
 # The Amitsur equalizer of a faithfully flat algebra
@@ -26,6 +28,8 @@ The nontrivial inclusion is the classical cokernel trick: if `s ⊗ 1 = 1 ⊗ s`
 co-action `ρ : B → B ⊗[R] A` (free of positive rank via the shear automorphism), and this
 equalizer is the top row of the two-row comparison in the `[HG-B5]` bootstrap.
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

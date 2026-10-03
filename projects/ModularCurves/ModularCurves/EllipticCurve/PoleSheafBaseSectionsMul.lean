@@ -1,6 +1,8 @@
-import ModularCurves.EllipticCurve.PoleSheaf
-import ModularCurves.EllipticCurve.PullbackTensorSection
-import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
+module
+
+public import ModularCurves.EllipticCurve.PoleSheaf
+public import ModularCurves.EllipticCurve.PullbackTensorSection
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 
 /-!
 # Multiplication on base sections of pole sheaves
@@ -9,6 +11,10 @@ The sheaf-level multiplication `O(m[0]) tensor O(n[0]) -> O((m+n)[0])`
 induces a base-linear multiplication on global sections. The construction uses the
 existing comparison between the localized tensor and the explicit sheafified tensor.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory MonoidalCategory Opposite TopologicalSpace
 

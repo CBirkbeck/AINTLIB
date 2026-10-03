@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.Data.Finset.NatDivisors
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
-import LeanModularForms.Modularforms.QExpansionSlash
+module
+
+public import Mathlib.Data.Finset.NatDivisors
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
+public import LeanModularForms.Modularforms.QExpansionSlash
 
 /-!
 # Fourier coefficient formula for Hecke operators
@@ -53,6 +55,8 @@ are the convention used downstream in `Newforms.lean` / `LFunction.lean`.
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.2 Prop 5.2.2, §5.3 Prop 5.3.1
 * [Miy] Miyake, *Modular Forms*, §4.5 Thm 4.5.13, Thm 4.5.16
 -/
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup
   ModularFormClass UpperHalfPlane

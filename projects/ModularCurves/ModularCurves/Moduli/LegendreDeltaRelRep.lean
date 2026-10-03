@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.CombinationLevel
-import ModularCurves.Moduli.LegendreDelta
-import ModularCurves.Moduli.LevelLocusNatural
-import ModularCurves.Moduli.QuotientProblem
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.LevelStructure.CombinationLevel
+public import ModularCurves.Moduli.LegendreDelta
+public import ModularCurves.Moduli.LevelLocusNatural
+public import ModularCurves.Moduli.QuotientProblem
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Relative representability of the Legendre `δ`: the scale-torsor funnel
@@ -24,6 +26,8 @@ pure plumbing: fibre the composite `Z₂ → locus → S` over the locus points
 (`sectionsCompSigmaEquiv`, a `subst`-trick fibration) and re-index along the
 classifying equivalence (`Equiv.sigmaCongrLeft`/`sigmaCongrRight`).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

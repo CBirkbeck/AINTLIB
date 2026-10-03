@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.PoleSheaf
-import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
+module
+
+public import ModularCurves.EllipticCurve.PoleSheaf
+public import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
 
 /-!
 # Pushforward base change for pole sheaves
@@ -7,6 +9,8 @@ import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
 This file specializes the canonical pullback--pushforward base-change morphism to
 the tensor powers `O(n[0])` of a section's pole sheaf.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitInCPlus
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.RealPthRootDescent
-import BernoulliRegular.UnitQuotient.Washington814Forward
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitInCPlus
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.RealPthRootDescent
+public import BernoulliRegular.UnitQuotient.Washington814Forward
 
 /-!
 # Washington §9.1 Case-II descent: eliminating the cyclotomic-membership conjunct

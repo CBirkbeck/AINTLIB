@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.SummandAdjoint
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.SummandAdjoint
 
 /-!
 # Hecke adjoint theory: DS-standard `δ_b` representative system.
@@ -12,6 +14,8 @@ Third module of the split of `AdjointTheoryPetersson`. Covers the T128
 DS-standard `δ_b` representative-system helpers and the associated
 fundamental-domain swap machinery.
 -/
+
+@[expose] public section
 
 noncomputable section
 
@@ -1124,7 +1128,7 @@ theorem isFundamentalDomain_Hecke_tiles_Gamma_p_α
         | some b => (glMap (T_p_upper p hp.pos b.val) : GL (Fin 2) ℝ)) •
         (Gamma1_fundDomain_PSL N : Set ℍ)) = D := by
     rw [hD_def]; refine Set.iUnion_congr fun i ↦ ?_; cases i <;> rfl
-  rw [hD_eq]
+  erw [hD_eq]
   -- Step (I): a FD for the conjugate group `toConjAct g • Γ_p(A).map` on `A • D`.
   have hI : IsFundamentalDomain
       ((ConjAct.toConjAct g • ((Gamma_p_α (N := N) (T_p_lower p hp.pos)).map SL2Z_to_PSL2R)) :

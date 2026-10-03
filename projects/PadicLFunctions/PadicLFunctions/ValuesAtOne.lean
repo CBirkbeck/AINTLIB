@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.ExtLog
-import PadicLFunctions.Interpolation.LpFunction
-import PadicLFunctions.MeasureR.FormalPsi
-import PadicLFunctions.ValuesAtOneComplex
+module
+
+public import PadicLFunctions.ExtLog
+public import PadicLFunctions.Interpolation.LpFunction
+public import PadicLFunctions.MeasureR.FormalPsi
+public import PadicLFunctions.ValuesAtOneComplex
 
 /-!
 # The p-adic value L_p(θ,1) (RJW §6.2, Thm 6.1(ii), decomposition P6)
@@ -29,6 +31,8 @@ value `(ψF̃_θ)(0)` is computed by the evaluated `Eqphipsi`
 
 Decomposition: `.mathlib-quality/decomposition.md` R6, cluster P6.
 -/
+
+@[expose] public section
 
 open PowerSeries
 

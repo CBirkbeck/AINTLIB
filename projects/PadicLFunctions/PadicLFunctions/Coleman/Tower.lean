@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.ResidueZeta
-import Mathlib.RingTheory.Polynomial.Eisenstein.IsIntegral
-import Mathlib.NumberTheory.Cyclotomic.PrimitiveRoots
+module
+
+public import PadicLFunctions.ResidueZeta
+public import Mathlib.RingTheory.Polynomial.Eisenstein.IsIntegral
+public import Mathlib.NumberTheory.Cyclotomic.PrimitiveRoots
 
 /-!
 # The cyclotomic tower over ℚ_p (RJW §9, TeX 2466–2511)
@@ -27,6 +29,8 @@ degree ladder `[K_n : ℚ_p] = φ(p^n)` comes from Eisenstein-ness of
 engine for both the cyclotomic units and the evaluation/norm commuting
 square.
 -/
+
+@[expose] public section
 
 open PowerSeries Polynomial
 open scoped IntermediateField

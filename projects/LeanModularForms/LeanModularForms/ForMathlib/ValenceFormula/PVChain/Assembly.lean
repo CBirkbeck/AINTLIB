@@ -3,11 +3,13 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.ModularInvariance
-import LeanModularForms.ForMathlib.ValenceFormula.PVChain.ArcContribution
-import LeanModularForms.ForMathlib.ValenceFormula.PVChain.OnCurveCapture
-import LeanModularForms.ForMathlib.ValenceFormula.PVChain.ResidueSideInfra
-import LeanModularForms.ForMathlib.ValenceFormula.PVChain.Seg5CuspIntegral
+module
+
+public import LeanModularForms.ForMathlib.ModularInvariance
+public import LeanModularForms.ForMathlib.ValenceFormula.PVChain.ArcContribution
+public import LeanModularForms.ForMathlib.ValenceFormula.PVChain.OnCurveCapture
+public import LeanModularForms.ForMathlib.ValenceFormula.PVChain.ResidueSideInfra
+public import LeanModularForms.ForMathlib.ValenceFormula.PVChain.Seg5CuspIntegral
 
 /-!
 # PV Chain Assembly
@@ -20,6 +22,8 @@ Assembles the modular side of the PV chain using `Tendsto` statements for the
 * `cpv_modular_side_tendsto` — the ε-truncated integral of `f'/f` around
     `fdBoundary_H H` tends to `-(2πi · (k/12 - ord_∞(f)))`.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Coleman.Theorem
-import Mathlib.NumberTheory.Padics.AddChar
+module
+
+public import PadicLFunctions.Coleman.Theorem
+public import Mathlib.NumberTheory.Padics.AddChar
 
 /-!
 # Local unit groups of the cyclotomic tower (RJW §9, TeX 2471–2505)
@@ -23,6 +25,10 @@ The congruence `u ≡ 1 (mod 𝔭_n)` is rendered as `‖u − 1‖ < 1` (replan
 mathlib's `PadicInt.addChar_of_value_at_one` applied to `r = u − 1` — literally the
 source's binomial series.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open scoped IntermediateField Topology
 

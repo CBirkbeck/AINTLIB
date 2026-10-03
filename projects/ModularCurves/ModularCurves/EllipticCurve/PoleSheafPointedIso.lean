@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.PoleSheaf
-import ModularCurves.LevelStructure.IsoTransport
+module
+
+public import ModularCurves.EllipticCurve.PoleSheaf
+public import ModularCurves.LevelStructure.IsoTransport
 
 /-!
 # Pole sheaves under pointed isomorphisms
@@ -7,6 +9,8 @@ import ModularCurves.LevelStructure.IsoTransport
 This file transports the ideal sheaf of a section, its dual pole sheaf, and every tensor
 power of that pole sheaf along an isomorphism carrying one marked section to another.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory SheafOfModules
   TopologicalSpace

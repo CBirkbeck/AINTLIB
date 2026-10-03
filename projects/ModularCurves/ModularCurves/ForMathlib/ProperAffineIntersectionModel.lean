@@ -1,8 +1,10 @@
-import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
-import Mathlib.AlgebraicGeometry.Noetherian
-import ModularCurves.ForMathlib.FiniteAffineOpenCover
-import ModularCurves.ForMathlib.FiniteIntersectionGlueComparison
-import ModularCurves.ForMathlib.FinitePresentationSchemeBaseChange
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
+public import Mathlib.AlgebraicGeometry.Noetherian
+public import ModularCurves.ForMathlib.FiniteAffineOpenCover
+public import ModularCurves.ForMathlib.FiniteIntersectionGlueComparison
+public import ModularCurves.ForMathlib.FinitePresentationSchemeBaseChange
 
 /-!
 # Finite-stage models of proper affine-intersection diagrams
@@ -12,6 +14,8 @@ affine cover whose complete intersection diagram consists of finitely presented
 base algebras. The diagram can therefore be spread to one stage of any filtered
 presentation of the base ring while retaining the geometric gluing conditions.
 -/
+
+@[expose] public section
 
 universe u
 

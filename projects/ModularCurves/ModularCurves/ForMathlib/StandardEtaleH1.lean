@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Etale.StandardEtale
-import Mathlib.RingTheory.Etale.Kaehler
-import Mathlib.RingTheory.Unramified.LocalStructure
+module
+
+public import Mathlib.RingTheory.Etale.StandardEtale
+public import Mathlib.RingTheory.Etale.Kaehler
+public import Mathlib.RingTheory.Unramified.LocalStructure
 
 /-!
 # H¹-cotangent base change along standard étale algebras
@@ -24,6 +26,8 @@ flatness of the standard étale cover.
 This is the étale-local input for descending smoothness along the finite
 étale `Y(ρ̄)`-covers (`T-YR-6 (c1)`).
 -/
+
+@[expose] public section
 
 open Polynomial TensorProduct
 

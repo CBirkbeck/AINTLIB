@@ -3,7 +3,9 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Homotopy.Integrality
+module
+
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Homotopy.Integrality
 
 /-!
 # Generalized winding number for curves avoiding `z₀`
@@ -16,6 +18,8 @@ curve avoids the point `z₀`.
 * `generalizedWindingNumber_eq_classical_away` — PV winding number equals the classical
   integral `(2πi)⁻¹ ∫ (γ - z₀)⁻¹ γ'` when `γ` avoids `z₀` on `[a, b]`.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

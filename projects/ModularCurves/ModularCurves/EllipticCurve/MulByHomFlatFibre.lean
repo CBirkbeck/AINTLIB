@@ -1,10 +1,12 @@
-import ModularCurves.ForMathlib.StandardSmoothMaximalDVR
-import ModularCurves.EllipticCurve.MulByHomFibresGlobal
-import ModularCurves.EllipticCurve.AdditionChartDomain
-import Mathlib.RingTheory.Spectrum.Prime.Topology
-import Mathlib.RingTheory.Nilpotent.Lemmas
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.ZariskisMainTheorem
+module
+
+public import ModularCurves.ForMathlib.StandardSmoothMaximalDVR
+public import ModularCurves.EllipticCurve.MulByHomFibresGlobal
+public import ModularCurves.EllipticCurve.AdditionChartDomain
+public import Mathlib.RingTheory.Spectrum.Prime.Topology
+public import Mathlib.RingTheory.Nilpotent.Lemmas
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.ZariskisMainTheorem
 
 /-!
 # BB-FLAT fibre leg: `[N]` on the model over a field is flat ([BBF-A1])
@@ -28,6 +30,8 @@ criterion assembly itself is the separately-boarded Buchsbaum–Eisenbud flat-lo
   `RingHom.Locally` standard-smooth of relative dimension `1`.
 * `injective_of_denseRange_comap` (below): dominance ⟹ injective on (reduced) sections.
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

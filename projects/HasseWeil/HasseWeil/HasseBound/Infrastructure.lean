@@ -3,34 +3,36 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.Witnesses
-import HasseWeil.HasseBound.OneSubFrobenius
-import HasseWeil.HasseBound.Separability
-import HasseWeil.HasseBound.PoleDivisorFallback
-import HasseWeil.HasseBound.QuadraticFormHoleE
-import HasseWeil.HasseBound.PointCount
-import HasseWeil.Foundation.Curves.Ramification.RamificationAtInfinity
-import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
-import HasseWeil.Foundation.Curves.Ramification.PoleOrderParity
-import HasseWeil.Foundation.Curves.Fiber.AFConditional
-import HasseWeil.Foundation.Curves.Divisor.EffectiveSumReduce
-import HasseWeil.Foundation.Curves.Divisor.Miller
-import HasseWeil.Foundation.Curves.Map.CurveMapBaseChange
-import HasseWeil.Isogeny.GroupHom.PicZero
-import HasseWeil.Isogeny.BaseChange.Basic
-import HasseWeil.Isogeny.FormalSeries
-import HasseWeil.Foundation.AdditionPullback
-import HasseWeil.Isogeny.Frobenius.OrdAtInfty
-import HasseWeil.Foundation.AdditionPullback.Differential
-import HasseWeil.Isogeny.Frobenius.PointCount
-import HasseWeil.Isogeny.Dual.Relation
-import HasseWeil.Foundation.Verschiebung.VerschiebungIsDualOfFrobenius
-import Mathlib.RingTheory.AdjoinRoot
-import Mathlib.RingTheory.PolynomialAlgebra
-import Mathlib.RingTheory.TensorProduct.Basic
-import Mathlib.RingTheory.TensorProduct.MvPolynomial
-import Mathlib.RingTheory.TensorProduct.Maps
-import Mathlib.Algebra.MvPolynomial.Equiv
+module
+
+public import HasseWeil.HasseBound.Witnesses
+public import HasseWeil.HasseBound.OneSubFrobenius
+public import HasseWeil.HasseBound.Separability
+public import HasseWeil.HasseBound.PoleDivisorFallback
+public import HasseWeil.HasseBound.QuadraticFormHoleE
+public import HasseWeil.HasseBound.PointCount
+public import HasseWeil.Foundation.Curves.Ramification.RamificationAtInfinity
+public import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
+public import HasseWeil.Foundation.Curves.Ramification.PoleOrderParity
+public import HasseWeil.Foundation.Curves.Fiber.AFConditional
+public import HasseWeil.Foundation.Curves.Divisor.EffectiveSumReduce
+public import HasseWeil.Foundation.Curves.Divisor.Miller
+public import HasseWeil.Foundation.Curves.Map.CurveMapBaseChange
+public import HasseWeil.Isogeny.GroupHom.PicZero
+public import HasseWeil.Isogeny.BaseChange.Basic
+public import HasseWeil.Isogeny.FormalSeries
+public import HasseWeil.Foundation.AdditionPullback
+public import HasseWeil.Isogeny.Frobenius.OrdAtInfty
+public import HasseWeil.Foundation.AdditionPullback.Differential
+public import HasseWeil.Isogeny.Frobenius.PointCount
+public import HasseWeil.Isogeny.Dual.Relation
+public import HasseWeil.Foundation.Verschiebung.VerschiebungIsDualOfFrobenius
+public import Mathlib.RingTheory.AdjoinRoot
+public import Mathlib.RingTheory.PolynomialAlgebra
+public import Mathlib.RingTheory.TensorProduct.Basic
+public import Mathlib.RingTheory.TensorProduct.MvPolynomial
+public import Mathlib.RingTheory.TensorProduct.Maps
+public import Mathlib.Algebra.MvPolynomial.Equiv
 
 /-!
 # Consolidated open lemmas for the Hasse bound (reviewer rounds 3, 4 revised)
@@ -158,6 +160,8 @@ are documented in the sweep note at the top of this docstring.
   (degrees), III.7 (Verschiebung / dual isogeny), V.1.3 (separable degree
   of Frobenius minus identity).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 open HasseWeil.Curves.RamificationAtInfinity

@@ -6,8 +6,10 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `IdealSheafPowerSubscheme.lean` in
 Vilin97/Clawristotle.
 -/
-import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
-import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+module
+
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 
 /-!
 # Positive powers and their closed subschemes
@@ -15,6 +17,8 @@ import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 This file records the affine kernel and underlying closed set of the
 subscheme defined by a positive power of an ideal sheaf.
 -/
+
+@[expose] public section
 
 open TopologicalSpace
 

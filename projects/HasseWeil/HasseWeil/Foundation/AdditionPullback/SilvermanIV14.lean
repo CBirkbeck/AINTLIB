@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.AdditionPullback.Differential
-import HasseWeil.Foundation.BridgeFrobenius
-import HasseWeil.Foundation.HahnSeriesAux
+module
+
+public import HasseWeil.Foundation.AdditionPullback.Differential
+public import HasseWeil.Foundation.BridgeFrobenius
+public import HasseWeil.Foundation.HahnSeriesAux
 
 /-!
 # Silverman IV.1.4 scaffold for the leading-coefficient bridge
@@ -53,6 +55,8 @@ The substantive piece breaks into:
 * Silverman, *The Arithmetic of Elliptic Curves*, IV.1.4 (formal group law
   agreement with the addition formula's local expansion).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve PowerSeries LaurentSeries
 

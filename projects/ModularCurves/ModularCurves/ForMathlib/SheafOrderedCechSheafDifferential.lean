@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SheafCechSheafDifferential
-import ModularCurves.ForMathlib.SheafOrderedCechSheafTerms
+module
+
+public import ModularCurves.ForMathlib.SheafCechSheafDifferential
+public import ModularCurves.ForMathlib.SheafOrderedCechSheafTerms
 
 /-!
 # The differential in the ordered sheaf-level Cech resolution
@@ -8,6 +10,10 @@ This file defines the cofaces and alternating differential on the sheaf-level
 Cech terms indexed by strictly increasing tuples. The component formulas
 identify these maps with the ordered Cech differential on sections.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

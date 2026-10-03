@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.GammaHMaster
-import ModularCurves.Moduli.KeystoneGeometricPoint
-import ModularCurves.Moduli.EngineWiring
+module
+
+public import ModularCurves.Moduli.GammaHMaster
+public import ModularCurves.Moduli.KeystoneGeometricPoint
+public import ModularCurves.Moduli.EngineWiring
 
 /-!
 # The T-H8/T-H9 closure layer: Drinfeld representability from the boxed keystones
@@ -37,6 +39,8 @@ The `GammaH.lean` statements themselves cannot import this file (they sit upstre
 these closure theorems are the library forms of record — downstream consumers should use
 them.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

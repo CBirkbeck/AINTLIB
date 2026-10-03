@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.FiniteHomologySequence
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechExact
+module
+
+public import ModularCurves.ForMathlib.FiniteHomologySequence
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechExact
 
 /-!
 # Finiteness of ordered base-linear Cech homology
@@ -12,6 +14,8 @@ import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechExact
 Over a Noetherian coefficient ring, finiteness of every ordered base-Cech homology
 module is stable under short exact sequences of quasicoherent scheme modules.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 

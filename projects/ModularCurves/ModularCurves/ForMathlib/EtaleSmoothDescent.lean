@@ -3,14 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.EtaleH1Descent
-import Mathlib.RingTheory.Smooth.StandardSmoothOfFree
-import Mathlib.RingTheory.Adjoin.Tower
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
-import Mathlib.RingTheory.RingHom.StandardSmooth
-import Mathlib.RingTheory.RingHom.Locally
-import Mathlib.RingTheory.Smooth.Locus
-import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+module
+
+public import ModularCurves.ForMathlib.EtaleH1Descent
+public import Mathlib.RingTheory.Smooth.StandardSmoothOfFree
+public import Mathlib.RingTheory.Adjoin.Tower
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+public import Mathlib.RingTheory.RingHom.StandardSmooth
+public import Mathlib.RingTheory.RingHom.Locally
+public import Mathlib.RingTheory.Smooth.Locus
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 
 /-!
 # Smoothness descends along finite étale faithfully flat covers
@@ -23,6 +25,8 @@ smooth over a noetherian base `k`, then `A` is smooth over `k`.
 * the `H¹`-half is `Algebra.subsingleton_h1Cotangent_of_etale_faithfullyFlat`;
 * finite presentation of `A` over `k` is the Artin–Tate lemma.
 -/
+
+@[expose] public section
 
 open TensorProduct
 

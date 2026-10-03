@@ -1,12 +1,14 @@
-import ModularCurves.EllipticCurve.PoleSheafCechHOne
-import ModularCurves.EllipticCurve.PoleSheafFibreHOne
-import ModularCurves.EllipticCurve.PoleSheafFibreSections
-import ModularCurves.ForMathlib.AffineModuleCechBaseChange
-import ModularCurves.ForMathlib.CochainComplexKernel
-import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
-import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
-import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafCechHOne
+public import ModularCurves.EllipticCurve.PoleSheafFibreHOne
+public import ModularCurves.EllipticCurve.PoleSheafFibreSections
+public import ModularCurves.ForMathlib.AffineModuleCechBaseChange
+public import ModularCurves.ForMathlib.CochainComplexKernel
+public import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
 
 /-!
 # Base-linear Cech comparison for pole sheaves
@@ -14,6 +16,10 @@ import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
 Retain the affine-base module structure on the Cech model computing degree-one
 cohomology of the pole line bundles on a smooth proper pointed relative curve.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TopologicalSpace
 

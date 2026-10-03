@@ -1,6 +1,8 @@
-import Mathlib.AlgebraicGeometry.Cover.Open
-import Mathlib.AlgebraicGeometry.AffineScheme
-import ModularCurves.Picard.InvertibleSheaf
+module
+
+public import Mathlib.AlgebraicGeometry.Cover.Open
+public import Mathlib.AlgebraicGeometry.AffineScheme
+public import ModularCurves.Picard.InvertibleSheaf
 
 /-!
 # Finite affine trivializing covers of invertible sheaves
@@ -8,6 +10,8 @@ import ModularCurves.Picard.InvertibleSheaf
 On a compact scheme, refine the defining trivializing cover of an invertible
 sheaf by the affine-open basis and then take a finite subcover.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

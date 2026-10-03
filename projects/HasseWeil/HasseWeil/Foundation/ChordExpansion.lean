@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.FormalGroupLawSpec
-import HasseWeil.Isogeny.FormalSeries
+module
+
+public import HasseWeil.FormalGroup.FormalGroupLawSpec
+public import HasseWeil.Isogeny.FormalSeries
 
 /-!
 # Chord expansion: the specialization layer (Silverman IV §1 at isogeny pullbacks)
@@ -67,6 +69,8 @@ no Laurent-series substitution anywhere) and `.mathlib-quality/tickets-iv1.md`
 
 * [Silverman, *The Arithmetic of Elliptic Curves*][silverman2009], IV §1.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve PowerSeries LaurentSeries
 

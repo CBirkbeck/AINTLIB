@@ -1,5 +1,8 @@
-import BernoulliRegular.FLT37.KummerUnits
-import FltRegular.NumberTheory.KummersLemma.KummersLemma
+module
+
+import FltRegular.NumberTheory.Hilbert94
+public import BernoulliRegular.FLT37.KummerUnits
+public import FltRegular.NumberTheory.KummersLemma.KummersLemma
 
 /-!
 # Real Kummer's lemma (the concrete Stage 2 target)

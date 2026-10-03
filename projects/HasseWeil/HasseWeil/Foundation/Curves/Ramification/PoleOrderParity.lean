@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.PicZero
-import HasseWeil.Foundation.Curves.Valuation.Infinity
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.PicZero
+public import HasseWeil.Foundation.Curves.Valuation.Infinity
 
 /-!
 # Pole-order parity at infinity
@@ -26,6 +28,8 @@ fact, weakened to the special case `(P) − (O)` is principal ⇒ P = O).
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.5 (algebraic
   Liouville-type results), III.3.3 (no degree-1 morphism to ℙ¹).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves.SmoothPlaneCurve
 

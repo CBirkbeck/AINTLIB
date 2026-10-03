@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornC1PerWCoverPieceSupplier
+module
+
+public import «Adic spaces».WedhornC1PerWCoverPieceSupplier
 
 /-!
 # Wedhorn 8.34(ii) — Per-`w` cover-piece upper-bound supplier (T040)
@@ -110,6 +112,8 @@ corresponding to Wedhorn 7.45's deduction at the localized side.
   the C1 layer; its honest discharge corresponds to the localized
   analog of Wedhorn Lemma 7.45 and is genuine downstream content.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

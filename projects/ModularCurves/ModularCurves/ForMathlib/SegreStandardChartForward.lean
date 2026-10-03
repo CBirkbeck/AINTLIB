@@ -6,8 +6,10 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreStandardChartForward`.
 -/
-import ModularCurves.ForMathlib.ProjectiveCoordinateChartAlgebra
-import ModularCurves.ForMathlib.SegreImageAffineCover
+module
+
+public import ModularCurves.ForMathlib.ProjectiveCoordinateChartAlgebra
+public import ModularCurves.ForMathlib.SegreImageAffineCover
 
 /-!
 # The forward map on a standard Segre chart
@@ -15,6 +17,8 @@ import ModularCurves.ForMathlib.SegreImageAffineCover
 On the chart where `XᵢYⱼ` is nonzero, the Segre coordinate `XₐY_b`
 dehomogenizes to `(Xₐ / Xᵢ) ⊗ (Y_b / Yⱼ)`.
 -/
+
+@[expose] public section
 
 open HomogeneousLocalization
 open scoped TensorProduct

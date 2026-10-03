@@ -3,15 +3,17 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Lie.OfAssociative
-import Mathlib.Analysis.Normed.Lp.WithLp
-import Mathlib.Analysis.Normed.Ring.Lemmas
-import Mathlib.Data.Finsupp.Pointwise
-import Mathlib.Algebra.Order.Star.Int
-import Mathlib.GroupTheory.Commensurable
-import Mathlib.GroupTheory.DoubleCoset
-import Mathlib.Order.CompletePartialOrder
-import Mathlib.Tactic.Group
+module
+
+public import Mathlib.Algebra.Lie.OfAssociative
+public import Mathlib.Analysis.Normed.Lp.WithLp
+public import Mathlib.Analysis.Normed.Ring.Lemmas
+public import Mathlib.Data.Finsupp.Pointwise
+public import Mathlib.Algebra.Order.Star.Int
+public import Mathlib.GroupTheory.Commensurable
+public import Mathlib.GroupTheory.DoubleCoset
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Tactic.Group
 
 /-!
 # Hecke Rings: Basic Definitions
@@ -20,6 +22,8 @@ Basic definitions for Hecke rings following Shimura Ch. 3: `HeckePair`, double c
 spaces `HeckeCoset` and `HeckeLeftCoset`, the Hecke ring type `𝕋` and module type `HeckeModule`,
 and foundational double coset lemmas.
 -/
+
+@[expose] public section
 
 open Set DoubleCoset Subgroup Subgroup.Commensurable
 

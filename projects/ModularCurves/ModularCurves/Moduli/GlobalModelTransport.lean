@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionBaseChange
-import ModularCurves.EllipticCurve.GroupLawAxioms
-import ModularCurves.Moduli.EngineDescent
+module
+
+public import ModularCurves.EllipticCurve.AdditionBaseChange
+public import ModularCurves.EllipticCurve.GroupLawAxioms
+public import ModularCurves.Moduli.EngineDescent
 
 /-!
 # [B0] T-B0-GLOBALMODEL — the global Weierstrass model transports to `𝕸(𝒫,δ)`
@@ -31,6 +33,10 @@ global model is stable under pullback along *any* morphism of affine bases.
   global model. Source: KM 4.7.0 setup (p. 113); the applications (Legendre, Hesse) supply
   the model on `Xδ`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve
 

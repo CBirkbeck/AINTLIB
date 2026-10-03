@@ -1,6 +1,8 @@
-import ModularCurves.ForMathlib.SheafCechGlobalSections
-import ModularCurves.ForMathlib.SheafCechSheafResolution
-import ModularCurves.ForMathlib.SheafCohomologyExact
+module
+
+public import ModularCurves.ForMathlib.SheafCechGlobalSections
+public import ModularCurves.ForMathlib.SheafCechSheafResolution
+public import ModularCurves.ForMathlib.SheafCohomologyExact
 
 /-!
 # Cech comparison for acyclic covers
@@ -10,6 +12,10 @@ augmented sheaf-level Cech resolution. Dimension shifting then turns vanishing o
 positive cohomology of the Cech terms into exactness of the Cech complex of global
 sections.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

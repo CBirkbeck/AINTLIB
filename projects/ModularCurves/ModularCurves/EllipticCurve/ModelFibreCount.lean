@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.MulByHomFibres
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.EllipticCurve.MulByHomFibres
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The model fibre-count (BB-QF, ALPHA leg)
@@ -19,6 +21,8 @@ These feed the fibre-count case analysis on `projModel W` (whose complement of t
 `zChart` is contained in the single-point range of the zero section), which the BETA leg's
 transport assembly consumes.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory WeierstrassCurve
 

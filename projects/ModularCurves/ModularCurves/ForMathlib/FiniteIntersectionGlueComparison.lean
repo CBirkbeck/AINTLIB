@@ -1,6 +1,8 @@
-import Mathlib.AlgebraicGeometry.Morphisms.IsIso
-import ModularCurves.ForMathlib.FiniteIntersectionFunctorGeometry
-import ModularCurves.ForMathlib.SpecBasicOpenAway
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.IsIso
+public import ModularCurves.ForMathlib.FiniteIntersectionFunctorGeometry
+public import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
 # Comparison of finite-intersection gluing with the original scheme
@@ -9,6 +11,10 @@ The affine-intersection algebra functor of an affine open cover produces scheme
 glue data. This file identifies its singleton and pair spectra with the original
 geometric opens and proves that the resulting glued scheme is the original scheme.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

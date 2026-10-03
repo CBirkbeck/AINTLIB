@@ -1,14 +1,16 @@
-import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.GaloisActionDecompositionAndEigenspace
-import BernoulliRegular.Thaine.UnitsComplexConjBridge
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.CharacterIdentification
-import BernoulliRegular.UnitQuotient.ModPReduction
-import BernoulliRegular.UnitQuotient.FreeLatticeComparison.ModPRepresentation
-import BernoulliRegular.UnitQuotient.FreeLatticeComparison.Eigenspaces
-import BernoulliRegular.UnitQuotient.GlobalUnitDimension
-import BernoulliRegular.FLT37.LehmerVandiver.PollaczekLog.FLT37Closure
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.PthPowerLift
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.CertificateAudit
+module
+
+public import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.GaloisActionDecompositionAndEigenspace
+public import BernoulliRegular.Thaine.UnitsComplexConjBridge
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.CharacterIdentification
+public import BernoulliRegular.UnitQuotient.ModPReduction
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.ModPRepresentation
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.Eigenspaces
+public import BernoulliRegular.UnitQuotient.GlobalUnitDimension
+public import BernoulliRegular.FLT37.LehmerVandiver.PollaczekLog.FLT37Closure
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.PthPowerLift
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.CertificateAudit
 
 /-!
 # T-EIG-B1: Structural decomposition of σ_a • pollaczekUnitPlus

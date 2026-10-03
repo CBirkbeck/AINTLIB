@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Pic0.PicDualDegreeViaIsDualOf
-import HasseWeil.Isogeny.BaseChange.Basic
-import HasseWeil.Pic0.ToClassFunctorial
+module
+
+public import HasseWeil.Pic0.PicDualDegreeViaIsDualOf
+public import HasseWeil.Isogeny.BaseChange.Basic
+public import HasseWeil.Pic0.ToClassFunctorial
 
 /-!
 # Route C (geometric): closing Leaf 1 over `F̄` WITHOUT the genuine-comorphism upgrade
@@ -48,6 +50,8 @@ comorphism** for `picDual` (no genuine isogeny, no Wall A / BRIDGE-003, no Wall 
   point-map push-pull + dual additivity + Vieta, pinned by TARGET 1, with **no** `IsGenuineWith`,
   **no** `Surjective β.toAddMonoidHom`, **no** Wall C.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 open scoped nonZeroDivisors

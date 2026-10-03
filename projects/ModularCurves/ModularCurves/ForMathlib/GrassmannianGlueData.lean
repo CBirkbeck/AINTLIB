@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.GrassmannianTransition
-import ModularCurves.ForMathlib.GrassmannianChart
-import ModularCurves.ForMathlib.GrassmannianOverlap
-import Mathlib.AlgebraicGeometry.Gluing
-import Mathlib.AlgebraicGeometry.Pullbacks
+module
+
+public import ModularCurves.ForMathlib.GrassmannianTransition
+public import ModularCurves.ForMathlib.GrassmannianChart
+public import ModularCurves.ForMathlib.GrassmannianOverlap
+public import Mathlib.AlgebraicGeometry.Gluing
+public import Mathlib.AlgebraicGeometry.Pullbacks
 
 /-!
 # The Grassmannian chart atlas as scheme glue data ([NISOG-GRASS], [GR-D]+[GR-F] opening)
@@ -22,6 +24,8 @@ reducing to the ring layer per the pinned architecture) is the next increment.
 Decomposition artifact: `.mathlib-quality/decomposition-nisog-grass.md` ([STREAM-FP],
 fable-FP, [GR-F] architecture pin).
 -/
+
+@[expose] public section
 
 -- v4.33 bump: neither the category instances nor the semireducible component types are
 -- transparent enough for the rewrites and instance searches below.

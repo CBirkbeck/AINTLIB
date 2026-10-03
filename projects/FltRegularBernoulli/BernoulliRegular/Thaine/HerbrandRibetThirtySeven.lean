@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.BernoulliFast.Tactic
-import Mathlib.NumberTheory.Bernoulli
+module
+
+public import BernoulliRegular.BernoulliFast.Tactic
+public import Mathlib.NumberTheory.Bernoulli
 
 /-!
 # Herbrand-Ribet small-Bernoulli data for `p = 37`

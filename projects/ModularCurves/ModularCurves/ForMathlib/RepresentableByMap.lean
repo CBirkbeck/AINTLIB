@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.CategoryTheory.Yoneda
+module
+
+public import Mathlib.CategoryTheory.Yoneda
 
 /-!
 # The morphism of representing objects induced by a natural transformation
@@ -20,6 +22,8 @@ That is what a level-forgetting map of moduli problems needs — `[Γ(N)] ⟶ [�
 `homEquiv_comp_map` is the characterising property, and the one downstream proofs use:
 precomposing with the induced morphism is applying `α`.
 -/
+
+@[expose] public section
 
 universe v u
 

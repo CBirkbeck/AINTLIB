@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.FieldLeaf
-import ModularCurves.WeilPairing.GlueDataset
-import ModularCurves.WeilPairing.ValuationTransport
-import HasseWeil.HasseBound.WeilPairing.HfactLemma
-import HasseWeil.Foundation.Curves.Fiber.GenericFiber
+module
+
+public import ModularCurves.WeilPairing.FieldLeaf
+public import ModularCurves.WeilPairing.GlueDataset
+public import ModularCurves.WeilPairing.ValuationTransport
+public import HasseWeil.HasseBound.WeilPairing.HfactLemma
+public import HasseWeil.Foundation.Curves.Fiber.GenericFiber
 
 /-!
 # The scheme-to-HasseWeil order pipeline ([FF-TRANSPORT] + [L1])
@@ -28,6 +30,10 @@ classical Weil function `g_T` lives in HasseWeil's `W.toAffine.FunctionField`. T
   (U5-L1b). The `[N]`-pullback factor `r` is existential — its τ-invariance (all that L3
   needs) holds for *any* `[N]`-pullback since `[N] ∘ τ_S = [N]`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

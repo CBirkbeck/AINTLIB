@@ -3,13 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
-import Mathlib.RingTheory.Etale.Field
-import Mathlib.LinearAlgebra.Dimension.Free
-import Mathlib.FieldTheory.Fixed
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import Mathlib.RingTheory.Etale.Field
+public import Mathlib.LinearAlgebra.Dimension.Free
+public import Mathlib.FieldTheory.Fixed
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Counting points of finite étale algebras over a separably closed field
@@ -24,6 +27,10 @@ rank `r` over `Spec k̄` has exactly `r` points" (ticket T-B6d; scheme side in
 Engine: mathlib's `Algebra.FormallyEtale.equivPiOfIsSepClosed : A ≃ₐ[K] (PrimeSpectrum A → K)`
 together with its `_comap` and `_self_apply` lemmas.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

@@ -1,4 +1,6 @@
-import ModularCurves.EllipticCurve.PoleFiltration
+module
+
+public import ModularCurves.EllipticCurve.PoleFiltration
 
 /-!
 # Evaluation on the affine Weierstrass model
@@ -7,6 +9,8 @@ A pair satisfying the mapped affine Weierstrass equation defines a ring
 homomorphism from the affine coordinate ring.  The formulas below record its
 values on the base ring and the two standard coordinates.
 -/
+
+@[expose] public section
 
 universe u
 

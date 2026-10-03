@@ -6,8 +6,10 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `OpenRestrictionComparisonSupport.lean`
 in Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.SchemeModuleRestrictLimits
-import ModularCurves.ForMathlib.SchemeModuleSupportDrop
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleRestrictLimits
+public import ModularCurves.ForMathlib.SchemeModuleSupportDrop
 
 /-!
 # Support of residuals of an open-local isomorphism
@@ -17,6 +19,8 @@ its kernel and cokernel residuals vanish there. If that open meets the source
 support and the target support is contained in the source support, both
 residuals have strictly smaller closed stalk support.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 

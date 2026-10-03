@@ -5,12 +5,14 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q3.
 -/
-import ModularCurves.ForMathlib.SpecGroupAction
-import ModularCurves.ForMathlib.InvariantLocalization
-import ModularCurves.ForMathlib.InvariantTorsor
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.PullbackCarrier
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.ForMathlib.SpecGroupAction
+public import ModularCurves.ForMathlib.InvariantLocalization
+public import ModularCurves.ForMathlib.InvariantTorsor
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.PullbackCarrier
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The affine quotient by a finite group action: universal property
@@ -38,6 +40,8 @@ around each `p : Spec Bᴳ` one finds an invariant basic open `D(a) ∋ p` with
 closed), and there the factorization is the algebra statement "invariants of the
 localization = localization of the invariants" (`InvariantLocalization.lean`).
 -/
+
+@[expose] public section
 
 universe u v
 

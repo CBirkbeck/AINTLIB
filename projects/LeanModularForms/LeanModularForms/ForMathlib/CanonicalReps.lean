@@ -3,7 +3,9 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.OrbitPairing
+module
+
+public import LeanModularForms.ForMathlib.OrbitPairing
 
 /-!
 # Canonical Representatives for Non-Elliptic Orbits
@@ -29,6 +31,8 @@ finsets used by `valence_formula_orbit_sum_s₀`.
   representative in `repCanon`
 * `orb_injOn_repCanon` — the orbit map is injective on `repCanon`
 -/
+
+@[expose] public section
 
 open Complex Set CongruenceSubgroup
 open scoped UpperHalfPlane ModularForm Modular MatrixGroups

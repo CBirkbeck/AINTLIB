@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjNormDescentDatumCapstone
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.ConjNormDescentDatumCapstone
 
 /-!
 # [FLT37-CASEII-R2] The **conjugate-norm** descended free-content datum (ξ-side reconciliation)

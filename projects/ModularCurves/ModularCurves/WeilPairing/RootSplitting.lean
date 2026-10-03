@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.CharZeroDescent
-import ModularCurves.WeilPairing.FieldPairingDet
+module
+
+public import ModularCurves.WeilPairing.CharZeroDescent
+public import ModularCurves.WeilPairing.FieldPairingDet
 
 /-!
 # Splitting `μ_N` by a root of unity (route A, step 1)
@@ -25,6 +27,8 @@ independent of the choice.
 assembles them over the constant scheme; `rootSplitting_π` records that it is a morphism over
 `S'`, which the descent's `overBase` field consumes.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

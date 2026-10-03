@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PullbackTensorSection
-import ModularCurves.Picard.PicComparison
-import ModularCurves.WeilPairing.KMPatching
+module
+
+public import ModularCurves.EllipticCurve.PullbackTensorSection
+public import ModularCurves.Picard.PicComparison
+public import ModularCurves.WeilPairing.KMPatching
 
 /-!
 # The transition cocycle is monoidal (the AP-D7 brick)
@@ -45,6 +47,8 @@ trivialization instead of the trivialization itself:
 The units in the conclusion are *not* obtainable from the coboundary relation alone (the zero
 family satisfies it): they come from `IsFrame`, i.e. from the frames being generators.
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

@@ -3,13 +3,17 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.ValenceFormula.OnCurvePV.EndpointCorner
+module
+
+public import LeanModularForms.ForMathlib.ValenceFormula.OnCurvePV.EndpointCorner
 
 /-!
 # On-Curve PV: Main Theorem
 
 For any point `s` on `fdBoundary_H H`, the CPV integral of `(z - s)⁻¹` exists.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

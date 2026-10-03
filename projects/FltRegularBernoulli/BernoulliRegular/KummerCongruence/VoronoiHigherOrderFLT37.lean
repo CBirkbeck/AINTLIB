@@ -1,5 +1,7 @@
-import BernoulliRegular.KummerCongruence.VoronoiHigherOrder
-import BernoulliRegular.BernoulliFast.Tactic
+module
+
+public import BernoulliRegular.KummerCongruence.VoronoiHigherOrder
+public import BernoulliRegular.BernoulliFast.Tactic
 
 
 /-!

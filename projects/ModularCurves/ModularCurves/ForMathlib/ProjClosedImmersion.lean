@@ -5,10 +5,12 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-A2d.
 -/
-import ModularCurves.ForMathlib.GradedQuotient
-import ModularCurves.ForMathlib.ProjectiveSpaceChart
-import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
-import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
+module
+
+public import ModularCurves.ForMathlib.GradedQuotient
+public import ModularCurves.ForMathlib.ProjectiveSpaceChart
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
 
 /-!
 # `Proj` of a quotient grading is a closed subscheme of `Proj`
@@ -26,6 +28,8 @@ because the quotient grading consists of images.
   subscheme of `Proj`.
 * `ker_away_map_quotientGradingHom`: the chartwise kernel of a principal quotient is principal.
 -/
+
+@[expose] public section
 
 namespace HomogeneousIdeal
 

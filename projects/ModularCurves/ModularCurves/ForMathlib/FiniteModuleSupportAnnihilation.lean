@@ -6,10 +6,12 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `FiniteModuleSupportAnnihilation.lean`
 in Vilin97/Clawristotle.
 -/
-import Mathlib.Algebra.Module.Torsion.Basic
-import Mathlib.RingTheory.Finiteness.Ideal
-import Mathlib.RingTheory.Noetherian.Defs
-import Mathlib.RingTheory.Support
+module
+
+public import Mathlib.Algebra.Module.Torsion.Basic
+public import Mathlib.RingTheory.Finiteness.Ideal
+public import Mathlib.RingTheory.Noetherian.Defs
+public import Mathlib.RingTheory.Support
 
 /-!
 # Annihilating a finite module by a power of a support ideal
@@ -18,6 +20,8 @@ If the support of a finite module is contained in the zero locus of a
 finitely generated ideal, then one power of that ideal annihilates the
 module.
 -/
+
+@[expose] public section
 
 open PrimeSpectrum
 

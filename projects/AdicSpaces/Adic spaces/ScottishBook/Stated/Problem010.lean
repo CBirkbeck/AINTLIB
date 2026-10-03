@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».AnalyticPoints
-import «Adic spaces».AdicSpectrum
+module
+
+public import «Adic spaces».AnalyticPoints
+public import «Adic spaces».AdicSpectrum
 
 /-!
 # Nonarchimedean Scottish Book — Problem 10
@@ -53,6 +55,8 @@ gave a counterexample showing the answer is no.
 * Kedlaya, *The Nonarchimedean Scottish Book*, Problem 10
 * Wedhorn, *Adic Spaces*, Definition 8.35, Proposition 8.36
 -/
+
+@[expose] public section
 
 open ValuationSpectrum
 

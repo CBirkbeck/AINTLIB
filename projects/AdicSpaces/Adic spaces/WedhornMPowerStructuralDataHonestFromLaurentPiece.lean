@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornMPowerStructuralDataHonest
-import «Adic spaces».WedhornLocalCor732ToFactoredChain
+module
+
+public import «Adic spaces».WedhornMPowerStructuralDataHonest
+public import «Adic spaces».WedhornLocalCor732ToFactoredChain
 
 /-!
 # `WedhornMPowerStructuralDataHonest` from localized Cor 7.32 Laurent-piece membership
@@ -81,6 +83,8 @@ strict <-domination at every τ), and matches Wedhorn's actual
   or bivariate-overlap content. No revival of the parked
   `sigma_power_decay_of_cor732` route.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

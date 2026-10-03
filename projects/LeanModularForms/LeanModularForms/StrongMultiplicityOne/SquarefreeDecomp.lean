@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.StrongMultiplicityOne.LevelCommute
+module
+
+public import LeanModularForms.StrongMultiplicityOne.LevelCommute
 
 /-!
 # Strong Multiplicity One via Miyake §4.6 — squarefree decomposition (4.6.7)
@@ -13,6 +15,10 @@ descent identity, and the per-`q` slash-sum machinery up to
 `function_identity_Δ_eq_sum_V_q_F`. Part of a multi-file split of
 `StrongMultiplicityOne.lean`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup UpperHalfPlane
 open scoped MatrixGroups ModularForm

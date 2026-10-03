@@ -1,7 +1,9 @@
-import Mathlib.AlgebraicGeometry.PullbackCarrier
-import Mathlib.AlgebraicGeometry.Pullbacks
-import ModularCurves.ForMathlib.FinitePresentationFunctorBaseChange
-import ModularCurves.ForMathlib.FinitePresentationSchemeGlueData
+module
+
+public import Mathlib.AlgebraicGeometry.PullbackCarrier
+public import Mathlib.AlgebraicGeometry.Pullbacks
+public import ModularCurves.ForMathlib.FinitePresentationFunctorBaseChange
+public import ModularCurves.ForMathlib.FinitePresentationSchemeGlueData
 
 /-!
 # Scheme base change of spread functor models
@@ -11,6 +13,10 @@ original affine scheme after extension to the filtered-colimit base. The compari
 natural in the modeled diagram and specializes to the singleton charts of the associated
 affine-intersection glue data.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

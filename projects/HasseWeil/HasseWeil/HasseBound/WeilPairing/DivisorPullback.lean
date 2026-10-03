@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.EC.MulByIntSamePlace
-import HasseWeil.Foundation.EC.MulByIntUnramified
-import HasseWeil.Foundation.EC.TranslateOrdInfty
-import HasseWeil.HasseBound.WeilPairing.SigmaBridge
-import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
+module
+
+public import HasseWeil.Foundation.EC.MulByIntSamePlace
+public import HasseWeil.Foundation.EC.MulByIntUnramified
+public import HasseWeil.Foundation.EC.TranslateOrdInfty
+public import HasseWeil.HasseBound.WeilPairing.SigmaBridge
+public import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
 
 /-!
 # Divisor-pullback functoriality for the separable multiplication-by-`ℓ` isogeny
@@ -52,6 +54,8 @@ III.8.1–2 in divisor language: the geometric content of the separability of `[
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, III.4.10c, III.8.1, III.8.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

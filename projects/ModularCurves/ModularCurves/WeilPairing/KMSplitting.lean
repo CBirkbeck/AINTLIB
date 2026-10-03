@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.DualPullback.LocalTrivialization
-import ModularCurves.Picard.DualPullback.Map
-import ModularCurves.WeilPairing.UnitSheaf
+module
+
+public import ModularCurves.Picard.DualPullback.LocalTrivialization
+public import ModularCurves.Picard.DualPullback.Map
+public import ModularCurves.WeilPairing.UnitSheaf
 
 /-!
 # `f_{i,j} ∘ [N] = h_i / h_j` — the existence half (ticket AP-D5)
@@ -52,6 +54,8 @@ Nothing here needs the index type to be nonempty, the `W i` to cover `X`, or `N 
 splitting is a statement about one overlap at a time and is vacuously true on an empty cover.
 All the `N`-dependence of the KM construction sits in the input `Pic.map (mulByN E t N) L = 1`.
 -/
+
+@[expose] public section
 
 universe u
 

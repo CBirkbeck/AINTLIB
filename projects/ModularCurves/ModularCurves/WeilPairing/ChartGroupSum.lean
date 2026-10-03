@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.ModelRecord
-import ModularCurves.EllipticCurve.RecordGroupUnique
-import ModularCurves.WeilPairing.ChartFromUniversalPair
+module
+
+public import ModularCurves.EllipticCurve.ModelRecord
+public import ModularCurves.EllipticCurve.RecordGroupUnique
+public import ModularCurves.WeilPairing.ChartFromUniversalPair
 
 /-!
 # The Weierstrass chart isomorphism is a group isomorphism (B3-step5b)
@@ -47,6 +49,10 @@ Nothing here needs the base to be reduced or Noetherian: that gap was closed ups
 `IsSquareIdentity.of_projModel'`, and the group-isomorphism primitive
 `isMonHom_of_pointedIso_records` is already an arbitrary-base statement.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

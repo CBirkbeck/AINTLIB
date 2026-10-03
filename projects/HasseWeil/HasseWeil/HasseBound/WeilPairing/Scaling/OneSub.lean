@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.Scaling.Separable
-import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
+module
+
+public import HasseWeil.HasseBound.WeilPairing.Scaling.Separable
+public import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
 
 /-!
 # The separable `1 − π` Weil-pairing scaling (Silverman III.8.6.1), CoordHom-free
@@ -64,6 +66,8 @@ base-change residuals (`FrobeniusScalingWitnesses`, `ProjOrdTransport`, `Natural
   covariance behind the separable adjoint), III.8.6.1 (the symplectic scaling
   `e_ℓ(φS, φT) = e_ℓ(S,T)^{deg φ}`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SheafCechSheafTerms
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
+module
+
+public import ModularCurves.ForMathlib.SheafCechSheafTerms
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
 
 /-!
 # Ordered sheaf-level Cech terms
@@ -8,6 +10,10 @@ This file restricts the sheaf-level Cech terms to strictly increasing tuples.
 Sections of an ordered term are identified with ordered families of sections
 on the corresponding intersections.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

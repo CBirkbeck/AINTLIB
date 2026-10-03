@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.TranslationBySection
-import ModularCurves.WeilPairing.KMUniqueness
+module
+
+public import ModularCurves.GroupScheme.TranslationBySection
+public import ModularCurves.WeilPairing.KMUniqueness
 
 /-!
 # Translation by a torsion section, and translation invariance of the splitting units
@@ -46,6 +48,10 @@ that unit is `h(P')`. Evaluating at `P` then reads off `h(P + P') = h(P)·h(P')`
 Nothing here uses `exists_torsionPoint_of_mem_kerMulByN` (`WeilPairing/KMPairing.lean`), so no
 declaration below inherits that `sorryAx`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

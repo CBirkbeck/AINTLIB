@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.Factorization
-import ModularCurves.Moduli.PullSectionCanonicity
-import ModularCurves.ForMathlib.FiniteFlatRigidity
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.LevelStructure.Factorization
+public import ModularCurves.Moduli.PullSectionCanonicity
+public import ModularCurves.ForMathlib.FiniteFlatRigidity
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The full-level bridge, forward half (T-D8 ⟹, KM 3.7 / 1.4.4 for Γ(N))
@@ -28,6 +30,8 @@ remaining content of the box — see the scope notes on the board (it needs the
 divisor↔norm dictionary `isFullSetOfSectionsAlg_iff_fields` (T-D2, proved) or an
 étale/reduced-fibre route).
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

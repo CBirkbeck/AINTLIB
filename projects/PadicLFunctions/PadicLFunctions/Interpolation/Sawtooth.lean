@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Common.Analysis.DirichletBounds
-import Mathlib.Analysis.Complex.AbelLimit
-import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
+module
+
+public import Common.Analysis.DirichletBounds
+public import Mathlib.Analysis.Complex.AbelLimit
+public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 
 /-!
 # The sawtooth boundary value and `hurwitzZeta` at `s = 0`
@@ -24,6 +26,8 @@ author's `flt-regular-bernoulli` project (`BernoulliRegular/LValueAtOne/
 prime-modulus wrappers; provenance recorded in `.mathlib-quality/plan.md`
 (survey addendum).
 -/
+
+@[expose] public section
 
 noncomputable section
 

@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.PoleSheafAwaySections
-import ModularCurves.EllipticCurve.PoleSheafModel
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafAwaySections
+public import ModularCurves.EllipticCurve.PoleSheafModel
 
 /-!
 # The marked-point complement of a Weierstrass model
@@ -7,6 +9,8 @@ import ModularCurves.EllipticCurve.PoleSheafModel
 This file identifies the complement of the zero section in a projective Weierstrass model
 with its standard affine `Z`-chart.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TopologicalSpace
 

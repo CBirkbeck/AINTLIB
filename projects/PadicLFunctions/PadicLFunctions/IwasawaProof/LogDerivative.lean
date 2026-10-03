@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Coleman.Map
+module
+
+public import PadicLFunctions.Coleman.Map
 
 /-!
 # The logarithmic derivative: the Coleman–Coates–Wiles exact sequence (RJW §12.2.1) — E12.2
@@ -50,6 +52,8 @@ project's deferred non-formal `Eqphipsi` (`φ∘ψ(F) = p⁻¹∑_ξ F((1+T)ξ�
   `dlog`-continuity). The `B ⊆ A` input (`lem:B mod p`) uses the `Eqphipsi`-based
   "`ψ` fixes `(T+1)/T`" (`LemmaPsiInvariant`, TeX 1521).
 -/
+
+@[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman PowerSeries
 

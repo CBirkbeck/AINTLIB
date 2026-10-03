@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.MvPolynomialProjectiveClosure
+module
+
+public import ModularCurves.ForMathlib.MvPolynomialProjectiveClosure
 
 /-!
 # Properness of polynomial projective space
@@ -14,6 +16,8 @@ The degree-zero part of a homogeneous polynomial ring is its coefficient ring. T
 usual structural morphism from polynomial `Proj` to the coefficient spectrum is proper when
 there are finitely many homogeneous coordinates.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

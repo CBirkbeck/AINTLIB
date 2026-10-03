@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.Scaling.Pencil
-import HasseWeil.HasseBound.WeilPairing.AffineResidueCalculus
-import HasseWeil.HasseBound.WeilPairing.OneSubInftyResidues
-import HasseWeil.HasseBound.WeilPairing.WallAGenericRealization
-import HasseWeil.Isogeny.SeparableWitnessReductions
-import HasseWeil.Foundation.EC.SeparableKernelTorsor
+module
+
+public import HasseWeil.HasseBound.WeilPairing.Scaling.Pencil
+public import HasseWeil.HasseBound.WeilPairing.AffineResidueCalculus
+public import HasseWeil.HasseBound.WeilPairing.OneSubInftyResidues
+public import HasseWeil.HasseBound.WeilPairing.WallAGenericRealization
+public import HasseWeil.Isogeny.SeparableWitnessReductions
+public import HasseWeil.Foundation.EC.SeparableKernelTorsor
 
 /-!
 # The local comap-valuation witnesses for `(rπ − s)_{K̄}`, and `pencilScaling_holds` (leaf 3)
@@ -96,6 +98,8 @@ addition-formula decomposition, so the `O`-summand never arises.  The mechanism 
 * Silverman, *The Arithmetic of Elliptic Curves*, I.2 (base change), III.4.10c (unramified
   order-transport), III.5.5 (separability), III.8.6.1 (the scaling).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

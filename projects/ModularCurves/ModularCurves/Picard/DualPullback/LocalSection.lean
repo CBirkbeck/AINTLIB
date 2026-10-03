@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.OpenUnit
+module
+
+public import ModularCurves.Picard.DualPullback.OpenUnit
 
 /-!
 # Local pullback of canonical sections
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.OpenUnit
 Transport canonical sections through local pullback, the terminal over-object, and the
 pullback unit.
 -/
+
+@[expose] public section
 
 universe u
 

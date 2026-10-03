@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.GlobalFibreChart
+module
+
+public import ModularCurves.WeilPairing.GlobalFibreChart
 
 /-!
 # The field-level Weil pairing is unique (WP-D3c, step 1)
@@ -21,6 +23,8 @@ The pin is faithfulness of the fibre functor of the Galois category of finite é
 `exists_finiteEtaleHom_of_galoisEquivariant` (`WeilPairing/EtaleDescent.lean`) that produced
 the pairing in the first place.
 -/
+
+@[expose] public section
 
 universe u
 

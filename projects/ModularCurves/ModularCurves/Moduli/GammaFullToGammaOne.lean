@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.FullLevelGammaOne
-import ModularCurves.Moduli.Representability
+module
+
+public import ModularCurves.LevelStructure.FullLevelGammaOne
+public import ModularCurves.Moduli.Representability
 
 /-!
 # The level-forgetting morphism `[Γ(N)] ⟶ [Γ₁(N)]` (WP-D1b)
@@ -24,6 +26,8 @@ both problems transport level structures by `EllHom.pullSection`.
 The `N`-invertibility hypothesis enters only through WP-D1a's per-geometric-point form
 `(N : k) ≠ 0`; `natCast_ne_zero_of_geometricPoint` derives it from `IsUnit (N : R)`.
 -/
+
+@[expose] public section
 
 universe u
 

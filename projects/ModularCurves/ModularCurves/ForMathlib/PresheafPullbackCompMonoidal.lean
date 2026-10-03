@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.PullbackTensorGeneral
+module
+
+public import ModularCurves.ForMathlib.PullbackTensorGeneral
 
 /-!
 # Monoidality of presheaf pullback composition
@@ -11,6 +13,8 @@ import ModularCurves.ForMathlib.PullbackTensorGeneral
 The canonical comparison from iterated pullback to pullback along a composite morphism
 of schemes is monoidal for the presheaf-of-modules tensor products.
 -/
+
+@[expose] public section
 
 universe u
 

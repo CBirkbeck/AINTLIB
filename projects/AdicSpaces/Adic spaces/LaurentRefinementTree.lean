@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LaurentRefinement
+module
+
+public import «Adic spaces».LaurentRefinement
 
 /-!
 # Finite Laurent Refinement Trees
@@ -40,6 +42,8 @@ the same mathematical content with no kernel objections.
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Lemma 8.34.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

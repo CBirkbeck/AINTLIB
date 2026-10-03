@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.FormalGroup.MulByNat
-import HasseWeil.FormalGroup.InvariantDiff
-import Mathlib.RingTheory.PowerSeries.Expand
-import Mathlib.Algebra.CharP.Invertible
+module
+
+public import HasseWeil.FormalGroup.MulByNat
+public import HasseWeil.FormalGroup.InvariantDiff
+public import Mathlib.RingTheory.PowerSeries.Expand
+public import Mathlib.Algebra.CharP.Invertible
 
 /-!
 # Multiplication by p in characteristic p (Silverman IV.4.4)
@@ -37,6 +39,8 @@ multiplication-by-`p` series lies in `R[[T^p]]`.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], IV.4.4.
 -/
+
+@[expose] public section
 
 set_option linter.dupNamespace false
 

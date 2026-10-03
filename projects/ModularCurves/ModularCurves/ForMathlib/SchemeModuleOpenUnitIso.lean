@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
-import ModularCurves.Picard.DualPullback.OpenAdjunction
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
+public import ModularCurves.Picard.DualPullback.OpenAdjunction
 
 /-!
 # Pullback--pushforward units over an isomorphism locus
@@ -8,6 +10,8 @@ This file proves that the pullback--pushforward unit is an isomorphism along an
 isomorphism of schemes. It then compares the global unit with the unit of a
 restriction to an open subscheme.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

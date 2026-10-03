@@ -1,7 +1,9 @@
-import Mathlib.AlgebraicGeometry.Morphisms.Affine
-import ModularCurves.ForMathlib.KempfInduction
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
-import ModularCurves.ForMathlib.SchemeModuleSheaf
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Affine
+public import ModularCurves.ForMathlib.KempfInduction
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+public import ModularCurves.ForMathlib.SchemeModuleSheaf
 
 /-!
 # Affine vanishing for quasicoherent modules
@@ -11,6 +13,8 @@ affine scheme. The proof is Kempf's induction: kill a class on a finite affine-o
 the module into the product of the restriction-pushforwards, and dimension-shift through its
 cokernel.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits Opposite TopologicalSpace
 

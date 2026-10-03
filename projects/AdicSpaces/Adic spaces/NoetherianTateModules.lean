@@ -2,14 +2,16 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Topology.Algebra.Module.ModuleTopology
-import Mathlib.Topology.Algebra.Nonarchimedean.Bases
-import Mathlib.Topology.Algebra.Group.OpenMapping
-import Mathlib.Topology.Algebra.IsUniformGroup.Basic
-import Mathlib.RingTheory.Filtration
-import Mathlib.RingTheory.AdicCompletion.Topology
-import Mathlib.Topology.Algebra.Ring.Ideal
-import «Adic spaces».HuberRings
+module
+
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
+public import Mathlib.Topology.Algebra.Nonarchimedean.Bases
+public import Mathlib.Topology.Algebra.Group.OpenMapping
+public import Mathlib.Topology.Algebra.IsUniformGroup.Basic
+public import Mathlib.RingTheory.Filtration
+public import Mathlib.RingTheory.AdicCompletion.Topology
+public import Mathlib.Topology.Algebra.Ring.Ideal
+public import «Adic spaces».HuberRings
 
 /-!
 # Noetherian Tate Module Topology (Wedhorn Prop 6.18)
@@ -40,6 +42,8 @@ already provides automatic continuity of linear maps and the open mapping theore
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Proposition 6.18, Remark 6.19
 -/
+
+@[expose] public section
 
 open Filter Topology Pointwise
 

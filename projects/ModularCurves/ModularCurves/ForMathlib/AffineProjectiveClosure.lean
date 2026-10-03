@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.PresentationProjectiveClosure
-import ModularCurves.ForMathlib.SmoothSectionLift
+module
+
+public import ModularCurves.ForMathlib.PresentationProjectiveClosure
+public import ModularCurves.ForMathlib.SmoothSectionLift
 
 /-!
 # Projective closures of affine finitely presented morphisms
@@ -15,6 +17,8 @@ An affine scheme locally of finite presentation over `Spec R` has a finite prese
 coordinate algebra. Homogenizing that presentation embeds the scheme as an open subscheme of a
 proper `R`-scheme.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

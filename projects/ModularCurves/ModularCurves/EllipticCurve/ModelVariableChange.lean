@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleFiltration
-import ModularCurves.ForMathlib.AffinePointVariableChange
-import ModularCurves.ForMathlib.ProjToSpecZero
-import ModularCurves.ForMathlib.ProjMapScaling
-import ModularCurves.ForMathlib.ProjFromGlobalSectionsMap
+module
+
+public import ModularCurves.EllipticCurve.PoleFiltration
+public import ModularCurves.ForMathlib.AffinePointVariableChange
+public import ModularCurves.ForMathlib.ProjToSpecZero
+public import ModularCurves.ForMathlib.ProjMapScaling
+public import ModularCurves.ForMathlib.ProjFromGlobalSectionsMap
 
 /-!
 # Variable changes on the projective Weierstrass model, and the comparison theorem
@@ -25,6 +27,10 @@ the pole filtration of `PoleFiltration.lean`.
 Sources: audit A1 (`expert-review/2026-07-07-tw7/integration.md`); KM §2.2/Deligne
 *Formulaire*-style statement, proof re-derived uniformly (pole filtration + freeness).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
 

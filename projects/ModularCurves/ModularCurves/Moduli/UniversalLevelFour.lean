@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.BridgeAssembly
-import ModularCurves.Moduli.UniversalLevelThree
+module
+
+public import ModularCurves.Moduli.BridgeAssembly
+public import ModularCurves.Moduli.UniversalLevelThree
 
 /-!
 # The universal naive level-4 object `ℰ₄` over `ℤ[1/2]` (STREAM-E4, E4-A)
@@ -38,6 +40,10 @@ with verbatim KM/Loeffler quotes in §0. The construction mirrors the landed ℰ
 (`Moduli/UniversalLevelThree.lean`) leaf-for-leaf; the classifying chain (E4A-12) and
 round-trip lemmas (E4A-13) are added by their tickets following the ℰ₃ literal pattern.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

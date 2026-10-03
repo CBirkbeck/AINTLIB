@@ -1,6 +1,8 @@
-import HasseWeil.Foundation.Curves.Valuation.Valuation
-import HasseWeil.Foundation.Curves.IntegralClosure
-import Mathlib.NumberTheory.RamificationInertia.Basic
+module
+
+public import HasseWeil.Foundation.Curves.Valuation.Valuation
+public import HasseWeil.Foundation.Curves.IntegralClosure
+public import Mathlib.NumberTheory.RamificationInertia.Basic
 
 /-!
 # Curve maps via function-field pullback
@@ -23,6 +25,8 @@ surjectivity, ramification, and the fiber-card formula).
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.4 (curves-fields
   correspondence), II.2 definition of degree
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

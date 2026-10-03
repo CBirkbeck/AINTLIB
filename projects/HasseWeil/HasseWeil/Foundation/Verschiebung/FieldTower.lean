@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Frobenius.PointCount
+module
+
+public import HasseWeil.Isogeny.Frobenius.PointCount
 
 /-!
 # Field tower for the Frobenius Verschiebung (T-HASSE-CLOSE-C-VERSCHIEBUNG-FROBENIUS Session 2)
@@ -53,6 +55,8 @@ is the focused work of the session sub-ticket.
   pullback structure), III.4.2 (mulByInt degree), III.6.2 (Verschiebung
   inclusion).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

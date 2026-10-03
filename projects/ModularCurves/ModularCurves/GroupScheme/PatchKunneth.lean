@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Pullbacks
-import Mathlib.AlgebraicGeometry.Restrict
-import Mathlib.AlgebraicGeometry.Morphisms.Affine
+module
+
+public import Mathlib.AlgebraicGeometry.Pullbacks
+public import Mathlib.AlgebraicGeometry.Restrict
+public import Mathlib.AlgebraicGeometry.Morphisms.Affine
 
 /-!
 # The affine Künneth identification over a base patch
@@ -27,6 +29,8 @@ Künneth of the translation co-action; with `(f, g) = (G.π, G.π)` and
 `(W₁, W₂) = (G|_V, G|_V)` it is the target of the comultiplication of the Hopf algebra of
 `G` over the patch.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits TensorProduct
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.MvPolynomial.PDeriv
-import Mathlib.RingTheory.Localization.Away.Basic
-import Mathlib.RingTheory.Smooth.StandardSmooth
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.RingTheory.Localization.Away.Basic
+public import Mathlib.RingTheory.Smooth.StandardSmooth
 
 /-!
 # Localized hypersurfaces are standard smooth
@@ -26,6 +28,10 @@ This is the chartwise smoothness engine for the projective Weierstrass model
 * `ModularCurves.isStandardSmoothOfRelativeDimension_hypersurface_away`: the localized
   hypersurface is standard smooth of relative dimension `#σ - 1` over `R`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open MvPolynomial
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafModuleCechTopExact
-import ModularCurves.ForMathlib.SheafModuleCechTwoCoverBicomplex
+module
+
+public import ModularCurves.ForMathlib.SheafModuleCechTopExact
+public import ModularCurves.ForMathlib.SheafModuleCechTwoCoverBicomplex
 
 /-!
 # Exact augmented rows of the module-valued two-cover Cech bicomplex
@@ -15,6 +17,8 @@ exactness at the start of every horizontal row while retaining the coefficient
 ring action. Exactness in the next Cech degree remains an explicit acyclicity
 input.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

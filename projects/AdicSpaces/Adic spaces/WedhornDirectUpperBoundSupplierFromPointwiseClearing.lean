@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPerPieceSubsetProductClearing
-import «Adic spaces».WedhornSigmaPowerClearedInequalitySupplier
+module
+
+public import «Adic spaces».WedhornPerPieceSubsetProductClearing
+public import «Adic spaces».WedhornSigmaPowerClearedInequalitySupplier
 
 /-!
 # Wedhorn 8.34(ii) — Direct upper bound supplier from pointwise clearing (T077)
@@ -92,6 +94,8 @@ lane (which routes through
 * No global universal-over-`D_T` lower bound resurrection.
 * No final Tate acyclicity hypothesis additions.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

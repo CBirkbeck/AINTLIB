@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.Finiteness.Ideal
-import Mathlib.Topology.Algebra.OpenSubgroup
-import Mathlib.Topology.Algebra.TopologicallyNilpotent
-import «Adic spaces».AdicSpectrum
+module
+
+public import Mathlib.RingTheory.Finiteness.Ideal
+public import Mathlib.Topology.Algebra.OpenSubgroup
+public import Mathlib.Topology.Algebra.TopologicallyNilpotent
+public import «Adic spaces».AdicSpectrum
 
 /-!
 # Open Ideals and the Topological Nilradical
@@ -28,6 +30,8 @@ in its radical.
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Lemma 6.6, Remark 7.30(1)
 -/
+
+@[expose] public section
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A]
 

@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SheafCechDifferential
-import ModularCurves.ForMathlib.SheafCechSheafTerms
+module
+
+public import ModularCurves.ForMathlib.SheafCechDifferential
+public import ModularCurves.ForMathlib.SheafCechSheafTerms
 
 /-!
 # The differential in the sheaf-level Cech resolution
@@ -9,6 +11,10 @@ the cofaces induced by deleting tuple entries, and their alternating sum. The co
 formulas identify these maps with the same restrictions that occur in the ordinary Cech
 complex of sections.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

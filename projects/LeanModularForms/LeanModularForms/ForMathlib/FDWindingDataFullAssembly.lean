@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.BoundaryWindingSeg1Proof
-import LeanModularForms.ForMathlib.BoundaryWindingSeg4Proof
-import LeanModularForms.ForMathlib.BoundaryWindingArcProof
+module
+
+public import LeanModularForms.ForMathlib.BoundaryWindingSeg1Proof
+public import LeanModularForms.ForMathlib.BoundaryWindingSeg4Proof
+public import LeanModularForms.ForMathlib.BoundaryWindingArcProof
 
 /-!
 # Assembly: `FDWindingDataFull` from per-segment FTC providers
@@ -20,6 +22,8 @@ this file assembles `FDWindingDataFull H` unconditionally.
 
 * `mkFDWindingDataFull_of_ftcProviders` -- the main assembler
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

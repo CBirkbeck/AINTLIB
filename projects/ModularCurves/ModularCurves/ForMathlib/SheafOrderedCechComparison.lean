@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SheafOrderedCechSheafComplex
+module
+
+public import ModularCurves.ForMathlib.SheafOrderedCechSheafComplex
 
 /-!
 # Projection from native to ordered sheaf-level Cech cochains
@@ -7,6 +9,8 @@ The native all-tuples Cech complex projects onto the complex indexed by
 strictly increasing tuples. This file constructs that projection as a chain
 map.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
   TopologicalSpace Opposite

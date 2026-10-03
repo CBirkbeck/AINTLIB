@@ -3,7 +3,9 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.ClassicalCPV
+module
+
+public import LeanModularForms.ForMathlib.ClassicalCPV
 
 /-!
 # Measure Theory Helpers for Residue Theory
@@ -11,6 +13,8 @@ import LeanModularForms.ForMathlib.ClassicalCPV
 Countability of isolated point sets and measure-zero results for
 preimages of singletons under piecewise C¹ immersions.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology Metric
 open scoped Real Interval

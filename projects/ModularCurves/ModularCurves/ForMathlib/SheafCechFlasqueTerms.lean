@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.FlasqueCohomology
-import ModularCurves.ForMathlib.SheafCohomologyFiniteProducts
+module
+
+public import ModularCurves.ForMathlib.FlasqueCohomology
+public import ModularCurves.ForMathlib.SheafCohomologyFiniteProducts
 
 /-!
 # Flasque terms in the sheaf-level Cech resolution
@@ -9,6 +11,8 @@ Consequently every factor of a Cech term of a flasque sheaf is flasque. For a fi
 cover, finite-product compatibility of genuine sheaf cohomology then makes the whole
 Cech term acyclic in positive degrees.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Class
-import HasseWeil.Isogeny.Dual.Descent
+module
+
+public import HasseWeil.Isogeny.Class
+public import HasseWeil.Isogeny.Dual.Descent
 
 /-!
 # LMFDB isogeny-class labels from a given representative table
@@ -32,6 +34,8 @@ be supplied as given data alongside the conductor and the table.
 This file is pure isogeny content; conductor strings and within-class curve numbers are taken as
 parameters (supplied by the conductor development and the table's within-class ordering).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.EC
 

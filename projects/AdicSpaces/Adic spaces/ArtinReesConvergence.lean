@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.Filtration
-import Mathlib.RingTheory.Ideal.Operations
-import Mathlib.LinearAlgebra.FreeModule.Finite.Basic
+module
+
+public import Mathlib.RingTheory.Filtration
+public import Mathlib.RingTheory.Ideal.Operations
+public import Mathlib.LinearAlgebra.FreeModule.Finite.Basic
 
 /-!
 # Artin-Rees Convergence API
@@ -28,6 +30,8 @@ submodule and `k₀` is the Artin-Rees constant), then there exists a preimage i
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §6, Lemma 8.31
 -/
+
+@[expose] public section
 
 open Finset
 

@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».BivariateContinuity
-import «Adic spaces».IteratedOverlapEquiv
-import «Adic spaces».QuotientTate
+module
+
+public import «Adic spaces».BivariateContinuity
+public import «Adic spaces».IteratedOverlapEquiv
+public import «Adic spaces».QuotientTate
 
 /-!
 # Lane A reverse round trip: construction of `τ_preBiv`
@@ -69,6 +71,8 @@ in `LaurentRefinement.lean`) remains.
   `bivariateOverlap_equiv_B₁₂gen`, `iteratedOverlap_forwardLocHom` /
   `iteratedOverlap_backwardLocHom` and round-trip lemma.
 -/
+
+@[expose] public section
 
 universe u
 

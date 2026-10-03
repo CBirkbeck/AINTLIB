@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+module
+
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 
 /-!
 # Route 2A — the Weil-pairing codomain `μ_ℓ ≅ ℤ/ℓ` (pairing step 4)
@@ -17,6 +19,8 @@ This ships `rootsOfUnity_addEquiv_zmod`: `Additive (rootsOfUnity ℓ F) ≃+ ℤ
 `ℓ`-th root, by composing mathlib's `IsPrimitiveRoot.zmodEquivZPowers` with
 `IsPrimitiveRoot.zpowers_eq` (`⟨ζ⟩ = μ_ℓ`).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.WeilPairing
 

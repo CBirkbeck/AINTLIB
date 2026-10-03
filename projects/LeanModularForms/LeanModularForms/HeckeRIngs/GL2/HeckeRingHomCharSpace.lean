@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.CharacterDecomp
-import LeanModularForms.HeckeRIngs.GL2.HeckeModularForm_Gamma0
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma0
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma1
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.CharacterDecomp
+public import LeanModularForms.HeckeRIngs.GL2.HeckeModularForm_Gamma0
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma0
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p_Gamma1
 
 /-!
 # Hecke operators restricted to `modFormCharSpace k χ`
@@ -32,6 +34,8 @@ This file packages the Hecke operators as endomorphisms of the character eigensp
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.4.
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.2.
 -/
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup
 open HeckeRing

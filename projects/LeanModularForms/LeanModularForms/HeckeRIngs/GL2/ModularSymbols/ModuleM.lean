@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.CoefficientSystem
-import Mathlib.RepresentationTheory.Coinvariants
-import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.CoefficientSystem
+public import Mathlib.RepresentationTheory.Coinvariants
+public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
 
 /-!
 # The integral modular-symbol module `𝕄 N k`
@@ -33,6 +35,8 @@ carrying `TensorProduct.addCommMonoid`, whereas `Representation.Coinvariants` re
 `AddCommGroup`/`Module R` instances (the tensor product of two submodules of `AddCommGroup`s) are
 found by instance resolution and `Coinvariants` elaborates cleanly.
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2.ModularSymbols
 

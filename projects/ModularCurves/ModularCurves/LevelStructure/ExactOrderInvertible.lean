@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.Factorization
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.ForMathlib.UnramifiedEqualizer
+module
+
+public import ModularCurves.LevelStructure.Factorization
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.ForMathlib.UnramifiedEqualizer
 
 /-!
 # The exact-order boxes at invertible `N` (T-E4F1 / T-E4F2)
@@ -49,6 +51,10 @@ proven WITHOUT the over-`ℤ` Oort–Tate/Deligne black box:
    (`point_eq_section_of_factors`, KM p. 29) pins every section as a multiple `aP`, and
    a proper relation `a • P = 0` would leave fewer than `N` multiples — contradiction.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Coalgebra WithConv
 open scoped TensorProduct

@@ -1,5 +1,7 @@
-import Mathlib.Topology.Sets.OpenCover
-import ModularCurves.ForMathlib.KempfLocalKilling
+module
+
+public import Mathlib.Topology.Sets.OpenCover
+public import ModularCurves.ForMathlib.KempfLocalKilling
 
 /-!
 # Kempf's local-killing induction
@@ -8,6 +10,8 @@ This file proves the induction which upgrades local vanishing of sheaf cohomolog
 an open cover killing a class in the next degree. The short-exact restriction calculation and
 cohomological naturality step are separated into option-free helpers.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits Opposite TopologicalSpace
 

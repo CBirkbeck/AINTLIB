@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.InvariantDifferential
+module
+
+public import ModularCurves.EllipticCurve.InvariantDifferential
 
 /-!
 # Every elliptic curve over a field has a *global* Weierstrass chart (DS4 M1c-1)
@@ -20,6 +22,8 @@ This is the input the field-level DS4 construction needs in order to run
 `WeilPairing/FibrePointDict.lean`'s `chartAffinePointEquiv` at the geometric point of a
 curve over `Spec k` — there is no chart to choose, the presentation covers everything.
 -/
+
+@[expose] public section
 
 universe u
 

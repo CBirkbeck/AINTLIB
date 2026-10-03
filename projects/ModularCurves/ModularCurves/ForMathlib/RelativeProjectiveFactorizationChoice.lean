@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.RelativeProjectiveFactorization
+module
+
+public import ModularCurves.ForMathlib.RelativeProjectiveFactorization
 
 /-!
 # Chosen data in a relative projective factorization
@@ -13,6 +15,8 @@ import ModularCurves.ForMathlib.RelativeProjectiveFactorization
 This file gives stable names to the dimension and closed embedding contained in a relative
 projective factorization.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

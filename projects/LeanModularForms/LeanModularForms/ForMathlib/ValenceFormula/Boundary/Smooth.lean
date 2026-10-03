@@ -3,7 +3,9 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Bounds
+module
+
+public import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Bounds
 
 /-!
 # Fundamental Domain Boundary – Smoothness
@@ -16,6 +18,10 @@ for the fundamental domain boundary.
 * `fdBoundary_HCurve` — H-parameterized boundary as `PiecewiseC1Curve`
 * `fdBoundary_HImmersion` — H-parameterized boundary as `PiecewiseC1Immersion`
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Verschiebung.FieldTower
+module
+
+public import HasseWeil.Foundation.Verschiebung.FieldTower
 
 /-!
 # Verschiebung pullback construction
@@ -21,6 +23,8 @@ Frobenius pullback range.
 * `verschiebungPullback_of_witness`: the induced Verschiebung pullback.
 * `mulByInt_q_factor_via_witness`: the resulting factorisation identity.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

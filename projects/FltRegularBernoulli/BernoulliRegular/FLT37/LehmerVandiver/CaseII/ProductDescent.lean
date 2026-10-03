@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.RealGenerator
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.RealGenerator
 
 /-!
 # [II1-PROD-SIGMA-FORMULA] Product-level Washington descent over σ-stable products

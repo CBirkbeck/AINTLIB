@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistPairingIso
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistPairingIso
 
 /-!
 # Shift isomorphisms for projective-space twists
@@ -11,6 +13,8 @@ import ModularCurves.EllipticCurve.ProjectiveSpaceTwistPairingIso
 Positive powers of the coordinate-hyperplane twist are additive, and
 tensoring `O(-m)` with `O(n)` for `m ≤ n` gives `O(n-m)`.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

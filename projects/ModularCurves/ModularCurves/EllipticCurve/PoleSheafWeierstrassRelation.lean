@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafMonomialBasis
-import ModularCurves.EllipticCurve.PoleSheafPowerOneSection
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafMonomialBasis
+public import ModularCurves.EllipticCurve.PoleSheafPowerOneSection
 
 /-!
 # The Weierstrass relation from the pole filtration
@@ -12,6 +14,8 @@ import ModularCurves.EllipticCurve.PoleSheafPowerOneSection
 The rank-six pole basis makes the square of a normalized pole-order-three
 section monic over the cube of a normalized pole-order-two section.
 -/
+
+@[expose] public section
 
 namespace Module.Basis
 

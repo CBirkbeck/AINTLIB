@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 STREAM-FIN [K-VC] (board v10.323-FIN): the VariableChange affine fixed-point keystone.
 -/
-import ModularCurves.EllipticCurve.Comparison
+module
+
+public import ModularCurves.EllipticCurve.Comparison
 
 /-!
 # [K-VC] Pointed automorphisms with enough fixed points are the identity
@@ -31,6 +33,8 @@ by `e` gives `ψ ∘ Φ = ψ`), the torsion-point supply [KVC-pts], the faithful
 [KVC-faith], and the record-endo conjugation [KVC-conj] discharging the full-level
 k̄-core (`aut_endo_eq_one_of_field`) and the narrowed `hbound` ([RIG-2′]).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
 

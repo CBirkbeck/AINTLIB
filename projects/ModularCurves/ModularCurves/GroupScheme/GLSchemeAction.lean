@@ -1,8 +1,10 @@
-import ModularCurves.Moduli.GammaH
-import ModularCurves.GroupScheme.MuN
-import ModularCurves.GroupScheme.TorsionEtaleTriv
-import ModularCurves.ForMathlib.FiniteSplitHomDuality
-import ModularCurves.ForMathlib.BijectiveResidueField
+module
+
+public import ModularCurves.Moduli.GammaH
+public import ModularCurves.GroupScheme.MuN
+public import ModularCurves.GroupScheme.TorsionEtaleTriv
+public import ModularCurves.ForMathlib.FiniteSplitHomDuality
+public import ModularCurves.ForMathlib.BijectiveResidueField
 
 /-!
 # The scheme-level `GL₂(ℤ/N)` action on `E[N]` (CHARTER-C5B-2, reading (1))
@@ -21,6 +23,8 @@ becomes a genuine automorphism of the scheme `E[N] = E.torsion N`.
 BOUNDARY: does NOT build the Weil pairing (p2's `[T-C1-KM28]`); cites only the finite-étale
 trivialisation infra it shares.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 open scoped TensorProduct

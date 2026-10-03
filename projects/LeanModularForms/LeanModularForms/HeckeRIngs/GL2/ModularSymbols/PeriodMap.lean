@@ -3,10 +3,12 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodIntegral
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleM
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.FinitelyManyCusps
-import Mathlib.Analysis.Complex.CauchyIntegral
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodIntegral
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleM
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.FinitelyManyCusps
+public import Mathlib.Analysis.Complex.CauchyIntegral
 
 /-!
 # The period map for modular symbols (ES-3b)
@@ -26,6 +28,8 @@ vertical geodesics.
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §8.2.
 -/
+
+@[expose] public section
 
 noncomputable section
 

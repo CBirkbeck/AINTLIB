@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafPointedIso
-import ModularCurves.ForMathlib.SchemeModulePullbackIteratedBaseChange
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafPointedIso
+public import ModularCurves.ForMathlib.SchemeModulePullbackIteratedBaseChange
 
 /-!
 # Iterated base change of pole-sheaf models
@@ -12,6 +14,8 @@ import ModularCurves.ForMathlib.SchemeModulePullbackIteratedBaseChange
 This file transports a pointed pole-sheaf model through a second base change
 and expresses the result on the direct pullback family.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits
 

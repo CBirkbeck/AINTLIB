@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordBridgeReduction
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordBridgeReduction
 
 /-!
 # The SOUND structure of the level-`71` unscaled Dwork-parameter `varpi^{32}` coordinate: the proven

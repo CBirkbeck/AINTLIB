@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.AddMonoidAlgebraLocalization
-import Mathlib.Data.Finsupp.Order
-import Mathlib.Tactic
+module
+
+public import ModularCurves.ForMathlib.AddMonoidAlgebraLocalization
+public import Mathlib.Data.Finsupp.Order
+public import Mathlib.Tactic
 
 /-!
 # Localizing natural exponent vectors
@@ -14,6 +16,10 @@ Localizing natural exponent vectors away from `m` gives the additive monoid of i
 vectors whose negative coordinates occur only in the support of `m`. This is the exponent normal
 form for Laurent monomials on standard projective intersections.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

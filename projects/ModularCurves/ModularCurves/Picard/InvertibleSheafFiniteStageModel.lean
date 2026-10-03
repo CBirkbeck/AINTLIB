@@ -1,9 +1,11 @@
-import ModularCurves.ForMathlib.ProperAffineIntersectionModel
-import ModularCurves.ForMathlib.FinitePresentationFunctorCover
-import ModularCurves.Picard.AffineIntersectionUnitCocycleFiniteStage
-import ModularCurves.Picard.InvertibleSheafCocycle
-import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
-import ModularCurves.Picard.UnitPullback
+module
+
+public import ModularCurves.ForMathlib.ProperAffineIntersectionModel
+public import ModularCurves.ForMathlib.FinitePresentationFunctorCover
+public import ModularCurves.Picard.AffineIntersectionUnitCocycleFiniteStage
+public import ModularCurves.Picard.InvertibleSheafCocycle
+public import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
+public import ModularCurves.Picard.UnitPullback
 
 /-!
 # Finite-stage models adapted to invertible sheaves
@@ -12,6 +14,10 @@ An invertible sheaf on a proper family admits a finite affine trivializing cover
 cover can be used to spread the family's complete affine-intersection diagram to a finite
 stage of a filtered presentation of the affine base.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

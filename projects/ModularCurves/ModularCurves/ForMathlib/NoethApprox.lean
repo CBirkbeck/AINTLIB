@@ -5,15 +5,17 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-NOETH.
 -/
-import ModularCurves.ForMathlib.FlatLocus
+module
+
+public import ModularCurves.ForMathlib.FlatLocus
 -- v4.33 bump: these no longer arrive transitively through `FlatLocus`.
-import Mathlib.AlgebraicGeometry.AffineScheme
-import Mathlib.CategoryTheory.Limits.IsLimit
-import Mathlib.CategoryTheory.Limits.Types.Colimits
-import Mathlib.CategoryTheory.ConcreteCategory.Basic
-import Mathlib.RingTheory.TensorProduct.DirectLimitFG
-import Mathlib.AlgebraicGeometry.Morphisms.Affine
-import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+public import Mathlib.AlgebraicGeometry.AffineScheme
+public import Mathlib.CategoryTheory.Limits.IsLimit
+public import Mathlib.CategoryTheory.Limits.Types.Colimits
+public import Mathlib.CategoryTheory.ConcreteCategory.Basic
+public import Mathlib.RingTheory.TensorProduct.DirectLimitFG
+public import Mathlib.AlgebraicGeometry.Morphisms.Affine
+public import Mathlib.AlgebraicGeometry.AffineTransitionLimit
 
 /-!
 # Noetherian approximation for finitely-presented algebras
@@ -71,6 +73,10 @@ the noetherian stage (where annihilators are finitely generated) and base-changi
 Grothendieck, *EGA IV*, §8.5 (spreading out finitely-presented algebras) and §11.2
 (spreading out flatness, in particular 11.2.6); Stacks project, tag 05LZ.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open TensorProduct MvPolynomial
 

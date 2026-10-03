@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Verschiebung.PurelyInsep
-import HasseWeil.Foundation.Verschiebung.UniversalQthRootWitness
-import HasseWeil.Isogeny.Dual.Morphism
-import HasseWeil.Isogeny.MulByInt.Basepoint
+module
+
+public import HasseWeil.Foundation.Verschiebung.PurelyInsep
+public import HasseWeil.Foundation.Verschiebung.UniversalQthRootWitness
+public import HasseWeil.Isogeny.Dual.Morphism
+public import HasseWeil.Isogeny.MulByInt.Basepoint
 
 /-!
 # The Frobenius dual — the Verschiebung as an `EC.Isogeny` (Silverman III.6.1 Case 2)
@@ -61,6 +63,8 @@ Silverman III.6.1 inside the witness machinery of `Isogeny/Dual/Morphism.lean`.
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.11–2.12, III.6.1
   (Case 2: the inseparable/Frobenius side), III.6.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

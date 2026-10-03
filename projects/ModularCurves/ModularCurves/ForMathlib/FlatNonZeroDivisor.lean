@@ -5,14 +5,18 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.RingTheory.Flat.TorsionFree
-import Mathlib.RingTheory.RingHom.Flat
+module
+
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.RingHom.Flat
 
 /-!
 # Nonzerodivisors under flat ring maps
 
 This file records that flat ring maps preserve nonzerodivisors.
 -/
+
+@[expose] public section
 
 open scoped nonZeroDivisors
 

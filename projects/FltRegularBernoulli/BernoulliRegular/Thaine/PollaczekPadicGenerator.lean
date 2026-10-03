@@ -1,5 +1,7 @@
-import BernoulliRegular.UnitQuotient.PadicTensor
-import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction
+module
+
+public import BernoulliRegular.UnitQuotient.PadicTensor
+public import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction
 
 /-!
 # T-Q1-EIGEN: Pollaczek's image as Padic eigenspace generator (FLT37)

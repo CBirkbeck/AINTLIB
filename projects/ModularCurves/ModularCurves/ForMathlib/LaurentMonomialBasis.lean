@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.LaurentExponentLocalization
-import Mathlib.Algebra.MonoidAlgebra.Module
+module
+
+public import ModularCurves.ForMathlib.LaurentExponentLocalization
+public import Mathlib.Algebra.MonoidAlgebra.Module
 
 /-!
 # Laurent monomial bases
@@ -13,6 +15,8 @@ The localization of a multivariable polynomial ring away from a monomial is cano
 additive monoid algebra on the corresponding allowed Laurent exponents. Transporting the standard
 monoid-algebra basis gives Laurent monomial coordinates on the localization.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 
@@ -68,8 +72,7 @@ theorem laurentMonomialRingEquiv_algebraMap_coeff (m : σ →₀ ℕ) (r : R) :
         algebraMap R (AddMonoidAlgebra R (laurentExponentSubmonoid m)) r := by
     change AddMonoidAlgebra.mapDomain (laurentExponentAwayMap m).toAddMonoidHom
       (AddMonoidAlgebra.single 0 r) = AddMonoidAlgebra.single 0 r
-    rw [AddMonoidAlgebra.mapDomain_single]
-    congr 1
+    rw [AddMonoidAlgebra.mapDomain_single, map_zero]
   rw [hsource]
   exact (laurentMonomialRingEquiv_algebraMap R m (MvPolynomial.C r)).trans htarget
 

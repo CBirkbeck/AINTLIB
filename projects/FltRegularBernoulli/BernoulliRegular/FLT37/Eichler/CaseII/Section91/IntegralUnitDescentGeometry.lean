@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.IntegralFactorGenerators
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.IntegralFactorGenerators
 
 /-!
 # [T-R2-L5d] The FINAL R2 geometry closure: FLT37 Case-II on the clean residual

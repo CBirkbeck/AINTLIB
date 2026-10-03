@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 
 /-!
 # Finiteness along the ordered Cech retract
@@ -12,6 +14,8 @@ The ordered Cech complex is a retract of the native all-tuples Cech complex.
 Consequently, finite generation of native Cech homology descends to ordered
 Cech homology in every degree.
 -/
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace
 

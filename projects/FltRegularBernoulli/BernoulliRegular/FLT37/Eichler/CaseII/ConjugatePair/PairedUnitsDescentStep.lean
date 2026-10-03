@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.PairedUnitsDatum
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.PairedUnitsDatum
 
 /-!
 # [FLT37-CASEII-R2] The paired-units descent: constructor, residual, minimality

@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SmoothFinitePresentationSchemeGlueData
-import ModularCurves.Picard.InvertibleSheafGlueBaseChange
+module
+
+public import ModularCurves.ForMathlib.SmoothFinitePresentationSchemeGlueData
+public import ModularCurves.Picard.InvertibleSheafGlueBaseChange
 
 /-!
 # Smooth finite-stage affine-intersection cocycle models
@@ -7,6 +9,8 @@ import ModularCurves.Picard.InvertibleSheafGlueBaseChange
 This file synchronizes descent of an affine-intersection unit cocycle with smoothness of
 the singleton affine charts and the geometric conditions required to glue those charts.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
-import HasseWeil.Isogeny.BaseChange.Concrete
+module
+
+public import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
+public import HasseWeil.Isogeny.BaseChange.Concrete
 
 /-!
 # Discharging the point/divisor witnesses of `OneSubScalingData` over `K̄` (CoordHom-free)
@@ -75,6 +77,8 @@ fixed-locus / `[ℓ]`-surjectivity machinery:
   V.1.1.
 * `HasseWeil/Curves/FrobeniusFixedPoint.lean` (the geometric-Frobenius fixed-locus theory).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

@@ -5,9 +5,11 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
-import Mathlib.AlgebraicGeometry.Morphisms.Separated
-import Mathlib.AlgebraicGeometry.Noetherian
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+public import Mathlib.AlgebraicGeometry.Morphisms.Separated
+public import Mathlib.AlgebraicGeometry.Noetherian
 
 /-!
 # Scheme-theoretic images and separated-target extensionality
@@ -16,6 +18,8 @@ The map to the scheme-theoretic image of a quasi-compact morphism is scheme-theo
 dominant. Consequently, precomposition by a scheme-theoretically dominant morphism detects
 equality between morphisms over a separated target, without a reducedness assumption.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits
 

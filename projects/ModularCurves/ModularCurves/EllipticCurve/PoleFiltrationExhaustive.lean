@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleFiltration
+module
+
+public import ModularCurves.EllipticCurve.PoleFiltration
 
 /-!
 # Exhaustivity of the Weierstrass pole filtration
@@ -11,6 +13,8 @@ import ModularCurves.EllipticCurve.PoleFiltration
 Every regular function on the affine Weierstrass chart has some finite pole
 order at the zero section.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry
 

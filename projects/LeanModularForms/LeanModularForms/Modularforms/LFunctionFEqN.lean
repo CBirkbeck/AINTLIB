@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.Modularforms.LFunctionFEq
+module
+
+public import LeanModularForms.Modularforms.LFunctionFEq
 
 /-!
 # Functional equation and analytic continuation at level `N` via the Fricke involution
@@ -62,6 +64,10 @@ level-`1` machinery in `LFunctionFEq.lean`.
 * [Shi] Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.6.
 * [Miy] Miyake, *Modular Forms*, Thm 4.3.5.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Filter Topology Asymptotics Set MeasureTheory Complex UpperHalfPlane
 open scoped Real ModularForm MatrixGroups

@@ -1,5 +1,11 @@
-import ModularCurves.ForMathlib.SheafModuleCechTwoCoverVerticalEdge
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechComparison
+module
+
+public import ModularCurves.ForMathlib.SheafModuleCechTwoCoverVerticalEdge
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechComparison
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicTopology CategoryTheory CategoryTheory.Limits Opposite
   TopologicalSpace

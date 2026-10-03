@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.PowerSeries.Substitution
-import Mathlib.RingTheory.PowerSeries.Order
+module
+
+public import Mathlib.RingTheory.PowerSeries.Substitution
+public import Mathlib.RingTheory.PowerSeries.Order
 
 /-!
 # Order of a power series substitution
@@ -32,6 +34,8 @@ the inequality `order g * order f ≤ order (subst f g)`.
 This is used to prove additivity of the height of a composition of formal
 group homomorphisms (Silverman IV.7).
 -/
+
+@[expose] public section
 
 namespace PowerSeries
 

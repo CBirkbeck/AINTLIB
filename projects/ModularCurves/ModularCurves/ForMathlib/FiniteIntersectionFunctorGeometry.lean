@@ -1,5 +1,7 @@
-import Mathlib.AlgebraicGeometry.Morphisms.Affine
-import ModularCurves.ForMathlib.FiniteIntersectionFunctor
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Affine
+public import ModularCurves.ForMathlib.FiniteIntersectionFunctor
 
 /-!
 # Geometry of finite affine-intersection diagrams
@@ -7,6 +9,8 @@ import ModularCurves.ForMathlib.FiniteIntersectionFunctor
 The coordinate-algebra functor of a family of affine open intersections has open
 singleton-to-pair spectrum maps, and its singleton/pair/triple squares are pushouts.
 -/
+
+@[expose] public section
 
 universe u
 

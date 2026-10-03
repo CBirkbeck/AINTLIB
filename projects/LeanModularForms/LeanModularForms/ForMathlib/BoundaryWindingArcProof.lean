@@ -3,10 +3,12 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.CrossingAtI
-import LeanModularForms.ForMathlib.InteriorWinding
-import LeanModularForms.ForMathlib.SmoothBoundaryWindingProof
-import LeanModularForms.ForMathlib.WindingWeightProofs
+module
+
+public import LeanModularForms.ForMathlib.CrossingAtI
+public import LeanModularForms.ForMathlib.InteriorWinding
+public import LeanModularForms.ForMathlib.SmoothBoundaryWindingProof
+public import LeanModularForms.ForMathlib.WindingWeightProofs
 
 /-!
 # SmoothBoundaryWindingData for the arc (seg 2 ∪ seg 3)
@@ -22,6 +24,8 @@ inverts this relation.
 * `smoothBoundaryData_arc_of_ftcHyp` -- constructs `SmoothBoundaryWindingData`
   at a generic smooth arc point from an external `ArcFTCHyp`
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

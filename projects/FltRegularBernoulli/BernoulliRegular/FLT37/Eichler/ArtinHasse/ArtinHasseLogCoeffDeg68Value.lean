@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseLogCoeffRecurrence
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasse37DegSixtyEightLogCoeffModSq
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseLogCoeffRecurrence
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasse37DegSixtyEightLogCoeffModSq
 
 /-!
 # `(formalSum68 : ℚ) = 68!·Lr 68 = N/120`: the degree-`68` Artin-Hasse log coefficient, DISCHARGED

@@ -3,15 +3,17 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
-import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
-import Mathlib.LinearAlgebra.Determinant
-import Mathlib.LinearAlgebra.Dual.Lemmas
-import Mathlib.LinearAlgebra.TensorProduct.Basis
-import Mathlib.LinearAlgebra.Contraction
-import Mathlib.RingTheory.TensorProduct.Basic
-import Mathlib.RingTheory.HopfAlgebra.Convolution
-import Mathlib.RingTheory.HopfAlgebra.GroupLike
+module
+
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+public import Mathlib.LinearAlgebra.Determinant
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.LinearAlgebra.TensorProduct.Basis
+public import Mathlib.LinearAlgebra.Contraction
+public import Mathlib.RingTheory.TensorProduct.Basic
+public import Mathlib.RingTheory.HopfAlgebra.Convolution
+public import Mathlib.RingTheory.HopfAlgebra.GroupLike
 
 /-!
 # Cartier duality and Deligne's order theorem (BB-DELIGNE)
@@ -47,6 +49,8 @@ API; the operator/commutator package (**T-D5d/e**, Prop 3.8.1) and the final ass
 
 See `.mathlib-quality/plan-deligne.md` for the full ticket board and verbatim source quotes.
 -/
+
+@[expose] public section
 
 open scoped Matrix TensorProduct
 open HopfAlgebra Coalgebra WithConv

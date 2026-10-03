@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.TateNormalForm
+module
+
+public import ModularCurves.ForMathlib.TateNormalForm
 
 /-!
 # The `ℰ₃`-normal form (flex normalization) — the algebraic core of [T-E15-NORM]
@@ -27,6 +29,8 @@ additionally pinning `a₁ = 3γ − 1` and `a₃ = −3γ²−β−3βγ` throu
 marked `3`-torsion point `Q = (γ, β+γ)`; that second normalization is a separate
 step. This file delivers the flex shape.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

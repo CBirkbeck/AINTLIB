@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
-import Mathlib.RingTheory.Jacobson.Ring
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
+public import Mathlib.RingTheory.Jacobson.Ring
 
 /-!
 # The second Bosma–Lenstra addition law in projective coordinates (T-W7.0c-i)
@@ -38,6 +40,8 @@ T-W7.0c-i): law 2 landing on the curve (c5) and law 1's `equation_addXYZ` route 
 generic-point engine — tickets T-W7.0c-c5α (factorization bridge; skeleton `eq_zero_of_`
 `forall_isMaximal_mem` below) and T-W7.0c-c5β (triple → morphism plumbing).
 -/
+
+@[expose] public section
 
 local notation3 "x" => (0 : Fin 3)
 

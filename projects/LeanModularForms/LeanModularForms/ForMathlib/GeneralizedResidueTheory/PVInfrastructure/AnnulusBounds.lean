@@ -3,9 +3,11 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.GammaAnalysis
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.RemainderAnalysis
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.StepBounds
+module
+
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.GammaAnalysis
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.RemainderAnalysis
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.StepBounds
 
 /-!
 # PV Infrastructure: Annulus Bounds
@@ -23,6 +25,8 @@ the dyadic PV convergence proof.
 * `annulus_symmDiff_measure_bound`: symmetric difference between the gamma-annulus and the
   linear-model annulus has measure `O(ε₁²)`.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

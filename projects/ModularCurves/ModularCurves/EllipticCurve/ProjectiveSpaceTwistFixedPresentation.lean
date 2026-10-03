@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistFinitePresentation
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistFinitePresentation
 
 /-!
 # Fixed-coordinate presentations by projective twists
@@ -12,6 +14,10 @@ The coordinate chart carrying a local section need not be the coordinate used
 to model `O(1)`. Consequently, every finite-type quasicoherent module is a
 quotient of finitely many negative powers of one fixed model of `O(-1)`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

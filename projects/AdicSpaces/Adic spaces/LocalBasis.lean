@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».StandardCover
+module
+
+public import «Adic spaces».StandardCover
 
 /-!
 # Local basis theorem for plus-pieces (Lane C reframe)
@@ -37,6 +39,8 @@ This file:
   Lemma 3.8.
 * [B. Zavyalov, *Quasicoherent sheaves on adic spaces*], §2.3.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

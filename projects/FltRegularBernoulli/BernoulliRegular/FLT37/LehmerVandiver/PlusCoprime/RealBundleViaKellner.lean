@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealBundle
-import BernoulliRegular.BernoulliFast.KellnerSecondOrder
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.BridgeAssembly
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealBundle
+public import BernoulliRegular.BernoulliFast.KellnerSecondOrder
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.BridgeAssembly
 
 /-!
 # Bundle assembly via parametric Kellner Prop 2.7

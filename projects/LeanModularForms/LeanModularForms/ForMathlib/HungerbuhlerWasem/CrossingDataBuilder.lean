@@ -3,11 +3,13 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Analysis.InnerProductSpace.Calculus
-import LeanModularForms.ForMathlib.BoundaryWinding
-import LeanModularForms.ForMathlib.PaperPwC1Immersion
-import LeanModularForms.ForMathlib.AsymmetricSingleCrossing
-import LeanModularForms.ForMathlib.HungerbuhlerWasem.HigherOrderAsymptotics
+module
+
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+public import LeanModularForms.ForMathlib.BoundaryWinding
+public import LeanModularForms.ForMathlib.PaperPwC1Immersion
+public import LeanModularForms.ForMathlib.AsymmetricSingleCrossing
+public import LeanModularForms.ForMathlib.HungerbuhlerWasem.HigherOrderAsymptotics
 
 /-!
 # Generic `SingleCrossingData` builder from `IsFlatOfOrder _ _ 1`
@@ -80,6 +82,8 @@ information.
 * K. Hungerbühler, J. Wasem, *A generalized notion of winding numbers*,
   arXiv:1808.00997v2.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology Asymptotics
 open scoped Real Interval

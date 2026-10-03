@@ -1,6 +1,8 @@
-import Mathlib.CategoryTheory.Abelian.Exact
-import Mathlib.CategoryTheory.Sites.SheafCohomology.Cech
-import Mathlib.Topology.Sheaves.SheafCondition.EqualizerProducts
+module
+
+public import Mathlib.CategoryTheory.Abelian.Exact
+public import Mathlib.CategoryTheory.Sites.SheafCohomology.Cech
+public import Mathlib.Topology.Sheaves.SheafCondition.EqualizerProducts
 
 /-!
 # Degree-zero exactness of the Cech complex
@@ -8,6 +10,8 @@ import Mathlib.Topology.Sheaves.SheafCondition.EqualizerProducts
 For a sheaf valued in an abelian category, the restriction map from sections on the
 union of a family of opens is the kernel of the first Cech restriction-difference map.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

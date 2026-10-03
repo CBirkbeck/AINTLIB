@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.PowerSeries.Derivative
+module
+
+public import Mathlib.RingTheory.PowerSeries.Derivative
 
 /-!
 # The operator `∂ = (1+T)·d/dT` on power series
@@ -16,6 +18,8 @@ RJW (arXiv:2309.15692) Lem. 3.24: on `R⟦T⟧` (for any commutative ring `R`) t
 and its basic coefficient / functoriality API; every `p`-adic specialisation in the project
 routes through it.
 -/
+
+@[expose] public section
 
 open PowerSeries
 

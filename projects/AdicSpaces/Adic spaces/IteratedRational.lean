@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PresheafTateStructure
-import «Adic spaces».TopologyComparison
-import «Adic spaces».CompletionLocalization
+module
+
+public import «Adic spaces».PresheafTateStructure
+public import «Adic spaces».TopologyComparison
+public import «Adic spaces».CompletionLocalization
 
 /-!
 # Iterated Rational Localization (Wedhorn Lemma 2.13): helpers
@@ -18,6 +20,8 @@ with `LaurentRefinement`).
 ## References
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Lemma 2.13, Prop 8.7.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

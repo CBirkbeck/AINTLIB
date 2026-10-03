@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.Newforms.AdjointTheoryBadPrime
-import LeanModularForms.HeckeRIngs.GL2.Newforms.MainLemmaProof
-import LeanModularForms.Modularforms.QExpansionSlash
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.AdjointTheoryBadPrime
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.MainLemmaProof
+public import LeanModularForms.Modularforms.QExpansionSlash
 
 /-!
 # Newforms are full eigenforms (Diamond–Shurman Theorem 5.8.2(a))
@@ -21,6 +23,8 @@ vanishing prime-to-`N` Fourier coefficients (so it is old by the Main Lemma), he
 
 * `Newform.isFullEigenform` — a `Newform` is a `T_n`-eigenform for all `n`.
 -/
+
+@[expose] public section
 
 noncomputable section
 

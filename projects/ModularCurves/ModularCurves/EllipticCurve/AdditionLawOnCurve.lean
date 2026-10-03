@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.AdditionLawField
+module
+
+public import ModularCurves.EllipticCurve.AdditionLawField
 
 /-!
 # The second Bosma–Lenstra law lands on the curve over reduced Jacobson rings (T-W7.0c-c5α)
@@ -19,6 +21,8 @@ Consumers (T-W7.0c-c5β / T-W7.0c-i) instantiate `A` at the biprojective chart r
 + quotient) and domains (0e integrality), with `Δ` a unit by construction, and the chart
 points tautologically satisfy the two curve equations. No chart plumbing enters this file.
 -/
+
+@[expose] public section
 
 local notation3 "x" => (0 : Fin 3)
 

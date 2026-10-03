@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from the first-chart `Proj`-factorization block of Clawristotle's
 `CoherentCohomologyFinite.SegreStandardOverlapCompatibility`.
 -/
-import ModularCurves.ForMathlib.SegreOverlapFirstCompatibility
+module
+
+public import ModularCurves.ForMathlib.SegreOverlapFirstCompatibility
 
 /-!
 # First-chart factorization through a double Segre-image chart
@@ -14,6 +16,8 @@ import ModularCurves.ForMathlib.SegreOverlapFirstCompatibility
 The first local Segre morphism on a source overlap factors through the canonical double
 homogeneous-localization chart of the Segre-image `Proj`.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry
 

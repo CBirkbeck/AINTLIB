@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Etale.StandardEtale
-import Mathlib.RingTheory.AdjoinRoot
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
+module
+
+public import Mathlib.RingTheory.Etale.StandardEtale
+public import Mathlib.RingTheory.AdjoinRoot
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
 
 /-!
 # The square-root cover of a unit (the `u² = d` finite étale double cover)
@@ -24,6 +26,8 @@ the `x² = d` form of the point spec.
 * `sqrtPairCongr` — the twist `X ↦ c⁻¹X` identifying the `d`-cover with the
   `c²d`-cover: the gluing ingredient for the twisted (line-bundle-valued) case.
 -/
+
+@[expose] public section
 
 open Polynomial
 

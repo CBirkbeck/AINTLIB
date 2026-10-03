@@ -1,5 +1,7 @@
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
-import Mathlib.AlgebraicGeometry.Modules.Sheaf
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
 
 /-!
 # Limits and restriction of scheme modules
@@ -8,6 +10,8 @@ Restriction of modules along an open immersion preserves limits. This is the com
 input for affine-local constructions on quasicoherent modules and for descent of invertible
 sheaves.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits
 

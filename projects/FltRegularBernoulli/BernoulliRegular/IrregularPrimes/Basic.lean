@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.BernoulliFast.Tactic
-import BernoulliRegular.Main
-import Mathlib.Data.Set.Finite.Basic
+module
+
+public import BernoulliRegular.BernoulliFast.Tactic
+public import BernoulliRegular.Main
+public import Mathlib.Data.Set.Finite.Basic
 
 /-!
 # Basic infrastructure for non-regular primes
@@ -14,6 +16,8 @@ This file contains the elementary bridge from Bernoulli numerator witnesses to
 the existing `IsRegularPrime` predicate, plus finite-set scaffolding for the
 infinitude argument.
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular
 

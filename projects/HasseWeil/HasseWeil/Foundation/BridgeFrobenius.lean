@@ -1,8 +1,10 @@
-import HasseWeil.Isogeny.FormalSeries
-import HasseWeil.Isogeny.Frobenius.PointCount
-import HasseWeil.HasseBound.PointCount
-import HasseWeil.HasseBound.Separability
-import HasseWeil.Foundation.LocalExpansion
+module
+
+public import HasseWeil.Isogeny.FormalSeries
+public import HasseWeil.Isogeny.Frobenius.PointCount
+public import HasseWeil.HasseBound.PointCount
+public import HasseWeil.HasseBound.Separability
+public import HasseWeil.Foundation.LocalExpansion
 
 /-!
 # T-IV-BRIDGE-004: Frobenius pulled back to formal group is `T^q`
@@ -28,6 +30,8 @@ Proof outline:
 ## References
 * Silverman, *The Arithmetic of Elliptic Curves*, IV.4, III.5.5
 -/
+
+@[expose] public section
 
 namespace HasseWeil
 

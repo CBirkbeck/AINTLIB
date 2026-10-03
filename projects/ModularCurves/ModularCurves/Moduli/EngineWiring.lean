@@ -3,12 +3,14 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.Moduli.EngineMouth
-import ModularCurves.Moduli.LevelThreeTorsor
-import ModularCurves.Moduli.LevelFourTorsor
-import ModularCurves.Moduli.UniversalLevelFour
-import ModularCurves.Moduli.Recollement
-import ModularCurves.Moduli.Bootstrap
+module
+
+public import ModularCurves.Moduli.EngineMouth
+public import ModularCurves.Moduli.LevelThreeTorsor
+public import ModularCurves.Moduli.LevelFourTorsor
+public import ModularCurves.Moduli.UniversalLevelFour
+public import ModularCurves.Moduli.Recollement
+public import ModularCurves.Moduli.Bootstrap
 
 /-!
 # [:324 WIRING] The KM 4.7.0 engine ⇐ direction, downstream of the mouth + torsor packages
@@ -25,6 +27,8 @@ The two torsor legs `ULift` their `Type 0` groups to `Type u` (the universe wall
 `TorsorData`), instantiate the mouth twice (level 3 over `R[1/3]`, Legendre over `R[1/2]`),
 and glue by recollement over `D(2) ∪ D(3) = Spec R` (`-1·2 + 1·3 = 1`).
 -/
+
+@[expose] public section
 
 universe u
 open CategoryTheory AlgebraicGeometry ModularCurves ModularCurves.ModuliProblem

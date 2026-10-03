@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.IwasawaProof.FundamentalSequence
-import PadicLFunctions.IwasawaProof.Generators
-import Mathlib.Analysis.Normed.Algebra.Basic
-import Mathlib.Analysis.Normed.Operator.Mul
+module
+
+public import PadicLFunctions.IwasawaProof.FundamentalSequence
+public import PadicLFunctions.IwasawaProof.Generators
+public import Mathlib.Analysis.Normed.Algebra.Basic
+public import Mathlib.Analysis.Normed.Operator.Mul
 
 /-!
 # Continuity of the Coleman map (RJW §13 / IMC analytic core)
@@ -27,6 +29,8 @@ computation `Col '' 𝒞_{∞,1} = I(𝒢)ζ_p`.
   on the `𝒩`-fixed units `𝒲ˣ` (where `Ring.inverse` is continuous via the
   compact-Hausdorff homeomorphism trick), and `Col u = colemanPipe (colemanSeries u)`.
 -/
+
+@[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman
 open scoped PowerSeries.WithPiTopology fwdDiff

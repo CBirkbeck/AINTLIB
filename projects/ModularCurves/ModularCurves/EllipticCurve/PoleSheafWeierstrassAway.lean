@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafAwayCoordinate
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassRelation
-import ModularCurves.EllipticCurve.WeierstrassModelCoordinates
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafAwayCoordinate
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassRelation
+public import ModularCurves.EllipticCurve.WeierstrassModelCoordinates
 
 /-!
 # The Weierstrass equation away from the marked section
@@ -14,6 +16,10 @@ The global pole-sheaf relation is evaluated in the canonical frames on an open
 disjoint from the marked section. This gives the affine Weierstrass equation
 with the same coefficients as the homogeneous equation near the section.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory MonoidalCategory
 

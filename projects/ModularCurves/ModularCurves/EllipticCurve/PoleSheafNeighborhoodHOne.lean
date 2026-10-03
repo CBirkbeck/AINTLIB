@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafNoetherianStage
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
-import ModularCurves.EllipticCurve.PoleSheafNoetherianStageCech
-import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChangeHOne
-import ModularCurves.ForMathlib.CochainComplexFlatBaseChangeExact
-import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChangeLinearEquiv
-import ModularCurves.ForMathlib.PrescribedLocalizedBasis
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafNoetherianStage
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
+public import ModularCurves.EllipticCurve.PoleSheafNoetherianStageCech
+public import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChangeHOne
+public import ModularCurves.ForMathlib.CochainComplexFlatBaseChangeExact
+public import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChangeLinearEquiv
+public import ModularCurves.ForMathlib.PrescribedLocalizedBasis
 
 /-!
 # Local `H¹` vanishing for the simple-pole sheaf (FLW-1)
@@ -34,6 +36,10 @@ The conclusion is stated on the direct stage family together with a pointed isom
 to the restricted original family; downstream consumers work with the direct family and
 cross back at the `LocallyWeierstrass` level (`LocallyWeierstrass.of_iso`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace TensorProduct
 open scoped ChangeOfRings

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.HasseAssembly
-import HasseWeil.Isogeny.BaseChange.Basic
+module
+
+public import HasseWeil.HasseBound.WeilPairing.HasseAssembly
+public import HasseWeil.Isogeny.BaseChange.Basic
 
 /-!
 # Frobenius matrix data over the algebraic closure
@@ -34,6 +36,8 @@ This file supplies the per-`ℓ` Frobenius-matrix determinant data used by
 `pullbackDivisor_kappaDivisor` is declared in both `HfactLemma.lean` and `PairingNondeg.lean`.
 This file imports neither directly, so no clash arises and no rename is needed.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Real Matrix
 

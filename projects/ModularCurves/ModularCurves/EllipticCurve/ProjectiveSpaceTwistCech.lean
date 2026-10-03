@@ -3,10 +3,12 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
-import ModularCurves.ForMathlib.ProjectiveLaurentWeight
-import ModularCurves.ForMathlib.ProjToSpecZero
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
+public import ModularCurves.ForMathlib.ProjectiveLaurentWeight
+public import ModularCurves.ForMathlib.ProjToSpecZero
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
 
 /-!
 # Cech factors for twists on polynomial projective space
@@ -15,6 +17,10 @@ This file begins the ordered standard-cover calculation of the cohomology of
 projective-space twists. It identifies the sections of `O(d)` on each ordered
 intersection with the sections of the structure sheaf there.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

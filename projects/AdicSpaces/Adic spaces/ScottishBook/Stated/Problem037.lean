@@ -1,5 +1,7 @@
-import «Adic spaces».RestrictedPowerSeries
-import «Adic spaces».ExcellentRing
+module
+
+public import «Adic spaces».RestrictedPowerSeries
+public import «Adic spaces».ExcellentRing
 
 /-!
 # Nonarchimedean Scottish Book — Problem 37
@@ -21,6 +23,8 @@ definition.
 
 Open.
 -/
+
+@[expose] public section
 
 universe u
 

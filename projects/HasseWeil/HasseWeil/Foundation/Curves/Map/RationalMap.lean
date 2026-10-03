@@ -1,4 +1,6 @@
-import HasseWeil.Foundation.Curves.Divisor.ProjectiveTuple
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.ProjectiveTuple
 
 /-!
 # Rational maps from a smooth curve to projective space
@@ -19,6 +21,8 @@ every rational map from a smooth curve is a morphism: given a representative
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.1
 -/
+
+@[expose] public section
 
 open WithTop
 

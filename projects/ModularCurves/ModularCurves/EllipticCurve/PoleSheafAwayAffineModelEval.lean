@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.AffineModelCoordinates
-import ModularCurves.EllipticCurve.PoleSheafAwayCoordinateRing
+module
+
+public import ModularCurves.EllipticCurve.AffineModelCoordinates
+public import ModularCurves.EllipticCurve.PoleSheafAwayCoordinateRing
 
 /-!
 # Affine Weierstrass evaluation on the section complement
@@ -8,6 +10,8 @@ The normalized pole coordinates on the exact complement of the marked
 section define a bijective homomorphism from the affine Weierstrass coordinate
 ring whenever they satisfy the affine equation.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 

@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.FiniteProperClosureChart
-import ModularCurves.ForMathlib.SpecBasicOpenAway
+module
+
+public import ModularCurves.ForMathlib.FiniteProperClosureChart
+public import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
 # Unions of charts in finite proper closures
@@ -7,6 +9,10 @@ import ModularCurves.ForMathlib.SpecBasicOpenAway
 This file forms the union of the inverse-image charts in a finite proper closure and glues their
 compatible maps to a separated target.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory
 

@@ -5,9 +5,11 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-D31.
 -/
-import Mathlib.RingTheory.Nilpotent.Lemmas
-import Mathlib.RingTheory.Localization.FractionRing
-import Mathlib.RingTheory.Ideal.Quotient.Basic
+module
+
+public import Mathlib.RingTheory.Nilpotent.Lemmas
+public import Mathlib.RingTheory.Localization.FractionRing
+public import Mathlib.RingTheory.Ideal.Quotient.Basic
 
 /-!
 # Field-valued points separate elements of a reduced ring
@@ -30,6 +32,8 @@ radical, which exceeds the nilradical in general.
 Upstream candidate: mathlib has `nilpotent_iff_mem_prime` and the
 `IsReduced (MvPolynomial σ R)` instance, but not this separation statement.
 -/
+
+@[expose] public section
 
 universe u
 

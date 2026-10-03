@@ -3,15 +3,17 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.Pairing
-import HasseWeil.HasseBound.WeilPairing.Constancy
-import HasseWeil.HasseBound.WeilPairing.DivisorGalois
-import HasseWeil.HasseBound.WeilPairing.FrobeniusFunctionFieldEquiv
-import HasseWeil.HasseBound.WeilPairing.FrobeniusConjugation
-import HasseWeil.Foundation.EC.AffinePointMap
-import HasseWeil.Foundation.EC.SeparableKernelTorsor
-import HasseWeil.Foundation.EC.Translation
-import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
+module
+
+public import HasseWeil.HasseBound.WeilPairing.Pairing
+public import HasseWeil.HasseBound.WeilPairing.Constancy
+public import HasseWeil.HasseBound.WeilPairing.DivisorGalois
+public import HasseWeil.HasseBound.WeilPairing.FrobeniusFunctionFieldEquiv
+public import HasseWeil.HasseBound.WeilPairing.FrobeniusConjugation
+public import HasseWeil.Foundation.EC.AffinePointMap
+public import HasseWeil.Foundation.EC.SeparableKernelTorsor
+public import HasseWeil.Foundation.EC.Translation
+public import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
 
 /-!
 # Galois equivariance of the field-level Weil pairing (T-C0c)
@@ -60,6 +62,8 @@ This file is the mirror, at an arbitrary curve-fixing `σ`, of HasseWeil's Frobe
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.8.1 (Galois equivariance).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial IsDedekindDomain HasseWeil HasseWeil.Curves
   HasseWeil.WeilPairing

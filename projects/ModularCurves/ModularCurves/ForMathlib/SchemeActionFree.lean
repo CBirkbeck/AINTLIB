@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.InvariantTorsor
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import ModularCurves.ForMathlib.EtaleCancellation
-import ModularCurves.ForMathlib.SchemeQuotient
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.ForMathlib.InvariantTorsor
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import ModularCurves.ForMathlib.EtaleCancellation
+public import ModularCurves.ForMathlib.SchemeQuotient
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Geometric freeness ⟹ algebraic freeness (the T-Q2 bridge)
@@ -26,6 +28,8 @@ This file is the bridge: on a `G`-stable **affine** open, geometric freeness giv
 `IsFreeAlgebraAction` on the section ring. It is the input that turns the local quotient
 `V ⟶ Spec Γ(X,V)ᴳ` into a finite étale `G`-torsor.
 -/
+
+@[expose] public section
 
 universe u
 

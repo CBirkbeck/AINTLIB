@@ -1,1 +1,3 @@
-import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.EigenspaceGeneratorAndCertEquivalence
+module
+
+public import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.EigenspaceGeneratorAndCertEquivalence

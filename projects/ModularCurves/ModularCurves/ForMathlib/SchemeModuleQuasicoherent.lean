@@ -1,19 +1,22 @@
-import Mathlib.Algebra.Category.ModuleCat.Products
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.LocallyFree
-import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
-import Mathlib.Algebra.Module.LocalizedModule.Submodule
-import Mathlib.AlgebraicGeometry.Modules.Tilde
-import Mathlib.AlgebraicGeometry.Noetherian
-import Mathlib.AlgebraicGeometry.Morphisms.Affine
-import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
-import Mathlib.CategoryTheory.ObjectProperty.Kernels
-import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
-import Mathlib.LinearAlgebra.Dimension.Finite
-import Mathlib.RingTheory.Localization.Finiteness
-import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
-import ModularCurves.ForMathlib.SchemeModuleRestrictLimits
-import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
-import ModularCurves.ForMathlib.SpecBasicOpenAway
+module
+
+import Mathlib.Algebra.Module.LocalizedModule.Away
+public import Mathlib.Algebra.Category.ModuleCat.Products
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.LocallyFree
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
+public import Mathlib.Algebra.Module.LocalizedModule.Submodule
+public import Mathlib.AlgebraicGeometry.Modules.Tilde
+public import Mathlib.AlgebraicGeometry.Noetherian
+public import Mathlib.AlgebraicGeometry.Morphisms.Affine
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+public import Mathlib.CategoryTheory.ObjectProperty.Kernels
+public import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
+public import Mathlib.LinearAlgebra.Dimension.Finite
+public import Mathlib.RingTheory.Localization.Finiteness
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
+public import ModularCurves.ForMathlib.SchemeModuleRestrictLimits
+public import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
+public import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
 # Quasicoherent modules on affine schemes
@@ -22,6 +25,10 @@ This file records the exact closure and global-section properties of quasicohere
 needed for affine sheaf-cohomology vanishing. The proofs use the equivalence between modules and
 quasicoherent modules on an affine scheme supplied by `tilde`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits Opposite TopologicalSpace
 

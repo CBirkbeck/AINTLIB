@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.NumberTheory.DirichletCharacter.GaussSum
-import Mathlib.NumberTheory.LegendreSymbol.AddCharacter
-import Mathlib.Topology.LocallyConstant.Basic
-import PadicLFunctions.Coefficients
-import PadicLFunctions.Measure.Basic
+module
+
+public import Mathlib.NumberTheory.DirichletCharacter.GaussSum
+public import Mathlib.NumberTheory.LegendreSymbol.AddCharacter
+public import Mathlib.Topology.LocallyConstant.Basic
+public import PadicLFunctions.Coefficients
+public import PadicLFunctions.Measure.Basic
 
 /-!
 # Dirichlet characters as functions on `ℤ_p`, and Gauss sums (RJW §5.1)
@@ -20,6 +22,8 @@ character attached to a primitive `p^n`-th root of unity; Rem 5.3(ii) is
 mathlib's `gaussSum_mulShift_of_isPrimitive`, and Rem 5.3(i) at non-prime
 level is `gaussSum_mul_gaussSum_inv` below (L5.1.5, a mathlib gap).
 -/
+
+@[expose] public section
 
 namespace PadicLFunctions
 

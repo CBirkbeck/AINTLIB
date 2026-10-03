@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import ModularCurves.WeilPairing.CharZeroAssembly
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import ModularCurves.WeilPairing.CharZeroAssembly
 
 /-!
 # Sections inject along a flat surjective cover (WP-C1)
@@ -32,6 +34,8 @@ The mathlib proof of `AlgebraicGeometry.epi_of_flat_of_surjective` establishes t
 stalkwise injectivity en route to a statement about epimorphisms of schemes; that statement
 does not give injectivity on sections, since `Γ` is not faithful.
 -/
+
+@[expose] public section
 
 universe u
 

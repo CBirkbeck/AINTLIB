@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Transcendence
-import HasseWeil.Foundation.Curves.Valuation.Infinity
-import Mathlib.FieldTheory.Minpoly.Field
+module
+
+public import HasseWeil.Foundation.Curves.Transcendence
+public import HasseWeil.Foundation.Curves.Valuation.Infinity
+public import Mathlib.FieldTheory.Minpoly.Field
 
 /-!
 # The ramification-pullback formula at the place at infinity (Silverman II.2.6)
@@ -45,6 +47,8 @@ construction.
   II.2.6 (`Σ e = deg`, `e` multiplicative), III.4.10a (`e = deg_i` ⟹ separable
   ⟹ `e = 1`), IV.1 (`ord_∞`).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves.SmoothPlaneCurve
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Map.CoordHomFinite
-import HasseWeil.Isogeny.Frobenius.Twist
-import HasseWeil.Isogeny.Ramification
-import HasseWeil.Foundation.Curves.Valuation.OrdAtInftyBaseChange
+module
+
+public import HasseWeil.Foundation.Curves.Map.CoordHomFinite
+public import HasseWeil.Isogeny.Frobenius.Twist
+public import HasseWeil.Isogeny.Ramification
+public import HasseWeil.Foundation.Curves.Valuation.OrdAtInftyBaseChange
 
 /-!
 # ISO-BC: base change of an `EC.Isogeny` along a field extension
@@ -53,6 +55,8 @@ engine `addHomProperty_descend_of_baseChange` (`GroupHomDescend.lean`) consumes:
 * [Silverman, *The Arithmetic of Elliptic Curves*], I.2 (base change /
   "defined over `K`"), III.4.8.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

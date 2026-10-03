@@ -1,7 +1,9 @@
-import Mathlib.Algebra.Homology.HomologicalBicomplex
-import Mathlib.CategoryTheory.Abelian.Injective.Resolution
-import ModularCurves.ForMathlib.SheafCechFlasqueHOne
-import ModularCurves.ForMathlib.SheafCechZero
+module
+
+public import Mathlib.Algebra.Homology.HomologicalBicomplex
+public import Mathlib.CategoryTheory.Abelian.Injective.Resolution
+public import ModularCurves.ForMathlib.SheafCechFlasqueHOne
+public import ModularCurves.ForMathlib.SheafCechZero
 
 /-!
 # The Cech bicomplex of an injective resolution
@@ -10,6 +12,8 @@ Apply mathlib's native Cech complex degreewise to an injective resolution. The r
 bicomplex has exact augmented rows in degree zero and exact rows in degree one. These are
 the horizontal inputs for the degree-one total-complex comparison.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

@@ -1,6 +1,8 @@
-import Mathlib.NumberTheory.Modular
-import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
-import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+module
+
+public import Mathlib.NumberTheory.Modular
+public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 
 /-!
 # Modular curves — foundations
@@ -27,6 +29,8 @@ See `projects/ModularCurves/docs/` for the source bibliography and the project p
 This file is intentionally a stub: it fixes the module root and pins the core imports. Real
 development happens in sibling files under `ModularCurves/`.
 -/
+
+@[expose] public section
 
 namespace ModularCurves
 

@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.KummerLogDetectorModSq
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DescentEigencomponentCollapse
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.KummerLogDetectorModSq
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DescentEigencomponentCollapse
 
 /-!
 # The single-column second-order (mod `37²`) Dwork-coefficient identity at the irregular row

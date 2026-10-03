@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Data.Nat.Digits.Defs
-import Mathlib.Data.Nat.Digits.Lemmas
+module
+
+public import Mathlib.Data.Nat.Digits.Defs
+public import Mathlib.Data.Nat.Digits.Lemmas
 
 /-!
 # LMFDB letter encoding (base-26 labels)
@@ -44,6 +46,8 @@ left inverse `letterDecode`, and prove `Function.Bijective` for the corestrictio
 * `letterEncode_zero`, `letterEncode_25`, `letterEncode_26` : small computations
   pinning down the convention (`0 ↦ "a"`, `25 ↦ "z"`, `26 ↦ "ba"`).
 -/
+
+@[expose] public section
 
 namespace LeanModularForms.Labels
 

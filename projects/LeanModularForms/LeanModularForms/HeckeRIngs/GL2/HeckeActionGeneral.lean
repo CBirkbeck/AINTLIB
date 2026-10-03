@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.Matrix.Adjugate
-import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
-import LeanModularForms.HeckeRIngs.GL2.HeckeModularForm
-import LeanModularForms.HeckeRIngs.GLn.CongruenceHecke
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Adjugate
+public import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
+public import LeanModularForms.HeckeRIngs.GL2.HeckeModularForm
+public import LeanModularForms.HeckeRIngs.GLn.CongruenceHecke
 
 /-!
 # Generalized Hecke Action for Arbitrary Hecke Pairs
@@ -38,6 +40,8 @@ subgroups like `Γ₁(N)` also satisfy `HeckePairAction`. For 2×2 matrices,
 
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §§3.4
 -/
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup Subgroup.Commensurable Pointwise CongruenceSubgroup
 open HeckeRing DoubleCoset HeckeRing.GLn HeckeRing.GL2

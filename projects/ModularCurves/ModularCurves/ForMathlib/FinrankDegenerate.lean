@@ -3,8 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
-import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+import all Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
 
 /-!
 # Fibre rank vanishes for morphisms factoring through a Cartier-type subscheme
@@ -29,6 +32,8 @@ KM 2.6.1's degenerate case) with no zero-or-isogeny dichotomy.
 * `AlgebraicGeometry.Scheme.Hom.finrank_eq_zero_of_factors_of_nonZeroDivisor_mem` — the main
   theorem.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 
@@ -63,14 +68,14 @@ theorem Scheme.Hom.appLE_eq_of_eq {P C : Scheme.{u}} {m m' : P ⟶ C} (h : m = m
     m.appLE U V e = m'.appLE U V (h ▸ e) := by
   subst h; rfl
 
-/-- Public defeq re-characterization of `Scheme.Hom.finrank`: the rank at `x` is the
+/-- Characterization of `Scheme.Hom.finrank`: the rank at `x` is the
 `RingHom.finrank` of the global-sections algebra of the pullback of `f` along the canonical
 affine chart at `x`, at the chart point's prime. -/
 theorem Scheme.Hom.finrank_eq_rankAtStalk_chart {X C : Scheme.{u}} (f : X ⟶ C) (x : C) :
     f.finrank x =
       (Limits.pullback.snd f (C.affineOpenCover.f (C.affineOpenCover.idx x))).appTop.hom.finrank
         ((Spec (C.affineOpenCover.X (C.affineOpenCover.idx x))).isoSpec.hom
-          (C.affineOpenCover.covers x).choose) := rfl
+          (C.affineOpenCover.covers x).choose) := (rfl)
 
 /-- A germ of a section of an ideal-sheaf component survives restriction to a smaller affine
 open: if `f₀ ∈ J.ideal V` has nonzero germ at `x ∈ W ≤ V` with `W` affine, then some

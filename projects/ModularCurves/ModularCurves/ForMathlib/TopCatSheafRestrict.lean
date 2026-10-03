@@ -1,5 +1,7 @@
-import Mathlib.CategoryTheory.Sites.Pullback
-import Mathlib.Topology.Sheaves.Flasque
+module
+
+public import Mathlib.CategoryTheory.Sites.Pullback
+public import Mathlib.Topology.Sheaves.Flasque
 
 /-!
 # Restriction of sheaves to an open subspace
@@ -8,6 +10,8 @@ This file supplies the restriction functor along an open embedding, its adjuncti
 pushforward, and the exactness properties needed to restrict short exact sequences of sheaves of
 abelian groups.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits Opposite TopologicalSpace Topology
 

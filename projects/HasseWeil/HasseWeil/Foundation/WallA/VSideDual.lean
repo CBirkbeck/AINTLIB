@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.VerschiebungFactorization
-import HasseWeil.HasseBound.SumTrace
-import HasseWeil.Foundation.Verschiebung.Genuine
+module
+
+public import HasseWeil.Isogeny.VerschiebungFactorization
+public import HasseWeil.HasseBound.SumTrace
+public import HasseWeil.Foundation.Verschiebung.Genuine
 
 /-!
 # Wall A — the V-side dual route to the signed III.6.3 degree identity
@@ -54,6 +56,8 @@ witness-parametric closing lemma is the live form.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.6.1–III.6.3.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

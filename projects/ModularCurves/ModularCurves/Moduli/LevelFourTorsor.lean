@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.GammaHRepresentability
-import ModularCurves.Moduli.Bootstrap
-import ModularCurves.Moduli.QuotientStack
-import ModularCurves.ForMathlib.EtaleSectionsCount
-import ModularCurves.Moduli.LevelThreeTorsor
+module
+
+public import ModularCurves.Moduli.GammaHRepresentability
+public import ModularCurves.Moduli.Bootstrap
+public import ModularCurves.Moduli.QuotientStack
+public import ModularCurves.ForMathlib.EtaleSectionsCount
+public import ModularCurves.Moduli.LevelThreeTorsor
 
 /-!
 # The level-4 `TorsorData` package (STREAM-E4, E4-B)
@@ -43,6 +45,10 @@ The rank-two torsion input `addEquiv_pi_fin_two_zmod_of_natCard` is pure group t
   `levelFourEquivariantData`, `levelFour_surjective`, `levelFour_torsor`, and the two
   exports `exists_levelFourTorsorData` / `exists_levelFourTorsorData_ulift`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 -- v4.33 bump: neither the `Scheme` category instance nor the semireducible component
 -- types are transparent enough for the rewrites below at `implicit` transparency.

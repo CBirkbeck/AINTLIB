@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Basic
-import HasseWeil.Isogeny.Dual.Morphism
+module
+
+public import HasseWeil.Isogeny.Basic
+public import HasseWeil.Isogeny.Dual.Morphism
 
 /-!
 # The isogeny relation and isogeny classes (Silverman III.4, III.6.1)
@@ -91,6 +93,8 @@ LMFDB's *isogeny class* of an elliptic curve is the equivalence class of
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4 (definition of
   *isogenous*), III.6.1 (the dual isogeny, used for symmetry).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

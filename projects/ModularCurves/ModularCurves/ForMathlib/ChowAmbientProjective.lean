@@ -5,9 +5,11 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.AffineProjectiveClosureFactorization
-import ModularCurves.ForMathlib.FiniteProperClosureProjective
-import ModularCurves.ForMathlib.NoetherianChowCover
+module
+
+public import ModularCurves.ForMathlib.AffineProjectiveClosureFactorization
+public import ModularCurves.ForMathlib.FiniteProperClosureProjective
+public import ModularCurves.ForMathlib.NoetherianChowCover
 
 /-!
 # Projectivity of the Chow ambient scheme
@@ -15,6 +17,8 @@ import ModularCurves.ForMathlib.NoetherianChowCover
 The finite scheme-theoretic closure assembled from a nonempty finite affine cover has an explicit
 projective factorization over the affine base.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

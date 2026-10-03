@@ -5,7 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.RelativeProjectiveAffineBase
+module
+
+public import ModularCurves.ForMathlib.RelativeProjectiveAffineBase
 
 /-!
 # Relative projective factorizations over affine opens
@@ -13,6 +15,8 @@ import ModularCurves.ForMathlib.RelativeProjectiveAffineBase
 A relative projective factorization becomes an ordinary projective-space factorization after
 restriction to an affine base open.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

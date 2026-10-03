@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.UnitClassBridge
-import BernoulliRegular.Reflection.ClassGroupModP.AtomC
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.UnitClassBridge
+public import BernoulliRegular.Reflection.ClassGroupModP.AtomC
 
 /-!
 # Regular-prime instance of `FLT37UnitClassBridgeRefined`

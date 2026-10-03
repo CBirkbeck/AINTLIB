@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.KummerLogDetectorModSq
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.KummerLogDetectorModSq
 
 /-!
 # The second-order descent detector vanishes

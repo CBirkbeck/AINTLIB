@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.Basic
+module
+
+public import ModularCurves.LevelStructure.Basic
 
 /-!
 # The category Ell/R and moduli problems (KM Ch. 4; Loeffler §3.7)
@@ -28,6 +30,8 @@ The stack remark (Loeffler, after 3.7.1): "The category `Ell/R` is `Sch/Y` for a
 does not exist. … This is the idea of *stacks*" — the stack-facing packaging lives in
 `Moduli/Stack.lean`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.CrossProduct
-import Mathlib.RingTheory.Ideal.Span
-import Mathlib.LinearAlgebra.Matrix.Adjugate
+module
+
+public import Mathlib.LinearAlgebra.CrossProduct
+public import Mathlib.RingTheory.Ideal.Span
+public import Mathlib.LinearAlgebra.Matrix.Adjugate
 
 /-!
 # The kernel of a rank-two system is spanned by the cross product
@@ -15,6 +17,8 @@ unimodular (its coordinates generate the unit ideal), then a vector annihilated 
 both dot products `v ⬝ᵥ ·` and `w ⬝ᵥ ·` is a multiple of `v ⨯₃ w`. No localization,
 no splitting theory — the chord-and-tangent line of [GAP-A-4] is this vector.
 -/
+
+@[expose] public section
 
 namespace ModularCurves
 

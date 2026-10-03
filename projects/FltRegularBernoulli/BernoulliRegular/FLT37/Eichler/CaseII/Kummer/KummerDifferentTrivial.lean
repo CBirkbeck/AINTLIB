@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.IdealKummerUnramified
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.PrimaryRadicalUnramified
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.IdealKummerUnramified
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.PrimaryRadicalUnramified
 
 /-!
 # [FLT37-CASEII-IDEAL-KUMMER-PROOF] Proving the ideal-theoretic Kummer Lemma 9.1

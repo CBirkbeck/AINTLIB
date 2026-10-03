@@ -6,8 +6,10 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreProductChartTransitionGeometry`.
 -/
-import ModularCurves.ForMathlib.SegreOverlapFirstProjFactorization
-import ModularCurves.ForMathlib.SegreProductChartTransitionGeometry
+module
+
+public import ModularCurves.ForMathlib.SegreOverlapFirstProjFactorization
+public import ModularCurves.ForMathlib.SegreProductChartTransitionGeometry
 
 /-!
 # Second-chart compatibility of the localized Segre equivalence
@@ -15,6 +17,8 @@ import ModularCurves.ForMathlib.SegreProductChartTransitionGeometry
 The first and second standard charts map to a common double homogeneous localization. Their
 coordinate ratios satisfy the usual projective transition identities there.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry HomogeneousLocalization
 

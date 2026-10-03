@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.PoleFiltration
-import ModularCurves.EllipticCurve.AdditionChartProj
+module
+
+public import ModularCurves.EllipticCurve.PoleFiltration
+public import ModularCurves.EllipticCurve.AdditionChartProj
 
 /-!
 # The zero ideal in the projective `Y`-chart
@@ -13,6 +15,8 @@ This file computes the two generators of the zero-section ideal under a projecti
 For the normalized pole-coordinate triple `[x * r, y, r ^ 3]`, with `x` and `y` invertible,
 the image of the model ideal `(s, t)` is the principal ideal `(r)`.
 -/
+
+@[expose] public section
 
 open MvPolynomial ModularCurves HomogeneousIdeal HomogeneousLocalization
 open AlgebraicGeometry CategoryTheory

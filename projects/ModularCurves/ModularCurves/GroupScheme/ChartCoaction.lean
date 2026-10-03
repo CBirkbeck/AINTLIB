@@ -1,6 +1,8 @@
-import ModularCurves.GroupScheme.PatchHopf
-import ModularCurves.ForMathlib.Coaction
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.GroupScheme.PatchHopf
+public import ModularCurves.ForMathlib.Coaction
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The chart co-action is a co-action
@@ -11,6 +13,8 @@ bialgebra structure `instBialgebraOpens` (`PatchHopf.lean`). The two axioms are 
 two group-action laws `translationAction_unit` / `translationAction_assoc`
 (`SubgroupGroupObject.lean`), mirroring the Hopf coassoc/counit development in `PatchHopf.lean`.
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

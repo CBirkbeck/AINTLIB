@@ -1,5 +1,7 @@
-import ModularCurves.ModularCurve.YRho
-import ModularCurves.WeilPairing.SelfUniversalVanishing
+module
+
+public import ModularCurves.ModularCurve.YRho
+public import ModularCurves.WeilPairing.SelfUniversalVanishing
 
 /-!
 # [T-EQ-3c-PIN] The pairing-side bridge: value-level symplectic condition ⟹
@@ -22,6 +24,8 @@ proves the bridge:
   register (`weilPairingEval_symplectic`) and the frame-determinant condition close
   each piece.
 -/
+
+@[expose] public section
 
 -- v4.33 bump: neither the `Scheme`/`CommAlgCat` category instances nor the semireducible
 -- component types are transparent enough for the rewrites and instance searches below.

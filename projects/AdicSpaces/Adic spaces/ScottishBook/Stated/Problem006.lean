@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidRing
+module
+
+public import «Adic spaces».PerfectoidRing
 
 /-!
 # Nonarchimedean Scottish Book — Problem 6
@@ -30,6 +32,8 @@ We define `IsSousperfectoid` locally by requiring a perfectoid ring `B`, a conti
 homomorphism `A →+* B`, and a continuous left inverse of its underlying function. The problem asks
 whether all stably uniform rings are sousperfectoid.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

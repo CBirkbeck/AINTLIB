@@ -1,8 +1,10 @@
-import HasseWeil.Foundation.Curves.FiniteOverKx
-import HasseWeil.Foundation.Curves.Map.CurveMap
-import Mathlib.RingTheory.Algebraic.Integral
-import Mathlib.RingTheory.Algebraic.Basic
-import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
+module
+
+public import HasseWeil.Foundation.Curves.FiniteOverKx
+public import HasseWeil.Foundation.Curves.Map.CurveMap
+public import Mathlib.RingTheory.Algebraic.Integral
+public import Mathlib.RingTheory.Algebraic.Basic
+public import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
 
 /-!
 # Algebraicity of `F(C)` over `F[x]` for a smooth plane curve `C`
@@ -33,6 +35,8 @@ typeclass-plumbing. That bridge is tracked as a follow-up.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.1, II.2.4
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

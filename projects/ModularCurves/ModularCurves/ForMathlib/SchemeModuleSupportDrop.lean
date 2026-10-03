@@ -6,7 +6,9 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `SchemeModuleSupportComplement.lean` and
 `OpenRestrictionSupportDrop.lean` in Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.SchemeModuleSupport
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleSupport
 
 /-!
 # Strict support decrease on an open subscheme
@@ -15,6 +17,8 @@ A finite-type quasicoherent module vanishes on the open complement of its
 closed stalk support. More generally, vanishing on an open meeting a larger
 support turns support containment into strict containment.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 

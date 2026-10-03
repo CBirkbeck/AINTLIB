@@ -1,12 +1,14 @@
-import BernoulliRegular.BernoulliFast.PrimesUpTo100
-import BernoulliRegular.FLT37.Arithmetic
-import BernoulliRegular.FLT37.CaseI
-import BernoulliRegular.FLT37.CaseII
-import BernoulliRegular.FLT37.MirimanoffDescent
-import BernoulliRegular.FLT37.PrimaryConj
-import BernoulliRegular.FLT37.Principalization
-import FltRegular.MayAssume.Lemmas
-import Mathlib.NumberTheory.FLT.Basic
+module
+
+public import BernoulliRegular.BernoulliFast.PrimesUpTo100
+public import BernoulliRegular.FLT37.Arithmetic
+public import BernoulliRegular.FLT37.CaseI
+public import BernoulliRegular.FLT37.CaseII
+public import BernoulliRegular.FLT37.MirimanoffDescent
+public import BernoulliRegular.FLT37.PrimaryConj
+public import BernoulliRegular.FLT37.Principalization
+public import FltRegular.MayAssume.Lemmas
+public import Mathlib.NumberTheory.FLT.Basic
 
 /-!
 # FLT for `p = 37` from Vandiver Theorem III (ticket FLT37h, conditional)
@@ -37,6 +39,8 @@ follows once tickets FLT37b – FLT37g are completed.
 Conditional. The `fermatLastTheoremFor_thirtyseven_of_vandiverIII` reduction
 is unconditional; the eponymous unconditional theorem awaits FLT37g.
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular
 

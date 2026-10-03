@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.RelativeProjectiveAffineFactorization
-import ModularCurves.ForMathlib.RelativeProjectiveFactorizationChoice
+module
+
+public import ModularCurves.ForMathlib.RelativeProjectiveAffineFactorization
+public import ModularCurves.ForMathlib.RelativeProjectiveFactorizationChoice
 
 /-!
 # Chosen relative projective maps over affine opens
@@ -15,6 +17,8 @@ The chosen embedding of a relative projective factorization restricts to an affi
 without changing its projective dimension. After the affine-base comparison, this gives a fixed
 closed embedding into ordinary projective space over the open's section ring.
 -/
+
+@[expose] public section
 
 open CategoryTheory Limits
 

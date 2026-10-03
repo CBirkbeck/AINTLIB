@@ -1,7 +1,9 @@
-import Mathlib.AlgebraicGeometry.Morphisms.Proper
-import ModularCurves.EllipticCurve.PoleSheaf
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
-import ModularCurves.Picard.InvertibleSheafBaseCechFlat
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Proper
+public import ModularCurves.EllipticCurve.PoleSheaf
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
+public import ModularCurves.Picard.InvertibleSheafBaseCechFlat
 
 /-!
 # Flat base-linear Cech models for pole sheaves
@@ -9,6 +11,8 @@ import ModularCurves.Picard.InvertibleSheafBaseCechFlat
 The pole line bundles on a smooth proper pointed curve have finite affine
 trivializing covers whose base-linear Cech complexes are termwise flat.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TopologicalSpace
 

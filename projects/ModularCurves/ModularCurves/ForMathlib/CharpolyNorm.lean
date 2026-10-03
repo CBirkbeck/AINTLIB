@@ -5,10 +5,12 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-D29.
 -/
-import Mathlib.LinearAlgebra.Charpoly.Basic
-import Mathlib.LinearAlgebra.TensorProduct.Basis
-import Mathlib.RingTheory.Norm.Defs
-import Mathlib.RingTheory.TensorProduct.Basic
+module
+
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+public import Mathlib.LinearAlgebra.TensorProduct.Basis
+public import Mathlib.RingTheory.Norm.Defs
+public import Mathlib.RingTheory.TensorProduct.Basic
 
 /-!
 # The characteristic polynomial of an algebra element as a norm
@@ -32,6 +34,8 @@ the (only) correct one.
 Upstream candidate: mathlib has `LinearMap.charpoly`, `Algebra.norm`, and
 `LinearMap.charpoly_baseChange`, but not this bridge.
 -/
+
+@[expose] public section
 
 open Polynomial TensorProduct
 

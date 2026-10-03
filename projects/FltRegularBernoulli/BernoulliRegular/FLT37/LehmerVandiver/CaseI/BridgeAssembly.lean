@@ -1,8 +1,10 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Bridge
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Stage2Interface
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ADivPrincipal
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Cor8_19Forward
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealBundle
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Bridge
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Stage2Interface
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ADivPrincipal
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Cor8_19Forward
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealBundle
 
 /-!
 # LV010-D Final assembly: FLT37 reduced to four parametric inputs

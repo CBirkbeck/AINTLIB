@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.IwasawaProof.GaloisAction
-import PadicLFunctions.Interpolation.Branches
+module
+
+public import PadicLFunctions.IwasawaProof.GaloisAction
+public import PadicLFunctions.Interpolation.Branches
 
 /-!
 # The residue field of `𝒪_n` and the Teichmüller section (RJW §12.1/§12.5, TeX 3159–3168)
@@ -31,6 +33,8 @@ formalised here:
 `p` is odd throughout the norm collapse (`levelNorm_const_eq_pow`, `Tower.lean`); the residue
 arguments themselves are `p`-agnostic.
 -/
+
+@[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman
 

@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.RegularIndexEigenspaceCollapse
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.EigenDecompAutomaticProvenance
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.RegularIndexEigenspaceCollapse
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.EigenDecompAutomaticProvenance
 
 /-!
 # Washington Lemma 9.9 regular-index half for `p = 37`: the leading-`λ`-exponent collapse

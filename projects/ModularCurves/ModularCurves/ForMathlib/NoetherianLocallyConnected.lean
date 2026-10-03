@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Topology.NoetherianSpace
-import Mathlib.Topology.Connected.LocallyConnected
+module
+
+public import Mathlib.Topology.NoetherianSpace
+public import Mathlib.Topology.Connected.LocallyConnected
 
 /-!
 # Noetherian spaces are locally connected
@@ -21,6 +23,8 @@ connected, so its connected components are clopen.
 
 AINTLIB ModularCurves (T-W7.7 rigidity infrastructure); upstream candidate.
 -/
+
+@[expose] public section
 
 open TopologicalSpace Set
 

@@ -2,25 +2,27 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Presheaf
-import «Adic spaces».Prop752
-import «Adic spaces».CompleteTopCommRingCat
-import «Adic spaces».Lemma745
-import «Adic spaces».TopologyComparison
-import «Adic spaces».LaurentRefinement
-import Mathlib.RingTheory.AdicCompletion.Topology
-import Mathlib.RingTheory.RingHom.Flat
-import Mathlib.RingTheory.TensorProduct.IncludeLeftSubRight
-import Mathlib.Topology.Sheaves.LocalPredicate
-import Mathlib.Topology.Sheaves.Forget
-import Mathlib.Topology.Sheaves.Stalks
-import Mathlib.Algebra.Category.Ring.Limits
-import Mathlib.Algebra.Category.Ring.Colimits
-import Mathlib.RingTheory.Localization.AtPrime.Basic
-import Mathlib.RingTheory.LocalRing.MaximalIdeal.Basic
-import Mathlib.RingTheory.LocalRing.RingHom.Basic
-import Mathlib.Geometry.RingedSpace.PresheafedSpace
-import Mathlib.Geometry.RingedSpace.Stalks
+module
+
+public import «Adic spaces».Presheaf
+public import «Adic spaces».Prop752
+public import «Adic spaces».CompleteTopCommRingCat
+public import «Adic spaces».Lemma745
+public import «Adic spaces».TopologyComparison
+public import «Adic spaces».LaurentRefinement
+public import Mathlib.RingTheory.AdicCompletion.Topology
+public import Mathlib.RingTheory.RingHom.Flat
+public import Mathlib.RingTheory.TensorProduct.IncludeLeftSubRight
+public import Mathlib.Topology.Sheaves.LocalPredicate
+public import Mathlib.Topology.Sheaves.Forget
+public import Mathlib.Topology.Sheaves.Stalks
+public import Mathlib.Algebra.Category.Ring.Limits
+public import Mathlib.Algebra.Category.Ring.Colimits
+public import Mathlib.RingTheory.Localization.AtPrime.Basic
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Basic
+public import Mathlib.RingTheory.LocalRing.RingHom.Basic
+public import Mathlib.Geometry.RingedSpace.PresheafedSpace
+public import Mathlib.Geometry.RingedSpace.Stalks
 
 /-!
 # The Structure Sheaf on the Adic Spectrum
@@ -40,6 +42,8 @@ We define the structure sheaf `𝒪_X` on `X = Spa(A, A⁺)` following §8.1 of 
   Remark 8.20, Definition 8.21, Definition 8.22, Definition 8.26,
   Theorem 8.28(c)
 -/
+
+@[expose] public section
 
 universe u
 

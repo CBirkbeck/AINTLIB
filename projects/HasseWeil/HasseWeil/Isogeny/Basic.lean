@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Map.PointFunctor
-import HasseWeil.Foundation.Curves.Valuation.Infinity
-import HasseWeil.Foundation.MulByIntPullback
-import HasseWeil.Isogeny.Frobenius.FunctionField
-import Mathlib.FieldTheory.Finite.Basic
+module
+
+public import HasseWeil.Foundation.Curves.Map.PointFunctor
+public import HasseWeil.Foundation.Curves.Valuation.Infinity
+public import HasseWeil.Foundation.MulByIntPullback
+public import HasseWeil.Isogeny.Frobenius.FunctionField
+public import Mathlib.FieldTheory.Finite.Basic
 
 /-!
 # Isogenies between elliptic curves (algebro-geometric definition)
@@ -52,6 +54,8 @@ strictly capture `φ(O) = O` — that would require the strict-positive form
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4 (definition,
   Theorem III.4.8 on group-hom property)
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 open scoped Polynomial.Bivariate

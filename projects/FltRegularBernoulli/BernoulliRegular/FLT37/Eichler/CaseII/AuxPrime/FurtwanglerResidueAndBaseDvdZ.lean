@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.Lemma98RealData
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.IntSolutionToRealDatum
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.Lemma98RealData
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.IntSolutionToRealDatum
 
 /-!
 # Furtwängler residue obstruction for `(37, 149)`

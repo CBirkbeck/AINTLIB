@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Frobenius.OrdAtInfty
-import HasseWeil.HasseBound.Separability
-import HasseWeil.HasseBound.PointCount
+module
+
+public import HasseWeil.Isogeny.Frobenius.OrdAtInfty
+public import HasseWeil.HasseBound.Separability
+public import HasseWeil.HasseBound.PointCount
 
 /-!
 # Witness assemblers for `isogOneSub_negFrobenius`
@@ -30,6 +32,8 @@ These specialisations document the inputs the historical `HasseWitnesses`
 record (`Hasse/Witnesses.lean`) was designed to accept. The current axiom-clean
 Hasse-bound route is the Weil-pairing consumer in `WeilPairing/HasseBound.lean`.
 -/
+
+@[expose] public section
 
 namespace HasseWeil
 

@@ -3,11 +3,13 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Analysis.SpecialFunctions.Complex.Circle
-import Mathlib.Analysis.SpecialFunctions.Complex.Log
-import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
-import Mathlib.MeasureTheory.Integral.DivergenceTheorem
-import Mathlib.Topology.MetricSpace.Lipschitz
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+public import Mathlib.Analysis.SpecialFunctions.Complex.Log
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
+public import Mathlib.MeasureTheory.Integral.DivergenceTheorem
+public import Mathlib.Topology.MetricSpace.Lipschitz
 
 /-!
 # Continuous argument lift and integer-valued winding number
@@ -31,6 +33,8 @@ that each segment `γ([t_i, t_{i+1}]) - w` lies in a "rotated slitPlane" (a half
 disjoint from `{0}`). On each segment, use `Complex.log` to extract the argument,
 adjusted by the running sum of previous segments' angles.
 -/
+
+@[expose] public section
 
 open Set
 

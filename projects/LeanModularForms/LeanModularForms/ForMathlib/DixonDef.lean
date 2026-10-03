@@ -3,8 +3,10 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Analysis.Calculus.DSlope
-import LeanModularForms.ForMathlib.SimplePoleIntegral
+module
+
+public import Mathlib.Analysis.Calculus.DSlope
+public import LeanModularForms.ForMathlib.SimplePoleIntegral
 
 /-!
 # Dixon Function Definitions and the h1/h2 Identity
@@ -41,6 +43,8 @@ The `dslope f w (Î³ t)` has center `w` (second argument) and evaluation point `Î
 * J. D. Dixon, *A brief proof of Cauchy's integral theorem*, 1971
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Complex Set Filter Topology MeasureTheory
 open scoped Classical Real Interval

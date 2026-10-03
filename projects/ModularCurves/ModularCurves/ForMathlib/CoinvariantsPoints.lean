@@ -3,15 +3,17 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.CoactionCharpoly
-import ModularCurves.ForMathlib.CoinvariantsBaseChange
-import Mathlib.RingTheory.Ideal.GoingUp
-import Mathlib.FieldTheory.Minpoly.Field
-import Mathlib.FieldTheory.IsAlgClosed.Basic
-import Mathlib.RingTheory.LocalRing.ResidueField.Basic
-import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
-import Mathlib.RingTheory.SimpleRing.Basic
-import Mathlib.LinearAlgebra.Determinant
+module
+
+public import ModularCurves.ForMathlib.CoactionCharpoly
+public import ModularCurves.ForMathlib.CoinvariantsBaseChange
+public import Mathlib.RingTheory.Ideal.GoingUp
+public import Mathlib.FieldTheory.Minpoly.Field
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+public import Mathlib.RingTheory.SimpleRing.Basic
+public import Mathlib.LinearAlgebra.Determinant
 
 /-!
 # Points of the co-invariants: surjectivity
@@ -25,6 +27,8 @@ surjective, because `B` is integral over the co-invariants (`isIntegral_coinvari
 The hard half of 03BL — the `k̄`-points orbit theorem and the finitely-many-maximals
 corollary — is the next increment of this file.
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornSourceSigmaDecayFromLocalizedChain
+module
+
+public import «Adic spaces».WedhornSourceSigmaDecayFromLocalizedChain
 
 /-!
 # Wedhorn 8.34(ii) — Source Laurent membership in localization base API (T088)
@@ -96,6 +98,8 @@ non-vacuously instantiable at the degenerate localization
   kernel postulates, and avoid native compilation and unchecked
   tactics.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

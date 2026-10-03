@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.GaloisFunctionField
+module
+
+public import ModularCurves.WeilPairing.GaloisFunctionField
 
 /-!
 # Galois equivariance of the bundled field Weil pairing (DS4 M1b-4)
@@ -16,6 +18,8 @@ DS4 descent input wants: the `ℕ`-indexed, `μ_N`-bundled `fieldWeilPairing` of
 
 Everything here is a thin wrapper — the mathematical content is `weilPairing_galois`.
 -/
+
+@[expose] public section
 
 universe u v
 

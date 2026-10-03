@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue.MeasureHelpers
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue
+module
+
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue.MeasureHelpers
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue
 
 /-!
 # Multi-point principal value: measurability and integrability
@@ -31,6 +33,8 @@ The dominated-convergence helpers used downstream
 `multipointPV_eq_sum_of_integral_zero`) live in
 `LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue.MultipointPV.DominatedConvergence`.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology Metric
 open scoped Real Interval

@@ -6,8 +6,10 @@ Authors: AINTLIB ModularCurves project
 STREAM-Y0 skeleton (M3 = Option 2, user-ratified 2026-07-22). Decomposition of record:
 `.mathlib-quality/decomposition-coarse-y0.md`.
 -/
-import ModularCurves.Moduli.GammaHClosure
-import ModularCurves.Moduli.GammaHSemiBorel
+module
+
+public import ModularCurves.Moduli.GammaHClosure
+public import ModularCurves.Moduli.GammaHSemiBorel
 
 /-!
 # The coarse modular curve `M(𝒫) = 𝔐(𝒫,δ)/G` at `δ = [Γ(N)]` — KM 8.1.1, fixed base
@@ -40,6 +42,8 @@ property (Loeffler Prop 3.6.1) delivered by `existsUnique_relQuotientπ_lift`, p
 projection/structure morphism properties. The KM 8.1.3.1 geometric-points description
 is a P2 follow-on (needs a KM A7.2.2 source pass).
 -/
+
+@[expose] public section
 
 universe u
 

@@ -1,4 +1,6 @@
-import ModularCurves.GroupScheme.PatchKunneth
+module
+
+public import ModularCurves.GroupScheme.PatchKunneth
 
 /-!
 # Affine source patches under base change
@@ -8,6 +10,10 @@ For an affine open `U` in the source of `f : X ⟶ S`, its inverse image in
 base-change scheme are affine, its section ring is the corresponding tensor
 product.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits TensorProduct
 

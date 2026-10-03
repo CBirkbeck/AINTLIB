@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafModuleCechTwoCoverEdge
-import ModularCurves.ForMathlib.SheafModuleCechTwoCoverVerticalEdge
+module
+
+public import ModularCurves.ForMathlib.SheafModuleCechTwoCoverEdge
+public import ModularCurves.ForMathlib.SheafModuleCechTwoCoverVerticalEdge
 
 /-!
 # Degree-one homology comparison for two open covers
@@ -15,6 +17,8 @@ coefficient-preserving double-Cech bicomplex. When both edge maps are
 quasi-isomorphisms in degree one, this identifies the two native degree-one
 homology modules.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

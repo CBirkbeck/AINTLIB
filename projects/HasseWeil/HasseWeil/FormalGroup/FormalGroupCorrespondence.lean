@@ -1,9 +1,11 @@
-import HasseWeil.Foundation.Auxiliary.DivisionPolynomial
-import HasseWeil.FormalGroup.FormalGroupAssoc
-import HasseWeil.Foundation.InvariantDifferential
-import Mathlib.RingTheory.Kaehler.Basic
-import Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition
-import Mathlib.LinearAlgebra.Basis.VectorSpace
+module
+
+public import HasseWeil.Foundation.Auxiliary.DivisionPolynomial
+public import HasseWeil.FormalGroup.FormalGroupAssoc
+public import HasseWeil.Foundation.InvariantDifferential
+public import Mathlib.RingTheory.Kaehler.Basic
+public import Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
 
 /-!
 # Formal Group ↔ Curve Correspondence (Silverman IV.1–2, IV.4)
@@ -40,6 +42,8 @@ function field K(E) of transcendence degree 1 over K.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.1.5, III.5, IV.1–4
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

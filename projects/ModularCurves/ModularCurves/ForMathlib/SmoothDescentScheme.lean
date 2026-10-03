@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.EtaleSmoothDescent
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
+module
+
+public import ModularCurves.ForMathlib.EtaleSmoothDescent
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
 
 /-!
 # Scheme-level descent of relative-dimension-one smoothness
@@ -18,6 +20,8 @@ relative dimension one over the base, then `Y` is smooth of relative dimension o
 This is the form consumed by the `Y(ρ̄)` smoothness leaf: `Z` is the Legendre-anchored
 ρ-quotient (`rhoLegendre_carrier_smooth`) and `Y` is the representing curve.
 -/
+
+@[expose] public section
 
 noncomputable section
 

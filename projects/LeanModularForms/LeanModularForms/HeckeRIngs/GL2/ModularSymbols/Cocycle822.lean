@@ -3,8 +3,10 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.RepresentationTheory.Homological.GroupCohomology.LowDegree
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleMFinite
+module
+
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.LowDegree
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleMFinite
 
 /-!
 # The group-1-cocycle bridge for Shimura's period pairing (8.1.3 / 8.2.22)
@@ -21,6 +23,8 @@ mathlib's `groupCohomology.cocycles₁`.  Its cocycle identity is pure divisor a
 against a cusp form `f` recovers Shimura's `u_f`; this is the algebraic skeleton onto which the
 single-fundamental-domain Stokes computation is grafted.
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2.ModularSymbols
 

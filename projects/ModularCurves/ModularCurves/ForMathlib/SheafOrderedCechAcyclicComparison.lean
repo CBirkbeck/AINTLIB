@@ -1,6 +1,8 @@
-import ModularCurves.ForMathlib.SheafOrderedCechCohomologyFiniteProducts
-import ModularCurves.ForMathlib.SheafOrderedCechSheafResolution
-import ModularCurves.ForMathlib.SheafCechAcyclicComparison
+module
+
+public import ModularCurves.ForMathlib.SheafOrderedCechCohomologyFiniteProducts
+public import ModularCurves.ForMathlib.SheafOrderedCechSheafResolution
+public import ModularCurves.ForMathlib.SheafCechAcyclicComparison
 
 /-!
 # Ordered Cech comparison for acyclic covers
@@ -9,6 +11,10 @@ The augmented ordered Cech resolution gives short exact sequences between
 successive cycle sheaves. Dimension shifting along these sequences compares
 positive sheaf cohomology with exactness of ordered Cech global sections.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

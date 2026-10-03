@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornLocalizedCor732Application
-import «Adic spaces».WedhornLocalizationContinuity
-import «Adic spaces».WedhornLocalCompatFromTestFamily
+module
+
+public import «Adic spaces».WedhornLocalizedCor732Application
+public import «Adic spaces».WedhornLocalizationContinuity
+public import «Adic spaces».WedhornLocalCompatFromTestFamily
 
 /-!
 # Localized Tate-data derivation for `exists_dominating_unit_in_localization`
@@ -60,6 +62,8 @@ The remaining explicit hypotheses for `exists_dominating_unit_in_localization`:
 * No edits to committed bridge files.
 * No Lane B / Cor 8.32 / Jacobson / T001 / faithful-flatness /
   final-acyclicity content. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

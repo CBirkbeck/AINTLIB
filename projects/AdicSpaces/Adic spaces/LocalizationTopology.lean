@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».HuberRings
-import Mathlib.RingTheory.Localization.Away.Basic
-import Mathlib.Topology.Algebra.Nonarchimedean.Bases
-import Mathlib.RingTheory.Adjoin.Polynomial.Basic
+module
+
+public import «Adic spaces».HuberRings
+public import Mathlib.RingTheory.Localization.Away.Basic
+public import Mathlib.Topology.Algebra.Nonarchimedean.Bases
+public import Mathlib.RingTheory.Adjoin.Polynomial.Basic
 
 /-!
 # Localization Topology for Huber Rings
@@ -25,6 +27,10 @@ We construct the non-archimedean ring topology on `Localization.Away s` followin
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §8.1
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open PairOfDefinition Pointwise
 

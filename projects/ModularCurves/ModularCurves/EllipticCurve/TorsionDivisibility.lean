@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.ExactOrderRigidity
-import ModularCurves.EllipticCurve.TorsionRestrict
-import ModularCurves.GroupScheme.SubgroupQuotient
+module
+
+public import ModularCurves.EllipticCurve.ExactOrderRigidity
+public import ModularCurves.EllipticCurve.TorsionRestrict
+public import ModularCurves.GroupScheme.SubgroupQuotient
 
 /-!
 # [T-G3d] `N`-divisibility of torsion-fixing endomorphisms (KM 2.7.2 proof)
@@ -29,6 +31,8 @@ categorical quotient `E/E[N]` (`GroupScheme/SubgroupQuotient.lean`):
 This discharges the `exists_eq_one_add_mulBy_comp_of_fixesTorsion` pin of
 `EndomorphismDegree.lean` up to the Niso box.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

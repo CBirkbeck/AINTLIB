@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.FDBoundaryH
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.ArcCalculus
+module
+
+public import LeanModularForms.ForMathlib.FDBoundaryH
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.ArcCalculus
 
 /-!
 # Fundamental Domain Boundary – Bounds
@@ -19,6 +21,8 @@ fundamental domain boundary.
 * `fdBoundary_H_im_le_H` — imaginary part ≤ H
 * `fdBoundary_H_re_abs_le_half` — |real part| ≤ 1/2
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

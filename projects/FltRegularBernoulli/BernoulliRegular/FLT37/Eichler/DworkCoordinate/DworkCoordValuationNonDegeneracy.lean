@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordSecondOrderLeadingCoeff
-import BernoulliRegular.FLT37.PadicL.Prop812
-import BernoulliRegular.FLT37.PadicL.IwasawaModSqCorrected
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordSecondOrderLeadingCoeff
+public import BernoulliRegular.FLT37.PadicL.Prop812
+public import BernoulliRegular.FLT37.PadicL.IwasawaModSqCorrected
 
 /-!
 # The level-`72` second-order leading coefficient via the **valuation interface**: splitting the

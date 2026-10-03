@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.StrongMultiplicityOne.DescentCosets
+module
+
+public import LeanModularForms.StrongMultiplicityOne.DescentCosets
 
 /-!
 # Strong Multiplicity One via Miyake §4.6 — Hecke descent map
@@ -20,6 +22,8 @@ invariance properties. Part of a multi-file split of `StrongMultiplicityOne.lean
   it by `χ'(d)` (character equivariance).
 * `miyake_hecke_descend_Gamma1_inv` — `Γ₁(N)`-invariance of the descent sum.
 -/
+
+@[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup
 open scoped MatrixGroups ModularForm

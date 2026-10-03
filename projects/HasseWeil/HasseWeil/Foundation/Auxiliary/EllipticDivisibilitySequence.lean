@@ -3,14 +3,17 @@ Copyright (c) 2024 Junyan Xu. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Junyan Xu, David Kurniadi Angdinata
 -/
-import Mathlib.Algebra.GroupWithZero.NonZeroDivisors
-import Mathlib.Algebra.MvPolynomial.CommRing
-import Mathlib.Algebra.Ring.NegOnePow
-import Mathlib.Data.Fin.Tuple.Sort
-import Mathlib.GroupTheory.Perm.Sign
-import Mathlib.NumberTheory.EllipticDivisibilitySequence
-import Mathlib.Tactic.IntervalCases
-import Mathlib.Tactic.LinearCombination
+module
+
+import Mathlib.Tactic.Ring
+public import Mathlib.Algebra.GroupWithZero.NonZeroDivisors
+public import Mathlib.Algebra.MvPolynomial.CommRing
+public import Mathlib.Algebra.Ring.NegOnePow
+public import Mathlib.Data.Fin.Tuple.Sort
+public import Mathlib.GroupTheory.Perm.Sign
+public import Mathlib.NumberTheory.EllipticDivisibilitySequence
+public import Mathlib.Tactic.IntervalCases
+public import Mathlib.Tactic.LinearCombination
 
 /-!
 # Additional lemmas for elliptic divisibility sequences
@@ -27,6 +30,10 @@ The key results are:
 
 Ported from the LutzNagell project (`LutzNagell/EllipticDivisibilitySequence.lean`).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open scoped nonZeroDivisors
 

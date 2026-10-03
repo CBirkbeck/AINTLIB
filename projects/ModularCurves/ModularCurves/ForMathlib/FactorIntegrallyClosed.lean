@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SmoothCurveComponents
-import ModularCurves.ForMathlib.StandardSmoothIntegrallyClosed
+module
+
+public import ModularCurves.ForMathlib.SmoothCurveComponents
+public import ModularCurves.ForMathlib.StandardSmoothIntegrallyClosed
 
 /-!
 # Each component of a smooth curve is an integrally closed domain (WP-D3a-FACTOR)
@@ -25,6 +27,8 @@ relative dimension `1` over the base field by transitivity, and it is a domain b
 This is WP-D3d's step 1: `rootOfUnityDescend` (`WeilPairing/UniversalRootBase.lean`) needs
 `IsIntegrallyClosed` on each factor.
 -/
+
+@[expose] public section
 
 universe u
 

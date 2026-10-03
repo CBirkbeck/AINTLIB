@@ -1,11 +1,13 @@
-import LutzNagell.DivisionPolynomialDegree
-import LutzNagell.ZSMul
-import LutzNagell.LutzNagellTheorem.GeneralDenominators
-import LutzNagell.LutzNagellTheorem.EvalBridge
-import LutzNagell.LutzNagellTheorem.GeneralCurve
-import LutzNagell.LutzNagellTheorem.PIDPrimeOrder
-import Mathlib.RingTheory.Polynomial.RationalRoot
-import Mathlib.RingTheory.Localization.Rat
+module
+
+public import LutzNagell.DivisionPolynomialDegree
+public import LutzNagell.ZSMul
+public import LutzNagell.LutzNagellTheorem.GeneralDenominators
+public import LutzNagell.LutzNagellTheorem.EvalBridge
+public import LutzNagell.LutzNagellTheorem.GeneralCurve
+public import LutzNagell.LutzNagellTheorem.PIDPrimeOrder
+public import Mathlib.RingTheory.Polynomial.RationalRoot
+public import Mathlib.RingTheory.Localization.Rat
 
 /-!
 # Prime-order and order-4 torsion integrality for general Weierstrass curves
@@ -21,6 +23,8 @@ For order 2, we prove the weaker bound `4x, 8y ∈ ℤ`.
 * `integrality_of_order_four_general`: a point of order 4 has integral coordinates.
 * `bounded_den_of_order_two_general`: a point of order 2 satisfies `4x, 8y ∈ ℤ`.
 -/
+
+@[expose] public section
 
 namespace LutzNagell
 namespace LutzNagellTheorem

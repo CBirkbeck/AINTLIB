@@ -1,6 +1,9 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.PrincipalDischarge
-import FltRegular.CaseII.InductionStep
-import FltRegular.NumberTheory.KummersLemma.KummersLemma
+module
+
+import FltRegular.CaseII.AuxLemmas
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.PrincipalDischarge
+public import FltRegular.CaseII.InductionStep
+public import FltRegular.NumberTheory.KummersLemma.KummersLemma
 
 /-!
 # LV-CaseII specific principalization discharge (refined)

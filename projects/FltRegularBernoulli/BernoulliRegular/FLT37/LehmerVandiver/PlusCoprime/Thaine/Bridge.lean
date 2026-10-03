@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.UnitClassBridge
-import BernoulliRegular.Thaine.PollaczekRankOne
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.UnitClassBridge
+public import BernoulliRegular.Thaine.PollaczekRankOne
 
 /-!
 # T-THAINE-6: FLT37 specialization — parametric Thaine + Reflection bundle

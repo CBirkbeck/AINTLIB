@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.UniversalLevelThree
+module
+
+public import ModularCurves.Moduli.UniversalLevelThree
 
 /-!
 # The universal cube root of unity on the `ℰ₃` base (WP-A7.3 at `N = 3`)
@@ -28,6 +30,8 @@ This is the arithmetic shadow of a geometric fact: the surviving relation has di
 available. The field of definition of `Y(3)`'s geometric components and the root of unity
 the Weil pairing's determinant twist needs are the same phenomenon.
 -/
+
+@[expose] public section
 
 universe u
 

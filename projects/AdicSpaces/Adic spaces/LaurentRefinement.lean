@@ -2,21 +2,23 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».RationalRefinement
-import «Adic spaces».RationalSubsets
-import «Adic spaces».TopologyComparison
-import «Adic spaces».PresheafTateStructure
-import «Adic spaces».LaurentCoverExact
-import «Adic spaces».LaurentCoverTopology
-import «Adic spaces».LaurentBaireSupport
-import «Adic spaces».CompletionLocalization
-import «Adic spaces».Example638
-import «Adic spaces».IteratedRational
-import «Adic spaces».LaurentRefinementCore
-import «Adic spaces».LaurentRefinementAcyclic
-import Mathlib.RingTheory.Flat.Basic
-import Mathlib.RingTheory.MvPowerSeries.NoZeroDivisors
-import Mathlib.Topology.MetricSpace.Completion
+module
+
+public import «Adic spaces».RationalRefinement
+public import «Adic spaces».RationalSubsets
+public import «Adic spaces».TopologyComparison
+public import «Adic spaces».PresheafTateStructure
+public import «Adic spaces».LaurentCoverExact
+public import «Adic spaces».LaurentCoverTopology
+public import «Adic spaces».LaurentBaireSupport
+public import «Adic spaces».CompletionLocalization
+public import «Adic spaces».Example638
+public import «Adic spaces».IteratedRational
+public import «Adic spaces».LaurentRefinementCore
+public import «Adic spaces».LaurentRefinementAcyclic
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.MvPowerSeries.NoZeroDivisors
+public import Mathlib.Topology.MetricSpace.Completion
 
 /-!
 # Laurent Covers and Tate Acyclicity Infrastructure
@@ -45,6 +47,8 @@ faithful flatness route (Corollary 8.31).
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Lemma 7.54, 8.30, 8.31,
   Corollary 8.31, Proposition 8.15, Theorem 8.28
 -/
+
+@[expose] public section
 
 open Classical
 

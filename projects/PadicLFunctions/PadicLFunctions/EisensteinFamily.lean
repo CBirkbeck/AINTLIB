@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.KubotaLeopoldt.ZetaP
+module
+
+public import PadicLFunctions.KubotaLeopoldt.ZetaP
 
 /-!
 # The p-adic family of Eisenstein series (RJW §8, TeX 2361–2446)
@@ -31,6 +33,8 @@ The complex side (the q-expansion of `E_k^{(p)}` and the σ^p-arithmetic)
 lives in `PadicLFunctions/EisensteinComplex.lean`; the two sides meet in
 the rational coefficient sequence `stabilisedCoeff` defined here.
 -/
+
+@[expose] public section
 
 open PowerSeries
 

@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.MultipointPV
-import LeanModularForms.ForMathlib.GeneralizedWindingNumber
+module
+
+public import LeanModularForms.ForMathlib.MultipointPV
+public import LeanModularForms.ForMathlib.GeneralizedWindingNumber
 
 /-!
 # PV Integrals of Simple Pole Terms
@@ -21,6 +23,8 @@ generalized winding number.
 
 * K. Hungerbühler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Set Filter Topology MeasureTheory Complex
 open scoped Interval

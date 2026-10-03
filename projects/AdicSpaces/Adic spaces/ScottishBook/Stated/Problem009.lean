@@ -1,5 +1,7 @@
-import «Adic spaces».ScottishBook.Stated.Problem007
-import Mathlib.RingTheory.Etale.Basic
+module
+
+public import «Adic spaces».ScottishBook.Stated.Problem007
+public import Mathlib.RingTheory.Etale.Basic
 
 /-!
 # Nonarchimedean Scottish Book — Problem 9
@@ -34,6 +36,8 @@ We formalize "finite étale" using the conjunction of Mathlib's `Algebra.Etale A
 * Kedlaya, *The Nonarchimedean Scottish Book*, Problem 9
 * Wedhorn, *Adic Spaces*, §7 (Definition 7.37)
 -/
+
+@[expose] public section
 
 open ValuationSpectrum ScottishBook
 

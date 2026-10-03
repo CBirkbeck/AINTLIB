@@ -1,8 +1,10 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassConjugateFixed
-import BernoulliRegular.FLT37.Eichler.FLT37GenuineResiduals
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerL3
-import BernoulliRegular.UnitQuotient.Washington83UnitForward
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassConjugateFixed
+public import BernoulliRegular.FLT37.Eichler.FLT37GenuineResiduals
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerL3
+public import BernoulliRegular.UnitQuotient.Washington83UnitForward
 
 /-!
 # [FLT37-CASEII-LEMMA-9.2-PROOF] Discharging `CaseIIRootClassConjFixed37`

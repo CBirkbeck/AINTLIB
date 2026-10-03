@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.CategoryTheory.Galois.Equivalence
-import Mathlib.CategoryTheory.Galois.IsFundamentalgroup
-import Mathlib.FieldTheory.Galois.Profinite
-import Mathlib.FieldTheory.KrullTopology
+module
 
-import ModularCurves.ForMathlib.FiniteEtaleFiberFunctor
+public import Mathlib.CategoryTheory.Galois.Equivalence
+public import Mathlib.CategoryTheory.Galois.IsFundamentalgroup
+public import Mathlib.FieldTheory.Galois.Profinite
+public import Mathlib.FieldTheory.KrullTopology
+
+public import ModularCurves.ForMathlib.FiniteEtaleFiberFunctor
 
 /-!
 # The absolute Galois group is the fundamental group of `FiniteEtale k`
@@ -26,6 +28,8 @@ topology is a fundamental group (in the sense of
 * an automorphism acting trivially on all fibers fixes every element of the
   separable closure.
 -/
+
+@[expose] public section
 
 universe u
 

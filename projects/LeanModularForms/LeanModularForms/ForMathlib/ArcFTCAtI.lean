@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.CrossingAtI
-import LeanModularForms.ForMathlib.SegmentAnalysis
+module
+
+public import LeanModularForms.ForMathlib.CrossingAtI
+public import LeanModularForms.ForMathlib.SegmentAnalysis
 
 /-!
 # ArcFTCHyp at i — Full FTC Telescope + Limit
@@ -34,6 +36,10 @@ negative real part and crosses through the slit.
 
 * K. Hungerbühler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

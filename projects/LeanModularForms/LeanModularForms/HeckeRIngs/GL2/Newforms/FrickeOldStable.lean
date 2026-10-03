@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.Newforms.LevelRaiseComm
-import LeanModularForms.HeckeRIngs.GL2.Fricke
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.LevelRaiseComm
+public import LeanModularForms.HeckeRIngs.GL2.Fricke
 
 /-!
 # The Fricke involution preserves the extended oldspace
@@ -29,6 +31,8 @@ finishes the proof.
 
 * Diamond–Shurman, *A First Course in Modular Forms*, Prop 5.6.2, Ex 5.6.3(e).
 -/
+
+@[expose] public section
 
 noncomputable section
 

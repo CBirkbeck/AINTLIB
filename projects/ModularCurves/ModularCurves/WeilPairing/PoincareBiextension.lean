@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.DivisorClass
-import ModularCurves.WeilPairing.ChartGroupSum
+module
+
+public import ModularCurves.Picard.DivisorClass
+public import ModularCurves.WeilPairing.ChartGroupSum
 
 /-!
 # The normalized biextension class, and `[N]^* κ(Q) = κ(Q)^N` (DS4, `(★)` upper half)
@@ -60,6 +62,8 @@ bridge all speak one language. `EllipticCurve.constPoint` here is deliberately *
 `EllipticCurve.constPt` there (that one is the constant *endomorphism* of `E.asOver`); the
 names are kept distinct because both live in `namespace ModularCurves.EllipticCurve`.
 -/
+
+@[expose] public section
 
 universe u
 

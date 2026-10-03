@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.Kaehler.Basic
+module
+
+public import Mathlib.RingTheory.Kaehler.Basic
 
 /-!
 # Pullback action on Kähler differentials along an algebra endomorphism
@@ -38,6 +40,8 @@ structure, `x ↦ KaehlerDifferential.D R S (f x)` becomes a genuine derivation
 `Ω[S⁄R] →ₗ[S] TwistedKaehler f`. We then forget the `S`-linearity (it's twisted)
 and keep only the underlying `AddMonoidHom`.
 -/
+
+@[expose] public section
 
 namespace AlgHom
 

@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.SubgroupGroupObject
-import ModularCurves.GroupScheme.StableCharts
-import ModularCurves.GroupScheme.PatchKunneth
-import ModularCurves.ForMathlib.SchemeAppLE
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.GroupScheme.SubgroupGroupObject
+public import ModularCurves.GroupScheme.StableCharts
+public import ModularCurves.GroupScheme.PatchKunneth
+public import ModularCurves.ForMathlib.SchemeAppLE
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The Hopf algebra of a finite locally free subgroup over an affine patch
@@ -27,6 +29,8 @@ the group-object laws already proven (`mulOver_assoc`, `unitOver_mulOver_left`,
 * `groupPatchCounit` — `ε : A ⟶ R`, restriction along the unit section.
 * `groupPatchAntipode` — `S : A ⟶ A`, restriction along inversion.
 -/
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.LevelSpaceEtale
-import ModularCurves.LevelStructure.CombinationLevel
+module
+
+public import ModularCurves.Moduli.LevelSpaceEtale
+public import ModularCurves.LevelStructure.CombinationLevel
 
 /-!
 # [GHA3 CLOSED] The level-space structure morphism is étale (KM 3.7.1, étale half)
@@ -19,6 +21,8 @@ structure morphism is étale through `fullLevelLocusπ_etale`.
 This file is the meeting point of the two development lines (it must sit downstream of both:
 `CombinationLevel` itself imports `LevelSpaceEtale` for the generation criterion).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

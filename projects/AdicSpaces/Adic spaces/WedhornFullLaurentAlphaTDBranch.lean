@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornFullLaurentVKBranchDecomposition
+module
+
+public import «Adic spaces».WedhornFullLaurentVKBranchDecomposition
 
 /-!
 # Wedhorn 8.34(ii) α_T_D branch per-`t'` σ-factored chain (T033)
@@ -50,6 +52,8 @@ so the missing comparison is explicit and reusable.
   API + σ-cancellation primitives.
 * Does NOT edit T027/T028/T029/T030/T031/T032 accepted files.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

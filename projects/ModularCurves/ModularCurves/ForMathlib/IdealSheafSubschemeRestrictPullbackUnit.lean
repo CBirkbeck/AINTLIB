@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.IdealSheafAffineChartPullbackUnit
-import ModularCurves.ForMathlib.IdealSheafSubschemeAffineChart
+module
+
+public import ModularCurves.ForMathlib.IdealSheafAffineChartPullbackUnit
+public import ModularCurves.ForMathlib.IdealSheafSubschemeAffineChart
 
 /-!
 # Pullback units for restricted ideal-sheaf subschemes
@@ -7,6 +9,8 @@ import ModularCurves.ForMathlib.IdealSheafSubschemeAffineChart
 The restriction of the global subscheme inclusion to an affine open is,
 up to an isomorphism of its source, the affine ideal-quotient chart map.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Basic
-import HasseWeil.Foundation.Valuation
+module
+
+public import HasseWeil.Foundation.Curves.Basic
+public import HasseWeil.Foundation.Valuation
 
 /-!
 # The local ring at a smooth point of a plane curve is a DVR
@@ -22,6 +24,8 @@ repackages it for the `SmoothPlaneCurve` abstraction of Stream A.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.1.1
 -/
+
+@[expose] public section
 
 namespace HasseWeil.Curves
 

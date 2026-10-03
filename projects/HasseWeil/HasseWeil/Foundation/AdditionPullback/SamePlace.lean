@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.AdditionPullback
-import HasseWeil.Foundation.EC.DifferentialOrd
-import HasseWeil.Foundation.EC.MulByIntSamePlace
-import HasseWeil.HasseBound.Primitives
+module
+
+public import HasseWeil.Foundation.AdditionPullback
+public import HasseWeil.Foundation.EC.DifferentialOrd
+public import HasseWeil.Foundation.EC.MulByIntSamePlace
+public import HasseWeil.HasseBound.Primitives
 
 /-!
 # The **(SamePlace)** fact for an addition-formula isogeny `α₁ + α₂` (`1 − π` case)
@@ -57,6 +59,10 @@ final section.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.2.5–2.6, III.4.10c, III.2.3c.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

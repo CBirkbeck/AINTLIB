@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.GroupHom.Basic
+module
+
+public import HasseWeil.Isogeny.GroupHom.Basic
 
 /-!
 # `EC.Isogeny → HasseWeil.Isogeny` (Silverman III.4.8)
@@ -30,6 +32,8 @@ II.2/II.3, consumed by III.4.8) is supplied by `CurveMap.CoordHom.module_finite`
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4.8 (the group-hom property).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

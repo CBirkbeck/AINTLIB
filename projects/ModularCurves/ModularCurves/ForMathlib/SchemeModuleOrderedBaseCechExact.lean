@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SchemeModuleBaseCechExact
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechExact
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
 
 /-!
 # Exact sequences of ordered base-linear Cech complexes
@@ -12,6 +14,8 @@ import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
 This file proves that the ordered base-linear Cech complex on an affine family sends short exact
 sequences of quasicoherent scheme modules to degreewise short exact sequences.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
 

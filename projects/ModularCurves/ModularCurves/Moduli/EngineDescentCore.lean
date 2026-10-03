@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.EngineDescent
-import ModularCurves.Moduli.EngineMouthCharts
+module
+
+public import ModularCurves.Moduli.EngineDescent
+public import ModularCurves.Moduli.EngineMouthCharts
 
 /-!
 # Route (a): the geometric core `exists_localModel_core_at` and the quotient assembly
@@ -25,6 +27,10 @@ lower-layer lemmas the moved declarations consume remain in `EngineDescent` (un-
 cross-file reference now requires it).  Nothing in this file does heavy scheme-term `isDefEq`, so
 it elaborates without regression.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

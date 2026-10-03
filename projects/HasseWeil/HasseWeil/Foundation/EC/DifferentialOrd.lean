@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
-import HasseWeil.Foundation.EC.TranslationOrd
-import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
+module
+
+public import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
+public import HasseWeil.Foundation.EC.TranslationOrd
+public import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
 
 /-!
 # The order inequality for the `ω`-derivative (`ord_P` ≤ `ord_P` of the differential + 1)
@@ -34,6 +36,8 @@ No algebraic closure of `F` is used.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.4.3.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves Polynomial
 

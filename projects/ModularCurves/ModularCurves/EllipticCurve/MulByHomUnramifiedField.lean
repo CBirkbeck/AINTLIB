@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.MulByHomFlatFibre
-import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.EllipticCurve.MulByHomFlatFibre
+public import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Unramified transport across pointed group-object isomorphisms
@@ -18,6 +20,8 @@ themselves (`modelMulByHom_formallyUnramified_of_isAlgClosed` — the kernel-cou
 argument — and its κ̄-descent to arbitrary fields) live in
 `EllipticCurve/TorsionFibre.lean`, downstream of the torsion machinery they consume.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

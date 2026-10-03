@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassConjugateFixed
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassConjugateFixed
 
 /-!
 # [FLT37-CASEII-R2] Conjugate-paired generators and the reality-preserving descent

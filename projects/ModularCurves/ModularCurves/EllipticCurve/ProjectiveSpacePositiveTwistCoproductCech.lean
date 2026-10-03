@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechHigher
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechHigher
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
 
 /-!
 # Cech exactness for finite coproducts of positive projective twists
@@ -12,6 +14,8 @@ import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
 The ordered standard-cover Cech complex of a finite coproduct of
 nonnegative coordinate twists is exact in every positive degree.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

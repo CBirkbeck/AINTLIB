@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Data.ZMod.QuotientRing
-import Mathlib.GroupTheory.FiniteAbelian.Basic
-import Mathlib.GroupTheory.SpecificGroups.Cyclic
-import ModularCurves.ForMathlib.TorsionByEquiv
+module
+
+public import Mathlib.Data.ZMod.QuotientRing
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+public import Mathlib.GroupTheory.SpecificGroups.Cyclic
+public import ModularCurves.ForMathlib.TorsionByEquiv
 
 /-!
 # Torsion-count characterisation of `(ℤ/N)²`
@@ -28,6 +30,8 @@ prime `p ∣ N`, exactly two summands with `p`-part `p ^ (N.factorization p)`; C
 
 Upstream candidate: `Mathlib.GroupTheory.FiniteAbelian`.
 -/
+
+@[expose] public section
 
 universe u
 

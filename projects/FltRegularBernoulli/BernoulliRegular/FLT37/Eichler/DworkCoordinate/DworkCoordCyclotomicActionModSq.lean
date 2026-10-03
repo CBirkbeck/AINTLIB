@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordUnitBridgeDeg32Slice
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordUnitBridgeDeg32Slice
 
 /-!
 # The `N`-generic specialized finite logarithm and the level-`71` Dwork-specialized residual

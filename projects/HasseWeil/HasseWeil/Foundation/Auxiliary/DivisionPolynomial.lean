@@ -3,11 +3,13 @@ Copyright (c) 2024 Junyan Xu, David Kurniadi Angdinata. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Junyan Xu, David Kurniadi Angdinata
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
-import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+module
 
-import HasseWeil.Foundation.Auxiliary.EllipticDivisibilitySequence
-import HasseWeil.Foundation.Auxiliary.Universal
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+
+public import HasseWeil.Foundation.Auxiliary.EllipticDivisibilitySequence
+public import HasseWeil.Foundation.Auxiliary.Universal
 
 /-!
 # Division polynomials: omega family and integer scalar multiplication
@@ -40,6 +42,8 @@ Ported from the LutzNagell project
 
 [J Silverman, *The Arithmetic of Elliptic Curves*][silverman2009]
 -/
+
+@[expose] public section
 
 open Polynomial
 open scoped Polynomial.Bivariate

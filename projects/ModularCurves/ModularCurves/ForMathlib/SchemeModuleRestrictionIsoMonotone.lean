@@ -7,8 +7,10 @@ ForMathlib (OURS, not vendored): upstream candidate.
 Adapted from the Apache-licensed `SchemeModuleRestrictionIsoMonotone.lean`
 in Vilin97/Clawristotle.
 -/
-import Mathlib.AlgebraicGeometry.Modules.Sheaf
-import Mathlib.AlgebraicGeometry.Restrict
+module
+
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.AlgebraicGeometry.Restrict
 
 /-!
 # Monotonicity of open-local module isomorphisms
@@ -16,6 +18,8 @@ import Mathlib.AlgebraicGeometry.Restrict
 A scheme-module morphism which is invertible on an open remains
 invertible after shrinking that open.
 -/
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry
 

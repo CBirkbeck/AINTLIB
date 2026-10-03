@@ -1,5 +1,7 @@
-import «Adic spaces».ValuationAction
-import «Adic spaces».HuberRings
+module
+
+public import «Adic spaces».ValuationAction
+public import «Adic spaces».HuberRings
 
 /-!
 # Nonarchimedean Scottish Book — Problem 12
@@ -41,6 +43,8 @@ We formalize the key definitions and state the main result:
 4. **Main theorem**: For a Tate ring `A` with finite group `G`, this descended map is a
    homeomorphism. The same holds for the adic spectrum `Spa`.
 -/
+
+@[expose] public section
 
 open ValuationSpectrum
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.WallAGenericRealization
-import HasseWeil.Isogeny.OneSubFrobeniusFamily
-import HasseWeil.HasseBound.WeilPairing.FrobeniusGenericCovariance
-import HasseWeil.Isogeny.SeparableWitnessReductions
+module
+
+public import HasseWeil.HasseBound.WeilPairing.WallAGenericRealization
+public import HasseWeil.Isogeny.OneSubFrobeniusFamily
+public import HasseWeil.HasseBound.WeilPairing.FrobeniusGenericCovariance
+public import HasseWeil.Isogeny.SeparableWitnessReductions
 
 /-!
 # Wall A closed for `1 − π`: the base-changed pullback is a genuine translatable action over `K̄`
@@ -69,6 +71,8 @@ natural function-field inclusion), never through a coordinate-ring endomorphism.
 * Silverman, *The Arithmetic of Elliptic Curves*, I.2 (base change), III.4.2 (generic point),
   III.4 (Frobenius), III.8.2 (translation covariance).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves HasseWeil HasseWeil.WeilPairing.IsogenyBaseChangeConcrete
 open scoped TensorProduct

@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornFullLaurentLowerBranchBound
+module
+
+public import «Adic spaces».WedhornFullLaurentLowerBranchBound
 
 /-!
 # Wedhorn 8.34(ii) full Laurent V_K branch decomposition (T031)
@@ -55,6 +57,8 @@ piece for τ), the V_K decomposition partitions Spa into branches:
   rational-open API.
 * Does NOT edit T027/T028/T029/T030 accepted files.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

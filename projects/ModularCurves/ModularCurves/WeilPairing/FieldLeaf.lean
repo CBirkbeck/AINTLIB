@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.KMBilinear
-import ModularCurves.WeilPairing.FieldComparisonBridge
-import ModularCurves.WeilPairing.Basic
-import ModularCurves.WeilPairing.OverRestrictionSquare
-import ModularCurves.ForMathlib.PullbackTensorMonoidal
-import HasseWeil.HasseBound.WeilPairing.Constancy
+module
+
+public import ModularCurves.WeilPairing.KMBilinear
+public import ModularCurves.WeilPairing.FieldComparisonBridge
+public import ModularCurves.WeilPairing.Basic
+public import ModularCurves.WeilPairing.OverRestrictionSquare
+public import ModularCurves.ForMathlib.PullbackTensorMonoidal
+public import HasseWeil.HasseBound.WeilPairing.Constancy
 
 /-!
 # The field leaf: comparing the KM pairing with the Silverman pairing (U5)
@@ -24,6 +26,8 @@ This file builds the comparison bottom-up:
   the proof of `torsionSplittingEval_add` (`KMBilinear.lean`) as a standalone lemma:
   `τ_{P'}^# h_i = h_i · π^# h(P')`, over any base.
 -/
+
+@[expose] public section
 
 universe u
 

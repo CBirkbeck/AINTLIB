@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
-import Mathlib.AlgebraicGeometry.Properties
-import Mathlib.AlgebraicGeometry.FunctionField
-import ModularCurves.ForMathlib.FinrankTower
-import ModularCurves.EllipticCurve.FinrankFractionField
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import Mathlib.AlgebraicGeometry.Properties
+public import Mathlib.AlgebraicGeometry.FunctionField
+public import ModularCurves.ForMathlib.FinrankTower
+public import ModularCurves.EllipticCurve.FinrankFractionField
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Composition multiplicativity of `Scheme.Hom.finrank` over integral schemes
@@ -35,6 +37,8 @@ restriction to a target open) — reproving on this branch the Y1-wave helpers o
 This is the scheme engine of the `endDeg_comp` multiplicativity pin of the endomorphism-degree
 keystone (`ModularCurves/EllipticCurve/EndomorphismDegree.lean`, KM 2.6.1).
 -/
+
+@[expose] public section
 
 -- v4.33 bump: opens/hom coercions are no longer transparent enough for the
 -- `≫`-associativity and `comp_apply` rewrites below.

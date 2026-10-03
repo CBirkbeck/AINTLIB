@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PointsDictionary
+module
+
+public import ModularCurves.EllipticCurve.PointsDictionary
 
 /-!
 # Galois naturality of the field-points dictionary (DS4 M1c, node A)
@@ -25,6 +27,8 @@ is literally `φ` applied to a **fixed** element of the away-algebra.
 Everything is split into one-step lemmas: this region of the development is
 elaboration-fragile and heartbeat bumps are not permitted.
 -/
+
+@[expose] public section
 
 universe u
 

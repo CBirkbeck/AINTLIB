@@ -1,10 +1,12 @@
-import BernoulliRegular.FLT37.PadicL.ValuationExactness
-import BernoulliRegular.FLT37.PadicL.PadicLog
-import BernoulliRegular.FLT37.PadicL.LpValue
-import BernoulliRegular.FLT37.PadicL.GaussSumValuation
-import BernoulliRegular.FLT37.PadicL.GaussSumValuationF1
-import BernoulliRegular.FLT37.PadicL.Theorem518
-import BernoulliRegular.FLT37.PadicL.Prop812
+module
+
+public import BernoulliRegular.FLT37.PadicL.ValuationExactness
+public import BernoulliRegular.FLT37.PadicL.PadicLog
+public import BernoulliRegular.FLT37.PadicL.LpValue
+public import BernoulliRegular.FLT37.PadicL.GaussSumValuation
+public import BernoulliRegular.FLT37.PadicL.GaussSumValuationF1
+public import BernoulliRegular.FLT37.PadicL.Theorem518
+public import BernoulliRegular.FLT37.PadicL.Prop812
 
 /-!
 # The `p`-adic `L`-function layer for Washington Proposition 8.12 (FLT for `p = 37`)
@@ -79,3 +81,5 @@ never `axiom`); everything downstream of them — the valuation read-off and the
   Thm 5.11, Cor 5.13, Thm 5.18, Prop 6.13, Prop 8.12, Cor 8.23.
 * Iwasawa, *Lectures on `p`-adic `L`-functions*.
 -/
+
+@[expose] public section

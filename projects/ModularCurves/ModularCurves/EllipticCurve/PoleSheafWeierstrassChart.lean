@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafCartierTrivialization
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassRelation
-import ModularCurves.EllipticCurve.WeierstrassModelCoordinates
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafCartierTrivialization
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassRelation
+public import ModularCurves.EllipticCurve.WeierstrassModelCoordinates
 
 /-!
 # The Weierstrass equation in a Cartier chart
@@ -14,6 +16,10 @@ The global pole-sheaf relation is expressed in the local frames induced by a
 Cartier generator of the marked section. This produces the homogeneous
 Weierstrass equation used to construct the local map to the projective cubic.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

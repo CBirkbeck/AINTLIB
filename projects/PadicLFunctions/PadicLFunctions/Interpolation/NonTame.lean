@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
-import PadicLFunctions.Interpolation.Branches
-import PadicLFunctions.Interpolation.TameConductor
+module
+
+public import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
+public import PadicLFunctions.Interpolation.Branches
+public import PadicLFunctions.Interpolation.TameConductor
 
 /-!
 # Non-trivial tame conductors (RJW §5.2, Thm 5.7)
@@ -18,6 +20,8 @@ moments `∫x^k μ_η = L(η,−k)` (Lem 5.9), the ψ-invariance `ψ(μ_η) = η
 unit-restricted moments (Lem 5.11), the twists `μ_θ` and `ζ_η`, and
 **RJW Theorem 5.7** (`thm:nontame`, TeX 1773–1776).
 -/
+
+@[expose] public section
 
 open PowerSeries
 

@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.GroupTheory.Coset.Basic
-import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
-import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
-import LeanModularForms.Modularforms.PeterssonInner
-import LeanModularForms.Modularforms.PSL2Action
+module
+
+public import Mathlib.GroupTheory.Coset.Basic
+public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
+public import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
+public import LeanModularForms.Modularforms.PeterssonInner
+public import LeanModularForms.Modularforms.PSL2Action
 
 /-!
 # Level-N Petersson Inner Product
@@ -40,6 +42,8 @@ Hermitian form suffices downstream.
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.4
 * [Miy] Miyake, *Modular Forms*, §2.5
 -/
+
+@[expose] public section
 
 noncomputable section
 

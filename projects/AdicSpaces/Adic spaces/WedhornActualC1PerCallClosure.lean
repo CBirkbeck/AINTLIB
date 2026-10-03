@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornC1CoverAssemblyClosure
-import «Adic spaces».WedhornTateAcyclicityFinalClosure
-import «Adic spaces».WedhornC1SigmaImageAlignment
+module
+
+public import «Adic spaces».WedhornC1CoverAssemblyClosure
+public import «Adic spaces».WedhornTateAcyclicityFinalClosure
+public import «Adic spaces».WedhornC1SigmaImageAlignment
 
 /-!
 # Wedhorn 8.34(ii) — Actual C1 per-call consumer modulo alignment (T064)
@@ -90,6 +92,8 @@ inside T062.
   bivariate-overlap content.
 * No global universal-over-Spa multi-element clearing claim.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

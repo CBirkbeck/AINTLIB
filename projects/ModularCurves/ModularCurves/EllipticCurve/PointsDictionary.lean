@@ -3,11 +3,13 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import Mathlib.AlgebraicGeometry.Geometrically.Integral
-import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
-import ModularCurves.ForMathlib.ProjIntegral
-import ModularCurves.ForMathlib.WeierstrassProjectivePrime
-import ModularCurves.Moduli.WeierstrassAtlas
+module
+
+public import Mathlib.AlgebraicGeometry.Geometrically.Integral
+public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
+public import ModularCurves.ForMathlib.ProjIntegral
+public import ModularCurves.ForMathlib.WeierstrassProjectivePrime
+public import ModularCurves.Moduli.WeierstrassAtlas
 
 /-!
 # T-W7 lane P2 — geometric integrality of `E_U^n` and the field-points dictionary
@@ -40,6 +42,8 @@ parallel `Moduli/PointsDictionary.lean`, now deleted).
   here). Discharge names (verified): `isClosedImmersion_equalizer_ι_left`,
   `isIso_of_isClosedImmersion_of_surjective`, `fromSpecResidueField`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
 

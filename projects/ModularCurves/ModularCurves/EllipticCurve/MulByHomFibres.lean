@@ -1,6 +1,8 @@
-import ModularCurves.EllipticCurve.MulByHomDegree
-import HasseWeil.NTorsion.TorsionPowStructure
-import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+module
+
+public import ModularCurves.EllipticCurve.MulByHomDegree
+public import HasseWeil.NTorsion.TorsionPowStructure
+public import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
 
 /-!
 # Finite fibres of `[N]` — the BB-QF geometric leaf (QF-FIBFIN)
@@ -41,6 +43,8 @@ infinite, hence dense, hence the fibres proper closed subsets of an integral cur
 Zero use of `mulByHom_finrank` / `endDeg` / any degree fact (KM's carve-out). The only
 nonconstancy input is HasseWeil's prime-to-char torsion cardinality.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj

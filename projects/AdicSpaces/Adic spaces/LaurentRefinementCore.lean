@@ -2,17 +2,21 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».RationalRefinement
-import «Adic spaces».RationalSubsets
-import «Adic spaces».TopologyComparison
-import «Adic spaces».PresheafTateStructure
-import «Adic spaces».LaurentCoverExact
-import «Adic spaces».LaurentCoverTopology
-import «Adic spaces».LaurentBaireSupport
-import «Adic spaces».CompletionLocalization
-import «Adic spaces».Example638
-import «Adic spaces».IteratedRational
-import Mathlib.Topology.MetricSpace.Completion
+module
+
+public import «Adic spaces».RationalRefinement
+public import «Adic spaces».RationalSubsets
+public import «Adic spaces».TopologyComparison
+public import «Adic spaces».PresheafTateStructure
+public import «Adic spaces».LaurentCoverExact
+public import «Adic spaces».LaurentCoverTopology
+public import «Adic spaces».LaurentBaireSupport
+public import «Adic spaces».CompletionLocalization
+public import «Adic spaces».Example638
+public import «Adic spaces».IteratedRational
+public import Mathlib.Topology.MetricSpace.Completion
+
+@[expose] public section
 
 open Classical
 

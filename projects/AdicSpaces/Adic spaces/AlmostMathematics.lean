@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.RingTheory.Ideal.Maps
-import Mathlib.LinearAlgebra.Quotient.Defs
+module
+
+public import Mathlib.RingTheory.Ideal.Maps
+public import Mathlib.LinearAlgebra.Quotient.Defs
 
 /-!
 # Almost Mathematics
@@ -28,6 +30,8 @@ A `V`-linear map is **almost injective/surjective** if its kernel/cokernel is al
 * Gabber--Ramero, *Almost Ring Theory*, Springer LNM 1800
 * Scholze, *Perfectoid Spaces*, section 4 (almost mathematics in perfectoid context)
 -/
+
+@[expose] public section
 
 universe u v
 

@@ -1,5 +1,7 @@
-import «Adic spaces».Presheaf
-import «Adic spaces».HuberRings
+module
+
+public import «Adic spaces».Presheaf
+public import «Adic spaces».HuberRings
 
 /-!
 # Nonarchimedean Scottish Book — Problem 28
@@ -45,6 +47,8 @@ i.e., `f` is annihilated by a power of `D.s` in `A`.
 * Kedlaya, *The Nonarchimedean Scottish Book*, Problem 28
 * Wedhorn, *Adic Spaces*, §6 (Huber/Tate rings), §8.1 (rational localizations)
 -/
+
+@[expose] public section
 
 open ValuationSpectrum
 

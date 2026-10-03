@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Coleman.Theorem
-import PadicLFunctions.KubotaLeopoldt.ZetaP
+module
+
+public import PadicLFunctions.Coleman.Theorem
+public import PadicLFunctions.KubotaLeopoldt.ZetaP
 
 /-!
 # The cyclotomic units and the Coleman map input layer (RJW §10.2, TeX 2572–2628)
@@ -32,6 +34,8 @@ and the two power-series identities that feed the Coleman-map computation of the
   TeX 2611–2624), realised at the measure level: the constant series `a−1` has
   zero residue (it is the Mahler transform of `(a−1)·δ_0`, and `0 ∉ ℤ_p^×`).
 -/
+
+@[expose] public section
 
 open PowerSeries
 

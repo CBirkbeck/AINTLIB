@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPart2LaneAInternalizedConsumer
-import «Adic spaces».WedhornLaneBSeparationInterface
+module
+
+public import «Adic spaces».WedhornPart2LaneAInternalizedConsumer
+public import «Adic spaces».WedhornLaneBSeparationInterface
 
 /-!
 # Integrated Lane A and Lane B consumers for Tate acyclicity
@@ -15,6 +17,8 @@ single-`t` structural data, together with generic separation and prime-extension
 Each family includes a full form with an explicit local-cover nonemptiness hypothesis and an
 allow-empty form in which nonemptiness is derived from the rational-open cover piece.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

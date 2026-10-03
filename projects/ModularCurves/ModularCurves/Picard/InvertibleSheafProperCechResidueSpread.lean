@@ -1,6 +1,8 @@
-import ModularCurves.ForMathlib.CochainComplexBoundedFlat
-import ModularCurves.ForMathlib.SchemeModuleProperLowDegreeCechFinite
-import ModularCurves.Picard.InvertibleSheafBaseCechFlat
+module
+
+public import ModularCurves.ForMathlib.CochainComplexBoundedFlat
+public import ModularCurves.ForMathlib.SchemeModuleProperLowDegreeCechFinite
+public import ModularCurves.Picard.InvertibleSheafBaseCechFlat
 
 /-!
 # Spreading residue-fibre Cech exactness
@@ -9,6 +11,8 @@ Finite homology and termwise flatness spread exactness of the ordered
 base-Cech complex of an invertible sheaf from one residue fibre to a
 principal neighborhood.
 -/
+
+@[expose] public section
 
 open CategoryTheory ModularCurves TopologicalSpace
 

@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPerPieceSubsetProductClearing
-import «Adic spaces».WedhornDominatingUnitInequality
-import «Adic spaces».WedhornSigmaDominationClearing
+module
+
+public import «Adic spaces».WedhornPerPieceSubsetProductClearing
+public import «Adic spaces».WedhornDominatingUnitInequality
+public import «Adic spaces».WedhornSigmaDominationClearing
 
 /-!
 # Wedhorn 8.34(ii) — Pointwise σ-product clearing (T070)
@@ -121,6 +123,8 @@ cleared form.
   named residual is a per-`(v, t')` σ-product algebraic step,
   consumed by Secondary's σ/Laurent-cover supplier lane.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

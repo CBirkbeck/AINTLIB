@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.IwasawaProof.LogDerivative
-import PadicLFunctions.IwasawaProof.Equivariance
+module
+
+public import PadicLFunctions.IwasawaProof.LogDerivative
+public import PadicLFunctions.IwasawaProof.Equivariance
 
 /-!
 # The fundamental exact sequence (RJW §12.2.2, TeX 3382–3441) — E12.3
@@ -23,6 +25,10 @@ p = 2* so carries `hp2 : p ≠ 2` (errata #14), threaded through `normOp_binomia
 system** (`teichNCU`, from `Interpolation/Branches.lean`'s `teichmullerFun`) for the principal
 split — so it no longer depends on the deferred `normCompat_eq_teichmuller_mul_principal`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman
 

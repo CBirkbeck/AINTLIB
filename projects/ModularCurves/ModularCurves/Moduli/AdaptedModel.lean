@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
-import ModularCurves.EllipticCurve.InvariantDifferential
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
+public import ModularCurves.EllipticCurve.InvariantDifferential
 
 /-!
 # ω-adapted Weierstrass models (T-E12, KM 2.2.5)
@@ -26,6 +28,10 @@ the classifying map into `M₁ = Spec ℤ[1/6][g₂, g₃][Δ⁻¹]` (E12-C/D).
 Stage 1 (`basisUnitOn`): glue the data over a fixed chart-overlap `V ⊓ U i` from its
 affine subopens (`exists_unit_glue`). Stage 2 (`basisUnitAt`): glue over the atlas.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Polynomial.Basis
-import Mathlib.LinearAlgebra.Basis.Submodule
-import Mathlib.RingTheory.AdjoinRoot
-import Mathlib.RingTheory.AlgebraTower
-import ModularCurves.EllipticCurve.Basic
-import ModularCurves.ForMathlib.ProjToSpecZero
+module
+
+public import Mathlib.Algebra.Polynomial.Basis
+public import Mathlib.LinearAlgebra.Basis.Submodule
+public import Mathlib.RingTheory.AdjoinRoot
+public import Mathlib.RingTheory.AlgebraTower
+public import ModularCurves.EllipticCurve.Basic
+public import ModularCurves.ForMathlib.ProjToSpecZero
 
 /-!
 # The pole-order filtration and global sections of the projective Weierstrass model
@@ -25,6 +27,10 @@ Sources: reviewer round 1 §Q2 (uniform chart computation; `.mathlib-quality/exp
 statements require `W.IsElliptic` — the chart rings are free `R`-modules with universal bases
 for arbitrary Weierstrass data.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
 

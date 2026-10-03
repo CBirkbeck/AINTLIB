@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.StrongMultiplicityOne.SquarefreeDecomp
+module
+
+public import LeanModularForms.StrongMultiplicityOne.SquarefreeDecomp
 
 /-!
 # Strong Multiplicity One via Miyake §4.6 — Lemma 4.6.14
@@ -27,6 +29,8 @@ split of `StrongMultiplicityOne.lean`.
 * `qExpansion_smul_cuspForm_coeff_aux`: scalar multiplication of cusp forms
   commutes with `q`-expansion coefficient extraction.
 -/
+
+@[expose] public section
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup
 open scoped MatrixGroups ModularForm

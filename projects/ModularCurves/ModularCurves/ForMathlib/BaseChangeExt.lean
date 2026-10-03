@@ -3,14 +3,21 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Category.Grp.AB
-import Mathlib.Algebra.Category.ModuleCat.Ext.DimensionShifting
-import Mathlib.Algebra.FiveLemma
-import Mathlib.Algebra.Homology.DerivedCategory.Ext.Map
-import Mathlib.Algebra.Module.StablyFree.Basic
-import Mathlib.CategoryTheory.Abelian.Ext
-import Mathlib.RingTheory.LocalProperties.ProjectiveDimension
-import Mathlib.RingTheory.PicardGroup
+module
+
+import Mathlib.Algebra.Module.LocalizedModule.Exact
+public import Mathlib.Algebra.Category.Grp.AB
+public import Mathlib.Algebra.Category.ModuleCat.Ext.DimensionShifting
+public import Mathlib.Algebra.FiveLemma
+public import Mathlib.Algebra.Homology.DerivedCategory.Ext.Map
+public import Mathlib.Algebra.Module.StablyFree.Basic
+public import Mathlib.CategoryTheory.Abelian.Ext
+public import Mathlib.RingTheory.LocalProperties.ProjectiveDimension
+public import Mathlib.RingTheory.PicardGroup
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Abelian Limits ModuleCat
 open scoped ModuleCat.Algebra

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.AtomicColumnCoordValue
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.AtomicColumnCoordValue
 
 /-!
 # The generic `37·unit` second-order column-coordinate collapse (the factor-agnostic R4 engine)

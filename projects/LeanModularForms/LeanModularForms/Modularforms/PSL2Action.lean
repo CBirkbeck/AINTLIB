@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.Matrix.ProjectiveSpecialLinearGroup
-import Mathlib.MeasureTheory.Function.Jacobian
-import Mathlib.MeasureTheory.Group.FundamentalDomain
-import Mathlib.NumberTheory.Modular
-import LeanModularForms.Modularforms.PeterssonInnerProduct
+module
+
+public import Mathlib.LinearAlgebra.Matrix.ProjectiveSpecialLinearGroup
+public import Mathlib.MeasureTheory.Function.Jacobian
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+public import Mathlib.NumberTheory.Modular
+public import LeanModularForms.Modularforms.PeterssonInnerProduct
 
 /-!
 # PSL₂(ℤ) action on the upper half-plane
@@ -28,6 +30,10 @@ the quotient.
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.4
 * [Shi] Shimura, *Arithmetic Theory of Automorphic Functions*, §1.5
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

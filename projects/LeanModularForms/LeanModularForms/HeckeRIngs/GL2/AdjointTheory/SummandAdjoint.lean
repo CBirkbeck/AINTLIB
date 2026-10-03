@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.FDTransport
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheory.FDTransport
 
 /-!
 # Hecke adjoint theory: summand-level adjoint identity.
@@ -12,6 +14,8 @@ This module covers the SL₂(ℤ) continuity instance, the `T_p` adjoint via dia
 unitarity, the GL₂⁺ coset adjoint lifted to `petN`, and the summand-level adjoint /
 finite-union bridge.
 -/
+
+@[expose] public section
 
 noncomputable section
 

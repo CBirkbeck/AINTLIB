@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.Moduli.WeierstrassAtlas
+module
+
+public import ModularCurves.Moduli.WeierstrassAtlas
 
 /-!
 # The bundled Weierstrass atlas and the classifying map
@@ -18,6 +20,8 @@ Sources: reviewer round 1 §Q5 caveat 3 (bundle the atlas, don't construct again
 pointwise predicate); audit items 9/10; the localization universal property for the
 classifying map.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve
 

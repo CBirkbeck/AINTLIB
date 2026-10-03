@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.CrossingAtI
-import LeanModularForms.ForMathlib.PVSplitting
+module
+
+public import LeanModularForms.ForMathlib.CrossingAtI
+public import LeanModularForms.ForMathlib.PVSplitting
 
 /-!
 # Asymmetric Crossing Data at rho and rho+1
@@ -24,6 +26,8 @@ directly construct `HasCauchyPV`, then derive `HasGeneralizedWindingNumber`.
 * `hasWindingNumber_atRho_of_cornerFtcHyp` -- winding number at rho is `-1/6`
 * `hasWindingNumber_atRhoPlusOne_of_cornerFtcHyp` -- winding number at rho+1 is `-1/6`
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

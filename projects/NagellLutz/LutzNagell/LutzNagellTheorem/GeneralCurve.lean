@@ -1,6 +1,8 @@
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
-import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
-import Mathlib.Tactic.Ring
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+public import Mathlib.Tactic.Ring
 
 /-!
 # General Weierstrass model for the generalized Lutz-Nagell theorem
@@ -10,6 +12,8 @@ along with basic rewriting lemmas (equation, coefficients).
 
 Downstream generalized Lutz-Nagell files import this file instead of `ShortWeierstrass.lean`.
 -/
+
+@[expose] public section
 
 open scoped Polynomial.Bivariate
 

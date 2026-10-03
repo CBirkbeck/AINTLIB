@@ -2,13 +2,15 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».HuberRings
-import «Adic spaces».RestrictedPowerSeries
-import «Adic spaces».StructureSheaf
-import «Adic spaces».LaurentCoverExact
-import «Adic spaces».FlatnessResults
-import «Adic spaces».CechCohomology
-import Mathlib.AlgebraicGeometry.StructureSheaf
+module
+
+public import «Adic spaces».HuberRings
+public import «Adic spaces».RestrictedPowerSeries
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».LaurentCoverExact
+public import «Adic spaces».FlatnessResults
+public import «Adic spaces».CechCohomology
+public import Mathlib.AlgebraicGeometry.StructureSheaf
 
 /-!
 # Tate Acyclicity (Wedhorn Theorem 8.28(b))
@@ -70,6 +72,8 @@ The remaining gaps for the general case are topological:
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Definition 6.36, Theorem 8.28(b)
 -/
+
+@[expose] public section
 
 open ValuationSpectrum
 

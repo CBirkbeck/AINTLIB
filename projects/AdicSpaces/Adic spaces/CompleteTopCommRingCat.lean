@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Topology.Category.TopCommRingCat
-import Mathlib.Topology.UniformSpace.Completion
-import Mathlib.Topology.Algebra.UniformRing
+module
+
+public import Mathlib.Topology.Category.TopCommRingCat
+public import Mathlib.Topology.UniformSpace.Completion
+public import Mathlib.Topology.Algebra.UniformRing
 
 /-!
 # Category of Complete Topological Commutative Rings
@@ -19,6 +21,8 @@ the target category for presheaf values on adic spectra (§8.1 of Wedhorn).
 * `forgetToCommRingCat` : Forgetful functor to `CommRingCat`.
 * `forgetToTopCat` : Forgetful functor to `TopCat`.
 -/
+
+@[expose] public section
 
 universe u
 

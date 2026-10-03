@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.FiniteProperClosure
+module
+
+public import ModularCurves.ForMathlib.FiniteProperClosure
 
 /-!
 # Charts in finite proper closures
@@ -7,6 +9,10 @@ This file constructs the inverse images of a compatible family of open charts in
 closure. It proves that the induced maps from these inverse-image charts to a separated target
 agree on pairwise overlaps.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory
 

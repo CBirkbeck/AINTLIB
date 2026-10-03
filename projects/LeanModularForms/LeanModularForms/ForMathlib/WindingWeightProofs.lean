@@ -3,9 +3,11 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.FDBoundary
-import LeanModularForms.ForMathlib.SegmentFTC
-import LeanModularForms.ForMathlib.SingleCrossing
+module
+
+public import LeanModularForms.ForMathlib.FDBoundary
+public import LeanModularForms.ForMathlib.SegmentFTC
+public import LeanModularForms.ForMathlib.SingleCrossing
 
 /-!
 # Winding Weight Proofs for the Valence Formula
@@ -47,6 +49,8 @@ are the inputs to the constructor `mkSingleCrossingData_atI`.
 
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

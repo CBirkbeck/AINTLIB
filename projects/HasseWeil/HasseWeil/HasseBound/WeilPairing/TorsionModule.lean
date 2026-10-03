@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.TorsionCardEll
-import Mathlib.Algebra.Module.ZMod
-import Mathlib.Algebra.Field.ZMod
-import Mathlib.FieldTheory.Finiteness
-import Mathlib.LinearAlgebra.Dimension.Free
+module
+
+public import HasseWeil.HasseBound.WeilPairing.TorsionCardEll
+public import Mathlib.Algebra.Module.ZMod
+public import Mathlib.Algebra.Field.ZMod
+public import Mathlib.FieldTheory.Finiteness
+public import Mathlib.LinearAlgebra.Dimension.Free
 
 /-!
 # `E[ℓ] ≅ (ZMod ℓ)²` — the geometric `ℓ`-torsion as a 2-dimensional `ZMod ℓ`-vector space
@@ -32,6 +34,8 @@ These are the structures the downstream mod-`ℓ` Galois representation
 
 Reference: Silverman III.6.4(a), III.7.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

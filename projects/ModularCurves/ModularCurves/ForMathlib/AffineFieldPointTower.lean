@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 
 /-!
 # The scalar tower attached to a field-valued point of an affine scheme
@@ -20,6 +22,8 @@ There is no elliptic-curve content here. Both lemmas were `private` in
 `EllipticCurve/PoleSheafBaseCechHigher.lean`; they are relocated here, unchanged, so that
 `ForMathlib/Seesaw.lean` can cite them too instead of duplicating the proofs.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TensorProduct TopologicalSpace
 

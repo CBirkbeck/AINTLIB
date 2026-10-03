@@ -1,4 +1,6 @@
-import Mathlib.NumberTheory.Bernoulli
+module
+
+public import Mathlib.NumberTheory.Bernoulli
 
 /-!
 # Foundations (placeholder)
@@ -11,3 +13,5 @@ p-adic L-function interpolates the special values `ζ(1 - n) = -Bₙ / n` of the
 Riemann zeta function, so `Mathlib.NumberTheory.Bernoulli` is on the critical
 path for Part I.
 -/
+
+@[expose] public section

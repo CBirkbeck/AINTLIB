@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleFiltration
-import ModularCurves.EllipticCurve.PoleSheafMonomialAway
+module
+
+public import ModularCurves.EllipticCurve.PoleFiltration
+public import ModularCurves.EllipticCurve.PoleSheafMonomialAway
 
 /-!
 # Ordered monomials in the model pole filtration
@@ -12,6 +14,8 @@ import ModularCurves.EllipticCurve.PoleSheafMonomialAway
 The model monomials `1, x, y, x², xy, x³, ...`, ordered by pole order,
 give exactly the generators in each positive stage of `poleOrderFiltration`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry
 

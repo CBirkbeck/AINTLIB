@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.GradedAlgebra.HomogeneousLocalization
+module
+
+public import Mathlib.RingTheory.GradedAlgebra.HomogeneousLocalization
 
 /-!
 # Transport of homogeneous localizations along element equalities
@@ -15,6 +17,8 @@ naturality against `Away.map`, so that downstream proofs never juggle `eqToHom`s
 
 AINTLIB ModularCurves (T-A5a-iso); upstream candidate.
 -/
+
+@[expose] public section
 
 namespace ModularCurves
 

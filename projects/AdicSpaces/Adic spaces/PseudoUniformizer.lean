@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».HuberRings
+module
+
+public import «Adic spaces».HuberRings
 
 /-!
 # Pseudo-uniformizers
@@ -20,6 +22,8 @@ A **pseudo-uniformizer** of a topological ring `A` is a topologically nilpotent 
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Definition 6.10
 -/
+
+@[expose] public section
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A]
 

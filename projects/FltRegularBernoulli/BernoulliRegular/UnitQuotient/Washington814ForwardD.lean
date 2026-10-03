@@ -1,6 +1,8 @@
-import BernoulliRegular.UnitQuotient.Washington814Forward
-import BernoulliRegular.CyclotomicUnits.UnitQuotientForward
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
+module
+
+public import BernoulliRegular.UnitQuotient.Washington814Forward
+public import BernoulliRegular.CyclotomicUnits.UnitQuotientForward
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
 
 /-!
 # Washington Theorem 8.14 forward step — the `(d)` index bridge

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.PicZero
-import HasseWeil.Isogeny.Basic
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.PicZero
+public import HasseWeil.Isogeny.Basic
 
 /-!
 # Pushforward of (projective) divisors via an isogeny
@@ -25,6 +27,8 @@ ticket roadmap in `.mathlib-quality/tickets/picard/`).
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.3.7 (referenced
   from III.4.8) — pushforward via finite morphisms.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

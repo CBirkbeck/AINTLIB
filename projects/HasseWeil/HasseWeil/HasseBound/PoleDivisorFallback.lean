@@ -3,18 +3,20 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Frobenius.OrdAtInfty
-import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
-import HasseWeil.Foundation.Curves.Map.PointFunctor
-import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
-import HasseWeil.Foundation.Curves.Ramification.RamificationAtInfinity
-import HasseWeil.Foundation.EC.TranslateValuation
-import HasseWeil.Isogeny.Frobenius.FunctionField
-import HasseWeil.Isogeny.OneSubFrobeniusFamily
-import HasseWeil.HasseBound.OneSubFrobenius
-import HasseWeil.HasseBound.PointCount
-import HasseWeil.HasseBound.Witnesses
-import HasseWeil.Foundation.Ramification
+module
+
+public import HasseWeil.Isogeny.Frobenius.OrdAtInfty
+public import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
+public import HasseWeil.Foundation.Curves.Map.PointFunctor
+public import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
+public import HasseWeil.Foundation.Curves.Ramification.RamificationAtInfinity
+public import HasseWeil.Foundation.EC.TranslateValuation
+public import HasseWeil.Isogeny.Frobenius.FunctionField
+public import HasseWeil.Isogeny.OneSubFrobeniusFamily
+public import HasseWeil.HasseBound.OneSubFrobenius
+public import HasseWeil.HasseBound.PointCount
+public import HasseWeil.HasseBound.Witnesses
+public import HasseWeil.Foundation.Ramification
 
 /-!
 # Pole-divisor fallback for `#ker(1−π) = deg(1−π)` (T-POLE-DIVISOR-FALLBACK)
@@ -76,6 +78,8 @@ rejected — both routes have ~200-300 LOC of substantive new infrastructure
 beyond what's currently shipped. The lemma decomposition documented here
 is the correct skeleton; the substantive sub-pieces are the gaps.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

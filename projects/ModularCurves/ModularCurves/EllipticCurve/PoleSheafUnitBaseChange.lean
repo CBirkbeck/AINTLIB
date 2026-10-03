@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.PoleSheaf
-import ModularCurves.Picard.DualPullback.UnitNaturality
+module
+
+public import ModularCurves.EllipticCurve.PoleSheaf
+public import ModularCurves.Picard.DualPullback.UnitNaturality
 
 /-!
 # Base change for the canonical pole-unit section
@@ -8,6 +10,10 @@ The canonical inclusion of the structure sheaf into the simple-pole sheaf is pre
 arbitrary base change. This identifies the first member of every compatible pole basis with the
 literal constant section `1`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

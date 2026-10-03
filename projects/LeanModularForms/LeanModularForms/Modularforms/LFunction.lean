@@ -3,23 +3,25 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.Analysis.Analytic.Uniqueness
-import Mathlib.Analysis.Complex.CauchyIntegral
-import Mathlib.Analysis.MellinTransform
-import Mathlib.Analysis.Meromorphic.Basic
-import Mathlib.Analysis.Meromorphic.Order
-import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
-import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
-import Mathlib.MeasureTheory.Integral.Gamma
-import Mathlib.NumberTheory.LSeries.Basic
-import Mathlib.NumberTheory.LSeries.Convergence
-import Mathlib.NumberTheory.LSeries.Injectivity
-import Mathlib.NumberTheory.Modular
-import Mathlib.NumberTheory.ModularForms.Bounds
-import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
-import Mathlib.NumberTheory.ModularForms.Cusps
+module
 
-import LeanModularForms.Modularforms.ResToImagAxis
+public import Mathlib.Analysis.Analytic.Uniqueness
+public import Mathlib.Analysis.Complex.CauchyIntegral
+public import Mathlib.Analysis.MellinTransform
+public import Mathlib.Analysis.Meromorphic.Basic
+public import Mathlib.Analysis.Meromorphic.Order
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
+public import Mathlib.MeasureTheory.Integral.Gamma
+public import Mathlib.NumberTheory.LSeries.Basic
+public import Mathlib.NumberTheory.LSeries.Convergence
+public import Mathlib.NumberTheory.LSeries.Injectivity
+public import Mathlib.NumberTheory.Modular
+public import Mathlib.NumberTheory.ModularForms.Bounds
+public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
+public import Mathlib.NumberTheory.ModularForms.Cusps
+
+public import LeanModularForms.Modularforms.ResToImagAxis
 
 /-!
 # L-functions of modular forms
@@ -56,6 +58,10 @@ with `Γ : Subgroup (GL (Fin 2) ℝ)` and `k : ℤ`; the convergence statements 
 * [DS] Diamond–Shurman, *A First Course in Modular Forms*, §5.9.
 * [Miy] Miyake, *Modular Forms*, Thm 4.5.16.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Filter LSeries UpperHalfPlane
 open scoped UpperHalfPlane

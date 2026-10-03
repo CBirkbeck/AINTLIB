@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
-import Mathlib.RingTheory.Flat.TorsionFree
-import Mathlib.RingTheory.Localization.Away.Basic
+module
+
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Localization.Away.Basic
 
 /-!
 # Schematic density of the invertibility locus of a regular section ([KM-FMT-FLAT], engine)
@@ -26,6 +28,8 @@ Consumers: STREAM-NISOG M3 wave (L9, L16, L19, L22, L24, L26) against
 
 Decomposition artifact: `.mathlib-quality/decomposition-fmt-flat.md` ([STREAM-FP], fable-FP).
 -/
+
+@[expose] public section
 
 universe u
 

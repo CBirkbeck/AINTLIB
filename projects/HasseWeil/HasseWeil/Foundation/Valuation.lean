@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.FunctionField
-import Mathlib.RingTheory.DiscreteValuationRing.TFAE
-import Mathlib.RingTheory.Localization.AtPrime.Basic
-import Mathlib.Algebra.Polynomial.Div
+module
+
+public import HasseWeil.Isogeny.FunctionField
+public import Mathlib.RingTheory.DiscreteValuationRing.TFAE
+public import Mathlib.RingTheory.Localization.AtPrime.Basic
+public import Mathlib.Algebra.Polynomial.Div
 
 /-!
 # Discrete Valuations on Elliptic Curve Function Fields
@@ -17,6 +19,8 @@ We show the local ring of an elliptic curve at a nonsingular point is a DVR.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], I.1.7, II.1.1
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial AdjoinRoot Ideal
 open scoped Polynomial.Bivariate

@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornStrengthenedC1
-import «Adic spaces».WedhornNormalizedC1Assembly
-import «Adic spaces».WedhornLocalizedMultiPieceLaurentRefinement
+module
+
+public import «Adic spaces».WedhornStrengthenedC1
+public import «Adic spaces».WedhornNormalizedC1Assembly
+public import «Adic spaces».WedhornLocalizedMultiPieceLaurentRefinement
 
 /-!
 # Strong-supplier insertDenom-lift bridge
@@ -104,6 +106,8 @@ file's structural lift is independent of them.
   or any other Lane B / Cor 8.32 / Jacobson / T001 / faithful-flatness
   / final-acyclicity file.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

@@ -1,7 +1,9 @@
-import BernoulliRegular.UnitQuotient.Washington814ForwardD
-import BernoulliRegular.UnitQuotient.Washington816
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Washington83
-import BernoulliRegular.BernoulliFast.Tactic
+module
+
+public import BernoulliRegular.UnitQuotient.Washington814ForwardD
+public import BernoulliRegular.UnitQuotient.Washington816
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Washington83
+public import BernoulliRegular.BernoulliFast.Tactic
 
 /-!
 # `¬ 37 ∣ h⁺` via the unit-side §8.3 route, with the forward step discharged

@@ -1,6 +1,8 @@
-import Mathlib.Algebra.Category.CommAlgCat.Basic
-import Mathlib.CategoryTheory.FinCategory.Basic
-import ModularCurves.ForMathlib.FinitePresentationDescent
+module
+
+public import Mathlib.Algebra.Category.CommAlgCat.Basic
+public import Mathlib.CategoryTheory.FinCategory.Basic
+public import ModularCurves.ForMathlib.FinitePresentationDescent
 
 /-!
 # Spreading finite functors of finitely presented algebras
@@ -10,6 +12,8 @@ This file assembles the object, map, and relation spreading results from
 system. The finite category supplies exactly the finite families of objects, arrows,
 identities, and composable pairs which must be synchronized.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

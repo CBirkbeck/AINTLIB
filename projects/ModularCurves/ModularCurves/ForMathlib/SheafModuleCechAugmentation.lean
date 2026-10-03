@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.SheafModuleCechComplex
+module
+
+public import ModularCurves.ForMathlib.SheafModuleCechComplex
 
 /-!
 # Augmentation of module-valued sheaf Cech complexes
@@ -11,6 +13,8 @@ import ModularCurves.ForMathlib.SheafModuleCechComplex
 This file defines the canonical augmentation from a module-valued sheaf to its
 sheaf-level Cech complex. The construction retains the coefficient-ring action.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

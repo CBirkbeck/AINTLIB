@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.InteriorWinding
-import LeanModularForms.ForMathlib.SegmentAnalysis
-import LeanModularForms.ForMathlib.ArcFTCAtI
+module
+
+public import LeanModularForms.ForMathlib.InteriorWinding
+public import LeanModularForms.ForMathlib.SegmentAnalysis
+public import LeanModularForms.ForMathlib.ArcFTCAtI
 
 /-!
 # Interior Contour Integral = -2πi
@@ -25,6 +27,8 @@ case-split on `z.re`: when `z.re ≤ 0`, `γ(t) - z ∈ slitPlane`; when `z.re >
 * `fdBoundary_contourIntegral_interior_eq`
 * `fdBoundary_interior_winding_complete`
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

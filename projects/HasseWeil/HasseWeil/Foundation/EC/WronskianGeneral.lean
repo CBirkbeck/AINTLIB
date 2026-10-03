@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
+module
+
+public import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
 
 /-!
 # The division-polynomial Wronskian over a general field (axiom-clean, downstream route)
@@ -38,6 +40,8 @@ by the affine unramifiedness lemma `ord_P_mulByInt_x_sub_const_eq_one`
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, Exercise III.3.7, III.5.3.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve Polynomial
 

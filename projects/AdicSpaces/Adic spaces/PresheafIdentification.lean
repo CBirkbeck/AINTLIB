@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Presheaf
-import «Adic spaces».TateAlgebra
-import «Adic spaces».TateAlgebraWedhorn
-import Mathlib.Topology.Algebra.Nonarchimedean.Completion
+module
+
+public import «Adic spaces».Presheaf
+public import «Adic spaces».TateAlgebra
+public import «Adic spaces».TateAlgebraWedhorn
+public import Mathlib.Topology.Algebra.Nonarchimedean.Completion
 
 /-!
 # Presheaf Value Identifications (Wedhorn Remark 7.55)
@@ -30,6 +32,8 @@ We prove the algebraic identifications:
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Remark 7.55, Lemma 8.31, Proposition 8.30
 -/
+
+@[expose] public section
 
 open ValuationSpectrum
 

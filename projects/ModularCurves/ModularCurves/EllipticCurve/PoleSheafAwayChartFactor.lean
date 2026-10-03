@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.PoleSheafAwayChartHom
-import ModularCurves.EllipticCurve.WeierstrassModelCoordinateTransition
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafAwayChartHom
+public import ModularCurves.EllipticCurve.WeierstrassModelCoordinateTransition
 
 /-!
 # Factoring the section-away comparison through the projective chart
@@ -8,6 +10,10 @@ The unit-coordinate projective comparison factors through the corresponding
 affine chart.  For the canonical pole coordinates on the complement of the
 marked section, the middle morphism of affine schemes is an isomorphism.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Opposite TopologicalSpace
 open WeierstrassCurve.Projective

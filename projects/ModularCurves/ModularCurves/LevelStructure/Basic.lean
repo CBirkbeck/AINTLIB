@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.LevelStructure.ExactOrder
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.LevelStructure.ExactOrder
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Level structures: Γ(N), Γ₁(N), Γ₀(N) (KM Ch. 3)
@@ -30,6 +32,8 @@ scheme `E[N]` (not just its affine model); the skeleton states the fibrewise/nai
 completely and routes the Drinfeld `Γ(N)` through the affine form on the (affine over
 affines) scheme `E[N]` — globalisation is ticket `T-D4`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorSupportedDescentResidue
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorSupportedDescentResidue
 
 /-!
 # [FLT37-CASEII-ANCHOR-SUPPORTED-DESCENT] Washington's `ξ₁ = ρ₀²` anchor-supported descent datum

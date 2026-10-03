@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidRing
-import «Adic spaces».Uniform
+module
+
+public import «Adic spaces».PerfectoidRing
+public import «Adic spaces».Uniform
 
 /-!
 # Nonarchimedean Scottish Book — Problem 34
@@ -34,6 +36,8 @@ The fiber condition is abstracted as a `Prop` parameter since fully formalizing 
 of a morphism of adic spaces is perfectoid" requires adic space morphisms and fiber
 functors that are not yet available in this library.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

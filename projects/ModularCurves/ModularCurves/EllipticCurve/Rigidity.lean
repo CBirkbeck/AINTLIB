@@ -3,16 +3,18 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.GroupLaw
+module
+
+public import ModularCurves.EllipticCurve.GroupLaw
 -- NOTE (P4, 2026-07-07): `import ModularCurves.EllipticCurve.PoleFiltration` deliberately
 -- deferred to the T-W7.r-supply ticket (which will consume
 -- `locallyWeierstrass_pushforward_O_eq_O`); nothing here references it yet, and keeping it
 -- out decouples lane P4 builds from lane P3's in-flight file.
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.Morphisms.Separated
-import Mathlib.AlgebraicGeometry.Noetherian
-import ModularCurves.ForMathlib.ConnectedTotalSpace
-import ModularCurves.EllipticCurve.PoleFiltration
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.Morphisms.Separated
+public import Mathlib.AlgebraicGeometry.Noetherian
+public import ModularCurves.ForMathlib.ConnectedTotalSpace
+public import ModularCurves.EllipticCurve.PoleFiltration
 
 /-!
 # The rigidity lemma and canonicity of the group law
@@ -33,6 +35,8 @@ clopen decomposition). The arbitrary-`S` upgrade is the separate spreading-out t
 Sources: Mumford GIT, Ch. 6 §1, pp. 115–117 — verbatim statement + proof quotes with
 locators in `.mathlib-quality/tw7-source-quotes.md`; audit A4.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj

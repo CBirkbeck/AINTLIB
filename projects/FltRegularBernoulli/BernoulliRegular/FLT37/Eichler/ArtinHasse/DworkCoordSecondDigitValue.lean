@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordSoundSecondDigit
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordSoundSecondDigit
 
 /-!
 # The EXACT level-`71` unscaled `varpi^{32}` Dwork coordinate: `ρ₀ = (32!)⁻¹ + c₆₈ = 26`,

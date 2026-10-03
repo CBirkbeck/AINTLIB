@@ -3,7 +3,9 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.AnnulusBounds
+module
+
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.AnnulusBounds
 
 /-!
 # PV Infrastructure: Singular Annulus Bounds
@@ -16,6 +18,8 @@ bound used in the dyadic PV convergence proof.
 
 * `singular_annulus_bound_explicit` — epsilon-independent bound on singular integral
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

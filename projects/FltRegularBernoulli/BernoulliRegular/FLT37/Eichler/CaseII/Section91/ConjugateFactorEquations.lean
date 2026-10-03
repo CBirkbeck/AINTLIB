@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.FactorRatioIsPthPower
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.FactorRatioIsPthPower
 
 /-!
 # [FLT37-CASEII-R2] Washington §9.1 factor-equation producer (squared form ⟹ factor equations)

@@ -1,5 +1,7 @@
-import HasseWeil.Foundation.Curves.Valuation.NormValuation
-import HasseWeil.Foundation.Curves.IntegralClosure
+module
+
+public import HasseWeil.Foundation.Curves.Valuation.NormValuation
+public import HasseWeil.Foundation.Curves.IntegralClosure
 
 /-!
 # SmoothPoint ↔ HeightOneSpectrum bridge
@@ -21,6 +23,8 @@ maximal ideal of a non-field is nonzero.
   `[IsAlgClosed F]` + `[IsElliptic]` + `IsIntegrallyClosed`).
 * `smoothPointEquivHeightOneSpectrum` — packaged bijection.
 -/
+
+@[expose] public section
 
 open scoped nonZeroDivisors
 

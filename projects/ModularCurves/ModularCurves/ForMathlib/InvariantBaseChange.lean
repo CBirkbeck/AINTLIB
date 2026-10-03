@@ -5,11 +5,13 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q4 (KM A7 appendix).
 -/
-import Mathlib.Algebra.Algebra.Subalgebra.Operations
-import Mathlib.LinearAlgebra.TensorProduct.Pi
-import Mathlib.RingTheory.Flat.Basic
-import Mathlib.RingTheory.TensorProduct.Maps
-import Mathlib.SetTheory.Cardinal.Finite
+module
+
+public import Mathlib.Algebra.Algebra.Subalgebra.Operations
+public import Mathlib.LinearAlgebra.TensorProduct.Pi
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.TensorProduct.Maps
+public import Mathlib.SetTheory.Cardinal.Finite
 
 /-!
 # Base change for rings of invariants (Katz–Mazur, Appendix A7)
@@ -38,6 +40,8 @@ for rings of invariants", pp. 215–218. The étale-torsor sufficient condition
 (A7.1.1/A7.1.2, via SGA III Exp. V) is deliberately not stated here — it belongs to
 the free-action vocabulary (ticket T-Q2).
 -/
+
+@[expose] public section
 
 universe u v
 

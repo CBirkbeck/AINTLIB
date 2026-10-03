@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionLawOnCurve
-import ModularCurves.ForMathlib.ProjectiveSpaceChart
+module
+
+public import ModularCurves.EllipticCurve.AdditionLawOnCurve
+public import ModularCurves.ForMathlib.ProjectiveSpaceChart
 
 /-!
 # Chart-level curve points and the addition-law triples (T-W7.0c-c5β, β2)
@@ -25,6 +27,8 @@ polynomial algebra — no schemes:
   instantiation supplies — β2b; the scheme layer identifies `Spec (biChartRing …)` with the
   chart-products of the pullback — β1/β3).
 -/
+
+@[expose] public section
 
 open MvPolynomial
 

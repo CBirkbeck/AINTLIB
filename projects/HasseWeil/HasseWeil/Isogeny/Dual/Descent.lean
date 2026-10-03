@@ -3,21 +3,23 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Class
-import HasseWeil.Isogeny.MulByInt.Basepoint
-import HasseWeil.Isogeny.Frobenius.Factorization
-import HasseWeil.Isogeny.BaseChange.Morphism
-import HasseWeil.Isogeny.TwoCurve.DualRange
-import HasseWeil.Isogeny.TwoCurve.NormConorm
-import HasseWeil.Isogeny.TwoCurve.GroupHom
-import HasseWeil.Isogeny.TwoCurve.Kernel
-import HasseWeil.Isogeny.TwoCurve.Covariance
-import HasseWeil.Isogeny.TwoCurve.PointImage
-import HasseWeil.Foundation.Curves.Map.CurveMapBaseChange
-import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
-import HasseWeil.Foundation.Curves.Valuation.OrdAtInftyBaseChange
-import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
-import HasseWeil.HasseBound.WeilPairing.OmegaBaseChange
+module
+
+public import HasseWeil.Isogeny.Class
+public import HasseWeil.Isogeny.MulByInt.Basepoint
+public import HasseWeil.Isogeny.Frobenius.Factorization
+public import HasseWeil.Isogeny.BaseChange.Morphism
+public import HasseWeil.Isogeny.TwoCurve.DualRange
+public import HasseWeil.Isogeny.TwoCurve.NormConorm
+public import HasseWeil.Isogeny.TwoCurve.GroupHom
+public import HasseWeil.Isogeny.TwoCurve.Kernel
+public import HasseWeil.Isogeny.TwoCurve.Covariance
+public import HasseWeil.Isogeny.TwoCurve.PointImage
+public import HasseWeil.Foundation.Curves.Map.CurveMapBaseChange
+public import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
+public import HasseWeil.Foundation.Curves.Valuation.OrdAtInftyBaseChange
+public import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
+public import HasseWeil.HasseBound.WeilPairing.OmegaBaseChange
 
 /-!
 # DUAL-DESCENT — the dual isogeny over the base field (symmetry of isogeny)
@@ -109,6 +111,8 @@ descends to an
   the arc is now `sorry`-free / axiom-clean. The label gate is discharged ungated in
   `IsogenyClassLabel.lean` (`*_charZero`).
 -/
+
+@[expose] public section
 
 namespace HasseWeil.EC
 

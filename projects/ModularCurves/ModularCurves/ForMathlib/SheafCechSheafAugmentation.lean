@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SheafCechSheafComplex
+module
+
+public import ModularCurves.ForMathlib.SheafCechSheafComplex
 
 /-!
 # The augmentation of the sheaf-level Cech complex
@@ -7,6 +9,8 @@ This file defines the canonical map from a sheaf to the degree-zero term of its
 sheaf-level Cech complex. Its composite with the first differential is zero because the
 two degree-zero cofaces agree after restriction.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

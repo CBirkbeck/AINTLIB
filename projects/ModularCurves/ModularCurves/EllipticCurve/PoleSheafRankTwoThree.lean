@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafProjectiveXY
-import ModularCurves.EllipticCurve.PoleSheafSuccessorBasis
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafProjectiveXY
+public import ModularCurves.EllipticCurve.PoleSheafSuccessorBasis
 
 /-!
 # The rank-two and rank-three pole modules (GAP-A-3)
@@ -30,6 +32,8 @@ base, by `PoleSheafPowerOneAwayBaseChangeBasis.lean` and
 `FibrewiseElliptic.sectionPoleSheafPower_baseChange_projectiveClosed_subsingleton_H_one`
 respectively.
 -/
+
+@[expose] public section
 
 universe u
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.NumberTheory.ModularForms.EisensteinSeries.QExpansion
-import LeanModularForms.HeckeRIngs.GL2.LevelRaise
-import PadicLFunctions.EisensteinFamily
-import PadicLFunctions.KubotaLeopoldt.ZetaValuesComplex
+module
+
+public import Mathlib.NumberTheory.ModularForms.EisensteinSeries.QExpansion
+public import LeanModularForms.HeckeRIngs.GL2.LevelRaise
+public import PadicLFunctions.EisensteinFamily
+public import PadicLFunctions.KubotaLeopoldt.ZetaValuesComplex
 
 /-!
 # The q-expansion of the p-stabilised Eisenstein series (RJW §8, complex side)
@@ -28,6 +30,10 @@ modular form of weight `k` and level `Γ₀(p)`") is realised here via the
 `E_k(z) − p^{k−1}E_k(pz)` (`stabilisedEisenstein_apply`), and
 `stabilisedEisenstein_smul_apply` for the bridge to `rjwEisenstein`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open Complex EisensteinSeries
 

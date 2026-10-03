@@ -3,15 +3,17 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Analysis.Calculus.ContDiff.Deriv
-import Mathlib.Analysis.Calculus.ContDiff.Operations
-import Mathlib.Analysis.Calculus.Deriv.Basic
-import Mathlib.Analysis.Calculus.MeanValue
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
-import Mathlib.Topology.Path
-import LeanModularForms.ForMathlib.PiecewiseC1Path
-import LeanModularForms.ForMathlib.PiecewiseC1PathOn
+module
+
+public import Mathlib.Analysis.Calculus.ContDiff.Deriv
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.Calculus.MeanValue
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
+public import Mathlib.Topology.Path
+public import LeanModularForms.ForMathlib.PiecewiseC1Path
+public import LeanModularForms.ForMathlib.PiecewiseC1PathOn
 
 /-!
 # Paper-faithful piecewise C¹ immersions (Hungerbühler–Wasem)
@@ -54,6 +56,8 @@ automatically interval-integrable on each piece, and so on `[0, 1]` by gluing.
 * K. Hungerbühler, M. Wasem, *Non-integer valued winding numbers and a generalized
   Residue Theorem*, arXiv:1808.00997v2, page 3.
 -/
+
+@[expose] public section
 
 open Set Filter Topology MeasureTheory
 

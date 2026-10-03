@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornCoverPieceStructuralDataDischarge
+module
+
+public import «Adic spaces».WedhornCoverPieceStructuralDataDischarge
 
 /-!
 # Wedhorn 8.34(ii) — V_K-nonempty per-`t` bound max-element reduction (T046)
@@ -92,6 +94,8 @@ inclusion".
 * Source-restriction is preserved: max-element residual is still
   conditioned on f-membership AND σ-strict-dom AND V_K-nonempty.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

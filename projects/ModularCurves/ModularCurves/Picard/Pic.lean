@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.Modules.Sheaf
-import Mathlib.CategoryTheory.Localization.Monoidal.Braided
-import Mathlib.CategoryTheory.Monoidal.Skeleton
-import ModularCurves.ForMathlib.SheafOfModulesMonoidal
+module
+
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.CategoryTheory.Localization.Monoidal.Braided
+public import Mathlib.CategoryTheory.Monoidal.Skeleton
+public import ModularCurves.ForMathlib.SheafOfModulesMonoidal
 
 /-!
 # The Picard group of a scheme
@@ -43,6 +45,8 @@ The comparison with the cover-local `IsInvertible` predicate of
 constructs the dual sheaf, which is coordinated with the Cartier-duality lane
 (v10.36 two-route edge: never build duality twice).
 -/
+
+@[expose] public section
 
 universe u
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistPullbackEquivalence
-import ModularCurves.ForMathlib.EquivalenceRightAdjointMate
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistPullbackEquivalence
+public import ModularCurves.ForMathlib.EquivalenceRightAdjointMate
 
 /-!
 # Pushforward projection formula for projective-space twists
@@ -13,6 +15,8 @@ The inverse-equivalence mate of negative-twist pullback compatibility gives
 the positive-twist projection formula for pushforward along an arbitrary
 morphism into polynomial projective space.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

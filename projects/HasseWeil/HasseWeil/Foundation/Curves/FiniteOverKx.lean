@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Auxiliary.Universal
-import HasseWeil.Foundation.Curves.Basic
-import Mathlib.LinearAlgebra.Dimension.Finrank
-import Mathlib.RingTheory.Localization.Finiteness
+module
+
+public import HasseWeil.Foundation.Auxiliary.Universal
+public import HasseWeil.Foundation.Curves.Basic
+public import Mathlib.LinearAlgebra.Dimension.Finrank
+public import Mathlib.RingTheory.Localization.Finiteness
 
 /-!
 # `K(C)` as a finite extension of `K(x)`
@@ -28,6 +30,8 @@ elliptic or otherwise — has the result.
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.1.4
 * [Silverman, III.3.1.1] (elliptic-curve specialization)
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

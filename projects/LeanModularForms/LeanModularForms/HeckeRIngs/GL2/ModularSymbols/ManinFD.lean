@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeterssonStokes
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeterssonStokes
 
 /-!
 # Manin ideal-triangle fundamental-domain infrastructure (ES-4, `k ≥ 2`) — SKELETON
@@ -41,6 +43,8 @@ statements typecheck) so the committed Manin-FD build has a scaffold to fill.
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §8.2, (8.2.22).
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.4 (Manin symbols / side pairings).
 -/
+
+@[expose] public section
 
 noncomputable section
 

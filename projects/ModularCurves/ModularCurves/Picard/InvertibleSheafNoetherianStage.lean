@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.Picard.InvertibleSheafGlueBaseChange
-import ModularCurves.ForMathlib.FilteredColimitProper
+module
+
+public import ModularCurves.Picard.InvertibleSheafGlueBaseChange
+public import ModularCurves.ForMathlib.FilteredColimitProper
 
 /-!
 # Noetherian finite-stage models of invertible sheaves
@@ -14,6 +16,10 @@ of an affine base as a filtered colimit of Noetherian finitely presented rings. 
 existing finite-stage descent theorem to this system gives a Noetherian separated model of a
 proper family and its invertible sheaf. Properness descends after moving to one later stage.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace
 

@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.TrivializationRestriction
+module
+
+public import ModularCurves.Picard.DualPullback.TrivializationRestriction
 
 /-!
 # Transition units of invertible-sheaf trivializations
@@ -6,6 +8,10 @@ import ModularCurves.Picard.DualPullback.TrivializationRestriction
 Changes between two trivializations of a line bundle are uniquely multiplication by a unit
 of the ring of sections. This file packages those units and their cocycle laws.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 universe u
 

@@ -1,7 +1,9 @@
-import LutzNagell.LutzNagellTheorem.PIDPrimeOrder
-import LutzNagell.LutzNagellTheorem.PIDIntegralMultiple
-import Mathlib.GroupTheory.OrderOfElement
-import Mathlib.NumberTheory.NumberField.Basic
+module
+
+public import LutzNagell.LutzNagellTheorem.PIDPrimeOrder
+public import LutzNagell.LutzNagellTheorem.PIDIntegralMultiple
+public import Mathlib.GroupTheory.OrderOfElement
+public import Mathlib.NumberTheory.NumberField.Basic
 
 /-!
 # The Lutz–Nagell theorem over PIDs and number fields
@@ -31,6 +33,8 @@ characteristic zero with fraction field `K`.
 * `lutz_nagell_number_field`: The theorem for number fields `K` with
   `IsPrincipalIdealRing (𝓞 K)` (class number 1).
 -/
+
+@[expose] public section
 
 namespace LutzNagell
 namespace PID

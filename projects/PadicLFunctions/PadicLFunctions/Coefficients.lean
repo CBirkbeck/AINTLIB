@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Analysis.Normed.Ring.Ultra
-import Mathlib.NumberTheory.Padics.AddChar
-import Mathlib.RingTheory.RootsOfUnity.Lemmas
-import Mathlib.Topology.Algebra.LinearTopology
+module
+
+public import Mathlib.Analysis.Normed.Ring.Ultra
+public import Mathlib.NumberTheory.Padics.AddChar
+public import Mathlib.RingTheory.RootsOfUnity.Lemmas
+public import Mathlib.Topology.Algebra.LinearTopology
 
 /-!
 # Coefficient rings for §5: the integer ring of a nonarchimedean field
@@ -27,6 +29,8 @@ Main declarations:
 * `IsPrimitiveRoot.norm_pow_sub_one_eq_one` — `‖ζ^c − 1‖ = 1` for `ζ` a
   primitive `D`-th root, `p ∤ D`, `D ∤ c` (W3; TeX 1798).
 -/
+
+@[expose] public section
 
 open Filter Topology
 

@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornNormalizedC1Assembly
-import «Adic spaces».WedhornStage2SpanExtractor
+module
+
+public import «Adic spaces».WedhornNormalizedC1Assembly
+public import «Adic spaces».WedhornStage2SpanExtractor
 
 /-!
 # Wedhorn Final Assembly Bridge: explicit Stage-2 hypotheses
@@ -52,6 +54,8 @@ existing chain.
   `WedhornC1Assembly`, `WedhornCompactExtraction`,
   `WedhornCoverNormalization`, `StandardCover`, or root imports.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.LinearAlgebra.Charpoly.BaseChange
-import Mathlib.RingTheory.Norm.Defs
-import Mathlib.RingTheory.TensorProduct.Free
-import Mathlib.RingTheory.TensorProduct.Maps
+module
+
+public import Mathlib.LinearAlgebra.Charpoly.BaseChange
+public import Mathlib.RingTheory.Norm.Defs
+public import Mathlib.RingTheory.TensorProduct.Free
+public import Mathlib.RingTheory.TensorProduct.Maps
 
 /-!
 # The norm commutes with base change
@@ -20,6 +22,8 @@ algebra isomorphism `A' ⊗[A] (A ⊗[R] B) ≃ₐ[A'] A' ⊗[R] B`, to the base
 multiplication operator of `f`, and determinants are invariant under conjugation and
 compatible with base change (`LinearMap.det_baseChange`). Upstream candidate.
 -/
+
+@[expose] public section
 
 open TensorProduct
 

@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimeDvdZSoundnessRepair
-import BernoulliRegular.FLT37.Eichler.Reduction.VandermondeCollapseAndLemma99Bridge
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimeDvdZSoundnessRepair
+public import BernoulliRegular.FLT37.Eichler.Reduction.VandermondeCollapseAndLemma99Bridge
 
 /-!
 # [FLT37-CASEII-R4-LEMMA98] Washington Lemma 9.8 `ℓ ∣ (ω + θ)` over the Case-II descent, corrected

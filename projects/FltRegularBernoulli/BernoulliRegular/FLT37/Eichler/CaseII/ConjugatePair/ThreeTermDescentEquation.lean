@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.ConjPairDescentMinimality
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.ConjPairDescentMinimality
 
 /-!
 # [FLT37-CASEII-R2] The σ-conjugate-pair 3-term descent: equation, σ-action, residual

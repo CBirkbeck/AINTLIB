@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.GroupScheme.StableCover
-import ModularCurves.ForMathlib.FiniteFlatFreeAway
+module
+
+public import ModularCurves.GroupScheme.StableCover
+public import ModularCurves.ForMathlib.FiniteFlatFreeAway
 
 /-!
 # Freeness of the group ring on a shrunk base patch (`[HG-C3d]`)
@@ -18,6 +20,8 @@ carries). Chain: the sections over `V` form a module-finite flat finitely-presen
 (`Module.Free.of_isLocalizedModule_away`), which are honest localizations
 (`isLocalization_basicOpen`).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

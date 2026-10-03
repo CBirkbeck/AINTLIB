@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.SheafCechSheafLocalContraction
-import ModularCurves.ForMathlib.SheafCechSheafZeroExact
+module
+
+public import ModularCurves.ForMathlib.SheafCechSheafLocalContraction
+public import ModularCurves.ForMathlib.SheafCechSheafZeroExact
 
 /-!
 # Positive-degree exactness of the sheaf-level Cech complex
@@ -9,6 +11,8 @@ opens cover the whole space, every positive-degree stalk cycle can be represente
 cycle on a neighborhood contained in one cover member, where the local contraction gives
 a preimage.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

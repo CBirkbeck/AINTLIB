@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.TorsionCombination
+module
+
+public import ModularCurves.GroupScheme.TorsionCombination
 
 /-!
 # Points of the combination-clopen locus
@@ -22,6 +24,8 @@ nontrivial combinations avoid the zero section topologically.
 The group-theoretic translation (torsion points, `PairGeneratesOfCardSq`, geometric
 fibres) is the `Moduli`-side layer.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

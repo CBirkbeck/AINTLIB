@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.SegreStandardChartOverlapAlgebra`.
 -/
-import ModularCurves.ForMathlib.SegreProductStandardCover
+module
+
+public import ModularCurves.ForMathlib.SegreProductStandardCover
 
 /-!
 # Algebra on overlaps of standard Segre charts
@@ -15,6 +17,8 @@ The overlap with a second standard chart is localization at the corresponding co
 ratio. The standard Segre chart equivalence sends that ratio to the product of the two
 projective transition ratios, so it extends canonically to the overlap rings.
 -/
+
+@[expose] public section
 
 open HomogeneousLocalization
 open scoped TensorProduct

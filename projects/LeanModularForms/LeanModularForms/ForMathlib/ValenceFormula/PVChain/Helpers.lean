@@ -3,12 +3,14 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.EllipticPoints
-import LeanModularForms.ForMathlib.FDBoundaryH
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue
-import LeanModularForms.ForMathlib.ModularInvariance
-import LeanModularForms.ForMathlib.Orbits
-import LeanModularForms.ForMathlib.ValenceFormula.OnCurvePV.Main
+module
+
+public import LeanModularForms.ForMathlib.EllipticPoints
+public import LeanModularForms.ForMathlib.FDBoundaryH
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.Residue
+public import LeanModularForms.ForMathlib.ModularInvariance
+public import LeanModularForms.ForMathlib.Orbits
+public import LeanModularForms.ForMathlib.ValenceFormula.OnCurvePV.Main
 
 /-!
 # PV Chain Helpers
@@ -22,6 +24,8 @@ together with closure, boundary and containment lemmas for them.
 * `pvIntegrand` — the ε-truncated integrand for the CPV of `f'/f`.
 * `sArcOfS`, `sVertOfS` — arc and vertical singular sets of `S`.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups

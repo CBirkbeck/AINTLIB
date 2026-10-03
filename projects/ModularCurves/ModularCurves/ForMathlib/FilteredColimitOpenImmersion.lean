@@ -5,10 +5,12 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
-import Mathlib.AlgebraicGeometry.Pullbacks
-import ModularCurves.ForMathlib.FiniteAffineOpenCover
-import ModularCurves.ForMathlib.FilteredColimitCompactOpen
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+public import Mathlib.AlgebraicGeometry.Pullbacks
+public import ModularCurves.ForMathlib.FiniteAffineOpenCover
+public import ModularCurves.ForMathlib.FilteredColimitCompactOpen
 
 /-!
 # Closed scalar extensions of compact open immersions
@@ -16,6 +18,8 @@ import ModularCurves.ForMathlib.FilteredColimitCompactOpen
 Closedness of a compact open immersion into an affine finitely presented target descends
 from a filtered colimit to one later scalar-extension stage.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TensorProduct TopologicalSpace
 

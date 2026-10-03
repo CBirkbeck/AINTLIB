@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LaurentCoverTopology
-import Mathlib.Topology.Metrizable.CompletelyMetrizable
-import Mathlib.Topology.Baire.CompleteMetrizable
+module
+
+public import «Adic spaces».LaurentCoverTopology
+public import Mathlib.Topology.Metrizable.CompletelyMetrizable
+public import Mathlib.Topology.Baire.CompleteMetrizable
 
 /-!
 # Pseudo-metrizability and BaireSpace support for the Laurent cover (T137–T140)
@@ -78,6 +80,8 @@ T140 (final consolidation):
   bivariate noetherian pair-subring hypotheses needed by the
   closed-ideal infrastructure.
 -/
+
+@[expose] public section
 
 namespace LaurentCover
 

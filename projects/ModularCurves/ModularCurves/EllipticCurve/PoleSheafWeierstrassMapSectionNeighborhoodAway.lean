@@ -1,6 +1,8 @@
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlobalFinite
-import ModularCurves.ForMathlib.AwayMapBasicOpen
-import ModularCurves.ForMathlib.ResLEIsIso
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlobalFinite
+public import ModularCurves.ForMathlib.AwayMapBasicOpen
+public import ModularCurves.ForMathlib.ResLEIsIso
 
 /-!
 # The punctured comparison on the affine section neighborhood
@@ -8,6 +10,8 @@ import ModularCurves.ForMathlib.ResLEIsIso
 The punctured Weierstrass comparison identifies the away localizations of
 the coordinate rings on the canonical affine section neighborhood.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

@@ -5,10 +5,12 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChange
-import ModularCurves.ForMathlib.ProjectiveFactorizationFiniteSections
-import ModularCurves.ForMathlib.RelativeProjectiveAffineFactorization
-import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChange
+public import ModularCurves.ForMathlib.ProjectiveFactorizationFiniteSections
+public import ModularCurves.ForMathlib.RelativeProjectiveAffineFactorization
+public import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
 
 /-!
 # Finite-type pushforwards along relative projective factorizations
@@ -16,6 +18,10 @@ import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
 Over a locally Noetherian base, the pushforward of a finite-type quasicoherent module along a
 relative projective factorization is finite type.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 

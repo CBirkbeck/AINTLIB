@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Pic0.PicDual
-import HasseWeil.Foundation.DegreeQuadraticForm
-import HasseWeil.Isogeny.VerschiebungFactorization
+module
+
+public import HasseWeil.Pic0.PicDual
+public import HasseWeil.Foundation.DegreeQuadraticForm
+public import HasseWeil.Isogeny.VerschiebungFactorization
 
 /-!
 # Route C assembly: the Pic⁰ dual machinery ⟹ `deg(rπ − s) = N` ⟹ `qf_nonneg` (generic)
@@ -65,6 +67,8 @@ The assembled `qf_nonneg_generic_via_picDual` closes modulo exactly:
 `deg(rπ−s) ≥ 0` and `0 < deg(rπ−s)` are **discharged here** unconditionally
 (`Int.natCast_nonneg`, `isogeny_degree_pos`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

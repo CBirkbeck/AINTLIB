@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.MvPolynomial.PDeriv
-import Mathlib.RingTheory.Derivation.Basic
-import Mathlib.RingTheory.MvPowerSeries.Basic
-import Mathlib.RingTheory.MvPowerSeries.PiTopology
-import Mathlib.RingTheory.MvPowerSeries.Substitution
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.RingTheory.Derivation.Basic
+public import Mathlib.RingTheory.MvPowerSeries.Basic
+public import Mathlib.RingTheory.MvPowerSeries.PiTopology
+public import Mathlib.RingTheory.MvPowerSeries.Substitution
 
 /-!
 # Partial derivatives of multivariate formal power series
@@ -46,6 +48,8 @@ invariance of the invariant differential on a formal group).
 * `MvPowerSeries.pderiv_subst_fin2` — specialization to `σ = Fin 2`, as used
   in Silverman IV.4.2.
 -/
+
+@[expose] public section
 
 noncomputable section
 

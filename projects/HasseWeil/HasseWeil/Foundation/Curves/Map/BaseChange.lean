@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Basic
+module
+
+public import HasseWeil.Foundation.Curves.Basic
 
 /-!
 # Base change of a smooth plane curve
@@ -24,6 +26,8 @@ statements.
 * [Silverman, *The Arithmetic of Elliptic Curves*], I.2 (definition of
   "defined over `K`")
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

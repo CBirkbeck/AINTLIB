@@ -2,11 +2,14 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».IdealLocalization
-import «Adic spaces».PresheafTateStructure
-import «Adic spaces».CompletionLocalization
-import «Adic spaces».AdicCompletionFaithfullyFlat
-import Mathlib.RingTheory.RingHom.FaithfullyFlat
+module
+
+import all «Adic spaces».CompletionLocalization
+public import «Adic spaces».IdealLocalization
+public import «Adic spaces».PresheafTateStructure
+public import «Adic spaces».CompletionLocalization
+public import «Adic spaces».AdicCompletionFaithfullyFlat
+public import Mathlib.RingTheory.RingHom.FaithfullyFlat
 
 /-!
 # Ideal Closedness Transfer via the Completion Ring of Definition
@@ -54,6 +57,8 @@ the residual is an ideal-theoretic statement about the Noetherian ring
 * Mathlib `Ideal.isClosed_of_isAdicComplete` (`IdealClosedness.lean:128`),
   `IsClosed.of_isClosed_subspace_of_isOpen_subring` (`IdealClosedness.lean:227`).
 -/
+
+@[expose] public section
 
 open Topology Filter
 

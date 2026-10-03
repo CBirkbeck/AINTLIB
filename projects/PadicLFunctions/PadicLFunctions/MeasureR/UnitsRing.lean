@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Measure.PseudoMeasure
-import PadicLFunctions.MeasureR.Fubini
-import PadicLFunctions.MeasureR.UnitsZp
+module
+
+public import PadicLFunctions.Measure.PseudoMeasure
+public import PadicLFunctions.MeasureR.Fubini
+public import PadicLFunctions.MeasureR.UnitsZp
 
 /-!
 # The Iwasawa algebra of the units over the integer ring of a field
@@ -17,6 +19,8 @@ computation), Dirac multiplicativity `[u]·[v] = [uv]`, and the degree
 `PadicLFunctions/Measure/PseudoMeasure.lean`; the pseudo-measure theory
 itself stays at `ℤ_p` coefficients (decomposition W-r4 scope note).
 -/
+
+@[expose] public section
 
 namespace PadicLFunctions
 

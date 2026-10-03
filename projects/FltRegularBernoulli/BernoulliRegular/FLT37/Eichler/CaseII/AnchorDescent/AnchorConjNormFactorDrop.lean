@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.ConjNormDatumAssembly
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.ConjNormDatumAssembly
 
 /-!
 # [FLT37-CASEII-R2] The conjugate-norm strict factor drop (Washington Thm 9.4, `ξ₁ = ρ₀σρ₀`)

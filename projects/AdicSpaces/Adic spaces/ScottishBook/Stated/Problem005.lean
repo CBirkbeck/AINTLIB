@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Tilting
-import «Adic spaces».Uniform
+module
+
+public import «Adic spaces».Tilting
+public import «Adic spaces».Uniform
 
 /-!
 # Nonarchimedean Scottish Book — Problem 5
@@ -34,6 +36,8 @@ The completed tensor product and `[1/p]` localization require infrastructure bey
 currently available, so the statement is formulated existentially: there exists a ring `C`
 representing `(W(R⁺) ⊗̂ A°)[1/p]` with the required properties.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

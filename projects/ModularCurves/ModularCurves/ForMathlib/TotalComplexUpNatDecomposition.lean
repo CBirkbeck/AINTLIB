@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.TotalComplexUpNatLowDegrees
-import Mathlib.Data.Finset.NatAntidiagonal
+module
+
+public import ModularCurves.ForMathlib.TotalComplexUpNatLowDegrees
+public import Mathlib.Data.Finset.NatAntidiagonal
 
 /-!
 # Decomposition of first-quadrant total-complex degrees
@@ -7,6 +9,8 @@ import Mathlib.Data.Finset.NatAntidiagonal
 Express every degree of a first-quadrant total complex as the finite sum of its
 bidegree projections and inclusions.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
 open scoped BigOperators

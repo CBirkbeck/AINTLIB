@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Main
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.Bridge
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Main
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Main
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.Bridge
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Main
 
 /-!
 # LV011 / FLT37 final assembly (corrected, parametric)

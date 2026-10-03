@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.ForMathlib.ProjectiveStandardIntersectionRing
+module
+
+public import ModularCurves.ForMathlib.ProjectiveStandardIntersectionRing
 
 /-!
 # Homogeneous Laurent weights on projective coordinate intersections
@@ -12,6 +14,10 @@ The Laurent exponents in one affine chart are reindexed by global integer expone
 fixed total degree. The local localization condition becomes the requirement that every negative
 global exponent occur among the coordinates defining the projective intersection.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

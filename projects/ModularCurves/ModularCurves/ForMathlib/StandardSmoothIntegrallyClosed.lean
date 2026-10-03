@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.StandardSmoothMaximalDVR
-import Mathlib.RingTheory.DedekindDomain.Dvr
+module
+
+public import ModularCurves.ForMathlib.StandardSmoothMaximalDVR
+public import Mathlib.RingTheory.DedekindDomain.Dvr
 
 /-!
 # A standard-smooth curve over a field is integrally closed (WP-D3b)
@@ -29,6 +31,8 @@ no normality of schemes (`AlgebraicGeometry/Morphisms/` has no `Normal.lean` or 
 and no "regular ⟹ integrally closed" (that is Auslander–Buchsbaum). Going through the
 one-dimensional DVR criterion sidesteps both.
 -/
+
+@[expose] public section
 
 universe u
 

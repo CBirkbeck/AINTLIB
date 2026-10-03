@@ -6,8 +6,10 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from Clawristotle's
 `CoherentCohomologyFinite.ProjectiveSpectrumClosedImmersion`.
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
-import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
 
 /-!
 # Closed immersions induced by surjective graded maps
@@ -15,6 +17,8 @@ import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
 A componentwise-surjective graded ring map induces a closed immersion in the
 contravariant direction on `Proj`.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 open AlgebraicGeometry

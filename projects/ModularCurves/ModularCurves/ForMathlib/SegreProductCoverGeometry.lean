@@ -6,8 +6,11 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from the first geometric block of Clawristotle's
 `CoherentCohomologyFinite.SegreProductStandardOverlap`.
 -/
-import ModularCurves.ForMathlib.SegreProductStandardCover
-import ModularCurves.ForMathlib.SegreStandardChartOverlapAlgebra
+module
+
+import Mathlib.AlgebraicGeometry.PullbackCarrier
+public import ModularCurves.ForMathlib.SegreProductStandardCover
+public import ModularCurves.ForMathlib.SegreStandardChartOverlapAlgebra
 
 /-!
 # Geometry of the standard cover on a product of projective spaces
@@ -15,6 +18,10 @@ import ModularCurves.ForMathlib.SegreStandardChartOverlapAlgebra
 This file computes the ranges and the two projections of the standard product-cover maps.
 It also computes the projections of the affine tensor-product presentation of each chart.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry TopologicalSpace
 

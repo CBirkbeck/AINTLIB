@@ -6,7 +6,9 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 Adapted from the localization-model block of Clawristotle's
 `CoherentCohomologyFinite.SegreProductStandardOverlap`.
 -/
-import ModularCurves.ForMathlib.SegreProductOverlapOpen
+module
+
+public import ModularCurves.ForMathlib.SegreProductOverlapOpen
 
 /-!
 # Localization models of standard Segre product overlaps
@@ -14,6 +16,10 @@ import ModularCurves.ForMathlib.SegreProductOverlapOpen
 Each double overlap in the standard cover of a product of projective spaces is identified
 with the spectrum of the product-chart ring localized at its transition function.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry TopologicalSpace
 

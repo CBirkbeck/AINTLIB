@@ -1,5 +1,7 @@
-import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
 
 /-!
 # Properness of the pole-sheaf Weierstrass comparison
@@ -7,6 +9,8 @@ import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
 Over an affine base, a morphism from a proper family to a projective
 Weierstrass model is proper as soon as it respects the structural morphisms.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 open CategoryTheory.Limits

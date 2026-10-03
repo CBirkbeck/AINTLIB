@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.CharZeroDescent
+module
+
+public import ModularCurves.WeilPairing.CharZeroDescent
 
 /-!
 # The DS4 Weil pairing from local descent data (T-C0e assembly)
@@ -25,6 +27,8 @@ The remaining input is the *local* pairing on a cover trivialising `E[N]`: the p
 convergence point. The determinant model it is fed is already in `CharZeroDescent`
 (`detFun`, `detConstMor`, `detConstMor_gl2Both`).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidRing
+module
+
+public import «Adic spaces».PerfectoidRing
 
 /-!
 # Nonarchimedean Scottish Book — Problem 13
@@ -27,6 +29,8 @@ RESOLVED: No (Gabber counterexample).
 We state the negation: there exists a perfectoid ring (of mixed characteristic) that does not
 contain any perfectoid subfield. The resolution is via a counterexample due to Gabber.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

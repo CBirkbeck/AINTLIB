@@ -1,6 +1,8 @@
-import ModularCurves.ForMathlib.TotalComplexModuleForget
-import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdgeHigher
-import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+module
+
+public import ModularCurves.ForMathlib.TotalComplexModuleForget
+public import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdgeHigher
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
 
 /-!
 # Module-valued horizontal edge maps
@@ -9,6 +11,10 @@ The degree-one quasi-isomorphism theorem for horizontal edge maps is transported
 from additive commutative groups to modules. Exactness and homology are both
 reflected by the forgetful functor.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open CategoryTheory
 

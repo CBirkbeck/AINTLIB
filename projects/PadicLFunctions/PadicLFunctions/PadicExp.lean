@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Coefficients
-import PadicLFunctions.Interpolation.Branches
-import Mathlib.RingTheory.PowerSeries.Log
+module
+
+public import PadicLFunctions.Coefficients
+public import PadicLFunctions.Interpolation.Branches
+public import Mathlib.RingTheory.PowerSeries.Log
 
 /-!
 # The p-adic exponential and logarithm (RJW Lem 5.14)
@@ -23,6 +25,8 @@ construction `PadicInt.onePAdicPow` by uniqueness of continuous characters.
 Decomposition: `.mathlib-quality/decomposition.md` §5, cluster R5.E
 (E1–E5; user-requested at board approval 2026-06-10).
 -/
+
+@[expose] public section
 
 open Filter Topology
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.QuotientProblem
+module
+
+public import ModularCurves.Moduli.QuotientProblem
 
 /-!
 # Products of moduli problems
@@ -16,6 +18,8 @@ problem over a representing object of the first: "a point of `Z` = a point of `X
 This is the tool that identifies the two orders of "add a ρ-level structure" and
 "add a Legendre datum" for the `Y(ρ̄)` smoothness leaf.
 -/
+
+@[expose] public section
 
 noncomputable section
 

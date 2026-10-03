@@ -3,13 +3,15 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.KernelDivisibilityChart
-import ModularCurves.EllipticCurve.ModelRecord
-import ModularCurves.EllipticCurve.MulByHomFlat
-import ModularCurves.EllipticCurve.RecordGroupUnique
-import ModularCurves.LevelStructure.IsoTransport
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
-import ModularCurves.LevelStructure.Factorization
+module
+
+public import ModularCurves.EllipticCurve.KernelDivisibilityChart
+public import ModularCurves.EllipticCurve.ModelRecord
+public import ModularCurves.EllipticCurve.MulByHomFlat
+public import ModularCurves.EllipticCurve.RecordGroupUnique
+public import ModularCurves.LevelStructure.IsoTransport
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
+public import ModularCurves.LevelStructure.Factorization
 
 /-!
 # Kernel divisibility: from the chart to arbitrary records (BB-FLAT N5)
@@ -20,6 +22,10 @@ chart theorems at the projective model's Y-chart, transports them along the
 `Point.baseChangeEquiv`/`pointAddEquiv` chain (the BB-QF pattern, hμ from K3), and glues
 over a basic-open cover of the test.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

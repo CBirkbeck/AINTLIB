@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Map.CoordHomFinite
-import HasseWeil.Foundation.EC.AffinePointMap
-import HasseWeil.Foundation.Ramification
-import HasseWeil.Isogeny.BaseChange.Morphism
-import HasseWeil.Isogeny.GroupHom.Basic
+module
+
+public import HasseWeil.Foundation.Curves.Map.CoordHomFinite
+public import HasseWeil.Foundation.EC.AffinePointMap
+public import HasseWeil.Foundation.Ramification
+public import HasseWeil.Isogeny.BaseChange.Morphism
+public import HasseWeil.Isogeny.GroupHom.Basic
 
 /-!
 # ISO-L7: descent of Silverman III.4.8 to a general base field
@@ -56,6 +58,8 @@ This file performs that descent.  The mathematical content splits in two:
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4.8 (geometric
   statement); I.2 (base change / "defined over `K`").
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

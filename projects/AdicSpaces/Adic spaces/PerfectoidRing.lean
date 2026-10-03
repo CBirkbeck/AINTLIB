@@ -2,11 +2,13 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PseudoUniformizer
-import «Adic spaces».StructureSheaf
-import «Adic spaces».Uniform
-import Mathlib.RingTheory.AdicCompletion.Basic
-import Mathlib.RingTheory.Valuation.Integers
+module
+
+public import «Adic spaces».PseudoUniformizer
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».Uniform
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Mathlib.RingTheory.Valuation.Integers
 
 /-!
 # Perfectoid Rings and Fields
@@ -36,6 +38,10 @@ The condition `ϖ^p | p` is expressed as: there exists a power-bounded `c` with
 * [P. Scholze, *Perfectoid Spaces*][scholze2012perfectoid], Definition 3.5
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §7
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

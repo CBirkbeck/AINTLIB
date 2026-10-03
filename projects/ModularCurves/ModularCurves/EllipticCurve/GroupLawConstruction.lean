@@ -1,13 +1,15 @@
-import ModularCurves.EllipticCurve.PointsDictionary
-import ModularCurves.EllipticCurve.ModelVariableChange
-import ModularCurves.EllipticCurve.AdditionBaseChange
-import ModularCurves.ForMathlib.ProjToSpecZero
-import ModularCurves.ForMathlib.ProjFromGlobalSectionsMap
-import ModularCurves.ForMathlib.ProjMapScaling
-import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
-import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
-import Mathlib.RingTheory.Localization.Basic
-import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
+module
+
+public import ModularCurves.EllipticCurve.PointsDictionary
+public import ModularCurves.EllipticCurve.ModelVariableChange
+public import ModularCurves.EllipticCurve.AdditionBaseChange
+public import ModularCurves.ForMathlib.ProjToSpecZero
+public import ModularCurves.ForMathlib.ProjFromGlobalSectionsMap
+public import ModularCurves.ForMathlib.ProjMapScaling
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+public import Mathlib.RingTheory.Localization.Basic
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
 
 /-!
 # The group law on the projective Weierstrass model, uniformly over every ring
@@ -28,6 +30,10 @@ Sources: Bosma–Lenstra, *Complete systems of two addition laws for elliptic cu
 `.mathlib-quality/tw7-source-quotes.md`); Lange–Ruppert, Invent. Math. 79 (1985); reviewer
 round 1 §Q1; audits A2/A5/A6.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   WeierstrassCurve

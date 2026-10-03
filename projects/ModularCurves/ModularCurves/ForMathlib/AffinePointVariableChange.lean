@@ -3,8 +3,10 @@ Copyright (c) 2026 Christopher Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christopher Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 
 /-!
 # General coordinate change on affine points of a Weierstrass curve
@@ -42,6 +44,8 @@ affine Weierstrass polynomial scales by `u⁻⁶`, so the defining equation is p
 Together these are the affine/fibrewise descent datum for the elliptic-curve group law; the
 scheme-level descent (ticket `T-W7`) consumes them once the group-scheme framework is available.
 -/
+
+@[expose] public section
 
 namespace WeierstrassCurve.VariableChange
 

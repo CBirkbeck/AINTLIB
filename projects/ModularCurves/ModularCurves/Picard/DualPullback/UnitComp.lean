@@ -1,10 +1,14 @@
-import ModularCurves.Picard.DualPullback.LocalModuleRestriction
+module
+
+public import ModularCurves.Picard.DualPullback.LocalModuleRestriction
 
 /-!
 # Pullback coherence for structure modules
 
 Option-free compatibility of pullback and restriction with the structure-module unit.
 -/
+
+@[expose] public section
 
 universe u v w u₁ u₂ v₁ v₂
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.ForMathlib.SurjectiveFreeSameRank
-import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+module
+
+public import ModularCurves.ForMathlib.SurjectiveFreeSameRank
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 
 /-!
 # Same-rank closed immersion of affines is an isomorphism (YFULL route γ)
@@ -19,6 +21,8 @@ equality (`Y(N)` clopen argument): a closed subscheme of a finite locally free `
 that has the same fibre rank everywhere is the whole scheme. It is a direct application of
 `bijective_of_surjective_ringHom_of_flat_rankAtStalk_eq`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RealityPreservingDescentReduction
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RealityPreservingDescentReduction
 
 /-!
 # [FLT37-CASEII-R2] The σ-fixed single-root descent solution (reality-preserving descent)

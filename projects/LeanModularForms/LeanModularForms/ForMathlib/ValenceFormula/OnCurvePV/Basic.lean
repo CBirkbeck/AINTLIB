@@ -3,12 +3,14 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Smooth
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.UniformStepBound
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.OnCurvePV.Basic
-import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.I
-import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.Rho
-import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.RhoPlusOne
+module
+
+public import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Smooth
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.UniformStepBound
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.OnCurvePV.Basic
+public import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.I
+public import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.Rho
+public import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.RhoPlusOne
 
 /-!
 # On-Curve PV: Infrastructure
@@ -16,6 +18,8 @@ import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.RhoPlusOne
 Bridge lemmas, elliptic point CPV, segment geometry helpers,
 and CPV helper lemmas (avoidance, concatenation, sub-interval extension, integrability).
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

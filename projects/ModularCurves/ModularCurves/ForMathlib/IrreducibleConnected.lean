@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Topology.Irreducible
-import Mathlib.Topology.Connected.Basic
-import Mathlib.Topology.Connected.Clopen
-import Mathlib.Topology.LocallyFinite
+module
+
+public import Mathlib.Topology.Irreducible
+public import Mathlib.Topology.Connected.Basic
+public import Mathlib.Topology.Connected.Clopen
+public import Mathlib.Topology.LocallyFinite
 
 /-!
 # Connected + locally-irreducible ⟹ irreducible
@@ -19,6 +21,8 @@ This is the purely topological half of "a connected smooth curve is irreducible"
 (`decomposition-km10.md` §L1); the other half is that smoothness forces the components
 to be disjoint (tickets T-G4a-SUB1/SUB2).
 -/
+
+@[expose] public section
 
 open Set
 

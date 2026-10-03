@@ -3,8 +3,10 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleM
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleM
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
 
 /-!
 # The integer Hecke and diamond operators on `𝕄 N k`
@@ -12,6 +14,10 @@ import LeanModularForms.HeckeRIngs.GL2.HeckeT_n
 This file defines the Hecke operators `T_n` (and `U_p` for `p ∣ N`) and the diamond operators
 `⟨d⟩` as `ℤ`-linear endomorphisms of the integral modular-symbol module `𝕄 N k`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace HeckeRing.GL2.ModularSymbols
 

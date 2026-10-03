@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Basic
-import Mathlib.FieldTheory.PurelyInseparable.Basic
-import Mathlib.FieldTheory.SeparableClosure
+module
+
+public import HasseWeil.Isogeny.Basic
+public import Mathlib.FieldTheory.PurelyInseparable.Basic
+public import Mathlib.FieldTheory.SeparableClosure
 
 /-!
 # Inseparable degree API for isogenies (Silverman II.2.10-12)
@@ -32,6 +34,8 @@ elliptic-curve isogenies, building on mathlib's
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.10-12.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

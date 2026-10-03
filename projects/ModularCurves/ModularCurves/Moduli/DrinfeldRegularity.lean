@@ -2,10 +2,12 @@
 Copyright (c) 2026 the AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import ModularCurves.LevelStructure.Basic
-import Mathlib.RingTheory.MvPowerSeries.Basic
-import Mathlib.Algebra.MvPolynomial.Coeff
-import Mathlib.Data.Nat.Multiplicity
+module
+
+public import ModularCurves.LevelStructure.Basic
+public import Mathlib.RingTheory.MvPowerSeries.Basic
+public import Mathlib.Algebra.MvPolynomial.Coeff
+public import Mathlib.Data.Nat.Multiplicity
 
 /-!
 # KM-INTEGRAL stream skeleton: the Drinfeld upgrade of Y₁(N) (Katz–Mazur Ch. 5)
@@ -25,6 +27,10 @@ relatively representable over (Ell). Each is finite and flat over (Ell) of const
 rank ≥ 1, and regular (necessarily of dimension two). Each tensored with ℤ[1/N] is
 finite etale over (Ell/ℤ[1/N])."
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory
 

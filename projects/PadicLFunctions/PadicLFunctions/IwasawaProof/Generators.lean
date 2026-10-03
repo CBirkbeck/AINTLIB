@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.IwasawaProof.GaloisAction
-import PadicLFunctions.IwasawaProof.FundamentalSequence
-import PadicLFunctions.Iwasawa.CyclotomicUnits
-import PadicLFunctions.Iwasawa.ZetaGalois
+module
+
+public import PadicLFunctions.IwasawaProof.GaloisAction
+public import PadicLFunctions.IwasawaProof.FundamentalSequence
+public import PadicLFunctions.Iwasawa.CyclotomicUnits
+public import PadicLFunctions.Iwasawa.ZetaGalois
 
 /-!
 # Generators for the cyclotomic units (RJW §12.3–12.4, TeX 3450–3578) — E12.4
@@ -18,6 +20,10 @@ lemmas (`lem:cyc units gen`, `cor:cyc units gen 2`); the closure lemma
 resolves the §11 b2-logged `a ≡ 1 mod p` note: `w ∈ μ_{p−1}` is the Teichmüller
 correction making `wγ_{n,a} ≡ 1 mod 𝔭_n`. Skeleton.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman
 

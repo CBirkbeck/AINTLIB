@@ -3,11 +3,14 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInjective
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodHecke
-import Mathlib.NumberTheory.ModularForms.Discriminant
-import Mathlib.NumberTheory.ModularForms.NormTrace
-import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
+module
+
+import Mathlib.Analysis.Calculus.SmoothSeries
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodInjective
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.PeriodHecke
+public import Mathlib.NumberTheory.ModularForms.Discriminant
+public import Mathlib.NumberTheory.ModularForms.NormTrace
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 
 /-!
 # Eichler-integral proof of period-map injectivity (`k ≥ 2`)
@@ -66,6 +69,10 @@ negative-weight packaging type-checks.
 * reply.md (expert-review/2026-06-24) §1–§2; Shimura §8.2; Diamond–Shurman §5.x;
   arXiv:1701.00611 (Bol); Res. Math. Sci. doi 10.1007/s40687-018-0128-2.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 noncomputable section
 

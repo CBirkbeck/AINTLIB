@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafSuccessorSections
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafSuccessorSections
 
 /-!
 # The constant section of the first pole module
@@ -11,6 +13,8 @@ import ModularCurves.EllipticCurve.PoleSheafSuccessorSections
 The literal constant section is nonzero in the monoidal unit and remains
 nonzero after applying the first pole-filtration inclusion.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory TopologicalSpace
 

@@ -1,13 +1,15 @@
-import ModularCurves.EllipticCurve.GroupLaw
-import ModularCurves.EllipticCurve.MulByHomFibresGlobal
-import ModularCurves.EllipticCurve.MulByHomFlat
-import ModularCurves.ForMathlib.FinitePresentationCancel
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
-import Mathlib.AlgebraicGeometry.ZariskisMainTheorem
+module
+
+public import ModularCurves.EllipticCurve.GroupLaw
+public import ModularCurves.EllipticCurve.MulByHomFibresGlobal
+public import ModularCurves.EllipticCurve.MulByHomFlat
+public import ModularCurves.ForMathlib.FinitePresentationCancel
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+public import Mathlib.AlgebraicGeometry.ZariskisMainTheorem
 
 /-!
 # Torsion subgroup schemes `E[N]`
@@ -31,6 +33,8 @@ is Silverman III.6.4(b) and is **already proved in this repository over fields**
 with the fibres of this scheme-theoretic `E[N]` is ticket `T-B6` (kept out of the skeleton to
 avoid the cross-project import in the definitional spine).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordSecondOrderLeadingCoeff
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordSecondOrderLeadingCoeff
 
 /-!
 # The level-`72` mod-`37²` Dwork column coordinate, as a level-`71` finite-log coordinate

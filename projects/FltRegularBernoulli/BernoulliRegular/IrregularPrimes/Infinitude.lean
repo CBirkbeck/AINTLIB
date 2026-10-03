@@ -1,13 +1,15 @@
-import BernoulliRegular.IrregularPrimes.Basic
-import BernoulliRegular.IrregularPrimes.BernoulliGrowth
-import BernoulliRegular.IrregularPrimes.DivisorClosedBase
-import BernoulliRegular.IrregularPrimes.KummerCongruenceFull
-import BernoulliRegular.IrregularPrimes.RatNumerator
-import BernoulliRegular.IrregularPrimes.VonStaudtConsequences
-import Mathlib.Algebra.Order.Ring.Abs
-import Mathlib.Data.Nat.ModEq
-import Mathlib.Data.Nat.Prime.Basic
-import Mathlib.Tactic
+module
+
+public import BernoulliRegular.IrregularPrimes.Basic
+public import BernoulliRegular.IrregularPrimes.BernoulliGrowth
+public import BernoulliRegular.IrregularPrimes.DivisorClosedBase
+public import BernoulliRegular.IrregularPrimes.KummerCongruenceFull
+public import BernoulliRegular.IrregularPrimes.RatNumerator
+public import BernoulliRegular.IrregularPrimes.VonStaudtConsequences
+public import Mathlib.Algebra.Order.Ring.Abs
+public import Mathlib.Data.Nat.ModEq
+public import Mathlib.Data.Nat.Prime.Basic
+public import Mathlib.Tactic
 
 /-!
 # Infinitude assembly infrastructure
@@ -15,6 +17,8 @@ import Mathlib.Tactic
 This file contains the Carlitz infinitude assembly from the full Kummer
 congruence for divided Bernoulli numbers.
 -/
+
+@[expose] public section
 
 namespace BernoulliRegular
 

@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornPart2LaneAInternalizedConsumer
-import «Adic spaces».GeometricReduction
+module
+
+public import «Adic spaces».WedhornPart2LaneAInternalizedConsumer
+public import «Adic spaces».GeometricReduction
 
 /-!
 # Wedhorn 8.34(ii) — Lane B per-E separation interface (T068)
@@ -103,6 +105,8 @@ discharges it from `(rationalOpen E.1.T E.1.s).Nonempty`).
   global-universal-Spa / σ-power-decay / M-power-decay routes; only
   the established Wedhorn Cor 8.32 / per-E separation route.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

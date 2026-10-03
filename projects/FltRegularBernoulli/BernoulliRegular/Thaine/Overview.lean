@@ -3,16 +3,18 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.Thaine.AuxiliaryUnits
-import BernoulliRegular.Thaine.AuxiliaryPrimes
-import BernoulliRegular.Thaine.KolyvaginDerivative
-import BernoulliRegular.Thaine.AnnihilatorDescent
-import BernoulliRegular.Thaine.SingleCharacter
-import BernoulliRegular.Thaine.HerbrandRibetThirtySeven
-import BernoulliRegular.Thaine.UniqueIrregularData
-import BernoulliRegular.Thaine.RankOneComponent
-import BernoulliRegular.Thaine.CircularUnits
-import BernoulliRegular.Thaine.PollaczekRankOne
+module
+
+public import BernoulliRegular.Thaine.AuxiliaryUnits
+public import BernoulliRegular.Thaine.AuxiliaryPrimes
+public import BernoulliRegular.Thaine.KolyvaginDerivative
+public import BernoulliRegular.Thaine.AnnihilatorDescent
+public import BernoulliRegular.Thaine.SingleCharacter
+public import BernoulliRegular.Thaine.HerbrandRibetThirtySeven
+public import BernoulliRegular.Thaine.UniqueIrregularData
+public import BernoulliRegular.Thaine.RankOneComponent
+public import BernoulliRegular.Thaine.CircularUnits
+public import BernoulliRegular.Thaine.PollaczekRankOne
 
 /-!
 # Thaine pivot — overview module

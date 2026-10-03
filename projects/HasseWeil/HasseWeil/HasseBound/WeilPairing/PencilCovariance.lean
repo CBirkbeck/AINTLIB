@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.MapTranslateGenericAdditive
-import HasseWeil.HasseBound.WeilPairing.FrobeniusGenericCovariance
-import HasseWeil.Isogeny.SeparableWitnessReductions
-import HasseWeil.HasseBound.WeilPairing.PencilSeparable
-import HasseWeil.HasseBound.WeilPairing.WallAGeometricRealization
+module
+
+public import HasseWeil.HasseBound.WeilPairing.MapTranslateGenericAdditive
+public import HasseWeil.HasseBound.WeilPairing.FrobeniusGenericCovariance
+public import HasseWeil.Isogeny.SeparableWitnessReductions
+public import HasseWeil.HasseBound.WeilPairing.PencilSeparable
+public import HasseWeil.HasseBound.WeilPairing.WallAGeometricRealization
 
 /-!
 # Generic-point covariance for `(rπ − s)_{K̄}`
@@ -17,6 +19,8 @@ This file discharges the translation covariance `hcomm'` for the base-changed se
 argument decomposes the pencil into the `r·π` and `−s·id` covariance leaves, proves Wall A
 genuineness, and then converts it to the canonical action used by `SeparableWitnesses`.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

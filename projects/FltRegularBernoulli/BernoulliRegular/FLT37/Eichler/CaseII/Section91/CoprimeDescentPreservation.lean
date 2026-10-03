@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.FactorUnitRatioRealRoot
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.FactorUnitRatioRealRoot
 
 /-!
 # [F3] Coprimality as a datum field: the descent stays coprime, and the FLT37 endpoint drops the

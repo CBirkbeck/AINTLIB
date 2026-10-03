@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorSupportedDescentReduction
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.WashingtonThetaReal
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.IntSolutionToRealDatum
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.AnchorSupportedDescentReduction
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.WashingtonThetaReal
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.IntSolutionToRealDatum
 
 /-!
 # [FLT37-CASEII-ANCHOR-SQUARE-DATUM] Washington's `ξ₁ = ρ₀·σρ₀` conjugate-norm anchor datum

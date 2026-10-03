@@ -2,22 +2,24 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib.Combinatorics.Pigeonhole
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+module
 
-import «Adic spaces».AdicCompletionNoetherian
-import «Adic spaces».Cor832
-import «Adic spaces».EmbeddingTopo
-import «Adic spaces».LaurentRefinement
-import «Adic spaces».LaurentRefinementTree
-import «Adic spaces».LocalBasis
-import «Adic spaces».RelativeRationalLocData
-import «Adic spaces».SpaCompactNoHArch
-import «Adic spaces».SpvCompletionExtension
-import «Adic spaces».StandardCover
-import «Adic spaces».StructureSheaf
-import «Adic spaces».WedhornCoverNormalization
-import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
+public import Mathlib.Combinatorics.Pigeonhole
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+
+public import «Adic spaces».AdicCompletionNoetherian
+public import «Adic spaces».Cor832
+public import «Adic spaces».EmbeddingTopo
+public import «Adic spaces».LaurentRefinement
+public import «Adic spaces».LaurentRefinementTree
+public import «Adic spaces».LocalBasis
+public import «Adic spaces».RelativeRationalLocData
+public import «Adic spaces».SpaCompactNoHArch
+public import «Adic spaces».SpvCompletionExtension
+public import «Adic spaces».StandardCover
+public import «Adic spaces».StructureSheaf
+public import «Adic spaces».WedhornCoverNormalization
+public import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
 
 /-!
 # Residual mathematical statements for completing Tate acyclicity
@@ -36,6 +38,8 @@ This file develops the remaining inputs for Wedhorn's Tate acyclicity theorem an
 * `tateAcyclicityComplete`: closure of the algebraic acyclicity argument.
 * `isSheafyComplete`: closure of the sheafiness argument.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

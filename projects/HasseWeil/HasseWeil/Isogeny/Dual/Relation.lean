@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Endomorphism
+module
+
+public import HasseWeil.Isogeny.Endomorphism
 
 /-!
 # The Dual Isogeny: the `IsDualOf` relation and its witness-parametric API
@@ -66,6 +68,8 @@ T-III-4-020b, proven), which is not in this file's import closure.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.6.1-2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

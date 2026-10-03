@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.RootSplitting
-import ModularCurves.WeilPairing.CharZeroAssembly
+module
+
+public import ModularCurves.WeilPairing.RootSplitting
+public import ModularCurves.WeilPairing.CharZeroAssembly
 
 /-!
 # Reading the local determinant pairing on a clopen piece (WP-B5b)
@@ -28,6 +30,8 @@ This file supplies the *reading* half: on such a piece the local pairing is lite
 `ζ ^ det v`. The cocycle then becomes the pointwise comparison of two such readings, which is
 the content-bearing statement (the root transforms by `det`).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

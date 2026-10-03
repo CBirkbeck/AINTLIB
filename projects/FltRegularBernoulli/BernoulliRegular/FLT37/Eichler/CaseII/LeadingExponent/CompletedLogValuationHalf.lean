@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.LeadingExponentBridge
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.LeadingExponentBridge
 
 /-!
 # Washington Exercise 8.11 for `p = 37`

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.SeparableWitnessReductions
-import HasseWeil.Isogeny.Dual.Galois
-import HasseWeil.Foundation.Curves.Fiber.GenericFiber
+module
+
+public import HasseWeil.Isogeny.SeparableWitnessReductions
+public import HasseWeil.Isogeny.Dual.Galois
+public import HasseWeil.Foundation.Curves.Fiber.GenericFiber
 
 /-!
 # Generic-point covariance for a general isogeny
@@ -28,6 +30,8 @@ This file proves `MapTranslateGenericPoint` for the canonical action attached to
 
 * Silverman, *The Arithmetic of Elliptic Curves*, II.1.2, II.2.4(c), III.4.8, III.8.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

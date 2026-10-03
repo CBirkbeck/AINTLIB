@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornMultiBranchSubsetInequality
-import «Adic spaces».WedhornMultiDominatingUnit
+module
+
+public import «Adic spaces».WedhornMultiBranchSubsetInequality
+public import «Adic spaces».WedhornMultiDominatingUnit
 
 /-!
 # Wedhorn factor-extraction discharger
@@ -68,6 +70,8 @@ file.
 * Imports `WedhornMultiBranchSubsetInequality` (committed `3bb87eb`)
   and `WedhornMultiDominatingUnit` (for `Spv.vle_prod_of_pointwise`).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

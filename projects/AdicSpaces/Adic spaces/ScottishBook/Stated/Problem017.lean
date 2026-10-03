@@ -1,4 +1,6 @@
-import «Adic spaces».Presheaf
+module
+
+public import «Adic spaces».Presheaf
 
 /-!
 # Nonarchimedean Scottish Book — Problem 17
@@ -25,6 +27,8 @@ Open in general (counterexample in strongly noetherian case).
 - **Maximal ideal contraction**: Given a ring homomorphism f: A → B and a maximal ideal
   m ⊂ B, the contraction f⁻¹(m) ⊂ A.
 -/
+
+@[expose] public section
 
 open ValuationSpectrum
 

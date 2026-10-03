@@ -1,7 +1,9 @@
-import ModularCurves.EllipticCurve.PoleSheafModel
-import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
-import ModularCurves.ForMathlib.AffineVanishing
-import ModularCurves.ForMathlib.TwoOpenHOne
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafModel
+public import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
+public import ModularCurves.ForMathlib.AffineVanishing
+public import ModularCurves.ForMathlib.TwoOpenHOne
 
 /-!
 # First cohomology of pole sheaves on Weierstrass models
@@ -10,6 +12,10 @@ This file proves the explicit two-chart principal-parts calculation for `O(n[0])
 projective Weierstrass model over a field. The resulting surjectivity of the section-difference
 map, together with affine vanishing, gives `H^1(O(n[0])) = 0` for every `n >= 1`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 open scoped nonZeroDivisors

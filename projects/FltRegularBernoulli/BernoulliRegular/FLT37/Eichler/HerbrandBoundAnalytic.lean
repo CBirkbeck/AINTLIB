@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.GroupTheory.PGroup
+module
 
-import BernoulliRegular.BernoulliFast.KellnerSecondOrder
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Washington83
-import BernoulliRegular.HMinus.HMinusCriterion
-import BernoulliRegular.HMinus.LValueReduction.Teichmuller
-import BernoulliRegular.UnitQuotient.Washington83UnitForward
+public import Mathlib.GroupTheory.PGroup
+
+public import BernoulliRegular.BernoulliFast.KellnerSecondOrder
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Washington83
+public import BernoulliRegular.HMinus.HMinusCriterion
+public import BernoulliRegular.HMinus.LValueReduction.Teichmuller
+public import BernoulliRegular.UnitQuotient.Washington83UnitForward
 
 /-!
 # The Case-I Herbrand bound, analytic route (Eichler pigeonhole input)

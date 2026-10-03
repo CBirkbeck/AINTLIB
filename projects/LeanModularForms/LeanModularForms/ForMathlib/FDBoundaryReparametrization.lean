@@ -3,12 +3,14 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.CauchyPrincipalValue
-import LeanModularForms.ForMathlib.ClassicalCPV
-import LeanModularForms.ForMathlib.FDBoundary
-import LeanModularForms.ForMathlib.FDBoundaryH
-import LeanModularForms.ForMathlib.FDBoundaryPath
-import LeanModularForms.ForMathlib.GeneralizedWindingNumber
+module
+
+public import LeanModularForms.ForMathlib.CauchyPrincipalValue
+public import LeanModularForms.ForMathlib.ClassicalCPV
+public import LeanModularForms.ForMathlib.FDBoundary
+public import LeanModularForms.ForMathlib.FDBoundaryH
+public import LeanModularForms.ForMathlib.FDBoundaryPath
+public import LeanModularForms.ForMathlib.GeneralizedWindingNumber
 
 /-!
 # Bridge: `fdBoundaryFun` ↔ `fdBoundary_H`
@@ -29,6 +31,8 @@ chains until the residue side is fully ported to the ForMathlib chain.
 * `generalizedWindingNumberPrime_eq_of_hasGeneralizedWindingNumber` — extract
   the old-chain winding-number value from the new chain's winding-number proof
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 

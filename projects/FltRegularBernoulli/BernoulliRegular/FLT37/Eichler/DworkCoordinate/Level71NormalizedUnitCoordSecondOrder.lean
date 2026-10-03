@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordDoubledDegreeNormalization
+module
+
+public import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordDoubledDegreeNormalization
 
 /-!
 # The level-`71` normalized-unit Dwork coordinate: the proven `37·(second-order part)` structure,

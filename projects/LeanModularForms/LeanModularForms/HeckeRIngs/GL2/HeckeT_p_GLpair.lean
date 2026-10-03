@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.HeckeActionGeneral
-import LeanModularForms.HeckeRIngs.GL2.HeckeT_p
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.HeckeActionGeneral
+public import LeanModularForms.HeckeRIngs.GL2.HeckeT_p
 
 /-!
 # Adjugated `T_p` representatives lie in distinct `SL₂(ℤ)`-cosets
@@ -27,6 +29,8 @@ abstract χ-twisted Hecke slash with the explicit `T_p` coset sum.
 * Diamond-Shurman, *A First Course in Modular Forms*, §5.2
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.4
 -/
+
+@[expose] public section
 
 open Matrix Subgroup.Commensurable Matrix.SpecialLinearGroup HeckeRing.GLn CongruenceSubgroup
 

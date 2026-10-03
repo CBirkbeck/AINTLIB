@@ -6,15 +6,17 @@ Authors: AINTLIB ModularCurves project
 STREAM-GH skeleton (T-H4 corrected + route to T-H6). Decomposition of record:
 `.mathlib-quality/decomposition-gammah-route.md` (2026-07-08).
 -/
-import ModularCurves.Moduli.GammaH
-import ModularCurves.Moduli.QuotientProblem
-import ModularCurves.Moduli.LevelSpaces
-import ModularCurves.Moduli.LevelSpaceEtaleClose
-import ModularCurves.ModularCurve.YFullRoute
-import ModularCurves.GroupScheme.DeligneOrder
-import ModularCurves.ForMathlib.RelativeInvariantSpec
-import ModularCurves.ForMathlib.SchemeActionFree
-import ModularCurves.Moduli.NaiveProblems
+module
+
+public import ModularCurves.Moduli.GammaH
+public import ModularCurves.Moduli.QuotientProblem
+public import ModularCurves.Moduli.LevelSpaces
+public import ModularCurves.Moduli.LevelSpaceEtaleClose
+public import ModularCurves.ModularCurve.YFullRoute
+public import ModularCurves.GroupScheme.DeligneOrder
+public import ModularCurves.ForMathlib.RelativeInvariantSpec
+public import ModularCurves.ForMathlib.SchemeActionFree
+public import ModularCurves.Moduli.NaiveProblems
 
 /-!
 # Γ_H relative representability (Loeffler 3.8.2 / KM 3.7.1 + 7.1) — corrected statements
@@ -63,6 +65,10 @@ G-torsor over `(𝒫/G)_{E/S}` and quotient formation commutes with base change
 Held files are never edited; all bridges toward `Moduli/GammaH.lean`'s declarations are
 stated here.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

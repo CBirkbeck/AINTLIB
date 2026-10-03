@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.TwoCurve.FixedField
-import HasseWeil.Isogeny.Kernel
+module
+
+public import HasseWeil.Isogeny.TwoCurve.FixedField
+public import HasseWeil.Isogeny.Kernel
 
 /-!
 # The two-curve `K̄`-dual range inclusion `Im([deg φ]*) ⊆ Im(φ*)` (Silverman III.6.1)
@@ -34,6 +36,8 @@ covariance `xy_family` and the cardinality match `#ker φ = deg φ`.
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4.10–4.11, III.6.1.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

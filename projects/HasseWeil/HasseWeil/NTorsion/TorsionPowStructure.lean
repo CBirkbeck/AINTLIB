@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.NTorsion.InverseSystem
-import HasseWeil.HasseBound.WeilPairing.PairingNondeg
+module
+
+public import HasseWeil.NTorsion.InverseSystem
+public import HasseWeil.HasseBound.WeilPairing.PairingNondeg
 
 /-!
 # `E[ℓⁿ] ≅ (ZMod ℓⁿ)²` — the `ℓⁿ`-torsion is free of rank 2 (Silverman III.6.4(c) at `m = ℓⁿ`)
@@ -39,6 +41,8 @@ Main results:
 Reference: Silverman, *The Arithmetic of Elliptic Curves* (2nd ed), §III.7 (Prop 7.1) and
 p. 87 (the cyclic-group decomposition `#E[pᵉ] = pᵉ`), III.6.4(b,c).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

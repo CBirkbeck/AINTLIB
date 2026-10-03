@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.KummerCongruenceResidue
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AssumptionIIFromR3
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.KummerCongruenceResidue
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AssumptionIIFromR3
 
 /-!
 # Washington Lemma 9.8 / 9.9 for `p = 37`: the half-range conjugate residue equations are PROVEN

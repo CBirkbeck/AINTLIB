@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.UnitCocycleSheaf
-import ModularCurves.WeilPairing.KMSplitting
+module
+
+public import ModularCurves.ForMathlib.UnitCocycleSheaf
+public import ModularCurves.WeilPairing.KMSplitting
 
 /-!
 # Normalising the splitting units: `h_i ∈ K_E^×` (ticket AP-D5, the normalisation step)
@@ -75,6 +77,8 @@ makes the trivialisation hypothesis `e i` unsatisfiable except in degenerate cas
 `κ(Q)` restricted to a fibre is trivial only where `Q` meets the zero section; the `h_i` then do
 not live over base opens, which is exactly why the normalising constant has to be glued.
 -/
+
+@[expose] public section
 
 universe u
 

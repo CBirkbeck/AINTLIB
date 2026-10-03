@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Measure.UnitsZp
-import PadicLFunctions.MeasureR.Toolbox
+module
+
+public import PadicLFunctions.Measure.UnitsZp
+public import PadicLFunctions.MeasureR.Toolbox
 
 /-!
 # Measures on the units over the integer ring of a field
@@ -16,6 +18,8 @@ injectivity via extension by zero, and the identification of its image with
 total disconnectedness, `unitsValCM`, `unitsHomeo`) are coefficient-free and
 reused from `PadicLFunctions/Measure/UnitsZp.lean`.
 -/
+
+@[expose] public section
 
 namespace PadicLFunctions
 

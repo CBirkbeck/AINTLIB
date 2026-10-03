@@ -1,4 +1,6 @@
-import ModularCurves.ForMathlib.SheafCechSheafComplex
+module
+
+public import ModularCurves.ForMathlib.SheafCechSheafComplex
 
 /-!
 # Local contraction of the sheaf-level Cech complex
@@ -8,6 +10,8 @@ of the cover. The contraction prepends the distinguished cover index to each tup
 cycle equation on that larger tuple then identifies the preceding differential with the
 original cycle.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 

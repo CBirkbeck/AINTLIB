@@ -3,13 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.LevelSpaces
-import ModularCurves.LevelStructure.FullLevelDictionary
-import ModularCurves.Moduli.DrinfeldRepresentability
-import ModularCurves.GroupScheme.TorsionEtaleTriv
-import ModularCurves.GroupScheme.TorsionCombination
-import Mathlib.AlgebraicGeometry.Morphisms.LocalFlatDescent
-import ModularCurves.ForMathlib.BaseChangeAlongCompat
+module
+
+public import ModularCurves.Moduli.LevelSpaces
+public import ModularCurves.LevelStructure.FullLevelDictionary
+public import ModularCurves.Moduli.DrinfeldRepresentability
+public import ModularCurves.GroupScheme.TorsionEtaleTriv
+public import ModularCurves.GroupScheme.TorsionCombination
+public import Mathlib.AlgebraicGeometry.Morphisms.LocalFlatDescent
+public import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # [GHA3] Towards étaleness of the full-level space (KM 3.7.1, route β)
@@ -34,6 +36,10 @@ invertible), avoiding the Weil pairing:
 This file provides the two reusable mechanisms (the mono factorization-predicate uniqueness and
 the descent shell); β2/β3 land against them.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

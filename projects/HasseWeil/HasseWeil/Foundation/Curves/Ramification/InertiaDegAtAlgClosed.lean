@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Valuation.NormValuation
-import HasseWeil.Foundation.Curves.Map.CurveMap
-import Mathlib.RingTheory.Finiteness.Quotient
+module
+
+public import HasseWeil.Foundation.Curves.Valuation.NormValuation
+public import HasseWeil.Foundation.Curves.Map.CurveMap
+public import Mathlib.RingTheory.Finiteness.Quotient
 
 /-!
 # `inertiaDeg' = 1` at smooth points over algebraically closed base (Piece 9)
@@ -28,6 +30,8 @@ Full closure waits on either an explicit `[instance]`-attribute version
 of `coordHom.toAlgebra` or the `ResidueFieldAtSmoothPoint.lean`
 AlgEquiv-transport route (worker A's task #61).
 -/
+
+@[expose] public section
 
 open IsDedekindDomain
 

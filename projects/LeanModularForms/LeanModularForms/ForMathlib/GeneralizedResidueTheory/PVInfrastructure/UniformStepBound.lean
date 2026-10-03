@@ -3,8 +3,10 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.AnnulusBounds
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.SingularAnnulus
+module
+
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.AnnulusBounds
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.SingularAnnulus
 
 /-!
 # PV Infrastructure: Uniform Step Bound
@@ -16,6 +18,8 @@ analysis, gamma bounds, and singular annulus bound into a single epsilon-indepen
 
 * `pv_step_bound_ratio_two_uniform`: uniform step bound with an epsilon-independent constant.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

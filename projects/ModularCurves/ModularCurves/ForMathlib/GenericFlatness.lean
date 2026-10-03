@@ -5,28 +5,30 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-GF* (generic flatness).
 -/
-import Mathlib.RingTheory.Ideal.AssociatedPrime.Basic
-import Mathlib.RingTheory.Ideal.Colon
-import Mathlib.LinearAlgebra.Span.Basic
-import Mathlib.LinearAlgebra.Quotient.Basic
-import Mathlib.Algebra.Category.ModuleCat.Biproducts
-import Mathlib.LinearAlgebra.FreeModule.Basic
-import Mathlib.Algebra.Module.Projective
-import Mathlib.RingTheory.NoetherNormalization
-import Mathlib.RingTheory.FiniteStability
-import Mathlib.RingTheory.Localization.FractionRing
-import Mathlib.RingTheory.TensorProduct.Basic
-import Mathlib.RingTheory.Support
-import Mathlib.Algebra.Module.LocalizedModule.Exact
-import Mathlib.RingTheory.LocalProperties.Projective
-import Mathlib.RingTheory.Localization.Away.Basic
-import Mathlib.RingTheory.Localization.Module
-import Mathlib.RingTheory.FiniteType
-import Mathlib.RingTheory.Ideal.AssociatedPrime.Finiteness
-import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
-import Mathlib.Algebra.MvPolynomial.Equiv
-import Mathlib.Algebra.Polynomial.Div
-import Mathlib.RingTheory.Polynomial.Basic
+module
+
+public import Mathlib.RingTheory.Ideal.AssociatedPrime.Basic
+public import Mathlib.RingTheory.Ideal.Colon
+public import Mathlib.LinearAlgebra.Span.Basic
+public import Mathlib.LinearAlgebra.Quotient.Basic
+public import Mathlib.Algebra.Category.ModuleCat.Biproducts
+public import Mathlib.LinearAlgebra.FreeModule.Basic
+public import Mathlib.Algebra.Module.Projective
+public import Mathlib.RingTheory.NoetherNormalization
+public import Mathlib.RingTheory.FiniteStability
+public import Mathlib.RingTheory.Localization.FractionRing
+public import Mathlib.RingTheory.TensorProduct.Basic
+public import Mathlib.RingTheory.Support
+public import Mathlib.Algebra.Module.LocalizedModule.Exact
+public import Mathlib.RingTheory.LocalProperties.Projective
+public import Mathlib.RingTheory.Localization.Away.Basic
+public import Mathlib.RingTheory.Localization.Module
+public import Mathlib.RingTheory.FiniteType
+public import Mathlib.RingTheory.Ideal.AssociatedPrime.Finiteness
+public import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
+public import Mathlib.Algebra.MvPolynomial.Equiv
+public import Mathlib.Algebra.Polynomial.Div
+public import Mathlib.RingTheory.Polynomial.Basic
 
 /-!
 # Generic flatness (Stacks 051R) — building blocks and dévissage
@@ -49,6 +51,8 @@ nonzero `f ∈ R`. This file collects the building blocks and assembles the dév
   dévissage; the domain-case dimension induction is isolated in
   `exists_generically_free_domain`.
 -/
+
+@[expose] public section
 
 open Submodule LinearMap TensorProduct
 

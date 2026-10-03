@@ -3,13 +3,19 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
+module
+
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
 
 /-!
 # Functoriality of ordered base-linear Cech complexes
 
 This file makes the ordered base-linear Cech complex functorial in the scheme module.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
   Opposite TopologicalSpace

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Valuation.OrdAtInftyBaseChange
-import HasseWeil.HasseBound.WeilPairing.OneSubAffineResidues
-import HasseWeil.HasseBound.WeilPairing.ProjOrdTransportLocal
-import HasseWeil.HasseBound.WeilPairing.WallAGeometricRealization
+module
+
+public import HasseWeil.Foundation.Curves.Valuation.OrdAtInftyBaseChange
+public import HasseWeil.HasseBound.WeilPairing.OneSubAffineResidues
+public import HasseWeil.HasseBound.WeilPairing.ProjOrdTransportLocal
+public import HasseWeil.HasseBound.WeilPairing.WallAGeometricRealization
 
 /-!
 # The infinity residues of the concrete `(1 − π)_{K̄}` (CoordHom-free)
@@ -72,6 +74,8 @@ axiom-clean `[propext, Classical.choice, Quot.sound]`, with **no carried `OrdAtI
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, I.2 (base change), III.4 (Frobenius),
 III.4.10c, IV.1 (`ord_∞(x) = -2`, `ord_∞(y) = -3`).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve HasseWeil.Curves
 

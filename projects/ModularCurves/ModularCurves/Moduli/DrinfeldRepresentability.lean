@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.GammaH
-import ModularCurves.LevelStructure.Incidence
-import ModularCurves.LevelStructure.ExactOrderInvertible
+module
+
+public import ModularCurves.Moduli.GammaH
+public import ModularCurves.LevelStructure.Incidence
+public import ModularCurves.LevelStructure.ExactOrderInvertible
 
 /-!
 # Relative representability of the Drinfeld `Γ₁(N)` problem (KM 3.6.0, Γ₁ half)
@@ -27,6 +29,8 @@ finite `E[N]`), and the functor-of-points bijection is `torsionPointsEquiv` cut 
 `Representable` itself then follows from `ModuliProblem.representable_iff` (KM SCHOLIE 4.7.0)
 together with rigidity — the same shared engine endgame the naive problems consume.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

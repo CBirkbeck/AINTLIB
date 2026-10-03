@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.RepresentationTheory.Basic
-import Mathlib.LinearAlgebra.Projectivization.Action
-import Mathlib.RingTheory.MvPolynomial.Homogeneous
+module
+
+public import Mathlib.RepresentationTheory.Basic
+public import Mathlib.LinearAlgebra.Projectivization.Action
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
 
 /-!
 # Coefficient systems for modular symbols
@@ -31,6 +33,8 @@ For `symRep`, the convention `(g · P)(v) = P(g⁻¹ v)`, i.e. `Xᵢ ↦ ∑ⱼ 
 one that makes `g ↦ ρ g` a *monoid* homomorphism (a left action): polynomial substitution is
 contravariant, and the inverse flips it back to covariant.
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2.ModularSymbols
 

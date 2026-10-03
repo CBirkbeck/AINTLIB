@@ -3,9 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.Labels.HeckeFieldArithmetic
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeSymbol
-import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleMFinite
+module
+
+public import LeanModularForms.Labels.HeckeFieldArithmetic
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.HeckeSymbol
+public import LeanModularForms.HeckeRIngs.GL2.ModularSymbols.ModuleMFinite
 
 /-!
 # The faithfulness endgame: `heckeAlgℤ` is module-finite, from a period map (ES-asm)
@@ -52,6 +54,8 @@ finiteness, and the first isomorphism theorem identifies the target with
 * `HeckeRing.GL2.ModularSymbols.heckeAlgℤ_finite_of_period` :
   `Module.Finite ℤ (heckeAlgℤ N k)`, given the period-map interface above.
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2.ModularSymbols
 

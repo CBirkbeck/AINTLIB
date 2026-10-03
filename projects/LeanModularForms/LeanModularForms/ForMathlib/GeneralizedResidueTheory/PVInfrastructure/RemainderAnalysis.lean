@@ -3,11 +3,13 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import Mathlib.Analysis.Calculus.ContDiff.Defs
-import Mathlib.Analysis.Normed.Operator.NormedSpace
-import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
-import Mathlib.Topology.Defs.Filter
-import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.GammaAnalysis
+module
+
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.Analysis.Normed.Operator.NormedSpace
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
+public import Mathlib.Topology.Defs.Filter
+public import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.GammaAnalysis
 
 /-!
 # PV Infrastructure: Remainder Analysis
@@ -22,6 +24,8 @@ The key result `remainder_bounded_of_C2` shows that the remainder
 * `numerator_quadratic_bound` — numerator is O(|t-t₀|²)
 * `quadratic_approx_of_contDiffAt_two` — quadratic Taylor approximation
 -/
+
+@[expose] public section
 
 open Complex Set Filter Topology
 open scoped Real Interval

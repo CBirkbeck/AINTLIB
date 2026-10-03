@@ -1,4 +1,6 @@
-import HasseWeil.Foundation.OmegaPullbackCoeff
+module
+
+public import HasseWeil.Foundation.OmegaPullbackCoeff
 
 /-!
 # Base case identities for `[1]` on division polynomials
@@ -25,6 +27,8 @@ Both are direct rewrites using the mathlib identities `WeierstrassCurve.Φ_one`,
 
 * [Silverman, *The Arithmetic of Elliptic Curves*], III.4 (division polynomials).
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

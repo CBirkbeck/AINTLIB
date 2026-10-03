@@ -3,7 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.HungerbuhlerWasem.CPVExistence
+module
+
+public import LeanModularForms.ForMathlib.HungerbuhlerWasem.CPVExistence
 
 /-!
 # Multi-crossing CPV existence — geometric foundations (T-BR-Y6b)
@@ -51,6 +53,8 @@ dischargeable using the local-uniqueness lemmas below.
 * K. Hungerbühler, J. Wasem, *A generalized notion of winding numbers*,
   arXiv:1808.00997v2 §3.
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology Asymptotics
 open scoped Real Interval

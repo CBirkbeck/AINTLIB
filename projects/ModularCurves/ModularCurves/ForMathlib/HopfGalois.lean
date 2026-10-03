@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.Coaction
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+module
+
+public import ModularCurves.ForMathlib.Coaction
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
 
 /-!
 # The canonical Galois map and the Hopf-Galois / torsor property
@@ -30,6 +32,8 @@ both target `IsHopfGalois`; only its *proof* (finite-flat-group-scheme torsor th
 descent) differs, and that proof is the multi-week, mathlib-absent core (no Hopf-Galois / torsor
 infrastructure exists in mathlib).
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

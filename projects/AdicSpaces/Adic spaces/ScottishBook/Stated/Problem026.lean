@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidSpace
+module
+
+public import «Adic spaces».PerfectoidSpace
 
 /-!
 # Nonarchimedean Scottish Book — Problem 26
@@ -34,6 +36,8 @@ We state: there exists a perfectoid space that satisfies the vanishing cohomolog
 but is not affinoid. Since sheaf cohomology on perfectoid spaces is not yet formalized,
 the vanishing condition is stated as an abstract hypothesis.
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

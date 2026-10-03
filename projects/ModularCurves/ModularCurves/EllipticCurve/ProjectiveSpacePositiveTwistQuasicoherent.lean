@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCech
+module
+
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCech
 
 /-!
 # Quasicoherence after a positive projective twist
@@ -12,6 +14,8 @@ The concrete positive coordinate twist is trivial on every member of the
 standard affine cover. Tensoring a quasicoherent module by it is therefore
 locally isomorphic to the original module and remains quasicoherent.
 -/
+
+@[expose] public section
 
 namespace MvPolynomial
 

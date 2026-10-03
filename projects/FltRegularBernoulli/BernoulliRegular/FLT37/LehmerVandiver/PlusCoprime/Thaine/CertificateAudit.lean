@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealBundle
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.PthPowerLift
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealBundle
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.PthPowerLift
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
 
 /-!
 # T-PIVOT-3: Certificate audit — σ-symmetric Pollaczek targeting

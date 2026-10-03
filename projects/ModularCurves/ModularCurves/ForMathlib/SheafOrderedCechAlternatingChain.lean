@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.HomologicalComplexExactRetract
-import ModularCurves.ForMathlib.SheafOrderedCechAlternating
+module
+
+public import ModularCurves.ForMathlib.HomologicalComplexExactRetract
+public import ModularCurves.ForMathlib.SheafOrderedCechAlternating
 
 /-!
 # Chain compatibility of ordered sheaf Cech alternating extension
@@ -8,6 +10,8 @@ The degreewise alternating extension from ordered to native sheaf Cech
 cochains commutes with the Cech differentials. Consequently, the ordered
 complex is a chain-level retract of the native complex.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
   TopologicalSpace Opposite

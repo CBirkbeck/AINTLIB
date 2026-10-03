@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.PicardGroup
-import Mathlib.RingTheory.Flat.LocallyFree
-import Mathlib.Algebra.Module.FinitePresentation
-import Mathlib.RingTheory.Localization.Finiteness
-import Mathlib.RingTheory.LocalRing.Module
-import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
+module
+
+public import Mathlib.RingTheory.PicardGroup
+public import Mathlib.RingTheory.Flat.LocallyFree
+public import Mathlib.Algebra.Module.FinitePresentation
+public import Mathlib.RingTheory.Localization.Finiteness
+public import Mathlib.RingTheory.LocalRing.Module
+public import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
 
 /-!
 # The line-bundle criterion: finite projective of rank one is invertible
@@ -27,6 +29,8 @@ The two supporting lemmas are of independent interest:
   the evaluation map `Mᵛ ⊗ M → R` is surjective (its range — the trace ideal — is contained in
   no maximal ideal, because a local basis coordinate lifts to a functional of unit value).
 -/
+
+@[expose] public section
 
 universe u v
 

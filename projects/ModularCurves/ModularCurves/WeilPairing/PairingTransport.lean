@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.FieldPairingDet
-import ModularCurves.WeilPairing.GaloisFieldPairing
+module
+
+public import ModularCurves.WeilPairing.FieldPairingDet
+public import ModularCurves.WeilPairing.GaloisFieldPairing
 
 /-!
 # The Weil pairing's transport core, across **two** fields (WP-D3c-2d)
@@ -28,6 +30,8 @@ lemma is its `F' = F`, `V' = V` case (with `Φ` an equivalence, which the argume
 Nothing in the proof needs `Φ` to be bijective, and nothing needs the two fields to be
 related: the cancellation happens entirely in `K(V')`.
 -/
+
+@[expose] public section
 
 universe v w
 

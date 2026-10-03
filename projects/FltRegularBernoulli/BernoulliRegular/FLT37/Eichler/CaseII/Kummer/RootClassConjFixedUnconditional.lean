@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerUnramifiedAtP
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerUnramifiedAwayP
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerDifferentTrivial
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerUnramifiedAtP
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerUnramifiedAwayP
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.KummerDifferentTrivial
 
 /-!
 # Closing the Case-II II1 residual: Washington Lemma 9.2 (`[𝔞(η)] = [𝔞(η⁻¹)]`) is unconditional

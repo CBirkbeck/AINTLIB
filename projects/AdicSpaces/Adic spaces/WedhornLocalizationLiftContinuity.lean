@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornValuationLocalizationLift
-import «Adic spaces».ContinuousValuations
+module
+
+public import «Adic spaces».WedhornValuationLocalizationLift
+public import «Adic spaces».ContinuousValuations
 
 /-!
 # Continuity of the localization-lifted valuation under `locTopology`
@@ -90,6 +92,8 @@ multi-generator polynomial expressions in the value group.
   any committed bridge file.
 * No Lane B / Cor 8.32 / Jacobson / T001 / faithful-flatness /
   final-acyclicity content. -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

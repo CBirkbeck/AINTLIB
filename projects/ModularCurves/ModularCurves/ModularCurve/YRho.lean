@@ -1,16 +1,18 @@
-import ModularCurves.ForMathlib.FiniteEtaleFundamentalGroup
-import ModularCurves.WeilPairing.SelfUniversalVanishing
-import ModularCurves.WeilPairing.Basic
-import ModularCurves.WeilPairing.CurveNaturality
-import ModularCurves.Moduli.Representability
-import ModularCurves.Moduli.Coarse
-import ModularCurves.Moduli.GammaHMaster
-import ModularCurves.ModularCurve.YFullRoute
-import ModularCurves.GroupScheme.GLSchemeAction
-import Mathlib.FieldTheory.AbsoluteGaloisGroup
-import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
-import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
-import Mathlib.RingTheory.RootsOfUnity.Basic
+module
+
+public import ModularCurves.ForMathlib.FiniteEtaleFundamentalGroup
+public import ModularCurves.WeilPairing.SelfUniversalVanishing
+public import ModularCurves.WeilPairing.Basic
+public import ModularCurves.WeilPairing.CurveNaturality
+public import ModularCurves.Moduli.Representability
+public import ModularCurves.Moduli.Coarse
+public import ModularCurves.Moduli.GammaHMaster
+public import ModularCurves.ModularCurve.YFullRoute
+public import ModularCurves.GroupScheme.GLSchemeAction
+public import Mathlib.FieldTheory.AbsoluteGaloisGroup
+public import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
+public import Mathlib.RingTheory.RootsOfUnity.Basic
 
 /-!
 # The twisted modular curve Y(ρ̄_N) (Buzzard, *Formalizing Fermat* Lecture 8, p. 33)
@@ -38,6 +40,8 @@ made precise as naturality in `K`; the full functor-on-`Sch/ℚ` representabilit
 Geometric irreducibility is a black box (BB-IRR: 1980s,
 complex-analytic uniformisation).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

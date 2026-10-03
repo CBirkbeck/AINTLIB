@@ -3,10 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Ramification.KernelOfDifferential
-import HasseWeil.HasseBound.Separability
-import HasseWeil.Isogeny.Frobenius.Dual
-import HasseWeil.Isogeny.Frobenius.Twist
+module
+
+public import Mathlib.Algebra.Module.Torsion.Field
+public import HasseWeil.Foundation.Curves.Ramification.KernelOfDifferential
+public import HasseWeil.HasseBound.Separability
+public import HasseWeil.Isogeny.Frobenius.Dual
+public import HasseWeil.Isogeny.Frobenius.Twist
 
 /-!
 # G3: the general twisted Frobenius factorization (Silverman II.2.12) and the relative Verschiebung
@@ -87,6 +90,8 @@ carries a dual witness, modulo only the separable side's witnesses on the twists
 * [Silverman, *The Arithmetic of Elliptic Curves*], II.2.11–2.12, III.4.10a, III.6.1.
 -/
 
+@[expose] public section
+
 open WeierstrassCurve
 
 namespace HasseWeil.EC
@@ -120,6 +125,9 @@ theorem Isogeny.finiteDimensional_toAlgebra (φ : Isogeny W₁ W₂) :
 /-- **Two-curve degree positivity**: `0 < deg φ` for any isogeny `φ : E₁ → E₂`,
 unconditionally. Generalizes `EC.Isogeny.degree_pos` (which is endomorphism-only). -/
 theorem Isogeny.degree_pos' (φ : Isogeny W₁ W₂) : 0 < φ.degree := by
+  letI : Algebra W₂.FunctionField W₁.FunctionField := φ.toCurveMap.toAlgebra
+  haveI : Module.IsTorsionFree W₂.FunctionField W₁.FunctionField :=
+    DivisionSemiring.to_moduleIsTorsionFree
   change 0 < φ.toCurveMap.degree
   simp only [CurveMap.degree]
   exact @Module.finrank_pos W₂.FunctionField W₁.FunctionField _ _

@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.ComparisonInjective
+module
+
+public import ModularCurves.EllipticCurve.ComparisonInjective
 
 /-!
 # The comparison theorem (T-W7.1b) — capstone
@@ -22,6 +24,8 @@ leaves are discharged here, above the whole stack. Statements are the verbatim t
   models is induced by a variable change.
 * `projModelVCIso_injective` (b5): the model action of `VariableChange` is faithful.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
 

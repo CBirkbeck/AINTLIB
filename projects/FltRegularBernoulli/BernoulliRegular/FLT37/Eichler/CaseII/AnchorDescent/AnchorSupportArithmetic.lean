@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.TerminalLayerAndDescentStep
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.AnchorDescent.TerminalLayerAndDescentStep
 
 /-!
 # [FLT37-CASEII-FACTOR-DESCENT-STEP] The anchor support relations for Washington Theorem 9.4

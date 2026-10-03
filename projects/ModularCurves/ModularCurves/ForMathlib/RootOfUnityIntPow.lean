@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Data.ZMod.Basic
+module
+
+public import Mathlib.Data.ZMod.Basic
 
 /-!
 # Integer exponents on a root of unity
@@ -26,6 +28,8 @@ Nothing here is specific to the Weil pairing; the file exists so that the regist
 `WeilPairing/Basic.lean` and the field-level determinant law in
 `WeilPairing/FieldPairingDet.lean` can share it without either importing the other.
 -/
+
+@[expose] public section
 
 namespace ModularCurves
 

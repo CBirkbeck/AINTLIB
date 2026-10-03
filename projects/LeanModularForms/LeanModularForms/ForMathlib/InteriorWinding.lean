@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import LeanModularForms.ForMathlib.CurveUtilities
-import LeanModularForms.ForMathlib.FDBoundary
+module
+
+public import LeanModularForms.ForMathlib.CurveUtilities
+public import LeanModularForms.ForMathlib.FDBoundary
 
 /-!
 # Interior Winding Number for the Fundamental Domain Boundary
@@ -52,6 +54,8 @@ A point `z` is in the **strict interior** of the fundamental domain at height `H
 
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology
 open scoped Real Interval

@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionBaseChange
-import ModularCurves.EllipticCurve.Comparison
-import ModularCurves.EllipticCurve.ModelVariableChange
-import ModularCurves.EllipticCurve.WeierstrassModel
-import ModularCurves.ForMathlib.WeierstrassInvariant
+module
+
+public import ModularCurves.EllipticCurve.AdditionBaseChange
+public import ModularCurves.EllipticCurve.Comparison
+public import ModularCurves.EllipticCurve.ModelVariableChange
+public import ModularCurves.EllipticCurve.WeierstrassModel
+public import ModularCurves.ForMathlib.WeierstrassInvariant
 
 /-!
 # The quotient curve's Weierstrass model, geometrically ([a5-iv], geometry)
@@ -27,6 +29,8 @@ compatibly with the structure maps and zero sections. The construction combines
 with `isPullback_quotientπ` and fppf descent along `X → X/G`, this yields the
 `LocallyWeierstrass` iso of `locallyWeierstrass_quotientπ`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve
 
@@ -116,6 +120,8 @@ theorem cartesianIso_hom_zero (g : R →+* R) (W : WeierstrassCurve R)
 
 /-! ### Cocycle-ness infrastructure — base-change automorphism forms -/
 
+-- Match projModelVCIso_map: unfold the algebraMap supplied by the local RingHom algebra.
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Automorphism form of `projModelVCIso_map` (base-change naturality of the change-of-variables
 iso), via `RingHom.toAlgebra g`. Backbone of the cocycle identity: it commutes a `projModelVCIso`
 past a `projModelBaseChange`. -/
@@ -124,10 +130,7 @@ theorem projModelVCIso_map_hom (g : R →+* R) (C : VariableChange R) (W : Weier
       eqToHom (by rw [map_variableChange]) ≫
         (projModelVCIso (C.map g) (W.map g)).hom ≫ projModelBaseChange g W := by
   letI : Algebra R R := g.toAlgebra
-  have h := projModelVCIso_map (R' := R) C W
-  have he : (algebraMap R R : R →+* R) = g := g.algebraMap_toAlgebra
-  rw [he] at h
-  exact h
+  exact projModelVCIso_map (R' := R) C W
 
 /-- Base change of `projModel` along a hom whose `Spec` map is an isomorphism is itself an
 isomorphism — the `fst` leg of the pullback square `isPullback_projModelBaseChange_hom` over the

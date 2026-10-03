@@ -1,6 +1,8 @@
-import Mathlib.AlgebraicGeometry.Modules.Sheaf
-import Mathlib.AlgebraicGeometry.Limits
-import ModularCurves.ForMathlib.AffineModuleBaseChange
+module
+
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.AlgebraicGeometry.Limits
+public import ModularCurves.ForMathlib.AffineModuleBaseChange
 
 /-!
 # Pullback--pushforward base change for scheme modules
@@ -9,6 +11,10 @@ This file constructs the canonical base-change morphism for a scheme module on a
 cartesian square. It is the mate, under the pullback--pushforward adjunction, of
 pullback pseudofunctoriality followed by the adjunction counit.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

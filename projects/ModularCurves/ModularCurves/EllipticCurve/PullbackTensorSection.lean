@@ -1,5 +1,7 @@
-import ModularCurves.EllipticCurve.PoleSheaf
-import ModularCurves.ForMathlib.AffineModuleBaseChange
+module
+
+public import ModularCurves.EllipticCurve.PoleSheaf
+public import ModularCurves.ForMathlib.AffineModuleBaseChange
 
 /-!
 # Pullback of pure tensor sections
@@ -9,6 +11,10 @@ modules on sections coming from the pullback adjunction unit. The implementation
 follows the construction of sheaf pullback through presheaf pullback and
 sheafification; the only public result is `pullback_δ_unit_tensorSection`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory MonoidalCategory
 

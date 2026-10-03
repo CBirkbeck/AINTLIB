@@ -5,8 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.MvPolynomialProjectiveClosure
-import ModularCurves.ForMathlib.ProjMapClosedImmersion
+module
+
+public import ModularCurves.ForMathlib.MvPolynomialProjectiveClosure
+public import ModularCurves.ForMathlib.ProjMapClosedImmersion
 
 /-!
 # Reindexing polynomial projective space
@@ -15,6 +17,10 @@ An equivalence of homogeneous coordinate types induces an isomorphism between th
 polynomial `Proj` schemes. This isomorphism respects their structural maps to the coefficient
 spectrum.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 namespace MvPolynomial
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.ComoduleCoinvariants
-import Mathlib.RingTheory.Bialgebra.Basic
-import Mathlib.RingTheory.TensorProduct.Maps
+module
+
+public import ModularCurves.ForMathlib.ComoduleCoinvariants
+public import Mathlib.RingTheory.Bialgebra.Basic
+public import Mathlib.RingTheory.TensorProduct.Maps
 
 /-!
 # Co-actions of a bialgebra (comodule algebras)
@@ -27,6 +29,8 @@ co-action (`isCoaction_includeLeft`) — the dual of the trivial action — vali
 `B^{coρ}`, the Hopf-Galois / torsor property): both the general finite-flat route and the E[N] étale
 shortcut factor through it; only the crux *proof* differs.
 -/
+
+@[expose] public section
 
 open scoped TensorProduct
 

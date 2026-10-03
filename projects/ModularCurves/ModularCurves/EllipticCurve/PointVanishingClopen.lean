@@ -3,9 +3,11 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.MulByHomEtale
-import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.ForMathlib.AgreementLocusClopen
+module
+
+public import ModularCurves.EllipticCurve.MulByHomEtale
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import ModularCurves.ForMathlib.AgreementLocusClopen
 
 /-!
 # The vanishing locus of a killed torsion point is clopen (YFULL route γ)
@@ -21,6 +23,8 @@ union of these finitely many clopen vanishing loci is closed, so its complement 
 locus where all nonzero combinations are nonvanishing (the Drinfeld full-level locus for
 `N` invertible) — is open. This is the openness input of the `Y(N)` clopen leaf.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

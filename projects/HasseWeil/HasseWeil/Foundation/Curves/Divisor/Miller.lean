@@ -3,11 +3,15 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Divisor.EffectiveSumReduce
-import HasseWeil.Foundation.Curves.Fiber.AFConditional
-import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
-import HasseWeil.Foundation.Curves.Valuation.NormValuation
-import HasseWeil.Isogeny.BaseChange.Basic
+module
+
+public import HasseWeil.Foundation.Curves.Divisor.EffectiveSumReduce
+public import HasseWeil.Foundation.Curves.Fiber.AFConditional
+public import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
+public import HasseWeil.Foundation.Curves.Valuation.NormValuation
+public import HasseWeil.Isogeny.BaseChange.Basic
+
+@[expose] public section
 
 open scoped Polynomial.Bivariate
 

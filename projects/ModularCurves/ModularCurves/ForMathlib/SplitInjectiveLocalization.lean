@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.RingTheory.LocalProperties.Projective
+module
+
+public import Mathlib.RingTheory.LocalProperties.Projective
 
 /-!
 # Split injectivity is local at maximal ideals
@@ -15,6 +17,8 @@ localization at every maximal ideal admits a global left inverse.
 This is the local-global engine for the unit-retraction of a finite projective
 faithfully flat algebra ([RETRACT], T-YR-6 (c1) Ω-half).
 -/
+
+@[expose] public section
 
 open LinearMap
 

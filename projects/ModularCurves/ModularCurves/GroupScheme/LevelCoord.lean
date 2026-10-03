@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.GroupScheme.GLSchemeAction
+module
+
+public import ModularCurves.GroupScheme.GLSchemeAction
 
 /-!
 # Coordinates of a torsion point in a full level basis (route β, the transition)
@@ -20,6 +22,8 @@ scheme, i.e. a locally constant `(ℤ/N)²`-valued function — its coordinate v
 `levelCoord_sigmaι` is the computation rule that makes the map usable: the coordinate vector of the
 basis combination labelled `v` is the constant function `v`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

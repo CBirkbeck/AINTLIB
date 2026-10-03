@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.UnitComp
+module
+
+public import ModularCurves.Picard.DualPullback.UnitComp
 
 /-!
 # Pullback-square compatibility for structure modules
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.UnitComp
 The pullback-square isomorphism sends the canonical structure-module comparison to the
 canonical comparison around the pasted square.
 -/
+
+@[expose] public section
 
 universe u
 

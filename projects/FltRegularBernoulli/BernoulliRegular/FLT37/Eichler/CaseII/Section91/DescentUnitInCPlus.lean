@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitRealness
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitRealness
 
 /-!
 # Washington §9.1 cyclotomic identification of the Case-II descent unit `η_a/η_b`

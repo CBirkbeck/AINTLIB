@@ -2,10 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornCor732BranchTransfer
-import «Adic spaces».WedhornLocalizedCor732Bridge
-import «Adic spaces».WedhornLocalizationContinuity
-import «Adic spaces».WedhornPrelocalizationTransfer
+module
+
+public import «Adic spaces».WedhornCor732BranchTransfer
+public import «Adic spaces».WedhornLocalizedCor732Bridge
+public import «Adic spaces».WedhornLocalizationContinuity
+public import «Adic spaces».WedhornPrelocalizationTransfer
 
 /-!
 # Wedhorn rational-open localization transfer (locSubring form)
@@ -68,6 +70,8 @@ per-branch chain itself, which is the genuinely-new Wedhorn content
 * Uses existing helpers and committed transfers; adds only new
   theorems for the `locSubring` plus-subring form.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

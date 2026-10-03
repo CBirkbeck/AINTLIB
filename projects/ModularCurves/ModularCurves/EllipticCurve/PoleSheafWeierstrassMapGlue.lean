@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapOverlap
-import ModularCurves.ForMathlib.SpecBasicOpenAway
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapOverlap
+public import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
 # Gluing the pole-sheaf Weierstrass comparison map
@@ -12,6 +14,10 @@ import ModularCurves.ForMathlib.SpecBasicOpenAway
 The projective comparison maps constructed in a Cartier frame near the marked
 section and in the canonical frame away from the section glue on their union.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 

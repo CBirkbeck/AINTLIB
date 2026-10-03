@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.TwoCurve.PointImage
-import HasseWeil.Isogeny.GroupHom.PicZero
+module
+
+public import HasseWeil.Isogeny.TwoCurve.PointImage
+public import HasseWeil.Isogeny.GroupHom.PicZero
 
 /-!
 # The group-hom property of the CoordHom-free place-restriction point map (PE-1b, TASK B)
@@ -46,6 +48,8 @@ in the closing report.
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.4.8, III.3.4, II.3.6/7.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Auxiliary.PullbackKaehler
-import HasseWeil.Foundation.OmegaPullbackCoeff
+module
+
+public import HasseWeil.Foundation.Auxiliary.PullbackKaehler
+public import HasseWeil.Foundation.OmegaPullbackCoeff
 
 /-!
 # Pullback of the invariant differential along an isogeny
@@ -21,6 +23,8 @@ Once these are in place, the chain rule
 `omegaPullbackCoeff_comp_of_base : a_{α∘β} = c_α · a_β` (for `c_α ∈ F`) follows from
 a string of three rewrites.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

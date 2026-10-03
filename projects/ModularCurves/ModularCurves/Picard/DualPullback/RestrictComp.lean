@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.Square
+module
+
+public import ModularCurves.Picard.DualPullback.Square
 
 /-!
 # Restriction and pullback composition
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.Square
 Option-free comparison lemmas for restriction functors, pullback functors, and the
 canonical square isomorphism.
 -/
+
+@[expose] public section
 
 universe u
 

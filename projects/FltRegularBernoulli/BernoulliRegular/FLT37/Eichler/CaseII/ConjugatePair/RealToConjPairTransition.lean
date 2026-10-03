@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.AnchoredClassTrivialConjPair
-import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.WashingtonThetaReal
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.AnchoredClassTrivialConjPair
+public import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.WashingtonThetaReal
 
 /-!
 # [FLT37-CASEII-R2] The first descent step: individually-real ⟶ σ-conjugate-pair

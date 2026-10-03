@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.EllCategory
+module
+
+public import ModularCurves.Moduli.EllCategory
 
 /-!
 # Base change of moduli problems ([B4]/[T-E5f] recollement infrastructure)
@@ -13,6 +15,8 @@ import ModularCurves.Moduli.EllCategory
 The foundational plumbing for the Katz–Mazur recollement of `representable_iff` ⇐ over the
 Zariski cover `Spec R = D(2) ∪ D(3)` (KM 4.7.0 SCHOLIE, over `ℤ[1/6]`).
 -/
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry Opposite
 universe u

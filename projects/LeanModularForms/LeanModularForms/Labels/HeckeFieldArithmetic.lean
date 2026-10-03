@@ -3,10 +3,12 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.HeckeRIngs.GL2.AdjointTheory
-import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
-import LeanModularForms.HeckeRIngs.GL2.Newforms.Basic
-import LeanModularForms.HeckeRIngs.GL2.Newforms.FullEigenform
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.AdjointTheory
+public import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.Basic
+public import LeanModularForms.HeckeRIngs.GL2.Newforms.FullEigenform
 
 /-!
 # The integral Hecke algebra and Hecke-eigenvalue arithmetic
@@ -21,6 +23,8 @@ coefficients of a newform are algebraic integers and that the coefficient field 
 * `heckeEnd N k n` — the `n`-th cusp Hecke operator as a `ℂ`-linear endomorphism.
 * `heckeAlgℤ N k` — the integral Hecke algebra (a `ℤ`-subalgebra of `End_ℂ(S_k(Γ₁N))`).
 -/
+
+@[expose] public section
 
 namespace HeckeRing.GL2
 

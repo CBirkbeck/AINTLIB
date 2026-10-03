@@ -6,14 +6,16 @@ Authors: AINTLIB ModularCurves project
 Adapted from the Apache-licensed `CanonicalSupportChowComodel.lean` in
 Vilin97/Clawristotle.
 -/
-import ModularCurves.ForMathlib.SchemeInducingOpenLift
-import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportChowLowDegreeFinite
-import ModularCurves.ForMathlib.SchemeModuleComparisonCoherent
-import ModularCurves.ForMathlib.SchemeModuleComparisonSupport
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforwardFinite
-import ModularCurves.ForMathlib.SchemeModulePushforwardMapRestrictionIso
-import ModularCurves.ForMathlib.SchemeModulePushforwardPullbackSupport
-import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+module
+
+public import ModularCurves.ForMathlib.SchemeInducingOpenLift
+public import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportChowLowDegreeFinite
+public import ModularCurves.ForMathlib.SchemeModuleComparisonCoherent
+public import ModularCurves.ForMathlib.SchemeModuleComparisonSupport
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforwardFinite
+public import ModularCurves.ForMathlib.SchemeModulePushforwardMapRestrictionIso
+public import ModularCurves.ForMathlib.SchemeModulePushforwardPullbackSupport
+public import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
 # Cech-finite Chow comodels on canonical support thickenings
@@ -24,6 +26,8 @@ module has finite ordered Cech homology in every degree, while both residuals
 of its comparison with the original module have strictly smaller closed stalk
 support.
 -/
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 

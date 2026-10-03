@@ -1,5 +1,7 @@
-import ModularCurves.ForMathlib.FinitePresentationFunctor
-import ModularCurves.ForMathlib.FinitePresentationLocalization
+module
+
+public import ModularCurves.ForMathlib.FinitePresentationFunctor
+public import ModularCurves.ForMathlib.FinitePresentationLocalization
 
 /-!
 # Base change of spread functor models
@@ -8,6 +10,8 @@ A finite-stage functor model becomes naturally isomorphic to its original functo
 extension of scalars to the filtered colimit. The construction uses the same tensor-product
 objects and maps as mathlib's `CommRingCat.tensorProd` functor.
 -/
+
+@[expose] public section
 
 universe u
 

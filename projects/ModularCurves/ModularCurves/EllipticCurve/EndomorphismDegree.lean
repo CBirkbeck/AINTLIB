@@ -3,12 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.GroupLaw
-import ModularCurves.EllipticCurve.Torsion
-import ModularCurves.EllipticCurve.Rigidity
-import ModularCurves.ForMathlib.FinrankComp
-import ModularCurves.ForMathlib.FinrankDegenerate
-import ModularCurves.LevelStructure.CartierDivisor
+module
+
+public import ModularCurves.EllipticCurve.GroupLaw
+public import ModularCurves.EllipticCurve.Torsion
+public import ModularCurves.EllipticCurve.Rigidity
+public import ModularCurves.ForMathlib.FinrankComp
+public import ModularCurves.ForMathlib.FinrankDegenerate
+public import ModularCurves.LevelStructure.CartierDivisor
 
 /-!
 # The endomorphism ring, degree, and Hasse bound of `E/S` (KM Ch. 2, §§2.5–2.7)
@@ -55,6 +57,8 @@ are **general-`S` degree theory, headline-dead**: every headline keystone consum
 drop-ins), which consumes **none** of these. They stay as honest WIP markers for the eventual
 general-`S` endomorphism theory (T-W7.8-gated, PARKED — do not grind for the headline).
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

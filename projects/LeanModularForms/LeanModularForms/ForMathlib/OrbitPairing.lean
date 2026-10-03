@@ -3,7 +3,9 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.Orbits
+module
+
+public import LeanModularForms.ForMathlib.Orbits
 
 /-!
 # OrbitFM Pairing Lemmas for the Valence Formula
@@ -21,6 +23,8 @@ pairing left/right vertical and arc contributions.
 * `orb_vAdd_neg_one_eq` — T⁻¹-translation preserves orbits
 * `orb_S_smul_eq` — S-action preserves orbits
 -/
+
+@[expose] public section
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
 open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups

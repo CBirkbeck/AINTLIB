@@ -3,7 +3,9 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Affine Čech `H¹` vanishing for a two-element cover (Mayer–Vietoris splitting)
@@ -65,6 +67,8 @@ defect dies in the triple localization by the cocycle law and hence is killed by
 `f k` (`exists_pow_smul_eq_zero_of_liftOfLE_eq_zero`), and average against a partition of unity
 `∑ k, g k * f k ^ (Γ + N) = 1` (`Ideal.span_pow_eq_top`).
 -/
+
+@[expose] public section
 
 namespace IsLocalizedModule
 

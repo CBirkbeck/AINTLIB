@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
-import LeanModularForms.HeckeRIngs.GL2.CharacterDecomp
+module
+
+public import LeanModularForms.HeckeRIngs.GL2.Unified.NebentypusHeckeRingHom
+public import LeanModularForms.HeckeRIngs.GL2.CharacterDecomp
 
 /-!
 # Transport of Hecke-operator identities from the ring `𝕋(Γ₀(N))`
@@ -31,6 +33,8 @@ The pipeline:
 The headline outputs `heckeT_n_comm_ring`, `heckeT_n_mul_coprime_ring`,
 `heckeT_n_comm_diamondOp_all` replace the former self-contained induction cascades.
 -/
+
+@[expose] public section
 
 open Matrix Matrix.SpecialLinearGroup CongruenceSubgroup HeckeRing.GLn
 open HeckeRing

@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafSuccessorBasis
-import ModularCurves.EllipticCurve.PoleSheafSuccessorCoordinateMul
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafSuccessorBasis
+public import ModularCurves.EllipticCurve.PoleSheafSuccessorCoordinateMul
 
 /-!
 # Successor bases from products of pole sections
@@ -12,6 +14,8 @@ import ModularCurves.EllipticCurve.PoleSheafSuccessorCoordinateMul
 The product of two normalized pole sections is a normalized lift of the next
 rank-one pole quotient, so it extends a basis of the preceding pole module.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 open TensorProduct

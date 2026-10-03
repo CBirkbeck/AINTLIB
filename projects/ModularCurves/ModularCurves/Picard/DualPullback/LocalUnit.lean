@@ -1,4 +1,6 @@
-import ModularCurves.Picard.DualPullback.LocalSection
+module
+
+public import ModularCurves.Picard.DualPullback.LocalSection
 
 /-!
 # The local pullback unit on the canonical section
@@ -6,6 +8,8 @@ import ModularCurves.Picard.DualPullback.LocalSection
 The local structure-module comparison and its inverse both preserve the canonical section
 `1`.
 -/
+
+@[expose] public section
 
 universe u
 

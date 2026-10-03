@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».Wedhorn745PointwiseBaseRefinementDischarge
-import «Adic spaces».WedhornDominatingUnitInequality
+module
+
+public import «Adic spaces».Wedhorn745PointwiseBaseRefinementDischarge
+public import «Adic spaces».WedhornDominatingUnitInequality
 
 /-!
 # Wedhorn 8.34(ii) — Multi-element σ-domination clearing primitives (T050)
@@ -96,6 +98,8 @@ piece the multi-element rational-subset bound holds by construction.
 * No global universal-over-Spa multi-clearing claim (per T035's
   counter-example).
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

@@ -3,11 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.FieldPairing
-import HasseWeil.HasseBound.WeilPairing.DivisorGalois
-import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
-import HasseWeil.HasseBound.WeilPairing.HfactLemma
-import HasseWeil.HasseBound.WeilPairing.Scaling.FrobeniusGalois
+module
+
+public import ModularCurves.WeilPairing.FieldPairing
+public import HasseWeil.HasseBound.WeilPairing.DivisorGalois
+public import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
+public import HasseWeil.HasseBound.WeilPairing.HfactLemma
+public import HasseWeil.HasseBound.WeilPairing.Scaling.FrobeniusGalois
 
 /-!
 # The Galois action on the function field of a base-changed curve (DS4 M1b-3a)
@@ -30,6 +32,8 @@ arbitrary `σ : k̄ ≃ₐ[k] k̄`:
 These are the transport maps along which the Weil function (hence the pairing) will be
 compared in M1b-3b.
 -/
+
+@[expose] public section
 
 universe u v
 

@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».PerfectoidRing
+module
+
+public import «Adic spaces».PerfectoidRing
 
 /-!
 # Perfectoid Spaces
@@ -29,6 +31,8 @@ Scholze's *Perfectoid Spaces* (2012), Definition 3.19.
 * [P. Scholze, *Perfectoid Spaces*][scholze2012perfectoid], Definition 3.19
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], §8
 -/
+
+@[expose] public section
 
 open TopologicalRing ValuationSpectrum
 

@@ -1,5 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Section91.AnchoredClassPrincipal
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.RealGenerator
+module
+
+import Mathlib.Algebra.GroupWithZero.Torsion
+public import BernoulliRegular.FLT37.Eichler.CaseII.Section91.AnchoredClassPrincipal
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.RealGenerator
 
 /-!
 # [FLT37-CASEII-REAL-ANCHORED] The anchored class is trivial over `RealCaseIIData37`

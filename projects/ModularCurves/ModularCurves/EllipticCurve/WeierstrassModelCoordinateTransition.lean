@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.AdditionChartOverlap
-import ModularCurves.EllipticCurve.WeierstrassModelCoordinates
+module
+
+public import ModularCurves.EllipticCurve.AdditionChartOverlap
+public import ModularCurves.EllipticCurve.WeierstrassModelCoordinates
 
 /-!
 # Coordinate transitions for projective Weierstrass models
@@ -13,6 +15,8 @@ A homogeneous coordinate morphism with a unit coordinate factors through the
 corresponding affine chart. This identifies the `Proj.fromOfGlobalSections`
 construction with the chart morphism obtained from coordinate ratios.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
 open WeierstrassCurve.Projective
@@ -163,15 +167,13 @@ theorem projModelFromOfGlobalSections_eq_chart
       (Spec.map (CommRingCat.ofHom
         (algebraMap Γ(X, (⊤ : X.Opens))
           (Localization.Away (φ q)))))]
-    slice_lhs 3 4 => rw [basicOpenIsoSpecAway_hom_SpecMap]
-    slice_lhs 2 3 =>
-      rw [morphismRestrict_ι X.toSpecΓ
-        (PrimeSpectrum.basicOpen (φ q) :
-          (Spec (CommRingCat.of Γ(X, (⊤ : X.Opens)))).Opens)]
-    slice_lhs 1 2 => rw [Scheme.isoOfEq_inv_ι]
-    slice_rhs 3 4 =>
-      rw [← Spec.map_comp, ← CommRingCat.ofHom_comp, hψ]
-      simp only [CommRingCat.ofHom_id, Spec.map_id]
+    simp only [Category.assoc, basicOpenIsoSpecAway_hom_SpecMap]
+    rw [morphismRestrict_ι X.toSpecΓ
+      (PrimeSpectrum.basicOpen (φ q) :
+        (Spec (CommRingCat.of Γ(X, (⊤ : X.Opens)))).Opens)]
+    rw [← Category.assoc, Scheme.isoOfEq_inv_ι]
+    simp only [Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp, hψ,
+      CommRingCat.ofHom_id, Spec.map_id, Category.comp_id]
     rfl
   rw [show projModelFromOfGlobalSections W
       (algebraMap R Γ(X, (⊤ : X.Opens))) P hP i hi = F by rfl]

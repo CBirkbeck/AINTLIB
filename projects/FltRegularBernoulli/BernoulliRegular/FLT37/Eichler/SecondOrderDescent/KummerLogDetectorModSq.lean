@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModSquare
-import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.KummerMatrixKernelCollapse
-import BernoulliRegular.FLT37.Eichler.Reduction.SecondOrderVandermondeRowCollapse
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModSquare
+public import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.KummerMatrixKernelCollapse
+public import BernoulliRegular.FLT37.Eichler.Reduction.SecondOrderVandermondeRowCollapse
 
 /-!
 # The second-order (mod `37²`) Kummer-log detector at the irregular index `i = 32`

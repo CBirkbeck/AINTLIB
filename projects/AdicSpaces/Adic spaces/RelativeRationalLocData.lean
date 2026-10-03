@@ -2,7 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».LaurentRefinement
+module
+
+public import «Adic spaces».LaurentRefinement
 
 /-!
 # Depth-N Wedhorn 2.13: relative rational locale data
@@ -40,6 +42,10 @@ and `s = E.canonicalMap D.s` coming from any rational sub-locale D ⊆ E.
 * [Wedhorn 2019] T. Wedhorn, *Adic spaces*. Lemma 2.13 (transitivity of
   rational localizations).
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open ValuationSpectrum CompletionLocalization
 

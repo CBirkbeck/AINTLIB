@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.TorsionFibre
-import Mathlib.AlgebraicGeometry.Morphisms.FlatMono
+module
+
+public import ModularCurves.EllipticCurve.TorsionFibre
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatMono
 
 /-!
 # The combination-clopen locus in `E[N] ×_S E[N]` (ENGINE AXIOM 2 carrier)
@@ -30,6 +32,8 @@ The identification of its points with naive full level structures (via
 `PairGeneratesOfCardSq` and `torsion_geometricFibre_rank_two`) is the next layer
 (`Moduli`-side); this file is the geometry.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.PoleSheafBaseCechHigher
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechFinite
-import ModularCurves.ForMathlib.CochainComplexBoundedFlat
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
+module
+
+public import ModularCurves.EllipticCurve.PoleSheafBaseCechHigher
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechFinite
+public import ModularCurves.ForMathlib.CochainComplexBoundedFlat
+public import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
 
 /-!
 # Projective Cech data for pole sheaves
@@ -14,6 +16,8 @@ import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
 Package flatness, finite homology, boundedness, field exactness, and the degree-zero field rank
 on the same ordered coordinate-cover Cech complex of a pole sheaf on a projective family.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
 

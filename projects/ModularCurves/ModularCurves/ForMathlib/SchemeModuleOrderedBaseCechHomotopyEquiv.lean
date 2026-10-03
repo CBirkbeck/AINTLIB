@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
-import Mathlib.Algebra.Homology.Homotopy
-import ModularCurves.ForMathlib.SchemeModuleBaseCechTupleHomotopy
+module
+
+public import Mathlib.Algebra.Homology.Homotopy
+public import ModularCurves.ForMathlib.SchemeModuleBaseCechTupleHomotopy
 
 /-!
 # Homotopy equivalence between native and ordered base-Cech complexes
@@ -13,6 +15,10 @@ The signed sorting homotopy makes the native all-tuples base-Cech complex homoto
 equivalent to its bounded ordered subcomplex. Consequently their homology modules
 are isomorphic in every degree.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Category
   CategoryTheory.Limits CategoryTheory.Preadditive TopologicalSpace

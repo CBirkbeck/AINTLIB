@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.IwasawaProof.FundamentalSequence
-import PadicLFunctions.IwasawaProof.Generators
-import PadicLFunctions.Coleman.ColContinuity
+module
+
+public import PadicLFunctions.IwasawaProof.FundamentalSequence
+public import PadicLFunctions.IwasawaProof.Generators
+public import PadicLFunctions.Coleman.ColContinuity
 
 /-!
 # Iwasawa's theorem (RJW §12.5, TeX 3582–3608) — E12.5, MILESTONE
@@ -33,6 +35,8 @@ tower-level *algebraic* density not supplied by the continuity layer; it is the 
 remaining input for `col_image_cycloTower1_eq_zetaIdeal` and hence for the milestones
 `iwasawa_theorem`/`iwasawa_exact_sequence`.
 -/
+
+@[expose] public section
 
 open PadicLFunctions PadicLFunctions.Coleman
 

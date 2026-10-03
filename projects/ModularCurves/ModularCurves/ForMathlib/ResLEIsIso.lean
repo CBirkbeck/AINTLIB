@@ -1,4 +1,6 @@
-import Mathlib.AlgebraicGeometry.Morphisms.IsIso
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.IsIso
 
 /-!
 # Isomorphisms on smaller open restrictions
@@ -6,6 +8,8 @@ import Mathlib.AlgebraicGeometry.Morphisms.IsIso
 This file records a pullback criterion for shrinking an isomorphic `resLE`
 comparison to smaller source and target opens.
 -/
+
+@[expose] public section
 
 open CategoryTheory TopologicalSpace
 

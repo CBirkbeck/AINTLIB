@@ -3,8 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.ModelVCEquivariance
-import ModularCurves.ForMathlib.FinitelyGeneratedSubalgebraSystem
+module
+
+public import ModularCurves.EllipticCurve.ModelVCEquivariance
+public import ModularCurves.ForMathlib.FinitelyGeneratedSubalgebraSystem
 
 /-!
 # Uniqueness of the pointed group structure on a projective Weierstrass model ([U-MODEL])
@@ -21,6 +23,8 @@ applies at the stage, and the equality base-changes back up.
 The keystone consumed by the records-level canonicity primitive (K3): every pointed group
 structure on `modelOver W` has the T-G4 multiplication `mulOver W`.
 -/
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj WeierstrassCurve

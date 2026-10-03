@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Picard.IdealModule
+module
+
+public import ModularCurves.Picard.IdealModule
 
 /-!
 # The invertible sheaf glued from a Čech 1-cocycle of units (T-OM-A*)
@@ -38,6 +40,10 @@ property reduces componentwise to that of `𝒪_X` (Stacks 01AJ specialized to r
 Consumer: `EllipticCurve/InvariantDifferential.lean` (T-OM-B*) instantiates all of this
 at the Weierstrass-atlas transition cocycle of an elliptic curve to define `ω_{E/S}`.
 -/
+
+set_option backward.privateInPublic true
+
+@[expose] public section
 
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false

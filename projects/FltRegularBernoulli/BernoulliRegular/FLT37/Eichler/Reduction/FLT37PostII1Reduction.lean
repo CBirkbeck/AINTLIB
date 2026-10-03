@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
-import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.LocalPowerDvdZ
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.Kummer.RootClassConjFixedUnconditional
+public import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.LocalPowerDvdZ
 
 /-!
 # FLT for `p = 37` with the Case-II II1 residual discharged

@@ -5,10 +5,12 @@ Authors: Vasil V., OpenAI Codex, AINTLIB ModularCurves project
 
 Adapted from Clawristotle's `CoherentCohomologyFinite.SegreImageGrading`.
 -/
-import ModularCurves.ForMathlib.SegreCoordinatePresentation
-import Mathlib.LinearAlgebra.LinearIndependent.Lemmas
-import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Subsemiring
-import Mathlib.RingTheory.GradedAlgebra.TensorProduct
+module
+
+public import ModularCurves.ForMathlib.SegreCoordinatePresentation
+public import Mathlib.LinearAlgebra.LinearIndependent.Lemmas
+public import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Subsemiring
+public import Mathlib.RingTheory.GradedAlgebra.TensorProduct
 
 /-!
 # The canonical grading on the Segre image algebra
@@ -16,6 +18,8 @@ import Mathlib.RingTheory.GradedAlgebra.TensorProduct
 The tensor product is graded by degree in its second factor. The Segre coordinate
 map preserves this grading, so its image algebra inherits a canonical grading.
 -/
+
+@[expose] public section
 
 open DirectSum
 open scoped TensorProduct

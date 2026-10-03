@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
-import HasseWeil.Foundation.Verschiebung.VerschiebungIsDualOfFrobenius
-import HasseWeil.Foundation.Verschiebung.Route2Universal
+module
+
+public import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
+public import HasseWeil.Foundation.Verschiebung.VerschiebungIsDualOfFrobenius
+public import HasseWeil.Foundation.Verschiebung.Route2Universal
 
 /-!
 # The universal q-th-root witness (general characteristic) — Route B
@@ -53,6 +55,8 @@ characteristic-specific polynomial computation:
 
 * Silverman, *The Arithmetic of Elliptic Curves*, II.2.12, III.5.5, III.6.2.
 -/
+
+@[expose] public section
 
 open WeierstrassCurve
 

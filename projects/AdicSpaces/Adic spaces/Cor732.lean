@@ -2,9 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».SpaCompact
-import «Adic spaces».SpaCompactNoHArch
-import «Adic spaces».RationalSubsets
+module
+
+public import «Adic spaces».SpaCompact
+public import «Adic spaces».SpaCompactNoHArch
+public import «Adic spaces».RationalSubsets
 
 /-!
 # Wedhorn Corollary 7.32: Dominating unit extraction
@@ -48,6 +50,8 @@ monotonicity. Setting `s := π^(N+1)` gives a unit with
 
 * [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Corollary 7.32.
 -/
+
+@[expose] public section
 
 open Topology
 

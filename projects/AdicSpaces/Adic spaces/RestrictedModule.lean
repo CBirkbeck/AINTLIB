@@ -3,9 +3,11 @@ Copyright (c) 2025. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Formalization project
 -/
-import «Adic spaces».RestrictedPowerSeries
-import Mathlib.Topology.Algebra.Module.Basic
-import Mathlib.Order.Filter.CountablyGenerated
+module
+
+public import «Adic spaces».RestrictedPowerSeries
+public import Mathlib.Topology.Algebra.Module.Basic
+public import Mathlib.Order.Filter.CountablyGenerated
 
 /-!
 # Restricted Module-valued Power Series M⟨X⟩
@@ -35,6 +37,8 @@ coefficient type.
 The surjection lifting proof uses a diagonal construction over a countable decreasing
 basis of open additive subgroups, requiring `FirstCountableTopology M` and `T2Space M`.
 -/
+
+@[expose] public section
 
 open Filter
 

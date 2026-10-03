@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.IntegerSeparation
-import HasseWeil.HasseBound.WeilPairing.MatrixDet
-import Mathlib.Tactic.LinearCombination
+module
+
+public import HasseWeil.HasseBound.WeilPairing.IntegerSeparation
+public import HasseWeil.HasseBound.WeilPairing.MatrixDet
+public import Mathlib.Tactic.LinearCombination
 
 /-!
 # Route 2 — the reduction of Leaf 1 to the finite-level Weil-pairing residual (Silverman V.2.3.1)
@@ -34,6 +36,8 @@ characteristic-`p` dual additivity that has no elementary proof in the text.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, V.2.3.1, III.8.6.
 -/
+
+@[expose] public section
 
 namespace HasseWeil.WeilPairing
 

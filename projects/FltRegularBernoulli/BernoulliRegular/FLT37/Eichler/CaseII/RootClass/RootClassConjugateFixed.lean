@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassTrivialOverRealData
+module
+
+public import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassTrivialOverRealData
 
 /-!
 # [FLT37-CASEII-REAL-ROOTCLASS-CONJFIXED] The genuinely-true Case-II II1 residual

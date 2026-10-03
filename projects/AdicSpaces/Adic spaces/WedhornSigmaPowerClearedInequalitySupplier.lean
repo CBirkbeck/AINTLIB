@@ -2,8 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».WedhornC1SigmaConstructionAssembly
-import «Adic spaces».WedhornLocalArithmeticPerTChain
+module
+
+public import «Adic spaces».WedhornC1SigmaConstructionAssembly
+public import «Adic spaces».WedhornLocalArithmeticPerTChain
 
 /-!
 # Wedhorn 8.34(ii) — σ-power-cleared inequality supplier (T073)
@@ -114,6 +116,8 @@ rejected universal-over-`D_T` form.
   named residuals are per-`(v, t')` σ-construction algebraic content,
   consumed by Secondary's σ/Laurent-cover supplier lane.
 -/
+
+@[expose] public section
 
 namespace ValuationSpectrum
 

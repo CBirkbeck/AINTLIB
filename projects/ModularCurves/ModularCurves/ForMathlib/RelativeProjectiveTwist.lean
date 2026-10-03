@@ -5,9 +5,11 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import ModularCurves.ForMathlib.RelativeProjectiveFactorizationChoice
-import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
-import ModularCurves.Picard.InvertibleSheafLocallyFree
+module
+
+public import ModularCurves.ForMathlib.RelativeProjectiveFactorizationChoice
+public import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
+public import ModularCurves.Picard.InvertibleSheafLocallyFree
 
 /-!
 # Twists from a relative projective factorization
@@ -15,6 +17,8 @@ import ModularCurves.Picard.InvertibleSheafLocallyFree
 The chosen projective map of a relative projective factorization pulls the concrete integer
 twists on polynomial projective space back to invertible modules on the source.
 -/
+
+@[expose] public section
 
 open CategoryTheory
 

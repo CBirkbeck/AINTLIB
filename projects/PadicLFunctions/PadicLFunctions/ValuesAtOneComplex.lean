@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import PadicLFunctions.Interpolation.GenBernoulliComplex
-import PadicLFunctions.Interpolation.Characters
-import Mathlib.NumberTheory.LSeries.Linearity
+module
+
+public import PadicLFunctions.Interpolation.GenBernoulliComplex
+public import PadicLFunctions.Interpolation.Characters
+public import Mathlib.NumberTheory.LSeries.Linearity
 
 /-!
 # The classical value L(θ,1) (RJW §6.1, Thm 6.1(i), decomposition C6)
@@ -18,6 +20,8 @@ mathlib's `DirichletCharacter.LFunction` per the mathlib-linking directive.
 
 Decomposition: `.mathlib-quality/decomposition.md` R6, cluster C6.
 -/
+
+@[expose] public section
 
 open Complex DirichletCharacter
 

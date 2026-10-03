@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.WeierstrassModel
+module
+
+public import ModularCurves.EllipticCurve.WeierstrassModel
 
 /-!
 # Sections of the projective model through affine points (T-E14b-2)
@@ -20,6 +22,8 @@ adapted `x` satisfies `x(P₂) = 0, x(Q₂) = 1`"* becomes "`P` is carried by th
 chart to `projModelAffineSection … 0 0 …` and `Q` to `projModelAffineSection … 1 0 …`"
 (on `2`-torsion, `y = 0` is forced in char ≠ 2, so pinning `x` pins the point).
 -/
+
+@[expose] public section
 
 -- v4.33 bump: opens/hom coercions are no longer transparent enough for the
 -- `≫`-associativity and `comp_apply` rewrites below.

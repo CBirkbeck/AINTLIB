@@ -3,7 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Invertible modules over a ring with trivial Picard group are free
@@ -37,6 +39,8 @@ module over a ring with trivial Picard group is free, is isomorphic to the ring,
 mathlib does not state verbatim — carries a concrete rank-one basis `Basis (Fin 1) R M`.
 All proofs are one-liners over the mathlib API.
 -/
+
+@[expose] public section
 
 open CommRing (Pic)
 
