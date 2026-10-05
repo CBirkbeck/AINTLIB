@@ -64,13 +64,13 @@ variable {G}
 `g` to `(ψ g).inv` (the inversion converts `Aut`'s reversed composition into the
 covariant `hom (g * h) = hom g ≫ hom h` convention). -/
 def ofAut {X : Scheme.{u}} (ψ : G →* Aut X) : SchemeAction G X where
-  hom g := (ψ g).inv
+  hom g := (ψ g).asIso.inv
   hom_one := by rw [map_one]; rfl
   hom_mul g h := by rw [map_mul]; rfl
 
 @[simp]
 theorem ofAut_hom {X : Scheme.{u}} (ψ : G →* Aut X) (g : G) :
-    (ofAut ψ).hom g = (ψ g).inv := rfl
+    (ofAut ψ).hom g = (ψ g).asIso.inv := rfl
 variable {X : Scheme.{u}} (σ : SchemeAction G X)
 
 instance isIso_hom (g : G) : IsIso (σ.hom g) :=

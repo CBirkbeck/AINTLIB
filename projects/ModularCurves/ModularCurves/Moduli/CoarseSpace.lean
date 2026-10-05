@@ -73,7 +73,7 @@ theorem _root_.CategoryTheory.Functor.RepresentableBy.baseSchemeAction_over
     {P : ModuliProblem R} {X₀ : EllObj R} (r : P.RepresentableBy X₀)
     {G : Type*} [Group G] (φ : G →* Aut P) (γ : G) :
     (r.baseSchemeAction φ).hom γ ≫ X₀.structMap = X₀.structMap :=
-  (r.autMulHom (φ γ)).inv.base_w
+  (r.autMulHom (φ γ)).asIso.inv.base_w
 
 /-! ## Affineness of the representing base (KM 8.1.1: "𝔐(𝒫,δ) is itself affine") -/
 
@@ -326,7 +326,7 @@ noncomputable def piOneFine (N : ℕ) [NeZero N] (hN4 : 4 ≤ N)
 theorem gammaHAut_inv_comp_piOneFineEll (N : ℕ) [NeZero N] (hN4 : 4 ≤ N)
     (hinv : IsUnit (N : R)) (γ : (semiBorel N)) :
     ((xFullNaiveRepr (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
-        hinv).autMulHom (gammaHAut R N (semiBorel N) γ)).inv ≫
+        hinv).autMulHom (gammaHAut R N (semiBorel N) γ)).asIso.inv ≫
       piOneFineEll (R := R) N hN4 hinv = piOneFineEll (R := R) N hN4 hinv := by
   classical
   apply (xOneFineRepr (R := R) N hN4 hinv).homEquiv.injective
@@ -335,22 +335,22 @@ theorem gammaHAut_inv_comp_piOneFineEll (N : ℕ) [NeZero N] (hN4 : 4 ≤ N)
       (semiBorelQPD (R := R) N hN4 hinv).proj]
   have h2 : (gammaFullNaiveProblem R N).map
       (((xFullNaiveRepr (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
-        hinv).autMulHom (gammaHAut R N (semiBorel N) γ)).inv).op
+        hinv).autMulHom (gammaHAut R N (semiBorel N) γ)).asIso.inv).op
       ((xFullNaiveRepr (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
         hinv).homEquiv (𝟙 _)) =
-      (gammaHAut R N (semiBorel N) γ).inv.app _
+      (gammaHAut R N (semiBorel N) γ).asIso.inv.app _
         ((xFullNaiveRepr (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
           hinv).homEquiv (𝟙 _)) := by
     have hchar := (xFullNaiveRepr (R := R) N
       (by exact_mod_cast Nat.le_of_succ_le hN4) hinv).homEquiv_comp_transportHom
-      (gammaHAut R N (semiBorel N) γ).inv (𝟙 _)
+      (gammaHAut R N (semiBorel N) γ).asIso.inv (𝟙 _)
     rw [Category.id_comp] at hchar
     rw [← hchar, ← (xFullNaiveRepr (R := R) N
       (by exact_mod_cast Nat.le_of_succ_le hN4) hinv).homEquiv_comp]
     rfl
   rw [h2]
-  have h3 : (gammaHAut R N (semiBorel N) γ).inv =
-      (gammaHAut R N (semiBorel N) γ⁻¹).hom := by
+  have h3 : (gammaHAut R N (semiBorel N) γ).asIso.inv =
+      (gammaHAut R N (semiBorel N) γ⁻¹).asIso.hom := by
     rw [map_inv]; rfl
   have h4 := congrArg (fun (m : gammaFullNaiveProblem R N ⟶
       (semiBorelQPD (R := R) N hN4 hinv).prob) =>

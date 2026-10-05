@@ -988,7 +988,7 @@ private noncomputable def baseModulePresheafObjUnitScalar
     {X S : Scheme.{u}} (π : X ⟶ S) (U : X.Opens) (s : Γ(X, U)) :
     (Scheme.Modules.baseModulePresheaf π (Scheme.Modules.unitObj X)).obj (op U) ⟶
       (Scheme.Modules.baseModulePresheaf π (Scheme.Modules.unitObj X)).obj (op U) := by
-  let q := ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s
+  let q := (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s).asHom
   let qVal := (SheafOfModules.forget (X.ringCatSheaf.over U)).map q
   let qTop := (PresheafOfModules.evaluation (X.ringCatSheaf.over U).obj
     (.op (Over.mk (𝟙 U)))).map qVal
@@ -1003,13 +1003,13 @@ private theorem baseModulePresheafObjIsoUnitOfOverIso_comp_scalar
     (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
     (s : Γ(X, U))
     (h : e.hom = g.hom ≫
-      ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s) :
+      (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s).asHom) :
     (baseModulePresheafObjIsoUnitOfOverIso π M U e).hom =
       (baseModulePresheafObjIsoUnitOfOverIso π M U g).hom ≫
         baseModulePresheafObjUnitScalar π U s := by
   ext x
   change e.hom.val.app (.op (Over.mk (𝟙 U))) x =
-    (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s).val.app
+    (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s).asHom.val.app
       (.op (Over.mk (𝟙 U))) (g.hom.val.app (.op (Over.mk (𝟙 U))) x)
   have happ := congrArg (fun q => q.val.app (.op (Over.mk (𝟙 U)))) h
   exact ConcreteCategory.congr_hom happ x
@@ -1063,7 +1063,7 @@ private theorem restrictOpenTrivialization_hom_eq_comp_scalar_aux
   let eOver := Scheme.Modules.overTrivializationOfRestrictIso M U e
   let gOver := Scheme.Modules.overTrivializationOfRestrictIso M U g
   have hOver : eOver.hom = gOver.hom ≫
-      ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r :=
+      (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom :=
     ModularCurves.overTrivializationOfRestrictIso_hom_eq_comp_scalar
       M U e g r h
   let eRes := ModularCurves.SheafOfModules.restrictOverTrivialization
@@ -1071,8 +1071,8 @@ private theorem restrictOpenTrivialization_hom_eq_comp_scalar_aux
   let gRes := ModularCurves.SheafOfModules.restrictOverTrivialization
     X.ringCatSheaf M U gOver (Over.mk (homOfLE hVU))
   have hRes : eRes.hom = gRes.hom ≫
-      ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf V
-        (X.presheaf.map (homOfLE hVU).op r) :=
+      (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf V
+        (X.presheaf.map (homOfLE hVU).op r)).asHom :=
     ModularCurves.restrictOverTrivialization_hom_eq_comp_scalar
       M hVU gOver eOver r hOver
   have hOpen := ModularCurves.restrictTrivializationOfOverIso_hom_eq_comp_scalar
@@ -1696,7 +1696,7 @@ theorem coordinateOpenCechFirstTransitionFactorEnd_apply_laurent
       Γ(X, coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)ˣ) :
       Γ(X, coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down))
   change coordinateOpenCechIntersectionBaseLaurentRingEquiv (R := R) a.1
-      ((ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s).val.app
+      ((ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s).asHom.val.app
         (.op (Over.mk (𝟙 U))) x) = _
   change coordinateOpenCechIntersectionBaseLaurentRingEquiv (R := R) a.1
       ((show Γ(X, U) from x) * s) = _

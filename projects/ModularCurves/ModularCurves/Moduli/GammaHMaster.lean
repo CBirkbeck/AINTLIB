@@ -862,7 +862,7 @@ theorem gammaH_hfree_of_orderOf_absurd (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ
     (b : (gammaFullNaiveProblem R N).obj
       (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
     (γ : ↥H) :
-    (gammaHAut R N H γ).hom.app
+    (gammaHAut R N H γ).asIso.hom.app
       (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
       ((gammaFullNaiveProblem R N).map e.hom.op b) ≠ b := by
   intro hcon
@@ -904,7 +904,7 @@ theorem gammaFullNaive_hfree_bot (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
     (b : (gammaFullNaiveProblem R N).obj
       (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
     (γ : ↥(⊥ : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) :
-    (gammaHAut R N ⊥ γ).hom.app
+    (gammaHAut R N ⊥ γ).asIso.hom.app
       (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
       ((gammaFullNaiveProblem R N).map e.hom.op b) ≠ b := by
   intro hcon
@@ -943,7 +943,7 @@ theorem ModuliProblem.QuotientProblemData.rigid_at_of_geom_free {Q : ModuliProbl
         (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)),
       e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ →
       ∀ (b : Q.obj (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) (γ : G),
-        (φ γ).hom.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+        (φ γ).asIso.hom.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
           (Q.map e.hom.op b) ≠ b) :
     ∀ (e : X ≅ X), e.hom.baseHom = 𝟙 X.base → e ≠ Iso.refl X →
       ∀ a : qpd.prob.obj (Opposite.op X), qpd.prob.map e.hom.op a ≠ a := by
@@ -1000,7 +1000,7 @@ theorem ModuliProblem.QuotientProblemData.rigid_of_geom_free {Q : ModuliProblem 
         (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)),
       e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ →
       ∀ (b : Q.obj (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) (γ : G),
-        (φ γ).hom.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+        (φ γ).asIso.hom.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
           (Q.map e.hom.op b) ≠ b) :
     qpd.prob.Rigid :=
   fun X => qpd.rigid_at_of_geom_free X (hdetect X) hfree
@@ -1026,7 +1026,7 @@ theorem ModuliProblem.QuotientProblemData.rigidNoeth_of_geom_free {Q : ModuliPro
         (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)),
       e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ →
       ∀ (b : Q.obj (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) (γ : G),
-        (φ γ).hom.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+        (φ γ).asIso.hom.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
           (Q.map e.hom.op b) ≠ b) :
     qpd.prob.RigidNoeth :=
   fun X hX => qpd.rigid_at_of_geom_free X (hdetect X hX) hfree
@@ -1055,7 +1055,7 @@ theorem gammaH_rigidNoeth (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
       e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ →
       ∀ (b : (gammaFullNaiveProblem R N).obj
           (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) (γ : ↥H),
-        (gammaHAut R N H γ).hom.app
+        (gammaHAut R N H γ).asIso.hom.app
           (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
           ((gammaFullNaiveProblem R N).map e.hom.op b) ≠ b) :
     qpd.prob.RigidNoeth := by
@@ -1082,7 +1082,7 @@ theorem gammaH_rigid (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
       e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ →
       ∀ (b : (gammaFullNaiveProblem R N).obj
           (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) (γ : ↥H),
-        (gammaHAut R N H γ).hom.app
+        (gammaHAut R N H γ).asIso.hom.app
           (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
           ((gammaFullNaiveProblem R N).map e.hom.op b) ≠ b) :
     qpd.prob.Rigid :=

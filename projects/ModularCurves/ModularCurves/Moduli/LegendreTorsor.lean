@@ -158,7 +158,7 @@ descends to an automorphism of `δ`. -/
 restriction of `legendreBootstrapNegAut` along `δ ↪ Γ(2)-naive × ω`, using
 `IsLegendreDatum.neg` for stability. Identity on the level datum, `−1` on `ω`. -/
 noncomputable def legendreDeltaNegAut : Aut (legendreDeltaProblem R) where
-  hom :=
+  asIso.hom :=
     { app := fun X => ↾fun x : { p : (gammaFullNaiveProblem R 2).obj X ×
           OmegaBasis X.unop.curve.toEllipticCurveGeom // IsLegendreDatum X.unop p.1 p.2 } =>
         ⟨(x.1.1, (-1 : Γ(X.unop.base, ⊤)ˣ) • x.1.2), IsLegendreDatum.neg x.2⟩
@@ -170,7 +170,7 @@ noncomputable def legendreDeltaNegAut : Aut (legendreDeltaProblem R) where
         rw [Units.coe_map, Units.val_neg, Units.val_one]
         show ((φ.unop.baseHom.appLE ⊤ ⊤ (fun x _ => trivial)).hom) (-1) = -1
         rw [map_neg, map_one] }
-  inv :=
+  asIso.inv :=
     { app := fun X => ↾fun x : { p : (gammaFullNaiveProblem R 2).obj X ×
           OmegaBasis X.unop.curve.toEllipticCurveGeom // IsLegendreDatum X.unop p.1 p.2 } =>
         ⟨(x.1.1, (-1 : Γ(X.unop.base, ⊤)ˣ) • x.1.2), IsLegendreDatum.neg x.2⟩
@@ -182,12 +182,12 @@ noncomputable def legendreDeltaNegAut : Aut (legendreDeltaProblem R) where
         rw [Units.coe_map, Units.val_neg, Units.val_one]
         show ((φ.unop.baseHom.appLE ⊤ ⊤ (fun x _ => trivial)).hom) (-1) = -1
         rw [map_neg, map_one] }
-  hom_inv_id := by
+  asIso.hom_inv_id := by
     ext X x
     refine Subtype.ext (Prod.ext rfl ?_)
     exact (OmegaBasis.mul_smul' _ _ _).trans
       (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
-  inv_hom_id := by
+  asIso.inv_hom_id := by
     ext X x
     refine Subtype.ext (Prod.ext rfl ?_)
     exact (OmegaBasis.mul_smul' _ _ _).trans
@@ -207,7 +207,7 @@ noncomputable def legendreDeltaSignAction : ℤˣ →* Aut (legendreDeltaProblem
     · rw [one_mul, if_pos rfl, one_mul]
     · rw [mul_one, if_pos rfl, mul_one]
     · rw [show (-1 : ℤˣ) * (-1) = 1 from by decide, if_pos rfl, if_neg (by decide)]
-      refine Iso.ext ?_
+      refine Aut.ext (Iso.ext ?_)
       refine Eq.symm ?_
       ext X x
       refine Subtype.ext (Prod.ext rfl ?_)

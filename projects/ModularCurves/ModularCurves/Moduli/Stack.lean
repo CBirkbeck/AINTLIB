@@ -79,14 +79,14 @@ theorem levelledCurve_descent_of_torsor {T T' : Scheme.{u}} (f : T' ⟶ T)
     [Flat f] [LocallyOfFinitePresentation f] [Surjective f]
     (G : Type u) [Group G] [Finite G] (σ : G →* Aut (Over.mk f))
     (htorsor : IsIso ((Limits.Sigma.desc (fun g : G =>
-      Limits.pullback.lift (f := f) (g := f) ((σ g).hom.left) (𝟙 T')
-        (by rw [Category.id_comp]; exact Over.w (σ g).hom))) :
+      Limits.pullback.lift (f := f) (g := f) ((σ g).asIso.hom.left) (𝟙 T')
+        (by rw [Category.id_comp]; exact Over.w (σ g).asIso.hom))) :
       (∐ fun _ : G => T') ⟶ Limits.pullback f f))
     (N : ℕ) [NeZero N] (hN : 3 ≤ N) (hinv : IsUnit (N : Γ(T', ⊤)))
     (E' : EllipticCurve T') (L' : E'.FullLevelPt N)
     (hdesc : ∀ g : G, Nonempty
-      ((⟨E'.baseChange ((σ g).hom.left), EllipticCurve.FullLevelPt.pullAlong
-          ((σ g).hom.left) L'⟩ : Σ E : EllipticCurve T', E.FullLevelPt N) ≅
+      ((⟨E'.baseChange ((σ g).asIso.hom.left), EllipticCurve.FullLevelPt.pullAlong
+          ((σ g).asIso.hom.left) L'⟩ : Σ E : EllipticCurve T', E.FullLevelPt N) ≅
         ⟨E', L'⟩)) :
     ∃ (E : EllipticCurve T) (L : E.FullLevelPt N), Nonempty
       ((⟨E.baseChange f, EllipticCurve.FullLevelPt.pullAlong f L⟩ :

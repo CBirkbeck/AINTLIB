@@ -74,12 +74,12 @@ noncomputable def overUnitSectionEquiv (U : C) :
 corresponding over-site. -/
 noncomputable def overUnitScalarEnd (U : C) (r : R.obj.obj (op U)) :
     End (SheafOfModules.unit (R.over U)) :=
-  (SheafOfModules.unit (R.over U)).unitHomEquiv.symm (overUnitSection R U r)
+  .of ((SheafOfModules.unit (R.over U)).unitHomEquiv.symm (overUnitSection R U r))
 
 @[simp]
 theorem overUnitScalarEnd_app_apply (U : C) (r : R.obj.obj (op U))
     (V : (Over U)ᵒᵖ) (x : (R.over U).obj.obj V) :
-    (overUnitScalarEnd R U r).val.app V x =
+    (overUnitScalarEnd R U r).asHom.val.app V x =
       x * (show (R.over U).obj.obj V from R.obj.map V.unop.hom.op r) := by
   rfl
 
@@ -91,20 +91,23 @@ noncomputable def overUnitScalarEndRingHom (U : C) :
     R.obj.obj (op U) →+* End (SheafOfModules.unit (R.over U)) where
   toFun := overUnitScalarEnd R U
   map_one' := by
+    apply End.ext
     apply (SheafOfModules.forget _).map_injective
     ext V
     erw [overUnitScalarEnd_app_apply]
-    rw [End.one_def]
+    rw [End.one_asHom]
     simp
     erw [ModuleCat.hom_id]
     rfl
   map_mul' r s := by
     rw [mul_comm' r s]
+    apply End.ext
     apply (SheafOfModules.forget _).map_injective
     ext V
     repeat' erw [overUnitScalarEnd_app_apply]
     simp
   map_zero' := by
+    apply End.ext
     apply (SheafOfModules.forget _).map_injective
     ext V
     erw [overUnitScalarEnd_app_apply]
@@ -112,14 +115,14 @@ noncomputable def overUnitScalarEndRingHom (U : C) :
     erw [PresheafOfModules.zero_app, ModuleCat.hom_zero]
     rfl
   map_add' r s := by
+    apply End.ext
     apply (SheafOfModules.forget _).map_injective
     ext V
     repeat' erw [overUnitScalarEnd_app_apply]
     simp
-    erw [SheafOfModules.add_val, PresheafOfModules.add_app, ModuleCat.hom_add]
-    change _ = (overUnitScalarEnd R U r).val.app V
+    change _ = (overUnitScalarEnd R U r).asHom.val.app V
         (show (R.over U).obj.obj V from 1) +
-      (overUnitScalarEnd R U s).val.app V
+      (overUnitScalarEnd R U s).asHom.val.app V
         (show (R.over U).obj.obj V from 1)
     rw [overUnitScalarEnd_app_apply, overUnitScalarEnd_app_apply, one_mul, one_mul]
 
@@ -217,10 +220,10 @@ theorem dualRestrict_smul (M : _root_.SheafOfModules R) {U V : Cᵒᵖ} (f : U �
     dualRestrict R M f (r • α) = R.obj.map f r • dualRestrict R M f α := by
   letI := dualSectionsModule R M U.unop
   letI := dualSectionsModule R M V.unop
-  rw [show r • α = α ≫ overUnitScalarEnd R U.unop r from rfl]
+  rw [show r • α = α ≫ (overUnitScalarEnd R U.unop r).asHom from rfl]
   rw [show R.obj.map f r • dualRestrict R M f α =
     dualRestrict R M f α ≫
-      overUnitScalarEnd R V.unop (R.obj.map f r) from rfl]
+      (overUnitScalarEnd R V.unop (R.obj.map f r)).asHom from rfl]
   apply (_root_.SheafOfModules.forget _).map_injective
   apply PresheafOfModules.hom_ext
   intro W
@@ -557,7 +560,7 @@ theorem dualUnitSectionsEquiv_apply (U : C)
 omit [∀ U, IsMulCommutative (R.obj.obj U)] in
 @[simp]
 theorem dualUnitSectionsEquiv_symm_apply (U : C) (r : R.obj.obj (op U)) :
-    (dualUnitSectionsEquiv R U).symm r = overUnitScalarEnd R U r :=
+    (dualUnitSectionsEquiv R U).symm r = (overUnitScalarEnd R U r).asHom :=
   rfl
 
 /-- Endomorphisms of the unit module on `Over U` are exactly scalar multiplications by
@@ -567,13 +570,13 @@ noncomputable def overUnitScalarEndRingEquiv (U : C) :
       End (_root_.SheafOfModules.unit (R.over U)) :=
   RingEquiv.ofBijective (overUnitScalarEndRingHom R U) <| by
     refine Function.bijective_iff_has_inverse.mpr
-      ⟨dualUnitSectionsEquiv R U, ?_, ?_⟩
+      ⟨fun f ↦ dualUnitSectionsEquiv R U f.asHom, ?_, ?_⟩
     · intro r
       change dualUnitSectionsEquiv R U ((dualUnitSectionsEquiv R U).symm r) = r
       exact Equiv.apply_symm_apply _ r
     · intro f
-      change (dualUnitSectionsEquiv R U).symm (dualUnitSectionsEquiv R U f) = f
-      exact Equiv.symm_apply_apply _ f
+      change End.of ((dualUnitSectionsEquiv R U).symm (dualUnitSectionsEquiv R U f.asHom)) = f
+      rw [Equiv.symm_apply_apply]
 
 /-- The identification of unit endomorphisms with scalars is linear for the
 postcomposition action used on the dual. -/
@@ -592,27 +595,27 @@ noncomputable def dualUnitLinearEquiv (U : C) :
         R.obj.obj (op U) := by
   letI := dualUnitEndModule R U
   refine
-    { toEquiv := dualUnitSectionsEquiv R U
+    { toEquiv := End.homEquiv.trans (dualUnitSectionsEquiv R U)
       map_add' := ?_
       map_smul' := ?_ }
   · intro α β
-    change (α + β).val.app (op (Over.mk (𝟙 U)))
+    change (α + β).asHom.val.app (op (Over.mk (𝟙 U)))
         (show (R.over U).obj.obj (op (Over.mk (𝟙 U))) from 1) =
-      α.val.app (op (Over.mk (𝟙 U)))
+      α.asHom.val.app (op (Over.mk (𝟙 U)))
           (show (R.over U).obj.obj (op (Over.mk (𝟙 U))) from 1) +
-        β.val.app (op (Over.mk (𝟙 U)))
+        β.asHom.val.app (op (Over.mk (𝟙 U)))
           (show (R.over U).obj.obj (op (Over.mk (𝟙 U))) from 1)
     rfl
   · intro r α
-    rw [show r • α = α ≫ overUnitScalarEnd R U r from rfl]
-    change (overUnitScalarEnd R U r).val.app (op (Over.mk (𝟙 U)))
-        (α.val.app (op (Over.mk (𝟙 U)))
+    rw [show r • α = .of (α.asHom ≫ (overUnitScalarEnd R U r).asHom) from rfl]
+    change (overUnitScalarEnd R U r).asHom.val.app (op (Over.mk (𝟙 U)))
+        (α.asHom.val.app (op (Over.mk (𝟙 U)))
           (show (R.over U).obj.obj (op (Over.mk (𝟙 U))) from 1)) =
       r * (show R.obj.obj (op U) from
-        α.val.app (op (Over.mk (𝟙 U)))
+        α.asHom.val.app (op (Over.mk (𝟙 U)))
           (show (R.over U).obj.obj (op (Over.mk (𝟙 U))) from 1))
     rw [overUnitScalarEnd_app_apply]
-    change (show R.obj.obj (op U) from α.val.app (op (Over.mk (𝟙 U)))
+    change (show R.obj.obj (op U) from α.asHom.val.app (op (Over.mk (𝟙 U)))
           (show (R.over U).obj.obj (op (Over.mk (𝟙 U))) from 1)) *
         R.obj.map (𝟙 U).op r = _
     rw [op_id, R.obj.map_id]
@@ -623,8 +626,8 @@ set_option backward.isDefEq.respectTransparency.types false in
 theorem dualUnitLinearEquiv_dualRestrict {U V : Cᵒᵖ} (f : U ⟶ V)
     (α : (_root_.SheafOfModules.unit R).over U.unop ⟶
       _root_.SheafOfModules.unit (R.over U.unop)) :
-    dualUnitLinearEquiv R V.unop (dualRestrict R (_root_.SheafOfModules.unit R) f α) =
-      R.obj.map f (dualUnitLinearEquiv R U.unop α) := by
+    dualUnitLinearEquiv R V.unop (.of (dualRestrict R (_root_.SheafOfModules.unit R) f α)) =
+      R.obj.map f (dualUnitLinearEquiv R U.unop (.of α)) := by
   change (dualRestrict R (_root_.SheafOfModules.unit R) f α).val.app
       (op (Over.mk (𝟙 V.unop)))
         (show (R.over V.unop).obj.obj (op (Over.mk (𝟙 V.unop))) from 1) =
@@ -680,7 +683,17 @@ noncomputable def dualUnitPresheafIso :
     dualPresheaf R (_root_.SheafOfModules.unit R) ≅
       PresheafOfModules.unit R.obj :=
   PresheafOfModules.isoMk
-    (fun U ↦ (dualUnitLinearEquiv R U.unop).toModuleIso)
+    (fun U ↦
+      letI : Module (R.obj.obj (op U.unop))
+          (_root_.SheafOfModules.unit (R.over U.unop) ⟶
+            _root_.SheafOfModules.unit (R.over U.unop)) :=
+        dualSectionsModule R (_root_.SheafOfModules.unit R) U.unop
+      letI := dualUnitEndModule R U.unop
+      (LinearEquiv.trans
+        { toEquiv := End.homEquiv.symm
+          map_add' := fun _ _ ↦ rfl
+          map_smul' := fun _ _ ↦ rfl }
+        (dualUnitLinearEquiv R U.unop)).toModuleIso)
     (fun {_ _} f ↦ by
       apply ModuleCat.hom_ext
       apply LinearMap.ext
@@ -725,8 +738,8 @@ noncomputable def dualPrecompLinearMap {M N : _root_.SheafOfModules R}
   · intro α β
     simp [dualPrecomp, Preadditive.comp_add]
   · intro r α
-    change f.over U ≫ (α ≫ overUnitScalarEnd R U r) =
-      (f.over U ≫ α) ≫ overUnitScalarEnd R U r
+    change f.over U ≫ (α ≫ (overUnitScalarEnd R U r).asHom) =
+      (f.over U ≫ α) ≫ (overUnitScalarEnd R U r).asHom
     simp [Category.assoc]
 
 /-- The morphism on dual presheaves induced contravariantly by a module morphism. -/
@@ -790,32 +803,32 @@ noncomputable def dualTrivializationLinearEquiv (M : _root_.SheafOfModules R) (U
   letI := dualSectionsModule R M U
   letI := dualUnitEndModule R U
   refine
-    { toFun := fun α ↦ dualUnitLinearEquiv R U (e.inv ≫ α)
-      invFun := fun r ↦ e.hom ≫ (dualUnitLinearEquiv R U).symm r
+    { toFun := fun α ↦ dualUnitLinearEquiv R U (.of (e.inv ≫ α))
+      invFun := fun r ↦ e.hom ≫ ((dualUnitLinearEquiv R U).symm r).asHom
       left_inv := ?_
       right_inv := ?_
       map_add' := ?_
       map_smul' := ?_ }
   · intro α β
-    let α' : End (_root_.SheafOfModules.unit (R.over U)) := e.inv ≫ α
-    let β' : End (_root_.SheafOfModules.unit (R.over U)) := e.inv ≫ β
+    let α' : End (_root_.SheafOfModules.unit (R.over U)) := .of (e.inv ≫ α)
+    let β' : End (_root_.SheafOfModules.unit (R.over U)) := .of (e.inv ≫ β)
     rw [Preadditive.comp_add]
     change dualUnitLinearEquiv R U (α' + β') =
       dualUnitLinearEquiv R U α' + dualUnitLinearEquiv R U β'
     exact (dualUnitLinearEquiv R U).map_add α' β'
   · intro r α
-    let α' : End (_root_.SheafOfModules.unit (R.over U)) := e.inv ≫ α
+    let α' : End (_root_.SheafOfModules.unit (R.over U)) := .of (e.inv ≫ α)
     change dualUnitLinearEquiv R U
-        (e.inv ≫ (α ≫ overUnitScalarEnd R U r)) =
+        (.of (e.inv ≫ (α ≫ (overUnitScalarEnd R U r).asHom))) =
       r • dualUnitLinearEquiv R U α'
     rw [← Category.assoc]
     change dualUnitLinearEquiv R U (r • α') =
       r • dualUnitLinearEquiv R U α'
     exact (dualUnitLinearEquiv R U).map_smul r α'
   · intro α
-    let α' : End (_root_.SheafOfModules.unit (R.over U)) := e.inv ≫ α
-    change e.hom ≫ (dualUnitLinearEquiv R U).symm
-      (dualUnitLinearEquiv R U α') = α
+    let α' : End (_root_.SheafOfModules.unit (R.over U)) := .of (e.inv ≫ α)
+    change e.hom ≫ ((dualUnitLinearEquiv R U).symm
+      (dualUnitLinearEquiv R U α')).asHom = α
     rw [LinearEquiv.symm_apply_apply]
     change e.hom ≫ (e.inv ≫ α) = α
     simp
@@ -823,7 +836,7 @@ noncomputable def dualTrivializationLinearEquiv (M : _root_.SheafOfModules R) (U
     let α' : End (_root_.SheafOfModules.unit (R.over U)) :=
       (dualUnitLinearEquiv R U).symm r
     change dualUnitLinearEquiv R U
-      (e.inv ≫ (e.hom ≫ α')) = r
+      (.of (e.inv ≫ (e.hom ≫ α'.asHom))) = r
     rw [← Category.assoc]
     rw [e.inv_hom_id, Category.id_comp]
     exact (dualUnitLinearEquiv R U).apply_symm_apply r

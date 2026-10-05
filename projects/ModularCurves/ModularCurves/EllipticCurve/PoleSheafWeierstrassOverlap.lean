@@ -69,7 +69,7 @@ private theorem dualUnitSectionsEquiv_over_comp_eq_overTrivializationCoefficient
 private theorem dualUnitSectionsEquiv_overUnitScalarEnd
     {X : Scheme.{u}} (U : X.Opens) (r : Γ(X, U)) :
     SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf U
-        (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) = r := by
+        (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom = r := by
   rw [SheafOfModules.dualUnitSectionsEquiv_apply]
   erw [SheafOfModules.overUnitScalarEnd_app_apply]
   change (1 : Γ(X, U)) * X.presheaf.map (𝟙 (.op U)) r = r
@@ -82,7 +82,7 @@ private theorem overTrivializationCoefficient_unitHom_apply_one_eq_of_comp_eq_sc
     (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
     (r : Γ(X, U))
     (h : f.over U ≫ e.hom =
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) :
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom) :
     overTrivializationCoefficient M U e
         (f.val.app (.op (⊤ : X.Opens))
           (show X.presheaf.obj (.op (⊤ : X.Opens)) from 1)) = r := by
@@ -107,9 +107,9 @@ private theorem overTrivialization_hom_eq_comp_scalar_of_unit_coefficients
         (f.val.app (.op (⊤ : X.Opens))
           (show X.presheaf.obj (.op (⊤ : X.Opens)) from 1)) = 1) :
     e.hom = g.hom ≫
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r := by
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom := by
   have heMap : f.over U ≫ e.hom =
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r := by
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom := by
     apply (SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf U).injective
     exact
       (dualUnitSectionsEquiv_over_comp_eq_overTrivializationCoefficient
@@ -117,7 +117,7 @@ private theorem overTrivialization_hom_eq_comp_scalar_of_unit_coefficients
         (he.trans
           (dualUnitSectionsEquiv_overUnitScalarEnd (X := X) U r).symm)
   have hgMap : f.over U ≫ g.hom =
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U 1 := by
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U 1).asHom := by
     apply (SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf U).injective
     exact
       (dualUnitSectionsEquiv_over_comp_eq_overTrivializationCoefficient
@@ -126,12 +126,12 @@ private theorem overTrivialization_hom_eq_comp_scalar_of_unit_coefficients
           (dualUnitSectionsEquiv_overUnitScalarEnd (X := X) U 1).symm)
   have hgMapId : f.over U ≫ g.hom = 𝟙 _ :=
     hgMap.trans
-      (map_one (SheafOfModules.overUnitScalarEndRingHom X.ringCatSheaf U))
+      (congrArg End.asHom (map_one (SheafOfModules.overUnitScalarEndRingHom X.ringCatSheaf U)))
   have hf : f.over U = g.inv := by
     apply (cancel_mono g.hom).1
     exact hgMapId.trans g.inv_hom_id.symm
   have hInv : g.inv ≫ e.hom =
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r := by
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom := by
     rw [← hf]
     exact heMap
   rw [← hInv, ← Category.assoc, g.hom_inv_id, Category.id_comp]
@@ -147,7 +147,7 @@ private theorem sectionPoleUnitHom_over_comp_cartierTrivialization
           (sectionPoleSheaf π z hz) U.1
           (sectionPoleSheafTrivializationOfCartierGenerator
             z hz U r hr hspan hnzd)).hom =
-      SheafOfModules.overUnitScalarEnd C.ringCatSheaf U.1 r := by
+      (SheafOfModules.overUnitScalarEnd C.ringCatSheaf U.1 r).asHom := by
   letI : IsClosedImmersion z := isClosedImmersion_section z hz
   letI : QuasiCompact z := inferInstance
   let eGen := localIdealGeneratorIso z U r hr hspan hnzd
@@ -180,7 +180,7 @@ private theorem sectionPoleUnitHom_over_comp_awayTrivialization
           (sectionPoleSheaf π z hz) V
           (sectionPoleSheafTrivializationOfSectionPreimageEqBot
             z hz V hV)).hom =
-      SheafOfModules.overUnitScalarEnd C.ringCatSheaf V 1 := by
+      (SheafOfModules.overUnitScalarEnd C.ringCatSheaf V 1).asHom := by
   letI : IsClosedImmersion z := isClosedImmersion_section z hz
   let hIso : IsIso (restrictIdealModuleToUnit z V.ι) :=
     restrictIdealModuleToUnit_isIso_of_preimage_eq_bot z V hV
@@ -301,8 +301,8 @@ private theorem sectionPoleSheaf_cartier_away_subopen_transition
           (Scheme.Modules.restrictOpenTrivialization hWV
             (sectionPoleSheafTrivializationOfSectionPreimageEqBot
               z hz V hV))).hom ≫
-        SheafOfModules.overUnitScalarEnd C.ringCatSheaf W
-          (C.presheaf.map (homOfLE hWU).op r) := by
+        (SheafOfModules.overUnitScalarEnd C.ringCatSheaf W
+          (C.presheaf.map (homOfLE hWU).op r)).asHom := by
   exact overTrivialization_hom_eq_comp_scalar_of_unit_coefficients
     (sectionPoleSheaf π z hz) (sectionPoleUnitHom π z hz) W
     (Scheme.Modules.overTrivializationOfRestrictIso
@@ -343,7 +343,7 @@ theorem sectionPoleSheaf_cartier_away_overlap_transition
         (sectionPoleSheaf π z hz) W eCartier).hom =
       (Scheme.Modules.overTrivializationOfRestrictIso
           (sectionPoleSheaf π z hz) W eAway).hom ≫
-        SheafOfModules.overUnitScalarEnd C.ringCatSheaf W rW := by
+        (SheafOfModules.overUnitScalarEnd C.ringCatSheaf W rW).asHom := by
   exact sectionPoleSheaf_cartier_away_subopen_transition
     z hz U r hr hspan hnzd V hV (U.1 ⊓ V) inf_le_left inf_le_right
 
@@ -351,7 +351,7 @@ theorem sectionPoleSheaf_cartier_away_overlap_transition
 over-site of an open is an isomorphism only if the section is a unit. -/
 private theorem isUnit_of_isIso_overUnitScalarEnd {X : Scheme.{u}} (U : X.Opens)
     (r : Γ(X, U))
-    (h : IsIso (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r)) :
+    (h : IsIso (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom) :
     IsUnit r := by
   have hEnd : IsUnit (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) := by
     rw [CategoryTheory.isUnit_iff_isIso]
@@ -366,11 +366,11 @@ private theorem isUnit_of_overTrivialization_eq_comp_scalar
     {X : Scheme.{u}} {M : X.Modules} {U : X.Opens}
     {e f : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)} {r : Γ(X, U)}
     (h : e.hom =
-      f.hom ≫ SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) :
+      f.hom ≫ (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom) :
     IsUnit r := by
   refine isUnit_of_isIso_overUnitScalarEnd U r ?_
   have hscalar :
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r = f.inv ≫ e.hom := by
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom = f.inv ≫ e.hom := by
     rw [h, ← Category.assoc, f.inv_hom_id, Category.id_comp]
   rw [hscalar]
   infer_instance
@@ -407,8 +407,8 @@ private theorem sectionPoleSheafPower_cartier_away_subopen_transition
           (Scheme.Modules.restrictOpenTrivialization hWV
             (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
               z hz V hV n))).hom ≫
-        SheafOfModules.overUnitScalarEnd C.ringCatSheaf W
-          (C.presheaf.map (homOfLE hWU).op r ^ n) := by
+        (SheafOfModules.overUnitScalarEnd C.ringCatSheaf W
+          (C.presheaf.map (homOfLE hWU).op r ^ n)).asHom := by
   let eCartier :=
     Scheme.Modules.restrictOpenTrivialization hWU
       (sectionPoleSheafTrivializationOfCartierGenerator
@@ -510,7 +510,7 @@ theorem sectionPoleSheafPower_cartier_away_overlap_transition
         (sectionPoleSheafPower π z hz n) W eCartier).hom =
       (Scheme.Modules.overTrivializationOfRestrictIso
           (sectionPoleSheafPower π z hz n) W eAway).hom ≫
-        SheafOfModules.overUnitScalarEnd C.ringCatSheaf W (rW ^ n) := by
+        (SheafOfModules.overUnitScalarEnd C.ringCatSheaf W (rW ^ n)).asHom := by
   exact sectionPoleSheafPower_cartier_away_subopen_transition
     z hz U r hr hspan hnzd V hV (U.1 ⊓ V) inf_le_left inf_le_right n
 

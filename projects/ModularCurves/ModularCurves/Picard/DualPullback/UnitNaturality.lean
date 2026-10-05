@@ -361,7 +361,7 @@ private theorem unitEnd_comp_eq_id_of_terminal_oneT
       (show (Y.ringCatSheaf.over V).obj.obj
         (.op (Over.mk (𝟙 V))) from 1)) :
     a ≫ b = 𝟙 _ := by
-  apply unitEnd_eq_id_of_terminal_oneT Y.ringCatSheaf V
+  apply unitEnd_eq_id_of_terminal_oneT Y.ringCatSheaf V (.of (a ≫ b))
   erw [sheafOfModules_comp_app_apply]
   exact h
 
@@ -407,12 +407,12 @@ private theorem dualUnitObjIso_inv_app_oneT (U : X.Opens) :
     (dualUnitObjIso (X := X)).inv.val.app (.op U)
         (show X.presheaf.obj (.op U) from 1) =
       𝟙 (_root_.SheafOfModules.unit (X.ringCatSheaf.over U)) := by
-  change (ModularCurves.SheafOfModules.dualUnitLinearEquiv
-    X.ringCatSheaf U).symm 1 = _
-  change ModularCurves.SheafOfModules.overUnitScalarEnd
-    X.ringCatSheaf U 1 = _
-  exact map_one (ModularCurves.SheafOfModules.overUnitScalarEndRingHom
-    X.ringCatSheaf U)
+  change ((ModularCurves.SheafOfModules.dualUnitLinearEquiv
+    X.ringCatSheaf U).symm 1).asHom = _
+  change (ModularCurves.SheafOfModules.overUnitScalarEnd
+    X.ringCatSheaf U 1).asHom = _
+  exact congrArg End.asHom (map_one (ModularCurves.SheafOfModules.overUnitScalarEndRingHom
+    X.ringCatSheaf U))
 
 private theorem unit_hom_ext_top_one {M : X.Modules}
     {p q : unitObj X ⟶ M}

@@ -1087,7 +1087,7 @@ private theorem iUnion_T_p_lower_tile_family_isFundamentalDomain_conj
       (⋃ i, (r i : PSL(2, ℝ)) • (Gamma1_fundDomain_PSL N : Set ℍ)) μ_hyp :=
     hbase.iUnion_smul_of_transversal e (fun i ↦ rfl)
   have htrans := htool.image_of_equiv (Equiv.refl ℍ)
-    (MeasureTheory.Measure.QuasiMeasurePreserving.id μ_hyp)
+    (MeasureTheory.QuasiMeasurePreserving.id μ_hyp)
     (Subgroup.subgroupOfEquivOfLe hKG).symm.toEquiv (fun _ _ ↦ rfl)
   simp only [Equiv.coe_refl, Set.image_id] at htrans
   exact htrans

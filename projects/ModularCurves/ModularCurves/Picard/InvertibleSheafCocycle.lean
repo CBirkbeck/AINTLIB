@@ -37,13 +37,15 @@ private noncomputable def trivializationTransitionEndUnit
     {X : Scheme.{u}} {M : X.Modules} (U : X.Opens)
     (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
     (End (SheafOfModules.unit (X.ringCatSheaf.over U)))ˣ where
-  val := e.inv ≫ g.hom
-  inv := g.inv ≫ e.hom
+  val := .of (e.inv ≫ g.hom)
+  inv := .of (g.inv ≫ e.hom)
   val_inv := by
-    rw [End.mul_def, End.one_def]
+    ext1
+    rw [End.mul_asHom, End.one_asHom]
     simp
   inv_val := by
-    rw [End.mul_def, End.one_def]
+    ext1
+    rw [End.mul_asHom, End.one_asHom]
     simp
 
 /-- The unit by which two over-site trivializations of an invertible sheaf differ. -/
@@ -59,12 +61,12 @@ noncomputable def trivializationTransitionUnit
 theorem overUnitScalarEnd_transitionUnit
     {X : Scheme.{u}} {M : X.Modules} (U : X.Opens)
     (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
-    ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
-      (trivializationTransitionUnit U e g : Γ(X, U)) =
+    (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
+      (trivializationTransitionUnit U e g : Γ(X, U))).asHom =
       e.inv ≫ g.hom := by
   rw [trivializationTransitionUnit, Units.coe_map]
-  exact (ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv
-    X.ringCatSheaf U).apply_symm_apply _
+  exact congrArg End.asHom ((ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv
+    X.ringCatSheaf U).apply_symm_apply _)
 
 @[simp]
 theorem trivializationTransitionUnit_self
@@ -75,16 +77,16 @@ theorem trivializationTransitionUnit_self
   let E := ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv
     X.ringCatSheaf U
   have hee : E (trivializationTransitionUnit U e e : Γ(X, U)) =
-      e.inv ≫ e.hom := by
+      .of (e.inv ≫ e.hom) := by
     dsimp only [E]
-    exact overUnitScalarEnd_transitionUnit U e e
+    exact End.ext (overUnitScalarEnd_transitionUnit U e e)
   apply E.injective
   calc
     E (trivializationTransitionUnit U e e : Γ(X, U)) =
-        (show End (SheafOfModules.unit (X.ringCatSheaf.over U)) from
-          e.inv ≫ e.hom) := hee
+        (End.of (e.inv ≫ e.hom)) := hee
     _ = (1 : End (SheafOfModules.unit (X.ringCatSheaf.over U))) := by
-      rw [End.one_def]
+      ext1
+      rw [End.one_asHom]
       exact e.inv_hom_id
     _ = E (1 : Γ(X, U)) := E.map_one.symm
 
@@ -97,26 +99,25 @@ theorem trivializationTransitionUnit_symm
   let E := ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv
     X.ringCatSheaf U
   have heg : E (trivializationTransitionUnit U e g : Γ(X, U)) =
-      e.inv ≫ g.hom := by
+      .of (e.inv ≫ g.hom) := by
     dsimp only [E]
-    exact overUnitScalarEnd_transitionUnit U e g
+    exact End.ext (overUnitScalarEnd_transitionUnit U e g)
   have hge : E (trivializationTransitionUnit U g e : Γ(X, U)) =
-      g.inv ≫ e.hom := by
+      .of (g.inv ≫ e.hom) := by
     dsimp only [E]
-    exact overUnitScalarEnd_transitionUnit U g e
+    exact End.ext (overUnitScalarEnd_transitionUnit U g e)
   apply E.injective
   calc
     E (↑(trivializationTransitionUnit U e g *
         trivializationTransitionUnit U g e) : Γ(X, U)) =
         E (trivializationTransitionUnit U e g : Γ(X, U)) *
           E (trivializationTransitionUnit U g e : Γ(X, U)) := E.map_mul _ _
-    _ = (show End (SheafOfModules.unit (X.ringCatSheaf.over U)) from
-          e.inv ≫ g.hom) *
-        (show End (SheafOfModules.unit (X.ringCatSheaf.over U)) from
-          g.inv ≫ e.hom) := by
+    _ = (End.of (e.inv ≫ g.hom)) *
+        (End.of (g.inv ≫ e.hom)) := by
       exact congrArg₂ (· * ·) heg hge
     _ = 1 := by
-      rw [End.mul_def, End.one_def]
+      ext1
+      rw [End.mul_asHom, End.one_asHom]
       simp
     _ = E (1 : Γ(X, U)) := E.map_one.symm
 
@@ -131,31 +132,29 @@ theorem trivializationTransitionUnit_trans
   let E := ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv
     X.ringCatSheaf U
   have hgh : E (trivializationTransitionUnit U g h : Γ(X, U)) =
-      g.inv ≫ h.hom := by
+      .of (g.inv ≫ h.hom) := by
     dsimp only [E]
-    exact overUnitScalarEnd_transitionUnit U g h
+    exact End.ext (overUnitScalarEnd_transitionUnit U g h)
   have heg : E (trivializationTransitionUnit U e g : Γ(X, U)) =
-      e.inv ≫ g.hom := by
+      .of (e.inv ≫ g.hom) := by
     dsimp only [E]
-    exact overUnitScalarEnd_transitionUnit U e g
+    exact End.ext (overUnitScalarEnd_transitionUnit U e g)
   have heh : E (trivializationTransitionUnit U e h : Γ(X, U)) =
-      e.inv ≫ h.hom := by
+      .of (e.inv ≫ h.hom) := by
     dsimp only [E]
-    exact overUnitScalarEnd_transitionUnit U e h
+    exact End.ext (overUnitScalarEnd_transitionUnit U e h)
   apply E.injective
   calc
     E (↑(trivializationTransitionUnit U g h *
         trivializationTransitionUnit U e g) : Γ(X, U)) =
         E (trivializationTransitionUnit U g h : Γ(X, U)) *
           E (trivializationTransitionUnit U e g : Γ(X, U)) := E.map_mul _ _
-    _ = (show End (SheafOfModules.unit (X.ringCatSheaf.over U)) from
-          g.inv ≫ h.hom) *
-        (show End (SheafOfModules.unit (X.ringCatSheaf.over U)) from
-          e.inv ≫ g.hom) := by
+    _ = (End.of (g.inv ≫ h.hom)) *
+        (End.of (e.inv ≫ g.hom)) := by
       exact congrArg₂ (· * ·) hgh heg
-    _ = (show End (SheafOfModules.unit (X.ringCatSheaf.over U)) from
-          e.inv ≫ h.hom) := by
-      rw [End.mul_def]
+    _ = (End.of (e.inv ≫ h.hom)) := by
+      ext1
+      rw [End.mul_asHom]
       simp
     _ = E (trivializationTransitionUnit U e h : Γ(X, U)) := heh.symm
 
@@ -181,17 +180,17 @@ theorem trivializationTransitionUnit_restrict
   let s := trivializationTransitionUnit U e g
   let sV : Γ(X, V) := X.presheaf.map (homOfLE hVU).op (s : Γ(X, U))
   have htransition : g.hom = e.hom ≫
-      ModularCurves.SheafOfModules.overUnitScalarEnd
-        X.ringCatSheaf U (s : Γ(X, U)) := by
+      (ModularCurves.SheafOfModules.overUnitScalarEnd
+        X.ringCatSheaf U (s : Γ(X, U))).asHom := by
     rw [overUnitScalarEnd_transitionUnit]
     simp
   have hrestrict : gV.hom = eV.hom ≫
-      ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf V sV := by
+      (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf V sV).asHom := by
     have h := ModularCurves.restrictOverTrivialization_hom_eq_comp_scalar
       M hVU e g (s : Γ(X, U)) htransition
     simpa only [j, eV, gV, sV] using h
   have hcoordinate : eV.inv ≫ gV.hom =
-      ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf V sV := by
+      (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf V sV).asHom := by
     rw [hrestrict]
     exact eV.inv_hom_id_assoc _
   apply Units.ext
@@ -201,10 +200,9 @@ theorem trivializationTransitionUnit_restrict
   apply E.injective
   calc
     E (trivializationTransitionUnit V eV gV : Γ(X, V)) =
-        (show End (SheafOfModules.unit (X.ringCatSheaf.over V)) from
-          eV.inv ≫ gV.hom) := overUnitScalarEnd_transitionUnit V eV gV
+        (End.of (eV.inv ≫ gV.hom)) := End.ext (overUnitScalarEnd_transitionUnit V eV gV)
     _ = ModularCurves.SheafOfModules.overUnitScalarEnd
-        X.ringCatSheaf V sV := hcoordinate
+        X.ringCatSheaf V sV := End.ext hcoordinate
     _ = E sV := rfl
 
 /-- The transition unit between two trivializations on an open subscheme. -/

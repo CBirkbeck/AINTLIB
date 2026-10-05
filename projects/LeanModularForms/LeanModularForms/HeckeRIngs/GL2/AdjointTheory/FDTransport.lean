@@ -618,7 +618,7 @@ theorem isFundamentalDomain_Gamma_p_α_PSL_canonical_at_PSL_R
     simp
   rw [← h_image_eq]
   refine (isFundamentalDomain_Gamma_p_α_PSL_canonical (N := N) α).image_of_equiv (Equiv.refl ℍ)
-    (MeasureTheory.Measure.QuasiMeasurePreserving.id μ_hyp)
+    (MeasureTheory.QuasiMeasurePreserving.id μ_hyp)
     ((Subgroup.equivMapOfInjective (image_Gamma_p_α_PSL (N := N) α)
       PSL2Z_to_PSL2R PSL2Z_to_PSL2R_injective).toEquiv.symm) ?_
   intro g τ
@@ -650,7 +650,7 @@ theorem isFundamentalDomain_Gamma_p_α_fundDomain_PSL_at_PSL_R
     IsFundamentalDomain ((Gamma_p_α (N := N) α).map SL2Z_to_PSL2R)
       (Gamma_p_α_fundDomain_PSL (N := N) α) μ_hyp := by
   have h_image := (Gamma_p_α_PSL_R_FD_finite_index_decomp_auto (N := N) α).image_of_equiv
-    (Equiv.refl ℍ) (MeasureTheory.Measure.QuasiMeasurePreserving.id _)
+    (Equiv.refl ℍ) (MeasureTheory.QuasiMeasurePreserving.id _)
     ((Subgroup.subgroupOfEquivOfLe (Subgroup.map_mono (Gamma_p_α_le_Gamma1 α))).symm.toEquiv)
     (fun _ _ ↦ rfl)
   rw [Gamma_p_α_fundDomain_PSL]

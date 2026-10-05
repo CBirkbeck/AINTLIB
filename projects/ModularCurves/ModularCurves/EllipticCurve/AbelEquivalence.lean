@@ -89,16 +89,16 @@ theorem eval_smul {E : Scheme.{u}} (M : E.Modules) (V : E.Opens)
       (show ↑(E.ringCatSheaf.obj.obj (Opposite.op V)) from ψ.val.app
         (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x) * r := by
   letI := ModularCurves.SheafOfModules.dualSectionsModule E.ringCatSheaf M V
-  have hcomp : (r • ψ) = ψ ≫ ModularCurves.SheafOfModules.overUnitScalarEnd
-    E.ringCatSheaf V r := rfl
+  have hcomp : (r • ψ) = ψ ≫ (ModularCurves.SheafOfModules.overUnitScalarEnd
+    E.ringCatSheaf V r).asHom := rfl
   rw [hcomp]
-  have hsplit : (ψ ≫ ModularCurves.SheafOfModules.overUnitScalarEnd
-      E.ringCatSheaf V r).val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x =
-      (ModularCurves.SheafOfModules.overUnitScalarEnd E.ringCatSheaf V r).val.app
+  have hsplit : (ψ ≫ (ModularCurves.SheafOfModules.overUnitScalarEnd
+      E.ringCatSheaf V r).asHom).val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x =
+      (ModularCurves.SheafOfModules.overUnitScalarEnd E.ringCatSheaf V r).asHom.val.app
         (Opposite.op (CategoryTheory.Over.mk (𝟙 V)))
         (ψ.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x) := rfl
   rw [hsplit]
-  have h0 : (ModularCurves.SheafOfModules.overUnitScalarEnd E.ringCatSheaf V r).val.app
+  have h0 : (ModularCurves.SheafOfModules.overUnitScalarEnd E.ringCatSheaf V r).asHom.val.app
       (Opposite.op (CategoryTheory.Over.mk (𝟙 V)))
       (ψ.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 V))) x) =
       (show ↑(E.ringCatSheaf.obj.obj (Opposite.op V)) from ψ.val.app
@@ -601,9 +601,9 @@ theorem span_range_eval_eq_of_trivialization {E : Scheme.{u}} (M : E.Modules)
   apply le_antisymm
   · refine Ideal.span_le.mpr ?_
     rintro x ⟨φ, rfl⟩
-    have hφ : φ = t.hom ≫ ModularCurves.SheafOfModules.overUnitScalarEnd
+    have hφ : φ = t.hom ≫ (ModularCurves.SheafOfModules.overUnitScalarEnd
         E.ringCatSheaf V (ModularCurves.SheafOfModules.dualTrivializationLinearEquiv
-          E.ringCatSheaf M V t φ) :=
+          E.ringCatSheaf M V t φ)).asHom :=
       ((ModularCurves.SheafOfModules.dualTrivializationLinearEquiv
         E.ringCatSheaf M V t).symm_apply_apply φ).symm
     rw [hφ]

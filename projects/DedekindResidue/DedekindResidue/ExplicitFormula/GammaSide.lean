@@ -2619,7 +2619,7 @@ theorem gammaFT_ae_eq_fourierL2 {F : ℝ → ℂ} (hF : Integrable F)
       ((𝓕 (hFdiv2.toLp h) : Lp ℂ 2 (volume : Measure ℝ)) : ℝ → ℂ) := by
     exact tendstoInMeasure_of_tendsto_eLpNorm (p := 2) (by norm_num) heLp
   obtain ⟨ns, hns_mono, hns_ae⟩ := hmeas.exists_seq_tendsto_ae
-  have hqmp : Measure.QuasiMeasurePreserving (fun t : ℝ => -t/(2*π))
+  have hqmp : QuasiMeasurePreserving (fun t : ℝ => -t/(2*π))
       volume volume := by
     have h0 : (fun t : ℝ => -t/(2*π)) = fun t : ℝ => (-(2*π))⁻¹ * t := by
       funext t
@@ -2686,7 +2686,7 @@ theorem integrable_muFT_mul_gammaFT {k F : ℝ → ℂ}
   have hkae : (fun t : ℝ => 𝓕 k (-t/(2*π))) =ᵐ[volume]
       (fun t : ℝ => repk (-t/(2*π))) := by
     have h0 : (𝓕 k) =ᵐ[volume] repk := (coeFn_fourier_toLp_two hk1 hk2).symm
-    have hqmp : Measure.QuasiMeasurePreserving (fun t : ℝ => -t/(2*π))
+    have hqmp : QuasiMeasurePreserving (fun t : ℝ => -t/(2*π))
         (volume : Measure ℝ) (volume : Measure ℝ) := by
       have h1 : (fun t : ℝ => -t/(2*π)) = fun t : ℝ => (-(2*π))⁻¹ * t := by
         funext t
@@ -2721,7 +2721,7 @@ theorem integral_muFT_mul_gammaFT {k F : ℝ → ℂ}
   have hkae : (fun t : ℝ => 𝓕 k (-t/(2*π))) =ᵐ[volume]
       (fun t : ℝ => repk (-t/(2*π))) := by
     have h0 : (𝓕 k) =ᵐ[volume] repk := (coeFn_fourier_toLp_two hk1 hk2).symm
-    have hqmp : Measure.QuasiMeasurePreserving (fun t : ℝ => -t/(2*π))
+    have hqmp : QuasiMeasurePreserving (fun t : ℝ => -t/(2*π))
         (volume : Measure ℝ) (volume : Measure ℝ) := by
       have h1 : (fun t : ℝ => -t/(2*π)) = fun t : ℝ => (-(2*π))⁻¹ * t := by
         funext t

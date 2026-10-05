@@ -90,10 +90,10 @@ private theorem overUnitScalarIso_one {Y : Scheme.{u}} (U : Y.Opens) :
     change IsMulCommutative (Y.presheaf.obj Z)
     exact ⟨⟨fun a b => mul_comm a b⟩⟩
   apply Iso.ext
-  show SheafOfModules.overUnitScalarEnd Y.ringCatSheaf U ((1 : Γ(Y, U)ˣ) : Γ(Y, U)) =
+  show (SheafOfModules.overUnitScalarEnd Y.ringCatSheaf U ((1 : Γ(Y, U)ˣ) : Γ(Y, U))).asHom =
     𝟙 _
-  exact ((SheafOfModules.overUnitScalarEndRingHom
-    Y.ringCatSheaf U).map_one).trans End.one_def
+  exact (congrArg End.asHom (SheafOfModules.overUnitScalarEndRingHom
+    Y.ringCatSheaf U).map_one).trans (End.one_asHom _)
 
 private theorem mul_inv_mul_inv_cancel' {G : Type*} [CommGroup G] (a b : G) :
     a * b⁻¹ * a⁻¹ * b = 1 := by

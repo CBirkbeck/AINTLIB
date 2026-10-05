@@ -430,7 +430,7 @@ theorem sectionPoleUnitHom_over_comp_trivializationOfSectionPreimageEqBot
     ((sectionPoleUnitHom π z hz).over U) ≫
         (SheafOfModules.dualOverIsoOfIso C.ringCatSheaf
           (sectionIdealModule π z hz) U eIdeal).hom =
-      SheafOfModules.overUnitScalarEnd C.ringCatSheaf U 1 := by
+      (SheafOfModules.overUnitScalarEnd C.ringCatSheaf U 1).asHom := by
   letI : IsClosedImmersion z := isClosedImmersion_section z hz
   let hIso : IsIso (restrictIdealModuleToUnit z U.ι) :=
     restrictIdealModuleToUnit_isIso_of_preimage_eq_bot z U hU
@@ -446,9 +446,9 @@ theorem sectionPoleUnitHom_over_comp_trivializationOfSectionPreimageEqBot
       eIdeal.inv ≫ eIdeal.hom :=
     congrArg (fun p ↦ eIdeal.inv ≫ p) he.symm
   have hid : eIdeal.inv ≫ eIdeal.hom = 𝟙 _ := eIdeal.inv_hom_id
-  have hone : (𝟙 _) = SheafOfModules.overUnitScalarEnd
-      C.ringCatSheaf U 1 :=
-    (SheafOfModules.overUnitScalarEndRingHom C.ringCatSheaf U).map_one.symm
+  have hone : (𝟙 _) = (SheafOfModules.overUnitScalarEnd
+      C.ringCatSheaf U 1).asHom :=
+    (congrArg End.asHom (SheafOfModules.overUnitScalarEndRingHom C.ringCatSheaf U).map_one).symm
   exact hcomp.trans (hid.trans hone)
 
 /-- Away from the section, every consecutive pole-filtration map is the

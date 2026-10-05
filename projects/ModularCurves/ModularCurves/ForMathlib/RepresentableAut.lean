@@ -80,22 +80,22 @@ representing object**, as a group homomorphism. This is the Yoneda step of
 KM 4.7's "Let `G` operate upon `𝕸(𝒫,δ)` through its action on `δ`": a group
 action `G →* Aut F` composes with this to give `G →* Aut Y`. -/
 noncomputable def autMulHom (r : F.RepresentableBy Y) : Aut F →* Aut Y where
-  toFun e :=
-    { hom := r.transportHom e.hom
-      inv := r.transportHom e.inv
+  toFun e := .of
+    { hom := r.transportHom e.asIso.hom
+      inv := r.transportHom e.asIso.inv
       hom_inv_id := by
-        rw [← r.transportHom_comp, e.hom_inv_id, r.transportHom_id]
+        rw [← r.transportHom_comp, e.asIso.hom_inv_id, r.transportHom_id]
       inv_hom_id := by
-        rw [← r.transportHom_comp, e.inv_hom_id, r.transportHom_id] }
+        rw [← r.transportHom_comp, e.asIso.inv_hom_id, r.transportHom_id] }
   map_one' := by
     ext
     exact r.transportHom_id
   map_mul' e₁ e₂ := by
     ext
-    exact r.transportHom_comp e₂.hom e₁.hom
+    exact r.transportHom_comp e₂.asIso.hom e₁.asIso.hom
 
 @[simp]
 theorem autMulHom_apply_hom (r : F.RepresentableBy Y) (e : Aut F) :
-    (r.autMulHom e).hom = r.transportHom e.hom := rfl
+    (r.autMulHom e).asIso.hom = r.transportHom e.asIso.hom := rfl
 
 end CategoryTheory.Functor.RepresentableBy

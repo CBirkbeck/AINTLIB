@@ -105,7 +105,7 @@ representation datum (the relative mirror of `RepresentableBy.transportHom`): th
 over-`f` endomorphism of `Z` classifying `α(univ)`, where `univ` is the universal
 value classified by `𝟙 Z`. -/
 noncomputable def relRepAut (d : RelRepData Q X) (α : Aut Q) : d.Z ⟶ d.Z :=
-  ((d.eqv d.f).symm (α.hom.app (Opposite.op (X.pullbackAlong d.f))
+  ((d.eqv d.f).symm (α.asIso.hom.app (Opposite.op (X.pullbackAlong d.f))
     (d.eqv d.f ⟨𝟙 d.Z, Category.id_comp d.f⟩))).1
 
 /-- The transport lies over the base. -/
@@ -115,7 +115,7 @@ theorem relRepAut_over (d : RelRepData Q X) (α : Aut Q) : relRepAut d α ≫ d.
 /-- The defining equation of the transport: it classifies `α` of the universal value. -/
 theorem eqv_relRepAut (d : RelRepData Q X) (α : Aut Q) :
     d.eqv d.f ⟨relRepAut d α, relRepAut_over d α⟩ =
-      α.hom.app (Opposite.op (X.pullbackAlong d.f))
+      α.asIso.hom.app (Opposite.op (X.pullbackAlong d.f))
         (d.eqv d.f ⟨𝟙 d.Z, Category.id_comp d.f⟩) :=
   (d.eqv d.f).apply_symm_apply _
 
@@ -125,7 +125,7 @@ classified value. Pure `d.nat`-naturality. -/
 theorem eqv_comp_relRepAut (d : RelRepData Q X) {T : Scheme.{u}} (v : T ⟶ d.Z)
     {g : T ⟶ X.base} (hv : v ≫ d.f = g) (α : Aut Q) :
     d.eqv g ⟨v ≫ relRepAut d α, by rw [Category.assoc, relRepAut_over, hv]⟩ =
-      α.hom.app (Opposite.op (X.pullbackAlong g)) (d.eqv g ⟨v, hv⟩) := by
+      α.asIso.hom.app (Opposite.op (X.pullbackAlong g)) (d.eqv g ⟨v, hv⟩) := by
   subst hv
   -- `v` classifies the pullback of the universal value
   have recon : d.eqv (v ≫ d.f) ⟨v, rfl⟩ =
@@ -135,7 +135,7 @@ theorem eqv_comp_relRepAut (d : RelRepData Q X) {T : Scheme.{u}} (v : T ⟶ d.Z)
     simpa only [Category.comp_id] using hnat
   have hnat := d.nat d.f v ⟨relRepAut d α, relRepAut_over d α⟩
   rw [eqv_relRepAut] at hnat
-  rw [hnat, ← NatTrans.naturality_apply α.hom (X.pullbackAlongMap d.f v).op
+  rw [hnat, ← NatTrans.naturality_apply α.asIso.hom (X.pullbackAlongMap d.f v).op
     (d.eqv d.f ⟨𝟙 d.Z, Category.id_comp d.f⟩), ← recon]
 
 /-- The transport of the identity is the identity. -/
@@ -189,7 +189,7 @@ theorem relRepSchemeAction_equivariant {G : Type*} [Group G] (φ : G →* Aut Q)
     (h : { h : T ⟶ d.Z // h ≫ d.f = g }) (γ : G) :
     d.eqv g ⟨h.1 ≫ (relRepSchemeAction φ d).hom γ,
         by rw [Category.assoc, relRepSchemeAction_over, h.2]⟩ =
-      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong g)) (d.eqv g h) :=
+      (φ γ⁻¹).asIso.hom.app (Opposite.op (X.pullbackAlong g)) (d.eqv g h) :=
   eqv_comp_relRepAut d h.1 h.2 (φ γ⁻¹)
 
 end RelRepData
@@ -753,10 +753,10 @@ private theorem levelThree_torsor (hinv : IsUnit ((3 : ℕ) : R)) (X : EllObj R)
   -- the induced scheme action agrees with `glSmul` on classified level structures
   have hact : ∀ (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod 3))
       (L : (gammaFullNaiveProblem R 3).obj (Opposite.op (X.pullbackAlong g))),
-      (gammaFullNaiveGlAction R 3 γ⁻¹).hom.app (Opposite.op (X.pullbackAlong g)) L =
+      (gammaFullNaiveGlAction R 3 γ⁻¹).asIso.hom.app (Opposite.op (X.pullbackAlong g)) L =
         (X.pullbackAlong g).curve.glSmul γ L := by
     intro γ L
-    show (gammaFullNaiveGlAut R 3 (γ⁻¹)⁻¹).hom.app _ L = _
+    show (gammaFullNaiveGlAut R 3 (γ⁻¹)⁻¹).asIso.hom.app _ L = _
     rw [inv_inv]
     rfl
   -- the fibre condition `b ≫ σZ γ = a` is exactly the `glSmul`-equation `glSmul γ Lb = La`,

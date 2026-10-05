@@ -816,7 +816,7 @@ theorem overTriv_pullbackIdealTriv_inv_comp_toUnitHom {X : Scheme.{u}}
         (restrictIsoOfPullbackIso (idealModule J) V.1
           (pullbackIdealTrivOfPrincipal J V f hspan hnzd hfmem))).inv ≫
       (idealModuleToUnitHom J).over V.1 =
-    SheafOfModules.overUnitScalarEnd X.ringCatSheaf V.1 f := by
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V.1 f).asHom := by
   rw [restrictIsoOfPullbackIso_pullbackIdealTrivOfPrincipal]
   haveI := isIso_idealGenHom_of_principal J V f hspan hnzd hfmem
   let G := (Scheme.Modules.overEquiv V.1).functor
@@ -828,7 +828,7 @@ theorem overTriv_pullbackIdealTriv_inv_comp_toUnitHom {X : Scheme.{u}}
     Functor.FullyFaithful.preimageIso_inv, Functor.FullyFaithful.map_preimage,
     Iso.trans_inv, Iso.symm_inv]
   have hs : G.map (ModularCurves.SheafOfModules.overUnitScalarEnd
-      X.ringCatSheaf V.1 f) =
+      X.ringCatSheaf V.1 f).asHom =
       C.hom ≫ ModularCurves.unitEndomorphismOfTopSection
         (Scheme.Modules.openTopSection V.1 f) ≫ C.inv := by
     rw [← Category.assoc, Iso.eq_comp_inv]
@@ -865,7 +865,7 @@ theorem mono_overUnitScalarEnd_of_nonZeroDivisors {X : Scheme.{u}} (V : X.Opens)
     (hr : ∀ (W : X.Opens) (h : W ≤ V),
       X.presheaf.map (homOfLE h).op r ∈ nonZeroDivisors Γ(X, W)) :
     Mono ((SheafOfModules.overUnitScalarEnd X.ringCatSheaf V r :
-      CategoryTheory.End (SheafOfModules.unit (X.ringCatSheaf.over V)))) := by
+      CategoryTheory.End (SheafOfModules.unit (X.ringCatSheaf.over V)))).asHom := by
   constructor
   intro Z g₁ g₂ hgg
   apply _root_.SheafOfModules.hom_ext
@@ -919,10 +919,9 @@ theorem mono_idealModuleToUnitHom_over {X : Scheme.{u}} (J : X.IdealSheafData)
 /-- **(U5-L1a 3c-iii C(i))** The scalar endomorphisms are multiplicative:
 `scalar (a·b) = scalar a ≫ scalar b`. -/
 theorem overUnitScalarEnd_mul {X : Scheme.{u}} (V : X.Opens) (a b : Γ(X, V)) :
-    SheafOfModules.overUnitScalarEnd X.ringCatSheaf V (a * b) =
-    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V a ≫
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V b :
-      CategoryTheory.End (SheafOfModules.unit (X.ringCatSheaf.over V))) := by
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V (a * b)).asHom =
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V a).asHom ≫
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V b).asHom := by
   apply _root_.SheafOfModules.hom_ext
   apply PresheafOfModules.hom_ext
   intro W
@@ -957,13 +956,13 @@ theorem trivialization_inv_comp_hom_of_characterisation {X : Scheme.{u}}
       _root_.SheafOfModules.unit (X.ringCatSheaf.over V))
     (r₁ r₂ u : Γ(X, V))
     (h₁ : T₁.inv ≫ (idealModuleToUnitHom J).over V =
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V r₁)
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V r₁).asHom)
     (h₂ : T₂.inv ≫ (idealModuleToUnitHom J).over V =
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V r₂)
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V r₂).asHom)
     (hu : r₁ = u * r₂) :
-    T₁.inv ≫ T₂.hom = SheafOfModules.overUnitScalarEnd X.ringCatSheaf V u := by
+    T₁.inv ≫ T₂.hom = (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V u).asHom := by
   haveI := mono_idealModuleToUnitHom_over J V
-  have key : T₁.inv = SheafOfModules.overUnitScalarEnd X.ringCatSheaf V u ≫ T₂.inv := by
+  have key : T₁.inv = (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V u).asHom ≫ T₂.inv := by
     rw [← cancel_mono ((idealModuleToUnitHom J).over V), h₁, Category.assoc, h₂, hu]
     exact overUnitScalarEnd_mul V u r₂
   rw [key, Category.assoc, Iso.inv_hom_id, Category.comp_id]
@@ -1046,8 +1045,8 @@ theorem overTriv_pullbackIdealTriv_restrict_inv_comp_toUnitHom {X : Scheme.{u}}
             (pullbackIdealTrivOfPrincipal J V f hspan hnzd hfmem)))
         (Over.mk (homOfLE hUV))).inv ≫
       (idealModuleToUnitHom J).over U =
-    SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
-      (X.presheaf.map (homOfLE hUV).op f) :=
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
+      (X.presheaf.map (homOfLE hUV).op f)).asHom :=
   restrictOverTrivialization_inv_comp_over (idealModuleToUnitHom J) V.1
     (Scheme.Modules.overTrivializationOfRestrictIso (idealModule J) V.1
       (restrictIsoOfPullbackIso (idealModule J) V.1
@@ -1077,7 +1076,7 @@ theorem idealTriv_restrict_inv_comp_hom {X : Scheme.{u}} (J : X.IdealSheafData)
           (restrictIsoOfPullbackIso (idealModule J) Vj.1
             (pullbackIdealTrivOfPrincipal J Vj fj hspanj hnzdj hfmemj)))
         (Over.mk (homOfLE inf_le_right))).hom =
-    SheafOfModules.overUnitScalarEnd X.ringCatSheaf (Vi.1 ⊓ Vj.1) u :=
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf (Vi.1 ⊓ Vj.1) u).asHom :=
   trivialization_inv_comp_hom_of_characterisation J (Vi.1 ⊓ Vj.1) _ _
     (X.presheaf.map (homOfLE (inf_le_left : Vi.1 ⊓ Vj.1 ≤ Vi.1)).op fi)
     (X.presheaf.map (homOfLE (inf_le_right : Vi.1 ⊓ Vj.1 ≤ Vj.1)).op fj) u
@@ -1118,6 +1117,7 @@ theorem trivializationTransitionUnit_idealTriv {X : Scheme.{u}} (J : X.IdealShea
   apply Units.ext
   apply (SheafOfModules.overUnitScalarEndRingEquiv
     X.ringCatSheaf (Vi.1 ⊓ Vj.1)).injective
+  apply End.ext
   refine Eq.trans (overUnitScalarEnd_transitionUnit (Vi.1 ⊓ Vj.1) _ _) ?_
   exact idealTriv_restrict_inv_comp_hom J Vi Vj fi fj hspani hnzdi hfmemi
     hspanj hnzdj hfmemj u hu
@@ -1365,7 +1365,7 @@ theorem overSmulEndo_naturality {X : Scheme.{u}} {M N : X.Modules} (U : X.Opens)
 `overUnitScalarEnd` (left- vs right-multiplication, commutativity). -/
 theorem overSmulEndo_unit {X : Scheme.{u}} (U : X.Opens) (r : Γ(X, U)) :
     overSmulEndo (unitObj X) U r =
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r := by
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom := by
   apply _root_.SheafOfModules.hom_ext
   apply PresheafOfModules.hom_ext
   intro W
@@ -1986,12 +1986,13 @@ theorem trivializationTransitionUnit_restrictOverTrivialization {X : Scheme.{u}}
     (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M V g
       (Over.mk (homOfLE hWV)))
   have hV := overUnitScalarEnd_transitionUnit V e g
-  have hgh : g.hom = e.hom ≫ ModularCurves.SheafOfModules.overUnitScalarEnd
-      X.ringCatSheaf V (trivializationTransitionUnit V e g : Γ(X, V)) := by
+  have hgh : g.hom = e.hom ≫ (ModularCurves.SheafOfModules.overUnitScalarEnd
+      X.ringCatSheaf V (trivializationTransitionUnit V e g : Γ(X, V))).asHom := by
     refine ((Iso.inv_comp_eq e).mp ?_).symm.symm
     exact hV.symm
   have h911 := ModularCurves.restrictOverTrivialization_hom_eq_comp_scalar
     M hWV e g (trivializationTransitionUnit V e g : Γ(X, V)) hgh
+  apply End.ext
   refine hL.trans ?_
   dsimp only at h911
   refine Eq.trans (congrArg (fun t =>
@@ -2011,7 +2012,7 @@ theorem overTriv_inv_comp_hom_of_restrict_scalar {X : Scheme.{u}}
         (Scheme.Modules.openTopSection W u)) :
     (Scheme.Modules.overTrivializationOfRestrictIso M W ψ₁).inv ≫
       (Scheme.Modules.overTrivializationOfRestrictIso M W ψ₂).hom =
-    SheafOfModules.overUnitScalarEnd X.ringCatSheaf W u := by
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf W u).asHom := by
   apply (Scheme.Modules.overEquiv W).functor.map_injective
   simp only [Functor.map_comp, Scheme.Modules.overTrivializationOfRestrictIso,
     Functor.FullyFaithful.preimageIso_inv, Functor.FullyFaithful.preimageIso_hom,
@@ -2066,6 +2067,7 @@ theorem trivializationTransitionUnit_overTriv_of_inv_comp_hom {X : Scheme.{u}}
   apply Units.ext
   apply (ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv
     X.ringCatSheaf W).injective
+  apply End.ext
   refine (overUnitScalarEnd_transitionUnit W _ _).trans ?_
   refine Eq.trans (overTriv_inv_comp_hom_of_restrict_scalar M W ψ₁ ψ₂
     ((u : Γ(X, W))) h) ?_

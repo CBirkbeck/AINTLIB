@@ -104,8 +104,8 @@ of their transition unit. -/
 theorem localPullbackTrivialization_inv_comp_hom (f : Y ⟶ X) (M : X.Modules) (U : X.Opens)
     (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
     (localPullbackTrivializationT f M U e).inv ≫ (localPullbackTrivializationT f M U g).hom =
-      ModularCurves.SheafOfModules.overUnitScalarEnd Y.ringCatSheaf (f ⁻¹ᵁ U)
-        ((f.app U).hom (trivializationTransitionUnit U e g : Γ(X, U))) := by
+      (ModularCurves.SheafOfModules.overUnitScalarEnd Y.ringCatSheaf (f ⁻¹ᵁ U)
+        ((f.app U).hom (trivializationTransitionUnit U e g : Γ(X, U)))).asHom := by
   apply (overEquiv (f ⁻¹ᵁ U)).functor.map_injective
   rw [Functor.map_comp, overEquiv_map_localPullbackTrivialization_hom,
     overEquiv_map_localPullbackTrivialization_inv]
@@ -113,7 +113,7 @@ theorem localPullbackTrivialization_inv_comp_hom (f : Y ⟶ X) (M : X.Modules) (
       (pullback (f ∣_ U)).map ((overEquiv U).functor.map g.hom) =
       (pullback (f ∣_ U)).map ((overEquiv U).functor.map
         (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
-          (trivializationTransitionUnit U e g : Γ(X, U)))) := by
+          (trivializationTransitionUnit U e g : Γ(X, U))).asHom) := by
     rw [overUnitScalarEnd_transitionUnit, Functor.map_comp, Functor.map_comp]
   calc ((localPullbackUnitIso f U).inv ≫
         (pullback (f ∣_ U)).map ((overEquiv U).functor.map e.inv) ≫
@@ -129,17 +129,17 @@ theorem localPullbackTrivialization_inv_comp_hom (f : Y ⟶ X) (M : X.Modules) (
     _ = (localPullbackUnitIso f U).inv ≫
           (pullback (f ∣_ U)).map ((overEquiv U).functor.map
             (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
-              (trivializationTransitionUnit U e g : Γ(X, U)))) ≫
+              (trivializationTransitionUnit U e g : Γ(X, U))).asHom) ≫
             (localPullbackUnitIso f U).hom := by
         rw [hcomp]
     _ = (localPullbackUnitIso f U).inv ≫ (localPullbackUnitIso f U).hom ≫
           (overEquiv (f ⁻¹ᵁ U)).functor.map
             (ModularCurves.SheafOfModules.overUnitScalarEnd Y.ringCatSheaf (f ⁻¹ᵁ U)
-              ((f.app U).hom (trivializationTransitionUnit U e g : Γ(X, U)))) := by
+              ((f.app U).hom (trivializationTransitionUnit U e g : Γ(X, U)))).asHom := by
         rw [localPullbackUnitIso_scalar]
     _ = (overEquiv (f ⁻¹ᵁ U)).functor.map
           (ModularCurves.SheafOfModules.overUnitScalarEnd Y.ringCatSheaf (f ⁻¹ᵁ U)
-            ((f.app U).hom (trivializationTransitionUnit U e g : Γ(X, U)))) := by
+            ((f.app U).hom (trivializationTransitionUnit U e g : Γ(X, U)))).asHom := by
         rw [Iso.inv_hom_id_assoc]
 
 /-- **(KM p. 88, the meaning of `f_{i,j} ∘ [N]`)** Transition units are natural under pullback:
@@ -155,6 +155,7 @@ theorem trivializationTransitionUnit_localPullbackTrivialization (f : Y ⟶ X) (
     Y.ringCatSheaf (f ⁻¹ᵁ U)).injective ?_
   show ModularCurves.SheafOfModules.overUnitScalarEnd Y.ringCatSheaf (f ⁻¹ᵁ U) _ =
     ModularCurves.SheafOfModules.overUnitScalarEnd Y.ringCatSheaf (f ⁻¹ᵁ U) _
+  apply End.ext
   rw [overUnitScalarEnd_transitionUnit, localPullbackTrivialization_inv_comp_hom]
   rfl
 

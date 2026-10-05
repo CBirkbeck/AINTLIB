@@ -102,22 +102,22 @@ open Opposite
 class is `(A γ).inv`-invariant: `G` acts only through the `δ`-component. -/
 private theorem map_fst_autMulHom_inv {P Q : ModuliProblem R} {G : Type u} [Group G]
     (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
-    P.map (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.op (rM.homEquiv (𝟙 XM)).1 =
+    P.map (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv.op (rM.homEquiv (𝟙 XM)).1 =
       (rM.homEquiv (𝟙 XM)).1 := by
   set η : Aut (P.simul Q) := (P.simulAutSnd Q) (φ γ) with hη
-  have key : rM.homEquiv ((rM.autMulHom η).inv) =
-      (P.simul Q).map (rM.autMulHom η).inv.op (rM.homEquiv (𝟙 XM)) := by
-    conv_lhs => rw [show (rM.autMulHom η).inv =
-      (rM.autMulHom η).inv ≫ 𝟙 XM from (Category.comp_id _).symm]
+  have key : rM.homEquiv ((rM.autMulHom η).asIso.inv) =
+      (P.simul Q).map (rM.autMulHom η).asIso.inv.op (rM.homEquiv (𝟙 XM)) := by
+    conv_lhs => rw [show (rM.autMulHom η).asIso.inv =
+      (rM.autMulHom η).asIso.inv ≫ 𝟙 XM from (Category.comp_id _).symm]
     exact rM.homEquiv_comp _ _
-  have key2 : rM.homEquiv ((rM.autMulHom η).inv) =
-      η.inv.app (op XM) (rM.homEquiv (𝟙 XM)) := by
-    have h := rM.homEquiv_comp_transportHom η.inv (𝟙 XM)
+  have key2 : rM.homEquiv ((rM.autMulHom η).asIso.inv) =
+      η.asIso.inv.app (op XM) (rM.homEquiv (𝟙 XM)) := by
+    have h := rM.homEquiv_comp_transportHom η.asIso.inv (𝟙 XM)
     rw [Category.id_comp] at h
     exact h
-  calc P.map (rM.autMulHom η).inv.op (rM.homEquiv (𝟙 XM)).1
-      = (rM.homEquiv ((rM.autMulHom η).inv)).1 := (congrArg Prod.fst key).symm
-    _ = (η.inv.app (op XM) (rM.homEquiv (𝟙 XM))).1 := congrArg Prod.fst key2
+  calc P.map (rM.autMulHom η).asIso.inv.op (rM.homEquiv (𝟙 XM)).1
+      = (rM.homEquiv ((rM.autMulHom η).asIso.inv)).1 := (congrArg Prod.fst key).symm
+    _ = (η.asIso.inv.app (op XM) (rM.homEquiv (𝟙 XM))).1 := congrArg Prod.fst key2
     _ = (rM.homEquiv (𝟙 XM)).1 := rfl
 
 /-- **([a2-M], the orbit-in-an-affine-open input — DISCHARGED via route 1.)**
@@ -196,7 +196,7 @@ private theorem exists_engineQuotient (P Q : ModuliProblem R) {G : Type u} [Grou
     (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ XM.base),
       t ≫ (P.simulSchemeAction Q φ rM).hom γ = t → IsEmpty T) :
     ∃ (X₀ : EllObj R) (q : XM ⟶ X₀),
-      (∀ γ : G, (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv ≫ q = q) ∧
+      (∀ γ : G, (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv ≫ q = q) ∧
       Epi q.baseHom ∧
       (∀ {W : Scheme.{u}} (F : XM.base ⟶ W),
         (∀ γ : G, (P.simulSchemeAction Q φ rM).hom γ ≫ F = F) →
@@ -241,7 +241,7 @@ private theorem exists_engineQuotient (P Q : ModuliProblem R) {G : Type u} [Grou
     hfree π' hπ'
   -- descend the structure map through the quotient
   have hstructinv : ∀ γ, σ.hom γ ≫ XM.structMap = XM.structMap :=
-    fun γ => (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.base_w
+    fun γ => (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv.base_w
   obtain ⟨structMap₀, hstructMap₀, -⟩ :=
     σ.existsUnique_quotientπ_lift V hVs hVa hVmem XM.structMap hstructinv
   -- assemble `X₀` and the quotient `Ell/R`-morphism `q`
@@ -259,10 +259,10 @@ private theorem exists_engineQuotient (P Q : ModuliProblem R) {G : Type u} [Grou
     -- by construction (`hom_quotientπ` downstairs and upstairs)
     intro γ
     refine EllHom.ext ?_ ?_
-    · show (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom ≫
+    · show (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv.baseHom ≫
           σ.quotientπ V hVs hVa hVmem = σ.quotientπ V hVs hVa hVmem
       exact σ.hom_quotientπ V hVs hVa hVmem γ
-    · show (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.top ≫
+    · show (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv.top ≫
           σE.quotientπ VE hVEs hVEa hVEmem = σE.quotientπ VE hVEs hVEa hVEmem
       exact σE.hom_quotientπ VE hVEs hVEa hVEmem γ
   · exact ⟨fun {W} g₁ g₂ h => σ.quotientπ_hom_ext V hVs hVa hVmem g₁ g₂ h⟩
@@ -297,14 +297,14 @@ private theorem deck_classifyTorsor_comm {P Q : ModuliProblem R} {G : Type u} [G
     {Y : EllObj R} (td : TorsorData φ Y) (α : P.obj (op Y)) (γ : G) :
     EllObj.homToPullbackAlong (Y.pullbackAlongπ td.f) (td.σZ.hom γ) (td.over_base γ) ≫
         classifyTorsor rM td α =
-      classifyTorsor rM td α ≫ (rM.autMulHom ((P.simulAutSnd Q) (φ γ⁻¹))).hom := by
+      classifyTorsor rM td α ≫ (rM.autMulHom ((P.simulAutSnd Q) (φ γ⁻¹))).asIso.hom := by
   set ρ : Y.pullbackAlong td.f ⟶ Y.pullbackAlong td.f :=
     EllObj.homToPullbackAlong (Y.pullbackAlongπ td.f) (td.σZ.hom γ) (td.over_base γ) with hρ
   have hHEc := classifyTorsor_homEquiv rM td α
   apply rM.homEquiv.injective
   rw [rM.homEquiv_comp, hHEc,
-    show (rM.autMulHom ((P.simulAutSnd Q) (φ γ⁻¹))).hom
-        = rM.transportHom ((P.simulAutSnd Q) (φ γ⁻¹)).hom from rfl,
+    show (rM.autMulHom ((P.simulAutSnd Q) (φ γ⁻¹))).asIso.hom
+        = rM.transportHom ((P.simulAutSnd Q) (φ γ⁻¹)).asIso.hom from rfl,
     rM.homEquiv_comp_transportHom, hHEc]
   refine Prod.ext ?_ ?_
   · show P.map ρ.op (P.map (Y.pullbackAlongπ td.f).op α)
@@ -312,7 +312,7 @@ private theorem deck_classifyTorsor_comm {P Q : ModuliProblem R} {G : Type u} [G
     rw [← Functor.map_comp_apply, ← op_comp, hρ,
       EllObj.homToPullbackAlong_pullbackAlongπ]
   · show Q.map ρ.op (td.eqv td.f ⟨𝟙 td.Z, Category.id_comp td.f⟩) =
-      (φ γ⁻¹).hom.app (op (Y.pullbackAlong td.f))
+      (φ γ⁻¹).asIso.hom.app (op (Y.pullbackAlong td.f))
         (td.eqv td.f ⟨𝟙 td.Z, Category.id_comp td.f⟩)
     rw [hρ, map_eqv td.toRelRepData
       (EllObj.homToPullbackAlong (Y.pullbackAlongπ td.f) (td.σZ.hom γ) (td.over_base γ))
@@ -469,7 +469,7 @@ composite `classifyTorsor α ≫ q` is deck-invariant (equivariance of the class
 private theorem exists_descended {P Q : ModuliProblem R} {G : Type u} [Group G] [Finite G]
     {φ : G →* Aut Q} {XM X₀ : EllObj R} (rM : (P.simul Q).RepresentableBy XM)
     (q : XM ⟶ X₀)
-    (hqfull : ∀ γ : G, (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv ≫ q = q)
+    (hqfull : ∀ γ : G, (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv ≫ q = q)
     {Y : EllObj R} (td : TorsorData φ Y) (α : P.obj (op Y)) :
     ∃ v : Y ⟶ X₀, Y.pullbackAlongπ td.f ≫ v = classifyTorsor rM td α ≫ q := by
   haveI := td.surjective
@@ -477,15 +477,15 @@ private theorem exists_descended {P Q : ModuliProblem R} {G : Type u} [Group G] 
   haveI := td.finite
   haveI : Flat td.f := inferInstance
   haveI : QuasiCompact td.f := inferInstance
-  have hAq : ∀ γ : G, (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫ q = q := by
+  have hAq : ∀ γ : G, (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.hom ≫ q = q := by
     intro γ
-    calc (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫ q
-        = (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫
-            ((rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv ≫ q) := by rw [hqfull γ]
-      _ = ((rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫
-            (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv) ≫ q :=
+    calc (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.hom ≫ q
+        = (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.hom ≫
+            ((rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv ≫ q) := by rw [hqfull γ]
+      _ = ((rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.hom ≫
+            (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv) ≫ q :=
           (Category.assoc _ _ _).symm
-      _ = 𝟙 XM ≫ q := by rw [(rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom_inv_id]
+      _ = 𝟙 XM ≫ q := by rw [(rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.hom_inv_id]
       _ = q := Category.id_comp q
   have hg_inv : ∀ γ,
       EllObj.homToPullbackAlong (Y.pullbackAlongπ td.f) (td.σZ.hom γ) (td.over_base γ) ≫
@@ -668,7 +668,7 @@ theorem representable_of_rigidNoeth_of_torsor (P Q : ModuliProblem R)
   obtain ⟨d₀, -⟩ := hPaff X₀
   obtain ⟨α₀, hα₀, -⟩ :=
     existsUnique_alpha_descent q d₀ (P.simulSchemeAction Q φ rM)
-      (fun γ => (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv) (fun γ => rfl) hqfull
+      (fun γ => (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv) (fun γ => rfl) hqfull
       (fun {W} F hF => hqlift F hF) hqepi
       ((rM.homEquiv (𝟙 XM)).1) (map_fst_autMulHom_inv φ rM)
   -- the representability bijection (KM pp. 114–116)
@@ -775,7 +775,7 @@ theorem exists_representableBy_isAffine_of_rigidNoeth_of_torsor (P Q : ModuliPro
   obtain ⟨d₀, -⟩ := hPaff X₀
   obtain ⟨α₀, hα₀, -⟩ :=
     existsUnique_alpha_descent q d₀ (P.simulSchemeAction Q φ rM)
-      (fun γ => (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv) (fun γ => rfl) hqfull
+      (fun γ => (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv) (fun γ => rfl) hqfull
       (fun {W} F hF => hqlift F hF) hqepi
       ((rM.homEquiv (𝟙 XM)).1) (map_fst_autMulHom_inv φ rM)
   -- the representability bijection (KM pp. 114–116)

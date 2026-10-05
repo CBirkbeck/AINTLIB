@@ -253,14 +253,14 @@ theorem unitEnd_eq_id_of_terminal_oneT
     (R : Sheaf J RingCat.{u})
     [∀ U, IsMulCommutative (R.obj.obj U)] (U : C)
     (q : End (_root_.SheafOfModules.unit (R.over U)))
-    (h : q.val.app (.op (Over.mk (𝟙 U)))
+    (h : q.asHom.val.app (.op (Over.mk (𝟙 U)))
         (show (R.over U).obj.obj (.op (Over.mk (𝟙 U))) from 1) =
       (show (R.over U).obj.obj (.op (Over.mk (𝟙 U))) from 1)) :
-    q = 𝟙 _ := by
+    q.asHom = 𝟙 _ := by
   apply (ModularCurves.SheafOfModules.dualUnitSectionsEquiv R U).injective
   rw [ModularCurves.SheafOfModules.dualUnitSectionsEquiv_apply]
   rw [ModularCurves.SheafOfModules.dualUnitSectionsEquiv_apply]
-  change q.val.app (.op (Over.mk (𝟙 U)))
+  change q.asHom.val.app (.op (Over.mk (𝟙 U)))
       (show (R.over U).obj.obj (.op (Over.mk (𝟙 U))) from 1) =
     (show (R.over U).obj.obj (.op (Over.mk (𝟙 U))) from 1)
   exact h
@@ -289,7 +289,7 @@ theorem isIso_of_local_trivializations_terminal_oneT
       oneV x y oneV hs hm ht
   have hconj : pS.inv ≫ m ≫ pT.hom = 𝟙 _ :=
     unitEnd_eq_id_of_terminal_oneT Y.ringCatSheaf V
-      (pS.inv ≫ m ≫ pT.hom) hvalue
+      (.of (pS.inv ≫ m ≫ pT.hom)) hvalue
   haveI hconjIso : IsIso (pS.inv ≫ m ≫ pT.hom) := by
     rw [hconj]
     infer_instance

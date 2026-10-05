@@ -917,14 +917,14 @@ theorem restrictOverTrivialization_hom_eq_comp_scalar
     (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
     (s : Γ(X, U))
     (h : g.hom = e.hom ≫
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s) :
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s).asHom) :
     let j : Over U := Over.mk (homOfLE hVU)
     (SheafOfModules.restrictOverTrivialization
         X.ringCatSheaf M U g j).hom =
       (SheafOfModules.restrictOverTrivialization
           X.ringCatSheaf M U e j).hom ≫
-        SheafOfModules.overUnitScalarEnd X.ringCatSheaf V
-          (X.presheaf.map (homOfLE hVU).op s) := by
+        (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V
+          (X.presheaf.map (homOfLE hVU).op s)).asHom := by
   dsimp only
   let j : Over U := Over.mk (homOfLE hVU)
   apply SheafOfModules.hom_ext
