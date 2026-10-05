@@ -156,7 +156,7 @@ theorem gammaFullNaive_fix_fst_of_le_semiBorel (N : ℕ) [NeZero N] (hN : 1 < N)
     (b : (gammaFullNaiveProblem R N).obj
       (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
     (γ : ↥H)
-    (hcon : (gammaHAut R N H γ).hom.app
+    (hcon : (gammaHAut R N H γ).asIso.hom.app
       (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
       ((gammaFullNaiveProblem R N).map e.hom.op b) = b) :
     EllHom.pullSection R e.hom b.1.1 = b.1.1 := by
@@ -339,7 +339,7 @@ theorem gammaH_hfree_of_le_semiBorel (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     (b : (gammaFullNaiveProblem R N).obj
       (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
     (γ : ↥H) :
-    (gammaHAut R N H γ).hom.app
+    (gammaHAut R N H γ).asIso.hom.app
       (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
       ((gammaFullNaiveProblem R N).map e.hom.op b) ≠ b := by
   intro hcon

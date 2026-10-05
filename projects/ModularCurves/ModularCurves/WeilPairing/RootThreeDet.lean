@@ -76,7 +76,7 @@ noncomputable def e3GlIso (hR : IsUnit (3 : R))
     (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod 3)) :
     universalE3Obj R ≅ universalE3Obj R :=
   (naiveLevelThreeRepresentableBy R hR hL hArb).uniqueUpToIso
-    ((naiveLevelThreeRepresentableBy R hR hL hArb).ofIso (gammaFullNaiveGlAut R 3 g))
+    ((naiveLevelThreeRepresentableBy R hR hL hArb).ofIso (gammaFullNaiveGlAut R 3 g).asIso)
 
 /-- **(WP-D3c-N3, the characterisation)** `e3GlIso g` classifies the universal level-three
 structure **re-marked by `g⁻¹`**.
@@ -95,7 +95,7 @@ theorem e3GlIso_hom_homEquiv (hR : IsUnit (3 : R))
           (𝟙 (universalE3Obj R))) := by
   show (naiveLevelThreeRepresentableBy R hR hL hArb).homEquiv
       (((naiveLevelThreeRepresentableBy R hR hL hArb).ofIso
-          (gammaFullNaiveGlAut R 3 g)).homEquiv.symm
+          (gammaFullNaiveGlAut R 3 g).asIso).homEquiv.symm
         ((naiveLevelThreeRepresentableBy R hR hL hArb).homEquiv
           (𝟙 (universalE3Obj R)))) = _
   exact (naiveLevelThreeRepresentableBy R hR hL hArb).homEquiv.apply_symm_apply _

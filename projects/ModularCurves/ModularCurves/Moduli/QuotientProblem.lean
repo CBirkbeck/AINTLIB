@@ -552,21 +552,21 @@ theorem simulMapSnd_comp {Q Q' Q'' : ModuliProblem R} (η : Q ⟶ Q')
 /-- **The action of `Aut δ` on the simultaneous problem `(𝒫,δ)` through the
 second factor** (KM p. 112: `G` acts on `(𝒫,δ)` through its action on `δ`). -/
 def simulAutSnd : Aut Q →* Aut (P.simul Q) where
-  toFun e :=
-    { hom := P.simulMapSnd e.hom
-      inv := P.simulMapSnd e.inv
-      hom_inv_id := by rw [← simulMapSnd_comp, e.hom_inv_id, simulMapSnd_id]
-      inv_hom_id := by rw [← simulMapSnd_comp, e.inv_hom_id, simulMapSnd_id] }
+  toFun e := .of
+    { hom := P.simulMapSnd e.asIso.hom
+      inv := P.simulMapSnd e.asIso.inv
+      hom_inv_id := by rw [← simulMapSnd_comp, e.asIso.hom_inv_id, simulMapSnd_id]
+      inv_hom_id := by rw [← simulMapSnd_comp, e.asIso.inv_hom_id, simulMapSnd_id] }
   map_one' := by
-    ext1
+    ext1; ext1
     exact P.simulMapSnd_id Q
   map_mul' e₁ e₂ := by
-    ext1
-    exact P.simulMapSnd_comp e₂.hom e₁.hom
+    ext1; ext1
+    exact P.simulMapSnd_comp e₂.asIso.hom e₁.asIso.hom
 
 @[simp]
 theorem simulAutSnd_apply_hom (e : Aut Q) :
-    ((P.simulAutSnd Q) e).hom = P.simulMapSnd e.hom := rfl
+    ((P.simulAutSnd Q) e).asIso.hom = P.simulMapSnd e.asIso.hom := rfl
 
 end GroupAction
 
@@ -577,17 +577,17 @@ namespace EllObj
 /-- Base-scheme projection of `Ell/R`-automorphisms: an automorphism of an
 `Ell/R`-object restricts to an automorphism of its base scheme. -/
 def autBase (X : EllObj R) : Aut X →* Aut X.base where
-  toFun e :=
-    { hom := e.hom.baseHom
-      inv := e.inv.baseHom
-      hom_inv_id := congrArg EllHom.baseHom e.hom_inv_id
-      inv_hom_id := congrArg EllHom.baseHom e.inv_hom_id }
+  toFun e := .of
+    { hom := e.asIso.hom.baseHom
+      inv := e.asIso.inv.baseHom
+      hom_inv_id := congrArg EllHom.baseHom e.asIso.hom_inv_id
+      inv_hom_id := congrArg EllHom.baseHom e.asIso.inv_hom_id }
   map_one' := rfl
   map_mul' _ _ := rfl
 
 @[simp]
 theorem autBase_apply_hom (X : EllObj R) (e : Aut X) :
-    (X.autBase e).hom = e.hom.baseHom := rfl
+    (X.autBase e).asIso.hom = e.asIso.hom.baseHom := rfl
 
 /-- **([a1], total-space projection)** Total-space projection of `Ell/R`-automorphisms: an
 automorphism of an `Ell/R`-object restricts to an automorphism of the total space of its
@@ -596,17 +596,17 @@ curve. This is the map that turns KM's cocycle `θ(g) : g*(E, α_univ) ≅ (E, �
 which route (a) of `[T-E5c-ROUTE-A]` rests: the curve descended along the torsor is `E/G`,
 so no effective descent of projective schemes (SGA I Exp. VIII 7.8) is needed. -/
 def autTotal (X : EllObj R) : Aut X →* Aut X.curve.E where
-  toFun e :=
-    { hom := e.hom.top
-      inv := e.inv.top
-      hom_inv_id := congrArg EllHom.top e.hom_inv_id
-      inv_hom_id := congrArg EllHom.top e.inv_hom_id }
+  toFun e := .of
+    { hom := e.asIso.hom.top
+      inv := e.asIso.inv.top
+      hom_inv_id := congrArg EllHom.top e.asIso.hom_inv_id
+      inv_hom_id := congrArg EllHom.top e.asIso.inv_hom_id }
   map_one' := rfl
   map_mul' _ _ := rfl
 
 @[simp]
 theorem autTotal_apply_hom (X : EllObj R) (e : Aut X) :
-    (X.autTotal e).hom = e.hom.top := rfl
+    (X.autTotal e).asIso.hom = e.asIso.hom.top := rfl
 
 end EllObj
 
@@ -647,14 +647,14 @@ theorem simulSchemeActionTotal_π (P Q : ModuliProblem R) {G : Type*} [Group G]
     (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
     (P.simulSchemeActionTotal Q φ rM).hom γ ≫ XM.curve.π =
       XM.curve.π ≫ (P.simulSchemeAction Q φ rM).hom γ := by
-  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback.w
+  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv.isPullback.w
 
 /-- **([a1], the zero section is equivariant)** -/
 theorem simulSchemeActionTotal_zero (P Q : ModuliProblem R) {G : Type*} [Group G]
     (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
     XM.curve.zero ≫ (P.simulSchemeActionTotal Q φ rM).hom γ =
       (P.simulSchemeAction Q φ rM).hom γ ≫ XM.curve.zero := by
-  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.zero_w
+  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv.zero_w
 
 /-- **([a1], each `γ` acts cartesianly)** Every `γ ∈ G` acts on `E` by an isomorphism whose
 square over the base action is **cartesian**. Equivalently: `E` is the pullback of itself
@@ -663,7 +663,7 @@ theorem simulSchemeActionTotal_isPullback (P Q : ModuliProblem R) {G : Type*} [G
     (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
     IsPullback ((P.simulSchemeActionTotal Q φ rM).hom γ) XM.curve.π XM.curve.π
       ((P.simulSchemeAction Q φ rM).hom γ) := by
-  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback
+  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv.isPullback
 
 section Engine
 
@@ -785,7 +785,7 @@ structure TorsorData {Q : ModuliProblem R} {G : Type u} [Group G] [Finite G]
   equivariant : ∀ {T : Scheme.{u}} (g : T ⟶ X.base)
     (h : { h : T ⟶ Z // h ≫ f = g }) (γ : G),
     eqv g ⟨h.1 ≫ σZ.hom γ, by rw [Category.assoc, over_base, h.2]⟩ =
-      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong g)) (eqv g h)
+      (φ γ⁻¹).asIso.hom.app (Opposite.op (X.pullbackAlong g)) (eqv g h)
   /-- The structure map is finite. -/
   finite : IsFinite f
   /-- The structure map is étale. -/
@@ -827,19 +827,19 @@ theorem simulSchemeAction_free_of_rigidNoeth_of_isLocallyNoetherian
     (γ : G) (hγ : γ ≠ 1) (T : Scheme.{u}) [IsLocallyNoetherian T] (t : T ⟶ XM.base)
     (hfix : t ≫ (P.simulSchemeAction Q φ rM).hom γ = t) :
     IsEmpty T := by
-  have hfix' : t ≫ (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom = t :=
+  have hfix' : t ≫ (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv.baseHom = t :=
     hfix
   -- the Ell/R-level lift of `t` and the two morphisms it compares
   have hb : (XM.pullbackAlongπ t ≫
-      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv).baseHom =
+      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv).baseHom =
       (XM.pullbackAlongπ t).baseHom := hfix'
   have hb2 : (XM.pullbackAlongπ t ≫
-      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom).baseHom =
+      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.hom).baseHom =
       (XM.pullbackAlongπ t).baseHom := by
     show t ≫ _ = t
-    have hcan : (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom ≫
-        (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom = 𝟙 XM.base :=
-      congrArg EllHom.baseHom (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv_hom_id
+    have hcan : (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv.baseHom ≫
+        (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.hom.baseHom = 𝟙 XM.base :=
+      congrArg EllHom.baseHom (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv_hom_id
     conv_lhs => rw [← hfix']
     rw [Category.assoc, hcan, Category.comp_id]
   -- the connecting endomorphism θ(γ) and its inverse
@@ -865,13 +865,13 @@ theorem simulSchemeAction_free_of_rigidNoeth_of_isLocallyNoetherian
         Iso.hom_inv_id, Category.comp_id]
   -- value comparison: the P-component is θ(γ)-fixed, the Q-component γ-moved
   have h1 : rM.homEquiv (XM.pullbackAlongπ t ≫
-      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv) =
+      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv) =
       ((rM.homEquiv (XM.pullbackAlongπ t)).1,
-        (φ γ).inv.app (Opposite.op (XM.pullbackAlong t))
+        (φ γ).asIso.inv.app (Opposite.op (XM.pullbackAlong t))
           (rM.homEquiv (XM.pullbackAlongπ t)).2) :=
-    rM.homEquiv_comp_transportHom (P.simulMapSnd (φ γ).inv) (XM.pullbackAlongπ t)
+    rM.homEquiv_comp_transportHom (P.simulMapSnd (φ γ).asIso.inv) (XM.pullbackAlongπ t)
   have h2 : rM.homEquiv (XM.pullbackAlongπ t ≫
-      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv) =
+      (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).asIso.inv) =
       (P.map (EllObj.connectHom _ _ hb).op
         (rM.homEquiv (XM.pullbackAlongπ t)).1,
        Q.map (EllObj.connectHom _ _ hb).op
@@ -885,7 +885,7 @@ theorem simulSchemeAction_free_of_rigidNoeth_of_isLocallyNoetherian
     congrArg Prod.fst (h2.symm.trans h1)
   have c2 : Q.map (EllObj.connectHom _ _ hb).op
       (rM.homEquiv (XM.pullbackAlongπ t)).2 =
-      (φ γ).inv.app (Opposite.op (XM.pullbackAlong t))
+      (φ γ).asIso.inv.app (Opposite.op (XM.pullbackAlong t))
         (rM.homEquiv (XM.pullbackAlongπ t)).2 :=
     congrArg Prod.snd (h2.symm.trans h1)
   -- rigidity forces θ(γ) = 𝟙
@@ -898,35 +898,35 @@ theorem simulSchemeAction_free_of_rigidNoeth_of_isLocallyNoetherian
       (fun hEq => hne (congrArg Iso.hom hEq))
       (rM.homEquiv (XM.pullbackAlongπ t)).1 c1
   -- hence the δ-value is γ-fixed
-  have hfixval : (φ γ).hom.app (Opposite.op (XM.pullbackAlong t))
+  have hfixval : (φ γ).asIso.hom.app (Opposite.op (XM.pullbackAlong t))
       (rM.homEquiv (XM.pullbackAlongπ t)).2 =
       (rM.homEquiv (XM.pullbackAlongπ t)).2 := by
     have c2' : (rM.homEquiv (XM.pullbackAlongπ t)).2 =
-        (φ γ).inv.app (Opposite.op (XM.pullbackAlong t))
+        (φ γ).asIso.inv.app (Opposite.op (XM.pullbackAlong t))
           (rM.homEquiv (XM.pullbackAlongπ t)).2 := by
       rw [← c2, hΘ, op_id, Functor.map_id_apply]
     conv_lhs => rw [c2']
     exact congrArg
       (fun η : Q ⟶ Q => η.app (Opposite.op (XM.pullbackAlong t))
-        (rM.homEquiv (XM.pullbackAlongπ t)).2) (φ γ).inv_hom_id
+        (rM.homEquiv (XM.pullbackAlongπ t)).2) (φ γ).asIso.inv_hom_id
   -- the `γ⁻¹`-fixedness, as demanded by the [B2-TD-CONV] `equivariant` convention
-  have hfixval' : (φ γ⁻¹).hom.app (Opposite.op (XM.pullbackAlong t))
+  have hfixval' : (φ γ⁻¹).asIso.hom.app (Opposite.op (XM.pullbackAlong t))
       (rM.homEquiv (XM.pullbackAlongπ t)).2 =
       (rM.homEquiv (XM.pullbackAlongπ t)).2 := by
     conv_lhs => rw [← hfixval]
     rw [_root_.map_inv]
     exact congrArg
       (fun η : Q ⟶ Q => η.app (Opposite.op (XM.pullbackAlong t))
-        (rM.homEquiv (XM.pullbackAlongπ t)).2) (φ γ).hom_inv_id
+        (rM.homEquiv (XM.pullbackAlongπ t)).2) (φ γ).asIso.hom_inv_id
   -- transport into the torsor chart at the identity base map
   obtain ⟨td⟩ := htors (XM.pullbackAlong t)
-  have hβ : (φ γ⁻¹).hom.app
+  have hβ : (φ γ⁻¹).asIso.hom.app
       (Opposite.op ((XM.pullbackAlong t).pullbackAlong (𝟙 _)))
       (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
         (rM.homEquiv (XM.pullbackAlongπ t)).2) =
       Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
         (rM.homEquiv (XM.pullbackAlongπ t)).2 := by
-    erw [NatTrans.naturality_apply (φ γ⁻¹).hom
+    erw [NatTrans.naturality_apply (φ γ⁻¹).asIso.hom
         (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op]
     rw [hfixval']
   have hZfix : ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm

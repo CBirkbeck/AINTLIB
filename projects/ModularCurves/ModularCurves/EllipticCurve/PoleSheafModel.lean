@@ -778,8 +778,8 @@ theorem projModelZeroIdealOverTrivialization_inv_comp
     (projModelZeroIdealOverTrivialization W).inv ≫
         (idealModuleToUnit (projModelZero W)).over
           (projModelSectionNeighborhood W) =
-      SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
-        (projModelSectionNeighborhood W) (projModelSectionRoot W) := by
+      (SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+        (projModelSectionNeighborhood W) (projModelSectionRoot W)).asHom := by
   let r := projModelSectionRoot W
   have hspan := projModelZero_ker_ideal_sectionNeighborhood W
   have hr : r ∈ (projModelZero W).ker.ideal
@@ -796,8 +796,8 @@ theorem projModelZeroIdealOverTrivializationZ_inv_comp
     (W : WeierstrassCurve R) :
     (projModelZeroIdealOverTrivializationZ W).inv ≫
         (idealModuleToUnit (projModelZero W)).over (projModelZChart W) =
-      SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
-        (projModelZChart W) (1 : Γ(projModel W, projModelZChart W)) := by
+      (SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+        (projModelZChart W) (1 : Γ(projModel W, projModelZChart W))).asHom := by
   have hspan := projModelZero_ker_ideal_chartZ W
   have hr : (1 : Γ(projModel W, projModelZChart W)) ∈
       (projModelZero W).ker.ideal (projModelZChart W) := by
@@ -835,8 +835,8 @@ theorem projModelZeroIdealOverlapTrivialization_inv_comp
     (W : WeierstrassCurve R) :
     (projModelZeroIdealOverlapTrivialization W).inv ≫
         (idealModuleToUnit (projModelZero W)).over (projModelPoleOverlap W) =
-      SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
-        (projModelPoleOverlap W) (projModelSectionRootOverlap W) := by
+      (SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+        (projModelPoleOverlap W) (projModelSectionRootOverlap W)).asHom := by
   have hres := restrictOverTrivialization_inv_comp_over
     (idealModuleToUnit (projModelZero W)) (projModelSectionNeighborhood W)
       (projModelZeroIdealOverTrivialization W) (projModelSectionRoot W)
@@ -855,11 +855,11 @@ private theorem restrictOverTrivialization_inv_comp_over_one
     (i : M ⟶ Scheme.Modules.unitObj X) (U : X.Opens)
     (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
     (h : e.inv ≫ i.over U =
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U (1 : Γ(X, U)))
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U (1 : Γ(X, U))).asHom)
     {V : X.Opens} (hVU : V ≤ U) :
     (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M U e
           (Over.mk (homOfLE hVU))).inv ≫ i.over V =
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V (1 : Γ(X, V)) := by
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf V (1 : Γ(X, V))).asHom := by
   simpa only [map_one] using
     restrictOverTrivialization_inv_comp_over i U e 1 h hVU
 
@@ -867,8 +867,8 @@ theorem projModelZeroIdealOverlapTrivializationZ_inv_comp
     (W : WeierstrassCurve R) :
     (projModelZeroIdealOverlapTrivializationZ W).inv ≫
         (idealModuleToUnit (projModelZero W)).over (projModelPoleOverlap W) =
-      SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
-        (projModelPoleOverlap W) (1 : Γ(projModel W, projModelPoleOverlap W)) :=
+      (SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+        (projModelPoleOverlap W) (1 : Γ(projModel W, projModelPoleOverlap W))).asHom :=
   restrictOverTrivialization_inv_comp_over_one
     (idealModuleToUnit (projModelZero W)) (projModelZChart W)
     (projModelZeroIdealOverTrivializationZ W)
@@ -888,24 +888,24 @@ section parameter `s`. -/
 theorem projModelZeroIdealOverlap_transition (W : WeierstrassCurve R) :
     (projModelZeroIdealOverlapTrivializationZ W).hom =
       (projModelZeroIdealOverlapTrivialization W).hom ≫
-        SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
-          (projModelPoleOverlap W) (projModelSectionRootOverlap W) := by
+        (SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+          (projModelPoleOverlap W) (projModelSectionRootOverlap W)).asHom := by
   let eU := projModelZeroIdealOverlapTrivialization W
   let eZ := projModelZeroIdealOverlapTrivializationZ W
   let i := (idealModuleToUnit (projModelZero W)).over (projModelPoleOverlap W)
   let s := projModelSectionRootOverlap W
   change eZ.hom = eU.hom ≫
-    SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
-      (projModelPoleOverlap W) s
+    (SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+      (projModelPoleOverlap W) s).asHom
   have hone := map_one
     (SheafOfModules.overUnitScalarEndRingHom (projModel W).ringCatSheaf
       (projModelPoleOverlap W))
   have hZ : eZ.inv ≫ i = 𝟙 _ := by
     rw [show eZ.inv ≫ i =
-      SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
-        (projModelPoleOverlap W) 1 from
+      (SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+        (projModelPoleOverlap W) 1).asHom from
           projModelZeroIdealOverlapTrivializationZ_inv_comp W]
-    exact hone
+    exact congrArg End.asHom hone
   have hi : i = eZ.hom := by
     have hUnit : i = 𝟙 _ ≫ i := (Category.id_comp i).symm
     have hInsert : 𝟙 _ ≫ i = (eZ.hom ≫ eZ.inv) ≫ i :=
@@ -969,8 +969,8 @@ the section parameter `s`. -/
 theorem projModelSectionPoleOverlap_transition (W : WeierstrassCurve R) :
     (projModelSectionPoleOverlapTrivialization W).hom =
       (projModelSectionPoleOverlapTrivializationZ W).hom ≫
-        SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
-          (projModelPoleOverlap W) (projModelSectionRootOverlap W) := by
+        (SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+          (projModelPoleOverlap W) (projModelSectionRootOverlap W)).asHom := by
   let M := sectionIdealModule (projModelπ W) (projModelZero W)
     (projModelZero_projModelπ W)
   let e : M.over (projModelPoleOverlap W) ≅
@@ -984,8 +984,8 @@ theorem projModelSectionPoleOverlap_transition (W : WeierstrassCurve R) :
     change (idealModule (projModelZero W)).over (projModelPoleOverlap W) ≅ _
     exact projModelZeroIdealOverlapTrivializationZ W
   have h : g.hom = e.hom ≫
-      SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
-        (projModelPoleOverlap W) (projModelSectionRootOverlap W) := by
+      (SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+        (projModelPoleOverlap W) (projModelSectionRootOverlap W)).asHom := by
     change (projModelZeroIdealOverlapTrivializationZ W).hom =
       (projModelZeroIdealOverlapTrivialization W).hom ≫ _
     exact projModelZeroIdealOverlap_transition W
@@ -1103,8 +1103,8 @@ theorem projModelSectionPolePowerOverlapOver_transition
     (W : WeierstrassCurve R) (n : ℕ) :
     (projModelSectionPolePowerOverlapOverTrivialization W n).hom =
       (projModelSectionPolePowerOverlapOverTrivializationZ W n).hom ≫
-        SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
-          (projModelPoleOverlap W) (projModelSectionRootOverlap W ^ n) := by
+        (SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+          (projModelPoleOverlap W) (projModelSectionRootOverlap W ^ n)).asHom := by
   apply overTrivializationOfRestrictIso_hom_eq_comp_scalar
   convert projModelSectionPolePowerOverlap_transition W n using 1
   unfold projModelSectionRootOverlapTop Scheme.Modules.openTopSection

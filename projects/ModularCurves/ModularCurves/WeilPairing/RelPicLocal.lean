@@ -304,49 +304,49 @@ theorem glueSectionASeed_compat {T : Scheme.{u}} (N : T.Modules) {Vi Vj : T.Open
     rw [h1] at hnat
     exact hnat.symm
   rw [hseedL, hseedR]
-  have hE : ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-      ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) =
+  have hE : (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+      ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom =
       rOTj.inv ≫ rOTi.hom :=
     AlgebraicGeometry.Scheme.Modules.overUnitScalarEnd_transitionUnit (Vi ⊓ Vj) rOTj rOTi
-  have hcancel : ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
-      ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-        ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) =
+  have hcancel : (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom ≫
+      (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+        ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom =
       𝟙 (_root_.SheafOfModules.unit (T.ringCatSheaf.over (Vi ⊓ Vj))) := by
-    have h1 : (ModularCurves.SheafOfModules.overUnitScalarEndRingHom
+    have h1 : ((ModularCurves.SheafOfModules.overUnitScalarEndRingHom
         T.ringCatSheaf (Vi ⊓ Vj))
         (((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) *
-          (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))) =
+          (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)))).asHom =
         𝟙 (_root_.SheafOfModules.unit (T.ringCatSheaf.over (Vi ⊓ Vj))) := by
       rw [Units.mul_inv]
-      exact map_one _
+      exact congrArg End.asHom (map_one _)
     have h2 := map_mul (ModularCurves.SheafOfModules.overUnitScalarEndRingHom
         T.ringCatSheaf (Vi ⊓ Vj))
       ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))
       (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))
-    exact (h2.symm.trans h1 : _)
+    exact ((congrArg End.asHom h2).symm.trans h1 : _)
   have hinv : rOTi.inv =
-      ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-        (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+      (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+        (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom ≫
         rOTj.inv := by
     calc rOTi.inv
         = 𝟙 (_root_.SheafOfModules.unit (T.ringCatSheaf.over (Vi ⊓ Vj))) ≫ rOTi.inv :=
           (Category.id_comp _).symm
-      _ = (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
-          ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-            ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))) ≫
+      _ = ((ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom ≫
+          (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom) ≫
           rOTi.inv := by rw [hcancel]
-      _ = ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
-          ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-            ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+      _ = (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom ≫
+          (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom ≫
           rOTi.inv := by rw [Category.assoc]
-      _ = ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+      _ = (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom ≫
           (rOTj.inv ≫ rOTi.hom) ≫ rOTi.inv := by rw [hE]
-      _ = ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+      _ = (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+            (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom ≫
           rOTj.inv := by rw [Category.assoc, Iso.hom_inv_id, Category.comp_id]
   have happ := CategoryTheory.ConcreteCategory.congr_hom
     (congrArg (fun q : _root_.SheafOfModules.unit (T.ringCatSheaf.over (Vi ⊓ Vj)) ⟶
@@ -354,29 +354,29 @@ theorem glueSectionASeed_compat {T : Scheme.{u}} (N : T.Modules) {Vi Vj : T.Open
       q.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))) hinv)
     (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
       (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1)
-  have hsplit : (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) ≫
+  have hsplit : ((ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom ≫
         rOTj.inv).val.app
       (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
       (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
         (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1) =
       rOTj.inv.val.app (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
-        ((ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-          (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).val.app
+        (((ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+          (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom).val.app
           (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
           (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
             (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1)) := rfl
   refine (happ.trans hsplit).trans ?_
-  have hEapp : (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).val.app
+  have hEapp : ((ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+      (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom).val.app
       (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
       (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
         (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1) =
       (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
         (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from
         (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))) := by
-    have h0 : (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-        (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).val.app
+    have h0 : ((ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+        (((glueTransitionUnit N ei ej)⁻¹ : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom).val.app
         (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj))))
         (show (T.ringCatSheaf.over (Vi ⊓ Vj)).obj.obj
           (Opposite.op (CategoryTheory.Over.mk (𝟙 (Vi ⊓ Vj)))) from 1) =
@@ -481,10 +481,10 @@ theorem glueSectionB_compat {T : Scheme.{u}} (N : T.Modules) {Vi Vj : T.Opens}
     (ModularCurves.SheafOfModules.restrictOverTrivialization T.ringCatSheaf N Vj
       (overTrivialization N Vj ej)
       (CategoryTheory.Over.mk (homOfLE (inf_le_right : Vi ⊓ Vj ≤ Vj)))).hom ≫
-      ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-        ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))
-  rw [show ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
-      ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj)) = _ from hE,
+      (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+        ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom
+  rw [show (ModularCurves.SheafOfModules.overUnitScalarEnd T.ringCatSheaf (Vi ⊓ Vj)
+      ((glueTransitionUnit N ei ej : ↑Γ(T, Vi ⊓ Vj)ˣ) : ↑Γ(T, Vi ⊓ Vj))).asHom = _ from hE,
     Iso.hom_inv_id_assoc]
 
 /-- **(AP2-B1a′, ⊗-self — discharged)** Invertibility pairing `N ⊗ N^∨ ≅ 𝒪`: exactly the tree's

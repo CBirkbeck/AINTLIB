@@ -79,50 +79,33 @@ noncomputable local instance projectiveCoordinateTwistMapMonoidalCategory
     (X : Scheme.{u}) : MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
+/-- A morphism whose composite with an isomorphism is an isomorphism is itself one. Stated
+for an arbitrary category, with the composite as a hypothesis, so that the kernel never has to
+re-check a concrete composite. -/
+private theorem isIso_of_comp_hom_eq {C : Type*} [Category C] {A B D : C} {f : A ⟶ B}
+    {e : B ⟶ D} {g : A ⟶ D} (h : f ≫ e = g) (he : IsIso e) (hg : IsIso g) : IsIso f := by
+  have : IsIso (f ≫ e) := h ▸ hg
+  exact IsIso.of_isIso_comp_right f e
+
 private theorem coordinateHyperplanePoleUnitHom_over_self_isIso
     (j : σ) :
     IsIso
       ((coordinateHyperplanePoleUnitHom (R := R) j).over
         (coordinateOpen (R := R) j)) := by
-  let X := Proj (homogeneousSubmodule σ R)
-  let U := coordinateOpen (R := R) j
-  let M := ModularCurves.idealModule
-    (coordinateHyperplaneι (R := R) j)
-  letI : ∀ V, IsMulCommutative (X.ringCatSheaf.obj.obj V) :=
+  letI : ∀ V, IsMulCommutative ((Proj (homogeneousSubmodule σ R)).ringCatSheaf.obj.obj V) :=
     fun V ↦ by
-      change IsMulCommutative (X.presheaf.obj V)
+      change IsMulCommutative ((Proj (homogeneousSubmodule σ R)).presheaf.obj V)
       exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
-  let e :=
-    ModularCurves.SheafOfModules.dualOverIsoOfIso
-      X.ringCatSheaf M U
-      (AlgebraicGeometry.Scheme.Modules.overTrivializationOfRestrictIso
-        M U
-          (coordinateHyperplaneIdealModuleTrivialization
-          (R := R) j j).symm)
-  let q := (coordinateHyperplanePoleUnitHom (R := R) j).over U
-  have hq :
-      q ≫ e.hom =
-        ModularCurves.SheafOfModules.overUnitScalarEnd
-          X.ringCatSheaf U 1 := by
-    have h :=
-      coordinateHyperplanePoleUnitHom_over_comp_trivialization
-        (R := R) j j
-    rw [coordinateHyperplaneLocalEquation_self] at h
-    change q ≫ e.hom =
-      ModularCurves.SheafOfModules.overUnitScalarEnd
-        X.ringCatSheaf U 1 at h
-    exact h
+  have hq := coordinateHyperplanePoleUnitHom_over_comp_trivialization (R := R) j j
+  rw [coordinateHyperplaneLocalEquation_self] at hq
   have hone :
-      ModularCurves.SheafOfModules.overUnitScalarEnd
-          X.ringCatSheaf U 1 =
+      (ModularCurves.SheafOfModules.overUnitScalarEnd
+          (Proj (homogeneousSubmodule σ R)).ringCatSheaf (coordinateOpen (R := R) j)
+          (1 : Γ(Proj (homogeneousSubmodule σ R), coordinateOpen (R := R) j))).asHom =
         𝟙 _ :=
-    (ModularCurves.SheafOfModules.overUnitScalarEndRingHom
-      X.ringCatSheaf U).map_one
-  have hqe : IsIso (q ≫ e.hom) := by
-    rw [hq, hone]
-    exact CategoryTheory.IsIso.id _
-  exact @IsIso.of_isIso_comp_right _ _ _ _ _ q e.hom
-    e.isIso_hom hqe
+    congrArg End.asHom (ModularCurves.SheafOfModules.overUnitScalarEndRingHom
+      (Proj (homogeneousSubmodule σ R)).ringCatSheaf (coordinateOpen (R := R) j)).map_one
+  exact isIso_of_comp_hom_eq hq (Iso.isIso_hom _) (by rw [hone]; exact CategoryTheory.IsIso.id _)
 
 /-- The canonical coordinate morphism `O -> O(1)` is invertible on its
 own standard projective chart. -/

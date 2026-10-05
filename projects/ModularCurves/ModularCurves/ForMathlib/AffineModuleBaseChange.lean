@@ -337,20 +337,20 @@ private noncomputable def affineΓPushforwardIsoSpecApp
         (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens))) := by
     refine ModuleCat.isoMk (Iso.refl _) ?_
     intro r
-    change (F.obj ((Opens.map X.isoSpec.hom.base).op.obj
-      (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)))).smul r =
-        ((pushforward X.isoSpec.hom ⋙ moduleSpecΓFunctor).obj M).smul r
+    change ((F.obj ((Opens.map X.isoSpec.hom.base).op.obj
+      (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)))).smul r).asHom =
+        (((pushforward X.isoSpec.hom ⋙ moduleSpecΓFunctor).obj M).smul r).asHom
     change
-      (M.1.obj ((Opens.map X.isoSpec.hom.base).op.obj
+      ((M.1.obj ((Opens.map X.isoSpec.hom.base).op.obj
         (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)))).smul
           ((X.presheaf.map ((Limits.initialOpOfTerminal Limits.isTerminalTop).to
             ((Opens.map X.isoSpec.hom.base).op.obj
-              (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens))))).hom r) =
-        (M.1.obj ((Opens.map X.isoSpec.hom.base).op.obj
+              (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens))))).hom r)).asHom =
+        ((M.1.obj ((Opens.map X.isoSpec.hom.base).op.obj
           (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)))).smul
             ((X.isoSpec.hom.app (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)).hom
-              ((Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).inv.hom r))
-    congr 1
+              ((Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).inv.hom r))).asHom
+    congr 2
     change
       (X.presheaf.map ((Limits.initialOpOfTerminal Limits.isTerminalTop).to
         (op (⊤ : X.Opens)))).hom r =
@@ -411,16 +411,16 @@ private noncomputable def affinePushforwardΓIsoApp
     refine ModuleCat.isoMk (Iso.refl _) ?_
     intro r
     change
-      (N.1.obj W).smul
+      ((N.1.obj W).smul
           ((Y.presheaf.map
             ((Limits.initialOpOfTerminal Limits.isTerminalTop).to W)).hom
-              (g.appTop.hom r)) =
-        (N.1.obj W).smul
+              (g.appTop.hom r))).asHom =
+        ((N.1.obj W).smul
           ((g.app (⊤ : X.Opens)).hom
             ((X.presheaf.map
               ((Limits.initialOpOfTerminal Limits.isTerminalTop).to
-                (op (⊤ : X.Opens)))).hom r))
-    congr 1
+                (op (⊤ : X.Opens)))).hom r))).asHom
+    congr 2
     exact (ConcreteCategory.congr_hom
       (g.naturality ((Limits.initialOpOfTerminal Limits.isTerminalTop).to
         (op (⊤ : X.Opens)))) r).symm
@@ -562,12 +562,12 @@ private noncomputable def affineΓLiteralIso (X : Scheme.{u}) (M : X.Modules) :
   refine ModuleCat.isoMk (Iso.refl _) ?_
   intro r
   change
-    (M.1.obj (op (⊤ : X.Opens))).smul
+    ((M.1.obj (op (⊤ : X.Opens))).smul
         ((X.presheaf.map
           ((Limits.initialOpOfTerminal Limits.isTerminalTop).to
-            (op (⊤ : X.Opens)))).hom r) =
-      (M.1.obj (op (⊤ : X.Opens))).smul r
-  congr 1
+            (op (⊤ : X.Opens)))).hom r)).asHom =
+      ((M.1.obj (op (⊤ : X.Opens))).smul r).asHom
+  congr 2
   rw [show (Limits.initialOpOfTerminal Limits.isTerminalTop).to
     (op (⊤ : X.Opens)) = 𝟙 _ from Subsingleton.elim _ _]
   simp

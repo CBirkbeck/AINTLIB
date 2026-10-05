@@ -159,7 +159,7 @@ componentwise action of the ideal module is injective. -/
 private theorem idealActionPre_app_injective_of_span
     (V : C.affineOpens) (g : Γ(C, V.1))
     (hspan : J.ideal V = Ideal.span {g}) (hnzd : g ∈ nonZeroDivisors Γ(C, V.1))
-    (hLinj : Function.Injective ((L.smul (U := V.1) g).hom)) :
+    (hLinj : Function.Injective ((L.smul (U := V.1) g).asHom.hom)) :
     Function.Injective ((idealActionPre J L).app (Opposite.op V.1)) := by
   have hsurj : Function.Surjective
       (LinearMap.rTensor (L.val.obj (Opposite.op V.1))
@@ -189,8 +189,8 @@ private theorem idealActionPre_app_injective_of_span
   obtain ⟨x', rfl⟩ := hsurj x
   obtain ⟨y', rfl⟩ := hsurj y
   have h2 := (key x').symm.trans (hxy.trans (key y'))
-  have h2' : (L.smul (U := V.1) g).hom ((TensorProduct.lid _ _) x') =
-      (L.smul (U := V.1) g).hom ((TensorProduct.lid _ _) y') := h2
+  have h2' : (L.smul (U := V.1) g).asHom.hom ((TensorProduct.lid _ _) x') =
+      (L.smul (U := V.1) g).asHom.hom ((TensorProduct.lid _ _) y') := h2
   have h3 := hLinj h2'
   have h4 := (TensorProduct.lid _ _).injective h3
   rw [h4]
@@ -204,10 +204,10 @@ multiplication on the structure sheaf of the open subscheme. -/
 private theorem smul_injective_of_restrict_triv {W : C.Opens}
     (e : L.restrict W.ι ≅ unitObj W.toScheme)
     (g' : Γ(C, W)) (hg' : g' ∈ nonZeroDivisors Γ(C, W)) :
-    Function.Injective ((L.smul (U := W) g').hom) := by
+    Function.Injective ((L.smul (U := W) g').asHom.hom) := by
   have inner : ∀ g'' ∈ nonZeroDivisors Γ(C, W.ι ''ᵁ (⊤ : W.toScheme.Opens)),
       Function.Injective
-        ((L.smul (U := W.ι ''ᵁ (⊤ : W.toScheme.Opens)) g'').hom) := by
+        ((L.smul (U := W.ι ''ᵁ (⊤ : W.toScheme.Opens)) g'').asHom.hom) := by
     intro g'' hg''
     -- the module smul IS the restricted module's smul at the transported scalar:
     -- restrict-scalars acts through the appIso, and inv ∘ hom cancels
@@ -238,8 +238,8 @@ private theorem smul_injective_of_restrict_triv {W : C.Opens}
     let y' : Γ(L.restrict W.ι, (⊤ : W.toScheme.Opens)) := y
     have hxy2 : e.hom.app (⊤ : W.toScheme.Opens) (r₀ • x') =
         e.hom.app (⊤ : W.toScheme.Opens) (r₀ • y') := by
-      have h1 : r₀ • x' = ((L.restrict W.ι).smul r₀).hom x' := rfl
-      have h2 : r₀ • y' = ((L.restrict W.ι).smul r₀).hom y' := rfl
+      have h1 : r₀ • x' = ((L.restrict W.ι).smul r₀).asHom.hom x' := rfl
+      have h2 : r₀ • y' = ((L.restrict W.ι).smul r₀).asHom.hom y' := rfl
       rw [h1, h2]
       exact congrArg (fun t => e.hom.app (⊤ : W.toScheme.Opens) t) hxy
     rw [Hom.app_smul, Hom.app_smul] at hxy2

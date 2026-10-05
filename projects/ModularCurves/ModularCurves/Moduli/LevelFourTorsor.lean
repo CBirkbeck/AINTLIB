@@ -593,10 +593,10 @@ private theorem levelFour_torsor (hinv : IsUnit ((4 : ℕ) : R)) (X : EllObj R) 
   -- the induced scheme action agrees with `glSmul` on classified level structures
   have hact : ∀ (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod 4))
       (L : (gammaFullNaiveProblem R 4).obj (Opposite.op (X.pullbackAlong g))),
-      (gammaFullNaiveGlAction R 4 γ⁻¹).hom.app (Opposite.op (X.pullbackAlong g)) L =
+      (gammaFullNaiveGlAction R 4 γ⁻¹).asIso.hom.app (Opposite.op (X.pullbackAlong g)) L =
         (X.pullbackAlong g).curve.glSmul γ L := by
     intro γ L
-    show (gammaFullNaiveGlAut R 4 (γ⁻¹)⁻¹).hom.app _ L = _
+    show (gammaFullNaiveGlAut R 4 (γ⁻¹)⁻¹).asIso.hom.app _ L = _
     rw [inv_inv]
     rfl
   -- the fibre condition `b ≫ σZ γ = a` is exactly the `glSmul`-equation `glSmul γ Lb = La`,

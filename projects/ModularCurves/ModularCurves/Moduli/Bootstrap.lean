@@ -251,7 +251,7 @@ set_option backward.isDefEq.respectTransparency false in
 identity on the level datum, sign on the `ω`-datum. -/
 noncomputable def legendreBootstrapNegAut :
     Aut (legendreBootstrapProblem R) where
-  hom :=
+  asIso.hom :=
     { app := fun X => ↾fun x : (gammaFullNaiveProblem R 2).obj X ×
           OmegaBasis X.unop.curve.toEllipticCurveGeom =>
         (x.1, (-1 : Γ(X.unop.base, ⊤)ˣ) • x.2)
@@ -263,7 +263,7 @@ noncomputable def legendreBootstrapNegAut :
         rw [Units.coe_map, Units.val_neg, Units.val_one]
         show ((φ.unop.baseHom.appLE ⊤ ⊤ (fun x _ => trivial)).hom) (-1) = -1
         rw [map_neg, map_one] }
-  inv :=
+  asIso.inv :=
     { app := fun X => ↾fun x : (gammaFullNaiveProblem R 2).obj X ×
           OmegaBasis X.unop.curve.toEllipticCurveGeom =>
         (x.1, (-1 : Γ(X.unop.base, ⊤)ˣ) • x.2)
@@ -275,12 +275,12 @@ noncomputable def legendreBootstrapNegAut :
         rw [Units.coe_map, Units.val_neg, Units.val_one]
         show ((φ.unop.baseHom.appLE ⊤ ⊤ (fun x _ => trivial)).hom) (-1) = -1
         rw [map_neg, map_one] }
-  hom_inv_id := by
+  asIso.hom_inv_id := by
     ext X x
     refine Prod.ext rfl ?_
     exact (OmegaBasis.mul_smul' _ _ _).trans
       (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
-  inv_hom_id := by
+  asIso.inv_hom_id := by
     ext X x
     refine Prod.ext rfl ?_
     exact (OmegaBasis.mul_smul' _ _ _).trans
@@ -299,7 +299,7 @@ noncomputable def legendreBootstrapSignAction :
     · rw [one_mul, if_pos rfl, one_mul]
     · rw [mul_one, if_pos rfl, mul_one]
     · rw [show (-1 : ℤˣ) * (-1) = 1 from by decide, if_pos rfl, if_neg (by decide)]
-      refine Iso.ext ?_
+      refine Aut.ext (Iso.ext ?_)
       refine Eq.symm ?_
       ext X x
       refine Prod.ext rfl ?_
@@ -321,7 +321,7 @@ of the sections and `EllHom.pullSection` is `ℤ`-linear. -/
 noncomputable def gammaFullNaiveGlAut (N : ℕ) [NeZero N]
     (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
     Aut (gammaFullNaiveProblem R N) where
-  hom :=
+  asIso.hom :=
     { app := fun X => ↾fun L : X.unop.curve.FullLevelPt N => X.unop.curve.glSmul γ L
       naturality := fun X Y φ => by
         ext L
@@ -332,7 +332,7 @@ noncomputable def gammaFullNaiveGlAut (N : ℕ) [NeZero N]
         · exact ((EllHom.pullSection_add R φ.unop _ _).trans
             (congrArg₂ (· + ·) (pullSection_zsmul' R φ.unop _ _)
               (pullSection_zsmul' R φ.unop _ _))).symm }
-  inv :=
+  asIso.inv :=
     { app := fun X => ↾fun L : X.unop.curve.FullLevelPt N => X.unop.curve.glSmul γ⁻¹ L
       naturality := fun X Y φ => by
         ext L
@@ -343,11 +343,11 @@ noncomputable def gammaFullNaiveGlAut (N : ℕ) [NeZero N]
         · exact ((EllHom.pullSection_add R φ.unop _ _).trans
             (congrArg₂ (· + ·) (pullSection_zsmul' R φ.unop _ _)
               (pullSection_zsmul' R φ.unop _ _))).symm }
-  hom_inv_id := by
+  asIso.hom_inv_id := by
     ext X L
     exact (X.unop.curve.glSmul_mul γ γ⁻¹ L).symm.trans
       (by rw [mul_inv_cancel]; exact X.unop.curve.glSmul_one L)
-  inv_hom_id := by
+  asIso.inv_hom_id := by
     ext X L
     exact (X.unop.curve.glSmul_mul γ⁻¹ γ L).symm.trans
       (by rw [inv_mul_cancel]; exact X.unop.curve.glSmul_one L)
@@ -362,12 +362,12 @@ noncomputable def gammaFullNaiveGlAction (N : ℕ) [NeZero N] :
   toFun γ := gammaFullNaiveGlAut R N γ⁻¹
   map_one' := by
     rw [inv_one]
-    refine Iso.ext ?_
+    refine Aut.ext (Iso.ext ?_)
     ext X L
     show X.unop.curve.glSmul 1 L = L
     exact X.unop.curve.glSmul_one L
   map_mul' γ δ := by
-    refine Iso.ext ?_
+    refine Aut.ext (Iso.ext ?_)
     ext X L
     show X.unop.curve.glSmul (γ * δ)⁻¹ L =
       X.unop.curve.glSmul γ⁻¹ (X.unop.curve.glSmul δ⁻¹ L)
@@ -408,10 +408,10 @@ theorem prodFstNatTrans_comp (β : F ⟶ F') (β' : F' ⟶ F'') :
 /-- Lift an automorphism of `F` to an automorphism of `FunctorToTypes.prod F G`
 (the identity on the second factor). -/
 def prodFstAut (α : Aut F) : Aut (FunctorToTypes.prod F G) where
-  hom := prodFstNatTrans G α.hom
-  inv := prodFstNatTrans G α.inv
-  hom_inv_id := by rw [← prodFstNatTrans_comp, α.hom_inv_id, prodFstNatTrans_id]
-  inv_hom_id := by rw [← prodFstNatTrans_comp, α.inv_hom_id, prodFstNatTrans_id]
+  asIso.hom := prodFstNatTrans G α.asIso.hom
+  asIso.inv := prodFstNatTrans G α.asIso.inv
+  asIso.hom_inv_id := by rw [← prodFstNatTrans_comp, α.asIso.hom_inv_id, prodFstNatTrans_id]
+  asIso.inv_hom_id := by rw [← prodFstNatTrans_comp, α.asIso.inv_hom_id, prodFstNatTrans_id]
 
 end ProdFst
 
@@ -428,12 +428,12 @@ noncomputable def legendreBootstrapGlAction :
   toFun γ := legendreBootstrapLevelAut R (gammaFullNaiveGlAction R 2 γ)
   map_one' := by
     rw [map_one]
-    refine Iso.ext ?_
+    refine Aut.ext (Iso.ext ?_)
     ext X x
     exact Prod.ext rfl rfl
   map_mul' γ δ := by
     rw [map_mul]
-    refine Iso.ext ?_
+    refine Aut.ext (Iso.ext ?_)
     ext X x
     exact Prod.ext rfl rfl
 
@@ -444,7 +444,7 @@ private theorem legendreBootstrap_actions_comm
       legendreBootstrapGlAction R γ * legendreBootstrapSignAction R u := by
   rcases Int.units_eq_one_or u with rfl | rfl
   · rw [map_one, one_mul, mul_one]
-  · refine Iso.ext ?_
+  · refine Aut.ext (Iso.ext ?_)
     ext X x
     exact Prod.ext rfl rfl
 

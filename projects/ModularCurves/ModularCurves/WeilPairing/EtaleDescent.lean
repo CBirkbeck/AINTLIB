@@ -325,7 +325,7 @@ theorem exists_finiteEtaleHom_of_galoisEquivariant {k : Type u} [Field k]
   have hAut : ∀ (g : Aut (CommAlgCat.FiniteEtale.fiber k (SeparableClosure k) :
         (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ⥤ FintypeCat.{u}))
       (x : (CommAlgCat.FiniteEtale.fiber k (SeparableClosure k)).obj (Opposite.op B)),
-      q (g.hom.app (Opposite.op B) x) = g.hom.app (Opposite.op A) (q x) := by
+      q (g.asIso.hom.app (Opposite.op B) x) = g.asIso.hom.app (Opposite.op A) (q x) := by
     intro g x
     obtain ⟨σ, rfl⟩ := (PreGaloisCategory.toAut_bijective
       (CommAlgCat.FiniteEtale.fiber k (SeparableClosure k) :

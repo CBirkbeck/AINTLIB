@@ -112,7 +112,7 @@ theorem evalSection_smul_left (M : _root_.SheafOfModules R) (U : C)
     (r : R.obj.obj (op U)) (m : M.val.obj (op U)) :
     evalSection R M U (letI := dualSectionsModule R M U; r • φ) m =
       r • evalSection R M U φ m := by
-  change evalSection R M U (φ ≫ overUnitScalarEnd R U r) m = _
+  change evalSection R M U (φ ≫ (overUnitScalarEnd R U r).asHom) m = _
   simp only [evalSection_eq]
   change
     (show R.obj.obj (op U) from

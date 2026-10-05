@@ -53,26 +53,28 @@ local instance (X : Scheme.{u}) :
 /-- Composition of scalar endomorphisms of the over-site unit is multiplication of the
 scalars. -/
 private theorem overUnitScalarEnd_comp (U : X.Opens) (a b : Γ(X, U)) :
-    SheafOfModules.overUnitScalarEnd X.ringCatSheaf U a ≫
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U b =
-    SheafOfModules.overUnitScalarEnd X.ringCatSheaf U (a * b) :=
-  ((End.mul_def _ _).symm.trans
-    ((SheafOfModules.overUnitScalarEndRingHom X.ringCatSheaf U).map_mul b a).symm).trans
-    (congrArg (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U) (mul_comm b a))
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U a).asHom ≫
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U b).asHom =
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U (a * b)).asHom :=
+  ((End.mul_asHom _ _ _).symm.trans (congrArg End.asHom
+    ((SheafOfModules.overUnitScalarEndRingHom X.ringCatSheaf U).map_mul b a).symm)).trans
+    (congrArg (fun r ↦ (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom)
+      (mul_comm b a))
 
 /-- The scalar endomorphism of `1` is the identity. -/
 private theorem overUnitScalarEnd_one (U : X.Opens) :
-    SheafOfModules.overUnitScalarEnd X.ringCatSheaf U (1 : Γ(X, U)) =
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U (1 : Γ(X, U))).asHom =
       𝟙 (_root_.SheafOfModules.unit (X.ringCatSheaf.over U)) :=
-  ((SheafOfModules.overUnitScalarEndRingHom X.ringCatSheaf U).map_one).trans End.one_def
+  (congrArg End.asHom
+    (SheafOfModules.overUnitScalarEndRingHom X.ringCatSheaf U).map_one).trans (End.one_asHom _)
 
 /-- **(AP-E1-DS5)** Multiplication by a unit section, as an automorphism of the over-site
 unit module. Rescaling a trivialisation composes with this. -/
 noncomputable def overUnitScalarIso (U : X.Opens) (c : Γ(X, U)ˣ) :
     _root_.SheafOfModules.unit (X.ringCatSheaf.over U) ≅
       _root_.SheafOfModules.unit (X.ringCatSheaf.over U) where
-  hom := SheafOfModules.overUnitScalarEnd X.ringCatSheaf U (c : Γ(X, U))
-  inv := SheafOfModules.overUnitScalarEnd X.ringCatSheaf U ((c⁻¹ : Γ(X, U)ˣ) : Γ(X, U))
+  hom := (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U (c : Γ(X, U))).asHom
+  inv := (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U ((c⁻¹ : Γ(X, U)ˣ) : Γ(X, U))).asHom
   hom_inv_id := by
     rw [overUnitScalarEnd_comp, Units.mul_inv, overUnitScalarEnd_one]
   inv_hom_id := by
@@ -110,27 +112,27 @@ theorem trivializationTransitionUnit_trans_scalarIso {M : X.Modules} (U : X.Open
   have hL : (SheafOfModules.overUnitScalarEndRingEquiv X.ringCatSheaf U)
       (trivializationTransitionUnit U (a ≪≫ overUnitScalarIso U ca)
         (b ≪≫ overUnitScalarIso U cb) : Γ(X, U)) =
-      (a ≪≫ overUnitScalarIso U ca).inv ≫ (b ≪≫ overUnitScalarIso U cb).hom :=
-    overUnitScalarEnd_transitionUnit U _ _
+      .of ((a ≪≫ overUnitScalarIso U ca).inv ≫ (b ≪≫ overUnitScalarIso U cb).hom) :=
+    End.ext (overUnitScalarEnd_transitionUnit U _ _)
   have hR : (SheafOfModules.overUnitScalarEndRingEquiv X.ringCatSheaf U)
-      (trivializationTransitionUnit U a b : Γ(X, U)) = a.inv ≫ b.hom :=
-    overUnitScalarEnd_transitionUnit U a b
+      (trivializationTransitionUnit U a b : Γ(X, U)) = .of (a.inv ≫ b.hom) :=
+    End.ext (overUnitScalarEnd_transitionUnit U a b)
   rw [hL]
   have hcomp : (a ≪≫ overUnitScalarIso U ca).inv ≫ (b ≪≫ overUnitScalarIso U cb).hom =
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
         ((((ca⁻¹ : Γ(X, U)ˣ) : Γ(X, U)) *
-          (trivializationTransitionUnit U a b : Γ(X, U))) * (cb : Γ(X, U))) := by
+          (trivializationTransitionUnit U a b : Γ(X, U))) * (cb : Γ(X, U)))).asHom := by
     rw [Iso.trans_inv, Iso.trans_hom]
-    have hmid : a.inv ≫ b.hom = SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
-        (trivializationTransitionUnit U a b : Γ(X, U)) := hR.symm
+    have hmid : a.inv ≫ b.hom = (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
+        (trivializationTransitionUnit U a b : Γ(X, U))).asHom := congrArg End.asHom hR.symm
     show (overUnitScalarIso U ca).inv ≫ a.inv ≫ b.hom ≫ (overUnitScalarIso U cb).hom = _
     rw [show a.inv ≫ b.hom ≫ (overUnitScalarIso U cb).hom =
         (a.inv ≫ b.hom) ≫ (overUnitScalarIso U cb).hom from by simp only [Category.assoc],
       hmid]
-    show SheafOfModules.overUnitScalarEnd X.ringCatSheaf U ((ca⁻¹ : Γ(X, U)ˣ) : Γ(X, U)) ≫
-        SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
-          (trivializationTransitionUnit U a b : Γ(X, U)) ≫
-        SheafOfModules.overUnitScalarEnd X.ringCatSheaf U ((cb : Γ(X, U)ˣ) : Γ(X, U)) = _
+    show (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U ((ca⁻¹ : Γ(X, U)ˣ) : Γ(X, U))).asHom ≫
+        (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U
+          (trivializationTransitionUnit U a b : Γ(X, U))).asHom ≫
+        (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U ((cb : Γ(X, U)ˣ) : Γ(X, U))).asHom = _
     rw [overUnitScalarEnd_comp, overUnitScalarEnd_comp, mul_assoc]
   rw [hcomp]
   show SheafOfModules.overUnitScalarEnd X.ringCatSheaf U _ =

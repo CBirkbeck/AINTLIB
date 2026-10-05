@@ -207,7 +207,7 @@ theorem openTopSection_restrict (U : X.Opens) (V : U.toScheme.Opens) (r : Γ(X, 
 
 theorem overEquiv_unitScalarEnd (U : X.Opens) (r : Γ(X, U)) :
     (overEquiv U).functor.map
-          (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) ≫
+          (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom ≫
         (U.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom =
       (U.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom ≫
         ModularCurves.unitEndomorphismOfTopSection (openTopSection U r) := by
@@ -298,10 +298,10 @@ theorem overEquiv_unitScalarEnd_inv (U : X.Opens) (r : Γ(X, U)) :
         (U.sheafOfModulesEquivOverUnit X.ringCatSheaf).inv =
       (U.sheafOfModulesEquivOverUnit X.ringCatSheaf).inv ≫
         (overEquiv U).functor.map
-          (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) := by
+          (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom := by
   let e := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
   let a := (overEquiv U).functor.map
-    (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r)
+    (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom
   let b := ModularCurves.unitEndomorphismOfTopSection (openTopSection U r)
   have h : a ≫ e.hom = e.hom ≫ b := overEquiv_unitScalarEnd U r
   change b ≫ e.inv = e.inv ≫ a
@@ -314,20 +314,20 @@ theorem localPullbackUnitIso_scalar (f : Y ⟶ X) (U : X.Opens) (r : Γ(X, U)) :
     (pullback (f ∣_ U)).map
           ((overEquiv U).functor.map
             (ModularCurves.SheafOfModules.overUnitScalarEnd
-              X.ringCatSheaf U r)) ≫
+              X.ringCatSheaf U r).asHom) ≫
         (localPullbackUnitIso f U).hom =
       (localPullbackUnitIso f U).hom ≫
         (overEquiv (f ⁻¹ᵁ U)).functor.map
           (ModularCurves.SheafOfModules.overUnitScalarEnd Y.ringCatSheaf
-            (f ⁻¹ᵁ U) ((f.app U).hom r)) := by
+            (f ⁻¹ᵁ U) ((f.app U).hom r)).asHom := by
   let g := f ∣_ U
   let eU := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
   let eV := (f ⁻¹ᵁ U).sheafOfModulesEquivOverUnit Y.ringCatSheaf
   let a := (overEquiv U).functor.map
-    (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r)
+    (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom
   let b := (overEquiv (f ⁻¹ᵁ U)).functor.map
     (ModularCurves.SheafOfModules.overUnitScalarEnd Y.ringCatSheaf
-      (f ⁻¹ᵁ U) ((f.app U).hom r))
+      (f ⁻¹ᵁ U) ((f.app U).hom r)).asHom
   let o := ModularCurves.unitEndomorphismOfTopSection (openTopSection U r)
   have hU : (pullback g).map a ≫ (pullback g).map eU.hom =
       (pullback g).map eU.hom ≫ (pullback g).map o := by
@@ -408,11 +408,11 @@ theorem localDualPullback_smul (f : Y ⟶ X) (M : X.Modules) (U : X.Opens)
     ModularCurves.SheafOfModules.dualSectionsModule Y.ringCatSheaf
       ((pullback f).obj M) (f ⁻¹ᵁ U)
   rw [show r • α = α ≫
-    ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r from rfl]
+    (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).asHom from rfl]
   rw [show (f.app U).hom r • localDualPullback f M U α =
     localDualPullback f M U α ≫
-      ModularCurves.SheafOfModules.overUnitScalarEnd Y.ringCatSheaf
-        (f ⁻¹ᵁ U) ((f.app U).hom r) from rfl]
+      (ModularCurves.SheafOfModules.overUnitScalarEnd Y.ringCatSheaf
+        (f ⁻¹ᵁ U) ((f.app U).hom r)).asHom from rfl]
   apply (overEquiv (f ⁻¹ᵁ U)).functor.map_injective
   rw [Functor.map_comp]
   simp only [localDualPullback, Functor.FullyFaithful.map_preimage]

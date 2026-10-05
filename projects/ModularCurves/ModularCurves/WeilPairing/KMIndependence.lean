@@ -169,12 +169,12 @@ theorem trivializationTransitionUnit_iso_trans {M M' : X.Modules} (U : X.Opens)
   let E := ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv X.ringCatSheaf U
   apply E.injective
   have h1 : E (trivializationTransitionUnit U (ψ ≪≫ a) (ψ ≪≫ b) : Γ(X, U)) =
-      (ψ ≪≫ a).inv ≫ (ψ ≪≫ b).hom := by
+      .of ((ψ ≪≫ a).inv ≫ (ψ ≪≫ b).hom) := by
     dsimp only [E]
-    exact overUnitScalarEnd_transitionUnit U (ψ ≪≫ a) (ψ ≪≫ b)
-  have h2 : E (trivializationTransitionUnit U a b : Γ(X, U)) = a.inv ≫ b.hom := by
+    exact End.ext (overUnitScalarEnd_transitionUnit U (ψ ≪≫ a) (ψ ≪≫ b))
+  have h2 : E (trivializationTransitionUnit U a b : Γ(X, U)) = .of (a.inv ≫ b.hom) := by
     dsimp only [E]
-    exact overUnitScalarEnd_transitionUnit U a b
+    exact End.ext (overUnitScalarEnd_transitionUnit U a b)
   rw [h1, h2, Iso.trans_inv, Iso.trans_hom, Category.assoc, Iso.inv_hom_id_assoc]
 
 /-- **(AP-E1-IND4, restriction half)** `restrictOverTrivialization` is natural in the module:

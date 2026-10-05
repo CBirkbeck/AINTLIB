@@ -490,7 +490,7 @@ theorem isFundamentalDomain_Gamma1_PSL_R :
     simp
   rw [← h_image_eq]
   refine isFundamentalDomain_Gamma1_PSL.image_of_equiv (Equiv.refl ℍ)
-    (MeasureTheory.Measure.QuasiMeasurePreserving.id μ_hyp)
+    (MeasureTheory.QuasiMeasurePreserving.id μ_hyp)
     ((Subgroup.equivMapOfInjective (imageGamma1_PSL N) PSL2Z_to_PSL2R
       PSL2Z_to_PSL2R_injective).toEquiv.symm) ?_
   intro g τ

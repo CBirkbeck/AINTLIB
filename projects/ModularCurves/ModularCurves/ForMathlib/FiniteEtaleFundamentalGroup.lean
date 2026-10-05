@@ -353,7 +353,7 @@ lemma pointsEquivOfContAction_smul
     (x : ((CommAlgCat.FiniteEtale.fiber k (SeparableClosure k)).obj
       ((finiteEtaleEquivContAction k).inverse.obj X) : Type u)) :
     pointsEquivOfContAction k X (σ • x) =
-      (show X.obj.V ⟶ X.obj.V from X.obj.ρ σ) (pointsEquivOfContAction k X x) := by
+      (X.obj.ρ σ).asHom (pointsEquivOfContAction k X x) := by
   have hc := ((finiteEtaleEquivContAction k).counitIso.hom.app X).hom.comm σ
   have h2 := congrArg (fun q => q x) hc
   rw [ConcreteCategory.comp_apply, ConcreteCategory.comp_apply] at h2

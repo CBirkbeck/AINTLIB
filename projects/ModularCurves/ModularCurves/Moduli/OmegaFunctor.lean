@@ -859,7 +859,7 @@ scale every basis by the global unit `−1`. Natural by `omegaBasisMap_smul` (ri
 send `−1` to `−1`); an involution by `mul_smul'`. -/
 noncomputable def omegaProblemNegAut (R : CommRingCat.{u}) :
     Aut (omegaProblem R) where
-  hom :=
+  asIso.hom :=
     { app := fun X => ↾fun b : OmegaBasis X.unop.curve.toEllipticCurveGeom =>
         (-1 : Γ(X.unop.base, ⊤)ˣ) • b
       naturality := fun X Y φ => by
@@ -869,7 +869,7 @@ noncomputable def omegaProblemNegAut (R : CommRingCat.{u}) :
           rw [Units.coe_map, Units.val_neg, Units.val_one]
           show ((φ.unop.baseHom.appLE ⊤ ⊤ (fun x _ => trivial)).hom) (-1) = -1
           rw [map_neg, map_one])).symm }
-  inv :=
+  asIso.inv :=
     { app := fun X => ↾fun b : OmegaBasis X.unop.curve.toEllipticCurveGeom =>
         (-1 : Γ(X.unop.base, ⊤)ˣ) • b
       naturality := fun X Y φ => by
@@ -879,11 +879,11 @@ noncomputable def omegaProblemNegAut (R : CommRingCat.{u}) :
           rw [Units.coe_map, Units.val_neg, Units.val_one]
           show ((φ.unop.baseHom.appLE ⊤ ⊤ (fun x _ => trivial)).hom) (-1) = -1
           rw [map_neg, map_one])).symm }
-  hom_inv_id := by
+  asIso.hom_inv_id := by
     ext X b
     exact (OmegaBasis.mul_smul' _ _ _).trans
       (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
-  inv_hom_id := by
+  asIso.inv_hom_id := by
     ext X b
     exact (OmegaBasis.mul_smul' _ _ _).trans
       (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
@@ -902,7 +902,7 @@ noncomputable def omegaProblemSignAction (R : CommRingCat.{u}) :
     · rw [one_mul, if_pos rfl, one_mul]
     · rw [mul_one, if_pos rfl, mul_one]
     · rw [show (-1 : ℤˣ) * (-1) = 1 from by decide, if_pos rfl, if_neg (by decide)]
-      refine Iso.ext ?_
+      refine Aut.ext (Iso.ext ?_)
       refine Eq.symm ?_
       ext X b
       exact (OmegaBasis.mul_smul' _ _ _).trans

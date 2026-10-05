@@ -784,11 +784,10 @@ glued inverse chart maps. -/
 instance isIso_segreProductToImageProj
     (R : Type u) [CommRing R] (m n : ℕ) :
     IsIso (segreProductToImageProj R m n) :=
-  IsIso.mk'
-    ⟨segreImageProjToProduct R m n,
-      segreImageProjToProduct_segreProductToImageProj
-        R m n,
-      segreProductToImageProj_segreImageProjToProduct
-        R m n⟩
+  ⟨segreImageProjToProduct R m n,
+    segreProductToImageProj_segreImageProjToProduct
+      R m n,
+    segreImageProjToProduct_segreProductToImageProj
+      R m n⟩
 
 end MvPolynomial

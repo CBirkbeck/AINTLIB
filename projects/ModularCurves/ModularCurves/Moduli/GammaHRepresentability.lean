@@ -106,7 +106,7 @@ same adjudication as T-H7's DEF-1 guard and `simulSchemeAction_free_of_rigid`'s
 `IsEmpty` convention). -/
 def FreeAction {Q : ModuliProblem R} {G : Type*} [Group G] (φ : G →* Aut Q) : Prop :=
   ∀ X : EllObj R, Nonempty X.base → ∀ γ : G, γ ≠ 1 →
-    ∀ a : Q.obj (Opposite.op X), (φ γ).hom.app (Opposite.op X) a ≠ a
+    ∀ a : Q.obj (Opposite.op X), (φ γ).asIso.hom.app (Opposite.op X) a ≠ a
 
 /-- **[GH0b] (KM 7.1.1 + 3.7.1 conclusion, bundled)** A relative representation datum
 for `Q` at `X` carrying a compatible `G`-action on the representing scheme, with the
@@ -131,7 +131,7 @@ structure EquivariantRelRepData {Q : ModuliProblem R} {G : Type*} [Group G] [Fin
   equivariant : ∀ {T : Scheme.{u}} (g : T ⟶ X.base)
     (h : { h : T ⟶ Z // h ≫ f = g }) (γ : G),
     eqv g ⟨h.1 ≫ σZ.hom γ, by rw [Category.assoc, over_base, h.2]⟩ =
-      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong g)) (eqv g h)
+      (φ γ⁻¹).asIso.hom.app (Opposite.op (X.pullbackAlong g)) (eqv g h)
   /-- The structure map is finite (KM 3.7.1: "a finite etale S-scheme"). -/
   finite : IsFinite f
   /-- The structure map is étale. -/
@@ -154,13 +154,13 @@ structure QuotientProblemData {Q : ModuliProblem R} {G : Type*} [Group G] [Finit
   /-- The projection `Q ⟶ Q/G`. -/
   proj : Q ⟶ prob
   /-- The projection coequalizes the action (KM (Q1)-side). -/
-  proj_invariant : ∀ γ : G, (φ γ).hom ≫ proj = proj
+  proj_invariant : ∀ γ : G, (φ γ).asIso.hom ≫ proj = proj
   /-- KM 7.1.3(1) + the étale conjunct: `Q/G` is relatively representable by finite
   étale morphisms. -/
   relRep : ∀ X : EllObj R, ∃ d : RelRepData prob X, IsFinite d.f ∧ Etale d.f
   /-- KM 7.1.3(1), verbatim (rel-repr restriction is KM's). -/
   couniversal : ∀ P' : ModuliProblem R, P'.RelativelyRepresentable →
-    ∀ ν' : Q ⟶ P', (∀ γ : G, (φ γ).hom ≫ ν' = ν') →
+    ∀ ν' : Q ⟶ P', (∀ γ : G, (φ γ).asIso.hom ≫ ν' = ν') →
       ∃! μ : prob ⟶ P', proj ≫ μ = ν'
   /-- Over an algebraically closed field, every value of `Q/G` lifts to `Q`
   (KM 7.1.3(3): the comparison is "bijective on geometric points"; surjectivity half). -/
@@ -177,7 +177,7 @@ structure QuotientProblemData {Q : ModuliProblem R} {G : Type*} [Group G] [Finit
     (a b : Q.obj (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))),
     proj.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)) a =
         proj.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)) b ↔
-      ∃ γ : G, (φ γ).hom.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)) a = b
+      ∃ γ : G, (φ γ).asIso.hom.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)) a = b
 
 /-- **[GHB1] (KM 7.1.1, closing sentence)** — "If 𝒫 is relatively representable, then
 for every E/S, the group G acts on the S-scheme 𝒫_{E/S}": a problem-level action
@@ -235,21 +235,21 @@ theorem RelRepData.exists_equivariant {Q : ModuliProblem R} {G : Type*} [Group G
   refine ⟨{
     toRelRepData := d
     σZ :=
-      { hom := fun γ => (rT ((φ γ).inv)).1
+      { hom := fun γ => (rT ((φ γ).asIso.inv)).1
         hom_one := by
-          show (rT ((φ (1 : G)).inv)).1 = 𝟙 d.Z
-          rw [show (φ (1 : G)).inv = 𝟙 Q from by rw [map_one]; rfl, hidT]
+          show (rT ((φ (1 : G)).asIso.inv)).1 = 𝟙 d.Z
+          rw [show (φ (1 : G)).asIso.inv = 𝟙 Q from by rw [map_one]; rfl, hidT]
         hom_mul := fun γ₁ γ₂ => by
-          show (rT ((φ (γ₁ * γ₂)).inv)).1
-            = (rT ((φ γ₁).inv)).1 ≫ (rT ((φ γ₂).inv)).1
-          rw [show (φ (γ₁ * γ₂)).inv = (φ γ₁).inv ≫ (φ γ₂).inv from by rw [map_mul]; rfl,
+          show (rT ((φ (γ₁ * γ₂)).asIso.inv)).1
+            = (rT ((φ γ₁).asIso.inv)).1 ≫ (rT ((φ γ₂).asIso.inv)).1
+          rw [show (φ (γ₁ * γ₂)).asIso.inv = (φ γ₁).asIso.inv ≫ (φ γ₂).asIso.inv from by rw [map_mul]; rfl,
             hcompT] }
-    over_base := fun γ => (rT ((φ γ).inv)).2
+    over_base := fun γ => (rT ((φ γ).asIso.inv)).2
     equivariant := by
       intro T g h γ
-      show d.eqv g ⟨h.1 ≫ (rT ((φ γ).inv)).1, _⟩ = (φ γ⁻¹).hom.app _ (d.eqv g h)
-      rw [show (φ γ⁻¹).hom = (φ γ).inv from by rw [map_inv]; rfl]
-      exact relKey g h.1 h.2 ((φ γ).inv)
+      show d.eqv g ⟨h.1 ≫ (rT ((φ γ).asIso.inv)).1, _⟩ = (φ γ⁻¹).asIso.hom.app _ (d.eqv g h)
+      rw [show (φ γ⁻¹).asIso.hom = (φ γ).asIso.inv from by rw [map_inv]; rfl]
+      exact relKey g h.1 h.2 ((φ γ).asIso.inv)
     finite := hfin
     etale := het }⟩
 
@@ -339,7 +339,7 @@ noncomputable def ModuliProblem.EquivariantRelRepData.pullback {R : CommRingCat.
             show (v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ) ≫
                 pullback.snd d.f ψ.baseHom = g by
               rw [Category.assoc, hbsnd, hv2]⟩ =
-        (φ γ⁻¹).hom.app (Opposite.op (X'.pullbackAlong g))
+        (φ γ⁻¹).asIso.hom.app (Opposite.op (X'.pullbackAlong g))
           ((d.toRelRepData.pullback ψ).eqv g ⟨v, hv2⟩) := by
       intro v hv2
       have hmred : (v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ) ≫
@@ -378,7 +378,7 @@ noncomputable def ModuliProblem.EquivariantRelRepData.pullback {R : CommRingCat.
             (v ≫ pullback.fst d.f ψ.baseHom) ≫ d.σZ.hom γ
           rw [Category.assoc, hbfst, ← Category.assoc])]
       rw [d.equivariant (g ≫ ψ.baseHom) ⟨v ≫ pullback.fst d.f ψ.baseHom, hp2⟩ γ]
-      exact (NatTrans.naturality_apply (φ γ⁻¹).hom
+      exact (NatTrans.naturality_apply (φ γ⁻¹).asIso.hom
         (EllObj.toPullbackAlong (X'.pullbackAlongπ g ≫ ψ)).op _).symm
     exact key h.1 h.2
   finite := by
@@ -409,7 +409,7 @@ theorem ModuliProblem.EquivariantRelRepData.compare_equivariant {R : CommRingCat
     ModuliProblem.RelRepData.eqv_comp_compare d₁.toRelRepData d₂.toRelRepData d₁.f
       ⟨d₁.σZ.hom γ, d₁.over_base γ⟩
   have e2 : d₁.eqv d₁.f ⟨d₁.σZ.hom γ, d₁.over_base γ⟩ =
-      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong d₁.f))
+      (φ γ⁻¹).asIso.hom.app (Opposite.op (X.pullbackAlong d₁.f))
         (d₁.eqv d₁.f ⟨𝟙 d₁.Z, Category.id_comp d₁.f⟩) := by
     rw [show (⟨d₁.σZ.hom γ, d₁.over_base γ⟩ :
         { s : d₁.Z ⟶ d₁.Z // s ≫ d₁.f = d₁.f }) =
@@ -418,7 +418,7 @@ theorem ModuliProblem.EquivariantRelRepData.compare_equivariant {R : CommRingCat
     exact d₁.equivariant d₁.f ⟨𝟙 d₁.Z, Category.id_comp d₁.f⟩ γ
   have e3 : d₂.eqv d₁.f ⟨(d₁.toRelRepData.compare d₂.toRelRepData).1 ≫ d₂.σZ.hom γ,
         m₂⟩ =
-      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong d₁.f))
+      (φ γ⁻¹).asIso.hom.app (Opposite.op (X.pullbackAlong d₁.f))
         (d₂.eqv d₁.f (d₁.toRelRepData.compare d₂.toRelRepData)) :=
     d₂.equivariant d₁.f (d₁.toRelRepData.compare d₂.toRelRepData) γ
   have e4 : d₂.eqv d₁.f (d₁.toRelRepData.compare d₂.toRelRepData) =
@@ -1314,7 +1314,7 @@ classification intertwines the action (`equivariant`) and the chosen projection 
 it (`hπinv`). -/
 theorem QuotPkg.projQ_invariant (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (hfree : FreeAction φ) (γ : G) :
-    (φ γ).hom ≫ QuotPkg.projQ pkg hfree = QuotPkg.projQ pkg hfree := by
+    (φ γ).asIso.hom ≫ QuotPkg.projQ pkg hfree = QuotPkg.projQ pkg hfree := by
   ext Xop a
   refine Subtype.ext ?_
   have hmem : ((((pkg Xop.unop).d.eqv
@@ -1334,7 +1334,7 @@ theorem QuotPkg.projQ_invariant (pkg : ∀ X : EllObj R, QuotPkg φ X)
       ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
       (Q.map (Xop.unop.pullbackAlongπ
         ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op
-        ((φ γ).hom.app Xop a)))
+        ((φ γ).asIso.hom.app Xop a)))
     (a₂ := ⟨(((pkg Xop.unop).d.eqv
         ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
         (Q.map (Xop.unop.pullbackAlongπ
@@ -1342,7 +1342,7 @@ theorem QuotPkg.projQ_invariant (pkg : ∀ X : EllObj R, QuotPkg φ X)
       (pkg Xop.unop).d.σZ.hom γ⁻¹, hmem⟩)
     (by
       rw [Equiv.apply_symm_apply]
-      have hnat := NatTrans.naturality_apply (φ γ).hom
+      have hnat := NatTrans.naturality_apply (φ γ).asIso.hom
         (Xop.unop.pullbackAlongπ
           ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a
       rw [← hnat]
@@ -1358,7 +1358,7 @@ theorem QuotPkg.projQ_invariant (pkg : ∀ X : EllObj R, QuotPkg φ X)
       ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
       (Q.map (Xop.unop.pullbackAlongπ
         ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op
-        ((φ γ).hom.app Xop a))).1 ≫ (pkg Xop.unop).π =
+        ((φ γ).asIso.hom.app Xop a))).1 ≫ (pkg Xop.unop).π =
     (((pkg Xop.unop).d.eqv
       ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
       (Q.map (Xop.unop.pullbackAlongπ
@@ -1654,7 +1654,7 @@ content): a `G`-invariant morphism to a relatively representable problem induces
 each object, a `G`-invariant morphism of representing schemes over the base. -/
 theorem QuotPkg.exists_crossTransport {P' : ModuliProblem R} {X : EllObj R}
     (p : QuotPkg φ X) (d' : ModuliProblem.RelRepData P' X) (ν' : Q ⟶ P')
-    (hν' : ∀ γ : G, (φ γ).hom ≫ ν' = ν') :
+    (hν' : ∀ γ : G, (φ γ).asIso.hom ≫ ν' = ν') :
     ∃ (ν : p.d.Z ⟶ d'.Z) (hνf : ν ≫ d'.f = p.d.f),
       d'.eqv p.d.f ⟨ν, hνf⟩ =
         ν'.app (Opposite.op (X.pullbackAlong p.d.f))
@@ -1700,7 +1700,7 @@ theorem QuotPkg.exists_crossTransport {P' : ModuliProblem R} {X : EllObj R}
       Opposite.op (X.pullbackAlong t)) hgs))
       (Q.map (X.pullbackAlongMap p.d.f (p.d.σZ.hom γ)).op
         (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩)) =
-      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong p.d.f))
+      (φ γ⁻¹).asIso.hom.app (Opposite.op (X.pullbackAlong p.d.f))
         (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩) := by
     rw [← p.d.nat p.d.f (p.d.σZ.hom γ) ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩,
       ← ModuliProblem.RelRepData.eqv_congr p.d.toRelRepData hgs
@@ -1712,9 +1712,9 @@ theorem QuotPkg.exists_crossTransport {P' : ModuliProblem R} {X : EllObj R}
     exact p.d.equivariant p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩ γ
   rw [hQside,
     show ν'.app (Opposite.op (X.pullbackAlong p.d.f))
-      ((φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong p.d.f))
+      ((φ γ⁻¹).asIso.hom.app (Opposite.op (X.pullbackAlong p.d.f))
         (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩)) =
-      ((φ γ⁻¹).hom ≫ ν').app (Opposite.op (X.pullbackAlong p.d.f))
+      ((φ γ⁻¹).asIso.hom ≫ ν').app (Opposite.op (X.pullbackAlong p.d.f))
         (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩) from rfl,
     hν' γ⁻¹]
 
@@ -3028,7 +3028,7 @@ theorem QuotPkg.projQ_geom_orbits (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (a b : Q.obj (Opposite.op X)) :
     (QuotPkg.projQ pkg hfree).app (Opposite.op X) a =
       (QuotPkg.projQ pkg hfree).app (Opposite.op X) b ↔
-    ∃ γ : G, (φ γ).hom.app (Opposite.op X) a = b := by
+    ∃ γ : G, (φ γ).asIso.hom.app (Opposite.op X) a = b := by
   constructor
   · intro heq
     -- the classifying sections lie in one fibre, hence one orbit
@@ -3058,7 +3058,7 @@ theorem QuotPkg.projQ_geom_orbits (pkg : ∀ X : EllObj R, QuotPkg φ X)
         (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a)).2)
     have hQside : Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op b =
         Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op
-          ((φ γ₀⁻¹).hom.app (Opposite.op X) a) := by
+          ((φ γ₀⁻¹).asIso.hom.app (Opposite.op X) a) := by
       calc Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op b
           = (pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
             (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
@@ -3069,7 +3069,7 @@ theorem QuotPkg.projQ_geom_orbits (pkg : ∀ X : EllObj R, QuotPkg φ X)
               (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a)).1 ≫
               (pkg X).d.σZ.hom γ₀, hm⟩ :=
             congrArg _ (Subtype.ext hγ₀)
-        _ = (φ γ₀⁻¹).hom.app (Opposite.op (X.pullbackAlong
+        _ = (φ γ₀⁻¹).asIso.hom.app (Opposite.op (X.pullbackAlong
               ((𝟙 X : X ⟶ X).baseHom)))
             ((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
               (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
@@ -3077,14 +3077,14 @@ theorem QuotPkg.projQ_geom_orbits (pkg : ∀ X : EllObj R, QuotPkg φ X)
             (pkg X).d.equivariant ((𝟙 X : X ⟶ X).baseHom)
               (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
                 (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a)) γ₀
-        _ = (φ γ₀⁻¹).hom.app (Opposite.op (X.pullbackAlong
+        _ = (φ γ₀⁻¹).asIso.hom.app (Opposite.op (X.pullbackAlong
               ((𝟙 X : X ⟶ X).baseHom)))
             (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a) :=
             congrArg _ (((pkg X).d.eqv
               ((𝟙 X : X ⟶ X).baseHom)).apply_symm_apply _)
         _ = Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op
-            ((φ γ₀⁻¹).hom.app (Opposite.op X) a) :=
-            NatTrans.naturality_apply (φ γ₀⁻¹).hom
+            ((φ γ₀⁻¹).asIso.hom.app (Opposite.op X) a) :=
+            NatTrans.naturality_apply (φ γ₀⁻¹).asIso.hom
               (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a
     -- recover the values through the tautological roundtrip
     have hrec : ∀ y : Q.obj (Opposite.op X),
@@ -3101,7 +3101,7 @@ theorem QuotPkg.projQ_geom_orbits (pkg : ∀ X : EllObj R, QuotPkg φ X)
               (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 X)))).trans
           (FunctorToTypes.map_id_apply Q y))
     have := congrArg (Q.map (EllObj.toPullbackAlong (𝟙 X)).op) hQside
-    rw [hrec b, hrec ((φ γ₀⁻¹).hom.app (Opposite.op X) a)] at this
+    rw [hrec b, hrec ((φ γ₀⁻¹).asIso.hom.app (Opposite.op X) a)] at this
     exact this.symm
   · rintro ⟨γ, rfl⟩
     exact (congrArg (fun η : Q ⟶ QuotPkg.quotProb pkg hfree =>
@@ -3307,7 +3307,7 @@ and its spec `gammaHAut_app_val`. -/
 noncomputable def gammaHAut (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) :
     ↥H →* Aut (gammaFullNaiveProblem R N) where
-  toFun γ :=
+  toFun γ := .of
     { hom := glSmulNat R N ((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
       inv := glSmulNat R N ((γ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
       hom_inv_id := by
@@ -3362,7 +3362,7 @@ noncomputable def gammaHAut (N : ℕ) [NeZero N]
 theorem gammaHAut_app_val (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) (γ : ↥H)
     (X : EllObj R) (L : (gammaFullNaiveProblem R N).obj (Opposite.op X)) :
-    (gammaHAut R N H γ).hom.app (Opposite.op X) L =
+    (gammaHAut R N H γ).asIso.hom.app (Opposite.op X) L =
       X.curve.glSmul ((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L :=
   rfl
 

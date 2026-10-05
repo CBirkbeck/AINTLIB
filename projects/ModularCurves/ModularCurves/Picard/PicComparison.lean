@@ -94,11 +94,11 @@ theorem evalSection_factor (M : _root_.SheafOfModules R) (U : C)
     evalSection R M U φ m =
       dualUnitSectionsEquiv R U (ψ.inv ≫ φ) * evalSection R M U ψ.hom m := by
   have hφ : φ = ψ.hom ≫ (ψ.inv ≫ φ) := by rw [Iso.hom_inv_id_assoc]
-  have hε : (ψ.inv ≫ φ) = overUnitScalarEnd R U (dualUnitSectionsEquiv R U (ψ.inv ≫ φ)) :=
+  have hε : (ψ.inv ≫ φ) = (overUnitScalarEnd R U (dualUnitSectionsEquiv R U (ψ.inv ≫ φ))).asHom :=
     ((dualUnitSectionsEquiv R U).symm_apply_apply (ψ.inv ≫ φ)).symm
   calc evalSection R M U φ m
-      = evalSection R M U (ψ.hom ≫ overUnitScalarEnd R U
-          (dualUnitSectionsEquiv R U (ψ.inv ≫ φ))) m := by rw [← hε, ← hφ]
+      = evalSection R M U (ψ.hom ≫ (overUnitScalarEnd R U
+          (dualUnitSectionsEquiv R U (ψ.inv ≫ φ))).asHom) m := by rw [← hε, ← hφ]
     _ = evalSection R M U (letI := dualSectionsModule R M U
           dualUnitSectionsEquiv R U (ψ.inv ≫ φ) • ψ.hom) m := rfl
     _ = dualUnitSectionsEquiv R U (ψ.inv ≫ φ) • evalSection R M U ψ.hom m :=
@@ -413,8 +413,8 @@ theorem bijective_evPre_app_of_triv {M : X.Modules} {W : X.Opens}
     -- the scalar times the trivialization is the functional
     have hcψ : ModularCurves.SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf W
         (ψ.inv ≫ φ) • ψ.hom = φ := by
-      show ψ.hom ≫ ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf W
-        (ModularCurves.SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf W (ψ.inv ≫ φ)) = φ
+      show ψ.hom ≫ (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf W
+        (ModularCurves.SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf W (ψ.inv ≫ φ))).asHom = φ
       exact (congrArg (fun t => ψ.hom ≫ t)
         ((ModularCurves.SheafOfModules.dualUnitSectionsEquiv
           X.ringCatSheaf W).symm_apply_apply (ψ.inv ≫ φ))).trans (Iso.hom_inv_id_assoc ψ φ)
