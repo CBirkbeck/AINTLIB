@@ -13,7 +13,7 @@ pp.unicode.fun = true   # universal across all origin projects
 [[require]]
 name = "mathlib"
 git = "https://github.com/leanprover-community/mathlib4.git"
-rev = "08c3fc3f372a6d35d18190fb26b7be083378dc38"     # daily steady-state bump 2026-10-06, toolchain v4.35.0-rc3
+rev = "e6bbacd0e1b7307ff6e17da09cd2455f60804fa6"     # daily steady-state bump 2026-10-07, toolchain v4.35.0-rc4
 
 # ───────────────────────── shared, refactored-out lemmas ─────────────────────────
 [[lean_lib]]
