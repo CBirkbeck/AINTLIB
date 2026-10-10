@@ -101,10 +101,9 @@ theorem globalUnitToFractionalUnit_surjective :
     rw [map_inv, hxPrincipal, inv_one]
   have hxInvSpan :
       FractionalIdeal.spanSingleton (𝓞 K)⁰ ((x⁻¹ : Kˣ) : K) =
-        (1 : FractionalIdeal (𝓞 K)⁰ K) := by
-    simpa using
-      (toPrincipalIdeal_eq_iff (R := 𝓞 K) (K := K)
-        (I := (1 : (FractionalIdeal (𝓞 K)⁰ K)ˣ)) (x := x⁻¹)).1 hxInvPrincipal
+        (1 : FractionalIdeal (𝓞 K)⁰ K) :=
+    (toPrincipalIdeal_eq_iff (R := 𝓞 K) (K := K)
+      (I := (1 : (FractionalIdeal (𝓞 K)⁰ K)ˣ)) (x := x⁻¹)).1 hxInvPrincipal
   have hxInvMem : ((x⁻¹ : Kˣ) : K) ∈ (1 : FractionalIdeal (𝓞 K)⁰ K) := by
     rw [← hxInvSpan]
     exact FractionalIdeal.mem_spanSingleton_self (𝓞 K)⁰ ((x⁻¹ : Kˣ) : K)

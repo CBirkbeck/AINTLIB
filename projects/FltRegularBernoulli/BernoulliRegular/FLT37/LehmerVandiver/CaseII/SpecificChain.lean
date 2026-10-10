@@ -1996,8 +1996,8 @@ theorem CaseIIData37.descent_step_of_etaZeroSpanSingletons_and_unitPower
       (by simpa [CaseIIData37.etaZero] using hη₁)
       (by simpa [CaseIIData37.etaZero] using hη₂)
       hη ha₁ hb₁ ha₂ hb₂
-      (by simpa [CaseIIData37.rootIdeal] using hspan₁)
-      (by simpa [CaseIIData37.rootIdeal] using hspan₂)
+      (by simpa only [CaseIIData37.rootIdeal] using hspan₁)
+      (by simpa only [CaseIIData37.rootIdeal] using hspan₂)
       h_unit
 
 theorem CaseIIData37.descent_step_of_etaZeroSpanSingletons_and_adaptedKummer
@@ -2033,8 +2033,8 @@ theorem CaseIIData37.descent_step_of_etaZeroSpanSingletons_and_adaptedKummer
       (by simpa [CaseIIData37.etaZero] using hη₁)
       (by simpa [CaseIIData37.etaZero] using hη₂)
       hη ha₁ hb₁ ha₂ hb₂
-      (by simpa [CaseIIData37.rootIdeal] using hspan₁)
-      (by simpa [CaseIIData37.rootIdeal] using hspan₂)
+      (by simpa only [CaseIIData37.rootIdeal] using hspan₁)
+      (by simpa only [CaseIIData37.rootIdeal] using hspan₂)
       h_kummer
 
 /-- Adjacent-root version of
