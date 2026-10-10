@@ -151,7 +151,7 @@ theorem fdBoundaryFun_arg_right (H : ℝ) {δ : ℝ} (hδ : 0 < δ) (hδs : δ <
   have h_trig : (↑(Real.cos α) : ℂ) + ↑(Real.sin α) * I =
       Complex.cos ↑α + Complex.sin ↑α * I := by
     rw [← ofReal_cos, ← ofReal_sin]
-  rw [h_trig, Complex.arg_neg_eq_arg_sub_pi_of_im_pos (by simp [mul_im]; positivity),
+  rw [h_trig, Complex.arg_neg_eq_arg_sub_pi_of_im_pos (by simp [mul_im, sin_ofReal_re]; positivity),
     Complex.arg_mul_cos_add_sin_mul_I (show (0:ℝ) < 2 * Real.sin α by positivity)
       ⟨by rw [hα_def]; nlinarith [Real.pi_pos], by linarith⟩]
 
