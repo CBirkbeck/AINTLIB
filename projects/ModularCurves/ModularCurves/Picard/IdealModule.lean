@@ -85,7 +85,7 @@ set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- The ideal sections as a subfunctor of the `Type`-valued structure sheaf. -/
 noncomputable def idealSubfunctor :
-    Subfunctor (C.sheaf.val ⋙ CategoryTheory.forget CommRingCat) where
+    Subfunctor (C.sheaf.obj ⋙ CategoryTheory.forget CommRingCat) where
   obj U := {g | (J.subschemeι.app U.unop).hom g = 0}
   map {U V} i := fun g hg =>
     RingHom.mem_ker.mp (idealSections_map J i (RingHom.mem_ker.mpr hg))
@@ -100,7 +100,7 @@ theorem idealSubfunctor_isSheaf :
   apply ((idealSubfunctor J).isSheaf_iff
     ((isSheaf_iff_isSheaf_of_type _ _).mp
       ((Presheaf.isSheaf_iff_isSheaf_forget _ _ (CategoryTheory.forget CommRingCat)).mp
-        C.sheaf.cond))).2
+        C.sheaf.property))).2
   intro U g hsieve
   show (J.subschemeι.app U.unop).hom g = 0
   rw [Opens.mem_grothendieckTopology] at hsieve

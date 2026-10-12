@@ -7715,7 +7715,7 @@ theorem fullLevel_eval_eqToHom {X : EllObj (CommRingCat.of ℚ)} {T : Scheme.{0}
   have hEQ : (gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
       (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t))
         (rfl : g₁ = g₁))) v = v :=
-    FunctorToTypes.map_id_apply _ v
+    Functor.map_id_apply _ _ v
   exact weilPairingEval_congr_raw rfl (congrArg (fun w => w.1.1.1) hEQ)
     (congrArg (fun w => w.1.2.1) hEQ) _ _ _ _
 
@@ -8339,11 +8339,11 @@ noncomputable def sympFramedProblem (D : GaloisRepData N) [Fact (1 < N)] :
   map_id X := by
     ext Lh : 3
     exact Subtype.ext
-      (FunctorToTypes.map_id_apply (bareFramedProblem D) Lh.val)
+      (Functor.map_id_apply (bareFramedProblem D) _ Lh.val)
   map_comp f g := by
     ext Lh : 3
     exact Subtype.ext
-      (FunctorToTypes.map_comp_apply (bareFramedProblem D) f g Lh.val)
+      (Functor.map_comp_apply (bareFramedProblem D) f g Lh.val)
 
 /-- **[T-CV-3c-5]** The diagonal translation of the symplectically framed problem
 (the condition twists by the same power endo on both sides). -/

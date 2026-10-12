@@ -1405,7 +1405,7 @@ theorem RelRepData.compare_pullback_comp {Q : ModuliProblem R} {X X' X'' : EllOb
     -- defeq index boundary, but `exact`-position elaboration can)
     have hcoll : ∀ {A B C : (EllObj R)ᵒᵖ} (f : A ⟶ B) (g : B ⟶ C) (x : Q.obj A),
         Q.map g (Q.map f x) = Q.map (f ≫ g) x :=
-      fun f g x => (FunctorToTypes.map_comp_apply Q f g x).symm
+      fun f g x => (Functor.map_comp_apply Q f g x).symm
     -- the morphism-level cocycle: `toPullbackAlong_comp` + associativity `eqToHom`
     have hEll : EllObj.toPullbackAlong
           (X''.pullbackAlongπ (d.pullback (k₂ ≫ k₁)).f ≫ k₂) ≫
@@ -1492,7 +1492,7 @@ theorem RelRepData.eqv_comp_compare_pullback_of_eqv {Q : ModuliProblem R}
   -- collapse the four functor layers and close with the `Ell`-level cocycle
   have hcoll : ∀ {A B C : (EllObj R)ᵒᵖ} (f : A ⟶ B) (g : B ⟶ C) (x : Q.obj A),
       Q.map g (Q.map f x) = Q.map (f ≫ g) x :=
-    fun f g x => (FunctorToTypes.map_comp_apply Q f g x).symm
+    fun f g x => (Functor.map_comp_apply Q f g x).symm
   -- the `Ell`-level identity: the four-step comparison equals `π ≫ k`
   have hEll : EllObj.toPullbackAlong
       (X'.pullbackAlongπ ((𝟙 X' : X' ⟶ X').baseHom) ≫ k) ≫

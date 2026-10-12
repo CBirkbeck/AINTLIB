@@ -691,7 +691,7 @@ theorem weilPairingEval_self_of_locally {S : Scheme.{u}} (E : EllipticCurve S) {
           (EllipticCurve.Point.restrict E V.ι x) hxr hxr : Γ((V : Scheme.{u}), ⊤)) = 1) :
     (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by
   refine TopCat.Presheaf.IsSheaf.section_ext
-    (F := T.presheaf) T.sheaf.cond (U := Opposite.op ⊤) ?_
+    (F := T.presheaf) T.sheaf.property (U := Opposite.op ⊤) ?_
   intro p _
   obtain ⟨V, hpV, hV⟩ := hloc p
   refine ⟨V, le_top, hpV, ?_⟩

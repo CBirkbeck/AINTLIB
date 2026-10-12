@@ -238,11 +238,11 @@ noncomputable def legendreDeltaProblem (R : CommRingCat.{u}) : ModuliProblem R w
     IsLegendreDatum.map φ.unop x.2 _ rfl rfl⟩
   map_id X := by
     ext x
-    · exact FunctorToTypes.map_id_apply (gammaFullNaiveProblem R 2) x.1.1
-    · exact FunctorToTypes.map_id_apply (omegaProblem R) x.1.2
+    · exact (Functor.map_id_apply (gammaFullNaiveProblem R 2) _ x.1.1 :)
+    · exact (Functor.map_id_apply (omegaProblem R) _ x.1.2 :)
   map_comp {X Y Z} φ ψ := by
     ext x
-    · exact FunctorToTypes.map_comp_apply (gammaFullNaiveProblem R 2) φ ψ x.1.1
-    · exact FunctorToTypes.map_comp_apply (omegaProblem R) φ ψ x.1.2
+    · exact (Functor.map_comp_apply (gammaFullNaiveProblem R 2) φ ψ x.1.1 :)
+    · exact (Functor.map_comp_apply (omegaProblem R) φ ψ x.1.2 :)
 
 end ModularCurves

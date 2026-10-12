@@ -2293,7 +2293,7 @@ noncomputable def legendreDeltaRepresentableBy (R : CommRingCat.{u})
         · exact pullSection_legendreClassifyingEllHom_Q x.2 (X.isUnit_two hR) hR
         · exact omegaBasisMap_legendreClassifyingEllHom x.2 (X.isUnit_two hR) hR }
   homEquiv_comp {X X'} f g :=
-    FunctorToTypes.map_comp_apply (legendreDeltaProblem R)
+    Functor.map_comp_apply (legendreDeltaProblem R)
       (Opposite.op g) (Opposite.op f) _
 
 open AlgebraicGeometry CategoryTheory Scheme in

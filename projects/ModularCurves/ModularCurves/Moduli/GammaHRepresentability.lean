@@ -2043,7 +2043,7 @@ noncomputable def QuotPkg.crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
       (s.1 ≫ μf Xop.unop)
       (by rw [Category.assoc, hμf Xop.unop]; exact s.2)
       (by
-        rw [← FunctorToTypes.map_comp_apply, ← op_comp]
+        rw [← Functor.map_comp_apply, ← op_comp]
         have hππ : Xop.unop.pullbackAlongπ
             ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom) ≫
             EllObj.toPullbackAlong (𝟙 Xop.unop) =
@@ -2083,7 +2083,7 @@ noncomputable def QuotPkg.crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
       M1 M2
     exact (congrArg (fun y => P'.map (EllObj.toPullbackAlong (𝟙 X'op.unop)).op y)
         h4a).trans
-      ((FunctorToTypes.map_comp_apply P'
+      ((Functor.map_comp_apply P'
           (X'op.unop.pullbackAlongπ
             ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)).op
           (EllObj.toPullbackAlong (𝟙 X'op.unop)).op
@@ -2102,7 +2102,7 @@ noncomputable def QuotPkg.crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
               𝟙 (Opposite.op X'op.unop) from
             congrArg Quiver.Hom.op
               (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 X'op.unop)))).trans
-          (FunctorToTypes.map_id_apply P' _)))
+          (Functor.map_id_apply P' _ _)))
 
 /-- **The couniversal factorization** ([GHB7-couniv-iv]): the couniversal morphism
 factors the invariant map through the projection (KM 7.1.3(1), existence half). -/
@@ -2184,7 +2184,7 @@ theorem QuotPkg.projQ_crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
       (Q.map (Xop.unop.pullbackAlongπ
         ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).symm.trans
     (congrArg (fun y => ν'.app Xop y)
-      (((FunctorToTypes.map_comp_apply Q
+      (((Functor.map_comp_apply Q
         (Xop.unop.pullbackAlongπ
           ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op
         (EllObj.toPullbackAlong (𝟙 Xop.unop)).op a).symm).trans
@@ -2195,7 +2195,7 @@ theorem QuotPkg.projQ_crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
               𝟙 (Opposite.op Xop.unop) from
             congrArg Quiver.Hom.op
               (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 Xop.unop)))).trans
-          (FunctorToTypes.map_id_apply Q a))))
+          (Functor.map_id_apply Q _ a))))
 
 /-- **The source-generic classification key** ([GHB7-couniv-v-prep]): `crossRelKey`
 over an arbitrary source problem — needed at source `quotProb` for the couniversal
@@ -2456,7 +2456,7 @@ theorem QuotPkg.relRepDatum_eqv_π (pkg : ∀ X : EllObj R, QuotPkg φ X)
           X.pullbackAlongπ (pkg X).d.f)).op y)
         (ModuliProblem.RelRepData.eqv_congr (pkg X).d.toRelRepData hg
           (𝟙 (pkg X).d.Z) (Category.id_comp (pkg X).d.f))).trans
-      ((FunctorToTypes.map_comp_apply Q
+      ((Functor.map_comp_apply Q
           (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hg))
           (EllObj.toPullbackAlong
         (((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
@@ -2651,7 +2651,7 @@ theorem QuotPkg.crossμ_unique (pkg : ∀ X : EllObj R, QuotPkg φ X)
               ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op s)) := by
     rw [NatTrans.naturality_apply μ''
       (Xop.unop.pullbackAlongπ ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op s]
-    exact ((FunctorToTypes.map_comp_apply P'
+    exact ((Functor.map_comp_apply P'
         (Xop.unop.pullbackAlongπ
           ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op
         (EllObj.toPullbackAlong (𝟙 Xop.unop)).op (μ''.app Xop s)).symm.trans
@@ -2662,7 +2662,7 @@ theorem QuotPkg.crossμ_unique (pkg : ∀ X : EllObj R, QuotPkg φ X)
             𝟙 (Opposite.op Xop.unop) from
           congrArg Quiver.Hom.op
             (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 Xop.unop)))).trans
-        (FunctorToTypes.map_id_apply P' (μ''.app Xop s)))).symm
+        (Functor.map_id_apply P' _ (μ''.app Xop s)))).symm
   have m₃ : (s.1 ≫ (((dP Xop.unop).eqv
           (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
@@ -2790,7 +2790,7 @@ theorem QuotPkg.projQ_geom_surjective (pkg : ∀ X : EllObj R, QuotPkg φ X)
           ⟨t ≫ pullback.fst (pkg X).π s.1, hmem⟩)) =
       (pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
         ⟨t ≫ pullback.fst (pkg X).π s.1, hmem⟩ :=
-    (FunctorToTypes.map_comp_apply Q (EllObj.toPullbackAlong (𝟙 X)).op
+    (Functor.map_comp_apply Q (EllObj.toPullbackAlong (𝟙 X)).op
       (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op _).symm.trans
       ((congrArg (fun m => Q.map m ((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
         ⟨t ≫ pullback.fst (pkg X).π s.1, hmem⟩))
@@ -2799,7 +2799,7 @@ theorem QuotPkg.projQ_geom_surjective (pkg : ∀ X : EllObj R, QuotPkg φ X)
             𝟙 (Opposite.op (X.pullbackAlong ((𝟙 X : X ⟶ X).baseHom))) from
           congrArg Quiver.Hom.op
             (ModularCurves.EllObj.pullbackAlongπ_toPullbackAlong_id X))).trans
-        (FunctorToTypes.map_id_apply Q _))
+        (Functor.map_id_apply Q _ _))
   show (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
       (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op
         (Q.map (EllObj.toPullbackAlong (𝟙 X)).op
@@ -3091,7 +3091,7 @@ theorem QuotPkg.projQ_geom_orbits (pkg : ∀ X : EllObj R, QuotPkg φ X)
         Q.map (EllObj.toPullbackAlong (𝟙 X)).op
           (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op y) = y := by
       intro y
-      exact (FunctorToTypes.map_comp_apply Q
+      exact (Functor.map_comp_apply Q
         (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op
         (EllObj.toPullbackAlong (𝟙 X)).op y).symm.trans
         ((congrArg (fun m => Q.map m y)
@@ -3099,7 +3099,7 @@ theorem QuotPkg.projQ_geom_orbits (pkg : ∀ X : EllObj R, QuotPkg φ X)
               (EllObj.toPullbackAlong (𝟙 X)).op = 𝟙 (Opposite.op X) from
             congrArg Quiver.Hom.op
               (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 X)))).trans
-          (FunctorToTypes.map_id_apply Q y))
+          (Functor.map_id_apply Q _ y))
     have := congrArg (Q.map (EllObj.toPullbackAlong (𝟙 X)).op) hQside
     rw [hrec b, hrec ((φ γ₀⁻¹).asIso.hom.app (Opposite.op X) a)] at this
     exact this.symm

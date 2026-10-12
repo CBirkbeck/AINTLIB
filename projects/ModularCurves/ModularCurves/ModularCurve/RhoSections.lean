@@ -5260,7 +5260,7 @@ theorem strZ_equivariant (D : GaloisRepData N) [Fact (1 < N)]
         (Opposite.op (X.pullbackAlong (strPr D (X.pullbackAlong k) ≫ k)))
         (d.eqv (strPr D (X.pullbackAlong k) ≫ k) (strZ D d k str)) := by
     rw [hVAL]
-    refine Eq.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+    refine Eq.trans (Functor.map_comp_apply (sympFramedProblem D)
       (EllObj.toPullbackAlong (X.pullbackAlongMap k
         (strPr D (X.pullbackAlong k)))).op (strActX D k γ).op
       (strValue D str)).symm ?_
@@ -5269,7 +5269,7 @@ theorem strZ_equivariant (D : GaloisRepData N) [Fact (1 < N)]
       (strActX D k γ ≫ EllObj.toPullbackAlong (X.pullbackAlongMap k
         (strPr D (X.pullbackAlong k)))).op from rfl]
     rw [strActX_square D k γ]
-    refine Eq.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+    refine Eq.trans (Functor.map_comp_apply (sympFramedProblem D)
       (strActHom D (X.pullbackAlong k) γ).op
       (EllObj.toPullbackAlong (X.pullbackAlongMap k
         (strPr D (X.pullbackAlong k)))).op (strValue D str)) ?_
@@ -6285,7 +6285,7 @@ theorem rhoOfSection_zrel
       (EllObj.homToPullbackAlong_pullbackAlongπ _ _ _)
       (strZ D d k str')
     rw [hVAL] at hnat
-    exact hnat.symm.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+    exact hnat.symm.trans (Functor.map_comp_apply (sympFramedProblem D)
       u₁.op w₁.op (strValue D str')).symm
   have pf₂ : z₂ ≫ d.f = ξ ≫ k := by
     rw [hz₂, Category.assoc, secLift_f D d k s hs, ← Category.assoc]
@@ -6299,7 +6299,7 @@ theorem rhoOfSection_zrel
         EllObj.homToPullbackAlong_pullbackAlongπ,
         ModuliProblem.pullbackAlongMap_pullbackAlongπ])
       ⟨secLift D d s, secLift_f D d k s hs⟩
-    exact hnat.symm.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+    exact hnat.symm.trans (Functor.map_comp_apply (sympFramedProblem D)
       (pullbackAlongAssocHom X k (secCover D d s)).op w₂.op
       (secValue D d k s hs))
   -- invertibility of N on the relevant bases
@@ -6563,7 +6563,7 @@ theorem strSection_pull_pointwise
       (EllObj.homToPullbackAlong_pullbackAlongπ _ _ _)
       (strZ D d k str)
     rw [hVAL] at hnat
-    exact hnat.symm.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+    exact hnat.symm.trans (Functor.map_comp_apply (sympFramedProblem D)
       (EllObj.toPullbackAlong
         (X.pullbackAlongMap k (strPr D (X.pullbackAlong k)))).op
       (EllObj.homToPullbackAlong (X.pullbackAlongπ ((ζ₀ ≫ pullback.snd
@@ -6604,7 +6604,7 @@ theorem strSection_pull_pointwise
         (ModuliProblem.pullbackAlongMap_pullbackAlongπ X k _)))))
       ⟨secLift D d (strSection D d k str),
         secLift_f D d k (strSection D d k str) (strSection_struct D d k str)⟩
-    exact hnat.symm.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+    exact hnat.symm.trans (Functor.map_comp_apply (sympFramedProblem D)
       (pullbackAlongAssocHom X k (secCover D d (strSection D d k str))).op
       (EllObj.homToPullbackAlong
         (X.pullbackAlongMap k (ζ₀ ≫ pullback.snd
@@ -7163,7 +7163,7 @@ theorem strZ_pull_pointwise {X : EllObj (CommRingCat.of ℚ)}
       (strZ D d (k' ≫ g')
         (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0))
     rw [hVAL''] at hnat
-    exact hnat.symm.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+    exact hnat.symm.trans (Functor.map_comp_apply (sympFramedProblem D)
       (EllObj.toPullbackAlong (X.pullbackAlongMap (k' ≫ g')
         (strPr D (X.pullbackAlong (k' ≫ g'))))).op
       (EllObj.homToPullbackAlong (X.pullbackAlongπ
@@ -7200,7 +7200,7 @@ theorem strZ_pull_pointwise {X : EllObj (CommRingCat.of ℚ)}
       (EllObj.homToPullbackAlong_pullbackAlongπ _ _ _)
       (strZ D d g' str0)
     rw [hVAL'] at hnat
-    exact hnat.symm.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+    exact hnat.symm.trans (Functor.map_comp_apply (sympFramedProblem D)
       (EllObj.toPullbackAlong (X.pullbackAlongMap g'
         (strPr D (X.pullbackAlong g')))).op
       (EllObj.homToPullbackAlong (X.pullbackAlongπ
