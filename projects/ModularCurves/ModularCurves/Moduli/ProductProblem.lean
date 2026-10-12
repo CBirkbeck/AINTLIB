@@ -45,15 +45,15 @@ def prod (P Q : ModuliProblem R) : ModuliProblem R where
   map {X Y} f := ↾fun a => (P.map f a.1, Q.map f a.2)
   map_id X := by
     ext a
-    · simp only [FunctorToTypes.map_id_apply]
+    · simp only [Functor.map_id_apply]
       rfl
-    · simp only [FunctorToTypes.map_id_apply]
+    · simp only [Functor.map_id_apply]
       rfl
   map_comp f g := by
     ext a
-    · simp only [FunctorToTypes.map_comp_apply]
+    · simp only [Functor.map_comp_apply]
       rfl
-    · simp only [FunctorToTypes.map_comp_apply]
+    · simp only [Functor.map_comp_apply]
       rfl
 
 @[simp] lemma prod_map_apply (P Q : ModuliProblem R) {X Y : (EllObj R)ᵒᵖ} (f : X ⟶ Y)
@@ -131,7 +131,7 @@ theorem prodHom_pair {W : EllObj R} (u : W ⟶ X.pullbackAlong f) :
   have hq : Q.map (EllObj.isoPullbackAlong (u ≫ X.pullbackAlongπ f)).inv.op
       (prodSnd f eqv u) =
         eqv (u ≫ X.pullbackAlongπ f).baseHom ⟨u.baseHom, rfl⟩ := by
-    rw [prodSnd, prodSndOf, ← FunctorToTypes.map_comp_apply, ← op_comp]
+    rw [prodSnd, prodSndOf, ← Functor.map_comp_apply, ← op_comp]
     rw [show (EllObj.isoPullbackAlong (u ≫ X.pullbackAlongπ f)).inv ≫
       EllObj.toPullbackAlong (u ≫ X.pullbackAlongπ f) = 𝟙 _ from
       (EllObj.isoPullbackAlong (u ≫ X.pullbackAlongπ f)).inv_hom_id]
@@ -180,7 +180,7 @@ theorem prodSnd_prodHomOf {W : EllObj R} (v : W ⟶ X) (q : Q.obj (op W)) :
     exact EllObj.homToPullbackAlong_pullbackAlongπ _ _ _
   rw [prodSnd, prodSndOf_congr f eqv hπ _ rfl (hb ▸ w.2),
     prodSndOf_congr_hom f eqv v hb (hb ▸ w.2) w.2, prodSndOf, hw,
-    Equiv.apply_symm_apply, ← FunctorToTypes.map_comp_apply, ← op_comp,
+    Equiv.apply_symm_apply, ← Functor.map_comp_apply, ← op_comp,
     show EllObj.toPullbackAlong v ≫ (EllObj.isoPullbackAlong v).inv = 𝟙 _ from
       (EllObj.isoPullbackAlong v).hom_inv_id]
   simp

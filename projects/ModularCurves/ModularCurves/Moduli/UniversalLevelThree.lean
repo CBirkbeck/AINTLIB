@@ -2705,10 +2705,10 @@ noncomputable def e3DatumProblem (R : CommRingCat.{u}) : ModuliProblem R where
     IsE3Datum.map φ.unop x.2 _ rfl rfl⟩
   map_id X := by
     ext x
-    exact FunctorToTypes.map_id_apply (gammaFullNaiveProblem R 3) x.1
+    exact (Functor.map_id_apply (gammaFullNaiveProblem R 3) _ x.1 :)
   map_comp {X Y Z} φ ψ := by
     ext x
-    exact FunctorToTypes.map_comp_apply (gammaFullNaiveProblem R 3) φ ψ x.1
+    exact (Functor.map_comp_apply (gammaFullNaiveProblem R 3) φ ψ x.1 :)
 
 section Rt2
 
@@ -2993,7 +2993,7 @@ noncomputable def e3DatumRepresentableBy (R : CommRingCat.{u}) (hR : IsUnit (3 :
         · exact pullSection_e3ClassifyingEllHom_P x.2 (X.isUnit_three hR)
         · exact pullSection_e3ClassifyingEllHom_Q x.2 (X.isUnit_three hR) }
   homEquiv_comp {X X'} f g :=
-    FunctorToTypes.map_comp_apply (e3DatumProblem R)
+    Functor.map_comp_apply (e3DatumProblem R)
       (Opposite.op g) (Opposite.op f) _
 
 open AlgebraicGeometry CategoryTheory Scheme in
@@ -3034,7 +3034,7 @@ noncomputable def naiveLevelThreeRepresentableBy (R : CommRingCat.{u}) (hR : IsU
         · exact pullSection_e3ClassifyingEllHom_P (hArb X x) (X.isUnit_three hR)
         · exact pullSection_e3ClassifyingEllHom_Q (hArb X x) (X.isUnit_three hR) }
   homEquiv_comp {X X'} f g :=
-    FunctorToTypes.map_comp_apply (gammaFullNaiveProblem R 3)
+    Functor.map_comp_apply (gammaFullNaiveProblem R 3)
       (Opposite.op g) (Opposite.op f) _
 
 open AlgebraicGeometry CategoryTheory Scheme in

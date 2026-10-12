@@ -182,12 +182,12 @@ noncomputable def legendreBootstrapProblem : ModuliProblem R where
   map φ := ↾fun x => ⟨(gammaFullNaiveProblem R 2).map φ x.1, (omegaProblem R).map φ x.2⟩
   map_id X := by
     ext x
-    · exact FunctorToTypes.map_id_apply (gammaFullNaiveProblem R 2) x.1
-    · exact FunctorToTypes.map_id_apply (omegaProblem R) x.2
+    · exact (Functor.map_id_apply (gammaFullNaiveProblem R 2) _ x.1 :)
+    · exact (Functor.map_id_apply (omegaProblem R) _ x.2 :)
   map_comp φ ψ := by
     ext x
-    · exact FunctorToTypes.map_comp_apply (gammaFullNaiveProblem R 2) φ ψ x.1
-    · exact FunctorToTypes.map_comp_apply (omegaProblem R) φ ψ x.2
+    · exact (Functor.map_comp_apply (gammaFullNaiveProblem R 2) φ ψ x.1 :)
+    · exact (Functor.map_comp_apply (omegaProblem R) φ ψ x.2 :)
 
 /-- **(T-E14-AX1, KM engine axiom 1 for the corrected Legendre `δ`; KM 4.6.2 / GME
 Ex. 2.2.1)** Over a base in which `2` is invertible, the Legendre-marked problem is
