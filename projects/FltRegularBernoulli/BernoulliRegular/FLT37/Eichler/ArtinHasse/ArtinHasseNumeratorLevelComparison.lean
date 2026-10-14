@@ -66,7 +66,7 @@ theorem dworkParameterApprox_pow_sixtyeight_sub_mem :
   rw [← pow_add] at hprod
   exact hprod
 
-set_option maxRecDepth 4000 in
+set_option maxRecDepth 8000 in
 /-- The level-`107` and level-`71` degree-`68` coordinate-polynomial coefficients
 differ by an element of `(λ)^{108}`. -/
 theorem deg68_coordPoly_pow_coeff_level_diff_mem (a : ℕ) :

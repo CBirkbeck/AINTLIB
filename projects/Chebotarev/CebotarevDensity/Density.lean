@@ -525,7 +525,7 @@ theorem primeIdealZetaSum_le_card_of_finite (hS : S.Finite)
     primeIdealZetaSum S s ≤
       Nat.card {𝔭 : Ideal (𝓞 K) // 𝔭 ∈ S ∧ 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} := by
   have : Finite {𝔭 : Ideal (𝓞 K) // 𝔭 ∈ S ∧ 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} :=
-    (hS.subset fun _ hx ↦ hx.1).to_subtype
+    (hS.subset (t := {𝔭 | 𝔭 ∈ S ∧ 𝔭.IsPrime ∧ 𝔭 ≠ ⊥}) fun _ hx ↦ hx.1).to_subtype
   have : Fintype {𝔭 : Ideal (𝓞 K) // 𝔭 ∈ S ∧ 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} := Fintype.ofFinite _
   rw [primeIdealZetaSum_def, tsum_fintype, Nat.card_eq_fintype_card]
   calc ∑ 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭 ∈ S ∧ 𝔭.IsPrime ∧ 𝔭 ≠ ⊥},

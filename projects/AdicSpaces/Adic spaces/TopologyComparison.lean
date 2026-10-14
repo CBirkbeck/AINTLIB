@@ -255,10 +255,10 @@ the set of `g ∈ A⟨X⟩` whose scaled coefficients `s ^ n · coeff n g` lie i
 image of `I ^ (M + (N - n) * C)` for every `n ≤ N`. The `(N - n) * C` shift budget
 is what lets `G` absorb a multiplication by `algebraMap t * X` (Artin-Rees). -/
 private def artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
-    Set ↥(TateAlgebra A) := fun g ↦
+    Set ↥(TateAlgebra A) := {g |
   ∀ n : ℕ, n ≤ N →
     s ^ n * TateAlgebra.coeff n g ∈
-      Subtype.val '' ((P.I ^ (M + (N - n) * C) : Ideal P.A₀) : Set P.A₀)
+      Subtype.val '' ((P.I ^ (M + (N - n) * C) : Ideal P.A₀) : Set P.A₀)}
 
 /-- `0 ∈ artinReesNhd`. -/
 private theorem zero_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
@@ -1650,9 +1650,9 @@ Artin-Rees intersection tied to the T-topology), it pins a single ideal `P.I ^ M
 across all coefficients — which is exactly what is stable under the generators of
 `locSubring` once `P` is the enlarged pair `D.P.adjoin D.T`. -/
 private def coeffIdealNhd (P : PairOfDefinition A) (M : ℕ) : Set ↥(TateAlgebra A) :=
-  fun g ↦ ∀ l : Fin 1 →₀ ℕ,
+  {g | ∀ l : Fin 1 →₀ ℕ,
     MvPowerSeries.coeff l g.val ∈
-      Subtype.val '' ((P.I ^ M : Ideal P.A₀) : Set P.A₀)
+      Subtype.val '' ((P.I ^ M : Ideal P.A₀) : Set P.A₀)}
 
 omit [PlusSubring A] [IsHuberRing A] in
 omit [PlusSubring A] [IsHuberRing A] in

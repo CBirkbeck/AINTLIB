@@ -102,18 +102,11 @@ theorem
                 (sectionPoleSheafPower πV zV hzV 3),
               sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
                 hsmV zV hzV U hU r hspan hnzd 2 y = 1 := by
-  dsimp only
-  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  intro π
   obtain ⟨V, hsV, U, hU, r, hspan, hnzd⟩ :=
     exists_affineBaseChange_sectionCartierGenerator hsm z hz s
   refine ⟨V, hsV, ?_⟩
-  let t : V.1.toScheme ⟶ Spec (.of R) := V.1.ι
-  let πV := pullback.snd π t
-  let zV := sectionBaseChange z hz t
-  let hzV := sectionBaseChange_snd z hz t
-  have hsmV : SmoothOfRelativeDimension 1 πV :=
-    (smoothOfRelativeDimension_isStableUnderBaseChange 1).of_isPullback
-      (IsPullback.of_hasPullback π t) hsm
+  intro t πV zV hzV hsmV
   letI : SmoothOfRelativeDimension 1 πV := hsmV
   have hH1 : Subsingleton (CategoryTheory.Sheaf.H
       (sectionPoleSheafPower πV zV hzV 1).sheaf 1) :=

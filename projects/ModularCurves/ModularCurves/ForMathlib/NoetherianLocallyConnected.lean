@@ -53,7 +53,8 @@ theorem TopologicalSpace.NoetherianSpace.isOpen_connectedComponent [NoetherianSp
         mem_irreducibleComponent
       exact hsub mem_irreducibleComponent
   rw [hcompl, isOpen_compl_iff]
-  exact (hfin.subset (fun C hC => hC.1)).isClosed_biUnion
+  exact (hfin.subset (t := {C ∈ irreducibleComponents α | ¬ C ⊆ connectedComponent x})
+    (fun C hC => hC.1)).isClosed_biUnion
     (fun C hC => isClosed_of_mem_irreducibleComponents C hC.1)
 
 /-- A noetherian space is locally connected. -/

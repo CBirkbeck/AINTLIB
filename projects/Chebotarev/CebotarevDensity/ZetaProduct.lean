@@ -2111,7 +2111,8 @@ bounded norm), so the defining `tsum` of `galoisCharacterCoeff` is over a finite
 private theorem finite_nonzeroIdeal_absNorm_eq
     (K : Type*) [Field K] [NumberField K] (n : ℕ) :
     Finite {𝔞 : NonzeroIdeal K // Ideal.absNorm 𝔞.1 = n} :=
-  Set.Finite.to_subtype <| Set.Finite.of_finite_image (f := fun I : NonzeroIdeal K ↦ I.1)
+  Set.Finite.to_subtype (s := {𝔞 : NonzeroIdeal K | Ideal.absNorm 𝔞.1 = n}) <|
+    Set.Finite.of_finite_image (f := fun I : NonzeroIdeal K ↦ I.1)
     ((Ideal.finite_setOf_absNorm_eq (S := 𝓞 K) n).subset (by rintro _ ⟨⟨I, _⟩, rfl, rfl⟩; rfl))
     (fun _ _ _ _ ↦ Subtype.ext)
 

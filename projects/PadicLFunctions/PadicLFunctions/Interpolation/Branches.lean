@@ -347,8 +347,7 @@ lemma onePAdicPow_sub_one_mem_pow {y : ℤ_[p]}
     rw [show Ideal.span {((p : ℤ_[p])) ^ m}
         = {z : ℤ_[p] | ‖z‖ ≤ (p : ℝ) ^ (-(m : ℤ))} by
       ext z
-      rw [Set.mem_setOf_eq, PadicInt.norm_le_pow_iff_mem_span_pow]
-      rfl]
+      rw [SetLike.mem_coe, Set.mem_setOf_eq, PadicInt.norm_le_pow_iff_mem_span_pow]]
     exact isClosed_le continuous_norm continuous_const
   have hnat : Set.range ((↑) : ℕ → ℤ_[p]) ⊆ {x : ℤ_[p] |
       onePAdicPow p y hy x - 1 ∈ Ideal.span {((p : ℤ_[p])) ^ m}} := by

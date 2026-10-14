@@ -421,7 +421,8 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
   set f_γ' : ℝ → ℂ := fun t ↦
     if ε₂ < h' t ∧ h' t ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0 with hf_γ'_def
   have hf_γ'_meas : Measurable f_γ' := by
-    refine Measurable.ite (.inter ?_ ?_) ?_ measurable_const
+    refine Measurable.ite (.inter (s₁ := {a | ε₂ < h' a}) (s₂ := {a | h' a ≤ ε₁}) ?_ ?_) ?_
+      measurable_const
     · exact hh'_sm.measurable measurableSet_Ioi
     · exact hh'_sm.measurable measurableSet_Iic
     · exact (Complex.measurable_ofReal.comp (measurable_id.sub_const t₀)).inv

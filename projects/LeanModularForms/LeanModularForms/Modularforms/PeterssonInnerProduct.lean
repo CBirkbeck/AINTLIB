@@ -319,7 +319,7 @@ theorem volume_complex_re_eq (c : ℝ) : volume {z : ℂ | z.re = c} = 0 := by
 
 private theorem finite_sq_eq (d : ℝ) : Set.Finite {y : ℝ | y ^ 2 = d} := by
   by_cases hd : d < 0
-  · convert Set.finite_empty; ext y; simp; intro h; linarith [sq_nonneg y]
+  · convert Set.finite_empty using 1; ext y; simp; intro h; linarith [sq_nonneg y]
   · push Not at hd
     exact (({Real.sqrt d, -Real.sqrt d} : Set ℝ).toFinite).subset (fun y hy ↦ by
       simp only [mem_setOf_eq] at hy
@@ -340,8 +340,8 @@ theorem volume_complex_normSq_eq (c : ℝ) :
         rw [volume_eq_prod,
           measure_prod_null (measurableSet_eq_fun (by fun_prop) measurable_const)]
         filter_upwards with x; simp only [Pi.zero_apply]
-        apply measure_mono_null (fun y (hy : x ^ 2 + y ^ 2 = c) ↦
-          show y ^ 2 = c - x ^ 2 by linarith)
+        refine measure_mono_null (t := {y : ℝ | y ^ 2 = c - x ^ 2})
+          (fun y (hy : x ^ 2 + y ^ 2 = c) ↦ show y ^ 2 = c - x ^ 2 by linarith) ?_
         exact (finite_sq_eq _).measure_zero _
 
 /-- If a subset of `ℂ` has zero Lebesgue measure, its preimage in `ℍ` has

@@ -379,15 +379,13 @@ private lemma integrableOn_logDeriv_mul_deriv_farSet
   intro γ S₀ g K'
   have hK'_compact : IsCompact K' := by
     refine IsCompact.of_isClosed_subset isCompact_Icc ?_ (fun _ ⟨ht, _⟩ ↦ ht)
-    apply IsClosed.inter isClosed_Icc
+    apply IsClosed.inter (s₂ := {t : ℝ | ∀ s ∈ S₀, ε ≤ ‖γ t - (s : ℂ)‖}) isClosed_Icc
     have : IsClosed (⋂ (s : ℂ) (_ : s ∈ S₀), {t : ℝ | ε ≤ ‖γ t - s‖}) :=
       isClosed_iInter fun s ↦ isClosed_iInter fun _ ↦
         isClosed_le continuous_const (by fun_prop)
     convert this using 1
-    refine iff_of_eq (congrArg IsClosed ?_)
     ext t
     simp only [mem_iInter, mem_setOf_eq]
-    exact Iff.rfl
   have hK'_meas : MeasurableSet K' := hK'_compact.isClosed.measurableSet
   have h_ne : ∀ t ∈ K', g (γ t) ≠ 0 := fun t ⟨ht_Icc, h_far⟩ h_zero ↦ by
     have := h_far _ (Finset.mem_coe.mp (h_capture t ht_Icc h_zero))
@@ -410,7 +408,8 @@ private lemma integrableOn_logDeriv_mul_deriv_farSet
       (continuous_norm.comp_continuousOn h_cont)
     set M := ‖logDeriv g (γ t_max)‖ * max H 1
     refine IntegrableOn.of_bound
-      ((measure_mono (inter_subset_left (s := Icc 0 5))).trans_lt measure_Icc_lt_top)
+      ((measure_mono (inter_subset_left (s := Icc 0 5)
+        (t := {t : ℝ | ∀ s ∈ S₀, ε ≤ ‖γ t - (s : ℂ)‖}))).trans_lt measure_Icc_lt_top)
       h_asm M ?_
     refine (ae_restrict_iff' hK'_meas).mpr ?_
     filter_upwards [show ({(1:ℝ), 3, 4} : Set ℝ)ᶜ ∈ ae (volume : Measure ℝ) by
@@ -462,20 +461,18 @@ private lemma pvIntegrand_intervalIntegrable
     exact h_not_K ⟨ht_uioc, by simpa using h_far⟩
   have h_int_K' := integrableOn_logDeriv_mul_deriv_farSet f S hH h_capture hε
   have hK_meas : MeasurableSet K := by
-    apply measurableSet_uIoc.inter
+    apply measurableSet_uIoc.inter (s₂ := {t : ℝ | ∃ s ∈ (S₀ : Set ℂ), ‖γ t - s‖ ≤ ε}ᶜ)
     apply MeasurableSet.compl
     suffices h : IsClosed (⋃ s ∈ (S₀ : Set ℂ), {t : ℝ | ‖γ t - s‖ ≤ ε}) by
       convert h.measurableSet using 1
-      refine iff_of_eq (congrArg MeasurableSet ?_)
       ext t
       simp only [mem_iUnion, mem_setOf_eq, Finset.mem_coe, exists_prop]
-      exact Iff.rfl
     exact S₀.finite_toSet.isClosed_biUnion fun s _ ↦
       isClosed_le (by fun_prop) continuous_const
   rw [intervalIntegrable_iff]
   have := ((h_int_K'.mono_set hK_subset_K').congr_fun hF_K.symm hK_meas).union
     (integrableOn_zero.congr_fun h_compl_zero.symm (measurableSet_uIoc.diff hK_meas))
-  rwa [union_sdiff_cancel (fun t ht ↦ ht.1)] at this
+  rwa [union_sdiff_cancel (s := K) (fun t ht ↦ ht.1)] at this
 
 omit hf in
 private theorem tendsto_pvIntegral_split

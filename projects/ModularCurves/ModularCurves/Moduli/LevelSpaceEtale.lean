@@ -661,7 +661,7 @@ lemma isClopen_range_torsionZero (hinv : NIsInvertible S N) :
 
 /-- **(β3, the good locus)** The set of points of `E[N] ×_S E[N]` where every nonzero
 `(ℤ/N)²`-combination of the tautological pair avoids the zero section. -/
-def fullLevelLocusSet : Set ↥(pullback (E.torsionπ N) (E.torsionπ N)) :=
+noncomputable def fullLevelLocusSet : Set ↥(pullback (E.torsionπ N) (E.torsionπ N)) :=
   ⋂ (ab : {ab : ZMod N × ZMod N // ab ≠ 0}),
     (comboMap E N (ab.1.1.val : ℤ) (ab.1.2.val : ℤ)).base ⁻¹'
       (Set.range (torsionZero E N).base)ᶜ

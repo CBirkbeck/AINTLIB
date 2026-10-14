@@ -946,6 +946,8 @@ private theorem heq_hom_over_of_heq {X : Scheme.{u}} {M N₁ N₂ : X.Modules} (
   cases hf
   rfl
 
+-- The kernel check of this `rfl` exceeds the default budget since the 2026-10-14 mathlib bump.
+set_option maxHeartbeats 400000 in
 /-- The coordinate section is the dualized ideal inclusion, with the composite typed into the
 pole sheaf itself, so that the kernel checks the unfolding against the definition's own body. -/
 private theorem coordinateHyperplanePoleUnitHom_eq_comp (j : σ) :

@@ -85,7 +85,7 @@ lemma cutoff_integrand_intervalIntegrable {γ : ℝ → ℂ} {a b t₀ : ℝ} {L
   rw [intervalIntegrable_iff]
   apply MeasureTheory.IntegrableOn.of_bound
   · exact measure_Ioc_lt_top
-  · apply AEStronglyMeasurable.indicator
+  · apply AEStronglyMeasurable.indicator (s := {t | ε < ‖γ t - γ t₀‖})
     · apply Measurable.aestronglyMeasurable
       exact ((hγ_meas.sub_const (γ t₀)).inv.mul (measurable_deriv γ))
     · exact (measurable_norm.comp (hγ_meas.sub_const (γ t₀))) measurableSet_Ioi

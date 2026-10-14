@@ -281,7 +281,7 @@ theorem extendToLocalization_isContinuous_locTopology_of_bounded
   -- which by P.hasBasis_nhds_zero has the form `Subtype.val '' (P.I^m)`.
   by_cases hγ : γ = 0
   · subst hγ
-    convert isOpen_empty
+    convert isOpen_empty using 1
     ext b
     simp
   -- γ ≠ 0, so γ is a unit. Use ltAddSubgroup characterization.

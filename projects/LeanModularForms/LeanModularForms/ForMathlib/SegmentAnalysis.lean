@@ -253,7 +253,7 @@ theorem seg2_intervalIntegrable_I (H : ℝ) {a : ℝ} (ha : 1/5 ≤ a) (ha' : a 
     rw [uIcc_of_le ha]
     unfold arcIntegrand_I
     exact (((arc_exp_continuous.sub continuous_const).continuousOn.inv₀
-      (fun t ht ↦ arc_sub_I_ne_zero_seg2 ht.1 (by linarith [ht.2]))).mul
+      (fun t (ht : t ∈ Icc (1/5) a) ↦ arc_sub_I_ne_zero_seg2 ht.1 (by linarith [ht.2]))).mul
       (continuous_const.mul arc_exp_continuous).continuousOn)
 
 /-- Integrability on seg3 `[a, 3/5]` for `2/5 < a`, shifted by `I`. -/
@@ -265,7 +265,7 @@ theorem seg3_intervalIntegrable_I (H : ℝ) {a : ℝ} (ha : 2/5 < a) (ha' : a �
     rw [uIcc_of_le ha']
     unfold arcIntegrand_I
     exact (((arc_exp_continuous.sub continuous_const).continuousOn.inv₀
-      (fun t ht ↦ arc_sub_I_ne_zero_seg3 H (by linarith [ht.1]) ht.2)).mul
+      (fun t (ht : t ∈ Icc a (3/5)) ↦ arc_sub_I_ne_zero_seg3 H (by linarith [ht.1]) ht.2)).mul
       (continuous_const.mul arc_exp_continuous).continuousOn)
 
 private lemma refSeg_intervalIntegrable_aux (H : ℝ) (g : ℝ → ℂ) {α β : ℝ}

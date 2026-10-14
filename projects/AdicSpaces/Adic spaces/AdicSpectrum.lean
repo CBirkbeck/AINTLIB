@@ -164,11 +164,11 @@ lemma exists_mem_spa_supp_eq (𝔪 : Ideal A) [𝔪.IsMaximal]
     intro γ
     by_cases hγ : γ = 0
     · subst hγ
-      convert isOpen_empty
+      convert isOpen_empty using 1
       ext a
       simp
     · by_cases h1 : (1 : ℤᵐ⁰) < γ
-      · convert isOpen_univ
+      · convert isOpen_univ using 1
         ext a
         simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true, w, Valuation.comap_apply]
         exact lt_of_le_of_lt (Valuation.one_apply_le_one _) h1
