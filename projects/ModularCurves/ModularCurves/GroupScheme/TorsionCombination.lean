@@ -172,7 +172,7 @@ theorem combinationHom_torsionι (v : ZMod N × ZMod N) :
 
 /-- The full-level set: pairs all of whose nontrivial combinations avoid the zero
 section. -/
-def fullLevelSet : Set (E.torsionPair N) :=
+noncomputable def fullLevelSet : Set (E.torsionPair N) :=
   ⋂ v ∈ {v : ZMod N × ZMod N | v ≠ 0},
     (E.combinationHom N v).base ⁻¹' (Set.range (E.torsionZero N).base)ᶜ
 

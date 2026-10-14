@@ -81,7 +81,7 @@ theorem multipleHom_torsionι (a : ℕ) :
 
 /-- The naive `Γ₁(N)` set: torsion points all of whose proper multiples avoid the zero
 section. -/
-def naiveGammaOneSet : Set (E.torsion N) :=
+noncomputable def naiveGammaOneSet : Set (E.torsion N) :=
   ⋂ a ∈ {a : ℕ | 0 < a ∧ a < N},
     (E.multipleHom N a).base ⁻¹' (Set.range (E.torsionZero N).base)ᶜ
 

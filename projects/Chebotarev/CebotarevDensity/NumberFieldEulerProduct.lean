@@ -501,7 +501,8 @@ eventually captured, so the partial sums tend to `∑_𝔞 N𝔞^{-s} = ζ_K(s)`
 
 private instance instFiniteAbsNormFiber (n : ℕ) :
     Finite {I : NonzeroIdeal L // Ideal.absNorm I.1 = n} :=
-  Set.Finite.to_subtype <| Set.Finite.of_finite_image (f := fun I : NonzeroIdeal L ↦ I.1)
+  Set.Finite.to_subtype (s := {I : NonzeroIdeal L | Ideal.absNorm I.1 = n}) <|
+    Set.Finite.of_finite_image (f := fun I : NonzeroIdeal L ↦ I.1)
     ((Ideal.finite_setOf_absNorm_eq (S := 𝓞 L) n).subset (by rintro _ ⟨⟨I, _⟩, rfl, rfl⟩; rfl))
     (fun _ _ _ _ ↦ Subtype.ext)
 

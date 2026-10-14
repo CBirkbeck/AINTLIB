@@ -61,7 +61,7 @@ theorem combPoint_killed (c d : ℤ) :
 
 /-- The **full-level open locus**: the complement of the union of the clopen vanishing loci
 of the nonzero combination points. Open (`fullLevelOpenSet_isOpen`). -/
-def fullLevelOpenSet (hN : NIsInvertible S N) :
+noncomputable def fullLevelOpenSet (hN : NIsInvertible S N) :
     Set ↥(pullback (E.torsionπ N) (E.torsionπ N)) :=
   (⋃ (cd : Fin N × Fin N) (_ : cd ≠ 0),
     E.pointVanishSet N (tautBase E N) (combPoint E N (cd.1 : ℤ) (cd.2 : ℤ))
@@ -80,7 +80,7 @@ theorem fullLevelOpenSet_isOpen (hN : NIsInvertible S N) :
 -- `private`: `GroupScheme/TorsionCombination.lean` defines the same name in the same
 -- namespace and both are imported together by the root index; this copy has no
 -- consumers outside this file (which itself has no dependents).
-private def fullLevelOpens (hN : NIsInvertible S N) :
+private noncomputable def fullLevelOpens (hN : NIsInvertible S N) :
     (pullback (E.torsionπ N) (E.torsionπ N)).Opens :=
   ⟨fullLevelOpenSet E N hN, fullLevelOpenSet_isOpen E N hN⟩
 

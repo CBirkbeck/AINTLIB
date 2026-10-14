@@ -1274,7 +1274,7 @@ theorem one_mem_idealSections_ker_of_preimage_eq_bot {S : Scheme.{u}}
     have hc2 : c ∈ closure (Set.range z.base) := h2 ▸ (h1 ▸ hc)
     rwa [z.isClosedEmbedding.isClosed_range.closure_eq] at hc2
   haveI hempty : IsEmpty
-      ((Scheme.Hom.ker z).subschemeι ⁻¹ᵁ W : Set _) := by
+      ((Scheme.Hom.ker z).subschemeι ⁻¹ᵁ W : Set (Scheme.Hom.ker z).subscheme) := by
     constructor
     rintro ⟨c, hc⟩
     obtain ⟨s, hs⟩ := hrange ⟨c, rfl⟩

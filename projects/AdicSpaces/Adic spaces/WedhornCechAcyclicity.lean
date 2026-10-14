@@ -2312,7 +2312,7 @@ private theorem bivariateSpan_eq_laurentSup (b : A) :
       rw [SetLike.mem_coe, hid]
       refine sub_mem (neg_mem (Ideal.subset_span ?_)) (Ideal.mul_mem_right _ _
         (Ideal.subset_span ?_))
-      · exact Set.mem_union_right _ (Set.mem_singleton _)
+      · exact Set.mem_insert_of_mem _ (Set.mem_singleton _)
       · exact Set.mem_union_left _ (Set.mem_singleton _)
     · exact Ideal.subset_span (Set.mem_union_left _ (Set.mem_singleton _))
 

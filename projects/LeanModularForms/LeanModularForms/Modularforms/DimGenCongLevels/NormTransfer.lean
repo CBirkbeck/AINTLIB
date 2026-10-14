@@ -104,7 +104,7 @@ lemma valueAtInfty_norm_eq_zero_of_valueAtInfty_eq_zero
   have hperSL : cuspWidth (Γ := Γ) ∈ (𝒮ℒ : Subgroup (GL (Fin 2) ℝ)).strictPeriods :=
     cuspWidth_mem_strictPeriods_levelOne (Γ := Γ)
   haveI : (G Γ).IsArithmetic := instIsArithmetic (Γ := Γ) hΓ
-  haveI : (G Γ).IsFiniteRelIndex 𝒮ℒ := Subgroup.IsArithmetic.isFiniteRelIndexSL (𝒢 := (G Γ))
+  haveI : (G Γ).IsFiniteRelIndex 𝒮ℒ := Subgroup.IsArithmetic.isFiniteRelIndex (G Γ) 𝒮ℒ
   have ht_f :
       Tendsto (fun τ : ℍ ↦ f τ) UpperHalfPlane.atImInfty (𝓝 (0 : ℂ)) := by
     simpa [hval0] using
@@ -224,7 +224,7 @@ public lemma qExpansion_coeff_eq_zero_norm_of_qExpansion_coeff_eq_zero
   have hperSL : cuspWidth (Γ := Γ) ∈ (𝒮ℒ : Subgroup (GL (Fin 2) ℝ)).strictPeriods :=
     cuspWidth_mem_strictPeriods_levelOne (Γ := Γ)
   haveI : (G Γ).IsArithmetic := instIsArithmetic (Γ := Γ) hΓ
-  haveI : (G Γ).IsFiniteRelIndex 𝒮ℒ := Subgroup.IsArithmetic.isFiniteRelIndexSL (𝒢 := (G Γ))
+  haveI : (G Γ).IsFiniteRelIndex 𝒮ℒ := Subgroup.IsArithmetic.isFiniteRelIndex (G Γ) 𝒮ℒ
   have hO_norm_punct :=
     cuspFunction_norm_isBigO_pow_punctNhds_of_qExpansion_coeff_eq_zero
       (Γ := Γ) (k := k) f N hΓ hh hperΓ hcoeff

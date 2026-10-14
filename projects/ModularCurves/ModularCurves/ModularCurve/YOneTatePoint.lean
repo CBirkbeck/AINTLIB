@@ -106,7 +106,7 @@ variable (N : ℕ)
 killed loci `Y_d`, `d ∣ N`, `4 ≤ d < N` — Loeffler's `Y_N − ⋃_{d|N, 4≤d<N} Y_d` (Def 3.3.6,
 p. 14) with his exact index set (divisors `d ≤ 3` need no removal: the atlas already has no
 order-`≤ 3` points, Cor 3.3.5). -/
-def yOneSet : Set ((tateUniversal R).killedLocus (tatePoint R) N) :=
+noncomputable def yOneSet : Set ((tateUniversal R).killedLocus (tatePoint R) N) :=
   (⋃ d ∈ N.properDivisors.filter (fun d ↦ 4 ≤ d),
     ((tateUniversal R).killedLocusπ (tatePoint R) N).base ⁻¹'
       Set.range ((tateUniversal R).killedLocusπ (tatePoint R) d).base)ᶜ

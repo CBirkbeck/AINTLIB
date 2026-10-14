@@ -180,7 +180,7 @@ lemma dim_gen_cong_levels (k : ℤ) (Γ : Subgroup SL(2, ℤ)) (hΓ : Subgroup.i
       SpherePacking.ModularForms.NormReduction.cuspWidth_mem_strictPeriods_levelOne (Γ := Γ)
   haveI : GΓ.IsArithmetic :=
     SpherePacking.ModularForms.NormReduction.instIsArithmetic (Γ := Γ) hΓ
-  haveI : GΓ.IsFiniteRelIndex 𝒮ℒ := Subgroup.IsArithmetic.isFiniteRelIndexSL (𝒢 := GΓ)
+  haveI : GΓ.IsFiniteRelIndex 𝒮ℒ := Subgroup.IsArithmetic.isFiniteRelIndex GΓ 𝒮ℒ
   let w : ℤ := k * Nat.card (SpherePacking.ModularForms.NormReduction.Q Γ)
   haveI : FiniteDimensional ℂ (ModularForm 𝒮ℒ w) := inferInstance
   obtain ⟨N, hNinj⟩ :=

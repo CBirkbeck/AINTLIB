@@ -47,7 +47,7 @@ power-bounded elements `A°(R(T/s))` in the presheaf value `O_X(R(T/s))`.
 This is the set of sections of the integral structure sheaf on the rational
 subset `R(T/s)` (§8.1 of Wedhorn). The integral structure sheaf `O⁺` is the
 subsheaf of `O_X` whose sections are power-bounded elements. -/
-def integralPresheafValue (D : RationalLocData A) : Set (presheafValue D) :=
+noncomputable def integralPresheafValue (D : RationalLocData A) : Set (presheafValue D) :=
   powerBoundedSubring (presheafValue D)
 
 /-- Membership in `O⁺(R(T/s))` is equivalent to being power-bounded. -/

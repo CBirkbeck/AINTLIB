@@ -151,8 +151,8 @@ private lemma cpv_integrand_intervalIntegrable_arc (S : Finset UpperHalfPlane)
   set K' := {t ∈ Set.Icc (1:ℝ) 3 | ∀ s ∈ S_arc, ε ≤ ‖γ t - (s : ℂ)‖}
   have hK'_compact : IsCompact K' := by
     refine IsCompact.of_isClosed_subset isCompact_Icc ?_ (fun _t ⟨ht, _⟩ ↦ ht)
-    refine IsClosed.inter isClosed_Icc ?_
-    have hset : (fun t : ℝ ↦ ∀ s ∈ S_arc, ε ≤ ‖γ t - (s : ℂ)‖)
+    refine IsClosed.inter (s₂ := {t : ℝ | ∀ s ∈ S_arc, ε ≤ ‖γ t - (s : ℂ)‖}) isClosed_Icc ?_
+    have hset : {t : ℝ | ∀ s ∈ S_arc, ε ≤ ‖γ t - (s : ℂ)‖}
         = ⋂ (s : ℂ) (_ : s ∈ S_arc), {t : ℝ | ε ≤ ‖γ t - s‖} :=
       Set.ext fun t ↦ by rw [Set.mem_iInter₂]; rfl
     rw [hset]
@@ -198,12 +198,12 @@ private lemma cpv_integrand_intervalIntegrable_arc (S : Finset UpperHalfPlane)
   have h_int : IntegrableOn (fun t ↦ logDeriv g (γ t) * deriv γ t) K' :=
     ContinuousOn.integrableOn_compact hK'_compact h_cont
   have hK_meas : MeasurableSet K := by
-    apply measurableSet_uIoc.inter
+    apply measurableSet_uIoc.inter (s₂ := {t : ℝ | ∃ s ∈ (↑S_arc : Set ℂ), ‖γ t - s‖ ≤ ε}ᶜ)
     apply MeasurableSet.compl
     suffices h : IsClosed (⋃ s ∈ (↑S_arc : Set ℂ), {t : ℝ | ‖γ t - s‖ ≤ ε}) by
-      have hset : (fun t : ℝ ↦ ∃ s ∈ (↑S_arc : Set ℂ), ‖γ t - s‖ ≤ ε)
+      have hset : {t : ℝ | ∃ s ∈ (↑S_arc : Set ℂ), ‖γ t - s‖ ≤ ε}
           = ⋃ s ∈ (↑S_arc : Set ℂ), {t : ℝ | ‖γ t - s‖ ≤ ε} :=
-        Set.ext fun t ↦ by simp only [Set.mem_iUnion, Set.mem_setOf_eq, exists_prop]; rfl
+        Set.ext fun t ↦ by simp only [Set.mem_iUnion, Set.mem_setOf_eq, exists_prop]
       rw [hset]
       exact h.measurableSet
     exact S_arc.finite_toSet.isClosed_biUnion fun s _ ↦
@@ -229,7 +229,7 @@ private lemma cpv_integrand_intervalIntegrable_arc (S : Finset UpperHalfPlane)
     integrableOn_zero.congr_fun h_compl_zero.symm hcompl_meas
   have h_int_union : IntegrableOn F (Set.uIoc (1:ℝ) 3) := by
     have := h_int_K.union h_int_compl
-    rwa [Set.union_sdiff_cancel (fun t ht ↦ ht.1)] at this
+    rwa [Set.union_sdiff_cancel (s := K) (fun t ht ↦ ht.1)] at this
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (1:ℝ) ≤ 3)]
   rwa [Set.uIoc_of_le (by norm_num : (1:ℝ) ≤ 3)] at h_int_union
 

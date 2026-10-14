@@ -250,7 +250,7 @@ theorem finsum_nonell_eq_repCanon_sum :
     ∑ᶠ (q : NonEllOrbitFM), ordOrbitQ f q =
     ∑ s ∈ repCanon f hf, (orderOfVanishingAt' (⇑f) s : ℂ) := by
   set S := (finite_support_ordOrbit_nonEllFM f hf).toFinset
-  rw [finsum_eq_sum_of_support_subset _ (fun q hq ↦ by
+  rw [finsum_eq_sum_of_support_subset (s := S) _ (fun q hq ↦ by
     rw [Finset.mem_coe, Set.Finite.mem_toFinset]
     exact Int.cast_ne_zero.mp (Function.mem_support.mp hq))]
   set R := repCanon f hf
@@ -267,11 +267,12 @@ theorem finsum_nonell_eq_repCanon_sum :
     obtain ⟨p, hp_mem, hp_orb⟩ := exists_repCanon_of_nonEllOrbit f hf q
       ((Set.Finite.mem_toFinset _).mp hq)
     exact ⟨p, hp_mem, Subtype.ext hp_orb⟩
-  exact (Finset.sum_bij φ h_im
+  symm
+  exact Finset.sum_bij φ h_im
     (fun _ h₁ _ h₂ heq ↦ orb_injOn_repCanon f hf h₁ h₂ (congr_arg Subtype.val heq))
     h_surj (fun p hp ↦ by
       simp only [ordOrbitQ, hφ_def]
-      exact_mod_cast (ordOrbit_mkFM f p).symm)).symm
+      exact_mod_cast (ordOrbit_mkFM f p).symm)
 
 /-- The `repCanon` sum splits into strict interior + left vertical + left arc. -/
 theorem repCanon_sum_split :

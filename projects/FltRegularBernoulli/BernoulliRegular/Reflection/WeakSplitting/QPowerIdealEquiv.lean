@@ -312,7 +312,7 @@ under classical decidability).
 instance qPowerFiber_finite {q : ℕ} (k : ℕ) :
     Finite {I : NonzeroIdeal L // Ideal.absNorm I.1 = q^k} := by
   classical
-  refine Set.Finite.to_subtype ?_
+  refine Set.Finite.to_subtype (s := {I : NonzeroIdeal L | Ideal.absNorm I.1 = q^k}) ?_
   have h_inj : Function.Injective (fun I : NonzeroIdeal L ↦ I.1) := fun _ _ ↦ Subtype.ext
   exact (Ideal.finite_setOf_absNorm_eq (q^k)).preimage h_inj.injOn
 
