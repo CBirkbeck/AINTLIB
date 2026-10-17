@@ -60,9 +60,8 @@ elab "bernoulli_decide" : tactic => do
      cbv))
   withTheReader Core.Context
     (fun ctx =>
-      { ctx with
-        maxHeartbeats := 1000000000
-        options := (ctx.options.set `maxRecDepth 1000000000).set `cbv.maxSteps 20000000 }) do
+      { ctx.setOptions ((ctx.options.set `maxRecDepth 1000000000).set `cbv.maxSteps 20000000) with
+        maxHeartbeats := 1000000000 }) do
     evalTactic stx
 
 end BernoulliRegular.BernoulliFast

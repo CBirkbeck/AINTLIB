@@ -60,7 +60,7 @@ theorem IsStandardSmoothOfRelativeDimension.polynomial :
     have h0 := IsStandardSmoothOfRelativeDimension.mvPolynomial R PUnit.{1}
     rwa [Nat.card_unique] at h0
   exact IsStandardSmoothOfRelativeDimension.of_algEquiv (n := 1)
-    (e := (MvPolynomial.pUnitAlgEquiv R :
+    (e := (MvPolynomial.uniqueAlgEquiv R PUnit.{1} :
       MvPolynomial PUnit.{1} R ≃ₐ[R] Polynomial R))
 
 /-- A localization of the one-variable polynomial algebra away from an element

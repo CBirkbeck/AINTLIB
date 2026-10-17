@@ -240,6 +240,7 @@ private lemma exists_Gamma0_conj_of_delta_mod
     rw [Matrix.det_fin_two_of]
     have hdet : (δ : Matrix (Fin 2) (Fin 2) ℤ).det = 1 := by exact_mod_cast δ.det_coe
     simp only [Matrix.det_fin_two] at hdet
+    rw [hk'] at hdet
     lia
   let β : Matrix.SpecialLinearGroup (Fin 2) ℤ := ⟨!![a, k'; (p : ℤ) * c, d], h_det_β⟩
   have hδ_10_Np : ((N / p : ℕ) : ℤ) ∣ (δ : Matrix (Fin 2) (Fin 2) ℤ) 1 0 := by

@@ -639,7 +639,7 @@ theorem equivMapDomain_pullbackDiv {L : Type v} [Field L] [DecidableEq L] [IsAlg
         galoisPointEquiv W σ Q } :=
     @Fintype.ofFinite _ (HasseWeil.WeilPairing.fiber_finite _ hN (galoisPointEquiv W σ Q))
   unfold HasseWeil.WeilPairing.pullbackDiv
-  rw [Finsupp.equivMapDomain_eq_mapDomain, Finsupp.mapDomain_finset_sum]
+  rw [Finsupp.equivMapDomain_eq_mapDomain, Finsupp.mapDomain_finsetSum]
   refine Finset.sum_nbij'
     (i := fun P => (⟨galoisPointEquiv W σ P.1, by
         have hP : N • P.1 = Q := P.2
