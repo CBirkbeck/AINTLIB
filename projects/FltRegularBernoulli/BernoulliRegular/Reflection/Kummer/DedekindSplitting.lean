@@ -94,7 +94,7 @@ theorem normalizedFactors_X_pow_sub_C_card_eq
     (X_pow_sub_C_separable_iff hn ha).mpr hnF
   rw [normalizedFactors_toFinset_card_eq_natDegree_of_monic_splits_separable
     hf0 hsplit hsep]
-  exact natDegree_X_pow_sub_C
+  exact natDegree_X_pow_sub_C a
 
 end PolynomialFactorCount
 

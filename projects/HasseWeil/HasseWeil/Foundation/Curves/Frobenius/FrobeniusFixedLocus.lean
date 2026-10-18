@@ -62,10 +62,10 @@ noncomputable local instance : DecidableEq (AlgebraicClosure K) := Classical.dec
 private noncomputable abbrev frobPoly : L[X] := X ^ Fintype.card K - X
 
 private theorem frobPoly_ne_zero : (frobPoly (K := K)) ≠ 0 :=
-  FiniteField.X_pow_card_sub_X_ne_zero L Fintype.one_lt_card
+  Polynomial.X_pow_sub_X_ne_zero (R := L) Fintype.one_lt_card
 
 private theorem frobPoly_natDegree : (frobPoly (K := K)).natDegree = Fintype.card K :=
-  FiniteField.X_pow_card_sub_X_natDegree_eq L Fintype.one_lt_card
+  Polynomial.natDegree_X_pow_sub_X (R := L) Fintype.one_lt_card
 
 /-- The cardinality of `K`, cast into the algebraic closure, is `0` (matching characteristics). -/
 private theorem card_cast_eq_zero : (Fintype.card K : L) = 0 := by
