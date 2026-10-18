@@ -830,7 +830,7 @@ private lemma muNRingMap_finrank (N : ℕ) [NeZero N] (y : PrimeSpectrum (ULift.
   have hfr : Module.finrank ℤ (Polynomial ℤ ⧸ Ideal.span {(X : Polynomial ℤ) ^ N - 1}) = N := by
     have h := (AdjoinRoot.powerBasis' (muN_poly_monic N)).finrank
     rw [AdjoinRoot.powerBasis'_dim] at h
-    exact h.trans (by simpa using Polynomial.natDegree_X_pow_sub_C (n := N) (r := (1 : ℤ)))
+    exact h.trans (by simpa using Polynomial.natDegree_X_pow_sub_C (n := N) (a := (1 : ℤ)))
   simp only [Pi.natCast_apply, Nat.cast_id]
   exact hfr
 
@@ -1106,9 +1106,9 @@ private lemma not_isReduced_adjoinRoot_muNModelPoly (K : Type u) [Field K] (N : 
   have hdeg := Polynomial.natDegree_le_of_dvd hdvd hne
   have hNle : N ≤ N / ringChar K := by
     have e1 : (muNModelPoly K N).natDegree = N := by
-      simpa using Polynomial.natDegree_X_pow_sub_C (n := N) (r := (1 : K))
+      simpa using Polynomial.natDegree_X_pow_sub_C (n := N) (a := (1 : K))
     have e2 : ((X : Polynomial K) ^ (N / ringChar K) - 1).natDegree = N / ringChar K := by
-      simpa using Polynomial.natDegree_X_pow_sub_C (n := N / ringChar K) (r := (1 : K))
+      simpa using Polynomial.natDegree_X_pow_sub_C (n := N / ringChar K) (a := (1 : K))
     rw [e1, e2] at hdeg
     exact hdeg
   have hlt : N / ringChar K < N :=

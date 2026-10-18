@@ -508,7 +508,6 @@ theorem artinHasseExp_inverse_reindexed_shifted_range_eq_tail_of_pos
   have hpow : (δ ^ (ℓ ^ j)) ^ ℓ = δ ^ (ℓ ^ (j + 1)) := by
     rw [← pow_mul, Nat.pow_succ]
   rw [hpow]
-  simp [δ, πbar, Ips]
 
 /-- Split the reindexed tail into the peeled zeroth-coordinate factor and the
 lower-depth tail attached to the shifted Witt coefficients. -/

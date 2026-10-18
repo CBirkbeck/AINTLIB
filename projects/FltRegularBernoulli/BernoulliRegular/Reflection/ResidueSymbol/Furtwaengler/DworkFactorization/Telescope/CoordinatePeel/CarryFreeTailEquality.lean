@@ -412,7 +412,6 @@ theorem artinHasseExp_reindexed_shifted_range_eq_tail_of_pos
   refine Finset.prod_congr rfl ?_
   intro r _hr
   rw [← pow_mul, ← Nat.pow_succ]
-  simp
 
 /-- Parameter-general split of the reindexed tail into the peeled zeroth
 coordinate and the shifted lower-depth tail. -/
@@ -598,7 +597,6 @@ theorem artinHasseExp_reindexed_shifted_range_depth_eq_tail_of_pos
   refine Finset.prod_congr rfl ?_
   intro r _hr
   rw [← pow_mul, ← Nat.pow_succ]
-  simp
 
 /-- Depth-indexed split of the reindexed tail into the peeled zeroth coordinate
 and the shifted lower-depth tail. -/

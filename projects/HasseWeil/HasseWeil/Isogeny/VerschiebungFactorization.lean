@@ -750,8 +750,8 @@ theorem frobenius_fixedPoint_iff_mem_baseField_gen {L : Type*} [Field L] [Algebr
   classical
   set q := Fintype.card K with hq_def
   set f : Polynomial L := Polynomial.X ^ q - Polynomial.X with hf_def
-  have hf_ne : f ≠ 0 := FiniteField.X_pow_card_sub_X_ne_zero L Fintype.one_lt_card
-  have hf_deg : f.natDegree = q := FiniteField.X_pow_card_sub_X_natDegree_eq L Fintype.one_lt_card
+  have hf_ne : f ≠ 0 := Polynomial.X_pow_sub_X_ne_zero (R := L) Fintype.one_lt_card
+  have hf_deg : f.natDegree = q := Polynomial.natDegree_X_pow_sub_X (R := L) Fintype.one_lt_card
   have mem_roots_iff : ∀ b : L, b ∈ f.roots.toFinset ↔ b ^ q = b := by
     intro b
     rw [Multiset.mem_toFinset, Polynomial.mem_roots hf_ne, Polynomial.IsRoot.def]

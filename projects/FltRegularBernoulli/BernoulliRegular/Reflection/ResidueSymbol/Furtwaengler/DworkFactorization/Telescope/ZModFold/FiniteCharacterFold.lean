@@ -491,16 +491,12 @@ theorem artinHasseExpTraceCarryZModUnshiftedProduct_eq_currentRootPeelProduct_po
   classical
   induction D generalizing m s with
   | zero =>
-      have hcoord :
-          (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + s)).coeff 0 =
-            (F.traceCarry y).coeff s := by
-        simp
       rw [show artinHasseExpTraceCarryZModUnshiftedProduct F N m 0 s ε y =
           artinHasseExpTraceCarryZModUnshiftedRangeProduct F N m s ε y from rfl,
         F.artinHasseExpTraceCarryZModUnshiftedRangeProduct_eq_currentRootRange_pow_prime
           N m s ε y]
       simp only [artinHasseExpCurrentRootPeelProduct,
-        artinHasseExpTraceCarryCurrentRootRangeProduct, hcoord]
+        artinHasseExpTraceCarryCurrentRootRangeProduct, zero_add]
       refine congrArg (· ^ ℓ) (Finset.prod_congr rfl ?_)
       intro j _hj
       rw [F.wittThetaModQPow_teichmuller_pow_prime N ((F.traceCarry y).coeff s)]

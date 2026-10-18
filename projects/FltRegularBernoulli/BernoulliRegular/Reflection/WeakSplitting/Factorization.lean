@@ -323,7 +323,7 @@ private lemma mem_primesOverFinset_span_iff (Q : Ideal (𝓞 L)) [Q.IsPrime] [Ne
       show Ideal.absNorm (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) =
           Nat.card (ℤ ⧸ Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) from ?_]
     · exact Int.card_ideal_quot _
-    · rw [← Submodule.cardQuot_apply]; rfl
+    · exact Ideal.absNorm_eq_natCard _
   · intro hnorm
     refine ⟨‹Q.IsPrime›, ?_⟩
     have hunder : Ideal.under ℤ Q = Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ) := by

@@ -5,6 +5,7 @@ Authors: Junyan Xu, David Kurniadi Angdinata
 -/
 module
 
+import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 public import Mathlib.Algebra.GroupWithZero.NonZeroDivisors
 public import Mathlib.Algebra.MvPolynomial.CommRing
@@ -22,7 +23,6 @@ This file provides definitions and lemmas about normalised elliptic divisibility
 that are not yet in mathlib. These are needed for the division polynomial / ZSMul development.
 
 The key results are:
-* `IsEllipticSequence.normEDS`: a normalised EDS is an elliptic sequence.
 * `IsEllipticSequence.ext`: two elliptic sequences with the same first four terms are equal.
 * `normEDS_two_three_two`: when `b = 2, c = 3, d = 2`, the normalised EDS is the identity.
 * `complEDSAux₂`: auxiliary complement used in the `ω` definition.
@@ -670,24 +670,8 @@ lemma complEDS_eq_aeval :
 
 end Universal
 
-section NormEDSIsEll
-
-variable {R : Type*} [CommRing R] (b c d : R)
-open Param MvPolynomial
-
-private lemma IsEllipticSequence.map' {S : Type*} [CommRing S] {W : ℤ → R}
-    (h : IsEllipticSequence W)
-    (f : R →+* S) : IsEllipticSequence (f ∘ W) :=
-    (isEllipticSequence_iff_rel₃ (f ∘ W)).mpr fun m n r ↦ by
-  simpa [Rel₃, Function.comp] using congr_arg f ((isEllipticSequence_iff_rel₃ W).mp h m n r)
-
-/-- A normalised EDS is an elliptic sequence. -/
-protected theorem IsEllipticSequence.normEDS : IsEllipticSequence (normEDS b c d) := by
-  rw [normEDS_eq_aeval]
-  exact map' (normEDS_of_mem_nonZeroDivisors _ _ _
-    (mem_nonZeroDivisors_of_ne_zero <| X_ne_zero _)) _
-
-end NormEDSIsEll
+-- `IsEllipticSequence.normEDS` (a normalised EDS is an elliptic sequence) is now in mathlib
+-- (`Mathlib.NumberTheory.EllipticDivisibilitySequence`, #42453).
 
 section Ext
 
