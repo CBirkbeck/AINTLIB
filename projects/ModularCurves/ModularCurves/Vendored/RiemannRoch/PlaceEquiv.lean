@@ -67,7 +67,7 @@ noncomputable def Place.ofChart (w : PlaceA k K) : Place k K := by
       isDiscrete := ?_ }
   letI : q.IsRankOneDiscrete := hqdisc
   let h := Valuation.isEquiv_valuation_valuationSubring q
-  exact ⟨h.orderMonoidIso.symm.trans
+  exact ⟨h.orderMonoidIso₀.symm.trans
     (Valuation.IsRankOneDiscrete.valueGroup₀_equiv_withZeroMulInt q)⟩
 
 @[simp]
@@ -92,7 +92,7 @@ theorem Place.ofChart_valuation_eq (w : PlaceA k K) :
   letI : q.IsRankOneDiscrete := hqdisc
   let h := Valuation.isEquiv_valuation_valuationSubring q
   let e : ValueGroup₀ (.ofClass V.valuation) ≃*o ℤᵐ⁰ :=
-    h.orderMonoidIso.symm.trans
+    h.orderMonoidIso₀.symm.trans
       (Valuation.IsRankOneDiscrete.valueGroup₀_equiv_withZeroMulInt q)
   have hnorm : (Place.ofChart k K w).normalization = e :=
     orderMonoidIso_withZeroMulInt_unique _ _
@@ -101,11 +101,11 @@ theorem Place.ofChart_valuation_eq (w : PlaceA k K) :
       (V.valuation.restrict x) = q x
   rw [hnorm]
   change (Valuation.IsRankOneDiscrete.valueGroup₀_equiv_withZeroMulInt q)
-      (h.orderMonoidIso.symm (V.valuation.restrict x)) = q x
-  rw [show h.orderMonoidIso.symm (V.valuation.restrict x) = q.restrict x by
-    change h.orderMonoidIso.symm
+      (h.orderMonoidIso₀.symm (V.valuation.restrict x)) = q x
+  rw [show h.orderMonoidIso₀.symm (V.valuation.restrict x) = q.restrict x by
+    change h.orderMonoidIso₀.symm
       (q.valuationSubring.valuation.restrict x) = q.restrict x
-    exact h.orderMonoidIso.symm_apply_eq.mpr (h.orderMonoidIso_spec x).symm]
+    exact h.orderMonoidIso₀.symm_apply_eq.mpr (h.orderMonoidIso₀_spec x).symm]
   exact Valuation.IsRankOneDiscrete.valueGroup₀_equiv_withZeroMulInt_restrict_apply_of_surjective
       (by
         rcases w with w | w
