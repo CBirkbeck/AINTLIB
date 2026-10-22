@@ -435,7 +435,7 @@ private theorem orbit_upper_gamma0 [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.Prim
     have hτval : Subtype.val τ = τ_mat := rfl
     ext i j
     fin_cases i <;> fin_cases j <;>
-      simp only [GeneralLinearGroup.coe_mul, mul_apply, T_p_upper_coe, Fin.isValue,
+      simp only [GeneralLinearGroup.coe_mul, Matrix.mul_apply, T_p_upper_coe, Fin.isValue,
         Matrix.SpecialLinearGroup.mapGL_coe_matrix, Fin.sum_univ_two, algebraMap_int_eq] <;>
       norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply, hτval, hτ_mat_def,
         Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, Matrix.head_fin_const] <;>
@@ -487,7 +487,7 @@ private theorem orbit_upper_div_gamma0 [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.
     have hτval : Subtype.val τ = τ_mat := rfl
     ext i j
     fin_cases i <;> fin_cases j <;>
-      simp only [GeneralLinearGroup.coe_mul, mul_apply, T_p_upper_coe, T_p_lower_coe, Fin.isValue,
+      simp only [GeneralLinearGroup.coe_mul, Matrix.mul_apply, T_p_upper_coe, T_p_lower_coe, Fin.isValue,
         Matrix.SpecialLinearGroup.mapGL_coe_matrix, Fin.sum_univ_two,
         algebraMap_int_eq] <;>
       norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply, hτval, hτ_mat_def,
@@ -550,7 +550,7 @@ private theorem orbit_lower_gamma0 [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.Prim
     have hτval : Subtype.val τ = τ_mat := rfl
     ext i j
     fin_cases i <;> fin_cases j <;>
-      simp only [GeneralLinearGroup.coe_mul, mul_apply, T_p_lower_coe, T_p_upper_coe, Fin.isValue,
+      simp only [GeneralLinearGroup.coe_mul, Matrix.mul_apply, T_p_lower_coe, T_p_upper_coe, Fin.isValue,
         Matrix.SpecialLinearGroup.mapGL_coe_matrix, Fin.sum_univ_two,
         algebraMap_int_eq] <;>
       norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply, hτval, hτ_mat_def,
@@ -599,7 +599,7 @@ private theorem orbit_lower_div_gamma0 [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.
     have hτval : Subtype.val τ = τ_mat := rfl
     ext i j
     fin_cases i <;> fin_cases j <;>
-      simp only [GeneralLinearGroup.coe_mul, mul_apply, T_p_lower_coe, Fin.isValue,
+      simp only [GeneralLinearGroup.coe_mul, Matrix.mul_apply, T_p_lower_coe, Fin.isValue,
         Matrix.SpecialLinearGroup.mapGL_coe_matrix, Fin.sum_univ_two,
         algebraMap_int_eq] <;>
       norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply, hτval, hτ_mat_def,

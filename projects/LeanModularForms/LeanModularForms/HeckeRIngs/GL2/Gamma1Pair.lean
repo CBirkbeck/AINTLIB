@@ -65,10 +65,10 @@ noncomputable def Delta1_submonoid (N : ℕ) : Submonoid (GL (Fin 2) ℚ) where
     intro a b ⟨ha, hda, A, hA, hAN, hAone⟩ ⟨hb, hdb, B, hB, hBN, hBone⟩
     refine ⟨ha.mul _ hb, by simpa [det_mul] using mul_pos hda hdb, A * B, ?_, ?_, ?_⟩
     · ext i j
-      simp [hA, hB, mul_apply, map_apply]
-    · simp only [mul_apply, Fin.sum_univ_two]
+      simp [hA, hB, Matrix.mul_apply, map_apply]
+    · simp only [Matrix.mul_apply, Fin.sum_univ_two]
       exact dvd_add (dvd_mul_of_dvd_left hAN _) (dvd_mul_of_dvd_right hBN _)
-    · simp [mul_apply, Fin.sum_univ_two, hAone, hBone,
+    · simp [Matrix.mul_apply, Fin.sum_univ_two, hAone, hBone,
         (ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mpr hBN]
 
 /-- `Γ₁(N) ≤ Δ₁(N)`: the congruence subgroup embeds into the submonoid. -/
