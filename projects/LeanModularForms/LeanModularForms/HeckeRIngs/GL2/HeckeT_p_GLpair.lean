@@ -55,7 +55,7 @@ lemma adj_upper_inv_mul_upper_not_mem_H (p : ℕ) (hp : Nat.Prime p) (b₁ b₂ 
         (by simp) := by
     rw [inv_mul_eq_iff_eq_mul]
     ext i j
-    fin_cases i <;> fin_cases j <;> simp [mul_apply, hp_ne, mul_div_cancel₀]
+    fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, hp_ne, mul_div_cancel₀]
     ring
   intro hmem
   obtain ⟨n, hn⟩ := SLnZ_entry_is_int _ (h_eq ▸ hmem) 0 1
@@ -76,7 +76,7 @@ lemma adj_upper_inv_mul_lower_not_mem_H (p : ℕ) (hp : Nat.Prime p) (b : ℕ) :
       GeneralLinearGroup.mkOfDetNeZero !![1 / (p : ℚ), (b : ℚ); 0, p] (by simp [hp_ne]) := by
     rw [inv_mul_eq_iff_eq_mul]
     ext i j
-    fin_cases i <;> fin_cases j <;> simp [mul_apply, hp_ne]
+    fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, hp_ne]
     ring
   intro hmem
   obtain ⟨n, hn⟩ := SLnZ_entry_is_int _ (h_eq ▸ hmem) 0 0

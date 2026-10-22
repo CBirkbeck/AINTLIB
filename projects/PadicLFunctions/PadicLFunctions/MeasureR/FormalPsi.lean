@@ -206,7 +206,7 @@ lemma dirac_mul_eq_pushforward (a : ℤ_[p]) (μ : MeasureR K ℤ_[p]) :
     dirac K ℤ_[p] a * μ
       = pushforward K ℤ_[p] ℤ_[p] ⟨fun y => a + y, by fun_prop⟩ μ := by
   refine LinearMap.ext fun f => ?_
-  rw [mul_apply, dirac_apply, convInner_apply, pushforward_apply]
+  rw [MeasureR.mul_apply, dirac_apply, convInner_apply, pushforward_apply]
 
 omit [CompleteSpace K] in
 /-- The series-side of `MeasureR.phi`: `𝓐_{φμ} = phiSeries 𝓐_μ` (R-level
@@ -300,7 +300,7 @@ lemma psi_dirac_mul_phi_eq_zero {a : ℤ_[p]} (ha : ‖a‖ = 1) (ν : MeasureR 
       = (dirac K ℤ_[p] a * MeasureR.phi p K ν)
           (charFnCM K ℤ_[p] (PadicMeasure.isClopen_pZp p)
             * f.comp (PadicMeasure.shiftDiv p)) from rfl,
-    mul_apply, dirac_apply, convInner_apply, LinearMap.zero_apply, MeasureR.phi,
+    MeasureR.mul_apply, dirac_apply, convInner_apply, LinearMap.zero_apply, MeasureR.phi,
     pushforward_apply]
   rw [show ((charFnCM K ℤ_[p] (PadicMeasure.isClopen_pZp p)
         * f.comp (PadicMeasure.shiftDiv p)).comp
