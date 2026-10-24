@@ -453,7 +453,6 @@ private theorem dirichlet_AP_main (n : ℕ) (hn4 : n % 4 ≠ 2) (hn : 1 ≤ n)
   have hσ : hζ.autToPow ℚ σ = ha.unit := by
     have h1 : (E σ : (ZMod n)ˣ) = hζ.autToPow ℚ σ := by
       rw [hE, IsCyclotomicExtension.autEquivPow_apply]
-      simp only [MonoidHom.toFun_eq_coe]
       rw [IsPrimitiveRoot.autToPow_eq_modularCyclotomicCharacter,
         IsPrimitiveRoot.autToPow_eq_modularCyclotomicCharacter]
     rw [← h1, hσdef, E.apply_symm_apply]
