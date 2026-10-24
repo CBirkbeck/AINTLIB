@@ -136,7 +136,6 @@ theorem galAut_zetaSys (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) :
     rw [hgal, MulEquiv.apply_symm_apply]
   have hval : (zetaSysK_primitiveRoot p n).autToPow ℚ_[p] (galAut p a n) = t := by
     rw [autToPow_zetaSys_eq, ← hae, IsCyclotomicExtension.autEquivPow_apply]
-    rfl
   have hspec := (zetaSysK_primitiveRoot p n).autToPow_spec ℚ_[p] (galAut p a n)
   rw [hval] at hspec
   have hcoe := congrArg (Subtype.val) hspec
