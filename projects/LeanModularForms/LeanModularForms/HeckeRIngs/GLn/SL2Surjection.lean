@@ -148,8 +148,8 @@ theorem inv_mul_10_eq_zero {R : Type*} [CommRing R] (M g : SpecialLinearGroup (F
     (h0 : M 0 0 = g 0 0) (h1 : M 1 0 = g 1 0) : (M⁻¹ * g) 1 0 = 0 := by
   rw [show ((M⁻¹ * g : SpecialLinearGroup (Fin 2) R) : Matrix (Fin 2) (Fin 2) R)
       = adjugate M * (g : Matrix (Fin 2) (Fin 2) R) from by rw [coe_mul, coe_inv]]
-  simp only [adjugate_fin_two, mul_apply, Fin.sum_univ_two, of_apply, cons_val', cons_val_zero,
-    cons_val_one, head_cons, empty_val', cons_val_fin_one]
+  simp only [adjugate_fin_two, Matrix.mul_apply, Fin.sum_univ_two, of_apply, cons_val',
+    cons_val_zero, cons_val_one, head_cons, empty_val', cons_val_fin_one]
   rw [← h0, ← h1]; ring
 
 /-- If two SL₂ elements share the same first column, their quotient has
@@ -158,8 +158,8 @@ theorem inv_mul_00_eq_one {R : Type*} [CommRing R] (M g : SpecialLinearGroup (Fi
     (h0 : M 0 0 = g 0 0) (h1 : M 1 0 = g 1 0) : (M⁻¹ * g) 0 0 = 1 := by
   rw [show ((M⁻¹ * g : SpecialLinearGroup (Fin 2) R) : Matrix (Fin 2) (Fin 2) R)
       = adjugate M * (g : Matrix (Fin 2) (Fin 2) R) from by rw [coe_mul, coe_inv]]
-  simp only [adjugate_fin_two, mul_apply, Fin.sum_univ_two, of_apply, cons_val', cons_val_zero,
-    cons_val_one, head_cons, empty_val', cons_val_fin_one]
+  simp only [adjugate_fin_two, Matrix.mul_apply, Fin.sum_univ_two, of_apply, cons_val',
+    cons_val_zero, cons_val_one, head_cons, empty_val', cons_val_fin_one]
   rw [← h0, ← h1]
   have hdet : M 0 0 * M 1 1 - M 0 1 * M 1 0 = 1 := by
     have := M.2; rwa [Matrix.det_fin_two] at this

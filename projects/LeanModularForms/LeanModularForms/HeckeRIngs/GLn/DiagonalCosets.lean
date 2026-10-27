@@ -407,8 +407,8 @@ private lemma gcd_2x2_mul (a b : ℤ) :
   have hbez : s * a + t * b = g := by linarith [Int.gcd_eq_gcd_ab a b]
   have h1 : !![s, t; -q, p] * (!![a, (0 : ℤ); 0, b] : Matrix (Fin 2) (Fin 2) ℤ) =
       !![s * a, t * b; -(q * a), p * b] := by
-    ext i j; fin_cases i <;> fin_cases j <;> simp [mul_apply, Fin.sum_univ_two]
-  rw [h1]; ext i j; fin_cases i <;> fin_cases j <;> simp [mul_apply, Fin.sum_univ_two]
+    ext i j; fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_two]
+  rw [h1]; ext i j; fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_two]
   · linarith
   · have key : -(s * a * (t * q)) + t * b * (1 - t * q) =
         (1 - (s * p + t * q)) * (t * q * g) := by rw [← hpg, ← hqg]; ring
@@ -588,8 +588,8 @@ private lemma gcd_step_general (k : ℕ) (d : Fin (k + 2) → ℤ) (hd : ∀ i, 
 private lemma dvd_diag_of_SL_transform (m : ℕ) (d d' : Fin m → ℤ) (c : ℤ) (hc : ∀ i, c ∣ d i)
     (L R : Matrix (Fin m) (Fin m) ℤ) (heq : L * Matrix.diagonal d * R = Matrix.diagonal d') :
     ∀ i, c ∣ d' i := by
-  intro i; rw [show d' i = (Matrix.diagonal d') i i by simp, ← heq, mul_apply]
-  apply Finset.dvd_sum; intro k _; rw [mul_apply]; apply dvd_mul_of_dvd_left
+  intro i; rw [show d' i = (Matrix.diagonal d') i i by simp, ← heq, Matrix.mul_apply]
+  apply Finset.dvd_sum; intro k _; rw [Matrix.mul_apply]; apply dvd_mul_of_dvd_left
   apply Finset.dvd_sum; intro l _; simp only [diagonal_apply]; split_ifs with h
   · subst h; exact dvd_mul_of_dvd_right (hc l) _
   · simp
