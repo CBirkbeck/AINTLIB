@@ -216,7 +216,7 @@ private lemma SL2_gamma_entry_modEq (N : ℕ) (γ : SpecialLinearGroup (Fin 2) �
   simp only [map_apply_coe, RingHom.mapMatrix_apply, Matrix.map_apply, coe_one,
     Int.coe_castRingHom] at h
   rw [← ZMod.intCast_eq_intCast_iff]
-  simpa [one_apply] using h.symm
+  simpa [Matrix.one_apply] using h.symm
 
 private lemma crt_lift_reduces_mod {a b : ℕ} [NeZero (Nat.lcm a b)]
     (M : Matrix (Fin 2) (Fin 2) ℤ) (β : SpecialLinearGroup (Fin 2) ℤ)
