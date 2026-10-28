@@ -2480,6 +2480,7 @@ norm `0`) nor `1` (only `⊤` has norm `1`). -/
 private theorem two_le_absNorm {R : Type*} [CommRing R] [IsDedekindDomain R]
     [Module.Free ℤ R] [Module.Finite ℤ R] {𝔭 : Ideal R} (hp : 𝔭.IsPrime) (hb : 𝔭 ≠ ⊥) :
     2 ≤ Ideal.absNorm 𝔭 := by
+  have : Ring.HasFiniteQuotients R := .of_module_finite ℤ R
   have hne0 : Ideal.absNorm 𝔭 ≠ 0 := fun h ↦ hb (Ideal.absNorm_eq_zero_iff.mp h)
   have hne1 : Ideal.absNorm 𝔭 ≠ 1 := fun h ↦ hp.ne_top (Ideal.absNorm_eq_one_iff.mp h)
   lia

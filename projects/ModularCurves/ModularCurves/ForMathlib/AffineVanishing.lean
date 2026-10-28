@@ -312,7 +312,7 @@ theorem affine_subsingleton_H [IsAffine X] [F.IsQuasicoherent] (n : ℕ) :
     Subsingleton (H F.sheaf (n + 1)) := by
   revert F X
   refine Nat.case_strong_induction_on
-    (p := fun n ↦ ∀ {X : Scheme.{u}} (F : X.Modules)
+    (motive := fun n ↦ ∀ {X : Scheme.{u}} (F : X.Modules)
       [IsAffine X] [F.IsQuasicoherent], Subsingleton (H F.sheaf (n + 1)))
     n ?_ ?_
   · intro X F _ _

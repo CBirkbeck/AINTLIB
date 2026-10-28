@@ -186,7 +186,7 @@ theorem inv_of_constantCoeff_one {r : ℕ} {F : PowerSeries ℚ}
     IsRIntegralPS r F⁻¹ := by
   intro n
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
       rw [PowerSeries.coeff_inv]
       by_cases hn : n = 0
       · simp [hn, hF0, IsRIntegralRat.one]
@@ -465,7 +465,7 @@ theorem dieudonneDwork_mpr
     IsRIntegralPS r F := by
   intro n
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
       by_cases hn0 : n = 0
       · simpa [hn0, PowerSeries.coeff_zero_eq_constantCoeff, hF1] using
           IsRIntegralRat.one r

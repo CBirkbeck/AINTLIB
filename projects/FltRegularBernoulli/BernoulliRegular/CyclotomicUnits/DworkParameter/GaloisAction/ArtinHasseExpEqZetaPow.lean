@@ -307,9 +307,9 @@ theorem scaledDworkParameterExpApprox_sub_zetaPow_mem_pow_succ
     scaledDworkParameterExpApprox p K a N -
         valuedCyclotomicZetaInteger p K ^ a.val ∈ I ^ (N + 1) := by
   induction N using Nat.case_strong_induction_on with
-  | hz =>
+  | zero =>
       cases hN
-  | hi N ih =>
+  | succ N ih =>
       by_cases hN0 : N = 0
       · subst N
         simpa using scaledDworkParameterExpApprox_sub_zetaPow_mem_sq
