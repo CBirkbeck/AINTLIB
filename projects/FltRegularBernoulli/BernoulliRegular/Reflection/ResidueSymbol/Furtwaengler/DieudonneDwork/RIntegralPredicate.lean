@@ -426,7 +426,7 @@ theorem IsRIntegralPS.substInv_of_constantCoeff_zero_coeff_one
   classical
   intro n
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
       rcases n with _ | _ | m
       · simp [PowerSeries.substInv, PowerSeries.substInvFun, IsRIntegralRat.zero]
       · simp [PowerSeries.substInv, PowerSeries.substInvFun, hP1, IsRIntegralRat.one]

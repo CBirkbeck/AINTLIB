@@ -38,7 +38,7 @@ theorem dworkParameterPowerLinearMap_coeff_mem_primeIdeal_of_eq_zero
         a i ∈ rationalPadicPrimeIdeal p := by
     intro n
     induction n using Nat.strong_induction_on with
-    | h n ih =>
+    | ind n ih =>
         intro i hi
         let Jpow : Ideal S := I ^ ((i : ℕ) + 1)
         have htotal : (∑ j : Fin (p - 1), term j) ∈ Jpow := by

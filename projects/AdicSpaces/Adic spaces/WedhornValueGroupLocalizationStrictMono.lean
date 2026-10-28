@@ -249,21 +249,21 @@ theorem mapValueGroupWithZero_surjective_of_localization
     letI : ValuativeRel A :=
       (comap (algebraMap A (Localization.Away s)) w).toValuativeRel
     letI : ValuativeExtension A (Localization.Away s) :=
-      ⟨fun _ _ => Iff.rfl⟩
+      ⟨Iff.rfl⟩
     Function.Surjective
       (ValuativeExtension.mapValueGroupWithZero A (Localization.Away s)) := by
   letI : ValuativeRel (Localization.Away s) := w.toValuativeRel
   letI : ValuativeRel A :=
     (comap (algebraMap A (Localization.Away s)) w).toValuativeRel
-  letI : ValuativeExtension A (Localization.Away s) := ⟨fun _ _ => Iff.rfl⟩
+  letI : ValuativeExtension A (Localization.Away s) := ⟨Iff.rfl⟩
   -- Positivity of algebraMap s in B = Localization.Away s.
   have hs_alg_pos : (0 : Localization.Away s) <ᵥ
       algebraMap A (Localization.Away s) s := hws
   -- Positivity of s in A under comap (uses ValuativeExtension's Iff.rfl).
   have hs_A_pos : (0 : A) <ᵥ s := by
     change ¬ s ≤ᵥ (0 : A)
-    rw [(ValuativeExtension.vle_iff_vle (A := A) (B := Localization.Away s) s 0).symm,
-      map_zero]
+    rw [(ValuativeExtension.vle_iff_vle (A := A) (B := Localization.Away s)
+      (a := s) (b := 0)).symm, map_zero]
     exact hws
   -- Positivity of s^k in A:
   have hs_A_pow_pos : ∀ k : ℕ, (0 : A) <ᵥ s ^ k := by
@@ -295,7 +295,8 @@ theorem mapValueGroupWithZero_surjective_of_localization
       -- Goal in A: ¬ rec2.1 ≤ᵥ 0. Via ValuativeExtension: ¬ algebraMap rec2.1 ≤ᵥ 0 in B.
       change ¬ rec2.1 ≤ᵥ (0 : A)
       rw [(ValuativeExtension.vle_iff_vle
-        (A := A) (B := Localization.Away s) rec2.1 0).symm, map_zero, ← h2, map_pow]
+        (A := A) (B := Localization.Away s) (a := rec2.1) (b := 0)).symm, map_zero, ← h2,
+        map_pow]
       -- Goal: ¬ b₂ * (algebraMap s)^rec2.2 ≤ᵥ 0 in B.
       exact ValuativeRel.zero_vlt_mul b₂.property (hs_alg_pow_pos rec2.2)
     -- c := rec2.1 * s^rec1.2 ∈ posSubmonoid A.
@@ -360,7 +361,7 @@ theorem mulArchimedean_localization_comap_transfer_concrete
   letI : ValuativeRel (Localization.Away s) := w.toValuativeRel
   letI : ValuativeRel A :=
     (comap (algebraMap A (Localization.Away s)) w).toValuativeRel
-  letI : ValuativeExtension A (Localization.Away s) := ⟨fun _ _ => Iff.rfl⟩
+  letI : ValuativeExtension A (Localization.Away s) := ⟨Iff.rfl⟩
   intro hArch_A
   -- The forward map (`→*₀`) from Mathlib, as a `→*`.
   let g : ValuativeRel.ValueGroupWithZero A →*
