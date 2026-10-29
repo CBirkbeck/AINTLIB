@@ -83,7 +83,7 @@ theorem Ideal.isClosed_of_le_jacobson
   intro x hx
   rw [mem_closure_iff_of_isAdic hI] at hx
   have hKrull : (⨅ n : ℕ, I ^ n • (⊤ : Submodule R (R ⧸ q))) = ⊥ :=
-    Ideal.iInf_pow_smul_eq_bot_of_le_jacobson I h_jac
+    Ideal.iInf_pow_smul_eq_bot_of_le_jacobson I (by rwa [Ideal.jacobson_bot] at h_jac)
   set π := Ideal.Quotient.mk q
   have hπx_inter : π x ∈ (⨅ n : ℕ, I ^ n • (⊤ : Submodule R (R ⧸ q))) := by
     rw [Submodule.mem_iInf]
@@ -151,7 +151,7 @@ theorem Ideal.isClosed_of_le_jacobson_pointwise
     rwa [hJ_def, Ideal.map_le_iff_le_comap]
   haveI : IsNoetherianRing (R ⧸ q) := Ideal.Quotient.isNoetherianRing q
   have hKrull : (⨅ n : ℕ, J ^ n • (⊤ : Submodule (R ⧸ q) (R ⧸ q))) = ⊥ :=
-    Ideal.iInf_pow_smul_eq_bot_of_le_jacobson J hJ_jac
+    Ideal.iInf_pow_smul_eq_bot_of_le_jacobson J (by rwa [Ideal.jacobson_bot] at hJ_jac)
   suffices h : π x = 0 from (Ideal.Quotient.eq_zero_iff_mem (I := q)).mp h
   have hπx_mem : π x ∈ (⨅ n : ℕ, J ^ n • (⊤ : Submodule (R ⧸ q) (R ⧸ q))) := by
     rw [Submodule.mem_iInf]

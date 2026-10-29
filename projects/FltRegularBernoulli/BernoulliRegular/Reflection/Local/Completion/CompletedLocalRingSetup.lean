@@ -642,9 +642,9 @@ theorem isUnit_one_add_of_mem_completedLocalCyclotomicMaximalIdeal
   have hH : HenselianRing (completedLocalCyclotomicRing p K)
       (completedLocalCyclotomicMaximalIdeal p K) :=
     completedLocalCyclotomic_henselianRing (p := p) (K := K)
-  have hxjac : x ∈ Ideal.jacobson (⊥ : Ideal (completedLocalCyclotomicRing p K)) :=
+  have hxjac : x ∈ Ring.jacobson (completedLocalCyclotomicRing p K) :=
     hH.jac hx
-  simpa [mul_comm, add_comm] using (Ideal.mem_jacobson_bot.mp hxjac 1)
+  simpa [mul_comm, add_comm] using (Ring.mem_jacobson_iff.mp hxjac 1)
 
 /-- The unit `1 + x` for `x` in a positive completed maximal-ideal power. -/
 noncomputable def completedOneAddUnitOfMemMaximalIdealPow {n : ℕ} (hn : n ≠ 0)

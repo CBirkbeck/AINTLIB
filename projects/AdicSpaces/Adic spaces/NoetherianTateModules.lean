@@ -398,7 +398,7 @@ private theorem isClosed_ideal_of_adicComplete_noetherian
     {I : Ideal R} (hadic : IsAdic I) (J : Ideal R) :
     IsClosed (J : Set R) := by
   haveI : IsAdicComplete I R := hadic.isAdicComplete_iff.mpr ⟨‹_›, ‹_›⟩
-  have hjac : I ≤ (⊥ : Ideal R).jacobson := IsAdicComplete.le_jacobson_bot I
+  have hjac : I ≤ Ring.jacobson R := IsAdicComplete.le_jacobson I
   have hkrull : (⨅ i : ℕ, I ^ i • (⊤ : Submodule R (R ⧸ J))) = ⊥ :=
     Ideal.iInf_pow_smul_eq_bot_of_le_jacobson I hjac
   rw [← closure_subset_iff_isClosed]
