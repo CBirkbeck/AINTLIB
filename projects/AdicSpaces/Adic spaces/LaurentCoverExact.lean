@@ -593,7 +593,7 @@ theorem span_singleton_iInf_pow_eq_bot_of_le_jacobson (f : A)
     (⨅ n : ℕ, Ideal.span ({f} : Set A) ^ n) = ⊥ := by
   have hsub :
       (⨅ n : ℕ, Ideal.span ({f} : Set A) ^ n • ⊤ : Submodule A A) = ⊥ :=
-    Ideal.iInf_pow_smul_eq_bot_of_le_jacobson _ hf_jac
+    Ideal.iInf_pow_smul_eq_bot_of_le_jacobson _ (by rwa [Ideal.jacobson_bot] at hf_jac)
   rw [eq_bot_iff]
   intro x hx
   have hx_sub :

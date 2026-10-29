@@ -513,9 +513,9 @@ theorem isUnit_one_add_of_mem_dworkCompleteLambdaIdeal
   have hH : HenselianRing (DworkCompleteIntegerRing p K)
       (dworkCompleteLambdaIdeal p K) :=
     dworkComplete_henselianRing (p := p) (K := K)
-  have hxjac : x ∈ Ideal.jacobson (⊥ : Ideal (DworkCompleteIntegerRing p K)) :=
+  have hxjac : x ∈ Ring.jacobson (DworkCompleteIntegerRing p K) :=
     hH.jac hx
-  simpa [mul_comm, add_comm] using (Ideal.mem_jacobson_bot.mp hxjac 1)
+  simpa [mul_comm, add_comm] using (Ring.mem_jacobson_iff.mp hxjac 1)
 
 /-- The lambda-adic topology on the Dwork completion is Hausdorff. -/
 instance instT2SpaceDworkCompleteIntegerRing :

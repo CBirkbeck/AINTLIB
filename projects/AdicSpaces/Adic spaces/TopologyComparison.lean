@@ -1254,7 +1254,7 @@ theorem isClosed_ideal_of_noetherian_adic_separated
   -- Step 2: IsAdicComplete I R from IsAdic + CompleteSpace + T2.
   have hac : IsAdicComplete I R := hadic.isAdicComplete_iff.mpr ⟨hcs, ‹_›⟩
   -- Step 3: I ≤ jacobson ⊥ from IsAdicComplete.
-  have hjac : I ≤ (⊥ : Ideal R).jacobson := IsAdicComplete.le_jacobson_bot I
+  have hjac : I ≤ Ring.jacobson R := IsAdicComplete.le_jacobson I
   -- Step 4: Krull intersection on R ⧸ J: ⨅ n, I^n • ⊤ = ⊥.
   have hkrull : (⨅ i : ℕ, I ^ i • (⊤ : Submodule R (R ⧸ J))) = ⊥ :=
     Ideal.iInf_pow_smul_eq_bot_of_le_jacobson I hjac
