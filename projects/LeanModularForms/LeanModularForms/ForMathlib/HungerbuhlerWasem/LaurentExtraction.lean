@@ -65,7 +65,7 @@ private lemma circleIntegrable_higherOrder_term {s : ℂ} {r : ℝ}
     rw [show (fun z ↦ a k / (z - s) ^ (k.val + 1)) =
         fun z ↦ a k * (z - s) ^ (-((k.val + 1 : ℕ) : ℤ)) by
       funext z; rw [div_eq_mul_inv, zpow_neg, zpow_natCast]]
-    refine CircleIntegrable.const_smul ?_
+    refine CircleIntegrable.const_smul (𝕜 := ℂ) ?_
     show CircleIntegrable (fun z ↦ (z - s) ^ (-((k.val + 1 : ℕ) : ℤ))) s r
     rw [circleIntegrable_sub_zpow_iff]
     exact Or.inr (Or.inr hs_notin)
@@ -169,7 +169,7 @@ theorem residue_of_laurent_expansion {f g : ℂ → ℂ} {s : ℂ} (N : ℕ) (a 
       exact CircleIntegrable.sum _ (fun k _ ↦ h_ci_higher_each k)
     have h_ci_rest : CircleIntegrable rest s r := h_ci_g.add h_ci_higher_sum
     have h_ci_a0_inv : CircleIntegrable (fun z ↦ a ⟨0, hN_pos⟩ * (z - s)⁻¹) s r :=
-      (circleIntegrable_sub_inv_iff.mpr (Or.inr hs_notin)).const_fun_smul
+      (circleIntegrable_sub_inv_iff.mpr (Or.inr hs_notin)).const_fun_smul (𝕜 := ℂ)
     rw [circleIntegral.integral_congr hr_pos.le h_eq_on,
       circleIntegral.integral_add h_ci_a0_inv h_ci_rest,
       circleIntegral.integral_const_mul,
