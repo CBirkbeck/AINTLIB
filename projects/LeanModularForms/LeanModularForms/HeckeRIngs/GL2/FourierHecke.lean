@@ -297,7 +297,7 @@ private theorem ppow_divisorSum_recurrence_dvd [NeZero N] (k : ℤ) {p : ℕ} (h
     Finset.sum_range_succ'
       (fun j ↦ (↑(p ^ j) : ℂ) ^ (k - 1) * ↑(χ (ZMod.unitOfCoprime (p ^ j) (hpN.pow_left j))) *
         c (m * p ^ (r + 2) / (p ^ j * p ^ j)))]
-  simp only [pow_zero, Nat.cast_one, one_zpow, one_mul, chi_unitOfCoprime_one_eq_one χ, Nat.div_one]
+  simp only [pow_zero, Nat.cast_one, _root_.one_zpow, one_mul, chi_unitOfCoprime_one_eq_one χ, Nat.div_one]
   rw [show p * m * p ^ (r + 1) = m * p ^ (r + 2) by ring]
   have h_mp_prod : m / p * p ^ (r + 1) = m * p ^ r := by
     rw [show p ^ (r + 1) = p * p ^ r by ring, ← mul_assoc, Nat.div_mul_cancel hdvd]
@@ -350,7 +350,7 @@ private theorem ppow_divisorSum_recurrence_not_dvd [NeZero N] (k : ℤ) {p : ℕ
   simp only [Nat.Coprime, Nat.gcd_one_left, dite_true]
   rw [gcd_m r, Nat.divisors_one, Finset.sum_singleton,
     gcd_pm_eq, hp.divisors, Finset.sum_insert (by simp; exact Ne.symm hp.one_lt.ne')]
-  simp only [Finset.sum_singleton, Nat.gcd_one_left, dite_true, Nat.cast_one, one_zpow, one_mul,
+  simp only [Finset.sum_singleton, Nat.gcd_one_left, dite_true, Nat.cast_one, _root_.one_zpow, one_mul,
     Nat.div_one, hpN]
   rw [show p * m * p ^ (r + 1) / (p * p) = m * p ^ r by
       rw [show p * m * p ^ (r + 1) = p * p * (m * p ^ r) by ring]
@@ -454,13 +454,13 @@ private theorem fourierCoeff_heckeT_ppow_one_eq [NeZero N] (k : ℤ) {p : ℕ} (
   by_cases hdvd : p ∣ m
   · rw [Nat.gcd_eq_right hdvd, hp.divisors, Finset.sum_insert (by simp; exact hp.one_lt.ne)]
     simp only [Finset.sum_singleton, Nat.Coprime, Nat.gcd_one_left, dite_true, Nat.cast_one,
-      one_zpow, unitOfCoprime_one_eq_one, map_one, Units.val_one, one_mul, Nat.div_one, hpN,
+      _root_.one_zpow, unitOfCoprime_one_eq_one, map_one, Units.val_one, one_mul, Nat.div_one, hpN,
       if_pos hdvd]
     rw [Nat.mul_div_mul_right m p hp.pos, Nat.mul_comm p m]
   · rw [(hp.eq_one_or_self_of_dvd _ (Nat.gcd_dvd_right m p)).resolve_right fun h ↦
         hdvd (h ▸ Nat.gcd_dvd_left m p), Nat.divisors_one, Finset.sum_singleton]
     simp only [Nat.Coprime, Nat.gcd_one_left, dite_true, unitOfCoprime_one_eq_one, map_one,
-      Units.val_one, Nat.cast_one, one_zpow, one_mul, Nat.div_one]
+      Units.val_one, Nat.cast_one, _root_.one_zpow, one_mul, Nat.div_one]
     rw [if_neg hdvd, mul_zero, add_zero, Nat.mul_comm p m]
 
 private theorem fourierCoeff_heckeT_ppow_succ_succ_eq [NeZero N] (k : ℤ) {p : ℕ} (hp : Nat.Prime p)
@@ -524,13 +524,13 @@ private theorem fourierCoeff_heckeT_n_prime [NeZero N] (k : ℤ) {n : ℕ} [NeZe
   · rw [Nat.gcd_eq_right hdvd, hn_prime.divisors,
       Finset.sum_insert (by simp; exact hn_prime.one_lt.ne)]
     simp only [Finset.sum_singleton, Nat.Coprime, Nat.gcd_one_left, dite_true, Nat.cast_one,
-      one_zpow, unitOfCoprime_one_eq_one, map_one, Units.val_one, one_mul, Nat.div_one, hnN,
+      _root_.one_zpow, unitOfCoprime_one_eq_one, map_one, Units.val_one, one_mul, Nat.div_one, hnN,
       if_pos hdvd]
     rw [Nat.mul_div_mul_right m n hn_prime.pos, Nat.mul_comm n m]
   · rw [(hn_prime.eq_one_or_self_of_dvd _ (Nat.gcd_dvd_right m n)).resolve_right fun h ↦
         hdvd (h ▸ Nat.gcd_dvd_left m n), Nat.divisors_one, Finset.sum_singleton]
     simp only [Nat.Coprime, Nat.gcd_one_left, dite_true, unitOfCoprime_one_eq_one, map_one,
-      Units.val_one, Nat.cast_one, one_zpow, one_mul, Nat.div_one]
+      Units.val_one, Nat.cast_one, _root_.one_zpow, one_mul, Nat.div_one]
     rw [if_neg hdvd, mul_zero, add_zero, Nat.mul_comm n m]
 
 private theorem fourierCoeff_heckeT_n_eq_ppow [NeZero N] (k : ℤ) {p : ℕ} (hp : Nat.Prime p)
@@ -746,7 +746,7 @@ theorem eigenvalue_eq_fourierCoeff_one [NeZero N] (k : ℤ) (n : ℕ+) (hn : Nat
   have : NeZero n.val := ⟨n.pos.ne'⟩
   have h1 := fourierCoeff_heckeT_n_period_one k n.val hn χ hf_char 1
   simp only [Nat.gcd_one_left, Nat.divisors_one, Finset.sum_singleton, Nat.Coprime, dite_true,
-    Nat.cast_one, one_zpow, unitOfCoprime_one_eq_one, map_one, Units.val_one, one_mul,
+    Nat.cast_one, _root_.one_zpow, unitOfCoprime_one_eq_one, map_one, Units.val_one, one_mul,
     Nat.div_one] at h1
   have h_lhs : (qExpansion (1 : ℝ) (heckeT_n k n.val f)).coeff 1 =
       eigenvalue k f hf_eigen.1 n hn := by

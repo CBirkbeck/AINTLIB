@@ -179,7 +179,7 @@ private theorem slash_T_p_lower_eval (k : ℤ) (p : ℕ) (hp : Nat.Prime p)
     push_cast; ring
   have hdenom : UpperHalfPlane.denom (glMap (T_p_lower p hp.pos)) ↑τ = 1 := by
     simp [UpperHalfPlane.denom, glMap, T_p_lower, Matrix.cons_val_one]
-  rw [hσ, ContinuousAlgEquiv.refl_apply, hmob, hdenom, one_zpow, mul_one,
+  rw [hσ, ContinuousAlgEquiv.refl_apply, hmob, hdenom, _root_.one_zpow, mul_one,
     hdet_val, abs_of_pos (Nat.cast_pos.mpr hp.pos)]
   push_cast; ring
 
