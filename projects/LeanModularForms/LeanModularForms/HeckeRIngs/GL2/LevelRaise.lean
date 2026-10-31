@@ -324,7 +324,7 @@ lemma levelRaiseFun_apply (l : ℕ) [NeZero l] (k : ℤ) (f : UpperHalfPlane →
     levelRaiseFun l k f τ = f ((levelRaiseMatrix l) • τ) := by
   change ((l : ℂ) ^ (1 - k)) • ((f ∣[k] levelRaiseMatrix l) τ) = _
   rw [ModularForm.slash_apply, σ_levelRaiseMatrix, ContinuousAlgEquiv.refl_apply,
-    abs_levelRaiseMatrix_det_val, denom_levelRaiseMatrix, one_zpow, mul_one,
+    abs_levelRaiseMatrix_det_val, denom_levelRaiseMatrix, _root_.one_zpow, mul_one,
     smul_eq_mul, Complex.ofReal_natCast, mul_comm (f _), ← mul_assoc,
     ← zpow_add₀ (Nat.cast_ne_zero.mpr (NeZero.ne l))]
   norm_num
