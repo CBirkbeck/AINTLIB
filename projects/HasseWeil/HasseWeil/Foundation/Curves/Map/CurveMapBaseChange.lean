@@ -738,8 +738,7 @@ private theorem tensorCoordRing_algebraMapSubmonoid_le_nonZeroDivisors
   have hinjL : Function.Injective
       (Algebra.TensorProduct.includeLeft :
         C.toAffine.CoordinateRing →ₐ[F] C.toAffine.CoordinateRing ⊗[F] L) :=
-    @Algebra.TensorProduct.includeLeft_injective F F C.toAffine.CoordinateRing L
-      _ _ _ _ _ _ _ _ hflatCR
+    Algebra.TensorProduct.includeLeft_injective (R := F) (S := F)
       (RingHom.injective (algebraMap F L))
   exact map_le_nonZeroDivisors_of_injective
     (M₀' := C.toAffine.CoordinateRing ⊗[F] L)
