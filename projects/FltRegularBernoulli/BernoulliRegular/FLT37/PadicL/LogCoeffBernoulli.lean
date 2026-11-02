@@ -262,8 +262,8 @@ theorem two_le_valuation_natCast_mul_p_sq_mul {i : ℕ} (hi0 : 0 < i) (hip : i <
     Padic.valuation_mul hi_ne hp2_ne]
   have hvi : Padic.valuation (i : ℚ_[p]) = 0 := by
     rw [show (i : ℚ_[p]) = ((i : ℕ) : ℚ_[p]) from rfl, Padic.valuation_natCast]
-    have hpvi0 : padicValNat p i = 0 := by
-      rw [padicValNat.eq_zero_iff]; right; right
+    have hpvi0 : multiplicity p i = 0 := by
+      rw [Nat.multiplicity_eq_zero_iff]; right; right
       exact Nat.not_dvd_of_pos_of_lt hi0 hip
     rw [hpvi0]; rfl
   have hvp2 : Padic.valuation ((p : ℚ_[p]) ^ 2) = 2 := by

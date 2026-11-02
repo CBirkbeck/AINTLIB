@@ -677,11 +677,14 @@ private theorem zetaSys_pow_sub_one_mem_aug (hp2 : p ≠ 2) {n : ℕ} (hn : 1 �
       have hk1 : 1 ≤ k := by
         rw [hk, Nat.one_le_div_iff hppos]; exact Nat.le_of_dvd (by omega) hpa
       have hm1 : 1 ≤ m := by
-        rw [← ham]; exact one_le_padicValNat_of_dvd (by omega) hpa
-      have hvk : padicValNat p k = m - 1 := by rw [hk, padicValNat.div hpa, ham]
+        rw [← ham, Nat.padicValNat_def]; exact one_le_multiplicity_of_dvd (by omega) hpa
+      have hvk : padicValNat p k = m - 1 := by
+        rw [hk, Nat.padicValNat_def, Nat.multiplicity_div hpa, ← Nat.padicValNat_def, ham]
       have hmn : m < n := by
         rw [← ham]
-        have hle : p ^ padicValNat p a ≤ a := Nat.le_of_dvd (by omega) pow_padicValNat_dvd
+        have hle : p ^ padicValNat p a ≤ a := by
+          rw [Nat.padicValNat_def]
+          exact Nat.le_of_dvd (by omega) (pow_multiplicity_dvd ..)
         exact (Nat.pow_lt_pow_iff_right hp.out.one_lt).mp (lt_of_le_of_lt hle ha2)
       -- each factor exponent `e i = k + i·p^{n−1}`: bounds and smaller `v_p`
       have hpsucc : p ^ (n - 1) * p = p ^ n := by rw [← pow_succ]; congr 1; omega
@@ -706,12 +709,13 @@ private theorem zetaSys_pow_sub_one_mem_aug (hp2 : p ≠ 2) {n : ℕ} (hn : 1 �
         rcases Nat.eq_zero_or_pos i with hi0 | hi0
         · subst hi0; simp only [zero_mul, add_zero, hvk]; omega
         · -- `p^m ∣ i·p^{n-1}` but `p^m ∤ k`, so `p^m ∤ e i`
-          rw [← not_le, ← padicValNat_dvd_iff_le (by omega : k + i * p ^ (n - 1) ≠ 0)]
+          rw [← not_le, Nat.padicValNat_def,
+            ← multiplicity_dvd_iff_le (by omega : k + i * p ^ (n - 1) ≠ 0)]
           intro hcontra
           have hdvd2 : p ^ m ∣ i * p ^ (n - 1) :=
             Dvd.dvd.mul_left (pow_dvd_pow p (by omega)) i
           have hdvdk : p ^ m ∣ k := (Nat.dvd_add_right hdvd2).mp (by rwa [add_comm] at hcontra)
-          rw [padicValNat_dvd_iff_le (by omega : k ≠ 0)] at hdvdk; omega
+          rw [multiplicity_dvd_iff_le (by omega : k ≠ 0), ← Nat.padicValNat_def] at hdvdk; omega
       -- the factor units, and `g = ∏ facU i`
       let facU : ℕ → ℂ_[p]ˣ := fun i =>
         if hi : i < p then Units.mk0 _ (he_ne i hi) else 1

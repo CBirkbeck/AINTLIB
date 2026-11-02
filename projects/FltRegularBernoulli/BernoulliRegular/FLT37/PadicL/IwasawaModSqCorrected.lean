@@ -158,7 +158,7 @@ theorem valuation_bernoulliGenOmega_thirtytwo_of_valTwo
   have h37_ne : (37 : ℚ_[37]) ≠ 0 := by norm_num
   have hv37 : Padic.valuation (37 : ℚ_[37]) = 1 := by
     rw [show (37 : ℚ_[37]) = ((37 : ℕ) : ℚ_[37]) from by norm_num, Padic.valuation_natCast,
-      show padicValNat 37 37 = 1 from by rw [padicValNat_self]]; rfl
+      show multiplicity 37 37 = 1 from Nat.multiplicity_self (by norm_num)]; rfl
   have hB_ne : bernoulliGenOmega 37 32 ≠ 0 := by
     intro h0; rw [h0, mul_zero] at h; simp at h
   have hsum : (1 : ℤ) + (bernoulliGenOmega 37 32).valuation = 2 := by

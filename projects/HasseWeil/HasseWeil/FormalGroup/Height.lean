@@ -124,7 +124,7 @@ private theorem ENat.map_padicValNat_mul (p : ℕ) [Fact p.Prime] {a b : ℕ∞}
       have hn : n ≠ 0 := by
         intro h; apply hb; simp [h]
       rw [← Nat.cast_mul, ENat.map_coe, ENat.map_coe, ENat.map_coe,
-        _root_.padicValNat.mul hm hn]
+        Nat.padicValNat_def, Nat.padicValNat_def, Nat.padicValNat_def, Nat.multiplicity_mul hm hn]
       push_cast
       rfl
 

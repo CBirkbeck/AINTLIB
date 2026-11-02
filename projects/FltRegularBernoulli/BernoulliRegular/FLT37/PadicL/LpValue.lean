@@ -83,8 +83,8 @@ theorem padicValRat_bernoulli_thirtytwo :
       kellner_at_zero_not_dvd
         ((padicValInt_dvd_iff (p := 37) 2 (bernoulli 32).num).mpr (Or.inr hle))
     omega
-  have hpvn : padicValNat 37 (bernoulli 32).den = 0 := by
-    rw [bernoulli_thirtytwo_den_eq]; exact padicValNat.eq_zero_of_not_dvd (by decide)
+  have hpvn : multiplicity 37 (bernoulli 32).den = 0 := by
+    rw [bernoulli_thirtytwo_den_eq]; exact multiplicity_eq_zero_of_not_dvd (by decide)
   rw [padicValRat_def, hpvi, hpvn]; norm_num
 
 /-- **`v₃₇(B₃₂ / 32) = 1`** (proved): the sharp first-order valuation, the

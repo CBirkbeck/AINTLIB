@@ -807,9 +807,9 @@ private theorem norm_natCast_inv_le {n : ℕ} (hn : 1 ≤ n) :
   have hnK : ((n : K)) = algebraMap ℚ_[p] K (n : ℚ_[p]) := (map_natCast _ n).symm
   have hnorm : ‖((n : K))⁻¹‖ = ((p ^ padicValNat p n : ℕ) : ℝ) := by
     rw [norm_inv, hnK, norm_algebraMap', Padic.norm_eq_zpow_neg_valuation hn0,
-      Padic.valuation_natCast, ← zpow_neg, neg_neg, zpow_natCast]
+      Padic.valuation_natCast, ← zpow_neg, neg_neg, zpow_natCast, Nat.padicValNat_def]
     push_cast; ring
-  rw [hnorm, ← Nat.factorization_def n hp.out]
+  rw [hnorm, Nat.padicValNat_def, ← Nat.factorization_def n hp.out]
   exact_mod_cast Nat.ordProj_le p (by omega)
 
 omit [IsUltrametricDist K] [CompleteSpace K] [CharZero K] in

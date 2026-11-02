@@ -339,7 +339,7 @@ theorem valuation_secondOrderFaulhaberTerm_thirtytwo :
     rw [Padic.valuation_ratCast, padicValRat_def, hnum30, hden30]
     have h1 : padicValInt 37 8615841276005 = 0 := by
       rw [padicValInt]; exact padicValNat.eq_zero_of_not_dvd (by decide)
-    have h2 : padicValNat 37 14322 = 0 := padicValNat.eq_zero_of_not_dvd (by decide)
+    have h2 : multiplicity 37 14322 = 0 := multiplicity_eq_zero_of_not_dvd (by decide)
     rw [h1, h2]; norm_num
   have hv_choose : Padic.valuation ((Nat.choose 32 2 : ℕ) : ℚ_[37]) = 0 := by
     rw [show (Nat.choose 32 2 : ℕ) = 496 from rfl, Padic.valuation_natCast,
