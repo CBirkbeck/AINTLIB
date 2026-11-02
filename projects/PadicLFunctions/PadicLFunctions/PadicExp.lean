@@ -59,8 +59,8 @@ theorem norm_factorial_le {n : ℕ} (hn : 1 ≤ n) :
   rw [Padic.norm_eq_zpow_neg_valuation hf0, Padic.valuation_natCast,
     ← zpow_natCast _ (p - 1), ← zpow_mul]
   refine zpow_le_zpow_right₀ (by exact_mod_cast hp.out.one_lt.le) ?_
-  have hlt := sub_one_mul_padicValNat_factorial_lt_of_ne_zero p (by omega : n ≠ 0)
-  have hcast : ((p - 1 : ℕ) : ℤ) * (padicValNat p n.factorial : ℤ) < (n : ℤ) := by
+  have hlt := sub_one_mul_multiplicity_factorial_lt_of_ne_zero p (by omega : n ≠ 0)
+  have hcast : ((p - 1 : ℕ) : ℤ) * (multiplicity p n.factorial : ℤ) < (n : ℤ) := by
     exact_mod_cast hlt
   linarith [hcast]
 
@@ -321,7 +321,9 @@ theorem sub_one_mul_padicValNat_succ_le (n : ℕ) :
   · rw [show p - 1 = 0 by omega, Nat.zero_mul]
     exact Nat.zero_le n
   · set v : ℕ := padicValNat p (n + 1)
-    have hle : p ^ v ≤ n + 1 := Nat.le_of_dvd (Nat.succ_pos n) pow_padicValNat_dvd
+    have hle : p ^ v ≤ n + 1 := Nat.le_of_dvd (Nat.succ_pos n) <| by
+      rw [show v = multiplicity p (n + 1) from Nat.padicValNat_def]
+      exact pow_multiplicity_dvd ..
     have hbern : 1 + (v : ℤ) * ((p : ℤ) - 1) ≤ (p : ℤ) ^ v := by
       have h2 : (-2 : ℤ) ≤ (p : ℤ) - 1 := by omega
       simpa using one_add_mul_le_pow h2 v
@@ -354,7 +356,7 @@ theorem norm_succ_inv_smul_pow_le (y : L) (n : ℕ) :
     rw [show ((n : ℚ_[p]) + 1) = ((n + 1 : ℕ) : ℚ_[p]) by push_cast; ring,
       Padic.norm_eq_zpow_neg_valuation
         (Nat.cast_ne_zero.2 (Nat.succ_ne_zero n)),
-      Padic.valuation_natCast]
+      Padic.valuation_natCast, Nat.padicValNat_def]
   have hfac : (‖((n : ℚ_[p]) + 1)‖ ^ (p - 1))⁻¹ ≤ (p : ℝ) ^ n := by
     rw [hval, ← zpow_natCast _ (p - 1), ← zpow_mul, ← zpow_neg,
       ← zpow_natCast (p : ℝ) n]
@@ -866,7 +868,7 @@ theorem norm_natCast_inv_pow_le (n : ℕ) :
     exact zero_le_one
   have hval : ‖(n : ℚ_[p])‖ = (p : ℝ) ^ (-(padicValNat p n : ℤ)) := by
     rw [Padic.norm_eq_zpow_neg_valuation (Nat.cast_ne_zero.2 (by omega : n ≠ 0)),
-      Padic.valuation_natCast]
+      Padic.valuation_natCast, Nat.padicValNat_def]
   rw [hval, ← zpow_natCast _ (p - 1), ← zpow_mul, ← zpow_neg, ← zpow_natCast (p : ℝ) (n - 1)]
   refine zpow_le_zpow_right₀ (by exact_mod_cast hp.out.one_lt.le) ?_
   have hkey : (p - 1) * padicValNat p ((n - 1) + 1) ≤ n - 1 :=

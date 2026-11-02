@@ -107,7 +107,7 @@ This is the precise factorial-`37` obstruction: at degree `68` the factorial `d!
 theorem padicValNat_thirtyseven_factorial_sixtyeight :
     padicValNat 37 (Nat.factorial 68) = 1 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  rw [padicValNat_factorial (b := 2) (by norm_num [Nat.log])]
+  rw [Nat.padicValNat_def, multiplicity_factorial (b := 2) (by norm_num [Nat.log])]
   decide
 
 /-- **`37 ∣ 68!`** — one factor of `37` (from `37 ∈ {1,…,68}`). -/
@@ -595,9 +595,10 @@ theorem factorial_div_mod37_eq_zero (n : ℕ) (hn1 : 1 ≤ n) (hn : n ≤ 68) (h
   haveI : Fact (Nat.Prime 37) := ⟨by norm_num⟩
   have hn37 : ¬ (37 ∣ n) := by
     intro h; obtain ⟨c, hc⟩ := h; interval_cases n <;> omega
-  apply dvd_of_one_le_padicValNat
-  rw [padicValNat.div_of_dvd hdvd, padicValNat_thirtyseven_factorial_sixtyeight]
-  have hvn : padicValNat 37 n = 0 := by rw [padicValNat.eq_zero_iff]; right; right; exact hn37
+  apply dvd_of_one_le_multiplicity
+  rw [Nat.multiplicity_div_of_dvd hdvd, ← Nat.padicValNat_def (n := Nat.factorial 68),
+    padicValNat_thirtyseven_factorial_sixtyeight]
+  have hvn : multiplicity 37 n = 0 := multiplicity_eq_zero_of_not_dvd hn37
   omega
 
 /-- **The Frobenius-power Artin-Hasse coefficient** `ahCoeff37`: the `λ^{68}` coefficient of

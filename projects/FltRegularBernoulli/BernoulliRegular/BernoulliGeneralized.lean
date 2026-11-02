@@ -350,14 +350,15 @@ Proof outline:
 hence does not divide `n.choose k` for any `k`. -/
 lemma padicValNat_choose_eq_zero_of_lt {p : ℕ} [hp : Fact p.Prime]
     {n k : ℕ} (h : n < p) : padicValNat p (n.choose k) = 0 := by
+  rw [Nat.padicValNat_def]
   by_cases hle : k ≤ n
   · have hfac : ¬ p ∣ n.choose k := fun hdvd ↦ by
       have h_fac : n.choose k ∣ n.factorial :=
         ⟨k.factorial * (n - k).factorial, by
           rw [← mul_assoc, Nat.choose_mul_factorial_mul_factorial hle]⟩
       exact Nat.not_lt.mpr ((Nat.Prime.dvd_factorial hp.out).mp (dvd_trans hdvd h_fac)) h
-    exact padicValNat.eq_zero_iff.mpr (Or.inr (Or.inr hfac))
-  · rw [Nat.choose_eq_zero_of_lt (by omega), padicValNat_zero_right]
+    exact Nat.multiplicity_eq_zero_iff.mpr (Or.inr (Or.inr hfac))
+  · rw [Nat.choose_eq_zero_of_lt (by omega), multiplicity_zero_right]
 
 /-- Bernoulli numbers below the boundary `p - 1` are `p`-adic integers.
 

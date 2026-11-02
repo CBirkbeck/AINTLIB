@@ -214,7 +214,7 @@ degree-`68` — needs no factorial-`37` cancellation: `32!` is invertible mod `3
 theorem padicValNat_thirtyseven_factorial_thirtytwo :
     padicValNat 37 (Nat.factorial 32) = 0 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  rw [padicValNat.eq_zero_iff]
+  rw [Nat.padicValNat_def, Nat.multiplicity_eq_zero_iff]
   right; right
   intro hdvd
   exact absurd ((Nat.Prime.dvd_factorial (by norm_num)).mp hdvd) (by norm_num)

@@ -581,7 +581,7 @@ private theorem rescale_exp_sub_one_coeff_rMultiple
   have hr_ne_zero : r ≠ 0 := hr_prime.ne_zero
   have hfact_ne : n.factorial ≠ 0 := Nat.factorial_ne_zero n
   have hfact : r ^ v * m = n.factorial := by
-    simp [v, m, Nat.pow_padicValNat_mul_divMaxPow]
+    simp [v, m, Nat.padicValNat_def]
   have hm_ne : m ≠ 0 := by
     intro hm
     have : n.factorial = 0 := by simpa [hm] using hfact.symm
@@ -600,7 +600,7 @@ private theorem rescale_exp_sub_one_coeff_rMultiple
       Rat.den_dvd ((r ^ (n - 1 - v) : ℕ) : ℤ) (m : ℤ)
     exact Int.natCast_dvd_natCast.mp hden_dvd_int
   · have hvlt : v < n := by
-      simpa [v] using padicValNat_factorial_lt_of_ne_zero r (Nat.ne_of_gt hn)
+      simpa [v, Nat.padicValNat_def] using multiplicity_factorial_lt_of_ne_zero r (Nat.ne_of_gt hn)
     have hvle : v ≤ n - 1 := Nat.le_sub_one_of_lt hvlt
     have hnv : n - 1 = (n - 1 - v) + v :=
       (Nat.sub_add_cancel hvle).symm

@@ -53,8 +53,9 @@ theorem padicValNat_factorial_le (p : ℕ) [hp : Fact p.Prime] {n : ℕ} (hn : 1
     have : (1 : ℝ) < (p : ℝ) := by exact_mod_cast hp.out.one_lt
     linarith
   -- Mathlib strict inequality in ℕ: `(p - 1) * v_p(n!) < n` for `n ≠ 0`.
-  have hlt : (p - 1) * padicValNat p n.factorial < n :=
-    sub_one_mul_padicValNat_factorial_lt_of_ne_zero p (by omega)
+  have hlt : (p - 1) * padicValNat p n.factorial < n := by
+    rw [Nat.padicValNat_def]
+    exact sub_one_mul_multiplicity_factorial_lt_of_ne_zero p (by omega)
   -- In ℕ, strict `<` gives `≤ n - 1`; cast to ℝ and divide by `(p - 1) > 0`.
   have hle_nat : (p - 1) * padicValNat p n.factorial ≤ n - 1 := by omega
   rw [le_div_iff₀ hp1_posR, mul_comm]
@@ -72,7 +73,7 @@ theorem padicValNat_factorial_div_le (p : ℕ) [hp : Fact p.Prime] (n : ℕ) :
     linarith
   rcases Nat.eq_zero_or_pos n with hn0 | hn1
   · subst hn0
-    simp
+    simp [Nat.padicValNat_def]
   · refine (padicValNat_factorial_le p (n := n) hn1).trans ?_
     gcongr
     linarith
