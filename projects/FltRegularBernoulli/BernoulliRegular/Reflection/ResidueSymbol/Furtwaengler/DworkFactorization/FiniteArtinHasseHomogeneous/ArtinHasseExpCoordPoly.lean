@@ -57,13 +57,13 @@ theorem finiteArtinHasseExpCoordPoly_coeff_mem_Q_pow
   intro n _hn
   by_cases hnd : n + 1 = d
   · subst d
-    simpa [Polynomial.coeff_monomial] using
+    simpa [Polynomial.coeff_monomial_apply] using
       dworkCoeffArtinHasseAtTo_mem_Q_pow F.toConcreteStickelbergerSetup hx N (n + 1)
-  · simp [Polynomial.coeff_monomial, hnd]
+  · simp [Polynomial.coeff_monomial_apply, hnd]
 
 theorem finiteArtinHasseExpCoordPoly_coeff_zero (N : ℕ) (x : 𝓞 R') :
     (F.finiteArtinHasseExpCoordPoly N x).coeff 0 = 0 := by
-  simp [finiteArtinHasseExpCoordPoly, Polynomial.coeff_monomial]
+  simp [finiteArtinHasseExpCoordPoly, Polynomial.coeff_monomial_apply]
 
 theorem finiteArtinHasseExpCoordPoly_coeff_eq_of_pos_le
     (N d : ℕ) (x : 𝓞 R') (hd0 : d ≠ 0) (hdN : d ≤ N) :
@@ -85,7 +85,7 @@ theorem finiteArtinHasseExpCoordPoly_coeff_eq_of_pos_le
         intro n _hn hne
         have hne_degree : n + 1 ≠ d := fun h =>
           hne (by lia)
-        simp [Polynomial.coeff_monomial, hne_degree]
+        simp [Polynomial.coeff_monomial_apply, hne_degree]
     _ = dworkCoeffArtinHasseAtTo F.toConcreteStickelbergerSetup x N d := by
         simp [Nat.sub_add_cancel hdpos]
 
@@ -275,7 +275,7 @@ theorem quotient_mk_finiteArtinHasseExpCoordPoly_coeff_eq
         intro n hn
         have hnlt : n < N := Finset.mem_range.mp hn
         have hne_degree : n + 1 ≠ d := by lia
-        simp [Polynomial.coeff_monomial, hne_degree]
+        simp [Polynomial.coeff_monomial_apply, hne_degree]
       have hxpow : x ^ d ∈ F.Q ^ (N + 1) :=
         Ideal.pow_le_pow_right hNd (Ideal.pow_mem_pow hx d)
       have hmk_xpow : Ideal.Quotient.mk QN (x ^ d) = (0 : A) :=

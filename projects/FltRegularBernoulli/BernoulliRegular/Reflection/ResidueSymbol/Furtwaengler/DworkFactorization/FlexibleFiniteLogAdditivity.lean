@@ -90,7 +90,7 @@ theorem finiteLogAdditivityNumerator_mem_Q_pow {x y : 𝓞 R'}
 omit [NumberField R'] in
 theorem finiteLogProductArgPoly_coeff_zero (x y : 𝓞 R') :
     (finiteLogProductArgPoly x y).coeff 0 = 0 := by
-  simp [finiteLogProductArgPoly, Polynomial.coeff_monomial]
+  simp [finiteLogProductArgPoly, Polynomial.coeff_monomial_apply]
 
 omit [NumberField R'] in
 theorem finiteLogProductArgPoly_map_coeff_zero (x y : 𝓞 R') :

@@ -480,7 +480,7 @@ private theorem ofEquation_v_ne_zero : v ≠ 0 := by
     Polynomial.C V.toAffine.a₄ * Polynomial.X + Polynomial.C V.toAffine.a₆ with hq_def
   have hq_ne : q ≠ 0 := by
     intro h
-    have h3 := congrArg (fun r ↦ Polynomial.coeff r 3) h
+    have h3 := congrArg (fun r ↦ AddMonoidAlgebra.coeff r 3) h
     simp [hq_def, Polynomial.coeff_X_pow] at h3
   have hq_eval : Polynomial.aeval u q = 0 := by
     rw [hq_def]

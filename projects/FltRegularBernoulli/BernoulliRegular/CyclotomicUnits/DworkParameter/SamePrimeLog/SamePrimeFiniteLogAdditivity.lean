@@ -518,16 +518,16 @@ theorem samePrimeFiniteArtinHasseExpCoordPoly_coeff_mem_lambdaIdeal_pow
   intro n _hn
   by_cases hnd : n + 1 = d
   · subst d
-    simpa [Polynomial.coeff_monomial] using
+    simpa [Polynomial.coeff_monomial_apply] using
       (((lambdaIdeal p K) ^ (n + 1)).mul_mem_left _
         (Ideal.pow_mem_pow hx (n + 1)))
-  · simp [Polynomial.coeff_monomial, hnd]
+  · simp [Polynomial.coeff_monomial_apply, hnd]
 
 theorem samePrimeFiniteArtinHasseExpCoordPoly_coeff_zero
     (N : ℕ) (x : ValuedIntegerRing p K) :
     (samePrimeFiniteArtinHasseExpCoordPoly (p := p) (K := K) N x).coeff 0 = 0 := by
   classical
-  simp [samePrimeFiniteArtinHasseExpCoordPoly, Polynomial.coeff_monomial]
+  simp [samePrimeFiniteArtinHasseExpCoordPoly, Polynomial.coeff_monomial_apply]
 
 theorem samePrimeFiniteArtinHasseExpCoordPoly_coeff_eq_of_pos_le
     (N d : ℕ) (x : ValuedIntegerRing p K) (hd0 : d ≠ 0) (hdN : d ≤ N) :
@@ -553,7 +553,7 @@ theorem samePrimeFiniteArtinHasseExpCoordPoly_coeff_eq_of_pos_le
             intro hbd
             apply hbne
             omega
-          simp [Polynomial.coeff_monomial, hbne']
+          simp [Polynomial.coeff_monomial_apply, hbne']
         · intro hnot
           exact False.elim (hnot hdmem)
     _ =
@@ -571,7 +571,7 @@ theorem samePrimeFiniteArtinHasseExpCoordPoly_coeff_eq_zero_of_lt
     by
       have hnlt : n < N := Finset.mem_range.mp hn
       have hne : n + 1 ≠ d := by omega
-      simp [Polynomial.coeff_monomial, hne]
+      simp [Polynomial.coeff_monomial_apply, hne]
 
 theorem samePrimeFiniteArtinHasseExpCoordPoly_pow_coeff_mem_lambdaIdeal_pow
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)

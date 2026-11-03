@@ -20,6 +20,7 @@ variable (u : (𝓞 K)ˣ)
   (hcong : (hζ.toInteger - 1 : 𝓞 K) ^ p ∣ (↑u : 𝓞 K) - 1) (hu : ∀ v : K, v ^ p ≠ u)
 
 open Polynomial
+open AddMonoidAlgebra (coeff)
 
 include hcong hp in
 lemma zeta_sub_one_pow_dvd_poly [IsCyclotomicExtension {p} ℚ K] :
@@ -103,7 +104,7 @@ lemma map_poly : (poly hp hζ u hcong).map (algebraMap (𝓞 K) K) =
       · rfl
   apply mul_right_injective₀ (pow_ne_zero p (hζ.sub_one_ne_zero hpri.out.one_lt))
   simp only [coeff_map, one_div, coeff_add, this, mul_add]
-  simp_rw [← smul_eq_mul (α := K), ← coeff_smul]
+  simp_rw [← smul_eq_mul (α := K), ← AddMonoidAlgebra.coeff_smul_apply]
   rw [smul_C, smul_eq_mul, ← _root_.smul_pow, ← mul_div_assoc, mul_div_cancel_left₀, smul_sub,
     smul_C, smul_eq_mul, mul_inv_cancel₀, map_one, Algebra.smul_def, ← C_eq_algebraMap, map_sub,
     map_one]

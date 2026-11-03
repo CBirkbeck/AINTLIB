@@ -1425,7 +1425,7 @@ The substantive content — the `OmegaThreeBasisHolds` theorem
     the {1, Y} basis Y⁰ coefficient (sympy-extracted, deg 13 in X). -/
 noncomputable def omega_3_X_coeff_char_three (W : WeierstrassCurve K) :
     Polynomial K :=
-  Polynomial.coeff (W.ω 3) 0
+  AddMonoidAlgebra.coeff (W.ω 3) 0
 
 /-- **Raw Y¹ coefficient of `W.ω 3`** in `K[X]`: the Y-degree-1 term
     of the bivariate polynomial `W.ω 3 ∈ K[X][Y]`. After Weierstrass
@@ -1434,7 +1434,7 @@ noncomputable def omega_3_X_coeff_char_three (W : WeierstrassCurve K) :
     starting with `2·X¹²`). -/
 noncomputable def omega_3_Y_coeff_char_three (W : WeierstrassCurve K) :
     Polynomial K :=
-  Polynomial.coeff (W.ω 3) 1
+  AddMonoidAlgebra.coeff (W.ω 3) 1
 
 /-! ### ω_3 reduced coefficients (Weierstrass-reduced via y_gen^k helpers)
 
@@ -1458,11 +1458,11 @@ noncomputable def omega_3_X_coeff_reduced_char_three
     (W : WeierstrassCurve K) : Polynomial K :=
   let ψ : Polynomial K := Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃
   let c : Polynomial K := cubic_x W
-  Polynomial.coeff (W.ω 3) 0 +
-  c * Polynomial.coeff (W.ω 3) 2 -
-  ψ * c * Polynomial.coeff (W.ω 3) 3 +
-  c * (ψ ^ 2 + c) * Polynomial.coeff (W.ω 3) 4 -
-  ψ * c * (ψ ^ 2 + 2 * c) * Polynomial.coeff (W.ω 3) 5
+  AddMonoidAlgebra.coeff (W.ω 3) 0 +
+  c * AddMonoidAlgebra.coeff (W.ω 3) 2 -
+  ψ * c * AddMonoidAlgebra.coeff (W.ω 3) 3 +
+  c * (ψ ^ 2 + c) * AddMonoidAlgebra.coeff (W.ω 3) 4 -
+  ψ * c * (ψ ^ 2 + 2 * c) * AddMonoidAlgebra.coeff (W.ω 3) 5
 
 /-- **Reduced Y¹ coefficient of ω_3 in char 3** (Weierstrass-reduced).
     Sums Y¹ contributions from all Y-degrees 0..5 of W.ω 3. -/
@@ -1470,11 +1470,11 @@ noncomputable def omega_3_Y_coeff_reduced_char_three
     (W : WeierstrassCurve K) : Polynomial K :=
   let ψ : Polynomial K := Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃
   let c : Polynomial K := cubic_x W
-  Polynomial.coeff (W.ω 3) 1 -
-  ψ * Polynomial.coeff (W.ω 3) 2 +
-  (ψ ^ 2 + c) * Polynomial.coeff (W.ω 3) 3 -
-  ψ * (ψ ^ 2 + 2 * c) * Polynomial.coeff (W.ω 3) 4 +
-  (ψ ^ 4 + 3 * ψ ^ 2 * c + c ^ 2) * Polynomial.coeff (W.ω 3) 5
+  AddMonoidAlgebra.coeff (W.ω 3) 1 -
+  ψ * AddMonoidAlgebra.coeff (W.ω 3) 2 +
+  (ψ ^ 2 + c) * AddMonoidAlgebra.coeff (W.ω 3) 3 -
+  ψ * (ψ ^ 2 + 2 * c) * AddMonoidAlgebra.coeff (W.ω 3) 4 +
+  (ψ ^ 4 + 3 * ψ ^ 2 * c + c ^ 2) * AddMonoidAlgebra.coeff (W.ω 3) 5
 
 /-- **Reduced basis decomposition Prop (q=3 char-3)**: K(E)-level
     statement that `ω_ff W 3` equals `aeval x_gen A + aeval x_gen B · y_gen`
@@ -2399,12 +2399,12 @@ theorem omega_ff_three_decomp_via_nat_degree_bound
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (h_deg : (W.ω 3).natDegree ≤ 5) :
     ω_ff W 3 =
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 0) +
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 1) * y_gen W +
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 2) * (y_gen W) ^ 2 +
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 3) * (y_gen W) ^ 3 +
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 4) * (y_gen W) ^ 4 +
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 5) * (y_gen W) ^ 5 := by
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 0) +
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 1) * y_gen W +
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 2) * (y_gen W) ^ 2 +
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 3) * (y_gen W) ^ 3 +
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 4) * (y_gen W) ^ 4 +
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 5) * (y_gen W) ^ 5 := by
   -- Use Polynomial.as_sum_range_C_mul_X_pow' to expand W.ω 3 as a sum
   have h_lt : (W.ω 3).natDegree < 6 := by omega
   have h_decomp_poly := (W.ω 3).as_sum_range_C_mul_X_pow' h_lt
@@ -2455,25 +2455,25 @@ omit [Fintype K] [DecidableEq K] in
 theorem omega_ff_three_basis_decomp_via_witness_char_three
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [CharP K 3]
     (h_decomp : ω_ff W 3 =
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 0) +
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 1) * y_gen W +
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 2) * (y_gen W) ^ 2 +
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 3) * (y_gen W) ^ 3 +
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 4) * (y_gen W) ^ 4 +
-      Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 5) * (y_gen W) ^ 5) :
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 0) +
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 1) * y_gen W +
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 2) * (y_gen W) ^ 2 +
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 3) * (y_gen W) ^ 3 +
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 4) * (y_gen W) ^ 4 +
+      Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 5) * (y_gen W) ^ 5) :
     OmegaThreeBasisHoldsReduced W := by
   simp only [OmegaThreeBasisHoldsReduced, omega_3_X_coeff_reduced_char_three,
     omega_3_Y_coeff_reduced_char_three]
   rw [h_decomp]
   -- Use the Y-degree contribution helpers (multiplied form) for k=2,3,4,5.
   have h_sq_mul := y_gen_sq_mul_basis_form_char_three W
-    (Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 2))
+    (Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 2))
   have h_cube_mul := y_gen_cubed_mul_basis_form_char_three W
-    (Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 3))
+    (Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 3))
   have h_quartic_mul := y_gen_quartic_mul_basis_form_char_three W
-    (Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 4))
+    (Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 4))
   have h_quintic_mul := y_gen_quintic_mul_basis_form_char_three W
-    (Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 5))
+    (Polynomial.aeval (x_gen W) (AddMonoidAlgebra.coeff (W.ω 3) 5))
   rw [h_sq_mul, h_cube_mul, h_quartic_mul, h_quintic_mul]
   -- Now goal: sums of {1, y_gen} basis terms = X_reduced + Y_reduced · y_gen
   -- after aeval distributes.
@@ -2737,7 +2737,7 @@ theorem ψ_2_ne_zero_of_char_three {K' : Type*} [CommRing K'] [Nontrivial K'] [C
   simp only [WeierstrassCurve.Affine.polynomialY]
   intro h
   -- Take coeff at degree 1: C(C 2) = 0, so C 2 = 0, so 2 = 0 — contradicting char 3.
-  have h_coeff_1 := congrArg (Polynomial.coeff · 1) h
+  have h_coeff_1 := congrArg (AddMonoidAlgebra.coeff · 1) h
   simp only [Polynomial.coeff_zero, Polynomial.coeff_add, Polynomial.coeff_C_mul,
     Polynomial.coeff_X_one, Polynomial.coeff_C, mul_one] at h_coeff_1
   -- After simp: C(2 : K') = 0 (or close to it)
@@ -2887,10 +2887,10 @@ private theorem a₁X_plus_a₃_polynomial_ne_zero_char_two
       Polynomial K) ≠ 0 := by
   intro h
   have h_a1 : W.toAffine.a₁ = 0 := by
-    have := congr_arg (Polynomial.coeff · 1) h
+    have := congr_arg (AddMonoidAlgebra.coeff · 1) h
     simpa using this
   have h_a3 : W.toAffine.a₃ = 0 := by
-    have := congr_arg (Polynomial.coeff · 0) h
+    have := congr_arg (AddMonoidAlgebra.coeff · 0) h
     simpa using this
   have h_delta : W.toAffine.Δ = 0 := by
     rw [WeierstrassCurve.Δ_of_char_two, h_a1, h_a3]; ring

@@ -144,7 +144,7 @@ theorem squarefree_e3RelMul (h3 : IsUnit (3 : A)) :
       rw [ht, map_mul, hX1ev, zero_mul]
     rw [hevS] at hev0
     have h32 : (3 : A) = 0 := by
-      have h := congrArg (fun g => Polynomial.coeff g 2) hev0
+      have h := congrArg (fun g => AddMonoidAlgebra.coeff g 2) hev0
       simpa using h
     exact h3ne h32
   · -- case `r ∣ 2X₀+X₁`: with `r ∣ X₀+X₁` get `r ∣ X₀`, so `X₀ ∣ f`; but `f(0,X) = X³`

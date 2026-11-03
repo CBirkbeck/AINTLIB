@@ -768,7 +768,7 @@ theorem x_gen_cubic_ne_zero :
     exact h
   -- Basis independence forces the monic cubic coordinate to vanish.
   have hp0 : p = 0 := (Affine.CoordinateRing.smul_basis_eq_zero hG).1
-  have h3 := congrArg (fun r ↦ Polynomial.coeff r 3) hp0
+  have h3 := congrArg (fun r ↦ AddMonoidAlgebra.coeff r 3) hp0
   simp [hp_def, Polynomial.coeff_X_pow] at h3
 
 /-- **Chord-branch nonvanishing of the line intercept**: if `α*x ≠ β*x`, then

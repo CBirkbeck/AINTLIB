@@ -277,9 +277,9 @@ private theorem cubic_coeff_eq {a₂ a₄ a₆ b₂ b₄ b₆ : R}
         Polynomial.C b₄ * Polynomial.X + Polynomial.C b₆) :
     a₂ = b₂ ∧ a₄ = b₄ ∧ a₆ = b₆ := by
   refine ⟨?_, ?_, ?_⟩
-  · simpa using congrArg (fun q => Polynomial.coeff q 2) h
-  · simpa using congrArg (fun q => Polynomial.coeff q 1) h
-  · simpa using congrArg (fun q => Polynomial.coeff q 0) h
+  · simpa using congrArg (fun q => AddMonoidAlgebra.coeff q 2) h
+  · simpa using congrArg (fun q => AddMonoidAlgebra.coeff q 1) h
+  · simpa using congrArg (fun q => AddMonoidAlgebra.coeff q 0) h
 
 /-- **(T-G3a-SUB2c)** Over an algebraically closed field a monic cubic splits, with
 Vieta's identities: there are roots `e₁ e₂ e₃` with `a₂ = −(e₁+e₂+e₃)`,
