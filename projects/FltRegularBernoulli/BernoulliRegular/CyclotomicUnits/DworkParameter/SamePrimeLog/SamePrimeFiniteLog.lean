@@ -278,7 +278,7 @@ theorem samePrimeFiniteLogProductArgPoly_coeff_mem_lambdaIdeal_pow
       (lambdaIdeal p K) ^ d := by
   by_cases h1 : d = 1
   · subst d
-    simpa [samePrimeFiniteLogProductArgPoly, Polynomial.coeff_monomial] using
+    simpa [samePrimeFiniteLogProductArgPoly, Polynomial.coeff_monomial_apply] using
       (lambdaIdeal p K).add_mem hx hy
   by_cases h2 : d = 2
   · subst d
@@ -286,10 +286,10 @@ theorem samePrimeFiniteLogProductArgPoly_coeff_mem_lambdaIdeal_pow
       have hmul : x * y ∈ lambdaIdeal p K * lambdaIdeal p K :=
         Ideal.mul_mem_mul hx hy
       simpa [pow_two] using hmul
-    simpa [samePrimeFiniteLogProductArgPoly, Polynomial.coeff_monomial] using hxy
+    simpa [samePrimeFiniteLogProductArgPoly, Polynomial.coeff_monomial_apply] using hxy
   have hne1 : 1 ≠ d := fun h => h1 h.symm
   have hne2 : 2 ≠ d := fun h => h2 h.symm
-  simp [samePrimeFiniteLogProductArgPoly, Polynomial.coeff_monomial, hne1, hne2]
+  simp [samePrimeFiniteLogProductArgPoly, Polynomial.coeff_monomial_apply, hne1, hne2]
 
 theorem samePrimeFiniteLogProductArgPoly_pow_coeff_mem_lambdaIdeal_pow
     {x y : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
@@ -445,7 +445,7 @@ theorem samePrimeFiniteLogAdditivityNumerator_mem_lambdaIdeal_pow
 theorem samePrimeFiniteLogProductArgPoly_coeff_zero
     (x y : ValuedIntegerRing p K) :
     (samePrimeFiniteLogProductArgPoly (p := p) (K := K) x y).coeff 0 = 0 := by
-  simp [samePrimeFiniteLogProductArgPoly, Polynomial.coeff_monomial]
+  simp [samePrimeFiniteLogProductArgPoly, Polynomial.coeff_monomial_apply]
 
 theorem samePrimeFiniteLogProductArgPoly_map_coeff_zero
     (x y : ValuedIntegerRing p K) :

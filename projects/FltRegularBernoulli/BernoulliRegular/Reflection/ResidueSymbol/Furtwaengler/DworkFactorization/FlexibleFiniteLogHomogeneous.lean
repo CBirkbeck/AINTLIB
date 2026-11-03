@@ -62,18 +62,18 @@ theorem finiteLogProductArgPoly_coeff_mem_Q_pow {x y : 𝓞 R'}
     (finiteLogProductArgPoly x y).coeff d ∈ F.Q ^ d := by
   by_cases h1 : d = 1
   · subst d
-    simpa [finiteLogProductArgPoly, Polynomial.coeff_monomial] using F.Q.add_mem hx hy
+    simpa [finiteLogProductArgPoly, Polynomial.coeff_monomial_apply] using F.Q.add_mem hx hy
   by_cases h2 : d = 2
   · subst d
     have hxy : x * y ∈ F.Q ^ 2 := by
       have hmul : x * y ∈ F.Q * F.Q := Ideal.mul_mem_mul hx hy
       simpa [pow_two] using hmul
-    simpa [finiteLogProductArgPoly, Polynomial.coeff_monomial] using hxy
+    simpa [finiteLogProductArgPoly, Polynomial.coeff_monomial_apply] using hxy
   have hne1 : 1 ≠ d := fun h =>
     h1 h.symm
   have hne2 : 2 ≠ d := fun h =>
     h2 h.symm
-  simp [finiteLogProductArgPoly, Polynomial.coeff_monomial, hne1, hne2]
+  simp [finiteLogProductArgPoly, Polynomial.coeff_monomial_apply, hne1, hne2]
 
 /-- Every homogeneous coefficient of
 `(T*x + T*y + T^2*(x*y))^n` has at least its formal total degree as `Q`-adic

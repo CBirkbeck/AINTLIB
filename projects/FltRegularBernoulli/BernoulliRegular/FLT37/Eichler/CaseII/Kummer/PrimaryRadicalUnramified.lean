@@ -39,6 +39,7 @@ This is the non-unit generalisation of flt-regular `KummersLemma.separable_poly_
 
 open scoped NumberField
 open Polynomial
+open AddMonoidAlgebra (coeff)
 
 namespace BernoulliRegular.FLT37.Eichler.NonUnitKummer
 
@@ -131,7 +132,7 @@ lemma map_poly : (poly hp hζ a hcong).map (algebraMap (𝓞 K) K) =
       · rfl
   apply mul_right_injective₀ (pow_ne_zero p (hζ.sub_one_ne_zero hpri.out.one_lt))
   simp only [coeff_map, one_div, coeff_add, this, mul_add]
-  simp_rw [← smul_eq_mul (α := K), ← coeff_smul]
+  simp_rw [← smul_eq_mul (α := K), ← AddMonoidAlgebra.coeff_smul_apply]
   rw [smul_C, smul_eq_mul, ← _root_.smul_pow, ← mul_div_assoc, mul_div_cancel_left₀, smul_sub,
     smul_C, smul_eq_mul, mul_inv_cancel₀, map_one, Algebra.smul_def, ← C_eq_algebraMap, map_sub,
     map_one]

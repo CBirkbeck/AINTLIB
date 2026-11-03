@@ -532,7 +532,7 @@ theorem map_coactionCharpoly (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ)
 theorem coactionCharpoly_coeff_mem (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ) (f : B)
     (k : ℕ) : (coactionCharpoly R A ρ f).coeff k ∈ coinvariants ρ := by
   simpa [Polynomial.coeff_map, mem_coinvariants] using
-    congrArg (fun q => Polynomial.coeff q k) (map_coactionCharpoly R A ρ hρ f)
+    congrArg (fun q => AddMonoidAlgebra.coeff q k) (map_coactionCharpoly R A ρ hρ f)
 
 /-- The multiplication-matrix map, packaged as a ring homomorphism — the (faithful) matrix
 representation of `B ⊗[R] A` acting on itself in the basis `1 ⊗ eⱼ`. -/

@@ -2452,10 +2452,10 @@ theorem mulByInt_neg_one_pullback_y_gen_ne_y_gen_char_two
         Polynomial K) = 0 :=
     transcendental_iff.mp (x_gen_transcendental W) _ h_aeval
   have h_a1 : W.toAffine.a₁ = 0 := by
-    have h := congr_arg (Polynomial.coeff · 1) h_poly_zero
+    have h := congr_arg (AddMonoidAlgebra.coeff · 1) h_poly_zero
     simpa using h
   have h_a3 : W.toAffine.a₃ = 0 := by
-    have h := congr_arg (Polynomial.coeff · 0) h_poly_zero
+    have h := congr_arg (AddMonoidAlgebra.coeff · 0) h_poly_zero
     simpa using h
   -- `[IsElliptic]` in char 2 with `a₁ = a₃ = 0` forces `Δ = 0`. Contradiction.
   have h_delta : W.toAffine.Δ = 0 := by
@@ -2622,10 +2622,10 @@ theorem a₁X_plus_a₃_ne_zero_char_two [CharP K 2] :
       Polynomial K) ≠ 0 := by
   intro h
   have h_a1 : W.toAffine.a₁ = 0 := by
-    have := congr_arg (Polynomial.coeff · 1) h
+    have := congr_arg (AddMonoidAlgebra.coeff · 1) h
     simpa using this
   have h_a3 : W.toAffine.a₃ = 0 := by
-    have := congr_arg (Polynomial.coeff · 0) h
+    have := congr_arg (AddMonoidAlgebra.coeff · 0) h
     simpa using this
   have h_delta : W.toAffine.Δ = 0 := by
     rw [WeierstrassCurve.Δ_of_char_two, h_a1, h_a3]; ring

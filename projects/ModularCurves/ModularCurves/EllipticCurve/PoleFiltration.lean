@@ -223,13 +223,13 @@ theorem linearIndependent_one_coordX_coordY (W : WeierstrassCurve R) :
   unfold coordY at hg
   obtain ⟨hpq, hq⟩ := WeierstrassCurve.Affine.CoordinateRing.smul_basis_eq_zero hg
   have hg0 : g 0 = 0 := by
-    have := congrArg (Polynomial.coeff · 0) hpq
+    have := congrArg (AddMonoidAlgebra.coeff · 0) hpq
     simpa using this
   have hg1 : g 1 = 0 := by
-    have := congrArg (Polynomial.coeff · 1) hpq
+    have := congrArg (AddMonoidAlgebra.coeff · 1) hpq
     simpa using this
   have hg2 : g 2 = 0 := by
-    simpa using congrArg (Polynomial.coeff · 0) hq
+    simpa using congrArg (AddMonoidAlgebra.coeff · 0) hq
   intro i
   fin_cases i <;> assumption
 
@@ -469,7 +469,7 @@ lemma adjoinRoot_root_mem_nonZeroDivisors {R' : Type*} [CommRing R'] {f : Polyno
       AdjoinRoot.mk_eq_zero] at hm
     obtain ⟨g, hg⟩ := hm
     have hg0 : g.coeff 0 = 0 := by
-      have h0 := congrArg (Polynomial.coeff · 0) hg
+      have h0 := congrArg (AddMonoidAlgebra.coeff · 0) hg
       simp only [Polynomial.mul_coeff_zero, Polynomial.coeff_X_zero, mul_zero] at h0
       exact (mem_nonZeroDivisors_iff.mp hf).1 _ (by linear_combination -h0)
     obtain ⟨g₁, rfl⟩ := Polynomial.X_dvd_iff.mpr hg0
@@ -1195,7 +1195,7 @@ private lemma sPowCoord_coeff_lead (W : WeierstrassCurve R) {i : ℕ} {j : Fin 3
     (hmod : i % 3 = (j : ℕ)) :
     (sPowCoord W i j).coeff ((i - (j : ℕ)) / 3) = 1 := by
   obtain ⟨A, hA⟩ := X_pow_dvd_sPowCoord_sub W i j hmod
-  have h := congrArg (Polynomial.coeff · ((i - (j : ℕ)) / 3)) hA
+  have h := congrArg (AddMonoidAlgebra.coeff · ((i - (j : ℕ)) / 3)) hA
   simp only [Polynomial.coeff_sub, Polynomial.coeff_X_pow, if_true] at h
   have hzero : (Polynomial.X ^ ((i - (j : ℕ)) / 3 + 1) * A).coeff ((i - (j : ℕ)) / 3) = 0 :=
     Polynomial.X_pow_dvd_iff.mp (dvd_mul_right _ _) _ (Nat.lt_succ_self _)
@@ -1496,7 +1496,7 @@ theorem overlap_pair_eq_baseRing (W : WeierstrassCurve R)
         simp at hcase
       have hstar_d := hstar ⟨p.natDegree % 3, by omega⟩
       have hcoeff := congrArg
-        (Polynomial.coeff · (N - p.natDegree + p.natDegree / 3)) hstar_d
+        (AddMonoidAlgebra.coeff · (N - p.natDegree + p.natDegree / 3)) hstar_d
       simp only [Polynomial.coeff_add] at hcoeff
       rw [coordOf_coeff_lead (W := W) (f := p) (N := N)
           (j := ⟨p.natDegree % 3, by omega⟩) (by omega) rfl,
@@ -1510,7 +1510,7 @@ theorem overlap_pair_eq_baseRing (W : WeierstrassCurve R)
     · -- The `q`-side leads (parity: `2·deg p ≠ 2·deg q + 3`): kill `q.leadingCoeff`.
       have hstar_m := hstar ⟨q.natDegree % 3, by omega⟩
       have hcoeff := congrArg
-        (Polynomial.coeff · (N - 1 - q.natDegree + q.natDegree / 3)) hstar_m
+        (AddMonoidAlgebra.coeff · (N - 1 - q.natDegree + q.natDegree / 3)) hstar_m
       simp only [Polynomial.coeff_add] at hcoeff
       rw [coordOf_coeff_lead (W := W) (f := q) (N := N - 1)
           (j := ⟨q.natDegree % 3, by omega⟩) (by omega) rfl,
@@ -1531,7 +1531,7 @@ theorem overlap_pair_eq_baseRing (W : WeierstrassCurve R)
       simp at hpd
     have hstar_d := hstar ⟨p.natDegree % 3, by omega⟩
     have hcoeff := congrArg
-      (Polynomial.coeff · (N - p.natDegree + p.natDegree / 3)) hstar_d
+      (AddMonoidAlgebra.coeff · (N - p.natDegree + p.natDegree / 3)) hstar_d
     simp only [Polynomial.coeff_add] at hcoeff
     rw [coordOf_coeff_lead (W := W) (f := p) (N := N)
         (j := ⟨p.natDegree % 3, by omega⟩) (by omega) rfl,
@@ -3480,7 +3480,7 @@ theorem mem_poleOrderFiltration_of_overlapMap (W : WeierstrassCurve R) [Nontrivi
         intro h
         rw [h] at hcase
         simp at hcase
-      have hcoeff := congrArg (Polynomial.coeff ·
+      have hcoeff := congrArg (AddMonoidAlgebra.coeff ·
         (N - p.natDegree + (p.natDegree + n) / 3))
         (hstar ⟨(p.natDegree + n) % 3, by omega⟩)
       simp only [Polynomial.coeff_add] at hcoeff
@@ -3495,7 +3495,7 @@ theorem mem_poleOrderFiltration_of_overlapMap (W : WeierstrassCurve R) [Nontrivi
         hXvanish _ _ (by omega)] at hcoeff
       exact hp0 (Polynomial.leadingCoeff_eq_zero.mp (by linear_combination hcoeff))
     · -- the y-part leads; kill its top coefficient — contradiction with q ≠ 0
-      have hcoeff := congrArg (Polynomial.coeff ·
+      have hcoeff := congrArg (AddMonoidAlgebra.coeff ·
         (N - 1 - q.natDegree + (q.natDegree + n) / 3))
         (hstar ⟨(q.natDegree + n) % 3, by omega⟩)
       simp only [Polynomial.coeff_add] at hcoeff
@@ -3514,7 +3514,7 @@ theorem mem_poleOrderFiltration_of_overlapMap (W : WeierstrassCurve R) [Nontrivi
     by_contra hcon
     push Not at hcon
     obtain ⟨hp0, hpn⟩ := hcon
-    have hcoeff := congrArg (Polynomial.coeff ·
+    have hcoeff := congrArg (AddMonoidAlgebra.coeff ·
       (N - p.natDegree + (p.natDegree + n) / 3))
       (hstar ⟨(p.natDegree + n) % 3, by omega⟩)
     simp only [Polynomial.coeff_add] at hcoeff
@@ -4318,7 +4318,7 @@ theorem overlapMap_injective (W : WeierstrassCurve R) :
         intro h
         rw [h] at hcase
         simp at hcase
-      have hcoeff := congrArg (Polynomial.coeff ·
+      have hcoeff := congrArg (AddMonoidAlgebra.coeff ·
         (N - p.natDegree + (p.natDegree + 0) / 3))
         (hstar ⟨(p.natDegree + 0) % 3, by omega⟩)
       simp only [Polynomial.coeff_add, Polynomial.coeff_zero] at hcoeff
@@ -4331,7 +4331,7 @@ theorem overlapMap_injective (W : WeierstrassCurve R) :
               (p.natDegree + 0) % 3 := rfl
             omega)] at hcoeff
       exact hp0 (Polynomial.leadingCoeff_eq_zero.mp (by linear_combination hcoeff))
-    · have hcoeff := congrArg (Polynomial.coeff ·
+    · have hcoeff := congrArg (AddMonoidAlgebra.coeff ·
         (N - 1 - q.natDegree + (q.natDegree + 0) / 3))
         (hstar ⟨(q.natDegree + 0) % 3, by omega⟩)
       simp only [Polynomial.coeff_add, Polynomial.coeff_zero] at hcoeff
@@ -4348,7 +4348,7 @@ theorem overlapMap_injective (W : WeierstrassCurve R) :
   have hp0 : p = 0 := by
     by_contra hp0
     -- with q = 0 the p-lead kill has no cross terms and no right side
-    have hcoeff := congrArg (Polynomial.coeff ·
+    have hcoeff := congrArg (AddMonoidAlgebra.coeff ·
       (N - p.natDegree + (p.natDegree + 0) / 3))
       (hstar ⟨(p.natDegree + 0) % 3, by omega⟩)
     simp only [Polynomial.coeff_add, Polynomial.coeff_zero] at hcoeff

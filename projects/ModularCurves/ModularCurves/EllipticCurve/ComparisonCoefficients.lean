@@ -224,12 +224,12 @@ private lemma six_ext {W : WeierstrassCurve R} [Nontrivial R]
     linear_combination h
   obtain ⟨hp, hq⟩ := WeierstrassCurve.Affine.CoordinateRing.smul_basis_eq_zero
     (W' := W.toAffine) hzero
-  have hp0 := congrArg (fun p => Polynomial.coeff p 0) hp
-  have hp1 := congrArg (fun p => Polynomial.coeff p 1) hp
-  have hp2 := congrArg (fun p => Polynomial.coeff p 2) hp
-  have hp3 := congrArg (fun p => Polynomial.coeff p 3) hp
-  have hq0 := congrArg (fun p => Polynomial.coeff p 0) hq
-  have hq1 := congrArg (fun p => Polynomial.coeff p 1) hq
+  have hp0 := congrArg (fun p => AddMonoidAlgebra.coeff p 0) hp
+  have hp1 := congrArg (fun p => AddMonoidAlgebra.coeff p 1) hp
+  have hp2 := congrArg (fun p => AddMonoidAlgebra.coeff p 2) hp
+  have hp3 := congrArg (fun p => AddMonoidAlgebra.coeff p 3) hp
+  have hq0 := congrArg (fun p => AddMonoidAlgebra.coeff p 0) hq
+  have hq1 := congrArg (fun p => AddMonoidAlgebra.coeff p 1) hq
   simp only [Polynomial.coeff_add, Polynomial.coeff_C_mul, Polynomial.coeff_X_pow,
     Polynomial.coeff_C, Polynomial.coeff_X, Polynomial.coeff_zero] at hp0 hp1 hp2 hp3 hq0 hq1
   norm_num at hp0 hp1 hp2 hp3 hq0 hq1

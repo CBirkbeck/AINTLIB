@@ -102,7 +102,7 @@ protected abbrev Ring : Type := curve.CoordinateRing
 the field of fractions of the universal ring. -/
 protected abbrev Field : Type := FractionRing Universal.Ring
 
-instance : CommRing Poly := Polynomial.commRing /- why is this not automatic ... -/
+instance : CommRing Poly := AddMonoidAlgebra.commRing /- why is this not automatic ... -/
 
 lemma Poly.two_ne_zero : (2 : Poly) ≠ 0 :=
   Polynomial.C_ne_zero.mpr <| Polynomial.C_ne_zero.mpr fun h ↦ two_ne_zero' (α := ℤ) <|
@@ -144,7 +144,7 @@ lemma equation_point : pointedCurve.toAffine.Equation (polyToField (C X)) (polyT
     ((curve.map (algebraMap _ Universal.Field)).toAffine.polynomial) = 0
   have h : (evalEvalRingHom (polyToField (C X)) (polyToField Y)).comp
       (mapRingHom <| mapRingHom (algebraMap _ Universal.Field)) = polyToField := by
-    ext <;> simp [polyToField, algebraMap_field_eq_comp]
+    ext <;> simp [polyToField, algebraMap_field_eq_comp, Polynomial.single_eq_monomial]
   have : ∀ p, evalEval (polyToField (C X)) (polyToField Y)
       (p.map (mapRingHom (algebraMap _ Universal.Field))) = polyToField p :=
     fun p ↦ congr($h p)
@@ -228,7 +228,7 @@ lemma ringEval_comp_mk : (ringEval eqn).comp (AdjoinRoot.mk _) = polyEval W x y 
   RingHom.ext (ringEval_mk eqn)
 
 lemma polyEval_comp_eq_specialize : (polyEval W x y).comp (algebraMap _ _) = W.specialize := by
-  ext <;> simp [polyEval]
+  ext <;> simp [polyEval, Polynomial.single_eq_monomial]
 
 lemma ringEval_comp_eq_specialize : (ringEval eqn).comp (algebraMap _ _) = W.specialize := by
   rw [algebraMap_ring_eq_comp, ← RingHom.comp_assoc, ringEval_comp_mk, polyEval_comp_eq_specialize]

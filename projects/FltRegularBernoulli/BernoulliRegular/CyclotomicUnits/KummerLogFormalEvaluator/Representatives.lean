@@ -116,7 +116,7 @@ theorem kummerLogFormalEvenRowRepresentative_coeff_even
   rw [kummerLogEvenPowerIndex_val]
   dsimp [kummerLogFormalEvenRowRepresentative]
   rw [Polynomial.finsetSum_coeff]
-  simp only [Polynomial.coeff_monomial]
+  simp only [Polynomial.coeff_monomial_apply]
   rw [Finset.sum_eq_single j]
   · simp
   · intro b _hb hbj
