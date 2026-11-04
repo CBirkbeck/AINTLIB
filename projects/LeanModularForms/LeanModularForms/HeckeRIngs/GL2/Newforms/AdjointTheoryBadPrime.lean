@@ -271,7 +271,7 @@ private theorem integrableOn_petersson_slash_T_p_lower_slash_SL'
       S μ_hyp := by
   have hσ : (⇑g ∣[k] (glMap (T_p_lower p hp) : GL (Fin 2) ℝ)) ∣[k] (γ : SL(2, ℤ)) =
       ⇑g ∣[k] (glMap (T_p_lower p hp * mapGL ℚ γ) : GL (Fin 2) ℝ) := by
-    rw [ModularForm.SL_slash, map_mul, ← SlashAction.slash_mul]; rfl
+    rw [ModularForm.SL_slash, map_mul, ← SlashAction.slash_mul, glMap_mapGL_eq]; rfl
   rw [hσ]
   exact integrableOn_petersson_cuspform_slash_glMap_of_finiteMeasure f g
     (T_p_lower p hp * mapGL ℚ γ) hS
